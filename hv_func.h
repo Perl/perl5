@@ -73,7 +73,7 @@
 #endif
 
 
-#if PERL_HASH_USE_SBOX32_ALSO == 1
+#if PERL_HASH_USE_SBOX32_ALSO != 1
 # define _PERL_HASH_FUNC                        __PERL_HASH_FUNC
 # define _PERL_HASH_SEED_BYTES                  __PERL_HASH_SEED_BYTES
 # define _PERL_HASH_STATE_BYTES                 __PERL_HASH_STATE_BYTES
@@ -86,11 +86,11 @@
 #define _PERL_HASH_SEED_BYTES   ( __PERL_HASH_SEED_BYTES + ( 3 * sizeof(U32) ) )
 
 #define _PERL_HASH_STATE_BYTES  \
-    ( __PERL_HASH_SEED_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
+    ( __PERL_HASH_STATE_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
 
 #define _PERL_HASH_SEED_STATE(seed,state) STMT_START {                                      \
     __PERL_HASH_SEED_STATE(seed,state);                                                     \
-    sbox32_seed_state96(seed + __PERL_HASH_SEED_BYTES , state + __PERL_HASH_STATE_BYTES);   \
+    sbox32_seed_state96(seed + __PERL_HASH_SEED_BYTES, state + __PERL_HASH_STATE_BYTES);    \
 } STMT_END
 
 #define _PERL_HASH_WITH_STATE(state,str,len)                                            \
