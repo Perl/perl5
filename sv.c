@@ -13255,6 +13255,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
         {
             STRLEN need, have, gap;
+            STRLEN i;
 
             /* signed value that's wrapped? */
             assert(elen  <= ((~(STRLEN)0) >> 1));
@@ -13279,39 +13280,44 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             SvGROW(sv, need);
 
             p = SvEND(sv);
-            if (esignlen && fill) {
-                STRLEN i;
+
+            if (left) {
                 for (i = 0; i < esignlen; i++)
                     *p++ = esignbuf[i];
-            }
-            if (gap && !left) {
-                memset(p, (fill ? '0' : ' '), gap);
-                p += gap;
-            }
-            if (esignlen && !fill) {
-                STRLEN i;
-                for (i = 0; i < esignlen; i++)
-                    *p++ = esignbuf[i];
-            }
-            if (zeros) {
-                STRLEN i;
                 for (i = zeros; i; i--)
                     *p++ = '0';
+                Copy(eptr, p, elen, char);
+                p += elen;
+                for (i = gap; i; i--)
+                    *p++ = ' ';
             }
-            if (elen) {
+            else {
+                if (fill) {
+                    for (i = 0; i < esignlen; i++)
+                        *p++ = esignbuf[i];
+                    assert(!zeros);
+                    zeros = gap;
+                }
+                else {
+                    for (i = gap; i; i--)
+                        *p++ = ' ';
+                    for (i = 0; i < esignlen; i++)
+                        *p++ = esignbuf[i];
+                }
+
+                for (i = zeros; i; i--)
+                    *p++ = '0';
                 Copy(eptr, p, elen, char);
                 p += elen;
             }
-            if (gap && left) {
-                memset(p, ' ', gap);
-                p += gap;
-            }
+
+            *p = '\0';
+            SvCUR_set(sv, p - SvPVX_const(sv));
+
             if (is_utf8)
                 has_utf8 = TRUE;
             if (has_utf8)
                 SvUTF8_on(sv);
-            *p = '\0';
-            SvCUR_set(sv, p - SvPVX_const(sv));
         }
 
 	if (vectorize && veclen) {
