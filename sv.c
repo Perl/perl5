@@ -12668,16 +12668,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		case 16:
                     {
 		    const char * const p =
-                        (c == 'X') ? PL_hexdigit + 16 : PL_hexdigit;
-		    do {
-			dig = uv & 15;
-			*--ptr = p[dig];
-		    } while (uv >>= 4);
-		    if (alt && *ptr != '0') {
-			esignbuf[esignlen++] = '0';
-			esignbuf[esignlen++] = c;  /* 'x' or 'X' */
-		    }
-		    break;
+                            (c == 'X') ? PL_hexdigit + 16 : PL_hexdigit;
+
+                        do {
+                            dig = uv & 15;
+                            *--ptr = p[dig];
+                        } while (uv >>= 4);
+                        if (alt && *ptr != '0') {
+                            esignbuf[esignlen++] = '0';
+                            esignbuf[esignlen++] = c;  /* 'x' or 'X' */
+                        }
+                        break;
                     }
 		case 8:
 		    do {
