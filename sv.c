@@ -10955,12 +10955,12 @@ Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
 
 void
 Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
-                 va_list *const args, SV **const svargs, const Size_t svmax, bool *const maybe_tainted)
+                 va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted)
 {
     PERL_ARGS_ASSERT_SV_VSETPVFN;
 
     SvPVCLEAR(sv);
-    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, 0);
+    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, sv_count, maybe_tainted, 0);
 }
 
 
@@ -11131,11 +11131,11 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 
 void
 Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
-                 va_list *const args, SV **const svargs, const Size_t svmax, bool *const maybe_tainted)
+                 va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted)
 {
     PERL_ARGS_ASSERT_SV_VCATPVFN;
 
-    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
+    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, sv_count, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
 }
 
 
@@ -11858,7 +11858,7 @@ Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 
 void
 Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
-                       va_list *const args, SV **const svargs, const Size_t svmax, bool *const maybe_tainted,
+                       va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted,
                        const U32 flags)
 {
     const char *fmtstart; /* character following the current '%' */
@@ -11901,10 +11901,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
      * warnings etc.
      */
 
-    if (patlen == 0 && (args || svmax == 0))
+    if (patlen == 0 && (args || sv_count == 0))
 	return;
 
-    if (patlen <= 4 && pat[0] == '%' && (args || svmax == 1)) {
+    if (patlen <= 4 && pat[0] == '%' && (args || sv_count == 1)) {
 
         /* "%s" */
         if (patlen == 2 && pat[1] == 's') {
@@ -12119,7 +12119,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     vecsv = va_arg(*args, SV*);
                 else {
                     ix = ix ? ix - 1 : svix++;
-                    vecsv = ix < svmax ? svargs[ix]
+                    vecsv = ix < sv_count ? svargs[ix]
                                        : (arg_missing = TRUE, &PL_sv_no);
                 }
                 dotstr = SvPV_const(vecsv, dotstrlen);
@@ -12145,7 +12145,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     i = va_arg(*args, int);
                 else {
                     ix = ix ? ix - 1 : svix++;
-                    sv = (ix < svmax) ? svargs[ix]
+                    sv = (ix < sv_count) ? svargs[ix]
                                       : (arg_missing = TRUE, (SV*)NULL);
                 }
                 width = S_sprintf_arg_num_val(aTHX_ args, i, sv, &left);
@@ -12202,7 +12202,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         i = va_arg(*args, int);
                     else {
                         ix = ix ? ix - 1 : svix++;
-                        sv = (ix < svmax) ? svargs[ix]
+                        sv = (ix < sv_count) ? svargs[ix]
                                           : (arg_missing = TRUE, (SV*)NULL);
                     }
                     precis = S_sprintf_arg_num_val(aTHX_ args, i, sv, &neg);
@@ -12312,7 +12312,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
         if (!args) {
             efix = efix ? efix - 1 : svix++;
-            argsv = efix < svmax ? svargs[efix]
+            argsv = efix < sv_count ? svargs[efix]
                                  : (arg_missing = TRUE, &PL_sv_no);
 	}
 
@@ -13368,7 +13368,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     /* Now that we've consumed all our printf format arguments (svix)
      * do we have things left on the stack that we didn't use?
      */
-    if (!no_redundant_warning && svmax >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
+    if (!no_redundant_warning && sv_count >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
 	Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
 		PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
     }

@@ -1618,14 +1618,14 @@ Apdmb	|void	|sv_usepvn	|NN SV* sv|NULLOK char* ptr|STRLEN len
 Apd	|void	|sv_usepvn_flags|NN SV *const sv|NULLOK char* ptr|const STRLEN len\
 				|const U32 flags
 Apd	|void	|sv_vcatpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
-				|NULLOK va_list *const args|NULLOK SV **const svargs|const Size_t svmax \
+				|NULLOK va_list *const args|NULLOK SV **const svargs|const Size_t sv_count \
 				|NULLOK bool *const maybe_tainted
 Apd	|void	|sv_vcatpvfn_flags|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
-				|NULLOK va_list *const args|NULLOK SV **const svargs|const Size_t svmax \
+				|NULLOK va_list *const args|NULLOK SV **const svargs|const Size_t sv_count \
 				|NULLOK bool *const maybe_tainted|const U32 flags
 Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
-				|const Size_t svmax|NULLOK bool *const maybe_tainted
+				|const Size_t sv_count|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
 EXpRM	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 EXpM	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
