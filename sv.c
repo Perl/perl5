@@ -11870,7 +11870,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     SV *argsv = NULL;
     bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
     const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
-    SV *nsv = NULL;
     /* Times 4: a decimal digit takes more than 3 binary digits.
      * NV_DIG: mantissa takes than many decimal digits.
      * Plus 32: Playing safe. */
@@ -11990,8 +11989,24 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             {};
 
 	if (q > fmtstart) {
-	    if (has_utf8 && !pat_utf8)
-		sv_catpvn_nomg_utf8_upgrade(sv, fmtstart, q - fmtstart, nsv);
+	    if (has_utf8 && !pat_utf8) {
+                /* upgrade and copy the bytes of fmtstart..q-1 to utf8 on
+                 * the fly */
+                const char *p;
+                char *dst;
+                STRLEN need = SvCUR(sv) + (q - fmtstart) + 1;
+
+                for (p = fmtstart; p < q; p++)
+                    if (!NATIVE_BYTE_IS_INVARIANT(*p))
+                        need++;
+                SvGROW(sv, need);
+
+                dst = SvEND(sv);
+                for (p = fmtstart; p < q; p++)
+                    append_utf8_from_native_byte((U8)*p, (U8**)&dst);
+                *dst = '\0';
+                SvCUR_set(sv, need - 1);
+            }
 	    else
                 S_sv_catpvn_simple(aTHX_ sv, fmtstart, q - fmtstart);
 	}
