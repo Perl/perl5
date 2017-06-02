@@ -1219,6 +1219,75 @@
     },
 
 
+    'func::sprintf::d' => {
+        desc    => '%d',
+        setup   => 'my $s; my $a1 = 1234;',
+        code    => '$s = sprintf "%d", $a1',
+    },
+    'func::sprintf::d8' => {
+        desc    => '%8d',
+        setup   => 'my $s; my $a1 = 1234;',
+        code    => '$s = sprintf "%8d", $a1',
+    },
+    'func::sprintf::foo_d8' => {
+        desc    => 'foo=%8d',
+        setup   => 'my $s; my $a1 = 1234;',
+        code    => '$s = sprintf "foo=%8d", $a1',
+    },
+
+    'func::sprintf::f0' => {
+        # "%.0f" is very special-cased
+        desc    => 'sprintf "%.0f"',
+        setup   => 'my $s; my $a1 = 123.456;',
+        code    => '$s = sprintf "%.0f", $a1',
+    },
+    'func::sprintf::foo_f0' => {
+        # "...%.0f..." is special-cased
+        desc    => 'sprintf "foo=%.0f"',
+        setup   => 'my $s; my $a1 = 123.456;',
+        code    => '$s = sprintf "foo=%.0f\n", $a1',
+    },
+    'func::sprintf::foo_f93' => {
+        desc    => 'foo=%9.3f',
+        setup   => 'my $s; my $a1 = 123.456;',
+        code    => '$s = sprintf "foo=%9.3f\n", $a1',
+    },
+
+    'func::sprintf::g9' => {
+        # "...%.NNNg..." is special-cased
+        desc    => '%.9g',
+        setup   => 'my $s; my $a1 = 123.456;',
+        code    => '$s = sprintf "%.9g", $a1',
+    },
+    'func::sprintf::foo_g9' => {
+        # "...%.NNNg..." is special-cased
+        desc    => 'foo=%.9g',
+        setup   => 'my $s; my $a1 = 123.456;',
+        code    => '$s = sprintf "foo=%.9g\n", $a1',
+    },
+    'func::sprintf::foo_g93' => {
+        desc    => 'foo=%9.3g',
+        setup   => 'my $s; my $a1 = 123.456;',
+        code    => '$s = sprintf "foo=%9.3g\n", $a1',
+    },
+
+    'func::sprintf::s' => {
+        desc    => '%s',
+        setup   => 'my $s; my $a1 = "abcd";',
+        code    => '$s = sprintf "%s", $a1',
+    },
+    'func::sprintf::foo_s' => {
+        desc    => 'foo=%s',
+        setup   => 'my $s; my $a1 = "abcd";',
+        code    => '$s = sprintf "foo=%s", $a1',
+    },
+    'func::sprintf::mixed_utf8_s' => {
+        desc    => 'foo=%s bar=%s baz=%s',
+        setup   => 'my $s;',
+        code    => '$s = sprintf "foo=%s", "ab\x{100}cd", "efg", "h\x{101}ij"',
+    },
+
+
     'loop::block' => {
         desc    => 'empty basic loop',
         setup   => '',
