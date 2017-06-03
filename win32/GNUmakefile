@@ -700,7 +700,7 @@ endif
 # Perl itself with e.g. VC6 but later installs an XS module using VC8
 # the time_t types will still be compatible.
 ifeq ($(WIN64),undef)
-ifeq ((PREMSVC80),define)
+ifeq ($(PREMSVC80),define)
 BUILDOPT	+= -D_USE_32BIT_TIME_T
 endif
 endif
