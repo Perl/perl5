@@ -155,6 +155,8 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 #CCTYPE		= MSVC140
 # Visual C++ 2015 Express Edition (aka Visual C++ 14.0) (free version)
 #CCTYPE		= MSVC140FREE
+# Visual C++ 2017 (aka Visual C++ 14.1) (all versions)
+#CCTYPE		= MSVC141
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		= GCC
 
@@ -241,7 +243,7 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 # Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
 # so you may have to set CCHOME explicitly (spaces in the path name should
-# not be quoted)
+# not be quoted), for MSVC141 the value for %VCToolsInstallDir%
 #
 
 #CCHOME		*= C:\MinGW
@@ -617,7 +619,8 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrt.lib
 .ELSE
 LIBC		= msvcrt.lib
@@ -630,7 +633,8 @@ LINK_DBG	= -debug
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
 .ELIF  "$(CFG)" == "DebugFull"
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrtd.lib
 .ELSE
 LIBC		= msvcrtd.lib
@@ -668,7 +672,8 @@ DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
 # Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 .ENDIF
 
@@ -691,7 +696,8 @@ LIBBASEFILES	= oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 	netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib version.lib \
 	odbc32.lib odbccp32.lib comctl32.lib
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 .IF "$(CFG)" == "DebugFull"
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 .ELSE
@@ -746,6 +752,7 @@ PRIV_LINK_FLAGS	+= "/manifestdependency:type='Win32' name='Microsoft.Windows.Com
 RSC_FLAGS	= -DINCLUDE_MANIFEST
 .ENDIF
 
+# VS 2017 (VC++ 14.1) requires at minimum Windows 7 SP1 (with latest Windows Updates)
 
 # For XP support in >= VS 2013 (VC++ 12.0), subsystem is always in Config.pm
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
@@ -1241,7 +1248,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" || "$(CCTYPE)" == "MSVC141"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
