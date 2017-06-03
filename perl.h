@@ -6187,14 +6187,20 @@ expression, but with an empty argument list, like this:
         _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;          \
     }
 
-/* Lock to the C locale until unlock is called */
+/* Lock/unlock to the C locale until unlock is called.  This needs to be
+ * recursively callable.  [perl #128207] */
 #define LOCK_LC_NUMERIC_STANDARD()                          \
         (__ASSERT_(PL_numeric_standard)                     \
-        PL_numeric_standard = 2)
-
+        PL_numeric_standard++)
 #define UNLOCK_LC_NUMERIC_STANDARD()                        \
-        (__ASSERT_(PL_numeric_standard == 2)                \
-        PL_numeric_standard = 1)
+            STMT_START {                                    \
+                if (PL_numeric_standard > 1) {              \
+                    PL_numeric_standard--;                  \
+                }                                           \
+                else {                                      \
+                    assert(0);                              \
+                }                                           \
+            } STMT_END
 
 #define RESTORE_LC_NUMERIC_UNDERLYING()                     \
 	if (_was_local) set_numeric_local();
