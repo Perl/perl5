@@ -19,7 +19,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 340;
+plan tests => 341;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -267,6 +267,7 @@ $a = "\0\x{100}"; chop($a);
 ok(utf8::is_utf8($a)); # make sure UTF8 flag is still there
 $a = ~$a;
 is($a, "\xFF", "~ works with utf-8");
+ok(! utf8::is_utf8($a), "    and turns off the UTF-8 flag");
 
 $a = "\0\x{100}"; chop($a);
 undef $b;
@@ -287,6 +288,7 @@ ok(utf8::is_utf8($b), "Verify UTF-8 ^ non-UTF-8 retains UTF-8 flag");
 undef $b;
 $b = "\xFF" ^ $a;
 ok(utf8::is_utf8($b), "Verify non-UTF-8 ^ UTF-8 retains UTF-8 flag");
+
 
 # [rt.perl.org 33003]
 # This would cause a segfault without malloc wrap
