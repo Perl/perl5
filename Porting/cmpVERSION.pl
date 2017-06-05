@@ -169,6 +169,7 @@ unless (%module_diffs) {
 }
 
 printf "1..%d\n" => scalar keys %module_diffs if $tap;
+print "#\n# Comparing against $tag_to_compare ....\n#\n" if $tap;
 
 my $count;
 my $diff_cmd = "git --no-pager diff $tag_to_compare ";
@@ -194,9 +195,14 @@ foreach my $pm_file (sort keys %module_diffs) {
         print "ok $count - $pm_file\n" if $tap;
     } else {
 	if ($tap) {
+            print "#\n# " . '-' x 75 . "\n"
+            . "# Version number ($pm_version) unchanged since"
+            . " $tag_to_compare, but contents have changed:\n#\n";
 	    foreach (sort @{$module_diffs{$pm_file}}) {
 		print "# $_" for `$diff_cmd $q$_$q`;
 	    }
+            print "# " . '-' x 75 . "\n";
+
 	    if (exists $skip_versions{$pm_file}
 		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
 		print "ok $count - SKIP $pm_file version $pm_version\n";
