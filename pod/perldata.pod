@@ -399,9 +399,9 @@ leave nothing to doubt:
 
     $element_count = scalar(@whatever);
 
-If you evaluate a hash in scalar context, it returns false if the
-hash is empty.  If there are any key/value pairs, it returns true.
-A more precise definition is version dependent.
+If you evaluate a hash in scalar context, it returns a false value if
+the hash is empty.  If there are any key/value pairs, it returns a
+true value.  A more precise definition is version dependent.
 
 Prior to Perl 5.25 the value returned was a string consisting of the
 number of used buckets and the number of allocated buckets, separated
