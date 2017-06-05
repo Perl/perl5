@@ -24,5 +24,8 @@ is( scalar keys %vers, 1, 'All Module-CoreList modules should have the same $VER
 
 # Check that there is a release entry for the current perl version
 my $released = $Module::CoreList::released{ $] };
+# duplicate fetch to avoid 'used only once: possible typo' warning
+$released = $Module::CoreList::released{ $] };
+
 ok( defined $released, "There is a released entry for $]" );
 like( $released, qr!^\d{4}\-\d{2}\-\d{2}$!, 'It should be a date in YYYY-MM-DD format' );
