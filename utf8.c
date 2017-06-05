@@ -1981,7 +1981,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
     U8 *d;
     const U8 *start = s;
     const U8 *send;
-    I32 count = 0;
+    Size_t count = 0;
 
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
     PERL_UNUSED_CONTEXT;
