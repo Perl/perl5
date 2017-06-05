@@ -2649,3 +2649,15 @@ my Foo::Bar ($s4, @a4, %h4) :foo(f1, f2) bar(b1, b2);
 # avoid false positives in my $x :attribute
 'attributes'->import('main', \my $x1, 'foo(bar)'), my $y1;
 'attributes'->import('Fooo', \my $x2, 'foo(bar)'), my $y2;
+####
+# hash slices and hash key/value slices
+my(@a, %h);
+our(@oa, %oh);
+@a = @h{'foo', 'bar'};
+@a = %h{'foo', 'bar'};
+@a = delete @h{'foo', 'bar'};
+@a = delete %h{'foo', 'bar'};
+@oa = @oh{'foo', 'bar'};
+@oa = %oh{'foo', 'bar'};
+@oa = delete @oh{'foo', 'bar'};
+@oa = delete %oh{'foo', 'bar'};

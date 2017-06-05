@@ -12,7 +12,8 @@ use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPf_PARENS
-	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
+	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpKVSLICE
+         OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
@@ -362,7 +363,8 @@ BEGIN {
 
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
-		 nextstate dbstate rv2av rv2hv helem custom ]) {
+		 kvaslice kvhslice
+                 nextstate dbstate rv2av rv2hv helem custom ]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
 
@@ -2677,7 +2679,7 @@ sub pp_delete {
     my($op, $cx) = @_;
     my $arg;
     my $name = $self->keyword("delete");
-    if ($op->private & OPpSLICE) {
+    if ($op->private & (OPpSLICE|OPpKVSLICE)) {
 	if ($op->flags & OPf_SPECIAL) {
 	    # Deleting from an array, not a hash
 	    return $self->maybe_parens_func($name,
@@ -4513,8 +4515,9 @@ sub slice {
     } else {
 	$list = $self->elem_or_slice_single_index($kid);
     }
-    my $lead = '@';
-    $lead = '%' if $op->name =~ /^kv/i;
+    my $lead = (   _op_is_or_was($op, OP_KVHSLICE)
+                || _op_is_or_was($op, OP_KVASLICE))
+               ? '%' : '@';
     return $lead . $array . $left . $list . $right;
 }
 
