@@ -23,6 +23,8 @@ my $deparse_failures;
 # And skip even running these
 my $deparse_skips;
 
+my $deparse_skip_file = '../Porting/deparse-skips.txt';
+
 # directories with special sets of test switches
 my %dir_to_switch =
     (base => '',
@@ -562,6 +564,7 @@ EOT
     my $tested_files  = 0;
     my $totmax = 0;
     my %failed_tests;
+    my @unexpected_pass; # files where deparse-skips.txt says fail but passed
     my $toolnm;		# valgrind, cachegrind, perf
 
     while (my $test = shift @tests) {
@@ -715,6 +718,7 @@ EOT
 	    if (!$failure) {
 		# Wait, it didn't fail? Great news! Tell someone!
 		$failure = "FAILED--all tests passed but test should have failed";
+		push @unexpected_pass, $test;
 	    } else {
 		# Bah, still failing. Mask it.
 		print "${te}skipped\n";
@@ -774,6 +778,17 @@ EOT
 	for my $test ( sort keys %failed_tests ) {
 	    print "\t$test\n";
 	}
+
+	if (@unexpected_pass) {
+	    print <<EOF;
+
+The following scripts were expected to fail under -deparse (at least
+according to $deparse_skip_file), but unexpectedly succeeded:
+EOF
+	    print "\t$_\n" for sort @unexpected_pass;
+	    print "\n";
+	}
+
 	warn <<'SHRDLU_1';
 ### Since not all tests were successful, you may want to run some of
 ### them individually and examine any diagnostic messages they produce.
@@ -947,13 +962,12 @@ sub _cleanup_valgrind {
 }
 
 # Generate regexps of known bad filenames / skips from Porting/deparse-skips.txt
-my $in;
 
 sub _process_deparse_config {
     my @deparse_failures;
     my @deparse_skips;
 
-    my $f = '../Porting/deparse-skips.txt';
+    my $f = $deparse_skip_file;
 
     my $skips;
     if (!open($skips, '<', $f)) {
@@ -961,6 +975,7 @@ sub _process_deparse_config {
         return;
     }
 
+    my $in;
     while(<$skips>) {
         if (/__DEPARSE_FAILURES__/) {
             $in = \@deparse_failures; next;
@@ -976,6 +991,7 @@ sub _process_deparse_config {
         next unless $_;
 
         push @$in, $_;
+	warn "WARNING: $f:$.: excluded file doesn't exist: $_\n" unless -f $_;
     }
 
     for my $f (@deparse_failures, @deparse_skips) {
