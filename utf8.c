@@ -2044,9 +2044,6 @@ see L</sv_recode_to_utf8>().
 =cut
 */
 
-/* This logic is duplicated in sv_catpvn_flags, so any bug fixes will
-   likewise need duplication. */
-
 U8*
 Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
 {
