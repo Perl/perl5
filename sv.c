@@ -1525,6 +1525,11 @@ Perl_sv_backoff(SV *const sv)
     return;
 }
 
+
+/* forward declaration */
+static void S_sv_uncow(pTHX_ SV * const sv, const U32 flags);
+
+
 /*
 =for apidoc sv_grow
 
@@ -1535,7 +1540,6 @@ Use the C<SvGROW> wrapper instead.
 =cut
 */
 
-static void S_sv_uncow(pTHX_ SV * const sv, const U32 flags);
 
 char *
 Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
@@ -5209,28 +5213,6 @@ Perl_sv_usepvn_flags(pTHX_ SV *const sv, char *ptr, const STRLEN len, const U32 
 	SvSETMAGIC(sv);
 }
 
-/*
-=for apidoc sv_force_normal_flags
-
-Undo various types of fakery on an SV, where fakery means
-"more than" a string: if the PV is a shared string, make
-a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an C<xpvmg>; if we're a copy-on-write scalar, this is the on-write time when
-we do the copy, and is also used locally; if this is a
-vstring, drop the vstring magic.  If C<SV_COW_DROP_PV> is set
-then a copy-on-write scalar drops its PV buffer (if any) and becomes
-C<SvPOK_off> rather than making a copy.  (Used where this
-scalar is about to be set to some other value.)  In addition,
-the C<flags> parameter gets passed to C<sv_unref_flags()>
-when unreffing.  C<sv_force_normal> calls this function
-with flags set to 0.
-
-This function is expected to be used to signal to perl that this SV is
-about to be written to, and any extra book-keeping needs to be taken care
-of.  Hence, it croaks on read-only values.
-
-=cut
-*/
 
 static void
 S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
@@ -5309,6 +5291,30 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 #endif
     }
 }
+
+
+/*
+=for apidoc sv_force_normal_flags
+
+Undo various types of fakery on an SV, where fakery means
+"more than" a string: if the PV is a shared string, make
+a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
+an C<xpvmg>; if we're a copy-on-write scalar, this is the on-write time when
+we do the copy, and is also used locally; if this is a
+vstring, drop the vstring magic.  If C<SV_COW_DROP_PV> is set
+then a copy-on-write scalar drops its PV buffer (if any) and becomes
+C<SvPOK_off> rather than making a copy.  (Used where this
+scalar is about to be set to some other value.)  In addition,
+the C<flags> parameter gets passed to C<sv_unref_flags()>
+when unreffing.  C<sv_force_normal> calls this function
+with flags set to 0.
+
+This function is expected to be used to signal to perl that this SV is
+about to be written to, and any extra book-keeping needs to be taken care
+of.  Hence, it croaks on read-only values.
+
+=cut
+*/
 
 void
 Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
