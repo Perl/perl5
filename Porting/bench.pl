@@ -431,7 +431,7 @@ my %OPTS = (
               . "'$OPTS{sort}'\n";
         }
         my ($field, $perl) = @s;
-        die "Error: --sort: unknown field '$field\n"
+        die "Error: --sort: unknown field '$field'\n"
             unless $VALID_FIELDS{$field};
         # the 'perl' value will be validated later, after we have processed
         # the perls
