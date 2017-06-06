@@ -1907,10 +1907,10 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 /*
 =for apidoc utf8_to_bytes
 
-Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
+Converts a string C<s> of length C<*lenp> from UTF-8 into native byte encoding.
 Unlike L</bytes_to_utf8>, this over-writes the original string, and
-updates C<len> to contain the new length.
-Returns zero on failure, setting C<len> to -1.
+updates C<*lenp> to contain the new length.
+Returns zero on failure,  setting C<*lenp> to -1.
 
 If you need a copy of the string, see L</bytes_from_utf8>.
 
@@ -1918,7 +1918,7 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 */
 
 U8 *
-Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
+Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 {
     U8 * first_variant;
 
@@ -1926,13 +1926,13 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     PERL_UNUSED_CONTEXT;
 
     /* This is a no-op if no variants at all in the input */
-    if (is_utf8_invariant_string_loc(s, *len, (const U8 **) &first_variant)) {
+    if (is_utf8_invariant_string_loc(s, *lenp, (const U8 **) &first_variant)) {
         return s;
     }
 
     {
         U8 * const save = s;
-        U8 * const send = s + *len;
+        U8 * const send = s + *lenp;
         U8 * d;
 
         /* Nothing before the first variant needs to be changed, so start the real
@@ -1941,7 +1941,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
         while (s < send) {
             if (! UTF8_IS_INVARIANT(*s)) {
                 if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                    *len = ((STRLEN) -1);
+                    *lenp = ((STRLEN) -1);
                     return 0;
                 }
                 s++;
@@ -1961,7 +1961,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
             *d++ = c;
         }
         *d = '\0';
-        *len = d - save;
+        *lenp = d - save;
 
         return save;
     }
@@ -1970,7 +1970,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 /*
 =for apidoc bytes_from_utf8
 
-Converts a potentially UTF-8 encoded string C<s> of length C<len> into native
+Converts a potentially UTF-8 encoded string C<s> of length C<*lenp> into native
 byte encoding.  On input, the boolean C<*is_utf8> gives whether or not C<s> is
 actually encoded in UTF-8.
 
@@ -1979,17 +1979,17 @@ the input string.
 
 Do nothing if C<*is_utf8> is 0, or if there are code points in the string
 not expressible in native byte encoding.  In these cases, C<*is_utf8> and
-C<*len> are unchanged, and the return value is the original C<s>.
+C<*lenp> are unchanged, and the return value is the original C<s>.
 
 Otherwise, C<*is_utf8> is set to 0, and the return value is a pointer to a
 newly created string containing a downgraded copy of C<s>, and whose length is
-returned in C<*len>, updated.
+returned in C<*lenp>, updated.
 
 =cut
 */
 
 U8 *
-Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
+Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8)
 {
     U8 *d;
     const U8 *start = s;
@@ -2002,7 +2002,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
         return (U8 *)start;
 
     /* ensure valid UTF-8 and chars < 256 before converting string */
-    for (send = s + *len; s < send;) {
+    for (send = s + *lenp; s < send;) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
                 return (U8 *)start;
@@ -2015,7 +2015,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 
     *is_utf8 = FALSE;
 
-    Newx(d, (*len) - count + 1, U8);
+    Newx(d, (*lenp) - count + 1, U8);
 
     if (LIKELY(count)) {
         s = start; start = d;
@@ -2029,13 +2029,13 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
             *d++ = c;
         }
         *d = '\0';
-        *len = d - start;
+        *lenp = d - start;
 
         return (U8 *)start;
     }
     else {
-        Copy(start, d, *len, U8);
-        *(d + *len) = '\0';
+        Copy(start, d, *lenp, U8);
+        *(d + *lenp) = '\0';
         return (U8 *)d;
     }
 }
@@ -2043,9 +2043,9 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 /*
 =for apidoc bytes_to_utf8
 
-Converts a string C<s> of length C<len> bytes from the native encoding into
+Converts a string C<s> of length C<*lenp> bytes from the native encoding into
 UTF-8.
-Returns a pointer to the newly-created string, and sets C<len> to
+Returns a pointer to the newly-created string, and sets C<*lenp> to
 reflect the new length in bytes.
 
 A C<NUL> character will be written after the end of the string.
@@ -2058,16 +2058,16 @@ see L</sv_recode_to_utf8>().
 */
 
 U8*
-Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
+Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
 {
-    const U8 * const send = s + (*len);
+    const U8 * const send = s + (*lenp);
     U8 *d;
     U8 *dst;
 
     PERL_ARGS_ASSERT_BYTES_TO_UTF8;
     PERL_UNUSED_CONTEXT;
 
-    Newx(d, (*len) * 2 + 1, U8);
+    Newx(d, (*lenp) * 2 + 1, U8);
     dst = d;
 
     while (s < send) {
@@ -2075,7 +2075,7 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
         s++;
     }
     *d = '\0';
-    *len = d-dst;
+    *lenp = d-dst;
     return dst;
 }
 
