@@ -1931,37 +1931,39 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     }
 
     {
-    U8 * const save = s;
-    U8 * const send = s + *len;
-    U8 * d;
+        U8 * const save = s;
+        U8 * const send = s + *len;
+        U8 * d;
 
-    /* Nothing before the first variant needs to be changed, so start the real
-     * work there */
-    s = first_variant;
-    while (s < send) {
-        if (! UTF8_IS_INVARIANT(*s)) {
-            if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                *len = ((STRLEN) -1);
-                return 0;
+        /* Nothing before the first variant needs to be changed, so start the real
+         * work there */
+        s = first_variant;
+        while (s < send) {
+            if (! UTF8_IS_INVARIANT(*s)) {
+                if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
+                    *len = ((STRLEN) -1);
+                    return 0;
+                }
+                s++;
             }
             s++;
         }
-        s++;
-    }
 
-    d = s = first_variant;
-    while (s < send) {
-	U8 c = *s++;
-	if (! UVCHR_IS_INVARIANT(c)) {
-	    /* Then it is two-byte encoded */
-	    c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
-            s++;
-	}
-	*d++ = c;
-    }
-    *d = '\0';
-    *len = d - save;
-    return save;
+        /* Is downgradable, so do it */
+        d = s = first_variant;
+        while (s < send) {
+            U8 c = *s++;
+            if (! UVCHR_IS_INVARIANT(c)) {
+                /* Then it is two-byte encoded */
+                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
+                s++;
+            }
+            *d++ = c;
+        }
+        *d = '\0';
+        *len = d - save;
+
+        return save;
     }
 }
 
