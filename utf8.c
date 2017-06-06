@@ -1942,7 +1942,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     d = s = save;
     while (s < send) {
 	U8 c = *s++;
-	if (! UTF8_IS_INVARIANT(c)) {
+	if (! UVCHR_IS_INVARIANT(c)) {
 	    /* Then it is two-byte encoded */
 	    c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
             s++;
