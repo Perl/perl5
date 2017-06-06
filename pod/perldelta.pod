@@ -87,6 +87,10 @@ This was deprecated since Perl 5.24.
 
 Use C<B::Concise::b_terse> instead.
 
+=head2 Use of inherited AUTOLOAD for non-methods is no longer allowed.
+
+This was deprecated in Perl 5.004.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

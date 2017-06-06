@@ -1210,16 +1210,14 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	return NULL;
 
     /*
-     * Inheriting AUTOLOAD for non-methods works ... for now.
+     * Inheriting AUTOLOAD for non-methods no longer works
      */
     if (
         !(flags & GV_AUTOLOAD_ISMETHOD)
      && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			 "Use of inherited AUTOLOAD for non-method %" SVf
-			 "::%" UTF8f "() is deprecated. This will be "
-                         "fatal in Perl 5.28",
+        Perl_croak(aTHX_ "Use of inherited AUTOLOAD for non-method %" SVf
+                         "::%" UTF8f "() is no longer allowed",
 			 SVfARG(packname),
                          UTF8fARG(is_utf8, len, name));
 
