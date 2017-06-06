@@ -1907,10 +1907,14 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 /*
 =for apidoc utf8_to_bytes
 
-Converts a string C<s> of length C<*lenp> from UTF-8 into native byte encoding.
+Converts a string C<"s"> of length C<*lenp> from UTF-8 into native byte encoding.
 Unlike L</bytes_to_utf8>, this over-writes the original string, and
 updates C<*lenp> to contain the new length.
-Returns zero on failure,  setting C<*lenp> to -1.
+Returns zero on failure (leaving C<"s"> unchanged) setting C<*lenp> to -1.
+
+Upon successful return, the number of variants in the string can be computed by
+saving the value of C<*lenp> before the call, and subtracting the after-call
+value of C<*lenp> from it.
 
 If you need a copy of the string, see L</bytes_from_utf8>.
 
@@ -1985,6 +1989,10 @@ Otherwise, C<*is_utf8> is set to 0, and the return value is a pointer to a
 newly created string containing a downgraded copy of C<s>, and whose length is
 returned in C<*lenp>, updated.
 
+Upon successful return, the number of variants in the string can be computed by
+saving the value of C<*lenp> before the call, and subtracting the after-call
+value of C<*lenp> from it.
+
 =cut
 */
 
@@ -2047,6 +2055,10 @@ Converts a string C<s> of length C<*lenp> bytes from the native encoding into
 UTF-8.
 Returns a pointer to the newly-created string, and sets C<*lenp> to
 reflect the new length in bytes.
+
+Upon successful return, the number of variants in the string can be computed by
+saving the value of C<*lenp> before the call, and subtracting it from the
+after-call value of C<*lenp>.
 
 A C<NUL> character will be written after the end of the string.
 
