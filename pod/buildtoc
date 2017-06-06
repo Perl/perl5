@@ -18,7 +18,7 @@ BEGIN {
 }
 
 die "$0: Usage: $0 [--quiet]\n"
-    unless GetOptions (quiet => \$Quiet) && !@ARGV;
+    unless GetOptions ('q|quiet' => \$Quiet) && !@ARGV;
 
 my $state = get_pod_metadata(0, sub { warn @_ if @_ }, 'pod/perltoc.pod');
 
