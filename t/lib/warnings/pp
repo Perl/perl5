@@ -21,8 +21,6 @@
   Constant subroutine (anonymous) undefined
 	$foo = sub () { 3 }; undef &$foo;
 
-  Use of strings with code points over 0xFF as arguments to 1's complement (~) operator is deprecated. This will be a fatal error in Perl 5.28
-
   Invalid negative number (%s) in chr
 
 __END__
@@ -132,14 +130,6 @@ use utf8 ;
 $_ = "\x80  \xff" ;
 reverse ;
 EXPECT
-########
-# NAME deprecation of complement with above ff code points
-$_ = ~ "\xff";
-$_ = ~ "\x{100}";
-EXPECT
-OPTION regex
-Use of strings with code points over 0xFF as arguments to 1's complement \(~\) operator is deprecated. This will be a fatal error in Perl 5.28 at - line \d+.
-Use of code point 0xFF+EFF is not allowed; the permissible max is 0x7F+ at - line 2\.
 ########
 # NAME chr -1
 use warnings 'utf8';

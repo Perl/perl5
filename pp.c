@@ -2641,10 +2641,11 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 	  STRLEN targlen = 0;
 	  STRLEN l;
 	  UV nchar = 0;
-	  UV nwide = 0;
 	  U8 * const send = tmps + len;
 	  U8 * const origtmps = tmps;
 	  const UV utf8flags = UTF8_ALLOW_ANYUV;
+	  U8 *result;
+	  U8 *p;
 
 	  while (tmps < send) {
 	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
@@ -2652,45 +2653,23 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 	    targlen += UVCHR_SKIP(~c);
 	    nchar++;
 	    if (c > 0xff)
-		nwide++;
+                Perl_croak(aTHX_
+                           fatal_above_ff_msg, PL_op_desc[PL_op->op_type]);
 	  }
 
 	  /* Now rewind strings and write them. */
 	  tmps = origtmps;
 
-	  if (nwide) {
-	      U8 *result;
-	      U8 *p;
-
-              Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                        deprecated_above_ff_msg, PL_op_desc[PL_op->op_type]);
-	      Newx(result, targlen + 1, U8);
-	      p = result;
-	      while (tmps < send) {
-		  const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
-		  tmps += l;
-		  p = uvchr_to_utf8_flags(p, ~c, UNICODE_ALLOW_ANY);
-	      }
-	      *p = '\0';
-	      sv_usepvn_flags(TARG, (char*)result, targlen,
-			      SV_HAS_TRAILING_NUL);
-	      SvUTF8_on(TARG);
-	  }
-	  else {
-	      U8 *result;
-	      U8 *p;
-
-	      Newx(result, nchar + 1, U8);
-	      p = result;
-	      while (tmps < send) {
-		  const U8 c = (U8)utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
-		  tmps += l;
-		  *p++ = ~c;
-	      }
-	      *p = '\0';
-	      sv_usepvn_flags(TARG, (char*)result, nchar, SV_HAS_TRAILING_NUL);
-	      SvUTF8_off(TARG);
-	  }
+	  Newx(result, nchar + 1, U8);
+	  p = result;
+	  while (tmps < send) {
+              const U8 c = (U8)utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
+              tmps += l;
+              *p++ = ~c;
+          }
+          *p = '\0';
+          sv_usepvn_flags(TARG, (char*)result, nchar, SV_HAS_TRAILING_NUL);
+          SvUTF8_off(TARG);
 	  return;
 	}
 #ifdef LIBERAL

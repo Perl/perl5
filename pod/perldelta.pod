@@ -91,6 +91,11 @@ Use C<B::Concise::b_terse> instead.
 
 This was deprecated in Perl 5.004.
 
+=head2 Use of strings with code points over 0xFF is not allowed for
+bitwise string operators
+
+Code points over 0xFF do not make sense for bitwise operators.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

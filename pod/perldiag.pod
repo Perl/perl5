@@ -7055,14 +7055,14 @@ its behavior may change or even be removed in any future release of perl.
 See the explanation under L<perlvar/$_>.
 
 =item Use of strings with code points over 0xFF as arguments to %s
-operator is deprecated. This will be a fatal error in Perl 5.28
+operator is not allowed
 
-(D deprecated) You tried to use one of the string bitwise operators
+(F) You tried to use one of the string bitwise operators
 (C<&> or C<|> or C<^> or C<~>) on a string containing a code point over
 0xFF.  The string bitwise operators treat their operands as strings of
 bytes, and values beyond 0xFF are nonsensical in this context.
 
-Such usage will be a fatal error in Perl 5.28.
+This became fatal in Perl 5.28.
 
 =item Use of strings with code points over 0xFF as arguments to C<vec>
 is deprecated. This will be a fatal error in Perl 5.32

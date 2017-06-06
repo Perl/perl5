@@ -19,7 +19,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 187 + (10*13*2) + 5 + 31;
+plan tests => 334;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -108,34 +108,6 @@ is ("o\000 \0001\000" ^ "\000k\0002\000\n", "ok 21\n");
 is ("ok \x{FF}\x{FF}\n" & "ok 22\n", "ok 22\n");
 is ("ok 23\n" | "ok \x{0}\x{0}\n", "ok 23\n");
 is ("o\x{0} \x{0}4\x{0}" ^ "\x{0}k\x{0}2\x{0}\n", "ok 24\n");
-
-#
-is (sprintf("%vd", v4095 & v801), 801);
-is (sprintf("%vd", v4095 | v801), 4095);
-is (sprintf("%vd", v4095 ^ v801), 3294);
-
-#
-is (sprintf("%vd", v4095.801.4095 & v801.4095), '801.801');
-is (sprintf("%vd", v4095.801.4095 | v801.4095), '4095.4095.4095');
-is (sprintf("%vd", v801.4095 ^ v4095.801.4095), '3294.3294.4095');
-#
-is (sprintf("%vd", v120.300 & v200.400), '72.256');
-is (sprintf("%vd", v120.300 | v200.400), '248.444');
-is (sprintf("%vd", v120.300 ^ v200.400), '176.188');
-#
-{
-    my $a = v120.300;
-    my $b = v200.400;
-    $a ^= $b;
-    is (sprintf("%vd", $a), '176.188');
-}
-{
-    my $a = v120.300;
-    my $b = v200.400;
-    $a |= $b;
-    is (sprintf("%vd", $a), '248.444');
-}
-
 
 # More variations on 19 and 22.
 is ("ok \xFF\x{FF}\n" & "ok 41\n", "ok 41\n");
@@ -314,77 +286,6 @@ SKIP: {
     ok($b =~ /b+$/, 'Unicode "b" is NUL-terminated');
 }
 
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $c = $a | $b;
-    is($c, chr(0x1FF) x 0xFF . chr(0x101) x 2);
-
-    $c = $b | $a;
-    is($c, chr(0x1FF) x 0xFF . chr(0x101) x 2);
-
-    $c = $a & $b;
-    is($c, chr(0x001) x 0x0FF);
-
-    $c = $b & $a;
-    is($c, chr(0x001) x 0x0FF);
-
-    $c = $a ^ $b;
-    is($c, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
-
-    $c = $b ^ $a;
-    is($c, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
-}
-
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $a |= $b;
-    is($a, chr(0x1FF) x 0xFF . chr(0x101) x 2);
-}
-
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $b |= $a;
-    is($b, chr(0x1FF) x 0xFF . chr(0x101) x 2);
-}
-
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $a &= $b;
-    is($a, chr(0x001) x 0x0FF);
-}
-
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $b &= $a;
-    is($b, chr(0x001) x 0x0FF);
-}
-
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $a ^= $b;
-    is($a, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
-}
-
-{
-    $a = chr(0x101) x 0x101;
-    $b = chr(0x0FF) x 0x0FF;
-
-    $b ^= $a;
-    is($b, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
-}
-
 
 # New string- and number-specific bitwise ops
 {
@@ -478,7 +379,7 @@ for (
 ) {
     my ($val, $orig, $type) = @$_;
 
-    for (["x", "string"], ["\x{100}", "utf8"]) {
+    for (["x", "string"]) {
         my ($str, $desc) = @$_;
 
         $warn = 0;
@@ -632,3 +533,26 @@ is $byte, "\0", "utf8 &. appends null byte";
 fresh_perl_is('$x = "UUUUUUUV"; $y = "xxxxxxx"; $x |= $y; print $x',
               ( $::IS_EBCDIC) ? 'XXXXXXXV' : '}}}}}}}V',
               {}, "[perl #129995] access to freed memory");
+
+
+#
+# Using code points above 0xFF is fatal
+#
+foreach my $op_info ([and => "&"], [or => "|"], [xor => "^"]) {
+    my ($op_name, $op) = @$op_info;
+    local $@;
+    eval '$_ = "\xFF" ' . $op . ' "\x{100}";';
+    like $@, qr /^Use of strings with code points over 0xFF as arguments (?#
+                 )to bitwise $op_name \Q($op)\E operator is not allowed/,
+         "Use of code points above 0xFF as arguments to bitwise " .
+         "$op_name ($op) is not allowed";
+}
+
+{
+    local $@;
+    eval '$_ = ~ "\x{100}";';
+    like $@, qr /^Use of strings with code points over 0xFF as arguments (?#
+                 )to 1's complement \(~\) operator is not allowed/,
+         "Use of code points above 0xFF as argument to 1's complement " .
+         "(~) is not allowed";
+}
