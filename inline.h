@@ -1111,7 +1111,8 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
 
 #endif
 
-#ifndef PERL_IN_REGEXEC_C   /* Keep  these around for that file */
+   /* Keep  these around for these files */
+#if ! defined(PERL_IN_REGEXEC_C) && ! defined(PERL_IN_UTF8_C)
 #  undef PERL_WORDSIZE
 #  undef PERL_COUNT_MULTIPLIER
 #  undef PERL_WORD_BOUNDARY_MASK
