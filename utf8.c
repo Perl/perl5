@@ -1920,14 +1920,24 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 U8 *
 Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 {
-    U8 * const save = s;
-    U8 * const send = s + *len;
-    U8 *d;
+    U8 * first_variant;
 
     PERL_ARGS_ASSERT_UTF8_TO_BYTES;
     PERL_UNUSED_CONTEXT;
 
-    /* ensure valid UTF-8 and chars < 256 before updating string */
+    /* This is a no-op if no variants at all in the input */
+    if (is_utf8_invariant_string_loc(s, *len, (const U8 **) &first_variant)) {
+        return s;
+    }
+
+    {
+    U8 * const save = s;
+    U8 * const send = s + *len;
+    U8 * d;
+
+    /* Nothing before the first variant needs to be changed, so start the real
+     * work there */
+    s = first_variant;
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
@@ -1939,7 +1949,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
         s++;
     }
 
-    d = s = save;
+    d = s = first_variant;
     while (s < send) {
 	U8 c = *s++;
 	if (! UVCHR_IS_INVARIANT(c)) {
@@ -1952,6 +1962,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     *d = '\0';
     *len = d - save;
     return save;
+    }
 }
 
 /*
