@@ -37,7 +37,8 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 static const char cp_above_legal_max[] =
- "Use of code point 0x%" UVXf " is deprecated; the permissible max is 0x%" UVXf ". This will be fatal in Perl 5.28";
+      "Use of code point 0x%" UVXf " is not allowed; "
+      "the permissible max is 0x%" UVXf;
 
 #define MAX_NON_DEPRECATED_CP ((UV) (IV_MAX))
 
@@ -198,11 +199,8 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
      * performance hit on these high EBCDIC code points. */
 
     if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-        if (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
-            && ckWARN_d(WARN_DEPRECATED))
-        {
-            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                        cp_above_legal_max, uv, MAX_NON_DEPRECATED_CP);
+        if (UNLIKELY(uv > MAX_NON_DEPRECATED_CP)) {
+            Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_NON_DEPRECATED_CP);
         }
         if (   (flags & UNICODE_WARN_SUPER)
             || (   UNICODE_IS_ABOVE_31_BIT(uv)
@@ -1663,12 +1661,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                  * where 'uv' is not valid. */
                 if (   ! (orig_problems
                                     & (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
-                    && UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
-                    && ckWARN_d(WARN_DEPRECATED))
-                {
-                    message = Perl_form(aTHX_ cp_above_legal_max,
-                                              uv, MAX_NON_DEPRECATED_CP);
-                    pack_warn = packWARN(WARN_DEPRECATED);
+                    && UNLIKELY(uv > MAX_NON_DEPRECATED_CP)) {
+                    Perl_croak(aTHX_ cp_above_legal_max, uv,
+                                     MAX_NON_DEPRECATED_CP);
                 }
             }
             else if (possible_problems & UTF8_GOT_NONCHAR) {
@@ -2818,11 +2813,9 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
                 }
 
                 if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
-                    if (   UNLIKELY(uv1 > MAX_NON_DEPRECATED_CP)
-                        && ckWARN_d(WARN_DEPRECATED))
-                    {
-                        Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                                cp_above_legal_max, uv1, MAX_NON_DEPRECATED_CP);
+                    if (UNLIKELY(uv1 > MAX_NON_DEPRECATED_CP)) {
+                        Perl_croak(aTHX_ cp_above_legal_max, uv1,
+                                         MAX_NON_DEPRECATED_CP);
                     }
                     if (ckWARN_d(WARN_NON_UNICODE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;

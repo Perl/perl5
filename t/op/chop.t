@@ -264,10 +264,10 @@ foreach my $start (@chars) {
         use Config;
         $Config{ivsize} >= 8
 	  or skip("this build can't handle very large characters", 2);
-        my $utf = "\x{ffffffffffffffff}\x{fffffffffffffffe}";
+        my $utf = "\x{7fffffffffffffff}\x{7ffffffffffffffe}";
         my $result = chop $utf;
-        is($utf, "\x{ffffffffffffffff}", "chop even higher 'unicode' - remnant");
-        is($result, "\x{fffffffffffffffe}", "chop even higher 'unicode' - result");
+        is($utf, "\x{7fffffffffffffff}", "chop even higher 'unicode' - remnant");
+        is($result, "\x{7ffffffffffffffe}", "chop even higher 'unicode' - result");
     }
 }
 

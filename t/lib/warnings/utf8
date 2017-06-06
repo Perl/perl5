@@ -736,39 +736,6 @@ $a = uc("\x{103}");
 $a = ucfirst("\x{104}");
 EXPECT
 ########
-# NAME Deprecation of too-large code points
-require "../test.pl";
-use warnings 'non_unicode';
-my $max_cp = ~0 >> 1;
-my $max_char = chr $max_cp;
-my $to_warn_cp = $max_cp + 1;
-my $to_warn_char = chr $to_warn_cp;
-$max_char =~ /[\x{110000}\P{Unassigned}]/;
-$to_warn_char =~ /[\x{110000}\P{Unassigned}]/;
-my $temp = qr/$max_char/;
-$temp = qr/$to_warn_char/;
-$temp = uc($max_char);
-$temp = uc($to_warn_char);
-my $file = tempfile();
-open(my $fh, "+>:utf8", $file);
-print $fh $max_char, "\n";
-print $fh $to_warn_char, "\n";
-close $fh;
-EXPECT
-OPTION regex
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in pattern match \(m//\) at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in regexp compilation at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in regexp compilation at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in regexp compilation at - line \d+.
-Operation "uc" returns its argument for non-Unicode code point 0x7F+ at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in uc at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
-Operation "uc" returns its argument for non-Unicode code point 0x80+ at - line \d+.
-Code point 0x7F+ is not Unicode, may not be portable in print at - line \d+.
-Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in print at - line \d+.
-########
 # NAME  [perl #127262]
 BEGIN{
     if (ord('A') == 193) {

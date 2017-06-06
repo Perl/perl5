@@ -2342,7 +2342,7 @@ EOF
         # We use 'ok' instead of 'like' because the warnings are lexically
         # scoped, and want to turn them off, so have to do the match in this
         # scope.
-        if ($Config{uvsize} < 8) {
+        if ($Config{uvsize} > 4) {
             ok(chr(0xFFFF_FFFE) =~ /\p{Is_32_Bit_Super}/,
                             "chr(0xFFFF_FFFE) can match a Unicode property");
             ok(chr(0xFFFF_FFFF) =~ /\p{Is_32_Bit_Super}/,
@@ -2352,24 +2352,6 @@ EOF
                     "chr(0xFFFF_FFFF) can match itself in a [class]");
             ok(chr(0xFFFF_FFFF) =~ $p, # Tests any caching
                     "chr(0xFFFF_FFFF) can match itself in a [class] subsequently");
-        }
-        else {
-            no warnings 'overflow';
-            ok(chr(0xFFFF_FFFF_FFFF_FFFE) =~ qr/\p{Is_Portable_Super}/,
-                    "chr(0xFFFF_FFFF_FFFF_FFFE) can match a Unicode property");
-            ok(chr(0xFFFF_FFFF_FFFF_FFFF) =~ qr/^\p{Is_Portable_Super}$/,
-                    "chr(0xFFFF_FFFF_FFFF_FFFF) can match a Unicode property");
-
-            my $p = qr/^[\x{FFFF_FFFF_FFFF_FFFF}]$/;
-            ok(chr(0xFFFF_FFFF_FFFF_FFFF) =~ $p,
-                    "chr(0xFFFF_FFFF_FFFF_FFFF) can match itself in a [class]");
-            ok(chr(0xFFFF_FFFF_FFFF_FFFF) =~ $p, # Tests any caching
-                    "chr(0xFFFF_FFFF_FFFF_FFFF) can match itself in a [class] subsequently");
-
-            # This test is because something was declared as 32 bits, but
-            # should have been cast to 64; only a problem where
-            # sizeof(STRLEN) != sizeof(UV)
-            ok(chr(0xFFFF_FFFF_FFFF_FFFE) !~ qr/\p{Is_32_Bit_Super}/, "chr(0xFFFF_FFFF_FFFF_FFFE) shouldn't match a range ending in 0xFFFF_FFFF");
         }
     }
 

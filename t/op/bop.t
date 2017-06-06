@@ -19,7 +19,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 192 + (10*13*2) + 5 + 31;
+plan tests => 187 + (10*13*2) + 5 + 31;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -134,57 +134,6 @@ is (sprintf("%vd", v120.300 ^ v200.400), '176.188');
     my $b = v200.400;
     $a |= $b;
     is (sprintf("%vd", $a), '248.444');
-}
-
-#
-# UTF8 ~ behaviour
-#
-
-{
-    my @not36;
-
-    for (0x100...0xFFF) {
-    $a = ~(chr $_);
-        push @not36, sprintf("%#03X", $_)
-            if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
-    }
-    is (join (', ', @not36), '');
-
-    my @not37;
-
-    for my $i (0xEEE...0xF00) {
-        for my $j (0x0..0x120) {
-            $a = ~(chr ($i) . chr $j);
-                push @not37, sprintf("%#03X %#03X", $i, $j)
-                    if $a ne chr(~$i).chr(~$j) or
-                    length($a) != 2 or
-                    ~$a ne chr($i).chr($j);
-        }
-    }
-    is (join (', ', @not37), '');
-
-    is (~chr(~0), "\0");
-
-
-    my @not39;
-
-    for my $i (0x100..0x120) {
-        for my $j (0x100...0x120) {
-            push @not39, sprintf("%#03X %#03X", $i, $j)
-                if ~(chr($i)|chr($j)) ne (~chr($i)&~chr($j));
-        }
-    }
-    is (join (', ', @not39), '');
-
-    my @not40;
-
-    for my $i (0x100..0x120) {
-        for my $j (0x100...0x120) {
-            push @not40, sprintf("%#03X %#03X", $i, $j)
-                if ~(chr($i)&chr($j)) ne (~chr($i)|~chr($j));
-        }
-    }
-    is (join (', ', @not40), '');
 }
 
 
