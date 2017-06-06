@@ -14127,6 +14127,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
      * decide that no posix class was intended.  Should be at least
      * sizeof("alphanumeric") */
     UV input_text[15];
+    STATIC_ASSERT_DECL(C_ARRAY_LENGTH(input_text) >= sizeof "alphanumeric");
 
     PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX;
 
