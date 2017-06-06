@@ -6944,25 +6944,21 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
-=item Use of code point 0x%s is deprecated; the permissible max is 0x%s. This will be fatal in Perl 5.28
+=item Use of code point 0x%s is not allowed; the permissible max is 0x%s.
 
-(D deprecated) You used a code point that will not be allowed in a
-future perl version, because it is too large.  Unicode only allows code
-points up to 0x10FFFF, but Perl allows much larger ones.  However, the
-largest possible ones break the perl interpreter in some constructs,
-including causing it to hang in a few cases.  The known problem areas
-are in C<tr///>, regular expression pattern matching using quantifiers,
-as quote delimiters in C<qI<X>...I<X>> (where I<X> is the C<chr()> of a large
-code point), and as the upper limits in loops.
-There may be other breakages as well.  If you get this warning, and
-things aren't working correctly, you probably have found one of these.
+(F) You used a code point that is not allowed, because it is too large.
+Unicode only allows code points up to 0x10FFFF, but Perl allows much
+larger ones. Earlier versions of Perl allowed code points above IV_MAX
+(0x7FFFFFF on 32-bit platforms, 0x7FFFFFFFFFFFFFFF on 64-bit platforms),
+however, this could possibly break the perl interpreter in some constructs,
+including causing it to hang in a few cases.
 
 If your code is to run on various platforms, keep in mind that the upper
 limit depends on the platform.  It is much larger on 64-bit word sizes
 than 32-bit ones.
 
 The use of out of range code points was deprecated in Perl 5.24, and
-it will be a fatal error in Perl 5.28.
+became a fatal error in Perl 5.28.
 
 =item Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28
 
