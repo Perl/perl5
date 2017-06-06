@@ -3496,20 +3496,16 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	 * incoming SV being well formed and having a trailing '\0', as certain
 	 * code in pp_formline can send us partially built SVs. */
 
-	while (t < e) {
-	    const U8 ch = *t++;
-	    if (NATIVE_BYTE_IS_INVARIANT(ch)) continue;
+	if (is_utf8_invariant_string_loc(s, SvCUR(sv), (const U8 **) &t)) {
 
-	    t--;    /* t already incremented; re-point to first variant */
-	    two_byte_count = 1;
-	    goto must_be_utf8;
+            /* utf8 conversion not needed because all are invariants.  Mark as
+             * UTF-8 even if no variant - saves scanning loop */
+            SvUTF8_on(sv);
+            if (extra) SvGROW(sv, SvCUR(sv) + extra);
+            return SvCUR(sv);
 	}
 
-	/* utf8 conversion not needed because all are invariants.  Mark as
-	 * UTF-8 even if no variant - saves scanning loop */
-	SvUTF8_on(sv);
-	if (extra) SvGROW(sv, SvCUR(sv) + extra);
-	return SvCUR(sv);
+        two_byte_count = 1;
 
       must_be_utf8:
 
