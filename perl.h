@@ -3691,24 +3691,24 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 /* placeholder */
 #endif
 
-/* STATIC_ASSERT_GLOBAL/STATIC_ASSERT_STMT are like assert(), but for compile
+/* STATIC_ASSERT_DECL/STATIC_ASSERT_STMT are like assert(), but for compile
    time invariants. That is, their argument must be a constant expression that
    can be verified by the compiler. This expression can contain anything that's
    known to the compiler, e.g. #define constants, enums, or sizeof (...). If
    the expression evaluates to 0, compilation fails.
    Because they generate no runtime code (i.e.  their use is "free"), they're
    always active, even under non-DEBUGGING builds.
-   STATIC_ASSERT_GLOBAL expands to a declaration and is suitable for use at
+   STATIC_ASSERT_DECL expands to a declaration and is suitable for use at
    file scope (outside of any function).
    STATIC_ASSERT_STMT expands to a statement and is suitable for use inside a
    function.
 */
 #if (defined(static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L)) && (!defined(__IBMC__) || __IBMC__ >= 1210)
 /* static_assert is a macro defined in <assert.h> in C11 or a compiler
-   builtin in C++11.
+   builtin in C++11.  But IBM XL C V11 does not support _Static_assert, no
+   matter what <assert.h> says.
 */
-/* IBM XL C V11 does not support _Static_assert, no matter what <assert.h> says */
-#  define STATIC_ASSERT_GLOBAL(COND) static_assert(COND, #COND)
+#  define STATIC_ASSERT_DECL(COND) static_assert(COND, #COND)
 #else
 /* We use a bit-field instead of an array because gcc accepts
    'typedef char x[n]' where n is not a compile-time constant.
@@ -3719,12 +3719,12 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
         unsigned int _static_assertion_failed_##SUFFIX : (COND) ? 1 : -1; \
     } _static_assertion_failed_##SUFFIX PERL_UNUSED_DECL
 #  define STATIC_ASSERT_1(COND, SUFFIX) STATIC_ASSERT_2(COND, SUFFIX)
-#  define STATIC_ASSERT_GLOBAL(COND)    STATIC_ASSERT_1(COND, __LINE__)
+#  define STATIC_ASSERT_DECL(COND)    STATIC_ASSERT_1(COND, __LINE__)
 #endif
 /* We need this wrapper even in C11 because 'case X: static_assert(...);' is an
    error (static_assert is a declaration, and only statements can have labels).
 */
-#define STATIC_ASSERT_STMT(COND)      do { STATIC_ASSERT_GLOBAL(COND); } while (0)
+#define STATIC_ASSERT_STMT(COND)      do { STATIC_ASSERT_DECL(COND); } while (0)
 
 #ifndef __has_builtin
 #  define __has_builtin(x) 0 /* not a clang style compiler */
