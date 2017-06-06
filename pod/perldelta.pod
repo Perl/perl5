@@ -79,6 +79,10 @@ Use of a bare terminator has been deprecated since Perl 5.000.
 This used to work like setting it to C<undef>, but has been deprecated
 since Perl 5.20.
 
+=head2 Unicode code points with values exceeding C<IV_MAX> are now fatal.
+
+This was deprecated since Perl 5.24.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
