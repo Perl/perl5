@@ -294,7 +294,7 @@
 #define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
 #define is_utf8_idcont(a)	Perl_is_utf8_idcont(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
-#define is_utf8_invariant_string	S_is_utf8_invariant_string
+#define is_utf8_invariant_string_loc	S_is_utf8_invariant_string_loc
 #define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
 #define is_utf8_perl_space(a)	Perl_is_utf8_perl_space(aTHX_ a)

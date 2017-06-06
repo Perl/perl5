@@ -353,19 +353,44 @@ and
 C<L</is_c9strict_utf8_string_loclen>>.
 
 =cut
+
+*/
+
+#define is_utf8_invariant_string(s, len)                                    \
+                                is_utf8_invariant_string_loc(s, len, NULL)
+
+/*
+=for apidoc is_utf8_invariant_string_loc
+
+Like C<L</is_utf8_invariant_string>> but upon failure, stores the location of
+the first UTF-8 variant character in the C<ep> pointer; if all characters are
+UTF-8 invariant, this function does not change the contents of C<*ep>.
+
+=cut
+
+XXX On ASCII machines this could be sped up by doing word-at-a-time operations
+
 */
 
 PERL_STATIC_INLINE bool
-S_is_utf8_invariant_string(const U8* const s, const STRLEN len)
+S_is_utf8_invariant_string_loc(const U8* const s, const STRLEN len, const U8 ** ep)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
 
-    PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING;
+    PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING_LOC;
 
-    for (; x < send; ++x) {
-	if (!UTF8_IS_INVARIANT(*x))
-	    return FALSE;
+    while (x < send) {
+	if (UTF8_IS_INVARIANT(*x)) {
+            x++;
+            continue;
+        }
+
+        if (ep) {
+            *ep = x;
+        }
+
+        return FALSE;
     }
 
     return TRUE;
@@ -388,6 +413,7 @@ code points are considered valid.
 
 See also
 C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_invariant_string_loc>>,
 C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loclen>>,
 C<L</is_utf8_fixed_width_buf_flags>>,
@@ -435,6 +461,7 @@ non-character code points.
 
 See also
 C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_invariant_string_loc>>,
 C<L</is_utf8_string>>,
 C<L</is_utf8_string_flags>>,
 C<L</is_utf8_string_loc>>,
@@ -491,6 +518,7 @@ L<Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
 
 See also
 C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_invariant_string_loc>>,
 C<L</is_utf8_string>>,
 C<L</is_utf8_string_flags>>,
 C<L</is_utf8_string_loc>>,
@@ -553,6 +581,7 @@ C<L</utf8n_to_uvchr>>, with the same meanings.
 
 See also
 C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_invariant_string_loc>>,
 C<L</is_utf8_string>>,
 C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loc_flags>>,

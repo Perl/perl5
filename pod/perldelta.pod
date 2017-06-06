@@ -409,6 +409,15 @@ The C<PL_statbuf> interpreter variable has been removed.
 The deprecated function C<to_utf8_case()>, accessible from XS code, has
 been removed.
 
+=item *
+
+A new function
+L<C<is_utf8_invariant_string_loc()>|perlapi/is_utf8_invariant_string_loc>
+has been added that is like
+L<C<is_utf8_invariant_string()>|perlapi/is_utf8_invariant_string>
+but takes an extra pointer parameter into which is stored the location
+of the first variant character, if any are found.
+
 =back
 
 =head1 Selected Bug Fixes

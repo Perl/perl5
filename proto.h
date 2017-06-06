@@ -1617,10 +1617,13 @@ PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_IDFIRST	\
 	assert(p)
 
+/* PERL_CALLCONV bool	is_utf8_invariant_string(const U8* const s, STRLEN const len)
+			__attribute__warn_unused_result__; */
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_invariant_string(const U8* const s, STRLEN const len)
+PERL_STATIC_INLINE bool	S_is_utf8_invariant_string_loc(const U8* const s, STRLEN const len, const U8 ** ep)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING	\
+#define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING_LOC	\
 	assert(s)
 #endif
 
