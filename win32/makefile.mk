@@ -669,7 +669,7 @@ DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 
 # Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
 .IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
-DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 .ENDIF
 
 # In VS 2005 (VC++ 8.0) Microsoft changes time_t from 32-bit to
@@ -1246,10 +1246,10 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
 	echo #undef FILE_bufsiz&& \
-	echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)&& \
-	echo #define FILE_cnt(fp) PERLIO_FILE_cnt(fp)&& \
-	echo #define FILE_base(fp) PERLIO_FILE_base(fp)&& \
-	echo #define FILE_bufsiz(fp) (PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))&& \
+	echo #define FILE_ptr^(fp^) PERLIO_FILE_ptr^(fp^)&& \
+	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
+	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
+	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
 	echo #define I_STDBOOL)>> config.h
 .ENDIF
 .IF "$(USE_LARGE_FILES)"=="define"
