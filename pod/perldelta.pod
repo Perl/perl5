@@ -418,7 +418,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fetching the name of a glob that was previously UTF-8 but wasn't any
+longer would return that name flagged as UTF-8.  [perl #131263]
 
 =back
 
