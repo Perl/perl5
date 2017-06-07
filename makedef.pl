@@ -573,6 +573,9 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 ++$skip{PL_op_exec_cnt}
     unless $define{PERL_TRACE_OPS};
 
+++$skip{PL_hash_chars}
+    unless $define{PERL_USE_SINGLE_CHAR_HASH_CACHE};
+
 # functions from *.sym files
 
 my @syms = qw(globvar.sym);
