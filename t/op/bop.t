@@ -5,7 +5,6 @@
 #
 
 use warnings;
-no warnings 'deprecated';
 
 BEGIN {
     chdir 't' if -d 't';
@@ -19,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 341;
+plan tests => 471;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -303,11 +302,11 @@ SKIP: {
     $a &= "a";
     ok($a =~ /a+$/, 'ASCII "a" is NUL-terminated');
 
-    $b = "bb\x{100}";
+    $b = "bb\x{FF}";
+    utf8::upgrade($b);
     $b &= "b";
     ok($b =~ /b+$/, 'Unicode "b" is NUL-terminated');
 }
-
 
 # New string- and number-specific bitwise ops
 {
@@ -361,7 +360,8 @@ SKIP: {
 
 my %res;
 
-for my $str ("x", "\x{100}") {
+for my $str ("x", "\x{B6}") {
+    utf8::upgrade($str) if $str !~ /x/;
     for my $chr (qw/S A H G X ( * F/) {
         for my $op (qw/| & ^/) {
             my $co = ord $chr;
@@ -401,8 +401,9 @@ for (
 ) {
     my ($val, $orig, $type) = @$_;
 
-    for (["x", "string"]) {
+    for (["x", "string"], ["\x{B6}", "utf8"]) {
         my ($str, $desc) = @$_;
+        utf8::upgrade($str) if $desc =~ /utf8/;
 
         $warn = 0;
 
