@@ -2635,43 +2635,17 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 
 	sv_copypv_nomg(TARG, sv);
 	tmps = (U8*)SvPV_nomg(TARG, len);
-	anum = len;
+
 	if (SvUTF8(TARG)) {
-	  /* Calculate exact length, let's not estimate. */
-	  STRLEN targlen = 0;
-	  STRLEN l;
-	  UV nchar = 0;
-	  U8 * const send = tmps + len;
-	  U8 * const origtmps = tmps;
-	  const UV utf8flags = UTF8_ALLOW_ANYUV;
-	  U8 *result;
-	  U8 *p;
+            if (len && ! utf8_to_bytes(tmps, &len)) {
+                Perl_croak(aTHX_ fatal_above_ff_msg, PL_op_desc[PL_op->op_type]);
+            }
+            SvCUR(TARG) = len;
+            SvUTF8_off(TARG);
+        }
 
-	  while (tmps < send) {
-	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
-	    tmps += l;
-	    targlen += UVCHR_SKIP(~c);
-	    nchar++;
-	    if (c > 0xff)
-                Perl_croak(aTHX_
-                           fatal_above_ff_msg, PL_op_desc[PL_op->op_type]);
-	  }
+	anum = len;
 
-	  /* Now rewind strings and write them. */
-	  tmps = origtmps;
-
-	  Newx(result, nchar + 1, U8);
-	  p = result;
-	  while (tmps < send) {
-              const U8 c = (U8)utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
-              tmps += l;
-              *p++ = ~c;
-          }
-          *p = '\0';
-          sv_usepvn_flags(TARG, (char*)result, nchar, SV_HAS_TRAILING_NUL);
-          SvUTF8_off(TARG);
-	  return;
-	}
 #ifdef LIBERAL
 	{
 	    long *tmpl;
