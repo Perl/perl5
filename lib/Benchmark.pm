@@ -699,7 +699,7 @@ sub runloop {
         $subref  = _doeval($subcode);
     }
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
-    print STDERR "runloop $n '$subcode'\n" if $Debug;
+    print STDERR "XXX1: runloop $n '$subcode'\n" if $Debug;
 
     # Wait for the user timer to tick.  This makes the error range more like
     # -0.01, +0.  If we don't wait, then it's more like -0.01, +0.01.  This
@@ -719,10 +719,13 @@ sub runloop {
         for (my $i=0; $i < $limit; $i++) { my $x = $i / 1.5 } # burn user CPU
         $limit *= 1.1;
     }
+    print STDERR "XXX2:\n" if $Debug;
     $subref->();
+    print STDERR "XXX3:\n" if $Debug;
     $t1 = Benchmark->new($n);
     $td = &timediff($t1, $t0);
     timedebug("runloop:",$td);
+    print STDERR "XXX4:\n" if $Debug;
     $td;
 }
 
@@ -741,15 +744,19 @@ sub timeit {
     printf STDERR "timeit $n $code\n" if $Debug;
     my $cache_key = $n . ( ref( $code ) ? 'c' : 's' );
     if ($Do_Cache && exists $Cache{$cache_key} ) {
-	$wn = $Cache{$cache_key};
-    } else {
-	$wn = &runloop($n, ref( $code ) ? sub { } : '' );
-	# Can't let our baseline have any iterations, or they get subtracted
-	# out of the result.
-	$wn->[5] = 0;
-	$Cache{$cache_key} = $wn;
+        print STDERR "CCC: Why do I think I have a cache?\n" if $Debug;
+	    $wn = $Cache{$cache_key};
+    }
+    else {
+        print STDERR "AAA: About to call runloop for 'wn'\n" if $Debug;
+	    $wn = &runloop($n, ref( $code ) ? sub { } : '' );
+	    # Can't let our baseline have any iterations, or they get subtracted
+	    # out of the result.
+	    $wn->[5] = 0;
+	    $Cache{$cache_key} = $wn;
     }
 
+    print STDERR "BBB: About to call runloop for 'wc'\n" if $Debug;
     $wc = &runloop($n, $code);
 
     $wd = timediff($wc, $wn);
