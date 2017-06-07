@@ -534,15 +534,17 @@ you want to see what the native values are.)
 
 =item *
 
-Bit Complement Operator ~ And vec()
+Starting in Perl 5.28, it is illegal for bit operators, like C<~>, to
+operate on strings containing code points above 255.
 
-The bit complement operator C<~> may produce surprising results if
+=item *
+
+The vec() function may produce surprising results if
 used on strings containing characters with ordinal values above
 255. In such a case, the results are consistent with the internal
 encoding of the characters, but not with much else. So don't do
-that. Similarly for C<vec()>: you will be operating on the
-internally-encoded bit patterns of the Unicode characters, not on
-the code point values, which is very probably not what you want.
+that, and starting in Perl 5.28, a deprecation message is issued if you
+do so, becoming illegal in Perl 5.32.
 
 =item *
 

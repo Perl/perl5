@@ -243,11 +243,8 @@ bits wide on a 64-bit platform, so if you are expecting a certain bit
 width, remember to use the C<"&"> operator to mask off the excess bits.
 X<~> X<negation, binary>
 
-When complementing strings, if all characters have ordinal values under
-256, then their complements will, also.  But if they do not, all
-characters will be in either 32- or 64-bit complements, depending on your
-architecture.  So for example, C<~"\x{3B1}"> is C<"\x{FFFF_FC4E}"> on
-32-bit machines and C<"\x{FFFF_FFFF_FFFF_FC4E}"> on 64-bit machines.
+Starting in Perl 5.28, it is a fatal error to try to complement a string
+containing a character with an ordinal value above 255.
 
 If the experimental "bitwise" feature is enabled via S<C<use feature
 'bitwise'>>, then unary C<"~"> always treats its argument as a number, and an
@@ -3362,9 +3359,10 @@ strings:
 The assignment variants of these operators (C<&= |= ^= &.= |.= ^.=>)
 behave likewise under the feature.
 
-The behavior of these operators is problematic (and subject to change)
-if either or both of the strings are encoded in UTF-8 (see
-L<perlunicode/Byte and Character Semantics>.
+It is a fatal error if an operand contains a character whose ordinal
+value is above 0xFF, and hence not expressible except in UTF-8.  The
+operation is performed on a non-UTF-8 copy for other operands encoded in
+UTF-8.  See L<perlunicode/Byte and Character Semantics>.
 
 See L<perlfunc/vec> for information on how to manipulate individual bits
 in a bit vector.

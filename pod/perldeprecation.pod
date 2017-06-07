@@ -395,7 +395,7 @@ This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
 The string bitwise operators, C<&>, C<|>, C<^>, and C<~>, treat
 their operands as strings of bytes. As such, values above 0xFF 
 are nonsensical. Using such code points with these operators
-was deprecated in Perl 5.24, and will be fatal in Perl 5.28.
+was deprecated in Perl 5.24, and is fatal starting in Perl 5.28.
 
 =head3 In XS code, use of C<to_utf8_case()>
 

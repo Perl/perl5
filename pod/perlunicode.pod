@@ -191,11 +191,12 @@ C<scalar reverse()> reverses by character rather than by byte.
 =item *
 
 The bit string operators, C<& | ^ ~> and (starting in v5.22)
-C<&. |. ^.  ~.> can operate on characters that don't fit into a byte.
-However, the current behavior is likely to change.  You should not use
-these operators on strings that are encoded in UTF-8.  If you're not
-sure about the encoding of a string, downgrade it before using any of
-these operators; you can use
+C<&. |. ^.  ~.> can operate on bit strings encoded in UTF-8, but this
+can give unexpected results if any of the strings contain code points
+above 0xFF.  Starting in v5.28, it is a fatal error to have such an
+operand.  Otherwise, the operation is performed on a non-UTF-8 copy of
+the operand.  If you're not sure about the encoding of a string,
+downgrade it before using any of these operators; you can use
 L<C<utf8::utf8_downgrade()>|utf8/Utility functions>.
 
 =back
