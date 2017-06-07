@@ -1138,37 +1138,37 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	len = remainder;
     }
 #endif
-	switch (optype) {
-	case OP_BIT_AND:
-	    while (len--)
-		*dc++ = *lc++ & *rc++;
-	    *dc = '\0';
-	    break;
-	case OP_BIT_XOR:
-	    while (len--)
-		*dc++ = *lc++ ^ *rc++;
-	    goto mop_up;
-	case OP_BIT_OR:
-	    while (len--)
-		*dc++ = *lc++ | *rc++;
-	  mop_up:
-	    len = lensave;
-	    if (rightlen > len) {
-                if (dc == rc)
-                    SvCUR(sv) = rightlen;
-                else
-                    sv_catpvn_nomg(sv, rsave + len, rightlen - len);
-            }
-            else if (leftlen > len) {
-                if (dc == lc)
-                    SvCUR(sv) = leftlen;
-                else
-                    sv_catpvn_nomg(sv, lsave + len, leftlen - len);
-            }
-            *SvEND(sv) = '\0';
+    switch (optype) {
+    case OP_BIT_AND:
+        while (len--)
+            *dc++ = *lc++ & *rc++;
+        *dc = '\0';
+        break;
+    case OP_BIT_XOR:
+        while (len--)
+            *dc++ = *lc++ ^ *rc++;
+        goto mop_up;
+    case OP_BIT_OR:
+        while (len--)
+            *dc++ = *lc++ | *rc++;
+      mop_up:
+        len = lensave;
+        if (rightlen > len) {
+            if (dc == rc)
+                SvCUR(sv) = rightlen;
+            else
+                sv_catpvn_nomg(sv, rsave + len, rightlen - len);
+        }
+        else if (leftlen > len) {
+            if (dc == lc)
+                SvCUR(sv) = leftlen;
+            else
+                sv_catpvn_nomg(sv, lsave + len, leftlen - len);
+        }
+        *SvEND(sv) = '\0';
 
-	    break;
-	}
+        break;
+    }
 
     if (result_needs_to_be_utf8) {
 	sv_utf8_upgrade_nomg(sv);
