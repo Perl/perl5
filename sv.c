@@ -3185,6 +3185,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	assert(SvPOK(buffer));
 	if (SvUTF8(buffer))
 	    SvUTF8_on(sv);
+        else
+            SvUTF8_off(sv);
 	if (lp)
 	    *lp = SvCUR(buffer);
 	return SvPVX(buffer);

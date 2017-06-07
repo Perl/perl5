@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan(tests => 282);
+plan(tests => 284);
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1168,6 +1168,14 @@ SKIP: {
     runperl(prog => 'open my $fh, q|>|, \$buf;'
                    .'my $sub = eval q|sub {exit 0}|; $sub->()');
     is ($? & 127, 0,"[perl #128597] No crash when gp_free calls ckWARN_d");
+}
+
+{
+    # [perl #131263]
+    *sym = "\N{U+0080}";
+    ok(*sym eq "*main::\N{U+0080}", "utf8 flag properly set");
+    *sym = "\xC3\x80";
+    ok(*sym eq "*main::\xC3\x80", "utf8 flag properly cleared");
 }
 
 # test gv_try_downgrade()
