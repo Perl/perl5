@@ -3147,8 +3147,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
 
                     local_radix = PL_numeric_local && PL_numeric_radix_sv;
-                    if (local_radix && SvLEN(PL_numeric_radix_sv) > 1) {
-                        size += SvLEN(PL_numeric_radix_sv) - 1;
+                    if (local_radix && SvCUR(PL_numeric_radix_sv) > 1) {
+                        size += SvCUR(PL_numeric_radix_sv) - 1;
                         s = SvGROW_mutable(sv, size);
                     }
 
@@ -10955,12 +10955,35 @@ Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
 
 void
 Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
-                 va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
+                 va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted)
 {
     PERL_ARGS_ASSERT_SV_VSETPVFN;
 
     SvPVCLEAR(sv);
-    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, 0);
+    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, sv_count, maybe_tainted, 0);
+}
+
+
+/* simplified inline Perl_sv_catpvn_nomg() when you know the SV's SvPOK */
+
+PERL_STATIC_INLINE void
+S_sv_catpvn_simple(pTHX_ SV *const sv, const char* const buf, const STRLEN len)
+{
+    STRLEN const need = len + SvCUR(sv) + 1;
+    char *end;
+
+    /* can't wrap as both len and SvCUR() are allocated in
+     * memory and together can't consume all the address space
+     */
+    assert(need > len);
+
+    assert(SvPOK(sv));
+    SvGROW(sv, need);
+    end = SvEND(sv);
+    Copy(buf, end, len, char);
+    end += len;
+    *end = '\0';
+    SvCUR_set(sv, need - 1);
 }
 
 
@@ -10978,27 +11001,101 @@ S_warn_vcatpvfn_missing_argument(pTHX) {
 }
 
 
-STATIC I32
-S_expect_number(pTHX_ char **const pattern)
+static void
+S_croak_overflow()
 {
-    I32 var = 0;
+    dTHX;
+    Perl_croak(aTHX_ "Integer overflow in format string for %s",
+                    (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
+}
+
+
+/* Given an int i from the next arg (if args is true) or an sv from an arg
+ * (if args is false), try to extract a STRLEN-ranged value from the arg,
+ * with overflow checking.
+ * Sets *neg to true if the value was negative (untouched otherwise.
+ * Returns the absolute value.
+ * As an extra margin of safety, it croaks if the returned value would
+ * exceed the maximum value of a STRLEN / 4.
+ */
+
+static STRLEN
+S_sprintf_arg_num_val(pTHX_ va_list *const args, int i, SV *sv, bool *neg)
+{
+    IV iv;
+
+    if (args) {
+        iv = i;
+        goto do_iv;
+    }
+
+    if (!sv)
+        return 0;
+
+    SvGETMAGIC(sv);
+
+    if (UNLIKELY(SvIsUV(sv))) {
+        UV uv = SvUV_nomg(sv);
+        if (uv > IV_MAX)
+            S_croak_overflow();
+        iv = uv;
+    }
+    else {
+        iv = SvIV_nomg(sv);
+      do_iv:
+        if (iv < 0) {
+            if (iv < -IV_MAX)
+                S_croak_overflow();
+            iv = -iv;
+            *neg = TRUE;
+        }
+    }
+
+    if (iv > (IV)(((STRLEN)~0) / 4))
+        S_croak_overflow();
+
+    return (STRLEN)iv;
+}
+
+
+/* Returns true if c is in the range '1'..'9'
+ * Written with the cast so it only needs one conditional test
+ */
+#define IS_1_TO_9(c) ((U8)(c - '1') <= 8)
+
+/* Read in and return a number. Updates *pattern to point to the char
+ * following the number. Expects the first char to 1..9.
+ * Croaks if the number exceeds 1/4 of the maximum value of STRLEN.
+ * This is a belt-and-braces safety measure to complement any
+ * overflow/wrap checks done in the main body of sv_vcatpvfn_flags.
+ * It means that e.g. on a 32-bit system the width/precision can't be more
+ * than 1G, which seems reasonable.
+ */
+
+STATIC STRLEN
+S_expect_number(pTHX_ const char **const pattern)
+{
+    STRLEN var;
 
     PERL_ARGS_ASSERT_EXPECT_NUMBER;
 
-    switch (**pattern) {
-    case '1': case '2': case '3':
-    case '4': case '5': case '6':
-    case '7': case '8': case '9':
-	var = *(*pattern)++ - '0';
-	while (isDIGIT(**pattern)) {
-	    const I32 tmp = var * 10 + (*(*pattern)++ - '0');
-	    if (tmp < var)
-		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
-	    var = tmp;
-	}
+    assert(IS_1_TO_9(**pattern));
+
+    var = *(*pattern)++ - '0';
+    while (isDIGIT(**pattern)) {
+        /* if var * 10 + 9 would exceed 1/4 max strlen, croak */
+        if (var > ((((STRLEN)~0) / 4 - 9) / 10))
+            S_croak_overflow();
+        var = var * 10 + (*(*pattern)++ - '0');
     }
     return var;
 }
+
+/* Implement a fast "%.0f": given a pointer to the end of a buffer (caller
+ * ensures it's big enough), back fill it with the rounded integer part of
+ * nv. Returns ptr to start of string, and sets *len to its length.
+ * Returns NULL if not convertible.
+ */
 
 STATIC char *
 S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
@@ -11008,11 +11105,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 
     PERL_ARGS_ASSERT_F0CONVERT;
 
-    if (UNLIKELY(Perl_isinfnan(nv))) {
-        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 0);
-        *len = n;
-        return endbuf - n;
-    }
+    assert(!Perl_isinfnan(nv));
     if (neg)
 	nv = -nv;
     if (nv < UV_MAX) {
@@ -11034,43 +11127,44 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 }
 
 
-/*
-=for apidoc sv_vcatpvfn
-
-=for apidoc sv_vcatpvfn_flags
-
-Processes its arguments like C<vsprintf> and appends the formatted output
-to an SV.  Uses an array of SVs if the C-style variable argument list is
-missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d>
-or C<%*2$d>) is supported only when using an array of SVs; using a C-style
-C<va_list> argument list with a format string that uses argument reordering
-will yield an exception.
-
-When running with taint checks enabled, indicates via
-C<maybe_tainted> if results are untrustworthy (often due to the use of
-locales).
-
-If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
-
-Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
-
-=cut
-*/
-
-#define VECTORIZE_ARGS	vecsv = va_arg(*args, SV*);\
-			vecstr = (U8*)SvPV_const(vecsv,veclen);\
-			vec_utf8 = DO_UTF8(vecsv);
-
 /* XXX maybe_tainted is never assigned to, so the doc above is lying. */
 
 void
 Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
-                 va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
+                 va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted)
 {
     PERL_ARGS_ASSERT_SV_VCATPVFN;
 
-    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
+    sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, sv_count, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
 }
+
+
+/* For the vcatpvfn code, we need a long double target in case
+ * HAS_LONG_DOUBLE, even without USE_LONG_DOUBLE, so that we can printf
+ * with long double formats, even without NV being long double.  But we
+ * call the target 'fv' instead of 'nv', since most of the time it is not
+ * (most compilers these days recognize "long double", even if only as a
+ * synonym for "double").
+*/
+#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && \
+	defined(PERL_PRIgldbl) && !defined(USE_QUADMATH)
+#  define VCATPVFN_FV_GF PERL_PRIgldbl
+#  if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
+       /* Work around breakage in OTS$CVT_FLOAT_T_X */
+#    define VCATPVFN_NV_TO_FV(nv,fv)                    \
+            STMT_START {                                \
+                double _dv = nv;                        \
+                fv = Perl_isnan(_dv) ? LDBL_QNAN : _dv; \
+            } STMT_END
+#  else
+#    define VCATPVFN_NV_TO_FV(nv,fv) (fv)=(nv)
+#  endif
+   typedef long double vcatpvfn_long_double_t;
+#else
+#  define VCATPVFN_FV_GF NVgf
+#  define VCATPVFN_NV_TO_FV(nv,fv) (fv)=(nv)
+   typedef NV vcatpvfn_long_double_t;
+#endif
 
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
 /* The first double can be as large as 2**1023, or '1' x '0' x 1023.
@@ -11121,7 +11215,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #  define HEXTRACT_MIX_ENDIAN
 #endif
 
-/* S_hextract() is a helper for Perl_sv_vcatpvfn_flags, for extracting
+/* S_hextract() is a helper for S_format_hexfp, for extracting
  * the hexadecimal values (for %a/%A).  The nv is the NV where the value
  * are being extracted from (either directly from the long double in-memory
  * presentation, or from the uquad computed via frexp+ldexp).  frexp also
@@ -11203,6 +11297,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #endif
 
     const U8* vmaxend = vhex + HEXTRACTSIZE;
+
+    assert(HEXTRACTSIZE <= VHEX_SIZE);
+
     PERL_UNUSED_VAR(ix); /* might happen */
     (void)Perl_frexp(PERL_ABS(nv), exponent);
     *subnormal = FALSE;
@@ -11221,7 +11318,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         const U8* nvp = (const U8*)(&nv);
 	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
-#   undef HEXTRACT_HAS_TOP_NYBBLE
+#    undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_LE(13, 0);
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
         /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
@@ -11231,7 +11328,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         const U8* nvp = (const U8*)(&nv);
 	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
-#   undef HEXTRACT_HAS_TOP_NYBBLE
+#    undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_BE(2, 15);
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
         /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
@@ -11331,9 +11428,10 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #    define HEXTRACT_FALLBACK
 #  endif
 #endif /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) #else */
-#  ifdef HEXTRACT_FALLBACK
+
+#ifdef HEXTRACT_FALLBACK
 	HEXTRACT_GET_SUBNORMAL(nv);
-#    undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
+#  undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
         /* The fallback is used for the double-double format, and
          * for unknown long double formats, and for unknown double
          * formats, or in general unknown NV formats. */
@@ -11414,7 +11512,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
                     v++;
             }
         }
-#  endif
+#endif
     }
     /* Croak for various reasons: if the output pointer escaped the
      * output buffer, if the extraction index escaped the extraction
@@ -11432,40 +11530,355 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
     return v;
 }
 
-/* Helper for sv_vcatpvfn_flags().  */
-#define FETCH_VCATPVFN_ARGUMENT(var, in_range, expr)   \
-    STMT_START {                                       \
-        if (in_range)                                  \
-            (var) = (expr);                            \
-        else {                                         \
-            (var) = &PL_sv_no; /* [perl #71000] */     \
-            arg_missing = TRUE;                        \
-        }                                              \
-    } STMT_END
+
+/* S_format_hexfp(): helper function for Perl_sv_vcatpvfn_flags().
+ *
+ * Processes the %a/%A hexadecimal floating-point format, since the
+ * built-in snprintf()s which are used for most of the f/p formats, don't
+ * universally handle %a/%A.
+ * Populates buf of length bufsize, and returns the length of the created
+ * string.
+ * The rest of the args have the same meaning as the local vars of the
+ * same name within Perl_sv_vcatpvfn_flags().
+ *
+ * It assumes the caller has already done STORE_LC_NUMERIC_SET_TO_NEEDED();
+ *
+ * It requires the caller to make buf large enough.
+ */
+
+static STRLEN
+S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
+                    const NV nv, const vcatpvfn_long_double_t fv,
+                    bool has_precis, STRLEN precis, STRLEN width,
+                    bool alt, char plus, bool left, bool fill)
+{
+    /* Hexadecimal floating point. */
+    char* p = buf;
+    U8 vhex[VHEX_SIZE];
+    U8* v = vhex; /* working pointer to vhex */
+    U8* vend; /* pointer to one beyond last digit of vhex */
+    U8* vfnz = NULL; /* first non-zero */
+    U8* vlnz = NULL; /* last non-zero */
+    U8* v0 = NULL; /* first output */
+    const bool lower = (c == 'a');
+    /* At output the values of vhex (up to vend) will
+     * be mapped through the xdig to get the actual
+     * human-readable xdigits. */
+    const char* xdig = PL_hexdigit;
+    STRLEN zerotail = 0; /* how many extra zeros to append */
+    int exponent = 0; /* exponent of the floating point input */
+    bool hexradix = FALSE; /* should we output the radix */
+    bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
+    bool negative = FALSE;
+    STRLEN elen;
+
+    /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
+     *
+     * For example with denormals, (assuming the vanilla
+     * 64-bit double): the exponent is zero. 1xp-1074 is
+     * the smallest denormal and the smallest double, it
+     * could be output also as 0x0.0000000000001p-1022 to
+     * match its internal structure. */
+
+    vend = S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, NULL);
+    S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, vend);
+
+#if NVSIZE > DOUBLESIZE
+#  ifdef HEXTRACT_HAS_IMPLICIT_BIT
+    /* In this case there is an implicit bit,
+     * and therefore the exponent is shifted by one. */
+    exponent--;
+#  else
+#    ifdef NV_X86_80_BIT
+    if (subnormal) {
+        /* The subnormals of the x86-80 have a base exponent of -16382,
+         * (while the physical exponent bits are zero) but the frexp()
+         * returned the scientific-style floating exponent.  We want
+         * to map the last one as:
+         * -16831..-16384 -> -16382 (the last normal is 0x1p-16382)
+         * -16835..-16388 -> -16384
+         * since we want to keep the first hexdigit
+         * as one of the [8421]. */
+        exponent = -4 * ( (exponent + 1) / -4) - 2;
+    } else {
+        exponent -= 4;
+    }
+#    endif
+    /* TBD: other non-implicit-bit platforms than the x86-80. */
+#  endif
+#endif
+
+    negative = fv < 0 || Perl_signbit(nv);
+    if (negative)
+        *p++ = '-';
+    else if (plus)
+        *p++ = plus;
+    *p++ = '0';
+    if (lower) {
+        *p++ = 'x';
+    }
+    else {
+        *p++ = 'X';
+        xdig += 16; /* Use uppercase hex. */
+    }
+
+    /* Find the first non-zero xdigit. */
+    for (v = vhex; v < vend; v++) {
+        if (*v) {
+            vfnz = v;
+            break;
+        }
+    }
+
+    if (vfnz) {
+        /* Find the last non-zero xdigit. */
+        for (v = vend - 1; v >= vhex; v--) {
+            if (*v) {
+                vlnz = v;
+                break;
+            }
+        }
+
+#if NVSIZE == DOUBLESIZE
+        if (fv != 0.0)
+            exponent--;
+#endif
+
+        if (subnormal) {
+#ifndef NV_X86_80_BIT
+          if (vfnz[0] > 1) {
+            /* IEEE 754 subnormals (but not the x86 80-bit):
+             * we want "normalize" the subnormal,
+             * so we need to right shift the hex nybbles
+             * so that the output of the subnormal starts
+             * from the first true bit.  (Another, equally
+             * valid, policy would be to dump the subnormal
+             * nybbles as-is, to display the "physical" layout.) */
+            int i, n;
+            U8 *vshr;
+            /* Find the ceil(log2(v[0])) of
+             * the top non-zero nybble. */
+            for (i = vfnz[0], n = 0; i > 1; i >>= 1, n++) { }
+            assert(n < 4);
+            vlnz[1] = 0;
+            for (vshr = vlnz; vshr >= vfnz; vshr--) {
+              vshr[1] |= (vshr[0] & (0xF >> (4 - n))) << (4 - n);
+              vshr[0] >>= n;
+            }
+            if (vlnz[1]) {
+              vlnz++;
+            }
+          }
+#endif
+          v0 = vfnz;
+        } else {
+          v0 = vhex;
+        }
+
+        if (has_precis) {
+            U8* ve = (subnormal ? vlnz + 1 : vend);
+            SSize_t vn = ve - v0;
+            assert(vn >= 1);
+            if (precis < (Size_t)(vn - 1)) {
+                bool overflow = FALSE;
+                if (v0[precis + 1] < 0x8) {
+                    /* Round down, nothing to do. */
+                } else if (v0[precis + 1] > 0x8) {
+                    /* Round up. */
+                    v0[precis]++;
+                    overflow = v0[precis] > 0xF;
+                    v0[precis] &= 0xF;
+                } else { /* v0[precis] == 0x8 */
+                    /* Half-point: round towards the one
+                     * with the even least-significant digit:
+                     * 08 -> 0  88 -> 8
+                     * 18 -> 2  98 -> a
+                     * 28 -> 2  a8 -> a
+                     * 38 -> 4  b8 -> c
+                     * 48 -> 4  c8 -> c
+                     * 58 -> 6  d8 -> e
+                     * 68 -> 6  e8 -> e
+                     * 78 -> 8  f8 -> 10 */
+                    if ((v0[precis] & 0x1)) {
+                        v0[precis]++;
+                    }
+                    overflow = v0[precis] > 0xF;
+                    v0[precis] &= 0xF;
+                }
+
+                if (overflow) {
+                    for (v = v0 + precis - 1; v >= v0; v--) {
+                        (*v)++;
+                        overflow = *v > 0xF;
+                        (*v) &= 0xF;
+                        if (!overflow) {
+                            break;
+                        }
+                    }
+                    if (v == v0 - 1 && overflow) {
+                        /* If the overflow goes all the
+                         * way to the front, we need to
+                         * insert 0x1 in front, and adjust
+                         * the exponent. */
+                        Move(v0, v0 + 1, vn - 1, char);
+                        *v0 = 0x1;
+                        exponent += 4;
+                    }
+                }
+
+                /* The new effective "last non zero". */
+                vlnz = v0 + precis;
+            }
+            else {
+                zerotail =
+                  subnormal ? precis - vn + 1 :
+                  precis - (vlnz - vhex);
+            }
+        }
+
+        v = v0;
+        *p++ = xdig[*v++];
+
+        /* If there are non-zero xdigits, the radix
+         * is output after the first one. */
+        if (vfnz < vlnz) {
+          hexradix = TRUE;
+        }
+    }
+    else {
+        *p++ = '0';
+        exponent = 0;
+        zerotail = precis;
+    }
+
+    /* The radix is always output if precis, or if alt. */
+    if (precis > 0 || alt) {
+      hexradix = TRUE;
+    }
+
+    if (hexradix) {
+#ifndef USE_LOCALE_NUMERIC
+            *p++ = '.';
+#else
+            if (PL_numeric_radix_sv) {
+                STRLEN n;
+                const char* r = SvPV(PL_numeric_radix_sv, n);
+                assert(IN_LC(LC_NUMERIC));
+                Copy(r, p, n, char);
+                p += n;
+            }
+            else {
+                *p++ = '.';
+            }
+#endif
+    }
+
+    if (vlnz) {
+        while (v <= vlnz)
+            *p++ = xdig[*v++];
+    }
+
+    if (zerotail > 0) {
+      while (zerotail--) {
+        *p++ = '0';
+      }
+    }
+
+    elen = p - buf;
+
+    /* sanity checks */
+    if (elen >= bufsize || width >= bufsize)
+        /* diag_listed_as: Hexadecimal float: internal error (%s) */
+        Perl_croak(aTHX_ "Hexadecimal float: internal error (overflow)");
+
+    elen += my_snprintf(p, bufsize - elen,
+                        "%c%+d", lower ? 'p' : 'P',
+                        exponent);
+
+    if (elen < width) {
+        STRLEN gap = (STRLEN)(width - elen);
+        if (left) {
+            /* Pad the back with spaces. */
+            memset(buf + elen, ' ', gap);
+        }
+        else if (fill) {
+            /* Insert the zeros after the "0x" and the
+             * the potential sign, but before the digits,
+             * otherwise we end up with "0000xH.HHH...",
+             * when we want "0x000H.HHH..."  */
+            STRLEN nzero = gap;
+            char* zerox = buf + 2;
+            STRLEN nmove = elen - 2;
+            if (negative || plus) {
+                zerox++;
+                nmove--;
+            }
+            Move(zerox, zerox + nzero, nmove, char);
+            memset(zerox, fill ? '0' : ' ', nzero);
+        }
+        else {
+            /* Move it to the right. */
+            Move(buf, buf + gap,
+                 elen, char);
+            /* Pad the front with spaces. */
+            memset(buf, ' ', gap);
+        }
+        elen = width;
+    }
+    return elen;
+}
+
+
+/*
+=for apidoc sv_vcatpvfn
+
+=for apidoc sv_vcatpvfn_flags
+
+Processes its arguments like C<vsprintf> and appends the formatted output
+to an SV.  Uses an array of SVs if the C-style variable argument list is
+missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d>
+or C<%*2$d>) is supported only when using an array of SVs; using a C-style
+C<va_list> argument list with a format string that uses argument reordering
+will yield an exception.
+
+When running with taint checks enabled, indicates via
+C<maybe_tainted> if results are untrustworthy (often due to the use of
+locales).
+
+If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
+
+It assumes that pat has the same utf8-ness as sv.  It's the caller's
+responsibility to ensure that this is so.
+
+Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
+
+=cut
+*/
+
 
 void
 Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
-                       va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted,
+                       va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted,
                        const U32 flags)
 {
-    char *p;
-    char *q;
+    const char *fmtstart; /* character following the current '%' */
+    const char *q;        /* current position within format */
     const char *patend;
     STRLEN origlen;
-    I32 svix = 0;
+    Size_t svix = 0;
     static const char nullstr[] = "(null)";
     SV *argsv = NULL;
     bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
     const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
-    SV *nsv = NULL;
     /* Times 4: a decimal digit takes more than 3 binary digits.
      * NV_DIG: mantissa takes than many decimal digits.
      * Plus 32: Playing safe. */
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
-    bool hexfp = FALSE; /* hexadecimal floating point? */
-
+#ifdef USE_LOCALE_NUMERIC
     DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+    bool lc_numeric_set = FALSE; /* called STORE_LC_NUMERIC_SET_TO_NEEDED? */
+#endif
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
     PERL_UNUSED_ARG(maybe_tainted);
@@ -11476,182 +11889,131 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     /* no matter what, this is a string now */
     (void)SvPV_force_nomg(sv, origlen);
 
-    /* special-case "", "%s", and "%-p" (SVf - see below) */
-    if (patlen == 0) {
-	if (svmax && ckWARN(WARN_REDUNDANT))
-	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
-	return;
-    }
-    if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
-	if (svmax > 1 && ckWARN(WARN_REDUNDANT))
-	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+    /* the code that scans for flags etc following a % relies on
+     * a '\0' being present to avoid falling off the end. Ideally that
+     * should be fixed */
+    assert(pat[patlen] == '\0');
 
-	if (args) {
-	    const char * const s = va_arg(*args, char*);
-	    sv_catpv_nomg(sv, s ? s : nullstr);
-	}
-	else if (svix < svmax) {
-	    /* we want get magic on the source but not the target. sv_catsv can't do that, though */
-	    SvGETMAGIC(*svargs);
-	    sv_catsv_nomg(sv, *svargs);
-	}
-	else
-	    S_warn_vcatpvfn_missing_argument(aTHX);
-	return;
-    }
-    if (args && patlen == 3 && pat[0] == '%' &&
-		pat[1] == '-' && pat[2] == 'p') {
-	if (svmax > 1 && ckWARN(WARN_REDUNDANT))
-	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
-	argsv = MUTABLE_SV(va_arg(*args, void*));
-	sv_catsv_nomg(sv, argsv);
-	return;
-    }
 
+    /* Special-case "", "%s", "%-p" (SVf - see below) and "%.0f".
+     * In each case, if there isn't the correct number of args, instead
+     * fall through to the main code to handle the issuing of any
+     * warnings etc.
+     */
+
+    if (patlen == 0 && (args || sv_count == 0))
+	return;
+
+    if (patlen <= 4 && pat[0] == '%' && (args || sv_count == 1)) {
+
+        /* "%s" */
+        if (patlen == 2 && pat[1] == 's') {
+            if (args) {
+                const char * const s = va_arg(*args, char*);
+                sv_catpv_nomg(sv, s ? s : nullstr);
+            }
+            else {
+                /* we want get magic on the source but not the target.
+                 * sv_catsv can't do that, though */
+                SvGETMAGIC(*svargs);
+                sv_catsv_nomg(sv, *svargs);
+            }
+            return;
+        }
+
+        /* "%-p" */
+        if (args) {
+            if (patlen == 3  && pat[1] == '-' && pat[2] == 'p') {
+                SV *asv = MUTABLE_SV(va_arg(*args, void*));
+                sv_catsv_nomg(sv, asv);
+                return;
+            }
+        }
 #if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
-    /* special-case "%.<number>[gf]" */
-    if ( !args && patlen <= 5 && pat[0] == '%' && pat[1] == '.'
-	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
-	unsigned digits = 0;
-	const char *pp;
-
-	pp = pat + 2;
-	while (*pp >= '0' && *pp <= '9')
-	    digits = 10 * digits + (*pp++ - '0');
-
-	/* XXX: Why do this `svix < svmax` test? Couldn't we just
-	   format the first argument and WARN_REDUNDANT if svmax > 1?
-	   Munged by Nicholas Clark in v5.13.0-209-g95ea86d */
-	if (pp - pat == (int)patlen - 1 && svix < svmax) {
-	    const NV nv = SvNV(*svargs);
+        /* special-case "%.0f" */
+        else if (   patlen == 4
+                 && pat[1] == '.' && pat[2] == '0' && pat[3] == 'f')
+        {
+            const NV nv = SvNV(*svargs);
             if (LIKELY(!Perl_isinfnan(nv))) {
-                if (*pp == 'g') {
-                    /* Add check for digits != 0 because it seems that some
-                       gconverts are buggy in this case, and we don't yet have
-                       a Configure test for this.  */
-                    if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
-                        /* 0, point, slack */
-                        STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        SNPRINTF_G(nv, ebuf, size, digits);
-                        sv_catpv_nomg(sv, ebuf);
-                        if (*ebuf)	/* May return an empty string for digits==0 */
-                            return;
-                    }
-                } else if (!digits) {
-                    STRLEN l;
+                STRLEN l;
+                char *p;
 
-                    if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
-                        sv_catpvn_nomg(sv, p, l);
-                        return;
-                    }
+                if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
+                    sv_catpvn_nomg(sv, p, l);
+                    return;
                 }
             }
-	}
-    }
+        }
 #endif /* !USE_LONG_DOUBLE */
+    }
 
-    if (!args && svix < svmax && DO_UTF8(*svargs))
-	has_utf8 = TRUE;
 
     patend = (char*)pat + patlen;
-    for (p = (char*)pat; p < patend; p = q) {
-	bool alt = FALSE;
-	bool left = FALSE;
-	bool vectorize = FALSE;
-	bool vectorarg = FALSE;
-	bool vec_utf8 = FALSE;
-	char fill = ' ';
-	char plus = 0;
-	char intsize = 0;
-	STRLEN width = 0;
-	STRLEN zeros = 0;
-	bool has_precis = FALSE;
-	STRLEN precis = 0;
-	const I32 osvix = svix;
-	bool is_utf8 = FALSE;  /* is this item utf8?   */
-        bool used_explicit_ix = FALSE;
-        bool arg_missing = FALSE;
-#ifdef HAS_LDBL_SPRINTF_BUG
-	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
-	   with sfio - Allen <allens@cpan.org> */
-	bool fix_ldbl_sprintf_bug = FALSE;
-#endif
+    for (fmtstart = pat; fmtstart < patend; fmtstart = q) {
+	char intsize     = 0;         /* size qualifier in "%hi..." etc */
+	bool alt         = FALSE;     /* has      "%#..."    */
+	bool left        = FALSE;     /* has      "%-..."    */
+	bool fill        = FALSE;     /* has      "%0..."    */
+	char plus        = 0;         /* has      "%+..."    */
+	STRLEN width     = 0;         /* value of "%NNN..."  */
+	bool has_precis  = FALSE;     /* has      "%.NNN..." */
+	STRLEN precis    = 0;         /* value of "%.NNN..." */
+	int base         = 0;         /* base to print in, e.g. 8 for %o */
+	UV uv            = 0;         /* the value to print of int-ish args */
 
-	char esignbuf[4];
-	U8 utf8buf[UTF8_MAXBYTES+1];
-	STRLEN esignlen = 0;
+	bool vectorize   = FALSE;     /* has      "%v..."    */
+	bool vec_utf8    = FALSE;     /* SvUTF8(vec arg)     */
+	const U8 *vecstr = NULL;      /* SvPVX(vec arg)      */
+	STRLEN veclen    = 0;         /* SvCUR(vec arg)      */
+	const char *dotstr = NULL;    /* separator string for %v */
+	STRLEN dotstrlen;             /* length of separator string for %v */
 
-	const char *eptr = NULL;
-	const char *fmtstart;
-	STRLEN elen = 0;
-	SV *vecsv = NULL;
-	const U8 *vecstr = NULL;
-	STRLEN veclen = 0;
-	char c = 0;
-	int i;
-	unsigned base = 0;
-	IV iv = 0;
-	UV uv = 0;
-	/* We need a long double target in case HAS_LONG_DOUBLE,
-         * even without USE_LONG_DOUBLE, so that we can printf with
-         * long double formats, even without NV being long double.
-         * But we call the target 'fv' instead of 'nv', since most of
-         * the time it is not (most compilers these days recognize
-         * "long double", even if only as a synonym for "double").
-	*/
-#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && \
-	defined(PERL_PRIgldbl) && !defined(USE_QUADMATH)
-	long double fv;
-#  ifdef Perl_isfinitel
-#    define FV_ISFINITE(x) Perl_isfinitel(x)
-#  endif
-#  define FV_GF PERL_PRIgldbl
-#    if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
-       /* Work around breakage in OTS$CVT_FLOAT_T_X */
-#      define NV_TO_FV(nv,fv) STMT_START {                   \
-                                           double _dv = nv;  \
-                                           fv = Perl_isnan(_dv) ? LDBL_QNAN : _dv; \
-                              } STMT_END
-#    else
-#      define NV_TO_FV(nv,fv) (fv)=(nv)
-#    endif
-#else
-	NV fv;
-#  define FV_GF NVgf
-#  define NV_TO_FV(nv,fv) (fv)=(nv)
-#endif
-#ifndef FV_ISFINITE
-#  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
-#endif
-        NV nv;
-	STRLEN have;
-	STRLEN need;
-	STRLEN gap;
-	const char *dotstr = ".";
-	STRLEN dotstrlen = 1;
-	I32 efix = 0; /* explicit format parameter index */
-	I32 ewix = 0; /* explicit width index */
-	I32 epix = 0; /* explicit precision index */
-	I32 evix = 0; /* explicit vector index */
-	bool asterisk = FALSE;
-        bool infnan = FALSE;
+	Size_t efix      = 0;         /* explicit format parameter index */
+	const Size_t osvix  = svix;   /* original index in case of bad fmt */
+
+	bool is_utf8     = FALSE;     /* is this item utf8?   */
+        bool arg_missing = FALSE;     /* give "Missing argument" warning */
+	char esignbuf[4];             /* holds sign prefix, e.g. "-0x" */
+	STRLEN esignlen  = 0;         /* length of e.g. "-0x" */
+	STRLEN zeros     = 0;         /* how many '0' to prepend */
+
+	const char *eptr = NULL;      /* the address of the element string */
+	STRLEN elen      = 0;         /* the length  of the element string */
+
+	char c;                       /* the actual format ('d', s' etc) */
+
 
 	/* echo everything up to the next format specification */
-	for (q = p; q < patend && *q != '%'; ++q) ;
-	if (q > p) {
-	    if (has_utf8 && !pat_utf8)
-		sv_catpvn_nomg_utf8_upgrade(sv, p, q - p, nsv);
+	for (q = fmtstart; q < patend && *q != '%'; ++q)
+            {};
+
+	if (q > fmtstart) {
+	    if (has_utf8 && !pat_utf8) {
+                /* upgrade and copy the bytes of fmtstart..q-1 to utf8 on
+                 * the fly */
+                const char *p;
+                char *dst;
+                STRLEN need = SvCUR(sv) + (q - fmtstart) + 1;
+
+                for (p = fmtstart; p < q; p++)
+                    if (!NATIVE_BYTE_IS_INVARIANT(*p))
+                        need++;
+                SvGROW(sv, need);
+
+                dst = SvEND(sv);
+                for (p = fmtstart; p < q; p++)
+                    append_utf8_from_native_byte((U8)*p, (U8**)&dst);
+                *dst = '\0';
+                SvCUR_set(sv, need - 1);
+            }
 	    else
-		sv_catpvn_nomg(sv, p, q - p);
-	    p = q;
+                S_sv_catpvn_simple(aTHX_ sv, fmtstart, q - fmtstart);
 	}
 	if (q++ >= patend)
 	    break;
 
-	fmtstart = q;
+	fmtstart = q; /* fmtstart is char following the '%' */
 
 /*
     We allow format specification elements in this order:
@@ -11665,85 +12027,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     [%bcdefginopsuxDFOUX] format (mandatory)
 */
 
-	if (args) {
-/*  
-	As of perl5.9.3, printf format checking is on by default.
-	Internally, perl uses %p formats to provide an escape to
-	some extended formatting.  This block deals with those
-	extensions: if it does not match, (char*)q is reset and
-	the normal format processing code is used.
-
-	Currently defined extensions are:
-		%p		include pointer address (standard)	
-		%-p	(SVf)	include an SV (previously %_)
-		%-<num>p	include an SV with precision <num>	
-		%2p		include a HEK
-		%3p		include a HEK with precision of 256
-		%4p		char* preceded by utf8 flag and length
-		%<num>p		(where num is 1 or > 4) reserved for future
-				extensions
-
-	Robin Barker 2005-07-14 (but modified since)
-
-		%1p	(VDf)	removed.  RMB 2007-10-19
-*/
- 	    char* r = q; 
-	    bool sv = FALSE;	
-	    STRLEN n = 0;
-	    if (*q == '-')
-		sv = *q++;
-	    else if (strnEQ(q, UTF8f, sizeof(UTF8f)-1)) { /* UTF8f */
-		/* The argument has already gone through cBOOL, so the cast
-		   is safe. */
-		is_utf8 = (bool)va_arg(*args, int);
-		elen = va_arg(*args, UV);
-                /* if utf8 length is larger than 0x7ffff..., then it might
-                 * have been a signed value that wrapped */
-                if (elen  > ((~(STRLEN)0) >> 1)) {
-                    assert(0); /* in DEBUGGING build we want to crash */
-                    elen= 0; /* otherwise we want to treat this as an empty string */
-                }
-		eptr = va_arg(*args, char *);
-		q += sizeof(UTF8f)-1;
-		goto string;
-	    }
-	    n = expect_number(&q);
-	    if (*q++ == 'p') {
-		if (sv) {			/* SVf */
-		    if (n) {
-			precis = n;
-			has_precis = TRUE;
-		    }
-		    argsv = MUTABLE_SV(va_arg(*args, void*));
-		    eptr = SvPV_const(argsv, elen);
-		    if (DO_UTF8(argsv))
-			is_utf8 = TRUE;
-		    goto string;
-		}
-		else if (n==2 || n==3) {	/* HEKf */
-		    HEK * const hek = va_arg(*args, HEK *);
-		    eptr = HEK_KEY(hek);
-		    elen = HEK_LEN(hek);
-		    if (HEK_UTF8(hek)) is_utf8 = TRUE;
-		    if (n==3) precis = 256, has_precis = TRUE;
-		    goto string;
-		}
-		else if (n) {
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-				     "internal %%<num>p might conflict with future printf extensions");
-		}
-	    }
-	    q = r; 
-	}
-
-	if ( (width = expect_number(&q)) ) {
+	if (IS_1_TO_9(*q)) {
+            width = expect_number(&q);
 	    if (*q == '$') {
                 if (args)
                     Perl_croak_nocontext(
                         "Cannot yet reorder sv_catpvfn() arguments from va_list");
 		++q;
-		efix = width;
-                used_explicit_ix = TRUE;
+		efix = (Size_t)width;
+                width = 0;
+                no_redundant_warning = TRUE;
 	    } else {
 		goto gotwidth;
 	    }
@@ -11767,7 +12060,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		continue;
 
 	    case '0':
-		fill = *q++;
+		fill = TRUE;
+                q++;
 		continue;
 
 	    case '#':
@@ -11781,73 +12075,102 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    break;
 	}
 
+      /* at this point we can expect one of:
+       *
+       *  123  an explicit width
+       *  *    width taken from next arg
+       *  *12$ width taken from 12th arg
+       *       or no width
+       *
+       * But any width specification may be preceded by a v, in one of its
+       * forms:
+       *        v
+       *        *v
+       *        *12$v
+       * So an asterisk may be either a width specifier or a vector
+       * separator arg specifier, and we don't know which initially
+       */
+
       tryasterisk:
 	if (*q == '*') {
+            STRLEN ix; /* explicit width/vector separator index */
 	    q++;
-	    if ( (ewix = expect_number(&q)) ) {
+	    if (IS_1_TO_9(*q)) {
+                ix = expect_number(&q);
 		if (*q++ == '$') {
                     if (args)
                         Perl_croak_nocontext(
                             "Cannot yet reorder sv_catpvfn() arguments from va_list");
-                    used_explicit_ix = TRUE;
+                    no_redundant_warning = TRUE;
                 } else
 		    goto unknown;
             }
-	    asterisk = TRUE;
-	}
-	if (*q == 'v') {
+            else
+                ix = 0;
+
+            if (*q == 'v') {
+                SV *vecsv;
+                /* The asterisk was for  *v, *NNN$v: vectorizing, but not
+                 * with the default "." */
+                q++;
+                if (vectorize)
+                    goto unknown;
+                if (args)
+                    vecsv = va_arg(*args, SV*);
+                else {
+                    ix = ix ? ix - 1 : svix++;
+                    vecsv = ix < sv_count ? svargs[ix]
+                                       : (arg_missing = TRUE, &PL_sv_no);
+                }
+                dotstr = SvPV_const(vecsv, dotstrlen);
+                /* Keep the DO_UTF8 test *after* the SvPV call, else things go
+                   bad with tied or overloaded values that return UTF8.  */
+                if (DO_UTF8(vecsv))
+                    is_utf8 = TRUE;
+                else if (has_utf8) {
+                    vecsv = sv_mortalcopy(vecsv);
+                    sv_utf8_upgrade(vecsv);
+                    dotstr = SvPV_const(vecsv, dotstrlen);
+                    is_utf8 = TRUE;
+                }
+                vectorize = TRUE;
+                goto tryasterisk;
+            }
+
+            /* the asterisk specified a width */
+            {
+                int i = 0;
+                SV *sv = NULL;
+                if (args)
+                    i = va_arg(*args, int);
+                else {
+                    ix = ix ? ix - 1 : svix++;
+                    sv = (ix < sv_count) ? svargs[ix]
+                                      : (arg_missing = TRUE, (SV*)NULL);
+                }
+                width = S_sprintf_arg_num_val(aTHX_ args, i, sv, &left);
+            }
+        }
+	else if (*q == 'v') {
 	    q++;
 	    if (vectorize)
 		goto unknown;
-	    if ((vectorarg = asterisk)) {
-		evix = ewix;
-		ewix = 0;
-		asterisk = FALSE;
-	    }
 	    vectorize = TRUE;
-	    goto tryasterisk;
+            dotstr = ".";
+            dotstrlen = 1;
+            goto tryasterisk;
+
+        }
+	else {
+        /* explicit width? */
+	    if(*q == '0') {
+		fill = TRUE;
+                q++;
+            }
+            if (IS_1_TO_9(*q))
+                width = expect_number(&q);
 	}
 
-	if (!asterisk)
-	{
-	    if( *q == '0' )
-		fill = *q++;
-	    width = expect_number(&q);
-	}
-
-	if (vectorize && vectorarg) {
-	    /* vectorizing, but not with the default "." */
-	    if (args)
-		vecsv = va_arg(*args, SV*);
-	    else if (evix) {
-                FETCH_VCATPVFN_ARGUMENT(
-                    vecsv, evix > 0 && evix <= svmax, svargs[evix-1]);
-	    } else {
-                FETCH_VCATPVFN_ARGUMENT(
-                    vecsv, svix < svmax, svargs[svix++]);
-	    }
-	    dotstr = SvPV_const(vecsv, dotstrlen);
-	    /* Keep the DO_UTF8 test *after* the SvPV call, else things go
-	       bad with tied or overloaded values that return UTF8.  */
-	    if (DO_UTF8(vecsv))
-		is_utf8 = TRUE;
-	    else if (has_utf8) {
-		vecsv = sv_mortalcopy(vecsv);
-		sv_utf8_upgrade(vecsv);
-		dotstr = SvPV_const(vecsv, dotstrlen);
-		is_utf8 = TRUE;
-	    }		    
-	}
-
-	if (asterisk) {
-	    if (args)
-		i = va_arg(*args, int);
-	    else
-		i = (ewix ? ewix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
-	    left |= (i < 0);
-	    width = (i < 0) ? -i : i;
-	}
       gotwidth:
 
 	/* PRECISION */
@@ -11855,69 +12178,49 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (*q == '.') {
 	    q++;
 	    if (*q == '*') {
+                STRLEN ix; /* explicit precision index */
 		q++;
-                if ( (epix = expect_number(&q)) ) {
+                if (IS_1_TO_9(*q)) {
+                    ix = expect_number(&q);
                     if (*q++ == '$') {
                         if (args)
                             Perl_croak_nocontext(
                                 "Cannot yet reorder sv_catpvfn() arguments from va_list");
-                        used_explicit_ix = TRUE;
+                        no_redundant_warning = TRUE;
                     } else
                         goto unknown;
                 }
-		if (args)
-                    i = va_arg(*args, int);
-		else {
-                    SV *precsv;
-                    if (epix)
-                        FETCH_VCATPVFN_ARGUMENT(
-                            precsv, epix > 0 && epix <= svmax, svargs[epix-1]);
-                    else
-                        FETCH_VCATPVFN_ARGUMENT(
-                            precsv, svix < svmax, svargs[svix++]);
-                    i = precsv == &PL_sv_no ? 0 : SvIVx(precsv);
+                else
+                    ix = 0;
+
+                {
+                    int i = 0;
+                    SV *sv = NULL;
+                    bool neg = FALSE;
+
+                    if (args)
+                        i = va_arg(*args, int);
+                    else {
+                        ix = ix ? ix - 1 : svix++;
+                        sv = (ix < sv_count) ? svargs[ix]
+                                          : (arg_missing = TRUE, (SV*)NULL);
+                    }
+                    precis = S_sprintf_arg_num_val(aTHX_ args, i, sv, &neg);
+                    has_precis = !neg;
                 }
-		precis = i;
-		has_precis = !(i < 0);
 	    }
 	    else {
-		precis = 0;
-		while (isDIGIT(*q))
-		    precis = precis * 10 + (*q++ - '0');
+                /* although it doesn't seem documented, this code has long
+                 * behaved so that:
+                 *   no digits following the '.' is treated like '.0'
+                 *   the number may be preceded by any number of zeroes,
+                 *      e.g. "%.0001f", which is the same as "%.1f"
+                 * so I've kept that behaviour. DAPM May 2017
+                 */
+                while (*q == '0')
+                    q++;
+                precis = IS_1_TO_9(*q) ? expect_number(&q) : 0;
 		has_precis = TRUE;
-	    }
-	}
-
-	if (vectorize) {
-	    if (args) {
-		VECTORIZE_ARGS
-	    }
-	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
-		vecsv = svargs[efix ? efix-1 : svix++];
-		vecstr = (U8*)SvPV_const(vecsv,veclen);
-		vec_utf8 = DO_UTF8(vecsv);
-
-		/* if this is a version object, we need to convert
-		 * back into v-string notation and then let the
-		 * vectorize happen normally
-		 */
-		if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
-		    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
-			"vector argument not supported with alpha versions");
-			goto vdblank;
-		    }
-		    vecsv = sv_newmortal();
-		    scan_vstring((char *)vecstr, (char *)vecstr + veclen,
-				 vecsv);
-		    vecstr = (U8*)SvPV_const(vecsv, veclen);
-		    vec_utf8 = DO_UTF8(vecsv);
-		}
-	    }
-	    else {
-	      vdblank:
-		vecstr = (U8*)"";
-		veclen = 0;
 	    }
 	}
 
@@ -11990,63 +12293,35 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	/* CONVERSION */
 
-	if (*q == '%') {
-	    eptr = q++;
+	c = *q++; /* c now holds the conversion type */
+
+        /* '%' doesn't have an arg, so skip arg processing */
+	if (c == '%') {
+	    eptr = q - 1;
 	    elen = 1;
-	    if (vectorize) {
-		c = '%';
+	    if (vectorize)
 		goto unknown;
-	    }
 	    goto string;
 	}
 
-	if (!vectorize && !args) {
-	    if (efix) {
-		const I32 i = efix-1;
-                FETCH_VCATPVFN_ARGUMENT(argsv, i >= 0 && i < svmax, svargs[i]);
-	    } else {
-                FETCH_VCATPVFN_ARGUMENT(argsv, svix >= 0 && svix < svmax,
-                                        svargs[svix++]);
-	    }
+	if (vectorize && !strchr("BbDdiOouUXx", c))
+            goto unknown;
+
+        /* get next arg (individual branches do their own va_arg()
+         * handling for the args case) */
+
+        if (!args) {
+            efix = efix ? efix - 1 : svix++;
+            argsv = efix < sv_count ? svargs[efix]
+                                 : (arg_missing = TRUE, &PL_sv_no);
 	}
 
-        if (argsv && strchr("BbcDdiOopuUXx",*q)) {
-            /* XXX va_arg(*args) case? need peek, use va_copy? */
-            SvGETMAGIC(argsv);
-            if (UNLIKELY(SvAMAGIC(argsv)))
-                argsv = sv_2num(argsv);
-            infnan = UNLIKELY(isinfnansv(argsv));
-        }
 
-	switch (c = *q++) {
+	switch (c) {
 
 	    /* STRINGS */
 
-	case 'c':
-	    if (vectorize)
-		goto unknown;
-            if (infnan)
-                Perl_croak(aTHX_ "Cannot printf %" NVgf " with '%c'",
-                           /* no va_arg() case */
-                           SvNV_nomg(argsv), (int)c);
-	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
-	    if ((uv > 255 ||
-		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
-		&& !IN_BYTES) {
-		eptr = (char*)utf8buf;
-		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
-		is_utf8 = TRUE;
-	    }
-	    else {
-		c = (char)uv;
-		eptr = &c;
-		elen = 1;
-	    }
-	    goto string;
-
 	case 's':
-	    if (vectorize)
-		goto unknown;
 	    if (args) {
 		eptr = va_arg(*args, char*);
 		if (eptr)
@@ -12085,14 +12360,99 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* INTEGERS */
 
 	case 'p':
-            if (infnan) {
-                goto floating_point;
-            }
-	    if (alt || vectorize)
+	    if (alt)
 		goto unknown;
+
+            /* %p extensions:
+             *
+             * "%...p" is normally treated like "%...x", except that the
+             * number to print is the SV's address (or a pointer address
+             * for C-ish sprintf).
+             *
+             * However, the C-ish sprintf variant allows a few special
+             * extensions. These are currently:
+             *
+             * %-p       (SVf)  Like %s, but gets the string from an SV*
+             *                  arg rather than a char* arg.
+             *                  (This was previously %_).
+             *
+             * %-<num>p         Ditto but like %.<num>s (i.e. num is max width)
+             *
+             * %2p       (HEKf) Like %s, but using the key string in a HEK
+             *
+             * %3p       (HEKf256) Ditto but like %.256s
+             *
+             * %d%lu%4p  (UTF8f) A utf8 string. Consumes 3 args:
+             *                       (cBOOL(utf8), len, string_buf).
+             *                   It's handled by the "case 'd'" branch
+             *                   rather than here.
+             *
+             * %<num>p   where num is 1 or > 4: reserved for future
+             *           extensions. Warns, but then is treated as a
+             *           general %p (print hex address) format.
+             */
+
+            if (   args
+                && !intsize
+                && !fill
+                && !plus
+                && !has_precis
+                    /* not %*p or %*1$p - any width was explicit */
+                && q[-2] != '*'
+                && q[-2] != '$'
+            ) {
+                if (left) {			/* %-p (SVf), %-NNNp */
+                    if (width) {
+                        precis = width;
+                        has_precis = TRUE;
+                    }
+                    argsv = MUTABLE_SV(va_arg(*args, void*));
+                    eptr = SvPV_const(argsv, elen);
+                    if (DO_UTF8(argsv))
+                        is_utf8 = TRUE;
+                    width = 0;
+                    goto string;
+                }
+                else if (width == 2 || width == 3) {	/* HEKf, HEKf256 */
+                    HEK * const hek = va_arg(*args, HEK *);
+                    eptr = HEK_KEY(hek);
+                    elen = HEK_LEN(hek);
+                    if (HEK_UTF8(hek))
+                        is_utf8 = TRUE;
+                    if (width == 3) {
+                        precis = 256;
+                        has_precis = TRUE;
+                    }
+                    width = 0;
+                    goto string;
+                }
+                else if (width) {
+                    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+                         "internal %%<num>p might conflict with future printf extensions");
+                }
+            }
+
+            /* treat as normal %...p */
+
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
-	    goto integer;
+	    goto do_integer;
+
+	case 'c':
+            /* Ignore any size specifiers, since they're not documented as
+             * being allowed for %c (ideally we should warn on e.g. '%hc').
+             * Setting a default intsize, along with a positive
+             * (which signals unsigned) base, causes, for C-ish use, the
+             * va_arg to be interpreted as as unsigned int, when it's
+             * actually signed, which will convert -ve values to high +ve
+             * values. Note that unlike the libc %c, values > 255 will
+             * convert to high unicode points rather than being truncated
+             * to 8 bits. For perlish use, it will do SvUV(argsv), which
+             * will again convert -ve args to high -ve values.
+             */
+            intsize = 0;
+            base = 1; /* special value that indicates we're doing a 'c' */
+            goto get_int_arg_val;
 
 	case 'D':
 #ifdef IV_IS_QUAD
@@ -12100,80 +12460,42 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 	    intsize = 'l';
 #endif
-	    /* FALLTHROUGH */
+            base = -10;
+            goto get_int_arg_val;
+
 	case 'd':
+            /* probably just a plain %d, but it might be the start of the
+             * special UTF8f format, which usually looks something like
+             * "%d%lu%4p" (the lu may vary by platform)
+             */
+            assert((UTF8f)[0] == 'd');
+            assert((UTF8f)[1] == '%');
+
+	     if (   args              /* UTF8f only valid for C-ish sprintf */
+                 && q == fmtstart + 1 /* plain %d, not %....d */
+                 && patend >= fmtstart + sizeof(UTF8f) - 1 /* long enough */
+                 && *q == '%'
+                 && strnEQ(q + 1, UTF8f + 2, sizeof(UTF8f) - 3))
+            {
+		/* The argument has already gone through cBOOL, so the cast
+		   is safe. */
+		is_utf8 = (bool)va_arg(*args, int);
+		elen = va_arg(*args, UV);
+                /* if utf8 length is larger than 0x7ffff..., then it might
+                 * have been a signed value that wrapped */
+                if (elen  > ((~(STRLEN)0) >> 1)) {
+                    assert(0); /* in DEBUGGING build we want to crash */
+                    elen = 0; /* otherwise we want to treat this as an empty string */
+                }
+		eptr = va_arg(*args, char *);
+		q += sizeof(UTF8f) - 2;
+		goto string;
+	    }
+
+	    /* FALLTHROUGH */
 	case 'i':
-            if (infnan) {
-                goto floating_point;
-            }
-	    if (vectorize) {
-		STRLEN ulen;
-		if (!veclen)
-                    goto donevalidconversion;
-		if (vec_utf8)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
-					UTF8_ALLOW_ANYUV);
-		else {
-		    uv = *vecstr;
-		    ulen = 1;
-		}
-		vecstr += ulen;
-		veclen -= ulen;
-		if (plus)
-		     esignbuf[esignlen++] = plus;
-	    }
-	    else if (args) {
-		switch (intsize) {
-		case 'c':	iv = (char)va_arg(*args, int); break;
-		case 'h':	iv = (short)va_arg(*args, int); break;
-		case 'l':	iv = va_arg(*args, long); break;
-		case 'V':	iv = va_arg(*args, IV); break;
-		case 'z':	iv = va_arg(*args, SSize_t); break;
-#ifdef HAS_PTRDIFF_T
-		case 't':	iv = va_arg(*args, ptrdiff_t); break;
-#endif
-		default:	iv = va_arg(*args, int); break;
-#ifdef I_STDINT
-		case 'j':	iv = va_arg(*args, intmax_t); break;
-#endif
-		case 'q':
-#if IVSIZE >= 8
-				iv = va_arg(*args, Quad_t); break;
-#else
-				goto unknown;
-#endif
-		}
-	    }
-	    else {
-		IV tiv = SvIV_nomg(argsv); /* work around GCC bug #13488 */
-		switch (intsize) {
-		case 'c':	iv = (char)tiv; break;
-		case 'h':	iv = (short)tiv; break;
-		case 'l':	iv = (long)tiv; break;
-		case 'V':
-		default:	iv = tiv; break;
-		case 'q':
-#if IVSIZE >= 8
-				iv = (Quad_t)tiv; break;
-#else
-				goto unknown;
-#endif
-		}
-	    }
-	    if ( !vectorize )	/* we already set uv above */
-	    {
-		if (iv >= 0) {
-		    uv = iv;
-		    if (plus)
-			esignbuf[esignlen++] = plus;
-		}
-		else {
-		    uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
-		    esignbuf[esignlen++] = '-';
-		}
-	    }
-	    base = 10;
-	    goto integer;
+            base = -10;
+            goto get_int_arg_val;
 
 	case 'U':
 #ifdef IV_IS_QUAD
@@ -12184,12 +12506,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* FALLTHROUGH */
 	case 'u':
 	    base = 10;
-	    goto uns_integer;
+	    goto get_int_arg_val;
 
 	case 'B':
 	case 'b':
 	    base = 2;
-	    goto uns_integer;
+	    goto get_int_arg_val;
 
 	case 'O':
 #ifdef IV_IS_QUAD
@@ -12200,21 +12522,53 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* FALLTHROUGH */
 	case 'o':
 	    base = 8;
-	    goto uns_integer;
+	    goto get_int_arg_val;
 
 	case 'X':
 	case 'x':
 	    base = 16;
 
-	uns_integer:
-            if (infnan) {
-                goto floating_point;
-            }
+          get_int_arg_val:
+
 	    if (vectorize) {
 		STRLEN ulen;
-	vector:
+                SV *vecsv;
+
+                if (base < 0) {
+                    base = -base;
+                    if (plus)
+                         esignbuf[esignlen++] = plus;
+                }
+
+                /* initialise the vector string to iterate over */
+
+                vecsv = args ? va_arg(*args, SV*) : argsv;
+
+                /* if this is a version object, we need to convert
+                 * back into v-string notation and then let the
+                 * vectorize happen normally
+                 */
+                if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
+                    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
+                        Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
+                        "vector argument not supported with alpha versions");
+                        vecsv = &PL_sv_no;
+                    }
+                    else {
+                        vecstr = (U8*)SvPV_const(vecsv,veclen);
+                        vecsv = sv_newmortal();
+                        scan_vstring((char *)vecstr, (char *)vecstr + veclen,
+                                     vecsv);
+                    }
+                }
+                vecstr = (U8*)SvPV_const(vecsv, veclen);
+                vec_utf8 = DO_UTF8(vecsv);
+
+              /* This is the re-entry point for when we're iterating
+               * over the individual characters of a vector arg */
+	      vector:
 		if (!veclen)
-                    goto donevalidconversion;
+                    goto done_valid_conversion;
 		if (vec_utf8)
 		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
 					UTF8_ALLOW_ANYUV);
@@ -12225,64 +12579,145 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		vecstr += ulen;
 		veclen -= ulen;
 	    }
-	    else if (args) {
-		switch (intsize) {
-		case 'c':  uv = (unsigned char)va_arg(*args, unsigned); break;
-		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
-		case 'l':  uv = va_arg(*args, unsigned long); break;
-		case 'V':  uv = va_arg(*args, UV); break;
-		case 'z':  uv = va_arg(*args, Size_t); break;
+	    else {
+                /* test arg for inf/nan. This can trigger an unwanted
+                 * 'str' overload, so manually force 'num' overload first
+                 * if necessary */
+                if (argsv) {
+                    SvGETMAGIC(argsv);
+                    if (UNLIKELY(SvAMAGIC(argsv)))
+                        argsv = sv_2num(argsv);
+                    if (UNLIKELY(isinfnansv(argsv)))
+                        goto handle_infnan_argsv;
+                }
+
+                if (base < 0) {
+                    /* signed int type */
+                    IV iv;
+                    base = -base;
+                    if (args) {
+                        switch (intsize) {
+                        case 'c':  iv = (char)va_arg(*args, int);  break;
+                        case 'h':  iv = (short)va_arg(*args, int); break;
+                        case 'l':  iv = va_arg(*args, long);       break;
+                        case 'V':  iv = va_arg(*args, IV);         break;
+                        case 'z':  iv = va_arg(*args, SSize_t);    break;
 #ifdef HAS_PTRDIFF_T
-	        case 't':  uv = va_arg(*args, ptrdiff_t); break; /* will sign extend, but there is no uptrdiff_t, so oh well */
+                        case 't':  iv = va_arg(*args, ptrdiff_t);  break;
+#endif
+                        default:   iv = va_arg(*args, int);        break;
+#ifdef I_STDINT
+                        case 'j':  iv = va_arg(*args, intmax_t);   break;
+#endif
+                        case 'q':
+#if IVSIZE >= 8
+                                   iv = va_arg(*args, Quad_t);     break;
+#else
+                                   goto unknown;
+#endif
+                        }
+                    }
+                    else {
+                        /* assign to tiv then cast to iv to work around
+                         * 2003 GCC cast bug (gnu.org bugzilla #13488) */
+                        IV tiv = SvIV_nomg(argsv);
+                        switch (intsize) {
+                        case 'c':  iv = (char)tiv;   break;
+                        case 'h':  iv = (short)tiv;  break;
+                        case 'l':  iv = (long)tiv;   break;
+                        case 'V':
+                        default:   iv = tiv;         break;
+                        case 'q':
+#if IVSIZE >= 8
+                                   iv = (Quad_t)tiv; break;
+#else
+                                   goto unknown;
+#endif
+                        }
+                    }
+
+                    /* now convert iv to uv */
+                    if (iv >= 0) {
+                        uv = iv;
+                        if (plus)
+                            esignbuf[esignlen++] = plus;
+                    }
+                    else {
+                        uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
+                        esignbuf[esignlen++] = '-';
+                    }
+                }
+                else {
+                    /* unsigned int type */
+                    if (args) {
+                        switch (intsize) {
+                        case 'c': uv = (unsigned char)va_arg(*args, unsigned);
+                                  break;
+                        case 'h': uv = (unsigned short)va_arg(*args, unsigned);
+                                  break;
+                        case 'l': uv = va_arg(*args, unsigned long); break;
+                        case 'V': uv = va_arg(*args, UV);            break;
+                        case 'z': uv = va_arg(*args, Size_t);        break;
+#ifdef HAS_PTRDIFF_T
+                                  /* will sign extend, but there is no
+                                   * uptrdiff_t, so oh well */
+                        case 't': uv = va_arg(*args, ptrdiff_t);     break;
 #endif
 #ifdef I_STDINT
-		case 'j':  uv = va_arg(*args, uintmax_t); break;
+                        case 'j': uv = va_arg(*args, uintmax_t);     break;
 #endif
-		default:   uv = va_arg(*args, unsigned); break;
-		case 'q':
+                        default:  uv = va_arg(*args, unsigned);      break;
+                        case 'q':
 #if IVSIZE >= 8
-			   uv = va_arg(*args, Uquad_t); break;
+                                  uv = va_arg(*args, Uquad_t);       break;
 #else
-			   goto unknown;
+                                  goto unknown;
 #endif
-		}
-	    }
-	    else {
-		UV tuv = SvUV_nomg(argsv); /* work around GCC bug #13488 */
-		switch (intsize) {
-		case 'c':	uv = (unsigned char)tuv; break;
-		case 'h':	uv = (unsigned short)tuv; break;
-		case 'l':	uv = (unsigned long)tuv; break;
-		case 'V':
-		default:	uv = tuv; break;
-		case 'q':
+                        }
+                    }
+                    else {
+                        /* assign to tiv then cast to iv to work around
+                         * 2003 GCC cast bug (gnu.org bugzilla #13488) */
+                        UV tuv = SvUV_nomg(argsv);
+                        switch (intsize) {
+                        case 'c': uv = (unsigned char)tuv;  break;
+                        case 'h': uv = (unsigned short)tuv; break;
+                        case 'l': uv = (unsigned long)tuv;  break;
+                        case 'V':
+                        default:  uv = tuv;                 break;
+                        case 'q':
 #if IVSIZE >= 8
-				uv = (Uquad_t)tuv; break;
+                                  uv = (Uquad_t)tuv;        break;
 #else
-				goto unknown;
+                                  goto unknown;
 #endif
-		}
-	    }
+                        }
+                    }
+                }
+            }
 
-	integer:
+	do_integer:
 	    {
 		char *ptr = ebuf + sizeof ebuf;
-		bool tempalt = uv ? alt : FALSE; /* Vectors can't change alt */
                 unsigned dig;
 		zeros = 0;
 
 		switch (base) {
 		case 16:
-		    p = (char *)((c == 'X') ? PL_hexdigit + 16 : PL_hexdigit);
-		    do {
-			dig = uv & 15;
-			*--ptr = p[dig];
-		    } while (uv >>= 4);
-		    if (tempalt) {
-			esignbuf[esignlen++] = '0';
-			esignbuf[esignlen++] = c;  /* 'x' or 'X' */
-		    }
-		    break;
+                    {
+		    const char * const p =
+                            (c == 'X') ? PL_hexdigit + 16 : PL_hexdigit;
+
+                        do {
+                            dig = uv & 15;
+                            *--ptr = p[dig];
+                        } while (uv >>= 4);
+                        if (alt && *ptr != '0') {
+                            esignbuf[esignlen++] = '0';
+                            esignbuf[esignlen++] = c;  /* 'x' or 'X' */
+                        }
+                        break;
+                    }
 		case 8:
 		    do {
 			dig = uv & 7;
@@ -12296,11 +12731,33 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			dig = uv & 1;
 			*--ptr = '0' + dig;
 		    } while (uv >>= 1);
-		    if (tempalt) {
+		    if (alt && *ptr != '0') {
 			esignbuf[esignlen++] = '0';
-			esignbuf[esignlen++] = c;
+			esignbuf[esignlen++] = c; /* 'b' or 'B' */
 		    }
 		    break;
+
+		case 1:
+                    /* special-case: base 1 indicates a 'c' format:
+                     * we use the common code for extracting a uv,
+                     * but handle that value differently here than
+                     * all the other int types */
+                    if ((uv > 255 ||
+                         (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
+                        && !IN_BYTES)
+                    {
+                        assert(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
+                        eptr = ebuf;
+                        elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
+                        is_utf8 = TRUE;
+                    }
+                    else {
+                        eptr = ebuf;
+                        ebuf[0] = (char)uv;
+                        elen = 1;
+                    }
+                    goto string;
+
 		default:		/* it had better be ten or less */
 		    do {
 			dig = uv % base;
@@ -12317,16 +12774,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			     && !(base == 8 && alt)) /* "%#.0o" prints "0" */
 			elen = 0;
 
-		/* a precision nullifies the 0 flag. */
-		    if (fill == '0')
-			fill = ' ';
+                    /* a precision nullifies the 0 flag. */
+                    fill = FALSE;
 		}
 	    }
 	    break;
 
 	    /* FLOATING POINT */
-
-        floating_point:
 
 	case 'F':
 	    c = 'f';		/* maybe %F isn't supported here */
@@ -12335,8 +12789,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'f':
 	case 'g': case 'G':
 	case 'a': case 'A':
-	    if (vectorize)
-		goto unknown;
+
+        {
+            STRLEN float_need; /* what PL_efloatsize needs to become */
+            bool hexfp;        /* hexadecimal floating point? */
+
+            vcatpvfn_long_double_t fv;
+            NV                     nv;
 
 	    /* This is evil, but floating point is even more evil */
 
@@ -12393,7 +12852,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     nv = fv;
                 } else {
                     nv = va_arg(*args, double);
-                    NV_TO_FV(nv, fv);
+                    VCATPVFN_NV_TO_FV(nv, fv);
                 }
 #else
                 nv = va_arg(*args, double);
@@ -12402,456 +12861,227 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
             else
             {
-                if (!infnan) SvGETMAGIC(argsv);
+                SvGETMAGIC(argsv);
+                /* we jump here if an int-ish format encountered an
+                 * infinite/Nan argsv. After setting nv/fv, it falls
+                 * into the isinfnan block which follows */
+              handle_infnan_argsv:
                 nv = SvNV_nomg(argsv);
-                NV_TO_FV(nv, fv);
+                VCATPVFN_NV_TO_FV(nv, fv);
             }
 
-	    need = 0;
-	    /* frexp() (or frexpl) has some unspecified behaviour for
-             * nan/inf/-inf, so let's avoid calling that on non-finites. */
-	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
-                i = PERL_INT_MIN;
+            if (Perl_isinfnan(nv)) {
+                if (c == 'c')
+                    Perl_croak(aTHX_ "Cannot printf %" NVgf " with '%c'",
+                           SvNV_nomg(argsv), (int)c);
+
+                elen = S_infnan_2pv(nv, ebuf, sizeof(ebuf), plus);
+                assert(elen);
+                eptr = ebuf;
+                zeros     = 0;
+                esignlen  = 0;
+                dotstrlen = 0;
+                break;
+            }
+
+            /* special-case "%.0f" */
+            if (   c == 'f'
+                && !precis
+                && has_precis
+                && !(width || left || plus || alt)
+                && !fill
+                && intsize != 'q'
+                && ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
+            )
+                goto float_concat;
+
+            /* Determine the buffer size needed for the various
+             * floating-point formats.
+             *
+             * The basic possibilities are:
+             *
+             *               <---P--->
+             *    %f 1111111.123456789
+             *    %e       1.111111123e+06
+             *    %a     0x1.0f4471f9bp+20
+             *    %g        1111111.12
+             *    %g        1.11111112e+15
+             *
+             * where P is the value of the precision in the format, or 6
+             * if not specified. Note the two possible output formats of
+             * %g; in both cases the number of significant digits is <=
+             * precision.
+             *
+             * For most of the format types the maximum buffer size needed
+             * is precision, plus: any leading 1 or 0x1, the radix
+             * point, and an exponent.  The difficult one is %f: for a
+             * large positive exponent it can have many leading digits,
+             * which needs to be calculated specially. Also %a is slightly
+             * different in that in the absence of a specified precision,
+             * it uses as many digits as necessary to distinguish
+             * different values.
+             *
+             * First, here are the constant bits. For ease of calculation
+             * we over-estimate the needed buffer size, for example by
+             * assuming all formats have an exponent and a leading 0x1.
+             *
+             * Also for production use, add a little extra overhead for
+             * safety's sake. Under debugging don't, as it means we're
+             * more likely to quickly spot issues during development.
+             */
+
+            float_need =     1  /* possible unary minus */
+                          +  4  /* "0x1" plus very unlikely carry */
+                          +  1  /* default radix point '.' */
+                          +  2  /* "e-", "p+" etc */
+                          +  6  /* exponent: up to 16383 (quad fp) */
+#ifndef DEBUGGING
+                          + 20  /* safety net */
+#endif
+                          +  1; /* \0 */
+
+
+            /* determine the radix point len, e.g. length(".") in "1.2" */
+#ifdef USE_LOCALE_NUMERIC
+            /* note that we may either explicitly use PL_numeric_radix_sv
+             * below, or implicitly, via an snprintf() variant.
+             * Note also things like ps_AF.utf8 which has
+             * "\N{ARABIC DECIMAL SEPARATOR} as a radix point */
+            if (!lc_numeric_set) {
+                /* only set once and reuse in-locale value on subsequent
+                 * iterations.
+                 * XXX what happens if we die in an eval?
+                 */
+                STORE_LC_NUMERIC_SET_TO_NEEDED();
+                lc_numeric_set = TRUE;
+            }
+
+            if (PL_numeric_radix_sv) {
+                assert(IN_LC(LC_NUMERIC));
+                /* this can't wrap unless PL_numeric_radix_sv is a string
+                 * consuming virtually all the 32-bit or 64-bit address
+                 * space
+                 */
+                float_need += (SvCUR(PL_numeric_radix_sv) - 1);
+
+                /* floating-point formats only get utf8 if the radix point
+                 * is utf8. All other characters in the string are < 128
+                 * and so can be safely appended to both a non-utf8 and utf8
+                 * string as-is.
+                 * Note that this will convert the output to utf8 even if
+                 * the radix point didn't get output.
+                 */
+                if (SvUTF8(PL_numeric_radix_sv) && !has_utf8) {
+                    sv_utf8_upgrade(sv);
+                    has_utf8 = TRUE;
+                }
+            }
+#endif
+
+            hexfp = FALSE;
+
+	    if (isALPHA_FOLD_EQ(c, 'f')) {
+                /* Determine how many digits before the radix point
+                 * might be emitted.  frexp() (or frexpl) has some
+                 * unspecified behaviour for nan/inf/-inf, so lucky we've
+                 * already handled them above */
+                STRLEN digits;
+                int i = PERL_INT_MIN;
                 (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp: %" FV_GF, fv);
-                /* Do not set hexfp earlier since we want to printf
-                 * Inf/NaN for Inf/NaN, not their hexfp. */
-                hexfp = isALPHA_FOLD_EQ(c, 'a');
-                if (UNLIKELY(hexfp)) {
-                    /* This seriously overshoots in most cases, but
-                     * better the undershooting.  Firstly, all bytes
+                    Perl_die(aTHX_ "panic: frexp: %" VCATPVFN_FV_GF, fv);
+
+                if (i > 0) {
+                    digits = BIT_DIGITS(i);
+                    /* this can't overflow. 'digits' will only be a few
+                     * thousand even for the largest floating-point types.
+                     * And up until now float_need is just some small
+                     * constants plus radix len, which can't be in
+                     * overflow territory unless the radix SV is consuming
+                     * over 1/2 the address space */
+                    assert(float_need < ((STRLEN)~0) - digits);
+                    float_need += digits;
+                }
+            }
+            else if (UNLIKELY(isALPHA_FOLD_EQ(c, 'a'))) {
+                hexfp = TRUE;
+                if (!has_precis) {
+                    /* %a in the absence of precision may print as many
+                     * digits as needed to represent the entire mantissa
+                     * bit pattern.
+                     * This estimate seriously overshoots in most cases,
+                     * but better the undershooting.  Firstly, all bytes
                      * of the NV are not mantissa, some of them are
                      * exponent.  Secondly, for the reasonably common
                      * long doubles case, the "80-bit extended", two
-                     * or six bytes of the NV are unused. */
-                    need +=
-                        (fv < 0) ? 1 : 0 + /* possible unary minus */
-                        2 + /* "0x" */
-                        1 + /* the very unlikely carry */
-                        1 + /* "1" */
-                        1 + /* "." */
-                        2 * NVSIZE + /* 2 hexdigits for each byte */
-                        2 + /* "p+" */
-                        6 + /* exponent: sign, plus up to 16383 (quad fp) */
-                        1;   /* \0 */
+                     * or six bytes of the NV are unused. Also, we'll
+                     * still pick up an extra +6 from the default
+                     * precision calculation below. */
+                    STRLEN digits =
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
-                    /* However, for the "double double", we need more.
-                     * Since each double has their own exponent, the
-                     * doubles may float (haha) rather far from each
-                     * other, and the number of required bits is much
-                     * larger, up to total of DOUBLEDOUBLE_MAXBITS bits.
-                     * See the definition of DOUBLEDOUBLE_MAXBITS.
-                     *
-                     * Need 2 hexdigits for each byte. */
-                    need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
-                    /* the size for the exponent already added */
+                        /* For the "double double", we need more.
+                         * Since each double has their own exponent, the
+                         * doubles may float (haha) rather far from each
+                         * other, and the number of required bits is much
+                         * larger, up to total of DOUBLEDOUBLE_MAXBITS bits.
+                         * See the definition of DOUBLEDOUBLE_MAXBITS.
+                         *
+                         * Need 2 hexdigits for each byte. */
+                        (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
+#else
+                        NVSIZE * 2; /* 2 hexdigits for each byte */
 #endif
-#ifdef USE_LOCALE_NUMERIC
-                        STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))
-                            need += SvLEN(PL_numeric_radix_sv);
-                        RESTORE_LC_NUMERIC();
-#endif
+                    /* see "this can't overflow" comment above */
+                    assert(float_need < ((STRLEN)~0) - digits);
+                    float_need += digits;
                 }
-                else if (i > 0) {
-                    need = BIT_DIGITS(i);
-                } /* if i < 0, the number of digits is hard to predict. */
 	    }
+            /* special-case "%.<number>g" if it will fit in ebuf */
+            else if (c == 'g'
+                && precis   /* See earlier comment about buggy Gconvert
+                               when digits, aka precis, is 0  */
+                && has_precis
+                /* check, in manner not involving wrapping, that it will
+                 * fit in ebuf  */
+                && float_need < sizeof(ebuf)
+                && sizeof(ebuf) - float_need > precis
+                && !(width || left || plus || alt)
+                && !fill
+                && intsize != 'q'
+            ) {
+                SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis);
+                elen = strlen(ebuf);
+                eptr = ebuf;
+                goto float_concat;
+	    }
+
 
             {
                 STRLEN pr = has_precis ? precis : 6; /* known default */
-                if (need >= ((STRLEN)~0) - pr)
+                /* this probably can't wrap, since precis is limited
+                 * to 1/4 address space size, but better safe than sorry
+                 */
+                if (float_need >= ((STRLEN)~0) - pr)
                     croak_memory_wrap();
-                need += pr;
+                float_need += pr;
             }
 
-	    if (need < width)
-		need = width;
+	    if (float_need < width)
+		float_need = width;
 
-#ifdef HAS_LDBL_SPRINTF_BUG
-	    /* This is to try to fix a bug with irix/nonstop-ux/powerux and
-	       with sfio - Allen <allens@cpan.org> */
-
-#  ifdef DBL_MAX
-#    define MY_DBL_MAX DBL_MAX
-#  else /* XXX guessing! HUGE_VAL may be defined as infinity, so not using */
-#    if DOUBLESIZE >= 8
-#      define MY_DBL_MAX 1.7976931348623157E+308L
-#    else
-#      define MY_DBL_MAX 3.40282347E+38L
-#    endif
-#  endif
-
-#  ifdef HAS_LDBL_SPRINTF_BUG_LESS1 /* only between -1L & 1L - Allen */
-#    define MY_DBL_MAX_BUG 1L
-#  else
-#    define MY_DBL_MAX_BUG MY_DBL_MAX
-#  endif
-
-#  ifdef DBL_MIN
-#    define MY_DBL_MIN DBL_MIN
-#  else  /* XXX guessing! -Allen */
-#    if DOUBLESIZE >= 8
-#      define MY_DBL_MIN 2.2250738585072014E-308L
-#    else
-#      define MY_DBL_MIN 1.17549435E-38L
-#    endif
-#  endif
-
-	    if ((intsize == 'q') && (c == 'f') &&
-		((fv < MY_DBL_MAX_BUG) && (fv > -MY_DBL_MAX_BUG)) &&
-		(need < DBL_DIG)) {
-		/* it's going to be short enough that
-		 * long double precision is not needed */
-
-		if ((fv <= 0L) && (fv >= -0L))
-		    fix_ldbl_sprintf_bug = TRUE; /* 0 is 0 - easiest */
-		else {
-		    /* would use Perl_fp_class as a double-check but not
-		     * functional on IRIX - see perl.h comments */
-
-		    if ((fv >= MY_DBL_MIN) || (fv <= -MY_DBL_MIN)) {
-			/* It's within the range that a double can represent */
-#if defined(DBL_MAX) && !defined(DBL_MIN)
-			if ((fv >= ((long double)1/DBL_MAX)) ||
-			    (fv <= (-(long double)1/DBL_MAX)))
-#endif
-			fix_ldbl_sprintf_bug = TRUE;
-		    }
-		}
-		if (fix_ldbl_sprintf_bug == TRUE) {
-		    double temp;
-
-		    intsize = 0;
-		    temp = (double)fv;
-		    fv = (NV)temp;
-		}
-	    }
-
-#  undef MY_DBL_MAX
-#  undef MY_DBL_MAX_BUG
-#  undef MY_DBL_MIN
-
-#endif /* HAS_LDBL_SPRINTF_BUG */
-
-            if (need >= ((STRLEN)~0) - 40)
-                croak_memory_wrap();
-	    need += 40; /* fudge factor */
-	    if (PL_efloatsize < need) {
+	    if (PL_efloatsize < float_need) {
 		Safefree(PL_efloatbuf);
-		PL_efloatsize = need;
+		PL_efloatsize = float_need;
 		Newx(PL_efloatbuf, PL_efloatsize, char);
 		PL_efloatbuf[0] = '\0';
 	    }
 
-	    if ( !(width || left || plus || alt) && fill != '0'
-		 && has_precis && intsize != 'q'	/* Shortcuts */
-                 && LIKELY(!Perl_isinfnan((NV)fv)) ) {
-		/* See earlier comment about buggy Gconvert when digits,
-		   aka precis is 0  */
-		if ( c == 'g' && precis ) {
-                    STORE_LC_NUMERIC_SET_TO_NEEDED();
-                    SNPRINTF_G(fv, PL_efloatbuf, PL_efloatsize, precis);
-		    /* May return an empty string for digits==0 */
-		    if (*PL_efloatbuf) {
-			elen = strlen(PL_efloatbuf);
-			goto float_converted;
-		    }
-		} else if ( c == 'f' && !precis ) {
-		    if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
-			break;
-		}
-	    }
-
             if (UNLIKELY(hexfp)) {
-                /* Hexadecimal floating point. */
-                char* p = PL_efloatbuf;
-                U8 vhex[VHEX_SIZE];
-                U8* v = vhex; /* working pointer to vhex */
-                U8* vend; /* pointer to one beyond last digit of vhex */
-                U8* vfnz = NULL; /* first non-zero */
-                U8* vlnz = NULL; /* last non-zero */
-                U8* v0 = NULL; /* first output */
-                const bool lower = (c == 'a');
-                /* At output the values of vhex (up to vend) will
-                 * be mapped through the xdig to get the actual
-                 * human-readable xdigits. */
-                const char* xdig = PL_hexdigit;
-                int zerotail = 0; /* how many extra zeros to append */
-                int exponent = 0; /* exponent of the floating point input */
-                bool hexradix = FALSE; /* should we output the radix */
-                bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
-                bool negative = FALSE;
-
-                /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
-                 *
-                 * For example with denormals, (assuming the vanilla
-                 * 64-bit double): the exponent is zero. 1xp-1074 is
-                 * the smallest denormal and the smallest double, it
-                 * could be output also as 0x0.0000000000001p-1022 to
-                 * match its internal structure. */
-
-                vend = S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, NULL);
-                S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, vend);
-
-#if NVSIZE > DOUBLESIZE
-#  ifdef HEXTRACT_HAS_IMPLICIT_BIT
-                /* In this case there is an implicit bit,
-                 * and therefore the exponent is shifted by one. */
-                exponent--;
-#  else
-#   ifdef NV_X86_80_BIT
-                if (subnormal) {
-                    /* The subnormals of the x86-80 have a base exponent of -16382,
-                     * (while the physical exponent bits are zero) but the frexp()
-                     * returned the scientific-style floating exponent.  We want
-                     * to map the last one as:
-                     * -16831..-16384 -> -16382 (the last normal is 0x1p-16382)
-                     * -16835..-16388 -> -16384
-                     * since we want to keep the first hexdigit
-                     * as one of the [8421]. */
-                    exponent = -4 * ( (exponent + 1) / -4) - 2;
-                } else {
-                    exponent -= 4;
-                }
-#   endif
-                /* TBD: other non-implicit-bit platforms than the x86-80. */
-#  endif
-#endif
-
-                negative = fv < 0 || Perl_signbit(nv);
-                if (negative)
-                    *p++ = '-';
-                else if (plus)
-                    *p++ = plus;
-                *p++ = '0';
-                if (lower) {
-                    *p++ = 'x';
-                }
-                else {
-                    *p++ = 'X';
-                    xdig += 16; /* Use uppercase hex. */
-                }
-
-                /* Find the first non-zero xdigit. */
-                for (v = vhex; v < vend; v++) {
-                    if (*v) {
-                        vfnz = v;
-                        break;
-                    }
-                }
-
-                if (vfnz) {
-                    /* Find the last non-zero xdigit. */
-                    for (v = vend - 1; v >= vhex; v--) {
-                        if (*v) {
-                            vlnz = v;
-                            break;
-                        }
-                    }
-
-#if NVSIZE == DOUBLESIZE
-                    if (fv != 0.0)
-                        exponent--;
-#endif
-
-                    if (subnormal) {
-#ifndef NV_X86_80_BIT
-                      if (vfnz[0] > 1) {
-                        /* IEEE 754 subnormals (but not the x86 80-bit):
-                         * we want "normalize" the subnormal,
-			 * so we need to right shift the hex nybbles
-                         * so that the output of the subnormal starts
-                         * from the first true bit.  (Another, equally
-			 * valid, policy would be to dump the subnormal
-			 * nybbles as-is, to display the "physical" layout.) */
-                        int i, n;
-                        U8 *vshr;
-                        /* Find the ceil(log2(v[0])) of
-                         * the top non-zero nybble. */
-                        for (i = vfnz[0], n = 0; i > 1; i >>= 1, n++) { }
-                        assert(n < 4);
-                        vlnz[1] = 0;
-                        for (vshr = vlnz; vshr >= vfnz; vshr--) {
-                          vshr[1] |= (vshr[0] & (0xF >> (4 - n))) << (4 - n);
-                          vshr[0] >>= n;
-                        }
-                        if (vlnz[1]) {
-                          vlnz++;
-                        }
-                      }
-#endif
-                      v0 = vfnz;
-                    } else {
-                      v0 = vhex;
-                    }
-
-                    if (has_precis) {
-                        U8* ve = (subnormal ? vlnz + 1 : vend);
-                        SSize_t vn = ve - (subnormal ? vfnz : vhex);
-                        if ((SSize_t)(precis + 1) < vn) {
-                            bool overflow = FALSE;
-                            if (v0[precis + 1] < 0x8) {
-                                /* Round down, nothing to do. */
-                            } else if (v0[precis + 1] > 0x8) {
-                                /* Round up. */
-                                v0[precis]++;
-                                overflow = v0[precis] > 0xF;
-                                v0[precis] &= 0xF;
-                            } else { /* v0[precis] == 0x8 */
-                                /* Half-point: round towards the one
-                                 * with the even least-significant digit:
-                                 * 08 -> 0  88 -> 8
-                                 * 18 -> 2  98 -> a
-                                 * 28 -> 2  a8 -> a
-                                 * 38 -> 4  b8 -> c
-                                 * 48 -> 4  c8 -> c
-                                 * 58 -> 6  d8 -> e
-                                 * 68 -> 6  e8 -> e
-                                 * 78 -> 8  f8 -> 10 */
-                                if ((v0[precis] & 0x1)) {
-                                    v0[precis]++;
-                                }
-                                overflow = v0[precis] > 0xF;
-                                v0[precis] &= 0xF;
-                            }
-
-                            if (overflow) {
-                                for (v = v0 + precis - 1; v >= v0; v--) {
-                                    (*v)++;
-                                    overflow = *v > 0xF;
-                                    (*v) &= 0xF;
-                                    if (!overflow) {
-                                        break;
-                                    }
-                                }
-                                if (v == v0 - 1 && overflow) {
-                                    /* If the overflow goes all the
-                                     * way to the front, we need to
-                                     * insert 0x1 in front, and adjust
-                                     * the exponent. */
-                                    Move(v0, v0 + 1, vn, char);
-                                    *v0 = 0x1;
-                                    exponent += 4;
-                                }
-                            }
-
-                            /* The new effective "last non zero". */
-                            vlnz = v0 + precis;
-                        }
-                        else {
-                            zerotail =
-                              subnormal ? precis - vn + 1 :
-                              precis - (vlnz - vhex);
-                        }
-                    }
-
-                    v = v0;
-                    *p++ = xdig[*v++];
-
-                    /* If there are non-zero xdigits, the radix
-                     * is output after the first one. */
-                    if (vfnz < vlnz) {
-                      hexradix = TRUE;
-                    }
-                }
-                else {
-                    *p++ = '0';
-                    exponent = 0;
-                    zerotail = precis;
-                }
-
-                /* The radix is always output if precis, or if alt. */
-                if (precis > 0 || alt) {
-                  hexradix = TRUE;
-                }
-
-                if (hexradix) {
-#ifndef USE_LOCALE_NUMERIC
-                        *p++ = '.';
-#else
-                        STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
-                            STRLEN n;
-                            const char* r = SvPV(PL_numeric_radix_sv, n);
-                            Copy(r, p, n, char);
-                            p += n;
-                        }
-                        else {
-                            *p++ = '.';
-                        }
-                        RESTORE_LC_NUMERIC();
-#endif
-                }
-
-                if (vlnz) {
-                    while (v <= vlnz)
-                        *p++ = xdig[*v++];
-                }
-
-                if (zerotail > 0) {
-                  while (zerotail--) {
-                    *p++ = '0';
-                  }
-                }
-
-                elen = p - PL_efloatbuf;
-                elen += my_snprintf(p, PL_efloatsize - elen,
-                                    "%c%+d", lower ? 'p' : 'P',
-                                    exponent);
-
-                if (elen < width) {
-                    if (left) {
-                        /* Pad the back with spaces. */
-                        memset(PL_efloatbuf + elen, ' ', width - elen);
-                    }
-                    else if (fill == '0') {
-                        /* Insert the zeros after the "0x" and the
-                         * the potential sign, but before the digits,
-                         * otherwise we end up with "0000xH.HHH...",
-                         * when we want "0x000H.HHH..."  */
-                        STRLEN nzero = width - elen;
-                        char* zerox = PL_efloatbuf + 2;
-                        STRLEN nmove = elen - 2;
-                        if (negative || plus) {
-                            zerox++;
-                            nmove--;
-                        }
-                        Move(zerox, zerox + nzero, nmove, char);
-                        memset(zerox, fill, nzero);
-                    }
-                    else {
-                        /* Move it to the right. */
-                        Move(PL_efloatbuf, PL_efloatbuf + width - elen,
-                             elen, char);
-                        /* Pad the front with spaces. */
-                        memset(PL_efloatbuf, ' ', width - elen);
-                    }
-                    elen = width;
-                }
+                elen = S_format_hexfp(aTHX_ PL_efloatbuf, PL_efloatsize, c,
+                                nv, fv, has_precis, precis, width,
+                                alt, plus, left, fill);
             }
             else {
-                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, plus);
-                if (elen) {
-                    /* Not affecting infnan output: precision, alt, fill. */
-                    if (elen < width) {
-                        if (left) {
-                            /* Pack the back with spaces. */
-                            memset(PL_efloatbuf + elen, ' ', width - elen);
-                        } else {
-                            /* Move it to the right. */
-                            Move(PL_efloatbuf, PL_efloatbuf + width - elen,
-                                 elen, char);
-                            /* Pad the front with spaces. */
-                            memset(PL_efloatbuf, ' ', width - elen);
-                        }
-                        elen = width;
-                    }
-                }
-            }
-
-            if (elen == 0) {
                 char *ptr = ebuf + sizeof ebuf;
                 *--ptr = '\0';
                 *--ptr = c;
@@ -12883,8 +13113,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    base = width;
 		    do { *--ptr = '0' + (base % 10); } while (base /= 10);
 		}
-		if (fill == '0')
-		    *--ptr = fill;
+		if (fill)
+		    *--ptr = '0';
 		if (left)
 		    *--ptr = '-';
 		if (plus)
@@ -12896,8 +13126,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		/* No taint.  Otherwise we are in the strange situation
 		 * where printf() taints but print($float) doesn't.
 		 * --jhi */
-
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
 
                 /* hopefully the above makes ptr a very constrained format
                  * that is safe to use, even though it's not literal */
@@ -12927,53 +13155,69 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 GCC_DIAG_RESTORE;
 	    }
 
-	float_converted:
 	    eptr = PL_efloatbuf;
-            assert((IV)elen > 0); /* here zero elen is bad */
 
-#ifdef USE_LOCALE_NUMERIC
-            /* If the decimal point character in the string is UTF-8, make the
-             * output utf8 */
-            if (PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
-                && instr(eptr, SvPVX_const(PL_numeric_radix_sv)))
-            {
-                is_utf8 = TRUE;
-            }
-#endif
+	  float_concat:
 
-	    break;
+            /* Since floating-point formats do their own formatting and
+             * padding, we skip the main block of code at the end of this
+             * loop which handles appending eptr to sv, and do our own
+             * stripped-down version */
+
+            assert(!zeros);
+            assert(!esignlen);
+            assert(elen);
+            assert(elen >= width);
+
+            S_sv_catpvn_simple(aTHX_ sv, eptr, elen);
+
+            goto done_valid_conversion;
+        }
 
 	    /* SPECIAL */
 
 	case 'n':
-	    if (vectorize)
-		goto unknown;
-	    i = SvCUR(sv) - origlen;
-	    if (args) {
-		switch (intsize) {
-		case 'c':	*(va_arg(*args, char*)) = i; break;
-		case 'h':	*(va_arg(*args, short*)) = i; break;
-		default:	*(va_arg(*args, int*)) = i; break;
-		case 'l':	*(va_arg(*args, long*)) = i; break;
-		case 'V':	*(va_arg(*args, IV*)) = i; break;
-		case 'z':	*(va_arg(*args, SSize_t*)) = i; break;
+            {
+                STRLEN len;
+                /* XXX ideally we should warn if any flags etc have been
+                 * set, e.g. "%-4.5n" */
+                /* XXX if sv was originally non-utf8 with a char in the
+                 * range 0x80-0xff, then if it got upgraded, we should
+                 * calculate char len rather than byte len here */
+                len = SvCUR(sv) - origlen;
+                if (args) {
+                    int i = (len > PERL_INT_MAX) ? PERL_INT_MAX : (int)len;
+
+                    switch (intsize) {
+                    case 'c':  *(va_arg(*args, char*))      = i; break;
+                    case 'h':  *(va_arg(*args, short*))     = i; break;
+                    default:   *(va_arg(*args, int*))       = i; break;
+                    case 'l':  *(va_arg(*args, long*))      = i; break;
+                    case 'V':  *(va_arg(*args, IV*))        = i; break;
+                    case 'z':  *(va_arg(*args, SSize_t*))   = i; break;
 #ifdef HAS_PTRDIFF_T
-		case 't':	*(va_arg(*args, ptrdiff_t*)) = i; break;
+                    case 't':  *(va_arg(*args, ptrdiff_t*)) = i; break;
 #endif
 #ifdef I_STDINT
-		case 'j':	*(va_arg(*args, intmax_t*)) = i; break;
+                    case 'j':  *(va_arg(*args, intmax_t*))  = i; break;
 #endif
-		case 'q':
+                    case 'q':
 #if IVSIZE >= 8
-				*(va_arg(*args, Quad_t*)) = i; break;
+                               *(va_arg(*args, Quad_t*))    = i; break;
 #else
-				goto unknown;
+                               goto unknown;
 #endif
-		}
-	    }
-	    else
-		sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
-            goto donevalidconversion;
+                    }
+                }
+                else {
+                    if (arg_missing)
+                        Perl_croak_nocontext(
+                            "Missing argument for %%n in %s",
+                                PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+                    sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)len);
+                }
+                goto done_valid_conversion;
+            }
 
 	    /* UNKNOWN */
 
@@ -13005,20 +13249,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%" SVf, SVfARG(msg)); /* yes, this is reentrant */
 	    }
 
-	    /* output mangled stuff ... */
-	    if (c == '\0')
-		--q;
-	    eptr = p;
-	    elen = q - p;
-
-	    /* ... right here, because formatting flags should not apply */
-	    SvGROW(sv, SvCUR(sv) + elen + 1);
-	    p = SvEND(sv);
-	    Copy(eptr, p, elen, char);
-	    p += elen;
-	    *p = '\0';
-	    SvCUR_set(sv, p - SvPVX_const(sv));
+	    /* mangled format: output the '%', then continue from the
+             * character following that */
+            sv_catpvn_nomg(sv, fmtstart-1, 1);
+            q = fmtstart;
 	    svix = osvix;
+            /* Any "redundant arg" warning from now onwards will probably
+             * just be misleading, so don't bother. */
+            no_redundant_warning = TRUE;
 	    continue;	/* not "break" */
 	}
 
@@ -13041,68 +13279,88 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
-        /* signed value that's wrapped? */
-        assert(elen  <= ((~(STRLEN)0) >> 1));
-	have = esignlen + zeros + elen;
-	if (have < zeros)
-	    croak_memory_wrap();
 
-	need = (have > width ? have : width);
-	gap = need - have;
+        /* append esignbuf, filler, zeros, eptr and dotstr to sv */
 
-	if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
-	    croak_memory_wrap();
-	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
-	p = SvEND(sv);
-	if (esignlen && fill == '0') {
-	    int i;
-	    for (i = 0; i < (int)esignlen; i++)
-		*p++ = esignbuf[i];
-	}
-	if (gap && !left) {
-	    memset(p, fill, gap);
-	    p += gap;
-	}
-	if (esignlen && fill != '0') {
-	    int i;
-	    for (i = 0; i < (int)esignlen; i++)
-		*p++ = esignbuf[i];
-	}
-	if (zeros) {
-	    int i;
-	    for (i = zeros; i; i--)
-		*p++ = '0';
-	}
-	if (elen) {
-	    Copy(eptr, p, elen, char);
-	    p += elen;
-	}
-	if (gap && left) {
-	    memset(p, ' ', gap);
-	    p += gap;
-	}
-	if (vectorize) {
-	    if (veclen) {
-		Copy(dotstr, p, dotstrlen, char);
-		p += dotstrlen;
-	    }
-	    else
-		vectorize = FALSE;		/* done iterating over vecstr */
-	}
-	if (is_utf8)
-	    has_utf8 = TRUE;
-	if (has_utf8)
-	    SvUTF8_on(sv);
-	*p = '\0';
-	SvCUR_set(sv, p - SvPVX_const(sv));
-	if (vectorize) {
-	    esignlen = 0;
-	    goto vector;
+        {
+            STRLEN need, have, gap;
+            STRLEN i;
+            char *s;
+
+            /* signed value that's wrapped? */
+            assert(elen  <= ((~(STRLEN)0) >> 1));
+
+            /* if zeros is non-zero, then it represents filler between
+             * elen and precis. So adding elen and zeros together will
+             * always be <= precis, and the addition can never wrap */
+            assert(!zeros || (precis > elen && precis - elen == zeros));
+            have = elen + zeros;
+
+            if (have >= (((STRLEN)~0) - esignlen))
+                croak_memory_wrap();
+            have += esignlen;
+
+            need = (have > width ? have : width);
+            gap = need - have;
+
+            if (need >= (((STRLEN)~0) - (SvCUR(sv) + 1)))
+                croak_memory_wrap();
+            need += (SvCUR(sv) + 1);
+
+            SvGROW(sv, need);
+
+            s = SvEND(sv);
+
+            if (left) {
+                for (i = 0; i < esignlen; i++)
+                    *s++ = esignbuf[i];
+                for (i = zeros; i; i--)
+                    *s++ = '0';
+                Copy(eptr, s, elen, char);
+                s += elen;
+                for (i = gap; i; i--)
+                    *s++ = ' ';
+            }
+            else {
+                if (fill) {
+                    for (i = 0; i < esignlen; i++)
+                        *s++ = esignbuf[i];
+                    assert(!zeros);
+                    zeros = gap;
+                }
+                else {
+                    for (i = gap; i; i--)
+                        *s++ = ' ';
+                    for (i = 0; i < esignlen; i++)
+                        *s++ = esignbuf[i];
+                }
+
+                for (i = zeros; i; i--)
+                    *s++ = '0';
+                Copy(eptr, s, elen, char);
+                s += elen;
+            }
+
+            *s = '\0';
+            SvCUR_set(sv, s - SvPVX_const(sv));
+
+            if (is_utf8)
+                has_utf8 = TRUE;
+            if (has_utf8)
+                SvUTF8_on(sv);
+        }
+
+	if (vectorize && veclen) {
+            /* we append the vector separator separately since %v isn't
+             * very common: don't slow down the general case by adding
+             * dotstrlen to need etc */
+            sv_catpvn_nomg(sv, dotstr, dotstrlen);
+            esignlen = 0;
+            goto vector; /* do next iteration */
 	}
 
-      donevalidconversion:
-        if (used_explicit_ix)
-            no_redundant_warning = TRUE;
+      done_valid_conversion:
+
         if (arg_missing)
             S_warn_vcatpvfn_missing_argument(aTHX);
     }
@@ -13110,7 +13368,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     /* Now that we've consumed all our printf format arguments (svix)
      * do we have things left on the stack that we didn't use?
      */
-    if (!no_redundant_warning && svmax >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
+    if (!no_redundant_warning && sv_count >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
 	Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
 		PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
     }

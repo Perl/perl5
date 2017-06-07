@@ -295,14 +295,6 @@ for my $i (1, 3, 5, 10) {
        "width & precision interplay with utf8 strings, length=$i");
 }
 
-# Used to mangle PL_sv_undef
-fresh_perl_like(
-    'print sprintf "xxx%n\n"; print undef',
-    qr/Modification of a read-only value attempted at\b/,
-    { switches => [ '-w' ] },
-    q(%n should not be able to modify read-only constants),
-);
-
 # check overflows
 for (int(~0/2+1), ~0, "9999999999999999999") {
     is(eval {sprintf "%${_}d", 0}, undef, "no sprintf result expected %${_}d");
@@ -323,10 +315,16 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
 	}
     };
 
-    my $fmt = join('', map("%$_\$s%" . ((1 << 31)-$_) . '$s', 1..20));
-    my $result = sprintf $fmt, qw(a b c d);
-    is($result, "abcd", "only four valid values in $fmt");
-    is($warn, 36, "expected warnings");
+    for my $i (1..20) {
+        my @args = qw(a b c d);
+        my $result = sprintf "%$i\$s", @args;
+        is $result, $args[$i-1]//"", "%NNN\$s where NNN=$i";
+        my $j = ~$i;
+        $result = eval { sprintf "%$j\$s", @args; };
+        like $@, qr/Integer overflow/ , "%NNN\$s where NNN=~$i";
+    }
+
+    is($warn, 16, "expected warnings");
     is($bad,   0, "unexpected warnings");
 }
 
@@ -470,7 +468,9 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
     foreach my $ord (0 .. 255) {
 	my $bad = 0;
 	local $SIG{__WARN__} = sub {
-	    if ($_[0] !~ /^Invalid conversion in sprintf/) {
+	    if (  $_[0] !~ /^Invalid conversion in sprintf/
+               && $_[0] !~ /^Missing argument in sprintf/ )
+            {
 		warn $_[0];
 		$bad++;
 	    }
@@ -559,7 +559,6 @@ for my $t (@tests) {
     } else {
       is($sprintf_got, $fmt, "quad unsupported: $fmt -> $fmt");
       like($w, qr/Invalid conversion in sprintf: "$fmt"/, "got warning about invalid conversion from fmt : $fmt");
-      like($w, qr/Redundant argument in sprintf/, "got warning about redundant argument in sprintf from fmt : $fmt");
     }
   }
 }
@@ -913,5 +912,126 @@ SKIP: {
 
     is(sprintf("%a", eval '0x1p-16494'), '0x1p-16494'); # underflow
 }
+
+# check all calls to croak_memory_wrap()
+# RT #131260
+# (these now fail earlier with "Integer overflow" rather than
+# "memory wrap" - DAPM)
+
+{
+    my $s = 8 * $Config{sizesize};
+    my $i = 1;
+    my $max;
+    while ($s--) { $max |= $i; $i <<= 1; }
+
+    my @tests = (
+                  # format, arg
+                  ["%.${max}a",        1.1 ],
+                  ["%.${max}i",          1 ],
+                  ["%.${max}i",         -1 ],
+    );
+
+    for my $test (@tests) {
+        my ($fmt, $arg) = @$test;
+        eval { my $s = sprintf $fmt, $arg; };
+        like("$@", qr/Integer overflow in format string/,
+                    qq{Integer overflow: "$fmt", "$arg"});
+    }
+}
+
+{
+    # handle utf8 correctly when skipping invalid format
+    my $w_red   = 0;
+    my $w_inv   = 0;
+    my $w_other = 0;
+    local $SIG{__WARN__} = sub {
+        if ($_[0] =~ /^Invalid conversion/) {
+            $w_inv++;
+        }
+        elsif ($_[0] =~ /^Redundant argument/) {
+            $w_red++;
+        }
+        else {
+            $w_other++;
+        }
+    };
+
+    use warnings;
+    my $s = sprintf "%s%\xc4\x80%s", "\x{102}", "\xc4\x83";
+    is($s, "\x{102}%\xc4\x80\xc4\x83", "utf8 for invalid format");
+    is($w_inv,   1, "utf8 for invalid format: invalid warnings");
+    is($w_red,   0, "utf8 for invalid format: redundant warnings");
+    is($w_other, 0, "utf8 for invalid format: other warnings");
+}
+
+# it used to upgrade the result to utf8 if the 1st arg happened to be utf8
+
+{
+    my $precis = "9";
+    utf8::upgrade($precis);
+    my $s = sprintf "%.*f\n", $precis, 1.1;
+    ok(!utf8::is_utf8($s), "first arg not special utf8-wise");
+}
+
+# sprintf("%n") used to croak "Modification of a read-only value"
+# as it tried to set &PL_sv_no
+
+{
+    eval { my $s = sprintf("%n"); };
+    like $@, qr/Missing argument for %n in sprintf/, "%n";
+}
+
+# %p of an Inf or Nan address should still print its address, not
+# 'Inf' etc.
+
+like sprintf("%p", 0+'Inf'), qr/^[0-9a-f]+$/, "%p and Inf";
+like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
+
+# when the width or precision is specified by an argument, handle overflows
+# ditto for literal precisions.
+
+{
+    for my $i (
+               (~0     ) - 0, # UV_MAX
+               (~0     ) - 1,
+               (~0     ) - 2,
+
+               (~0 >> 1) + 2,
+               (~0 >> 1) + 1,
+               (~0 >> 1) - 0, # IV_MAX
+               (~0 >> 1) - 1,
+               (~0 >> 1) - 2,
+
+               (~0 >> 2) + 2,
+               (~0 >> 2) + 1,
+
+               -1 - (~0 >> 1),# -(IV_MAX+1)
+                0 - (~0 >> 1),
+                1 - (~0 >> 1),
+
+               -2 - (~0 >> 2),
+               -1 - (~0 >> 2),
+            )
+    {
+        my $hex = sprintf "0x%x", $i;
+        eval { my $s = sprintf '%*s', $i, "abc"; };
+        like $@, qr/Integer overflow/, "overflow: %*s $hex, $i";
+
+        eval { my $s = sprintf '%*2$s', "abc", $i; };
+        like $@, qr/Integer overflow/, 'overflow: %*2$s';
+
+        eval { my $s = sprintf '%.*s', $i, "abc"; };
+        like $@, qr/Integer overflow/, 'overflow: %.*s';
+
+        eval { my $s = sprintf '%.*2$s', "abc", $i; };
+        like $@, qr/Integer overflow/, 'overflow: %.*2$s';
+
+        next if $i < 0;
+
+        eval { my $s = sprintf "%.${i}f", 1.234 };
+        like $@, qr/Integer overflow/, 'overflow: %.NNNf';
+    }
+}
+
 
 done_testing();
