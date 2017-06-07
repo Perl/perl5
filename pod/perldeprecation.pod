@@ -259,24 +259,25 @@ the existing calls, without changing the names.
 
 =head2 Perl 5.28
 
-=head3 Attribute "%s" is deprecated, and will disappear in 5.28
+=head3 Attributes C<< :locked >> and C<< :unique >>
 
 The attributes C<< :locked >> (on code references) and C<< :unique >>
 (on array, hash and scalar references) have had no effect since 
 Perl 5.005 and Perl 5.8.8 respectively. Their use has been deprecated
 since.
 
-These attributes will no longer be recognized in Perl 5.28, and will
-then result in a syntax error. Since the attributes do not do anything,
-removing them from your code fixes the deprecation warning; and removing
-them will not influence the behaviour of your code.
+In Perl 5.28, these attributes are syntax errors. Since the
+attributes do not do anything, removing them from your code fixes
+the syntax error; and removing them will not influence the behaviour
+of your code.
 
 
 =head3 Bare here-document terminators
 
 Perl has allowed you to use a bare here-document terminator to have the
 here-document end at the first empty line. This practise was deprecated
-in Perl 5.000, and this will be a fatal error in Perl 5.28.
+in Perl 5.000, in Perl 5.28, using a bare here-document terminator
+throws a fatal error.
 
 You are encouraged to use the explictly quoted form if you wish to
 use an empty line as the terminator of the here-document:
@@ -299,7 +300,8 @@ In Perl 5.20.0 this was changed so that it would be B<exactly> the same as
 setting C<$/> to undef, with the exception that this warning would be
 thrown.
 
-In Perl 5.28, this will throw a fatal error.
+As of Perl 5.28, setting C<$/> to a reference of a non-positive
+integer throws a fatal error.
 
 You are recommended to change your code to set C<$/> to C<undef> explicitly
 if you wish to slurp the file.
@@ -307,27 +309,30 @@ if you wish to slurp the file.
 
 =head3 Limit on the value of Unicode code points.
 
-Unicode only allows code points up to 0x10FFFF, but Perl allows much
-larger ones. However, using code points exceeding the maximum value
-of an integer (C<IV_MAX>) may break the perl interpreter in some constructs,
-including causing it to hang in a few cases.  The known problem areas
-are in C<tr///>, regular expression pattern matching using quantifiers,
-as quote delimiters in C<qI<X>...I<X>> (where I<X> is the C<chr()> of a large
-code point), and as the upper limits in loops.
+Unicode only allows code points up to 0x10FFFF, but Perl allows
+much larger ones. Up till Perl 5.28, it was allowed to use code
+points exceeding the maximum value of an integer (C<IV_MAX>).
+However, that did break the perl interpreter in some constructs,
+including causing it to hang in a few cases.  The known problem
+areas were in C<tr///>, regular expression pattern matching using
+quantifiers, as quote delimiters in C<qI<X>...I<X>> (where I<X> is
+the C<chr()> of a large code point), and as the upper limits in
+loops.
 
-The use of out of range code points was deprecated in Perl 5.24, and
-it will be a fatal error in Perl 5.28.
+The use of out of range code points was deprecated in Perl 5.24; in
+Perl 5.28 using a code point exceeding C<IV_MAX> throws a fatal error.
 
 If your code is to run on various platforms, keep in mind that the upper
-limit depends on the platform.  It is much larger on 64-bit word sizes
-than 32-bit ones.
+limit depends on the platform. It is much larger on 64-bit word sizes
+than 32-bit ones. For 32-bit integers, C<IV_MAX> equals C<0x7FFFFFFF>,
+for 64-bit integers, C<IV_MAX> equals C<0x7FFFFFFFFFFFFFFF>.
 
 
 =head3 Use of comma-less variable list in formats.
 
-It's allowed to use a list of variables in a format, without
+It was allowed to use a list of variables in a format, without
 separating them with commas. This usage has been deprecated
-for a long time, and it will be a fatal error in Perl 5.28.
+for a long time, and in Perl 5.28, this throws a fatal error.
 
 =head3 Use of C<\N{}>
 
@@ -345,7 +350,7 @@ This idiom is likely to be confusing, and it was deprecated in
 Perl 5.10.
 
 Using the same symbol to C<open()> a filehandle and a dirhandle
-will be a fatal error in Perl 5.28.
+throws a fatal error in Perl 5.28.
 
 You should be using two different symbols instead.
 
@@ -356,26 +361,27 @@ the C<encoding> pragma. Setting this variable to anything other
 than C<undef> was deprecated in Perl 5.22. Full deprecation
 of the variable happened in Perl 5.25.3.
 
-Setting this variable will become a fatal error in Perl 5.28.
+Setting this variable to anything other than an undefined value
+throws a fatal error in Perl 5.28.
 
 
 =head3 C<< B::OP::terse >>
 
 This method, which just calls C<< B::Concise::b_terse >>, has been
-deprecated, and will disappear in Perl 5.28. Please use 
+deprecated, and disappeared in Perl 5.28. Please use 
 C<< B::Concise >> instead.
 
 
 
-=head3 Use of inherited AUTOLOAD for non-method %s() is deprecated
+=head3 Use of inherited AUTOLOAD for non-method %s::%s() is no longer allowed
 
-As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked
+As an (ahem) accidental feature, C<AUTOLOAD> subroutines were looked
 up as methods (using the C<@ISA> hierarchy) even when the subroutines
 to be autoloaded were called as plain functions (e.g. C<Foo::bar()>),
 not as methods (e.g. C<< Foo->bar() >> or C<< $obj->bar() >>).
 
-This bug will be rectified in future by using method lookup only for
-methods' C<AUTOLOAD>s.
+This bug was deprecated in Perl 5.004, has been rectified in Perl 5.28
+by using method lookup only for methods' C<AUTOLOAD>s.
 
 The simple rule is:  Inheritance will not work when autoloading
 non-methods.  The simple fix for old code is:  In any module that used
@@ -386,8 +392,6 @@ startup.
 In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
-
-This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
 
 
 =head3 Use of code points over 0xFF in string bitwise operators
