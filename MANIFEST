@@ -5742,7 +5742,7 @@ t/perf/taint.t			See if optimisations are keeping things fast (taint issues)
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
-t/porting/bench.t		Check that Porting/bench.pl is okay
+t/porting/bench_selftest.t	run Porting/bench.pl's selftest facility
 t/porting/bincompat.t		Check that {non_,}bincompat_options are ordered
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/checkcfgvar.t		Check that all config.sh-like files are good
