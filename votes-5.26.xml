@@ -1,0 +1,137 @@
+<?xml version="1.0"?><?xml-stylesheet type="text/xml" href="#stylesheet"?><!DOCTYPE doc SYSTEM "doc.dtd"><doc>
+
+<data>
+
+<div><h2>Tickets Listed in #131533: 5.26.1 blockers</h2>
+
+</div>
+
+<div><h2>Other Proposed Cherry-Picks</h2>
+
+Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
+
+(NOTE: The same document states that the following types of change are not acceptable:
+
+Anything controversial
+Breaking binary compatibility
+Adding or removing features
+Adding new warnings, errors or deprecations
+
+The same criteria apply to code in dual-life modules as to core code.)
+
+</div>
+
+<div><h3>Security Fixes</h3>
+
+</div>
+
+<div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
+
+</div>
+
+<div><h3>Regression Fixes</h3>
+
+</div>
+
+<div><h3>New Feature Fixes</h3>
+
+</div>
+
+<div><h3>Build and Installation Fixes</h3>
+
+</div>
+
+<div><h3>Portability Fixes</h3>
+
+</div>
+
+<div><h3>Platform-Specific Test Fixes</h3>
+
+</div>
+
+<div><h3>Documentation Fixes</h3>
+
+</div>
+
+</data>
+
+<xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/>
+  <xsl:template match="/">
+    <html>
+      <head>
+        <title>Cherry-pick votes for maint-5.26</title>
+        <style>
+          .accepted .ref a { color: #090 }
+          .unvoted  .ref a { color: #c00 }
+        </style>
+      </head>
+      <body>
+        <h1>Cherry-pick votes for maint-5.26</h1>
+        <xsl:for-each select="/doc/data/div">
+          <h2><xsl:value-of select="h2"/></h2>
+          <h3><xsl:value-of select="h3"/></h3>
+          <table>
+            <xsl:for-each select="commit|head">
+              <xsl:choose>
+                <xsl:when test="local-name() = 'commit'">
+                  <tr>
+                    <xsl:apply-templates select="@votes"/>
+                    <td style="vertical-align: top; white-space: nowrap">
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref" style="vertical-align: top">
+                      <a href="http://perl5.git.perl.org/perl.git/commitdiff/{@id}">
+                        <xsl:value-of select="@id"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                        <xsl:value-of select="@ticket"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+                <xsl:when test="local-name() = 'head'">
+                  <tr>
+                    <xsl:apply-templates select="@votes"/>
+                    <td style="vertical-align: top; white-space: nowrap">
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref" style="vertical-align: top">
+                      <a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}">
+                        <xsl:value-of select="@branch"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                        <xsl:value-of select="@ticket"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+              </xsl:choose>
+            </xsl:for-each>
+          </table>
+        </xsl:for-each>
+      </body>
+    </html>
+  </xsl:template>
+  <xsl:template match="@votes">
+    <xsl:choose>
+      <xsl:when test=". = ''">
+        <xsl:attribute name="class">unvoted</xsl:attribute>
+      </xsl:when>
+      <xsl:when test="substring-after(substring-after(normalize-space(translate(., ',', ' ')), ' '), ' ') != ''">
+        <xsl:attribute name="class">accepted</xsl:attribute>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+</xsl:stylesheet>
+
+</doc>
