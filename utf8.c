@@ -2005,20 +2005,20 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
     Newx(d, (*len) - count + 1, U8);
 
     if (LIKELY(count)) {
-    s = start; start = d;
-    while (s < send) {
-	U8 c = *s++;
-	if (! UTF8_IS_INVARIANT(c)) {
-	    /* Then it is two-byte encoded */
-	    c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
-            s++;
-	}
-	*d++ = c;
-    }
-    *d = '\0';
-    *len = d - start;
+        s = start; start = d;
+        while (s < send) {
+            U8 c = *s++;
+            if (! UTF8_IS_INVARIANT(c)) {
+                /* Then it is two-byte encoded */
+                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
+                s++;
+            }
+            *d++ = c;
+        }
+        *d = '\0';
+        *len = d - start;
 
-    return (U8 *)start;
+        return (U8 *)start;
     }
     else {
         Copy(start, d, *len, U8);
