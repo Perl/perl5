@@ -3529,7 +3529,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	 * from s to t - 1 is invariant, the destination can be initialized
 	 * with these using a fast memory copy
 	 *
-	 * The other way is to figure out exactly how big the string should be
+         * The other way is to figure out exactly how big the string should be,
 	 * by parsing the entire input.  Then you don't have to make it big
 	 * enough to handle the worst possible case, and more importantly, if
 	 * the string you already have is large enough, you don't have to
@@ -3551,18 +3551,18 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	 *	value.  We go backwards through the string, converting until we
 	 *	get to the position we are at now, and then stop.  If this
 	 *	position is far enough along in the string, this method is
-	 *	faster than the other method.  If the memory copy were the same
-	 *	speed as the byte-by-byte loop, that position would be about
-	 *	half-way, as at the half-way mark, parsing to the end and back
-	 *	is one complete string's parse, the same amount as starting
-	 *	over and going all the way through.  Actually, it would be
-	 *	somewhat less than half-way, as it's faster to just count bytes
-	 *	than to also copy, and we don't have the overhead of allocating
-	 *	a new string, changing the scalar to use it, and freeing the
-	 *	existing one.  But if the memory copy is fast, the break-even
-	 *	point is somewhere after half way.  The counting loop could be
-	 *	sped up by vectorization, etc, to move the break-even point
-	 *	further towards the beginning.
+         *	faster than the first method above.  If the memory copy were
+         *	the same speed as the byte-by-byte loop, that position would be
+         *	about half-way, as at the half-way mark, parsing to the end and
+         *	back is one complete string's parse, the same amount as
+         *	starting over and going all the way through.  Actually, it
+         *	would be somewhat less than half-way, as it's faster to just
+         *	count bytes than to also copy, and we don't have the overhead
+         *	of allocating a new string, changing the scalar to use it, and
+         *	freeing the existing one.  But if the memory copy is fast, the
+         *	break-even point is somewhere after half way.  The counting
+         *	loop could be sped up by vectorization, etc, to move the
+         *	break-even point further towards the beginning.
 	 *  2)	if the string doesn't have enough space to handle the converted
 	 *	value.  A new string will have to be allocated, and one might
 	 *	as well, given that, start from the beginning doing the first
