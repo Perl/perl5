@@ -619,26 +619,30 @@ static PerlIO *
 PerlIOVia_dup(pTHX_ PerlIO * f, PerlIO * o, CLONE_PARAMS * param,
 	      int flags)
 {
-    if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags)) && param) {
-	/* For a non-interpreter dup stash and obj have been set up
-	   by the implied push.
+    if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags))) {
+#ifdef USE_ITHREADS
+        if (param) {
+            /* For a non-interpreter dup stash and obj have been set up
+               by the implied push.
 
-           But if this is a clone for a new interpreter we need to
-           translate the objects to their dups.
-	 */
+               But if this is a clone for a new interpreter we need to
+               translate the objects to their dups.
+            */
 
-        PerlIOVia *fs = PerlIOSelf(f, PerlIOVia);
-        PerlIOVia *os = PerlIOSelf(o, PerlIOVia);
+            PerlIOVia *fs = PerlIOSelf(f, PerlIOVia);
+            PerlIOVia *os = PerlIOSelf(o, PerlIOVia);
 
-        fs->obj = sv_dup_inc(os->obj, param);
-        fs->stash = (HV*)sv_dup((SV*)os->stash, param);
-        fs->var = sv_dup_inc(os->var, param);
-        fs->cnt = os->cnt;
+            fs->obj = sv_dup_inc(os->obj, param);
+            fs->stash = (HV*)sv_dup((SV*)os->stash, param);
+            fs->var = sv_dup_inc(os->var, param);
+            fs->cnt = os->cnt;
 
-        /* fh, io, cached CVs left as NULL, PerlIOVia_method()
-           will reinitialize them if needed */
+            /* fh, io, cached CVs left as NULL, PerlIOVia_method()
+               will reinitialize them if needed */
+        }
+#endif
+        /* for a non-threaded dup fs->obj and stash should be set by _pushed() */
     }
-    /* for a non-threaded dup fs->obj and stash should be set by _pushed() */
 
     return f;
 }
