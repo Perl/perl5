@@ -3488,33 +3488,35 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	U8 * s = (U8 *) SvPVX_const(sv);
 	U8 * e = (U8 *) SvEND(sv);
 	U8 *t = s;
-	STRLEN two_byte_count = 0;
+	STRLEN two_byte_count;
 	
-	if (flags & SV_FORCE_UTF8_UPGRADE) goto must_be_utf8;
+	if (flags & SV_FORCE_UTF8_UPGRADE) {
+            two_byte_count = 0;
+        }
+        else {
+            if (is_utf8_invariant_string_loc(s, SvCUR(sv), (const U8 **) &t)) {
 
-	/* See if really will need to convert to utf8.  We mustn't rely on our
-	 * incoming SV being well formed and having a trailing '\0', as certain
-	 * code in pp_formline can send us partially built SVs. */
+                /* utf8 conversion not needed because all are invariants.  Mark
+                 * as UTF-8 even if no variant - saves scanning loop */
+                SvUTF8_on(sv);
+                if (extra) SvGROW(sv, SvCUR(sv) + extra);
+                return SvCUR(sv);
+            }
 
-	if (is_utf8_invariant_string_loc(s, SvCUR(sv), (const U8 **) &t)) {
+            /* Here, there is at least one variant, and t points to the first
+             * one */
+            two_byte_count = 1;
+        }
 
-            /* utf8 conversion not needed because all are invariants.  Mark as
-             * UTF-8 even if no variant - saves scanning loop */
-            SvUTF8_on(sv);
-            if (extra) SvGROW(sv, SvCUR(sv) + extra);
-            return SvCUR(sv);
-	}
-
-        two_byte_count = 1;
-
-      must_be_utf8:
-
-	/* Here, the string should be converted to utf8, either because of an
-	 * input flag (two_byte_count = 0), or because a character that
-	 * requires 2 bytes was found (two_byte_count = 1).  t points either to
-	 * the beginning of the string (if we didn't examine anything), or to
-	 * the first variant.  In either case, everything from s to t - 1 will
-	 * occupy only 1 byte each on output.
+        /* Note that the incoming SV may not have a trailing '\0', as certain
+         * code in pp_formline can send us partially built SVs.
+         *
+	 * Here, the string should be converted to utf8, either because of an
+         * input flag (which causes two_byte_count to be set to 0), or because
+         * a character that requires 2 bytes was found (two_byte_count = 1).  t
+         * points either to the beginning of the string (if we didn't examine
+         * anything), or to the first variant.  In either case, everything from
+         * s to t - 1 will occupy only 1 byte each on output.
 	 *
 	 * There are two main ways to convert.  One is to create a new string
 	 * and go through the input starting from the beginning, appending each
