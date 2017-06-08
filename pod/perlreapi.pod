@@ -624,7 +624,6 @@ values.
          * matching*/
         U32 lastparen;            /* highest close paren matched ($+) */
         U32 lastcloseparen;       /* last close paren matched ($^N) */
-        regexp_paren_pair *swap;  /* Swap copy of *offs */
         regexp_paren_pair *offs;  /* Array of offsets for (@-) and
                                      (@+) */
 
@@ -726,10 +725,6 @@ A void* pointing to an engine-defined
 data structure.  The Perl engine uses the
 C<regexp_internal> structure (see L<perlreguts/Base Structures>) but a custom
 engine should use something else.
-
-=head2 C<swap>
-
-Unused.  Left in for compatibility with Perl 5.10.0.
 
 =head2 C<offs>
 
