@@ -776,7 +776,7 @@ sub do_grind {
         close $out       or die "Error: closing file '$OPTS{write}': $!\n";
     }
     if (!$OPTS{write} or $OPTS{show}) {
-        if (@$perls < 2) {
+        if (@$perls < 2 && !$OPTS{raw}) {
             die "Error: need more than one perl to do a report.\n";
         }
         my ($processed, $averages) =
