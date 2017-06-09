@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::Tutorial;
 
-our $VERSION = '7.24';
+our $VERSION = '7.28';
 $VERSION = eval $VERSION;
 
 
@@ -125,7 +125,7 @@ Simply add another entry in the test location string. For example, to test:
 
 You would use the following C<test> directive:
 
-    test => {TESTS => 't/*.t t/*/*/*.t}
+    test => {TESTS => 't/*.t t/*/*/*.t'}
 
 Note that in the above example, tests in the first subdirectory will not be
 run. To run all tests in the intermediary subdirectory preceeding the one

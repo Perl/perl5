@@ -1,9 +1,10 @@
 package ExtUtils::MM_AIX;
 
 use strict;
-our $VERSION = '7.24';
+our $VERSION = '7.28';
 $VERSION = eval $VERSION;
 
+use ExtUtils::MakeMaker::Config;
 require ExtUtils::MM_Unix;
 our @ISA = qw(ExtUtils::MM_Unix);
 
@@ -34,13 +35,7 @@ Define DL_FUNCS and DL_VARS and write the *.exp files.
 sub dlsyms {
     my($self,%attribs) = @_;
     return '' unless $self->needs_linking;
-    my @m;
-    # these will need XSMULTI-fying but maybe that already happens
-    push @m,"\ndynamic :: $self->{BASEEXT}.exp\n\n"
-      unless $self->{SKIPHASH}{'dynamic'}; # dynamic and static are subs, so...
-    push @m,"\nstatic :: $self->{BASEEXT}.exp\n\n"
-      unless $self->{SKIPHASH}{'static'};  # we avoid a warning if we tick them
-    join "\n", @m, $self->xs_dlsyms_iterator(\%attribs);
+    join "\n", $self->xs_dlsyms_iterator(\%attribs);
 }
 
 =head3 xs_dlsyms_ext
@@ -51,6 +46,21 @@ On AIX, is C<.exp>.
 
 sub xs_dlsyms_ext {
     '.exp';
+}
+
+sub xs_dlsyms_arg {
+    my($self, $file) = @_;
+    return qq{-bE:${file}};
+}
+
+sub init_others {
+    my $self = shift;
+    $self->SUPER::init_others;
+    # perl "hints" add -bE:$(BASEEXT).exp to LDDLFLAGS. strip that out
+    # so right value can be added by xs_make_dynamic_lib to work for XSMULTI
+    $self->{LDDLFLAGS} ||= $Config{lddlflags};
+    $self->{LDDLFLAGS} =~ s#(\s*)\S*\Q$(BASEEXT)\E\S*(\s*)#$1$2#;
+    return;
 }
 
 =head1 AUTHOR

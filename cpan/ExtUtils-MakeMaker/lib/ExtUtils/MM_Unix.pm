@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.24';
+$VERSION = '7.28';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -932,6 +932,7 @@ sub dynamic_lib {
     return '' unless $self->has_link_code;
     my @m = $self->xs_dynamic_lib_macros(\%attribs);
     my @libs;
+    my $dlsyms_ext = eval { $self->xs_dlsyms_ext };
     if ($self->{XSMULTI}) {
         my @exts = $self->_xs_list_basenames;
         for my $ext (@exts) {
@@ -952,10 +953,14 @@ sub dynamic_lib {
             my $ldfrom = $self->_xsbuild_value('xs', $ext, 'LDFROM');
             $ldfrom = $objfile unless defined $ldfrom;
             my $exportlist = "$ext.def";
-            push @libs, [ $objfile, $instfile, $instdir, $ldfrom, $exportlist ];
+            my @libchunk = ($objfile, $instfile, $instdir, $ldfrom, $exportlist);
+            push @libchunk, $dlsyms_ext ? $ext.$dlsyms_ext : undef;
+            push @libs, \@libchunk;
         }
     } else {
-        @libs = ([ qw($(OBJECT) $(INST_DYNAMIC) $(INST_ARCHAUTODIR) $(LDFROM) $(EXPORT_LIST)) ]);
+        my @libchunk = qw($(OBJECT) $(INST_DYNAMIC) $(INST_ARCHAUTODIR) $(LDFROM) $(EXPORT_LIST));
+        push @libchunk, $dlsyms_ext ? '$(BASEEXT)'.$dlsyms_ext : undef;
+        @libs = (\@libchunk);
     }
     push @m, map { $self->xs_make_dynamic_lib(\%attribs, @$_); } @libs;
 
@@ -999,10 +1004,11 @@ Defines the recipes for the C<dynamic_lib> section.
 =cut
 
 sub xs_make_dynamic_lib {
-    my ($self, $attribs, $object, $to, $todir, $ldfrom, $exportlist) = @_;
+    my ($self, $attribs, $object, $to, $todir, $ldfrom, $exportlist, $dlsyms) = @_;
     $exportlist = '' if $exportlist ne '$(EXPORT_LIST)';
     my $armaybe = $self->_xs_armaybe($attribs);
-    my @m = sprintf '%s : %s $(MYEXTLIB) %s$(DFSEP).exists %s $(PERL_ARCHIVEDEP) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)'."\n", $to, $object, $todir, $exportlist;
+    my @m = sprintf '%s : %s $(MYEXTLIB) %s$(DFSEP).exists %s $(PERL_ARCHIVEDEP) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP) %s'."\n", $to, $object, $todir, $exportlist, ($dlsyms || '');
+    my $dlsyms_arg = $self->xs_dlsyms_arg($dlsyms);
     if ($armaybe ne ':'){
         $ldfrom = 'tmp$(LIB_EXT)';
         push(@m,"	\$(ARMAYBE) cr $ldfrom $object\n");
@@ -1043,8 +1049,8 @@ sub xs_make_dynamic_lib {
         $ld_run_path_shell = 'LD_RUN_PATH="$(LD_RUN_PATH)" ';
     }
 
-    push @m, sprintf <<'MAKE', $ld_run_path_shell, $ldrun, $ldfrom, $self->xs_obj_opt('$@'), $libs, $exportlist;
-	%s$(LD) %s $(LDDLFLAGS) %s $(OTHERLDFLAGS) %s $(MYEXTLIB) \
+    push @m, sprintf <<'MAKE', $ld_run_path_shell, $ldrun, $dlsyms_arg, $ldfrom, $self->xs_obj_opt('$@'), $libs, $exportlist;
+	%s$(LD) %s $(LDDLFLAGS) %s %s $(OTHERLDFLAGS) %s $(MYEXTLIB) \
 	  $(PERL_ARCHIVE) %s $(PERL_ARCHIVE_AFTER) %s \
 	  $(INST_DYNAMIC_FIX)
 	$(CHMOD) $(PERM_RWX) $@
@@ -2531,6 +2537,14 @@ $(MAKE_APERL_FILE) : static $(FIRST_MAKEFILE) pm_to_blib
 	'auto', $self->{FULLEXT}, "$self->{BASEEXT}$self->{LIB_EXT}"
     );
     File::Find::find(sub {
+	if ($File::Find::name =~ m{/auto/share\z}) {
+	    # in a subdir of auto/share, prune because e.g.
+	    # Alien::pkgconfig uses File::ShareDir to put .a files
+	    # there. do not want
+	    $File::Find::prune = 1;
+	    return;
+	}
+
 	return unless m/\Q$self->{LIB_EXT}\E$/;
 
         # Skip perl's libraries.
@@ -2578,7 +2592,7 @@ $(MAKE_APERL_FILE) : static $(FIRST_MAKEFILE) pm_to_blib
 	return if $File::Find::name =~ m:\Q$installed_version\E\z:;
 	use Cwd 'cwd';
 	$static{cwd() . "/" . $_}++;
-    }, grep( -d $_, @{$searchdirs || []}) );
+    }, grep( -d $_, map { $self->catdir($_, 'auto') } @{$searchdirs || []}) );
 
     # We trust that what has been handed in as argument, will be buildable
     $static = [] unless $static;
@@ -3259,7 +3273,7 @@ sub processPL {
 
             $m .= <<MAKE_FRAG;
 
-all :: $target
+pure_all :: $target
 	\$(NOECHO) \$(NOOP)
 
 $target :: $plfile $pm_dep
@@ -3659,7 +3673,7 @@ test_ : test_$default_testtype
 EOF
 
     for my $linktype (qw(dynamic static)) {
-        my $directdeps = "$linktype pure_all";
+        my $directdeps = join ' ', grep !$self->{SKIPHASH}{$_}, $linktype, "pure_all"; # no depend on a linktype if SKIPped
         push @m, "subdirs-test_$linktype :: $directdeps\n";
         foreach my $dir (@{ $self->{DIR} }) {
             my $test = $self->cd($dir, "\$(MAKE) test_$linktype \$(PASTHRU)");
@@ -3869,7 +3883,7 @@ Obsolete, deprecated method. Not used since Version 5.21.
 sub writedoc {
 # --- perllocal.pod section ---
     my($self,$what,$name,@attribs)=@_;
-    my $time = localtime;
+    my $time = gmtime($ENV{SOURCE_DATE_EPOCH} || time);
     print "=head2 $time: $what C<$name>\n\n=over 4\n\n=item *\n\n";
     print join "\n\n=item *\n\n", map("C<$_>",@attribs);
     print "\n\n=back\n\n";

@@ -24,7 +24,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.24';
+our $VERSION = '7.28';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -34,7 +34,7 @@ $Revision = int $Revision * 10000;
 our $Filename = __FILE__;   # referenced outside MakeMaker
 
 our @ISA = qw(Exporter);
-our @EXPORT    = qw(&WriteMakefile $Verbose &prompt);
+our @EXPORT    = qw(&WriteMakefile $Verbose &prompt &os_unsupported);
 our @EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
                     &WriteEmptyMakefile &open_for_writing &write_file_via_tmp
                     &_sprintf562);
@@ -225,6 +225,10 @@ sub prompt ($;$) {  ## no critic
     }
 
     return (!defined $ans || $ans eq '') ? $def : $ans;
+}
+
+sub os_unsupported {
+    die "OS unsupported\n";
 }
 
 sub eval_in_subdirs {
@@ -650,11 +654,6 @@ END
         } else {
             croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
         }
-    }
-
-    # This is for old Makefiles written pre 5.00, will go away
-    if ( Carp::longmess("") =~ /runsubdirpl/s ){
-        carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
     }
 
     my $newclass = ++$PACKNAME;
@@ -3014,6 +3013,8 @@ you provide your own C<TESTS> attribute, defaults to false.
 
   {RECURSIVE_TEST_FILES=>1}
 
+This is supported since 6.76
+
 =item tool_autosplit
 
   {MAXLEN => 8}
@@ -3289,6 +3290,17 @@ is set to true, the $default will be used without prompting.  This
 prevents automated processes from blocking on user input.
 
 If no $default is provided an empty string will be used instead.
+
+=item os_unsupported
+
+  os_unsupported();
+  os_unsupported if $^O eq 'MSWin32';
+
+The C<os_unsupported()> function provides a way to correctly exit your
+C<Makefile.PL> before calling C<WriteMakefile>. It is essentially a
+C<die> with the message "OS unsupported".
+
+This is supported since 7.26
 
 =back
 

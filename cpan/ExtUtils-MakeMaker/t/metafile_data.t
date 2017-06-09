@@ -17,7 +17,7 @@ use File::Temp;
 use Cwd;
 use MakeMaker::Test::Utils;
 
-plan tests => 31;
+plan tests => 35;
 require ExtUtils::MM_Any;
 
 sub mymeta_ok {
@@ -260,6 +260,110 @@ my @GENERIC_OUT = (
         },
         @GENERIC_OUT,
     },'TEST_REQUIRES meta-spec 2.0';
+}
+
+{
+    my $mm = $new_mm->(
+        @GENERIC_IN,
+    );
+    is_deeply $mm->metafile_data(
+        {
+            resources => {
+                homepage => "https://metacpan.org/release/ExtUtils-MakeMaker",
+                repository => "http://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker",
+            },
+        },
+        { @METASPEC14 },
+    ), {
+        prereqs => { @REQ20 },
+        resources => {
+            homepage => "https://metacpan.org/release/ExtUtils-MakeMaker",
+            repository => {
+                url => "http://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker",
+            },
+        },
+        @GENERIC_OUT,
+    }, 'META_ADD takes meta version 1.4 from META_MERGE';
+}
+
+{
+    my $mm = $new_mm->(
+        @GENERIC_IN,
+    );
+    is_deeply $mm->metafile_data(
+        { @METASPEC14 },
+        {
+            resources => {
+                homepage => "https://metacpan.org/release/ExtUtils-MakeMaker",
+                repository => "http://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker",
+            },
+        },
+    ), {
+        prereqs => { @REQ20 },
+        resources => {
+            homepage => "https://metacpan.org/release/ExtUtils-MakeMaker",
+            repository => {
+                url => "http://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker",
+            },
+        },
+        @GENERIC_OUT,
+    }, 'META_MERGE takes meta version 1.4 from META_ADD';
+}
+
+{
+    my $mm = $new_mm->(
+        @GENERIC_IN,
+    );
+    is_deeply $mm->metafile_data(
+        {
+            'configure_requires' => {
+                'Fake::Module1' => 1,
+            },
+            'prereqs' => {
+                @REQ20,
+                'test' => {
+                    'requires' => {
+                        'Fake::Module2' => 2,
+                    },
+                },
+            },
+        },
+        { @METASPEC20 },
+    ), {
+        prereqs => {
+            @REQ20,
+            test => { requires => { "Fake::Module2" => 2, }, },
+        },
+        @GENERIC_OUT,
+    }, 'META_ADD takes meta version 2 from META_MERGE';
+}
+
+{
+    my $mm = $new_mm->(
+        @GENERIC_IN,
+    );
+    is_deeply $mm->metafile_data(
+        { @METASPEC20 },
+        {
+            'configure_requires' => {
+                'Fake::Module1' => 1,
+            },
+            'prereqs' => {
+                @REQ20,
+                'test' => {
+                    'requires' => {
+                        'Fake::Module2' => 2,
+                    },
+                },
+            },
+        },
+    ), {
+        prereqs => {
+            @REQ20,
+            test => { requires => { "Fake::Module2" => 2, }, },
+        },
+        @GENERIC_OUT,
+    }, 'META_MERGE takes meta version 2 from META_ADD';
 }
 
 # Test _REQUIRES key priority over META_ADD
