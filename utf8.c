@@ -1975,17 +1975,17 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 =for apidoc bytes_from_utf8
 
 Converts a potentially UTF-8 encoded string C<s> of length C<*lenp> into native
-byte encoding.  On input, the boolean C<*is_utf8> gives whether or not C<s> is
+byte encoding.  On input, the boolean C<*is_utf8p> gives whether or not C<s> is
 actually encoded in UTF-8.
 
 Unlike L</utf8_to_bytes> but like L</bytes_to_utf8>, this is non-destructive of
 the input string.
 
-Do nothing if C<*is_utf8> is 0, or if there are code points in the string
-not expressible in native byte encoding.  In these cases, C<*is_utf8> and
+Do nothing if C<*is_utf8p> is 0, or if there are code points in the string
+not expressible in native byte encoding.  In these cases, C<*is_utf8p> and
 C<*lenp> are unchanged, and the return value is the original C<s>.
 
-Otherwise, C<*is_utf8> is set to 0, and the return value is a pointer to a
+Otherwise, C<*is_utf8p> is set to 0, and the return value is a pointer to a
 newly created string containing a downgraded copy of C<s>, and whose length is
 returned in C<*lenp>, updated.
 
@@ -1997,7 +1997,7 @@ value of C<*lenp> from it.
 */
 
 U8 *
-Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8)
+Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 {
     U8 *d;
     const U8 *start = s;
@@ -2006,7 +2006,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8)
 
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
     PERL_UNUSED_CONTEXT;
-    if (!*is_utf8)
+    if (!*is_utf8p)
         return (U8 *)start;
 
     /* ensure valid UTF-8 and chars < 256 before converting string */
@@ -2021,7 +2021,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8)
         s++;
     }
 
-    *is_utf8 = FALSE;
+    *is_utf8p = FALSE;
 
     Newx(d, (*lenp) - count + 1, U8);
 
