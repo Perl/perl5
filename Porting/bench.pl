@@ -386,7 +386,7 @@ my %OPTS = (
         'compact=s'   => \$OPTS{compact},
         'debug'       => \$OPTS{debug},
         'grindargs=s' => \$OPTS{grindargs},
-        'help'        => \$OPTS{help},
+        'help|h'      => \$OPTS{help},
         'fields=s'    => \$OPTS{fields},
         'jobs|j=i'    => \$OPTS{jobs},
         'norm=s'      => \$OPTS{norm},
@@ -398,7 +398,7 @@ my %OPTS = (
         'tests=s'     => \$OPTS{tests},
         'verbose'     => \$OPTS{verbose},
         'write|w=s'   => \$OPTS{write},
-    ) or usage;
+    ) or die "Use the -h option for usage information.\n";
 
     usage if $OPTS{help};
 
