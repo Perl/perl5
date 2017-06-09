@@ -701,10 +701,10 @@ for my $strict ("", "use re 'strict';") {
             fail("$0: Internal error: '$death[$i]' should have an error message");
         }
         else {
-        no warnings 'experimental::regex_sets';
-        no warnings 'experimental::re_strict';
+            no warnings 'experimental::regex_sets';
+            no warnings 'experimental::re_strict';
 
-        warning_is(sub {
+            warning_is(sub {
                     my $meaning_of_life;
                     my $eval_string = "$strict $regex";
                     $_ = "x";
