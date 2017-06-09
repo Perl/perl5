@@ -124,6 +124,12 @@
 :
 :   o  Has no Perl_foo or S_foo compatibility macro:
 :
+:	This can be used when you define a macro with this entry's name that
+:	doesn't call the function specified by this entry.  This is typically
+:	done for a function that effectively just wraps another one, and where
+:	the macro form calls the underlying function directly.  For these, also
+:	specify the 'm' flag.  Legacy-only functions should instead use 'b'.
+:
 :         embed.h: suppress "#define foo Perl_foo"
 :
 :   P  Pure function:
