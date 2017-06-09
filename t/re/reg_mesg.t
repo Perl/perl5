@@ -697,22 +697,29 @@ for my $strict ("", "use re 'strict';") {
     for (my $i = 0; $i < @death; $i += 2) {
         my $regex = $death[$i] =~ s/ default_ (on | off) //rx;
         my $expect = fixup_expect($death[$i+1], $strict);
+        if ($expect eq "") {
+            fail("$0: Internal error: '$death[$i]' should have an error message");
+        }
+        else {
         no warnings 'experimental::regex_sets';
         no warnings 'experimental::re_strict';
 
         warning_is(sub {
+                    my $meaning_of_life;
                     my $eval_string = "$strict $regex";
                     $_ = "x";
-                    eval $eval_string;
+                    eval "$eval_string; \$meaning_of_life = 42";
+                    ok (! defined $meaning_of_life, "$eval_string died");
                     my $error= $@;
                     if ($error =~ qr/\Q$expect/) {
-                        ok(1,$eval_string);
+                        ok(1, "... and gave expected message");
                     } else {
                         ok(0,$eval_string);
                         diag("Have: " . _q(add_markers($error)));
                         diag("Want: " . _q($death[$i+1]));
                     }
-                }, undef, "... and died without any other warnings");
+                }, undef, "... and no other warnings");
+        }
     }
 }
 
