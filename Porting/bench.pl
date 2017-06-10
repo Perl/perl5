@@ -740,7 +740,7 @@ sub do_grind {
         my @run_perls= process_puts($perls, @$perl_args);
         push @$perls, @run_perls;
         die "Error: Not enough perls to run a report, and --write not specified.\n"
-            if @$perls < 2 and !$OPTS{write};
+            if @$perls < 2 and !($OPTS{write} || $OPTS{bisect});
         $results = grind_run($tests, $order, \@run_perls, $loop_counts, $results);
     }
 
@@ -776,7 +776,7 @@ sub do_grind {
         close $out       or die "Error: closing file '$OPTS{write}': $!\n";
     }
     if (!$OPTS{write} or $OPTS{show}) {
-        if (@$perls < 2 && !$OPTS{raw}) {
+        if (@$perls < 2 && !($OPTS{raw} || $OPTS{bisect})) {
             die "Error: need more than one perl to do a report.\n";
         }
         my ($processed, $averages) =

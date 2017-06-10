@@ -93,7 +93,8 @@ ok -s $resultfile1, "--write should create a non-empty results file (1 perl)";
 
 note("running cachegrind for 2nd perl; may be slow...");
 $out = qx($bench_cmd -j 2 --read=$resultfile1 --write=$resultfile2 $^X=p1 2>&1);
-is length($out), 0, "--write should produce no output (2 perls)";
+is length($out), 0, "--write should produce no output (2 perls)"
+    or diag("got: $out");
 ok -s $resultfile2, "--write should create a non-empty results file (2 perls)";
 
 # 1 perl:
@@ -126,6 +127,16 @@ $out = qx($bench_cmd --read=$resultfile2 --compact=1 2>&1);
 like $out, $format_qrs{compact}, "basic cachegrind compact format; 2 perls";
 
 
+# bisect
+
+note("running cachegrind bisect on 1 perl; may be slow...");
+
+# the Ir range here is intended such that the bisect will always fail
+$out = qx($bench_cmd --tests=call::sub::empty --bisect=Ir,100000,100001 $^X=p0 2>&1);
+
+is $?, 1 << 8, "--bisect should not match";
+is length($out), 0, "--bisect should produce no output"
+    or diag("got: $out");
 
 done_testing();
 
