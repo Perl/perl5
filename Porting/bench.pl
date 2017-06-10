@@ -16,22 +16,19 @@ perls.
 
     bench.pl [options] -- perlA[=labelA] perlB[=labelB] ...
 
-    # run the tests against same perlA 2x, with and without extra
-    # options
+    # run the tests against the same perl twice, with varying options
 
-    bench.pl [options] -- perlA=fast PerlA=slow -Mstrict -Dpsltoc 
+    bench.pl [options] -- perlA=bigint -Mbigint perlA=int
 
-    # Run bench.pl's own built-in sanity tests
-
-    bench.pl --action=selftest
-
-    # Run bench on blead, which is then modified and timed again
+    # Run bench on blead, saving results to file; then modify the blead
+    # binary, and benchmark again, comparing against the saved results
 
     bench.pl [options] --write=blead.time -- ./perl=blead
-    # hack hack hack
+    # ... hack hack hack, updating ./perl ...
     bench.pl --read=blead.time -- ./perl=hacked
 
     # You can also combine --read with --write
+
     bench.pl --read=blead.time --write=last.time -- ./perl=hacked
 
 =head1 DESCRIPTION
@@ -39,8 +36,9 @@ perls.
 By default, F<bench.pl> will run code snippets found in
 F<t/perf/benchmarks> (or similar) under cachegrind, in order to calculate
 how many instruction reads, data writes, branches, cache misses, etc. that
-one execution of the snippet uses. It will run them against two or more
-perl executables and show how much each test has gotten better or worse.
+one execution of the snippet uses. Usually it will run them against two or
+more perl executables and show how much each test has gotten better or
+worse.
 
 It is modelled on the F<perlbench> tool, but since it measures instruction
 reads etc., rather than timings, it is much more precise and reproducible.
@@ -53,14 +51,16 @@ There are options to write the raw data to a file, and to read it back.
 This means that you can view the same run data in different views with
 different selection and sort options. You can also use this mechanism
 to save the results of timing one perl, and then read it back while timing
-a modification, so that you dont have rerun the same tests on the same
-perl over and over, or have two perls built at the same time.
+a modification, so that you don't have rerun the same tests on the same
+perl over and over, or have two perl executables built at the same time.
 
 The optional C<=label> after each perl executable is used in the display
 output. If you are doing a two step benchmark then you should provide
 a label for at least the "base" perl.
 
 =head1 OPTIONS
+
+=head2 General options
 
 =over 4
 
@@ -74,10 +74,64 @@ I<selftest>, which runs some basic sanity checks and produces TAP output.
 
 =item *
 
---average
+--debug
 
-Only display the overall average, rather than the results for each
-individual test.
+Enable verbose debugging output.
+
+=item *
+
+---help
+
+Display basic usage information.
+
+=item *
+
+--verbose
+
+Display progress information.
+
+=back
+
+=head2 Test selection options
+
+=over 4
+
+=item *
+
+--tests=I<FOO>
+
+Specify a subset of tests to run (or in the case of C<--read>, to display).
+It may be either a comma-separated list of test names, or a regular
+expression. For example
+
+    --tests=expr::assign::scalar_lex,expr::assign::2list_lex
+    --tests=/^expr::/
+
+
+=back
+
+=head2 Input options
+
+=over 4
+
+
+=item *
+
+-r I<file>
+--read=I<file>
+
+Read in saved data from a previous C<--write> run from the specified file.
+
+Requires C<JSON::PP> to be available.
+
+=back
+
+=head2 Benchmarking options
+
+Benchmarks will be run for all perls specified on the command line.
+These options can be used to modify the benchmarking behavior:
+
+=over 4
 
 =item *
 
@@ -85,45 +139,6 @@ individual test.
 
 The path of the file which contains the benchmarks (F<t/perf/benchmarks>
 by default).
-
-=item *
-
---bisect=I<field,minval,maxval>
-
-Run a single test against one perl and exit with a zero status if the
-named field is in the specified range; exit 1 otherwise. It will complain
-if more than one test or perl has been specified. It is intended to be
-called as part of a bisect run, to determine when something changed.
-For example,
-
-    bench.pl -j 8 --tests=foo --bisect=Ir,100,105 --perlargs=-Ilib \
-        ./miniperl
-
-might be called from bisect to find when the number of instruction reads
-for test I<foo> falls outside the range 100..105.
-
-=item *
-
---compact=<Iperl>
-
-Display the results for a single perl executable in a compact form.
-Which perl to display is specified in the same manner as C<--norm>.
-
-=item *
-
---debug
-
-Enable verbose debugging output.
-
-=item *
-
---fields=I<a,b,c>
-
-Display only the specified fields; for example,
-
-    --fields=Ir,Ir_m,Ir_mm
-
-If only one field is selected, the output is in more compact form.
 
 =item *
 
@@ -193,13 +208,6 @@ COND_m        0.0            6743.1
  Dr_mm        0.0              10.6
  Dw_mm        0.0               4.7
 
-
-=item *
-
----help
-
-Display basic usage information.
-
 =item *
 
 -j I<N>
@@ -211,18 +219,89 @@ of CPUs available.
 
 =item *
 
+--perlargs=I<foo>
+
+Optional command-line arguments to pass to each perl-under-test
+(perlA, perlB in synopsis) For example, C<--perlargs=-Ilib>.
+
+=back
+
+=head2 Output options
+
+Any results accumulated via --read or running benchmarks can be output
+in any or all of these three ways:
+
+=over 4
+
+=item *
+
+-w I<file>
+--write=I<file>
+
+Save the raw data to the specified file. It can be read back later with
+C<--read>. If combined with C<--read> then the output file will be
+the merge of the file read and any additional perls added on the command
+line.
+
+Requires C<JSON::PP> to be available.
+
+=item *
+
+--bisect=I<field,minval,maxval>
+
+Run a single test against one perl and exit with a zero status if the
+named field is in the specified range; exit 1 otherwise. It will complain
+if more than one test or perl has been specified. It is intended to be
+called as part of a bisect run, to determine when something changed.
+For example,
+
+    bench.pl -j 8 --tests=foo --bisect=Ir,100,105 --perlargs=-Ilib \
+        ./miniperl
+
+might be called from bisect to find when the number of instruction reads
+for test I<foo> falls outside the range 100..105.
+
+=item *
+
+--show
+
+Display the results to stdout in human-readable form.  This is enabled by
+default, except with --write and --bisect. The following sub-options alter
+how --show behaves.
+
+=over 4
+
+=item *
+
+--average
+
+Only display the overall average, rather than the results for each
+individual test.
+
+=item *
+
+--compact=<Iperl>
+
+Display the results for a single perl executable in a compact form.
+Which perl to display is specified in the same manner as C<--norm>.
+
+=item *
+
+--fields=I<a,b,c>
+
+Display only the specified fields; for example,
+
+    --fields=Ir,Ir_m,Ir_mm
+
+If only one field is selected, the output is in more compact form.
+
+=item *
+
 --norm=I<foo>
 
 Specify which perl column in the output to treat as the 100% norm.
 It may be a column number (0..N-1) or a perl executable name or label.
 It defaults to the leftmost column.
-
-=item *
-
---perlargs=I<foo>
-
-Optional command-line arguments to pass to each perl-under-test
-(perlA, perlB in synopsis) For example, C<--perlargs=-Ilib>.
 
 =item *
 
@@ -245,43 +324,7 @@ column I<perl>. The I<perl> value is as per C<--norm>. For example
     bench.pl --sort=Dw:perl-5.20.0 \
         perl-5.16.0 perl-5.18.0 perl-5.20.0
 
-=item *
-
--r I<file>
---read=I<file>
-
-Read in saved data from a previous C<--write> run from the specified file.
-
-Requires C<JSON::PP> to be available.
-
-=item *
-
---tests=I<FOO>
-
-Specify a subset of tests to run (or in the case of C<--read>, to display).
-It may be either a comma-separated list of test names, or a regular
-expression. For example
-
-    --tests=expr::assign::scalar_lex,expr::assign::2list_lex
-    --tests=/^expr::/
-
-=item *
-
---verbose
-
-Display progress information.
-
-=item *
-
--w I<file>
---write=I<file>
-
-Save the raw data to the specified file. It can be read back later with
-C<--read>. If combined with C<--read> then the output file will be
-the merge of the file read and any additional perls added on the command
-line.
-
-Requires C<JSON::PP> to be available.
+=back
 
 =back
 
@@ -310,39 +353,69 @@ my %VALID_FIELDS = map { $_ => 1 }
 
 sub usage {
     die <<EOF;
-usage: $0 [options] -- perl[=label] ...
-  --action=foo       What action to perform [default: grind].
-  --average          Only display average, not individual test results.
-  --benchfile=foo    File containing the benchmarks;
-                       [default: t/perf/benchmarks].
-  --bisect=f,min,max run a single test against one perl and exit with a
-                       zero status if the named field is in the specified
-                       range; exit 1 otherwise.
-  --compact=perl     Display the results of a single perl in compact form.
-                     Which perl specified like --norm
-  --debug            Enable verbose debugging output.
-  --fields=a,b,c     Display only the specified fields (e.g. Ir,Ir_m,Ir_mm).
-  --grindargs=foo    Optional command-line args to pass to cachegrind.
-  --help             Display this help.
-  -j|--jobs=N        Run N jobs in parallel [default 1].
-  --norm=perl        Which perl column to treat as 100%; may be a column
-                       number (0..N-1) or a perl executable name or label;
-                       [default: 0].
-  --perlargs=foo     Optional command-line args to pass to each perl to run.
-  --raw              Display raw data counts rather than percentages.
-  --show             Show results even though we are going to write results.
-  --sort=field:perl  Sort the tests based on the value of 'field' in the
-                       column 'perl'. The perl value is as per --norm.
-  -r|--read=file     Read in previously saved data from the specified file.
-  --tests=FOO        Select only the specified tests from the benchmarks file;
-                       FOO may be either of the form 'foo,bar' or '/regex/';
-                       [default: all tests].
-  --verbose          Display progress information.
-  -w|--write=file    Save the raw data to the specified file.
+Usage: $0 [options] -- perl[=label] ...
 
---action is one of:
-    grind            run the code under cachegrind
-    selftest         perform a selftest; produce TAP output
+General options:
+
+  --action=foo       What action to perform [default: grind]:
+                        grind      run the code under cachegrind
+                        selftest   perform a selftest; produce TAP output
+  --debug            Enable verbose debugging output.
+  --help             Display this help.
+  --verbose          Display progress information.
+
+
+Selection:
+
+  --tests=FOO        Select only the specified tests for reading, benchmarking
+                       and display.  FOO may be either a list of tests or
+                       a pattern: 'foo,bar,baz' or '/regex/';
+                       [default: all tests].
+
+Input:
+
+  -r|--read=file     Read in previously saved data from the specified file.
+                        May be repeated, and be used together with new
+                        benchmarking to create combined results.
+
+Benchmarking:
+  Benchmarks will be run for any perl specified on the command line.
+  These options can be used to modify the benchmarking behavior:
+
+  --benchfile=foo    File containing the benchmarks.
+                         [default: t/perf/benchmarks].
+  --grindargs=foo    Optional command-line args to pass to cachegrind.
+  -j|--jobs=N        Run N jobs in parallel [default 1].
+  --perlargs=foo     Optional command-line args to pass to each perl to run.
+
+Output:
+  Any results accumulated via --read or running benchmarks can be output
+  in any or all of these three ways:
+
+  -w|--write=file    Save the raw data to the specified file (may be read
+                       back later with --read).
+
+  --bisect=f,min,max Exit with a zero status if the named field f is in
+                       the specified min..max range; exit 1 otherwise.
+                       Produces no other output. Only legal if a single
+                       benchmark test has been specified.
+
+  --show             Display the results to stdout in human-readable form.
+                       This is enabled by default, except with --write and
+                       --bisect. The following sub-options alter how
+                       --show behaves.
+
+    --average          Only display average, not individual test results.
+    --compact=perl     Display the results of a single perl in compact form.
+                       Which perl specified like --norm
+    --fields=a,b,c     Display only the specified fields (e.g. Ir,Ir_m,Ir_mm).
+    --norm=perl        Which perl column to treat as 100%; may be a column
+                         number (0..N-1) or a perl executable name or label;
+                         [default: 0].
+    --raw              Display raw data counts rather than percentages.
+    --sort=field:perl  Sort the tests based on the value of 'field' in the
+                       column 'perl'. The perl value is as per --norm.
+
 
 The command line ends with one or more specified perl executables,
 which will be searched for in the current \$PATH. Each binary name may
@@ -367,7 +440,7 @@ my %OPTS = (
     perlargs  => '',
     raw       => 0,
     read      => undef,
-    show      => 0,
+    show      => undef,
     sort      => undef,
     tests     => undef,
     verbose   => 0,
@@ -393,7 +466,7 @@ my %OPTS = (
         'perlargs=s'  => \$OPTS{perlargs},
         'raw'         => \$OPTS{raw},
         'read|r=s@'   => \$OPTS{read},
-        'show!'       => \$OPTS{show},
+        'show'        => \$OPTS{show},
         'sort=s'      => \$OPTS{sort},
         'tests=s'     => \$OPTS{tests},
         'verbose'     => \$OPTS{verbose},
@@ -439,24 +512,16 @@ my %OPTS = (
         $OPTS{'sort-perl'}  = $perl;
     }
 
-    if ($OPTS{action} eq 'selftest') {
-        if (@ARGV) {
-            die "Error: no perl executables may be specified with --read\n"
-        }
-    }
-    elsif (defined $OPTS{bisect}) {
-        die "Error: exactly one perl executable must be specified for bisect\n"
-                                                unless @ARGV == 1;
-        die "Error: Can't specify both --bisect and --read\n"
-                                                if defined $OPTS{read};
-        die "Error: Can't specify both --bisect and --write\n"
-                                                if defined $OPTS{write};
-    }
+    # show is the default output action
+    $OPTS{show} = 1 unless $OPTS{write} || $OPTS{bisect};
 
     if ($OPTS{action} eq 'grind') {
         do_grind(\@ARGV);
     }
     elsif ($OPTS{action} eq 'selftest') {
+        if (@ARGV) {
+            die "Error: no perl executables may be specified with selftest\n"
+        }
         do_selftest();
     }
 }
@@ -525,8 +590,8 @@ sub read_tests_file {
 }
 
 
-# Process the perl/column argument of options like --norm and --sort.
-# Return the index of the matching perl.
+# Process the perl name/label/column argument of options like --norm and
+# --sort.  Return the index of the matching perl.
 
 sub select_a_perl {
     my ($perl, $perls, $who) = @_;
@@ -661,8 +726,9 @@ sub parse_cachegrind {
 sub do_grind {
     my ($perl_args) = @_; # the residue of @ARGV after option processing
 
-    my ($loop_counts, $perls, $results, $tests, $order);
+    my ($loop_counts, $perls, $results, $tests, $order, @run_perls);
     my ($bisect_field, $bisect_min, $bisect_max);
+    my ($processed, $averages);
 
     if (defined $OPTS{bisect}) {
         ($bisect_field, $bisect_min, $bisect_max) = split /,/, $OPTS{bisect}, 3;
@@ -678,6 +744,8 @@ sub do_grind {
         die "Error: --bisect min ($bisect_min) must be <= max ($bisect_max)\n"
             if $bisect_min > $bisect_max;
     }
+
+    # Read in previous benchmark results
 
     foreach my $file (@{$OPTS{read}}) {
         open my $in, '<:encoding(UTF-8)', $file
@@ -724,6 +792,8 @@ sub do_grind {
         }
     }
 
+    # Gather list of perls to benchmark:
+
     if (@$perl_args) {
         unless ($loop_counts) {
             # How many times to execute the loop for the two trials. The lower
@@ -733,24 +803,31 @@ sub do_grind {
             $loop_counts = [10, 20];
 
             ($tests, $order) = read_tests_file($OPTS{benchfile});
-            die "Error: only a single test may be specified with --bisect\n"
-                if defined $OPTS{bisect} and keys %$tests != 1;
         }
 
-        my @run_perls= process_puts($perls, @$perl_args);
+        @run_perls = process_puts($perls, @$perl_args);
         push @$perls, @run_perls;
-        die "Error: Not enough perls to run a report, and --write not specified.\n"
-            if @$perls < 2 and !($OPTS{write} || $OPTS{bisect});
-        $results = grind_run($tests, $order, \@run_perls, $loop_counts, $results);
     }
+
+    # Now we know what perls and tests we have, do extra option processing
+    # and checking (done before grinding, so time isn't wasted if we die).
 
     if (!$perls or !@$perls) {
         die "Error: nothing to do: no perls to run, no data to read.\n";
     }
-    # now that we have a list of perls, use it to process the
-    # 'perl' component of the --norm and --sort args
+    if (@$perls < 2 and $OPTS{show} and !$OPTS{raw}) {
+        die "Error: need at least 2 perls for comparison.\n"
+    }
+
+    if ($OPTS{bisect}) {
+        die "Error: exactly one perl executable must be specified for bisect\n"
+            unless @$perls == 1;
+        die "Error: only a single test may be specified with --bisect\n"
+            unless keys %$tests == 1;
+    }
 
     $OPTS{norm} = select_a_perl($OPTS{norm}, $perls, "--norm");
+
     if (defined $OPTS{'sort-perl'}) {
         $OPTS{'sort-perl'} =
                 select_a_perl($OPTS{'sort-perl'}, $perls, "--sort");
@@ -760,6 +837,17 @@ sub do_grind {
         $OPTS{'compact'} =
                 select_a_perl($OPTS{'compact'}, $perls, "--compact");
     }
+
+
+    # Run the benchmarks; accumulate with any previously read # results.
+
+    if (@run_perls) {
+        $results = grind_run($tests, $order, \@run_perls, $loop_counts, $results);
+    }
+
+
+    # Handle the 3 forms of output
+
     if (defined $OPTS{write}) {
         my $json = JSON::PP::encode_json({
                     version      => $FORMAT_VERSION,
@@ -775,33 +863,36 @@ sub do_grind {
         print $out $json or die "Error: writing to file '$OPTS{write}': $!\n";
         close $out       or die "Error: closing file '$OPTS{write}': $!\n";
     }
-    if (!$OPTS{write} or $OPTS{show}) {
-        if (@$perls < 2 && !($OPTS{raw} || $OPTS{bisect})) {
-            die "Error: need more than one perl to do a report.\n";
-        }
-        my ($processed, $averages) =
-                    grind_process($results, $perls, $loop_counts);
 
-        if (defined $OPTS{bisect}) {
-            my @r = values %$results;
-            die "Panic: expected exactly one test result in bisect\n"
-                                                            if @r != 1;
-            @r = values %{$r[0]};
-            die "Panic: expected exactly one perl result in bisect\n"
-                                                            if @r != 1;
-            my $c = $r[0]{$bisect_field};
-            die "Panic: no result in bisect for field '$bisect_field'\n"
-                                                            unless defined $c;
-            exit 0 if $bisect_min <= $c and $c <= $bisect_max;
-            exit 1;
-        }
-        elsif (defined $OPTS{compact}) {
+    if ($OPTS{show} or $OPTS{bisect}) {
+        # numerically process the raw data
+        ($processed, $averages) =
+                    grind_process($results, $perls, $loop_counts);
+    }
+
+    if ($OPTS{show}) {
+        if (defined $OPTS{compact}) {
             grind_print_compact($processed, $averages, $OPTS{compact},
                                 $perls, $tests, $order);
         }
         else {
             grind_print($processed, $averages, $perls, $tests, $order);
         }
+    }
+
+    if ($OPTS{bisect}) {
+        my @r = values %$results;
+        die "Panic: expected exactly one test result in bisect\n"
+                                                        if @r != 1;
+        @r = values %{$r[0]};
+        die "Panic: expected exactly one perl result in bisect\n"
+                                                        if @r != 1;
+        my $c = $r[0]{$bisect_field};
+        die "Panic: no result in bisect for field '$bisect_field'\n"
+                                                        unless defined $c;
+
+        exit 0 if $bisect_min <= $c and $c <= $bisect_max;
+        exit 1;
     }
 }
 
