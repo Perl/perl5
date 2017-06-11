@@ -148,9 +148,15 @@ XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+Additionally, the following selected changes have been made:
 
 =head3 L<XXX>
 
@@ -251,6 +257,17 @@ listed here.  Changes which create B<new> files in F<t/> go here as do any
 large changes to the testing harness (e.g. when parallel testing was added).
 Changes to existing files in F<t/> aren't worth summarizing, although the bugs
 that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+XXX If instead there were significant changes, say this:
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
 
 [ List each test improvement as a =item entry ]
 
