@@ -1916,6 +1916,7 @@ Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 Anpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 AnpR	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
+Anp    |void    |DeclareStaticMemory|Malloc_t from|Malloc_t to|MEM_SIZE size
 Anp	|Free_t	|safesysfree	|Malloc_t where
 Asrnx	|void	|croak_memory_wrap
 #if defined(PERL_GLOBAL_STRUCT)

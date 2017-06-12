@@ -24,6 +24,7 @@ PERL_CALLCONV UV	ASCII_TO_NEED(const UV enc, const UV ch)
 			__attribute__pure__;
 #endif
 
+PERL_CALLCONV void  Perl_DeclareStaticMemory(Malloc_t from, Malloc_t to, MEM_SIZE size);
 PERL_CALLCONV int	Perl_Gv_AMupdate(pTHX_ HV* stash, bool destructing);
 #define PERL_ARGS_ASSERT_GV_AMUPDATE	\
 	assert(stash)

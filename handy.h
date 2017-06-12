@@ -2390,6 +2390,10 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)MEM_LOG_ALLOC(n,t,safemalloc((MEM_SIZE)((n)*sizeof(t))))))
 #define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safecalloc((n),sizeof(t)))))
 
+typedef struct static_memory_t { Malloc_t from; Malloc_t to; MEM_SIZE size; struct static_memory_t *next; } STATIC_MEMORY_AREA;
+/* auto cast arguments using a dumy helper */
+#define declare_static_memory(f, t, s) DeclareStaticMemory( (Malloc_t) (f), (Malloc_t) (t), (MEM_SIZE) (s) )
+
 #ifndef PERL_CORE
 /* pre 5.9.x compatibility */
 #define New(x,v,n,t)	Newx(v,n,t)
