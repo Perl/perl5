@@ -4075,7 +4075,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 		New(10003, classname, len+1, char);
 		malloced_classname = classname;
 	}
-	SAFEPVREAD(classname, len, malloced_classname);
+	SAFEPVREAD(classname, (SSize_t)len, malloced_classname);
 	classname[len] = '\0';		/* Mark string end */
 
 	/*
@@ -4266,7 +4266,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 			malloced_classname = classname;
 		}
 
-		SAFEPVREAD(classname, len, malloced_classname);
+		SAFEPVREAD(classname, (SSize_t)len, malloced_classname);
 		classname[len] = '\0';		/* Mark string end */
 
 		/*
