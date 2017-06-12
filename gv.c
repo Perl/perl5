@@ -1995,9 +1995,9 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                                 /* @{^CAPTURE} %{^CAPTURE} */
                 if (memEQs(name, len, "\003APTURE")) {
                     AV* const av = GvAVn(gv);
-                    UV uv= *name;
+                    const Size_t n = *name;
 
-                    sv_magic(MUTABLE_SV(av), (SV*)uv, PERL_MAGIC_regdata, NULL, 0);
+                    sv_magic(MUTABLE_SV(av), (SV*)n, PERL_MAGIC_regdata, NULL, 0);
                     SvREADONLY_on(av);
 
                     if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
@@ -2163,9 +2163,9 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             }
             {   /* @- @+ */
                 AV* const av = GvAVn(gv);
-                const UV uv = (UV)*name;
+                const Size_t n = *name;
 
-                sv_magic(MUTABLE_SV(av), (SV*)uv, PERL_MAGIC_regdata, NULL, 0);
+                sv_magic(MUTABLE_SV(av), (SV*)n, PERL_MAGIC_regdata, NULL, 0);
                 SvREADONLY_on(av);
             }
             break;
