@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-my $tests_count = 148;
+my $tests_count = 146;
 plan tests => $tests_count;
 
 $_ = 'abc';
@@ -253,22 +253,10 @@ foreach my $start (@chars) {
     # [perl #73246] chop doesn't support utf8
     # the problem was UTF8_IS_START() didn't handle perl's extended UTF8
 
-    no warnings 'deprecated'; # This is above IV_MAX on 32 bit machines
-    my $utf = "\x{80000001}\x{80000000}";
+    my $utf = "\x{7fffffff}\x{7ffffffe}";
     my $result = chop($utf);
-    is($utf, "\x{80000001}", "chopping high 'unicode'- remnant");
-    is($result, "\x{80000000}", "chopping high 'unicode' - result");
-
-    SKIP: {
-        no warnings 'overflow'; # avoid compile-time warnings below on 32-bit architectures
-        use Config;
-        $Config{ivsize} >= 8
-	  or skip("this build can't handle very large characters", 2);
-        my $utf = "\x{7fffffffffffffff}\x{7ffffffffffffffe}";
-        my $result = chop $utf;
-        is($utf, "\x{7fffffffffffffff}", "chop even higher 'unicode' - remnant");
-        is($result, "\x{7ffffffffffffffe}", "chop even higher 'unicode' - result");
-    }
+    is($utf, "\x{7fffffff}", "chopping high 'unicode'- remnant");
+    is($result, "\x{7ffffffe}", "chopping high 'unicode' - result");
 }
 
 $/ = "\n";

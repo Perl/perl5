@@ -869,6 +869,9 @@ my $p = (isASCII) ? "\xe1\x80" : I8_to_native("\xE4\xA0");  # partial
 for my $restriction (sort keys %restriction_types) {
     use bytes;
 
+    next if $restriction eq 'fits_in_31_bits'
+         && !defined $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'};
+
     for my $use_flags ("", "_flags") {
 
         # For each restriction, we test it in both the is_foo_flags functions
