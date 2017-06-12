@@ -83,7 +83,7 @@
 
 #define _PERL_HASH_FUNC         "SBOX32_WITH_" __PERL_HASH_FUNC
 
-#define _PERL_HASH_SEED_BYTES   ( __PERL_HASH_SEED_BYTES + ( 3 * sizeof(U32) ) )
+#define _PERL_HASH_SEED_BYTES   ( __PERL_HASH_SEED_BYTES + (int)( 3 * sizeof(U32) ) )
 
 #define _PERL_HASH_STATE_BYTES  \
     ( __PERL_HASH_STATE_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
