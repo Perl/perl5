@@ -322,10 +322,12 @@ d_printf_format_null='undef'
 d_uselocale='undef'
 
 # https://rt.perl.org/Ticket/Display.html?id=131337
+# Reported in 11.0-CURRENT with g++-4.8.5:
+# If using g++, the Configure scan for dlopen() fails.
+# Easier for now to just to forcibly set it.
 case "$cc" in
 *g++*)
-  usedl='define'
-  dlsrc='dl_dlopen.xs'
+  d_dlopen='define'
   ;;
 esac
 
