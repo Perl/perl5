@@ -4530,6 +4530,13 @@ To (re)open C<STDOUT> or C<STDERR> as an in-memory file, close it first:
     open(STDOUT, ">", \$variable)
 	or die "Can't open STDOUT: $!";
 
+The scalars for in-memory files are treated as octet strings: unless
+the file is being opened with truncation the scalar may not contain
+any code points over 0xFF.
+
+Opening in-memory files I<can> fail for a variety of reasons.  As with
+any other C<open>, check the return value for success.
+
 See L<perliol> for detailed info on PerlIO.
 
 General examples:
