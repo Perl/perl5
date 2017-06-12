@@ -150,6 +150,7 @@ $label2files{static} = +{
     q{LINKTYPE => 'static'},
   ),
   "blib/arch/auto/share/dist/x-y/libwhatevs$MM->{LIB_EXT}" => 'hi there', # mimic what File::ShareDir can do
+  "blib/arch/auto/Alien/ROOT/root/lib/root/root$MM->{LIB_EXT}" => 'hi there', # mimic Alien::ROOT that installs a .a without extralibs.ld
 };
 
 $label2files{subdirs} = +{

@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.28';
+$VERSION = '7.30';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -2546,6 +2546,8 @@ $(MAKE_APERL_FILE) : static $(FIRST_MAKEFILE) pm_to_blib
 	}
 
 	return unless m/\Q$self->{LIB_EXT}\E$/;
+
+	return unless -f 'extralibs.ld'; # this checks is a "proper" XS installation
 
         # Skip perl's libraries.
         return if m/^libperl/ or m/^perl\Q$self->{LIB_EXT}\E$/;
