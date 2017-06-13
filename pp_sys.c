@@ -1554,6 +1554,8 @@ PP(pp_leavewrite)
     retop = cx->blk_sub.retop;
     CX_POP(cx);
 
+    EXTEND(SP, 1);
+
     if (is_return)
         /* XXX the semantics of doing 'return' in a format aren't documented.
          * Currently we ignore any args to 'return' and just return
