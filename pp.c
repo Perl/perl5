@@ -5682,8 +5682,11 @@ PP(pp_reverse)
 	SvUTF8_off(TARG);				/* decontaminate */
 	if (SP - MARK > 1)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
-	else {
-	    sv_setsv(TARG, SP > MARK ? *SP : DEFSV);
+	else if (SP > MARK)
+	    sv_setsv(TARG, *SP);
+        else {
+	    sv_setsv(TARG, DEFSV);
+            EXTEND(SP, 1);
 	}
 
 	up = SvPV_force(TARG, len);
