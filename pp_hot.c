@@ -3037,7 +3037,7 @@ PP(pp_iter)
         retsv = &PL_sv_no;
     }
     /* pp_enteriter should have pre-extended the stack */
-    assert(PL_stack_sp < PL_stack_max);
+    EXTEND_SKIP(PL_stack_sp, 1);
     *++PL_stack_sp =retsv;
 
     return PL_op->op_next;

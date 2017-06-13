@@ -2413,15 +2413,29 @@ Perl_sv_dump(pTHX_ SV *sv)
 int
 Perl_runops_debug(pTHX)
 {
+#ifdef DEBUGGING && !defined DEBUGGING_RE_ONLY
+    SSize_t orig_stack_hwm = PL_curstackinfo->si_stack_hwm;
+
+    PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
+#endif
+
     if (!PL_op) {
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
 	return 0;
     }
-
     DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
     do {
 #ifdef PERL_TRACE_OPS
         ++PL_op_exec_cnt[PL_op->op_type];
+#endif
+#ifdef DEBUGGING && !defined DEBUGGING_RE_ONLY
+        if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
+            Perl_croak_nocontext(
+                "panic: previous op failed to extend arg stack: "
+                "base=%p, sp=%p, hwm=%p\n",
+                    PL_stack_base, PL_stack_sp,
+                    PL_stack_base + PL_curstackinfo->si_stack_hwm);
+        PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
 #endif
 	if (PL_debug) {
             ENTER;
@@ -2452,6 +2466,9 @@ Perl_runops_debug(pTHX)
     DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
     PERL_ASYNC_CHECK();
 
+#ifdef DEBUGGING && !defined DEBUGGING_RE_ONLY
+    PL_curstackinfo->si_stack_hwm = orig_stack_hwm;
+#endif
     TAINT_NOT;
     return 0;
 }

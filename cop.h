@@ -994,6 +994,12 @@ struct stackinfo {
     I32			si_markoff;	/* offset where markstack begins for us.
 					 * currently used only with DEBUGGING,
 					 * but not #ifdef-ed for bincompat */
+#ifdef DEBUGGING && !defined DEBUGGING_RE_ONLY
+/* high water mark: for checking if the stack was correctly extended /
+ * tested for extension by each pp function */
+    SSize_t             si_stack_hwm;
+#endif
+
 };
 
 typedef struct stackinfo PERL_SI;
@@ -1007,6 +1013,12 @@ typedef struct stackinfo PERL_SI;
     PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
 #else
 #  define	SET_MARK_OFFSET NOOP
+#endif
+
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#  define PUSHSTACK_INIT_HWM(si) si->si_stack_hwm = 0
+#else
+#  define PUSHSTACK_INIT_HWM(si) NOOP
 #endif
 
 #define PUSHSTACKi(type) \
@@ -1024,6 +1036,7 @@ typedef struct stackinfo PERL_SI;
 	}								\
 	next->si_type = type;						\
 	next->si_cxix = -1;						\
+        PUSHSTACK_INIT_HWM(next);                                       \
 	AvFILLp(next->si_stack) = 0;					\
 	SWITCHSTACK(PL_curstack,next->si_stack);			\
 	PL_curstackinfo = next;						\

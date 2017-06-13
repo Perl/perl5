@@ -295,6 +295,20 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 =cut
 */
 
+/* EXTEND_HWM_SET: note the high-water-mark to which the stack has been
+ * requested to be extended (which is likely to be less than PL_stack_max)
+ */
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#  define EXTEND_HWM_SET(p, n)                      \
+        STMT_START {                                \
+            SSize_t ix = (p) - PL_stack_base + (n); \
+            if (ix > PL_curstackinfo->si_stack_hwm) \
+                PL_curstackinfo->si_stack_hwm = ix; \
+        } STMT_END
+#else
+#  define EXTEND_HWM_SET(p, n) NOOP
+#endif
+
 /* _EXTEND_SAFE_N(n): private helper macro for EXTEND().
  * Tests whether the value of n would be truncated when implicitly cast to
  * SSize_t as an arg to stack_grow(). If so, sets it to -1 instead to
@@ -306,6 +320,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
         (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
 
 #ifdef STRESS_REALLOC
+# define EXTEND_SKIP(p, n) EXTEND_HWM_SET(p, n)
+
 # define EXTEND(p,n)   STMT_START {                                     \
                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            PERL_UNUSED_VAR(sp);                         \
@@ -335,15 +351,32 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * this just gives a safe false positive
  */
 
-#  define _EXTEND_NEEDS_GROW(p,n) ( (n) < 0 || PL_stack_max - p < (n))
+#  define _EXTEND_NEEDS_GROW(p,n) ((n) < 0 || PL_stack_max - p < (n))
+
+
+/* EXTEND_SKIP(): used for where you would normally call EXTEND(), but
+ * you know for sure that a previous op will have already extended the
+ * stack sufficiently.  For example pp_enteriter ensures that that there
+ * is always at least 1 free slot, so pp_iter can return &PL_sv_yes/no
+ * without checking each time. Calling EXTEND_SKIP() defeats the HWM
+ * debugging mechanism which would otherwise whine
+ */
+
+#  define EXTEND_SKIP(p, n) STMT_START {                                \
+                                EXTEND_HWM_SET(p, n);                   \
+                                assert(!_EXTEND_NEEDS_GROW(p,n));       \
+                          } STMT_END
+
 
 #  define EXTEND(p,n)   STMT_START {                                    \
+                         EXTEND_HWM_SET(p, n);                          \
                          if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            PERL_UNUSED_VAR(sp);                         \
                          } } STMT_END
 /* Same thing, but update mark register too. */
 #  define MEXTEND(p,n)  STMT_START {                                    \
+                         EXTEND_HWM_SET(p, n);                          \
                          if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
                            const SSize_t markoff = mark - PL_stack_base;\
                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
@@ -351,6 +384,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                            PERL_UNUSED_VAR(sp);                         \
                          } } STMT_END
 #endif
+
 
 /* set TARG to the IV value i. If do_taint is false,
  * assume that PL_tainted can never be true */
