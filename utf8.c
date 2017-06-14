@@ -2072,9 +2072,9 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
     Newx(d, (*lenp) + 1, U8);
 
     converted_start = d;
-        while (s < send) {
-            U8 c = *s++;
-            if (! UTF8_IS_INVARIANT(c)) {
+    while (s < send) {
+        U8 c = *s++;
+        if (! UTF8_IS_INVARIANT(c)) {
 
             /* Then it is multi-byte encoded.  If the code point is above 0xFF,
              * have to stop now */
@@ -2089,11 +2089,11 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
                 }
             }
 
-                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
-                s++;
-            }
-            *d++ = c;
+            c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
+            s++;
         }
+        *d++ = c;
+    }
 
     /* Here, converted the whole of the input */
     *is_utf8p = FALSE;
