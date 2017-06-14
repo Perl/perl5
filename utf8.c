@@ -1913,8 +1913,8 @@ updates C<*lenp> to contain the new length.
 Returns zero on failure (leaving C<"s"> unchanged) setting C<*lenp> to -1.
 
 Upon successful return, the number of variants in the string can be computed by
-saving the value of C<*lenp> before the call, and subtracting the after-call
-value of C<*lenp> from it.
+having saved the value of C<*lenp> before the call, and subtracting the
+after-call value of C<*lenp> from it.
 
 If you need a copy of the string, see L</bytes_from_utf8>.
 
@@ -1987,11 +1987,11 @@ C<*lenp> are unchanged, and the return value is the original C<s>.
 
 Otherwise, C<*is_utf8p> is set to 0, and the return value is a pointer to a
 newly created string containing a downgraded copy of C<s>, and whose length is
-returned in C<*lenp>, updated.
+returned in C<*lenp>, updated.  The new string is C<NUL>-terminated.
 
 Upon successful return, the number of variants in the string can be computed by
-saving the value of C<*lenp> before the call, and subtracting the after-call
-value of C<*lenp> from it.
+having saved the value of C<*lenp> before the call, and subtracting the
+after-call value of C<*lenp> from it.
 
 =cut
 */
@@ -2057,7 +2057,7 @@ Returns a pointer to the newly-created string, and sets C<*lenp> to
 reflect the new length in bytes.
 
 Upon successful return, the number of variants in the string can be computed by
-saving the value of C<*lenp> before the call, and subtracting it from the
+having saved the value of C<*lenp> before the call, and subtracting it from the
 after-call value of C<*lenp>.
 
 A C<NUL> character will be written after the end of the string.
