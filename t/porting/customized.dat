@@ -1,8 +1,6 @@
 Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
 Encode cpan/Encode/Unicode/Unicode.pm 9749692c67f7d69083034de9184a93f070ab4799
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
-File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
-File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
 JSON::PP cpan/JSON-PP/bin/json_pp a7b8de6c201ef177ee82624ee4ca6a47cc1a3b4f
 JSON::PP cpan/JSON-PP/lib/JSON/PP.pm 86f697dae482106270fdd659b18c95a54af764ba
 JSON::PP cpan/JSON-PP/t/011_pc_expo.t e4c896d5f06ca380ddb6b4d6cd5714ea3003ada6

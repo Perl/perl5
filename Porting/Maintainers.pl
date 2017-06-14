@@ -494,14 +494,12 @@ use File::Glob qw(:case);
     },
 
     'File::Path' => {
-        'DISTRIBUTION' => 'RICHE/File-Path-2.12.tar.gz',
+        'DISTRIBUTION' => 'JKEENAN/File-Path-2.14.tar.gz',
         'FILES'        => q[cpan/File-Path],
         'EXCLUDED'     => [
             qw(t/Path-Class.t),
             qr{^xt/},
         ],
-        # https://github.com/rpcme/File-Path/pull/34
-        'CUSTOMIZED' => [ qw( lib/File/Path.pm t/Path_win32.t ) ],
     },
 
     'File::Temp' => {
