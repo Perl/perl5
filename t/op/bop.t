@@ -18,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 471;
+plan tests => 477;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -579,3 +579,10 @@ foreach my $op_info ([and => "&"], [or => "|"], [xor => "^"]) {
          "Use of code points above 0xFF as argument to 1's complement " .
          "(~) is not allowed";
 }
+
+is("abc" & "abc\x{100}", "abc", '"abc" & "abc\x{100}" works');
+is("abc" | "abc\x{100}", "abc\x{100}", '"abc" | "abc\x{100}" works');
+is("abc" ^ "abc\x{100}", "\0\0\0\x{100}", '"abc" ^ "abc\x{100}" works');
+is("abc\x{100}" & "abc", "abc", '"abc\x{100}" & "abc" works');
+is("abc\x{100}" | "abc", "abc\x{100}", '"abc\x{100}" | "abc" works');
+is("abc\x{100}" ^ "abc", "\0\0\0\x{100}", '"abc\x{100}" | "abc" works');
