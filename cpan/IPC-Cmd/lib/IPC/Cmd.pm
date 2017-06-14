@@ -18,7 +18,7 @@ BEGIN {
                         $HAVE_MONOTONIC
                     ];
 
-    $VERSION        = '0.96';
+    $VERSION        = '0.98';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -242,7 +242,7 @@ sub can_run {
     } else {
         for my $dir (
             File::Spec->path,
-            File::Spec->curdir
+            ( IS_WIN32 ? File::Spec->curdir : () )
         ) {
             next if ! $dir || ! -d $dir;
             my $abs = File::Spec->catfile( IS_WIN32 ? Win32::GetShortPathName( $dir ) : $dir, $command);
@@ -742,6 +742,29 @@ STDOUT from the executing program.
 Coderef of a subroutine to call when a portion of data is received on
 STDERR from the executing program.
 
+=item C<wait_loop_callback>
+
+Coderef of a subroutine to call inside of the main waiting loop
+(while C<run_forked> waits for the external to finish or fail).
+It is useful to stop running external process before it ends
+by itself, e.g.
+
+  my $r = run_forked("some external command", {
+	  'wait_loop_callback' => sub {
+          if (condition) {
+              kill(1, $$);
+          }
+	  },
+	  'terminate_on_signal' => 'HUP',
+	  });
+
+Combined with C<stdout_handler> and C<stderr_handler> allows terminating
+external command based on its output. Could also be used as a timer
+without engaging with L<alarm> (signals).
+
+Remember that this code could be called every millisecond (depending
+on the output which external command generates), so try to make it
+as lightweight as possible.
 
 =item C<discard_output>
 
@@ -1073,6 +1096,10 @@ sub run_forked {
           # another counter in such case, maybe later)
           #
           push @{$ready_fds}, $select->can_read(1/100) if $child_finished;
+        }
+
+        if ($opts->{'wait_loop_callback'} && ref($opts->{'wait_loop_callback'}) eq 'CODE') {
+          $opts->{'wait_loop_callback'}->();
         }
 
         Time::HiRes::usleep(1);
