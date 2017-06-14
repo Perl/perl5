@@ -2034,7 +2034,7 @@ unchanged.  Note that the new string may have length 0.
 Another way to look at it is, if C<*first_non_downgradable> is non-C<NULL> and
 C<*is_utf8p> is TRUE, this function starts at the beginning of C<"s"> and
 converts as many characters in it as possible stopping at the first one it
-finds one that can't be converted to non-UTF-8.  C<*first_non_downgradable> is
+finds that can't be converted to non-UTF-8.  C<*first_non_downgradable> is
 set to point to that.  The function returns the portion that could be converted
 in a newly created C<NUL>-terminated string, and C<*lenp> is set to its length,
 not including the terminating C<NUL>.  If the very first character in the
