@@ -239,11 +239,9 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 #ALL_STATIC	*= define
 
 #
-# set the install locations of the compiler include/libraries
-# Running VCVARS32.BAT is *required* when using Visual C.
-# Some versions of Visual C don't define MSVCDIR in the environment,
-# so you may have to set CCHOME explicitly (spaces in the path name should
-# not be quoted), for MSVC141 the value for %VCToolsInstallDir%
+# set the install location of the compiler
+# Running VCVARS32.BAT, VCVARSALL.BAT or similar is *required* when using
+# Visual C++.
 #
 
 #CCHOME		*= C:\MinGW
@@ -366,27 +364,20 @@ CCTYPE		:= MSVC$(MSVCVER)0
 .ENDIF
 .ENDIF
 
-
+# Versions of Visual C++ up to VC++ 7.1 define $(MSVCDir); versions since then
+# define $(VCINSTALLDIR) instead, but for VC++ 14.1 we need the subfolder given
+# by $(VCToolsInstallDir).
 .IF "$(CCHOME)" == ""
 .IF "$(CCTYPE)" == "GCC"
 CCHOME		*= C:\MinGW
+.ELIF "$(CCTYPE)" == "MSVC60" || \
+    "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+CCHOME		*= $(MSVCDir)
+.ELIF "$(CCTYPE)" == "MSVC141"
+CCHOME		*= $(VCToolsInstallDir)
 .ELSE
-CCHOME		*= $(MSVCDIR)
+CCHOME		*= $(VCINSTALLDIR)
 .ENDIF
-.ENDIF
-
-#
-# Following sets $Config{incpath} and $Config{libpth}
-#
-
-.IF "$(GCCCROSS)" == "define"
-CCINCDIR *= $(CCHOME)\x86_64-w64-mingw32\include
-CCLIBDIR *= $(CCHOME)\x86_64-w64-mingw32\lib
-CCDLLDIR *= $(CCLIBDIR)
-.ELSE
-CCINCDIR *= $(CCHOME)\include
-CCLIBDIR *= $(CCHOME)\lib
-CCDLLDIR *= $(CCHOME)\bin
 .ENDIF
 
 PROCESSOR_ARCHITECTURE *= x86
@@ -460,6 +451,33 @@ ARCHNAME	!:= $(ARCHNAME)-64int
 ARCHNAME	!:= $(ARCHNAME)-ld
 .ENDIF
 
+# Set the install location of the compiler headers/libraries.
+# These are saved into $Config{incpath} and $Config{libpth}.
+.IF "$(GCCCROSS)" == "define"
+CCINCDIR *= $(CCHOME)\x86_64-w64-mingw32\include
+CCLIBDIR *= $(CCHOME)\x86_64-w64-mingw32\lib
+.ELSE
+CCINCDIR *= $(CCHOME)\include
+.IF "$(CCTYPE)" == "MSVC141"
+.IF "$(WIN64)" == "define"
+CCLIBDIR *= $(CCHOME)\lib\x64
+.ELSE
+CCLIBDIR *= $(CCHOME)\lib\x86
+.ENDIF
+.ELSE
+CCLIBDIR *= $(CCHOME)\lib
+.ENDIF
+.ENDIF
+
+# Set DLL location for GCC compilers.
+.IF "$(CCTYPE)" == "GCC"
+.IF "$(GCCCROSS)" == "define"
+CCDLLDIR *= $(CCLIBDIR)
+.ELSE
+CCDLLDIR *= $(CCHOME)\bin
+.ENDIF
+.ENDIF
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -470,7 +488,6 @@ CPANDIR		= ..\cpan
 PODDIR		= ..\pod
 HTMLDIR		= .\html
 
-#
 INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
 INST_BIN	= $(INST_SCRIPT)$(INST_ARCH)
 INST_LIB	= $(INST_TOP)$(INST_VER)\lib
