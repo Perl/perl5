@@ -6,8 +6,6 @@ use Getopt::Long;
 
 use JSON::PP ();
 
-my $VERSION = '1.00';
-
 # imported from JSON-XS/bin/json_xs
 
 my %allow_json_opt = map { $_ => 1 } qw(
@@ -22,11 +20,11 @@ GetOptions(
    't=s' => \( my $opt_to = 'json' ),
    'json_opt=s' => \( my $json_opt = 'pretty' ),
    'V'   => \( my $version ),
-) or die "Usage: $0 [-v] -f from_format [-t to_format]\n";
+) or die "Usage: $0 [-V] [-f from_format] [-t to_format] [-json_opt options]\n";
 
 
 if ( $version ) {
-    print "$VERSION\n";
+    print "$JSON::PP::VERSION\n";
     exit;
 }
 
@@ -58,6 +56,11 @@ my %T = (
    },
    'dumper' => sub {
       require Data::Dumper;
+      local $Data::Dumper::Terse     = 1;
+      local $Data::Dumper::Indent    = 1;
+      local $Data::Dumper::Useqq     = 1;
+      local $Data::Dumper::Quotekeys = 0;
+      local $Data::Dumper::Sortkeys  = 1;
       Data::Dumper::Dumper($_)
    },
 );

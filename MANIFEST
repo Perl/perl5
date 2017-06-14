@@ -1584,7 +1584,12 @@ cpan/JSON-PP/t/113_overloaded_eq.t
 cpan/JSON-PP/t/114_decode_prefix.t
 cpan/JSON-PP/t/115_tie_ixhash.t
 cpan/JSON-PP/t/116_incr_parse_fixed.t
+cpan/JSON-PP/t/117_numbers.t
 cpan/JSON-PP/t/_unicode_handling.pm
+cpan/JSON-PP/t/gh_28_json_test_suite.t
+cpan/JSON-PP/t/gh_29_trailing_false_value.t
+cpan/JSON-PP/t/rt_116998_wrong_character_offset.t
+cpan/JSON-PP/t/rt_90071_incr_parse.t
 cpan/JSON-PP/t/zero-mojibake.t
 cpan/libnet/lib/Net/Cmd.pm
 cpan/libnet/lib/Net/Config.pm

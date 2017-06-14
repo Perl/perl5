@@ -1,5 +1,5 @@
-# copied over from JSON::PP::PC and modified to use JSON::PP
-# copied over from JSON::PP::XS and modified to use JSON::PP
+# copied over from JSON::PC and modified to use JSON::PP
+# copied over from JSON::XS and modified to use JSON::PP
 
 use Test::More;
 use strict;
@@ -22,8 +22,10 @@ is($js,'[-12.34]', 'digit -12.34');
 $js  = q|[-1.234e5]|;
 $obj = $pc->decode($js);
 is($obj->[0], -123400, 'digit -1.234e5');
+{ #SKIP_IF_CPANEL
 $js = $pc->encode($obj);
 is($js,'[-123400]', 'digit -1.234e5');
+}
 
 $js  = q|[1.23E-4]|;
 $obj = $pc->decode($js);

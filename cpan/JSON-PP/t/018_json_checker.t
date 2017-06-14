@@ -1,9 +1,7 @@
-#! perl
-
 # use the testsuite from http://www.json.org/JSON_checker/
 # except for fail18.json, as we do not support a depth of 20 (but 16 and 32).
 
-# copied over from JSON::PP::XS and modified to use JSON::PP
+# copied over from JSON::XS and modified to use JSON::PP
 
 use strict;
 #no warnings;
@@ -27,6 +25,9 @@ for (;;) {
       or last;
    $/ = "\n";
    my $name = <DATA>;
+   if ($vax_float && $name =~ /pass1.json/) {
+       $test =~ s/\b23456789012E66\b/23456789012E20/;
+   }
    if (my $perl = eval { $json->decode ($test) }) {
       ok ($name =~ /^pass/, $name);
 #print $json->encode ($perl), "\n";
@@ -120,7 +121,7 @@ break"]
         "real": -9876.543210,
         "e": 0.123456789e-12,
         "E": 1.234567890E+34,
-        "":  23456789012E20,
+        "":  23456789012E66,
         "zero": 0,
         "one": 1,
         "space": " ",

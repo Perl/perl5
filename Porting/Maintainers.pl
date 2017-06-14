@@ -646,14 +646,8 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'MAKAMAKA/JSON-PP-2.27400.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-2.94.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
-        'CUSTOMIZED'   => [
-            'bin/json_pp',    # CVE-2016-1238
-            'lib/JSON/PP.pm', # CVE-2016-1238, CPAN RT 118469
-            't/011_pc_expo.t',      # CPAN RT 118469
-            't/018_json_checker.t', # CPAN RT 118469
-        ],
     },
 
     'lib' => {
