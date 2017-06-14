@@ -100,6 +100,12 @@ Code points over 0xFF do not make sense for bitwise operators.
 
 This has been deprecated since Perl 5.22 and a no-op since Perl 5.26.
 
+=head2 Backslash no longer escapes colon in PATH for the -S switch
+
+Previously the C<-S> switch incorrectly treated backslash ("\") as an
+escape for colon when traversing the C<PATH> environment variable.
+[perl #129183]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
