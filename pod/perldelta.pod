@@ -346,6 +346,11 @@ made:
 Testing of the XS-APItest directory is now done in parallel, where
 applicable.
 
+=item *
+
+Perl now includes a default F<.travis.yml> file for Travis CI testing
+on github mirrors.  [perl #123981]
+
 =back
 
 =head1 Platform Support
