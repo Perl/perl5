@@ -1049,6 +1049,8 @@ is a valid UTF-8 character.
           : _is_utf8_char_helper(s, e, 0))
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
+#define bytes_from_utf8(s, lenp, is_utf8p)                                  \
+                            bytes_from_utf8_loc(s, lenp, is_utf8p, 0)
 
 /*
 
