@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "2.24";
+$VERSION                = "2.26";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -1756,7 +1756,8 @@ Example usage:
 
 sub iter {
     my $class       = shift;
-    my $filename    = shift or return;
+    my $filename    = shift;
+    return unless defined $filename;
     my $compressed  = shift || 0;
     my $opts        = shift || {};
 
