@@ -436,7 +436,7 @@ my @tests = (
         $::UTF8_WARN_ABOVE_31_BIT,
         $::UTF8_DISALLOW_ABOVE_31_BIT,
         $::UTF8_GOT_ABOVE_31_BIT,
-        'utf8', 0,
+        'utf8', -1,
         (! isASCII || $::is64bit) ? $::max_bytes : 7,
         (isASCII || $::is64bit) ? 2 : 8,
         qr/overflows/
@@ -451,7 +451,7 @@ if (! $::is64bit) {
                 "\xFE\x84\x80\x80\x80\x80\x80",
                 $::UTF8_WARN_ABOVE_31_BIT, $::UTF8_DISALLOW_ABOVE_31_BIT,
                 $::UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x100000000,
+                'utf8', -1,
                 7, 1,
                 qr/and( is)? not portable/
             ];
@@ -545,7 +545,7 @@ foreach my $test (@tests) {
        ) = @$test;
 
     my $length = length $bytes;
-    my $will_overflow = $testname =~ /overflow/ ? 'overflow' : "";
+    my $will_overflow = $allowed_uv < 0;
 
     {
         use warnings;
@@ -620,7 +620,7 @@ foreach my $test (@tests) {
             # bit.  It is really testing other things than the partial
             # character tests, for which other tests in this file are
             # sufficient
-            last if $testname =~ /overflow/;
+            last if $will_overflow;
 
             foreach my $disallow_flag (0, $disallow_flags) {
                 my $partial = substr($bytes, 0, $j);
