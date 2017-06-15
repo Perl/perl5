@@ -385,6 +385,58 @@ else {
     }
 }
 
+sub flags_to_text($$)
+{
+    my ($flags, $flags_to_text_ref) = @_;
+
+    # Returns a string containing a mnemonic representation of the bits that
+    # are set in the $flags.  These are assumed to be flag bits.  The return
+    # looks like "FOO|BAR|BAZ".  The second parameter is a reference to an
+    # array that gives the textual representation of all the possible flags.
+    # Element 0 is the text for the bit 0 flag; element 1 for bit 1; ....  If
+    # no bits at all are set the string "0" is returned;
+
+    my @flag_text;
+    my $shift = 0;
+
+    return "0" if $flags == 0;
+
+    while ($flags) {
+        #diag sprintf "%x", $flags;
+        if ($flags & 1) {
+            push @flag_text, $flags_to_text_ref->[$shift];
+        }
+        $shift++;
+        $flags >>= 1;
+    }
+
+    return join "|", @flag_text;
+}
+
+# Possible flag returns from utf8n_to_uvchr_error().  These should have G_,
+# instead of A_, D_, but the prefixes will be used in a a later commit, so
+# minimize churn by having them here.
+my @utf8n_flags_to_text =  ( qw(
+        A_EMPTY
+        A_CONTINUATION
+        A_NON_CONTINUATION
+        A_SHORT
+        A_LONG
+        A_LONG_AND_ITS_VALUE
+        PLACEHOLDER
+        A_OVERFLOW
+        D_SURROGATE
+        W_SURROGATE
+        D_NONCHAR
+        W_NONCHAR
+        D_SUPER
+        W_SUPER
+        D_ABOVE_31_BIT
+        W_ABOVE_31_BIT
+        CHECK_ONLY
+        NO_CONFIDENCE_IN_CURLEN_
+    ) );
+
 # This test is split into this number of files.
 my $num_test_files = $ENV{TEST_JOBS} || 1;
 $num_test_files = 10 if $num_test_files > 10;
@@ -723,7 +775,14 @@ foreach my $test (@tests) {
                           or diag $call;
                     }
                     else {
-                        is($returned_flags, 0, "Got no other error flag");
+                        is($returned_flags, 0, "Got no other error flag")
+                        or
+
+                        # We strip off any prefixes from the flag names
+                        diag "The unexpected flags were: "
+                           . (flags_to_text($returned_flags,
+                                            \@utf8n_flags_to_text)
+                             =~ s/ \b [A-Z] _ //xgr);
                     }
 
                     if (@malformations) {
