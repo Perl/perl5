@@ -504,7 +504,7 @@ switches, followed by the default Perl library, probably
 F</usr/local/lib/perl>, followed by ".", to represent the current
 directory.  ("." will not be appended if taint checks are enabled,
 either by C<-T> or by C<-t>, or if configured not to do so by the
-C<-Ddefault_inc_excludes_dot> compile time option.)  If you need to
+C<-Ddefault_inc_excludes_dot> compile-time option.)  If you need to
 modify this at runtime, you should use the C<use lib> pragma to get
 the machine-dependent library properly loaded also:
 
@@ -1918,7 +1918,7 @@ X<$@> X<$EVAL_ERROR>
 The Perl error from the last C<eval> operator, i.e. the last exception that
 was caught.  For C<eval BLOCK>, this is either a runtime error message or the
 string or reference C<die> was called with.  The C<eval STRING> form also
-catches syntax errors and other compile time exceptions.
+catches syntax errors and other compile-time exceptions.
 
 If no error occurs, C<eval> sets C<$@> to the empty string.
 
@@ -2120,7 +2120,7 @@ executes within BEGIN blocks is free to change the value of C<$^H>.
 
 During run-time this variable is just like any other, and changes made during
 compilation are not directly visible via accessing the variable directly,
-instead you can find out at run time what value was in effect at a given point
+instead you can find out at run-time what value was in effect at a given point
 in the code by accessing item 8 of the return from caller:
 
   sub hint_bits { (caller(0))[8] }
@@ -2161,8 +2161,8 @@ it useful for implementation of lexically scoped pragmas.  See
 L<perlpragma>.
 
 Similar to $^H this variable is part of the lexical state of the compilation
-process, and changes made to it at compile time are not visible later on
-at a run time. Instead you can access those values by accessing the 10th
+process, and changes made to it at compile-time are not visible later on
+at run-time. Instead you can access those values by accessing the 10th
 slot of the return of caller:
 
   sub hints_hash { (caller(0))[10] }
@@ -2170,7 +2170,7 @@ slot of the return of caller:
 During compilation this hash may be used to store complex structures, such
 as code references, however once compilation is completed these structures
 will be flattened to a representation that means that only simple values can
-be accommodated and retrieved at run time via C<caller()> as above.
+be accommodated and retrieved at run-time via C<caller()> as above.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.
@@ -2178,7 +2178,7 @@ A module should use only keys that begin with the module's name (the
 name of its main package) and a "/" character.  For example, a module
 C<Foo::Bar> should use keys such as C<Foo::Bar/baz>.
 
-During run time C<%^H> is essentially the same as any other hash, and any
+During run-time C<%^H> is essentially the same as any other hash, and any
 changes made to it during the compilation phase are not visible.
 
 This variable was added in Perl v5.6.0.
