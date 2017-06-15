@@ -197,7 +197,7 @@ test_freeent(freeent_function *f) {
 
     i = 0;
     do {
-	mPUSHu(results[i]);
+	mXPUSHu(results[i]);
     } while (++i < (int)(sizeof(results)/sizeof(results[0])));
 
     /* Goodbye to our extra reference.  */
