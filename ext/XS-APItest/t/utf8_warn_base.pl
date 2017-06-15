@@ -44,219 +44,177 @@ sub nonportable_regex ($) {
 # Now test the cases where a legal code point is generated, but may or may not
 # be allowed/warned on.
 my @tests = (
-     # ($testname, $bytes, $disallow_flags, $controlling_warning_category,
+     # ($testname, $bytes, $controlling_warning_category,
      #  $allowed_uv, $needed_to_discern_len )
     [ "lowest surrogate",
         (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
-        $::UTF8_DISALLOW_SURROGATE,
         'surrogate', 0xD800,
     ],
     [ "a middle surrogate",
         (isASCII) ? "\xed\xa4\x8d" : I8_to_native("\xf1\xb6\xa8\xad"),
-        $::UTF8_DISALLOW_SURROGATE,
         'surrogate', 0xD90D,
     ],
     [ "highest surrogate",
         (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
-        $::UTF8_DISALLOW_SURROGATE,
         'surrogate', 0xDFFF,
     ],
     [ "first non_unicode",
         (isASCII) ? "\xf4\x90\x80\x80" : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
-        $::UTF8_DISALLOW_SUPER,
         'non_unicode', 0x110000,
         2,
     ],
     [ "non_unicode whose first byte tells that",
         (isASCII) ? "\xf5\x80\x80\x80" : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
-        $::UTF8_DISALLOW_SUPER,
         'non_unicode',
         (isASCII) ? 0x140000 : 0x200000,
         1,
     ],
     [ "first of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFDD0,
     ],
     [ "a mid non-character code point of the 32 consecutive ones",
         (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFDE0,
     ],
     [ "final of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFDEF,
     ],
     [ "non-character code point U+FFFE",
         (isASCII) ? "\xef\xbf\xbe" : I8_to_native("\xf1\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFFFE,
     ],
     [ "non-character code point U+FFFF",
         (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFFFF,
     ],
     [ "non-character code point U+1FFFE",
         (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x1FFFE,
     ],
     [ "non-character code point U+1FFFF",
         (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x1FFFF,
     ],
     [ "non-character code point U+2FFFE",
         (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x2FFFE,
     ],
     [ "non-character code point U+2FFFF",
         (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x2FFFF,
     ],
     [ "non-character code point U+3FFFE",
         (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x3FFFE,
     ],
     [ "non-character code point U+3FFFF",
         (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x3FFFF,
     ],
     [ "non-character code point U+4FFFE",
         (isASCII) ? "\xf1\x8f\xbf\xbe" : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x4FFFE,
     ],
     [ "non-character code point U+4FFFF",
         (isASCII) ? "\xf1\x8f\xbf\xbf" : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x4FFFF,
     ],
     [ "non-character code point U+5FFFE",
         (isASCII) ? "\xf1\x9f\xbf\xbe" : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x5FFFE,
     ],
     [ "non-character code point U+5FFFF",
         (isASCII) ? "\xf1\x9f\xbf\xbf" : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x5FFFF,
     ],
     [ "non-character code point U+6FFFE",
         (isASCII) ? "\xf1\xaf\xbf\xbe" : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x6FFFE,
     ],
     [ "non-character code point U+6FFFF",
         (isASCII) ? "\xf1\xaf\xbf\xbf" : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x6FFFF,
     ],
     [ "non-character code point U+7FFFE",
         (isASCII) ? "\xf1\xbf\xbf\xbe" : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x7FFFE,
     ],
     [ "non-character code point U+7FFFF",
         (isASCII) ? "\xf1\xbf\xbf\xbf" : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x7FFFF,
     ],
     [ "non-character code point U+8FFFE",
         (isASCII) ? "\xf2\x8f\xbf\xbe" : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x8FFFE,
     ],
     [ "non-character code point U+8FFFF",
         (isASCII) ? "\xf2\x8f\xbf\xbf" : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x8FFFF,
     ],
     [ "non-character code point U+9FFFE",
         (isASCII) ? "\xf2\x9f\xbf\xbe" : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x9FFFE,
     ],
     [ "non-character code point U+9FFFF",
         (isASCII) ? "\xf2\x9f\xbf\xbf" : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x9FFFF,
     ],
     [ "non-character code point U+AFFFE",
         (isASCII) ? "\xf2\xaf\xbf\xbe" : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xAFFFE,
     ],
     [ "non-character code point U+AFFFF",
         (isASCII) ? "\xf2\xaf\xbf\xbf" : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xAFFFF,
     ],
     [ "non-character code point U+BFFFE",
         (isASCII) ? "\xf2\xbf\xbf\xbe" : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xBFFFE,
     ],
     [ "non-character code point U+BFFFF",
         (isASCII) ? "\xf2\xbf\xbf\xbf" : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xBFFFF,
     ],
     [ "non-character code point U+CFFFE",
         (isASCII) ? "\xf3\x8f\xbf\xbe" : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xCFFFE,
     ],
     [ "non-character code point U+CFFFF",
         (isASCII) ? "\xf3\x8f\xbf\xbf" : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xCFFFF,
     ],
     [ "non-character code point U+DFFFE",
         (isASCII) ? "\xf3\x9f\xbf\xbe" : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xDFFFE,
     ],
     [ "non-character code point U+DFFFF",
         (isASCII) ? "\xf3\x9f\xbf\xbf" : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xDFFFF,
     ],
     [ "non-character code point U+EFFFE",
         (isASCII) ? "\xf3\xaf\xbf\xbe" : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xEFFFE,
     ],
     [ "non-character code point U+EFFFF",
         (isASCII) ? "\xf3\xaf\xbf\xbf" : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xEFFFF,
     ],
     [ "non-character code point U+FFFFE",
         (isASCII) ? "\xf3\xbf\xbf\xbe" : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFFFFE,
     ],
     [ "non-character code point U+FFFFF",
         (isASCII) ? "\xf3\xbf\xbf\xbf" : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0xFFFFF,
     ],
     [ "non-character code point U+10FFFE",
         (isASCII) ? "\xf4\x8f\xbf\xbe" : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x10FFFE,
     ],
     [ "non-character code point U+10FFFF",
         (isASCII) ? "\xf4\x8f\xbf\xbf" : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_NONCHAR,
         'nonchar', 0x10FFFF,
     ],
     [ "requires at least 32 bits",
@@ -266,7 +224,6 @@ my @tests = (
             "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         # This code point is chosen so that it is representable in a UV on
         # 32-bit machines
-        $::UTF8_DISALLOW_ABOVE_31_BIT,
         'utf8', 0x80000000,
         (isASCII) ? 1 : 8,
     ],
@@ -275,7 +232,6 @@ my @tests = (
          ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
          : I8_to_native(
             "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
-        $::UTF8_DISALLOW_ABOVE_31_BIT,
         'utf8', 0xFFFFFFFF,
         (isASCII) ? 1 : 8,
     ],
@@ -285,7 +241,6 @@ my @tests = (
          ? "\xfe\x82\x80\x80\x80\x80\x80"
          : I8_to_native(
            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-        $::UTF8_DISALLOW_SUPER,
         'utf8', 0x80000000,
         1,
     ],
@@ -307,7 +262,6 @@ my @tests = (
            ?    "\xfe\x86\x80\x80\x80\x80\x80"
            : I8_to_native(
                 "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
-        $::UTF8_DISALLOW_ABOVE_31_BIT,
         'utf8', -1,
         (isASCII || $::is64bit) ? 2 : 8,
     ],
@@ -319,7 +273,6 @@ if (! $::is64bit) {
         push @tests,
             [ "Lowest 33 bit code point: overflow",
                 "\xFE\x84\x80\x80\x80\x80\x80",
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', -1,
                 1,
             ];
@@ -333,7 +286,6 @@ else {
             ?       "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
             : I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-            $::UTF8_DISALLOW_ABOVE_31_BIT,
             'utf8', 0x1000000000,
             (isASCII) ? 1 : 7,
         ];
@@ -343,42 +295,36 @@ else {
             [ "requires at least 32 bits",
                 I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x800000000,
                 7,
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x10000000000,
                 6,
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
                     "\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x200000000000,
                 5,
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
                     "\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x4000000000000,
                 4,
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
                     "\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x80000000000000,
                 3,
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
                     "\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x1000000000000000,
                 2,
             ];
@@ -493,7 +439,7 @@ foreach my $test (@tests) {
     $test_count++;
     next if $test_count % $num_test_files != $::TEST_CHUNK;
 
-    my ($testname, $bytes, $disallow_flags,
+    my ($testname, $bytes,
         $controlling_warning_category, $allowed_uv, $needed_to_discern_len
        ) = @$test;
 
@@ -502,32 +448,48 @@ foreach my $test (@tests) {
 
     my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
 
-    # The convention is that the got flag is the same value as the disallow
-    # one, and the warn flag is the next bit over.  If this were violated, the
-    # tests here should start failing.  We could do an eval under no strict to
-    # be sure.
-    my $expected_error_flags = $disallow_flags;
-    my $warn_flags = $disallow_flags << 1;
+    my $utf8n_flag_to_warn;
+    my $utf8n_flag_to_disallow;
+    my $uvchr_flag_to_warn;
+    my $uvchr_flag_to_disallow;
 
     my $message;
-    if ($allowed_uv > 0x7FFFFFFF) {
-        $message = nonportable_regex($allowed_uv);
-    }
-    elsif ($allowed_uv > 0x10FFFF) {
-        $message = qr/(not Unicode|for a non-Unicode code point).* may not be portable/;
+    if ($will_overflow || $allowed_uv > 0x10FFFF) {
+
+        $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
+        $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SUPER;
+        $uvchr_flag_to_warn     = $::UNICODE_WARN_SUPER;
+        $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SUPER;;
+
+        if ($will_overflow) {
+            $message = qr/overflows/;
+        }
+        elsif ($allowed_uv > 0x7FFFFFFF) {
+            $message = nonportable_regex($allowed_uv);
+        }
+        else  {
+            $message = qr/(not Unicode|for a non-Unicode code point).* may not be portable/;
+        }
     }
     elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
         $message = qr/surrogate/;
         $needed_to_discern_len = 2 unless defined $needed_to_discern_len;
+
+        $utf8n_flag_to_warn     = $::UTF8_WARN_SURROGATE;
+        $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SURROGATE;
+        $uvchr_flag_to_warn     = $::UNICODE_WARN_SURROGATE;
+        $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SURROGATE;;
     }
     elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
            || ($allowed_uv & 0xFFFE) == 0xFFFE)
     {
         $message = qr/Unicode non-character.*is not recommended for open interchange/;
         $needed_to_discern_len = $length unless defined $needed_to_discern_len;
-    }
-    elsif ($will_overflow) {
-        $message = qr/overflows/;
+
+        $utf8n_flag_to_warn     = $::UTF8_WARN_NONCHAR;
+        $utf8n_flag_to_disallow = $::UTF8_DISALLOW_NONCHAR;
+        $uvchr_flag_to_warn     = $::UNICODE_WARN_NONCHAR;
+        $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_NONCHAR;;
     }
     else {
         die "Can't figure out what type of warning to test for $testname"
@@ -535,6 +497,14 @@ foreach my $test (@tests) {
 
     die 'Didn\'t set $needed_to_discern_len for ' . $testname
                                         unless defined $needed_to_discern_len;
+    my $disallow_flags = $utf8n_flag_to_disallow;
+    my $warn_flags = $disallow_flags << 1;
+
+    # The convention is that the got flag is the same value as the disallow
+    # one, and the warn flag is the next bit over.  If this were violated, the
+    # tests here should start failing.  We could do an eval under no strict to
+    # be sure.
+    my $expected_error_flags = $disallow_flags;
 
     {
         use warnings;
@@ -934,51 +904,10 @@ foreach my $test (@tests) {
                     my $uvchr_warn_flag = 0;
                     my $uvchr_disallow_flag = 0;
                     if ($warn_flag) {
-                        if ($warn_flag == $::UTF8_WARN_SURROGATE) {
-                            $uvchr_warn_flag = $::UNICODE_WARN_SURROGATE
-                        }
-                        elsif ($warn_flag == $::UTF8_WARN_NONCHAR) {
-                            $uvchr_warn_flag = $::UNICODE_WARN_NONCHAR
-                        }
-                        elsif ($warn_flag == $::UTF8_WARN_SUPER) {
-                            $uvchr_warn_flag = $::UNICODE_WARN_SUPER
-                        }
-                        elsif ($warn_flag == $::UTF8_WARN_ABOVE_31_BIT) {
-                            $uvchr_warn_flag
-                                        = $::UNICODE_WARN_ABOVE_31_BIT;
-                        }
-                        else {
-                            fail(sprintf "Unexpected warn flag: %x",
-                                $warn_flag);
-                            next;
-                        }
+                        $uvchr_warn_flag = $uvchr_flag_to_warn;
                     }
                     if ($disallow_flag) {
-                        if ($disallow_flag == $::UTF8_DISALLOW_SURROGATE)
-                        {
-                            $uvchr_disallow_flag
-                                        = $::UNICODE_DISALLOW_SURROGATE;
-                        }
-                        elsif ($disallow_flag == $::UTF8_DISALLOW_NONCHAR)
-                        {
-                            $uvchr_disallow_flag
-                                        = $::UNICODE_DISALLOW_NONCHAR;
-                        }
-                        elsif ($disallow_flag == $::UTF8_DISALLOW_SUPER) {
-                            $uvchr_disallow_flag
-                                        = $::UNICODE_DISALLOW_SUPER;
-                        }
-                        elsif ($disallow_flag
-                                        == $::UTF8_DISALLOW_ABOVE_31_BIT)
-                        {
-                            $uvchr_disallow_flag =
-                                        $::UNICODE_DISALLOW_ABOVE_31_BIT;
-                        }
-                        else {
-                            fail(sprintf "Unexpected disallow flag: %x",
-                                $disallow_flag);
-                            next;
-                        }
+                        $uvchr_disallow_flag = $uvchr_flag_to_disallow;
                     }
 
                     $disallowed = $uvchr_disallow_flag;
