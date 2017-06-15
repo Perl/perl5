@@ -500,6 +500,8 @@ foreach my $test (@tests) {
     my $length = length $bytes;
     my $will_overflow = $allowed_uv < 0;
 
+    my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
+
     # The convention is that the got flag is the same value as the disallow
     # one, and the warn flag is the next bit over.  If this were violated, the
     # tests here should start failing.  We could do an eval under no strict to
@@ -786,7 +788,7 @@ foreach my $test (@tests) {
                     else {
                         is($ret_ref->[0], $expected_uv,
                                 "$this_name: Returns expected uv: "
-                                . sprintf("0x%04X", $expected_uv))
+                                . $uv_string)
                           or diag "Call was: " . utf8n_display_call($eval_text);
                     }
                     is($ret_ref->[1], $this_expected_len,
