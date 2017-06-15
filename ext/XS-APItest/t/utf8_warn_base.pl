@@ -437,6 +437,32 @@ my @utf8n_flags_to_text =  ( qw(
         NO_CONFIDENCE_IN_CURLEN_
     ) );
 
+sub uvchr_display_call($)
+{
+    # Converts an eval string that calls test_uvchr_to_utf8 into a more human
+    # readable form, and returns it.  The return will look something like:
+    #   test_uvchr_to_utf8n_flags($uv, $flags)
+    #diag $_[0];
+
+    my @flags_to_text =  ( qw(
+            W_SURROGATE
+            W_NONCHAR
+            W_SUPER
+            W_ABOVE_31_BIT
+            D_SURROGATE
+            D_NONCHAR
+            D_SUPER
+            D_ABOVE_31_BIT
+       ) );
+
+    $_[0] =~ / ^ ( [^(]* \( ) ( \d+ ) , \s* ( \d+ ) \) $ /x;
+    my $text = $1;
+    my $cp = sprintf "%X", $2;
+    my $flags = $3;
+
+    return "${text}0x$cp, " . flags_to_text($flags, \@flags_to_text) . ')';
+}
+
 # This test is split into this number of files.
 my $num_test_files = $ENV{TEST_JOBS} || 1;
 $num_test_files = 10 if $num_test_files > 10;
@@ -943,30 +969,24 @@ foreach my $test (@tests) {
 
                     undef @warnings_gotten;
                     my $ret;
-                    my $warn_flag = sprintf "0x%x", $uvchr_warn_flag;
-                    my $disallow_flag = sprintf "0x%x",
-                                                $uvchr_disallow_flag;
-                    $call = sprintf("    Call was: $eval_warn; \$ret"
-                                . " = test_uvchr_to_utf8_flags("
-                                . " 0x%x, $warn_flag|$disallow_flag)",
-                                $allowed_uv);
+                    my $this_flags = $uvchr_warn_flag | $uvchr_disallow_flag;
                     $eval_text = "$eval_warn; \$ret ="
                             . " test_uvchr_to_utf8_flags("
-                            . "$allowed_uv, $warn_flag|"
-                            . "$disallow_flag)";
+                            . "$allowed_uv, $this_flags)";
                     eval "$eval_text";
                     if (! ok ("$@ eq ''", "$this_name: eval succeeded"))
                     {
-                        diag "\$!='$!'; eval'd=\"$eval_text\"";
+                        diag "\$@='$@'; call was: "
+                           . uvchr_display_call($eval_text);
                         next;
                     }
                     if ($disallowed) {
                         is($ret, undef, "$this_name: Returns undef")
-                          or diag $call;
+                          or diag "Call was: " . uvchr_display_call($eval_text);
                     }
                     else {
-                        is($ret, $bytes, "$this_name: Returns expected string")
-                          or diag $call;
+                        is($ret, $this_bytes, "$this_name: Returns expected string")
+                          or diag "Call was: " . uvchr_display_call($eval_text);
                     }
                     if (! $do_warning
                         && ($trial_warning_category eq 'utf8' || $trial_warning_category eq $controlling_warning_category))
@@ -974,7 +994,7 @@ foreach my $test (@tests) {
                         if (!is(scalar @warnings_gotten, 0,
                                 "$this_name: No warnings generated"))
                         {
-                            diag $call;
+                            diag "Call was: " . uvchr_display_call($eval_text);
                             output_warnings(@warnings_gotten);
                         }
                     }
@@ -987,10 +1007,11 @@ foreach my $test (@tests) {
                         {
                             like($warnings_gotten[0], $message,
                                     "$this_name: Got expected warning")
-                                or diag $call;
+                                or diag "Call was: "
+                                      . uvchr_display_call($eval_text);
                         }
                         else {
-                            diag $call;
+                            diag "Call was: " . uvchr_display_call($eval_text);
                             output_warnings(@warnings_gotten)
                                                 if scalar @warnings_gotten;
                         }
