@@ -860,7 +860,7 @@ sub unlink_all {
 	if( -f $file ){
 	    _print_stderr "# Couldn't unlink '$file': $!\n";
 	}else{
-	    ++$count;
+	    $count = $count + 1; # don't use ++
 	}
     }
     $count;
@@ -1141,7 +1141,7 @@ sub setup_multiple_progs {
         my $found;
         while (<$fh>) {
             if (/^__END__/) {
-                ++$found;
+                $found = $found + 1; # don't use ++
                 last;
             }
         }
