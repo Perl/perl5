@@ -15,7 +15,7 @@
 
 use strict;
 $^W = 1;
-require "parts/ppptools.pl";
+require "./parts/ppptools.pl";
 
 my %SECTION = (
   xshead => { code => '', header => "/* ---- code from __FILE__ ---- */" },
