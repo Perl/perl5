@@ -2101,13 +2101,15 @@ This variable was added in Perl 5.14.0.
 =item $^H
 X<$^H>
 
-WARNING: This variable is strictly for
-internal use only.  Its availability,
+WARNING: This variable is strictly for internal use only.  Its availability,
 behavior, and contents are subject to change without notice.
 
-This variable contains compile-time hints for the Perl interpreter.  At the
-end of compilation of a BLOCK the value of this variable is restored to the
-value when the interpreter started to compile the BLOCK.
+This variable is part of the lexical state of the compilation process
+and contains compile-time hints for the Perl interpreter. At the end of
+compilation of a block the value of this variable is restored to the value
+when the interpreter started to compile the block.  This behavior provides
+the semantic of lexical scoping, and is used in, for instance,
+the C<use strict> pragma.
 
 When perl begins to parse any block construct that provides a lexical scope
 (e.g., eval body, required file, subroutine body, loop body, or conditional
@@ -2116,8 +2118,12 @@ When the compilation of the block is completed, it regains the saved value.
 Between the points where its value is saved and restored, code that
 executes within BEGIN blocks is free to change the value of C<$^H>.
 
-This behavior provides the semantic of lexical scoping, and is used in,
-for instance, the C<use strict> pragma.
+During run-time this variable is just like any other, and changes made during
+compilation are not directly visible via accessing the variable directly,
+instead you can find out at run time what value was in effect at a given point
+in the code by accessing item 8 of the return from caller:
+
+  sub hint_bits { (caller(0))[8] }
 
 The contents should be an integer; different bits of it are used for
 different pragmatic flags.  Here's an example:
@@ -2131,8 +2137,7 @@ different pragmatic flags.  Here's an example:
 
 Consider what happens during execution of the BEGIN block.  At this point
 the BEGIN block has already been compiled, but the body of C<foo()> is still
-being compiled.  The new value of C<$^H>
-will therefore be visible only while
+being compiled.  The new value of C<$^H> will therefore be visible only while
 the body of C<foo()> is being compiled.
 
 Substitution of C<BEGIN { add_100() }> block with:
@@ -2153,15 +2158,28 @@ X<%^H>
 
 The C<%^H> hash provides the same scoping semantic as C<$^H>.  This makes
 it useful for implementation of lexically scoped pragmas.  See
-L<perlpragma>.   All the entries are stringified when accessed at
-runtime, so only simple values can be accommodated.  This means no
-pointers to objects, for example.
+L<perlpragma>.
+
+Similar to $^H this variable is part of the lexical state of the compilation
+process, and changes made to it at compile time are not visible later on
+at a run time. Instead you can access those values by accessing the 10th
+slot of the return of caller:
+
+  sub hints_hash { (caller(0))[10] }
+
+During compilation this hash may be used to store complex structures, such
+as code references, however once compilation is completed these structures
+will be flattened to a representation that means that only simple values can
+be accommodated and retrieved at run time via C<caller()> as above.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.
 A module should use only keys that begin with the module's name (the
 name of its main package) and a "/" character.  For example, a module
 C<Foo::Bar> should use keys such as C<Foo::Bar/baz>.
+
+During run time C<%^H> is essentially the same as any other hash, and any
+changes made to it during the compilation phase are not visible.
 
 This variable was added in Perl v5.6.0.
 
