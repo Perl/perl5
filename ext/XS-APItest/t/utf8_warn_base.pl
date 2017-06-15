@@ -437,6 +437,27 @@ my @utf8n_flags_to_text =  ( qw(
         NO_CONFIDENCE_IN_CURLEN_
     ) );
 
+sub utf8n_display_call($)
+{
+    # Converts an eval string that calls test_utf8n_to_uvchr into a more human
+    # readable form, and returns it.  Doesn't work if the byte string contains
+    # an apostrophe.  The return will look something like:
+    #   test_utf8n_to_uvchr_error('$bytes', $length, $flags)
+    #diag $_[0];
+
+    $_[0] =~ / ^ ( [^(]* \( ) ' ( [^']*? ) ' ( .+ , \D* ) ( \d+ ) \) $ /x;
+    my $text1 = $1;     # Everything before the byte string
+    my $bytes = $2;
+    my $text2 = $3;     # Includes the length
+    my $flags = $4;
+
+    return $text1
+         . display_bytes($bytes)
+         . $text2
+         . flags_to_text($flags, \@utf8n_flags_to_text)
+         . ')';
+}
+
 sub uvchr_display_call($)
 {
     # Converts an eval string that calls test_uvchr_to_utf8 into a more human
@@ -745,38 +766,33 @@ foreach my $test (@tests) {
 
                     undef @warnings_gotten;
                     my $ret_ref;
-                    my $display_bytes = display_bytes($this_bytes);
-                    my $call = "    Call was: $eval_warn; \$ret_ref"
-                            . " = test_utf8n_to_uvchr_error("
-                            . "'$display_bytes', $this_length,"
-                            . "$warn_flag"
-                            . "|$disallow_flag)";
+                    my $this_flags = $warn_flag | $disallow_flag;
                     my $eval_text =      "$eval_warn; \$ret_ref"
                             . " = test_utf8n_to_uvchr_error("
                             . "'$this_bytes',"
-                            . " $this_length, $warn_flag"
-                            . "|$disallow_flag)";
+                            . " $this_length, $this_flags)";
                     eval "$eval_text";
                     if (! ok ("$@ eq ''",
                         "$this_name: eval succeeded"))
                     {
-                        diag "\$!='$!'; eval'd=\"$call\"";
+                        diag "\$@='$@'; call was: "
+                           . utf8n_display_call($eval_text);
                         next;
                     }
                     if ($disallowed) {
                         is($ret_ref->[0], 0, "$this_name: Returns 0")
-                          or diag $call;
+                          or diag "Call was: " . utf8n_display_call($eval_text);
                     }
                     else {
                         is($ret_ref->[0], $expected_uv,
                                 "$this_name: Returns expected uv: "
                                 . sprintf("0x%04X", $expected_uv))
-                          or diag $call;
+                          or diag "Call was: " . utf8n_display_call($eval_text);
                     }
                     is($ret_ref->[1], $this_expected_len,
                                         "$this_name: Returns expected length:"
                                       . " $this_expected_len")
-                      or diag $call;
+                      or diag "Call was: " . utf8n_display_call($eval_text);
 
                     my $returned_flags = $ret_ref->[2];
 
@@ -798,7 +814,7 @@ foreach my $test (@tests) {
                     {
                         is($returned_flags, $expected_error_flags,
                                 "Got the correct error flag")
-                          or diag $call;
+                          or diag "Call was: " . utf8n_display_call($eval_text);
                     }
                     else {
                         is($returned_flags, 0, "Got no other error flag")
@@ -852,10 +868,11 @@ foreach my $test (@tests) {
                         {
                             like($warnings_gotten[0], $message,
                                     "$this_name: Got expected warning")
-                                or diag $call;
+                                or diag "Call was: "
+                                 . utf8n_display_call($eval_text);
                         }
                         else {
-                            diag $call;
+                            diag "Call was: " . utf8n_display_call($eval_text);
                             if (scalar @warnings_gotten) {
                                 output_warnings(@warnings_gotten);
                             }
@@ -867,7 +884,7 @@ foreach my $test (@tests) {
                         unless (is(scalar @warnings_gotten, 0,
                                 "$this_name: Got no warnings"))
                         {
-                            diag $call;
+                            diag "Call was: " . utf8n_display_call($eval_text);
                             output_warnings(@warnings_gotten);
                         }
                     }
@@ -877,20 +894,28 @@ foreach my $test (@tests) {
                     # not just when the $disallow_flag is set
                     if ($disallowed) {
                         undef @warnings_gotten;
-                        $ret_ref = test_utf8n_to_uvchr_error(
-                                    $this_bytes, $this_length,
-                                    $disallow_flag|$::UTF8_CHECK_ONLY);
+                        $this_flags = $disallow_flag|$::UTF8_CHECK_ONLY;
+                        $eval_text = "\$ret_ref = test_utf8n_to_uvchr_error("
+                                   . "'$this_bytes', $this_length, $this_flags)";
+                        eval "$eval_text";
+                        if (! ok ("$@ eq ''",
+                            "    And eval succeeded with CHECK_ONLY"))
+                        {
+                            diag "\$@='$@'; Call was: "
+                               . utf8n_display_call($eval_text);
+                            next;
+                        }
                         is($ret_ref->[0], 0,
                                         "$this_name, CHECK_ONLY: Returns 0")
-                          or diag $call;
+                          or diag "Call was: " . utf8n_display_call($eval_text);
                         is($ret_ref->[1], -1,
                             "$this_name: CHECK_ONLY: returns -1 for length")
-                          or diag $call;
+                          or diag "Call was: " . utf8n_display_call($eval_text);
                         if (! is(scalar @warnings_gotten, 0,
                             "$this_name, CHECK_ONLY: no warnings"
                         . " generated"))
                         {
-                            diag $call;
+                            diag "Call was: " . utf8n_display_call($eval_text);
                             output_warnings(@warnings_gotten);
                         }
                     }
@@ -969,7 +994,7 @@ foreach my $test (@tests) {
 
                     undef @warnings_gotten;
                     my $ret;
-                    my $this_flags = $uvchr_warn_flag | $uvchr_disallow_flag;
+                    $this_flags = $uvchr_warn_flag | $uvchr_disallow_flag;
                     $eval_text = "$eval_warn; \$ret ="
                             . " test_uvchr_to_utf8_flags("
                             . "$allowed_uv, $this_flags)";
