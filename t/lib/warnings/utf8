@@ -765,7 +765,7 @@ Operation "uc" returns its argument for non-Unicode code point 0x7F+ at - line \
 Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in uc at - line \d+.
 Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
 Operation "uc" returns its argument for non-Unicode code point 0x80+ at - line \d+.
-Code point 0x7F+ is not Unicode, may not be portable in print at - line \d+.
+Code point 0x7F+ is not Unicode, (may not be|requires a Perl extension, and so is not) portable in print at - line \d+.
 Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in print at - line \d+.
 ########
 # NAME  [perl #127262]

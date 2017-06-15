@@ -953,8 +953,7 @@ foreach my $test (@tests) {
                                           ? 'with flag for raising warnings'
                                           : 'no flag for raising warnings');
                     $this_name .= $malformations_name;
-                    local $TODO = "High code point tests temporarily broken"
-                                                   if $allowed_uv > 0x7FFFFFFF;
+
                     undef @warnings_gotten;
                     my $ret_ref;
                     my $this_flags = $this_warning_flags|$this_disallow_flags;

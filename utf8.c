@@ -1673,9 +1673,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 {
                     if (  ! (flags & UTF8_CHECK_ONLY)
                         &&  (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER))
-                        &&  ckWARN_d(WARN_UTF8))
+                        &&  ckWARN_d(WARN_NON_UNICODE))
                     {
-                        pack_warn = packWARN(WARN_UTF8);
+                        pack_warn = packWARN(WARN_NON_UNICODE);
 
                         if (orig_problems & UTF8_GOT_TOO_SHORT) {
                             message = Perl_form(aTHX_
