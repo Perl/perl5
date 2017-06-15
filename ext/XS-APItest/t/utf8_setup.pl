@@ -19,7 +19,13 @@ sub display_bytes {
 }
 
 sub output_warnings(@) {
-    diag "The warnings were:\n" . join("", @_);
+    my @list = @_;
+    if (@list) {
+        diag "The warnings were:\n" . join "\n", map { chomp; $_ } @list;
+    }
+    else {
+        diag "No warnings were raised";
+    }
 }
 
 sub start_byte_to_cont($) {
