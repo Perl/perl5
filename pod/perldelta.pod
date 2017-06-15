@@ -202,7 +202,9 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+File::Glob has been modified to remove unnecessary backtracking and
+recursion, thanks to Russ Cox. See L<https://research.swtch.com/glob>
+for more details.
 
 =back
 
