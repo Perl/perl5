@@ -183,6 +183,8 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #CCTYPE		:= MSVC140
 # Visual C++ 2015 Express Edition (aka Visual C++ 14.0) (free version)
 #CCTYPE		:= MSVC140FREE
+# Visual C++ 2017 (aka Visual C++ 14.1) (all versions)
+#CCTYPE		:= MSVC141
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		:= GCC
 
@@ -242,11 +244,9 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #ALL_STATIC	:= define
 
 #
-# set the install locations of the compiler include/libraries
-# Running VCVARS32.BAT is *required* when using Visual C.
-# Some versions of Visual C don't define MSVCDIR in the environment,
-# so you may have to set CCHOME explicitly (spaces in the path name should
-# not be quoted)
+# set the install locations of the compiler
+# Running VCVARS32.BAT, VCVARSALL.BAT or similar is *required* when using
+# Visual C++.
 #
 #CCHOME		:= C:\MinGW
 
@@ -361,28 +361,23 @@ CCTYPE		:= MSVC$(MSVCVER)0
 endif
 endif
 
+# Versions of Visual C++ up to VC++ 7.1 define $(MSVCDir); versions since then
+# define $(VCINSTALLDIR) instead, but for VC++ 14.1 we need the subfolder given
+# by $(VCToolsInstallDir).
 ifeq ($(CCHOME),)
 ifeq ($(CCTYPE),GCC)
 CCHOME		:= C:\MinGW
+else ifeq ($(CCTYPE),MSVC60)
+CCHOME		:= $(MSVCDir)
+else ifeq ($(CCTYPE),MSVC70)
+CCHOME		:= $(MSVCDir)
+else ifeq ($(CCTYPE),MSVC70FREE)
+CCHOME		:= $(MSVCDir)
+else ifeq ($(CCTYPE),MSVC141)
+CCHOME		:= $(VCToolsInstallDir)
 else
-CCHOME		:= $(MSVCDIR)
+CCHOME		:= $(VCINSTALLDIR)
 endif
-endif
-
-#
-# Following sets $Config{incpath} and $Config{libpth}
-#
-
-ifneq ($(GCCCROSS),)
-CCINCDIR := $(CCHOME)\$(GCCCROSS)\include
-CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
-CCDLLDIR := $(CCLIBDIR)
-ARCHPREFIX := $(GCCCROSS)-
-else
-CCINCDIR := $(CCHOME)\include
-CCLIBDIR := $(CCHOME)\lib
-CCDLLDIR := $(CCHOME)\bin
-ARCHPREFIX :=
 endif
 
 ifeq ($(CCTYPE),GCC)
@@ -477,6 +472,35 @@ ifeq ($(USE_LONG_DOUBLE),define)
 ARCHNAME	:= $(ARCHNAME)-ld
 endif
 
+# Set the install location of the compiler headers/libraries.
+# These are saved into $Config{incpath} and $Config{libpth}.
+ifneq ($(GCCCROSS),)
+CCINCDIR := $(CCHOME)\$(GCCCROSS)\include
+CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
+ARCHPREFIX := $(GCCCROSS)-
+else
+CCINCDIR := $(CCHOME)\include
+ifeq ($(CCTYPE),MSVC141)
+ifeq ($(WIN64),define)
+CCLIBDIR := $(CCHOME)\lib\x64
+else
+CCLIBDIR := $(CCHOME)\lib\x86
+endif
+else
+CCLIBDIR := $(CCHOME)\lib
+endif
+ARCHPREFIX :=
+endif
+
+# Set DLL location for GCC compilers.
+ifeq ($(CCTYPE),GCC)
+ifneq ($(GCCCROSS),)
+CCDLLDIR := $(CCLIBDIR)
+else
+CCDLLDIR := $(CCHOME)\bin
+endif
+endif
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -487,7 +511,6 @@ CPANDIR		= ..\cpan
 PODDIR		= ..\pod
 HTMLDIR		= .\html
 
-#
 INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
 INST_BIN	= $(INST_SCRIPT)$(INST_ARCH)
 INST_LIB	= $(INST_TOP)$(INST_VER)\lib
@@ -634,6 +657,8 @@ ifeq ($(CCTYPE),MSVC140)
 LIBC		= ucrt.lib
 else ifeq ($(CCTYPE),MSVC140FREE)
 LIBC		= ucrt.lib
+else ifeq ($(CCTYPE),MSVC141)
+LIBC		= ucrt.lib
 else
 LIBC		= msvcrt.lib
 endif
@@ -648,6 +673,8 @@ else ifeq ($(CFG),DebugFull)
 ifeq ($(CCTYPE),MSVC140)
 LIBC		= ucrtd.lib
 else ifeq ($(CCTYPE),MSVC140FREE)
+LIBC		= ucrtd.lib
+else ifeq ($(CCTYPE),MSVC141)
 LIBC		= ucrtd.lib
 else
 LIBC		= msvcrtd.lib
@@ -686,9 +713,11 @@ endif
 
 # Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
 ifeq ($(CCTYPE),MSVC140)
-DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 else ifeq ($(CCTYPE),MSVC140FREE)
-DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
+else ifeq ($(CCTYPE),MSVC141)
+DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 endif
 
 # In VS 2005 (VC++ 8.0) Microsoft changes time_t from 32-bit to
@@ -717,6 +746,12 @@ else
 LIBBASEFILES	+= msvcrt.lib vcruntime.lib
 endif
 else ifeq ($(CCTYPE),MSVC140FREE)
+ifeq ($(CFG),DebugFull)
+LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
+else
+LIBBASEFILES	+= msvcrt.lib vcruntime.lib
+endif
+else ifeq ($(CCTYPE),MSVC141)
 ifeq ($(CFG),DebugFull)
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 else
@@ -771,6 +806,7 @@ else
 RSC_FLAGS	= -DINCLUDE_MANIFEST
 endif
 
+# VS 2017 (VC++ 14.1) requires at minimum Windows 7 SP1 (with latest Windows Updates)
 
 # For XP support in >= VS 2013 (VC++ 12.0), subsystem is always in Config.pm
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
@@ -1290,20 +1326,30 @@ ifeq ($(CCTYPE),MSVC140)
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
 	echo #undef FILE_bufsiz&& \
-	echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)&& \
-	echo #define FILE_cnt(fp) PERLIO_FILE_cnt(fp)&& \
-	echo #define FILE_base(fp) PERLIO_FILE_base(fp)&& \
-	echo #define FILE_bufsiz(fp) (PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))&& \
+	echo #define FILE_ptr^(fp^) PERLIO_FILE_ptr^(fp^)&& \
+	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
+	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
+	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
 	echo #define I_STDBOOL)>> config.h
 else ifeq ($(CCTYPE),MSVC140FREE)
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
 	echo #undef FILE_bufsiz&& \
-	echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)&& \
-	echo #define FILE_cnt(fp) PERLIO_FILE_cnt(fp)&& \
-	echo #define FILE_base(fp) PERLIO_FILE_base(fp)&& \
-	echo #define FILE_bufsiz(fp) (PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))&& \
+	echo #define FILE_ptr^(fp^) PERLIO_FILE_ptr^(fp^)&& \
+	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
+	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
+	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
+	echo #define I_STDBOOL)>> config.h
+else ifeq ($(CCTYPE),MSVC141)
+	@(echo #undef FILE_ptr&& \
+	echo #undef FILE_cnt&& \
+	echo #undef FILE_base&& \
+	echo #undef FILE_bufsiz&& \
+	echo #define FILE_ptr^(fp^) PERLIO_FILE_ptr^(fp^)&& \
+	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
+	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
+	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
 	echo #define I_STDBOOL)>> config.h
 endif
 ifeq ($(USE_LARGE_FILES),define)
