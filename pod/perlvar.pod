@@ -2169,8 +2169,9 @@ slot of the return of caller:
 
 During compilation this hash may be used to store complex structures, such
 as code references, however once compilation is completed these structures
-will be flattened to a representation that means that only simple values can
-be accommodated and retrieved at run-time via C<caller()> as above.
+will be flattened to a representation that accommodates only simple
+values, which means that complex structures such as references
+can not be retrieved at run-time via C<caller()> as described above.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.
