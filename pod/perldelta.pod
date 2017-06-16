@@ -431,9 +431,16 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+=over 4
+
+=item *
+
+Support for compiling perl on Windows using Microsoft Visual Studio 2017
+(containing Visual C++ 14.1) has been added.
+
+=back
 
 =back
 
