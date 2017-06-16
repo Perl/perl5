@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 836;  # Update this when adding/deleting tests.
+plan tests => 837;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1906,6 +1906,17 @@ EOP
         # [perl #129281] buffer write overflow, detected by ASAN, valgrind
         fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {}, "don't bump whilem_c too much");
     }
+
+    {
+        # RT #131575 intuit skipping back from the end to find the highest
+        # possible start point, was potentially hopping back beyond pos()
+        # and crashing by calling fbm_instr with a negative length
+
+        my $text = "=t=\x{5000}";
+        pos($text) = 3;
+        ok(scalar($text !~ m{(~*=[a-z]=)}g), "RT #131575");
+    }
+
 } # End of sub run_tests
 
 1;

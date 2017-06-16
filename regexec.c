@@ -126,12 +126,15 @@ static const char* const non_utf8_target_but_utf8_required
                     (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg)) \
 	    : (U8*)(pos + off))
 
-#define HOPBACKc(pos, off) \
-	(char*)(reginfo->is_utf8_target \
-	    ? reghopmaybe3((U8*)pos, (SSize_t)0-off, (U8*)(reginfo->strbeg)) \
-	    : (pos - off >= reginfo->strbeg)	\
-		? (U8*)pos - off		\
+/* like HOPMAYBE3 but backwards. lim must be +ve. Returns NULL on overshoot */
+#define HOPBACK3(pos, off, lim) \
+	(reginfo->is_utf8_target                          \
+	    ? reghopmaybe3((U8*)pos, (SSize_t)0-off, (U8*)(lim)) \
+	    : (pos - off >= lim)	                         \
+		? (U8*)pos - off		                 \
 		: NULL)
+
+#define HOPBACKc(pos, off) ((char*)HOPBACK3(pos, off, reginfo->strbeg))
 
 #define HOP3(pos,off,lim) (reginfo->is_utf8_target  ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
@@ -884,7 +887,9 @@ Perl_re_intuit_start(pTHX_
                 (IV)prog->check_end_shift);
         });
         
-        end_point = HOP3(strend, -end_shift, strbeg);
+        end_point = HOPBACK3(strend, end_shift, rx_origin);
+        if (!end_point)
+            goto fail_finish;
         start_point = HOPMAYBE3(rx_origin, start_shift, end_point);
         if (!start_point)
             goto fail_finish;
