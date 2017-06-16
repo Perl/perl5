@@ -2,6 +2,7 @@
 #
 # Copyright (c) 1995-2011 Paul Marquess. All rights reserved.
 # Copyright (c) 2011-2014 Reini Urban. All rights reserved.
+# Copyright (c) 2014-2017 cPanel Inc. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
@@ -14,11 +15,13 @@ require Exporter;
 use Carp ;
 use strict;
 use warnings;
-use vars qw($VERSION @ISA @EXPORT) ;
+use vars qw($VERSION $XS_VERSION @ISA @EXPORT) ;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
-$VERSION = "1.55" ;
+$VERSION = "1.57" ;
+$XS_VERSION = $VERSION;
+$VERSION = eval $VERSION;
 
 sub filter_read_exact($)
 {
@@ -525,6 +528,7 @@ Paul Marquess
 
 Copyright (c) 1995-2011 Paul Marquess. All rights reserved.
 Copyright (c) 2011-2014 Reini Urban. All rights reserved.
+Copyright (c) 2014-2017 cPanel Inc. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
