@@ -134,6 +134,12 @@ Previously the C<-S> switch incorrectly treated backslash ("\") as an
 escape for colon when traversing the C<PATH> environment variable.
 [perl #129183]
 
+=head2 the -DH (DEBUG_H) misfeature has been removed
+
+On a perl built with debugging support, the C<H> flag to the C<-D>
+debugging option has been removed. This was supposed to dump hash values,
+but has been broken for many years.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -206,6 +212,11 @@ File::Glob has been modified to remove unnecessary backtracking and
 recursion, thanks to Russ Cox. See L<https://research.swtch.com/glob>
 for more details.
 
+=item *
+
+The ref() builtin is now much faster in boolean context, since it no
+longer bothers to construct a temporary string like C<Foo=ARRAY(0x134af48)>.
+
 =back
 
 =head1 Modules and Pragmata
@@ -235,6 +246,15 @@ XXX
 =item *
 
 L<XXX> has been upgraded from version A.xx to B.yy.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.40 to 1.41. It includes
+many bug fixes, and in particular, it now deparses variable attributes
+correctly:
+
+    my $x :foo;  # used to deparse as
+                 # 'attributes'->import('main', \$x, 'foo'), my $x;
 
 =back
 
@@ -475,6 +495,24 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 Fetching the name of a glob that was previously UTF-8 but wasn't any
 longer would return that name flagged as UTF-8.  [perl #131263]
+
+=item *
+
+The perl sprintf() function (via the underlying C function
+Perl_sv_vcatpvfn_flags()) has been heavily reworked to fix many minor
+bugs, including the integer wrapping of large width and precision
+specifiers and potential buffer overruns. It has also been made faster in
+many cases.
+
+=item *
+
+Exiting from an C<eval>, whether normally or via an exception, now always
+frees temporary values (possibly calling destructors) I<before> setting
+C<$@>. For example:
+
+    sub DESTROY { eval { die "died in DESTROY"; } }
+    eval { bless []; };
+    # $@ used to be equal to "died in DESTROY" here; it's now "".
 
 =back
 
