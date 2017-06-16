@@ -26,22 +26,6 @@ local $SIG{__WARN__} = sub { my @copy = @_;
                              push @warnings_gotten, map { chomp; $_ } @copy;
                            };
 
-sub nonportable_regex ($) {
-
-    # Returns a pattern that matches the non-portable message raised either
-    # for the specific input code point, or the one generated when there
-    # is some malformation that precludes the message containing the specific
-    # code point
-
-    my $code_point = shift;
-
-    my $string = sprintf '(Code point 0x%X is not Unicode, and'
-                       . '|Any UTF-8 sequence that starts with'
-                       . ' "(\\\x[[:xdigit:]]{2})+" is for a'
-                       . ' non-Unicode code point, and is) not portable',
-                    $code_point;
-    return qr/$string/;
-}
 
 # Now test the cases where a legal code point is generated, but may or may not
 # be allowed/warned on.
@@ -462,7 +446,15 @@ foreach my $test (@tests) {
     # fully test the non-middling code points.
     my $skip_most_tests = 0;
 
-    my $message;
+    my $cp_message_qr;      # Pattern that matches the message raised when
+                            # that message contains the problematic code
+                            # point.  The message is the same (currently) both
+                            # when going from/to utf8.
+    my $non_cp_trailing_text;   # The suffix text when the message doesn't
+                                # contain a code point.  (This is a result of
+                                # some sort of malformation that means we
+                                # can't get an exact code poin
+
     if ($will_overflow || $allowed_uv > 0x10FFFF) {
 
         $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
@@ -471,17 +463,24 @@ foreach my $test (@tests) {
         $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SUPER;;
 
         if ($will_overflow) {
-            $message = qr/overflows/;
+            $non_cp_trailing_text = "overflows";
+            $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
         }
         elsif ($allowed_uv > 0x7FFFFFFF) {
-            $message = nonportable_regex($allowed_uv);
+            $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
+                                \Q and not portable\E/x;
+            $non_cp_trailing_text = "is for a non-Unicode code point, and is not portable";
         }
-        else  {
-            $message = qr/(not Unicode|for a non-Unicode code point).* may not be portable/;
+        else {
+            $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
+                                \Q may not be portable\E/x;
+            $non_cp_trailing_text = "is for a non-Unicode code point, may not"
+                                . " be portable";
         }
     }
     elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
-        $message = qr/surrogate/;
+        $cp_message_qr = qr/UTF-16 surrogate U\+$uv_string/;
+        $non_cp_trailing_text = "is for a surrogate";
         $needed_to_discern_len = 2 unless defined $needed_to_discern_len;
         $skip_most_tests = 1 if $allowed_uv > 0xD800 && $allowed_uv < 0xDFFF;
 
@@ -493,7 +492,9 @@ foreach my $test (@tests) {
     elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
            || ($allowed_uv & 0xFFFE) == 0xFFFE)
     {
-        $message = qr/Unicode non-character.*is not recommended for open interchange/;
+        $cp_message_qr = qr/\QUnicode non-character U+$uv_string\E
+                            \Q is not recommended for open interchange\E/x;
+        $non_cp_trailing_text = "if you see this, there is an error";
         $needed_to_discern_len = $length unless defined $needed_to_discern_len;
         if (   ($allowed_uv > 0xFDD0 && $allowed_uv < 0xFDEF)
             || ($allowed_uv > 0xFFFF && $allowed_uv < 0x10FFFE))
@@ -672,6 +673,14 @@ foreach my $test (@tests) {
                     if ($will_overflow) {
                         push @malformations, 'overflow';
                         push @expected_return_flags, $::UTF8_GOT_OVERFLOW;
+                    }
+
+                    my $message;
+                    if (@malformations && grep { $_ !~ /overlong/ } @malformations) {
+                        $message = qr/\Q$non_cp_trailing_text\E/;
+                    }
+                    else {
+                        $message = $cp_message_qr;
                     }
 
                     my $malformations_name = join "/", @malformations;
