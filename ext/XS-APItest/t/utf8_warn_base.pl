@@ -455,6 +455,13 @@ foreach my $test (@tests) {
     my $uvchr_flag_to_warn;
     my $uvchr_flag_to_disallow;
 
+    # Many of the code points being tested are middling in that if code point
+    # edge cases work, these are very likely to as well.  Because this test
+    # file takes a while to execute, we skip testing the edge effects of code
+    # points deemed middling, while testing their basics and continuing to
+    # fully test the non-middling code points.
+    my $skip_most_tests = 0;
+
     my $message;
     if ($will_overflow || $allowed_uv > 0x10FFFF) {
 
@@ -476,6 +483,7 @@ foreach my $test (@tests) {
     elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
         $message = qr/surrogate/;
         $needed_to_discern_len = 2 unless defined $needed_to_discern_len;
+        $skip_most_tests = 1 if $allowed_uv > 0xD800 && $allowed_uv < 0xDFFF;
 
         $utf8n_flag_to_warn     = $::UTF8_WARN_SURROGATE;
         $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SURROGATE;
@@ -487,6 +495,11 @@ foreach my $test (@tests) {
     {
         $message = qr/Unicode non-character.*is not recommended for open interchange/;
         $needed_to_discern_len = $length unless defined $needed_to_discern_len;
+        if (   ($allowed_uv > 0xFDD0 && $allowed_uv < 0xFDEF)
+            || ($allowed_uv > 0xFFFF && $allowed_uv < 0x10FFFE))
+        {
+            $skip_most_tests = 1;
+        }
 
         $utf8n_flag_to_warn     = $::UTF8_WARN_NONCHAR;
         $utf8n_flag_to_disallow = $::UTF8_DISALLOW_NONCHAR;
@@ -622,17 +635,24 @@ foreach my $test (@tests) {
     # of utf8 warnings to verify they work with and without the utf8 class,
     # and don't have effects on other sublass warnings
     foreach my $trial_warning_category ('utf8', 'surrogate', 'nonchar', 'non_unicode') {
+      next if $skip_most_tests && $trial_warning_category ne $controlling_warning_category;
       foreach my $warn_flag (0, $warn_flags) {
+        next if $skip_most_tests && ! $warn_flag;
         foreach my $disallow_flag (0, $disallow_flags) {
+          next if $skip_most_tests && ! $disallow_flag;
           foreach my $do_warning (0, 1) {
+            next if $skip_most_tests && ! $do_warning;
 
             # We try each of the above with various combinations of
             # malformations that can occur on the same input sequence.
             foreach my $short ("", "short") {
+              next if $skip_most_tests && $short;
               foreach my $unexpected_noncont ("",
                                               "unexpected non-continuation")
               {
+                next if $skip_most_tests && $unexpected_noncont;
                 foreach my $overlong ("", "overlong") {
+                    next if $overlong && $skip_most_tests;
 
                     # If we're creating an overlong, it can't be longer than
                     # the maximum length, so skip if we're already at that
