@@ -1715,7 +1715,7 @@ EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
-pM	|char *	|_byte_dump_string					\
+EpM	|char *	|_byte_dump_string					\
 				|NN const U8 * s			\
 				|const STRLEN len			\
 				|const bool format
