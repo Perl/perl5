@@ -159,7 +159,7 @@ using, e.g.
 (assuming the default installation location was chosen).
 
 Perl should now build using the win32/Makefile.  You will need to edit that
-file to set CCTYPE to one of MSVC90FREE-MSVC141FREE first.
+file to set CCTYPE to one of MSVC90-MSVC141 first.
 
 =item Microsoft Visual C++ 2005 Express Edition
 
@@ -201,7 +201,7 @@ while the latest versions install into version-specific locations such as
 Perl should now build using the win32/Makefile.  You will need to edit that
 file to set
 
- CCTYPE = MSVC80FREE
+ CCTYPE = MSVC80
 
 and to set CCHOME, CCINCDIR and CCLIBDIR as per the environment setup above.
 

@@ -131,31 +131,19 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 #CCTYPE		*= MSVC70FREE
 # Windows Server 2003 SP1 Platform SDK (April 2005)
 #CCTYPE		= SDK2003SP1
-# Visual C++ 2005 (aka Visual C++ 8.0) (full version)
+# Visual C++ 2005 (aka Visual C++ 8.0) (full version or Express Edition)
 #CCTYPE		*= MSVC80
-# Visual C++ 2005 Express Edition (aka Visual C++ 8.0) (free version)
-#CCTYPE		*= MSVC80FREE
-# Visual C++ 2008 (aka Visual C++ 9.0) (full version)
+# Visual C++ 2008 (aka Visual C++ 9.0) (full version or Express Edition)
 #CCTYPE		*= MSVC90
-# Visual C++ 2008 Express Edition (aka Visual C++ 9.0) (free version)
-#CCTYPE		*= MSVC90FREE
-# Visual C++ 2010 (aka Visual C++ 10.0) (full version)
+# Visual C++ 2010 (aka Visual C++ 10.0) (full version or Express Edition)
 #CCTYPE		= MSVC100
-# Visual C++ 2010 Express Edition (aka Visual C++ 10.0) (free version)
-#CCTYPE		= MSVC100FREE
-# Visual C++ 2012 (aka Visual C++ 11.0) (full version)
+# Visual C++ 2012 (aka Visual C++ 11.0) (full version or Express Edition)
 #CCTYPE		= MSVC110
-# Visual C++ 2012 Express Edition (aka Visual C++ 11.0) (free version)
-#CCTYPE		= MSVC110FREE
-# Visual C++ 2013 (aka Visual C++ 12.0) (full version)
+# Visual C++ 2013 (aka Visual C++ 12.0) (full version or Express Edition)
 #CCTYPE		= MSVC120
-# Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
-#CCTYPE		= MSVC120FREE
-# Visual C++ 2015 (aka Visual C++ 14.0) (full version)
+# Visual C++ 2015 (aka Visual C++ 14.0) (full version or Express Edition)
 #CCTYPE		= MSVC140
-# Visual C++ 2015 Express Edition (aka Visual C++ 14.0) (free version)
-#CCTYPE		= MSVC140FREE
-# Visual C++ 2017 (aka Visual C++ 14.1) (all versions)
+# Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
 #CCTYPE		= MSVC141
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		= GCC
@@ -636,8 +624,7 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
-    || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrt.lib
 .ELSE
 LIBC		= msvcrt.lib
@@ -650,8 +637,7 @@ LINK_DBG	= -debug
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
 .ELIF  "$(CFG)" == "DebugFull"
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
-    || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrtd.lib
 .ELSE
 LIBC		= msvcrtd.lib
@@ -688,9 +674,8 @@ OPTIMIZE	+= -fp:precise
 DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
-# Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
-    || "$(CCTYPE)" == "MSVC141"
+# Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 .ENDIF
 
@@ -713,8 +698,7 @@ LIBBASEFILES	= oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 	netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib version.lib \
 	odbc32.lib odbccp32.lib comctl32.lib
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
-    || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
 .IF "$(CFG)" == "DebugFull"
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 .ELSE
@@ -775,8 +759,7 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
 # Console vs GUI makes no difference for DLLs, so use default for cleaner
 # building cmd lines
-.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC120FREE" \
-    || "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
+.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
 .IF "$(WIN64)" == "define"
 LINK_FLAGS	+= -subsystem:console,"5.02"
 .ELSE
@@ -1265,7 +1248,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
