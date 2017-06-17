@@ -2162,8 +2162,8 @@ L<perlpragma>.
 
 Similar to $^H this variable is part of the lexical state of the compilation
 process, and changes made to it at compile-time are not visible later on
-at run-time. Instead you can access those values by accessing the 10th
-slot of the return of caller:
+at run-time. Instead you can access a flattened version of those values by
+accessing the 10th slot of the return of caller:
 
   sub hints_hash { (caller(0))[10] }
 
@@ -2172,7 +2172,7 @@ such as code references, as well as simple non-referential scalars. A
 flattened copy of the values written into the hash is stored with the
 code that was compiled while it was in effect, and is the copy
 available via the C<caller()> mechanism. This copy preserves simple
-strings and numbers, but will not preserve more complex values
+strings and numbers, but will not properly preserve more complex values
 like references.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
