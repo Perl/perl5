@@ -764,18 +764,12 @@ sub do_grind {
             @$hash{qw(loop_counts perls results tests order)};
         filter_tests($read_results);
         filter_tests($read_tests);
-        if (!$read_order) {
-            $order = [ sort keys %$read_tests ];
-        }
         if (!$done_read) {
             ($loop_counts, $perls, $results, $tests, $order) =
                 ($read_loop_counts, $read_perls, $read_results, $read_tests, $read_order);
             $done_read = 1;
             filter_tests($results);
             filter_tests($tests);
-            if (!$order) {
-                $order = [ sort keys %$tests ];
-            }
         } else {
             my @have_keys= sort keys %$read_tests;
             my @want_keys= sort keys %$tests;
