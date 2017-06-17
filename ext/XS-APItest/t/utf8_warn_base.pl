@@ -22,7 +22,9 @@ use Data::Dumper;
 my @warnings_gotten;
 
 use warnings 'utf8';
-local $SIG{__WARN__} = sub { push @warnings_gotten, @_ };
+local $SIG{__WARN__} = sub { my @copy = @_;
+                             push @warnings_gotten, map { chomp; $_ } @copy;
+                           };
 
 sub nonportable_regex ($) {
 
