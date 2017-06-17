@@ -234,17 +234,44 @@ for my $test (
     # note that callsub.json was created using
     # ./perl -Ilib Porting/bench.pl --tests='/call::sub::(amp_)?empty/' \
     #                     --write=t/porting/bench/callsub.json ./perl
-
     [
         "--read=t/porting/bench/callsub.json --write=no/such/file/boz",
         qr{\AError: can't open 'no/such/file/boz' for writing: },
         "croak: --write open error"
     ],
+    # note that callsub2.json was created using
+    # ./perl -Ilib Porting/bench.pl \
+    #    --tests='call::sub::empty,call::sub::args3' \
+    #                     --write=t/porting/bench/callsub2.json ./perl
+    [
+           "--read=t/porting/bench/callsub.json "
+        . " --read=t/porting/bench/callsub2.json",
+        "Can't merge multiple read files: they contain differing test sets.\n"
+        . "Re-run with --verbose to see the differences.\n",
+        "croak: --read callsub, callsub2"
+    ],
+    [
+           "--read=t/porting/bench/callsub.json "
+        . " --read=t/porting/bench/callsub2.json"
+        . " --verbose",
+        "Can't merge multiple read files: they contain differing test sets.\n"
+        . "Previous tests:\n"
+        . "  call::sub::amp_empty\n"
+        . "  call::sub::empty\n"
+        . "tests from 't/porting/bench/callsub2.json':\n"
+        . "  call::sub::args3\n"
+        . "  call::sub::empty\n",
+        "croak: --read callsub, callsub2 --verbose"
+    ],
 
-    # these ones isn't tested:
+    # these ones aren't tested (and nor are any "Panic:" ones):
 
     # Error: can't parse '$field' field from cachegrind output
     # Error: while starting cachegrind subprocess for NNNN:
+    # File '$file' contains no results
+    # File '$file' contains differing test and results names
+    # File '$file' contains differing test and sort order names
+    # Can't merge multiple read files: differing loop counts:
 )
 {
     my ($args, $expected, $desc) = @$test;
@@ -321,6 +348,22 @@ $out = qx($bench_cmd --tests=call::sub::empty --bisect=Ir,100000,100001 $^X=p0 2
 is $?, 1 << 8, "--bisect should not match";
 is length($out), 0, "--bisect should produce no output"
     or diag("got: $out");
+
+# multiple reads with differing test sets but common --tests subset
+
+$out = qx($bench_cmd --read=t/porting/bench/callsub.json  --read=t/porting/bench/callsub2.json --tests=call::sub::empty 2>&1);
+$out =~ s{^\./perl}{p0}m;
+$out =~ s{\Q./perl ./perl}{    p0     p1};
+like $out, $format_qrs{percent2}, "2 reads; overlapping test sets";
+
+# A read defines what benchmarks to run
+
+note("running cachegrind on 1 perl; may be slow...");
+$out = qx($bench_cmd --read=t/porting/bench/callsub.json --tests=call::sub::empty $^X=p1 2>&1);
+$out =~ s{^\./perl}{p0}m;
+$out =~ s{\Q./perl}{    p0};
+like $out, $format_qrs{percent2}, "1 read; 1 generate";
+
 
 
 done_testing();

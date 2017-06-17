@@ -27,7 +27,7 @@ perls.
     # ... hack hack hack, updating ./perl ...
     bench.pl --read=blead.time -- ./perl=hacked
 
-    # You can also combine --read with --write
+    # You can also combine --read with --write and new benchmark runs
 
     bench.pl --read=blead.time --write=last.time -- ./perl=hacked
 
@@ -100,7 +100,7 @@ Display progress information.
 
 --tests=I<FOO>
 
-Specify a subset of tests to run (or in the case of C<--read>, to display).
+Specify a subset of tests to run (or in the case of C<--read>, to read).
 It may be either a comma-separated list of test names, or a regular
 expression. For example
 
@@ -121,6 +121,15 @@ expression. For example
 --read=I<file>
 
 Read in saved data from a previous C<--write> run from the specified file.
+If C<--tests> is present too, then only tests matching those conditions
+are read from the file.
+
+C<--read> may be specified multiple times, in which case the results
+across all files are aggregated. The list of test names from each file
+(after filtering by C<--tests>) must be identical across all files.
+
+This list of tests is used instead of the normal benchfile (or
+C<--benchfile>) for any benchmarks that are run.
 
 Requires C<JSON::PP> to be available.
 
@@ -762,22 +771,50 @@ sub do_grind {
         }
         my ($read_loop_counts, $read_perls, $read_results, $read_tests, $read_order) =
             @$hash{qw(loop_counts perls results tests order)};
+
+        # check file contents for consistency
+        my $k_o = join ';', sort @$read_order;
+        my $k_r = join ';', sort keys %$read_results;
+        my $k_t = join ';', sort keys %$read_tests;
+        die "File '$file' contains no results\n" unless length $k_r;
+        die "File '$file' contains differing test and results names\n"
+            unless $k_r eq $k_t;
+        die "File '$file' contains differing test and sort order names\n"
+            unless $k_o eq $k_t;
+
+        # delete tests not matching --tests= criteria, if any
         filter_tests($read_results);
         filter_tests($read_tests);
+
         if (!$done_read) {
             ($loop_counts, $perls, $results, $tests, $order) =
                 ($read_loop_counts, $read_perls, $read_results, $read_tests, $read_order);
             $done_read = 1;
-            filter_tests($results);
-            filter_tests($tests);
-        } else {
-            my @have_keys= sort keys %$read_tests;
-            my @want_keys= sort keys %$tests;
+        }
+        else {
+            # merge results across multiple files
 
-            if ("@have_keys" ne "@want_keys" or
-                "@$read_loop_counts" ne "@$loop_counts")
+            if (   join(';', sort keys %$tests)
+                ne join(';', sort keys %$read_tests))
             {
-                die "tests run aren't the same, cant merge read files";
+                my $err = "Can't merge multiple read files: "
+                        . "they contain differing test sets.\n";
+                if ($OPTS{verbose}) {
+                    $err .= "Previous tests:\n";
+                    $err .= "  $_\n" for sort keys %$tests;
+                    $err .= "tests from '$file':\n";
+                    $err .= "  $_\n" for sort keys %$read_tests;
+                }
+                else {
+                    $err .= "Re-run with --verbose to see the differences.\n";
+                }
+                die $err;
+            }
+
+            if ("@$read_loop_counts" ne "@$loop_counts") {
+                die "Can't merge multiple read files: differing loop counts:\n"
+                . "  (previous=(@$loop_counts), "
+                . "'$file'=(@$read_loop_counts))\n";
             }
 
             push @$perls, @{$hash->{perls}};
