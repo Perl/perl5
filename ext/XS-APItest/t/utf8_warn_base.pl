@@ -483,6 +483,21 @@ foreach my $test (@tests) {
     my $uvchr_flag_to_warn;
     my $uvchr_flag_to_disallow;
 
+    # We want to test that the independent flags are actually independent.
+    # For example, that a surrogate doesn't trigger a non-character warning,
+    # and conversely, turning off an above-Unicode flag doesn't suppress a
+    # surrogate warning.  Earlier versions of this file used nested loops to
+    # test all possible combinations.  But that creates lots of tests, making
+    # this run too long.  What is now done instead is to use the complement of
+    # the category we are testing to greatly reduce the combinatorial
+    # explosion.  For example, if we have a surrogate and we aren't expecting
+    # a warning about it, we set all the flags for non-surrogates to raise
+    # warnings.  If one shows up, it indicates the flags aren't independent.
+    my $utf8n_flag_to_warn_complement;
+    my $utf8n_flag_to_disallow_complement;
+    my $uvchr_flag_to_warn_complement;
+    my $uvchr_flag_to_disallow_complement;
+
     # Many of the code points being tested are middling in that if code point
     # edge cases work, these are very likely to as well.  Because this test
     # file takes a while to execute, we skip testing the edge effects of code
@@ -501,10 +516,24 @@ foreach my $test (@tests) {
 
     if ($will_overflow || $allowed_uv > 0x10FFFF) {
 
+        # Set the SUPER flags; later, we test for ABOVE_31_BIT as well.
         $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
         $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SUPER;
         $uvchr_flag_to_warn     = $::UNICODE_WARN_SUPER;
         $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SUPER;;
+
+        # Below, we add the flags for non-above-31 bit to the code points that
+        # don't fit that category.  Special tests are done for this category
+        # in the inner loop.
+        $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
+                                            |$::UTF8_WARN_SURROGATE;
+        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
+                                            |$::UTF8_DISALLOW_SURROGATE;
+        $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
+                                            |$::UNICODE_WARN_SURROGATE;
+        $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
+                                            |$::UNICODE_DISALLOW_SURROGATE;
+        $controlling_warning_category = 'non_unicode';
 
         if ($will_overflow) {
             $non_cp_trailing_text = "if you see this, there is an error";
@@ -520,6 +549,11 @@ foreach my $test (@tests) {
                                 \Q may not be portable\E/x;
             $non_cp_trailing_text = "is for a non-Unicode code point, may not"
                                 . " be portable";
+            $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_ABOVE_31_BIT;
+            $utf8n_flag_to_disallow_complement |= $::UTF8_DISALLOW_ABOVE_31_BIT;
+            $uvchr_flag_to_warn_complement     |= $::UNICODE_WARN_ABOVE_31_BIT;
+            $uvchr_flag_to_disallow_complement
+                                            |= $::UNICODE_DISALLOW_ABOVE_31_BIT;
         }
     }
     elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
@@ -532,6 +566,19 @@ foreach my $test (@tests) {
         $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SURROGATE;
         $uvchr_flag_to_warn     = $::UNICODE_WARN_SURROGATE;
         $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SURROGATE;;
+
+        $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
+                                            |$::UTF8_WARN_SUPER
+                                            |$::UTF8_WARN_ABOVE_31_BIT;
+        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
+                                            |$::UTF8_DISALLOW_SUPER
+                                            |$::UTF8_DISALLOW_ABOVE_31_BIT;
+        $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
+                                            |$::UNICODE_WARN_SUPER
+                                            |$::UNICODE_WARN_ABOVE_31_BIT;
+        $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
+                                            |$::UNICODE_DISALLOW_SUPER
+                                            |$::UNICODE_DISALLOW_ABOVE_31_BIT;
     }
     elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
            || ($allowed_uv & 0xFFFE) == 0xFFFE)
@@ -550,6 +597,20 @@ foreach my $test (@tests) {
         $utf8n_flag_to_disallow = $::UTF8_DISALLOW_NONCHAR;
         $uvchr_flag_to_warn     = $::UNICODE_WARN_NONCHAR;
         $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_NONCHAR;;
+
+        $utf8n_flag_to_warn_complement     = $::UTF8_WARN_SURROGATE
+                                            |$::UTF8_WARN_SUPER
+                                            |$::UTF8_WARN_ABOVE_31_BIT;
+        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE
+                                            |$::UTF8_DISALLOW_SUPER
+                                            |$::UTF8_DISALLOW_ABOVE_31_BIT;
+        $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_SURROGATE
+                                            |$::UNICODE_WARN_SUPER
+                                            |$::UNICODE_WARN_ABOVE_31_BIT;
+        $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_SURROGATE
+                                            |$::UNICODE_DISALLOW_SUPER
+                                            |$::UNICODE_DISALLOW_ABOVE_31_BIT;
+
     }
     else {
         die "Can't figure out what type of warning to test for $testname"
@@ -669,13 +730,10 @@ foreach my $test (@tests) {
     # This is more complicated than the malformations tested in other files in
     # this directory, as there are several orthogonal variables involved.  We
     # test most possible combinations
-    foreach my $trial_warning_category ('surrogate', 'nonchar', 'non_unicode') {
-      next if $skip_most_tests && $trial_warning_category ne $controlling_warning_category;
       foreach my $do_disallow (0, 1) {
         next if $skip_most_tests && ! $do_disallow;
 
-            # We try each of the above with various combinations of
-            # malformations that can occur on the same input sequence.
+            # We try various combinations of malformations that can occur
             foreach my $short ("", "short") {
               next if $skip_most_tests && $short;
               foreach my $unexpected_noncont ("",
@@ -727,12 +785,10 @@ foreach my $test (@tests) {
                     }
                     elsif ($warning_type == 3) {
                         $eval_warn = "no warnings; use warnings"
-                                   . " '$trial_warning_category'";
-                        $expect_regular_warnings
-                            = (   $trial_warning_category eq $controlling_warning_category
-                               && $use_warn_flag);
+                                   . " '$controlling_warning_category'";
+                        $expect_regular_warnings = $use_warn_flag;
                         $expect_warnings_for_overflow
-                                    = $trial_warning_category eq 'non_unicode';
+                            = $controlling_warning_category eq 'non_unicode';
                         $expect_warnings_for_malformed = 0;
                     }
                     elsif ($warning_type == 4) {  # Like type 3, but uses the
@@ -745,7 +801,7 @@ foreach my $test (@tests) {
                         # left to test is that the large code points do
                         # trigger the above-31-bit flags.
                         next if ! $will_overflow && $allowed_uv < 0x80000000;
-                        next if $trial_warning_category ne 'non_unicode';
+                        next if $controlling_warning_category ne 'non_unicode';
                         $eval_warn = "no warnings; use warnings 'non_unicode'";
                         $expect_regular_warnings = 1;
                         $expect_warnings_for_overflow = 1;
@@ -775,12 +831,16 @@ foreach my $test (@tests) {
                     # here should start failing.
                     my $return_flag = $this_utf8n_flag_to_disallow;
 
-                    my $this_warning_flags = ($use_warn_flag)
-                                             ? $this_utf8n_flag_to_warn
-                                             : 0;
+                    # If we aren't expecting warnings/disallow for this, turn
+                    # on all the other flags.  That makes sure that they all
+                    # are independent of this flag, and so we don't need to
+                    # test them individually.
+                    my $this_warning_flags  = ($use_warn_flag)
+                                              ? $this_utf8n_flag_to_warn
+                                              : $utf8n_flag_to_warn_complement;
                     my $this_disallow_flags = ($do_disallow)
-                                             ? $this_utf8n_flag_to_disallow
-                                             : 0;
+                                          ? $this_utf8n_flag_to_disallow
+                                          : $utf8n_flag_to_disallow_complement;
                     my $this_bytes = $bytes;
                     my $this_length = $length;
                     my $expected_uv = $allowed_uv;
@@ -996,7 +1056,7 @@ foreach my $test (@tests) {
                                    # malformations
                             elsif ($i > @malformation_names - 1)  {
                                 pass("    Expected and got return flag"
-                                   . " for " . $trial_warning_category);
+                                   . " for " . $controlling_warning_category);
                             }
                             else {
                                 pass("    Expected and got return flag for "
@@ -1119,7 +1179,6 @@ foreach my $test (@tests) {
             }
           }
         }
-      }
     }
 }
 
