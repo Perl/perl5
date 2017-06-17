@@ -730,7 +730,7 @@ sub do_grind {
 
     my ($loop_counts, $perls, $results, $tests, $order, @run_perls);
     my ($bisect_field, $bisect_min, $bisect_max);
-    my ($processed, $averages);
+    my ($done_read, $processed, $averages);
 
     if (defined $OPTS{bisect}) {
         ($bisect_field, $bisect_min, $bisect_max) = split /,/, $OPTS{bisect}, 3;
@@ -767,9 +767,10 @@ sub do_grind {
         if (!$read_order) {
             $order = [ sort keys %$read_tests ];
         }
-        if (!$loop_counts) {
+        if (!$done_read) {
             ($loop_counts, $perls, $results, $tests, $order) =
                 ($read_loop_counts, $read_perls, $read_results, $read_tests, $read_order);
+            $done_read = 1;
             filter_tests($results);
             filter_tests($tests);
             if (!$order) {
@@ -797,7 +798,7 @@ sub do_grind {
     # Gather list of perls to benchmark:
 
     if (@$perl_args) {
-        unless ($loop_counts) {
+        unless ($done_read) {
             # How many times to execute the loop for the two trials. The lower
             # value is intended to do the loop enough times that branch
             # prediction has taken hold; the higher loop allows us to see the
