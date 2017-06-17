@@ -806,6 +806,9 @@ sub do_grind {
         push @$perls, @run_perls;
     }
 
+    # strip @$order to just the actual tests present
+    $order = [ grep exists $tests->{$_}, @$order ];
+
     # Now we know what perls and tests we have, do extra option processing
     # and checking (done before grinding, so time isn't wasted if we die).
 
