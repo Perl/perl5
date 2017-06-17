@@ -1428,7 +1428,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         if (pack_warn) {
                             message = Perl_form(aTHX_ "%s: %s (overflows)",
                                             malformed_text,
-                                            _byte_dump_string(s0, send - s0, 0));
+                                            _byte_dump_string(s0, curlen, 0));
                         }
                     }
                 }
@@ -1554,7 +1554,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                 "%s: %s (overlong; instead use %s to represent"
                                 " U+%0*" UVXf ")",
                                 malformed_text,
-                                _byte_dump_string(s0, send - s0, 0),
+                                _byte_dump_string(s0, curlen, 0),
                                 _byte_dump_string(tmpbuf, e - tmpbuf, 0),
                                 ((uv < 256) ? 2 : 4), /* Field width of 2 for
                                                          small code points */
