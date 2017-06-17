@@ -77,6 +77,190 @@ my %format_qrs;
 }
 
 
+# ---------------------------------------------------
+# check croaks
+
+for my $test (
+    [
+        "--boz",
+        "Unknown option: boz\nUse the -h option for usage information.\n",
+        "croak: basic unknown option"
+    ],
+    [
+        "--fields=Ir,Boz",
+        "Error: --fields: unknown field 'Boz'\n",
+        "croak: unknown --field"
+    ],
+    [
+        "--action=boz",
+        "Error: unrecognised action 'boz'\nmust be one of: grind, selftest\n",
+        "croak: unknown --action"
+    ],
+    [
+        "--sort=boz",
+        "Error: --sort argument should be of the form field:perl: 'boz'\n",
+        "croak: invalid --sort"
+    ],
+    [
+        "--sort=boz:perl",
+        "Error: --sort: unknown field 'boz'\n",
+        "croak: unknown --sort field"
+    ],
+    [
+        "-action=selftest perl",
+        "Error: no perl executables may be specified with selftest\n",
+        "croak: --action-selftest with executable"
+    ],
+    [
+        "--tests=/boz perl",
+        "Error: --tests regex must be of the form /.../\n",
+        "croak: invalid --tests regex"
+    ],
+    [
+        "--tests=call::sub::empty,foo::bar::baz::boz perl",
+        "Error: no such test found: 'foo::bar::baz::boz'\n",
+        "croak: unknown test in --tests"
+    ],
+    [
+        "--tests=/foo::bar::baz::boz/ perl",
+        "Error: no tests to run\n",
+        "croak: no --tests to run "
+    ],
+    [
+        "--benchfile=no-such-file-boz perl",
+        qr/\AError: can't read 'no-such-file-boz':/,
+        "croak: non-existent --benchfile "
+    ],
+    [
+        "--benchfile=t/porting/bench/synerr perl",
+        qr{\AError: can't parse 't/porting/bench/synerr':\nsyntax error},
+        "croak: --benchfile with syntax error"
+    ],
+    [
+        "--benchfile=t/porting/bench/ret0 perl",
+        "Error: can't load 't/porting/bench/ret0': code didn't return a true value\n",
+        "croak: --benchfile which returns 0"
+    ],
+    [
+        "--norm=2 ./miniperl ./perl",
+        "Error: --norm value 2 outside range 0..1\n",
+        "croak: select-a-perl out of range"
+    ],
+    [
+        "--sort=Ir:myperl ./miniperl ./perl",
+        "Error: --sort: unrecognised perl 'myperl'\n",
+        "croak: select-a-perl unrecognised"
+    ],
+    [
+        "--compact=./perl ./perl=A ./perl=B",
+        "Error: --compact: ambiguous perl './perl'\n",
+        "croak: select-a-perl ambiguous"
+    ],
+    [
+        " ./perl=A ./miniperl=A",
+        "A cannot be used on 2 different perls under test\n",
+        "croak: duplicate label"
+    ],
+    [
+        "--grindargs=Boz --tests=call::sub::empty ./perl=A ./perl=B",
+        qr{Error: while executing call::sub::empty/A empty/short loop:\nunexpected code or cachegrind output:\n},
+        "croak: cachegrind output format "
+    ],
+    [
+        "--bisect=Ir",,
+        "Error: --bisect option must be of form 'field,integer,integer'\n",
+        "croak: --bisect=Ir"
+    ],
+    [
+        "--bisect=Ir,1",,
+        "Error: --bisect option must be of form 'field,integer,integer'\n",
+        "croak: --bisect=Ir,1"
+    ],
+    [
+        "--bisect=Ir,1,2,3",
+        "Error: --bisect option must be of form 'field,integer,integer'\n",
+        "croak: --bisect=Ir,1,2,3"
+    ],
+    [
+        "--bisect=Ir,1,x",
+        "Error: --bisect option must be of form 'field,integer,integer'\n",
+        "croak: --bisect=Ir,1,x"
+    ],
+    [
+        "--bisect=Ir,x,2",
+        "Error: --bisect option must be of form 'field,integer,integer'\n",
+        "croak: --bisect=Ir,x,2"
+    ],
+    [
+        "--bisect=boz,1,2",
+        "Error: unrecognised field 'boz' in --bisect option\n",
+        "croak: --bisect=boz,1,2"
+    ],
+    [
+        "--bisect=Ir,2,1",
+        "Error: --bisect min (2) must be <= max (1)\n",
+        "croak: --bisect=boz,2,1"
+    ],
+    [
+        "--read=no-such-file-boz",
+        qr/\AError: can't open 'no-such-file-boz' for reading:/,
+        "croak: non-existent --read file "
+    ],
+    [
+        "--read=t/porting/bench/badversion.json",
+        "Error: unsupported version 9999.9 in file 't/porting/bench/badversion.json' (too new)\n",
+        "croak: --read version"
+    ],
+    [
+        "",
+        "Error: nothing to do: no perls to run, no data to read.\n",
+        "croak: no input"
+    ],
+    [
+        "./perl",
+        "Error: need at least 2 perls for comparison.\n",
+        "croak: need 2 perls"
+    ],
+    [
+        "--bisect=Ir,1,2 ./perl=A ./perl=B",
+        "Error: exactly one perl executable must be specified for bisect\n",
+        "croak: --bisect, need 1 perls"
+    ],
+    [
+        "--bisect=Ir,1,2 --tests=/call/ ./perl=A",
+        "Error: only a single test may be specified with --bisect\n",
+        "croak: --bisect one test only"
+    ],
+    # note that callsub.json was created using
+    # ./perl -Ilib Porting/bench.pl --tests='/call::sub::(amp_)?empty/' \
+    #                     --write=t/porting/bench/callsub.json ./perl
+
+    [
+        "--read=t/porting/bench/callsub.json --write=no/such/file/boz",
+        qr{\AError: can't open 'no/such/file/boz' for writing: },
+        "croak: --write open error"
+    ],
+
+    # these ones isn't tested:
+
+    # Error: can't parse '$field' field from cachegrind output
+    # Error: while starting cachegrind subprocess for NNNN:
+)
+{
+    my ($args, $expected, $desc) = @$test;
+    $out = qx($bench_cmd $args 2>&1);
+    if (ref($expected)) {
+        like $out, $expected, $desc;
+    }
+    else {
+        is $out, $expected, $desc;
+    }
+}
+
+# ---------------------------------------------------
+# run benchmarks
+
+
 my $resultfile1 = tempfile(); # benchmark results for 1 perl
 my $resultfile2 = tempfile(); # benchmark results for 2 perls
 
@@ -137,6 +321,7 @@ $out = qx($bench_cmd --tests=call::sub::empty --bisect=Ir,100000,100001 $^X=p0 2
 is $?, 1 << 8, "--bisect should not match";
 is length($out), 0, "--bisect should produce no output"
     or diag("got: $out");
+
 
 done_testing();
 

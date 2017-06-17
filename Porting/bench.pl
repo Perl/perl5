@@ -575,7 +575,9 @@ sub read_tests_file {
         $ta = do $file;
     }
     unless ($ta) {
-        die "Error: can't parse '$file': $@\n" if $@;
+        die "Error: can't load '$file': code didn't return a true value\n"
+                if defined $ta;
+        die "Error: can't parse '$file':\n$@\n" if $@;
         die "Error: can't read '$file': $!\n";
     }
 
@@ -749,14 +751,14 @@ sub do_grind {
 
     foreach my $file (@{$OPTS{read}}) {
         open my $in, '<:encoding(UTF-8)', $file
-            or die " Error: can't open '$file' for reading: $!\n";
+            or die "Error: can't open '$file' for reading: $!\n";
         my $data = do { local $/; <$in> };
         close $in;
 
         my $hash = JSON::PP::decode_json($data);
         if (int($FORMAT_VERSION) < int($hash->{version})) {
             die "Error: unsupported version $hash->{version} in file"
-              . "'$file' (too new)\n";
+              . " '$file' (too new)\n";
         }
         my ($read_loop_counts, $read_perls, $read_results, $read_tests, $read_order) =
             @$hash{qw(loop_counts perls results tests order)};
@@ -881,6 +883,7 @@ sub do_grind {
     }
 
     if ($OPTS{bisect}) {
+        # these panics shouldn't happen if the bisect checks above are sound
         my @r = values %$results;
         die "Panic: expected exactly one test result in bisect\n"
                                                         if @r != 1;
