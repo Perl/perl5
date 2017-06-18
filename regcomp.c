@@ -13936,6 +13936,13 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
                                              REPORT_LOCATION_ARGS(p)));     \
         }                                                                   \
     } STMT_END
+#define CLEAR_POSIX_WARNINGS()                                              \
+    if (posix_warnings && RExC_warn_text)                                   \
+        av_clear(RExC_warn_text)
+
+#define CLEAR_POSIX_WARNINGS_AND_RETURN(ret)                                \
+    CLEAR_POSIX_WARNINGS();                                                 \
+    return ret
 
 STATIC int
 S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
@@ -14008,7 +14015,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
      *
      * The syntax for a legal posix class is:
      *
-     * qr/(?xa: \[ : \^? [:lower:]{4,6} : \] )/
+     * qr/(?xa: \[ : \^? [[:lower:]]{4,6} : \] )/
      *
      * What this routine considers syntactically to be an intended posix class
      * is this (the comments indicate some restrictions that the pattern
@@ -14033,7 +14040,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
      *                                      # for it to be considered to be
      *                                      # an intended posix class.
      *          \h*
-     *          [:punct:]?                  # The closing class character,
+     *          [[:punct:]]?                # The closing class character,
      *                                      # possibly omitted.  If not a colon
      *                                      # nor semi colon, the class name
      *                                      # must be even closer to a valid
@@ -14075,8 +14082,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
 
     PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX;
 
-    if (posix_warnings && RExC_warn_text)
-        av_clear(RExC_warn_text);
+    CLEAR_POSIX_WARNINGS();
 
     if (p >= e) {
         return NOT_MEANT_TO_BE_A_POSIX_CLASS;
@@ -14168,7 +14174,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                     *updated_parse_ptr = (char *) temp_ptr;
                 }
 
-                return OOB_NAMEDCLASS;
+                CLEAR_POSIX_WARNINGS_AND_RETURN(OOB_NAMEDCLASS);
             }
         }
 
@@ -14238,7 +14244,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
         /* We consider something like [^:^alnum:]] to not have been intended to
          * be a posix class, but XXX maybe we should */
         if (complement) {
-            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(NOT_MEANT_TO_BE_A_POSIX_CLASS);
         }
 
         complement = 1;
@@ -14265,7 +14271,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
          * this leaves this construct looking like [:] or [:^], which almost
          * certainly weren't intended to be posix classes */
         if (has_opening_bracket) {
-            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(NOT_MEANT_TO_BE_A_POSIX_CLASS);
         }
 
         /* But this function can be called when we parse the colon for
@@ -14282,7 +14288,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
             /* XXX We are currently very restrictive here, so this code doesn't
              * consider the possibility that, say, /[alpha.]]/ was intended to
              * be a posix class. */
-            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(NOT_MEANT_TO_BE_A_POSIX_CLASS);
         }
 
         /* Here we have something like 'foo:]'.  There was no initial colon,
@@ -14452,7 +14458,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
             }
 
             /* Otherwise, it can't have meant to have been a class */
-            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(NOT_MEANT_TO_BE_A_POSIX_CLASS);
         }
 
         /* If we ran off the end, and the final character was a punctuation
@@ -14502,7 +14508,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
          * class name.  (We can do this on the first pass, as any second pass
          * will yield an even shorter name) */
         if (name_len < 3) {
-            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(NOT_MEANT_TO_BE_A_POSIX_CLASS);
         }
 
         /* Find which class it is.  Initially switch on the length of the name.
@@ -14661,7 +14667,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
             }
 
             /* Here neither pass found a close-enough class name */
-            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(NOT_MEANT_TO_BE_A_POSIX_CLASS);
         }
 
     probably_meant_to_be:
@@ -14703,7 +14709,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
             /* If it is a known class, return the class.  The class number
              * #defines are structured so each complement is +1 to the normal
              * one */
-            return class_number + complement;
+            CLEAR_POSIX_WARNINGS_AND_RETURN(class_number + complement);
         }
         else if (! check_only) {
 
