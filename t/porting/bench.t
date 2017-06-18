@@ -345,10 +345,8 @@ like $out, $format_qrs{compact}, "basic cachegrind compact format; 2 perls";
 
 # bisect
 
-note("running cachegrind bisect on 1 perl; may be slow...");
-
 # the Ir range here is intended such that the bisect will always fail
-$out = qx($bench_cmd --tests=call::sub::empty --bisect=Ir,100000,100001 $^X=p0 2>&1);
+$out = qx($bench_cmd --read=t/porting/bench/callsub.json --tests=call::sub::empty --bisect=Ir,100000,100001 2>&1);
 
 is $?, 1 << 8, "--bisect should not match";
 is length($out), 0, "--bisect should produce no output"
