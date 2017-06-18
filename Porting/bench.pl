@@ -128,8 +128,8 @@ C<--read> may be specified multiple times, in which case the results
 across all files are aggregated. The list of test names from each file
 (after filtering by C<--tests>) must be identical across all files.
 
-This list of tests is used instead of the normal benchfile (or
-C<--benchfile>) for any benchmarks that are run.
+This list of tests is used instead of that obtained from the normal
+benchmark file (or C<--benchfile>) for any benchmarks that are run.
 
 Requires C<JSON::PP> to be available.
 
@@ -438,7 +438,7 @@ EOF
 my %OPTS = (
     action    => 'grind',
     average   => 0,
-    benchfile => 't/perf/benchmarks',
+    benchfile => undef,
     bisect    => undef,
     compact   => undef,
     debug     => 0,
@@ -825,6 +825,8 @@ sub do_grind {
             }
         }
     }
+    die "Error: --benchfile cannot be used when --read is present\n"
+        if $done_read && defined $OPTS{benchfile};
 
     # Gather list of perls to benchmark:
 
@@ -836,7 +838,8 @@ sub do_grind {
             # branch misses after that
             $loop_counts = [10, 20];
 
-            ($tests, $order) = read_tests_file($OPTS{benchfile});
+            ($tests, $order) =
+                read_tests_file($OPTS{benchfile} // 't/perf/benchmarks');
         }
 
         @run_perls = process_puts($perls, @$perl_args);

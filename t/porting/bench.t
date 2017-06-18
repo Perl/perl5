@@ -212,6 +212,11 @@ for my $test (
         "croak: --read version"
     ],
     [
+        "--read=t/porting/bench/callsub.json --benchfile=t/perf/benchmarks ./perl ",
+        "Error: --benchfile cannot be used when --read is present\n",
+        "croak: benchfile with read"
+    ],
+    [
         "",
         "Error: nothing to do: no perls to run, no data to read.\n",
         "croak: no input"
