@@ -216,7 +216,6 @@ my @death =
  '/(?[[[::]]])/' => "Syntax error in (?[...]) in regex m/(?[[[::]]])/",
  '/(?[[[:w:]]])/' => "Syntax error in (?[...]) in regex m/(?[[[:w:]]])/",
  '/(?[[:w:]])/' => "",
- '/[][[:alpha:]]' => "",    # [perl #127581]
  '/([.].*)[.]/'   => "",    # [perl #127582]
  '/[.].*[.]/'     => "",    # [perl #127604]
  '/(?[a])/' =>  'Unexpected character {#} m/(?[a{#}])/',
@@ -578,7 +577,8 @@ my @warning = (
                                   'Assuming NOT a POSIX class since a semi-colon was found instead of a colon {#} m/[foo;{#}punct;]]\x{100}/',
                                   'Assuming NOT a POSIX class since a semi-colon was found instead of a colon {#} m/[foo;punct;]{#}]\x{100}/',
                                 ],
-
+   '/[][[:alpha:]]/' => "",        # [perl #127581]
+   '/[][[:alpha:]\\@\\\\^_?]/' => "", # [perl #131522]
 ); # See comments before this for why '\x{100}' is generally needed
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
