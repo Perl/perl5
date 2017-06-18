@@ -1,6 +1,10 @@
 #!perl -w
 
 # This is a base file to be used by various .t's in its directory
+# It tests various code points that are "problematic", and verifies that the
+# correct warnings/flags etc are generated when using them.  It also takes the
+# UTF-8 for some of them and perturbs it to be malformed in various ways, and
+# tests that this gets appropriately detected.
 
 use strict;
 use Test::More;
@@ -25,295 +29,356 @@ use warnings 'utf8';
 local $SIG{__WARN__} = sub { my @copy = @_;
                              push @warnings_gotten, map { chomp; $_ } @copy;
                            };
-
-
-# Now test the cases where a legal code point is generated, but may or may not
-# be allowed/warned on.
 my @tests = (
-     # ($testname, $bytes, $allowed_uv, $needed_to_discern_len )
-    [ "lowest surrogate",
-        (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
-        0xD800,
-    ],
-    [ "a middle surrogate",
-        (isASCII) ? "\xed\xa4\x8d" : I8_to_native("\xf1\xb6\xa8\xad"),
-        0xD90D,
-    ],
-    [ "highest surrogate",
-        (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
-        0xDFFF,
-    ],
-    [ "first non_unicode",
-        (isASCII) ? "\xf4\x90\x80\x80" : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
-        0x110000,
-        2,
-    ],
-    [ "non_unicode whose first byte tells that",
-        (isASCII) ? "\xf5\x80\x80\x80" : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
-        (isASCII) ? 0x140000 : 0x200000,
-        1,
-    ],
-    [ "first of 32 consecutive non-character code points",
-        (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
-        0xFDD0,
-    ],
-    [ "a mid non-character code point of the 32 consecutive ones",
-        (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
-        0xFDE0,
-    ],
-    [ "final of 32 consecutive non-character code points",
-        (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
-        0xFDEF,
-    ],
-    [ "non-character code point U+FFFE",
-        (isASCII) ? "\xef\xbf\xbe" : I8_to_native("\xf1\xbf\xbf\xbe"),
-        0xFFFE,
-    ],
-    [ "non-character code point U+FFFF",
-        (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
-        0xFFFF,
-    ],
-    [ "non-character code point U+1FFFE",
-        (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
-        0x1FFFE,
-    ],
-    [ "non-character code point U+1FFFF",
-        (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
-        0x1FFFF,
-    ],
-    [ "non-character code point U+2FFFE",
-        (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
-        0x2FFFE,
-    ],
-    [ "non-character code point U+2FFFF",
-        (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
-        0x2FFFF,
-    ],
-    [ "non-character code point U+3FFFE",
-        (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
-        0x3FFFE,
-    ],
-    [ "non-character code point U+3FFFF",
-        (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
-        0x3FFFF,
-    ],
-    [ "non-character code point U+4FFFE",
-        (isASCII) ? "\xf1\x8f\xbf\xbe" : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
-        0x4FFFE,
-    ],
-    [ "non-character code point U+4FFFF",
-        (isASCII) ? "\xf1\x8f\xbf\xbf" : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
-        0x4FFFF,
-    ],
-    [ "non-character code point U+5FFFE",
-        (isASCII) ? "\xf1\x9f\xbf\xbe" : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
-        0x5FFFE,
-    ],
-    [ "non-character code point U+5FFFF",
-        (isASCII) ? "\xf1\x9f\xbf\xbf" : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
-        0x5FFFF,
-    ],
-    [ "non-character code point U+6FFFE",
-        (isASCII) ? "\xf1\xaf\xbf\xbe" : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
-        0x6FFFE,
-    ],
-    [ "non-character code point U+6FFFF",
-        (isASCII) ? "\xf1\xaf\xbf\xbf" : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
-        0x6FFFF,
-    ],
-    [ "non-character code point U+7FFFE",
-        (isASCII) ? "\xf1\xbf\xbf\xbe" : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
-        0x7FFFE,
-    ],
-    [ "non-character code point U+7FFFF",
-        (isASCII) ? "\xf1\xbf\xbf\xbf" : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
-        0x7FFFF,
-    ],
-    [ "non-character code point U+8FFFE",
-        (isASCII) ? "\xf2\x8f\xbf\xbe" : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
-        0x8FFFE,
-    ],
-    [ "non-character code point U+8FFFF",
-        (isASCII) ? "\xf2\x8f\xbf\xbf" : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
-        0x8FFFF,
-    ],
-    [ "non-character code point U+9FFFE",
-        (isASCII) ? "\xf2\x9f\xbf\xbe" : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
-        0x9FFFE,
-    ],
-    [ "non-character code point U+9FFFF",
-        (isASCII) ? "\xf2\x9f\xbf\xbf" : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
-        0x9FFFF,
-    ],
-    [ "non-character code point U+AFFFE",
-        (isASCII) ? "\xf2\xaf\xbf\xbe" : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
-        0xAFFFE,
-    ],
-    [ "non-character code point U+AFFFF",
-        (isASCII) ? "\xf2\xaf\xbf\xbf" : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
-        0xAFFFF,
-    ],
-    [ "non-character code point U+BFFFE",
-        (isASCII) ? "\xf2\xbf\xbf\xbe" : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
-        0xBFFFE,
-    ],
-    [ "non-character code point U+BFFFF",
-        (isASCII) ? "\xf2\xbf\xbf\xbf" : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
-        0xBFFFF,
-    ],
-    [ "non-character code point U+CFFFE",
-        (isASCII) ? "\xf3\x8f\xbf\xbe" : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
-        0xCFFFE,
-    ],
-    [ "non-character code point U+CFFFF",
-        (isASCII) ? "\xf3\x8f\xbf\xbf" : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
-        0xCFFFF,
-    ],
-    [ "non-character code point U+DFFFE",
-        (isASCII) ? "\xf3\x9f\xbf\xbe" : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
-        0xDFFFE,
-    ],
-    [ "non-character code point U+DFFFF",
-        (isASCII) ? "\xf3\x9f\xbf\xbf" : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
-        0xDFFFF,
-    ],
-    [ "non-character code point U+EFFFE",
-        (isASCII) ? "\xf3\xaf\xbf\xbe" : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
-        0xEFFFE,
-    ],
-    [ "non-character code point U+EFFFF",
-        (isASCII) ? "\xf3\xaf\xbf\xbf" : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
-        0xEFFFF,
-    ],
-    [ "non-character code point U+FFFFE",
-        (isASCII) ? "\xf3\xbf\xbf\xbe" : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
-        0xFFFFE,
-    ],
-    [ "non-character code point U+FFFFF",
-        (isASCII) ? "\xf3\xbf\xbf\xbf" : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
-        0xFFFFF,
-    ],
-    [ "non-character code point U+10FFFE",
-        (isASCII) ? "\xf4\x8f\xbf\xbe" : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
-        0x10FFFE,
-    ],
-    [ "non-character code point U+10FFFF",
-        (isASCII) ? "\xf4\x8f\xbf\xbf" : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
-        0x10FFFF,
-    ],
-    [ "requires at least 32 bits",
-        (isASCII)
-         ?  "\xfe\x82\x80\x80\x80\x80\x80"
-         : I8_to_native(
+        # $testname,
+        # $bytes,                  UTF-8 string
+        # $allowed_uv,             code point $bytes evaluates to; -1 if
+        #                          overflows
+        # $needed_to_discern_len   optional, how long an initial substring do
+        #                          we need to tell that the string must be for
+        #                          a code point in the category it falls in,
+        #                          like being a surrogate; 0 indicates we need
+        #                          the whole string.  Some categories have a
+        #                          default that is used if this is omitted.
+        [ "lowest surrogate",
+            (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
+            0xD800,
+        ],
+        [ "a middle surrogate",
+            (isASCII) ? "\xed\xa4\x8d" : I8_to_native("\xf1\xb6\xa8\xad"),
+            0xD90D,
+        ],
+        [ "highest surrogate",
+            (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
+            0xDFFF,
+        ],
+        [ "first non_unicode",
+            (isASCII)
+            ?              "\xf4\x90\x80\x80"
+            : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
+            0x110000,
+            2,
+        ],
+        [ "non_unicode whose first byte tells that",
+            (isASCII)
+            ?              "\xf5\x80\x80\x80"
+            : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
+            (isASCII) ? 0x140000 : 0x200000,
+            1,
+        ],
+        [ "first of 32 consecutive non-character code points",
+            (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
+            0xFDD0,
+        ],
+        [ "a mid non-character code point of the 32 consecutive ones",
+            (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
+            0xFDE0,
+        ],
+        [ "final of 32 consecutive non-character code points",
+            (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
+            0xFDEF,
+        ],
+        [ "non-character code point U+FFFE",
+            (isASCII) ? "\xef\xbf\xbe" : I8_to_native("\xf1\xbf\xbf\xbe"),
+            0xFFFE,
+        ],
+        [ "non-character code point U+FFFF",
+            (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
+            0xFFFF,
+        ],
+        [ "non-character code point U+1FFFE",
+            (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
+            0x1FFFE,
+        ],
+        [ "non-character code point U+1FFFF",
+            (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
+            0x1FFFF,
+        ],
+        [ "non-character code point U+2FFFE",
+            (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
+            0x2FFFE,
+        ],
+        [ "non-character code point U+2FFFF",
+            (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
+            0x2FFFF,
+        ],
+        [ "non-character code point U+3FFFE",
+            (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
+            0x3FFFE,
+        ],
+        [ "non-character code point U+3FFFF",
+            (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
+            0x3FFFF,
+        ],
+        [ "non-character code point U+4FFFE",
+            (isASCII)
+            ?               "\xf1\x8f\xbf\xbe"
+            : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
+            0x4FFFE,
+        ],
+        [ "non-character code point U+4FFFF",
+            (isASCII)
+            ?               "\xf1\x8f\xbf\xbf"
+            : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
+            0x4FFFF,
+        ],
+        [ "non-character code point U+5FFFE",
+            (isASCII)
+            ?              "\xf1\x9f\xbf\xbe"
+            : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
+            0x5FFFE,
+        ],
+        [ "non-character code point U+5FFFF",
+            (isASCII)
+            ?              "\xf1\x9f\xbf\xbf"
+            : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
+            0x5FFFF,
+        ],
+        [ "non-character code point U+6FFFE",
+            (isASCII)
+            ?              "\xf1\xaf\xbf\xbe"
+            : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
+            0x6FFFE,
+        ],
+        [ "non-character code point U+6FFFF",
+            (isASCII)
+            ?              "\xf1\xaf\xbf\xbf"
+            : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
+            0x6FFFF,
+        ],
+        [ "non-character code point U+7FFFE",
+            (isASCII)
+            ?              "\xf1\xbf\xbf\xbe"
+            : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
+            0x7FFFE,
+        ],
+        [ "non-character code point U+7FFFF",
+            (isASCII)
+            ?              "\xf1\xbf\xbf\xbf"
+            : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
+            0x7FFFF,
+        ],
+        [ "non-character code point U+8FFFE",
+            (isASCII)
+            ?              "\xf2\x8f\xbf\xbe"
+            : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
+            0x8FFFE,
+        ],
+        [ "non-character code point U+8FFFF",
+            (isASCII)
+            ?              "\xf2\x8f\xbf\xbf"
+            : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
+            0x8FFFF,
+        ],
+        [ "non-character code point U+9FFFE",
+            (isASCII)
+            ?              "\xf2\x9f\xbf\xbe"
+            : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
+            0x9FFFE,
+        ],
+        [ "non-character code point U+9FFFF",
+            (isASCII)
+            ?              "\xf2\x9f\xbf\xbf"
+            : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
+            0x9FFFF,
+        ],
+        [ "non-character code point U+AFFFE",
+            (isASCII)
+            ?              "\xf2\xaf\xbf\xbe"
+            : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
+            0xAFFFE,
+        ],
+        [ "non-character code point U+AFFFF",
+            (isASCII)
+            ?              "\xf2\xaf\xbf\xbf"
+            : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
+            0xAFFFF,
+        ],
+        [ "non-character code point U+BFFFE",
+            (isASCII)
+            ?              "\xf2\xbf\xbf\xbe"
+            : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
+            0xBFFFE,
+        ],
+        [ "non-character code point U+BFFFF",
+            (isASCII)
+            ?              "\xf2\xbf\xbf\xbf"
+            : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
+            0xBFFFF,
+        ],
+        [ "non-character code point U+CFFFE",
+            (isASCII)
+            ?              "\xf3\x8f\xbf\xbe"
+            : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
+            0xCFFFE,
+        ],
+        [ "non-character code point U+CFFFF",
+            (isASCII)
+            ?              "\xf3\x8f\xbf\xbf"
+            : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
+            0xCFFFF,
+        ],
+        [ "non-character code point U+DFFFE",
+            (isASCII)
+            ?              "\xf3\x9f\xbf\xbe"
+            : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
+            0xDFFFE,
+        ],
+        [ "non-character code point U+DFFFF",
+            (isASCII)
+            ?              "\xf3\x9f\xbf\xbf"
+            : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
+            0xDFFFF,
+        ],
+        [ "non-character code point U+EFFFE",
+            (isASCII)
+            ?              "\xf3\xaf\xbf\xbe"
+            : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
+            0xEFFFE,
+        ],
+        [ "non-character code point U+EFFFF",
+            (isASCII)
+            ?              "\xf3\xaf\xbf\xbf"
+            : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
+            0xEFFFF,
+        ],
+        [ "non-character code point U+FFFFE",
+            (isASCII)
+            ?              "\xf3\xbf\xbf\xbe"
+            : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
+            0xFFFFE,
+        ],
+        [ "non-character code point U+FFFFF",
+            (isASCII)
+            ?              "\xf3\xbf\xbf\xbf"
+            : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
+            0xFFFFF,
+        ],
+        [ "non-character code point U+10FFFE",
+            (isASCII)
+            ?              "\xf4\x8f\xbf\xbe"
+            : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
+            0x10FFFE,
+        ],
+        [ "non-character code point U+10FFFF",
+            (isASCII)
+            ?              "\xf4\x8f\xbf\xbf"
+            : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
+            0x10FFFF,
+        ],
+        [ "requires at least 32 bits",
+            (isASCII)
+            ?  "\xfe\x82\x80\x80\x80\x80\x80"
+            : I8_to_native(
+                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+            # This code point is chosen so that it is representable in a UV on
+            # 32-bit machines
+            0x80000000,
+            (isASCII) ? 1 : 8,
+        ],
+        [ "highest 32 bit code point",
+            (isASCII)
+            ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+            : I8_to_native(
+               "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
+            0xFFFFFFFF,
+            (isASCII) ? 1 : 8,
+        ],
+        [ "requires at least 32 bits, and use SUPER-type flags, instead of"
+        . " ABOVE_31_BIT",
+            (isASCII)
+            ? "\xfe\x82\x80\x80\x80\x80\x80"
+            : I8_to_native(
             "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-        # This code point is chosen so that it is representable in a UV on
-        # 32-bit machines
-        0x80000000,
-        (isASCII) ? 1 : 8,
-    ],
-    [ "highest 32 bit code point",
-        (isASCII)
-         ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
-         : I8_to_native(
-            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
-        0xFFFFFFFF,
-        (isASCII) ? 1 : 8,
-    ],
-    [ "requires at least 32 bits, and use SUPER-type flags, instead of"
-    . " ABOVE_31_BIT",
-        (isASCII)
-         ? "\xfe\x82\x80\x80\x80\x80\x80"
-         : I8_to_native(
-           "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-        0x80000000,
-        1,
-    ],
-    [ "overflow with warnings/disallow for more than 31 bits",
-        # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
-        # with overflow.  The overflow malformation is never allowed, so
-        # preventing it takes precedence if the ABOVE_31_BIT options would
-        # otherwise allow in an overflowing value.  The ASCII code points (1
-        # for 32-bits; 1 for 64) were chosen because the old overflow
-        # detection algorithm did not catch them; this means this test also
-        # checks for that fix.  The EBCDIC are arbitrary overflowing ones
-        # since we have no reports of failures with it.
-       (($::is64bit)
-        ? ((isASCII)
-           ?    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-           : I8_to_native(
-                "\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
-        : ((isASCII)
-           ?    "\xfe\x86\x80\x80\x80\x80\x80"
-           : I8_to_native(
-                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
-        -1,
-        (isASCII || $::is64bit) ? 2 : 8,
-    ],
-);
+            0x80000000,
+            1,
+        ],
+        [ "overflow with warnings/disallow for more than 31 bits",
+            # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
+            # with overflow.  The overflow malformation is never allowed, so
+            # preventing it takes precedence if the ABOVE_31_BIT options would
+            # otherwise allow in an overflowing value.  The ASCII code points (1
+            # for 32-bits; 1 for 64) were chosen because the old overflow
+            # detection algorithm did not catch them; this means this test also
+            # checks for that fix.  The EBCDIC are arbitrary overflowing ones
+            # since we have no reports of failures with it.
+        (($::is64bit)
+            ? ((isASCII)
+            ?    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+            : I8_to_native(
+                    "\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
+            : ((isASCII)
+            ?    "\xfe\x86\x80\x80\x80\x80\x80"
+            : I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
+            -1,
+            (isASCII || $::is64bit) ? 2 : 8,
+        ],
+    );
 
-if (! $::is64bit) {
-    if (isASCII) {
+    if (! $::is64bit) {
+        if (isASCII) {
+            no warnings qw{portable overflow};
+            push @tests,
+                [ "Lowest 33 bit code point: overflow",
+                    "\xFE\x84\x80\x80\x80\x80\x80",
+                    -1,
+                    1,
+                ];
+        }
+    }
+    else {
         no warnings qw{portable overflow};
         push @tests,
-            [ "Lowest 33 bit code point: overflow",
-                "\xFE\x84\x80\x80\x80\x80\x80",
-                -1,
-                1,
+            [ "More than 32 bits",
+                (isASCII)
+                ?       "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
+                : I8_to_native(
+                        "\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                0x1000000000,
+                (isASCII) ? 1 : 7,
             ];
-    }
-}
-else {
-    no warnings qw{portable overflow};
-    push @tests,
-        [ "More than 32 bits",
-            (isASCII)
-            ?       "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
-            : I8_to_native(
-                    "\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-            0x1000000000,
-            (isASCII) ? 1 : 7,
-        ];
-    if (! isASCII) {
-        push @tests,   # These could falsely show wrongly in a naive
-                       # implementation
-            [ "requires at least 32 bits",
-                I8_to_native(
+        if (! isASCII) {
+            push @tests,    # These could falsely show wrongly in a naive
+                            # implementation
+                [ "requires at least 32 bits",
+                    I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x800000000,
-                7,
-            ],
-            [ "requires at least 32 bits",
-                I8_to_native(
+                    0x800000000,
+                    7,
+                ],
+                [ "requires at least 32 bits",
+                    I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x10000000000,
-                6,
-            ],
-            [ "requires at least 32 bits",
-                I8_to_native(
+                    0x10000000000,
+                    6,
+                ],
+                [ "requires at least 32 bits",
+                    I8_to_native(
                     "\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x200000000000,
-                5,
-            ],
-            [ "requires at least 32 bits",
-                I8_to_native(
+                    0x200000000000,
+                    5,
+                ],
+                [ "requires at least 32 bits",
+                    I8_to_native(
                     "\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x4000000000000,
-                4,
-            ],
-            [ "requires at least 32 bits",
-                I8_to_native(
+                    0x4000000000000,
+                    4,
+                ],
+                [ "requires at least 32 bits",
+                    I8_to_native(
                     "\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x80000000000000,
-                3,
-            ],
-            [ "requires at least 32 bits",
-                I8_to_native(
+                    0x80000000000000,
+                    3,
+                ],
+                [ "requires at least 32 bits",
+                    I8_to_native(
                     "\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x1000000000000000,
-                2,
-            ];
+                    0x1000000000000000,
+                    2,
+                ];
+        }
     }
-}
 
 sub flags_to_text($$)
 {
@@ -532,7 +597,7 @@ foreach my $test (@tests) {
                                             |$::UNICODE_DISALLOW_SURROGATE;
         $controlling_warning_category = 'non_unicode';
 
-        if ($will_overflow) {
+        if ($will_overflow) {  # This is realy a malformation
             $non_cp_trailing_text = "if you see this, there is an error";
             $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
         }
@@ -617,9 +682,10 @@ foreach my $test (@tests) {
 
     die 'Didn\'t set $needed_to_discern_len for ' . $testname
                                         unless defined $needed_to_discern_len;
-    {
-        use warnings;
+    {   # First test the isFOO calls
+        use warnings;   # Make sure these don't raise warnings
         undef @warnings_gotten;
+
         my $ret = test_isUTF8_CHAR($bytes, $length);
         my $ret_flags = test_isUTF8_CHAR_flags($bytes, $length, 0);
         if ($will_overflow) {
@@ -673,7 +739,7 @@ foreach my $test (@tests) {
             is($ret, $expected_ret, "    And isC9_STRICT_UTF8_CHAR()"
                                    ." returns expected length: $expected_ret");
             $ret = test_isUTF8_CHAR_flags($bytes, $length,
-                                          $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
+                                        $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
             is($ret, $expected_ret,
                   "    And isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE')"
                 . " acts like isC9_STRICT_UTF8_CHAR");
@@ -726,26 +792,24 @@ foreach my $test (@tests) {
         }
     }
 
+    # Now test the to/from UTF-8 calls
     # This is more complicated than the malformations tested in other files in
     # this directory, as there are several orthogonal variables involved.  We
     # test most possible combinations
-      foreach my $do_disallow (0, 1) {
-        next if $skip_most_tests && ! $do_disallow;
+    foreach my $do_disallow (0, 1) {
+      next if $skip_most_tests && ! $do_disallow;
 
-            # We try various combinations of malformations that can occur
-            foreach my $short ("", "short") {
-              next if $skip_most_tests && $short;
-              foreach my $unexpected_noncont ("",
-                                              "unexpected non-continuation")
-              {
-                next if $skip_most_tests && $unexpected_noncont;
-                foreach my $overlong ("", "overlong") {
-                    next if $overlong && $skip_most_tests;
+      # We try various combinations of malformations that can occur
+      foreach my $short ("", "short") {
+        next if $skip_most_tests && $short;
+        foreach my $unexpected_noncont ("", "unexpected non-continuation") {
+          next if $skip_most_tests && $unexpected_noncont;
+          foreach my $overlong ("", "overlong") {
+            next if $overlong && $skip_most_tests;
 
-                    # If we're creating an overlong, it can't be longer than
-                    # the maximum length, so skip if we're already at that
-                    # length.
-                    next if $overlong && $length >= $::max_bytes;
+            # If we're creating an overlong, it can't be longer than the
+            # maximum length, so skip if we're already at that length.
+            next if $overlong && $length >= $::max_bytes;
 
               # We classify the warnings into certain "interesting" types,
               # described later
@@ -753,6 +817,8 @@ foreach my $test (@tests) {
                 next if $skip_most_tests && $warning_type != 1;
                 foreach my $use_warn_flag (0, 1) {
                     next if $skip_most_tests && ! $use_warn_flag;
+
+                    # Finally, here is the inner loop
 
                     my $this_utf8n_flag_to_warn = $utf8n_flag_to_warn;
                     my $this_utf8n_flag_to_disallow = $utf8n_flag_to_disallow;
@@ -855,28 +921,28 @@ foreach my $test (@tests) {
                     # certain other things now, like whether we expect a
                     # return flag from this malformation and which flag.
                     if ($overlong) {
-                            # For an overlong, we convert the original
-                            # start byte into a continuation byte with
-                            # the same data bits as originally. ...
-                            substr($this_bytes, 0, 1)
-                                = start_byte_to_cont(substr($this_bytes,
-                                                            0, 1));
 
-                            # ... Then we prepend it with a known
-                            # overlong sequence.  This should evaluate
-                            # to the exact same code point as the
-                            # original.
-                            $this_bytes
-                            = I8_to_native("\xff")
-                            . (I8_to_native(chr $::lowest_continuation)
-                            x ( $::max_bytes - 1 - length($this_bytes)))
-                            . $this_bytes;
-                            $this_length = length($this_bytes);
-                            $this_needed_to_discern_len
-                                 = $::max_bytes - ($this_expected_len
+                        # To force this malformation, we convert the original
+                        # start byte into a continuation byte with the same
+                        # data bits as originally. ...
+                        substr($this_bytes, 0, 1)
+                            = start_byte_to_cont(substr($this_bytes,
+                                                        0, 1));
+
+                        # ... Then we prepend it with a known overlong
+                        # sequence.  This should evaluate to the exact same
+                        # code point as the original.
+                        $this_bytes
+                        =  I8_to_native("\xff")
+                        . (I8_to_native(chr $::lowest_continuation)
+                        x ( $::max_bytes - 1 - length($this_bytes)))
+                        . $this_bytes;
+                        $this_length = length($this_bytes);
+                        $this_needed_to_discern_len
+                                = $::max_bytes - ($this_expected_len
                                                - $this_needed_to_discern_len);
-                            $this_expected_len = $::max_bytes;
-                            push @expected_return_flags, $::UTF8_GOT_LONG;
+                        $this_expected_len = $::max_bytes;
+                        push @expected_return_flags, $::UTF8_GOT_LONG;
                         push @malformation_names, $overlong;
                         if ($expect_warnings_for_malformed) {
                             if (   ! $short
@@ -1013,6 +1079,7 @@ foreach my $test (@tests) {
                                           : 'no flag for raising warnings');
                     $this_name .= $malformations_name;
 
+                    # Do the actual test using an eval
                     undef @warnings_gotten;
                     my $ret_ref;
                     my $this_flags = $this_warning_flags|$this_disallow_flags;
@@ -1121,8 +1188,8 @@ foreach my $test (@tests) {
 
                     # Now repeat some of the above, but for
                     # uvchr_to_utf8_flags().  Since this comes from an
-                    # existing code point, it hasn't overflowed, and
-                    # isn't malformed.
+                    # existing code point, it hasn't overflowed, and isn't
+                    # malformed.
                     next if @malformation_names;
 
                     $this_warning_flags = ($use_warn_flag)
@@ -1175,9 +1242,9 @@ foreach my $test (@tests) {
                       or diag "Call was: " . uvchr_display_call($eval_text);
                 }
               }
-            }
           }
         }
+      }
     }
 }
 
