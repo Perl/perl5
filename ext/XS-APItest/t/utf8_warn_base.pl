@@ -285,16 +285,19 @@ my @tests;
             0xFFFFFFFF,
             (isASCII) ? 1 : 8,
         ],
+        [ "Lowest 33 bit code point",
+            (isASCII)
+            ?  "\xfe\x84\x80\x80\x80\x80\x80"
+            : I8_to_native(
+                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
+            ($::is64bit) ? 0x100000000 : -1,   # Overflows on 32-bit systems
+            (isASCII && ! $::is64bit) ? 2 : 1,
+        ],
     );
 
     if (! $::is64bit) {
         if (isASCII) {
             push @tests,
-                [ "Lowest 33 bit code point: overflow",
-                    "\xFE\x84\x80\x80\x80\x80\x80",
-                    -1,
-                    1,
-                ],
                 [ "overflow that old algorithm failed to detect",
                     "\xfe\x86\x80\x80\x80\x80\x80",
                     -1,
