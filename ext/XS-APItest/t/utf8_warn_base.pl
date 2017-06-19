@@ -861,8 +861,6 @@ foreach my $test (@tests) {
             next if     $malformed_allow_type == 2
                     && ($will_overflow || $short || $unexpected_noncont);
             next if $skip_most_tests && $malformed_allow_type;
-            local $TODO = "Warning messages don't return correct code point"
-                        . " for allowed malformations" if $malformed_allow_type;
 
             # Here we are in the innermost loop for malformations.  So we
             # know which ones are in effect.  Can now change the input to be

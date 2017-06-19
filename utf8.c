@@ -1415,7 +1415,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
 
             /* Each 'if' clause handles one problem.  They are ordered so that
              * the first ones' messages will be displayed before the later
-             * ones; this is kinda in decreasing severity order */
+             * ones; this is kinda in decreasing severity order.  But the
+             * overlong must come last, as it changes 'uv' looked at by the
+             * others */
             if (possible_problems & UTF8_GOT_OVERFLOW) {
 
                 /* Overflow means also got a super and are using Perl's
@@ -1544,63 +1546,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                                             printlen,
                                                             s - s0,
                                                             (int) expectlen));
-                    }
-                }
-            }
-            else if (possible_problems & UTF8_GOT_LONG) {
-                possible_problems &= ~UTF8_GOT_LONG;
-                *errors |= UTF8_GOT_LONG;
-
-                if (flags & UTF8_ALLOW_LONG) {
-
-                    /* We don't allow the actual overlong value, unless the
-                     * special extra bit is also set */
-                    if (! (flags & (   UTF8_ALLOW_LONG_AND_ITS_VALUE
-                                    & ~UTF8_ALLOW_LONG)))
-                    {
-                        uv = UNICODE_REPLACEMENT;
-                    }
-                }
-                else {
-                    disallowed = TRUE;
-
-                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
-                        pack_warn = packWARN(WARN_UTF8);
-
-                        /* These error types cause 'uv' to be something that
-                         * isn't what was intended, so can't use it in the
-                         * message.  The other error types either can't
-                         * generate an overlong, or else the 'uv' is valid */
-                        if (orig_problems &
-                                        (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
-                        {
-                            message = Perl_form(aTHX_
-                                    "%s: %s (any UTF-8 sequence that starts"
-                                    " with \"%s\" is overlong which can and"
-                                    " should be represented with a"
-                                    " different, shorter sequence)",
-                                    malformed_text,
-                                    _byte_dump_string(s0, send - s0, 0),
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            U8 tmpbuf[UTF8_MAXBYTES+1];
-                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
-                                                                        uv, 0);
-                            const char * preface = (uv <= PERL_UNICODE_MAX)
-                                                   ? "U+"
-                                                   : "0x";
-                            message = Perl_form(aTHX_
-                                "%s: %s (overlong; instead use %s to represent"
-                                " %s%0*" UVXf ")",
-                                malformed_text,
-                                _byte_dump_string(s0, curlen, 0),
-                                _byte_dump_string(tmpbuf, e - tmpbuf, 0),
-                                preface,
-                                ((uv < 256) ? 2 : 4), /* Field width of 2 for
-                                                         small code points */
-                                uv);
-                        }
                     }
                 }
             }
@@ -1747,6 +1692,63 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 if (flags & UTF8_DISALLOW_NONCHAR) {
                     disallowed = TRUE;
                     *errors |= UTF8_GOT_NONCHAR;
+                }
+            }
+            else if (possible_problems & UTF8_GOT_LONG) {
+                possible_problems &= ~UTF8_GOT_LONG;
+                *errors |= UTF8_GOT_LONG;
+
+                if (flags & UTF8_ALLOW_LONG) {
+
+                    /* We don't allow the actual overlong value, unless the
+                     * special extra bit is also set */
+                    if (! (flags & (   UTF8_ALLOW_LONG_AND_ITS_VALUE
+                                    & ~UTF8_ALLOW_LONG)))
+                    {
+                        uv = UNICODE_REPLACEMENT;
+                    }
+                }
+                else {
+                    disallowed = TRUE;
+
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+
+                        /* These error types cause 'uv' to be something that
+                         * isn't what was intended, so can't use it in the
+                         * message.  The other error types either can't
+                         * generate an overlong, or else the 'uv' is valid */
+                        if (orig_problems &
+                                        (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
+                        {
+                            message = Perl_form(aTHX_
+                                    "%s: %s (any UTF-8 sequence that starts"
+                                    " with \"%s\" is overlong which can and"
+                                    " should be represented with a"
+                                    " different, shorter sequence)",
+                                    malformed_text,
+                                    _byte_dump_string(s0, send - s0, 0),
+                                    _byte_dump_string(s0, curlen, 0));
+                        }
+                        else {
+                            U8 tmpbuf[UTF8_MAXBYTES+1];
+                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
+                                                                        uv, 0);
+                            const char * preface = (uv <= PERL_UNICODE_MAX)
+                                                   ? "U+"
+                                                   : "0x";
+                            message = Perl_form(aTHX_
+                                "%s: %s (overlong; instead use %s to represent"
+                                " %s%0*" UVXf ")",
+                                malformed_text,
+                                _byte_dump_string(s0, send - s0, 0),
+                                _byte_dump_string(tmpbuf, e - tmpbuf, 0),
+                                preface,
+                                ((uv < 256) ? 2 : 4), /* Field width of 2 for
+                                                         small code points */
+                                uv);
+                        }
+                    }
                 }
             } /* End of looking through the possible flags */
 
