@@ -70,7 +70,7 @@ my %format_qrs;
                     "("
                     . "\\s*-?\\d+\."
                     . "\\d" x length($2)
-                    ."|-)"
+                    ."|\\s+-)"
                }ge;
         $format_qrs{$name} = qr/\A$f\z/;
     }
@@ -157,12 +157,42 @@ for my $test (
         "croak: select-a-perl ambiguous"
     ],
     [
-        " ./perl ./perl",
+        "./perl --foo",
+        "Error: unrecognised executable switch '--foo'\n",
+        "croak: ./perl --foo"
+    ],
+    [
+        "-- --args=foo",
+        "Error: --args without a preceding executable name\n",
+        "croak: --args without perl"
+    ],
+    [
+        "-- --env=foo=bar",
+        "Error: --env without a preceding executable name\n",
+        "croak: --env without perl"
+    ],
+    [
+        "./perl --args",
+        "Error: --args is missing value\n",
+        "croak: --args without value"
+    ],
+    [
+        "./perl --env",
+        "Error: --env is missing value\n",
+        "croak: --env without value"
+    ],
+    [
+        "./perl --env='FOO'",
+        "Error: --env is missing =value\n",
+        "croak: --env without =value"
+    ],
+    [
+        "./perl ./perl",
         "Error: duplicate label './perl': each executable must have a unique label\n",
         "croak: duplicate label ./perl ./perl"
     ],
     [
-        " ./perl=A ./miniperl=A",
+        "./perl=A ./miniperl=A",
         "Error: duplicate label 'A': each executable must have a unique label\n",
         "croak: duplicate label =A =A"
     ],
@@ -175,6 +205,11 @@ for my $test (
         "--read=t/porting/bench/callsub.json ./perl",
         "Error: duplicate label './perl': seen both in --read file and on command line\n",
         "croak: duplicate label --read=... ./perl"
+    ],
+    [
+        "./nosuch-perl",
+        qr{^\QError: unable to execute './nosuch-perl': },
+        "croak:  no such perl"
     ],
     [
         "--grindargs=Boz --tests=call::sub::empty ./perl=A ./perl=B",
@@ -381,6 +416,15 @@ $out = qx($bench_cmd --read=t/porting/bench/callsub.json --tests=call::sub::empt
 $out =~ s{^\./perl}{p0}m;
 $out =~ s{\Q./perl}{    p0};
 like $out, $format_qrs{percent2}, "1 read; 1 generate";
+
+# Process environment and optional args.
+# This is a minimal test that it runs - it doesn't test whether
+# the environment and args are getting applied correctly, apart from the
+# fact that the perls in question are being successfully executed.
+
+note("running cachegrind on 2 perls; may be slow...");
+$out = qx($bench_cmd --tests=call::sub::empty --perlargs=-Ilib $^X=p0 --args='-Ifoo/bar -Mstrict' --env='FOO=foo' $^X=p1 --args='-Ifoo/bar' --env='BAR=bar' --env='BAZ=baz' 2>&1);
+like $out, $format_qrs{percent2}, "2 perls with args and env";
 
 
 

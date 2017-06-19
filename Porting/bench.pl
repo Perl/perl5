@@ -14,11 +14,11 @@ perls.
     # Basic: run the tests in t/perf/benchmarks against two or
     # more perls
 
-    bench.pl [options] -- perlA[=labelA] perlB[=labelB] ...
+    bench.pl [options] perlA[=labelA] perlB[=labelB] ...
 
     # run the tests against the same perl twice, with varying options
 
-    bench.pl [options] -- perlA=bigint -Mbigint perlA=int
+    bench.pl [options] perlA=bigint --args='-Mbigint' perlA=int
 
     # Run bench on blead, saving results to file; then modify the blead
     # binary, and benchmark again, comparing against the saved results
@@ -56,7 +56,28 @@ perl over and over, or have two perl executables built at the same time.
 
 The optional C<=label> after each perl executable is used in the display
 output. If you are doing a two step benchmark then you should provide
-a label for at least the "base" perl.
+a label for at least the "base" perl. If a label isn't specified, it
+defaults to the name of the perl executable. Labels must be unique across
+all current executables, plus any previous ones obtained via --read.
+
+In its most general form, the specification of a perl executable is:
+
+    path/perl=+mylabel --args='-foo -bar' --env='A=a' --env='B=b'
+
+This defines how to run the executable F<path/perl>. It has a label,
+which due to the C<+>, is appended to the binary name to give a label of
+C<path/perl=+mylabel> (without the C<+>, the label would be just
+C<mylabel>).
+
+It can be optionally followed by one or more C<--args> or C<--env>
+switches, which specify extra command line arguments or environment
+variables to use when invoking that executable. Each C<--env> switch
+should be of the form C<--env=VARABLE=value>. Any C<--arg> values are
+concatenated with a space, along with the global C<--perlargs> value if
+any. The above would cause a system() call looking something like:
+
+    PERL_HASH_SEED=0 A=a= B=b valgrind --tool=cachegrind \
+        path/perl -foo -bar ....
 
 =head1 OPTIONS
 
@@ -230,8 +251,18 @@ of CPUs available.
 
 --perlargs=I<foo>
 
-Optional command-line arguments to pass to each perl-under-test
-(perlA, perlB in synopsis) For example, C<--perlargs=-Ilib>.
+Optional command-line arguments to pass to every perl executable.  This
+may optionaly be combined with C<--args>s switches following individual
+perls. For example:
+
+    bench.pl --perlargs='-Ilib -It/lib' .... \
+        perlA --args='-Mstrict' \
+        perlB --args='-Mwarnings'
+
+would cause the invocations
+
+    perlA -Ilib -It/lib -Mstrict
+    perlB -Ilib -It/lib -Mwarnings
 
 =back
 
@@ -429,9 +460,13 @@ Output:
 The command line ends with one or more specified perl executables,
 which will be searched for in the current \$PATH. Each binary name may
 have an optional =LABEL appended, which will be used rather than the
-executable name in output. E.g.
+executable name in output. The labels must be unique across all current
+executables and previous runs obtained via --read. Each executable may
+optionally be succeeded by --args= and --env= to specify per-executable
+arguments and environmenbt variables:
 
-    perl-5.20.1=PRE-BUGFIX  perl-5.20.1-new=POST-BUGFIX
+    perl-5.24.0=strict --args='-Mwarnings -Mstrict' --env='FOO=foo' \
+    perl-5.24.0=plain
 EOF
 }
 
@@ -625,21 +660,54 @@ sub select_a_perl {
 }
 
 
-# Validate the list of perl=label (+ cmdline options) on the command line.
-# Return a list of [ exe, label, cmdline-options ] tuples, i.e.
-# 'perl-under-test's (PUTs)
+# Validate the list of perl executables on the command line.
+# The general form is
+#
+#      a_perl_exe[=label] [ --args='perl args'] [ --env='FOO=foo' ]
+#
+# Return a list of [ exe, label, {env}, 'args' ] tuples
 
-sub process_puts {
-    my $read_perls= shift;
-    my @res_puts; # returned, each item is [ perlexe, label, @putargs ]
+sub process_executables_list {
+    my ($read_perls, @cmd_line_args) = @_;
+
+    my @results; # returned, each item is [ perlexe, label, {env}, 'args' ]
     my %seen_from_reads = map { $_->[1] => 1 } @$read_perls;
     my %seen;
     my @putargs; # collect not-perls into args per PUT
 
-    for my $p (reverse @_) {
-        push @putargs, $p and next if $p =~ /^-/; # not-perl, dont send to qx//
+    while (@cmd_line_args) {
+        my $item = shift @cmd_line_args;
 
-        my ($perl, $label, $env) = split /[=:,]/, $p, 3;
+        if ($item =~ /^--(.*)$/) {
+            my ($switch, $val) = split /=/, $1, 2;
+            die "Error: unrecognised executable switch '--$switch'\n"
+                unless $switch =~  /^(args|env)$/;
+
+            die "Error: --$switch without a preceding executable name\n"
+                unless @results;
+
+            unless (defined $val) {
+                $val = shift @cmd_line_args;
+                die "Error: --$switch is missing value\n"
+                    unless defined $val;
+            }
+
+            if ($switch eq 'args') {
+                $results[-1][3] .= " $val";
+            }
+            else {
+                # --env
+                $val =~ /^(\w+)=(.*)$/
+                    or die "Error: --env is missing =value\n";
+                $results[-1][2]{$1} = $2;
+            }
+
+            next;
+        }
+
+        # whatever is left must be the name of an executable
+
+        my ($perl, $label) = split /=/, $item, 2;
         $label //= $perl;
         $label = $perl.$label if $label =~ /^\+/;
 
@@ -651,23 +719,18 @@ sub process_puts {
                         . "seen both in --read file and on command line\n"
             if $seen_from_reads{$label};
 
-        my %env;
-        if ($env) {
-            %env = split /[=,]/, $env;
-        }
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
-        if ($r eq "ok\n") {
-	    push @res_puts, [ $perl, $label, \%env, reverse @putargs ];
-            @putargs = ();
-            warn "Added Perl-Under-Test: [ @{[@{$res_puts[-1]}]} ]\n"
-                if $OPTS{verbose};
-	} else {
-            warn "perl-under-test args: @putargs + a not-perl: $p $r\n"
-                if $OPTS{verbose};
-            push @putargs, $p; # not-perl
-	}
+        die "Error: unable to execute '$perl': $r\n" if $r ne "ok\n";
+
+        push @results, [ $perl, $label,  { }, '' ];
     }
-    return reverse @res_puts;
+
+    # make args '' by default
+    for (@results) {
+        push @$_, '' unless @$_ > 3;
+    }
+
+    return @results;
 }
 
 
@@ -857,7 +920,7 @@ sub do_grind {
                 read_tests_file($OPTS{benchfile} // 't/perf/benchmarks');
         }
 
-        @run_perls = process_puts($perls, @$perl_args);
+        @run_perls = process_executables_list($perls, @$perl_args);
         push @$perls, @run_perls;
     }
 
@@ -978,7 +1041,7 @@ sub grind_run {
         );
 
         for my $p (@$perls) {
-            my ($perl, $label, $env, @putargs) = @$p;
+            my ($perl, $label, $env, $args) = @$p;
 
             # Run both the empty loop and the active loop
             # $counts->[0] and $counts->[1] times.
@@ -993,7 +1056,7 @@ sub grind_run {
                             . "valgrind --tool=cachegrind  --branch-sim=yes "
                             . "--cachegrind-out-file=/dev/null "
                             . "$OPTS{grindargs} "
-                            . "$perl $OPTS{perlargs} @putargs - $counts->[$j] 2>&1";
+                            . "$perl $OPTS{perlargs} $args - $counts->[$j] 2>&1";
                     # for debugging and error messages
                     my $id = "$test/$label "
                         . ($i ? "active" : "empty") . "/"
