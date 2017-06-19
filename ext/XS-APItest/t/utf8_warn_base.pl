@@ -304,17 +304,13 @@ my @tests;
     }
 
     if ($::is64bit) {
-        push @tests,
-            [ "More than 32 bits",
-                (isASCII)
-                ?       "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
-                : I8_to_native(
-                        "\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                0x1000000000,
-                (isASCII) ? 1 : 7,
-            ];
         if (isASCII) {
             push @tests,
+                [ "Lowest code point requiring 13 bytes to represent",
+                    "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
+                    0x1000000000,
+                    1,
+                ],
                 [ "overflow that old algorithm failed to detect",
                     "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
                     -1,
