@@ -1587,12 +1587,16 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                             U8 tmpbuf[UTF8_MAXBYTES+1];
                             const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
                                                                         uv, 0);
+                            const char * preface = (uv <= PERL_UNICODE_MAX)
+                                                   ? "U+"
+                                                   : "0x";
                             message = Perl_form(aTHX_
                                 "%s: %s (overlong; instead use %s to represent"
-                                " U+%0*" UVXf ")",
+                                " %s%0*" UVXf ")",
                                 malformed_text,
                                 _byte_dump_string(s0, curlen, 0),
                                 _byte_dump_string(tmpbuf, e - tmpbuf, 0),
+                                preface,
                                 ((uv < 256) ? 2 : 4), /* Field width of 2 for
                                                          small code points */
                                 uv);

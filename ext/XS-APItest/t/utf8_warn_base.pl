@@ -953,11 +953,14 @@ foreach my $test (@tests) {
                                         = display_bytes_no_quotes($this_bytes);
                                 my $correct_bytes
                                              = display_bytes_no_quotes($bytes);
+                                my $prefix = ($allowed_uv > 0x10FFFF)
+                                             ? "0x"
+                                             : "U+";
                                 push @expected_warnings,
                                      qr/\QMalformed UTF-8 character:\E
                                         \Q $overlong_bytes (overlong;\E
                                         \Q instead use $correct_bytes to\E
-                                        \Q represent U+$uv_string)/x;
+                                        \Q represent $prefix$uv_string)/x;
                             }
                             else {
                                 push @expected_warnings, qr/overlong/;
