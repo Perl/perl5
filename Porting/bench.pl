@@ -895,10 +895,10 @@ sub do_grind {
                 . "'$file'=(@$read_loop_counts))\n";
             }
 
-            push @$perls, @{$hash->{perls}};
-            foreach my $test (keys %{$hash->{results}}) {
-                foreach my $perl (keys %{$hash->{results}{$test}}) {
-                    $results->{$test}{$perl}= $hash->{results}{$test}{$perl};
+            push @$perls, @{$read_perls};
+            foreach my $test (keys %{$read_results}) {
+                foreach my $label (keys %{$read_results->{$test}}) {
+                    $results->{$test}{$label}= $read_results->{$test}{$label};
                 }
             }
         }
