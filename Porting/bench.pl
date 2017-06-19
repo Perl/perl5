@@ -593,10 +593,18 @@ sub filter_tests {
     else {
         my %t;
         for (split /,/, $opt) {
-            die "Error: no such test found: '$_'\n"
-                . ($OPTS{verbose} ? "  have: @{[ sort keys %$tests ]}\n" : "")
-                unless exists $tests->{$_};
             $t{$_} = 1;
+            next if exists $tests->{$_};
+
+            my $e = "Error: no such test found: '$_'\n";
+            if ($OPTS{verbose}) {
+                $e .= "Valid test names are:\n";
+                $e .= "  $_\n" for sort keys %$tests;
+            }
+            else {
+                $e .= "Re-run with --verbose for a list of valid tests.\n";
+            }
+            die $e;
         }
         for (keys %$tests) {
             delete $tests->{$_} unless exists $t{$_};

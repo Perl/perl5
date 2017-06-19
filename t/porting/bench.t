@@ -118,8 +118,17 @@ for my $test (
     ],
     [
         "--tests=call::sub::empty,foo::bar::baz::boz perl",
-        "Error: no such test found: 'foo::bar::baz::boz'\n",
+          "Error: no such test found: 'foo::bar::baz::boz'\n"
+        . "Re-run with --verbose for a list of valid tests.\n",
         "croak: unknown test in --tests"
+    ],
+    [
+        "--verbose --tests=call::sub::empty,foo::bar::baz::boz --read=t/porting/bench/callsub.json",
+            "Error: no such test found: 'foo::bar::baz::boz'\n"
+          . "Valid test names are:\n"
+          . "  call::sub::amp_empty\n"
+          . "  call::sub::empty\n",
+        "croak: unknown test in --tests --verbose"
     ],
     [
         "--tests=/foo::bar::baz::boz/ perl",
