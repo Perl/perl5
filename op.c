@@ -3826,9 +3826,9 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	    PL_parser->in_my = FALSE;
 	    PL_parser->in_my_stash = NULL;
 	    apply_attrs(GvSTASH(gv),
-			(type == OP_RV2SV ? GvSV(gv) :
-			 type == OP_RV2AV ? MUTABLE_SV(GvAV(gv)) :
-			 type == OP_RV2HV ? MUTABLE_SV(GvHV(gv)) : MUTABLE_SV(gv)),
+			(type == OP_RV2SV ? GvSVn(gv) :
+			 type == OP_RV2AV ? MUTABLE_SV(GvAVn(gv)) :
+			 type == OP_RV2HV ? MUTABLE_SV(GvHVn(gv)) : MUTABLE_SV(gv)),
 			attrs);
 	}
 	o->op_private |= OPpOUR_INTRO;
