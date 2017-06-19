@@ -345,8 +345,8 @@ longer would return that name flagged as UTF-8.  [perl #131263]
 
 =item *
 
-The perl sprintf() function (via the underlying C function
-Perl_sv_vcatpvfn_flags()) has been heavily reworked to fix many minor
+The perl C<sprintf()> function (via the underlying C function
+C<Perl_sv_vcatpvfn_flags()>) has been heavily reworked to fix many minor
 bugs, including the integer wrapping of large width and precision
 specifiers and potential buffer overruns. It has also been made faster in
 many cases.
