@@ -55,20 +55,6 @@ my @tests;
             (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
             0xDFFF,
         ],
-        [ "first non_unicode",
-            (isASCII)
-            ?              "\xf4\x90\x80\x80"
-            : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
-            0x110000,
-            2,
-        ],
-        [ "non_unicode whose first byte tells that",
-            (isASCII)
-            ?              "\xf5\x80\x80\x80"
-            : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
-            (isASCII) ? 0x140000 : 0x200000,
-            1,
-        ],
         [ "first of 32 consecutive non-character code points",
             (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
             0xFDD0,
@@ -268,6 +254,20 @@ my @tests;
             ?              "\xf4\x8f\xbf\xbf"
             : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
             0x10FFFF,
+        ],
+        [ "first non_unicode",
+            (isASCII)
+            ?              "\xf4\x90\x80\x80"
+            : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
+            0x110000,
+            2,
+        ],
+        [ "non_unicode whose first byte tells that",
+            (isASCII)
+            ?              "\xf5\x80\x80\x80"
+            : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
+            (isASCII) ? 0x140000 : 0x200000,
+            1,
         ],
         [ "requires at least 32 bits",
             (isASCII)
