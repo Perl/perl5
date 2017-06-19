@@ -285,15 +285,6 @@ my @tests;
             0xFFFFFFFF,
             (isASCII) ? 1 : 8,
         ],
-        [ "requires at least 32 bits, and use SUPER-type flags, instead of"
-        . " ABOVE_31_BIT",
-            (isASCII)
-            ? "\xfe\x82\x80\x80\x80\x80\x80"
-            : I8_to_native(
-            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-            0x80000000,
-            1,
-        ],
     );
 
     if (! $::is64bit) {
