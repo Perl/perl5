@@ -70,7 +70,7 @@ This has been deprecated since Perl 5.24.
 
 =head2 Opening the same symbol as both a file and directory handle is no longer allowed
 
-Using open() and opendir() to associate both a filehandle and a dirhandle
+Using C<open()> and C<opendir()> to associate both a filehandle and a dirhandle
 to the same symbol (glob or scalar) has been deprecated since Perl 5.10.
 
 =head2 Use of bare C<< << >> to mean C<< <<"" >> is no longer allowed
@@ -97,7 +97,7 @@ This was deprecated in Perl 5.004.
 =head2 Use of strings with code points over 0xFF is not allowed for
 bitwise string operators
 
-Code points over 0xFF do not make sense for bitwise operators.
+Code points over C<0xFF> do not make sense for bitwise operators.
 
 =head2 Setting C<${^ENCODING}> to a defined value is now illegal
 
@@ -147,13 +147,13 @@ Note that these uses continue to raise a deprecation message.
 
 =item *
 
-File::Glob has been modified to remove unnecessary backtracking and
+L<File::Glob> has been modified to remove unnecessary backtracking and
 recursion, thanks to Russ Cox. See L<https://research.swtch.com/glob>
 for more details.
 
 =item *
 
-The ref() builtin is now much faster in boolean context, since it no
+The C<ref()> builtin is now much faster in boolean context, since it no
 longer bothers to construct a temporary string like C<Foo=ARRAY(0x134af48)>.
 
 =back
