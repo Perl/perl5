@@ -269,13 +269,11 @@ my @tests;
             (isASCII) ? 0x140000 : 0x200000,
             1,
         ],
-        [ "requires at least 32 bits",
+        [ "lowest 32 bit code point",
             (isASCII)
             ?  "\xfe\x82\x80\x80\x80\x80\x80"
             : I8_to_native(
                 "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-            # This code point is chosen so that it is representable in a UV on
-            # 32-bit machines
             0x80000000,
             (isASCII) ? 1 : 8,
         ],
