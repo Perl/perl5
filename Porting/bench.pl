@@ -632,7 +632,8 @@ sub select_a_perl {
 sub process_puts {
     my $read_perls= shift;
     my @res_puts; # returned, each item is [ perlexe, label, @putargs ]
-    my %seen= map { $_->[1] => 1 } @$read_perls;
+    my %seen_from_reads = map { $_->[1] => 1 } @$read_perls;
+    my %seen;
     my @putargs; # collect not-perls into args per PUT
 
     for my $p (reverse @_) {
@@ -641,7 +642,14 @@ sub process_puts {
         my ($perl, $label, $env) = split /[=:,]/, $p, 3;
         $label //= $perl;
         $label = $perl.$label if $label =~ /^\+/;
-        die "$label cannot be used on 2 different perls under test\n" if $seen{$label}++;
+
+        die "Error: duplicate label '$label': "
+                        . "each executable must have a unique label\n"
+            if $seen{$label}++;
+
+        die "Error: duplicate label '$label': "
+                        . "seen both in --read file and on command line\n"
+            if $seen_from_reads{$label};
 
         my %env;
         if ($env) {
@@ -739,7 +747,7 @@ sub do_grind {
 
     my ($loop_counts, $perls, $results, $tests, $order, @run_perls);
     my ($bisect_field, $bisect_min, $bisect_max);
-    my ($done_read, $processed, $averages);
+    my ($done_read, $processed, $averages, %seen_labels);
 
     if (defined $OPTS{bisect}) {
         ($bisect_field, $bisect_min, $bisect_max) = split /,/, $OPTS{bisect}, 3;
@@ -785,6 +793,13 @@ sub do_grind {
         # delete tests not matching --tests= criteria, if any
         filter_tests($read_results);
         filter_tests($read_tests);
+
+        for my $perl (@$read_perls) {
+            my $label = $perl->[1];
+            die "Error: duplicate label '$label': seen in file '$file'\n"
+                if exists $seen_labels{$label};
+            $seen_labels{$label}++;
+        }
 
         if (!$done_read) {
             ($loop_counts, $perls, $results, $tests, $order) =

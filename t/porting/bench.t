@@ -157,9 +157,24 @@ for my $test (
         "croak: select-a-perl ambiguous"
     ],
     [
+        " ./perl ./perl",
+        "Error: duplicate label './perl': each executable must have a unique label\n",
+        "croak: duplicate label ./perl ./perl"
+    ],
+    [
         " ./perl=A ./miniperl=A",
-        "A cannot be used on 2 different perls under test\n",
-        "croak: duplicate label"
+        "Error: duplicate label 'A': each executable must have a unique label\n",
+        "croak: duplicate label =A =A"
+    ],
+    [
+        "--read=t/porting/bench/callsub.json --read=t/porting/bench/callsub.json",
+        "Error: duplicate label './perl': seen in file 't/porting/bench/callsub.json'\n",
+        "croak: duplicate label --read=... --read=..."
+    ],
+    [
+        "--read=t/porting/bench/callsub.json ./perl",
+        "Error: duplicate label './perl': seen both in --read file and on command line\n",
+        "croak: duplicate label --read=... ./perl"
     ],
     [
         "--grindargs=Boz --tests=call::sub::empty ./perl=A ./perl=B",
@@ -247,7 +262,7 @@ for my $test (
     # note that callsub2.json was created using
     # ./perl -Ilib Porting/bench.pl \
     #    --tests='call::sub::empty,call::sub::args3' \
-    #                     --write=t/porting/bench/callsub2.json ./perl
+    #                     --write=t/porting/bench/callsub2.json ./perl=perl2
     [
            "--read=t/porting/bench/callsub.json "
         . " --read=t/porting/bench/callsub2.json",
@@ -355,8 +370,8 @@ is length($out), 0, "--bisect should produce no output"
 # multiple reads with differing test sets but common --tests subset
 
 $out = qx($bench_cmd --read=t/porting/bench/callsub.json  --read=t/porting/bench/callsub2.json --tests=call::sub::empty 2>&1);
+$out =~ s{\Q./perl  perl2}{    p0     p1};
 $out =~ s{^\./perl}{p0}m;
-$out =~ s{\Q./perl ./perl}{    p0     p1};
 like $out, $format_qrs{percent2}, "2 reads; overlapping test sets";
 
 # A read defines what benchmarks to run
