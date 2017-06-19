@@ -29,7 +29,10 @@ use warnings 'utf8';
 local $SIG{__WARN__} = sub { my @copy = @_;
                              push @warnings_gotten, map { chomp; $_ } @copy;
                            };
-my @tests = (
+my @tests;
+{
+    no warnings qw(portable overflow);
+    @tests = (
         # $testname,
         # $bytes,                  UTF-8 string
         # $allowed_uv,             code point $bytes evaluates to; -1 if
@@ -318,7 +321,6 @@ my @tests = (
 
     if (! $::is64bit) {
         if (isASCII) {
-            no warnings qw{portable overflow};
             push @tests,
                 [ "Lowest 33 bit code point: overflow",
                     "\xFE\x84\x80\x80\x80\x80\x80",
@@ -328,7 +330,6 @@ my @tests = (
         }
     }
     else {
-        no warnings qw{portable overflow};
         push @tests,
             [ "More than 32 bits",
                 (isASCII)
@@ -379,6 +380,7 @@ my @tests = (
                 ];
         }
     }
+}
 
 sub flags_to_text($$)
 {
