@@ -307,6 +307,23 @@ my @tests;
     }
 
     if ($::is64bit) {
+        push @tests,
+            [ "highest 64 bit code point",
+              (isASCII)
+              ? "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+              : I8_to_native(
+                "\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"),
+              0xFFFFFFFFFFFFFFFF,
+              (isASCII) ? 1 : 2,
+            ],
+            [ "first 65 bit code point",
+              (isASCII)
+              ? "\xff\x80\x9f\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
+              : I8_to_native(
+                "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+              -1,
+              (isASCII) ? 3 : 2,
+            ];
         if (isASCII) {
             push @tests,
                 [ "Lowest code point requiring 13 bytes to represent",
