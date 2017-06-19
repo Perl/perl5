@@ -296,27 +296,6 @@ my @tests;
             0x80000000,
             1,
         ],
-        [ "overflow with warnings/disallow for more than 31 bits",
-            # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
-            # with overflow.  The overflow malformation is never allowed, so
-            # preventing it takes precedence if the ABOVE_31_BIT options would
-            # otherwise allow in an overflowing value.  The ASCII code points (1
-            # for 32-bits; 1 for 64) were chosen because the old overflow
-            # detection algorithm did not catch them; this means this test also
-            # checks for that fix.  The EBCDIC are arbitrary overflowing ones
-            # since we have no reports of failures with it.
-        (($::is64bit)
-            ? ((isASCII)
-            ?    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-            : I8_to_native(
-                    "\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
-            : ((isASCII)
-            ?    "\xfe\x86\x80\x80\x80\x80\x80"
-            : I8_to_native(
-                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
-            -1,
-            (isASCII || $::is64bit) ? 2 : 8,
-        ],
     );
 
     if (! $::is64bit) {
@@ -326,10 +305,16 @@ my @tests;
                     "\xFE\x84\x80\x80\x80\x80\x80",
                     -1,
                     1,
+                ],
+                [ "overflow that old algorithm failed to detect",
+                    "\xfe\x86\x80\x80\x80\x80\x80",
+                    -1,
+                    2,
                 ];
         }
     }
-    else {
+
+    if ($::is64bit) {
         push @tests,
             [ "More than 32 bits",
                 (isASCII)
@@ -339,7 +324,15 @@ my @tests;
                 0x1000000000,
                 (isASCII) ? 1 : 7,
             ];
-        if (! isASCII) {
+        if (isASCII) {
+            push @tests,
+                [ "overflow that old algorithm failed to detect",
+                    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
+                    -1,
+                    3,
+                ];
+        }
+        else {
             push @tests,    # These could falsely show wrongly in a naive
                             # implementation
                 [ "requires at least 32 bits",
