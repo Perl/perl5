@@ -1,6 +1,6 @@
-# DerivedJoiningGroup-9.0.0.txt
-# Date: 2016-03-02, 18:54:59 GMT
-# © 2016 Unicode®, Inc.
+# DerivedJoiningGroup-10.0.0.txt
+# Date: 2017-02-17, 04:46:04 GMT
+# © 2017 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -630,6 +630,72 @@
 # ================================================
 
 08BD          ; African_Noon # Lo       ARABIC LETTER AFRICAN NOON
+
+# Total code points: 1
+
+# ================================================
+
+0860          ; Malayalam_Nga # Lo       SYRIAC LETTER MALAYALAM NGA
+
+# Total code points: 1
+
+# ================================================
+
+0861          ; Malayalam_Ja # Lo       SYRIAC LETTER MALAYALAM JA
+
+# Total code points: 1
+
+# ================================================
+
+0862          ; Malayalam_Nya # Lo       SYRIAC LETTER MALAYALAM NYA
+
+# Total code points: 1
+
+# ================================================
+
+0863          ; Malayalam_Tta # Lo       SYRIAC LETTER MALAYALAM TTA
+
+# Total code points: 1
+
+# ================================================
+
+0864          ; Malayalam_Nna # Lo       SYRIAC LETTER MALAYALAM NNA
+
+# Total code points: 1
+
+# ================================================
+
+0865          ; Malayalam_Nnna # Lo       SYRIAC LETTER MALAYALAM NNNA
+
+# Total code points: 1
+
+# ================================================
+
+0866          ; Malayalam_Bha # Lo       SYRIAC LETTER MALAYALAM BHA
+
+# Total code points: 1
+
+# ================================================
+
+0867          ; Malayalam_Ra # Lo       SYRIAC LETTER MALAYALAM RA
+
+# Total code points: 1
+
+# ================================================
+
+0868          ; Malayalam_Lla # Lo       SYRIAC LETTER MALAYALAM LLA
+
+# Total code points: 1
+
+# ================================================
+
+0869          ; Malayalam_Llla # Lo       SYRIAC LETTER MALAYALAM LLLA
+
+# Total code points: 1
+
+# ================================================
+
+086A          ; Malayalam_Ssa # Lo       SYRIAC LETTER MALAYALAM SSA
 
 # Total code points: 1
 

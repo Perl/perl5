@@ -1,6 +1,6 @@
-# ArabicShaping-9.0.0.txt
-# Date: 2016-02-24, 22:25:00 GMT [RP]
-# © 2016 Unicode®, Inc.
+# ArabicShaping-10.0.0.txt
+# Date: 2017-02-16, 00:00:00 GMT [RP, KW]
+# © 2017 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -86,7 +86,7 @@
 # Note: Code points that are not explicitly listed in this file are
 # either of joining type T or U:
 #
-# - Those that not explicitly listed that are of General Category Mn, Me, or Cf
+# - Those that are not explicitly listed and that are of General Category Mn, Me, or Cf
 #   have joining type T.
 # - All others not explicitly listed have joining type U.
 #
@@ -412,6 +412,20 @@
 0856; MANDAIC DUSHENNA; U; No_Joining_Group
 0857; MANDAIC KAD; U; No_Joining_Group
 0858; MANDAIC AIN; U; No_Joining_Group
+
+# Syriac Supplement Characters
+
+0860; MALAYALAM NGA; D; MALAYALAM NGA
+0861; MALAYALAM JA; U; MALAYALAM JA
+0862; MALAYALAM NYA; D; MALAYALAM NYA
+0863; MALAYALAM TTA; D; MALAYALAM TTA
+0864; MALAYALAM NNA; D; MALAYALAM NNA
+0865; MALAYALAM NNNA; D; MALAYALAM NNNA
+0866; MALAYALAM BHA; U; MALAYALAM BHA
+0867; MALAYALAM RA; R; MALAYALAM RA
+0868; MALAYALAM LLA; D; MALAYALAM LLA
+0869; MALAYALAM LLLA; R; MALAYALAM LLLA
+086A; MALAYALAM SSA; R; MALAYALAM SSA
 
 # Arabic Extended-A Characters
 

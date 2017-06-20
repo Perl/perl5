@@ -1,6 +1,6 @@
-# NamedSequences-9.0.0.txt
-# Date: 2016-05-26, 00:00:00 GMT [KW, LI]
-# © 2016 Unicode®, Inc.
+# NamedSequences-10.0.0.txt
+# Date: 2017-04-13, 01:00:00 GMT [KW, LI]
+# © 2017 Unicode®, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Unicode Character Database
@@ -36,6 +36,24 @@
 # to find entries in the list.
 
 # ================================================
+
+# Named keycap sequences for telephone keypad (used for emoji)
+# Provisional, 2015-05-05
+# FE0F added to the sequences, 2016-05-11
+# Approved 2017-05-12
+
+KEYCAP NUMBER SIGN;0023 FE0F 20E3
+KEYCAP ASTERISK;002A FE0F 20E3
+KEYCAP DIGIT ZERO;0030 FE0F 20E3
+KEYCAP DIGIT ONE;0031 FE0F 20E3
+KEYCAP DIGIT TWO;0032 FE0F 20E3
+KEYCAP DIGIT THREE;0033 FE0F 20E3
+KEYCAP DIGIT FOUR;0034 FE0F 20E3
+KEYCAP DIGIT FIVE;0035 FE0F 20E3
+KEYCAP DIGIT SIX;0036 FE0F 20E3
+KEYCAP DIGIT SEVEN;0037 FE0F 20E3
+KEYCAP DIGIT EIGHT;0038 FE0F 20E3
+KEYCAP DIGIT NINE;0039 FE0F 20E3
 
 # Latin letter plus accent combinations.
 # These are part of the original set of approved named sequences
@@ -523,7 +541,7 @@ KHMER VOWEL SIGN AAM;17B6 17C6
 
 # Entries for JIS X 0213 compatibility mapping.
 # Provisional 2008-11-07, Approved 2010-05-14
-# 
+#
 # Two of these were part of the original set of approved named sequences
 # for Unicode 4.1. 2005.
 

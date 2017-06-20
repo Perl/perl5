@@ -1,6 +1,6 @@
-# StandardizedVariants-9.0.0.txt
-# Date: 2015-11-20, 22:54:00 GMT [KW, LI, RP]
-# © 1991-2015 Unicode®, Inc.
+# StandardizedVariants-10.0.0.txt
+# Date: 2017-05-02, 01:00:00 GMT [KW, LI, RP]
+# © 2017 Unicode®, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Specification of the variation sequences that are defined in the
@@ -10,20 +10,29 @@
 # Unicode Character Database.
 #
 # Standardized variation sequences are defined in this file.
+#
 # Ideographic variation sequences are defined according to the registration
 # process specified in UTS #37, and are listed in the Ideographic
-# Variation Database. Only those two types of variation sequences
+# Variation Database.
+#
+# Emoji variation sequences are defined in the file
+# emoji-variation-sequences.txt, documented in UTS #51, Unicode Emoji.
+#
+# Only those three types of variation sequences
 # are sanctioned for use by conformant implementations.
 # In all other cases, use of a variation selector character does
 # not change the visual appearance of the preceding base character
 # from what it would have had in the absence of the variation selector.
 #
-# For more information on standardized variation sequences, 
-# see Section 23.4, Variation Selectors, 
-# in The Unicode Standard, Version 9.0.
+# For more information on standardized variation sequences,
+# see Section 23.4, Variation Selectors,
+# in The Unicode Standard, Version 10.0.
 #
 # For more information on the Ideographic Variation Database,
 # see http://www.unicode.org/ivd/
+#
+# For more information on emoji variation sequences,
+# see http://www.unicode.org/reports/tr51/
 #
 # Format:
 #   Field 0: the variation sequence
@@ -37,7 +46,7 @@
 
 0030 FE00; short diagonal stroke form; # DIGIT ZERO
 2205 FE00; zero with long diagonal stroke overlay form; # EMPTY SET
-2229 FE00; with serifs; # INTERSECTION 
+2229 FE00; with serifs; # INTERSECTION
 222A FE00; with serifs; # UNION
 2268 FE00; with vertical stroke; # LESS-THAN BUT NOT EQUAL TO
 2269 FE00; with vertical stroke; # GREATER-THAN BUT NOT EQUAL TO
@@ -117,43 +126,41 @@ A868 FE00; phags-pa letter reversed shaping subjoined ya; # PHAGS-PA SUBJOINED L
 # Mongolian
 
 1820 180B; second form; isolate medial final # MONGOLIAN LETTER A
-1820 180C; third form; medial # MONGOLIAN LETTER A 
+1820 180C; third form; medial # MONGOLIAN LETTER A
 1821 180B; second form; initial final # MONGOLIAN LETTER E
 1822 180B; second form; medial # MONGOLIAN LETTER I
-1823 180B; second form; medial final # MONGOLIAN LETTER O 
-1824 180B; second form; medial # MONGOLIAN LETTER U 
-1825 180B; second form; medial final # MONGOLIAN LETTER OE 
-1825 180C; third form; medial # MONGOLIAN LETTER OE 
-1826 180B; second form; isolate medial final # MONGOLIAN LETTER UE 
-1826 180C; third form; medial # MONGOLIAN LETTER UE 
+1823 180B; second form; medial final # MONGOLIAN LETTER O
+1824 180B; second form; medial # MONGOLIAN LETTER U
+1825 180B; second form; medial final # MONGOLIAN LETTER OE
+1825 180C; third form; medial # MONGOLIAN LETTER OE
+1826 180B; second form; isolate medial final # MONGOLIAN LETTER UE
+1826 180C; third form; medial # MONGOLIAN LETTER UE
 1828 180B; second form; initial medial # MONGOLIAN LETTER NA
 1828 180C; third form; medial # MONGOLIAN LETTER NA
-1828 180D; separate form; medial # MONGOLIAN LETTER NA
-182A 180B; alternative form; final # MONGOLIAN LETTER BA
-182C 180B; second form; initial medial # MONGOLIAN LETTER QA
-182C 180B; feminine second form; isolate # MONGOLIAN LETTER QA 
+1828 180D; fourth form; medial # MONGOLIAN LETTER NA
+182A 180B; second form; final # MONGOLIAN LETTER BA
+182C 180B; second form; isolate initial medial # MONGOLIAN LETTER QA
 182C 180C; third form; medial # MONGOLIAN LETTER QA
 182C 180D; fourth form; medial # MONGOLIAN LETTER QA
-182D 180B; second form; initial medial # MONGOLIAN LETTER GA
-182D 180B; feminine form; final # MONGOLIAN LETTER GA
+182D 180B; second form; initial medial final # MONGOLIAN LETTER GA
 182D 180C; third form; medial # MONGOLIAN LETTER GA
-182D 180D; feminine form; medial # MONGOLIAN LETTER GA
+182D 180D; fourth form; medial # MONGOLIAN LETTER GA
 1830 180B; second form; final # MONGOLIAN LETTER SA
 1830 180C; third form; final # MONGOLIAN LETTER SA
-1832 180B; second form; medial # MONGOLIAN LETTER TA 
+1832 180B; second form; medial # MONGOLIAN LETTER TA
 1833 180B; second form; initial medial final # MONGOLIAN LETTER DA
 1835 180B; second form; medial # MONGOLIAN LETTER JA
-1836 180B; second form; initial medial # # MONGOLIAN LETTER YA
+1836 180B; second form; initial medial # MONGOLIAN LETTER YA
 1836 180C; third form; medial # MONGOLIAN LETTER YA
 1838 180B; second form; final # MONGOLIAN LETTER WA
 1844 180B; second form; medial # MONGOLIAN LETTER TODO E
-1845 180B; second form; medial # MONGOLIAN LETTER TODO I 
+1845 180B; second form; medial # MONGOLIAN LETTER TODO I
 1846 180B; second form; medial # MONGOLIAN LETTER TODO O
 1847 180B; second form; isolate medial final # MONGOLIAN LETTER TODO U
 1847 180C; third form; medial # MONGOLIAN LETTER TODO U
 1848 180B; second form; medial # MONGOLIAN LETTER TODO OE
 1849 180B; second form; isolate medial # MONGOLIAN LETTER TODO UE
-184D 180B; feminine form; initial medial # MONGOLIAN LETTER TODO QA
+184D 180B; second form; initial medial # MONGOLIAN LETTER TODO QA
 184E 180B; second form; medial # MONGOLIAN LETTER TODO GA
 185D 180B; second form; medial final # MONGOLIAN LETTER SIBE E
 185E 180B; second form; medial final # MONGOLIAN LETTER SIBE I
@@ -167,535 +174,17 @@ A868 FE00; phags-pa letter reversed shaping subjoined ya; # PHAGS-PA SUBJOINED L
 1873 180B; second form; medial final # MONGOLIAN LETTER MANCHU I
 1873 180C; third form; medial final # MONGOLIAN LETTER MANCHU I
 1873 180D; fourth form; medial # MONGOLIAN LETTER MANCHU I
-1874 180B; second form; medial # MONGOLIAN LETTER MANCHU KA
-1874 180B; feminine first final form; final # MONGOLIAN LETTER MANCHU KA
-1874 180C; feminine first medial form; medial # MONGOLIAN LETTER MANCHU KA
-1874 180C; feminine second final form; final # MONGOLIAN LETTER MANCHU KA 
-1874 180D; feminine second medial form; medial # MONGOLIAN LETTER MANCHU KA
+1874 180B; second form; medial final # MONGOLIAN LETTER MANCHU KA
+1874 180C; third form; medial final # MONGOLIAN LETTER MANCHU KA
+1874 180D; fourth form; medial # MONGOLIAN LETTER MANCHU KA
 1876 180B; second form; initial medial # MONGOLIAN LETTER MANCHU FA
 1880 180B; second form; # MONGOLIAN LETTER ALI GALI ANUSVARA ONE
 1881 180B; second form; # MONGOLIAN LETTER ALI GALI VISARGA ONE
 1887 180B; second form; isolate final # MONGOLIAN LETTER ALI GALI A
 1887 180C; third form; final # MONGOLIAN LETTER ALI GALI A
 1887 180D; fourth form; final # MONGOLIAN LETTER ALI GALI A
-1888 180B; second form; final # MONGOLIAN LETTER ALI GALI I 
+1888 180B; second form; final # MONGOLIAN LETTER ALI GALI I
 188A 180B; second form; initial medial # MONGOLIAN LETTER ALI GALI NGA
-
-# Emoji variation sequences for use as part of keycap symbols
-
-0023 FE0E; text style;  # NUMBER SIGN
-0023 FE0F; emoji style; # NUMBER SIGN
-002A FE0E; text style;  # ASTERISK
-002A FE0F; emoji style; # ASTERISK
-0030 FE0E; text style;  # DIGIT ZERO
-0030 FE0F; emoji style; # DIGIT ZERO
-0031 FE0E; text style;  # DIGIT ONE
-0031 FE0F; emoji style; # DIGIT ONE
-0032 FE0E; text style;  # DIGIT TWO
-0032 FE0F; emoji style; # DIGIT TWO
-0033 FE0E; text style;  # DIGIT THREE
-0033 FE0F; emoji style; # DIGIT THREE
-0034 FE0E; text style;  # DIGIT FOUR
-0034 FE0F; emoji style; # DIGIT FOUR
-0035 FE0E; text style;  # DIGIT FIVE
-0035 FE0F; emoji style; # DIGIT FIVE
-0036 FE0E; text style;  # DIGIT SIX
-0036 FE0F; emoji style; # DIGIT SIX
-0037 FE0E; text style;  # DIGIT SEVEN
-0037 FE0F; emoji style; # DIGIT SEVEN
-0038 FE0E; text style;  # DIGIT EIGHT
-0038 FE0F; emoji style; # DIGIT EIGHT
-0039 FE0E; text style;  # DIGIT NINE
-0039 FE0F; emoji style; # DIGIT NINE
-
-# Emoji variation sequences
-
-00A9 FE0E; text style;  # COPYRIGHT SIGN
-00A9 FE0F; emoji style; # COPYRIGHT SIGN
-00AE FE0E; text style;  # REGISTERED SIGN
-00AE FE0F; emoji style; # REGISTERED SIGN
-203C FE0E; text style;  # DOUBLE EXCLAMATION MARK
-203C FE0F; emoji style; # DOUBLE EXCLAMATION MARK
-2049 FE0E; text style;  # EXCLAMATION QUESTION MARK
-2049 FE0F; emoji style; # EXCLAMATION QUESTION MARK
-2122 FE0E; text style;  # TRADE MARK SIGN
-2122 FE0F; emoji style; # TRADE MARK SIGN
-2139 FE0E; text style;  # INFORMATION SOURCE
-2139 FE0F; emoji style; # INFORMATION SOURCE
-2194 FE0E; text style;  # LEFT RIGHT ARROW
-2194 FE0F; emoji style; # LEFT RIGHT ARROW
-2195 FE0E; text style;  # UP DOWN ARROW
-2195 FE0F; emoji style; # UP DOWN ARROW
-2196 FE0E; text style;  # NORTH WEST ARROW
-2196 FE0F; emoji style; # NORTH WEST ARROW
-2197 FE0E; text style;  # NORTH EAST ARROW
-2197 FE0F; emoji style; # NORTH EAST ARROW
-2198 FE0E; text style;  # SOUTH EAST ARROW
-2198 FE0F; emoji style; # SOUTH EAST ARROW
-2199 FE0E; text style;  # SOUTH WEST ARROW
-2199 FE0F; emoji style; # SOUTH WEST ARROW
-21A9 FE0E; text style;  # LEFTWARDS ARROW WITH HOOK
-21A9 FE0F; emoji style; # LEFTWARDS ARROW WITH HOOK
-21AA FE0E; text style;  # RIGHTWARDS ARROW WITH HOOK
-21AA FE0F; emoji style; # RIGHTWARDS ARROW WITH HOOK
-231A FE0E; text style;  # WATCH
-231A FE0F; emoji style; # WATCH
-231B FE0E; text style;  # HOURGLASS
-231B FE0F; emoji style; # HOURGLASS
-2328 FE0E; text style;  # KEYBOARD
-2328 FE0F; emoji style; # KEYBOARD
-23CF FE0E; text style;  # EJECT SYMBOL
-23CF FE0F; emoji style; # EJECT SYMBOL
-23ED FE0E; text style;  # BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
-23ED FE0F; emoji style; # BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
-23EE FE0E; text style;  # BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
-23EE FE0F; emoji style; # BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
-23EF FE0E; text style;  # BLACK RIGHT-POINTING TRIANGLE WITH DOUBLE VERTICAL BAR
-23EF FE0F; emoji style; # BLACK RIGHT-POINTING TRIANGLE WITH DOUBLE VERTICAL BAR
-23F1 FE0E; text style;  # STOPWATCH
-23F1 FE0F; emoji style; # STOPWATCH
-23F2 FE0E; text style;  # TIMER CLOCK
-23F2 FE0F; emoji style; # TIMER CLOCK
-23F8 FE0E; text style;  # DOUBLE VERTICAL BAR
-23F8 FE0F; emoji style; # DOUBLE VERTICAL BAR
-23F9 FE0E; text style;  # BLACK SQUARE FOR STOP
-23F9 FE0F; emoji style; # BLACK SQUARE FOR STOP
-23FA FE0E; text style;  # BLACK CIRCLE FOR RECORD
-23FA FE0F; emoji style; # BLACK CIRCLE FOR RECORD
-24C2 FE0E; text style;  # CIRCLED LATIN CAPITAL LETTER M
-24C2 FE0F; emoji style; # CIRCLED LATIN CAPITAL LETTER M
-25AA FE0E; text style;  # BLACK SMALL SQUARE
-25AA FE0F; emoji style; # BLACK SMALL SQUARE
-25AB FE0E; text style;  # WHITE SMALL SQUARE
-25AB FE0F; emoji style; # WHITE SMALL SQUARE
-25B6 FE0E; text style;  # BLACK RIGHT-POINTING TRIANGLE
-25B6 FE0F; emoji style; # BLACK RIGHT-POINTING TRIANGLE
-25C0 FE0E; text style;  # BLACK LEFT-POINTING TRIANGLE
-25C0 FE0F; emoji style; # BLACK LEFT-POINTING TRIANGLE
-25FB FE0E; text style;  # WHITE MEDIUM SQUARE
-25FB FE0F; emoji style; # WHITE MEDIUM SQUARE
-25FC FE0E; text style;  # BLACK MEDIUM SQUARE
-25FC FE0F; emoji style; # BLACK MEDIUM SQUARE
-25FD FE0E; text style;  # WHITE MEDIUM SMALL SQUARE
-25FD FE0F; emoji style; # WHITE MEDIUM SMALL SQUARE
-25FE FE0E; text style;  # BLACK MEDIUM SMALL SQUARE
-25FE FE0F; emoji style; # BLACK MEDIUM SMALL SQUARE
-2600 FE0E; text style;  # BLACK SUN WITH RAYS
-2600 FE0F; emoji style; # BLACK SUN WITH RAYS
-2601 FE0E; text style;  # CLOUD
-2601 FE0F; emoji style; # CLOUD
-2602 FE0E; text style;  # UMBRELLA
-2602 FE0F; emoji style; # UMBRELLA
-2603 FE0E; text style;  # SNOWMAN
-2603 FE0F; emoji style; # SNOWMAN
-2604 FE0E; text style;  # COMET
-2604 FE0F; emoji style; # COMET
-260E FE0E; text style;  # BLACK TELEPHONE
-260E FE0F; emoji style; # BLACK TELEPHONE
-2611 FE0E; text style;  # BALLOT BOX WITH CHECK
-2611 FE0F; emoji style; # BALLOT BOX WITH CHECK
-2614 FE0E; text style;  # UMBRELLA WITH RAIN DROPS
-2614 FE0F; emoji style; # UMBRELLA WITH RAIN DROPS
-2615 FE0E; text style;  # HOT BEVERAGE
-2615 FE0F; emoji style; # HOT BEVERAGE
-2618 FE0E; text style;  # SHAMROCK
-2618 FE0F; emoji style; # SHAMROCK
-261D FE0E; text style;  # WHITE UP POINTING INDEX
-261D FE0F; emoji style; # WHITE UP POINTING INDEX
-2620 FE0E; text style;  # SKULL AND CROSSBONES
-2620 FE0F; emoji style; # SKULL AND CROSSBONES
-2622 FE0E; text style;  # RADIOACTIVE SIGN
-2622 FE0F; emoji style; # RADIOACTIVE SIGN
-2623 FE0E; text style;  # BIOHAZARD SIGN
-2623 FE0F; emoji style; # BIOHAZARD SIGN
-2626 FE0E; text style;  # ORTHODOX CROSS
-2626 FE0F; emoji style; # ORTHODOX CROSS
-262A FE0E; text style;  # STAR AND CRESCENT
-262A FE0F; emoji style; # STAR AND CRESCENT
-262E FE0E; text style;  # PEACE SYMBOL
-262E FE0F; emoji style; # PEACE SYMBOL
-262F FE0E; text style;  # YIN YANG
-262F FE0F; emoji style; # YIN YANG
-2638 FE0E; text style;  # WHEEL OF DHARMA
-2638 FE0F; emoji style; # WHEEL OF DHARMA
-2639 FE0E; text style;  # WHITE FROWNING FACE
-2639 FE0F; emoji style; # WHITE FROWNING FACE
-263A FE0E; text style;  # WHITE SMILING FACE
-263A FE0F; emoji style; # WHITE SMILING FACE
-2648 FE0E; text style;  # ARIES
-2648 FE0F; emoji style; # ARIES
-2649 FE0E; text style;  # TAURUS
-2649 FE0F; emoji style; # TAURUS
-264A FE0E; text style;  # GEMINI
-264A FE0F; emoji style; # GEMINI
-264B FE0E; text style;  # CANCER
-264B FE0F; emoji style; # CANCER
-264C FE0E; text style;  # LEO
-264C FE0F; emoji style; # LEO
-264D FE0E; text style;  # VIRGO
-264D FE0F; emoji style; # VIRGO
-264E FE0E; text style;  # LIBRA
-264E FE0F; emoji style; # LIBRA
-264F FE0E; text style;  # SCORPIUS
-264F FE0F; emoji style; # SCORPIUS
-2650 FE0E; text style;  # SAGITTARIUS
-2650 FE0F; emoji style; # SAGITTARIUS
-2651 FE0E; text style;  # CAPRICORN
-2651 FE0F; emoji style; # CAPRICORN
-2652 FE0E; text style;  # AQUARIUS
-2652 FE0F; emoji style; # AQUARIUS
-2653 FE0E; text style;  # PISCES
-2653 FE0F; emoji style; # PISCES
-2660 FE0E; text style;  # BLACK SPADE SUIT
-2660 FE0F; emoji style; # BLACK SPADE SUIT
-2663 FE0E; text style;  # BLACK CLUB SUIT
-2663 FE0F; emoji style; # BLACK CLUB SUIT
-2665 FE0E; text style;  # BLACK HEART SUIT
-2665 FE0F; emoji style; # BLACK HEART SUIT
-2666 FE0E; text style;  # BLACK DIAMOND SUIT
-2666 FE0F; emoji style; # BLACK DIAMOND SUIT
-2668 FE0E; text style;  # HOT SPRINGS
-2668 FE0F; emoji style; # HOT SPRINGS
-267B FE0E; text style;  # BLACK UNIVERSAL RECYCLING SYMBOL
-267B FE0F; emoji style; # BLACK UNIVERSAL RECYCLING SYMBOL
-267F FE0E; text style;  # WHEELCHAIR SYMBOL
-267F FE0F; emoji style; # WHEELCHAIR SYMBOL
-2692 FE0E; text style;  # HAMMER AND PICK
-2692 FE0F; emoji style; # HAMMER AND PICK
-2693 FE0E; text style;  # ANCHOR
-2693 FE0F; emoji style; # ANCHOR
-2694 FE0E; text style;  # CROSSED SWORDS
-2694 FE0F; emoji style; # CROSSED SWORDS
-2696 FE0E; text style;  # SCALES
-2696 FE0F; emoji style; # SCALES
-2697 FE0E; text style;  # ALEMBIC
-2697 FE0F; emoji style; # ALEMBIC
-2699 FE0E; text style;  # GEAR
-2699 FE0F; emoji style; # GEAR
-269B FE0E; text style;  # ATOM SYMBOL
-269B FE0F; emoji style; # ATOM SYMBOL
-269C FE0E; text style;  # FLEUR-DE-LIS
-269C FE0F; emoji style; # FLEUR-DE-LIS
-26A0 FE0E; text style;  # WARNING SIGN
-26A0 FE0F; emoji style; # WARNING SIGN
-26A1 FE0E; text style;  # HIGH VOLTAGE SIGN
-26A1 FE0F; emoji style; # HIGH VOLTAGE SIGN
-26AA FE0E; text style;  # MEDIUM WHITE CIRCLE
-26AA FE0F; emoji style; # MEDIUM WHITE CIRCLE
-26AB FE0E; text style;  # MEDIUM BLACK CIRCLE
-26AB FE0F; emoji style; # MEDIUM BLACK CIRCLE
-26B0 FE0E; text style;  # COFFIN
-26B0 FE0F; emoji style; # COFFIN
-26B1 FE0E; text style;  # FUNERAL URN
-26B1 FE0F; emoji style; # FUNERAL URN
-26BD FE0E; text style;  # SOCCER BALL
-26BD FE0F; emoji style; # SOCCER BALL
-26BE FE0E; text style;  # BASEBALL
-26BE FE0F; emoji style; # BASEBALL
-26C4 FE0E; text style;  # SNOWMAN WITHOUT SNOW
-26C4 FE0F; emoji style; # SNOWMAN WITHOUT SNOW
-26C5 FE0E; text style;  # SUN BEHIND CLOUD
-26C5 FE0F; emoji style; # SUN BEHIND CLOUD
-26C8 FE0E; text style;  # THUNDER CLOUD AND RAIN
-26C8 FE0F; emoji style; # THUNDER CLOUD AND RAIN
-26CF FE0E; text style;  # PICK
-26CF FE0F; emoji style; # PICK
-26D1 FE0E; text style;  # HELMET WITH WHITE CROSS
-26D1 FE0F; emoji style; # HELMET WITH WHITE CROSS
-26D3 FE0E; text style;  # CHAINS
-26D3 FE0F; emoji style; # CHAINS
-26D4 FE0E; text style;  # NO ENTRY
-26D4 FE0F; emoji style; # NO ENTRY
-26E9 FE0E; text style;  # SHINTO SHRINE
-26E9 FE0F; emoji style; # SHINTO SHRINE
-26EA FE0E; text style;  # CHURCH
-26EA FE0F; emoji style; # CHURCH
-26F0 FE0E; text style;  # MOUNTAIN
-26F0 FE0F; emoji style; # MOUNTAIN
-26F1 FE0E; text style;  # UMBRELLA ON GROUND
-26F1 FE0F; emoji style; # UMBRELLA ON GROUND
-26F2 FE0E; text style;  # FOUNTAIN
-26F2 FE0F; emoji style; # FOUNTAIN
-26F3 FE0E; text style;  # FLAG IN HOLE
-26F3 FE0F; emoji style; # FLAG IN HOLE
-26F4 FE0E; text style;  # FERRY
-26F4 FE0F; emoji style; # FERRY
-26F5 FE0E; text style;  # SAILBOAT
-26F5 FE0F; emoji style; # SAILBOAT
-26F7 FE0E; text style;  # SKIER
-26F7 FE0F; emoji style; # SKIER
-26F8 FE0E; text style;  # ICE SKATE
-26F8 FE0F; emoji style; # ICE SKATE
-26F9 FE0E; text style;  # PERSON WITH BALL
-26F9 FE0F; emoji style; # PERSON WITH BALL
-26FA FE0E; text style;  # TENT
-26FA FE0F; emoji style; # TENT
-26FD FE0E; text style;  # FUEL PUMP
-26FD FE0F; emoji style; # FUEL PUMP
-2702 FE0E; text style;  # BLACK SCISSORS
-2702 FE0F; emoji style; # BLACK SCISSORS
-2708 FE0E; text style;  # AIRPLANE
-2708 FE0F; emoji style; # AIRPLANE
-2709 FE0E; text style;  # ENVELOPE
-2709 FE0F; emoji style; # ENVELOPE
-270C FE0E; text style;  # VICTORY HAND
-270C FE0F; emoji style; # VICTORY HAND
-270D FE0E; text style;  # WRITING HAND
-270D FE0F; emoji style; # WRITING HAND
-270F FE0E; text style;  # PENCIL
-270F FE0F; emoji style; # PENCIL
-2712 FE0E; text style;  # BLACK NIB
-2712 FE0F; emoji style; # BLACK NIB
-2714 FE0E; text style;  # HEAVY CHECK MARK
-2714 FE0F; emoji style; # HEAVY CHECK MARK
-2716 FE0E; text style;  # HEAVY MULTIPLICATION X
-2716 FE0F; emoji style; # HEAVY MULTIPLICATION X
-271D FE0E; text style;  # LATIN CROSS
-271D FE0F; emoji style; # LATIN CROSS
-2721 FE0E; text style;  # STAR OF DAVID
-2721 FE0F; emoji style; # STAR OF DAVID
-2733 FE0E; text style;  # EIGHT SPOKED ASTERISK
-2733 FE0F; emoji style; # EIGHT SPOKED ASTERISK
-2734 FE0E; text style;  # EIGHT POINTED BLACK STAR
-2734 FE0F; emoji style; # EIGHT POINTED BLACK STAR
-2744 FE0E; text style;  # SNOWFLAKE
-2744 FE0F; emoji style; # SNOWFLAKE
-2747 FE0E; text style;  # SPARKLE
-2747 FE0F; emoji style; # SPARKLE
-2757 FE0E; text style;  # HEAVY EXCLAMATION MARK SYMBOL
-2757 FE0F; emoji style; # HEAVY EXCLAMATION MARK SYMBOL
-2763 FE0E; text style;  # HEAVY HEART EXCLAMATION MARK ORNAMENT
-2763 FE0F; emoji style; # HEAVY HEART EXCLAMATION MARK ORNAMENT
-2764 FE0E; text style;  # HEAVY BLACK HEART
-2764 FE0F; emoji style; # HEAVY BLACK HEART
-27A1 FE0E; text style;  # BLACK RIGHTWARDS ARROW
-27A1 FE0F; emoji style; # BLACK RIGHTWARDS ARROW
-2934 FE0E; text style;  # ARROW POINTING RIGHTWARDS THEN CURVING UPWARDS
-2934 FE0F; emoji style; # ARROW POINTING RIGHTWARDS THEN CURVING UPWARDS
-2935 FE0E; text style;  # ARROW POINTING RIGHTWARDS THEN CURVING DOWNWARDS
-2935 FE0F; emoji style; # ARROW POINTING RIGHTWARDS THEN CURVING DOWNWARDS
-2B05 FE0E; text style;  # LEFTWARDS BLACK ARROW
-2B05 FE0F; emoji style; # LEFTWARDS BLACK ARROW
-2B06 FE0E; text style;  # UPWARDS BLACK ARROW
-2B06 FE0F; emoji style; # UPWARDS BLACK ARROW
-2B07 FE0E; text style;  # DOWNWARDS BLACK ARROW
-2B07 FE0F; emoji style; # DOWNWARDS BLACK ARROW
-2B1B FE0E; text style;  # BLACK LARGE SQUARE
-2B1B FE0F; emoji style; # BLACK LARGE SQUARE
-2B1C FE0E; text style;  # WHITE LARGE SQUARE
-2B1C FE0F; emoji style; # WHITE LARGE SQUARE
-2B50 FE0E; text style;  # WHITE MEDIUM STAR
-2B50 FE0F; emoji style; # WHITE MEDIUM STAR
-2B55 FE0E; text style;  # HEAVY LARGE CIRCLE
-2B55 FE0F; emoji style; # HEAVY LARGE CIRCLE
-3030 FE0E; text style;  # WAVY DASH
-3030 FE0F; emoji style; # WAVY DASH
-303D FE0E; text style;  # PART ALTERNATION MARK
-303D FE0F; emoji style; # PART ALTERNATION MARK
-3297 FE0E; text style;  # CIRCLED IDEOGRAPH CONGRATULATION
-3297 FE0F; emoji style; # CIRCLED IDEOGRAPH CONGRATULATION
-3299 FE0E; text style;  # CIRCLED IDEOGRAPH SECRET
-3299 FE0F; emoji style; # CIRCLED IDEOGRAPH SECRET
-1F004 FE0E; text style;  # MAHJONG TILE RED DRAGON
-1F004 FE0F; emoji style; # MAHJONG TILE RED DRAGON
-1F170 FE0E; text style;  # NEGATIVE SQUARED LATIN CAPITAL LETTER A
-1F170 FE0F; emoji style; # NEGATIVE SQUARED LATIN CAPITAL LETTER A
-1F171 FE0E; text style;  # NEGATIVE SQUARED LATIN CAPITAL LETTER B
-1F171 FE0F; emoji style; # NEGATIVE SQUARED LATIN CAPITAL LETTER B
-1F17E FE0E; text style;  # NEGATIVE SQUARED LATIN CAPITAL LETTER O
-1F17E FE0F; emoji style; # NEGATIVE SQUARED LATIN CAPITAL LETTER O
-1F17F FE0E; text style;  # NEGATIVE SQUARED LATIN CAPITAL LETTER P
-1F17F FE0F; emoji style; # NEGATIVE SQUARED LATIN CAPITAL LETTER P
-1F202 FE0E; text style;  # SQUARED KATAKANA SA
-1F202 FE0F; emoji style; # SQUARED KATAKANA SA
-1F21A FE0E; text style;  # SQUARED CJK UNIFIED IDEOGRAPH-7121
-1F21A FE0F; emoji style; # SQUARED CJK UNIFIED IDEOGRAPH-7121
-1F22F FE0E; text style;  # SQUARED CJK UNIFIED IDEOGRAPH-6307
-1F22F FE0F; emoji style; # SQUARED CJK UNIFIED IDEOGRAPH-6307
-1F237 FE0E; text style;  # SQUARED CJK UNIFIED IDEOGRAPH-6708
-1F237 FE0F; emoji style; # SQUARED CJK UNIFIED IDEOGRAPH-6708
-1F321 FE0E; text style;  # THERMOMETER
-1F321 FE0F; emoji style; # THERMOMETER
-1F324 FE0E; text style;  # WHITE SUN WITH SMALL CLOUD
-1F324 FE0F; emoji style; # WHITE SUN WITH SMALL CLOUD
-1F325 FE0E; text style;  # WHITE SUN BEHIND CLOUD
-1F325 FE0F; emoji style; # WHITE SUN BEHIND CLOUD
-1F326 FE0E; text style;  # WHITE SUN BEHIND CLOUD WITH RAIN
-1F326 FE0F; emoji style; # WHITE SUN BEHIND CLOUD WITH RAIN
-1F327 FE0E; text style;  # CLOUD WITH RAIN
-1F327 FE0F; emoji style; # CLOUD WITH RAIN
-1F328 FE0E; text style;  # CLOUD WITH SNOW
-1F328 FE0F; emoji style; # CLOUD WITH SNOW
-1F329 FE0E; text style;  # CLOUD WITH LIGHTNING
-1F329 FE0F; emoji style; # CLOUD WITH LIGHTNING
-1F32A FE0E; text style;  # CLOUD WITH TORNADO
-1F32A FE0F; emoji style; # CLOUD WITH TORNADO
-1F32B FE0E; text style;  # FOG
-1F32B FE0F; emoji style; # FOG
-1F32C FE0E; text style;  # WIND BLOWING FACE
-1F32C FE0F; emoji style; # WIND BLOWING FACE
-1F336 FE0E; text style;  # HOT PEPPER
-1F336 FE0F; emoji style; # HOT PEPPER
-1F37D FE0E; text style;  # FORK AND KNIFE WITH PLATE
-1F37D FE0F; emoji style; # FORK AND KNIFE WITH PLATE
-1F396 FE0E; text style;  # MILITARY MEDAL
-1F396 FE0F; emoji style; # MILITARY MEDAL
-1F397 FE0E; text style;  # REMINDER RIBBON
-1F397 FE0F; emoji style; # REMINDER RIBBON
-1F399 FE0E; text style;  # STUDIO MICROPHONE
-1F399 FE0F; emoji style; # STUDIO MICROPHONE
-1F39A FE0E; text style;  # LEVEL SLIDER
-1F39A FE0F; emoji style; # LEVEL SLIDER
-1F39B FE0E; text style;  # CONTROL KNOBS
-1F39B FE0F; emoji style; # CONTROL KNOBS
-1F39E FE0E; text style;  # FILM FRAMES
-1F39E FE0F; emoji style; # FILM FRAMES
-1F39F FE0E; text style;  # ADMISSION TICKETS
-1F39F FE0F; emoji style; # ADMISSION TICKETS
-1F3CB FE0E; text style;  # WEIGHT LIFTER
-1F3CB FE0F; emoji style; # WEIGHT LIFTER
-1F3CC FE0E; text style;  # GOLFER
-1F3CC FE0F; emoji style; # GOLFER
-1F3CD FE0E; text style;  # RACING MOTORCYCLE
-1F3CD FE0F; emoji style; # RACING MOTORCYCLE
-1F3CE FE0E; text style;  # RACING CAR
-1F3CE FE0F; emoji style; # RACING CAR
-1F3D4 FE0E; text style;  # SNOW CAPPED MOUNTAIN
-1F3D4 FE0F; emoji style; # SNOW CAPPED MOUNTAIN
-1F3D5 FE0E; text style;  # CAMPING
-1F3D5 FE0F; emoji style; # CAMPING
-1F3D6 FE0E; text style;  # BEACH WITH UMBRELLA
-1F3D6 FE0F; emoji style; # BEACH WITH UMBRELLA
-1F3D7 FE0E; text style;  # BUILDING CONSTRUCTION
-1F3D7 FE0F; emoji style; # BUILDING CONSTRUCTION
-1F3D8 FE0E; text style;  # HOUSE BUILDINGS
-1F3D8 FE0F; emoji style; # HOUSE BUILDINGS
-1F3D9 FE0E; text style;  # CITYSCAPE
-1F3D9 FE0F; emoji style; # CITYSCAPE
-1F3DA FE0E; text style;  # DERELICT HOUSE BUILDING
-1F3DA FE0F; emoji style; # DERELICT HOUSE BUILDING
-1F3DB FE0E; text style;  # CLASSICAL BUILDING
-1F3DB FE0F; emoji style; # CLASSICAL BUILDING
-1F3DC FE0E; text style;  # DESERT
-1F3DC FE0F; emoji style; # DESERT
-1F3DD FE0E; text style;  # DESERT ISLAND
-1F3DD FE0F; emoji style; # DESERT ISLAND
-1F3DE FE0E; text style;  # NATIONAL PARK
-1F3DE FE0F; emoji style; # NATIONAL PARK
-1F3DF FE0E; text style;  # STADIUM
-1F3DF FE0F; emoji style; # STADIUM
-1F3F3 FE0E; text style;  # WAVING WHITE FLAG
-1F3F3 FE0F; emoji style; # WAVING WHITE FLAG
-1F3F5 FE0E; text style;  # ROSETTE
-1F3F5 FE0F; emoji style; # ROSETTE
-1F3F7 FE0E; text style;  # LABEL
-1F3F7 FE0F; emoji style; # LABEL
-1F43F FE0E; text style;  # CHIPMUNK
-1F43F FE0F; emoji style; # CHIPMUNK
-1F441 FE0E; text style;  # EYE
-1F441 FE0F; emoji style; # EYE
-1F4FD FE0E; text style;  # FILM PROJECTOR
-1F4FD FE0F; emoji style; # FILM PROJECTOR
-1F549 FE0E; text style;  # OM SYMBOL
-1F549 FE0F; emoji style; # OM SYMBOL
-1F54A FE0E; text style;  # DOVE OF PEACE
-1F54A FE0F; emoji style; # DOVE OF PEACE
-1F56F FE0E; text style;  # CANDLE
-1F56F FE0F; emoji style; # CANDLE
-1F570 FE0E; text style;  # MANTELPIECE CLOCK
-1F570 FE0F; emoji style; # MANTELPIECE CLOCK
-1F573 FE0E; text style;  # HOLE
-1F573 FE0F; emoji style; # HOLE
-1F574 FE0E; text style;  # MAN IN BUSINESS SUIT LEVITATING
-1F574 FE0F; emoji style; # MAN IN BUSINESS SUIT LEVITATING
-1F575 FE0E; text style;  # SLEUTH OR SPY
-1F575 FE0F; emoji style; # SLEUTH OR SPY
-1F576 FE0E; text style;  # DARK SUNGLASSES
-1F576 FE0F; emoji style; # DARK SUNGLASSES
-1F577 FE0E; text style;  # SPIDER
-1F577 FE0F; emoji style; # SPIDER
-1F578 FE0E; text style;  # SPIDER WEB
-1F578 FE0F; emoji style; # SPIDER WEB
-1F579 FE0E; text style;  # JOYSTICK
-1F579 FE0F; emoji style; # JOYSTICK
-1F587 FE0E; text style;  # LINKED PAPERCLIPS
-1F587 FE0F; emoji style; # LINKED PAPERCLIPS
-1F58A FE0E; text style;  # LOWER LEFT BALLPOINT PEN
-1F58A FE0F; emoji style; # LOWER LEFT BALLPOINT PEN
-1F58B FE0E; text style;  # LOWER LEFT FOUNTAIN PEN
-1F58B FE0F; emoji style; # LOWER LEFT FOUNTAIN PEN
-1F58C FE0E; text style;  # LOWER LEFT PAINTBRUSH
-1F58C FE0F; emoji style; # LOWER LEFT PAINTBRUSH
-1F58D FE0E; text style;  # LOWER LEFT CRAYON
-1F58D FE0F; emoji style; # LOWER LEFT CRAYON
-1F590 FE0E; text style;  # RAISED HAND WITH FINGERS SPLAYED
-1F590 FE0F; emoji style; # RAISED HAND WITH FINGERS SPLAYED
-1F5A5 FE0E; text style;  # DESKTOP COMPUTER
-1F5A5 FE0F; emoji style; # DESKTOP COMPUTER
-1F5A8 FE0E; text style;  # PRINTER
-1F5A8 FE0F; emoji style; # PRINTER
-1F5B1 FE0E; text style;  # THREE BUTTON MOUSE
-1F5B1 FE0F; emoji style; # THREE BUTTON MOUSE
-1F5B2 FE0E; text style;  # TRACKBALL
-1F5B2 FE0F; emoji style; # TRACKBALL
-1F5BC FE0E; text style;  # FRAME WITH PICTURE
-1F5BC FE0F; emoji style; # FRAME WITH PICTURE
-1F5C2 FE0E; text style;  # CARD INDEX DIVIDERS
-1F5C2 FE0F; emoji style; # CARD INDEX DIVIDERS
-1F5C3 FE0E; text style;  # CARD FILE BOX
-1F5C3 FE0F; emoji style; # CARD FILE BOX
-1F5C4 FE0E; text style;  # FILE CABINET
-1F5C4 FE0F; emoji style; # FILE CABINET
-1F5D1 FE0E; text style;  # WASTEBASKET
-1F5D1 FE0F; emoji style; # WASTEBASKET
-1F5D2 FE0E; text style;  # SPIRAL NOTE PAD
-1F5D2 FE0F; emoji style; # SPIRAL NOTE PAD
-1F5D3 FE0E; text style;  # SPIRAL CALENDAR PAD
-1F5D3 FE0F; emoji style; # SPIRAL CALENDAR PAD
-1F5DC FE0E; text style;  # COMPRESSION
-1F5DC FE0F; emoji style; # COMPRESSION
-1F5DD FE0E; text style;  # OLD KEY
-1F5DD FE0F; emoji style; # OLD KEY
-1F5DE FE0E; text style;  # ROLLED-UP NEWSPAPER
-1F5DE FE0F; emoji style; # ROLLED-UP NEWSPAPER
-1F5E1 FE0E; text style;  # DAGGER KNIFE
-1F5E1 FE0F; emoji style; # DAGGER KNIFE
-1F5E3 FE0E; text style;  # SPEAKING HEAD IN SILHOUETTE
-1F5E3 FE0F; emoji style; # SPEAKING HEAD IN SILHOUETTE
-1F5E8 FE0E; text style;  # LEFT SPEECH BUBBLE
-1F5E8 FE0F; emoji style; # LEFT SPEECH BUBBLE
-1F5EF FE0E; text style;  # RIGHT ANGER BUBBLE
-1F5EF FE0F; emoji style; # RIGHT ANGER BUBBLE
-1F5F3 FE0E; text style;  # BALLOT BOX WITH BALLOT
-1F5F3 FE0F; emoji style; # BALLOT BOX WITH BALLOT
-1F5FA FE0E; text style;  # WORLD MAP
-1F5FA FE0F; emoji style; # WORLD MAP
-1F6CB FE0E; text style;  # COUCH AND LAMP
-1F6CB FE0F; emoji style; # COUCH AND LAMP
-1F6CD FE0E; text style;  # SHOPPING BAGS
-1F6CD FE0F; emoji style; # SHOPPING BAGS
-1F6CE FE0E; text style;  # BELLHOP BELL
-1F6CE FE0F; emoji style; # BELLHOP BELL
-1F6CF FE0E; text style;  # BED
-1F6CF FE0F; emoji style; # BED
-1F6E0 FE0E; text style;  # HAMMER AND WRENCH
-1F6E0 FE0F; emoji style; # HAMMER AND WRENCH
-1F6E1 FE0E; text style;  # SHIELD
-1F6E1 FE0F; emoji style; # SHIELD
-1F6E2 FE0E; text style;  # OIL DRUM
-1F6E2 FE0F; emoji style; # OIL DRUM
-1F6E3 FE0E; text style;  # MOTORWAY
-1F6E3 FE0F; emoji style; # MOTORWAY
-1F6E4 FE0E; text style;  # RAILWAY TRACK
-1F6E4 FE0F; emoji style; # RAILWAY TRACK
-1F6E5 FE0E; text style;  # MOTOR BOAT
-1F6E5 FE0F; emoji style; # MOTOR BOAT
-1F6E9 FE0E; text style;  # SMALL AIRPLANE
-1F6E9 FE0F; emoji style; # SMALL AIRPLANE
-1F6F0 FE0E; text style;  # SATELLITE
-1F6F0 FE0F; emoji style; # SATELLITE
-1F6F3 FE0E; text style;  # PASSENGER SHIP
-1F6F3 FE0F; emoji style; # PASSENGER SHIP
 
 # CJK compatibility ideographs
 

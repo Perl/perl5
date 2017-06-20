@@ -1,6 +1,6 @@
-# DerivedNumericValues-9.0.0.txt
-# Date: 2016-03-02, 18:55:01 GMT
-# © 2016 Unicode®, Inc.
+# DerivedNumericValues-10.0.0.txt
+# Date: 2017-02-14, 04:26:10 GMT
+# © 2017 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -101,6 +101,7 @@ FF10          ; 0.0 ; ; 0 # Nd       FULLWIDTH DIGIT ZERO
 11730         ; 0.0 ; ; 0 # Nd       AHOM DIGIT ZERO
 118E0         ; 0.0 ; ; 0 # Nd       WARANG CITI DIGIT ZERO
 11C50         ; 0.0 ; ; 0 # Nd       BHAIKSUKI DIGIT ZERO
+11D50         ; 0.0 ; ; 0 # Nd       MASARAM GONDI DIGIT ZERO
 16A60         ; 0.0 ; ; 0 # Nd       MRO DIGIT ZERO
 16B50         ; 0.0 ; ; 0 # Nd       PAHAWH HMONG DIGIT ZERO
 1D7CE         ; 0.0 ; ; 0 # Nd       MATHEMATICAL BOLD DIGIT ZERO
@@ -112,7 +113,7 @@ FF10          ; 0.0 ; ; 0 # Nd       FULLWIDTH DIGIT ZERO
 1F100..1F101  ; 0.0 ; ; 0 # No   [2] DIGIT ZERO FULL STOP..DIGIT ZERO COMMA
 1F10B..1F10C  ; 0.0 ; ; 0 # No   [2] DINGBAT CIRCLED SANS-SERIF DIGIT ZERO..DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT ZERO
 
-# Total code points: 74
+# Total code points: 75
 
 # ================================================
 
@@ -446,6 +447,7 @@ FF11          ; 1.0 ; ; 1 # Nd       FULLWIDTH DIGIT ONE
 118E1         ; 1.0 ; ; 1 # Nd       WARANG CITI DIGIT ONE
 11C51         ; 1.0 ; ; 1 # Nd       BHAIKSUKI DIGIT ONE
 11C5A         ; 1.0 ; ; 1 # No       BHAIKSUKI NUMBER ONE
+11D51         ; 1.0 ; ; 1 # Nd       MASARAM GONDI DIGIT ONE
 12415         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE GESH2
 1241E         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE GESHU
 1242C         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE SHARU
@@ -465,7 +467,7 @@ FF11          ; 1.0 ; ; 1 # Nd       FULLWIDTH DIGIT ONE
 1F102         ; 1.0 ; ; 1 # No       DIGIT ONE COMMA
 2092A         ; 1.0 ; ; 1 # Lo       CJK UNIFIED IDEOGRAPH-2092A
 
-# Total code points: 121
+# Total code points: 122
 
 # ================================================
 
@@ -571,6 +573,7 @@ FF12          ; 2.0 ; ; 2 # Nd       FULLWIDTH DIGIT TWO
 118E2         ; 2.0 ; ; 2 # Nd       WARANG CITI DIGIT TWO
 11C52         ; 2.0 ; ; 2 # Nd       BHAIKSUKI DIGIT TWO
 11C5B         ; 2.0 ; ; 2 # No       BHAIKSUKI NUMBER TWO
+11D52         ; 2.0 ; ; 2 # Nd       MASARAM GONDI DIGIT TWO
 12400         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO ASH
 12416         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO GESH2
 1241F         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO GESHU
@@ -594,7 +597,7 @@ FF12          ; 2.0 ; ; 2 # Nd       FULLWIDTH DIGIT TWO
 1F103         ; 2.0 ; ; 2 # No       DIGIT TWO COMMA
 22390         ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-22390
 
-# Total code points: 121
+# Total code points: 122
 
 # ================================================
 
@@ -694,6 +697,7 @@ FF13          ; 3.0 ; ; 3 # Nd       FULLWIDTH DIGIT THREE
 118E3         ; 3.0 ; ; 3 # Nd       WARANG CITI DIGIT THREE
 11C53         ; 3.0 ; ; 3 # Nd       BHAIKSUKI DIGIT THREE
 11C5C         ; 3.0 ; ; 3 # No       BHAIKSUKI NUMBER THREE
+11D53         ; 3.0 ; ; 3 # Nd       MASARAM GONDI DIGIT THREE
 12401         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE ASH
 12408         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE DISH
 12417         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE GESH2
@@ -721,7 +725,7 @@ FF13          ; 3.0 ; ; 3 # Nd       FULLWIDTH DIGIT THREE
 22998         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-22998
 23B1B         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-23B1B
 
-# Total code points: 123
+# Total code points: 124
 
 # ================================================
 
@@ -815,6 +819,7 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 118E4         ; 4.0 ; ; 4 # Nd       WARANG CITI DIGIT FOUR
 11C54         ; 4.0 ; ; 4 # Nd       BHAIKSUKI DIGIT FOUR
 11C5D         ; 4.0 ; ; 4 # No       BHAIKSUKI NUMBER FOUR
+11D54         ; 4.0 ; ; 4 # Nd       MASARAM GONDI DIGIT FOUR
 12402         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR ASH
 12409         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR DISH
 1240F         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR U
@@ -842,7 +847,7 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 200E2         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-200E2
 2626D         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-2626D
 
-# Total code points: 115
+# Total code points: 116
 
 # ================================================
 
@@ -941,6 +946,7 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 118E5         ; 5.0 ; ; 5 # Nd       WARANG CITI DIGIT FIVE
 11C55         ; 5.0 ; ; 5 # Nd       BHAIKSUKI DIGIT FIVE
 11C5E         ; 5.0 ; ; 5 # No       BHAIKSUKI NUMBER FIVE
+11D55         ; 5.0 ; ; 5 # Nd       MASARAM GONDI DIGIT FIVE
 12403         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE ASH
 1240A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE DISH
 12410         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE U
@@ -965,7 +971,7 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 1F106         ; 5.0 ; ; 5 # No       DIGIT FIVE COMMA
 20121         ; 5.0 ; ; 5 # Lo       CJK UNIFIED IDEOGRAPH-20121
 
-# Total code points: 113
+# Total code points: 114
 
 # ================================================
 
@@ -1055,6 +1061,7 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 118E6         ; 6.0 ; ; 6 # Nd       WARANG CITI DIGIT SIX
 11C56         ; 6.0 ; ; 6 # Nd       BHAIKSUKI DIGIT SIX
 11C5F         ; 6.0 ; ; 6 # No       BHAIKSUKI NUMBER SIX
+11D56         ; 6.0 ; ; 6 # Nd       MASARAM GONDI DIGIT SIX
 12404         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX ASH
 1240B         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX DISH
 12411         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX U
@@ -1076,7 +1083,7 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 1F107         ; 6.0 ; ; 6 # No       DIGIT SIX COMMA
 20AEA         ; 6.0 ; ; 6 # Lo       CJK UNIFIED IDEOGRAPH-20AEA
 
-# Total code points: 100
+# Total code points: 101
 
 # ================================================
 
@@ -1164,6 +1171,7 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 118E7         ; 7.0 ; ; 7 # Nd       WARANG CITI DIGIT SEVEN
 11C57         ; 7.0 ; ; 7 # Nd       BHAIKSUKI DIGIT SEVEN
 11C60         ; 7.0 ; ; 7 # No       BHAIKSUKI NUMBER SEVEN
+11D57         ; 7.0 ; ; 7 # Nd       MASARAM GONDI DIGIT SEVEN
 12405         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN ASH
 1240C         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN DISH
 12412         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN U
@@ -1184,7 +1192,7 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 1F108         ; 7.0 ; ; 7 # No       DIGIT SEVEN COMMA
 20001         ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-20001
 
-# Total code points: 99
+# Total code points: 100
 
 # ================================================
 
@@ -1270,6 +1278,7 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 118E8         ; 8.0 ; ; 8 # Nd       WARANG CITI DIGIT EIGHT
 11C58         ; 8.0 ; ; 8 # Nd       BHAIKSUKI DIGIT EIGHT
 11C61         ; 8.0 ; ; 8 # No       BHAIKSUKI NUMBER EIGHT
+11D58         ; 8.0 ; ; 8 # Nd       MASARAM GONDI DIGIT EIGHT
 12406         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT ASH
 1240D         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT DISH
 12413         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT U
@@ -1289,7 +1298,7 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 1E958         ; 8.0 ; ; 8 # Nd       ADLAM DIGIT EIGHT
 1F109         ; 8.0 ; ; 8 # No       DIGIT EIGHT COMMA
 
-# Total code points: 95
+# Total code points: 96
 
 # ================================================
 
@@ -1376,6 +1385,7 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 118E9         ; 9.0 ; ; 9 # Nd       WARANG CITI DIGIT NINE
 11C59         ; 9.0 ; ; 9 # Nd       BHAIKSUKI DIGIT NINE
 11C62         ; 9.0 ; ; 9 # No       BHAIKSUKI NUMBER NINE
+11D59         ; 9.0 ; ; 9 # Nd       MASARAM GONDI DIGIT NINE
 12407         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE ASH
 1240E         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE DISH
 12414         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE U
@@ -1396,7 +1406,7 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 1F10A         ; 9.0 ; ; 9 # No       DIGIT NINE COMMA
 2F890         ; 9.0 ; ; 9 # Lo       CJK COMPATIBILITY IDEOGRAPH-2F890
 
-# Total code points: 99
+# Total code points: 100
 
 # ================================================
 

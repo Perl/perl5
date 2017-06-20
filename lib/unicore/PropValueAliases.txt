@@ -1,6 +1,6 @@
-# PropertyValueAliases-9.0.0.txt
-# Date: 2016-03-02, 18:55:05 GMT
-# © 2016 Unicode®, Inc.
+# PropertyValueAliases-10.0.0.txt
+# Date: 2017-05-17, 08:45:34 GMT
+# © 2017 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -80,6 +80,7 @@ age; 6.3                              ; V6_3
 age; 7.0                              ; V7_0
 age; 8.0                              ; V8_0
 age; 9.0                              ; V9_0
+age; 10.0                             ; V10_0
 age; NA                               ; Unassigned
 
 # Alphabetic (Alpha)
@@ -191,6 +192,7 @@ blk; CJK_Ext_B                        ; CJK_Unified_Ideographs_Extension_B
 blk; CJK_Ext_C                        ; CJK_Unified_Ideographs_Extension_C
 blk; CJK_Ext_D                        ; CJK_Unified_Ideographs_Extension_D
 blk; CJK_Ext_E                        ; CJK_Unified_Ideographs_Extension_E
+blk; CJK_Ext_F                        ; CJK_Unified_Ideographs_Extension_F
 blk; CJK_Radicals_Sup                 ; CJK_Radicals_Supplement
 blk; CJK_Strokes                      ; CJK_Strokes
 blk; CJK_Symbols                      ; CJK_Symbols_And_Punctuation
@@ -263,6 +265,7 @@ blk; Jamo_Ext_A                       ; Hangul_Jamo_Extended_A
 blk; Jamo_Ext_B                       ; Hangul_Jamo_Extended_B
 blk; Javanese                         ; Javanese
 blk; Kaithi                           ; Kaithi
+blk; Kana_Ext_A                       ; Kana_Extended_A
 blk; Kana_Sup                         ; Kana_Supplement
 blk; Kanbun                           ; Kanbun
 blk; Kangxi                           ; Kangxi_Radicals
@@ -299,6 +302,7 @@ blk; Malayalam                        ; Malayalam
 blk; Mandaic                          ; Mandaic
 blk; Manichaean                       ; Manichaean
 blk; Marchen                          ; Marchen
+blk; Masaram_Gondi                    ; Masaram_Gondi
 blk; Math_Alphanum                    ; Mathematical_Alphanumeric_Symbols
 blk; Math_Operators                   ; Mathematical_Operators
 blk; Meetei_Mayek                     ; Meetei_Mayek
@@ -330,6 +334,7 @@ blk; New_Tai_Lue                      ; New_Tai_Lue
 blk; Newa                             ; Newa
 blk; NKo                              ; NKo
 blk; Number_Forms                     ; Number_Forms
+blk; Nushu                            ; Nushu
 blk; OCR                              ; Optical_Character_Recognition
 blk; Ogham                            ; Ogham
 blk; Ol_Chiki                         ; Ol_Chiki
@@ -369,6 +374,7 @@ blk; Sinhala                          ; Sinhala
 blk; Sinhala_Archaic_Numbers          ; Sinhala_Archaic_Numbers
 blk; Small_Forms                      ; Small_Form_Variants
 blk; Sora_Sompeng                     ; Sora_Sompeng
+blk; Soyombo                          ; Soyombo
 blk; Specials                         ; Specials
 blk; Sundanese                        ; Sundanese
 blk; Sundanese_Sup                    ; Sundanese_Supplement
@@ -384,6 +390,7 @@ blk; Super_And_Sub                    ; Superscripts_And_Subscripts
 blk; Sutton_SignWriting               ; Sutton_SignWriting
 blk; Syloti_Nagri                     ; Syloti_Nagri
 blk; Syriac                           ; Syriac
+blk; Syriac_Sup                       ; Syriac_Supplement
 blk; Tagalog                          ; Tagalog
 blk; Tagbanwa                         ; Tagbanwa
 blk; Tags                             ; Tags
@@ -414,6 +421,7 @@ blk; Warang_Citi                      ; Warang_Citi
 blk; Yi_Radicals                      ; Yi_Radicals
 blk; Yi_Syllables                     ; Yi_Syllables
 blk; Yijing                           ; Yijing_Hexagram_Symbols
+blk; Zanabazar_Square                 ; Zanabazar_Square
 
 # Canonical_Combining_Class (ccc)
 
@@ -741,6 +749,7 @@ Ideo; Y                               ; Yes                              ; T    
 # Indic_Positional_Category (InPC)
 
 InPC; Bottom                          ; Bottom
+InPC; Bottom_And_Left                 ; Bottom_And_Left
 InPC; Bottom_And_Right                ; Bottom_And_Right
 InPC; Left                            ; Left
 InPC; Left_And_Right                  ; Left_And_Right
@@ -885,6 +894,17 @@ jg ; Khaph                            ; Khaph
 jg ; Knotted_Heh                      ; Knotted_Heh
 jg ; Lam                              ; Lam
 jg ; Lamadh                           ; Lamadh
+jg ; Malayalam_Bha                    ; Malayalam_Bha
+jg ; Malayalam_Ja                     ; Malayalam_Ja
+jg ; Malayalam_Lla                    ; Malayalam_Lla
+jg ; Malayalam_Llla                   ; Malayalam_Llla
+jg ; Malayalam_Nga                    ; Malayalam_Nga
+jg ; Malayalam_Nna                    ; Malayalam_Nna
+jg ; Malayalam_Nnna                   ; Malayalam_Nnna
+jg ; Malayalam_Nya                    ; Malayalam_Nya
+jg ; Malayalam_Ra                     ; Malayalam_Ra
+jg ; Malayalam_Ssa                    ; Malayalam_Ssa
+jg ; Malayalam_Tta                    ; Malayalam_Tta
 jg ; Manichaean_Aleph                 ; Manichaean_Aleph
 jg ; Manichaean_Ayin                  ; Manichaean_Ayin
 jg ; Manichaean_Beth                  ; Manichaean_Beth
@@ -1135,6 +1155,11 @@ QMark; Y                              ; Yes                              ; T    
 Radical; N                            ; No                               ; F                                ; False
 Radical; Y                            ; Yes                              ; T                                ; True
 
+# Regional_Indicator (RI)
+
+RI ; N                                ; No                               ; F                                ; False
+RI ; Y                                ; Yes                              ; T                                ; True
+
 # Script (sc)
 
 sc ; Adlm                             ; Adlam
@@ -1171,6 +1196,7 @@ sc ; Elba                             ; Elbasan
 sc ; Ethi                             ; Ethiopic
 sc ; Geor                             ; Georgian
 sc ; Glag                             ; Glagolitic
+sc ; Gonm                             ; Masaram_Gondi
 sc ; Goth                             ; Gothic
 sc ; Gran                             ; Grantha
 sc ; Grek                             ; Greek
@@ -1223,6 +1249,7 @@ sc ; Narb                             ; Old_North_Arabian
 sc ; Nbat                             ; Nabataean
 sc ; Newa                             ; Newa
 sc ; Nkoo                             ; Nko
+sc ; Nshu                             ; Nushu
 sc ; Ogam                             ; Ogham
 sc ; Olck                             ; Ol_Chiki
 sc ; Orkh                             ; Old_Turkic
@@ -1250,6 +1277,7 @@ sc ; Sidd                             ; Siddham
 sc ; Sind                             ; Khudawadi
 sc ; Sinh                             ; Sinhala
 sc ; Sora                             ; Sora_Sompeng
+sc ; Soyo                             ; Soyombo
 sc ; Sund                             ; Sundanese
 sc ; Sylo                             ; Syloti_Nagri
 sc ; Syrc                             ; Syriac
@@ -1273,6 +1301,7 @@ sc ; Wara                             ; Warang_Citi
 sc ; Xpeo                             ; Old_Persian
 sc ; Xsux                             ; Cuneiform
 sc ; Yiii                             ; Yi
+sc ; Zanb                             ; Zanabazar_Square
 sc ; Zinh                             ; Inherited                        ; Qaai
 sc ; Zyyy                             ; Common
 sc ; Zzzz                             ; Unknown
@@ -1356,6 +1385,13 @@ Upper; Y                              ; Yes                              ; T    
 
 VS ; N                                ; No                               ; F                                ; False
 VS ; Y                                ; Yes                              ; T                                ; True
+
+# Vertical_Orientation (vo)
+
+vo ; R                                ; Rotated
+vo ; Tr                               ; Transformed_Rotated
+vo ; Tu                               ; Transformed_Upright
+vo ; U                                ; Upright
 
 # White_Space (WSpace)
 

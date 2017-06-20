@@ -1,6 +1,6 @@
-# ScriptExtensions-9.0.0.txt
-# Date: 2016-06-01, 10:34:37 GMT
-# © 2016 Unicode®, Inc.
+# ScriptExtensions-10.0.0.txt
+# Date: 2017-05-31, 01:07:00 GMT [RP]
+# © 2017 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -36,6 +36,14 @@
 # ================================================
 
 # Property:	Script_Extensions
+
+# ================================================
+
+# Script_Extensions=Beng
+
+1CF7          ; Beng # Mc       VEDIC SIGN ATIKRAMA
+
+# Total code points: 1
 
 # ================================================
 
@@ -256,10 +264,12 @@ A8F3          ; Deva Taml # Lo       DEVANAGARI SIGN CANDRABINDU VIRAMA
 0BB5          ; Gran Taml # Lo       TAMIL LETTER VA
 0BE6..0BEF    ; Gran Taml # Nd  [10] TAMIL DIGIT ZERO..TAMIL DIGIT NINE
 0BF0..0BF2    ; Gran Taml # No   [3] TAMIL NUMBER TEN..TAMIL NUMBER ONE THOUSAND
+11301         ; Gran Taml # Mn       GRANTHA SIGN CANDRABINDU
 11303         ; Gran Taml # Mc       GRANTHA SIGN VISARGA
 1133C         ; Gran Taml # Mn       GRANTHA SIGN NUKTA
 
-# Total code points: 17
+
+# Total code points: 18
 
 # ================================================
 
@@ -306,9 +316,10 @@ FF9E..FF9F    ; Hira Kana # Lm   [2] HALFWIDTH KATAKANA VOICED SOUND MARK..HALFW
 
 060C          ; Arab Syrc Thaa # Po       ARABIC COMMA
 061B          ; Arab Syrc Thaa # Po       ARABIC SEMICOLON
+061C          ; Arab Syrc Thaa # Cf       ARABIC LETTER MARK
 061F          ; Arab Syrc Thaa # Po       ARABIC QUESTION MARK
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 

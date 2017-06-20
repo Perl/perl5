@@ -4714,6 +4714,7 @@ lib/unicore/SpecialCasing.txt			Unicode character database
 lib/unicore/StandardizedVariants.txt		Unicode character database
 lib/unicore/UnicodeData.txt			Unicode character database
 lib/unicore/version				The version of the Unicode
+lib/unicore/VerticalOrientation.txt		Unicode character database
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
 lib/User/grent.t		See if User::grwent works
