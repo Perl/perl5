@@ -33,7 +33,7 @@ Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
 Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
-Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcke,
+Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcker,
 and Eric Herman.
 
 =head2 PUMPKIN?
