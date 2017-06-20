@@ -30,7 +30,7 @@ ok -e $bench_pl, "$bench_pl exists and is executable";
 
 my $bench_cmd = "$^X -Ilib $bench_pl";
 
-my $out;
+my ($out, $cmd);
 
 # Read in the expected output format templates and create qr//s from them.
 
@@ -67,10 +67,13 @@ my %format_qrs;
         # convert NNNN.NN placeholders into a regex
         $f =~ s{(N+)\\.(N+)}
                {
+                    my $l = length($2);
                     "("
-                    . "\\s*-?\\d+\."
-                    . "\\d" x length($2)
-                    ."|\\s+-)"
+                    . "\\s*-?\\d+\\."
+                    . "\\d" x $l
+                    ."|\\s{"
+                    . ($l + 1)
+                    . ",}-)"
                }ge;
         $format_qrs{$name} = qr/\A$f\z/;
     }
@@ -430,11 +433,27 @@ like $out, $format_qrs{percent2}, "1 read; 1 generate";
 # This is a minimal test that it runs - it doesn't test whether
 # the environment and args are getting applied correctly, apart from the
 # fact that the perls in question are being successfully executed.
+#
+# Also check the --autolabel feature
 
 note("running cachegrind on 2 perls; may be slow...");
-$out = qx($bench_cmd --tests=call::sub::empty --perlargs=-Ilib $^X=p0 --args='-Ifoo/bar -Mstrict' --env='FOO=foo' $^X=p1 --args='-Ifoo/bar' --env='BAR=bar' --env='BAZ=baz' 2>&1);
-like $out, $format_qrs{percent2}, "2 perls with args and env";
-
+$cmd = <<EOF;
+$bench_cmd
+    --read=t/porting/bench/callsub.json
+    --read=t/porting/bench/callsub2.json
+    --tests=call::sub::empty
+    --autolabel
+    --perlargs=-Ilib
+    $^X --args='-Ifoo/bar -Mstrict' --env='FOO=foo'
+    $^X --args='-Ifoo/bar'          --env='BAR=bar' --env='BAZ=baz'
+    2>&1
+EOF
+$cmd =~ s/\n\s+/ /g;
+$out = qx($cmd);
+$out =~ s{^\./perl}{p0}m;
+$out =~ s{\Q       ./perl  perl2      0      1}
+         {           p0     p1     p2     p3};
+like $out, $format_qrs{percent4}, "4 perls with autolabel and args and env";
 
 
 done_testing();
@@ -495,6 +514,36 @@ COND_m 100.00 NNN.NN
  Ir_mm 100.00 NNN.NN
  Dr_mm 100.00 NNN.NN
  Dw_mm 100.00 NNN.NN
+# ===================================================================
+FORMAT: percent4
+%%STD_HEADER%%
+
+The numbers represent relative counts per loop iteration, compared to
+p0 at 100.0%.
+Higher is better: for example, using half as many instructions gives 200%,
+while using twice as many gives 50%.
+
+call::sub::empty
+function call with no args or body
+
+           p0     p1     p2     p3
+       ------ ------ ------ ------
+    Ir 100.00 NNN.NN NNN.NN NNN.NN
+    Dr 100.00 NNN.NN NNN.NN NNN.NN
+    Dw 100.00 NNN.NN NNN.NN NNN.NN
+  COND 100.00 NNN.NN NNN.NN NNN.NN
+   IND 100.00 NNN.NN NNN.NN NNN.NN
+
+COND_m 100.00 NNN.NN NNN.NN NNN.NN
+ IND_m 100.00 NNN.NN NNN.NN NNN.NN
+
+ Ir_m1 100.00 NNN.NN NNN.NN NNN.NN
+ Dr_m1 100.00 NNN.NN NNN.NN NNN.NN
+ Dw_m1 100.00 NNN.NN NNN.NN NNN.NN
+
+ Ir_mm 100.00 NNN.NN NNN.NN NNN.NN
+ Dr_mm 100.00 NNN.NN NNN.NN NNN.NN
+ Dw_mm 100.00 NNN.NN NNN.NN NNN.NN
 # ===================================================================
 FORMAT: raw1
 %%STD_HEADER%%

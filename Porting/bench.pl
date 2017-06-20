@@ -165,6 +165,28 @@ These options can be used to modify the benchmarking behavior:
 
 =item *
 
+--autolabel
+
+Generate a unique label for every executable which doesn't have an
+explicit C<=label>. Works by stripping out common prefixes and suffixes
+from the executable names, then for any non-unique names, appending
+C<-0>, C<-1>, etc. Parts surrounding the unique part that look like
+version numbers (i.e. which match C</[0-9\.]+/>) aren't stripped.
+For example,
+
+    perl-5.20.0-threaded  perl-5.22.0-threaded  perl-5.24.0-threaded
+
+stripped to unique parts would be:
+
+    20  22  24
+
+but is actually only stripped down to:
+
+    5.20.0  5.22.0  5.24.0
+
+
+=item *
+
 --benchfile=I<foo>
 
 The path of the file which contains the benchmarks (F<t/perf/benchmarks>
@@ -422,6 +444,7 @@ Benchmarking:
   Benchmarks will be run for any perl specified on the command line.
   These options can be used to modify the benchmarking behavior:
 
+  --autolabel        generate labels for any executables without one
   --benchfile=foo    File containing the benchmarks.
                          [default: t/perf/benchmarks].
   --grindargs=foo    Optional command-line args to pass to cachegrind.
@@ -498,6 +521,7 @@ my %OPTS = (
     GetOptions(
         'action=s'    => \$OPTS{action},
         'average'     => \$OPTS{average},
+        'autolabel'   => \$OPTS{autolabel},
         'benchfile=s' => \$OPTS{benchfile},
         'bisect=s'    => \$OPTS{bisect},
         'compact=s'   => \$OPTS{compact},
@@ -682,6 +706,7 @@ sub process_executables_list {
     my %seen_from_reads = map { $_->[1] => 1 } @$read_perls;
     my %seen;
     my @putargs; # collect not-perls into args per PUT
+    my @labels;
 
     while (@cmd_line_args) {
         my $item = shift @cmd_line_args;
@@ -716,16 +741,19 @@ sub process_executables_list {
         # whatever is left must be the name of an executable
 
         my ($perl, $label) = split /=/, $item, 2;
-        $label //= $perl;
-        $label = $perl.$label if $label =~ /^\+/;
+        push @labels, $label;
+        unless ($OPTS{autolabel}) {
+            $label //= $perl;
+            $label = $perl.$label if $label =~ /^\+/;
+        }
 
         die "Error: duplicate label '$label': "
                         . "each executable must have a unique label\n"
-            if $seen{$label}++;
+            if defined $label && $seen{$label}++;
 
         die "Error: duplicate label '$label': "
                         . "seen both in --read file and on command line\n"
-            if $seen_from_reads{$label};
+            if defined $label && $seen_from_reads{$label};
 
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
         die "Error: unable to execute '$perl': $r\n" if $r ne "ok\n";
@@ -737,6 +765,69 @@ sub process_executables_list {
     for (@results) {
         push @$_, '' unless @$_ > 3;
     }
+
+    if ($OPTS{autolabel}) {
+
+        # create a list of [ 'perl-path', $i ] pairs for all
+        # $results[$i] which don't have a label
+        my @labels;
+        for (0..$#results)  {
+            push @labels, [ $results[$_][0], $_ ]
+                        unless defined $results[$_][1];
+        }
+
+        if (@labels) {
+            # strip off common prefixes
+            my $pre = '';
+          STRIP_PREFIX:
+            while (length $labels[0][0]) {
+                my $c = substr($labels[0][0], 0, 1);
+                for my $i (1..$#labels) {
+                    last STRIP_PREFIX if substr($labels[$i][0], 0, 1) ne $c;
+                }
+                substr($labels[$_][0], 0, 1)  = '' for 0..$#labels;
+                $pre .= $c;
+            }
+            # add back any final "version-ish" prefix
+            $pre =~ s/^.*?([0-9\.]*)$/$1/;
+            substr($labels[$_][0], 0, 0) = $pre for 0..$#labels;
+
+            # strip off common suffixes
+            my $post = '';
+          STRIP_SUFFFIX:
+            while (length $labels[0][0]) {
+                my $c = substr($labels[0][0], -1, 1);
+                for my $i (1..$#labels) {
+                    last STRIP_SUFFFIX if substr($labels[$i][0], -1, 1) ne $c;
+                }
+                chop $labels[$_][0] for 0..$#labels;
+                $post = "$c$post";
+            }
+            # add back any initial "version-ish" suffix
+            $post =~ s/^([0-9\.]*).*$/$1/;
+            $labels[$_][0] .= $post for 0..$#labels;
+
+            # now de-duplicate labels
+
+            my (%seen, %index);
+            $seen{$read_perls->[$_][1]}++ for 0..$#$read_perls;
+            $seen{$labels[$_][0]}++ for 0..$#labels;
+
+            for my $i (0..$#labels)  {
+                my $label = $labels[$i][0];
+                next unless $seen{$label} > 1;
+                my $d = length($label) ? '-' : '';
+                my $n = $index{$label} // 0;
+                $n++ while exists $seen{"$label$d$n"};
+                $labels[$i][0] .= "$d$n";
+                $index{$label} = $n + 1;
+            }
+
+            # finally, store them
+            $results[$_->[1]][1]= $_->[0] for @labels;
+        }
+    }
+
 
     return @results;
 }
