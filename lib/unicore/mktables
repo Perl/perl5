@@ -45,7 +45,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v9.0.0;
+my $version_of_mk_invlist_bounds = v10.0.0;
 
 ##########################################################################
 #
@@ -19067,6 +19067,14 @@ my @input_file_objects = (
                     Property => 'Joining_Type',
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
+    Input_file->new("${EXTRACTED}DName.txt", v10.0.0,
+                    Skip => 'This file adds no new information not already'
+                          . ' present in other files',
+                    # And it's unnecessary programmer work to handle this new
+                    # format.  Previous Derived files actually had bug fixes
+                    # in them that were useful, but that should not be the
+                    # case here.
+                   ),
     Input_file->new('Jamo.txt', v2.0.0,
                     Property => 'Jamo_Short_Name',
                     Each_Line_Handler => \&filter_jamo_line,
@@ -19504,6 +19512,13 @@ my @input_file_objects = (
                           . ' and components. This data file also includes'
                           . ' informative radical-stroke values that are used'
                           . ' internally by Unicode',
+                   ),
+    Input_file->new('VerticalOrientation.txt', v10.0.0,
+                    Property => 'Vertical_Orientation',
+                    Has_Missings_Defaults => $NOT_IGNORED,
+                   ),
+    Input_file->new('NushuSources.txt', v10.0.0,
+                    Skip => 'Specifies source material for Nushu characters',
                    ),
 );
 

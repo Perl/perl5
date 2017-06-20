@@ -4345,7 +4345,7 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 /* Do not break within emoji flag sequences. That is, do not
                  * break between regional indicator (RI) symbols if there is an
                  * odd number of RI characters before the break point.
-                 *  GB12     ^ (RI RI)* RI × RI
+                 *  GB12   sot (RI RI)* RI × RI
                  *  GB13 [^RI] (RI RI)* RI × RI */
 
                 while (backup_one_GCB(strbeg,
@@ -4637,7 +4637,7 @@ S_isLB(pTHX_ LB_enum before,
                  * only if there are an even number of regional indicators
                  * preceding the position of the break.
                  *
-                 *  sot (RI RI)* RI × RI
+                 *    sot (RI RI)* RI × RI
                  *  [^RI] (RI RI)* RI × RI */
 
                 while (backup_one_LB(strbeg,
@@ -5167,7 +5167,7 @@ S_isWB(pTHX_ WB_enum previous,
                  * odd number of RI characters before the potential break
                  * point.
                  *
-                 * WB15     ^ (RI RI)* RI × RI
+                 * WB15   sot (RI RI)* RI × RI
                  * WB16 [^RI] (RI RI)* RI × RI */
 
                 while (backup_one_WB(&previous,

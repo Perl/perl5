@@ -759,7 +759,7 @@ sub output_GCB_table() {
     # regional indicator (RI) symbols if there is an odd number of RI
     # characters before the break point.  Must be resolved in runtime code.
     #
-    # GB12 ^ (RI RI)* RI × RI
+    # GB12 sot (RI RI)* RI × RI
     # GB13 [^RI] (RI RI)* RI × RI
     $gcb_table[$gcb_enums{'Regional_Indicator'}]
               [$gcb_enums{'Regional_Indicator'}] = $gcb_actions{GCB_RI_then_RI};
@@ -1509,7 +1509,7 @@ sub output_WB_table() {
     # regional indicator (RI) symbols if there is an odd number of RI
     # characters before the break point.
     # WB16  [^RI] (RI RI)* RI × RI
-    # WB15   ^    (RI RI)* RI × RI
+    # WB15   sot    (RI RI)* RI × RI
     $wb_table[$wb_enums{'Regional_Indicator'}]
              [$wb_enums{'Regional_Indicator'}] = $wb_actions{'WB_RI_then_RI'};
 
