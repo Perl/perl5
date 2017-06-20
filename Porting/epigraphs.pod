@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.27.1 - Rona Munro, Doctor Who: Survival
 
-Announced on 2017-06-20 by Eric Herman
+L<Announced on 2017-06-20 by Eric Herman|http://www.nntp.perl.org/group/perl.perl5.porters/2017/06/msg245055.html>
 
   There are worlds out there where the sky is burning,
   where the sea's asleep and the rivers dream,
