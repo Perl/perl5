@@ -13992,12 +13992,16 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
         }                                                                   \
     } STMT_END
 #define CLEAR_POSIX_WARNINGS()                                              \
-    if (posix_warnings && RExC_warn_text)                                   \
-        av_clear(RExC_warn_text)
+    STMT_START {                                                            \
+        if (posix_warnings && RExC_warn_text)                               \
+            av_clear(RExC_warn_text);                                       \
+    } STMT_END
 
 #define CLEAR_POSIX_WARNINGS_AND_RETURN(ret)                                \
-    CLEAR_POSIX_WARNINGS();                                                 \
-    return ret
+    STMT_START {                                                            \
+        CLEAR_POSIX_WARNINGS();                                             \
+        return ret;                                                         \
+    } STMT_END
 
 STATIC int
 S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
