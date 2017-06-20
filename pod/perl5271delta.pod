@@ -1,0 +1,434 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5271delta - what is new for perl v5.27.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.27.0 release and the 5.27.1
+release.
+
+If you are upgrading from an earlier release such as 5.26.0, first read
+L<perl5270delta>, which describes differences between 5.26.0 and 5.27.0.
+
+=head1 Core Enhancements
+
+=head2 L<C<delete>|perlfunc/delete EXPR> on key/value slices
+
+L<C<delete>|perlfunc/delete EXPR> can now be used on key/value slices,
+returning the keys along with the deleted values.
+L<[perl #131328]|https://rt.perl.org/Ticket/Display.html?id=131328>
+
+=head1 Security
+
+=head2 Default Hash Function Change
+
+Perl 5.27.1 retires various older hash functions which are not viewed as
+sufficiently secure for use in Perl. We now support four general purpose
+hash functions, Siphash (2-4 and 1-3 variants), and  Zaphod32, and StadtX
+hash. In addition we support SBOX32 (a form of tabular hashing) for hashing
+short  strings, in conjunction with any of the other hash functions provided.
+
+By default Perl is configured to support SBOX hashing of strings up to 24
+characters, in conjunction with StadtX hashing on 64 bit builds, and
+Zaphod32 hashing for 32 bit builds.
+
+You may control these settings with the following options to Configure:
+
+    -DPERL_HASH_FUNC_SIPHASH
+    -DPERL_HASH_FUNC_SIPHASH13
+    -DPERL_HASH_FUNC_STADTX
+    -DPERL_HASH_FUNC_ZAPHOD32
+
+To disable SBOX hashing you can use
+
+    -DPERL_HASH_USE_SBOX32_ALSO=0
+
+And to set the maximum length to use SBOX32 hashing on with:
+
+    -DSBOX32_MAX_LEN=16
+
+The maximum length allowed is 256. There probably isn't much point
+in setting it higher than the default.
+
+=head1 Incompatible Changes
+
+=head2 Comma-less variable lists in formats are no longer allowed
+
+Omitting the commas between variables passed to formats is no longer
+allowed.  This has been deprecated since Perl 5.000.
+
+=head2 The C<:locked> and C<:unique> attributes have been removed
+
+These have been no-ops and deprecated since Perl 5.12 and 5.10,
+respectively.
+
+=head2 C<\N{}> with nothing between the braces is now illegal.
+
+This has been deprecated since Perl 5.24.
+
+=head2 Opening the same symbol as both a file and directory handle is no longer allowed
+
+Using C<open()> and C<opendir()> to associate both a filehandle and a dirhandle
+to the same symbol (glob or scalar) has been deprecated since Perl 5.10.
+
+=head2 Use of bare C<< << >> to mean C<< <<"" >> is no longer allowed
+
+Use of a bare terminator has been deprecated since Perl 5.000.
+
+=head2 Setting $/ to a reference to a non-positive integer no longer allowed
+
+This used to work like setting it to C<undef>, but has been deprecated
+since Perl 5.20.
+
+=head2 Unicode code points with values exceeding C<IV_MAX> are now fatal.
+
+This was deprecated since Perl 5.24.
+
+=head2 C<B::OP::terse> no longer exists.
+
+Use C<B::Concise::b_terse> instead.
+
+=head2 Use of inherited AUTOLOAD for non-methods is no longer allowed.
+
+This was deprecated in Perl 5.004.
+
+=head2 Use of strings with code points over 0xFF is not allowed for
+bitwise string operators
+
+Code points over C<0xFF> do not make sense for bitwise operators.
+
+=head2 Setting C<${^ENCODING}> to a defined value is now illegal
+
+This has been deprecated since Perl 5.22 and a no-op since Perl 5.26.
+
+=head2 Backslash no longer escapes colon in PATH for the -S switch
+
+Previously the C<-S> switch incorrectly treated backslash ("\") as an
+escape for colon when traversing the C<PATH> environment variable.
+[perl #129183]
+
+=head2 the -DH (DEBUG_H) misfeature has been removed
+
+On a perl built with debugging support, the C<H> flag to the C<-D>
+debugging option has been removed. This was supposed to dump hash values,
+but has been broken for many years.
+
+=head1 Deprecations
+
+=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code
+points above 0xFF is deprecated.
+
+Use of these is nonsensical, as C<vec> is a bit-oriented operation,
+which operates on the underlying UTF-8 representation these strings must
+be in, and will likely give unexpected results.
+
+=head2 Some uses of unescaped C<"{"> are no longer fatal
+
+Perl 5.26.0 fatalized some uses of an unescaped left brace, but an
+exception was made at the last minute, specifically crafted to be a
+minimal change to allow GNU Autoconf to work.  This code is heavily
+depended upon, and continues to use the deprecated usage.  Its use of an
+unescaped left brace is one where we have no intention of repurposing
+C<"{"> to be something other than itself.
+
+That exception is now generalized to include various other such cases
+where the C<"{"> will not be repurposed.  This is to get real experience
+with this more complicated change now, in case we need to issue a dot
+release if we find other things like Autoconf that are important to work
+around.
+
+Note that these uses continue to raise a deprecation message.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+L<File::Glob> has been modified to remove unnecessary backtracking and
+recursion, thanks to Russ Cox. See L<https://research.swtch.com/glob>
+for more details.
+
+=item *
+
+The C<ref()> builtin is now much faster in boolean context, since it no
+longer bothers to construct a temporary string like C<Foo=ARRAY(0x134af48)>.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 2.24 to 2.26.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.40 to 1.41. It includes
+many bug fixes, and in particular, it now deparses variable attributes
+correctly:
+
+    my $x :foo;  # used to deparse as
+                 # 'attributes'->import('main', \$x, 'foo'), my $x;
+
+=item *
+
+L<charnames> has been upgraded from version 1.44 to 1.45.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.35 to 3.36.
+
+=item *
+
+L<DirHandle> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 2.04 to 2.14.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.24 to 7.30.
+
+=item *
+
+L<File::Path> has been upgraded from version 2.12_01 to 2.14.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.55 to 1.57.
+
+=item *
+
+L<GDBM_File> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.49 to 2.5.
+
+=item *
+
+L<if> has been upgraded from version 0.0606 to 0.0607.
+
+=item *
+
+L<IO::Socket::IP> has been upgraded from version 0.38 to 0.39.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.96 to 0.98.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27400_02 to 2.94.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.42 to 3.52.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170620 to 5.20170621.
+
+=item *
+
+L<mro> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.26 to 0.27.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.16 to 0.17.
+
+=item *
+
+L<Storable> has been upgraded from version 2.62 to 2.63.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.38 to 3.39.
+
+=item *
+
+L<threads> has been upgraded from version 2.15 to 2.16.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.56 to 1.57.
+
+=item *
+
+L<version> has been upgraded from version 0.9917 to 0.9918.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+Testing of the XS-APItest directory is now done in parallel, where
+applicable.
+
+=item *
+
+Perl now includes a default F<.travis.yml> file for Travis CI testing
+on github mirrors.  [perl #123981]
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+=over 4
+
+=item *
+
+Support for compiling perl on Windows using Microsoft Visual Studio 2017
+(containing Visual C++ 14.1) has been added.
+
+=back
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The C<PL_statbuf> interpreter variable has been removed.
+
+=item *
+
+The deprecated function C<to_utf8_case()>, accessible from XS code, has
+been removed.
+
+=item *
+
+A new function
+L<C<is_utf8_invariant_string_loc()>|perlapi/is_utf8_invariant_string_loc>
+has been added that is like
+L<C<is_utf8_invariant_string()>|perlapi/is_utf8_invariant_string>
+but takes an extra pointer parameter into which is stored the location
+of the first variant character, if any are found.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Fetching the name of a glob that was previously UTF-8 but wasn't any
+longer would return that name flagged as UTF-8.  [perl #131263]
+
+=item *
+
+The perl C<sprintf()> function (via the underlying C function
+C<Perl_sv_vcatpvfn_flags()>) has been heavily reworked to fix many minor
+bugs, including the integer wrapping of large width and precision
+specifiers and potential buffer overruns. It has also been made faster in
+many cases.
+
+=item *
+
+Exiting from an C<eval>, whether normally or via an exception, now always
+frees temporary values (possibly calling destructors) I<before> setting
+C<$@>. For example:
+
+    sub DESTROY { eval { die "died in DESTROY"; } }
+    eval { bless []; };
+    # $@ used to be equal to "died in DESTROY" here; it's now "".
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.27.1 represents approximately 3 weeks of development since Perl 5.27.0
+and contains approximately 62,000 lines of changes across 510 files from 30
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 55,000 lines of changes to 380 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.27.1:
+
+Aaron Crane, Abigail, Andy Dougherty, Andy Lester, Aristotle Pagaltzis, Chris
+'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan Collins,
+David Mitchell, Eric Herman, Eugen Konkov, Father Chrysostomos, Graham Knop,
+H.Merijn Brand, Jacques Germishuys, James E Keenan, Jerry D. Hedden, John
+Peacock, Karl Williamson, Ken Cotterill, Lukas Mai, Matthew Horsfall, Sawyer X,
+Steve Hay, Sullivan Beck, Thomas Sibley, Tony Cook, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
