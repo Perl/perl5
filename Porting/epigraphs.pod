@@ -17,7 +17,21 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-Announced on 2017-05-31 by Sawyer X
+=head2 v5.27.1 - Rona Munro, Doctor Who: Survival
+
+Announced on 2017-06-20 by Eric Herman
+
+  There are worlds out there where the sky is burning,
+  where the sea's asleep and the rivers dream,
+  people made of smoke and cities made of song.
+  Somewhere there's danger,
+  somewhere there's injustice
+  and somewhere else the tea is getting cold.
+  Come on, Ace, we've got work to do.
+
+=head2 v5.27.0 - Bertrand Russell, The Road to Happiness
+
+L<Announced on 2017-05-31 by Sawyer X| http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244580.html>
 
   People who have theories as to how one should live tend to forget the
   limitations of nature. If your way of life involves constant
