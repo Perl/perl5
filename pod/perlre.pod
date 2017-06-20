@@ -505,7 +505,7 @@ a C<\Q...\E> stays unaffected by C</x>.  And note that C</x> doesn't affect
 space interpretation within a single multi-character construct.  For
 example in C<\x{...}>, regardless of the C</x> modifier, there can be no
 spaces.  Same for a L<quantifier|/Quantifiers> such as C<{3}> or
-C<{5,}>.  Similarly, C<(?:...)> can't have a space between the C<"{">,
+C<{5,}>.  Similarly, C<(?:...)> can't have a space between the C<"(">,
 C<"?">, and C<":">.  Within any delimiters for such a
 construct, allowed spaces are not affected by C</x>, and depend on the
 construct.  For example, C<\x{...}> can't have spaces because hexadecimal
