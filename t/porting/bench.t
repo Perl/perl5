@@ -387,6 +387,16 @@ like $out, $format_qrs{raw1}, "basic cachegrind raw format; 1 perl";
 $out = qx($bench_cmd --read=$resultfile1 --raw --compact=0 2>&1);
 like $out, $format_qrs{raw_compact}, "basic cachegrind raw compact format; 1 perl";
 
+# and read back the results in raw average form
+
+$out = qx($bench_cmd --read=$resultfile1 --raw --average 2>&1);
+like $out, $format_qrs{raw_average1}, "basic cachegrind raw average format; 1 perl";
+
+# and read back the results with raw selected fields
+
+$out = qx($bench_cmd --read=$resultfile1 --raw --fields=Ir,Dr 2>&1);
+like $out, $format_qrs{fields1}, "basic cachegrind --fields; 1 perl";
+
 # 2 perls:
 
 # read back the results in relative-percent form
@@ -394,15 +404,60 @@ like $out, $format_qrs{raw_compact}, "basic cachegrind raw compact format; 1 per
 $out = qx($bench_cmd --read=$resultfile2 2>&1);
 like $out, $format_qrs{percent2}, "basic cachegrind percent format; 2 perls";
 
+# read back the results in relative-percent form with norm
+
+$out = qx($bench_cmd --read=$resultfile2 --norm=0 2>&1);
+like $out, $format_qrs{percent2}, "basic cachegrind percent format, norm; 2 perls";
+
+# read back the results in relative-percent form with sort
+
+$out = qx($bench_cmd --read=$resultfile2 --sort=Ir:0 2>&1);
+like $out, $format_qrs{percent2}, "basic cachegrind percent format, sort; 2 perls";
+
+# read back the results in relative-percent form with sort and norm
+
+$out = qx($bench_cmd --read=$resultfile2 --sort=Ir:0 --norm=0 2>&1);
+like $out, $format_qrs{percent2}, "basic cachegrind percent format, sort, norm; 2 perls";
+
 # and read back the results in raw form
 
 $out = qx($bench_cmd --read=$resultfile2 --raw 2>&1);
 like $out, $format_qrs{raw2}, "basic cachegrind raw format; 2 perls";
 
+# and read back the results in raw form with norm
+
+$out = qx($bench_cmd --read=$resultfile2 --raw --norm=0 2>&1);
+like $out, $format_qrs{raw2}, "basic cachegrind raw format, norm; 2 perls";
+
+# and read back the results in raw form with sort
+
+$out = qx($bench_cmd --read=$resultfile2 --raw --sort=Ir:0 2>&1);
+like $out, $format_qrs{raw2}, "basic cachegrind raw format, sort, norm; 2 perls";
+
+# and read back the results in raw form with sort and norm
+
+$out = qx($bench_cmd --read=$resultfile2 --raw --sort=Ir:0 --norm=0 2>&1);
+like $out, $format_qrs{raw2}, "basic cachegrind raw format, sort, norm; 2 perls";
+
 # and read back the results in compact form
 
 $out = qx($bench_cmd --read=$resultfile2 --compact=1 2>&1);
 like $out, $format_qrs{compact}, "basic cachegrind compact format; 2 perls";
+
+# and read back the results in average form
+
+$out = qx($bench_cmd --read=$resultfile2 --average 2>&1);
+like $out, $format_qrs{average}, "basic cachegrind average format; 2 perls";
+
+# and read back the results with selected fields
+
+$out = qx($bench_cmd --read=$resultfile2 --fields=Ir,Dr 2>&1);
+like $out, $format_qrs{fields2}, "basic cachegrind --fields; 2 perls";
+#
+# and read back the results in compact form with selected fields
+
+$out = qx($bench_cmd --read=$resultfile2 --compact=1  --fields=Ir,Dr 2>&1);
+like $out, $format_qrs{compact_fields}, "basic cachegrind compact, fields; 2 perls";
 
 
 # bisect
@@ -545,6 +600,22 @@ COND_m 100.00 NNN.NN NNN.NN NNN.NN
  Dr_mm 100.00 NNN.NN NNN.NN NNN.NN
  Dw_mm 100.00 NNN.NN NNN.NN NNN.NN
 # ===================================================================
+FORMAT: fields2
+%%STD_HEADER%%
+
+The numbers represent relative counts per loop iteration, compared to
+p0 at 100.0%.
+Higher is better: for example, using half as many instructions gives 200%,
+while using twice as many gives 50%.
+
+call::sub::empty
+function call with no args or body
+
+           p0     p1
+       ------ ------
+    Ir 100.00 NNN.NN
+    Dr 100.00 NNN.NN
+# ===================================================================
 FORMAT: raw1
 %%STD_HEADER%%
 
@@ -571,6 +642,45 @@ COND_m NNNNNN.N
  Ir_mm NNNNNN.N
  Dr_mm NNNNNN.N
  Dw_mm NNNNNN.N
+# ===================================================================
+FORMAT: raw_average1
+%%STD_HEADER%%
+
+The numbers represent raw counts per loop iteration.
+
+AVERAGE
+
+             p0
+       --------
+    Ir NNNNNN.N
+    Dr NNNNNN.N
+    Dw NNNNNN.N
+  COND NNNNNN.N
+   IND NNNNNN.N
+
+COND_m NNNNNN.N
+ IND_m NNNNNN.N
+
+ Ir_m1 NNNNNN.N
+ Dr_m1 NNNNNN.N
+ Dw_m1 NNNNNN.N
+
+ Ir_mm NNNNNN.N
+ Dr_mm NNNNNN.N
+ Dw_mm NNNNNN.N
+# ===================================================================
+FORMAT: fields1
+%%STD_HEADER%%
+
+The numbers represent raw counts per loop iteration.
+
+call::sub::empty
+function call with no args or body
+
+             p0
+       --------
+    Ir NNNNNN.N
+    Dr NNNNNN.N
 # ===================================================================
 FORMAT: raw2
 %%STD_HEADER%%
@@ -612,6 +722,49 @@ Results for p1
      Ir     Dr     Dw   COND    IND COND_m  IND_m  Ir_m1  Dr_m1  Dw_m1  Ir_mm  Dr_mm  Dw_mm
  ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------
  NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN  call::sub::empty
+# ===================================================================
+FORMAT: compact_fields
+%%STD_HEADER%%
+
+The numbers represent relative counts per loop iteration, compared to
+p0 at 100.0%.
+Higher is better: for example, using half as many instructions gives 200%,
+while using twice as many gives 50%.
+
+Results for p1
+
+     Ir     Dr
+ ------ ------
+ NNN.NN NNN.NN  call::sub::empty
+# ===================================================================
+FORMAT: average
+%%STD_HEADER%%
+
+The numbers represent relative counts per loop iteration, compared to
+p0 at 100.0%.
+Higher is better: for example, using half as many instructions gives 200%,
+while using twice as many gives 50%.
+
+AVERAGE
+
+           p0     p1
+       ------ ------
+    Ir 100.00 NNN.NN
+    Dr 100.00 NNN.NN
+    Dw 100.00 NNN.NN
+  COND 100.00 NNN.NN
+   IND 100.00 NNN.NN
+
+COND_m 100.00 NNN.NN
+ IND_m 100.00 NNN.NN
+
+ Ir_m1 100.00 NNN.NN
+ Dr_m1 100.00 NNN.NN
+ Dw_m1 100.00 NNN.NN
+
+ Ir_mm 100.00 NNN.NN
+ Dr_mm 100.00 NNN.NN
+ Dw_mm 100.00 NNN.NN
 # ===================================================================
 FORMAT: raw_compact
 %%STD_HEADER%%
