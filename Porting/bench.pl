@@ -705,7 +705,6 @@ sub process_executables_list {
     my @results; # returned, each item is [ perlexe, label, {env}, 'args' ]
     my %seen_from_reads = map { $_->[1] => 1 } @$read_perls;
     my %seen;
-    my @putargs; # collect not-perls into args per PUT
     my @labels;
 
     while (@cmd_line_args) {
@@ -905,7 +904,7 @@ sub parse_cachegrind {
 # Handle the 'grind' action
 
 sub do_grind {
-    my ($perl_args) = @_; # the residue of @ARGV after option processing
+    my ($cmd_line_args) = @_; # the residue of @ARGV after option processing
 
     my ($loop_counts, $perls, $results, $tests, $order, @run_perls);
     my ($bisect_field, $bisect_min, $bisect_max);
@@ -1007,7 +1006,7 @@ sub do_grind {
 
     # Gather list of perls to benchmark:
 
-    if (@$perl_args) {
+    if (@$cmd_line_args) {
         unless ($done_read) {
             # How many times to execute the loop for the two trials. The lower
             # value is intended to do the loop enough times that branch
@@ -1019,7 +1018,7 @@ sub do_grind {
                 read_tests_file($OPTS{benchfile} // 't/perf/benchmarks');
         }
 
-        @run_perls = process_executables_list($perls, @$perl_args);
+        @run_perls = process_executables_list($perls, @$cmd_line_args);
         push @$perls, @run_perls;
     }
 
