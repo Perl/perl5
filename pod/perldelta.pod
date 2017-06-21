@@ -27,6 +27,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 10.0 is supported
+
+A list of changes is at
+L<http://www.unicode.org/versions/Unicode10.0.0>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
