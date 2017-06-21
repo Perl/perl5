@@ -1108,6 +1108,8 @@ sub do_grind {
         die "Panic: no result in bisect for field '$bisect_field'\n"
                                                         unless defined $c;
 
+        print "Bisect: $bisect_field had the value $c\n";
+
         exit 0 if $bisect_min <= $c and $c <= $bisect_max;
         exit 1;
     }
