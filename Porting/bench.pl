@@ -18,14 +18,14 @@ perls.
 
     # run the tests against the same perl twice, with varying options
 
-    bench.pl [options] perlA=bigint --args='-Mbigint' perlA=int
+    bench.pl [options] perlA=bigint --args='-Mbigint' perlA=plain
 
     # Run bench on blead, saving results to file; then modify the blead
     # binary, and benchmark again, comparing against the saved results
 
-    bench.pl [options] --write=blead.time -- ./perl=blead
+    bench.pl [options] --write=blead.time ./perl=blead
     # ... hack hack hack, updating ./perl ...
-    bench.pl --read=blead.time -- ./perl=hacked
+    bench.pl --read=blead.time ./perl=hacked
 
     # You can also combine --read with --write and new benchmark runs
 
@@ -62,7 +62,8 @@ all current executables, plus any previous ones obtained via --read.
 
 In its most general form, the specification of a perl executable is:
 
-    path/perl=+mylabel --args='-foo -bar' --env='A=a' --env='B=b'
+    path/perl=+mylabel --args='-foo -bar' --args='-baz' \
+                       --env='A=a' --env='B=b'
 
 This defines how to run the executable F<path/perl>. It has a label,
 which due to the C<+>, is appended to the binary name to give a label of
@@ -72,12 +73,13 @@ C<mylabel>).
 It can be optionally followed by one or more C<--args> or C<--env>
 switches, which specify extra command line arguments or environment
 variables to use when invoking that executable. Each C<--env> switch
-should be of the form C<--env=VARABLE=value>. Any C<--arg> values are
-concatenated with a space, along with the global C<--perlargs> value if
-any. The above would cause a system() call looking something like:
+should be of the form C<--env=VARIABLE=value>. Any C<--arg> values are
+concatenated to the eventual command line, along with the global
+C<--perlargs> value if any. The above would cause a system() call looking
+something like:
 
-    PERL_HASH_SEED=0 A=a= B=b valgrind --tool=cachegrind \
-        path/perl -foo -bar ....
+    PERL_HASH_SEED=0 A=a B=b valgrind --tool=cachegrind \
+        path/perl -foo -bar -baz ....
 
 =head1 OPTIONS
 
@@ -152,6 +154,8 @@ across all files are aggregated. The list of test names from each file
 This list of tests is used instead of that obtained from the normal
 benchmark file (or C<--benchfile>) for any benchmarks that are run.
 
+The perl labels must be unique across all read in test results.
+
 Requires C<JSON::PP> to be available.
 
 =back
@@ -170,8 +174,8 @@ These options can be used to modify the benchmarking behavior:
 Generate a unique label for every executable which doesn't have an
 explicit C<=label>. Works by stripping out common prefixes and suffixes
 from the executable names, then for any non-unique names, appending
-C<-0>, C<-1>, etc. Parts surrounding the unique part that look like
-version numbers (i.e. which match C</[0-9\.]+/>) aren't stripped.
+C<-0>, C<-1>, etc. text directly surrounding the unique part which look
+like version numbers (i.e. which match C</[0-9\.]+/>) aren't stripped.
 For example,
 
     perl-5.20.0-threaded  perl-5.22.0-threaded  perl-5.24.0-threaded
@@ -198,75 +202,13 @@ by default).
 
 Optional command-line arguments to pass to all cachegrind invocations.
 
-This option is appended to those which bench.pl uses for its own
-purposes; so it can be used to override them (see --debug output
-below), and can also be 'abused' to add redirects into the valgrind
-command invocation.
-
-For example, this writes PERL_MEM_LOG activity to foobar.$$, because
-3>foobar.$$ redirects fd 3, then perl under PERL_MEM_LOG writes to fd 3.
-
- $ perl Porting/bench.pl --jobs=2 --verbose --debug \
-    --tests=call::sub::amp_empty \
-    \
-    --grindargs='--cachegrind-out-file=junk.$$ 3>foobar.$$' \
-    -- \
-    perl5.24.0	perl5.24.0:+memlog:PERL_MEM_LOG=3mst
-
-for the +memlog tests, this executes as: (shown via --debug, then prettyfied)
-
-  Command: PERL_HASH_SEED=0 PERL_MEM_LOG=3mst
-    valgrind --tool=cachegrind  --branch-sim=yes
-    --cachegrind-out-file=/dev/null --cachegrind-out-file=junk.$$
-    3>foobar.$$ perl5.24.0  - 10 2>&1
-
-The result is that a set of junk.$$ files containing raw cachegrind
-output are written, and foobar.$$ contains the expected memlog output.
-
-Notes:
-
-Theres no obvious utility for those junk.$$ and foobar.$$ files, but
-you can have them anyway.
-
-The 3 in PERL_MEM_LOG=3mst is needed because the output would
-otherwize go to STDERR, and cause parse_cachegrind() to reject the
-test and die.
-
-The --grindargs redirect is needed to capture the memlog output;
-without it, the memlog output is written to fd3, around
-parse_cachegrind and effectively into /dev/null
-
-PERL_MEM_LOG is expensive when used.
-
-call::sub::amp_empty
-&foo function call with no args or body
-
-       perl5.24.0 perl5.24.0+memlog
-       ---------- -----------------
-    Ir      394.0          543477.5
-    Dr      161.0          146814.1
-    Dw       72.0          122304.6
-  COND       58.0           66796.4
-   IND        5.0            5537.7
-
-COND_m        0.0            6743.1
- IND_m        5.0            1490.2
-
- Ir_m1        0.0             683.7
- Dr_m1        0.0              65.9
- Dw_m1        0.0               8.5
-
- Ir_mm        0.0              11.6
- Dr_mm        0.0              10.6
- Dw_mm        0.0               4.7
-
 =item *
 
 -j I<N>
 --jobs=I<N>
 
 Run I<N> jobs in parallel (default 1). This determines how many cachegrind
-process will running at a time, and should generally be set to the number
+process will run at a time, and should generally be set to the number
 of CPUs available.
 
 =item *
@@ -274,7 +216,7 @@ of CPUs available.
 --perlargs=I<foo>
 
 Optional command-line arguments to pass to every perl executable.  This
-may optionaly be combined with C<--args>s switches following individual
+may optionaly be combined with C<--args> switches following individual
 perls. For example:
 
     bench.pl --perlargs='-Ilib -It/lib' .... \
@@ -290,7 +232,7 @@ would cause the invocations
 
 =head2 Output options
 
-Any results accumulated via --read or running benchmarks can be output
+Any results accumulated via --read or by running benchmarks can be output
 in any or all of these three ways:
 
 =over 4
@@ -311,11 +253,10 @@ Requires C<JSON::PP> to be available.
 
 --bisect=I<field,minval,maxval>
 
-Run a single test against one perl and exit with a zero status if the
-named field is in the specified range; exit 1 otherwise. It will complain
-if more than one test or perl has been specified. It is intended to be
-called as part of a bisect run, to determine when something changed.
-For example,
+Exit with a zero status if the named field is in the specified range;
+exit with 1 otherwise. It will complain if more than one test or perl has
+been specified. It is intended to be called as part of a bisect run, to
+determine when something changed.  For example,
 
     bench.pl -j 8 --tests=foo --bisect=Ir,100,105 --perlargs=-Ilib \
         ./miniperl
@@ -342,7 +283,7 @@ individual test.
 
 =item *
 
---compact=<Iperl>
+--compact=I<perl>
 
 Display the results for a single perl executable in a compact form.
 Which perl to display is specified in the same manner as C<--norm>.
