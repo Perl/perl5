@@ -453,11 +453,16 @@ like $out, $format_qrs{average}, "basic cachegrind average format; 2 perls";
 
 $out = qx($bench_cmd --read=$resultfile2 --fields=Ir,Dr 2>&1);
 like $out, $format_qrs{fields2}, "basic cachegrind --fields; 2 perls";
-#
+
 # and read back the results in compact form with selected fields
 
 $out = qx($bench_cmd --read=$resultfile2 --compact=1  --fields=Ir,Dr 2>&1);
 like $out, $format_qrs{compact_fields}, "basic cachegrind compact, fields; 2 perls";
+
+# and read back the results with 1 selected fields (this is more compact)
+
+$out = qx($bench_cmd --read=$resultfile2 --fields=Ir 2>&1);
+like $out, $format_qrs{'1field'}, "basic cachegrind 1 field; 2 perls";
 
 
 # bisect
@@ -736,6 +741,20 @@ Results for p1
      Ir     Dr
  ------ ------
  NNN.NN NNN.NN  call::sub::empty
+# ===================================================================
+FORMAT: 1field
+%%STD_HEADER%%
+
+The numbers represent relative counts per loop iteration, compared to
+p0 at 100.0%.
+Higher is better: for example, using half as many instructions gives 200%,
+while using twice as many gives 50%.
+
+Results for field Ir.
+
+                     p0     p1
+                 ------ ------
+call::sub::empty NNN.NN NNN.NN
 # ===================================================================
 FORMAT: average
 %%STD_HEADER%%

@@ -1492,7 +1492,7 @@ sub grind_print {
     my $one_field = defined $OPTS{fields} &&  keys(%{$OPTS{fields}}) == 1;
 
     if ($one_field) {
-        print "Results for field " . (keys(%{$OPTS{fields}}))[0] . ".\n";
+        print "\nResults for field " . (keys(%{$OPTS{fields}}))[0] . ".\n";
 
         # The first column will now contain test names rather than
         # field names; Calculate the max width.
