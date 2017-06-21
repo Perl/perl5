@@ -43,7 +43,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	     && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))
 		    Perl_warner(aTHX_ packWARN(WARN_LAYER), "%s", PL_no_modify);
-		SETERRNO(EINVAL, SS_IVCHAN);
+		SETERRNO(EACCES, RMS_PRV);
 		return -1;
 	    }
 	    s->var = SvREFCNT_inc(SvRV(arg));
