@@ -538,6 +538,7 @@ foreach my $test (@tests) {
     my $will_overflow = $allowed_uv < 0;
 
     my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
+    my $display_bytes = display_bytes($bytes);
 
     my $controlling_warning_category;
     my $utf8n_flag_to_warn;
@@ -576,6 +577,10 @@ foreach my $test (@tests) {
                                 # some sort of malformation that means we
                                 # can't get an exact code poin
 
+    # Is this test malformed from the beginning?  If so, we know to generally
+    # expect that the tests will show it isn't valid.
+    my $initially_malformed = 0;
+
     if ($will_overflow || $allowed_uv > 0x10FFFF) {
 
         # Set the SUPER flags; later, we test for ABOVE_31_BIT as well.
@@ -600,6 +605,7 @@ foreach my $test (@tests) {
         if ($will_overflow) {  # This is realy a malformation
             $non_cp_trailing_text = "if you see this, there is an error";
             $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
+            $initially_malformed = 1;
         }
         elsif ($allowed_uv > 0x7FFFFFFF) {
             $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
@@ -682,13 +688,14 @@ foreach my $test (@tests) {
 
     die 'Didn\'t set $needed_to_discern_len for ' . $testname
                                         unless defined $needed_to_discern_len;
+
     {   # First test the isFOO calls
-        use warnings;   # Make sure these don't raise warnings
+        use warnings; no warnings 'deprecated';   # Make sure these don't raise warnings
         undef @warnings_gotten;
 
         my $ret = test_isUTF8_CHAR($bytes, $length);
         my $ret_flags = test_isUTF8_CHAR_flags($bytes, $length, 0);
-        if ($will_overflow) {
+        if ($initially_malformed) {
             is($ret, 0, "For $testname: isUTF8_CHAR() returns 0");
             is($ret_flags, 0, "    And isUTF8_CHAR_flags() returns 0");
         }
@@ -705,7 +712,7 @@ foreach my $test (@tests) {
 
         undef @warnings_gotten;
         $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
-        if ($will_overflow) {
+        if ($initially_malformed) {
             is($ret, 0, "    And isSTRICT_UTF8_CHAR() returns 0");
         }
         else {
@@ -728,7 +735,7 @@ foreach my $test (@tests) {
 
         undef @warnings_gotten;
         $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
-        if ($will_overflow) {
+        if ($initially_malformed) {
             is($ret, 0, "    And isC9_STRICT_UTF8_CHAR() returns 0");
         }
         else {
@@ -749,26 +756,60 @@ foreach my $test (@tests) {
               . " generated any warnings")
           or output_warnings(@warnings_gotten);
 
-        # Test partial character handling, for each byte not a full character
-        for my $j (1.. $length - 1) {
+        foreach my $disallow_type (0..2) {
+            # 0 is don't disallow this type of code point
+            # 1 is do disallow
+            # 2 is do disallow, but only for above 31 bit
 
-            # Skip the test for the interaction between overflow and above-31
-            # bit.  It is really testing other things than the partial
-            # character tests, for which other tests in this file are
-            # sufficient
-            last if $will_overflow;
+            my $disallow_flags;
+            my $expected_ret;
 
-            foreach my $disallow_flag (0, $utf8n_flag_to_disallow) {
+            if ($initially_malformed) {
+
+                # Malformations are by default disallowed, so testing with
+                # $disallow_type equal to 0 is sufficicient.
+                next if $disallow_type;
+
+                $disallow_flags = 0;
+                $expected_ret = 0;
+            }
+            elsif ($disallow_type == 1) {
+                $disallow_flags = $utf8n_flag_to_disallow;
+                $expected_ret = 0;
+            }
+            elsif ($disallow_type == 2) {
+                next if ! $will_overflow && $allowed_uv < 0x80000000;
+                $disallow_flags = $::UTF8_DISALLOW_ABOVE_31_BIT;
+                $expected_ret = 0;
+            }
+            else {  # type is 0
+                $disallow_flags = $utf8n_flag_to_disallow_complement;
+                $expected_ret = $length;
+            }
+
+            $ret = test_isUTF8_CHAR_flags($bytes, $length, $disallow_flags);
+            is($ret, $expected_ret, "    And isUTF8_CHAR_flags("
+                                  . "$display_bytes, $disallow_flags) returns "
+                                  . $expected_ret)
+             or diag "The flags mean "
+              . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
+
+            is(scalar @warnings_gotten, 0,
+                    "    And isUTF8_CHAR_flags(...) generated no warnings")
+            or output_warnings(@warnings_gotten);
+
+            # Test partial character handling, for each byte not a full character
+            for (my $j = 1; $j < $length - 1; $j++) {
                 my $partial = substr($bytes, 0, $j);
                 my $ret_should_be;
                 my $comment;
-                if ($disallow_flag) {
+                if ($disallow_type || $initially_malformed) {
                     $ret_should_be = 0;
                     $comment = "disallowed";
                     if ($j < $needed_to_discern_len) {
                         $ret_should_be = 1;
-                        $comment .= ", but need $needed_to_discern_len bytes"
-                                 .  " to discern:";
+                        $comment .= ", but need $needed_to_discern_len"
+                                 . " bytes to discern:";
                     }
                 }
                 else {
@@ -779,11 +820,13 @@ foreach my $test (@tests) {
                 undef @warnings_gotten;
 
                 $ret = test_is_utf8_valid_partial_char_flags($partial, $j,
-                                                             $disallow_flag);
+                                                             $disallow_flags);
                 is($ret, $ret_should_be,
-                                "    And is_utf8_valid_partial_char_flags("
-                              . display_bytes($partial)
-                              . "), $comment: returns $ret_should_be");
+                    "    And is_utf8_valid_partial_char_flags("
+                    . display_bytes($partial)
+                    . ", $disallow_flags), $comment: returns $ret_should_be")
+                 or diag "The flags mean "
+                  . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
                 is(scalar @warnings_gotten, 0,
                         "    And is_utf8_valid_partial_char_flags()"
                       . " generated no warnings")
