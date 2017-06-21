@@ -1258,7 +1258,7 @@ sub grind_run {
 # grind_process(): process the data that has been extracted from
 # cachgegrind's output.
 #
-# $res is of the form ->{benchmark_name}{perl_name}[active][count]{field_name},
+# $res is of the form ->{benchmark_name}{perl_label}[active][count]{field_name},
 # where active is 0 or 1 indicating an empty or active loop,
 # count is 0 or 1 indicating a short or long loop. E.g.
 #
@@ -1273,8 +1273,8 @@ sub grind_run {
 #
 # return \%output, \%averages, where
 #
-# $output{benchmark_name}{perl_name}{field_name} = N
-# $averages{perl_name}{field_name} = M
+# $output{benchmark_name}{perl_label}{field_name} = N
+# $averages{perl_label}{field_name} = M
 #
 # where N is the raw count ($OPTS{raw}), or count_perl0/count_perlI otherwise;
 # M is the average raw count over all tests ($OPTS{raw}), or
@@ -1285,9 +1285,9 @@ sub grind_process {
 
     # Process the four results for each test/perf combo:
     # Convert
-    #    $res->{benchmark_name}{perl_name}[active][count]{field_name} = n
+    #    $res->{benchmark_name}{perl_label}[active][count]{field_name} = n
     # to
-    #    $res->{benchmark_name}{perl_name}{field_name} = averaged_n
+    #    $res->{benchmark_name}{perl_label}{field_name} = averaged_n
     #
     # $r[0][1] - $r[0][0] is the time to do ($counts->[1]-$counts->[0])
     #                     empty loops, eliminating startup time
@@ -1462,8 +1462,8 @@ sub sorted_test_names {
 # grind_print(): display the tabulated results of all the cachegrinds.
 #
 # Arguments are of the form:
-#    $results->{benchmark_name}{perl_name}{field_name} = N
-#    $averages->{perl_name}{field_name} = M
+#    $results->{benchmark_name}{perl_label}{field_name} = N
+#    $averages->{perl_label}{field_name} = M
 #    $perls = [ [ perl-exe, perl-label ], ... ]
 #    $tests->{test_name}{desc => ..., ...}
 
@@ -1585,8 +1585,8 @@ sub grind_print {
 # which perl to display.
 #
 # Arguments are of the form:
-#    $results->{benchmark_name}{perl_name}{field_name} = N
-#    $averages->{perl_name}{field_name} = M
+#    $results->{benchmark_name}{perl_label}{field_name} = N
+#    $averages->{perl_label}{field_name} = M
 #    $perls = [ [ perl-exe, perl-label ], ... ]
 #    $tests->{test_name}{desc => ..., ...}
 
