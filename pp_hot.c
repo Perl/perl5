@@ -1736,7 +1736,7 @@ PP(pp_aassign)
                     if (UNLIKELY(ix >= PL_tmps_max))
                         /* speculatively grow enough to cover other
                          * possible refs */
-                        ix = tmps_grow_p(ix + (lastlelem - lelem));
+                         (void)tmps_grow_p(ix + (lastlelem - lelem));
                     PL_tmps_stack[ix] = ref;
                 }
 
