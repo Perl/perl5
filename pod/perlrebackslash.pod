@@ -622,7 +622,7 @@ space is immediately followed by something like U+0303, COMBINING TILDE.
 If the final space character in the span is a horizontal white space, it
 is broken out so that it attaches instead to the combining character.
 To be precise, if a span of white space that ends in a horizontal space
-has the character immediately following it have either of the Word
+has the character immediately following it have any of the Word
 Boundary property values "Extend", "Format" or "ZWJ", the boundary between the
 final horizontal space character and the rest of the span matches
 C<\b{wb}>.  In all other cases the boundary between two white space
@@ -650,8 +650,8 @@ rule.
 It is also important to realize that these are default boundary
 definitions, and that implementations may wish to tailor the results for
 particular purposes and locales.  For example, some languages, such as
-Japanese and Thai, require dictionary lookup to determine word
-boundaries.
+Japanese and Thai, require dictionary lookup to accurately determine
+word boundaries.
 
 Mnemonic: I<b>oundary.
 
