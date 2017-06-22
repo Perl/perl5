@@ -15,7 +15,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.46";
+our $VERSION    = "1.47";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 

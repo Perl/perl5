@@ -7,14 +7,33 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#define NEED_sv_2pv_flags 1
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#  define NEED_sv_2pv_flags 1
+#  define NEED_newSVpvn_flags 1
+#  include "ppport.h"
+#endif
 
-#if PERL_BCDVERSION >= 0x5006000
+#ifndef PERL_VERSION_DECIMAL
+#  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
+#endif
+#ifndef PERL_DECIMAL_VERSION
+#  define PERL_DECIMAL_VERSION \
+	  PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
+#endif
+#ifndef PERL_VERSION_GE
+#  define PERL_VERSION_GE(r,v,s) \
+	  (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
+#endif
+#ifndef PERL_VERSION_LE
+#  define PERL_VERSION_LE(r,v,s) \
+	  (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
+#endif
+
+#if PERL_VERSION_GE(5,6,0)
 #  include "multicall.h"
 #endif
 
-#if PERL_BCDVERSION < 0x5023008
+#if !PERL_VERSION_GE(5,23,8)
 #  define UNUSED_VAR_newsp PERL_UNUSED_VAR(newsp)
 #else
 #  define UNUSED_VAR_newsp NOOP
@@ -28,7 +47,7 @@
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
 */
-#if PERL_BCDVERSION < 0x5007000
+#if !PERL_VERSION_GE(5,7,0)
 /* Not in 5.6.1. */
 #  ifdef cxinc
 #    undef cxinc
@@ -879,7 +898,7 @@ PPCODE:
 /* This MULTICALL-based code appears to fail on perl 5.10.0 and 5.8.9
  * Skip it on those versions (RT#87857)
  */
-#if defined(dMULTICALL) && (PERL_BCDVERSION > 0x5010000 || PERL_BCDVERSION < 0x5008009)
+#if defined(dMULTICALL) && (PERL_VERSION_GE(5,10,1) || PERL_VERSION_LE(5,8,8))
     assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
@@ -1056,11 +1075,11 @@ CODE:
                 arg = sv_mortalcopy(arg);
 
             if(SvUOK(arg))
-                sv_setpvf(keysv, "%"UVuf, SvUV(arg));
+                sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             else if(SvIOK(arg))
-                sv_setpvf(keysv, "%"IVdf, SvIV(arg));
+                sv_setpvf(keysv, "%" IVdf, SvIV(arg));
             else
-                sv_setpvf(keysv, "%"NVgf, SvNV(arg));
+                sv_setpvf(keysv, "%" NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
@@ -1329,7 +1348,7 @@ CODE:
     if(SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
         sv = tempsv;
     }
-#if PERL_BCDVERSION < 0x5008005
+#if !PERL_VERSION_GE(5,8,5)
     if(SvPOK(sv) || SvPOKp(sv)) {
         RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
     }

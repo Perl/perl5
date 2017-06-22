@@ -11,7 +11,7 @@ WriteMakefile(
   NAME         => q[List::Util],
   ABSTRACT     => q[Common Scalar and List utility subroutines],
   AUTHOR       => q[Graham Barr <gbarr@cpan.org>],
-  DEFINE       => q[-DPERL_EXT],
+  DEFINE       => ($ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H]),
   DISTNAME     => q[Scalar-List-Utils],
   VERSION_FROM => 'lib/List/Util.pm',
 
