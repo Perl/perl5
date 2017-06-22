@@ -70,10 +70,6 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
            'uniqnum distinguishes floats' );
 
-SKIP: {
-my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
-skip("VAX does not have inf/nan", 1) if $vax_float;
-
 # Hard to know for sure what an Inf is going to be. Lets make one
 my $Inf = 0 + 1E1000;
 my $NaN;
@@ -82,7 +78,6 @@ $Inf **= 1000 while ( $NaN = $Inf - $Inf ) == $NaN;
 is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
            [ 0, 1, 12345, $Inf, -$Inf, $NaN ],
            'uniqnum preserves the special values of +-Inf and Nan' );
-}
 
 {
     my $maxint = ~0;
