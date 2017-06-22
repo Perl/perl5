@@ -14,13 +14,6 @@ Pod::Checker cpan/Pod-Checker/t/pod/contains_bad_pod.xr 73538fd80dfe6e19ad561fe0
 Pod::Checker cpan/Pod-Checker/t/pod/selfcheck.t 8ce3cfd38e4b9bcf5bc7fe7f2a14195e49aed7d8
 Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916e3d8a16
 Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5facf5b3b
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm 8cbd3463af838b4a39a7077bea3fe758a71f8ec3
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm 2d09b84a5575e67834655a0e9b3569c83d9a3902
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm 98af8fe390d9c9fa11a1fafebbc68ea663cdce2c
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm 188cf0dd95cd7ba60fd6a366f440811fb52c2c79
-Scalar-List-Utils cpan/Scalar-List-Utils/t/lln.t b7148c7f1cd9c70fd21d8153542b6d3de2b655ad
-Scalar-List-Utils cpan/Scalar-List-Utils/t/tainted.t 9c52e04687ec8a7d23a1c38a762723858305b1fe
-Scalar-List-Utils cpan/Scalar-List-Utils/t/uniq.t 5de01094d2bca9cf8b2bbbca920122f7396bf11e
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 Test::Harness cpan/Test-Harness/bin/prove 9b2866928cb1125de2c68f9773b25723e02c54c0

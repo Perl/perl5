@@ -959,17 +959,8 @@ use File::Glob qw(:case);
     },
 
     'Scalar-List-Utils' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.46.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.47.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
-        'CUSTOMIZED'   => [
-            'lib/List/Util.pm',    # CPAN RT 118470
-            'lib/List/Util/XS.pm', # CPAN RT 118470
-            'lib/Scalar/Util.pm',  # CPAN RT 118470
-            'lib/Sub/Util.pm',     # CPAN RT 118470
-            't/lln.t',             # CPAN RT 118470
-            't/uniq.t',            # CPAN RT 118470
-            't/tainted.t',         # CPAN RT 119169
-        ],
     },
 
     'Search::Dict' => {
