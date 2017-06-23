@@ -1,5 +1,6 @@
 #if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
 #  define DEBUGGING
+#  define DEBUGGING_RE_ONLY
 #endif
 
 #define PERL_NO_GET_CONTEXT
