@@ -6,13 +6,16 @@
 #
 # See also t/porting/bench_selftest.pl
 
-use warnings;
-use strict;
-
 BEGIN {
     chdir '..' if -f 'test.pl' && -f 'thread_it.pl';
     require './t/test.pl';
+    push @INC, 'lib';
 }
+
+use warnings;
+use strict;
+use Config;
+
 
 # Only test on git checkouts - this is more of a perl core developer
 # tool than an end-user tool.
@@ -22,6 +25,8 @@ BEGIN {
 skip_all "not devel"   unless -d ".git";
 skip_all "not linux"   unless $^O eq 'linux';
 skip_all "no valgrind" unless -x '/bin/valgrind' || -x '/usr/bin/valgrind';
+# Address sanitizer clashes horribly with cachegrind
+skip_all "not with ASAN" if $Config{ccflags} =~ /sanitize=address/;
 
 
 my $bench_pl = "Porting/bench.pl";
@@ -363,7 +368,7 @@ my $resultfile2 = tempfile(); # benchmark results for 2 perls
 
 note("running cachegrind for 1st perl; may be slow...");
 $out = qx($bench_cmd -j 2 --write=$resultfile1 --tests=call::sub::empty $^X=p0 2>&1);
-is length($out), 0, "--write should produce no output (1 perl)";
+is $out, "", "--write should produce no output (1 perl)";
 ok -s $resultfile1, "--write should create a non-empty results file (1 perl)";
 
 # and again with 2 perls. This is also tests the 'mix read and new new
@@ -371,7 +376,7 @@ ok -s $resultfile1, "--write should create a non-empty results file (1 perl)";
 
 note("running cachegrind for 2nd perl; may be slow...");
 $out = qx($bench_cmd -j 2 --read=$resultfile1 --write=$resultfile2 $^X=p1 2>&1);
-is length($out), 0, "--write should produce no output (2 perls)"
+is $out, "", "--write should produce no output (2 perls)"
     or diag("got: $out");
 ok -s $resultfile2, "--write should create a non-empty results file (2 perls)";
 
