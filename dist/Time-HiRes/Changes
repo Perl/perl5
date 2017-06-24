@@ -1,5 +1,10 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9742 [2017-04-16]
+  - prefer 3-argument open: blead 1ae6ead9
+  - fix dist/Time-HiRes/t/*.t that assumed '.' in @INC: blead 465db51d
+  - fix cases where 'do file' should be 'do ./file'.: blead 8b69401c
+
 1.9741 [2016-11-20]
   - C++11 compatibility: blead a914236c
   - El Capitan compatibility: blead 45bbc013
