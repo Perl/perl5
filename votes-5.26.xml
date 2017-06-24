@@ -27,9 +27,16 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="khw" id="1d5030e143202c1e963e1fc91eb6f3afaa2df83e" ticket="131646" desc="[perl #131646] 5.26 regression: Assert fail instead of proper error msg" />
+
 </div>
 
 <div><h3>Regression Fixes</h3>
+
+This was found as a result of an error check introduced in 5.27 causing a
+compilation error on freebsd.  The consequences of not fixing this is the
+program not working correctly.
+<commit votes="khw" id="4e1ed312da261450ba45a56e7b6756a873678f52" ticket="" desc="Missing parens around macro params" />
 
 </div>
 
@@ -50,6 +57,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Documentation Fixes</h3>
+
+<commit votes="khw" id="725a67e540ba5cb03c83ba1ed0541f2cc088b3b1" ticket="" desc="Update perluniintro to reflect 5.26 changes" />
+<commit votes="khw" id="754e15cfc175f0e2e1299d27fd387a0d868c2764" ticket="" desc="Update charnames pod to reflect 5.26 changes" />
 
 </div>
 
