@@ -1016,7 +1016,7 @@ typedef struct stackinfo PERL_SI;
 #endif
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-#  define PUSHSTACK_INIT_HWM(si) si->si_stack_hwm = 0
+#  define PUSHSTACK_INIT_HWM(si) ((si)->si_stack_hwm = 0)
 #else
 #  define PUSHSTACK_INIT_HWM(si) NOOP
 #endif

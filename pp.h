@@ -351,7 +351,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * this just gives a safe false positive
  */
 
-#  define _EXTEND_NEEDS_GROW(p,n) ((n) < 0 || PL_stack_max - p < (n))
+#  define _EXTEND_NEEDS_GROW(p,n) ((n) < 0 || PL_stack_max - (p) < (n))
 
 
 /* EXTEND_SKIP(): used for where you would normally call EXTEND(), but
