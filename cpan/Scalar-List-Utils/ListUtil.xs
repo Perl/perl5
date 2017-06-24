@@ -636,9 +636,9 @@ PPCODE:
         SvGETMAGIC(pair);
 
         if(SvTYPE(pair) != SVt_RV)
-            croak("Not a reference at List::Util::unpack() argument %d", i);
+            croak("Not a reference at List::Util::unpairs() argument %d", i);
         if(SvTYPE(SvRV(pair)) != SVt_PVAV)
-            croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
+            croak("Not an ARRAY reference at List::Util::unpairs() argument %d", i);
 
         /* TODO: assert pair is an ARRAY ref */
         pairav = (AV *)SvRV(pair);
@@ -905,6 +905,7 @@ PPCODE:
         SV **stack = PL_stack_base + ax;
         I32 ret_gimme = GIMME_V;
         int i;
+        AV *spill = NULL; /* accumulates results if too big for stack */
 
         dMULTICALL;
         I32 gimme = G_ARRAY;
@@ -914,41 +915,64 @@ PPCODE:
         for(; argi < items; argi += 2) {
             int count;
 
-            GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
-            GvSV(bgv) = argi < items-1 ?
-                (args_copy ? args_copy[argi+1] : stack[argi+1]) :
-                &PL_sv_undef;
+            GvSV(agv) = stack[argi];
+            GvSV(bgv) = argi < items-1 ? stack[argi+1]: &PL_sv_undef;
 
             MULTICALL;
             count = PL_stack_sp - PL_stack_base;
 
-            if(count > 2 && !args_copy) {
+            if (count > 2 || spill) {
                 /* We can't return more than 2 results for a given input pair
-                 * without trashing the remaining argmuents on the stack still
-                 * to be processed. So, we'll copy them out to a temporary
-                 * buffer and work from there instead.
+                 * without trashing the remaining arguments on the stack still
+                 * to be processed, or possibly overrunning the stack end.
+                 * So, we'll accumulate the results in a temporary buffer
+                 * instead.
                  * We didn't do this initially because in the common case, most
                  * code blocks will return only 1 or 2 items so it won't be
                  * necessary
                  */
-                int n_args = items - argi;
-                Newx(args_copy, n_args, SV *);
-                SAVEFREEPV(args_copy);
+                int fill;
 
-                Copy(stack + argi, args_copy, n_args, SV *);
+                if (!spill) {
+                    spill = newAV();
+                    AvREAL_off(spill); /* don't ref count its contents */
+                    /* can't mortalize here as every nextstate in the code
+                     * block frees temps */
+                    SAVEFREESV(spill);
+                }
 
-                argi = 0;
-                items = n_args;
+                fill = (int)AvFILL(spill);
+                av_extend(spill, fill + count);
+                for(i = 0; i < count; i++)
+                    (void)av_store(spill, ++fill,
+                                    newSVsv(PL_stack_base[i + 1]));
             }
-
-            for(i = 0; i < count; i++)
-                stack[reti++] = newSVsv(PL_stack_sp[i - count + 1]);
+            else
+                for(i = 0; i < count; i++)
+                    stack[reti++] = newSVsv(PL_stack_base[i + 1]);
         }
+
+        if (spill)
+            /* the POP_MULTICALL will trigger the SAVEFREESV above;
+             * keep it alive  it on the temps stack instead */
+            SvREFCNT_inc_simple_void_NN(spill);
+            sv_2mortal((SV*)spill);
+
         POP_MULTICALL;
+
+        if (spill) {
+            int n = (int)AvFILL(spill) + 1;
+            SP = &ST(reti - 1);
+            EXTEND(SP, n);
+            for (i = 0; i < n; i++)
+                *++SP = *av_fetch(spill, i, FALSE);
+            reti += n;
+            av_clear(spill);
+        }
 
         if(ret_gimme == G_ARRAY)
             for(i = 0; i < reti; i++)
-                sv_2mortal(stack[i]);
+                sv_2mortal(ST(i));
     }
     else
 #endif
