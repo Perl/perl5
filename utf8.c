@@ -1875,7 +1875,7 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
                         /* diag_listed_as: Malformed UTF-8 character%s */
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
                                     "%s %s%s",
-                                    unexpected_non_continuation_text(u - 1, 2, 1, 2),
+                                    unexpected_non_continuation_text(u - 2, 2, 1, 2),
                                     PL_op ? " in " : "",
                                     PL_op ? OP_DESC(PL_op) : "");
 			return -2;

@@ -749,3 +749,16 @@ BEGIN{
 {};$^H=eval'2**400'}Â
 EXPECT
 Malformed UTF-8 character: \xc2\x0a (unexpected non-continuation byte 0x0a, immediately after start byte 0xc2; need 2 bytes, got 1) at - line 11.
+########
+# NAME  [perl #131646]
+BEGIN{
+    if (ord('A') == 193) {
+        print "SKIPPED\n# ebcdic platforms generates different Malformed UTF-8 warnings.";
+        exit 0;
+    }
+}
+no warnings;
+use warnings 'utf8';
+for(uc 0..t){0~~pack"UXp>",exp}
+EXPECT
+Malformed UTF-8 character: \xc2\x00 (unexpected non-continuation byte 0x00, immediately after start byte 0xc2; need 2 bytes, got 1)  in smart match at - line 9.
