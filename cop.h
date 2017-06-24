@@ -994,7 +994,7 @@ struct stackinfo {
     I32			si_markoff;	/* offset where markstack begins for us.
 					 * currently used only with DEBUGGING,
 					 * but not #ifdef-ed for bincompat */
-#ifdef DEBUGGING && !defined DEBUGGING_RE_ONLY
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
 /* high water mark: for checking if the stack was correctly extended /
  * tested for extension by each pp function */
     SSize_t             si_stack_hwm;
