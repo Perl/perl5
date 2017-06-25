@@ -1,5 +1,7 @@
 #!./perl
 
+# Four-argument select
+
 my $hires;
 BEGIN {
     chdir 't' if -d 't';
