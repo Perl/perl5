@@ -1149,6 +1149,7 @@ PP(pp_sselect)
     struct timeval *tbuf = &timebuf;
     I32 growsize;
     char *fd_sets[4];
+    SV *svs[4];
 #if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
 	I32 masksize;
 	I32 offset;
@@ -1164,7 +1165,7 @@ PP(pp_sselect)
 
     SP -= 4;
     for (i = 1; i <= 3; i++) {
-	SV * const sv = SP[i];
+	SV * const sv = svs[i] = SP[i];
 	SvGETMAGIC(sv);
 	if (!SvOK(sv))
 	    continue;
@@ -1177,9 +1178,14 @@ PP(pp_sselect)
 	    if (!SvPOKp(sv))
 		Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 				    "Non-string passed as bitmask");
-	    SvPV_force_nomg_nolen(sv);	/* force string conversion */
+	    if (SvGAMAGIC(sv)) {
+		svs[i] = sv_newmortal();
+		sv_copypv_nomg(svs[i], sv);
+	    }
+	    else
+		SvPV_force_nomg_nolen(sv); /* force string conversion */
 	}
-	j = SvCUR(sv);
+	j = SvCUR(svs[i]);
 	if (maxlen < j)
 	    maxlen = j;
     }
@@ -1228,7 +1234,7 @@ PP(pp_sselect)
 	tbuf = NULL;
 
     for (i = 1; i <= 3; i++) {
-	sv = SP[i];
+	sv = svs[i];
 	if (!SvOK(sv) || SvCUR(sv) == 0) {
 	    fd_sets[i] = 0;
 	    continue;
@@ -1275,7 +1281,7 @@ PP(pp_sselect)
 #endif
     for (i = 1; i <= 3; i++) {
 	if (fd_sets[i]) {
-	    sv = SP[i];
+	    sv = svs[i];
 #if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
 	    s = SvPVX(sv);
 	    for (offset = 0; offset < growsize; offset += masksize) {
@@ -1284,7 +1290,10 @@ PP(pp_sselect)
 	    }
 	    Safefree(fd_sets[i]);
 #endif
-	    SvSETMAGIC(sv);
+	    if (sv != SP[i])
+		SvSetMagicSV(SP[i], sv);
+	    else
+		SvSETMAGIC(sv);
 	}
     }
 
