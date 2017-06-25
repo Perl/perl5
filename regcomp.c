@@ -11336,7 +11336,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 vFAIL("Unknown switch condition (?(...))");
 	    }
 	    case '[':           /* (?[ ... ]) */
-                return handle_regex_sets(pRExC_state, NULL, flagp, depth,
+                return handle_regex_sets(pRExC_state, NULL, flagp, depth+1,
                                          oregcomp_parse);
             case 0: /* A NUL */
 		RExC_parse--; /* for vFAIL to print correctly */
@@ -14919,6 +14919,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
     PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
 
+    DEBUG_PARSE("xcls");
+
     if (in_locale) {
         set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
     }
@@ -14936,7 +14938,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * these things, we need to realize that something preceded by a backslash
      * is escaped, so we have to keep track of backslashes */
     if (SIZE_ONLY) {
-        UV depth = 0; /* how many nested (?[...]) constructs */
+        UV nest_depth = 0; /* how many nested (?[...]) constructs */
 
         while (RExC_parse < RExC_end) {
             SV* current = NULL;
@@ -14946,7 +14948,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
             switch (*RExC_parse) {
                 case '?':
-                    if (RExC_parse[1] == '[') depth++, RExC_parse++;
+                    if (RExC_parse[1] == '[') nest_depth++, RExC_parse++;
                     /* FALLTHROUGH */
                 default:
                     break;
@@ -15003,7 +15005,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 }
 
                 case ']':
-                    if (depth--) break;
+                    if (nest_depth--) break;
                     RExC_parse++;
                     if (*RExC_parse == ')') {
                         node = reganode(pRExC_state, ANYOF, 0);
