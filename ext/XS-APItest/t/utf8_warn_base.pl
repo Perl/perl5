@@ -852,6 +852,130 @@ foreach my $test (@tests) {
           # maximum length, so skip if we're already at that length.
           next if $overlong && $length >= $::max_bytes;
 
+            # Here we are in the innermost loop for malformations.  So we
+            # know which ones are in effect.  Can now change the input to be
+            # appropriately malformed.  We also can set up certain other
+            # things now, like whether we expect a return flag from this
+            # malformation, and which flag.
+
+            my $this_bytes = $bytes;
+            my $this_length = $length;
+            my $this_expected_len = $length;
+            my $this_needed_to_discern_len = $needed_to_discern_len;
+
+            my @malformation_names;
+            my @expected_malformation_warnings;
+            my @expected_malformation_return_flags;
+
+            if ($overlong) {
+
+                # To force this malformation, we convert the original start
+                # byte into a continuation byte with the same data bits as
+                # originally. ...
+                substr($this_bytes, 0, 1)
+                              = start_byte_to_cont(substr($this_bytes, 0, 1));
+
+                # ... Then we prepend it with a known overlong sequence.  This
+                # should evaluate to the exact same code point as the
+                # original.
+                $this_bytes =  I8_to_native("\xff")
+                            . (I8_to_native(chr $::lowest_continuation)
+                               x ( $::max_bytes - 1 - length($this_bytes)))
+                            . $this_bytes;
+                $this_length = length($this_bytes);
+                $this_needed_to_discern_len = $::max_bytes
+                                            - (   $this_expected_len
+                                               - $this_needed_to_discern_len);
+                $this_expected_len = $::max_bytes;
+                push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
+                push @malformation_names, 'overlong';
+            }
+
+            if ($short) {
+                push @malformation_names, 'short';
+
+                # To force this malformation, just tell the test to not look
+                # as far as it should into the input.
+                $this_length--;
+                $this_expected_len--;
+                push @expected_malformation_return_flags, $::UTF8_GOT_SHORT;
+            }
+
+            if ($unexpected_noncont) {
+                push @malformation_names, 'unexpected non-continuation';
+
+                # To force this malformation, change the final continuation
+                # byte into a non continuation.
+                my $pos = ($short) ? -2 : -1;
+                substr($this_bytes, $pos, 1) = '?';
+                $this_expected_len--;
+                push @expected_malformation_return_flags,
+                                $::UTF8_GOT_NON_CONTINUATION;
+            }
+
+            # Here, we've transformed the input with all of the desired
+            # non-overflow malformations.  We are now in a position to
+            # construct any potential warnings for those malformations.  But
+            # it's a pain to get the detailed messages exactly right, so for
+            # now XXX, only do so for those that return an explicit code
+            # point.
+
+            if ($overlong) {
+
+                # If one of the other malformation types is also in effect, we
+                # don't know what the intended code point was.
+                if ($short || $unexpected_noncont || $will_overflow) {
+                    push @expected_malformation_warnings, qr/overlong/;
+                }
+                else {
+                    my $wrong_bytes = display_bytes_no_quotes(
+                                         substr($this_bytes, 0, $this_length));
+                    my $correct_bytes = display_bytes_no_quotes($bytes);
+                    my $prefix = ($allowed_uv > 0x10FFFF) ? "0x" : "U+";
+                    push @expected_malformation_warnings,
+                            qr/\QMalformed UTF-8 character: $wrong_bytes\E
+                               \Q (overlong; instead use\E
+                               \Q $correct_bytes to\E
+                               \Q represent $prefix$uv_string)/x;
+                }
+            }
+            if ($short) {
+                push @expected_malformation_warnings, qr/too short/;
+            }
+            if ($unexpected_noncont) {
+                push @expected_malformation_warnings,
+                                        qr/unexpected non-continuation byte/;
+            }
+
+            # The overflow malformation is done differently than other
+            # malformations.  It comes from manually typed tests in the test
+            # array.  We now make it be treated like one of the other
+            # malformations.  But some has to be deferred until the inner loop
+            my $overflow_msg_pattern;
+            if ($will_overflow) {
+                push @malformation_names, 'overflow';
+
+                $overflow_msg_pattern = display_bytes_no_quotes(
+                                    substr($this_bytes, 0, $this_expected_len));
+                $overflow_msg_pattern = qr/\QMalformed UTF-8 character:\E
+                                           \Q $overflow_msg_pattern\E
+                                           \Q (overflows)\E/x;
+                push @expected_malformation_return_flags, $::UTF8_GOT_OVERFLOW;
+            }
+
+            # And we can create the malformation-related text for the the test
+            # names we eventually will generate.
+            my $malformations_name = "";
+            if (@malformation_names) {
+                $malformations_name .= "malformation";
+                $malformations_name .= "s" if @malformation_names > 1;
+                $malformations_name .= ": ";
+                $malformations_name .=  join "/", @malformation_names;
+                $malformations_name =  " ($malformations_name)";
+            }
+
+            # Done setting up the malformation related stuff
+
             foreach my $do_disallow (0, 1) {
               next if $skip_most_tests && ! $do_disallow;
 
@@ -950,93 +1074,13 @@ foreach my $test (@tests) {
                     my $this_disallow_flags = ($do_disallow)
                                           ? $this_utf8n_flag_to_disallow
                                           : $utf8n_flag_to_disallow_complement;
-                    my $this_bytes = $bytes;
-                    my $this_length = $length;
                     my $expected_uv = $allowed_uv;
-                    my $this_expected_len = $length;
-                    my $this_needed_to_discern_len = $needed_to_discern_len;
 
-                    my @malformation_names;
+                    my @expected_return_flags
+                                        = @expected_malformation_return_flags;
                     my @expected_warnings;
-                    my @expected_return_flags;
-
-                    # Now go through the possible malformations wanted,  and
-                    # change the input accordingly.  We also can set up
-                    # certain other things now, like whether we expect a
-                    # return flag from this malformation and which flag.
-                    if ($overlong) {
-
-                        # To force this malformation, we convert the original
-                        # start byte into a continuation byte with the same
-                        # data bits as originally. ...
-                        substr($this_bytes, 0, 1)
-                            = start_byte_to_cont(substr($this_bytes,
-                                                        0, 1));
-
-                        # ... Then we prepend it with a known overlong
-                        # sequence.  This should evaluate to the exact same
-                        # code point as the original.
-                        $this_bytes
-                        =  I8_to_native("\xff")
-                        . (I8_to_native(chr $::lowest_continuation)
-                        x ( $::max_bytes - 1 - length($this_bytes)))
-                        . $this_bytes;
-                        $this_length = length($this_bytes);
-                        $this_needed_to_discern_len
-                                = $::max_bytes - ($this_expected_len
-                                               - $this_needed_to_discern_len);
-                        $this_expected_len = $::max_bytes;
-                        push @expected_return_flags, $::UTF8_GOT_LONG;
-                        push @malformation_names, 'overlong';
-                        if ($expect_warnings_for_malformed) {
-                            if (   ! $short
-                                && ! $unexpected_noncont
-                                && ! $will_overflow)
-                            {
-                                my $overlong_bytes
-                                        = display_bytes_no_quotes($this_bytes);
-                                my $correct_bytes
-                                             = display_bytes_no_quotes($bytes);
-                                my $prefix = ($allowed_uv > 0x10FFFF)
-                                             ? "0x"
-                                             : "U+";
-                                push @expected_warnings,
-                                     qr/\QMalformed UTF-8 character:\E
-                                        \Q $overlong_bytes (overlong;\E
-                                        \Q instead use $correct_bytes to\E
-                                        \Q represent $prefix$uv_string)/x;
-                            }
-                            else {
-                                push @expected_warnings, qr/overlong/;
-                            }
-                        }
-                    }
-
-                    if ($short) {
-                        push @malformation_names, 'short';
-                        push @expected_warnings, qr/short/
+                    push @expected_warnings, @expected_malformation_warnings
                                             if $expect_warnings_for_malformed;
-
-                        # To force this malformation, just tell the test to
-                        # not look as far as it should into the input.
-                        $this_length--;
-                        $this_expected_len--;
-                        push @expected_return_flags, $::UTF8_GOT_SHORT;
-                    }
-
-                    if ($unexpected_noncont) {
-                        push @malformation_names, 'unexpected non-continuation';
-                        push @expected_warnings, qr/unexpected non-continuation/
-                                            if $expect_warnings_for_malformed;
-
-                        # To force this malformation, change the final
-                        # continuation byte into a non continuation.
-                        my $pos = ($short) ? -2 : -1;
-                        substr($this_bytes, $pos, 1) = '?';
-                        $this_expected_len--;
-                        push @expected_return_flags,
-                                        $::UTF8_GOT_NON_CONTINUATION;
-                    }
 
                     # The overflow malformation is done differently than other
                     # malformations.  It comes from manually typed tests in
@@ -1050,26 +1094,9 @@ foreach my $test (@tests) {
                         # everything else.
                         $expect_regular_warnings = 0;
 
-                        push @malformation_names, 'overflow';
                         if ($expect_warnings_for_overflow) {
-                            my $qr = display_bytes_no_quotes(
-                                   substr($this_bytes, 0, $this_expected_len));
-                            $qr = qr/\QMalformed UTF-8 character: \E
-                                     \Q$qr (overflows)\E/x;
-                            push @expected_warnings, $qr;
+                            push @expected_warnings, $overflow_msg_pattern;
                         }
-                        push @expected_return_flags, $::UTF8_GOT_OVERFLOW;
-                    }
-
-                    # Here, we've set things up based on the malformations.
-                    # Now generate the text for them for the test name.
-                    my $malformations_name = "";
-                    if (@malformation_names) {
-                        $malformations_name .= "malformation";
-                        $malformations_name .= "s" if @malformation_names > 1;
-                        $malformations_name .= ": ";
-                        $malformations_name .=  join "/", @malformation_names;
-                        $malformations_name =  " ($malformations_name)";
                     }
 
                     # It may be that the malformations have shortened the
