@@ -852,6 +852,18 @@ foreach my $test (@tests) {
           # maximum length, so skip if we're already at that length.
           next if $overlong && $length >= $::max_bytes;
 
+          foreach my $malformed_allow_type (0..2) {
+            # 0 don't allow this malformation; ignored if no malformation
+            # 1 allow, with REPLACEMENT CHARACTER returned
+            # 2 allow, with intended code point returned.  All malformations
+            #   other than overlong can't determine the intended code point,
+            #   so this isn't valid for them.
+            next if     $malformed_allow_type == 2
+                    && ($will_overflow || $short || $unexpected_noncont);
+            next if $skip_most_tests && $malformed_allow_type;
+            local $TODO = "Warning messages don't return correct code point"
+                        . " for allowed malformations" if $malformed_allow_type;
+
             # Here we are in the innermost loop for malformations.  So we
             # know which ones are in effect.  Can now change the input to be
             # appropriately malformed.  We also can set up certain other
@@ -866,6 +878,11 @@ foreach my $test (@tests) {
             my @malformation_names;
             my @expected_malformation_warnings;
             my @expected_malformation_return_flags;
+
+            # Contains the flags for any allowed malformations.  Currently no
+            # combinations of on/off are tested for.  It's either all are
+            # allowed, or none are.
+            my $allow_flags = 0;
 
             if ($overlong) {
 
@@ -889,6 +906,13 @@ foreach my $test (@tests) {
                 $this_expected_len = $::max_bytes;
                 push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
                 push @malformation_names, 'overlong';
+
+                if ($malformed_allow_type == 2) {
+                    $allow_flags |= $::UTF8_ALLOW_LONG_AND_ITS_VALUE;
+                }
+                elsif ($malformed_allow_type) {
+                    $allow_flags |= $::UTF8_ALLOW_LONG;
+                }
             }
 
             if ($short) {
@@ -899,6 +923,8 @@ foreach my $test (@tests) {
                 $this_length--;
                 $this_expected_len--;
                 push @expected_malformation_return_flags, $::UTF8_GOT_SHORT;
+
+                $allow_flags |= $::UTF8_ALLOW_SHORT if $malformed_allow_type;
             }
 
             if ($unexpected_noncont) {
@@ -911,6 +937,8 @@ foreach my $test (@tests) {
                 $this_expected_len--;
                 push @expected_malformation_return_flags,
                                 $::UTF8_GOT_NON_CONTINUATION;
+                $allow_flags |= $::UTF8_ALLOW_NON_CONTINUATION
+                                                    if $malformed_allow_type;
             }
 
             # Here, we've transformed the input with all of the desired
@@ -961,12 +989,15 @@ foreach my $test (@tests) {
                                            \Q $overflow_msg_pattern\E
                                            \Q (overflows)\E/x;
                 push @expected_malformation_return_flags, $::UTF8_GOT_OVERFLOW;
+                $allow_flags |= $::UTF8_ALLOW_OVERFLOW if $malformed_allow_type;
             }
 
             # And we can create the malformation-related text for the the test
             # names we eventually will generate.
             my $malformations_name = "";
             if (@malformation_names) {
+                $malformations_name .= "dis" unless $malformed_allow_type;
+                $malformations_name .= "allowed ";
                 $malformations_name .= "malformation";
                 $malformations_name .= "s" if @malformation_names > 1;
                 $malformations_name .= ": ";
@@ -1001,8 +1032,17 @@ foreach my $test (@tests) {
                     if ($warning_type == 0) {
                         $eval_warn = "use warnings; no warnings 'deprecated'";
                         $expect_regular_warnings = $use_warn_flag;
+
+                        # We ordinarily expect overflow warnings here.  But it
+                        # is somewhat more complicated, and the final
+                        # determination is deferred to one place in the filw
+                        # where we handle overflow.
                         $expect_warnings_for_overflow = 1;
-                        $expect_warnings_for_malformed = 1;
+
+                        # We would ordinarily expect malformed warnings in
+                        # this case, but not if malformations are allowed.
+                        $expect_warnings_for_malformed
+                                                = $malformed_allow_type == 0;
                     }
                     elsif ($warning_type == 1) {
                         $eval_warn = "no warnings";
@@ -1014,7 +1054,8 @@ foreach my $test (@tests) {
                         $eval_warn = "no warnings; use warnings 'utf8'";
                         $expect_regular_warnings = $use_warn_flag;
                         $expect_warnings_for_overflow = 1;
-                        $expect_warnings_for_malformed = 1;
+                        $expect_warnings_for_malformed
+                                                = $malformed_allow_type == 0;
                     }
                     elsif ($warning_type == 3) {
                         $eval_warn = "no warnings; use warnings"
@@ -1075,6 +1116,7 @@ foreach my $test (@tests) {
                                           ? $this_utf8n_flag_to_disallow
                                           : $utf8n_flag_to_disallow_complement;
                     my $expected_uv = $allowed_uv;
+                    my $this_uv_string = $uv_string;
 
                     my @expected_return_flags
                                         = @expected_malformation_return_flags;
@@ -1094,7 +1136,19 @@ foreach my $test (@tests) {
                         # everything else.
                         $expect_regular_warnings = 0;
 
-                        if ($expect_warnings_for_overflow) {
+                        # Earlier, we tentatively calculated whether this
+                        # should emit a message or not.  It's tentative
+                        # because, even if we ordinarily would output it, we
+                        # don't if malformations are allowed -- except an
+                        # overflow is also a SUPER and ABOVE_31_BIT, and if
+                        # warnings for those are enabled, the overflow
+                        # warning does get raised.
+                        if (   $expect_warnings_for_overflow
+                            && (    $malformed_allow_type == 0
+                                ||   (   $this_warning_flags
+                                      & ($::UTF8_WARN_SUPER
+                                        |$::UTF8_WARN_ABOVE_31_BIT))))
+                        {
                             push @expected_warnings, $overflow_msg_pattern;
                         }
                     }
@@ -1135,13 +1189,29 @@ foreach my $test (@tests) {
                         }
                     }
 
-                    # Is effectively disallowed if we've set up a
-                    # malformation, even if the flag indicates it is
-                    # allowed.  Fix up test name to indicate this as
-                    # well
-                    my $disallowed = (  $this_disallow_flags
-                                      & $this_utf8n_flag_to_disallow)
-                                  || $malformations_name;
+                    # Is effectively disallowed if we've set up a malformation
+                    # (unless malformations are allowed), even if the flag
+                    # indicates it is allowed.  Fix up test name to indicate
+                    # this as well
+                    my $disallowed = 0;
+                    if (   $this_disallow_flags & $this_utf8n_flag_to_disallow
+                        && $this_expected_len >= $this_needed_to_discern_len)
+                    {
+                        $disallowed = 1;
+                    }
+                    if ($malformations_name) {
+                        if ($malformed_allow_type == 0) {
+                            $disallowed = 1;
+                        }
+                        elsif ($malformed_allow_type == 1) {
+
+                            # Even if allowed, the malformation returns the
+                            # REPLACEMENT CHARACTER.
+                            $expected_uv = 0xFFFD;
+                            $this_uv_string = "0xFFFD"
+                        }
+                    }
+
                     my $this_name = "utf8n_to_uvchr_error() $testname: "
                                                 . (($disallowed)
                                                    ? 'disallowed'
@@ -1156,7 +1226,8 @@ foreach my $test (@tests) {
                     # Do the actual test using an eval
                     undef @warnings_gotten;
                     my $ret_ref;
-                    my $this_flags = $this_warning_flags|$this_disallow_flags;
+                    my $this_flags
+                        = $allow_flags|$this_warning_flags|$this_disallow_flags;
                     my $eval_text =      "$eval_warn; \$ret_ref"
                             . " = test_utf8n_to_uvchr_error("
                             . "'$this_bytes', $this_length, $this_flags)";
@@ -1174,7 +1245,7 @@ foreach my $test (@tests) {
                     else {
                         is($ret_ref->[0], $expected_uv,
                                 "    And returns expected uv: "
-                              . $uv_string)
+                              . $this_uv_string)
                           or diag "Call was: " . utf8n_display_call($eval_text);
                     }
                     is($ret_ref->[1], $this_expected_len,
@@ -1316,6 +1387,7 @@ foreach my $test (@tests) {
                       or diag "Call was: " . uvchr_display_call($eval_text);
                 }
               }
+            }
           }
         }
       }
