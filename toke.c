@@ -1367,13 +1367,13 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	    (void)PerlIO_close(PL_parser->rsfp);
 	PL_parser->rsfp = NULL;
 	PL_parser->in_pod = PL_parser->filtered = 0;
-	if (!PL_in_eval && PL_minus_p) {
+	if (!PL_in_eval && (PL_minus_p || PL_minus_P)) {
 	    sv_catpvs(linestr,
 		/*{*/";}continue{print or die qq(-p destination: $!\\n);}");
-	    PL_minus_n = PL_minus_p = 0;
-	} else if (!PL_in_eval && PL_minus_n) {
+	    PL_minus_n = PL_minus_p = PL_minus_N = PL_minus_P = 0;
+	} else if (!PL_in_eval && (PL_minus_n || PL_minus_N)) {
 	    sv_catpvs(linestr, /*{*/";}");
-	    PL_minus_n = 0;
+	    PL_minus_n = PL_minus_N = 0;
 	} else
 	    sv_catpvs(linestr, ";");
 	got_some = 1;
@@ -5226,8 +5226,12 @@ Perl_yylex(pTHX)
 	    if (PL_minus_E)
 		sv_catpvs(PL_linestr,
 			  "use feature ':5." STRINGIFY(PERL_VERSION) "';");
-	    if (PL_minus_n || PL_minus_p) {
-		sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
+	    if (PL_minus_n || PL_minus_p || PL_minus_N || PL_minus_P) {
+		if ((PL_minus_N || PL_minus_P) && !PL_minus_p) {
+		    sv_catpvs(PL_linestr, "LINE: while (<<>>) {"/*}*/);
+		} else {
+		    sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
+		}
 		if (PL_minus_l)
 		    sv_catpvs(PL_linestr,"chomp;");
 		if (PL_minus_a) {
@@ -5467,6 +5471,8 @@ Perl_yylex(pTHX)
 			const U32 oldpdb = PL_perldb;
 			const bool oldn = PL_minus_n;
 			const bool oldp = PL_minus_p;
+			const bool oldN = PL_minus_N;
+			const bool oldP = PL_minus_P;
 			const char *d1 = d;
 
 			do {
@@ -5495,7 +5501,8 @@ Perl_yylex(pTHX)
 			    init_argv_symbols(argc,argv);
 			}
 			if (   (PERLDB_LINE_OR_SAVESRC && !oldpdb)
-                            || ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
+                            || ((PL_minus_n || PL_minus_p || PL_minus_N || PL_minus_P)
+                            && !(oldn || oldp || oldN || oldP)))
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
 			{

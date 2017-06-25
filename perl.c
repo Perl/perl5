@@ -979,6 +979,8 @@ perl_destruct(pTHXx)
     /* switches */
     PL_minus_n      = FALSE;
     PL_minus_p      = FALSE;
+    PL_minus_N      = FALSE;
+    PL_minus_P      = FALSE;
     PL_minus_l      = FALSE;
     PL_minus_a      = FALSE;
     PL_minus_F      = FALSE;
@@ -1976,8 +1978,10 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'l':
 	case 'M':
 	case 'm':
+	case 'N':
 	case 'n':
 	case 'p':
+	case 'P':
 	case 's':
 	case 'u':
 	case 'U':
@@ -3117,6 +3121,8 @@ S_usage(pTHX)		/* XXX move this out into a module ? */
 "  -Idirectory       specify @INC/#include directory (several -I's allowed)\n",
 "  -l[octal]         enable line ending processing, specifies line terminator\n"
 "  -[mM][-]module    execute \"use/no module...\" before executing program\n"
+"  -N                assume \"while (<<>>) { ... }\" loop around program\n"
+"  -P                assume loop like -N but print line also\n"
 "  -n                assume \"while (<>) { ... }\" loop around program\n"
 "  -p                assume loop like -n but print line also, like sed\n"
 "  -s                enable rudimentary parsing for switches after programfile\n"
@@ -3481,6 +3487,14 @@ Perl_moreswitches(pTHX_ const char *s)
 	return s;
     case 'p':
 	PL_minus_p = TRUE;
+	s++;
+	return s;
+    case 'N':
+	PL_minus_N = TRUE;
+	s++;
+	return s;
+    case 'P':
+	PL_minus_P = TRUE;
 	s++;
 	return s;
     case 's':

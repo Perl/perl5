@@ -15186,6 +15186,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_splitstr		= proto_perl->Isplitstr;
     PL_minus_n		= proto_perl->Iminus_n;
     PL_minus_p		= proto_perl->Iminus_p;
+    PL_minus_N		= proto_perl->Iminus_N;
+    PL_minus_P		= proto_perl->Iminus_P;
     PL_minus_l		= proto_perl->Iminus_l;
     PL_minus_a		= proto_perl->Iminus_a;
     PL_minus_E		= proto_perl->Iminus_E;

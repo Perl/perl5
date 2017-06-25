@@ -5869,9 +5869,12 @@ t/run/switchF.t			Test the -F switch
 t/run/switchF1.t		Pathological tests for the -F switch
 t/run/switchF2.t		Pathological tests for the -F switch
 t/run/switchI.t			Test the -I switch
+t/run/switchloop.t		Test the -F, -N, P, -a, -n, and -p switch interactions
 t/run/switchM.t			Test the -M switch
 t/run/switchn.t			Test the -n switch
+t/run/switchn_safe.t		Test the -N switch
 t/run/switchp.t			Test the -p switch
+t/run/switchp_safe.t		Test the -P switch
 t/run/switcht.t			Test the -t switch
 t/run/switchx.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch

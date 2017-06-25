@@ -203,6 +203,8 @@
 #define PL_min_intro_pending	(vTHX->Imin_intro_pending)
 #define PL_minus_E		(vTHX->Iminus_E)
 #define PL_minus_F		(vTHX->Iminus_F)
+#define PL_minus_N		(vTHX->Iminus_N)
+#define PL_minus_P		(vTHX->Iminus_P)
 #define PL_minus_a		(vTHX->Iminus_a)
 #define PL_minus_c		(vTHX->Iminus_c)
 #define PL_minus_l		(vTHX->Iminus_l)

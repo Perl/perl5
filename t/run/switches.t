@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 115);
+plan(tests => 111);
 
 use Config;
 
@@ -322,7 +322,7 @@ is runperl(stderr => 1, prog => '#!perl -M'),
 
 # Tests for switches which do not exist
 
-foreach my $switch (split //, "ABbGgHJjKkLNOoPQqRrYyZz123456789_")
+foreach my $switch (split //, "ABbGgHJjKkLOoQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 

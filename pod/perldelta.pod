@@ -32,6 +32,15 @@ here, but most should go in the L</Performance Enhancements> section.
 A list of changes is at
 L<http://www.unicode.org/versions/Unicode10.0.0>.
 
+=head2 Two new commandline switches: -N and -P
+
+The B<-n> and B<-p> switches use B<readline> which uses the two argument
+version of B<open> which has a security flaw (it will run a program if it
+sees a file whose name starts with |).  The B<< <<>> >> operator does not
+have this issue, but was not available from simply from the commandline.
+The B<-N> and B<-P> operators behave the same as B<-n> and B<-p>, but use
+B<< <<>> >> instead of B<readline>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
