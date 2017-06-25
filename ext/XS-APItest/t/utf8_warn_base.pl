@@ -839,20 +839,21 @@ foreach my $test (@tests) {
     # This is more complicated than the malformations tested in other files in
     # this directory, as there are several orthogonal variables involved.  We
     # test most possible combinations
-    foreach my $do_disallow (0, 1) {
-      next if $skip_most_tests && ! $do_disallow;
 
-      # We try various combinations of malformations that can occur
-      foreach my $short ("", "short") {
-        next if $skip_most_tests && $short;
-        foreach my $unexpected_noncont ("", "unexpected non-continuation") {
-          next if $skip_most_tests && $unexpected_noncont;
-          foreach my $overlong ("", "overlong") {
-            next if $overlong && $skip_most_tests;
+    # We try various combinations of malformations that can occur
+    foreach my $short (0, 1) {
+      next if $skip_most_tests && $short;
+      foreach my $unexpected_noncont (0, 1) {
+        next if $skip_most_tests && $unexpected_noncont;
+        foreach my $overlong (0, 1) {
+          next if $overlong && $skip_most_tests;
 
-            # If we're creating an overlong, it can't be longer than the
-            # maximum length, so skip if we're already at that length.
-            next if $overlong && $length >= $::max_bytes;
+          # If we're creating an overlong, it can't be longer than the
+          # maximum length, so skip if we're already at that length.
+          next if $overlong && $length >= $::max_bytes;
+
+            foreach my $do_disallow (0, 1) {
+              next if $skip_most_tests && ! $do_disallow;
 
               # We classify the warnings into certain "interesting" types,
               # described later
@@ -986,7 +987,7 @@ foreach my $test (@tests) {
                                                - $this_needed_to_discern_len);
                         $this_expected_len = $::max_bytes;
                         push @expected_return_flags, $::UTF8_GOT_LONG;
-                        push @malformation_names, $overlong;
+                        push @malformation_names, 'overlong';
                         if ($expect_warnings_for_malformed) {
                             if (   ! $short
                                 && ! $unexpected_noncont
@@ -1012,7 +1013,7 @@ foreach my $test (@tests) {
                     }
 
                     if ($short) {
-                        push @malformation_names, $short;
+                        push @malformation_names, 'short';
                         push @expected_warnings, qr/short/
                                             if $expect_warnings_for_malformed;
 
@@ -1024,8 +1025,8 @@ foreach my $test (@tests) {
                     }
 
                     if ($unexpected_noncont) {
-                        push @malformation_names, $unexpected_noncont;
-                        push @expected_warnings, qr/$unexpected_noncont/
+                        push @malformation_names, 'unexpected non-continuation';
+                        push @expected_warnings, qr/unexpected non-continuation/
                                             if $expect_warnings_for_malformed;
 
                         # To force this malformation, change the final
