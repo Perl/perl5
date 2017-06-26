@@ -234,8 +234,9 @@ my @death =
  '/\b{gc}/' => "'gc' is an unknown bound type {#} m/\\b{gc{#}}/",
  '/\B{gc}/' => "'gc' is an unknown bound type {#} m/\\B{gc{#}}/",
 
- '/(?[[[::]]])/' => "Syntax error in (?[...]) in regex m/(?[[[::]]])/",
- '/(?[[[:w:]]])/' => "Syntax error in (?[...]) in regex m/(?[[[:w:]]])/",
+
+ '/(?[[[::]]])/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[[[::]]{#}])/",
+ '/(?[[[:w:]]])/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[[[:w:]]{#}])/",
  '/(?[[:w:]])/' => "",
  '/([.].*)[.]/'   => "",    # [perl #127582]
  '/[.].*[.]/'     => "",    # [perl #127604]
@@ -258,11 +259,12 @@ my @death =
  '/(?[ \p{foo} ])/' => 'Can\'t find Unicode property definition "foo" {#} m/(?[ \p{foo}{#} ])/',
  '/(?[ \p{ foo = bar } ])/' => 'Can\'t find Unicode property definition "foo = bar" {#} m/(?[ \p{ foo = bar }{#} ])/',
  '/(?[ \8 ])/' => 'Unrecognized escape \8 in character class {#} m/(?[ \8{#} ])/',
- '/(?[ \t ]/' => 'Syntax error in (?[...]) in regex m/(?[ \t ]/',
- '/(?[ [ \t ]/' => 'Syntax error in (?[...]) in regex m/(?[ [ \t ]/',
- '/(?[ \t ] ]/' => 'Syntax error in (?[...]) in regex m/(?[ \t ] ]/',
- '/(?[ [ ] ]/' => 'Syntax error in (?[...]) in regex m/(?[ [ ] ]/',
- '/(?[ \t + \e # This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # This was supposed to be a comment ])/',
+ '/(?[ \t ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[ \\t ]{#}/",
+ '/(?[ [ \t ]/' => "Syntax error in (?[...]) {#} m/(?[ [ \\t ]{#}/",
+ '/(?[ \t ] ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[ \\t ]{#} ]/",
+ '/(?[ [ ] ]/' => "Syntax error in (?[...]) {#} m/(?[ [ ] ]{#}/",
+ '/(?[ \t + \e # This was supposed to be a comment ])/' =>
+    "Syntax error in (?[...]) {#} m/(?[ \\t + \\e # This was supposed to be a comment ]){#}/",
  '/(?[ ])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ {#}])/',
  'm/(?[[a-\d]])/' => 'False [] range "a-\d" {#} m/(?[[a-\d{#}]])/',
  'm/(?[[\w-x]])/' => 'False [] range "\w-" {#} m/(?[[\w-{#}x]])/',
@@ -452,10 +454,10 @@ my @death_utf8 = mark_as_utf8(
 
  '/ネ\p{}ネ/' => 'Empty \p{} {#} m/ネ\p{{#}}ネ/',
 
- '/ネ(?[[[:ネ]]])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[:ネ]]])ネ/",
- '/ネ(?[[[:ネ: ])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[:ネ: ])ネ/",
- '/ネ(?[[[::]]])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[::]]])ネ/",
- '/ネ(?[[[:ネ:]]])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[:ネ:]]])ネ/",
+ '/ネ(?[[[:ネ]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[:ネ]]{#}])ネ/",
+ '/ネ(?[[[:ネ: ])ネ/' => "Syntax error in (?[...]) {#} m/ネ(?[[[:ネ: ])ネ{#}/",
+ '/ネ(?[[[::]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[::]]{#}])ネ/",
+ '/ネ(?[[[:ネ:]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[:ネ:]]{#}])ネ/",
  '/ネ(?[[:ネ:]])ネ/' => "",
  '/ネ(?[ネ])ネ/' =>  'Unexpected character {#} m/ネ(?[ネ{#}])ネ/',
  '/ネ(?[ + [ネ] ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ +{#} [ネ] ])/',
@@ -468,8 +470,9 @@ my @death_utf8 = mark_as_utf8(
  '/(?[ \x{ネ} ])ネ/' => 'Non-hex character {#} m/(?[ \x{ネ{#}} ])ネ/',
  '/(?[ \p{ネ} ])/' => 'Can\'t find Unicode property definition "ネ" {#} m/(?[ \p{ネ}{#} ])/',
  '/(?[ \p{ ネ = bar } ])/' => 'Can\'t find Unicode property definition "ネ = bar" {#} m/(?[ \p{ ネ = bar }{#} ])/',
- '/ネ(?[ \t ]/' => 'Syntax error in (?[...]) in regex m/ネ(?[ \t ]/',
- '/(?[ \t + \e # ネ This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # ネ This was supposed to be a comment ])/',
+ '/ネ(?[ \t ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[ \\t ]{#}/",
+ '/(?[ \t + \e # ネ This was supposed to be a comment ])/' =>
+    "Syntax error in (?[...]) {#} m/(?[ \\t + \\e # ネ This was supposed to be a comment ]){#}/",
  'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>,
  '/\cネ/' => "Character following \"\\c\" must be printable ASCII",
  '/\b{ネ}/' => "'ネ' is an unknown bound type {#} m/\\b{ネ{#}}/",
