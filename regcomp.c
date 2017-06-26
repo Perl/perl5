@@ -14840,8 +14840,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                     TRUE /* Force /x */ );
 
             switch (*RExC_parse) {
-                case '?':
-                    if (RExC_parse[1] == '[') depth++, RExC_parse++;
+                case '(':
+                    if (RExC_parse[1] == '?' && RExC_parse[2] == '[')
+                        depth++, RExC_parse+=2;
                     /* FALLTHROUGH */
                 default:
                     break;
@@ -14898,9 +14899,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 }
 
                 case ']':
-                    if (depth--) break;
-                    RExC_parse++;
-                    if (*RExC_parse == ')') {
+                    if (RExC_parse[1] == ')') {
+                        RExC_parse++;
+                        if (depth--) break;
                         node = reganode(pRExC_state, ANYOF, 0);
                         RExC_size += ANYOF_SKIP;
                         nextchar(pRExC_state);
@@ -14912,20 +14913,25 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
                         return node;
                     }
-                    goto no_close;
+                    /* We output the messages even if warnings are off, because we'll fail
+                     * the very next thing, and these give a likely diagnosis for that */
+                    if (posix_warnings && av_tindex_skip_len_mg(posix_warnings) >= 0) {
+                        output_or_return_posix_warnings(pRExC_state, posix_warnings, NULL);
+                    }
+                    RExC_parse++;
+                    vFAIL("Unexpected ']' with no following ')' in (?[...");
             }
 
             RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
         }
 
-      no_close:
         /* We output the messages even if warnings are off, because we'll fail
          * the very next thing, and these give a likely diagnosis for that */
         if (posix_warnings && av_tindex_skip_len_mg(posix_warnings) >= 0) {
             output_or_return_posix_warnings(pRExC_state, posix_warnings, NULL);
         }
 
-        FAIL("Syntax error in (?[...])");
+        vFAIL("Syntax error in (?[...])");
     }
 
     /* Pass 2 only after this. */
@@ -15105,12 +15111,14 @@ redo_curchar:
                      * inversion list, and RExC_parse points to the trailing
                      * ']'; the next character should be the ')' */
                     RExC_parse++;
-                    assert(UCHARAT(RExC_parse) == ')');
+                    if (UCHARAT(RExC_parse) != ')')
+                        vFAIL("Expecting close paren for nested extended charclass");
 
                     /* Then the ')' matching the original '(' handled by this
                      * case: statement */
                     RExC_parse++;
-                    assert(UCHARAT(RExC_parse) == ')');
+                    if (UCHARAT(RExC_parse) != ')')
+                        vFAIL("Expecting close paren for wrapper for nested extended charclass");
 
                     RExC_flags = save_flags;
                     goto handle_operand;
