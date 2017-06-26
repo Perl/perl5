@@ -1815,6 +1815,7 @@ cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
 cpan/Math-BigRat/t/requirer.t		see if require works properly
+cpan/Math-BigRat/t/rt121139.t
 cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
 cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
 cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
