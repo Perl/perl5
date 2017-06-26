@@ -1019,7 +1019,7 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 
 Until the lexical C<$_> feature was removed, this function would
 find the position of the lexical C<$_> in the pad of the
-currently-executing function and returns the offset in the current pad,
+currently-executing function and return the offset in the current pad,
 or C<NOT_IN_PAD>.
 
 Now it always returns C<NOT_IN_PAD>.
