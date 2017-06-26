@@ -213,20 +213,20 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
                         cp_above_legal_max, uv, MAX_NON_DEPRECATED_CP);
         }
         if (       (flags & UNICODE_WARN_SUPER)
-            || (   UNICODE_IS_ABOVE_31_BIT(uv)
-                && (flags & UNICODE_WARN_ABOVE_31_BIT)))
+            || (   UNICODE_IS_PERL_EXTENDED(uv)
+                && (flags & UNICODE_WARN_PERL_EXTENDED)))
         {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
 
               /* Choose the more dire applicable warning */
-              (UNICODE_IS_ABOVE_31_BIT(uv))
+              (UNICODE_IS_PERL_EXTENDED(uv))
               ? above_31_bit_cp_format
               : super_cp_format,
              uv);
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
-            || (   UNICODE_IS_ABOVE_31_BIT(uv)
-                && (flags & UNICODE_DISALLOW_ABOVE_31_BIT)))
+            || (   UNICODE_IS_PERL_EXTENDED(uv)
+                && (flags & UNICODE_DISALLOW_PERL_EXTENDED)))
         {
             return NULL;
         }
@@ -680,7 +680,7 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
     PERL_ARGS_ASSERT__IS_UTF8_CHAR_HELPER;
 
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_ABOVE_31_BIT)));
+                          |UTF8_DISALLOW_PERL_EXTENDED)));
     assert(! UTF8_IS_INVARIANT(*s));
 
     /* A variant char must begin with a start byte */
@@ -742,7 +742,7 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
             return 0;           /* Above Unicode */
         }
 
-        if (   (flags & UTF8_DISALLOW_ABOVE_31_BIT)
+        if (   (flags & UTF8_DISALLOW_PERL_EXTENDED)
             &&  UNLIKELY(is_utf8_cp_above_31_bits(s, e)))
         {
             return 0;           /* Above 31 bits */
@@ -1320,11 +1320,11 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
 	&& ((flags & ( UTF8_DISALLOW_NONCHAR
                       |UTF8_DISALLOW_SURROGATE
                       |UTF8_DISALLOW_SUPER
-                      |UTF8_DISALLOW_ABOVE_31_BIT
+                      |UTF8_DISALLOW_PERL_EXTENDED
 	              |UTF8_WARN_NONCHAR
                       |UTF8_WARN_SURROGATE
                       |UTF8_WARN_SUPER
-                      |UTF8_WARN_ABOVE_31_BIT))
+                      |UTF8_WARN_PERL_EXTENDED))
                    /* In case of a malformation, 'uv' is not valid, and has
                     * been changed to something in the Unicode range.
                     * Currently we don't output a deprecation message if there
@@ -1423,7 +1423,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 /* Overflow means also got a super and are using Perl's
                  * extended UTF-8, but we handle all three cases here */
                 possible_problems
-                  &= ~(UTF8_GOT_OVERFLOW|UTF8_GOT_SUPER|UTF8_GOT_ABOVE_31_BIT);
+                  &= ~(UTF8_GOT_OVERFLOW|UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
                 *errors |= UTF8_GOT_OVERFLOW;
 
                 /* But the API says we flag all errors found */
@@ -1431,15 +1431,15 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                     *errors |= UTF8_GOT_SUPER;
                 }
                 if (flags
-                        & (UTF8_WARN_ABOVE_31_BIT|UTF8_DISALLOW_ABOVE_31_BIT))
+                        & (UTF8_WARN_PERL_EXTENDED|UTF8_DISALLOW_PERL_EXTENDED))
                 {
-                    *errors |= UTF8_GOT_ABOVE_31_BIT;
+                    *errors |= UTF8_GOT_PERL_EXTENDED;
                 }
 
                 /* Disallow if any of the three categories say to */
                 if ( ! (flags &   UTF8_ALLOW_OVERFLOW)
                     || (flags & ( UTF8_DISALLOW_SUPER
-                                 |UTF8_DISALLOW_ABOVE_31_BIT)))
+                                 |UTF8_DISALLOW_PERL_EXTENDED)))
                 {
                     disallowed = TRUE;
                 }
@@ -1448,7 +1448,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                  * are on, because this code point is above IV_MAX */
                 if (      ckWARN_d(WARN_DEPRECATED)
                     || ! (flags & UTF8_ALLOW_OVERFLOW)
-                    ||   (flags & (UTF8_WARN_SUPER|UTF8_WARN_ABOVE_31_BIT)))
+                    ||   (flags & (UTF8_WARN_SUPER|UTF8_WARN_PERL_EXTENDED)))
                 {
 
                     /* The warnings code explicitly says it doesn't handle the
@@ -1610,18 +1610,18 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                  * test for these after the regular SUPER ones, and before
                  * possibly bailing out, so that the slightly more dire warning
                  * will override the regular one. */
-                if (   (flags & (UTF8_WARN_ABOVE_31_BIT
+                if (   (flags & (UTF8_WARN_PERL_EXTENDED
                                 |UTF8_WARN_SUPER
-                                |UTF8_DISALLOW_ABOVE_31_BIT))
+                                |UTF8_DISALLOW_PERL_EXTENDED))
                     && (   (   UNLIKELY(orig_problems & UTF8_GOT_TOO_SHORT)
                             && UNLIKELY(is_utf8_cp_above_31_bits(
                                                 adjusted_s0,
                                                 adjusted_send)))
                         || (   LIKELY(! (orig_problems & UTF8_GOT_TOO_SHORT))
-                            && UNLIKELY(UNICODE_IS_ABOVE_31_BIT(uv)))))
+                            && UNLIKELY(UNICODE_IS_PERL_EXTENDED(uv)))))
                 {
                     if (  ! (flags & UTF8_CHECK_ONLY)
-                        &&  (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER))
+                        &&  (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
                         &&  ckWARN_d(WARN_NON_UNICODE))
                     {
                         pack_warn = packWARN(WARN_NON_UNICODE);
@@ -1639,12 +1639,12 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         }
                     }
 
-                    if (flags & ( UTF8_WARN_ABOVE_31_BIT
-                                 |UTF8_DISALLOW_ABOVE_31_BIT))
+                    if (flags & ( UTF8_WARN_PERL_EXTENDED
+                                 |UTF8_DISALLOW_PERL_EXTENDED))
                     {
-                        *errors |= UTF8_GOT_ABOVE_31_BIT;
+                        *errors |= UTF8_GOT_PERL_EXTENDED;
 
-                        if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
+                        if (flags & UTF8_DISALLOW_PERL_EXTENDED) {
                             disallowed = TRUE;
                         }
                     }

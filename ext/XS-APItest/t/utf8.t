@@ -29,8 +29,8 @@ my $look_for_everything_utf8n_to
 			| $::UTF8_WARN_NONCHAR
 			| $::UTF8_DISALLOW_SUPER
 			| $::UTF8_WARN_SUPER
-			| $::UTF8_DISALLOW_ABOVE_31_BIT
-			| $::UTF8_WARN_ABOVE_31_BIT;
+			| $::UTF8_DISALLOW_PERL_EXTENDED
+			| $::UTF8_WARN_PERL_EXTENDED;
 my $look_for_everything_uvchr_to
                         = $::UNICODE_DISALLOW_SURROGATE
 			| $::UNICODE_WARN_SURROGATE
@@ -38,8 +38,8 @@ my $look_for_everything_uvchr_to
 			| $::UNICODE_WARN_NONCHAR
 			| $::UNICODE_DISALLOW_SUPER
 			| $::UNICODE_WARN_SUPER
-			| $::UNICODE_DISALLOW_ABOVE_31_BIT
-			| $::UNICODE_WARN_ABOVE_31_BIT;
+			| $::UNICODE_DISALLOW_PERL_EXTENDED
+			| $::UNICODE_WARN_PERL_EXTENDED;
 
 foreach ([0, '', '', 'empty'],
 	 [0, 'N', 'N', '1 char'],
@@ -620,15 +620,15 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     my $valid_under_strict = 1;
     my $valid_under_c9strict = 1;
-    my $valid_for_fits_in_31_bits = 1;
+    my $valid_for_not_extended_utf8 = 1;
     if ($n > 0x10FFFF) {
         $this_utf8_flags &= ~($::UTF8_DISALLOW_SUPER|$::UTF8_WARN_SUPER);
         $valid_under_strict = 0;
         $valid_under_c9strict = 0;
         if ($n > 2 ** 31 - 1) {
             $this_utf8_flags &=
-                        ~($::UTF8_DISALLOW_ABOVE_31_BIT|$::UTF8_WARN_ABOVE_31_BIT);
-            $valid_for_fits_in_31_bits = 0;
+                ~($::UTF8_DISALLOW_PERL_EXTENDED|$::UTF8_WARN_PERL_EXTENDED);
+            $valid_for_not_extended_utf8 = 0;
         }
     }
     elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
@@ -784,17 +784,18 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     my $this_uvchr_flags = $look_for_everything_uvchr_to;
     if ($n > 2 ** 31 - 1) {
         $this_uvchr_flags &=
-                ~($::UNICODE_DISALLOW_ABOVE_31_BIT|$::UNICODE_WARN_ABOVE_31_BIT);
+            ~($::UNICODE_DISALLOW_PERL_EXTENDED|$::UNICODE_WARN_PERL_EXTENDED);
     }
     if ($n > 0x10FFFF) {
         $this_uvchr_flags &= ~($::UNICODE_DISALLOW_SUPER|$::UNICODE_WARN_SUPER);
     }
     elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
-        $this_uvchr_flags &= ~($::UNICODE_DISALLOW_NONCHAR|$::UNICODE_WARN_NONCHAR);
+        $this_uvchr_flags
+                     &= ~($::UNICODE_DISALLOW_NONCHAR|$::UNICODE_WARN_NONCHAR);
     }
     elsif ($n >= 0xD800 && $n <= 0xDFFF) {
         $this_uvchr_flags
-                     &= ~($::UNICODE_DISALLOW_SURROGATE|$::UNICODE_WARN_SURROGATE);
+                &= ~($::UNICODE_DISALLOW_SURROGATE|$::UNICODE_WARN_SURROGATE);
     }
     $display_flags = sprintf "0x%x", $this_uvchr_flags;
 
@@ -844,17 +845,17 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
                                 = $restriction_types{"strict"}{'valid_counts'};
     }
 
-    if ($valid_for_fits_in_31_bits) {
-        $restriction_types{"fits_in_31_bits"}{'valid_strings'} .= $bytes;
-        $restriction_types{"fits_in_31_bits"}{'valid_counts'}++;
+    if ($valid_for_not_extended_utf8) {
+        $restriction_types{"not_extended_utf8"}{'valid_strings'} .= $bytes;
+        $restriction_types{"not_extended_utf8"}{'valid_counts'}++;
     }
     elsif (! exists
-                $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'})
+                $restriction_types{"not_extended_utf8"}{'first_invalid_offset'})
     {
-        $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'}
-                = length $restriction_types{"fits_in_31_bits"}{'valid_strings'};
-        $restriction_types{"fits_in_31_bits"}{'first_invalid_count'}
-                        = $restriction_types{"fits_in_31_bits"}{'valid_counts'};
+        $restriction_types{"not_extended_utf8"}{'first_invalid_offset'}
+                = length $restriction_types{"not_extended_utf8"}{'valid_strings'};
+        $restriction_types{"not_extended_utf8"}{'first_invalid_count'}
+                        = $restriction_types{"not_extended_utf8"}{'valid_counts'};
     }
 }
 
@@ -874,7 +875,7 @@ for my $restriction (sort keys %restriction_types) {
         # and the specially named foo function.  But not if there isn't such a
         # specially named function.  Currently, this is the only tested
         # restriction that doesn't have a specially named function
-        next if $use_flags eq "" && $restriction eq "fits_in_31_bits";
+        next if $use_flags eq "" && $restriction eq "not_extended_utf8";
 
         # Start building up the name of the function we will test.
         my $base_name = "is_";
@@ -994,8 +995,8 @@ for my $restriction (sort keys %restriction_types) {
                             elsif ($restriction eq "strict") {
                                 $test .= ", $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE";
                             }
-                            elsif ($restriction eq "fits_in_31_bits") {
-                                $test .= ", $::UTF8_DISALLOW_ABOVE_31_BIT";
+                            elsif ($restriction eq "not_extended_utf8") {
+                                $test .= ", $::UTF8_DISALLOW_PERL_EXTENDED";
                             }
                             else {
                                 fail("Internal test error: Unknown restriction "

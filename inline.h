@@ -609,19 +609,19 @@ S_is_utf8_string_flags(const U8 *s, const STRLEN len, const U32 flags)
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_FLAGS;
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_ABOVE_31_BIT)));
+                          |UTF8_DISALLOW_PERL_EXTENDED)));
 
     if (flags == 0) {
         return is_utf8_string(s, len);
     }
 
-    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
                                         == UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
     {
         return is_strict_utf8_string(s, len);
     }
 
-    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
                                        == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
     {
         return is_c9strict_utf8_string(s, len);
@@ -855,19 +855,19 @@ S_is_utf8_string_loclen_flags(const U8 *s, const STRLEN len, const U8 **ep, STRL
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS;
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_ABOVE_31_BIT)));
+                          |UTF8_DISALLOW_PERL_EXTENDED)));
 
     if (flags == 0) {
         return is_utf8_string_loclen(s, len, ep, el);
     }
 
-    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
                                         == UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
     {
         return is_strict_utf8_string_loclen(s, len, ep, el);
     }
 
-    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
                                     == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
     {
         return is_c9strict_utf8_string_loclen(s, len, ep, el);
@@ -1123,7 +1123,7 @@ S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const
     PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS;
 
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_ABOVE_31_BIT)));
+                          |UTF8_DISALLOW_PERL_EXTENDED)));
 
     if (s >= e || s + UTF8SKIP(s) <= e) {
         return FALSE;

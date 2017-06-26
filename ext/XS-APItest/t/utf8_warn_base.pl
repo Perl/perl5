@@ -437,8 +437,8 @@ my @utf8n_flags_to_text =  ( qw(
         W_NONCHAR
         D_SUPER
         W_SUPER
-        D_ABOVE_31_BIT
-        W_ABOVE_31_BIT
+        D_PERL_EXTENDED
+        W_PERL_EXTENDED
         CHECK_ONLY
         NO_CONFIDENCE_IN_CURLEN_
     ) );
@@ -475,11 +475,11 @@ sub uvchr_display_call($)
             W_SURROGATE
             W_NONCHAR
             W_SUPER
-            W_ABOVE_31_BIT
+            W_PERL_EXTENDED
             D_SURROGATE
             D_NONCHAR
             D_SUPER
-            D_ABOVE_31_BIT
+            D_PERL_EXTENDED
        ) );
 
     $_[0] =~ / ^ ( [^(]* \( ) ( \d+ ) , \s* ( \d+ ) \) $ /x;
@@ -594,15 +594,15 @@ foreach my $test (@tests) {
 
     if ($will_overflow || $allowed_uv > 0x10FFFF) {
 
-        # Set the SUPER flags; later, we test for ABOVE_31_BIT as well.
+        # Set the SUPER flags; later, we test for PERL_EXTENDED as well.
         $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
         $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SUPER;
         $uvchr_flag_to_warn     = $::UNICODE_WARN_SUPER;
         $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SUPER;;
 
-        # Below, we add the flags for non-above-31 bit to the code points that
-        # don't fit that category.  Special tests are done for this category
-        # in the inner loop.
+        # Below, we add the flags for non-perl_extended to the code points
+        # that don't fit that category.  Special tests are done for this
+        # category in the inner loop.
         $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
                                             |$::UTF8_WARN_SURROGATE;
         $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
@@ -628,11 +628,12 @@ foreach my $test (@tests) {
                                 \Q may not be portable\E/x;
             $non_cp_trailing_text = "is for a non-Unicode code point, may not"
                                 . " be portable";
-            $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_ABOVE_31_BIT;
-            $utf8n_flag_to_disallow_complement |= $::UTF8_DISALLOW_ABOVE_31_BIT;
-            $uvchr_flag_to_warn_complement     |= $::UNICODE_WARN_ABOVE_31_BIT;
+            $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_PERL_EXTENDED;
+            $utf8n_flag_to_disallow_complement
+                                           |= $::UTF8_DISALLOW_PERL_EXTENDED;
+            $uvchr_flag_to_warn_complement |= $::UNICODE_WARN_PERL_EXTENDED;
             $uvchr_flag_to_disallow_complement
-                                            |= $::UNICODE_DISALLOW_ABOVE_31_BIT;
+                                        |= $::UNICODE_DISALLOW_PERL_EXTENDED;
         }
     }
     elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
@@ -648,16 +649,16 @@ foreach my $test (@tests) {
 
         $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
                                             |$::UTF8_WARN_SUPER
-                                            |$::UTF8_WARN_ABOVE_31_BIT;
+                                            |$::UTF8_WARN_PERL_EXTENDED;
         $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
                                             |$::UTF8_DISALLOW_SUPER
-                                            |$::UTF8_DISALLOW_ABOVE_31_BIT;
+                                            |$::UTF8_DISALLOW_PERL_EXTENDED;
         $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
                                             |$::UNICODE_WARN_SUPER
-                                            |$::UNICODE_WARN_ABOVE_31_BIT;
+                                            |$::UNICODE_WARN_PERL_EXTENDED;
         $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
                                             |$::UNICODE_DISALLOW_SUPER
-                                            |$::UNICODE_DISALLOW_ABOVE_31_BIT;
+                                            |$::UNICODE_DISALLOW_PERL_EXTENDED;
         $controlling_warning_category = 'surrogate';
     }
     elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
@@ -680,16 +681,16 @@ foreach my $test (@tests) {
 
         $utf8n_flag_to_warn_complement     = $::UTF8_WARN_SURROGATE
                                             |$::UTF8_WARN_SUPER
-                                            |$::UTF8_WARN_ABOVE_31_BIT;
+                                            |$::UTF8_WARN_PERL_EXTENDED;
         $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE
                                             |$::UTF8_DISALLOW_SUPER
-                                            |$::UTF8_DISALLOW_ABOVE_31_BIT;
+                                            |$::UTF8_DISALLOW_PERL_EXTENDED;
         $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_SURROGATE
                                             |$::UNICODE_WARN_SUPER
-                                            |$::UNICODE_WARN_ABOVE_31_BIT;
+                                            |$::UNICODE_WARN_PERL_EXTENDED;
         $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_SURROGATE
                                             |$::UNICODE_DISALLOW_SUPER
-                                            |$::UNICODE_DISALLOW_ABOVE_31_BIT;
+                                            |$::UNICODE_DISALLOW_PERL_EXTENDED;
 
         $controlling_warning_category = 'nonchar';
     }
@@ -770,7 +771,8 @@ foreach my $test (@tests) {
         foreach my $disallow_type (0..2) {
             # 0 is don't disallow this type of code point
             # 1 is do disallow
-            # 2 is do disallow, but only for above 31 bit
+            # 2 is do disallow, but only code points requiring
+            #   perl-extended-UTF8
 
             my $disallow_flags;
             my $expected_ret;
@@ -790,7 +792,7 @@ foreach my $test (@tests) {
             }
             elsif ($disallow_type == 2) {
                 next if ! requires_extended_utf8($allowed_uv);
-                $disallow_flags = $::UTF8_DISALLOW_ABOVE_31_BIT;
+                $disallow_flags = $::UTF8_DISALLOW_PERL_EXTENDED;
                 $expected_ret = 0;
             }
             else {  # type is 0
@@ -1106,26 +1108,27 @@ foreach my $test (@tests) {
                         $expect_warnings_for_malformed = 0;
                     }
                     elsif ($warning_type == 4) {  # Like type 3, but uses the
-                                                  # above-31-bit flags
+                                                  # PERL_EXTENDED flags
                         # The complement flags were set up so that the
-                        # above-31-bit flags have been tested that they don't
+                        # PERL_EXTENDED flags have been tested that they don't
                         # trigger wrongly for too small code points.  And the
                         # flags have been set up so that those small code
                         # points are tested for being above Unicode.  What's
                         # left to test is that the large code points do
-                        # trigger the above-31-bit flags.
+                        # trigger the PERL_EXTENDED flags.
                         next if ! requires_extended_utf8($allowed_uv);
                         next if $controlling_warning_category ne 'non_unicode';
                         $eval_warn = "no warnings; use warnings 'non_unicode'";
                         $expect_regular_warnings = 1;
                         $expect_warnings_for_overflow = 1;
                         $expect_warnings_for_malformed = 0;
-                        $this_utf8n_flag_to_warn   = $::UTF8_WARN_ABOVE_31_BIT;
+                        $this_utf8n_flag_to_warn = $::UTF8_WARN_PERL_EXTENDED;
                         $this_utf8n_flag_to_disallow
-                                                = $::UTF8_DISALLOW_ABOVE_31_BIT;
-                        $this_uvchr_flag_to_warn = $::UNICODE_WARN_ABOVE_31_BIT;
+                                             = $::UTF8_DISALLOW_PERL_EXTENDED;
+                        $this_uvchr_flag_to_warn
+                                              = $::UNICODE_WARN_PERL_EXTENDED;
                         $this_uvchr_flag_to_disallow
-                                             = $::UNICODE_DISALLOW_ABOVE_31_BIT;
+                                          = $::UNICODE_DISALLOW_PERL_EXTENDED;
                     }
                     else {
                        die "Unexpected warning type '$warning_type'";
@@ -1180,14 +1183,14 @@ foreach my $test (@tests) {
                         # should emit a message or not.  It's tentative
                         # because, even if we ordinarily would output it, we
                         # don't if malformations are allowed -- except an
-                        # overflow is also a SUPER and ABOVE_31_BIT, and if
+                        # overflow is also a SUPER and PERL_EXTENDED, and if
                         # warnings for those are enabled, the overflow
                         # warning does get raised.
                         if (   $expect_warnings_for_overflow
                             && (    $malformed_allow_type == 0
                                 ||   (   $this_warning_flags
                                       & ($::UTF8_WARN_SUPER
-                                        |$::UTF8_WARN_ABOVE_31_BIT))))
+                                        |$::UTF8_WARN_PERL_EXTENDED))))
                         {
                             push @expected_warnings, $overflow_msg_pattern;
                         }
@@ -1298,10 +1301,10 @@ foreach my $test (@tests) {
                     for (my $i = @expected_return_flags - 1; $i >= 0; $i--) {
                         if ($expected_return_flags[$i] & $returned_flags) {
                             if ($expected_return_flags[$i]
-                                            == $::UTF8_DISALLOW_ABOVE_31_BIT)
+                                                == $::UTF8_GOT_PERL_EXTENDED)
                             {
                                 pass("    Expected and got return flag for"
-                                   . " above_31_bit");
+                                   . " PERL_EXTENDED");
                             }
                                    # The first entries in this are
                                    # malformations
