@@ -29,6 +29,17 @@ use warnings 'utf8';
 local $SIG{__WARN__} = sub { my @copy = @_;
                              push @warnings_gotten, map { chomp; $_ } @copy;
                            };
+
+sub requires_extended_utf8($) {
+
+    # Returns a boolean as to whether or not the code point parameter fits
+    # into 31 bits, subject to the convention that a negative code point
+    # stands for one that overflows the word size, so won't fit in 31 bits.
+
+    my $cp = shift;
+    return $cp > 0x7FFFFFFF;
+}
+
 my @tests;
 {
     no warnings qw(portable overflow);
@@ -607,7 +618,7 @@ foreach my $test (@tests) {
             $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
             $initially_malformed = 1;
         }
-        elsif ($allowed_uv > 0x7FFFFFFF) {
+        elsif (requires_extended_utf8($allowed_uv)) {
             $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
                                 \Q and not portable\E/x;
             $non_cp_trailing_text = "is for a non-Unicode code point, and is not portable";
@@ -778,7 +789,7 @@ foreach my $test (@tests) {
                 $expected_ret = 0;
             }
             elsif ($disallow_type == 2) {
-                next if ! $will_overflow && $allowed_uv < 0x80000000;
+                next if ! requires_extended_utf8($allowed_uv);
                 $disallow_flags = $::UTF8_DISALLOW_ABOVE_31_BIT;
                 $expected_ret = 0;
             }
@@ -1072,7 +1083,7 @@ foreach my $test (@tests) {
                         # points are tested for being above Unicode.  What's
                         # left to test is that the large code points do
                         # trigger the above-31-bit flags.
-                        next if ! $will_overflow && $allowed_uv < 0x80000000;
+                        next if ! requires_extended_utf8($allowed_uv);
                         next if $controlling_warning_category ne 'non_unicode';
                         $eval_warn = "no warnings; use warnings 'non_unicode'";
                         $expect_regular_warnings = 1;
