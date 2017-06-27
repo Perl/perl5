@@ -24,12 +24,13 @@ Code freezes (which happen in the 5.27.X series)
 =head2 Perl 5.26
 
   2017-05-30  5.26.0 ✓        Sawyer X
+  2017-08-??  5.26.1          Steve Hay
 
 =head2 Perl 5.24
 
   2016-05-09  5.24.0 ✓        Ricardo Signes
   2017-01-14  5.24.1 ✓        Steve Hay
-  2017-02-??  5.24.2          Steve Hay
+  2017-07-??  5.24.2          Steve Hay
 
 =head2 Perl 5.22
 
@@ -37,7 +38,7 @@ Code freezes (which happen in the 5.27.X series)
   2015-12-13  5.22.1 ✓        Steve Hay
   2016-04-29  5.22.2 ✓        Steve Hay
   2017-01-14  5.22.3 ✓        Steve Hay
-  2017-02-??  5.22.4          Steve Hay
+  2017-07-??  5.22.4          Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
