@@ -28,6 +28,7 @@ local $SIG{__WARN__} = sub { my @copy = @_;
                              push @warnings_gotten, map { chomp; $_ } @copy;
                            };
 
+my $highest_non_extended_utf8_cp = (isASCII) ? 0x7FFFFFFF : 0x3FFFFFFF;
 my $native_lowest_continuation_chr = I8_to_native(chr $::lowest_continuation);
 
 sub requires_extended_utf8($) {
@@ -36,8 +37,7 @@ sub requires_extended_utf8($) {
     # into 31 bits, subject to the convention that a negative code point
     # stands for one that overflows the word size, so won't fit in 31 bits.
 
-    my $cp = shift;
-    return $cp > 0x7FFFFFFF;
+    return shift > $highest_non_extended_utf8_cp;
 }
 
 my @tests;
@@ -286,7 +286,6 @@ my @tests;
             : I8_to_native(
                 "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
             0x80000000,
-            (isASCII) ? 1 : 8,
         ],
         [ "highest 32 bit code point",
             (isASCII)
@@ -294,7 +293,6 @@ my @tests;
             : I8_to_native(
                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
             0xFFFFFFFF,
-            (isASCII) ? 1 : 8,
         ],
         [ "Lowest 33 bit code point",
             (isASCII)
@@ -340,7 +338,6 @@ my @tests;
                 [ "Lowest code point requiring 13 bytes to represent",
                     "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
                     0x1000000000,
-                    1,
                 ],
                 [ "overflow that old algorithm failed to detect",
                     "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
@@ -355,37 +352,31 @@ my @tests;
                     I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x800000000,
-                    7,
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x10000000000,
-                    6,
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
                     "\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x200000000000,
-                    5,
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
                     "\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x4000000000000,
-                    4,
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
                     "\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x80000000000000,
-                    3,
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
                     "\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x1000000000000000,
-                    2,
                 ];
         }
     }
@@ -587,6 +578,11 @@ foreach my $test (@tests) {
                                 # contain a code point.  (This is a result of
                                 # some sort of malformation that means we
                                 # can't get an exact code poin
+    my $extended_cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
+                        \Q requires a Perl extension, and so is not\E
+                        \Q portable\E/x;
+    my $extended_non_cp_trailing_text
+                        = "is a Perl extension, and so is not portable";
 
     # Is this test malformed from the beginning?  If so, we know to generally
     # expect that the tests will show it isn't valid.
@@ -619,9 +615,9 @@ foreach my $test (@tests) {
             $initially_malformed = 1;
         }
         elsif (requires_extended_utf8($allowed_uv)) {
-            $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
-                                \Q and not portable\E/x;
-            $non_cp_trailing_text = "is for a non-Unicode code point, and is not portable";
+            $cp_message_qr = $extended_cp_message_qr;
+            $non_cp_trailing_text = $extended_non_cp_trailing_text;
+            $needed_to_discern_len = 1 unless defined $needed_to_discern_len;
         }
         else {
             $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
@@ -870,6 +866,9 @@ foreach my $test (@tests) {
           # maximum length, so skip if we're already at that length.
           next if $overlong && $length >= $::max_bytes;
 
+          my $this_cp_message_qr = $cp_message_qr;
+          my $this_non_cp_trailing_text = $non_cp_trailing_text;
+
           foreach my $malformed_allow_type (0..2) {
             # 0 don't allow this malformation; ignored if no malformation
             # 1 allow, with REPLACEMENT CHARACTER returned
@@ -899,6 +898,8 @@ foreach my $test (@tests) {
             # combinations of on/off are tested for.  It's either all are
             # allowed, or none are.
             my $allow_flags = 0;
+            my $overlong_is_in_perl_extended_utf8 = 0;
+            my $dont_use_overlong_cp = 0;
 
             if ($overlong) {
                 my $new_expected_len;
@@ -929,8 +930,20 @@ foreach my $test (@tests) {
                 else {  # Must use extended UTF-8.  On ASCII platforms, we
                         # could express some overlongs here starting with
                         # \xFE, but there's no real reason to do so.
+                    $overlong_is_in_perl_extended_utf8 = 1;
                     $start_byte = I8_to_native("\xFF");
                     $new_expected_len = $::max_bytes;
+                    $this_cp_message_qr = $extended_cp_message_qr;
+
+                    # The warning that gets raised doesn't include the code
+                    # point in the message if the code point can be expressed
+                    # without using extended UTF-8, but the particular
+                    # overlong sequence used is in extended UTF-8.  To do
+                    # otherwise would be confusing to the user, as it would
+                    # claim the code point requires extended, when it doesn't.
+                    $dont_use_overlong_cp = 1
+                                    unless requires_extended_utf8($allowed_uv);
+                    $this_non_cp_trailing_text = $extended_non_cp_trailing_text;
                 }
 
                 # Splice in the revise continuation byte, preceded by the
@@ -1152,12 +1165,20 @@ foreach my $test (@tests) {
                     # on all the other flags.  That makes sure that they all
                     # are independent of this flag, and so we don't need to
                     # test them individually.
-                    my $this_warning_flags  = ($use_warn_flag)
-                                              ? $this_utf8n_flag_to_warn
-                                              : $utf8n_flag_to_warn_complement;
-                    my $this_disallow_flags = ($do_disallow)
-                                          ? $this_utf8n_flag_to_disallow
-                                          : $utf8n_flag_to_disallow_complement;
+                    my $this_warning_flags
+                            = ($use_warn_flag)
+                              ? $this_utf8n_flag_to_warn
+                              : ($overlong_is_in_perl_extended_utf8
+                                ? ($utf8n_flag_to_warn_complement
+                                    & ~$::UTF8_WARN_PERL_EXTENDED)
+                                :  $utf8n_flag_to_warn_complement);
+                    my $this_disallow_flags
+                            = ($do_disallow)
+                              ? $this_utf8n_flag_to_disallow
+                              : ($overlong_is_in_perl_extended_utf8
+                                 ? ($utf8n_flag_to_disallow_complement
+                                    & ~$::UTF8_DISALLOW_PERL_EXTENDED)
+                                 :  $utf8n_flag_to_disallow_complement);
                     my $expected_uv = $allowed_uv;
                     my $this_uv_string = $uv_string;
 
@@ -1216,19 +1237,21 @@ foreach my $test (@tests) {
 
                         # So far the array contains warnings generated by
                         # malformations.  Add the expected regular one.
-                        unshift @expected_warnings, $cp_message_qr;
+                        unshift @expected_warnings, $this_cp_message_qr;
 
                         # But it may need to be modified, because either of
                         # these malformations means we can't determine the
                         # expected code point.
-                        if ($short || $unexpected_noncont) {
+                        if (   $short || $unexpected_noncont
+                            || $dont_use_overlong_cp)
+                        {
                             my $first_byte = substr($this_bytes, 0, 1);
                             $expected_warnings[0] = display_bytes(
                                     substr($this_bytes, 0, $this_expected_len));
                             $expected_warnings[0]
                                 = qr/[Aa]\Qny UTF-8 sequence that starts with\E
                                      \Q $expected_warnings[0]\E
-                                     \Q $non_cp_trailing_text\E/x;
+                                     \Q $this_non_cp_trailing_text\E/x;
                         }
                     }
 

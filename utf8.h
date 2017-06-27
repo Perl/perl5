@@ -407,6 +407,8 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
     ( LIKELY( ( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
 : LIKELY( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( ( ((const U8*)s)[1] & 0xF0 ) == 0x80 ) ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
 
+#define UNICODE_IS_PERL_EXTENDED(uv)    UNLIKELY((UV) (uv) > 0x7FFFFFFF)
+
 #endif /* EBCDIC vs ASCII */
 
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
@@ -781,7 +783,8 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_GOT_PERL_EXTENDED          UTF8_DISALLOW_PERL_EXTENDED
 #define UTF8_WARN_PERL_EXTENDED         0x8000
 
-/* For back compat, these old names are misleading for UTF_EBCDIC */
+/* For back compat, these old names are misleading for overlongs and
+ * UTF_EBCDIC. */
 #define UTF8_DISALLOW_ABOVE_31_BIT      UTF8_DISALLOW_PERL_EXTENDED
 #define UTF8_GOT_ABOVE_31_BIT           UTF8_GOT_PERL_EXTENDED
 #define UTF8_WARN_ABOVE_31_BIT          UTF8_WARN_PERL_EXTENDED
@@ -958,7 +961,6 @@ point's representation.
          && UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
 
 #define UNICODE_IS_SUPER(uv)    ((UV) (uv) > PERL_UNICODE_MAX)
-#define UNICODE_IS_PERL_EXTENDED(uv)    ((UV) (uv) > 0x7FFFFFFF)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \

@@ -4078,6 +4078,17 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
 STATIC NV	S_mulexp10(NV value, I32 exponent);
 #  endif
 #endif
+#if !defined(UV_IS_QUAD)
+#  if defined(PERL_IN_UTF8_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS	\
+	assert(s); assert(e)
+#endif
+
+#  endif
+#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report);
 #define PERL_ARGS_ASSERT_DO_EXEC3	\
@@ -5832,13 +5843,6 @@ PERL_STATIC_INLINE bool	S_is_utf8_common_with_len(pTHX_ const U8 *const p, const
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_COMMON_WITH_LEN	\
 	assert(p); assert(e); assert(swash); assert(swashname)
-#endif
-
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS	\
-	assert(s); assert(e)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS

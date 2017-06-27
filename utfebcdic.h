@@ -511,6 +511,8 @@ explicitly forbidden, and the shortest possible encoding should always be used
  * has this start byte (expressed in I8) as the maximum */
 #define _IS_UTF8_CHAR_HIGHEST_START_BYTE 0xF9
 
+#define UNICODE_IS_PERL_EXTENDED(uv)    UNLIKELY((UV) (uv) > 0x3FFFFFFF)
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

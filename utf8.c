@@ -122,8 +122,9 @@ const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf
                                    " is not recommended for open interchange";
 const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
                                    " may not be portable";
-const char above_31_bit_cp_format[] = "Code point 0x%" UVXf " is not"
-                                      " Unicode, and not portable";
+const char perl_extended_cp_format[] = "Code point 0x%" UVXf " is not"        \
+                                       " Unicode, requires a Perl extension," \
+                                       " and so is not portable";
 
 #define HANDLE_UNICODE_SURROGATE(uv, flags)                         \
     STMT_START {                                                    \
@@ -220,7 +221,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
 
               /* Choose the more dire applicable warning */
               (UNICODE_IS_PERL_EXTENDED(uv))
-              ? above_31_bit_cp_format
+              ? perl_extended_cp_format
               : super_cp_format,
              uv);
         }
@@ -362,30 +363,27 @@ defined in
 L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
 See L<perlunicode/Noncharacter code points>.
 
-Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
-so using them is more problematic than other above-Unicode code points.  Perl
-invented an extension to UTF-8 to represent the ones above 2**36-1, so it is
-likely that non-Perl languages will not be able to read files that contain
-these that written by the perl interpreter; nor would Perl understand files
-written by something that uses a different extension.  For these reasons, there
-is a separate set of flags that can warn and/or disallow these extremely high
-code points, even if other above-Unicode ones are accepted.  These are the
-C<UNICODE_WARN_ABOVE_31_BIT> and C<UNICODE_DISALLOW_ABOVE_31_BIT> flags.  These
-are entirely independent from the deprecation warning for code points above
-C<IV_MAX>.  On 32-bit machines, it will eventually be forbidden to have any
-code point that needs more than 31 bits to represent.  When that happens,
-effectively the C<UNICODE_DISALLOW_ABOVE_31_BIT> flag will always be set on
-32-bit machines.  (Of course C<UNICODE_DISALLOW_SUPER> will treat all
-above-Unicode code points, including these, as malformations; and
-C<UNICODE_WARN_SUPER> warns on these.)
+Extremely high code points were never specified in any standard, and require an
+extension to UTF-8 to express, which Perl does.  It is likely that programs
+written in something other than Perl would not be able to read files that
+contain these; nor would Perl understand files written by something that uses a
+different extension.  For these reasons, there is a separate set of flags that
+can warn and/or disallow these extremely high code points, even if other
+above-Unicode ones are accepted.  They are the C<UNICODE_WARN_PERL_EXTENDED>
+and C<UNICODE_DISALLOW_PERL_EXTENDED> flags.  For more information see
+L</C<UTF8_GOT_PERL_EXTENDED>>.  Of course C<UNICODE_DISALLOW_SUPER> will
+treat all above-Unicode code points, including these, as malformations.  (Note
+that the Unicode standard considers anything above 0x10FFFF to be illegal, but
+there are standards predating it that allow up to 0x7FFF_FFFF (2**31 -1))
 
-On EBCDIC platforms starting in Perl v5.24, the Perl extension for representing
-extremely high code points kicks in at 0x3FFF_FFFF (2**30 -1), which is lower
-than on ASCII.  Prior to that, code points 2**31 and higher were simply
-unrepresentable, and a different, incompatible method was used to represent
-code points between 2**30 and 2**31 - 1.  The flags C<UNICODE_WARN_ABOVE_31_BIT>
-and C<UNICODE_DISALLOW_ABOVE_31_BIT> have the same function as on ASCII
-platforms, warning and disallowing 2**31 and higher.
+A somewhat misleadingly named synonym for C<UNICODE_WARN_PERL_EXTENDED> is
+retained for backward compatibility: C<UNICODE_WARN_ABOVE_31_BIT>.  Similarly,
+C<UNICODE_DISALLOW_ABOVE_31_BIT> is usable instead of the more accurately named
+C<UNICODE_DISALLOW_PERL_EXTENDED>.  The names are misleading because these
+flags can apply to code points that actually do fit in 31 bits.  This happens
+on EBCDIC platforms, and sometimes when the L<overlong
+malformation|/C<UTF8_GOT_LONG>> is also present.  The new names accurately
+describe the situation in all cases.
 
 =cut
 */
@@ -398,6 +396,8 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     return uvchr_to_utf8_flags(d, uv, flags);
 }
+
+#ifndef UV_IS_QUAD
 
 PERL_STATIC_INLINE bool
 S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
@@ -479,6 +479,8 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
 #endif
 
 }
+
+#endif
 
 /* Anything larger than this will overflow the word if it were converted into a UV */
 #if defined(UV_IS_QUAD)
@@ -730,10 +732,12 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 #  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xF1              \
                                                        /* B6 and B7 */      \
                                               && ((s1) & 0xFE ) == 0xB6)
+#  define isUTF8_PERL_EXTENDED(s)   (*s == I8_TO_NATIVE_UTF8(0xFF))
 #else
 #  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xF5
 #  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF4 && (s1) >= 0x90)
 #  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xED && (s1) >= 0xA0)
+#  define isUTF8_PERL_EXTENDED(s)   (*s >= 0xFE)
 #endif
 
         if (  (flags & UTF8_DISALLOW_SUPER)
@@ -743,9 +747,9 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
         }
 
         if (   (flags & UTF8_DISALLOW_PERL_EXTENDED)
-            &&  UNLIKELY(is_utf8_cp_above_31_bits(s, e)))
+            &&  UNLIKELY(isUTF8_PERL_EXTENDED(s)))
         {
-            return 0;           /* Above 31 bits */
+            return 0;
         }
 
         if (len > 1) {
@@ -954,35 +958,33 @@ a malformation and raise a warning, specify both the WARN and DISALLOW flags.
 (But note that warnings are not raised if lexically disabled nor if
 C<UTF8_CHECK_ONLY> is also specified.)
 
+Extremely high code points were never specified in any standard, and require an
+extension to UTF-8 to express, which Perl does.  It is likely that programs
+written in something other than Perl would not be able to read files that
+contain these; nor would Perl understand files written by something that uses a
+different extension.  For these reasons, there is a separate set of flags that
+can warn and/or disallow these extremely high code points, even if other
+above-Unicode ones are accepted.  They are the C<UTF8_WARN_PERL_EXTENDED> and
+C<UTF8_DISALLOW_PERL_EXTENDED> flags.  For more information see
+L</C<UTF8_GOT_PERL_EXTENDED>>.  Of course C<UTF8_DISALLOW_SUPER> will treat all
+above-Unicode code points, including these, as malformations.
+(Note that the Unicode standard considers anything above 0x10FFFF to be
+illegal, but there are standards predating it that allow up to 0x7FFF_FFFF
+(2**31 -1))
+
+A somewhat misleadingly named synonym for C<UTF8_WARN_PERL_EXTENDED> is
+retained for backward compatibility: C<UTF8_WARN_ABOVE_31_BIT>.  Similarly,
+C<UTF8_DISALLOW_ABOVE_31_BIT> is usable instead of the more accurately named
+C<UTF8_DISALLOW_PERL_EXTENDED>.  The names are misleading because these flags
+can apply to code points that actually do fit in 31 bits.  This happens on
+EBCDIC platforms, and sometimes when the L<overlong
+malformation|/C<UTF8_GOT_LONG>> is also present.  The new names accurately
+describe the situation in all cases.
+
 It is now deprecated to have very high code points (above C<IV_MAX> on the
 platforms) and this function will raise a deprecation warning for these (unless
 such warnings are turned off).  This value is typically 0x7FFF_FFFF (2**31 -1)
 in a 32-bit word.
-
-Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
-so using them is more problematic than other above-Unicode code points.  Perl
-invented an extension to UTF-8 to represent the ones above 2**36-1, so it is
-likely that non-Perl languages will not be able to read files that contain
-these; nor would Perl understand files
-written by something that uses a different extension.  For these reasons, there
-is a separate set of flags that can warn and/or disallow these extremely high
-code points, even if other above-Unicode ones are accepted.  These are the
-C<UTF8_WARN_ABOVE_31_BIT> and C<UTF8_DISALLOW_ABOVE_31_BIT> flags.  These
-are entirely independent from the deprecation warning for code points above
-C<IV_MAX>.  On 32-bit machines, it will eventually be forbidden to have any
-code point that needs more than 31 bits to represent.  When that happens,
-effectively the C<UTF8_DISALLOW_ABOVE_31_BIT> flag will always be set on
-32-bit machines.  (Of course C<UTF8_DISALLOW_SUPER> will treat all
-above-Unicode code points, including these, as malformations; and
-C<UTF8_WARN_SUPER> warns on these.)
-
-On EBCDIC platforms starting in Perl v5.24, the Perl extension for representing
-extremely high code points kicks in at 0x3FFF_FFFF (2**30 -1), which is lower
-than on ASCII.  Prior to that, code points 2**31 and higher were simply
-unrepresentable, and a different, incompatible method was used to represent
-code points between 2**30 and 2**31 - 1.  The flags C<UTF8_WARN_ABOVE_31_BIT>
-and C<UTF8_DISALLOW_ABOVE_31_BIT> have the same function as on ASCII
-platforms, warning and disallowing 2**31 and higher.
 
 All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
@@ -1026,12 +1028,36 @@ exceptions are noted:
 
 =over 4
 
-=item C<UTF8_GOT_ABOVE_31_BIT>
+=item C<UTF8_GOT_PERL_EXTENDED>
 
-The code point represented by the input UTF-8 sequence occupies more than 31
-bits.
-This bit is set only if the input C<flags> parameter contains either the
-C<UTF8_DISALLOW_ABOVE_31_BIT> or the C<UTF8_WARN_ABOVE_31_BIT> flags.
+The input sequence is not standard UTF-8, but a Perl extension.  This bit is
+set only if the input C<flags> parameter contains either the
+C<UTF8_DISALLOW_PERL_EXTENDED> or the C<UTF8_WARN_PERL_EXTENDED> flags.
+
+Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
+and so some extension must be used to express them.  Perl uses a natural
+extension to UTF-8 to represent the ones up to 2**36-1, and invented a further
+extension to represent even higher ones, so that any code point that fits in a
+64-bit word can be represented.  Text using these extensions is not likely to
+be portable to non-Perl code.  We lump both of these extensions together and
+refer to them as Perl extended UTF-8.  There exist other extensions that people
+have invented, incompatible with Perl's.
+
+On EBCDIC platforms starting in Perl v5.24, the Perl extension for representing
+extremely high code points kicks in at 0x3FFF_FFFF (2**30 -1), which is lower
+than on ASCII.  Prior to that, code points 2**31 and higher were simply
+unrepresentable, and a different, incompatible method was used to represent
+code points between 2**30 and 2**31 - 1.
+
+On both platforms, ASCII and EBCDIC, C<UTF8_GOT_PERL_EXTENDED> is set if
+Perl extended UTF-8 is used.
+
+In earlier Perls, this bit was named C<UTF8_GOT_ABOVE_31_BIT>, which you still
+may use for backward compatibility.  That name is misleading, as this flag may
+be set when the code point actually does fit in 31 bits.  This happens on
+EBCDIC platforms, and sometimes when the L<overlong
+malformation|/C<UTF8_GOT_LONG>> is also present.  The new name accurately
+describes the situation in all cases.
 
 =item C<UTF8_GOT_CONTINUATION>
 
@@ -1119,8 +1145,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
      * too short one.  Otherwise the first two are set to 's0' and 'send', and
      * the third not used at all */
     U8 * adjusted_s0 = (U8 *) s0;
-    U8 * adjusted_send = NULL;  /* (Initialized to silence compilers' wrong
-                                   warning) */
     U8 temp_char_buf[UTF8_MAXBYTES + 1]; /* Used to avoid a Newx in this
                                             routine; see [perl #130921] */
     UV uv_so_far = 0;   /* (Initialized to silence compilers' wrong warning) */
@@ -1212,7 +1236,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     else {
         send += expectlen;
     }
-    adjusted_send = send;
 
     /* Now, loop through the remaining bytes in the character's sequence,
      * accumulating each into the working value as we go. */
@@ -1297,7 +1320,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
             }
 
             adjusted_s0 = temp_char_buf;
-            adjusted_send = uvoffuni_to_utf8_flags(adjusted_s0, min_uv, 0);
+            (void) uvoffuni_to_utf8_flags(adjusted_s0, min_uv, 0);
         }
     }
 
@@ -1316,7 +1339,8 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                            * and we deal with those in the overflow handling
                            * code */
                 && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW))
-                && isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)))
+                && (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
+                    || UNLIKELY(isUTF8_PERL_EXTENDED(s0)))))
 	&& ((flags & ( UTF8_DISALLOW_NONCHAR
                       |UTF8_DISALLOW_SURROGATE
                       |UTF8_DISALLOW_SUPER
@@ -1396,13 +1420,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
      *                      end, based on how many bytes the start byte tells
      *                      us should be in it, but no further than s0 +
      *                      avail_len
-     * adjusted_s0          normally is the same as s0, but in case of an
-     *                      overlong for which the UTF-8 matters below, it is
-     *                      the first byte of the shortest form representation
-     *                      of the input.
-     * adjusted_send        normally is the same as 'send', but if adjusted_s0
-     *                      is set to something other than s0, this points one
-     *                      beyond its end
      */
 
     if (UNLIKELY(possible_problems)) {
@@ -1603,39 +1620,35 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                     }
                 }
 
-                /* The maximum code point ever specified by a standard was
-                 * 2**31 - 1.  Anything larger than that is a Perl extension
-                 * that very well may not be understood by other applications
-                 * (including earlier perl versions on EBCDIC platforms).  We
-                 * test for these after the regular SUPER ones, and before
-                 * possibly bailing out, so that the slightly more dire warning
-                 * will override the regular one. */
-                if (   (flags & (UTF8_WARN_PERL_EXTENDED
-                                |UTF8_WARN_SUPER
-                                |UTF8_DISALLOW_PERL_EXTENDED))
-                    && (   (   UNLIKELY(orig_problems & UTF8_GOT_TOO_SHORT)
-                            && UNLIKELY(is_utf8_cp_above_31_bits(
-                                                adjusted_s0,
-                                                adjusted_send)))
-                        || (   LIKELY(! (orig_problems & UTF8_GOT_TOO_SHORT))
-                            && UNLIKELY(UNICODE_IS_PERL_EXTENDED(uv)))))
-                {
+                /* Test for Perl's extended UTF-8 after the regular SUPER ones,
+                 * and before possibly bailing out, so that the more dire
+                 * warning will override the regular one. */
+                if (UNLIKELY(isUTF8_PERL_EXTENDED(s0))) {
                     if (  ! (flags & UTF8_CHECK_ONLY)
                         &&  (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
                         &&  ckWARN_d(WARN_NON_UNICODE))
                     {
                         pack_warn = packWARN(WARN_NON_UNICODE);
 
-                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                        /* If it is an overlong that evaluates to a code point
+                         * that doesn't have to use the Perl extended UTF-8, it
+                         * still used it, and so we output a message that
+                         * doesn't refer to the code point.  The same is true
+                         * if there was a SHORT malformation where the code
+                         * point is not valid.  In that case, 'uv' will have
+                         * been set to the REPLACEMENT CHAR, and the message
+                         * below without the code point in it will be selected
+                         * */
+                        if (UNICODE_IS_PERL_EXTENDED(uv)) {
                             message = Perl_form(aTHX_
-                                        "Any UTF-8 sequence that starts with"
-                                        " \"%s\" is for a non-Unicode code"
-                                        " point, and is not portable",
-                                        _byte_dump_string(s0, curlen, 0));
+                                            perl_extended_cp_format, uv);
                         }
                         else {
                             message = Perl_form(aTHX_
-                                            above_31_bit_cp_format, uv);
+                                        "Any UTF-8 sequence that starts with"
+                                        " \"%s\" is a Perl extension, and"
+                                        " so is not portable",
+                                        _byte_dump_string(s0, curlen, 0));
                         }
                     }
 
