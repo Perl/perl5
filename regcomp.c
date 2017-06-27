@@ -19869,33 +19869,47 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 	    d->what[i] = ri->data->what[i];
 	    switch (d->what[i]) {
 	        /* see also regcomp.h and regfree_internal() */
-	    case 'a': /* actually an AV, but the dup function is identical.  */
-	    case 'r':
-	    case 's':
-	    case 'S':
-	    case 'u': /* actually an HV, but the dup function is identical.  */
+            case 'a': /* actually an AV, but the dup function is identical.
+                         values seem to be "plain sv's" generally. */
+            case 'r': /* a compiled regex (but still just another SV) */
+            case 's': /* an RV (currently only used for an RV to an AV by the ANYOF code)
+                         this use case should go away, the code could have used
+                         'a' instead - see S_set_ANYOF_arg() for array contents. */
+            case 'S': /* actually an SV, but the dup function is identical.  */
+            case 'u': /* actually an HV, but the dup function is identical.
+                         values are "plain sv's" */
 		d->data[i] = sv_dup_inc((const SV *)ri->data->data[i], param);
 		break;
 	    case 'f':
+                /* Synthetic Start Class - "Fake" charclass we generate to optimize
+                 * patterns which could start with several different things. Pre-TRIE
+                 * this was more important than it is now, however this still helps
+                 * in some places, for instance /x?a+/ might produce a SSC equivalent
+                 * to [xa]. This is used by Perl_re_intuit_start() and S_find_byclass()
+                 * in regexec.c
+                 */
 		/* This is cheating. */
 		Newx(d->data[i], 1, regnode_ssc);
 		StructCopy(ri->data->data[i], d->data[i], regnode_ssc);
 		reti->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'T':
-		/* Trie stclasses are readonly and can thus be shared
+                /* AHO-CORASICK fail table */
+                /* Trie stclasses are readonly and can thus be shared
 		 * without duplication. We free the stclass in pregfree
 		 * when the corresponding reg_ac_data struct is freed.
 		 */
 		reti->regstclass= ri->regstclass;
 		/* FALLTHROUGH */
 	    case 't':
+                /* TRIE transition table */
 		OP_REFCNT_LOCK;
 		((reg_trie_data*)ri->data->data[i])->refcount++;
 		OP_REFCNT_UNLOCK;
 		/* FALLTHROUGH */
-	    case 'l':
-	    case 'L':
+            case 'l': /* (?{...}) or (??{ ... }) code (cb->block) */
+            case 'L': /* same when RExC_pm_flags & PMf_HAS_CV and code
+                         is not from another regexp */
 		d->data[i] = ri->data->data[i];
 		break;
             default:
