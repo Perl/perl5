@@ -216,7 +216,7 @@ sub torture_hash {
     my $keys = pop @groups;
     ++$h->{$_} foreach @$keys;
     my (undef, $total) = validate_hash($desc, $h);
-    is($total, $total0, "bucket count is constant when rebuilding");
+    ok($total == $total0 || $total == ($total0*2), "bucket count is expected size when rebuilding");
     is(scalar %$h, pop @groups, "scalar keys is identical when rebuilding");
     ++$h1->{$_} foreach @$keys;
     validate_hash("$desc copy", $h1);
