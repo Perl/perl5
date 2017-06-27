@@ -49,8 +49,13 @@ while (++$count < 10) {
 is $count,10,
     "tried all the patterns without bailing out";
 
-cmp_ok $elapsed_fail/$elapsed_match,"<",2,
-    "time to fail less than twice the time to match";
+SKIP: {
+    skip "unstable timing", 1 unless $elapsed_match && $elapsed_fail;
+    ok $elapsed_fail <= 10 * $elapsed_match,
+        "time to fail less than 10x the time to match"
+        or diag("elapsed_match=$elapsed_match elapsed_fail=$elapsed_fail");
+}
+
 is "@got_files", catfile($path, $files[0]),
     "only got the expected file for xa*..b";
 is "@no_files", "", "shouldnt have files for xa*..c";
