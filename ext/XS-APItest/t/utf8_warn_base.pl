@@ -28,6 +28,8 @@ local $SIG{__WARN__} = sub { my @copy = @_;
                              push @warnings_gotten, map { chomp; $_ } @copy;
                            };
 
+my $native_lowest_continuation_chr = I8_to_native(chr $::lowest_continuation);
+
 sub requires_extended_utf8($) {
 
     # Returns a boolean as to whether or not the code point parameter fits
@@ -897,25 +899,51 @@ foreach my $test (@tests) {
             my $allow_flags = 0;
 
             if ($overlong) {
+                my $new_expected_len;
 
                 # To force this malformation, we convert the original start
                 # byte into a continuation byte with the same data bits as
                 # originally. ...
-                substr($this_bytes, 0, 1)
-                              = start_byte_to_cont(substr($this_bytes, 0, 1));
+                my $start_byte = substr($this_bytes, 0, 1);
+                my $converted_to_continuation_byte
+                                            = start_byte_to_cont($start_byte);
 
                 # ... Then we prepend it with a known overlong sequence.  This
                 # should evaluate to the exact same code point as the
-                # original.
-                $this_bytes =  I8_to_native("\xff")
-                            . (I8_to_native(chr $::lowest_continuation)
-                               x ( $::max_bytes - 1 - length($this_bytes)))
-                            . $this_bytes;
+                # original.  We try to avoid an overlong using Perl extended
+                # UTF-8.  The code points are the highest representable as
+                # overlongs on the respective platform without using extended
+                # UTF-8.
+                if (native_to_I8($start_byte) lt "\xFC") {
+                    $start_byte = I8_to_native("\xFC");
+                    $new_expected_len = 6;
+                }
+                elsif (! isASCII && native_to_I8($start_byte) lt "\xFE") {
+
+                    # FE is not extended UTF-8 on EBCDIC
+                    $start_byte = I8_to_native("\xFE");
+                    $new_expected_len = 7;
+                }
+                else {  # Must use extended UTF-8.  On ASCII platforms, we
+                        # could express some overlongs here starting with
+                        # \xFE, but there's no real reason to do so.
+                    $start_byte = I8_to_native("\xFF");
+                    $new_expected_len = $::max_bytes;
+                }
+
+                # Splice in the revise continuation byte, preceded by the
+                # start byte and the proper number of the lowest continuation
+                # bytes.
+                $this_bytes =   $start_byte
+                             . ($native_lowest_continuation_chr
+                                x ( $new_expected_len - 1 - length($this_bytes)))
+                             .  $converted_to_continuation_byte
+                             .  substr($this_bytes, 1);
                 $this_length = length($this_bytes);
-                $this_needed_to_discern_len = $::max_bytes
-                                            - (   $this_expected_len
+                $this_needed_to_discern_len =    $new_expected_len
+                                            - (  $this_expected_len
                                                - $this_needed_to_discern_len);
-                $this_expected_len = $::max_bytes;
+                $this_expected_len = $new_expected_len;
                 push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
                 push @malformation_names, 'overlong';
 
