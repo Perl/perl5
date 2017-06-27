@@ -2462,8 +2462,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     /* we just use folder as a flag in utf8 */
     const U8 * folder = NULL;
 
+    /* in the below add_data call we are storing either 'tu' or 'tuaa'
+     * which stands for one trie structure, one hash, optionally followed
+     * by two arrays */
 #ifdef DEBUGGING
-    const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("tuuu"));
+    const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("tuaa"));
     AV *trie_words = NULL;
     /* along with revcharmap, this only used during construction but both are
      * useful during debugging so we store them in the struct when debugging.
