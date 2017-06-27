@@ -13067,7 +13067,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (float_need < width)
 		float_need = width;
 
-	    if (PL_efloatsize < float_need) {
+	    if (PL_efloatsize <= float_need) {
+                /* PL_efloatbuf should be at least 1 greater than
+                 * float_need to allow a trailing \0 to be returned by
+                 * snprintf().  If we need to grow, overgrow for the
+                 * benefit of future generations */
+                const STRLEN extra = 0x20;
+                if (float_need >= ((STRLEN)~0) - extra)
+                    croak_memory_wrap();
+                float_need += extra;
 		Safefree(PL_efloatbuf);
 		PL_efloatsize = float_need;
 		Newx(PL_efloatbuf, PL_efloatsize, char);

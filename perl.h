@@ -1569,7 +1569,7 @@ EXTERN_C char *crypt(const char *, const char *);
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
-#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len >= (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
+#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len > (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
 
 #ifdef USE_QUADMATH
 #  define my_snprintf Perl_my_snprintf

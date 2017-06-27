@@ -773,3 +773,4 @@ e>%vd<   >"version"<    >165.133.153.162.137.150.149<   >perl #102586: vector fl
 >%.001f<   >123.432<   >123.4<   >by tradition, leading zeroes ignored in precison<
 >%.0f<   >[1.2, 3.4]<   >1 REDUNDANT<   >special-cased "%.0f" should check count<
 >%.0f<   >[]<   >0 MISSING<   >special-cased "%.0f" should check count<
+>%53.0f<   >69.0<   >                                                   69<   >#131659<
