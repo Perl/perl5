@@ -722,7 +722,7 @@ foreach my $test (@tests) {
                             # original.
                             $this_bytes
                             = I8_to_native("\xff")
-                            . (I8_to_native(chr $::first_continuation)
+                            . (I8_to_native(chr $::lowest_continuation)
                             x ( $::max_bytes - 1 - length($this_bytes)))
                             . $this_bytes;
                             $this_length = length($this_bytes);

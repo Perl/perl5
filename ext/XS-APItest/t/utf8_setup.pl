@@ -51,7 +51,7 @@ sub start_byte_to_cont($) {
 
 $::is64bit = length sprintf("%x", ~0) > 8;
 
-$::first_continuation = (isASCII) ? 0x80 : 0xA0;
+$::lowest_continuation = (isASCII) ? 0x80 : 0xA0;
 
 $::I8c = (isASCII) ? "\x80" : "\xa0";    # A continuation byte
 

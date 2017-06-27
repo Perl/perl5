@@ -449,17 +449,17 @@ while ($cp < ((isASCII) ? 128 : 160)) {   # This is from the definition of
 # continuation bytes can be in, and what the lowest start byte can be.  So we
 # cycle through them.
 
-my $final_continuation = 0xBF;
+my $highest_continuation = 0xBF;
 my $start = (isASCII) ? 0xC2 : 0xC5;
 
-my $continuation = $::first_continuation - 1;
+my $continuation = $::lowest_continuation - 1;
 
 while ($cp < 255) {
-    if (++$continuation > $final_continuation) {
+    if (++$continuation > $highest_continuation) {
 
         # Wrap to the next start byte when we reach the final continuation
         # byte possible
-        $continuation = $::first_continuation;
+        $continuation = $::lowest_continuation;
         $start++;
     }
     $code_points{$cp} = I8_to_native(chr($start) . chr($continuation));
