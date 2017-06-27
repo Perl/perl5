@@ -1304,8 +1304,11 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     /* Here, we have found all the possible problems, except for when the input
      * is for a problematic code point not allowed by the input parameters. */
 
-                                              /* isn't problematic if < this */
-    if (   (   (   LIKELY(! possible_problems) && uv >= UNICODE_SURROGATE_FIRST)
+                                /* uv is valid for overlongs */
+    if (   (   (      LIKELY(! (possible_problems & ~UTF8_GOT_LONG))
+
+                      /* isn't problematic if < this */
+                   && uv >= UNICODE_SURROGATE_FIRST)
             || (   UNLIKELY(possible_problems)
 
                           /* if overflow, we know without looking further
