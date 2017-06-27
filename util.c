@@ -5339,13 +5339,9 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
     PERL_ARGS_ASSERT_MY_CXT_INIT;
     if (*index == -1) {
 	/* this module hasn't been allocated an index yet */
-#if defined(USE_ITHREADS)
 	MUTEX_LOCK(&PL_my_ctx_mutex);
-#endif
 	*index = PL_my_cxt_index++;
-#if defined(USE_ITHREADS)
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
-#endif
     }
     
     /* make sure the array is big enough */
@@ -5402,13 +5398,9 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
     index = Perl_my_cxt_index(aTHX_ my_cxt_key);
     if (index == -1) {
 	/* this module hasn't been allocated an index yet */
-#if defined(USE_ITHREADS)
 	MUTEX_LOCK(&PL_my_ctx_mutex);
-#endif
 	index = PL_my_cxt_index++;
-#if defined(USE_ITHREADS)
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
-#endif
     }
 
     /* make sure the array is big enough */

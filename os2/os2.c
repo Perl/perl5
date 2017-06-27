@@ -4959,10 +4959,8 @@ Perl_OS2_init3(char **env, void **preg, int flags)
 	    if (PL_sh_path[i] == '\\') PL_sh_path[i] = '/';
 	}
     }
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     MUTEX_INIT(&start_thread_mutex);
     MUTEX_INIT(&perlos2_state_mutex);
-#endif
     os2_mytype = my_type();		/* Do it before morphing.  Needed? */
     os2_mytype_ini = os2_mytype;
     Perl_os2_initial_mode = -1;		/* Uninit */

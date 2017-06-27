@@ -26,9 +26,7 @@ STATIC perl_mutex ab_op_map_mutex;
 STATIC const ab_op_info *ab_map_fetch(const OP *o, ab_op_info *oi) {
  const ab_op_info *val;
 
-#ifdef USE_ITHREADS
  MUTEX_LOCK(&ab_op_map_mutex);
-#endif
 
  val = (ab_op_info *)ptable_fetch(ab_op_map, o);
  if (val) {
@@ -36,9 +34,7 @@ STATIC const ab_op_info *ab_map_fetch(const OP *o, ab_op_info *oi) {
   val = oi;
  }
 
-#ifdef USE_ITHREADS
  MUTEX_UNLOCK(&ab_op_map_mutex);
-#endif
 
  return val;
 }
@@ -65,28 +61,20 @@ STATIC void ab_map_store(
 {
 #define ab_map_store(O, PP, B) ab_map_store(aPTBLMS_ (O),(PP),(B))
 
-#ifdef USE_ITHREADS
  MUTEX_LOCK(&ab_op_map_mutex);
-#endif
 
  ab_map_store_locked(o, old_pp, base);
 
-#ifdef USE_ITHREADS
  MUTEX_UNLOCK(&ab_op_map_mutex);
-#endif
 }
 
 STATIC void ab_map_delete(pTHX_ const OP *o) {
 #define ab_map_delete(O) ab_map_delete(aTHX_ (O))
-#ifdef USE_ITHREADS
  MUTEX_LOCK(&ab_op_map_mutex);
-#endif
 
  ptable_map_store(ab_op_map, o, NULL);
 
-#ifdef USE_ITHREADS
  MUTEX_UNLOCK(&ab_op_map_mutex);
-#endif
 }
 
 /* ... $[ Implementation .............................................. */
@@ -412,9 +400,7 @@ BOOT:
 {
     if (!ab_initialized++) {
 	ab_op_map = ptable_new();
-#ifdef USE_ITHREADS
 	MUTEX_INIT(&ab_op_map_mutex);
-#endif
 #define check(uc,lc,ck) \
 		wrap_op_checker(OP_##uc, ab_ck_##ck, &ab_old_ck_##lc)
 	check(SASSIGN,  sassign,  sassign);
