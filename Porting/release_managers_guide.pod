@@ -173,7 +173,7 @@ which has a F<public_html> directory to share files with.
 If you use Dropbox, you can append "raw=1" as a parameter to their usual
 sharing link to allow direct download (albeit with redirects).
 
-=head3 git clone of https://github.com/perlorg/perlweb
+=head3 git clone of L<https://github.com/perlorg/perlweb>
 
 For updating the L<http://dev.perl.org> web pages, either a Github account or
 sweet-talking somebody with a Github account into obedience is needed. This
@@ -373,14 +373,14 @@ fix.
 =head3 monitor CPAN testers for failures
 
 For any release except a BLEAD-POINT: Examine the relevant analysis report(s)
-at http://analysis.cpantesters.org/beforemaintrelease to see how the impending
-release is performing compared to previous releases with regard to building
-and testing CPAN modules.
+at L<http://analysis.cpantesters.org/beforemaintrelease> to see how the
+impending release is performing compared to previous releases with
+regard to building and testing CPAN modules.
 
 That page accepts a query parameter, C<pair> that takes a pair of
 colon-delimited versions to use for comparison.  For example:
 
-http://analysis.cpantesters.org/beforemaintrelease?pair=5.20.2:5.22.0%20RC1
+L<http://analysis.cpantesters.org/beforemaintrelease?pair=5.20.2:5.22.0%20RC1>
 
 =head3 update perldelta
 
@@ -644,7 +644,7 @@ modules on CPAN. It can use a full, local CPAN mirror and/or fall back
 on HTTP::Tiny to fetch package metadata remotely.
 
 (If you'd prefer to have a full CPAN mirror, see
-http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN)
+L<http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN>)
 
 Then change to your perl checkout, and if necessary,
 
@@ -739,7 +739,7 @@ formatting, e.g.
     $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
         /tmp/perldelta.html
 
-Another good HTML preview option is http://search.cpan.org/pod2html
+Another good HTML preview option is L<http://search.cpan.org/pod2html>
 
 If you make changes, be sure to commit them.
 
@@ -1545,7 +1545,7 @@ will make life easier for the next release manager.
 =head1 SOURCE
 
 Based on
-http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html,
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html>,
 plus a whole bunch of other sources, including private correspondence.
 
 =cut
