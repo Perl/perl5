@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.25.12 - Kurt Vonnegut, Slaughterhouse-Five
 
-L<Announced on 2017-04-20 by Sawyer X|>
+Announced on 2017-04-20 by Sawyer X
 
   I have told my sons that they are not under any circumstances to take
   part in massacres, and that the news of massacres of enemies is not
