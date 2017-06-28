@@ -132,12 +132,12 @@ L<Announced on 2016-12-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.
 
 L<Announced on 2016-11-20 by Chad 'Exodist' Granum|http://www.nntp.perl.org/group/perl.perl5.porters/2016/11/msg241120.html>
 
-  Of Beren and Lúthien
+  Of Beren and LÃºthien
 
   Among the tales of sorrow and of ruin that come down to us from the darkness of
   those days there are yet some in which amid weeping there is joy and under the
   shadow of death light that endures. And of these histories most fair still in
-  the ears of the Elves is the tale of Beren and Lúthien. Of their lives was made
+  the ears of the Elves is the tale of Beren and LÃºthien. Of their lives was made
   the Lay of Leithian, Release from Bondage, which is the longest save one of the
   songs concerning the world of old; but here is told in fewer words and without
   song.
