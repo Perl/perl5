@@ -449,6 +449,7 @@ struct scan_data_substrs {
     SSize_t max_offset; /* latest point in string it can appear */
     SSize_t *minlenp;   /* pointer to the minlen relevant to the string */
     SSize_t lookbehind; /* is the pos of the string modified by LB */
+    I32 flags;          /* per substring SF_* and SCF_* flags */
 };
 
 typedef struct scan_data_t {
@@ -465,7 +466,7 @@ typedef struct scan_data_t {
     /* [0] is longest fixed substring so far, [1] is longest float so far */
     struct scan_data_substrs  substrs[2];
 
-    I32 flags;
+    I32 flags;             /* common SF_* and SCF_* flags */
     I32 whilem_c;
     SSize_t *last_closep;
     regnode_ssc *start_class;
@@ -478,26 +479,18 @@ typedef struct scan_data_t {
 static const scan_data_t zero_scan_data = {
     0, 0, NULL, 0, 0, 0, 0,
     {
-        { NULL, 0, 0, 0, 0 },
-        { NULL, 0, 0, 0, 0 },
+        { NULL, 0, 0, 0, 0, 0 },
+        { NULL, 0, 0, 0, 0, 0 },
     },
     0, 0, NULL, NULL
 };
 
-#define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
+/* study flags */
+
 #define SF_BEFORE_SEOL		0x0001
 #define SF_BEFORE_MEOL		0x0002
-#define SF_FIX_BEFORE_EOL	(SF_FIX_BEFORE_SEOL|SF_FIX_BEFORE_MEOL)
-#define SF_FL_BEFORE_EOL	(SF_FL_BEFORE_SEOL|SF_FL_BEFORE_MEOL)
+#define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
 
-#define SF_FIX_SHIFT_EOL	(+2)
-#define SF_FL_SHIFT_EOL		(+4)
-
-#define SF_FIX_BEFORE_SEOL	(SF_BEFORE_SEOL << SF_FIX_SHIFT_EOL)
-#define SF_FIX_BEFORE_MEOL	(SF_BEFORE_MEOL << SF_FIX_SHIFT_EOL)
-
-#define SF_FL_BEFORE_SEOL	(SF_BEFORE_SEOL << SF_FL_SHIFT_EOL)
-#define SF_FL_BEFORE_MEOL	(SF_BEFORE_MEOL << SF_FL_SHIFT_EOL) /* 0x20 */
 #define SF_IS_INF		0x0040
 #define SF_HAS_PAR		0x0080
 #define SF_IN_PAR		0x0100
@@ -989,8 +982,8 @@ S_debug_show_study_flags(pTHX_ U32 flags, const char *open_str,
         return;
 
     Perl_re_printf( aTHX_  "%s", open_str);
-    DEBUG_SHOW_STUDY_FLAG(flags, SF_FL_BEFORE_SEOL);
-    DEBUG_SHOW_STUDY_FLAG(flags, SF_FL_BEFORE_MEOL);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_BEFORE_SEOL);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_BEFORE_MEOL);
     DEBUG_SHOW_STUDY_FLAG(flags, SF_IS_INF);
     DEBUG_SHOW_STUDY_FLAG(flags, SF_HAS_PAR);
     DEBUG_SHOW_STUDY_FLAG(flags, SF_IN_PAR);
@@ -1034,23 +1027,32 @@ S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
             is_inf ? "INF " : ""
         );
 
-        if (data->last_found)
-            Perl_re_printf( aTHX_
-                "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf
-                " %sFixed:'%s' @ %" IVdf
-                " %sFloat: '%s' @ %" IVdf "/%" IVdf,
-                SvPVX_const(data->last_found),
-                (IV)data->last_end,
-                (IV)data->last_start_min,
-                (IV)data->last_start_max,
+        if (data->last_found) {
+            Perl_re_printf(aTHX_
+                "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf,
+                    SvPVX_const(data->last_found),
+                    (IV)data->last_end,
+                    (IV)data->last_start_min,
+                    (IV)data->last_start_max
+            );
+
+            Perl_re_printf(aTHX_
+                " %sFixed:'%s' @ %" IVdf,
                 data->longest == 0 ? "*" : "",
                 SvPVX_const(data->substrs[0].str),
-                (IV)data->substrs[0].min_offset,
+                (IV)data->substrs[0].min_offset
+            );
+            S_debug_show_study_flags(aTHX_ data->substrs[0].flags," [","]");
+
+            Perl_re_printf(aTHX_
+                " %sFloat: '%s' @ %" IVdf "/%" IVdf,
                 data->longest == 1 ? "*" : "",
                 SvPVX_const(data->substrs[1].str),
                 (IV)data->substrs[1].min_offset,
                 (IV)data->substrs[1].max_offset
             );
+            S_debug_show_study_flags(aTHX_ data->substrs[1].flags," [","]");
+        }
 
         Perl_re_printf( aTHX_ "\n");
     });
@@ -1281,10 +1283,9 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	if (data->longest == 0) { /* fixed */
 	    data->substrs[0].min_offset = l ? data->last_start_min : data->pos_min;
 	    if (data->flags & SF_BEFORE_EOL)
-		data->flags
-		    |= ((data->flags & SF_BEFORE_EOL) << SF_FIX_SHIFT_EOL);
+		data->substrs[0].flags |= (data->flags & SF_BEFORE_EOL);
 	    else
-		data->flags &= ~SF_FIX_BEFORE_EOL;
+		data->substrs[0].flags &= ~SF_BEFORE_EOL;
 	    data->substrs[0].minlenp = minlenp;
 	    data->substrs[0].lookbehind = 0;
 	}
@@ -1298,11 +1299,11 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	    if (is_inf
 		 || (STRLEN)data->substrs[1].max_offset > (STRLEN)SSize_t_MAX)
 		data->substrs[1].max_offset = SSize_t_MAX;
+
 	    if (data->flags & SF_BEFORE_EOL)
-		data->flags
-		    |= ((data->flags & SF_BEFORE_EOL) << SF_FL_SHIFT_EOL);
+		data->substrs[1].flags |= (data->flags & SF_BEFORE_EOL);
 	    else
-		data->flags &= ~SF_FL_BEFORE_EOL;
+		data->substrs[1].flags &= ~SF_BEFORE_EOL;
             data->substrs[1].minlenp = minlenp;
             data->substrs[1].lookbehind = 0;
 	}
@@ -5718,6 +5719,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 else
                     data_fake.last_closep = &fake;
                 data_fake.flags = 0;
+                data_fake.substrs[0].flags = 0;
+                data_fake.substrs[1].flags = 0;
 		data_fake.pos_delta = delta;
                 if (is_inf)
 	            data_fake.flags |= SF_IS_INF;
@@ -6748,7 +6751,7 @@ STATIC bool
 S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
                       SV** rx_utf8, SV** rx_substr, SSize_t* rx_end_shift,
                       struct scan_data_substrs *sub,
-                      STRLEN longest_length, bool eol, bool meol)
+                      STRLEN longest_length)
 {
     /* This is the common code for setting up the floating and fixed length
      * string data extracted from Perl_re_op_compile() below.  Returns a boolean
@@ -6756,6 +6759,8 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
 
     I32 t;
     SSize_t ml;
+    bool eol  = cBOOL(sub->flags & SF_BEFORE_EOL);
+    bool meol = cBOOL(sub->flags & SF_BEFORE_MEOL);
 
     if (! (longest_length
            || (eol /* Can't have SEOL and MULTI */
@@ -7599,9 +7604,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                     &(r->float_substr),
                                     &(r->float_end_shift),
                                     &(data.substrs[1]),
-                                    longest_float_length,
-                                    cBOOL(data.flags & SF_FL_BEFORE_EOL),
-                                    cBOOL(data.flags & SF_FL_BEFORE_MEOL)))
+                                    longest_float_length))
         {
 	    r->float_min_offset = data.substrs[1].min_offset - data.substrs[1].lookbehind;
 	    r->float_max_offset = data.substrs[1].max_offset;
@@ -7621,9 +7624,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                 &(r->anchored_substr),
                                 &(r->anchored_end_shift),
                                 &(data.substrs[0]),
-                                longest_fixed_length,
-                                cBOOL(data.flags & SF_FIX_BEFORE_EOL),
-                                cBOOL(data.flags & SF_FIX_BEFORE_MEOL)))
+                                longest_fixed_length))
         {
 	    r->anchored_offset = data.substrs[0].min_offset - data.substrs[0].lookbehind;
 	    SvREFCNT_inc_simple_void_NN(data.substrs[0].str);
