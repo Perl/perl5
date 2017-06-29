@@ -460,9 +460,9 @@ typedef struct scan_data_t {
     SSize_t last_end;	    /* min value, <0 unless valid. */
     SSize_t last_start_min;
     SSize_t last_start_max;
-    SV **longest;	    /* Either &l_fixed, or &l_float. */
+    U8 longest;	            /* 0 = fixed is longest, 1 = float is longest */
 
-    /* [0] is longest fixed substring, [1] is longest float */
+    /* [0] is longest fixed substring so far, [1] is longest float so far */
     struct scan_data_substrs  substrs[2];
 
     I32 flags;
@@ -476,7 +476,7 @@ typedef struct scan_data_t {
  */
 
 static const scan_data_t zero_scan_data = {
-    0, 0, NULL, 0, 0, 0, NULL,
+    0, 0, NULL, 0, 0, 0, 0,
     {
         { NULL, 0, 0, 0, 0 },
         { NULL, 0, 0, 0, 0 },
@@ -1026,12 +1026,10 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
             (IV)((data)->last_end),                                  \
             (IV)((data)->last_start_min),                            \
             (IV)((data)->last_start_max),                            \
-            ((data)->longest &&                                      \
-             (data)->longest==&((data)->substrs[0].str)) ? "*" : "", \
+            (data)->longest == 0 ? "*" : "",                         \
             SvPVX_const((data)->substrs[0].str),                     \
             (IV)((data)->substrs[0].min_offset),                     \
-            ((data)->longest &&                                      \
-             (data)->longest==&((data)->substrs[1].str)) ? "*" : "", \
+            (data)->longest == 1 ? "*" : "",                         \
             SvPVX_const((data)->substrs[1].str),                     \
             (IV)((data)->substrs[1].min_offset),                     \
             (IV)((data)->substrs[1].max_offset)                      \
@@ -1217,14 +1215,15 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
                     SSize_t *minlenp, int is_inf)
 {
     const STRLEN l = CHR_SVLEN(data->last_found);
-    const STRLEN old_l = CHR_SVLEN(*data->longest);
+    SV * const longest_sv = data->substrs[data->longest].str;
+    const STRLEN old_l = CHR_SVLEN(longest_sv);
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_SCAN_COMMIT;
 
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
-	SvSetMagicSV(*data->longest, data->last_found);
-	if (*data->longest == data->substrs[0].str) {
+	SvSetMagicSV(longest_sv, data->last_found);
+	if (data->longest == 0) { /* fixed */
 	    data->substrs[0].min_offset = l ? data->last_start_min : data->pos_min;
 	    if (data->flags & SF_BEFORE_EOL)
 		data->flags
@@ -1234,7 +1233,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	    data->substrs[0].minlenp = minlenp;
 	    data->substrs[0].lookbehind = 0;
 	}
-	else { /* *data->longest == data->substrs[1].str (float) */
+	else { /* float */
 	    data->substrs[1].min_offset = l ? data->last_start_min : data->pos_min;
 	    data->substrs[1].max_offset = (l
                           ? data->last_start_max
@@ -4352,7 +4351,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else
 		        data->pos_delta += max1 - min1;
 		    if (max1 != min1 || is_inf)
-			data->longest = &(data->substrs[1].str);
+			data->longest = 1 /*float*/;
 		}
 		min += min1;
 		if (delta == SSize_t_MAX
@@ -4799,7 +4798,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                      * */
                     if (flags & SCF_DO_SUBSTR) {
                         scan_commit(pRExC_state, data, minlenp, is_inf);
-                        data->longest = &(data->substrs[1].str);
+                        data->longest = 1; /* float */
                     }
                     is_inf = is_inf_internal = 1;
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
@@ -4927,7 +4926,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 }
                 data->pos_delta += min_subtract;
 		if (min_subtract) {
-		    data->longest = &(data->substrs[1].str);
+		    data->longest = 1; /* float */
 		}
 	    }
 
@@ -4994,7 +4993,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (flags & SCF_DO_SUBSTR) {
                     scan_commit(pRExC_state, data, minlenp, is_inf);
                     /* Cannot extend fixed substrings */
-		    data->longest = &(data->substrs[1].str);
+		    data->longest = 1; /* float */
 		}
                 is_inf = is_inf_internal = 1;
                 scan = regnext(scan);
@@ -5332,7 +5331,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 				? SSize_t_MAX
 				: data->pos_min + data->pos_delta - last_chrs;
 			}
-			data->longest = &(data->substrs[1].str);
+			data->longest = 1; /* float */
 		    }
 		    SvREFCNT_dec(last_str);
 		}
@@ -5356,7 +5355,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 		if (flags & SCF_DO_SUBSTR) {
                     /* Cannot expect anything... */
                     scan_commit(pRExC_state, data, minlenp, is_inf);
-		    data->longest = &(data->substrs[1].str);
+		    data->longest = 1; /* float */
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) {
@@ -5403,7 +5402,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 scan_commit(pRExC_state, data, minlenp, is_inf);
     	        data->pos_min += 1;
 	        data->pos_delta += 1;
-		data->longest = &(data->substrs[1].str);
+		data->longest = 1; /* float */
     	    }
 	}
 	else if (REGNODE_SIMPLE(OP(scan))) {
@@ -5775,7 +5774,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 	{
 		if (flags & SCF_DO_SUBSTR) {
                     scan_commit(pRExC_state, data, minlenp, is_inf);
-		    data->longest = &(data->substrs[1].str);
+		    data->longest = 1; /* float */
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
@@ -5886,7 +5885,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 data->pos_min += min1;
                 data->pos_delta += max1 - min1;
                 if (max1 != min1 || is_inf)
-                    data->longest = &(data->substrs[1].str);
+                    data->longest = 1; /* float */
             }
             min += min1;
             if (delta != SSize_t_MAX)
@@ -5930,7 +5929,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     	        data->pos_min += trie->minlen;
     	        data->pos_delta += (trie->maxlen - trie->minlen);
 		if (trie->maxlen != trie->minlen)
-		    data->longest = &(data->substrs[1].str);
+		    data->longest = 1; /* float */
     	    }
     	    if (trie->jump) /* no more substrings -- for now /grr*/
                flags &= ~SCF_DO_SUBSTR;
@@ -7510,7 +7509,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	data.substrs[0].str = newSVpvs("");
 	data.substrs[1].str = newSVpvs("");
 	data.last_found = newSVpvs("");
-	data.longest = &(data.substrs[0].str);
+	data.longest = 0; /* fixed */
 	ENTER_with_name("study_chunk");
 	SAVEFREESV(data.substrs[0].str);
 	SAVEFREESV(data.substrs[1].str);
@@ -7536,7 +7535,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
 
 
-	if ( RExC_npar == 1 && data.longest == &(data.substrs[0].str)
+	if ( RExC_npar == 1 && data.longest == 0 /*fixed */
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
              && !(RExC_seen & REG_VERBARG_SEEN)
