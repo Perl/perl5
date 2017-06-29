@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use version;
-$VERSION = '5.20170622';
+$VERSION = '5.20170720';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -14273,9 +14273,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.027002',
             'Config'                => '5.027002',
-            'Module::CoreList'      => '5.20170622',
-            'Module::CoreList::TieHashDelta'=> '5.20170622',
-            'Module::CoreList::Utils'=> '5.20170622',
+            'Module::CoreList'      => '5.20170720',
+            'Module::CoreList::TieHashDelta'=> '5.20170720',
+            'Module::CoreList::Utils'=> '5.20170720',
             'Unicode'               => '10.0.0',
         },
         removed => {
