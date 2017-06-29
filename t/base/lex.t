@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..116\n";
+print "1..117\n";
 
 $x = 'x';
 
@@ -158,8 +158,11 @@ my $test = 31;
   ${^TEST}= "splat";
   @{^TEST}= ("foo", "bar");
   %{^TEST}= ("foo" => "FOO", "bar" => "BAR" );
-
+  
   print "not " if "${^TEST}" ne "splat";
+  print "ok $test\n"; $test++;
+  
+  print "not " if "${ ^TEST }" ne "splat";
   print "ok $test\n"; $test++;
 
   print "not " if "${^TEST}[0]" ne "splat[0]";
