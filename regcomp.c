@@ -3838,7 +3838,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(val);
 #endif
-    DEBUG_PEEP("join", scan, depth, flags);
+    DEBUG_PEEP("join", scan, depth, 0);
 
     /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
      * EXACT ones that are mergeable to the current one. */
@@ -3852,7 +3852,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         if (OP(n) == TAIL || n > next)
             stringok = 0;
         if (PL_regkind[OP(n)] == NOTHING) {
-            DEBUG_PEEP("skip:", n, depth, flags);
+            DEBUG_PEEP("skip:", n, depth, 0);
             NEXT_OFF(scan) += NEXT_OFF(n);
             next = n + NODE_STEP_REGNODE;
 #ifdef DEBUGGING
@@ -3872,7 +3872,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
 
-            DEBUG_PEEP("merg", n, depth, flags);
+            DEBUG_PEEP("merg", n, depth, 0);
             merged++;
 
             NEXT_OFF(scan) += NEXT_OFF(n);
@@ -3889,7 +3889,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 
 #ifdef EXPERIMENTAL_INPLACESCAN
 	if (flags && !NEXT_OFF(n)) {
-	    DEBUG_PEEP("atch", val, depth, flags);
+	    DEBUG_PEEP("atch", val, depth, 0);
 	    if (reg_off_by_arg[OP(n)]) {
 		ARG_SET(n, val - n);
 	    }
@@ -4120,7 +4120,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         n++;
     }
 #endif
-    DEBUG_OPTIMISE_r(if (merged){DEBUG_PEEP("finl", scan, depth, flags);});
+    DEBUG_OPTIMISE_r(if (merged){DEBUG_PEEP("finl", scan, depth, 0);});
     return stopnow;
 }
 
@@ -7469,7 +7469,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	/* Starting-point info. */
       again:
-        DEBUG_PEEP("first:", first, 0, flags);
+        DEBUG_PEEP("first:", first, 0, 0);
         /* Ignore EXACT as we deal with it later. */
 	if (PL_regkind[OP(first)] == EXACT) {
 	    if (OP(first) == EXACT || OP(first) == EXACTL)
