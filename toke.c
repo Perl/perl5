@@ -9352,19 +9352,36 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         bool skip;
         char *s2;
         /* If we were processing {...} notation then...  */
-        if (isIDFIRST_lazy_if_safe(d, e, is_utf8)) {
-            /* if it starts as a valid identifier, assume that it is one.
-               (the later check for } being at the expected point will trap
-               cases where this doesn't pan out.)  */
-            d += is_utf8 ? UTF8SKIP(d) : 1;
-            parse_ident(&s, &d, e, 1, is_utf8, TRUE);
-	    *d = '\0';
+        if (isIDFIRST_lazy_if_safe(d, e, is_utf8)
+            || (!isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
+                 && isWORDCHAR(*s))
+        ) {
+            /* note we have to check for a normal identifier first,
+             * as it handles utf8 symbols, and only after that has
+             * been ruled out can we look at the caret words */
+            if (isIDFIRST_lazy_if_safe(d, e, is_utf8) ) {
+                /* if it starts as a valid identifier, assume that it is one.
+                   (the later check for } being at the expected point will trap
+                   cases where this doesn't pan out.)  */
+                d += is_utf8 ? UTF8SKIP(d) : 1;
+                parse_ident(&s, &d, e, 1, is_utf8, TRUE);
+                *d = '\0';
+            }
+            else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
+                d++;
+                while (isWORDCHAR(*s) && d < e) {
+                    *d++ = *s++;
+                }
+                if (d >= e)
+                    Perl_croak(aTHX_ "%s", ident_too_long);
+                *d = '\0';
+            }
             tmp_copline = CopLINE(PL_curcop);
             if (s < PL_bufend && isSPACE(*s)) {
                 s = skipspace(s);
             }
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
-                /* ${foo[0]} and ${foo{bar}} notation.  */
+                /* ${foo[0]} and ${foo{bar}} and ${^CAPTURE[0]} notation.  */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
 		    const char * const brack =
 			(const char *)
@@ -9382,19 +9399,6 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 		PL_lex_allbrackets++;
 		return s;
 	    }
-	}
-	/* Handle extended ${^Foo} variables
-	 * 1999-02-27 mjd-perl-patch@plover.com */
-	else if (! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
-		 && isWORDCHAR(*s))
-	{
-	    d++;
-	    while (isWORDCHAR(*s) && d < e) {
-		*d++ = *s++;
-	    }
-	    if (d >= e)
-		Perl_croak(aTHX_ "%s", ident_too_long);
-	    *d = '\0';
 	}
 
         if ( !tmp_copline )
