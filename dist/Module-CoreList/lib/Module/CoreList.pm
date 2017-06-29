@@ -14090,9 +14090,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.026000',
             'Config'                => '5.026',
-            'Module::CoreList'      => '5.20170520',
-            'Module::CoreList::TieHashDelta'=> '5.20170520',
-            'Module::CoreList::Utils'=> '5.20170520',
+            'Module::CoreList'      => '5.20170530',
+            'Module::CoreList::TieHashDelta'=> '5.20170530',
+            'Module::CoreList::Utils'=> '5.20170530',
         },
         removed => {
         }
