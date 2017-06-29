@@ -979,63 +979,118 @@ Perl_re_indentf(pTHX_ const char *fmt, U32 depth, ...)
 #define DEBUG_SHOW_STUDY_FLAG(flags,flag) \
   if ((flags) & flag) Perl_re_printf( aTHX_  "%s ", #flag)
 
-#define DEBUG_SHOW_STUDY_FLAGS(flags,open_str,close_str)                    \
-    if ( ( flags ) ) {                                                      \
-        Perl_re_printf( aTHX_  "%s", open_str);                                         \
-        DEBUG_SHOW_STUDY_FLAG(flags,SF_FL_BEFORE_SEOL);                     \
-        DEBUG_SHOW_STUDY_FLAG(flags,SF_FL_BEFORE_MEOL);                     \
-        DEBUG_SHOW_STUDY_FLAG(flags,SF_IS_INF);                             \
-        DEBUG_SHOW_STUDY_FLAG(flags,SF_HAS_PAR);                            \
-        DEBUG_SHOW_STUDY_FLAG(flags,SF_IN_PAR);                             \
-        DEBUG_SHOW_STUDY_FLAG(flags,SF_HAS_EVAL);                           \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_SUBSTR);                         \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_STCLASS_AND);                    \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_STCLASS_OR);                     \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_STCLASS);                        \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_WHILEM_VISITED_POS);                \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_TRIE_RESTUDY);                      \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_SEEN_ACCEPT);                       \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_TRIE_DOING_RESTUDY);                \
-        DEBUG_SHOW_STUDY_FLAG(flags,SCF_IN_DEFINE);                         \
-        Perl_re_printf( aTHX_  "%s", close_str);                                        \
-    }
+
+#ifdef DEBUGGING
+static void
+S_debug_show_study_flags(pTHX_ U32 flags, const char *open_str,
+                                    const char *close_str)
+{
+    if (!flags)
+        return;
+
+    Perl_re_printf( aTHX_  "%s", open_str);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_FL_BEFORE_SEOL);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_FL_BEFORE_MEOL);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_IS_INF);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_HAS_PAR);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_IN_PAR);
+    DEBUG_SHOW_STUDY_FLAG(flags, SF_HAS_EVAL);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_DO_SUBSTR);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_DO_STCLASS_AND);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_DO_STCLASS_OR);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_DO_STCLASS);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_WHILEM_VISITED_POS);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_TRIE_RESTUDY);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_SEEN_ACCEPT);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_TRIE_DOING_RESTUDY);
+    DEBUG_SHOW_STUDY_FLAG(flags, SCF_IN_DEFINE);
+    Perl_re_printf( aTHX_  "%s", close_str);
+}
 
 
-#define DEBUG_STUDYDATA(where,data,depth)                            \
-DEBUG_OPTIMISE_MORE_r(if(data){                                      \
-    Perl_re_indentf( aTHX_  "" where "Pos:%" IVdf "/%" IVdf          \
-        " Flags: 0x%" UVXf,                                          \
-        depth,                                                       \
-        (IV)((data)->pos_min),                                       \
-        (IV)((data)->pos_delta),                                     \
-        (UV)((data)->flags)                                          \
-    );                                                               \
-    DEBUG_SHOW_STUDY_FLAGS((data)->flags," [ ","]");                 \
-    Perl_re_printf( aTHX_                                            \
-        " Whilem_c: %" IVdf " Lcp: %" IVdf " %s",                    \
-        (IV)((data)->whilem_c),                                      \
-        (IV)((data)->last_closep ? *((data)->last_closep) : -1),     \
-        is_inf ? "INF " : ""                                         \
-    );                                                               \
-    if ((data)->last_found)                                          \
-        Perl_re_printf( aTHX_                                        \
-            "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf                   \
-            " %sFixed:'%s' @ %" IVdf                                 \
-            " %sFloat: '%s' @ %" IVdf "/%" IVdf,                     \
-            SvPVX_const((data)->last_found),                         \
-            (IV)((data)->last_end),                                  \
-            (IV)((data)->last_start_min),                            \
-            (IV)((data)->last_start_max),                            \
-            (data)->longest == 0 ? "*" : "",                         \
-            SvPVX_const((data)->substrs[0].str),                     \
-            (IV)((data)->substrs[0].min_offset),                     \
-            (data)->longest == 1 ? "*" : "",                         \
-            SvPVX_const((data)->substrs[1].str),                     \
-            (IV)((data)->substrs[1].min_offset),                     \
-            (IV)((data)->substrs[1].max_offset)                      \
-        );                                                           \
-    Perl_re_printf( aTHX_ "\n");                                                 \
-});
+static void
+S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
+                    U32 depth, int is_inf)
+{
+    GET_RE_DEBUG_FLAGS_DECL;
+
+    DEBUG_OPTIMISE_MORE_r({
+        if (!data)
+            return;
+        Perl_re_indentf(aTHX_  "%s: Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
+            depth,
+            where,
+            (IV)data->pos_min,
+            (IV)data->pos_delta,
+            (UV)data->flags
+        );
+
+        S_debug_show_study_flags(aTHX_ data->flags," [","]");
+
+        Perl_re_printf( aTHX_
+            " Whilem_c: %" IVdf " Lcp: %" IVdf " %s",
+            (IV)data->whilem_c,
+            (IV)(data->last_closep ? *((data)->last_closep) : -1),
+            is_inf ? "INF " : ""
+        );
+
+        if (data->last_found)
+            Perl_re_printf( aTHX_
+                "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf
+                " %sFixed:'%s' @ %" IVdf
+                " %sFloat: '%s' @ %" IVdf "/%" IVdf,
+                SvPVX_const(data->last_found),
+                (IV)data->last_end,
+                (IV)data->last_start_min,
+                (IV)data->last_start_max,
+                data->longest == 0 ? "*" : "",
+                SvPVX_const(data->substrs[0].str),
+                (IV)data->substrs[0].min_offset,
+                data->longest == 1 ? "*" : "",
+                SvPVX_const(data->substrs[1].str),
+                (IV)data->substrs[1].min_offset,
+                (IV)data->substrs[1].max_offset
+            );
+
+        Perl_re_printf( aTHX_ "\n");
+    });
+}
+
+
+static void
+S_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state,
+                regnode *scan, U32 depth, U32 flags)
+{
+    GET_RE_DEBUG_FLAGS_DECL;
+
+    DEBUG_OPTIMISE_r({
+        regnode *Next;
+
+        if (!scan)
+            return;
+        Next = regnext(scan);
+        regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state);
+        Perl_re_indentf( aTHX_   "%s>%3d: %s (%d)",
+            depth,
+            str,
+            REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),
+            Next ? (REG_NODE_NUM(Next)) : 0 );
+        S_debug_show_study_flags(aTHX_ flags," [ ","]");
+        Perl_re_printf( aTHX_  "\n");
+   });
+}
+
+
+#  define DEBUG_STUDYDATA(where, data, depth, is_inf) \
+                    S_debug_studydata(aTHX_ where, data, depth, is_inf)
+
+#  define DEBUG_PEEP(str, scan, depth, flags)   \
+                    S_debug_peep(aTHX_ str, pRExC_state, scan, depth, flags)
+
+#else
+#  define DEBUG_STUDYDATA(where, data, depth, is_inf) NOOP
+#  define DEBUG_PEEP(str, scan, depth, flags)         NOOP
+#endif
 
 
 /* =========================================================
@@ -1263,7 +1318,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
     }
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
-    DEBUG_STUDYDATA("commit: ",data,0);
+    DEBUG_STUDYDATA("commit", data, 0, is_inf);
 }
 
 /* An SSC is just a regnode_charclass_posix with an extra field: the inversion
@@ -3629,17 +3684,6 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
 }
 
 
-#define DEBUG_PEEP(str,scan,depth)         \
-    DEBUG_OPTIMISE_r({if (scan){           \
-       regnode *Next = regnext(scan);      \
-       regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state);\
-       Perl_re_indentf( aTHX_  "" str ">%3d: %s (%d)", \
-           depth, REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),\
-           Next ? (REG_NODE_NUM(Next)) : 0 );\
-       DEBUG_SHOW_STUDY_FLAGS(flags," [ ","]");\
-       Perl_re_printf( aTHX_  "\n");                   \
-   }});
-
 /* The below joins as many adjacent EXACTish nodes as possible into a single
  * one.  The regop may be changed if the node(s) contain certain sequences that
  * require special handling.  The joining is only done if:
@@ -3794,7 +3838,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(val);
 #endif
-    DEBUG_PEEP("join",scan,depth);
+    DEBUG_PEEP("join", scan, depth, flags);
 
     /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
      * EXACT ones that are mergeable to the current one. */
@@ -3808,7 +3852,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         if (OP(n) == TAIL || n > next)
             stringok = 0;
         if (PL_regkind[OP(n)] == NOTHING) {
-            DEBUG_PEEP("skip:",n,depth);
+            DEBUG_PEEP("skip:", n, depth, flags);
             NEXT_OFF(scan) += NEXT_OFF(n);
             next = n + NODE_STEP_REGNODE;
 #ifdef DEBUGGING
@@ -3828,7 +3872,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
 
-            DEBUG_PEEP("merg",n,depth);
+            DEBUG_PEEP("merg", n, depth, flags);
             merged++;
 
             NEXT_OFF(scan) += NEXT_OFF(n);
@@ -3845,7 +3889,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 
 #ifdef EXPERIMENTAL_INPLACESCAN
 	if (flags && !NEXT_OFF(n)) {
-	    DEBUG_PEEP("atch", val, depth);
+	    DEBUG_PEEP("atch", val, depth, flags);
 	    if (reg_off_by_arg[OP(n)]) {
 		ARG_SET(n, val - n);
 	    }
@@ -4076,7 +4120,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         n++;
     }
 #endif
-    DEBUG_OPTIMISE_r(if (merged){DEBUG_PEEP("finl",scan,depth)});
+    DEBUG_OPTIMISE_r(if (merged){DEBUG_PEEP("finl", scan, depth, flags);});
     return stopnow;
 }
 
@@ -4190,8 +4234,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                    the folded version may be shorter) */
 	bool unfolded_multi_char = FALSE;
 	/* Peephole optimizer: */
-        DEBUG_STUDYDATA("Peep:", data, depth);
-        DEBUG_PEEP("Peep", scan, depth);
+        DEBUG_STUDYDATA("Peep", data, depth, is_inf);
+        DEBUG_PEEP("Peep", scan, depth, flags);
 
 
         /* The reason we do this here is that we need to deal with things like
@@ -4235,14 +4279,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             StructCopy(&zero_scan_data, &data_fake, scan_data_t);
             scan = regnext(scan);
             assert( OP(scan) == IFTHEN );
-            DEBUG_PEEP("expect IFTHEN", scan, depth);
+            DEBUG_PEEP("expect IFTHEN", scan, depth, flags);
 
             data_fake.last_closep= &fake_last_close;
             minlen = *minlenp;
             next = regnext(scan);
             scan = NEXTOPER(NEXTOPER(scan));
-            DEBUG_PEEP("scan", scan, depth);
-            DEBUG_PEEP("next", next, depth);
+            DEBUG_PEEP("scan", scan, depth, flags);
+            DEBUG_PEEP("next", next, depth, flags);
 
             /* we suppose the run is continuous, last=next...
              * NOTE we dont use the return here! */
@@ -4286,7 +4330,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    I32 f = 0;
 		    regnode_ssc this_class;
 
-                    DEBUG_PEEP("Branch", scan, depth);
+                    DEBUG_PEEP("Branch", scan, depth, flags);
 
 		    num++;
                     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
@@ -4789,11 +4833,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                              RExC_study_chunk_recursed_bytes, U8);
                     }
                     /* we havent recursed into this paren yet, so recurse into it */
-                    DEBUG_STUDYDATA("gosub-set:", data,depth);
+                    DEBUG_STUDYDATA("gosub-set", data, depth, is_inf);
                     PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
                     my_recursed_depth= recursed_depth + 1;
                 } else {
-                    DEBUG_STUDYDATA("gosub-inf:", data,depth);
+                    DEBUG_STUDYDATA("gosub-inf", data, depth, is_inf);
                     /* some form of infinite recursion, assume infinite length
                      * */
                     if (flags & SCF_DO_SUBSTR) {
@@ -4836,8 +4880,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 newframe->prev_recursed_depth = recursed_depth;
                 newframe->this_prev_frame= frame;
 
-                DEBUG_STUDYDATA("frame-new:",data,depth);
-                DEBUG_PEEP("fnew", scan, depth);
+                DEBUG_STUDYDATA("frame-new", data, depth, is_inf);
+                DEBUG_PEEP("fnew", scan, depth, flags);
 
 	        frame = newframe;
 	        scan =  start;
@@ -5946,8 +5990,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
         /* we need to unwind recursion. */
         depth = depth - 1;
 
-        DEBUG_STUDYDATA("frame-end:",data,depth);
-        DEBUG_PEEP("fend", scan, depth);
+        DEBUG_STUDYDATA("frame-end", data, depth, is_inf);
+        DEBUG_PEEP("fend", scan, depth, flags);
 
         /* restore previous context */
         last = frame->last_regnode;
@@ -5961,7 +6005,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     }
 
     assert(!frame);
-    DEBUG_STUDYDATA("pre-fin:",data,depth);
+    DEBUG_STUDYDATA("pre-fin", data, depth, is_inf);
 
     *scanp = scan;
     *deltap = is_inf_internal ? SSize_t_MAX : delta;
@@ -5983,7 +6027,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     if (flags & SCF_TRIE_RESTUDY)
         data->flags |= 	SCF_TRIE_RESTUDY;
 
-    DEBUG_STUDYDATA("post-fin:",data,depth);
+    DEBUG_STUDYDATA("post-fin", data, depth, is_inf);
 
     {
         SSize_t final_minlen= min < stopmin ? min : stopmin;
@@ -7425,7 +7469,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	/* Starting-point info. */
       again:
-        DEBUG_PEEP("first:",first,0);
+        DEBUG_PEEP("first:", first, 0, flags);
         /* Ignore EXACT as we deal with it later. */
 	if (PL_regkind[OP(first)] == EXACT) {
 	    if (OP(first) == EXACT || OP(first) == EXACTL)
