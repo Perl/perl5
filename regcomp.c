@@ -443,6 +443,14 @@ struct RExC_state_t {
 
 */
 
+struct scan_data_substrs {
+    SV      *str;       /* longest substring found in pattern */
+    SSize_t min_offset; /* earliest point in string it can appear */
+    SSize_t max_offset; /* latest point in string it can appear */
+    SSize_t *minlenp;   /* pointer to the minlen relevant to the string */
+    SSize_t lookbehind; /* is the pos of the string modified by LB */
+};
+
 typedef struct scan_data_t {
     /*I32 len_min;      unused */
     /*I32 len_delta;    unused */
@@ -455,13 +463,7 @@ typedef struct scan_data_t {
     SV **longest;	    /* Either &l_fixed, or &l_float. */
 
     /* [0] is longest fixed substring, [1] is longest float */
-    struct {
-        SV      *str;       /* longest substring found in pattern */
-        SSize_t min_offset; /* earliest point in string it can appear */
-        SSize_t max_offset; /* latest point in string it can appear */
-        SSize_t *minlenp;   /* pointer to the minlen relevant to the string */
-        SSize_t lookbehind; /* is the pos of the string modified by LB */
-    } substrs[2];
+    struct scan_data_substrs  substrs[2];
 
     I32 flags;
     I32 whilem_c;
@@ -6700,9 +6702,9 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 
 STATIC bool
-S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
+S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
                       SV** rx_utf8, SV** rx_substr, SSize_t* rx_end_shift,
-		      SSize_t lookbehind, SSize_t offset, SSize_t *minlen,
+                      struct scan_data_substrs *sub,
                       STRLEN longest_length, bool eol, bool meol)
 {
     /* This is the common code for setting up the floating and fixed length
@@ -6724,29 +6726,29 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
 
     /* copy the information about the longest from the reg_scan_data
         over to the program. */
-    if (SvUTF8(sv_longest)) {
-        *rx_utf8 = sv_longest;
+    if (SvUTF8(sub->str)) {
+        *rx_utf8 = sub->str;
         *rx_substr = NULL;
     } else {
-        *rx_substr = sv_longest;
+        *rx_substr = sub->str;
         *rx_utf8 = NULL;
     }
     /* end_shift is how many chars that must be matched that
         follow this item. We calculate it ahead of time as once the
         lookbehind offset is added in we lose the ability to correctly
         calculate it.*/
-    ml = minlen ? *(minlen) : (SSize_t)longest_length;
-    *rx_end_shift = ml - offset
+    ml = sub->minlenp ? *(sub->minlenp) : (SSize_t)longest_length;
+    *rx_end_shift = ml - sub->min_offset
         - longest_length
             /* XXX SvTAIL is always false here - did you mean FBMcf_TAIL
              * intead? - DAPM
-            + (SvTAIL(sv_longest) != 0)
+            + (SvTAIL(sub->str) != 0)
             */
-        + lookbehind;
+        + sub->lookbehind;
 
     t = (eol/* Can't have SEOL and MULTI */
          && (! meol || (RExC_flags & RXf_PMf_MULTILINE)));
-    fbm_compile(sv_longest, t ? FBMcf_TAIL : 0);
+    fbm_compile(sub->str, t ? FBMcf_TAIL : 0);
 
     return TRUE;
 }
@@ -7550,13 +7552,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                    && data.substrs[0].min_offset == data.substrs[1].min_offset
                    && SvCUR(data.substrs[0].str) == SvCUR(data.substrs[1].str)))
             && S_setup_longest (aTHX_ pRExC_state,
-                                    data.substrs[1].str,
                                     &(r->float_utf8),
                                     &(r->float_substr),
                                     &(r->float_end_shift),
-                                    data.substrs[1].lookbehind,
-                                    data.substrs[1].min_offset,
-                                    data.substrs[1].minlen,
+                                    &(data.substrs[1]),
                                     longest_float_length,
                                     cBOOL(data.flags & SF_FL_BEFORE_EOL),
                                     cBOOL(data.flags & SF_FL_BEFORE_MEOL)))
@@ -7575,13 +7574,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	longest_fixed_length = CHR_SVLEN(data.substrs[0].str);
 
         if (S_setup_longest (aTHX_ pRExC_state,
-                                data.substrs[0].str,
                                 &(r->anchored_utf8),
                                 &(r->anchored_substr),
                                 &(r->anchored_end_shift),
-                                data.substrs[0].lookbehind,
-                                data.substrs[0].min_offset,
-                                data.substrs[0].minlen,
+                                &(data.substrs[0]),
                                 longest_fixed_length,
                                 cBOOL(data.flags & SF_FIX_BEFORE_EOL),
                                 cBOOL(data.flags & SF_FIX_BEFORE_MEOL)))
