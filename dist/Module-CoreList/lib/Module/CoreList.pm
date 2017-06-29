@@ -310,6 +310,7 @@ sub changes_between {
     5.025012 => '2017-04-20',
     5.026000 => '2017-05-30',
     5.027000 => '2017-05-31',
+    5.027001 => '2017-06-03',
     5.024002 => '????-??-??',
   );
 
@@ -14116,6 +14117,52 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.027001 => {
+        delta_from => 5.027000,
+        changed => {
+            'B::Op_private'         => '5.027001',
+            'Config'                => '5.027001',
+            'GDBM_File'             => '1.16',
+            'Locale::Codes'         => '3.52',
+            'Locale::Codes::Constants'=> '3.52',
+            'Locale::Codes::Country'=> '3.52',
+            'Locale::Codes::Country_Codes'=> '3.52',
+            'Locale::Codes::Country_Retired'=> '3.52',
+            'Locale::Codes::Currency'=> '3.52',
+            'Locale::Codes::Currency_Codes'=> '3.52',
+            'Locale::Codes::Currency_Retired'=> '3.52',
+            'Locale::Codes::LangExt'=> '3.52',
+            'Locale::Codes::LangExt_Codes'=> '3.52',
+            'Locale::Codes::LangExt_Retired'=> '3.52',
+            'Locale::Codes::LangFam'=> '3.52',
+            'Locale::Codes::LangFam_Codes'=> '3.52',
+            'Locale::Codes::LangFam_Retired'=> '3.52',
+            'Locale::Codes::LangVar'=> '3.52',
+            'Locale::Codes::LangVar_Codes'=> '3.52',
+            'Locale::Codes::LangVar_Retired'=> '3.52',
+            'Locale::Codes::Language'=> '3.52',
+            'Locale::Codes::Language_Codes'=> '3.52',
+            'Locale::Codes::Language_Retired'=> '3.52',
+            'Locale::Codes::Script' => '3.52',
+            'Locale::Codes::Script_Codes'=> '3.52',
+            'Locale::Codes::Script_Retired'=> '3.52',
+            'Locale::Country'       => '3.52',
+            'Locale::Currency'      => '3.52',
+            'Locale::Language'      => '3.52',
+            'Locale::Script'        => '3.52',
+            'XS::APItest'           => '0.89',
+            '_charnames'            => '1.45',
+            'charnames'             => '1.45',
+            'if'                    => '0.0607',
+            'mro'                   => '1.21',
+            'threads'               => '2.16',
+            'threads::shared'       => '1.57',
+            'version'               => '0.9918',
+            'version::regex'        => '0.9918',
+        },
+        removed => {
+        }
+    },
     5.024002 => {
         delta_from => 5.024001,
         changed => {
@@ -14895,6 +14942,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.027000 => {
         delta_from => 5.026,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027001 => {
+        delta_from => 5.027,
         changed => {
         },
         removed => {
