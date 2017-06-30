@@ -810,7 +810,9 @@ foreach my $test (@tests) {
             or output_warnings(@warnings_gotten);
 
             # Test partial character handling, for each byte not a full character
+            my $did_test_partial = 0;
             for (my $j = 1; $j < $length - 1; $j++) {
+                $did_test_partial = 1;
                 my $partial = substr($bytes, 0, $j);
                 my $ret_should_be;
                 my $comment;
@@ -838,10 +840,13 @@ foreach my $test (@tests) {
                     . ", $disallow_flags), $comment: returns $ret_should_be")
                  or diag "The flags mean "
                   . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
+            }
+
+            if ($did_test_partial) {
                 is(scalar @warnings_gotten, 0,
                         "    And is_utf8_valid_partial_char_flags()"
-                      . " generated no warnings")
-                  or output_warnings(@warnings_gotten);
+                        . " generated no warnings for any of the lengths")
+                    or output_warnings(@warnings_gotten);
             }
         }
     }
