@@ -541,18 +541,16 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
 
     for (x = s; x < e; x++, y++) {
 
-            /* If this byte is larger than the corresponding highest UTF-8
-                * byte, it overflows */
-            if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
-                return TRUE;
-            }
-
-            /* If not the same as this byte, it must be smaller, doesn't
-                * overflow */
-            if (LIKELY(NATIVE_UTF8_TO_I8(*x) != *y)) {
-                return FALSE;
-            }
+        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
+            continue;
         }
+
+        /* If this byte is larger than the corresponding highest UTF-8 byte,
+         * the sequence overflow; otherwise the byte is less than, and so the
+         * sequence doesn't overflow */
+        return NATIVE_UTF8_TO_I8(*x) > *y;
+
+    }
 
     /* Got to the end and all bytes are the same.  If the input is a whole
      * character, it doesn't overflow.  And if it is a partial character,
