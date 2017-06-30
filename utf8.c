@@ -1006,6 +1006,9 @@ The input C<curlen> parameter was 0.
 The input sequence was malformed in that there is some other sequence that
 evaluates to the same code point, but that sequence is shorter than this one.
 
+Until Unicode 3.1, it was legal for programs to accept this malformation, but
+it was discovered that this created security issues.
+
 =item C<UTF8_GOT_NONCHAR>
 
 The code point represented by the input UTF-8 sequence is for a Unicode
