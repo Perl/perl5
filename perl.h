@@ -357,6 +357,11 @@
 #  endif
 #endif
 
+/* better experience with gdb */
+#ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#endif
+
 /* Use PERL_UNUSED_RESULT() to suppress the warnings about unused results
  * of function calls, e.g. PERL_UNUSED_RESULT(foo(a, b)).
  *
