@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.22';
+$VERSION = '2.22_01';
 $VERSION = eval $VERSION;
 
 # simplest way to avoid indexing of the package: no package statement
