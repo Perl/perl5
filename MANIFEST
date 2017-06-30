@@ -3007,6 +3007,7 @@ dist/base/t/fields-5_6_0.t	See if fields work
 dist/base/t/fields-5_8_0.t	See if fields work
 dist/base/t/fields-base.t	See if fields work
 dist/base/t/fields.t		See if fields work
+dist/base/t/incdot.t		Test how base.pm handles '.' in @INC
 dist/base/t/isa.t		See if base's behaviour doesn't change
 dist/base/t/lib/Broken.pm	Test module for base.pm
 dist/base/t/lib/Dummy.pm	Test module for base.pm
