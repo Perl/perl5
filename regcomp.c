@@ -7617,7 +7617,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    SvREFCNT_inc_simple_void_NN(data.substrs[1].str);
 	}
 	else {
-	    r->float_substr = r->float_utf8 = NULL;
+	    r->substrs->data[1].substr      = NULL;
+            r->substrs->data[1].utf8_substr = NULL;
 	    longest_float_length = 0;
 	}
 
@@ -7640,7 +7641,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    SvREFCNT_inc_simple_void_NN(data.substrs[0].str);
 	}
 	else {
-	    r->anchored_substr = r->anchored_utf8 = NULL;
+            r->substrs->data[0].substr      = NULL;
+            r->substrs->data[0].utf8_substr = NULL;
 	    longest_fixed_length = 0;
 	}
 	LEAVE_with_name("study_chunk");
@@ -7649,7 +7651,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    && (OP(ri->regstclass) == REG_ANY || OP(ri->regstclass) == SANY))
 	    ri->regstclass = NULL;
 
-	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
+	if ((!(r->substrs->data[0].substr || r->substrs->data[0].utf8_substr)
+              || r->substrs->data[0].min_offset)
 	    && stclass_flag
             && ! (ANYOF_FLAGS(data.start_class) & SSC_MATCHES_EMPTY_STRING)
 	    && is_ssc_worth_it(pRExC_state, data.start_class))
@@ -7676,9 +7679,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * more info. */
 	if (longest_fixed_length > longest_float_length) {
 	    r->substrs->check_ix = 0;
-	    r->check_end_shift = r->anchored_end_shift;
-	    r->check_substr = r->anchored_substr;
-	    r->check_utf8 = r->anchored_utf8;
+	    r->check_end_shift  = r->substrs->data[0].end_shift;
+	    r->check_substr     = r->substrs->data[0].substr;
+	    r->check_utf8       = r->substrs->data[0].utf8_substr;
 	    r->check_offset_min = r->substrs->data[0].min_offset;
 	    r->check_offset_max = r->substrs->data[0].max_offset;
             if (r->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS))
@@ -7686,9 +7689,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	}
 	else {
 	    r->substrs->check_ix = 1;
-	    r->check_end_shift = r->float_end_shift;
-	    r->check_substr = r->float_substr;
-	    r->check_utf8 = r->float_utf8;
+	    r->check_end_shift  = r->substrs->data[1].end_shift;
+	    r->check_substr     = r->substrs->data[1].substr;
+	    r->check_utf8       = r->substrs->data[1].utf8_substr;
 	    r->check_offset_min = r->substrs->data[1].min_offset;
 	    r->check_offset_max = r->substrs->data[1].max_offset;
 	}
@@ -7729,8 +7732,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         CHECK_RESTUDY_GOTO_butfirst(NOOP);
 
-	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
-		= r->float_substr = r->float_utf8 = NULL;
+	r->check_substr = NULL;
+        r->check_utf8 = NULL;
+        r->substrs->data[0].substr      = NULL;
+        r->substrs->data[0].utf8_substr = NULL;
+        r->substrs->data[1].substr      = NULL;
+        r->substrs->data[1].utf8_substr = NULL;
 
         if (! (ANYOF_FLAGS(data.start_class) & SSC_MATCHES_EMPTY_STRING)
 	    && is_ssc_worth_it(pRExC_state, data.start_class))
@@ -18993,41 +19000,41 @@ Perl_regdump(pTHX_ const regexp *r)
     (void)dumpuntil(r, ri->program, ri->program + 1, NULL, NULL, sv, 0, 0);
 
     /* Header fields of interest. */
-    if (r->anchored_substr) {
-	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->anchored_substr),
-	    RE_SV_DUMPLEN(r->anchored_substr), 30);
+    if (r->substrs->data[0].substr) {
+	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->substrs->data[0].substr),
+	    RE_SV_DUMPLEN(r->substrs->data[0].substr), 30);
         Perl_re_printf( aTHX_
 		      "anchored %s%s at %" IVdf " ",
-		      s, RE_SV_TAIL(r->anchored_substr),
-		      (IV)r->anchored_offset);
-    } else if (r->anchored_utf8) {
-	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->anchored_utf8),
-	    RE_SV_DUMPLEN(r->anchored_utf8), 30);
+		      s, RE_SV_TAIL(r->substrs->data[0].substr),
+		      (IV)r->substrs->data[0].min_offset);
+    } else if (r->substrs->data[0].utf8_substr) {
+	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->substrs->data[0].utf8_substr),
+	    RE_SV_DUMPLEN(r->substrs->data[0].utf8_substr), 30);
         Perl_re_printf( aTHX_
 		      "anchored utf8 %s%s at %" IVdf " ",
-		      s, RE_SV_TAIL(r->anchored_utf8),
-		      (IV)r->anchored_offset);
+		      s, RE_SV_TAIL(r->substrs->data[0].utf8_substr),
+		      (IV)r->substrs->data[0].min_offset);
     }
-    if (r->float_substr) {
-	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->float_substr),
-	    RE_SV_DUMPLEN(r->float_substr), 30);
+    if (r->substrs->data[1].substr) {
+	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->substrs->data[1].substr),
+	    RE_SV_DUMPLEN(r->substrs->data[1].substr), 30);
         Perl_re_printf( aTHX_
 		      "floating %s%s at %" IVdf "..%" UVuf " ",
-		      s, RE_SV_TAIL(r->float_substr),
-		      (IV)r->float_min_offset, (UV)r->float_max_offset);
-    } else if (r->float_utf8) {
-	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->float_utf8),
-	    RE_SV_DUMPLEN(r->float_utf8), 30);
+		      s, RE_SV_TAIL(r->substrs->data[1].substr),
+		      (IV)r->substrs->data[1].min_offset, (UV)r->substrs->data[1].max_offset);
+    } else if (r->substrs->data[1].utf8_substr) {
+	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->substrs->data[1].utf8_substr),
+	    RE_SV_DUMPLEN(r->substrs->data[1].utf8_substr), 30);
         Perl_re_printf( aTHX_
 		      "floating utf8 %s%s at %" IVdf "..%" UVuf " ",
-		      s, RE_SV_TAIL(r->float_utf8),
-		      (IV)r->float_min_offset, (UV)r->float_max_offset);
+		      s, RE_SV_TAIL(r->substrs->data[1].utf8_substr),
+		      (IV)r->substrs->data[1].min_offset, (UV)r->substrs->data[1].max_offset);
     }
     if (r->check_substr || r->check_utf8)
         Perl_re_printf( aTHX_
 		      (const char *)
-		      (r->check_substr == r->float_substr
-		       && r->check_utf8 == r->float_utf8
+		      (   r->check_substr == r->substrs->data[1].substr
+		       && r->check_utf8   == r->substrs->data[1].utf8_substr
 		       ? "(checking floating" : "(checking anchored"));
     if (r->intflags & PREGf_NOSCAN)
         Perl_re_printf( aTHX_  " noscan");
@@ -19539,10 +19546,10 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 	Safefree(r->xpv_len_u.xpvlenu_pv);
     }
     if (r->substrs) {
-        SvREFCNT_dec(r->anchored_substr);
-        SvREFCNT_dec(r->anchored_utf8);
-        SvREFCNT_dec(r->float_substr);
-        SvREFCNT_dec(r->float_utf8);
+        SvREFCNT_dec(r->substrs->data[0].substr);
+        SvREFCNT_dec(r->substrs->data[0].utf8_substr);
+        SvREFCNT_dec(r->substrs->data[1].substr);
+        SvREFCNT_dec(r->substrs->data[1].utf8_substr);
 	Safefree(r->substrs);
     }
     RX_MATCH_COPY_FREE(rx);
@@ -19622,10 +19629,10 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
         Newx(ret->substrs, 1, struct reg_substr_data);
 	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
 
-	SvREFCNT_inc_void(ret->anchored_substr);
-	SvREFCNT_inc_void(ret->anchored_utf8);
-	SvREFCNT_inc_void(ret->float_substr);
-	SvREFCNT_inc_void(ret->float_utf8);
+	SvREFCNT_inc_void(ret->substrs->data[0].substr);
+	SvREFCNT_inc_void(ret->substrs->data[0].utf8_substr);
+	SvREFCNT_inc_void(ret->substrs->data[1].substr);
+	SvREFCNT_inc_void(ret->substrs->data[1].utf8_substr);
 
 	/* check_substr and check_utf8, if non-NULL, point to either their
 	   anchored or float namesakes, and don't hold a second reference.  */
@@ -19805,35 +19812,37 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	   That way, if any of the sv_dup_inc()s dislodge *r from the L1
 	   cache, it doesn't matter.  */
 	const bool anchored = r->check_substr
-	    ? r->check_substr == r->anchored_substr
-	    : r->check_utf8 == r->anchored_utf8;
+	    ? r->check_substr == r->substrs->data[0].substr
+	    : r->check_utf8   == r->substrs->data[0].utf8_substr;
         Newx(ret->substrs, 1, struct reg_substr_data);
 	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
 
-	ret->anchored_substr = sv_dup_inc(ret->anchored_substr, param);
-	ret->anchored_utf8 = sv_dup_inc(ret->anchored_utf8, param);
-	ret->float_substr = sv_dup_inc(ret->float_substr, param);
-	ret->float_utf8 = sv_dup_inc(ret->float_utf8, param);
+	ret->substrs->data[0].substr      = sv_dup_inc(ret->substrs->data[0].substr, param);
+	ret->substrs->data[0].utf8_substr = sv_dup_inc(ret->substrs->data[0].utf8_substr, param);
+	ret->substrs->data[1].substr      = sv_dup_inc(ret->substrs->data[1].substr, param);
+	ret->substrs->data[1].utf8_substr = sv_dup_inc(ret->substrs->data[1].utf8_substr, param);
 
 	/* check_substr and check_utf8, if non-NULL, point to either their
 	   anchored or float namesakes, and don't hold a second reference.  */
 
 	if (ret->check_substr) {
 	    if (anchored) {
-		assert(r->check_utf8 == r->anchored_utf8);
-		ret->check_substr = ret->anchored_substr;
-		ret->check_utf8 = ret->anchored_utf8;
+		assert(r->check_utf8 == r->substrs->data[0].utf8_substr);
+
+		ret->check_substr = ret->substrs->data[0].substr;
+		ret->check_utf8   = ret->substrs->data[0].utf8_substr;
 	    } else {
-		assert(r->check_substr == r->float_substr);
-		assert(r->check_utf8 == r->float_utf8);
-		ret->check_substr = ret->float_substr;
-		ret->check_utf8 = ret->float_utf8;
+		assert(r->check_substr == r->substrs->data[1].substr);
+		assert(r->check_utf8   == r->substrs->data[1].utf8_substr);
+
+		ret->check_substr = ret->substrs->data[1].substr;
+		ret->check_utf8   = ret->substrs->data[1].utf8_substr;
 	    }
 	} else if (ret->check_utf8) {
 	    if (anchored) {
-		ret->check_utf8 = ret->anchored_utf8;
+		ret->check_utf8 = ret->substrs->data[0].utf8_substr;
 	    } else {
-		ret->check_utf8 = ret->float_utf8;
+		ret->check_utf8 = ret->substrs->data[1].utf8_substr;
 	    }
 	}
     }
