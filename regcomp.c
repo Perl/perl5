@@ -404,6 +404,7 @@ struct RExC_state_t {
     Only used for floating strings. This is the rightmost point that
     the string can appear at. If set to SSize_t_MAX it indicates that the
     string can occur infinitely far to the right.
+    For fixed strings, it is equal to min_offset.
 
   - minlenp
     A pointer to the minimum number of characters of the pattern that the
@@ -1282,6 +1283,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	SvSetMagicSV(longest_sv, data->last_found);
 	if (data->longest == 0) { /* fixed */
 	    data->substrs[0].min_offset = l ? data->last_start_min : data->pos_min;
+	    data->substrs[0].max_offset = data->substrs[0].min_offset;
 	    if (data->flags & SF_BEFORE_EOL)
 		data->substrs[0].flags |= (data->flags & SF_BEFORE_EOL);
 	    else
@@ -5770,6 +5772,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 
                         if (data_fake.substrs[0].minlenp != minlenp) {
                             data->substrs[0].min_offset = data_fake.substrs[0].min_offset;
+                            data->substrs[0].max_offset = data_fake.substrs[0].max_offset;
                             data->substrs[0].minlenp = data_fake.substrs[0].minlenp;
                             data->substrs[0].lookbehind += scan->flags;
                         }
@@ -7606,10 +7609,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                     &(data.substrs[1]),
                                     longest_float_length))
         {
-	    r->float_min_offset = data.substrs[1].min_offset - data.substrs[1].lookbehind;
-	    r->float_max_offset = data.substrs[1].max_offset;
+	    r->substrs->data[1].min_offset =
+                    data.substrs[1].min_offset - data.substrs[1].lookbehind;
+
+	    r->substrs->data[1].max_offset = data.substrs[1].max_offset;
 	    if (data.substrs[1].max_offset < SSize_t_MAX) /* Don't offset infinity */
-	        r->float_max_offset -= data.substrs[1].lookbehind;
+	        r->substrs->data[1].max_offset -= data.substrs[1].lookbehind;
+
 	    SvREFCNT_inc_simple_void_NN(data.substrs[1].str);
 	}
 	else {
@@ -7626,7 +7632,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                 &(data.substrs[0]),
                                 longest_fixed_length))
         {
-	    r->anchored_offset = data.substrs[0].min_offset - data.substrs[0].lookbehind;
+	    r->substrs->data[0].min_offset =
+                    data.substrs[0].min_offset - data.substrs[0].lookbehind;
+            /* XXX this calc isn't necessary for anchored, but is done
+             * for consistency with float code path */
+	    r->substrs->data[0].max_offset = data.substrs[0].max_offset;
+
+	    if (data.substrs[0].max_offset < SSize_t_MAX) /* Don't offset infinity */
+	        r->substrs->data[0].max_offset -= data.substrs[0].lookbehind;
+
 	    SvREFCNT_inc_simple_void_NN(data.substrs[0].str);
 	}
 	else {
@@ -7669,7 +7683,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    r->check_end_shift = r->anchored_end_shift;
 	    r->check_substr = r->anchored_substr;
 	    r->check_utf8 = r->anchored_utf8;
-	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
+	    r->check_offset_min = r->substrs->data[0].min_offset;
+	    r->check_offset_max = r->substrs->data[0].max_offset;
             if (r->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS))
                 r->intflags |= PREGf_NOSCAN;
 	}
@@ -7678,15 +7693,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    r->check_end_shift = r->float_end_shift;
 	    r->check_substr = r->float_substr;
 	    r->check_utf8 = r->float_utf8;
-	    r->check_offset_min = r->float_min_offset;
-	    r->check_offset_max = r->float_max_offset;
+	    r->check_offset_min = r->substrs->data[1].min_offset;
+	    r->check_offset_max = r->substrs->data[1].max_offset;
 	}
+
 	if ((r->check_substr || r->check_utf8) ) {
 	    r->extflags |= RXf_USE_INTUIT;
 	    if (SvTAIL(r->check_substr ? r->check_substr : r->check_utf8))
 		r->extflags |= RXf_INTUIT_TAIL;
 	}
-        r->substrs->data[0].max_offset = r->substrs->data[0].min_offset;
 
 	/* XXX Unneeded? dmq (shouldn't as this is handled elsewhere)
 	if ( (STRLEN)minlen < longest_float_length )
