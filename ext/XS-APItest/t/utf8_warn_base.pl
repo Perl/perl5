@@ -19,9 +19,7 @@ $|=1;
 
 no warnings 'deprecated'; # Some of the below are above IV_MAX on 32 bit
                           # machines, and that is tested elsewhere
-
 use XS::APItest;
-use Data::Dumper;
 
 my @warnings_gotten;
 
