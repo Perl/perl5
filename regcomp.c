@@ -6752,7 +6752,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 STATIC bool
 S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
-                      SV** rx_utf8, SV** rx_substr, SSize_t* rx_end_shift,
+                      struct reg_substr_datum  *rsd,
                       struct scan_data_substrs *sub,
                       STRLEN longest_length)
 {
@@ -6778,18 +6778,18 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
     /* copy the information about the longest from the reg_scan_data
         over to the program. */
     if (SvUTF8(sub->str)) {
-        *rx_utf8 = sub->str;
-        *rx_substr = NULL;
+        rsd->substr      = NULL;
+        rsd->utf8_substr = sub->str;
     } else {
-        *rx_substr = sub->str;
-        *rx_utf8 = NULL;
+        rsd->substr      = sub->str;
+        rsd->utf8_substr = NULL;
     }
     /* end_shift is how many chars that must be matched that
         follow this item. We calculate it ahead of time as once the
         lookbehind offset is added in we lose the ability to correctly
         calculate it.*/
     ml = sub->minlenp ? *(sub->minlenp) : (SSize_t)longest_length;
-    *rx_end_shift = ml - sub->min_offset
+    rsd->end_shift = ml - sub->min_offset
         - longest_length
             /* XXX SvTAIL is always false here - did you mean FBMcf_TAIL
              * intead? - DAPM
@@ -7603,9 +7603,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                    && data.substrs[0].min_offset == data.substrs[1].min_offset
                    && SvCUR(data.substrs[0].str) == SvCUR(data.substrs[1].str)))
             && S_setup_longest (aTHX_ pRExC_state,
-                                    &(r->float_utf8),
-                                    &(r->float_substr),
-                                    &(r->float_end_shift),
+                                    &(r->substrs->data[1]),
                                     &(data.substrs[1]),
                                     longest_float_length))
         {
@@ -7626,9 +7624,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	longest_fixed_length = CHR_SVLEN(data.substrs[0].str);
 
         if (S_setup_longest (aTHX_ pRExC_state,
-                                &(r->anchored_utf8),
-                                &(r->anchored_substr),
-                                &(r->anchored_end_shift),
+                                &(r->substrs->data[0]),
                                 &(data.substrs[0]),
                                 longest_fixed_length))
         {
