@@ -116,11 +116,20 @@ For details, see the description for L</uvchr_to_utf8_flags>.
 =cut
 */
 
+/* All these formats take a single UV code point argument */
+const char surrogate_cp_format[] = "UTF-16 surrogate U+%04" UVXf;
+const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf
+                                   " is not recommended for open interchange";
+const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
+                                   " may not be portable";
+const char above_31_bit_cp_format[] = "Code point 0x%" UVXf " is not"
+                                      " Unicode, and not portable";
+
 #define HANDLE_UNICODE_SURROGATE(uv, flags)                         \
     STMT_START {                                                    \
         if (flags & UNICODE_WARN_SURROGATE) {                       \
             Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),        \
-                                "UTF-16 surrogate U+%04" UVXf, uv); \
+                                   surrogate_cp_format, uv);        \
         }                                                           \
         if (flags & UNICODE_DISALLOW_SURROGATE) {                   \
             return NULL;                                            \
@@ -131,8 +140,7 @@ For details, see the description for L</uvchr_to_utf8_flags>.
     STMT_START {                                                    \
         if (flags & UNICODE_WARN_NONCHAR) {                         \
             Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),          \
-		 "Unicode non-character U+%04" UVXf " is not "      \
-                 "recommended for open interchange", uv);           \
+		                   nonchar_cp_format, uv);          \
         }                                                           \
         if (flags & UNICODE_DISALLOW_NONCHAR) {                     \
             return NULL;                                            \
@@ -212,8 +220,8 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
 
               /* Choose the more dire applicable warning */
               (UNICODE_IS_ABOVE_31_BIT(uv))
-              ? "Code point 0x%" UVXf " is not Unicode, and not portable"
-              : "Code point 0x%" UVXf " is not Unicode, may not be portable",
+              ? above_31_bit_cp_format
+              : super_cp_format,
              uv);
         }
         if (flags & UNICODE_DISALLOW_SUPER
@@ -1591,8 +1599,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                     _byte_dump_string(s0, curlen, 0));
                         }
                         else {
-                            message = Perl_form(aTHX_
-                                            "UTF-16 surrogate U+%04" UVXf, uv);
+                            message = Perl_form(aTHX_ surrogate_cp_format, uv);
                         }
                     }
                 }
@@ -1621,10 +1628,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                     _byte_dump_string(s0, curlen, 0));
                         }
                         else {
-                            message = Perl_form(aTHX_
-                                                "Code point 0x%04" UVXf " is not"
-                                                " Unicode, may not be portable",
-                                                uv);
+                            message = Perl_form(aTHX_ super_cp_format, uv);
                         }
                     }
                 }
@@ -1661,9 +1665,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         }
                         else {
                             message = Perl_form(aTHX_
-                                        "Code point 0x%" UVXf " is not Unicode,"
-                                        " and not portable",
-                                         uv);
+                                            above_31_bit_cp_format, uv);
                         }
                     }
 
@@ -1713,9 +1715,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                         & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
 
                         pack_warn = packWARN(WARN_NONCHAR);
-                        message = Perl_form(aTHX_ "Unicode non-character"
-                                                " U+%04" UVXf " is not recommended"
-                                                " for open interchange", uv);
+                        message = Perl_form(aTHX_ nonchar_cp_format, uv);
                     }
                 }
 
