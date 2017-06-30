@@ -767,18 +767,25 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_GOT_SURROGATE		UTF8_DISALLOW_SURROGATE
 #define UTF8_WARN_SURROGATE		0x0200
 
-#define UTF8_DISALLOW_NONCHAR           0x0400	/* Unicode non-character */
+/* Unicode non-character  code points */
+#define UTF8_DISALLOW_NONCHAR           0x0400
 #define UTF8_GOT_NONCHAR                UTF8_DISALLOW_NONCHAR
-#define UTF8_WARN_NONCHAR               0x0800	/*  code points */
+#define UTF8_WARN_NONCHAR               0x0800
 
-#define UTF8_DISALLOW_SUPER		0x1000	/* Super-set of Unicode: code */
+/* Super-set of Unicode: code points above the legal max */
+#define UTF8_DISALLOW_SUPER		0x1000
 #define UTF8_GOT_SUPER		        UTF8_DISALLOW_SUPER
-#define UTF8_WARN_SUPER		        0x2000	/* points above the legal max */
+#define UTF8_WARN_SUPER		        0x2000
 
-/* Code points which never were part of the original UTF-8 standard, which only
- * went up to 2 ** 31 - 1.  Note that these all overflow a signed 32-bit word,
- * The first byte of these code points is FE or FF on ASCII platforms.  If the
- * first byte is FF, it will overflow a 32-bit word. */
+/* The original UTF-8 standard did not define UTF-8 with start bytes of 0xFE or
+ * 0xFF, though UTF-EBCDIC did.  This allowed both versions to represent code
+ * points up to 2 ** 31 - 1.  Perl extends UTF-8 so that 0xFE and 0xFF are
+ * usable on ASCII platforms, and 0xFF means something different than
+ * UTF-EBCDIC defines.  These changes allow code points of 64 bits (actually
+ * somewhat more) to be represented on both platforms.  But these are Perl
+ * extensions, and not likely to be interchangeable with other languages.  Note
+ * that on ASCII platforms, FE overflows a signed 32-bit word, and FF an
+ * unsigned one. */
 #define UTF8_DISALLOW_PERL_EXTENDED     0x4000
 #define UTF8_GOT_PERL_EXTENDED          UTF8_DISALLOW_PERL_EXTENDED
 #define UTF8_WARN_PERL_EXTENDED         0x8000
