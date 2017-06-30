@@ -126,6 +126,10 @@ XXX
 
 =item *
 
+L<base> has been upgraded from version 2.23 to 2.23_01.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20170114_24 to 5.20170715_24.
 
 =item *
