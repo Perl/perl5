@@ -6,7 +6,7 @@ use vars qw[$VERSION %utilities];
 use Module::CoreList;
 use Module::CoreList::TieHashDelta;
 
-$VERSION = '5.20170312_22';
+$VERSION = '5.20170715_22';
 
 sub utilities {
     my $perl = shift;
