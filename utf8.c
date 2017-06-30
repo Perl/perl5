@@ -213,9 +213,9 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
             Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
                         cp_above_legal_max, uv, MAX_NON_DEPRECATED_CP);
         }
-        if (       (flags & UNICODE_WARN_SUPER)
-            || (   UNICODE_IS_PERL_EXTENDED(uv)
-                && (flags & UNICODE_WARN_PERL_EXTENDED)))
+        if (      (flags & UNICODE_WARN_SUPER)
+            || (  (flags & UNICODE_WARN_PERL_EXTENDED)
+                && UNICODE_IS_PERL_EXTENDED(uv)))
         {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
 
@@ -226,8 +226,8 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
              uv);
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
-            || (   UNICODE_IS_PERL_EXTENDED(uv)
-                && (flags & UNICODE_DISALLOW_PERL_EXTENDED)))
+            || (   (flags & UNICODE_DISALLOW_PERL_EXTENDED)
+                &&  UNICODE_IS_PERL_EXTENDED(uv)))
         {
             return NULL;
         }
