@@ -558,20 +558,25 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
     return FALSE;
 }
 
-PERL_STATIC_INLINE bool
+PERL_STATIC_INLINE int
 S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
 {
-    /* Overlongs can occur whenever the number of continuation bytes
-     * changes.  That means whenever the number of leading 1 bits in a start
-     * byte increases from the next lower start byte.  That happens for start
-     * bytes C0, E0, F0, F8, FC, FE, and FF.  On modern perls, the following
-     * illegal start bytes have already been excluded, so don't need to be
-     * tested here;
+    /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
+     * 's' + 'len' - 1 is an overlong.  It returns 1 if it is an overlong; 0 if
+     * it isn't, and -1 if there isn't enough information to tell.  This last
+     * return value can happen if the sequence is incomplete, missing some
+     * trailing bytes that would form a complete character.  If there are
+     * enough bytes to make a definitive decision, this function does so.
+     * Usually 2 bytes sufficient.
+     *
+     * Overlongs can occur whenever the number of continuation bytes changes.
+     * That means whenever the number of leading 1 bits in a start byte
+     * increases from the next lower start byte.  That happens for start bytes
+     * C0, E0, F0, F8, FC, FE, and FF.  On modern perls, the following illegal
+     * start bytes have already been excluded, so don't need to be tested here;
      * ASCII platforms: C0, C1
      * EBCDIC platforms C0, C1, C2, C3, C4, E0
-     *
-     * At least a second byte is required to determine if other sequences will
-     * be an overlong. */
+     */
 
     const U8 s0 = NATIVE_UTF8_TO_I8(s[0]);
     const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
@@ -596,7 +601,7 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
 #       else
 
     if (s0 == 0xE0 && UNLIKELY(s1 < 0xA0)) {
-        return TRUE;
+        return 1;
     }
 
 #           define F0_ABOVE_OVERLONG 0x90
@@ -612,11 +617,11 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
         || (s0 == 0xFC && UNLIKELY(s1 < FC_ABOVE_OVERLONG))
         || (s0 == 0xFE && UNLIKELY(s1 < FE_ABOVE_OVERLONG)))
     {
-        return TRUE;
+        return 1;
     }
 
     /* Check for the FF overlong */
-    return isFF_OVERLONG(s, len) > 0;
+    return isFF_OVERLONG(s, len);
 }
 
 PERL_STATIC_INLINE int
@@ -799,7 +804,7 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 
     /* Here is syntactically valid.  Next, make sure this isn't the start of an
      * overlong. */
-    if (len > 1 && is_utf8_overlong_given_start_byte_ok(s, len)) {
+    if (len > 1 && is_utf8_overlong_given_start_byte_ok(s, len) > 0) {
         return 0;
     }
 
@@ -1303,7 +1308,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
         || (       UNLIKELY(possible_problems)
             && (   UNLIKELY(! UTF8_IS_START(*s0))
                 || (   curlen > 1
-                    && UNLIKELY(is_utf8_overlong_given_start_byte_ok(s0,
+                    && UNLIKELY(0 < is_utf8_overlong_given_start_byte_ok(s0,
                                                                 s - s0))))))
     {
         possible_problems |= UTF8_GOT_LONG;
