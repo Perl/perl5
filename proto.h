@@ -4537,9 +4537,6 @@ PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv);
 STATIC void	S_clear_placeholders(pTHX_ HV *hv, U32 items);
 #define PERL_ARGS_ASSERT_CLEAR_PLACEHOLDERS	\
 	assert(hv)
-STATIC void	S_hfreeentries(pTHX_ HV *hv);
-#define PERL_ARGS_ASSERT_HFREEENTRIES	\
-	assert(hv)
 STATIC void	S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize);
 #define PERL_ARGS_ASSERT_HSPLIT	\
 	assert(hv)
@@ -4553,6 +4550,9 @@ STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN k
 STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry);
 #define PERL_ARGS_ASSERT_HV_FREE_ENT_RET	\
 	assert(hv); assert(entry)
+STATIC void	S_hv_free_entries(pTHX_ HV *hv);
+#define PERL_ARGS_ASSERT_HV_FREE_ENTRIES	\
+	assert(hv)
 STATIC void	S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store);
 #define PERL_ARGS_ASSERT_HV_MAGIC_CHECK	\
 	assert(hv); assert(needs_copy); assert(needs_store)

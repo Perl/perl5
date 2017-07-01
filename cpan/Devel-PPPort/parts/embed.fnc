@@ -1920,7 +1920,7 @@ po	|SV*	|hfree_next_entry	|NN HV *hv|NN STRLEN *indexp
 
 #if defined(PERL_IN_HV_C)
 s	|void	|hsplit		|NN HV *hv|STRLEN const oldsize|STRLEN newsize
-s	|void	|hfreeentries	|NN HV *hv
+s	|void	|hv_free_entries	|NN HV *hv
 s	|SV*	|hv_free_ent_ret|NN HV *hv|NN HE *entry
 sa	|HE*	|new_he
 sanR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
