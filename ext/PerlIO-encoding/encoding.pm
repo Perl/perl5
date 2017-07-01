@@ -14,7 +14,7 @@ require XSLoader;
 XSLoader::load();
 
 our $fallback =
-    Encode::PERLQQ()|Encode::WARN_ON_ERR()|Encode::STOP_AT_PARTIAL();
+    Encode::PERLQQ()|Encode::WARN_ON_ERR()|Encode::ONLY_PRAGMA_WARNINGS()|Encode::STOP_AT_PARTIAL();
 
 1;
 __END__
