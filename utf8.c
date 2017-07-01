@@ -531,7 +531,7 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
     /* On 32 bit ASCII machines, many overlongs that start with FF don't
      * overflow */
 
-    if (isFF_OVERLONG(s, len)) {
+    if (isFF_OVERLONG(s, len) > 0) {
         const U8 max_32_bit_overlong[] = "\xFF\x80\x80\x80\x80\x80\x80\x84";
         return memGE(s, max_32_bit_overlong,
                                 MIN(len, sizeof(max_32_bit_overlong) - 1));
@@ -616,21 +616,38 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
     }
 
     /* Check for the FF overlong */
-    return isFF_OVERLONG(s, len);
+    return isFF_OVERLONG(s, len) > 0;
 }
 
-PERL_STATIC_INLINE bool
+PERL_STATIC_INLINE int
 S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
 {
+    /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
+     * 'e' - 1 is an overlong beginning with \xFF.  It returns 1 if it is; 0 if
+     * it isn't, and -1 if there isn't enough information to tell.  This last
+     * return value can happen if the sequence is incomplete, missing some
+     * trailing bytes that would form a complete character.  If there are
+     * enough bytes to make a definitive decision, this function does so. */
+
     PERL_ARGS_ASSERT_ISFF_OVERLONG;
 
-    /* Check for the FF overlong.  This happens only if all these bytes match;
-     * what comes after them doesn't matter.  See tables in utf8.h,
-     * utfebcdic.h. */
+    /* To be an FF overlong, all the available bytes must match */
+    if (LIKELY(memNE(s, FF_OVERLONG_PREFIX,
+                     MIN(len, sizeof(FF_OVERLONG_PREFIX) - 1))))
+    {
+        return 0;
+    }
 
-    return    len >= sizeof(FF_OVERLONG_PREFIX) - 1
-           && UNLIKELY(memEQ(s, FF_OVERLONG_PREFIX,
-                                            sizeof(FF_OVERLONG_PREFIX) - 1));
+    /* To be an FF overlong sequence, all the bytes in FF_OVERLONG_PREFIX must
+     * be there; what comes after them doesn't matter.  See tables in utf8.h,
+     * utfebcdic.h. */
+    if (len >= sizeof(FF_OVERLONG_PREFIX) - 1) {
+        return 1;
+    }
+
+    /* The missing bytes could cause the result to go one way or the other, so
+     * the result is indeterminate */
+    return -1;
 }
 
 #undef F0_ABOVE_OVERLONG
