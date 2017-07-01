@@ -1963,7 +1963,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
 
-    /* The name must be deleted before the call to hfreeeeentries so that
+    /* The name must be deleted before the call to hfreeentries so that
        CVs are anonymised properly. But the effective name must be pre-
        served until after that call (and only deleted afterwards if the
        call originated from sv_clear). For stashes with one name that is
