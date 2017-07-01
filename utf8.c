@@ -482,82 +482,6 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
 
 #endif
 
-/* Anything larger than this will overflow the word if it were converted into a UV */
-#if defined(UV_IS_QUAD)
-#  ifdef EBCDIC     /* Actually is I8 */
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\xAF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
-#  else
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\x80\x8F\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
-#  endif
-#else   /* 32-bit */
-#  ifdef EBCDIC
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA3\xBF\xBF\xBF\xBF\xBF\xBF"
-#  else
-#   define HIGHEST_REPRESENTABLE_UTF8  "\xFE\x83\xBF\xBF\xBF\xBF\xBF"
-#  endif
-#endif
-
-PERL_STATIC_INLINE bool
-S_does_utf8_overflow(const U8 * const s, const U8 * e)
-{
-    const U8 *x;
-    const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
-
-#if ! defined(UV_IS_QUAD) && ! defined(EBCDIC)
-
-    const STRLEN len = e - s;
-
-#endif
-
-    /* Returns a boolean as to if this UTF-8 string would overflow a UV on this
-     * platform, that is if it represents a code point larger than the highest
-     * representable code point.  (For ASCII platforms, we could use memcmp()
-     * because we don't have to convert each byte to I8, but it's very rare
-     * input indeed that would approach overflow, so the loop below will likely
-     * only get executed once.
-     *
-     * 'e' must not be beyond a full character.  If it is less than a full
-     * character, the function returns FALSE if there is any input beyond 'e'
-     * that could result in a non-overflowing code point */
-
-    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
-    assert(s <= e && s + UTF8SKIP(s) >= e);
-
-#if ! defined(UV_IS_QUAD) && ! defined(EBCDIC)
-
-    /* On 32 bit ASCII machines, many overlongs that start with FF don't
-     * overflow */
-
-    if (isFF_OVERLONG(s, len) > 0) {
-        const U8 max_32_bit_overlong[] = "\xFF\x80\x80\x80\x80\x80\x80\x84";
-        return memGE(s, max_32_bit_overlong,
-                                MIN(len, sizeof(max_32_bit_overlong) - 1));
-    }
-
-#endif
-
-    for (x = s; x < e; x++, y++) {
-
-        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
-            continue;
-        }
-
-        /* If this byte is larger than the corresponding highest UTF-8 byte,
-         * the sequence overflow; otherwise the byte is less than, and so the
-         * sequence doesn't overflow */
-        return NATIVE_UTF8_TO_I8(*x) > *y;
-
-    }
-
-    /* Got to the end and all bytes are the same.  If the input is a whole
-     * character, it doesn't overflow.  And if it is a partial character,
-     * there's not enough information to tell, so assume doesn't overflow */
-    return FALSE;
-}
-
 PERL_STATIC_INLINE int
 S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
 {
@@ -653,6 +577,82 @@ S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
     /* The missing bytes could cause the result to go one way or the other, so
      * the result is indeterminate */
     return -1;
+}
+
+/* Anything larger than this will overflow the word if it were converted into a UV */
+#if defined(UV_IS_QUAD)
+#  ifdef EBCDIC     /* Actually is I8 */
+#   define HIGHEST_REPRESENTABLE_UTF8                                       \
+                "\xFF\xAF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#  else
+#   define HIGHEST_REPRESENTABLE_UTF8                                       \
+                "\xFF\x80\x8F\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#  endif
+#else   /* 32-bit */
+#  ifdef EBCDIC
+#   define HIGHEST_REPRESENTABLE_UTF8                                       \
+                "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA3\xBF\xBF\xBF\xBF\xBF\xBF"
+#  else
+#   define HIGHEST_REPRESENTABLE_UTF8  "\xFE\x83\xBF\xBF\xBF\xBF\xBF"
+#  endif
+#endif
+
+PERL_STATIC_INLINE bool
+S_does_utf8_overflow(const U8 * const s, const U8 * e)
+{
+    const U8 *x;
+    const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
+
+#if ! defined(UV_IS_QUAD) && ! defined(EBCDIC)
+
+    const STRLEN len = e - s;
+
+#endif
+
+    /* Returns a boolean as to if this UTF-8 string would overflow a UV on this
+     * platform, that is if it represents a code point larger than the highest
+     * representable code point.  (For ASCII platforms, we could use memcmp()
+     * because we don't have to convert each byte to I8, but it's very rare
+     * input indeed that would approach overflow, so the loop below will likely
+     * only get executed once.
+     *
+     * 'e' must not be beyond a full character.  If it is less than a full
+     * character, the function returns FALSE if there is any input beyond 'e'
+     * that could result in a non-overflowing code point */
+
+    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
+    assert(s <= e && s + UTF8SKIP(s) >= e);
+
+#if ! defined(UV_IS_QUAD) && ! defined(EBCDIC)
+
+    /* On 32 bit ASCII machines, many overlongs that start with FF don't
+     * overflow */
+
+    if (isFF_OVERLONG(s, len) > 0) {
+        const U8 max_32_bit_overlong[] = "\xFF\x80\x80\x80\x80\x80\x80\x84";
+        return memGE(s, max_32_bit_overlong,
+                                MIN(len, sizeof(max_32_bit_overlong) - 1));
+    }
+
+#endif
+
+    for (x = s; x < e; x++, y++) {
+
+        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
+            continue;
+        }
+
+        /* If this byte is larger than the corresponding highest UTF-8 byte,
+         * the sequence overflow; otherwise the byte is less than, and so the
+         * sequence doesn't overflow */
+        return NATIVE_UTF8_TO_I8(*x) > *y;
+
+    }
+
+    /* Got to the end and all bytes are the same.  If the input is a whole
+     * character, it doesn't overflow.  And if it is a partial character,
+     * there's not enough information to tell, so assume doesn't overflow */
+    return FALSE;
 }
 
 #undef F0_ABOVE_OVERLONG
