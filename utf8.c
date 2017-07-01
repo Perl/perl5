@@ -597,28 +597,27 @@ S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
 #  endif
 #endif
 
-PERL_STATIC_INLINE bool
+PERL_STATIC_INLINE int
 S_does_utf8_overflow(const U8 * const s, const U8 * e)
 {
-    const U8 *x;
-    const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
-
-#if ! defined(UV_IS_QUAD) && ! defined(EBCDIC)
+    /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
+     * 'e' - 1 would overflow a UV on this platform; that is if it represents a
+     * code point larger than the highest representable code point.  It returns
+     * 1 if it does overflow; 0 if it doesn't, and -1 if there isn't enough
+     * information to tell.  This last return value can happen if the sequence
+     * is incomplete, missing some trailing bytes that would form a complete
+     * character.  If there are enough bytes to make a definitive decision,
+     * this function does so.
+     *
+     * (For ASCII platforms, we could use memcmp() because we don't have to
+     * convert each byte to I8, but it's very rare input indeed that would
+     * approach overflow, so the loop below will likely only get executed once.)
+     *
+     * 'e' - 1 must not be beyond a full character. */
 
     const STRLEN len = e - s;
-
-#endif
-
-    /* Returns a boolean as to if this UTF-8 string would overflow a UV on this
-     * platform, that is if it represents a code point larger than the highest
-     * representable code point.  (For ASCII platforms, we could use memcmp()
-     * because we don't have to convert each byte to I8, but it's very rare
-     * input indeed that would approach overflow, so the loop below will likely
-     * only get executed once.
-     *
-     * 'e' must not be beyond a full character.  If it is less than a full
-     * character, the function returns FALSE if there is any input beyond 'e'
-     * that could result in a non-overflowing code point */
+    const U8 *x;
+    const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
 
     PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
     assert(s <= e && s + UTF8SKIP(s) >= e);
@@ -627,11 +626,19 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
 
     /* On 32 bit ASCII machines, many overlongs that start with FF don't
      * overflow */
-
     if (isFF_OVERLONG(s, len) > 0) {
-        const U8 max_32_bit_overlong[] = "\xFF\x80\x80\x80\x80\x80\x80\x84";
-        return memGE(s, max_32_bit_overlong,
-                                MIN(len, sizeof(max_32_bit_overlong) - 1));
+
+        /* To be such an overlong, the first bytes of 's' must match
+         * FF_OVERLONG_PREFIX, which is "\xff\x80\x80\x80\x80\x80\x80".  If we
+         * don't have any additional bytes available, the sequence, when
+         * completed might or might not fit in 32 bits.  But if we have that
+         * next byte, we can tell for sure.  If it is <= 0x83, then it does
+         * fit. */
+        if (len <= sizeof(FF_OVERLONG_PREFIX) - 1) {
+            return -1;
+        }
+
+        return s[sizeof(FF_OVERLONG_PREFIX) - 1] > 0x83;
     }
 
 #endif
@@ -651,8 +658,12 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
 
     /* Got to the end and all bytes are the same.  If the input is a whole
      * character, it doesn't overflow.  And if it is a partial character,
-     * there's not enough information to tell, so assume doesn't overflow */
-    return FALSE;
+     * there's not enough information to tell */
+    if (len < sizeof(HIGHEST_REPRESENTABLE_UTF8) - 1) {
+        return -1;
+    }
+
+    return 0;
 }
 
 #undef F0_ABOVE_OVERLONG
@@ -810,7 +821,7 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 
     /* And finally, that the code point represented fits in a word on this
      * platform */
-    if (does_utf8_overflow(s, e)) {
+    if (does_utf8_overflow(s, e) > 0) {
         return 0;
     }
 
@@ -1294,7 +1305,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
 
     /* Check for overflow.  The algorithm requires us to not look past the end
      * of the current character, even if partial, so the upper limit is 's' */
-    if (UNLIKELY(does_utf8_overflow(s0, s))) {
+    if (UNLIKELY(does_utf8_overflow(s0, s) > 0)) {
         possible_problems |= UTF8_GOT_OVERFLOW;
         uv = UNICODE_REPLACEMENT;
     }

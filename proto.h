@@ -5818,7 +5818,7 @@ STATIC UV	S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV res
 	assert(p); assert(ustrp); assert(lenp)
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_does_utf8_overflow(const U8 * const s, const U8 * e)
+PERL_STATIC_INLINE int	S_does_utf8_overflow(const U8 * const s, const U8 * e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW	\
 	assert(s); assert(e)

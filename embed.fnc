@@ -1722,7 +1722,7 @@ EpM	|char *	|_byte_dump_string					\
 				|const STRLEN len			\
 				|const bool format
 #if defined(PERL_IN_UTF8_C)
-inR	|bool	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
+inR	|int	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
 inR	|int	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s \
 						     |const STRLEN len
 inR	|int	|isFF_OVERLONG	|NN const U8 * const s|const STRLEN len
