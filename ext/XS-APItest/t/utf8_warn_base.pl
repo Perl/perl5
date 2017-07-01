@@ -18,8 +18,6 @@ BEGIN {
 
 $|=1;
 
-no warnings 'deprecated'; # Some of the below are above IV_MAX on 32 bit
-                          # machines, and that is tested elsewhere
 use XS::APItest;
 
 my @warnings_gotten;
@@ -62,9 +60,12 @@ sub overflow_discern_len($) {
     # needed.
 
     if (isASCII) {
-        return ($::is64bit) ? 3 : ((shift == $::max_bytes)
-                                   ? 1
-                                   : 2);
+        return ($::is64bit) ? 3 : 1;
+
+        # Below is needed for code points above IV_MAX
+        #return ($::is64bit) ? 3 : ((shift == $::max_bytes)
+        #                           ? 1
+        #                           : 2);
     }
 
     return ($::is64bit) ? 2 : 8;
@@ -79,11 +80,17 @@ sub overlong_discern_len($) {
     my $length = length $string;
     my $byte = ord native_to_I8(substr($string, 0, 1));
     if (isASCII) {
-        return ($length == $::max_bytes)
-                  # This is constrained to 1 on 32-bit machines, as it
-                  # overflows there
-                ? (($::is64bit) ? 7 : 1)
+        return ($byte >= 0xFE)
+                ? ((! $::is64bit)
+                    ? 1
+                    : ($byte == 0xFF) ? 7 : 2)
                 : (($length == 2) ? 1 : 2);
+        # Below is needed for code points above IV_MAX
+        #return ($length == $::max_bytes)
+        #          # This is constrained to 1 on 32-bit machines, as it
+        #          # overflows there
+        #        ? (($::is64bit) ? 7 : 1)
+        #        : (($length == 2) ? 1 : 2);
     }
 
     return ($length == $::max_bytes) ? 8 : (($length <= 3) ? 1 : 2);
@@ -394,36 +401,51 @@ my @tests;
             : I8_to_native("\xfe\xa1\xbf\xbf\xbf\xbf\xbf"),
             (isASCII) ? 0x7FFFFFFF : 0x3FFFFFF,
         ],
+        [ "highest 31 bit code point",
+            (isASCII)
+            ?  "\xfd\xbf\xbf\xbf\xbf\xbf"
+            : I8_to_native(
+               "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf"),
+            0x7FFFFFFF,
+            1,
+        ],
         [ "lowest 32 bit code point",
             (isASCII)
             ?  "\xfe\x82\x80\x80\x80\x80\x80"
             : I8_to_native(
                 "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-            0x80000000,
+            ($::is64bit) ? 0x80000000 : -1,   # Overflows on 32-bit systems
+            1,
         ],
-        [ "highest 32 bit code point",
-            (isASCII)
-            ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
-            : I8_to_native(
-               "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
-            0xFFFFFFFF,
-        ],
-        [ "Lowest 33 bit code point",
-            (isASCII)
-            ?  "\xfe\x84\x80\x80\x80\x80\x80"
-            : I8_to_native(
-                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
-            ($::is64bit) ? 0x100000000 : -1,   # Overflows on 32-bit systems
-        ],
+        # Used when UV_MAX is allowed as a code point
+        #[ "highest 32 bit code point",
+        #    (isASCII)
+        #    ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+        #    : I8_to_native(
+        #       "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
+        #    0xFFFFFFFF,
+        #],
+        #[ "Lowest 33 bit code point",
+        #    (isASCII)
+        #    ?  "\xfe\x84\x80\x80\x80\x80\x80"
+        #    : I8_to_native(
+        #        "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
+        #    ($::is64bit) ? 0x100000000 : 0x0,   # Overflows on 32-bit systems
+        #],
     );
 
     if (! $::is64bit) {
         if (isASCII) {
             push @tests,
                 [ "overlong malformation, but naively looks like overflow",
-                    "\xff\x80\x80\x80\x80\x80\x80\x83\xbf\xbf\xbf\xbf\xbf",
-                    0xFFFFFFFF,
+                    "\xff\x80\x80\x80\x80\x80\x80\x81\xbf\xbf\xbf\xbf\xbf",
+                    0x7FFFFFFF,
                 ],
+                # Used when above IV_MAX are allowed.
+                #[ "overlong malformation, but naively looks like overflow",
+                #    "\xff\x80\x80\x80\x80\x80\x80\x83\xbf\xbf\xbf\xbf\xbf",
+                #    0xFFFFFFFF,
+                #],
                 [ "overflow that old algorithm failed to detect",
                     "\xfe\x86\x80\x80\x80\x80\x80",
                     -1,
@@ -457,21 +479,37 @@ my @tests;
 
     if ($::is64bit) {
         push @tests,
-            [ "highest 64 bit code point",
+            [ "highest 63 bit code point",
               (isASCII)
-              ? "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+              ? "\xff\x80\x87\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
               : I8_to_native(
-                "\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"),
-              0xFFFFFFFFFFFFFFFF,
+                "\xff\xa7\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"),
+              0x7FFFFFFFFFFFFFFF,
               (isASCII) ? 1 : 2,
             ],
-            [ "first 65 bit code point",
+            [ "first 64 bit code point",
               (isASCII)
-              ? "\xff\x80\x9f\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
+              ? "\xff\x80\x88\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
               : I8_to_native(
-                "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                "\xff\xa8\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
               -1,
             ];
+            # Used when UV_MAX is allowed as a code point
+            #[ "highest 64 bit code point",
+            #  (isASCII)
+            #  ? "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+            #  : I8_to_native(
+            #    "\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"),
+            #  0xFFFFFFFFFFFFFFFF,
+            #  (isASCII) ? 1 : 2,
+            #],
+            #[ "first 65 bit code point",
+            #  (isASCII)
+            #  ? "\xff\x80\x9f\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
+            #  : I8_to_native(
+            #    "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+            #  0,
+            #];
         if (isASCII) {
             push @tests,
                 [ "overflow that old algorithm failed to detect",
@@ -1332,7 +1370,7 @@ foreach my $test (@tests) {
                     my $expect_warnings_for_overflow;
 
                     if ($warning_type == 0) {
-                        $eval_warn = "use warnings; no warnings 'deprecated'";
+                        $eval_warn = "use warnings";
                         $expect_regular_warnings = $use_warn_flag;
 
                         # We ordinarily expect overflow warnings here.  But it
@@ -1621,7 +1659,7 @@ foreach my $test (@tests) {
                     # not just when the $this_disallow_flags is set
                     if ($disallowed) {
                         my $this_flags = $this_disallow_flags|$::UTF8_CHECK_ONLY;
-                        my $eval_text = "use warnings; no warnings 'deprecated'; \$ret_ref ="
+                        my $eval_text = "use warnings; \$ret_ref ="
                                       . " test_utf8n_to_uvchr_error('"
                                       . "$this_bytes', $this_length,"
                                       . " $this_flags)";

@@ -2421,8 +2421,7 @@ EOF
         $Config{uvsize} == 8
 	  or skip("need large code-points for this test", 1);
 
-        # This is above IV_MAX on 32 bit machines, so turn off those warnings
-	fresh_perl_is('no warnings "deprecated"; /\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
+	fresh_perl_is('/\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
 		      "buffer overflow in TRIE_STORE_REVCHAR");
     }
 
