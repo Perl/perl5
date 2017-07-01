@@ -289,6 +289,23 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.2-RC1 - Roald Dahl, "The Three Little Pigs"
+
+L<Announced on 2017-07-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/07/msg245292.html>
+
+  The animal I really dig
+  Above all others is the pig.
+  Pigs are noble. Pigs are clever,
+  Pig are courteous. However,
+  Now and then, to break this rule,
+  One meets a pig who is a fool.
+  What, for example, would you say
+  If strolling through the woods one day,
+  Right there in front of you you saw
+  A pig who'd built his house of STRAW?
+  The Wolf who saw it licked his lips,
+  And said, 'That pig has had his chips.'
+
 =head2 v5.24.1 - Charles Dodgson [as "Lewis Carroll"], "The Hunting of the Snark", Fit 4: The Hunting
 
 L<Announced on 2017-01-14 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242259.html>
@@ -815,6 +832,21 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.4-RC1 - Roald Dahl, "Little Red Riding Hood and the Wolf"
+
+L<Announced on 2017-07-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/07/msg245293.html>
+
+  As soon as Wolf began to feel
+  That he would like a decent meal,
+  He went and knocked on Grandma's door.
+  When Grandma opened it, she saw
+  The sharp white teeth, the horrid grin,
+  And Wolfie said, 'May I come in?'
+  Poor Grandmamma was terrified,
+  'He's going to eat me up!' she cried.
+  And she was absolutely right.
+  He ate her up in one big bite.
 
 =head2 v5.22.3 - Charles Dodgson [as "Lewis Carroll"], "Phantasmagoria", Canto 6: Discomfyture
 
