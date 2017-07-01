@@ -40,6 +40,21 @@ sub requires_extended_utf8($) {
     return shift > $highest_non_extended_utf8_cp;
 }
 
+sub overflow_discern_len($) {
+
+    # Returns how many bytes are needed to tell if a UTF-8 sequence is for a
+    # code point that won't fit in the platform's word size.  Only the length
+    # of the sequence representing a single code point is needed.
+
+    if (isASCII) {
+        return ($::is64bit) ? 3 : ((shift == $::max_bytes)
+                                   ? 1
+                                   : 2);
+    }
+
+    return ($::is64bit) ? 2 : 8;
+}
+
 my @tests;
 {
     no warnings qw(portable overflow);
@@ -300,7 +315,6 @@ my @tests;
             : I8_to_native(
                 "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
             ($::is64bit) ? 0x100000000 : -1,   # Overflows on 32-bit systems
-            (isASCII && ! $::is64bit) ? 2 : 1,
         ],
     );
 
@@ -310,7 +324,6 @@ my @tests;
                 [ "overflow that old algorithm failed to detect",
                     "\xfe\x86\x80\x80\x80\x80\x80",
                     -1,
-                    2,
                 ];
         }
     }
@@ -331,7 +344,6 @@ my @tests;
               : I8_to_native(
                 "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
               -1,
-              (isASCII) ? 3 : 2,
             ];
         if (isASCII) {
             push @tests,
@@ -342,7 +354,6 @@ my @tests;
                 [ "overflow that old algorithm failed to detect",
                     "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
                     -1,
-                    3,
                 ];
         }
         else {
@@ -613,6 +624,9 @@ foreach my $test (@tests) {
             $non_cp_trailing_text = "if you see this, there is an error";
             $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
             $initially_malformed = 1;
+            if (! defined $needed_to_discern_len) {
+                $needed_to_discern_len = overflow_discern_len($length);
+            }
         }
         elsif (requires_extended_utf8($allowed_uv)) {
             $cp_message_qr = $extended_cp_message_qr;
