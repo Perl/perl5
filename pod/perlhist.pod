@@ -574,6 +574,7 @@ the strings?).
  Steve     5.22.3-RC4   2016-Oct-12
  Steve     5.22.3-RC5   2017-Jan-02
  Steve     5.22.3       2017-Jan-14
+ Steve     5.22.4-RC1   2017-Jul-01
 
  Ricardo   5.23.0       2015-Jun-20     The 5.23 development track
  Matthew   5.23.1       2015-Jul-20
@@ -598,6 +599,7 @@ the strings?).
  Steve     5.24.1-RC4   2016-Oct-12
  Steve     5.24.1-RC5   2017-Jan-02
  Steve     5.24.1       2017-Jan-14
+ Steve     5.24.2-RC1   2017-Jul-01
 
  Ricardo   5.25.0       2016-May-09     The 5.25 development track
  Sawyer X  5.25.1       2016-May-20
