@@ -1857,7 +1857,7 @@ S_hv_free_entries(pTHX_ HV *hv)
     XPVHV * const xhv = (XPVHV*)SvANY(hv);
     SV *sv;
 
-    PERL_ARGS_ASSERT_HFREEENTRIES;
+    PERL_ARGS_ASSERT_HV_FREE_ENTRIES;
 
     while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))||xhv->xhv_keys) {
 	SvREFCNT_dec(sv);
