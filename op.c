@@ -13495,7 +13495,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
  */
 
 static void
-S_check_for_bool_cxt(pTHX_ OP*o, U8 bool_flag, U8 maybe_flag)
+S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
 {
     OP *lop;
 
@@ -14292,7 +14292,7 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_PADHV:
             /* see if %h is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(aTHX_ o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+                S_check_for_bool_cxt(o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             if (o->op_type != OP_PADHV)
                 break;
             /* FALLTHROUGH */
@@ -14790,7 +14790,7 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_REF:
             /* see if ref() is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(aTHX_ o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+                S_check_for_bool_cxt(o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             break;
 
 	case OP_CUSTOM: {
