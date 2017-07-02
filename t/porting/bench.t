@@ -229,7 +229,7 @@ for my $test (
         "croak:  no such perl"
     ],
     [
-        "--grindargs=Boz --tests=call::sub::empty ./perl=A ./perl=B",
+        "--grindargs=Boz --debug --tests=call::sub::empty ./perl=A ./perl=B",
         qr{Error: while executing call::sub::empty/A empty/short loop:\nunexpected code or cachegrind output:\n},
         "croak: cachegrind output format "
     ],
