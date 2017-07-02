@@ -133,6 +133,12 @@ state sub;
 EXPECT
 Missing name in "state sub" at - line 2.
 ########
+# NAME our sub pack::foo
+our sub foo::bar;
+EXPECT
+No package name allowed for subroutine &foo::bar in "our" at - line 1, near "our sub foo::bar"
+Execution of - aborted due to compilation errors.
+########
 # NAME my sub pack::foo
 use feature 'lexical_subs', 'state';
 my sub foo::bar;

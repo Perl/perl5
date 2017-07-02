@@ -8848,7 +8848,8 @@ S_pending_ident(pTHX)
         if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
             if (has_colon)
                 yyerror_pv(Perl_form(aTHX_ "No package name allowed for "
-                                  "variable %s in \"our\"",
+                                  "%se %s in \"our\"",
+                                  *PL_tokenbuf=='&' ?"subroutin":"variabl",
                                   PL_tokenbuf), UTF ? SVf_UTF8 : 0);
             tmp = allocmy(PL_tokenbuf, tokenbuf_len, UTF ? SVf_UTF8 : 0);
         }
