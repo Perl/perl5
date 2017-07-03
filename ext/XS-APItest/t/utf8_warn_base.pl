@@ -377,6 +377,70 @@ my @tests = (
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
+    [ "requires at least 32 bits",
+        (isASCII)
+         ?  "\xfe\x82\x80\x80\x80\x80\x80"
+         : I8_to_native(
+            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+        # This code point is chosen so that it is representable in a UV on
+        # 32-bit machines
+        $::UTF8_WARN_ABOVE_31_BIT, $::UTF8_DISALLOW_ABOVE_31_BIT,
+        $::UTF8_GOT_ABOVE_31_BIT,
+        'utf8', 0x80000000,
+        (isASCII) ? 7 : $::max_bytes,
+        (isASCII) ? 1 : 8,
+        nonportable_regex(0x80000000)
+    ],
+    [ "highest 32 bit code point",
+        (isASCII)
+         ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+         : I8_to_native(
+            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
+        $::UTF8_WARN_ABOVE_31_BIT, $::UTF8_DISALLOW_ABOVE_31_BIT,
+        $::UTF8_GOT_ABOVE_31_BIT,
+        'utf8', 0xFFFFFFFF,
+        (isASCII) ? 7 : $::max_bytes,
+        (isASCII) ? 1 : 8,
+        nonportable_regex(0xffffffff)
+    ],
+    [ "requires at least 32 bits, and use SUPER-type flags, instead of"
+    . " ABOVE_31_BIT",
+        (isASCII)
+         ? "\xfe\x82\x80\x80\x80\x80\x80"
+         : I8_to_native(
+           "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+        $::UTF8_WARN_SUPER, $::UTF8_DISALLOW_SUPER, $::UTF8_GOT_SUPER,
+        'utf8', 0x80000000,
+        (isASCII) ? 7 : $::max_bytes,
+        1,
+        nonportable_regex(0x80000000)
+    ],
+    [ "overflow with warnings/disallow for more than 31 bits",
+        # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
+        # with overflow.  The overflow malformation is never allowed, so
+        # preventing it takes precedence if the ABOVE_31_BIT options would
+        # otherwise allow in an overflowing value.  The ASCII code points (1
+        # for 32-bits; 1 for 64) were chosen because the old overflow
+        # detection algorithm did not catch them; this means this test also
+        # checks for that fix.  The EBCDIC are arbitrary overflowing ones
+        # since we have no reports of failures with it.
+       (($::is64bit)
+        ? ((isASCII)
+           ?    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+           : I8_to_native(
+                "\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
+        : ((isASCII)
+           ?    "\xfe\x86\x80\x80\x80\x80\x80"
+           : I8_to_native(
+                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
+        $::UTF8_WARN_ABOVE_31_BIT,
+        $::UTF8_DISALLOW_ABOVE_31_BIT,
+        $::UTF8_GOT_ABOVE_31_BIT,
+        'utf8', 0,
+        (! isASCII || $::is64bit) ? $::max_bytes : 7,
+        (isASCII || $::is64bit) ? 2 : 8,
+        qr/overflows/
+    ],
 );
 
 if (! $::is64bit) {
@@ -407,66 +471,6 @@ else {
             $::max_bytes, (isASCII) ? 1 : 7,
             qr/and( is)? not portable/
         ];
-        [ "requires at least 32 bits",
-            (isASCII)
-             ?  "\xfe\x82\x80\x80\x80\x80\x80"
-             : I8_to_native(
-                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-            # This code point is chosen so that it is representable in a UV on
-            # 32-bit machines
-            $::UTF8_WARN_ABOVE_31_BIT, $::UTF8_DISALLOW_ABOVE_31_BIT,
-            $::UTF8_GOT_ABOVE_31_BIT,
-            'utf8', 0x80000000,
-            (isASCII) ? 7 : $::max_bytes,
-            (isASCII) ? 1 : 8,
-            nonportable_regex(0x80000000)
-        ],
-        [ "highest 32 bit code point",
-            (isASCII)
-             ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
-             : I8_to_native(
-                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
-            $::UTF8_WARN_ABOVE_31_BIT, $::UTF8_DISALLOW_ABOVE_31_BIT,
-            $::UTF8_GOT_ABOVE_31_BIT,
-            'utf8', 0xFFFFFFFF,
-            (isASCII) ? 7 : $::max_bytes,
-            (isASCII) ? 1 : 8,
-            nonportable_regex(0xffffffff)
-        ],
-        [ "requires at least 32 bits, and use SUPER-type flags, instead of"
-        . " ABOVE_31_BIT",
-            (isASCII)
-             ? "\xfe\x82\x80\x80\x80\x80\x80"
-             : I8_to_native(
-               "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-            $::UTF8_WARN_SUPER, $::UTF8_DISALLOW_SUPER, $::UTF8_GOT_SUPER,
-            'utf8', 0x80000000,
-            (isASCII) ? 7 : $::max_bytes,
-            1,
-            nonportable_regex(0x80000000)
-        ],
-        [ "overflow with warnings/disallow for more than 31 bits",
-            # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
-            # with overflow.  The overflow malformation is never allowed, so
-            # preventing it takes precedence if the ABOVE_31_BIT options would
-            # otherwise allow in an overflowing value.  The ASCII code points (1
-            # for 32-bits; 1 for 64) were chosen because the old overflow
-            # detection algorithm did not catch them; this means this test also
-            # checks for that fix.  The EBCDIC are arbitrary overflowing ones
-            # since we have no reports of failures with it.
-            ((isASCII)
-               ?    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-               : I8_to_native(
-                    "\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0")),
-            $::UTF8_WARN_ABOVE_31_BIT,
-            $::UTF8_DISALLOW_ABOVE_31_BIT,
-            $::UTF8_GOT_ABOVE_31_BIT,
-            'utf8', 0,
-            (! isASCII || $::is64bit) ? $::max_bytes : 7,
-            (isASCII || $::is64bit) ? 2 : 8,
-            qr/overflows/
-        ];
-
     if (! isASCII) {
         push @tests,   # These could falsely show wrongly in a naive
                        # implementation

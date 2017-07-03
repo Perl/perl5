@@ -237,8 +237,9 @@ SKIP: {   # [perl #128738]
         skip("test is only valid on 64-bit ints", 2);
     }
     else {
+        no warnings 'deprecated';
         my $a;
-        eval "\$a = q \x{7fffffff}Hello, \\\\whirled!\x{7fffffff}";
+        eval "\$a = q \x{ffffffff}Hello, \\\\whirled!\x{ffffffff}";
         is $@, "",
                "No errors in eval'ing a string with large code point delimiter";
         is $a, 'Hello, \whirled!',

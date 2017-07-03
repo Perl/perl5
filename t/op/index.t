@@ -130,16 +130,17 @@ is(rindex($a, "foo",    ), 0);
 }
 
 {
-    my $a = eval q{"\x{7fffffff}"};
+    no warnings 'deprecated'; # These are above IV_MAX on 32 bit machines
+    my $a = eval q{"\x{80000000}"};
     my $s = $a.'defxyz';
-    is(index($s, 'def'), 1, "0x7fffffff is a single character");
+    is(index($s, 'def'), 1, "0x80000000 is a single character");
 
-    my $b = eval q{"\x{7ffffffd}"};
+    my $b = eval q{"\x{fffffffd}"};
     my $t = $b.'pqrxyz';
-    is(index($t, 'pqr'), 1, "0x7ffffffd is a single character");
+    is(index($t, 'pqr'), 1, "0xfffffffd is a single character");
 
     local ${^UTF8CACHE} = -1;
-    is(index($t, 'xyz'), 4, "0x7ffffffd and utf8cache");
+    is(index($t, 'xyz'), 4, "0xfffffffd and utf8cache");
 }
 
 

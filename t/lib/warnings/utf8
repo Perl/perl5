@@ -99,11 +99,12 @@ Operation "uc" returns its argument for non-Unicode code point 0x110000 at - lin
 Operation "uc" returns its argument for UTF-16 surrogate U+D800 at - line 5.
 ########
 use warnings 'utf8';
-my $big_nonUnicode = uc(chr(0x7fff_ffff));
+no warnings 'deprecated'; # This is above IV_MAX on 32 bit machines
+my $big_nonUnicode = uc(chr(0x8000_0000));
 no warnings 'non_unicode';
-my $big_nonUnicode = uc(chr(0x7fff_ffff));
+my $big_nonUnicode = uc(chr(0x8000_0000));
 EXPECT
-Operation "uc" returns its argument for non-Unicode code point 0x7FFFFFFF at - line 2.
+Operation "uc" returns its argument for non-Unicode code point 0x80000000 at - line 3.
 ########
 use warnings 'utf8';
 my $d7ff  = lc pack("U", 0xD7FF);
@@ -734,6 +735,39 @@ $a = fc("\x{102}");
 $a = uc("\x{103}");
 $a = ucfirst("\x{104}");
 EXPECT
+########
+# NAME Deprecation of too-large code points
+require "../test.pl";
+use warnings 'non_unicode';
+my $max_cp = ~0 >> 1;
+my $max_char = chr $max_cp;
+my $to_warn_cp = $max_cp + 1;
+my $to_warn_char = chr $to_warn_cp;
+$max_char =~ /[\x{110000}\P{Unassigned}]/;
+$to_warn_char =~ /[\x{110000}\P{Unassigned}]/;
+my $temp = qr/$max_char/;
+$temp = qr/$to_warn_char/;
+$temp = uc($max_char);
+$temp = uc($to_warn_char);
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh $max_char, "\n";
+print $fh $to_warn_char, "\n";
+close $fh;
+EXPECT
+OPTION regex
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in pattern match \(m//\) at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in regexp compilation at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in regexp compilation at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in regexp compilation at - line \d+.
+Operation "uc" returns its argument for non-Unicode code point 0x7F+ at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in uc at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
+Operation "uc" returns its argument for non-Unicode code point 0x80+ at - line \d+.
+Code point 0x7F+ is not Unicode, may not be portable in print at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 in print at - line \d+.
 ########
 # NAME  [perl #127262]
 BEGIN{
