@@ -4161,6 +4161,9 @@ Perl_init_stacks(pTHX)
     PL_curstackinfo = new_stackinfo(REASONABLE(128),
 				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
     PL_curstackinfo->si_type = PERLSI_MAIN;
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+    PL_curstackinfo->si_stack_hwm = 0;
+#endif
     PL_curstack = PL_curstackinfo->si_stack;
     PL_mainstack = PL_curstack;		/* remember in case we switch stacks */
 
