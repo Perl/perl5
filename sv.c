@@ -15407,6 +15407,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     init_constants();
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_undef, &PL_sv_undef);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_zero, &PL_sv_zero);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
     ptr_table_store(PL_ptr_table, &proto_perl->Ipadname_const,
 		    &PL_padname_const);
@@ -15914,6 +15915,12 @@ Perl_init_constants(pTHX)
 				  |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK;
 
+    SvANY(&PL_sv_zero)		= new_XPVNV();
+    SvREFCNT(&PL_sv_zero)	= SvREFCNT_IMMORTAL;
+    SvFLAGS(&PL_sv_zero)	= SVt_PVNV|SVf_READONLY|SVf_PROTECT
+				  |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
+				  |SVp_POK|SVf_POK;
+
     SvPV_set(&PL_sv_no, (char*)PL_No);
     SvCUR_set(&PL_sv_no, 0);
     SvLEN_set(&PL_sv_no, 0);
@@ -15925,6 +15932,12 @@ Perl_init_constants(pTHX)
     SvLEN_set(&PL_sv_yes, 0);
     SvIV_set(&PL_sv_yes, 1);
     SvNV_set(&PL_sv_yes, 1);
+
+    SvPV_set(&PL_sv_zero, (char*)PL_Zero);
+    SvCUR_set(&PL_sv_zero, 1);
+    SvLEN_set(&PL_sv_zero, 0);
+    SvIV_set(&PL_sv_zero, 0);
+    SvNV_set(&PL_sv_zero, 0);
 
     PadnamePV(&PL_padname_const) = (char *)PL_No;
 }

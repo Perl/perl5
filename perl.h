@@ -4766,6 +4766,8 @@ EXTCONST char PL_Yes[]
   INIT("1");
 EXTCONST char PL_No[]
   INIT("");
+EXTCONST char PL_Zero[]
+  INIT("0");
 EXTCONST char PL_hexdigit[]
   INIT("0123456789abcdef0123456789ABCDEF");
 
