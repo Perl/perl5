@@ -12,7 +12,7 @@ $DOWARN = 1; # enable run-time warnings now
 
 use Config;
 
-plan( tests => 58 );
+plan( tests => 52 );
 
 eval 'use v5.5.640';
 is( $@, '', "use v5.5.640; $@");
@@ -223,27 +223,6 @@ is( $v, "$]", qq{\$^V eq "\$]"});
 $v = $revision + $version/1000 + $subversion/1000000;
 
 ok( abs($v - $]) < 10**-8 , "\$^V == \$] (numeric)" );
-
-{
-
-  no warnings 'deprecated'; # These are above IV_MAX on 32 bit machines
-  # [ID 20010902.001 (#7608)] check if v-strings handle full UV range or not
-  if ( $Config{'uvsize'} >= 4 ) {
-    is(  sprintf("%vd", eval 'v2147483647.2147483648'),   '2147483647.2147483648', 'v-string > IV_MAX[32-bit]' );
-    is(  sprintf("%vd", eval 'v3141592653'),              '3141592653',            'IV_MAX < v-string < UV_MAX[32-bit]');
-    is(  sprintf("%vd", eval 'v4294967295'),              '4294967295',            'v-string == UV_MAX[32-bit] - 1');
-  }
-
-  SKIP: {
-    skip("No quads", 3) if $Config{uvsize} < 8;
-
-    if ( $Config{'uvsize'} >= 8 ) {
-      is(  sprintf("%vd", eval 'v9223372036854775807.9223372036854775808'),   '9223372036854775807.9223372036854775808', 'v-string > IV_MAX[64-bit]' );
-      is(  sprintf("%vd", eval 'v17446744073709551615'),                      '17446744073709551615',                    'IV_MAX < v-string < UV_MAX[64-bit]');
-      is(  sprintf("%vd", eval 'v18446744073709551615'),                      '18446744073709551615',                    'v-string == UV_MAX[64-bit] - 1');
-    }
-  }
-}
 
 # Tests for magic v-strings 
 
