@@ -35,9 +35,24 @@ struct jmpenv {
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
     U16                 je_old_delaymagic; /* saved PL_delaymagic */
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+    SSize_t             je_old_stack_hwm;
+#endif
 };
 
 typedef struct jmpenv JMPENV;
+
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#  define JE_OLD_STACK_HWM_zero      PL_start_env.je_old_stack_hwm = 0
+#  define JE_OLD_STACK_HWM_save(je)  \
+        (je).je_old_stack_hwm = PL_curstackinfo->si_stack_hwm
+#  define JE_OLD_STACK_HWM_restore(je)  \
+        PL_curstackinfo->si_stack_hwm = (je).je_old_stack_hwm
+#else
+#  define JE_OLD_STACK_HWM_zero        NOOP
+#  define JE_OLD_STACK_HWM_save(je)    NOOP
+#  define JE_OLD_STACK_HWM_restore(je) NOOP
+#endif
 
 /*
  * How to build the first jmpenv.
@@ -57,6 +72,7 @@ typedef struct jmpenv JMPENV;
 	PL_start_env.je_ret = -1;		\
 	PL_start_env.je_mustcatch = TRUE;	\
 	PL_start_env.je_old_delaymagic = 0;	\
+        JE_OLD_STACK_HWM_zero;                  \
     } STMT_END
 
 /*
@@ -102,7 +118,9 @@ typedef struct jmpenv JMPENV;
 	    Perl_deb(aTHX_ "JUMPENV_PUSH level=%d at %s:%d\n",		\
 		         i,  __FILE__, __LINE__);})			\
 	cur_env.je_prev = PL_top_env;					\
+        JE_OLD_STACK_HWM_save(cur_env);                                 \
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
+        JE_OLD_STACK_HWM_restore(cur_env);                              \
 	PL_top_env = &cur_env;						\
 	cur_env.je_mustcatch = FALSE;					\
 	cur_env.je_old_delaymagic = PL_delaymagic;			\
