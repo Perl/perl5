@@ -129,7 +129,8 @@ is(rindex($a, "foo",    ), 0);
     is (rindex($text, $search_octets), -1);
 }
 
-{
+SKIP: {
+    skip("Not a 64-bit machine", 3) if length sprintf("%x", ~0) <= 8;
     no warnings 'deprecated'; # These are above IV_MAX on 32 bit machines
     my $a = eval q{"\x{80000000}"};
     my $s = $a.'defxyz';
