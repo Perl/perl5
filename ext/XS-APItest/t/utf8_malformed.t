@@ -176,14 +176,6 @@ if (isASCII && ! $::is64bit) {    # 32-bit ASCII platform
     no warnings 'portable';
     push @malformations,
         [ "overflow malformation",
-            "\xfe\x84\x80\x80\x80\x80\x80",  # Represents 2**32
-            7,
-            $::UTF8_ALLOW_OVERFLOW, $::UTF8_GOT_OVERFLOW,
-            $REPLACEMENT,
-            7, 2,
-            qr/overflows/
-        ],
-        [ "overflow malformation",
             "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
             $::max_bytes,
             $::UTF8_ALLOW_OVERFLOW, $::UTF8_GOT_OVERFLOW,
