@@ -167,15 +167,6 @@ my @malformations = (
 
 if (isASCII && ! $::is64bit) {    # 32-bit ASCII platform
     no warnings 'portable';
-    push @malformations,
-        [ "overflow malformation",
-            "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
-            $::max_bytes,
-            $::UTF8_ALLOW_OVERFLOW, $::UTF8_GOT_OVERFLOW,
-            $REPLACEMENT,
-            $::max_bytes, 1,
-            qr/overflows/
-        ];
 }
 else { # 64-bit ASCII, or EBCDIC of any size.
     # On EBCDIC platforms, another overlong test is needed even on 32-bit

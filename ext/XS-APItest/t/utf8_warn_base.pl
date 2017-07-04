@@ -348,6 +348,14 @@ my @tests;
         }
     }
 
+    if (isASCII) {
+        push @tests,
+            [ "Lowest code point requiring 13 bytes to represent", # 2**36
+                "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
+                ($::is64bit) ? 0x1000000000 : -1,    # overflows on 32bit
+            ],
+    };
+
     if ($::is64bit) {
         push @tests,
             [ "highest 64 bit code point",
@@ -367,10 +375,6 @@ my @tests;
             ];
         if (isASCII) {
             push @tests,
-                [ "Lowest code point requiring 13 bytes to represent",
-                    "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
-                    0x1000000000,
-                ],
                 [ "overflow that old algorithm failed to detect",
                     "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf",
                     -1,
