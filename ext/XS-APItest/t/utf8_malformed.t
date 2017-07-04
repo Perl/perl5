@@ -55,13 +55,6 @@ my @malformations = (
         2, 3,
         qr/unexpected non-continuation byte .* 2 bytes after start byte/
     ],
-    [ "too short malformation", I8_to_native("\xf1${I8c}a"), 2,
-        # Having the 'a' after this, but saying there are only 2 bytes also
-        # tests that we pay attention to the passed in length
-        $::UTF8_ALLOW_SHORT, $::UTF8_GOT_SHORT, $REPLACEMENT,
-        2, 2,
-        qr/2 bytes available, need 4/
-    ],
     [ "overlong malformation, lowest 2-byte",
         (isASCII) ? "\xc0\x80" : I8_to_native("\xc0\xa0"),
         2,
