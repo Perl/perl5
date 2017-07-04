@@ -13488,14 +13488,56 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
 /* See if the ops following o are such that o will always be executed in
  * boolean context: that is, the SV which o pushes onto the stack will
- * only ever be used by later ops with SvTRUE(sv) or similar.
+ * only ever be consumed by later ops via SvTRUE(sv) or similar.
  * If so, set a suitable private flag on o. Normally this will be
- * bool_flag; but if it's only possible to determine booleaness at run
- * time (e.g. sub f { ....; (%h || $y) }), then set maybe_flag instead.
+ * bool_flag; but see below why maybe_flag is needed too.
+ *
+ * Typically the two flags you pass will be the generic OPpTRUEBOOL and
+ * OPpMAYBE_TRUEBOOL, buts it's possible that for some ops those bits may
+ * already be taken, so you'll have to give that op two different flags.
+ *
+ * More explanation of 'maybe_flag' and 'safe_and' parameters.
+ * The binary logical ops &&, ||, // (plus 'if' and 'unless' which use
+ * those underlying ops) short-circuit, which means that rather than
+ * necessarily returning a truth value, they may return the LH argument,
+ * which may not be boolean. For example in $x = (keys %h || -1), keys
+ * should return a key count rather than a boolean, even though its
+ * sort-of being used in boolean context.
+ *
+ * So we only consider such logical ops to provide boolean context to
+ * their LH argument if they themselves are in void or boolean context.
+ * However, sometimes the context isn't known until run-time. In this
+ * case the op is marked with the maybe_flag flag it.
+ *
+ * Consider the following.
+ *
+ *     sub f { ....;  if (%h) { .... } }
+ *
+ * This is actually compiled as
+ *
+ *     sub f { ....;  %h && do { .... } }
+ *
+ * Here we won't know until runtime whether the final statement (and hence
+ * the &&) is in void context and so is safe to return a boolean value.
+ * So mark o with maybe_flag rather than the bool_flag.
+ * Note that there is cost associated with determining context at runtime
+ * (e.g. a call to block_gimme()), so it may not be worth setting (at
+ * compile time) and testing (at runtime) maybe_flag if the scalar verses
+ * boolean costs savings are marginal.
+ *
+ * However, we can do slightly better with && (compared to || and //):
+ * this op only returns its LH argument when that argument is false. In
+ * this case, as long as the op promises to return a false value which is
+ * valid in both boolean and scalar contexts, we can mark an op consumed
+ * by && with bool_flag rather than maybe_flag.
+ * For example as long as pp_padhv and pp_rv2hv return &PL_sv_zero rather
+ * than &PL_sv_no for a false result in boolean context, then it's safe. An
+ * op which promises to handle this case is indicated by setting safe_and
+ * to true.
  */
 
 static void
-S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
+S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
 {
     OP *lop;
 
@@ -13535,9 +13577,15 @@ S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
          * that whatever follows consumes the arg only in boolean context
          * too.
          */
+        case OP_AND:
+            if (safe_and) {
+                o->op_private |= bool_flag;
+                lop = NULL;
+                break;
+            }
+            /* FALLTHROUGH */
         case OP_OR:
         case OP_DOR:
-        case OP_AND:
             if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
                 o->op_private |= bool_flag;
                 lop = NULL;
@@ -14292,7 +14340,7 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_PADHV:
             /* see if %h is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             if (o->op_type != OP_PADHV)
                 break;
             /* FALLTHROUGH */
@@ -14790,7 +14838,7 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_REF:
             /* see if ref() is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             break;
 
 	case OP_CUSTOM: {
