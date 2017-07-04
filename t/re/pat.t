@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 837;  # Update this when adding/deleting tests.
+plan tests => 843;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -138,6 +138,21 @@ sub run_tests {
         $null = "";
         $xyz =~ /$null/;
         is($&, $xyz, $message);
+
+        # each entry: regexp, match string, $&, //o match success
+        my @tests =
+          (
+           [ "", "xy", "x", 1 ],
+           [ "y", "yz", "y", !1 ],
+          );
+        for my $test (@tests) {
+            my ($re, $str, $matched, $omatch) = @$test;
+            $xyz =~ /x/o;
+            ok($str =~ /$re/, "$str matches /$re/");
+            is($&, $matched, "on $matched");
+            $xyz =~ /x/o;
+            is($str =~ /$re/o, $omatch, "$str matches /$re/o (or not)");
+        }
     }
 
     {

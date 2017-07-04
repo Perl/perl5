@@ -163,15 +163,9 @@ PP(pp_regcomp)
     /* handle the empty pattern */
     if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm) {
         if (PL_curpm == PL_reg_curpm) {
-            if (PL_curpm_under) {
-                if (PL_curpm_under == PL_reg_curpm) {
-                    Perl_croak(aTHX_ "Infinite recursion via empty pattern");
-                } else {
-                    pm = PL_curpm_under;
-                }
+            if (PL_curpm_under && PL_curpm_under == PL_reg_curpm) {
+                Perl_croak(aTHX_ "Infinite recursion via empty pattern");
             }
-        } else {
-            pm = PL_curpm;
         }
     }
 
