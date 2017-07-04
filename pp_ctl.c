@@ -958,7 +958,7 @@ PP(pp_grepstart)
     if (PL_stack_base + TOPMARK == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
-	    mXPUSHi(0);
+	    XPUSHs(&PL_sv_zero);
 	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + TOPMARK + 1;
@@ -1945,7 +1945,7 @@ PP(pp_caller)
     }
     else {
 	PUSHs(newSVpvs_flags("(eval)", SVs_TEMP));
-	mPUSHi(0);
+	PUSHs(&PL_sv_zero);
     }
     gimme = cx->blk_gimme;
     if (gimme == G_VOID)
@@ -5634,7 +5634,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	DEFSV_set(upstream);
 	PUSHMARK(SP);
-	mPUSHi(0);
+	PUSHs(&PL_sv_zero);
 	if (filter_state) {
 	    PUSHs(filter_state);
 	}

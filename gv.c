@@ -3180,7 +3180,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case abs_amg:
 	   if ((cvp[off1=lt_amg] || cvp[off1=ncmp_amg])
 	       && ((cv = cvp[off=neg_amg]) || (cv = cvp[off=subtr_amg]))) {
-	     SV* const nullsv=sv_2mortal(newSViv(0));
+	     SV* const nullsv=&PL_sv_zero;
 	     if (off1==lt_amg) {
 	       SV* const lessp = amagic_call(left,nullsv,
 				       lt_amg,AMGf_noright);
@@ -3204,7 +3204,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case neg_amg:
 	   if ((cv = cvp[off=subtr_amg])) {
 	     right = left;
-	     left = sv_2mortal(newSViv(0));
+	     left = &PL_sv_zero;
 	     lr = 1;
 	   }
 	   break;

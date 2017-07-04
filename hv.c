@@ -995,12 +995,13 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
             return magic_scalarpack(hv, mg);
     }
 
-    sv = sv_newmortal();
-    if (HvUSEDKEYS((HV *)hv))
+    if (HvUSEDKEYS((HV *)hv)) {
+        sv = sv_newmortal();
         Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
                 (long)HvFILL(hv), (long)HvMAX(hv) + 1);
+    }
     else
-        sv_setiv(sv, 0);
+        sv = &PL_sv_zero;
     
     return sv;
 }
