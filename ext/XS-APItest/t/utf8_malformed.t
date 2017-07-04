@@ -213,33 +213,6 @@ else { # 64-bit ASCII, or EBCDIC of any size.
             $::max_bytes, (isASCII) ? 7 : 8,
             qr/overlong/,
         ];
-
-    if (! $::is64bit) {   # 32-bit EBCDIC
-        push @malformations,
-        [ "overflow malformation",
-            I8_to_native(
-                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
-            $::max_bytes,
-            $::UTF8_ALLOW_OVERFLOW, $::UTF8_GOT_OVERFLOW,
-            $REPLACEMENT,
-            $::max_bytes, 8,
-            qr/overflows/
-        ];
-    }
-    else {  # 64-bit, either ASCII or EBCDIC
-        push @malformations,
-            [ "overflow malformation",
-               (isASCII)
-                ?   "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
-                : I8_to_native(
-                    "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                $::max_bytes,
-                $::UTF8_ALLOW_OVERFLOW, $::UTF8_GOT_OVERFLOW,
-                $REPLACEMENT,
-                $::max_bytes, (isASCII) ? 3 : 2,
-                qr/overflows/
-            ];
-    }
 }
 
 # For each overlong malformation in the list, we modify it, so that there are
