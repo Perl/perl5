@@ -412,6 +412,10 @@ my @tests;
     if (! $::is64bit) {
         if (isASCII) {
             push @tests,
+                [ "overlong malformation, but naively looks like overflow",
+                    "\xff\x80\x80\x80\x80\x80\x80\x83\xbf\xbf\xbf\xbf\xbf",
+                    0xFFFFFFFF,
+                ],
                 [ "overflow that old algorithm failed to detect",
                     "\xfe\x86\x80\x80\x80\x80\x80",
                     -1,
