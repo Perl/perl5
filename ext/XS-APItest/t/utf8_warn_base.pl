@@ -1,10 +1,11 @@
 #!perl -w
 
 # This is a base file to be used by various .t's in its directory
-# It tests various code points that are "problematic", and verifies that the
-# correct warnings/flags etc are generated when using them.  It also takes the
-# UTF-8 for some of them and perturbs it to be malformed in various ways, and
-# tests that this gets appropriately detected.
+# It tests various malformed UTF-8 sequences and some code points that are
+# "problematic", and verifies that the correct warnings/flags etc are
+# generated when using them.  For the code points, it also takes the UTF-8 and
+# perturbs it to be malformed in various ways, and tests that this gets
+# appropriately detected.
 
 use strict;
 use Test::More;
@@ -38,6 +39,16 @@ sub requires_extended_utf8($) {
     # stands for one that overflows the word size, so won't fit in 31 bits.
 
     return shift > $highest_non_extended_utf8_cp;
+}
+
+sub is_extended_utf8($) {
+
+    # Returns a boolean as to whether or not the input UTF-8 sequence uses
+    # Perl extended UTF-8.
+
+    my $byte = substr(shift, 0, 1);
+    return ord $byte >= 0xFE if isASCII;
+    return $byte == I8_to_native("\xFF");
 }
 
 sub overflow_discern_len($) {
@@ -89,6 +100,22 @@ my @tests;
         #                          like being a surrogate; 0 indicates we need
         #                          the whole string.  Some categories have a
         #                          default that is used if this is omitted.
+        [ "overlong malformation, lowest 2-byte",
+            (isASCII) ? "\xc0\x80" : I8_to_native("\xc0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest 2-byte",
+            (isASCII) ? "\xc1\xbf" : I8_to_native("\xc4\xbf"),
+            (isASCII) ? 0x7F : utf8::unicode_to_native(0x9F),
+        ],
+        [ "overlong malformation, lowest 3-byte",
+            (isASCII) ? "\xe0\x80\x80" : I8_to_native("\xe0\xa0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest 3-byte",
+            (isASCII) ? "\xe0\x9f\xbf" : I8_to_native("\xe0\xbf\xbf"),
+            (isASCII) ? 0x7FF : 0x3FF,
+        ],
         [ "lowest surrogate",
             (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
             0xD800,
@@ -120,6 +147,14 @@ my @tests;
         [ "non-character code point U+FFFF",
             (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
             0xFFFF,
+        ],
+        [ "overlong malformation, lowest 4-byte",
+            (isASCII) ? "\xf0\x80\x80\x80" : I8_to_native("\xf0\xa0\xa0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest 4-byte",
+            (isASCII) ? "\xf0\x8F\xbf\xbf" : I8_to_native("\xf0\xaf\xbf\xbf"),
+            (isASCII) ? 0xFFFF : 0x3FFF,
         ],
         [ "non-character code point U+1FFFE",
             (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
@@ -315,6 +350,42 @@ my @tests;
             (isASCII) ? 0x140000 : 0x200000,
             1,
         ],
+        [ "overlong malformation, lowest 5-byte",
+            (isASCII)
+            ?              "\xf8\x80\x80\x80\x80"
+            : I8_to_native("\xf8\xa0\xa0\xa0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest 5-byte",
+            (isASCII)
+            ?              "\xf8\x87\xbf\xbf\xbf"
+            : I8_to_native("\xf8\xa7\xbf\xbf\xbf"),
+            (isASCII) ? 0x1FFFFF : 0x3FFFF,
+        ],
+        [ "overlong malformation, lowest 6-byte",
+            (isASCII)
+            ?              "\xfc\x80\x80\x80\x80\x80"
+            : I8_to_native("\xfc\xa0\xa0\xa0\xa0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest 6-byte",
+            (isASCII)
+            ?              "\xfc\x83\xbf\xbf\xbf\xbf"
+            : I8_to_native("\xfc\xa3\xbf\xbf\xbf\xbf"),
+            (isASCII) ? 0x3FFFFFF : 0x3FFFFF,
+        ],
+        [ "overlong malformation, lowest 7-byte",
+            (isASCII)
+            ?              "\xfe\x80\x80\x80\x80\x80\x80"
+            : I8_to_native("\xfe\xa0\xa0\xa0\xa0\xa0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest 7-byte",
+            (isASCII)
+            ?              "\xfe\x81\xbf\xbf\xbf\xbf\xbf"
+            : I8_to_native("\xfe\xa1\xbf\xbf\xbf\xbf\xbf"),
+            (isASCII) ? 0x7FFFFFFF : 0x3FFFFFF,
+        ],
         [ "lowest 32 bit code point",
             (isASCII)
             ?  "\xfe\x82\x80\x80\x80\x80\x80"
@@ -347,6 +418,22 @@ my @tests;
                 ];
         }
     }
+
+    push @tests,
+        [ "overlong malformation, lowest max-byte",
+            (isASCII)
+             ?      "\xff\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
+             : I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+            0,   # NUL
+        ],
+        [ "overlong malformation, highest max-byte",
+            (isASCII)    # 2**36-1 on ASCII; 2**30-1 on EBCDIC
+             ?      "\xff\x80\x80\x80\x80\x80\x80\xbf\xbf\xbf\xbf\xbf\xbf"
+             : I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xbf\xbf\xbf\xbf\xbf\xbf"),
+            (isASCII) ? (($::is64bit) ? 0xFFFFFFFFF : -1) : 0x3FFFFFFF,
+        ];
 
     if (isASCII) {
         push @tests,
@@ -572,6 +659,7 @@ foreach my $test (@tests) {
     my ($testname, $bytes, $allowed_uv, $needed_to_discern_len) = @$test;
 
     my $length = length $bytes;
+    my $initially_overlong = $testname =~ /overlong/;
     my $will_overflow = $allowed_uv < 0;
 
     my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
@@ -619,11 +707,42 @@ foreach my $test (@tests) {
     my $extended_non_cp_trailing_text
                         = "is a Perl extension, and so is not portable";
 
+    # What bytes should have been used to specify a code point that has been
+    # specified as an overlong.
+    my $correct_bytes_for_overlong;
+
     # Is this test malformed from the beginning?  If so, we know to generally
     # expect that the tests will show it isn't valid.
     my $initially_malformed = 0;
 
-    if ($will_overflow || $allowed_uv > 0x10FFFF) {
+    if ($initially_overlong) {
+        $non_cp_trailing_text = "if you see this, there is an error";
+        $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
+        if (! defined $needed_to_discern_len) {
+            $needed_to_discern_len = overlong_discern_len($bytes);
+        }
+        $initially_malformed = 1;
+        $correct_bytes_for_overlong = display_bytes_no_quotes(chr $allowed_uv);
+        $utf8n_flag_to_warn     = 0;
+        $utf8n_flag_to_disallow = 0;
+
+        $utf8n_flag_to_warn_complement =     $::UTF8_WARN_SURROGATE;
+        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE;
+        if (! $will_overflow && $allowed_uv <= 0x10FFFF) {
+            $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_SUPER;
+            $utf8n_flag_to_disallow_complement |= $::UTF8_DISALLOW_SUPER;
+            if (($allowed_uv & 0xFFFF) != 0xFFFF) {
+                $utf8n_flag_to_warn_complement      |= $::UTF8_WARN_NONCHAR;
+                $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_NONCHAR;
+            }
+        }
+        if (! is_extended_utf8($bytes)) {
+            $utf8n_flag_to_warn_complement |= $::UTF8_WARN_PERL_EXTENDED;
+            $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_PERL_EXTENDED;
+        }
+        $controlling_warning_category = 'utf8';
+    }
+    elsif($will_overflow || $allowed_uv > 0x10FFFF) {
 
         # Set the SUPER flags; later, we test for PERL_EXTENDED as well.
         $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
@@ -742,10 +861,12 @@ foreach my $test (@tests) {
         next if $skip_most_tests && $unexpected_noncont;
         foreach my $overlong (0, 1) {
           next if $overlong && $skip_most_tests;
+          next if $initially_overlong && ! $overlong;
 
           # If we're creating an overlong, it can't be longer than the
           # maximum length, so skip if we're already at that length.
-          next if $overlong && $length >= $::max_bytes;
+          next if   (! $initially_overlong && $overlong)
+                   &&  $length >= $::max_bytes;
 
           my $this_cp_message_qr = $cp_message_qr;
           my $this_non_cp_trailing_text = $non_cp_trailing_text;
@@ -783,6 +904,7 @@ foreach my $test (@tests) {
             my $dont_use_overlong_cp = 0;
 
             if ($overlong) {
+                if (! $initially_overlong) {
                 my $new_expected_len;
 
                 # To force this malformation, we convert the original start
@@ -840,6 +962,7 @@ foreach my $test (@tests) {
                                             - (  $this_expected_len
                                                - $this_needed_to_discern_len);
                 $this_expected_len = $new_expected_len;
+                }
             }
 
             if ($short) {
@@ -887,12 +1010,15 @@ foreach my $test (@tests) {
                 else {
                     my $wrong_bytes = display_bytes_no_quotes(
                                          substr($this_bytes, 0, $this_length));
-                    my $correct_bytes = display_bytes_no_quotes($bytes);
+                    if (! defined $correct_bytes_for_overlong) {
+                        $correct_bytes_for_overlong
+                                            = display_bytes_no_quotes($bytes);
+                    }
                     my $prefix = ($allowed_uv > 0x10FFFF) ? "0x" : "U+";
                     push @expected_malformation_warnings,
                             qr/\QMalformed UTF-8 character: $wrong_bytes\E
                                \Q (overlong; instead use\E
-                               \Q $correct_bytes to\E
+                               \Q $correct_bytes_for_overlong to\E
                                \Q represent $prefix$uv_string)/x;
                 }
 
@@ -1140,14 +1266,24 @@ foreach my $test (@tests) {
             # variables involved.  We test most possible combinations
 
             foreach my $do_disallow (0, 1) {
-              next if $skip_most_tests && ! $do_disallow;
+              if ($do_disallow) {
+                next if $initially_overlong;
+              }
+              else {
+                next if $skip_most_tests;
+            }
 
               # We classify the warnings into certain "interesting" types,
               # described later
               foreach my $warning_type (0..4) {
                 next if $skip_most_tests && $warning_type != 1;
                 foreach my $use_warn_flag (0, 1) {
-                    next if $skip_most_tests && ! $use_warn_flag;
+                    if ($use_warn_flag) {
+                        next if $initially_overlong;
+                    }
+                    else {
+                        next if $skip_most_tests;
+                    }
 
                     # Finally, here is the inner loop
 
