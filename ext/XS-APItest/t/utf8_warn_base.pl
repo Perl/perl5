@@ -711,163 +711,6 @@ foreach my $test (@tests) {
     die 'Didn\'t set $needed_to_discern_len for ' . $testname
                                         unless defined $needed_to_discern_len;
 
-    {   # First test the isFOO calls
-        use warnings; no warnings 'deprecated';   # Make sure these don't raise warnings
-        undef @warnings_gotten;
-
-        my $ret = test_isUTF8_CHAR($bytes, $length);
-        my $ret_flags = test_isUTF8_CHAR_flags($bytes, $length, 0);
-        if ($initially_malformed) {
-            is($ret, 0, "For $testname: isUTF8_CHAR() returns 0");
-            is($ret_flags, 0, "    And isUTF8_CHAR_flags() returns 0");
-        }
-        else {
-            is($ret, $length,
-               "For $testname: isUTF8_CHAR() returns expected length: $length");
-            is($ret_flags, $length, "    And isUTF8_CHAR_flags(...,0)"
-                                  . " returns expected length: $length");
-        }
-        is(scalar @warnings_gotten, 0,
-                "    And neither isUTF8_CHAR() nor isUTF8_CHAR()_flags generated"
-              . " any warnings")
-          or output_warnings(@warnings_gotten);
-
-        undef @warnings_gotten;
-        $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
-        if ($initially_malformed) {
-            is($ret, 0, "    And isSTRICT_UTF8_CHAR() returns 0");
-        }
-        else {
-            my $expected_ret = (   $testname =~ /surrogate|non-character/
-                                || $allowed_uv > 0x10FFFF)
-                               ? 0
-                               : $length;
-            is($ret, $expected_ret, "    And isSTRICT_UTF8_CHAR() returns"
-                                  . " expected length: $expected_ret");
-            $ret = test_isUTF8_CHAR_flags($bytes, $length,
-                                          $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
-            is($ret, $expected_ret,
-                    "    And isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE')"
-                    . " acts like isSTRICT_UTF8_CHAR");
-        }
-        is(scalar @warnings_gotten, 0,
-                "    And neither isSTRICT_UTF8_CHAR() nor isUTF8_CHAR_flags"
-              . " generated any warnings")
-          or output_warnings(@warnings_gotten);
-
-        undef @warnings_gotten;
-        $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
-        if ($initially_malformed) {
-            is($ret, 0, "    And isC9_STRICT_UTF8_CHAR() returns 0");
-        }
-        else {
-            my $expected_ret = (   $testname =~ /surrogate/
-                                || $allowed_uv > 0x10FFFF)
-                               ? 0
-                               : $length;
-            is($ret, $expected_ret, "    And isC9_STRICT_UTF8_CHAR()"
-                                   ." returns expected length: $expected_ret");
-            $ret = test_isUTF8_CHAR_flags($bytes, $length,
-                                        $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
-            is($ret, $expected_ret,
-                  "    And isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE')"
-                . " acts like isC9_STRICT_UTF8_CHAR");
-        }
-        is(scalar @warnings_gotten, 0,
-                "    And neither isC9_STRICT_UTF8_CHAR() nor isUTF8_CHAR_flags"
-              . " generated any warnings")
-          or output_warnings(@warnings_gotten);
-
-        foreach my $disallow_type (0..2) {
-            # 0 is don't disallow this type of code point
-            # 1 is do disallow
-            # 2 is do disallow, but only code points requiring
-            #   perl-extended-UTF8
-
-            my $disallow_flags;
-            my $expected_ret;
-
-            if ($initially_malformed) {
-
-                # Malformations are by default disallowed, so testing with
-                # $disallow_type equal to 0 is sufficicient.
-                next if $disallow_type;
-
-                $disallow_flags = 0;
-                $expected_ret = 0;
-            }
-            elsif ($disallow_type == 1) {
-                $disallow_flags = $utf8n_flag_to_disallow;
-                $expected_ret = 0;
-            }
-            elsif ($disallow_type == 2) {
-                next if ! requires_extended_utf8($allowed_uv);
-                $disallow_flags = $::UTF8_DISALLOW_PERL_EXTENDED;
-                $expected_ret = 0;
-            }
-            else {  # type is 0
-                $disallow_flags = $utf8n_flag_to_disallow_complement;
-                $expected_ret = $length;
-            }
-
-            $ret = test_isUTF8_CHAR_flags($bytes, $length, $disallow_flags);
-            is($ret, $expected_ret, "    And isUTF8_CHAR_flags("
-                                  . "$display_bytes, $disallow_flags) returns "
-                                  . $expected_ret)
-             or diag "The flags mean "
-              . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
-
-            is(scalar @warnings_gotten, 0,
-                    "    And isUTF8_CHAR_flags(...) generated no warnings")
-            or output_warnings(@warnings_gotten);
-
-            # Test partial character handling, for each byte not a full character
-            my $did_test_partial = 0;
-            for (my $j = 1; $j < $length - 1; $j++) {
-                $did_test_partial = 1;
-                my $partial = substr($bytes, 0, $j);
-                my $ret_should_be;
-                my $comment;
-                if ($disallow_type || $initially_malformed) {
-                    $ret_should_be = 0;
-                    $comment = "disallowed";
-                    if ($j < $needed_to_discern_len) {
-                        $ret_should_be = 1;
-                        $comment .= ", but need $needed_to_discern_len"
-                                 . " bytes to discern:";
-                    }
-                }
-                else {
-                    $ret_should_be = 1;
-                    $comment = "allowed";
-                }
-
-                undef @warnings_gotten;
-
-                $ret = test_is_utf8_valid_partial_char_flags($partial, $j,
-                                                             $disallow_flags);
-                is($ret, $ret_should_be,
-                    "    And is_utf8_valid_partial_char_flags("
-                    . display_bytes($partial)
-                    . ", $disallow_flags), $comment: returns $ret_should_be")
-                 or diag "The flags mean "
-                  . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
-            }
-
-            if ($did_test_partial) {
-                is(scalar @warnings_gotten, 0,
-                        "    And is_utf8_valid_partial_char_flags()"
-                        . " generated no warnings for any of the lengths")
-                    or output_warnings(@warnings_gotten);
-            }
-        }
-    }
-
-    # Now test the to/from UTF-8 calls
-    # This is more complicated than the malformations tested in other files in
-    # this directory, as there are several orthogonal variables involved.  We
-    # test most possible combinations
-
     # We try various combinations of malformations that can occur
     foreach my $short (0, 1) {
       next if $skip_most_tests && $short;
@@ -1082,6 +925,171 @@ foreach my $test (@tests) {
             }
 
             # Done setting up the malformation related stuff
+
+            {   # First test the isFOO calls
+                use warnings; # XXX no warnings 'deprecated';   # Make sure these don't raise warnings
+                undef @warnings_gotten;
+
+                my $ret = test_isUTF8_CHAR($bytes, $length);
+                my $ret_flags = test_isUTF8_CHAR_flags($bytes, $length, 0);
+                if ($initially_malformed) {
+                    is($ret, 0, "For $testname: isUTF8_CHAR() returns 0");
+                    is($ret_flags, 0, "    And isUTF8_CHAR_flags() returns 0");
+                }
+                else {
+                    is($ret, $length, "For $testname: isUTF8_CHAR() returns"
+                                    . " expected length: $length");
+                    is($ret_flags, $length,
+                       "    And isUTF8_CHAR_flags(...,0) returns expected"
+                     . " length: $length");
+                }
+                is(scalar @warnings_gotten, 0,
+                   "    And neither isUTF8_CHAR() nor isUTF8_CHAR()_flags"
+                 . " generated any warnings")
+                or output_warnings(@warnings_gotten);
+
+                undef @warnings_gotten;
+                $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
+                if ($initially_malformed) {
+                    is($ret, 0, "    And isSTRICT_UTF8_CHAR() returns 0");
+                }
+                else {
+                    my $expected_ret
+                                = (   $testname =~ /surrogate|non-character/
+                                   || $allowed_uv > 0x10FFFF)
+                                  ? 0
+                                  : $length;
+                    is($ret, $expected_ret,
+                        "    And isSTRICT_UTF8_CHAR() returns expected"
+                      . " length: $expected_ret");
+                    $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                                        $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+                    is($ret, $expected_ret,
+                       "    And isUTF8_CHAR_flags('"
+                     . "DISALLOW_ILLEGAL_INTERCHANGE') acts like"
+                     . " isSTRICT_UTF8_CHAR");
+                }
+                is(scalar @warnings_gotten, 0,
+                        "    And neither isSTRICT_UTF8_CHAR() nor"
+                      . " isUTF8_CHAR_flags generated any warnings")
+                or output_warnings(@warnings_gotten);
+
+                undef @warnings_gotten;
+                $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
+                if ($initially_malformed) {
+                    is($ret, 0, "    And isC9_STRICT_UTF8_CHAR() returns 0");
+                }
+                else {
+                    my $expected_ret = (   $testname =~ /surrogate/
+                                        || $allowed_uv > 0x10FFFF)
+                                       ? 0
+                                       : $length;
+                    is($ret, $expected_ret, "    And isC9_STRICT_UTF8_CHAR()"
+                                          . " returns expected length:"
+                                          . " $expected_ret");
+                    $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                                    $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
+                    is($ret, $expected_ret,
+                       "    And isUTF8_CHAR_flags('"
+                     . "DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like"
+                     . " isC9_STRICT_UTF8_CHAR");
+                }
+                is(scalar @warnings_gotten, 0,
+                        "    And neither isC9_STRICT_UTF8_CHAR() nor"
+                      . " isUTF8_CHAR_flags generated any warnings")
+                or output_warnings(@warnings_gotten);
+
+                foreach my $disallow_type (0..2) {
+                    # 0 is don't disallow this type of code point
+                    # 1 is do disallow
+                    # 2 is do disallow, but only code points requiring
+                    #   perl-extended-UTF8
+
+                    my $disallow_flags;
+                    my $expected_ret;
+
+                    if ($initially_malformed) {
+
+                        # Malformations are by default disallowed, so testing
+                        # with $disallow_type equal to 0 is sufficicient.
+                        next if $disallow_type;
+
+                        $disallow_flags = 0;
+                        $expected_ret = 0;
+                    }
+                    elsif ($disallow_type == 1) {
+                        $disallow_flags = $utf8n_flag_to_disallow;
+                        $expected_ret = 0;
+                    }
+                    elsif ($disallow_type == 2) {
+                        next if ! requires_extended_utf8($allowed_uv);
+                        $disallow_flags = $::UTF8_DISALLOW_PERL_EXTENDED;
+                        $expected_ret = 0;
+                    }
+                    else {  # type is 0
+                        $disallow_flags = $utf8n_flag_to_disallow_complement;
+                        $expected_ret = $length;
+                    }
+
+                    $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                                                  $disallow_flags);
+                    is($ret, $expected_ret,
+                             "    And isUTF8_CHAR_flags($display_bytes,"
+                           . " $disallow_flags) returns $expected_ret")
+                      or diag "The flags mean "
+                            . flags_to_text($disallow_flags,
+                                            \@utf8n_flags_to_text);
+                    is(scalar @warnings_gotten, 0,
+                            "    And isUTF8_CHAR_flags(...) generated"
+                          . " no warnings")
+                      or output_warnings(@warnings_gotten);
+
+                    # Test partial character handling, for each byte not a
+                    # full character
+                    my $did_test_partial = 0;
+                    for (my $j = 1; $j < $length - 1; $j++) {
+                        $did_test_partial = 1;
+                        my $partial = substr($bytes, 0, $j);
+                        my $ret_should_be;
+                        my $comment;
+                        if ($disallow_type || $initially_malformed) {
+                            $ret_should_be = 0;
+                            $comment = "disallowed";
+                            if ($j < $needed_to_discern_len) {
+                                $ret_should_be = 1;
+                                $comment .= ", but need $needed_to_discern_len"
+                                          . " bytes to discern:";
+                            }
+                        }
+                        else {
+                            $ret_should_be = 1;
+                            $comment = "allowed";
+                        }
+
+                        undef @warnings_gotten;
+
+                        $ret = test_is_utf8_valid_partial_char_flags($partial,
+                                                        $j, $disallow_flags);
+                        is($ret, $ret_should_be,
+                            "    And is_utf8_valid_partial_char_flags("
+                            . display_bytes($partial)
+                            . ", $disallow_flags), $comment: returns"
+                            . " $ret_should_be")
+                        or diag "The flags mean "
+                        . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
+                    }
+
+                    if ($did_test_partial) {
+                        is(scalar @warnings_gotten, 0,
+                            "    And is_utf8_valid_partial_char_flags()"
+                            . " generated no warnings for any of the lengths")
+                          or output_warnings(@warnings_gotten);
+                    }
+                }
+            }
+
+            # Now test the to/from UTF-8 calls.  There are several orthogonal
+            # variables involved.  We test most possible combinations
 
             foreach my $do_disallow (0, 1) {
               next if $skip_most_tests && ! $do_disallow;
