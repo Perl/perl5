@@ -42,19 +42,6 @@ my @malformations = (
         1, 1,
         qr/unexpected continuation byte/
     ],
-    [ "premature next character malformation (immediate)",
-        (isASCII) ? "\xc2\xc2\x80" : I8_to_native("\xc5\xc5\xa0"),
-        3,
-        $::UTF8_ALLOW_NON_CONTINUATION, $::UTF8_GOT_NON_CONTINUATION, $REPLACEMENT,
-        1, 2,
-        qr/unexpected non-continuation byte.*immediately after start byte/
-    ],
-    [ "premature next character malformation (non-immediate)",
-        I8_to_native("\xef${I8c}a"), 3,
-        $::UTF8_ALLOW_NON_CONTINUATION, $::UTF8_GOT_NON_CONTINUATION, $REPLACEMENT,
-        2, 3,
-        qr/unexpected non-continuation byte .* 2 bytes after start byte/
-    ],
 );
 
 if (isASCII && ! $::is64bit) {    # 32-bit ASCII platform
