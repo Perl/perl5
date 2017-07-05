@@ -973,41 +973,25 @@ foreach my $test (@tests) {
                                             - (  $this_expected_len
                                                - $this_needed_to_discern_len);
                 $this_expected_len = $new_expected_len;
-                push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
-                push @malformation_names, 'overlong';
-
-                if ($malformed_allow_type == 2) {
-                    $allow_flags |= $::UTF8_ALLOW_LONG_AND_ITS_VALUE;
-                }
-                elsif ($malformed_allow_type) {
-                    $allow_flags |= $::UTF8_ALLOW_LONG;
-                }
             }
 
             if ($short) {
-                push @malformation_names, 'short';
 
                 # To force this malformation, just tell the test to not look
                 # as far as it should into the input.
                 $this_length--;
                 $this_expected_len--;
-                push @expected_malformation_return_flags, $::UTF8_GOT_SHORT;
 
                 $allow_flags |= $::UTF8_ALLOW_SHORT if $malformed_allow_type;
             }
 
             if ($unexpected_noncont) {
-                push @malformation_names, 'unexpected non-continuation';
 
                 # To force this malformation, change the final continuation
                 # byte into a non continuation.
                 my $pos = ($short) ? -2 : -1;
                 substr($this_bytes, $pos, 1) = '?';
                 $this_expected_len--;
-                push @expected_malformation_return_flags,
-                                $::UTF8_GOT_NON_CONTINUATION;
-                $allow_flags |= $::UTF8_ALLOW_NON_CONTINUATION
-                                                    if $malformed_allow_type;
             }
 
             # The whole point of a test that is malformed from the beginning
@@ -1025,6 +1009,8 @@ foreach my $test (@tests) {
             # point.
 
             if ($overlong) {
+                push @malformation_names, 'overlong';
+                push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
 
                 # If one of the other malformation types is also in effect, we
                 # don't know what the intended code point was.
@@ -1042,11 +1028,25 @@ foreach my $test (@tests) {
                                \Q $correct_bytes to\E
                                \Q represent $prefix$uv_string)/x;
                 }
+
+                if ($malformed_allow_type == 2) {
+                    $allow_flags |= $::UTF8_ALLOW_LONG_AND_ITS_VALUE;
+                }
+                elsif ($malformed_allow_type) {
+                    $allow_flags |= $::UTF8_ALLOW_LONG;
+                }
             }
             if ($short) {
+                push @malformation_names, 'short';
+                push @expected_malformation_return_flags, $::UTF8_GOT_SHORT;
                 push @expected_malformation_warnings, qr/too short/;
             }
             if ($unexpected_noncont) {
+                push @malformation_names, 'unexpected non-continuation';
+                push @expected_malformation_return_flags,
+                                $::UTF8_GOT_NON_CONTINUATION;
+                $allow_flags |= $::UTF8_ALLOW_NON_CONTINUATION
+                                                    if $malformed_allow_type;
                 push @expected_malformation_warnings,
                                         qr/unexpected non-continuation byte/;
             }
