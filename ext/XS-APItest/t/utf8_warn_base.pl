@@ -1010,6 +1010,13 @@ foreach my $test (@tests) {
                                                     if $malformed_allow_type;
             }
 
+            # The whole point of a test that is malformed from the beginning
+            # is to test for that malformation.  If we've modified things so
+            # much that we don't have enough information to detect that
+            # malformation, there's no point in testing.
+            next if    $initially_malformed
+                    && $this_expected_len < $this_needed_to_discern_len;
+
             # Here, we've transformed the input with all of the desired
             # non-overflow malformations.  We are now in a position to
             # construct any potential warnings for those malformations.  But
