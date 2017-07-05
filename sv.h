@@ -1762,10 +1762,11 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#define SvTRUE(sv)        (LIKELY(sv) && (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
-#define SvTRUE_nomg(sv)   (LIKELY(sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
-#define SvTRUE_NN(sv)              (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
-#define SvTRUE_nomg_NN(sv) (                                        SvTRUE_common(sv, sv_2bool_nomg(sv)))
+#define SvTRUE(sv)         (LIKELY(sv) && SvTRUE_NN(sv))
+#define SvTRUE_nomg(sv)    (LIKELY(sv) && SvTRUE_nomg_NN(sv))
+#define SvTRUE_NN(sv)      (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_nomg_NN(sv))
+#define SvTRUE_nomg_NN(sv) (SvTRUE_common(sv, sv_2bool_nomg(sv)))
+
 #define SvTRUE_common(sv,fallback) (			\
       !SvOK(sv)						\
 	? 0						\
