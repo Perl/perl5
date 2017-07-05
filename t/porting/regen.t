@@ -12,6 +12,8 @@ require './regen/regen_lib.pl';
 require './t/test.pl';
 $::NO_ENDING = $::NO_ENDING = 1;
 
+skip_all( "porting/regen.t disabled by cPanel" );
+
 if ( $^O eq "VMS" ) {
   skip_all( "- regen.pl needs porting." );
 }

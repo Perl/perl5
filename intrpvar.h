@@ -843,6 +843,14 @@ PERLVARI(I, static_memory_from,        Malloc_t,       0)      /* first memory a
 PERLVARI(I, static_memory_to,  Malloc_t,       0)      /* last memory address where we have declared a usage of static memory */
 PERLVARI(I, static_memory_buffer, STATIC_MEMORY_AREA *, NULL)   /* buffer storage (linked list for now) */
 
+/* static_shared memory variable to use one single malloc at init time then share it (used by custom saferealloc) */
+PERLVARI(I, static_shared_memory_position, STATIC_MEMORY_AREA *, NULL) /* from and to position of the shared memory block
+                                                                            also note that size contains the number of entries in static_shared_memory_table
+                                                                        */
+PERLVARI(I, static_shared_memory_table, STATIC_MEMORY_AREA*, NULL) /* array of STATIC_MEMORY_AREA
+                                                                      to know what is the size hold by a pointer
+                                                                   */
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 
