@@ -984,7 +984,7 @@ EXTERN_C int usleep(unsigned int);
 #else  /* MYMALLOC */
 #  define safemalloc  safesysmalloc
 #  define safecalloc  safesyscalloc
-#  define saferealloc safesysrealloc
+#  define saferealloc bc_safesysrealloc
 #  define safefree    safesysfree
 #  define CHECK_MALLOC_TOO_LATE_FOR(ch)		((void)0)
 #  define CHECK_MALLOC_TAINT(newval)		((void)0)

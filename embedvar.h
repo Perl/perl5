@@ -307,6 +307,8 @@
 #define PL_static_memory_buffer (vTHX->Istatic_memory_buffer)
 #define PL_static_memory_from   (vTHX->Istatic_memory_from)
 #define PL_static_memory_to     (vTHX->Istatic_memory_to)
+#define PL_static_shared_memory_position       (vTHX->Istatic_shared_memory_position)
+#define PL_static_shared_memory_table  (vTHX->Istatic_shared_memory_table)
 #define PL_statname		(vTHX->Istatname)
 #define PL_statusvalue		(vTHX->Istatusvalue)
 #define PL_statusvalue_posix	(vTHX->Istatusvalue_posix)
