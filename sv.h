@@ -1764,7 +1764,7 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 
 #define SvTRUE(sv)         (LIKELY(sv) && SvTRUE_NN(sv))
 #define SvTRUE_nomg(sv)    (LIKELY(sv) && SvTRUE_nomg_NN(sv))
-#define SvTRUE_NN(sv)      (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_nomg_NN(sv))
+#define SvTRUE_NN(sv)      (SvGETMAGIC(sv), SvTRUE_nomg_NN(sv))
 #define SvTRUE_nomg_NN(sv) (SvTRUE_common(sv, sv_2bool_nomg(sv)))
 
 #define SvTRUE_common(sv,fallback) (			\
