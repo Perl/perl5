@@ -1299,11 +1299,13 @@ foreach my $test (@tests) {
                         }
                     }
 
-                    my $this_name = "utf8n_to_uvchr_error() $testname: "
-                                                . (($disallowed)
-                                                   ? 'disallowed'
-                                                   : 'allowed');
-                    $this_name .= ", $eval_warn";
+                    my $this_name = "utf8n_to_uvchr_error() $testname: ";
+                    if (! $initially_malformed) {
+                        $this_name .= ($disallowed)
+                                       ? 'disallowed, '
+                                       : 'allowed, ';
+                    }
+                    $this_name .= "$eval_warn";
                     $this_name .= ", " . ((  $this_warning_flags
                                             & $this_utf8n_flag_to_warn)
                                           ? 'with flag for raising warnings'
