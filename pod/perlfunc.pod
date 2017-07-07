@@ -4071,12 +4071,11 @@ X<map>
 =for Pod::Functions apply a change to a list to get back a new list with the changes
 
 Evaluates the BLOCK or EXPR for each element of LIST (locally setting
-L<C<$_>|perlvar/$_> to each element) and returns the list value composed
-of the
-results of each such evaluation.  In scalar context, returns the
-total number of elements so generated.  Evaluates BLOCK or EXPR in
-list context, so each element of LIST may produce zero, one, or
-more elements in the returned value.
+L<C<$_>|perlvar/$_> to each element) and composes a list of the results of
+each such evaluation.  Each element of LIST may produce zero, one, or more
+elements in the generated list, so the number of elements in the generated
+list may differ from that in LIST.  In scalar context, returns the total
+number of elements so generated.  In list context, returns the generated list.
 
     my @chars = map(chr, @numbers);
 
