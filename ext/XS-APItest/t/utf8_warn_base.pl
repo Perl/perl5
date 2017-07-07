@@ -42,9 +42,10 @@ sub requires_extended_utf8($) {
 
 sub overflow_discern_len($) {
 
-    # Returns how many bytes are needed to tell if a UTF-8 sequence is for a
-    # code point that won't fit in the platform's word size.  Only the length
-    # of the sequence representing a single code point is needed.
+    # Returns how many bytes are needed to tell if a non-overlong UTF-8
+    # sequence is for a code point that won't fit in the platform's word size.
+    # Only the length of the sequence representing a single code point is
+    # needed.
 
     if (isASCII) {
         return ($::is64bit) ? 3 : ((shift == $::max_bytes)
@@ -53,6 +54,25 @@ sub overflow_discern_len($) {
     }
 
     return ($::is64bit) ? 2 : 8;
+}
+
+sub overlong_discern_len($) {
+
+    # Returns how many bytes are needed to tell if the input UTF-8 sequence
+    # for a code point is overlong
+
+    my $string = shift;
+    my $length = length $string;
+    my $byte = ord native_to_I8(substr($string, 0, 1));
+    if (isASCII) {
+        return ($length == $::max_bytes)
+                  # This is constrained to 1 on 32-bit machines, as it
+                  # overflows there
+                ? (($::is64bit) ? 7 : 1)
+                : (($length == 2) ? 1 : 2);
+    }
+
+    return ($length == $::max_bytes) ? 8 : (($length <= 3) ? 1 : 2);
 }
 
 my @tests;
@@ -930,18 +950,19 @@ foreach my $test (@tests) {
                 use warnings; # XXX no warnings 'deprecated';   # Make sure these don't raise warnings
                 undef @warnings_gotten;
 
-                my $ret = test_isUTF8_CHAR($bytes, $length);
-                my $ret_flags = test_isUTF8_CHAR_flags($bytes, $length, 0);
-                if ($initially_malformed) {
-                    is($ret, 0, "For $testname: isUTF8_CHAR() returns 0");
+                my $ret = test_isUTF8_CHAR($this_bytes, $this_length);
+                my $ret_flags
+                        = test_isUTF8_CHAR_flags($this_bytes, $this_length, 0);
+                if ($malformations_name) {
+                    is($ret, 0, "For $testname$malformations_name: isUTF8_CHAR() returns 0");
                     is($ret_flags, 0, "    And isUTF8_CHAR_flags() returns 0");
                 }
                 else {
-                    is($ret, $length, "For $testname: isUTF8_CHAR() returns"
-                                    . " expected length: $length");
-                    is($ret_flags, $length,
+                    is($ret, $this_length, "For $testname: isUTF8_CHAR() returns"
+                                         . " expected length: $this_length");
+                    is($ret_flags, $this_length,
                        "    And isUTF8_CHAR_flags(...,0) returns expected"
-                     . " length: $length");
+                     . " length: $this_length");
                 }
                 is(scalar @warnings_gotten, 0,
                    "    And neither isUTF8_CHAR() nor isUTF8_CHAR()_flags"
@@ -949,8 +970,8 @@ foreach my $test (@tests) {
                 or output_warnings(@warnings_gotten);
 
                 undef @warnings_gotten;
-                $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
-                if ($initially_malformed) {
+                $ret = test_isSTRICT_UTF8_CHAR($this_bytes, $this_length);
+                if ($malformations_name) {
                     is($ret, 0, "    And isSTRICT_UTF8_CHAR() returns 0");
                 }
                 else {
@@ -958,11 +979,11 @@ foreach my $test (@tests) {
                                 = (   $testname =~ /surrogate|non-character/
                                    || $allowed_uv > 0x10FFFF)
                                   ? 0
-                                  : $length;
+                                  : $this_length;
                     is($ret, $expected_ret,
                         "    And isSTRICT_UTF8_CHAR() returns expected"
                       . " length: $expected_ret");
-                    $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                    $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
                                         $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
                     is($ret, $expected_ret,
                        "    And isUTF8_CHAR_flags('"
@@ -975,19 +996,19 @@ foreach my $test (@tests) {
                 or output_warnings(@warnings_gotten);
 
                 undef @warnings_gotten;
-                $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
-                if ($initially_malformed) {
+                $ret = test_isC9_STRICT_UTF8_CHAR($this_bytes, $this_length);
+                if ($malformations_name) {
                     is($ret, 0, "    And isC9_STRICT_UTF8_CHAR() returns 0");
                 }
                 else {
                     my $expected_ret = (   $testname =~ /surrogate/
                                         || $allowed_uv > 0x10FFFF)
                                        ? 0
-                                       : $length;
+                                       : $this_expected_len;
                     is($ret, $expected_ret, "    And isC9_STRICT_UTF8_CHAR()"
                                           . " returns expected length:"
                                           . " $expected_ret");
-                    $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                    $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
                                     $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
                     is($ret, $expected_ret,
                        "    And isUTF8_CHAR_flags('"
@@ -1008,7 +1029,7 @@ foreach my $test (@tests) {
                     my $disallow_flags;
                     my $expected_ret;
 
-                    if ($initially_malformed) {
+                    if ($malformations_name) {
 
                         # Malformations are by default disallowed, so testing
                         # with $disallow_type equal to 0 is sufficicient.
@@ -1028,10 +1049,10 @@ foreach my $test (@tests) {
                     }
                     else {  # type is 0
                         $disallow_flags = $utf8n_flag_to_disallow_complement;
-                        $expected_ret = $length;
+                        $expected_ret = $this_length;
                     }
 
-                    $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                    $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
                                                   $disallow_flags);
                     is($ret, $expected_ret,
                              "    And isUTF8_CHAR_flags($display_bytes,"
@@ -1047,17 +1068,40 @@ foreach my $test (@tests) {
                     # Test partial character handling, for each byte not a
                     # full character
                     my $did_test_partial = 0;
-                    for (my $j = 1; $j < $length - 1; $j++) {
+                    for (my $j = 1; $j < $this_length - 1; $j++) {
                         $did_test_partial = 1;
-                        my $partial = substr($bytes, 0, $j);
+                        my $partial = substr($this_bytes, 0, $j);
                         my $ret_should_be;
                         my $comment;
-                        if ($disallow_type || $initially_malformed) {
+                        if ($disallow_type || $malformations_name) {
                             $ret_should_be = 0;
                             $comment = "disallowed";
-                            if ($j < $needed_to_discern_len) {
+
+                            # The number of bytes required to tell if a
+                            # sequence has something wrong is the smallest of
+                            # all the things wrong with it.  We start with the
+                            # number for this type of code point, if that is
+                            # disallowed; or the whole length if not.  The
+                            # latter is what a couple of the malformations
+                            # require.
+                            my $needed_to_tell = ($disallow_type)
+                                                  ? $this_needed_to_discern_len
+                                                  : $this_expected_len;
+
+                            # Then we see if the malformations that are
+                            # detectable early in the string are present.
+                            if ($overlong) {
+                                my $dl = overlong_discern_len($this_bytes);
+                                $needed_to_tell = $dl if $dl < $needed_to_tell;
+                            }
+                            if ($will_overflow) {
+                                my $dl = overflow_discern_len($length);
+                                $needed_to_tell = $dl if $dl < $needed_to_tell;
+                            }
+
+                            if ($j < $needed_to_tell) {
                                 $ret_should_be = 1;
-                                $comment .= ", but need $needed_to_discern_len"
+                                $comment .= ", but need $needed_to_tell"
                                           . " bytes to discern:";
                             }
                         }
