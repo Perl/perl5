@@ -499,8 +499,9 @@ and check for NULL.
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
 #define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ReANY(prog)->pre_prefix - 1)
-#define RX_WRAPPED(prog)	ReANY(prog)->xpv_len_u.xpvlenu_pv
-#define RX_WRAPPED_const(prog)	((const char *)RX_WRAPPED(prog))
+
+#define RX_WRAPPED(prog)	SvPVX(prog)
+#define RX_WRAPPED_const(prog)	SvPVX_const(prog)
 #define RX_WRAPLEN(prog)	SvCUR(prog)
 #define RX_CHECK_SUBSTR(prog)	(ReANY(prog)->check_substr)
 #define RX_REFCNT(prog)		SvREFCNT(prog)

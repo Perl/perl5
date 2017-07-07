@@ -7262,8 +7262,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* make sure PL_bitcount bounds not exceeded */
         assert(sizeof(STD_PAT_MODS) <= 8);
 
-        Newx(p, wraplen + 1, char); /* +1 for the ending NUL */
-	r->xpv_len_u.xpvlenu_pv = p;
+        p = sv_grow(MUTABLE_SV(rx), wraplen + 1); /* +1 for the ending NUL */
+        SvPOK_on(rx);
 	if (RExC_utf8)
 	    SvFLAGS(rx) |= SVf_UTF8;
         *p++='('; *p++='?';
@@ -19516,7 +19516,6 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     } else {
         CALLREGFREE_PVT(rx); /* free the private data */
         SvREFCNT_dec(RXp_PAREN_NAMES(r));
-	Safefree(r->xpv_len_u.xpvlenu_pv);
     }
     if (r->substrs) {
         int i;
@@ -19534,7 +19533,6 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     SvREFCNT_dec(r->qr_anoncv);
     if (r->recurse_locinput)
         Safefree(r->recurse_locinput);
-    rx->sv_u.svu_rx = 0;
 }
 
 /*  reg_temp_copy()
@@ -19568,12 +19566,12 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     else {
 	SvOK_off((SV *)ret_x);
 	if (islv) {
-	    /* For PVLVs, SvANY points to the xpvlv body while sv_u points
-	       to the regexp.  (For SVt_REGEXPs, sv_upgrade has already
-	       made both spots point to the same regexp body.) */
+	    /* For PVLVs, the head (sv_any) points to an XPVLV, while
+             * the LV's xpvlenu_rx will point to a regexp body, which
+             * we allocate here */
 	    REGEXP *temp = (REGEXP *)newSV_type(SVt_REGEXP);
 	    assert(!SvPVX(ret_x));
-	    ret_x->sv_u.svu_rx = temp->sv_any;
+            ((XPV*)SvANY(ret_x))->xpv_len_u.xpvlenu_rx = temp->sv_any;
 	    temp->sv_any = NULL;
 	    SvFLAGS(temp) = (SvFLAGS(temp) & ~SVTYPEMASK) | SVt_NULL;
 	    SvREFCNT_dec_NN(temp);
@@ -19587,13 +19585,16 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     SvFAKE_on(ret_x);
     ret = ReANY(ret_x);
 
-    SvFLAGS(ret_x) |= SvUTF8(rx);
+    SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
+    SvPV_set(ret_x, RX_WRAPPED(rx));
     /* We share the same string buffer as the original regexp, on which we
        hold a reference count, incremented when mother_re is set below.
        The string pointer is copied here, being part of the regexp struct.
      */
     memcpy(&(ret->xpv_cur), &(r->xpv_cur),
 	   sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
+    if (!islv)
+        SvLEN_set(ret_x, 0);
     if (r->offs) {
         const I32 npar = r->nparens+1;
         Newx(ret->offs, npar, regexp_paren_pair);
@@ -19847,7 +19848,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	       1: a buffer in a different thread
 	       2: something we no longer hold a reference on
 	       so we need to copy it locally.  */
-    RX_WRAPPED(dstr) = SAVEPVN(RX_WRAPPED(sstr), SvCUR(sstr)+1);
+    RX_WRAPPED(dstr) = SAVEPVN(RX_WRAPPED_const(sstr), SvCUR(sstr)+1);
     ret->mother_re   = NULL;
 }
 #endif /* PERL_IN_XSUB_RE */

@@ -10428,7 +10428,9 @@ Perl_ck_index(pTHX_ OP *o)
 	if (kid && kid->op_type == OP_CONST) {
 	    const bool save_taint = TAINT_get;
 	    SV *sv = kSVOP->op_sv;
-	    if ((!SvPOK(sv) || SvNIOKp(sv)) && SvOK(sv) && !SvROK(sv)) {
+	    if (   (!SvPOK(sv) || SvNIOKp(sv) || isREGEXP(sv))
+                && SvOK(sv) && !SvROK(sv))
+            {
 		sv = newSV(0);
 		sv_copypv(sv, kSVOP->op_sv);
 		SvREFCNT_dec_NN(kSVOP->op_sv);

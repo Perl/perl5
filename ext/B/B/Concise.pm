@@ -730,13 +730,13 @@ sub concise_sv {
 	    $hr->{svval} .= ["Null", "sv_undef", "sv_yes", "sv_no",
                              '', '', '', "sv_zero"]->[$$sv];
 	} elsif ($preferpv
-	      && ($sv->FLAGS & SVf_POK || class($sv) eq "REGEXP")) {
+	      && ($sv->FLAGS & SVf_POK)) {
 	    $hr->{svval} .= cstring($sv->PV);
 	} elsif ($sv->FLAGS & SVf_NOK) {
 	    $hr->{svval} .= $sv->NV;
 	} elsif ($sv->FLAGS & SVf_IOK) {
 	    $hr->{svval} .= $sv->int_value;
-	} elsif ($sv->FLAGS & SVf_POK || class($sv) eq "REGEXP") {
+	} elsif ($sv->FLAGS & SVf_POK) {
 	    $hr->{svval} .= cstring($sv->PV);
 	} elsif (class($sv) eq "HV") {
 	    $hr->{svval} .= 'HASH';
