@@ -100,6 +100,11 @@ my @tests;
         #                          like being a surrogate; 0 indicates we need
         #                          the whole string.  Some categories have a
         #                          default that is used if this is omitted.
+        [ "orphan continuation byte malformation",
+            I8_to_native("$::I8c"),
+            0xFFFD,
+            1,
+        ],
         [ "overlong malformation, lowest 2-byte",
             (isASCII) ? "\xc0\x80" : I8_to_native("\xc0\xa0"),
             0,   # NUL
@@ -664,6 +669,7 @@ foreach my $test (@tests) {
 
     my $length = length $bytes;
     my $initially_overlong = $testname =~ /overlong/;
+    my $initially_orphan   = $testname =~ /orphan/;
     my $will_overflow = $allowed_uv < 0;
 
     my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
@@ -719,14 +725,10 @@ foreach my $test (@tests) {
     # expect that the tests will show it isn't valid.
     my $initially_malformed = 0;
 
-    if ($initially_overlong) {
+    if ($initially_overlong || $initially_orphan) {
         $non_cp_trailing_text = "if you see this, there is an error";
         $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
-        if (! defined $needed_to_discern_len) {
-            $needed_to_discern_len = overlong_discern_len($bytes);
-        }
         $initially_malformed = 1;
-        $correct_bytes_for_overlong = display_bytes_no_quotes(chr $allowed_uv);
         $utf8n_flag_to_warn     = 0;
         $utf8n_flag_to_disallow = 0;
 
@@ -744,7 +746,15 @@ foreach my $test (@tests) {
             $utf8n_flag_to_warn_complement |= $::UTF8_WARN_PERL_EXTENDED;
             $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_PERL_EXTENDED;
         }
+
         $controlling_warning_category = 'utf8';
+
+        if ($initially_overlong) {
+            if (! defined $needed_to_discern_len) {
+                $needed_to_discern_len = overlong_discern_len($bytes);
+            }
+            $correct_bytes_for_overlong = display_bytes_no_quotes(chr $allowed_uv);
+        }
     }
     elsif($will_overflow || $allowed_uv > 0x10FFFF) {
 
@@ -907,6 +917,10 @@ foreach my $test (@tests) {
             my $overlong_is_in_perl_extended_utf8 = 0;
             my $dont_use_overlong_cp = 0;
 
+            if ($initially_orphan) {
+                next if $overlong || $short || $unexpected_noncont;
+            }
+
             if ($overlong) {
                 if (! $initially_overlong) {
                     my $new_expected_len;
@@ -1005,6 +1019,15 @@ foreach my $test (@tests) {
             # it's a pain to get the detailed messages exactly right, so for
             # now XXX, only do so for those that return an explicit code
             # point.
+
+            if ($initially_orphan) {
+                push @malformation_names, "orphan continuation";
+                push @expected_malformation_return_flags,
+                                                    $::UTF8_GOT_CONTINUATION;
+                $allow_flags |= $::UTF8_ALLOW_CONTINUATION
+                                                    if $malformed_allow_type;
+                push @expected_malformation_warnings, qr/unexpected continuation/;
+            }
 
             if ($overlong) {
                 push @malformation_names, 'overlong';
@@ -1275,7 +1298,7 @@ foreach my $test (@tests) {
 
             foreach my $do_disallow (0, 1) {
               if ($do_disallow) {
-                next if $initially_overlong;
+                next if $initially_overlong || $initially_orphan;
               }
               else {
                 next if $skip_most_tests;
@@ -1287,7 +1310,7 @@ foreach my $test (@tests) {
                 next if $skip_most_tests && $warning_type != 1;
                 foreach my $use_warn_flag (0, 1) {
                     if ($use_warn_flag) {
-                        next if $initially_overlong;
+                        next if $initially_overlong || $initially_orphan;
                     }
                     else {
                         next if $skip_most_tests;

@@ -37,11 +37,6 @@ my @malformations = (
     #    $::UTF8_ALLOW_EMPTY, $::UTF8_GOT_EMPTY, $REPLACEMENT, 0, 0,
     #    qr/empty string/
     #],
-    [ "orphan continuation byte malformation", I8_to_native("${I8c}a"), 2,
-        $::UTF8_ALLOW_CONTINUATION, $::UTF8_GOT_CONTINUATION, $REPLACEMENT,
-        1, 1,
-        qr/unexpected continuation byte/
-    ],
 );
 
 if (isASCII && ! $::is64bit) {    # 32-bit ASCII platform
@@ -63,7 +58,6 @@ my @added_overlongs;
 foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $expected_error_flags,
         $allowed_uv, $expected_len, $needed_to_discern_len, $message ) = @$test;
-    next unless $testname =~ /overlong/;
 
     $test->[0] .= "; use REPLACEMENT CHAR";
     $test->[5] = $REPLACEMENT;
