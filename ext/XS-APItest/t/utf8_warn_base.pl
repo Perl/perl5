@@ -909,63 +909,67 @@ foreach my $test (@tests) {
 
             if ($overlong) {
                 if (! $initially_overlong) {
-                my $new_expected_len;
+                    my $new_expected_len;
 
-                # To force this malformation, we convert the original start
-                # byte into a continuation byte with the same data bits as
-                # originally. ...
-                my $start_byte = substr($this_bytes, 0, 1);
-                my $converted_to_continuation_byte
+                    # To force this malformation, we convert the original start
+                    # byte into a continuation byte with the same data bits as
+                    # originally. ...
+                    my $start_byte = substr($this_bytes, 0, 1);
+                    my $converted_to_continuation_byte
                                             = start_byte_to_cont($start_byte);
 
-                # ... Then we prepend it with a known overlong sequence.  This
-                # should evaluate to the exact same code point as the
-                # original.  We try to avoid an overlong using Perl extended
-                # UTF-8.  The code points are the highest representable as
-                # overlongs on the respective platform without using extended
-                # UTF-8.
-                if (native_to_I8($start_byte) lt "\xFC") {
-                    $start_byte = I8_to_native("\xFC");
-                    $new_expected_len = 6;
-                }
-                elsif (! isASCII && native_to_I8($start_byte) lt "\xFE") {
+                    # ... Then we prepend it with a known overlong sequence.
+                    # This should evaluate to the exact same code point as the
+                    # original.  We try to avoid an overlong using Perl
+                    # extended UTF-8.  The code points are the highest
+                    # representable as overlongs on the respective platform
+                    # without using extended UTF-8.
+                    if (native_to_I8($start_byte) lt "\xFC") {
+                        $start_byte = I8_to_native("\xFC");
+                        $new_expected_len = 6;
+                    }
+                    elsif (! isASCII && native_to_I8($start_byte) lt "\xFE") {
 
-                    # FE is not extended UTF-8 on EBCDIC
-                    $start_byte = I8_to_native("\xFE");
-                    $new_expected_len = 7;
-                }
-                else {  # Must use extended UTF-8.  On ASCII platforms, we
-                        # could express some overlongs here starting with
-                        # \xFE, but there's no real reason to do so.
-                    $overlong_is_in_perl_extended_utf8 = 1;
-                    $start_byte = I8_to_native("\xFF");
-                    $new_expected_len = $::max_bytes;
-                    $this_cp_message_qr = $extended_cp_message_qr;
+                        # FE is not extended UTF-8 on EBCDIC
+                        $start_byte = I8_to_native("\xFE");
+                        $new_expected_len = 7;
+                    }
+                    else {  # Must use extended UTF-8.  On ASCII platforms, we
+                            # could express some overlongs here starting with
+                            # \xFE, but there's no real reason to do so.
+                        $overlong_is_in_perl_extended_utf8 = 1;
+                        $start_byte = I8_to_native("\xFF");
+                        $new_expected_len = $::max_bytes;
+                        $this_cp_message_qr = $extended_cp_message_qr;
 
-                    # The warning that gets raised doesn't include the code
-                    # point in the message if the code point can be expressed
-                    # without using extended UTF-8, but the particular
-                    # overlong sequence used is in extended UTF-8.  To do
-                    # otherwise would be confusing to the user, as it would
-                    # claim the code point requires extended, when it doesn't.
-                    $dont_use_overlong_cp = 1
+                        # The warning that gets raised doesn't include the
+                        # code point in the message if the code point can be
+                        # expressed without using extended UTF-8, but the
+                        # particular overlong sequence used is in extended
+                        # UTF-8.  To do otherwise would be confusing to the
+                        # user, as it would claim the code point requires
+                        # extended, when it doesn't.
+                        $dont_use_overlong_cp = 1
                                     unless requires_extended_utf8($allowed_uv);
-                    $this_non_cp_trailing_text = $extended_non_cp_trailing_text;
-                }
+                        $this_non_cp_trailing_text
+                                              = $extended_non_cp_trailing_text;
+                    }
 
-                # Splice in the revise continuation byte, preceded by the
-                # start byte and the proper number of the lowest continuation
-                # bytes.
-                $this_bytes =   $start_byte
-                             . ($native_lowest_continuation_chr
-                                x ( $new_expected_len - 1 - length($this_bytes)))
-                             .  $converted_to_continuation_byte
-                             .  substr($this_bytes, 1);
-                $this_length = length($this_bytes);
-                $this_needed_to_discern_len =    $new_expected_len
-                                            - (  $this_expected_len
-                                               - $this_needed_to_discern_len);
-                $this_expected_len = $new_expected_len;
+                    # Splice in the revise continuation byte, preceded by the
+                    # start byte and the proper number of the lowest
+                    # continuation bytes.
+                    $this_bytes =   $start_byte
+                                . ($native_lowest_continuation_chr
+                                    x (  $new_expected_len
+                                       - 1
+                                       - length($this_bytes)))
+                                .  $converted_to_continuation_byte
+                                .  substr($this_bytes, 1);
+                    $this_length = length($this_bytes);
+                    $this_needed_to_discern_len =    $new_expected_len
+                                                - (  $this_expected_len
+                                                - $this_needed_to_discern_len);
+                    $this_expected_len = $new_expected_len;
                 }
             }
 
