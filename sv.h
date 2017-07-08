@@ -1774,9 +1774,11 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 	? 0						\
     : SvPOK(sv)						\
 	? SvPVXtrue(sv)					\
-    : (SvFLAGS(sv) & (SVf_IOK|SVf_NOK))			\
-	? (   (SvIOK(sv) && SvIVX(sv) != 0)		\
-	   || (SvNOK(sv) && SvNVX(sv) != 0.0))		\
+    : SvIOK(sv)                			        \
+        ? SvIVX(sv)                                     \
+    : (SvROK(sv) && !(   SvOBJECT(SvRV(sv))             \
+                      && HvAMAGIC(SvSTASH(SvRV(sv)))))  \
+        ? TRUE                                          \
     : (fallback))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)

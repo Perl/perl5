@@ -3366,6 +3366,10 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
     if (isREGEXP(sv))
 	return
 	  RX_WRAPLEN(sv) > 1 || (RX_WRAPLEN(sv) && *RX_WRAPPED(sv) != '0');
+
+    if (SvNOK(sv) && !SvPOK(sv))
+        return SvNVX(sv) != 0.0;
+
     return SvTRUE_common(sv, isGV_with_GP(sv) ? 1 : 0);
 }
 
