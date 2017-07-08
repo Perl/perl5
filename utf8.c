@@ -1272,8 +1272,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
         uv = UNICODE_REPLACEMENT;
     }
 
-    /* Check for overflow. */
-    if (UNLIKELY(does_utf8_overflow(s0, send))) {
+    /* Check for overflow.  The algorithm requires us to not look past the end
+     * of the current character, even if partial, so the upper limit is 's' */
+    if (UNLIKELY(does_utf8_overflow(s0, s))) {
         possible_problems |= UTF8_GOT_OVERFLOW;
         uv = UNICODE_REPLACEMENT;
     }
@@ -1288,7 +1289,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
             && (   UNLIKELY(! UTF8_IS_START(*s0))
                 || (   curlen > 1
                     && UNLIKELY(is_utf8_overlong_given_start_byte_ok(s0,
-                                                                send - s0))))))
+                                                                s - s0))))))
     {
         possible_problems |= UTF8_GOT_LONG;
 

@@ -84,10 +84,17 @@ foreach (<DATA>) {
 
             my $message;
             my $after = "";
-            if ($expect64 != $expect32 && ! $is64bit) {
-                like($warnings[0], qr/overflow/, "overflow warning for $id seen");
-                shift @warnings;
-                $after .= "overflow";
+            if ($expect64 < $expect32 && ! $is64bit) {
+                if (       substr($octets, 0, 1) gt "\xfe"
+                    || (   substr($octets, 0, 1) eq "\xfe"
+                        && length $octets > 1
+                        && substr($octets, 1, 1) le "\xbf"
+                        && substr($octets, 1, 1) ge "\x80"))
+                {
+                    like($warnings[0], qr/overflow/, "overflow warning for $id seen");
+                    shift @warnings;
+                    $after .= "overflow";
+                }
             }
 
             # The data below assumes that if there is both a 'short' and
@@ -183,7 +190,7 @@ __DATA__
 3.5	Impossible bytes (but not with Perl's extended UTF-8)
 3.5.1 n -	1	fe	-	1 byte available, need 7
 3.5.2 N2,1 -	1	ff	-	1 byte available, need 13
-3.5.3 N11,8 -	4	fe:fe:ff:ff	-	byte 0xfe
+3.5.3 N9,7 -	4	fe:fe:ff:ff	-	byte 0xfe
 4	Overlong sequences
 4.1	Examples of an overlong ASCII character
 4.1.1 n -	2	c0:af	-	overlong

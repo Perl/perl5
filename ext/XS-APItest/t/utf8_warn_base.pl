@@ -32,6 +32,9 @@ local $SIG{__WARN__} = sub { my @copy = @_;
 my $highest_non_extended_utf8_cp = (isASCII) ? 0x7FFFFFFF : 0x3FFFFFFF;
 my $native_lowest_continuation_chr = I8_to_native(chr $::lowest_continuation);
 
+# C5 is chosen as it is valid for both ASCII and EBCDIC platforms
+my $known_start_byte = I8_to_native("\xC5");
+
 sub requires_extended_utf8($) {
 
     # Returns a boolean as to whether or not the code point parameter fits
@@ -1000,9 +1003,9 @@ foreach my $test (@tests) {
             if ($unexpected_noncont) {
 
                 # To force this malformation, change the final continuation
-                # byte into a non continuation.
+                # byte into a start byte.
                 my $pos = ($short) ? -2 : -1;
-                substr($this_bytes, $pos, 1) = '?';
+                substr($this_bytes, $pos, 1) = $known_start_byte;
                 $this_expected_len--;
             }
 
