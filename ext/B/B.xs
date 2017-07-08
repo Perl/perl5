@@ -77,7 +77,7 @@ static const size_t opsizes[] = {
 #define MY_CXT_KEY "B::_guts" XS_VERSION
 
 typedef struct {
-    SV *	x_specialsv_list[7];
+    SV *	x_specialsv_list[8];
     int		x_walkoptree_debug;	/* Flag for walkoptree debug hook */
 } my_cxt_t;
 
@@ -95,6 +95,7 @@ static void B_init_my_cxt(pTHX_ my_cxt_t * cxt) {
     cxt->x_specialsv_list[4] = (SV *) pWARN_ALL;
     cxt->x_specialsv_list[5] = (SV *) pWARN_NONE;
     cxt->x_specialsv_list[6] = (SV *) pWARN_STD;
+    cxt->x_specialsv_list[7] = &PL_sv_zero;
 }
 
 

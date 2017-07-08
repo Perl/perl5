@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.68';
+    $B::VERSION = '1.69';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -80,7 +80,8 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
 @B::specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
-			(SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD);
+			(SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD
+                        &PL_sv_zero);
 
 {
     # Stop "-w" from complaining about the lack of a real B::OBJECT class
