@@ -509,7 +509,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		/* This cast somewhat evil, but I'm merely using NULL/
 		   not NULL to return the boolean exists.
 		   And I know hv is not NULL.  */
-		return SvTRUE(svret) ? (void *)hv : NULL;
+		return SvTRUE_NN(svret) ? (void *)hv : NULL;
 		}
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((const SV *)hv, PERL_MAGIC_env)) {

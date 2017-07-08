@@ -231,11 +231,11 @@ PP(pp_sassign)
 PP(pp_cond_expr)
 {
     dSP;
+    SV *sv;
+
     PERL_ASYNC_CHECK();
-    if (SvTRUEx(POPs))
-	RETURNOP(cLOGOP->op_other);
-    else
-	RETURNOP(cLOGOP->op_next);
+    sv = POPs;
+    RETURNOP(SvTRUE_NN(sv) ? cLOGOP->op_other : cLOGOP->op_next);
 }
 
 PP(pp_unstack)
@@ -521,8 +521,10 @@ PP(pp_predec)
 PP(pp_or)
 {
     dSP;
+    SV *sv;
     PERL_ASYNC_CHECK();
-    if (SvTRUE(TOPs))
+    sv = TOPs;
+    if (SvTRUE_NN(sv))
 	RETURN;
     else {
 	if (PL_op->op_type == OP_OR)
@@ -3511,8 +3513,9 @@ PP(pp_subst)
 PP(pp_grepwhile)
 {
     dSP;
+    dPOPss;
 
-    if (SvTRUEx(POPs))
+    if (SvTRUE_NN(sv))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
     ++*PL_markstack_ptr;
     FREETMPS;

@@ -1128,9 +1128,11 @@ PP(pp_mapwhile)
 
 PP(pp_range)
 {
+    dTARG;
     if (GIMME_V == G_ARRAY)
 	return NORMAL;
-    if (SvTRUEx(PAD_SV(PL_op->op_targ)))
+    GETTARGET;
+    if (SvTRUE_NN(targ))
 	return cLOGOP->op_other;
     else
 	return NORMAL;
@@ -1158,7 +1160,7 @@ PP(pp_flip)
 		    flip = SvIV(sv) == SvIV(GvSV(gv));
 	    }
 	} else {
-	    flip = SvTRUE(sv);
+	    flip = SvTRUE_NN(sv);
 	}
 	if (flip) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
@@ -1271,7 +1273,7 @@ PP(pp_flop)
 	    }
 	}
 	else {
-	    flop = SvTRUE(sv);
+	    flop = SvTRUE_NN(sv);
 	}
 
 	if (flop) {
@@ -1803,7 +1805,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 PP(pp_xor)
 {
     dSP; dPOPTOPssrl;
-    if (SvTRUE(left) != SvTRUE(right))
+    if (SvTRUE_NN(left) != SvTRUE_NN(right))
 	RETSETYES;
     else
 	RETSETNO;
@@ -4462,7 +4464,7 @@ PP(pp_leaveeval)
     /* did require return a false value? */
     failed =    CxOLD_OP_TYPE(cx) == OP_REQUIRE
              && !(gimme == G_SCALAR
-                    ? SvTRUE(*PL_stack_sp)
+                    ? SvTRUE_NN(*PL_stack_sp)
                     : PL_stack_sp > oldsp);
 
     if (gimme == G_VOID) {

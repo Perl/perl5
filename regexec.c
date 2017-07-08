@@ -6983,7 +6983,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		if (logical == 0)        /*   (?{})/   */
 		    sv_setsv(save_scalar(PL_replgv), ret); /* $^R */
 		else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
-		    sw = cBOOL(SvTRUE(ret));
+		    sw = cBOOL(SvTRUE_NN(ret));
 		    logical = 0;
 		}
 		else {                   /*  /(??{})  */

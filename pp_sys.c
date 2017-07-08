@@ -3293,7 +3293,7 @@ PP(pp_ftis)
 	    break;
 	}
 	SvSETMAGIC(TARG);
-	return SvTRUE_nomg(TARG)
+	return SvTRUE_nomg_NN(TARG)
             ? S_ft_return_true(aTHX_ TARG) : S_ft_return_false(aTHX_ TARG);
     }
 }

@@ -3184,7 +3184,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	     if (off1==lt_amg) {
 	       SV* const lessp = amagic_call(left,nullsv,
 				       lt_amg,AMGf_noright);
-	       logic = SvTRUE(lessp);
+	       logic = SvTRUE_NN(lessp);
 	     } else {
 	       SV* const lessp = amagic_call(left,nullsv,
 				       ncmp_amg,AMGf_noright);
@@ -3557,7 +3557,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       case dec_amg:
 	SvSetSV(left,res); return left;
       case not_amg:
-	ans=!SvTRUE(res); break;
+	ans=!SvTRUE_NN(res); break;
       default:
         ans=0; break;
       }
