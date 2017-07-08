@@ -306,6 +306,11 @@
         setup   => 'my %h;',
         code    => '!%h',
     },
+    'expr::hash::bool_empty_unknown' => {
+        desc    => 'empty lexical hash in unknown context',
+        setup   => 'my ($i, %h); sub f { if (%h) { $i++ }}',
+        code    => 'f()',
+    },
     'expr::hash::bool_full' => {
         desc    => 'non-empty lexical hash in boolean context',
         setup   => 'my %h = 1..10;',
@@ -937,6 +942,54 @@
         desc    => 'multiply an int and an NV and assign to a package var',
         setup   => 'my ($x,$y); ($x,$y,$z) = (1, 2.2, 3.3);',
         code    => '$z = $x * $y',
+    },
+
+    # use '!' to test SvTRUE on various classes of value
+
+    'expr::arith::not_PL_undef' => {
+        desc    => '!undef (using PL_sv_undef)',
+        setup   => 'my $x',
+        code    => '$x = !undef',
+    },
+    'expr::arith::not_PL_no' => {
+        desc    => '!($x == $y) (using PL_sv_no)',
+        setup   => 'my ($x, $y) = (1,2); my $z;',
+        code    => '$z = !($x == $y)',
+    },
+    'expr::arith::not_PL_zero' => {
+        desc    => '!%h (using PL_sv_zero)',
+        setup   => 'my ($x, %h)',
+        code    => '$x = !%h',
+    },
+    'expr::arith::not_PL_yes' => {
+        desc    => '!($x == $y) (using PL_sv_yes)',
+        setup   => 'my ($x, $y) = (1,1); my $z;',
+        code    => '$z = !($x == $y)',
+    },
+    'expr::arith::not_undef' => {
+        desc    => '!$y where $y is undef',
+        setup   => 'my ($x, $y)',
+        code    => '$x = !$y',
+    },
+    'expr::arith::not_0' => {
+        desc    => '!$x where $x is 0',
+        setup   => 'my ($x, $y) = (0, 0)',
+        code    => '$y = !$x',
+    },
+    'expr::arith::not_1' => {
+        desc    => '!$x where $x is 1',
+        setup   => 'my ($x, $y) = (1, 0)',
+        code    => '$y = !$x',
+    },
+    'expr::arith::not_string' => {
+        desc    => '!$x where $x is "foo"',
+        setup   => 'my ($x, $y) = ("foo", 0)',
+        code    => '$y = !$x',
+    },
+    'expr::arith::not_ref' => {
+        desc    => '!$x where $s is an array ref',
+        setup   => 'my ($x, $y) = ([], 0)',
+        code    => '$y = !$x',
     },
 
     'expr::arith::preinc' => {
