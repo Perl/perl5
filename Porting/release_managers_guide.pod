@@ -18,6 +18,12 @@ This script is run as:
     perl Porting/make-rmg-checklist \
         --version [5.x.y-RC#] > /tmp/rmg.pod
 
+You can also pass the C<--html> flag to generate an HTML document instead of
+POD.
+
+    perl Porting/make-rmg-checklist --html \
+        --version [5.x.y-RC#] > /tmp/rmg.html
+
 =head1 SYNOPSIS
 
 This document describes the series of tasks required - some automatic, some
