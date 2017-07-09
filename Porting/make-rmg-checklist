@@ -72,8 +72,13 @@ sub iterate_items {
     ITEM:
     foreach my $item ( @{$items} ) {
         foreach my $meta ( @{ $item->{'metadata'} || [] } ) {
-            $meta =~ /skip .+ $type/xms
-                and next ITEM;
+            if ( $meta =~ /skip .+ $type/xms ) {
+                next ITEM;
+            }
+            elsif ( $meta =~ /skip/xms ) {
+                $item->{content} =~
+                    s/^ [^\n]* \b MUST\ SKIP\ this\ step \b [^\n]* \n\n//xms;
+            }
         }
 
         $cb->($item);
