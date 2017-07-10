@@ -360,7 +360,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+List assignment (C<aassign>) could in some rare cases allocate an
+entry on the mortal stack and leave the entry uninitialized. [perl
+#131570]
 
 =back
 
