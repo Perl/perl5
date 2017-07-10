@@ -2448,6 +2448,11 @@ is eval { eval $::x.1 }, 1, 'reset does not taint undef';
     isnt_tainted $b, "list assign post tainted expression b";
 }
 
+# Module::Runtime was temporarily broken between 5.27.0 and 5.27.1 because
+# ref() would fail an assertion in a tainted statement.  (No ok() neces-
+# sary since it aborts when it fails.)
+() = defined $^X && ref \$^X;
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
