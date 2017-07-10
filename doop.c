@@ -1241,7 +1241,16 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 }
 
 
-/* used for: pp_keys(), pp_values() */
+/* Perl_do_kv() may be:
+ *  * called directly as the pp function for pp_keys() and pp_values();
+ *  * called indirectly by pp_padhv() and pp_rv2hv() to implement their
+ *       key-value list context functionality.
+ *  * It may also be called directly when the op is OP_AVHVSWITCH, to
+ *       implement CORE::keys(), CORE::values().
+ *
+ * In all cases it expects an HV on the stack and returns a list of keys,
+ * values, or key-value pairs, depending on PL_op.
+ */
 
 OP *
 Perl_do_kv(pTHX)
@@ -1251,14 +1260,25 @@ Perl_do_kv(pTHX)
     HE *entry;
     SSize_t extend_size;
     const U8 gimme = GIMME_V;
-    const I32 dokv =     (PL_op->op_type == OP_RV2HV || PL_op->op_type == OP_PADHV);
-    /* op_type is OP_RKEYS/OP_RVALUES if pp_rkeys delegated to here */
-    const I32 dokeys =   dokv || (PL_op->op_type == OP_KEYS)
-	|| (  PL_op->op_type == OP_AVHVSWITCH
-	   && (PL_op->op_private & 3) + OP_EACH == OP_KEYS  );
-    const I32 dovalues = dokv || (PL_op->op_type == OP_VALUES)
-	|| (  PL_op->op_type == OP_AVHVSWITCH
-	   && (PL_op->op_private & 3) + OP_EACH == OP_VALUES  );
+
+    const I32 dokv     = (   PL_op->op_type == OP_RV2HV
+                          || PL_op->op_type == OP_PADHV);
+
+    const I32 dokeys   =     dokv
+                          || (PL_op->op_type == OP_KEYS)
+                          || (    PL_op->op_type == OP_AVHVSWITCH
+                              && (PL_op->op_private & 3) + OP_EACH == OP_KEYS);
+
+    const I32 dovalues =     dokv
+                          || (PL_op->op_type == OP_VALUES)
+                          || (    PL_op->op_type == OP_AVHVSWITCH
+                              && (PL_op->op_private & 3) + OP_EACH == OP_VALUES);
+
+    assert(   PL_op->op_type == OP_PADHV
+           || PL_op->op_type == OP_RV2HV
+           || PL_op->op_type == OP_KEYS
+           || PL_op->op_type == OP_VALUES
+           || PL_op->op_type == OP_AVHVSWITCH);
 
     (void)hv_iterinit(keys);	/* always reset iterator regardless */
 

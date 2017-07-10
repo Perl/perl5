@@ -6414,6 +6414,19 @@ PP(pp_coreargs)
     RETURN;
 }
 
+/* Implement CORE::keys(),values(),each().
+ *
+ * We won't know until run-time whether the arg is an array or hash,
+ * so this op calls
+ *
+ *    pp_keys/pp_values/pp_each
+ * or
+ *    pp_akeys/pp_avalues/pp_aeach
+ *
+ * as appropriate (or whatever pp function actually implements the OP_FOO
+ * functionality for each FOO).
+ */
+
 PP(pp_avhvswitch)
 {
     dVAR; dSP;
