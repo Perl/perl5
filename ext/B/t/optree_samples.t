@@ -483,8 +483,7 @@ checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
 #            goto 7
 # g  <0> pushmark s
 # h  <#> gv[*h] s
-# i  <1> rv2hv[t2] lKRM*/1         < 5.019006
-# i  <1> rv2hv lKRM*/1             >=5.019006
+# i  <1> rv2hv lKRM*
 # j  <2> aassign[t10] KS/COM_AGG
 # k  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
@@ -507,8 +506,7 @@ EOT_EOT
 #            goto 7
 # g  <0> pushmark s
 # h  <$> gv(*h) s
-# i  <1> rv2hv[t1] lKRM*/1         < 5.019006
-# i  <1> rv2hv lKRM*/1             >=5.019006
+# i  <1> rv2hv lKRM*
 # j  <2> aassign[t5] KS/COM_AGG
 # k  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
@@ -521,8 +519,7 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*h] s
-# 5  <1> rv2hv[t2] lKRM*/1         < 5.019006
-# 5  <1> rv2hv lKRM*/1             >=5.019006
+# 5  <1> rv2hv lKRM*
 # 6  <2> aassign[t3] vKS
 # 7  <;> nextstate(main 506 (eval 24):1) v:{
 # 8  <0> pushmark sM
@@ -536,7 +533,7 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 # e      <;> nextstate(main 505 (eval 24):1) v:{
 # f      <#> gvsv[*_] s
 # g      <#> gv[*h] s
-# h      <1> rv2hv sKR/1
+# h      <1> rv2hv sKR
 # i      <0> pushmark s
 # j      <#> gvsv[*_] s
 # k      <#> gv[*getkey] s/EARLYCV
@@ -552,8 +549,7 @@ EOT_EOT
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*h) s
-# 5  <1> rv2hv[t1] lKRM*/1         < 5.019006
-# 5  <1> rv2hv lKRM*/1             >=5.019006
+# 5  <1> rv2hv lKRM*
 # 6  <2> aassign[t2] vKS
 # 7  <;> nextstate(main 506 (eval 24):1) v:{
 # 8  <0> pushmark sM
@@ -567,7 +563,7 @@ EOT_EOT
 # e      <;> nextstate(main 505 (eval 24):1) v:{
 # f      <$> gvsv(*_) s
 # g      <$> gv(*h) s
-# h      <1> rv2hv sKR/1
+# h      <1> rv2hv sKR
 # i      <0> pushmark s
 # j      <$> gvsv(*_) s
 # k      <$> gv(*getkey) s/EARLYCV

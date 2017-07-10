@@ -1035,20 +1035,43 @@ PP(pp_rv2av)
 	    SETi(maxarg);
 	}
     } else {
+        bool tied;
 	/* The guts of pp_rv2hv  */
 	if (gimme == G_ARRAY) { /* array wanted */
 	    *PL_stack_sp = sv;
 	    return Perl_do_kv(aTHX);
 	}
-	else if ((PL_op->op_private & OPpTRUEBOOL
+
+        if (PL_op->op_private & OPpRV2HV_ISKEYS)
+            /* 'keys %h' masquerading as '%h': reset iterator */
+            (void)hv_iterinit(MUTABLE_HV(sv));
+
+        tied = SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied);
+
+	if ( (   PL_op->op_private & OPpTRUEBOOL
 	      || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-		 && block_gimme() == G_VOID  ))
-	      && (!SvRMAGICAL(sv) || !mg_find(sv, PERL_MAGIC_tied)))
+		 && block_gimme() == G_VOID)
+             )
+	     && !tied)
 	    SETs(HvUSEDKEYS(MUTABLE_HV(sv)) ? &PL_sv_yes : &PL_sv_zero);
 	else if (gimme == G_SCALAR) {
 	    dTARG;
-	    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
-	    SETTARG;
+            if (PL_op->op_private & OPpRV2HV_ISKEYS) {
+                IV i;
+                if (tied) {
+                    i = 0;
+                    while (hv_iternext(MUTABLE_HV(sv)))
+                        i++;
+                }
+                else
+                    i = HvUSEDKEYS(MUTABLE_HV(sv));
+                (void)POPs;
+                mPUSHi(i);
+            }
+            else {
+                TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
+                SETTARG;
+            }
 	}
     }
     RETURN;

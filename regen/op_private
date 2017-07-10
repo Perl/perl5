@@ -198,7 +198,8 @@ use strict;
 
     # find which ops use 0,1,2,3 or 4 bits of op_private for arg count info
 
-    $args0{$_} = 1 for qw(entersub avhvswitch); # UNOPs that usurp bit 0
+    $args0{$_} = 1 for qw(entersub avhvswitch
+                       rv2hv);                  # UNOPs that usurp bit 0
 
     $args1{$_} = 1 for (
                         qw(reverse), # ck_fun(), but most bits stolen
@@ -783,6 +784,18 @@ addbits('argelem',
                            )],
                },
 );
+
+
+# rv2hv and padhv in void/scalar context implementing 'keys %h'
+# directly, without a following OP_KEYS
+
+addbits('padhv',
+    0 => qw(OPpPADHV_ISKEYS KEYS),
+);
+addbits('rv2hv',
+    0 => qw(OPpRV2HV_ISKEYS KEYS),
+);
+
 
 
 1;

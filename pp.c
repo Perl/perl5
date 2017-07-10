@@ -122,6 +122,7 @@ PP(pp_padhv)
 {
     dSP; dTARGET;
     U8 gimme;
+    bool tied;
 
     assert(SvTYPE(TARG) == SVt_PVHV);
     XPUSHs(TARG);
@@ -145,15 +146,37 @@ PP(pp_padhv)
     if (gimme == G_ARRAY) {
 	RETURNOP(Perl_do_kv(aTHX));
     }
-    else if ((PL_op->op_private & OPpTRUEBOOL
+
+    if (PL_op->op_private & OPpPADHV_ISKEYS)
+        /* 'keys %h' masquerading as '%h': reset iterator */
+        (void)hv_iterinit(MUTABLE_HV(TARG));
+
+    tied = SvRMAGICAL(TARG) && mg_find(TARG, PERL_MAGIC_tied);
+
+    if (  (  PL_op->op_private & OPpTRUEBOOL
 	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-	     && block_gimme() == G_VOID  ))
-	  && (!SvRMAGICAL(TARG) || !mg_find(TARG, PERL_MAGIC_tied))
+	     && block_gimme() == G_VOID  )
+          )
+	  && !tied
     )
 	SETs(HvUSEDKEYS(TARG) ? &PL_sv_yes : &PL_sv_zero);
     else if (gimme == G_SCALAR) {
-	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
-	SETs(sv);
+        if (PL_op->op_private & OPpPADHV_ISKEYS) {
+            IV i;
+            if (tied) {
+                i = 0;
+                while (hv_iternext(MUTABLE_HV(TARG)))
+                    i++;
+            }
+            else
+                i = HvUSEDKEYS(MUTABLE_HV(TARG));
+            (void)POPs;
+            mPUSHi(i);
+        }
+        else {
+            SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
+            SETs(sv);
+        }
     }
     RETURN;
 }

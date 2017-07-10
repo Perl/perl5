@@ -2661,3 +2661,17 @@ our(@oa, %oh);
 @oa = %oh{'foo', 'bar'};
 @oa = delete @oh{'foo', 'bar'};
 @oa = delete %oh{'foo', 'bar'};
+####
+# keys optimised away in void and scalar context
+no warnings;
+;
+our %h1;
+my($x, %h2);
+%h1;
+keys %h1;
+$x = %h1;
+$x = keys %h1;
+%h2;
+keys %h2;
+$x = %h2;
+$x = keys %h2;

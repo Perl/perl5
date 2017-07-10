@@ -9471,6 +9471,8 @@ Perl_oopsHV(pTHX_ OP *o)
     case OP_RV2SV:
     case OP_RV2AV:
         OpTYPE_set(o, OP_RV2HV);
+        /* rv2hv steals the bottom bit for its own uses */
+        o->op_private &= ~OPpARG1_MASK;
 	ref(o, OP_RV2HV);
 	break;
 
@@ -9924,6 +9926,10 @@ Perl_ck_rvconst(pTHX_ OP *o)
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_RVCONST;
+
+    if (o->op_type == OP_RV2HV)
+        /* rv2hv steals the bottom bit for its own uses */
+        o->op_private &= ~OPpARG1_MASK;
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
 
@@ -14340,9 +14346,33 @@ Perl_rpeep(pTHX_ OP *o)
 
 	case OP_RV2HV:
 	case OP_PADHV:
+            /*'keys %h' in void or scalar context: skip the OP_KEYS
+             * and perform the functionality directly in the RV2HV/PADHV
+             * op
+             */
+            if (o->op_flags & OPf_REF) {
+                OP *k = o->op_next;
+                if (   k
+                    && k->op_type == OP_KEYS
+                    && (   (k->op_flags & OPf_WANT) == OPf_WANT_VOID
+                        || (k->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                    && !(k->op_private & OPpMAYBE_LVSUB)
+                    && !(k->op_flags & OPf_MOD)
+                ) {
+                    o->op_next     = k->op_next;
+                    o->op_flags   &= ~(OPf_REF|OPf_WANT);
+                    o->op_flags   |= (k->op_flags & OPf_WANT);
+                    o->op_private |= (o->op_type == OP_PADHV ?
+                                      OPpRV2HV_ISKEYS : OPpRV2HV_ISKEYS);
+                    op_null(k);
+                }
+            }
+
             /* see if %h is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+
+
             if (o->op_type != OP_PADHV)
                 break;
             /* FALLTHROUGH */

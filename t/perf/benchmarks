@@ -306,6 +306,11 @@
         setup   => 'my %h;',
         code    => '!%h',
     },
+    'expr::hash::bool_empty_keys' => {
+        desc    => 'empty lexical hash in boolean keys context',
+        setup   => 'my %h;',
+        code    => '!keys %h',
+    },
     'expr::hash::bool_empty_unknown' => {
         desc    => 'empty lexical hash in unknown context',
         setup   => 'my ($i, %h); sub f { if (%h) { $i++ }}',
@@ -315,6 +320,11 @@
         desc    => 'non-empty lexical hash in boolean context',
         setup   => 'my %h = 1..10;',
         code    => '!%h',
+    },
+    'expr::hash::bool_full_keys' => {
+        desc    => 'non-empty lexical hash in keys boolean context',
+        setup   => 'my %h = 1..10;',
+        code    => '!keys %h',
     },
 
 

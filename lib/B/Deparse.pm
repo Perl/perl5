@@ -18,6 +18,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
          OPpSPLIT_ASSIGN OPpSPLIT_LEX
+         OPpPADHV_ISKEYS OPpRV2HV_ISKEYS
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
@@ -48,7 +49,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.41';
+$VERSION = '1.42';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -4084,7 +4085,11 @@ sub pp_padsv {
 }
 
 sub pp_padav { pp_padsv(@_) }
-sub pp_padhv { pp_padsv(@_) }
+
+sub pp_padhv {
+    my $op = $_[1];
+    (($op->private & OPpPADHV_ISKEYS) ? 'keys ' : '') . pp_padsv(@_);
+}
 
 sub gv_or_padgv {
     my $self = shift;
@@ -4167,8 +4172,13 @@ sub rv2x {
 }
 
 sub pp_rv2sv { maybe_local(@_, rv2x(@_, "\$")) }
-sub pp_rv2hv { maybe_local(@_, rv2x(@_, "%")) }
 sub pp_rv2gv { maybe_local(@_, rv2x(@_, "*")) }
+
+sub pp_rv2hv {
+    my $op = $_[1];
+    (($op->private & OPpRV2HV_ISKEYS) ? 'keys ' : '')
+        . maybe_local(@_, rv2x(@_, "%"))
+}
 
 # skip rv2av
 sub pp_av2arylen {
