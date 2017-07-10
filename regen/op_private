@@ -429,10 +429,14 @@ addbits($_, 6 => qw(OPpOUR_INTRO OURINTR)) # Variable was in an our()
 
 
 # We might be an lvalue to return
+# 'values' doesn't actually use this bit, but we reserve it here as
+# pp_values may call Perl_do_kv() which is shared among several ops which
+# do.
+
 addbits($_, 3 => qw(OPpMAYBE_LVSUB LVSUB))
     for qw(aassign rv2av rv2gv rv2hv padav padhv aelem helem aslice hslice
            av2arylen keys akeys avhvswitch kvaslice kvhslice substr pos vec
-           multideref);
+           multideref values);
 
 
 

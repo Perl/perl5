@@ -2588,7 +2588,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* avalues */
       38, /* akeys */
        0, /* each */
-       0, /* values */
+      38, /* values */
       38, /* keys */
      100, /* delete */
      104, /* exists */
@@ -2858,7 +2858,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, values, pop, shift, grepstart, grepwhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, method, argcheck, argdefelem, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, grepwhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, method, argcheck, argdefelem, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
     0x2dbc, 0x3ef9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0498, 0x18d0, 0x3fac, 0x3a68, 0x3185, /* const */
@@ -2870,7 +2870,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x2dbc, 0x3ef8, 0x0614, 0x06b0, 0x2eac, 0x3be9, /* padhv */
     0x2dbc, 0x1ab8, 0x03d6, 0x2eac, 0x30a8, 0x3fa4, 0x0003, /* rv2gv */
     0x2dbc, 0x32d8, 0x03d6, 0x3fa4, 0x0003, /* rv2sv */
-    0x2eac, 0x0003, /* av2arylen, pos, akeys, keys */
+    0x2eac, 0x0003, /* av2arylen, pos, akeys, values, keys */
     0x301c, 0x0ef8, 0x0c54, 0x028c, 0x4168, 0x3fa4, 0x0003, /* rv2cv */
     0x0614, 0x06b0, 0x0003, /* ref */
     0x018f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
@@ -3073,7 +3073,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* AVALUES    */ (OPpARG1_MASK),
     /* AKEYS      */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
     /* EACH       */ (OPpARG1_MASK),
-    /* VALUES     */ (OPpARG1_MASK),
+    /* VALUES     */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
     /* KEYS       */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
     /* DELETE     */ (OPpARG1_MASK|OPpKVSLICE|OPpSLICE|OPpLVAL_INTRO),
     /* EXISTS     */ (OPpARG1_MASK|OPpEXISTS_SUB),

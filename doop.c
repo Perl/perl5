@@ -1282,6 +1282,9 @@ Perl_do_kv(pTHX)
            || PL_op->op_type == OP_VALUES
            || PL_op->op_type == OP_AVHVSWITCH);
 
+    assert(!(    PL_op->op_type == OP_VALUES
+             && (PL_op->op_private & OPpMAYBE_LVSUB)));
+
     (void)hv_iterinit(keys);	/* always reset iterator regardless */
 
     if (gimme == G_VOID)
