@@ -1267,12 +1267,14 @@ Perl_do_kv(pTHX)
     const I32 dokeys   =     dokv
                           || (PL_op->op_type == OP_KEYS)
                           || (    PL_op->op_type == OP_AVHVSWITCH
-                              && (PL_op->op_private & 3) + OP_EACH == OP_KEYS);
+                              && (PL_op->op_private & OPpAVHVSWITCH_MASK)
+                                    + OP_EACH == OP_KEYS);
 
     const I32 dovalues =     dokv
                           || (PL_op->op_type == OP_VALUES)
                           || (    PL_op->op_type == OP_AVHVSWITCH
-                              && (PL_op->op_private & 3) + OP_EACH == OP_VALUES);
+                              && (PL_op->op_private & OPpAVHVSWITCH_MASK)
+                                     + OP_EACH == OP_VALUES);
 
     assert(   PL_op->op_type == OP_PADHV
            || PL_op->op_type == OP_RV2HV

@@ -3092,7 +3092,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         goto nomod;
     case OP_AVHVSWITCH:
 	if (type == OP_LEAVESUBLV
-	 && (o->op_private & 3) + OP_EACH == OP_KEYS)
+	 && (o->op_private & OPpAVHVSWITCH_MASK) + OP_EACH == OP_KEYS)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
     case OP_AV2ARYLEN:
