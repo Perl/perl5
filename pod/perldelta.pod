@@ -364,6 +364,13 @@ List assignment (C<aassign>) could in some rare cases allocate an
 entry on the mortal stack and leave the entry uninitialized. [perl
 #131570]
 
+=item *
+
+Attempting to apply an attribute to an C<our> variable where a
+function of that name already exists could result in a NULL pointer
+being supplied where an SV was expected, crashing perl.  [perl
+#131597]
+
 =back
 
 =head1 Known Problems
