@@ -945,7 +945,9 @@ sub run_tests {
                     'Empty string charname produces NOTHING node';
         like "\N{LONG-STR}", qr/^\N{LONG-STR}$/, 'Verify that long string works';
         like "\N{LONG-STR}", qr/^\N{LONG-STR}$/i, 'Verify under folding that long string works';
-        like "\xc4", qr/\N{EMPTY-STR}\xe4/i, 'Empty \N{} should change /d to /u';
+
+        # perlhacktips points out that these work on both ASCII and EBCDIC
+        like "\xfc", qr/\N{EMPTY-STR}\xdc/i, 'Empty \N{} should change /d to /u';
 
         eval '/(?[[\N{EMPTY-STR}]])/';
         like $@, qr/Zero length \\N\{\}/, 'Verify zero-length return from \N{} correctly fails';
