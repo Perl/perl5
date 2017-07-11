@@ -156,7 +156,7 @@ $bits{$_}{6} = 'OPpTRANS_GROWS' for qw(trans transr);
 $bits{$_}{2} = 'OPpTRANS_IDENTICAL' for qw(trans transr);
 $bits{$_}{3} = 'OPpTRANS_SQUASH' for qw(trans transr);
 $bits{$_}{1} = 'OPpTRANS_TO_UTF' for qw(trans transr);
-$bits{$_}{5} = 'OPpTRUEBOOL' for qw(padhv ref rv2hv);
+$bits{$_}{5} = 'OPpTRUEBOOL' for qw(padav padhv ref rv2av rv2hv);
 
 my @bf = (
     {
@@ -830,6 +830,7 @@ our %ops_using = (
     OPpSUBSTR_REPL_FIRST     => [qw(substr)],
     OPpTARGET_MY             => [qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int kill left_shift length link log mkdir modulo multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid)],
     OPpTRANS_COMPLEMENT      => [qw(trans transr)],
+    OPpTRUEBOOL              => [qw(padav padhv ref rv2av rv2hv)],
 );
 
 $ops_using{OPpASSIGN_COMMON_RC1} = $ops_using{OPpASSIGN_COMMON_AGG};
@@ -872,6 +873,5 @@ $ops_using{OPpTRANS_GROWS} = $ops_using{OPpTRANS_COMPLEMENT};
 $ops_using{OPpTRANS_IDENTICAL} = $ops_using{OPpTRANS_COMPLEMENT};
 $ops_using{OPpTRANS_SQUASH} = $ops_using{OPpTRANS_COMPLEMENT};
 $ops_using{OPpTRANS_TO_UTF} = $ops_using{OPpTRANS_COMPLEMENT};
-$ops_using{OPpTRUEBOOL} = $ops_using{OPpMAYBE_TRUEBOOL};
 
 # ex: set ro:

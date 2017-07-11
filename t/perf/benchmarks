@@ -218,6 +218,46 @@
         code    => '($r||0)->[0][0][0]',
     },
 
+    'expr::array::lex_bool_empty' => {
+        desc    => 'empty lexical array in boolean context',
+        setup   => 'my @a;',
+        code    => '!@a',
+    },
+    'expr::array::lex_bool_full' => {
+        desc    => 'non-empty lexical array in boolean context',
+        setup   => 'my @a = 1..10;',
+        code    => '!@a',
+    },
+    'expr::array::lex_scalar_empty' => {
+        desc    => 'empty lexical array in scalar context',
+        setup   => 'my (@a, $i);',
+        code    => '$i = @a',
+    },
+    'expr::array::lex_scalar_full' => {
+        desc    => 'non-empty lexical array in scalar context',
+        setup   => 'my @a = 1..10; my $i',
+        code    => '$i = @a',
+    },
+    'expr::array::pkg_bool_empty' => {
+        desc    => 'empty lexical array in boolean context',
+        setup   => 'our @a;',
+        code    => '!@a',
+    },
+    'expr::array::pkg_bool_full' => {
+        desc    => 'non-empty lexical array in boolean context',
+        setup   => 'our @a = 1..10;',
+        code    => '!@a',
+    },
+    'expr::array::pkg_scalar_empty' => {
+        desc    => 'empty lexical array in scalar context',
+        setup   => 'our @a; my $i;',
+        code    => '$i = @a',
+    },
+    'expr::array::pkg_scalar_full' => {
+        desc    => 'non-empty lexical array in scalar context',
+        setup   => 'our @a = 1..10; my $i',
+        code    => '$i = @a',
+    },
 
     'expr::arrayhash::lex_3var' => {
         desc    => 'lexical $h{$k1}[$i]{$k2}',

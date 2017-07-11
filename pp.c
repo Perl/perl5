@@ -110,10 +110,13 @@ PP(pp_padav)
 	SP += maxarg;
     }
     else if (gimme == G_SCALAR) {
-	SV* const sv = sv_newmortal();
 	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
-	sv_setiv(sv, maxarg);
-	PUSHs(sv);
+        if (!maxarg)
+            PUSHs(&PL_sv_zero);
+        else if (PL_op->op_private & OPpTRUEBOOL)
+            PUSHs(&PL_sv_yes);
+        else
+            mPUSHi(maxarg);
     }
     RETURN;
 }

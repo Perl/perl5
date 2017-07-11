@@ -13,7 +13,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 854;
+plan 1490;
 
 use v5.10; # state
 use B qw(svref_2object
@@ -208,8 +208,12 @@ is svref_2object(sub { "@_" })->ROOT->first->last->name, 'join',
 
 for my $ops (
     #  op       code           op path   flag         maybe flag
+    [ 'rv2av', '@pkg',         [],       OPpTRUEBOOL, 0,                ],
+    [ 'rv2av', 'scalar(@pkg)', [0],      OPpTRUEBOOL, 0,                ],
     [ 'rv2hv', '%pkg',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
     [ 'rv2hv', 'scalar(%pkg)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'padav',  '@lex',        [],       OPpTRUEBOOL, 0,                ],
+    [ 'padav',  'scalar @lex', [0],      OPpTRUEBOOL, 0,                ],
     [ 'padhv', '%lex',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
     [ 'padhv', 'scalar(%lex)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
     [ 'ref',   'ref($x)',      [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
@@ -368,8 +372,8 @@ for my $ops (
 
             my $sub;
             {
-                our (%pkg);
-                my  (%lex, $p, $q, $r, $x, $y);
+                our (@pkg, %pkg);
+                my  (@lex, %lex, $p, $q, $r, $x, $y);
 
                 no warnings 'void';
                 $sub = eval "sub { $code }"

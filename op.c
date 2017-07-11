@@ -14344,6 +14344,11 @@ Perl_rpeep(pTHX_ OP *o)
             break;
         }
 
+	case OP_RV2AV:
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            break;
+
 	case OP_RV2HV:
 	case OP_PADHV:
             /*'keys %h' in void or scalar context: skip the OP_KEYS
@@ -14377,6 +14382,11 @@ Perl_rpeep(pTHX_ OP *o)
                 break;
             /* FALLTHROUGH */
 	case OP_PADAV:
+            if (   o->op_type == OP_PADAV
+                && (o->op_flags & OPf_WANT) == OPf_WANT_SCALAR
+            )
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            /* FALLTHROUGH */
 	case OP_PADSV:
             /* Skip over state($x) in void context.  */
             if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)

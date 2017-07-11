@@ -1030,11 +1030,16 @@ PP(pp_rv2av)
             SPAGAIN;
 	}
 	else if (gimme == G_SCALAR) {
-	    dTARGET;
 	    const SSize_t maxarg = AvFILL(av) + 1;
-	    SETi(maxarg);
+            if (PL_op->op_private & OPpTRUEBOOL)
+                SETs(maxarg ? &PL_sv_yes : &PL_sv_zero);
+            else {
+                dTARGET;
+                SETi(maxarg);
+            }
 	}
-    } else {
+    }
+    else {
         bool tied;
 	/* The guts of pp_rv2hv  */
 	if (gimme == G_ARRAY) { /* array wanted */
