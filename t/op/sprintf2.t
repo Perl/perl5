@@ -5,6 +5,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    require './charset_tools.pl';
     set_up_inc('../lib');
 }   
 
@@ -957,8 +958,13 @@ SKIP: {
     };
 
     use warnings;
-    my $s = sprintf "%s%\xc4\x80%s", "\x{102}", "\xc4\x83";
-    is($s, "\x{102}%\xc4\x80\xc4\x83", "utf8 for invalid format");
+    my $cap_A_macron_utf8 = byte_utf8a_to_utf8n("\xc4\x80");
+    my $small_a_breve_utf8 = byte_utf8a_to_utf8n("\xc4\x83");
+    my $s = sprintf "%s%$cap_A_macron_utf8%s",
+                    "\x{102}",
+                    $small_a_breve_utf8;
+    is($s, "\x{102}%$cap_A_macron_utf8$small_a_breve_utf8",
+       "utf8 for invalid format");
     is($w_inv,   1, "utf8 for invalid format: invalid warnings");
     is($w_red,   0, "utf8 for invalid format: redundant warnings");
     is($w_other, 0, "utf8 for invalid format: other warnings");
