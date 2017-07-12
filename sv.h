@@ -1768,7 +1768,9 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvTRUE_nomg_NN(sv) (SvTRUE_common(sv, sv_2bool_nomg(sv)))
 
 #define SvTRUE_common(sv,fallback) (			\
-      !SvOK(sv)						\
+      SvIMMORTAL_INTERP(sv)                             \
+        ? SvIMMORTAL_TRUE(sv)                           \
+    : !SvOK(sv)						\
 	? 0						\
     : SvPOK(sv)						\
 	? SvPVXtrue(sv)					\
