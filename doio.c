@@ -872,7 +872,17 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 #define ARGVMG_ORIG_NAME 2
 #define ARGVMG_ORIG_MODE 3
 #define ARGVMG_ORIG_PID 4
+
+#ifdef ARGV_USE_ATFUNCTIONS
 #define ARGVMG_ORIG_DIRP 5
+#else
+/* we store the entire stat_t since the ino_t and dev_t values might
+   not fit in an IV.  I could have created a new structure and
+   transferred them across, but this seemed too much effort for very
+   little win.
+ */
+#define ARGVMG_ORIG_CWD_STAT 5
+#endif
 
 static int
 S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
@@ -1107,6 +1117,11 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #ifdef ARGV_USE_ATFUNCTIONS
                 curdir = opendir(".");
                 av_store(magic_av, ARGVMG_ORIG_DIRP, newSViv(PTR2IV(curdir)));
+#else
+                if (PerlLIO_stat(".", &statbuf) >= 0) {
+                    av_store(magic_av, ARGVMG_ORIG_CWD_STAT,
+                             newSVpvn((char *)&statbuf, sizeof(statbuf)));
+                }
 #endif
 		setdefout(PL_argvoutgv);
                 sv_setsv(GvSVn(PL_argvoutgv), temp_name_sv);
@@ -1203,6 +1218,10 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         SV **dir_psv  = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
         DIR *dir;
         int dfd;
+#else
+        Stat_t statbuf;
+        SV **stat_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_CWD_STAT, FALSE);
+        Stat_t *orig_cwd_stat = stat_psv && *stat_psv ? (Stat_t *)SvPVX(*stat_psv) : NULL;
 #endif
         UV mode;
         int fd;
@@ -1241,6 +1260,23 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         }
 
         if (retval) {
+#ifndef ARGV_USE_ATFUNCTIONS
+            /* if the path is absolute the possible moving of cwd (which the file
+               might be in) isn't our problem.
+               This code tries to be reasonably balanced about detecting a changed
+               CWD, if we have the information needed to check that curdir has changed, we
+               check it
+            */
+            if (!PERL_FILE_IS_ABSOLUTE(SvPVX(*orig_psv))
+                && orig_cwd_stat
+                && PerlLIO_stat(".", &statbuf) >= 0
+                && ( statbuf.st_dev != orig_cwd_stat->st_dev
+                     || statbuf.st_ino != orig_cwd_stat->st_ino)) {
+                Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": "
+                           "Current directory has changed", *orig_psv);
+            }
+#endif
+
 #if defined(DOSISH) || defined(__CYGWIN__)
             if (PL_argvgv && GvIOp(PL_argvgv)
                 && IoIFP(GvIOp(PL_argvgv))

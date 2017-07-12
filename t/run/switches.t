@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 135);
+plan(tests => 136);
 
 use Config;
 
@@ -560,6 +560,8 @@ CODE
     is(scalar(@names), 0, "no extra files")
       or diag "Found @names, expected none";
 
+    # the following tests might leave work files behind
+
     # this test can leave the work file in the directory, since making
     # the directory non-writable also prevents removing the work file
   SKIP:
@@ -586,10 +588,29 @@ CODE
         chmod 0700, "inplacetmp" or die "Cannot make inplacetmp writable again: $!";
     }
 
+  SKIP:
+    {
+        # this needs to reverse match how ARGV_USE_ATFUNCTIONS is defined in doio.c
+        skip "Testing without *at functions", 1
+          if $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
+              && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
+              && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
+        fresh_perl_is(<<'CODE', "Cannot complete in-place edit of inplacetmp/foo: Current directory has changed at - line 5, <> line 1.\n", { },
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  chdir "..";
+  print "xx\n";
+}
+print "ok\n";
+CODE
+                       "chdir while in-place editing (no at-functions)");
+    }
+
     unlink $work;
 
     opendir $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
-    @names = grep !/^\.\.?$/, readdir $d;
+    @names = grep !/^\.\.?$/ && !/foo$/aai, readdir $d;
     closedir $d;
 
     # clean up in case the above failed
