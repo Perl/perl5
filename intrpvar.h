@@ -167,10 +167,16 @@ C<&PL_sv_zero>. Introduced in 5.28.
 =cut
 */
 
+#ifdef MULTIPLICITY
+PERLVAR(I, sv_yes,	SV)
 PERLVAR(I, sv_undef,	SV)
 PERLVAR(I, sv_no,	SV)
-PERLVAR(I, sv_yes,	SV)
 PERLVAR(I, sv_zero,	SV)
+#else
+/* store the immortals as an array to ensure they are contiguous in
+ * memory: makes SvIMMORTAL_INTERP(sv) possible */
+PERLVARA(I, sv_immortals, 4, SV)
+#endif
 
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)

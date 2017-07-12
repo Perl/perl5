@@ -317,6 +317,7 @@
 #define PL_sv_arenaroot		(vTHX->Isv_arenaroot)
 #define PL_sv_consts		(vTHX->Isv_consts)
 #define PL_sv_count		(vTHX->Isv_count)
+#define PL_sv_immortals		(vTHX->Isv_immortals)
 #define PL_sv_no		(vTHX->Isv_no)
 #define PL_sv_root		(vTHX->Isv_root)
 #define PL_sv_serial		(vTHX->Isv_serial)

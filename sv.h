@@ -2090,7 +2090,20 @@ properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 #define SvPEEK(sv) ""
 #endif
 
-#define SvIMMORTAL(sv) (SvREADONLY(sv) && ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_zero || (sv)==&PL_sv_placeholder))
+/* Is this a per-interpreter immortal SV (rather than global)?
+ * These should either occupy adjacent entries in the interpreter struct
+ * (MULTIPLICITY) or adjacent elements of PL_sv_immortals[] otherwise.
+ * The unsigned (Size_t) cast avoids the need for a second < 0 condition.
+ */
+#define SvIMMORTAL_INTERP(sv) ((Size_t)((sv) - &PL_sv_yes) < 4)
+
+/* Does this immortal have a true value? Currently only PL_sv_yes does. */
+#define SvIMMORTAL_TRUE(sv)   ((sv) == &PL_sv_yes)
+
+/* the SvREADONLY() test is to quickly reject most SVs */
+#define SvIMMORTAL(sv) \
+                (  SvREADONLY(sv) \
+                && (SvIMMORTAL_INTERP(sv) || (sv) == &PL_sv_placeholder))
 
 #ifdef DEBUGGING
    /* exercise the immortal resurrection code in sv_free2() */

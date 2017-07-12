@@ -15931,6 +15931,26 @@ Perl_init_constants(pTHX)
     SvNV_set(&PL_sv_zero, 0);
 
     PadnamePV(&PL_padname_const) = (char *)PL_No;
+
+    assert(SvIMMORTAL_INTERP(&PL_sv_yes));
+    assert(SvIMMORTAL_INTERP(&PL_sv_undef));
+    assert(SvIMMORTAL_INTERP(&PL_sv_no));
+    assert(SvIMMORTAL_INTERP(&PL_sv_zero));
+
+    assert(SvIMMORTAL(&PL_sv_yes));
+    assert(SvIMMORTAL(&PL_sv_undef));
+    assert(SvIMMORTAL(&PL_sv_no));
+    assert(SvIMMORTAL(&PL_sv_zero));
+
+    assert( SvIMMORTAL_TRUE(&PL_sv_yes));
+    assert(!SvIMMORTAL_TRUE(&PL_sv_undef));
+    assert(!SvIMMORTAL_TRUE(&PL_sv_no));
+    assert(!SvIMMORTAL_TRUE(&PL_sv_zero));
+
+    assert( SvTRUE_nomg_NN(&PL_sv_yes));
+    assert(!SvTRUE_nomg_NN(&PL_sv_undef));
+    assert(!SvTRUE_nomg_NN(&PL_sv_no));
+    assert(!SvTRUE_nomg_NN(&PL_sv_zero));
 }
 
 /*

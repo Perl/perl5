@@ -5629,6 +5629,10 @@ struct tempsym; /* defined in pp_pack.c */
 START_EXTERN_C
 #  include "intrpvar.h"
 END_EXTERN_C
+#  define PL_sv_yes   (PL_sv_immortals[0])
+#  define PL_sv_undef (PL_sv_immortals[1])
+#  define PL_sv_no    (PL_sv_immortals[2])
+#  define PL_sv_zero  (PL_sv_immortals[3])
 #endif
 
 #ifdef PERL_CORE
