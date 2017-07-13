@@ -422,19 +422,6 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
      * several places in this file, so is centralized here.  It is based on the
      * following table:
      *
-     * U+7FFFFFFF (2 ** 31 - 1)
-     *      ASCII: \xFD\xBF\xBF\xBF\xBF\xBF
-     *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x42\x73\x73\x73\x73\x73\x73
-     *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x42\x72\x72\x72\x72\x72\x72
-     *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x42\x75\x75\x75\x75\x75\x75
-     *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1\xBF\xBF\xBF\xBF\xBF\xBF
-     * U+80000000 (2 ** 31):
-     *      ASCII: \xFE\x82\x80\x80\x80\x80\x80
-     *              [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] 10  11  12  13
-     *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-     *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-     *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-     *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA2\xA0\xA0\xA0\xA0\xA0\xA0
      */
 
 #ifdef EBCDIC
@@ -472,8 +459,24 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
         return FALSE;
     }
 
-    /* Note that in UTF-EBCDIC, the two lowest possible continuation bytes are
-     * \x41 and \x42. */
+        /* U+7FFFFFFF (2 ** 31 - 1)
+         *              [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] 10  11  12  13
+         *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x42\x73\x73\x73\x73\x73\x73
+         *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x42\x72\x72\x72\x72\x72\x72
+         *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x42\x75\x75\x75\x75\x75\x75
+         *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1\xBF\xBF\xBF\xBF\xBF\xBF
+         * U+80000000 (2 ** 31):
+         *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+         *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+         *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+         *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA2\xA0\xA0\xA0\xA0\xA0\xA0
+         */
+        /* (Note that in UTF-EBCDIC, the two lowest possible continuation bytes
+         * are \x41 and \x42.)  If we have enough bytes available to determine
+         * the answer, or the bytes we do have differ from the UTF-8 prefix of
+         * the highest 30-bit code point, we can compare them to get a
+         * definitive answer */
+
     return cBOOL(memGT(s + 1, prefix, cmp_len));
 
 #endif
