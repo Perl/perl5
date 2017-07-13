@@ -24,6 +24,23 @@ use B qw(svref_2object
          OPpMAYBE_TRUEBOOL
       );
 
+# for debugging etc. Basic dump of an optree
+
+sub dump_optree {
+    my ($o, $depth) = @_;
+
+    return '' unless $$o;
+    # use Devel::Peek; Dump $o;
+    my $s = ("  " x $depth) . $o->name . "\n";
+    my $n = eval { $o->first };
+    while ($n && $$n) {
+        $s .= dump_optree($n, $depth+1);
+        $n = $n->sibling;
+    }
+    $s;
+}
+
+
 
 # Test that OP_AASSIGN gets the appropriate
 # OPpASSIGN_COMMON* flags set.
@@ -325,9 +342,9 @@ for my $ops (
 
         # GREP
 
-        [ [1,1,1], [0,1,0],    'grep %s,1,2'                     ],
-        [ [1,1,1], [0,1,0,0],  'grep !%s,1,2'                    ],
-        [ [1,1,1], [0,1,0,0,1],'grep  $y || %s,1,2'              ],
+        [ [1,1,1], [0,1,0],    'grep(%s,1,2)'                    ],
+        [ [1,1,1], [0,1,0,0],  'grep(!%s,1,2)'                   ],
+        [ [1,1,1], [0,1,0,0,1],'grep($y || %s,1,2)'              ],
 
         # FLIP
 
@@ -384,6 +401,7 @@ for my $ops (
 
             # find the expression subtree in the main lineseq of the sub
             my $expr = svref_2object($sub)->ROOT->first;
+            my $orig_expr = $expr;
             my @ops;
             my $next = $expr->first;
             while ($$next) {
@@ -395,14 +413,21 @@ for my $ops (
             # search through the expr subtree looking for the named op -
             # this assumes that for all the code examples above, the
             # op is always in the LH branch
+            my @orig_op_path = @op_path;
             while (defined (my $p = shift @op_path)) {
-                $expr = $expr->first;
-                $expr = $expr->sibling while $p--;
+                eval {
+                    $expr = $expr->first;
+                    $expr = $expr->sibling while $p--;
+                }
             }
 
-            if (!$expr || $expr->name ne $op_name) {
-                die "Can't find $op_name op in optree for '$code'; "
-                     . "this test needs to be rewritten" 
+            if (!$expr || !$$expr || $expr->name ne $op_name) {
+                my $optree = dump_optree($orig_expr,2);
+                print STDERR "Can't find $op_name op in optree for '$code'.\n";
+                print STDERR "This test needs to be rewritten\n";
+                print STDERR "seq_offset=$seq_offset op_path=(@orig_op_path)\n";
+                print STDERR "optree=\n$optree";
+                exit 1;
             }
 
             my $exp = $expects->[$context];
