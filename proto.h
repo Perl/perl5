@@ -4080,12 +4080,10 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 #if !defined(UV_IS_QUAD)
 #  if defined(PERL_IN_UTF8_C)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
+STATIC int	S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e, const bool consider_overlongs)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS	\
 	assert(s); assert(e)
-#endif
 
 #  endif
 #endif
@@ -5818,7 +5816,7 @@ STATIC UV	S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV res
 	assert(p); assert(ustrp); assert(lenp)
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE int	S_does_utf8_overflow(const U8 * const s, const U8 * e)
+PERL_STATIC_INLINE int	S_does_utf8_overflow(const U8 * const s, const U8 * e, const bool consider_overlongs)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW	\
 	assert(s); assert(e)
