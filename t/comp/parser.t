@@ -582,13 +582,16 @@ is $@, "", 'read into keys';
 eval 'substr keys(%h),0,=3';
 is $@, "", 'substr keys assignment';
 
-# very large utf8 char in error message was overflowing buffer
-{
-
-    no warnings;
-    eval "q" . chr(0x7fffffff);
-    like $@, qr/Can't find string terminator "." anywhere before EOF/,
-        'RT 128952';
+{ # very large utf8 char in error message was overflowing buffer
+    if (length sprintf("%x", ~0) <= 8) {
+        is 1, 1, "skip because overflows on 32-bit machine";
+    }
+    else {
+        no warnings;
+        eval "q" . chr(100000000064);
+        like $@, qr/Can't find string terminator "." anywhere before EOF/,
+            'RT 128952';
+    }
 }
 
 # RT #130311: many parser shifts before a reduce

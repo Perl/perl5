@@ -407,6 +407,8 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
     ( LIKELY( ( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
 : LIKELY( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( ( ((const U8*)s)[1] & 0xF0 ) == 0x80 ) ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
 
+#define UNICODE_IS_PERL_EXTENDED(uv)    UNLIKELY((UV) (uv) > 0x7FFFFFFF)
+
 #endif /* EBCDIC vs ASCII */
 
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
@@ -765,25 +767,36 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_GOT_SURROGATE		UTF8_DISALLOW_SURROGATE
 #define UTF8_WARN_SURROGATE		0x0200
 
-#define UTF8_DISALLOW_NONCHAR           0x0400	/* Unicode non-character */
+/* Unicode non-character  code points */
+#define UTF8_DISALLOW_NONCHAR           0x0400
 #define UTF8_GOT_NONCHAR                UTF8_DISALLOW_NONCHAR
-#define UTF8_WARN_NONCHAR               0x0800	/*  code points */
+#define UTF8_WARN_NONCHAR               0x0800
 
-#define UTF8_DISALLOW_SUPER		0x1000	/* Super-set of Unicode: code */
+/* Super-set of Unicode: code points above the legal max */
+#define UTF8_DISALLOW_SUPER		0x1000
 #define UTF8_GOT_SUPER		        UTF8_DISALLOW_SUPER
-#define UTF8_WARN_SUPER		        0x2000	/* points above the legal max */
+#define UTF8_WARN_SUPER		        0x2000
 
-/* Code points which never were part of the original UTF-8 standard, which only
- * went up to 2 ** 31 - 1.  Note that these all overflow a signed 32-bit word,
- * The first byte of these code points is FE or FF on ASCII platforms.  If the
- * first byte is FF, it will overflow a 32-bit word. */
-#define UTF8_DISALLOW_ABOVE_31_BIT      0x4000
-#define UTF8_GOT_ABOVE_31_BIT           UTF8_DISALLOW_ABOVE_31_BIT
-#define UTF8_WARN_ABOVE_31_BIT          0x8000
+/* The original UTF-8 standard did not define UTF-8 with start bytes of 0xFE or
+ * 0xFF, though UTF-EBCDIC did.  This allowed both versions to represent code
+ * points up to 2 ** 31 - 1.  Perl extends UTF-8 so that 0xFE and 0xFF are
+ * usable on ASCII platforms, and 0xFF means something different than
+ * UTF-EBCDIC defines.  These changes allow code points of 64 bits (actually
+ * somewhat more) to be represented on both platforms.  But these are Perl
+ * extensions, and not likely to be interchangeable with other languages.  Note
+ * that on ASCII platforms, FE overflows a signed 32-bit word, and FF an
+ * unsigned one. */
+#define UTF8_DISALLOW_PERL_EXTENDED     0x4000
+#define UTF8_GOT_PERL_EXTENDED          UTF8_DISALLOW_PERL_EXTENDED
+#define UTF8_WARN_PERL_EXTENDED         0x8000
 
-/* For back compat, these old names are misleading for UTF_EBCDIC */
-#define UTF8_DISALLOW_FE_FF             UTF8_DISALLOW_ABOVE_31_BIT
-#define UTF8_WARN_FE_FF                 UTF8_WARN_ABOVE_31_BIT
+/* For back compat, these old names are misleading for overlongs and
+ * UTF_EBCDIC. */
+#define UTF8_DISALLOW_ABOVE_31_BIT      UTF8_DISALLOW_PERL_EXTENDED
+#define UTF8_GOT_ABOVE_31_BIT           UTF8_GOT_PERL_EXTENDED
+#define UTF8_WARN_ABOVE_31_BIT          UTF8_WARN_PERL_EXTENDED
+#define UTF8_DISALLOW_FE_FF             UTF8_DISALLOW_PERL_EXTENDED
+#define UTF8_WARN_FE_FF                 UTF8_WARN_PERL_EXTENDED
 
 #define UTF8_CHECK_ONLY			0x10000
 #define _UTF8_NO_CONFIDENCE_IN_CURLEN   0x20000  /* Internal core use only */
@@ -907,14 +920,16 @@ point's representation.
  * let's be conservative and do as Unicode says. */
 #define PERL_UNICODE_MAX	0x10FFFF
 
-#define UNICODE_WARN_SURROGATE        0x0001	/* UTF-16 surrogates */
-#define UNICODE_WARN_NONCHAR          0x0002	/* Non-char code points */
-#define UNICODE_WARN_SUPER            0x0004	/* Above 0x10FFFF */
-#define UNICODE_WARN_ABOVE_31_BIT     0x0008	/* Above 0x7FFF_FFFF */
-#define UNICODE_DISALLOW_SURROGATE    0x0010
-#define UNICODE_DISALLOW_NONCHAR      0x0020
-#define UNICODE_DISALLOW_SUPER        0x0040
-#define UNICODE_DISALLOW_ABOVE_31_BIT 0x0080
+#define UNICODE_WARN_SURROGATE         0x0001	/* UTF-16 surrogates */
+#define UNICODE_WARN_NONCHAR           0x0002	/* Non-char code points */
+#define UNICODE_WARN_SUPER             0x0004	/* Above 0x10FFFF */
+#define UNICODE_WARN_PERL_EXTENDED     0x0008	/* Above 0x7FFF_FFFF */
+#define UNICODE_WARN_ABOVE_31_BIT      UNICODE_WARN_PERL_EXTENDED
+#define UNICODE_DISALLOW_SURROGATE     0x0010
+#define UNICODE_DISALLOW_NONCHAR       0x0020
+#define UNICODE_DISALLOW_SUPER         0x0040
+#define UNICODE_DISALLOW_PERL_EXTENDED 0x0080
+#define UNICODE_DISALLOW_ABOVE_31_BIT  UNICODE_DISALLOW_PERL_EXTENDED
 #define UNICODE_WARN_ILLEGAL_C9_INTERCHANGE                                   \
                                   (UNICODE_WARN_SURROGATE|UNICODE_WARN_SUPER)
 #define UNICODE_WARN_ILLEGAL_INTERCHANGE                                      \
@@ -953,7 +968,6 @@ point's representation.
          && UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
 
 #define UNICODE_IS_SUPER(uv)    ((UV) (uv) > PERL_UNICODE_MAX)
-#define UNICODE_IS_ABOVE_31_BIT(uv)    ((UV) (uv) > 0x7FFFFFFF)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \

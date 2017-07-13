@@ -99,9 +99,9 @@ Operation "uc" returns its argument for non-Unicode code point 0x110000 at - lin
 Operation "uc" returns its argument for UTF-16 surrogate U+D800 at - line 5.
 ########
 use warnings 'utf8';
-my $big_nonUnicode = uc(chr(0x7fff_ffff));
+my $big_nonUnicode = uc(chr(0x7FFF_FFFF));
 no warnings 'non_unicode';
-my $big_nonUnicode = uc(chr(0x7fff_ffff));
+my $big_nonUnicode = uc(chr(0x7FFF_FFFF));
 EXPECT
 Operation "uc" returns its argument for non-Unicode code point 0x7FFFFFFF at - line 2.
 ########
@@ -734,6 +734,26 @@ $a = fc("\x{102}");
 $a = uc("\x{103}");
 $a = ucfirst("\x{104}");
 EXPECT
+########
+# NAME Fatality of too-large code points, but IV_MAX works, warns
+require "../test.pl";
+use warnings 'non_unicode';
+my $max_cp = ~0 >> 1;
+my $max_char = chr $max_cp;
+my $temp = qr/$max_char/;
+$temp = uc($max_char);
+$max_char =~ /[\x{110000}\P{Unassigned}]/;
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh $max_char, "\n";
+close $fh;
+my $error_cp = $max_cp + 1;
+my $error_char = chr $error_cp;
+EXPECT
+OPTIONS fatal regex
+Operation "uc" returns its argument for non-Unicode code point 0x7F+ at - line \d+.
+Code point 0x7F+ is not Unicode, (may not be|requires a Perl extension, and so is not) portable in print at - line \d+.
+Use of code point 0x80+ is not allowed; the permissible max is 0x7F+\ at - line \d+.
 ########
 # NAME  [perl #127262]
 BEGIN{

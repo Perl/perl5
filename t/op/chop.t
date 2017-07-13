@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-my $tests_count = 146;
+my $tests_count = 148;
 plan tests => $tests_count;
 
 $_ = 'abc';
@@ -249,14 +249,28 @@ foreach my $start (@chars) {
     ok(1, "extend sp in pp_chomp");
 }
 
-{
+SKIP: {
     # [perl #73246] chop doesn't support utf8
     # the problem was UTF8_IS_START() didn't handle perl's extended UTF8
+    # The first code point that failed was 0x80000000, which is now illegal on
+    # 32-bit machines.
 
-    my $utf = "\x{7fffffff}\x{7ffffffe}";
+    use Config;
+    ($Config{ivsize} > 4)
+        or skip("this build can't handle very large characters", 4);
+
+    # Use chr instead of \x{} so doesn't try to compile these on 32-bit
+    # machines, which would crash
+    my $utf = chr(0x80000001) . chr(0x80000000);
     my $result = chop($utf);
-    is($utf, "\x{7fffffff}", "chopping high 'unicode'- remnant");
-    is($result, "\x{7ffffffe}", "chopping high 'unicode' - result");
+    is($utf, chr(0x80000001), "chopping high 'unicode'- remnant");
+    is($result, chr(0x80000000), "chopping high 'unicode' - result");
+
+    no warnings;
+    $utf = chr(0x7fffffffffffffff) . chr(0x7ffffffffffffffe);
+    $result = chop($utf);
+    is($utf, chr(0x7fffffffffffffff), "chop even higher 'unicode'- remnant");
+    is($result, chr(0x7ffffffffffffffe), "chop even higher 'unicode' - result");
 }
 
 $/ = "\n";
