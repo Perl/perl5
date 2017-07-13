@@ -843,6 +843,17 @@
         code    => '($r1, $r2) = ([], []);',
     },
 
+    'expr::aassign::boolean' => {
+        desc    => '!(@a = @b)',
+        setup   => 'my ($s,@a, @b); @b = (1,2)',
+        code    => '!(@a = @b);',
+    },
+    'expr::aassign::scalar' => {
+        desc    => '$scalar = (@a = @b)',
+        setup   => 'my ($s, @a, @b); @b = (1,2)',
+        code    => '$s = (@a = @b);',
+    },
+
     # array assign of strings
 
     'expr::aassign::la_3s' => {
@@ -1100,6 +1111,26 @@
     },
 
 
+    'func::grep::bool0' => {
+        desc    => 'grep returning 0 items in boolean context',
+        setup   => 'my @a;',
+        code    => '!grep $_, @a;',
+    },
+    'func::grep::bool1' => {
+        desc    => 'grep returning 1 item in boolean context',
+        setup   => 'my @a =(1);',
+        code    => '!grep $_, @a;',
+    },
+    'func::grep::scalar0' => {
+        desc    => 'returning 0 items in scalar context',
+        setup   => 'my $g; my @a;',
+        code    => '$g = grep $_, @a;',
+    },
+    'func::grep::scalar1' => {
+        desc    => 'returning 1 item in scalar context',
+        setup   => 'my $g; my @a =(1);',
+        code    => '$g = grep $_, @a;',
+    },
 
     # using a const string as second arg to index triggers using FBM.
     # the FBM matcher special-cases 1,2-byte strings.
@@ -1195,7 +1226,52 @@
         code    => 'index $x, "b"',
     },
 
+    'func::length::bool0' => {
+        desc    => 'length==0 in boolean context',
+        setup   => 'my $s = "";',
+        code    => '!length($s);',
+    },
+    'func::length::bool10' => {
+        desc    => 'length==10 in boolean context',
+        setup   => 'my $s = "abcdefghijk";',
+        code    => '!length($s);',
+    },
+    'func::length::scalar10' => {
+        desc    => 'length==10 in scalar context',
+        setup   => 'my $p; my $s = "abcdefghijk";',
+        code    => '$p = length($s);',
+    },
+    'func::length::bool0_utf8' => {
+        desc    => 'utf8 string length==0 in boolean context',
+        setup   => 'my $s = "\x{100}"; chop $s;',
+        code    => '!length($s);',
+    },
+    'func::length::bool10_utf8' => {
+        desc    => 'utf8 string length==10 in boolean context',
+        setup   => 'my $s = "abcdefghij\x{100}";',
+        code    => '!length($s);',
+    },
+    'func::length::scalar10_utf8' => {
+        desc    => 'utf8 string length==10 in scalar context',
+        setup   => 'my $p; my $s = "abcdefghij\x{100}";',
+        code    => '$p = length($s);',
+    },
 
+    'func::pos::bool0' => {
+        desc    => 'pos==0 in boolean context',
+        setup   => 'my $s = "abc"; pos($s) = 0',
+        code    => '!pos($s);',
+    },
+    'func::pos::bool10' => {
+        desc    => 'pos==10 in boolean context',
+        setup   => 'my $s = "abcdefghijk"; pos($s) = 10',
+        code    => '!pos($s);',
+    },
+    'func::pos::scalar10' => {
+        desc    => 'pos==10 in scalar context',
+        setup   => 'my $p; my $s = "abcdefghijk"; pos($s) = 10',
+        code    => '$p = pos($s);',
+    },
 
     'func::ref::notaref_bool' => {
         desc    => 'ref($notaref) in boolean context',
@@ -1388,6 +1464,12 @@
         desc    => 'foo=%s bar=%s baz=%s',
         setup   => 'my $s;',
         code    => '$s = sprintf "foo=%s", "ab\x{100}cd", "efg", "h\x{101}ij"',
+    },
+
+    'func::subst::bool' => {
+        desc    => 's/// in boolean context',
+        setup   => '',
+        code    => '$_ = "aaa"; !s/./x/g;'
     },
 
 

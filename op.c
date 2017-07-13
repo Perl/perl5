@@ -14516,9 +14516,12 @@ Perl_rpeep(pTHX_ OP *o)
 	    o->op_opt = 1;
 	    break;
 	
+	case OP_GREPWHILE:
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            /* FALLTHROUGH */
 	case OP_COND_EXPR:
 	case OP_MAPWHILE:
-	case OP_GREPWHILE:
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
 	case OP_DORASSIGN:
@@ -14550,6 +14553,8 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_SUBST:
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
 	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
 	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
@@ -14883,6 +14888,8 @@ Perl_rpeep(pTHX_ OP *o)
                 o->op_private &=
                         ~(OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1);
 
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpASSIGN_TRUEBOOL, 0);
 	    break;
         }
 
@@ -14890,6 +14897,21 @@ Perl_rpeep(pTHX_ OP *o)
             /* see if ref() is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+            break;
+
+        case OP_LENGTH:
+            /* see if the op is used in known boolean context,
+             * but not if OA_TARGLEX optimisation is enabled */
+            if (   (o->op_flags & OPf_WANT) == OPf_WANT_SCALAR
+                && !(o->op_private & OPpTARGET_MY)
+            )
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            break;
+
+        case OP_POS:
+            /* see if the op is used in known boolean context */
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
             break;
 
 	case OP_CUSTOM: {

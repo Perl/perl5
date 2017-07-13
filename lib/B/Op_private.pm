@@ -156,7 +156,7 @@ $bits{$_}{6} = 'OPpTRANS_GROWS' for qw(trans transr);
 $bits{$_}{2} = 'OPpTRANS_IDENTICAL' for qw(trans transr);
 $bits{$_}{3} = 'OPpTRANS_SQUASH' for qw(trans transr);
 $bits{$_}{1} = 'OPpTRANS_TO_UTF' for qw(trans transr);
-$bits{$_}{5} = 'OPpTRUEBOOL' for qw(padav padhv ref rv2av rv2hv);
+$bits{$_}{5} = 'OPpTRUEBOOL' for qw(grepwhile length padav padhv pos ref rv2av rv2hv subst);
 
 my @bf = (
     {
@@ -244,7 +244,7 @@ my @bf = (
     },
 );
 
-@{$bits{aassign}}{6,5,4,1,0} = ('OPpASSIGN_COMMON_SCALAR', 'OPpASSIGN_COMMON_RC1', 'OPpASSIGN_COMMON_AGG', $bf[1], $bf[1]);
+@{$bits{aassign}}{6,5,4,2,1,0} = ('OPpASSIGN_COMMON_SCALAR', 'OPpASSIGN_COMMON_RC1', 'OPpASSIGN_COMMON_AGG', 'OPpASSIGN_TRUEBOOL', $bf[1], $bf[1]);
 $bits{abs}{0} = $bf[0];
 @{$bits{accept}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{add}}{1,0} = ($bf[1], $bf[1]);
@@ -596,6 +596,7 @@ our %defines = (
     OPpASSIGN_COMMON_RC1     =>  32,
     OPpASSIGN_COMMON_SCALAR  =>  64,
     OPpASSIGN_CV_TO_GV       => 128,
+    OPpASSIGN_TRUEBOOL       =>   4,
     OPpAVHVSWITCH_MASK       =>   3,
     OPpCONST_BARE            =>  64,
     OPpCONST_ENTERED         =>  16,
@@ -698,6 +699,7 @@ our %labels = (
     OPpASSIGN_COMMON_RC1     => 'COM_RC1',
     OPpASSIGN_COMMON_SCALAR  => 'COM_SCALAR',
     OPpASSIGN_CV_TO_GV       => 'CV2GV',
+    OPpASSIGN_TRUEBOOL       => 'BOOL',
     OPpCONST_BARE            => 'BARE',
     OPpCONST_ENTERED         => 'ENTERED',
     OPpCONST_NOVER           => 'NOVER',
@@ -830,12 +832,13 @@ our %ops_using = (
     OPpSUBSTR_REPL_FIRST     => [qw(substr)],
     OPpTARGET_MY             => [qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int kill left_shift length link log mkdir modulo multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid)],
     OPpTRANS_COMPLEMENT      => [qw(trans transr)],
-    OPpTRUEBOOL              => [qw(padav padhv ref rv2av rv2hv)],
+    OPpTRUEBOOL              => [qw(grepwhile length padav padhv pos ref rv2av rv2hv subst)],
 );
 
 $ops_using{OPpASSIGN_COMMON_RC1} = $ops_using{OPpASSIGN_COMMON_AGG};
 $ops_using{OPpASSIGN_COMMON_SCALAR} = $ops_using{OPpASSIGN_COMMON_AGG};
 $ops_using{OPpASSIGN_CV_TO_GV} = $ops_using{OPpASSIGN_BACKWARDS};
+$ops_using{OPpASSIGN_TRUEBOOL} = $ops_using{OPpASSIGN_COMMON_AGG};
 $ops_using{OPpCONST_ENTERED} = $ops_using{OPpCONST_BARE};
 $ops_using{OPpCONST_NOVER} = $ops_using{OPpCONST_BARE};
 $ops_using{OPpCONST_SHORTCIRCUIT} = $ops_using{OPpCONST_BARE};

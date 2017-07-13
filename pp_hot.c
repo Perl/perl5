@@ -1912,10 +1912,14 @@ PP(pp_aassign)
     if (gimme == G_VOID)
 	SP = firstrelem - 1;
     else if (gimme == G_SCALAR) {
-	dTARGET;
 	SP = firstrelem;
         EXTEND(SP,1);
-	SETi(firstlelem - firstrelem);
+        if (PL_op->op_private & OPpASSIGN_TRUEBOOL)
+            SETs((firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero);
+        else {
+            dTARGET;
+            SETi(firstlelem - firstrelem);
+        }
     }
     else
         SP = relem - 1;
@@ -3395,7 +3399,10 @@ PP(pp_subst)
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
 	    SPAGAIN;
-	    mPUSHi(iters);
+            if (PL_op->op_private & OPpTRUEBOOL)
+                PUSHs(iters ? &PL_sv_yes : &PL_sv_zero);
+            else
+                mPUSHi(iters);
 	}
     }
     else {
@@ -3560,8 +3567,12 @@ PP(pp_grepwhile)
 	(void)POPMARK;				/* pop dst */
 	SP = PL_stack_base + POPMARK;		/* pop original mark */
 	if (gimme == G_SCALAR) {
+            if (PL_op->op_private & OPpTRUEBOOL)
+                XPUSHs(items ? &PL_sv_yes : &PL_sv_zero);
+            else {
 		dTARGET;
 		XPUSHi(items);
+            }
 	}
 	else if (gimme == G_ARRAY)
 	    SP += items;

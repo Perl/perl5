@@ -13,7 +13,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 1490;
+plan 2285;
 
 use v5.10; # state
 use B qw(svref_2object
@@ -22,6 +22,7 @@ use B qw(svref_2object
          OPpASSIGN_COMMON_AGG
          OPpTRUEBOOL
          OPpMAYBE_TRUEBOOL
+         OPpASSIGN_TRUEBOOL
       );
 
 # for debugging etc. Basic dump of an optree
@@ -225,6 +226,9 @@ is svref_2object(sub { "@_" })->ROOT->first->last->name, 'join',
 
 for my $ops (
     #  op       code           op path   flag         maybe flag
+    [ 'aassign','(@pkg = @lex)',[],      OPpASSIGN_TRUEBOOL, 0,         ],
+    [ 'grepwhile','grep($_,1)', [],       OPpTRUEBOOL, 0,                ],
+    [ 'length',  'length($x)', [],       OPpTRUEBOOL, 0,                ],
     [ 'rv2av', '@pkg',         [],       OPpTRUEBOOL, 0,                ],
     [ 'rv2av', 'scalar(@pkg)', [0],      OPpTRUEBOOL, 0,                ],
     [ 'rv2hv', '%pkg',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
@@ -233,7 +237,9 @@ for my $ops (
     [ 'padav',  'scalar @lex', [0],      OPpTRUEBOOL, 0,                ],
     [ 'padhv', '%lex',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
     [ 'padhv', 'scalar(%lex)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'pos',   'pos($x)',      [],       OPpTRUEBOOL, 0,                ],
     [ 'ref',   'ref($x)',      [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'subst',  's/a/b/',      [],       OPpTRUEBOOL, 0,                ],
 ) {
     my ($op_name, $op_code, $post_op_path, $bool_flag, $maybe_flag) = @$ops;
 
@@ -382,15 +388,17 @@ for my $ops (
                 $code .= "; 1";
             }
             elsif ($context == 1) {
-                $code = "\$r = ($code)";
+                $code = "\$pkg_result = ($code)";
                 unshift @op_path, 0;
             }
 
 
             my $sub;
             {
-                our (@pkg, %pkg);
-                my  (@lex, %lex, $p, $q, $r, $x, $y);
+                # don't use 'my' for $pkg_result to avoid the assignment in
+                # '$result = foo()' being optimised away with OPpTARGET_MY
+                our (@pkg, %pkg, $pkg_result);
+                my  (@lex, %lex, $p, $q, $x, $y);
 
                 no warnings 'void';
                 $sub = eval "sub { $code }"
