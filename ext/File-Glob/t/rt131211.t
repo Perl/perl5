@@ -5,7 +5,10 @@ use File::Temp 'tempdir';
 use File::Spec::Functions;
 use Test::More;
 use Time::HiRes qw(time);
+use Config;
 
+plan skip_all => 'This platform doesn\'t use File::Glob'
+                            if $Config{ccflags} =~ /\b-DPERL_EXTERNAL_GLOB\b/;
 plan tests => 13;
 
 my $path = tempdir uc cleanup => 1;
