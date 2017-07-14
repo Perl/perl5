@@ -329,7 +329,6 @@ EXTCONST char* const PL_op_name[] = {
 	"andassign",
 	"orassign",
 	"dorassign",
-	"method",
 	"entersub",
 	"leavesub",
 	"leavesublv",
@@ -358,6 +357,7 @@ EXTCONST char* const PL_op_name[] = {
 	"dump",
 	"goto",
 	"exit",
+	"method",
 	"method_named",
 	"method_super",
 	"method_redir",
@@ -733,7 +733,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"logical and assignment (&&=)",
 	"logical or assignment (||=)",
 	"defined or assignment (//=)",
-	"method lookup",
 	"subroutine entry",
 	"subroutine exit",
 	"lvalue subroutine return",
@@ -762,6 +761,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"dump",
 	"goto",
 	"exit",
+	"method lookup",
 	"method with known name",
 	"super with known name",
 	"redirect method with known name",
@@ -1151,7 +1151,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_andassign,	/* implemented by Perl_pp_and */
 	Perl_pp_orassign,	/* implemented by Perl_pp_or */
 	Perl_pp_dorassign,	/* implemented by Perl_pp_defined */
-	Perl_pp_method,
 	Perl_pp_entersub,
 	Perl_pp_leavesub,
 	Perl_pp_leavesublv,
@@ -1180,6 +1179,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_dump,	/* implemented by Perl_pp_goto */
 	Perl_pp_goto,
 	Perl_pp_exit,
+	Perl_pp_method,
 	Perl_pp_method_named,
 	Perl_pp_method_super,
 	Perl_pp_method_redir,
@@ -1565,7 +1565,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* andassign */
 	Perl_ck_null,		/* orassign */
 	Perl_ck_null,		/* dorassign */
-	Perl_ck_method,		/* method */
 	Perl_ck_subr,		/* entersub */
 	Perl_ck_null,		/* leavesub */
 	Perl_ck_null,		/* leavesublv */
@@ -1594,6 +1593,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* dump */
 	Perl_ck_null,		/* goto */
 	Perl_ck_fun,		/* exit */
+	Perl_ck_method,		/* method */
 	Perl_ck_null,		/* method_named */
 	Perl_ck_null,		/* method_super */
 	Perl_ck_null,		/* method_redir */
@@ -1973,7 +1973,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000304,	/* andassign */
 	0x00000304,	/* orassign */
 	0x00000304,	/* dorassign */
-	0x00000e40,	/* method */
 	0x00002141,	/* entersub */
 	0x00000100,	/* leavesub */
 	0x00000100,	/* leavesublv */
@@ -2002,6 +2001,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000d44,	/* dump */
 	0x00000d04,	/* goto */
 	0x00009b04,	/* exit */
+	0x00000e40,	/* method */
 	0x00000e40,	/* method_named */
 	0x00000e40,	/* method_super */
 	0x00000e40,	/* method_redir */
@@ -2631,7 +2631,6 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* andassign */
        0, /* orassign */
        0, /* dorassign */
-       0, /* method */
      154, /* entersub */
      161, /* leavesub */
      161, /* leavesublv */
@@ -2660,6 +2659,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      177, /* dump */
      177, /* goto */
       52, /* exit */
+       0, /* method */
        0, /* method_named */
        0, /* method_super */
        0, /* method_redir */
@@ -2862,7 +2862,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, method, argcheck, argdefelem, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
     0x2e5c, 0x3f99, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0498, 0x18d0, 0x404c, 0x3b08, 0x3225, /* const */
@@ -3120,7 +3120,6 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* ANDASSIGN  */ (OPpARG1_MASK),
     /* ORASSIGN   */ (OPpARG1_MASK),
     /* DORASSIGN  */ (OPpARG1_MASK),
-    /* METHOD     */ (OPpARG1_MASK),
     /* ENTERSUB   */ (OPpENTERSUB_INARGS|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpDEREF|OPpENTERSUB_DB|OPpLVAL_INTRO),
     /* LEAVESUB   */ (OPpARG1_MASK|OPpREFCOUNTED),
     /* LEAVESUBLV */ (OPpARG1_MASK|OPpREFCOUNTED),
@@ -3149,6 +3148,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* DUMP       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
     /* GOTO       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
     /* EXIT       */ (OPpARG4_MASK),
+    /* METHOD     */ (OPpARG1_MASK),
     /* METHOD_NAMED */ (OPpARG1_MASK),
     /* METHOD_SUPER */ (OPpARG1_MASK),
     /* METHOD_REDIR */ (OPpARG1_MASK),

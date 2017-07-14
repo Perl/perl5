@@ -292,7 +292,6 @@ andassign	logical and assignment (&&=)	ck_null		s|
 orassign	logical or assignment (||=)	ck_null		s|	
 dorassign	defined or assignment (//=)	ck_null		s|
 
-method		method lookup		ck_method	d.
 entersub	subroutine entry	ck_subr		dm1	L
 leavesub	subroutine exit		ck_null		1	
 leavesublv	lvalue subroutine return	ck_null		1	
@@ -322,6 +321,7 @@ redo		redo			ck_null		s}
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		s}	
 exit		exit			ck_fun		s%	S?
+method		method lookup		ck_method	d.
 method_named	method with known name	ck_null		d.
 method_super	super with known name	ck_null		d.
 method_redir	redirect method with known name	ck_null	d.
