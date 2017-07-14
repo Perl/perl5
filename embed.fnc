@@ -2728,6 +2728,9 @@ s	|void	|print_collxfrm_input_and_return		\
 			    |NN const char * const e		\
 			    |NULLOK const STRLEN * const xlen	\
 			    |const bool is_utf8
+s	|void	|print_bytes_for_locale	|NN const char * const s	\
+					|NN const char * const e	\
+					|const bool is_utf8
 #   endif
 #endif
 

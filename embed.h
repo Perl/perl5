@@ -1494,6 +1494,7 @@
 #define tokereport(a,b)		S_tokereport(aTHX_ a,b)
 #    endif
 #    if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
+#define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
 #define print_collxfrm_input_and_return(a,b,c,d)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d)
 #    endif
 #  endif

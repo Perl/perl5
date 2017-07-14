@@ -388,6 +388,10 @@ Perl_new_ctype(pTHX_ const char *newctype)
         /* We only handle single-byte locales (outside of UTF-8 ones; so if
          * this locale requires more than one byte, there are going to be
          * problems. */
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                 "%s:%d: check_for_problems=%d, MB_CUR_MAX=%d\n",
+                 __FILE__, __LINE__, check_for_problems, (int) MB_CUR_MAX));
+
         if (check_for_problems && MB_CUR_MAX > 1
 
                /* Some platforms return MB_CUR_MAX > 1 for even the "C"
@@ -1949,9 +1953,6 @@ S_print_collxfrm_input_and_return(pTHX_
                                   const STRLEN * const xlen,
                                   const bool is_utf8)
 {
-    const char * t = s;
-    bool prev_was_printable = TRUE;
-    bool first_time = TRUE;
 
     PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
 
@@ -1965,6 +1966,22 @@ S_print_collxfrm_input_and_return(pTHX_
     }
     PerlIO_printf(Perl_debug_log, " for locale '%s', string='",
                                                             PL_collation_name);
+    print_bytes_for_locale(s, e, is_utf8);
+
+    PerlIO_printf(Perl_debug_log, "'\n");
+}
+
+STATIC void
+S_print_bytes_for_locale(pTHX_
+                    const char * const s,
+                    const char * const e,
+                    const bool is_utf8)
+{
+    const char * t = s;
+    bool prev_was_printable = TRUE;
+    bool first_time = TRUE;
+
+    PERL_ARGS_ASSERT_PRINT_BYTES_FOR_LOCALE;
 
     while (t < e) {
         UV cp = (is_utf8)
@@ -1987,8 +2004,6 @@ S_print_collxfrm_input_and_return(pTHX_
         t += (is_utf8) ? UTF8SKIP(t) : 1;
         first_time = FALSE;
     }
-
-    PerlIO_printf(Perl_debug_log, "'\n");
 }
 
 #endif   /* #ifdef DEBUGGING */
@@ -2557,15 +2572,24 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 #  endif
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                            "my_strerror called with errnum %d\n", errnum));
     if (! within_locale_scope) {
         errno = 0;
 
 #  ifdef USE_THREAD_SAFE_LOCALE /* Use the thread-safe locale functions */
 
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                    "Not within locale scope, about to call"
+                                    " uselocale(0x%p)\n", PL_C_locale_obj));
         save_locale = uselocale(PL_C_locale_obj);
         if (! save_locale) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  "uselocale failed, errno=%d\n", errno));
+                                    "uselocale failed, errno=%d\n", errno));
+        }
+        else {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                    "uselocale returned 0x%p\n", save_locale));
         }
 
 #  else    /* Not thread-safe build */
@@ -2591,11 +2615,23 @@ Perl_my_strerror(pTHX_ const int errnum)
 #  endif
 
     }   /* end of ! within_locale_scope */
+    else {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s: %d: WITHIN locale scope\n",
+                                               __FILE__, __LINE__));
+    }
 
 #endif
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+             "Any locale change has been done; about to call Strerror\n"));
     errstr = Strerror(errnum);
     if (errstr) {
+        if (DEBUG_Lv_TEST) {
+            PerlIO_printf(Perl_debug_log, "Strerror returned; saving a copy: '");
+            print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);
+            PerlIO_printf(Perl_debug_log, "'\n");
+        }
+
         errstr = savepv(errstr);
         SAVEFREEPV(errstr);
     }
@@ -2607,6 +2643,9 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 #  ifdef USE_THREAD_SAFE_LOCALE
 
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                    "%s: %d: not within locale scope, restoring the locale\n",
+                    __FILE__, __LINE__));
         if (save_locale && ! uselocale(save_locale)) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "uselocale restore failed, errno=%d\n", errno));
