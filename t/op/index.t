@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 122 );
+plan( tests => 170 );
 
 run_tests() unless caller;
 
@@ -256,3 +256,68 @@ is index('the main road', __PACKAGE__), 4,
 utf8::upgrade my $substr = "\x{a3}a";
 
 is index($substr, 'a'), 1, 'index reply reflects characters not octets';
+
+# op_eq, op_const optimised away in (index() == -1) and variants
+
+{
+    my $s = "ab";
+    ok(!(index($s,"a") == -1),  "index(a) == -1");
+    ok( (index($s,"a") != -1),  "index(a) != -1");
+    ok( (index($s,"c") == -1),  "index(c) == -1");
+    ok(!(index($s,"c") != -1),  "index(c) != -1");
+
+    ok(!(rindex($s,"a") == -1), "rindex(a) == -1");
+    ok( (rindex($s,"a") != -1), "rindex(a) != -1");
+    ok( (rindex($s,"c") == -1), "rindex(c) == -1");
+    ok(!(rindex($s,"c") != -1), "rindex(c) != -1");
+
+    ok(!(-1 == index($s,"a")),  "-1 == index(a)");
+    ok( (-1 != index($s,"a")),  "-1 != index(a)");
+    ok( (-1 == index($s,"c")),  "-1 == index(c)");
+    ok(!(-1 != index($s,"c")),  "-1 != index(c)");
+
+    ok(!(-1 == rindex($s,"a")), "-1 == rindex(a)");
+    ok( (-1 != rindex($s,"a")), "-1 != rindex(a)");
+    ok( (-1 == rindex($s,"c")), "-1 == rindex(c)");
+    ok(!(-1 != rindex($s,"c")), "-1 != rindex(c)");
+
+    # OPpTARGET_MY variant: the '$r = ' is optimised away too
+
+    my $r;
+
+    ok(!($r = index($s,"a") == -1),  "r = index(a) == -1");
+    ok(!$r,                          "r = index(a) == -1 - r value");
+    ok( ($r = index($s,"a") != -1),  "r = index(a) != -1");
+    ok( $r,                          "r = index(a) != -1 - r value");
+    ok( ($r = index($s,"c") == -1),  "r = index(c) == -1");
+    ok( $r,                          "r = index(c) == -1 - r value");
+    ok(!($r = index($s,"c") != -1),  "r = index(c) != -1");
+    ok(!$r,                          "r = index(c) != -1 - r value");
+
+    ok(!($r = rindex($s,"a") == -1), "r = rindex(a) == -1");
+    ok(!$r,                         "r = rindex(a) == -1 - r value");
+    ok( ($r = rindex($s,"a") != -1), "r = rindex(a) != -1");
+    ok( $r,                         "r = rindex(a) != -1 - r value");
+    ok( ($r = rindex($s,"c") == -1), "r = rindex(c) == -1");
+    ok( $r,                         "r = rindex(c) == -1 - r value");
+    ok(!($r = rindex($s,"c") != -1), "r = rindex(c) != -1");
+    ok(!$r,                         "r = rindex(c) != -1 - r value");
+
+    ok(!($r = -1 == index($s,"a")),  "r = -1 == index(a)");
+    ok(!$r,                          "r = -1 == index(a) - r value");
+    ok( ($r = -1 != index($s,"a")),  "r = -1 != index(a)");
+    ok( $r,                          "r = -1 != index(a) - r value");
+    ok( ($r = -1 == index($s,"c")),  "r = -1 == index(c)");
+    ok( $r,                          "r = -1 == index(c) - r value");
+    ok(!($r = -1 != index($s,"c")),  "r = -1 != index(c)");
+    ok(!$r,                          "r = -1 != index(c) - r value");
+
+    ok(!($r = -1 == rindex($s,"a")), "r = -1 == rindex(a)");
+    ok(!$r,                         "r = -1 == rindex(a) - r value");
+    ok( ($r = -1 != rindex($s,"a")), "r = -1 != rindex(a)");
+    ok( $r,                         "r = -1 != rindex(a) - r value");
+    ok( ($r = -1 == rindex($s,"c")), "r = -1 == rindex(c)");
+    ok( $r,                         "r = -1 == rindex(c) - r value");
+    ok(!($r = -1 != rindex($s,"c")), "r = -1 != rindex(c)");
+    ok(!$r,                         "r = -1 != rindex(c) - r value");
+}

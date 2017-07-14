@@ -1132,6 +1132,29 @@
         code    => '$g = grep $_, @a;',
     },
 
+    # (index() == -1) and variants optimise away the op_const and op_eq
+    # and any assignment to a lexical var
+    'func::index::bool' => {
+        desc    => '(index() == -1) for match',
+        setup   => 'my $x = "aaaab"',
+        code    => 'index($x, "b") == -1',
+    },
+    'func::index::bool_fail' => {
+        desc    => '(index() == -1) for no match',
+        setup   => 'my $x = "aaaab"',
+        code    => 'index($x, "c") == -1',
+    },
+    'func::index::lex_bool' => {
+        desc    => '$lex = (index() == -1) for match',
+        setup   => 'my $r; my $x = "aaaab"',
+        code    => '$r = index($x, "b") == -1',
+    },
+    'func::index::lex_bool_fail' => {
+        desc    => '$lex = (index() == -1) for no match',
+        setup   => 'my $r; my $x = "aaaab"',
+        code    => '$r = index($x, "c") == -1',
+    },
+
     # using a const string as second arg to index triggers using FBM.
     # the FBM matcher special-cases 1,2-byte strings.
     #

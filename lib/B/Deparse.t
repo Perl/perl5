@@ -2675,3 +2675,31 @@ $x = keys %h1;
 keys %h2;
 $x = %h2;
 $x = keys %h2;
+####
+# eq,const optimised away for (index() == -1)
+my($a, $b);
+our $c;
+$c = index($a, $b) == 2;
+$c = rindex($a, $b) == 2;
+$c = index($a, $b) == -1;
+$c = rindex($a, $b) == -1;
+$c = index($a, $b) != -1;
+$c = rindex($a, $b) != -1;
+$c = (index($a, $b) == -1);
+$c = (rindex($a, $b) == -1);
+$c = (index($a, $b) != -1);
+$c = (rindex($a, $b) != -1);
+####
+# eq,const,sassign,madmy optimised away for (index() == -1)
+my($a, $b);
+my $c;
+$c = index($a, $b) == 2;
+$c = rindex($a, $b) == 2;
+$c = index($a, $b) == -1;
+$c = rindex($a, $b) == -1;
+$c = index($a, $b) != -1;
+$c = rindex($a, $b) != -1;
+$c = (index($a, $b) == -1);
+$c = (rindex($a, $b) == -1);
+$c = (index($a, $b) != -1);
+$c = (rindex($a, $b) != -1);

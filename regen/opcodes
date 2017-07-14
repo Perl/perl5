@@ -144,10 +144,10 @@ le		numeric le (<=)		ck_cmp		Iifs2	S S<
 i_le		integer le (<=)		ck_cmp		ifs2	S S<
 ge		numeric ge (>=)		ck_cmp		Iifs2	S S<
 i_ge		integer ge (>=)		ck_cmp		ifs2	S S<
-eq		numeric eq (==)		ck_null		Iifs2	S S<
-i_eq		integer eq (==)		ck_null		ifs2	S S<
-ne		numeric ne (!=)		ck_null		Iifs2	S S<
-i_ne		integer ne (!=)		ck_null		ifs2	S S<
+eq		numeric eq (==)		ck_eq		Iifs2	S S<
+i_eq		integer eq (==)		ck_eq		ifs2	S S<
+ne		numeric ne (!=)		ck_eq		Iifs2	S S<
+i_ne		integer ne (!=)		ck_eq		ifs2	S S<
 ncmp		numeric comparison (<=>)	ck_null		Iifst2	S S<
 i_ncmp		integer comparison (<=>)	ck_null		ifst2	S S<
 

@@ -9815,6 +9815,53 @@ Perl_ck_eof(pTHX_ OP *o)
     return o;
 }
 
+
+/* for OP_EQ, OP_NE, OP_I_EQ, OP_I_NE */
+
+OP *
+Perl_ck_eq(pTHX_ OP *o)
+{
+    OP *indexop, *constop, *start;
+    SV *sv;
+    PERL_ARGS_ASSERT_CK_EQ;
+
+    /* convert (index(...) == -1) and variations into
+     *   (r)index/BOOL(,NEG)
+     */
+
+    indexop = cUNOPo->op_first;
+    constop = OpSIBLING(indexop);
+    start = NULL;
+    if (indexop->op_type == OP_CONST) {
+        constop = indexop;
+        indexop = OpSIBLING(constop);
+        start = constop;
+    }
+
+    if (indexop->op_type != OP_INDEX && indexop->op_type != OP_RINDEX)
+        return o;
+
+    if (constop->op_type != OP_CONST)
+        return o;
+
+    sv = cSVOPx_sv(constop);
+    if (!(sv && SvIOK_notUV(sv) && SvIVX(sv) == -1))
+        return o;
+
+    assert(!(indexop->op_private & OPpTARGET_MY));
+    indexop->op_flags &= ~OPf_PARENS;
+    indexop->op_flags |= (o->op_flags & OPf_PARENS);
+    indexop->op_private |= OPpTRUEBOOL;
+    if (o->op_type == OP_EQ || o->op_type == OP_I_EQ)
+        indexop->op_private |= OPpINDEX_BOOLNEG;
+    /* cut out the index op and free the eq,const ops */
+    (void)op_sibling_splice(o, start, 1, NULL);
+    op_free(o);
+
+    return indexop;
+}
+
+
 OP *
 Perl_ck_eval(pTHX_ OP *o)
 {

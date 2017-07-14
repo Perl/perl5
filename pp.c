@@ -3604,7 +3604,7 @@ PP(pp_index)
 		   convert the small string to ISO-8859-1, then there is no
 		   way that it could be found anywhere by index.  */
 		retval = -1;
-		goto fail;
+		goto push_result;
 	    }
 
 	    /* At this point, pv is a malloc()ed string. So donate it to temp
@@ -3667,8 +3667,18 @@ PP(pp_index)
 	    retval = sv_pos_b2u_flags(big, retval, SV_CONST_RETURN);
     }
     SvREFCNT_dec(temp);
- fail:
-    PUSHi(retval);
+
+  push_result:
+    /* OPpTRUEBOOL indicates an '== -1' has been optimised away */
+    if (PL_op->op_private & OPpTRUEBOOL) {
+        PUSHs( ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
+                    ? &PL_sv_yes : &PL_sv_no);
+        if (PL_op->op_private & OPpTARGET_MY)
+            /* $lex = (index() == -1) */
+            sv_setsv(TARG, TOPs);
+    }
+    else 
+        PUSHi(retval);
     RETURN;
 }
 

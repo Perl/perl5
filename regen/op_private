@@ -447,7 +447,7 @@ for (qw(rv2hv padhv ref)) {
         5 => qw(OPpTRUEBOOL       BOOL),
     );
 }
-for (qw(grepwhile length padav pos rv2av subst)) {
+for (qw(grepwhile index length padav pos rindex rv2av subst)) {
     addbits($_,
         5 => qw(OPpTRUEBOOL       BOOL),  # if (@a) {...}
     );
@@ -800,6 +800,14 @@ addbits('padhv',
 addbits('rv2hv',
     0 => qw(OPpRV2HV_ISKEYS KEYS),
 );
+
+# In conjunction with OPpTRUEBOOL, indicates that the test should be
+# inverted. This allows both (index() == -1) and (index() != -1)
+# to optimise away the const and eq/ne
+
+for (qw(index rindex)) {
+    addbits($_, 6 => qw(OPpINDEX_BOOLNEG NEG));
+}
 
 
 
