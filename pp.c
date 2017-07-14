@@ -3247,11 +3247,11 @@ PP(pp_length)
     if(svflags & SVs_GMG)
         mg_get(sv);
     if (SvOK(sv)) {
+        STRLEN len;
 	if (!IN_BYTES) /* reread to avoid using an C auto/register */
-	    sv_setiv(TARG, (IV)sv_len_utf8_nomg(sv));
+	    len = sv_len_utf8_nomg(sv);
 	else
 	{
-	    STRLEN len;
             /* unrolled SvPV_nomg_const(sv,len) */
             if(SvPOK_nog(sv)){
                 simple_pv:
@@ -3259,20 +3259,18 @@ PP(pp_length)
             } else  {
                 (void)sv_2pv_flags(sv, &len, 0|SV_CONST_RETURN);
             }
-	    sv_setiv(TARG, (IV)(len));
 	}
+        TARGi((IV)(len), 1);
     } else {
 	if (!SvPADTMP(TARG)) {
             sv_set_undef(TARG);
+            SvSETMAGIC(TARG);
 	} else { /* TARG is on stack at this point and is overwriten by SETs.
                    This branch is the odd one out, so put TARG by default on
                    stack earlier to let local SP go out of liveness sooner */
             SETs(&PL_sv_undef);
-            goto no_set_magic;
         }
     }
-    SvSETMAGIC(TARG);
-    no_set_magic:
     return NORMAL; /* no putback, SP didn't move in this opcode */
 }
 

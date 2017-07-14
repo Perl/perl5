@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5215;
+plan tests => 5217;
 
 use Scalar::Util qw(tainted);
 
@@ -2815,6 +2815,16 @@ package bitops2 {
     is "@bitops2::o", '& 5 1 | 5 1 ^ 5 1 ~ 5 1 &. 4 u |. 4 u ^. 4 u ~. 4 u ' 		    . '&= 5 1 |= 5 1 ^= 5 1 &.= 4 u |.= 4 u ^.= 4 u',
        'experimental "bitwise" ops with nomethod'
 }
+
+package length_utf8 {
+    use overload '""' => sub { "\x{100}" };
+    my $o = bless [];
+print length $o, "\n";
+
+    ::is length($o), 1, "overloaded utf8 length";
+    ::is "$o", "\x{100}", "overloaded utf8 value";
+}
+
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;
