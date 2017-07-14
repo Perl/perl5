@@ -225,21 +225,22 @@ is svref_2object(sub { "@_" })->ROOT->first->last->name, 'join',
 # if in scalar context, %h must return a key count.
 
 for my $ops (
-    #  op       code           op path   flag         maybe flag
-    [ 'aassign','(@pkg = @lex)',[],      OPpASSIGN_TRUEBOOL, 0,         ],
-    [ 'grepwhile','grep($_,1)', [],       OPpTRUEBOOL, 0,                ],
-    [ 'length',  'length($x)', [],       OPpTRUEBOOL, 0,                ],
-    [ 'rv2av', '@pkg',         [],       OPpTRUEBOOL, 0,                ],
-    [ 'rv2av', 'scalar(@pkg)', [0],      OPpTRUEBOOL, 0,                ],
-    [ 'rv2hv', '%pkg',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
-    [ 'rv2hv', 'scalar(%pkg)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
-    [ 'padav',  '@lex',        [],       OPpTRUEBOOL, 0,                ],
-    [ 'padav',  'scalar @lex', [0],      OPpTRUEBOOL, 0,                ],
-    [ 'padhv', '%lex',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
-    [ 'padhv', 'scalar(%lex)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
-    [ 'pos',   'pos($x)',      [],       OPpTRUEBOOL, 0,                ],
-    [ 'ref',   'ref($x)',      [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
-    [ 'subst',  's/a/b/',      [],       OPpTRUEBOOL, 0,                ],
+    #  op          code        op_path flag               maybe_flag
+    #  ---------   ----------  ------- -----------------  ----------------
+    [ 'aassign',  '(@pkg = @lex)',[],  OPpASSIGN_TRUEBOOL,0,                ],
+    [ 'grepwhile','grep($_,1)',   [],  OPpTRUEBOOL,       0,                ],
+    [ 'length',   'length($x)',   [],  OPpTRUEBOOL,       0,                ],
+    [ 'padav',    '@lex',         [],  OPpTRUEBOOL,       0,                ],
+    [ 'padav',    'scalar @lex',  [0], OPpTRUEBOOL,       0,                ],
+    [ 'padhv',    '%lex',         [],  OPpTRUEBOOL,       OPpMAYBE_TRUEBOOL ],
+    [ 'padhv',    'scalar(%lex)', [0], OPpTRUEBOOL,       OPpMAYBE_TRUEBOOL ],
+    [ 'pos',      'pos($x)',      [],  OPpTRUEBOOL,       0,                ],
+    [ 'ref',      'ref($x)',      [],  OPpTRUEBOOL,       OPpMAYBE_TRUEBOOL ],
+    [ 'rv2av',    '@pkg',         [],  OPpTRUEBOOL,       0,                ],
+    [ 'rv2av',    'scalar(@pkg)', [0], OPpTRUEBOOL,       0,                ],
+    [ 'rv2hv',    '%pkg',         [],  OPpTRUEBOOL,       OPpMAYBE_TRUEBOOL ],
+    [ 'rv2hv',    'scalar(%pkg)', [0], OPpTRUEBOOL,       OPpMAYBE_TRUEBOOL ],
+    [ 'subst',    's/a/b/',       [],  OPpTRUEBOOL,       0,                ],
 ) {
     my ($op_name, $op_code, $post_op_path, $bool_flag, $maybe_flag) = @$ops;
 
