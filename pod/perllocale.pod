@@ -22,9 +22,14 @@ these kinds of matters is called B<internationalization> (often
 abbreviated as B<i18n>); telling such an application about a particular
 set of preferences is known as B<localization> (B<l10n>).
 
-Perl has been extended to support the locale system.  This
-is controlled per application by using one pragma, one function call,
-and several environment variables.
+Perl has been extended to support certain types of locales available in
+the locale system.  This is controlled per application by using one
+pragma, one function call, and several environment variables.
+
+Perl supports single-byte locales that are supersets of ASCII, such as
+the ISO 8859 ones, and one multi-byte-type locale, UTF-8 ones, described
+in the next paragraph.  Perl doesn't support any other multi-byte
+locales, such as the ones for East Asian languages.
 
 Unfortunately, there are quite a few deficiencies with the design (and
 often, the implementations) of locales.  Unicode was invented (see
@@ -35,7 +40,7 @@ Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
 UTF-8 locales, except for sorting and string comparisons like C<lt> and
 C<ge>.  Starting in v5.26, Perl can handle these reasonably as well,
 depending on the platform's implementation.  However, for earlier
-releases or for better control, use L<Unicode::Collate> .  Perl continues to
+releases or for better control, use L<Unicode::Collate>.  Perl continues to
 support the old non UTF-8 locales as well.  There are currently no UTF-8
 locales for EBCDIC platforms.
 
@@ -843,9 +848,6 @@ tie breaker.
 If Perl detects that there are problems with the locale collation order,
 it reverts to using non-locale collation rules for that locale.
 
-If Perl detects that there are problems with the locale collation order,
-it reverts to using non-locale collation rules for that locale.
-
 If you have a single string that you want to check for "equality in
 locale" against several others, you might think you could gain a little
 efficiency by using C<POSIX::strxfrm()> in conjunction with C<eq>:
@@ -871,7 +873,7 @@ string the first time it's needed in a comparison, then keeps this version aroun
 in case it's needed again.  An example rewritten the easy way with
 C<cmp> runs just about as fast.  It also copes with null characters
 embedded in strings; if you call C<strxfrm()> directly, it treats the first
-null it finds as a terminator.  don't expect the transformed strings
+null it finds as a terminator.  Don't expect the transformed strings
 it produces to be portable across systems--or even from one revision
 of your operating system to the next.  In short, don't call C<strxfrm()>
 directly: let Perl do it for you.
@@ -1526,7 +1528,7 @@ for Unicode only, such as C<\p{Alpha}>.  They assume that 0xD7 always has its
 Unicode meaning (or the equivalent on EBCDIC platforms).  Since Latin1 is a
 subset of Unicode and 0xD7 is the multiplication sign in both Latin1 and
 Unicode, C<\p{Alpha}> will never match it, regardless of locale.  A similar
-issue occurs with C<\N{...}>.  Prior to v5.20, It is therefore a bad
+issue occurs with C<\N{...}>.  Prior to v5.20, it is therefore a bad
 idea to use C<\p{}> or
 C<\N{}> under plain C<use locale>--I<unless> you can guarantee that the
 locale will be ISO8859-1.  Use POSIX character classes instead.
@@ -1602,7 +1604,8 @@ don't contain this non-C<NUL> control, the results will be correct, and
 in many locales, this control, whatever it might be, will rarely be
 encountered.  But there are cases where a C<NUL> should sort before this
 control, but doesn't.  If two strings do collate identically, the one
-containing the C<NUL> will sort to earlier.
+containing the C<NUL> will sort to earlier.  Prior to 5.26, there were
+more bugs.
 
 =head2 Broken systems
 
