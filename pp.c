@@ -3248,8 +3248,11 @@ PP(pp_length)
         mg_get(sv);
     if (SvOK(sv)) {
         STRLEN len;
-	if (!IN_BYTES) /* reread to avoid using an C auto/register */
+	if (!IN_BYTES) { /* reread to avoid using an C auto/register */
+            if ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == SVf_POK)
+                goto simple_pv;
 	    len = sv_len_utf8_nomg(sv);
+        }
 	else
 	{
             /* unrolled SvPV_nomg_const(sv,len) */
