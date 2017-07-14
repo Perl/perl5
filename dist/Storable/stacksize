@@ -173,7 +173,7 @@ if ($max_depth == $bad1-1
 print "MAX_DEPTH_HASH = $n\n" unless QUIET;
 my $max_depth_hash = $n;
 
-open $f, ">", $fn or exit(1);
+open $f, ">", $fn or die "$fn $!";
 print $f "/* bisected with stacksize.pl */\n";
 print $f "#define PST_STACK_MAX_DEPTH	$max_depth\n";
 print $f "#define PST_STACK_MAX_DEPTH_HASH $max_depth_hash\n";
