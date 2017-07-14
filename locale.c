@@ -2626,11 +2626,16 @@ Perl_my_strerror(pTHX_ const int errnum)
              "Any locale change has been done; about to call Strerror\n"));
     errstr = Strerror(errnum);
     if (errstr) {
+
+#ifdef DEBUGGING
+
         if (DEBUG_Lv_TEST) {
             PerlIO_printf(Perl_debug_log, "Strerror returned; saving a copy: '");
             print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);
             PerlIO_printf(Perl_debug_log, "'\n");
         }
+
+#endif
 
         errstr = savepv(errstr);
         SAVEFREEPV(errstr);
