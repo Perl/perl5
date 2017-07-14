@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder::Platform::aix;
-$ExtUtils::CBuilder::Platform::aix::VERSION = '0.280225';
+$ExtUtils::CBuilder::Platform::aix::VERSION = '0.280226';
 use warnings;
 use strict;
 use ExtUtils::CBuilder::Platform::Unix;
