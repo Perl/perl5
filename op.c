@@ -13548,8 +13548,15 @@ static void
 S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
 {
     OP *lop;
+    U8 flag = 0;
 
     assert((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR);
+
+    /* OPpTARGET_MY and boolean context probably don't mix well.
+     * If someone finds a valid use case, maybe add an extra flag to this
+     * function which indicates its safe to do so for this op? */
+    assert(!(   (PL_opargs[o->op_type] & OA_TARGLEX)
+             && (o->op_private & OPpTARGET_MY)));
 
     lop = o->op_next;
 
@@ -13575,7 +13582,7 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
         case OP_XOR:
         case OP_COND_EXPR:
         case OP_GREPWHILE:
-            o->op_private |= bool_flag;
+            flag = bool_flag;
             lop = NULL;
             break;
 
@@ -13587,7 +13594,7 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
          */
         case OP_AND:
             if (safe_and) {
-                o->op_private |= bool_flag;
+                flag = bool_flag;
                 lop = NULL;
                 break;
             }
@@ -13595,12 +13602,12 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
         case OP_OR:
         case OP_DOR:
             if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
-                o->op_private |= bool_flag;
+                flag = bool_flag;
                 lop = NULL;
             }
             else if (!(lop->op_flags & OPf_WANT)) {
                 /* unknown context - decide at runtime */
-                o->op_private |= maybe_flag;
+                flag = maybe_flag;
                 lop = NULL;
             }
             break;
@@ -13613,6 +13620,8 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
         if (lop)
             lop = lop->op_next;
     }
+
+    o->op_private |= flag;
 }
 
 
