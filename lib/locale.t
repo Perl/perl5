@@ -29,7 +29,7 @@ BEGIN {
 }
 
 use strict;
-use feature 'fc', 'postderef';
+use feature 'fc';
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
 our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
@@ -2454,28 +2454,30 @@ my $final_locales_test_number = $locales_test_number;
 
 TEST_NUM:
 foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
-    if (%setlocale_failed) {
-        print "not ";
+    my $has_non_global_failure = $Problem{$test_num}
+                            || ! defined $Okay{$test_num}
+                            || ! @{$Okay{$test_num}};
+    print "not " if %setlocale_failed || $has_non_global_failure;
+    print "ok $test_num";
+    $test_names{$test_num} = "" unless defined $test_names{$test_num};
+
+    # If TODO is in the test name, make it thus
+    my $todo = $test_names{$test_num} =~ s/\s*TODO\s*//;
+    print " $test_names{$test_num}";
+    if ($todo) {
+        print " # TODO\n";
     }
-    elsif ($Problem{$test_num}
-           || ! defined $Okay{$test_num}
-           || ! @{$Okay{$test_num}})
-    {
-	if (defined $not_necessarily_a_problem_test_number
-            && $test_num == $not_necessarily_a_problem_test_number)
-        {
-	    print "# The failure of test $not_necessarily_a_problem_test_number is not necessarily fatal.\n";
-	    print "# It usually indicates a problem in the environment,\n";
-	    print "# not in Perl itself.\n";
-	}
+    elsif (%setlocale_failed || ! $has_non_global_failure) {
+        print "\n";
+    }
+    elsif ($has_non_global_failure) {
 
         # If there are any locales that pass this test, or are known-bad, it
-        # may be that there are enough passes that we TODO the failure.
-        if (($Okay{$test_num} || $Known_bad_locale{$test_num})
+        # may be that there are enough passes that we TODO the failure, but
+        # only for tests that we have decided can be problematical.
+        if (  ($Okay{$test_num} || $Known_bad_locale{$test_num})
             && grep { $_ == $test_num } keys %problematical_tests)
         {
-            no warnings 'experimental::postderef';
-
             # Don't count the known-bad failures when calculating the
             # percentage that fail.
             my $known_failures = (exists $Known_bad_locale{$test_num})
@@ -2487,8 +2489,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             # Specially handle failures where only known-bad locales fail.
             # This makes the diagnositics clearer.
             if ($adjusted_failures <= 0) {
-                print "not ok $test_num $test_names{$test_num} # TODO fails only on ",
-                                                                "known bad locales: ",
+                print " # TODO fails only on known bad locales: ",
                       join " ", keys $Known_bad_locale{$test_num}->%*, "\n";
                 next TEST_NUM;
             }
@@ -2497,15 +2498,10 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             my $percent_fail = (int(.5 + (1000 * $adjusted_failures
                                           / scalar(@Locale))))
                                / 10;
-            if ($percent_fail < $acceptable_failure_percentage) {
-                if (! $debug) {
-                    $test_names{$test_num} .= 'TODO';
-                    print "# ", 100 - $percent_fail, "% of locales not known to be problematic on this platform\n";
-                    print "# pass the following test, so it is likely that the failures\n";
-                    print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
-                    print "# problem is not likely to be Perl's\n";
-                }
-            }
+            $todo = $percent_fail < $acceptable_failure_percentage;
+            print " # TODO" if $todo;
+            print "\n";
+
             if ($debug) {
                 print "# $percent_fail% of locales (",
                       scalar(keys $Problem{$test_num}->%*),
@@ -2515,8 +2511,14 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
                       $acceptable_failure_percentage,
                       "%)\n";
             }
+            elsif ($todo) {
+                print "# ", 100 - $percent_fail, "% of locales not known to be problematic on this platform\n";
+                print "# pass the above test, so it is likely that the failures\n";
+                print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
+                print "# problem is not likely to be Perl's\n";
+            }
         }
-        print "#\n";
+
         if ($debug) {
             print "# The code points that had this failure are given above.  Look for lines\n";
             print "# that match 'failed $test_num'\n";
@@ -2525,16 +2527,14 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             print "# For more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1.\n";
             print "# Then look at that output for lines that match 'failed $test_num'\n";
         }
-	print "not ";
+	if (defined $not_necessarily_a_problem_test_number
+            && $test_num == $not_necessarily_a_problem_test_number)
+        {
+	    print "# The failure of test $not_necessarily_a_problem_test_number is not necessarily fatal.\n";
+	    print "# It usually indicates a problem in the environment,\n";
+	    print "# not in Perl itself.\n";
+	}
     }
-    print "ok $test_num";
-    if (defined $test_names{$test_num}) {
-        # If TODO is in the test name, make it thus
-        my $todo = $test_names{$test_num} =~ s/TODO\s*//;
-        print " $test_names{$test_num}";
-        print " # TODO" if $todo;
-    }
-    print "\n";
 }
 
 $test_num = $final_locales_test_number;
