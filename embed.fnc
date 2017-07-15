@@ -1258,7 +1258,7 @@ Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
 EXnpo	|char*	|setlocale	|int category|NULLOK const char* locale
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
-ApM	|char*	|my_strerror	|const int errnum
+p	|char*	|my_strerror	|const int errnum
 Xpn	|void	|_warn_problematic_locale
 p	|void	|new_numeric	|NULLOK const char* newcoll
 Xp	|void	|set_numeric_local
