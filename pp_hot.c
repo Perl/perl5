@@ -3579,10 +3579,10 @@ PP(pp_grepwhile)
 	SP = PL_stack_base + POPMARK;		/* pop original mark */
 	if (gimme == G_SCALAR) {
             if (PL_op->op_private & OPpTRUEBOOL)
-                XPUSHs(items ? &PL_sv_yes : &PL_sv_zero);
+                PUSHs(items ? &PL_sv_yes : &PL_sv_zero);
             else {
 		dTARGET;
-		XPUSHi(items);
+		PUSHi(items);
             }
 	}
 	else if (gimme == G_ARRAY)
