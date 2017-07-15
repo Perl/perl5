@@ -710,7 +710,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		}
 	}
     }
-    sv_setsv(sv, NULL);
+    sv_set_undef(sv);
     return 0;
 }
 
@@ -849,7 +849,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\005':  /* ^E */
 	 if (nextchar != '\0') {
             if (strEQ(remaining, "NCODING"))
-                sv_setsv(sv, NULL);
+                sv_set_undef(sv);
             break;
         }
 
@@ -960,7 +960,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		SvROK_on(sv);
 		sv_rvweaken(sv);
 	    }
-	    else sv_setsv_nomg(sv, NULL);
+	    else
+                sv_set_undef(sv);
 	}
 	break;
     case '\017':		/* ^O & ^OPEN */
@@ -2061,7 +2062,7 @@ Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
     if (obj) {
 	sv_setiv(sv, AvFILL(obj));
     } else {
-	sv_setsv(sv, NULL);
+        sv_set_undef(sv);
     }
     return 0;
 }
@@ -2139,7 +2140,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setuv(sv, i);
 	    return 0;
     }
-    sv_setsv(sv,NULL);
+    sv_set_undef(sv);
     return 0;
 }
 

@@ -2245,7 +2245,7 @@ Perl_do_readline(pTHX)
 	if (gimme == G_SCALAR) {
 	    /* undef TARG, and push that undefined value */
 	    if (type != OP_RCATLINE) {
-		sv_setsv(TARG,NULL);
+		sv_set_undef(TARG);
 	    }
 	    PUSHTARG;
 	}
