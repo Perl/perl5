@@ -50,7 +50,7 @@ sub new {
 
     ## If the path is just "cc", fileparse returns $ccpath as "./"
     $ccpath = "" if $self->{config}{cc} =~ /^$ccbase$ccsfx$/;
-      
+
     foreach my $cxx (@{$cc2cxx{$ccbase}}) {
       my $cxx1 = File::Spec->catfile( $ccpath, $cxx . $ccsfx);
 
