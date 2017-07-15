@@ -289,6 +289,30 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.2 - Roald Dahl, "The Three Little Pigs"
+
+L<Announced on 2017-07-15 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/07/msg245527.html>
+
+  A short while later, through the wood,
+  Came striding brave Miss Riding Hood.
+  The Wolf stood there, his eyes ablaze
+  And yellowish, like mayonnaise.
+  His teeth were sharp, his gums were raw,
+  And spit was dripping from his jaw.
+  Once more the maiden's eyelid flickers.
+  She draws the pistol from her knickers.
+  Once more, she hits the vital spot,
+  And kills him with a single shot.
+  Pig, peeping through the window, stood
+  And yelled, 'Well done, Miss Riding Hood!'
+
+  Ah, Piglet, you must never trust
+  Young ladies from the upper crust.
+  For now, Miss Riding Hood, one notes,
+  Not only has two wolfskin coats,
+  But when she goes from place to place,
+  She has a PIGSKIN TRAVELLING CASE.
+
 =head2 v5.24.2-RC1 - Roald Dahl, "The Three Little Pigs"
 
 L<Announced on 2017-07-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/07/msg245292.html>
@@ -832,6 +856,28 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.4 - Roald Dahl, "Little Red Riding Hood and the Wolf"
+
+L<Announced on 2017-07-15 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/07/msg245526.html>
+
+  Then Little Red Riding Hood said, 'But Grandma,
+  what a lovely great big furry coat you have on.'
+  'That's wrong!' cried Wolf. 'Have you forgot
+  'To tell me what BIG TEETH I've got?
+  'Ah well, no matter what you say,
+  'I'm going to eat you anyway.'
+  The small girl smiles. One eyelid flickers.
+  She whips a pistol from her knickers.
+  She aims it at the creature's head
+  And bang bang bang, she shoots him dead.
+
+  A few weeks later, in the wood,
+  I came across Miss Riding Hood.
+  But what a change! No cloak of red,
+  No silly hood upon her head.
+  She said, 'Hello, and do please note
+  'My lovely furry WOLFSKIN COAT.'
 
 =head2 v5.22.4-RC1 - Roald Dahl, "Little Red Riding Hood and the Wolf"
 
