@@ -761,9 +761,6 @@
 #   if !defined(NO_LOCALE_TIME) && defined(LC_TIME)
 #	define USE_LOCALE_TIME
 #   endif
-#   ifndef WIN32    /* No wrapper except on Windows */
-#       define my_setlocale(a,b) setlocale(a,b)
-#   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
 #include <setjmp.h>

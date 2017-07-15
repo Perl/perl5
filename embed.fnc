@@ -1255,20 +1255,13 @@ ApdO	|AV*	|get_av		|NN const char *name|I32 flags
 ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
-#ifdef WIN32
-ApM	|char*	|my_setlocale	|int category|NULLOK const char* locale
-#else
-AmM	|char*	|my_setlocale	|int category|NULLOK const char* locale
-#endif
+EXnpo	|char*	|setlocale	|int category|NULLOK const char* locale
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
 ApM	|char*	|my_strerror	|const int errnum
-ApOM	|void	|new_collate	|NULLOK const char* newcoll
-ApOM	|void	|new_ctype	|NN const char* newctype
 EXpMn	|void	|_warn_problematic_locale
 ApOM	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
-Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
 ApM	|bool	|_is_in_locale_category|const bool compiling|const int category
 Apd	|void	|sync_locale
@@ -2722,6 +2715,12 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
 
 #if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
 s	|char*	|stdize_locale	|NN char* locs
+s	|void	|new_collate	|NULLOK const char* newcoll
+s	|void	|new_ctype	|NN const char* newctype
+s	|void	|set_numeric_radix
+#ifdef WIN32
+s	|char*	|my_setlocale	|int category|NULLOK const char* locale
+#endif
 #   ifdef DEBUGGING
 s	|void	|print_collxfrm_input_and_return		\
 			    |NN const char * const s		\
@@ -2731,17 +2730,15 @@ s	|void	|print_collxfrm_input_and_return		\
 s	|void	|print_bytes_for_locale	|NN const char * const s	\
 					|NN const char * const e	\
 					|const bool is_utf8
+snR	|char *	|setlocale_debug_string	|const int category		    \
+					|NULLOK const char* const locale    \
+					|NULLOK const char* const retval
 #   endif
 #endif
 
-#if defined(USE_LOCALE) \
+#if     defined(USE_LOCALE) \
     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
 ApM	|bool	|_is_cur_LC_category_utf8|int category
-#	ifdef DEBUGGING
-AMnpR	|char *	|_setlocale_debug_string|const int category		    \
-					|NULLOK const char* const locale    \
-					|NULLOK const char* const retval
-#	endif
 #endif
 
 

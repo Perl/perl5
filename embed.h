@@ -429,8 +429,6 @@
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
 #define newXS(a,b,c)		Perl_newXS(aTHX_ a,b,c)
 #define newXS_flags(a,b,c,d,e)	Perl_newXS_flags(aTHX_ a,b,c,d,e)
-#define new_collate(a)		Perl_new_collate(aTHX_ a)
-#define new_ctype(a)		Perl_new_ctype(aTHX_ a)
 #define new_numeric(a)		Perl_new_numeric(aTHX_ a)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
 #define new_version(a)		Perl_new_version(aTHX_ a)
@@ -580,7 +578,6 @@
 #define seed()			Perl_seed(aTHX)
 #define set_context		Perl_set_context
 #define set_numeric_local()	Perl_set_numeric_local(aTHX)
-#define set_numeric_radix()	Perl_set_numeric_radix(aTHX)
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
@@ -824,9 +821,6 @@
 #if defined(DEBUGGING)
 #define pad_setsv(a,b)		Perl_pad_setsv(aTHX_ a,b)
 #define pad_sv(a)		Perl_pad_sv(aTHX_ a)
-#  if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
-#define _setlocale_debug_string	Perl__setlocale_debug_string
-#  endif
 #endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #define csighandler		Perl_csighandler
@@ -927,9 +921,6 @@
 #if defined(USE_QUADMATH)
 #define quadmath_format_needed	Perl_quadmath_format_needed
 #define quadmath_format_single	Perl_quadmath_format_single
-#endif
-#if defined(WIN32)
-#define my_setlocale(a,b)	Perl_my_setlocale(aTHX_ a,b)
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
@@ -1496,6 +1487,7 @@
 #    if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
 #define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
 #define print_collxfrm_input_and_return(a,b,c,d)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d)
+#define setlocale_debug_string	S_setlocale_debug_string
 #    endif
 #  endif
 #  if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
@@ -1887,7 +1879,13 @@
 #define padnamelist_dup(a,b)	Perl_padnamelist_dup(aTHX_ a,b)
 #  endif
 #  if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
+#define new_collate(a)		S_new_collate(aTHX_ a)
+#define new_ctype(a)		S_new_ctype(aTHX_ a)
+#define set_numeric_radix()	S_set_numeric_radix(aTHX)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
+#    if defined(WIN32)
+#define my_setlocale(a,b)	S_my_setlocale(aTHX_ a,b)
+#    endif
 #  endif
 #  if defined(USE_LOCALE_COLLATE)
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
@@ -1936,8 +1934,6 @@
 #  define perl_get_sv(a,b)		get_sv(a,b)
 #  define perl_init_i18nl10n(a)		init_i18nl10n(a)
 #  define perl_init_i18nl14n(a)		init_i18nl14n(a)
-#  define perl_new_collate(a)		new_collate(a)
-#  define perl_new_ctype(a)		new_ctype(a)
 #  define perl_new_numeric(a)		new_numeric(a)
 #  define perl_require_pv(a)		require_pv(a)
 
