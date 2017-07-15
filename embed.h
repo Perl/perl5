@@ -429,7 +429,6 @@
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
 #define newXS(a,b,c)		Perl_newXS(aTHX_ a,b,c)
 #define newXS_flags(a,b,c,d,e)	Perl_newXS_flags(aTHX_ a,b,c,d,e)
-#define new_numeric(a)		Perl_new_numeric(aTHX_ a)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
 #define new_version(a)		Perl_new_version(aTHX_ a)
 #define nothreadhook()		Perl_nothreadhook(aTHX)
@@ -577,8 +576,6 @@
 #define scan_vstring(a,b,c)	Perl_scan_vstring(aTHX_ a,b,c)
 #define seed()			Perl_seed(aTHX)
 #define set_context		Perl_set_context
-#define set_numeric_local()	Perl_set_numeric_local(aTHX)
-#define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
@@ -929,7 +926,6 @@
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define _byte_dump_string(a,b,c)	Perl__byte_dump_string(aTHX_ a,b,c)
-#define _warn_problematic_locale	Perl__warn_problematic_locale
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
@@ -1154,6 +1150,7 @@
 #ifdef PERL_CORE
 #define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
 #define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
+#define _warn_problematic_locale	Perl__warn_problematic_locale
 #define abort_execution(a,b)	Perl_abort_execution(aTHX_ a,b)
 #define alloc_LOGOP(a,b,c)	Perl_alloc_LOGOP(aTHX_ a,b,c)
 #define allocmy(a,b,c)		Perl_allocmy(aTHX_ a,b,c)
@@ -1340,6 +1337,7 @@
 #define newSVavdefelem(a,b,c)	Perl_newSVavdefelem(aTHX_ a,b,c)
 #define newXS_deffile(a,b)	Perl_newXS_deffile(aTHX_ a,b)
 #define newXS_len_flags(a,b,c,d,e,f,g)	Perl_newXS_len_flags(aTHX_ a,b,c,d,e,f,g)
+#define new_numeric(a)		Perl_new_numeric(aTHX_ a)
 #define nextargv(a,b)		Perl_nextargv(aTHX_ a,b)
 #define noperl_die		Perl_noperl_die
 #define notify_parser_that_changed_to_utf8()	Perl_notify_parser_that_changed_to_utf8(aTHX)
@@ -1381,6 +1379,8 @@
 #define scalar(a)		Perl_scalar(aTHX_ a)
 #define scalarvoid(a)		Perl_scalarvoid(aTHX_ a)
 #define set_caret_X()		Perl_set_caret_X(aTHX)
+#define set_numeric_local()	Perl_set_numeric_local(aTHX)
+#define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define sub_crush_depth(a)	Perl_sub_crush_depth(aTHX_ a)
 #define sv_2num(a)		Perl_sv_2num(aTHX_ a)
 #define sv_clean_all()		Perl_sv_clean_all(aTHX)
@@ -1934,7 +1934,6 @@
 #  define perl_get_sv(a,b)		get_sv(a,b)
 #  define perl_init_i18nl10n(a)		init_i18nl10n(a)
 #  define perl_init_i18nl14n(a)		init_i18nl14n(a)
-#  define perl_new_numeric(a)		new_numeric(a)
 #  define perl_require_pv(a)		require_pv(a)
 
 /* varargs functions can't be handled with CPP macros. :-(

@@ -1259,10 +1259,10 @@ EXnpo	|char*	|setlocale	|int category|NULLOK const char* locale
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
 ApM	|char*	|my_strerror	|const int errnum
-EXpMn	|void	|_warn_problematic_locale
-ApOM	|void	|new_numeric	|NULLOK const char* newcoll
-Ap	|void	|set_numeric_local
-Ap	|void	|set_numeric_standard
+Xpn	|void	|_warn_problematic_locale
+p	|void	|new_numeric	|NULLOK const char* newcoll
+Xp	|void	|set_numeric_local
+Xp	|void	|set_numeric_standard
 ApM	|bool	|_is_in_locale_category|const bool compiling|const int category
 Apd	|void	|sync_locale
 ApdO	|void	|require_pv	|NN const char* pv
