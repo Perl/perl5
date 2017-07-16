@@ -384,6 +384,25 @@ representation contained characters that are whitespace by Unicode rules but
 not by ASCII rules, it treated those characters as part of fields rather
 than as field separators.  [perl #130907]
 
+=item *
+
+Several built-in functions previously had bugs that could cause them to
+write to the internal stack without allocating room for the item being
+written. In rare situations, this could have led to a crash. These bugs have
+now been fixed, and if any similar bugs are introduced in future, they will
+be detected automatically in debugging builds.
+
+=item *
+
+Using a symbolic ref with postderef syntax as the key in a hash lookup was
+yielding an assertion failure on debugging builds. [perl #131627]
+
+=item *
+
+Array and hash variables whose names begin with a caret now admit indexing
+inside their curlies when interpolated into strings, as in C<<
+"${^CAPTURE[0]}" >> to index C<@{^CAPTURE}>.  [perl #131664]
+
 =back
 
 =head1 Known Problems
