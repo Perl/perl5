@@ -255,7 +255,7 @@ PROTOTYPES: ENABLE
 BOOT:
 {
     MY_CXT_INIT;
-    assert(PL_maxo < OP_MASK_BUF_SIZE);
+    STATIC_ASSERT_STMT(PL_maxo < OP_MASK_BUF_SIZE);
     opset_len = (PL_maxo + 7) / 8;
     if (opcode_debug >= 1)
 	warn("opset_len %ld\n", (long)opset_len);
