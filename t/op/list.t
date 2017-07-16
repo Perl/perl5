@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw(. ../lib));
 }
 
-plan( tests => 70 );
+plan( tests => 71 );
 
 @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
@@ -220,3 +220,11 @@ is(tied($t)->{fetched}, undef, 'assignment to empty list makes no copies');
 
 # this was passing a trash SV at the top of the stack to SvIV()
 ok(($0[()[()]],1), "[perl #126193] list slice with zero indexes");
+
+# RT #131732: pp_list must extend stack when empty-array arg and not in list
+# context
+{
+    my @x;
+    @x;
+    pass('no panic'); # panics only under DEBUGGING
+}
