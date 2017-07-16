@@ -47,7 +47,8 @@ typedef struct jmpenv JMPENV;
 #  define JE_OLD_STACK_HWM_save(je)  \
         (je).je_old_stack_hwm = PL_curstackinfo->si_stack_hwm
 #  define JE_OLD_STACK_HWM_restore(je)  \
-        PL_curstackinfo->si_stack_hwm = (je).je_old_stack_hwm
+        if (PL_curstackinfo->si_stack_hwm < (je).je_old_stack_hwm) \
+            PL_curstackinfo->si_stack_hwm = (je).je_old_stack_hwm
 #else
 #  define JE_OLD_STACK_HWM_zero        NOOP
 #  define JE_OLD_STACK_HWM_save(je)    NOOP

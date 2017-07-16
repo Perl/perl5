@@ -2467,7 +2467,8 @@ Perl_runops_debug(pTHX)
     PERL_ASYNC_CHECK();
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-    PL_curstackinfo->si_stack_hwm = orig_stack_hwm;
+    if (PL_curstackinfo->si_stack_hwm < orig_stack_hwm)
+        PL_curstackinfo->si_stack_hwm = orig_stack_hwm;
 #endif
     TAINT_NOT;
     return 0;
