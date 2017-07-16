@@ -186,7 +186,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
          * seems safe) and that the size of the buffer in our SV is
          * always less than half the size of the address space
          */
-        assert(sizeof(Off_t) >= sizeof(len));
+        STATIC_ASSERT_STMT(sizeof(Off_t) >= sizeof(len));
         assert(len < ((~(STRLEN)0) >> 1));
         if ((Off_t)len <= s->posn)
 	    return 0;
