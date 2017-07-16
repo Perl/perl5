@@ -5185,6 +5185,7 @@ PP(pp_list)
     if (GIMME_V != G_ARRAY) {
 	SV **mark = PL_stack_base + markidx;
 	dSP;
+        EXTEND(SP, 1);          /* in case no arguments, as in @empty */
 	if (++MARK <= SP)
 	    *MARK = *SP;		/* unwanted list, return last item */
 	else
