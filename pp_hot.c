@@ -966,6 +966,59 @@ PP(pp_print)
 }
 
 
+/* do the common parts of pp_padhv() and pp_rv2hv()
+ * It assumes the caller has done EXTEND(SP, 1) or equivalent.
+ * 'is_keys' indicates the OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS flag is set
+ * */
+
+PERL_STATIC_INLINE OP*
+S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys)
+{
+    bool tied;
+    dSP;
+
+    assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
+
+    if (gimme == G_ARRAY) {
+        PUSHs(MUTABLE_SV(hv));
+        PUTBACK;
+        return Perl_do_kv(aTHX);
+    }
+
+    if (is_keys)
+        /* 'keys %h' masquerading as '%h': reset iterator */
+        (void)hv_iterinit(hv);
+
+    tied = SvRMAGICAL(hv) && mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied);
+
+    if (  (  PL_op->op_private & OPpTRUEBOOL
+	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
+	     && block_gimme() == G_VOID)
+          )
+	  && !tied
+    )
+	PUSHs(HvUSEDKEYS(hv) ? &PL_sv_yes : &PL_sv_zero);
+    else if (gimme == G_SCALAR) {
+        if (is_keys) {
+            IV i;
+            if (tied) {
+                i = 0;
+                while (hv_iternext(hv))
+                    i++;
+            }
+            else
+                i = HvUSEDKEYS(hv);
+            mPUSHi(i);
+        }
+        else
+            PUSHs(Perl_hv_scalar(aTHX_ hv));
+    }
+
+    PUTBACK;
+    return NORMAL;
+}
+
+
 /* This is also called directly by pp_lvavref.  */
 PP(pp_padav)
 {
@@ -1030,63 +1083,33 @@ PP(pp_padhv)
 {
     dSP; dTARGET;
     U8 gimme;
-    bool tied;
 
     assert(SvTYPE(TARG) == SVt_PVHV);
-    XPUSHs(TARG);
     if (UNLIKELY( PL_op->op_private & OPpLVAL_INTRO ))
 	if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
 
-    if (PL_op->op_flags & OPf_REF)
+    EXTEND(SP, 1);
+
+    if (PL_op->op_flags & OPf_REF) {
+        PUSHs(TARG);
 	RETURN;
+    }
     else if (PL_op->op_private & OPpMAYBE_LVSUB) {
         const I32 flags = is_lvalue_sub();
         if (flags && !(flags & OPpENTERSUB_INARGS)) {
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
                 Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+            PUSHs(TARG);
             RETURN;
         }
     }
 
     gimme = GIMME_V;
-    if (gimme == G_ARRAY) {
-	RETURNOP(Perl_do_kv(aTHX));
-    }
 
-    if (PL_op->op_private & OPpPADHV_ISKEYS)
-        /* 'keys %h' masquerading as '%h': reset iterator */
-        (void)hv_iterinit(MUTABLE_HV(TARG));
-
-    tied = SvRMAGICAL(TARG) && mg_find(TARG, PERL_MAGIC_tied);
-
-    if (  (  PL_op->op_private & OPpTRUEBOOL
-	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-	     && block_gimme() == G_VOID  )
-          )
-	  && !tied
-    )
-	SETs(HvUSEDKEYS(TARG) ? &PL_sv_yes : &PL_sv_zero);
-    else if (gimme == G_SCALAR) {
-        if (PL_op->op_private & OPpPADHV_ISKEYS) {
-            IV i;
-            if (tied) {
-                i = 0;
-                while (hv_iternext(MUTABLE_HV(TARG)))
-                    i++;
-            }
-            else
-                i = HvUSEDKEYS(MUTABLE_HV(TARG));
-            (void)POPs;
-            mPUSHi(i);
-        }
-        else {
-            SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
-            SETs(sv);
-        }
-    }
-    RETURN;
+    return S_padhv_rv2hv_common(aTHX_ (HV*)TARG, gimme,
+                        cBOOL(PL_op->op_private & OPpPADHV_ISKEYS));
 }
 
 
@@ -1166,44 +1189,9 @@ PP(pp_rv2av)
 	}
     }
     else {
-        bool tied;
-	/* The guts of pp_rv2hv  */
-	if (gimme == G_ARRAY) { /* array wanted */
-	    *PL_stack_sp = sv;
-	    return Perl_do_kv(aTHX);
-	}
-
-        if (PL_op->op_private & OPpRV2HV_ISKEYS)
-            /* 'keys %h' masquerading as '%h': reset iterator */
-            (void)hv_iterinit(MUTABLE_HV(sv));
-
-        tied = SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied);
-
-	if ( (   PL_op->op_private & OPpTRUEBOOL
-	      || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-		 && block_gimme() == G_VOID)
-             )
-	     && !tied)
-	    SETs(HvUSEDKEYS(MUTABLE_HV(sv)) ? &PL_sv_yes : &PL_sv_zero);
-	else if (gimme == G_SCALAR) {
-	    dTARG;
-            if (PL_op->op_private & OPpRV2HV_ISKEYS) {
-                IV i;
-                if (tied) {
-                    i = 0;
-                    while (hv_iternext(MUTABLE_HV(sv)))
-                        i++;
-                }
-                else
-                    i = HvUSEDKEYS(MUTABLE_HV(sv));
-                (void)POPs;
-                mPUSHi(i);
-            }
-            else {
-                TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
-                SETTARG;
-            }
-	}
+        SP--; PUTBACK;
+        return S_padhv_rv2hv_common(aTHX_ (HV*)sv, gimme,
+                        cBOOL(PL_op->op_private & OPpRV2HV_ISKEYS));
     }
     RETURN;
 
