@@ -1243,8 +1243,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
 /* Perl_do_kv() may be:
  *  * called directly as the pp function for pp_keys() and pp_values();
- *  * called indirectly by pp_padhv() and pp_rv2hv() to implement their
- *       key-value list context functionality.
  *  * It may also be called directly when the op is OP_AVHVSWITCH, to
  *       implement CORE::keys(), CORE::values().
  *
@@ -1261,24 +1259,17 @@ Perl_do_kv(pTHX)
     SSize_t extend_size;
     const U8 gimme = GIMME_V;
 
-    const I32 dokv     = (   PL_op->op_type == OP_RV2HV
-                          || PL_op->op_type == OP_PADHV);
-
-    const I32 dokeys   =     dokv
-                          || (PL_op->op_type == OP_KEYS)
+    const I32 dokeys   =     (PL_op->op_type == OP_KEYS)
                           || (    PL_op->op_type == OP_AVHVSWITCH
                               && (PL_op->op_private & OPpAVHVSWITCH_MASK)
                                     + OP_EACH == OP_KEYS);
 
-    const I32 dovalues =     dokv
-                          || (PL_op->op_type == OP_VALUES)
+    const I32 dovalues =     (PL_op->op_type == OP_VALUES)
                           || (    PL_op->op_type == OP_AVHVSWITCH
                               && (PL_op->op_private & OPpAVHVSWITCH_MASK)
                                      + OP_EACH == OP_VALUES);
 
-    assert(   PL_op->op_type == OP_PADHV
-           || PL_op->op_type == OP_RV2HV
-           || PL_op->op_type == OP_KEYS
+    assert(   PL_op->op_type == OP_KEYS
            || PL_op->op_type == OP_VALUES
            || PL_op->op_type == OP_AVHVSWITCH);
 
@@ -1302,6 +1293,11 @@ Perl_do_kv(pTHX)
 	    IV i;
 	    dTARGET;
 
+            /* note that in 'scalar(keys %h)' the OP_KEYS is usually
+             * optimised away and the action is performed directly by the
+             * padhv or rv2hv op. We now only get here via OP_AVHVSWITCH
+             * and \&CORE::keys
+             */
 	    if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) ) {
 		i = HvUSEDKEYS(keys);
 	    }

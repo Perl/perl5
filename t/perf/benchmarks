@@ -659,6 +659,14 @@
         code    => '($x,$y,$z) = @_',
     },
 
+    # (....) = %lexical
+
+    'expr::aassign::ma_lh' => {
+        desc    => 'my array assigned lexical hash',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => 'my @a = %h',
+    },
+
 
     # (....) = ($lex1,$lex2,$lex3);
 

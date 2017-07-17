@@ -967,6 +967,50 @@ Perl_hv_scalar(pTHX_ HV *hv)
     return sv;
 }
 
+
+/*
+Pushes all the keys and values of a hash onto the stack.
+Resets the hash's iterator.
+The rough Perl equivalent: C< () = %hash; >
+XXX this may at some point be extended to push 'keys %h' and 'values %h'
+too. I might also unroll hv_iternext() - DAPM
+*/
+
+void
+Perl_hv_pushkv(pTHX_ HV *hv)
+{
+    HE *entry;
+    bool tied = SvRMAGICAL(hv) && mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied);
+    dSP;
+
+    PERL_ARGS_ASSERT_HV_PUSHKV;
+
+    (void)hv_iterinit(hv);
+
+    if (tied) {
+        while ((entry = hv_iternext(hv))) {
+            EXTEND(SP, 2);
+            PUSHs(hv_iterkeysv(entry));
+            PUSHs(hv_iterval(hv, entry));
+        }
+    }
+    else {
+        SSize_t extend_size;
+        /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
+        assert(HvUSEDKEYS(hv) <= (SSize_t_MAX >> 1));
+        extend_size = (SSize_t)HvUSEDKEYS(hv) * 2;
+        EXTEND(SP, extend_size);
+
+        while ((entry = hv_iternext(hv))) {
+            PUSHs(hv_iterkeysv(entry));
+            PUSHs(HeVAL(entry));
+        }
+    }
+
+    PUTBACK;
+}
+
+
 /*
 =for apidoc hv_bucket_ratio
 

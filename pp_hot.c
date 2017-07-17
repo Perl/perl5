@@ -968,7 +968,7 @@ PP(pp_print)
 
 /* do the common parts of pp_padhv() and pp_rv2hv()
  * It assumes the caller has done EXTEND(SP, 1) or equivalent.
- * 'is_keys' indicates the OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS flag is set
+ * 'is_keys' indicates the OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS flag is set.
  * 'has_targ' indicates that the op has a target - this should
  * be a compile-time constant so that the code can constant-folded as
  * appropriate
@@ -983,9 +983,8 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
     if (gimme == G_ARRAY) {
-        PUSHs(MUTABLE_SV(hv));
-        PUTBACK;
-        return Perl_do_kv(aTHX);
+        hv_pushkv(hv);
+        return NORMAL;
     }
 
     if (is_keys)
