@@ -5883,6 +5883,20 @@ typedef struct am_table_short AMTS;
 #ifdef USE_LOCALE
 /* These locale things are all subject to change */
 
+#  if      defined(USE_ITHREADS)                \
+      &&   defined(HAS_NEWLOCALE)               \
+      &&   defined(LC_ALL_MASK)                 \
+      &&   defined(HAS_FREELOCALE)              \
+      &&   defined(HAS_USELOCALE)               \
+      && ! defined(NO_THREAD_SAFE_USELOCALE)
+
+    /* The code is written for simplicity to assume that any platform advanced
+     * enough to have the Posix 2008 locale functions has LC_ALL.  The test
+     * above makes sure that assumption is valid */
+
+#    define USE_THREAD_SAFE_LOCALE
+#  endif
+
 #   define LOCALE_INIT   MUTEX_INIT(&PL_locale_mutex)
 
 #   ifdef USE_THREAD_SAFE_LOCALE
@@ -5986,20 +6000,6 @@ typedef struct am_table_short AMTS;
         }  STMT_END
 
 #   endif   /* PERL_CORE or PERL_IN_XSUB_RE */
-
-#if      defined(USE_ITHREADS)              \
-    &&   defined(HAS_NEWLOCALE)             \
-    &&   defined(LC_ALL_MASK)               \
-    &&   defined(HAS_FREELOCALE)            \
-    &&   defined(HAS_USELOCALE)             \
-    && ! defined(NO_THREAD_SAFE_USELOCALE)
-
-    /* The code is written for simplicity to assume that any platform advanced
-     * enough to have the Posix 2008 locale functions has LC_ALL.  The test
-     * above makes sure that assumption is valid */
-
-#   define USE_THREAD_SAFE_LOCALE
-#endif
 
 #else   /* No locale usage */
 #   define LOCALE_INIT
