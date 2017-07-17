@@ -5897,7 +5897,6 @@ typedef struct am_table_short AMTS;
                             PL_C_locale_obj = (locale_t) NULL;              \
                         }                                                   \
                      } STMT_END
-    }
 #   else
 #       define LOCALE_TERM   MUTEX_DESTROY(&PL_locale_mutex)
 #   endif
