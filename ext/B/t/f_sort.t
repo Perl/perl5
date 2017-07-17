@@ -280,7 +280,7 @@ checkOptree(note   => q{},
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*age] s
-# 5  <1> rv2hv lKRM
+# 5  <1> rv2hv[t9] lKRM
 # 6  <1> keys[t10] lK/1		< 5.019002
 # 6  <1> keys[t10] lKM/1	>=5.019002
 # 7  <@> sort lKS*
@@ -294,7 +294,7 @@ EOT_EOT
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*age) s
-# 5  <1> rv2hv lKRM
+# 5  <1> rv2hv[t3] lKRM
 # 6  <1> keys[t4] lK/1		< 5.019002
 # 6  <1> keys[t4] lKM/1		>=5.019002
 # 7  <@> sort lKS*

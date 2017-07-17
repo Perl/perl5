@@ -969,10 +969,13 @@ PP(pp_print)
 /* do the common parts of pp_padhv() and pp_rv2hv()
  * It assumes the caller has done EXTEND(SP, 1) or equivalent.
  * 'is_keys' indicates the OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS flag is set
+ * 'has_targ' indicates that the op has a target - this should
+ * be a compile-time constant so that the code can constant-folded as
+ * appropriate
  * */
 
 PERL_STATIC_INLINE OP*
-S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys)
+S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 {
     bool tied;
     dSP;
@@ -1008,7 +1011,12 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys)
             }
             else
                 i = HvUSEDKEYS(hv);
-            mPUSHi(i);
+            if (has_targ) {
+                dTARGET;
+                PUSHi(i);
+            }
+            else
+                mPUSHi(i);
         }
         else
             PUSHs(Perl_hv_scalar(aTHX_ hv));
@@ -1109,7 +1117,8 @@ PP(pp_padhv)
     gimme = GIMME_V;
 
     return S_padhv_rv2hv_common(aTHX_ (HV*)TARG, gimme,
-                        cBOOL(PL_op->op_private & OPpPADHV_ISKEYS));
+                        cBOOL(PL_op->op_private & OPpPADHV_ISKEYS),
+                        0 /* has_targ*/);
 }
 
 
@@ -1191,7 +1200,8 @@ PP(pp_rv2av)
     else {
         SP--; PUTBACK;
         return S_padhv_rv2hv_common(aTHX_ (HV*)sv, gimme,
-                        cBOOL(PL_op->op_private & OPpRV2HV_ISKEYS));
+                        cBOOL(PL_op->op_private & OPpRV2HV_ISKEYS),
+                        1 /* has_targ*/);
     }
     RETURN;
 

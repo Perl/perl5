@@ -1938,7 +1938,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00004b08,	/* keys */
 	0x00001b00,	/* delete */
 	0x00001b04,	/* exists */
-	0x00000140,	/* rv2hv */
+	0x00000148,	/* rv2hv */
 	0x00014204,	/* helem */
 	0x00024401,	/* hslice */
 	0x00024401,	/* kvhslice */
