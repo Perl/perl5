@@ -1,15 +1,20 @@
 #
-# $Id: Encode.pm,v 2.88 2016/11/29 23:30:30 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.92 2017/07/18 07:15:29 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.88 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
-use XSLoader ();
-XSLoader::load( __PACKAGE__, $VERSION );
+our $VERSION;
+BEGIN {
+    $VERSION = sprintf "%d.%02d", q$Revision: 2.92 $ =~ /(\d+)/g;
+    require XSLoader;
+    XSLoader::load( __PACKAGE__, $VERSION );
+}
 
 use Exporter 5.57 'import';
+
+our @CARP_NOT = qw(Encode::Encoder);
 
 # Public, encouraged API is exported by default
 
@@ -44,7 +49,10 @@ our %EXPORT_TAGS = (
 
 our $ON_EBCDIC = ( ord("A") == 193 );
 
-use Encode::Alias;
+use Encode::Alias ();
+use Encode::MIME::Name;
+
+use Storable;
 
 # Make a %Encoding package variable to allow a certain amount of cheating
 our %Encoding;
@@ -96,6 +104,9 @@ sub define_encoding {
         my $alias = shift;
         define_alias( $alias, $obj );
     }
+    my $class = ref($obj);
+    push @Encode::CARP_NOT, $class unless grep { $_ eq $class } @Encode::CARP_NOT;
+    push @Encode::Encoding::CARP_NOT, $class unless grep { $_ eq $class } @Encode::Encoding::CARP_NOT;
     return $obj;
 }
 
@@ -127,6 +138,15 @@ sub getEncoding {
     return;
 }
 
+# HACK: These two functions must be defined in Encode and because of
+# cyclic dependency between Encode and Encode::Alias, Exporter does not work
+sub find_alias {
+    goto &Encode::Alias::find_alias;
+}
+sub define_alias {
+    goto &Encode::Alias::define_alias;
+}
+
 sub find_encoding($;$) {
     my ( $name, $skip_external ) = @_;
     return __PACKAGE__->getEncoding( $name, $skip_external );
@@ -134,8 +154,6 @@ sub find_encoding($;$) {
 
 sub find_mime_encoding($;$) {
     my ( $mime_name, $skip_external ) = @_;
-    eval { require Encode::MIME::Name; };
-    $@ and return;
     my $name = Encode::MIME::Name::get_encode_name( $mime_name );
     return find_encoding( $name, $skip_external );
 }
@@ -149,8 +167,6 @@ sub resolve_alias($) {
 sub clone_encoding($) {
     my $obj = find_encoding(shift);
     ref $obj or return;
-    eval { require Storable };
-    $@ and return;
     return Storable::dclone($obj);
 }
 
@@ -182,7 +198,7 @@ sub encode($$;$) {
     else {
         $octets = $enc->encode( $string, $check );
     }
-    $_[1] = $string if $check and !ref $check and !( $check & LEAVE_SRC() );
+    $_[1] = $string if $check and !ref $check and !( $check & LEAVE_SRC );
     return $octets;
 }
 *str2bytes = \&encode;
@@ -211,7 +227,7 @@ sub decode($$;$) {
     else {
         $string = $enc->decode( $octets, $check );
     }
-    $_[1] = $octets if $check and !ref $check and !( $check & LEAVE_SRC() );
+    $_[1] = $octets if $check and !ref $check and !( $check & LEAVE_SRC );
     return $string;
 }
 *bytes2str = \&decode;
@@ -278,133 +294,87 @@ sub decode_utf8($;$) {
     $check   ||= 0;
     $utf8enc ||= find_encoding('utf8');
     my $string = $utf8enc->decode( $octets, $check );
-    $_[0] = $octets if $check and !ref $check and !( $check & LEAVE_SRC() );
+    $_[0] = $octets if $check and !ref $check and !( $check & LEAVE_SRC );
     return $string;
 }
 
-# sub decode_utf8($;$) {
-#     my ( $str, $check ) = @_;
-#     return $str if is_utf8($str);
-#     if ($check) {
-#         return decode( "utf8", $str, $check );
-#     }
-#     else {
-#         return decode( "utf8", $str );
-#         return $str;
-#     }
-# }
+onBOOT;
 
-predefine_encodings(1);
-
-#
-# This is to restore %Encoding if really needed;
-#
-
-sub predefine_encodings {
-    require Encode::Encoding;
-    no warnings 'redefine';
-    my $use_xs = shift;
-    if ($ON_EBCDIC) {
-
-        # was in Encode::UTF_EBCDIC
-        package Encode::UTF_EBCDIC;
-        push @Encode::UTF_EBCDIC::ISA, 'Encode::Encoding';
-        *decode = sub {
-            my ( undef, $str, $chk ) = @_;
-            my $res = '';
-            for ( my $i = 0 ; $i < length($str) ; $i++ ) {
-                $res .=
-                  chr(
-                    utf8::unicode_to_native( ord( substr( $str, $i, 1 ) ) )
-                  );
-            }
-            $_[1] = '' if $chk;
-            return $res;
-        };
-        *encode = sub {
-            my ( undef, $str, $chk ) = @_;
-            my $res = '';
-            for ( my $i = 0 ; $i < length($str) ; $i++ ) {
-                $res .=
-                  chr(
-                    utf8::native_to_unicode( ord( substr( $str, $i, 1 ) ) )
-                  );
-            }
-            $_[1] = '' if $chk;
-            return $res;
-        };
-        $Encode::Encoding{Unicode} =
-          bless { Name => "UTF_EBCDIC" } => "Encode::UTF_EBCDIC";
-    }
-    else {
-
-        package Encode::Internal;
-        push @Encode::Internal::ISA, 'Encode::Encoding';
-        *decode = sub {
-            my ( undef, $str, $chk ) = @_;
-            utf8::upgrade($str);
-            $_[1] = '' if $chk;
-            return $str;
-        };
-        *encode = \&decode;
-        $Encode::Encoding{Unicode} =
-          bless { Name => "Internal" } => "Encode::Internal";
-    }
-    {
-        # https://rt.cpan.org/Public/Bug/Display.html?id=103253
-        package Encode::XS;
-        push @Encode::XS::ISA, 'Encode::Encoding';
-    }
-    {
-
-        # was in Encode::utf8
-        package Encode::utf8;
-        push @Encode::utf8::ISA, 'Encode::Encoding';
-
-        #
-        if ($use_xs) {
-            Encode::DEBUG and warn __PACKAGE__, " XS on";
-            *decode = \&decode_xs;
-            *encode = \&encode_xs;
+if ($ON_EBCDIC) {
+    package Encode::UTF_EBCDIC;
+    use parent 'Encode::Encoding';
+    my $obj = bless { Name => "UTF_EBCDIC" } => "Encode::UTF_EBCDIC";
+    Encode::define_encoding($obj, 'Unicode');
+    sub decode {
+        my ( undef, $str, $chk ) = @_;
+        my $res = '';
+        for ( my $i = 0 ; $i < length($str) ; $i++ ) {
+            $res .=
+              chr(
+                utf8::unicode_to_native( ord( substr( $str, $i, 1 ) ) )
+              );
         }
-        else {
-            Encode::DEBUG and warn __PACKAGE__, " XS off";
-            *decode = sub {
-                my ( undef, $octets, $chk ) = @_;
-                my $str = Encode::decode_utf8($octets);
-                if ( defined $str ) {
-                    $_[1] = '' if $chk;
-                    return $str;
-                }
-                return undef;
-            };
-            *encode = sub {
-                my ( undef, $string, $chk ) = @_;
-                my $octets = Encode::encode_utf8($string);
-                $_[1] = '' if $chk;
-                return $octets;
-            };
+        $_[1] = '' if $chk;
+        return $res;
+    }
+    sub encode {
+        my ( undef, $str, $chk ) = @_;
+        my $res = '';
+        for ( my $i = 0 ; $i < length($str) ; $i++ ) {
+            $res .=
+              chr(
+                utf8::native_to_unicode( ord( substr( $str, $i, 1 ) ) )
+              );
         }
-        *cat_decode = sub {    # ($obj, $dst, $src, $pos, $trm, $chk)
-                               # currently ignores $chk
-            my ( undef, undef, undef, $pos, $trm ) = @_;
-            my ( $rdst, $rsrc, $rpos ) = \@_[ 1, 2, 3 ];
-            use bytes;
-            if ( ( my $npos = index( $$rsrc, $trm, $pos ) ) >= 0 ) {
-                $$rdst .=
-                  substr( $$rsrc, $pos, $npos - $pos + length($trm) );
-                $$rpos = $npos + length($trm);
-                return 1;
-            }
-            $$rdst .= substr( $$rsrc, $pos );
-            $$rpos = length($$rsrc);
-            return '';
-        };
-        $Encode::Encoding{utf8} =
-          bless { Name => "utf8" } => "Encode::utf8";
-        $Encode::Encoding{"utf-8-strict"} =
-          bless { Name => "utf-8-strict", strict_utf8 => 1 } 
-            => "Encode::utf8";
+        $_[1] = '' if $chk;
+        return $res;
+    }
+} else {
+    package Encode::Internal;
+    use parent 'Encode::Encoding';
+    my $obj = bless { Name => "Internal" } => "Encode::Internal";
+    Encode::define_encoding($obj, 'Unicode');
+    sub decode {
+        my ( undef, $str, $chk ) = @_;
+        utf8::upgrade($str);
+        $_[1] = '' if $chk;
+        return $str;
+    }
+    *encode = \&decode;
+}
+
+{
+    # https://rt.cpan.org/Public/Bug/Display.html?id=103253
+    package Encode::XS;
+    use parent 'Encode::Encoding';
+}
+
+{
+    package Encode::utf8;
+    use parent 'Encode::Encoding';
+    my %obj = (
+        'utf8'         => { Name => 'utf8' },
+        'utf-8-strict' => { Name => 'utf-8-strict', strict_utf8 => 1 }
+    );
+    for ( keys %obj ) {
+        bless $obj{$_} => __PACKAGE__;
+        Encode::define_encoding( $obj{$_} => $_ );
+    }
+    sub cat_decode {
+        # ($obj, $dst, $src, $pos, $trm, $chk)
+        # currently ignores $chk
+        my ( undef, undef, undef, $pos, $trm ) = @_;
+        my ( $rdst, $rsrc, $rpos ) = \@_[ 1, 2, 3 ];
+        use bytes;
+        if ( ( my $npos = index( $$rsrc, $trm, $pos ) ) >= 0 ) {
+            $$rdst .=
+              substr( $$rsrc, $pos, $npos - $pos + length($trm) );
+            $$rpos = $npos + length($trm);
+            return 1;
+        }
+        $$rdst .= substr( $$rsrc, $pos );
+        $$rpos = length($$rsrc);
+        return '';
     }
 }
 
@@ -516,13 +486,15 @@ ISO-8859-1, also known as Latin1:
 
   $octets = encode("iso-8859-1", $string);
 
-B<CAVEAT>: When you run C<$octets = encode("utf8", $string)>, then
+B<CAVEAT>: When you run C<$octets = encode("UTF-8", $string)>, then
 $octets I<might not be equal to> $string.  Though both contain the
 same data, the UTF8 flag for $octets is I<always> off.  When you
 encode anything, the UTF8 flag on the result is always off, even when it
-contains a completely valid utf8 string. See L</"The UTF8 flag"> below.
+contains a completely valid UTF-8 string. See L</"The UTF8 flag"> below.
 
 If the $string is C<undef>, then C<undef> is returned.
+
+C<str2bytes> may be used as an alias for C<encode>.
 
 =head3 decode
 
@@ -544,12 +516,14 @@ internal format:
 
   $string = decode("iso-8859-1", $octets);
 
-B<CAVEAT>: When you run C<$string = decode("utf8", $octets)>, then $string
+B<CAVEAT>: When you run C<$string = decode("UTF-8", $octets)>, then $string
 I<might not be equal to> $octets.  Though both contain the same data, the
 UTF8 flag for $string is on.  See L</"The UTF8 flag">
 below.
 
 If the $string is C<undef>, then C<undef> is returned.
+
+C<bytes2str> may be used as an alias for C<decode>.
 
 =head3 find_encoding
 
@@ -559,11 +533,11 @@ Returns the I<encoding object> corresponding to I<ENCODING>.  Returns
 C<undef> if no matching I<ENCODING> is find.  The returned object is
 what does the actual encoding or decoding.
 
-  $utf8 = decode($name, $bytes);
+  $string = decode($name, $bytes);
 
 is in fact
 
-    $utf8 = do {
+    $string = do {
         $obj = find_encoding($name);
         croak qq(encoding "$name" not found) unless ref $obj;
         $obj->decode($bytes);
@@ -575,8 +549,8 @@ You can therefore save time by reusing this object as follows;
 
     my $enc = find_encoding("iso-8859-1");
     while(<>) {
-        my $utf8 = $enc->decode($_);
-        ... # now do something with $utf8;
+        my $string = $enc->decode($_);
+        ... # now do something with $string;
     }
 
 Besides L</decode> and L</encode>, other methods are
@@ -624,13 +598,13 @@ and C<undef> on error.
 
 B<CAVEAT>: The following operations may look the same, but are not:
 
-  from_to($data, "iso-8859-1", "utf8"); #1
+  from_to($data, "iso-8859-1", "UTF-8"); #1
   $data = decode("iso-8859-1", $data);  #2
 
 Both #1 and #2 make $data consist of a completely valid UTF-8 string,
 but only #2 turns the UTF8 flag on.  #1 is equivalent to:
 
-  $data = encode("utf8", decode("iso-8859-1", $data));
+  $data = encode("UTF-8", decode("iso-8859-1", $data));
 
 See L</"The UTF8 flag"> below.
 
@@ -655,7 +629,11 @@ followed by C<encode> as follows:
 Equivalent to C<$octets = encode("utf8", $string)>.  The characters in
 $string are encoded in Perl's internal format, and the result is returned
 as a sequence of octets.  Because all possible characters in Perl have a
-(loose, not strict) UTF-8 representation, this function cannot fail.
+(loose, not strict) utf8 representation, this function cannot fail.
+
+B<WARNING>: do not use this function for data exchange as it can produce
+not strict utf8 $octets! For strictly valid UTF-8 output use
+C<$octets = encode("UTF-8", $string)>.
 
 =head3 decode_utf8
 
@@ -663,10 +641,14 @@ as a sequence of octets.  Because all possible characters in Perl have a
 
 Equivalent to C<$string = decode("utf8", $octets [, CHECK])>.
 The sequence of octets represented by $octets is decoded
-from UTF-8 into a sequence of logical characters.
-Because not all sequences of octets are valid UTF-8,
+from (loose, not strict) utf8 into a sequence of logical characters.
+Because not all sequences of octets are valid not strict utf8,
 it is quite possible for this function to fail.
 For CHECK, see L</"Handling Malformed Data">.
+
+B<WARNING>: do not use this function for data exchange as it can produce
+$string with not strict utf8 representation! For strictly valid UTF-8
+$string representation use C<$string = decode("UTF-8", $octets [, CHECK])>.
 
 B<CAVEAT>: the input I<$octets> might be modified in-place depending on
 what is set in CHECK. See L</LEAVE_SRC> if you want your inputs to be
@@ -903,15 +885,14 @@ octets that represent the fallback character.  For instance:
 
 Acts like C<FB_PERLQQ> but U+I<XXXX> is used instead of C<\x{I<XXXX>}>.
 
-Even the fallback for C<decode> must return octets, which are
-then decoded with the character encoding that C<decode> accepts. So for
+Fallback for C<decode> must return decoded string (sequence of characters)
+and takes a list of ordinal values as its arguments. So for
 example if you wish to decode octets as UTF-8, and use ISO-8859-15 as
 a fallback for bytes that are not valid UTF-8, you could write
 
     $str = decode 'UTF-8', $octets, sub {
-        my $tmp = chr shift;
-        from_to $tmp, 'ISO-8859-15', 'UTF-8';
-        return $tmp;
+        my $tmp = join '', map chr, @_;
+        return decode 'ISO-8859-15', $tmp;
     };
 
 =head1 Defining Encodings
@@ -980,9 +961,9 @@ When you I<encode>, the resulting UTF8 flag is always B<off>.
 
 When you I<decode>, the resulting UTF8 flag is B<on>--I<unless> you can
 unambiguously represent data.  Here is what we mean by "unambiguously".
-After C<$utf8 = decode("foo", $octet)>,
+After C<$str = decode("foo", $octet)>,
 
-  When $octet is...   The UTF8 flag in $utf8 is
+  When $octet is...    The UTF8 flag in $str is
   ---------------------------------------------
   In ASCII only (or EBCDIC only)            OFF
   In ISO-8859-1                              ON

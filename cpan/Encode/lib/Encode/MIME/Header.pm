@@ -2,7 +2,7 @@ package Encode::MIME::Header;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = ( q$Revision: 2.24 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.27 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Carp ();
 use Encode ();
@@ -16,23 +16,27 @@ my %seed = (
     bpl      => 75,      # bytes per line
 );
 
-$Encode::Encoding{'MIME-Header'} = bless {
+my @objs;
+
+push @objs, bless {
     %seed,
     Name     => 'MIME-Header',
 } => __PACKAGE__;
 
-$Encode::Encoding{'MIME-B'} = bless {
+push @objs, bless {
     %seed,
     decode_q => 0,
     Name     => 'MIME-B',
 } => __PACKAGE__;
 
-$Encode::Encoding{'MIME-Q'} = bless {
+push @objs, bless {
     %seed,
     decode_b => 0,
     encode   => 'Q',
     Name     => 'MIME-Q',
 } => __PACKAGE__;
+
+Encode::define_encoding($_, $_->{Name}) foreach @objs;
 
 use parent qw(Encode::Encoding);
 
@@ -52,7 +56,7 @@ my $re_capture_encoded_word_split = qr/=\?($re_charset)((?:\*$re_language)?)\?($
 my $re_encoding_strict_b = qr/[Bb]/;
 my $re_encoding_strict_q = qr/[Qq]/;
 my $re_encoded_text_strict_b = qr/[0-9A-Za-z\+\/]*={0,2}/;
-my $re_encoded_text_strict_q = qr/(?:[^\?\s=]|=[0-9A-Fa-f]{2})*/;
+my $re_encoded_text_strict_q = qr/(?:[\x21-\x3C\x3E\x40-\x7E]|=[0-9A-Fa-f]{2})*/; # NOTE: first part are printable US-ASCII except ?, =, SPACE and TAB
 my $re_encoded_word_strict = qr/=\?$re_charset(?:\*$re_language)?\?(?:$re_encoding_strict_b\?$re_encoded_text_strict_b|$re_encoding_strict_q\?$re_encoded_text_strict_q)\?=/;
 my $re_capture_encoded_word_strict = qr/=\?($re_charset)((?:\*$re_language)?)\?($re_encoding_strict_b\?$re_encoded_text_strict_b|$re_encoding_strict_q\?$re_encoded_text_strict_q)\?=/;
 
@@ -74,6 +78,7 @@ our $STRICT_DECODE = 0;
 
 sub decode($$;$) {
     my ($obj, $str, $chk) = @_;
+    return undef unless defined $str;
 
     my $re_match_decode = $STRICT_DECODE ? $re_match_strict : $re_match;
     my $re_capture_decode = $STRICT_DECODE ? $re_capture_strict : $re_capture;
@@ -194,7 +199,6 @@ sub _decode_q {
 sub _decode_octets {
     my ($enc, $octets, $chk) = @_;
     $chk &= ~Encode::LEAVE_SRC if not ref $chk and $chk;
-    local $Carp::CarpLevel = $Carp::CarpLevel + 1; # propagate Carp messages back to caller
     my $output = $enc->decode($octets, $chk);
     return undef if not ref $chk and $chk and $octets ne '';
     return $output;
@@ -202,6 +206,7 @@ sub _decode_octets {
 
 sub encode($$;$) {
     my ($obj, $str, $chk) = @_;
+    return undef unless defined $str;
     my $output = $obj->_fold_line($obj->_encode_string($str, $chk));
     $_[1] = $str if not ref $chk and $chk and !($chk & Encode::LEAVE_SRC);
     return $output . substr($str, 0, 0); # to propagate taintedness
@@ -237,11 +242,7 @@ sub _encode_string {
     my @result = ();
     my $octets = '';
     while ( length( my $chr = substr($str, 0, 1, '') ) ) {
-        my $seq;
-        {
-            local $Carp::CarpLevel = $Carp::CarpLevel + 1; # propagate Carp messages back to caller
-            $seq = $enc->encode($chr, $enc_chk);
-        }
+        my $seq = $enc->encode($chr, $enc_chk);
         if ( not length($seq) ) {
             substr($str, 0, 0, $chr);
             last;

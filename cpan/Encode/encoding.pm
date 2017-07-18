@@ -1,15 +1,16 @@
-# $Id: encoding.pm,v 2.19 2016/11/01 13:30:38 dankogai Exp $
+# $Id: encoding.pm,v 2.20 2017/06/10 17:23:50 dankogai Exp $
 package encoding;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.19 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.20 $ =~ /(\d+)/g;
 
 use Encode;
 use strict;
 use warnings;
+use Config;
 
 use constant {
     DEBUG => !!$ENV{PERL_ENCODE_DEBUG},
     HAS_PERLIO => eval { require PerlIO::encoding; PerlIO::encoding->VERSION(0.02) },
-    PERL_5_21_7 => $^V && $^V ge v5.21.7,
+    PERL_5_21_7 => $^V && $^V ge v5.21.7, # lexically scoped
 };
 
 sub _exception {
@@ -115,7 +116,8 @@ sub import {
     }
 
     my $deprecate =
-        $] >= 5.017 ? "Use of the encoding pragma is deprecated" : 0;
+        ($] >= 5.017 and !$Config{usecperl})
+        ? "Use of the encoding pragma is deprecated" : 0;
 
     my $class = shift;
     my $name  = shift;
@@ -132,6 +134,7 @@ sub import {
         return;
     }
     $name = _get_locale_encoding() if $name eq ':locale';
+    BEGIN { strict->unimport('hashpairs') if $] >= 5.027 and $^V =~ /c$/; }
     my %arg = @_;
     $name = $ENV{PERL_ENCODING} unless defined $name;
     my $enc = find_encoding($name);
@@ -141,9 +144,9 @@ sub import {
     }
     $name = $enc->name;    # canonize
     unless ( $arg{Filter} ) {
-        if ($] >= 5.025003) {
+        if ($] >= 5.025003 and !$Config{usecperl}) {
             require Carp;
-            Carp::croak("The encoding pragma is no longer supported");
+            Carp::croak("The encoding pragma is no longer supported. Check cperl");
         }
         warnings::warnif("deprecated",$deprecate) if $deprecate;
 
@@ -186,8 +189,8 @@ sub import {
                     $status;
                 }
             );
-        };
-        $@ eq '' and DEBUG and warn "Filter installed";
+            1;
+        } and DEBUG and warn "Filter installed";
     }
     defined ${^UNICODE} and ${^UNICODE} != 0 and return 1;
     for my $h (qw(STDIN STDOUT)) {
@@ -368,7 +371,7 @@ Note that C<STDERR> WILL NOT be changed, regardless.
 Also note that non-STD file handles remain unaffected.  Use C<use
 open> or C<binmode> to change the layers of those.
 
-=item C<use encoding I<ENCNAME> Filter=E<gt>1;>
+=item C<use encoding I<ENCNAME>, Filter=E<gt>1;>
 
 This operates as above, but the C<Filter> argument with a non-zero
 value causes the entire script, and not just literals, to be translated from

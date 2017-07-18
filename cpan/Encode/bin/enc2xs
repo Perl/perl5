@@ -11,7 +11,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -1038,8 +1038,7 @@ sub find_e2x{
 
 sub make_makefile_pl
 {
-    eval { require Encode; };
-    $@ and die "You need to install Encode to use enc2xs -M\nerror: $@\n";
+    eval { require Encode } or die "You need to install Encode to use enc2xs -M\nerror: $@\n";
     # our used for variable expansion
     $_Enc2xs = $0;
     $_Version = $VERSION;
@@ -1063,8 +1062,7 @@ use vars qw(
         );
 
 sub make_configlocal_pm {
-    eval { require Encode; };
-    $@ and die "Unable to require Encode: $@\n";
+    eval { require Encode } or die "Unable to require Encode: $@\n";
     eval { require File::Spec; };
 
     # our used for variable expantion
@@ -1084,8 +1082,7 @@ sub make_configlocal_pm {
 	$mod =~ s/.*\bEncode\b/Encode/o;
 	$mod =~ s/\.pm\z//o;
 	$mod =~ s,/,::,og;
-	eval qq{ require $mod; };
-        return if $@;
+	eval qq{ require $mod; } or return;
         warn qq{ require $mod;\n};
 	for my $enc ( Encode->encodings() ) {
 	    no warnings;
@@ -1119,8 +1116,7 @@ sub _mkversion{
 }
 
 sub _print_expand{
-    eval { require File::Basename; };
-    $@ and die "File::Basename needed.  Are you on miniperl?;\nerror: $@\n";
+    eval { require File::Basename } or die "File::Basename needed.  Are you on miniperl?;\nerror: $@\n";
     File::Basename->import();
     my ($src, $dst, $clobber) = @_;
     if (!$clobber and -e $dst){

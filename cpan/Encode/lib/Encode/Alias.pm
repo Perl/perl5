@@ -1,8 +1,7 @@
 package Encode::Alias;
 use strict;
 use warnings;
-no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.21 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.23 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 use Exporter 'import';
@@ -19,7 +18,6 @@ our @Alias;    # ordered matching list
 our %Alias;    # cached known aliases
 
 sub find_alias {
-    require Encode;
     my $class = shift;
     my $find  = shift;
     unless ( exists $Alias{$find} ) {
@@ -109,6 +107,9 @@ sub define_alias {
     }
 }
 
+# HACK: Encode must be used after define_alias is declarated as Encode calls define_alias
+use Encode ();
+
 # Allow latin-1 style names as well
 # 0  1  2  3  4  5   6   7   8   9  10
 our @Latin2iso = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
@@ -134,7 +135,6 @@ sub undef_aliases {
 }
 
 sub init_aliases {
-    require Encode;
     undef_aliases();
 
     # Try all-lower-case version should all else fails
