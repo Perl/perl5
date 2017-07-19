@@ -995,14 +995,20 @@ Perl_hv_pushkv(pTHX_ HV *hv)
         }
     }
     else {
-        SSize_t extend_size;
-        /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
-        assert(HvUSEDKEYS(hv) <= (SSize_t_MAX >> 1));
-        extend_size = (SSize_t)HvUSEDKEYS(hv) * 2;
-        EXTEND(SP, extend_size);
+        Size_t nkeys = HvUSEDKEYS(hv);
+        SSize_t nkv;
+        /* 2*nkeys() should never be big enough to truncate or wrap */
+        assert(nkeys <= (SSize_t_MAX >> 1));
+        nkv = nkeys * 2;
+
+        EXTEND_MORTAL(nkeys);
+        EXTEND(SP, nkv);
 
         while ((entry = hv_iternext(hv))) {
-            PUSHs(hv_iterkeysv(entry));
+            SV *keysv = newSVhek(HeKEY_hek(entry));
+            SvTEMP_on(keysv);
+            PL_tmps_stack[++PL_tmps_ix] = keysv;
+            PUSHs(keysv);
             PUSHs(HeVAL(entry));
         }
     }
