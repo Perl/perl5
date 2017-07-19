@@ -1605,7 +1605,7 @@
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #      if defined(WIN32)
-#define my_setlocale(a,b)	S_my_setlocale(aTHX_ a,b)
+#define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #      endif
 #    endif
 #  endif

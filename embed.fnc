@@ -2738,7 +2738,7 @@ s	|void	|new_collate	|NULLOK const char* newcoll
 s	|void	|new_ctype	|NN const char* newctype
 s	|void	|set_numeric_radix|const bool use_locale
 #    ifdef WIN32
-s	|char*	|my_setlocale	|int category|NULLOK const char* locale
+s	|char*	|win32_setlocale|int category|NULLOK const char* locale
 #    endif
 #    ifdef DEBUGGING
 s	|void	|print_collxfrm_input_and_return		\

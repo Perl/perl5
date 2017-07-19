@@ -742,8 +742,10 @@ S_new_collate(pTHX_ const char *newcoll)
 
 #else   /* WIN32 */
 
+#define my_setlocale(a,b) win32_setlocale(a,b)
+
 STATIC char *
-S_my_setlocale(pTHX_ int category, const char* locale)
+S_win32_setlocale(pTHX_ int category, const char* locale)
 {
     /* This, for Windows, emulates POSIX setlocale() behavior.  There is no
      * difference between the two unless the input locale is "", which normally
