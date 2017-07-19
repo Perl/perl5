@@ -1048,26 +1048,11 @@ PP(pp_padav)
 
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-        /* XXX see also S_pushav in pp_hot.c */
-	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
-	EXTEND(SP, maxarg);
-	if (SvRMAGICAL(TARG)) {
-	    SSize_t i;
-	    for (i=0; i < maxarg; i++) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(TARG), i, FALSE);
-		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
-	    }
-	}
-	else {
-	    SSize_t i;
-	    for (i=0; i < maxarg; i++) {
-		SV * const sv = AvARRAY((const AV *)TARG)[i];
-		SP[i+1] = sv ? sv : &PL_sv_undef;
-	    }
-	}
-	SP += maxarg;
+        S_pushav(aTHX_ (AV*)TARG);
+        return NORMAL;
     }
-    else if (gimme == G_SCALAR) {
+
+    if (gimme == G_SCALAR) {
 	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
         if (!maxarg)
             PUSHs(&PL_sv_zero);
