@@ -1517,3 +1517,36 @@ print "$h{x}\n";
 EXPECT
 foo
 bar
+########
+# keys(%tied) in bool context without SCALAR present
+my ($f,$n) = (0,0);
+my %inner = (a =>1, b => 2, c => 3);
+sub TIEHASH  { bless \%inner, $_[0] }
+sub FIRSTKEY { $f++; my $a = scalar keys %{$_[0]}; each %{$_[0]} }
+sub NEXTKEY  { $n++; each %{$_[0]} }
+tie %h, 'main';
+my $x = !keys %h;
+print "[$x][$f][$n]\n";
+%inner = ();
+$x = !keys %h;
+print "[$x][$f][$n]\n";
+EXPECT
+[][1][0]
+[1][2][0]
+########
+# keys(%tied) in bool context with SCALAR present
+my ($f,$n, $s) = (0,0,0);
+my %inner = (a =>1, b => 2, c => 3);
+sub TIEHASH  { bless \%inner, $_[0] }
+sub FIRSTKEY { $f++; my $a = scalar keys %{$_[0]}; each %{$_[0]} }
+sub NEXTKEY  { $n++; each %{$_[0]} }
+sub SCALAR   { $s++; scalar %{$_[0]} }
+tie %h, 'main';
+my $x = !keys %h;
+print "[$x][$f][$n][$s]\n";
+%inner = ();
+$x = !keys %h;
+print "[$x][$f][$n][$s]\n";
+EXPECT
+[][0][0][1]
+[1][0][0][2]

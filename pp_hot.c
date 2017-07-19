@@ -993,9 +993,12 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
 	     && block_gimme() == G_VOID)
           )
-	  && !tied
-    )
-	PUSHs(HvUSEDKEYS(hv) ? &PL_sv_yes : &PL_sv_zero);
+    ) {
+        if (tied)
+            PUSHs(Perl_hv_scalar(aTHX_ hv));
+        else
+            PUSHs(HvUSEDKEYS(hv) ? &PL_sv_yes : &PL_sv_zero);
+    }
     else if (gimme == G_SCALAR) {
         if (is_keys) {
             IV i;
