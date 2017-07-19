@@ -473,8 +473,11 @@ standardisation organisations are recognised; for a more detailed
 list see L<Encode::Supported>.
 
 C<read()> reads characters and returns the number of characters.
-C<seek()> and C<tell()> operate on byte counts, as do C<sysread()>
-and C<sysseek()>.
+C<seek()> and C<tell()> operate on byte counts, as does C<sysseek()>.
+
+C<sysread()> and C<syswrite()> should not be used on file handles with
+character encoding layers, they behave badly, and that behaviour has
+been deprecated since perl 5.24.
 
 Notice that because of the default behaviour of not doing any
 conversion upon input if there is no default layer,
