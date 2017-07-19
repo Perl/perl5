@@ -320,10 +320,7 @@ PP(pp_concat)
   }
 }
 
-/* push the elements of av onto the stack.
- * XXX Note that padav has similar code but without the mg_get().
- * I suspect that the mg_get is no longer needed, but while padav
- * differs, it can't share this function */
+/* push the elements of av onto the stack */
 
 STATIC void
 S_pushav(pTHX_ AV* const av)
@@ -335,10 +332,7 @@ S_pushav(pTHX_ AV* const av)
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV ** const svp = av_fetch(av, i, FALSE);
-            /* See note in pp_helem, and bug id #27839 */
-            SP[i+1] = svp
-                ? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
-                : &PL_sv_undef;
+            SP[i+1] = svp ? *svp : &PL_sv_undef;
         }
     }
     else {
@@ -1057,7 +1051,7 @@ PP(pp_padav)
         /* XXX see also S_pushav in pp_hot.c */
 	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	EXTEND(SP, maxarg);
-	if (SvMAGICAL(TARG)) {
+	if (SvRMAGICAL(TARG)) {
 	    SSize_t i;
 	    for (i=0; i < maxarg; i++) {
 		SV * const * const svp = av_fetch(MUTABLE_AV(TARG), i, FALSE);
