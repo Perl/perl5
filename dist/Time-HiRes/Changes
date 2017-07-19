@@ -3,6 +3,7 @@ Revision history for the Perl extension Time::HiRes.
 1.9743
   - correct declared minimum Perl version (should be 5.6, was declared
     as 5.8 since 1.9727_03)
+  - fix the fix for 'do file' to load hints in Makefile.PL
 
 1.9742 [2017-04-16]
   - prefer 3-argument open: blead 1ae6ead9
