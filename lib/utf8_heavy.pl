@@ -44,6 +44,12 @@ sub _loose_name ($) {
     # progress, pushed upon entry, popped upon return.
     my @recursed;
 
+    sub reset_swash {
+        undef $min_floating_slop;
+        @recursed = ();
+        %Cache = ();
+    }
+
     sub SWASHNEW {
         my ($class, $type, $list, $minbits, $none) = @_;
         my $user_defined = 0;
