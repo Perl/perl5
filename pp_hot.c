@@ -320,9 +320,10 @@ PP(pp_concat)
   }
 }
 
-/* push the elements of av onto the stack */
+/* push the elements of av onto the stack.
+ * Returns PL_op->op_next to allow tail-call optimisation of its callers */
 
-STATIC void
+STATIC OP*
 S_pushav(pTHX_ AV* const av)
 {
     dSP;
@@ -344,6 +345,7 @@ S_pushav(pTHX_ AV* const av)
     }
     SP += maxarg;
     PUTBACK;
+    return NORMAL;
 }
 
 
@@ -357,7 +359,7 @@ PP(pp_padrange)
     if (PL_op->op_flags & OPf_SPECIAL) {
         /* fake the RHS of my ($x,$y,..) = @_ */
         PUSHMARK(SP);
-        S_pushav(aTHX_ GvAVn(PL_defgv));
+        (void)S_pushav(aTHX_ GvAVn(PL_defgv));
         SPAGAIN;
     }
 
@@ -1047,10 +1049,8 @@ PP(pp_padav)
     }
 
     gimme = GIMME_V;
-    if (gimme == G_ARRAY) {
-        S_pushav(aTHX_ (AV*)TARG);
-        return NORMAL;
-    }
+    if (gimme == G_ARRAY)
+        return S_pushav(aTHX_ (AV*)TARG);
 
     if (gimme == G_SCALAR) {
 	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
@@ -1158,14 +1158,14 @@ PP(pp_rv2av)
 
     if (is_pp_rv2av) {
 	AV *const av = MUTABLE_AV(sv);
-	/* The guts of pp_rv2av  */
+
 	if (gimme == G_ARRAY) {
             SP--;
             PUTBACK;
-            S_pushav(aTHX_ av);
-            SPAGAIN;
+            return S_pushav(aTHX_ av);
 	}
-	else if (gimme == G_SCALAR) {
+
+	if (gimme == G_SCALAR) {
 	    const SSize_t maxarg = AvFILL(av) + 1;
             if (PL_op->op_private & OPpTRUEBOOL)
                 SETs(maxarg ? &PL_sv_yes : &PL_sv_zero);
