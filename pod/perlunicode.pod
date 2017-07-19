@@ -233,7 +233,7 @@ Unicode:
 Within the scope of S<C<use utf8>>
 
 If the whole program is Unicode (signified by using 8-bit B<U>nicode
-B<T>ransformation B<F>ormat), then all strings within it must be
+B<T>ransformation B<F>ormat), then all literal strings within it must be
 Unicode.
 
 =item *
