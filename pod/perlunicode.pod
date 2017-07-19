@@ -60,10 +60,11 @@ filenames.
 Use the C<:encoding(...)> layer  to read from and write to
 filehandles using the specified encoding.  (See L<open>.)
 
-=item You should convert your non-ASCII, non-UTF-8 Perl scripts to be
+=item You must convert your non-ASCII, non-UTF-8 Perl scripts to be
 UTF-8.
 
-See L<encoding>.
+The L<encoding> module has been deprecated since perl 5.18 and the
+perl internals it requires have been removed with perl 5.26.
 
 =item C<use utf8> still needed to enable L<UTF-8|/Unicode Encodings> in scripts
 
