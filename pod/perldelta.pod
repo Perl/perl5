@@ -128,7 +128,7 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280226.
+L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280227.
 
 =back
 

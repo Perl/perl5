@@ -35,11 +35,11 @@ ok( $b, "got CBuilder object" ) or diag $@;
     #    'Can't exec "djaadjfkadjkfajdf"'
     # or similar on STDERR; so make sure fd2 is temporarily closed before
     # the fork
-    open(my $orig_err, ">&", \*STDERR) or die "Can't dup STDERR: $!";
+    open(OLDERR, ">&STDERR") or die "Can't dup STDERR: $!";
     close(STDERR);
     my $res = $b1->have_compiler;
-    open(STDERR, ">&", $orig_err) or die "Can't dup \$orig_err $!";
-    close($orig_err);
+    open(STDERR, ">&OLDERR") or die "Can't restore STDERR: $!";
+    close(OLDERR);
 
     is($res, 0, "have_compiler: fake missing cc" );
 }
@@ -47,11 +47,11 @@ ok( $b, "got CBuilder object" ) or diag $@;
     my $b2 = ExtUtils::CBuilder->new(quiet => 1);
     configure_fake_missing_compilers($b2);
 
-    open(my $orig_err, ">&", \*STDERR) or die "Can't dup STDERR: $!";
+    open(OLDERR, ">&STDERR") or die "Can't dup STDERR: $!";
     close(STDERR);
     my $res = $b2->have_cplusplus;
-    open(STDERR, ">&", $orig_err) or die "Can't dup \$orig_err $!";
-    close($orig_err);
+    open(STDERR, ">&OLDERR") or die "Can't restore STDERR: $!";
+    close(OLDERR);
 
     is($res, 0, "have_cplusplus: fake missing c++" );
 }
