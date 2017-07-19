@@ -973,9 +973,12 @@ PP(pp_print)
 PERL_STATIC_INLINE OP*
 S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 {
-    bool tied;
+    bool is_tied;
+    bool is_bool;
     MAGIC *mg;
     dSP;
+    IV  i;
+    SV *sv;
 
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
@@ -988,40 +991,38 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         /* 'keys %h' masquerading as '%h': reset iterator */
         (void)hv_iterinit(hv);
 
-    tied = SvRMAGICAL(hv) && (mg = mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied));
+    is_bool = (     PL_op->op_private & OPpTRUEBOOL
+              || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
+                  && block_gimme() == G_VOID));
+    is_tied = SvRMAGICAL(hv) && (mg = mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied));
 
-    if (  (  PL_op->op_private & OPpTRUEBOOL
-	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-	     && block_gimme() == G_VOID)
-          )
-    ) {
-        if (tied)
-            PUSHs(magic_scalarpack(hv, mg));
-        else
-            PUSHs(HvUSEDKEYS(hv) ? &PL_sv_yes : &PL_sv_zero);
+    if (UNLIKELY(is_tied)) {
+        if (is_keys && !is_bool) {
+            i = 0;
+            while (hv_iternext(hv))
+                i++;
+            goto push_i;
+        }
+        else {
+            sv = magic_scalarpack(hv, mg);
+            goto push_sv;
+        }
     }
-    else if (gimme == G_SCALAR) {
-        if (is_keys) {
-            IV i;
-            if (tied) {
-                i = 0;
-                while (hv_iternext(hv))
-                    i++;
-            }
-            else
-                i = HvUSEDKEYS(hv);
+    else {
+        i = HvUSEDKEYS(hv);
+        if (is_bool) {
+            sv = i ? &PL_sv_yes : &PL_sv_zero;
+          push_sv:
+            PUSHs(sv);
+        }
+        else {
+          push_i:
             if (has_targ) {
                 dTARGET;
                 PUSHi(i);
             }
             else
                 mPUSHi(i);
-        }
-        else {
-            if (tied)
-                PUSHs(magic_scalarpack(hv, mg));
-            else
-                mPUSHi(HvUSEDKEYS(hv));
         }
     }
 
