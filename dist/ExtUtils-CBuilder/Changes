@@ -1,5 +1,11 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280228 - 2017-07-20
+
+  Fixed:
+
+  - Fix link() on Windows, broken in version 0.280226.
+
 0.280227 - 2017-07-19
 
   Fixed:

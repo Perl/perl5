@@ -136,7 +136,7 @@ L<Cwd> has been upgraded from version 3.67 to 3.68.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280227.
+L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280228.
 
 =item *
 
