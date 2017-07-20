@@ -359,19 +359,27 @@ be included.
 Historically, only the pumpking cherry-picked changes from bleadperl
 into maintperl.  This has scaling problems.  At the same time,
 maintenance branches of stable versions of Perl need to be treated with
-great care. To that end, as of Perl 5.12, we have a new process for
+great care.  To that end, as of Perl 5.12, we have a new process for
 maint branches.
 
-Any committer may cherry-pick any commit from blead to a maint branch if
-they send mail to perl5-porters announcing their intent to cherry-pick
-a specific commit along with a rationale for doing so and at least two
-other committers respond to the list giving their assent. (This policy
-applies to current and former pumpkings, as well as other committers.)
+Any committer may cherry-pick any commit from blead to a maint branch by
+first adding an entry to the relevant voting file in the maint-votes branch
+announcing the commit as a candidate for back-porting, and then waiting for
+at least two other committers to add their votes in support of this (i.e. a
+total of at least three votes is required before a commit may be back-ported).
 
-Other voting mechanisms may be used instead, as long as the same number of
-votes is gathered in a transparent manner.  Specifically, proposals of
-which changes to cherry-pick must be visible to everyone on perl5-porters
-so that the views of everyone interested may be heard.
+Most of the work involved in both rounding up a suitable set of candidate
+commits and cherry-picking those for which three votes have been cast will
+be done by the maint branch release manager, but anyone else is free to add
+other proposals if they're keen to ensure certain fixes don't get overlooked
+or fear they already have been.
+
+Other voting mechanisms may also be used instead (e.g. sending mail to
+perl5-porters and at least two other committers responding to the list
+giving their assent), as long as the same number of votes is gathered in a
+transparent manner.  Specifically, proposals of which changes to cherry-pick
+must be visible to everyone on perl5-porters so that the views of everyone
+interested may be heard.
 
 It is not necessary for voting to be held on cherry-picking perldelta
 entries associated with changes that have already been cherry-picked, nor
