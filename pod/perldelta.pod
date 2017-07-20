@@ -128,6 +128,10 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =item *
 
+L<Cwd> has been upgraded from version 3.67 to 3.68.
+
+=item *
+
 L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280227.
 
 =item *
