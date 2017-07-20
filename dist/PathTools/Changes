@@ -1,5 +1,9 @@
 Revision history for Perl distribution PathTools.
 
+3.68
+- avoid warning from pre-5.8 code for detecting tainted values
+- make taint.t detect that a pre-5.8 Perl supports tainting
+
 3.67 - Mon Feb 27 09:33:04 EST 2017
 - Add security usage note to File::Spec::no_upwards
 

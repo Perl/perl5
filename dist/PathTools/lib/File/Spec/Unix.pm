@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.67';
+$VERSION = '3.68';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -185,7 +185,8 @@ sub _tmpdir {
 	@dirlist = grep { ! Scalar::Util::tainted($_) } @dirlist;
     }
     elsif ($] < 5.007) { # No ${^TAINT} before 5.8
-	@dirlist = grep { eval { eval('1'.substr $_,0,0) } } @dirlist;
+	@dirlist = grep { !defined($_) || eval { eval('1'.substr $_,0,0) } }
+			@dirlist;
     }
     
     foreach (@dirlist) {
