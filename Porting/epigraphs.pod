@@ -17,6 +17,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.2 - Lev Grossman, Codex
+
+L<Announced on 2017-07-20 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2017/07/msg245585.html>
+
+  He went back for another stack of books: a three-volume English legal
+  treatise; a travel guide to Tuscany from the '20s crammed with faded
+  Italian wildflowers that fluttered out from between the pages like
+  moths; a French edition of Turgeniev so decayed that it came apart in
+  his hands; a register of London society from 1863. In a way it was
+  idiotic. He was treating these books like they were holy relics. It
+  wasn't like he would ever actually read them. But there was something
+  magnetic about them, something that compelled respect, even the silly
+  ones, like the Enlightenment treatise about how lightning was caused
+  by bees. They were information, data, but not in the form he was used
+  to dealing with it. They were non-digital, nonelectrical chunks of
+  memory, not stamped out of silicon but laboriously crafted out of wood
+  pulp and ink, leather and glue. Somebody had cared enough to write
+  these things; somebody else had cared enough to buy them, possibly
+  even read them, at the very least keep them safe for 150 years,
+  sometimes longer, when they could have vanished at the touch of a
+  spark. That made them worth something, didn't it, just by itself?
+  Though most of them would have bored him rigid the second he cracked
+  them open, which there wasn't much chance of. Maybe that was what he
+  found so appealing: the sight of so many books that he'd never have to
+  read, so much work he'd never have to do.
+
 =head2 v5.27.1 - Rona Munro, Doctor Who: Survival
 
 L<Announced on 2017-06-20 by Eric Herman|http://www.nntp.perl.org/group/perl.perl5.porters/2017/06/msg245055.html>
