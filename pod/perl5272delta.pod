@@ -1,0 +1,215 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5272delta - what is new for perl v5.27.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.27.1 release and the 5.27.2
+release.
+
+If you are upgrading from an earlier release such as 5.27.0, first read
+L<perl5271delta>, which describes differences between 5.27.0 and 5.27.1.
+
+=head1 Core Enhancements
+
+=head2 Unicode 10.0 is supported
+
+A list of changes is at
+L<http://www.unicode.org/versions/Unicode10.0.0>.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<arybase> has been upgraded from version 0.12 to 0.13.
+
+=item *
+
+L<Carp> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<Encode> has been upgraded from version 2.88 to 2.92.
+
+=item *
+
+L<encoding> has been upgraded from version 2.19 to 2.20.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280228.
+
+=item *
+
+L<feature> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.28 to 1.29.
+
+=item *
+
+L<File::Spec> and L<Cwd> have been upgraded from version 3.67 to 3.68.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.46_02 to 1.48.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2611 to 0.2613.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170621 to 5.20170720.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.27 to 0.29.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.76 to 1.77.
+
+=item *
+
+L<re> has been upgraded from version 0.34 to 0.35.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.46_02 to 1.48.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9741 to 1.9743.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.31 to 1.3201.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+List assignment (C<aassign>) could in some rare cases allocate an
+entry on the mortal stack and leave the entry uninitialized. [perl
+#131570]
+
+=item *
+
+Attempting to apply an attribute to an C<our> variable where a
+function of that name already exists could result in a NULL pointer
+being supplied where an SV was expected, crashing perl.  [perl
+#131597]
+
+=item *
+
+C<split ' '> now correctly handles the argument being split when in the
+scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature"
+>> feature. Previously, when a string using the single-byte internal
+representation contained characters that are whitespace by Unicode rules but
+not by ASCII rules, it treated those characters as part of fields rather
+than as field separators.  [perl #130907]
+
+=item *
+
+Several built-in functions previously had bugs that could cause them to
+write to the internal stack without allocating room for the item being
+written. In rare situations, this could have led to a crash. These bugs have
+now been fixed, and if any similar bugs are introduced in future, they will
+be detected automatically in debugging builds.
+
+=item *
+
+Using a symbolic ref with postderef syntax as the key in a hash lookup was
+yielding an assertion failure on debugging builds. [perl #131627]
+
+=item *
+
+Array and hash variables whose names begin with a caret now admit indexing
+inside their curlies when interpolated into strings, as in C<<
+"${^CAPTURE[0]}" >> to index C<@{^CAPTURE}>.  [perl #131664]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.27.2 represents approximately 4 weeks of development since Perl 5.27.1
+and contains approximately 26,000 lines of changes across 290 files from 18
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 9,700 lines of changes to 150 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.27.2:
+
+Aaron Crane, Alberto Simões, Chris 'BinGOs' Williams, Dagfinn Ilmari
+Mannsåker, David Mitchell, E. Choroba, Eric Herman, Father Chrysostomos, James
+E Keenan, Karl Williamson, Lukas Mai, Ricardo Signes, Sawyer X, Steve Hay, Tony
+Cook, Vitali Peil, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
