@@ -4633,7 +4633,7 @@ STATIC void	S_new_collate(pTHX_ const char* newcoll);
 STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
-STATIC void	S_set_numeric_radix(pTHX);
+STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
 	assert(locs)

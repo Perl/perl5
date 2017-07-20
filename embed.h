@@ -1602,7 +1602,7 @@
 #    if defined(USE_LOCALE)
 #define new_collate(a)		S_new_collate(aTHX_ a)
 #define new_ctype(a)		S_new_ctype(aTHX_ a)
-#define set_numeric_radix()	S_set_numeric_radix(aTHX)
+#define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #      if defined(WIN32)
 #define my_setlocale(a,b)	S_my_setlocale(aTHX_ a,b)

@@ -2736,7 +2736,7 @@ in	|const char *|save_to_buffer|NN const char * string	\
 s	|char*	|stdize_locale	|NN char* locs
 s	|void	|new_collate	|NULLOK const char* newcoll
 s	|void	|new_ctype	|NN const char* newctype
-s	|void	|set_numeric_radix
+s	|void	|set_numeric_radix|const bool use_locale
 #    ifdef WIN32
 s	|char*	|my_setlocale	|int category|NULLOK const char* locale
 #    endif
