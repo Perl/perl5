@@ -101,6 +101,12 @@ following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
 for important changes should then be added by hand.  In an ideal world,
 dual-life modules would have a F<Changes> file that could be cribbed.
 
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
 [ Within each section, list entries as an =item entry ]
 
 =head2 New Modules and Pragmata
