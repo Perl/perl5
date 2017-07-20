@@ -1,3 +1,17 @@
+version 1.43
+
+  * fix problems introduced by the partial EBCDIC support from version
+    1.35
+
+version 1.42
+
+  * add some doc clue about what cluck does
+
+  * avoid floating point overflow in test
+
+version 1.41
+
+  * add missing "<FH> chunk #" phrase to messages
 
 version 1.40; 2016-03-10
   * Get arg_string.t to compile in perl v5.6

@@ -87,7 +87,36 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.42';
+# is_safe_printable_codepoint() indicates whether a character, specified
+# by integer codepoint, is OK to output literally in a trace.  Generally
+# this is if it is a printable character in the ancestral character set
+# (ASCII or EBCDIC).  This is used on some Perls in situations where a
+# regexp can't be used.
+BEGIN {
+    *is_safe_printable_codepoint =
+	"$]" >= 5.007_003 ?
+	    eval(q(sub ($) {
+		my $u = utf8::native_to_unicode($_[0]);
+		$u >= 0x20 && $u <= 0x7e;
+	    }))
+	: ord("A") == 65 ?
+	    sub ($) { $_[0] >= 0x20 && $_[0] <= 0x7e }
+	:
+	    sub ($) {
+		# Early EBCDIC
+		# 3 EBCDIC code pages supported then;  all controls but one
+		# are the code points below SPACE.  The other one is 0x5F on
+		# POSIX-BC; FF on the other two.
+		# FIXME: there are plenty of unprintable codepoints other
+		# than those that this code and the comment above identifies
+		# as "controls".
+		$_[0] >= ord(" ") && $_[0] <= 0xff &&
+		    $_[0] != (ord ("^") == 106 ? 0x5f : 0xff);
+	    }
+	;
+}
+
+our $VERSION = '1.43';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
@@ -300,32 +329,15 @@ sub format_arg {
 		next;
 	    }
 	    my $o = ord($c);
-
-            # This code is repeated in Regexp::CARP_TRACE()
-            if ($] ge 5.007_003) {
-                substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-		  if utf8::native_to_unicode($o) < utf8::native_to_unicode(0x20)
-                  || utf8::native_to_unicode($o) > utf8::native_to_unicode(0x7e);
-            } elsif (ord("A") == 65) {
-                substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-                    if $o < 0x20 || $o > 0x7e;
-            } else { # Early EBCDIC
-
-                # 3 EBCDIC code pages supported then;  all controls but one
-                # are the code points below SPACE.  The other one is 0x5F on
-                # POSIX-BC; FF on the other two.
-                substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-                    if $o < ord(" ") || ((ord ("^") == 106)
-                                          ? $o == 0x5f
-                                          : $o == 0xff);
-            }
+	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
+		unless is_safe_printable_codepoint($o);
 	}
     } else {
 	$arg =~ s/([\"\\\$\@])/\\$1/g;
         # This is all the ASCII printables spelled-out.  It is portable to all
         # Perl versions and platforms (such as EBCDIC).  There are other more
         # compact ways to do this, but may not work everywhere every version.
-        $arg =~ s/([^ !"\$\%#'()*+,\-.\/0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]^_`abcdefghijklmnopqrstuvwxyz\{|}~])/sprintf("\\x{%x}",ord($1))/eg;
+        $arg =~ s/([^ !"#\$\%\&'()*+,\-.\/0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]^_`abcdefghijklmnopqrstuvwxyz\{|}~])/sprintf("\\x{%x}",ord($1))/eg;
     }
     downgrade($arg, 1);
     return "\"".$arg."\"".$suffix;
@@ -338,25 +350,12 @@ sub Regexp::CARP_TRACE {
 	for(my $i = length($arg); $i--; ) {
 	    my $o = ord(substr($arg, $i, 1));
 	    my $x = substr($arg, 0, 0);   # work around bug on Perl 5.8.{1,2}
-
-            # This code is repeated in format_arg()
-            if ($] ge 5.007_003) {
-                substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-		  if utf8::native_to_unicode($o) < utf8::native_to_unicode(0x20)
-                  || utf8::native_to_unicode($o) > utf8::native_to_unicode(0x7e);
-            } elsif (ord("A") == 65) {
-                substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-                    if $o < 0x20 || $o > 0x7e;
-            } else { # Early EBCDIC
-                substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-                    if $o < ord(" ") || ((ord ("^") == 106)
-                                          ? $o == 0x5f
-                                          : $o == 0xff);
-            }
+	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
+		unless is_safe_printable_codepoint($o);
 	}
     } else {
         # See comment in format_arg() about this same regex.
-        $arg =~ s/([^ !"\$\%#'()*+,\-.\/0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]^_`abcdefghijklmnopqrstuvwxyz\{|}~])/sprintf("\\x{%x}",ord($1))/eg;
+        $arg =~ s/([^ !"#\$\%\&'()*+,\-.\/0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]^_`abcdefghijklmnopqrstuvwxyz\{|}~])/sprintf("\\x{%x}",ord($1))/eg;
     }
     downgrade($arg, 1);
     my $suffix = "";
