@@ -139,6 +139,7 @@ my @tests = (
 ($] >= 5.008 ? (
 [ "Unix->canonpath(do { my \$x = '///a'.chr(0xaf); use utf8 (); utf8::upgrade(\$x); \$x })",   '/a'.chr(0xaf)   ],
 ) : ()),
+[ "Unix->canonpath(1)",                        '1'              ],
 
 [  "Unix->abs2rel('/t1/t2/t3','/t1/t2/t3')",          '.'                  ],
 [  "Unix->abs2rel('/t1/t2/t4','/t1/t2/t3')",          '../t4'              ],
