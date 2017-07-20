@@ -623,6 +623,7 @@ the strings?).
 
  Sawyer X  5.27.0       2017-May-31     The 5.27 development track
  Eric      5.27.1       2017-Jun-20
+ Aaron     5.27.2       2017-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
