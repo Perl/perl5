@@ -124,7 +124,7 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<arybase> has been upgraded from version 0.12 to 0.13.
 
 =item *
 
@@ -132,7 +132,11 @@ L<Carp> has been upgraded from version 1.42 to 1.43.
 
 =item *
 
-L<Cwd> has been upgraded from version 3.67 to 3.68.
+L<Encode> has been upgraded from version 2.88 to 2.92.
+
+=item *
+
+L<encoding> has been upgraded from version 2.19 to 2.20.
 
 =item *
 
@@ -140,17 +144,55 @@ L<ExtUtils::CBuilder> has been upgraded from version 0.280225 to 0.280228.
 
 =item *
 
-L<Time::HiRes> has been upgraded from version 1.9742 to 1.9743.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<feature> has been upgraded from version 1.48 to 1.49.
 
 =item *
 
-XXX
+L<File::Glob> has been upgraded from version 1.28 to 1.29.
+
+=item *
+
+L<File::Spec> and L<Cwd> have been upgraded from version 3.67 to 3.68.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.46_02 to 1.48.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2611 to 0.2613.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170621 to 5.20170720.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.27 to 0.29.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.76 to 1.77.
+
+=item *
+
+L<re> has been upgraded from version 0.34 to 0.35.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.46_02 to 1.48.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9741 to 1.9743.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.31 to 1.3201.
 
 =back
 
