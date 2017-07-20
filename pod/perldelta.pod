@@ -128,6 +128,10 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =item *
 
+L<Carp> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
 L<Cwd> has been upgraded from version 3.67 to 3.68.
 
 =item *
