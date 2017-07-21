@@ -6,6 +6,19 @@
 #  in the README file that comes with the distribution.
 #
 
+BEGIN {
+    # Do this as the very first thing, in order to avoid problems with the
+    # PADTMP flag on pre-5.19.3 threaded Perls.  On those Perls, compiling
+    # code that contains a constant-folded canonical truth value breaks
+    # the ability to take a reference to that canonical truth value later.
+    $::false = 0;
+    %::immortals = (
+	'u' => \undef,
+	'y' => \!$::false,
+	'n' => \!!$::false,
+    );
+}
+
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
@@ -19,12 +32,6 @@ sub BEGIN {
 use Test::More;
 
 use Storable qw(freeze thaw store retrieve);
-
-%::immortals
-  = (u => \undef,
-     'y' => \(1 == 1),
-     n => \(1 == 0)
-);
 
 {
     %::weird_refs = (
