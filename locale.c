@@ -2712,7 +2712,7 @@ S_print_collxfrm_input_and_return(pTHX_
     PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%" UVuf "]: returning ",
                                                         (UV)PL_collation_ix);
     if (xlen) {
-        PerlIO_printf(Perl_debug_log, "%" UVuf, (UV) *xlen);
+        PerlIO_printf(Perl_debug_log, "%zu", *xlen);
     }
     else {
         PerlIO_printf(Perl_debug_log, "NULL");
