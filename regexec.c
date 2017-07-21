@@ -707,7 +707,7 @@ Perl_re_intuit_start(pTHX_
 	goto fail;
     }
 
-    RX_MATCH_UTF8_set(rx,utf8_target);
+    RXp_MATCH_UTF8_set(prog, utf8_target);
     reginfo->is_utf8_target = cBOOL(utf8_target);
     reginfo->info_aux = NULL;
     reginfo->strbeg = strbeg;
@@ -841,7 +841,7 @@ Perl_re_intuit_start(pTHX_
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
 	Perl_croak(aTHX_ "panic: end_shift: %" IVdf " pattern:\n%s\n ",
-		   (IV)end_shift, RX_PRECOMP(prog));
+		   (IV)end_shift, RX_PRECOMP(rx));
 #endif
 
   restart:
@@ -2771,7 +2771,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             }
             else {
                 /* create new COW SV to share string */
-                RX_MATCH_COPY_FREE(rx);
+                RXp_MATCH_COPY_FREE(prog);
                 prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
             }
             prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
@@ -2834,7 +2834,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             assert(min >= 0 && min <= max && min <= strend - strbeg);
             sublen = max - min;
 
-            if (RX_MATCH_COPIED(rx)) {
+            if (RXp_MATCH_COPIED(prog)) {
                 if (sublen > prog->sublen)
                     prog->subbeg =
                             (char*)saferealloc(prog->subbeg, sublen+1);
@@ -2845,7 +2845,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             prog->subbeg[sublen] = '\0';
             prog->suboffset = min;
             prog->sublen = sublen;
-            RX_MATCH_COPIED_on(rx);
+            RXp_MATCH_COPIED_on(prog);
         }
         prog->subcoffset = prog->suboffset;
         if (prog->suboffset && utf8_target) {
@@ -2872,7 +2872,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         }
     }
     else {
-        RX_MATCH_COPY_FREE(rx);
+        RXp_MATCH_COPY_FREE(prog);
         prog->subbeg = strbeg;
         prog->suboffset = 0;
         prog->subcoffset = 0;
@@ -3029,7 +3029,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             /* match via INTUIT shouldn't have any captures.
              * Let @-, @+, $^N know */
             prog->lastparen = prog->lastcloseparen = 0;
-            RX_MATCH_UTF8_set(rx, utf8_target);
+            RXp_MATCH_UTF8_set(prog, utf8_target);
             prog->offs[0].start = s - strbeg;
             prog->offs[0].end = utf8_target
                 ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
@@ -3056,8 +3056,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	Perl_croak(aTHX_ "corrupted regexp program");
     }
 
-    RX_MATCH_TAINTED_off(rx);
-    RX_MATCH_UTF8_set(rx, utf8_target);
+    RXp_MATCH_TAINTED_off(prog);
+    RXp_MATCH_UTF8_set(prog, utf8_target);
 
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;

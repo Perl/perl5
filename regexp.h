@@ -458,6 +458,7 @@ and check for NULL.
 
 #ifdef NO_TAINT_SUPPORT
 #  define RX_ISTAINTED(rx_sv)           0
+#  define RXp_ISTAINTED(prog)           0
 #  define RX_TAINT_on(rx_sv)            NOOP
 #  define RXp_MATCH_TAINTED(prog)       0
 #  define RX_MATCH_TAINTED(rx_sv)       0
@@ -466,11 +467,13 @@ and check for NULL.
 #  define RX_MATCH_TAINTED_off(rx_sv)   NOOP
 #else
 #  define RX_ISTAINTED(rx_sv)           (RX_EXTFLAGS(rx_sv) & RXf_TAINTED)
+#  define RXp_ISTAINTED(prog)           (RXp_EXTFLAGS(prog) & RXf_TAINTED)
 #  define RX_TAINT_on(rx_sv)            (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED)
 #  define RXp_MATCH_TAINTED(prog)       (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
 #  define RX_MATCH_TAINTED(rx_sv)       (RX_EXTFLAGS(rx_sv) & RXf_TAINTED_SEEN)
 #  define RXp_MATCH_TAINTED_on(prog)    (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
 #  define RX_MATCH_TAINTED_on(rx_sv)    (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED_SEEN)
+#  define RXp_MATCH_TAINTED_off(prog)   (RXp_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
 #  define RX_MATCH_TAINTED_off(rx_sv)   (RX_EXTFLAGS(rx_sv) &= ~RXf_TAINTED_SEEN)
 #endif
 
@@ -511,52 +514,66 @@ and check for NULL.
 #define RX_REFCNT(rx_sv)                SvREFCNT(rx_sv)
 #define RX_EXTFLAGS(rx_sv)              RXp_EXTFLAGS(ReANY(rx_sv))
 #define RX_COMPFLAGS(rx_sv)             RXp_COMPFLAGS(ReANY(rx_sv))
-#define RX_ENGINE(rx_sv)                (ReANY(rx_sv)->engine)
-#define RX_SUBBEG(rx_sv)                (ReANY(rx_sv)->subbeg)
-#define RX_SUBOFFSET(rx_sv)             (ReANY(rx_sv)->suboffset)
+#define RXp_ENGINE(prog)                ((prog)->engine)
+#define RX_ENGINE(rx_sv)                (RXp_ENGINE(ReANY(rx_sv)))
+#define RXp_SUBBEG(prog)                (prog->subbeg)
+#define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
+#define RXp_SUBOFFSET(prog)             (prog->suboffset)
+#define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
 #define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
-#define RX_OFFS(rx_sv)                  (ReANY(rx_sv)->offs)
-#define RX_NPARENS(rx_sv)               (ReANY(rx_sv)->nparens)
+#define RXp_OFFS(prog)                  (prog->offs)
+#define RX_OFFS(rx_sv)                  (RXp_OFFS(ReANY(rx_sv)))
+#define RXp_NPARENS(prog)               (prog->nparens)
+#define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
 #define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
-#define RX_MINLEN(rx_sv)                (ReANY(rx_sv)->minlen)
-#define RX_MINLENRET(rx_sv)             (ReANY(rx_sv)->minlenret)
-#define RX_GOFS(rx_sv)                  (ReANY(rx_sv)->gofs)
+#define RXp_MINLEN(prog)                (prog->minlen)
+#define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
+#define RXp_MINLENRET(prog)             (prog->minlenret)
+#define RX_MINLENRET(rx_sv)             (RXp_MINLENRET(ReANY(rx_sv)))
+#define RXp_GOFS(prog)                  (prog->gofs)
+#define RX_GOFS(rx_sv)                  (RXp_GOFS(ReANY(rx_sv)))
 #define RX_LASTPAREN(rx_sv)             (ReANY(rx_sv)->lastparen)
 #define RX_LASTCLOSEPAREN(rx_sv)        (ReANY(rx_sv)->lastcloseparen)
-#define RX_SAVED_COPY(rx_sv)            (ReANY(rx_sv)->saved_copy)
+#define RXp_SAVED_COPY(prog)            (prog->saved_copy)
+#define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 /* last match was zero-length */
-#define RX_ZERO_LEN(rx_sv) \
-        (RX_OFFS(rx_sv)[0].start + (SSize_t)RX_GOFS(rx_sv) \
-          == RX_OFFS(rx_sv)[0].end)
+#define RXp_ZERO_LEN(prog) \
+        (RXp_OFFS(prog)[0].start + (SSize_t)RXp_GOFS(prog) \
+          == RXp_OFFS(prog)[0].end)
+#define RX_ZERO_LEN(rx_sv)              (RXp_ZERO_LEN(ReANY(rx_sv)))
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
 /* Stuff that needs to be included in the pluggable extension goes below here */
 
 #ifdef PERL_ANY_COW
-#define RX_MATCH_COPY_FREE(rx) \
-	STMT_START {if (RX_SAVED_COPY(rx)) { \
-	    SV_CHECK_THINKFIRST_COW_DROP(RX_SAVED_COPY(rx)); \
+#define RXp_MATCH_COPY_FREE(prog) \
+	STMT_START {if (RXp_SAVED_COPY(prog)) { \
+	    SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog)); \
 	} \
-	if (RX_MATCH_COPIED(rx)) { \
-	    Safefree(RX_SUBBEG(rx)); \
-	    RX_MATCH_COPIED_off(rx); \
+	if (RXp_MATCH_COPIED(prog)) { \
+	    Safefree(RXp_SUBBEG(prog)); \
+	    RXp_MATCH_COPIED_off(prog); \
 	}} STMT_END
 #else
-#define RX_MATCH_COPY_FREE(rx) \
-	STMT_START {if (RX_MATCH_COPIED(rx)) { \
-	    Safefree(RX_SUBBEG(rx)); \
-	    RX_MATCH_COPIED_off(rx); \
+#define RXp_MATCH_COPY_FREE(prog) \
+	STMT_START {if (RXp_MATCH_COPIED(prog)) { \
+	    Safefree(RXp_SUBBEG(prog)); \
+	    RXp_MATCH_COPIED_off(prog); \
 	}} STMT_END
 #endif
+#define RX_MATCH_COPY_FREE(rx_sv)       (RXp_MATCH_COPY_FREE(ReANY(rx_sv)))
 
 #define RXp_MATCH_UTF8(prog)            (RXp_EXTFLAGS(prog) & RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8(rx_sv)            (RX_EXTFLAGS(rx_sv) & RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_on(rx_sv)         (RX_EXTFLAGS(rx_sv) |= RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_off(rx_sv)        (RX_EXTFLAGS(rx_sv) &= ~RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_set(rx_sv, t)     ((t) \
-                                        ? RX_MATCH_UTF8_on(rx_sv) \
-                                        : RX_MATCH_UTF8_off(rx_sv))
+#define RXp_MATCH_UTF8_on(prog)         (RXp_EXTFLAGS(prog) |= RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_on(rx_sv)         (RXp_EXTFLAGS(ReANY(rx_sv)))
+#define RXp_MATCH_UTF8_off(prog)        (RXp_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_off(rx_sv)        (RXp_MATCH_UTF8_off(ReANY(rx_sv))
+#define RXp_MATCH_UTF8_set(prog, t)     ((t) \
+                                        ? RXp_MATCH_UTF8_on(prog) \
+                                        : RXp_MATCH_UTF8_off(prog))
+#define RX_MATCH_UTF8_set(rx_sv, t)     (RXp_MATCH_UTF8_set(ReANY(rx_sv), t))
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
 #define RX_UTF8(rx_sv)                  SvUTF8(rx_sv)
