@@ -102,6 +102,11 @@ S_stdize_locale(pTHX_ char *locs)
 
 #endif
 
+/* Just placeholders for now.  "_c" is intended to be called when the category
+ * is a constant known at compile time; "_r", not known until run time  */
+#define do_setlocale_c(category, locale) setlocale(category, locale)
+#define do_setlocale_r(category, locale) setlocale(category, locale)
+
 STATIC void
 S_set_numeric_radix(pTHX_ const bool use_locale)
 {
@@ -259,7 +264,7 @@ Perl_set_numeric_standard(pTHX)
      * to our records (which could be wrong if some XS code has changed the
      * locale behind our back) */
 
-    setlocale(LC_NUMERIC, "C");
+    do_setlocale_c(LC_NUMERIC, "C");
     PL_numeric_standard = TRUE;
     PL_numeric_local = isNAME_C_OR_POSIX(PL_numeric_name);
     set_numeric_radix(0);
@@ -288,7 +293,7 @@ Perl_set_numeric_local(pTHX)
      * if toggling isn't necessary according to our records (which could be
      * wrong if some XS code has changed the locale behind our back) */
 
-    setlocale(LC_NUMERIC, PL_numeric_name);
+    do_setlocale_c(LC_NUMERIC, PL_numeric_name);
     PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
     PL_numeric_local = TRUE;
     set_numeric_radix(1);
@@ -468,12 +473,12 @@ S_new_ctype(pTHX_ const char *newctype)
                  * here is transparent to this function's caller */
                 const char * const badlocale = savepv(newctype);
 
-                setlocale(LC_CTYPE, "C");
+                do_setlocale_c(LC_CTYPE, "C");
 
                 /* The '0' below suppresses a bogus gcc compiler warning */
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE), SvPVX(PL_warn_locale), 0);
 
-                setlocale(LC_CTYPE, badlocale);
+                do_setlocale_c(LC_CTYPE, badlocale);
                 Safefree(badlocale);
 
                 if (IN_LC(LC_CTYPE)) {
@@ -1010,7 +1015,7 @@ Perl_setlocale(int category, const char * locale)
 #  ifdef LC_ALL
 
             if (category == LC_ALL) {
-                newctype = setlocale(LC_CTYPE, NULL);
+                newctype = do_setlocale_c(LC_CTYPE, NULL);
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                     "%s:%d: %s\n", __FILE__, __LINE__,
                     setlocale_debug_string(LC_CTYPE, NULL, newctype)));
@@ -1041,7 +1046,7 @@ Perl_setlocale(int category, const char * locale)
 #  ifdef LC_ALL
 
             if (category == LC_ALL) {
-                newcoll = setlocale(LC_COLLATE, NULL);
+                newcoll = do_setlocale_c(LC_COLLATE, NULL);
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                     "%s:%d: %s\n", __FILE__, __LINE__,
                     setlocale_debug_string(LC_COLLATE, NULL, newcoll)));
@@ -1072,7 +1077,7 @@ Perl_setlocale(int category, const char * locale)
 #  ifdef LC_ALL
 
             if (category == LC_ALL) {
-                newnum = setlocale(LC_NUMERIC, NULL);
+                newnum = do_setlocale_c(LC_NUMERIC, NULL);
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                     "%s:%d: %s\n", __FILE__, __LINE__,
                     setlocale_debug_string(LC_NUMERIC, NULL, newnum)));
@@ -1290,7 +1295,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
     if (toggle) {
         if (item == PERL_RADIXCHAR || item == PERL_THOUSEP) {
-            setlocale(LC_NUMERIC, PL_numeric_name);
+            do_setlocale_c(LC_NUMERIC, PL_numeric_name);
         }
         else {
             toggle = FALSE;
@@ -1300,7 +1305,7 @@ S_my_nl_langinfo(const int item, bool toggle)
     save_to_buffer(nl_langinfo(item), &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
 
     if (toggle) {
-        setlocale(LC_NUMERIC, "C");
+        do_setlocale_c(LC_NUMERIC, "C");
     }
 
     LOCALE_UNLOCK;
@@ -1408,7 +1413,7 @@ S_my_nl_langinfo(const int item, bool toggle)
             LOCALE_LOCK;
 
             if (toggle) {
-                setlocale(LC_NUMERIC, PL_numeric_name);
+                do_setlocale_c(LC_NUMERIC, PL_numeric_name);
             }
 
             lc = localeconv();
@@ -1443,7 +1448,7 @@ S_my_nl_langinfo(const int item, bool toggle)
             save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
 
             if (toggle) {
-                setlocale(LC_NUMERIC, "C");
+                do_setlocale_c(LC_NUMERIC, "C");
             }
 
             LOCALE_UNLOCK;
@@ -1949,7 +1954,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
                 /* Note that this may change the locale, but we are going to do
                  * that anyway just below */
-                system_default_locale = setlocale(LC_ALL, "");
+                system_default_locale = do_setlocale_c(LC_ALL, "");
                 DEBUG_LOCALE_INIT(LC_ALL, "", system_default_locale);
 
                 /* Skip if invalid or if it's already on the list of locales to
@@ -2231,21 +2236,21 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef USE_LOCALE_CTYPE
 
             Safefree(curctype);
-            curctype = savepv(setlocale(LC_CTYPE, NULL));
+            curctype = savepv(do_setlocale_c(LC_CTYPE, NULL));
             DEBUG_LOCALE_INIT(LC_CTYPE, NULL, curctype);
 
 #  endif /* USE_LOCALE_CTYPE */
 #  ifdef USE_LOCALE_COLLATE
 
             Safefree(curcoll);
-            curcoll = savepv(setlocale(LC_COLLATE, NULL));
+            curcoll = savepv(do_setlocale_c(LC_COLLATE, NULL));
             DEBUG_LOCALE_INIT(LC_COLLATE, NULL, curcoll);
 
 #  endif /* USE_LOCALE_COLLATE */
 #  ifdef USE_LOCALE_NUMERIC
 
             Safefree(curnum);
-            curnum = savepv(setlocale(LC_NUMERIC, NULL));
+            curnum = savepv(do_setlocale_c(LC_NUMERIC, NULL));
             DEBUG_LOCALE_INIT(LC_NUMERIC, NULL, curnum);
 
 #  endif /* USE_LOCALE_NUMERIC */
@@ -2971,7 +2976,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #  endif
 
     /* First dispose of the trivial cases */
-    save_input_locale = setlocale(category, NULL);
+    save_input_locale = do_setlocale_r(category, NULL);
     if (! save_input_locale) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                               "Could not find current locale for category %d\n",
@@ -2998,7 +3003,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         if (category != LC_CTYPE) { /* These work only on LC_CTYPE */
 
             /* Get the current LC_CTYPE locale */
-            save_ctype_locale = setlocale(LC_CTYPE, NULL);
+            save_ctype_locale = do_setlocale_c(LC_CTYPE, NULL);
             if (! save_ctype_locale) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                                "Could not find current locale for LC_CTYPE\n"));
@@ -3014,7 +3019,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 Safefree(save_ctype_locale);
                 save_ctype_locale = NULL;
             }
-            else if (! setlocale(LC_CTYPE, save_input_locale)) {
+            else if (! do_setlocale_c(LC_CTYPE, save_input_locale)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                                     "Could not change LC_CTYPE locale to %s\n",
                                     save_input_locale));
@@ -3039,7 +3044,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
                 /* If we switched LC_CTYPE, switch back */
                 if (save_ctype_locale) {
-                    setlocale(LC_CTYPE, save_ctype_locale);
+                    do_setlocale_c(LC_CTYPE, save_ctype_locale);
                     Safefree(save_ctype_locale);
                 }
 
@@ -3099,7 +3104,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         /* If we switched LC_CTYPE, switch back */
         if (save_ctype_locale) {
-            setlocale(LC_CTYPE, save_ctype_locale);
+            do_setlocale_c(LC_CTYPE, save_ctype_locale);
             Safefree(save_ctype_locale);
         }
 
@@ -3136,7 +3141,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         if (category != LC_MONETARY) {
 
-            save_monetary_locale = setlocale(LC_MONETARY, NULL);
+            save_monetary_locale = do_setlocale_c(LC_MONETARY, NULL);
             if (! save_monetary_locale) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not find current locale for LC_MONETARY\n"));
@@ -3148,7 +3153,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 Safefree(save_monetary_locale);
                 save_monetary_locale = NULL;
             }
-            else if (! setlocale(LC_MONETARY, save_input_locale)) {
+            else if (! do_setlocale_c(LC_MONETARY, save_input_locale)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not change LC_MONETARY locale to %s\n",
                                                         save_input_locale));
@@ -3174,7 +3179,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         /* If we changed it, restore LC_MONETARY to its original locale */
         if (save_monetary_locale) {
-            setlocale(LC_MONETARY, save_monetary_locale);
+            do_setlocale_c(LC_MONETARY, save_monetary_locale);
             Safefree(save_monetary_locale);
         }
 
@@ -3213,7 +3218,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         if (category != LC_TIME) {
 
-            save_time_locale = setlocale(LC_TIME, NULL);
+            save_time_locale = do_setlocale_c(LC_TIME, NULL);
             if (! save_time_locale) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not find current locale for LC_TIME\n"));
@@ -3225,7 +3230,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 Safefree(save_time_locale);
                 save_time_locale = NULL;
             }
-            else if (! setlocale(LC_TIME, save_input_locale)) {
+            else if (! do_setlocale_c(LC_TIME, save_input_locale)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not change LC_TIME locale to %s\n",
                                                         save_input_locale));
@@ -3264,7 +3269,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              * false otherwise.  But first, restore LC_TIME to its original
              * locale if we changed it */
             if (save_time_locale) {
-                setlocale(LC_TIME, save_time_locale);
+                do_setlocale_c(LC_TIME, save_time_locale);
                 Safefree(save_time_locale);
             }
 
@@ -3279,7 +3284,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * ASCII.  Go on to the next test.  If we changed it, restore LC_TIME
          * to its original locale */
         if (save_time_locale) {
-            setlocale(LC_TIME, save_time_locale);
+            do_setlocale_c(LC_TIME, save_time_locale);
             Safefree(save_time_locale);
         }
         DEBUG_L(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
@@ -3313,7 +3318,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         if (category != LC_MESSAGES) {
 
-            save_messages_locale = setlocale(LC_MESSAGES, NULL);
+            save_messages_locale = do_setlocale_c(LC_MESSAGES, NULL);
             if (! save_messages_locale) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not find current locale for LC_MESSAGES\n"));
@@ -3325,7 +3330,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 Safefree(save_messages_locale);
                 save_messages_locale = NULL;
             }
-            else if (! setlocale(LC_MESSAGES, save_input_locale)) {
+            else if (! do_setlocale_c(LC_MESSAGES, save_input_locale)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not change LC_MESSAGES locale to %s\n",
                                                         save_input_locale));
@@ -3356,7 +3361,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         /* And, if we changed it, restore LC_MESSAGES to its original locale */
         if (save_messages_locale) {
-            setlocale(LC_MESSAGES, save_messages_locale);
+            do_setlocale_c(LC_MESSAGES, save_messages_locale);
             Safefree(save_messages_locale);
         }
 
@@ -3559,7 +3564,7 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 #    else    /* Not thread-safe build */
 
-        save_locale = setlocale(LC_MESSAGES, NULL);
+        save_locale = do_setlocale_c(LC_MESSAGES, NULL);
         if (! save_locale) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
                                   "setlocale failed, errno=%d\n", errno));
@@ -3573,7 +3578,7 @@ Perl_my_strerror(pTHX_ const int errnum)
                 /* The setlocale() just below likely will zap 'save_locale', so
                  * create a copy.  */
                 save_locale = savepv(save_locale);
-                setlocale(LC_MESSAGES, "C");
+                do_setlocale_c(LC_MESSAGES, "C");
             }
         }
 
@@ -3606,7 +3611,7 @@ Perl_my_strerror(pTHX_ const int errnum)
 #    else
 
         if (save_locale && ! locale_is_C) {
-            if (! setlocale(LC_MESSAGES, save_locale)) {
+            if (! do_setlocale_c(LC_MESSAGES, save_locale)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                       "setlocale restore failed, errno=%d\n", errno));
             }
@@ -3652,18 +3657,18 @@ Perl_sync_locale(pTHX)
 
 #ifdef USE_LOCALE_CTYPE
 
-    new_ctype(setlocale(LC_CTYPE, NULL));
+    new_ctype(do_setlocale_c(LC_CTYPE, NULL));
 
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 
-    new_collate(setlocale(LC_COLLATE, NULL));
+    new_collate(do_setlocale_c(LC_COLLATE, NULL));
 
 #endif
 #ifdef USE_LOCALE_NUMERIC
 
     set_numeric_local();    /* Switch from "C" to underlying LC_NUMERIC */
-    new_numeric(setlocale(LC_NUMERIC, NULL));
+    new_numeric(do_setlocale_c(LC_NUMERIC, NULL));
 
 #endif /* USE_LOCALE_NUMERIC */
 
