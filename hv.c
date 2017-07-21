@@ -969,47 +969,66 @@ Perl_hv_scalar(pTHX_ HV *hv)
 
 
 /*
-Pushes all the keys and values of a hash onto the stack.
+hv_pushkv(): push all the keys and/or values of a hash onto the stack.
+The rough Perl equivalents:
+    () = %hash;
+    () = keys %hash;
+    () = values %hash;
+
 Resets the hash's iterator.
-The rough Perl equivalent: C< () = %hash; >
-XXX this may at some point be extended to push 'keys %h' and 'values %h'
-too. I might also unroll hv_iternext() - DAPM
+
+flags : 1   = push keys
+        2   = push values
+        1|2 = push keys and values
+        XXX use symbolic flag constants at some point?
+I might unroll the non-tied hv_iternext() in here at some point - DAPM
 */
 
 void
-Perl_hv_pushkv(pTHX_ HV *hv)
+Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
 {
     HE *entry;
     bool tied = SvRMAGICAL(hv) && mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied);
     dSP;
 
     PERL_ARGS_ASSERT_HV_PUSHKV;
+    assert(flags); /* must be pushing at least one of keys and values */
 
     (void)hv_iterinit(hv);
 
     if (tied) {
+        SSize_t ext = (flags == 3) ? 2 : 1;
         while ((entry = hv_iternext(hv))) {
-            EXTEND(SP, 2);
-            PUSHs(hv_iterkeysv(entry));
-            PUSHs(hv_iterval(hv, entry));
+            EXTEND(SP, ext);
+            if (flags & 1)
+                PUSHs(hv_iterkeysv(entry));
+            if (flags & 2)
+                PUSHs(hv_iterval(hv, entry));
         }
     }
     else {
         Size_t nkeys = HvUSEDKEYS(hv);
-        SSize_t nkv;
+        SSize_t ext;
+
+        if (!nkeys)
+            return;
+
         /* 2*nkeys() should never be big enough to truncate or wrap */
         assert(nkeys <= (SSize_t_MAX >> 1));
-        nkv = nkeys * 2;
+        ext = nkeys * ((flags == 3) ? 2 : 1);
 
         EXTEND_MORTAL(nkeys);
-        EXTEND(SP, nkv);
+        EXTEND(SP, ext);
 
         while ((entry = hv_iternext(hv))) {
-            SV *keysv = newSVhek(HeKEY_hek(entry));
-            SvTEMP_on(keysv);
-            PL_tmps_stack[++PL_tmps_ix] = keysv;
-            PUSHs(keysv);
-            PUSHs(HeVAL(entry));
+            if (flags & 1) {
+                SV *keysv = newSVhek(HeKEY_hek(entry));
+                SvTEMP_on(keysv);
+                PL_tmps_stack[++PL_tmps_ix] = keysv;
+                PUSHs(keysv);
+            }
+            if (flags & 2)
+                PUSHs(HeVAL(entry));
         }
     }
 

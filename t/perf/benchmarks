@@ -1257,6 +1257,29 @@
         code    => 'index $x, "b"',
     },
 
+
+    'func::keys::scalar_cxt_empty' => {
+        desc    => ' keys() on an empty hash in scalar context',
+        setup   => 'my $k; my %h = ()',
+        code    => '$k = keys %h',
+    },
+    'func::keys::scalar_cxt' => {
+        desc    => ' keys() on a non-empty hash in scalar context',
+        setup   => 'my $k; my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '$k = keys %h',
+    },
+    'func::keys::list_cxt_empty' => {
+        desc    => ' keys() on an empty hash in list context',
+        setup   => 'my %h = ()',
+        code    => '() = keys %h',
+    },
+    'func::keys::list_cxt' => {
+        desc    => ' keys() on a non-empty hash in list context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '() = keys %h',
+    },
+
+
     'func::length::bool0' => {
         desc    => 'length==0 in boolean context',
         setup   => 'my $s = "";',
@@ -1502,6 +1525,29 @@
         setup   => '',
         code    => '$_ = "aaa"; !s/./x/g;'
     },
+
+
+    'func::values::scalar_cxt_empty' => {
+        desc    => ' values() on an empty hash in scalar context',
+        setup   => 'my $k; my %h = ()',
+        code    => '$k = values %h',
+    },
+    'func::values::scalar_cxt' => {
+        desc    => ' values() on a non-empty hash in scalar context',
+        setup   => 'my $k; my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '$k = values %h',
+    },
+    'func::values::list_cxt_empty' => {
+        desc    => ' values() on an empty hash in list context',
+        setup   => 'my %h = ()',
+        code    => '() = values %h',
+    },
+    'func::values::list_cxt' => {
+        desc    => ' values() on a non-empty hash in list context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '() = values %h',
+    },
+
 
 
     'loop::block' => {

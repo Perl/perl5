@@ -1255,8 +1255,6 @@ Perl_do_kv(pTHX)
 {
     dSP;
     HV * const keys = MUTABLE_HV(POPs);
-    HE *entry;
-    SSize_t extend_size;
     const U8 gimme = GIMME_V;
 
     const I32 dokeys   =     (PL_op->op_type == OP_KEYS)
@@ -1317,22 +1315,9 @@ Perl_do_kv(pTHX)
 	    Perl_croak(aTHX_ "Can't modify keys in list assignment");
     }
 
-    /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
-    assert(HvUSEDKEYS(keys) <= (SSize_t_MAX >> 1));
-    extend_size = (SSize_t)HvUSEDKEYS(keys) * (dokeys + dovalues);
-    EXTEND(SP, extend_size);
-
-    while ((entry = hv_iternext(keys))) {
-	if (dokeys) {
-	    SV* const sv = hv_iterkeysv(entry);
-	    XPUSHs(sv);
-	}
-	if (dovalues) {
-	    SV *const sv = hv_iterval(keys,entry);
-	    XPUSHs(sv);
-	}
-    }
-    RETURN;
+    PUTBACK;
+    hv_pushkv(keys, (dokeys | (dovalues << 1)));
+    return NORMAL;
 }
 
 /*

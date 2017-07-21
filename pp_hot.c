@@ -983,7 +983,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
     if (gimme == G_ARRAY) {
-        hv_pushkv(hv);
+        hv_pushkv(hv, 3);
         return NORMAL;
     }
 
