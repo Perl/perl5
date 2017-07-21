@@ -11130,7 +11130,7 @@ Perl_ck_sort(pTHX_ OP *o)
 }
 
 /* for sort { X } ..., where X is one of
- *   $a <=> $b, $b <= $a, $a cmp $b, $b cmp $a
+ *   $a <=> $b, $b <=> $a, $a cmp $b, $b cmp $a
  * elide the second child of the sort (the one containing X),
  * and set these flags as appropriate
 	OPpSORT_NUMERIC;
