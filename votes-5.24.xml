@@ -163,9 +163,9 @@ The entry above about [cpan #120032] is the same underlying issue, I think. --ar
 <commit votes="khw sprout jhi" id="d2b457d752c03448e8006f00a3761b5f542000d6" desc="perlunicode: Forgot to update pod to reflect 5.24 fix"/>
 <commit votes="khw sprout jhi" id="c55dd03d1d6eb39244430d1cf2e0e94240d2b37a" desc="Fix typo in d2b457d"/>
 <commit votes="khw sprout arc" id="8df98a270ad3d8791a954ebf97837b721b1c144a" desc="perlop: Fix important typo"/>
-<commit votes="jkeenan arc" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
+<commit votes="jkeenan arc xsawyerx" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
 <commit votes="jkeenan sprout arc" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
-<commit votes="jkeenan arc" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
+<commit votes="jkeenan arc xsawyerx" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
      
 
 
