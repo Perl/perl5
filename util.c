@@ -6096,17 +6096,17 @@ static const char* atos_parse(const char* p,
     UV uv;
 
     /* Skip trailing whitespace. */
-    while (p > start && isspace(*p)) p--;
+    while (p > start && isSPACE(*p)) p--;
     /* Now we should be at the close paren. */
     if (p == start || *p != ')')
         return NULL;
     close_paren = p;
     p--;
     /* Now we should be in the line number. */
-    if (p == start || !isdigit(*p))
+    if (p == start || !isDIGIT(*p))
         return NULL;
     /* Skip over the digits. */
-    while (p > start && isdigit(*p))
+    while (p > start && isDIGIT(*p))
         p--;
     /* Now we should be at the colon. */
     if (p == start || *p != ':')
@@ -6151,7 +6151,7 @@ static void atos_symbolize(atos_context* ctx,
      * the object name (used as "-o '%s'" ), leave since at least
      * partially the user controls it. */
     for (p = ctx->fname; *p; p++) {
-        if (*p == '\'' || iscntrl(*p)) {
+        if (*p == '\'' || isCNTRL(*p)) {
             ctx->unavail = TRUE;
             return;
         }
