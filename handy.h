@@ -1402,7 +1402,7 @@ END_EXTERN_C
 #   define isGRAPH_L1(c)     (isPRINT_L1(c) && (! isBLANK_L1(c)))
 #   define isLOWER_L1(c)     (isLOWER_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && ((NATIVE_TO_LATIN1((U8) c) >= 0xDF      \
+                                  && ((   NATIVE_TO_LATIN1((U8) c) >= 0xDF   \
                                        && NATIVE_TO_LATIN1((U8) c) != 0xF7)  \
                                        || NATIVE_TO_LATIN1((U8) c) == 0xAA   \
                                        || NATIVE_TO_LATIN1((U8) c) == 0xBA   \
@@ -1412,7 +1412,7 @@ END_EXTERN_C
                                   && NATIVE_TO_LATIN1((U8) c) >= 0xA0))
 #   define isPUNCT_L1(c)     (isPUNCT_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (NATIVE_TO_LATIN1((U8) c) == 0xA1       \
+                                  && (   NATIVE_TO_LATIN1((U8) c) == 0xA1    \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xA7    \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xAB    \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xB6    \
@@ -1421,11 +1421,11 @@ END_EXTERN_C
                                       || NATIVE_TO_LATIN1((U8) c) == 0xBF)))
 #   define isSPACE_L1(c)     (isSPACE_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (NATIVE_TO_LATIN1((U8) c) == 0x85       \
+                                  && (   NATIVE_TO_LATIN1((U8) c) == 0x85    \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xA0)))
 #   define isUPPER_L1(c)     (isUPPER_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (NATIVE_TO_LATIN1((U8) c) >= 0xC0       \
+                                  && (   NATIVE_TO_LATIN1((U8) c) >= 0xC0    \
                                       && NATIVE_TO_LATIN1((U8) c) <= 0xDE    \
                                       && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
 #   define isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT_A(c))
