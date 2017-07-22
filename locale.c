@@ -2228,7 +2228,6 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         char * e = s + len;
         char * sans_nuls;
         STRLEN sans_nuls_len;
-        STRLEN sans_nuls_pos;
         int try_non_controls;
         char this_replacement_char[] = "?\0";   /* Room for a two-byte string,
                                                    making sure 2nd byte is NUL.
@@ -2347,19 +2346,14 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         sans_nuls_len = (len * this_replacement_len) + 1;
         Newx(sans_nuls, sans_nuls_len, char);
         *sans_nuls = '\0';
-        sans_nuls_pos = 0;
 
         /* Replace each NUL with the lowest collating control.  Loop until have
          * exhausted all the NULs */
         while (s + s_strlen < e) {
-            sans_nuls_pos = my_strlcat(sans_nuls + sans_nuls_pos,
-                                       s,
-                                       sans_nuls_len);
+            my_strlcat(sans_nuls, s, sans_nuls_len);
 
             /* Do the actual replacement */
-            sans_nuls_pos = my_strlcat(sans_nuls + sans_nuls_pos,
-                                       this_replacement_char,
-                                       sans_nuls_len);
+            my_strlcat(sans_nuls, this_replacement_char, sans_nuls_len);
 
             /* Move past the input NUL */
             s += s_strlen + 1;
@@ -2367,7 +2361,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         }
 
         /* And add anything that trails the final NUL */
-        my_strlcat(sans_nuls + sans_nuls_pos, s, sans_nuls_len);
+        my_strlcat(sans_nuls, s, sans_nuls_len);
 
         /* Switch so below we transform this modified string */
         s = sans_nuls;
