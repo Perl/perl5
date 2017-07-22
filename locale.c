@@ -2224,7 +2224,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
      * otherwise contain that character, but otherwise there may be
      * less-than-perfect results with that character and NUL.  This is
      * unavoidable unless we replace strxfrm with our own implementation. */
-    if (s_strlen < len) {   /* Only execute if there is an embedded NUL */
+    if (UNLIKELY(s_strlen < len)) {   /* Only execute if there is an embedded
+                                         NUL */
         char * e = s + len;
         char * sans_nuls;
         STRLEN sans_nuls_len;
