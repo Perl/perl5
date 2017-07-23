@@ -85,7 +85,7 @@ use File::Glob qw(:case);
 
 # DEPRECATED contains the *first* version of Perl in which the module
 # was considered deprecated.  It should only be present if the module is
-# actually deprecated.  Such modules should use deprecated.pm to
+# actually deprecated.  Such modules should use deprecate.pm to
 # issue a warning if used.  E.g.:
 #
 #     use if $] >= 5.011, 'deprecate';
