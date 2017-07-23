@@ -991,6 +991,9 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         /* 'keys %h' masquerading as '%h': reset iterator */
         (void)hv_iterinit(hv);
 
+    if (gimme == G_VOID)
+        return NORMAL;
+
     is_bool = (     PL_op->op_private & OPpTRUEBOOL
               || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
                   && block_gimme() == G_VOID));
@@ -1022,6 +1025,21 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
                 PUSHi(i);
             }
             else
+#ifdef PERL_OP_PARENT
+            if (is_keys) {
+                /* parent op should be an unused OP_KEYS whose targ we can
+                 * use */
+                dTARG;
+                OP *k;
+
+                assert(!OpHAS_SIBLING(PL_op));
+                k = PL_op->op_sibparent;
+                assert(k->op_type == OP_KEYS);
+                TARG = PAD_SV(k->op_targ);
+                PUSHi(i);
+            }
+            else
+#endif
                 mPUSHi(i);
         }
     }

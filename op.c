@@ -14413,19 +14413,24 @@ Perl_rpeep(pTHX_ OP *o)
              */
             if (o->op_flags & OPf_REF) {
                 OP *k = o->op_next;
+                U8 want = (k->op_flags & OPf_WANT);
                 if (   k
                     && k->op_type == OP_KEYS
-                    && (   (k->op_flags & OPf_WANT) == OPf_WANT_VOID
-                        || (k->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                    && (   want == OPf_WANT_VOID
+                        || want == OPf_WANT_SCALAR)
                     && !(k->op_private & OPpMAYBE_LVSUB)
                     && !(k->op_flags & OPf_MOD)
                 ) {
                     o->op_next     = k->op_next;
                     o->op_flags   &= ~(OPf_REF|OPf_WANT);
-                    o->op_flags   |= (k->op_flags & OPf_WANT);
+                    o->op_flags   |= want;
                     o->op_private |= (o->op_type == OP_PADHV ?
                                       OPpRV2HV_ISKEYS : OPpRV2HV_ISKEYS);
-                    op_null(k);
+                    /* for keys(%lex), hold onto the OP_KEYS's targ
+                     * since padhv doesn't have its own targ to return
+                     * an int with */
+                    if (!(o->op_type ==OP_PADHV && want == OPf_WANT_SCALAR))
+                        op_null(k);
                 }
             }
 

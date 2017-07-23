@@ -1258,24 +1258,65 @@
     },
 
 
-    'func::keys::scalar_cxt_empty' => {
-        desc    => ' keys() on an empty hash in scalar context',
+    'func::keys::lex::void_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in void context',
+        setup   => 'my %h = ()',
+        code    => 'keys %h',
+    },
+    'func::keys::lex::void_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in void context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => 'keys %h',
+    },
+    'func::keys::lex::scalar_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in scalar context',
         setup   => 'my $k; my %h = ()',
         code    => '$k = keys %h',
     },
-    'func::keys::scalar_cxt' => {
-        desc    => ' keys() on a non-empty hash in scalar context',
+    'func::keys::lex::scalar_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in scalar context',
         setup   => 'my $k; my %h = qw(aardvark 1 banana 2 cucumber 3)',
         code    => '$k = keys %h',
     },
-    'func::keys::list_cxt_empty' => {
-        desc    => ' keys() on an empty hash in list context',
+    'func::keys::lex::list_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in list context',
         setup   => 'my %h = ()',
         code    => '() = keys %h',
     },
-    'func::keys::list_cxt' => {
-        desc    => ' keys() on a non-empty hash in list context',
+    'func::keys::lex::list_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in list context',
         setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '() = keys %h',
+    },
+
+    'func::keys::pkg::void_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in void context',
+        setup   => 'our %h = ()',
+        code    => 'keys %h',
+    },
+    'func::keys::pkg::void_cxt' => {
+        desc    => ' keys() on a non-empty package hash in void context',
+        setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => 'keys %h',
+    },
+    'func::keys::pkg::scalar_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in scalar context',
+        setup   => 'my $k; our %h = ()',
+        code    => '$k = keys %h',
+    },
+    'func::keys::pkg::scalar_cxt' => {
+        desc    => ' keys() on a non-empty package hash in scalar context',
+        setup   => 'my $k; our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '$k = keys %h',
+    },
+    'func::keys::pkg::list_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in list context',
+        setup   => 'our %h = ()',
+        code    => '() = keys %h',
+    },
+    'func::keys::pkg::list_cxt' => {
+        desc    => ' keys() on a non-empty package hash in list context',
+        setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
         code    => '() = keys %h',
     },
 

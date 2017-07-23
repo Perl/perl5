@@ -4115,7 +4115,13 @@ sub pp_padav { pp_padsv(@_) }
 
 sub pp_padhv {
     my $op = $_[1];
-    (($op->private & OPpPADHV_ISKEYS) ? 'keys ' : '') . pp_padsv(@_);
+    my $keys = '';
+    # with OPpPADHV_ISKEYS the keys op is optimised away, except
+    # in scalar context the old op is kept (but not executed) so its targ
+    # can be used.
+    $keys = 'keys ' if (     ($op->private & OPpPADHV_ISKEYS)
+                            && !(($op->flags & OPf_WANT) == OPf_WANT_SCALAR));
+    $keys . pp_padsv(@_);
 }
 
 sub gv_or_padgv {
