@@ -2791,16 +2791,6 @@ Perl_my_strerror(pTHX_ const int errnum)
     errstr = Strerror(errnum);
     if (errstr) {
 
-#ifdef DEBUGGING
-
-        if (DEBUG_Lv_TEST) {
-            PerlIO_printf(Perl_debug_log, "Strerror returned; saving a copy: '");
-            print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);
-            PerlIO_printf(Perl_debug_log, "'\n");
-        }
-
-#endif
-
         errstr = savepv(errstr);
         SAVEFREEPV(errstr);
     }
@@ -2835,6 +2825,15 @@ Perl_my_strerror(pTHX_ const int errnum)
     LOCALE_UNLOCK;
 
 #  endif
+
+#ifdef DEBUGGING
+
+    if (DEBUG_Lv_TEST) {
+        PerlIO_printf(Perl_debug_log, "Strerror returned; saving a copy: '");
+        print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);
+        PerlIO_printf(Perl_debug_log, "'\n");
+    }
+
 #endif
 
     return errstr;
