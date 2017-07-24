@@ -1,3 +1,9 @@
+2017-07-24 13:57:13 rurban
+    Version 3.05_13
+
+        * mingw fix: use safe defaults, not segfaulting defaults.
+        mingw fails on the stacksize binary search, leaving it empty.
+
 Wed Apr 19 09:11:07 2017 +0200 Reini Urban <rurban@cpan.org>
     Version 3.05_12
 

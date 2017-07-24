@@ -163,7 +163,7 @@ while (!$found) {
 if ($max_depth == $bad1-1
     and $n == $bad2-1)
 {
-    # more likely the shell. travis docker ubuntu e.g.
+    # more likely the shell. travis docker ubuntu, mingw e.g.
     print "Error: Apparently your system(SHELLSTRING) cannot catch stack overflows\n"
       unless QUIET;
     $max_depth = 512;
