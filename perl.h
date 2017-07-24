@@ -5894,18 +5894,19 @@ typedef struct am_table_short AMTS;
       &&   defined(LC_ALL_MASK)                 \
       &&   defined(HAS_FREELOCALE)              \
       &&   defined(HAS_USELOCALE)               \
-      && ! defined(NO_THREAD_SAFE_USELOCALE)
+      && ! defined(NO_POSIX_2008_LOCALE)
 
     /* The code is written for simplicity to assume that any platform advanced
      * enough to have the Posix 2008 locale functions has LC_ALL.  The test
      * above makes sure that assumption is valid */
 
-#    define USE_THREAD_SAFE_LOCALE
+#    define USE_POSIX_2008_LOCALE
 #  endif
 
 #   define LOCALE_INIT   MUTEX_INIT(&PL_locale_mutex)
 
-#   ifdef USE_THREAD_SAFE_LOCALE
+#   ifdef USE_POSIX_2008_LOCALE
+#       define USE_THREAD_SAFE_LOCALE
 #       define LOCALE_TERM                                                  \
                     STMT_START {                                            \
                         MUTEX_DESTROY(&PL_locale_mutex);                    \
