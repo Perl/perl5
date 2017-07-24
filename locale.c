@@ -3658,20 +3658,33 @@ to do so, before returning to Perl.
 void
 Perl_sync_locale(pTHX)
 {
+    char * newlocale;
 
 #ifdef USE_LOCALE_CTYPE
 
-    new_ctype(do_setlocale_c(LC_CTYPE, NULL));
+    newlocale = do_setlocale_c(LC_CTYPE, NULL);
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+        "%s:%d: %s\n", __FILE__, __LINE__,
+        setlocale_debug_string(LC_CTYPE, NULL, newlocale)));
+    new_ctype(newlocale);
 
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 
-    new_collate(do_setlocale_c(LC_COLLATE, NULL));
+    newlocale = do_setlocale_c(LC_COLLATE, NULL);
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+        "%s:%d: %s\n", __FILE__, __LINE__,
+        setlocale_debug_string(LC_COLLATE, NULL, newlocale)));
+    new_collate(newlocale);
 
 #endif
 #ifdef USE_LOCALE_NUMERIC
 
-    new_numeric(do_setlocale_c(LC_NUMERIC, NULL));
+    newlocale = do_setlocale_c(LC_NUMERIC, NULL);
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+        "%s:%d: %s\n", __FILE__, __LINE__,
+        setlocale_debug_string(LC_NUMERIC, NULL, newlocale)));
+    new_numeric(newlocale);
 
 #endif /* USE_LOCALE_NUMERIC */
 
