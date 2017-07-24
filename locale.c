@@ -946,6 +946,7 @@ Perl_setlocale(int category, const char * locale)
     /* This wraps POSIX::setlocale() */
 
     char * retval;
+    char * newlocale;
     dTHX;
 
 #ifdef USE_LOCALE_NUMERIC
@@ -996,103 +997,63 @@ Perl_setlocale(int category, const char * locale)
         SET_NUMERIC_STANDARD();
         return retval;
     }
-    else {  /* Now that have switched locales, we have to update our records to
-               correspond */
+
+    /* Now that have switched locales, we have to update our records to
+     * correspond. */
+
+    switch (category) {
 
 #ifdef USE_LOCALE_CTYPE
 
-        if (   category == LC_CTYPE
+        case LC_CTYPE:
+            new_ctype(retval);
+            break;
 
-#  ifdef LC_ALL
-
-            || category == LC_ALL
-
-#  endif
-
-            )
-        {
-            char *newctype;
-
-#  ifdef LC_ALL
-
-            if (category == LC_ALL) {
-                newctype = do_setlocale_c(LC_CTYPE, NULL);
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: %s\n", __FILE__, __LINE__,
-                    setlocale_debug_string(LC_CTYPE, NULL, newctype)));
-            }
-            else
-
-#  endif
-
-                newctype = retval;
-            new_ctype(newctype);
-        }
-
-#endif /* USE_LOCALE_CTYPE */
+#endif
 #ifdef USE_LOCALE_COLLATE
 
-        if (   category == LC_COLLATE
+        case LC_COLLATE:
+            new_collate(retval);
+            break;
 
-#  ifdef LC_ALL
-
-            || category == LC_ALL
-
-#  endif
-
-            )
-        {
-            char *newcoll;
-
-#  ifdef LC_ALL
-
-            if (category == LC_ALL) {
-                newcoll = do_setlocale_c(LC_COLLATE, NULL);
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: %s\n", __FILE__, __LINE__,
-                    setlocale_debug_string(LC_COLLATE, NULL, newcoll)));
-            }
-            else
-
-#  endif
-
-                newcoll = retval;
-            new_collate(newcoll);
-        }
-
-#endif /* USE_LOCALE_COLLATE */
+#endif
 #ifdef USE_LOCALE_NUMERIC
 
-        if (   category == LC_NUMERIC
+        case LC_NUMERIC:
+            new_numeric(retval);
+            break;
 
-#  ifdef LC_ALL
+#endif
+#ifdef LC_ALL
 
-            || category == LC_ALL
+        case LC_ALL:
+
+            /* LC_ALL updates all the things we care about.  The values may not
+             * be the same as 'retval', as the locale "" may have set things
+             * individually */
+
+#  ifdef USE_LOCALE_CTYPE
+
+            newlocale = do_setlocale_c(LC_CTYPE, NULL);
+            new_ctype(newlocale);
+
+#  endif /* USE_LOCALE_CTYPE */
+#  ifdef USE_LOCALE_COLLATE
+
+            newlocale = do_setlocale_c(LC_COLLATE, NULL);
+            new_collate(newlocale);
 
 #  endif
+#  ifdef USE_LOCALE_NUMERIC
 
-            )
-        {
-            char *newnum;
+            newlocale = do_setlocale_c(LC_NUMERIC, NULL);
+            new_numeric(newlocale);
 
-#  ifdef LC_ALL
+#  endif /* USE_LOCALE_NUMERIC */
+#endif /* LC_ALL */
 
-            if (category == LC_ALL) {
-                newnum = do_setlocale_c(LC_NUMERIC, NULL);
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: %s\n", __FILE__, __LINE__,
-                    setlocale_debug_string(LC_NUMERIC, NULL, newnum)));
-            }
-            else
-
-#  endif
-
-                newnum = retval;
-            new_numeric(newnum);
-        }
-
-#endif /* USE_LOCALE_NUMERIC */
-
+        default:
+            break;
     }
 
     return retval;
