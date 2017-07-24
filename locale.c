@@ -2715,13 +2715,18 @@ Perl_my_strerror(pTHX_ const int errnum)
      * to the C locale */
 
     char *errstr;
-
-#ifdef USE_LOCALE_MESSAGES  /* If platform doesn't have messages category, we
-                               don't do any switching to the C locale; we just
-                               use whatever strerror() returns */
-    const bool within_locale_scope = IN_LC(LC_MESSAGES);
-
     dVAR;
+
+#ifndef USE_LOCALE_MESSAGES
+
+    /* If platform doesn't have messages category, we don't do any switching to
+     * the C locale; we just use whatever strerror() returns */
+
+    errstr = savepv(Strerror(errnum));
+
+#else   /* Has locale messages */
+
+    const bool within_locale_scope = IN_LC(LC_MESSAGES);
 
 #  ifdef USE_POSIX_2008_LOCALE
     locale_t save_locale = NULL;
@@ -2784,18 +2789,9 @@ Perl_my_strerror(pTHX_ const int errnum)
                                                __FILE__, __LINE__));
     }
 
-#endif
-
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "Any locale change has been done; about to call Strerror\n"));
-    errstr = Strerror(errnum);
-    if (errstr) {
-
-        errstr = savepv(errstr);
-        SAVEFREEPV(errstr);
-    }
-
-#ifdef USE_LOCALE_MESSAGES
+    errstr = savepv(Strerror(errnum));
 
     if (! within_locale_scope) {
         errno = 0;
@@ -2825,6 +2821,7 @@ Perl_my_strerror(pTHX_ const int errnum)
     LOCALE_UNLOCK;
 
 #  endif
+#endif   /* End of does have locale messages */
 
 #ifdef DEBUGGING
 
@@ -2836,6 +2833,7 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 #endif
 
+    SAVEFREEPV(errstr);
     return errstr;
 }
 
