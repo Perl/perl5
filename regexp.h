@@ -474,7 +474,7 @@ and check for NULL.
 #  define RX_MATCH_TAINTED_off(rx_sv)   (RX_EXTFLAGS(rx_sv) &= ~RXf_TAINTED_SEEN)
 #endif
 
-#define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
+#define RXp_HAS_CUTGROUP(prog)          ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 
 #define RX_MATCH_TAINTED_set(rx_sv, t)  ((t) \
                                         ? RX_MATCH_TAINTED_on(rx_sv) \

@@ -5375,7 +5375,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     SV *sv_yes_mark = NULL; /* last mark name we have seen 
                                during a successful match */
     U32 lastopen = 0;       /* last open we saw */
-    bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;   
+    bool has_cutgroup = RXp_HAS_CUTGROUP(rex) ? 1 : 0;
     SV* const oreplsv = GvSVn(PL_replgv);
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
