@@ -3671,7 +3671,6 @@ Perl_sync_locale(pTHX)
 #endif
 #ifdef USE_LOCALE_NUMERIC
 
-    set_numeric_local();    /* Switch from "C" to underlying LC_NUMERIC */
     new_numeric(do_setlocale_c(LC_NUMERIC, NULL));
 
 #endif /* USE_LOCALE_NUMERIC */
