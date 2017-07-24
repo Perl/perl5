@@ -457,73 +457,73 @@ and check for NULL.
  */
 
 #ifdef NO_TAINT_SUPPORT
-#   define RX_ISTAINTED(prog)    0
-#   define RX_TAINT_on(prog)     NOOP
+#   define RX_ISTAINTED(rx_sv)        0
+#   define RX_TAINT_on(rx_sv)     NOOP
 #   define RXp_MATCH_TAINTED(prog) 0
-#   define RX_MATCH_TAINTED(prog)  0
+#   define RX_MATCH_TAINTED(rx_sv)  0
 #   define RXp_MATCH_TAINTED_on(prog) NOOP
-#   define RX_MATCH_TAINTED_on(prog)  NOOP
-#   define RX_MATCH_TAINTED_off(prog) NOOP
+#   define RX_MATCH_TAINTED_on(rx_sv)  NOOP
+#   define RX_MATCH_TAINTED_off(rx_sv) NOOP
 #else
-#   define RX_ISTAINTED(prog)    (RX_EXTFLAGS(prog) & RXf_TAINTED)
-#   define RX_TAINT_on(prog)     (RX_EXTFLAGS(prog) |= RXf_TAINTED)
+#   define RX_ISTAINTED(rx_sv)    (RX_EXTFLAGS(rx_sv) & RXf_TAINTED)
+#   define RX_TAINT_on(rx_sv)     (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED)
 #   define RXp_MATCH_TAINTED(prog)    (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
-#   define RX_MATCH_TAINTED(prog)     (RX_EXTFLAGS(prog)  & RXf_TAINTED_SEEN)
+#   define RX_MATCH_TAINTED(rx_sv)     (RX_EXTFLAGS(rx_sv)  & RXf_TAINTED_SEEN)
 #   define RXp_MATCH_TAINTED_on(prog) (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
-#   define RX_MATCH_TAINTED_on(prog)  (RX_EXTFLAGS(prog)  |= RXf_TAINTED_SEEN)
-#   define RX_MATCH_TAINTED_off(prog) (RX_EXTFLAGS(prog)  &= ~RXf_TAINTED_SEEN)
+#   define RX_MATCH_TAINTED_on(rx_sv)  (RX_EXTFLAGS(rx_sv)  |= RXf_TAINTED_SEEN)
+#   define RX_MATCH_TAINTED_off(rx_sv) (RX_EXTFLAGS(rx_sv)  &= ~RXf_TAINTED_SEEN)
 #endif
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
-#define RX_MATCH_TAINTED_set(prog, t) ((t) \
-				       ? RX_MATCH_TAINTED_on(prog) \
-				       : RX_MATCH_TAINTED_off(prog))
+#define RX_MATCH_TAINTED_set(rx_sv, t) ((t) \
+				       ? RX_MATCH_TAINTED_on(rx_sv) \
+				       : RX_MATCH_TAINTED_off(rx_sv))
 
 #define RXp_MATCH_COPIED(prog)		(RXp_EXTFLAGS(prog) & RXf_COPY_DONE)
-#define RX_MATCH_COPIED(prog)		(RX_EXTFLAGS(prog) & RXf_COPY_DONE)
+#define RX_MATCH_COPIED(rx_sv)		(RX_EXTFLAGS(rx_sv) & RXf_COPY_DONE)
 #define RXp_MATCH_COPIED_on(prog)	(RXp_EXTFLAGS(prog) |= RXf_COPY_DONE)
-#define RX_MATCH_COPIED_on(prog)	(RX_EXTFLAGS(prog) |= RXf_COPY_DONE)
+#define RX_MATCH_COPIED_on(rx_sv)	(RX_EXTFLAGS(rx_sv) |= RXf_COPY_DONE)
 #define RXp_MATCH_COPIED_off(prog)	(RXp_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
-#define RX_MATCH_COPIED_off(prog)	(RX_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
-#define RX_MATCH_COPIED_set(prog,t)	((t) \
-					 ? RX_MATCH_COPIED_on(prog) \
-					 : RX_MATCH_COPIED_off(prog))
+#define RX_MATCH_COPIED_off(rx_sv)	(RX_EXTFLAGS(rx_sv) &= ~RXf_COPY_DONE)
+#define RX_MATCH_COPIED_set(rx_sv,t)	((t) \
+					 ? RX_MATCH_COPIED_on(rx_sv) \
+					 : RX_MATCH_COPIED_off(rx_sv))
 
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 #define RXp_COMPFLAGS(rx)        ((rx)->compflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(prog)	(RX_WRAPPED(prog) + ReANY(prog)->pre_prefix)
-#define RX_PRECOMP_const(prog)	(RX_WRAPPED_const(prog) + ReANY(prog)->pre_prefix)
+#define RX_PRECOMP(rx_sv)	(RX_WRAPPED(rx_sv) + ReANY(rx_sv)->pre_prefix)
+#define RX_PRECOMP_const(rx_sv)	(RX_WRAPPED_const(rx_sv) + ReANY(rx_sv)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
-#define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ReANY(prog)->pre_prefix - 1)
+#define RX_PRELEN(rx_sv)		(RX_WRAPLEN(rx_sv) - ReANY(rx_sv)->pre_prefix - 1)
 
-#define RX_WRAPPED(prog)	SvPVX(prog)
-#define RX_WRAPPED_const(prog)	SvPVX_const(prog)
-#define RX_WRAPLEN(prog)	SvCUR(prog)
-#define RX_CHECK_SUBSTR(prog)	(ReANY(prog)->check_substr)
-#define RX_REFCNT(prog)		SvREFCNT(prog)
-#define RX_EXTFLAGS(prog)	RXp_EXTFLAGS(ReANY(prog))
-#define RX_COMPFLAGS(prog)        RXp_COMPFLAGS(ReANY(prog))
-#define RX_ENGINE(prog)		(ReANY(prog)->engine)
-#define RX_SUBBEG(prog)		(ReANY(prog)->subbeg)
-#define RX_SUBOFFSET(prog)	(ReANY(prog)->suboffset)
-#define RX_SUBCOFFSET(prog)	(ReANY(prog)->subcoffset)
-#define RX_OFFS(prog)		(ReANY(prog)->offs)
-#define RX_NPARENS(prog)	(ReANY(prog)->nparens)
-#define RX_SUBLEN(prog)		(ReANY(prog)->sublen)
-#define RX_MINLEN(prog)		(ReANY(prog)->minlen)
-#define RX_MINLENRET(prog)	(ReANY(prog)->minlenret)
-#define RX_GOFS(prog)		(ReANY(prog)->gofs)
-#define RX_LASTPAREN(prog)	(ReANY(prog)->lastparen)
-#define RX_LASTCLOSEPAREN(prog)	(ReANY(prog)->lastcloseparen)
-#define RX_SAVED_COPY(prog)	(ReANY(prog)->saved_copy)
+#define RX_WRAPPED(rx_sv)	SvPVX(rx_sv)
+#define RX_WRAPPED_const(rx_sv)	SvPVX_const(rx_sv)
+#define RX_WRAPLEN(rx_sv)	SvCUR(rx_sv)
+#define RX_CHECK_SUBSTR(rx_sv)	(ReANY(rx_sv)->check_substr)
+#define RX_REFCNT(rx_sv)		SvREFCNT(rx_sv)
+#define RX_EXTFLAGS(rx_sv)	RXp_EXTFLAGS(ReANY(rx_sv))
+#define RX_COMPFLAGS(rx_sv)        RXp_COMPFLAGS(ReANY(rx_sv))
+#define RX_ENGINE(rx_sv)		(ReANY(rx_sv)->engine)
+#define RX_SUBBEG(rx_sv)		(ReANY(rx_sv)->subbeg)
+#define RX_SUBOFFSET(rx_sv)	(ReANY(rx_sv)->suboffset)
+#define RX_SUBCOFFSET(rx_sv)	(ReANY(rx_sv)->subcoffset)
+#define RX_OFFS(rx_sv)		(ReANY(rx_sv)->offs)
+#define RX_NPARENS(rx_sv)	(ReANY(rx_sv)->nparens)
+#define RX_SUBLEN(rx_sv)		(ReANY(rx_sv)->sublen)
+#define RX_MINLEN(rx_sv)		(ReANY(rx_sv)->minlen)
+#define RX_MINLENRET(rx_sv)	(ReANY(rx_sv)->minlenret)
+#define RX_GOFS(rx_sv)		(ReANY(rx_sv)->gofs)
+#define RX_LASTPAREN(rx_sv)	(ReANY(rx_sv)->lastparen)
+#define RX_LASTCLOSEPAREN(rx_sv)	(ReANY(rx_sv)->lastcloseparen)
+#define RX_SAVED_COPY(rx_sv)	(ReANY(rx_sv)->saved_copy)
 /* last match was zero-length */
-#define RX_ZERO_LEN(prog) \
-        (RX_OFFS(prog)[0].start + (SSize_t)RX_GOFS(prog) \
-          == RX_OFFS(prog)[0].end)
+#define RX_ZERO_LEN(rx_sv) \
+        (RX_OFFS(rx_sv)[0].start + (SSize_t)RX_GOFS(rx_sv) \
+          == RX_OFFS(rx_sv)[0].end)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
@@ -547,15 +547,15 @@ and check for NULL.
 #endif
 
 #define RXp_MATCH_UTF8(prog)		(RXp_EXTFLAGS(prog) & RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8(prog)		(RX_EXTFLAGS(prog) & RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_on(prog)		(RX_EXTFLAGS(prog) |= RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_off(prog)		(RX_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_set(prog, t)	((t) \
-			? RX_MATCH_UTF8_on(prog) \
-			: RX_MATCH_UTF8_off(prog))
+#define RX_MATCH_UTF8(rx_sv)		(RX_EXTFLAGS(rx_sv) & RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_on(rx_sv)		(RX_EXTFLAGS(rx_sv) |= RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_off(rx_sv)		(RX_EXTFLAGS(rx_sv) &= ~RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_set(rx_sv, t)	((t) \
+			? RX_MATCH_UTF8_on(rx_sv) \
+			: RX_MATCH_UTF8_off(rx_sv))
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
-#define RX_UTF8(prog)			SvUTF8(prog)
+#define RX_UTF8(rx_sv)			SvUTF8(rx_sv)
 
 
 /* bits in flags arg of Perl_regexec_flags() */
