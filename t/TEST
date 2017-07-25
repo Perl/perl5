@@ -61,8 +61,7 @@ my %abs = (
 	   '../dist/Tie-File' => 1,
 	  );
 
-my %temp_no_core =
-    ('../cpan/B-Debug' => 1,
+my %temp_no_core = (
      '../cpan/Compress-Raw-Bzip2' => 1,
      '../cpan/Compress-Raw-Zlib' => 1,
      '../cpan/Devel-PPPort' => 1,

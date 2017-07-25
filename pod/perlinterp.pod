@@ -435,7 +435,7 @@ operations in.
 The easiest way to examine the op tree is to stop Perl after it has
 finished parsing, and get it to dump out the tree. This is exactly what
 the compiler backends L<B::Terse|B::Terse>, L<B::Concise|B::Concise>
-and L<B::Debug|B::Debug> do.
+and CPAN module B::Debug do.
 
 Let's have a look at how Perl sees C<$a = $b + $c>:
 
