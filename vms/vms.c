@@ -196,7 +196,7 @@ static char * int_tovmspath(const char *path, char *buf, int * utf8_fl);
 
 static char *__mystrtolower(char *str)
 {
-  if (str) for (; *str; ++str) *str= tolower(*str);
+  if (str) for (; *str; ++str) *str= toLOWER_L1(*str);
   return str;
 }
 
@@ -446,13 +446,13 @@ copy_expand_unix_filename_escape(char *outspec, const char *inspec, int *output_
     if ((inspec[0] == '$') && (inspec[1] == '(')) {
     int tcnt;
 
-	if (isalnum(inspec[2]) || (inspec[2] == '.') || (inspec[2] == '_')) {
+	if (isALPHA_L1(inspec[2]) || (inspec[2] == '.') || (inspec[2] == '_')) {
 	    tcnt = 3;
 	    outspec[0] = inspec[0];
 	    outspec[1] = inspec[1];
 	    outspec[2] = inspec[2];
 
-	    while(isalnum(inspec[tcnt]) ||
+	    while(isALPHA_L1(inspec[tcnt]) ||
 		  (inspec[2] == '.') || (inspec[2] == '_')) {
 		outspec[tcnt] = inspec[tcnt];
 		tcnt++;
@@ -787,9 +787,9 @@ is_dir_ext(char * e_spec, int e_len, char * vs_spec, int vs_len)
 
     /* Look for the DIR on the extension */
     if (vms_process_case_tolerant) {
-        if ((toupper(e_spec[1]) == 'D') &&
-            (toupper(e_spec[2]) == 'I') &&
-            (toupper(e_spec[3]) == 'R')) {
+        if ((toUPPER_A(e_spec[1]) == 'D') &&
+            (toUPPER_A(e_spec[2]) == 'I') &&
+            (toUPPER_A(e_spec[3]) == 'R')) {
             return 1;
         }
     } else {
@@ -886,7 +886,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return 0;
     }
     for (cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
-      *cp2 = _toupper(*cp1);
+      *cp2 = toUPPER_A(*cp1);
       if (cp1 - lnm > LNM$C_NAMLENGTH) {
         set_errno(EINVAL); set_vaxc_errno(SS$_IVLOGNAM);
         return 0;
@@ -1077,7 +1077,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
       eqv = __my_getenv_eqv;  
     }
 
-    for (cp1 = lnm, cp2 = eqv; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
+    for (cp1 = lnm, cp2 = eqv; *cp1; cp1++,cp2++) *cp2 = toUPPER_A(*cp1);
     if (cp1 - lnm == 7 && !strncmp(eqv,"DEFAULT",7)) {
       int len;
       getcwd(eqv,LNM$C_NAMLENGTH);
@@ -1173,7 +1173,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
       buf = __my_getenv_len_eqv;  
     }
 
-    for (cp1 = lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
+    for (cp1 = lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = toUPPER_A(*cp1);
     if (cp1 - lnm == 7 && !strncmp(buf,"DEFAULT",7)) {
     char * zeros;
 
@@ -1394,7 +1394,7 @@ prime_env_iter(void)
       if (sts == SS$_BUFFEROVF && ckWARN(WARN_INTERNAL))
         Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Buffer overflow in prime_env_iter: %s",buf);
 
-      for (cp1 = buf; *cp1 && isspace(*cp1); cp1++) ;
+      for (cp1 = buf; *cp1 && isSPACE_L1(*cp1); cp1++) ;
       if (*cp1 == '(' || /* Logical name table name */
           *cp1 == '='    /* Next eqv of searchlist  */) continue;
       if (*cp1 == '"') cp1++;
@@ -1489,7 +1489,7 @@ Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s *
     }
 
     for (cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
-      *cp2 = _toupper(*cp1);
+      *cp2 = toUPPER_A(*cp1);
       if (cp1 - lnm > LNM$C_NAMLENGTH) {
         set_errno(EINVAL); set_vaxc_errno(SS$_IVLOGNAM);
         return SS$_IVLOGNAM;
@@ -1636,7 +1636,7 @@ Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
       if  (len == 7) {
         char uplnm[8];
         int i;
-        for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
+        for (i = 0; lnm[i]; i++) uplnm[i] = toUPPER_A(lnm[i]);
         if (!strcmp(uplnm,"DEFAULT")) {
           if (eqv && *eqv) my_chdir(eqv);
           return;
@@ -6604,9 +6604,9 @@ int_pathify_dirspec_simple(const char * dir, char * buf,
             if (e_len > 0) {
                 if (decc_efs_charset) {
                     if (e_len == 4 
-                        && (toupper(e_spec[1]) == 'D')
-                        && (toupper(e_spec[2]) == 'I')
-                        && (toupper(e_spec[3]) == 'R')) {
+                        && (toUPPER_A(e_spec[1]) == 'D')
+                        && (toUPPER_A(e_spec[2]) == 'I')
+                        && (toUPPER_A(e_spec[3]) == 'R')) {
 
                         /* Corner case: directory spec with invalid version.
                          * Valid would have followed is_dir path above.
@@ -8769,9 +8769,9 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
 
 	    /* Test through */
 	    *(cp1++) = *(cp2++);
-	    if (isalnum(*cp2) || (*cp2 == '.') || (*cp2 == '_')) {
+	    if (isALPHA_L1(*cp2) || (*cp2 == '.') || (*cp2 == '_')) {
 		*(cp1++) = *(cp2++);
-		while (isalnum(*cp2) || (*cp2 == '.') || (*cp2 == '_')) {
+		while (isALPHA_L1(*cp2) || (*cp2 == '.') || (*cp2 == '_')) {
 		    *(cp1++) = *(cp2++);
 		}
 		if (*cp2 == ')') {
@@ -9420,10 +9420,10 @@ mp_expand_wild_cards(pTHX_ char *item, struct list_item **head,
 #endif
 
     for (cp = item; *cp; cp++) {
-	if (*cp == '*' || *cp == '%' || isspace(*cp)) break;
+	if (*cp == '*' || *cp == '%' || isSPACE_L1(*cp)) break;
 	if (*cp == '.' && *(cp-1) == '.' && *(cp-2) =='.') break;
     }
-    if (!*cp || isspace(*cp))
+    if (!*cp || isSPACE_L1(*cp))
 	{
 	add_item(head, tail, item, count);
 	return;
@@ -9487,7 +9487,7 @@ mp_expand_wild_cards(pTHX_ char *item, struct list_item **head,
 	if (!decc_efs_case_preserve) {
 	    for (c = string; *c; ++c)
 	    if (isupper(*c))
-		*c = tolower(*c);
+		*c = toLOWER_L1(*c);
 	}
 	if (isunix) trim_unixpath(string,item,1);
 	add_item(head, tail, string, count);
@@ -9534,8 +9534,8 @@ pipe_and_fork(pTHX_ char **cmargv)
     j = l = 0;
     p = subcmd;
     q = cmargv[0];
-    ismcr = q && toupper(*q) == 'M'     && toupper(*(q+1)) == 'C' 
-              && toupper(*(q+2)) == 'R' && !*(q+3);
+    ismcr = q && toUPPER_A(*q) == 'M'     && toUPPER_A(*(q+1)) == 'C' 
+              && toUPPER_A(*(q+2)) == 'R' && !*(q+3);
 
     while (q && l < MAX_DCL_LINE_LENGTH) {
         if (!*q) {
@@ -9932,7 +9932,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
       }
       if (!decc_efs_case_preserve) {
  	for (cp1 = tpl, cp2 = base; *cp1 && *cp2; cp1++,cp2++)
-	  if (_tolower(*cp1) != _tolower(*cp2)) break;
+	  if (toLOWER_L1(*cp1) != toLOWER_L1(*cp2)) break;
       }
       segdirs = dirs - totells;  /* Min # of dirs we must have left */
       for (front = cp2+1; *front; front++) if (*front == '/') segdirs--;
@@ -9954,7 +9954,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
     for (cp1=tplate,cp2=lcres; *cp1 && cp2 <= lcres + (VMS_MAXRSS - 1);
          cp1++,cp2++) {
 	    if (!decc_efs_case_preserve) {
-		*cp2 = _tolower(*cp1);  /* Make lc copy for match */
+		*cp2 = toLOWER_L1(*cp1);  /* Make lc copy for match */
 	    }
 	    else {
 		*cp2 = *cp1;
@@ -9988,7 +9988,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
          if (*cp1 == '?') *cp2 = '%'; /* Substitute VMS' wildcard for Unix' */
          else {
 	    if (!decc_efs_case_preserve) {
-	      *cp2 = _tolower(*cp1);  /* else lowercase for match */
+	      *cp2 = toLOWER_L1(*cp1);  /* else lowercase for match */
 	    }
 	    else {
 	      *cp2 = *cp1;  /* else preserve case for match */
@@ -10041,7 +10041,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
 	}
 	if (!decc_efs_case_preserve) {
 	  for (cp1 = def, cp2 = base; *cp1 && *cp2; cp1++,cp2++)
-	    if (_tolower(*cp1) != _tolower(*cp2)) break;
+	    if (toLOWER_L1(*cp1) != toLOWER_L1(*cp2)) break;
 	}
         segdirs = dirs - totells;  /* Min # of dirs we must have left */
         for (st = cp2+1; *st; st++) if (*st == '/') segdirs--;
@@ -10300,10 +10300,10 @@ Perl_readdir(pTHX_ DIR *dd)
     /* Force the buffer to end with a NUL, and downcase name to match C convention. */
     buff[res.dsc$w_length] = '\0';
     p = buff + res.dsc$w_length;
-    while (--p >= buff) if (!isspace(*p)) break;  
+    while (--p >= buff) if (!isSPACE_L1(*p)) break;  
     *p = '\0';
     if (!decc_efs_case_preserve) {
-      for (p = buff; *p; p++) *p = _tolower(*p);
+      for (p = buff; *p; p++) *p = toLOWER_L1(*p);
     }
 
     /* Skip any directory component and just copy the name. */
@@ -10602,11 +10602,11 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 
   s = cmd;
 
-  while (*s && isspace(*s)) s++;
+  while (*s && isSPACE_L1(*s)) s++;
 
   if (*s == '@' || *s == '$') {
     vmsspec[0] = *s;  rest = s + 1;
-    for (cp = &vmsspec[1]; *rest && isspace(*rest); rest++,cp++) *cp = *rest;
+    for (cp = &vmsspec[1]; *rest && isSPACE_L1(*rest); rest++,cp++) *cp = *rest;
   }
   else { cp = vmsspec; rest = s; }
 
@@ -10674,7 +10674,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   if (*rest == '.' || *rest == '/') {
     char *cp2;
     for (cp2 = resspec;
-         *rest && !isspace(*rest) && cp2 - resspec < (VMS_MAXRSS - 1);
+         *rest && !isSPACE_L1(*rest) && cp2 - resspec < (VMS_MAXRSS - 1);
          rest++, cp2++) *cp2 = *rest;
     *cp2 = '\0';
     if (int_tovmsspec(resspec, cp, 0, NULL)) { 
@@ -10742,7 +10742,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
     if (retsts & 1) {
       FILE *fp;
       s = resspec;
-      while (*s && !isspace(*s)) s++;
+      while (*s && !isSPACE_L1(*s)) s++;
       *s = '\0';
 
       /* check that it's really not DCL with no file extension */
@@ -10750,7 +10750,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
       if (fp) {
         char b[256] = {0,0,0,0};
         read(fileno(fp), b, 256);
-        isdcl = isprint(b[0]) && isprint(b[1]) && isprint(b[2]) && isprint(b[3]);
+        isdcl = isPRINT_L1(b[0]) && isPRINT_L1(b[1]) && isPRINT_L1(b[2]) && isPRINT_L1(b[3]);
 	if (isdcl) {
 	  int shebang_len;
 
@@ -10780,11 +10780,11 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	    i = shebang_len;
 	     /* Image is following after white space */
 	    /*--------------------------------------*/
-	    while (isprint(b[i]) && isspace(b[i]))
+	    while (isPRINT_L1(b[i]) && isSPACE_L1(b[i]))
 		i++;
 
 	    j = 0;
-	    while (isprint(b[i]) && !isspace(b[i])) {
+	    while (isPRINT_L1(b[i]) && !isSPACE_L1(b[i])) {
 		tmpspec[j++] = b[i++];
 		if (j >= NAM$C_MAXRSS)
 		   break;
@@ -10794,12 +10794,12 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	     /* There may be some default parameters to the image */
 	    /*---------------------------------------------------*/
 	    j = 0;
-	    while (isprint(b[i])) {
+	    while (isPRINT_L1(b[i])) {
 		image_argv[j++] = b[i++];
 		if (j >= NAM$C_MAXRSS)
 		   break;
 	    }
-	    while ((j > 0) && !isprint(image_argv[j-1]))
+	    while ((j > 0) && !isPRINT_L1(image_argv[j-1]))
 		j--;
 	    image_argv[j] = 0;
 
@@ -10884,7 +10884,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	    my_strlcat(vmscmd->dsc$a_pointer, resspec, MAX_DCL_LINE_LENGTH);
 	else {
 	    rest = cmd;
-	    while (*rest && isspace(*rest)) rest++;
+	    while (*rest && isSPACE_L1(*rest)) rest++;
 	}
 
 	if (image_argv[0] != 0) {
@@ -11828,7 +11828,7 @@ encode_dev (pTHX_ const char *dev)
 	break;
     if (isdigit (*q))
       c= (*q) - '0';
-    else if (isalpha (toupper (*q)))
+    else if (isALPHA_A(toUPPER_A(*q)))
       c= toupper (*q) - 'A' + (char)10;
     else
       continue; /* Skip '$'s */
@@ -11861,9 +11861,9 @@ is_null_device(const char *name)
        filename, but two consecutive colons indicates a nodename rather
        than a device.  [pr]  */
   if (*name == '_') ++name;
-  if (tolower(*name++) != 'n') return 0;
-  if (tolower(*name++) != 'l') return 0;
-  if (tolower(*name) == 'a') ++name;
+  if (toLOWER_L1(*name++) != 'n') return 0;
+  if (toLOWER_L1(*name++) != 'l') return 0;
+  if (toLOWER_L1(*name) == 'a') ++name;
   if (*name == '0') ++name;
   return (*name++ == ':') && (*name != ':');
 }
@@ -12953,11 +12953,11 @@ mod2fname(pTHX_ CV *cv)
       last = 0;
       dest = workbuff;
       for (source = work_name; *source; source++) {
-	if (last == toupper(*source)) {
+	if (last == toUPPER_A(*source)) {
 	continue;
 	}
 	*dest++ = *source;
-	last = toupper(*source);
+	last = toUPPER_A(*source);
       }
       my_strlcpy(work_name, workbuff, sizeof(work_name));
     }
@@ -13196,7 +13196,7 @@ Perl_vms_start_glob(pTHX_ SV *tmpglob, IO *io)
 	    }
 
 	    if (!decc_efs_case_preserve) {
-	        for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
+	        for (cp = rstr; *cp; cp++) *cp = toLOWER_L1(*cp);
 	    }
 
             /* Find File treats a Null extension as return all extensions */
@@ -13870,7 +13870,7 @@ set_feature_default(const char *name, int value)
     if (value > 0) {
         status = simple_trnlnm(name, val_str, sizeof(val_str));
         if (status) {
-            val_str[0] = _toupper(val_str[0]);
+            val_str[0] = toUPPER_A(val_str[0]);
             if (val_str[0] == 'D' || val_str[0] == '0' || val_str[0] == 'F')
 	        return 0;
         }
@@ -13922,7 +13922,7 @@ vmsperl_set_features(void)
     vms_debug_on_exception = 0;
     status = simple_trnlnm("PERL_VMS_EXCEPTION_DEBUG", val_str, sizeof(val_str));
     if (status) {
-       val_str[0] = _toupper(val_str[0]);
+       val_str[0] = toUPPER_A(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_debug_on_exception = 1;
        else
@@ -13933,7 +13933,7 @@ vmsperl_set_features(void)
     vms_debug_fileify = 0;
     status = simple_trnlnm("PERL_VMS_FILEIFY_DEBUG", val_str, sizeof(val_str));
     if (status) {
-	val_str[0] = _toupper(val_str[0]);
+	val_str[0] = toUPPER_A(val_str[0]);
         if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	    vms_debug_fileify = 1;
         else
@@ -13953,7 +13953,7 @@ vmsperl_set_features(void)
     vms_bug_stat_filename = 0;
     status = simple_trnlnm("PERL_VMS_BUG_STAT_FILENAME", val_str, sizeof(val_str));
     if (status) {
-	val_str[0] = _toupper(val_str[0]);
+	val_str[0] = toUPPER_A(val_str[0]);
         if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	    vms_bug_stat_filename = 1;
         else
@@ -13965,7 +13965,7 @@ vmsperl_set_features(void)
     vms_vtf7_filenames = 0;
     status = simple_trnlnm("PERL_VMS_VTF7_FILENAMES", val_str, sizeof(val_str));
     if (status) {
-       val_str[0] = _toupper(val_str[0]);
+       val_str[0] = toUPPER_A(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_vtf7_filenames = 1;
        else
@@ -13976,7 +13976,7 @@ vmsperl_set_features(void)
     vms_unlink_all_versions = 0;
     status = simple_trnlnm("PERL_VMS_UNLINK_ALL_VERSIONS", val_str, sizeof(val_str));
     if (status) {
-       val_str[0] = _toupper(val_str[0]);
+       val_str[0] = toUPPER_A(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_unlink_all_versions = 1;
        else
@@ -14013,7 +14013,7 @@ vmsperl_set_features(void)
     decc_bug_devnull = 0;
     status = simple_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if (status) {
-       val_str[0] = _toupper(val_str[0]);
+       val_str[0] = toUPPER_A(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
           decc_bug_devnull = 1;
        else
@@ -14110,7 +14110,7 @@ vmsperl_set_features(void)
     /* for strict backward compatibility */
     status = simple_trnlnm("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
     if (status) {
-       val_str[0] = _toupper(val_str[0]);
+       val_str[0] = toUPPER_A(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_posix_exit = 1;
        else
