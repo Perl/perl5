@@ -1095,17 +1095,21 @@ syntax error at foo line 8, near ", 123"
 EOF
 
 eval "#line 8 foo\nno warnings; sub t096 (\$a 123) { }";
-is $@, qq{syntax error at foo line 8, near "\$a 123"\n};
+is $@, <<'EOF';
+Illegal operator following parameter in a subroutine signature at foo line 8, near "($a 123"
+syntax error at foo line 8, near "($a 123"
+EOF
 
 eval "#line 8 foo\nsub t097 (\$a { }) { }";
-is $@, <<EOF;
-syntax error at foo line 8, near "\$a { "
+is $@, <<'EOF';
+Illegal operator following parameter in a subroutine signature at foo line 8, near "($a { }"
+syntax error at foo line 8, near "($a { }"
 EOF
 
 eval "#line 8 foo\nsub t098 (\$a; \$b) { }";
-is $@, <<EOF;
-syntax error at foo line 8, at EOF
-syntax error at foo line 8, near "\$b) "
+is $@, <<'EOF';
+Illegal operator following parameter in a subroutine signature at foo line 8, near "($a; "
+syntax error at foo line 8, near "($a; "
 EOF
 
 eval "#line 8 foo\nsub t099 (\$\$) { }";

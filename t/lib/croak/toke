@@ -404,3 +404,12 @@ Number found where operator expected at - line 1, near "--5"
 	(Missing operator before 5?)
 syntax error at - line 1, near "1e"
 Execution of - aborted due to compilation errors.
+########
+# NAME signature with non-"=" assignop #131777
+use feature 'signatures';
+no warnings 'experimental::signatures';
+sub foo ($a += 1)
+EXPECT
+Illegal operator following parameter in a subroutine signature at - line 3, near "($a += 1"
+syntax error at - line 3, near "($a += 1"
+Execution of - aborted due to compilation errors.

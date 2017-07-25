@@ -5125,12 +5125,43 @@ Perl_yylex(pTHX)
                     0, cBOOL(UTF), FALSE);
                 *dest = '\0';
                 assert(PL_tokenbuf[1]); /* we have a variable name */
+            }
+            else {
+                *PL_tokenbuf = 0;
+                PL_in_my = 0;
+            }
+
+            s = skipspace(s);
+            /* parse the = for the default ourselves to avoid '+=' etc being accepted here
+             * as the ASSIGNOP, and exclude other tokens that start with =
+             */
+            if (*s == '=' && (!s[1] || strchr("=~>", s[1]) == 0)) {
+                /* save now to report with the same context as we did when
+                 * all ASSIGNOPS were accepted */
+                PL_oldbufptr = s;
+
+                ++s;
+                NEXTVAL_NEXTTOKE.ival = 0;
+                force_next(ASSIGNOP);
+                PL_expect = XTERM;
+            }
+            else if (*s == ',' || *s == ')') {
+                PL_expect = XOPERATOR;
+            }
+            else {
+                /* make sure the context shows the unexpected character and
+                 * hopefully a bit more */
+                if (*s) ++s;
+                while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
+                    s++;
+                PL_bufptr = s; /* for error reporting */
+                yyerror("Illegal operator following parameter in a subroutine signature");
+                PL_in_my = 0;
+            }
+            if (*PL_tokenbuf) {
                 NEXTVAL_NEXTTOKE.ival = sigil;
                 force_next('p'); /* force a signature pending identifier */
             }
-            else
-                PL_in_my = 0;
-            PL_expect = XOPERATOR;
             break;
 
         case ')':

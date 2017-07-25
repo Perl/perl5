@@ -2652,6 +2652,17 @@ this error when Perl was built using standard options.  For some
 reason, your version of Perl appears to have been built without
 this support.  Talk to your Perl administrator.
 
+=item Illegal operator following parameter in a subroutine signature
+
+(F) A parameter in a subroutine signature, was followed by something
+other than C<=> introducing a default, C<,> or C<)>.
+
+    use feature 'signatures';
+    sub foo ($=1) {}           # legal
+    sub foo ($a = 1) {}        # legal
+    sub foo ($a += 1) {}       # illegal
+    sub foo ($a == 1) {}       # illegal
+
 =item Illegal character following sigil in a subroutine signature
 
 (F) A parameter in a subroutine signature contained an unexpected character
