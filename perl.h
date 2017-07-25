@@ -5889,8 +5889,8 @@ typedef struct am_table_short AMTS;
 #ifdef USE_LOCALE
 /* These locale things are all subject to change */
 
-#  if      defined(USE_ITHREADS)                \
-      &&   defined(HAS_NEWLOCALE)               \
+
+#  if      defined(HAS_NEWLOCALE)               \
       &&   defined(LC_ALL_MASK)                 \
       &&   defined(HAS_FREELOCALE)              \
       &&   defined(HAS_USELOCALE)               \
@@ -5900,16 +5900,16 @@ typedef struct am_table_short AMTS;
      * enough to have the Posix 2008 locale functions has LC_ALL.  The test
      * above makes sure that assumption is valid */
 
-#    define USE_POSIX_2008_LOCALE
+#    define HAS_POSIX_2008_LOCALE
 #  endif
 
-#   define LOCALE_INIT   MUTEX_INIT(&PL_locale_mutex)
-
-#   ifdef USE_POSIX_2008_LOCALE
-#       define USE_THREAD_SAFE_LOCALE
-#       define LOCALE_TERM                                                  \
+/* We create a C locale object unconditionally if we have the functions to do
+ * so; hence must destroy it unconditionally at the end */
+#  ifndef HAS_POSIX_2008_LOCALE
+#    define _LOCALE_TERM_POSIX_2008  NOOP
+#  else
+#    define _LOCALE_TERM_POSIX_2008                                         \
                     STMT_START {                                            \
-                        MUTEX_DESTROY(&PL_locale_mutex);                    \
                         if (PL_C_locale_obj) {                              \
                             /* Make sure we aren't using the locale         \
                              * space we are about to free */                \
@@ -5917,13 +5917,28 @@ typedef struct am_table_short AMTS;
                             freelocale(PL_C_locale_obj);                    \
                             PL_C_locale_obj = (locale_t) NULL;              \
                         }                                                   \
-                     } STMT_END
-#   else
-#       define LOCALE_TERM   MUTEX_DESTROY(&PL_locale_mutex)
-#   endif
+                    } STMT_END
+#  endif
 
-#   define LOCALE_LOCK   MUTEX_LOCK(&PL_locale_mutex)
-#   define LOCALE_UNLOCK MUTEX_UNLOCK(&PL_locale_mutex)
+#  ifndef USE_ITHREADS
+#    define LOCALE_INIT
+#    define LOCALE_LOCK
+#    define LOCALE_UNLOCK
+#    define LOCALE_TERM  STMT_START { _LOCALE_TERM_POSIX_2008; } STMT_END
+#  else /* Below is do use threads */
+#    define LOCALE_INIT         MUTEX_INIT(&PL_locale_mutex)
+#    define LOCALE_LOCK         MUTEX_LOCK(&PL_locale_mutex)
+#    define LOCALE_UNLOCK       MUTEX_UNLOCK(&PL_locale_mutex)
+#    define LOCALE_TERM                                                     \
+                    STMT_START {                                            \
+                        MUTEX_DESTROY(&PL_locale_mutex);                    \
+                        _LOCALE_TERM_POSIX_2008;                            \
+                    } STMT_END
+#    ifdef HAS_POSIX_2008_LOCALE
+#      define USE_POSIX_2008_LOCALE
+#      define USE_THREAD_SAFE_LOCALE
+#    endif
+#  endif
 
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
