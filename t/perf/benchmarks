@@ -346,11 +346,6 @@
         setup   => 'my %h;',
         code    => '!%h',
     },
-    'expr::hash::bool_empty_keys' => {
-        desc    => 'empty lexical hash in boolean keys context',
-        setup   => 'my %h;',
-        code    => '!keys %h',
-    },
     'expr::hash::bool_empty_unknown' => {
         desc    => 'empty lexical hash in unknown context',
         setup   => 'my ($i, %h); sub f { if (%h) { $i++ }}',
@@ -360,11 +355,6 @@
         desc    => 'non-empty lexical hash in boolean context',
         setup   => 'my %h = 1..10;',
         code    => '!%h',
-    },
-    'expr::hash::bool_full_keys' => {
-        desc    => 'non-empty lexical hash in keys boolean context',
-        setup   => 'my %h = 1..10;',
-        code    => '!keys %h',
     },
 
 
@@ -1268,6 +1258,16 @@
         setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
         code    => 'keys %h',
     },
+    'func::keys::lex::bool_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in bool context',
+        setup   => 'my %h = ()',
+        code    => '!keys %h',
+    },
+    'func::keys::lex::bool_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in bool context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '!keys %h',
+    },
     'func::keys::lex::scalar_cxt_empty' => {
         desc    => ' keys() on an empty lexical hash in scalar context',
         setup   => 'my $k; my %h = ()',
@@ -1298,6 +1298,16 @@
         desc    => ' keys() on a non-empty package hash in void context',
         setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
         code    => 'keys %h',
+    },
+    'func::keys::pkg::bool_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in bool context',
+        setup   => 'our %h = ()',
+        code    => '!keys %h',
+    },
+    'func::keys::pkg::bool_cxt' => {
+        desc    => ' keys() on a non-empty package hash in bool context',
+        setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '!keys %h',
     },
     'func::keys::pkg::scalar_cxt_empty' => {
         desc    => ' keys() on an empty package hash in scalar context',
