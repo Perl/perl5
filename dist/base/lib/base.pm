@@ -3,7 +3,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.25';
+$VERSION = '2.26';
 $VERSION =~ tr/_//d;
 
 # simplest way to avoid indexing of the package: no package statement
