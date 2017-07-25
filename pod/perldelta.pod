@@ -135,10 +135,6 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =item *
 
-B::Debug has been removed from the core distribution.
-
-=item *
-
 XXX
 
 =back
