@@ -5158,12 +5158,23 @@ Perl_yylex(pTHX)
         else {
             c = Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
         }
-        len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (STRLEN) (s - PL_linestart);
-        if (len > UNRECOGNIZED_PRECEDE_COUNT) {
-            d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)PL_linestart) : s - UNRECOGNIZED_PRECEDE_COUNT;
-        } else {
+
+        if (s >= PL_linestart) {
             d = PL_linestart;
         }
+        else {
+            /* somehow (probably due to a parse failure), PL_linestart has advanced
+             * pass PL_bufptr, get a reasonable beginning of line
+             */
+            d = s;
+            while (d > SvPVX(PL_linestr) && d[-1] && d[-1] != '\n')
+                --d;
+        }
+        len = UTF ? Perl_utf8_length(aTHX_ (U8 *) d, (U8 *) s) : (STRLEN) (s - d);
+        if (len > UNRECOGNIZED_PRECEDE_COUNT) {
+            d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)d) : s - UNRECOGNIZED_PRECEDE_COUNT;
+        }
+
         Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %" UTF8f "<-- HERE near column %d", c,
                           UTF8fARG(UTF, (s - d), d),
                          (int) len + 1);
