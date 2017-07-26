@@ -141,6 +141,21 @@ const int categories[] = {
 #    ifdef USE_LOCALE_MONETARY
                              LC_MONETARY,
 #    endif
+#    ifdef USE_LOCALE_ADDRESS
+                             LC_ADDRESS,
+#    endif
+#    ifdef USE_LOCALE_IDENTIFICATION
+                             LC_IDENTIFICATION,
+#    endif
+#    ifdef USE_LOCALE_MEASUREMENT
+                             LC_MEASUREMENT,
+#    endif
+#    ifdef USE_LOCALE_PAPER
+                             LC_PAPER,
+#    endif
+#    ifdef USE_LOCALE_TELEPHONE
+                             LC_TELEPHONE,
+#    endif
 #    ifdef LC_ALL
                              LC_ALL,
 #    endif
@@ -170,6 +185,21 @@ const char * category_names[] = {
 #    endif
 #    ifdef USE_LOCALE_MONETARY
                                  "LC_MONETARY",
+#    endif
+#    ifdef USE_LOCALE_ADDRESS
+                                 "LC_ADDRESS",
+#    endif
+#    ifdef USE_LOCALE_IDENTIFICATION
+                                 "LC_IDENTIFICATION",
+#    endif
+#    ifdef USE_LOCALE_MEASUREMENT
+                                 "LC_MEASUREMENT",
+#    endif
+#    ifdef USE_LOCALE_PAPER
+                                 "LC_PAPER",
+#    endif
+#    ifdef USE_LOCALE_TELEPHONE
+                                 "LC_TELEPHONE",
 #    endif
 #    ifdef LC_ALL
                                  "LC_ALL",
@@ -280,8 +310,38 @@ S_category_name(const int category)
 #  else
 #    define _DUMMY_MONETARY             _DUMMY_MESSAGES
 #  endif
+#  ifdef USE_LOCALE_ADDRESS
+#    define LC_ADDRESS_INDEX            _DUMMY_MONETARY + 1
+#    define _DUMMY_ADDRESS              LC_ADDRESS_INDEX
+#  else
+#    define _DUMMY_ADDRESS              _DUMMY_MONETARY
+#  endif
+#  ifdef USE_LOCALE_IDENTIFICATION
+#    define LC_IDENTIFICATION_INDEX     _DUMMY_ADDRESS + 1
+#    define _DUMMY_IDENTIFICATION       LC_IDENTIFICATION_INDEX
+#  else
+#    define _DUMMY_IDENTIFICATION       _DUMMY_ADDRESS
+#  endif
+#  ifdef USE_LOCALE_MEASUREMENT
+#    define LC_MEASUREMENT_INDEX        _DUMMY_IDENTIFICATION + 1
+#    define _DUMMY_MEASUREMENT          LC_MEASUREMENT_INDEX
+#  else
+#    define _DUMMY_MEASUREMENT          _DUMMY_IDENTIFICATION
+#  endif
+#  ifdef USE_LOCALE_PAPER
+#    define LC_PAPER_INDEX              _DUMMY_MEASUREMENT + 1
+#    define _DUMMY_PAPER                LC_PAPER_INDEX
+#  else
+#    define _DUMMY_PAPER                _DUMMY_MEASUREMENT
+#  endif
+#  ifdef USE_LOCALE_TELEPHONE
+#    define LC_TELEPHONE_INDEX          _DUMMY_PAPER + 1
+#    define _DUMMY_TELEPHONE            LC_TELEPHONE_INDEX
+#  else
+#    define _DUMMY_TELEPHONE            _DUMMY_PAPER
+#  endif
 #  ifdef LC_ALL
-#    define LC_ALL_INDEX                _DUMMY_MONETARY + 1
+#    define LC_ALL_INDEX                _DUMMY_TELEPHONE + 1
 #  endif
 #endif /* ifdef USE_LOCALE */
 
@@ -1892,6 +1952,26 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     assert(categories[LC_MONETARY_INDEX] == LC_MONETARY);
     assert(strEQ(category_names[LC_MONETARY_INDEX], "LC_MONETARY"));
 #    endif
+#    ifdef USE_LOCALE_ADDRESS
+    assert(categories[LC_ADDRESS_INDEX] == LC_ADDRESS);
+    assert(strEQ(category_names[LC_ADDRESS_INDEX], "LC_ADDRESS"));
+#    endif
+#    ifdef USE_LOCALE_IDENTIFICATION
+    assert(categories[LC_IDENTIFICATION_INDEX] == LC_IDENTIFICATION);
+    assert(strEQ(category_names[LC_IDENTIFICATION_INDEX], "LC_IDENTIFICATION"));
+#    endif
+#    ifdef USE_LOCALE_MEASUREMENT
+    assert(categories[LC_MEASUREMENT_INDEX] == LC_MEASUREMENT);
+    assert(strEQ(category_names[LC_MEASUREMENT_INDEX], "LC_MEASUREMENT"));
+#    endif
+#    ifdef USE_LOCALE_PAPER
+    assert(categories[LC_PAPER_INDEX] == LC_PAPER);
+    assert(strEQ(category_names[LC_PAPER_INDEX], "LC_PAPER"));
+#    endif
+#    ifdef USE_LOCALE_TELEPHONE
+    assert(categories[LC_TELEPHONE_INDEX] == LC_TELEPHONE);
+    assert(strEQ(category_names[LC_TELEPHONE_INDEX], "LC_TELEPHONE"));
+#    endif
 #    ifdef LC_ALL
     assert(categories[LC_ALL_INDEX] == LC_ALL);
     assert(strEQ(category_names[LC_ALL_INDEX], "LC_ALL"));
@@ -2049,8 +2129,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                         Safefree(curlocales[j]);
                     }
                 }
-
-                PerlIO_printf(Perl_error_log, "and possibly others\n");
 
 #  endif /* LC_ALL */
 

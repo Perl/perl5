@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.81';
+our $VERSION = '1.82';
 
 require XSLoader;
 
@@ -306,7 +306,8 @@ my %default_export_tags = ( # cf. exports policy below
 		_POSIX_STREAM_MAX _POSIX_TZNAME_MAX)],
 
     locale_h =>	[qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES
-		    LC_MONETARY LC_NUMERIC LC_TIME NULL
+		    LC_MONETARY LC_NUMERIC LC_TIME LC_IDENTIFICATION
+                    LC_MEASUREMENT LC_PAPER LC_TELEPHONE LC_ADDRESS NULL
 		    localeconv setlocale)],
 
     math_h =>   [qw(FP_ILOGB0 FP_ILOGBNAN FP_INFINITE FP_NAN FP_NORMAL

@@ -735,6 +735,21 @@
 #   if !defined(NO_LOCALE_TIME) && defined(LC_TIME)
 #	define USE_LOCALE_TIME
 #   endif
+#   if !defined(NO_LOCALE_ADDRESS) && defined(LC_ADDRESS)
+#	define USE_LOCALE_ADDRESS
+#   endif
+#   if !defined(NO_LOCALE_IDENTIFICATION) && defined(LC_IDENTIFICATION)
+#	define USE_LOCALE_IDENTIFICATION
+#   endif
+#   if !defined(NO_LOCALE_MEASUREMENT) && defined(LC_MEASUREMENT)
+#	define USE_LOCALE_MEASUREMENT
+#   endif
+#   if !defined(NO_LOCALE_PAPER) && defined(LC_PAPER)
+#	define USE_LOCALE_PAPER
+#   endif
+#   if !defined(NO_LOCALE_TELEPHONE) && defined(LC_TELEPHONE)
+#	define USE_LOCALE_TELEPHONE
+#   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
 #include <setjmp.h>
