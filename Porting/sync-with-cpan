@@ -334,7 +334,7 @@ else {
     die "The latest version of $module is $new_version, but blead already has it\n"
         if $new_version eq $old_version;
 
-    my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
+    my $url = "https://cpan.metacpan.org/authors/id/$new_path";
     say "Fetching $url";
     #
     # Fetch the new distro
