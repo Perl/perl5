@@ -2661,3 +2661,45 @@ our(@oa, %oh);
 @oa = %oh{'foo', 'bar'};
 @oa = delete @oh{'foo', 'bar'};
 @oa = delete %oh{'foo', 'bar'};
+####
+# keys optimised away in void and scalar context
+no warnings;
+;
+our %h1;
+my($x, %h2);
+%h1;
+keys %h1;
+$x = %h1;
+$x = keys %h1;
+%h2;
+keys %h2;
+$x = %h2;
+$x = keys %h2;
+####
+# eq,const optimised away for (index() == -1)
+my($a, $b);
+our $c;
+$c = index($a, $b) == 2;
+$c = rindex($a, $b) == 2;
+$c = index($a, $b) == -1;
+$c = rindex($a, $b) == -1;
+$c = index($a, $b) != -1;
+$c = rindex($a, $b) != -1;
+$c = (index($a, $b) == -1);
+$c = (rindex($a, $b) == -1);
+$c = (index($a, $b) != -1);
+$c = (rindex($a, $b) != -1);
+####
+# eq,const,sassign,madmy optimised away for (index() == -1)
+my($a, $b);
+my $c;
+$c = index($a, $b) == 2;
+$c = rindex($a, $b) == 2;
+$c = index($a, $b) == -1;
+$c = rindex($a, $b) == -1;
+$c = index($a, $b) != -1;
+$c = rindex($a, $b) != -1;
+$c = (index($a, $b) == -1);
+$c = (rindex($a, $b) == -1);
+$c = (index($a, $b) != -1);
+$c = (rindex($a, $b) != -1);

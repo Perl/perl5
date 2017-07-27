@@ -62,101 +62,7 @@ PP(pp_stub)
 
 /* Pushy stuff. */
 
-/* This is also called directly by pp_lvavref.  */
-PP(pp_padav)
-{
-    dSP; dTARGET;
-    U8 gimme;
-    assert(SvTYPE(TARG) == SVt_PVAV);
-    if (UNLIKELY( PL_op->op_private & OPpLVAL_INTRO ))
-	if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
-	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-    EXTEND(SP, 1);
 
-    if (PL_op->op_flags & OPf_REF) {
-	PUSHs(TARG);
-	RETURN;
-    }
-    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
-        const I32 flags = is_lvalue_sub();
-        if (flags && !(flags & OPpENTERSUB_INARGS)) {
-	    if (GIMME_V == G_SCALAR)
-                /* diag_listed_as: Can't return %s to lvalue scalar context */
-                Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
-            PUSHs(TARG);
-            RETURN;
-       }
-    }
-
-    gimme = GIMME_V;
-    if (gimme == G_ARRAY) {
-        /* XXX see also S_pushav in pp_hot.c */
-	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
-	EXTEND(SP, maxarg);
-	if (SvMAGICAL(TARG)) {
-	    SSize_t i;
-	    for (i=0; i < maxarg; i++) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(TARG), i, FALSE);
-		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
-	    }
-	}
-	else {
-	    SSize_t i;
-	    for (i=0; i < maxarg; i++) {
-		SV * const sv = AvARRAY((const AV *)TARG)[i];
-		SP[i+1] = sv ? sv : &PL_sv_undef;
-	    }
-	}
-	SP += maxarg;
-    }
-    else if (gimme == G_SCALAR) {
-	SV* const sv = sv_newmortal();
-	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
-	sv_setiv(sv, maxarg);
-	PUSHs(sv);
-    }
-    RETURN;
-}
-
-PP(pp_padhv)
-{
-    dSP; dTARGET;
-    U8 gimme;
-
-    assert(SvTYPE(TARG) == SVt_PVHV);
-    XPUSHs(TARG);
-    if (UNLIKELY( PL_op->op_private & OPpLVAL_INTRO ))
-	if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
-	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-
-    if (PL_op->op_flags & OPf_REF)
-	RETURN;
-    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
-        const I32 flags = is_lvalue_sub();
-        if (flags && !(flags & OPpENTERSUB_INARGS)) {
-            if (GIMME_V == G_SCALAR)
-                /* diag_listed_as: Can't return %s to lvalue scalar context */
-                Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
-            RETURN;
-        }
-    }
-
-    gimme = GIMME_V;
-    if (gimme == G_ARRAY) {
-	RETURNOP(Perl_do_kv(aTHX));
-    }
-    else if ((PL_op->op_private & OPpTRUEBOOL
-	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-	     && block_gimme() == G_VOID  ))
-	  && (!SvRMAGICAL(TARG) || !mg_find(TARG, PERL_MAGIC_tied))
-    )
-	SETs(HvUSEDKEYS(TARG) ? &PL_sv_yes : &PL_sv_no);
-    else if (gimme == G_SCALAR) {
-	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
-	SETs(sv);
-    }
-    RETURN;
-}
 
 PP(pp_padcv)
 {
@@ -440,11 +346,15 @@ PP(pp_pos)
     else {
 	    const MAGIC * const mg = mg_find_mglob(sv);
 	    if (mg && mg->mg_len != -1) {
-		dTARGET;
 		STRLEN i = mg->mg_len;
-		if (mg->mg_flags & MGf_BYTES && DO_UTF8(sv))
-		    i = sv_pos_b2u_flags(sv, i, SV_GMAGIC|SV_CONST_RETURN);
-		SETu(i);
+                if (PL_op->op_private & OPpTRUEBOOL)
+                    SETs(i ? &PL_sv_yes : &PL_sv_zero);
+                else {
+                    dTARGET;
+                    if (mg->mg_flags & MGf_BYTES && DO_UTF8(sv))
+                        i = sv_pos_b2u_flags(sv, i, SV_GMAGIC|SV_CONST_RETURN);
+                    SETu(i);
+                }
 		return NORMAL;
 	    }
 	    SETs(&PL_sv_undef);
@@ -2621,8 +2531,11 @@ PP(pp_negate)
 PP(pp_not)
 {
     dSP;
+    SV *sv;
+
     tryAMAGICun_MG(not_amg, AMGf_set);
-    *PL_stack_sp = boolSV(!SvTRUE_nomg(*PL_stack_sp));
+    sv = *PL_stack_sp;
+    *PL_stack_sp = boolSV(!SvTRUE_nomg_NN(sv));
     return NORMAL;
 }
 
@@ -3201,51 +3114,73 @@ PP(pp_oct)
 
 /* String stuff. */
 
+
 PP(pp_length)
 {
     dSP; dTARGET;
     SV * const sv = TOPs;
 
     U32 in_bytes = IN_BYTES;
-    /* simplest case shortcut */
-    /* turn off SVf_UTF8 in tmp flags if HINT_BYTES on*/
+    /* Simplest case shortcut:
+     * set svflags to just the SVf_POK|SVs_GMG|SVf_UTF8 from the SV,
+     * with the SVf_UTF8 flag inverted if under 'use bytes' (HINT_BYTES
+     * set)
+     */
     U32 svflags = (SvFLAGS(sv) ^ (in_bytes << 26)) & (SVf_POK|SVs_GMG|SVf_UTF8);
-    STATIC_ASSERT_STMT(HINT_BYTES == 0x00000008 && SVf_UTF8 == 0x20000000 && (SVf_UTF8 == HINT_BYTES << 26));
+
+    STATIC_ASSERT_STMT(SVf_UTF8 == (HINT_BYTES << 26));
     SETs(TARG);
 
-    if(LIKELY(svflags == SVf_POK))
+    if (LIKELY(svflags == SVf_POK))
         goto simple_pv;
-    if(svflags & SVs_GMG)
+
+    if (svflags & SVs_GMG)
         mg_get(sv);
+
     if (SvOK(sv)) {
-	if (!IN_BYTES) /* reread to avoid using an C auto/register */
-	    sv_setiv(TARG, (IV)sv_len_utf8_nomg(sv));
-	else
-	{
-	    STRLEN len;
-            /* unrolled SvPV_nomg_const(sv,len) */
-            if(SvPOK_nog(sv)){
-                simple_pv:
+        STRLEN len;
+	if (!IN_BYTES) { /* reread to avoid using an C auto/register */
+            if ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == SVf_POK)
+                goto simple_pv;
+            if ( SvPOK(sv) && (PL_op->op_private & OPpTRUEBOOL)) {
+                /* no need to convert from bytes to chars */
                 len = SvCUR(sv);
-            } else  {
+                goto return_bool;
+            }
+	    len = sv_len_utf8_nomg(sv);
+        }
+	else {
+            /* unrolled SvPV_nomg_const(sv,len) */
+            if (SvPOK_nog(sv)) {
+              simple_pv:
+                len = SvCUR(sv);
+                if (PL_op->op_private & OPpTRUEBOOL) {
+                  return_bool:
+                    SETs(len ? &PL_sv_yes : &PL_sv_zero);
+                    return NORMAL;
+                }
+            }
+            else {
                 (void)sv_2pv_flags(sv, &len, 0|SV_CONST_RETURN);
             }
-	    sv_setiv(TARG, (IV)(len));
 	}
-    } else {
-	if (!SvPADTMP(TARG)) {
-            sv_set_undef(TARG);
-	} else { /* TARG is on stack at this point and is overwriten by SETs.
-                   This branch is the odd one out, so put TARG by default on
-                   stack earlier to let local SP go out of liveness sooner */
-            SETs(&PL_sv_undef);
-            goto no_set_magic;
-        }
+        TARGi((IV)(len), 1);
     }
-    SvSETMAGIC(TARG);
-    no_set_magic:
+    else {
+	if (!SvPADTMP(TARG)) {
+            /* OPpTARGET_MY: targ is var in '$lex = length()' */
+            sv_set_undef(TARG);
+            SvSETMAGIC(TARG);
+	}
+        else
+            /* TARG is on stack at this point and is overwriten by SETs.
+             * This branch is the odd one out, so put TARG by default on
+             * stack earlier to let local SP go out of liveness sooner */
+            SETs(&PL_sv_undef);
+    }
     return NORMAL; /* no putback, SP didn't move in this opcode */
 }
+
 
 /* Returns false if substring is completely outside original string.
    No length is indicated by len_iv = 0 and len_is_uv = 0.  len_is_uv must
@@ -3549,7 +3484,7 @@ PP(pp_index)
 		   convert the small string to ISO-8859-1, then there is no
 		   way that it could be found anywhere by index.  */
 		retval = -1;
-		goto fail;
+		goto push_result;
 	    }
 
 	    /* At this point, pv is a malloc()ed string. So donate it to temp
@@ -3612,8 +3547,18 @@ PP(pp_index)
 	    retval = sv_pos_b2u_flags(big, retval, SV_CONST_RETURN);
     }
     SvREFCNT_dec(temp);
- fail:
-    PUSHi(retval);
+
+  push_result:
+    /* OPpTRUEBOOL indicates an '== -1' has been optimised away */
+    if (PL_op->op_private & OPpTRUEBOOL) {
+        PUSHs( ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
+                    ? &PL_sv_yes : &PL_sv_no);
+        if (PL_op->op_private & OPpTARGET_MY)
+            /* $lex = (index() == -1) */
+            sv_setsv(TARG, TOPs);
+    }
+    else 
+        PUSHi(retval);
     RETURN;
 }
 
@@ -6410,6 +6355,19 @@ PP(pp_coreargs)
 
     RETURN;
 }
+
+/* Implement CORE::keys(),values(),each().
+ *
+ * We won't know until run-time whether the arg is an array or hash,
+ * so this op calls
+ *
+ *    pp_keys/pp_values/pp_each
+ * or
+ *    pp_akeys/pp_avalues/pp_aeach
+ *
+ * as appropriate (or whatever pp function actually implements the OP_FOO
+ * functionality for each FOO).
+ */
 
 PP(pp_avhvswitch)
 {

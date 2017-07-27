@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2261;
+plan 2277;
 
 use B ();
 
@@ -348,5 +348,36 @@ test_opcount(0, 'barewords can be constant-folded',
                     rv2av   => $partial,
                     aassign => 0,
                 });
+    }
+}
+
+# index(...) == -1 and variants optimise away the EQ and CONST
+# and with $lex = (index(...) == -1), the assignment is optimised away
+# too
+
+{
+    local our @pkg;
+    my @lex;
+
+    my ($x, $y, $z);
+    for my $assign (0, 1) {
+        for my $op ('index($x,$y)', 'rindex($x,$y)') {
+            for my $eq ('==', '!=') {
+                for my $swap (0, 1) {
+                    my $expr = $swap ? "(-1 $eq $op)" : "($op $eq -1)";
+                    $expr = "\$z = ($expr)" if $assign;
+
+                    test_opcount(0, "optimise away qe,const in $expr",
+                            eval qq{sub { $expr }},
+                            {
+                                eq      => 0,
+                                ne      => 0,
+                                const   => 0,
+                                sassign => 0,
+                                padsv   => 2.
+                            });
+                }
+            }
+        }
     }
 }

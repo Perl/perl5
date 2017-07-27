@@ -153,8 +153,10 @@ S_POPMARK(pTHX)
 PERL_STATIC_INLINE struct regexp *
 S_ReANY(const REGEXP * const re)
 {
+    XPV* const p = (XPV*)SvANY(re);
     assert(isREGEXP(re));
-    return re->sv_u.svu_rx;
+    return SvTYPE(re) == SVt_PVLV ? p->xpv_len_u.xpvlenu_rx
+                                   : (struct regexp *)p;
 }
 
 /* ------------------------------- sv.h ------------------------------- */

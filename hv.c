@@ -509,7 +509,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		/* This cast somewhat evil, but I'm merely using NULL/
 		   not NULL to return the boolean exists.
 		   And I know hv is not NULL.  */
-		return SvTRUE(svret) ? (void *)hv : NULL;
+		return SvTRUE_NN(svret) ? (void *)hv : NULL;
 		}
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((const SV *)hv, PERL_MAGIC_env)) {
@@ -967,6 +967,75 @@ Perl_hv_scalar(pTHX_ HV *hv)
     return sv;
 }
 
+
+/*
+hv_pushkv(): push all the keys and/or values of a hash onto the stack.
+The rough Perl equivalents:
+    () = %hash;
+    () = keys %hash;
+    () = values %hash;
+
+Resets the hash's iterator.
+
+flags : 1   = push keys
+        2   = push values
+        1|2 = push keys and values
+        XXX use symbolic flag constants at some point?
+I might unroll the non-tied hv_iternext() in here at some point - DAPM
+*/
+
+void
+Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
+{
+    HE *entry;
+    bool tied = SvRMAGICAL(hv) && mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied);
+    dSP;
+
+    PERL_ARGS_ASSERT_HV_PUSHKV;
+    assert(flags); /* must be pushing at least one of keys and values */
+
+    (void)hv_iterinit(hv);
+
+    if (tied) {
+        SSize_t ext = (flags == 3) ? 2 : 1;
+        while ((entry = hv_iternext(hv))) {
+            EXTEND(SP, ext);
+            if (flags & 1)
+                PUSHs(hv_iterkeysv(entry));
+            if (flags & 2)
+                PUSHs(hv_iterval(hv, entry));
+        }
+    }
+    else {
+        Size_t nkeys = HvUSEDKEYS(hv);
+        SSize_t ext;
+
+        if (!nkeys)
+            return;
+
+        /* 2*nkeys() should never be big enough to truncate or wrap */
+        assert(nkeys <= (SSize_t_MAX >> 1));
+        ext = nkeys * ((flags == 3) ? 2 : 1);
+
+        EXTEND_MORTAL(nkeys);
+        EXTEND(SP, ext);
+
+        while ((entry = hv_iternext(hv))) {
+            if (flags & 1) {
+                SV *keysv = newSVhek(HeKEY_hek(entry));
+                SvTEMP_on(keysv);
+                PL_tmps_stack[++PL_tmps_ix] = keysv;
+                PUSHs(keysv);
+            }
+            if (flags & 2)
+                PUSHs(HeVAL(entry));
+        }
+    }
+
+    PUTBACK;
+}
+
+
 /*
 =for apidoc hv_bucket_ratio
 
@@ -995,12 +1064,13 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
             return magic_scalarpack(hv, mg);
     }
 
-    sv = sv_newmortal();
-    if (HvUSEDKEYS((HV *)hv))
+    if (HvUSEDKEYS((HV *)hv)) {
+        sv = sv_newmortal();
         Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
                 (long)HvFILL(hv), (long)HvMAX(hv) + 1);
+    }
     else
-        sv_setiv(sv, 0);
+        sv = &PL_sv_zero;
     
     return sv;
 }

@@ -363,6 +363,11 @@ PERL_CALLCONV OP *	Perl_ck_eof(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_EOF	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_eq(pTHX_ OP *o)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CK_EQ	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_eval(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CK_EVAL	\
@@ -1293,6 +1298,9 @@ PERL_CALLCONV SSize_t*	Perl_hv_placeholders_p(pTHX_ HV *hv)
 
 PERL_CALLCONV void	Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph);
 #define PERL_ARGS_ASSERT_HV_PLACEHOLDERS_SET	\
+	assert(hv)
+PERL_CALLCONV void	Perl_hv_pushkv(pTHX_ HV *hv, U32 flags);
+#define PERL_ARGS_ASSERT_HV_PUSHKV	\
 	assert(hv)
 PERL_CALLCONV void	Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand);
 #define PERL_ARGS_ASSERT_HV_RAND_SET	\

@@ -3092,7 +3092,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         goto nomod;
     case OP_AVHVSWITCH:
 	if (type == OP_LEAVESUBLV
-	 && (o->op_private & 3) + OP_EACH == OP_KEYS)
+	 && (o->op_private & OPpAVHVSWITCH_MASK) + OP_EACH == OP_KEYS)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
     case OP_AV2ARYLEN:
@@ -9471,6 +9471,8 @@ Perl_oopsHV(pTHX_ OP *o)
     case OP_RV2SV:
     case OP_RV2AV:
         OpTYPE_set(o, OP_RV2HV);
+        /* rv2hv steals the bottom bit for its own uses */
+        o->op_private &= ~OPpARG1_MASK;
 	ref(o, OP_RV2HV);
 	break;
 
@@ -9813,6 +9815,53 @@ Perl_ck_eof(pTHX_ OP *o)
     return o;
 }
 
+
+/* for OP_EQ, OP_NE, OP_I_EQ, OP_I_NE */
+
+OP *
+Perl_ck_eq(pTHX_ OP *o)
+{
+    OP *indexop, *constop, *start;
+    SV *sv;
+    PERL_ARGS_ASSERT_CK_EQ;
+
+    /* convert (index(...) == -1) and variations into
+     *   (r)index/BOOL(,NEG)
+     */
+
+    indexop = cUNOPo->op_first;
+    constop = OpSIBLING(indexop);
+    start = NULL;
+    if (indexop->op_type == OP_CONST) {
+        constop = indexop;
+        indexop = OpSIBLING(constop);
+        start = constop;
+    }
+
+    if (indexop->op_type != OP_INDEX && indexop->op_type != OP_RINDEX)
+        return o;
+
+    if (constop->op_type != OP_CONST)
+        return o;
+
+    sv = cSVOPx_sv(constop);
+    if (!(sv && SvIOK_notUV(sv) && SvIVX(sv) == -1))
+        return o;
+
+    assert(!(indexop->op_private & OPpTARGET_MY));
+    indexop->op_flags &= ~OPf_PARENS;
+    indexop->op_flags |= (o->op_flags & OPf_PARENS);
+    indexop->op_private |= OPpTRUEBOOL;
+    if (o->op_type == OP_EQ || o->op_type == OP_I_EQ)
+        indexop->op_private |= OPpINDEX_BOOLNEG;
+    /* cut out the index op and free the eq,const ops */
+    (void)op_sibling_splice(o, start, 1, NULL);
+    op_free(o);
+
+    return indexop;
+}
+
+
 OP *
 Perl_ck_eval(pTHX_ OP *o)
 {
@@ -9924,6 +9973,10 @@ Perl_ck_rvconst(pTHX_ OP *o)
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_RVCONST;
+
+    if (o->op_type == OP_RV2HV)
+        /* rv2hv steals the bottom bit for its own uses */
+        o->op_private &= ~OPpARG1_MASK;
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
 
@@ -10428,7 +10481,9 @@ Perl_ck_index(pTHX_ OP *o)
 	if (kid && kid->op_type == OP_CONST) {
 	    const bool save_taint = TAINT_get;
 	    SV *sv = kSVOP->op_sv;
-	    if ((!SvPOK(sv) || SvNIOKp(sv)) && SvOK(sv) && !SvROK(sv)) {
+	    if (   (!SvPOK(sv) || SvNIOKp(sv) || isREGEXP(sv))
+                && SvOK(sv) && !SvROK(sv))
+            {
 		sv = newSV(0);
 		sv_copypv(sv, kSVOP->op_sv);
 		SvREFCNT_dec_NN(kSVOP->op_sv);
@@ -13488,18 +13543,67 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
 /* See if the ops following o are such that o will always be executed in
  * boolean context: that is, the SV which o pushes onto the stack will
- * only ever be used by later ops with SvTRUE(sv) or similar.
+ * only ever be consumed by later ops via SvTRUE(sv) or similar.
  * If so, set a suitable private flag on o. Normally this will be
- * bool_flag; but if it's only possible to determine booleaness at run
- * time (e.g. sub f { ....; (%h || $y) }), then set maybe_flag instead.
+ * bool_flag; but see below why maybe_flag is needed too.
+ *
+ * Typically the two flags you pass will be the generic OPpTRUEBOOL and
+ * OPpMAYBE_TRUEBOOL, buts it's possible that for some ops those bits may
+ * already be taken, so you'll have to give that op two different flags.
+ *
+ * More explanation of 'maybe_flag' and 'safe_and' parameters.
+ * The binary logical ops &&, ||, // (plus 'if' and 'unless' which use
+ * those underlying ops) short-circuit, which means that rather than
+ * necessarily returning a truth value, they may return the LH argument,
+ * which may not be boolean. For example in $x = (keys %h || -1), keys
+ * should return a key count rather than a boolean, even though its
+ * sort-of being used in boolean context.
+ *
+ * So we only consider such logical ops to provide boolean context to
+ * their LH argument if they themselves are in void or boolean context.
+ * However, sometimes the context isn't known until run-time. In this
+ * case the op is marked with the maybe_flag flag it.
+ *
+ * Consider the following.
+ *
+ *     sub f { ....;  if (%h) { .... } }
+ *
+ * This is actually compiled as
+ *
+ *     sub f { ....;  %h && do { .... } }
+ *
+ * Here we won't know until runtime whether the final statement (and hence
+ * the &&) is in void context and so is safe to return a boolean value.
+ * So mark o with maybe_flag rather than the bool_flag.
+ * Note that there is cost associated with determining context at runtime
+ * (e.g. a call to block_gimme()), so it may not be worth setting (at
+ * compile time) and testing (at runtime) maybe_flag if the scalar verses
+ * boolean costs savings are marginal.
+ *
+ * However, we can do slightly better with && (compared to || and //):
+ * this op only returns its LH argument when that argument is false. In
+ * this case, as long as the op promises to return a false value which is
+ * valid in both boolean and scalar contexts, we can mark an op consumed
+ * by && with bool_flag rather than maybe_flag.
+ * For example as long as pp_padhv and pp_rv2hv return &PL_sv_zero rather
+ * than &PL_sv_no for a false result in boolean context, then it's safe. An
+ * op which promises to handle this case is indicated by setting safe_and
+ * to true.
  */
 
 static void
-S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
+S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
 {
     OP *lop;
+    U8 flag = 0;
 
     assert((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR);
+
+    /* OPpTARGET_MY and boolean context probably don't mix well.
+     * If someone finds a valid use case, maybe add an extra flag to this
+     * function which indicates its safe to do so for this op? */
+    assert(!(   (PL_opargs[o->op_type] & OA_TARGLEX)
+             && (o->op_private & OPpTARGET_MY)));
 
     lop = o->op_next;
 
@@ -13525,7 +13629,7 @@ S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
         case OP_XOR:
         case OP_COND_EXPR:
         case OP_GREPWHILE:
-            o->op_private |= bool_flag;
+            flag = bool_flag;
             lop = NULL;
             break;
 
@@ -13535,16 +13639,22 @@ S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
          * that whatever follows consumes the arg only in boolean context
          * too.
          */
+        case OP_AND:
+            if (safe_and) {
+                flag = bool_flag;
+                lop = NULL;
+                break;
+            }
+            /* FALLTHROUGH */
         case OP_OR:
         case OP_DOR:
-        case OP_AND:
             if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
-                o->op_private |= bool_flag;
+                flag = bool_flag;
                 lop = NULL;
             }
             else if (!(lop->op_flags & OPf_WANT)) {
                 /* unknown context - decide at runtime */
-                o->op_private |= maybe_flag;
+                flag = maybe_flag;
                 lop = NULL;
             }
             break;
@@ -13557,6 +13667,8 @@ S_check_for_bool_cxt(OP*o, U8 bool_flag, U8 maybe_flag)
         if (lop)
             lop = lop->op_next;
     }
+
+    o->op_private |= flag;
 }
 
 
@@ -14288,15 +14400,54 @@ Perl_rpeep(pTHX_ OP *o)
             break;
         }
 
+	case OP_RV2AV:
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            break;
+
 	case OP_RV2HV:
 	case OP_PADHV:
+            /*'keys %h' in void or scalar context: skip the OP_KEYS
+             * and perform the functionality directly in the RV2HV/PADHV
+             * op
+             */
+            if (o->op_flags & OPf_REF) {
+                OP *k = o->op_next;
+                U8 want = (k->op_flags & OPf_WANT);
+                if (   k
+                    && k->op_type == OP_KEYS
+                    && (   want == OPf_WANT_VOID
+                        || want == OPf_WANT_SCALAR)
+                    && !(k->op_private & OPpMAYBE_LVSUB)
+                    && !(k->op_flags & OPf_MOD)
+                ) {
+                    o->op_next     = k->op_next;
+                    o->op_flags   &= ~(OPf_REF|OPf_WANT);
+                    o->op_flags   |= want;
+                    o->op_private |= (o->op_type == OP_PADHV ?
+                                      OPpRV2HV_ISKEYS : OPpRV2HV_ISKEYS);
+                    /* for keys(%lex), hold onto the OP_KEYS's targ
+                     * since padhv doesn't have its own targ to return
+                     * an int with */
+                    if (!(o->op_type ==OP_PADHV && want == OPf_WANT_SCALAR))
+                        op_null(k);
+                }
+            }
+
             /* see if %h is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+
+
             if (o->op_type != OP_PADHV)
                 break;
             /* FALLTHROUGH */
 	case OP_PADAV:
+            if (   o->op_type == OP_PADAV
+                && (o->op_flags & OPf_WANT) == OPf_WANT_SCALAR
+            )
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            /* FALLTHROUGH */
 	case OP_PADSV:
             /* Skip over state($x) in void context.  */
             if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)
@@ -14417,9 +14568,12 @@ Perl_rpeep(pTHX_ OP *o)
 	    o->op_opt = 1;
 	    break;
 	
+	case OP_GREPWHILE:
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            /* FALLTHROUGH */
 	case OP_COND_EXPR:
 	case OP_MAPWHILE:
-	case OP_GREPWHILE:
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
 	case OP_DORASSIGN:
@@ -14451,6 +14605,8 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_SUBST:
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
 	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
 	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
@@ -14784,13 +14940,30 @@ Perl_rpeep(pTHX_ OP *o)
                 o->op_private &=
                         ~(OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1);
 
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpASSIGN_TRUEBOOL, 0);
 	    break;
         }
 
         case OP_REF:
             /* see if ref() is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+            break;
+
+        case OP_LENGTH:
+            /* see if the op is used in known boolean context,
+             * but not if OA_TARGLEX optimisation is enabled */
+            if (   (o->op_flags & OPf_WANT) == OPf_WANT_SCALAR
+                && !(o->op_private & OPpTARGET_MY)
+            )
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
+            break;
+
+        case OP_POS:
+            /* see if the op is used in known boolean context */
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
             break;
 
 	case OP_CUSTOM: {

@@ -359,8 +359,7 @@ do_test('reference to regexp',
   RV = $ADDR
   SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)		# $] < 5.017006
-    FLAGS = \\(OBJECT,FAKE\\)			# $] >= 5.017006
+    FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)
     PV = $ADDR "\\(\\?\\^:tic\\)"
     CUR = 8
     LEN = 0					# $] < 5.017006
@@ -387,7 +386,7 @@ do_test('reference to regexp',
 . ($] < 5.019003 ? '' : '
     SV = REGEXP\($ADDR\) at $ADDR
       REFCNT = 2
-      FLAGS = \(\)
+      FLAGS = \(POK,pPOK\)
       PV = $ADDR "\(\?\^:tic\)"
       CUR = 8
       COMPFLAGS = 0x0 \(\)
@@ -1162,7 +1161,7 @@ do_test('UTF-8 in a regular expression',
   RV = $ADDR
   SV = REGEXP\($ADDR\) at $ADDR
     REFCNT = 1
-    FLAGS = \(OBJECT,FAKE,UTF8\)
+    FLAGS = \(OBJECT,POK,FAKE,pPOK,UTF8\)
     PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
     CUR = 13
     STASH = $ADDR	"Regexp"
@@ -1186,7 +1185,7 @@ do_test('UTF-8 in a regular expression',
 . ($] < 5.019003 ? '' : '
     SV = REGEXP\($ADDR\) at $ADDR
       REFCNT = 2
-      FLAGS = \(UTF8\)
+      FLAGS = \(POK,pPOK,UTF8\)
       PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
       CUR = 13
       COMPFLAGS = 0x0 \(\)

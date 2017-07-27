@@ -218,6 +218,46 @@
         code    => '($r||0)->[0][0][0]',
     },
 
+    'expr::array::lex_bool_empty' => {
+        desc    => 'empty lexical array in boolean context',
+        setup   => 'my @a;',
+        code    => '!@a',
+    },
+    'expr::array::lex_bool_full' => {
+        desc    => 'non-empty lexical array in boolean context',
+        setup   => 'my @a = 1..10;',
+        code    => '!@a',
+    },
+    'expr::array::lex_scalar_empty' => {
+        desc    => 'empty lexical array in scalar context',
+        setup   => 'my (@a, $i);',
+        code    => '$i = @a',
+    },
+    'expr::array::lex_scalar_full' => {
+        desc    => 'non-empty lexical array in scalar context',
+        setup   => 'my @a = 1..10; my $i',
+        code    => '$i = @a',
+    },
+    'expr::array::pkg_bool_empty' => {
+        desc    => 'empty lexical array in boolean context',
+        setup   => 'our @a;',
+        code    => '!@a',
+    },
+    'expr::array::pkg_bool_full' => {
+        desc    => 'non-empty lexical array in boolean context',
+        setup   => 'our @a = 1..10;',
+        code    => '!@a',
+    },
+    'expr::array::pkg_scalar_empty' => {
+        desc    => 'empty lexical array in scalar context',
+        setup   => 'our @a; my $i;',
+        code    => '$i = @a',
+    },
+    'expr::array::pkg_scalar_full' => {
+        desc    => 'non-empty lexical array in scalar context',
+        setup   => 'our @a = 1..10; my $i',
+        code    => '$i = @a',
+    },
 
     'expr::arrayhash::lex_3var' => {
         desc    => 'lexical $h{$k1}[$i]{$k2}',
@@ -305,6 +345,11 @@
         desc    => 'empty lexical hash in boolean context',
         setup   => 'my %h;',
         code    => '!%h',
+    },
+    'expr::hash::bool_empty_unknown' => {
+        desc    => 'empty lexical hash in unknown context',
+        setup   => 'my ($i, %h); sub f { if (%h) { $i++ }}',
+        code    => 'f()',
     },
     'expr::hash::bool_full' => {
         desc    => 'non-empty lexical hash in boolean context',
@@ -604,6 +649,14 @@
         code    => '($x,$y,$z) = @_',
     },
 
+    # (....) = %lexical
+
+    'expr::aassign::ma_lh' => {
+        desc    => 'my array assigned lexical hash',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => 'my @a = %h',
+    },
+
 
     # (....) = ($lex1,$lex2,$lex3);
 
@@ -788,6 +841,17 @@
         code    => '($r1, $r2) = ([], []);',
     },
 
+    'expr::aassign::boolean' => {
+        desc    => '!(@a = @b)',
+        setup   => 'my ($s,@a, @b); @b = (1,2)',
+        code    => '!(@a = @b);',
+    },
+    'expr::aassign::scalar' => {
+        desc    => '$scalar = (@a = @b)',
+        setup   => 'my ($s, @a, @b); @b = (1,2)',
+        code    => '$s = (@a = @b);',
+    },
+
     # array assign of strings
 
     'expr::aassign::la_3s' => {
@@ -939,6 +1003,54 @@
         code    => '$z = $x * $y',
     },
 
+    # use '!' to test SvTRUE on various classes of value
+
+    'expr::arith::not_PL_undef' => {
+        desc    => '!undef (using PL_sv_undef)',
+        setup   => 'my $x',
+        code    => '$x = !undef',
+    },
+    'expr::arith::not_PL_no' => {
+        desc    => '!($x == $y) (using PL_sv_no)',
+        setup   => 'my ($x, $y) = (1,2); my $z;',
+        code    => '$z = !($x == $y)',
+    },
+    'expr::arith::not_PL_zero' => {
+        desc    => '!%h (using PL_sv_zero)',
+        setup   => 'my ($x, %h)',
+        code    => '$x = !%h',
+    },
+    'expr::arith::not_PL_yes' => {
+        desc    => '!($x == $y) (using PL_sv_yes)',
+        setup   => 'my ($x, $y) = (1,1); my $z;',
+        code    => '$z = !($x == $y)',
+    },
+    'expr::arith::not_undef' => {
+        desc    => '!$y where $y is undef',
+        setup   => 'my ($x, $y)',
+        code    => '$x = !$y',
+    },
+    'expr::arith::not_0' => {
+        desc    => '!$x where $x is 0',
+        setup   => 'my ($x, $y) = (0, 0)',
+        code    => '$y = !$x',
+    },
+    'expr::arith::not_1' => {
+        desc    => '!$x where $x is 1',
+        setup   => 'my ($x, $y) = (1, 0)',
+        code    => '$y = !$x',
+    },
+    'expr::arith::not_string' => {
+        desc    => '!$x where $x is "foo"',
+        setup   => 'my ($x, $y) = ("foo", 0)',
+        code    => '$y = !$x',
+    },
+    'expr::arith::not_ref' => {
+        desc    => '!$x where $s is an array ref',
+        setup   => 'my ($x, $y) = ([], 0)',
+        code    => '$y = !$x',
+    },
+
     'expr::arith::preinc' => {
         desc    => '++$x',
         setup   => 'my $x = 1;',
@@ -997,6 +1109,49 @@
     },
 
 
+    'func::grep::bool0' => {
+        desc    => 'grep returning 0 items in boolean context',
+        setup   => 'my @a;',
+        code    => '!grep $_, @a;',
+    },
+    'func::grep::bool1' => {
+        desc    => 'grep returning 1 item in boolean context',
+        setup   => 'my @a =(1);',
+        code    => '!grep $_, @a;',
+    },
+    'func::grep::scalar0' => {
+        desc    => 'returning 0 items in scalar context',
+        setup   => 'my $g; my @a;',
+        code    => '$g = grep $_, @a;',
+    },
+    'func::grep::scalar1' => {
+        desc    => 'returning 1 item in scalar context',
+        setup   => 'my $g; my @a =(1);',
+        code    => '$g = grep $_, @a;',
+    },
+
+    # (index() == -1) and variants optimise away the op_const and op_eq
+    # and any assignment to a lexical var
+    'func::index::bool' => {
+        desc    => '(index() == -1) for match',
+        setup   => 'my $x = "aaaab"',
+        code    => 'index($x, "b") == -1',
+    },
+    'func::index::bool_fail' => {
+        desc    => '(index() == -1) for no match',
+        setup   => 'my $x = "aaaab"',
+        code    => 'index($x, "c") == -1',
+    },
+    'func::index::lex_bool' => {
+        desc    => '$lex = (index() == -1) for match',
+        setup   => 'my $r; my $x = "aaaab"',
+        code    => '$r = index($x, "b") == -1',
+    },
+    'func::index::lex_bool_fail' => {
+        desc    => '$lex = (index() == -1) for no match',
+        setup   => 'my $r; my $x = "aaaab"',
+        code    => '$r = index($x, "c") == -1',
+    },
 
     # using a const string as second arg to index triggers using FBM.
     # the FBM matcher special-cases 1,2-byte strings.
@@ -1093,6 +1248,135 @@
     },
 
 
+    'func::keys::lex::void_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in void context',
+        setup   => 'my %h = ()',
+        code    => 'keys %h',
+    },
+    'func::keys::lex::void_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in void context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => 'keys %h',
+    },
+    'func::keys::lex::bool_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in bool context',
+        setup   => 'my %h = ()',
+        code    => '!keys %h',
+    },
+    'func::keys::lex::bool_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in bool context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '!keys %h',
+    },
+    'func::keys::lex::scalar_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in scalar context',
+        setup   => 'my $k; my %h = ()',
+        code    => '$k = keys %h',
+    },
+    'func::keys::lex::scalar_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in scalar context',
+        setup   => 'my $k; my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '$k = keys %h',
+    },
+    'func::keys::lex::list_cxt_empty' => {
+        desc    => ' keys() on an empty lexical hash in list context',
+        setup   => 'my %h = ()',
+        code    => '() = keys %h',
+    },
+    'func::keys::lex::list_cxt' => {
+        desc    => ' keys() on a non-empty lexical hash in list context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '() = keys %h',
+    },
+
+    'func::keys::pkg::void_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in void context',
+        setup   => 'our %h = ()',
+        code    => 'keys %h',
+    },
+    'func::keys::pkg::void_cxt' => {
+        desc    => ' keys() on a non-empty package hash in void context',
+        setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => 'keys %h',
+    },
+    'func::keys::pkg::bool_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in bool context',
+        setup   => 'our %h = ()',
+        code    => '!keys %h',
+    },
+    'func::keys::pkg::bool_cxt' => {
+        desc    => ' keys() on a non-empty package hash in bool context',
+        setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '!keys %h',
+    },
+    'func::keys::pkg::scalar_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in scalar context',
+        setup   => 'my $k; our %h = ()',
+        code    => '$k = keys %h',
+    },
+    'func::keys::pkg::scalar_cxt' => {
+        desc    => ' keys() on a non-empty package hash in scalar context',
+        setup   => 'my $k; our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '$k = keys %h',
+    },
+    'func::keys::pkg::list_cxt_empty' => {
+        desc    => ' keys() on an empty package hash in list context',
+        setup   => 'our %h = ()',
+        code    => '() = keys %h',
+    },
+    'func::keys::pkg::list_cxt' => {
+        desc    => ' keys() on a non-empty package hash in list context',
+        setup   => 'our %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '() = keys %h',
+    },
+
+
+    'func::length::bool0' => {
+        desc    => 'length==0 in boolean context',
+        setup   => 'my $s = "";',
+        code    => '!length($s);',
+    },
+    'func::length::bool10' => {
+        desc    => 'length==10 in boolean context',
+        setup   => 'my $s = "abcdefghijk";',
+        code    => '!length($s);',
+    },
+    'func::length::scalar10' => {
+        desc    => 'length==10 in scalar context',
+        setup   => 'my $p; my $s = "abcdefghijk";',
+        code    => '$p = length($s);',
+    },
+    'func::length::bool0_utf8' => {
+        desc    => 'utf8 string length==0 in boolean context',
+        setup   => 'my $s = "\x{100}"; chop $s;',
+        code    => '!length($s);',
+    },
+    'func::length::bool10_utf8' => {
+        desc    => 'utf8 string length==10 in boolean context',
+        setup   => 'my $s = "abcdefghij\x{100}";',
+        code    => '!length($s);',
+    },
+    'func::length::scalar10_utf8' => {
+        desc    => 'utf8 string length==10 in scalar context',
+        setup   => 'my $p; my $s = "abcdefghij\x{100}";',
+        code    => '$p = length($s);',
+    },
+
+    'func::pos::bool0' => {
+        desc    => 'pos==0 in boolean context',
+        setup   => 'my $s = "abc"; pos($s) = 0',
+        code    => '!pos($s);',
+    },
+    'func::pos::bool10' => {
+        desc    => 'pos==10 in boolean context',
+        setup   => 'my $s = "abcdefghijk"; pos($s) = 10',
+        code    => '!pos($s);',
+    },
+    'func::pos::scalar10' => {
+        desc    => 'pos==10 in scalar context',
+        setup   => 'my $p; my $s = "abcdefghijk"; pos($s) = 10',
+        code    => '$p = pos($s);',
+    },
 
     'func::ref::notaref_bool' => {
         desc    => 'ref($notaref) in boolean context',
@@ -1286,6 +1570,35 @@
         setup   => 'my $s;',
         code    => '$s = sprintf "foo=%s", "ab\x{100}cd", "efg", "h\x{101}ij"',
     },
+
+    'func::subst::bool' => {
+        desc    => 's/// in boolean context',
+        setup   => '',
+        code    => '$_ = "aaa"; !s/./x/g;'
+    },
+
+
+    'func::values::scalar_cxt_empty' => {
+        desc    => ' values() on an empty hash in scalar context',
+        setup   => 'my $k; my %h = ()',
+        code    => '$k = values %h',
+    },
+    'func::values::scalar_cxt' => {
+        desc    => ' values() on a non-empty hash in scalar context',
+        setup   => 'my $k; my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '$k = values %h',
+    },
+    'func::values::list_cxt_empty' => {
+        desc    => ' values() on an empty hash in list context',
+        setup   => 'my %h = ()',
+        code    => '() = values %h',
+    },
+    'func::values::list_cxt' => {
+        desc    => ' values() on a non-empty hash in list context',
+        setup   => 'my %h = qw(aardvark 1 banana 2 cucumber 3)',
+        code    => '() = values %h',
+    },
+
 
 
     'loop::block' => {

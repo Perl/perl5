@@ -4766,6 +4766,8 @@ EXTCONST char PL_Yes[]
   INIT("1");
 EXTCONST char PL_No[]
   INIT("");
+EXTCONST char PL_Zero[]
+  INIT("0");
 EXTCONST char PL_hexdigit[]
   INIT("0123456789abcdef0123456789ABCDEF");
 
@@ -5627,6 +5629,10 @@ struct tempsym; /* defined in pp_pack.c */
 START_EXTERN_C
 #  include "intrpvar.h"
 END_EXTERN_C
+#  define PL_sv_yes   (PL_sv_immortals[0])
+#  define PL_sv_undef (PL_sv_immortals[1])
+#  define PL_sv_no    (PL_sv_immortals[2])
+#  define PL_sv_zero  (PL_sv_immortals[3])
 #endif
 
 #ifdef PERL_CORE
@@ -5713,7 +5719,7 @@ PL_valid_types_IVX[]    = { 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
 EXTCONST bool
 PL_valid_types_NVX[]    = { 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
 EXTCONST bool
-PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1 };
+PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1 };
 EXTCONST bool
 PL_valid_types_RV[]     = { 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1 };
 EXTCONST bool

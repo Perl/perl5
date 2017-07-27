@@ -198,7 +198,8 @@ use strict;
 
     # find which ops use 0,1,2,3 or 4 bits of op_private for arg count info
 
-    $args0{$_} = 1 for qw(entersub avhvswitch); # UNOPs that usurp bit 0
+    $args0{$_} = 1 for qw(entersub avhvswitch
+                       rv2hv);                  # UNOPs that usurp bit 0
 
     $args1{$_} = 1 for (
                         qw(reverse), # ck_fun(), but most bits stolen
@@ -429,20 +430,28 @@ addbits($_, 6 => qw(OPpOUR_INTRO OURINTR)) # Variable was in an our()
 
 
 # We might be an lvalue to return
+# 'values' doesn't actually use this bit, but we reserve it here as
+# pp_values may call Perl_do_kv() which is shared among several ops which
+# do.
+
 addbits($_, 3 => qw(OPpMAYBE_LVSUB LVSUB))
     for qw(aassign rv2av rv2gv rv2hv padav padhv aelem helem aslice hslice
            av2arylen keys akeys avhvswitch kvaslice kvhslice substr pos vec
-           multideref);
+           multideref values);
 
 
 
 for (qw(rv2hv padhv ref)) {
     addbits($_,                           # e.g. %hash in (%hash || $foo) ...
-        4 => qw(OPpMAYBE_TRUEBOOL BOOL?), # ... cx not known till run time
-        5 => qw(OPpTRUEBOOL       BOOL),  # ... in void cxt
+        4 => qw(OPpMAYBE_TRUEBOOL BOOL?), # but cx not known till run time
+        5 => qw(OPpTRUEBOOL       BOOL),
     );
 }
-
+for (qw(grepwhile index length padav pos rindex rv2av subst)) {
+    addbits($_,
+        5 => qw(OPpTRUEBOOL       BOOL),  # if (@a) {...}
+    );
+}
 
 
 addbits($_, 1 => qw(OPpHINT_STRICT_REFS STRICT))
@@ -491,6 +500,7 @@ addbits('aassign', 5 => qw(OPpASSIGN_COMMON_RC1 COM_RC1));
 # run-time checking is required for an aggregate on the LHS
 addbits('aassign', 4 => qw(OPpASSIGN_COMMON_AGG COM_AGG));
 
+addbits('aassign', 2 => qw(OPpASSIGN_TRUEBOOL BOOL));  # if (@a = (...)) {...}
 
 
 # NB: both sassign and aassign use the 'OPpASSIGN' naming convention
@@ -779,6 +789,26 @@ addbits('argelem',
                            )],
                },
 );
+
+
+# rv2hv and padhv in void/scalar context implementing 'keys %h'
+# directly, without a following OP_KEYS
+
+addbits('padhv',
+    0 => qw(OPpPADHV_ISKEYS KEYS),
+);
+addbits('rv2hv',
+    0 => qw(OPpRV2HV_ISKEYS KEYS),
+);
+
+# In conjunction with OPpTRUEBOOL, indicates that the test should be
+# inverted. This allows both (index() == -1) and (index() != -1)
+# to optimise away the const and eq/ne
+
+for (qw(index rindex)) {
+    addbits($_, 6 => qw(OPpINDEX_BOOLNEG NEG));
+}
+
 
 
 1;

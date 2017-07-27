@@ -1241,24 +1241,38 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 }
 
 
-/* used for: pp_keys(), pp_values() */
+/* Perl_do_kv() may be:
+ *  * called directly as the pp function for pp_keys() and pp_values();
+ *  * It may also be called directly when the op is OP_AVHVSWITCH, to
+ *       implement CORE::keys(), CORE::values().
+ *
+ * In all cases it expects an HV on the stack and returns a list of keys,
+ * values, or key-value pairs, depending on PL_op.
+ */
 
 OP *
 Perl_do_kv(pTHX)
 {
     dSP;
     HV * const keys = MUTABLE_HV(POPs);
-    HE *entry;
-    SSize_t extend_size;
     const U8 gimme = GIMME_V;
-    const I32 dokv =     (PL_op->op_type == OP_RV2HV || PL_op->op_type == OP_PADHV);
-    /* op_type is OP_RKEYS/OP_RVALUES if pp_rkeys delegated to here */
-    const I32 dokeys =   dokv || (PL_op->op_type == OP_KEYS)
-	|| (  PL_op->op_type == OP_AVHVSWITCH
-	   && (PL_op->op_private & 3) + OP_EACH == OP_KEYS  );
-    const I32 dovalues = dokv || (PL_op->op_type == OP_VALUES)
-	|| (  PL_op->op_type == OP_AVHVSWITCH
-	   && (PL_op->op_private & 3) + OP_EACH == OP_VALUES  );
+
+    const I32 dokeys   =     (PL_op->op_type == OP_KEYS)
+                          || (    PL_op->op_type == OP_AVHVSWITCH
+                              && (PL_op->op_private & OPpAVHVSWITCH_MASK)
+                                    + OP_EACH == OP_KEYS);
+
+    const I32 dovalues =     (PL_op->op_type == OP_VALUES)
+                          || (    PL_op->op_type == OP_AVHVSWITCH
+                              && (PL_op->op_private & OPpAVHVSWITCH_MASK)
+                                     + OP_EACH == OP_VALUES);
+
+    assert(   PL_op->op_type == OP_KEYS
+           || PL_op->op_type == OP_VALUES
+           || PL_op->op_type == OP_AVHVSWITCH);
+
+    assert(!(    PL_op->op_type == OP_VALUES
+             && (PL_op->op_private & OPpMAYBE_LVSUB)));
 
     (void)hv_iterinit(keys);	/* always reset iterator regardless */
 
@@ -1277,6 +1291,11 @@ Perl_do_kv(pTHX)
 	    IV i;
 	    dTARGET;
 
+            /* note that in 'scalar(keys %h)' the OP_KEYS is usually
+             * optimised away and the action is performed directly by the
+             * padhv or rv2hv op. We now only get here via OP_AVHVSWITCH
+             * and \&CORE::keys
+             */
 	    if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) ) {
 		i = HvUSEDKEYS(keys);
 	    }
@@ -1296,22 +1315,9 @@ Perl_do_kv(pTHX)
 	    Perl_croak(aTHX_ "Can't modify keys in list assignment");
     }
 
-    /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
-    assert(HvUSEDKEYS(keys) <= (SSize_t_MAX >> 1));
-    extend_size = (SSize_t)HvUSEDKEYS(keys) * (dokeys + dovalues);
-    EXTEND(SP, extend_size);
-
-    while ((entry = hv_iternext(keys))) {
-	if (dokeys) {
-	    SV* const sv = hv_iterkeysv(entry);
-	    XPUSHs(sv);
-	}
-	if (dovalues) {
-	    SV *const sv = hv_iterval(keys,entry);
-	    XPUSHs(sv);
-	}
-    }
-    RETURN;
+    PUTBACK;
+    hv_pushkv(keys, (dokeys | (dovalues << 1)));
+    return NORMAL;
 }
 
 /*

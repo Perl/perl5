@@ -18,6 +18,8 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
          OPpSPLIT_ASSIGN OPpSPLIT_LEX
+         OPpPADHV_ISKEYS OPpRV2HV_ISKEYS
+         OPpTRUEBOOL OPpINDEX_BOOLNEG
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
@@ -48,7 +50,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.41';
+$VERSION = '1.42';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -3317,9 +3319,35 @@ sub pp_substr {
     }
     maybe_local(@_, listop(@_, "substr"))
 }
+
+sub pp_index {
+    # Also handles pp_rindex.
+    #
+    # The body of this function includes an unrolled maybe_targmy(),
+    # since the two parts of that sub's actions need to have have the
+    # '== -1' bit in between
+
+    my($self, $op, $cx) = @_;
+
+    my $lex  = ($op->private & OPpTARGET_MY);
+    my $bool = ($op->private & OPpTRUEBOOL);
+
+    my $val = $self->listop($op, ($bool ? 14 : $lex ? 7 : $cx), $op->name);
+
+    # (index() == -1) has op_eq and op_const optimised away
+    if ($bool) {
+        $val .= ($op->private & OPpINDEX_BOOLNEG) ? " == -1" : " != -1";
+        $val = "($val)" if ($op->flags & OPf_PARENS);
+    }
+    if ($lex) {
+	my $var = $self->padname($op->targ);
+	$val = $self->maybe_parens("$var = $val", $cx, 7);
+    }
+    $val;
+}
+
+sub pp_rindex { pp_index(@_); }
 sub pp_vec { maybe_targmy(@_, \&maybe_local, listop(@_, "vec")) }
-sub pp_index { maybe_targmy(@_, \&listop, "index") }
-sub pp_rindex { maybe_targmy(@_, \&listop, "rindex") }
 sub pp_sprintf { maybe_targmy(@_, \&listop, "sprintf") }
 sub pp_formline { listop(@_, "formline") } # see also deparse_format
 sub pp_crypt { maybe_targmy(@_, \&listop, "crypt") }
@@ -4084,7 +4112,17 @@ sub pp_padsv {
 }
 
 sub pp_padav { pp_padsv(@_) }
-sub pp_padhv { pp_padsv(@_) }
+
+sub pp_padhv {
+    my $op = $_[1];
+    my $keys = '';
+    # with OPpPADHV_ISKEYS the keys op is optimised away, except
+    # in scalar context the old op is kept (but not executed) so its targ
+    # can be used.
+    $keys = 'keys ' if (     ($op->private & OPpPADHV_ISKEYS)
+                            && !(($op->flags & OPf_WANT) == OPf_WANT_SCALAR));
+    $keys . pp_padsv(@_);
+}
 
 sub gv_or_padgv {
     my $self = shift;
@@ -4167,8 +4205,13 @@ sub rv2x {
 }
 
 sub pp_rv2sv { maybe_local(@_, rv2x(@_, "\$")) }
-sub pp_rv2hv { maybe_local(@_, rv2x(@_, "%")) }
 sub pp_rv2gv { maybe_local(@_, rv2x(@_, "*")) }
+
+sub pp_rv2hv {
+    my $op = $_[1];
+    (($op->private & OPpRV2HV_ISKEYS) ? 'keys ' : '')
+        . maybe_local(@_, rv2x(@_, "%"))
+}
 
 # skip rv2av
 sub pp_av2arylen {

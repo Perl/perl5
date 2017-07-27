@@ -158,12 +158,26 @@ C<&PL_sv_no>.
 This is the C<true> SV.  See C<L</PL_sv_no>>.  Always refer to this as
 C<&PL_sv_yes>.
 
+=for apidoc Amn|SV|PL_sv_zero
+This readonly SV has a zero numeric value and a C<"0"> string value. It's
+similar to C<L</PL_sv_no>> except for its string value. Can be used as a
+cheap alternative to C<mXPUSHi(0)> for example.  Always refer to this as
+C<&PL_sv_zero>. Introduced in 5.28.
+
 =cut
 */
 
+#ifdef MULTIPLICITY
+PERLVAR(I, sv_yes,	SV)
 PERLVAR(I, sv_undef,	SV)
 PERLVAR(I, sv_no,	SV)
-PERLVAR(I, sv_yes,	SV)
+PERLVAR(I, sv_zero,	SV)
+#else
+/* store the immortals as an array to ensure they are contiguous in
+ * memory: makes SvIMMORTAL_INTERP(sv) possible */
+PERLVARA(I, sv_immortals, 4, SV)
+#endif
+
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
 PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */

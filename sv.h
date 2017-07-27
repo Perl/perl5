@@ -208,7 +208,6 @@ typedef struct hek HEK;
 	UV      svu_uv;			\
 	_NV_BODYLESS_UNION		\
 	SV*     svu_rv;		/* pointer to another SV */		\
-	struct regexp* svu_rx;		\
 	SV**    svu_array;		\
 	HE**	svu_hash;		\
 	GP*	svu_gp;			\
@@ -402,7 +401,12 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 					  refers to an eval or once only
 					  [CvEVAL(cv), CvSPECIAL(cv)]
                                        3: HV: informally reserved by DAPM
-                                          for vtables */
+                                          for vtables
+                                       4: Together with other flags (or
+                                           lack thereof) indicates a regex,
+                                           including PVLV-as-regex. See
+                                           isREGEXP().
+                                       */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
 				       after the main array */
@@ -473,7 +477,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
 	STRLEN	xpvlenu_len; 	/* allocated size */			\
-	char *	xpvlenu_pv;	/* regexp string */			\
+        struct regexp* xpvlenu_rx; /* regex when SV body is XPVLV */    \
     } xpv_len_u	
 
 #define xpv_len	xpv_len_u.xpvlenu_len
@@ -847,7 +851,7 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 #define assert_not_ROK(sv)	assert_(!SvROK(sv) || !SvRV(sv))
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
-#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK || isREGEXP(sv))
+#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\
@@ -1181,8 +1185,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 	 }))
 #    define SvCUR(sv)							\
 	(*({ const SV *const _svcur = (const SV *)(sv);			\
-	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]	\
-		|| SvTYPE(_svcur) == SVt_REGEXP);			\
+	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svcur));				\
 	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
 		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
@@ -1312,8 +1315,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { \
-		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]	\
-			|| SvTYPE(sv) == SVt_REGEXP);	\
+		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
@@ -1760,18 +1762,23 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#define SvTRUE(sv)        (LIKELY(sv) && (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
-#define SvTRUE_nomg(sv)   (LIKELY(sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
-#define SvTRUE_NN(sv)              (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
-#define SvTRUE_nomg_NN(sv) (                                        SvTRUE_common(sv, sv_2bool_nomg(sv)))
+#define SvTRUE(sv)         (LIKELY(sv) && SvTRUE_NN(sv))
+#define SvTRUE_nomg(sv)    (LIKELY(sv) && SvTRUE_nomg_NN(sv))
+#define SvTRUE_NN(sv)      (SvGETMAGIC(sv), SvTRUE_nomg_NN(sv))
+#define SvTRUE_nomg_NN(sv) (SvTRUE_common(sv, sv_2bool_nomg(sv)))
+
 #define SvTRUE_common(sv,fallback) (			\
-      !SvOK(sv)						\
+      SvIMMORTAL_INTERP(sv)                             \
+        ? SvIMMORTAL_TRUE(sv)                           \
+    : !SvOK(sv)						\
 	? 0						\
     : SvPOK(sv)						\
 	? SvPVXtrue(sv)					\
-    : (SvFLAGS(sv) & (SVf_IOK|SVf_NOK))			\
-	? (   (SvIOK(sv) && SvIVX(sv) != 0)		\
-	   || (SvNOK(sv) && SvNVX(sv) != 0.0))		\
+    : SvIOK(sv)                			        \
+        ? SvIVX(sv)                                     \
+    : (SvROK(sv) && !(   SvOBJECT(SvRV(sv))             \
+                      && HvAMAGIC(SvSTASH(SvRV(sv)))))  \
+        ? TRUE                                          \
     : (fallback))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -2087,7 +2094,20 @@ properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 #define SvPEEK(sv) ""
 #endif
 
-#define SvIMMORTAL(sv) (SvREADONLY(sv) && ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder))
+/* Is this a per-interpreter immortal SV (rather than global)?
+ * These should either occupy adjacent entries in the interpreter struct
+ * (MULTIPLICITY) or adjacent elements of PL_sv_immortals[] otherwise.
+ * The unsigned (Size_t) cast avoids the need for a second < 0 condition.
+ */
+#define SvIMMORTAL_INTERP(sv) ((Size_t)((sv) - &PL_sv_yes) < 4)
+
+/* Does this immortal have a true value? Currently only PL_sv_yes does. */
+#define SvIMMORTAL_TRUE(sv)   ((sv) == &PL_sv_yes)
+
+/* the SvREADONLY() test is to quickly reject most SVs */
+#define SvIMMORTAL(sv) \
+                (  SvREADONLY(sv) \
+                && (SvIMMORTAL_INTERP(sv) || (sv) == &PL_sv_placeholder))
 
 #ifdef DEBUGGING
    /* exercise the immortal resurrection code in sv_free2() */
@@ -2128,7 +2148,7 @@ See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
     } STMT_END
 #define isREGEXP(sv) \
     (SvTYPE(sv) == SVt_REGEXP				      \
-     || (SvFLAGS(sv) & (SVTYPEMASK|SVp_POK|SVpgv_GP|SVf_FAKE)) \
+     || (SvFLAGS(sv) & (SVTYPEMASK|SVpgv_GP|SVf_FAKE))        \
 	 == (SVt_PVLV|SVf_FAKE))
 
 

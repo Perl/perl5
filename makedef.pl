@@ -482,6 +482,10 @@ unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_interp_size
 		    PL_interp_size_5_18_0
+                    PL_sv_yes
+                    PL_sv_undef
+                    PL_sv_no
+                    PL_sv_zero
 			 );
 }
 

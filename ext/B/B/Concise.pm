@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "1.000";
+our $VERSION   = "1.001";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -727,15 +727,16 @@ sub concise_sv {
 	    }
 	}
 	if (class($sv) eq "SPECIAL") {
-	    $hr->{svval} .= ["Null", "sv_undef", "sv_yes", "sv_no"]->[$$sv];
+	    $hr->{svval} .= ["Null", "sv_undef", "sv_yes", "sv_no",
+                             '', '', '', "sv_zero"]->[$$sv];
 	} elsif ($preferpv
-	      && ($sv->FLAGS & SVf_POK || class($sv) eq "REGEXP")) {
+	      && ($sv->FLAGS & SVf_POK)) {
 	    $hr->{svval} .= cstring($sv->PV);
 	} elsif ($sv->FLAGS & SVf_NOK) {
 	    $hr->{svval} .= $sv->NV;
 	} elsif ($sv->FLAGS & SVf_IOK) {
 	    $hr->{svval} .= $sv->int_value;
-	} elsif ($sv->FLAGS & SVf_POK || class($sv) eq "REGEXP") {
+	} elsif ($sv->FLAGS & SVf_POK) {
 	    $hr->{svval} .= cstring($sv->PV);
 	} elsif (class($sv) eq "HV") {
 	    $hr->{svval} .= 'HASH';
