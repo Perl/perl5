@@ -6261,7 +6261,7 @@ expression, but with an empty argument list, like this:
 #    ifdef __hpux
 #        define strtoll __strtoll	/* secret handshake */
 #    endif
-#    ifdef WIN64
+#    if defined(WIN64) && defined(_MSC_VER)
 #        define strtoll _strtoi64	/* secret handshake */
 #    endif
 #   if !defined(Strtol) && defined(HAS_STRTOLL)
@@ -6295,7 +6295,7 @@ expression, but with an empty argument list, like this:
 #    ifdef __hpux
 #        define strtoull __strtoull	/* secret handshake */
 #    endif
-#    ifdef WIN64
+#    if defined(WIN64) && defined(_MSC_VER)
 #        define strtoull _strtoui64	/* secret handshake */
 #    endif
 #    if !defined(Strtoul) && defined(HAS_STRTOULL)
