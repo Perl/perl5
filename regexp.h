@@ -562,7 +562,7 @@ and check for NULL.
 	    RXp_MATCH_COPIED_off(prog); \
 	}} STMT_END
 #endif
-#define RX_MATCH_COPY_FREE(rx_sv)       (RXp_MATCH_COPY_FREE(ReANY(rx_sv)))
+#define RX_MATCH_COPY_FREE(rx_sv)       RXp_MATCH_COPY_FREE(ReANY(rx_sv))
 
 #define RXp_MATCH_UTF8(prog)            (RXp_EXTFLAGS(prog) & RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8(rx_sv)            (RX_EXTFLAGS(rx_sv) & RXf_MATCH_UTF8)
