@@ -112,6 +112,7 @@ so I've voted for the cluster in total.
 
 Should we not just backport 2d41a263 instead? And does 5.22 need this, too? --sprout
 The entry above about [cpan #120032] is the same underlying issue, I think. --arc
+See also https://rt.perl.org/Ticket/Display.html?id=128972, on which it is said that 5.22 doesn't suffer the problem (assuming it is also the same thing).
 <commit votes="" id="c4a535af41823cc84534bf8dbecfdcc3eb7daa86" desc="[perl #128972] Build failure on OS X 10.12 Sierra."/>
 
 <commit votes="craigb jhi" id="f6a154ae766a3404d83b81448ca6a356d30198e1" desc="Treat VSI C the same as DEC/Compaq/HP C."/>
