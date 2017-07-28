@@ -50,7 +50,7 @@ program not working correctly.
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="steveh" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
+<commit votes="steveh xsawyerx" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
 
 </div>
 
