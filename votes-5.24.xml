@@ -16,15 +16,8 @@ This one does not fix a crash, but merely fixed bad debugging output that confus
 <commit votes="sprout arc" id="fcd130693a9e7a753f63a08691ff619ad91bf8eb" ticket="128106" desc="[perl #128106] Fix reset with non-globs" />
 <commit votes="jhi arc" id="adec5bbf0b66ee5ebc2ba80eda2389bb68e23d86" ticket="128131" desc="fix symbol detection with gcc 6 link-time optimization (RT #128131)" />
 <commit votes="sprout arc" id="d674449463a15ac3f36086e3a0bb3a9d02729887" ticket="128171" desc="[perl #128171] Fix assert fail with /@0{0*->@*/*0" />
-<commit votes="sprout xsawyerx arc" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="[perl #128182] Fix crash with require $nonstring" />
 <commit votes="sprout arc" id="76734a3218e712760695898e424c2369ccdd49c6" ticket="128204" desc="[perl #128204] Fix crash with @a &amp;.= etc." />
 <commit votes="sprout arc" id="4cb26c52ed90189e6e3564a4654b869fe4c4d3e6" ticket="128219" desc="PATCH: [perl #128219] typo in perlrecharclass" />
-
-<commit votes="sprout xsawyerx arc" id="b3dd0aba3d2bf0b22280303ef6f068e976e31888" ticket="128508" desc="[perl #128508] Fix line numbers with perl -x" />
-The commit ID here is on the yves/backport_128313 branch:
-<commit votes="khw sprout yves xsawyerx arc" id="dfd347fdcdbaf5a157586b05825005dc352b0e83" ticket="128313" desc="[perl #128313] Fix memory leak regression in regexes" />
-
-<commit votes="dom arc xsawyerx" id="1050723fecc0e27677c39fadbb97cb892dfd27d2" ticket="130766" desc="avoid a leak in list assign from/to magic values" />
 
 </div>
 
@@ -52,12 +45,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 <commit votes="sprout arc" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
-<commit votes="khw sprout xsawyerx" id="f2e32b2c677945ce6a36531a7cd5696dc1ca2cef" ticket="128170" desc="[perl #128170] Regression: Assert fail in regcomp.c"/>
 
 This one needs the version in ext/POSIX/lib/POSIX.pm bumped to 1.65_01:
 <commit votes="sprout arc" id="d80a6052a64d2df61ee61888853ef5f3872c0e34" ticket="128763" desc="[perl #128763] Fix POSIX.xs longdbl assertion"/>
 
-<commit votes="sprout xsawyerx arc" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
 <commit votes="sprout arc" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
 
 <commit votes="sprout arc" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
@@ -70,40 +61,24 @@ There doesn't seem to be a blead commit for this ticket, so nothing to backport.
 
 <div><h3>Regression Fixes</h3>
 
-Perhaps just the removal of SETERRNO() from this.
-<commit votes="tonyc jhi arc" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
-
-<commit votes="tonyc jhi arc" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
- 
 <commit votes="khw arc" id="753b2c6a60a81dacbe59e2041e30e8302484dc2d" desc="Fix -Dr output regression"/>
-
-<commit votes="khw sprout xsawyerx" id="3a34ca0bce7835211b45e070373cf653c253636a" ticket="128734" desc="Fix tr// regression"/>
-<commit votes="khw sprout xsawyerx" id="9f42613cff9529b84706745e7fee949fab7b9613" ticket="128926" desc="Add &quot;{&quot; removed in 5.23"/>
-
-<commit votes="sprout xsawyerx arc" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
-
-<commit votes="jhi craigb xsawyerx alh" id="" desc="[cpan #120032] Doesn't compile with Perl 5.24.1 on OS/X"/>
 
 NOTE from jhi: so the Time-HiRes in 5.24.1 has the broken version of Time-HiRes that is broken in OS X.  Possibilities:
 [1] The smallish fix from https://rt.perl.org/Ticket/Display.html?id=128445 (blead c4a535af41823cc84534bf8dbecfdcc3eb7daa86) which upgrades 1.9734 to 1.9739
 [2] Craig Berry's fix in https://marc.info/?l=perl5-porters;m=148305290013791 which upgrades 5.24 maint to version 1.9741, which has now been out for two months, and seems to be doing well: http://matrix.cpantesters.org/?dist=Time-HiRes+1.9741
-
 NOTE from arc: I'd like to see this fixed in maint-5.24. Since the changes
 in 1.9739 are already fairly involved, I'm inclined to think that the
 additional risk of going to 1.9741 is limited. I therefore tentatively cast
 a vote in favour of that approach.
-
-<commit votes="jhi sprout arc" id="dd1dbff095629118e73a48a2a6008f03418a07f6" ticket="128967" desc="#128967: Inconsistency between doc and code for chown using negative argument: -1"/>
+<commit votes="jhi craigb xsawyerx alh" id="" desc="[cpan #120032] Doesn't compile with Perl 5.24.1 on OS/X"/>
 
 NOTE from jhi: the following cluster of hexfp-related fixes
 (in ascending time order) only makes sense as a unit, they all touch
 the same code. I tried cherry-picking these onto maint-5.24, and only
 the first one required manual backporting (available on request).
-
 NOTE from arc: if it's reasonably possible to avoid the test-only changes
 from this cluster, I'd prefer that. But I accept that may not be the case,
 so I've voted for the cluster in total.
-
 <commit votes="jhi arc" id="b6d9b423fab1963346eb79e83b356114396b1f2e" ticket="128843" desc="printf %a mishandles subnormals"/>
 <commit votes="jhi arc" id="94d00769fba240ffb86f18b3d66341fb1d24ae6c" ticket="128843" desc="Add rt.perl.org reference for b6d9b423"/>
 <commit votes="jhi arc" id="520f3e58c346a7bc3ef0509dfe0db206dae454ee" ticket="128843" desc="Comment fix for b6d9b423"/>
@@ -127,7 +102,6 @@ so I've voted for the cluster in total.
 <commit votes="jhi arc" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
 
 <commit votes="khw arc" id="1d4ea287e9a924ad1eaef98145b6d6c3b6219e80" ticket="128929" desc="Add casts to silence new in 5.23 Win32 warnings"/>
-<commit votes="khw sprout xsawyerx" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -135,10 +109,6 @@ so I've voted for the cluster in total.
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-<commit votes="jhi sprout xsawyerx" id="d06c8f869698f7905df974ab8bafb703a5438fc1" desc="[perl #128538] [PATCH] Fix copy/paste error in Configure"/>
-<commit votes="jhi sprout xsawyerx" id="a2c061044c1e87ae8e777d6134191760235db0de" desc="make Configure abort if both -Duselongdouble and -Dusequadmath are requested"/>
-<commit votes="steveh jhi sprout" id="ab0fe36e478f78846a1944a3e22e9cd26260c042" desc="fix build on clang plus -DPERL_GLOBAL_STRUCT"/>
 
 Should we not just backport 2d41a263 instead? And does 5.22 need this, too? --sprout
 The entry above about [cpan #120032] is the same underlying issue, I think. --arc
@@ -160,15 +130,6 @@ The entry above about [cpan #120032] is the same underlying issue, I think. --ar
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="khw sprout jhi" id="d2b457d752c03448e8006f00a3761b5f542000d6" desc="perlunicode: Forgot to update pod to reflect 5.24 fix"/>
-<commit votes="khw sprout jhi" id="c55dd03d1d6eb39244430d1cf2e0e94240d2b37a" desc="Fix typo in d2b457d"/>
-<commit votes="khw sprout arc" id="8df98a270ad3d8791a954ebf97837b721b1c144a" desc="perlop: Fix important typo"/>
-<commit votes="jkeenan arc xsawyerx" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
-<commit votes="jkeenan sprout arc" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
-<commit votes="jkeenan arc xsawyerx" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
-     
-
 
 </div>
 
