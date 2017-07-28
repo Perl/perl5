@@ -268,6 +268,7 @@ my @death =
  '/(?[\ |!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ |!{#}])/',    # [perl #126180]
  '/(?[()-!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[()-!{#}])/',    # [perl #126204]
  '/(?[!()])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[!(){#}])/',      # [perl #126404]
+ '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
 );
 
 # These are messages that are warnings when not strict; death under 'use re
