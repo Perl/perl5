@@ -1073,24 +1073,45 @@ declared, and only after that declaration:
     no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
-    foo();		# calls the package/global subroutine
+    foo();              # calls the package/global subroutine
     state sub foo {
-	foo();		# also calls the package subroutine
+        foo();          # also calls the package subroutine
     }
-    foo();		# calls "state" sub
-    my $ref = \&foo;	# take a reference to "state" sub
+    foo();              # calls "state" sub
+    my $ref = \&foo;    # take a reference to "state" sub
 
     my sub bar { ... }
-    bar();		# calls "my" sub
+    bar();              # calls "my" sub
 
-To use a lexical subroutine from inside the subroutine itself, you must
-predeclare it.  The C<sub foo {...}> subroutine definition syntax respects
-any previous C<my sub;> or C<state sub;> declaration.
+You can't (directly) write a recursive lexical subroutine:
 
-    my sub baz;		# predeclaration
-    sub baz {		# define the "my" sub
-	baz();		# recursive call
+    # WRONG
+    my sub baz {
+        baz();
     }
+
+This example fails because C<baz()> refers to the package/global subroutine
+C<baz>, not the lexical subroutine currently being defined.
+
+The solution is to use L<C<__SUB__>|perlfunc/__SUB__>:
+
+    my sub baz {
+        __SUB__->();    # calls itself
+    }
+
+It is possible to predeclare a lexical subroutine.  The C<sub foo {...}>
+subroutine definition syntax respects any previous C<my sub;> or C<state sub;>
+declaration.  Using this to define recursive subroutines is a bad idea,
+however:
+
+    my sub baz;         # predeclaration
+    sub baz {           # define the "my" sub
+        baz();          # WRONG: calls itself, but leaks memory
+    }
+
+Just like C<< my $f; $f = sub { $f->() } >>, this example leaks memory.  The
+name C<baz> is a reference to the subroutine, and the subroutine uses the name
+C<baz>; they keep each other alive (see L<perlref/Circular References>).
 
 =head3 C<state sub> vs C<my sub>
 
