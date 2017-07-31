@@ -1,7 +1,7 @@
 #!./perl
 
 #
-# test the logical operators '&&', '||', '!', 'and', 'or', 'not'
+# test the logical operators '&&', '||', '!', 'and', 'or', , 'xor', 'not'
 #
 
 BEGIN {
@@ -10,7 +10,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 23;
+plan tests => 33;
 
 for my $i (undef, 0 .. 2, "", "0 but true") {
     my $true = 1;
@@ -81,4 +81,27 @@ is( $i, 11, 'negation precedence with &&, multiple operands' );
 
     $i = !do { "str" } && !$x;
     is( $i, '', 'neg-do-const on lhs of && with non-foldable neg-true on rhs' );
+}
+
+# RT #131820
+#
+# It turns out that in 2017, 23 years after the release of perl5,
+# the 'xor' logical operator was still untested in core.
+
+for my $test (
+    [ 0, 0, '' ],
+    [ 0, 1, 1  ],
+    [ 1, 0, 1  ],
+    [ 1, 1, '' ],
+
+    [ 0, 2, 1  ],
+    [ 2, 0, 1  ],
+    [ 2, 2, '' ],
+
+    [ 0, 3, 1  ],
+    [ 3, 0, 1  ],
+    [ 3, 4, '' ],
+) {
+    my ($a,$b, $exp) = @$test;
+    is(($a xor $b), $exp, "($a xor $b) == '$exp'");
 }
