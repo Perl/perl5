@@ -4,7 +4,7 @@ use strict;
 use warnings;
 require ExtUtils::Typemaps;
 
-our $VERSION = '3.34';
+our $VERSION = '3.35';
 
 =head1 NAME
 
