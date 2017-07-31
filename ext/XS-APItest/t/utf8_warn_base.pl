@@ -121,7 +121,7 @@ my @tests;
         ],
         [ "overlong malformation, highest 2-byte",
             (isASCII) ? "\xc1\xbf" : I8_to_native("\xc4\xbf"),
-            (isASCII) ? 0x7F : utf8::unicode_to_native(0x9F),
+            (isASCII) ? 0x7F : 0x9F,    # Output as U+, so no need to xlate
         ],
         [ "overlong malformation, lowest 3-byte",
             (isASCII) ? "\xe0\x80\x80" : I8_to_native("\xe0\xa0\xa0"),
@@ -524,6 +524,7 @@ my @tests;
                     I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                     0x800000000,
+                      40000000
                 ],
                 [ "requires at least 32 bits",
                     I8_to_native(
