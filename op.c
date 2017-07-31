@@ -15375,18 +15375,6 @@ pointer to the next function in the chain will be stored.  The value of
 C<new_pointer> is written into the L</PL_check> array, while the value
 previously stored there is written to C<*old_checker_p>.
 
-The function should be defined like this:
-
-    static OP *new_checker(pTHX_ OP *op) { ... }
-
-It is intended to be called in this manner:
-
-    new_checker(aTHX_ op)
-
-C<old_checker_p> should be defined like this:
-
-    static Perl_check_t old_checker_p;
-
 L</PL_check> is global to an entire process, and a module wishing to
 hook op checking may find itself invoked more than once per process,
 typically in different threads.  To handle that situation, this function
@@ -15407,6 +15395,19 @@ be appropriately set before C<new_checker> is called.  If C<new_checker>
 decides not to do anything special with an op that it is given (which
 is the usual case for most uses of op check hooking), it must chain the
 check function referenced by C<*old_checker_p>.
+
+Taken all together, XS code to hook an op checker should typically look
+something like this:
+
+    static Perl_check_t nxck_frob;
+    static OP *myck_frob(pTHX_ OP *op) {
+	...
+	op = nxck_frob(aTHX_ op);
+	...
+	return op;
+    }
+    BOOT:
+	wrap_op_checker(OP_FROB, myck_frob, &nxck_frob);
 
 If you want to influence compilation of calls to a specific subroutine,
 then use L</cv_set_call_checker> rather than hooking checking of all
