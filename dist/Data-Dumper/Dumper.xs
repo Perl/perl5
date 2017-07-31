@@ -41,6 +41,11 @@
                           || (((UV) (c)) >= '0' && ((UV) (c)) <= '9'))
 #endif
 
+/* SvPVCLEAR only from perl 5.25.6 */
+#ifndef SvPVCLEAR
+#  define SvPVCLEAR(sv) sv_setpvs((sv), "")
+#endif
+
 /* This struct contains almost all the user's desired configuration, and it
  * is treated as constant by the recursive function. This arrangement has
  * the advantage of needing less memory than passing all of them on the

@@ -6,7 +6,11 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
-=item 2,166 (Nov 29 2016)
+=item 2.167_01  (Jul 31 2017)
+
+CPAN dev release with the accumulated changes from core perl.
+
+=item 2.166 (Nov 29 2016)
 
 Reduce memory usage by not importing from Carp
 Reduce memory usage by removing unused overload require.
