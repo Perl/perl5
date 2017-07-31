@@ -41,6 +41,8 @@ my $look_for_everything_uvchr_to
 			| $::UNICODE_DISALLOW_PERL_EXTENDED
 			| $::UNICODE_WARN_PERL_EXTENDED;
 
+my $highest_non_extended_cp = 2 ** ((isASCII) ? 31 : 30) - 1;
+
 foreach ([0, '', '', 'empty'],
 	 [0, 'N', 'N', '1 char'],
 	 [1, 'NN', 'N', '1 char substring'],
@@ -625,7 +627,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         $this_utf8_flags &= ~($::UTF8_DISALLOW_SUPER|$::UTF8_WARN_SUPER);
         $valid_under_strict = 0;
         $valid_under_c9strict = 0;
-        if ($n > 2 ** 31 - 1) {
+        if ($n > $highest_non_extended_cp) {
             $this_utf8_flags &=
                 ~($::UTF8_DISALLOW_PERL_EXTENDED|$::UTF8_WARN_PERL_EXTENDED);
             $valid_for_not_extended_utf8 = 0;
@@ -782,7 +784,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     # Similarly for uvchr_to_utf8
     my $this_uvchr_flags = $look_for_everything_uvchr_to;
-    if ($n > 2 ** 31 - 1) {
+    if ($n > $highest_non_extended_cp) {
         $this_uvchr_flags &=
             ~($::UNICODE_DISALLOW_PERL_EXTENDED|$::UNICODE_WARN_PERL_EXTENDED);
     }
