@@ -567,7 +567,7 @@ and check for NULL.
 #define RXp_MATCH_UTF8(prog)            (RXp_EXTFLAGS(prog) & RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8(rx_sv)            (RX_EXTFLAGS(rx_sv) & RXf_MATCH_UTF8)
 #define RXp_MATCH_UTF8_on(prog)         (RXp_EXTFLAGS(prog) |= RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_on(rx_sv)         (RXp_EXTFLAGS(ReANY(rx_sv)))
+#define RX_MATCH_UTF8_on(rx_sv)         (RXp_MATCH_UTF8_on(ReANY(rx_sv)))
 #define RXp_MATCH_UTF8_off(prog)        (RXp_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_off(rx_sv)        (RXp_MATCH_UTF8_off(ReANY(rx_sv))
 #define RXp_MATCH_UTF8_set(prog, t)     ((t) \
