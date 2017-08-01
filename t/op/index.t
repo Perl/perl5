@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 170 );
+plan( tests => 172 );
 
 run_tests() unless caller;
 
@@ -260,7 +260,7 @@ is index($substr, 'a'), 1, 'index reply reflects characters not octets';
 # op_eq, op_const optimised away in (index() == -1) and variants
 
 {
-    my $s = "ab";
+    my $s = "abxyz";
     ok(!(index($s,"a") == -1),  "index(a) == -1");
     ok( (index($s,"a") != -1),  "index(a) != -1");
     ok( (index($s,"c") == -1),  "index(c) == -1");
@@ -320,4 +320,12 @@ is index($substr, 'a'), 1, 'index reply reflects characters not octets';
     ok( $r,                         "r = -1 == rindex(c) - r value");
     ok(!($r = -1 != rindex($s,"c")), "r = -1 != rindex(c)");
     ok(!$r,                         "r = -1 != rindex(c) - r value");
+
+    # RT #131823
+    # index with OPpTARGET_MY shouldn't do the '== -1' optimisation
+
+    ok(!(($r = index($s,"z")) == -1),  "(r = index(a)) == -1");
+    is($r, 4,                          "(r = index(a)) == -1 - r value");
+
+
 }
