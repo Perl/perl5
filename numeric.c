@@ -1212,11 +1212,18 @@ Perl_my_atof(pTHX_ const char* s)
     /* 's' must be NUL terminated */
 
     NV x = 0.0;
-#ifdef USE_QUADMATH
-    Perl_my_atof2(aTHX_ s, &x);
-    return x;
-#elif defined(USE_LOCALE_NUMERIC)
+
     PERL_ARGS_ASSERT_MY_ATOF;
+
+#ifdef USE_QUADMATH
+
+    Perl_my_atof2(aTHX_ s, &x);
+
+#elif ! defined(USE_LOCALE_NUMERIC)
+
+    Perl_atof2(s, x);
+
+#else
 
     {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
@@ -1247,9 +1254,9 @@ Perl_my_atof(pTHX_ const char* s)
             Perl_atof2(s, x);
         RESTORE_LC_NUMERIC();
     }
-#else
-    Perl_atof2(s, x);
+
 #endif
+
     return x;
 }
 
