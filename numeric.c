@@ -1229,9 +1229,11 @@ Perl_my_atof(pTHX_ const char* s)
              * that we have to determine this beforehand because on some
              * systems, Perl_atof2 is just a wrapper around the system's atof.
              * */
-            const char * const standard = strchr(s, '.');
-            const char * const local = strstr(s, SvPV_nolen(PL_numeric_radix_sv));
-            const bool use_standard_radix = standard && (!local || standard < local);
+            const char * const standard_pos = strchr(s, '.');
+            const char * const local_pos
+                                  = strstr(s, SvPV_nolen(PL_numeric_radix_sv));
+            const bool use_standard_radix
+                    = standard_pos && (!local_pos || standard_pos < local_pos);
 
             if (use_standard_radix)
                 SET_NUMERIC_STANDARD();
