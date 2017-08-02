@@ -2,7 +2,7 @@
 
 <data>
 
-<div><h2>Tickets Listed in #128222: 5.24.2 blockers</h2>
+<div><h2>Tickets Listed in #128222: 5.24.3 blockers</h2>
 
 This was a regression in 5.12. -arc
 <commit votes="sprout arc" id="f15d05806fb7522031b75cb5a8784727ae03b98a" ticket="127952" desc="[perl #127952] misoptimization for negated constant-ish on lhs of logop" />
