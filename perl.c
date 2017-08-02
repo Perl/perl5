@@ -286,6 +286,14 @@ perl_construct(pTHXx)
     PL_localpatches = local_patches;	/* For possible -v */
 #endif
 
+#if defined(LIBM_LIB_VERSION)
+    /*
+     * Some BSDs and Cygwin default to POSIX math instead of IEEE.
+     * This switches them over to IEEE.
+     */
+    _LIB_VERSION = _IEEE_;
+#endif
+
 #ifdef HAVE_INTERP_INTERN
     sys_intern_init();
 #endif
