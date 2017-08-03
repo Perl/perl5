@@ -81,14 +81,10 @@ sub AUTOLOAD
 
 BOOT_XS: {
   # If I inherit DynaLoader then I inherit AutoLoader and I DON'T WANT TO
-  require DynaLoader;
+  use XSLoader ();
 
-  # DynaLoader calls dl_load_flags as a static method.
-  *dl_load_flags = DynaLoader->can('dl_load_flags');
+  XSLoader::load( 'IPC::SysV', $VERSION );
 
-  do {
-    __PACKAGE__->can('bootstrap') || \&DynaLoader::bootstrap
-  }->(__PACKAGE__, $VERSION);
 }
 
 1;

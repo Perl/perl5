@@ -21,9 +21,8 @@ our $VERSION = '1.19';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
-require DynaLoader;
-our @ISA = qw(DynaLoader);
-bootstrap Unicode::Collate $VERSION;
+use XSLoader ();
+XSLoader::load( 'Unicode::Collate', $VERSION );
 ### end XS only ###
 
 my @Path = qw(Unicode Collate);
