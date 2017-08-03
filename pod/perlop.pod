@@ -2669,12 +2669,12 @@ use C<chomp()>.
     END
 
 If you want your here-docs to be indented with the rest of the code,
-you'll need to remove leading whitespace from each line manually:
+use the C<<< <<~FOO >>> construct described under L</Indented Here-docs>:
 
-    ($quote = <<'FINIS') =~ s/^\s+//gm;
+    $quote = <<~'FINIS';
        The Road goes ever on and on,
        down from the door where it began.
-    FINIS
+       FINIS
 
 If you use a here-doc within a delimited construct, such as in C<s///eg>,
 the quoted material must still come on the line following the
