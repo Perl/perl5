@@ -56,9 +56,9 @@ require Exporter;
 
 ##### The above part is common to XS and PP #####
 
-our @ISA = qw(Exporter DynaLoader);
-require DynaLoader;
-bootstrap Unicode::Normalize $VERSION;
+our @ISA = qw(Exporter);
+use XSLoader ();
+XSLoader::load( 'Unicode::Normalize', $VERSION );
 
 ##### The below part is common to XS and PP #####
 

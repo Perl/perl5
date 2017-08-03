@@ -10,14 +10,13 @@
 package Filter::Util::Call ;
 
 require 5.005 ;
-require DynaLoader;
 require Exporter;
 use Carp ;
 use strict;
 use warnings;
 use vars qw($VERSION $XS_VERSION @ISA @EXPORT) ;
 
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
 $VERSION = "1.57" ;
 $XS_VERSION = $VERSION;
@@ -59,7 +58,7 @@ sub filter_add($)
     Filter::Util::Call::real_import($obj, (caller)[0], $coderef) ;
 }
 
-bootstrap Filter::Util::Call ;
+XSLoader::load( 'Filter::Util::Call', $VERSION );
 
 1;
 __END__

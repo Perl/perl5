@@ -11,8 +11,10 @@ use integer;
 $VERSION = '5.98';
 
 require Exporter;
-require DynaLoader;
-@ISA = qw(Exporter DynaLoader);
+
+use XSLoader ();
+
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(
 	hmac_sha1	hmac_sha1_base64	hmac_sha1_hex
 	hmac_sha224	hmac_sha224_base64	hmac_sha224_hex
@@ -236,7 +238,7 @@ sub load {
 	$class->putstate($str);
 }
 
-Digest::SHA->bootstrap($VERSION);
+XSLoader::load( 'Digest::SHA', $VERSION );
 
 1;
 __END__
