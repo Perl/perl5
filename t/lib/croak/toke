@@ -394,3 +394,13 @@ $a = <<~ ;
 
 EXPECT
 Use of bare << to mean <<"" is forbidden at - line 1.
+########
+# NAME incomplete floating point decimal exponent (#131725)
+1e--5
+EXPECT
+Bareword found where operator expected at - line 1, near "1e"
+	(Missing operator before e?)
+Number found where operator expected at - line 1, near "--5"
+	(Missing operator before 5?)
+syntax error at - line 1, near "1e"
+Execution of - aborted due to compilation errors.

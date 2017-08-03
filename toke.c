@@ -11182,9 +11182,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
               || UNLIKELY(hexfp && isALPHA_FOLD_EQ(*s, 'p')))
             && strchr("+-0123456789_", s[1]))
         {
-            floatit = TRUE;
+            int exp_digits = 0;
+            const char *save_s = s;
+            char * save_d = d;
 
-	    /* regardless of whether user said 3E5 or 3e5, use lower 'e',
+            /* regardless of whether user said 3E5 or 3e5, use lower 'e',
                ditto for p (hexfloats) */
             if ((isALPHA_FOLD_EQ(*s, 'e'))) {
 		/* At least some Mach atof()s don't grok 'E' */
@@ -11216,6 +11218,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    /* read digits of exponent */
 	    while (isDIGIT(*s) || *s == '_') {
 	        if (isDIGIT(*s)) {
+                    ++exp_digits;
 		    if (d >= e)
 		        Perl_croak(aTHX_ "%s", number_too_long);
 		    *d++ = *s++;
@@ -11227,6 +11230,20 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		   lastub = s++;
 		}
 	    }
+
+            if (!exp_digits) {
+                /* no exponent digits, the [eEpP] could be for something else,
+                 * though in practice we don't get here for p since that's preparsed
+                 * earlier, and results in only the 0xX being consumed, so behave similarly
+                 * for decimal floats and consume only the D.DD, leaving the [eE] to the
+                 * next token.
+                 */
+                s = save_s;
+                d = save_d;
+            }
+            else {
+                floatit = TRUE;
+            }
 	}
 
 
