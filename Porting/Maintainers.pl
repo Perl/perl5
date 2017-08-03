@@ -968,7 +968,7 @@ use File::Glob qw(:case);
     },
 
     'SelfLoader' => {
-        'DISTRIBUTION' => 'SMUELLER/SelfLoader-1.20.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/SelfLoader-1.24.tar.gz',
         'FILES'        => q[dist/SelfLoader],
         'EXCLUDED'     => ['t/00pod.t'],
     },
