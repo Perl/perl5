@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 33);
+plan(tests => 34);
 
 sub r {
     return qr/Good/;
@@ -119,3 +119,19 @@ sub {
     utf8::upgrade($$r1);
     like "xxx", $r1, "RT #131821 utf8::upgrade: case insensitive";
 }
+
+# after v5.27.2-30-gdf6b4bd, this was double-freeing the PVX buffer
+# and would crash under valgrind or similar. The eval ensures that the
+# regex any children are freed.
+
+{
+    my %h;
+    eval q{
+        sub {
+           my $r = qr/abc/;
+           $_[0] = $$r;
+        }->($h{foo});
+        1;
+    };
+}
+pass("PVLV-as-REGEXP double-free of PVX");

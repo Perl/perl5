@@ -6624,7 +6624,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    goto freescalar;
 	case SVt_REGEXP:
 	    /* FIXME for plugins */
-	  freeregexp:
 	    pregfree2((REGEXP*) sv);
 	    goto freescalar;
 	case SVt_PVCV:
@@ -6703,7 +6702,16 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    }
 	    else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
 		SvREFCNT_dec(LvTARG(sv));
-	    if (isREGEXP(sv)) goto freeregexp;
+	    if (isREGEXP(sv)) {
+                /* SvLEN points to a regex body. Free the body, then
+                 * set SvLEN to whatever value was in the now-freed
+                 * regex body. The PVX buffer is shared by multiple re's
+                 * and only freed once, by the re whose len in non-null */
+                STRLEN len = ReANY(sv)->xpv_len;
+                pregfree2((REGEXP*) sv);
+                SvLEN_set((sv), len);
+                goto freescalar;
+            }
             /* FALLTHROUGH */
 	case SVt_PVGV:
 	    if (isGV_with_GP(sv)) {
