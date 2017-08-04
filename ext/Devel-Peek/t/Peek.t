@@ -362,7 +362,7 @@ do_test('reference to regexp',
     FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)
     PV = $ADDR "\\(\\?\\^:tic\\)"
     CUR = 8
-    LEN = 0					# $] < 5.017006
+    LEN = 0
     STASH = $ADDR\\t"Regexp"'
 . ($] < 5.013 ? '' :
 '
@@ -389,6 +389,7 @@ do_test('reference to regexp',
       FLAGS = \(POK,pPOK\)
       PV = $ADDR "\(\?\^:tic\)"
       CUR = 8
+      LEN = \d+
       COMPFLAGS = 0x0 \(\)
       EXTFLAGS = 0x680000 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
 (?:      ENGINE = $ADDR \(STANDARD\)
@@ -1164,6 +1165,7 @@ do_test('UTF-8 in a regular expression',
     FLAGS = \(OBJECT,POK,FAKE,pPOK,UTF8\)
     PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
     CUR = 13
+    LEN = 0
     STASH = $ADDR	"Regexp"
     COMPFLAGS = 0x0 \(\)
     EXTFLAGS = $ADDR \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
@@ -1188,6 +1190,7 @@ do_test('UTF-8 in a regular expression',
       FLAGS = \(POK,pPOK,UTF8\)
       PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
       CUR = 13
+      LEN = \d+
       COMPFLAGS = 0x0 \(\)
       EXTFLAGS = $ADDR \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
 (?:      ENGINE = $ADDR \(STANDARD\)
