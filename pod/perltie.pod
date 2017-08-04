@@ -504,8 +504,9 @@ reports whether a key is present in the hash, and DELETE deletes one.
 CLEAR empties the hash by deleting all the key and value pairs.  FIRSTKEY
 and NEXTKEY implement the keys() and each() functions to iterate over all
 the keys. SCALAR is triggered when the tied hash is evaluated in scalar 
-context. UNTIE is called when C<untie> happens, and DESTROY is called when
-the tied variable is garbage collected.
+context, and in 5.28 onwards, by C<keys> in boolean context. UNTIE is
+called when C<untie> happens, and DESTROY is called when the tied variable
+is garbage collected.
 
 If this seems like a lot, then feel free to inherit from merely the
 standard Tie::StdHash module for most of your methods, redefining only the
@@ -805,9 +806,10 @@ thing, but we'll have to go through the LIST field indirectly.
 =item SCALAR this
 X<SCALAR>
 
-This is called when the hash is evaluated in scalar context. In order
-to mimic the behaviour of untied hashes, this method should return a
-false value when the tied hash is considered empty. If this method does
+This is called when the hash is evaluated in scalar context, and in 5.28
+onwards, by C<keys> in boolean context. In order to mimic the behaviour of
+untied hashes, this method must return a value which when used as boolean,
+indicates whether the tied hash is considered empty. If this method does
 not exist, perl will make some educated guesses and return true when
 the hash is inside an iteration. If this isn't the case, FIRSTKEY is
 called, and the result will be a false value if FIRSTKEY returns the empty
