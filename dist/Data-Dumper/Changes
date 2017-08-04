@@ -6,6 +6,16 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.167_02  (Aug  4 2017)
+
+Attempt to work around XS deparse issues on old perls.
+According to the few old perls at my disposure, this now repairs,
+for example 5.18, but 5.8.9 still barfs. My debugging hasn't
+really come up with much since all changes other than the deparse
+change look benign to me.
+Can someone who uses ancient perls please step up and take a look?
+--Steffen
+
 =item 2.167_01  (Jul 31 2017)
 
 CPAN dev release with the accumulated changes from core perl.

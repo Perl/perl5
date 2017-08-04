@@ -10,13 +10,15 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.167_01'; # Don't forget to set version and release
+    $VERSION = '2.167_02'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
 
 use 5.006_001;
 require Exporter;
+
+use constant IS_PRE_520_PERL => $] < 5.020;
 
 use Carp ();
 
@@ -224,12 +226,19 @@ sub Names {
 sub DESTROY {}
 
 sub Dump {
-    return &Dumpxs
-    unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl})
+  # On old versions of perl, the xs-deparse support can fail
+  # mysteriously. Barring copious spare time, it's best to revert
+  # to the previously standard behavior of using the pure perl dumper
+  # for deparsing on old perls. --Steffen
+  if (IS_PRE_520_PERL and ($Data::Dumper::Deparse or (ref($_[0]) && $_[0]->{deparse}))) {
+    return &Dumpperl;
+  }
 
+  return &Dumpxs
+    unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl})
             # Use pure perl version on earlier releases on EBCDIC platforms
         || (! $IS_ASCII && $] lt 5.021_010);
-    return &Dumpperl;
+  return &Dumpperl;
 }
 
 #
@@ -1465,7 +1474,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.167_01
+Version 2.167_02
 
 =head1 SEE ALSO
 
