@@ -19535,9 +19535,17 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
         Safefree(r->recurse_locinput);
 }
 
+
 /*  reg_temp_copy()
 
-    This is a hacky workaround to the structural issue of match results
+    Copy ssv to dsv, both of which should of type SVt_REGEXP or SVt_PVLV,
+    except that dsv will be created if NULL.
+
+    This function is used in two main ways. First to implement
+        $r = qr/....; $s = $$r;
+
+    Secondly, it is used as a hacky workaround to the structural issue of
+    match results
     being stored in the regexp structure which is in turn stored in
     PL_curpm/PL_reg_curpm. The problem is that due to qr// the pattern
     could be PL_curpm in multiple contexts, and could require multiple
@@ -19553,78 +19561,79 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 
 
 REGEXP *
-Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
+Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
 {
-    struct regexp *ret;
-    struct regexp *const r = ReANY(rx);
-    const bool islv = ret_x && SvTYPE(ret_x) == SVt_PVLV;
+    struct regexp *drx;
+    struct regexp *const srx = ReANY(ssv);
+    const bool islv = dsv && SvTYPE(dsv) == SVt_PVLV;
 
     PERL_ARGS_ASSERT_REG_TEMP_COPY;
 
-    if (!ret_x)
-	ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
+    if (!dsv)
+	dsv = (REGEXP*) newSV_type(SVt_REGEXP);
     else {
-	SvOK_off((SV *)ret_x);
+	SvOK_off((SV *)dsv);
 	if (islv) {
 	    /* For PVLVs, the head (sv_any) points to an XPVLV, while
              * the LV's xpvlenu_rx will point to a regexp body, which
              * we allocate here */
 	    REGEXP *temp = (REGEXP *)newSV_type(SVt_REGEXP);
-	    assert(!SvPVX(ret_x));
-            ((XPV*)SvANY(ret_x))->xpv_len_u.xpvlenu_rx = temp->sv_any;
+	    assert(!SvPVX(dsv));
+            ((XPV*)SvANY(dsv))->xpv_len_u.xpvlenu_rx = temp->sv_any;
 	    temp->sv_any = NULL;
 	    SvFLAGS(temp) = (SvFLAGS(temp) & ~SVTYPEMASK) | SVt_NULL;
 	    SvREFCNT_dec_NN(temp);
 	    /* SvCUR still resides in the xpvlv struct, so the regexp copy-
 	       ing below will not set it. */
-	    SvCUR_set(ret_x, SvCUR(rx));
+	    SvCUR_set(dsv, SvCUR(ssv));
 	}
     }
     /* This ensures that SvTHINKFIRST(sv) is true, and hence that
        sv_force_normal(sv) is called.  */
-    SvFAKE_on(ret_x);
-    ret = ReANY(ret_x);
+    SvFAKE_on(dsv);
+    drx = ReANY(dsv);
 
-    SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
-    SvPV_set(ret_x, RX_WRAPPED(rx));
+    SvFLAGS(dsv) |= SvFLAGS(ssv) & (SVf_POK|SVp_POK|SVf_UTF8);
+    SvPV_set(dsv, RX_WRAPPED(ssv));
     /* We share the same string buffer as the original regexp, on which we
        hold a reference count, incremented when mother_re is set below.
        The string pointer is copied here, being part of the regexp struct.
      */
-    memcpy(&(ret->xpv_cur), &(r->xpv_cur),
+    memcpy(&(drx->xpv_cur), &(srx->xpv_cur),
 	   sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
     if (!islv)
-        SvLEN_set(ret_x, 0);
-    if (r->offs) {
-        const I32 npar = r->nparens+1;
-        Newx(ret->offs, npar, regexp_paren_pair);
-        Copy(r->offs, ret->offs, npar, regexp_paren_pair);
+        SvLEN_set(dsv, 0);
+    if (srx->offs) {
+        const I32 npar = srx->nparens+1;
+        Newx(drx->offs, npar, regexp_paren_pair);
+        Copy(srx->offs, drx->offs, npar, regexp_paren_pair);
     }
-    if (r->substrs) {
+    if (srx->substrs) {
         int i;
-        Newx(ret->substrs, 1, struct reg_substr_data);
-	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
+        Newx(drx->substrs, 1, struct reg_substr_data);
+	StructCopy(srx->substrs, drx->substrs, struct reg_substr_data);
 
         for (i = 0; i < 2; i++) {
-            SvREFCNT_inc_void(ret->substrs->data[i].substr);
-            SvREFCNT_inc_void(ret->substrs->data[i].utf8_substr);
+            SvREFCNT_inc_void(drx->substrs->data[i].substr);
+            SvREFCNT_inc_void(drx->substrs->data[i].utf8_substr);
         }
 
 	/* check_substr and check_utf8, if non-NULL, point to either their
 	   anchored or float namesakes, and don't hold a second reference.  */
     }
-    RX_MATCH_COPIED_off(ret_x);
+    RX_MATCH_COPIED_off(dsv);
 #ifdef PERL_ANY_COW
-    ret->saved_copy = NULL;
+    drx->saved_copy = NULL;
 #endif
-    ret->mother_re = ReREFCNT_inc(r->mother_re ? r->mother_re : rx);
-    SvREFCNT_inc_void(ret->qr_anoncv);
-    if (r->recurse_locinput)
-        Newxz(ret->recurse_locinput,r->nparens + 1,char *);
+    drx->mother_re = ReREFCNT_inc(srx->mother_re ? srx->mother_re : ssv);
+    SvREFCNT_inc_void(drx->qr_anoncv);
+    if (srx->recurse_locinput)
+        Newxz(drx->recurse_locinput,srx->nparens + 1,char *);
 
-    return ret_x;
+    return dsv;
 }
 #endif
+
 
 /* regfree_internal()
 

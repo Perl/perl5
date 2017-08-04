@@ -2675,9 +2675,9 @@ PERL_CALLCONV void	Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I
 PERL_CALLCONV SV*	Perl_reg_qr_package(pTHX_ REGEXP * const rx);
 #define PERL_ARGS_ASSERT_REG_QR_PACKAGE	\
 	assert(rx)
-PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* ret_x, REGEXP* rx);
+PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* dsv, REGEXP* ssv);
 #define PERL_ARGS_ASSERT_REG_TEMP_COPY	\
-	assert(rx)
+	assert(ssv)
 PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **altsvp);
 #define PERL_ARGS_ASSERT_REGCLASS_SWASH	\
 	assert(node)
