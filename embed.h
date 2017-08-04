@@ -1171,7 +1171,6 @@
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
 #define ck_each(a)		Perl_ck_each(aTHX_ a)
 #define ck_eof(a)		Perl_ck_eof(aTHX_ a)
-#define ck_eq(a)		Perl_ck_eq(aTHX_ a)
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
 #define ck_exists(a)		Perl_ck_exists(aTHX_ a)
