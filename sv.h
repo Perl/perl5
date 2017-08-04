@@ -1775,7 +1775,7 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
     : SvPOK(sv)						\
 	? SvPVXtrue(sv)					\
     : SvIOK(sv)                			        \
-        ? (SvIVX(sv) != 0)                              \
+        ? (SvIVX(sv) != 0 /* cast to bool */)           \
     : (SvROK(sv) && !(   SvOBJECT(SvRV(sv))             \
                       && HvAMAGIC(SvSTASH(SvRV(sv)))))  \
         ? TRUE                                          \
