@@ -3462,7 +3462,12 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	}
     }
 
-    if (SvUTF8(sv)) {
+    /* SVt_REGEXP's shouldn't be upgraded to UTF8 - they're already
+     * compiled and individual nodes will remain non-utf8 even if the
+     * stringified version of the pattern gets upgraded. Whether the
+     * PVX of a REGEXP should be grown or we should just croak, I don't
+     * know - DAPM */
+    if (SvUTF8(sv) || isREGEXP(sv)) {
 	if (extra) SvGROW(sv, SvCUR(sv) + extra);
 	return SvCUR(sv);
     }

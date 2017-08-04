@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 32);
+plan(tests => 33);
 
 sub r {
     return qr/Good/;
@@ -110,3 +110,12 @@ sub {
     is $_[0], "$str ", 'stringifying regexpvlv in place';
 }
  ->((\my%hash)->{key});
+
+# utf8::upgrade on an SVt_REGEXP should be a NOOP.
+# RT #131821
+
+{
+    my $r1 = qr/X/i;
+    utf8::upgrade($$r1);
+    like "xxx", $r1, "RT #131821 utf8::upgrade: case insensitive";
+}
