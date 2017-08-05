@@ -988,7 +988,11 @@ void
 Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
 {
     HE *entry;
-    bool tied = SvRMAGICAL(hv) && mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied);
+    bool tied = SvRMAGICAL(hv) && (mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied)
+#ifdef DYNAMIC_ENV_FETCH  /* might not know number of keys yet */
+                                   || mg_find(MUTABLE_SV(hv), PERL_MAGIC_env)
+#endif
+                                  );
     dSP;
 
     PERL_ARGS_ASSERT_HV_PUSHKV;
