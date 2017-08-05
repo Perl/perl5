@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 172 );
+plan( tests => 268 );
 
 run_tests() unless caller;
 
@@ -261,8 +261,12 @@ is index($substr, 'a'), 1, 'index reply reflects characters not octets';
 
 for my $test (
       # op  const  match
+    [ '<=',   -1,      0 ],
     [ '==',   -1,      0 ],
     [ '!=',   -1,      1 ],
+    [ '>',    -1,      1 ],
+    [ '<',     0,      0 ],
+    [ '>=',    0,      1 ],
 ) {
     my ($op, $const, $match) = @$test;
 
@@ -273,9 +277,13 @@ for my $test (
         my $expect = !(($substr eq "a") xor $match);
         for my $rindex ("", "r") {
             for my $reverse (0, 1) {
+                my $rop = $op;
+                if ($reverse) {
+                    $rop =~ s/>/</ or  $rop =~ s/</>/;
+                }
                 for my $targmy (0, 1) {
                     my $index = "${rindex}index(\$s, '$substr')";
-                    my $expr = $reverse ? "$const $op $index" : "$index $op $const";
+                    my $expr = $reverse ? "$const $rop $index" : "$index $rop $const";
                     # OPpTARGET_MY variant: the '$r = ' is optimised away too
                     $expr = "\$r = ($expr)" if $targmy;
 

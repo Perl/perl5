@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2277;
+plan 2309;
 
 use B ();
 
@@ -351,7 +351,7 @@ test_opcount(0, 'barewords can be constant-folded',
     }
 }
 
-# index(...) == -1 and variants optimise away the EQ and CONST
+# index(...) == -1 and variants optimise away the EQ/NE/etc and CONST
 # and with $lex = (index(...) == -1), the assignment is optimised away
 # too
 
@@ -361,17 +361,34 @@ test_opcount(0, 'barewords can be constant-folded',
 
     my ($x, $y, $z);
     for my $assign (0, 1) {
-        for my $op ('index($x,$y)', 'rindex($x,$y)') {
-            for my $eq ('==', '!=') {
+        for my $index ('index($x,$y)', 'rindex($x,$y)') {
+            for my $cmp_ops (
+                    [ '<=',   -1, ],
+                    [ '==',   -1, ],
+                    [ '!=',   -1, ],
+                    [ '>',    -1, ],
+                    [ '<',     0, ],
+                    [ '>=',    0, ],
+            ) {
+                my ($cmp, $const) = @$cmp_ops;
                 for my $swap (0, 1) {
-                    my $expr = $swap ? "(-1 $eq $op)" : "($op $eq -1)";
+                    my $rcmp = $cmp;
+                    if ($swap) {
+                        $rcmp =~ s/>/</ or  $rcmp =~ s/</>/;
+                    }
+                    my $expr = $swap ? "($const $cmp $index)"
+                                     : "($index $cmp $const)";
                     $expr = "\$z = ($expr)" if $assign;
 
-                    test_opcount(0, "optimise away qe,const in $expr",
+                    test_opcount(0, "optimise away compare,const in $expr",
                             eval qq{sub { $expr }},
                             {
+                                le      => 0,
+                                le      => 0,
                                 eq      => 0,
                                 ne      => 0,
+                                ge      => 0,
+                                gt      => 0,
                                 const   => 0,
                                 sassign => 0,
                                 padsv   => 2.
