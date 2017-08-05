@@ -259,70 +259,44 @@ is index($substr, 'a'), 1, 'index reply reflects characters not octets';
 
 # op_eq, op_const optimised away in (index() == -1) and variants
 
-{
-    my $s = "abxyz";
-    ok(!(index($s,"a") == -1),  "index(a) == -1");
-    ok( (index($s,"a") != -1),  "index(a) != -1");
-    ok( (index($s,"c") == -1),  "index(c) == -1");
-    ok(!(index($s,"c") != -1),  "index(c) != -1");
+for my $test (
+      # op  const  match
+    [ '==',   -1,      0 ],
+    [ '!=',   -1,      1 ],
+) {
+    my ($op, $const, $match) = @$test;
 
-    ok(!(rindex($s,"a") == -1), "rindex(a) == -1");
-    ok( (rindex($s,"a") != -1), "rindex(a) != -1");
-    ok( (rindex($s,"c") == -1), "rindex(c) == -1");
-    ok(!(rindex($s,"c") != -1), "rindex(c) != -1");
-
-    ok(!(-1 == index($s,"a")),  "-1 == index(a)");
-    ok( (-1 != index($s,"a")),  "-1 != index(a)");
-    ok( (-1 == index($s,"c")),  "-1 == index(c)");
-    ok(!(-1 != index($s,"c")),  "-1 != index(c)");
-
-    ok(!(-1 == rindex($s,"a")), "-1 == rindex(a)");
-    ok( (-1 != rindex($s,"a")), "-1 != rindex(a)");
-    ok( (-1 == rindex($s,"c")), "-1 == rindex(c)");
-    ok(!(-1 != rindex($s,"c")), "-1 != rindex(c)");
-
-    # OPpTARGET_MY variant: the '$r = ' is optimised away too
-
+    my $s = "abcde";
     my $r;
 
-    ok(!($r = index($s,"a") == -1),  "r = index(a) == -1");
-    ok(!$r,                          "r = index(a) == -1 - r value");
-    ok( ($r = index($s,"a") != -1),  "r = index(a) != -1");
-    ok( $r,                          "r = index(a) != -1 - r value");
-    ok( ($r = index($s,"c") == -1),  "r = index(c) == -1");
-    ok( $r,                          "r = index(c) == -1 - r value");
-    ok(!($r = index($s,"c") != -1),  "r = index(c) != -1");
-    ok(!$r,                          "r = index(c) != -1 - r value");
+    for my $substr ("a", "z") {
+        my $expect = !(($substr eq "a") xor $match);
+        for my $rindex ("", "r") {
+            for my $reverse (0, 1) {
+                for my $targmy (0, 1) {
+                    my $index = "${rindex}index(\$s, '$substr')";
+                    my $expr = $reverse ? "$const $op $index" : "$index $op $const";
+                    # OPpTARGET_MY variant: the '$r = ' is optimised away too
+                    $expr = "\$r = ($expr)" if $targmy;
 
-    ok(!($r = rindex($s,"a") == -1), "r = rindex(a) == -1");
-    ok(!$r,                         "r = rindex(a) == -1 - r value");
-    ok( ($r = rindex($s,"a") != -1), "r = rindex(a) != -1");
-    ok( $r,                         "r = rindex(a) != -1 - r value");
-    ok( ($r = rindex($s,"c") == -1), "r = rindex(c) == -1");
-    ok( $r,                         "r = rindex(c) == -1 - r value");
-    ok(!($r = rindex($s,"c") != -1), "r = rindex(c) != -1");
-    ok(!$r,                         "r = rindex(c) != -1 - r value");
+                    my $got = eval $expr;
+                    die "eval of <$expr> gave: $@\n" if $@ ne "";
 
-    ok(!($r = -1 == index($s,"a")),  "r = -1 == index(a)");
-    ok(!$r,                          "r = -1 == index(a) - r value");
-    ok( ($r = -1 != index($s,"a")),  "r = -1 != index(a)");
-    ok( $r,                          "r = -1 != index(a) - r value");
-    ok( ($r = -1 == index($s,"c")),  "r = -1 == index(c)");
-    ok( $r,                          "r = -1 == index(c) - r value");
-    ok(!($r = -1 != index($s,"c")),  "r = -1 != index(c)");
-    ok(!$r,                          "r = -1 != index(c) - r value");
+                    is !!$got, $expect, $expr;
+                    if ($targmy) {
+                        is !!$r, $expect, "$expr - r value";
+                    }
+                }
+            }
+        }
+    }
+}
 
-    ok(!($r = -1 == rindex($s,"a")), "r = -1 == rindex(a)");
-    ok(!$r,                         "r = -1 == rindex(a) - r value");
-    ok( ($r = -1 != rindex($s,"a")), "r = -1 != rindex(a)");
-    ok( $r,                         "r = -1 != rindex(a) - r value");
-    ok( ($r = -1 == rindex($s,"c")), "r = -1 == rindex(c)");
-    ok( $r,                         "r = -1 == rindex(c) - r value");
-    ok(!($r = -1 != rindex($s,"c")), "r = -1 != rindex(c)");
-    ok(!$r,                         "r = -1 != rindex(c) - r value");
-
+{
     # RT #131823
     # index with OPpTARGET_MY shouldn't do the '== -1' optimisation
+    my $s = "abxyz";
+    my $r;
 
     ok(!(($r = index($s,"z")) == -1),  "(r = index(a)) == -1");
     is($r, 4,                          "(r = index(a)) == -1 - r value");
