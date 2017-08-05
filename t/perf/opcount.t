@@ -383,7 +383,7 @@ test_opcount(0, 'barewords can be constant-folded',
                     test_opcount(0, "optimise away compare,const in $expr",
                             eval qq{sub { $expr }},
                             {
-                                le      => 0,
+                                lt      => 0,
                                 le      => 0,
                                 eq      => 0,
                                 ne      => 0,
