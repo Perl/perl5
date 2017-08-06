@@ -672,6 +672,7 @@ addbits('sort',
     4 => qw(OPpSORT_DESCEND  DESC   ), # Descending sort
     5 => qw(OPpSORT_QSORT    QSORT  ), # Use quicksort (not mergesort)
     6 => qw(OPpSORT_STABLE   STABLE ), # Use a stable algorithm
+    7 => qw(OPpSORT_UNSTABLE UNSTABLE),# Use an unstable algorithm
 );
 
 

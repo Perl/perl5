@@ -5408,7 +5408,8 @@ typedef enum {
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
 #define HINT_SORT_MERGESORT	0x00000002
-#define HINT_SORT_STABLE	0x00000100 /* sort styles (currently one) */
+#define HINT_SORT_STABLE	0x00000100 /* sort styles */
+#define HINT_SORT_UNSTABLE	0x00000200
 
 /* flags for PL_sawampersand */
 

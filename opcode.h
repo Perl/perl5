@@ -2299,6 +2299,7 @@ END_EXTERN_C
 #define OPpOFFBYONE             0x80
 #define OPpOPEN_OUT_CRLF        0x80
 #define OPpPV_IS_UTF8           0x80
+#define OPpSORT_UNSTABLE        0x80
 #define OPpTRANS_DELETE         0x80
 START_EXTERN_C
 
@@ -2412,6 +2413,7 @@ EXTCONST char PL_op_private_labels[] = {
     'T','A','R','G','\0',
     'T','A','R','G','M','Y','\0',
     'U','N','I','\0',
+    'U','N','S','T','A','B','L','E','\0',
     'U','T','F','\0',
     'k','e','y','\0',
     'o','f','f','s','e','t','\0',
@@ -2434,11 +2436,11 @@ EXTCONST char PL_op_private_labels[] = {
 EXTCONST I16 PL_op_private_bitfields[] = {
     0, 8, -1,
     0, 8, -1,
-    0, 556, -1,
+    0, 565, -1,
     0, 8, -1,
     0, 8, -1,
-    0, 563, -1,
-    0, 552, -1,
+    0, 572, -1,
+    0, 561, -1,
     1, -1, 0, 529, 1, 33, 2, 283, -1,
     4, -1, 1, 164, 2, 171, 3, 178, -1,
     4, -1, 0, 529, 1, 33, 2, 283, 3, 110, -1,
@@ -2617,49 +2619,49 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* shift */
       84, /* unshift */
      143, /* sort */
-     150, /* reverse */
+     151, /* reverse */
        0, /* grepstart */
-     152, /* grepwhile */
+     153, /* grepwhile */
        0, /* mapstart */
        0, /* mapwhile */
        0, /* range */
-     154, /* flip */
-     154, /* flop */
+     155, /* flip */
+     155, /* flop */
        0, /* and */
        0, /* or */
       12, /* xor */
        0, /* dor */
-     156, /* cond_expr */
+     157, /* cond_expr */
        0, /* andassign */
        0, /* orassign */
        0, /* dorassign */
-     158, /* entersub */
-     165, /* leavesub */
-     165, /* leavesublv */
+     159, /* entersub */
+     166, /* leavesub */
+     166, /* leavesublv */
        0, /* argcheck */
-     167, /* argelem */
+     168, /* argelem */
        0, /* argdefelem */
-     169, /* caller */
+     170, /* caller */
       52, /* warn */
       52, /* die */
       52, /* reset */
       -1, /* lineseq */
-     171, /* nextstate */
-     171, /* dbstate */
+     172, /* nextstate */
+     172, /* dbstate */
       -1, /* unstack */
       -1, /* enter */
-     172, /* leave */
+     173, /* leave */
       -1, /* scope */
-     174, /* enteriter */
-     178, /* iter */
+     175, /* enteriter */
+     179, /* iter */
       -1, /* enterloop */
-     179, /* leaveloop */
+     180, /* leaveloop */
       -1, /* return */
-     181, /* last */
-     181, /* next */
-     181, /* redo */
-     181, /* dump */
-     181, /* goto */
+     182, /* last */
+     182, /* next */
+     182, /* redo */
+     182, /* dump */
+     182, /* goto */
       52, /* exit */
        0, /* method */
        0, /* method_named */
@@ -2672,7 +2674,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* leavewhen */
       -1, /* break */
       -1, /* continue */
-     183, /* open */
+     184, /* open */
       52, /* close */
       52, /* pipe_op */
       52, /* fileno */
@@ -2688,7 +2690,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       52, /* getc */
       52, /* read */
       52, /* enterwrite */
-     165, /* leavewrite */
+     166, /* leavewrite */
       -1, /* prtf */
       -1, /* print */
       -1, /* say */
@@ -2718,33 +2720,33 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* getpeername */
        0, /* lstat */
        0, /* stat */
-     188, /* ftrread */
-     188, /* ftrwrite */
-     188, /* ftrexec */
-     188, /* fteread */
-     188, /* ftewrite */
-     188, /* fteexec */
-     193, /* ftis */
-     193, /* ftsize */
-     193, /* ftmtime */
-     193, /* ftatime */
-     193, /* ftctime */
-     193, /* ftrowned */
-     193, /* fteowned */
-     193, /* ftzero */
-     193, /* ftsock */
-     193, /* ftchr */
-     193, /* ftblk */
-     193, /* ftfile */
-     193, /* ftdir */
-     193, /* ftpipe */
-     193, /* ftsuid */
-     193, /* ftsgid */
-     193, /* ftsvtx */
-     193, /* ftlink */
-     193, /* fttty */
-     193, /* fttext */
-     193, /* ftbinary */
+     189, /* ftrread */
+     189, /* ftrwrite */
+     189, /* ftrexec */
+     189, /* fteread */
+     189, /* ftewrite */
+     189, /* fteexec */
+     194, /* ftis */
+     194, /* ftsize */
+     194, /* ftmtime */
+     194, /* ftatime */
+     194, /* ftctime */
+     194, /* ftrowned */
+     194, /* fteowned */
+     194, /* ftzero */
+     194, /* ftsock */
+     194, /* ftchr */
+     194, /* ftblk */
+     194, /* ftfile */
+     194, /* ftdir */
+     194, /* ftpipe */
+     194, /* ftsuid */
+     194, /* ftsgid */
+     194, /* ftsvtx */
+     194, /* ftlink */
+     194, /* fttty */
+     194, /* fttext */
+     194, /* ftbinary */
       84, /* chdir */
       84, /* chown */
       75, /* chroot */
@@ -2764,17 +2766,17 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* rewinddir */
        0, /* closedir */
       -1, /* fork */
-     197, /* wait */
+     198, /* wait */
       84, /* waitpid */
       84, /* system */
       84, /* exec */
       84, /* kill */
-     197, /* getppid */
+     198, /* getppid */
       84, /* getpgrp */
       84, /* setpgrp */
       84, /* getpriority */
       84, /* setpriority */
-     197, /* time */
+     198, /* time */
       -1, /* tms */
        0, /* localtime */
       52, /* gmtime */
@@ -2794,8 +2796,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* require */
        0, /* dofile */
       -1, /* hintseval */
-     198, /* entereval */
-     165, /* leaveeval */
+     199, /* entereval */
+     166, /* leaveeval */
        0, /* entertry */
       -1, /* leavetry */
        0, /* ghbyname */
@@ -2833,18 +2835,18 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* lock */
        0, /* once */
       -1, /* custom */
-     204, /* coreargs */
-     208, /* avhvswitch */
+     205, /* coreargs */
+     209, /* avhvswitch */
        3, /* runcv */
        0, /* fc */
       -1, /* padcv */
       -1, /* introcv */
       -1, /* clonecv */
-     210, /* padrange */
-     212, /* refassign */
-     218, /* lvref */
-     224, /* lvrefslice */
-     225, /* lvavref */
+     211, /* padrange */
+     213, /* refassign */
+     219, /* lvref */
+     225, /* lvrefslice */
+     226, /* lvavref */
        0, /* anonconst */
 
 };
@@ -2905,7 +2907,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x2e5c, 0x2d58, 0x1074, 0x19d0, 0x2f4c, 0x40c4, 0x0003, /* multideref */
     0x2e5c, 0x33f8, 0x0350, 0x2b6c, 0x2489, /* split */
     0x2e5c, 0x20f9, /* list */
-    0x3f38, 0x3694, 0x1310, 0x27ac, 0x39e8, 0x28a4, 0x3361, /* sort */
+    0x449c, 0x3f38, 0x3694, 0x1310, 0x27ac, 0x39e8, 0x28a4, 0x3361, /* sort */
     0x27ac, 0x0003, /* reverse */
     0x0614, 0x0003, /* grepwhile */
     0x2bf8, 0x0003, /* flip, flop */
@@ -2919,7 +2921,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x2e5c, 0x33f8, 0x0f6c, 0x3a65, /* enteriter */
     0x3a65, /* iter */
     0x2cfc, 0x0067, /* leaveloop */
-    0x449c, 0x0003, /* last, next, redo, dump, goto */
+    0x45bc, 0x0003, /* last, next, redo, dump, goto */
     0x35dc, 0x34f8, 0x2714, 0x2650, 0x018f, /* open */
     0x1c70, 0x1ecc, 0x1d88, 0x1b44, 0x0003, /* ftrread, ftrwrite, ftrexec, fteread, ftewrite, fteexec */
     0x1c70, 0x1ecc, 0x1d88, 0x0003, /* ftis, ftsize, ftmtime, ftatime, ftctime, ftrowned, fteowned, ftzero, ftsock, ftchr, ftblk, ftfile, ftdir, ftpipe, ftsuid, ftsgid, ftsvtx, ftlink, fttty, fttext, ftbinary */
@@ -3106,7 +3108,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* POP        */ (OPpARG1_MASK),
     /* SHIFT      */ (OPpARG1_MASK),
     /* UNSHIFT    */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SORT       */ (OPpSORT_NUMERIC|OPpSORT_INTEGER|OPpSORT_REVERSE|OPpSORT_INPLACE|OPpSORT_DESCEND|OPpSORT_QSORT|OPpSORT_STABLE),
+    /* SORT       */ (OPpSORT_NUMERIC|OPpSORT_INTEGER|OPpSORT_REVERSE|OPpSORT_INPLACE|OPpSORT_DESCEND|OPpSORT_QSORT|OPpSORT_STABLE|OPpSORT_UNSTABLE),
     /* REVERSE    */ (OPpARG1_MASK|OPpREVERSE_INPLACE),
     /* GREPSTART  */ (OPpARG1_MASK),
     /* GREPWHILE  */ (OPpARG1_MASK|OPpTRUEBOOL),

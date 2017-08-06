@@ -1,6 +1,6 @@
 package sort;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 # The hints for pp_sort are now stored in $^H{sort}; older versions
 # of perl used the global variable $sort::hints. -- rjh 2005-12-19
@@ -9,6 +9,7 @@ $sort::quicksort_bit   = 0x00000001;
 $sort::mergesort_bit   = 0x00000002;
 $sort::sort_bits       = 0x000000FF; # allow 256 different ones
 $sort::stable_bit      = 0x00000100;
+$sort::unstable_bit    = 0x00000200;
 
 use strict;
 
@@ -29,6 +30,7 @@ sub import {
 	    $^H{sort} |=  $sort::mergesort_bit;
 	} elsif ($_ eq 'stable') {
 	    $^H{sort} |=  $sort::stable_bit;
+	    $^H{sort} &= ~$sort::unstable_bit;
 	} elsif ($_ eq 'defaults') {
 	    $^H{sort} =   0;
 	} else {
@@ -53,6 +55,7 @@ sub unimport {
 	    $^H{sort} &= ~$sort::sort_bits;
 	} elsif ($_ eq 'stable') {
 	    $^H{sort} &= ~$sort::stable_bit;
+	    $^H{sort} |=  $sort::unstable_bit;
 	} else {
 	    require Carp;
 	    Carp::croak("sort: unknown subpragma '$_'");

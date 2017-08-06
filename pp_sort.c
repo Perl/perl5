@@ -46,6 +46,7 @@
 #define SORTf_DESC   1
 #define SORTf_STABLE 2
 #define SORTf_QSORT  4
+#define SORTf_UNSTABLE 8
 
 /*
  * The mergesort implementation is by Peter M. Mcilroy <pmcilroy@lucent.com>.
@@ -1494,6 +1495,8 @@ PP(pp_sort)
 	sort_flags |= SORTf_QSORT;
     if ((priv & OPpSORT_STABLE) != 0)
 	sort_flags |= SORTf_STABLE;
+    if ((priv & OPpSORT_UNSTABLE) != 0)
+	sort_flags |= SORTf_UNSTABLE;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;

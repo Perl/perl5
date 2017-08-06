@@ -11166,6 +11166,8 @@ Perl_ck_sort(pTHX_ OP *o)
 		    o->op_private |= OPpSORT_QSORT;
 		if ((sorthints & HINT_SORT_STABLE) != 0)
 		    o->op_private |= OPpSORT_STABLE;
+		if ((sorthints & HINT_SORT_UNSTABLE) != 0)
+		    o->op_private |= OPpSORT_UNSTABLE;
 	    }
     }
 
