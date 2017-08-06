@@ -1875,11 +1875,17 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         }
                         else {
                             U8 tmpbuf[UTF8_MAXBYTES+1];
-                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
-                                                                        uv, 0);
-                            const char * preface = (uv <= PERL_UNICODE_MAX)
-                                                   ? "U+"
-                                                   : "0x";
+                            const U8 * const e = uvchr_to_utf8_flags(tmpbuf,
+                                                                     uv, 0);
+                            /* Don't use U+ for non-Unicode code points, which
+                             * includes those in the Latin1 range */
+                            const char * preface = (    uv > PERL_UNICODE_MAX
+#ifdef EBCDIC
+                                                     || uv <= 0xFF
+#endif
+                                                    )
+                                                   ? "0x"
+                                                   : "U+";
                             message = Perl_form(aTHX_
                                 "%s: %s (overlong; instead use %s to represent"
                                 " %s%0*" UVXf ")",
