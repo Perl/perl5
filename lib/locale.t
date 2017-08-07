@@ -5,6 +5,27 @@
 # without using 'eval' as much as possible, which might cloud the issue,  the
 # crucial parts of the code are duplicated in a block for each pragma.
 
+# Unfortunately, many systems have defective locale definitions.  This test
+# file looks for both perl bugs and bugs in the system's locale definitions.
+# It can be difficult to tease apart which is which.  For the latter, there
+# are tests that are based on the POSIX standard.  A character isn't supposed
+# to be both a space and graphic, for example.  Another example is if a
+# character is the uppercase of another, that other should be the lowercase of
+# the first.  Including tests for these allows you to test for defective
+# locales, as described in perllocale.  The way this file distinguishes
+# between defective locales, and perl bugs is to see what percentage of
+# locales fail a given test.  If it's a lot, then it's more likely to be a
+# perl bug; only a few, those particular locales are likely defective.  In
+# that case the failing tests are marked TODO.  (They should be reported to
+# the vendor, however; but it's not perl's problem.)  In some cases, this
+# script has caused tickets to be filed against perl which turn out to be the
+# platform's bug, but a higher percentage of locales are failing than the
+# built-in cut-off point.  For those platforms, code has been added to
+# increase the cut-off, so those platforms don't trigger failing test reports.
+# Ideally, the platforms would get fixed and that code would be changed to
+# only kick-in when run on versions that are earlier than the fixed one.  But,
+# this rarely happens in practice.
+
 # To make a TODO test, add the string 'TODO' to its %test_names value
 
 my $is_ebcdic = ord("A") == 193;
