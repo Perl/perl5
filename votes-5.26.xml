@@ -4,12 +4,14 @@
 
 <div><h2>Tickets Listed in #131533: 5.26.1 blockers</h2>
 
-<commit votes="" id="bab0f8e933b383b6bef406d79c2da340bbcded33" ticket="131522" desc="Resolve Perl #131522: Spurious 'Assuming NOT a POSIX class' warning" />
-<commit votes="" id="d730a80128abafff1e47e2506c23a8c1a06cfef4" ticket="131522" desc="add test for [perl #131522] and fix test for (related) [perl #127581]" />
+<commit votes="steveh" id="bab0f8e933b383b6bef406d79c2da340bbcded33" ticket="131522" desc="Resolve Perl #131522: Spurious 'Assuming NOT a POSIX class' warning" />
+<commit votes="steveh" id="d730a80128abafff1e47e2506c23a8c1a06cfef4" ticket="131522" desc="add test for [perl #131522] and fix test for (related) [perl #127581]" />
 
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
+
+Blead changes have been examined up to and including d819dc506b9fbd0d9bb316e42ca5bbefdd5f1d77 (utf8_to_uvchr() EBCDIC fix)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -30,7 +32,18 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="khw" id="1d5030e143202c1e963e1fc91eb6f3afaa2df83e" ticket="131646" desc="[perl #131646] 5.26 regression: Assert fail instead of proper error msg" />
+<commit votes="khw steveh" id="1d5030e143202c1e963e1fc91eb6f3afaa2df83e" ticket="131646" desc="[perl #131646] 5.26 regression: Assert fail instead of proper error msg" />
+<commit votes="steveh" id="790acddeaa0d2c73524596048b129561225cf100" ticket="131085" desc="[perl #131085] Crash with sub-in-stash" />
+<commit votes="steveh" id="d7e3f70f30811328d2f6ae57e5892deccf64d0b2" ticket="105930" desc="set up catchable runloops early enough" />
+<commit votes="steveh" id="655f5b268af8bf50c44ba4ae4803a33c9b792b8b" ticket="130861" desc="S_require_tie_mod(): use a new stack" />
+<commit votes="steveh" id="42752acc4959c5b770bbc29532bf2677f4533c4e" ticket="128207" desc="Make LOCK_LC_NUMERIC_STANDARD recursive" />
+<commit votes="steveh" id="9604fbf0722bd97ca6031a263c50ad52b6633db7" ticket="131526" desc="(perl #131526) don't go beyond the end of the NUL in my_atof2" />
+<commit votes="steveh" id="bb152a4b442f7718fd37d32cc558be675e8ae1ae" ticket="131575" desc="don't call Perl_fbm_instr() with negative length" />
+<commit votes="steveh" id="e13dc8886fcabf88a521e8e73c358157b1fa4c8a" ticket="131627" desc="[perl #131627] Fix multideref for $x{qw/a/->$*}" />
+<commit votes="steveh" id="e26c6904d9f9f5ea818e590331b14038279332d1" ticket="131645" desc="[perl #131645] Fix assert fail in pp_sselect" />
+<commit votes="steveh" id="67c3640a57440a4e9e224e9164ac9f39bdc9376f" ticket="131570" desc="(perl #131570) don't skip the temps stack entry we just allocated" />
+<commit votes="steveh" id="6091bd4ca4a4a4c9b6f8cadddb53c19b96748a04" ticket="131597" desc="(perl #131597) ensure the GV slot is filled for our [%$@]foo: attr" />
+<commit votes="steveh" id="b54564c32e53d4c517e4d4810eeb633be80649a9" ticket="131627" desc="[perl #131627] extend stack in scalar-context pp_list when no args" />
 
 </div>
 
@@ -39,7 +52,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 This was found as a result of an error check introduced in 5.27 causing a
 compilation error on freebsd.  The consequences of not fixing this is the
 program not working correctly.
-<commit votes="khw" id="4e1ed312da261450ba45a56e7b6756a873678f52" ticket="" desc="Missing parens around macro params" />
+<commit votes="khw steveh" id="4e1ed312da261450ba45a56e7b6756a873678f52" ticket="" desc="Missing parens around macro params" />
+
+<commit votes="steveh" id="0a31ee11c8f69d509334d0813d833cddacf9dacb" ticket="131371" desc="add X&lt;s&gt; to s/// in perlop (RT #131371)" />
+<commit votes="steveh" id="2c2da8e7f0f6325fab643997a536072633fa0cf8" ticket="131190" desc="Fix #131190 - UTF8 code improperly casting negative integer to U8 in comparison" />
 
 </div>
 
@@ -49,11 +65,28 @@ program not working correctly.
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="steveh" id="fe7ba591228c20c0840941f6994ce3055969d50f" ticket="" desc="Fix dmake build breakage when using Visual C++" />
+
+(This needs the AUTHORS update in d1b368f612b42c74923f42155c5381d9e344d53a too:)
+<commit votes="steveh" id="b5749b6710c39eba669f84c841b0999029955dfa" ticket="" desc="correct PREMSVC80 typo" />
+
+(Not sure if supporting a new compiler version constitutes a "fix"?:)
+<commit votes="steveh" id="58998b2a913ef6f390e2e9c38e455a3ff8473960" ticket="" desc="Update nmake for VS 2017" />
+<commit votes="steveh" id="82cad14406dfff5f5a8b6b67da3ce16840f06274" ticket="" desc="Update dmake for VS 2017" />
+<commit votes="steveh" id="74102a88afc9d8f1973892ce66cf9a83e79d043a" ticket="" desc="Fix up CCINCDIR/CCLIBDIR for VC++ 14.1 (and VC++ 8.0-14.0 too!)" />
+<commit votes="steveh" id="88b13658991e60bf62462d089d8bbf592f48ce0c" ticket="" desc="Update gmake for VS 2017" />
+<commit votes="steveh" id="d8efeb4672ed789e8b5d885676607ec8487984d5" ticket="" desc="We now support building with Visual Studio 2017 (VC++ 14.1)" />
+
 </div>
 
 <div><h3>Portability Fixes</h3>
 
 <commit votes="steveh xsawyerx" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
+
+<commit votes="steveh" id="66c5e3f2ab554a89dfc00689602414ac21ea66f6" ticket="131337" desc="Patch suggested by Craig Berry for RT 131337." />
+<commit votes="steveh" id="21a33adc37856aaedd4bf756d5dca47bdc4f7b50" ticket="131337" desc="When building with g++ on FreeBSD, explicitly set 'usedl' and 'dlsrc'." />
+<commit votes="steveh" id="2c8efe4079b75c61cf34425054539a9c24913e9f" ticket="131337" desc="Simpler hints fix for [perl #131337]." />
+<commit votes="steveh" id="fd998cbffc88a8e50fa34259c36a8db338168383" ticket="" desc="make _GNU-ish function declarations visible on cygwin" />
 
 </div>
 
@@ -63,8 +96,9 @@ program not working correctly.
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="khw" id="725a67e540ba5cb03c83ba1ed0541f2cc088b3b1" ticket="" desc="Update perluniintro to reflect 5.26 changes" />
-<commit votes="khw" id="754e15cfc175f0e2e1299d27fd387a0d868c2764" ticket="" desc="Update charnames pod to reflect 5.26 changes" />
+<commit votes="khw steveh" id="725a67e540ba5cb03c83ba1ed0541f2cc088b3b1" ticket="" desc="Update perluniintro to reflect 5.26 changes" />
+<commit votes="khw steveh" id="754e15cfc175f0e2e1299d27fd387a0d868c2764" ticket="" desc="Update charnames pod to reflect 5.26 changes" />
+<commit votes="steveh" id="b7f366106e07d8d8d2efe8d65343329ebb32062b" ticket="131603" desc="Pod correction." />
 
 </div>
 
