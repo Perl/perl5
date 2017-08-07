@@ -8,6 +8,7 @@
 # To make a TODO test, add the string 'TODO' to its %test_names value
 
 my $is_ebcdic = ord("A") == 193;
+my $os = lc $^O;
 
 no warnings 'locale';  # We test even weird locales; and do some scary things
                        # in ok locales
@@ -40,9 +41,9 @@ our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 # (There aren't 1000 locales currently in existence, so 99.9 works)
 # EBCDIC os390 has more locales fail than normal, because it has locales that
 # move various critical characters like '['.
-my $acceptable_failure_percentage = ($^O =~ / ^ ( AIX ) $ /ix)
+my $acceptable_failure_percentage = ($os =~ / ^ ( aix ) $ /x)
                                      ? 99.9
-                                     : ($^O =~ / ^ ( os390 ) $ /ix)
+                                     : ($os =~ / ^ ( os390 ) $ /x)
                                        ? 10
                                        : 5;
 
@@ -59,7 +60,7 @@ my %known_bad_locales = (
 
 # cygwin isn't returning proper radix length in this locale, but supposedly to
 # be fixed in later versions.
-if ($^O eq 'cygwin' && version->new(($Config{osvers} =~ /^(\d+(?:\.\d+)+)/)[0]) le v2.4.1) {
+if ($os eq 'cygwin' && version->new(($Config{osvers} =~ /^(\d+(?:\.\d+)+)/)[0]) le v2.4.1) {
     $known_bad_locales{'cygwin'} = qr/ ^ ps_AF /ix;
 }
 
@@ -971,8 +972,8 @@ sub report_result {
     else {
         $message //= "";
         $message = "  ($message)" if $message;
-	$Known_bad_locale{$i}{$Locale} = 1 if exists $known_bad_locales{$^O}
-                                         && $Locale =~ $known_bad_locales{$^O};
+	$Known_bad_locale{$i}{$Locale} = 1 if exists $known_bad_locales{$os}
+                                         && $Locale =~ $known_bad_locales{$os};
 	$Problem{$i}{$Locale} = 1;
 	debug "failed $i ($test_names{$i}) with locale '$Locale'$message\n";
     }
@@ -2539,7 +2540,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 
 $test_num = $final_locales_test_number;
 
-unless ( $^O =~ m!^(dragonfly|openbsd|bitrig|mirbsd)$! ) {
+unless ( $os =~ m!^(dragonfly|openbsd|bitrig|mirbsd)$! ) {
     # perl #115808
     use warnings;
     my $warned = 0;
@@ -2684,8 +2685,8 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
 	my @f = sort keys %{ $Problem{$_} };
 
         # Don't list the failures caused by known-bad locales.
-        if (exists $known_bad_locales{$^O}) {
-            @f = grep { $_ !~ $known_bad_locales{$^O} } @f;
+        if (exists $known_bad_locales{$os}) {
+            @f = grep { $_ !~ $known_bad_locales{$os} } @f;
             next unless @f;
         }
 	my $f = join(" ", @f);
@@ -2766,7 +2767,7 @@ if ($didwarn) {
     }
 }
 
-if (exists $known_bad_locales{$^O} && ! %Known_bad_locale) {
+if (exists $known_bad_locales{$os} && ! %Known_bad_locale) {
     $test_num++;
     print "ok $test_num $^O no longer has known bad locales # TODO\n";
 }
