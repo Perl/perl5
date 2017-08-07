@@ -362,38 +362,40 @@ test_opcount(0, 'barewords can be constant-folded',
     my ($x, $y, $z);
     for my $assign (0, 1) {
         for my $index ('index($x,$y)', 'rindex($x,$y)') {
-            for my $cmp_ops (
-                    [ '<=',   -1, ],
-                    [ '==',   -1, ],
-                    [ '!=',   -1, ],
-                    [ '>',    -1, ],
-                    [ '<',     0, ],
-                    [ '>=',    0, ],
-            ) {
-                my ($cmp, $const) = @$cmp_ops;
-                for my $swap (0, 1) {
-                    my $rcmp = $cmp;
-                    if ($swap) {
-                        $rcmp =~ s/>/</ or  $rcmp =~ s/</>/;
-                    }
-                    my $expr = $swap ? "($const $cmp $index)"
-                                     : "($index $cmp $const)";
-                    $expr = "\$z = ($expr)" if $assign;
+            for my $fmt (
+                    "%s <= -1",
+                    "%s == -1",
+                    "%s != -1",
+                    "%s >  -1",
 
-                    test_opcount(0, "optimise away compare,const in $expr",
-                            eval qq{sub { $expr }},
-                            {
-                                lt      => 0,
-                                le      => 0,
-                                eq      => 0,
-                                ne      => 0,
-                                ge      => 0,
-                                gt      => 0,
-                                const   => 0,
-                                sassign => 0,
-                                padsv   => 2.
-                            });
-                }
+                    "%s <  0",
+                    "%s >= 0",
+
+                    "-1 <  %s",
+                    "-1 == %s",
+                    "-1 != %s",
+                    "-1 >= %s",
+
+                    " 0 <= %s",
+                    " 0 >  %s",
+
+            ) {
+                my $expr = sprintf $fmt, $index;
+                $expr = "\$z = ($expr)" if $assign;
+
+                test_opcount(0, "optimise away compare,const in $expr",
+                        eval qq{sub { $expr }},
+                        {
+                            lt      => 0,
+                            le      => 0,
+                            eq      => 0,
+                            ne      => 0,
+                            ge      => 0,
+                            gt      => 0,
+                            const   => 0,
+                            sassign => 0,
+                            padsv   => 2.
+                        });
             }
         }
     }

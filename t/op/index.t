@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 268 );
+plan( tests => 412 );
 
 run_tests() unless caller;
 
@@ -260,21 +260,43 @@ is index($substr, 'a'), 1, 'index reply reflects characters not octets';
 # op_eq, op_const optimised away in (index() == -1) and variants
 
 for my $test (
-      # op  const  match
-    [ '<=',   -1,      0 ],
-    [ '==',   -1,      0 ],
-    [ '!=',   -1,      1 ],
-    [ '>',    -1,      1 ],
-    [ '<',     0,      0 ],
-    [ '>=',    0,      1 ],
+      # expect:
+      #    F: always false regardless of the expression
+      #    T: always true  regardless of the expression
+      #    f: expect false if the string is found
+      #    t: expect true  if the string is found
+      #
+      # op  const  expect
+    [ '<',    -1,      'F' ],
+    [ '<',     0,      'f' ],
+
+    [ '<=',   -1,      'f' ],
+    [ '<=',    0,      'f' ],
+
+    [ '==',   -1,      'f' ],
+    [ '==',    0,      'F' ],
+
+    [ '!=',   -1,      't' ],
+    [ '!=',    0,      'T' ],
+
+    [ '>=',   -1,      'T' ],
+    [ '>=',    0,      't' ],
+
+    [ '>',    -1,      't' ],
+    [ '>',     0,      't' ],
 ) {
-    my ($op, $const, $match) = @$test;
+    my ($op, $const, $expect0) = @$test;
 
     my $s = "abcde";
     my $r;
 
-    for my $substr ("a", "z") {
-        my $expect = !(($substr eq "a") xor $match);
+    for my $substr ("e", "z") {
+        my $expect =
+            $expect0 eq 'T' ? 1 == 1 :
+            $expect0 eq 'F' ? 0 == 1 :
+            $expect0 eq 't' ? ($substr eq "e") :
+                              ($substr ne "e");
+
         for my $rindex ("", "r") {
             for my $reverse (0, 1) {
                 my $rop = $op;
