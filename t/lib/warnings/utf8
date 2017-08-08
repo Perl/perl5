@@ -779,7 +779,7 @@ BEGIN{
 }
 no warnings;
 use warnings 'utf8';
-for(uc 0..t){0~~pack"UXp>",exp}
+for(uc 0..t){0~~pack"UXc",exp}
 EXPECT
 OPTIONS regex
 Malformed UTF-8 character: \\x([[:xdigit:]]{2})\\x([[:xdigit:]]{2}) \(unexpected non-continuation byte 0x\2, immediately after start byte 0x\1; need 2 bytes, got 1\)  in smart match at - line 9.
