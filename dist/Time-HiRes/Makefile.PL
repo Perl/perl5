@@ -290,6 +290,7 @@ sub has_clock_xxx_syscall {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 #include <$SYSCALL_H>
 int main(int argc, char** argv)
 {
@@ -309,6 +310,7 @@ sub has_clock_xxx {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 int main(int argc, char** argv)
 {
     struct timespec ts;
@@ -325,6 +327,7 @@ sub has_clock {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 int main(int argc, char** argv)
 {
     clock_t tictoc;
@@ -348,8 +351,59 @@ int main(int argc, char** argv)
     struct timespec ts2;
     ts1.tv_sec  = 0;
     ts1.tv_nsec = 750000000;;
-    ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &ts1, &ts2);
+    /* All implementations are supposed to support CLOCK_REALTIME. */
+    ret = clock_nanosleep(CLOCK_REALTIME, 0, &ts1, &ts2);
     ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
+}
+
+sub has_futimens {
+    return 1 if
+    try_compile_and_link(<<EOM);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <sys/stat.h>
+int main(int argc, char** argv)
+{
+    int ret;
+    struct timespec ts[2];
+    ret = futimens(0, ts);
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
+}
+
+sub has_utimensat{
+    return 1 if
+    try_compile_and_link(<<EOM);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <sys/stat.h>
+#include <fcntl.h>
+int main(int argc, char** argv)
+{
+    int ret;
+    struct timespec ts[2];
+    ret = utimensat(AT_FDCWD, 0, ts, 0);
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
+}
+
+sub has_clockid_t{
+    return 1 if
+    try_compile_and_link(<<EOM);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <time.h>
+int main(int argc, char** argv)
+{
+    clockid_t id = CLOCK_REALTIME;
+    exit(id == CLOCK_REALTIME ? 1 : 0);
 }
 EOM
 }
@@ -534,6 +588,16 @@ EOD
         print "(It would not be portable anyway.)\n";
     }
 
+    print "Looking for clockid_t... ";
+    my $has_clockid_t;
+    if (has_clockid_t()) {
+	print "found.\n";
+        $has_clockid_t++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCKID_T';
+    } else {
+	print "NOT found, will use int.\n";
+    }
+
     print "Looking for clock_gettime()... ";
     my $has_clock_gettime;
     my $has_clock_gettime_emulation;
@@ -548,7 +612,7 @@ EOD
     } elsif ($^O eq 'darwin') {
        $has_clock_gettime_emulation++;
        $has_clock_gettime++;
-       $DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME';
+       $DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME -DTIME_HIRES_CLOCK_GETTIME_EMULATION';
     }
 
     if ($has_clock_gettime) {
@@ -577,7 +641,7 @@ EOD
     } elsif ($^O eq 'darwin') {
        $has_clock_getres_emulation++;
        $has_clock_getres++;
-       $DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES';
+       $DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES -DTIME_HIRES_CLOCK_GETRES_EMULATION';
     }
 
     if ($has_clock_getres) {
@@ -603,7 +667,7 @@ EOD
     } elsif ($^O eq 'darwin') {
         $has_clock_nanosleep++;
         $has_clock_nanosleep_emulation++;
-	$DEFINE .= ' -DTIME_HIRES_CLOCK_NANOSLEEP';
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_NANOSLEEP -DTIME_HIRES_CLOCK_NANOSLEEP_EMULATION';
     }
 
     if ($has_clock_nanosleep) {
@@ -631,6 +695,36 @@ EOD
 	print "NOT found.\n";
     }
 
+    print "Looking for futimens()... ";
+    my $has_futimens;
+    if (has_futimens()) {
+        $has_futimens++;
+	$DEFINE .= ' -DHAS_FUTIMENS';
+    }
+
+    if ($has_futimens) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Looking for utimensat()... ";
+    my $has_utimensat;
+    if (has_utimensat()) {
+        $has_utimensat++;
+	$DEFINE .= ' -DHAS_UTIMENSAT';
+    }
+
+    if ($has_utimensat) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    if ($has_futimens or $has_utimensat) {
+	$DEFINE .= ' -DTIME_HIRES_UTIME';
+    }
+
     print "Looking for stat() subsecond timestamps...\n";
 
     print "Trying struct stat st_atimespec.tv_nsec...";
@@ -644,7 +738,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtimespec++;
-      DEFINE('TIME_HIRES_STAT', 1);
+      DEFINE('TIME_HIRES_STAT_ST_XTIMESPEC');  # 1
     }
 
     if ($has_stat_st_xtimespec) {
@@ -664,7 +758,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtimensec++;
-      DEFINE('TIME_HIRES_STAT', 2);
+      DEFINE('TIME_HIRES_STAT_ST_XTIMENSEC');  # 2
     }
 
     if ($has_stat_st_xtimensec) {
@@ -684,7 +778,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtime_n++;
-      DEFINE('TIME_HIRES_STAT', 3);
+      DEFINE('TIME_HIRES_STAT_ST_XTIME_N');  # 3
     }
 
     if ($has_stat_st_xtime_n) {
@@ -704,7 +798,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtim++;
-      DEFINE('TIME_HIRES_STAT', 4);
+      DEFINE('TIME_HIRES_STAT_XTIM');  # 4
     }
 
     if ($has_stat_st_xtim) {
@@ -724,7 +818,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_uxtime++;
-      DEFINE('TIME_HIRES_STAT', 5);
+      DEFINE('TIME_HIRES_STAT_ST_UXTIME');  # 5
     }
 
     if ($has_stat_st_uxtime) {
@@ -732,6 +826,19 @@ EOM
     } else {
 	print "NOT found.\n";
     }
+
+    # See HiRes.xs hrstatns()
+    if ($has_stat_st_xtimespec) {
+        DEFINE('TIME_HIRES_STAT', 1);
+    } elsif ($has_stat_st_xtimensec) {
+        DEFINE('TIME_HIRES_STAT', 2);
+    } elsif ($has_stat_st_xtime_n) {
+        DEFINE('TIME_HIRES_STAT', 3);
+    } elsif ($has_stat_st_xtim) {
+        DEFINE('TIME_HIRES_STAT', 4);
+    } elsif ($has_stat_st_uxtime) {
+        DEFINE('TIME_HIRES_STAT', 5);
+    }    
 
    if ($DEFINE =~ /-DTIME_HIRES_STAT=\d+/) {
     print "You seem to have stat() subsecond timestamps.\n";
@@ -791,7 +898,7 @@ sub doMakefile {
 	    'DynaLoader' => 0,
 	    'Exporter' => 0,
 	    'ExtUtils::MakeMaker' => 0,
-	    'Test::More' => "0.82",
+	    'Test::More' => 0,
 	    'strict' => 0,
 	},
 	'dist'      => {
@@ -869,7 +976,8 @@ sub doConstants {
                       );
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep d_clock_gettime d_clock_getres
-		     d_clock d_clock_nanosleep d_hires_stat)) {
+		     d_clock d_clock_nanosleep d_hires_stat
+                     d_futimens d_utimensat d_hires_utime)) {
 	    my $macro = $_;
 	    if ($macro =~ /^(d_nanosleep|d_clock)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
@@ -877,6 +985,13 @@ sub doConstants {
 		my $d_hires_stat = 0;
 		$d_hires_stat = $1 if ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/);
 		push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
+			      default => ["IV", "0"]};
+		next;
+	    } elsif ($macro =~ /^(d_hires_utime)$/) {
+		my $d_hires_utime =
+                    ($DEFINE =~ /-DHAS_FUTIMENS/ ||
+                     $DEFINE =~ /-DHAS_UTIMENSAT/) ? 1 : 0;
+		push @names, {name => $_, macro => "TIME_HIRES_UTIME", value => $d_hires_utime,
 			      default => ["IV", "0"]};
 		next;
 	    } elsif ($macro =~ /^(d_clock_gettime|d_clock_getres|d_clock_nanosleep)$/) {
