@@ -15420,7 +15420,7 @@ C<opcode> specifies which type of op is to be affected.  C<new_checker>
 is a pointer to the C function that is to be added to that opcode's
 check chain, and C<old_checker_p> points to the storage location where a
 pointer to the next function in the chain will be stored.  The value of
-C<new_pointer> is written into the L</PL_check> array, while the value
+C<new_checker> is written into the L</PL_check> array, while the value
 previously stored there is written to C<*old_checker_p>.
 
 L</PL_check> is global to an entire process, and a module wishing to
