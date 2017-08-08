@@ -220,9 +220,6 @@ use strict;
                         qw(vec),
                         grep !$maxarg{$_} && !$args0{$_} && !$args1{$_},
                             ops_with_flag('2'), # BINOP
-                            # this is a binop, but special-cased as a
-                            # baseop in regen/opcodes
-                            'sassign',
                     );
 
     $args3{$_} = 1 for grep !$maxarg{$_} && !$args0{$_}
