@@ -12023,70 +12023,101 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 }
 
 /*
-=for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
+=for apidoc Am|void|cv_get_call_checker_flags|CV *cv|U32 gflags|Perl_call_checker *ckfun_p|SV **ckobj_p|U32 *ckflags_p
 
 Retrieves the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
 subroutine call, not marked with C<&>, where the callee can be identified
 at compile time as C<cv>.
 
-The C-level function pointer is returned in C<*ckfun_p>, and an SV
-argument for it is returned in C<*ckobj_p>.  The function is intended
-to be called in this manner:
+The C-level function pointer is returned in C<*ckfun_p>, an SV argument
+for it is returned in C<*ckobj_p>, and control flags are returned in
+C<*ckflags_p>.  The function is intended to be called in this manner:
 
  entersubop = (*ckfun_p)(aTHX_ entersubop, namegv, (*ckobj_p));
 
 In this call, C<entersubop> is a pointer to the C<entersub> op,
-which may be replaced by the check function, and C<namegv> is a GV
-supplying the name that should be used by the check function to refer
+which may be replaced by the check function, and C<namegv> supplies
+the name that should be used by the check function to refer
 to the callee of the C<entersub> op if it needs to emit any diagnostics.
 It is permitted to apply the check function in non-standard situations,
 such as to a call to a different subroutine or to a method call.
 
-By default, the function is
+C<namegv> may not actually be a GV.  If the C<CALL_CHECKER_REQUIRE_GV>
+bit is clear in C<*ckflags_p>, it is permitted to pass a CV or other SV
+instead, anything that can be used as the first argument to L</cv_name>.
+If the C<CALL_CHECKER_REQUIRE_GV> bit is set in C<*ckflags_p> then the
+check function requires C<namegv> to be a genuine GV.
+
+By default, the check function is
 L<Perl_ck_entersub_args_proto_or_list|/ck_entersub_args_proto_or_list>,
-and the SV parameter is C<cv> itself.  This implements standard
-prototype processing.  It can be changed, for a particular subroutine,
-by L</cv_set_call_checker>.
+the SV parameter is C<cv> itself, and the C<CALL_CHECKER_REQUIRE_GV>
+flag is clear.  This implements standard prototype processing.  It can
+be changed, for a particular subroutine, by L</cv_set_call_checker_flags>.
+
+If the C<CALL_CHECKER_REQUIRE_GV> bit is set in C<gflags> then it
+indicates that the caller only knows about the genuine GV version of
+C<namegv>, and accordingly the corresponding bit will always be set in
+C<*ckflags_p>, regardless of the check function's recorded requirements.
+If the C<CALL_CHECKER_REQUIRE_GV> bit is clear in C<gflags> then it
+indicates the caller knows about the possibility of passing something
+other than a GV as C<namegv>, and accordingly the corresponding bit may
+be either set or clear in C<*ckflags_p>, indicating the check function's
+recorded requirements.
+
+C<gflags> is a bitset passed into C<cv_get_call_checker_flags>, in which
+only the C<CALL_CHECKER_REQUIRE_GV> bit currently has a defined meaning
+(for which see above).  All other bits should be clear.
+
+=for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
+
+The original form of L</cv_get_call_checker_flags>, which does not return
+checker flags.  When using a checker function returned by this function,
+it is only safe to call it with a genuine GV as its C<namegv> argument.
 
 =cut
 */
 
-static void
-S_cv_get_call_checker(CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p,
-		      U8 *flagsp)
+void
+Perl_cv_get_call_checker_flags(pTHX_ CV *cv, U32 gflags,
+	Perl_call_checker *ckfun_p, SV **ckobj_p, U32 *ckflags_p)
 {
     MAGIC *callmg;
+    PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER_FLAGS;
+    PERL_UNUSED_CONTEXT;
     callmg = SvMAGICAL((SV*)cv) ? mg_find((SV*)cv, PERL_MAGIC_checkcall) : NULL;
     if (callmg) {
 	*ckfun_p = DPTR2FPTR(Perl_call_checker, callmg->mg_ptr);
 	*ckobj_p = callmg->mg_obj;
-	if (flagsp) *flagsp = callmg->mg_flags;
+	*ckflags_p = (callmg->mg_flags | gflags) & MGf_REQUIRE_GV;
     } else {
 	*ckfun_p = Perl_ck_entersub_args_proto_or_list;
 	*ckobj_p = (SV*)cv;
-	if (flagsp) *flagsp = 0;
+	*ckflags_p = gflags & MGf_REQUIRE_GV;
     }
 }
 
 void
 Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 {
+    U32 ckflags;
     PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
     PERL_UNUSED_CONTEXT;
-    S_cv_get_call_checker(cv, ckfun_p, ckobj_p, NULL);
+    cv_get_call_checker_flags(cv, CALL_CHECKER_REQUIRE_GV, ckfun_p, ckobj_p,
+	&ckflags);
 }
 
 /*
-=for apidoc Am|void|cv_set_call_checker_flags|CV *cv|Perl_call_checker ckfun|SV *ckobj|U32 flags
+=for apidoc Am|void|cv_set_call_checker_flags|CV *cv|Perl_call_checker ckfun|SV *ckobj|U32 ckflags
 
 Sets the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
 subroutine call, not marked with C<&>, where the callee can be identified
 at compile time as C<cv>.
 
-The C-level function pointer is supplied in C<ckfun>, and an SV argument
-for it is supplied in C<ckobj>.  The function should be defined like this:
+The C-level function pointer is supplied in C<ckfun>, an SV argument for
+it is supplied in C<ckobj>, and control flags are supplied in C<ckflags>.
+The function should be defined like this:
 
     STATIC OP * ckfun(pTHX_ OP *op, GV *namegv, SV *ckobj)
 
@@ -12104,15 +12135,21 @@ such as to a call to a different subroutine or to a method call.
 C<namegv> may not actually be a GV.  For efficiency, perl may pass a
 CV or other SV instead.  Whatever is passed can be used as the first
 argument to L</cv_name>.  You can force perl to pass a GV by including
-C<CALL_CHECKER_REQUIRE_GV> in the C<flags>.
+C<CALL_CHECKER_REQUIRE_GV> in the C<ckflags>.
+
+C<ckflags> is a bitset, in which only the C<CALL_CHECKER_REQUIRE_GV>
+bit currently has a defined meaning (for which see above).  All other
+bits should be clear.
 
 The current setting for a particular CV can be retrieved by
-L</cv_get_call_checker>.
+L</cv_get_call_checker_flags>.
 
 =for apidoc Am|void|cv_set_call_checker|CV *cv|Perl_call_checker ckfun|SV *ckobj
 
 The original form of L</cv_set_call_checker_flags>, which passes it the
-C<CALL_CHECKER_REQUIRE_GV> flag for backward-compatibility.
+C<CALL_CHECKER_REQUIRE_GV> flag for backward-compatibility.  The effect
+of that flag setting is that the check function is guaranteed to get a
+genuine GV as its C<namegv> argument.
 
 =cut
 */
@@ -12126,7 +12163,7 @@ Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 
 void
 Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
-				     SV *ckobj, U32 flags)
+				     SV *ckobj, U32 ckflags)
 {
     PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER_FLAGS;
     if (ckfun == Perl_ck_entersub_args_proto_or_list && ckobj == (SV*)cv) {
@@ -12148,7 +12185,7 @@ Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
 	    callmg->mg_flags |= MGf_REFCOUNTED;
 	}
 	callmg->mg_flags = (callmg->mg_flags &~ MGf_REQUIRE_GV)
-			 | (U8)(flags & MGf_REQUIRE_GV) | MGf_COPY;
+			 | (U8)(ckflags & MGf_REQUIRE_GV) | MGf_COPY;
     }
 }
 
@@ -12229,8 +12266,8 @@ Perl_ck_subr(pTHX_ OP *o)
     } else {
 	Perl_call_checker ckfun;
 	SV *ckobj;
-	U8 flags;
-	S_cv_get_call_checker(cv, &ckfun, &ckobj, &flags);
+	U32 ckflags;
+	cv_get_call_checker_flags(cv, 0, &ckfun, &ckobj, &ckflags);
 	if (CvISXSUB(cv) || !CvROOT(cv))
 	    S_entersub_alloc_targ(aTHX_ o);
 	if (!namegv) {
@@ -12240,7 +12277,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	       the CV’s GV, unless this is an anonymous sub.  This is not
 	       ideal for lexical subs, as its stringification will include
 	       the package.  But it is the best we can do.  */
-	    if (flags & MGf_REQUIRE_GV) {
+	    if (ckflags & CALL_CHECKER_REQUIRE_GV) {
 		if (!CvANON(cv) && (!CvNAMED(cv) || CvNAME_HEK(cv)))
 		    namegv = CvGV(cv);
 	    }
@@ -15458,8 +15495,8 @@ something like this:
 	wrap_op_checker(OP_FROB, myck_frob, &nxck_frob);
 
 If you want to influence compilation of calls to a specific subroutine,
-then use L</cv_set_call_checker> rather than hooking checking of all
-C<entersub> ops.
+then use L</cv_set_call_checker_flags> rather than hooking checking of
+all C<entersub> ops.
 
 =cut
 */
