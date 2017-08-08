@@ -15,7 +15,8 @@ typedef SV *SVREF;
 typedef PTR_TBL_t *XS__APItest__PtrTable;
 
 #define croak_fail() croak("fail at " __FILE__ " line %d", __LINE__)
-#define croak_fail_ne(h, w) croak("fail %p!=%p at " __FILE__ " line %d", (h), (w), __LINE__)
+#define croak_fail_nep(h, w) croak("fail %p!=%p at " __FILE__ " line %d", (h), (w), __LINE__)
+#define croak_fail_nei(h, w) croak("fail %d!=%d at " __FILE__ " line %d", (int)(h), (int)(w), __LINE__)
 
 #ifdef EBCDIC
 
@@ -3088,33 +3089,59 @@ test_cv_getset_call_checker()
 	CV *troc_cv, *tsh_cv;
 	Perl_call_checker ckfun;
 	SV *ckobj;
+	U32 ckflags;
     CODE:
-#define check_cc(cv, xckfun, xckobj) \
+#define check_cc(cv, xckfun, xckobj, xckflags) \
     do { \
 	cv_get_call_checker((cv), &ckfun, &ckobj); \
-	if (ckfun != (xckfun)) croak_fail_ne(FPTR2DPTR(void *, ckfun), xckfun); \
-	if (ckobj != (xckobj)) croak_fail_ne(FPTR2DPTR(void *, ckobj), xckobj); \
+	if (ckfun != (xckfun)) croak_fail_nep(FPTR2DPTR(void *, ckfun), xckfun); \
+	if (ckobj != (xckobj)) croak_fail_nep(FPTR2DPTR(void *, ckobj), xckobj); \
+	cv_get_call_checker_flags((cv), CALL_CHECKER_REQUIRE_GV, &ckfun, &ckobj, &ckflags); \
+	if (ckfun != (xckfun)) croak_fail_nep(FPTR2DPTR(void *, ckfun), xckfun); \
+	if (ckobj != (xckobj)) croak_fail_nep(FPTR2DPTR(void *, ckobj), xckobj); \
+	if (ckflags != CALL_CHECKER_REQUIRE_GV) croak_fail_nei(ckflags, CALL_CHECKER_REQUIRE_GV); \
+	cv_get_call_checker_flags((cv), 0, &ckfun, &ckobj, &ckflags); \
+	if (ckfun != (xckfun)) croak_fail_nep(FPTR2DPTR(void *, ckfun), xckfun); \
+	if (ckobj != (xckobj)) croak_fail_nep(FPTR2DPTR(void *, ckobj), xckobj); \
+	if (ckflags != (xckflags)) croak_fail_nei(ckflags, (xckflags)); \
     } while(0)
 	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
 	tsh_cv = get_cv("XS::APItest::test_savehints", 0);
-	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
-	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
+	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv, 0);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv, 0);
 	cv_set_call_checker(tsh_cv, Perl_ck_entersub_args_proto_or_list,
 				    &PL_sv_yes);
-	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
-	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes);
+	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv, 0);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes, CALL_CHECKER_REQUIRE_GV);
 	cv_set_call_checker(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no);
-	check_cc(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no);
-	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes);
+	check_cc(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no, CALL_CHECKER_REQUIRE_GV);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes, CALL_CHECKER_REQUIRE_GV);
 	cv_set_call_checker(tsh_cv, Perl_ck_entersub_args_proto_or_list,
 				    (SV*)tsh_cv);
-	check_cc(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no);
-	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
+	check_cc(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no, CALL_CHECKER_REQUIRE_GV);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv, 0);
 	cv_set_call_checker(troc_cv, Perl_ck_entersub_args_proto_or_list,
 				    (SV*)troc_cv);
-	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
-	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
+	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv, 0);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv, 0);
 	if (SvMAGICAL((SV*)troc_cv) || SvMAGIC((SV*)troc_cv)) croak_fail();
+	if (SvMAGICAL((SV*)tsh_cv) || SvMAGIC((SV*)tsh_cv)) croak_fail();
+	cv_set_call_checker_flags(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    &PL_sv_yes, 0);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes, 0);
+	cv_set_call_checker_flags(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    &PL_sv_yes, CALL_CHECKER_REQUIRE_GV);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes, CALL_CHECKER_REQUIRE_GV);
+	cv_set_call_checker_flags(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    (SV*)tsh_cv, 0);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv, 0);
+	if (SvMAGICAL((SV*)tsh_cv) || SvMAGIC((SV*)tsh_cv)) croak_fail();
+	cv_set_call_checker_flags(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    &PL_sv_yes, CALL_CHECKER_REQUIRE_GV);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes, CALL_CHECKER_REQUIRE_GV);
+	cv_set_call_checker_flags(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    (SV*)tsh_cv, CALL_CHECKER_REQUIRE_GV);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv, 0);
 	if (SvMAGICAL((SV*)tsh_cv) || SvMAGIC((SV*)tsh_cv)) croak_fail();
 #undef check_cc
 
