@@ -63,15 +63,6 @@ There doesn't seem to be a blead commit for this ticket, so nothing to backport.
 
 <commit votes="khw arc" id="753b2c6a60a81dacbe59e2041e30e8302484dc2d" desc="Fix -Dr output regression"/>
 
-NOTE from jhi: so the Time-HiRes in 5.24.1 has the broken version of Time-HiRes that is broken in OS X.  Possibilities:
-[1] The smallish fix from https://rt.perl.org/Ticket/Display.html?id=128445 (blead c4a535af41823cc84534bf8dbecfdcc3eb7daa86) which upgrades 1.9734 to 1.9739
-[2] Craig Berry's fix in https://marc.info/?l=perl5-porters;m=148305290013791 which upgrades 5.24 maint to version 1.9741, which has now been out for two months, and seems to be doing well: http://matrix.cpantesters.org/?dist=Time-HiRes+1.9741
-NOTE from arc: I'd like to see this fixed in maint-5.24. Since the changes
-in 1.9739 are already fairly involved, I'm inclined to think that the
-additional risk of going to 1.9741 is limited. I therefore tentatively cast
-a vote in favour of that approach.
-<commit votes="jhi craigb xsawyerx alh" id="" desc="[cpan #120032] Doesn't compile with Perl 5.24.1 on OS/X"/>
-
 NOTE from jhi: the following cluster of hexfp-related fixes
 (in ascending time order) only makes sense as a unit, they all touch
 the same code. I tried cherry-picking these onto maint-5.24, and only
@@ -109,11 +100,6 @@ so I've voted for the cluster in total.
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-Should we not just backport 2d41a263 instead? And does 5.22 need this, too? --sprout
-The entry above about [cpan #120032] is the same underlying issue, I think. --arc
-See also https://rt.perl.org/Ticket/Display.html?id=128972, on which it is said that 5.22 doesn't suffer the problem (assuming it is also the same thing).
-<commit votes="" id="c4a535af41823cc84534bf8dbecfdcc3eb7daa86" desc="[perl #128972] Build failure on OS X 10.12 Sierra."/>
 
 <commit votes="craigb jhi" id="f6a154ae766a3404d83b81448ca6a356d30198e1" desc="Treat VSI C the same as DEC/Compaq/HP C."/>
 
