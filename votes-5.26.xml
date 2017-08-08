@@ -33,6 +33,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 <commit votes="khw steveh" id="1d5030e143202c1e963e1fc91eb6f3afaa2df83e" ticket="131646" desc="[perl #131646] 5.26 regression: Assert fail instead of proper error msg" />
+Fixes a problem with the previous patch:
+<commit votes="tonyc" id="9c6b56dc65cdd9256fbe04a7baf4f085db1c04dd" ticket="131646" desc="(perl #131646) make the test less fragile" />
 <commit votes="steveh" id="790acddeaa0d2c73524596048b129561225cf100" ticket="131085" desc="[perl #131085] Crash with sub-in-stash" />
 <commit votes="steveh" id="d7e3f70f30811328d2f6ae57e5892deccf64d0b2" ticket="105930" desc="set up catchable runloops early enough" />
 <commit votes="steveh" id="655f5b268af8bf50c44ba4ae4803a33c9b792b8b" ticket="130861" desc="S_require_tie_mod(): use a new stack" />
