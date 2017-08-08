@@ -1106,7 +1106,7 @@ being a prime example).  If Configure C<-Dgccansipedantic> is used, the
 C<cflags> frontend selects C<-ansi -pedantic> for the platforms where
 they are known to be safe.
 
-Starting from Perl 5.9.4 the following extra flags are added:
+The following extra flags are added:
 
 =over 4
 
@@ -1120,7 +1120,15 @@ C<-Wextra>
 
 =item *
 
-C<-Wdeclaration-after-statement>
+C<-Wc++-compat>
+
+=item *
+
+C<-Wwrite-strings>
+
+=item *
+
+C<-Werror=declaration-after-statement>
 
 =back
 
