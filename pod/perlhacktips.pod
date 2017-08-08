@@ -1130,16 +1130,16 @@ C<-Wwrite-strings>
 
 C<-Werror=declaration-after-statement>
 
+=item *
+
+C<-Werror=pointer-arith>
+
 =back
 
 The following flags would be nice to have but they would first need
 their own Augean stablemaster:
 
 =over 4
-
-=item *
-
-C<-Wpointer-arith>
 
 =item *
 
