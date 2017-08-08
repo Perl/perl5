@@ -34,13 +34,16 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="khw steveh" id="1d5030e143202c1e963e1fc91eb6f3afaa2df83e" ticket="131646" desc="[perl #131646] 5.26 regression: Assert fail instead of proper error msg" />
 Fixes a problem with the previous patch:
-<commit votes="tonyc" id="9c6b56dc65cdd9256fbe04a7baf4f085db1c04dd" ticket="131646" desc="(perl #131646) make the test less fragile" />
+<commit votes="tonyc steveh" id="9c6b56dc65cdd9256fbe04a7baf4f085db1c04dd" ticket="131646" desc="(perl #131646) make the test less fragile" />
 <commit votes="steveh" id="790acddeaa0d2c73524596048b129561225cf100" ticket="131085" desc="[perl #131085] Crash with sub-in-stash" />
 <commit votes="steveh" id="d7e3f70f30811328d2f6ae57e5892deccf64d0b2" ticket="105930" desc="set up catchable runloops early enough" />
 <commit votes="steveh" id="655f5b268af8bf50c44ba4ae4803a33c9b792b8b" ticket="130861" desc="S_require_tie_mod(): use a new stack" />
 <commit votes="steveh" id="42752acc4959c5b770bbc29532bf2677f4533c4e" ticket="128207" desc="Make LOCK_LC_NUMERIC_STANDARD recursive" />
 <commit votes="steveh" id="9604fbf0722bd97ca6031a263c50ad52b6633db7" ticket="131526" desc="(perl #131526) don't go beyond the end of the NUL in my_atof2" />
+
+Take care when cherry-picking this: The test count isn't adjusted correctly by Git because maint-5.26 doesn't have 90c172854f (which reduced the count by one):
 <commit votes="steveh" id="bb152a4b442f7718fd37d32cc558be675e8ae1ae" ticket="131575" desc="don't call Perl_fbm_instr() with negative length" />
+
 <commit votes="steveh" id="e13dc8886fcabf88a521e8e73c358157b1fa4c8a" ticket="131627" desc="[perl #131627] Fix multideref for $x{qw/a/->$*}" />
 <commit votes="steveh" id="e26c6904d9f9f5ea818e590331b14038279332d1" ticket="131645" desc="[perl #131645] Fix assert fail in pp_sselect" />
 <commit votes="steveh" id="67c3640a57440a4e9e224e9164ac9f39bdc9376f" ticket="131570" desc="(perl #131570) don't skip the temps stack entry we just allocated" />
