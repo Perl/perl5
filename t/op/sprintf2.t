@@ -1039,5 +1039,81 @@ like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
     }
 }
 
+# multiconcat: only one scalar assign at most should be optimised away
+
+{
+    local our $x1 = '';
+    local our $x2 = '';
+    my ($a, $b) = qw(abcd wxyz);
+    $x1 = ($x2 = sprintf("%s%s", $a, $b));
+    is $x1, "abcdwxyz", "\$x1 = \$x2 = sprintf(): x1";
+    is $x2, "abcdwxyz", "\$x1 = \$x2 = sprintf(): x2";
+
+    my $y1 = '';
+    my $y2 = '';
+    $y1 = ($y2 = sprintf("%s%s", $a, $b));
+    is $y1, "abcdwxyz", "\$y1 = \$y2 = sprintf(): y1";
+    is $y2, "abcdwxyz", "\$y1 = \$y2 = sprintf(): y2";
+}
+
+# multiconcat: mutator optimisation
+
+{
+    my $lex = 'abc';
+    my $a1 = 'pqr';
+    my $a2 = 'xyz';
+    $lex .= sprintf "(%s,%s)", $a1, $a2;
+    is $lex, "abc(pqr,xyz)", "\$lex .= sprintf ...";
+
+    local our $pkg = "def";
+    $pkg .= sprintf "(%s,%s)", $a1, $a2;
+    is $pkg, "def(pqr,xyz)", "\$pkg .= sprintf ...";
+
+    my @ary;
+    $ary[3] = "ghi";
+    $ary[3] .= sprintf "(%s,%s)", $a1, $a2;
+    is $ary[3], "ghi(pqr,xyz)", "\$ary[3] .= sprintf ...";
+}
+
+# multiconcat: strings with 0x80..0xff chars and/or utf8 chars
+
+{
+    my $plain  = "abc";
+    my $s80    = "d\x{80}e";
+    my $s81    = "h\x{81}i";
+    my $utf8   = "f\x{100}g";
+    my $res;
+
+    $res = sprintf "-%s-%s-\x{90}-%s-\x{91}-%s-\x{92}",
+                        $plain, $s80, $utf8, $s81;
+    is $res, "-abc-d\x{80}e-\x{90}-f\x{100}g-\x{91}-h\x{81}i-\x{92}",
+                "multiconcat 80.ff handling";
+
+    $res = sprintf "%s \x{101} %s", $plain, $plain;
+    is $res, "abc \x{101} abc", "multiconcat p u p";
+
+    $res = sprintf "%s \x{101} %s", $plain, $utf8;
+    is $res, "abc \x{101} f\x{100}g", "multiconcat p u u";
+}
+
+# check /INTRO flag set correctly on multiconcat
+
+{
+    my $a = "a";
+    my $b = "b";
+    my $x;
+    {
+        $x = sprintf "-%s-%s-", $a, $b;
+    }
+    is $x, "-a-b-", "no INTRO flag on non-my";
+    for (1,2) {
+        my $y;
+        is $y, undef, "INTRO flag on my: $_";
+        $y = sprintf "-%s-%s-", $b, $a;
+        is $y, "-b-a-", "INTRO flag on my - result: $_";
+    }
+}
+
+
 
 done_testing();

@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2309;
+plan 2579;
 
 use B ();
 
@@ -400,3 +400,237 @@ test_opcount(0, 'barewords can be constant-folded',
         }
     }
 }
+
+
+# a sprintf that can't be optimised shouldn't stop the .= concat being
+# optimised
+
+{
+    my ($i,$j,$s);
+    test_opcount(0, "sprintf pessimised",
+        sub { $s .= sprintf "%d%d",$i, $j },
+        {
+            const       => 1,
+            sprintf     => 1,
+            concat      => 0,
+            multiconcat => 1,
+            padsv       => 2,
+        });
+}
+
+
+# sprintf with constant args should be constant folded
+
+test_opcount(0, "sprintf constant args",
+        sub { sprintf "%s%s", "abc", "def" },
+        {
+            const       => 1,
+            sprintf     => 0,
+            multiconcat => 0.
+        });
+
+#
+# concats and assigns that should be optimised into a single multiconcat
+# op
+
+{
+
+    my %seen; # weed out duplicate combinations
+
+    # these are the ones where using multiconcat isn't a gain, so should
+    # be pessimised
+    my %pessimise = map { $_ => 1 }
+                        '$a1.$a2',
+                        '"$a1$a2"',
+                        '$pkg .= $a1',
+                        '$pkg .= "$a1"',
+                        '$lex  = $a1.$a2',
+                        '$lex  = "$a1$a2"',
+                        # these already constant folded
+                        'sprintf("-")',
+                        '$pkg  = sprintf("-")',
+                        '$lex  = sprintf("-")',
+                        'my $l = sprintf("-")',
+                    ;
+
+    for my $lhs (
+        '',
+        '$pkg  = ',
+        '$pkg .= ',
+        '$lex  = ',
+        '$lex .= ',
+        'my $l = ',
+    ) {
+        for my $nargs (0..3) {
+            for my $type (0..2) {
+                # 0: $a . $b
+                # 1: "$a$b"
+                # 2: sprintf("%s%s", $a, $b)
+
+                for my $const (0..4) {
+                    # 0: no consts:       "$a1$a2"
+                    # 1: interior consts: "$a1-$a2"
+                    # 2: + LH   edge:    "-$a1-$a2"
+                    # 3: + RH   edge:     "$a1-$a2-"
+                    # 4: + both edge:    "-$a1-$a2-"
+
+                    my @args;
+                    my @sprintf_args;
+                    my $c = $type == 0 ? '"-"' : '-';
+                    push @args, $c if $const == 2 || $const == 4;
+                    for my $n (1..$nargs) {
+                        if ($type == 2) {
+                            # sprintf
+                            push @sprintf_args, "\$a$n";
+                            push @args, '%s';
+                        }
+                        else {
+                            push @args, "\$a$n";
+                        }
+                        push @args, $c if $const;
+                    }
+                    pop @args if  $const == 1 || $const == 2;
+
+                    push @args, $c if $nargs == 0 && $const == 1;
+
+
+                    if ($type == 2) {
+                        # sprintf
+                        next unless @args;
+                    }
+                    else {
+                        # To ensure that there's at least once concat
+                        # action, if appending, need at least one RHS arg;
+                        # else least 2 args:
+                        #    $x = $a . $b
+                        #    $x .= $a
+                        next unless @args >= ($lhs =~ /\./ ? 1 : 2);
+                    }
+
+                    my $rhs;
+                    if ($type == 0) {
+                        $rhs = join('.', @args);
+                    }
+                    elsif ($type == 1) {
+                        $rhs = '"' . join('',  @args) . '"'
+                    }
+                    else {
+                        $rhs = 'sprintf("'
+                               . join('',  @args)
+                               . '"'
+                               . join('', map ",$_",  @sprintf_args)
+                               . ')';
+                    }
+
+                    my $expr = $lhs . $rhs;
+
+                    next if exists $seen{$expr};
+                    $seen{$expr} = 1;
+
+                    my ($a1, $a2, $a3);
+                    my $lex;
+                    our $pkg;
+                    my $sub = eval qq{sub { $expr }};
+                    die "eval(sub { $expr }: $@" if $@;
+
+                    my $pm = $pessimise{$expr};
+                    test_opcount(0, ($pm ? "concat     " : "multiconcat")
+                                            . ": $expr",
+                            $sub,
+                            $pm
+                            ?   {   multiconcat => 0 }
+                            :   {
+                                    multiconcat => 1,
+                                    padsv       => $nargs,
+                                    concat      => 0,
+                                    sprintf     => 0,
+                                    const       => 0,
+                                    sassign     => 0,
+                                    stringify   => 0,
+                                    gv          => 0, # optimised to gvsv
+                                });
+                }
+            }
+        }
+    }
+}
+
+# $lex = "foo" should *not* get converted into a multiconcat - there's
+# no actual concatenation involved, and treating it as a degnerate concat
+# would forego any COW copy efficiency
+
+test_opcount(0, '$lex = "foo"', sub { my $x; $x = "foo"; },
+        {
+            multiconcat => 0,
+        });
+
+# for '$lex1 = $lex2 . $lex3', multiconcat is normally slower than
+# concat, except in the specific case of '$lex1 = $lex2 . $lex1'
+
+test_opcount(0, '$lex1 = $lex2 . $lex1', sub { my ($x,$y); $x = $y . $x },
+            {
+                multiconcat => 1,
+                padsv       => 4, # 2 are from the my()
+                concat      => 0,
+                sassign     => 0,
+                stringify   => 0,
+            });
+test_opcount(0, '$lex1 = "$lex2$lex1"', sub { my ($x,$y); $x = "$y$x" },
+            {
+                multiconcat => 1,
+                padsv       => 4, # 2 are from the my()
+                concat      => 0,
+                sassign     => 0,
+                stringify   => 0,
+            });
+test_opcount(0, '$lex1 = $lex1 . $lex1', sub { my $x; $x = $x . $x },
+            {
+                multiconcat => 0,
+            });
+
+# 'my $x .= ...' doesn't make a lot of sense and so isn't optimised
+test_opcount(0, 'my $a .= $b.$c.$d', sub { our ($b,$c,$d); my $a .= $b.$c.$d },
+            {
+                padsv => 1,
+            });
+
+# prefer rcatline optimisation over multiconcat
+
+test_opcount(0, "rcatline", sub { my ($x,$y); open FOO, "xxx"; $x .= <FOO> },
+        {
+            rcatline    => 1,
+            readline    => 0,
+            multiconcat => 0,
+            concat      => 0,
+        });
+
+# long chains of concats should be converted into chained multiconcats
+
+{
+    my @a;
+    for my $i (60..68) { # check each side of 64 threshold
+        my $c = join '.', map "\$a[$_]", 1..$i;
+        my $sub = eval qq{sub { $c }} or die $@;
+        test_opcount(0, "long chain $i", $sub,
+            {
+                multiconcat => $i > 65 ? 2 : 1,
+                concat      => $i == 65 ? 1 : 0,
+                aelem       => 0,
+                aelemfast   => 0,
+            });
+    }
+}
+
+# with C<$state $s = $a . $b . ....>, the assign is optimised away,
+# but the padsv isn't (it's treated like a general LHS expression rather
+# than using OPpTARGET_MY).
+
+test_opcount(0, "state works with multiconcat",
+                sub { use feature 'state'; our ($a, $b, $c); state $s = $a . $b . $c },
+                {
+                    multiconcat => 1,
+                    concat      => 0,
+                    sassign     => 0,
+                    once        => 1,
+                    padsv       => 2, # one each for the next/once branches
+                });

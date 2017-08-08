@@ -3476,7 +3476,12 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     SV* res;
     const bool oldcatch = CATCH_GET;
     I32 oldmark, nret;
-    U8 gimme = force_scalar ? G_SCALAR : GIMME_V;
+                /* for multiconcat, we may call overload several times,
+                 * with the context of individual concats being scalar,
+                 * regardless of the overall context of the multiconcat op
+                 */
+    U8 gimme = (force_scalar || PL_op->op_type == OP_MULTICONCAT)
+                    ? G_SCALAR : GIMME_V;
 
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);

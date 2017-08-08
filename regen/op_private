@@ -300,7 +300,8 @@ for (qw(nextstate dbstate)) {
 addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
     for qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice split
            hslice delete padsv padav padhv enteriter entersub padrange
-           pushmark cond_expr refassign lvref lvrefslice lvavref multideref),
+           pushmark cond_expr refassign lvref lvrefslice lvavref multideref
+           multiconcat),
            'list', # this gets set in my_attrs() for some reason
            ;
 
@@ -806,6 +807,14 @@ addbits('rv2hv',
 for (qw(index rindex)) {
     addbits($_, 6 => qw(OPpINDEX_BOOLNEG NEG));
 }
+
+addbits('multiconcat',
+  # 7       OPpLVAL_INTRO
+    6 => qw(OPpMULTICONCAT_APPEND APPEND), # $x .= ....
+    5 => qw(OPpMULTICONCAT_FAKE   FAKE),   # sprintf() optimised to MC.
+  # 4       OPpTARGET_MY
+    3 => qw(OPpMULTICONCAT_STRINGIFY STRINGIFY), # "$a$b...", (for Deparse.pm)
+);
 
 
 

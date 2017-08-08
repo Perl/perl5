@@ -1078,6 +1078,22 @@ Perl_op_clear(pTHX_ OP *o)
         PerlMemShared_free(cUNOP_AUXo->op_aux);
         break;
 
+    case OP_MULTICONCAT:
+        {
+            UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+            /* aux[PERL_MULTICONCAT_IX_PLAIN_PV] and/or
+             * aux[PERL_MULTICONCAT_IX_UTF8_PV] point to plain and/or
+             * utf8 shared strings */
+            char *p1 = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+            char *p2 = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
+            if (p1)
+                PerlMemShared_free(p1);
+            if (p2 && p1 != p2)
+                PerlMemShared_free(p2);
+            PerlMemShared_free(aux);
+        }
+        break;
+
     case OP_MULTIDEREF:
         {
             UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
@@ -2470,6 +2486,883 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
     }
 }
 
+/* info returned by S_sprintf_is_multiconcatable() */
+
+struct sprintf_ismc_info {
+    UV     nargs;     /* num of args to sprintf (not including the format) */
+    char  *start;     /* start of raw format string */
+    char  *end;       /* bytes after end of raw format string */
+    STRLEN total_len; /* total length (in bytes) of format string, not
+                         including '%s' and  half of '%%' */
+    STRLEN variant;   /* number of bytes by which total_len_p would grow
+                         if upgraded to utf8 */
+    bool   utf8;      /* whether the format is utf8 */
+};
+
+
+/* is the OP_SPRINTF o suitable for converting into a multiconcat op?
+ * i.e. its format argument is a const string with only '%s' and '%%'
+ * formats, and the number of args is known, e.g.
+ *    sprintf "a=%s f=%s", $a[0], scalar(f());
+ * but not
+ *    sprintf "i=%d a=%s f=%s", $i, @a, f();
+ *
+ * If successful, the sprintf_ismc_info struct pointed to by info will be
+ * populated.
+ */
+
+STATIC bool
+S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
+{
+    OP    *pm, *constop, *kid;
+    SV    *sv;
+    char  *s, *e, *p;
+    UV     nargs, nformats;
+    STRLEN cur, total_len, variant;
+    bool   utf8;
+
+    /* if sprintf's behaviour changes, die here so that someone
+     * can decide whether to enhance this function or skip optimising
+     * under those new circumstances */
+    assert(!(o->op_flags & OPf_STACKED));
+    assert(!(PL_opargs[OP_SPRINTF] & OA_TARGLEX));
+    assert(!(o->op_private & ~OPpARG4_MASK));
+
+    pm = cUNOPo->op_first;
+    if (pm->op_type != OP_PUSHMARK) /* weird coreargs stuff */
+        return FALSE;
+    constop = OpSIBLING(pm);
+    if (!constop || constop->op_type != OP_CONST)
+        return FALSE;
+    sv = cSVOPx_sv(constop);
+    if (SvMAGICAL(sv) || !SvPOK(sv))
+        return FALSE;
+
+    s = SvPV(sv, cur);
+    e = s + cur;
+
+    /* Scan format for %% and %s and work out how many %s there are.
+     * Abandon if other format types are found.
+     */
+
+    nformats  = 0;
+    total_len = 0;
+    variant   = 0;
+
+    for (p = s; p < e; p++) {
+        if (*p != '%') {
+            total_len++;
+            if (UTF8_IS_INVARIANT(*p))
+                variant++;
+            continue;
+        }
+        p++;
+        if (p >= e)
+            return FALSE; /* lone % at end gives "Invalid conversion" */
+        if (*p == '%')
+            total_len++;
+        else if (*p == 's')
+            nformats++;
+        else
+            return FALSE;
+    }
+
+    if (!nformats || nformats > PERL_MULTICONCAT_MAXARG)
+        return FALSE;
+
+    utf8 = cBOOL(SvUTF8(sv));
+    if (utf8)
+        variant = 0;
+
+    /* scan args; they must all be in scalar cxt */
+
+    nargs = 0;
+    kid = OpSIBLING(constop);
+
+    while (kid) {
+        if ((kid->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+            return FALSE;
+        nargs++;
+        kid = OpSIBLING(kid);
+    }
+
+    if (nargs != nformats)
+        return FALSE; /* e.g. sprintf("%s%s", $a); */
+
+
+    info->nargs      = nargs;
+    info->start      = s;
+    info->end        = e;
+    info->total_len  = total_len;
+    info->variant    = variant;
+    info->utf8       = utf8;
+
+    return TRUE;
+}
+
+
+
+/* S_maybe_multiconcat():
+ *
+ * given an OP_STRINGIFY, OP_SASSIGN, OP_CONCAT or OP_SPRINTF op, possibly
+ * convert it (and its children) into an OP_MULTICONCAT. See the code
+ * comments just before pp_multiconcat() for the full details of what
+ * OP_MULTICONCAT supports.
+ *
+ * Basically we're looking for an optree with a chain of OP_CONCATS down
+ * the LHS (or an OP_SPRINTF), with possibly an OP_SASSIGN, and/or
+ * OP_STRINGIFY, and/or OP_CONCAT acting as '.=' at its head, e.g.
+ *
+ *      $x = "$a$b-$c"
+ *
+ *  looks like
+ *
+ *      SASSIGN
+ *         |
+ *      STRINGIFY   -- PADSV[$x]
+ *         |
+ *         |
+ *      ex-PUSHMARK -- CONCAT/S
+ *                        |
+ *                     CONCAT/S  -- PADSV[$d]
+ *                        |
+ *                     CONCAT    -- CONST["-"]
+ *                        |
+ *                     PADSV[$a] -- PADSV[$b]
+ *
+ * Note that at this stage the OP_SASSIGN may have already been optimised
+ * away with OPpTARGET_MY set on the OP_STRINGIFY or OP_CONCAT.
+ */
+
+STATIC void
+S_maybe_multiconcat(pTHX_ OP *o)
+{
+    OP *lastkidop;   /* the right-most of any kids unshifted onto o */
+    OP *topop;       /* the top-most op in the concat tree (often equals o,
+                        unless there are assign/stringify ops above it */
+    OP *parentop;    /* the parent op of topop (or itself if no parent) */
+    OP *targmyop;    /* the op (if any) with the OPpTARGET_MY flag */
+    OP *targetop;    /* the op corresponding to target=... or target.=... */
+    OP *stringop;    /* the OP_STRINGIFY op, if any */
+    OP *nextop;      /* used for recreating the op_next chain without consts */
+    OP *kid;         /* general-purpose op pointer */
+    UNOP_AUX_item *aux;
+    UNOP_AUX_item *lenp;
+    char *const_str, *p;
+    struct sprintf_ismc_info sprintf_info;
+
+                     /* store info about each arg in args[];
+                      * toparg is the highest used slot; argp is a general
+                      * pointer to args[] slots */
+    struct {
+        void *p;      /* initially points to const sv (or null for op);
+                         later, set to SvPV(constsv), with ... */
+        STRLEN len;   /* ... len set to SvPV(..., len) */
+    } *argp, *toparg, args[PERL_MULTICONCAT_MAXARG*2 + 1];
+
+    UV nargs  = 0;
+    UV nconst = 0;
+    STRLEN variant;
+    bool utf8 = FALSE;
+    bool kid_is_last = FALSE; /* most args will be the RHS kid of a concat op;
+                                 the last-processed arg will the LHS of one,
+                                 as args are processed in reverse order */
+    U8   stacked_last = 0;   /* whether the last seen concat op was STACKED */
+    STRLEN total_len  = 0;   /* sum of the lengths of the const segments */
+    U8 flags          = 0;   /* what will become the op_flags and ... */
+    U8 private_flags  = 0;   /* ... op_private of the multiconcat op */
+    bool is_sprintf = FALSE; /* we're optimising an sprintf */
+    bool is_targable  = FALSE; /* targetop is an OPpTARGET_MY candidate */
+
+    /* -----------------------------------------------------------------
+     * Phase 1:
+     *
+     * Examine the optree non-destructively to determine whether it's
+     * suitable to be converted into an OP_MULTICONCAT. Accumulate
+     * information about the optree in args[].
+     */
+
+    argp     = args;
+    targmyop = NULL;
+    targetop = NULL;
+    stringop = NULL;
+    topop    = o;
+    parentop = o;
+
+    assert(   o->op_type == OP_SASSIGN
+           || o->op_type == OP_CONCAT
+           || o->op_type == OP_SPRINTF
+           || o->op_type == OP_STRINGIFY);
+
+    /* first see if, at the top of the tree, there is an assign,
+     * append and/or stringify */
+
+    if (topop->op_type == OP_SASSIGN) {
+        /* expr = ..... */
+        if (o->op_ppaddr != PL_ppaddr[OP_SASSIGN])
+            return;
+        if (o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
+            return;
+        assert(!(o->op_private & ~OPpARG2_MASK)); /* barf on unknown flags */
+
+        parentop = topop;
+        topop = cBINOPo->op_first;
+        targetop = OpSIBLING(topop);
+        if (!targetop) /* probably some sort of syntax error */
+            return;
+    }
+    else if (   topop->op_type == OP_CONCAT
+             && (topop->op_flags & OPf_STACKED)
+             && (cUNOPo->op_first->op_flags & OPf_MOD))
+    {
+        /* expr .= ..... */
+
+        /* OPpTARGET_MY shouldn't be able to be set here. If it is,
+         * decide what to do about it */
+        assert(!(o->op_private & OPpTARGET_MY));
+
+        /* barf on unknown flags */
+        assert(!(o->op_private & ~(OPpARG2_MASK|OPpTARGET_MY)));
+        private_flags |= OPpMULTICONCAT_APPEND;
+        targetop = cBINOPo->op_first;
+        parentop = topop;
+        topop    = OpSIBLING(targetop);
+
+        /* $x .= <FOO> gets optimised to rcatline instead */
+        if (topop->op_type == OP_READLINE)
+            return;
+    }
+
+    if (targetop) {
+        /* Can targetop (the LHS) if it's a padsv, be be optimised
+         * away and use OPpTARGET_MY instead?
+         */
+        if (    (targetop->op_type == OP_PADSV)
+            && !(targetop->op_private & OPpDEREF)
+            && !(targetop->op_private & OPpPAD_STATE)
+               /* we don't support 'my $x .= ...' */
+            && (   o->op_type == OP_SASSIGN
+                || !(targetop->op_private & OPpLVAL_INTRO))
+        )
+            is_targable = TRUE;
+    }
+
+    if (topop->op_type == OP_STRINGIFY) {
+        if (topop->op_ppaddr != PL_ppaddr[OP_STRINGIFY])
+            return;
+        stringop = topop;
+
+        /* barf on unknown flags */
+        assert(!(o->op_private & ~(OPpARG4_MASK|OPpTARGET_MY)));
+
+        if ((topop->op_private & OPpTARGET_MY)) {
+            if (o->op_type == OP_SASSIGN)
+                return; /* can't have two assigns */
+            targmyop = topop;
+        }
+
+        private_flags |= OPpMULTICONCAT_STRINGIFY;
+        parentop = topop;
+        topop = cBINOPx(topop)->op_first;
+        assert(OP_TYPE_IS_OR_WAS_NN(topop, OP_PUSHMARK));
+        topop = OpSIBLING(topop);
+    }
+
+    if (topop->op_type == OP_SPRINTF) {
+        if (topop->op_ppaddr != PL_ppaddr[OP_SPRINTF])
+            return;
+        if (S_sprintf_is_multiconcatable(aTHX_ topop, &sprintf_info)) {
+            nargs     = sprintf_info.nargs;
+            total_len = sprintf_info.total_len;
+            variant   = sprintf_info.variant;
+            utf8      = sprintf_info.utf8;
+            is_sprintf = TRUE;
+            private_flags |= OPpMULTICONCAT_FAKE;
+            toparg = argp;
+            /* we have an sprintf op rather than a concat optree.
+             * Skip most of the code below which is associated with
+             * processing that optree. We also skip phase 2, determining
+             * whether its cost effective to optimise, since for sprintf,
+             * multiconcat is *always* faster */
+            goto create_aux;
+        }
+        /* note that even if the sprintf itself isn't multiconcatable,
+         * the expression as a whole may be, e.g. in
+         *    $x .= sprintf("%d",...)
+         * the sprintf op will be left as-is, but the concat/S op may
+         * be upgraded to multiconcat
+         */
+    }
+    else if (topop->op_type == OP_CONCAT) {
+        if (topop->op_ppaddr != PL_ppaddr[OP_CONCAT])
+            return;
+
+        if ((topop->op_private & OPpTARGET_MY)) {
+            if (o->op_type == OP_SASSIGN || targmyop)
+                return; /* can't have two assigns */
+            targmyop = topop;
+        }
+    }
+
+    /* Is it safe to convert a sassign/stringify/concat op into
+     * a multiconcat? */
+    assert((PL_opargs[OP_SASSIGN]   & OA_CLASS_MASK) == OA_BINOP);
+    assert((PL_opargs[OP_CONCAT]    & OA_CLASS_MASK) == OA_BINOP);
+    assert((PL_opargs[OP_STRINGIFY] & OA_CLASS_MASK) == OA_LISTOP);
+    assert((PL_opargs[OP_SPRINTF]   & OA_CLASS_MASK) == OA_LISTOP);
+    STATIC_ASSERT_STMT(   STRUCT_OFFSET(BINOP,    op_last)
+                       == STRUCT_OFFSET(UNOP_AUX, op_aux));
+    STATIC_ASSERT_STMT(   STRUCT_OFFSET(LISTOP,   op_last)
+                       == STRUCT_OFFSET(UNOP_AUX, op_aux));
+
+    /* Now scan the down the tree looking for a series of
+     * CONCAT/OPf_STACKED ops on the LHS (with the last one not
+     * stacked). For example this tree:
+     *
+     *     |
+     *   CONCAT/STACKED
+     *     |
+     *   CONCAT/STACKED -- EXPR5
+     *     |
+     *   CONCAT/STACKED -- EXPR4
+     *     |
+     *   CONCAT -- EXPR3
+     *     |
+     *   EXPR1  -- EXPR2
+     *
+     * corresponds to an expression like
+     *
+     *   (EXPR1 . EXPR2 . EXPR3 . EXPR4 . EXPR5)
+     *
+     * Record info about each EXPR in args[]: in particular, whether it is
+     * a stringifiable OP_CONST and if so what the const sv is.
+     *
+     * The reason why the last concat can't be STACKED is the difference
+     * between
+     *
+     *    ((($a .= $a) .= $a) .= $a) .= $a
+     *
+     * and
+     *    $a . $a . $a . $a . $a
+     *
+     * The main difference between the optrees for those two constructs
+     * is the presence of the last STACKED. As well as modifying $a,
+     * the former sees the changed $a between each concat, so if $s is
+     * initially 'a', the first returns 'a' x 16, while the latter returns
+     * 'a' x 5. And pp_multiconcat can't handle that kind of thing.
+     */
+
+    kid = topop;
+
+    for (;;) {
+        OP *argop;
+        SV *sv;
+        bool last = FALSE;
+
+        if (    kid->op_type == OP_CONCAT
+            && !kid_is_last
+        ) {
+            OP *k1, *k2;
+            k1 = cUNOPx(kid)->op_first;
+            k2 = OpSIBLING(k1);
+            /* shouldn't happen except maybe after compile err? */
+            if (!k2)
+                return;
+
+            /* avoid turning (A . B . ($lex = C) ...)  into  (A . B . C ...) */
+            if (kid->op_private & OPpTARGET_MY)
+                kid_is_last = TRUE;
+
+            stacked_last = (kid->op_flags & OPf_STACKED);
+            if (!stacked_last)
+                kid_is_last = TRUE;
+
+            kid   = k1;
+            argop = k2;
+        }
+        else {
+            argop = kid;
+            last = TRUE;
+        }
+
+        if (   nargs              >  PERL_MULTICONCAT_MAXARG        - 2
+            || (argp - args + 1)  > (PERL_MULTICONCAT_MAXARG*2 + 1) - 2)
+        {
+            /* At least two spare slots are needed to decompose both
+             * concat args. If there are no slots left, continue to
+             * examine the rest of the optree, but don't push new values
+             * on args[]. If the optree as a whole is legal for conversion
+             * (in particular that the last concat isn't STACKED), then
+             * the first PERL_MULTICONCAT_MAXARG elements of the optree
+             * can be converted into an OP_MULTICONCAT now, with the first
+             * child of that op being the remainder of the optree -
+             * which may itself later be converted to a multiconcat op
+             * too.
+             */
+            if (last) {
+                /* the last arg is the rest of the optree */
+                argp++->p = NULL;
+                nargs++;
+            }
+        }
+        else if (   argop->op_type == OP_CONST
+            && ((sv = cSVOPx_sv(argop)))
+            /* defer stringification until runtime of 'constant'
+             * things that might stringify variantly, e.g. the radix
+             * point of NVs, or overloaded RVs */
+            && (SvPOK(sv) || SvIOK(sv))
+            && (!SvGMAGICAL(sv))
+        ) {
+            argp++->p = sv;
+            utf8   |= cBOOL(SvUTF8(sv));
+            nconst++;
+        }
+        else {
+            argp++->p = NULL;
+            nargs++;
+        }
+
+        if (last)
+            break;
+    }
+
+    toparg = argp - 1;
+
+    if (stacked_last)
+        return; /* we don't support ((A.=B).=C)...) */
+
+    /* -----------------------------------------------------------------
+     * Phase 2:
+     *
+     * At this point we have determined that the optree *can* be converted
+     * into a multiconcat. Having gathered all the evidence, we now decide
+     * whether it *should*.
+     */
+
+
+    /* we need at least one concat action, e.g.:
+     *
+     *  Y . Z
+     *  X = Y . Z
+     *  X .= Y
+     *
+     * otherwise we could be doing something like $x = "foo", which
+     * if treated as as a concat, would fail to COW.
+     */
+    if (nargs + nconst + cBOOL(private_flags & OPpMULTICONCAT_APPEND) < 2)
+        return;
+
+    /* Benchmarking seems to indicate that we gain if:
+     * * we optimise at least two actions into a single multiconcat
+     *    (e.g concat+concat, sassign+concat);
+     * * or if we can eliminate at least 1 OP_CONST;
+     * * or if we can eliminate a padsv via OPpTARGET_MY
+     */
+
+    if (
+           /* eliminated at least one OP_CONST */
+           nconst >= 1
+           /* eliminated an OP_SASSIGN */
+        || o->op_type == OP_SASSIGN
+           /* eliminated an OP_PADSV */
+        || (!targmyop && is_targable)
+    )
+        /* definitely a net gain to optimise */
+        goto optimise;
+
+    /* ... if not, what else? */
+
+    /* special-case '$lex1 = expr . $lex1' (where expr isn't lex1):
+     * multiconcat is faster (due to not creating a temporary copy of
+     * $lex1), whereas for a general $lex1 = $lex2 . $lex3, concat is
+     * faster.
+     */
+    if (   nconst == 0
+         && nargs == 2
+         && targmyop
+         && topop->op_type == OP_CONCAT
+    ) {
+        PADOFFSET t = targmyop->op_targ;
+        OP *k1 = cBINOPx(topop)->op_first;
+        OP *k2 = cBINOPx(topop)->op_last;
+        if (   k2->op_type == OP_PADSV
+            && k2->op_targ == t
+            && (   k1->op_type != OP_PADSV
+                || k1->op_targ != t)
+        )
+            goto optimise;
+    }
+
+    /* need at least two concats */
+    if (nargs + nconst + cBOOL(private_flags & OPpMULTICONCAT_APPEND) < 3)
+        return;
+
+
+
+    /* -----------------------------------------------------------------
+     * Phase 3:
+     *
+     * At this point the optree has been verified as ok to be optimised
+     * into an OP_MULTICONCAT. Now start changing things.
+     */
+
+   optimise:
+
+    /* stringify all const args and determine utf8ness */
+
+    variant = 0;
+    for (argp = args; argp <= toparg; argp++) {
+        SV *sv = (SV*)argp->p;
+        if (!sv)
+            continue; /* not a const op */
+        if (utf8 && !SvUTF8(sv))
+            sv_utf8_upgrade_nomg(sv);
+        argp->p = SvPV_nomg(sv, argp->len);
+        total_len += argp->len;
+        
+        /* see if any strings would grow if converted to utf8 */
+        if (!utf8) {
+            char *p    = (char*)argp->p;
+            STRLEN len = argp->len;
+            while (len--) {
+                U8 c = *p++;
+                if (!UTF8_IS_INVARIANT(c))
+                    variant++;
+            }
+        }
+    }
+
+    /* create and populate aux struct */
+
+  create_aux:
+
+    aux = (UNOP_AUX_item*)PerlMemShared_malloc(
+                    sizeof(UNOP_AUX_item)
+                    *  (
+                           PERL_MULTICONCAT_HEADER_SIZE
+                         + ((nargs + 1) * (variant ? 2 : 1))
+                        )
+                    );
+    const_str = (char *)PerlMemShared_malloc(total_len);
+
+    /* Extract all the non-const expressions from the concat tree then
+     * dispose of the old tree, e.g. convert the tree from this:
+     *
+     *  o => SASSIGN
+     *         |
+     *       STRINGIFY   -- TARGET
+     *         |
+     *       ex-PUSHMARK -- CONCAT
+     *                        |
+     *                      CONCAT -- EXPR5
+     *                        |
+     *                      CONCAT -- EXPR4
+     *                        |
+     *                      CONCAT -- EXPR3
+     *                        |
+     *                      EXPR1  -- EXPR2
+     *
+     *
+     * to:
+     *
+     *  o => MULTICONCAT
+     *         |
+     *       ex-PUSHMARK -- EXPR1 -- EXPR2 -- EXPR3 -- EXPR4 -- EXPR5 -- TARGET
+     *
+     * except that if EXPRi is an OP_CONST, it's discarded.
+     *
+     * During the conversion process, EXPR ops are stripped from the tree
+     * and unshifted onto o. Finally, any of o's remaining original
+     * childen are discarded and o is converted into an OP_MULTICONCAT.
+     *
+     * In this middle of this, o may contain both: unshifted args on the
+     * left, and some remaining original args on the right. lastkidop
+     * is set to point to the right-most unshifted arg to delineate
+     * between the two sets.
+     */
+
+
+    if (is_sprintf) {
+        /* create a copy of the format with the %'s removed, and record
+         * the sizes of the const string segments in the aux struct */
+        char *q, *oldq;
+        lenp = aux + PERL_MULTICONCAT_IX_LENGTHS;
+
+        p    = sprintf_info.start;
+        q    = const_str;
+        oldq = q;
+        for (; p < sprintf_info.end; p++) {
+            if (*p == '%') {
+                p++;
+                if (*p != '%') {
+                    (lenp++)->uv = q - oldq;
+                    oldq = q;
+                    continue;
+                }
+            }
+            *q++ = *p;
+        }
+        lenp->uv = q - oldq;
+        assert((STRLEN)(q - const_str) == total_len);
+
+        /* Attach all the args (i.e. the kids of the sprintf) to o (which
+         * may or may not be topop) The pushmark and const ops need to be
+         * kept in case they're an op_next entry point.
+         */
+        lastkidop = cLISTOPx(topop)->op_last;
+        kid = cUNOPx(topop)->op_first; /* pushmark */
+        op_null(kid);
+        op_null(OpSIBLING(kid));       /* const */
+        if (o != topop) {
+            kid = op_sibling_splice(topop, NULL, -1, NULL); /* cut all args */
+            op_sibling_splice(o, NULL, 0, kid); /* and attach to o */
+            lastkidop->op_next = o;
+        }
+    }
+    else {
+        p = const_str;
+        lenp = aux + PERL_MULTICONCAT_IX_LENGTHS;
+
+        lenp->size = -1;
+
+        /* Concatenate all const strings into const_str.
+         * Note that args[] contains the RHS args in reverse order, so
+         * we scan args[] from top to bottom to get constant strings
+         * in L-R order
+         */
+        for (argp = toparg; argp >= args; argp--) {
+            if (!argp->p)
+                /* not a const op */
+                (++lenp)->size = -1;
+            else {
+                STRLEN l = argp->len;
+                Copy(argp->p, p, l, char);
+                p += l;
+                if (lenp->size == -1)
+                    lenp->size = l;
+                else
+                    lenp->size += l;
+            }
+        }
+
+        kid = topop;
+        nextop = o;
+        lastkidop = NULL;
+
+        for (argp = args; argp <= toparg; argp++) {
+            /* only keep non-const args, except keep the first-in-next-chain
+             * arg no matter what it is (but nulled if OP_CONST), because it
+             * may be the entry point to this subtree from the previous
+             * op_next.
+             */
+            bool last = (argp == toparg);
+            OP *prev;
+
+            /* set prev to the sibling *before* the arg to be cut out,
+             * e.g.:
+             *
+             *         |
+             * kid=  CONST
+             *         |
+             * prev= CONST -- EXPR
+             *         |
+             */
+            if (argp == args && kid->op_type != OP_CONCAT) {
+                /* in e.g. '$x . = f(1)' there's no RHS concat tree
+                 * so the expression to be cut isn't kid->op_last but
+                 * kid itself */
+                OP *o1, *o2;
+                /* find the op before kid */
+                o1 = NULL;
+                o2 = cUNOPx(parentop)->op_first;
+                while (o2 && o2 != kid) {
+                    o1 = o2;
+                    o2 = OpSIBLING(o2);
+                }
+                assert(o2 == kid);
+                prev = o1;
+                kid  = parentop;
+            }
+            else if (kid == o && lastkidop)
+                prev = last ? lastkidop : OpSIBLING(lastkidop);
+            else
+                prev = last ? NULL : cUNOPx(kid)->op_first;
+
+            if (!argp->p || last) {
+                /* cut RH op */
+                OP *aop = op_sibling_splice(kid, prev, 1, NULL);
+                /* and unshift to front of o */
+                op_sibling_splice(o, NULL, 0, aop);
+                /* record the right-most op added to o: later we will
+                 * free anything to the right of it */
+                if (!lastkidop)
+                    lastkidop = aop;
+                aop->op_next = nextop;
+                if (last) {
+                    if (argp->p)
+                        /* null the const at start of op_next chain */
+                        op_null(aop);
+                }
+                else if (prev)
+                    nextop = prev->op_next;
+            }
+
+            /* the last two arguments are both attached to the same concat op */
+            if (argp < toparg - 1)
+                kid = prev;
+        }
+    }
+
+    /* Populate the aux struct */
+
+    aux[PERL_MULTICONCAT_IX_NARGS].uv       = nargs;
+    aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv    = utf8 ? NULL : const_str;
+    aux[PERL_MULTICONCAT_IX_PLAIN_LEN].size = utf8 ?    0 : total_len;
+    aux[PERL_MULTICONCAT_IX_UTF8_PV].pv     = const_str;
+    aux[PERL_MULTICONCAT_IX_UTF8_LEN].size  = total_len;
+
+    /* if variant > 0, calculate a variant const string and lengths where
+     * the utf8 version of the string will take 'variant' more bytes than
+     * the plain one. */
+
+    if (variant) {
+        char              *p = const_str;
+        STRLEN          ulen = total_len + variant;
+        UNOP_AUX_item  *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
+        UNOP_AUX_item *ulens = lens + (nargs + 1);
+        char             *up = (char*)PerlMemShared_malloc(ulen);
+        UV                 n;
+
+        aux[PERL_MULTICONCAT_IX_UTF8_PV].pv    = up;
+        aux[PERL_MULTICONCAT_IX_UTF8_LEN].size = ulen;
+
+        for (n = 0; n < (nargs + 1); n++) {
+            SSize_t l, ul, i;
+            l = ul = (lens++)->size;
+            for (i = 0; i < l; i++) {
+                U8 c = *p++;
+                if (UTF8_IS_INVARIANT(c))
+                    *up++ = c;
+                else {
+                    *up++ = UTF8_EIGHT_BIT_HI(c);
+                    *up++ = UTF8_EIGHT_BIT_LO(c);
+                    ul++;
+                }
+            }
+            (ulens++)->size = ul;
+        }
+    }
+
+    if (stringop) {
+        /* if there was a top(ish)-level OP_STRINGIFY, we need to keep
+         * that op's first child - an ex-PUSHMARK - because the op_next of
+         * the previous op may point to it (i.e. it's the entry point for
+         * the o optree)
+         */
+        OP *pmop =
+            (stringop == o)
+                ? op_sibling_splice(o, lastkidop, 1, NULL)
+                : op_sibling_splice(stringop, NULL, 1, NULL);
+        assert(OP_TYPE_IS_OR_WAS_NN(pmop, OP_PUSHMARK));
+        op_sibling_splice(o, NULL, 0, pmop);
+        if (!lastkidop)
+            lastkidop = pmop;
+    }
+
+    /* Optimise 
+     *    target  = A.B.C...
+     *    target .= A.B.C...
+     */
+
+    if (targetop) {
+        assert(!targmyop);
+
+        if (o->op_type == OP_SASSIGN) {
+            /* Move the target subtree from being the last of o's children
+             * to being the last of o's preserved children.
+             * Note the difference between 'target = ...' and 'target .= ...':
+             * for the former, target is executed last; for the latter,
+             * first.
+             */
+            kid = OpSIBLING(lastkidop);
+            op_sibling_splice(o, kid, 1, NULL); /* cut target op */
+            op_sibling_splice(o, lastkidop, 0, targetop); /* and paste */
+            lastkidop->op_next = kid->op_next;
+            lastkidop = targetop;
+        }
+        else {
+            /* Move the target subtree from being the first of o's
+             * original children to being the first of *all* o's children.
+             */
+            if (lastkidop) {
+                op_sibling_splice(o, lastkidop, 1, NULL); /* cut target op */
+                op_sibling_splice(o, NULL, 0, targetop);  /* and paste*/
+            }
+            else {
+                /* if the RHS of .= doesn't contain a concat (e.g.
+                 * $x .= "foo"), it gets missed by the "strip ops from the
+                 * tree and add to o" loop earlier */
+                assert(topop->op_type != OP_CONCAT);
+                if (stringop) {
+                    /* in e.g. $x .= "$y", move the $y expression
+                     * from being a child of OP_STRINGIFY to being the
+                     * second child of the OP_CONCAT
+                     */
+                    assert(cUNOPx(stringop)->op_first == topop);
+                    op_sibling_splice(stringop, NULL, 1, NULL);
+                    op_sibling_splice(o, cUNOPo->op_first, 0, topop);
+                }
+                assert(topop == OpSIBLING(cBINOPo->op_first));
+                if (toparg->p)
+                    op_null(topop);
+                lastkidop = topop;
+            }
+        }
+
+        if (is_targable) {
+            /* optimise
+             *  my $lex  = A.B.C...
+             *     $lex  = A.B.C...
+             *     $lex .= A.B.C...
+             * The original padsv op is kept but nulled in case it's the
+             * entry point for the optree (which it will be for
+             * '$lex .=  ... '
+             */
+            private_flags |= OPpTARGET_MY;
+            private_flags |= (targetop->op_private & OPpLVAL_INTRO);
+            o->op_targ = targetop->op_targ;
+            targetop->op_targ = 0;
+            op_null(targetop);
+        }
+        else
+            flags |= OPf_STACKED;
+    }
+    else if (targmyop) {
+        private_flags |= OPpTARGET_MY;
+        if (o != targmyop) {
+            o->op_targ = targmyop->op_targ;
+            targmyop->op_targ = 0;
+        }
+    }
+
+    /* detach the emaciated husk of the sprintf/concat optree and free it */
+    for (;;) {
+        kid = op_sibling_splice(o, lastkidop, 1, NULL);
+        if (!kid)
+            break;
+        op_free(kid);
+    }
+
+    /* and convert o into a multiconcat */
+
+    o->op_flags        = (flags|OPf_KIDS|stacked_last
+                         |(o->op_flags & (OPf_WANT|OPf_PARENS)));
+    o->op_private      = private_flags;
+    o->op_type         = OP_MULTICONCAT;
+    o->op_ppaddr       = PL_ppaddr[OP_MULTICONCAT];
+    cUNOP_AUXo->op_aux = aux;
+}
+
 
 /* do all the final processing on an optree (e.g. running the peephole
  * optimiser on it), then attach it to cv (if cv is non-null)
@@ -2548,6 +3441,13 @@ S_optimize_op(pTHX_ OP* o)
 	PL_curcop = ((COP*)o);		/* for warnings */
 	break;
 
+
+    case OP_CONCAT:
+    case OP_SASSIGN:
+    case OP_STRINGIFY:
+    case OP_SPRINTF:
+        S_maybe_multiconcat(aTHX_ o);
+        break;
 
     case OP_SUBST:
 	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
@@ -9903,6 +10803,7 @@ Perl_ck_concat(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_CONCAT;
     PERL_UNUSED_CONTEXT;
 
+    /* reuse the padtmp returned by the concat child */
     if (kid->op_type == OP_CONCAT && !(kid->op_private & OPpTARGET_MY) &&
 	    !(kUNOP->op_first->op_flags & OPf_MOD))
         o->op_flags |= OPf_STACKED;
@@ -10857,6 +11758,7 @@ Perl_ck_sassign(pTHX_ OP *o)
     }
     return S_maybe_targlex(aTHX_ o);
 }
+
 
 OP *
 Perl_ck_match(pTHX_ OP *o)

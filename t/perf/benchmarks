@@ -1096,10 +1096,257 @@
     },
 
 
+    # concatenation; quite possibly optimised to OP_MULTICONCAT
+
+    'expr::concat::cl' => {
+        setup   => 'my $lex = "abcd"',
+        code    => '"foo" . $lex',
+    },
+    'expr::concat::lc' => {
+        setup   => 'my $lex = "abcd"',
+        code    => '$lex . "foo"',
+    },
+    'expr::concat::ll' => {
+        setup   => 'my $lex1 = "abcd";  my $lex2 = "wxyz"',
+        code    => '$lex1 . $lex2',
+    },
+
+    'expr::concat::l_append_c' => {
+        setup   => 'my $lex',
+        pre     => '$lex = "abcd"',
+        code    => '$lex .= "foo"',
+    },
+    'expr::concat::l_append_l' => {
+        setup   => 'my $lex1;  my $lex2 = "wxyz"',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 .= $lex2',
+    },
+    'expr::concat::l_append_ll' => {
+        setup   => 'my $lex1; my $lex2 = "pqrs"; my $lex3 = "wxyz"',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 .= $lex2 . $lex3',
+    },
+    'expr::concat::l_append_clclc' => {
+        setup   => 'my $lex1; my $lex2 = "pqrs"; my $lex3 = "wxyz"',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 .= "-foo-$lex2-foo-$lex3-foo"',
+    },
+    'expr::concat::l_append_lll' => {
+        setup   => 'my $lex1; my ($lex2, $lex3, $lex4) = qw(pqrs wxyz 1234)',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 .= $lex2 . $lex3 . $lex4',
+    },
+
+    'expr::concat::m_ll' => {
+        setup   => 'my $lex1 = "abcd";  my $lex2 = "wxyz"',
+        code    => 'my $lex = $lex1 . $lex2',
+    },
+    'expr::concat::m_lll' => {
+        setup   => 'my $lex1 = "abcd"; my $lex2 = "pqrs"; my $lex3 = "wxyz"',
+        code    => 'my $lex = $lex1 . $lex2 . $lex3',
+    },
+    'expr::concat::m_cl' => {
+        setup   => 'my $lex1 = "abcd"',
+        code    => 'my $lex = "const$lex1"',
+    },
+    'expr::concat::m_clclc' => {
+        setup   => 'my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => 'my $lex = "foo=$lex1 bar=$lex2\n"',
+    },
+    'expr::concat::m_clclc_long' => {
+        desc    => 'my $lex = "foooooooooo=$lex1 baaaaaaaaar=$lex2\n" where lex1/2 are 400 chars',
+        setup   => 'my $lex1 = "abcd" x 100; my $lex2 = "wxyz" x 100',
+        code    => 'my $lex = "foooooooooo=$lex1 baaaaaaaaar=$lex2\n"',
+    },
+
+    'expr::concat::l_ll' => {
+        setup   => 'my $lex; my $lex1 = "abcd";  my $lex2 = "wxyz"',
+        code    => '$lex = $lex1 . $lex2',
+    },
+    'expr::concat::l_ll_ldup' => {
+        setup   => 'my $lex1; my $lex2 = "wxyz"',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 = $lex1 . $lex2',
+    },
+    'expr::concat::l_ll_rdup' => {
+        setup   => 'my $lex1; my $lex2 = "wxyz"',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 = $lex2 . $lex1',
+    },
+    'expr::concat::l_ll_lrdup' => {
+        setup   => 'my $lex1',
+        pre     => '$lex1 = "abcd"',
+        code    => '$lex1 = $lex1 . $lex1',
+    },
+    'expr::concat::l_lll' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "pqrs"; my $lex3 = "wxyz"',
+        code    => '$lex = $lex1 . $lex2 . $lex3',
+    },
+    'expr::concat::l_lllll' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "pqrs"; my $lex3 = "wxyz"; my $lex4 = "the quick brown fox"; my $lex5 = "to be, or not to be..."',
+        code    => '$lex = $lex1 . $lex2 . $lex3 . $lex4 . $lex5',
+    },
+    'expr::concat::l_cl' => {
+        setup   => 'my $lex; my $lex1 = "abcd"',
+        code    => '$lex = "const$lex1"',
+    },
+    'expr::concat::l_clclc' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$lex = "foo=$lex1 bar=$lex2\n"',
+    },
+    'expr::concat::l_clclc_long' => {
+        desc    => '$lex = "foooooooooo=$lex1 baaaaaaaaar=$lex2\n" where lex1/2 are 400 chars',
+        setup   => 'my $lex; my $lex1 = "abcd" x 100; my $lex2 = "wxyz" x 100',
+        code    => '$lex = "foooooooooo=$lex1 baaaaaaaaar=$lex2\n"',
+    },
+    'expr::concat::l_clclclclclc' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "pqrs"; my $lex3 = "the quick brown fox"; my $lex4 = "to be, or not to be..."',
+        code    => '$lex = "foo1=$lex1 foo2=$lex2 foo3=$lex3 foo4=$lex4\n"',
+    },
+
+    'expr::concat::g_append_c' => {
+        setup   => 'our $pkg',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg .= "foo"',
+    },
+    'expr::concat::g_append_l' => {
+        setup   => 'our $pkg;  my $lex1 = "wxyz"',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg .= $lex1',
+    },
+    'expr::concat::g_append_ll' => {
+        setup   => 'our $pkg; my $lex1 = "pqrs"; my $lex2 = "wxyz"',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg .= $lex1 . $lex2',
+    },
+    'expr::concat::g_append_clclc' => {
+        setup   => 'our $pkg; my $lex1 = "pqrs"; my $lex2 = "wxyz"',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg .= "-foo-$lex1-foo-$lex2-foo-"',
+    },
+
+    'expr::concat::g_ll' => {
+        setup   => 'our $pkg; my $lex1 = "abcd";  my $lex2 = "wxyz"',
+        code    => '$pkg = $lex1 . $lex2',
+    },
+    'expr::concat::g_gl_ldup' => {
+        setup   => 'our $pkg;  my $lex2 = "wxyz"',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg = $pkg . $lex2',
+    },
+    'expr::concat::g_lg_rdup' => {
+        setup   => 'our $pkg;  my $lex1 = "wxyz"',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg = $lex1 . $pkg',
+    },
+    'expr::concat::g_gg_lrdup' => {
+        setup   => 'our $pkg',
+        pre     => '$pkg = "abcd"',
+        code    => '$pkg = $pkg . $pkg',
+    },
+    'expr::concat::g_lll' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"; my $lex2 = "pqrs"; my $lex3 = "wxyz"',
+        code    => '$pkg = $lex1 . $lex2 . $lex3',
+    },
+    'expr::concat::g_cl' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"',
+        code    => '$pkg = "const$lex1"',
+    },
+    'expr::concat::g_clclc' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$pkg = "foo=$lex1 bar=$lex2\n"',
+    },
+    'expr::concat::g_clclc_long' => {
+        desc    => '$pkg = "foooooooooo=$lex1 baaaaaaaaar=$lex2\n" where lex1/2 are 400 chars',
+        setup   => 'our $pkg; my $lex1 = "abcd" x 100; my $lex2 = "wxyz" x 100',
+        code    => '$pkg = "foooooooooo=$lex1 baaaaaaaaar=$lex2\n"',
+    },
+
+    'expr::concat::utf8_uuu' => {
+        desc    => 'my $s = $a.$b.$c where all args are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "\x{101}fghij"; my $c = "\x{102}klmn"',
+        code    => '$s = $a.$b.$c',
+    },
+    'expr::concat::utf8_suu' => {
+        desc    => 'my $s = "foo=$a bar=$b baz=$c" where $b,$c are utf8',
+        setup   => 'my $s; my $a = "abcde"; my $b = "\x{100}fghij"; my $c = "\x{101}klmn"',
+        code    => '$s = "foo=$a bar=$b baz=$c"',
+    },
+    'expr::concat::utf8_usu' => {
+        desc    => 'my $s = "foo=$a bar=$b baz=$c" where $a,$c are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x{101}klmn"',
+        code    => '$s = "foo=$a bar=$b baz=$c"',
+    },
+    'expr::concat::utf8_usx' => {
+        desc    => 'my $s = "foo=$a bar=$b baz=$c" where $a is utf8, $c has 0x80',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x80\x81klmn"',
+        code    => '$s = "foo=$a bar=$b baz=$c"',
+    },
+
+    'expr::concat::utf8_s_append_uuu' => {
+        desc    => '$s .= $a.$b.$c where all RH args are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "\x{101}fghij"; my $c = "\x{102}klmn"',
+        pre     => '$s = "abcd"',
+        code    => '$s .= $a.$b.$c',
+    },
+    'expr::concat::utf8_s_append_suu' => {
+        desc    => '$s .= "foo=$a bar=$b baz=$c" where $b,$c are utf8',
+        setup   => 'my $s; my $a = "abcde"; my $b = "\x{100}fghij"; my $c = "\x{101}klmn"',
+        pre     => '$s = "abcd"',
+        code    => '$s .= "foo=$a bar=$b baz=$c"',
+    },
+    'expr::concat::utf8_s_append_usu' => {
+        desc    => '$s .= "foo=$a bar=$b baz=$c" where $a,$c are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x{101}klmn"',
+        pre     => '$s = "abcd"',
+        code    => '$s .= "foo=$a bar=$b baz=$c"',
+    },
+    'expr::concat::utf8_s_append_usx' => {
+        desc    => '$s .= "foo=$a bar=$b baz=$c" where $a is utf8, $c has 0x80',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x80\x81klmn"',
+        pre     => '$s = "abcd"',
+        code    => '$s .= "foo=$a bar=$b baz=$c"',
+    },
+
+    'expr::concat::utf8_u_append_uuu' => {
+        desc    => '$s .= $a.$b.$c where all args are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "\x{101}fghij"; my $c = "\x{102}klmn"',
+        pre     => '$s = "\x{100}wxyz"',
+        code    => '$s .= $a.$b.$c',
+    },
+    'expr::concat::utf8_u_append_suu' => {
+        desc    => '$s .= "foo=$a bar=$b baz=$c" where $s,$b,$c are utf8',
+        setup   => 'my $s; my $a = "abcde"; my $b = "\x{100}fghij"; my $c = "\x{101}klmn"',
+        pre     => '$s = "\x{100}wxyz"',
+        code    => '$s .= "foo=$a bar=$b baz=$c"',
+    },
+    'expr::concat::utf8_u_append_usu' => {
+        desc    => '$s .= "foo=$a bar=$b baz=$c" where $s,$a,$c are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x{101}klmn"',
+        pre     => '$s = "\x{100}wxyz"',
+        code    => '$s .= "foo=$a bar=$b baz=$c"',
+    },
+    'expr::concat::utf8_u_append_usx' => {
+        desc    => '$s .= "foo=$a bar=$b baz=$c" where $s,$a are utf8, $c has 0x80',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x80\x81klmn"',
+        pre     => '$s = "\x{100}wxyz"',
+        code    => '$s .= "foo=$a bar=$b baz=$c"',
+    },
+
+    'expr::concat::nested_mutator' => {
+        setup   => 'my $lex1; my ($lex2, $lex3, $lex4) = qw(abcd pqrs wxyz)',
+        pre     => '$lex1 = "QPR"',
+        code    => '(($lex1 .= $lex2) .= $lex3) .= $lex4',
+    },
+
 
     # scalar assign, OP_SASSIGN
    
 
+    'expr::sassign::my_conststr' => {
+        setup   => '',
+        code    => 'my $x = "abc"',
+    },
     'expr::sassign::scalar_lex_int' => {
         desc    => 'lexical $x = 1',
         setup   => 'my $x',
@@ -1269,6 +1516,18 @@
         setup   => 'my $x = "abc". chr(0x100); chop $x',
         code    => 'index $x, "b"',
     },
+
+
+    # JOIN
+
+
+    'func::join::empty_l_ll' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$lex = join "", $lex1, $lex2',
+    },
+
+
+    # KEYS
 
 
     'func::keys::lex::void_cxt_empty' => {
@@ -1525,6 +1784,8 @@
         code    => '@a = (split(/:/, $s, 2), 1);',
     },
 
+    # SPRINTF
+
 
     'func::sprintf::d' => {
         desc    => '%d',
@@ -1593,6 +1854,96 @@
         setup   => 'my $s;my $a = "ab\x{100}cd"; my $b = "efg"; my $c = "h\x{101}ij"',
         code    => '$s = sprintf "foo=%s bar=%s baz=%s", $a, $b, $c',
     },
+
+    # sprint that's likely to be optimised to an OP_MULTICONCAT
+
+    'func::sprintf::l' => {
+        setup   => 'my $lex1 = "abcd"',
+        code    => 'sprintf "%s", $lex1',
+    },
+    'func::sprintf::g_l' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"',
+        code    => '$pkg = sprintf "%s", $lex1',
+    },
+    'func::sprintf::g_append_l' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"',
+        pre     => '$pkg = "pqrs"',
+        code    => '$pkg .= sprintf "%s", $lex1',
+    },
+    'func::sprintf::g_ll' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$pkg = sprintf "%s%s", $lex1, $lex2',
+    },
+    'func::sprintf::g_append_ll' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        pre     => '$pkg = "pqrs"',
+        code    => '$pkg .= sprintf "%s%s", $lex1, $lex2',
+    },
+    'func::sprintf::g_cl' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"',
+        code    => '$pkg = sprintf "foo=%s", $lex1',
+    },
+    'func::sprintf::g_clclc' => {
+        setup   => 'our $pkg; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$pkg = sprintf "foo=%s bar=%s\n", $lex1, $lex2',
+    },
+
+    'func::sprintf::l_l' => {
+        setup   => 'my $lex; my $lex1 = "abcd"',
+        code    => '$lex = sprintf "%s", $lex1',
+    },
+    'func::sprintf::l_append_l' => {
+        setup   => 'my $lex; my $lex1 = "abcd"',
+        pre     => '$lex = "pqrs"',
+        code    => '$lex .= sprintf "%s", $lex1',
+    },
+    'func::sprintf::ll' => {
+        setup   => 'my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => 'sprintf "%s%s", $lex1, $lex2',
+    },
+    'func::sprintf::l_ll' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$lex = sprintf "%s%s", $lex1, $lex2',
+    },
+    'func::sprintf::l_append_ll' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        pre     => '$lex = "pqrs"',
+        code    => '$lex .= sprintf "%s%s", $lex1, $lex2',
+    },
+    'func::sprintf::l_cl' => {
+        setup   => 'my $lex; my $lex1 = "abcd"',
+        code    => '$lex = sprintf "foo=%s", $lex1',
+    },
+    'func::sprintf::l_clclc' => {
+        setup   => 'my $lex; my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => '$lex = sprintf "foo=%s bar=%s\n", $lex1, $lex2',
+    },
+
+    'func::sprintf::m_l' => {
+        setup   => 'my $lex1 = "abcd"',
+        code    => 'my $lex = sprintf "%s", $lex1',
+    },
+    'func::sprintf::m_ll' => {
+        setup   => 'my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => 'my $lex = sprintf "%s%s", $lex1, $lex2',
+    },
+    'func::sprintf::m_cl' => {
+        setup   => 'my $lex1 = "abcd"',
+        code    => 'my $lex = sprintf "foo=%s", $lex1',
+    },
+    'func::sprintf::m_clclc' => {
+        setup   => 'my $lex1 = "abcd"; my $lex2 = "wxyz"',
+        code    => 'my $lex = sprintf "foo=%s bar=%s\n", $lex1, $lex2',
+    },
+
+    'func::sprintf::utf8__l_lll' => {
+        desc    => '$s = sprintf("foo=%s bar=%s baz=%s", $a, $b, $c) where $a,$c are utf8',
+        setup   => 'my $s; my $a = "ab\x{100}cde"; my $b = "fghij"; my $c = "\x{101}klmn"',
+        code    => '$s = sprintf "foo=%s bar=%s baz=%s", $a, $b, $c',
+    },
+
+
+    # S///
 
     'func::subst::bool' => {
         desc    => 's/// in boolean context',

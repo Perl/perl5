@@ -2067,6 +2067,9 @@ PERL_CALLCONV void	Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const
 PERL_CALLCONV SV*	Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta, const struct mro_alg *const which, SV *const data);
 #define PERL_ARGS_ASSERT_MRO_SET_PRIVATE_DATA	\
 	assert(smeta); assert(which); assert(data)
+PERL_CALLCONV SV*	Perl_multiconcat_stringify(pTHX_ const OP* o);
+#define PERL_ARGS_ASSERT_MULTICONCAT_STRINGIFY	\
+	assert(o)
 PERL_CALLCONV SV*	Perl_multideref_stringify(pTHX_ const OP* o, CV *cv);
 #define PERL_ARGS_ASSERT_MULTIDEREF_STRINGIFY	\
 	assert(o)
