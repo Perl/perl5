@@ -11929,7 +11929,8 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop,
 OP *
 Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
-    int opnum = SvTYPE(protosv) == SVt_PVCV ? 0 : (int)SvUV(protosv);
+    IV cvflags = SvIVX(protosv);
+    int opnum = cvflags & 0xffff;
     OP *aop = cUNOPx(entersubop)->op_first;
 
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
@@ -11940,11 +11941,14 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    aop = cUNOPx(aop)->op_first;
 	aop = OpSIBLING(aop);
 	for (cvop = aop; OpSIBLING(cvop); cvop = OpSIBLING(cvop)) ;
-	if (aop != cvop)
-	    (void)too_many_arguments_pv(entersubop, GvNAME(namegv), 0);
+	if (aop != cvop) {
+	    SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
+	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
+		SVfARG(namesv)), SvUTF8(namesv));
+	}
 	
 	op_free(entersubop);
-	switch(GvNAME(namegv)[2]) {
+	switch(cvflags >> 16) {
 	case 'F': return newSVOP(OP_CONST, 0,
 					newSVpv(CopFILE(PL_curcop),0));
 	case 'L': return newSVOP(
@@ -11997,8 +12001,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
             op_sibling_splice(parent, first, -1, NULL);
 	op_free(entersubop);
 
-	if (opnum == OP_ENTEREVAL
-	 && GvNAMELEN(namegv)==9 && strnEQ(GvNAME(namegv), "evalbytes", 9))
+	if (cvflags == (OP_ENTEREVAL | (1<<16)))
 	    flags |= OPpEVAL_BYTES <<8;
 	
 	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
@@ -12008,7 +12011,9 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    return aop ? newUNOP(opnum,flags,aop) : newOP(opnum,flags);
 	case OA_BASEOP:
 	    if (aop) {
-		    (void)too_many_arguments_pv(aop, GvNAME(namegv), 0);
+		SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
+		yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
+		    SVfARG(namesv)), SvUTF8(namesv));
 		op_free(aop);
 	    }
 	    return opnum == OP_RUNCV

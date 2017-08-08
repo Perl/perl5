@@ -444,7 +444,7 @@ BOOT:
 {
     CV * const cv = get_cvn_flags("Devel::Peek::Dump", 17, 0);
     assert(cv);
-    cv_set_call_checker(cv, S_ck_dump, (SV *)cv);
+    cv_set_call_checker_flags(cv, S_ck_dump, (SV *)cv, 0);
     Perl_custom_op_register(aTHX_ S_pp_dump, &my_xop);
 }
 

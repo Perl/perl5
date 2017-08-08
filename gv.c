@@ -608,11 +608,12 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	PL_compcv = oldcompcv;
     }
     if (cv) {
-        SV *opnumsv = opnum ? newSVuv((UV)opnum) : (SV *)NULL;
-        cv_set_call_checker(
-          cv, Perl_ck_entersub_args_core, opnumsv ? opnumsv : (SV *)cv
-        );
-        SvREFCNT_dec(opnumsv);
+	SV *opnumsv = newSViv(
+	    (opnum == OP_ENTEREVAL && len == 9 && memEQ(name, "evalbytes", 9)) ?
+		(OP_ENTEREVAL | (1<<16))
+	    : opnum ? opnum : (((I32)name[2]) << 16));
+        cv_set_call_checker_flags(cv, Perl_ck_entersub_args_core, opnumsv, 0);
+	SvREFCNT_dec_NN(opnumsv);
     }
 
     return gv;
