@@ -40,6 +40,7 @@ Fixes a problem with the previous patch:
 <commit votes="steveh tonyc" id="655f5b268af8bf50c44ba4ae4803a33c9b792b8b" ticket="130861" desc="S_require_tie_mod(): use a new stack" />
 <commit votes="steveh tonyc" id="42752acc4959c5b770bbc29532bf2677f4533c4e" ticket="128207" desc="Make LOCK_LC_NUMERIC_STANDARD recursive" />
 <commit votes="steveh tonyc" id="9604fbf0722bd97ca6031a263c50ad52b6633db7" ticket="131526" desc="(perl #131526) don't go beyond the end of the NUL in my_atof2" />
+Take care when cherry-picking this: The test count isn't adjusted correctly by Git because maint-5.26 doesn't have 90c172854f (which reduced the count by one):
 <commit votes="steveh tonyc" id="bb152a4b442f7718fd37d32cc558be675e8ae1ae" ticket="131575" desc="don't call Perl_fbm_instr() with negative length" />
 <commit votes="steveh tonyc" id="e13dc8886fcabf88a521e8e73c358157b1fa4c8a" ticket="131627" desc="[perl #131627] Fix multideref for $x{qw/a/->$*}" />
 <commit votes="steveh tonyc" id="e26c6904d9f9f5ea818e590331b14038279332d1" ticket="131645" desc="[perl #131645] Fix assert fail in pp_sselect" />
