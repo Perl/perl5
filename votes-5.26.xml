@@ -51,11 +51,6 @@ Fixes a problem with the previous patch:
 
 <div><h3>Regression Fixes</h3>
 
-This was found as a result of an error check introduced in 5.27 causing a
-compilation error on freebsd.  The consequences of not fixing this is the
-program not working correctly.
-<commit votes="khw steveh tonyc" id="4e1ed312da261450ba45a56e7b6756a873678f52" ticket="" desc="Missing parens around macro params" />
-
 <commit votes="steveh tonyc" id="0a31ee11c8f69d509334d0813d833cddacf9dacb" ticket="131371" desc="add X&lt;s&gt; to s/// in perlop (RT #131371)" />
 <commit votes="steveh tonyc" id="2c2da8e7f0f6325fab643997a536072633fa0cf8" ticket="131190" desc="Fix #131190 - UTF8 code improperly casting negative integer to U8 in comparison" />
 
