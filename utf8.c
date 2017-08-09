@@ -1875,8 +1875,8 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         }
                         else {
                             U8 tmpbuf[UTF8_MAXBYTES+1];
-                            const U8 * const e = uvchr_to_utf8_flags(tmpbuf,
-                                                                     uv, 0);
+                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
+                                                                        uv, 0);
                             /* Don't use U+ for non-Unicode code points, which
                              * includes those in the Latin1 range */
                             const char * preface = (    uv > PERL_UNICODE_MAX
@@ -1895,7 +1895,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                 preface,
                                 ((uv < 256) ? 2 : 4), /* Field width of 2 for
                                                          small code points */
-                                uv);
+                                UNI_TO_NATIVE(uv));
                         }
                     }
                 }

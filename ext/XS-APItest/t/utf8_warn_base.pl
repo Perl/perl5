@@ -1087,7 +1087,10 @@ foreach my $test (@tests) {
                         $correct_bytes_for_overlong
                                             = display_bytes_no_quotes($bytes);
                     }
-                    my $prefix = ($allowed_uv > 0x10FFFF) ? "0x" : "U+";
+                    my $prefix = (   $allowed_uv > 0x10FFFF
+                                  || ! isASCII && $allowed_uv < 256)
+                                 ? "0x"
+                                 : "U+";
                     push @expected_malformation_warnings,
                             qr/\QMalformed UTF-8 character: $wrong_bytes\E
                                \Q (overlong; instead use\E
