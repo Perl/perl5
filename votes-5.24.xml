@@ -33,40 +33,13 @@ The fix for #129196 has been cherry-picked, so why not the test as well? -steveh
 <commit votes="sprout steveh" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
 
 There doesn't seem to be a blead commit for this ticket, so nothing to backport. -arc
+Correct: As noted on the ticket, it was listed here in the hope that it could be fixed in time, but it hasn't happened yet. -steveh
 <commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-NOTE from jhi: the following cluster of hexfp-related fixes
-(in ascending time order) only makes sense as a unit, they all touch
-the same code. I tried cherry-picking these onto maint-5.24, and only
-the first one required manual backporting (available on request).
-NOTE from arc: if it's reasonably possible to avoid the test-only changes
-from this cluster, I'd prefer that. But I accept that may not be the case,
-so I've voted for the cluster in total.
-<commit votes="jhi arc" id="b6d9b423fab1963346eb79e83b356114396b1f2e" ticket="128843" desc="printf %a mishandles subnormals"/>
-<commit votes="jhi arc" id="94d00769fba240ffb86f18b3d66341fb1d24ae6c" ticket="128843" desc="Add rt.perl.org reference for b6d9b423"/>
-<commit votes="jhi arc" id="520f3e58c346a7bc3ef0509dfe0db206dae454ee" ticket="128843" desc="Comment fix for b6d9b423"/>
-<commit votes="jhi arc" id="82229f9f47d9a169b59715582fb5a09b5a4ac0ff" ticket="128888" desc="printf %a mishandles zero precision"/>
-<commit votes="jhi arc" id="a9ce335538454d590920dab8d62db84948f1fb83" ticket="128889" desc="printf %a mishandles negative pseudo-precision"/>
-<commit votes="jhi arc" id="75326c485e9d40be5c22d508f581cdea68b244ce" ticket="128890" desc="printf %a rounds incorrectly"/>
-<commit votes="jhi arc" id="be93048a43d87d317acca5b37619111b6a5f8c44" ticket="128893" desc="printf %a botches 0 flag for negative values"/>
-<commit votes="jhi arc" id="749d85343f3cdb65891a5fe3b9f55ef3a5b03ca8" ticket="" desc="The new tests are valid only for IEEE 754 64-bit doubles."/>
-<commit votes="jhi arc" id="5208a0305e9e82c534fa034515d54a0409dfcc77" ticket="" desc="Fix on top of 75326c48."/>
-<commit votes="jhi arc" id="e3f7a67e8485950fdf5fd9c7131d0a78b6c8cf32" ticket="" desc="Test new hexfp fixes also on (x86 80-bit) long doubles."/>
-<commit votes="jhi arc" id="44348173fce5aaf28fdf59ba6ace73ea435d9380" ticket="" desc="Bogus skip count."/>
-<commit votes="jhi arc" id="ee58923a8531731f8acb98ab130abf41f75ebdc7" ticket="128909" desc="printf %a mishandles exponent-crossing rounding with long double"/>
-<commit votes="jhi arc" id="9e67a8c1b21482ed5fada053dd462eb23320dc86" ticket="" desc="Avoid test noise on non-longdouble."/>
-<commit votes="jhi arc" id="a149d1180209525972d84fd1a62f488da83e568a" ticket="128919" desc="limited exponent range in hex fp literal with long double"/>
-<commit votes="jhi arc" id="7301378635b35757b228e07c14276afaf06a4728" ticket="" desc="Follow-up on a149d11"/>
-<commit votes="jhi arc" id="f5a466613ec0b74a224adb5b7da6da0a74713596" ticket="" desc="Use library testing for subnormality"/>
-<commit votes="jhi arc" id="f40ac91c3b9891b83f3d253861009c290584b646" ticket="" desc="Handle subnormals of x86 80-bit"/>
-<commit votes="jhi arc" id="b28053d1f063cb783e73b0596d1f58a21681fda6" ticket="" desc="Define Perl_fp_class() for quadmath"/>
-<commit votes="jhi arc" id="de1a8b537348227e83c8efd15d3cb36d9ac646f5" ticket="" desc="Test subnormals with quadmath"/>
-<commit votes="jhi arc" id="dd1645173d8209e05c419b0f3edc9b1c0f9643a8" ticket="" desc="Do not deploy the fractional matching without fractions"/>
-<commit votes="jhi arc" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -79,9 +52,9 @@ so I've voted for the cluster in total.
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="jhi" id="bf49eae4014ca7ff7b44362d99251f5b9f30bec8" desc="Perl_my_vsnprintf: avoid compiler warning"/>
+<commit votes="jhi steveh" id="bf49eae4014ca7ff7b44362d99251f5b9f30bec8" desc="Perl_my_vsnprintf: avoid compiler warning"/>
 <commit votes="steveh xsawyerx" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
-<commit votes="tonyc" id="fd998cbffc88a8e50fa34259c36a8db338168383" ticket="" desc="make _GNU-ish function declarations visible on cygwin" />
+<commit votes="tonyc steveh" id="fd998cbffc88a8e50fa34259c36a8db338168383" ticket="" desc="make _GNU-ish function declarations visible on cygwin" />
 
 </div>
 
