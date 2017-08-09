@@ -94,6 +94,7 @@ so I've voted for the cluster in total.
 
 <commit votes="jhi" id="bf49eae4014ca7ff7b44362d99251f5b9f30bec8" desc="Perl_my_vsnprintf: avoid compiler warning"/>
 <commit votes="steveh xsawyerx" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
+<commit votes="tonyc" id="fd998cbffc88a8e50fa34259c36a8db338168383" ticket="" desc="make _GNU-ish function declarations visible on cygwin" />
 
 </div>
 
