@@ -9024,6 +9024,8 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
     else if (ck_uni && bracket == -1)
 	check_uni();
     if (bracket != -1) {
+        bool skip;
+        char *s2;
         /* If we were processing {...} notation then...  */
 	if (isIDFIRST_lazy_if(d,is_utf8)) {
             /* if it starts as a valid identifier, assume that it is one.
@@ -9072,13 +9074,19 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
-        if (s < PL_bufend && isSPACE(*s)) {
-            s = skipspace(s);
-        }
+        if ((skip = s < PL_bufend && isSPACE(*s)))
+            /* Avoid incrementing line numbers or resetting PL_linestart,
+               in case we have to back up.  */
+            s2 = skipspace_flags(s, LEX_NO_INCLINE);
+        else
+            s2 = s;
 	    
         /* Expect to find a closing } after consuming any trailing whitespace.
          */
-	if (*s == '}') {
+        if (*s2 == '}') {
+            /* Now increment line numbers if applicable.  */
+            if (skip)
+                s = skipspace(s);
 	    s++;
 	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
 		PL_lex_state = LEX_INTERPEND;
