@@ -10985,8 +10985,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * the hexadecimal values (for %a/%A).  The nv is the NV where the value
  * are being extracted from (either directly from the long double in-memory
  * presentation, or from the uquad computed via frexp+ldexp).  frexp also
- * is used to update the exponent.  vhex is the pointer to the beginning
- * of the output buffer (of VHEX_SIZE).
+ * is used to update the exponent.  The subnormal is set to true
+ * for IEEE 754 subnormals/denormals.  The vhex is the pointer to
+ * the beginning of the output buffer (of VHEX_SIZE).
  *
  * The tricky part is that S_hextract() needs to be called twice:
  * the first time with vend as NULL, and the second time with vend as
@@ -10996,14 +10997,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * (the extraction of the hexadecimal values) takes place.
  * Sanity failures cause fatal failures during both rounds. */
 STATIC U8*
-S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
+S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
+           U8* vhex, U8* vend)
 {
     U8* v = vhex;
     int ix;
     int ixmin = 0, ixmax = 0;
 
-    /* XXX Inf/NaN/denormal handling in the HEXTRACT_IMPLICIT_BIT,
-     * and elsewhere. */
+    /* XXX Inf/NaN are not handled here, since it is
+     * assumed they are to be output as "Inf" and "NaN". */
 
     /* These macros are just to reduce typos, they have multiple
      * repetitions below, but usually only one (or sometimes two)
@@ -11038,11 +11040,17 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     for (ix = a; ix <= b; ix++) { HEXTRACT_BYTE(ix); }
 #define HEXTRACT_IMPLICIT_BIT(nv) \
     STMT_START { \
-        if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
+        if (!(*subnormal = (HEXTRACT_EXPONENT_BITS() == 0))) { \
+            if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
+        } \
    } STMT_END
 
-/* Most formats do.  Those which don't should undef this. */
+/* Most formats do.  Those which don't should undef this.
+ *
+ * But also note that IEEE 754 subnormals do not have it, or,
+ * expressed alternatively, their implicit bit is zero. */
 #define HEXTRACT_HAS_IMPLICIT_BIT
+
 /* Many formats do.  Those which don't should undef this. */
 #define HEXTRACT_HAS_TOP_NYBBLE
 
@@ -11056,6 +11064,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     const U8* vmaxend = vhex + HEXTRACTSIZE;
     PERL_UNUSED_VAR(ix); /* might happen */
     (void)Perl_frexp(PERL_ABS(nv), exponent);
+    *subnormal = FALSE;
     if (vend && (vend <= vhex || vend > vmaxend)) {
         /* diag_listed_as: Hexadecimal float: internal error (%s) */
         Perl_croak(aTHX_ "Hexadecimal float: internal error (entry)");
@@ -11065,10 +11074,11 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
 #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE)
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
         /* Used in e.g. VMS and HP-UX IA-64, e.g. -0.1L:
-         * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f */
+         * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb bf */
         /* The bytes 13..0 are the mantissa/fraction,
          * the 15,14 are the sign+exponent. */
         const U8* nvp = (const U8*)(&nv);
+#   define HEXTRACT_EXPONENT_BITS() (nvp[14] | (nvp[15] & 0x7F) << 8)
         HEXTRACT_IMPLICIT_BIT(nv);
 #   undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_LE(13, 0);
@@ -11078,14 +11088,15 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         /* The bytes 2..15 are the mantissa/fraction,
          * the 0,1 are the sign+exponent. */
         const U8* nvp = (const U8*)(&nv);
+#   define HEXTRACT_EXPONENT_BITS() ((nvp[0] & 0x7F) << 8 | nvp[1])
         HEXTRACT_IMPLICIT_BIT(nv);
 #   undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_BE(2, 15);
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
         /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
-         * significand, 15 bits of exponent, 1 bit of sign.  NVSIZE can
-         * be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux and OS X),
-         * meaning that 2 or 6 bytes are empty padding. */
+         * significand, 15 bits of exponent, 1 bit of sign.  No implicit bit.
+         * NVSIZE can be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux
+         * and OS X), meaning that 2 or 6 bytes are empty padding. */
         /* The bytes 7..0 are the mantissa/fraction */
         const U8* nvp = (const U8*)(&nv);
 #    undef HEXTRACT_HAS_IMPLICIT_BIT
@@ -11134,18 +11145,21 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
 #    ifdef HEXTRACT_LITTLE_ENDIAN
         /* 0 1 2 3 4 5 6 7 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
         const U8* nvp = (const U8*)(&nv);
+#   define HEXTRACT_EXPONENT_BITS() (nvp[6] | (nvp[7] & 0x7F) << 4)
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(6);
         HEXTRACT_BYTES_LE(5, 0);
 #    elif defined(HEXTRACT_BIG_ENDIAN)
         /* 7 6 5 4 3 2 1 0 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
         const U8* nvp = (const U8*)(&nv);
+#   define HEXTRACT_EXPONENT_BITS() (nvp[1] | (nvp[0] & 0x7F) << 4)
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(1);
         HEXTRACT_BYTES_BE(2, 7);
 #    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
         /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6:7 = nybble:exponent:sign) */
         const U8* nvp = (const U8*)(&nv);
+#   define HEXTRACT_EXPONENT_BITS() (nvp[2] | (nvp[3] & 0x7F) << 4)
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(2); /* 6 */
         HEXTRACT_BYTE(1); /* 5 */
@@ -11157,6 +11171,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
 #    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
         /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 7:6 = sign:exponent:nybble) */
         const U8* nvp = (const U8*)(&nv);
+#   define HEXTRACT_EXPONENT_BITS() (nvp[5] | (nvp[4] & 0x7F) << 4)
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(5); /* 6 */
         HEXTRACT_BYTE(6); /* 5 */
@@ -12404,6 +12419,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 U8* vend; /* pointer to one beyond last digit of vhex */
                 U8* vfnz = NULL; /* first non-zero */
                 U8* vlnz = NULL; /* last non-zero */
+                U8* v0 = NULL; /* first output */
                 const bool lower = (c == 'a');
                 /* At output the values of vhex (up to vend) will
                  * be mapped through the xdig to get the actual
@@ -12412,6 +12428,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 int zerotail = 0; /* how many extra zeros to append */
                 int exponent = 0; /* exponent of the floating point input */
                 bool hexradix = FALSE; /* should we output the radix */
+                bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
 
                 /* XXX: denormals, NaN, Inf.
                  *
@@ -12421,14 +12438,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * should be output as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
-                vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
-                S_hextract(aTHX_ nv, &exponent, vhex, vend);
+                vend = S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, NULL);
+                S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, vend);
 
 #if NVSIZE > DOUBLESIZE
 #  ifdef HEXTRACT_HAS_IMPLICIT_BIT
                 /* In this case there is an implicit bit,
-                 * and therefore the exponent is shifted shift by one. */
-                exponent--;
+                 * and therefore the exponent is shifted by one,
+                 * unless this is a subnormal/denormal. */
+                if (!subnormal) {
+                    exponent--;
+                }
 #  else
                 /* In this case there is no implicit bit,
                  * and the exponent is shifted by the first xdigit. */
@@ -12473,17 +12493,44 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         exponent--;
 #endif
 
+                    if (subnormal) {
+                      if (vfnz[0] > 1) {
+                        /* We need to right shift the hex nybbles so
+                         * that the output of the subnormal starts
+                         * from the first true bit. */
+                        int i, n;
+                        U8 *vshr;
+                        /* Find the ceil(log2(v[0])) of
+                         * the top non-zero nybble. */
+                        for (i = vfnz[0], n = 0; i > 1; i >>= 1, n++) { }
+                        assert(n < 4);
+                        vlnz[1] = 0;
+                        for (vshr = vlnz; vshr >= vfnz; vshr--) {
+                          vshr[1] |= (vshr[0] & (0xF >> (4 - n))) << (4 - n);
+                          vshr[0] >>= n;
+                        }
+                        if (vlnz[1]) {
+                          vlnz++;
+                        }
+                      }
+                      v0 = vfnz;
+                    } else {
+                      v0 = vhex;
+                    }
+
                     if (precis > 0) {
-                        if ((SSize_t)(precis + 1) < vend - vhex) {
+                        U8* ve = (subnormal ? vlnz + 1 : vend);
+                        SSize_t vn = ve - (subnormal ? vfnz : vhex);
+                        if ((SSize_t)(precis + 1) < vn) {
                             bool round;
 
-                            v = vhex + precis + 1;
+                            v = v0 + precis + 1;
                             /* Round away from zero: if the tail
                              * beyond the precis xdigits is equal to
                              * or greater than 0x8000... */
                             round = *v > 0x8;
                             if (!round && *v == 0x8) {
-                                for (v++; v < vend; v++) {
+                                for (v++; v < ve; v++) {
                                     if (*v) {
                                         round = TRUE;
                                         break;
@@ -12491,13 +12538,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                 }
                             }
                             if (round) {
-                                for (v = vhex + precis; v >= vhex; v--) {
+                                for (v = v0 + precis; v >= v0; v--) {
                                     if (*v < 0xF) {
                                         (*v)++;
                                         break;
                                     }
                                     *v = 0;
-                                    if (v == vhex) {
+                                    if (v == v0) {
                                         /* If the carry goes all the way to
                                          * the front, we need to output
                                          * a single '1'. This goes against
@@ -12509,14 +12556,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                 }
                             }
                             /* The new effective "last non zero". */
-                            vlnz = vhex + precis;
+                            vlnz = v0 + precis;
                         }
                         else {
-                            zerotail = precis - (vlnz - vhex);
+                            zerotail =
+                              subnormal ? precis - vn + 1 :
+                              precis - (vlnz - vhex);
                         }
                     }
 
-                    v = vhex;
+                    v = v0;
                     *p++ = xdig[*v++];
 
                     /* If there are non-zero xdigits, the radix

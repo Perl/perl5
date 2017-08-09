@@ -6758,7 +6758,9 @@ extern void moncontrol(int);
 #endif
 
 /* All the basic IEEE formats have the implicit bit,
- * except for the 80-bit extended formats, which will undef this. */
+ * except for the x86 80-bit extended formats, which will undef this.
+ * Also note that the IEEE 754 subnormals (formerly known as denormals)
+ * do not have the implicit bit of one. */
 #define NV_IMPLICIT_BIT
 
 #ifdef LONG_DOUBLEKIND
