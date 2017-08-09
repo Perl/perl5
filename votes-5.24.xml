@@ -29,15 +29,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="sprout arc" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
-
-This one needs the version in ext/POSIX/lib/POSIX.pm bumped to 1.65_01:
-<commit votes="sprout arc" id="d80a6052a64d2df61ee61888853ef5f3872c0e34" ticket="128763" desc="[perl #128763] Fix POSIX.xs longdbl assertion"/>
-
-<commit votes="sprout arc" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
-
-<commit votes="sprout arc" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
-<commit votes="sprout" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
+The fix for #129196 has been cherry-picked, so why not the test as well? -steveh
+<commit votes="sprout steveh" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
 
 There doesn't seem to be a blead commit for this ticket, so nothing to backport. -arc
 <commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
@@ -45,8 +38,6 @@ There doesn't seem to be a blead commit for this ticket, so nothing to backport.
 </div>
 
 <div><h3>Regression Fixes</h3>
-
-<commit votes="khw arc" id="753b2c6a60a81dacbe59e2041e30e8302484dc2d" desc="Fix -Dr output regression"/>
 
 NOTE from jhi: the following cluster of hexfp-related fixes
 (in ascending time order) only makes sense as a unit, they all touch
@@ -76,8 +67,6 @@ so I've voted for the cluster in total.
 <commit votes="jhi arc" id="de1a8b537348227e83c8efd15d3cb36d9ac646f5" ticket="" desc="Test subnormals with quadmath"/>
 <commit votes="jhi arc" id="dd1645173d8209e05c419b0f3edc9b1c0f9643a8" ticket="" desc="Do not deploy the fractional matching without fractions"/>
 <commit votes="jhi arc" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
-
-<commit votes="khw arc" id="1d4ea287e9a924ad1eaef98145b6d6c3b6219e80" ticket="128929" desc="Add casts to silence new in 5.23 Win32 warnings"/>
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -85,8 +74,6 @@ so I've voted for the cluster in total.
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-<commit votes="craigb jhi" id="f6a154ae766a3404d83b81448ca6a356d30198e1" desc="Treat VSI C the same as DEC/Compaq/HP C."/>
 
 </div>
 
