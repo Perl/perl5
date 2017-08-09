@@ -78,11 +78,12 @@ Fixes a problem with the previous patch:
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="steveh xsawyerx" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
+<commit votes="steveh xsawyerx tonyc" id="8ed77d12c9275cd4e145ab50aaecf69730166a9b" desc="[perl #131726] [Win32] perl.h remaps 'strtoll' and 'strtoull' incorrectly"/>
 
-<commit votes="steveh" id="66c5e3f2ab554a89dfc00689602414ac21ea66f6" ticket="131337" desc="Patch suggested by Craig Berry for RT 131337." />
-<commit votes="steveh" id="21a33adc37856aaedd4bf756d5dca47bdc4f7b50" ticket="131337" desc="When building with g++ on FreeBSD, explicitly set 'usedl' and 'dlsrc'." />
-<commit votes="steveh" id="2c8efe4079b75c61cf34425054539a9c24913e9f" ticket="131337" desc="Simpler hints fix for [perl #131337]." />
+need all three of the following if we use any
+<commit votes="steveh tonyc" id="66c5e3f2ab554a89dfc00689602414ac21ea66f6" ticket="131337" desc="Patch suggested by Craig Berry for RT 131337." />
+<commit votes="steveh tonyc" id="21a33adc37856aaedd4bf756d5dca47bdc4f7b50" ticket="131337" desc="When building with g++ on FreeBSD, explicitly set 'usedl' and 'dlsrc'." />
+<commit votes="steveh tonyc" id="2c8efe4079b75c61cf34425054539a9c24913e9f" ticket="131337" desc="Simpler hints fix for [perl #131337]." />
 <commit votes="steveh tonyc" id="fd998cbffc88a8e50fa34259c36a8db338168383" ticket="" desc="make _GNU-ish function declarations visible on cygwin" />
 
 </div>
@@ -93,9 +94,9 @@ Fixes a problem with the previous patch:
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="khw steveh" id="725a67e540ba5cb03c83ba1ed0541f2cc088b3b1" ticket="" desc="Update perluniintro to reflect 5.26 changes" />
-<commit votes="khw steveh" id="754e15cfc175f0e2e1299d27fd387a0d868c2764" ticket="" desc="Update charnames pod to reflect 5.26 changes" />
-<commit votes="steveh" id="b7f366106e07d8d8d2efe8d65343329ebb32062b" ticket="131603" desc="Pod correction." />
+<commit votes="khw steveh tonyc" id="725a67e540ba5cb03c83ba1ed0541f2cc088b3b1" ticket="" desc="Update perluniintro to reflect 5.26 changes" />
+<commit votes="khw steveh tonyc" id="754e15cfc175f0e2e1299d27fd387a0d868c2764" ticket="" desc="Update charnames pod to reflect 5.26 changes" />
+<commit votes="steveh tonyc" id="b7f366106e07d8d8d2efe8d65343329ebb32062b" ticket="131603" desc="Pod correction." />
 
 </div>
 
