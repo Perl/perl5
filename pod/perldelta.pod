@@ -204,7 +204,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+C<< /@0{0*->@*/*0 >> and similar contortions used to crash, but no longer
+do, but merely produce a syntax error. [perl #128171]
 
 =back
 
@@ -338,7 +339,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<reset> with an argument no longer crashes when encountering stash entries
+other than globs. [perl #128106]
+
+=item *
+
+Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no
+longer causes crashes. [perl #128086]
 
 =back
 
