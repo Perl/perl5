@@ -459,6 +459,11 @@ point literals will give a warning about "exponent underflow".
 The parser could sometimes crash if a bareword came after C<evalbytes>.
 [perl #129196]
 
+=item *
+
+Fixed place where regex was not setting the syntax error correctly.
+[perl #129122]
+
 =back
 
 =head1 Known Problems
