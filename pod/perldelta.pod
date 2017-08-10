@@ -361,7 +361,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fixed a duplicate symbol failure with C<-flto -mieee-fp> builds.
+F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
+#131786]
 
 =back
 
