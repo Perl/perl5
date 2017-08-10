@@ -2388,10 +2388,12 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    *d++ = UTF8_TWO_BYTE_LO(UNI_TO_NATIVE(uv));
 	    continue;
 	}
+
 #define FIRST_HIGH_SURROGATE UNICODE_SURROGATE_FIRST
 #define LAST_HIGH_SURROGATE  0xDBFF
 #define FIRST_LOW_SURROGATE  0xDC00
 #define LAST_LOW_SURROGATE   UNICODE_SURROGATE_LAST
+#define FIRST_IN_PLANE1      0x10000
 
         /* This assumes that most uses will be in the first Unicode plane, not
          * needing surrogates */
@@ -2410,13 +2412,13 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
                 }
 		p += 2;
 		uv = ((uv - FIRST_HIGH_SURROGATE) << 10)
-                                       + (low - FIRST_LOW_SURROGATE) + 0x10000;
+                                + (low - FIRST_LOW_SURROGATE) + FIRST_IN_PLANE1;
 	    }
 	}
 #ifdef EBCDIC
         d = uvoffuni_to_utf8_flags(d, uv, 0);
 #else
-	if (uv < 0x10000) {
+	if (uv < FIRST_IN_PLANE1) {
 	    *d++ = (U8)(( uv >> 12)         | 0xe0);
 	    *d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
 	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
