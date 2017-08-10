@@ -952,10 +952,10 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 }
 
 char *
-Perl__byte_dump_string(pTHX_ const U8 * s, const STRLEN len, const bool format)
+Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format)
 {
     /* Returns a mortalized C string that is a displayable copy of the 'len'
-     * bytes starting at 's'.  'format' gives how to display each byte.
+     * bytes starting at 'start'.  'format' gives how to display each byte.
      * Currently, there are only two formats, so it is currently a bool:
      *      0   \xab
      *      1    ab         (that is a space between two hex digit bytes)
@@ -963,7 +963,8 @@ Perl__byte_dump_string(pTHX_ const U8 * s, const STRLEN len, const bool format)
 
     const STRLEN output_len = 4 * len + 1;  /* 4 bytes per each input, plus a
                                                trailing NUL */
-    const U8 * const e = s + len;
+    const U8 * s = start;
+    const U8 * const e = start + len;
     char * output;
     char * d;
 
@@ -973,12 +974,14 @@ Perl__byte_dump_string(pTHX_ const U8 * s, const STRLEN len, const bool format)
     SAVEFREEPV(output);
 
     d = output;
-    for (; s < e; s++) {
+    for (s = start; s < e; s++) {
         const unsigned high_nibble = (*s & 0xF0) >> 4;
         const unsigned low_nibble =  (*s & 0x0F);
 
         if (format) {
-            *d++ = ' ';
+            if (s > start) {
+                *d++ = ' ';
+            }
         }
         else {
             *d++ = '\\';
