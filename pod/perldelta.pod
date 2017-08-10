@@ -439,6 +439,11 @@ C<@{x> followed by a newline where C<x> represents a control or non-ASCII
 character no longer produces a garbled syntax error message or a crash.
 [perl #128951]
 
+=item *
+
+A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
+128 and 255 has been fixed. [perl #128734].
+
 =back
 
 =head1 Known Problems
