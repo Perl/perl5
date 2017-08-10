@@ -11906,6 +11906,8 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	    }
 	}
 
+        /* 'chars' isn't quite the right name, as code points above 0xFFFF
+         * require 4 bytes per char */
 	chars = SvCUR(utf16_buffer) >> 1;
 	have = SvCUR(utf8_buffer);
 
