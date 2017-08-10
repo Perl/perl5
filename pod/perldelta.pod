@@ -377,6 +377,10 @@ crash if the left-hand side was an array or hash.  [perl #128204]
 socket() now leaves the error code returned by the system in C<$!> on
 failure.  [perl #128316]
 
+=item *
+
+Parsing bad POSIX charclasses no longer leaks memory. [perl #128313]
+
 =back
 
 =head1 Known Problems
