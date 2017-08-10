@@ -252,6 +252,23 @@ C<gcc>), C<Configure> was treating all probed symbols as present on the
 system, regardless of whether they actually exist. This has been fixed.
 [perl #128131]
 
+=item *
+
+F<Configure> now aborts if both "-Duselongdouble" and "-Dusequadmath" are
+requested.
+L<[perl #126203]|https://rt.perl.org/Public/Bug/Display.html?id=126203>
+
+=item *
+
+Fixed a bug in which F<Configure> could append "-quadmath" to the archname even
+if it was already present.
+L<[perl #128538]|https://rt.perl.org/Public/Bug/Display.html?id=128538>
+
+=item *
+
+Clang builds with "-DPERL_GLOBAL_STRUCT" or "-DPERL_GLOBAL_STRUCT_PRIVATE" have
+been fixed (by disabling Thread Safety Analysis for these configurations).
+
 =back
 
 =head1 Testing
@@ -391,6 +408,12 @@ with the B<-x> switch.  This has been fixed. [perl #128508]
 Some obscure cases of subroutines and file handles being freed at the same
 time could result in crashes, but have been fixed.  The crash was
 introduced in v5.22. [perl #128597]
+
+=item *
+
+Some regular expression parsing glitches could lead to assertion failures with
+regular expressions such as C</(?<=/> and C</(?<!/>.  This has now been fixed.
+L<[perl #128170]|https://rt.perl.org/Public/Bug/Display.html?id=128170>
 
 =back
 
