@@ -247,7 +247,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+When building with GCC 6 and link-time optimization (the C<-flto> option to
+C<gcc>), C<Configure> was treating all probed symbols as present on the
+system, regardless of whether they actually exist. This has been fixed.
+[perl #128131]
 
 =back
 
@@ -342,6 +345,17 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 [ List each fix as a =item entry ]
 
 =over 4
+
+=item *
+
+Expressions containing an C<&&> or C<||> operator (or their synonyms C<and>
+and C<or>) were being compiled incorrectly in some cases. If the left-hand
+side consisted of either a negated bareword constant or a negated C<do {}>
+block containing a constant expression, and the right-hand side consisted of
+a negated non-foldable expression, one of the negations was effectively
+ignored. The same was true of C<if> and C<unless> statement modifiers,
+though with the left-hand and right-hand sides swapped. This long-standing
+bug has now been fixed. [perl #127952]
 
 =item *
 
