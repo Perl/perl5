@@ -2885,7 +2885,7 @@ utf16_to_utf8 (sv, ...)
 	    len = SvUV(ST(1));
  	}
 	/* Mortalise this right now, as we'll be testing croak()s  */
-	dest = sv_2mortal(newSV(len * 3 / 2 + 1));
+	dest = sv_2mortal(newSV(len * 2 + 1));
 	if (ix) {
 	    utf16_to_utf8_reversed(source, (U8 *)SvPVX(dest), len, &got);
 	} else {

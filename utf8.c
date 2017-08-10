@@ -2364,10 +2364,19 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
 }
 
 /*
- * Convert native (big-endian) or reversed (little-endian) UTF-16 to UTF-8.
+ * Convert native (big-endian) UTF-16 to UTF-8.  For reversed (little-endian),
+ * use utf16_to_utf8_reversed().
  *
- * Destination must be pre-extended to 3/2 source.  Do not use in-place.
- * We optimize for native, for obvious reasons. */
+ * UTF-16 requires 2 bytes for every code point below 0x10000; otherwise 4 bytes.
+ * UTF-8 requires 1-3 bytes for every code point below 0x1000; otherwise 4 bytes.
+ * UTF-EBCDIC requires 1-4 bytes for every code point below 0x1000; otherwise 4-5 bytes.
+ *
+ * These functions don't check for overflow.  The worst case is every code
+ * point in the input is 2 bytes, and requires 4 bytes on output.  (If the code
+ * is never going to run in EBCDIC, it is 2 bytes requiring 3 on output.)  Therefore the
+ * destination must be pre-extended to 2 times the source length.
+ *
+ * Do not use in-place.  We optimize for native, for obvious reasons. */
 
 U8*
 Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
