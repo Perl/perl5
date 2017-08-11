@@ -475,6 +475,7 @@ floating point numbers (64-bit or 128-bit) and the x86 80-bit
 "extended precision".  Note that subnormal hexadecimal floating
 point literals will give a warning about "exponent underflow".
 L<[perl #128843]|https://rt.perl.org/Public/Bug/Display.html?id=128843>
+L<[perl #128888]|https://rt.perl.org/Public/Bug/Display.html?id=128888>
 L<[perl #128889]|https://rt.perl.org/Public/Bug/Display.html?id=128889>
 L<[perl #128890]|https://rt.perl.org/Public/Bug/Display.html?id=128890>
 L<[perl #128893]|https://rt.perl.org/Public/Bug/Display.html?id=128893>
