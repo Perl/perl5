@@ -450,9 +450,10 @@ L<[perl #126482]|https://rt.perl.org/Public/Bug/Display.html?id=126482>
 
 =item *
 
-In 5.25.4 fchown() was changed not to accept negative one as an argument
+In v5.24 C<fchown> was changed not to accept negative one as an argument
 because in some platforms that is an error.  However, in some other platforms
-that is an acceptable argument.  This change has been reverted [perl #128967].
+that is an acceptable argument.  This change has been reverted.
+L<[perl #128967]|https://rt.perl.org/Public/Bug/Display.html?id=128967>.
 
 =item *
 
