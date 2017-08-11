@@ -2124,14 +2124,29 @@ localeconv()
 #else
 	struct lconv *lcbuf;
 
+        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+
         /* localeconv() deals with both LC_NUMERIC and LC_MONETARY, but
          * LC_MONETARY is already in the correct locale */
-        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+#  ifdef USE_LOCALE_MONETARY
+
+        const bool is_monetary_utf8 = _is_cur_LC_category_utf8(LC_MONETARY);
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+
+        bool is_numeric_utf8;
+
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+
+        is_numeric_utf8 = _is_cur_LC_category_utf8(LC_NUMERIC);
+#  endif
 
 	RETVAL = newHV();
 	sv_2mortal((SV*)RETVAL);
-	if ((lcbuf = localeconv())) {
+
+        lcbuf = localeconv();
+
+	if (lcbuf) {
 	    const struct lconv_offset *strings = lconv_strings;
 	    const struct lconv_offset *integers = lconv_integers;
 	    const char *ptr = (const char *) lcbuf;
@@ -2139,18 +2154,18 @@ localeconv()
 	    while (strings->name) {
                 /* This string may be controlled by either LC_NUMERIC, or
                  * LC_MONETARY */
-                bool is_utf8_locale
-#if defined(USE_LOCALE_NUMERIC) && defined(USE_LOCALE_MONETARY)
-                 = _is_cur_LC_category_utf8((isLC_NUMERIC_STRING(strings->name))
-                                             ? LC_NUMERIC
-                                             : LC_MONETARY);
-#elif defined(USE_LOCALE_NUMERIC)
-                 = _is_cur_LC_category_utf8(LC_NUMERIC);
-#elif defined(USE_LOCALE_MONETARY)
-                 = _is_cur_LC_category_utf8(LC_MONETARY);
-#else
-                 = FALSE;
-#endif
+                const bool is_utf8_locale =
+#  if defined(USE_LOCALE_NUMERIC) && defined(USE_LOCALE_MONETARY)
+                                        (isLC_NUMERIC_STRING(strings->name))
+                                        ? is_numeric_utf8
+                                        : is_monetary_utf8;
+#  elif defined(USE_LOCALE_NUMERIC)
+                                        is_numeric_utf8;
+#  elif defined(USE_LOCALE_MONETARY)
+                                        is_monetary_utf8;
+#  else
+                                        FALSE;
+#  endif
 
 		const char *value = *((const char **)(ptr + strings->offset));
 
@@ -2181,6 +2196,7 @@ localeconv()
                 integers++;
             }
 	}
+
         RESTORE_LC_NUMERIC_STANDARD();
 #endif  /* HAS_LOCALECONV */
     OUTPUT:
