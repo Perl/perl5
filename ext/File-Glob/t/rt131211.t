@@ -28,6 +28,9 @@ my @files= (
 );
 
 
+# VMS needs a real extension.
+map { $_ .= '.tmp' } @files if $^O eq 'VMS';
+
 foreach (@files) {
     open(my $f, ">", catfile $path, $_);
 }
