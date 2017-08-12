@@ -8731,6 +8731,7 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
 	else
 	  *(cp1++) = '?';
 	cp2++;
+	break;
     case ' ':
 	if (cp2 >= path && (cp2 == path || *(cp2-1) != '^')) /* not previously escaped */
 	    *(cp1)++ = '^';
