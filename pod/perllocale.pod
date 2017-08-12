@@ -1623,10 +1623,7 @@ for broken locales>.
 =head1 SEE ALSO
 
 L<I18N::Langinfo>, L<perluniintro>, L<perlunicode>, L<open>,
-L<POSIX/isalnum>, L<POSIX/isalpha>,
-L<POSIX/isdigit>, L<POSIX/isgraph>, L<POSIX/islower>,
-L<POSIX/isprint>, L<POSIX/ispunct>, L<POSIX/isspace>,
-L<POSIX/isupper>, L<POSIX/isxdigit>, L<POSIX/localeconv>,
+L<POSIX/localeconv>,
 L<POSIX/setlocale>, L<POSIX/strcoll>, L<POSIX/strftime>,
 L<POSIX/strtod>, L<POSIX/strxfrm>.
 
@@ -1637,4 +1634,4 @@ see L<perlembed/Using embedded Perl with POSIX locales>.
 
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.  Prose worked over a bit by
-Tom Christiansen, and updated by Perl 5 porters.
+Tom Christiansen, and now maintained by Perl 5 porters.
