@@ -693,6 +693,7 @@
 #define sv_setsv_mg(a,b)	Perl_sv_setsv_mg(aTHX_ a,b)
 #define sv_setuv(a,b)		Perl_sv_setuv(aTHX_ a,b)
 #define sv_setuv_mg(a,b)	Perl_sv_setuv_mg(aTHX_ a,b)
+#define sv_string_from_errnum(a,b)	Perl_sv_string_from_errnum(aTHX_ a,b)
 #define sv_tainted(a)		Perl_sv_tainted(aTHX_ a)
 #define sv_true(a)		Perl_sv_true(aTHX_ a)
 #define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)

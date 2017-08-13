@@ -810,6 +810,52 @@ S_fixup_errno_string(pTHX_ SV* sv)
     }
 }
 
+/*
+=for apidoc Am|SV *|sv_string_from_errnum|int errnum|SV *tgtsv
+
+Generates the message string describing an OS error and returns it as
+an SV.  C<errnum> must be a value that C<errno> could take, identifying
+the type of error.
+
+If C<tgtsv> is non-null then the string will be written into that SV
+(overwriting existing content) and it will be returned.  If C<tgtsv>
+is a null pointer then the string will be written into a new mortal SV
+which will be returned.
+
+The message will be taken from whatever locale would be used by C<$!>,
+and will be encoded in the SV in whatever manner would be used by C<$!>.
+The details of this process are subject to future change.  Currently,
+the message is taken from the C locale by default (usually producing an
+English message), and from the currently selected locale when in the scope
+of the C<use locale> pragma.  A heuristic attempt is made to decode the
+message from the locale's character encoding, but it will only be decoded
+as either UTF-8 or ISO-8859-1.  It is always correctly decoded in a UTF-8
+locale, usually in an ISO-8859-1 locale, and never in any other locale.
+
+The SV is always returned containing an actual string, and with no other
+OK bits set.  Unlike C<$!>, a message is even yielded for C<errnum> zero
+(meaning success), and if no useful message is available then a useless
+string (currently empty) is returned.
+
+=cut
+*/
+
+SV *
+Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv)
+{
+    char const *errstr;
+    if(!tgtsv)
+	tgtsv = sv_newmortal();
+    errstr = my_strerror(errnum);
+    if(errstr) {
+	sv_setpv(tgtsv, errstr);
+	fixup_errno_string(tgtsv);
+    } else {
+	SvPVCLEAR(tgtsv);
+    }
+    return tgtsv;
+}
+
 #ifdef VMS
 #include <descrip.h>
 #include <starlet.h>
@@ -930,14 +976,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 SvPVCLEAR(sv);
             }
             else {
-
-                /* Strerror can return NULL on some platforms, which will
-                 * result in 'sv' not being considered SvOK.  The SvNOK_on()
+                sv_string_from_errnum(errno, sv);
+                /* If no useful string is available, don't
+                 * claim to have a string part.  The SvNOK_on()
                  * below will cause just the number part to be valid */
-                sv_setpv(sv, my_strerror(errno));
-                if (SvOK(sv)) {
-                    fixup_errno_string(sv);
-                }
+                if (!SvCUR(sv))
+                    SvPOK_off(sv);
             }
             RESTORE_ERRNO;
 	}

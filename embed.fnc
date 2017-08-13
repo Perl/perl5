@@ -1029,6 +1029,7 @@ Apd	|int	|mg_copy	|NN SV *sv|NN SV *nsv|NULLOK const char *key \
 				|I32 klen
 : Defined in mg.c, used only in scope.c
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv|bool setmagic
+Apd	|SV*	|sv_string_from_errnum|int errnum|NULLOK SV* tgtsv
 ApdRn	|MAGIC*	|mg_find	|NULLOK const SV* sv|int type
 ApdRn	|MAGIC*	|mg_findext	|NULLOK const SV* sv|int type|NULLOK const MGVTBL *vtbl
 : exported for re.pm
