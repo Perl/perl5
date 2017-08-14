@@ -370,6 +370,15 @@ F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
 The tokenizer no longer consumes the exponent part of a floating
 pointer number if it's incomplete. [perl #131725]
 
+=item *
+
+On non-threaded builds, for C<m/$null/> where C<$null> is an empty
+string is no longer treated as if the C</o> flag was present when the
+previous matching match operator included the C</o> flag.  The
+rewriting used to implement this behavior could confuse the
+interpreter.  This matches the behaviour of threaded builds.  [perl
+#124368]
+
 =back
 
 =head1 Known Problems
