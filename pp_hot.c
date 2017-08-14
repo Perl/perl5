@@ -4330,7 +4330,8 @@ PP(pp_entersub)
                 AvARRAY(av) = ary;
             }
 
-	    Copy(MARK+1,AvARRAY(av),items,SV*);
+            if (items)
+                Copy(MARK+1,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
 	}
 	if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
