@@ -368,7 +368,7 @@ F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
 =item *
 
 The tokenizer no longer consumes the exponent part of a floating
-pointer number if it's incomplete. [perl #131725]
+point number if it's incomplete. [perl #131725]
 
 =item *
 
