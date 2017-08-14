@@ -12377,7 +12377,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    elen = sizeof nullstr - 1;
 		}
 	    }
-	    else if (argsv) {
+	    else {
 		eptr = SvPV_const(argsv, elen);
 		if (DO_UTF8(argsv)) {
 		    STRLEN old_precis = precis;
