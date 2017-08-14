@@ -365,6 +365,11 @@ Fixed a duplicate symbol failure with C<-flto -mieee-fp> builds.
 F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
 #131786]
 
+=item *
+
+The tokenizer no longer consumes the exponent part of a floating
+pointer number if it's incomplete. [perl #131725]
+
 =back
 
 =head1 Known Problems
