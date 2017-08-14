@@ -1588,10 +1588,10 @@
         setup   => 'my $s; my $a1 = "abcd";',
         code    => '$s = sprintf "foo=%s", $a1',
     },
-    'func::sprintf::mixed_utf8_s' => {
+    'func::sprintf::mixed_utf8_sss' => {
         desc    => 'foo=%s bar=%s baz=%s',
-        setup   => 'my $s;',
-        code    => '$s = sprintf "foo=%s", "ab\x{100}cd", "efg", "h\x{101}ij"',
+        setup   => 'my $s;my $a = "ab\x{100}cd"; my $b = "efg"; my $c = "h\x{101}ij"',
+        code    => '$s = sprintf "foo=%s bar=%s baz=%s", $a, $b, $c',
     },
 
     'func::subst::bool' => {
