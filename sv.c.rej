@@ -1,0 +1,15 @@
+--- sv.c
++++ sv.c
+@@ -11706,9 +11706,11 @@
+ 			has_precis = TRUE;
+ 		    }
+ 		    argsv = MUTABLE_SV(va_arg(*args, void*));
+-		    eptr = SvPV_const(argsv, elen);
++		    if (argsv) {
++            eptr = SvPV_const(argsv, elen);
+ 		    if (DO_UTF8(argsv))
+ 			is_utf8 = TRUE;
++            }
+ 		    goto string;
+ 		}
+ 		else if (n==2 || n==3) {	/* HEKf */
