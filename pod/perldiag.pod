@@ -656,6 +656,13 @@ the warning.  See L<perlsub>.
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
 
+=item Cannot complete in-place edit of %s: %s
+
+(F) Your perl script appears to have changed directory while
+performing an in-place edit of a file specified by a relative path,
+and your system doesn't include the directory relative POSIX functions
+needed to handle that.
+
 =item Cannot compress %f in pack
 
 (F) You tried compressing an infinity or not-a-number as an unsigned

@@ -867,15 +867,24 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 #  define ARGV_USE_ATFUNCTIONS
 #endif
 
+/* Win32 doesn't necessarily return useful information
+ * in st_dev, st_ino.
+ */
+#ifndef ARGV_USE_ATFUNCTIONS
+#  ifndef DOSISH
+#    define ARGV_USE_STAT_INO
+#  endif
+#endif
+
 #define ARGVMG_BACKUP_NAME 0
 #define ARGVMG_TEMP_NAME 1
 #define ARGVMG_ORIG_NAME 2
 #define ARGVMG_ORIG_MODE 3
 #define ARGVMG_ORIG_PID 4
 
-#ifdef ARGV_USE_ATFUNCTIONS
+#if defined(ARGV_USE_ATFUNCTIONS)
 #define ARGVMG_ORIG_DIRP 5
-#else
+#elif defined(ARGV_USE_STAT_INO)
 /* we store the entire stat_t since the ino_t and dev_t values might
    not fit in an IV.  I could have created a new structure and
    transferred them across, but this seemed too much effort for very
@@ -1114,10 +1123,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 av_store(magic_av, ARGVMG_ORIG_NAME, newSVsv(sv));
                 av_store(magic_av, ARGVMG_ORIG_MODE, newSVuv(PL_filemode));
                 av_store(magic_av, ARGVMG_ORIG_PID, newSViv((IV)PerlProc_getpid()));
-#ifdef ARGV_USE_ATFUNCTIONS
+#if defined(ARGV_USE_ATFUNCTIONS)
                 curdir = opendir(".");
                 av_store(magic_av, ARGVMG_ORIG_DIRP, newSViv(PTR2IV(curdir)));
-#else
+#elif defined(ARGV_USE_STAT_INO)
                 if (PerlLIO_stat(".", &statbuf) >= 0) {
                     av_store(magic_av, ARGVMG_ORIG_CWD_STAT,
                              newSVpvn((char *)&statbuf, sizeof(statbuf)));
@@ -1214,14 +1223,16 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         SV **orig_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_NAME, FALSE);
         SV **mode_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_MODE, FALSE);
         SV **pid_psv  = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
-#ifdef ARGV_USE_ATFUNCTIONS
+#if defined(ARGV_USE_ATFUNCTIONS)
         SV **dir_psv  = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
         DIR *dir;
         int dfd;
-#else
-        Stat_t statbuf;
+#elif defined(ARGV_USE_STAT_INO)
         SV **stat_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_CWD_STAT, FALSE);
         Stat_t *orig_cwd_stat = stat_psv && *stat_psv ? (Stat_t *)SvPVX(*stat_psv) : NULL;
+#endif
+#ifndef ARGV_USE_ATFUNCTIONS
+        Stat_t statbuf;
 #endif
         UV mode;
         int fd;
@@ -1260,7 +1271,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         }
 
         if (retval) {
-#ifndef ARGV_USE_ATFUNCTIONS
+#ifdef ARGV_USE_STAT_INO
             /* if the path is absolute the possible moving of cwd (which the file
                might be in) isn't our problem.
                This code tries to be reasonably balanced about detecting a changed
@@ -1272,8 +1283,19 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
                 && PerlLIO_stat(".", &statbuf) >= 0
                 && ( statbuf.st_dev != orig_cwd_stat->st_dev
                      || statbuf.st_ino != orig_cwd_stat->st_ino)) {
-                Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": "
-                           "Current directory has changed", *orig_psv);
+                Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
+                           *orig_psv, "Current directory has changed");
+            }
+#endif
+#if !defined(ARGV_USE_ATFUNCTIONS) && !defined(ARGV_USE_STAT_INO)
+            /* Some platforms don't have useful st_ino etc, so just
+               check we can see the work file.
+            */
+            if (!PERL_FILE_IS_ABSOLUTE(SvPVX(*orig_psv))
+                && PerlLIO_stat(SvPVX(*temp_psv), &statbuf) < 0) {
+                Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
+                           *orig_psv,
+                           "Work file is missing - did you change directory?");
             }
 #endif
 

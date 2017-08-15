@@ -595,7 +595,7 @@ CODE
           if $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
               && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
               && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
-        fresh_perl_is(<<'CODE', "Cannot complete in-place edit of inplacetmp/foo: Current directory has changed at - line 5, <> line 1.\n", { },
+        fresh_perl_like(<<'CODE', qr/^Cannot complete in-place edit of inplacetmp\/foo: .* - line 5, <> line \d+\./, { },
 @ARGV = ("inplacetmp/foo");
 $^I = "";
 while (<>) {
