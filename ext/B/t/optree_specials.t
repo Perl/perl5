@@ -20,7 +20,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 15;
+plan skip_all => 'Case BC-865 and Perl RT 130087';
 
 require_ok("B::Concise");
 
