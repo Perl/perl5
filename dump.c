@@ -578,7 +578,10 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
         /* output preceding blank line */
         PerlIO_puts(file, "     ");
         for (i = level-1; i >= 0; i--)
-            PerlIO_puts(file,  i == 0 || (bar & (1 << i)) ?  "|   " : "    ");
+            PerlIO_puts(file,  (   i == 0
+                                || (i < UVSIZE*8 && (bar & ((UV)1 << i)))
+                               )
+                                    ?  "|   " : "    ");
         PerlIO_puts(file, "\n");
 
         /* output sequence number */
