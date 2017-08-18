@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5217;
+plan tests => 5326;
 
 use Scalar::Util qw(tainted);
 
@@ -2836,4 +2836,162 @@ print length $o, "\n";
 }
 
 
-# EOF
+# test various aspects of string concat overloading, especially where
+# multiple concats etc are optimised into a single multiconcat op
+
+package Concat {
+
+    my $id;
+
+    # append a brief description of @_ to $id
+    sub id {
+        my @a = map ref $_      ?  "[" . $_->[0] . "]" :
+                    !defined $_ ? "u"                  :
+                    $_,
+                @_;
+        $id .= '(' . join (',', @a) . ')';
+    }
+
+    use overload
+        '.'  => sub {
+                    id('.', @_);
+                    my ($l, $r, $rev) = @_;
+                    ($l, $r) = map ref $_ ? $_->[0] : $_, $l, $r;
+                    ($l,$r) = ($r, $l) if $rev;
+                    bless [ $l . $r ];
+                },
+
+        '.=' => sub {
+                    id('.=', @_);
+                    my ($l, $r, $rev) = @_;
+                    my ($ll, $rr) = map ref $_ ? $_->[0] : $_, $l, $r;
+                    die "Unexpected reverse in .=" if $rev;
+                    $l->[0] .= ref $r ? $r->[0] : $r;
+                    $l;
+                },
+
+        '=' => sub {
+                    id('=', @_);
+                    bless [ $_[0][0] ];
+                },
+
+        '""' => sub {
+                    id('""', @_);
+                    $_[0][0];
+                },
+    ;
+
+    my $a = 'a';
+    my $b = 'b';
+    my $c = 'c';
+    my $A = bless [ 'A' ];
+    my $B = bless [ 'B' ];
+    my $C = bless [ 'C' ];
+
+    my ($r, $R);
+
+
+    # like c, but with $is_ref set to 1
+    sub c {
+        my ($expr, $expect, $exp_id) = @_;
+        cc($expr, $expect, 1, $exp_id);
+    }
+
+    # eval $expr, and see if it returns $expect, and whether
+    # the returned value is a ref ($is_ref). Finally, check that
+    # $id, which has accumulated info from all overload method calls,
+    # matches $exp_id.
+
+    sub cc {
+        my ($expr, $expect, $is_ref, $exp_id) = @_;
+
+        $id = '';
+        $r = 'r';
+        $R = bless ['R'];
+
+        my $got = eval $expr;
+        die "eval failed: $@" if $@;
+        ::is "$got", $expect,   "expect: $expr";
+        ::is $id, $exp_id,      "id:     $expr";
+        ::is ref($got), ($is_ref ? 'Concat' : ''), "is_ref: $expr";
+    }
+
+    # single concats
+
+    c '$r=$A.$b',       'Ab',   '(.,[A],b,)("",[Ab],u,)';
+    c '$r=$a.$B',       'aB',   '(.,[B],a,1)("",[aB],u,)';
+    c '$r=$A.$B',       'AB',   '(.,[A],[B],)("",[AB],u,)';
+    c '$R.=$a',         'Ra',   '(.=,[R],a,u)("",[Ra],u,)';
+    c '$R.=$A',         'RA',   '(.=,[R],[A],u)("",[RA],u,)';
+
+   # two concats
+
+    c '$r=$A.$b.$c',    'Abc',   '(.,[A],b,)(.=,[Ab],c,u)("",[Abc],u,)';
+    c '$r=$A.($b.$c)',  'Abc',   '(.,[A],bc,)("",[Abc],u,)';
+    c '$r=$a.$B.$c',    'aBc',   '(.,[B],a,1)(.=,[aB],c,u)("",[aBc],u,)';
+    c '$r=$a.($B.$c)',  'aBc',   '(.,[B],c,)(.,[Bc],a,1)("",[aBc],u,)';
+    c '$r=$a.$b.$C',    'abC',   '(.,[C],ab,1)("",[abC],u,)';
+    c '$r=$a.($b.$C)',  'abC',   '(.,[C],b,1)(.,[bC],a,1)("",[abC],u,)';
+
+   # two concats plus mutator
+
+    c '$r.=$A.$b.$c',   'rAbc',  '(.,[A],b,)(.=,[Ab],c,u)(.,[Abc],r,1)'
+                                .'("",[rAbc],u,)';
+    c '$r.=$A.($b.$c)', 'rAbc',  '(.,[A],bc,)(.,[Abc],r,1)("",[rAbc],u,)';
+    c '$r.=$a.$B.$c',   'raBc',  '(.,[B],a,1)(.=,[aB],c,u)(.,[aBc],r,1)'
+                                .'("",[raBc],u,)';
+    c '$r.=$a.($B.$c)', 'raBc',  '(.,[B],c,)(.,[Bc],a,1)(.,[aBc],r,1)'
+                                .'("",[raBc],u,)';
+    c '$r.=$a.$b.$C',   'rabC',  '(.,[C],ab,1)(.,[abC],r,1)("",[rabC],u,)';
+    c '$r.=$a.($b.$C)', 'rabC',  '(.,[C],b,1)(.,[bC],a,1)(.,[abC],r,1)'
+                                .'("",[rabC],u,)';
+
+    c '$R.=$A.$b.$c',   'RAbc',  '(.,[A],b,)(.=,[Ab],c,u)(.=,[R],[Abc],u)'
+                                .'("",[RAbc],u,)';
+    c '$R.=$A.($b.$c)', 'RAbc',  '(.,[A],bc,)(.=,[R],[Abc],u)("",[RAbc],u,)';
+    c '$R.=$a.$B.$c',   'RaBc',  '(.,[B],a,1)(.=,[aB],c,u)(.=,[R],[aBc],u)'
+                                .'("",[RaBc],u,)';
+    c '$R.=$a.($B.$c)', 'RaBc',  '(.,[B],c,)(.,[Bc],a,1)(.=,[R],[aBc],u)'
+                                .'("",[RaBc],u,)';
+    c '$R.=$a.$b.$C',   'RabC',  '(.,[C],ab,1)(.=,[R],[abC],u)("",[RabC],u,)';
+    c '$R.=$a.($b.$C)', 'RabC',  '(.,[C],b,1)(.,[bC],a,1)(.=,[R],[abC],u)'
+                                .'("",[RabC],u,)';
+
+    # concat over assign
+
+    c '($R.=$a).$B.$c', 'RaBc',  '(.=,[R],a,u)(.,[Ra],[B],)(.=,[RaB],c,u)'
+                                  .'("",[RaBc],u,)';
+    ::is "$R", "Ra", 'R in concat over assign';
+
+
+    # nested mutators
+
+    c '(($R.=$a).=$b).=$c', 'Rabc',  '(.=,[R],a,u)(=,[Ra],u,)(.=,[Ra],b,u)'
+                                   . '(=,[Rab],u,)(.=,[Rab],c,u)("",[Rabc],u,)';
+    c '(($R.=$a).=$B).=$c', 'RaBc',  '(.=,[R],a,u)(=,[Ra],u,)(.=,[Ra],[B],u)'
+                                   . '(=,[RaB],u,)(.=,[RaB],c,u)("",[RaBc],u,)';
+
+    # plain SV on both LHS and RHS with RHS object
+
+    c '$r=$r.$A.$r',   'rAr',  '(.,[A],r,1)(.=,[rA],r,u)("",[rAr],u,)';
+    c '$r.=$r.$A.$r',  'rrAr', '(.,[A],r,1)(.=,[rA],r,u)(.,[rAr],r,1)'
+                              .'("",[rrAr],u,)';
+
+    # object on both LHS and RHS
+
+    c '$R.=$R',        'RR',    '(.=,[R],[R],u)("",[RR],u,)';
+    c '$R.=$R.$b.$c',  'RRbc',  '(.,[R],b,)(.=,[Rb],c,u)(.=,[R],[Rbc],u)'
+                               .'("",[RRbc],u,)';
+    c '$R.=$a.$R.$c',  'RaRc',  '(.,[R],a,1)(.=,[aR],c,u)(.=,[R],[aRc],u)'
+                               .'("",[RaRc],u,)'; 
+    c '$R.=$a.$b.$R',  'RabR',  '(.,[R],ab,1)(.=,[R],[abR],u)("",[RabR],u,)';
+
+
+    # sprintf shouldn't do concat overloading
+
+    cc '$r=sprintf("%s%s%s",$a,$B,$c)',  'aBc',  0, '("",[B],u,)';
+    cc '$R=sprintf("%s%s%s",$a,$B,$c)',  'aBc',  0, '("",[B],u,)';
+    cc '$r.=sprintf("%s%s%s",$a,$B,$c)', 'raBc', 0, '("",[B],u,)';
+    cc '$R.=sprintf("%s%s%s",$a,$B,$c)', 'RaBc', 1, '("",[B],u,)(.=,[R],aBc,u)'
+                                                   .'("",[RaBc],u,)';
+}
