@@ -787,12 +787,24 @@ S_fixup_errno_string(pTHX_ SV* sv)
          * UTF-8 validity test"
          * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
          * potential that we will get it wrong however, especially on short
-         * error message text.  (If it turns out to be necessary, we could also
-         * keep track if the current LC_MESSAGES locale is UTF-8) */
-        if (! IN_BYTES  /* respect 'use bytes' */
+         * error message text, so do an additional check. */
+        if (   ! IN_BYTES  /* respect 'use bytes' */
             && ! is_utf8_invariant_string((U8*) SvPVX_const(sv), SvCUR(sv))
-            && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
-        {
+            &&   is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv))
+
+#ifdef USE_LOCALE_MESSAGES
+
+            &&   _is_cur_LC_category_utf8(LC_MESSAGES)
+
+#elif defined(USE_LOCLAE_CTYPE)
+
+                 /* For systems that don't have a separate message category,
+                  * this assumes that they follow the CTYPE one */
+            &&   _is_cur_LC_category_utf8(LC_CTYPE)
+
+#endif
+
+        ) {
             SvUTF8_on(sv);
         }
     }
