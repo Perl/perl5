@@ -4781,7 +4781,8 @@ DIRHANDLE may be an expression whose value can be used as an indirect
 dirhandle, usually the real dirhandle name.  If DIRHANDLE is an undefined
 scalar variable (or array or hash element), the variable is assigned a
 reference to a new anonymous dirhandle; that is, it's autovivified.
-DIRHANDLEs have their own namespace separate from FILEHANDLEs.
+Dirhandles are the same objects as filehandles; an I/O object can only
+be open as one of these handle types at once.
 
 See the example at L<C<readdir>|/readdir DIRHANDLE>.
 
