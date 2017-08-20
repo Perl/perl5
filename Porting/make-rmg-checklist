@@ -6,13 +6,13 @@ use Getopt::Long qw< :config no_ignore_case >;
 sub pod {
     my $filename = shift;
 
-    open my $fh, '<', 'Porting/release_managers_guide.pod'
-        or die "Cannot open file: $!\n";
+    open my $fh, '<', $filename
+        or die "Cannot open file ($filename): $!\n";
 
     my @lines = <$fh>;
 
     close $fh
-        or die "Cannot close file: $!\n";
+        or die "Cannot close file ($filename): $!\n";
 
     return \@lines;
 }
@@ -140,7 +140,7 @@ if ($html) {
 
 my $type = _type_from_version($version);
 
-chomp( my @pod_lines = @{ pod() } );
+chomp( my @pod_lines = @{ pod('Porting/release_managers_guide.pod') } );
 
 my ( @items, $current_element, @leading_attrs );
 my $skip_headers     = qr/^=encoding/xms;
