@@ -2066,7 +2066,8 @@ X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e> X</r
 
 Searches a string for a pattern, and if found, replaces that pattern
 with the replacement text and returns the number of substitutions
-made.  Otherwise it returns false (specifically, the empty string).
+made.  Otherwise it returns false (a value that is both an empty string (C<"">)
+and numeric zero (C<0>) as described in L</Relational Operators>).
 
 If the C</r> (non-destructive) option is used then it runs the
 substitution on a copy of the string and instead of returning the
