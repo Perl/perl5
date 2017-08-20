@@ -247,7 +247,7 @@ sub ::addbits {
             my $flag_name   = shift @args;
             my $flag_label  = shift @args;
             add_label($flag_name, $flag_label);
-            croak "addbits(): bit $bits of $op already specified"
+            croak "addbits(): bit $bits of $op already specified ($FLAGS{$op}{$bits})"
                 if defined $FLAGS{$op}{$bits};
             $FLAGS{$op}{$bits} = $flag_name;
             add_define($flag_name, (1 << $bits));
@@ -344,7 +344,7 @@ sub ::addbits {
             }
 
             for my $bit ($bitmin..$bitmax) {
-                croak "addbits(): bit $bit of $op already specified"
+                croak "addbits(): bit $bit of $op already specified ($FLAGS{$op}{$bit})"
                     if defined $FLAGS{$op}{$bit};
                 $FLAGS{$op}{$bit} = $BITFIELDS{$id};
             }
