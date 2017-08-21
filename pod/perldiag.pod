@@ -2596,7 +2596,7 @@ zero-length sequence.  When such an escape is used in a character
 class its behavior is not well defined.  Check that the correct
 escape has been used, and the correct charname handler is in scope.
 
-=item Illegal binary digit %s
+=item Illegal binary digit '%c'
 
 (F) You used a digit other than 0 or 1 in a binary number.
 
@@ -2676,7 +2676,7 @@ numbers don't take to this kindly.
 (F) The number of bits in vec() (the third argument) must be a power of
 two from 1 to 32 (or 64, if your platform supports that).
 
-=item Illegal octal digit %s
+=item Illegal octal digit '%c'
 
 (F) You used an 8 or 9 in an octal number.
 
@@ -6517,7 +6517,7 @@ iterating over it, and someone else stuck a message in the stream of
 data Perl expected.  Someone's very confused, or perhaps trying to
 subvert Perl's population of %ENV for nefarious purposes.
 
-=item Unknown regex modifier "%s"
+=item Unknown regexp modifier "/%s"
 
 (F) Alphanumerics immediately following the closing delimiter
 of a regular expression pattern are interpreted by Perl as modifier
