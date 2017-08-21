@@ -1,0 +1,241 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5273delta - what is new for perl v5.27.3
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.27.2 release and the 5.27.3
+release.
+
+If you are upgrading from an earlier release such as 5.27.1, first read
+L<perl5272delta>, which describes differences between 5.27.1 and 5.27.2.
+
+=head1 Deprecations
+
+=head2 Module removals
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item B::Debug
+
+=back
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+C<SvTRUE()> is now more efficient.
+
+=item *
+
+C<keys()> in void and scalar contexts is now more efficient.
+
+=item *
+
+Various integer-returning ops are now more efficient in scalar/boolean context.
+
+=item *
+
+C<< if (index(...) != -1) { ... } >> is now more efficient.
+
+=item *
+
+C<for()> loops and similar constructs are now more efficient in most cases.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.68 to 1.69.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.000 to 1.001.
+
+=item *
+
+L<B::Debug> has been upgraded from version 1.24 to 1.25.
+NOTE: L<B::Debug> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.41 to 1.42.
+
+=item *
+
+L<base> has been upgraded from version 2.25 to 2.26.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.167 to 2.167_02.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<ExtUtils::Constant> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.34 to 3.35.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.34 to 3.35.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.93 to 0.94.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170720 to 5.20170821.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<Storable> has been upgraded from version 2.63 to 2.64.
+
+=item *
+
+L<threads> has been upgraded from version 2.16 to 2.17.
+
+=item *
+
+L<utf8> has been upgraded from version 1.19 to 1.20.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+On GCC, C<-Werror=pointer-arith> is now enabled by default,
+disallowing arithmetic on void and function pointers.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Fixed a duplicate symbol failure with C<-flto -mieee-fp> builds.
+F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
+#131786]
+
+=item *
+
+The tokenizer no longer consumes the exponent part of a floating
+point number if it's incomplete. [perl #131725]
+
+=item *
+
+On non-threaded builds, for C<m/$null/> where C<$null> is an empty
+string is no longer treated as if the C</o> flag was present when the
+previous matching match operator included the C</o> flag.  The
+rewriting used to implement this behavior could confuse the
+interpreter.  This matches the behaviour of threaded builds.  [perl
+#124368]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.27.3 represents approximately 5 weeks of development since Perl 5.27.2
+and contains approximately 5,600 lines of changes across 150 files from 19
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 4,000 lines of changes to 84 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.27.3:
+
+Aaron Crane, Aristotle Pagaltzis, Chris 'BinGOs' Williams, Craig A. Berry,
+Dagfinn Ilmari Mannsåker, Daniel Dragan, David Mitchell, Father Chrysostomos,
+James E Keenan, Karl Williamson, Ken Brown, Lukas Mai, Matthew Horsfall,
+Nicholas Clark, Robin Barker, Steffen Müller, Steve Hay, Tony Cook, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
