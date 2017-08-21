@@ -305,6 +305,8 @@ sub check_file {
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
       $category && $category =~ s/\).*//s;
+      # Special-case yywarn
+      /yywarn/ and $category = 'syntax';
       if (/win32_croak_not_implemented\(/) {
         $name .= " not implemented!"
       }
