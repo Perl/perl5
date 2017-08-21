@@ -2702,6 +2702,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         }
     }
     if (*(s-1) == ' ') {
+        /* diag_listed_as: charnames alias definitions may not contain
+                           trailing white-space; marked by <-- HERE in %s
+         */
         yyerror_pv(
             Perl_form(aTHX_
             "charnames alias definitions may not contain trailing "
@@ -2724,6 +2727,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                                               (U8 *) PL_parser->bufend,
                                               0,
                                               0 /* 0 means don't die */ );
+            /* diag_listed_as: Malformed UTF-8 returned by \N{%s}
+                               immediately after '%s' */
             yyerror_pv(
               Perl_form(aTHX_
                 "Malformed UTF-8 returned by %.*s immediately after '%.*s'",
@@ -2741,6 +2746,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
         /* The final %.*s makes sure that should the trailing NUL be missing
          * that this print won't run off the end of the string */
+        /* diag_listed_as: Invalid character in \N{...}; marked by <-- HERE
+                           in \N{%s} */
         yyerror_pv(
           Perl_form(aTHX_
             "Invalid character in \\N{...}; marked by <-- HERE in %.*s<-- HERE %.*s",
@@ -2752,6 +2759,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     }
 
   multi_spaces:
+        /* diag_listed_as: charnames alias definitions may not contain a
+                           sequence of multiple spaces; marked by <-- HERE
+                           in %s */
         yyerror_pv(
           Perl_form(aTHX_
             "charnames alias definitions may not contain a sequence of "
@@ -4613,6 +4623,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     PERL_ARGS_ASSERT_TOKENIZE_USE;
 
     if (PL_expect != XSTATE)
+	/* diag_listed_as: "use" not allowed in expression */
 	yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
 		    is_use ? "use" : "no"));
     PL_expect = XTERM;
@@ -8858,6 +8869,8 @@ S_pending_ident(pTHX)
     if (PL_in_my) {
         if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
             if (has_colon)
+                /* diag_listed_as: No package name allowed for variable %s
+                                   in "our" */
                 yyerror_pv(Perl_form(aTHX_ "No package name allowed for "
                                   "%se %s in \"our\"",
                                   *PL_tokenbuf=='&' ?"subroutin":"variabl",
