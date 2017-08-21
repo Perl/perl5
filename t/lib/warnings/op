@@ -1128,65 +1128,6 @@ Prototype mismatch: sub main::frèd () vs ($) at - line 5.
 use utf8;
 use open qw( :utf8 :std );
 use warnings;
-eval "sub fòò (@\$\0) {}";
-EXPECT
-Prototype after '@' for main::fòò : @$\0 at (eval 1) line 1.
-Illegal character in prototype for main::fòò : @$\0 at (eval 1) line 1.
-########
-# op.c
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-eval "sub foo (@\0) {}";
-EXPECT
-Prototype after '@' for main::foo : @\0 at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\0 at (eval 1) line 1.
-########
-# op.c
-BEGIN {
-    if (ord('A') == 193) {
-        print "SKIPPED\n# Different results on EBCDIC";
-        exit 0;
-    }
-}
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-BEGIN { $::{"foo"} = "\@\$\0L\351on" }
-BEGIN { eval "sub foo (@\$\0L\x{c3}\x{a9}on) {}"; }
-EXPECT
-Prototype after '@' for main::foo : @$\x{0}L... at (eval 1) line 1.
-Illegal character in prototype for main::foo : @$\x{0}L... at (eval 1) line 1.
-########
-# op.c
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-BEGIN { eval "sub foo (@\0) {}"; }
-EXPECT
-Prototype after '@' for main::foo : @\0 at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\0 at (eval 1) line 1.
-########
-# op.c
-use warnings;
-eval "sub foo (@\xAB) {}";
-EXPECT
-Prototype after '@' for main::foo : @\x{ab} at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\x{ab} at (eval 1) line 1.
-########
-# op.c
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-BEGIN { eval "sub foo (@\x{30cb}) {}"; }
-EXPECT
-Prototype after '@' for main::foo : @\x{30cb} at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\x{30cb} at (eval 1) line 1.
-########
-# op.c
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
 BEGIN { $::{"foo"} = "\x{30cb}" }
 BEGIN { eval "sub foo {}"; }
 EXPECT
