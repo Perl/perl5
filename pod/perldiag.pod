@@ -3131,9 +3131,8 @@ syswrite() or send() to read or send bytes from/to :utf8 handles.
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
-You specified a character that has the given plainer way of writing it,
-and which is also portable to platforms running with different character
-sets.
+You specified a character that has the given plainer way of writing it, and
+which is also portable to platforms running with different character sets.
 
 =item $* is no longer supported. Its use will be fatal in Perl 5.30
 
@@ -3393,13 +3392,12 @@ platform (overflows).  Details as to the exact malformation are given in
 the variable, C<%s>, part of the message.
 
 One possible cause is that you set the UTF8 flag yourself for data that
-you thought to be in UTF-8 but it wasn't (it was for example legacy
-8-bit data).  To guard against this, you can use C<Encode::decode('UTF-8', ...)>.
+you thought to be in UTF-8 but it wasn't (it was for example legacy 8-bit
+data).  To guard against this, you can use C<Encode::decode('UTF-8', ...)>.
 
 If you use the C<:encoding(UTF-8)> PerlIO layer for input, invalid byte
-sequences are handled gracefully, but if you use C<:utf8>, the flag is
-set without validating the data, possibly resulting in this error
-message.
+sequences are handled gracefully, but if you use C<:utf8>, the flag is set
+without validating the data, possibly resulting in this error message.
 
 See also L<Encode/"Handling Malformed Data">.
 
@@ -4283,10 +4281,9 @@ that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
 =item Cannot open %s as a filehandle: it is already open as a dirhandle
 
-(F) You tried to use open() to associate a filehandle to
-a symbol (glob or scalar) that already holds a dirhandle.
-This idiom might render your code confusing
-and this was deprecated in Perl 5.10. As of Perl 5.28, this
+(F) You tried to use open() to associate a filehandle to a symbol (glob
+or scalar) that already holds a dirhandle.  Since this idiom might render
+your code confusing, it was deprecated in Perl 5.10.  As of Perl 5.28, it
 is a fatal error.
 
 =item Cannot open %s as a dirhandle: it is already open as a filehandle
@@ -5558,19 +5555,18 @@ L<perlfunc/setsockopt>.
 
 =item Setting $/ to a reference to %s is forbidden
 
-(F) You assigned a reference to a scalar to C<$/> where the
-referenced item is not a positive integer.  In older perls this B<appeared>
-to work the same as setting it to C<undef> but was in fact internally
-different, less efficient and with very bad luck could have resulted in
-your file being split by a stringified form of the reference.
+(F) You assigned a reference to a scalar to C<$/> where the referenced item is
+not a positive integer.  In older perls this B<appeared> to work the same as
+setting it to C<undef> but was in fact internally different, less efficient
+and with very bad luck could have resulted in your file being split by a
+stringified form of the reference.
 
 In Perl 5.20.0 this was changed so that it would be B<exactly> the same as
-setting C<$/> to undef, with the exception that this warning would be
-thrown.
+setting C<$/> to undef, with the exception that this warning would be thrown.
 
-You are recommended to change your code to set C<$/> to C<undef> explicitly
-if you wish to slurp the file.  As of Perl 5.28 assigning C<$/> to a
-reference to an integer which isn't positive is a fatal error.
+You are recommended to change your code to set C<$/> to C<undef> explicitly if
+you wish to slurp the file.  As of Perl 5.28 assigning C<$/> to a reference
+to an integer which isn't positive is a fatal error.
 
 =item Setting $/ to %s reference is forbidden
 
@@ -6088,13 +6084,12 @@ system call to call, silly dilly.
 
 =item Too few arguments for subroutine '%s'
 
-(F) A subroutine using a signature received too few arguments than
-required by the signature.  The caller of the subroutine is presumably
-at fault.
+(F) A subroutine using a signature fewer arguments than required by the
+signature.  The caller of the subroutine is presumably at fault.
 
-The message attempts to include the name of the called subroutine. If the
-subroutine has been aliased, the subroutine's original name will be shown,
-regardless of what name the caller used.
+The message attempts to include the name of the called subroutine.  If
+the subroutine has been aliased, the subroutine's original name will be
+shown, regardless of what name the caller used.
 
 =item Too late for "-%s" option
 
@@ -6128,9 +6123,8 @@ BEGIN block.
 
 =item Too many arguments for subroutine '%s'
 
-(F) A subroutine using a signature received too many arguments than
-required by the signature.  The caller of the subroutine is presumably
-at fault.
+(F) A subroutine using a signature received more arguments than permitted
+by the signature.  The caller of the subroutine is presumably at fault.
 
 The message attempts to include the name of the called subroutine. If the
 subroutine has been aliased, the subroutine's original name will be shown,
@@ -6932,12 +6926,11 @@ is deprecated.  See L<perlvar/"$[">.
 
 =item Use of bare << to mean <<"" is forbidden
 
-(F) You are now required to use the explicitly quoted
-form if you wish to use an empty line as the terminator of the
-here-document.
+(F) You are now required to use the explicitly quoted form if you wish
+to use an empty line as the terminator of the here-document.
 
-Use of a bare terminator was deprecated in Perl 5.000, and
-is a fatal error as of Perl 5.28.
+Use of a bare terminator was deprecated in Perl 5.000, and is a fatal
+error as of Perl 5.28.
 
 =item Use of /c modifier is meaningless in s///
 
@@ -7063,10 +7056,10 @@ See the explanation under L<perlvar/$_>.
 =item Use of strings with code points over 0xFF as arguments to %s
 operator is not allowed
 
-(F) You tried to use one of the string bitwise operators
-(C<&> or C<|> or C<^> or C<~>) on a string containing a code point over
-0xFF.  The string bitwise operators treat their operands as strings of
-bytes, and values beyond 0xFF are nonsensical in this context.
+(F) You tried to use one of the string bitwise operators (C<&> or C<|> or C<^> or
+C<~>) on a string containing a code point over 0xFF.  The string bitwise
+operators treat their operands as strings of bytes, and values beyond
+0xFF are nonsensical in this context.
 
 This became fatal in Perl 5.28.
 
