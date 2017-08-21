@@ -60,7 +60,7 @@ you should reset the version numbers to the next blead series.
   2017-05-31  5.27.0 ✓        Sawyer X
   2017-06-20  5.27.1 ✓        Eric Herman
   2017-07-20  5.27.2 ✓        Aaron Crane
-  2017-08-20  5.27.3          Matthew Horsfall
+  2017-08-20  5.27.3 ✓        Matthew Horsfall
   2017-09-20  5.27.4          John Anderson
   2017-10-20  5.27.5          Steve Hay
   2017-11-20  5.27.6          Karen Etheridge
