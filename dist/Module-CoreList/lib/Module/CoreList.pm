@@ -14369,8 +14369,38 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.027003 => {
         delta_from => 5.027002,
         changed => {
+            'B'                     => '1.69',
+            'B::Concise'            => '1.001',
+            'B::Debug'              => '1.25',
+            'B::Deparse'            => '1.42',
             'B::Op_private'         => '5.027003',
             'Config'                => '5.027003',
+            'Data::Dumper'          => '2.167_02',
+            'Devel::Peek'           => '1.27',
+            'ExtUtils::Constant'    => '0.24',
+            'ExtUtils::Constant::Base'=> '0.06',
+            'ExtUtils::Constant::ProxySubs'=> '0.09',
+            'ExtUtils::Constant::Utils'=> '0.04',
+            'ExtUtils::ParseXS'     => '3.35',
+            'ExtUtils::ParseXS::Constants'=> '3.35',
+            'ExtUtils::ParseXS::CountLines'=> '3.35',
+            'ExtUtils::ParseXS::Eval'=> '3.35',
+            'ExtUtils::ParseXS::Utilities'=> '3.35',
+            'ExtUtils::Typemaps'    => '3.35',
+            'ExtUtils::Typemaps::Cmd'=> '3.35',
+            'ExtUtils::Typemaps::InputMap'=> '3.35',
+            'ExtUtils::Typemaps::OutputMap'=> '3.35',
+            'ExtUtils::Typemaps::Type'=> '3.35',
+            'Filter::Simple'        => '0.94',
+            'Module::CoreList'      => '5.20170821',
+            'Module::CoreList::TieHashDelta'=> '5.20170821',
+            'Module::CoreList::Utils'=> '5.20170821',
+            'SelfLoader'            => '1.24',
+            'Storable'              => '2.64',
+            'XS::APItest'           => '0.91',
+            'base'                  => '2.26',
+            'threads'               => '2.17',
+            'utf8'                  => '1.20',
         },
         removed => {
         }
@@ -15170,6 +15200,7 @@ sub is_core
     5.027003 => {
         delta_from => 5.027002,
         changed => {
+            'B::Debug'              => '1',
         },
         removed => {
         }
