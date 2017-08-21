@@ -578,8 +578,8 @@ the strings?).
  Steve     5.22.4       2017-Jul-15
 
  Ricardo   5.23.0       2015-Jun-20     The 5.23 development track
- Matthew   5.23.1       2015-Jul-20
- Matthew   5.23.2       2015-Aug-20
+ Matthew H 5.23.1       2015-Jul-20
+ Matthew H 5.23.2       2015-Aug-20
  Peter     5.23.3       2015-Sep-20
  Steve     5.23.4       2015-Oct-20
  Abigail   5.23.5       2015-Nov-20
@@ -605,7 +605,7 @@ the strings?).
 
  Ricardo   5.25.0       2016-May-09     The 5.25 development track
  Sawyer X  5.25.1       2016-May-20
- Matthew   5.25.2       2016-Jun-20
+ Matthew H 5.25.2       2016-Jun-20
  Steve     5.25.3       2016-Jul-20
  BinGOs    5.25.4       2016-Aug-20
  Stevan    5.25.5       2016-Sep-20
@@ -624,6 +624,7 @@ the strings?).
  Sawyer X  5.27.0       2017-May-31     The 5.27 development track
  Eric      5.27.1       2017-Jun-20
  Aaron     5.27.2       2017-Jul-20
+ Matthew H 5.27.3       2017-Aug-21
 
 =head2 SELECTED RELEASE SIZES
 
