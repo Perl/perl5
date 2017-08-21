@@ -252,7 +252,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+On GCC, C<-Werror=pointer-arith> is now enabled by default,
+disallowing arithmetic on void and function pointers.
 
 =back
 
