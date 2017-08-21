@@ -176,6 +176,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'RURBAN/B-Debug-1.25.tar.gz',
         'FILES'        => q[cpan/B-Debug],
         'EXCLUDED'     => ['t/pod.t'],
+        'DEPRECATED'   => '5.027003',
     },
 
     'base' => {
