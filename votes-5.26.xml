@@ -36,25 +36,12 @@ The same criteria apply to code in dual-life modules as to core code.)
 Fixes a problem with the previous patch:
 <commit votes="tonyc steveh khw" id="9c6b56dc65cdd9256fbe04a7baf4f085db1c04dd" ticket="131646" desc="(perl #131646) make the test less fragile" />
 
-<commit votes="steveh tonyc khw" id="790acddeaa0d2c73524596048b129561225cf100" ticket="131085" desc="[perl #131085] Crash with sub-in-stash" />
 <commit votes="steveh tonyc" id="d7e3f70f30811328d2f6ae57e5892deccf64d0b2" ticket="105930" desc="set up catchable runloops early enough" />
-<commit votes="steveh tonyc khw" id="655f5b268af8bf50c44ba4ae4803a33c9b792b8b" ticket="130861" desc="S_require_tie_mod(): use a new stack" />
-<commit votes="steveh tonyc khw" id="42752acc4959c5b770bbc29532bf2677f4533c4e" ticket="128207" desc="Make LOCK_LC_NUMERIC_STANDARD recursive" />
-<commit votes="steveh tonyc khw" id="9604fbf0722bd97ca6031a263c50ad52b6633db7" ticket="131526" desc="(perl #131526) don't go beyond the end of the NUL in my_atof2" />
-Take care when cherry-picking this: The test count isn't adjusted correctly by Git because maint-5.26 doesn't have 90c172854f (which reduced the count by one):
-<commit votes="steveh tonyc khw" id="bb152a4b442f7718fd37d32cc558be675e8ae1ae" ticket="131575" desc="don't call Perl_fbm_instr() with negative length" />
-<commit votes="steveh tonyc khw" id="e13dc8886fcabf88a521e8e73c358157b1fa4c8a" ticket="131627" desc="[perl #131627] Fix multideref for $x{qw/a/->$*}" />
 <commit votes="steveh tonyc" id="e26c6904d9f9f5ea818e590331b14038279332d1" ticket="131645" desc="[perl #131645] Fix assert fail in pp_sselect" />
-<commit votes="steveh tonyc khw" id="67c3640a57440a4e9e224e9164ac9f39bdc9376f" ticket="131570" desc="(perl #131570) don't skip the temps stack entry we just allocated" />
-<commit votes="steveh tonyc khw" id="6091bd4ca4a4a4c9b6f8cadddb53c19b96748a04" ticket="131597" desc="(perl #131597) ensure the GV slot is filled for our [%$@]foo: attr" />
-<commit votes="steveh tonyc khw" id="b54564c32e53d4c517e4d4810eeb633be80649a9" ticket="131627" desc="[perl #131627] extend stack in scalar-context pp_list when no args" />
 
 </div>
 
 <div><h3>Regression Fixes</h3>
-
-<commit votes="steveh tonyc khw" id="0a31ee11c8f69d509334d0813d833cddacf9dacb" ticket="131371" desc="add X&lt;s&gt; to s/// in perlop (RT #131371)" />
-<commit votes="steveh tonyc khw" id="2c2da8e7f0f6325fab643997a536072633fa0cf8" ticket="131190" desc="Fix #131190 - UTF8 code improperly casting negative integer to U8 in comparison" />
 
 </div>
 
@@ -80,12 +67,6 @@ Take care when cherry-picking this: The test count isn't adjusted correctly by G
 
 <div><h3>Portability Fixes</h3>
 
-need all three of the following if we use any
-<commit votes="steveh tonyc khw" id="66c5e3f2ab554a89dfc00689602414ac21ea66f6" ticket="131337" desc="Patch suggested by Craig Berry for RT 131337." />
-<commit votes="steveh tonyc khw" id="21a33adc37856aaedd4bf756d5dca47bdc4f7b50" ticket="131337" desc="When building with g++ on FreeBSD, explicitly set 'usedl' and 'dlsrc'." />
-<commit votes="steveh tonyc khw" id="2c8efe4079b75c61cf34425054539a9c24913e9f" ticket="131337" desc="Simpler hints fix for [perl #131337]." />
-<commit votes="steveh tonyc khw" id="fd998cbffc88a8e50fa34259c36a8db338168383" ticket="" desc="make _GNU-ish function declarations visible on cygwin" />
-
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
@@ -93,8 +74,6 @@ need all three of the following if we use any
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="steveh tonyc khw" id="b7f366106e07d8d8d2efe8d65343329ebb32062b" ticket="131603" desc="Pod correction." />
 
 </div>
 
