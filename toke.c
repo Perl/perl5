@@ -1829,14 +1829,14 @@ S_incline(pTHX_ const char *s, const char *end)
 		    }
 		    else if (GvAV(cfgv)) {
 			AV * const av = GvAV(cfgv);
-			const I32 start = CopLINE(PL_curcop)+1;
-			I32 items = AvFILLp(av) - start;
+			const line_t start = CopLINE(PL_curcop)+1;
+			SSize_t items = AvFILLp(av) - start;
 			if (items > 0) {
 			    AV * const av2 = GvAVn(gv2);
 			    SV **svp = AvARRAY(av) + start;
-			    I32 l = (I32)line_num+1;
-			    while (items--)
-				av_store(av2, l++, SvREFCNT_inc(*svp++));
+			    Size_t l = line_num+1;
+			    while (items-- && l < SSize_t_MAX && l == (line_t)l)
+				av_store(av2, (SSize_t)l++, SvREFCNT_inc(*svp++));
 			}
 		    }
 		}
