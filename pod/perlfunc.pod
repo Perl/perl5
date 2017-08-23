@@ -4969,7 +4969,7 @@ of values, as follows:
           those.  Raises an exception otherwise.)
 
     i  A signed integer value.
-    I  A unsigned integer value.
+    I  An unsigned integer value.
          (This 'integer' is _at_least_ 32 bits wide.  Its exact
           size depends on what a local C compiler calls 'int'.)
 
