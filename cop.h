@@ -35,9 +35,7 @@ struct jmpenv {
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
     U16                 je_old_delaymagic; /* saved PL_delaymagic */
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
     SSize_t             je_old_stack_hwm;
-#endif
 };
 
 typedef struct jmpenv JMPENV;
