@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 837;  # Update this when adding/deleting tests.
+plan tests => 838;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
