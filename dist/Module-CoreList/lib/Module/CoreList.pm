@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use version;
-$VERSION = '5.20170821';
+$VERSION = '5.20170903';
 
 sub _undelta {
     my ($delta) = @_;
@@ -327,6 +327,7 @@ sub changes_between {
     5.024002 => '2017-07-15',
     5.027002 => '2017-07-20',
     5.027003 => '2017-08-21',
+    5.026001 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -14412,6 +14413,21 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.026001 => {
+        delta_from => 5.026000,
+        changed => {
+            'B::Op_private'         => '5.026001',
+            'Config'                => '5.026001',
+            'Module::CoreList'      => '5.20170903',
+            'Module::CoreList::TieHashDelta'=> '5.20170903',
+            'Module::CoreList::Utils'=> '5.20170903',
+            '_charnames'            => '1.45',
+            'base'                  => '2.26',
+            'charnames'             => '1.45',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -15210,6 +15226,13 @@ sub is_core
         delta_from => 5.027002,
         changed => {
             'B::Debug'              => '1',
+        },
+        removed => {
+        }
+    },
+    5.026001 => {
+        delta_from => 5.026000,
+        changed => {
         },
         removed => {
         }
@@ -16023,7 +16046,7 @@ sub is_core
     'Test2::Event::Encoding'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Exception'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Generic' => 'http://github.com/Test-More/test-more/issues',
-    'Test2::Event::Info'    => 'http://github.com/Test-More/test-more/issues',
+    'Test2::Event::Info'    => undef,
     'Test2::Event::Note'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Ok'      => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Plan'    => 'http://github.com/Test-More/test-more/issues',
