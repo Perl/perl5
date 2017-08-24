@@ -14110,14 +14110,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.027000 => {
-        delta_from => 5.026000,
+        delta_from => 5.026,
         changed => {
             'B::Op_private'         => '5.027000',
             'Config'                => '5.027',
-            'feature'               => '1.48',
             'Module::CoreList'      => '5.20170531',
             'Module::CoreList::TieHashDelta'=> '5.20170531',
             'Module::CoreList::Utils'=> '5.20170531',
+            'feature'               => '1.48',
         },
         removed => {
         }
@@ -14882,7 +14882,7 @@ sub is_core
         }
     },
     5.027000 => {
-        delta_from => 5.026000,
+        delta_from => 5.026,
         changed => {
         },
         removed => {
