@@ -9438,10 +9438,13 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
-        if ((skip = s < PL_bufend && isSPACE(*s)))
+        if ((skip = s < PL_bufend && isSPACE(*s))) {
             /* Avoid incrementing line numbers or resetting PL_linestart,
                in case we have to back up.  */
+            STRLEN s_off = s - SvPVX(PL_linestr);
             s2 = peekspace(s);
+            s = SvPVX(PL_linestr) + s_off;
+        }
         else
             s2 = s;
 
