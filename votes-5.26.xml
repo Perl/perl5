@@ -67,6 +67,8 @@ Fixes a problem with the previous patch:
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="craigb" id="774e46341e1837e52ab0da20f9a8d251f2e27065" ticket="" desc="Fix missing break in tovmsspec." />
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
