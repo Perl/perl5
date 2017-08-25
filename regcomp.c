@@ -12159,14 +12159,16 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	}
         sv_catpv(substitute_parse, ")");
 
-        RExC_parse = RExC_start = RExC_adjusted_start = SvPV(substitute_parse,
-                                                             len);
+        len = SvCUR(substitute_parse);
 
 	/* Don't allow empty number */
 	if (len < (STRLEN) 8) {
             RExC_parse = endbrace;
 	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
+
+        RExC_parse = RExC_start = RExC_adjusted_start
+                                              = SvPV_nolen(substitute_parse);
 	RExC_end = RExC_parse + len;
 
         /* The values are Unicode, and therefore not subject to recoding, but
