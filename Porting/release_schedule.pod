@@ -24,14 +24,14 @@ Code freezes (which happen in the 5.27.X series)
 =head2 Perl 5.26
 
   2017-05-30  5.26.0 ✓        Sawyer X
-  2017-08-??  5.26.1          Steve Hay
+  2017-09-??  5.26.1          Steve Hay
 
 =head2 Perl 5.24
 
   2016-05-09  5.24.0 ✓        Ricardo Signes
   2017-01-14  5.24.1 ✓        Steve Hay
   2017-07-15  5.24.2 ✓        Steve Hay
-  2017-??-??  5.24.3          Steve Hay
+  2017-10-??  5.24.3          Steve Hay
 
 =head2 Perl 5.22
 
