@@ -179,6 +179,11 @@ EXPECT
 Prototype after '@' for main::foo : @\x{30cb} at (eval 1) line 1.
 Illegal character in prototype for main::foo : @\x{30cb} at (eval 1) line 1.
 ########
+use warnings;
+sub f ([)
+EXPECT
+Missing ']' in prototype for main::f : [ at - line 2.
+########
 # toke.c
 $a =~ m/$foo/eq;
 $a =~ s/$foo/fool/seq;
