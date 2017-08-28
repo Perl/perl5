@@ -5785,8 +5785,10 @@ expression, but with an empty argument list, like this:
 #define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED              \
                         DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 #define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()                    \
-                DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;     \
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
+            STMT_START {                                            \
+                DECLARATION_FOR_LC_NUMERIC_MANIPULATION;            \
+                STORE_LC_NUMERIC_SET_TO_NEEDED();                   \
+            STMT_END
 #define LOCK_NUMERIC_STANDARD() LOCK_LC_NUMERIC_STANDARD()
 #define RESTORE_NUMERIC_LOCAL() RESTORE_LC_NUMERIC_UNDERLYING()
 #define RESTORE_NUMERIC_STANDARD() RESTORE_LC_NUMERIC_STANDARD()
