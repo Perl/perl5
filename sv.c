@@ -2666,11 +2666,11 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	/* The logic to use SVt_PVNV if necessary is in sv_upgrade.  */
 	sv_upgrade(sv, SVt_NV);
 	DEBUG_c({
-	    STORE_NUMERIC_LOCAL_SET_STANDARD();
+	    STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD();
 	    PerlIO_printf(Perl_debug_log,
 			  "0x%" UVxf " num(%" NVgf ")\n",
 			  PTR2UV(sv), SvNVX(sv));
-	    RESTORE_NUMERIC_LOCAL();
+	    RESTORE_LC_NUMERIC_UNDERLYING();
 	});
     }
     else if (SvTYPE(sv) < SVt_PVNV)
@@ -2807,10 +2807,10 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	return 0.0;
     }
     DEBUG_c({
-	STORE_NUMERIC_LOCAL_SET_STANDARD();
+	STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD();
 	PerlIO_printf(Perl_debug_log, "0x%" UVxf " 2nv(%" NVgf ")\n",
 		      PTR2UV(sv), SvNVX(sv));
-	RESTORE_NUMERIC_LOCAL();
+	RESTORE_LC_NUMERIC_UNDERLYING();
     });
     return SvNVX(sv);
 }
