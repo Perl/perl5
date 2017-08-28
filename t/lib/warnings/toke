@@ -138,9 +138,12 @@ use utf8;
 use open qw( :utf8 :std );
 use warnings;
 eval "sub foo (@\0) {}";
+eval "sub foo2 :prototype(@\0) {}";
 EXPECT
 Prototype after '@' for main::foo : @\0 at (eval 1) line 1.
 Illegal character in prototype for main::foo : @\0 at (eval 1) line 1.
+Prototype after '@' for main::foo2 : @\x{0} at (eval 2) line 1.
+Illegal character in prototype for main::foo2 : @\x{0} at (eval 2) line 1.
 ########
 BEGIN {
     if (ord('A') == 193) {
@@ -180,9 +183,11 @@ Prototype after '@' for main::foo : @\x{30cb} at (eval 1) line 1.
 Illegal character in prototype for main::foo : @\x{30cb} at (eval 1) line 1.
 ########
 use warnings;
-sub f ([)
+sub f ([);
+sub f :prototype([)
 EXPECT
 Missing ']' in prototype for main::f : [ at - line 2.
+Missing ']' in prototype for main::f : [ at - line 3.
 ########
 # toke.c
 $a =~ m/$foo/eq;
@@ -1303,7 +1308,7 @@ sub proto_after_hashref(\%$);
 sub proto_after_hashref2(\[%$]);
 sub underscore_last_pos($_);
 sub underscore2($_;$);
-sub underscore_fail($_$);
+sub underscore_fail($_$); sub underscore_fail2 : prototype($_$);
 sub underscore_after_at(@_);
 our sub hour (@$);
 my sub migh (@$);
@@ -1321,6 +1326,7 @@ EXPECT
 Prototype after '@' for main::proto_after_array : @$ at - line 3.
 Prototype after '%' for main::proto_after_hash : %$ at - line 7.
 Illegal character after '_' in prototype for main::underscore_fail : $_$ at - line 12.
+Illegal character after '_' in prototype for main::underscore_fail2 : $_$ at - line 12.
 Prototype after '@' for main::underscore_after_at : @_ at - line 13.
 Prototype after '@' for hour : @$ at - line 14.
 Prototype after '@' for migh : @$ at - line 15.

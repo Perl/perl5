@@ -1685,6 +1685,13 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
 	                     origlen, UNI_DISPLAY_ISPRINT)
 	    : pv_pretty(tmpsv, p, origlen, 60, NULL, NULL, PERL_PV_ESCAPE_NONASCII);
 
+	if (curstash && !memchr(SvPVX(name), ':', SvCUR(name))) {
+	    SV *name2 = sv_2mortal(newSVsv(PL_curstname));
+	    sv_catpvs(name2, "::");
+	    sv_catsv(name2, (SV *)name);
+	    name = name2;
+	}
+
 	if (proto_after_greedy_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 			"Prototype after '%c' for %" SVf " : %s",

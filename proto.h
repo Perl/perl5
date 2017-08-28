@@ -4699,7 +4699,7 @@ STATIC bool	S_looks_like_bool(pTHX_ const OP* o);
 #define PERL_ARGS_ASSERT_LOOKS_LIKE_BOOL	\
 	assert(o)
 STATIC OP*	S_modkids(pTHX_ OP *o, I32 type);
-STATIC void	S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name);
+STATIC void	S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name, bool curstash);
 #define PERL_ARGS_ASSERT_MOVE_PROTO_ATTR	\
 	assert(proto); assert(attrs); assert(name)
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
