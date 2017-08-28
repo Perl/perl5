@@ -96,7 +96,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		    else
 			subname=(SV *)CvGV((const CV *)sv);
 		    if (ckWARN(WARN_ILLEGALPROTO))
-			Perl_validate_proto(aTHX_ subname, proto, TRUE);
+			Perl_validate_proto(aTHX_ subname, proto, TRUE, 0);
 		    Perl_cv_ckproto_len_flags(aTHX_ (const CV *)sv,
 		                                    (const GV *)subname,
 		                                    name+10,

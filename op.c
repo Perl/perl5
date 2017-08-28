@@ -3761,7 +3761,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
         else
             svname = (SV *)name;
         if (ckWARN(WARN_ILLEGALPROTO))
-            (void)validate_proto(svname, cSVOPx_sv(new_proto), TRUE);
+            (void)validate_proto(svname, cSVOPx_sv(new_proto), TRUE, 0);
         if (*proto && ckWARN(WARN_PROTOTYPE)) {
             STRLEN old_len, new_len;
             const char * oldp = SvPV(cSVOPx_sv(*proto), old_len);

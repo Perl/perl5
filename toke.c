@@ -1623,7 +1623,7 @@ Note that C<NULL> is a valid C<proto> and will always return C<true>.
  */
 
 bool
-Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
+Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
 {
     STRLEN len, origlen;
     char *p;
@@ -8636,7 +8636,8 @@ Perl_yylex(pTHX)
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
-		    (void)validate_proto(PL_subname, PL_lex_stuff, ckWARN(WARN_ILLEGALPROTO));
+		    (void)validate_proto(PL_subname, PL_lex_stuff,
+					 ckWARN(WARN_ILLEGALPROTO), 0);
 		    have_proto = TRUE;
 
 		    s = skipspace(s);
