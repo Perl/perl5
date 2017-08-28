@@ -1268,7 +1268,7 @@ ApOM	|int	|init_i18nl14n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
 Xpn	|void	|_warn_problematic_locale
 p	|void	|new_numeric	|NULLOK const char* newcoll
-Xp	|void	|set_numeric_local
+Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
 ApM	|bool	|_is_in_locale_category|const bool compiling|const int category
 Apd	|void	|sync_locale

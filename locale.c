@@ -201,8 +201,8 @@ Perl_new_numeric(pTHX_ const char *newnum)
      * It installs this locale as the current underlying default.
      *
      * The default locale and the C locale can be toggled between by use of the
-     * set_numeric_local() and set_numeric_standard() functions, which should
-     * probably not be called directly, but only via macros like
+     * set_numeric_underlying() and set_numeric_standard() functions, which
+     * should probably not be called directly, but only via macros like
      * SET_NUMERIC_STANDARD() in perl.h.
      *
      * The toggling is necessary mainly so that a non-dot radix decimal point
@@ -289,7 +289,7 @@ Perl_set_numeric_standard(pTHX)
 }
 
 void
-Perl_set_numeric_local(pTHX)
+Perl_set_numeric_underlying(pTHX)
 {
 
 #ifdef USE_LOCALE_NUMERIC

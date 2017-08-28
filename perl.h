@@ -5690,14 +5690,14 @@ expression, but with an empty argument list, like this:
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED()                                  \
     if (IN_LC(LC_NUMERIC)) {                                                \
         if (_NOT_IN_NUMERIC_UNDERLYING) {                                   \
-            Perl_set_numeric_local(aTHX);                                   \
+            Perl_set_numeric_underlying(aTHX);                              \
             _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;      \
         }                                                                   \
     }                                                                       \
     else {                                                                  \
         if (_NOT_IN_NUMERIC_STANDARD) {                                     \
             SET_NUMERIC_STANDARD();                                         \
-            _restore_LC_NUMERIC_function = &Perl_set_numeric_local;         \
+            _restore_LC_NUMERIC_function = &Perl_set_numeric_underlying;    \
         }                                                                   \
     }
 
@@ -5715,26 +5715,26 @@ expression, but with an empty argument list, like this:
 
 #  define SET_NUMERIC_UNDERLYING()                                          \
 	STMT_START { if (_NOT_IN_NUMERIC_UNDERLYING)                        \
-                                Perl_set_numeric_local(aTHX); } STMT_END
+                            Perl_set_numeric_underlying(aTHX); } STMT_END
 
 /* The rest of these LC_NUMERIC macros toggle to one or the other state, with
  * the RESTORE_foo ones called to switch back, but only if need be */
 #  define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()                        \
-	bool _was_local = _NOT_IN_NUMERIC_STANDARD;                         \
-	if (_was_local) Perl_set_numeric_standard(aTHX);
+	bool _was_underlying = _NOT_IN_NUMERIC_STANDARD;                         \
+	if (_was_underlying) Perl_set_numeric_standard(aTHX);
 
 /* Doesn't change to underlying locale unless within the scope of some form of
  * 'use locale'.  This is the usual desired behavior. */
 #  define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()        \
 	bool _was_standard = _NOT_IN_NUMERIC_UNDERLYING                     \
                             && IN_LC(LC_NUMERIC);                           \
-	if (_was_standard) Perl_set_numeric_local(aTHX);
+	if (_was_standard) Perl_set_numeric_underlying(aTHX);
 
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
 #  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()            \
     if (_NOT_IN_NUMERIC_UNDERLYING) {                                       \
-        Perl_set_numeric_local(aTHX);                                       \
+        Perl_set_numeric_underlying(aTHX);                                       \
         _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;          \
     }
 
@@ -5753,8 +5753,8 @@ expression, but with an empty argument list, like this:
                 }                                           \
             } STMT_END
 
-#  define RESTORE_LC_NUMERIC_UNDERLYING()                   \
-	if (_was_local) Perl_set_numeric_local(aTHX);
+#  define RESTORE_LC_NUMERIC_UNDERLYING()                       \
+	if (_was_underlying) Perl_set_numeric_underlying(aTHX);
 
 #  define RESTORE_LC_NUMERIC_STANDARD()                     \
     if (_restore_LC_NUMERIC_function) {                     \
