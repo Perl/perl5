@@ -361,7 +361,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Parsing a C<sub> definition could cause a use after free if the C<sub>
+keyword was followed by whitespace including newlines (and comments.)
+[perl #131836]
 
 =back
 
