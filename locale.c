@@ -211,7 +211,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
      *
      * This sets several interpreter-level variables:
      * PL_numeric_name  The underlying locale's name: a copy of 'newnum'
-     * PL_numeric_local A boolean indicating if the toggled state is such
+     * PL_numeric_underlying  A boolean indicating if the toggled state is such
      *                  that the current locale is the program's underlying
      *                  locale
      * PL_numeric_standard An int indicating if the toggled state is such
@@ -233,14 +233,14 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	Safefree(PL_numeric_name);
 	PL_numeric_name = NULL;
 	PL_numeric_standard = TRUE;
-	PL_numeric_local = TRUE;
+	PL_numeric_underlying = TRUE;
 	return;
     }
 
     save_newnum = stdize_locale(savepv(newnum));
 
     PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
-    PL_numeric_local = TRUE;
+    PL_numeric_underlying = TRUE;
 
     if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
 	Safefree(PL_numeric_name);
@@ -273,7 +273,7 @@ Perl_set_numeric_standard(pTHX)
 
     do_setlocale_c(LC_NUMERIC, "C");
     PL_numeric_standard = TRUE;
-    PL_numeric_local = isNAME_C_OR_POSIX(PL_numeric_name);
+    PL_numeric_underlying = isNAME_C_OR_POSIX(PL_numeric_name);
     set_numeric_radix(0);
 
 #  ifdef DEBUGGING
@@ -302,7 +302,7 @@ Perl_set_numeric_local(pTHX)
 
     do_setlocale_c(LC_NUMERIC, PL_numeric_name);
     PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
-    PL_numeric_local = TRUE;
+    PL_numeric_underlying = TRUE;
     set_numeric_radix(1);
 
 #  ifdef DEBUGGING

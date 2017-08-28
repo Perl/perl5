@@ -5682,7 +5682,7 @@ expression, but with an empty argument list, like this:
  * contrary be noops, in the dynamic scope by setting PL_numeric_standard to 2.
  * */
 #  define _NOT_IN_NUMERIC_UNDERLYING                                        \
-                        (! PL_numeric_local && PL_numeric_standard < 2)
+                        (! PL_numeric_underlying && PL_numeric_standard < 2)
 
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION                           \
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL

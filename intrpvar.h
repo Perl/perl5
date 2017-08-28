@@ -613,9 +613,9 @@ PERLVARI(I, perl_destruct_level, signed char,	0)
 #ifdef USE_LOCALE_NUMERIC
 
 PERLVARI(I, numeric_standard, int, TRUE)
-					/* Assume simple numerics */
-PERLVARI(I, numeric_local, bool, TRUE)
-					/* Assume local numerics */
+					/* Assume C locale numerics */
+PERLVARI(I, numeric_underlying, bool, TRUE)
+					/* Assume underlying locale numerics */
 PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
