@@ -3372,7 +3372,11 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 	SAVEGENERICSV(PL_curstash);
 	PL_curstash = (HV *)CopSTASH(PL_curcop);
 	if (SvTYPE(PL_curstash) != SVt_PVHV) PL_curstash = NULL;
-	else SvREFCNT_inc_simple_void(PL_curstash);
+	else {
+	    SvREFCNT_inc_simple_void(PL_curstash);
+	    save_item(PL_curstname);
+	    sv_sethek(PL_curstname, HvNAME_HEK(PL_curstash));
+	}
     }
     /* XXX:ajgo do we really need to alloc an AV for begin/checkunit */
     SAVESPTR(PL_beginav);

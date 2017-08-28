@@ -189,6 +189,12 @@ EXPECT
 Missing ']' in prototype for main::f : [ at - line 2.
 Missing ']' in prototype for main::f : [ at - line 3.
 ########
+use warnings;
+package bar { sub bar { eval q"sub foo ([)" } }
+bar::bar
+EXPECT
+Missing ']' in prototype for bar::foo : [ at (eval 1) line 1.
+########
 # toke.c
 $a =~ m/$foo/eq;
 $a =~ s/$foo/fool/seq;
