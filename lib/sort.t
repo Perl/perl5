@@ -130,8 +130,23 @@ sub main {
     }
 }
 
-# Test with no pragma still loaded -- stability expected (this is a mergesort)
+# Test with no pragma yet loaded. Stability is expected from default sort.
 main(sub { sort {&{$_[0]}} @{$_[1]} }, 0);
+
+# Verify that we have eliminated the segfault that could be triggered
+# by invoking a sort as part of a comparison routine.
+# No need for an explicit test. If we don't segfault, we're good.
+
+{
+    sub dumbsort {
+	my ($a, $b) = @_;
+	use sort qw( defaults stable );
+	my @ignore = sort (5,4,3,2,1);
+	return $a <=> $b;
+    }
+    use sort qw( defaults _qsort stable );
+    my @nested = sort { dumbsort($a,$b) } (3,2,2,1);
+}
 
 {
     use sort qw(_qsort);
