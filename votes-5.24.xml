@@ -25,7 +25,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="steveh tonyc" id="ddb03b72f46eae3c278f28e8758e87b9c98c66a1" ticket="131260" desc="avoid a memory wrap in sv_vcatpvfn_flags()"/>
+<commit votes="steveh tonyc jhi" id="ddb03b72f46eae3c278f28e8758e87b9c98c66a1" ticket="131260" desc="avoid a memory wrap in sv_vcatpvfn_flags()"/>
 
 </div>
 

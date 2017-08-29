@@ -29,12 +29,12 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="sprout arc" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
+<commit votes="sprout arc jhi" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
 
 <commit votes="sprout xsawyerx arc" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
 <commit votes="sprout arc" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
 
-<commit votes="sprout arc" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
+<commit votes="sprout arc jhi" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
 <commit votes="sprout" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
 
 <commit votes="" id="" ticket="123878" desc=""/>
@@ -112,9 +112,9 @@ the first one required manual backporting (available on request).
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="jkeenan arc" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
+<commit votes="jkeenan arc jhi" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
 <commit votes="jkeenan sprout arc" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
-<commit votes="jkeenan arc" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
+<commit votes="jkeenan arc jhi" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
 
 </div>
 
