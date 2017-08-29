@@ -32,13 +32,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="khw steveh jhi" id="1d5030e143202c1e963e1fc91eb6f3afaa2df83e" ticket="131646" desc="[perl #131646] 5.26 regression: Assert fail instead of proper error msg" />
-Fixes a problem with the previous patch:
-<commit votes="tonyc steveh khw" id="9c6b56dc65cdd9256fbe04a7baf4f085db1c04dd" ticket="131646" desc="(perl #131646) make the test less fragile" />
-
-<commit votes="steveh tonyc jhi" id="d7e3f70f30811328d2f6ae57e5892deccf64d0b2" ticket="105930" desc="set up catchable runloops early enough" />
-<commit votes="steveh tonyc jhi" id="e26c6904d9f9f5ea818e590331b14038279332d1" ticket="131645" desc="[perl #131645] Fix assert fail in pp_sselect" />
-
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -51,23 +44,9 @@ Fixes a problem with the previous patch:
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh khw jhi" id="fe7ba591228c20c0840941f6994ce3055969d50f" ticket="" desc="Fix dmake build breakage when using Visual C++" />
-
-(This needs the AUTHORS update in d1b368f612b42c74923f42155c5381d9e344d53a too:)
-<commit votes="steveh khw jhi" id="b5749b6710c39eba669f84c841b0999029955dfa" ticket="" desc="correct PREMSVC80 typo" />
-
-(Not sure if supporting a new compiler version constitutes a "fix"?:)
-<commit votes="steveh khw jhi" id="58998b2a913ef6f390e2e9c38e455a3ff8473960" ticket="" desc="Update nmake for VS 2017" />
-<commit votes="steveh khw jhi" id="82cad14406dfff5f5a8b6b67da3ce16840f06274" ticket="" desc="Update dmake for VS 2017" />
-<commit votes="steveh khw jhi" id="74102a88afc9d8f1973892ce66cf9a83e79d043a" ticket="" desc="Fix up CCINCDIR/CCLIBDIR for VC++ 14.1 (and VC++ 8.0-14.0 too!)" />
-<commit votes="steveh khw jhi" id="88b13658991e60bf62462d089d8bbf592f48ce0c" ticket="" desc="Update gmake for VS 2017" />
-<commit votes="steveh khw jhi" id="d8efeb4672ed789e8b5d885676607ec8487984d5" ticket="" desc="We now support building with Visual Studio 2017 (VC++ 14.1)" />
-
 </div>
 
 <div><h3>Portability Fixes</h3>
-
-<commit votes="craigb jhi" id="774e46341e1837e52ab0da20f9a8d251f2e27065" ticket="" desc="Fix missing break in tovmsspec." />
 
 </div>
 
