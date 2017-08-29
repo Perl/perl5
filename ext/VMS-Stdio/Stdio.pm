@@ -13,7 +13,7 @@ use Carp '&croak';
 use DynaLoader ();
 use Exporter ();
  
-$VERSION = '2.41';
+$VERSION = '2.42';
 @ISA = qw( Exporter DynaLoader IO::File );
 @EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
               &O_RDONLY &O_RDWR  &O_TRUNC &O_WRONLY );
@@ -47,30 +47,6 @@ sub AUTOLOAD {
 
 sub DESTROY { close($_[0]); }
 
-
-################################################################################
-# Intercept calls to old VMS::stdio package, complain, and hand off
-# This will be removed in a future version of VMS::Stdio
-
-package VMS::stdio;
-
-sub AUTOLOAD {
-  my($func) = $AUTOLOAD;
-  $func =~ s/.*:://;
-  # Cheap trick: we know DynaLoader has required Carp.pm
-  Carp::carp("Old package VMS::stdio is now VMS::Stdio; please update your code");
-  if ($func eq 'vmsfopen') {
-    Carp::carp("Old function &vmsfopen is now &vmsopen");
-    goto &VMS::Stdio::vmsopen;
-  }
-  elsif ($func eq 'fgetname') {
-    Carp::carp("Old function &fgetname is now &getname");
-    goto &VMS::Stdio::getname;
-  }
-  else { goto &{"VMS::Stdio::$func"}; }
-}
-
-package VMS::Stdio;  # in case we ever use AutoLoader
 
 1;
 
@@ -138,13 +114,11 @@ is done to save startup time for users who don't wish to use
 the IO::File methods.
 
 B<Note:>  In order to conform to naming conventions for Perl
-extensions and functions, the name of this package has been
-changed to VMS::Stdio as of Perl 5.002, and the names of some
-routines have been changed.  Calls to the old VMS::stdio routines
-will generate a warning, and will be routed to the equivalent
-VMS::Stdio function.  This compatibility interface will be
-removed in a future release of this extension, so please
-update your code to use the new routines.
+extensions and functions, the name of this package was
+changed to from VMS::stdio to VMS::Stdio as of Perl 5.002, and the names of some
+routines were changed.  For many releases, calls to the old VMS::stdio routines
+would generate a warning, and then route to the equivalent
+VMS::Stdio function.  This compatibility interface has now been removed.
 
 =over 4
 
