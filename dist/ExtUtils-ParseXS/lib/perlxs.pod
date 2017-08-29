@@ -418,9 +418,9 @@ automatically designated as an output value.  For more complex functions
 the B<xsubpp> compiler will need help to determine which variables are output
 variables.
 
-This keyword will normally be used to complement the CODE:  keyword.
+This keyword will normally be used to complement the CODE: keyword.
 The RETVAL variable is not recognized as an output variable when the
-CODE: keyword is present.  The OUTPUT:  keyword is used in this
+CODE: keyword is present.  The OUTPUT: keyword is used in this
 situation to tell the compiler that RETVAL really is an output
 variable.
 
@@ -454,7 +454,7 @@ parameters (needed for hash or array element parameters that must be
 created if they didn't exist).  If for some reason, this behavior is
 not desired, the OUTPUT section may contain a C<SETMAGIC: DISABLE> line
 to disable it for the remainder of the parameters in the OUTPUT section.
-Likewise,  C<SETMAGIC: ENABLE> can be used to reenable it for the
+Likewise, C<SETMAGIC: ENABLE> can be used to reenable it for the
 remainder of the OUTPUT section.  See L<perlguts> for more details
 about 'set' magic.
 
@@ -654,8 +654,8 @@ from Perl with either of the following statements:
 
      $status = rpcb_gettime( $timep );
 
-The XSUB will look like the code  which  follows.   A  CODE:
-block  is used to call the real rpcb_gettime() function with
+The XSUB will look like the code which follows.  A CODE:
+block is used to call the real rpcb_gettime() function with
 the parameters in the correct order for that function.
 
      bool_t
@@ -1027,7 +1027,7 @@ to tell the B<xsubpp> compiler that the programmer is supplying the code to
 control the argument stack for the XSUBs return values.  Occasionally one
 will want an XSUB to return a list of values rather than a single value.
 In these cases one must use PPCODE: and then explicitly push the list of
-values on the stack.  The PPCODE: and CODE:  keywords should not be used
+values on the stack.  The PPCODE: and CODE: keywords should not be used
 together within the same XSUB.
 
 The actual difference between PPCODE: and CODE: sections is in the
@@ -1197,7 +1197,7 @@ contains the following statement will compile with only B<xsubpp> version
 =head2 The CLEANUP: Keyword
 
 This keyword can be used when an XSUB requires special cleanup procedures
-before it terminates.  When the CLEANUP:  keyword is used it must follow
+before it terminates.  When the CLEANUP: keyword is used it must follow
 any CODE:, or OUTPUT: blocks which are present in the XSUB.  The code
 specified for the cleanup block will be added as the last statements in
 the XSUB.
@@ -2166,7 +2166,7 @@ passed
 into it from the environment.  This is an important difference from a
 generic C language program, where the underlying locale is the "C"
 locale unless the program changes it.  As of v5.20, this underlying
-locale is completely hidden from pure perl code outside the lexical
+locale is completely hidden from pure Perl code outside the lexical
 scope of C<S<use locale>> except for a couple of function calls in the
 POSIX module which of necessity use it.  But the underlying locale, with
 that
