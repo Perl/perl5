@@ -28,6 +28,7 @@ use warnings;
 use Test::More tests => @TestSizes * 2	# sort() tests
 			* 6		# number of pragmas to test
 			+ 1 		# extra test for qsort instability
+			+ 1 		# extra test to demonstrate no segfault
 			+ 3		# tests for sort::current
 			+ 3;		# tests for "defaults" and "no sort"
 
@@ -135,17 +136,17 @@ main(sub { sort {&{$_[0]}} @{$_[1]} }, 0);
 
 # Verify that we have eliminated the segfault that could be triggered
 # by invoking a sort as part of a comparison routine.
-# No need for an explicit test. If we don't segfault, we're good.
 
 {
     sub dumbsort {
-	my ($a, $b) = @_;
-	use sort qw( defaults stable );
-	my @ignore = sort (5,4,3,2,1);
-	return $a <=> $b;
+        my ($a, $b) = @_;
+        use sort qw( defaults stable );
+        my @ignore = sort (5,4,3,2,1);
+        return $a <=> $b;
     }
     use sort qw( defaults _qsort stable );
     my @nested = sort { dumbsort($a,$b) } (3,2,2,1);
+    pass("No segfault when sort invoked as part of comparison routine: RT #131984");
 }
 
 {
