@@ -1524,6 +1524,11 @@ expression pattern.  Trying to do this in ordinary Perl code produces a
 value that prints out looking like SCALAR(0xdecaf).  Use the $1 form
 instead.
 
+=item Can't unweaken a nonreference
+
+(F) You attempted to unweaken something that was not a reference.  Only
+references can be unweakened.
+
 =item Can't weaken a nonreference
 
 (F) You attempted to weaken something that was not a reference.  Only
@@ -5202,6 +5207,11 @@ to use parens.  In any case, a hash requires key/value B<pairs>.
 =item Reference is already weak
 
 (W misc) You have attempted to weaken a reference that is already weak.
+Doing so has no effect.
+
+=item Reference is not weak
+
+(W misc) You have attempted to unweaken a reference that is not weak.
 Doing so has no effect.
 
 =item Reference to invalid group 0 in regex; marked by S<<-- HERE> in m/%s/

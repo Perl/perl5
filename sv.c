@@ -5961,7 +5961,8 @@ Weaken a reference: set the C<SvWEAKREF> flag on this RV; give the
 referred-to SV C<PERL_MAGIC_backref> magic if it hasn't already; and
 push a back-reference to this RV onto the array of backreferences
 associated with that magic.  If the RV is magical, set magic will be
-called after the RV is cleared.
+called after the RV is cleared.  Silently ignores C<undef> and warns
+on already-weak references.
 
 =cut
 */
@@ -5986,6 +5987,42 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
     Perl_sv_add_backref(aTHX_ tsv, sv);
     SvWEAKREF_on(sv);
     SvREFCNT_dec_NN(tsv);
+    return sv;
+}
+
+/*
+=for apidoc sv_rvunweaken
+
+Unweaken a reference: Clear the C<SvWEAKREF> flag on this RV; remove
+the backreference to this RV from the array of backreferences
+associated with the target SV, increment the refcount of the target.
+Silently ignores C<undef> and warns on non-weak references.
+
+=cut
+*/
+
+SV *
+Perl_sv_rvunweaken(pTHX_ SV *const sv)
+{
+    SV *tsv;
+
+    PERL_ARGS_ASSERT_SV_RVUNWEAKEN;
+
+    if (!SvOK(sv)) /* let undefs pass */
+        return sv;
+    if (!SvROK(sv))
+        Perl_croak(aTHX_ "Can't unweaken a nonreference");
+    else if (!SvWEAKREF(sv)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is not weak");
+        return sv;
+    }
+    else if (SvREADONLY(sv)) croak_no_modify();
+
+    tsv = SvRV(sv);
+    SvWEAKREF_off(sv);
+    SvROK_on(sv);
+    SvREFCNT_inc_NN(tsv);
+    Perl_sv_del_backref(aTHX_ tsv, sv);
     return sv;
 }
 
