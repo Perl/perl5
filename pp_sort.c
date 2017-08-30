@@ -1769,6 +1769,9 @@ PP(pp_sort)
                     base[i] = newSVsv(sv);
                 else
                     SvREFCNT_inc_simple_void_NN(sv);
+
+                if (SvWEAKREF(sv))
+                    sv_rvunweaken(sv);
             }
             av_clear(av);
             if (max > 0) {
