@@ -4420,6 +4420,21 @@ PP(pp_entersub)
 	assert(CvXSUB(cv));
 	CvXSUB(cv)(aTHX_ cv);
 
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+        /* This duplicates the check done in runops_debug(), but provides more
+         * information in the common case of the fault being with an XSUB.
+         *
+         * It should also catch an XSUB pushing more than it extends
+         * in scalar context.
+        */
+        if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
+            Perl_croak_nocontext(
+                "panic: XSUB %s::%s (%s) failed to extend arg stack: "
+                "base=%p, sp=%p, hwm=%p\n",
+                    HvNAME(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)), CvFILE(cv),
+                    PL_stack_base, PL_stack_sp,
+                    PL_stack_base + PL_curstackinfo->si_stack_hwm);
+#endif
 	/* Enforce some sanity in scalar context. */
 	if (is_scalar) {
             SV **svp = PL_stack_base + markix + 1;
