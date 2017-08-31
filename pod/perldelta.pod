@@ -361,6 +361,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
+The internal stack usage checks introduced in 5.27.2 is now also done
+by the C<entersub> operator when calling XSUBs.  This means we can
+report which XSUB failed to allocate enough stack space.  [perl
+#131975]
+
+=item *
+
 Parsing a C<sub> definition could cause a use after free if the C<sub>
 keyword was followed by whitespace including newlines (and comments.)
 [perl #131836]
