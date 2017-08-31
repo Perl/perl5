@@ -951,7 +951,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\014':		/* ^LAST_FH */
 	if (strEQ(remaining, "AST_FH")) {
-	    if (PL_last_in_gv) {
+	    if (PL_last_in_gv && (SV*)PL_last_in_gv != &PL_sv_undef) {
 		assert(isGV_with_GP(PL_last_in_gv));
 		SV_CHECK_THINKFIRST_COW_DROP(sv);
 		prepare_SV_for_RV(sv);
