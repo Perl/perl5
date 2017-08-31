@@ -370,6 +370,11 @@ keyword was followed by whitespace including newlines (and comments.)
 The tokenizer now correctly adjusts a parse pointer when skipping
 whitespace in a C< ${identifier} > construct.  [perl #131949]
 
+=item *
+
+Accesses to C<${^LAST_FH}> no longer assert after using any of a
+variety of I/O operations on a non-glob.  [perl #128263]
+
 =back
 
 =head1 Known Problems

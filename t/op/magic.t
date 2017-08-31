@@ -645,8 +645,6 @@ is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
 
 # all of these would set PL_last_in_gv to a non-GV which would
 # assert when referenced by the magic for ${^LAST_FH}.
-# Instead it should act like <$0> which NULLs PL_last_in_gv and the magic
-# returns that as undef.
 # The approach to fixing this has changed (#128263), but it's still useful
 # to check each op.
 for my $code ('tell $0', 'sysseek $0, 0, 0', 'seek $0, 0, 0', 'eof $0') {
