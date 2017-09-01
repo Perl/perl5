@@ -3669,6 +3669,7 @@ dist/Term-ReadLine/lib/Term/ReadLine.pm		Stub readline library
 dist/Term-ReadLine/t/AE.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/AETk.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/ReadLine.t			See if Term::ReadLine works
+dist/Term-ReadLine/t/ReadLine-STDERR.t		See if Term::ReadLine works
 dist/Term-ReadLine/t/Tk.t			See if Term::ReadLine works
 dist/Test/lib/Test.pm		A simple framework for writing test scripts
 dist/Test/t/05_about_verbose.t	See if Test works
