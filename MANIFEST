@@ -5699,6 +5699,7 @@ t/op/sprintf2.t			See if sprintf works
 t/op/srand.t			See if srand works
 t/op/sselect.t			See if 4 argument select works
 t/op/stash.t			See if %:: stashes work
+t/op/stash_parse_gv.t		See if parse_gv_stash_name works
 t/op/stat.t			See if stat works
 t/op/state.t			See if state variables work
 t/op/study.t			See if study works
