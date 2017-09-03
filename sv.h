@@ -2146,6 +2146,10 @@ See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
 	assert (!SvIOKp(sv));					       \
 	(SvFLAGS(sv) &= ~SVpgv_GP);				       \
     } STMT_END
+#ifdef PERL_CORE
+# define isGV_or_RVCV(kadawp) \
+    (isGV(kadawp) || (SvROK(kadawp) && SvTYPE(SvRV(kadawp)) == SVt_PVCV))
+#endif
 #define isREGEXP(sv) \
     (SvTYPE(sv) == SVt_REGEXP				      \
      || (SvFLAGS(sv) & (SVTYPEMASK|SVpgv_GP|SVf_FAKE))        \
