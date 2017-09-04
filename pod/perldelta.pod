@@ -382,6 +382,15 @@ whitespace in a C< ${identifier} > construct.  [perl #131949]
 Accesses to C<${^LAST_FH}> no longer assert after using any of a
 variety of I/O operations on a non-glob.  [perl #128263]
 
+=item *
+
+The C<Copy()>, C<Move()>, C<Zero()> macros and their variants now
+assert if the pointers supplied are C<NULL>.  ISO C considers
+supplying NULL pointers to the functions these macros are built upon
+as undefined behaviour even when their count parameters are zero.
+Based on these assertions and the original bug report three macro
+calls were made conditional. [perl #131746][perl #131892]
+
 =back
 
 =head1 Known Problems
