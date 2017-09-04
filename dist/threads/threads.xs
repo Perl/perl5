@@ -870,15 +870,18 @@ S_ithread_create(
            reallocated (and hence move) as a side effect of calls to
            perl_clone() and sv_dup_inc(). Hence copy the parameters
            somewhere under our control first, before duplicating.  */
+        if (num_params) {
 #if (PERL_VERSION > 8)
-        Copy(parent_perl->Istack_base + params_start, array, num_params, SV *);
+            Copy(parent_perl->Istack_base + params_start, array, num_params, SV *);
 #else
-        Copy(parent_perl->Tstack_base + params_start, array, num_params, SV *);
+            Copy(parent_perl->Tstack_base + params_start, array, num_params, SV *);
 #endif
-        while (num_params--) {
-            *array = sv_dup_inc(*array, clone_param);
-            ++array;
+            while (num_params--) {
+                *array = sv_dup_inc(*array, clone_param);
+                ++array;
+            }
         }
+
 #if (PERL_VERSION > 13) || (PERL_VERSION == 13 && PERL_SUBVERSION > 1)
         Perl_clone_params_del(clone_param);
 #endif
