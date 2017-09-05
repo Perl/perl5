@@ -462,3 +462,21 @@ tr//\N{}-0/;
 EXPECT
 Unknown charname '' at - line 1, within string
 Execution of - aborted due to compilation errors.
+########
+# NAME octal fp with non-octal digits after the decimal point
+01.1234567p0;
+07.8p0;
+EXPECT
+Bareword found where operator expected at - line 2, near "8p0"
+	(Missing operator before p0?)
+syntax error at - line 2, near "8p0"
+Execution of - aborted due to compilation errors.
+########
+# NAME binary fp with non-binary digits after the decimal point
+0b1.10p0;
+0b1.2p0;
+EXPECT
+Bareword found where operator expected at - line 2, near "2p0"
+	(Missing operator before p0?)
+syntax error at - line 2, near "2p0"
+Execution of - aborted due to compilation errors.

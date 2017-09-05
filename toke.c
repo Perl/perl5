@@ -11078,9 +11078,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     NV nv_mult = 1.0;
 #endif
                     bool accumulate = TRUE;
-                    for (h++; (isXDIGIT(*h) || *h == '_'); h++) {
+                    U8 b;
+                    int lim = 1 << shift;
+                    for (h++; ((isXDIGIT(*h) && (b = XDIGIT_VALUE(*h)) < lim) ||
+                               *h == '_'); h++) {
                         if (isXDIGIT(*h)) {
-                            U8 b = XDIGIT_VALUE(*h);
                             significant_bits += shift;
 #ifdef HEXFP_UQUAD
                             if (accumulate) {

@@ -10,7 +10,7 @@ use strict;
 
 use Config;
 
-plan(tests => 112);
+plan(tests => 123);
 
 # Test hexfloat literals.
 
@@ -264,6 +264,20 @@ SKIP: {
     is sprintf("%a", eval("01400000000000000000.1p0")), "0x1.8p+54";
     is sprintf("%a", eval("0b110000000000000000000000000000000000000000000000000000000.1p0")), "0x1.8p+56";
 }
+
+# the implementation also allow for octal and binary fp
+is(01p0, 1);
+is(01.0p0, 1);
+is(01.00p0, 1);
+is(010.1p0, 8.125);
+is(00.400p1, 1);
+is(00p0, 0);
+is(01.1p0, 1.125);
+
+is(0b0p0, 0);
+is(0b1p0, 1);
+is(0b10p0, 2);
+is(0b1.1p0, 1.5);
 
 # sprintf %a/%A testing is done in sprintf2.t,
 # trickier than necessary because of long doubles,
