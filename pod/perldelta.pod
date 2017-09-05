@@ -89,7 +89,7 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Slightly improved performance when parsing stash names.  [perl #129990]
 
 =back
 
