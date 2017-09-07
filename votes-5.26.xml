@@ -4,9 +4,6 @@
 
 <div><h2>Tickets Listed in #131533: 5.26.1 blockers</h2>
 
-<commit votes="steveh khw arc" id="bab0f8e933b383b6bef406d79c2da340bbcded33" ticket="131522" desc="Resolve Perl #131522: Spurious 'Assuming NOT a POSIX class' warning" />
-<commit votes="steveh khw arc" id="d730a80128abafff1e47e2506c23a8c1a06cfef4" ticket="131522" desc="add test for [perl #131522] and fix test for (related) [perl #127581]" />
-
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
