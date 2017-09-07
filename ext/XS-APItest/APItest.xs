@@ -6544,6 +6544,13 @@ test_Gconvert(SV * number, SV * num_digits)
     OUTPUT:
         RETVAL
 
+SV *
+test_Perl_langinfo(SV * item)
+    CODE:
+        RETVAL = newSVpv(Perl_langinfo(SvIV(item)), 0);
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Backrefs
 
 void

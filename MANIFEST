@@ -4896,6 +4896,7 @@ parser.h			parser object header
 patchlevel.h			The current patch level of perl
 perl.c				main()
 perl.h				Global declarations
+perl_langinfo.h			Perl's version of <langinfo.h>
 perlapi.c			Perl API functions
 perlapi.h			Perl API function declarations
 perldtrace.d			D script for Perl probes

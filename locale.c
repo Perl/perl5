@@ -36,11 +36,8 @@
 
 #include "EXTERN.h"
 #define PERL_IN_LOCALE_C
+#include "perl_langinfo.h"
 #include "perl.h"
-
-#ifdef I_LANGINFO
-#   include <langinfo.h>
-#endif
 
 #include "reentr.h"
 
@@ -1021,6 +1018,598 @@ Perl_setlocale(int category, const char * locale)
     }
 
     return retval;
+
+
+}
+
+PERL_STATIC_INLINE const char *
+S_save_to_buffer(const char * string, char **buf, Size_t *buf_size, const Size_t offset)
+{
+    /* Copy the NUL-terminated 'string' to 'buf' + 'offset'.  'buf' has size 'buf_size',
+     * growing it if necessary */
+
+    const Size_t string_size = strlen(string) + offset + 1;
+
+    PERL_ARGS_ASSERT_SAVE_TO_BUFFER;
+
+    if (*buf_size == 0) {
+        Newx(*buf, string_size, char);
+        *buf_size = string_size;
+    }
+    else if (string_size > *buf_size) {
+        Renew(*buf, string_size, char);
+        *buf_size = string_size;
+    }
+
+    Copy(string, *buf + offset, string_size - offset, char);
+    return *buf;
+}
+
+/*
+
+=head1 Locale-related functions and macros
+
+=for apidoc Perl_langinfo
+
+This is an (almostª) drop-in replacement for the system C<L<nl_langinfo(3)>>,
+taking the same C<item> parameter values, and returning the same information.
+But it is more thread-safe than regular C<nl_langinfo()>, and hides the quirks
+of Perl's locale handling from your code, and can be used on systems that lack
+a native C<nl_langinfo>.
+
+Expanding on these:
+
+=over
+
+=item *
+
+It delivers the correct results for the C<RADIXCHAR> and C<THOUSESEP> items,
+without you having to write extra code.  The reason for the extra code would be
+because these are from the C<LC_NUMERIC> locale category, which is normally
+kept set to the C locale by Perl, no matter what the underlying locale is
+supposed to be, and so to get the expected results, you have to temporarily
+toggle into the underlying locale, and later toggle back.  (You could use
+plain C<nl_langinfo> and C<L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>> for this
+but then you wouldn't get the other advantages of C<Perl_langinfo()>; not
+keeping C<LC_NUMERIC> in the C locale would break a lot of CPAN, which is
+expecting the radix (decimal point) character to be a dot.)
+
+=item *
+
+Depending on C<item>, it works on systems that don't have C<nl_langinfo>, hence
+makes your code more portable.  Of the fifty-some possible items specified by
+the POSIX 2008 standard,
+L<http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
+only two are completely unimplemented.  It uses various techniques to recover
+the other items, including calling C<L<localeconv(3)>>, and C<L<strftime(3)>>,
+both of which are specified in C89, so should be always be available.  Later
+C<strftime()> versions have additional capabilities; C<""> is returned for
+those not available on your system.
+
+The details for those items which may differ from what this emulation returns
+and what a native C<nl_langinfo()> would return are:
+
+=over
+
+=item C<CODESET>
+
+=item C<ERA>
+
+Unimplemented, so returns C<"">.
+
+=item C<YESEXPR>
+
+=item C<NOEXPR>
+
+Only the values for English are returned.  Earlier POSIX standards also
+specified C<YESSTR> and C<NOSTR>, but these have been removed from POSIX 2008,
+and aren't supported by C<Perl_langinfo>.
+
+=item C<D_FMT>
+
+Always evaluates to C<%x>, the locale's appropriate date representation.
+
+=item C<T_FMT>
+
+Always evaluates to C<%X>, the locale's appropriate time representation.
+
+=item C<D_T_FMT>
+
+Always evaluates to C<%c>, the locale's appropriate date and time
+representation.
+
+=item C<CRNCYSTR>
+
+The return may be incorrect for those rare locales where the currency symbol
+replaces the radix character.
+Send email to L<mailto:perlbug@perl.org> if you have examples of it needing
+to work differently.
+
+=item C<ALT_DIGITS>
+
+Currently this gives the same results as Linux does.
+Send email to L<mailto:perlbug@perl.org> if you have examples of it needing
+to work differently.
+
+=item C<ERA_D_FMT>
+
+=item C<ERA_T_FMT>
+
+=item C<ERA_D_T_FMT>
+
+=item C<T_FMT_AMPM>
+
+These are derived by using C<strftime()>, and not all versions of that function
+know about them.  C<""> is returned for these on such systems.
+
+=back
+
+When using C<Perl_langinfo> on systems that don't have a native
+C<nl_langinfo()>, you must
+
+ #include "perl_langinfo.h"
+
+before the C<perl.h> C<#include>.  You can replace your C<langinfo.h>
+C<#include> with this one.  (Doing it this way keeps out the symbols that plain
+C<langinfo.h> imports into the namespace for code that doesn't need it.)
+
+You also should not use the bare C<langinfo.h> item names, but should preface
+them with C<PERL_>, so use C<PERL_RADIXCHAR> instead of plain C<RADIXCHAR>.
+The C<PERL_I<foo>> versions will also work for this function on systems that do
+have a native C<nl_langinfo>.
+
+=item *
+
+It is thread-friendly, returning its result in a buffer that won't be
+overwritten by another thread, so you don't have to code for that possibility.
+The buffer can be overwritten by the next call to C<nl_langinfo> or
+C<Perl_langinfo> in the same thread.
+
+=item *
+
+ªIt returns S<C<const char *>>, whereas plain C<nl_langinfo()> returns S<C<char
+*>>, but you are (only by documentation) forbidden to write into the buffer.
+By declaring this C<const>, the compiler enforces this restriction.  The extra
+C<const> is why this isn't an unequivocal drop-in replacement for
+C<nl_langinfo>.
+
+=back
+
+The original impetus for C<Perl_langinfo()> was so that code that needs to
+find out the current currency symbol, floating point radix character, or digit
+grouping separator can use, on all systems, the simpler and more
+thread-friendly C<nl_langinfo> API instead of C<L<localeconv(3)>> which is a
+pain to make thread-friendly.  For other fields returned by C<localeconv>, it
+is better to use the methods given in L<perlcall> to call
+L<C<POSIX::localeconv()>|POSIX/localeconv>, which is thread-friendly.
+
+=cut
+
+*/
+
+const char *
+#ifdef HAS_NL_LANGINFO
+Perl_langinfo(const nl_item item)
+#else
+Perl_langinfo(const int item)
+#endif
+{
+    bool toggle = TRUE;
+
+#if defined(HAS_NL_LANGINFO)
+#  if ! defined(USE_ITHREADS)
+
+    /* Single-thread, and nl_langinfo() is available.  Call it, switching to
+     * underlying LC_NUMERIC for those items dependent on it */
+
+    const char * retval;
+
+    if (toggle) {
+        if (item == PERL_RADIXCHAR || item == PERL_THOUSEP) {
+            setlocale(LC_NUMERIC, PL_numeric_name);
+        }
+        else {
+            toggle = FALSE;
+        }
+    }
+
+    retval = nl_langinfo(item);
+
+    if (toggle) {
+        setlocale(LC_NUMERIC, "C");
+    }
+
+    return retval;
+
+
+#  else
+
+    /* Multi-threaded, with native nl_langinfo().  Use it, copying result to
+     * per-thread buffer, and toggling LC_NUMERIC if necessary, all within a
+     * crtical section */
+
+    dTHX;
+
+    LOCALE_LOCK;
+
+    if (toggle) {
+        if (item == PERL_RADIXCHAR || item == PERL_THOUSEP) {
+            setlocale(LC_NUMERIC, PL_numeric_name);
+        }
+        else {
+            toggle = FALSE;
+        }
+    }
+
+    save_to_buffer(nl_langinfo(item), &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+
+    if (toggle) {
+        setlocale(LC_NUMERIC, "C");
+    }
+
+    LOCALE_UNLOCK;
+
+    return PL_langinfo_buf;
+
+#  endif
+#else   /* Below, emulate nl_langinfo as best we can */
+
+    dTHX;
+
+#  ifdef HAS_LOCALECONV
+
+    const struct lconv* lc;
+
+#  endif
+#  ifdef HAS_STRFTIME
+
+    struct tm tm;
+    bool return_format = FALSE; /* Return the %format, not the value */
+    const char * format;
+
+#  endif
+
+    /* We copy the results to a per-thread buffer, even if not multi-threaded.
+     * This is in part to simplify this code, and partly because we need a
+     * buffer anyway for strftime(), and partly because a call of localeconv()
+     * could otherwise wipe out the buffer, and the programmer would not be
+     * expecting this, as this is a nl_langinfo() substitute after all, so s/he
+     * might be thinking their localeconv() is safe until another localeconv()
+     * call. */
+
+    switch (item) {
+        Size_t len;
+        const char * retval;
+
+        /* These 2 are unimplemented */
+        case PERL_CODESET:
+        case PERL_ERA:	        /* For use with strftime() %E modifier */
+
+        default:
+            return "";
+
+        /* We use only an English set, since we don't know any more */
+        case PERL_YESEXPR:   return "^[+1yY]";
+        case PERL_NOEXPR:    return "^[-0nN]";
+
+#  ifdef HAS_LOCALECONV
+
+        case PERL_CRNCYSTR:
+
+            LOCALE_LOCK;
+
+            lc = localeconv();
+            if (! lc || ! lc->currency_symbol || strEQ("", lc->currency_symbol))
+            {
+                LOCALE_UNLOCK;
+                return "";
+            }
+
+            /* Leave the first spot empty to be filled in below */
+            save_to_buffer(lc->currency_symbol, &PL_langinfo_buf,
+                           &PL_langinfo_bufsize, 1);
+            if (lc->mon_decimal_point && strEQ(lc->mon_decimal_point, ""))
+            { /*  khw couldn't figure out how the localedef specifications
+                  would show that the $ should replace the radix; this is
+                  just a guess as to how it might work.*/
+                *PL_langinfo_buf = '.';
+            }
+            else if (lc->p_cs_precedes) {
+                *PL_langinfo_buf = '-';
+            }
+            else {
+                *PL_langinfo_buf = '+';
+            }
+
+            LOCALE_UNLOCK;
+            break;
+
+        case PERL_RADIXCHAR:
+        case PERL_THOUSEP:
+
+            LOCALE_LOCK;
+
+            if (toggle) {
+                setlocale(LC_NUMERIC, PL_numeric_name);
+            }
+
+            lc = localeconv();
+            if (! lc) {
+                retval = "";
+            }
+            else switch (item) {
+                case PERL_RADIXCHAR:
+                    if (! lc->decimal_point) {
+                        retval = "";
+                    }
+                    else {
+                        retval = lc->decimal_point;
+                    }
+                    break;
+
+                case PERL_THOUSEP:
+                    if (! lc->thousands_sep || strEQ("", lc->thousands_sep)) {
+                        retval = "";
+                    }
+                    else {
+                        retval = lc->thousands_sep;
+                    }
+                    break;
+
+                default:
+                    LOCALE_UNLOCK;
+                    Perl_croak(aTHX_ "panic: %s: %d: switch case: %d problem",
+                                            __FILE__, __LINE__, item);
+            }
+
+            save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+
+            if (toggle) {
+                setlocale(LC_NUMERIC, "C");
+            }
+
+            LOCALE_UNLOCK;
+
+            break;
+
+#  endif
+#  ifdef HAS_STRFTIME
+
+        /* These are defined by C89, so we assume that strftime supports them,
+         * and so are returned unconditionally; they may not be what the locale
+         * actually says, but should give good enough results for someone using
+         * them as formats (as opposed to trying to parse them to figure out
+         * what the locale says).  The other format ones are actually tested to
+         * verify they work on the platform */
+        case PERL_D_FMT:         return "%x";
+        case PERL_T_FMT:         return "%X";
+        case PERL_D_T_FMT:       return "%c";
+
+        /* These formats are only available in later strfmtime's */
+        case PERL_ERA_D_FMT: case PERL_ERA_T_FMT: case PERL_ERA_D_T_FMT:
+        case PERL_T_FMT_AMPM:
+
+        /* The rest can be gotten from most versions of strftime(). */
+        case PERL_ABDAY_1: case PERL_ABDAY_2: case PERL_ABDAY_3:
+        case PERL_ABDAY_4: case PERL_ABDAY_5: case PERL_ABDAY_6:
+        case PERL_ABDAY_7:
+        case PERL_ALT_DIGITS:
+        case PERL_AM_STR: case PERL_PM_STR:
+        case PERL_ABMON_1: case PERL_ABMON_2: case PERL_ABMON_3:
+        case PERL_ABMON_4: case PERL_ABMON_5: case PERL_ABMON_6:
+        case PERL_ABMON_7: case PERL_ABMON_8: case PERL_ABMON_9:
+        case PERL_ABMON_10: case PERL_ABMON_11: case PERL_ABMON_12:
+        case PERL_DAY_1: case PERL_DAY_2: case PERL_DAY_3: case PERL_DAY_4:
+        case PERL_DAY_5: case PERL_DAY_6: case PERL_DAY_7:
+        case PERL_MON_1: case PERL_MON_2: case PERL_MON_3: case PERL_MON_4:
+        case PERL_MON_5: case PERL_MON_6: case PERL_MON_7: case PERL_MON_8:
+        case PERL_MON_9: case PERL_MON_10: case PERL_MON_11: case PERL_MON_12:
+
+            LOCALE_LOCK;
+
+            init_tm(&tm);   /* Precaution against core dumps */
+            tm.tm_sec = 30;
+            tm.tm_min = 30;
+            tm.tm_hour = 6;
+            tm.tm_year = 2017 - 1900;
+            tm.tm_wday = 0;
+            tm.tm_mon = 0;
+            switch (item) {
+                default:
+                    LOCALE_UNLOCK;
+                    Perl_croak(aTHX_ "panic: %s: %d: switch case: %d problem",
+                                             __FILE__, __LINE__, item);
+                    NOT_REACHED; /* NOTREACHED */
+
+                case PERL_PM_STR: tm.tm_hour = 18;
+                case PERL_AM_STR:
+                    format = "%p";
+                    break;
+
+                case PERL_ABDAY_7: tm.tm_wday++;
+                case PERL_ABDAY_6: tm.tm_wday++;
+                case PERL_ABDAY_5: tm.tm_wday++;
+                case PERL_ABDAY_4: tm.tm_wday++;
+                case PERL_ABDAY_3: tm.tm_wday++;
+                case PERL_ABDAY_2: tm.tm_wday++;
+                case PERL_ABDAY_1:
+                    format = "%a";
+                    break;
+
+                case PERL_DAY_7: tm.tm_wday++;
+                case PERL_DAY_6: tm.tm_wday++;
+                case PERL_DAY_5: tm.tm_wday++;
+                case PERL_DAY_4: tm.tm_wday++;
+                case PERL_DAY_3: tm.tm_wday++;
+                case PERL_DAY_2: tm.tm_wday++;
+                case PERL_DAY_1:
+                    format = "%A";
+                    break;
+
+                case PERL_ABMON_12: tm.tm_mon++;
+                case PERL_ABMON_11: tm.tm_mon++;
+                case PERL_ABMON_10: tm.tm_mon++;
+                case PERL_ABMON_9: tm.tm_mon++;
+                case PERL_ABMON_8: tm.tm_mon++;
+                case PERL_ABMON_7: tm.tm_mon++;
+                case PERL_ABMON_6: tm.tm_mon++;
+                case PERL_ABMON_5: tm.tm_mon++;
+                case PERL_ABMON_4: tm.tm_mon++;
+                case PERL_ABMON_3: tm.tm_mon++;
+                case PERL_ABMON_2: tm.tm_mon++;
+                case PERL_ABMON_1:
+                    format = "%b";
+                    break;
+
+                case PERL_MON_12: tm.tm_mon++;
+                case PERL_MON_11: tm.tm_mon++;
+                case PERL_MON_10: tm.tm_mon++;
+                case PERL_MON_9: tm.tm_mon++;
+                case PERL_MON_8: tm.tm_mon++;
+                case PERL_MON_7: tm.tm_mon++;
+                case PERL_MON_6: tm.tm_mon++;
+                case PERL_MON_5: tm.tm_mon++;
+                case PERL_MON_4: tm.tm_mon++;
+                case PERL_MON_3: tm.tm_mon++;
+                case PERL_MON_2: tm.tm_mon++;
+                case PERL_MON_1:
+                    format = "%B";
+                    break;
+
+                case PERL_T_FMT_AMPM:
+                    format = "%r";
+                    return_format = TRUE;
+                    break;
+
+                case PERL_ERA_D_FMT:
+                    format = "%Ex";
+                    return_format = TRUE;
+                    break;
+
+                case PERL_ERA_T_FMT:
+                    format = "%EX";
+                    return_format = TRUE;
+                    break;
+
+                case PERL_ERA_D_T_FMT:
+                    format = "%Ec";
+                    return_format = TRUE;
+                    break;
+
+                case PERL_ALT_DIGITS:
+                    tm.tm_wday = 0;
+                    format = "%Ow";	/* Find the alternate digit for 0 */
+                    break;
+            }
+
+            /* We can't use my_strftime() because it doesn't look at tm_wday  */
+            while (0 == strftime(PL_langinfo_buf, PL_langinfo_bufsize,
+                                 format, &tm))
+            {
+                /* A zero return means one of:
+                 *  a)  there wasn't enough space in PL_langinfo_buf
+                 *  b)  the format, like a plain %p, returns empty
+                 *  c)  it was an illegal format, though some implementations of
+                 *      strftime will just return the illegal format as a plain
+                 *      character sequence.
+                 *
+                 *  To quickly test for case 'b)', try again but precede the
+                 *  format with a plain character.  If that result is still
+                 *  empty, the problem is either 'a)' or 'c)' */
+
+                Size_t format_size = strlen(format) + 1;
+                Size_t mod_size = format_size + 1;
+                char * mod_format;
+                char * temp_result;
+
+                Newx(mod_format, mod_size, char);
+                Newx(temp_result, PL_langinfo_bufsize, char);
+                *mod_format = '\a';
+                my_strlcpy(mod_format + 1, format, mod_size);
+                len = strftime(temp_result,
+                               PL_langinfo_bufsize,
+                               mod_format, &tm);
+                Safefree(mod_format);
+                Safefree(temp_result);
+
+                /* If 'len' is non-zero, it means that we had a case like %p
+                 * which means the current locale doesn't use a.m. or p.m., and
+                 * that is valid */
+                if (len == 0) {
+
+                    /* Here, still didn't work.  If we get well beyond a
+                     * reasonable size, bail out to prevent an infinite loop. */
+
+                    if (PL_langinfo_bufsize > 100 * format_size) {
+                        *PL_langinfo_buf = '\0';
+                    }
+                    else { /* Double the buffer size to retry;  Add 1 in case
+                              original was 0, so we aren't stuck at 0. */
+                        PL_langinfo_bufsize *= 2;
+                        PL_langinfo_bufsize++;
+                        Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
+                        continue;
+                    }
+                }
+
+                break;
+            }
+
+            /* Here, we got a result.
+             *
+             * If the item is 'ALT_DIGITS', PL_langinfo_buf contains the
+             * alternate format for wday 0.  If the value is the same as the
+             * normal 0, there isn't an alternate, so clear the buffer. */
+            if (   item == PERL_ALT_DIGITS
+                && strEQ(PL_langinfo_buf, "0"))
+            {
+                *PL_langinfo_buf = '\0';
+            }
+
+            /* ALT_DIGITS is problematic.  Experiments on it showed that
+             * strftime() did not always work properly when going from alt-9 to
+             * alt-10.  Only a few locales have this item defined, and in all
+             * of them on Linux that khw was able to find, nl_langinfo() merely
+             * returned the alt-0 character, possibly doubled.  Most Unicode
+             * digits are in blocks of 10 consecutive code points, so that is
+             * sufficient information for those scripts, as we can infer alt-1,
+             * alt-2, ....  But for a Japanese locale, a CJK ideographic 0 is
+             * returned, and the CJK digits are not in code point order, so you
+             * can't really infer anything.  The localedef for this locale did
+             * specify the succeeding digits, so that strftime() works properly
+             * on them, without needing to infer anything.  But the
+             * nl_langinfo() return did not give sufficient information for the
+             * caller to understand what's going on.  So until there is
+             * evidence that it should work differently, this returns the alt-0
+             * string for ALT_DIGITS.
+             *
+             * wday was chosen because its range is all a single digit.  Things
+             * like tm_sec have two digits as the minimum: '00' */
+
+            LOCALE_UNLOCK;
+
+            /* If to return the format, not the value, overwrite the buffer
+             * with it.  But some strftime()s will keep the original format if
+             * illegal, so change those to "" */
+            if (return_format) {
+                if (strEQ(PL_langinfo_buf, format)) {
+                    *PL_langinfo_buf = '\0';
+                }
+                else {
+                    save_to_buffer(format, &PL_langinfo_buf,
+                                    &PL_langinfo_bufsize, 0);
+                }
+            }
+
+            break;
+
+#  endif
+
+    }
+
+    return PL_langinfo_buf;
+
+#endif
 
 }
 
@@ -2857,8 +3446,6 @@ Perl_my_strerror(pTHX_ const int errnum)
 }
 
 /*
-
-=head1 Locale-related functions and macros
 
 =for apidoc sync_locale
 

@@ -1259,6 +1259,11 @@ ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
 EXnpo	|char*	|setlocale	|int category|NULLOK const char* locale
+#if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
+Ando	|const char*|Perl_langinfo|const nl_item item
+#else
+Ando	|const char*|Perl_langinfo|const int item
+#endif
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
@@ -2718,15 +2723,20 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
                                         |STRLEN len|U32 flags
 #endif
 
-#if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
+#if defined(PERL_IN_LOCALE_C)
+in	|const char *|save_to_buffer|NN const char * string	\
+				    |NULLOK char **buf		\
+				    |NN Size_t *buf_size	\
+				    |const Size_t offset
+#  if defined(USE_LOCALE)
 s	|char*	|stdize_locale	|NN char* locs
 s	|void	|new_collate	|NULLOK const char* newcoll
 s	|void	|new_ctype	|NN const char* newctype
 s	|void	|set_numeric_radix
-#ifdef WIN32
+#    ifdef WIN32
 s	|char*	|my_setlocale	|int category|NULLOK const char* locale
-#endif
-#   ifdef DEBUGGING
+#    endif
+#    ifdef DEBUGGING
 s	|void	|print_collxfrm_input_and_return		\
 			    |NN const char * const s		\
 			    |NN const char * const e		\
@@ -2738,7 +2748,8 @@ s	|void	|print_bytes_for_locale	|NN const char * const s	\
 snR	|char *	|setlocale_debug_string	|const int category		    \
 					|NULLOK const char* const locale    \
 					|NULLOK const char* const retval
-#   endif
+#    endif
+#  endif
 #endif
 
 #if        defined(USE_LOCALE)		\

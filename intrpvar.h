@@ -588,6 +588,9 @@ PERLVARI(I, collation_standard, bool, TRUE)
 					/* Assume simple collation */
 #endif /* USE_LOCALE_COLLATE */
 
+PERLVARI(I, langinfo_buf, char *, NULL)
+PERLVARI(I, langinfo_bufsize, Size_t, 0)
+
 #ifdef PERL_SAWAMPERSAND
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */
 #endif

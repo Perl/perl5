@@ -15660,6 +15660,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_numeric_radix_sv	= sv_dup_inc(proto_perl->Inumeric_radix_sv, param);
 #endif /* !USE_LOCALE_NUMERIC */
 
+    PL_langinfo_buf = NULL;
+    PL_langinfo_bufsize = 0;
+
     /* Unicode inversion lists */
     PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
     PL_UpperLatin1	= sv_dup_inc(proto_perl->IUpperLatin1, param);

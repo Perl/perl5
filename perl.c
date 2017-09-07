@@ -1115,6 +1115,11 @@ perl_destruct(pTHXx)
     PL_numeric_radix_sv = NULL;
 #endif
 
+    if (PL_langinfo_buf) {
+        Safefree(PL_langinfo_buf);
+        PL_langinfo_buf = NULL;
+    }
+
     /* clear character classes  */
     for (i = 0; i < POSIX_SWASH_COUNT; i++) {
         SvREFCNT_dec(PL_utf8_swash_ptrs[i]);

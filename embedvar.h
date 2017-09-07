@@ -176,6 +176,8 @@
 #define PL_inplace		(vTHX->Iinplace)
 #define PL_isarev		(vTHX->Iisarev)
 #define PL_known_layers		(vTHX->Iknown_layers)
+#define PL_langinfo_buf		(vTHX->Ilanginfo_buf)
+#define PL_langinfo_bufsize	(vTHX->Ilanginfo_bufsize)
 #define PL_last_in_gv		(vTHX->Ilast_in_gv)
 #define PL_last_swash_hv	(vTHX->Ilast_swash_hv)
 #define PL_last_swash_key	(vTHX->Ilast_swash_key)
