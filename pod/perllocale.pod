@@ -225,6 +225,8 @@ C<POSIX::strxfrm()> use C<LC_COLLATE>.  All such functions
 will behave according to the current underlying locale, even if that
 locale isn't exposed to Perl space.
 
+This applies as well to L<I18N::Langinfo>.
+
 =item *
 
 XS modules for all categories but C<LC_NUMERIC> get the underlying

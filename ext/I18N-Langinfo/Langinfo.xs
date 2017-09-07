@@ -27,7 +27,7 @@ langinfo(code)
 	    SETERRNO(EINVAL, LIB_INVARG);
 	    RETVAL = &PL_sv_undef;
 	} else {
-            RETVAL = newSVpv(nl_langinfo(code), 0);
+            RETVAL = newSVpv(Perl_langinfo(code), 0);
         }
 #else
 	croak("nl_langinfo() not implemented on this architecture");

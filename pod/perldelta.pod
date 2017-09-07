@@ -125,7 +125,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<I18N::Langinfo> has been upgraded from version 0.13 to 0.13.
+This fixes a bug in which the underlying locale was ignored for the
+C<RADIXCHAR> (always was returned as a dot, and the C<THOUSEP> (always
+empty).  Now the locale-appropriate values are returned.
 
 =back
 

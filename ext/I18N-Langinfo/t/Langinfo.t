@@ -2,6 +2,7 @@
 use strict;
 use Config;
 use Test::More;
+require "../../t/loc_tools.pl";
 
 plan skip_all => "I18N::Langinfo or POSIX unavailable" 
     if $Config{'extensions'} !~ m!\bI18N/Langinfo\b!;
@@ -20,7 +21,7 @@ my %want =
 
 my @want = sort keys %want;
 
-plan tests => 1 + 3 * @constants + keys(@want);
+plan tests => 1 + 3 * @constants + keys(@want) + 1;
 
 use_ok('I18N::Langinfo', 'langinfo', @constants);
 
@@ -45,4 +46,26 @@ for my $i (1..@want) {
         no strict 'refs';
         is (langinfo(&$try), $want{$try}, "$try => '$want{$try}'");
     }
+}
+
+my $comma_locale;
+for (find_locales( [ 'LC_NUMERIC' ] )) {
+    use POSIX;
+    use locale;
+    setlocale(LC_NUMERIC, $_) or next;
+    my $in = 4.2; # avoid any constant folding bugs
+    my $s = sprintf("%g", $in);
+    if ($s eq "4,2")  {
+        $comma_locale = $_;
+        last;
+    }
+}
+
+SKIP: {
+    skip "Couldn't find a locale with a comma decimal pt", 1
+                                                        unless $comma_locale;
+
+    no strict 'refs';
+    is (langinfo(&RADIXCHAR), ",",
+        "Returns ',' for decimal pt for locale '$comma_locale'");
 }
