@@ -1,4 +1,4 @@
-# This file is the data file for porting/podcheck.t.
+# This file is the data file for t/porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -159,6 +159,7 @@ Lingua::ZH::Romanize::Pinyin
 List::Gather
 listen(2)
 local::lib
+localeconv(3)
 lockf(3)
 Log::Message
 Log::Message::Config
@@ -276,6 +277,7 @@ SOM
 splain
 sprintf(3)
 stat(2)
+strftime(3)
 strictures
 String::Base
 String::Scanf
