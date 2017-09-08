@@ -9721,18 +9721,14 @@ S_scan_subst(pTHX_ char *start)
 
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
-	while (es-- > 0) {
-	    if (es)
-		sv_catpvs(repl, "eval ");
-	    else
-		sv_catpvs(repl, "do ");
-	}
-	sv_catpvs(repl, "{");
+        for (; es > 1; es--) {
+            sv_catpvs(repl, "eval ");
+        }
+        sv_catpvs(repl, "do {");
 	sv_catsv(repl, PL_parser->lex_sub_repl);
 	sv_catpvs(repl, "}");
 	SvREFCNT_dec(PL_parser->lex_sub_repl);
 	PL_parser->lex_sub_repl = repl;
-        es = 1;
     }
 
 
