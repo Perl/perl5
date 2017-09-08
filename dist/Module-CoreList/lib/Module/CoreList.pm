@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use version;
-$VERSION = '5.20170903';
+$VERSION = '5.20170922_26';
 
 sub _undelta {
     my ($delta) = @_;
@@ -14418,9 +14418,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.026001',
             'Config'                => '5.026001',
-            'Module::CoreList'      => '5.20170903',
-            'Module::CoreList::TieHashDelta'=> '5.20170903',
-            'Module::CoreList::Utils'=> '5.20170903',
+            'Module::CoreList'      => '5.20170922_26',
+            'Module::CoreList::TieHashDelta'=> '5.20170922_26',
+            'Module::CoreList::Utils'=> '5.20170922_26',
             '_charnames'            => '1.45',
             'base'                  => '2.26',
             'charnames'             => '1.45',
