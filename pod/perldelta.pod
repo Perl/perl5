@@ -113,7 +113,7 @@ L<charnames> has been upgraded from version 1.44 to 1.45.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20170530 to 5.20170903.
+L<Module::CoreList> has been upgraded from version 5.20170530 to 5.20170922_26.
 
 =back
 
