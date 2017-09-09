@@ -34,7 +34,8 @@ Bugs> below.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20170715_24 to 5.20170922_24.
+L<Module::CoreList> has been upgraded from version 5.20170715_24 to
+5.20170922_24.
 
 =item *
 
@@ -44,7 +45,10 @@ L<POSIX> has been upgraded from version 1.65 to 1.65_01.
 
 L<Time::HiRes> has been upgraded from version 1.9733 to 1.9741.
 
-Resolves [perl #128427], [perl #128445], [perl #128972], and [cpan #120032].
+L<[perl #128427]|https://rt.perl.org/Public/Bug/Display.html?id=128427>
+L<[perl #128445]|https://rt.perl.org/Public/Bug/Display.html?id=128445>
+L<[perl #128972]|https://rt.perl.org/Public/Bug/Display.html?id=128972>
+L<[cpan #120032]|https://rt.cpan.org/Public/Bug/Display.html?id=120032>
 
 =back
 
@@ -54,9 +58,9 @@ Resolves [perl #128427], [perl #128445], [perl #128972], and [cpan #120032].
 
 =item *
 
-When building with GCC 6 and link-time optimization (the C<-flto> option to
-C<gcc>), F<Configure> was treating all probed symbols as present on the
-system, regardless of whether they actually exist.  This has been fixed.
+When building with GCC 6 and link-time optimization (the B<-flto> option to
+B<gcc>), F<Configure> was treating all probed symbols as present on the system,
+regardless of whether they actually exist.  This has been fixed.
 L<[perl #128131]|https://rt.perl.org/Public/Bug/Display.html?id=128131>
 
 =item *
@@ -67,15 +71,14 @@ L<[perl #126203]|https://rt.perl.org/Public/Bug/Display.html?id=126203>
 
 =item *
 
-Fixed a bug in which F<Configure> could append C<-quadmath> to the
-archname even if it was already present.
+Fixed a bug in which F<Configure> could append C<-quadmath> to the archname
+even if it was already present.
 L<[perl #128538]|https://rt.perl.org/Public/Bug/Display.html?id=128538>
 
 =item *
 
-Clang builds with C<-DPERL_GLOBAL_STRUCT> or
-C<-DPERL_GLOBAL_STRUCT_PRIVATE> have
-been fixed (by disabling Thread Safety Analysis for these configurations).
+Clang builds with C<-DPERL_GLOBAL_STRUCT> or C<-DPERL_GLOBAL_STRUCT_PRIVATE>
+have been fixed (by disabling Thread Safety Analysis for these configurations).
 
 =back
 
@@ -101,9 +104,11 @@ C<configure.com> now recognizes the VSI-branded C compiler.
 
 =item *
 
-Building XS modules with C<gcc> 6 in a 64-bit build of Perl failed due to
-incorrect mapping of C<strtoll> and C<strtoull>. This has now been fixed.
-[perl #131726] [cpan #121683] [cpan #122353]
+Building XS modules with GCC 6 in a 64-bit build of Perl failed due to
+incorrect mapping of C<strtoll> and C<strtoull>.  This has now been fixed.
+L<[perl #131726]|https://rt.perl.org/Public/Bug/Display.html?id=131726>
+L<[cpan #121683]|https://rt.cpan.org/Public/Bug/Display.html?id=121683>
+L<[cpan #122353]|https://rt.cpan.org/Public/Bug/Display.html?id=122353>
 
 =back
 
@@ -121,22 +126,21 @@ L<[perl #128171]|https://rt.perl.org/Public/Bug/Display.html?id=128171>
 
 =item *
 
-C<do> or C<require> with an argument which is a reference or typeglob
-which, when stringified,
-contains a null character, started crashing in Perl 5.20, but has now been
-fixed.
+C<do> or C<require> with an argument which is a reference or typeglob which,
+when stringified, contains a null character, started crashing in Perl 5.20, but
+has now been fixed.
 L<[perl #128182]|https://rt.perl.org/Public/Bug/Display.html?id=128182>
 
 =item *
 
-Expressions containing an C<&&> or C<||> operator (or their synonyms C<and>
-and C<or>) were being compiled incorrectly in some cases.  If the left-hand
-side consisted of either a negated bareword constant or a negated C<do {}>
-block containing a constant expression, and the right-hand side consisted of
-a negated non-foldable expression, one of the negations was effectively
-ignored.  The same was true of C<if> and C<unless> statement modifiers,
-though with the left-hand and right-hand sides swapped.  This long-standing
-bug has now been fixed.
+Expressions containing an C<&&> or C<||> operator (or their synonyms C<and> and
+C<or>) were being compiled incorrectly in some cases.  If the left-hand side
+consisted of either a negated bareword constant or a negated C<do {}> block
+containing a constant expression, and the right-hand side consisted of a
+negated non-foldable expression, one of the negations was effectively ignored.
+The same was true of C<if> and C<unless> statement modifiers, though with the
+left-hand and right-hand sides swapped.  This long-standing bug has now been
+fixed.
 L<[perl #127952]|https://rt.perl.org/Public/Bug/Display.html?id=127952>
 
 =item *
@@ -147,20 +151,19 @@ L<[perl #128106]|https://rt.perl.org/Public/Bug/Display.html?id=128106>
 
 =item *
 
-Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no
-longer causes crashes.
+Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no longer
+causes crashes.
 L<[perl #128086]|https://rt.perl.org/Public/Bug/Display.html?id=128086>
 
 =item *
 
-Assignment variants of any bitwise ops under the C<bitwise> feature would
-crash if the left-hand side was an array or hash.
+Assignment variants of any bitwise ops under the C<bitwise> feature would crash
+if the left-hand side was an array or hash.
 L<[perl #128204]|https://rt.perl.org/Public/Bug/Display.html?id=128204>
 
 =item *
 
-socket() now leaves the error code returned by the system in C<$!> on
-failure.
+C<socket> now leaves the error code returned by the system in C<$!> on failure.
 L<[perl #128316]|https://rt.perl.org/Public/Bug/Display.html?id=128316>
 
 =item *
@@ -184,25 +187,27 @@ L<[perl #128597]|https://rt.perl.org/Public/Bug/Display.html?id=128597>
 =item *
 
 Some regular expression parsing glitches could lead to assertion failures with
-regular expressions such as C</(?E<lt>=/> and C</(?E<lt>!/>.  This has now been fixed.
+regular expressions such as C</(?E<lt>=/> and C</(?E<lt>!/>.  This has now been
+fixed.
 L<[perl #128170]|https://rt.perl.org/Public/Bug/Display.html?id=128170>
 
 =item *
 
 C<gethostent> and similar functions now perform a null check internally, to
-avoid crashing with the torsocks library.  This was a regression from v5.22.
+avoid crashing with the torsocks library.  This was a regression from Perl
+5.22.
 L<[perl #128740]|https://rt.perl.org/Public/Bug/Display.html?id=128740>
 
 =item *
 
-Mentioning the same constant twice in a row (which is a syntax error) no
-longer fails an assertion under debugging builds.  This was a regression
-from v5.20.
+Mentioning the same constant twice in a row (which is a syntax error) no longer
+fails an assertion under debugging builds.  This was a regression from Perl
+5.20.
 L<[perl #126482]|https://rt.perl.org/Public/Bug/Display.html?id=126482>
 
 =item *
 
-In v5.24 C<fchown> was changed not to accept negative one as an argument
+In Perl 5.24 C<fchown> was changed not to accept negative one as an argument
 because in some platforms that is an error.  However, in some other platforms
 that is an acceptable argument.  This change has been reverted.
 L<[perl #128967]|https://rt.perl.org/Public/Bug/Display.html?id=128967>.
@@ -215,18 +220,18 @@ L<[perl #128951]|https://rt.perl.org/Public/Bug/Display.html?id=128951>
 
 =item *
 
-A regression in v5.24 with C<tr/\N{U+...}/foo/> when the code point was between
-128 and 255 has been fixed.
+A regression in Perl 5.24 with C<tr/\N{U+...}/foo/> when the code point was
+between 128 and 255 has been fixed.
 L<[perl #128734]|https://rt.perl.org/Public/Bug/Display.html?id=128734>.
 
 =item *
 
-Many issues relating to C<printf "%a"> of hexadecimal floating point
-were fixed.  In addition, the "subnormals" (formerly known as "denormals")
-floating point numbers are now supported both with the plain IEEE 754
-floating point numbers (64-bit or 128-bit) and the x86 80-bit
-"extended precision".  Note that subnormal hexadecimal floating
-point literals will give a warning about "exponent underflow".
+Many issues relating to C<printf "%a"> of hexadecimal floating point were
+fixed.  In addition, the "subnormals" (formerly known as "denormals") floating
+point numbers are now supported both with the plain IEEE 754 floating point
+numbers (64-bit or 128-bit) and the x86 80-bit "extended precision".  Note that
+subnormal hexadecimal floating point literals will give a warning about
+"exponent underflow".
 L<[perl #128843]|https://rt.perl.org/Public/Bug/Display.html?id=128843>
 L<[perl #128888]|https://rt.perl.org/Public/Bug/Display.html?id=128888>
 L<[perl #128889]|https://rt.perl.org/Public/Bug/Display.html?id=128889>
@@ -242,14 +247,15 @@ L<[perl #129196]|https://rt.perl.org/Public/Bug/Display.html?id=129196>
 
 =item *
 
-Fixed a place where the regex parser was not setting the syntax error
-correctly on a syntactically incorrect pattern.
+Fixed a place where the regex parser was not setting the syntax error correctly
+on a syntactically incorrect pattern.
 L<[perl #129122]|https://rt.perl.org/Public/Bug/Display.html?id=129122>
 
 =item *
 
 A vulnerability in Perl's C<sprintf> implementation has been fixed by avoiding
-a possible memory wrap. [perl #131260]
+a possible memory wrap.
+L<[perl #131260]|https://rt.perl.org/Public/Bug/Display.html?id=131260>
 
 =back
 
@@ -273,8 +279,8 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 SEE ALSO
 
