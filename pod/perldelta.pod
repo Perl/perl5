@@ -325,7 +325,16 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Several built-in functions previously had bugs that could cause them to
+write to the internal stack without allocating room for the item being
+written. In rare situations, this could have led to a crash. These bugs have
+now been fixed, and if any similar bugs are introduced in future, they will
+be detected automatically in debugging builds.
+
+=item *
+
+Using a symbolic ref with postderef syntax as the key in a hash lookup was
+yielding an assertion failure on debugging builds. [perl #131627]
 
 =back
 
