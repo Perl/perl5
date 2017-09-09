@@ -119,6 +119,14 @@ XXX
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20170715_24 to 5.20170922_24.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.65 to 1.65_01.
+
+=item *
+
 L<Time::HiRes> has been upgraded from version 1.9733 to 1.9741.
 
 Resolves [perl #128427], [perl #128445], [perl #128972], and [cpan #120032].
