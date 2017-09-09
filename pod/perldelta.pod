@@ -9,8 +9,8 @@ perldelta - what is new for perl v5.26.1
 This document describes differences between the 5.26.0 release and the 5.26.1
 release.
 
-If you are upgrading from an earlier release such as 5.25.0, first read
-L<perl5260delta>, which describes differences between 5.25.0 and 5.26.0.
+If you are upgrading from an earlier release such as 5.24.0, first read
+L<perl5260delta>, which describes differences between 5.24.0 and 5.26.0.
 
 =head1 Security
 
@@ -37,8 +37,8 @@ Bugs> below.
 L<base> has been upgraded from version 2.25 to 2.26.
 
 The effects of dotless C<@INC> on this module have been limited by the
-introduction of a more refined and accurate solution for removing
-C<'.'> from C<@INC> while reducing the false positives.
+introduction of a more refined and accurate solution for removing C<'.'> from
+C<@INC> while reducing the false positives.
 
 =item *
 
@@ -62,7 +62,8 @@ L<Module::CoreList> has been upgraded from version 5.20170530 to 5.20170922_26.
 
 =item *
 
-Building with C<g++> on FreeBSD-11.0 has been fixed. [perl #131337]
+Building with B<g++> on FreeBSD-11.0 has been fixed.
+L<[perl #131337]|https://rt.perl.org/Public/Bug/Display.html?id=131337>
 
 =back
 
@@ -77,9 +78,11 @@ Support for compiling perl on Windows using Microsoft Visual Studio 2017
 
 =item *
 
-Building XS modules with C<gcc> 6 in a 64-bit build of Perl failed due to
-incorrect mapping of C<strtoll> and C<strtoull>. This has now been fixed.
-[perl #131726] [cpan #121683] [cpan #122353]
+Building XS modules with GCC 6 in a 64-bit build of Perl failed due to
+incorrect mapping of C<strtoll> and C<strtoull>.  This has now been fixed.
+L<[perl #131726]|https://rt.perl.org/Public/Bug/Display.html?id=131726>
+L<[cpan #121683]|https://rt.cpan.org/Public/Bug/Display.html?id=121683>
+L<[cpan #122353]|https://rt.cpan.org/Public/Bug/Display.html?id=122353>
 
 =back
 
@@ -91,63 +94,72 @@ incorrect mapping of C<strtoll> and C<strtoull>. This has now been fixed.
 
 =item *
 
-Several built-in functions previously had bugs that could cause them to
-write to the internal stack without allocating room for the item being
-written. In rare situations, this could have led to a crash. These bugs have
-now been fixed, and if any similar bugs are introduced in future, they will
-be detected automatically in debugging builds. [perl #131732]
+Several built-in functions previously had bugs that could cause them to write
+to the internal stack without allocating room for the item being written.  In
+rare situations, this could have led to a crash.  These bugs have now been
+fixed, and if any similar bugs are introduced in future, they will be detected
+automatically in debugging builds.
+L<[perl #131732]|https://rt.perl.org/Public/Bug/Display.html?id=131732>
 
 =item *
 
 Using a symbolic ref with postderef syntax as the key in a hash lookup was
-yielding an assertion failure on debugging builds. [perl #131627]
+yielding an assertion failure on debugging builds.
+L<[perl #131627]|https://rt.perl.org/Public/Bug/Display.html?id=131627>
 
 =item *
 
-List assignment (C<aassign>) could in some rare cases allocate an
-entry on the mortal stack and leave the entry uninitialized. [perl
-#131570]
+List assignment (C<aassign>) could in some rare cases allocate an entry on the
+mortal stack and leave the entry uninitialized.
+L<[perl #131570]|https://rt.perl.org/Public/Bug/Display.html?id=131570>
 
 =item *
 
-Attempting to apply an attribute to an C<our> variable where a
-function of that name already exists could result in a NULL pointer
-being supplied where an SV was expected, crashing perl.  [perl
-#131597]
+Attempting to apply an attribute to an C<our> variable where a function of that
+name already exists could result in a NULL pointer being supplied where an SV
+was expected, crashing perl.
+L<[perl #131597]|https://rt.perl.org/Public/Bug/Display.html?id=131597>
 
 =item *
 
 The code that vivifies a typeglob out of a code ref made some false assumptions
 that could lead to a crash in cases such as C<< $::{"A"} = sub {}; \&{"A"} >>.
-This has now been fixed. [perl #131085]
+This has now been fixed.
+L<[perl #131085]|https://rt.perl.org/Public/Bug/Display.html?id=131085>
 
 =item *
 
 C<my_atof2> no longer reads beyond the terminating NUL, which previously
-occurred if the decimal point is immediately before the NUL. [perl #131526]
+occurred if the decimal point is immediately before the NUL.
+L<[perl #131526]|https://rt.perl.org/Public/Bug/Display.html?id=131526>
 
 =item *
 
 Occasional "Malformed UTF-8 character" crashes in C<s//> on utf8 strings have
-been fixed. [perl #131575]
+been fixed.
+L<[perl #131575]|https://rt.perl.org/Public/Bug/Display.html?id=131575>
 
 =item *
 
-C<perldoc -f s> now finds C<s///>. [perl #131371]
+C<perldoc -f s> now finds C<s///>.
+L<[perl #131371]|https://rt.perl.org/Public/Bug/Display.html?id=131371>
 
 =item *
 
-Some erroneous warnings after utf8 conversion have been fixed. [perl #131190]
+Some erroneous warnings after utf8 conversion have been fixed.
+L<[perl #131190]|https://rt.perl.org/Public/Bug/Display.html?id=131190>
 
 =item *
 
-The C<jmpenv> frame to catch Perl exceptions is set up lazily, and this used
-to be a bit too lazy. The catcher is now set up earlier, preventing some
-possible crashes. [perl #105930]
+The C<jmpenv> frame to catch Perl exceptions is set up lazily, and this used to
+be a bit too lazy.  The catcher is now set up earlier, preventing some possible
+crashes.
+L<[perl #105930]|https://rt.perl.org/Public/Bug/Display.html?id=105930>
 
 =item *
 
-Spurious "Assuming NOT a POSIX class" warnings have been removed. [perl #131522]
+Spurious "Assuming NOT a POSIX class" warnings have been removed.
+L<[perl #131522]|https://rt.perl.org/Public/Bug/Display.html?id=131522>
 
 =back
 
@@ -170,13 +182,13 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
