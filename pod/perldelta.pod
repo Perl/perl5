@@ -336,6 +336,12 @@ be detected automatically in debugging builds. [perl #131732]
 Using a symbolic ref with postderef syntax as the key in a hash lookup was
 yielding an assertion failure on debugging builds. [perl #131627]
 
+=item *
+
+List assignment (C<aassign>) could in some rare cases allocate an
+entry on the mortal stack and leave the entry uninitialized. [perl
+#131570]
+
 =back
 
 =head1 Known Problems
