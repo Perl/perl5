@@ -348,6 +348,18 @@ C<configure.com> now recognizes the VSI-branded C compiler.
 
 =back
 
+=item Windows
+
+=over 4
+
+=item *
+
+Building XS modules with C<gcc> 6 in a 64-bit build of Perl failed due to
+incorrect mapping of C<strtoll> and C<strtoull>. This has now been fixed.
+[perl #131726] [cpan #121683] [cpan #122353]
+
+=back
+
 =back
 
 =head1 Internal Changes
@@ -493,6 +505,11 @@ L<[perl #129196]|https://rt.perl.org/Public/Bug/Display.html?id=129196>
 Fixed a place where the regex parser was not setting the syntax error
 correctly on a syntactically incorrect pattern.
 L<[perl #129122]|https://rt.perl.org/Public/Bug/Display.html?id=129122>
+
+=item *
+
+A vulnerability in Perl's C<sprintf> implementation has been fixed by avoiding
+a possible memory wrap. [perl #131260]
 
 =back
 
