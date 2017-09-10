@@ -3795,6 +3795,8 @@ Perl_mini_mktime(struct tm *ptm)
  * This algorithm also fails to handle years before A.D. 1 gracefully, but
  * that's still outside the scope for POSIX time manipulation, so I don't
  * care.
+ *
+ * - jhi
  */
 
     year = 1900 + ptm->tm_year;
@@ -3903,7 +3905,13 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 {
 #ifdef HAS_STRFTIME
 
-  /* Note that yday and wday effectively are ignored by this function, as mini_mktime() overwrites them */
+  /* strftime(), but with a different API so that the return value is a pointer
+   * to the formatted result (which MUST be arranged to be FREED BY THE
+   * CALLER).  This allows this function to increase the buffer size as needed,
+   * so that the caller doesn't have to worry about that.
+   *
+   * Note that yday and wday effectively are ignored by this function, as
+   * mini_mktime() overwrites them */
 
   char *buf;
   int buflen;
