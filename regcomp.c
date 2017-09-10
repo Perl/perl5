@@ -11763,6 +11763,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             if (max < min) {    /* If can't match, warn and optimize to fail
                                    unconditionally */
                 reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
+                orig_emit->flags = 0;
                 if (PASS2) {
                     ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
                     NEXT_OFF(orig_emit)= regarglen[OPFAIL] + NODE_STEP_REGNODE;
@@ -19440,8 +19441,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     /* add on the verb argument if there is one */
     if ( ( k == VERB || OP(o) == ACCEPT || OP(o) == OPFAIL ) && o->flags) {
-        Perl_sv_catpvf(aTHX_ sv, ":%" SVf,
+        if ( ARG(o) )
+            Perl_sv_catpvf(aTHX_ sv, ":%" SVf,
                        SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
+        else
+            sv_catpvs(sv, ":NULL");
     }
 #else
     PERL_UNUSED_CONTEXT;
