@@ -99,6 +99,35 @@ L<Announced on 2017-05-31 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.
 
     -- Bertrand Russell, The Road to Happiness
 
+=head2 v5.26.1-RC1 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
+
+L<Announced on 2017-09-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246202.html>
+
+  At length did cross an Albatross,
+  Thorough the fog it came;
+  As if it had been a Christian soul,
+  We hailed it in God's name.
+
+  It ate the food it ne'er had eat,
+  And round and round it flew.
+  The ice did split with a thunder-fit;
+  The helmsman steered us through!
+
+  And a good south wind sprung up behind;
+  The Albatross did follow,
+  And every day, for food or play,
+  Came to the mariner's hollo!
+
+  In mist or cloud, on mast or shroud,
+  It perched for vespers nine;
+  Whiles all the night, through fog-smoke white,
+  Glimmered the white Moon-shine.'
+
+  'God save thee, ancient Mariner!
+  From the fiends, that plague thee thus!—-
+  Why look'st thou so?'—-With my cross-bow
+  I shot the ALBATROSS.
+
 =head2 v5.26.0 - Nine Simone, Ain't Got No / I Got Life
 
 L<Announced on 2017-05-30 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244573.html>
@@ -342,6 +371,37 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
     Wide fields of asphodel foreâ€™er,
   To find that the utmost reward
     Of daring should be still to dare.
+
+=head2 v5.24.3-RC1 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
+
+L<Announced on 2017-09-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246201.html>
+
+  'And now the STORM-BLAST came, and he
+  Was tyrannous and strong:
+  He struck with his o'ertaking wings,
+  And chased us south along.
+
+  With sloping masts and dipping prow,
+  As who pursued with yell and blow
+  Still treads the shadow of his foe,
+  And forward bends his head,
+  The ship drove fast, loud roared the blast,
+  And southward aye we fled.
+
+  And now there came both mist and snow,
+  And it grew wondrous cold:
+  And ice, mast-high, came floating by,
+  As green as emerald.
+
+  And through the drifts the snowy clifts
+  Did send a dismal sheen:
+  Nor shapes of men nor beasts we ken—-
+  The ice was all between.
+
+  The ice was here, the ice was there,
+  The ice was all around:
+  It cracked and growled, and roared and howled,
+  Like noises in a swound!
 
 =head2 v5.24.2 - Roald Dahl, "The Three Little Pigs"
 
