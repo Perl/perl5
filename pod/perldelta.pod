@@ -35,6 +35,26 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 [CVE-2017-12837] Heap buffer overflow in regular expression compiler
+
+Compiling certain regular expression patterns with the case-insensitive
+modifier could cause a heap buffer overflow and crash perl.  This has now been
+fixed.
+L<[perl #131582]|https://rt.perl.org/Public/Bug/Display.html?id=131582>
+
+=head2 [CVE-2017-12883] Buffer over-read in regular expression parser
+
+For certain types of syntax error in a regular expression pattern, the error
+message could either contain the contents of a random, possibly large, chunk of
+memory, or could crash perl.  This has now been fixed.
+L<[perl #131598]|https://rt.perl.org/Public/Bug/Display.html?id=131598>
+
+=head2 [CVE-2017-12814] C<$ENV{$key}> stack buffer overflow on Windows
+
+A possible stack buffer overflow in the C<%ENV> code on Windows has been fixed
+by removing the buffer completely since it was superfluous anyway.
+L<[perl #131665]|https://rt.perl.org/Public/Bug/Display.html?id=131665>
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
