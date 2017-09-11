@@ -262,7 +262,6 @@ sub walksymtable {
     no strict 'refs';
     $prefix = '' unless defined $prefix;
     foreach my $sym ( sort keys %$symref ) {
-        $ref= $symref->{$sym};
         $fullname = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
