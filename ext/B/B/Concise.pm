@@ -145,13 +145,14 @@ sub concise_subref {
 
 sub concise_stashref {
     my($order, $h) = @_;
-    local *s;
+    my $name = svref_2object($h)->NAME;
     foreach my $k (sort keys %$h) {
 	next unless defined $h->{$k};
-	*s = $h->{$k};
-	my $coderef = *s{CODE} or next;
+	my $coderef = ref $h->{$k} eq 'CODE' ? $h->{$k}
+		    : ref\$h->{$k} eq 'GLOB' ? *{$h->{$k}}{CODE} || next
+		    : next;
 	reset_sequence();
-	print "FUNC: ", *s, "\n";
+	print "FUNC: *", $name, "::", $k, "\n";
 	my $codeobj = svref_2object($coderef);
 	next unless ref $codeobj eq 'B::CV';
 	eval { concise_cv_obj($order, $codeobj, $k) };
