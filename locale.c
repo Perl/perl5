@@ -3045,7 +3045,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         for (i = 0; i < 7 + 12; i++) {  /* 7 days; 12 months */
             formatted_time = my_strftime("%A %B %Z %p",
-                                    0, 0, hour, dom, month, 112, 0, 0, is_dst);
+                            0, 0, hour, dom, month, 2012 - 1900, 0, 0, is_dst);
             if ( ! formatted_time
                 || is_utf8_invariant_string((U8 *) formatted_time, 0))
             {
