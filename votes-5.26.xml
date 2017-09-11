@@ -53,6 +53,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="ilmari" id="8d1c7d0a38e3ac54307661eb111c22edcc597606" desc="Fix Windows-1252 em-dashes in latest epigraphs"/>
+
 </div>
 
 </data>
