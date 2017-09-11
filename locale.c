@@ -182,9 +182,51 @@ const char * category_names[] = {
  * special cases.  Most loops through these arrays in the code below are
  * written like 'for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++)'.  They will work
  * on either type of system.  But the code must be written to not access the
- * element at 'NOMINAL_LC_ALL_INDEX' except on platforms that have it. */
+ * element at 'LC_ALL_INDEX' except on platforms that have it.  This can be
+ * checked for at compile time by using the #define LC_ALL_INDEX which is only
+ * defined if we do have LC_ALL. */
 
-#endif
+/* Now create LC_foo_INDEX #defines for just those categories on this system */
+#  ifdef USE_LOCALE_NUMERIC
+#    define LC_NUMERIC_INDEX            0
+#    define _DUMMY_NUMERIC              LC_NUMERIC_INDEX
+#  else
+#    define _DUMMY_NUMERIC              -1
+#  endif
+#  ifdef USE_LOCALE_CTYPE
+#    define LC_CTYPE_INDEX              _DUMMY_NUMERIC + 1
+#    define _DUMMY_CTYPE                LC_CTYPE_INDEX
+#  else
+#    define _DUMMY_CTYPE                _DUMMY_NUMERIC
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+#    define LC_COLLATE_INDEX            _DUMMY_CTYPE + 1
+#    define _DUMMY_COLLATE              LC_COLLATE_INDEX
+#  else
+#    define _DUMMY_COLLATE              _DUMMY_COLLATE
+#  endif
+#  ifdef USE_LOCALE_TIME
+#    define LC_TIME_INDEX               _DUMMY_COLLATE + 1
+#    define _DUMMY_TIME                 LC_TIME_INDEX
+#  else
+#    define _DUMMY_TIME                 _DUMMY_COLLATE
+#  endif
+#  ifdef USE_LOCALE_MESSAGES
+#    define LC_MESSAGES_INDEX           _DUMMY_TIME + 1
+#    define _DUMMY_MESSAGES             LC_MESSAGES_INDEX
+#  else
+#    define _DUMMY_MESSAGES             _DUMMY_TIME
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+#    define LC_MONETARY_INDEX           _DUMMY_MESSAGES + 1
+#    define _DUMMY_MONETARY             LC_MONETARY_INDEX
+#  else
+#    define _DUMMY_MONETARY             _DUMMY_MESSAGES
+#  endif
+#  ifdef LC_ALL
+#    define LC_ALL_INDEX                _DUMMY_MONETARY + 1
+#  endif
+#endif /* ifdef USE_LOCALE */
 
 /* Windows requres a customized base-level setlocale() */
 #  ifdef WIN32
@@ -905,7 +947,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
      * one that is set.  (If they are set to "", it means to use the same thing
      * we just set LC_ALL to, so can skip) */
 
-    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+    for (i = 0; i < LC_ALL_INDEX; i++) {
         result = PerlEnv_getenv(category_names[i]);
         if (result && strNE(result, "")) {
             setlocale(categories[i], result);
@@ -1750,7 +1792,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char *system_default_locale = NULL;
 
 #  endif
-#  ifdef DEBUGGING
+
+#  ifndef DEBUGGING
+#    define DEBUG_LOCALE_INIT(a,b,c)
+#  else
 
     DEBUG_INITIALIZATION_set(cBOOL(PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT")));
 
@@ -1766,10 +1811,37 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 }                                                           \
 	} STMT_END
 
-#  else
-#    define DEBUG_LOCALE_INIT(a,b,c)
-#  endif
-
+/* Make sure the parallel arrays are properly set up */
+#    ifdef USE_LOCALE_NUMERIC
+    assert(categories[LC_NUMERIC_INDEX] == LC_NUMERIC);
+    assert(strEQ(category_names[LC_NUMERIC_INDEX], "LC_NUMERIC"));
+#    endif
+#    ifdef USE_LOCALE_CTYPE
+    assert(categories[LC_CTYPE_INDEX] == LC_CTYPE);
+    assert(strEQ(category_names[LC_CTYPE_INDEX], "LC_CTYPE"));
+#    endif
+#    ifdef USE_LOCALE_COLLATE
+    assert(categories[LC_COLLATE_INDEX] == LC_COLLATE);
+    assert(strEQ(category_names[LC_COLLATE_INDEX], "LC_COLLATE"));
+#    endif
+#    ifdef USE_LOCALE_TIME
+    assert(categories[LC_TIME_INDEX] == LC_TIME);
+    assert(strEQ(category_names[LC_TIME_INDEX], "LC_TIME"));
+#    endif
+#    ifdef USE_LOCALE_MESSAGES
+    assert(categories[LC_MESSAGES_INDEX] == LC_MESSAGES);
+    assert(strEQ(category_names[LC_MESSAGES_INDEX], "LC_MESSAGES"));
+#    endif
+#    ifdef USE_LOCALE_MONETARY
+    assert(categories[LC_MONETARY_INDEX] == LC_MONETARY);
+    assert(strEQ(category_names[LC_MONETARY_INDEX], "LC_MONETARY"));
+#    endif
+#    ifdef LC_ALL
+    assert(categories[LC_ALL_INDEX] == LC_ALL);
+    assert(strEQ(category_names[LC_ALL_INDEX], "LC_ALL"));
+    assert(NOMINAL_LC_ALL_INDEX == LC_ALL_INDEX);
+#    endif
+#  endif    /* DEBUGGING */
 #  ifndef LOCALE_ENVIRON_REQUIRED
 
     PERL_UNUSED_VAR(done);
@@ -1785,15 +1857,15 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #    ifdef LC_ALL
 
     if (lang) {
-	sl_result[NOMINAL_LC_ALL_INDEX] = do_setlocale_c(LC_ALL, setlocale_init);
-        DEBUG_LOCALE_INIT(LC_ALL, setlocale_init, sl_result[NOMINAL_LC_ALL_INDEX]);
-	if (sl_result[NOMINAL_LC_ALL_INDEX])
+	sl_result[LC_ALL_INDEX] = do_setlocale_c(LC_ALL, setlocale_init);
+        DEBUG_LOCALE_INIT(LC_ALL, setlocale_init, sl_result[LC_ALL_INDEX]);
+	if (sl_result[LC_ALL_INDEX])
 	    done = TRUE;
 	else
 	    setlocale_failure = TRUE;
     }
     if (! setlocale_failure) {
-        for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        for (i = 0; i < LC_ALL_INDEX; i++) {
             locale_param = (! done && (lang || PerlEnv_getenv(category_names[i])))
                            ? setlocale_init
                            : NULL;
@@ -1857,9 +1929,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  ifdef LC_ALL
 
-        sl_result[NOMINAL_LC_ALL_INDEX] = do_setlocale_c(LC_ALL, trial_locale);
-        DEBUG_LOCALE_INIT(LC_ALL, trial_locale, sl_result[NOMINAL_LC_ALL_INDEX]);
-        if (! sl_result[NOMINAL_LC_ALL_INDEX]) {
+        sl_result[LC_ALL_INDEX] = do_setlocale_c(LC_ALL, trial_locale);
+        DEBUG_LOCALE_INIT(LC_ALL, trial_locale, sl_result[LC_ALL_INDEX]);
+        if (! sl_result[LC_ALL_INDEX]) {
             setlocale_failure = TRUE;
         }
         else {
@@ -2108,34 +2180,24 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     /* Done with finding the locales; update our records */
 
-    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        switch (categories[i]) {
-
 #  ifdef USE_LOCALE_CTYPE
 
-            case LC_CTYPE:
-                new_ctype(curlocales[i]);
-                break;
+    new_ctype(curlocales[LC_CTYPE_INDEX]);
 
 #  endif
 #  ifdef USE_LOCALE_COLLATE
 
-            case LC_COLLATE:
-                new_collate(curlocales[i]);
-                break;
+    new_collate(curlocales[LC_COLLATE_INDEX]);
 
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
-            case LC_NUMERIC:
-                new_numeric(curlocales[i]);
-                break;
+    new_numeric(curlocales[LC_NUMERIC_INDEX]);
 
 #  endif
 
-            default: ;
-        }
 
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         Safefree(curlocales[i]);
     }
 
@@ -3534,7 +3596,16 @@ S_setlocale_debug_string(const int category,        /* category number,
                            " to undef it";
     unsigned int i;
 
-    const unsigned int highest_index = NOMINAL_LC_ALL_INDEX;
+#  ifdef LC_ALL
+
+    const unsigned int highest_index = LC_ALL_INDEX;
+
+#  else
+
+    const unsigned int highest_index = NOMINAL_LC_ALL_INDEX - 1;
+
+#endif
+
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
 
