@@ -1392,6 +1392,18 @@ X<SYS$LOGIN>
 
 Used if chdir has no argument and HOME and LOGDIR are not set.
 
+=item PERL_INTERNAL_RAND_SEED
+X<PERL_INTERNAL_RAND_SEED>
+
+Set to a non-negative integer to seed the random number generator used
+internally by perl for a variety of purposes.
+
+Ignored if perl is run setuid or setgid.  Used only for some limited
+startup randomization (hash keys) if C<-T> or C<-t> perl is started
+with tainting enabled.
+
+Perl may be built to ignore this variable.
+
 =back
 
 Perl also has environment variables that control how Perl handles data

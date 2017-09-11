@@ -63,6 +63,31 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_alarm HAS_ALARM		/**/
 
+/* HAS_OPENAT:
+ *	This symbol is defined if the openat() routine is available.
+ */
+#$d_openat HAS_OPENAT	/**/
+
+/* HAS_UNLINKAT:
+ *	This symbol is defined if the unlinkat() routine is available.
+ */
+#$d_unlinkat HAS_UNLINKAT	/**/
+
+/* HAS_RENAMEAT:
+ *	This symbol is defined if the renameat() routine is available.
+ */
+#$d_renameat HAS_RENAMEAT	/**/
+
+/* HAS_LINKAT:
+ *	This symbol is defined if the linkat() routine is available.
+ */
+#$d_linkat HAS_LINKAT	/**/
+
+/* HAS_FCHMODAT:
+ *	This symbol is defined if the fchmodat() routine is available.
+ */
+#$d_fchmodat HAS_FCHMODAT	/**/
+
 /* HAS_BCMP:
  *	This symbol is defined if the bcmp() routine is available to
  *	compare blocks of memory.

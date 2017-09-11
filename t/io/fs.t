@@ -468,18 +468,23 @@ SKIP: {
     chdir $wd || die "Can't cd back to $wd";
 }
 
-# check if rename() works on directories
-if ($^O eq 'VMS') {
-    # must have delete access to rename a directory
-    `set file $tmpdir.dir/protection=o:d`;
-    ok(rename("$tmpdir.dir", "$tmpdir1.dir"), "rename on directories") ||
-      print "# errno: $!\n";
-}
-else {
-    ok(rename($tmpdir, $tmpdir1), "rename on directories");
-}
+SKIP:
+{
+    $Config{d_rename}
+      or skip "Cannot rename directories with link()", 2;
+    # check if rename() works on directories
+    if ($^O eq 'VMS') {
+        # must have delete access to rename a directory
+        `set file $tmpdir.dir/protection=o:d`;
+        ok(rename("$tmpdir.dir", "$tmpdir1.dir"), "rename on directories") ||
+          print "# errno: $!\n";
+    }
+    else {
+        ok(rename($tmpdir, $tmpdir1), "rename on directories");
+    }
 
-ok(-d $tmpdir1, "rename on directories working");
+    ok(-d $tmpdir1, "rename on directories working");
+}
 
 {
     # Change 26011: Re: A surprising segfault

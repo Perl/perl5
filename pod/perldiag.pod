@@ -656,6 +656,13 @@ the warning.  See L<perlsub>.
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
 
+=item Cannot complete in-place edit of %s: %s
+
+(F) Your perl script appears to have changed directory while
+performing an in-place edit of a file specified by a relative path,
+and your system doesn't include the directory relative POSIX functions
+needed to handle that.
+
 =item Cannot compress %f in pack
 
 (F) You tried compressing an infinity or not-a-number as an unsigned
@@ -1311,8 +1318,13 @@ the modified file.  The file was left unmodified.
 
 =item Can't rename %s to %s: %s, skipping file
 
-(S inplace) The rename done by the B<-i> switch failed for some reason,
+(F) The rename done by the B<-i> switch failed for some reason,
 probably because you don't have write permission to the directory.
+
+=item Can't rename in-place work file '%s' to '%s': %s
+
+(F) When closed implicitly, the temporary file for in-place editing
+couldn't be renamed to the original filename.
 
 =item Can't reopen input pipe (name: %s) in binary mode
 
@@ -2311,7 +2323,7 @@ Check the #! line, or manually feed your script into Perl yourself.
 CHECK, INIT, or END subroutine.  Processing of the remainder of the
 queue of such routines has been prematurely ended.
 
-=item Failed to close in-place edit file %s: %s
+=item Failed to close in-place work file %s: %s
 
 (F) Closing an output file from in-place editing, as with the C<-i>
 command-line switch, failed.

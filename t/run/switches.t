@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 115);
+plan(tests => 136);
 
 use Config;
 
@@ -355,11 +355,12 @@ for (qw( e f x E S V )) {
     sub do_i_unlink { unlink_all("file", "file.bak") }
 
     open(FILE, ">file") or die "$0: Failed to create 'file': $!";
-    print FILE <<__EOF__;
+    my $yada = <<__EOF__;
 foo yada dada
 bada foo bing
 king kong foo
 __EOF__
+    print FILE $yada;
     close FILE;
 
     END { do_i_unlink() }
@@ -400,6 +401,222 @@ __EOF__
         args     => ['file'],
     );
     is($out2, "", "no warning when files given");
+
+    open my $f, ">", "file" or die "$0: failed to create 'file': $!";
+    print $f "foo\nbar\n";
+    close $f;
+
+    # a backup extension is no longer required on any platform
+    my $out3 = runperl(
+        switches => [ '-i', '-p' ],
+        prog => 's/foo/quux/',
+        stderr => 1,
+        args => [ 'file' ],
+    );
+    is($out3, "", "no warnings/errors without backup extension");
+    open $f, "<", "file" or die "$0: cannot open 'file': $!";
+    chomp(my @out4 = <$f>);
+    close $f;
+    is(join(":", @out4), "quux:bar", "correct output without backup extension");
+
+    -d "inplacetmp" or mkdir("inplacetmp")
+      or die "Cannot mkdir 'inplacetmp': $!";
+    require File::Spec;
+    my $work = File::Spec->catfile("inplacetmp", "foo");
+
+    # exit or die should leave original content in file
+    for my $inplace (qw/-i -i.bak/) {
+        for my $prog (qw/die exit/) {
+            open my $fh, ">", $work or die "$0: failed to open '$work': $!";
+            print $fh $yada;
+            close $fh or die "Failed to close: $!";
+            my $out = runperl (
+               switches => [ $inplace, '-n' ],
+               prog => "print q(foo\n); $prog",
+               stderr => 1,
+               args => [ $work ],
+            );
+            open my $in, "<", $work or die "$0: failed to open '$work': $!";
+            my $data = do { local $/; <$in> };
+            close $in;
+            is ($data, $yada, "check original content still in file");
+            unlink $work;
+        }
+    }
+
+    # test that path parsing is correct
+    open $f, ">", $work or die "Cannot create $work: $!";
+    print $f "foo\nbar\n";
+    close $f;
+
+    my $out4 = runperl
+      (
+       switches => [ "-i", "-p" ],
+       prog => 's/foo/bar/',
+       stderr => 1,
+       args => [ $work ],
+      );
+    is ($out4, "", "no errors or warnings");
+    open $f, "<", $work or die "Cannot open $work: $!";
+    chomp(my @file4 = <$f>);
+    close $f;
+    is(join(":", @file4), "bar:bar", "check output");
+
+  SKIP:
+    {
+        # this needs to match how ARGV_USE_ATFUNCTIONS is defined in doio.c
+        skip "Not enough *at functions", 3
+          unless $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
+              && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
+              && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
+        fresh_perl_is(<<'CODE', "ok\n", { },
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  chdir "..";
+  print "xx\n";
+}
+print "ok\n";
+CODE
+                       "chdir while in-place editing");
+        ok(open(my $fh, "<", $work), "open out file");
+        is(scalar <$fh>, "xx\n", "file successfully saved after chdir");
+        close $fh;
+    }
+
+  SKIP:
+    {
+        skip "Need threads and full perl", 3
+          if !$Config{useithreads} || is_miniperl();
+        fresh_perl_is(<<'CODE', "ok\n", { stderr => 1 },
+use threads;
+use strict;
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  threads->create(sub { })->join;
+  print "yy\n";
+}
+print "ok\n";
+CODE
+                      "threads while in-place editing");
+        ok(open(my $fh, "<", $work), "open out file");
+        is(scalar <$fh>, "yy\n", "file successfully saved after chdir");
+        close $fh;
+    }
+
+  SKIP:
+    {
+        skip "Need fork", 3 if !$Config{d_fork};
+        open my $fh, ">", $work
+          or die "Cannot open $work: $!";
+        # we want only a single line for this test, otherwise
+        # it attempts to close the file twice
+        print $fh "foo\n";
+        close $fh or die "Cannot close $work: $!";
+        fresh_perl_is(<<'CODE', "ok\n", { stderr => 1 },
+use strict;
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  my $pid = fork;
+  if (defined $pid && !$pid) {
+     # child
+     close ARGVOUT or die "Cannot close in child\n"; # this shouldn't do ARGVOUT magic
+     exit 0;
+  }
+  wait;
+  print "yy\n";
+  close ARGVOUT or die "Cannot close in parent\n"; # this should
+}
+print "ok\n";
+CODE
+                      "fork while in-place editing");
+        ok(open($fh, "<", $work), "open out file");
+        is(scalar <$fh>, "yy\n", "file successfully saved after chdir");
+        close $fh;
+    }
+
+    {
+        # test we handle the rename to the backup failing
+        # make it fail by creating a directory of the backup name
+        mkdir "$work.bak" or die "Cannot make mask backup directory: $!";
+        fresh_perl_like(<<'CODE', qr/Can't rename/, { stderr => 1 }, "fail backup rename");
+@ARGV = ("inplacetmp/foo");
+$^I = ".bak";
+while (<>) {
+  print;
+}
+print "ok\n";
+CODE
+        rmdir "$work.bak" or die "Cannot remove mask backup directory: $!";
+    }
+
+    # we now use temp files for in-place editing, make sure we didn't leave
+    # any behind in the above test
+    opendir my $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
+    my @names = grep !/^\.\.?$/ && $_ ne 'foo', readdir $d;
+    closedir $d;
+    is(scalar(@names), 0, "no extra files")
+      or diag "Found @names, expected none";
+
+    # the following tests might leave work files behind
+
+    # this test can leave the work file in the directory, since making
+    # the directory non-writable also prevents removing the work file
+  SKIP:
+    {
+        # test we handle the rename of the work to the original failing
+        # make it fail by removing write perms from the directory
+        # but first check that doesn't prevent writing
+        chmod 0500, "inplacetmp";
+        my $check = File::Spec->catfile("inplacetmp", "check");
+        my $canwrite = open my $fh, ">", $check;
+        unlink $check;
+        chmod 0700, "inplacetmp" or die "Cannot make inplacetmp writable again: $!";
+        skip "Cannot make inplacetmp read only", 1
+          if $canwrite;
+        fresh_perl_like(<<'CODE', qr/Can't rename/, { stderr => 1 }, "fail final rename");
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  chmod 0500, "inplacetmp";
+  print;
+}
+print "ok\n";
+CODE
+        chmod 0700, "inplacetmp" or die "Cannot make inplacetmp writable again: $!";
+    }
+
+  SKIP:
+    {
+        # this needs to reverse match how ARGV_USE_ATFUNCTIONS is defined in doio.c
+        skip "Testing without *at functions", 1
+          if $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
+              && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
+              && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
+        fresh_perl_like(<<'CODE', qr/^Cannot complete in-place edit of inplacetmp\/foo: .* - line 5, <> line \d+\./, { },
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  chdir "..";
+  print "xx\n";
+}
+print "ok\n";
+CODE
+                       "chdir while in-place editing (no at-functions)");
+    }
+
+    unlink $work;
+
+    opendir $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
+    @names = grep !/^\.\.?$/ && !/foo$/aai, readdir $d;
+    closedir $d;
+
+    # clean up in case the above failed
+    unlink map File::Spec->catfile("inplacetmp", $_), @names;
+
+    rmdir "inplacetmp";
 }
 
 # Tests for -E

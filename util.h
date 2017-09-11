@@ -89,6 +89,12 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 #define Perl_drand48_init(seed) (Perl_drand48_init_r(&PL_random_state, (seed)))
 #define Perl_drand48() (Perl_drand48_r(&PL_random_state))
 
+#ifdef PERL_CORE
+/* uses a different source of randomness to avoid interfering with the results
+ * of rand() */
+#define Perl_internal_drand48() (Perl_drand48_r(&PL_internal_random_state))
+#endif
+
 #ifdef USE_C_BACKTRACE
 
 typedef struct {
@@ -238,6 +244,10 @@ means arg not present, 1 is empty string/null byte */
 #ifdef HAS_MEMMEM
 #   define ninstr(big, bigend, little, lend)                                \
             ((char *) memmem(big, bigend - big, little, lend - little))
+#endif
+
+#if defined(HAS_MKSTEMP) && defined(PERL_CORE)
+#   define Perl_my_mkstemp(templte) mkstemp(templte)
 #endif
 
 #endif /* PERL_UTIL_H_ */

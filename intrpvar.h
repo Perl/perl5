@@ -830,6 +830,14 @@ PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
 
 PERLVARI(I, dump_re_max_len, STRLEN, 0)
 
+/* For internal uses of randomness, this ensures the sequence of
+ * random numbers returned by rand() isn't modified by perl's internal
+ * use of randomness.
+ * This is important if the user has called srand() with a seed.
+ */
+
+PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

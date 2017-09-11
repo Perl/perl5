@@ -626,6 +626,42 @@ Perl_mg_free_type(pTHX_ SV *sv, int how)
     mg_magical(sv);
 }
 
+/*
+=for apidoc mg_freeext
+
+Remove any magic of type C<how> using virtual table C<vtbl> from the
+SV C<sv>.  See L</sv_magic>.
+
+C<mg_freeext(sv, how, NULL)> is equivalent to C<mg_free_type(sv, how)>.
+
+=cut
+*/
+
+void
+Perl_mg_freeext(pTHX_ SV *sv, int how, const MGVTBL *vtbl)
+{
+    MAGIC *mg, *prevmg, *moremg;
+    PERL_ARGS_ASSERT_MG_FREEEXT;
+    for (prevmg = NULL, mg = SvMAGIC(sv); mg; prevmg = mg, mg = moremg) {
+	MAGIC *newhead;
+	moremg = mg->mg_moremagic;
+	if (mg->mg_type == how && (vtbl == NULL || mg->mg_virtual == vtbl)) {
+	    /* temporarily move to the head of the magic chain, in case
+	       custom free code relies on this historical aspect of mg_free */
+	    if (prevmg) {
+		prevmg->mg_moremagic = moremg;
+		mg->mg_moremagic = SvMAGIC(sv);
+		SvMAGIC_set(sv, mg);
+	    }
+	    newhead = mg->mg_moremagic;
+	    mg_free_struct(sv, mg);
+	    SvMAGIC_set(sv, newhead);
+	    mg = prevmg;
+	}
+    }
+    mg_magical(sv);
+}
+
 #include <signal.h>
 
 U32

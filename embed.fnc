@@ -1036,6 +1036,7 @@ ApdRn	|MAGIC*	|mg_findext	|NULLOK const SV* sv|int type|NULLOK const MGVTBL *vtb
 EXpR	|MAGIC*	|mg_find_mglob	|NN SV* sv
 Apd	|int	|mg_free	|NN SV* sv
 Apd	|void	|mg_free_type	|NN SV* sv|int how
+Apd	|void	|mg_freeext	|NN SV* sv|int how|NULLOK const MGVTBL *vtbl
 Apd	|int	|mg_get		|NN SV* sv
 ApdD	|U32	|mg_length	|NN SV* sv
 Apdn	|void	|mg_magical	|NN SV* sv
@@ -3051,6 +3052,10 @@ Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 
 #ifndef HAS_STRLCPY
 Apnod	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
+#endif
+
+#ifndef HAS_MKSTEMP
+pno	|int	|my_mkstemp	|NN char *templte
 #endif
 
 APpdn	|bool	|isinfnan	|NV nv
