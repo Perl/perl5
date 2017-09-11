@@ -3796,7 +3796,7 @@ Perl_mini_mktime(struct tm *ptm)
  * that's still outside the scope for POSIX time manipulation, so I don't
  * care.
  *
- * - jhi
+ * - lwall
  */
 
     year = 1900 + ptm->tm_year;
