@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use overload ();
 
-our $VERSION = '0.67';
+our $VERSION = '0.67_01';
 
 sub NEXT::ELSEWHERE::ancestors
 {
