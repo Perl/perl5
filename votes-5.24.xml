@@ -57,7 +57,7 @@ Correct: As noted on the ticket, it was listed here in the hope that it could be
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="ilmari" id="8d1c7d0a38e3ac54307661eb111c22edcc597606" desc="Fix Windows-1252 em-dashes in latest epigraphs"/>
+<commit votes="ilmari khw" id="8d1c7d0a38e3ac54307661eb111c22edcc597606" desc="Fix Windows-1252 em-dashes in latest epigraphs"/>
 
 </div>
 
