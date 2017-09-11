@@ -27,6 +27,40 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 In-place editing is now safer
+
+Previously in-place editing would delete or rename the input file
+as soon as you started working on a new file.
+
+Without backups this would result in loss of data if there was an
+error, such as a full disk, when writing to the output file.
+
+This has changed so that the input file isn't replaced until the
+output file has been completely written and successfully closed.
+
+This works by creating a work file in the same directory, which is
+renamed over the input file once the output file is complete.
+
+Incompatibilities:
+
+=over
+
+=item *
+
+Since this renaming needs to only happen once, if you create a thread
+or child process, that renaming will only happen in the original
+thread or process.
+
+=item *
+
+If you change directories while processing a file, and your operating
+system doesn't provide the unlinkat(), renameat() and fchmodat()
+functions, the final rename step may fail.
+
+=back
+
+[perl #127663]
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
