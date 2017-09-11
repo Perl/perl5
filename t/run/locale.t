@@ -148,8 +148,8 @@ EOF
 
         {
 	    fresh_perl_is(<<'EOF', ",,", {},
-print localeconv()->{decimal_point};
 use POSIX;
+print localeconv()->{decimal_point};
 use locale;
 print localeconv()->{decimal_point};
 EOF
