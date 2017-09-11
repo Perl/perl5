@@ -124,8 +124,8 @@ L<Announced on 2017-09-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   Glimmered the white Moon-shine.'
 
   'God save thee, ancient Mariner!
-  From the fiends, that plague thee thus!—-
-  Why look'st thou so?'—-With my cross-bow
+  From the fiends, that plague thee thus!â€”
+  Why look'st thou so?'â€”With my cross-bow
   I shot the ALBATROSS.
 
 =head2 v5.26.0 - Nine Simone, Ain't Got No / I Got Life
@@ -395,7 +395,7 @@ L<Announced on 2017-09-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
 
   And through the drifts the snowy clifts
   Did send a dismal sheen:
-  Nor shapes of men nor beasts we ken—-
+  Nor shapes of men nor beasts we kenâ€”
   The ice was all between.
 
   The ice was here, the ice was there,
