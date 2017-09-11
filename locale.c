@@ -55,6 +55,10 @@ static bool debug_initialization = FALSE;
 #  endif
 #endif
 
+/* strlen() of a literal string constant.  XXX We might want this more general,
+ * but using it in just this file for now */
+#define STRLENs(s)  (sizeof("" s "") - 1)
+
 #ifdef USE_LOCALE
 
 /*
