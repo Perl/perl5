@@ -3059,13 +3059,15 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
             PERL_UNUSED_RESULT(mbtowc(&wc, NULL, 0));/* Reset any shift state */
             errno = 0;
-            len = mbtowc(&wc, STR_WITH_LEN(HYPHEN_UTF8));
+            len = mbtowc(&wc, STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
 
-            if (   len != STRLENs(HYPHEN_UTF8)
-                || wc != (wchar_t) 0x2010)
+
+            if (   len != STRLENs(REPLACEMENT_CHARACTER_UTF8)
+                || wc != (wchar_t) 0xFFFD)
             {
                 is_utf8 = FALSE;
-                DEBUG_L(PerlIO_printf(Perl_debug_log, "\thyphen=U+%x\n", (unsigned int)wc));
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "\replacement=U+%x\n",
+                                                            (unsigned int)wc));
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                         "\treturn from mbtowc=%d; errno=%d; ?UTF8 locale=0\n",
                                                len,      errno));
