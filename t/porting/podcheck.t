@@ -93,6 +93,8 @@ missing from the C<LE<lt>E<gt>> pod command.
 A pod can't be linked to unless it has a unique name.
 And a NAME should have a dash and short description after it.
 
+=back
+
 If the C<PERL_POD_PEDANTIC> environment variable is set or the C<--pedantic>
 command line argument is provided then a few more checks are made.
 The pedantic checks are:
@@ -154,8 +156,6 @@ actually are.
 Another problem is that there is currently no check that modules listed as
 valid in the database
 actually are.  Thus any errors introduced there will remain there.
-
-=back
 
 =head2 Specially handled pods
 
