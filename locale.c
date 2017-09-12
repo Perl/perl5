@@ -3403,7 +3403,17 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 #  if defined(HAS_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
 
-    /* This function is trivial if we have strerror_l() */
+    /* This function is trivial if we don't have to worry about thread safety
+     * and have strerror_l(), as it handles the switch of locales so we don't
+     * have to deal with that.  We don't have to worry about thread safety if
+     * this is an unthreaded build, or if strerror_r() is also available.  Both
+     * it and strerror_l() are thread-safe.  Plain strerror() isn't thread
+     * safe.  But on threaded builds when strerror_r() is available, the
+     * apparent call to strerror() below is actually a macro that
+     * behind-the-scenes calls strerror_r().
+     */
+
+#    if ! defined(USE_ITHREADS) || defined(HAS_STRERROR_R)
 
     if (within_locale_scope) {
         errstr = savepv(strerror(errnum));
@@ -3412,7 +3422,34 @@ Perl_my_strerror(pTHX_ const int errnum)
         errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
     }
 
-#  else /* Doesn't have strerror_l(). */
+#    else
+
+    /* Here we have strerror_l(), but not strerror_r() and we are on a
+     * threaded-build.  We use strerror_l() for everything, constructing a
+     * locale to pass to it if necessary */
+
+    bool do_free = FALSE;
+    locale_t locale_to_use;
+
+    if (within_locale_scope) {
+        locale_to_use = uselocale((locale_t) 0);
+        if (locale_to_use == LC_GLOBAL_LOCALE) {
+            locale_to_use = duplocale(LC_GLOBAL_LOCALE);
+            do_free = TRUE;
+        }
+    }
+    else {  /* Use C locale if not within 'use locale' scope */
+        locale_to_use = PL_C_locale_obj;
+    }
+
+    errstr = savepv(strerror_l(errnum, locale_to_use));
+
+    if (do_free) {
+        freelocale(locale_to_use);
+    }
+
+#    endif
+#  else /* Doesn't have strerror_l() */
 
 #    ifdef USE_POSIX_2008_LOCALE
 
