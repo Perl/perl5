@@ -13,7 +13,7 @@ use strict;
 use Getopt::Long;
 use ExtUtils::Packlist;
 use Pod::Man;
-use vars qw(%opts $packlist);
+our ( %opts, $packlist );
 
 require './Porting/pod_lib.pl';
 my %man1 = (map {($_->[0], $_->[1])} @{get_pod_metadata()->{master}});

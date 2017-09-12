@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw($Quiet);
 use File::Spec;
 use FindBin;
 use Text::Wrap;
 use Getopt::Long;
 
+our $Quiet;
 no locale;
 
 # Assumption is that we're either already being run from the top level (*nix,
