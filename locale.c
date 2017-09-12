@@ -3490,13 +3490,11 @@ Perl_my_strerror(pTHX_ const int errnum)
     /* This function is trivial if we have strerror_l() */
 
     if (within_locale_scope) {
-        errstr = strerror(errnum);
+        errstr = savepv(strerror(errnum));
     }
     else {
-        errstr = strerror_l(errnum, PL_C_locale_obj);
+        errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
     }
-
-    errstr = savepv(errstr);
 
 #  else /* Doesn't have strerror_l(). */
 
