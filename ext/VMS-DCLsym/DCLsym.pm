@@ -2,12 +2,11 @@ package VMS::DCLsym;
 
 use Carp;
 use DynaLoader;
-use vars qw( @ISA $VERSION );
 use strict;
 
 # Package globals
-@ISA = ( 'DynaLoader' );
-$VERSION = '1.08';
+our @ISA = ( 'DynaLoader' );
+our $VERSION = '1.09';
 my(%Locsyms) = ( ':ID' => 'LOCAL' );
 my(%Gblsyms) = ( ':ID' => 'GLOBAL');
 my $DoCache = 1;

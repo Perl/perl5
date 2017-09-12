@@ -21,7 +21,7 @@ BEGIN { use_ok( 'B' ); }
 
 
 package Testing::Symtable;
-use vars qw($This @That %wibble $moo %moo);
+our ($This, @That, %wibble, $moo, %moo);
 my $not_a_sym = 'moo';
 
 sub moo { 42 }
@@ -35,7 +35,7 @@ package Testing::Symtable::Bar;
 sub hock { "yarrow" }
 
 package main;
-use vars qw(%Subs);
+our %Subs;
 local %Subs = ();
 B::walksymtable(\%Testing::Symtable::, 'find_syms', sub { $_[0] =~ /Foo/ },
                 'Testing::Symtable::');
@@ -46,8 +46,7 @@ sub B::GV::find_syms {
     $main::Subs{$symbol->STASH->NAME . '::' . $symbol->NAME}++;
 }
 
-my @syms = map { 'Testing::Symtable::'.$_ } qw(This That wibble moo car
-                                               BEGIN);
+my @syms = map { 'Testing::Symtable::'.$_ } qw(This That wibble moo car);
 push @syms, "Testing::Symtable::Foo::yarrow";
 
 # Make sure we hit all the expected symbols.

@@ -8,18 +8,17 @@
 package VMS::Stdio;
 
 require 5.002;
-use vars qw( $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA );
 use Carp '&croak';
 use DynaLoader ();
 use Exporter ();
- 
-$VERSION = '2.43';
-@ISA = qw( Exporter DynaLoader IO::File );
-@EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
+
+our $VERSION = '2.44';
+our @ISA = qw( Exporter DynaLoader IO::File );
+our @EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
               &O_RDONLY &O_RDWR  &O_TRUNC &O_WRONLY );
-@EXPORT_OK = qw( &binmode &flush &getname &remove &rewind &sync &setdef &tmpnam
+our @EXPORT_OK = qw( &binmode &flush &getname &remove &rewind &sync &setdef &tmpnam
                  &vmsopen &vmssysopen &waitfh &writeof );
-%EXPORT_TAGS = ( CONSTANTS => [ qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY
+our %EXPORT_TAGS = ( CONSTANTS => [ qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY
                                     &O_NOWAIT &O_RDONLY &O_RDWR &O_TRUNC
                                     &O_WRONLY ) ],
                  FUNCTIONS => [ qw( &binmode &flush &getname &remove &rewind

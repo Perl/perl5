@@ -63,7 +63,7 @@ warn "# didn't find " . join(' ', keys %ops) if keys %ops;
 # add it to the regex above too. (PADOPs are currently only produced
 # under ithreads, though).
 #
-use vars qw( $a $b );
+our ( $a, $b );
 sub bar {
 	# OP SVOP COP IV here or in sub definition
 	my @bar = (1, 2, 3);
