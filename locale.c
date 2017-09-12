@@ -1254,7 +1254,16 @@ Perl_langinfo(const nl_item item)
 Perl_langinfo(const int item)
 #endif
 {
-    bool toggle = TRUE;
+    return my_nl_langinfo(item, TRUE);
+}
+
+const char *
+#ifdef HAS_NL_LANGINFO
+S_my_nl_langinfo(const nl_item item, bool toggle)
+#else
+S_my_nl_langinfo(const int item, bool toggle)
+#endif
+{
     dTHX;
 
 #if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */

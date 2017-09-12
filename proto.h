@@ -3812,6 +3812,11 @@ PERL_CALLCONV char*	Perl_ninstr(const char* big, const char* bigend, const char*
 #if !(defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H))
 PERL_CALLCONV const char*	Perl_langinfo(const int item);
 #endif
+#if !(defined(HAS_NL_LANGINFO))
+#  if defined(PERL_IN_LOCALE_C)
+STATIC const char*	S_my_nl_langinfo(const int item, bool toggle);
+#  endif
+#endif
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
@@ -4233,6 +4238,11 @@ PERL_CALLCONV I32	Perl_do_semop(pTHX_ SV** mark, SV** sp);
 PERL_CALLCONV I32	Perl_do_shmio(pTHX_ I32 optype, SV** mark, SV** sp);
 #define PERL_ARGS_ASSERT_DO_SHMIO	\
 	assert(mark); assert(sp)
+#endif
+#if defined(HAS_NL_LANGINFO)
+#  if defined(PERL_IN_LOCALE_C)
+STATIC const char*	S_my_nl_langinfo(const nl_item item, bool toggle);
+#  endif
 #endif
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);

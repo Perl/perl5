@@ -2723,6 +2723,11 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
+#  ifdef HAS_NL_LANGINFO
+sn	|const char*|my_nl_langinfo|const nl_item item|bool toggle
+#  else
+sn	|const char*|my_nl_langinfo|const int item|bool toggle
+#  endif
 in	|const char *|save_to_buffer|NN const char * string	\
 				    |NULLOK char **buf		\
 				    |NN Size_t *buf_size	\

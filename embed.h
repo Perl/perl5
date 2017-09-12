@@ -1413,6 +1413,11 @@
 #      endif
 #    endif
 #  endif
+#  if !(defined(HAS_NL_LANGINFO))
+#    if defined(PERL_IN_LOCALE_C)
+#define my_nl_langinfo		S_my_nl_langinfo
+#    endif
+#  endif
 #  if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define sighandler		Perl_sighandler
 #  endif
@@ -1500,6 +1505,11 @@
 #define do_msgsnd(a,b)		Perl_do_msgsnd(aTHX_ a,b)
 #define do_semop(a,b)		Perl_do_semop(aTHX_ a,b)
 #define do_shmio(a,b,c)		Perl_do_shmio(aTHX_ a,b,c)
+#  endif
+#  if defined(HAS_NL_LANGINFO)
+#    if defined(PERL_IN_LOCALE_C)
+#define my_nl_langinfo		S_my_nl_langinfo
+#    endif
 #  endif
 #  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #define sighandler		Perl_sighandler
