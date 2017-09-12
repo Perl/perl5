@@ -802,8 +802,7 @@ can_ok('File::Spec::Win32', '_cwd');
 
 {
     package File::Spec::FakeWin32;
-    use vars qw(@ISA);
-    @ISA = qw(File::Spec::Win32);
+    our @ISA = qw(File::Spec::Win32);
 
     sub _cwd { 'C:\\one\\two' }
 

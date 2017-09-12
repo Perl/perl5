@@ -1,13 +1,12 @@
 package ExtUtils::CBuilder::Platform::android;
-$ExtUtils::CBuilder::Platform::android::VERSION = '0.280228';
 use warnings;
 use strict;
 use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 use Config;
 
-use vars qw(@ISA);
-@ISA = qw(ExtUtils::CBuilder::Platform::Unix);
+our $VERSION = '0.280229';
+our @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 # The Android linker will not recognize symbols from
 # libperl unless the module explicitly depends on it.

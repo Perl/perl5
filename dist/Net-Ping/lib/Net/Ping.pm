@@ -4,9 +4,7 @@ require 5.002;
 require Exporter;
 
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION
-            $def_timeout $def_proto $def_factor $def_family
-            $max_datasize $pingstring $hires $source_verify $syn_forking);
+our $hires;
 use Fcntl qw( F_GETFL F_SETFL O_NONBLOCK );
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW AF_INET PF_INET IPPROTO_TCP
 	       SOL_SOCKET SO_ERROR SO_BROADCAST
@@ -18,22 +16,22 @@ use FileHandle;
 use Carp;
 use Time::HiRes;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(pingecho);
-@EXPORT_OK = qw(wakeonlan);
-$VERSION = "2.61";
+our @ISA = qw(Exporter);
+our @EXPORT = qw(pingecho);
+our @EXPORT_OK = qw(wakeonlan);
+our $VERSION = "2.62";
 
 # Globals
 
-$def_timeout = 5;           # Default timeout to wait for a reply
-$def_proto = "tcp";         # Default protocol to use for pinging
-$def_factor = 1.2;          # Default exponential backoff rate.
-$def_family = AF_INET;      # Default family.
-$max_datasize = 1024;       # Maximum data bytes in a packet
+our $def_timeout = 5;           # Default timeout to wait for a reply
+our $def_proto = "tcp";         # Default protocol to use for pinging
+our $def_factor = 1.2;          # Default exponential backoff rate.
+our $def_family = AF_INET;      # Default family.
+our $max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
-$pingstring = "pingschwingping!\n";
-$source_verify = 1;         # Default is to verify source endpoint
-$syn_forking = 0;
+our $pingstring = "pingschwingping!\n";
+our $source_verify = 1;         # Default is to verify source endpoint
+our $syn_forking = 0;
 
 # Constants
 

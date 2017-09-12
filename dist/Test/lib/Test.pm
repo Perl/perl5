@@ -5,10 +5,9 @@ package Test;
 use strict;
 
 use Carp;
-use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
-          qw($TESTOUT $TESTERR %Program_Lines $told_about_diff
-             $ONFAIL %todo %history $planned @FAILDETAIL) #private-ish
-         );
+our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, $ntest, $TestLevel); #public-is
+our ($TESTOUT, $TESTERR, %Program_Lines, $told_about_diff,
+             $ONFAIL, %todo, %history, $planned, @FAILDETAIL); #private-ish
 
 # In case a test is run in a persistent environment.
 sub _reset_globals {
@@ -20,7 +19,7 @@ sub _reset_globals {
     $planned    = 0;
 }
 
-$VERSION = '1.30';
+$VERSION = '1.31';
 require Exporter;
 @ISA=('Exporter');
 

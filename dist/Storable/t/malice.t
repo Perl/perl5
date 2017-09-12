@@ -25,17 +25,15 @@ sub BEGIN {
 }
 
 use strict;
-use vars qw($file_magic_str $other_magic $network_magic $byteorder
-            $major $minor $minor_write $fancy);
 
-$byteorder = $Config{byteorder};
+our $byteorder = $Config{byteorder};
 
-$file_magic_str = 'pst0';
-$other_magic = 7 + length $byteorder;
-$network_magic = 2;
-$major = 2;
-$minor = 10;
-$minor_write = $] >= 5.019 ? 10 : $] > 5.008 ? 9 : $] > 5.005_50 ? 8 : 4;
+our $file_magic_str = 'pst0';
+our $other_magic = 7 + length $byteorder;
+our $network_magic = 2;
+our $major = 2;
+our $minor = 10;
+our $minor_write = $] >= 5.019 ? 10 : $] > 5.008 ? 9 : $] > 5.005_50 ? 8 : 4;
 
 use Test::More;
 
@@ -45,13 +43,13 @@ use Test::More;
 # There are only 2 * 2 tests per byte in the parts of the header not present
 # for network order, and 2 tests per byte on the 'pst0' "magic number" only
 # present in files, but not in things store()ed to memory
-$fancy = ($] > 5.007 ? 2 : 0);
+our $fancy = ($] > 5.007 ? 2 : 0);
 
 plan tests => 372 + length ($byteorder) * 4 + $fancy * 8;
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 require 'testlib.pl';
-use vars '$file';
+our $file;
 
 # The chr 256 is a hack to force the hash to always have the utf8 keys flag
 # set on 5.7.3 and later. Otherwise the test fails if run with -Mutf8 because

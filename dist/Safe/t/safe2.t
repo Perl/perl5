@@ -11,8 +11,6 @@ BEGIN {
 # Tests Todo:
 #	'main' as root
 
-use vars qw($bar);
-
 use Opcode 1.00, qw(opdesc opset opset_to_ops opset_to_hex
 	opmask_add full_opset empty_opset opcodes opmask define_optag);
 
@@ -23,7 +21,7 @@ my $TB = Test::Builder->new();
 
 # Set up a package namespace of things to be visible to the unsafe code
 $Root::foo = "visible";
-$bar = "invisible";
+our $bar = "invisible";
 
 # Stop perl from moaning about identifies which are apparently only used once
 $Root::foo .= "";

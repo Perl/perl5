@@ -1,8 +1,7 @@
 #!perl -w
 use strict;
-use vars '$file';
 
-$file = "storable-testfile.$$";
+our $file = "storable-testfile.$$";
 die "Temporary file '$file' already exists" if -e $file;
 
 END { while (-f $file) {unlink $file or die "Can't unlink '$file': $!" }}

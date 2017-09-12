@@ -203,7 +203,7 @@ is($FAULT::fault, 2);
 {
     package P;
     use Storable qw(freeze thaw);
-    use vars qw($a $b);
+    our ($a, $b);
     $b = "not ok ";
     sub TIESCALAR { bless \$a } sub FETCH { "ok " }
     tie $a, P; my $r = thaw freeze \$a; $b = $$r;

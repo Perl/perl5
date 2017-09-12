@@ -318,10 +318,9 @@ If you want to have your cake and eat it too, you need a more complicated
 boilerplate.
 
     package YourPackage;
-    use vars qw($VERSION @ISA);
 
-    @ISA = qw( OnePackage OtherPackage );
-    $VERSION = '0.01';
+    our @ISA = qw( OnePackage OtherPackage );
+    our $VERSION = '0.01';
     eval {
        require XSLoader;
        XSLoader::load('YourPackage', $VERSION);
@@ -387,7 +386,7 @@ boilerplate as
 
     package YourPackage;
     use XSLoader;
-    use vars qw($VERSION @ISA);
+    our ($VERSION, @ISA);
 
     BEGIN {
        @ISA = qw( OnePackage OtherPackage );
@@ -410,7 +409,7 @@ this:
 
     package YourPackage;
     use XSLoader;
-    use vars qw($VERSION @ISA);
+    our ($VERSION, @ISA);
 
     BEGIN {
        @ISA = qw( OnePackage OtherPackage );
