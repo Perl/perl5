@@ -95,3 +95,15 @@ qr/\N{}/;
 EXPECT
 Unknown charname '' at - line 2, within pattern
 Execution of - aborted due to compilation errors.
+########
+# NAME [perl #131868]
+use warnings;
+my $qr = qr {
+    (?(DEFINE)
+      (?<digit>   [0-9])
+      (?<digits>  (?&digit){4})
+    )
+    ^(?&digits)$
+}x;
+EXPECT
+########
