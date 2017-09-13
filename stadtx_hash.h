@@ -118,7 +118,7 @@ STADTX_STATIC_INLINE void stadtx_seed_state (
     const U8 *seed_ch,
     U8 *state_ch
 ) {
-    U64 *seed= (U64 *)seed_ch;
+    const U64 *seed= (const U64 *)seed_ch;
     U64 *state= (U64 *)state_ch;
     /* first we apply two masks to each word of the seed, this means that
      * a) at least one of state[0] and state[2] is nonzero,

@@ -1421,7 +1421,7 @@ SBOX32_STATIC_INLINE void sbox32_seed_state96 (
     const U8 *seed_ch,
     U8 *state_ch
 ) {
-    U32 *seed= (U32 *)seed_ch;
+    const U32 *seed= (const U32 *)seed_ch;
     U32 *state= (U32 *)state_ch;
     U32 *state_cursor = state + 1;
     U32 *sbox32_end = state + 1 + (256 * SBOX32_MAX_LEN);

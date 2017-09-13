@@ -134,7 +134,7 @@ void zaphod32_seed_state (
     const U8 *seed_ch,
     U8 *state_ch
 ) {
-    U32 *seed= (U32 *)seed_ch;
+    const U32 *seed= (const U32 *)seed_ch;
     U32 *state= (U32 *)state_ch;
   
     /* hex expansion of pi, skipping first two digits. pi= 3.2[43f6...]*/
