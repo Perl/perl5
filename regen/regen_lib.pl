@@ -1,15 +1,15 @@
 #!/usr/bin/perl -w
 use strict;
-use vars qw($Needs_Write $Verbose @Changed $TAP);
+our (@Changed, $TAP);
 use File::Compare;
 use Symbol;
 use Text::Wrap();
 
 # Common functions needed by the regen scripts
 
-$Needs_Write = $^O eq 'cygwin' || $^O eq 'os2' || $^O eq 'MSWin32';
+our $Needs_Write = $^O eq 'cygwin' || $^O eq 'os2' || $^O eq 'MSWin32';
 
-$Verbose = 0;
+our $Verbose = 0;
 @ARGV = grep { not($_ eq '-q' and $Verbose = -1) }
   grep { not($_ eq '--tap' and $TAP = 1) }
   grep { not($_ eq '-v' and $Verbose = 1) } @ARGV;
