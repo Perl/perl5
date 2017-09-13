@@ -4,12 +4,15 @@ our $VERSION = '1.02';
 
 use B ();
 
+our $BEGIN_output;
+our $saveout_fh;
+
 sub import {
     my ($class, @options) = @_;
     my ($quiet, $veryquiet) = (0, 0);
     if ($options[0] eq '-q' || $options[0] eq '-qq') {
 	$quiet = 1;
-	open (SAVEOUT, ">&STDOUT");
+	open ($saveout_fh, ">&", STDOUT);
 	close STDOUT;
 	open (STDOUT, ">", \$O::BEGIN_output);
 	if ($options[0] eq '-qq') {
@@ -27,8 +30,8 @@ sub import {
 	CHECK {
 	    if ($quiet) {
 		close STDOUT;
-		open (STDOUT, ">&SAVEOUT");
-		close SAVEOUT;
+		open (STDOUT, ">&", $saveout_fh);
+		close $saveout_fh;
 	    }
 
 	    # Note: if you change the code after this 'use', please
