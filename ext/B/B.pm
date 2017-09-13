@@ -6,10 +6,15 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B;
-use strict;
 
-require Exporter;
 @B::ISA = qw(Exporter);
+
+# If B is loaded without imports, we do not want to unnecessarily pollute the stash with Exporter.
+sub import {
+    return unless scalar @_ > 1; # Called as a method call.
+    require Exporter;
+    B->export_to_level(1, @_);
+}
 
 # walkoptree_slow comes from B.pm (you are there),
 # walkoptree comes from B.xs
