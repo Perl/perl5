@@ -2409,17 +2409,20 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
-#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), assert(s), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), assert(s), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), (void)memzero((char*)(d), (n) * sizeof(t)))
+#define perl_assert_ptr(p) assert( ((void*)(p)) != 0 )
 
-#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), assert(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), assert(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+
+#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), (void)memzero((char*)(d), (n) * sizeof(t)))
+
+#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
 #ifdef HAS_MEMSET
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), memzero((char*)(d), (n) * sizeof(t)))
+#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)))
 #else
 /* Using bzero(), which returns void.  */
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) assert(d), memzero((char*)(d), (n) * sizeof(t)),d)
+#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)),d)
 #endif
 
 #define PoisonWith(d,n,t,b)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), (U8)(b), (n) * sizeof(t)))
