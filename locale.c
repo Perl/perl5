@@ -284,7 +284,7 @@ Perl_set_numeric_standard(pTHX)
 
     if (DEBUG_L_TEST || debug_initialization) {
         PerlIO_printf(Perl_debug_log,
-                          "Underlying LC_NUMERIC locale now is C\n");
+                          "LC_NUMERIC locale now is standard C\n");
     }
 
 #  endif
@@ -313,7 +313,7 @@ Perl_set_numeric_underlying(pTHX)
 
     if (DEBUG_L_TEST || debug_initialization) {
         PerlIO_printf(Perl_debug_log,
-                          "Underlying LC_NUMERIC locale now is %s\n",
+                          "LC_NUMERIC locale now is %s\n",
                           PL_numeric_name);
     }
 
