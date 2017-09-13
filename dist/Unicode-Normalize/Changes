@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.26  *** RELEASE DATE HERE ***
+    - Switch to XSLoader from Dynaloader
+
 1.25  Wed Dec 16 03:05:57 UTC 2015
     - Fix Normalize.xs to work on releases earlier than 5.8.  The problem was
       introduced in this module's version 1.24

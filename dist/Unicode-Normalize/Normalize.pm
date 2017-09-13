@@ -16,7 +16,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 our $PACKAGE = __PACKAGE__;
 
 our @EXPORT = qw( NFC NFD NFKC NFKD );
@@ -56,9 +56,9 @@ require Exporter;
 
 ##### The above part is common to XS and PP #####
 
-our @ISA = qw(Exporter DynaLoader);
-require DynaLoader;
-bootstrap Unicode::Normalize $VERSION;
+our @ISA = qw(Exporter);
+use XSLoader ();
+XSLoader::load( 'Unicode::Normalize', $VERSION );
 
 ##### The below part is common to XS and PP #####
 

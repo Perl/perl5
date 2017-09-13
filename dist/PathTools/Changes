@@ -3,6 +3,7 @@ Revision history for Perl distribution PathTools.
 3.69
 - avoid loading modules repeatedly at runtime
 - replace 'use vars' by 'our'
+- Switch to XSLoader from Dynaloader
 
 3.68
 - avoid warning from pre-5.8 code for detecting tainted values

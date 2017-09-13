@@ -1,5 +1,8 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9747 [???]
+ - Switch to XSLoader from Dynaloader
+
 1.9746 [2017-08-17]
  - Unreliable t/usleep.t and t/utime.t tests [rt.cpan.org #122819]
    Avoid testing for $dt = $t2 - $t1 and assuming $dt is less than
