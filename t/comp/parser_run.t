@@ -5,11 +5,11 @@
 # Note that this should still be runnable under miniperl.
 
 BEGIN {
-    @INC = qw(. ../lib );
     chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc( qw(. ../lib ) );
 }
 
-require './test.pl';
 plan(4);
 
 # [perl #130814] can reallocate lineptr while looking ahead for
