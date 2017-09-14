@@ -3402,7 +3402,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         while ((name += strcspn(name, "Uu") + 1)
                                             <= save_input_locale + final_pos - 2)
         {
-            if (  !isALPHA_FOLD_NE(*name, 't')
+            if (   isALPHA_FOLD_NE(*name, 't')
                 || isALPHA_FOLD_NE(*(name + 1), 'f'))
             {
                 continue;
