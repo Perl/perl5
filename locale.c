@@ -59,6 +59,21 @@ static bool debug_initialization = FALSE;
  * but using it in just this file for now */
 #define STRLENs(s)  (sizeof("" s "") - 1)
 
+/* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
+ * return of setlocale(), then this is extremely likely to be the C or POSIX
+ * locale.  However, the output of setlocale() is documented to be opaque, but
+ * the odds are extremely small that it would return these two strings for some
+ * other locale.  Note that VMS in these two locales includes many non-ASCII
+ * characters as controls and punctuation (below are hex bytes):
+ *   cntrl:  84-97 9B-9F
+ *   punct:  A1-A3 A5 A7-AB B0-B3 B5-B7 B9-BD BF-CF D1-DD DF-EF F1-FD
+ * Oddly, none there are listed as alphas, though some represent alphabetics
+ * http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg198753.html */
+#define isNAME_C_OR_POSIX(name)                                              \
+                             (   (name) != NULL                              \
+                              && (( *(name) == 'C' && (*(name + 1)) == '\0') \
+                                   || strEQ((name), "POSIX")))
+
 #ifdef USE_LOCALE
 
 /*
@@ -297,20 +312,6 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 
 }
 
-/* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
- * return of setlocale(), then this is extremely likely to be the C or POSIX
- * locale.  However, the output of setlocale() is documented to be opaque, but
- * the odds are extremely small that it would return these two strings for some
- * other locale.  Note that VMS in these two locales includes many non-ASCII
- * characters as controls and punctuation (below are hex bytes):
- *   cntrl:  84-97 9B-9F
- *   punct:  A1-A3 A5 A7-AB B0-B3 B5-B7 B9-BD BF-CF D1-DD DF-EF F1-FD
- * Oddly, none there are listed as alphas, though some represent alphabetics
- * http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg198753.html */
-#define isNAME_C_OR_POSIX(name)                                              \
-                             (   (name) != NULL                              \
-                              && (( *(name) == 'C' && (*(name + 1)) == '\0') \
-                                   || strEQ((name), "POSIX")))
 
 void
 Perl_new_numeric(pTHX_ const char *newnum)
