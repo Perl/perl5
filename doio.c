@@ -863,7 +863,8 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 }
 
 #if defined(HAS_UNLINKAT) && defined(HAS_RENAMEAT) && defined(HAS_FCHMODAT) && \
-    (defined(HAS_DIRFD) || defined(HAS_DIR_DD_FD)) && !defined(NO_USE_ATFUNCTIONS)
+    (defined(HAS_DIRFD) || defined(HAS_DIR_DD_FD)) && !defined(NO_USE_ATFUNCTIONS) && \
+    defined(HAS_LINKAT)
 #  define ARGV_USE_ATFUNCTIONS
 #endif
 
