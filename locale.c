@@ -3037,12 +3037,16 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * should give the correct results */
 
 #    if defined(HAS_NL_LANGINFO) && defined(CODESET)
+     /* The task is easiest if has this POSIX 2001 function */
 
         {
-            char *codeset = nl_langinfo(CODESET);
-            if (codeset && strNE(codeset, "")) {
-                codeset = savepv(codeset);
+            const char *codeset = my_nl_langinfo(PERL_CODESET, FALSE);
+                                          /* FALSE => already in dest locale */
 
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "\tnllanginfo returned CODESET '%s'\n", codeset));
+
+            if (codeset && strNE(codeset, "")) {
                 /* If we switched LC_CTYPE, switch back */
                 if (save_ctype_locale) {
                     do_setlocale_c(LC_CTYPE, save_ctype_locale);
@@ -3055,7 +3059,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                        "\tnllanginfo returned CODESET '%s'; ?UTF8 locale=%d\n",
                                                      codeset,         is_utf8));
-                Safefree(codeset);
                 Safefree(save_input_locale);
                 return is_utf8;
             }
