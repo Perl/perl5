@@ -243,7 +243,8 @@ means arg not present, 1 is empty string/null byte */
 
 #ifdef HAS_MEMMEM
 #   define ninstr(big, bigend, little, lend)                                \
-            ((char *) memmem(big, bigend - big, little, lend - little))
+            ((char *) memmem((big), (bigend) - (big),                       \
+                             (little), (lend) - (little)))
 #endif
 
 #if defined(HAS_MKSTEMP) && defined(PERL_CORE)
