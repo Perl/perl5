@@ -511,3 +511,16 @@ if test "$d_unsetenv" = "$define" -a \
         ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
 fi
 EOOVER
+
+# if you use a newer toolchain before OS X 10.9 these functions may be
+# incorrectly detected, so disable them
+# OS X 10.10.x corresponds to kernel 14.x
+case "$osvers" in
+    [1-9].*|1[0-3].*)
+	d_linkat=undef
+	d_openat=undef
+	d_renameat=undef
+	d_unlinkat=undef
+	d_fchmodat=undef
+	;;
+esac
