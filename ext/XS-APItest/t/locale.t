@@ -124,11 +124,13 @@ SKIP: {
     # Get the translation from item name to numeric value.
     I18N::Langinfo->import(keys %items) if $has_nl_langinfo;
 
-    foreach my $item (sort keys %items) {
-        my $result = test_Perl_langinfo(eval $items{$item});
-        if (exists $correct_C_responses{$item}) {
-            is ($result, $correct_C_responses{$item},
-                "Returns expected value for $item");
+    foreach my $formal_item (sort keys %items) {
+        if (exists $correct_C_responses{$formal_item}) {
+            my $item = eval $items{$formal_item};
+            next if $@;
+            is (test_Perl_langinfo($item),
+                $correct_C_responses{$formal_item},
+                "Returns expected value for $formal_item");
         }
     }
 }
