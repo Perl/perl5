@@ -45,7 +45,7 @@ Correct: As noted on the ticket, it was listed here in the hope that it could be
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh" id="b9486474d36974b83d0b00fdcbfd1530299a0f7c" ticket="" desc="Configure: check for GCC 6 and 7"/>
+<commit votes="steveh jhi" id="b9486474d36974b83d0b00fdcbfd1530299a0f7c" ticket="" desc="Configure: check for GCC 6 and 7"/>
 
 </div>
 
