@@ -1194,10 +1194,7 @@ Perl_leave_scope(pTHX_ I32 base)
                         break;
                     case SVt_PVCV:
                     {
-                        HEK *hek =
-			      CvNAMED(sv)
-				? CvNAME_HEK((CV *)sv)
-				: GvNAME_HEK(CvGV(sv));
+                        HEK *hek = CvGvNAME_HEK(sv);
                         assert(hek);
                         (void)share_hek_hek(hek);
                         cv_undef((CV *)sv);
@@ -1223,9 +1220,7 @@ Perl_leave_scope(pTHX_ I32 base)
                     case SVt_PVHV:	*svp = MUTABLE_SV(newHV());	break;
                     case SVt_PVCV:
                     {
-                        HEK * const hek = CvNAMED(sv)
-                                             ? CvNAME_HEK((CV *)sv)
-                                             : GvNAME_HEK(CvGV(sv));
+                        HEK * const hek = CvGvNAME_HEK(sv);
 
                         /* Create a stub */
                         *svp = newSV_type(SVt_PVCV);
