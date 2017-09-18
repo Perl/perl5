@@ -75,6 +75,8 @@ history. Returns the old value.
 returns an array with two strings that give most appropriate names for
 files for input and output using conventions C<"E<lt>$in">, C<"E<gt>out">.
 
+The strings returned may not be useful for 3-argument open().
+
 =item Attribs
 
 returns a reference to a hash which describes internal configuration
