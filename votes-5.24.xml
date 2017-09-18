@@ -37,8 +37,6 @@ Correct: As noted on the ticket, it was listed here in the hope that it could be
 
 <div><h3>Regression Fixes</h3>
 
-<<commit votes="tonyc" id="d8b61909479178ddb668ad385988877d26f202f2" ticket="132008" desc="Term::ReadLine generates empty &amp;STDERR files"/>
-
 /div>
 
 <div><h3>New Feature Fixes</h3>
