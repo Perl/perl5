@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 136);
+plan(tests => 137);
 
 use Config;
 
@@ -550,6 +550,19 @@ while (<>) {
 print "ok\n";
 CODE
         rmdir "$work.bak" or die "Cannot remove mask backup directory: $!";
+    }
+
+    {
+        # test with absolute paths, this was failing on FreeBSD 11ish due
+        # to a bug in renameat()
+        my $abs_work = File::Spec->rel2abs($work);
+        fresh_perl_is(<<'CODE', "",
+while (<>) {
+  print;
+}
+CODE
+                      { stderr => 1, args => [ $abs_work ], switches => [ "-i" ] },
+                      "abs paths");
     }
 
     # we now use temp files for in-place editing, make sure we didn't leave
