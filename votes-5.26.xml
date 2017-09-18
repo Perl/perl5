@@ -33,6 +33,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
+<commit votes="tonyc" id="d8b61909479178ddb668ad385988877d26f202f2" ticket="132008" desc="Term::ReadLine generates empty &amp;STDERR files"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
