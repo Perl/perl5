@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 136);
+plan(tests => 137);
 
 use Config;
 
@@ -468,6 +468,7 @@ __EOF__
         skip "Not enough *at functions", 3
           unless $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
               && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
+              && $Config{d_linkat}
               && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
         fresh_perl_is(<<'CODE', "ok\n", { },
 @ARGV = ("inplacetmp/foo");
@@ -552,6 +553,19 @@ CODE
         rmdir "$work.bak" or die "Cannot remove mask backup directory: $!";
     }
 
+    {
+        # test with absolute paths, this was failing on FreeBSD 11ish due
+        # to a bug in renameat()
+        my $abs_work = File::Spec->rel2abs($work);
+        fresh_perl_is(<<'CODE', "",
+while (<>) {
+  print;
+}
+CODE
+                      { stderr => 1, args => [ $abs_work ], switches => [ "-i" ] },
+                      "abs paths");
+    }
+
     # we now use temp files for in-place editing, make sure we didn't leave
     # any behind in the above test
     opendir my $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
@@ -594,6 +608,7 @@ CODE
         skip "Testing without *at functions", 1
           if $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
               && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
+              && $Config{d_linkat}
               && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
         fresh_perl_like(<<'CODE', qr/^Cannot complete in-place edit of inplacetmp\/foo: .* - line 5, <> line \d+\./, { },
 @ARGV = ("inplacetmp/foo");

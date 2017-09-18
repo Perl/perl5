@@ -863,7 +863,8 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 }
 
 #if defined(HAS_UNLINKAT) && defined(HAS_RENAMEAT) && defined(HAS_FCHMODAT) && \
-    (defined(HAS_DIRFD) || defined(HAS_DIR_DD_FD)) && !defined(NO_USE_ATFUNCTIONS)
+    (defined(HAS_DIRFD) || defined(HAS_DIR_DD_FD)) && !defined(NO_USE_ATFUNCTIONS) && \
+    defined(HAS_LINKAT)
 #  define ARGV_USE_ATFUNCTIONS
 #endif
 
@@ -1191,6 +1192,30 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     return NULL;
 }
 
+#ifdef ARGV_USE_ATFUNCTIONS
+#  if defined(__FreeBSD__)
+
+/* FreeBSD 11 renameat() mis-behaves strangely with absolute paths in cases where the
+ * equivalent rename() succeeds
+ */
+static int
+S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath) {
+    /* this is intended only for use in Perl_do_close() */
+    assert(olddfd == newdfd);
+    assert(PERL_FILE_IS_ABSOLUTE(oldpath) == PERL_FILE_IS_ABSOLUTE(newpath));
+    if (PERL_FILE_IS_ABSOLUTE(oldpath)) {
+        return PerlLIO_rename(oldpath, newpath);
+    }
+    else {
+        return renameat(olddfd, oldpath, newdfd, newpath);
+    }
+}
+
+#  else
+#    define S_my_renameat(dh1, pv1, dh2, pv2) renameat((dh1), (pv1), (dh2), (pv2))
+#  endif /* if defined(__FreeBSD__) */
+#endif
+
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
 Perl_do_close(pTHX_ GV *gv, bool not_implicit)
@@ -1320,7 +1345,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #ifdef HAS_RENAME
                     if (
 #  ifdef ARGV_USE_ATFUNCTIONS
-                        renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0
+                        S_my_renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0
 #  else
                         PerlLIO_rename(orig_pv, SvPVX(*back_psv)) < 0
 #  endif
@@ -1360,7 +1385,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
             if (
 #ifdef HAS_RENAME
 #  ifdef ARGV_USE_ATFUNCTIONS
-                renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0
+		S_my_renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0
 #  else
                 PerlLIO_rename(SvPVX(*temp_psv), orig_pv) < 0
 #  endif
