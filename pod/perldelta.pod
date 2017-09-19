@@ -466,6 +466,12 @@ The in-place sort optimisation now correctly strengthens weak
 references using the new L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
 API function.
 
+=item *
+
+Only the C<=> operator is permitted for defining defaults for
+parameters in subroutine signatures.  Previously other assignment
+operators, eg. C<+=>, were also permitted. [perl #131777]
+
 =back
 
 =head1 Known Problems
