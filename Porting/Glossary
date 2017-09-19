@@ -694,19 +694,24 @@ d_dlsymun (d_dlsymun.U):
 	indicates that we need to prepend an underscore to the symbol
 	name before calling dlsym().
 
-d_double_has_inf (infnan.U):
+d_dosuid (d_dosuid.U):
+	This variable conditionally defines the symbol DOSUID, which
+	tells the C program that it should insert setuid emulation code
+	on hosts which have setuid #! scripts disabled.
+
+d_double_has_inf (longdblfio.U):
 	This variable conditionally defines the symbol DOUBLE_HAS_INF
 	which indicates that the double type has an infinity.
 
-d_double_has_nan (infnan.U):
+d_double_has_nan (longdblfio.U):
 	This variable conditionally defines the symbol DOUBLE_HAS_INF
 	which indicates that the double type has a not-a-number.
 
-d_double_has_negative_zero (infnan.U):
+d_double_has_negative_zero (longdblfio.U):
 	This variable conditionally defines the symbol DOUBLE_HAS_NEGATIVE_ZERO
 	which indicates that the double type has a negative zero.
 
-d_double_has_subnormals (infnan.U):
+d_double_has_subnormals (longdblfio.U):
 	This variable conditionally defines the symbol DOUBLE_HAS_SUBNORMALS
 	which indicates that the double type has subnormals (denormals).
 
@@ -725,11 +730,6 @@ d_double_style_ieee (longdblfio.U):
 d_double_style_vax (longdblfio.U):
 	This variable conditionally defines the symbol DOUBLE_STYLE_VAX,
 	which indicates that the double is the 64-bit VAX format D or G.
-
-d_dosuid (d_dosuid.U):
-	This variable conditionally defines the symbol DOSUID, which
-	tells the C program that it should insert setuid emulation code
-	on hosts which have setuid #! scripts disabled.
 
 d_drand48_r (d_drand48_r.U):
 	This variable conditionally defines the HAS_DRAND48_R symbol,
@@ -849,7 +849,7 @@ d_fchmod (d_fchmod.U):
 	indicates to the C program that the fchmod() routine is available
 	to change mode of opened files.
 
-d_fchmodat (d_fchmodat.U):
+d_fchmodat (d_fsat.U):
 	This variable conditionally defines the HAS_FCHMODAT symbol, which
 	indicates the POSIX fchmodat() function is available.
 
@@ -1529,7 +1529,7 @@ d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
 
-d_linkat (d_linkat.U):
+d_linkat (d_fsat.U):
 	This variable conditionally defines the HAS_LINKAT symbol, which
 	indicates the POSIX linkat() function is available.
 
@@ -1591,10 +1591,6 @@ d_logb (d_logb.U):
 	indicates to the C program that the logb() routine is available
 	to extract the exponent of x.
 
-d_longdbl (d_longdbl.U):
-	This variable conditionally defines HAS_LONG_DOUBLE if
-	the long double type is supported.
-
 d_long_double_style_ieee (d_longdbl.U):
 	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE
 	if the long double is any of the IEEE 754 style long doubles:
@@ -1618,6 +1614,10 @@ d_long_double_style_ieee_std (d_longdbl.U):
 d_long_double_style_vax (d_longdbl.U):
 	This variable conditionally defines LONG_DOUBLE_STYLE_VAX
 	if the long double is the 128-bit VAX format H.
+
+d_longdbl (d_longdbl.U):
+	This variable conditionally defines HAS_LONG_DOUBLE if
+	the long double type is supported.
 
 d_longlong (d_longlong.U):
 	This variable conditionally defines HAS_LONG_LONG if
@@ -1905,7 +1905,7 @@ d_open3 (d_open3.U):
 	which indicates to the C program that the 3 argument version of
 	the open(2) function is available.
 
-d_openat (d_openat.U):
+d_openat (d_fsat.U):
 	This variable conditionally defines the HAS_OPENAT symbol, which
 	indicates the POSIX openat() function is available.
 
@@ -2149,7 +2149,7 @@ d_rename (d_rename.U):
 	indicates to the C program that the rename() routine is available
 	to rename files.
 
-d_renameat (d_renameat.U):
+d_renameat (d_fsat.U):
 	This variable conditionally defines the HAS_RENAMEAT symbol, which
 	indicates the POSIX renameat() function is available.
 
@@ -2837,7 +2837,7 @@ d_union_semun (d_union_semun.U):
 	This variable conditionally defines HAS_UNION_SEMUN if the
 	union semun is defined by including <sys/sem.h>.
 
-d_unlinkat (d_unlinkat.U):
+d_unlinkat (d_fsat.U):
 	This variable conditionally defines the HAS_UNLINKAT symbol, which
 	indicates the POSIX unlinkat() function isavailable.
 

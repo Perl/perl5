@@ -383,11 +383,6 @@ d_alarm=''
 asctime_r_proto=''
 d_asctime_r=''
 d_asinh=''
-d_openat=''
-d_unlinkat=''
-d_renameat=''
-d_linkat=''
-d_fchmodat=''
 d_atanh=''
 d_attribute_deprecated=''
 d_attribute_format=''
@@ -503,6 +498,11 @@ d_fpgetround=''
 d_fpos64_t=''
 d_frexpl=''
 d_fs_data_s=''
+d_fchmodat=''
+d_linkat=''
+d_openat=''
+d_renameat=''
+d_unlinkat=''
 d_fseeko=''
 d_fsetpos=''
 d_fstatfs=''
@@ -13983,6 +13983,22 @@ eval $inlibc
 set fchmod d_fchmod
 eval $inlibc
 
+: check for openat, unlinkat, renameat, linkat, fchmodat
+set openat d_openat
+eval $inlibc
+
+set unlinkat d_unlinkat
+eval $inlibc
+
+set renameat d_renameat
+eval $inlibc
+
+set linkat d_linkat
+eval $inlibc
+
+set fchmodat d_fchmodat
+eval $inlibc
+
 : see if fchown exists
 set fchown d_fchown
 eval $inlibc
@@ -19774,22 +19790,6 @@ esac
 set strxfrm d_strxfrm
 eval $inlibc
 
-: check for openat, unlinkat, renameat, linkat, fchmodat
-set openat d_openat
-eval $inlibc
-
-set unlinkat d_unlinkat
-eval $inlibc
-
-set renameat d_renameat
-eval $inlibc
-
-set linkat d_linkat
-eval $inlibc
-
-set fchmodat d_fchmodat
-eval $inlibc
-
 : see if symlink exists
 set symlink d_symlink
 eval $inlibc
@@ -24466,11 +24466,6 @@ d_asctime64='$d_asctime64'
 d_asctime_r='$d_asctime_r'
 d_asinh='$d_asinh'
 d_atanh='$d_atanh'
-d_openat='$d_openat'
-d_unlinkat='$d_unlinkat'
-d_renameat='$d_renameat'
-d_linkat='$d_linkat'
-d_fchmodat='$d_fchmodat'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
 d_attribute_deprecated='$d_attribute_deprecated'
@@ -24560,6 +24555,7 @@ d_expm1='$d_expm1'
 d_faststdio='$d_faststdio'
 d_fchdir='$d_fchdir'
 d_fchmod='$d_fchmod'
+d_fchmodat='$d_fchmodat'
 d_fchown='$d_fchown'
 d_fcntl='$d_fcntl'
 d_fcntl_can_lock='$d_fcntl_can_lock'
@@ -24701,6 +24697,7 @@ d_lgamma_r='$d_lgamma_r'
 d_libm_lib_version='$d_libm_lib_version'
 d_libname_unique='$d_libname_unique'
 d_link='$d_link'
+d_linkat='$d_linkat'
 d_llrint='$d_llrint'
 d_llrintl='$d_llrintl'
 d_llround='$d_llround'
@@ -24779,6 +24776,7 @@ d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
 d_open3='$d_open3'
+d_openat='$d_openat'
 d_pathconf='$d_pathconf'
 d_pause='$d_pause'
 d_perl_otherlibdirs='$d_perl_otherlibdirs'
@@ -24819,6 +24817,7 @@ d_regcomp='$d_regcomp'
 d_remainder='$d_remainder'
 d_remquo='$d_remquo'
 d_rename='$d_rename'
+d_renameat='$d_renameat'
 d_rewinddir='$d_rewinddir'
 d_rint='$d_rint'
 d_rmdir='$d_rmdir'
@@ -24968,6 +24967,7 @@ d_ualarm='$d_ualarm'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_unlinkat='$d_unlinkat'
 d_unordered='$d_unordered'
 d_unsetenv='$d_unsetenv'
 d_uselocale='$d_uselocale'
