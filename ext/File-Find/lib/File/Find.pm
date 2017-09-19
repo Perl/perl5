@@ -787,15 +787,6 @@ $File::Find::dont_use_nlink = 1
     if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $Is_Win32 ||
        $^O eq 'interix' || $^O eq 'cygwin' || $^O eq 'qnx' || $^O eq 'nto';
 
-# Set dont_use_nlink in your hint file if your system's stat doesn't
-# report the number of links in a directory as an indication
-# of the number of files.
-# See e.g. hints/haiku.sh for Haiku.
-unless ($File::Find::dont_use_nlink) {
-    require Config;
-    $File::Find::dont_use_nlink = 1 if ($Config::Config{'dont_use_nlink'});
-}
-
 # We need a function that checks if a scalar is tainted. Either use the
 # Scalar::Util module's tainted() function or our (slower) pure Perl
 # fallback is_tainted_pp()

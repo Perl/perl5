@@ -7,7 +7,7 @@ use Carp;
 use strict;
 use warnings;
 use Tie::RefHash;   # To cache subroutine refs
-use Config;
+
 use Scalar::Util qw(set_prototype);
 
 use autodie::Util qw(
@@ -74,7 +74,8 @@ $Carp::CarpInternal{'autodie::exception'} = 1;
 
 # the linux parisc port has separate EAGAIN and EWOULDBLOCK,
 # and the kernel returns EAGAIN
-my $try_EAGAIN = ($^O eq 'linux' and $Config{archname} =~ /hppa|parisc/) ? 1 : 0;
+my $try_EAGAIN = 0; # false on CentOS ($^O eq 'linux' and $Config{archname} =~ /hppa|parisc/) ? 1 : 0;
+
 
 # We have some tags that can be passed in for use with import.
 # These are all assumed to be CORE::

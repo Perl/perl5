@@ -11,7 +11,7 @@ use 5.006;
 use strict;
 use warnings; no warnings 'newline';
 use File::Spec;
-use Config;
+
 # During perl build, we need File::Copy but Scalar::Util might not be built yet
 # And then we need these games to avoid loading overload, as that will
 # confuse miniperl during the bootstrap of perl.
@@ -97,8 +97,7 @@ sub copy {
 	$to = _catname($from, $to);
     }
 
-    if ((($Config{d_symlink} && $Config{d_readlink}) || $Config{d_link}) &&
-	!($^O eq 'MSWin32' || $^O eq 'os2')) {
+    if(1) { # Linux supports symlinks
 	my @fs = stat($from);
 	if (@fs) {
 	    my @ts = stat($to);
