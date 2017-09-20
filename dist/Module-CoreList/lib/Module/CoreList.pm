@@ -14407,9 +14407,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.027004',
             'Config'                => '5.027004',
+            'File::Glob'            => '1.30',
+            'I18N::Langinfo'        => '0.14',
             'Module::CoreList'      => '5.20170920',
             'Module::CoreList::TieHashDelta'=> '5.20170920',
             'Module::CoreList::Utils'=> '5.20170920',
+            'Term::ReadLine'        => '1.17',
+            'VMS::Stdio'            => '2.42',
+            'XS::APItest'           => '0.92',
+            'attributes'            => '0.31',
+            'sort'                  => '2.03',
+            'threads'               => '2.18',
         },
         removed => {
         }
