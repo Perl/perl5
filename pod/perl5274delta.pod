@@ -1,0 +1,352 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5274delta - what is new for perl v5.27.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.27.3 release and the 5.27.4
+release.
+
+If you are upgrading from an earlier release such as 5.27.2, first read
+L<perl5273delta>, which describes differences between 5.27.2 and 5.27.3.
+
+=head1 Core Enhancements
+
+=head2 In-place editing is now safer
+
+Previously in-place editing would delete or rename the input file
+as soon as you started working on a new file.
+
+Without backups this would result in loss of data if there was an
+error, such as a full disk, when writing to the output file.
+
+This has changed so that the input file isn't replaced until the
+output file has been completely written and successfully closed.
+
+This works by creating a work file in the same directory, which is
+renamed over the input file once the output file is complete.
+
+Incompatibilities:
+
+=over
+
+=item *
+
+Since this renaming needs to only happen once, if you create a thread
+or child process, that renaming will only happen in the original
+thread or process.
+
+=item *
+
+If you change directories while processing a file, and your operating
+system doesn't provide the C<unlinkat()>, C<renameat()> and C<fchmodat()>
+functions, the final rename step may fail.
+
+=back
+
+L<[perl #127663]|https://rt.perl.org/Public/Bug/Display.html?id=127663>
+
+=head1 Security
+
+=head2 [CVE-2017-12837] Heap buffer overflow in regular expression compiler
+
+Compiling certain regular expression patterns with the case-insensitive
+modifier could cause a heap buffer overflow and crash perl.  This has now been
+fixed.
+L<[perl #131582]|https://rt.perl.org/Public/Bug/Display.html?id=131582>
+
+=head2 [CVE-2017-12883] Buffer over-read in regular expression parser
+
+For certain types of syntax error in a regular expression pattern, the error
+message could either contain the contents of a random, possibly large, chunk of
+memory, or could crash perl.  This has now been fixed.
+L<[perl #131598]|https://rt.perl.org/Public/Bug/Display.html?id=131598>
+
+=head2 [CVE-2017-12814] C<$ENV{$key}> stack buffer overflow on Windows
+
+A possible stack buffer overflow in the C<%ENV> code on Windows has been fixed
+by removing the buffer completely since it was superfluous anyway.
+L<[perl #131665]|https://rt.perl.org/Public/Bug/Display.html?id=131665>
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Slightly improved performance when parsing stash names.
+L<[perl #129990]|https://rt.perl.org/Public/Bug/Display.html?id=129990>
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.3 to 0.31.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<I18N::Langinfo> has been upgraded from version 0.13 to 0.14.
+This fixes a bug in which the underlying locale was ignored for the
+C<RADIXCHAR> (always was returned as a dot, and the C<THOUSEP> (always
+empty).  Now the locale-appropriate values are returned.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170821 to 5.20170920.
+
+=item *
+
+L<sort> has been upgraded from version 2.02 to 2.03.
+
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<threads> has been upgraded from version 2.17 to 2.18.
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.41 to 2.42.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
+
+=item *
+
+The C<VMS::stdio> compatibility shim has been removed.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+A false-positive warning that was issued when using a
+numerically-quantified sub-pattern in a recursive regex has been
+silenced. L<[perl #131868]|https://rt.perl.org/Public/Bug/Display.html?id=131868>
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Darwin
+
+Perl now correctly uses reentrant functions, like C<asctime_r>, on
+versions of Darwin that have support for them.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+A new function, L<C<Perl_langinfo()>|perlapi/Perl_langinfo> has been
+added.  It is an (almost) drop-in replacement for the system
+C<nl_langinfo(3)>, but works on platforms that lack that; as well as
+being more thread-safe, and hiding some gotchas with locale handling
+from the caller.  Code that uses this, needn't use L<C<localeconv(3)>>
+(and be affected by the gotchas) to find the decimal point, thousands
+separator, or currency symbol.  See L<perlapi/Perl_langinfo>.
+
+=item *
+
+A new API function L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken> has
+been added to complement L<C<sv_rvweaken()>|perlapi/sv_rvweaken>.
+The implementation was taken from L<Scalar::Util/unweaken>.
+
+=item *
+
+A new flag, C<SORTf_UNSTABLE>, has been added. This will allow a
+future commit to make mergesort unstable when the user specifies ‘no
+sort stable’, since it has been decided that mergesort should remain
+stable by default.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The internal stack usage checks introduced in 5.27.2 are now also done
+by the C<entersub> operator when calling XSUBs.  This means we can
+report which XSUB failed to allocate enough stack space.
+L<[perl #131975]|https://rt.perl.org/Public/Bug/Display.html?id=131975>
+
+=item *
+
+Parsing a C<sub> definition could cause a use after free if the C<sub>
+keyword was followed by whitespace including newlines (and comments.)
+L<[perl #131836]|https://rt.perl.org/Public/Bug/Display.html?id=131836>
+
+=item *
+
+The tokenizer now correctly adjusts a parse pointer when skipping
+whitespace in a C< ${identifier} > construct.
+L<[perl #131949]|https://rt.perl.org/Public/Bug/Display.html?id=131949>
+
+=item *
+
+Accesses to C<${^LAST_FH}> no longer assert after using any of a
+variety of I/O operations on a non-glob.
+L<[perl #128263]|https://rt.perl.org/Public/Bug/Display.html?id=128263>
+
+=item *
+
+The C<Copy()>, C<Move()>, C<Zero()> macros and their variants now
+assert if the pointers supplied are C<NULL>.  ISO C considers
+supplying NULL pointers to the functions these macros are built upon
+as undefined behaviour even when their count parameters are zero.
+Based on these assertions and the original bug report three macro
+calls were made conditional.
+L<[perl #131746]|https://rt.perl.org/Public/Bug/Display.html?id=131746>
+L<[perl #131892]|https://rt.perl.org/Public/Bug/Display.html?id=131892>
+
+=item *
+
+The in-place sort optimisation now correctly strengthens weak
+references using the new L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
+API function.
+
+=item *
+
+Only the C<=> operator is permitted for defining defaults for
+parameters in subroutine signatures.  Previously other assignment
+operators, e.g. C<+=>, were also permitted.
+L<[perl #131777]|https://rt.perl.org/Public/Bug/Display.html?id=131777>
+
+=item *
+
+Package names are now always included in C<:prototype> warnings
+L<[perl #131833]|https://rt.perl.org/Public/Bug/Display.html?id=131833>
+
+=item *
+
+Creating a thread with no parameters no longer tries to C<Copy()> a
+null pointer. This fixes an assertion failure and allows threaded
+builds to work again.
+
+=item *
+
+The C<je_old_stack_hwm> field, previously only found in the C<jmpenv>
+structure on debugging builds, has been added to non-debug builds as
+well. This fixes an issue with some CPAN modules caused by the size of
+this structure varying between debugging and non-debugging builds.
+L<[perl #131942]|https://rt.perl.org/Public/Bug/Display.html?id=131942>
+
+=item *
+
+The arguments to the C<ninstr()> macro are now correctly parenthesized.
+
+=item *
+
+A NULL pointer dereference in the C<S_regmatch()> function has been
+fixed.
+L<[perl #132017]|https://rt.perl.org/Public/Bug/Display.html?id=132017>
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.27.4 represents approximately 4 weeks of development since Perl 5.27.3
+and contains approximately 5,000 lines of changes across 140 files from 18
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 3,300 lines of changes to 76 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.27.4:
+
+Abigail, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, David Mitchell,
+Dominic Hargreaves, Father Chrysostomos, H.Merijn Brand, James E Keenan, Jarkko
+Hietaniemi, John SJ Anderson, Karl Williamson, Lukas Mai, Matthew Horsfall,
+Neil Bowers, Nicolas R., Steve Hay, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
