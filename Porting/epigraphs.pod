@@ -51,7 +51,7 @@ L<Announced on 2017-09-20 by John SJ Anderson|https://www.nntp.perl.org/group/pe
 
 =head2 v5.27.3 - Rodgers and Hammerstein, "You'll Never Walk Alone"
 
-L<Announced on 2017-07-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2017/08/msg245988.html>
+L<Announced on 2017-08-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2017/08/msg245988.html>
 
   When you walk through a storm
   Hold your head up high
