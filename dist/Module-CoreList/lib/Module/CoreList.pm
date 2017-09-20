@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use version;
-$VERSION = '5.20170920';
+$VERSION = '5.20171020';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -321,6 +321,7 @@ sub changes_between {
     5.027002 => '2017-07-20',
     5.027003 => '2017-08-21',
     5.027004 => '2017-09-20',
+    5.027005 => '2017-10-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -14426,6 +14427,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.027005 => {
+        delta_from => 5.027004,
+        changed => {
+            'B::Op_private'         => '5.027005',
+            'Config'                => '5.027005',
+            'Module::CoreList'      => '5.20171020',
+            'Module::CoreList::TieHashDelta'=> '5.20171020',
+            'Module::CoreList::Utils'=> '5.20171020',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -15228,6 +15241,13 @@ sub is_core
     },
     5.027004 => {
         delta_from => 5.027003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027005 => {
+        delta_from => 5.027004,
         changed => {
         },
         removed => {
