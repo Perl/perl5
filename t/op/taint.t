@@ -1065,7 +1065,7 @@ SKIP: {
 # Reading from a file should be tainted
 {
     ok(open my $fh, '<', $TEST) or diag("Couldn't open '$TEST': $!");
-
+    binmode $fh;
     my $block;
     sysread($fh, $block, 100);
     my $line = <$fh>;

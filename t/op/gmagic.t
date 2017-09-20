@@ -64,11 +64,13 @@ expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
 {
     my $outfile = tempfile();
     open my $h, ">$outfile" or die  "$0 cannot close $outfile: $!";
+    binmode $h;
     print $h "bar\n";
     close $h or die "$0 cannot close $outfile: $!";    
 
     $c = *foo;                                         # 1 write
     open $h, $outfile;
+    binmode $h;
     sysread $h, $c, 3, 7;                              # 1 read; 1 write
     is $c, "*main::bar", 'what sysread wrote';         # 1 read
     expected_tie_calls(tied $c, 2, 2, 'calling sysread with tied buf');
