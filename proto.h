@@ -2435,6 +2435,9 @@ PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
 PERL_CALLCONV OP*	Perl_op_scope(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert);
 PERL_CALLCONV OP*	Perl_op_unscope(pTHX_ OP* o);
+PERL_CALLCONV void	Perl_optimize_optree(pTHX_ OP* o);
+#define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE	\
+	assert(o)
 PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags);
 #define PERL_ARGS_ASSERT_PACK_CAT	\
 	assert(cat); assert(pat); assert(patend); assert(beglist); assert(endlist); assert(next_in_list)
@@ -4750,6 +4753,9 @@ PERL_STATIC_INLINE OP*	S_op_std_init(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_OP_STD_INIT	\
 	assert(o)
 #endif
+STATIC void	S_optimize_op(pTHX_ OP* o);
+#define PERL_ARGS_ASSERT_OPTIMIZE_OP	\
+	assert(o)
 STATIC OP*	S_pmtrans(pTHX_ OP* o, OP* expr, OP* repl);
 #define PERL_ARGS_ASSERT_PMTRANS	\
 	assert(o); assert(expr); assert(repl)

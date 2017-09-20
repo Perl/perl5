@@ -2492,6 +2492,7 @@ S_process_optree(pTHX_ CV *cv, OP *optree, OP* start)
     *startp = start;
     optree->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(optree, 1);
+    optimize_optree(optree);
     CALL_PEEP(*startp);
     finalize_optree(optree);
     S_prune_chain_head(startp);
@@ -2501,6 +2502,67 @@ S_process_optree(pTHX_ CV *cv, OP *optree, OP* start)
         pad_tidy(optree->op_type == OP_LEAVEWRITE ? padtidy_FORMAT
                  : CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
     }
+}
+
+
+/*
+=for apidoc optimize_optree
+
+This function applies some optimisations to the optree in top-down order.
+It is called before the peephole optimizer, which processes ops in
+execution order. Note that finalize_optree() also does a top-down scan,
+but is called *after* the peephole optimizer.
+
+=cut
+*/
+
+void
+Perl_optimize_optree(pTHX_ OP* o)
+{
+    PERL_ARGS_ASSERT_OPTIMIZE_OPTREE;
+
+    ENTER;
+    SAVEVPTR(PL_curcop);
+
+    optimize_op(o);
+
+    LEAVE;
+}
+
+
+/* helper for optimize_optree() which optimises on op then recurses
+ * to optimise any children.
+ */
+
+STATIC void
+S_optimize_op(pTHX_ OP* o)
+{
+    OP *kid;
+
+    PERL_ARGS_ASSERT_OPTIMIZE_OP;
+    assert(o->op_type != OP_FREED);
+
+    switch (o->op_type) {
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
+	PL_curcop = ((COP*)o);		/* for warnings */
+	break;
+
+
+    case OP_SUBST:
+	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
+	    optimize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
+	break;
+
+    default:
+	break;
+    }
+
+    if (!(o->op_flags & OPf_KIDS))
+        return;
+
+    for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
+        optimize_op(kid);
 }
 
 
@@ -5845,6 +5907,11 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
 		scope->op_next = NULL; /* stop on last op */
 		op_null(scope);
 	    }
+
+	    if (is_compiletime)
+		/* runtime finalizes as part of finalizing whole tree */
+                optimize_optree(o);
+
 	    /* have to peep the DOs individually as we've removed it from
 	     * the op_next chain */
 	    CALL_PEEP(o);
