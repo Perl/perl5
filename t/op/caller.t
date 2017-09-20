@@ -5,20 +5,12 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
+    plan( tests => 100 ); # some tests are run in a BEGIN block
 }
-
-my @tests;
-plan( tests => 100 );
-
-print "# Tests with caller(0)\n";
-
-foreach my $t ( @tests ) {
-    my $s = \&{'main::'.$t->{type}};
-    $s->( @{$t->{args}}, $t->{txt} );
-}
-print "# end of BEGIN tests\n";
 
 my @c;
+
+BEGIN { print "# Tests with caller(0)\n"; }
 
 @c = caller(0);
 ok( (!@c), "caller(0) in main program" );
@@ -44,8 +36,8 @@ ok( $c[4], "hasargs true with deleted sub" );
 
 BEGIN {
  require strict;
- push @tests, { type => 'is', args => [ +(caller 0)[1], __FILE__ ],
-    txt => "[perl #68712] filenames after require in a BEGIN block" };
+ is +(caller 0)[1], __FILE__,
+  "[perl #68712] filenames after require in a BEGIN block"
 }
 
 print "# Tests with caller(1)\n";
@@ -105,18 +97,6 @@ sub testwarn {
     check_bits( (caller(0))[9], $w, "warnings match caller ($id)");
 }
 
-sub get_caller_0_9 {
-    return (caller(0))[9];
-}
-
-sub get_caller_0_9 {
-    return (caller(0))[9];
-}
-
-sub get_caller_0_9 {
-    return (caller(0))[9];
-}
-
 {
     no warnings;
     # Build the warnings mask dynamically
@@ -129,35 +109,28 @@ sub get_caller_0_9 {
 	vec($registered, $warnings::LAST_BIT/2, 2) = 1;
     }
 
-    BEGIN {
-        push @tests, { type => 'check_bits', args => [ ${^WARNING_BITS}, "\0" x $warnings::BYTES ],
-        txt =>  'all bits off via "no warnings"' };
-    }
+    BEGIN { check_bits( ${^WARNING_BITS}, "\0" x $warnings::BYTES, 'all bits off via "no warnings"' ) }
     testwarn("\0" x $warnings::BYTES, 'no bits');
 
     use warnings;
-    BEGIN {
-        push @tests, { type => 'check_bits', args => [ ${^WARNING_BITS}, $default ], txt => 'default bits on via "use warnings"' };
-    }
-    BEGIN {
-        push @tests, { type => 'check_bits', args => [ get_caller_0_9(), $default ], txt => 'warnings match caller' };
-    }
+    BEGIN { check_bits( ${^WARNING_BITS}, $default,
+			'default bits on via "use warnings"' ); }
+    BEGIN { testwarn($default, 'all'); }
     # run-time :
     # the warning mask has been extended by warnings::register
     testwarn($registered, 'ahead of w::r');
 
     use warnings::register;
-    BEGIN {
-        push @tests, { type => 'check_bits', args => [ ${^WARNING_BITS}, $registered ], txt => 'warning bits on via "use warnings::register"' };
-    }
+    BEGIN { check_bits( ${^WARNING_BITS}, $registered,
+			'warning bits on via "use warnings::register"' ) }
     testwarn($registered, 'following w::r');
 }
 
 
 # The next two cases test for a bug where caller ignored evals if
-# the DB::sub glob existed but &DB::sub did not (for example, if
+# the DB::sub glob existed but &DB::sub did not (for example, if 
 # $^P had been set but no debugger has been loaded).  The tests
-# thus assume that there is no &DB::sub: if there is one, they
+# thus assume that there is no &DB::sub: if there is one, they 
 # should both pass  no matter whether or not this bug has been
 # fixed.
 
@@ -343,7 +316,7 @@ is $line, "3000000000", "check large line numbers are preserved";
 # This was fixed with commit d4d03940c58a0177, which fixed bug #78742
 fresh_perl_is <<'END', "__ANON__::doof\n", {},
 package foo;
-INIT {undef %foo::} # adjust test for B::C
+BEGIN {undef %foo::}
 sub doof { caller(0) }
 print +(doof())[3];
 END
@@ -367,10 +340,10 @@ TODO: {
         my ($package, $file, $line) = caller;
         print "$line\n";
       }
-
+      
       tagCall
       "abc";
-
+      
       tagCall
       sub {};
 EOP
@@ -384,16 +357,12 @@ do './op/caller.pl' or die $@;
     package RT129239;
     BEGIN {
         my ($pkg, $file, $line) = caller;
-# push @tests, { type => 'is', args => [ +(caller 0)[1], __FILE__ ],
-#     txt => "[perl #68712] filenames after require in a BEGIN block" };
-
-        push @tests, { type => 'is', args => [ $file, 'virtually/op/caller.t' ], txt => "BEGIN block sees correct caller filename" };
-        push @tests, { type => 'is', args => [ $line, 12345 ], txt => "BEGIN block sees correct caller line" };
-        #TODO: {
-        #    local $::TODO = "BEGIN blocks have wrong caller package [perl #129239]";
-        #    push @tests, { type => is, args => [ $pkg, 'RT129239' ], txt => "BEGIN block sees correct caller package" };
-        #}
-        push @tests, { type => 'ok', txt => 'SKIPPING the BEGIN TODO test above' };
+        ::is $file, 'virtually/op/caller.t', "BEGIN block sees correct caller filename";
+        ::is $line, 12345,                   "BEGIN block sees correct caller line";
+        TODO: {
+            local $::TODO = "BEGIN blocks have wrong caller package [perl #129239]";
+            ::is $pkg, 'RT129239',               "BEGIN block sees correct caller package";
+        }
 #line 12345 "virtually/op/caller.t"
     }
 }
