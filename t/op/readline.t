@@ -63,7 +63,7 @@ foreach my $l (1, 21) {
 
 use strict;
 
-open F, '.' and sysread F, $_, 1;
+open F, '.' and binmode F and sysread F, $_, 1;
 my $err = $! + 0;
 close F;
 
@@ -147,6 +147,9 @@ SKIP: {
     if ( ! $piped ) {
 	skip( 2, 'The pipe function is unimplemented' );
     }
+
+    binmode $out;
+    binmode $in;
 
     # Make the pipe autoflushing
     {

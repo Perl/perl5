@@ -70,7 +70,7 @@ SKIP: {
 	       "make accept tcp socket");
 	    ok(my $addr = accept($accept, $serv), "accept() works")
 		or diag "accept error: $!";
-
+            binmode $accept;
 	    my $sent_total = 0;
 	    while ($sent_total < length $send_data) {
 		my $sent = send($accept, substr($send_data, $sent_total), 0);
@@ -98,7 +98,7 @@ SKIP: {
 
 	    ok_child(connect($child, $bind_name), "connect() works")
 		or diag "connect error: $!";
-
+            binmode $child;
 	    my $buf;
 	    my $recv_peer = recv($child, $buf, 1000, 0);
 	    {
