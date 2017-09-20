@@ -17,6 +17,38 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.4 - Richard Brautigan, "All Watched Over By Machines Of Loving Grace"
+
+L<Announced on 2017-09-20 by John SJ Anderson|https://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246371.html>
+
+ I like to think (and
+ the sooner the better!)
+ of a cybernetic meadow
+ where mammals and computers
+ live together in mutually
+ programming harmony
+ like pure water
+ touching clear sky.
+
+ I like to think
+ (right now, please!)
+ of a cybernetic forest
+ filled with pines and electronics
+ where deer stroll peacefully
+ past computers
+ as if they were flowers
+ with spinning blossoms.
+
+ I like to think
+ (it has to be!)
+ of a cybernetic ecology
+ where we are free of our labors
+ and joined back to nature,
+ returned to our mammal
+ brothers and sisters,
+ and all watched over
+ by machines of loving grace.
+
 =head2 v5.27.3 - Rodgers and Hammerstein, "You'll Never Walk Alone"
 
 L<Announced on 2017-07-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2017/08/msg245988.html>
