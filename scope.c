@@ -330,6 +330,17 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
     PERL_ARGS_ASSERT_SAVE_GP;
 
+    /* XXX For now, we just upgrade any coderef in the stash to a full GV
+           during localisation.  Maybe at some point we could make localis-
+           ation work without needing the upgrade.  (In which case our
+           callers should probably call a different function, not save_gp.)
+     */
+    if (!isGV(gv)) {
+        assert(isGV_or_RVCV(gv));
+        (void)CvGV(SvRV((SV *)gv)); /* CvGV does the upgrade */
+        assert(isGV(gv));
+    }
+
     save_pushptrptr(SvREFCNT_inc(gv), GvGP(gv), SAVEt_GP);
 
     if (empty) {

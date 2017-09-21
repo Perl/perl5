@@ -2561,7 +2561,7 @@ PP(pp_helem)
 	    RETURN;
 	}
 	if (localizing) {
-	    if (HvNAME_get(hv) && isGV(*svp))
+	    if (HvNAME_get(hv) && isGV_or_RVCV(*svp))
 		save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
 	    else if (preeminent)
 		save_helem_flags(hv, keysv, svp,

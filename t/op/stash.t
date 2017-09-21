@@ -179,7 +179,7 @@ SKIP: {
 	package FOO3;
 	sub named {};
 	my $anon = sub {};
-	my $named = eval q[\&named];
+	my $named = eval q[*named{CODE}]; # not \&named; we want a real GV
 	package main;
 	delete $FOO3::{named}; # make named anonymous
 
