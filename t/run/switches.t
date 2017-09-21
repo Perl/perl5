@@ -349,6 +349,7 @@ for (qw( e f x E S V )) {
 
 # Tests for -i
 
+SKIP:
 {
     local $TODO = '';   # these ones should work on VMS
 
@@ -419,9 +420,11 @@ __EOF__
     close $f;
     is(join(":", @out4), "quux:bar", "correct output without backup extension");
 
+    eval { require File::Spec; 1 }
+      or skip "Cannot load File::Spec - miniperl?", 20;
+
     -d "inplacetmp" or mkdir("inplacetmp")
       or die "Cannot mkdir 'inplacetmp': $!";
-    require File::Spec;
     my $work = File::Spec->catfile("inplacetmp", "foo");
 
     # exit or die should leave original content in file
