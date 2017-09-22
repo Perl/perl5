@@ -131,6 +131,21 @@ L<Announced on 2017-05-31 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.
 
     -- Bertrand Russell, The Road to Happiness
 
+=head2 v5.26.1 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
+
+L<Announced on 2017-09-22 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246408.html>
+
+  And soon I heard a roaring wind:
+  It did not come anear;
+  But with its sound it shook the sails,
+  That were so thin and sere.
+
+  The upper air burst into life!
+  And a hundred fire-flags sheen,
+  To and fro they were hurried about!
+  And to and fro, and in and out,
+  The wan stars danced between.
+
 =head2 v5.26.1-RC1 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
 
 L<Announced on 2017-09-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246202.html>
@@ -403,6 +418,21 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
     Wide fields of asphodel fore’er,
   To find that the utmost reward
     Of daring should be still to dare.
+
+=head2 v5.24.3 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
+
+L<Announced on 2017-09-22 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246407.html>
+
+  Oh sleep! it is a gentle thing,
+  Beloved from pole to pole!
+  To Mary Queen the praise be given!
+  She sent the gentle sleep from Heaven,
+  That slid into my soul.
+
+  The silly buckets on the deck,
+  That had so long remained,
+  I dreamt that they were filled with dew;
+  And when I awoke, it rained.
 
 =head2 v5.24.3-RC1 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
 
