@@ -22,9 +22,32 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.54  (planned 2017-12-01; sbeck)
+=head1 VERSION 3.55  (planned 2017-12-01; sbeck)
 
-=head1 VERSION 3.53  (planned 2017-09-01; sbeck)
+=head1 VERSION 3.54  (2017-09-01; sbeck)
+
+NEW CODE(s)
+
+=head1 VERSION 3.53  (2017-07-25; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item Fixed the default error condition in legacy modules.
+
+With the addition of the OO module, better error handling was added (and it
+was on by default).  The non-OO (legacy) modules did not report errors, so
+code that uses them, would now behave differently if invalid data were
+passed in.
+
+I have turned off error handling by default in the legacy modules.  The
+show_errors method was added to each of the non-OO modules to report errors
+if desired.
+
+Reported by dmaestro on GitHub.
+
+=back
 
 =head1 VERSION 3.52  (2017-06-01; sbeck)
 

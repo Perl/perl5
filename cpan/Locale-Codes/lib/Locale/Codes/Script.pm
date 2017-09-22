@@ -7,7 +7,7 @@ package Locale::Codes::Script;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'gen_mods' is run.
-#    Generated on: Tue May 30 10:31:45 EDT 2017
+#    Generated on: Mon Aug 28 13:35:23 EDT 2017
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ require 5.006;
 use Exporter qw(import);
 
 our($VERSION,@EXPORT);
-$VERSION   = '3.52';
+$VERSION   = '3.54';
 
 ################################################################################
 use Locale::Codes;
@@ -31,8 +31,9 @@ use Locale::Codes::Constants;
 push(@EXPORT,@Locale::Codes::Constants::CONSTANTS_SCRIPT);
 
 our $obj = new Locale::Codes('script');
+$obj->show_errors(0);
 
-sub _show_errors {
+sub show_errors {
    my($val) = @_;
    $obj->show_errors($val);
 }

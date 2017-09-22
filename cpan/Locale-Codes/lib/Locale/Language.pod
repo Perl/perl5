@@ -64,6 +64,14 @@ qualified with the package name:
 
 =over 4
 
+=item B<Locale::Language::show_errors(FLAG)>
+
+By default, invalid input will produce empty results, but no errors.  By
+passing in a non-zero value of FLAG, errors will be produced.
+
+See B<show_errors> in L<Locale::Codes> but note that the default for
+the non-OO modules are to NOT produce errors.
+
 =item B<Locale::Language::rename_language(CODE ,NEW_NAME [,CODESET])>
 
 See B<rename_code> in L<Locale::Codes>

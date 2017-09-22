@@ -50,12 +50,12 @@ sub do_tests {
    if ($test_type eq 'old') {
       $::module = "Locale::$type";
       eval("use $::module");
-      my $tmp   = $::module . "::_show_errors";
+      my $tmp   = $::module . "::show_errors";
       &{ $tmp }(0);
    } elsif ($test_type eq 'func') {
       $::module = "Locale::Codes::$type";
       eval("use $::module");
-      my $tmp   = $::module . "::_show_errors";
+      my $tmp   = $::module . "::show_errors";
       &{ $tmp }(0);
    } else {
       eval("use Locale::Codes");
