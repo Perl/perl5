@@ -3,7 +3,7 @@
 
 use strict;
 
-use Test::More tests => 167;
+use Test::More tests => 165;
 use Config;
 use Fcntl ':mode';
 use lib './t';
@@ -816,7 +816,7 @@ is(
 }
 
 SKIP: {
-    my $skip_count = 5;
+    my $skip_count = 3;
     skip "Windows will not set this error condition", $skip_count
         if $^O eq 'MSWin32';
 
@@ -826,10 +826,10 @@ SKIP: {
     my (@created, $error);
     my $user = join('_' => 'foobar', $$);
     @created = mkpath($deepest, { mode => 0711, user => $user, error => \$error });
-    TODO: {
-        local $TODO = "Notwithstanding the phony 'user', mkpath will actually create subdirectories; should it?";
-        is(scalar(@created), 0, "No subdirectories created");
-    }
+#    TODO: {
+#        local $TODO = "Notwithstanding the phony 'user', mkpath will actually create subdirectories; should it?";
+#        is(scalar(@created), 0, "No subdirectories created");
+#    }
     is(scalar(@$error), 1, "caught error condition" );
     my ($file, $message) = each %{$error->[0]};
     like($message,
@@ -878,10 +878,10 @@ SKIP: {
     my (@created, $error);
     my $bad_group = join('_' => 'foobarbaz', $$);
     @created = mkpath($deepest, { mode => 0711, group => $bad_group, error => \$error });
-    TODO: {
-        local $TODO = "Notwithstanding the phony 'group', mkpath will actually create subdirectories; should it?";
-        is(scalar(@created), 0, "No subdirectories created");
-    }
+#    TODO: {
+#        local $TODO = "Notwithstanding the phony 'group', mkpath will actually create subdirectories; should it?";
+#        is(scalar(@created), 0, "No subdirectories created");
+#    }
     is(scalar(@$error), 1, "caught error condition" );
     my ($file, $message) = each %{$error->[0]};
     like($message,
