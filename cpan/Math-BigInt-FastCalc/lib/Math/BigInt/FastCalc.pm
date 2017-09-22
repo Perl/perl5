@@ -4,11 +4,11 @@ use 5.006;
 use strict;
 use warnings;
 
-use Math::BigInt::Calc '1.999801';
+use Math::BigInt::Calc 1.999801;
 
 our @ISA = qw< Math::BigInt::Calc >;
 
-our $VERSION = '0.5005';
+our $VERSION = '0.5006';
 
 ##############################################################################
 # global constants, flags and accessory
