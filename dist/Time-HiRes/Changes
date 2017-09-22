@@ -1,9 +1,34 @@
 Revision history for the Perl extension Time::HiRes.
 
-1.9743
+1.9746 [2017-08-17]
+ - Unreliable t/usleep.t and t/utime.t tests [rt.cpan.org #122819]
+   Avoid testing for $dt = $t2 - $t1 and assuming $dt is less than
+   some value since a heavily loaded machine can delay the $t2.
+   Testing for greater than is fine.
+ - Tweak the configuring messages about subsecond stat/utime.
+
+1.9745 [2017-08-14]
+  - Properly check for futimens/utimensat actually doing something.
+    This should handle 'gnukfreebsd' (which has only stubs, so far
+    we have been skipping the test) and as a new thing 'gnu' (Hurd)
+    (also only stubs).  Thanks to Nigel Horne.
+  - Scan in t/utime.t whether the filesystem (wherever File::Temp
+    puts it tempfiles) supports subsecond timestamps.  This removes
+    the fragile Linux/ext3 specific hack.  As a side effect, the
+    setting of subsecond timestamps is tested only if reading of
+    them is supported.  Thanks to Carsten Gaebler for the test idea,
+    and Ryan Voots for testing.
+
+1.9744 [2017-07-27]
+  - add more potential clock constants, like CLOCK_MONOTONIC_FAST
+    (available in FreeBSD), and not all potentially found clock
+    constants were properly exported to be available from Perl,
+    see your system's clock_gettime() documentation for the available ones
+
+1.9743 [2017-07-20]
   - correct declared minimum Perl version (should be 5.6, was declared
-    as 5.8 since 1.9727_03)
-  - fix the fix for 'do file' to load hints in Makefile.PL
+    as 5.8 since 1.9727_03): blead af94b3ac
+  - fix the fix for 'do file' to load hints in Makefile.PL: blead 3172fdbc
 
 1.9742 [2017-04-16]
   - prefer 3-argument open: blead 1ae6ead9

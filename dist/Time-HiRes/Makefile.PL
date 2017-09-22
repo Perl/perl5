@@ -367,10 +367,14 @@ sub has_futimens {
 #include <sys/stat.h>
 int main(int argc, char** argv)
 {
-    int ret;
-    struct timespec ts[2];
-    ret = futimens(0, ts);
-    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+    int ret1, ret2;
+    struct timespec ts1[2], ts2[2];
+    ret1 = futimens(0, ts1);
+    char buf[1];
+    read(0, buf, 0); /* Assuming reading nothing updates atime (the [0]) */
+    ret2 = futimens(0, ts2);
+    ret1 == 0 && ret2 == 0 && (ts1[0].tv_nsec != 0 || ts2[0].tv_nsec != 0) ?
+        exit(0) : exit(errno ? errno : -1);
 }
 EOM
 }
@@ -385,10 +389,16 @@ sub has_utimensat{
 #include <fcntl.h>
 int main(int argc, char** argv)
 {
-    int ret;
-    struct timespec ts[2];
-    ret = utimensat(AT_FDCWD, 0, ts, 0);
-    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+    int ret1, ret2;
+    struct timespec ts1[2], ts2[2];
+    /* We make the brave but probably foolish assumption that systems
+     * modern enough to have utimensat also have the /dev/stdin. */
+    ret1 = utimensat(AT_FDCWD, "/dev/stdin", ts1, 0);
+    char buf[1];
+    read(0, buf, 0); /* Assuming reading nothing updates atime (the [0]) */
+    ret2 = utimensat(AT_FDCWD, "/dev/stdin", ts2, 0);
+    ret1 == 0 && ret2 == 0 && (ts1[0].tv_nsec != 0 || ts2[0].tv_nsec != 0) ?
+        exit(0) : exit(errno ? errno : -1);
 }
 EOM
 }
@@ -507,7 +517,7 @@ EOD
     if ($has_setitimer && $has_getitimer) {
 	print "You have interval timers (both setitimer and getitimer).\n";
     } else {
-	print "You do not have interval timers.\n";
+	print "You do NOT have interval timers.\n";
     }
 
     print "Looking for ualarm()... ";
@@ -695,7 +705,7 @@ EOD
 	print "NOT found.\n";
     }
 
-    print "Looking for futimens()... ";
+    print "Looking for working futimens()... ";
     my $has_futimens;
     if (has_futimens()) {
         $has_futimens++;
@@ -708,7 +718,7 @@ EOD
 	print "NOT found.\n";
     }
 
-    print "Looking for utimensat()... ";
+    print "Looking for working utimensat()... ";
     my $has_utimensat;
     if (has_utimensat()) {
         $has_utimensat++;
@@ -721,8 +731,12 @@ EOD
 	print "NOT found.\n";
     }
 
-    if ($has_futimens or $has_utimensat) {
+    my $has_hires_utime = ($has_futimens || $has_utimensat);
+    if ($has_hires_utime) {
 	$DEFINE .= ' -DTIME_HIRES_UTIME';
+        print "You seem to have subsecond timestamp setting.\n";
+    } else {
+        print "You do NOT seem to have subsecond timestamp setting.\n";
     }
 
     print "Looking for stat() subsecond timestamps...\n";
@@ -838,14 +852,18 @@ EOM
         DEFINE('TIME_HIRES_STAT', 4);
     } elsif ($has_stat_st_uxtime) {
         DEFINE('TIME_HIRES_STAT', 5);
-    }    
+    }
 
-   if ($DEFINE =~ /-DTIME_HIRES_STAT=\d+/) {
-    print "You seem to have stat() subsecond timestamps.\n";
-    print "(Your struct stat has them, but the filesystems must help.)\n";
-   } else {
-    print "You do not seem to have stat subsecond timestamps.\n";
-   }
+    my $has_hires_stat = ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/) ? $1 : 0;
+    if ($has_hires_stat) {
+        print "You seem to have subsecond timestamp reading.\n";
+        print "(Your struct stat has them, but the filesystems must help.)\n";
+        unless ($has_hires_utime) {
+            print "However, you do NOT seem to have subsecond timestamp setting.\n";
+        }
+    } else {
+        print "You do NOT seem to have subsecond timestamp reading.\n";
+    }
 
     my $has_w32api_windows_h;
 
@@ -948,31 +966,38 @@ sub doMakefile {
 
 sub doConstants {
     if (eval {require ExtUtils::Constant; 1}) {
+        # More or less this same list is in HiRes.pm.  Should unify.
 	my @names = qw(
-                       CLOCKS_PER_SEC
-                       CLOCK_BOOTTIME
-                       CLOCK_HIGHRES
-                       CLOCK_MONOTONIC
-                       CLOCK_MONOTONIC_COARSE
-                       CLOCK_MONOTONIC_PRECISE
-                       CLOCK_MONOTONIC_RAW
-                       CLOCK_PROCESS_CPUTIME_ID
-                       CLOCK_REALTIME
-                       CLOCK_REALTIME_COARSE
-                       CLOCK_REALTIME_FAST
-                       CLOCK_REALTIME_PRECISE
-                       CLOCK_SECOND
-                       CLOCK_SOFTTIME
-                       CLOCK_THREAD_CPUTIME_ID
-                       CLOCK_TIMEOFDAY
-                       CLOCK_UPTIME
-                       CLOCK_UPTIME_FAST
-                       CLOCK_UPTIME_PRECISE
-                       ITIMER_PROF
-                       ITIMER_REAL
-                       ITIMER_REALPROF
-                       ITIMER_VIRTUAL
-                       TIMER_ABSTIME
+		       CLOCKS_PER_SEC
+		       CLOCK_BOOTTIME
+		       CLOCK_HIGHRES
+		       CLOCK_MONOTONIC
+		       CLOCK_MONOTONIC_COARSE
+		       CLOCK_MONOTONIC_FAST
+		       CLOCK_MONOTONIC_PRECISE
+		       CLOCK_MONOTONIC_RAW
+		       CLOCK_PROF
+		       CLOCK_PROCESS_CPUTIME_ID
+		       CLOCK_REALTIME
+		       CLOCK_REALTIME_COARSE
+		       CLOCK_REALTIME_FAST
+		       CLOCK_REALTIME_PRECISE
+		       CLOCK_REALTIME_RAW
+		       CLOCK_SECOND
+		       CLOCK_SOFTTIME
+		       CLOCK_THREAD_CPUTIME_ID
+		       CLOCK_TIMEOFDAY
+		       CLOCK_UPTIME
+		       CLOCK_UPTIME_COARSE
+		       CLOCK_UPTIME_FAST
+		       CLOCK_UPTIME_PRECISE
+		       CLOCK_UPTIME_RAW
+		       CLOCK_VIRTUAL
+		       ITIMER_PROF
+		       ITIMER_REAL
+		       ITIMER_REALPROF
+		       ITIMER_VIRTUAL
+		       TIMER_ABSTIME
                       );
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep d_clock_gettime d_clock_getres
@@ -982,15 +1007,14 @@ sub doConstants {
 	    if ($macro =~ /^(d_nanosleep|d_clock)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 	    } elsif ($macro =~ /^(d_hires_stat)$/) {
-		my $d_hires_stat = 0;
-		$d_hires_stat = $1 if ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/);
+		my $d_hires_stat = $1 if ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/);
 		push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
 			      default => ["IV", "0"]};
 		next;
 	    } elsif ($macro =~ /^(d_hires_utime)$/) {
 		my $d_hires_utime =
-                    ($DEFINE =~ /-DHAS_FUTIMENS/ ||
-                     $DEFINE =~ /-DHAS_UTIMENSAT/) ? 1 : 0;
+		    ($DEFINE =~ /-DHAS_FUTIMENS/ ||
+		     $DEFINE =~ /-DHAS_UTIMENSAT/);
 		push @names, {name => $_, macro => "TIME_HIRES_UTIME", value => $d_hires_utime,
 			      default => ["IV", "0"]};
 		next;

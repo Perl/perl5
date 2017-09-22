@@ -1,5 +1,32 @@
 use strict;
 
+sub has_subsecond_file_times {
+  require File::Temp;
+  require Time::HiRes;
+  my ($fh, $filename) = File::Temp::tempfile( "Time-HiRes-utime-XXXXXXXXX" );
+  use File::Basename qw[dirname];
+  my $dirname =  dirname($filename);
+  require Cwd;
+  $dirname = &Cwd::getcwd if $dirname eq '.';
+  print(STDERR "\n# Testing for subsecond file timestamps (mtime) in $dirname\n");
+  close $fh;
+  my @mtimes;
+  for (1..2) {
+    open $fh, '>', $filename;
+    print $fh "foo";
+    close $fh;
+    push @mtimes, (Time::HiRes::stat($filename))[9];
+    Time::HiRes::sleep(.1) if $_ == 1;
+  }
+  my $delta = $mtimes[1] - $mtimes[0];
+  # print STDERR "mtimes = @mtimes, delta = $delta\n";
+  unlink $filename;
+  my $ok = $delta > 0 && $delta < 1;
+  printf(STDERR "# Subsecond file timestamps in $dirname: %s\n",
+         $ok ? "OK" : "NO");
+  return $ok;
+}
+
 BEGIN {
     require Time::HiRes;
     require Test::More;
@@ -7,43 +34,19 @@ BEGIN {
     unless(&Time::HiRes::d_hires_utime) {
 	Test::More::plan(skip_all => "no hires_utime");
     }
+    unless(&Time::HiRes::d_hires_stat) {
+        # Being able to read subsecond timestamps is a reasonable
+	# prerequisite for being able to write them.
+	Test::More::plan(skip_all => "no hires_stat");
+    }
     unless (&Time::HiRes::d_futimens) {
 	Test::More::plan(skip_all => "no futimens()");
     }
     unless (&Time::HiRes::d_utimensat) {
 	Test::More::plan(skip_all => "no utimensat()");
     }
-    if ($^O eq 'gnukfreebsd') {
-	Test::More::plan(skip_all => "futimens() and utimensat() not working in $^O");
-    }
-    if ($^O eq 'linux' && -e '/proc/mounts') {
-        # The linux might be wrong when ext3
-        # is available in other operating systems,
-        # but then we need other methods for detecting
-        # the filesystem type of the tempfiles.
-        my ($fh, $fn) = File::Temp::tempfile( "Time-HiRes-utime-XXXXXXXXX", UNLINK => 1);
-        sub getfstype {
-            my ($fn) = @_;
-            my $cmd = "df $fn";
-            open(my $df, '-|', $cmd) or die "$cmd: $!";
-             my @df = <$df>;  # Assume $df[0] is header line.
-             my $dev = +(split(" ", $df[1]))[0];
-             open(my $mounts, '<', '/proc/mounts') or die "/proc/mounts: $!";
-             while (<$mounts>) {
-                 my @m = split(" ");
-                 if ($m[0] eq $dev) { return $m[2] }
-             }
-             return;
-          }
-          my $fstype = getfstype($fn);
-          unless (defined $fstype) {
-              warn "Unknown fstype for $fn\n";
-          } else {
-              print "# fstype = $fstype\n";
-              if ($fstype eq 'ext3' || $fstype eq 'ext2') {
-                  Test::More::plan(skip_all => "fstype $fstype has no subsecond timestamps in $^O");
-            }
-        }
+    unless (has_subsecond_file_times()) {
+	Test::More::plan(skip_all => "No subsecond file timestamps");
     }
 }
 
@@ -106,17 +109,18 @@ print "# utime undef sets time to now\n";
 	my ($fh2, $filename2) = tempfile( "Time-HiRes-utime-XXXXXXXXX", UNLINK => 1 );
 
 	my $now = Time::HiRes::time;
+        sleep(1);
 	is Time::HiRes::utime(undef, undef, $filename1, $fh2), 2, "Two files changed";
 
 	{
 		my ($got_atime, $got_mtime) = ( Time::HiRes::stat($fh1) )[8, 9];
-		cmp_ok abs( $got_atime - $now), '<', 0.1, "File 1 atime set correctly";
-		cmp_ok abs( $got_mtime - $now), '<', 0.1, "File 1 mtime set correctly";
+		cmp_ok $got_atime, '>=', $now, "File 1 atime set correctly";
+		cmp_ok $got_mtime, '>=', $now, "File 1 mtime set correctly";
 	}
 	{
 		my ($got_atime, $got_mtime) = ( Time::HiRes::stat($filename2) )[8, 9];
-		cmp_ok abs( $got_atime - $now), '<', 0.1, "File 2 atime set correctly";
-		cmp_ok abs( $got_mtime - $now), '<', 0.1, "File 2 mtime set correctly";
+		cmp_ok $got_atime, '>=', $now, "File 2 atime set correctly";
+		cmp_ok $got_mtime, '>=', $now, "File 2 mtime set correctly";
 	}
 };
 
