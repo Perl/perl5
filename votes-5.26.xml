@@ -45,8 +45,6 @@ Both of these or neither
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh jhi ilmari" id="b9486474d36974b83d0b00fdcbfd1530299a0f7c" ticket="" desc="Configure: check for GCC 6 and 7"/>
-
 </div>
 
 <div><h3>Portability Fixes</h3>
