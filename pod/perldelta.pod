@@ -179,12 +179,12 @@ L<[perl #131522]|https://rt.perl.org/Public/Bug/Display.html?id=131522>
 
 =head1 Acknowledgements
 
-Perl 5.26.1 represents approximately 3 months of development since Perl 5.26.0
-and contains approximately 8,800 lines of changes across 84 files from 21
+Perl 5.26.1 represents approximately 4 months of development since Perl 5.26.0
+and contains approximately 8,900 lines of changes across 85 files from 23
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 960 lines of changes to 38 .pm, .t, .c and .h files.
+approximately 990 lines of changes to 38 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
@@ -192,9 +192,9 @@ the improvements that became Perl 5.26.1:
 
 Aaron Crane, Andy Dougherty, Aristotle Pagaltzis, Chris 'BinGOs' Williams,
 Craig A. Berry, Dagfinn Ilmari Mannsåker, David Mitchell, E. Choroba, Eric
-Herman, Father Chrysostomos, Jacques Germishuys, James E Keenan, Karl
-Williamson, Lukas Mai, Matthew Horsfall, Ricardo Signes, Sawyer X, Steve Hay,
-Tony Cook, Yves Orton, Zefram.
+Herman, Father Chrysostomos, Jacques Germishuys, James E Keenan, John SJ
+Anderson, Karl Williamson, Ken Brown, Lukas Mai, Matthew Horsfall, Ricardo
+Signes, Sawyer X, Steve Hay, Tony Cook, Yves Orton, Zefram.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
