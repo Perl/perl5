@@ -2,10 +2,10 @@
 
 	## shasum: filter for computing SHA digests (ref. sha1sum/md5sum)
 	##
-	## Copyright (C) 2003-2016 Mark Shelor, All Rights Reserved
+	## Copyright (C) 2003-2017 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.96
-	## Wed Jul 27 20:04:34 MST 2016
+	## Version: 5.97
+	## Wed Sep  6 02:23:02 MST 2017
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum. Add
 	## "-a" option for algorithm selection,
@@ -44,8 +44,9 @@ shasum - Print or Check SHA Checksums
                          all other characters ignored
    -p, --portable    read in portable mode (to be deprecated)
 
- The following two options are useful only when verifying checksums:
+ The following three options are useful only when verifying checksums:
    -s, --status      don't output anything, status code shows success
+   -q, --quiet       don't print OK for each successfully verified file
    -w, --warn        warn about improperly formatted checksum lines
 
    -h, --help        display this help and exit
@@ -60,7 +61,10 @@ shasum - Print or Check SHA Checksums
  the input should be a former output of this program.  The default
  mode is to print a line with checksum, a character indicating type
  (`*' for binary, ` ' for text, `U' for UNIVERSAL, `^' for BITS, `?'
- for portable), and name for each FILE.
+ for portable), and name for each FILE.  The line starts with a `\'
+ character if the FILE name contains either newlines or backslashes,
+ which are then replaced by the two-character sequences `\n' and `\\'
+ respectively.
 
  Report shasum bugs to mshelor@cpan.org
 
@@ -92,7 +96,7 @@ the 7-bit message I<0001100>:
 
 =head1 AUTHOR
 
-Copyright (c) 2003-2016 Mark Shelor <mshelor@cpan.org>.
+Copyright (c) 2003-2017 Mark Shelor <mshelor@cpan.org>.
 
 =head1 SEE ALSO
 
@@ -103,7 +107,7 @@ L<Digest::SHA::PurePerl>.
 
 END_OF_POD
 
-my $VERSION = "5.96";
+my $VERSION = "5.97";
 
 sub usage {
 	my($err, $msg) = @_;
@@ -130,7 +134,7 @@ select((select(STDERR), $| = 1)[0]);
 
 	## Collect options from command line
 
-my ($alg, $binary, $check, $text, $status, $warn, $help, $version);
+my ($alg, $binary, $check, $text, $status, $quiet, $warn, $help, $version);
 my ($portable, $BITS, $reverse, $UNIVERSAL, $versions);
 
 eval { Getopt::Long::Configure ("bundling") };
@@ -138,6 +142,7 @@ GetOptions(
 	'b|binary' => \$binary, 'c|check' => \$check,
 	't|text' => \$text, 'a|algorithm=i' => \$alg,
 	's|status' => \$status, 'w|warn' => \$warn,
+	'q|quiet' => \$quiet,
 	'h|help' => \$help, 'v|version' => \$version,
 	'p|portable' => \$portable,
 	'0|01' => \$BITS,
@@ -158,6 +163,8 @@ usage(1, "shasum: --warn option used only when verifying checksums\n")
 	if $warn && !$check;
 usage(1, "shasum: --status option used only when verifying checksums\n")
 	if $status && !$check;
+usage(1, "shasum: --quiet option used only when verifying checksums\n")
+	if $quiet && !$check;
 
 
 	## Try to use Digest::SHA.  If not installed, use the slower
@@ -258,7 +265,7 @@ sub verify {
 	my $checkfile = shift;
 	my ($err, $fmt_errs, $read_errs, $match_errs) = (0, 0, 0, 0);
 	my ($num_lines, $num_files) = (0, 0);
-	my ($bslash, $sum, $fname, $rsp, $digest);
+	my ($bslash, $sum, $fname, $rsp, $digest, $isOK);
 
 	local *FH;
 	$checkfile eq '-' and open(FH, '< -')
@@ -283,15 +290,16 @@ sub verify {
 		$rsp = "$fname: "; $num_files++;
 		($binary, $text, $UNIVERSAL, $BITS, $portable) =
 			map { $_ eq $modesym } ('*', ' ', 'U', '^', 'p');
+		$isOK = 0;
 		unless ($digest = sumfile($fname)) {
 			$rsp .= "FAILED open or read\n";
 			$err = 1; $read_errs++;
 		}
 		else {
-			if (lc($sum) eq $digest) { $rsp .= "OK\n" }
+			if (lc($sum) eq $digest) { $rsp .= "OK\n"; $isOK = 1 }
 			else { $rsp .= "FAILED\n"; $err = 1; $match_errs++ }
 		}
-		print $rsp unless $status;
+		print $rsp unless ($status || ($quiet && $isOK));
 	}
 	close(FH);
 	unless ($num_files) {
