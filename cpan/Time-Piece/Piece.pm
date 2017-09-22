@@ -20,7 +20,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.3201';
+our $VERSION = '1.3202';
 
 bootstrap Time::Piece $VERSION;
 

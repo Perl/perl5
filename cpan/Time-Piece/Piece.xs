@@ -1034,7 +1034,7 @@ _strptime ( string, format, got_GMT, SV* localization )
   PPCODE:
        memset(&mytm, 0, sizeof(mytm));
 
-       // sensible defaults.
+       /* sensible defaults. */
        mytm.tm_mday = 1;
        mytm.tm_year = 70;
        mytm.tm_wday = 4;
@@ -1047,7 +1047,7 @@ _strptime ( string, format, got_GMT, SV* localization )
             croak("_strptime requires a Hash Reference of locales");
        }
 
-       //populate our locale data struct (used for %[AaBbPp] flags)
+       /* populate our locale data struct (used for %[AaBbPp] flags) */
        _populate_C_time_locale(aTHX_ locales );
 
        remainder = (char *)_strptime(aTHX_ string, format, &mytm, &got_GMT);
