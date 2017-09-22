@@ -3,12 +3,15 @@
 use strict;
 use warnings;
 
-use Test::More tests => 344;
+use Test::More tests => 1373;
 
 my $class;
 
 BEGIN { $class = 'Math::BigInt'; }
 BEGIN { use_ok($class); }
+
+my @data;
+my $space = "\t\r\n ";
 
 while (<DATA>) {
     s/#.*$//;           # remove comments
@@ -16,6 +19,15 @@ while (<DATA>) {
     next unless length; # skip empty lines
 
     my ($in0, $out0) = split /:/;
+
+    push @data, [ $in0, $out0 ],
+                [ $in0 . $space, $out0 ],
+                [ $space . $in0, $out0 ],
+                [ $space . $in0 . $space, $out0 ];
+}
+
+for my $entry (@data) {
+    my ($in0, $out0) = @$entry;
 
     # As class method.
 

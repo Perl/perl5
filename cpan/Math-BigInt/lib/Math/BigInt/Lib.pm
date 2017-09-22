@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999806';
+our $VERSION = '1.999811';
 
 use Carp;
 
@@ -237,7 +237,7 @@ use overload
                 return $class -> _sqrt($class -> _copy($_[0]));
             },
 
-  'int'  => sub { $_[0] -> copy() -> bint(); },
+  'int'  => sub { $_[0] },
 
   # overload key: conversion
 
@@ -389,8 +389,7 @@ sub _digit {
 sub _zeros {
     my ($class, $x) = @_;
     my $str = $class -> _str($x);
-    $str =~ /[^0](0*)\z/;
-    CORE::length($1);
+    $str =~ /[^0](0*)\z/ ? CORE::length($1) : 0;
 }
 
 ##############################################################################
@@ -452,12 +451,17 @@ sub _mod {
     croak "@{[(caller 0)[3]]} requires non-zero second operand"
       if $class -> _is_zero($y);
 
-    my $r = $class -> _copy($x);
-    while ($class -> _acmp($r, $y) >= 0) {
-        $r = $class -> _sub($r, $y);
+    if ($class -> can('_div')) {
+        $x = $class -> _copy($x);
+        my ($q, $r) = $class -> _div($x, $y);
+        return $r;
+    } else {
+        my $r = $class -> _copy($x);
+        while ($class -> _acmp($r, $y) >= 0) {
+            $r = $class -> _sub($r, $y);
+        }
+        return $r;
     }
-
-    return $r;
 }
 
 ##############################################################################
@@ -477,7 +481,6 @@ sub _lsft {
 
 sub _pow {
     # power of $x to $y
-    # ref to array, ref to array, return ref to array
     my ($class, $x, $y) = @_;
 
     if ($class -> _is_zero($y)) {
@@ -511,9 +514,6 @@ sub _pow {
 
 sub _nok {
     # Return binomial coefficient (n over k).
-    # Given refs to arrays, return ref to array.
-    # First input argument is modified.
-
     my ($class, $n, $k) = @_;
 
     # If k > n/2, or, equivalently, 2*k > n, compute nok(n, k) as
@@ -528,15 +528,19 @@ sub _nok {
 
     # Example:
     #
-    # / 7 \       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
-    # |   | = --------- =  --------------- = --------- = 5 * - * -
-    # \ 3 /   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
+    # / 7 \       7!       1*2*3*4 * 5*6*7   5 * 6 * 7
+    # |   | = --------- =  --------------- = --------- = ((5 * 6) / 2 * 7) / 3
+    # \ 3 /   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3
+    #
+    # Equivalently, _nok(11, 5) is computed as
+    #
+    # (((((((7 * 8) / 2) * 9) / 3) * 10) / 4) * 11) / 5
 
     if ($class -> _is_zero($k)) {
         return $class -> _one();
     }
 
-    # Make a copy of the original n, since we'll be modifying n in-place.
+    # Make a copy of the original n, in case the subclass modifies n in-place.
 
     my $n_orig = $class -> _copy($n);
 
@@ -546,21 +550,15 @@ sub _nok {
     $n = $class -> _inc($n);
 
     my $f = $class -> _copy($n);
-    $class -> _inc($f);
+    $f = $class -> _inc($f);
 
     my $d = $class -> _two();
 
     # while f <= n (the original n, that is) ...
 
     while ($class -> _acmp($f, $n_orig) <= 0) {
-
-        # n = (n * f / d) == 5 * 6 / 2 (cf. example above)
-
         $n = $class -> _mul($n, $f);
         $n = $class -> _div($n, $d);
-
-        # f = 7, d = 3 (cf. example above)
-
         $f = $class -> _inc($f);
         $d = $class -> _inc($d);
     }
@@ -587,10 +585,29 @@ sub _fac {
     return $x;
 }
 
+sub _dfac {
+    # double factorial
+    my ($class, $x) = @_;
+
+    my $two = $class -> _two();
+
+    if ($class -> _acmp($x, $two) < 0) {
+        return $class -> _one();
+    }
+
+    my $i = $class -> _copy($x);
+    while ($class -> _acmp($i, $two) > 0) {
+        $i = $class -> _sub($i, $two);
+        $x = $class -> _mul($x, $i);
+    }
+
+    return $x;
+}
+
 sub _log_int {
     # calculate integer log of $x to base $base
+    # calculate integer log of $x to base $base
     # ref to array, ref to array - return ref to array
-
     my ($class, $x, $base) = @_;
 
     # X == 0 => NaN
@@ -664,177 +681,303 @@ sub _log_int {
 }
 
 sub _sqrt {
-    # square-root of $x in place
-    my ($class, $x) = @_;
+    # square-root of $y in place
+    my ($class, $y) = @_;
 
-    return $x if $class -> _is_zero($x);
+    return $y if $class -> _is_zero($y);
 
-    my $x_str = $class -> _str($x);
-    my $x_len = length($x_str);
+    my $y_str = $class -> _str($y);
+    my $y_len = length($y_str);
 
-    # Compute the guess $y.
+    # Compute the guess $x.
 
-    my $ym;
-    my $ye;
-    if ($x_len % 2 == 0) {
-        $ym = sqrt("." . $x_str);
-        $ye = $x_len / 2;
-        $ym = sprintf "%.0f", int($ym * 1e15);
-        $ye -= 15;
+    my $xm;
+    my $xe;
+    if ($y_len % 2 == 0) {
+        $xm = sqrt("." . $y_str);
+        $xe = $y_len / 2;
+        $xm = sprintf "%.0f", int($xm * 1e15);
+        $xe -= 15;
     } else {
-        $ym = sqrt(".0" . $x_str);
-        $ye = ($x_len + 1) / 2;
-        $ym = sprintf "%.0f", int($ym * 1e16);
-        $ye -= 16;
+        $xm = sqrt(".0" . $y_str);
+        $xe = ($y_len + 1) / 2;
+        $xm = sprintf "%.0f", int($xm * 1e16);
+        $xe -= 16;
     }
 
-    my $y;
-    if ($ye < 0) {
-        $y = substr $ym, 0, length($ym) + $ye;
+    my $x;
+    if ($xe < 0) {
+        $x = substr $xm, 0, length($xm) + $xe;
     } else {
-        $y = $ym . ("0" x $ye);
+        $x = $xm . ("0" x $xe);
     }
 
-    $y = $class -> _new($y);
+    $x = $class -> _new($x);
 
-    # Newton's method for computing square root of x. Generally, the algorithm
-    # below should undershoot.
+    # Newton's method for computing square root of y
     #
-    # y(i+1) = y(i) - f(y(i)) / f'(y(i))
-    #        = y(i) - (y(i)^2 - x) / (2 * y(i))
-    #        = y(i) + (x - y(i)^2) / (2 * y(i))
+    # x(i+1) = x(i) - f(x(i)) / f'(x(i))
+    #        = x(i) - (x(i)^2 - y) / (2 * x(i))     # use if x(i)^2 > y
+    #        = y(i) + (y - x(i)^2) / (2 * x(i))     # use if x(i)^2 < y
 
-    my $two  = $class -> _two();
-    my $zero = $class -> _zero();
-    my $over;
-    my $acmp;
+    # Determine if x, our guess, is too small, correct, or too large.
 
-    {
-        my $ysq = $class -> _mul($class -> _copy($y), $y);      # y(i)^2
-        $acmp = $class -> _acmp($x, $ysq);                      # x <=> y(i)^2
-        last if $acmp == 0;
-        if ($acmp < 0) {           # if we overshot
-            $over = 1;
-            last;
+    my $xsq = $class -> _mul($class -> _copy($x), $x);          # x(i)^2
+    my $acmp = $class -> _acmp($xsq, $y);                       # x(i)^2 <=> y
+
+    # Only assign a value to this variable if we will be using it.
+
+    my $two;
+    $two = $class -> _two() if $acmp != 0;
+
+    # If x is too small, do one iteration of Newton's method. Since the
+    # function f(x) = x^2 - y is concave and monotonically increasing, the next
+    # guess for x will either be correct or too large.
+
+    if ($acmp < 0) {
+
+        # x(i+1) = x(i) + (y - x(i)^2) / (2 * x(i))
+
+        my $numer = $class -> _sub($class -> _copy($y), $xsq);  # y - x(i)^2
+        my $denom = $class -> _mul($class -> _copy($two), $x);  # 2 * x(i)
+        my $delta = $class -> _div($numer, $denom);
+
+        unless ($class -> _is_zero($delta)) {
+            $x    = $class -> _add($x, $delta);
+            $xsq  = $class -> _mul($class -> _copy($x), $x);    # x(i)^2
+            $acmp = $class -> _acmp($xsq, $y);                  # x(i)^2 <=> y
         }
-
-        my $num = $class -> _sub($class -> _copy($x), $ysq);    # x - y(i)^2
-        my $den = $class -> _mul($class -> _copy($two), $y);    # 2 * y(i)
-
-        my $delta = $class -> _div($num, $den);
-        last if $class -> _acmp($delta, $zero) == 0;
-        $y = $class -> _add($y, $delta);
-        redo;
     }
 
-    # If we did overshoot, adjust now.
+    # If our guess for x is too large, apply Newton's method repeatedly until
+    # we either have got the correct value, or the delta is zero.
 
-    while ($acmp < 0) {
-        $class -> _dec($y);
-        my $ysq = $class -> _mul($class -> _copy($y), $y);      # y(i)^2
-        $acmp = $class -> _acmp($x, $ysq);                      # x <=> y(i)^2
+    while ($acmp > 0) {
+
+        # x(i+1) = x(i) - (x(i)^2 - y) / (2 * x(i))
+
+        my $numer = $class -> _sub($xsq, $y);                   # x(i)^2 - y
+        my $denom = $class -> _mul($class -> _copy($two), $x);  # 2 * x(i)
+        my $delta = $class -> _div($numer, $denom);
+        last if $class -> _is_zero($delta);
+
+        $x    = $class -> _sub($x, $delta);
+        $xsq  = $class -> _mul($class -> _copy($x), $x);        # x(i)^2
+        $acmp = $class -> _acmp($xsq, $y);                      # x(i)^2 <=> y
     }
 
-    return $y;
+    # When the delta is zero, our value for x might still be too large. We
+    # require that the outout is either exact or too small (i.e., rounded down
+    # to the nearest integer), so do a final check.
+
+    while ($acmp > 0) {
+        $x    = $class -> _dec($x);
+        $xsq  = $class -> _mul($class -> _copy($x), $x);        # x(i)^2
+        $acmp = $class -> _acmp($xsq, $y);                      # x(i)^2 <=> y
+    }
+
+    return $x;
 }
 
 sub _root {
-    my ($class, $x, $n) = @_;
+    my ($class, $y, $n) = @_;
 
-    return undef if $class -> _is_zero($n);
-
-    return $x if $class -> _is_zero($x) || $class -> _is_one($x) ||
+    return $y if $class -> _is_zero($y) || $class -> _is_one($y) ||
                  $class -> _is_one($n);
 
-    my $x_str = $class -> _str($x);
-    my $x_len = length($x_str);
+    # If y <= n, the result is always (truncated to) 1.
 
-    return $class -> _one() if $class -> _acmp($x, $n) <= 0;
+    return $class -> _one() if $class -> _acmp($y, $n) <= 0;
 
-    # Compute the guess $y.
-
-    my $n_num = $class -> _num($n);
-    my $p = int(($x_len - 1) / $n_num);
-    my $q = $x_len - $p * $n_num;
+    # Compute the initial guess x of y^(1/n). When n is large, Newton's method
+    # converges slowly if the "guess" (initial value) is poor, so we need a
+    # good guess. It the guess is too small, the next guess will be too large,
+    # and from then on all guesses are too large.
 
     my $DEBUG = 0;
 
-    if ($DEBUG) {
-        print "\n";
-        print substr($x_str, 0, $p), " ", "0" x $q, "\n";
-        print "\n";
-    }
-
-    my $ymant = substr($x_str, 0, $q) ** (1 / $n_num);
-    my $yexpo = $p;
-
-    my $y = (1 + int $ymant) . ("0" x $p);
-    $y = $class -> _new($y);
-
-    if ($DEBUG) {
-        print "\n";
-        print "p  = $p\n";
-        print "q  = $q\n";
-        print "\n";
-        print "ym = $ymant\n";
-        print "ye = $yexpo\n";
-        print "\n";
-        print "y  = $y (initial guess)\n";
-        print "\n";
-    }
-
-    # Newton's method for computing n'th root of x. Generally, the algorithm
-    # below should undershoot.
+    # Split y into mantissa and exponent in base 10, so that
     #
-    # y(i+1) = y(i) - f(y(i)) / f'(y(i))
-    #        = y(i) - (y(i)^n - x) / (n * y(i)^(n-1))
-    #        = y(i) + (x - y(i)^n) / (n * y(i)^(n-1))
+    #   y = xm * 10^xe, where 0 < xm < 1 and xe is an integer
 
-    my $nm1  = $class -> _dec($class -> _copy($n));             # n - 1
-    my $zero = $class -> _zero();
-    my $over;
-    my $acmp;
+    my $y_str  = $class -> _str($y);
+    my $ym = "." . $y_str;
+    my $ye = length($y_str);
 
-    {
-        my $ypowm1 = $class -> _pow($class -> _copy($y), $nm1);     # y(i)^(n-1)
-        my $ypow   = $class -> _mul($class -> _copy($ypowm1), $y);  # y(i)^n
-        $acmp = $class -> _acmp($x, $ypow);                         # x <=> y(i)^n
-        last if $acmp == 0;
+    # From this compute the approximate base 10 logarithm of y
+    #
+    #   log_10(y) = log_10(ym) + log_10(ye^10)
+    #             = log(ym)/log(10) + ye
 
-        my $num = $acmp > 0
-                ? $class -> _sub($class -> _copy($x), $ypow)        # x - y(i)^n
-                : $class -> _sub($ypow, $class -> _copy($x));       # y(i)^n - x
-        my $den = $class -> _mul($class -> _copy($n), $ypowm1);     # n * y(i)^(n-1)
-        my $delta = $class -> _div($num, $den);
-        last if $class -> _acmp($delta, $zero) == 0;
+    my $log10y = log($ym) / log(10) + $ye;
 
-        $y = $acmp > 0
-           ? $class -> _add($y, $delta)
-           : $class -> _sub($y, $delta);
+    # And from this compute the approximate base 10 logarithm of x, where
+    # x = y^(1/n)
+    #
+    #   log_10(x) = log_10(y)/n
 
-        if ($DEBUG) {
-            print "y  = $y\n";
-        }
+    my $log10x = $log10y / $class -> _num($n);
 
-        redo;
-    }
+    # From this compute xm and xe, the mantissa and exponent (in base 10) of x,
+    # where 1 < xm <= 10 and xe is an integer.
 
-    # Never overestimate. The output should always be exact or truncated.
+    my $xe = int $log10x;
+    my $xm = 10 ** ($log10x - $xe);
 
-    while ($acmp < 0) {
-        $class -> _dec($y);
-        if ($DEBUG) {
-            print "y  = $y\n";
-        }
-        my $ypow = $class -> _pow($class -> _copy($y), $n);     # y(i)^n
-        $acmp = $class -> _acmp($x, $ypow);                     # x <=> y(i)^2
-    }
+    # Scale the mantissa and exponent to increase the integer part of ym, which
+    # gives us better accuracy.
 
     if ($DEBUG) {
         print "\n";
+        print "y_str  = $y_str\n";
+        print "ym     = $ym\n";
+        print "ye     = $ye\n";
+        print "log10y = $log10y\n";
+        print "log10x = $log10x\n";
+        print "xm     = $xm\n";
+        print "xe     = $xe\n";
     }
 
-    return $y;
+    my $d = $xe < 15 ? $xe : 15;
+    $xm *= 10 ** $d;
+    $xe -= $d;
+
+    if ($DEBUG) {
+        print "\n";
+        print "xm     = $xm\n";
+        print "xe     = $xe\n";
+    }
+
+    # If the mantissa is not an integer, round up to nearest integer, and then
+    # convert the number to a string. It is important to always round up due to
+    # how Newton's method behaves in this case. If the initial guess is too
+    # small, the next guess will be too large, after which every succeeding
+    # guess converges the correct value from above. Now, if the initial guess
+    # is too small and n is large, the next guess will be much too large and
+    # require a large number of iterations to get close to the solution.
+    # Because of this, we are likely to find the solution faster if we make
+    # sure the initial guess is not too small.
+
+    my $xm_int = int($xm);
+    my $x_str = sprintf '%.0f', $xm > $xm_int ? $xm_int + 1 : $xm_int;
+    $x_str .= "0" x $xe;
+
+    my $x = $class -> _new($x_str);
+
+    if ($DEBUG) {
+        print "xm     = $xm\n";
+        print "xe     = $xe\n";
+        print "\n";
+        print "x_str  = $x_str (initial guess)\n";
+        print "\n";
+    }
+
+    # Use Newton's method for computing n'th root of y.
+    #
+    # x(i+1) = x(i) - f(x(i)) / f'(x(i))
+    #        = x(i) - (x(i)^n - y) / (n * x(i)^(n-1))   # use if x(i)^n > y
+    #        = x(i) + (y - x(i)^n) / (n * x(i)^(n-1))   # use if x(i)^n < y
+
+    # Determine if x, our guess, is too small, correct, or too large. Rather
+    # than computing x(i)^n and x(i)^(n-1) directly, compute x(i)^(n-1) and
+    # then the same value multiplied by x.
+
+    my $nm1     = $class -> _dec($class -> _copy($n));           # n-1
+    my $xpownm1 = $class -> _pow($class -> _copy($x), $nm1);     # x(i)^(n-1)
+    my $xpown   = $class -> _mul($class -> _copy($xpownm1), $x); # x(i)^n
+    my $acmp    = $class -> _acmp($xpown, $y);                   # x(i)^n <=> y
+
+    if ($DEBUG) {
+        print "\n";
+        print "x      = ", $class -> _str($x), "\n";
+        print "x^n    = ", $class -> _str($xpown), "\n";
+        print "y      = ", $class -> _str($y), "\n";
+        print "acmp   = $acmp\n";
+    }
+
+    # If x is too small, do one iteration of Newton's method. Since the
+    # function f(x) = x^n - y is concave and monotonically increasing, the next
+    # guess for x will either be correct or too large.
+
+    if ($acmp < 0) {
+
+        # x(i+1) = x(i) + (y - x(i)^n) / (n * x(i)^(n-1))
+
+        my $numer = $class -> _sub($class -> _copy($y), $xpown);    # y - x(i)^n
+        my $denom = $class -> _mul($class -> _copy($n), $xpownm1);  # n * x(i)^(n-1)
+        my $delta = $class -> _div($numer, $denom);
+
+        if ($DEBUG) {
+            print "\n";
+            print "numer  = ", $class -> _str($numer), "\n";
+            print "denom  = ", $class -> _str($denom), "\n";
+            print "delta  = ", $class -> _str($delta), "\n";
+        }
+
+        unless ($class -> _is_zero($delta)) {
+            $x       = $class -> _add($x, $delta);
+            $xpownm1 = $class -> _pow($class -> _copy($x), $nm1);     # x(i)^(n-1)
+            $xpown   = $class -> _mul($class -> _copy($xpownm1), $x); # x(i)^n
+            $acmp    = $class -> _acmp($xpown, $y);                   # x(i)^n <=> y
+
+            if ($DEBUG) {
+                print "\n";
+                print "x      = ", $class -> _str($x), "\n";
+                print "x^n    = ", $class -> _str($xpown), "\n";
+                print "y      = ", $class -> _str($y), "\n";
+                print "acmp   = $acmp\n";
+            }
+        }
+    }
+
+    # If our guess for x is too large, apply Newton's method repeatedly until
+    # we either have got the correct value, or the delta is zero.
+
+    while ($acmp > 0) {
+
+        # x(i+1) = x(i) - (x(i)^n - y) / (n * x(i)^(n-1))
+
+        my $numer = $class -> _sub($class -> _copy($xpown), $y);    # x(i)^n - y
+        my $denom = $class -> _mul($class -> _copy($n), $xpownm1);  # n * x(i)^(n-1)
+
+        if ($DEBUG) {
+            print "numer  = ", $class -> _str($numer), "\n";
+            print "denom  = ", $class -> _str($denom), "\n";
+        }
+
+        my $delta = $class -> _div($numer, $denom);
+
+        if ($DEBUG) {
+            print "delta  = ", $class -> _str($delta), "\n";
+        }
+
+        last if $class -> _is_zero($delta);
+
+        $x       = $class -> _sub($x, $delta);
+        $xpownm1 = $class -> _pow($class -> _copy($x), $nm1);     # x(i)^(n-1)
+        $xpown   = $class -> _mul($class -> _copy($xpownm1), $x); # x(i)^n
+        $acmp    = $class -> _acmp($xpown, $y);                   # x(i)^n <=> y
+
+        if ($DEBUG) {
+            print "\n";
+            print "x      = ", $class -> _str($x), "\n";
+            print "x^n    = ", $class -> _str($xpown), "\n";
+            print "y      = ", $class -> _str($y), "\n";
+            print "acmp   = $acmp\n";
+        }
+    }
+
+    # When the delta is zero, our value for x might still be too large. We
+    # require that the outout is either exact or too small (i.e., rounded down
+    # to the nearest integer), so do a final check.
+
+    while ($acmp > 0) {
+        $x     = $class -> _dec($x);
+        $xpown = $class -> _pow($class -> _copy($x), $n);     # x(i)^n
+        $acmp  = $class -> _acmp($xpown, $y);                 # x(i)^n <=> y
+    }
+
+    return $x;
 }
 
 ##############################################################################
@@ -933,114 +1076,182 @@ sub _or {
     return $z;
 }
 
-sub _as_hex {
-    # convert a decimal number to hex
+sub _to_bin {
+    # convert the number to a string of binary digits without prefix
     my ($class, $x) = @_;
-    my $str  = '';
-    my $tmp  = $class -> _copy($x);
-    my $zero = $class -> _zero();
-    my $base = $class -> _new("16");
+    my $str    = '';
+    my $tmp    = $class -> _copy($x);
+    my $chunk = $class -> _new("16777216");     # 2^24 = 24 binary digits
     my $rem;
-    while ($tmp > $zero) {
-        ($tmp, $rem) = $class -> _div($tmp, $base);
-        $str = sprintf("%0x", $rem) . $str;
+    until ($class -> _acmp($tmp, $chunk) < 0) {
+        ($tmp, $rem) = $class -> _div($tmp, $chunk);
+        $str = sprintf("%024b", $class -> _num($rem)) . $str;
     }
-    $str = '0' if length($str) == 0;
-    return '0x' . $str;
+    unless ($class -> _is_zero($tmp)) {
+        $str = sprintf("%b", $class -> _num($tmp)) . $str;
+    }
+    return length($str) ? $str : '0';
+}
+
+sub _to_oct {
+    # convert the number to a string of octal digits without prefix
+    my ($class, $x) = @_;
+    my $str    = '';
+    my $tmp    = $class -> _copy($x);
+    my $chunk = $class -> _new("16777216");     # 2^24 = 8 octal digits
+    my $rem;
+    until ($class -> _acmp($tmp, $chunk) < 0) {
+        ($tmp, $rem) = $class -> _div($tmp, $chunk);
+        $str = sprintf("%08o", $class -> _num($rem)) . $str;
+    }
+    unless ($class -> _is_zero($tmp)) {
+        $str = sprintf("%o", $class -> _num($tmp)) . $str;
+    }
+    return length($str) ? $str : '0';
+}
+
+sub _to_hex {
+    # convert the number to a string of hexadecimal digits without prefix
+    my ($class, $x) = @_;
+    my $str    = '';
+    my $tmp    = $class -> _copy($x);
+    my $chunk = $class -> _new("16777216");     # 2^24 = 6 hexadecimal digits
+    my $rem;
+    until ($class -> _acmp($tmp, $chunk) < 0) {
+        ($tmp, $rem) = $class -> _div($tmp, $chunk);
+        $str = sprintf("%06x", $class -> _num($rem)) . $str;
+    }
+    unless ($class -> _is_zero($tmp)) {
+        $str = sprintf("%x", $class -> _num($tmp)) . $str;
+    }
+    return length($str) ? $str : '0';
 }
 
 sub _as_bin {
-    # convert a decimal number to bin
+    # convert the number to a string of binary digits with prefix
     my ($class, $x) = @_;
-    my $str  = '';
-    my $tmp  = $class -> _copy($x);
-    my $zero = $class -> _zero();
-    my $base = $class -> _new("2");
-    my $rem;
-    while ($tmp > $zero) {
-        ($tmp, $rem) = $class -> _div($tmp, $base);
-        $str = ($class -> _is_zero($rem) ? '0' : '1') . $str;
-    }
-    $str = '0' if length($str) == 0;
-    return '0b' . $str;
+    return '0b' . $class -> _to_bin($x);
 }
 
 sub _as_oct {
-    # convert a decimal number to octal
+    # convert the number to a string of octal digits with prefix
     my ($class, $x) = @_;
-    my $str  = '';
-    my $tmp  = $class -> _copy($x);
-    my $zero = $class -> _zero();
-    my $base = $class -> _new("8");
-    my $rem;
-    while ($tmp > $zero) {
-        ($tmp, $rem) = $class -> _div($tmp, $base);
-        $str = sprintf("%0o", $rem) . $str;
-    }
-    $str = '0' if length($str) == 0;
-    return '0' . $str;          # yes, 0 becomes "00".
+    return '0' . $class -> _to_oct($x);         # yes, 0 becomes "00"
 }
 
-sub _as_bytes {
-    # convert a decimal number to a byte string
+sub _as_hex {
+    # convert the number to a string of hexadecimal digits with prefix
     my ($class, $x) = @_;
-    my $str  = '';
-    my $tmp  = $class -> _copy($x);
-    my $base = $class -> _new("256");
+    return '0x' . $class -> _to_hex($x);
+}
+
+sub _to_bytes {
+    # convert the number to a string of bytes
+    my ($class, $x) = @_;
+    my $str    = '';
+    my $tmp    = $class -> _copy($x);
+    my $chunk = $class -> _new("65536");
     my $rem;
     until ($class -> _is_zero($tmp)) {
-        ($tmp, $rem) = $class -> _div($tmp, $base);
-        my $byte = pack 'C', $rem;
-        $str = $byte . $str;
+        ($tmp, $rem) = $class -> _div($tmp, $chunk);
+        $str = pack('n', $class -> _num($rem)) . $str;
     }
-    return "\x00" unless length($str);
-    return $str;
+    $str =~ s/^\0+//;
+    return length($str) ? $str : "\x00";
+}
+
+*_as_bytes = \&_to_bytes;
+
+sub _from_hex {
+    # Convert a string of hexadecimal digits to a number.
+
+    my ($class, $hex) = @_;
+    $hex =~ s/^0[xX]//;
+
+    # Find the largest number of hexadecimal digits that we can safely use with
+    # 32 bit integers. There are 4 bits pr hexadecimal digit, and we use only
+    # 31 bits to play safe. This gives us int(31 / 4) = 7.
+
+    my $len = length $hex;
+    my $rem = 1 + ($len - 1) % 7;
+
+    # Do the first chunk.
+
+    my $ret = $class -> _new(int hex substr $hex, 0, $rem);
+    return $ret if $rem == $len;
+
+    # Do the remaining chunks, if any.
+
+    my $shift = $class -> _new(1 << (4 * 7));
+    for (my $offset = $rem ; $offset < $len ; $offset += 7) {
+        my $part = int hex substr $hex, $offset, 7;
+        $ret = $class -> _mul($ret, $shift);
+        $ret = $class -> _add($ret, $class -> _new($part));
+    }
+
+    return $ret;
 }
 
 sub _from_oct {
-    # convert a octal string to a decimal number
-    my ($class, $str) = @_;
-    $str =~ s/^0+//;
-    my $x    = $class -> _zero();
-    my $base = $class -> _new("8");
-    my $n    = length($str);
-    for (my $i = 0 ; $i < $n ; ++$i) {
-        $x = $class -> _mul($x, $base);
-        $x = $class -> _add($x, $class -> _new(substr($str, $i, 1)));
-    }
-    return $x;
-}
+    # Convert a string of octal digits to a number.
 
-sub _from_hex {
-    # convert a hexadecimal string to a decimal number
-    my ($class, $str) = @_;
-    $str =~ s/^0[Xx]//;
-    my $x    = $class -> _zero();
-    my $base = $class -> _new("16");
-    my $n    = length($str);
-    for (my $i = 0 ; $i < $n ; ++$i) {
-        $x = $class -> _mul($x, $base);
-        $x = $class -> _add($x, $class -> _new(hex substr($str, $i, 1)));
+    my ($class, $oct) = @_;
+
+    # Find the largest number of octal digits that we can safely use with 32
+    # bit integers. There are 3 bits pr octal digit, and we use only 31 bits to
+    # play safe. This gives us int(31 / 3) = 10.
+
+    my $len = length $oct;
+    my $rem = 1 + ($len - 1) % 10;
+
+    # Do the first chunk.
+
+    my $ret = $class -> _new(int oct substr $oct, 0, $rem);
+    return $ret if $rem == $len;
+
+    # Do the remaining chunks, if any.
+
+    my $shift = $class -> _new(1 << (3 * 10));
+    for (my $offset = $rem ; $offset < $len ; $offset += 10) {
+        my $part = int oct substr $oct, $offset, 10;
+        $ret = $class -> _mul($ret, $shift);
+        $ret = $class -> _add($ret, $class -> _new($part));
     }
-    return $x;
+
+    return $ret;
 }
 
 sub _from_bin {
-    # convert a binary string to a decimal number
-    my ($class, $str) = @_;
-    $str =~ s/^0[Bb]//;
-    my $x    = $class -> _zero();
-    my $base = $class -> _new("2");
-    my $n    = length($str);
-    for (my $i = 0 ; $i < $n ; ++$i) {
-        $x = $class -> _mul($x, $base);
-        $x = $class -> _add($x, $class -> _new(substr($str, $i, 1)));
+    # Convert a string of binary digits to a number.
+
+    my ($class, $bin) = @_;
+    $bin =~ s/^0[bB]//;
+
+    # The largest number of binary digits that we can safely use with 32 bit
+    # integers is 31. We use only 31 bits to play safe.
+
+    my $len = length $bin;
+    my $rem = 1 + ($len - 1) % 31;
+
+    # Do the first chunk.
+
+    my $ret = $class -> _new(int oct '0b' . substr $bin, 0, $rem);
+    return $ret if $rem == $len;
+
+    # Do the remaining chunks, if any.
+
+    my $shift = $class -> _new(1 << 31);
+    for (my $offset = $rem ; $offset < $len ; $offset += 31) {
+        my $part = int oct '0b' . substr $bin, $offset, 31;
+        $ret = $class -> _mul($ret, $shift);
+        $ret = $class -> _add($ret, $class -> _new($part));
     }
-    return $x;
+
+    return $ret;
 }
 
 sub _from_bytes {
-    # convert a byte string to a decimal number
+    # convert string of bytes to a number
     my ($class, $str) = @_;
     my $x    = $class -> _zero();
     my $base = $class -> _new("256");
@@ -1091,7 +1302,7 @@ sub _modinv {
         redo;
     }
 
-    # if the gcd is not 1, then return NaN
+    # if the gcd is not 1, there exists no modular multiplicative inverse
     return (undef, undef) unless $class -> _is_one($a);
 
     ($v, $sign == 1 ? '+' : '-');
@@ -1194,6 +1405,100 @@ sub _lcm {
     return $x;
 }
 
+sub _lucas {
+    my ($class, $n) = @_;
+
+    $n = $class -> _num($n) if ref $n;
+
+    # In list context, use lucas(n) = lucas(n-1) + lucas(n-2)
+
+    if (wantarray) {
+        my @y;
+
+        push @y, $class -> _two();
+        return @y if $n == 0;
+
+        push @y, $class -> _one();
+        return @y if $n == 1;
+
+        for (my $i = 2 ; $i <= $n ; ++ $i) {
+            $y[$i] = $class -> _add($class -> _copy($y[$i - 1]), $y[$i - 2]);
+        }
+
+        return @y;
+    }
+
+    require Scalar::Util;
+
+    # In scalar context use that lucas(n) = fib(n-1) + fib(n+1).
+    #
+    # Remember that _fib() behaves differently in scalar context and list
+    # context, so we must add scalar() to get the desired behaviour.
+
+    return $class -> _two() if $n == 0;
+
+    return $class -> _add(scalar $class -> _fib($n - 1),
+                          scalar $class -> _fib($n + 1));
+}
+
+sub _fib {
+    my ($class, $n) = @_;
+
+    $n = $class -> _num($n) if ref $n;
+
+    # In list context, use fib(n) = fib(n-1) + fib(n-2)
+
+    if (wantarray) {
+        my @y;
+
+        push @y, $class -> _zero();
+        return @y if $n == 0;
+
+        push @y, $class -> _one();
+        return @y if $n == 1;
+
+        for (my $i = 2 ; $i <= $n ; ++ $i) {
+            $y[$i] = $class -> _add($class -> _copy($y[$i - 1]), $y[$i - 2]);
+        }
+
+        return @y;
+    }
+
+    # In scalar context use a fast algorithm that is much faster than the
+    # recursive algorith used in list context.
+
+    my $cache = {};
+    my $two = $class -> _two();
+    my $fib;
+
+    $fib = sub {
+        my $n = shift;
+        return $class -> _zero() if $n <= 0;
+        return $class -> _one()  if $n <= 2;
+        return $cache -> {$n}    if exists $cache -> {$n};
+
+        my $k = int($n / 2);
+        my $a = $fib -> ($k + 1);
+        my $b = $fib -> ($k);
+        my $y;
+
+        if ($n % 2 == 1) {
+            # a*a + b*b
+            $y = $class -> _add($class -> _mul($class -> _copy($a), $a),
+                                $class -> _mul($class -> _copy($b), $b));
+        } else {
+            # (2*a - b)*b
+            $y = $class -> _mul($class -> _sub($class -> _mul(
+                   $class -> _copy($two), $a), $b), $b);
+        }
+
+        $cache -> {$n} = $y;
+        return $y;
+    };
+
+    return $fib -> ($n);
+}
+
 ##############################################################################
 ##############################################################################
 
@@ -1209,13 +1514,31 @@ Math::BigInt::Lib - virtual parent class for Math::BigInt libraries
 
 =head1 SYNOPSIS
 
-This module provides support for big integer calculations. It is not intended
-to be used directly, but rather as a parent class for backend libraries used by
-Math::BigInt, Math::BigFloat, Math::BigRat, and related modules. Backend
-libraries include Math::BigInt::Calc, Math::BigInt::FastCalc,
-Math::BigInt::GMP, Math::BigInt::Pari and others.
+    # In the backend library for Math::BigInt et al.
+
+    package Math::BigInt::MyBackend;
+
+    use Math::BigInt::lib;
+    our @ISA = qw< Math::BigInt::lib >;
+
+    sub _new { ... }
+    sub _str { ... }
+    sub _add { ... }
+    str _sub { ... }
+    ...
+
+    # In your main program.
+
+    use Math::BigInt lib => 'MyBackend';
 
 =head1 DESCRIPTION
+
+This module provides support for big integer calculations. It is not intended
+to be used directly, but rather as a parent class for backend libraries used by
+Math::BigInt, Math::BigFloat, Math::BigRat, and related modules.
+
+Other backend libraries include Math::BigInt::Calc, Math::BigInt::FastCalc,
+Math::BigInt::GMP, and Math::BigInt::Pari.
 
 In order to allow for multiple big integer libraries, Math::BigInt was
 rewritten to use a plug-in library for core math routines. Any module which
@@ -1230,12 +1553,12 @@ version, like 'Pari'.
 
 A library only needs to deal with unsigned big integers. Testing of input
 parameter validity is done by the caller, so there is no need to worry about
-underflow (e.g., in C<_sub()> and C<_dec()>) nor about division by zero (e.g.,
-in C<_div()>) or similar cases.
+underflow (e.g., in C<_sub()> and C<_dec()>) or about division by zero (e.g.,
+in C<_div()> and C<_mod()>)) or similar cases.
 
 Some libraries use methods that don't modify their argument, and some libraries
-don't even use objects. Because of this, liberary methods are always called as
-class methods, not instance methods:
+don't even use objects, but rather unblessed references. Because of this,
+liberary methods are always called as class methods, not instance methods:
 
     $x = Class -> method($x, $y);     # like this
     $x = $x -> method($y);            # not like this ...
@@ -1244,7 +1567,7 @@ class methods, not instance methods:
 And with boolean methods
 
     $bool = Class -> method($x, $y);  # like this
-    $bool = $x -> method($y);         # not like this ...
+    $bool = $x -> method($y);         # not like this
 
 Return values are always objects, strings, Perl scalars, or true/false for
 comparison routines.
@@ -1253,7 +1576,7 @@ comparison routines.
 
 =over 4
 
-=item api_version()
+=item CLASS-E<gt>api_version()
 
 Return API version as a Perl scalar, 1 for Math::BigInt v1.70, 2 for
 Math::BigInt v1.83.
@@ -1270,45 +1593,45 @@ However, computations will be very slow without _mul() and _div().
 
 =over 4
 
-=item _new(STR)
+=item CLASS-E<gt>_new(STR)
 
 Convert a string representing an unsigned decimal number to an object
-representing the same number. The input is normalize, i.e., it matches
+representing the same number. The input is normalized, i.e., it matches
 C<^(0|[1-9]\d*)$>.
 
-=item _zero()
+=item CLASS-E<gt>_zero()
 
 Return an object representing the number zero.
 
-=item _one()
+=item CLASS-E<gt>_one()
 
 Return an object representing the number one.
 
-=item _two()
+=item CLASS-E<gt>_two()
 
 Return an object representing the number two.
 
-=item _ten()
+=item CLASS-E<gt>_ten()
 
 Return an object representing the number ten.
 
-=item _from_bin(STR)
+=item CLASS-E<gt>_from_bin(STR)
 
 Return an object given a string representing a binary number. The input has a
 '0b' prefix and matches the regular expression C<^0[bB](0|1[01]*)$>.
 
-=item _from_oct(STR)
+=item CLASS-E<gt>_from_oct(STR)
 
 Return an object given a string representing an octal number. The input has a
 '0' prefix and matches the regular expression C<^0[1-7]*$>.
 
-=item _from_hex(STR)
+=item CLASS-E<gt>_from_hex(STR)
 
 Return an object given a string representing a hexadecimal number. The input
 has a '0x' prefix and matches the regular expression
 C<^0x(0|[1-9a-fA-F][\da-fA-F]*)$>.
 
-=item _from_bytes(STR)
+=item CLASS-E<gt>_from_bytes(STR)
 
 Returns an object given a byte string representing the number. The byte string
 is in big endian byte order, so the two-byte input string "\x01\x00" should
@@ -1320,129 +1643,143 @@ give an output value representing the number 256.
 
 =over 4
 
-=item _add(OBJ1, OBJ2)
+=item CLASS-E<gt>_add(OBJ1, OBJ2)
 
 Returns the result of adding OBJ2 to OBJ1.
 
-=item _mul(OBJ1, OBJ2)
+=item CLASS-E<gt>_mul(OBJ1, OBJ2)
 
 Returns the result of multiplying OBJ2 and OBJ1.
 
-=item _div(OBJ1, OBJ2)
+=item CLASS-E<gt>_div(OBJ1, OBJ2)
 
-Returns the result of dividing OBJ1 by OBJ2 and truncating the result to an
-integer.
+In scalar context, returns the quotient after dividing OBJ1 by OBJ2 and
+truncating the result to an integer. In list context, return the quotient and
+the remainder.
 
-=item _sub(OBJ1, OBJ2, FLAG)
+=item CLASS-E<gt>_sub(OBJ1, OBJ2, FLAG)
 
-=item _sub(OBJ1, OBJ2)
+=item CLASS-E<gt>_sub(OBJ1, OBJ2)
 
 Returns the result of subtracting OBJ2 by OBJ1. If C<flag> is false or omitted,
 OBJ1 might be modified. If C<flag> is true, OBJ2 might be modified.
 
-=item _dec(OBJ)
+=item CLASS-E<gt>_dec(OBJ)
 
-Decrement OBJ by one.
+Returns the result after decrementing OBJ by one.
 
-=item _inc(OBJ)
+=item CLASS-E<gt>_inc(OBJ)
 
-Increment OBJ by one.
+Returns the result after incrementing OBJ by one.
 
-=item _mod(OBJ1, OBJ2)
+=item CLASS-E<gt>_mod(OBJ1, OBJ2)
 
-Return OBJ1 modulo OBJ2, i.e., the remainder after dividing OBJ1 by OBJ2.
+Returns OBJ1 modulo OBJ2, i.e., the remainder after dividing OBJ1 by OBJ2.
 
-=item _sqrt(OBJ)
+=item CLASS-E<gt>_sqrt(OBJ)
 
-Return the square root of the object, truncated to integer.
+Returns the square root of OBJ, truncated to an integer.
 
-=item _root(OBJ, N)
+=item CLASS-E<gt>_root(OBJ, N)
 
-Return Nth root of the object, truncated to int. N is E<gt>= 3.
+Returns the Nth root of OBJ, truncated to an integer.
 
-=item _fac(OBJ)
+=item CLASS-E<gt>_fac(OBJ)
 
-Return factorial of object (1*2*3*4*...).
+Returns the factorial of OBJ, i.e., the product of all positive integers up to
+and including OBJ.
 
-=item _pow(OBJ1, OBJ2)
+=item CLASS-E<gt>_dfac(OBJ)
 
-Return OBJ1 to the power of OBJ2. By convention, 0**0 = 1.
+Returns the double factorial of OBJ. If OBJ is an even integer, returns the
+product of all positive, even integers up to and including OBJ, i.e.,
+2*4*6*...*OBJ. If OBJ is an odd integer, returns the product of all positive,
+odd integers, i.e., 1*3*5*...*OBJ.
 
-=item _modinv(OBJ1, OBJ2)
+=item CLASS-E<gt>_pow(OBJ1, OBJ2)
 
-Return modular multiplicative inverse, i.e., return OBJ3 so that
+Returns OBJ1 raised to the power of OBJ2. By convention, 0**0 = 1.
+
+=item CLASS-E<gt>_modinv(OBJ1, OBJ2)
+
+Returns the modular multiplicative inverse, i.e., return OBJ3 so that
 
     (OBJ3 * OBJ1) % OBJ2 = 1 % OBJ2
 
-The result is returned as two arguments. If the modular multiplicative
-inverse does not exist, both arguments are undefined. Otherwise, the
-arguments are a number (object) and its sign ("+" or "-").
+The result is returned as two arguments. If the modular multiplicative inverse
+does not exist, both arguments are undefined. Otherwise, the arguments are a
+number (object) and its sign ("+" or "-").
 
-The output value, with its sign, must either be a positive value in the
-range 1,2,...,OBJ2-1 or the same value subtracted OBJ2. For instance, if the
-input arguments are objects representing the numbers 7 and 5, the method
-must either return an object representing the number 3 and a "+" sign, since
-(3*7) % 5 = 1 % 5, or an object representing the number 2 and "-" sign,
-since (-2*7) % 5 = 1 % 5.
+The output value, with its sign, must either be a positive value in the range
+1,2,...,OBJ2-1 or the same value subtracted OBJ2. For instance, if the input
+arguments are objects representing the numbers 7 and 5, the method must either
+return an object representing the number 3 and a "+" sign, since (3*7) % 5 = 1
+% 5, or an object representing the number 2 and a "-" sign, since (-2*7) % 5 = 1
+% 5.
 
-=item _modpow(OBJ1, OBJ2, OBJ3)
+=item CLASS-E<gt>_modpow(OBJ1, OBJ2, OBJ3)
 
-Return modular exponentiation, (OBJ1 ** OBJ2) % OBJ3.
+Returns the modular exponentiation, i.e., (OBJ1 ** OBJ2) % OBJ3.
 
-=item _rsft(OBJ, N, B)
+=item CLASS-E<gt>_rsft(OBJ, N, B)
 
-Shift object N digits right in base B and return the resulting object. This is
+Returns the result after shifting OBJ N digits to thee right in base B. This is
 equivalent to performing integer division by B**N and discarding the remainder,
-except that it might be much faster, depending on how the number is represented
-internally.
+except that it might be much faster.
 
 For instance, if the object $obj represents the hexadecimal number 0xabcde,
 then C<_rsft($obj, 2, 16)> returns an object representing the number 0xabc. The
 "remainer", 0xde, is discarded and not returned.
 
-=item _lsft(OBJ, N, B)
+=item CLASS-E<gt>_lsft(OBJ, N, B)
 
-Shift the object N digits left in base B. This is equivalent to multiplying by
-B**N, except that it might be much faster, depending on how the number is
-represented internally.
+Returns the result after shifting OBJ N digits to the left in base B. This is
+equivalent to multiplying by B**N, except that it might be much faster.
 
-=item _log_int(OBJ, B)
+=item CLASS-E<gt>_log_int(OBJ, B)
 
-Return integer log of OBJ to base BASE. This method has two output arguments,
-the OBJECT and a STATUS. The STATUS is Perl scalar; it is 1 if OBJ is the exact
-result, 0 if the result was truncted to give OBJ, and undef if it is unknown
-whether OBJ is the exact result.
+Returns the logarithm of OBJ to base BASE truncted to an integer. This method
+has two output arguments, the OBJECT and a STATUS. The STATUS is Perl scalar;
+it is 1 if OBJ is the exact result, 0 if the result was truncted to give OBJ,
+and undef if it is unknown whether OBJ is the exact result.
 
-=item _gcd(OBJ1, OBJ2)
+=item CLASS-E<gt>_gcd(OBJ1, OBJ2)
 
-Return the greatest common divisor of OBJ1 and OBJ2.
+Returns the greatest common divisor of OBJ1 and OBJ2.
 
-=item _lcm(OBJ1, OBJ2)
+=item CLASS-E<gt>_lcm(OBJ1, OBJ2)
 
 Return the least common multiple of OBJ1 and OBJ2.
+
+=item CLASS-E<gt>_fib(OBJ)
+
+In scalar context, returns the nth Fibonacci number: _fib(0) returns 0, _fib(1)
+returns 1, _fib(2) returns 1, _fib(3) returns 2 etc. In list context, returns
+the Fibonacci numbers from F(0) to F(n): 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ...
+
+=item CLASS-E<gt>_lucas(OBJ)
+
+In scalar context, returns the nth Lucas number: _lucas(0) returns 2, _lucas(1)
+returns 1, _lucas(2) returns 3, etc. In list context, returns the Lucas numbers
+from L(0) to L(n): 2, 1, 3, 4, 7, 11, 18, 29,47, 76, ...
 
 =back
 
 =head3 Bitwise operators
 
-Each of these methods may modify the first input argument.
-
 =over 4
 
-=item _and(OBJ1, OBJ2)
+=item CLASS-E<gt>_and(OBJ1, OBJ2)
 
-Return bitwise and. If necessary, the smallest number is padded with leading
-zeros.
+Returns bitwise and.
 
-=item _or(OBJ1, OBJ2)
+=item CLASS-E<gt>_or(OBJ1, OBJ2)
 
-Return bitwise or. If necessary, the smallest number is padded with leading
-zeros.
+Return bitwise or.
 
-=item _xor(OBJ1, OBJ2)
+=item CLASS-E<gt>_xor(OBJ1, OBJ2)
 
-Return bitwise exclusive or. If necessary, the smallest number is padded
-with leading zeros.
+Return bitwise exclusive or.
 
 =back
 
@@ -1450,34 +1787,34 @@ with leading zeros.
 
 =over 4
 
-=item _is_zero(OBJ)
+=item CLASS-E<gt>_is_zero(OBJ)
 
 Returns a true value if OBJ is zero, and false value otherwise.
 
-=item _is_one(OBJ)
+=item CLASS-E<gt>_is_one(OBJ)
 
 Returns a true value if OBJ is one, and false value otherwise.
 
-=item _is_two(OBJ)
+=item CLASS-E<gt>_is_two(OBJ)
 
 Returns a true value if OBJ is two, and false value otherwise.
 
-=item _is_ten(OBJ)
+=item CLASS-E<gt>_is_ten(OBJ)
 
 Returns a true value if OBJ is ten, and false value otherwise.
 
-=item _is_even(OBJ)
+=item CLASS-E<gt>_is_even(OBJ)
 
 Return a true value if OBJ is an even integer, and a false value otherwise.
 
-=item _is_odd(OBJ)
+=item CLASS-E<gt>_is_odd(OBJ)
 
 Return a true value if OBJ is an even integer, and a false value otherwise.
 
-=item _acmp(OBJ1, OBJ2)
+=item CLASS-E<gt>_acmp(OBJ1, OBJ2)
 
-Compare OBJ1 and OBJ2 and return -1, 0, or 1, if OBJ1 is less than, equal
-to, or larger than OBJ2, respectively.
+Compare OBJ1 and OBJ2 and return -1, 0, or 1, if OBJ1 is numerically less than,
+equal to, or larger than OBJ2, respectively.
 
 =back
 
@@ -1485,35 +1822,44 @@ to, or larger than OBJ2, respectively.
 
 =over 4
 
-=item _str(OBJ)
+=item CLASS-E<gt>_str(OBJ)
 
-Return a string representing the object. The returned string should have no
-leading zeros, i.e., it should match C<^(0|[1-9]\d*)$>.
+Returns a string representing OBJ in decimal notation. The returned string
+should have no leading zeros, i.e., it should match C<^(0|[1-9]\d*)$>.
 
-=item _as_bin(OBJ)
+=item CLASS-E<gt>_to_bin(OBJ)
 
-Return the binary string representation of the number. The string must have a
-'0b' prefix.
+Returns the binary string representation of OBJ.
 
-=item _as_oct(OBJ)
+=item CLASS-E<gt>_to_oct(OBJ)
 
-Return the octal string representation of the number. The string must have
-a '0x' prefix.
+Returns the octal string representation of the number.
 
-Note: This method was required from Math::BigInt version 1.78, but the required
-API version number was not incremented, so there are older libraries that
-support API version 1, but do not support C<_as_oct()>.
+=item CLASS-E<gt>_to_hex(OBJ)
 
-=item _as_hex(OBJ)
+Returns the hexadecimal string representation of the number.
 
-Return the hexadecimal string representation of the number. The string must
-have a '0x' prefix.
+=item CLASS-E<gt>_to_bytes(OBJ)
 
-=item _as_bytes(OBJ)
+Returns a byte string representation of OBJ. The byte string is in big endian
+byte order, so if OBJ represents the number 256, the output should be the
+two-byte string "\x01\x00".
 
-Return a byte string representation of the number. The byte string is in big
-endian byte order, so if the object represents the number 256, the output
-should be the two-byte string "\x01\x00".
+=item CLASS-E<gt>_as_bin(OBJ)
+
+Like C<_to_bin()> but with a '0b' prefix.
+
+=item CLASS-E<gt>_as_oct(OBJ)
+
+Like C<_to_oct()> but with a '0' prefix.
+
+=item CLASS-E<gt>_as_hex(OBJ)
+
+Like C<_to_hex()> but with a '0x' prefix.
+
+=item CLASS-E<gt>_as_bytes(OBJ)
+
+This is an alias to C<_to_bytes()>.
 
 =back
 
@@ -1521,10 +1867,11 @@ should be the two-byte string "\x01\x00".
 
 =over 4
 
-=item _num(OBJ)
+=item CLASS-E<gt>_num(OBJ)
 
-Given an object, return a Perl scalar number (int/float) representing this
-number.
+Returns a Perl scalar number representing the number OBJ as close as
+possible. Since Perl scalars have limited precision, the returned value might
+not be exactly the same as OBJ.
 
 =back
 
@@ -1532,31 +1879,39 @@ number.
 
 =over 4
 
-=item _copy(OBJ)
+=item CLASS-E<gt>_copy(OBJ)
 
-Return a true copy of the object.
+Returns a true copy OBJ.
 
-=item _len(OBJ)
+=item CLASS-E<gt>_len(OBJ)
 
-Returns the number of the decimal digits in the number. The output is a
-Perl scalar.
+Returns the number of the decimal digits in OBJ. The output is a Perl scalar.
 
-=item _zeros(OBJ)
+=item CLASS-E<gt>_zeros(OBJ)
 
-Return the number of trailing decimal zeros. The output is a Perl scalar.
+Returns the number of trailing decimal zeros. The output is a Perl scalar. The
+number zero has no trailing decimal zeros.
 
-=item _digit(OBJ, N)
+=item CLASS-E<gt>_digit(OBJ, N)
 
-Return the Nth digit as a Perl scalar. N is a Perl scalar, where zero refers to
-the rightmost (least significant) digit, and negative values count from the
-left (most significant digit). If $obj represents the number 123, then
-I<$obj->_digit(0)> is 3 and I<_digit(123, -1)> is 1.
+Returns the Nth digit in OBJ as a Perl scalar. N is a Perl scalar, where zero
+refers to the rightmost (least significant) digit, and negative values count
+from the left (most significant digit). If $obj represents the number 123, then
 
-=item _check(OBJ)
+    CLASS->_digit($obj,  0)     # returns 3
+    CLASS->_digit($obj,  1)     # returns 2
+    CLASS->_digit($obj,  2)     # returns 1
+    CLASS->_digit($obj, -1)     # returns 1
 
-Return true if the object is invalid and false otherwise. Preferably, the true
+=item CLASS-E<gt>_check(OBJ)
+
+Returns true if the object is invalid and false otherwise. Preferably, the true
 value is a string describing the problem with the object. This is a check
 routine to test the internal state of the object for corruption.
+
+=item CLASS-E<gt>_set(OBJ)
+
+xxx
 
 =back
 
@@ -1568,7 +1923,7 @@ The following methods are required for an API version of 2 or greater.
 
 =over 4
 
-=item _1ex(N)
+=item CLASS-E<gt>_1ex(N)
 
 Return an object representing the number 10**N where N E<gt>= 0 is a Perl
 scalar.
@@ -1579,7 +1934,7 @@ scalar.
 
 =over 4
 
-=item _nok(OBJ1, OBJ2)
+=item CLASS-E<gt>_nok(OBJ1, OBJ2)
 
 Return the binomial coefficient OBJ1 over OBJ1.
 
@@ -1589,7 +1944,7 @@ Return the binomial coefficient OBJ1 over OBJ1.
 
 =over 4
 
-=item _alen(OBJ)
+=item CLASS-E<gt>_alen(OBJ)
 
 Return the approximate number of decimal digits of the object. The output is a
 Perl scalar.
@@ -1606,15 +1961,15 @@ slow) fallback routines to emulate these:
 
 =over 4
 
-=item _signed_or(OBJ1, OBJ2, SIGN1, SIGN2)
+=item CLASS-E<gt>_signed_or(OBJ1, OBJ2, SIGN1, SIGN2)
 
 Return the signed bitwise or.
 
-=item _signed_and(OBJ1, OBJ2, SIGN1, SIGN2)
+=item CLASS-E<gt>_signed_and(OBJ1, OBJ2, SIGN1, SIGN2)
 
 Return the signed bitwise and.
 
-=item _signed_xor(OBJ1, OBJ2, SIGN1, SIGN2)
+=item CLASS-E<gt>_signed_xor(OBJ1, OBJ2, SIGN1, SIGN2)
 
 Return the signed bitwise exclusive or.
 

@@ -77,27 +77,27 @@ while (<DATA>) {
     } elsif ($f eq "bone") {
         $try .= qq| \$x->bone("$args[1]");|;
     # some unary ops
-    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|sgn|inc|dec|not|sqrt|fac)$/) {
+    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|sgn|inc|dec|not|sqrt|exp|fac)$/) {
+        $try .= " \$x->$f();";
+    } elsif ($f =~ /^(numify|length|stringify)$/) {
+        $try .= " \$x->$f();";
+    } elsif ($f =~ /^(to|as)_(hex|oct|bin)$/) {
         $try .= " \$x->$f();";
     # overloaded functions
     } elsif ($f =~ /^(log|exp|sin|cos|atan2|int|neg|abs|sqrt)$/) {
         $try .= " \$x = $f(\$x);";
-    } elsif ($f =~ /^(numify|length|stringify|as_hex|as_bin|as_oct)$/) {
-        $try .= " \$x->$f();";
-    } elsif ($f eq "exponent") {
-        # ->bstr() to see if an object is returned
-        $try .= ' $x = $x->exponent()->bstr();';
-    } elsif ($f eq "mantissa") {
-        # ->bstr() to see if an object is returned
-        $try .= ' $x = $x->mantissa()->bstr();';
     } elsif ($f eq "parts") {
         $try .= ' ($m, $e) = $x->parts();';
         # ->bstr() to see if an object is returned
         $try .= ' $m = $m->bstr(); $m = "NaN" if !defined $m;';
         $try .= ' $e = $e->bstr(); $e = "NaN" if !defined $e;';
         $try .= ' "$m,$e";';
-    } elsif ($f eq "bexp") {
-        $try .= " \$x->bexp();";
+    } elsif ($f eq "exponent") {
+        # ->bstr() to see if an object is returned
+        $try .= ' $x = $x->exponent()->bstr();';
+    } elsif ($f eq "mantissa") {
+        # ->bstr() to see if an object is returned
+        $try .= ' $x = $x->mantissa()->bstr();';
     } elsif ($f eq "bpi") {
         $try .= " $CLASS\->bpi(\$x);";
     } else {
@@ -995,9 +995,9 @@ __DATA__
 
 &blog
 #
-NaNlog:2:NaN
-122:NaNlog:NaN
-NaNlog1:NaNlog:NaN
+invalid:2:NaN
+122:invalid:NaN
+invalid:invalid:NaN
 #
 122:inf:0
 inf:122:inf
@@ -1067,7 +1067,7 @@ inf:inf:NaN
 1:0
 +inf:0
 -inf:1
-NaNneg:0
+invalid:0
 
 &is_positive
 0:0
@@ -1075,12 +1075,12 @@ NaNneg:0
 1:1
 +inf:1
 -inf:0
-NaNneg:0
+invalid:0
 
 &is_int
 -inf:0
 +inf:0
-NaNis_int:0
+invalid:0
 1:1
 0:1
 123e12:1
@@ -1124,9 +1124,9 @@ abc:0
 -987654321:+123456789:1
 -123:+4567889:-1
 # NaNs
-acmpNaN:123:
-123:acmpNaN:
-acmpNaN:acmpNaN:
+invalid:123:
+123:invalid:
+invalid:invalid:
 # infinity
 +inf:+inf:0
 -inf:-inf:0
@@ -1388,8 +1388,8 @@ abc:NaN
 &bone
 2:+:1
 2:-:-1
-boneNaN:-:-1
-boneNaN:+:1
+invalid:-:-1
+invalid:+:1
 2:abc:1
 3::1
 
@@ -1498,7 +1498,7 @@ bsstrabc:NaN
 -100:-100
 
 &bneg
-bnegNaN:NaN
+invalid:NaN
 +inf:-inf
 -inf:inf
 abd:NaN
@@ -1509,7 +1509,7 @@ abd:NaN
 -123456789:123456789
 
 &babs
-babsNaN:NaN
+invalid:NaN
 +inf:inf
 -inf:inf
 0:0
@@ -1527,9 +1527,9 @@ NaN:NaN
 -123456789:-1
 
 &bcmp
-bcmpNaN:bcmpNaN:
-bcmpNaN:0:
-0:bcmpNaN:
+invalid:invalid:
+invalid:0:
+0:invalid:
 0:0:0
 -1:0:-1
 0:-1:1
@@ -1595,10 +1595,10 @@ abc:0:NaN
 -inf:+inf:NaN
 +inf:+inf:inf
 -inf:-inf:-inf
-baddNaN:+inf:NaN
-baddNaN:+inf:NaN
-+inf:baddNaN:NaN
--inf:baddNaN:NaN
+invalid:+inf:NaN
+invalid:+inf:NaN
++inf:invalid:NaN
+-inf:invalid:NaN
 0:0:0
 1:0:1
 0:1:1
@@ -1722,10 +1722,10 @@ abc:abc:0:NaN
 abc:+0:0:NaN
 +0:abc:0:NaN
 +0:0:abc:NaN
-NaNmul:+inf:0:NaN
-NaNmul:-inf:0:NaN
--inf:NaNmul:0:NaN
-+inf:NaNmul:0:NaN
+invalid:+inf:0:NaN
+invalid:-inf:0:NaN
+-inf:invalid:0:NaN
++inf:invalid:0:NaN
 +inf:+inf:0:inf
 +inf:-inf:0:-inf
 -inf:+inf:0:-inf
@@ -1782,10 +1782,10 @@ NaNmul:-inf:0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-NaNmul:+inf:NaN
-NaNmul:-inf:NaN
--inf:NaNmul:NaN
-+inf:NaNmul:NaN
+invalid:+inf:NaN
+invalid:-inf:NaN
+-inf:invalid:NaN
++inf:invalid:NaN
 +inf:+inf:inf
 +inf:-inf:-inf
 -inf:+inf:-inf
@@ -2812,7 +2812,7 @@ abc:NaN,NaN
 
 &bfac
 -1:NaN
-NaNfac:NaN
+invalid:NaN
 +inf:inf
 -inf:NaN
 0:1
@@ -3082,7 +3082,7 @@ NaN:1:NaN
 &bround
 $round_mode("trunc")
 0:12:0
-NaNbround:12:NaN
+invalid:12:NaN
 +inf:12:inf
 -inf:12:-inf
 1234:0:1234
@@ -3183,7 +3183,7 @@ $round_mode("common")
 
 &is_zero
 0:1
-NaNzero:0
+invalid:0
 +inf:0
 -inf:0
 123:0
@@ -3192,7 +3192,7 @@ NaNzero:0
 
 &is_one
 0:0
-NaNone:0
+invalid:0
 +inf:0
 -inf:0
 1:1
@@ -3203,7 +3203,7 @@ NaNone:0
 # floor, ceil, and int are pretty pointless in integer space, but play safe
 &bfloor
 0:0
-NaNfloor:NaN
+invalid:NaN
 +inf:inf
 -inf:-inf
 -1:-1
@@ -3213,7 +3213,7 @@ NaNfloor:NaN
 abc:NaN
 
 &bceil
-NaNceil:NaN
+invalid:NaN
 +inf:inf
 -inf:-inf
 0:0
@@ -3242,7 +3242,7 @@ NaN:NaN
 0x123456789123456789:0x123456789123456789
 +inf:inf
 -inf:-inf
-NaNas_hex:NaN
+invalid:NaN
 
 &as_bin
 128:0b10000000
@@ -3254,7 +3254,7 @@ NaNas_hex:NaN
 0x123456789123456789:0b100100011010001010110011110001001000100100011010001010110011110001001
 +inf:inf
 -inf:-inf
-NaNas_bin:NaN
+invalid:NaN
 
 &as_oct
 128:0200
@@ -3266,7 +3266,42 @@ NaNas_bin:NaN
 0x123456789123456789:044321263611044321263611
 +inf:inf
 -inf:-inf
-NaNas_oct:NaN
+invalid:NaN
+
+&to_hex
+128:80
+-128:-80
+0:0
+-0:0
+1:1
+0x123456789123456789:123456789123456789
++inf:inf
+-inf:-inf
+invalid:NaN
+
+&to_bin
+128:10000000
+-128:-10000000
+0:0
+-0:0
+1:1
+0b1010111101010101010110110110110110101:1010111101010101010110110110110110101
+0x123456789123456789:100100011010001010110011110001001000100100011010001010110011110001001
++inf:inf
+-inf:-inf
+invalid:NaN
+
+&to_oct
+128:200
+-128:-200
+0:0
+-0:0
+1:1
+0b1010111101010101010110110110110110101:1275252666665
+0x123456789123456789:44321263611044321263611
++inf:inf
+-inf:-inf
+invalid:NaN
 
 # overloaded functions
 &log

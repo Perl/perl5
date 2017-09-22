@@ -19,7 +19,7 @@ use warnings;
 use Carp ();
 use Math::BigInt ();
 
-our $VERSION = '1.999806';
+our $VERSION = '1.999811';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
@@ -529,6 +529,7 @@ sub from_hex {
 
     if ($str =~ s/
                      ^
+                     \s*
 
                      # sign
                      ( [+-]? )
@@ -555,6 +556,7 @@ sub from_hex {
                          ( \d+ (?: _ \d+ )* )
                      )?
 
+                     \s*
                      $
                  //x)
     {
@@ -618,6 +620,7 @@ sub from_oct {
 
     if ($str =~ s/
                      ^
+                     \s*
 
                      # sign
                      ( [+-]? )
@@ -641,6 +644,7 @@ sub from_oct {
                          ( \d+ (?: _ \d+ )* )
                      )?
 
+                     \s*
                      $
                  //x)
     {
@@ -704,6 +708,7 @@ sub from_bin {
 
     if ($str =~ s/
                      ^
+                     \s*
 
                      # sign
                      ( [+-]? )
@@ -730,6 +735,7 @@ sub from_bin {
                          ( \d+ (?: _ \d+ )* )
                      )?
 
+                     \s*
                      $
                  //x)
     {
@@ -2137,16 +2143,24 @@ sub bpow {
 }
 
 sub blog {
-    my ($class, $x, $base, $a, $p, $r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(2, @_);
+    # Return the logarithm of the operand. If a second operand is defined, that
+    # value is used as the base, otherwise the base is assumed to be Euler's
+    # constant.
 
-    # If called as $x -> blog() or $x -> blog(undef), don't objectify the
-    # undefined base, since undef signals that the base is Euler's number.
-    #unless (ref($x) && !defined($base)) {
-    #    # objectify is costly, so avoid it
-    #    if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
-    #        ($class, $x, $base, $a, $p, $r) = objectify(2, @_);
-    #    }
-    #}
+    my ($class, $x, $base, $a, $p, $r);
+
+    # Don't objectify the base, since an undefined base, as in $x->blog() or
+    # $x->blog(undef) signals that the base is Euler's number.
+
+    if (!ref($_[0]) && $_[0] =~ /^[A-Za-z]|::/) {
+        # E.g., Math::BigFloat->blog(256, 2)
+        ($class, $x, $base, $a, $p, $r) =
+          defined $_[2] ? objectify(2, @_) : objectify(1, @_);
+    } else {
+        # E.g., Math::BigFloat::blog(256, 2) or $x->blog(2)
+        ($class, $x, $base, $a, $p, $r) =
+          defined $_[1] ? objectify(2, @_) : objectify(1, @_);
+    }
 
     return $x if $x->modify('blog');
 
@@ -3226,13 +3240,39 @@ sub bfac {
       if (($x->{sign} ne '+') || # inf, NaN, <0 etc => NaN
           ($x->{_es} ne '+'));   # digits after dot?
 
-    # use BigInt's bfac() for faster calc
     if (! $MBI->_is_zero($x->{_e})) {
         $x->{_m} = $MBI->_lsft($x->{_m}, $x->{_e}, 10); # change 12e1 to 120e0
         $x->{_e} = $MBI->_zero();           # normalize
         $x->{_es} = '+';
     }
     $x->{_m} = $MBI->_fac($x->{_m});       # calculate factorial
+    $x->bnorm()->round(@r);     # norm again and round result
+}
+
+sub bdfac {
+    # compute double factorial
+
+    # set up parameters
+    my ($class, $x, @r) = (ref($_[0]), @_);
+    # objectify is costly, so avoid it
+    ($class, $x, @r) = objectify(1, @_) if !ref($x);
+
+    # inf => inf
+    return $x if $x->modify('bfac') || $x->{sign} eq '+inf';
+
+    return $x->bnan()
+      if (($x->{sign} ne '+') || # inf, NaN, <0 etc => NaN
+          ($x->{_es} ne '+'));   # digits after dot?
+
+    Carp::croak("bdfac() requires a newer version of the $MBI library.")
+        unless $MBI->can('_dfac');
+
+    if (! $MBI->_is_zero($x->{_e})) {
+        $x->{_m} = $MBI->_lsft($x->{_m}, $x->{_e}, 10); # change 12e1 to 120e0
+        $x->{_e} = $MBI->_zero();           # normalize
+        $x->{_es} = '+';
+    }
+    $x->{_m} = $MBI->_dfac($x->{_m});       # calculate factorial
     $x->bnorm()->round(@r);     # norm again and round result
 }
 
@@ -3999,12 +4039,13 @@ sub bestr {
     return $mant . 'e' . $esgn . $eabs;
 }
 
-sub as_hex {
+sub to_hex {
     # return number as hexadecimal string (only for integers defined)
+
     my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
-    return '0x0' if $x->is_zero();
+    return '0' if $x->is_zero();
 
     return $nan if $x->{_es} ne '+';    # how to do 1e-1 in hex?
 
@@ -4012,12 +4053,13 @@ sub as_hex {
     if (! $MBI->_is_zero($x->{_e})) {   # > 0
         $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
-    $z = Math::BigInt->new($x->{sign} . $MBI->_num($z));
-    $z->as_hex();
+    my $str = $MBI->_to_hex($z);
+    return $x->{sign} eq '-' ? "-$str" : $str;
 }
 
-sub as_oct {
+sub to_oct {
     # return number as octal digit string (only for integers defined)
+
     my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
@@ -4029,12 +4071,67 @@ sub as_oct {
     if (! $MBI->_is_zero($x->{_e})) {   # > 0
         $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
-    $z = Math::BigInt->new($x->{sign} . $MBI->_num($z));
-    $z->as_oct();
+    my $str = $MBI->_to_oct($z);
+    return $x->{sign} eq '-' ? "-$str" : $str;
+}
+
+sub to_bin {
+    # return number as binary digit string (only for integers defined)
+
+    my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
+
+    return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
+    return '0' if $x->is_zero();
+
+    return $nan if $x->{_es} ne '+';    # how to do 1e-1 in binary?
+
+    my $z = $MBI->_copy($x->{_m});
+    if (! $MBI->_is_zero($x->{_e})) {   # > 0
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
+    }
+    my $str = $MBI->_to_bin($z);
+    return $x->{sign} eq '-' ? "-$str" : $str;
+}
+
+sub as_hex {
+    # return number as hexadecimal string (only for integers defined)
+
+    my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
+
+    return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
+    return '0x0' if $x->is_zero();
+
+    return $nan if $x->{_es} ne '+';    # how to do 1e-1 in hex?
+
+    my $z = $MBI->_copy($x->{_m});
+    if (! $MBI->_is_zero($x->{_e})) {   # > 0
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
+    }
+    my $str = $MBI->_as_hex($z);
+    return $x->{sign} eq '-' ? "-$str" : $str;
+}
+
+sub as_oct {
+    # return number as octal digit string (only for integers defined)
+
+    my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
+
+    return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
+    return '00' if $x->is_zero();
+
+    return $nan if $x->{_es} ne '+';    # how to do 1e-1 in octal?
+
+    my $z = $MBI->_copy($x->{_m});
+    if (! $MBI->_is_zero($x->{_e})) {   # > 0
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
+    }
+    my $str = $MBI->_as_oct($z);
+    return $x->{sign} eq '-' ? "-$str" : $str;
 }
 
 sub as_bin {
     # return number as binary digit string (only for integers defined)
+
     my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
 
     return $x->bstr() if $x->{sign} !~ /^[+-]$/; # inf, nan etc
@@ -4046,8 +4143,8 @@ sub as_bin {
     if (! $MBI->_is_zero($x->{_e})) {   # > 0
         $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
-    $z = Math::BigInt->new($x->{sign} . $MBI->_num($z));
-    $z->as_bin();
+    my $str = $MBI->_as_bin($z);
+    return $x->{sign} eq '-' ? "-$str" : $str;
 }
 
 sub numify {

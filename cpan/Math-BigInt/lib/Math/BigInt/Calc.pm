@@ -7,7 +7,7 @@ use warnings;
 use Carp;
 use Math::BigInt::Lib;
 
-our $VERSION = '1.999806';
+our $VERSION = '1.999811';
 
 our @ISA = ('Math::BigInt::Lib');
 
@@ -1889,7 +1889,7 @@ sub _sqrt {
 }
 
 sub _root {
-    # Take n'th root of $x in place (n >= 2)
+    # Take n'th root of $x in place.
 
     my ($c, $x, $n) = @_;
 
@@ -1915,8 +1915,8 @@ sub _root {
         return $x;
     }
 
-    # If $n is a power of two, we take sqrt($x) repeatedly and find the proper
-    # result, because, e.g., sqrt(sqrt($x)) == root($x, 4)
+    # If $n is a power of two, take sqrt($x) repeatedly, e.g., root($x, 4) =
+    # sqrt(sqrt($x)), root($x, 8) = sqrt(sqrt(sqrt($x))).
 
     my $b = $c -> _as_bin($n);
     if ($b =~ /0b1(0+)$/) {
@@ -2485,12 +2485,7 @@ sub _gcd {
     return $x;
 }
 
-##############################################################################
-##############################################################################
-
 1;
-
-__END__
 
 =pod
 
