@@ -15,7 +15,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.48";
+our $VERSION    = "1.49";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -116,7 +116,7 @@ C<undef> being returned
 
 The above example code blocks also suggest how to use C<reduce> to build a
 more efficient combined version of one of these basic functions and a C<map>
-block. For example, to find the total length of the all the strings in a list,
+block. For example, to find the total length of all the strings in a list,
 we could use
 
     $total = sum map { length } @strings;

@@ -43,7 +43,8 @@ is_deeply( [ uniqstr qw( 1 1.0 1E0 ) ],
                'uniqstr on undef coerces to empty-string' );
 }
 
-{
+SKIP: {
+    skip 'Perl 5.007003 with utf8::encode is required', 3 if $] lt "5.007003";
     my $warnings = "";
     local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
 
@@ -123,7 +124,9 @@ is_deeply( [ uniq () ],
 
 is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
 
-{
+SKIP: {
+    skip "known to fail on $]", 1 if $] le "5.006002";
+
     package Stringify;
 
     use overload '""' => sub { return $_[0]->{str} };

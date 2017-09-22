@@ -112,8 +112,12 @@ SKIP: {
   is($t, (1<<31) - (1<<62), 'min * max');
   $t = product($max, $min);
   is($t, (1<<31) - (1<<62), 'max * min');
+
+  SKIP: {
+  skip "known to fail on $]", 1 if $] le "5.006002";
   $t = product($max, $max);
   is($t,  (1<<62)-(1<<32)+1, 'max * max');
+  }
 
   $t = product($min*8, $min);
   cmp_ok($t, '>',  (1<<61), 'min*8*min'); # may be an NV
