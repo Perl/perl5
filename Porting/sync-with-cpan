@@ -295,6 +295,22 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
     $cpan_mod =~ s/-/::/g;
 }
 
+sub wget {
+    my ($url, $saveas) = @_;
+    eval {
+        require HTTP::Tiny;
+        my $http= HTTP::Tiny->new();
+        $http->mirror( $url => $saveas );
+        1
+    } or
+       # Some system do not have wget.  Fall back to curl if we do not
+       # have it.  On Windows, `which wget` is not going to work, so
+       # just use wget, as this script has always done.
+       WIN32 || -x substr(`which wget`, 0, -1)
+         ? system wget => $url, '-qO', $saveas
+         : system curl => $url, '-sSo', $saveas;
+}
+
 #
 # Find the information from CPAN.
 #
@@ -313,12 +329,7 @@ else {
     # Poor man's cache
     #
     unless (-f $package_file && -M $package_file < 1) {
-        eval {
-            require HTTP::Tiny;
-            my $http= HTTP::Tiny->new();
-            $http->mirror( $package_url => $package_file );
-            1
-        } or system wget => $package_url, '-qO', $package_file;
+        wget $package_url, $package_file;
     }
 
     open my $fh, '<', $package_file;
@@ -339,12 +350,7 @@ else {
     #
     # Fetch the new distro
     #
-    eval {
-        require HTTP::Tiny;
-        my $http= HTTP::Tiny->new();
-        $http->mirror( $url => $new_file );
-        1
-    } or system wget => $url, '-qO', $new_file;
+    wget $url, $new_file;
 }
 
 my  $old_dir      = "$pkg_dir-$old_version";
