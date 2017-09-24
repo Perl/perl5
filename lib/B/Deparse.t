@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 46; # not counting those in the __DATA__ section
+my $tests = 49; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -151,6 +151,21 @@ $a = `$^X $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, "use constant ('PI', 4);\n",
    "Proxy Constant Subroutines must not show up as (incorrect) prototypes");
+
+$a = `$^X $path "-MO=Deparse" -e "sub foo(){1}" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, "sub foo () {\n    1;\n}\n",
+   "Main prog consisting of just a constant (via empty proto)");
+
+$a = readpipe qq|$^X $path "-MO=Deparse"|
+             .qq| -e "package F; sub f(){0} sub s{}"|
+             .qq| -e "#line 123 four-five-six"|
+             .qq| -e "package G; sub g(){0} sub s{}" 2>&1|;
+$a =~ s/-e syntax OK\n//g;
+like($a, qr/sub F::f \(\) \{\s*0;\s*}/,
+   "Constant is dumped in package in which other subs are dumped");
+unlike($a, qr/sub g/,
+   "Constant is not dumped in package in which other subs are not dumped");
 
 #Re: perlbug #35857, patch #24505
 #handle warnings::register-ed packages properly.

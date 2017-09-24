@@ -512,6 +512,10 @@ sub todo {
     } else {
 	$seq = 0;
     }
+    my $stash = $cv->STASH;
+    if (class($stash) eq 'HV') {
+        $self->{packs}{$stash->NAME}++;
+    }
     push @{$self->{'subs_todo'}}, [$seq, $cv, $is_form, $name];
 }
 
@@ -809,6 +813,14 @@ sub print_protos {
     my $ar;
     my @ret;
     foreach $ar (@{$self->{'protos_todo'}}) {
+	if (ref $ar->[1]) {
+	    # Only print a constant if it occurs in the same package as a
+	    # dumped sub.  This is not perfect, but a heuristic that will
+	    # hopefully work most of the time.  Ideally we would use
+	    # CvFILE, but a constant stub has no CvFILE.
+	    my $pack = ($ar->[0] =~ /(.*)::/)[0];
+	    next if $pack and !$self->{packs}{$pack}
+	}
 	my $body = defined $ar->[1]
 		? ref $ar->[1]
 		    ? " () {\n    " . $self->const($ar->[1]->RV,0) . ";\n}"
@@ -850,6 +862,7 @@ sub new {
     $self->{'ex_const'} = "'???'";
     $self->{'expand'} = 0;
     $self->{'files'} = {};
+    $self->{'packs'} = {};
     $self->{'indent_size'} = 4;
     $self->{'linenums'} = 0;
     $self->{'parens'} = 0;
