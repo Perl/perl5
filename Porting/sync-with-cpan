@@ -486,7 +486,7 @@ if (@de_exec && @delete) {
 # Mustn't change the +x bit on files that are whitelisted
 #
 if (@de_exec) {
-    my %permitted = map +(tr/\n//dr => 1), grep !/^#/,
+    my %permitted = map { (my $x = $_) =~ tr/\n//d; $x => 1 } grep !/^#/,
         do { local @ARGV = '../Porting/exec-bit.txt'; <> };
     @de_exec = grep !$permitted{"cpan/$pkg_dir/$_"}, @de_exec;
 }
