@@ -225,8 +225,8 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     /* create a PV with value "isa", but with a special address
      * so that perl knows we're really doing "DOES" instead */
     methodname = newSV_type(SVt_PV);
-    SvLEN(methodname) = 0;
-    SvCUR(methodname) = strlen(PL_isa_DOES);
+    SvLEN_set(methodname, 0);
+    SvCUR_set(methodname, strlen(PL_isa_DOES));
     SvPVX(methodname) = (char *)PL_isa_DOES; /* discard 'const' qualifier */
     SvPOK_on(methodname);
     sv_2mortal(methodname);

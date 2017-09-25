@@ -1271,7 +1271,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	    sv_setsv_nomg((SV *)cv, tmpsv);
 	    SvTEMP_off(tmpsv);
 	    SvREFCNT_dec_NN(tmpsv);
-	    SvLEN(cv) = SvCUR(cv) + 1;
+	    SvLEN_set(cv, SvCUR(cv) + 1);
 	    SvCUR(cv) = ulen;
 	}
 	else {

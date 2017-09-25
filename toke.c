@@ -4443,8 +4443,8 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 		    PL_parser->last_uni = buf + last_uni_pos;
 		if (PL_parser->last_lop)
 		    PL_parser->last_lop = buf + last_lop_pos;
-		SvLEN(linestr) = SvCUR(linestr);
-		SvCUR(linestr) = s-SvPVX(linestr);
+		SvLEN_set(linestr, SvCUR(linestr));
+		SvCUR_set(linestr, s - SvPVX(linestr));
 		PL_parser->filtered = 1;
 		break;
 	    }
