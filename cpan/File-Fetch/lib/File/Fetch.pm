@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN $FORCEIPV4
             ];
 
-$VERSION        = '0.52';
+$VERSION        = '0.54';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';

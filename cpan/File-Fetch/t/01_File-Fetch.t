@@ -195,14 +195,15 @@ for my $entry (@map) {
 ### Heuristics
 {
   require IO::Socket::INET;
-  my $sock = IO::Socket::INET->new( PeerAddr => 'www.cpan.org', PeerPort => 80, Timeout => 20 )
+  my $sock = IO::Socket::INET->new( PeerAddr => 'httpbin.org', PeerPort => 80, Timeout => 20 )
      or $heuristics{http} = 0;
 }
 
 ### http:// tests ###
-{   for my $uri ( 'http://www.cpan.org/index.html',
-                  'http://www.cpan.org/index.html?q=1',
-                  'http://www.cpan.org/index.html?q=1&y=2',
+{   for my $uri ( 'http://httpbin.org/html',
+                  'http://httpbin.org/response-headers?q=1',
+                  'http://httpbin.org/response-headers?q=1&y=2',
+                  #'http://www.cpan.org/index.html?q=1&y=2',
                   #'http://user:passwd@httpbin.org/basic-auth/user/passwd',
     ) {
         for (qw[lwp httptiny wget curl lftp fetch lynx httplite iosock]) {
