@@ -24,7 +24,7 @@ interfaces.
 This document gives a condensed list of the features available in the POSIX
 module.  Consult your operating system's manpages for general information on
 most features.  Consult L<perlfunc> for functions which are noted as being
-identical to Perl's builtin functions.
+identical or almost identical to Perl's builtin functions.
 
 The first section describes POSIX functions from the 1003.1 specification.
 The second section describes some classes for signal objects, TTY objects,
@@ -958,7 +958,15 @@ POSIX.1-2008 and are only available on systems that support them.
 =item C<localtime>
 
 This is identical to Perl's builtin C<localtime()> function for
-converting seconds since the epoch to a date see L<perlfunc/localtime>.
+converting seconds since the epoch to a date see L<perlfunc/localtime> except
+that C<POSIX::localtime()> must be provided an explicit value (rather than
+relying an implicit C<$_>:
+
+    @localtime = POSIX::localtime(time);    # Good
+
+    @localtime = localtime();               # Good
+
+    @localtime = POSIX::localtime();        # Throws exception
 
 =item C<log>
 
