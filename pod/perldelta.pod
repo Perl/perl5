@@ -387,7 +387,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The in-place reverse optimisation now correctly strengthens weak
+references using the L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
+API function.
 
 =back
 

@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 23;
+plan tests => 25;
 
 is(reverse("abc"), "cba", 'simple reverse');
 
@@ -90,4 +90,18 @@ use Tie::Array;
     my $b = scalar reverse($a);
     my $c = scalar reverse($b);
     is($a, $c, 'Unicode string double reversal matches original');
+}
+
+# in-place reversing of weak references
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, no extension Scalar::Util", 2);
+    require Scalar::Util;
+    my @a = map { \(my $dummy = $_) } 1..5; # odd number of elements
+    my @r = @a[0,2];                        # middle and non-middle element
+    Scalar::Util::weaken($a[0]);
+    Scalar::Util::weaken($a[2]);
+    @a = reverse @a;
+    @r = ();
+    ok defined $a[-1] && ${$a[-1]} eq '1', "in-place reverse strengthens weak reference";
+    ok defined $a[2] && ${$a[2]} eq '3', "in-place reverse strengthens weak reference in the middle";
 }
