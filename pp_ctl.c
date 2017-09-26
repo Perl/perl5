@@ -3752,6 +3752,7 @@ S_require_file(pTHX_ SV *sv)
     I32 old_savestack_ix;
     const bool op_is_require = PL_op->op_type == OP_REQUIRE;
     const char *const op_name = op_is_require ? "require" : "do";
+    SV ** svp_cached = NULL;
 
     assert(op_is_require || PL_op->op_type == OP_DOFILE);
 
@@ -3760,6 +3761,15 @@ S_require_file(pTHX_ SV *sv)
     name = SvPV_nomg_const(sv, len);
     if (!(name && len > 0 && *name))
         DIE(aTHX_ "Missing or undefined argument to %s", op_name);
+
+#ifndef VMS
+	/* try to return earlier (save the SAFE_PATHNAME check) if INC already got the name */
+	if (op_is_require) {
+		/* can optimize to only perform one single lookup */
+		svp_cached = hv_fetch(GvHVn(PL_incgv), (char*) name, len, 0);
+		if ( svp_cached && *svp_cached != &PL_sv_undef ) RETPUSHYES;
+	}
+#endif
 
     if (!IS_SAFE_PATHNAME(name, len, op_name)) {
         if (!op_is_require) {
@@ -3799,8 +3809,8 @@ S_require_file(pTHX_ SV *sv)
 	unixlen = len;
     }
     if (op_is_require) {
-	SV * const * const svp = hv_fetch(GvHVn(PL_incgv),
-					  unixname, unixlen, 0);
+	/* reuse the previous hv_fetch result if possible */
+	SV * const * const svp = svp_cached ? svp_cached : hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
 	if ( svp ) {
 	    if (*svp != &PL_sv_undef)
 		RETPUSHYES;
