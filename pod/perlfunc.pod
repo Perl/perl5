@@ -2989,6 +2989,9 @@ Returns the current priority for a process, a process group, or a user.
 (See L<getpriority(2)>.)  Will raise a fatal exception if used on a
 machine that doesn't implement L<getpriority(2)>.
 
+C<WHICH> can be any of C<PRIO_PROCESS>, C<PRIO_PGRP> or C<PRIO_USER>
+imported from L<POSIX/RESOURCE CONSTANTS>.
+
 Portability issues: L<perlport/getpriority>.
 
 =item getpwnam NAME
@@ -7035,6 +7038,9 @@ X<setpriority> X<priority> X<nice> X<renice>
 Sets the current priority for a process, a process group, or a user.
 (See L<setpriority(2)>.)  Raises an exception when used on a machine
 that doesn't implement L<setpriority(2)>.
+
+C<WHICH> can be any of C<PRIO_PROCESS>, C<PRIO_PGRP> or C<PRIO_USER>
+imported from L<POSIX/RESOURCE CONSTANTS>.
 
 Portability issues: L<perlport/setpriority>.
 
