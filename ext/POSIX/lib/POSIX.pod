@@ -2465,6 +2465,18 @@ C<_POSIX_TZNAME_MAX> C<_POSIX_VDISABLE> C<_POSIX_VERSION>
 
 =back
 
+=head1 RESOURCE CONSTANTS
+
+Imported with the C<:sys_resource_h> tag.
+
+=over 8
+
+=item Constants
+
+C<PRIO_PROCESS> C<PRIO_PGRP> C<PRIO_USER>
+
+=back
+
 =head1 SYSTEM CONFIGURATION
 
 =over 8

@@ -178,6 +178,10 @@ my %expect = (
             POLL_IN POLL_OUT POLL_MSG POLL_ERR POLL_PRI POLL_HUP
             SI_USER SI_QUEUE SI_TIMER SI_ASYNCIO SI_MESGQ
         ),
+        # added in 5.27
+        qw(
+            PRIO_PROCESS PRIO_PGRP PRIO_USER
+        ),
     ],
 );
 

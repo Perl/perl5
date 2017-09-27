@@ -62,6 +62,14 @@ static int not_here(const char *s);
 #include <unistd.h>
 #endif
 
+#ifdef I_SYS_TIME
+# include <sys/time.h>
+#endif
+
+#ifdef I_SYS_RESOURCE
+# include <sys/resource.h>
+#endif
+
 #if defined(USE_QUADMATH) && defined(I_QUADMATH)
 
 #  undef M_E
