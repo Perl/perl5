@@ -32,10 +32,10 @@ foreach my $func (sort @all) {
     my $arg_pat = join ', ', ('[a-z]+') x $valid{$func};
     my $expect = qr/\AUsage: POSIX::$func\($arg_pat\) at \(eval/;
     foreach my $try (@try) {
-	next if $valid{$func} == $try;
-	my $call = "POSIX::$func(" . join(', ', 1 .. $try) . ')';
-	is(eval "$call; 1", undef, "$call fails");
-	like($@, $expect, "POSIX::$func for $try arguments gives expected error")
+	    next if $valid{$func} == $try;
+	    my $call = "POSIX::$func(" . join(', ', 1 .. $try) . ')';
+	    is(eval "$call; 1", undef, "$call fails");
+	    like($@, $expect, "POSIX::$func for $try arguments gives expected error")
     }
 }
 
