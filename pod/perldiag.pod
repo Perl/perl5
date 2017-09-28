@@ -3277,6 +3277,11 @@ line.  See L<perlrun> for more details.
 
 (P) The regular expression parser is confused.
 
+=item \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/
+
+(F) Your regular expression used C<\K> in a lookhead or lookbehind
+assertion, which isn't permitted.
+
 =item Label not found for "last %s"
 
 (F) You named a loop to break out of, but you're not currently in a loop

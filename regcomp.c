@@ -182,6 +182,7 @@ struct RExC_state_t {
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     I32		in_lookbehind;
+    I32		in_lookahead;
     I32		contains_locale;
     I32		override_recoding;
 #ifdef EBCDIC
@@ -273,6 +274,7 @@ struct RExC_state_t {
 #define RExC_study_chunk_recursed_bytes  \
                                    (pRExC_state->study_chunk_recursed_bytes)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
+#define RExC_in_lookahead	(pRExC_state->in_lookahead)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
 #ifdef EBCDIC
 #   define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
@@ -7622,6 +7624,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_seen = 0;
     RExC_maxlen = 0;
     RExC_in_lookbehind = 0;
+    RExC_in_lookahead = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
 #ifdef EBCDIC
     RExC_recode_x_to_native = 0;
@@ -11078,6 +11081,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
     *flagp = 0;				/* Tentatively. */
 
+    if (RExC_in_lookbehind) {
+	RExC_in_lookbehind++;
+    }
+    if (RExC_in_lookahead) {
+        RExC_in_lookahead++;
+    }
+
     /* Having this true makes it feasible to have a lot fewer tests for the
      * parse pointer being in scope.  For example, we can write
      *      while(isFOO(*RExC_parse)) RExC_parse++;
@@ -11542,10 +11552,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if (RExC_parse >= RExC_end) {
                     vFAIL("Sequence (?... not terminated");
                 }
-
-                /* FALLTHROUGH */
+                RExC_seen_zerolen++;
+                break;
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;
+                RExC_in_lookahead++;
                 break;
 	    case '!':           /* (?!...) */
 		RExC_seen_zerolen++;
@@ -12343,6 +12354,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
     if (RExC_in_lookbehind) {
 	RExC_in_lookbehind--;
+    }
+    if (RExC_in_lookahead) {
+        RExC_in_lookahead--;
     }
     if (after_freeze > RExC_npar)
         RExC_npar = after_freeze;
@@ -13429,15 +13443,21 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'K':
-	    RExC_seen_zerolen++;
-	    ret = reg_node(pRExC_state, KEEPS);
-	    *flagp |= SIMPLE;
-	    /* XXX:dmq : disabling in-place substitution seems to
-	     * be necessary here to avoid cases of memory corruption, as
-	     * with: C<$_="x" x 80; s/x\K/y/> -- rgs
-	     */
-            RExC_seen |= REG_LOOKBEHIND_SEEN;
-	    goto finish_meta_pat;
+            if (!RExC_in_lookbehind && !RExC_in_lookahead) {
+                RExC_seen_zerolen++;
+                ret = reg_node(pRExC_state, KEEPS);
+                *flagp |= SIMPLE;
+                /* XXX:dmq : disabling in-place substitution seems to
+                 * be necessary here to avoid cases of memory corruption, as
+                 * with: C<$_="x" x 80; s/x\K/y/> -- rgs
+                 */
+                RExC_seen |= REG_LOOKBEHIND_SEEN;
+                goto finish_meta_pat;
+            }
+            else {
+                ++RExC_parse; /* advance past the 'K' */
+                vFAIL("\\K not permitted in lookahead/lookbehind");
+            }
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
 	    *flagp |= SIMPLE;
