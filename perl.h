@@ -6873,6 +6873,26 @@ extern void moncontrol(int);
 #  endif
 #endif
 
+/* We have somehow managed not to define the denormal/subnormal
+ * detection.
+ *
+ * This may happen if the compiler doesn't expose the C99 math like
+ * the fpclassify() without some special switches.  Perl tries to
+ * stay C89, so for example -std=c99 is not an option.
+ *
+ * The Perl_isinf() and Perl_isnan() should have been defined even if
+ * the C99 isinf() and isnan() are unavailable, and the NV_MIN becomes
+ * from the C89 DBL_MIN or moral equivalent. */
+#if !defined(Perl_fp_class_denorm) && defined(Perl_isinf) && defined(Perl_isnan) && defined(NV_MIN)
+#  define Perl_fp_class_denorm(x) ((x) != 0.0 && !Perl_isinf(x) && !Perl_isnan(x) && PERL_ABS(x) < NV_MIN)
+#endif
+
+/* This is not a great fallback: subnormals tests will fail,
+ * but at least Perl will link and 99.999% of tests will work. */
+#if !defined(Perl_fp_class_denorm)
+#  define Perl_fp_class_denorm(x) FALSE
+#endif
+
 #ifdef DOUBLE_IS_IEEE_FORMAT
 #  define DOUBLE_HAS_INF
 #  define DOUBLE_HAS_NAN
