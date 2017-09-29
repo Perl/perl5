@@ -45,6 +45,8 @@ Both of these or neither
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="steveh" id="488307ffa67ce70fc9755e560a74dac04bdcb0e4" ticket="" desc="Revert &quot;Revert &quot;Fallbacks for Perl_fp_class_denorm().&quot;&quot;"/>
+
 </div>
 
 <div><h3>Portability Fixes</h3>
