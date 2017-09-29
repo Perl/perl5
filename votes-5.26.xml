@@ -34,8 +34,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Regression Fixes</h3>
 
 Both of these or neither
-<commit votes="tonyc" id="d8b61909479178ddb668ad385988877d26f202f2" ticket="132008" desc="Term::ReadLine generates empty &amp;STDERR files"/>
-<commit votes="tonyc" id="1d217c696857b2bf41d87a7e927c43d20cc556e5" ticket="132008" desc="(perl #132008) make sure the test behaves without a tty"/>
+<commit votes="tonyc steveh" id="d8b61909479178ddb668ad385988877d26f202f2" ticket="132008" desc="Term::ReadLine generates empty &amp;STDERR files"/>
+<commit votes="tonyc steveh" id="1d217c696857b2bf41d87a7e927c43d20cc556e5" ticket="132008" desc="(perl #132008) make sure the test behaves without a tty"/>
 
 </div>
 
