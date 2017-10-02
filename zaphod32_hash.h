@@ -184,7 +184,7 @@ U32 zaphod32_hash_with_state(
 ) {
     U32 *state= (U32 *)state_ch;
     const U8 *end;
-    U32 len = key_len; 
+    STRLEN len = key_len;
     U32 v0= state[0];
     U32 v1= state[1];
     U32 v2= state[2] ^ (0xC41A7AB1 * (key_len + 1));

@@ -50,8 +50,8 @@
 #define STMT_END while(0)
 #endif
 
-#ifndef STADTX_UNALIGNED_AND_LITTLE_ENDIAN
-#define STADTX_UNALIGNED_AND_LITTLE_ENDIAN 1
+#ifndef STADTX_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN
+#define STADTX_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN 1
 #endif
 
 #if STADTX_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN
@@ -170,7 +170,7 @@ STADTX_STATIC_INLINE U64 stadtx_hash_with_state(
     const STRLEN key_len
 ) {
     U64 *state= (U64 *)state_ch;
-    U64 len = key_len;
+    STRLEN len = key_len;
     U64 v0= state[0] ^ ((key_len+1) * STADTX_K0_U64);
     U64 v1= state[1] ^ ((key_len+2) * STADTX_K1_U64);
     if (len < 32) {
