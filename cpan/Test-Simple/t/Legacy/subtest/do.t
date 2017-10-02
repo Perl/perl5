@@ -7,7 +7,7 @@ use Test::More;
 
 pass("First");
 
-my $file = "t/Legacy/subtest/for_do_t.test";
+my $file = "./t/Legacy/subtest/for_do_t.test";
 ok -e $file, "subtest test file exists";
 
 subtest $file => sub { do $file };

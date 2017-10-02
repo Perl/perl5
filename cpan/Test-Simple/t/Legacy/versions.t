@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-PRELOAD
 
 # Make sure all the modules have the same version
 #

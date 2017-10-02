@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-STREAM
+# HARNESS-NO-PRELOAD
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -25,11 +27,9 @@ require Test::Builder;
 my $TB = Test::Builder->create;
 $TB->plan(tests => 4);
 
-
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 local $ENV{HARNESS_ACTIVE} = 0;
-
 
 package main;
 

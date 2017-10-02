@@ -1059,21 +1059,16 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302073.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302096.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
             qr{^xt/},
             qw( appveyor.yml
-                perltidyrc
                 t/00compile.t
                 t/00-report.t
                 t/zzz-check-breaks.t
                 ),
-        ],
-        'CUSTOMIZED'   => [
-            #
-            qw( t/Test2/modules/IPC/Driver/Files.t )
         ],
     },
 

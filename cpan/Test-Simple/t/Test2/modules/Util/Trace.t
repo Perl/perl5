@@ -1,15 +1,15 @@
 use strict;
 use warnings;
 use Test2::Tools::Tiny;
-use Test2::Util::Trace;
+use Test2::EventFacet::Trace;
 
 like(
-    exception { 'Test2::Util::Trace'->new() },
+    exception { 'Test2::EventFacet::Trace'->new() },
     qr/The 'frame' attribute is required/,
     "got error"
 );
 
-my $one = 'Test2::Util::Trace'->new(frame => ['Foo::Bar', 'foo.t', 5, 'Foo::Bar::foo']);
+my $one = 'Test2::EventFacet::Trace'->new(frame => ['Foo::Bar', 'foo.t', 5, 'Foo::Bar::foo']);
 is_deeply($one->frame,  ['Foo::Bar', 'foo.t', 5, 'Foo::Bar::foo'], "Got frame");
 is_deeply([$one->call], ['Foo::Bar', 'foo.t', 5, 'Foo::Bar::foo'], "Got call");
 is($one->package, 'Foo::Bar',      "Got package");

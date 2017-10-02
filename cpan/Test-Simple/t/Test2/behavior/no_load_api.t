@@ -1,7 +1,8 @@
-# HARNESS-NO-PRELOAD
 use strict;
 use warnings;
 use Data::Dumper;
+# HARNESS-NO-STREAM
+# HARNESS-NO-PRELOAD
 
 ###############################################################################
 #                                                                             #
@@ -28,7 +29,7 @@ require Test2::Event::Waiting;
 require Test2::Util;
 require Test2::Util::ExternalMeta;
 require Test2::Util::HashBase;
-require Test2::Util::Trace;
+require Test2::EventFacet::Trace;
 
 require Test2::Hub;
 require Test2::Hub::Interceptor;
@@ -45,6 +46,6 @@ my @loaded = grep { $INC{$_} } qw{
 require Test2::Tools::Tiny;
 
 Test2::Tools::Tiny::ok(!@loaded, "Test2::API was not loaded")
-    || diag("Loaded: " . Dumper(\@loaded));
+    || Test2::Tools::Tiny::diag("Loaded: " . Dumper(\@loaded));
 
 Test2::Tools::Tiny::done_testing();

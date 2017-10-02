@@ -1,550 +1,1010 @@
 use strict;
 use warnings;
-use Test2::Formatter::TAP;
+# HARNESS-NO-PRELOAD
+
+my $CLASS;
+my %BEFORE_LOAD;
+
+BEGIN {
+    my $old = select STDOUT;
+    $BEFORE_LOAD{STDOUT} = $|;
+    select STDERR;
+    $BEFORE_LOAD{STDERR} = $|;
+    select $old;
+
+    require Test2::Formatter::TAP;
+    $CLASS = 'Test2::Formatter::TAP';
+    *OUT_STD = $CLASS->can('OUT_STD') or die "Could not get OUT_STD constant";
+    *OUT_ERR = $CLASS->can('OUT_ERR') or die "Could not get OUT_ERR constant";
+}
+
+use Test2::Tools::Tiny;
 use Test2::API qw/context/;
 use PerlIO;
 
-use Test2::Tools::Tiny;
+sub grabber {
+    my ($std, $err);
+    open( my $stdh, '>', \$std ) || die "Ooops";
+    open( my $errh, '>', \$err ) || die "Ooops";
 
-BEGIN {
-    *OUT_STD = Test2::Formatter::TAP->can('OUT_STD') or die;
-    *OUT_ERR = Test2::Formatter::TAP->can('OUT_ERR') or die;
+    my $it = $CLASS->new(
+        handles => [$stdh, $errh, $stdh],
+    );
+
+    return ($it, \$std, \$err);
 }
 
-use Test2::API;
-Test2::API::test2_add_callback_context_release(sub {
-    my $ctx = shift;
-    return if $ctx->hub->is_passing;
-    $ctx->throw("(Die On Fail)");
-});
+tests "IO handle stuff" => sub {
+    ok($CLASS->can($_), "$CLASS has the '$_' method") for qw/no_numbers handles/;
+    ok($CLASS->isa('Test2::Formatter'), "$CLASS isa Test2::Formatter");
 
-ok(my $one = Test2::Formatter::TAP->new, "Created a new instance");
-my $handles = $one->handles;
-is(@$handles, 2, "Got 2 handles");
-ok($handles->[0] != $handles->[1], "First and second handles are not the same");
-my $layers = { map {$_ => 1} PerlIO::get_layers($handles->[0]) };
+    ok(!$BEFORE_LOAD{STDOUT}, "AUTOFLUSH was not on for STDOUT before load");
+    ok(!$BEFORE_LOAD{STDERR}, "AUTOFLUSH was not on for STDERR before load");
+    my $old = select STDOUT;
+    ok($|, "AUTOFLUSH was turned on for STDOUT");
+    select STDERR;
+    ok($|, "AUTOFLUSH was turned on for STDERR");
+    select $old;
 
-if (${^UNICODE} & 2) { # 2 means STDIN
-    ok($layers->{utf8}, "'S' is set in PERL_UNICODE, or in -C, honor it, utf8 should be on")
-}
-else {
-    ok(!$layers->{utf8}, "Not utf8 by default")
-}
+    ok(my $one = $CLASS->new, "Created a new instance");
+    my $handles = $one->handles;
+    is(@$handles, 2, "Got 2 handles");
+    ok($handles->[0] != $handles->[1], "First and second handles are not the same");
+    my $layers = {map { $_ => 1 } PerlIO::get_layers($handles->[0])};
 
-$one->encoding('utf8');
-is($one->encoding, 'utf8', "Got encoding");
-$handles = $one->handles;
-is(@$handles, 2, "Got 2 handles");
-$layers = { map {$_ => 1} PerlIO::get_layers($handles->[0]) };
-ok($layers->{utf8}, "Now utf8");
+    if (${^UNICODE} & 2) {    # 2 means STDIN
+        ok($layers->{utf8}, "'S' is set in PERL_UNICODE, or in -C, honor it, utf8 should be on");
+    }
+    else {
+        ok(!$layers->{utf8}, "Not utf8 by default");
+    }
 
-my $two = Test2::Formatter::TAP->new(encoding => 'utf8');
-$handles = $two->handles;
-is(@$handles, 2, "Got 2 handles");
-$layers = { map {$_ => 1} PerlIO::get_layers($handles->[0]) };
-ok($layers->{utf8}, "Now utf8");
+    $one->encoding('utf8');
+    is($one->encoding, 'utf8', "Got encoding");
+    $handles = $one->handles;
+    is(@$handles, 2, "Got 2 handles");
+    $layers = {map { $_ => 1 } PerlIO::get_layers($handles->[OUT_STD])};
+    ok($layers->{utf8}, "Now utf8");
 
+    my $two = $CLASS->new(encoding => 'utf8');
+    $handles = $two->handles;
+    is(@$handles, 2, "Got 2 handles");
+    $layers = {map { $_ => 1 } PerlIO::get_layers($handles->[OUT_STD])};
+    ok($layers->{utf8}, "Now utf8");
 
-{
-    package My::Event;
+    $old = select $handles->[OUT_STD];
+    ok($|, "AUTOFLUSH was turned on for copy-STDOUT");
+    select select $handles->[OUT_ERR];
+    ok($|, "AUTOFLUSH was turned on for copy-STDERR");
+    select $old;
 
-    use base 'Test2::Event';
-    use Test2::Util::HashBase qw{pass name diag note};
+    ok($CLASS->hide_buffered, "TAP will hide buffered events");
+    ok(!$CLASS->no_subtest_space, "Default formatter does not have subtest space");
+};
 
-    Test2::Formatter::TAP->register_event(
-        __PACKAGE__,
-        sub {
-            my $self = shift;
-            my ($e, $num) = @_;
-            return (
-                [main::OUT_STD, "ok $num - " . $e->name . "\n"],
-                [main::OUT_ERR, "# " . $e->name . " " . $e->diag . "\n"],
-                [main::OUT_STD, "# " . $e->name . " " . $e->note . "\n"],
+tests optimal_pass => sub {
+    my ($it, $out, $err) = grabber();
+
+    my $fail = Test2::Event::Fail->new;
+    ok(!$it->print_optimal_pass($fail, 1), "Not gonna print a non-pass");
+
+    $fail = Test2::Event::Ok->new(pass => 0);
+    ok(!$it->print_optimal_pass($fail, 1), "Not gonna print a non-pass");
+
+    my $pass = Test2::Event::Pass->new();
+    $pass->add_amnesty({tag => 'foo', details => 'foo'});
+    ok(!$it->print_optimal_pass($pass, 1), "Not gonna print amnesty");
+
+    $pass = Test2::Event::Ok->new(pass => 1, todo => '');
+    ok(!$it->print_optimal_pass($pass, 1), "Not gonna print todo (even empty todo)");
+
+    $pass = Test2::Event::Ok->new(pass => 1, name => "foo # bar");
+    ok(!$it->print_optimal_pass($pass, 1), "Not gonna pritn a name with a hash");
+
+    $pass = Test2::Event::Ok->new(pass => 1, name => "foo \n bar");
+    ok(!$it->print_optimal_pass($pass, 1), "Not gonna pritn a name with a newline");
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+
+    $pass = Test2::Event::Pass->new();
+    ok($it->print_optimal_pass($pass, 1), "Printed a simple pass without a name");
+
+    $pass = Test2::Event::Pass->new(name => 'xxx');
+    ok($it->print_optimal_pass($pass, 1), "Printed a simple pass with a name");
+
+    $pass = Test2::Event::Ok->new(pass => 1, name => 'xxx');
+    ok($it->print_optimal_pass($pass, 1), "Printed an 'Ok' pass with a name");
+
+    $pass = Test2::Event::Pass->new(name => 'xxx', trace => { nested => 1 });
+    ok($it->print_optimal_pass($pass, 1), "Printed a nested pass");
+    $pass = Test2::Event::Pass->new(name => 'xxx', trace => { nested => 3 });
+    ok($it->print_optimal_pass($pass, 1), "Printed a deeply nested pass");
+
+    $pass = Test2::Event::Pass->new(name => 'xxx');
+    $it->{no_numbers} = 1;
+    ok($it->print_optimal_pass($pass, 1), "Printed a simple pass with a name");
+
+    is($$out, <<"    EOT", "Got expected TAP output");
+ok 1
+ok 1 - xxx
+ok 1 - xxx
+    ok 1 - xxx
+            ok 1 - xxx
+ok - xxx
+    EOT
+
+    is($it->{_last_fh}, $it->handles->[OUT_STD], "Set the last filehandle");
+
+    ok(!$$err, "No err output");
+};
+
+tests plan_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply([$it->plan_tap({})], [], "Nothing with no plan facet");
+
+    is_deeply(
+        [$it->plan_tap({plan => { none => 1 }})],
+        [],
+        "no-plan has no output"
+    );
+
+    is_deeply(
+        [$it->plan_tap({plan => { count => 20 }})],
+        [[OUT_STD, "1..20\n"]],
+        "Wrote the plan from, count"
+    );
+
+    is_deeply(
+        [$it->plan_tap({plan => { count => 'anything', skip => 1 }})],
+        [[OUT_STD, "1..0 # SKIP\n"]],
+        "Skip, no reason"
+    );
+
+    is_deeply(
+        [$it->plan_tap({plan => { count => 'anything', skip => 1, details => 'I said so' }})],
+        [[OUT_STD, "1..0 # SKIP I said so\n"]],
+        "Skip with reason"
+    );
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+};
+
+tests assert_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply(
+        [$it->assert_tap({assert => {pass => 1}}, 1)],
+        [[OUT_STD, "ok 1\n"]],
+        "Pass",
+    );
+
+    is_deeply(
+        [$it->assert_tap({assert => {pass => 0}}, 1)],
+        [[OUT_STD, "not ok 1\n"]],
+        "Fail",
+    );
+
+    tests amnesty => sub {
+        tests pass_no_name => sub {
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1}, amnesty => [{tag => 'skip', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "ok 1 # skip xxx\n"]],
+                "Pass with skip (with details)",
             );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1}, amnesty => [{tag => 'skip'}]}, 1)],
+                [[OUT_STD, "ok 1 # skip\n"]],
+                "Pass with skip (without details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1}, amnesty => [{tag => 'TODO', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "ok 1 # TODO xxx\n"]],
+                "Pass with TODO (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1}, amnesty => [{tag => 'TODO'}]}, 1)],
+                [[OUT_STD, "ok 1 # TODO\n"]],
+                "Pass with TODO (without details)",
+            );
+
+            is_deeply(
+                [
+                    $it->assert_tap(
+                        {
+                            assert  => {pass => 1},
+                            amnesty => [
+                                {tag => 'TODO', details => 'xxx'},
+                                {tag => 'skip', details => 'yyy'},
+                            ]
+                        },
+                        1
+                    )
+                ],
+                [[OUT_STD, "ok 1 # TODO & SKIP yyy\n"]],
+                "Pass with skip and TODO",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1}, amnesty => [{tag => 'foo', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "ok 1 # foo xxx\n"]],
+                "Pass with other amnesty",
+            );
+        };
+
+        tests pass_with_name => sub {
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => 'bob'}, amnesty => [{tag => 'skip', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "ok 1 - bob # skip xxx\n"]],
+                "Pass with skip (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => 'bob'}, amnesty => [{tag => 'skip'}]}, 1)],
+                [[OUT_STD, "ok 1 - bob # skip\n"]],
+                "Pass with skip (without details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => 'bob'}, amnesty => [{tag => 'TODO', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "ok 1 - bob # TODO xxx\n"]],
+                "Pass with TODO (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => 'bob'}, amnesty => [{tag => 'TODO'}]}, 1)],
+                [[OUT_STD, "ok 1 - bob # TODO\n"]],
+                "Pass with TODO (without details)",
+            );
+
+            is_deeply(
+                [
+                    $it->assert_tap(
+                        {
+                            assert  => {pass => 1, details => 'bob'},
+                            amnesty => [
+                                {tag => 'TODO', details => 'xxx'},
+                                {tag => 'skip', details => 'yyy'},
+                            ]
+                        },
+                        1
+                    )
+                ],
+                [[OUT_STD, "ok 1 - bob # TODO & SKIP yyy\n"]],
+                "Pass with skip and TODO",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => 'bob'}, amnesty => [{tag => 'foo', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "ok 1 - bob # foo xxx\n"]],
+                "Pass with other amnesty",
+            );
+        };
+
+        tests fail_no_name => sub {
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0}, amnesty => [{tag => 'skip', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "not ok 1 # skip xxx\n"]],
+                "Pass with skip (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0}, amnesty => [{tag => 'skip'}]}, 1)],
+                [[OUT_STD, "not ok 1 # skip\n"]],
+                "Pass with skip (without details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0}, amnesty => [{tag => 'TODO', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "not ok 1 # TODO xxx\n"]],
+                "Pass with TODO (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0}, amnesty => [{tag => 'TODO'}]}, 1)],
+                [[OUT_STD, "not ok 1 # TODO\n"]],
+                "Pass with TODO (without details)",
+            );
+
+            is_deeply(
+                [
+                    $it->assert_tap(
+                        {
+                            assert  => {pass => 0},
+                            amnesty => [
+                                {tag => 'TODO', details => 'xxx'},
+                                {tag => 'skip', details => 'yyy'},
+                            ]
+                        },
+                        1
+                    )
+                ],
+                [[OUT_STD, "not ok 1 # TODO & SKIP yyy\n"]],
+                "Pass with skip and TODO",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0}, amnesty => [{tag => 'foo', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "not ok 1 # foo xxx\n"]],
+                "Pass with other amnesty",
+            );
+        };
+
+        tests fail_with_name => sub {
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => 'bob'}, amnesty => [{tag => 'skip', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "not ok 1 - bob # skip xxx\n"]],
+                "Pass with skip (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => 'bob'}, amnesty => [{tag => 'skip'}]}, 1)],
+                [[OUT_STD, "not ok 1 - bob # skip\n"]],
+                "Pass with skip (without details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => 'bob'}, amnesty => [{tag => 'TODO', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "not ok 1 - bob # TODO xxx\n"]],
+                "Pass with TODO (with details)",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => 'bob'}, amnesty => [{tag => 'TODO'}]}, 1)],
+                [[OUT_STD, "not ok 1 - bob # TODO\n"]],
+                "Pass with TODO (without details)",
+            );
+
+            is_deeply(
+                [
+                    $it->assert_tap(
+                        {
+                            assert  => {pass => 0, details => 'bob'},
+                            amnesty => [
+                                {tag => 'TODO', details => 'xxx'},
+                                {tag => 'skip', details => 'yyy'},
+                            ]
+                        },
+                        1
+                    )
+                ],
+                [[OUT_STD, "not ok 1 - bob # TODO & SKIP yyy\n"]],
+                "Pass with skip and TODO",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => 'bob'}, amnesty => [{tag => 'foo', details => 'xxx'}]}, 1)],
+                [[OUT_STD, "not ok 1 - bob # foo xxx\n"]],
+                "Pass with other amnesty",
+            );
+        };
+    };
+
+    tests newline_and_hash => sub {
+        tests pass => sub {
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => "foo\nbar"}}, 1)],
+                [
+                    [OUT_STD, "ok 1 - foo\n"],
+                    [OUT_STD, "#      bar\n"],
+                ],
+                "Pass with newline",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => "foo\nbar"}, amnesty => [{tag => 'baz', details => 'bat'}]}, 1)],
+                [
+                    [OUT_STD, "ok 1 - foo # baz bat\n"],
+                    [OUT_STD, "#      bar\n"],
+                ],
+                "Pass with newline and amnesty",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => "foo#bar"}}, 1)],
+                [[OUT_STD, "ok 1 - foo\\#bar\n"]],
+                "Pass with hash",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => "foo#bar"}, amnesty => [{tag => 'baz', details => 'bat'}]}, 1)],
+                [[OUT_STD, "ok 1 - foo\\#bar # baz bat\n"]],
+                "Pass with hash and amnesty",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => "foo#x\nbar#boo"}}, 1)],
+                [
+                    [OUT_STD, "ok 1 - foo\\#x\n"],
+                    [OUT_STD, "#      bar#boo\n"],
+                ],
+                "Pass with newline and hash",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 1, details => "foo#x\nbar#boo"}, amnesty => [{tag => 'baz', details => 'bat'}]}, 1)],
+                [
+                    [OUT_STD, "ok 1 - foo\\#x # baz bat\n"],
+                    [OUT_STD, "#      bar#boo\n"],
+                ],
+                "Pass with newline and hash and amnesty",
+            );
+        };
+
+        tests fail => sub {
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => "foo\nbar"}}, 1)],
+                [
+                    [OUT_STD, "not ok 1 - foo\n"],
+                    [OUT_STD, "#          bar\n"],
+                ],
+                "Pass with newline",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => "foo\nbar"}, amnesty => [{tag => 'baz', details => 'bat'}]}, 1)],
+                [
+                    [OUT_STD, "not ok 1 - foo # baz bat\n"],
+                    [OUT_STD, "#          bar\n"],
+                ],
+                "Pass with newline and amnesty",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => "foo#bar"}}, 1)],
+                [[OUT_STD, "not ok 1 - foo\\#bar\n"]],
+                "Pass with hash",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => "foo#bar"}, amnesty => [{tag => 'baz', details => 'bat'}]}, 1)],
+                [[OUT_STD, "not ok 1 - foo\\#bar # baz bat\n"]],
+                "Pass with hash and amnesty",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => "foo#x\nbar#boo"}}, 1)],
+                [
+                    [OUT_STD, "not ok 1 - foo\\#x\n"],
+                    [OUT_STD, "#          bar#boo\n"],
+                ],
+                "Pass with newline and hash",
+            );
+
+            is_deeply(
+                [$it->assert_tap({assert => {pass => 0, details => "foo#x\nbar#boo"}, amnesty => [{tag => 'baz', details => 'bat'}]}, 1)],
+                [
+                    [OUT_STD, "not ok 1 - foo\\#x # baz bat\n"],
+                    [OUT_STD, "#          bar#boo\n"],
+                ],
+                "Pass with newline and hash and amnesty",
+            );
+        };
+    };
+
+    tests parent => sub {
+        is_deeply(
+            [
+                $it->assert_tap(
+                    {
+                        assert => {pass => 1, details  => 'bob'},
+                        parent => {hid  => 1, buffered => 1, children => [{assert => {pass => 1, details => 'bob2'}}]},
+                    },
+                    1
+                )
+            ],
+            [
+                [OUT_STD, "ok 1 - bob {\n"],
+                [OUT_STD, "    ok 1 - bob2\n"],
+                [OUT_STD, "}\n"],
+            ],
+            "Parent (buffered)",
+        );
+
+        is_deeply(
+            [
+                $it->assert_tap(
+                    {
+                        assert => {pass => 1, details  => 'bob'},
+                        parent => {hid  => 1, buffered => 0, children => [{assert => {pass => 1, details => 'bob2'}}]},
+                    },
+                    1
+                )
+            ],
+            [[OUT_STD, "ok 1 - bob\n"]],
+            "Parent (un-buffered)",
+        );
+    };
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+};
+
+tests debug_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply(
+        [
+            $it->debug_tap(
+                {
+                    assert => {pass  => 0},
+                    trace  => {frame => ['foo', 'foo.t', 42]},
+                },
+                1
+            )
+        ],
+        [
+            [OUT_ERR, "# Failed test at foo.t line 42.\n"],
+        ],
+        "debug tap, nameless test"
+    );
+
+    is_deeply(
+        [
+            $it->debug_tap(
+                {
+                    assert => {details => 'foo bar', pass => 0},
+                    trace => {frame => ['foo', 'foo.t', 42]},
+                },
+                1
+            )
+        ],
+        [
+            [OUT_ERR, "# Failed test 'foo bar'\n# at foo.t line 42.\n"],
+        ],
+        "Debug tap, named test"
+    );
+
+    is_deeply(
+        [
+            $it->debug_tap(
+                {
+                    assert => {details => 'foo bar', pass => 0},
+                    trace => {frame => ['foo', 'foo.t', 42], details => 'I say hi!'},
+                },
+                1
+            )
+        ],
+        [
+            [OUT_ERR, "# Failed test 'foo bar'\n# I say hi!\n"],
+        ],
+        "Debug tap with details"
+    );
+
+    is_deeply(
+        [
+            $it->debug_tap(
+                {
+                    assert => {details => 'foo bar', pass => 0},
+                },
+                1
+            )
+        ],
+        [
+            [OUT_ERR, "# Failed test 'foo bar'\n# [No trace info available]\n"],
+        ],
+        "Debug tap no trace"
+    );
+
+    is_deeply(
+        [
+            $it->debug_tap(
+                {
+                    assert => {details => 'foo bar', pass => 0},
+                    trace => {frame => ['foo', 'foo.t', 42]},
+                    amnesty => [],
+                },
+                1
+            )
+        ],
+        [
+            [OUT_ERR, "# Failed test 'foo bar'\n# at foo.t line 42.\n"],
+        ],
+        "Debug empty amnesty"
+    );
+
+    is_deeply(
+        [
+            $it->debug_tap(
+                {
+                    assert => {details => 'foo bar', pass => 0},
+                    trace => {frame => ['foo', 'foo.t', 42]},
+                    amnesty => [{tag => 'TODO', details => 'xxx'}],
+                },
+                1
+            )
+        ],
+        [
+            [OUT_STD, "# Failed test (with amnesty) 'foo bar'\n# at foo.t line 42.\n"],
+        ],
+        "Debug empty amnesty"
+    );
+
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+
+    my $event = Test2::Event::Fail->new(trace => {frame => ['foo', 'foo.pl', 42]});
+
+    {
+        local $ENV{HARNESS_ACTIVE} = 0;
+        local $ENV{HARNESS_IS_VERBOSE} = 0;
+
+        $event->{name} = 'no harness';
+        $it->write($event, 1);
+
+        $ENV{HARNESS_ACTIVE} = 0;
+        $ENV{HARNESS_IS_VERBOSE} = 1;
+
+        $event->{name} = 'no harness, but strangely verbose';
+        $it->write($event, 1);
+
+        $ENV{HARNESS_ACTIVE} = 1;
+        $ENV{HARNESS_IS_VERBOSE} = 0;
+
+        $event->{name} = 'harness, but not verbose';
+        $it->write($event, 1);
+
+        $ENV{HARNESS_ACTIVE} = 1;
+        $ENV{HARNESS_IS_VERBOSE} = 1;
+
+        $event->{name} = 'harness that is verbose';
+        $it->write($event, 1);
+    }
+
+    is($$out, <<"    EOT", "Got 4 failures to STDERR");
+not ok 1 - no harness
+not ok 1 - no harness, but strangely verbose
+not ok 1 - harness, but not verbose
+not ok 1 - harness that is verbose
+    EOT
+
+    is($$err, <<"    EOT", "Got expected diag to STDERR, newline for non-verbose harness");
+# Failed test 'no harness'
+# at foo.pl line 42.
+# Failed test 'no harness, but strangely verbose'
+# at foo.pl line 42.
+
+# Failed test 'harness, but not verbose'
+# at foo.pl line 42.
+# Failed test 'harness that is verbose'
+# at foo.pl line 42.
+    EOT
+};
+
+tests halt_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply(
+        [$it->halt_tap({trace => {nested => 1},})],
+        [],
+        "No output when nested"
+    );
+
+    is_deeply(
+        [$it->halt_tap({trace => {nested => 1, buffered => 1}})],
+        [[OUT_STD, "Bail out!\n" ]],
+        "Got tap for nested buffered bail"
+    );
+
+    is_deeply(
+        [$it->halt_tap({control => {details => ''}})],
+        [[OUT_STD, "Bail out!\n"]],
+        "Empty details"
+    );
+
+    is_deeply(
+        [$it->halt_tap({control => {details => undef}})],
+        [[OUT_STD, "Bail out!\n"]],
+        "undef details"
+    );
+
+    is_deeply(
+        [$it->halt_tap({control => {details => 0}})],
+        [[OUT_STD, "Bail out!  0\n"]],
+        "falsy details"
+    );
+
+    is_deeply(
+        [$it->halt_tap({control => {details => 'foo bar baz'}})],
+        [[OUT_STD, "Bail out!  foo bar baz\n"]],
+        "full details"
+    );
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+};
+
+tests summary_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply(
+        [$it->summary_tap({about => { no_display => 1, details => "Should not see me"}})],
+        [],
+        "no display"
+    );
+
+    is_deeply(
+        [$it->summary_tap({about => { no_display => 0, details => ""}})],
+        [],
+        "no summary"
+    );
+
+    is_deeply(
+        [$it->summary_tap({about => { no_display => 0, details => "foo bar"}})],
+        [[OUT_STD, "# foo bar\n"]],
+        "summary"
+    );
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+};
+
+tests info_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply(
+        [
+            $it->info_tap(
+                {
+                    info => [
+                        {debug => 0, details => "foo"},
+                        {debug => 1, details => "foo"},
+                        {debug => 0, details => "foo\nbar\nbaz"},
+                        {debug => 1, details => "foo\nbar\nbaz"},
+                    ]
+                }
+            )
+        ],
+        [
+            [OUT_STD, "# foo\n"],
+            [OUT_ERR, "# foo\n"],
+            [OUT_STD, "# foo\n# bar\n# baz\n"],
+            [OUT_ERR, "# foo\n# bar\n# baz\n"],
+        ],
+        "Got all infos"
+    );
+
+    my @TAP = $it->info_tap(
+        {
+            info => [
+                {debug => 0, details => {structure => 'yes'}},
+                {debug => 1, details => {structure => 'yes'}},
+            ]
         }
     );
-}
 
-my ($std, $err);
-open( my $stdh, '>', \$std ) || die "Ooops";
-open( my $errh, '>', \$err ) || die "Ooops";
+    is($TAP[0]->[0], OUT_STD, "First went to STDOUT");
+    is($TAP[1]->[0], OUT_ERR, "Second went to STDOUT");
 
-my $it = Test2::Formatter::TAP->new(
-    handles => [$stdh, $errh, $stdh],
-);
+    like($TAP[0]->[1], qr/structure.*=>.*yes/, "We see the structure in some form");
+    like($TAP[1]->[1], qr/structure.*=>.*yes/, "We see the structure in some form");
 
-$it->write(
-    My::Event->new(
-        pass => 1,
-        name => 'foo',
-        diag => 'diag',
-        note => 'note',
-        trace => 'fake',
-    ),
-    55,
-);
-
-$it->write(
-    My::Event->new(
-        pass => 1,
-        name => 'bar',
-        diag => 'diag',
-        note => 'note',
-        trace => 'fake',
-        nested => 1,
-    ),
-    1,
-);
-
-is($std, <<EOT, "Got expected TAP output to std");
-ok 55 - foo
-# foo note
-    ok 1 - bar
-    # bar note
-EOT
-
-is($err, <<EOT, "Got expected TAP output to err");
-# foo diag
-    # bar diag
-EOT
-
-$it = undef;
-close($stdh);
-close($errh);
-
-my ($trace, $ok, $diag, $plan, $bail);
-
-my $fmt = Test2::Formatter::TAP->new;
-sub before_each {
-    # Make sure there is a fresh trace object for each group
-    $trace = Test2::Util::Trace->new(
-        frame => ['main_foo', 'foo.t', 42, 'main_foo::flubnarb'],
-    );
-}
-
-tests bail => sub {
-    my $bail = Test2::Event::Bail->new(
-        trace => $trace,
-        reason => 'evil',
-    );
-
-    is_deeply(
-        [$fmt->event_tap($bail, 1)],
-        [[OUT_STD, "Bail out!  evil\n" ]],
-        "Got tap"
-    );
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
 };
 
-tests diag => sub {
-    my $diag = Test2::Event::Diag->new(
-        trace => $trace,
-        message => 'foo',
+tests error_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    # Data::Dumper behavior can change from version to version, specifically
+    # the Data::Dumper in 5.8.9 produces different whitespace from other
+    # versions.
+    require Data::Dumper;
+    my $dumper = Data::Dumper->new([{structure => 'yes'}])->Indent(2)->Terse(1)->Pad('# ')->Useqq(1)->Sortkeys(1);
+    chomp(my $struct = $dumper->Dump);
+
+    is_deeply(
+        [
+            $it->error_tap(
+                {
+                    errors => [
+                        {details => "foo"},
+                        {details => "foo\nbar\nbaz"},
+                        {details => {structure => 'yes'}},
+                    ]
+                }
+            )
+        ],
+        [
+            [OUT_ERR, "# foo\n"],
+            [OUT_ERR, "# foo\n# bar\n# baz\n"],
+            [OUT_ERR, "$struct\n"],
+        ],
+        "Got all errors"
+    );
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
+};
+
+
+tests event_tap => sub {
+    my ($it, $out, $err) = grabber();
+
+    is_deeply(
+        [$it->event_tap({plan => {count => 5}, assert => {pass => 1}}, 1)],
+        [
+            [OUT_STD, "1..5\n"],
+            [OUT_STD, "ok 1\n"],
+        ],
+        "Plan then assertion for first assertion"
+    );
+
+    $it->{made_assertion} = 1;
+
+    is_deeply(
+        [$it->event_tap({plan => {count => 5}, assert => {pass => 1}}, 2)],
+        [
+            [OUT_STD, "ok 2\n"],
+            [OUT_STD, "1..5\n"],
+        ],
+        "Assertion then plan for additional assertions"
+    );
+
+    $it->{made_assertion} = 0;
+    is_deeply(
+        [
+            $it->event_tap(
+                {
+                    plan   => {count    => 5},
+                    assert => {pass     => 0},
+                    errors => [{details => "foo"}],
+                    info   => [
+                        {tag => 'DIAG', debug => 1, details => 'xxx'},
+                        {tag => 'NOTE', debug => 0, details => 'yyy'},
+                    ],
+                    control => {halt    => 1, details => 'blah'},
+                    about   => {details => 'xyz'},
+                },
+                1
+            )
+        ],
+        [
+            [OUT_STD, "1..5\n"],
+            [OUT_STD, "not ok 1\n"],
+            [OUT_ERR, "# Failed test [No trace info available]\n"],
+            [OUT_ERR, "# foo\n"],
+            [OUT_ERR, "# xxx\n"],
+            [OUT_STD, "# yyy\n"],
+            [OUT_STD, "Bail out!  blah\n"],
+        ],
+        "All facets displayed"
     );
 
     is_deeply(
-        [$fmt->event_tap($diag, 1)],
+        [
+            $it->event_tap(
+                {
+                    plan  => {count   => 5},
+                    about => {details => 'xyz'},
+                },
+                1
+            )
+        ],
+        [[OUT_STD, "1..5\n"]],
+        "Plan blocks details"
+    );
+
+    is_deeply(
+        [
+            $it->event_tap(
+                {
+                    assert => {pass    => 0, no_debug => 1},
+                    about  => {details => 'xyz'},
+                },
+                1
+            )
+        ],
+        [[OUT_STD, "not ok 1\n"]],
+        "Assert blocks details"
+    );
+
+    is_deeply(
+        [
+            $it->event_tap(
+                {
+                    errors => [{details => "foo"}],
+                    about  => {details  => 'xyz'},
+                },
+                1
+            )
+        ],
         [[OUT_ERR, "# foo\n"]],
-        "Got tap"
-    );
-
-    $diag->set_message("foo\n");
-    is_deeply(
-        [$fmt->event_tap($diag, 1)],
-        [[OUT_ERR, "# foo\n"]],
-        "Only 1 newline"
-    );
-
-    $diag->set_message("foo\nbar\nbaz");
-    is_deeply(
-        [$fmt->event_tap($diag, 1)],
-        [[OUT_ERR, "# foo\n# bar\n# baz\n"]],
-        "All lines have proper prefix"
-    );
-};
-
-tests exception => sub {
-    my $exception = Test2::Event::Exception->new(
-        trace => $trace,
-        error => "evil at lake_of_fire.t line 6\n",
+        "Error blocks details"
     );
 
     is_deeply(
-        [$fmt->event_tap($exception, 1)],
-        [[OUT_ERR, "evil at lake_of_fire.t line 6\n" ]],
-        "Got tap"
-    );
-};
-
-tests note => sub {
-    my $note = Test2::Event::Note->new(
-        trace => $trace,
-        message => 'foo',
-    );
-
-    is_deeply(
-        [$fmt->event_tap($note, 1)],
-        [[OUT_STD, "# foo\n"]],
-        "Got tap"
-    );
-
-    $note->set_message("foo\n");
-    is_deeply(
-        [$fmt->event_tap($note, 1)],
-        [[OUT_STD, "# foo\n"]],
-        "Only 1 newline"
-    );
-
-    $note->set_message("foo\nbar\nbaz");
-    is_deeply(
-        [$fmt->event_tap($note, 1)],
-        [[OUT_STD, "# foo\n# bar\n# baz\n"]],
-        "All lines have proper prefix"
-    );
-};
-
-tests special_characters => sub {
-    my $ok = Test2::Event::Ok->new(
-        trace => $trace,
-        name  => 'nothing special',
-        pass  => 1,
-    );
-
-    is_deeply(
-        [$fmt->event_tap($ok, 1)],
-        [[OUT_STD, "ok 1 - nothing special\n"]],
-        "Got regular ok"
-    );
-
-    $ok = Test2::Event::Ok->new(
-        trace => $trace,
-        name  => 'just a \\ slash',
-        pass  => 1,
-    );
-
-    is_deeply(
-        [$fmt->event_tap($ok, 1)],
-        [[OUT_STD, "ok 1 - just a \\ slash\n"]],
-        "Do not escape slashes without a '#'"
-    );
-
-    $ok = Test2::Event::Ok->new(
-        trace => $trace,
-        name  => 'a \\ slash and a # hash',
-        pass  => 1,
-    );
-
-    is_deeply(
-        [$fmt->event_tap($ok, 1)],
-        [[OUT_STD, "ok 1 - a \\\\ slash and a \\# hash\n"]],
-        "Escape # and any slashes already present"
-    );
-
-    $ok = Test2::Event::Ok->new(
-        trace => $trace,
-        name  => "a \\ slash and a # hash\nand \\ some # newlines\nlike this # \\",
-        pass  => 1,
-    );
-
-    is_deeply(
-        [$fmt->event_tap($ok, 1)],
         [
-            [OUT_STD, "ok 1 - a \\\\ slash and a \\# hash\n"],
-            [OUT_STD, "#      and \\ some # newlines\n"],
-            [OUT_STD, "#      like this # \\\n"],
+            $it->event_tap(
+                {
+                    info => [
+                        {tag => 'DIAG', debug => 1, details => 'xxx'},
+                        {tag => 'NOTE', debug => 0, details => 'yyy'},
+                    ],
+                    about => {details => 'xyz'},
+                },
+                1
+            )
         ],
-        "Escape # and any slashes already present, and split newlines, do not escape the newlines"
-    );
-
-    $ok = Test2::Event::Ok->new(
-        trace => $trace,
-        name  => "Nothing special until the end \\\nfoo \\ bar",
-        pass  => 1,
+        [
+            [OUT_ERR, "# xxx\n"],
+            [OUT_STD, "# yyy\n"],
+        ],
+        "Info blocks details"
     );
 
     is_deeply(
-        [$fmt->event_tap($ok, 1)],
         [
-            [OUT_STD, "ok 1 - Nothing special until the end \\\\\n"],
-            [OUT_STD, "#      foo \\ bar\n"],
+            $it->event_tap(
+                {
+                    control => {halt    => 1, details => 'blah'},
+                    about   => {details => 'xyz'},
+                },
+                1
+            )
         ],
-        "Special case, escape things if last character of the first line is a \\"
+        [[OUT_STD, "Bail out!  blah\n"]],
+        "Halt blocks details"
     );
 
+    is_deeply(
+        [$it->event_tap({about => {details => 'xyz'}}, 1)],
+        [[OUT_STD, "# xyz\n"]],
+        "Fallback to summary"
+    );
+
+    ok(!$$out, "No std output yet");
+    ok(!$$err, "No err output yet");
 };
 
-for my $pass (1, 0) {
-    local $ENV{HARNESS_IS_VERBOSE} = 1;
-    tests name_and_number => sub {
-        my $ok = Test2::Event::Ok->new(trace => $trace, pass => $pass, name => 'foo');
-        my @tap = $fmt->event_tap($ok, 7);
-        is_deeply(
-            \@tap,
-            [
-                [OUT_STD, ($pass ? 'ok' : 'not ok') . " 7 - foo\n"],
-            ],
-            "Got expected output"
-        );
-    };
+tests write => sub {
+    my ($it, $out, $err) = grabber();
 
-    tests no_number => sub {
-        my $ok = Test2::Event::Ok->new(trace => $trace, pass => $pass, name => 'foo');
-        my @tap = $fmt->event_tap($ok, );
-        is_deeply(
-            \@tap,
-            [
-                [OUT_STD, ($pass ? 'ok' : 'not ok') . " - foo\n"],
-            ],
-            "Got expected output"
-        );
-    };
-
-    tests no_name => sub {
-        my $ok = Test2::Event::Ok->new(trace => $trace, pass => $pass);
-        my @tap = $fmt->event_tap($ok, 7);
-        is_deeply(
-            \@tap,
-            [
-                [OUT_STD, ($pass ? 'ok' : 'not ok') . " 7\n"],
-            ],
-            "Got expected output"
-        );
-    };
-
-    tests todo => sub {
-        my $ok = Test2::Event::Ok->new(trace => $trace, pass => $pass);
-        $ok->set_todo('b');
-        my @tap = $fmt->event_tap($ok, 7);
-        is_deeply(
-            \@tap,
-            [
-                [OUT_STD, ($pass ? 'ok' : 'not ok') . " 7 # TODO b\n"],
-            ],
-            "Got expected output"
-        );
-
-        $ok->set_todo("");
-
-        @tap = $fmt->event_tap($ok, 7);
-        is_deeply(
-            \@tap,
-            [
-                [OUT_STD, ($pass ? 'ok' : 'not ok') . " 7 # TODO\n"],
-            ],
-            "Got expected output"
-        );
-    };
-};
-
-tests plan => sub {
-    my $plan = Test2::Event::Plan->new(
-        trace => $trace,
-        max => 100,
-    );
-
-    is_deeply(
-        [$fmt->event_tap($plan, 1)],
-        [[OUT_STD, "1..100\n"]],
-        "Got tap"
-    );
-
-    $plan->set_max(0);
-    $plan->set_directive('SKIP');
-    $plan->set_reason('foo');
-    is_deeply(
-        [$fmt->event_tap($plan, 1)],
-        [[OUT_STD, "1..0 # SKIP foo\n"]],
-        "Got tap for skip_all"
-    );
-
-    $plan = Test2::Event::Plan->new(
-        trace => $trace,
-        max => 0,
-        directive => 'skip_all',
-    );
-    is_deeply(
-        [$fmt->event_tap($plan)],
-        [[OUT_STD, "1..0 # SKIP\n"]],
-        "SKIP without reason"
-    );
-
-    $plan = Test2::Event::Plan->new(
-        trace => $trace,
-        max => 0,
-        directive => 'no_plan',
-    );
-    is_deeply(
-        [$fmt->event_tap($plan)],
-        [],
-        "NO PLAN"
-    );
-
-    $plan = Test2::Event::Plan->new(
-        trace => $trace,
-        max => 0,
-        directive => 'skip_all',
-        reason => "Foo\nBar\nBaz",
-    );
-    is_deeply(
-        [$fmt->event_tap($plan)],
-        [
-            [OUT_STD, "1..0 # SKIP Foo\n# Bar\n# Baz\n"],
-        ],
-        "Multi-line reason for skip"
-    );
-};
-
-tests subtest => sub {
-    my $st = 'Test2::Event::Subtest';
-
-    my $one = $st->new(
-        trace      => $trace,
-        pass       => 1,
-        buffered   => 1,
-        name       => 'foo',
-        subtest_id => '1-1-1',
-    );
-
-    is_deeply(
-        [$fmt->event_tap($one, 5)],
-        [
-            [OUT_STD, "ok 5 - foo {\n"],
-            [OUT_STD, "}\n"],
-        ],
-        "Got Buffered TAP output"
-    );
-
-    $one->set_buffered(0);
-    is_deeply(
-        [$fmt->event_tap($one, 5)],
-        [
-            [OUT_STD, "ok 5 - foo\n"],
-        ],
-        "Got Unbuffered TAP output"
-    );
-
-    $one = $st->new(
-        trace     => $trace,
-        pass      => 0,
-        buffered  => 1,
-        name      => 'bar',
-        subtest_id => '1-1-1',
-        subevents => [
-            Test2::Event::Ok->new(trace => $trace, name => 'first',  pass => 1),
-            Test2::Event::Ok->new(trace => $trace, name => 'second', pass => 0),
-            Test2::Event::Ok->new(trace => $trace, name => 'third',  pass => 1),
-
-            Test2::Event::Diag->new(trace => $trace, message => 'blah blah'),
-
-            Test2::Event::Plan->new(trace => $trace, max => 3),
-        ],
-    );
+    local $ENV{HARNESS_ACTIVE}     = 0;
+    local $ENV{HARNESS_IS_VERBOSE} = 0;
 
     {
-        local $ENV{HARNESS_IS_VERBOSE};
-        is_deeply(
-            [$fmt->event_tap($one, 5)],
-            [
-                [OUT_STD, "not ok 5 - bar {\n"],
-                [OUT_STD, "    ok 1 - first\n"],
-                [OUT_STD, "    not ok 2 - second\n"],
-                [OUT_STD, "    ok 3 - third\n"],
-                [OUT_ERR, "    # blah blah\n"],
-                [OUT_STD, "    1..3\n"],
-                [OUT_STD, "}\n"],
-            ],
-            "Got Buffered TAP output (non-verbose)"
+        local $\ = 'oops1';
+        local $, = 'oops2';
+        $it->write(
+            undef, 1,
+            {
+                plan   => {count    => 5},
+                assert => {pass     => 0},
+                errors => [{details => "foo"}],
+                info   => [
+                    {tag => 'DIAG', debug => 1, details => 'xxx'},
+                    {tag => 'NOTE', debug => 0, details => 'yyy'},
+                ],
+                control => {halt    => 1, details => 'blah'},
+                about   => {details => 'xyz'},
+            },
         );
+
+        $it->write(undef, 2, {assert => {pass => 1}, trace => {nested => 1}});
     }
 
-    {
-        local $ENV{HARNESS_IS_VERBOSE} = 1;
-        is_deeply(
-            [$fmt->event_tap($one, 5)],
-            [
-                [OUT_STD, "not ok 5 - bar {\n"],
-                [OUT_STD, "    ok 1 - first\n"],
-                [OUT_STD, "    not ok 2 - second\n"],
-                [OUT_STD, "    ok 3 - third\n"],
-                [OUT_ERR, "    # blah blah\n"],
-                [OUT_STD, "    1..3\n"],
-                [OUT_STD, "}\n"],
-            ],
-            "Got Buffered TAP output (verbose)"
-        );
-    }
+    is($it->{_last_fh}, $it->handles->[OUT_STD], "Set last handle");
 
-    {
-        local $ENV{HARNESS_IS_VERBOSE};
-        $one->set_buffered(0);
-        is_deeply(
-            [$fmt->event_tap($one, 5)],
-            [
-                # In unbuffered TAP the subevents are rendered outside of this.
-                [OUT_STD, "not ok 5 - bar\n"],
-            ],
-            "Got Unbuffered TAP output (non-verbose)"
-        );
-    }
+    is($$out, <<"    EOT", "STDOUT is as expected");
+1..5
+not ok 1
+# yyy
+Bail out!  blah
+    ok 2
+    EOT
 
-    {
-        local $ENV{HARNESS_IS_VERBOSE} = 1;
-        $one->set_buffered(0);
-        is_deeply(
-            [$fmt->event_tap($one, 5)],
-            [
-                # In unbuffered TAP the subevents are rendered outside of this.
-                [OUT_STD, "not ok 5 - bar\n"],
-            ],
-            "Got Unbuffered TAP output (verbose)"
-        );
-    }
+    is($$err, <<"    EOT", "STDERR is as expected");
+# Failed test [No trace info available]
+# foo
+# xxx
+    EOT
 };
-
-tests skip => sub {
-    my $skip = Test2::Event::Skip->new(trace => $trace, pass => 1, name => 'foo', reason => 'xxx');
-    my @tap = $fmt->event_tap($skip, 7);
-    is_deeply(
-        \@tap,
-        [
-            [OUT_STD, "ok 7 - foo # skip xxx\n"],
-        ],
-        "Passing Skip"
-    );
-
-    $skip->set_pass(0);
-    @tap = $fmt->event_tap($skip, 7);
-    is_deeply(
-        \@tap,
-        [
-            [OUT_STD, "not ok 7 - foo # skip xxx\n"],
-        ],
-        "Failling Skip"
-    );
-
-    $skip->set_todo("xxx");
-    @tap = $fmt->event_tap($skip, 7);
-    is_deeply(
-        \@tap,
-        [
-            [OUT_STD, "not ok 7 - foo # TODO & SKIP xxx\n"],
-        ],
-        "Todo Skip"
-    );
-};
-
-tests version => sub {
-    require Test2::Event::TAP::Version;
-    my $ver = Test2::Event::TAP::Version->new(
-        trace => $trace,
-        version => '2',
-    );
-
-    is_deeply(
-        [$fmt->event_tap($ver, 1)],
-        [[OUT_STD, "TAP version 2\n"]],
-        "Got tap"
-    );
-};
-
 
 done_testing;

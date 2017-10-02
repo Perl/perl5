@@ -17,27 +17,33 @@ use Test::Builder::NoOutput;
 
 use Test::More tests => 12;
 
+# TB Methods expect to be wrapped.
+my $ok   = sub { shift->ok(@_) };
+my $plan = sub { shift->plan(@_) };
+my $diag = sub { shift->diag(@_) };
+my $finalize = sub { shift->finalize(@_) };
+
 # Formatting may change if we're running under Test::Harness.
 $ENV{HARNESS_ACTIVE} = 0;
 
 {
     my $tb = Test::Builder::NoOutput->create;
 
-    $tb->plan( tests => 7 );
+    $tb->$plan( tests => 7 );
     for( 1 .. 3 ) {
-        $tb->ok( $_, "We're on $_" );
-        $tb->diag("We ran $_");
+        $tb->$ok( $_, "We're on $_" );
+        $tb->$diag("We ran $_");
     }
     {
         my $indented = $tb->child;
-        $indented->plan('no_plan');
-        $indented->ok( 1, "We're on 1" );
-        $indented->ok( 1, "We're on 2" );
-        $indented->ok( 1, "We're on 3" );
-        $indented->finalize;
+        $indented->$plan('no_plan');
+        $indented->$ok( 1, "We're on 1" );
+        $indented->$ok( 1, "We're on 2" );
+        $indented->$ok( 1, "We're on 3" );
+        $indented->$finalize;
     }
     for( 7, 8, 9 ) {
-        $tb->ok( $_, "We're on $_" );
+        $tb->$ok( $_, "We're on $_" );
     }
 
     is $tb->read, <<"END", 'Output should nest properly';
@@ -61,27 +67,27 @@ END
 {
     my $tb = Test::Builder::NoOutput->create;
 
-    $tb->plan('no_plan');
+    $tb->$plan('no_plan');
     for( 1 .. 1 ) {
-        $tb->ok( $_, "We're on $_" );
-        $tb->diag("We ran $_");
+        $tb->$ok( $_, "We're on $_" );
+        $tb->$diag("We ran $_");
     }
     {
         my $indented = $tb->child;
-        $indented->plan('no_plan');
-        $indented->ok( 1, "We're on 1" );
+        $indented->$plan('no_plan');
+        $indented->$ok( 1, "We're on 1" );
         {
             my $indented2 = $indented->child('with name');
-            $indented2->plan( tests => 2 );
-            $indented2->ok( 1, "We're on 2.1" );
-            $indented2->ok( 1, "We're on 2.1" );
-            $indented2->finalize;
+            $indented2->$plan( tests => 2 );
+            $indented2->$ok( 1, "We're on 2.1" );
+            $indented2->$ok( 1, "We're on 2.1" );
+            $indented2->$finalize;
         }
-        $indented->ok( 1, 'after child' );
-        $indented->finalize;
+        $indented->$ok( 1, 'after child' );
+        $indented->$finalize;
     }
     for(7) {
-        $tb->ok( $_, "We're on $_" );
+        $tb->$ok( $_, "We're on $_" );
     }
 
     $tb->_ending;
@@ -107,20 +113,20 @@ END
 
     {
         my $child = $tb->child('expected to fail');
-        $child->plan( tests => 3 );
-        $child->ok(1);
-        $child->ok(0);
-        $child->ok(3);
-        $child->finalize;
+        $child->$plan( tests => 3 );
+        $child->$ok(1);
+        $child->$ok(0);
+        $child->$ok(3);
+        $child->$finalize;
     }
 
     {
         my $child = $tb->child('expected to pass');
-        $child->plan( tests => 3 );
-        $child->ok(1);
-        $child->ok(2);
-        $child->ok(3);
-        $child->finalize;
+        $child->$plan( tests => 3 );
+        $child->$ok(1);
+        $child->$ok(2);
+        $child->$ok(3);
+        $child->$finalize;
     }
     is $tb->read, <<"END", 'Previous child failures should not force subsequent failures';
     1..3
@@ -144,7 +150,7 @@ END
     my $child = $tb->child('one');
     is $child->{$_}, $tb->{$_}, "The child should copy the ($_) filehandle"
         foreach qw{Out_FH Todo_FH Fail_FH};
-    $child->finalize;
+    $child->$finalize;
 }
 {
     my $tb    = Test::Builder::NoOutput->create;
@@ -153,9 +159,9 @@ END
 
     can_ok $tb, 'name';
     is $child->name, 'one', '... but child names should be whatever we set them to';
-    $child->finalize;
+    $child->$finalize;
     $child = $tb->child;
-    $child->finalize;
+    $child->$finalize;
 }
 # Skip all subtests
 {
@@ -163,7 +169,7 @@ END
 
     {
         my $child = $tb->child('skippy says he loves you');
-        eval { $child->plan( skip_all => 'cuz I said so' ) };
+        eval { $child->$plan( skip_all => 'cuz I said so' ) };
     }
     subtest 'skip all', sub {
         plan skip_all => 'subtest with skip_all';
@@ -175,13 +181,13 @@ END
 {
 #line 204
     my $tb = Test::Builder::NoOutput->create;
-    $tb->plan( tests => 1 );
+    $tb->$plan( tests => 1 );
     my $child = $tb->child;
-    $child->plan( tests => 1 );
+    $child->$plan( tests => 1 );
     $child->todo_start( 'message' );
-    $child->ok( 0 );
+    $child->$ok( 0 );
     $child->todo_end;
-    $child->finalize;
+    $child->$finalize;
     $tb->_ending;
     is $tb->read, <<"END", 'TODO tests should not make the parent test fail';
 1..1
@@ -193,9 +199,9 @@ END
 }
 {
     my $tb = Test::Builder::NoOutput->create;
-    $tb->plan( tests => 1 );
+    $tb->$plan( tests => 1 );
     my $child = $tb->child;
-    $child->finalize;
+    $child->$finalize;
     $tb->_ending;
     my $expected = <<"END";
 1..1

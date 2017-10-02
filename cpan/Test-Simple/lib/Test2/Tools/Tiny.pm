@@ -10,7 +10,7 @@ use Test2::API qw/context run_subtest test2_stack/;
 use Test2::Hub::Interceptor();
 use Test2::Hub::Interceptor::Terminator();
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 our @EXPORT = qw{
@@ -21,9 +21,9 @@ our @EXPORT = qw{
 sub ok($;$@) {
     my ($bool, $name, @diag) = @_;
     my $ctx = context();
-    $ctx->ok($bool, $name, \@diag);
-    $ctx->release;
-    return $bool ? 1 : 0;
+
+    return $ctx->pass_and_release($name) if $bool;
+    return $ctx->fail_and_release($name, @diag);
 }
 
 sub is($$;$@) {
@@ -41,18 +41,16 @@ sub is($$;$@) {
         $bool = 1;
     }
 
-    unless ($bool) {
-        $got  = '*NOT DEFINED*' unless defined $got;
-        $want = '*NOT DEFINED*' unless defined $want;
-        unshift @diag => (
-            "GOT:      $got",
-            "EXPECTED: $want",
-        );
-    }
+    return $ctx->pass_and_release($name) if $bool;
 
-    $ctx->ok($bool, $name, \@diag);
-    $ctx->release;
-    return $bool;
+    $got  = '*NOT DEFINED*' unless defined $got;
+    $want = '*NOT DEFINED*' unless defined $want;
+    unshift @diag => (
+        "GOT:      $got",
+        "EXPECTED: $want",
+    );
+
+    return $ctx->fail_and_release($name, @diag);
 }
 
 sub isnt($$;$@) {
@@ -70,12 +68,12 @@ sub isnt($$;$@) {
         $bool = 0;
     }
 
+    return $ctx->pass_and_release($name) if $bool;
+
     unshift @diag => "Strings are the same (they should not be)"
         unless $bool;
 
-    $ctx->ok($bool, $name, \@diag);
-    $ctx->release;
-    return $bool;
+    return $ctx->fail_and_release($name, @diag);
 }
 
 sub like($$;$@) {
@@ -95,9 +93,8 @@ sub like($$;$@) {
         unshift @diag => "Got an undefined value.";
     }
 
-    $ctx->ok($bool, $name, \@diag);
-    $ctx->release;
-    return $bool;
+    return $ctx->pass_and_release($name) if $bool;
+    return $ctx->fail_and_release($name, @diag);
 }
 
 sub unlike($$;$@) {
@@ -118,9 +115,8 @@ sub unlike($$;$@) {
         unshift @diag => "Got an undefined value.";
     }
 
-    $ctx->ok($bool, $name, \@diag);
-    $ctx->release;
-    return $bool;
+    return $ctx->pass_and_release($name) if $bool;
+    return $ctx->fail_and_release($name, @diag);
 }
 
 sub is_deeply($$;$@) {
@@ -129,6 +125,10 @@ sub is_deeply($$;$@) {
 
     no warnings 'once';
     require Data::Dumper;
+
+    # Otherwise numbers might be unquoted
+    local $Data::Dumper::Useperl  = 1;
+
     local $Data::Dumper::Sortkeys = 1;
     local $Data::Dumper::Deparse  = 1;
     local $Data::Dumper::Freezer  = 'XXX';
@@ -147,11 +147,8 @@ sub is_deeply($$;$@) {
 
     my $bool = $g eq $w;
 
-    my $diff;
-
-    $ctx->ok($bool, $name, [$diff ? $diff : ($g, $w), @diag]);
-    $ctx->release;
-    return $bool;
+    return $ctx->pass_and_release($name) if $bool;
+    return $ctx->fail_and_release($name, $g, $w, @diag);
 }
 
 sub diag {
@@ -183,16 +180,13 @@ sub todo {
     my $filter = $hub->pre_filter(
         sub {
             my ($active_hub, $event) = @_;
-
-            # Turn a diag into a note
-            return Test2::Event::Note->new(%$event) if ref($event) eq 'Test2::Event::Diag';
-
-            # Set todo on ok's
-            if ($hub == $active_hub && $event->isa('Test2::Event::Ok')) {
-                $event->set_todo($reason);
-                $event->set_effective_pass(1);
+            if ($active_hub == $hub) {
+                $event->set_todo($reason) if $event->can('set_todo');
+                $event->add_amnesty([todo => $reason]);
             }
-
+            else {
+                $event->add_amnesty({tag => 'todo', details => $reason, inherited => 1});
+            }
             return $event;
         },
         inherit => 1,
@@ -237,7 +231,9 @@ sub tests {
     my ($name, $code) = @_;
     my $ctx = context();
 
-    before_each() if __PACKAGE__->can('before_each');
+    my $be = caller->can('before_each');
+
+    $be->($name) if $be;
 
     my $bool = run_subtest($name, $code, 1);
 
@@ -415,7 +411,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

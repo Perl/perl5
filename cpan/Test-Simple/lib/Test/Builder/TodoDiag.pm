@@ -2,11 +2,18 @@ package Test::Builder::TodoDiag;
 use strict;
 use warnings;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 BEGIN { require Test2::Event::Diag; our @ISA = qw(Test2::Event::Diag) }
 
 sub diagnostics { 0 }
+
+sub facet_data {
+    my $self = shift;
+    my $out = $self->SUPER::facet_data();
+    $out->{info}->[0]->{debug} = 0;
+    return $out;
+}
 
 1;
 
@@ -51,7 +58,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

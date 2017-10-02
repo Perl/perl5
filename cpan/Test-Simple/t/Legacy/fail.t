@@ -20,19 +20,24 @@ local $ENV{HARNESS_ACTIVE} = 0;
 use Test::Builder;
 use Test::Builder::NoOutput;
 
+# TB methods expect to be wrapped
+my $ok           = sub { shift->ok(@_) };
+my $plan         = sub { shift->plan(@_) };
+my $done_testing = sub { shift->done_testing(@_) };
+
 my $Test = Test::Builder->new;
 
 # Set up a builder to record some failing tests.
 {
     my $tb = Test::Builder::NoOutput->create;
-    $tb->plan( tests => 5 );
+    $tb->$plan( tests => 5 );
 
 #line 28
-    $tb->ok( 1, 'passing' );
-    $tb->ok( 2, 'passing still' );
-    $tb->ok( 3, 'still passing' );
-    $tb->ok( 0, 'oh no!' );
-    $tb->ok( 0, 'damnit' );
+    $tb->$ok( 1, 'passing' );
+    $tb->$ok( 2, 'passing still' );
+    $tb->$ok( 3, 'still passing' );
+    $tb->$ok( 0, 'oh no!' );
+    $tb->$ok( 0, 'damnit' );
     $tb->_ending;
 
     $Test->is_eq($tb->read('out'), <<OUT);
@@ -52,5 +57,5 @@ OUT
 # Looks like you failed 2 tests of 5.
 ERR
 
-    $Test->done_testing(2);
+    $Test->$done_testing(2);
 }

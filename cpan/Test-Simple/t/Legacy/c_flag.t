@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-STREAM
+# HARNESS-NO-PRELOAD
 
 # Test::More should not print anything when Perl is only doing
 # a compile as with the -c flag or B::Deparse or perlcc.

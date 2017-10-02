@@ -29,7 +29,7 @@ tests no_eval => sub {
 
 tests in_require => sub {
     my $events = intercept {
-        require 't/lib/SkipAll.pm';
+        require './t/lib/SkipAll.pm';
         die "Should not see this: $@";
     };
 

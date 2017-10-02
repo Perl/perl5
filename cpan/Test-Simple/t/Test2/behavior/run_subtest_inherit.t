@@ -17,9 +17,9 @@ is($e->trace->line, $line, "subtest is at correct line");
 my $plan = pop @{$e->subevents};
 ok($plan->isa('Test2::Event::Plan'), "Removed plan");
 for my $se (@{$e->subevents}) {
-    is($se->trace->file, $file, "subtest event ($se->{name}) is at correct file");
-    is($se->trace->line, $line, "subtest event ($se->{name}) is at correct line");
-    ok($se->pass, "subtest event ($se->{name}) passed");
+    is($se->trace->file, $file, "subtest event is at correct file");
+    is($se->trace->line, $line, "subtest event is at correct line");
+    ok($se->facets->{assert}->pass, "subtest event passed");
 }
 
 
@@ -37,9 +37,9 @@ is($e->trace->line, $line, "subtest is at correct line");
 $plan = pop @{$e->subevents};
 ok($plan->isa('Test2::Event::Plan'), "Removed plan");
 for my $se (@{$e->subevents}) {
-    ok($se->trace->file ne $file, "subtest event ($se->{name}) is not in our file");
-    ok($se->trace->line ne $line, "subtest event ($se->{name}) is not on our line");
-    ok($se->pass, "subtest event ($se->{name}) passed");
+    ok($se->trace->file ne $file, "subtest event is not in our file");
+    ok($se->trace->line ne $line, "subtest event is not on our line");
+    ok($se->facets->{assert}->{pass}, "subtest event passed");
 }
 
 done_testing;

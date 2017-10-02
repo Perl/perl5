@@ -2,14 +2,14 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 
 use Carp qw/confess croak longmess/;
 use Scalar::Util qw/weaken blessed/;
 use Test2::Util qw/get_tid try pkg_to_file get_tid/;
 
-use Test2::Util::Trace();
+use Test2::EventFacet::Trace();
 use Test2::API();
 
 # Preload some key event types
@@ -19,7 +19,7 @@ my %LOADED = (
         my $file = "Test2/Event/$_.pm";
         require $file unless $INC{$file};
         ( $pkg => $pkg, $_ => $pkg )
-    } qw/Ok Diag Note Info Plan Bail Exception Waiting Skip Subtest/
+    } qw/Ok Diag Note Plan Bail Exception Waiting Skip Subtest Pass Fail/
 );
 
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
@@ -155,9 +155,7 @@ sub do_in_context {
     # We need to update the pid/tid and error vars.
     my $clone = $self->snapshot;
     @$clone{+ERRNO, +EVAL_ERROR, +CHILD_ERROR} = ($!, $@, $?);
-    $clone->{+TRACE} = $clone->{+TRACE}->snapshot;
-    $clone->{+TRACE}->set_pid($$);
-    $clone->{+TRACE}->set_tid(get_tid());
+    $clone->{+TRACE} = $clone->{+TRACE}->snapshot(pid => $$, tid => get_tid());
 
     my $hub = $clone->{+HUB};
     my $hid = $hub->hid;
@@ -202,6 +200,13 @@ sub alert {
     $self->trace->alert($msg);
 }
 
+sub send_event_and_release {
+    my $self = shift;
+    my $out = $self->send_event(@_);
+    $self->release;
+    return $out;
+}
+
 sub send_event {
     my $self  = shift;
     my $event = shift;
@@ -209,12 +214,19 @@ sub send_event {
 
     my $pkg = $LOADED{$event} || $self->_parse_event($event);
 
-    my $e = $pkg->new(
-        trace => $self->{+TRACE}->snapshot,
-        %args,
-    );
+    my $e;
+    {
+        local $Carp::CarpLevel = $Carp::CarpLevel + 1;
+        $e = $pkg->new(
+            trace => $self->{+TRACE}->snapshot,
+            %args,
+        );
+    }
 
-    ${$self->{+_ABORTED}}++ if $self->{+_ABORTED} && defined $e->terminate;
+    if ($self->{+_ABORTED}) {
+        my $f = $e->facet_data;
+        ${$self->{+_ABORTED}}++ if $f->{control}->{halt} || defined($f->{control}->{terminate}) || defined($e->terminate);
+    }
     $self->{+HUB}->send($e);
 }
 
@@ -225,10 +237,79 @@ sub build_event {
 
     my $pkg = $LOADED{$event} || $self->_parse_event($event);
 
+    local $Carp::CarpLevel = $Carp::CarpLevel + 1;
     $pkg->new(
         trace => $self->{+TRACE}->snapshot,
         %args,
     );
+}
+
+sub pass {
+    my $self = shift;
+    my ($name) = @_;
+
+    my $e = bless(
+        {
+            trace => bless({%{$self->{+TRACE}}}, 'Test2::EventFacet::Trace'),
+            name  => $name,
+        },
+        "Test2::Event::Pass"
+    );
+
+    $self->{+HUB}->send($e);
+    return $e;
+}
+
+sub pass_and_release {
+    my $self = shift;
+    my ($name) = @_;
+
+    my $e = bless(
+        {
+            trace => bless({%{$self->{+TRACE}}}, 'Test2::EventFacet::Trace'),
+            name  => $name,
+        },
+        "Test2::Event::Pass"
+    );
+
+    $self->{+HUB}->send($e);
+    $self->release;
+    return 1;
+}
+
+sub fail {
+    my $self = shift;
+    my ($name, @diag) = @_;
+
+    my $e = bless(
+        {
+            trace => bless({%{$self->{+TRACE}}}, 'Test2::EventFacet::Trace'),
+            name  => $name,
+        },
+        "Test2::Event::Fail"
+    );
+
+    $e->add_info({tag => 'DIAG', debug => 1, details => $_}) for @diag;
+    $self->{+HUB}->send($e);
+    return $e;
+}
+
+sub fail_and_release {
+    my $self = shift;
+    my ($name, @diag) = @_;
+
+    my $e = bless(
+        {
+            trace => bless({%{$self->{+TRACE}}}, 'Test2::EventFacet::Trace'),
+            name  => $name,
+        },
+        "Test2::Event::Fail"
+    );
+
+    $e->add_info({tag => 'DIAG', debug => 1, details => $_}) for @diag;
+    $self->{+HUB}->send($e);
+    $self->release;
+    return 0;
 }
 
 sub ok {
@@ -238,7 +319,7 @@ sub ok {
     my $hub = $self->{+HUB};
 
     my $e = bless {
-        trace => bless( {%{$self->{+TRACE}}}, 'Test2::Util::Trace'),
+        trace => bless( {%{$self->{+TRACE}}}, 'Test2::EventFacet::Trace'),
         pass  => $pass,
         name  => $name,
     }, 'Test2::Event::Ok';
@@ -250,14 +331,7 @@ sub ok {
     $self->failure_diag($e);
 
     if ($on_fail && @$on_fail) {
-        for my $of (@$on_fail) {
-            if (ref($of) eq 'CODE' || (blessed($of) && $of->can('render'))) {
-                $self->info($of, diagnostics => 1);
-            }
-            else {
-                $self->diag($of);
-            }
-        }
+        $self->diag($_) for @$on_fail;
     }
 
     return $e;
@@ -266,13 +340,6 @@ sub ok {
 sub failure_diag {
     my $self = shift;
     my ($e) = @_;
-
-    # This behavior is inherited from Test::Builder which injected a newline at
-    # the start of the first diagnostics when the harness is active, but not
-    # verbose. This is important to keep the diagnostics from showing up
-    # appended to the existing line, which is hard to read. In a verbose
-    # harness there is no need for this.
-    my $prefix = $ENV{HARNESS_ACTIVE} && !$ENV{HARNESS_IS_VERBOSE} ? "\n" : "";
 
     # Figure out the debug info, this is typically the file name and line
     # number, but can also be a custom message. If no trace object is provided
@@ -284,8 +351,8 @@ sub failure_diag {
     # Create the initial diagnostics. If the test has a name we put the debug
     # info on a second line, this behavior is inherited from Test::Builder.
     my $msg = defined($name)
-        ? qq[${prefix}Failed test '$name'\n$debug.\n]
-        : qq[${prefix}Failed test $debug.\n];
+        ? qq[Failed test '$name'\n$debug.\n]
+        : qq[Failed test $debug.\n];
 
     $self->diag($msg);
 }
@@ -300,12 +367,6 @@ sub skip {
         pass => 1,
         @extra,
     );
-}
-
-sub info {
-    my $self = shift;
-    my ($renderer, %params) = @_;
-    $self->send_event('Info', renderer => $renderer, %params);
 }
 
 sub note {
@@ -509,7 +570,7 @@ current one to which all events should be sent.
 
 =item $dbg = $ctx->trace()
 
-This will return the L<Test2::Util::Trace> instance used by the context.
+This will return the L<Test2::EventFacet::Trace> instance used by the context.
 
 =item $ctx->do_in_context(\&code, @args);
 
@@ -555,9 +616,92 @@ The value of C<$@> when the context was created.
 
 =over 4
 
+=item $event = $ctx->pass()
+
+=item $event = $ctx->pass($name)
+
+This will send and return an L<Test2::Event::Pass> event. You may optionally
+provide a C<$name> for the assertion.
+
+The L<Test2::Event::Pass> is a specially crafted and optimized event, using
+this will help the performance of passing tests.
+
+=item $true = $ctx->pass_and_release()
+
+=item $true = $ctx->pass_and_release($name)
+
+This is a combination of C<pass()> and C<release()>. You can use this if you do
+not plan to do anything with the context after sending the event. This helps
+write more clear and compact code.
+
+    sub shorthand {
+        my ($bool, $name) = @_;
+        my $ctx = context();
+        return $ctx->pass_and_release($name) if $bool;
+
+        ... Handle a failure ...
+    }
+
+    sub longform {
+        my ($bool, $name) = @_;
+        my $ctx = context();
+
+        if ($bool) {
+            $ctx->pass($name);
+            $ctx->release;
+            return 1;
+        }
+
+        ... Handle a failure ...
+    }
+
+=item my $event = $ctx->fail()
+
+=item my $event = $ctx->fail($name)
+
+=item my $event = $ctx->fail($name, @diagnostics)
+
+This lets you send an L<Test2::Event::Fail> event. You may optionally provide a
+C<$name> and C<@diagnostics> messages.
+
+=item my $false = $ctx->fail_and_release()
+
+=item my $false = $ctx->fail_and_release($name)
+
+=item my $false = $ctx->fail_and_release($name, @diagnostics)
+
+This is a combination of C<fail()> and C<release()>. This can be used to write
+clearer and shorter code.
+
+    sub shorthand {
+        my ($bool, $name) = @_;
+        my $ctx = context();
+        return $ctx->fail_and_release($name) unless $bool;
+
+        ... Handle a success ...
+    }
+
+    sub longform {
+        my ($bool, $name) = @_;
+        my $ctx = context();
+
+        unless ($bool) {
+            $ctx->pass($name);
+            $ctx->release;
+            return 1;
+        }
+
+        ... Handle a success ...
+    }
+
+
 =item $event = $ctx->ok($bool, $name)
 
 =item $event = $ctx->ok($bool, $name, \@on_fail)
+
+B<NOTE:> Use of this method is discouraged in favor of C<pass()> and C<fail()>
+which produce L<Test2::Event::Pass> and L<Test2::Event::Fail> events. These
+newer event types are faster and less crufty.
 
 This will create an L<Test2::Event::Ok> object for you. If C<$bool> is false
 then an L<Test2::Event::Diag> event will be sent as well with details about the
@@ -565,13 +709,7 @@ failure. If you do not want automatic diagnostics you should use the
 C<send_event()> method directly.
 
 The third argument C<\@on_fail>) is an optional set of diagnostics to be sent in
-the event of a test failure. Plain strings will be sent as
-L<Test2::Event::Diag> events. References will be used to construct
-L<Test2::Event::Info> events with C<< diagnostics => 1 >>.
-
-=item $event = $ctx->info($renderer, diagnostics => $bool, %other_params)
-
-Send an L<Test2::Event::Info>.
+the event of a test failure.
 
 =item $event = $ctx->note($message)
 
@@ -616,6 +754,22 @@ or
 
 This is the same as C<send_event()>, except it builds and returns the event
 without sending it.
+
+=item $event = $ctx->send_event_and_release($Type, %parameters)
+
+This is a combination of C<send_event()> and C<release()>.
+
+    sub shorthand {
+        my $ctx = context();
+        return $ctx->send_event_and_release(Pass => { name => 'foo' });
+    }
+
+    sub longform {
+        my $ctx = context();
+        my $event = $ctx->send_event(Pass => { name => 'foo' });
+        $ctx->release;
+        return $event;
+    }
 
 =back
 
@@ -729,7 +883,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

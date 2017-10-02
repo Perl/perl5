@@ -78,13 +78,18 @@ warnings_like(qr/Use of uninitialized value.* at \(eval in cmp_ok\) $Filename li
 
 my $tb = Test::More->builder;
 
-my $err = '';
-$tb->failure_output(\$err);
-diag(undef);
-$tb->reset_outputs;
+SKIP: {
+    skip("Test cannot be run with this formatter", 2)
+        unless $tb->{Stack}->top->format->isa('Test::Builder::Formatter');
 
-is( $err, "# undef\n" );
-no_warnings;
+    my $err = '';
+    $tb->failure_output(\$err);
+    diag(undef);
+    $tb->reset_outputs;
+
+    is( $err, "# undef\n" );
+    no_warnings;
+}
 
 
 $tb->maybe_regex(undef);

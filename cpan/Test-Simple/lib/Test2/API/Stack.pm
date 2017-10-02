@@ -2,7 +2,7 @@ package Test2::API::Stack;
 use strict;
 use warnings;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 
 use Test2::Hub();
@@ -27,7 +27,7 @@ sub new_hub {
     }
     else {
         require Test2::API;
-        $hub->format(Test2::API::test2_formatter()->new)
+        $hub->format(Test2::API::test2_formatter()->new_root)
             unless $hub->format || exists($params{formatter});
 
         my $ipc = Test2::API::test2_ipc();
@@ -210,7 +210,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

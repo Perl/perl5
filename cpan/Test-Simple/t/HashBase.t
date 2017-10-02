@@ -90,7 +90,7 @@ BEGIN {
 
     package
         main::HBase::Wrapped;
-    use Test2::Util::HashBase qw/foo bar/;
+    use Test2::Util::HashBase qw/foo bar dup/;
 
     my $foo = __PACKAGE__->can('foo');
     no warnings 'redefine';
@@ -107,7 +107,7 @@ BEGIN {
     package
         main::HBase::Wrapped::Inherit;
     use base 'main::HBase::Wrapped';
-    use Test2::Util::HashBase;
+    use Test2::Util::HashBase qw/baz dup/;
 }
 
 my $o = main::HBase::Wrapped::Inherit->new(foo => 1);
@@ -151,6 +151,84 @@ like(exception { $ro->set_bar('xxx') }, qr/'bar' is read-only/, "Cannot set bar"
 
 my $warnings = warnings { is($ro->set_baz('xxx'), 'xxx', 'set baz') };
 like($warnings->[0], qr/set_baz\(\) is deprecated/, "Deprecation warning");
+
+
+
+is_deeply(
+    [Test2::Util::HashBase::attr_list('main::HBase::Wrapped::Inherit')],
+    [qw/foo bar dup baz/],
+    "Got a list of attributes in order starting from base class, duplicates removed",
+);
+
+my $x = main::HBase::Wrapped::Inherit->new(foo => 1, baz => 2);
+is($x->foo, 1, "set foo via pairs");
+is($x->baz, 2, "set baz via pairs");
+
+# Now with hashref
+my $y = main::HBase::Wrapped::Inherit->new({foo => 1, baz => 2});
+is($y->foo, 1, "set foo via hashref");
+is($y->baz, 2, "set baz via hashref");
+
+# Now with hashref
+my $z = main::HBase::Wrapped::Inherit->new([
+    1, # foo
+    2, # bar
+    3, # dup
+    4, # baz
+]);
+is($z->foo, 1, "set foo via arrayref");
+is($z->baz, 4, "set baz via arrayref");
+
+like(
+    exception { main::HBase::Wrapped::Inherit->new([1 .. 10]) },
+    qr/Too many arguments for main::HBase::Wrapped::Inherit constructor/,
+    "Too many args in array form"
+);
+
+
+my $CAN_COUNT = 0;
+my $CAN_COUNT2 = 0;
+my $INIT_COUNT = 0;
+BEGIN {
+    $INC{'Object/HashBase/Test/HBase3.pm'} = __FILE__;
+    package
+        main::HBase3;
+    use Test2::Util::HashBase qw/foo/;
+
+    sub can {
+        my $self = shift;
+        $CAN_COUNT++;
+        $self->SUPER::can(@_);
+    }
+
+    $INC{'Object/HashBase/Test/HBase4.pm'} = __FILE__;
+    package
+        main::HBase4;
+    use Test2::Util::HashBase qw/foo/;
+
+    sub can {
+        my $self = shift;
+        $CAN_COUNT2++;
+        $self->SUPER::can(@_);
+    }
+
+    sub init { $INIT_COUNT++ }
+}
+
+is($CAN_COUNT, 0, "->can has not been called yet");
+my $it = main::HBase3->new;
+is($CAN_COUNT, 1, "->can has been called once to check for init");
+$it = main::HBase3->new;
+is($CAN_COUNT, 1, "->can was not called again, we cached it");
+
+is($CAN_COUNT2, 0, "->can has not been called yet");
+is($INIT_COUNT, 0, "->init has not been called yet");
+$it = main::HBase4->new;
+is($CAN_COUNT2, 1, "->can has been called once to check for init");
+is($INIT_COUNT, 1, "->init has been called once");
+$it = main::HBase4->new;
+is($CAN_COUNT2, 1, "->can was not called again, we cached it");
+is($INIT_COUNT, 2, "->init has been called again");
 
 done_testing;
 

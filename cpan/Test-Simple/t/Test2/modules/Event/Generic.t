@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test2::Tools::Tiny;
-use Test2::Util::Trace;
+use Test2::EventFacet::Trace;
 
 use Test2::API qw/context intercept/;
 

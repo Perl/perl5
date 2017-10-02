@@ -5,6 +5,11 @@ use Test2::IPC;
 use Test2::Tools::Tiny;
 use Test2::Util qw/CAN_THREAD CAN_REALLY_FORK USE_THREADS get_tid/;
 
+ok(1, "Just to get things initialized.");
+
+# This test relies on TAP being the default formatter for non-canon instances
+$ENV{T2_FORMATTER} = 'TAP';
+
 my $CLASS = 'Test2::API::Instance';
 
 my $one = $CLASS->new;
@@ -19,6 +24,7 @@ is_deeply(
 
         ipc_polling => undef,
         ipc_drivers => [],
+        ipc_timeout => 30,
 
         formatters => [],
 
@@ -47,6 +53,7 @@ is_deeply(
 
         ipc_polling => undef,
         ipc_drivers => [],
+        ipc_timeout => 30,
 
         formatters => [],
 
@@ -153,7 +160,7 @@ if (CAN_REALLY_FORK) {
     die "Failed to fork!" unless defined $pid;
     unless($pid) { exit 0 }
 
-    is($one->_ipc_wait, 0, "No errors");
+    is(Test2::API::Instance::_ipc_wait, 0, "No errors");
 
     $pid = fork;
     die "Failed to fork!" unless defined $pid;
@@ -161,7 +168,7 @@ if (CAN_REALLY_FORK) {
     my @warnings;
     {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
-        is($one->_ipc_wait, 255, "Process exited badly");
+        is(Test2::API::Instance::_ipc_wait, 255, "Process exited badly");
     }
     like($warnings[0], qr/Process .* did not exit cleanly \(status: 255\)/, "Warn about exit");
 }
@@ -171,7 +178,7 @@ if (CAN_THREAD && $] ge '5.010') {
     $one->reset;
 
     threads->new(sub { 1 });
-    is($one->_ipc_wait, 0, "No errors");
+    is(Test2::API::Instance::_ipc_wait, 0, "No errors");
 
     if (threads->can('error')) {
         threads->new(sub {
@@ -182,7 +189,7 @@ if (CAN_THREAD && $] ge '5.010') {
         my @warnings;
         {
             local $SIG{__WARN__} = sub { push @warnings => @_ };
-            is($one->_ipc_wait, 255, "Thread exited badly");
+            is(Test2::API::Instance::_ipc_wait, 255, "Thread exited badly");
         }
         like($warnings[0], qr/Thread .* did not end cleanly: xxx/, "Warn about exit");
     }
@@ -351,7 +358,7 @@ if (CAN_REALLY_FORK) {
 
 {
     my $ctx = bless {
-        trace => Test2::Util::Trace->new(frame => ['Foo::Bar', 'Foo/Bar.pm', 42, 'xxx']),
+        trace => Test2::EventFacet::Trace->new(frame => ['Foo::Bar', 'Foo/Bar.pm', 42, 'xxx']),
         hub => Test2::Hub->new(),
     }, 'Test2::API::Context';
     $one->contexts->{1234} = $ctx;

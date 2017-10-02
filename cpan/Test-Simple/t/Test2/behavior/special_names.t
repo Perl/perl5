@@ -16,6 +16,8 @@ use Test2::API qw/test2_stack/;
 test2_stack->top;
 
 my $temp_hub = test2_stack->new_hub();
+require Test2::Formatter::TAP;
+$temp_hub->format(Test2::Formatter::TAP->new);
 
 my $ok = capture {
     ok(1);

@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-STREAM
+# HARNESS-NO-PRELOAD
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -23,6 +25,9 @@ BEGIN {
 }
 
 use Test::More;
+unless (Test::Builder->new->{Stack}->top->format->isa('Test::Builder::Formatter')) {
+    plan skip_all => 'Test cannot be run using this formatter';
+}
 
 if( !$have_perlio ) {
     plan skip_all => "Don't have PerlIO";

@@ -256,6 +256,14 @@ internals.
 
 Fixed in version: 0.15
 
+=item Test::More::Prefix
+
+Worked by applying a role that wrapped C<< Test::Builder->_print_comment >>.
+Fixed by adding an event filter that modifies the message instead when running
+under Test2.
+
+Fixed in version: 0.007
+
 =back
 
 =head2 STILL BROKEN
@@ -297,14 +305,6 @@ The author admits the module is crazy, and he is awaiting a stable release of
 something new (Test2) to completely rewrite it in a sane way.
 
 Still broken as of version: 0.32
-
-=item Test::More::Prefix
-
-The current version, 0.005 is broken. A patch has been applied in git, and
-released in 0.006, but a version issue with 0.006 prevents its installation.
-
-Still broken as of version: 0.005
-Potentially fixed in version: 0.006 (not installable)
 
 =item Net::BitTorrent
 
@@ -502,7 +502,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

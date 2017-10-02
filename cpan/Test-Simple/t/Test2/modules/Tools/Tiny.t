@@ -82,23 +82,23 @@ my ($diag, $note) = @$other_events;
 ok($plan->isa('Test2::Event::Plan'), "got plan");
 is($plan->max, 8, "planned for 8 oks");
 
-ok($ok->isa('Test2::Event::Ok'), "got 'ok' result");
-is($ok->pass, 0, "'ok' test failed");
+ok($ok->isa('Test2::Event::Fail'), "got 'ok' result");
+is($ok->facets->{assert}->pass, 0, "'ok' test failed");
 
-ok($is->isa('Test2::Event::Ok'), "got 'is' result");
-is($is->pass, 0, "'is' test failed");
+ok($is->isa('Test2::Event::Fail'), "got 'is' result");
+is($ok->facets->{assert}->pass, 0, "test failed");
 
-ok($isnt->isa('Test2::Event::Ok'), "got 'isnt' result");
-is($isnt->pass, 0, "'isnt' test failed");
+ok($isnt->isa('Test2::Event::Fail'), "got 'isnt' result");
+is($ok->facets->{assert}->pass, 0, "test failed");
 
-ok($like->isa('Test2::Event::Ok'), "got 'like' result");
-is($like->pass, 0, "'like' test failed");
+ok($like->isa('Test2::Event::Fail'), "got 'like' result");
+is($ok->facets->{assert}->pass, 0, "test failed");
 
-ok($unlike->isa('Test2::Event::Ok'), "got 'unlike' result");
-is($unlike->pass, 0, "'unlike' test failed");
+ok($unlike->isa('Test2::Event::Fail'), "got 'unlike' result");
+is($ok->facets->{assert}->pass, 0, "test failed");
 
-ok($is_deeply->isa('Test2::Event::Ok'), "got 'is_deeply' result");
-is($is_deeply->pass, 0, "'is_deeply' test failed");
+ok($is_deeply->isa('Test2::Event::Fail'), "got 'is_deeply' result");
+is($ok->facets->{assert}->pass, 0, "test failed");
 
 ok($diag->isa('Test2::Event::Diag'), "got 'diag' result");
 is($diag->message, "Testing Diag", "got diag message");
@@ -129,7 +129,7 @@ $events = intercept {
 
 @$events = grep {!$_->isa('Test2::Event::Diag')} @$events;
 is(@$events, 5, "5 events");
-ok(!$_->pass, "undef test - should not pass") for @$events;
+ok(!$_->facets->{assert}->pass, "undef test - should not pass") for @$events;
 
 sub tool { context() };
 
@@ -142,7 +142,7 @@ $events = intercept {
     $ictx = tool();
     $ictx->ok(1, 'pass');
     $ictx->ok(0, 'fail');
-    my $trace = Test2::Util::Trace->new(
+    my $trace = Test2::EventFacet::Trace->new(
         frame => [ __PACKAGE__, __FILE__, __LINE__],
     );
     $ictx->hub->finalize($trace, 1);
@@ -194,7 +194,7 @@ $events = intercept {
 };
 
 is(@$events, 2, "2 events");
-ok($events->[0]->isa('Test2::Event::Ok'), "got ok");
+ok($events->[0]->isa('Test2::Event::Pass'), "got a pass");
 ok($events->[1]->isa('Test2::Event::Plan'), "finalize was called");
 
 $events = intercept {
@@ -204,7 +204,7 @@ $events = intercept {
 };
 
 is(@$events, 2, "2 events");
-ok($events->[0]->isa('Test2::Event::Ok'), "got ok");
+ok($events->[0]->isa('Test2::Event::Pass'), "got a pass");
 ok($events->[1]->isa('Test2::Event::Plan'), "finalize was called (only 1 plan)");
 
 done_testing;

@@ -5,7 +5,7 @@ use Test2::Tools::Tiny;
 use Test2::Event::Subtest;
 my $st = 'Test2::Event::Subtest';
 
-my $trace = Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'xxx']);
+my $trace = Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'xxx']);
 my $one = $st->new(
     trace     => $trace,
     pass      => 1,
@@ -26,5 +26,32 @@ is($one->summary, "foo (TODO: foo)", "simple summary + TODO + Reason");
 $one->set_todo(undef);
 $one->set_name('');
 is($one->summary, "Nameless Subtest", "unnamed summary");
+
+require Test2::Event::Pass;
+push @{$one->subevents} => Test2::Event::Pass->new(name => 'xxx');
+
+my $facet_data = $one->facet_data;
+ok($facet_data->{about}, "got parent facet data");
+
+is_deeply(
+    $facet_data->{parent},
+    {
+        hid      => "1-1-1",
+        buffered => 1,
+        children => [
+            {
+                about => {
+                    details => 'pass',
+                    package => 'Test2::Event::Pass'
+                },
+                assert => {
+                    details => 'xxx',
+                    pass    => 1
+                },
+            }
+        ],
+    },
+    "Got facet data"
+);
 
 done_testing;

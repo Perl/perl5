@@ -5,7 +5,9 @@ use lib 't/lib';
 
 # We're going to need to override exit() later
 BEGIN {
-    *CORE::GLOBAL::exit = sub(;$) {
+    require Test2::Hub;
+    no warnings 'redefine';
+    *Test2::Hub::terminate = sub {
         my $status = @_ ? 0 : shift;
         CORE::exit $status;
     };
@@ -61,21 +63,18 @@ use Test::Builder::NoOutput;
     ok $tb->is_passing, "  and after the ending";
 }
 
-
 # is_passing() vs skip_all
 {
     my $tb = Test::Builder::NoOutput->create;
 
     {
         no warnings 'redefine';
-        local *CORE::GLOBAL::exit = sub {
-            return 1;
-        };
+        local *Test2::Hub::terminate = sub { 1 };
+
         $tb->plan( "skip_all" );
     }
     ok $tb->is_passing, "Passing with skip_all";
 }
-
 
 # is_passing() vs done_testing(#)
 {

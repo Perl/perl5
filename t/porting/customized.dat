@@ -15,6 +15,5 @@ Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916
 Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5facf5b3b
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
-Test::Simple cpan/Test-Simple/t/Test2/modules/IPC/Driver/Files.t 59648b5745fda06177d81c2c21f55b09f6e129bb
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
 version cpan/version/lib/version.pm bee369df1bd84e09107a90d72ec12c38bcb97cce

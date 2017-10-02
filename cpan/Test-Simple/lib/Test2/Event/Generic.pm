@@ -5,14 +5,14 @@ use warnings;
 use Carp qw/croak/;
 use Scalar::Util qw/reftype/;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
 use Test2::Util::HashBase;
 
 my @FIELDS = qw{
     causes_fail increments_count diagnostics no_display callback terminate
-    global sets_plan summary
+    global sets_plan summary facet_data
 };
 my %DEFAULTS = (
     causes_fail      => 0,
@@ -35,15 +35,24 @@ sub init {
 
 for my $field (@FIELDS) {
     no strict 'refs';
-    my $stash = \%{__PACKAGE__ . "::"};
 
     *$field = sub { exists $_[0]->{$field} ? $_[0]->{$field} : () }
-        unless defined $stash->{$field}
-            && defined *{$stash->{$field}}{CODE};
+        unless exists &{$field};
 
     *{"set_$field"} = sub { $_[0]->{$field} = $_[1] }
-        unless defined $stash->{"set_$field"}
-            && defined *{$stash->{"set_$field"}}{CODE};
+        unless exists &{"set_$field"};
+}
+
+sub can {
+    my $self = shift;
+    my ($name) = @_;
+    return $self->SUPER::can($name) unless $name eq 'callback';
+    return $self->{callback} || \&Test2::Event::callback;
+}
+
+sub facet_data {
+    my $self = shift;
+    return $self->{facet_data} || $self->SUPER::facet_data();
 }
 
 sub summary {
@@ -157,6 +166,14 @@ a published reusable event subclass.
 
 =over 4
 
+=item $e->facet_data($data)
+
+=item $data = $e->facet_data
+
+Get or set the facet data (see L<Test2::Event>). If no facet_data is set then
+C<< Test2::Event->facet_data >> will be called to produce facets from the other
+data.
+
 =item $e->callback($hub)
 
 Call the custom callback if one is set, otherwise this does nothing.
@@ -253,7 +270,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

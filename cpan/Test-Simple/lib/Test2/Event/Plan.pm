@@ -2,7 +2,7 @@ package Test2::Event::Plan;
 use strict;
 use warnings;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
@@ -46,17 +46,6 @@ sub sets_plan {
     );
 }
 
-sub callback {
-    my $self = shift;
-    my ($hub) = @_;
-
-    $hub->plan($self->{+DIRECTIVE} || $self->{+MAX});
-
-    return unless $self->{+DIRECTIVE};
-
-    $hub->set_skip_reason($self->{+REASON} || 1) if $self->{+DIRECTIVE} eq 'SKIP';
-}
-
 sub terminate {
     my $self = shift;
     # On skip_all we want to terminate the hub
@@ -78,6 +67,26 @@ sub summary {
 
     return "Plan is '$directive'";
 }
+
+sub facet_data {
+    my $self = shift;
+
+    my $out = $self->common_facet_data;
+
+    $out->{control}->{terminate} = $self->{+DIRECTIVE} eq 'SKIP' ? 0 : undef
+        unless defined $out->{control}->{terminate};
+
+    $out->{plan} = {count => $self->{+MAX}};
+    $out->{plan}->{details} = $self->{+REASON} if defined $self->{+REASON};
+
+    if (my $dir = $self->{+DIRECTIVE}) {
+        $out->{plan}->{skip} = 1 if $dir eq 'SKIP';
+        $out->{plan}->{none} = 1 if $dir eq 'NO PLAN';
+    }
+
+    return $out;
+}
+
 
 1;
 
@@ -150,7 +159,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -53,13 +53,12 @@ ok($one->isa('Test2::Hub'), "inheritence");
     my $ok = Test2::Event::Ok->new(
         pass => 1,
         name => 'blah',
-        trace => Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'xxx']),
+        trace => Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'xxx']),
     );
 
     def is => ($one->process($ok), 'P!', "processed");
     def is => ($ran, 1, "ran the mocked process");
     def is => ($event, $ok, "got our event");
-    def is => ($event->nested, 3, "nested was set");
     def is => ($one->bailed_out, undef, "did not bail");
 
     $ran = 0;
@@ -67,20 +66,18 @@ ok($one->isa('Test2::Hub'), "inheritence");
 
     my $bail = Test2::Event::Bail->new(
         message => 'blah',
-        trace => Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'xxx']),
+        trace => Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'xxx']),
     );
 
     def is => ($one->process($bail), 'P!', "processed");
     def is => ($ran, 1, "ran the mocked process");
     def is => ($event, $bail, "got our event");
-    def is => ($event->nested, 3, "nested was set");
-    def is => ($one->bailed_out, $event, "bailed");
 }
 
 do_def;
 
 my $skip = Test2::Event::Plan->new(
-    trace => Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__], pid => $$, tid => get_tid),
+    trace => Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__], pid => $$, tid => get_tid),
     directive => 'SKIP',
     reason => 'foo',
 );

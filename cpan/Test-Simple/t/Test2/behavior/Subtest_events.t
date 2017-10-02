@@ -10,8 +10,8 @@ my $events = intercept {
     run_subtest('blah', $code, 'buffered');
 };
 
-ok(!$events->[0]->in_subtest, "main event is not inside a subtest");
+ok(!$events->[0]->trace->nested, "main event is not inside a subtest");
 ok($events->[0]->subtest_id, "Got subtest id");
-ok($events->[0]->subevents->[0]->in_subtest, "nested events are in the subtest");
+is($events->[0]->subevents->[0]->trace->hid, $events->[0]->subtest_id, "nested events are in the subtest");
 
 done_testing;

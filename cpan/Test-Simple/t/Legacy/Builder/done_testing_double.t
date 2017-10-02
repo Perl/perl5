@@ -16,18 +16,22 @@ use Test::Builder::NoOutput;
 
 my $tb = Test::Builder::NoOutput->create;
 
+# $tb methods expect to be wrapped in at least 1 sub
+sub done_testing { $tb->done_testing(@_) }
+sub ok { $tb->ok(@_) }
+
 {
     # Normalize test output
     local $ENV{HARNESS_ACTIVE};
 
-    $tb->ok(1);
-    $tb->ok(1);
-    $tb->ok(1);
+    ok(1);
+    ok(1);
+    ok(1);
 
 #line 24
-    $tb->done_testing(3);
-    $tb->done_testing;
-    $tb->done_testing;
+    done_testing(3);
+    done_testing;
+    done_testing;
 }
 
 my $Test = Test::Builder->new;

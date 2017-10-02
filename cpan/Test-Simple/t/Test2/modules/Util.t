@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 
+use Config qw/%Config/;
+
 use Test2::Tools::Tiny;
 use Test2::Util qw/
     try
@@ -12,6 +14,8 @@ use Test2::Util qw/
     CAN_FORK
     CAN_THREAD
     CAN_REALLY_FORK
+
+    CAN_SIGSYS
 
     IS_WIN32
 /;
@@ -38,5 +42,20 @@ CAN_REALLY_FORK();
 IS_WIN32();
 
 is(IS_WIN32(), ($^O eq 'MSWin32') ? 1 : 0, "IS_WIN32 is correct ($^O)");
+
+my %sigs = map {$_ => 1} split /\s+/, $Config{sig_name};
+if ($sigs{SYS}) {
+    ok(CAN_SIGSYS, "System has SIGSYS");
+}
+else {
+    ok(!CAN_SIGSYS, "System lacks SIGSYS");
+}
+
+my $check_for_sig_sys = Test2::Util->can('_check_for_sig_sys');
+ok($check_for_sig_sys->("FOO SYS BAR"), "Found SIGSYS in the middle");
+ok($check_for_sig_sys->("SYS FOO BAR"), "Found SIGSYS at start");
+ok($check_for_sig_sys->("FOO BAR SYS"), "Found SIGSYS at end");
+ok(!$check_for_sig_sys->("FOO SYSX BAR"), "SYSX is not SYS");
+ok(!$check_for_sig_sys->("FOO XSYS BAR"), "XSYS is not SYS");
 
 done_testing;

@@ -1,48 +1,32 @@
 package Test2::Formatter::TAP;
 use strict;
 use warnings;
-require PerlIO;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
+
+use Test2::Util qw/clone_io/;
 
 use Test2::Util::HashBase qw{
-    no_numbers handles _encoding
+    no_numbers handles _encoding _last_fh
+    -made_assertion
 };
 
 sub OUT_STD() { 0 }
 sub OUT_ERR() { 1 }
 
-use Carp qw/croak/;
-
 BEGIN { require Test2::Formatter; our @ISA = qw(Test2::Formatter) }
 
-my %CONVERTERS = (
-    'Test2::Event::Ok'           => 'event_ok',
-    'Test2::Event::Skip'         => 'event_skip',
-    'Test2::Event::Note'         => 'event_note',
-    'Test2::Event::Diag'         => 'event_diag',
-    'Test2::Event::Bail'         => 'event_bail',
-    'Test2::Event::Exception'    => 'event_exception',
-    'Test2::Event::Subtest'      => 'event_subtest',
-    'Test2::Event::Plan'         => 'event_plan',
-    'Test2::Event::TAP::Version' => 'event_version',
-);
-
-# Initial list of converters are safe for direct hash access cause we control them.
-my %SAFE_TO_ACCESS_HASH = %CONVERTERS;
-
-sub register_event {
-    my $class = shift;
-    my ($type, $convert) = @_;
-    croak "Event type is a required argument" unless $type;
-    croak "Event type '$type' already registered" if $CONVERTERS{$type};
-    croak "The second argument to register_event() must be a code reference or method name"
-        unless $convert && (ref($convert) eq 'CODE' || $class->can($convert));
-    $CONVERTERS{$type} = $convert;
+sub _autoflush {
+    my($fh) = pop;
+    my $old_fh = select $fh;
+    $| = 1;
+    select $old_fh;
 }
 
 _autoflush(\*STDOUT);
 _autoflush(\*STDERR);
+
+sub hide_buffered { 1 }
 
 sub init {
     my $self = shift;
@@ -53,7 +37,18 @@ sub init {
     }
 }
 
-sub hide_buffered { 1 }
+sub _open_handles {
+    my $self = shift;
+
+    require Test2::API;
+    my $out = clone_io(Test2::API::test2_stdout());
+    my $err = clone_io(Test2::API::test2_stderr());
+
+    _autoflush($out);
+    _autoflush($err);
+
+    return [$out, $err];
+}
 
 sub encoding {
     my $self = shift;
@@ -82,15 +77,21 @@ if ($^C) {
     *write = sub {};
 }
 sub write {
-    my ($self, $e, $num) = @_;
+    my ($self, $e, $num, $f) = @_;
 
-    my $type = ref($e);
+    # The most common case, a pass event with no amnesty and a normal name.
+    return if $self->print_optimal_pass($e, $num);
 
-    my $converter = $CONVERTERS{$type} || 'event_other';
-    my @tap = $self->$converter($e, $self->{+NO_NUMBERS} ? undef : $num) or return;
+    $f ||= $e->facet_data;
 
+    $self->encoding($f->{control}->{encoding}) if $f->{control}->{encoding};
+
+    my @tap = $self->event_tap($f, $num) or return;
+
+    $self->{+MADE_ASSERTION} = 1 if $f->{assert};
+
+    my $nesting = $f->{trace}->{nested} || 0;
     my $handles = $self->{+HANDLES};
-    my $nesting = ($SAFE_TO_ACCESS_HASH{$type} ? $e->{nested} : $e->nested) || 0;
     my $indent = '    ' x $nesting;
 
     # Local is expensive! Only do it if we really need to.
@@ -101,59 +102,137 @@ sub write {
         next unless $msg;
         my $io = $handles->[$hid] or next;
 
+        print $io "\n"
+            if $ENV{HARNESS_ACTIVE}
+            && !$ENV{HARNESS_IS_VERBOSE}
+            && $hid == OUT_ERR
+            && $self->{+_LAST_FH} != $io
+            && $msg =~ m/^#\s*Failed test /;
+
         $msg =~ s/^/$indent/mg if $nesting;
         print $io $msg;
+        $self->{+_LAST_FH} = $io;
     }
 }
 
-sub _open_handles {
-    my $self = shift;
+sub print_optimal_pass {
+    my ($self, $e, $num) = @_;
 
-    my %seen;
-    open(my $out, '>&', STDOUT) or die "Can't dup STDOUT:  $!";
-    binmode($out, join(":", "", "raw", grep { $_ ne 'unix' and !$seen{$_}++ } PerlIO::get_layers(STDOUT)));
+    my $type = ref($e);
 
-    %seen = ();
-    open(my $err, '>&', STDERR) or die "Can't dup STDERR:  $!";
-    binmode($err, join(":", "", "raw", grep { $_ ne 'unix' and !$seen{$_}++ } PerlIO::get_layers(STDERR)));
+    # Only optimal if this is a Pass or a passing Ok
+    return unless $type eq 'Test2::Event::Pass' || ($type eq 'Test2::Event::Ok' && $e->{pass});
 
-    _autoflush($out);
-    _autoflush($err);
+    # Amnesty requires further processing (todo is a form of amnesty)
+    return if ($e->{amnesty} && @{$e->{amnesty}}) || defined($e->{todo});
 
-    return [$out, $err];
-}
+    # A name with a newline or hash symbol needs extra processing
+    return if defined($e->{name}) && (-1 != index($e->{name}, "\n") || -1 != index($e->{name}, '#'));
 
-sub _autoflush {
-    my($fh) = pop;
-    my $old_fh = select $fh;
-    $| = 1;
-    select $old_fh;
+    my $ok = 'ok';
+    $ok .= " $num" if $num && !$self->{+NO_NUMBERS};
+    $ok .= defined($e->{name}) ? " - $e->{name}\n" : "\n";
+
+    if (my $nesting = $e->{trace}->{nested}) {
+        my $indent = '    ' x $nesting;
+        $ok = "$indent$ok";
+    }
+
+    my $io = $self->{+HANDLES}->[OUT_STD];
+
+    local($\, $,) = (undef, '') if $\ || $,;
+    print $io $ok;
+    $self->{+_LAST_FH} = $io;
+
+    return 1;
 }
 
 sub event_tap {
-    my $self = shift;
-    my ($e, $num) = @_;
+    my ($self, $f, $num) = @_;
 
-    my $converter = $CONVERTERS{ref($e)} or return;
+    my @tap;
 
-    $num = undef if $self->{+NO_NUMBERS};
+    # If this IS the first event the plan should come first
+    # (plan must be before or after assertions, not in the middle)
+    push @tap => $self->plan_tap($f) if $f->{plan} && !$self->{+MADE_ASSERTION};
 
-    return $self->$converter($e, $num);
+    # The assertion is most important, if present.
+    if ($f->{assert}) {
+        push @tap => $self->assert_tap($f, $num);
+        push @tap => $self->debug_tap($f, $num) unless $f->{assert}->{no_debug} || $f->{assert}->{pass};
+    }
+
+    # Almost as important as an assertion
+    push @tap => $self->error_tap($f) if $f->{errors};
+
+    # Now lets see the diagnostics messages
+    push @tap => $self->info_tap($f) if $f->{info};
+
+    # If this IS NOT the first event the plan should come last
+    # (plan must be before or after assertions, not in the middle)
+    push @tap => $self->plan_tap($f) if $self->{+MADE_ASSERTION} && $f->{plan};
+
+    # Bail out
+    push @tap => $self->halt_tap($f) if $f->{control}->{halt};
+
+    return @tap if @tap;
+    return @tap if $f->{control}->{halt};
+    return @tap if grep { $f->{$_} } qw/assert plan info errors/;
+
+    # Use the summary as a fallback if nothing else is usable.
+    return $self->summary_tap($f, $num);
 }
 
-sub event_ok {
+sub error_tap {
     my $self = shift;
-    my ($e, $num) = @_;
+    my ($f) = @_;
 
-    # We use direct hash access for performance. OK events are so common we
-    # need this to be fast.
-    my ($name, $todo) = @{$e}{qw/name todo/};
-    my $in_todo = defined($todo);
+    return map {
+        my $details = $_->{details};
 
-    my $out = "";
-    $out .= "not " unless $e->{pass};
-    $out .= "ok";
-    $out .= " $num" if defined($num);
+        my $msg;
+        if (ref($details)) {
+            require Data::Dumper;
+            my $dumper = Data::Dumper->new([$details])->Indent(2)->Terse(1)->Pad('# ')->Useqq(1)->Sortkeys(1);
+            chomp($msg = $dumper->Dump);
+        }
+        else {
+            chomp($msg = $details);
+            $msg =~ s/^/# /;
+            $msg =~ s/\n/\n# /g;
+        }
+
+        [OUT_ERR, "$msg\n"];
+    } @{$f->{errors}};
+}
+
+sub plan_tap {
+    my $self = shift;
+    my ($f) = @_;
+    my $plan = $f->{plan} or return;
+
+    return if $plan->{none};
+
+    if ($plan->{skip}) {
+        my $reason = $plan->{details} or return [OUT_STD, "1..0 # SKIP\n"];
+        chomp($reason);
+        return [OUT_STD, '1..0 # SKIP ' . $reason . "\n"];
+    }
+
+    return [OUT_STD, "1.." . $plan->{count} . "\n"];
+}
+
+sub no_subtest_space { 0 }
+sub assert_tap {
+    my $self = shift;
+    my ($f, $num) = @_;
+
+    my $assert = $f->{assert} or return;
+    my $pass = $assert->{pass};
+    my $name = $assert->{details};
+
+    my $ok = $pass ? 'ok' : 'not ok';
+    $ok .= " $num" if $num && !$self->{+NO_NUMBERS};
 
     # The regex form is ~250ms, the index form is ~50ms
     my @extra;
@@ -162,194 +241,155 @@ sub event_ok {
         ((index($name, "#" ) != -1  || substr($name, -1) eq '\\') && (($name =~ s|\\|\\\\|g), ($name =~ s|#|\\#|g)))
     );
 
-    my $space = @extra ? ' ' x (length($out) + 2) : '';
+    my $extra_space = @extra ? ' ' x (length($ok) + 2) : '';
+    my $extra_indent = '';
 
-    $out .= " - $name" if defined $name;
-    $out .= " # TODO" if $in_todo;
-    $out .= " $todo" if defined($todo) && length($todo);
+    my ($directives, $reason, $is_skip);
+    if ($f->{amnesty}) {
+        my %directives;
 
-    # The primary line of TAP, if the test passed this is all we need.
-    return([OUT_STD, "$out\n"]) unless @extra;
+        for my $am (@{$f->{amnesty}}) {
+            next if $am->{inherited};
+            my $tag = $am->{tag} or next;
+            $is_skip = 1 if $tag eq 'skip';
 
-    return $self->event_ok_multiline($out, $space, @extra);
-}
+            $directives{$tag} ||= $am->{details};
+        }
 
-sub event_ok_multiline {
-    my $self = shift;
-    my ($out, $space, @extra) = @_;
+        my %seen;
+        my @order = grep { !$seen{$_}++ } sort keys %directives;
 
-    return(
-        [OUT_STD, "$out\n"],
-        map {[OUT_STD, "#${space}$_\n"]} @extra,
-    );
-}
+        $directives = ' # ' . join ' & ' => @order;
 
-sub event_skip {
-    my $self = shift;
-    my ($e, $num) = @_;
-
-    my $name   = $e->name;
-    my $reason = $e->reason;
-    my $todo   = $e->todo;
-
-    my $out = "";
-    $out .= "not " unless $e->{pass};
-    $out .= "ok";
-    $out .= " $num" if defined $num;
-    $out .= " - $name" if $name;
-    if (defined($todo)) {
-        $out .= " # TODO & SKIP"
-    }
-    else {
-        $out .= " # skip";
-    }
-    $out .= " $reason" if defined($reason) && length($reason);
-
-    return([OUT_STD, "$out\n"]);
-}
-
-sub event_note {
-    my $self = shift;
-    my ($e, $num) = @_;
-
-    chomp(my $msg = $e->message);
-    $msg =~ s/^/# /;
-    $msg =~ s/\n/\n# /g;
-
-    return [OUT_STD, "$msg\n"];
-}
-
-sub event_diag {
-    my $self = shift;
-    my ($e, $num) = @_;
-
-    chomp(my $msg = $e->message);
-    $msg =~ s/^/# /;
-    $msg =~ s/\n/\n# /g;
-
-    return [OUT_ERR, "$msg\n"];
-}
-
-sub event_bail {
-    my $self = shift;
-    my ($e, $num) = @_;
-
-    return if $e->nested;
-
-    return [
-        OUT_STD,
-        "Bail out!  " . $e->reason . "\n",
-    ];
-}
-
-sub event_exception {
-    my $self = shift;
-    my ($e, $num) = @_;
-    return [ OUT_ERR, $e->error ];
-}
-
-sub event_subtest {
-    my $self = shift;
-    my ($e, $num) = @_;
-
-    # A 'subtest' is a subclass of 'ok'. Let the code that renders 'ok' render
-    # this event.
-    my ($ok, @diag) = $self->event_ok($e, $num);
-
-    # If the subtest is not buffered then the sub-events have already been
-    # rendered, we can go ahead and return.
-    return ($ok, @diag) unless $e->buffered;
-
-    # In a verbose harness we indent the diagnostics from the 'Ok' event since
-    # they will appear inside the subtest braces. This helps readability. In a
-    # non-verbose harness we do not do this because it is less readable.
-    if ($ENV{HARNESS_IS_VERBOSE}) {
-        # index 0 is the filehandle, index 1 is the message we want to indent.
-        $_->[1] =~ s/^(.*\S.*)$/    $1/mg for @diag;
+        for my $tag ('skip', @order) {
+            next unless defined($directives{$tag}) && length($directives{$tag});
+            $reason = $directives{$tag};
+            last;
+        }
     }
 
-    # Add the trailing ' {' to the 'ok' line of TAP output.
-    $ok->[1] =~ s/\n/ {\n/;
+    $ok .= " - $name" if defined $name && !($is_skip && !$name);
 
-    # Render the sub-events, we use our own counter for these.
-    my $count = 0;
-    my @subs = map {
-        # Bump the count for any event that should bump it.
-        $count++ if $_->increments_count;
+    my @subtap;
+    if ($f->{parent} && $f->{parent}->{buffered}) {
+        $ok .= ' {';
 
-        # This indents all output lines generated for the sub-events.
-        # index 0 is the filehandle, index 1 is the message we want to indent.
-        map { $_->[1] =~ s/^(.*\S.*)$/    $1/mg; $_ } $self->event_tap($_, $count);
-    } @{$e->subevents};
+        # In a verbose harness we indent the extra since they will appear
+        # inside the subtest braces. This helps readability. In a non-verbose
+        # harness we do not do this because it is less readable.
+        if ($ENV{HARNESS_IS_VERBOSE} || !$ENV{HARNESS_ACTIVE}) {
+            $extra_indent = "    ";
+            $extra_space = ' ';
+        }
 
-    return (
-        $ok,                # opening ok - name {
-        @diag,              #   diagnostics if the subtest failed
-        @subs,              #   All the inner-event lines
-        [OUT_STD(), "}\n"], # } (closing brace)
-    );
-}
+        # Render the sub-events, we use our own counter for these.
+        my $count = 0;
+        @subtap = map {
+            my $f2 = $_;
 
-sub event_plan {
-    my $self = shift;
-    my ($e, $num) = @_;
+            # Bump the count for any event that should bump it.
+            $count++ if $f2->{assert};
 
-    my $directive = $e->directive;
-    return if $directive && $directive eq 'NO PLAN';
+            # This indents all output lines generated for the sub-events.
+            # index 0 is the filehandle, index 1 is the message we want to indent.
+            map { $_->[1] =~ s/^(.*\S.*)$/    $1/mg; $_ } $self->event_tap($f2, $count);
+        } @{$f->{parent}->{children}};
 
-    my $reason = $e->reason;
-    $reason =~ s/\n/\n# /g if $reason;
-
-    my $plan = "1.." . $e->max;
-    if ($directive) {
-        $plan .= " # $directive";
-        $plan .= " $reason" if defined $reason;
+        push @subtap => [OUT_STD, "}\n"];
     }
 
-    return [OUT_STD, "$plan\n"];
-}
-
-sub event_version {
-    my $self = shift;
-    my ($e, $num) = @_;
-
-    my $version = $e->version;
-
-    return [OUT_STD, "TAP version $version\n"];
-}
-
-sub event_other {
-    my $self = shift;
-    my ($e, $num) = @_;
-    return if $e->no_display;
-
-    my @out;
-
-    if (my ($max, $directive, $reason) = $e->sets_plan) {
-        my $plan = "1..$max";
-        $plan .= " # $directive" if $directive;
-        $plan .= " $reason" if defined $reason;
-        push @out => [OUT_STD, "$plan\n"];
+    if ($directives) {
+        $directives = ' # TODO & SKIP' if $directives eq ' # TODO & skip';
+        $ok .= $directives;
+        $ok .= " $reason" if defined($reason);
     }
 
-    if ($e->increments_count) {
-        my $ok = "";
-        $ok .= "not " if $e->causes_fail;
-        $ok .= "ok";
-        $ok .= " $num" if defined($num);
-        $ok .= " - " . $e->summary if $e->summary;
+    $extra_space = ' ' if $self->no_subtest_space;
 
-        push @out => [OUT_STD, "$ok\n"];
-    }
-    else { # Comment
-        my $handle =  ($e->causes_fail || $e->diagnostics) ? OUT_ERR : OUT_STD;
-        my $summary = $e->summary || ref($e);
-        chomp($summary);
-        $summary =~ s/^/# /smg;
-        push @out => [$handle, "$summary\n"];
-    }
+    my @out = ([OUT_STD, "$ok\n"]);
+    push @out => map {[OUT_STD, "${extra_indent}#${extra_space}$_\n"]} @extra if @extra;
+    push @out => @subtap;
 
     return @out;
+}
+
+sub debug_tap {
+    my ($self, $f, $num) = @_;
+
+    # Figure out the debug info, this is typically the file name and line
+    # number, but can also be a custom message. If no trace object is provided
+    # then we have nothing useful to display.
+    my $name  = $f->{assert}->{details};
+    my $trace = $f->{trace};
+
+    my $debug = "[No trace info available]";
+    if ($trace->{details}) {
+        $debug = $trace->{details};
+    }
+    elsif ($trace->{frame}) {
+        my ($pkg, $file, $line) = @{$trace->{frame}};
+        $debug = "at $file line $line." if $file && $line;
+    }
+
+    my $amnesty = $f->{amnesty} && @{$f->{amnesty}}
+        ? ' (with amnesty)'
+        : '';
+
+    # Create the initial diagnostics. If the test has a name we put the debug
+    # info on a second line, this behavior is inherited from Test::Builder.
+    my $msg = defined($name)
+        ? qq[# Failed test${amnesty} '$name'\n# $debug\n]
+        : qq[# Failed test${amnesty} $debug\n];
+
+    my $IO = $f->{amnesty} && @{$f->{amnesty}} ? OUT_STD : OUT_ERR;
+
+    return [$IO, $msg];
+}
+
+sub halt_tap {
+    my ($self, $f) = @_;
+
+    return if $f->{trace}->{nested} && !$f->{trace}->{buffered};
+    my $details = $f->{control}->{details};
+
+    return [OUT_STD, "Bail out!\n"] unless defined($details) && length($details);
+    return [OUT_STD, "Bail out!  $details\n"];
+}
+
+sub info_tap {
+    my ($self, $f) = @_;
+
+    return map {
+        my $details = $_->{details};
+
+        my $IO = $_->{debug} ? OUT_ERR : OUT_STD;
+
+        my $msg;
+        if (ref($details)) {
+            require Data::Dumper;
+            my $dumper = Data::Dumper->new([$details])->Indent(2)->Terse(1)->Pad('# ')->Useqq(1)->Sortkeys(1);
+            chomp($msg = $dumper->Dump);
+        }
+        else {
+            chomp($msg = $details);
+            $msg =~ s/^/# /;
+            $msg =~ s/\n/\n# /g;
+        }
+
+        [$IO, "$msg\n"];
+    } @{$f->{info}};
+}
+
+sub summary_tap {
+    my ($self, $f, $num) = @_;
+
+    return if $f->{about}->{no_display};
+
+    my $summary = $f->{about}->{details} or return;
+    chomp($summary);
+    $summary =~ s/^/# /smg;
+
+    return [OUT_STD, "$summary\n"];
 }
 
 1;
@@ -408,99 +448,6 @@ This directly modifies the stored filehandles, it does not create new ones.
 
 Write an event to the console.
 
-=item Test2::Formatter::TAP->register_event($pkg, sub { ... });
-
-In general custom events are not supported. There are however occasions where
-you might want to write a custom event type that results in TAP output. In
-order to do this you use the C<register_event()> class method.
-
-    package My::Event;
-    use Test2::Formatter::TAP;
-
-    use base 'Test2::Event';
-    use Test2::Util::HashBase qw/pass name diag note/;
-
-    Test2::Formatter::TAP->register_event(
-        __PACKAGE__,
-        sub {
-            my $self = shift;
-            my ($e, $num) = @_;
-            return (
-                [Test2::Formatter::TAP::OUT_STD, "ok $num - " . $e->name . "\n"],
-                [Test2::Formatter::TAP::OUT_ERR, "# " . $e->name . " " . $e->diag . "\n"],
-                [Test2::Formatter::TAP::OUT_STD, "# " . $e->name . " " . $e->note . "\n"],
-            );
-        }
-    );
-
-    1;
-
-=back
-
-=head2 EVENT METHODS
-
-All these methods require the event itself. Optionally they can all except a
-test number.
-
-All methods return a list of array-refs. Each array-ref will have 2 items, the
-first is an integer identifying an output handle, the second is a string that
-should be written to the handle.
-
-=over 4
-
-=item @out = $TAP->event_ok($e)
-
-=item @out = $TAP->event_ok($e, $num)
-
-Process an L<Test2::Event::Ok> event.
-
-=item @out = $TAP->event_plan($e)
-
-=item @out = $TAP->event_plan($e, $num)
-
-Process an L<Test2::Event::Plan> event.
-
-=item @out = $TAP->event_note($e)
-
-=item @out = $TAP->event_note($e, $num)
-
-Process an L<Test2::Event::Note> event.
-
-=item @out = $TAP->event_diag($e)
-
-=item @out = $TAP->event_diag($e, $num)
-
-Process an L<Test2::Event::Diag> event.
-
-=item @out = $TAP->event_bail($e)
-
-=item @out = $TAP->event_bail($e, $num)
-
-Process an L<Test2::Event::Bail> event.
-
-=item @out = $TAP->event_exception($e)
-
-=item @out = $TAP->event_exception($e, $num)
-
-Process an L<Test2::Event::Exception> event.
-
-=item @out = $TAP->event_skip($e)
-
-=item @out = $TAP->event_skip($e, $num)
-
-Process an L<Test2::Event::Skip> event.
-
-=item @out = $TAP->event_subtest($e)
-
-=item @out = $TAP->event_subtest($e, $num)
-
-Process an L<Test2::Event::Subtest> event.
-
-=item @out = $TAP->event_other($e, $num)
-
-Fallback for unregistered event types. It uses the L<Test2::Event> API to
-convert the event to TAP.
-
 =back
 
 =head1 SOURCE
@@ -528,7 +475,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

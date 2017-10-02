@@ -181,7 +181,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
         $ipc->add_hub($hid);
-        my $trace = Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
+        my $trace = Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
         my $e = eval { $ipc->send($hid, bless({glob => \*ok, trace => $trace}, 'Foo')); 1 };
         print STDERR $@ unless $e || $@ =~ m/^255/;
         $ipc->drop_hub($hid);

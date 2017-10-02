@@ -2,16 +2,16 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
 use Carp qw/confess carp/;
 use Scalar::Util qw/reftype/;
 
-use Test2::Util qw/get_tid USE_THREADS CAN_FORK pkg_to_file try/;
+use Test2::Util qw/get_tid USE_THREADS CAN_FORK pkg_to_file try CAN_SIGSYS/;
 
-use Test2::Util::Trace();
+use Test2::EventFacet::Trace();
 use Test2::API::Stack();
 
 use Test2::Util::HashBase qw{
@@ -21,11 +21,14 @@ use Test2::Util::HashBase qw{
     ipc stack formatter
     contexts
 
+    -preload
+
     ipc_shm_size
     ipc_shm_last
     ipc_shm_id
     ipc_polling
     ipc_drivers
+    ipc_timeout
     formatters
 
     exit_callbacks
@@ -35,8 +38,10 @@ use Test2::Util::HashBase qw{
     context_release_callbacks
 };
 
-sub pid { $_[0]->{+_PID} ||= $$ }
-sub tid { $_[0]->{+_TID} ||= get_tid() }
+sub DEFAULT_IPC_TIMEOUT() { 30 }
+
+sub pid { $_[0]->{+_PID} }
+sub tid { $_[0]->{+_TID} }
 
 # Wrap around the getters that should call _finalize.
 BEGIN {
@@ -63,6 +68,46 @@ sub import {
 
 sub init { $_[0]->reset }
 
+sub start_preload {
+    my $self = shift;
+
+    confess "preload cannot be started, Test2::API has already been initialized"
+        if $self->{+FINALIZED} || $self->{+LOADED};
+
+    return $self->{+PRELOAD} = 1;
+}
+
+sub stop_preload {
+    my $self = shift;
+
+    return 0 unless $self->{+PRELOAD};
+    $self->{+PRELOAD} = 0;
+
+    $self->post_preload_reset();
+
+    return 1;
+}
+
+sub post_preload_reset {
+    my $self = shift;
+
+    delete $self->{+_PID};
+    delete $self->{+_TID};
+
+    $self->{+CONTEXTS} = {};
+
+    $self->{+FORMATTERS} = [];
+
+    $self->{+FINALIZED} = undef;
+    $self->{+IPC}       = undef;
+
+    $self->{+IPC_TIMEOUT} = DEFAULT_IPC_TIMEOUT() unless defined $self->{+IPC_TIMEOUT};
+
+    $self->{+LOADED} = 0;
+
+    $self->{+STACK} ||= Test2::API::Stack->new;
+}
+
 sub reset {
     my $self = shift;
 
@@ -80,6 +125,8 @@ sub reset {
     $self->{+FINALIZED} = undef;
     $self->{+IPC}       = undef;
 
+    $self->{+IPC_TIMEOUT} = DEFAULT_IPC_TIMEOUT() unless defined $self->{+IPC_TIMEOUT};
+
     $self->{+NO_WAIT} = 0;
     $self->{+LOADED}  = 0;
 
@@ -96,6 +143,9 @@ sub _finalize {
     my $self = shift;
     my ($caller) = @_;
     $caller ||= [caller(1)];
+
+    confess "Attempt to initialize Test2::API during preload"
+        if $self->{+PRELOAD};
 
     $self->{+FINALIZED} = $caller;
 
@@ -227,6 +277,9 @@ sub add_post_load_callback {
 sub load {
     my $self = shift;
     unless ($self->{+LOADED}) {
+        confess "Attempt to initialize Test2::API during preload"
+            if $self->{+PRELOAD};
+
         $self->{+_PID} = $$        unless defined $self->{+_PID};
         $self->{+_TID} = get_tid() unless defined $self->{+_TID};
 
@@ -309,7 +362,7 @@ sub ipc_enable_shm {
         # In some systems (*BSD) accessing the SysV IPC APIs without
         # them being enabled can cause a SIGSYS.  We suppress the SIGSYS
         # and then get ENOSYS from the calls.
-        local $SIG{SYS} = 'IGNORE';
+        local $SIG{SYS} = 'IGNORE' if CAN_SIGSYS;
 
         require IPC::SysV;
 
@@ -367,40 +420,65 @@ sub disable_ipc_polling {
 }
 
 sub _ipc_wait {
+    my ($timeout) = @_;
     my $fail = 0;
 
-    if (CAN_FORK) {
-        while (1) {
-            my $pid = CORE::wait();
-            my $err = $?;
-            last if $pid == -1;
-            next unless $err;
-            $fail++;
-            $err = $err >> 8;
-            warn "Process $pid did not exit cleanly (status: $err)\n";
-        }
-    }
+    $timeout = DEFAULT_IPC_TIMEOUT() unless defined $timeout;
 
-    if (USE_THREADS) {
-        for my $t (threads->list()) {
-            $t->join;
-            # In older threads we cannot check if a thread had an error unless
-            # we control it and its return.
-            my $err = $t->can('error') ? $t->error : undef;
-            next unless $err;
-            my $tid = $t->tid();
-            $fail++;
-            chomp($err);
-            warn "Thread $tid did not end cleanly: $err\n";
-        }
-    }
+    my $ok = eval {
+        if (CAN_FORK) {
+            local $SIG{ALRM} = sub { die "Timeout waiting on child processes" };
+            alarm $timeout;
 
-    return 0 unless $fail;
+            while (1) {
+                my $pid = CORE::wait();
+                my $err = $?;
+                last if $pid == -1;
+                next unless $err;
+                $fail++;
+                $err = $err >> 8;
+                warn "Process $pid did not exit cleanly (status: $err)\n";
+            }
+
+            alarm 0;
+        }
+
+        if (USE_THREADS) {
+            my $start = time;
+
+            while (1) {
+                last unless threads->list();
+                die "Timeout waiting on child thread" if time - $start >= $timeout;
+                sleep 1;
+                for my $t (threads->list) {
+                    # threads older than 1.34 do not have this :-(
+                    next if $t->can('is_joinable') && !$t->is_joinable;
+                    $t->join;
+                    # In older threads we cannot check if a thread had an error unless
+                    # we control it and its return.
+                    my $err = $t->can('error') ? $t->error : undef;
+                    next unless $err;
+                    my $tid = $t->tid();
+                    $fail++;
+                    chomp($err);
+                    warn "Thread $tid did not end cleanly: $err\n";
+                }
+            }
+        }
+
+        1;
+    };
+    my $error = $@;
+
+    return 0 if $ok && !$fail;
+    warn $error unless $ok;
     return 255;
 }
 
 sub DESTROY {
     my $self = shift;
+
+    return if $self->{+PRELOAD};
 
     return unless defined($self->{+_PID}) && $self->{+_PID} == $$;
     return unless defined($self->{+_TID}) && $self->{+_TID} == get_tid();
@@ -411,6 +489,8 @@ sub DESTROY {
 
 sub set_exit {
     my $self = shift;
+
+    return if $self->{+PRELOAD};
 
     my $exit     = $?;
     my $new_exit = $exit;
@@ -470,13 +550,13 @@ This is not a supported configuration, you will have problems.
             $ipc->waiting();
         }
 
-        my $ipc_exit = _ipc_wait();
+        my $ipc_exit = _ipc_wait($self->{+IPC_TIMEOUT});
         $new_exit ||= $ipc_exit;
     }
 
     # None of this is necessary if we never got a root hub
     if(my $root = shift @hubs) {
-        my $trace = Test2::Util::Trace->new(
+        my $trace = Test2::EventFacet::Trace->new(
             frame  => [__PACKAGE__, __FILE__, 0, __PACKAGE__ . '::END'],
             detail => __PACKAGE__ . ' END Block finalization',
         );
@@ -645,6 +725,12 @@ pending events.
 
 When 1 is returned this will set C<< $obj->ipc_shm_last() >>.
 
+=item $timeout = $obj->ipc_timeout;
+
+=item $obj->set_ipc_timeout($timeout);
+
+How long to wait for child processes and threads before aborting.
+
 =item $drivers = $obj->ipc_drivers
 
 Get the list of IPC drivers.
@@ -744,7 +830,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

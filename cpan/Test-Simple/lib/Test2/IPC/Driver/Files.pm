@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302073';
+our $VERSION = '1.302096';
 
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
@@ -15,53 +15,8 @@ use Storable();
 use File::Spec();
 use POSIX();
 
-use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator/;
+use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator do_rename do_unlink try_sig_mask/;
 use Test2::API qw/test2_ipc_set_pending/;
-
-BEGIN {
-    if (IS_WIN32) {
-        my $max_tries = 5;
-
-        *do_rename = sub {
-            my ($from, $to) = @_;
-
-            my $err;
-            for (1 .. $max_tries) {
-                return (1) if rename($from, $to);
-                $err = "$!";
-                last if $_ == $max_tries;
-                sleep 1;
-            }
-
-            return (0, $err);
-        };
-        *do_unlink = sub {
-            my ($file) = @_;
-
-            my $err;
-            for (1 .. $max_tries) {
-                return (1) if unlink($file);
-                $err = "$!";
-                last if $_ == $max_tries;
-                sleep 1;
-            }
-
-            return (0, "$!");
-        };
-    }
-    else {
-        *do_rename = sub {
-            my ($from, $to) = @_;
-            return (1) if rename($from, $to);
-            return (0, "$!");
-        };
-        *do_unlink = sub {
-            my ($file) = @_;
-            return (1) if unlink($file);
-            return (0, "$!");
-        };
-    }
-}
 
 sub use_shm { 1 }
 sub shm_size() { 64 }
@@ -199,36 +154,18 @@ do so if Test::Builder is loaded for legacy reasons.
         $self->{+GLOBALS}->{$hid}->{$name}++;
     }
 
-    my ($old, $blocked);
-    unless(IS_WIN32) {
-        my $to_block = POSIX::SigSet->new(
-            POSIX::SIGINT(),
-            POSIX::SIGALRM(),
-            POSIX::SIGHUP(),
-            POSIX::SIGTERM(),
-            POSIX::SIGUSR1(),
-            POSIX::SIGUSR2(),
-        );
-        $old = POSIX::SigSet->new;
-        $blocked = POSIX::sigprocmask(POSIX::SIG_BLOCK(), $to_block, $old);
-        # Silently go on if we failed to log signals, not much we can do.
-    }
-
     # Write and rename the file.
-    my ($ok, $err) = try {
+    my ($ren_ok, $ren_err);
+    my ($ok, $err) = try_sig_mask {
         Storable::store($e, $file);
-        my ($ok, $err) = do_rename("$file", $ready);
-        unless ($ok) {
-            POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
-            $self->abort("Could not rename file '$file' -> '$ready': $err");
-        };
-        test2_ipc_set_pending(substr($file, -(shm_size)));
+        ($ren_ok, $ren_err) = do_rename("$file", $ready);
     };
 
-    # If our block was successful we want to restore the old mask.
-    POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
-
-    if (!$ok) {
+    if ($ok) {
+        $self->abort("Could not rename file '$file' -> '$ready': $ren_err") unless $ren_ok;
+        test2_ipc_set_pending(substr($file, -(shm_size)));
+    }
+    else {
         my $src_file = __FILE__;
         $err =~ s{ at \Q$src_file\E.*$}{};
         chomp($err);
@@ -374,7 +311,7 @@ sub waiting {
     require Test2::Event::Waiting;
     $self->send(
         GLOBAL => Test2::Event::Waiting->new(
-            trace => Test2::Util::Trace->new(frame => [caller()]),
+            trace => Test2::EventFacet::Trace->new(frame => [caller()]),
         ),
         'GLOBAL'
     );
@@ -487,7 +424,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

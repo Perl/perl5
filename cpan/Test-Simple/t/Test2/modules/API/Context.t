@@ -91,7 +91,7 @@ my $events = bless [], 'My::Formatter';
 my $hub = Test2::Hub->new(
     formatter => $events,
 );
-my $trace = Test2::Util::Trace->new(
+my $trace = Test2::EventFacet::Trace->new(
     frame => [ 'Foo::Bar', 'foo_bar.t', 42, 'Foo::Bar::baz' ],
 );
 my $ctx = Test2::API::Context->new(
@@ -232,7 +232,7 @@ is_deeply(
     my $ctx = context(level => -1);
 
     my $one = Test2::API::Context->new(
-        trace => Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'blah']),
+        trace => Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'blah']),
         hub => test2_stack()->top,
     );
     is($one->_depth, 0, "default depth");
@@ -257,7 +257,7 @@ is_deeply(
 {
     like(exception { Test2::API::Context->new() }, qr/The 'trace' attribute is required/, "need to have trace");
 
-    my $trace = Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
+    my $trace = Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
     like(exception { Test2::API::Context->new(trace => $trace) }, qr/The 'hub' attribute is required/, "need to have hub");
 
     my $hub = test2_stack()->top;
@@ -336,15 +336,10 @@ sub {
 }->();
 
 {
-    {
-        package An::Info::Thingy;
-        sub render { 'zzz' }
-    }
-
     my ($e1, $e2);
     my $events = intercept {
         my $ctx = context();
-        $e1 = $ctx->ok(0, 'foo', ['xxx', sub { 'yyy' }, bless({}, 'An::Info::Thingy')]);
+        $e1 = $ctx->ok(0, 'foo', ['xxx']);
         $e2 = $ctx->ok(0, 'foo');
         $ctx->release;
     };
@@ -353,19 +348,12 @@ sub {
     ok($e2->isa('Test2::Event::Ok'), "returned ok event");
 
     is($events->[0], $e1, "got ok event 1");
+    is($events->[3], $e2, "got ok event 2");
 
     is($events->[2]->message, 'xxx', "event 1 diag 2");
     ok($events->[2]->isa('Test2::Event::Diag'), "event 1 diag 2 is diag");
 
-    is($events->[3]->summary,     'yyy', "event 1 info 1");
-    is($events->[3]->diagnostics, 1,     "event 1 info 1 is diagnostics");
-    ok($events->[3]->isa('Test2::Event::Info'), "event 1 info 1 is an info");
-
-    is($events->[4]->summary,     'zzz', "event 1 info 2");
-    is($events->[4]->diagnostics, 1,     "event 1 info 2 is diagnostics");
-    ok($events->[4]->isa('Test2::Event::Info'), "event 2 info 1 is an info");
-
-    is($events->[5], $e2, "got ok event 2");
+    is($events->[3], $e2, "got ok event 2");
 }
 
 sub {
