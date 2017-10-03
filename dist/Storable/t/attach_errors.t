@@ -25,9 +25,7 @@ sub BEGIN {
 use Test::More tests => 40;
 use Storable ();
 
-
-
-
+$Storable::flags = Storable::FLAGS_COMPAT;
 
 #####################################################################
 # Error 1
