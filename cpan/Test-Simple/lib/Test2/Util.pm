@@ -2,12 +2,16 @@ package Test2::Util;
 use strict;
 use warnings;
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 use POSIX();
 use Config qw/%Config/;
 use Carp qw/croak/;
-use PerlIO();
+
+BEGIN {
+    local ($@, $!, $SIG{__DIE__});
+    *HAVE_PERLIO = eval { require PerlIO; PerlIO->VERSION(1.02); } ? sub() { 1 } : sub() { 0 };
+}
 
 our @EXPORT_OK = qw{
     try
@@ -25,7 +29,6 @@ our @EXPORT_OK = qw{
 
     ipc_separator
 
-    clone_io
     do_rename do_unlink
 
     try_sig_mask
@@ -175,14 +178,18 @@ my %PERLIO_SKIP = (
 
 sub clone_io {
     my ($fh) = @_;
-    my $fileno = fileno($fh) or croak "Could not get fileno for handle";
+    my $fileno = fileno($fh);
+
+    return $fh if !defined($fileno) || !length($fileno) || $fileno < 0;
+
+    open(my $out, '>&' . $fileno) or die "Can't dup fileno $fileno: $!";
 
     my %seen;
-    open(my $out, '>&', $fileno) or die "Can't dup fileno $fileno: $!";
-    binmode($out, join(":", "", "raw", grep { !$PERLIO_SKIP{$_} and !$seen{$_}++ } PerlIO::get_layers(STDOUT)));
+    my @layers = HAVE_PERLIO ? grep { !$PERLIO_SKIP{$_} and !$seen{$_}++ } PerlIO::get_layers($fh) : ();
+    binmode($out, join(":", "", "raw", @layers));
 
     my $old = select $fh;
-    my $af = $|;
+    my $af  = $|;
     select $out;
     $| = $af;
     select $old;

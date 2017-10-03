@@ -2,7 +2,7 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 
 use Carp qw/carp croak confess/;
@@ -320,7 +320,7 @@ sub process {
 
     my $fail = 0;
     $fail = 1 if $f->{assert} && !$f->{assert}->{pass};
-    $fail = 1 if $f->{error}  && $f->{error}->{fail};
+    $fail = 1 if $f->{errors} && grep { $_->{fail} } @{$f->{errors}};
     $fail = 0 if $f->{amnesty};
 
     $self->{+COUNT}++ if $f->{assert};

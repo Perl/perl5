@@ -47,6 +47,7 @@ Test::More->builder->no_ending(1);
 
 {
     local $ENV{HARNESS_ACTIVE} = 0;
+    local $ENV{HARNESS_IS_VERBOSE} = 0;
 
 #line 62
     fail( "this fails" );
@@ -66,6 +67,7 @@ ERR
 
 {
     local $ENV{HARNESS_ACTIVE} = 1;
+    local $ENV{HARNESS_IS_VERBOSE} = 0;
                    
 #line 71
     fail( "this fails" );

@@ -20,7 +20,16 @@ BEGIN {
 
 use Test2::Tools::Tiny;
 use Test2::API qw/context/;
-use PerlIO;
+
+BEGIN {
+    eval {
+        require PerlIO;
+        PerlIO->VERSION(1.02); # required for PerlIO::get_layers
+    } or do {
+        print "1..0 # SKIP Don't have PerlIO 1.02\n";
+        exit 0;
+    }
+}
 
 sub grabber {
     my ($std, $err);

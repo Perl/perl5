@@ -2,7 +2,7 @@ package Test2::Formatter::TAP;
 use strict;
 use warnings;
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 use Test2::Util qw/clone_io/;
 
@@ -53,7 +53,7 @@ sub _open_handles {
 sub encoding {
     my $self = shift;
 
-    if (@_) {
+    if ($] ge "5.007003" and @_) {
         my ($enc) = @_;
         my $handles = $self->{+HANDLES};
 

@@ -7,6 +7,7 @@ use Test2::Util qw/CAN_FORK/;
 
 BEGIN {
     skip_all "System cannot fork" unless CAN_FORK;
+    skip_all "known to fail on $]" if $] le "5.006002";
 }
 
 plan(3);

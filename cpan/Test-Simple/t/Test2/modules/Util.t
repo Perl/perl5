@@ -18,6 +18,8 @@ use Test2::Util qw/
     CAN_SIGSYS
 
     IS_WIN32
+
+    clone_io
 /;
 
 {
@@ -57,5 +59,19 @@ ok($check_for_sig_sys->("SYS FOO BAR"), "Found SIGSYS at start");
 ok($check_for_sig_sys->("FOO BAR SYS"), "Found SIGSYS at end");
 ok(!$check_for_sig_sys->("FOO SYSX BAR"), "SYSX is not SYS");
 ok(!$check_for_sig_sys->("FOO XSYS BAR"), "XSYS is not SYS");
+
+my $io = clone_io(\*STDOUT);
+ok($io, "Cloned the filehandle");
+close($io);
+
+my $out = '';
+open(my $fh, '>', \$out) or die "Could not open filehandle";
+
+$io = clone_io($fh);
+is($io, $fh, "For a scalar handle we simply return the original handle, no other choice");
+print $io "Test\n";
+
+is($out, "Test\n", "wrote to the scalar handle");
+
 
 done_testing;

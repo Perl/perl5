@@ -2,11 +2,16 @@ package Test2::Event::Exception;
 use strict;
 use warnings;
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
 use Test2::Util::HashBase qw{error};
+
+sub init {
+    my $self = shift;
+    $self->{+ERROR} = "$self->{+ERROR}";
+}
 
 sub causes_fail { 1 }
 
@@ -70,6 +75,10 @@ Inherits from L<Test2::Event>. Also defines:
 The reason for the exception.
 
 =back
+
+=head1 CAVEATS
+
+Be aware that all exceptions are stringified during construction.
 
 =head1 SOURCE
 

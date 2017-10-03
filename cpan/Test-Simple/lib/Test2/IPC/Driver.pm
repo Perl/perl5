@@ -2,10 +2,10 @@ package Test2::IPC::Driver;
 use strict;
 use warnings;
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 
-use Carp qw/confess longmess/;
+use Carp qw/confess/;
 use Test2::Util::HashBase qw{no_fatal};
 
 use Test2::API qw/test2_ipc_add_driver/;
@@ -45,7 +45,8 @@ sub abort {
 sub abort_trace {
     my $self = shift;
     my ($msg) = @_;
-    $self->abort(longmess($msg));
+    # Older versions of Carp do not export longmess() function, so it needs to be called with package name
+    $self->abort(Carp::longmess($msg));
 }
 
 1;

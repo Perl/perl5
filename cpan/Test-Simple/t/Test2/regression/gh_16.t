@@ -10,7 +10,7 @@ END { $? = 0 }
 BEGIN {
     print "\n1..1\n";
     close(STDERR);
-    open(STDERR, '>&', STDOUT);
+    open(STDERR, '>&STDOUT');
 }
 
 use Test2::API;

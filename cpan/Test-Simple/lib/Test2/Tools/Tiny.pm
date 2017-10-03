@@ -2,6 +2,12 @@ package Test2::Tools::Tiny;
 use strict;
 use warnings;
 
+BEGIN {
+    if ($] lt "5.008") {
+        require Test::Builder::IO::Scalar;
+    }
+}
+
 use Scalar::Util qw/blessed/;
 
 use Test2::Util qw/try/;
@@ -10,7 +16,7 @@ use Test2::API qw/context run_subtest test2_stack/;
 use Test2::Hub::Interceptor();
 use Test2::Hub::Interceptor::Terminator();
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 our @EXPORT = qw{
@@ -253,8 +259,16 @@ sub capture(&) {
         my ($out_fh, $err_fh);
 
         ($ok, $e) = try {
+          # Scalar refs as filehandles were added in 5.8.
+          if ($] ge "5.008") {
             open($out_fh, '>', \$out) or die "Failed to open a temporary STDOUT: $!";
             open($err_fh, '>', \$err) or die "Failed to open a temporary STDERR: $!";
+          }
+          # Emulate scalar ref filehandles with a tie.
+          else {
+            $out_fh = Test::Builder::IO::Scalar->new(\$out) or die "Failed to open a temporary STDOUT";
+            $err_fh = Test::Builder::IO::Scalar->new(\$err) or die "Failed to open a temporary STDERR";
+          }
 
             test2_stack->top->format->set_handles([$out_fh, $err_fh, $out_fh]);
 

@@ -5,6 +5,8 @@ use Test2::Tools::Tiny;
 
 use Test2::API qw/context/;
 
+skip_all("known to fail on $]") if $] le "5.006002";
+
 sub outer {
     my $code = shift;
     my $ctx = context();

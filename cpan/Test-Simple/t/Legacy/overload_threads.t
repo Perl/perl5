@@ -18,7 +18,11 @@ BEGIN {
     eval { require threads; 'threads'->import; 1; } if CAN_THREAD;
 }
 
-use Test::More tests => 5;
+use Test::More;
+
+plan skip_all => "known to crash on $]" if $] le "5.006002";
+
+plan tests => 5;
 
 
 package Overloaded;

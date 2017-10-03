@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -336,7 +336,7 @@ sub subtest {
         }
     }
 
-    if ($start_pid != $$ && !$INC{'Test/Sync/IPC.pm'}) {
+    if ($start_pid != $$ && !$INC{'Test2/IPC.pm'}) {
         warn $ok ? "Forked inside subtest, but subtest never finished!\n" : $err;
         exit 255;
     }
@@ -1439,7 +1439,7 @@ sub summary {
     my $ctx = $self->ctx;
     my $data = $ctx->hub->meta(__PACKAGE__, {})->{Test_Results};
     $ctx->release;
-    return map { $_->{'ok'} } @$data;
+    return map { $_ ? $_->{'ok'} : () } @$data;
 }
 
 

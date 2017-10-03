@@ -14,6 +14,8 @@ BEGIN {
     }
 }
 
+skip_all("known to fail on $]") if $] le "5.006002";
+
 $@ = "";
 my ($file, $line) = (__FILE__, __LINE__ + 1);
 eval { my $one = Foo::Bar->new };

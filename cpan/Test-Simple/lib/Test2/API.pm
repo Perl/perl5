@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302096';
+our $VERSION = '1.302097';
 
 
 my $INST;
@@ -68,7 +68,7 @@ use Test2::Event::Waiting();
 use Test2::Event::Skip();
 use Test2::Event::Subtest();
 
-use Carp qw/carp croak confess longmess/;
+use Carp qw/carp croak confess/;
 use Scalar::Util qw/blessed weaken/;
 use Test2::Util qw/get_tid clone_io pkg_to_file/;
 
@@ -267,7 +267,7 @@ my $CID = 1;
 sub context {
     # We need to grab these before anything else to ensure they are not
     # changed.
-    my ($errno, $eval_error, $child_error) = (0 + $!, $@, $?);
+    my ($errno, $eval_error, $child_error, $extended_error) = (0 + $!, $@, $?, $^E);
 
     my %params = (level => 0, wrapped => 0, @_);
 
@@ -309,7 +309,7 @@ sub context {
     }
 
     # I know this is ugly....
-    ($!, $@, $?) = ($errno, $eval_error, $child_error) and return bless(
+    ($!, $@, $?, $^E) = ($errno, $eval_error, $child_error, $extended_error) and return bless(
         {
             %$current,
             _is_canon   => undef,
@@ -378,7 +378,7 @@ sub context {
 
     $params{on_init}->($current) if $params{on_init};
 
-    ($!, $@, $?) = ($errno, $eval_error, $child_error);
+    ($!, $@, $?, $^E) = ($errno, $eval_error, $child_error, $extended_error);
 
     return $current;
 }
@@ -406,7 +406,8 @@ sub _existing_error {
     my $oldframe = $ctx->{trace}->frame;
     my $olddepth = $ctx->{_depth};
 
-    my $mess = longmess();
+    # Older versions of Carp do not export longmess() function, so it needs to be called with package name
+    my $mess = Carp::longmess();
 
     warn <<"    EOT";
 $msg
@@ -524,7 +525,6 @@ sub run_subtest {
     my $stack = $ctx->stack || $STACK;
     my $hub = $stack->new_hub(
         class => 'Test2::Hub::Subtest',
-        buffered => $buffered,
         %$params,
         buffered => $buffered,
     );

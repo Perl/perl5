@@ -258,7 +258,8 @@ if (CAN_THREAD && $] ge '5.010') {
     like($events[0]->message, qr/Test ended with extra hubs on the stack!/, "got diag");
 }
 
-{
+SKIP: {
+    last SKIP if $] lt "5.008";
     $one->reset;
     my $stderr = "";
     {
@@ -286,7 +287,8 @@ This is not a supported configuration, you will have problems.
     EOT
 }
 
-{
+SKIP: {
+    last SKIP if $] lt "5.008";
     require Test2::API::Breakage;
     no warnings qw/redefine once/;
     my $ran = 0;

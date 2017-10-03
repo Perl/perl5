@@ -2761,6 +2761,7 @@ cpan/Test-Simple/t/Legacy/Regression/637.t
 cpan/Test-Simple/t/Legacy/Regression/683_thread_todo.t
 cpan/Test-Simple/t/Legacy/Regression/6_cmp_ok.t
 cpan/Test-Simple/t/Legacy/Regression/736_use_ok.t
+cpan/Test-Simple/t/Legacy/Regression/789-read-only.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t
@@ -2843,6 +2844,7 @@ cpan/Test-Simple/t/regression/721-nested-streamed-subtest.t
 cpan/Test-Simple/t/regression/757-reset_in_subtest.t
 cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t
 cpan/Test-Simple/t/regression/builder_does_not_init.t
+cpan/Test-Simple/t/regression/errors_facet.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t
