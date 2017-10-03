@@ -25,6 +25,8 @@ sub BEGIN {
 use Storable ();
 use Test::More tests => 9;
 
+$Storable::flags = Storable::FLAGS_COMPAT;
+
 my $ddd = bless { }, 'Foo';
 my $eee = bless { Bar => $ddd }, 'Bar';
 $ddd->{Foo} = $eee;

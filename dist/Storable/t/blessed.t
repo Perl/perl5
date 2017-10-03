@@ -38,6 +38,8 @@ use Test::More;
 
 use Storable qw(freeze thaw store retrieve);
 
+$Storable::flags = Storable::FLAGS_COMPAT;
+
 {
     %::weird_refs = (
         REF     => \(my $aref    = []),
@@ -48,7 +50,7 @@ use Storable qw(freeze thaw store retrieve);
 }
 
 my $test = 12;
-my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
+my $tests = $test + 21 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
 plan(tests => $tests);
 
 package SHORT_NAME;
@@ -178,7 +180,6 @@ foreach $count (1..3) {
 
 package HAS_HOOK;
 
-$loaded_count = 0;
 $thawed_count = 0;
 
 sub make {
@@ -190,15 +191,19 @@ sub STORABLE_freeze {
   return '';
 }
 
+sub STORABLE_thaw {
+  my $self = shift;
+  $thawed_count++;
+  return $self;
+}
+
 package main;
 
 my $f = freeze (HAS_HOOK->make);
 
-is($HAS_HOOK::loaded_count, 0);
 is($HAS_HOOK::thawed_count, 0);
 
 my $t = thaw $f;
-is($HAS_HOOK::loaded_count, 1);
 is($HAS_HOOK::thawed_count, 1);
 isnt($t, undef);
 is(ref $t, 'HAS_HOOK');
@@ -206,8 +211,11 @@ is(ref $t, 'HAS_HOOK');
 delete $INC{"HAS_HOOK.pm"};
 delete $HAS_HOOK::{STORABLE_thaw};
 
+$t = eval { thaw $f; };
+ok($@);
+
+require HAS_HOOK;
 $t = thaw $f;
-is($HAS_HOOK::loaded_count, 2);
 is($HAS_HOOK::thawed_count, 2);
 isnt($t, undef);
 is(ref $t, 'HAS_HOOK');

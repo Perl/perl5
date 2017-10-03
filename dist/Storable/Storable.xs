@@ -344,6 +344,7 @@ typedef struct stcxt {
 	SV *prev;		/* contexts chained backwards in real recursion */
 	SV *my_sv;		/* the blessed scalar who's SvPVX() I am */
 	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
+	int flags;		/* controls whether to bless or tie objects */
 } stcxt_t;
 
 static int storable_free(pTHX_ SV *sv, MAGIC* mg);
@@ -769,6 +770,12 @@ static stcxt_t *Context_ptr = NULL;
 #define SHV_K_PLACEHOLDER	0x10
 
 /*
+ * flags to allow blessing and/or tieing data the data we load
+ */
+#define FLAG_BLESS_OK 2
+#define FLAG_TIE_OK 4
+
+/*
  * Before 0.6, the magic string was "perl-store" (binary version number 0).
  *
  * Since 0.6 introduced many binary incompatibilities, the magic string has
@@ -1083,16 +1090,21 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define BLESS(s,stash) 						\
   STMT_START {								\
 	SV *ref;								\
-	TRACEME(("blessing 0x%" UVxf " in %s", PTR2UV(s), (HvNAME_get(stash))));\
-	ref = newRV_noinc(s);					\
-	if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
-	{ \
-	    cxt->in_retrieve_overloaded = 0; \
-		SvAMAGIC_on(ref);                            \
+	if (cxt->flags & FLAG_BLESS_OK) {		\
+		TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
+		ref = newRV_noinc(s);					\
+		if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
+		{ \
+		    cxt->in_retrieve_overloaded = 0; \
+			SvAMAGIC_on(ref);                            \
+		} \
+		(void) sv_bless(ref, stash);			\
+		SvRV_set(ref, NULL);						\
+		SvREFCNT_dec(ref);						\
 	} \
-	(void) sv_bless(ref, stash);			\
-	SvRV_set(ref, NULL);						\
-	SvREFCNT_dec(ref);						\
+	else {									\
+		TRACEME(("not blessing 0x%"UVxf" in %s", PTR2UV(s), (p))); \
+	}										\
   } STMT_END
 /*
  * sort (used in store_hash) - conditionally use qsort when
@@ -4365,6 +4377,15 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 
 	/*
 	 * Look up the STORABLE_attach hook
+	 * If blessing is disabled, just return what we've got.
+	 */
+	if (!(cxt->flags & FLAG_BLESS_OK)) {
+		TRACEME(("skipping bless because flags is %d", cxt->flags));
+		return sv;
+	}
+
+	/*
+	 * Bless the object and look up the STORABLE_thaw hook.
 	 */
 	stash = gv_stashpv(classname, GV_ADD);
 
@@ -4413,33 +4434,9 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 
 	BLESS(sv, stash);
 
-	hook = pkg_can(aTHX_ cxt->hook, stash, "STORABLE_thaw");
-	if (!hook) {
-		/*
-		 * Hook not found.  Maybe they did not require the module where this
-		 * hook is defined yet?
-		 *
-		 * If the load below succeeds, we'll be able to find the hook.
-		 * Still, it only works reliably when each class is defined in a
-		 * file of its own.
-		 */
-
-		TRACEME(("No STORABLE_thaw defined for objects of class %s", classname));
-		TRACEME(("Going to load module '%s'", classname));
-	        load_module(PERL_LOADMOD_NOIMPORT, newSVpv(classname, 0), Nullsv);
-
-		/*
-		 * We cache results of pkg_can, so we need to uncache before attempting
-		 * the lookup again.
-		 */
-
-		pkg_uncache(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-		hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-
-		if (!hook)
-			CROAK(("No STORABLE_thaw defined for objects of class %s "
-					"(even after a \"require %s;\")", classname, classname));
-	}
+	hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+	if (!hook)
+		CROAK(("No STORABLE_thaw defined for objects of class %s", classname));
 
 	/*
 	 * If we don't have an 'av' yet, prepare one.
@@ -4734,6 +4731,10 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname)
 
 	TRACEME(("retrieve_tied_array (#%d)", cxt->tagnum));
 
+	if (!(cxt->flags & FLAG_TIE_OK)) {
+		CROAK(("Tying is disabled."));
+	}
+
 	tv = NEWSV(10002, 0);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(tv, stash, 0);			/* Will return if tv is null */
@@ -4765,6 +4766,10 @@ static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname)
 
 	TRACEME(("retrieve_tied_hash (#%d)", cxt->tagnum));
 
+	if (!(cxt->flags & FLAG_TIE_OK)) {
+		CROAK(("Tying is disabled."));
+	}
+
 	tv = NEWSV(10002, 0);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(tv, stash, 0);			/* Will return if tv is null */
@@ -4794,6 +4799,10 @@ static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 
 	TRACEME(("retrieve_tied_scalar (#%d)", cxt->tagnum));
+
+	if (!(cxt->flags & FLAG_TIE_OK)) {
+		CROAK(("Tying is disabled."));
+	}
 
 	tv = NEWSV(10002, 0);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
@@ -4834,6 +4843,10 @@ static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, const char *cname)
 
 	TRACEME(("retrieve_tied_key (#%d)", cxt->tagnum));
 
+	if (!(cxt->flags & FLAG_TIE_OK)) {
+		CROAK(("Tying is disabled."));
+	}
+
 	tv = NEWSV(10002, 0);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(tv, stash, 0);			/* Will return if tv is null */
@@ -4867,6 +4880,10 @@ static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname)
 	I32 idx;
 
 	TRACEME(("retrieve_tied_idx (#%d)", cxt->tagnum));
+
+	if (!(cxt->flags & FLAG_TIE_OK)) {
+		CROAK(("Tying is disabled."));
+	}
 
 	tv = NEWSV(10002, 0);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
@@ -6271,7 +6288,8 @@ static SV *do_retrieve(
         pTHX_
 	PerlIO *f,
 	SV *in,
-	int optype)
+	int optype,
+	int flags)
 {
 	dSTCXT;
 	SV *sv;
@@ -6279,8 +6297,10 @@ static SV *do_retrieve(
 	int pre_06_fmt = 0;			/* True with pre Storable 0.6 formats */
 
 	TRACEME(("do_retrieve (optype = 0x%x)", optype));
+	TRACEME(("do_retrieve (flags = 0x%x)", flags));
 
 	optype |= ST_RETRIEVE;
+	cxt->flags = flags;
 
 	/*
 	 * Sanity assertions for retrieve dispatch tables.
@@ -6307,8 +6327,10 @@ static SV *do_retrieve(
 	 * re-enter retrieve() via the hooks.
 	 */
 
-	if (cxt->entry)
+	if (cxt->entry) {
 		cxt = allocate_context(aTHX_ cxt);
+		cxt->flags = flags;
+	}
 
 	cxt->entry++;
 
@@ -6501,10 +6523,12 @@ static SV *do_retrieve(
  *
  * Retrieve data held in file and return the root object, undef on error.
  */
-static SV *pretrieve(pTHX_ PerlIO *f)
+static SV *pretrieve(pTHX_ PerlIO *f, SV *flag)
 {
+	int flags;
 	TRACEME(("pretrieve"));
-	return do_retrieve(aTHX_ f, Nullsv, 0);
+	flags = (int)SvIV(flag);
+	return do_retrieve(aTHX_ f, Nullsv, 0, flags);
 }
 
 /*
@@ -6512,10 +6536,12 @@ static SV *pretrieve(pTHX_ PerlIO *f)
  *
  * Retrieve data held in scalar and return the root object, undef on error.
  */
-static SV *mretrieve(pTHX_ SV *sv)
+static SV *mretrieve(pTHX_ SV *sv, SV *flag)
 {
+	int flags;
 	TRACEME(("mretrieve"));
-	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0);
+	flags = (int)SvIV(flag);
+	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0, flags);
 }
 
 /***
@@ -6600,7 +6626,7 @@ static SV *dclone(pTHX_ SV *sv)
 	 */
 
 	cxt->s_tainted = SvTAINTED(sv);
-	out = do_retrieve(aTHX_ (PerlIO*) 0, Nullsv, ST_CLONE);
+	out = do_retrieve(aTHX_ (PerlIO*) 0, Nullsv, ST_CLONE, FLAG_BLESS_OK | FLAG_TIE_OK);
 
 	TRACEME(("dclone returns 0x%" UVxf, PTR2UV(out)));
 
@@ -6713,18 +6739,20 @@ SV *	obj
   RETVAL
 
 SV *
-pretrieve(f)
+pretrieve(f, flag)
 InputStream	f
+SV *	flag
  CODE:
-  RETVAL = pretrieve(aTHX_ f);
+  RETVAL = pretrieve(aTHX_ f, flag);
  OUTPUT:
   RETVAL
 
 SV *
-mretrieve(sv)
+mretrieve(sv, flag)
 SV *	sv
+SV *	flag
  CODE:
-  RETVAL = mretrieve(aTHX_ sv);
+  RETVAL = mretrieve(aTHX_ sv, flag);
  OUTPUT:
   RETVAL
 

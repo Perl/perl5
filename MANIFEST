@@ -3692,6 +3692,7 @@ dist/Storable/t/dclone.t		See if Storable works
 dist/Storable/t/destroy.t		Test Storable in global destructon
 dist/Storable/t/downgrade.t		See if Storable works
 dist/Storable/t/file_magic.t		See if file_magic function works
+dist/Storable/t/flags.t			See if Storable works
 dist/Storable/t/forgive.t		See if Storable works
 dist/Storable/t/freeze.t		See if Storable works
 dist/Storable/t/HAS_ATTACH.pm		For auto-requiring of modules for STORABLE_attach

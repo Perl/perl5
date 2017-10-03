@@ -17,6 +17,9 @@ sub BEGIN {
 }
 
 use Storable qw(freeze thaw dclone);
+
+$Storable::flags = Storable::FLAGS_COMPAT;
+
 use Test::More tests => 33;
 
 package OBJ_REAL;
