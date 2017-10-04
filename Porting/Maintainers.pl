@@ -1249,6 +1249,7 @@ use File::Glob qw(:case);
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
             qw( lib/version.pm
+                vutil.c
                 ),
         ],
 
