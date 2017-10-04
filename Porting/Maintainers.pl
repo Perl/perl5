@@ -953,6 +953,8 @@ use File::Glob qw(:case);
             # this file lives outside the cpan/ directory
             'pod/perlpodstyle.pod' => 'pod/perlpodstyle.pod',
         },
+
+        'CUSTOMIZED'   => [ qw[ pod/perlpodstyle.pod ] ],
     },
 
     'Safe' => {
