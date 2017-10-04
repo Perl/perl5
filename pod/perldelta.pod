@@ -89,7 +89,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Calls to C<require> for an already loaded module are now slightly
+faster.  [perl #132171]
 
 =back
 
