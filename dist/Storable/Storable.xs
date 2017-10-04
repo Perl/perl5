@@ -2403,7 +2403,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 		I32 l = (I32)len;
 		PUTMARK(SX_ARRAY);
 		WLEN(l);
-		TRACEME(("size = %d", l));
+		TRACEME(("size = %d", (int)l));
 	}
 	/*
 	 * Now store each item recursively.
@@ -2528,8 +2528,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	} else {
 		I32 l = (I32)len;
 		if (flagged_hash) {
-			TRACEME(("store_hash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
-				 (int) hash_flags));
+			TRACEME(("store_hash (0x%" UVxf") (flags %x)", PTR2UV(hv),
+				 (unsigned int)hash_flags));
 			PUTMARK(SX_FLAG_HASH);
 			PUTMARK(hash_flags);
 		} else {
@@ -2537,7 +2537,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			PUTMARK(SX_HASH);
 		}
 		WLEN(l);
-		TRACEME(("size = %d, used = %d", l, (int)HvUSEDKEYS(hv)));
+		TRACEME(("size = %d, used = %d", (int)l, (int)HvUSEDKEYS(hv)));
 	}
 
 	/*
@@ -3171,7 +3171,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Idem, for -Wall */
 			return ret;
 
-		TRACEME(("store_tied_item: storing IDX %d", idx));
+		TRACEME(("store_tied_item: storing IDX %d", (int)idx));
 
 		WLEN(idx);
 	}
@@ -3507,10 +3507,10 @@ static int store_hook(
 
 check_done:
 	if (!known_class(aTHX_ cxt, classname, len, &classnum)) {
-		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
+            TRACEME(("first time we see class %s, ID = %d", classname, (int)classnum));
 		classnum = -1;				/* Mark: we must store classname */
 	} else {
-		TRACEME(("already seen class %s, ID = %d", classname, classnum));
+            TRACEME(("already seen class %s, ID = %d", classname, (int)classnum));
 	}
 
 	/*
@@ -3705,7 +3705,7 @@ static int store_blessed(
 	 */
 
 	if (known_class(aTHX_ cxt, classname, len, &classnum)) {
-		TRACEME(("already seen class %s, ID = %d", classname, classnum));
+                TRACEME(("already seen class %s, ID = %d", classname, (int)classnum));
 		PUTMARK(SX_IX_BLESS);
 		if (classnum <= LG_BLESS) {
 			unsigned char cnum = (unsigned char) classnum;
@@ -3716,7 +3716,7 @@ static int store_blessed(
 			WLEN(classnum);
 		}
 	} else {
-		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
+                TRACEME(("first time we see class %s, ID = %d", classname, (int)classnum));
 		PUTMARK(SX_BLESS);
 		if (len <= LG_BLESS) {
 			unsigned char clen = (unsigned char) len;
@@ -3974,7 +3974,7 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 
 undef_special_case:
 	TRACEME(("storing 0x%" UVxf " tag #%d, type %d...",
-		 PTR2UV(sv), (int)cxt->tagnum, type));
+		 PTR2UV(sv), (int)cxt->tagnum, (int)type));
 
 	if (SvOBJECT(sv)) {
 		HV *pkg = SvSTASH(sv);
@@ -3984,7 +3984,7 @@ undef_special_case:
 
 	TRACEME(("%s (stored 0x%" UVxf ", refcnt=%d, %s)",
 		ret ? "FAILED" : "ok", PTR2UV(sv),
-		SvREFCNT(sv), sv_reftype(sv, FALSE)));
+                 (int)SvREFCNT(sv), sv_reftype(sv, FALSE)));
 
 	return ret;
 }
@@ -4288,7 +4288,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 
 	classname = SvPVX(*sva);	/* We know it's a PV, by construction */
 
-	TRACEME(("class ID %d => %s", idx, classname));
+	TRACEME(("class ID %d => %s", (int)idx, classname));
 
 	/*
 	 * Retrieve object and bless it.
@@ -4327,10 +4327,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	GETMARK(len);			/* Length coded on a single char? */
 	if (len & 0x80) {
 		RLEN(len);
-		TRACEME(("** allocating %d bytes for class name", len+1));
-		if (len > I32_MAX) {
-			CROAK(("Corrupted classname length"));
-		}
+		TRACEME(("** allocating %d bytes for class name", (int)len+1));
 		New(10003, classname, len+1, char);
 		malloced_classname = classname;
 	}
@@ -4498,7 +4495,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
                                " should have been seen already", (IV) idx));
 
 		classname = SvPVX(*sva);	/* We know it's a PV, by construction */
-		TRACEME(("class ID %d => %s", idx, classname));
+		TRACEME(("class ID %d => %s", (int)idx, classname));
 
 	} else {
 		/*
@@ -4520,7 +4517,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		}
 
 		if (len > LG_BLESS) {
-			TRACEME(("** allocating %d bytes for class name", len+1));
+                        TRACEME(("** allocating %d bytes for class name", (int)len+1));
 			New(10003, classname, len+1, char);
 			malloced_classname = classname;
 		}
@@ -4567,7 +4564,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	if (cxt->s_tainted)				/* Is input source tainted? */
 		SvTAINT(frozen);
 
-	TRACEME(("frozen string: %d bytes", len2));
+	TRACEME(("frozen string: %d bytes", (int)len2));
 
 	/*
 	 * Decode object-ID list length, if present.
@@ -4585,7 +4582,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		}
 	}
 
-	TRACEME(("has %d object IDs to link", len3));
+	TRACEME(("has %d object IDs to link", (int)len3));
 
 	/*
 	 * Read object-ID list into array.
@@ -5649,7 +5646,7 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	RLEN(len);
-	TRACEME(("size = %d", len));
+	TRACEME(("size = %d", (int)len));
 	av = newAV();
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(av, stash, 0);			/* Will return if array not allocated nicely */
@@ -5840,13 +5837,13 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	RLEN(len);
-	TRACEME(("size = %d", len));
+	TRACEME(("size = %d", (int)len));
 	hv = newHV();
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	TRACEME(("split %d", len+1));
+	TRACEME(("split %d", (int)len+1));
 	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
 
 	/*
@@ -5930,14 +5927,14 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
 
 	RLEN(len);
-	TRACEME(("size = %d, flags = %d", len, hash_flags));
+	TRACEME(("size = %d, flags = %d", (int)len, hash_flags));
 	hv = newHV();
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	TRACEME(("split %d", len+1));
-	hv_ksplit(hv, len+1);	/* pre-extend hash to save multiple splits */
+	TRACEME(("split %d", (int)len+1));
+	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
 
 	/*
 	 * Now get each key/value pair in turn...
@@ -6195,7 +6192,7 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	RLEN(len);
-	TRACEME(("size = %d", len));
+	TRACEME(("size = %d", (int)len));
 	av = newAV();
 	SEEN0_NN(av, 0);			/* Will return if array not allocated nicely */
 	if (len)
@@ -6258,12 +6255,12 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	RLEN(len);
-	TRACEME(("size = %d", len));
+	TRACEME(("size = %d", (int)len));
 	hv = newHV();
 	SEEN0_NN(hv, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	TRACEME(("split %d", len+1));
+	TRACEME(("split %d", (int)len+1));
 	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
 
 	/*
@@ -6572,8 +6569,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
                                        " should have been retrieved already",
 					(IV) tagn));
 			sv = *svh;
-			TRACEME(("has retrieved #%d at 0x%" UVxf, tagn,
-                                 PTR2UV(sv)));
+			TRACEME(("has retrieved #%d at 0x%" UVxf, (int)tagn, PTR2UV(sv)));
 			SvREFCNT_inc(sv);	/* One more reference to this same sv */
 			return sv;			/* The SV pointer where object was retrieved */
 		}
@@ -6615,7 +6611,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
                                " should have been retrieved already",
 				(IV) tag));
 		sv = *svh;
-		TRACEME(("had retrieved #%d at 0x%" UVxf, tag, PTR2UV(sv)));
+		TRACEME(("had retrieved #%d at 0x%" UVxf, (int)tag, PTR2UV(sv)));
 		SvREFCNT_inc(sv);	/* One more reference to this same sv */
 		return sv;			/* The SV pointer where object was retrieved */
 	} else if (type >= SX_ERROR && cxt->ver_minor > STORABLE_BIN_MINOR) {
@@ -6679,7 +6675,7 @@ first_time:		/* Will disappear when support for old format is dropped */
 	}
 
 	TRACEME(("ok (retrieved 0x%" UVxf ", refcnt=%d, %s)", PTR2UV(sv),
-		SvREFCNT(sv) - 1, sv_reftype(sv, FALSE)));
+                 (int)SvREFCNT(sv) - 1, sv_reftype(sv, FALSE)));
 
 	return sv;	/* Ok */
 }
