@@ -419,6 +419,15 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
 #    define PerlMemShared PerlMem
 #endif
 
+/* make freed ops die if they're inadvertently executed */
+#ifdef DEBUGGING
+static OP *
+S_pp_freed(pTHX)
+{
+    DIE(aTHX_ "panic: freed op 0x%p called\n", PL_op);
+}
+#endif
+
 void
 Perl_Slab_Free(pTHX_ void *op)
 {
@@ -426,6 +435,10 @@ Perl_Slab_Free(pTHX_ void *op)
     OPSLAB *slab;
 
     PERL_ARGS_ASSERT_SLAB_FREE;
+
+#ifdef DEBUGGING
+    o->op_ppaddr = S_pp_freed;
+#endif
 
     if (!o->op_slabbed) {
         if (!o->op_static)
