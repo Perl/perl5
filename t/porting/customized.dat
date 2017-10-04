@@ -16,5 +16,7 @@ Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
+perlfaq cpan/perlfaq/lib/perlfaq5.pod bcc1b6af3b6dff3973643acf8d5e741463374123
+perlfaq cpan/perlfaq/lib/perlfaq8.pod bffbc0c8fa828aead24e0891a5e789369a8e0743
 podlators pod/perlpodstyle.pod c6500c9950b46e8228d4adbc09a3ee2ef23de2d0
 version cpan/version/lib/version.pm bee369df1bd84e09107a90d72ec12c38bcb97cce

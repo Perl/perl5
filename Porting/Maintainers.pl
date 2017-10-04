@@ -884,6 +884,8 @@ use File::Glob qw(:case);
                 t/00-compile.t),
             qr{^xt/},
         ],
+
+        'CUSTOMIZED'   => [ qw[ lib/perlfaq5.pod lib/perlfaq8.pod ] ],
     },
 
     'PerlIO::via::QuotedPrint' => {
