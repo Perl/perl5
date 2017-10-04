@@ -344,7 +344,8 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
-        ]
+        ],
+        'CUSTOMIZED'   => [ qw[ parts/embed.fnc ] ],
     },
 
     'Devel::SelfStubber' => {
