@@ -543,6 +543,7 @@ use File::Glob qw(:case);
                 t/sh.t
                 t/tee.t
                 t/z_kwalitee.t
+                t/z_manifest.t
                 t/z_meta.t
                 t/z_perl_minimum_version.t
                 t/z_pod-coverage.t
@@ -550,10 +551,10 @@ use File::Glob qw(:case);
                 ),
         ],
         'MAP' => {
-            'Call/'          => 'cpan/Filter-Util-Call/',
-            'filter-util.pl' => 'cpan/Filter-Util-Call/filter-util.pl',
-            'perlfilter.pod' => 'pod/perlfilter.pod',
-            ''               => 'cpan/Filter-Util-Call/',
+            'Call/'            => 'cpan/Filter-Util-Call/',
+            't/filter-util.pl' => 'cpan/Filter-Util-Call/filter-util.pl',
+            'perlfilter.pod'   => 'pod/perlfilter.pod',
+            ''                 => 'cpan/Filter-Util-Call/',
         },
     },
 
