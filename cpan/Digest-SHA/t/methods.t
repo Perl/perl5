@@ -21,7 +21,7 @@ my @out = (
 	"248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
 );
 
-my $numtests = 9 + scalar @out;
+my $numtests = 6 + scalar @out;
 print "1..$numtests\n";
 
 	# attempt to use an invalid algorithm, and check for failure
@@ -70,35 +70,6 @@ $fh->close;
 	# test addfile using file name instead of handle
 
 print "not " unless $sha->addfile($tempfile, "b")->hexdigest eq $rsp;
-print "ok ", $testnum++, "\n";
-
-	# test addfile portable mode
-
-$fh = FileHandle->new($tempfile, "w");
-binmode($fh);
-print $fh "abc\012" x 2048;		# using UNIX newline
-$fh->close;
-
-print "not " unless $sha->new(1)->addfile($tempfile, "p")->hexdigest eq
-	"d449e19c1b0b0c191294c8dc9fa2e4a6ff77fc51";
-print "ok ", $testnum++, "\n";
-
-$fh = FileHandle->new($tempfile, "w");
-binmode($fh);
-print $fh "abc\015\012" x 2048;		# using DOS/Windows newline
-$fh->close;
-
-print "not " unless $sha->new(1)->addfile($tempfile, "p")->hexdigest eq
-	"d449e19c1b0b0c191294c8dc9fa2e4a6ff77fc51";
-print "ok ", $testnum++, "\n";
-
-$fh = FileHandle->new($tempfile, "w");
-binmode($fh);
-print $fh "abc\015" x 2048;		# using early-Mac newline
-$fh->close;
-
-print "not " unless $sha->new(1)->addfile($tempfile, "p")->hexdigest eq
-	"d449e19c1b0b0c191294c8dc9fa2e4a6ff77fc51";
 print "ok ", $testnum++, "\n";
 
 	# test addfile "universal newlines" mode
