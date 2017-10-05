@@ -2,7 +2,7 @@ package Test2::EventFacet::Meta;
 use strict;
 use warnings;
 
-our $VERSION = '1.302097';
+our $VERSION = '1.302098';
 
 BEGIN { require Test2::EventFacet; our @ISA = qw(Test2::EventFacet) }
 use vars qw/$AUTOLOAD/;

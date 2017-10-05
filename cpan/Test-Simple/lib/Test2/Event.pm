@@ -2,7 +2,7 @@ package Test2::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302097';
+our $VERSION = '1.302098';
 
 use Test2::Util::HashBase qw/trace -amnesty/;
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;

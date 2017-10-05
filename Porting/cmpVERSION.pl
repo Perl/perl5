@@ -81,6 +81,7 @@ if ($exclude_upstream) {
 # usually because they pull in their version from some other file.
 my %skip;
 @skip{
+    'cpan/Test-Simple/lib/Test/Builder/IO/Scalar.pm', #
     'cpan/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm',  # just a test module
