@@ -261,6 +261,22 @@ perl_construct(pTHXx)
 
     init_constants();
 
+    SvREADONLY_on(&PL_sv_placeholder);
+    SvREFCNT(&PL_sv_placeholder) = SvREFCNT_IMMORTAL;
+
+    PL_sighandlerp = (Sighandler_t) Perl_sighandler;
+#ifdef PERL_USES_PL_PIDSTATUS
+    PL_pidstatus = newHV();
+#endif
+
+    PL_rs = newSVpvs("\n");
+
+    init_stacks();
+
+/* The PERL_INTERNAL_RAND_SEED set-up must be after init_stacks because it calls
+ * things that may put SVs on the stack.
+ */
+
 #ifdef NO_PERL_INTERNAL_RAND_SEED
     Perl_drand48_init_r(&PL_internal_random_state, seed());
 #else
@@ -276,18 +292,6 @@ perl_construct(pTHXx)
         Perl_drand48_init_r(&PL_internal_random_state, (U32)seed);
     }
 #endif
-
-    SvREADONLY_on(&PL_sv_placeholder);
-    SvREFCNT(&PL_sv_placeholder) = SvREFCNT_IMMORTAL;
-
-    PL_sighandlerp = (Sighandler_t) Perl_sighandler;
-#ifdef PERL_USES_PL_PIDSTATUS
-    PL_pidstatus = newHV();
-#endif
-
-    PL_rs = newSVpvs("\n");
-
-    init_stacks();
 
     init_ids();
 
