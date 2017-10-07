@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.28';
+$VERSION = '3.2801';
 
 #..........................................................................
 
@@ -486,11 +486,6 @@ sub init_formatter_class_list {
 
   $self->opt_M_with('Pod::Perldoc::ToPod');   # the always-there fallthru
   $self->opt_o_with('text');
-  $self->opt_o_with('term') 
-    unless $self->is_mswin32 || $self->is_dos || $self->is_amigaos
-       || !($ENV{TERM} && (
-              ($ENV{TERM} || '') !~ /dumb|emacs|none|unknown/i
-           ));
 
   return;
 }
@@ -1937,11 +1932,6 @@ sub page {  # apply a pager to the output file
 	    } elsif($self->is_amigaos) { 
                 last if system($pager, $output) == 0;
             } else {
-                my $formatter = $self->{'formatter_class'};
-                if ( $formatter->can('pager_configuration') ) {
-                  $self->aside("About to call $formatter" . "->pager_configuration(\"$pager\")\n");
-                  $formatter->pager_configuration($pager, $self);
-                }
                 last if system("$pager \"$output\"") == 0;
             }
         }
