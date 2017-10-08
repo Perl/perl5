@@ -3769,6 +3769,13 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
             const char * oldp = SvPV(cSVOPx_sv(*proto), old_len);
             const char * newp = SvPV(cSVOPx_sv(new_proto), new_len);
 
+            if (curstash && svname == (SV *)name
+             && !memchr(SvPVX(svname), ':', SvCUR(svname))) {
+                svname = sv_2mortal(newSVsv(PL_curstname));
+                sv_catpvs(svname, "::");
+                sv_catsv(svname, (SV *)name);
+            }
+
             Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
                 "Prototype '%" UTF8f "' overridden by attribute 'prototype(%" UTF8f ")'"
                 " in %" SVf,
@@ -8583,7 +8590,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	   sub is stored in.  */
 	const I32 flags =
 	   ec ? GV_NOADD_NOINIT
-	      :   PL_curstash != CopSTASH(PL_curcop)
+	      :   IN_PERL_RUNTIME && PL_curstash != CopSTASH(PL_curcop)
 	       || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
 		    ? gv_fetch_flags
 		    : GV_ADDMULTI | GV_NOINIT | GV_NOTQUAL;
@@ -8900,6 +8907,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		SvROK_on(gv);
 	    }
 	    SvRV_set(gv, (SV *)cv);
+	    if (HvENAME_HEK(PL_curstash))
+		mro_method_changed_in(PL_curstash);
 	}
     }
 
@@ -11598,11 +11607,18 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     }
     if (SvTYPE((SV*)cv) != SVt_PVCV)
 	return NULL;
-    if (flags & (RV2CVOPCV_RETURN_NAME_GV|RV2CVOPCV_MAYBE_NAME_GV)) {
-	if ((!CvANON(cv) || !gv) && !CvLEXICAL(cv)
-	 && ((flags & RV2CVOPCV_RETURN_NAME_GV) || !CvNAMED(cv)))
+    if (flags & RV2CVOPCV_RETURN_NAME_GV) {
+	if ((!CvANON(cv) && !CvLEXICAL(cv)) || !gv)
 	    gv = CvGV(cv);
 	return (CV*)gv;
+    }
+    else if (flags & RV2CVOPCV_MAYBE_NAME_GV) {
+	if (CvLEXICAL(cv) || CvNAMED(cv))
+	    return NULL;
+	if (!CvANON(cv) || !gv)
+	    gv = CvGV(cv);
+	return (CV*)gv;
+
     } else {
 	return cv;
     }

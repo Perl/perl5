@@ -2295,7 +2295,10 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv, U32 flags)
 		if (CvLEXICAL(cv) || flags & CV_NAME_NOTQUAL)
 		    sv_sethek(retsv, CvNAME_HEK(cv));
 		else {
-		    sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
+		    if (CvSTASH(cv) && HvNAME_HEK(CvSTASH(cv)))
+			sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
+		    else
+			sv_setpvs(retsv, "__ANON__");
 		    sv_catpvs(retsv, "::");
 		    sv_cathek(retsv, CvNAME_HEK(cv));
 		}
