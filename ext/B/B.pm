@@ -257,7 +257,6 @@ sub walkoptree_exec {
 sub walksymtable {
     my ($symref, $method, $recurse, $prefix) = @_;
     my $sym;
-    my $ref;
     my $fullname;
     no strict 'refs';
     $prefix = '' unless defined $prefix;
