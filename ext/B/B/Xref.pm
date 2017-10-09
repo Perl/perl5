@@ -1,6 +1,6 @@
 package B::Xref;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 =head1 NAME
 
