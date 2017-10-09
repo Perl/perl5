@@ -143,7 +143,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 use strict;
 use Config;
 use B qw(peekop class comppadlist main_start svref_2object walksymtable
-         OPpLVAL_INTRO SVf_POK OPpOUR_INTRO cstring
+         OPpLVAL_INTRO SVf_POK SVf_ROK OPpOUR_INTRO cstring
         );
 
 sub UNKNOWN { ["?", "?", "?"] }
@@ -331,7 +331,13 @@ sub pp_gv {
     }
     else {
 	$gv = $op->gv;
-	$top = [$gv->STASH->NAME, "*", $gv->SAFENAME];
+	if ($gv->FLAGS & SVf_ROK) { # sub ref
+	    my $cv = $gv->RV;
+	    $top = [$cv->STASH->NAME, '*', B::safename($cv->NAME_HEK)]
+	}
+	else {
+	    $top = [$gv->STASH->NAME, '*', $gv->SAFENAME];
+	}
     }
     process($top, $op->private & OPpLVAL_INTRO ? "intro" : "used");
 }
