@@ -1,7 +1,7 @@
 package Encode::MIME::Name;
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 1.2 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 1.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 # NOTE: This table must be 1:1 mapping
 our %MIME_NAME_OF = (
@@ -38,6 +38,7 @@ our %MIME_NAME_OF = (
     'cp866'                 => 'IBM866',
     'cp869'                 => 'IBM869',
     'cp936'                 => 'GBK',
+    'euc-cn'                => 'EUC-CN',
     'euc-jp'                => 'EUC-JP',
     'euc-kr'                => 'EUC-KR',
     #'gb2312-raw'            => 'GB2312', # no, you're wrong, I18N::Charset

@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.21 2017/07/18 07:15:29 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 2.22 2017/10/06 22:21:53 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
@@ -20,7 +20,7 @@ if (!$ENV{PERL_CORE}) {
     $gccver =~ s/\.//g; $gccver =~ s/ .*//;
     $gccver .= "0" while length $gccver < 3;
     $gccver = 0+$gccver;
-    $ccflags .= ' -Werror=declaration-after-statement' if $gccver > 400;
+    $ccflags .= ' -Werror=declaration-after-statement' if $gccver > 412;
     $ccflags .= ' -Wpointer-sign' if !$Config{d_cplusplus} and $gccver > 400;
     $ccflags .= ' -fpermissive' if $Config{d_cplusplus};
   }
