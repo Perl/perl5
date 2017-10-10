@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -52,7 +52,7 @@ sub encode($$;$) {
     # empty the input string in the stack so perlio is ok
     $_[1] = '' if $chk;
     my ( $h2z, $jis0212 ) = @$obj{qw(h2z jis0212)};
-    my $octet = Encode::encode( 'euc-jp', $utf8, $chk );
+    my $octet = Encode::encode( 'euc-jp', $utf8, $chk || 0 );
     $h2z and &Encode::JP::H2Z::h2z( \$octet );
     euc_jis( \$octet, $jis0212 );
     return $octet;

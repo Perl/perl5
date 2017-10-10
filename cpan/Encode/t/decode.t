@@ -1,11 +1,13 @@
 #
-# $Id: decode.t,v 1.3 2016/10/28 05:03:52 dankogai Exp $
+# $Id: decode.t,v 1.4 2017/10/06 22:21:53 dankogai Exp dankogai $
 #
 use strict;
 use Encode qw(decode_utf8 FB_CROAK find_encoding decode);
 use Test::More tests => 17;
+use Test::Builder;
 
 sub croak_ok(&) {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $code = shift;
     eval { $code->() };
     like $@, qr/does not map/;

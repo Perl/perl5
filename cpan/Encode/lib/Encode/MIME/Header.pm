@@ -2,7 +2,7 @@ package Encode::MIME::Header;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = ( q$Revision: 2.27 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.28 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Carp ();
 use Encode ();
@@ -128,26 +128,26 @@ sub decode($$;$) {
                 }
 
                 if ( not defined $enc ) {
-                    Carp::croak qq(Unknown charset "$charset") if not ref $chk and $chk & Encode::DIE_ON_ERR;
-                    Carp::carp qq(Unknown charset "$charset") if not ref $chk and $chk & Encode::WARN_ON_ERR;
-                    $stop = 1 if not ref $chk and $chk & Encode::RETURN_ON_ERR;
+                    Carp::croak qq(Unknown charset "$charset") if not ref $chk and $chk and $chk & Encode::DIE_ON_ERR;
+                    Carp::carp qq(Unknown charset "$charset") if not ref $chk and $chk and $chk & Encode::WARN_ON_ERR;
+                    $stop = 1 if not ref $chk and $chk and $chk & Encode::RETURN_ON_ERR;
                     $output .= ($output =~ /(?:\A|[ \t])$/ ? '' : ' ') . $orig unless $stop; # $orig mime word is separated by whitespace
                     $stop ? $orig : '';
                 } else {
                     if ( uc($mime_enc) eq 'B' and $obj->{decode_b} ) {
                         my $decoded = _decode_b($enc, $text, $chk);
-                        $stop = 1 if not defined $decoded and not ref $chk and $chk & Encode::RETURN_ON_ERR;
+                        $stop = 1 if not defined $decoded and not ref $chk and $chk and $chk & Encode::RETURN_ON_ERR;
                         $output .= (defined $decoded ? $decoded : $text) unless $stop;
                         $stop ? $orig : '';
                     } elsif ( uc($mime_enc) eq 'Q' and $obj->{decode_q} ) {
                         my $decoded = _decode_q($enc, $text, $chk);
-                        $stop = 1 if not defined $decoded and not ref $chk and $chk & Encode::RETURN_ON_ERR;
+                        $stop = 1 if not defined $decoded and not ref $chk and $chk and $chk & Encode::RETURN_ON_ERR;
                         $output .= (defined $decoded ? $decoded : $text) unless $stop;
                         $stop ? $orig : '';
                     } else {
-                        Carp::croak qq(MIME "$mime_enc" unsupported) if not ref $chk and $chk & Encode::DIE_ON_ERR;
-                        Carp::carp qq(MIME "$mime_enc" unsupported) if not ref $chk and $chk & Encode::WARN_ON_ERR;
-                        $stop = 1 if not ref $chk and $chk & Encode::RETURN_ON_ERR;
+                        Carp::croak qq(MIME "$mime_enc" unsupported) if not ref $chk and $chk and $chk & Encode::DIE_ON_ERR;
+                        Carp::carp qq(MIME "$mime_enc" unsupported) if not ref $chk and $chk and $chk & Encode::WARN_ON_ERR;
+                        $stop = 1 if not ref $chk and $chk and $chk & Encode::RETURN_ON_ERR;
                         $output .= ($output =~ /(?:\A|[ \t])$/ ? '' : ' ') . $orig unless $stop; # $orig mime word is separated by whitespace
                         $stop ? $orig : '';
                     }
@@ -198,6 +198,7 @@ sub _decode_q {
 
 sub _decode_octets {
     my ($enc, $octets, $chk) = @_;
+    $chk = 0 unless defined $chk;
     $chk &= ~Encode::LEAVE_SRC if not ref $chk and $chk;
     my $output = $enc->decode($octets, $chk);
     return undef if not ref $chk and $chk and $octets ne '';
@@ -238,7 +239,9 @@ sub _encode_string {
     my ($obj, $str, $chk) = @_;
     my $wordlen = $obj->{bpl} > 76 ? 76 : $obj->{bpl};
     my $enc = Encode::find_mime_encoding($obj->{charset});
-    my $enc_chk = (not ref $chk and $chk) ? ($chk | Encode::LEAVE_SRC) : $chk;
+    my $enc_chk = $chk;
+    $enc_chk = 0 unless defined $enc_chk;
+    $enc_chk |= Encode::LEAVE_SRC if not ref $enc_chk and $enc_chk;
     my @result = ();
     my $octets = '';
     while ( length( my $chr = substr($str, 0, 1, '') ) ) {
