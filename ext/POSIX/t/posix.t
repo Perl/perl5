@@ -25,7 +25,6 @@ $| = 1;
 
 $Is_W32     = $^O eq 'MSWin32';
 $Is_Dos     = $^O eq 'dos';
-$Is_MacOS   = $^O eq 'MacOS';
 $Is_VMS     = $^O eq 'VMS';
 $Is_OS2     = $^O eq 'os2';
 $Is_UWin    = $^O eq 'uwin';
@@ -91,55 +90,51 @@ SKIP: {
     ok(! $sigset->ismember(1),  'POSIX::SigSet->delset' );
     ok(  $sigset->ismember(3),  'POSIX::SigSet->ismember' );
 
-    SKIP: {
-        skip("no kill() support on Mac OS", 4) if $Is_MacOS;
+    my $sigint_called = 0;
 
-        my $sigint_called = 0;
+    my $mask   = new POSIX::SigSet &SIGINT;
+    my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
+    sigaction(&SIGHUP, $action);
+    $SIG{'INT'} = 'SigINT';
 
-	my $mask   = new POSIX::SigSet &SIGINT;
-	my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
-	sigaction(&SIGHUP, $action);
-	$SIG{'INT'} = 'SigINT';
-
-	# At least OpenBSD/i386 3.3 is okay, as is NetBSD 1.5.
-	# But not NetBSD 1.6 & 1.6.1: the test makes perl crash.
-	# So the kill() must not be done with this config in order to
-	# finish the test.
-	# For others (darwin & freebsd), let the test fail without crashing.
-	# the test passes at least from freebsd 8.1
-	my $todo = $^O eq 'netbsd' && $Config{osvers}=~/^1\.6/;
-	my $why_todo = "# TODO $^O $Config{osvers} seems to lose blocked signals";
-	if (!$todo) { 
-	  kill 'HUP', $$; 
-	} else {
-	  print "not ok 9 - sigaction SIGHUP ",$why_todo,"\n";
-	  print "not ok 10 - sig mask delayed SIGINT ",$why_todo,"\n";
-	}
-	sleep 1;
-
-	$todo = 1 if ($^O eq 'freebsd' && $Config{osvers} < 8)
-		  || ($^O eq 'darwin' && $Config{osvers} < '6.6');
-	printf "%s 11 - masked SIGINT received %s\n",
-	    $sigint_called ? "ok" : "not ok",
-	    $todo ? $why_todo : '';
-
-	print "ok 12 - signal masks successful\n";
-	
-	sub SigHUP {
-	    print "ok 9 - sigaction SIGHUP\n";
-	    kill 'INT', $$;
-	    sleep 2;
-	    print "ok 10 - sig mask delayed SIGINT\n";
-	}
-
-        sub SigINT {
-            $sigint_called++;
-	}
-
-        # The order of the above tests is very important, so
-        # we use literal prints and hard coded numbers.
-        next_test() for 1..4;
+    # At least OpenBSD/i386 3.3 is okay, as is NetBSD 1.5.
+    # But not NetBSD 1.6 & 1.6.1: the test makes perl crash.
+    # So the kill() must not be done with this config in order to
+    # finish the test.
+    # For others (darwin & freebsd), let the test fail without crashing.
+    # the test passes at least from freebsd 8.1
+    my $todo = $^O eq 'netbsd' && $Config{osvers}=~/^1\.6/;
+    my $why_todo = "# TODO $^O $Config{osvers} seems to lose blocked signals";
+    if (!$todo) {
+      kill 'HUP', $$;
+    } else {
+      print "not ok 9 - sigaction SIGHUP ",$why_todo,"\n";
+      print "not ok 10 - sig mask delayed SIGINT ",$why_todo,"\n";
     }
+    sleep 1;
+
+    $todo = 1 if ($^O eq 'freebsd' && $Config{osvers} < 8)
+              || ($^O eq 'darwin' && $Config{osvers} < '6.6');
+    printf "%s 11 - masked SIGINT received %s\n",
+        $sigint_called ? "ok" : "not ok",
+        $todo ? $why_todo : '';
+
+    print "ok 12 - signal masks successful\n";
+
+    sub SigHUP {
+        print "ok 9 - sigaction SIGHUP\n";
+        kill 'INT', $$;
+        sleep 2;
+        print "ok 10 - sig mask delayed SIGINT\n";
+    }
+
+    sub SigINT {
+        $sigint_called++;
+    }
+
+    # The order of the above tests is very important, so
+    # we use literal prints and hard coded numbers.
+    next_test() for 1..4;
 }
 
 SKIP: {
@@ -283,11 +278,8 @@ try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
     }
 }
 
-SKIP: {
-  skip("no kill() support on Mac OS", 1) if $Is_MacOS;
-  is (eval "kill 0", 0, "check we have CORE::kill")
-    or print "\$\@ is " . _qq($@) . "\n";
-}
+is (eval "kill 0", 0, "check we have CORE::kill")
+  or print "\$\@ is " . _qq($@) . "\n";
 
 # Check that we can import the POSIX kill routine
 POSIX->import ('kill');
@@ -415,7 +407,7 @@ if ($^O eq 'vos') {
 } else {
  $| = 0;
  # The following line assumes buffered output, which may be not true:
- print '@#!*$@(!@#$' unless ($Is_MacOS || $Is_OS2 || $Is_UWin || $Is_OS390 ||
+ print '@#!*$@(!@#$' unless ($Is_OS2 || $Is_UWin || $Is_OS390 ||
                             $Is_VMS ||
 			    (defined $ENV{PERLIO} &&
 			     $ENV{PERLIO} eq 'unix' &&
