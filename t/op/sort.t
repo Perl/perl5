@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 198);
+plan(tests => 203);
 
 # these shouldn't hang
 {
@@ -498,12 +498,15 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 SKIP: {
     skip_if_miniperl("no dynamic loading on miniperl, no extension Scalar::Util", 1);
     require Scalar::Util;
-    my @a = map { \(my $dummy = $_) } qw(c a d b);
-    my $r = $a[1];
-    Scalar::Util::weaken($a[1]);
-    @a = sort { $$a cmp $$b } @a;
-    undef $r;
-    ok defined $a[0] && ${$a[0]} eq 'a', "in-place sort strengthens weak references";
+    for my $i (1..3) {
+        my @s = my @w = map { \(my $dummy = $_) } qw(c a d b)[0..$i-1];
+        Scalar::Util::weaken($_) for @w;
+        @w = sort { $$a cmp $$b } @w;
+        @s = ();
+        ok !Scalar::Util::isweak($_) && defined($_),
+            "in-place sort unweakens references in $i-element array"
+            for @w;
+    }
 }
 
 # Test optimisations of reversed sorts. As we now guarantee stability by
