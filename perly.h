@@ -7,11 +7,11 @@
 #define PERL_BISON_VERSION  30000
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ S_is_opval_token(int type) {
 #endif /* PERL_IN_TOKE_C */
 #endif /* PERL_CORE */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 
@@ -171,6 +171,8 @@ union YYSTYPE
     GV *gvval;
 
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -181,6 +183,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 68a62998f7c607d7a1fa0fdf2d16ec19074c256dde18dfc475daff70d378e025 perly.y
+ * d514ce873054122b7e94010de82cb28120207ef6dab7b4cfa05f58ff7783d355 perly.y
  * 153cba5d215c1a083a0459c43f4d55c45fd0a7093c197d7247a456dcde21ea53 regen_perly.pl
  * ex: set ro: */

@@ -1514,6 +1514,73 @@ while(<$kh>) {
     }
 }
 
+
+{
+    eval 'sub (\$foo) {}';
+    like $@, qr/^Experimental aliasing via reference not enabled/;
+    use feature qw(refaliasing);
+    eval 'sub (\$foo) {}';
+    like $@, qr/^The experimental declared_refs feature is not enabled/;
+    use feature qw(declared_refs);
+    my @warning;
+    local $SIG{__WARN__} = sub { push @warning, $_[0] };
+    ok eval 'sub (\$foo) {}';
+    is $@, '';
+    like $warning[0], qr/^Aliasing via reference is experimental/;
+    like $warning[1], qr/^Declaring references is experimental/;
+}    
+
+{
+    use feature qw(refaliasing declared_refs);
+    no warnings qw(experimental::refaliasing experimental::declared_refs);
+
+    sub sref (\$foo = \42) { $foo }
+    sub aref (\@foo = [42]) { $foo[0] }
+    sub href (\%foo = { foo => 42 }) { $foo{foo} }
+
+    is sref(),    42, 'default scalar refalias argument';
+    is sref(\37), 37, 'scalar refalias argument';
+
+    is aref(),     42, 'default array refalias argument';
+    is aref([37]), 37, 'array refalias argument';
+
+    is href(),            42, 'default hash refalias argument';
+    is href({foo => 37}), 37, 'hash refalias argument';
+
+    sub srefassign(\$foo) { $foo =  42;         0+\$foo }
+    sub arefassign(\@foo) { @foo = (42);        0+\@foo }
+    sub hrefassign(\%foo) { %foo = (foo => 42); 0+\%foo }
+
+    my ($scalar, @array, %hash);
+
+    is srefassign(\$scalar), 0+\$scalar, 'scalar ref is aliased';
+    is arefassign(\@array),  0+\@array,  'array ref is aliased';
+    is hrefassign(\%hash),   0+\%hash,   'hash ref is aliased';
+
+    is $scalar,    42, 'assigning to aliased scalar';
+    is $array[0],  42, 'assigning to aliased array';
+    is $hash{foo}, 42, 'assigning to aliased hash';
+
+    is Internals::SvREFCNT($scalar), 1, 'no leak in scalar refaliasing';
+    is Internals::SvREFCNT(@array),  1, 'no leak in array refaliasing';
+    is Internals::SvREFCNT(%hash) ,  1, 'no leak in hash refaliasing';
+
+    for (
+        [SCALAR => \&sref],
+        [ARRAY  => \&aref],
+        [HASH   => \&href],
+    ) {
+        my ($type, $sub) = @$_;
+        eval { $sub->(42) };
+        like $@, qr/^Subroutine argument is not a reference/,
+            "$type errors on non-reference";
+        eval { $sub->(sub {}) };
+
+        like $@, qr/^Subroutine argument is not an? $type reference/,
+            "$type errors on wrong reference";
+    }
+}
+
 done_testing;
 
 1;

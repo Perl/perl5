@@ -6630,13 +6630,16 @@ PP(pp_argelem)
     AV *defav = GvAV(PL_defgv); /* @_ */
     IV ix = PTR2IV(cUNOP_AUXo->op_aux);
     IV argc;
+    const U8 type = o->op_private & OPpARGELEM_MASK;
 
     /* do 'my $var, @var or %var' action */
     padentry = &(PAD_SVl(o->op_targ));
     save_clearsv(padentry);
     targ = *padentry;
 
-    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV) {
+    if (type == OPpARGELEM_SV
+        || (o->op_private & OPpARGELEM_REFALIAS)
+    ) {
         if (o->op_flags & OPf_STACKED) {
             dSP;
             val = POPs;
@@ -6661,7 +6664,32 @@ PP(pp_argelem)
         if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
             TAINT_NOT;
 
-        SvSetMagicSV(targ, val);
+        if (o->op_private & OPpARGELEM_REFALIAS) {
+            const char *bad = NULL;
+            if (!SvROK(val))
+                Perl_croak_caller("Subroutine argument is not a reference");
+            switch (type) {
+            case OPpARGELEM_SV:
+                if(SvTYPE(SvRV(val)) > SVt_PVLV)
+                    bad = " SCALAR";
+                break;
+            case OPpARGELEM_AV:
+                if(SvTYPE(SvRV(val)) != SVt_PVAV)
+                    bad = "n ARRAY";
+                break;
+            case OPpARGELEM_HV:
+                if(SvTYPE(SvRV(val)) != SVt_PVHV)
+                    bad = " HASH";
+                break;
+            }
+            if (bad)
+                Perl_croak_caller("Subroutine argument is not a%s reference", bad);
+
+            *padentry = SvREFCNT_inc_NN(SvRV(val));
+        }
+        else
+            SvSetMagicSV(targ, val);
+
         return o->op_next;
     }
 
@@ -6672,7 +6700,7 @@ PP(pp_argelem)
 
     /* This is a copy of the relevant parts of pp_aassign().
      */
-    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_AV) {
+    if (type == OPpARGELEM_AV) {
         IV i;
 
         if (AvFILL((AV*)targ) > -1) {
@@ -6714,7 +6742,7 @@ PP(pp_argelem)
     else {
         IV i;
 
-        assert((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_HV);
+        assert(type == OPpARGELEM_HV);
 
         if (SvRMAGICAL(targ) || HvUSEDKEYS((HV*)targ)) {
             /* see "target should usually be empty" comment above */

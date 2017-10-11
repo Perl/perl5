@@ -5170,6 +5170,22 @@ Perl_yylex(pTHX)
         case ',': /* handle ($a,,$b) */
             break;
 
+        case '\\':              /* handle refs */
+            if (!FEATURE_REFALIASING_IS_ENABLED)
+                Perl_croak(aTHX_
+                    "Experimental aliasing via reference not enabled");
+            Perl_ck_warner_d(aTHX_
+		     packWARN(WARN_EXPERIMENTAL__REFALIASING),
+		    "Aliasing via reference is experimental");
+            if (!FEATURE_MYREF_IS_ENABLED)
+                Perl_croak(aTHX_ "The experimental declared_refs "
+                                 "feature is not enabled");
+            Perl_ck_warner_d(aTHX_
+                 packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+                "Declaring references is experimental");
+            
+            break;
+
         default:
             PL_in_my = 0;
             yyerror("A signature parameter must start with '$', '@' or '%'");
