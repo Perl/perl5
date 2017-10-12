@@ -1014,11 +1014,7 @@ EXTERN_C int usleep(unsigned int);
 #endif /* HAS_MEMCPY */
 
 #if !defined(HAS_MEMMOVE) && !defined(memmove)
-#   if defined(HAS_MEMCPY) && defined(HAS_SAFE_MEMCPY)
-#	define memmove(d,s,l) memcpy(d,s,l)
-#   else
-#	define memmove(d,s,l) my_bcopy(s,d,l)
-#   endif
+#   define memmove(d,s,l) my_bcopy(s,d,l)
 #endif
 
 #if defined(mips) && defined(ultrix) && !defined(__STDC__)

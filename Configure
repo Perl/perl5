@@ -747,7 +747,6 @@ d_rint=''
 d_rmdir=''
 d_round=''
 d_safebcpy=''
-d_safemcpy=''
 d_sanemcmp=''
 d_sbrkproto=''
 d_scalbn=''
@@ -17990,82 +17989,6 @@ esac
 set d_safebcpy
 eval $setvar
 
-: can memcpy handle overlapping blocks?
-echo " "
-val="$undef"
-case "$d_memmove" in
-"$define") echo "I'll use memmove() instead of memcpy() for overlapping copies." ;;
-*)	case "$d_memcpy" in
-	"$define")
-		echo "Checking to see if memcpy() can do overlapping copies..." >&4
-		$cat >try.c <<EOCP
-#$i_memory I_MEMORY
-#$i_stdlib I_STDLIB
-#$i_string I_STRING
-#$i_unistd I_UNISTD
-EOCP
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#ifdef I_UNISTD
-#  include <unistd.h>  /* Needed for NetBSD */
-#endif
-int main()
-{
-char buf[128], abc[128];
-char *b;
-int len;
-int off;
-int align;
-
-/* Copy "abcde..." string to char abc[] so that gcc doesn't
-   try to store the string in read-only memory. */
-memcpy(abc, "abcdefghijklmnopqrstuvwxyz0123456789", 36);
-
-for (align = 7; align >= 0; align--) {
-	for (len = 36; len; len--) {
-		b = buf+align;
-		memcpy(b, abc, len);
-		for (off = 1; off <= len; off++) {
-			memcpy(b+off, b, len);
-			memcpy(b, b+off, len);
-			if (memcmp(b, abc, len))
-				exit(1);
-		}
-	}
-}
-exit(0);
-}
-EOCP
-		set try
-		if eval $compile_ok; then
-			if $run ./try 2>/dev/null; then
-				echo "Yes, it can."
-				val="$define"
-			else
-				echo "It can't, sorry."
-			fi
-		else
-			echo "(I can't compile the test program, so we'll assume not...)"
-		fi
-		;;
-	esac
-	$rm_try
-	;;
-esac
-set d_safemcpy
-eval $setvar
-
 : can memcmp be trusted to compare relative magnitude?
 val="$undef"
 case "$d_memcmp" in
@@ -25033,7 +24956,6 @@ d_rint='$d_rint'
 d_rmdir='$d_rmdir'
 d_round='$d_round'
 d_safebcpy='$d_safebcpy'
-d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
 d_sbrkproto='$d_sbrkproto'
 d_scalbn='$d_scalbn'

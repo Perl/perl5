@@ -3835,7 +3835,7 @@ PERL_CALLCONV int	Perl_my_memcmp(const void* vs1, const void* vs2, size_t len)
 	assert(vs1); assert(vs2)
 
 #endif
-#if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
+#if !defined(HAS_MEMCPY) || !defined(HAS_MEMMOVE)
 PERL_CALLCONV void*	Perl_my_bcopy(const void* vfrom, void* vto, size_t len);
 #define PERL_ARGS_ASSERT_MY_BCOPY	\
 	assert(vfrom); assert(vto)
