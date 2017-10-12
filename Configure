@@ -662,7 +662,6 @@ d_mbrlen=''
 d_mbrtowc=''
 d_mbstowcs=''
 d_mbtowc=''
-d_memchr=''
 d_memmem=''
 d_memrchr=''
 d_mkdir=''
@@ -16604,10 +16603,6 @@ eval $inlibc
 set mbtowc d_mbtowc
 eval $inlibc
 
-: see if memchr exists
-set memchr d_memchr
-eval $inlibc
-
 : see if memmem exists
 set memmem d_memmem
 eval $inlibc
@@ -24702,7 +24697,6 @@ d_mbrlen='$d_mbrlen'
 d_mbrtowc='$d_mbrtowc'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
-d_memchr='$d_memchr'
 d_memmem='$d_memmem'
 d_memrchr='$d_memrchr'
 d_mkdir='$d_mkdir'

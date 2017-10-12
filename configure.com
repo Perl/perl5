@@ -4238,7 +4238,6 @@ $ WS "}"
 $ CS
 $ tmp = "memchr"
 $ GOSUB inlibc
-$ d_memchr = tmp
 $!
 $! Check for memrchr
 $!
@@ -6212,7 +6211,6 @@ $ WC "d_mbrlen='undef'"
 $ WC "d_mbrtowc='undef'"
 $ WC "d_mbstowcs='" + d_mbstowcs + "'"
 $ WC "d_mbtowc='" + d_mbtowc + "'"
-$ WC "d_memchr='" + d_memchr + "'"
 $ WC "d_memmem='undef'"
 $ WC "d_memrchr='" + d_memrchr + "'"
 $ WC "d_mkdir='define'"

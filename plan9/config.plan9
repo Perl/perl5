@@ -1961,12 +1961,6 @@
  */
 /*#define HAS_MADVISE		/ **/
 
-/* HAS_MEMCHR:
- *	This symbol, if defined, indicates that the memchr routine is available
- *	to locate characters within a C string.
- */
-#define HAS_MEMCHR	/**/
-
 /* HAS_MKDTEMP:
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.

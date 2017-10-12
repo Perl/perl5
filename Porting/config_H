@@ -2546,12 +2546,6 @@
 #define LONGLONGSIZE 8		/**/
 #endif
 
-/* HAS_MEMCHR:
- *	This symbol, if defined, indicates that the memchr routine is available
- *	to locate characters within a C string.
- */
-#define HAS_MEMCHR	/**/
-
 /* HAS_MKSTEMP:
  *	This symbol, if defined, indicates that the mkstemp routine is
  *	available to exclusively create and open a uniquely named

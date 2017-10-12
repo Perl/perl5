@@ -1918,12 +1918,6 @@
 #define LONGLONGSIZE 8		/**/
 #endif
 
-/* HAS_MEMCHR:
- *	This symbol, if defined, indicates that the memchr routine is available
- *	to locate characters within a C string.
- */
-#define HAS_MEMCHR	/**/
-
 /* HAS_MKSTEMP:
  *	This symbol, if defined, indicates that the mkstemp routine is
  *	available to exclusively create and open a uniquely named
@@ -5372,6 +5366,6 @@
 #endif
 
 /* Generated from:
- * 53d2d4cc7acf8d0b0b04606f10f9ad2405b078be305d3ad5e57aa2fa5954c9d6 config_h.SH
- * da0fc52cf0e7a996baafbaa4d6cfaa06229ec4a84f23e80dfdbf97d4e73eb2c8 uconfig.sh
+ * b0245f5f4da83b1e4e1dbcd8ffe33f50da89f790dc389b2868fc620cf460c375 config_h.SH
+ * f8fa6d0de3a2fb09b8ae480de350caefa12b0272cc67b1bc9f7e02427a3e9a14 uconfig.sh
  * ex: set ro: */

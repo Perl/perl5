@@ -1005,14 +1005,6 @@ EXTERN_C int usleep(unsigned int);
 #   define memzero(d,l) memset(d,0,l)
 #endif
 
-#ifndef PERL_MICRO
-#ifndef memchr
-#   ifndef HAS_MEMCHR
-#       define memchr(s,c,n) ninstr((char*)(s), ((char*)(s)) + n, &(c), &(c) + 1)
-#   endif
-#endif
-#endif
-
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>
 #endif

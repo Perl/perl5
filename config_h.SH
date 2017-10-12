@@ -1953,12 +1953,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define LONGLONGSIZE $longlongsize		/**/
 #endif
 
-/* HAS_MEMCHR:
- *	This symbol, if defined, indicates that the memchr routine is available
- *	to locate characters within a C string.
- */
-#$d_memchr HAS_MEMCHR	/**/
-
 /* HAS_MKSTEMP:
  *	This symbol, if defined, indicates that the mkstemp routine is
  *	available to exclusively create and open a uniquely named
