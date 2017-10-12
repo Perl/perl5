@@ -4485,7 +4485,6 @@ hints/os2.sh			Hints for named architecture
 hints/os390.sh			Hints for named architecture
 hints/os400.sh			Hints for named architecture
 hints/posix-bc.sh		Hints for named architecture
-hints/powerux.sh		Hints for named architecture
 hints/qnx.sh			Hints for named architecture
 hints/README.hints		Notes about hints
 hints/riscos.sh			Hints for named architecture
