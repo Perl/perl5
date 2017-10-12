@@ -865,12 +865,6 @@
  */
 /*#define I_VFORK	/**/
 
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
-#define	CAN_PROTOTYPE	/**/
-
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
  *	on this system to execute Bourne shell scripts.  Usually, this will be

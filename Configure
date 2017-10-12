@@ -1242,7 +1242,6 @@ prefixexp=''
 installprivlib=''
 privlib=''
 privlibexp=''
-prototype=''
 ptrsize=''
 d_PRIXU64=''
 d_PRId64=''
@@ -10742,28 +10741,6 @@ eval $inlibc
 set asctime64 d_asctime64
 eval $inlibc
 
-: Cruising for prototypes
-echo " "
-echo "Checking out function prototypes..." >&4
-$cat >prototype.c <<EOCP
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main(int argc, char *argv[]) {
-	exit(0);}
-EOCP
-if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
-	echo "Your C compiler appears to support function prototypes."
-	val="$define"
-else
-	echo "Your C compiler doesn't seem to understand function prototypes."
-	val="$undef"
-fi
-set prototype
-eval $setvar
-$rm -f prototype*
-
 : see if POSIX threads are available
 set pthread.h i_pthread
 eval $inhdr
@@ -10774,7 +10751,6 @@ $startsh
 cc="$cc"
 optimize="$optimize"
 ccflags="$ccflags"
-prototype="$prototype"
 define="$define"
 rm_try="$rm_try"
 usethreads=$usethreads
@@ -10802,13 +10778,8 @@ while test $# -ge 2; do
     fi
     shift 2
 done
-test "$prototype" = "$define"  && echo '#define CAN_PROTOTYPE' >> try.c
 cat >> try.c <<'EOCP'
-#ifdef CAN_PROTOTYPE
 #define	_(args) args
-#else
-#define	_(args) ()
-#endif
 EOCP
 echo "$foo" >> try.c
 echo 'int no_real_function_has_this_name _((void)) { return 0; }' >> try.c
@@ -25056,7 +25027,6 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 procselfexe='$procselfexe'
-prototype='$prototype'
 ptrsize='$ptrsize'
 quadkind='$quadkind'
 quadtype='$quadtype'

@@ -53,12 +53,6 @@ typedef struct {
 
 extern const datum nullitem;
 
-#if defined(__STDC__) || defined(__cplusplus) || defined(CAN_PROTOTYPE)
-#define proto(p) p
-#else
-#define proto(p) ()
-#endif
-
 /*
  * flags to sdbm_store
  */
@@ -68,20 +62,20 @@ extern const datum nullitem;
 /*
  * ndbm interface
  */
-extern DBM *sdbm_open proto((char *, int, int));
-extern void sdbm_close proto((DBM *));
-extern datum sdbm_fetch proto((DBM *, datum));
-extern int sdbm_delete proto((DBM *, datum));
-extern int sdbm_store proto((DBM *, datum, datum, int));
-extern datum sdbm_firstkey proto((DBM *));
-extern datum sdbm_nextkey proto((DBM *));
-extern int sdbm_exists proto((DBM *, datum));
+extern DBM *sdbm_open(char *, int, int);
+extern void sdbm_close(DBM *);
+extern datum sdbm_fetch(DBM *, datum);
+extern int sdbm_delete(DBM *, datum);
+extern int sdbm_store(DBM *, datum, datum, int);
+extern datum sdbm_firstkey(DBM *);
+extern datum sdbm_nextkey(DBM *);
+extern int sdbm_exists(DBM *, datum);
 
 /*
  * other
  */
-extern DBM *sdbm_prep proto((char *, char *, int, int));
-extern long sdbm_hash proto((const char *, int));
+extern DBM *sdbm_prep(char *, char *, int, int);
+extern long sdbm_hash(const char *, int);
 
 #ifndef SDBM_ONLY
 #define dbm_open sdbm_open
@@ -179,10 +173,10 @@ extern long sdbm_hash proto((const char *, int));
 extern "C" {
 #endif
 
-Malloc_t Perl_malloc proto((MEM_SIZE nbytes));
-Malloc_t Perl_calloc proto((MEM_SIZE elements, MEM_SIZE size));
-Malloc_t Perl_realloc proto((Malloc_t where, MEM_SIZE nbytes));
-Free_t   Perl_mfree proto((Malloc_t where));
+Malloc_t Perl_malloc(MEM_SIZE nbytes);
+Malloc_t Perl_calloc(MEM_SIZE elements, MEM_SIZE size);
+Malloc_t Perl_realloc(Malloc_t where, MEM_SIZE nbytes);
+Free_t   Perl_mfree(Malloc_t where);
 
 #ifdef __cplusplus
 }

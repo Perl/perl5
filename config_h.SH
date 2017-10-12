@@ -2323,24 +2323,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_mymalloc MYMALLOC			/**/
 
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
-/* _:
- *	This macro is used to declare function parameters for folks who want
- *	to make declarations with prototypes using a different style than
- *	the above macros.  Use double parentheses.  For example:
- *
- *		int main _((int argc, char *argv[]));
- */
-#$prototype	CAN_PROTOTYPE	/**/
-#ifdef CAN_PROTOTYPE
-#define	_(args) args
-#else
-#define	_(args) ()
-#endif
-
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
  *	on this system to execute Bourne shell scripts.  Usually, this will be

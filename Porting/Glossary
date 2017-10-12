@@ -4712,10 +4712,6 @@ procselfexe (d_procselfexe.U):
 	of the symbolic link pointing to the absolute pathname of
 	the executing program.
 
-prototype (prototype.U):
-	This variable holds the eventual value of CAN_PROTOTYPE, which
-	indicates the C compiler can handle function prototypes.
-
 ptrsize (ptrsize.U):
 	This variable contains the value of the PTRSIZE symbol, which
 	indicates to the C program how many bytes there are in a pointer.

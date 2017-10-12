@@ -22,7 +22,7 @@
 /* 
  * forward 
  */
-static int seepair proto((char *, int, const char *, int));
+static int seepair(char *, int, const char *, int);
 
 /*
  * page format:

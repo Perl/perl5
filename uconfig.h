@@ -2288,24 +2288,6 @@
  */
 /*#define MYMALLOC			/ **/
 
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
-/* _:
- *	This macro is used to declare function parameters for folks who want
- *	to make declarations with prototypes using a different style than
- *	the above macros.  Use double parentheses.  For example:
- *
- *		int main _((int argc, char *argv[]));
- */
-/*#define	CAN_PROTOTYPE	/ **/
-#ifdef CAN_PROTOTYPE
-#define	_(args) args
-#else
-#define	_(args) ()
-#endif
-
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
  *	on this system to execute Bourne shell scripts.  Usually, this will be
@@ -5310,6 +5292,6 @@
 #endif
 
 /* Generated from:
- * 3690e5bc441c5e9339d85fcb354568da9527990929543d72c73cf8ed150832fc config_h.SH
+ * 6c763f32474aeeec2af78bc744f36dcb8ec9c9cad13e888b624596dc4f0efb08 config_h.SH
  * 51a3d2a1b0cd9329ef5b65d93eca04f6f0769a86b8c16db672fda17ea1308fd3 uconfig.sh
  * ex: set ro: */

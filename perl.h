@@ -570,9 +570,10 @@
 # define DONT_DECLARE_STD 1
 #endif
 
-/* This exists only for back-compat. */
+/* These exist only for back-compat with XS modules. */
 #ifndef PERL_CORE
 #define VOL volatile
+#define CAN_PROTOTYPE
 #endif
 
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
