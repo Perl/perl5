@@ -59,11 +59,17 @@
 #define STMT_END while(0)
 #endif
 
-#ifndef U8TO32_LE
-#define U8TO32_LE(ptr)  (*((const U32 *)(ptr)))
+/* Find best way to ROTL32/ROTL64 */
+#ifndef ROTL32
+#if defined(_MSC_VER)
+  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+  #define ROTL32(x,r)  _rotl(x,r)
+  #define ROTR32(x,r)  _rotr(x,r)
+#else
+  /* gcc recognises this code and generates a rotate instruction for CPUs with one */
+  #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+  #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif
-#ifndef U8TO16_LE
-#define U8TO16_LE(ptr)  (*((const U16 *)(ptr)))
 #endif
 
 #ifndef SBOX32_MAX_LEN

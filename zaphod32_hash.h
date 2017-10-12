@@ -25,11 +25,17 @@
 #define ZAPHOD32_WARN2(pat,v0,v1)
 #endif
 
+/* Find best way to ROTL32/ROTL64 */
 #ifndef ROTL32
-#define _ROTL_SIZED(x,r,s) ( ((x) << (r)) | ((x) >> ((s) - (r))) )
-#define _ROTR_SIZED(x,r,s) ( ((x) << ((s) - (r))) | ((x) >> (r)) )
-#define ROTL32(x,r) _ROTL_SIZED(x,r,32)
-#define ROTR32(x,r) _ROTR_SIZED(x,r,32)
+#if defined(_MSC_VER)
+  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+  #define ROTL32(x,r)  _rotl(x,r)
+  #define ROTR32(x,r)  _rotr(x,r)
+#else
+  /* gcc recognises this code and generates a rotate instruction for CPUs with one */
+  #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+  #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
+#endif
 #endif
 
 #ifndef PERL_SEEN_HV_FUNC_H
@@ -68,14 +74,39 @@
 #define STMT_END while(0)
 #endif
 
-#ifndef U8TO64_LE
-#define U8TO64_LE(ptr)  (*((const U64 *)(ptr)))
+#ifndef ZAPHOD32_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN
+/* ZAPHOD32_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN only matters if nothing has defined U8TO64_LE etc,
+ * and when built with Perl these should be defined before this file is loaded.
+ */
+#ifdef U32_ALIGNMENT_REQUIRED
+#define ZAPHOD32_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN 0
+#else
+#define ZAPHOD32_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN 1
 #endif
+#endif
+
 #ifndef U8TO32_LE
+#if ZAPHOD32_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN
 #define U8TO32_LE(ptr)  (*((const U32 *)(ptr)))
+#else
+#define U8TO32_LE(ptr)  (\
+    (U32)(ptr)[3] << 24 | \
+    (U32)(ptr)[2] << 16 | \
+    (U32)(ptr)[1] << 8  | \
+    (U32)(ptr)[0]         \
+)
 #endif
+#endif
+
 #ifndef U8TO16_LE
+#if ZAPHOD32_ALLOW_UNALIGNED_AND_LITTLE_ENDIAN
 #define U8TO16_LE(ptr)  (*((const U16 *)(ptr)))
+#else
+#define U8TO16_LE(ptr)  (\
+    (U16)(ptr)[1] << 8  | \
+    (U16)(ptr)[0]         \
+)
+#endif
 #endif
 
 /* This is two marsaglia xor-shift permutes, with a prime-multiple
