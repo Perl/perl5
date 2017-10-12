@@ -530,10 +530,6 @@ d_builtin_expect (d_builtin.U):
 	__builtin_expect to provide the compiler with branch prediction
 	information.
 
-d_bzero (d_bzero.U):
-	This variable conditionally defines the HAS_BZERO symbol if
-	the bzero() routine is available to set memory to 0.
-
 d_c99_variadic_macros (d_c99_variadic.U):
 	This variable conditionally defines the HAS_C99_VARIADIC_MACROS
 	symbol, which indicates to the C program that C99 variadic macros
@@ -1707,11 +1703,6 @@ d_memmove (d_memmove.U):
 	This variable conditionally defines the HAS_MEMMOVE symbol, which
 	indicates to the C program that the memmove() routine is available
 	to copy potentially overlapping blocks of memory.
-
-d_memset (d_memset.U):
-	This variable conditionally defines the HAS_MEMSET symbol, which
-	indicates to the C program that the memset() routine is available
-	to set blocks of memory.
 
 d_memrchr (d_memrchr.U):
 	This variable conditionally defines the HAS_MEMRCHR symbol, which

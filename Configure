@@ -398,7 +398,6 @@ d_builtin_expect=''
 d_builtin_add_overflow=''
 d_builtin_mul_overflow=''
 d_builtin_sub_overflow=''
-d_bzero=''
 d_c99_variadic_macros=''
 d_casti32=''
 castflags=''
@@ -671,7 +670,6 @@ d_memcpy=''
 d_memmem=''
 d_memmove=''
 d_memrchr=''
-d_memset=''
 d_mkdir=''
 d_mkdtemp=''
 d_mkfifo=''
@@ -11686,10 +11684,6 @@ set d_builtin_expect
 eval $setvar
 $rm_try
 
-: see if bzero exists
-set bzero d_bzero
-eval $inlibc
-
 : see if stdarg is available
 echo " "
 if $test `./findhdr stdarg.h`; then
@@ -16648,10 +16642,6 @@ eval $inlibc
 
 : see if memrchr exists
 set memrchr d_memrchr
-eval $inlibc
-
-: see if memset exists
-set memset d_memset
 eval $inlibc
 
 : see if mkdir exists
@@ -24701,7 +24691,6 @@ d_builtin_choose_expr='$d_builtin_choose_expr'
 d_builtin_expect='$d_builtin_expect'
 d_builtin_mul_overflow='$d_builtin_mul_overflow'
 d_builtin_sub_overflow='$d_builtin_sub_overflow'
-d_bzero='$d_bzero'
 d_c99_variadic_macros='$d_c99_variadic_macros'
 d_casti32='$d_casti32'
 d_castneg='$d_castneg'
@@ -24955,7 +24944,6 @@ d_memcpy='$d_memcpy'
 d_memmem='$d_memmem'
 d_memmove='$d_memmove'
 d_memrchr='$d_memrchr'
-d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkdtemp='$d_mkdtemp'
 d_mkfifo='$d_mkfifo'

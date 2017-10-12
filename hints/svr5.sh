@@ -92,7 +92,7 @@ glibpth=`echo " $glibpth " | sed -e 's/ \/shlib / /' -e 's/ \/lib / /'`
 # Don't use BSD emulation pieces (/usr/ucblib) regardless
 # these would probably be autonondetected anyway but ...
 gconvert_preference='gcvt sprintf'	# Try gcvt() before gconvert().
-d_bcopy='undef' d_bcmp='undef'  d_bzero='undef'  d_safebcpy='undef'
+d_bcopy='undef' d_bcmp='undef'  d_safebcpy='undef'
 d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
 d_setlinebuf='undef' 
 d_setregid='undef' d_setreuid='undef'  # -- in /usr/lib/libc.so.1
@@ -121,7 +121,6 @@ if [ "$uw_isuw" = "UnixWare" -o "$uw_isuw" = "OpenUNIX" ]; then
    8.*|7.1*)
 	d_csh='undef'
 	d_memcpy='define'
-	d_memset='define'
 	stdio_cnt='((fp)->__cnt)'
 	d_stdio_cnt_lval='define'
 	stdio_ptr='((fp)->__ptr)'
@@ -138,7 +137,6 @@ if [ "$uw_isuw" = "UnixWare" -o "$uw_isuw" = "OpenUNIX" ]; then
    7*)
 	d_csh='undef'
 	d_memcpy='define'
-	d_memset='define'
 	stdio_cnt='((fp)->__cnt)'
 	d_stdio_cnt_lval='define'
 	stdio_ptr='((fp)->__ptr)'

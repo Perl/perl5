@@ -1058,9 +1058,6 @@ Ap	|NV	|my_atof	|NN const char *s
 #if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
 Anp	|void*	|my_bcopy	|NN const void* vfrom|NN void* vto|size_t len
 #endif
-#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-Anp	|void*	|my_bzero	|NN void* vloc|size_t len
-#endif
 Apr	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Ap	|I32	|my_fflush_all
@@ -1071,9 +1068,6 @@ Apmb	|I32	|my_lstat
 pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 AnpP	|int	|my_memcmp	|NN const void* vs1|NN const void* vs2|size_t len
-#endif
-#if !defined(HAS_MEMSET)
-Anp	|void*	|my_memset	|NN void* vloc|int ch|size_t len
 #endif
 #if !defined(PERL_IMPLICIT_SYS)
 Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr

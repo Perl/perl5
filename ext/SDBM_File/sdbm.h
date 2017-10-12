@@ -222,22 +222,7 @@ Free_t   Perl_mfree proto((Malloc_t where));
 #   endif
 #endif /* HAS_MEMCPY */
 
-#ifdef HAS_MEMSET
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memset
-	extern char *memset proto((char*, int, int));
-#    endif
-#  endif
-#  define memzero(d,l) memset(d,0,l)
-#else
-#   ifndef memzero
-#	ifdef HAS_BZERO
-#	    define memzero(d,l) bzero(d,l)
-#	else
-#	    define memzero(d,l) my_bzero(d,l)
-#	endif
-#   endif
-#endif /* HAS_MEMSET */
+#define memzero(d,l) memset(d,0,l)
 
 #if defined(mips) && defined(ultrix) && !defined(__STDC__)
 #   undef HAS_MEMCMP

@@ -2253,36 +2253,6 @@ Perl_my_bcopy(const void *vfrom, void *vto, size_t len)
 }
 #endif
 
-/* this is a drop-in replacement for memset() */
-#ifndef HAS_MEMSET
-void *
-Perl_my_memset(void *vloc, int ch, size_t len)
-{
-    unsigned char *loc = (unsigned char *)vloc;
-
-    PERL_ARGS_ASSERT_MY_MEMSET;
-
-    while (len--)
-	*loc++ = ch;
-    return vloc;
-}
-#endif
-
-/* this is a drop-in replacement for bzero() */
-#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-void *
-Perl_my_bzero(void *vloc, size_t len)
-{
-    unsigned char *loc = (unsigned char *)vloc;
-
-    PERL_ARGS_ASSERT_MY_BZERO;
-
-    while (len--)
-	*loc++ = 0;
-    return vloc;
-}
-#endif
-
 /* this is a drop-in replacement for memcmp() */
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 int

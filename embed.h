@@ -779,17 +779,11 @@
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif
-#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-#define my_bzero		Perl_my_bzero
-#endif
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 #define my_memcmp		Perl_my_memcmp
 #endif
 #if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
 #define my_bcopy		Perl_my_bcopy
-#endif
-#if !defined(HAS_MEMSET)
-#define my_memset		Perl_my_memset
 #endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)

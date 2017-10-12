@@ -4418,7 +4418,6 @@ $ WS "}"
 $ CS
 $ tmp = "bzero"
 $ GOSUB inlibc
-$ d_bzero = tmp
 $!
 $! Check for bcopy
 $!
@@ -5997,7 +5996,6 @@ $ WC "d_builtin_expect='undef'" ! GCC only
 $ WC "d_builtin_add_overflow='undef'" ! GCC only
 $ WC "d_builtin_mul_overflow='undef'" ! GCC only
 $ WC "d_builtin_sub_overflow='undef'" ! GCC only
-$ WC "d_bzero='" + d_bzero + "'"
 $ WC "d_casti32='define'"
 $ WC "d_castneg='define'"
 $ WC "d_cbrt='" + d_cbrt + "'"
@@ -6224,7 +6222,6 @@ $ WC "d_memcpy='define'"
 $ WC "d_memmem='undef'"
 $ WC "d_memmove='define'"
 $ WC "d_memrchr='" + d_memrchr + "'"
-$ WC "d_memset='define'"
 $ WC "d_mkdir='define'"
 $ WC "d_mkdtemp='" + d_mkdtemp + "'"
 $ WC "d_mkfifo='undef'"

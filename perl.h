@@ -1013,17 +1013,6 @@ EXTERN_C int usleep(unsigned int);
 #   endif
 #endif /* HAS_MEMCPY */
 
-#ifdef HAS_MEMSET
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memset
-	extern char *memset (char*, int, int);
-#    endif
-#  endif
-#else
-#  undef  memset
-#  define memset(d,c,l) my_memset(d,c,l)
-#endif /* HAS_MEMSET */
-
 #if !defined(HAS_MEMMOVE) && !defined(memmove)
 #   if defined(HAS_MEMCPY) && defined(HAS_SAFE_MEMCPY)
 #	define memmove(d,s,l) memcpy(d,s,l)
@@ -1048,15 +1037,7 @@ EXTERN_C int usleep(unsigned int);
 #endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
 
 #ifndef memzero
-#   ifdef HAS_MEMSET
-#	define memzero(d,l) memset(d,0,l)
-#   else
-#	ifdef HAS_BZERO
-#	    define memzero(d,l) bzero(d,l)
-#	else
-#	    define memzero(d,l) my_bzero(d,l)
-#	endif
-#   endif
+#   define memzero(d,l) memset(d,0,l)
 #endif
 
 #ifndef PERL_MICRO
