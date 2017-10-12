@@ -283,8 +283,13 @@ sub format_arg {
     my $arg = shift;
 
     if ( ref($arg) ) {
+
+        # lazy check if the CPAN module UNIVERSAL::isa is used or not
+        #   if we use a rogue version of UNIVERSAL this would lead to infinite loop
+        my $isa = $UNIVERSAL::isa::VERSION ? sub { 1 } : \&UNIVERSAL::isa;
+
          # legitimate, let's not leak it.
-        if (!$in_recurse &&
+        if (!$in_recurse && $isa->( $arg, 'UNIVERSAL' ) &&
 	    do {
                 local $@;
 	        local $in_recurse = 1;

@@ -1,3 +1,7 @@
+version 1.44
+
+  * Optimize format_arg when arguments contain many references
+
 version 1.43
 
   * fix problems introduced by the partial EBCDIC support from version
