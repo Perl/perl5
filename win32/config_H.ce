@@ -3728,17 +3728,6 @@
  */
 /*#define I_NDBM	/**/
 
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
-/* I_VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <varargs.h>.
- */
-#define I_STDARG		/**/
-/*#define I_VARARGS	/**/
-
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
  *	on this system to execute Bourne shell scripts.  Usually, this will be

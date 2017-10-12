@@ -2257,17 +2257,6 @@
 /*#define I_TERMIOS		/ **/
 /*#define I_SGTTY		/ **/
 
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
-/* I_VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <varargs.h>.
- */
-#define I_STDARG		/**/
-/*#define I_VARARGS	/ **/
-
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.
@@ -5292,6 +5281,6 @@
 #endif
 
 /* Generated from:
- * 6c763f32474aeeec2af78bc744f36dcb8ec9c9cad13e888b624596dc4f0efb08 config_h.SH
- * 51a3d2a1b0cd9329ef5b65d93eca04f6f0769a86b8c16db672fda17ea1308fd3 uconfig.sh
+ * 9ac22558a2db3bead054c2b016d0b70095e52fce40430a65015f21cd91dcc943 config_h.SH
+ * 408e88881e8a567afeba7b56cb949d7886e8473896575932bfdef72ee9c32249 uconfig.sh
  * ex: set ro: */

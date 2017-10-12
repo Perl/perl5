@@ -3233,17 +3233,6 @@
 /*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 /*#define DOSUID		/**/
 
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
-/* I_VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <varargs.h>.
- */
-#define I_STDARG		/**/
-/*#define I_VARARGS	/**/
-
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
  */

@@ -1078,9 +1078,6 @@ i_unistd=''
 i_ustat=''
 i_utime=''
 i_values=''
-i_stdarg=''
-i_varargs=''
-i_varhdr=''
 i_vfork=''
 i_wchar=''
 d_inc_version_list=''
@@ -23279,115 +23276,6 @@ set i_termio; eval $setvar
 val=$val2; set i_sgtty; eval $setvar
 val=$val3; set i_termios; eval $setvar
 
-: see if stdarg is available
-echo " "
-if $test `./findhdr stdarg.h`; then
-	echo "<stdarg.h> found." >&4
-	valstd="$define"
-else
-	echo "<stdarg.h> NOT found." >&4
-	valstd="$undef"
-fi
-
-: see if varargs is available
-echo " "
-if $test `./findhdr varargs.h`; then
-	echo "<varargs.h> found." >&4
-else
-	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
-fi
-
-: set up the varargs testing programs
-$cat > varargs.c <<EOP
-#ifdef I_STDARG
-#include <stdarg.h>
-#endif
-#ifdef I_VARARGS
-#include <varargs.h>
-#endif
-
-#ifdef I_STDARG
-int f(char *p, ...)
-#else
-int f(va_alist)
-va_dcl
-#endif
-{
-	va_list ap;
-#ifndef I_STDARG
-	char *p;
-#endif
-#ifdef I_STDARG
-	va_start(ap,p);
-#else
-	va_start(ap);
-	p = va_arg(ap, char *);
-#endif
-	va_end(ap);
-	return 0;
-}
-EOP
-$cat > varargs <<EOP
-$startsh
-if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
-	echo "true"
-else
-	echo "false"
-fi
-$rm -f varargs$_o
-EOP
-chmod +x varargs
-
-: now check which varargs header should be included
-echo " "
-i_varhdr=''
-val=''
-case "$valstd" in
-"$define")
-	if `./varargs I_STDARG`; then
-		val='stdarg.h'
-	elif `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-*)
-	if `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-esac
-case "$val" in
-'')
-	echo " "
-	echo "*** WHOA THERE!!! ***" >&4
-	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
-	case "$knowitall" in
-	'')
-	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
-		exit 1
-		;;
-	esac
-echo "I could not find the definition for va_dcl... You have problems..." >&4
-	val="$undef"; set i_stdarg; eval $setvar
-	val="$undef"; set i_varargs; eval $setvar
-	;;
-*)
-	set i_varhdr
-	eval $setvar
-	case "$i_varhdr" in
-	stdarg.h)
-		val="$define"; set i_stdarg; eval $setvar
-		val="$undef"; set i_varargs; eval $setvar
-		;;
-	varargs.h)
-		val="$undef"; set i_stdarg; eval $setvar
-		val="$define"; set i_varargs; eval $setvar
-		;;
-	esac
-	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
-esac
-$rm -f varargs*
-
 : see if stdbool is available
 : we want a real compile instead of Inhdr because some Solaris systems
 : have stdbool.h, but it can only be used if the compiler indicates it
@@ -24821,7 +24709,6 @@ i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
 i_socks='$i_socks'
-i_stdarg='$i_stdarg'
 i_stdbool='$i_stdbool'
 i_stddef='$i_stddef'
 i_stdint='$i_stdint'
@@ -24864,8 +24751,6 @@ i_unistd='$i_unistd'
 i_ustat='$i_ustat'
 i_utime='$i_utime'
 i_values='$i_values'
-i_varargs='$i_varargs'
-i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
 i_wchar='$i_wchar'
 i_xlocale='$i_xlocale'

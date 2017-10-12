@@ -693,12 +693,6 @@
 
 #include <sys/types.h>
 
-#ifdef __cplusplus
-#  ifndef I_STDARG
-#    define I_STDARG 1
-#  endif
-#endif
-
 /* EVC 4 SDK headers includes a bad definition of MB_CUR_MAX in stdlib.h
   which is included from stdarg.h. Bad definition not present in SD 2008
   SDK headers. wince.h is not yet included, so we cant fix this from there
@@ -708,13 +702,8 @@
 #if defined(UNDER_CE) && (_MSC_VER < 1300)
 #  define MB_CUR_MAX 1
 #endif
-#ifdef I_STDARG
-#  include <stdarg.h>
-#else
-#  ifdef I_VARARGS
-#    include <varargs.h>
-#  endif
-#endif
+
+# include <stdarg.h>
 
 #ifdef I_STDINT
 # include <stdint.h>

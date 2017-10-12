@@ -1532,27 +1532,6 @@ PERL5LIB, and PERL5OPT will influence the behaviour of the test suite.
 So if you are getting strange test failures, you may want to try
 retesting with the various PERL variables unset.
 
-=item varargs
-
-If you get varargs problems with gcc, be sure that gcc is installed
-correctly and that you are not passing -I/usr/include to gcc.  When using
-gcc, you should probably have i_stdarg='define' and i_varargs='undef'
-in config.sh.  The problem is usually solved by installing gcc
-correctly.  If you do change config.sh, don't forget to propagate
-your changes (see L<"Propagating your changes to config.sh"> below).
-
-=item util.c
-
-If you get error messages such as the following (the exact line
-numbers and function name may vary in different versions of perl):
-
-    util.c: In function 'Perl_form':
-    util.c:1107: number of arguments doesn't match prototype
-    proto.h:125: prototype declaration
-
-it might well be a symptom of the gcc "varargs problem".  See the
-previous L<"varargs"> item.
-
 =item LD_LIBRARY_PATH
 
 If you run into dynamic loading problems, check your setting of

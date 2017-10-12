@@ -4452,7 +4452,6 @@ hints/esix4.sh			Hints for named architecture
 hints/fps.sh			Hints for named architecture
 hints/freebsd.sh		Hints for named architecture
 hints/freemint.sh		Hints for named architecture
-hints/genix.sh			Hints for named architecture
 hints/gnu.sh			Hints for named architecture
 hints/gnukfreebsd.sh		Hints for named architecture
 hints/gnuknetbsd.sh		Hints for named architecture

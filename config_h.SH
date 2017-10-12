@@ -2292,17 +2292,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$i_termios I_TERMIOS		/**/
 #$i_sgtty I_SGTTY		/**/
 
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
-/* I_VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <varargs.h>.
- */
-#$i_stdarg I_STDARG		/**/
-#$i_varargs I_VARARGS	/**/
-
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.

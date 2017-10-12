@@ -3601,11 +3601,6 @@ i_socks (i_socks.U):
 	This variable conditionally defines the I_SOCKS symbol, and indicates
 	whether a C program should include <socks.h>.
 
-i_stdarg (i_varhdr.U):
-	This variable conditionally defines the I_STDARG symbol, which
-	indicates to the C program that <stdarg.h> exists and should
-	be included.
-
 i_stdbool (i_stdbool.U):
 	This variable conditionally defines the I_STDBOOL symbol, which
 	indicates to the C program that <stdbool.h> exists and should
@@ -3787,14 +3782,6 @@ i_values (i_values.U):
 	This variable conditionally defines the I_VALUES symbol, and indicates
 	whether a C program may include <values.h> to get symbols like MAXLONG
 	and friends.
-
-i_varargs (i_varhdr.U):
-	This variable conditionally defines I_VARARGS, which indicates
-	to the C program that it should include <varargs.h>.
-
-i_varhdr (i_varhdr.U):
-	Contains the name of the header to be included to get va_dcl definition.
-	Typically one of varargs.h or stdarg.h.
 
 i_vfork (i_vfork.U):
 	This variable conditionally defines the I_VFORK symbol, and indicates
