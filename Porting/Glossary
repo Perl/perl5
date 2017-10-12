@@ -5688,11 +5688,6 @@ uvXUformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl UV as an unsigned hexadecimal integer in uppercase ABCDEF.
 
-vaproto (vaproto.U):
-	This variable conditionally defines CAN_VAPROTO on systems supporting
-	prototype declaration of functions with a variable number of
-	arguments. See also prototype.
-
 vendorarch (vendorarch.U):
 	This variable contains the value of the PERL_VENDORARCH symbol.
 	It may have a ~ on the front.

@@ -824,28 +824,6 @@
  */
 #define STDCHAR char	/**/
 
-/* CAN_VAPROTO:
- *	This variable is defined on systems supporting prototype declaration
- *	of functions with a variable number of arguments.
- */
-/* _V:
- *	This macro is used to declare function parameters in prototypes for
- *	functions with a variable number of parameters. Use double parentheses.
- *	For example:
- *
- *		int printf _V((char *fmt, ...));
- *
- *	Remember to use the plain simple _() macro when declaring a function
- *	with no variable number of arguments, since it might be possible to
- *	have a non-effect _V() macro and still get prototypes via _().
- */
-/*#define CAN_VAPROTO	/ **/
-#ifdef CAN_VAPROTO
-#define	_V(args) args
-#else
-#define	_V(args) ()
-#endif
-
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
  *	preprocessor can make decisions based on it.
@@ -5332,6 +5310,6 @@
 #endif
 
 /* Generated from:
- * 7f3bfc1e6859428578c0019ab544d62b4ee21c87767834fb8501279c5b475c34 config_h.SH
- * b8700c9bc8dced75e16f3f8e898323e77d2c3af9b5722e21942e864eb0a0502b uconfig.sh
+ * 3690e5bc441c5e9339d85fcb354568da9527990929543d72c73cf8ed150832fc config_h.SH
+ * 51a3d2a1b0cd9329ef5b65d93eca04f6f0769a86b8c16db672fda17ea1308fd3 uconfig.sh
  * ex: set ro: */
