@@ -431,7 +431,7 @@ been wrapped here):
      PUTBACK;
 
      if (croak_on_error && SvTRUE(ERRSV))
- 	croak(SvPVx_nolen(ERRSV));
+        croak_sv(ERRSV);
 
      return retval;
  }

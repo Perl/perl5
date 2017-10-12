@@ -246,13 +246,25 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlembed>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+An example in L<perlembed> used the string value of C<ERRSV> as a
+format string when calling croak().  If that string contains format
+codes such as C<%s> this could crash the program.
+
+This has been changed to a call to croak_sv().
+
+An alternative could have been to supply a trivial format string:
+
+  croak("%s", SvPV_nolen(ERRSV));
+
+or as a special case for C<ERRSV> simply:
+
+  croak(NULL);
 
 =back
 
