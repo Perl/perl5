@@ -2237,11 +2237,7 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
    but probably won't on others.
 */
 
-#ifdef USE_CHAR_VSPRINTF
-char *
-#else
 int
-#endif
 vsprintf(char *dest, const char *pat, void *args)
 {
     FILE fakebuf;
@@ -2269,11 +2265,7 @@ vsprintf(char *dest, const char *pat, void *args)
 #  endif
     (void)fputc('\0', &fakebuf);
 #endif
-#ifdef USE_CHAR_VSPRINTF
-    return(dest);
-#else
     return 0;		/* perl doesn't use return value */
-#endif
 }
 
 #endif /* HAS_VPRINTF */
