@@ -5221,26 +5221,6 @@ PerlIO_getpos(PerlIO *f, SV *pos)
 }
 #endif
 
-#if !defined(HAS_VPRINTF)
-
-int
-vprintf(char *pat, char *args)
-{
-    _doprnt(pat, args, stdout);
-    return 0;                   /* wrong, but perl doesn't use the return
-				 * value */
-}
-
-int
-vfprintf(FILE *fd, char *pat, char *args)
-{
-    _doprnt(pat, args, fd);
-    return 0;                   /* wrong, but perl doesn't use the return
-				 * value */
-}
-
-#endif
-
 /* print a failure format string message to stderr and fail exit the process
    using only libc without depending on any perl data structures being
    initialized.

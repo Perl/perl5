@@ -1540,7 +1540,6 @@ gcc, you should probably have i_stdarg='define' and i_varargs='undef'
 in config.sh.  The problem is usually solved by installing gcc
 correctly.  If you do change config.sh, don't forget to propagate
 your changes (see L<"Propagating your changes to config.sh"> below).
-See also the L<"vsprintf"> item below.
 
 =item util.c
 
@@ -1581,20 +1580,6 @@ is probably that Configure couldn't find your umask() system call.
 Check your config.sh.  You should have d_umask='define'.  If you don't,
 this is probably the L<"nm extraction"> problem discussed above.  Also,
 try reading the hints file for your system for further information.
-
-=item vsprintf
-
-If you run into problems with vsprintf in compiling util.c, the
-problem is probably that Configure failed to detect your system's
-version of vsprintf().  Check whether your system has vprintf().
-(Virtually all modern Unix systems do.)  Then, check the variable
-d_vprintf in config.sh.  If your system has vprintf, it should be:
-
-	d_vprintf='define'
-
-If Configure guessed wrong, it is likely that Configure guessed wrong
-on a number of other common functions too.  This is probably
-the L<"nm extraction"> problem discussed above.
 
 =item do_aspawn
 

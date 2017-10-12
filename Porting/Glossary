@@ -540,11 +540,6 @@ d_cbrt (d_cbrt.U):
 	indicates to the C program that the cbrt() (cube root) function
 	is available.
 
-d_charvspr (d_vprintf.U):
-	This variable conditionally defines CHARVSPRINTF if this system
-	has vsprintf returning type (char*).  The trend seems to be to
-	declare it as "int vsprintf()".
-
 d_chown (d_chown.U):
 	This variable conditionally defines the HAS_CHOWN symbol, which
 	indicates to the C program that the chown() routine is available.
@@ -2842,11 +2837,6 @@ d_voidtty (i_sysioctl.U):
 	ioctl() call with TIOCNOTTY should be used to void tty association.
 	Otherwise (on USG probably), it is enough to close the standard file
 	descriptors and do a setpgrp().
-
-d_vprintf (d_vprintf.U):
-	This variable conditionally defines the HAS_VPRINTF symbol, which
-	indicates to the C program that the vprintf() routine is available
-	to printf with a pointer to an argument list.
 
 d_wait4 (d_wait4.U):
 	This variable conditionally defines the HAS_WAIT4 symbol, which

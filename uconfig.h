@@ -1208,20 +1208,6 @@
 #define FILE_bufsiz(fp)	((fp)->_IO_read_end - (fp)->_IO_read_base)
 #endif
 
-/* HAS_VPRINTF:
- *	This symbol, if defined, indicates that the vprintf routine is available
- *	to printf with a pointer to an argument list.  If unavailable, you
- *	may need to write your own, probably in terms of _doprnt().
- */
-/* USE_CHAR_VSPRINTF:
- *	This symbol is defined if this system has vsprintf() returning type
- *	(char*).  The trend seems to be to declare it as "int vsprintf()".  It
- *	is up to the package author to declare vsprintf correctly based on the
- *	symbol.
- */
-#define HAS_VPRINTF	/**/
-/*#define USE_CHAR_VSPRINTF 	/ **/
-
 /* DOUBLESIZE:
  *	This symbol contains the size of a double, so that the C preprocessor
  *	can make decisions based on it.
@@ -5346,6 +5332,6 @@
 #endif
 
 /* Generated from:
- * 6473cc944f55c251c871ab2c2b621b94505098ecf710a1d9c1ff2f6ce914ed61 config_h.SH
- * ba39162e41cd92a8c139a8885eacd1a562aedede9bc007a19118da3c09fbc3ac uconfig.sh
+ * 7f3bfc1e6859428578c0019ab544d62b4ee21c87767834fb8501279c5b475c34 config_h.SH
+ * b8700c9bc8dced75e16f3f8e898323e77d2c3af9b5722e21942e864eb0a0502b uconfig.sh
  * ex: set ro: */

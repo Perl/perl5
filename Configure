@@ -926,8 +926,6 @@ d_vfork=''
 usevfork=''
 d_voidsig=''
 signal_t=''
-d_charvspr=''
-d_vprintf=''
 d_wait4=''
 d_waitpid=''
 d_wcscmp=''
@@ -11908,196 +11906,6 @@ $rm_try
 set cbrt d_cbrt
 eval $inlibc
 
-: see if stdarg is available
-echo " "
-if $test `./findhdr stdarg.h`; then
-	echo "<stdarg.h> found." >&4
-	valstd="$define"
-else
-	echo "<stdarg.h> NOT found." >&4
-	valstd="$undef"
-fi
-
-: see if varargs is available
-echo " "
-if $test `./findhdr varargs.h`; then
-	echo "<varargs.h> found." >&4
-else
-	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
-fi
-
-: set up the varargs testing programs
-$cat > varargs.c <<EOP
-#ifdef I_STDARG
-#include <stdarg.h>
-#endif
-#ifdef I_VARARGS
-#include <varargs.h>
-#endif
-
-#ifdef I_STDARG
-int f(char *p, ...)
-#else
-int f(va_alist)
-va_dcl
-#endif
-{
-	va_list ap;
-#ifndef I_STDARG
-	char *p;
-#endif
-#ifdef I_STDARG
-	va_start(ap,p);
-#else
-	va_start(ap);
-	p = va_arg(ap, char *);
-#endif
-	va_end(ap);
-	return 0;
-}
-EOP
-$cat > varargs <<EOP
-$startsh
-if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
-	echo "true"
-else
-	echo "false"
-fi
-$rm -f varargs$_o
-EOP
-chmod +x varargs
-
-: now check which varargs header should be included
-echo " "
-i_varhdr=''
-val=''
-case "$valstd" in
-"$define")
-	if `./varargs I_STDARG`; then
-		val='stdarg.h'
-	elif `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-*)
-	if `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-esac
-case "$val" in
-'')
-	echo " "
-	echo "*** WHOA THERE!!! ***" >&4
-	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
-	case "$knowitall" in
-	'')
-	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
-		exit 1
-		;;
-	esac
-echo "I could not find the definition for va_dcl... You have problems..." >&4
-	val="$undef"; set i_stdarg; eval $setvar
-	val="$undef"; set i_varargs; eval $setvar
-	;;
-*)
-	set i_varhdr
-	eval $setvar
-	case "$i_varhdr" in
-	stdarg.h)
-		val="$define"; set i_stdarg; eval $setvar
-		val="$undef"; set i_varargs; eval $setvar
-		;;
-	varargs.h)
-		val="$undef"; set i_stdarg; eval $setvar
-		val="$define"; set i_varargs; eval $setvar
-		;;
-	esac
-	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
-esac
-$rm -f varargs*
-
-: see if vprintf exists
-echo " "
-if set vprintf val -f d_vprintf; eval $csym; $val; then
-	echo 'vprintf() found.' >&4
-	val="$define"
-	$cat >try.c <<EOF
-#$i_stdarg I_STDARG  /* Only one of these can be defined by i_varhrd */
-#$i_varargs I_VARARGS
-
-#$i_stdlib I_STDLIB
-#$i_unistd I_UNISTD
-
-#ifdef I_STDARG
-#  include <stdarg.h>
-#else /* I_VARARGS */
-#  include <varargs.h>
-#endif
-
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-
-#include <stdio.h> /* vsprintf prototype */
-
-#ifdef I_STDARG
-void xxx(int n, ...)
-{
-    va_list args;
-    char buf[10];
-    va_start(args, n);
-    exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
-}
-int main() { xxx(1, "foo"); }
-
-#else /* I_VARARGS */
-
-xxx(va_alist)
-va_dcl
-{
-    va_list args;
-    char buf[10];
-    va_start(args);
-    exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
-}
-int main() { xxx("foo"); }
-
-#endif
-
-EOF
-	set try
-	if eval $compile_ok; then
-		if $run ./try; then
-			echo "Your vsprintf() returns (int)." >&4
-			val2="$undef"
-		else
-			echo "Your vsprintf() returns (char*)." >&4
-			val2="$define"
-		fi
-	else
-		echo 'I am unable to compile the vsprintf() test program.' >&4
-		# We shouldn't get here.  If we do, assume the standard signature,
-		# not the old BSD one.
-		echo 'Guessing that vsprintf() returns (int).' >&4
-		val2="$undef"
-	fi
-else
-	echo 'vprintf() NOT found.' >&4
-	val="$undef"
-	val2="$undef"
-fi
-$rm_try
-set d_vprintf
-eval $setvar
-val=$val2
-set d_charvspr
-eval $setvar
-
 : see if chown exists
 set chown d_chown
 eval $inlibc
@@ -21621,6 +21429,115 @@ rp="What is the type used for file modes for system calls (e.g. fchmod())?"
 set mode_t modetype int stdio.h sys/types.h
 eval $typedef_ask
 
+: see if stdarg is available
+echo " "
+if $test `./findhdr stdarg.h`; then
+	echo "<stdarg.h> found." >&4
+	valstd="$define"
+else
+	echo "<stdarg.h> NOT found." >&4
+	valstd="$undef"
+fi
+
+: see if varargs is available
+echo " "
+if $test `./findhdr varargs.h`; then
+	echo "<varargs.h> found." >&4
+else
+	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
+fi
+
+: set up the varargs testing programs
+$cat > varargs.c <<EOP
+#ifdef I_STDARG
+#include <stdarg.h>
+#endif
+#ifdef I_VARARGS
+#include <varargs.h>
+#endif
+
+#ifdef I_STDARG
+int f(char *p, ...)
+#else
+int f(va_alist)
+va_dcl
+#endif
+{
+	va_list ap;
+#ifndef I_STDARG
+	char *p;
+#endif
+#ifdef I_STDARG
+	va_start(ap,p);
+#else
+	va_start(ap);
+	p = va_arg(ap, char *);
+#endif
+	va_end(ap);
+	return 0;
+}
+EOP
+$cat > varargs <<EOP
+$startsh
+if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
+	echo "true"
+else
+	echo "false"
+fi
+$rm -f varargs$_o
+EOP
+chmod +x varargs
+
+: now check which varargs header should be included
+echo " "
+i_varhdr=''
+val=''
+case "$valstd" in
+"$define")
+	if `./varargs I_STDARG`; then
+		val='stdarg.h'
+	elif `./varargs I_VARARGS`; then
+		val='varargs.h'
+	fi
+	;;
+*)
+	if `./varargs I_VARARGS`; then
+		val='varargs.h'
+	fi
+	;;
+esac
+case "$val" in
+'')
+	echo " "
+	echo "*** WHOA THERE!!! ***" >&4
+	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
+	case "$knowitall" in
+	'')
+	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
+		exit 1
+		;;
+	esac
+echo "I could not find the definition for va_dcl... You have problems..." >&4
+	val="$undef"; set i_stdarg; eval $setvar
+	val="$undef"; set i_varargs; eval $setvar
+	;;
+*)
+	set i_varhdr
+	eval $setvar
+	case "$i_varhdr" in
+	stdarg.h)
+		val="$define"; set i_stdarg; eval $setvar
+		val="$undef"; set i_varargs; eval $setvar
+		;;
+	varargs.h)
+		val="$undef"; set i_stdarg; eval $setvar
+		val="$define"; set i_varargs; eval $setvar
+		;;
+	esac
+	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
+esac
+$rm -f varargs*
+
 : see if we need va_copy
 echo " "
 case "$i_stdarg" in
@@ -24338,7 +24255,6 @@ d_c99_variadic_macros='$d_c99_variadic_macros'
 d_casti32='$d_casti32'
 d_castneg='$d_castneg'
 d_cbrt='$d_cbrt'
-d_charvspr='$d_charvspr'
 d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
@@ -24829,7 +24745,6 @@ d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
 d_voidtty='$d_voidtty'
-d_vprintf='$d_vprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcscmp='$d_wcscmp'

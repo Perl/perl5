@@ -77,7 +77,6 @@ archname='x86_64-catamount'
 archobjs='catalib.o'
 d_mmap='undef'
 d_setlocale='undef' # There is setlocale() but no locales.
-d_vprintf='define'
 hintfile='catamount'
 i_arpainet='undef'
 i_db='undef'
