@@ -1565,19 +1565,26 @@ while(<$kh>) {
     is Internals::SvREFCNT(@array),  1, 'no leak in array refaliasing';
     is Internals::SvREFCNT(%hash) ,  1, 'no leak in hash refaliasing';
 
-    for (
-        [SCALAR => \&sref],
-        [ARRAY  => \&aref],
-        [HASH   => \&href],
-    ) {
-        my ($type, $sub) = @$_;
-        eval { $sub->(42) };
-        like $@, qr/^Subroutine argument is not a reference/,
-            "$type errors on non-reference";
-        eval { $sub->(sub {}) };
+    sub srefanon(\$) { }
+    sub arefanon(\@) { }
+    sub hrefanon(\%) { }
 
-        like $@, qr/^Subroutine argument is not an? $type reference/,
-            "$type errors on wrong reference";
+    for (
+        [SCALAR => \&sref, \&srefanon],
+        [ARRAY  => \&aref, \&arefanon],
+        [HASH   => \&href, \&hrefanon],
+    ) {
+        my ($type, @subs) = @$_;
+
+        for my $sub (@subs) {
+            eval { $sub->(42) };
+            like $@, qr/^Subroutine argument is not a reference/,
+                "$type refalias errors on non-reference";
+
+            eval { $sub->(sub {}) };
+            like $@, qr/^Subroutine argument is not an? $type reference/,
+                "$type refalias errors on wrong reference";
+        }
     }
 }
 

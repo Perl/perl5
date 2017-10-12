@@ -762,8 +762,19 @@ sigscalarelem:
                                             "follows optional parameter");
                             }
 
-                            if (var && sigil)
-                                var->op_private |= OPpARGELEM_REFALIAS;
+                            if (sigil) {
+                                if (var)
+                                    var->op_private |= OPpARGELEM_REFALIAS;
+                                else {
+                                    var = newUNOP_AUX(OP_ARGELEM, 0, NULL,
+                                                      INT2PTR(UNOP_AUX_item *,
+                                                              (parser->sig_elems-1)));
+                                    var->op_private |= OPpARGELEM_REFALIAS
+                                                    |  ( sigil == '$' ? OPpARGELEM_SV
+                                                       : sigil == '@' ? OPpARGELEM_AV
+                                                       :                OPpARGELEM_HV);
+                                }
+                            }
 
                             $$ = var ? newSTATEOP(0, NULL, var) : NULL;
                         }
