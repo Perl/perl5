@@ -278,7 +278,7 @@ PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags);
 PERL_CALLCONV I32	Perl_call_pv(pTHX_ const char* sub_name, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_PV	\
 	assert(sub_name)
-PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, VOL I32 flags);
+PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, volatile I32 flags);
 #define PERL_ARGS_ASSERT_CALL_SV	\
 	assert(sv)
 PERL_CALLCONV const PERL_CONTEXT *	Perl_caller_cx(pTHX_ I32 level, const PERL_CONTEXT **dbcxp);

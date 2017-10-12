@@ -571,7 +571,9 @@
 #endif
 
 /* This exists only for back-compat. */
+#ifndef PERL_CORE
 #define VOL volatile
+#endif
 
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
  * you get a perl without taint support, but doubtlessly with a lesser

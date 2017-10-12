@@ -557,7 +557,7 @@ PERLVAR(I, sighandlerp,	Sighandler_t)
 
 PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
-PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
+PERLVAR(I, debug,	volatile U32)	/* flags given to -D switch */
 
 PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
