@@ -2755,13 +2755,6 @@
 #define USE_STAT_BLOCKS 	/**/
 #endif
 
-/* USE_STRUCT_COPY:
- *	This symbol, if defined, indicates that this C compiler knows how
- *	to copy structures.  If undefined, you'll need to use a block copy
- *	routine of some sort instead.
- */
-#define	USE_STRUCT_COPY	/**/
-
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
  *	available to translate error numbers to strings. See the writeup

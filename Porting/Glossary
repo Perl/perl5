@@ -2632,11 +2632,6 @@ d_strcoll (d_strcoll.U):
 	This variable conditionally defines HAS_STRCOLL if strcoll() is
 	available to compare strings using collating information.
 
-d_strctcpy (d_strctcpy.U):
-	This variable conditionally defines the USE_STRUCT_COPY symbol, which
-	indicates to the C program that this C compiler knows how to copy
-	structures.
-
 d_strerrm (d_strerror.U):
 	This variable holds what Strerror is defined as to translate an error
 	code condition into an error message string. It could be 'strerror'

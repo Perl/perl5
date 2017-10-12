@@ -874,7 +874,6 @@ stdio_ptr=''
 d_index=''
 d_strchr=''
 d_strcoll=''
-d_strctcpy=''
 d_strerrm=''
 d_strerror=''
 d_sysernlst=''
@@ -19531,30 +19530,6 @@ esac
 set strcoll d_strcoll
 eval $inlibc
 
-: check for structure copying
-echo " "
-echo "Checking to see if your C compiler can copy structs..." >&4
-$cat >try.c <<'EOCP'
-int main()
-{
-	struct blurfl {
-		int dyick;
-	} foo, bar;
-
-	foo = bar;
-}
-EOCP
-if $cc -c try.c >/dev/null 2>&1 ; then
-	val="$define"
-	echo "Yup, it can."
-else
-	val="$undef"
-	echo "Nope, it can't."
-fi
-set d_strctcpy
-eval $setvar
-$rm_try
-
 : see if strerror and/or sys_errlist[] exist
 echo " "
 if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
@@ -25168,7 +25143,6 @@ d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
 d_strchr='$d_strchr'
 d_strcoll='$d_strcoll'
-d_strctcpy='$d_strctcpy'
 d_strerrm='$d_strerrm'
 d_strerror='$d_strerror'
 d_strerror_l='$d_strerror_l'

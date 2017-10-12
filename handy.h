@@ -2436,11 +2436,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  define PERL_POISON_EXPR(x)
 #endif
 
-#ifdef USE_STRUCT_COPY
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
-#else
-#define StructCopy(s,d,t) Copy(s,d,1,t)
-#endif
 
 /* C_ARRAY_LENGTH is the number of elements in the C array (so you
  * want your zero-based indices to be less than but not equal to).
