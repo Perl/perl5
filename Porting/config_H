@@ -3559,17 +3559,6 @@
 /*#define	USE_SITECUSTOMIZE		/ **/
 #endif
 
-/* HAS_SNPRINTF:
- *	This symbol, if defined, indicates that the snprintf () library
- *	function is available for use.
- */
-/* HAS_VSNPRINTF:
- *	This symbol, if defined, indicates that the vsnprintf () library
- *	function is available for use.
- */
-#define HAS_SNPRINTF	/**/
-#define HAS_VSNPRINTF	/**/
-
 /* HAS_SOCKATMARK:
  *	This symbol, if defined, indicates that the sockatmark routine is
  *	available to test whether a socket is at the out-of-band mark.

@@ -2441,11 +2441,6 @@ d_sitearch (sitearch.U):
 	of architecture-dependent library files for $package.  If
 	$sitearch is the same as $archlib, then this is set to undef.
 
-d_snprintf (d_snprintf.U):
-	This variable conditionally defines the HAS_SNPRINTF symbol, which
-	indicates to the C program that the snprintf () library function
-	is available.
-
 d_sockaddr_in6 (d_socket.U):
 	This variable conditionally defines the HAS_SOCKADDR_IN6 symbol, which
 	indicates the availability of a struct sockaddr_in6.
@@ -2852,11 +2847,6 @@ d_vprintf (d_vprintf.U):
 	This variable conditionally defines the HAS_VPRINTF symbol, which
 	indicates to the C program that the vprintf() routine is available
 	to printf with a pointer to an argument list.
-
-d_vsnprintf (d_snprintf.U):
-	This variable conditionally defines the HAS_VSNPRINTF symbol, which
-	indicates to the C program that the vsnprintf () library function
-	is available.
 
 d_wait4 (d_wait4.U):
 	This variable conditionally defines the HAS_WAIT4 symbol, which

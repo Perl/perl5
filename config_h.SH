@@ -3427,17 +3427,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$usesitecustomize	USE_SITECUSTOMIZE		/**/
 #endif
 
-/* HAS_SNPRINTF:
- *	This symbol, if defined, indicates that the snprintf () library
- *	function is available for use.
- */
-/* HAS_VSNPRINTF:
- *	This symbol, if defined, indicates that the vsnprintf () library
- *	function is available for use.
- */
-#$d_snprintf HAS_SNPRINTF	/**/
-#$d_vsnprintf HAS_VSNPRINTF	/**/
-
 /* HAS_SOCKATMARK:
  *	This symbol, if defined, indicates that the sockatmark routine is
  *	available to test whether a socket is at the out-of-band mark.
