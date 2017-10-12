@@ -4436,7 +4436,6 @@ $ WS "}"
 $ CS
 $ tmp = "bcopy"
 $ GOSUB inlibc
-$ d_bcopy = tmp
 $!
 $! Check for mkstemp
 $!
@@ -5986,7 +5985,6 @@ $ WC "d_prctl='undef'"
 $ WC "d_prctl_set_name='undef'"
 $ WC "d_printf_format_null='undef'"
 $ WC "d_bcmp='" + d_bcmp + "'"
-$ WC "d_bcopy='" + d_bcopy + "'"
 $ WC "d_bincompat3='undef'"
 $ WC "d_bsd='undef'"
 $ WC "d_bsdgetpgrp='undef'"
@@ -6218,9 +6216,7 @@ $ WC "d_mbstowcs='" + d_mbstowcs + "'"
 $ WC "d_mbtowc='" + d_mbtowc + "'"
 $ WC "d_memchr='" + d_memchr + "'"
 $ WC "d_memcmp='define'"
-$ WC "d_memcpy='define'"
 $ WC "d_memmem='undef'"
-$ WC "d_memmove='define'"
 $ WC "d_memrchr='" + d_memrchr + "'"
 $ WC "d_mkdir='define'"
 $ WC "d_mkdtemp='" + d_mkdtemp + "'"
@@ -6310,7 +6306,6 @@ $ WC "d_rewinddir='define'"
 $ WC "d_rint='" + d_rint + "'"
 $ WC "d_rmdir='define'"
 $ WC "d_round='undef'"
-$ WC "d_safebcpy='undef'"
 $ WC "d_sanemcmp='define'"
 $ WC "d_sbrkproto='define'"
 $ WC "d_scalbn='undef'"

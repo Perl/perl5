@@ -1055,9 +1055,6 @@ s	|void	|move_proto_attr|NN OP **proto|NN OP **attrs \
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
 Ap	|NV	|my_atof	|NN const char *s
-#if !defined(HAS_MEMCPY) || !defined(HAS_MEMMOVE)
-Anp	|void*	|my_bcopy	|NN const void* vfrom|NN void* vto|size_t len
-#endif
 Apr	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Ap	|I32	|my_fflush_all

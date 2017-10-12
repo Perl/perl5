@@ -191,14 +191,9 @@ delpair(char *pag, datum key)
                         }
                 }
 #else
-#ifdef HAS_MEMMOVE
                 dst -= m;
                 src -= m;
                 memmove(dst, src, m);
-#else
-                while (m--)
-                        *--dst = *--src;
-#endif
 #endif
 /*
  * adjust offset index up

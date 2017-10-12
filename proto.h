@@ -3835,11 +3835,6 @@ PERL_CALLCONV int	Perl_my_memcmp(const void* vs1, const void* vs2, size_t len)
 	assert(vs1); assert(vs2)
 
 #endif
-#if !defined(HAS_MEMCPY) || !defined(HAS_MEMMOVE)
-PERL_CALLCONV void*	Perl_my_bcopy(const void* vfrom, void* vto, size_t len);
-#define PERL_ARGS_ASSERT_MY_BCOPY	\
-	assert(vfrom); assert(vto)
-#endif
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #  if defined(PERL_IN_PP_SYS_C)
 STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)

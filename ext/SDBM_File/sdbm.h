@@ -202,26 +202,6 @@ Free_t   Perl_mfree proto((Malloc_t where));
 #include <memory.h>
 #endif      
 
-#ifdef __cplusplus
-#define HAS_MEMCPY
-#endif
-
-#ifdef HAS_MEMCPY
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcpy
-        extern char * memcpy proto((char*, char*, int));
-#    endif
-#  endif
-#else
-#   ifndef memcpy
-#	ifdef HAS_BCOPY
-#	    define memcpy(d,s,l) bcopy(s,d,l)
-#	else
-#	    define memcpy(d,s,l) my_bcopy(s,d,l)
-#	endif
-#   endif
-#endif /* HAS_MEMCPY */
-
 #define memzero(d,l) memset(d,0,l)
 
 #if defined(mips) && defined(ultrix) && !defined(__STDC__)

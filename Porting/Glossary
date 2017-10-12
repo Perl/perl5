@@ -499,10 +499,6 @@ d_bcmp (d_bcmp.U):
 	This variable conditionally defines the HAS_BCMP symbol if
 	the bcmp() routine is available to compare strings.
 
-d_bcopy (d_bcopy.U):
-	This variable conditionally defines the HAS_BCOPY symbol if
-	the bcopy() routine is available to copy strings.
-
 d_bsd (Guess.U):
 	This symbol conditionally defines the symbol BSD when running on a
 	BSD system.
@@ -1688,21 +1684,11 @@ d_memcmp (d_memcmp.U):
 	indicates to the C program that the memcmp() routine is available
 	to compare blocks of memory.
 
-d_memcpy (d_memcpy.U):
-	This variable conditionally defines the HAS_MEMCPY symbol, which
-	indicates to the C program that the memcpy() routine is available
-	to copy blocks of memory.
-
 d_memmem (d_memmem.U):
 	This variable conditionally defines the HAS_MEMMEM symbol, which
 	indicates to the C program that the memmem() routine is available
 	to return a pointer to the start of the first occurance of a
 	substring in a memory area (or NULL if not found).
-
-d_memmove (d_memmove.U):
-	This variable conditionally defines the HAS_MEMMOVE symbol, which
-	indicates to the C program that the memmove() routine is available
-	to copy potentially overlapping blocks of memory.
 
 d_memrchr (d_memrchr.U):
 	This variable conditionally defines the HAS_MEMRCHR symbol, which
@@ -2165,11 +2151,6 @@ d_rmdir (d_rmdir.U):
 d_round (d_round.U):
 	This variable conditionally defines the HAS_ROUND symbol, which
 	indicates to the C program that the round() routine is available.
-
-d_safebcpy (d_safebcpy.U):
-	This variable conditionally defines the HAS_SAFE_BCOPY symbol if
-	the bcopy() routine can do overlapping copies.  Normally, you
-	should probably use memmove().
 
 d_sanemcmp (d_sanemcmp.U):
 	This variable conditionally defines the HAS_SANE_MEMCMP symbol if

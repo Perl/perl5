@@ -1001,22 +1001,6 @@ EXTERN_C int usleep(unsigned int);
 #  include <memory.h>
 #endif
 
-#ifdef HAS_MEMCPY
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcpy
-        extern char * memcpy (char*, char*, int);
-#    endif
-#  endif
-#else
-#   ifndef memcpy
-#	define memcpy(d,s,l) my_bcopy(s,d,l)
-#   endif
-#endif /* HAS_MEMCPY */
-
-#if !defined(HAS_MEMMOVE) && !defined(memmove)
-#   define memmove(d,s,l) my_bcopy(s,d,l)
-#endif
-
 #if defined(mips) && defined(ultrix) && !defined(__STDC__)
 #   undef HAS_MEMCMP
 #endif

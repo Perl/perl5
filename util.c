@@ -2223,36 +2223,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 }
 #endif
 
-/* this is a drop-in replacement for bcopy(), except for the return
- * value, which we need to be able to emulate memcpy()  */
-#if !defined(HAS_MEMCPY) || !defined(HAS_MEMMOVE)
-void *
-Perl_my_bcopy(const void *vfrom, void *vto, size_t len)
-{
-#if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
-    bcopy(vfrom, vto, len);
-#else
-    const unsigned char *from = (const unsigned char *)vfrom;
-    unsigned char *to = (unsigned char *)vto;
-
-    PERL_ARGS_ASSERT_MY_BCOPY;
-
-    if (from - to >= 0) {
-	while (len--)
-	    *to++ = *from++;
-    }
-    else {
-	to += len;
-	from += len;
-	while (len--)
-	    *(--to) = *(--from);
-    }
-#endif
-
-    return vto;
-}
-#endif
-
 /* this is a drop-in replacement for memcmp() */
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 int
