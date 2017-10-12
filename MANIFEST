@@ -2845,6 +2845,7 @@ cpan/Test-Simple/t/regression/757-reset_in_subtest.t
 cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t
 cpan/Test-Simple/t/regression/builder_does_not_init.t
 cpan/Test-Simple/t/regression/errors_facet.t
+cpan/Test-Simple/t/regression/inherit_trace.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t

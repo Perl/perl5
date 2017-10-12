@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302098';
+our $VERSION = '1.302100';
 
 
 my $INST;
@@ -542,9 +542,11 @@ sub run_subtest {
     if ($inherit_trace) {
         my $orig = $code;
         $code = sub {
+            my $base_trace = $ctx->trace;
+            my $trace = $base_trace->snapshot(nested => 1 + $base_trace->nested);
             my $st_ctx = Test2::API::Context->new(
-                trace => $ctx->trace,
-                hub   => $hub,
+                trace  => $trace,
+                hub    => $hub,
             );
             $st_ctx->do_in_context($orig, @args);
         };
