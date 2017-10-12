@@ -11664,120 +11664,9 @@ set d_builtin_expect
 eval $setvar
 $rm_try
 
-: see if stdarg is available
-echo " "
-if $test `./findhdr stdarg.h`; then
-	echo "<stdarg.h> found." >&4
-	valstd="$define"
-else
-	echo "<stdarg.h> NOT found." >&4
-	valstd="$undef"
-fi
-
-: see if varargs is available
-echo " "
-if $test `./findhdr varargs.h`; then
-	echo "<varargs.h> found." >&4
-else
-	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
-fi
-
-: set up the varargs testing programs
-$cat > varargs.c <<EOP
-#ifdef I_STDARG
-#include <stdarg.h>
-#endif
-#ifdef I_VARARGS
-#include <varargs.h>
-#endif
-
-#ifdef I_STDARG
-int f(char *p, ...)
-#else
-int f(va_alist)
-va_dcl
-#endif
-{
-	va_list ap;
-#ifndef I_STDARG
-	char *p;
-#endif
-#ifdef I_STDARG
-	va_start(ap,p);
-#else
-	va_start(ap);
-	p = va_arg(ap, char *);
-#endif
-	va_end(ap);
-	return 0;
-}
-EOP
-$cat > varargs <<EOP
-$startsh
-if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
-	echo "true"
-else
-	echo "false"
-fi
-$rm -f varargs$_o
-EOP
-chmod +x varargs
-
-: now check which varargs header should be included
-echo " "
-i_varhdr=''
-val=''
-case "$valstd" in
-"$define")
-	if `./varargs I_STDARG`; then
-		val='stdarg.h'
-	elif `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-*)
-	if `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-esac
-case "$val" in
-'')
-	echo " "
-	echo "*** WHOA THERE!!! ***" >&4
-	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
-	case "$knowitall" in
-	'')
-	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
-		exit 1
-		;;
-	esac
-echo "I could not find the definition for va_dcl... You have problems..." >&4
-	val="$undef"; set i_stdarg; eval $setvar
-	val="$undef"; set i_varargs; eval $setvar
-	;;
-*)
-	set i_varhdr
-	eval $setvar
-	case "$i_varhdr" in
-	stdarg.h)
-		val="$define"; set i_stdarg; eval $setvar
-		val="$undef"; set i_varargs; eval $setvar
-		;;
-	varargs.h)
-		val="$undef"; set i_stdarg; eval $setvar
-		val="$define"; set i_varargs; eval $setvar
-		;;
-	esac
-	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
-esac
-$rm -f varargs*
-
 : see if the Compiler supports C99 variadic macros
-case "$i_stdarg$i_stdlib" in
-    "$define$define")
-    echo "You have <stdarg.h> and <stdlib.h>, so checking for C99 variadic macros." >&4
-    $cat >try.c <<EOCP
+echo "Checking for C99 variadic macros." >&4
+$cat >try.c <<EOCP
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -11790,29 +11679,23 @@ int main() {
   return 0;
 }
 EOCP
-    set try
-    if eval $compile && $run ./try 2>&1 >/dev/null; then
-	case "`$run ./try`" in
-	    "123 456 789")
-	    echo "You have C99 variadic macros." >&4
-	    d_c99_variadic_macros="$define"
-	    ;;
-	    *)
-	    echo "You don't have functional C99 variadic macros." >&4
-	    d_c99_variadic_macros="$undef"
-	    ;;
-	esac
-    else
-	echo "I couldn't compile and run the test program, so I assume that you don't have functional C99 variadic macros." >&4
+set try
+if eval $compile && $run ./try 2>&1 >/dev/null; then
+    case "`$run ./try`" in
+	"123 456 789")
+	echo "You have C99 variadic macros." >&4
+	d_c99_variadic_macros="$define"
+	;;
+	*)
+	echo "You don't have functional C99 variadic macros." >&4
 	d_c99_variadic_macros="$undef"
-    fi
-    $rm_try
-    ;;
-    *)
-    echo "You don't have <stdarg.h> and <stdlib.h>, so not checking for C99 variadic macros." >&4
+	;;
+    esac
+else
+    echo "I couldn't compile and run the test program, so I assume that you don't have functional C99 variadic macros." >&4
     d_c99_variadic_macros="$undef"
-    ;;
-esac
+fi
+$rm_try
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
@@ -12024,6 +11907,115 @@ $rm_try
 : see if cbrt exists
 set cbrt d_cbrt
 eval $inlibc
+
+: see if stdarg is available
+echo " "
+if $test `./findhdr stdarg.h`; then
+	echo "<stdarg.h> found." >&4
+	valstd="$define"
+else
+	echo "<stdarg.h> NOT found." >&4
+	valstd="$undef"
+fi
+
+: see if varargs is available
+echo " "
+if $test `./findhdr varargs.h`; then
+	echo "<varargs.h> found." >&4
+else
+	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
+fi
+
+: set up the varargs testing programs
+$cat > varargs.c <<EOP
+#ifdef I_STDARG
+#include <stdarg.h>
+#endif
+#ifdef I_VARARGS
+#include <varargs.h>
+#endif
+
+#ifdef I_STDARG
+int f(char *p, ...)
+#else
+int f(va_alist)
+va_dcl
+#endif
+{
+	va_list ap;
+#ifndef I_STDARG
+	char *p;
+#endif
+#ifdef I_STDARG
+	va_start(ap,p);
+#else
+	va_start(ap);
+	p = va_arg(ap, char *);
+#endif
+	va_end(ap);
+	return 0;
+}
+EOP
+$cat > varargs <<EOP
+$startsh
+if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
+	echo "true"
+else
+	echo "false"
+fi
+$rm -f varargs$_o
+EOP
+chmod +x varargs
+
+: now check which varargs header should be included
+echo " "
+i_varhdr=''
+val=''
+case "$valstd" in
+"$define")
+	if `./varargs I_STDARG`; then
+		val='stdarg.h'
+	elif `./varargs I_VARARGS`; then
+		val='varargs.h'
+	fi
+	;;
+*)
+	if `./varargs I_VARARGS`; then
+		val='varargs.h'
+	fi
+	;;
+esac
+case "$val" in
+'')
+	echo " "
+	echo "*** WHOA THERE!!! ***" >&4
+	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
+	case "$knowitall" in
+	'')
+	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
+		exit 1
+		;;
+	esac
+echo "I could not find the definition for va_dcl... You have problems..." >&4
+	val="$undef"; set i_stdarg; eval $setvar
+	val="$undef"; set i_varargs; eval $setvar
+	;;
+*)
+	set i_varhdr
+	eval $setvar
+	case "$i_varhdr" in
+	stdarg.h)
+		val="$define"; set i_stdarg; eval $setvar
+		val="$undef"; set i_varargs; eval $setvar
+		;;
+	varargs.h)
+		val="$undef"; set i_stdarg; eval $setvar
+		val="$define"; set i_varargs; eval $setvar
+		;;
+	esac
+	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
+esac
+$rm -f varargs*
 
 : see if vprintf exists
 echo " "
