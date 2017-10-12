@@ -1063,9 +1063,6 @@ Anp	|void	|atfork_lock
 Anp	|void	|atfork_unlock
 Apmb	|I32	|my_lstat
 pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-AnpP	|int	|my_memcmp	|NN const void* vs1|NN const void* vs2|size_t len
-#endif
 #if !defined(PERL_IMPLICIT_SYS)
 Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
 Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode

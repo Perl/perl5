@@ -28,12 +28,6 @@
  */
 /*#define HAS_ALARM		/ **/
 
-/* HAS_BCMP:
- *	This symbol is defined if the bcmp() routine is available to
- *	compare blocks of memory.
- */
-/*#define HAS_BCMP	/ **/
-
 /* HAS_CBRT:
  *	This symbol, if defined, indicates that the cbrt() (cube root)
  *	function is available.
@@ -249,12 +243,6 @@
  *	to convert a multibyte to a wide character.
  */
 /*#define HAS_MBTOWC		/ **/
-
-/* HAS_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	to compare blocks of memory.
- */
-#define HAS_MEMCMP	/**/
 
 /* HAS_MKDIR:
  *	This symbol, if defined, indicates that the mkdir routine is available
@@ -1055,13 +1043,6 @@
  *	argument form of open(2) is available.
  */
 /*#define HAS_OPEN3		/ **/
-
-/* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	and can be used to compare relative magnitudes of chars with their high
- *	bits set.  If it is not defined, roll your own version.
- */
-/*#define HAS_SANE_MEMCMP	/ **/
 
 /* HAS_SIGACTION:
  *	This symbol, if defined, indicates that Vr4's sigaction() routine
@@ -5391,6 +5372,6 @@
 #endif
 
 /* Generated from:
- * 1cf368f3ea2fec4f94f386fdea4cdeeaa97c85016d4890593bf9f9883b0efddd config_h.SH
- * 0aaf1bf7863e3a8c2c9ebd5150ba593f980e174203d159deac8f83b981da6037 uconfig.sh
+ * 53d2d4cc7acf8d0b0b04606f10f9ad2405b078be305d3ad5e57aa2fa5954c9d6 config_h.SH
+ * da0fc52cf0e7a996baafbaa4d6cfaa06229ec4a84f23e80dfdbf97d4e73eb2c8 uconfig.sh
  * ex: set ro: */

@@ -63,12 +63,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_alarm HAS_ALARM		/**/
 
-/* HAS_BCMP:
- *	This symbol is defined if the bcmp() routine is available to
- *	compare blocks of memory.
- */
-#$d_bcmp HAS_BCMP	/**/
-
 /* HAS_CBRT:
  *	This symbol, if defined, indicates that the cbrt() (cube root)
  *	function is available.
@@ -284,12 +278,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	to convert a multibyte to a wide character.
  */
 #$d_mbtowc HAS_MBTOWC		/**/
-
-/* HAS_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	to compare blocks of memory.
- */
-#$d_memcmp HAS_MEMCMP	/**/
 
 /* HAS_MKDIR:
  *	This symbol, if defined, indicates that the mkdir routine is available
@@ -1090,13 +1078,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	argument form of open(2) is available.
  */
 #$d_open3 HAS_OPEN3		/**/
-
-/* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	and can be used to compare relative magnitudes of chars with their high
- *	bits set.  If it is not defined, roll your own version.
- */
-#$d_sanemcmp HAS_SANE_MEMCMP	/**/
 
 /* HAS_SIGACTION:
  *	This symbol, if defined, indicates that Vr4's sigaction() routine

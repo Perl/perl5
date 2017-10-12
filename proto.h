@@ -3827,14 +3827,6 @@ PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *l
 #define PERL_ARGS_ASSERT_GETENV_LEN	\
 	assert(env_elem); assert(len)
 #endif
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-PERL_CALLCONV int	Perl_my_memcmp(const void* vs1, const void* vs2, size_t len)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-#define PERL_ARGS_ASSERT_MY_MEMCMP	\
-	assert(vs1); assert(vs2)
-
-#endif
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #  if defined(PERL_IN_PP_SYS_C)
 STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)

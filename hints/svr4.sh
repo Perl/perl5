@@ -25,7 +25,6 @@ libswanted=`echo " $libswanted " | sed -e 's/ malloc / /'` # -e 's/ ucb / /'`
 if [ -r /usr/ucblib/libucb.a ]; then	# If using BSD-compat. library:
     gconvert_preference='gcvt sprintf'	# Try gcvt() before gconvert().
     # Use the "native" counterparts, not the BSD emulation stuff:
-    d_bcmp='undef'
     d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
     d_setlinebuf='undef' 
     # d_setregid='undef' d_setreuid='undef'  # ???

@@ -2223,25 +2223,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 }
 #endif
 
-/* this is a drop-in replacement for memcmp() */
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-int
-Perl_my_memcmp(const void *vs1, const void *vs2, size_t len)
-{
-    const U8 *a = (const U8 *)vs1;
-    const U8 *b = (const U8 *)vs2;
-    int tmp;
-
-    PERL_ARGS_ASSERT_MY_MEMCMP;
-
-    while (len--) {
-        if ((tmp = *a++ - *b++))
-	    return tmp;
-    }
-    return 0;
-}
-#endif /* !HAS_MEMCMP || !HAS_SANE_MEMCMP */
-
 #ifndef HAS_VPRINTF
 /* This vsprintf replacement should generally never get used, since
    vsprintf was available in both System V and BSD 2.11.  (There may

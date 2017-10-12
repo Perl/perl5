@@ -493,13 +493,8 @@ Returns zero if non-equal, or non-zero if equal.
 #define strEQs(s1,s2) (!strncmp(s1,"" s2 "", sizeof(s2)-1))
 #endif
 
-#ifdef HAS_MEMCMP
-#  define memNE(s1,s2,l) (memcmp(s1,s2,l))
-#  define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
-#else
-#  define memNE(s1,s2,l) (bcmp(s1,s2,l))
-#  define memEQ(s1,s2,l) (!bcmp(s1,s2,l))
-#endif
+#define memNE(s1,s2,l) (memcmp(s1,s2,l))
+#define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
 
 /* memEQ and memNE where second comparand is a string constant */
 #define memEQs(s1, l, s2) \

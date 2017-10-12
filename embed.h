@@ -779,9 +779,6 @@
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-#define my_memcmp		Perl_my_memcmp
-#endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)
 #endif

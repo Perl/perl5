@@ -92,7 +92,6 @@ glibpth=`echo " $glibpth " | sed -e 's/ \/shlib / /' -e 's/ \/lib / /'`
 # Don't use BSD emulation pieces (/usr/ucblib) regardless
 # these would probably be autonondetected anyway but ...
 gconvert_preference='gcvt sprintf'	# Try gcvt() before gconvert().
-d_bcmp='undef' 
 d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
 d_setlinebuf='undef' 
 d_setregid='undef' d_setreuid='undef'  # -- in /usr/lib/libc.so.1

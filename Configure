@@ -391,7 +391,6 @@ d_attribute_unused=''
 d_attribute_warn_unused_result=''
 d_printf_format_null=''
 d_backtrace=''
-d_bcmp=''
 d_builtin_choose_expr=''
 d_builtin_expect=''
 d_builtin_add_overflow=''
@@ -664,7 +663,6 @@ d_mbrtowc=''
 d_mbstowcs=''
 d_mbtowc=''
 d_memchr=''
-d_memcmp=''
 d_memmem=''
 d_memrchr=''
 d_mkdir=''
@@ -743,7 +741,6 @@ d_rename=''
 d_rint=''
 d_rmdir=''
 d_round=''
-d_sanemcmp=''
 d_sbrkproto=''
 d_scalbn=''
 d_scalbnl=''
@@ -11361,10 +11358,6 @@ set d_attribute_warn_unused_result
 eval $setvar
 $rm -f attrib*
 
-: see if bcmp exists
-set bcmp d_bcmp
-eval $inlibc
-
 : see if getpgrp exists
 set getpgrp d_getpgrp
 eval $inlibc
@@ -16615,10 +16608,6 @@ eval $inlibc
 set memchr d_memchr
 eval $inlibc
 
-: see if memcmp exists
-set memcmp d_memcmp
-eval $inlibc
-
 : see if memmem exists
 set memmem d_memmem
 eval $inlibc
@@ -17872,84 +17861,6 @@ eval $inlibc
 : see if round exists
 set round d_round
 eval $inlibc
-
-: see if memory.h is available.
-val=''
-set memory.h val
-eval $inhdr
-
-: See if it conflicts with string.h
-case "$val" in
-$define)
-	case "$strings" in
-	'') ;;
-	*)
-		$cppstdin $cppflags $cppminus < $strings > mem.h
-		if $contains 'memcpy' mem.h >/dev/null 2>&1; then
-			echo " "
-			echo "We won't be including <memory.h>."
-			val="$undef"
-		fi
-		$rm -f mem.h
-		;;
-	esac
-esac
-set i_memory
-eval $setvar
-
-: can memcmp be trusted to compare relative magnitude?
-val="$undef"
-case "$d_memcmp" in
-"$define")
-	echo " "
-	echo "Checking if your memcmp() can compare relative magnitude..." >&4
-	$cat >try.c <<EOCP
-#$i_memory I_MEMORY
-#$i_stdlib I_STDLIB
-#$i_string I_STRING
-#$i_unistd I_UNISTD
-EOCP
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#ifdef I_UNISTD
-#  include <unistd.h>  /* Needed for NetBSD */
-#endif
-int main()
-{
-char a = -1;
-char b = 0;
-if ((a < b) && memcmp(&a, &b, 1) < 0)
-	exit(1);
-exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		if $run ./try 2>/dev/null; then
-			echo "Yes, it can."
-			val="$define"
-		else
-			echo "No, it can't (it uses signed chars)."
-		fi
-	else
-		echo "(I can't compile the test program, so we'll assume not...)"
-	fi
-	;;
-esac
-$rm_try
-set d_sanemcmp
-eval $setvar
 
 : see if prototype for sbrk is available
 echo " "
@@ -23395,6 +23306,30 @@ else
 	i_machcthr="$undef"
 fi
 
+: see if memory.h is available.
+val=''
+set memory.h val
+eval $inhdr
+
+: See if it conflicts with string.h
+case "$val" in
+$define)
+	case "$strings" in
+	'') ;;
+	*)
+		$cppstdin $cppflags $cppminus < $strings > mem.h
+		if $contains 'memcpy' mem.h >/dev/null 2>&1; then
+			echo " "
+			echo "We won't be including <memory.h>."
+			val="$undef"
+		fi
+		$rm -f mem.h
+		;;
+	esac
+esac
+set i_memory
+eval $setvar
+
 : see if this is a mntent.h system
 set mntent.h i_mntent
 eval $inhdr
@@ -24512,7 +24447,6 @@ d_attribute_pure='$d_attribute_pure'
 d_attribute_unused='$d_attribute_unused'
 d_attribute_warn_unused_result='$d_attribute_warn_unused_result'
 d_backtrace='$d_backtrace'
-d_bcmp='$d_bcmp'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdsetpgrp='$d_bsdsetpgrp'
@@ -24769,7 +24703,6 @@ d_mbrtowc='$d_mbrtowc'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
 d_memchr='$d_memchr'
-d_memcmp='$d_memcmp'
 d_memmem='$d_memmem'
 d_memrchr='$d_memrchr'
 d_mkdir='$d_mkdir'
@@ -24860,7 +24793,6 @@ d_rewinddir='$d_rewinddir'
 d_rint='$d_rint'
 d_rmdir='$d_rmdir'
 d_round='$d_round'
-d_sanemcmp='$d_sanemcmp'
 d_sbrkproto='$d_sbrkproto'
 d_scalbn='$d_scalbn'
 d_scalbnl='$d_scalbnl'

@@ -32,12 +32,6 @@
  */
 #define HAS_ALARM		/**/
 
-/* HAS_BCMP:
- *	This symbol is defined if the bcmp() routine is available to
- *	compare blocks of memory.
- */
-#define HAS_BCMP	/**/
-
 /* HAS_CHOWN:
  *	This symbol, if defined, indicates that the chown routine is
  *	available.
@@ -247,12 +241,6 @@
  *	to covert a multibyte to a wide character.
  */
 #define HAS_MBTOWC		/**/
-
-/* HAS_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	to compare blocks of memory.
- */
-#define HAS_MEMCMP	/**/
 
 /* HAS_MEMRCHR:
  *	This symbol, if defined, indicates that the memrchr routine is
@@ -1624,13 +1612,6 @@
  */
 /*#define HAS_READDIR_R	   / **/
 #define READDIR_R_PROTO 0	   /**/
-
-/* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	and can be used to compare relative magnitudes of chars with their high
- *	bits set.  If it is not defined, roll your own version.
- */
-#define HAS_SANE_MEMCMP	/**/
 
 /* HAS_SETGRENT_R:
  *	This symbol, if defined, indicates that the setgrent_r routine

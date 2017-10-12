@@ -204,42 +204,12 @@ Free_t   Perl_mfree proto((Malloc_t where));
 
 #define memzero(d,l) memset(d,0,l)
 
-#if defined(mips) && defined(ultrix) && !defined(__STDC__)
-#   undef HAS_MEMCMP
+#ifdef BUGGY_MSC
+#  pragma function(memcmp)
 #endif
 
-#if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcmp
-	extern int memcmp proto((char*, char*, int));
-#    endif
-#  endif
-#  ifdef BUGGY_MSC
-#    pragma function(memcmp)
-#  endif
-#else
-#   ifndef memcmp
-	/* maybe we should have included the full embedding header... */
-#	define memcmp Perl_my_memcmp
-#ifndef __cplusplus
-	extern int memcmp proto((char*, char*, int));
-#endif
-#   endif
-#endif /* HAS_MEMCMP */
-
-#ifndef HAS_BCMP
-#   ifndef bcmp
-#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
-#   endif
-#endif /* !HAS_BCMP */
-
-#ifdef HAS_MEMCMP
-#  define memNE(s1,s2,l) (memcmp(s1,s2,l))
-#  define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
-#else
-#  define memNE(s1,s2,l) (bcmp(s1,s2,l))
-#  define memEQ(s1,s2,l) (!bcmp(s1,s2,l))
-#endif
+#define memNE(s1,s2,l) (memcmp(s1,s2,l))
+#define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
 
 #ifdef I_NETINET_IN
 #  ifdef VMS

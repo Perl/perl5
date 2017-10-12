@@ -1001,21 +1001,6 @@ EXTERN_C int usleep(unsigned int);
 #  include <memory.h>
 #endif
 
-#if defined(mips) && defined(ultrix) && !defined(__STDC__)
-#   undef HAS_MEMCMP
-#endif
-
-#if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcmp
-	extern int memcmp (char*, char*, int);
-#    endif
-#  endif
-#else
-#   undef memcmp
-#   define memcmp   my_memcmp
-#endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
-
 #ifndef memzero
 #   define memzero(d,l) memset(d,0,l)
 #endif
@@ -1027,12 +1012,6 @@ EXTERN_C int usleep(unsigned int);
 #   endif
 #endif
 #endif
-
-#ifndef HAS_BCMP
-#   ifndef bcmp
-#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
-#   endif
-#endif /* !HAS_BCMP */
 
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>
