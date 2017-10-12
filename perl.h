@@ -1492,10 +1492,8 @@ EXTERN_C char *crypt(const char *, const char *);
  */
 
 /* Note that we do not check against snprintf()/vsnprintf() returning
- * negative values because that is non-standard behaviour and we use
- * snprintf/vsnprintf only iff HAS_VSNPRINTF has been defined, and
- * that should be true only if the snprintf()/vsnprintf() are true
- * to the standard. */
+ * negative values because that is non-standard behaviour and we now
+ * assume a working C89 implementation. */
 
 #define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len > (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
 
@@ -1518,7 +1516,7 @@ EXTERN_C char *crypt(const char *, const char *);
 
 /* There is no quadmath_vsnprintf, and therefore my_vsnprintf()
  * dies if called under USE_QUADMATH. */
-#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
+#if defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_vsnprintf(buffer, max, ...) ({ int len = vsnprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, vsnprintf); len; })
 #      define PERL_MY_VSNPRINTF_GUARDED
