@@ -6469,7 +6469,6 @@ $ WC "d_vms_shorten_long_symbols='" + d_vms_shorten_long_symbols + "'" ! VMS
 $ WC "d_void_closedir='define'"
 $ WC "d_voidsig='undef'"
 $ WC "d_voidtty='" + "'"
-$ WC "d_volatile='define'"
 $ WC "d_vprintf='define'"
 $ WC "d_vsnprintf='" + d_vsnprintf + "'"
 $ WC "d_wait4='" + d_wait4 + "'"

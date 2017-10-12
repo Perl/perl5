@@ -2848,11 +2848,6 @@ d_voidtty (i_sysioctl.U):
 	Otherwise (on USG probably), it is enough to close the standard file
 	descriptors and do a setpgrp().
 
-d_volatile (d_volatile.U):
-	This variable conditionally defines the HASVOLATILE symbol, which
-	indicates to the C program that this C compiler knows about the
-	volatile declaration.
-
 d_vprintf (d_vprintf.U):
 	This variable conditionally defines the HAS_VPRINTF symbol, which
 	indicates to the C program that the vprintf() routine is available

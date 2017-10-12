@@ -2168,15 +2168,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define Signal_t $signal_t	/* Signal handler's return type */
 
-/* HASVOLATILE:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the volatile declaration.
- */
-#$d_volatile	HASVOLATILE	/**/
-#ifndef HASVOLATILE
-#define volatile
-#endif
-
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <dirent.h>. Using this symbol also triggers the definition

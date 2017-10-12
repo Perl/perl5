@@ -547,15 +547,6 @@
  */
 /*#define HAS_USLEEP		/**/
 
-/* HASVOLATILE:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the volatile declaration.
- */
-#define	HASVOLATILE	/**/
-#ifndef HASVOLATILE
-#define volatile
-#endif
-
 /* HAS_WAIT4:
  *	This symbol, if defined, indicates that wait4() exists.
  */

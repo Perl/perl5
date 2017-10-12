@@ -2133,15 +2133,6 @@
  */
 #define Signal_t int	/* Signal handler's return type */
 
-/* HASVOLATILE:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the volatile declaration.
- */
-/*#define	HASVOLATILE	/ **/
-#ifndef HASVOLATILE
-#define volatile
-#endif
-
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <dirent.h>. Using this symbol also triggers the definition
@@ -5366,6 +5357,6 @@
 #endif
 
 /* Generated from:
- * b0245f5f4da83b1e4e1dbcd8ffe33f50da89f790dc389b2868fc620cf460c375 config_h.SH
- * f8fa6d0de3a2fb09b8ae480de350caefa12b0272cc67b1bc9f7e02427a3e9a14 uconfig.sh
+ * de64a83defbfab2e684766a378e7304e30db7e2e8545430f86e0239f6850ac8a config_h.SH
+ * 034e09d42cd2ce87573eb1bd11b7169cb5a57d0d0741d379d39c1f3c4fc2f24e uconfig.sh
  * ex: set ro: */
