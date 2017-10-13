@@ -280,6 +280,13 @@
  */
 #define HAS_MEMMOVE	/**/
 
+/* HAS_MEMRCHR:
+ *	This symbol, if defined, indicates that the memrchr routine is
+ *	available to return a pointer to the last occurrence of a byte in
+ *	a memory area (or NULL if not found).
+ */
+#define HAS_MEMRCHR		/**/
+
 /* HAS_MEMSET:
  *	This symbol, if defined, indicates that the memset routine is available
  *	to set blocks of memory.

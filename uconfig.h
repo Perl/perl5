@@ -3206,6 +3206,13 @@
  */
 /*#define HAS_MEMMEM		/ **/
 
+/* HAS_MEMRCHR:
+ *	This symbol, if defined, indicates that the memrchr routine is
+ *	available to return a pointer to the last occurrence of a byte in
+ *	a memory area (or NULL if not found).
+ */
+/*#define HAS_MEMRCHR		/ **/
+
 /* HAS_MKDTEMP:
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.
@@ -5375,6 +5382,6 @@
 #endif
 
 /* Generated from:
- * 2068b3888dbafff8fe3ae7aa6b8c5fb1f89db5b3931b89068053eb588d023b64 config_h.SH
- * a088a21b0ddb63b48c794da959469ddb98da178e5b2d4ec568331a988d59e146 uconfig.sh
+ * 2de7484af521c1029bb9853f03e27d74d89b7f91d1ce1228865d6c4808d4131d config_h.SH
+ * 7e93e67e8d10f41bf582fd383aa099ab2479b61979a341e2f1bd96f8873442cc uconfig.sh
  * ex: set ro: */

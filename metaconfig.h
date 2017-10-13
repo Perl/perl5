@@ -12,4 +12,6 @@
  *
  * Symbols should only be here temporarily. Once they are actually used,
  * they should be removed from here.
+ *
+ * HAS_MEMRCHR
  */

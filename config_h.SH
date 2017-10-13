@@ -3241,6 +3241,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_memmem HAS_MEMMEM		/**/
 
+/* HAS_MEMRCHR:
+ *	This symbol, if defined, indicates that the memrchr routine is
+ *	available to return a pointer to the last occurrence of a byte in
+ *	a memory area (or NULL if not found).
+ */
+#$d_memrchr HAS_MEMRCHR		/**/
+
 /* HAS_MKDTEMP:
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.
