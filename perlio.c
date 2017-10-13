@@ -243,22 +243,21 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
 #if defined(PERL_MICRO) || defined(__SYMBIAN32__)
     return NULL;
-#else
-#ifdef PERL_IMPLICIT_SYS
+#elif defined(PERL_IMPLICIT_SYS)
     return PerlSIO_fdupopen(f);
 #else
-#ifdef WIN32
+# ifdef WIN32
     return win32_fdupopen(f);
-#else
+# else
     if (f) {
 	const int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
 	    char mode[8];
-#ifdef DJGPP
+#  ifdef DJGPP
 	    const int omode = djgpp_get_stream_mode(f);
-#else
+#  else
 	    const int omode = fcntl(fd, F_GETFL);
-#endif
+#  endif
 	    PerlIO_intmode2str(omode,mode,NULL);
 	    /* the r+ is a hack */
 	    return PerlIO_fdopen(fd, mode);
@@ -268,9 +267,8 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     else {
 	SETERRNO(EBADF, SS_IVCHAN);
     }
-#endif
+# endif
     return NULL;
-#endif
 #endif
 }
 
@@ -3607,14 +3605,12 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
      */
 #ifdef STDIO_CNT_LVALUE
     PerlSIO_set_cnt(stdio, cnt);
-#else                           /* STDIO_CNT_LVALUE */
-#if (defined(STDIO_PTR_LVALUE) && defined(STDIO_PTR_LVAL_SETS_CNT))
+#elif (defined(STDIO_PTR_LVALUE) && defined(STDIO_PTR_LVAL_SETS_CNT))
     PerlSIO_set_ptr(stdio,
 		    PerlSIO_get_ptr(stdio) + (PerlSIO_get_cnt(stdio) -
 					      cnt));
 #else                           /* STDIO_PTR_LVAL_SETS_CNT */
     PerlProc_abort();
-#endif                          /* STDIO_PTR_LVAL_SETS_CNT */
 #endif                          /* STDIO_CNT_LVALUE */
 }
 
@@ -5038,8 +5034,7 @@ PerlIO_tmpfile(void)
      const int fd = win32_tmpfd();
      if (fd >= 0)
 	  f = PerlIO_fdopen(fd, "w+b");
-#else /* WIN32 */
-#    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
+#elif defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
      int fd = -1;
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = TAINTING_get ? NULL : PerlEnv_getenv("TMPDIR");
@@ -5074,13 +5069,12 @@ PerlIO_tmpfile(void)
 	  PerlLIO_unlink(sv ? SvPVX_const(sv) : tempname);
      }
      SvREFCNT_dec(sv);
-#    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
+#else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
      FILE * const stdio = PerlSIO_tmpfile();
 
      if (stdio)
 	  f = PerlIO_fdopen(fileno(stdio), "w+");
 
-#    endif /* else HAS_MKSTEMP */
 #endif /* else WIN32 */
      return f;
 }
