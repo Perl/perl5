@@ -832,22 +832,6 @@ extern	Malloc_t sbrk(int);
 #  define MIN_SBRK_FRAC1000	(MIN_SBRK_FRAC * 10)
 #endif
 
-#ifndef START_EXTERN_C
-#  ifdef __cplusplus
-#    define START_EXTERN_C	extern "C" {
-#  else
-#    define START_EXTERN_C
-#  endif
-#endif
-
-#ifndef END_EXTERN_C
-#  ifdef __cplusplus
-#    define END_EXTERN_C		};
-#  else
-#    define END_EXTERN_C
-#  endif
-#endif
-
 #include "malloc_ctl.h"
 
 #ifndef NO_MALLOC_DYNAMIC_CFG
