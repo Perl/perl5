@@ -663,6 +663,7 @@ void	init_os_extras (void);
 int	Perl_vms_status_to_unix(int vms_status, int child_flag);
 int	Perl_unix_status_to_vms(int unix_status);
 int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
+PerlIO *Perl_vms_start_glob(pTHX_ SV *, IO *);
 char *	Perl_vms_realpath (pTHX_ const char *, char *, int *);
 char *	Perl_my_getenv (pTHX_ const char *, bool);
 int	Perl_my_trnlnm (pTHX_ const char *, char *, unsigned long int);

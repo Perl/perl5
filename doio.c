@@ -2920,11 +2920,6 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 #ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */
            /* since spawning off a process is a real performance hit */
 
-PerlIO * 
-Perl_vms_start_glob
-   (pTHX_ SV *tmpglob,
-    IO *io);
-
     fp = Perl_vms_start_glob(aTHX_ tmpglob, io);
 
 #else /* !VMS */
