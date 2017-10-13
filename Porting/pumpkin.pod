@@ -322,11 +322,15 @@ useful information - DAPM 7/2009.
 If you need to make changes to Configure or config_h.SH, it may be best to
 change the appropriate metaconfig units instead, and regenerate Configure.
 
-	metaconfig -m
+	mconfig -m -O
 
 will regenerate F<Configure> and F<config_h.SH>.  Much more information
 on obtaining and running metaconfig is in the F<U/README> file
-that comes with Perl's metaconfig units.
+that comes with Perl's metaconfig units. See the head of Configure for the
+recent information on how to obtain the units and the tools. The base boils
+down to
+
+`	git clone github.com:perl5-metaconfig/metaconfig metaconfig
 
 Since metaconfig is hard to change, running correction scripts after
 this generation is sometimes needed. Configure gained complexity over
@@ -335,16 +339,8 @@ when compiling perl. Therefor, you need to run Porting/config_h.pl
 after that generation. All that and more is described in the README
 files that come with the metaunits.
 
-Perl's metaconfig units should be available on CPAN.  A set of units
-that will work with perl5.9.x is in a file with a name similar to
-F<mc_units-20070423.tgz> under L<http://www.cpan.org/authors/id/H/HM/HMBRAND/>.
-The mc_units tar file should be unpacked in your main perl source directory.
-Note: those units were for use with 5.9.x.  There may have been changes since
-then.  Check for later versions or contact perl5-porters@perl.org to obtain a
-pointer to the current version.
-
-Alternatively, do consider if the F<*ish.h> files or the hint files might be
-a better place for your changes.
+Alternatively, do consider if the F<*ish.h> files or the hint files might
+be a better place for your changes.
 
 =head2 MANIFEST
 
@@ -1385,11 +1381,11 @@ copyrights alone.  Doing more than that requires quite a bit of tracking.
 =head1 AUTHORS
 
 Original author:  Andy Dougherty doughera@lafayette.edu .
-Additions by Chip Salzenberg chip@perl.com and 
-Tim Bunce Tim.Bunce@ig.co.uk .
+Additions by Chip Salzenberg chip@perl.com, Tim Bunce and the perl5
+development team.
 
 All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-2009-07-08-01 Jesse Vincent
+2017-10-13 H.Merijn Brand
