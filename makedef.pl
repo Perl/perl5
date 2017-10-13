@@ -108,7 +108,6 @@ my $config_h = 'config.h';
 open(CFG, '<', $config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
-                                           |SPRINTF_RETURNS_STRLEN
                                            |KILL_BY_SIGPRC
                                            |(?:PERL|USE|HAS)_\w+)\b/x;
 }
@@ -463,10 +462,6 @@ unless ($define{'DEBUG_LEAKING_SCALARS_FORK_DUMP'}) {
 
 unless ($define{'PERL_DONT_CREATE_GVSV'}) {
     ++$skip{Perl_gv_SVadd};
-}
-
-if ($define{'SPRINTF_RETURNS_STRLEN'}) {
-    ++$skip{Perl_my_sprintf};
 }
 
 unless ($define{'PERL_USES_PL_PIDSTATUS'}) {

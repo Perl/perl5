@@ -4059,11 +4059,6 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 	assert(rsfp)
 #  endif
 #endif
-#if !defined(SPRINTF_RETURNS_STRLEN)
-PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
-#define PERL_ARGS_ASSERT_MY_SPRINTF	\
-	assert(buffer); assert(pat)
-#endif
 #if !defined(USE_QUADMATH)
 #  if defined(PERL_IN_NUMERIC_C)
 STATIC NV	S_mulexp10(NV value, I32 exponent);

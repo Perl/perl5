@@ -2466,12 +2466,6 @@ d_socks5_init (d_socks5_init.U):
 	This variable conditionally defines the HAS_SOCKS5_INIT symbol, which
 	indicates to the C program that the socks5_init() routine is available.
 
-d_sprintf_returns_strlen (d_sprintf_len.U):
-	This variable defines whether sprintf returns the length of the string
-	(as per the ANSI spec). Some C libraries retain compatibility with
-	pre-ANSI C and return a pointer to the passed in buffer; for these
-	this variable will be undef.
-
 d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which
 	indicates to the C program that the sqrtl() routine is available.

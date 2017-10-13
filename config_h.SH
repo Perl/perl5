@@ -3370,14 +3370,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_socks5_init HAS_SOCKS5_INIT		/**/
 
-/* SPRINTF_RETURNS_STRLEN:
- *	This variable defines whether sprintf returns the length of the string
- *	(as per the ANSI spec). Some C libraries retain compatibility with
- *	pre-ANSI C and return a pointer to the passed in buffer; for these
- *	this variable will be undef.
- */
-#$d_sprintf_returns_strlen SPRINTF_RETURNS_STRLEN	/**/
-
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
  *	available to do long double square roots.
