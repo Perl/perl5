@@ -2808,17 +2808,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (*(mg->mg_ptr+1) == '\0') {
 #ifdef VMS
 	    set_vaxc_errno(SvIV(sv));
-#else
-#  ifdef WIN32
+#elif defined(WIN32)
 	    SetLastError( SvIV(sv) );
-#  else
-#    ifdef OS2
+#elif defined(OS2)
 	    os2_setsyserrno(SvIV(sv));
-#    else
+#else
 	    /* will anyone ever use this? */
 	    SETERRNO(SvIV(sv), 4);
-#    endif
-#  endif
 #endif
 	}
 	else if (strEQ(mg->mg_ptr + 1, "NCODING") && SvOK(sv))
@@ -3088,25 +3084,21 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 #ifdef HAS_SETRUID
 	PERL_UNUSED_RESULT(setruid(new_uid));
-#else
-#ifdef HAS_SETREUID
+#elif defined(HAS_SETREUID)
         PERL_UNUSED_RESULT(setreuid(new_uid, (Uid_t)-1));
-#else
-#ifdef HAS_SETRESUID
+#elif defined(HAS_SETRESUID)
         PERL_UNUSED_RESULT(setresuid(new_uid, (Uid_t)-1, (Uid_t)-1));
 #else
 	if (new_uid == PerlProc_geteuid()) {		/* special case $< = $> */
-#ifdef PERL_DARWIN
+#  ifdef PERL_DARWIN
 	    /* workaround for Darwin's setuid peculiarity, cf [perl #24122] */
 	    if (new_uid != 0 && PerlProc_getuid() == 0)
                 PERL_UNUSED_RESULT(PerlProc_setuid(0));
-#endif
+#  endif
             PERL_UNUSED_RESULT(PerlProc_setuid(new_uid));
 	} else {
 	    Perl_croak(aTHX_ "setruid() not implemented");
 	}
-#endif
-#endif
 #endif
 	break;
 	}
@@ -3121,11 +3113,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 #ifdef HAS_SETEUID
 	PERL_UNUSED_RESULT(seteuid(new_euid));
-#else
-#ifdef HAS_SETREUID
+#elif defined(HAS_SETREUID)
 	PERL_UNUSED_RESULT(setreuid((Uid_t)-1, new_euid));
-#else
-#ifdef HAS_SETRESUID
+#elif defined(HAS_SETRESUID)
 	PERL_UNUSED_RESULT(setresuid((Uid_t)-1, new_euid, (Uid_t)-1));
 #else
 	if (new_euid == PerlProc_getuid())		/* special case $> = $< */
@@ -3133,8 +3123,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else {
 	    Perl_croak(aTHX_ "seteuid() not implemented");
 	}
-#endif
-#endif
 #endif
 	break;
 	}
@@ -3149,11 +3137,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 #ifdef HAS_SETRGID
 	PERL_UNUSED_RESULT(setrgid(new_gid));
-#else
-#ifdef HAS_SETREGID
+#elif defined(HAS_SETREGID)
 	PERL_UNUSED_RESULT(setregid(new_gid, (Gid_t)-1));
-#else
-#ifdef HAS_SETRESGID
+#elif defined(HAS_SETRESGID)
         PERL_UNUSED_RESULT(setresgid(new_gid, (Gid_t)-1, (Gid_t) -1));
 #else
 	if (new_gid == PerlProc_getegid())			/* special case $( = $) */
@@ -3161,8 +3147,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else {
 	    Perl_croak(aTHX_ "setrgid() not implemented");
 	}
-#endif
-#endif
 #endif
 	break;
 	}
@@ -3232,11 +3216,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 #ifdef HAS_SETEGID
 	PERL_UNUSED_RESULT(setegid(new_egid));
-#else
-#ifdef HAS_SETREGID
+#elif defined(HAS_SETREGID)
 	PERL_UNUSED_RESULT(setregid((Gid_t)-1, new_egid));
-#else
-#ifdef HAS_SETRESGID
+#elif defined(HAS_SETRESGID)
 	PERL_UNUSED_RESULT(setresgid((Gid_t)-1, new_egid, (Gid_t)-1));
 #else
 	if (new_egid == PerlProc_getgid())			/* special case $) = $( */
@@ -3244,8 +3226,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else {
 	    Perl_croak(aTHX_ "setegid() not implemented");
 	}
-#endif
-#endif
 #endif
 	break;
 	}
