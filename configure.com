@@ -4240,6 +4240,24 @@ $ tmp = "memchr"
 $ GOSUB inlibc
 $ d_memchr = tmp
 $!
+$! Check for memrchr
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <string.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "char * place;"
+$ WS "place = (char *)memrchr(""foo"", 47, 3);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "memrchr"
+$ GOSUB inlibc
+$ d_memrchr = tmp
+$!
 $! Check for strtoull
 $!
 $ OS
@@ -6199,7 +6217,7 @@ $ WC "d_memcmp='define'"
 $ WC "d_memcpy='define'"
 $ WC "d_memmem='undef'"
 $ WC "d_memmove='define'"
-$ WC "d_memrchr='undef'"
+$ WC "d_memrchr='" + d_memrchr + "'"
 $ WC "d_memset='define'"
 $ WC "d_mkdir='define'"
 $ WC "d_mkdtemp='" + d_mkdtemp + "'"
