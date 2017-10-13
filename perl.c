@@ -427,14 +427,10 @@ perl_construct(pTHXx)
 	    Perl_croak(aTHX_ "panic: sysconf: pagesize unknown");
 	}
       }
-#else
-#   ifdef HAS_GETPAGESIZE
+#elif defined(HAS_GETPAGESIZE)
       PL_mmap_page_size = getpagesize();
-#   else
-#       if defined(I_SYS_PARAM) && defined(PAGESIZE)
+#elif defined(I_SYS_PARAM) && defined(PAGESIZE)
       PL_mmap_page_size = PAGESIZE;       /* compiletime, bad */
-#       endif
-#   endif
 #endif
       if (PL_mmap_page_size <= 0)
 	Perl_croak(aTHX_ "panic: bad pagesize %" IVdf,
@@ -4638,12 +4634,10 @@ S_init_perllib(pTHX)
     s = PerlEnv_lib_path(PERL_FS_VERSION, &len);
     if (s)
 	incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#else
-#  ifdef NETWARE
+#elif defined(NETWARE)
     S_incpush_use_sep(aTHX_ PRIVLIB_EXP, 0, INCPUSH_CAN_RELOCATE);
-#  else
+#else
     S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
-#  endif
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
@@ -4720,12 +4714,10 @@ S_init_perllib(pTHX)
 
 #if defined(DOSISH) || defined(__SYMBIAN32__)
 #    define PERLLIB_SEP ';'
-#else
-#  if defined(__VMS)
+#elif defined(__VMS)
 #    define PERLLIB_SEP PL_perllib_sep
-#  else
+#else
 #    define PERLLIB_SEP ':'
-#  endif
 #endif
 #ifndef PERLLIB_MANGLE
 #  define PERLLIB_MANGLE(s,n) (s)
