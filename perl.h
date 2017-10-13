@@ -647,7 +647,7 @@
 #  if defined(HAS_SETPGRP) && defined(USE_BSD_SETPGRP)
 #    define BSD_SETPGRP(pid, pgrp)	setpgrp((pid), (pgrp))
 #  else
-#    ifdef HAS_SETPGRP2  /* DG/UX */
+#    ifdef HAS_SETPGRP2
 #      define BSD_SETPGRP(pid, pgrp)	setpgrp2((pid), (pgrp))
 #    endif
 #  endif
@@ -665,7 +665,7 @@
 #  if defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)
 #    define BSD_GETPGRP(pid)		getpgrp((pid))
 #  else
-#    ifdef HAS_GETPGRP2  /* DG/UX */
+#    ifdef HAS_GETPGRP2
 #      define BSD_GETPGRP(pid)		getpgrp2((pid))
 #    endif
 #  endif

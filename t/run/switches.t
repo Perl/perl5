@@ -294,8 +294,8 @@ is runperl(stderr => 1, prog => '#!perl -M'),
 
 {
     local $TODO = '';   # these ones should work on VMS
-    # there are definitely known build configs where this test will fail
-    # DG/UX comes to mind. Maybe we should remove these special cases?
+    # There may be build configs where this test will fail; DG/UX was one,
+    # but we no longer support it. Maybe we should remove these special cases?
   SKIP:
     {
         skip "Win32 miniperl produces a default archname in -v", 1
