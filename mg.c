@@ -994,6 +994,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
 #endif  /* End of platforms with special handling for $^E; others just fall
            through to $! */
+    /* FALLTHROUGH */
 
     case '!':
 	{

@@ -7231,6 +7231,7 @@ Perl_yylex(pTHX)
 		orig_keyword = 0;
 		lex = 0;
 		off = 0;
+            /* FALLTHROUGH */
 	default:			/* not a keyword */
 	  just_a_word: {
 		int pkgname = 0;

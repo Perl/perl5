@@ -1,6 +1,8 @@
 #ifndef DEBUG_SBOX32_HASH
 #define DEBUG_SBOX32_HASH 0
 
+GCC_DIAG_IGNORE(-Wimplicit-fallthrough)
+
 #include "zaphod32_hash.h"
 
 #if DEBUG_SBOX32_HASH == 1
@@ -1779,5 +1781,6 @@ SBOX32_STATIC_INLINE U32 sbox32_hash128(
     return sbox32_hash_with_state((U8*)state,key,key_len);
 }
 
+GCC_DIAG_RESTORE
 
 #endif

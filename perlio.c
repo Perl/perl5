@@ -934,9 +934,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			    if (*e++) {
 				break;
 			    }
-			    /*
-			     * Drop through
-			     */
+                            /* Fall through */
 			case '\0':
 			    e--;
 			    Perl_ck_warner(aTHX_ packWARN(WARN_LAYER),

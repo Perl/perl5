@@ -1645,6 +1645,7 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
     case SVt_PVGV:
 	if (!isGV_with_GP(sv))
 	    break;
+        /* FALLTHROUGH */
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1758,6 +1759,7 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
     case SVt_PVGV:
 	if (!isGV_with_GP(sv))
 	    break;
+        /* FALLTHROUGH */
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -16908,6 +16910,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	/* def-ness of rval pos() is independent of the def-ness of its arg */
 	if ( !(obase->op_flags & OPf_MOD))
 	    break;
+        /* FALLTHROUGH */
 
     case OP_SCHOMP:
     case OP_CHOMP:

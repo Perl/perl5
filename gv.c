@@ -3537,7 +3537,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
             res = &PL_sv_undef;
             SP = PL_stack_base + oldmark;
             break;
-        case G_ARRAY: {
+        case G_ARRAY:
             if (flags & AMGf_want_list) {
                 res = sv_2mortal((SV *)newAV());
                 av_extend((AV *)res, nret);
@@ -3546,7 +3546,6 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                 break;
             }
             /* FALLTHROUGH */
-        }
         default:
             res = POPs;
             break;

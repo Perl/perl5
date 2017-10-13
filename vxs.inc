@@ -219,7 +219,7 @@ VXS(version_new)
         SvGETMAGIC(vs);
         if(SvOK(vs))
             break;
-        /* drop through */
+        /* fall through */
     case 1:
         /* no param or explicit undef */
         /* create empty object */

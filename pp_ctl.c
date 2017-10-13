@@ -715,6 +715,7 @@ PP(pp_formline)
 		SvSETMAGIC(sv);
 		break;
 	    }
+            /* FALLTHROUGH */
 
 	case FF_LINESNGL: /* process ^*  */
 	    chopspace = 0;
@@ -3276,7 +3277,7 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 		    return cv;
 		case FIND_RUNCV_level_eq:
 		    if (level++ != arg) continue;
-		    /* GERONIMO! */
+                    /* FALLTHROUGH */
 		default:
 		    return cv;
 		}
@@ -5377,7 +5378,8 @@ S_doparseform(pTHX_ SV *sv)
 	    if (s < send) {
 	        skipspaces = 0;
                 continue;
-            } /* else FALL THROUGH */
+            }
+            /* FALLTHROUGH */
 	case '\n':
 	    arg = s - base;
 	    skipspaces++;
