@@ -3443,11 +3443,6 @@ i_fenv (i_fenv.U):
 	indicates to the C program that <fenv.h> exists and should
 	be included.
 
-i_float (i_float.U):
-	This variable conditionally defines the I_FLOAT symbol, and indicates
-	whether a C program may include <float.h> to get symbols like DBL_MAX
-	or DBL_MIN, i.e. machine dependent floating point values.
-
 i_fp (i_fp.U):
 	This variable conditionally defines the I_FP symbol, and indicates
 	whether a C program should include <fp.h>.
