@@ -1283,11 +1283,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #	include <sys/ndir.h>
 #   else
 #	ifdef I_SYS_DIR
-#	    ifdef hp9000s500
-#		include <ndir.h>	/* may be wrong in the future */
-#	    else
 #		include <sys/dir.h>
-#	    endif
 #	endif
 #   endif
 #endif

@@ -12488,11 +12488,7 @@ $cat >dirfd.c <<EOM
 #include <sys/ndir.h>
 #else
 #ifdef I_SYS_DIR
-#ifdef hp9000s500
-#include <ndir.h>	/* may be wrong in the future */
-#else
 #include <sys/dir.h>
-#endif
 #endif
 #endif
 #endif
@@ -19643,11 +19639,7 @@ case "$d_closedir" in
 #include <sys/ndir.h>
 #else
 #ifdef I_SYS_DIR
-#ifdef hp9000s500
-#include <ndir.h>	/* may be wrong in the future */
-#else
 #include <sys/dir.h>
-#endif
 #endif
 #endif
 #endif
@@ -22823,7 +22815,7 @@ FAVOR_BSD FILE_OFFSET_BITS FORTIFY_SOURCE FreeBSD
 GCC_NEW_VARARGS gcos gcx gimpel GLIBC GLIBC_MINOR GNUC GNUC_MINOR
 GNU_LIBRARY GNU_SOURCE GO32 gould GOULD_PN
 H3050R H3050RX hbullx20 hcx host_mips hp200 hp300 HP700 hp700
-hp800 hp9000 hp9000s200 hp9000s300 hp9000s400 hp9000s500
+hp800 hp9000 hp9000s200 hp9000s300 hp9000s400
 hp9000s700 hp9000s800 hp9k8 hppa hpux HPUX_SOURCE hp_osf
 i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960 IA32 IA64
 iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
