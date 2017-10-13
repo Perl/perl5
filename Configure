@@ -13,7 +13,7 @@
 #
 # Note: this Configure script was generated automatically by the tool
 # called "metaconfig". Rather than working with this copy of Configure,
-# you should use get metaconfig. Perl uses a modified version of this
+# you should use metaconfig. Perl uses a modified version of this
 # tool, and this, together with the metaconfig units, are available
 # in the git repository:
 #    $ git clone https://github.com/perl5-metaconfig/metaconfig metaconfig
