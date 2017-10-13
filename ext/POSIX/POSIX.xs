@@ -1336,9 +1336,7 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
 #if defined(I_TERMIOS)
 #include <termios.h>
 #endif
-#ifdef I_STDLIB
 #include <stdlib.h>
-#endif
 #ifndef __ultrix__
 #include <string.h>
 #endif

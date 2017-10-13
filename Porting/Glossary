@@ -3616,11 +3616,6 @@ i_stdint (i_stdint.U):
 	indicates to the C program that <stdint.h> exists and should
 	be included.
 
-i_stdlib (i_stdlib.U):
-	This variable conditionally defines the I_STDLIB symbol, which
-	indicates to the C program that <stdlib.h> exists and should
-	be included.
-
 i_string (i_string.U):
 	This variable conditionally defines the I_STRING symbol, which
 	indicates that <string.h> should be included rather than <strings.h>.

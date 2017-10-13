@@ -771,10 +771,8 @@
 #   endif
 #endif
 
-/* Use all the "standard" definitions? */
-#if defined(STANDARD_C) && defined(I_STDLIB)
-#   include <stdlib.h>
-#endif
+/* Use all the "standard" definitions */
+#include <stdlib.h>
 
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD

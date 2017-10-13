@@ -731,12 +731,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_stddef I_STDDEF	/**/
 
-/* I_STDLIB:
- *	This symbol, if defined, indicates that <stdlib.h> exists and should
- *	be included.
- */
-#$i_stdlib I_STDLIB		/**/
-
 /* I_STRING:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <string.h> (USG systems) instead of <strings.h> (BSD systems).

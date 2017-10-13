@@ -153,10 +153,8 @@ extern long sdbm_hash(const char *, int);
 # endif
 #endif
 
-/* Use all the "standard" definitions? */
-#if defined(STANDARD_C) && defined(I_STDLIB)
-#   include <stdlib.h>
-#endif /* STANDARD_C */
+/* Use all the "standard" definitions */
+#include <stdlib.h>
 
 #define MEM_SIZE Size_t
 

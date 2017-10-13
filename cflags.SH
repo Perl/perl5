@@ -73,9 +73,7 @@ cat >_cflags.c <<__EOT__
 #include <setjmp.h>
 /* Just in case the inclusion of perl.h did not
  * pull in enough system headers, let's try again. */
-#ifdef I_STDLIB
 #include <stdlib.h>
-#endif
 #ifdef I_STDDEF
 #include <stddef.h>
 #endif

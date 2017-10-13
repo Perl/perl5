@@ -696,12 +696,6 @@
  */
 #define I_STDDEF	/**/
 
-/* I_STDLIB:
- *	This symbol, if defined, indicates that <stdlib.h> exists and should
- *	be included.
- */
-#define I_STDLIB		/**/
-
 /* I_STRING:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <string.h> (USG systems) instead of <strings.h> (BSD systems).
@@ -5281,6 +5275,6 @@
 #endif
 
 /* Generated from:
- * 9ac22558a2db3bead054c2b016d0b70095e52fce40430a65015f21cd91dcc943 config_h.SH
+ * 71879525dcc4fa1f709eedff386a3384fad9b06f7f066a51ecc7f6bba9331b24 config_h.SH
  * 408e88881e8a567afeba7b56cb949d7886e8473896575932bfdef72ee9c32249 uconfig.sh
  * ex: set ro: */
