@@ -3755,6 +3755,9 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 
 #if defined(__sun)      /* ASSUME() generates warnings on Solaris */
 #  define NOT_REACHED
+#elif defined(DEBUGGING) && (__has_builtin(__builtin_unreachable) \
+     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4)) /* 4.5 -> */
+#  define NOT_REACHED STMT_START { ASSUME(0); __builtin_unreachable(); } STMT_END
 #else
 #  define NOT_REACHED ASSUME(0)
 #endif
