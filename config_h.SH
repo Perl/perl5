@@ -793,14 +793,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_utime I_UTIME		/**/
 
-/* I_VALUES:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <values.h> to get definition of symbols like MINFLOAT or
- *	MAXLONG, i.e. machine dependant limitations.  Probably, you
- *	should use <limits.h> instead, if it is available.
- */
-#$i_values I_VALUES		/**/
-
 /* I_VFORK:
  *	This symbol, if defined, indicates to the C program that it should
  *	include vfork.h.

@@ -1734,18 +1734,6 @@ typedef UVTYPE UV;
 
 #include <limits.h>
 
-#ifdef I_VALUES
-#  if !defined(DBL_MIN) || !defined(DBL_MAX)
-#    include <values.h>
-#    if defined(MAXDOUBLE) && !defined(DBL_MAX)
-#      define DBL_MAX MAXDOUBLE
-#    endif
-#    if defined(MINDOUBLE) && !defined(DBL_MIN)
-#      define DBL_MIN MINDOUBLE
-#    endif
-#  endif
-#endif /* defined(I_VALUES) */
-
 typedef NVTYPE NV;
 
 #ifdef I_IEEEFP

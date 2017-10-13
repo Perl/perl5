@@ -758,14 +758,6 @@
  */
 /*#define I_UTIME		/ **/
 
-/* I_VALUES:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <values.h> to get definition of symbols like MINFLOAT or
- *	MAXLONG, i.e. machine dependant limitations.  Probably, you
- *	should use <limits.h> instead, if it is available.
- */
-/*#define I_VALUES		/ **/
-
 /* I_VFORK:
  *	This symbol, if defined, indicates to the C program that it should
  *	include vfork.h.
@@ -5227,6 +5219,6 @@
 #endif
 
 /* Generated from:
- * 2d22094514b83bd987ad35ed557d99cd19f65621ee3870d0616b3c942e337faf config_h.SH
- * 4425baab434b1c600933b21fb798a0a73397dbac36deea56173e1ca5efc76582 uconfig.sh
+ * e81265de883a5cc39311fc0d3a54c848f4222c64f8b0f805900f87d6cbf1c244 config_h.SH
+ * faa4a2944bbf58412d06721da4266607432d610d9d2099beebd9c08eabdea983 uconfig.sh
  * ex: set ro: */

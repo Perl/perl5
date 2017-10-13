@@ -1070,7 +1070,6 @@ timeincl=''
 i_unistd=''
 i_ustat=''
 i_utime=''
-i_values=''
 i_vfork=''
 i_wchar=''
 d_inc_version_list=''
@@ -21480,17 +21479,8 @@ else
 fi
 $rm -f foo* bar*
 
-: see if this is a values.h system
-set values.h i_values
-eval $inhdr
-
 : Check the max offset that gmtime and localtime accept
 echo "Checking max offsets that gmtime () accepts"
-
-case $i_values in
-    define) yyy="#include <values.h>" ;;
-    *)      yyy="" ;;
-    esac
 
 case "$sGMTIME_min/$sGMTIME_max" in
     0/0|/)
@@ -21498,7 +21488,6 @@ case "$sGMTIME_min/$sGMTIME_max" in
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
-$yyy
 
 int i;
 struct tm *tmp;
@@ -21577,7 +21566,6 @@ case "$sLOCALTIME_min/$sLOCALTIME_max" in
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
-$yyy
 
 int i;
 struct tm *tmp;
@@ -24576,7 +24564,6 @@ i_time='$i_time'
 i_unistd='$i_unistd'
 i_ustat='$i_ustat'
 i_utime='$i_utime'
-i_values='$i_values'
 i_vfork='$i_vfork'
 i_wchar='$i_wchar'
 i_xlocale='$i_xlocale'

@@ -3744,11 +3744,6 @@ i_utime (i_utime.U):
 	This variable conditionally defines the I_UTIME symbol, and indicates
 	whether a C program should include <utime.h>.
 
-i_values (i_values.U):
-	This variable conditionally defines the I_VALUES symbol, and indicates
-	whether a C program may include <values.h> to get symbols like MAXLONG
-	and friends.
-
 i_vfork (i_vfork.U):
 	This variable conditionally defines the I_VFORK symbol, and indicates
 	whether a C program should include vfork.h.
