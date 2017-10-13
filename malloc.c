@@ -822,10 +822,8 @@ static	union overhead *nextf[NBUCKETS];
 #ifdef USE_PERL_SBRK
 # define sbrk(a) Perl_sbrk(a)
 Malloc_t Perl_sbrk (int size);
-#else
-# ifndef HAS_SBRK_PROTO /* <unistd.h> usually takes care of this */
+#elif !defined(HAS_SBRK_PROTO) /* <unistd.h> usually takes care of this */
 extern	Malloc_t sbrk(int);
-# endif
 #endif
 
 #ifndef MIN_SBRK_FRAC1000	/* Backward compatibility */
