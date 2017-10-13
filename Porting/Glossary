@@ -1373,10 +1373,6 @@ d_inc_version_list (inc_version_list.U):
 	This variable conditionally defines PERL_INC_VERSION_LIST.
 	It is set to undef when PERL_INC_VERSION_LIST is empty.
 
-d_index (d_strchr.U):
-	This variable conditionally defines HAS_INDEX if index() and
-	rindex() are available for string searching.
-
 d_inetaton (d_inetaton.U):
 	This variable conditionally defines the HAS_INET_ATON symbol, which
 	indicates to the C program that the inet_aton() function is available
@@ -2551,10 +2547,6 @@ d_stdstdio (d_stdstdio.U):
 	This variable conditionally defines USE_STDIO_PTR if this system
 	has a FILE structure declaring usable _ptr and _cnt fields (or
 	equivalent) in stdio.h.
-
-d_strchr (d_strchr.U):
-	This variable conditionally defines HAS_STRCHR if strchr() and
-	strrchr() are available for string searching.
 
 d_strcoll (d_strcoll.U):
 	This variable conditionally defines HAS_STRCOLL if strcoll() is

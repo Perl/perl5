@@ -486,18 +486,6 @@
  */
 #define HAS_STAT	/**/
 
-/* HAS_STRCHR:
- *	This symbol is defined to indicate that the strchr()/strrchr()
- *	functions are available for string searching. If not, try the
- *	index()/rindex() pair.
- */
-/* HAS_INDEX:
- *	This symbol is defined to indicate that the index()/rindex()
- *	functions are available for string searching.
- */
-/*#define HAS_STRCHR	/ **/
-/*#define HAS_INDEX	/ **/
-
 /* HAS_STRCOLL:
  *	This symbol, if defined, indicates that the strcoll routine is
  *	available to compare strings using collating information.
@@ -5261,6 +5249,6 @@
 #endif
 
 /* Generated from:
- * a54380e85f5a0f9c6f5793c309854712008ac68f6370e6376c6a90edbecb6a7b config_h.SH
+ * 798105cde7e4037b267cd74a3ebf1895b212f333b5300ebdc1414825b2a210e1 config_h.SH
  * d40282b246b20f1f20a5febcae42b3ac44234c5a1c1a2df89e5ac77a54830cca uconfig.sh
  * ex: set ro: */

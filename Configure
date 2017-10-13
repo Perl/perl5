@@ -856,8 +856,6 @@ stdio_bufsiz=''
 stdio_cnt=''
 stdio_filbuf=''
 stdio_ptr=''
-d_index=''
-d_strchr=''
 d_strcoll=''
 d_strerrm=''
 d_strerror=''
@@ -15776,39 +15774,6 @@ eval $inlibc
 set ilogbl d_ilogbl
 eval $inlibc
 
-: index or strchr
-echo " "
-if set index val -f; eval $csym; $val; then
-	if set strchr val -f d_strchr; eval $csym; $val; then
-		if $contains strchr "$strings" >/dev/null 2>&1 ; then
-			val="$define"
-			vali="$undef"
-			echo "strchr() found." >&4
-		else
-			val="$undef"
-			vali="$define"
-			echo "index() found." >&4
-		fi
-	else
-		val="$undef"
-		vali="$define"
-		echo "index() found." >&4
-	fi
-else
-	if set strchr val -f d_strchr; eval $csym; $val; then
-		val="$define"
-		vali="$undef"
-		echo "strchr() found." >&4
-	else
-		echo "No index() or strchr() found!" >&4
-		val="$undef"
-		vali="$undef"
-	fi
-fi
-set d_strchr; eval $setvar
-val="$vali"
-set d_index; eval $setvar
-
 : check whether inet_aton exists
 set inet_aton d_inetaton
 eval $inlibc
@@ -24168,7 +24133,6 @@ d_hypot='$d_hypot'
 d_ilogb='$d_ilogb'
 d_ilogbl='$d_ilogbl'
 d_inc_version_list='$d_inc_version_list'
-d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_inetntop='$d_inetntop'
 d_inetpton='$d_inetpton'
@@ -24416,7 +24380,6 @@ d_stdio_ptr_lval_sets_cnt='$d_stdio_ptr_lval_sets_cnt'
 d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
-d_strchr='$d_strchr'
 d_strcoll='$d_strcoll'
 d_strerrm='$d_strerrm'
 d_strerror='$d_strerror'
