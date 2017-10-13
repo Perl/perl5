@@ -116,13 +116,11 @@ Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
  * XXX Similarly, a Configure probe for __FILE__ and __LINE__ is needed. */
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
 #  define FUNCTION__ __func__
+#elif (defined(USING_MSVC6)) || /* MSVC6 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
+    (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
+#  define FUNCTION__ ""
 #else
-#  if (defined(USING_MSVC6)) || /* MSVC6 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
-      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
-#    define FUNCTION__ ""
-#  else
-#    define FUNCTION__ __FUNCTION__ /* Common extension. */
-#  endif
+#  define FUNCTION__ __FUNCTION__ /* Common extension. */
 #endif
 
 /* XXX A note on the perl source internal type system.  The
@@ -2439,12 +2437,10 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #ifdef NEED_VA_COPY
 # ifdef va_copy
 #  define Perl_va_copy(s, d) va_copy(d, s)
+# elif defined(__va_copy)
+#  define Perl_va_copy(s, d) __va_copy(d, s)
 # else
-#  if defined(__va_copy)
-#   define Perl_va_copy(s, d) __va_copy(d, s)
-#  else
-#   define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
-#  endif
+#  define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
 # endif
 #endif
 
@@ -2485,27 +2481,23 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  if Uid_t_size > IVSIZE
 #    define sv_setuid(sv, uid)       sv_setnv((sv), (NV)(uid))
 #    define SvUID(sv)                SvNV(sv)
+#  elif Uid_t_sign <= 0
+#    define sv_setuid(sv, uid)       sv_setiv((sv), (IV)(uid))
+#    define SvUID(sv)                SvIV(sv)
 #  else
-#    if Uid_t_sign <= 0
-#      define sv_setuid(sv, uid)       sv_setiv((sv), (IV)(uid))
-#      define SvUID(sv)                SvIV(sv)
-#    else
-#      define sv_setuid(sv, uid)       sv_setuv((sv), (UV)(uid))
-#      define SvUID(sv)                SvUV(sv)
-#    endif
+#    define sv_setuid(sv, uid)       sv_setuv((sv), (UV)(uid))
+#    define SvUID(sv)                SvUV(sv)
 #  endif /* Uid_t_size */
 
 #  if Gid_t_size > IVSIZE
 #    define sv_setgid(sv, gid)       sv_setnv((sv), (NV)(gid))
 #    define SvGID(sv)                SvNV(sv)
+#  elif Gid_t_sign <= 0
+#    define sv_setgid(sv, gid)       sv_setiv((sv), (IV)(gid))
+#    define SvGID(sv)                SvIV(sv)
 #  else
-#    if Gid_t_sign <= 0
-#      define sv_setgid(sv, gid)       sv_setiv((sv), (IV)(gid))
-#      define SvGID(sv)                SvIV(sv)
-#    else
-#      define sv_setgid(sv, gid)       sv_setuv((sv), (UV)(gid))
-#      define SvGID(sv)                SvUV(sv)
-#    endif
+#    define sv_setgid(sv, gid)       sv_setuv((sv), (UV)(gid))
+#    define SvGID(sv)                SvUV(sv)
 #  endif /* Gid_t_size */
 
 #endif
