@@ -1689,9 +1689,7 @@ typedef UVTYPE UV;
    a given precision of printing can be done with a double instead of
    a long double - Allen).
 */
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 #ifdef I_FLOAT
 #include <float.h>
 #endif
@@ -1711,9 +1709,7 @@ typedef UVTYPE UV;
    default value for printing floating point numbers in Gconvert.
    (see config.h)
 */
-# ifdef I_LIMITS
-#   include <limits.h>
-# endif
+# include <limits.h>
 # ifdef I_FLOAT
 #  include <float.h>
 # endif
@@ -1743,12 +1739,10 @@ typedef UVTYPE UV;
  * necessary to do so. - Allen <allens@cpan.org>
  */
 
-#ifdef I_LIMITS
-#  include <limits.h>
-#endif
+#include <limits.h>
 
 #ifdef I_VALUES
-#  if !(defined(DBL_MIN) && defined(DBL_MAX) && defined(I_LIMITS))
+#  if !defined(DBL_MIN) || !defined(DBL_MAX)
 #    include <values.h>
 #    if defined(MAXDOUBLE) && !defined(DBL_MAX)
 #      define DBL_MAX MAXDOUBLE
@@ -2340,9 +2334,7 @@ int isnan(double d);
  *    define PERL ULONG_MAX       4294967295L
  */
 
-#ifdef I_LIMITS  /* Needed for cast_xxx() functions below. */
-#  include <limits.h>
-#endif
+#include <limits.h>  /* Needed for cast_xxx() functions below. */
 /* Included values.h above if necessary; still including limits.h down here,
  * despite doing above, because math.h might have overridden... XXX - Allen */
 

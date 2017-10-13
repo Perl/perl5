@@ -3493,11 +3493,6 @@ i_libutil (i_libutil.U):
 	This variable conditionally defines the I_LIBUTIL symbol, and indicates
 	whether a C program should include <libutil.h>.
 
-i_limits (i_limits.U):
-	This variable conditionally defines the I_LIMITS symbol, and indicates
-	whether a C program may include <limits.h> to get symbols like WORD_BIT
-	and friends.
-
 i_locale (i_locale.U):
 	This variable conditionally defines the I_LOCALE symbol,
 	and indicates whether a C program should include <locale.h>.

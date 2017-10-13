@@ -76,9 +76,7 @@ cat >_cflags.c <<__EOT__
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdarg.h>
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 #ifdef I_DIRENT
 #include <dirent.h>
 #endif

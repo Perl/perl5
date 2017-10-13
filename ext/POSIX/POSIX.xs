@@ -42,9 +42,7 @@ static int not_here(const char *s);
 #include <fenv.h>
 #endif
 #endif
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 #include <locale.h>
 #include <math.h>
 #ifdef I_PWD

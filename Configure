@@ -992,7 +992,6 @@ i_ieeefp=''
 i_inttypes=''
 i_langinfo=''
 i_libutil=''
-i_limits=''
 i_locale=''
 i_machcthr=''
 i_malloc=''
@@ -12327,18 +12326,11 @@ esac
 set cuserid d_cuserid
 eval $inlibc
 
-: see if this is a limits.h system
-set limits.h i_limits
-eval $inhdr
-
 : See if number of significant digits in a double precision number is known
 echo " "
 $cat >dbl_dig.c <<EOM
-#$i_limits I_LIMITS
 #$i_float I_FLOAT
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 #ifdef I_FLOAT
 #include <float.h>
 #endif
@@ -16019,11 +16011,8 @@ eval $setvar
 : See if number of significant digits in a double precision number is known
 echo " "
 $cat >ldbl_dig.c <<EOM
-#$i_limits I_LIMITS
 #$i_float I_FLOAT
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 #ifdef I_FLOAT
 #include <float.h>
 #endif
@@ -24570,7 +24559,6 @@ i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
 i_langinfo='$i_langinfo'
 i_libutil='$i_libutil'
-i_limits='$i_limits'
 i_locale='$i_locale'
 i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'

@@ -70,14 +70,6 @@
  */
 /*#define HAS_CUSERID		/ **/
 
-/* HAS_DBL_DIG:
- *	This symbol, if defined, indicates that this system's <float.h>
- *	or <limits.h> defines the symbol DBL_DIG, which is the number
- *	of significant digits in a double precision number.  If this
- *	symbol is not defined, a guess of 15 is usually pretty good.
- */
-/*#define HAS_DBL_DIG 	/ **/
-
 /* HAS_DIFFTIME:
  *	This symbol, if defined, indicates that the difftime routine is
  *	available.
@@ -646,13 +638,6 @@
  *	be included.
  */
 /*#define I_GDBM	/ **/
-
-/* I_LIMITS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <limits.h> to get definition of symbols like WORD_BIT or
- *	LONG_MAX, i.e. machine dependant limitations.
- */
-/*#define I_LIMITS		/ **/
 
 /* I_LOCALE:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1548,6 +1533,14 @@
 #ifdef HAS_CSH
 #define CSH ""	/**/
 #endif
+
+/* HAS_DBL_DIG:
+ *	This symbol, if defined, indicates that this system's <float.h>
+ *	or <limits.h> defines the symbol DBL_DIG, which is the number
+ *	of significant digits in a double precision number.  If this
+ *	symbol is not defined, a guess of 15 is usually pretty good.
+ */
+/*#define HAS_DBL_DIG 	/ **/
 
 /* HAS_DLADDR:
  *	This symbol, if defined, indicates that the dladdr() routine is
@@ -5249,6 +5242,6 @@
 #endif
 
 /* Generated from:
- * ef59adc025306aceebb47a7515e514357b77e44a359af4bc0bf5d52082e41a26 config_h.SH
- * d40282b246b20f1f20a5febcae42b3ac44234c5a1c1a2df89e5ac77a54830cca uconfig.sh
+ * 82aa50fd961b36e3bc3ab644715698645fed961055bc70f4ad44ad88f51c25b0 config_h.SH
+ * 37da610aa9e38f4374ef9ce47cd7cd08240a33511faa8ee028f9e33ee76587ca uconfig.sh
  * ex: set ro: */

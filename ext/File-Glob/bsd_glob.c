@@ -87,9 +87,7 @@ static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
 #  endif
 #endif
 
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 
 #ifndef ARG_MAX
 #  ifdef _SC_ARG_MAX
