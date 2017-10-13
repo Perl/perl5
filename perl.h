@@ -1020,9 +1020,7 @@ EXTERN_C int usleep(unsigned int);
 #   undef S_ISLNK
 #endif
 
-#ifdef I_TIME
-#   include <time.h>
-#endif
+#include <time.h>
 
 #ifdef I_SYS_TIME
 #   ifdef I_SYS_TIME_KERNEL

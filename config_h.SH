@@ -1204,8 +1204,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define DOUBLESIZE $doublesize		/**/
 
 /* I_TIME:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <time.h>.
+ *	This symbol is always defined, and indicates to the C program that
+ *	it should include <time.h>.
  */
 /* I_SYS_TIME:
  *	This symbol, if defined, indicates to the C program that it should

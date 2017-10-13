@@ -10830,16 +10830,15 @@ set $varname;
 eval $setvar;
 $rm_try'
 
-: see if we should include time.h, sys/time.h, or both
+: see if we should include sys/time.h
 echo " "
+i_time='define'
 if test "X$timeincl" = X; then
-	echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
+	echo "Testing to see if we should include <sys/time.h>." >&4
 	$echo $n "I'm now running the test program...$c"
 	$cat >try.c <<EOCP
 #include <sys/types.h>
-#ifdef I_TIME
 #include <time.h>
-#endif
 #ifdef I_SYSTIME
 #ifdef SYSTIMEKERNEL
 #define KERNEL
@@ -10876,13 +10875,12 @@ EOCP
 	sysselect=''
 	for s_timeval in '-DS_TIMEVAL' ''; do
 	for i_systimek in '' '-DSYSTIMEKERNEL'; do
-	for i_time in '' '-DI_TIME'; do
 	for i_systime in '-DI_SYSTIME' ''; do
 		case "$flags" in
 		'') $echo $n ".$c"
-			set try $i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone
+			set try $i_systime $i_systimek $sysselect $s_timeval $s_timezone
 			if eval $compile; then
-				set X $i_time $i_systime $i_systimek $sysselect $s_timeval
+				set X $i_systime $i_systimek $sysselect $s_timeval
 				shift
 				flags="$*"
 				echo " "
@@ -10894,7 +10892,6 @@ EOCP
 	done
 	done
 	done
-	done
 	timeincl=''
 	echo " "
 	case "$flags" in
@@ -10902,12 +10899,6 @@ EOCP
 		timeincl=`./findhdr sys/time.h`
 		echo "We'll include <sys/time.h> with KERNEL defined." >&4;;
 	*) i_systimek="$undef";;
-	esac
-	case "$flags" in
-	*I_TIME*) i_time="$define"
-		timeincl=`./findhdr time.h`" $timeincl"
-		echo "We'll include <time.h>." >&4;;
-	*) i_time="$undef";;
 	esac
 	case "$flags" in
 	*I_SYSTIME*) i_systime="$define"

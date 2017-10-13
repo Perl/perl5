@@ -1169,8 +1169,8 @@
 #define DOUBLESIZE 8		/**/
 
 /* I_TIME:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <time.h>.
+ *	This symbol is always defined, and indicates to the C program that
+ *	it should include <time.h>.
  */
 /* I_SYS_TIME:
  *	This symbol, if defined, indicates to the C program that it should
@@ -5249,6 +5249,6 @@
 #endif
 
 /* Generated from:
- * 798105cde7e4037b267cd74a3ebf1895b212f333b5300ebdc1414825b2a210e1 config_h.SH
+ * ef59adc025306aceebb47a7515e514357b77e44a359af4bc0bf5d52082e41a26 config_h.SH
  * d40282b246b20f1f20a5febcae42b3ac44234c5a1c1a2df89e5ac77a54830cca uconfig.sh
  * ex: set ro: */
