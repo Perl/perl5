@@ -6585,7 +6585,6 @@ $   WC "i_stdbool='define'"
 $ ELSE
 $   WC "i_stdbool='undef'"
 $ ENDIF
-$ WC "i_stddef='define'"
 $ WC "i_stdint='undef'"
 $ WC "i_stdlib='define'"
 $ WC "i_string='define'"

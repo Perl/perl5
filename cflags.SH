@@ -74,9 +74,7 @@ cat >_cflags.c <<__EOT__
 /* Just in case the inclusion of perl.h did not
  * pull in enough system headers, let's try again. */
 #include <stdlib.h>
-#ifdef I_STDDEF
 #include <stddef.h>
-#endif
 #include <stdarg.h>
 #ifdef I_LIMITS
 #include <limits.h>

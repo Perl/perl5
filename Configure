@@ -1031,7 +1031,6 @@ i_quadmath=''
 i_shadow=''
 i_socks=''
 i_stdbool=''
-i_stddef=''
 i_stdint=''
 i_stdlib=''
 i_string=''
@@ -23304,10 +23303,6 @@ $rm_try
 set i_stdbool
 eval $setvar
 
-: see if stddef is available
-set stddef.h i_stddef
-eval $inhdr
-
 : see if stdint is available
 set stdint.h i_stdint
 eval $inhdr
@@ -24709,7 +24704,6 @@ i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
 i_socks='$i_socks'
 i_stdbool='$i_stdbool'
-i_stddef='$i_stddef'
 i_stdint='$i_stdint'
 i_stdlib='$i_stdlib'
 i_string='$i_string'

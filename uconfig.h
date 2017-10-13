@@ -690,12 +690,6 @@
  */
 /*#define I_NETINET_IN	/ **/
 
-/* I_STDDEF:
- *	This symbol, if defined, indicates that <stddef.h> exists and should
- *	be included.
- */
-#define I_STDDEF	/**/
-
 /* I_STRING:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <string.h> (USG systems) instead of <strings.h> (BSD systems).
@@ -5275,6 +5269,6 @@
 #endif
 
 /* Generated from:
- * 71879525dcc4fa1f709eedff386a3384fad9b06f7f066a51ecc7f6bba9331b24 config_h.SH
- * 408e88881e8a567afeba7b56cb949d7886e8473896575932bfdef72ee9c32249 uconfig.sh
+ * 946b039c5c96299edae15aed6aeb6ca541042f6e545cb5631660412885369e33 config_h.SH
+ * ac7c2c95dc09327ba3d5305e3e786bcd8c6d759f88fc469a2f1b9310f03137f9 uconfig.sh
  * ex: set ro: */
