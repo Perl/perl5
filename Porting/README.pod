@@ -258,6 +258,10 @@ This library provides functions used in checking and sorting the F<MANIFEST>.
 
 This script sorts the files in F<MANIFEST>.
 
+=head2 F<mksample>
+
+This script regenerates F<Porting/config.sh> and F<Porting/config_H>.
+
 =head2 F<new-perldelta.pl>
 
 This script automates the process for creating perldelta.pl.
