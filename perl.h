@@ -710,6 +710,8 @@
 #endif
 
 #include <ctype.h>
+#include <float.h>
+#include <limits.h>
 
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
 #undef METHOD
@@ -1676,63 +1678,21 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
-#ifdef OVR_DBL_DIG
-/* Use an overridden DBL_DIG */
-# ifdef DBL_DIG
-#  undef DBL_DIG
-# endif
-# define DBL_DIG OVR_DBL_DIG
-#else
-/* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert
-   (see config.h). (It also has other uses, such as figuring out if
-   a given precision of printing can be done with a double instead of
-   a long double - Allen).
-*/
-#include <limits.h>
-#include <float.h>
-#endif
-
-#ifdef OVR_LDBL_DIG
-/* Use an overridden LDBL_DIG */
-# ifdef LDBL_DIG
-#  undef LDBL_DIG
-# endif
-# define LDBL_DIG OVR_LDBL_DIG
-#else
 /* The following is all to get LDBL_DIG, in order to pick a nice
    default value for printing floating point numbers in Gconvert.
    (see config.h)
 */
-# include <limits.h>
-# include <float.h>
-# ifndef HAS_LDBL_DIG
+#ifndef HAS_LDBL_DIG
 #  if LONG_DOUBLESIZE == 10
-#   define LDBL_DIG 18 /* assume IEEE */
-#  else
-#   if LONG_DOUBLESIZE == 12
+#    define LDBL_DIG 18 /* assume IEEE */
+#  elif LONG_DOUBLESIZE == 12
 #    define LDBL_DIG 18 /* gcc? */
-#   else
-#    if LONG_DOUBLESIZE == 16
-#     define LDBL_DIG 33 /* assume IEEE */
-#    else
-#     if LONG_DOUBLESIZE == DOUBLESIZE
-#      define LDBL_DIG DBL_DIG /* bummer */
-#     endif
-#    endif
-#   endif
+#  elif LONG_DOUBLESIZE == 16
+#    define LDBL_DIG 33 /* assume IEEE */
+#  elif LONG_DOUBLESIZE == DOUBLESIZE
+#    define LDBL_DIG DBL_DIG /* bummer */
 #  endif
-# endif
 #endif
-
-/*
- * This is for making sure we have a good DBL_MAX value, if possible,
- * either for usage as NV_MAX or for usage in figuring out if we can
- * fit a given long double into a double, if bug-fixing makes it
- * necessary to do so. - Allen <allens@cpan.org>
- */
-
-#include <limits.h>
 
 typedef NVTYPE NV;
 
@@ -1909,38 +1869,16 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_fp_class_zero(x)   (Perl_fp_class(x) == 0)
 #else
 #   define NV_DIG DBL_DIG
-#   ifdef DBL_MANT_DIG
-#       define NV_MANT_DIG DBL_MANT_DIG
-#   endif
-#   ifdef DBL_MIN
-#       define NV_MIN DBL_MIN
-#   endif
-#   ifdef DBL_MAX
-#       define NV_MAX DBL_MAX
-#   endif
-#   ifdef DBL_MIN_EXP
-#       define NV_MIN_EXP DBL_MIN_EXP
-#   endif
-#   ifdef DBL_MAX_EXP
-#       define NV_MAX_EXP DBL_MAX_EXP
-#   endif
-#   ifdef DBL_MIN_10_EXP
-#       define NV_MIN_10_EXP DBL_MIN_10_EXP
-#   endif
-#   ifdef DBL_MAX_10_EXP
-#       define NV_MAX_10_EXP DBL_MAX_10_EXP
-#   endif
-#   ifdef DBL_EPSILON
-#       define NV_EPSILON DBL_EPSILON
-#   endif
-#   ifdef DBL_MAX               /* XXX Does DBL_MAX imply having DBL_MIN? */
-#       define NV_MAX DBL_MAX
-#       define NV_MIN DBL_MIN
-#   else
-#       ifdef HUGE_VAL
-#           define NV_MAX HUGE_VAL
-#       endif
-#   endif
+#   define NV_MANT_DIG DBL_MANT_DIG
+#   define NV_MIN DBL_MIN
+#   define NV_MAX DBL_MAX
+#   define NV_MIN_EXP DBL_MIN_EXP
+#   define NV_MAX_EXP DBL_MAX_EXP
+#   define NV_MIN_10_EXP DBL_MIN_10_EXP
+#   define NV_MAX_10_EXP DBL_MAX_10_EXP
+#   define NV_EPSILON DBL_EPSILON
+#   define NV_MAX DBL_MAX
+#   define NV_MIN DBL_MIN
 
 /* These math interfaces are C89. */
 #   define Perl_acos acos
@@ -2314,10 +2252,6 @@ int isnan(double d);
  *    define PERL_LONG_MIN        (-LONG_MAX - 1)
  *    define PERL ULONG_MAX       4294967295L
  */
-
-#include <limits.h>  /* Needed for cast_xxx() functions below. */
-/* Included values.h above if necessary; still including limits.h down here,
- * despite doing above, because math.h might have overridden... XXX - Allen */
 
 /*
  * Try to figure out max and min values for the integral types.  THE CORRECT
