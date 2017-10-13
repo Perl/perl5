@@ -1527,14 +1527,6 @@
 #define CSH ""	/**/
 #endif
 
-/* HAS_DBL_DIG:
- *	This symbol, if defined, indicates that this system's <float.h>
- *	or <limits.h> defines the symbol DBL_DIG, which is the number
- *	of significant digits in a double precision number.  If this
- *	symbol is not defined, a guess of 15 is usually pretty good.
- */
-/*#define HAS_DBL_DIG 	/ **/
-
 /* HAS_DLADDR:
  *	This symbol, if defined, indicates that the dladdr() routine is
  *	available to query dynamic linker information for an address.
@@ -5235,6 +5227,6 @@
 #endif
 
 /* Generated from:
- * 9100fef145843fcfa105bdc8111ca24ddb625d35d59b8a1eef427a60fd294ab3 config_h.SH
+ * 2d22094514b83bd987ad35ed557d99cd19f65621ee3870d0616b3c942e337faf config_h.SH
  * 4425baab434b1c600933b21fb798a0a73397dbac36deea56173e1ca5efc76582 uconfig.sh
  * ex: set ro: */

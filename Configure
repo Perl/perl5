@@ -424,7 +424,6 @@ d_ctermid_r=''
 ctime_r_proto=''
 d_ctime_r=''
 d_cuserid=''
-d_dbl_dig=''
 d_dbminitproto=''
 d_difftime=''
 d_dir_dd_fd=''
@@ -12318,27 +12317,6 @@ esac
 set cuserid d_cuserid
 eval $inlibc
 
-: See if number of significant digits in a double precision number is known
-echo " "
-$cat >dbl_dig.c <<EOM
-#include <limits.h>
-#include <float.h>
-#ifdef DBL_DIG
-printf("Contains DBL_DIG");
-#endif
-EOM
-$cppstdin $cppflags $cppminus < dbl_dig.c >dbl_dig.E 2>/dev/null
-if $contains 'DBL_DIG' dbl_dig.E >/dev/null 2>&1; then
-	echo "DBL_DIG found." >&4
-	val="$define"
-else
-	echo "DBL_DIG NOT found." >&4
-	val="$undef"
-fi
-$rm -f dbl_dig.?
-set d_dbl_dig
-eval $setvar
-
 : see if dbm.h is available
 : see if dbmclose exists
 set dbmclose d_dbmclose
@@ -23936,7 +23914,6 @@ d_ctermid_r='$d_ctermid_r'
 d_ctime64='$d_ctime64'
 d_ctime_r='$d_ctime_r'
 d_cuserid='$d_cuserid'
-d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
 d_difftime64='$d_difftime64'
 d_difftime='$d_difftime'
