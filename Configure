@@ -992,7 +992,6 @@ i_locale=''
 i_machcthr=''
 i_malloc=''
 i_mallocmalloc=''
-i_math=''
 i_memory=''
 i_mntent=''
 d_gdbm_ndbm_h_uses_prototypes=''
@@ -13973,17 +13972,10 @@ eval $inlibc
 set fp_class d_fp_class
 eval $inlibc
 
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
-
 : check for fpclassify
 echo "Checking to see if you have fpclassify..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return fpclassify(1.0) == FP_NORMAL ? 0 : 1; }
 EOCP
 set try
@@ -15785,10 +15777,7 @@ $rm -f isblank*
 : check for isfinite
 echo "Checking to see if you have isfinite..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isfinite(0.0); }
 EOCP
 set try
@@ -15810,10 +15799,7 @@ eval $inlibc
 : check for isinf
 echo "Checking to see if you have isinf..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isinf(0.0); }
 EOCP
 set try
@@ -15835,10 +15821,7 @@ eval $inlibc
 : check for isless
 echo "Checking to see if you have isless..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isless(0.0); }
 EOCP
 set try
@@ -15856,10 +15839,7 @@ eval $setvar
 : check for isnan
 echo "Checking to see if you have isnan..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isnan(0.0); }
 EOCP
 set try
@@ -15881,10 +15861,7 @@ eval $inlibc
 : check for isnormal
 echo "Checking to see if you have isnormal..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isnormal(0.0); }
 EOCP
 set try
@@ -15999,11 +15976,9 @@ eval $inlibc
 
 : check to see if math.h defines _LIB_VERSION
 d_libm_lib_version="$undef"
-case $i_math in
-    $define)
-	echo " "
-	echo "Checking to see if your libm supports _LIB_VERSION..." >&4
-	$cat >try.c <<EOCP
+echo " "
+echo "Checking to see if your libm supports _LIB_VERSION..." >&4
+$cat >try.c <<EOCP
 #include <unistd.h>
 #include <math.h>
 int main (int argc, char *argv[])
@@ -16012,18 +15987,15 @@ int main (int argc, char *argv[])
     return (0);
     } /* main */
 EOCP
-	set try
-	if eval $compile; then
-	    foo=`$run ./try`
-	    echo "Yes, it does ($foo)" >&4
-	    d_libm_lib_version="$define"
-	else
-	    echo "No, it does not (probably harmless)" >&4
-	    fi
-	$rm_try
-	;;
-
-    esac
+set try
+if eval $compile; then
+    foo=`$run ./try`
+    echo "Yes, it does ($foo)" >&4
+    d_libm_lib_version="$define"
+else
+    echo "No, it does not (probably harmless)" >&4
+    fi
+$rm_try
 
 : see if link exists
 set link d_link
@@ -16318,7 +16290,7 @@ eval $inlibc
 
 : see if prototype for modfl is available
 echo " "
-set d_modflproto modfl $i_math math.h
+set d_modflproto modfl define math.h
 eval $hasproto
 
 if $test "$uselongdouble" = "$define"; then
@@ -18334,11 +18306,8 @@ eval $inhdr
 : see if signbit exists
 $echo $n "Checking to see if you have signbit() available to work on $nvtype... $c" >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
 #$i_sunmath I_SUNMATH
-#ifdef I_MATH
-#  include <math.h>
-#endif
+#include <math.h>
 #ifdef I_SUNMATH  /* Solaris special math library */
 #  include <sunmath.h>
 #endif
@@ -20062,11 +20031,8 @@ $cat >try.c <<EOP
 #define LONG_DOUBLESIZE $longdblsize
 #define LONG_DOUBLEKIND $longdblkind
 #endif
-#$i_math I_MATH
 #$i_string I_STRING
-#ifdef I_MATH
 #include <math.h>
-#endif
 #ifdef I_STRING
 #  include <string.h>
 #endif
@@ -24468,7 +24434,6 @@ i_locale='$i_locale'
 i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
 i_mallocmalloc='$i_mallocmalloc'
-i_math='$i_math'
 i_memory='$i_memory'
 i_mntent='$i_mntent'
 i_ndbm='$i_ndbm'

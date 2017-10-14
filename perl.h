@@ -4004,26 +4004,10 @@ static PERL_MG_UFUNC(foo_get, index, val)
 #define PERL_MG_UFUNC(name,ix,sv) I32 name(pTHX_ IV ix, SV *sv)
 #endif
 
-#ifdef I_MATH
-#    include <math.h>
-#    ifdef __VMS
+#include <math.h>
+#ifdef __VMS
      /* isfinite and others are here rather than in math.h as C99 stipulates */
-#        include <fp.h>
-#    endif
-#else
-START_EXTERN_C
-	    double exp (double);
-	    double log (double);
-	    double log10 (double);
-	    double sqrt (double);
-	    double frexp (double,int*);
-	    double ldexp (double,int);
-	    double modf (double,double*);
-	    double sin (double);
-	    double cos (double);
-	    double atan2 (double,double);
-	    double pow (double,double);
-END_EXTERN_C
+#    include <fp.h>
 #endif
 
 #ifndef __cplusplus
