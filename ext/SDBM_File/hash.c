@@ -31,10 +31,10 @@ sdbm_hash(const char *str, int len)
 
                 switch(len & (8 - 1)) {
                 case 0: do {
-                        HASHC;  case 7: HASHC;
-                case 6: HASHC;  case 5: HASHC;
-                case 4: HASHC;  case 3: HASHC;
-                case 2: HASHC;  case 1: HASHC;
+                        HASHC; /* FALLTHROUGH */ case 7: HASHC; /* FALLTHROUGH */
+                case 6: HASHC; /* FALLTHROUGH */ case 5: HASHC; /* FALLTHROUGH */
+                case 4: HASHC; /* FALLTHROUGH */ case 3: HASHC; /* FALLTHROUGH */
+                case 2: HASHC; /* FALLTHROUGH */ case 1: HASHC;
                         } while (--loop);
                 }
 

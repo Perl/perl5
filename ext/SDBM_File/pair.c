@@ -183,10 +183,10 @@ delpair(char *pag, datum key)
 
                         switch (m & (8 - 1)) {
                         case 0: do {
-                                MOVB;   case 7: MOVB;
-                        case 6: MOVB;   case 5: MOVB;
-                        case 4: MOVB;   case 3: MOVB;
-                        case 2: MOVB;   case 1: MOVB;
+                                MOVB; /* FALLTHROUGH */ case 7: MOVB; /* FALLTHROUGH */
+                        case 6: MOVB; /* FALLTHROUGH */ case 5: MOVB; /* FALLTHROUGH */
+                        case 4: MOVB; /* FALLTHROUGH */ case 3: MOVB; /* FALLTHROUGH */
+                        case 2: MOVB; /* FALLTHROUGH */ case 1: MOVB;
                                 } while (--loop);
                         }
                 }
