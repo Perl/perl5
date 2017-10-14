@@ -403,12 +403,12 @@
  * clang only pretends to be GCC 4.2, but still supports push/pop.
  *
  * Note on usage: on non-gcc (or lookalike, like clang) compilers
- * one cannot use these at file (global) level without warnings
- * since they are defined as empty, which leads into the terminating
+ * one cannot use these with a semicolon at file (global) level without
+ * warnings since they are defined as empty, which leads into the terminating
  * semicolon being left alone on a line:
  * ;
  * which makes compilers mildly cranky.  Therefore at file level one
- * should use the GCC_DIAG_IGNORE and GCC_DIAG_RESTORE_FILE *without*
+ * should use the GCC_DIAG_IGNORE and GCC_DIAG_RESTORE macros *without*
  * the semicolons.
  *
  * (A dead-on-arrival solution would be to try to define the macros as
