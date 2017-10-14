@@ -1960,12 +1960,11 @@ PP(pp_aassign)
                setresuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
                          (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1,
                          (Uid_t)-1));
-#else
-#  ifdef HAS_SETREUID
+#elif defined(HAS_SETREUID)
             PERL_UNUSED_RESULT(
                 setreuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
                          (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1));
-#  else
+#else
 #    ifdef HAS_SETRUID
 	    if ((PL_delaymagic & DM_UID) == DM_RUID) {
 		PERL_UNUSED_RESULT(setruid(PL_delaymagic_uid));
@@ -1983,7 +1982,6 @@ PP(pp_aassign)
 		    DIE(aTHX_ "No setreuid available");
 		PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
 	    }
-#  endif /* HAS_SETREUID */
 #endif /* HAS_SETRESUID */
 
 	    tmp_uid  = PerlProc_getuid();
@@ -1996,12 +1994,11 @@ PP(pp_aassign)
                 setresgid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
                           (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1,
                           (Gid_t)-1));
-#else
-#  ifdef HAS_SETREGID
+#elif defined(HAS_SETREGID)
 	    PERL_UNUSED_RESULT(
                 setregid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
                          (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1));
-#  else
+#else
 #    ifdef HAS_SETRGID
 	    if ((PL_delaymagic & DM_GID) == DM_RGID) {
 		PERL_UNUSED_RESULT(setrgid(PL_delaymagic_gid));
@@ -2019,7 +2016,6 @@ PP(pp_aassign)
 		    DIE(aTHX_ "No setregid available");
 		PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
 	    }
-#  endif /* HAS_SETREGID */
 #endif /* HAS_SETRESGID */
 
 	    tmp_gid  = PerlProc_getgid();
