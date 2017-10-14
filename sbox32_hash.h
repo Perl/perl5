@@ -1779,6 +1779,4 @@ SBOX32_STATIC_INLINE U32 sbox32_hash128(
     return sbox32_hash_with_state((U8*)state,key,key_len);
 }
 
-GCC_DIAG_RESTORE
-
 #endif
