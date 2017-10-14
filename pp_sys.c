@@ -76,18 +76,16 @@ extern int h_errno;
 #ifdef HAS_PASSWD
 # ifdef I_PWD
 #  include <pwd.h>
-# else
-#  if !defined(VMS)
+# elif !defined(VMS)
     struct passwd *getpwnam (char *);
     struct passwd *getpwuid (Uid_t);
-#  endif
 # endif
 # ifdef HAS_GETPWENT
-#ifndef getpwent
+#  ifndef getpwent
   struct passwd *getpwent (void);
-#elif defined (VMS) && defined (my_getpwent)
+#  elif defined (VMS) && defined (my_getpwent)
   struct passwd *Perl_my_getpwent (pTHX);
-#endif
+#  endif
 # endif
 #endif
 
@@ -99,9 +97,9 @@ extern int h_errno;
     struct group *getgrgid (Gid_t);
 # endif
 # ifdef HAS_GETGRENT
-#ifndef getgrent
+#  ifndef getgrent
     struct group *getgrent (void);
-#endif
+#  endif
 # endif
 #endif
 
@@ -118,12 +116,10 @@ extern int h_errno;
 #   undef my_chsize
 # endif
 # define my_chsize PerlLIO_chsize
+#elif defined(HAS_TRUNCATE)
+# define my_chsize PerlLIO_chsize
 #else
-# ifdef HAS_TRUNCATE
-#   define my_chsize PerlLIO_chsize
-# else
 I32 my_chsize(int fd, Off_t length);
-# endif
 #endif
 
 #ifdef HAS_FLOCK
@@ -141,12 +137,10 @@ I32 my_chsize(int fd, Off_t length);
 #  if defined(HAS_FCNTL) && defined(FCNTL_CAN_LOCK)
 #    define FLOCK fcntl_emulate_flock
 #    define FCNTL_EMULATE_FLOCK
-#  else /* no flock() or fcntl(F_SETLK,...) */
-#    ifdef HAS_LOCKF
-#      define FLOCK lockf_emulate_flock
-#      define LOCKF_EMULATE_FLOCK
-#    endif /* lockf */
-#  endif /* no flock() or fcntl(F_SETLK,...) */
+#  elif defined(HAS_LOCKF)
+#    define FLOCK lockf_emulate_flock
+#    define LOCKF_EMULATE_FLOCK
+#  endif
 
 #  ifdef FLOCK
      static int FLOCK (int, int);
@@ -240,13 +234,11 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
     Perl_croak(aTHX_ "switching effective uid is not implemented");
 #else
-#ifdef HAS_SETREUID
+#  ifdef HAS_SETREUID
     if (setreuid(euid, ruid))
-#else
-#ifdef HAS_SETRESUID
+#  elif defined(HAS_SETRESUID)
     if (setresuid(euid, ruid, (Uid_t)-1))
-#endif
-#endif
+#  endif
 	/* diag_listed_as: entering effective %s failed */
 	Perl_croak(aTHX_ "entering effective uid failed");
 #endif
@@ -254,13 +246,11 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #if !defined(HAS_SETREGID) && !defined(HAS_SETRESGID)
     Perl_croak(aTHX_ "switching effective gid is not implemented");
 #else
-#ifdef HAS_SETREGID
+#  ifdef HAS_SETREGID
     if (setregid(egid, rgid))
-#else
-#ifdef HAS_SETRESGID
+#  elif defined(HAS_SETRESGID)
     if (setresgid(egid, rgid, (Gid_t)-1))
-#endif
-#endif
+#  endif
 	/* diag_listed_as: entering effective %s failed */
 	Perl_croak(aTHX_ "entering effective gid failed");
 #endif
@@ -269,20 +259,16 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 
 #ifdef HAS_SETREUID
     if (setreuid(ruid, euid))
-#else
-#ifdef HAS_SETRESUID
+#elif defined(HAS_SETRESUID)
     if (setresuid(ruid, euid, (Uid_t)-1))
-#endif
 #endif
 	/* diag_listed_as: leaving effective %s failed */
 	Perl_croak(aTHX_ "leaving effective uid failed");
 
 #ifdef HAS_SETREGID
     if (setregid(rgid, egid))
-#else
-#ifdef HAS_SETRESGID
+#elif defined(HAS_SETRESGID)
     if (setresgid(rgid, egid, (Gid_t)-1))
-#endif
 #endif
 	/* diag_listed_as: leaving effective %s failed */
 	Perl_croak(aTHX_ "leaving effective gid failed");
@@ -2462,12 +2448,10 @@ PP(pp_ioctl)
     else
 #ifndef HAS_FCNTL
       DIE(aTHX_ "fcntl is not implemented");
-#else
-#if defined(OS2) && defined(__EMX__)
+#elif defined(OS2) && defined(__EMX__)
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, (int)s);
 #else
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, s);
-#endif
 #endif
 
 #if defined(HAS_IOCTL) || defined(HAS_FCNTL)
@@ -3007,12 +2991,10 @@ PP(pp_stat)
 	mPUSHi(PL_statcache.st_dev);
 #if ST_INO_SIZE > IVSIZE
 	mPUSHn(PL_statcache.st_ino);
-#else
-#   if ST_INO_SIGN <= 0
+#elif ST_INO_SIGN <= 0
 	mPUSHi(PL_statcache.st_ino);
-#   else
+#else
 	mPUSHu(PL_statcache.st_ino);
-#   endif
 #endif
 	mPUSHu(PL_statcache.st_mode);
 	mPUSHu(PL_statcache.st_nlink);
@@ -3815,20 +3797,16 @@ PP(pp_link)
 	const char * const tmps = SvPV_nolen_const(TOPs);
 	TAINT_PROPER(PL_op_desc[op_type]);
 	result =
-#  if defined(HAS_LINK)
-#    if defined(HAS_SYMLINK)
+#  if defined(HAS_LINK) && defined(HAS_SYMLINK)
 	    /* Both present - need to choose which.  */
 	    (op_type == OP_LINK) ?
 	    PerlLIO_link(tmps, tmps2) : symlink(tmps, tmps2);
-#    else
+#  elif defined(HAS_LINK)
     /* Only have link, so calls to pp_symlink will have DIE()d above.  */
 	PerlLIO_link(tmps, tmps2);
-#    endif
-#  else
-#    if defined(HAS_SYMLINK)
+#  elif defined(HAS_SYMLINK)
     /* Only have symlink, so calls to pp_link will have DIE()d above.  */
 	symlink(tmps, tmps2);
-#    endif
 #  endif
     }
 
@@ -4260,8 +4238,7 @@ PP(pp_fork)
     }
     PUSHi(childpid);
     RETURN;
-#else
-#  if (defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)) || defined(__amigaos4__)
+#elif (defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)) || defined(__amigaos4__)
     dSP; dTARGET;
     Pid_t childpid;
 
@@ -4272,9 +4249,8 @@ PP(pp_fork)
 	RETPUSHUNDEF;
     PUSHi(childpid);
     RETURN;
-#  else
+#else
     DIE(aTHX_ PL_no_func, "fork");
-#  endif
 #endif
 }
 
@@ -4701,8 +4677,7 @@ PP(pp_tms)
 	mPUSHn(((NV)timesbuf.tms_cstime)/(NV)PL_clocktick);
     }
     RETURN;
-#else
-#   ifdef PERL_MICRO
+#elif defined(PERL_MICRO)
     dSP;
     mPUSHn(0.0);
     EXTEND(SP, 4);
@@ -4712,9 +4687,8 @@ PP(pp_tms)
 	 mPUSHn(0.0);
     }
     RETURN;
-#   else
+#else
     DIE(aTHX_ "times not implemented");
-#   endif
 #endif /* HAS_TIMES */
 }
 
@@ -5560,30 +5534,24 @@ PP(pp_gpwent)
 	 * but we are accursed by our history, alas. --jhi.  */
 #   ifdef PWCHANGE
 	mPUSHi(pwent->pw_change);
-#   else
-#       ifdef PWQUOTA
+#   elif defined(PWQUOTA)
 	mPUSHi(pwent->pw_quota);
-#       else
-#           ifdef PWAGE
+#   elif defined(PWAGE)
 	mPUSHs(newSVpv(pwent->pw_age, 0));
-#	    else
+#   else
 	/* I think that you can never get this compiled, but just in case.  */
 	PUSHs(sv_mortalcopy(&PL_sv_no));
-#           endif
-#       endif
 #   endif
 
 	/* pw_class and pw_comment are mutually exclusive--.
 	 * see the above note for pw_change, pw_quota, and pw_age. */
 #   ifdef PWCLASS
 	mPUSHs(newSVpv(pwent->pw_class, 0));
-#   else
-#       ifdef PWCOMMENT
+#   elif defined(PWCOMMENT)
 	mPUSHs(newSVpv(pwent->pw_comment, 0));
-#	else
+#   else
 	/* I think that you can never get this compiled, but just in case.  */
 	PUSHs(sv_mortalcopy(&PL_sv_no));
-#       endif
 #   endif
 
 #   ifdef PWGECOS
