@@ -3384,11 +3384,6 @@ i_arpainet (i_arpainet.U):
 	This variable conditionally defines the I_ARPA_INET symbol,
 	and indicates whether a C program should include <arpa/inet.h>.
 
-i_assert (i_assert.U):
-	This variable conditionally defines the I_ASSERT symbol, which
-	indicates to the C program that <assert.h> exists and could be
-	included.
-
 i_bfd (i_bfd.U):
 	This variable conditionally defines the I_BFD symbol, and
 	indicates whether a C program can include <bfd.h>.

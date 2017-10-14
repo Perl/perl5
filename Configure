@@ -961,7 +961,6 @@ html3dir=''
 html3direxp=''
 installhtml3dir=''
 i_arpainet=''
-i_assert=''
 i_bfd=''
 i_crypt=''
 db_hashtype=''
@@ -22601,10 +22600,6 @@ case "$yacc" in
 	;;
 esac
 
-: see if this is a assert.h system
-set assert.h i_assert
-eval $inhdr
-
 : see if this is a bfd.h system
 set bfd.h i_bfd
 eval $inhdr
@@ -24409,7 +24404,6 @@ i64type='$i64type'
 i8size='$i8size'
 i8type='$i8type'
 i_arpainet='$i_arpainet'
-i_assert='$i_assert'
 i_bfd='$i_bfd'
 i_bsdioctl='$i_bsdioctl'
 i_crypt='$i_crypt'

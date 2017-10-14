@@ -3575,12 +3575,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$fflushNULL	FFLUSH_NULL 		/**/
 #$fflushall	FFLUSH_ALL 		/**/
 
-/* I_ASSERT:
- *	This symbol, if defined, indicates that <assert.h> exists and
- *	could be included by the C program to get the assert() macro.
- */
-#$i_assert	I_ASSERT		/**/
-
 /* I_BFD:
  *	This symbol, if defined, indicates that <bfd.h> exists and
  *	can be included.
