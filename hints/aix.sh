@@ -238,19 +238,19 @@ case "$usethreads" in
 
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
-	    *gcc*|*g++*) 
-	      ccflags="-D_THREAD_SAFE $ccflags" 
+	    *gcc*|*g++*)
+	      ccflags="-D_THREAD_SAFE $ccflags"
 	      ;;
-	    cc_r) 
+	    cc_r)
 	      ;;
-	    xlc_r) 
+	    xlc_r)
 	      ;;
 	    # we do not need the C++ compiler
-	    xlC_r) 
-	      cc=xlc_r 
+	    xlC_r)
+	      cc=xlc_r
 	      ;;
-	    '') 
-	      cc=cc_r 
+	    '')
+	      cc=cc_r
 	      ;;
 	    *)
 	esac
@@ -266,11 +266,11 @@ case "$usethreads" in
 	;;
     *)
 	case "$cc" in
-	    xlc) 
+	    xlc)
 	      ;;
 	    # we do not need the C++ compiler
-	    xlC) 
-	      cc=xlc 
+	    xlC)
+	      cc=xlc
 	      ;;
 	    *)
 	esac
