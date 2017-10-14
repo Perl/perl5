@@ -856,8 +856,6 @@ stdio_cnt=''
 stdio_filbuf=''
 stdio_ptr=''
 d_strcoll=''
-d_strerrm=''
-d_strerror=''
 d_sysernlst=''
 d_syserrlst=''
 d_strerror_l=''
@@ -18729,45 +18727,6 @@ esac
 set strcoll d_strcoll
 eval $inlibc
 
-: see if strerror and/or sys_errlist[] exist
-echo " "
-if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
-    if set strerror val -f d_strerror; eval $csym; $val; then
-		echo 'strerror() found.' >&4
-		d_strerror="$define"
-		d_strerrm='strerror(e)'
-		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-			echo "(You also have sys_errlist[], so we could roll our own strerror.)"
-			d_syserrlst="$define"
-		else
-			echo "(Since you don't have sys_errlist[], strerror() is welcome.)"
-			d_syserrlst="$undef"
-		fi
-    elif xxx=`./findhdr string.h`; test "$xxx" || xxx=`./findhdr strings.h`; \
-			$contains '#[ 	]*define.*strerror' "$xxx" >/dev/null 2>&1; then
-		echo 'strerror() found in string header.' >&4
-		d_strerror="$define"
-		d_strerrm='strerror(e)'
-		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-			echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
-				d_syserrlst="$define"
-		else
-			echo "(You don't appear to have any sys_errlist[], how can this be?)"
-			d_syserrlst="$undef"
-		fi
-    elif set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-		echo "strerror() not found, but you have sys_errlist[] so we'll use that." >&4
-		d_strerror="$undef"
-		d_syserrlst="$define"
-		d_strerrm='((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e])'
-    else
-		echo 'strerror() and sys_errlist[] NOT found.' >&4
-		d_strerror="$undef"
-		d_syserrlst="$undef"
-		d_strerrm='"unknown"'
-    fi
-fi
-
 : see if strerror_l exists
 set strerror_l d_strerror_l
 eval $inlibc
@@ -19128,6 +19087,18 @@ eval $hasproto
 : see if sysconf exists
 set sysconf d_sysconf
 eval $inlibc
+
+: see if sys_errlist[] exists
+echo " "
+if test "X$d_syserrlst" = X; then
+	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
+		echo "You have sys_errlist[], so we could roll our own strerror."
+		d_syserrlst="$define"
+	else
+		echo "You don't have sys_errlist[], so strerror() is welcome."
+		d_syserrlst="$undef"
+	fi
+fi
 
 : see if system exists
 set system d_system
@@ -24298,8 +24269,6 @@ d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
 d_strcoll='$d_strcoll'
-d_strerrm='$d_strerrm'
-d_strerror='$d_strerror'
 d_strerror_l='$d_strerror_l'
 d_strerror_r='$d_strerror_r'
 d_strftime='$d_strftime'

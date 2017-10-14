@@ -1028,10 +1028,6 @@ EXTERN_C int usleep(unsigned int);
 #    include <sys/times.h>
 #endif
 
-#if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
-#   undef HAS_STRERROR
-#endif
-
 #include <errno.h>
 
 #if defined(WIN32) && defined(PERL_IMPLICIT_SYS)
@@ -1214,24 +1210,10 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #define UNKNOWN_ERRNO_MSG "(unknown)"
 
-#ifdef HAS_STRERROR
-#   ifndef DONT_DECLARE_STD
-#       ifdef VMS
-	char *strerror (int,...);
-#       else
-	char *strerror (int);
-#       endif
-#    endif
-#    ifndef Strerror
-#       define Strerror strerror
-#    endif
-#elif defined(HAS_SYS_ERRLIST)
-	extern int sys_nerr;
-	extern char *sys_errlist[];
-#       ifndef Strerror
-#           define Strerror(e) \
-		((e) < 0 || (e) >= sys_nerr ? UNKNOWN_ERRNO_MSG : sys_errlist[e])
-#       endif
+#if VMS
+#define Strerror(e) strerror((e), vaxc$errno)
+#else
+#define Strerror(e) strerror(e)
 #endif
 
 #ifdef I_SYS_IOCTL
