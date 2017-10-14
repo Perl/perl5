@@ -41,10 +41,6 @@ alignbytes (alignbytes.U):
 	double-- or a long double when applicable. Usual values are
 	2, 4 and 8.  The default is eight, for safety.
 
-ansi2knr (ansi2knr.U):
-	This variable is set if the user needs to run ansi2knr.
-	Currently, this is not supported, so we just abort.
-
 aphostname (d_gethname.U):
 	This variable contains the command which can be used to compute the
 	host name. The command is fully qualified by its absolute path, to make

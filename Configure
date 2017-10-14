@@ -336,7 +336,6 @@ rm_try=''
 afs=''
 afsroot=''
 alignbytes=''
-ansi2knr=''
 archlib=''
 archlibexp=''
 d_archlib=''
@@ -8105,52 +8104,6 @@ esac
 set d_perl_otherlibdirs
 eval $setvar
 
-: Cruising for prototypes
-echo " "
-echo "Checking out function prototypes..." >&4
-$cat >prototype.c <<EOCP
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main(int argc, char *argv[]) {
-	exit(0);}
-EOCP
-if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
-	echo "Your C compiler appears to support function prototypes."
-	val="$define"
-else
-	echo "Your C compiler doesn't seem to understand function prototypes."
-	val="$undef"
-fi
-set prototype
-eval $setvar
-$rm -f prototype*
-
-: Check if ansi2knr is required
-case "$prototype" in
-"$define") ;;
-*)	ansi2knr='ansi2knr'
-	echo " "
-	cat <<EOM >&4
-
-$me:  FATAL ERROR:
-This version of $package can only be compiled by a compiler that
-understands function prototypes.  Unfortunately, your C compiler
-	$cc $ccflags
-doesn't seem to understand them.  Sorry about that.
-
-If GNU cc is available for your system, perhaps you could try that instead.
-
-Eventually, we hope to support building Perl with pre-ANSI compilers.
-If you would like to help in that effort, please contact <perlbug@perl.org>.
-
-Aborting Configure now.
-EOM
-	exit 2
-	;;
-esac
-
 : DTrace support
 dflt_dtrace='/usr/sbin/dtrace'
 $test -x /usr/bin/dtrace && dflt_dtrace='/usr/bin/dtrace'
@@ -10788,6 +10741,28 @@ eval $inlibc
 
 set asctime64 d_asctime64
 eval $inlibc
+
+: Cruising for prototypes
+echo " "
+echo "Checking out function prototypes..." >&4
+$cat >prototype.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main(int argc, char *argv[]) {
+	exit(0);}
+EOCP
+if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
+	echo "Your C compiler appears to support function prototypes."
+	val="$define"
+else
+	echo "Your C compiler doesn't seem to understand function prototypes."
+	val="$undef"
+fi
+set prototype
+eval $setvar
+$rm -f prototype*
 
 : see if POSIX threads are available
 set pthread.h i_pthread
@@ -24120,7 +24095,6 @@ _o='$_o'
 afs='$afs'
 afsroot='$afsroot'
 alignbytes='$alignbytes'
-ansi2knr='$ansi2knr'
 aphostname='$aphostname'
 api_revision='$api_revision'
 api_subversion='$api_subversion'

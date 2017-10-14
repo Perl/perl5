@@ -527,7 +527,6 @@ for file do
     toke) optimize=-O0 ;;
     esac
 
-    # Can we perhaps use $ansi2knr here
     echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
 
     . $TOP/config.sh
