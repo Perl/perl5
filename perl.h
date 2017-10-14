@@ -2242,50 +2242,6 @@ int isnan(double d);
 #   define Perl_atof2(s, n) ((n) = atof(s))
 #endif
 
-/* Previously these definitions used hardcoded figures.
- * It is hoped these formula are more portable, although
- * no data one way or another is presently known to me.
- * The "PERL_" names are used because these calculated constants
- * do not meet the ANSI requirements for LONG_MAX, etc., which
- * need to be constants acceptable to #if - kja
- *    define PERL_LONG_MAX        2147483647L
- *    define PERL_LONG_MIN        (-LONG_MAX - 1)
- *    define PERL ULONG_MAX       4294967295L
- */
-
-/*
- * Try to figure out max and min values for the integral types.  THE CORRECT
- * SOLUTION TO THIS MESS: ADAPT enquire.c FROM GCC INTO CONFIGURE.  The
- * following hacks are used if neither limits.h or values.h provide them:
- * U<TYPE>_MAX: for types >= int: ~(unsigned TYPE)0
- *              for types <  int:  (unsigned TYPE)~(unsigned)0
- *	The argument to ~ must be unsigned so that later signed->unsigned
- *	conversion can't modify the value's bit pattern (e.g. -0 -> +0),
- *	and it must not be smaller than int because ~ does integral promotion.
- * <type>_MAX: (<type>) (U<type>_MAX >> 1)
- * <type>_MIN: -<type>_MAX - <is_twos_complement_architecture: (3 & -1) == 3>.
- *	The latter is a hack which happens to work on some machines but
- *	does *not* catch any random system, or things like integer types
- *	with NaN if that is possible.
- *
- * All of the types are explicitly cast to prevent accidental loss of
- * numeric range, and in the hope that they will be less likely to confuse
- * over-eager optimizers.
- *
- */
-
-#define PERL_UCHAR_MIN ((unsigned char)0)
-
-#ifdef UCHAR_MAX
-#  define PERL_UCHAR_MAX ((unsigned char)UCHAR_MAX)
-#else
-#  ifdef MAXUCHAR
-#    define PERL_UCHAR_MAX ((unsigned char)MAXUCHAR)
-#  else
-#    define PERL_UCHAR_MAX       ((unsigned char)~(unsigned)0)
-#  endif
-#endif
-
 /*
  * CHAR_MIN and CHAR_MAX are not included here, as the (char) type may be
  * ambiguous. It may be equivalent to (signed char) or (unsigned char)
@@ -2295,121 +2251,32 @@ int isnan(double d);
  *                                                           - kja
  */
 
+#define PERL_UCHAR_MIN ((unsigned char)0)
+#define PERL_UCHAR_MAX ((unsigned char)UCHAR_MAX)
+
 #define PERL_USHORT_MIN ((unsigned short)0)
+#define PERL_USHORT_MAX ((unsigned short)USHRT_MAX)
 
-#ifdef USHORT_MAX
-#  define PERL_USHORT_MAX ((unsigned short)USHORT_MAX)
-#else
-#  ifdef MAXUSHORT
-#    define PERL_USHORT_MAX ((unsigned short)MAXUSHORT)
-#  else
-#    ifdef USHRT_MAX
-#      define PERL_USHORT_MAX ((unsigned short)USHRT_MAX)
-#    else
-#      define PERL_USHORT_MAX       ((unsigned short)~(unsigned)0)
-#    endif
-#  endif
-#endif
+#define PERL_SHORT_MAX ((short)SHRT_MAX)
+#define PERL_SHORT_MIN ((short)SHRT_MIN)
 
-#ifdef SHORT_MAX
-#  define PERL_SHORT_MAX ((short)SHORT_MAX)
-#else
-#  ifdef MAXSHORT    /* Often used in <values.h> */
-#    define PERL_SHORT_MAX ((short)MAXSHORT)
-#  else
-#    ifdef SHRT_MAX
-#      define PERL_SHORT_MAX ((short)SHRT_MAX)
-#    else
-#      define PERL_SHORT_MAX      ((short) (PERL_USHORT_MAX >> 1))
-#    endif
-#  endif
-#endif
-
-#ifdef SHORT_MIN
-#  define PERL_SHORT_MIN ((short)SHORT_MIN)
-#else
-#  ifdef MINSHORT
-#    define PERL_SHORT_MIN ((short)MINSHORT)
-#  else
-#    ifdef SHRT_MIN
-#      define PERL_SHORT_MIN ((short)SHRT_MIN)
-#    else
-#      define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
-#    endif
-#  endif
-#endif
-
-#ifdef UINT_MAX
-#  define PERL_UINT_MAX ((unsigned int)UINT_MAX)
-#else
-#  ifdef MAXUINT
-#    define PERL_UINT_MAX ((unsigned int)MAXUINT)
-#  else
-#    define PERL_UINT_MAX       (~(unsigned int)0)
-#  endif
-#endif
-
+#define PERL_UINT_MAX ((unsigned int)UINT_MAX)
 #define PERL_UINT_MIN ((unsigned int)0)
 
-#ifdef INT_MAX
-#  define PERL_INT_MAX ((int)INT_MAX)
-#else
-#  ifdef MAXINT    /* Often used in <values.h> */
-#    define PERL_INT_MAX ((int)MAXINT)
-#  else
-#    define PERL_INT_MAX        ((int)(PERL_UINT_MAX >> 1))
-#  endif
-#endif
+#define PERL_INT_MAX ((int)INT_MAX)
+#define PERL_INT_MIN ((int)INT_MIN)
 
-#ifdef INT_MIN
-#  define PERL_INT_MIN ((int)INT_MIN)
-#else
-#  ifdef MININT
-#    define PERL_INT_MIN ((int)MININT)
-#  else
-#    define PERL_INT_MIN        (-PERL_INT_MAX - ((3 & -1) == 3))
-#  endif
-#endif
-
-#ifdef ULONG_MAX
-#  define PERL_ULONG_MAX ((unsigned long)ULONG_MAX)
-#else
-#  ifdef MAXULONG
-#    define PERL_ULONG_MAX ((unsigned long)MAXULONG)
-#  else
-#    define PERL_ULONG_MAX       (~(unsigned long)0)
-#  endif
-#endif
-
+#define PERL_ULONG_MAX ((unsigned long)ULONG_MAX)
 #define PERL_ULONG_MIN ((unsigned long)0L)
 
-#ifdef LONG_MAX
-#  define PERL_LONG_MAX ((long)LONG_MAX)
-#else
-#  ifdef MAXLONG    /* Often used in <values.h> */
-#    define PERL_LONG_MAX ((long)MAXLONG)
-#  else
-#    define PERL_LONG_MAX        ((long) (PERL_ULONG_MAX >> 1))
-#  endif
-#endif
-
-#ifdef LONG_MIN
-#  define PERL_LONG_MIN ((long)LONG_MIN)
-#else
-#  ifdef MINLONG
-#    define PERL_LONG_MIN ((long)MINLONG)
-#  else
-#    define PERL_LONG_MIN        (-PERL_LONG_MAX - ((3 & -1) == 3))
-#  endif
-#endif
+#define PERL_LONG_MAX ((long)LONG_MAX)
+#define PERL_LONG_MIN ((long)LONG_MIN)
 
 #ifdef UV_IS_QUAD
-
 #    define PERL_UQUAD_MAX	(~(UV)0)
 #    define PERL_UQUAD_MIN	((UV)0)
 #    define PERL_QUAD_MAX 	((IV) (PERL_UQUAD_MAX >> 1))
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
-
 #endif
 
 typedef MEM_SIZE STRLEN;
