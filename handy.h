@@ -14,13 +14,6 @@
 #ifndef PERL_HANDY_H_ /* Guard against nested #inclusion */
 #define PERL_HANDY_H_
 
-#if !defined(__STDC__)
-#ifdef NULL
-#undef NULL
-#endif
-#  define NULL 0
-#endif
-
 #ifndef PERL_CORE
 #  define Null(type) ((type)NULL)
 
