@@ -28,32 +28,32 @@
 /* Find best way to ROTL32/ROTL64 */
 #ifndef ROTL32
 #if defined(_MSC_VER)
-  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
-  #define ROTL32(x,r)  _rotl(x,r)
-  #define ROTR32(x,r)  _rotr(x,r)
+#include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+#define ROTL32(x,r)  _rotl(x,r)
+#define ROTR32(x,r)  _rotr(x,r)
 #else
-  /* gcc recognises this code and generates a rotate instruction for CPUs with one */
-  #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
-  #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
+/* gcc recognises this code and generates a rotate instruction for CPUs with one */
+#define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+#define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif
 #endif
 
 #ifndef PERL_SEEN_HV_FUNC_H
 #if !defined(U64)
-    #include <stdint.h>
-    #define U64 uint64_t
+#include <stdint.h>
+#define U64 uint64_t
 #endif
 
 #if !defined(U32)
-  #define U32 uint32_t
+#define U32 uint32_t
 #endif
 
 #if !defined(U8)
-    #define U8 unsigned char
+#define U8 unsigned char
 #endif
 
 #if !defined(U16)
-    #define U16 uint16_t
+#define U16 uint16_t
 #endif
 
 #ifndef STRLEN
@@ -226,24 +226,24 @@ U32 zaphod32_hash_with_state(
     {
         switch (len) {
             default: goto zaphod32_read8;
-            case 12: v2 += (U32)key[11] << 24;
-            case 11: v2 += (U32)key[10] << 16;
+            case 12: v2 += (U32)key[11] << 24;  /* FALLTHROUGH */
+            case 11: v2 += (U32)key[10] << 16;  /* FALLTHROUGH */
             case 10: v2 += (U32)U8TO16_LE(key+8);
                      v1 -= U8TO32_LE(key+4);
                      v0 += U8TO32_LE(key+0);
                      goto zaphod32_finalize;
-            case 9: v2 += (U32)key[8];
+            case 9: v2 += (U32)key[8];          /* FALLTHROUGH */
             case 8: v1 -= U8TO32_LE(key+4);
                     v0 += U8TO32_LE(key+0);
                     goto zaphod32_finalize;
-            case 7: v2 += (U32)key[6];
+            case 7: v2 += (U32)key[6];          /* FALLTHROUGH */
             case 6: v0 += (U32)U8TO16_LE(key+4);
                     v1 -= U8TO32_LE(key+0);
                     goto zaphod32_finalize;
-            case 5: v0 += (U32)key[4];
+            case 5: v0 += (U32)key[4];          /* FALLTHROUGH */
             case 4: v1 -= U8TO32_LE(key+0);
                     goto zaphod32_finalize;
-            case 3: v2 += (U32)key[2];
+            case 3: v2 += (U32)key[2];          /* FALLTHROUGH */
             case 2: v0 += (U32)U8TO16_LE(key);
                     break;
             case 1: v0 += (U32)key[0];
@@ -288,12 +288,13 @@ zaphod32_read8:
 
     v0 += (U32)(key_len) << 24;
     switch (len & 0x3) {
-        case 3: v2 += (U32)key[2];
+        case 3: v2 += (U32)key[2];          /* FALLTHROUGH */
         case 2: v0 += (U32)U8TO16_LE(key);
                 break;
         case 1: v0 += (U32)key[0];
                 break;
         case 0: v2 ^= 0xFF;
+                break;
     }
 zaphod32_finalize:
     ZAPHOD32_FINALIZE(v0,v1,v2);

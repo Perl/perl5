@@ -31,16 +31,16 @@ GCC_DIAG_IGNORE(-Wimplicit-fallthrough)
 
 #ifndef PERL_SEEN_HV_FUNC_H
 #if !defined(U32) 
-    #include <stdint.h>
-    #define U32 uint32_t
+#include <stdint.h>
+#define U32 uint32_t
 #endif
 
 #if !defined(U8)
-    #define U8 unsigned char
+#define U8 unsigned char
 #endif
 
 #if !defined(U16)
-    #define U16 uint16_t
+#define U16 uint16_t
 #endif
 
 #ifndef STRLEN
@@ -64,13 +64,13 @@ GCC_DIAG_IGNORE(-Wimplicit-fallthrough)
 /* Find best way to ROTL32/ROTL64 */
 #ifndef ROTL32
 #if defined(_MSC_VER)
-  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
-  #define ROTL32(x,r)  _rotl(x,r)
-  #define ROTR32(x,r)  _rotr(x,r)
+#include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+#define ROTL32(x,r)  _rotl(x,r)
+#define ROTR32(x,r)  _rotr(x,r)
 #else
-  /* gcc recognises this code and generates a rotate instruction for CPUs with one */
-  #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
-  #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
+/* gcc recognises this code and generates a rotate instruction for CPUs with one */
+#define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+#define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif
 #endif
 
@@ -1500,262 +1500,262 @@ SBOX32_STATIC_INLINE U32 sbox32_hash_with_state(
     U32 hash = *state;
     switch (key_len) {
         default: return zaphod32_hash_with_state(state_ch, key, key_len);
-        case_256_SBOX32(hash,state,key)
-        case_255_SBOX32(hash,state,key)
-        case_254_SBOX32(hash,state,key)
-        case_253_SBOX32(hash,state,key)
-        case_252_SBOX32(hash,state,key)
-        case_251_SBOX32(hash,state,key)
-        case_250_SBOX32(hash,state,key)
-        case_249_SBOX32(hash,state,key)
-        case_248_SBOX32(hash,state,key)
-        case_247_SBOX32(hash,state,key)
-        case_246_SBOX32(hash,state,key)
-        case_245_SBOX32(hash,state,key)
-        case_244_SBOX32(hash,state,key)
-        case_243_SBOX32(hash,state,key)
-        case_242_SBOX32(hash,state,key)
-        case_241_SBOX32(hash,state,key)
-        case_240_SBOX32(hash,state,key)
-        case_239_SBOX32(hash,state,key)
-        case_238_SBOX32(hash,state,key)
-        case_237_SBOX32(hash,state,key)
-        case_236_SBOX32(hash,state,key)
-        case_235_SBOX32(hash,state,key)
-        case_234_SBOX32(hash,state,key)
-        case_233_SBOX32(hash,state,key)
-        case_232_SBOX32(hash,state,key)
-        case_231_SBOX32(hash,state,key)
-        case_230_SBOX32(hash,state,key)
-        case_229_SBOX32(hash,state,key)
-        case_228_SBOX32(hash,state,key)
-        case_227_SBOX32(hash,state,key)
-        case_226_SBOX32(hash,state,key)
-        case_225_SBOX32(hash,state,key)
-        case_224_SBOX32(hash,state,key)
-        case_223_SBOX32(hash,state,key)
-        case_222_SBOX32(hash,state,key)
-        case_221_SBOX32(hash,state,key)
-        case_220_SBOX32(hash,state,key)
-        case_219_SBOX32(hash,state,key)
-        case_218_SBOX32(hash,state,key)
-        case_217_SBOX32(hash,state,key)
-        case_216_SBOX32(hash,state,key)
-        case_215_SBOX32(hash,state,key)
-        case_214_SBOX32(hash,state,key)
-        case_213_SBOX32(hash,state,key)
-        case_212_SBOX32(hash,state,key)
-        case_211_SBOX32(hash,state,key)
-        case_210_SBOX32(hash,state,key)
-        case_209_SBOX32(hash,state,key)
-        case_208_SBOX32(hash,state,key)
-        case_207_SBOX32(hash,state,key)
-        case_206_SBOX32(hash,state,key)
-        case_205_SBOX32(hash,state,key)
-        case_204_SBOX32(hash,state,key)
-        case_203_SBOX32(hash,state,key)
-        case_202_SBOX32(hash,state,key)
-        case_201_SBOX32(hash,state,key)
-        case_200_SBOX32(hash,state,key)
-        case_199_SBOX32(hash,state,key)
-        case_198_SBOX32(hash,state,key)
-        case_197_SBOX32(hash,state,key)
-        case_196_SBOX32(hash,state,key)
-        case_195_SBOX32(hash,state,key)
-        case_194_SBOX32(hash,state,key)
-        case_193_SBOX32(hash,state,key)
-        case_192_SBOX32(hash,state,key)
-        case_191_SBOX32(hash,state,key)
-        case_190_SBOX32(hash,state,key)
-        case_189_SBOX32(hash,state,key)
-        case_188_SBOX32(hash,state,key)
-        case_187_SBOX32(hash,state,key)
-        case_186_SBOX32(hash,state,key)
-        case_185_SBOX32(hash,state,key)
-        case_184_SBOX32(hash,state,key)
-        case_183_SBOX32(hash,state,key)
-        case_182_SBOX32(hash,state,key)
-        case_181_SBOX32(hash,state,key)
-        case_180_SBOX32(hash,state,key)
-        case_179_SBOX32(hash,state,key)
-        case_178_SBOX32(hash,state,key)
-        case_177_SBOX32(hash,state,key)
-        case_176_SBOX32(hash,state,key)
-        case_175_SBOX32(hash,state,key)
-        case_174_SBOX32(hash,state,key)
-        case_173_SBOX32(hash,state,key)
-        case_172_SBOX32(hash,state,key)
-        case_171_SBOX32(hash,state,key)
-        case_170_SBOX32(hash,state,key)
-        case_169_SBOX32(hash,state,key)
-        case_168_SBOX32(hash,state,key)
-        case_167_SBOX32(hash,state,key)
-        case_166_SBOX32(hash,state,key)
-        case_165_SBOX32(hash,state,key)
-        case_164_SBOX32(hash,state,key)
-        case_163_SBOX32(hash,state,key)
-        case_162_SBOX32(hash,state,key)
-        case_161_SBOX32(hash,state,key)
-        case_160_SBOX32(hash,state,key)
-        case_159_SBOX32(hash,state,key)
-        case_158_SBOX32(hash,state,key)
-        case_157_SBOX32(hash,state,key)
-        case_156_SBOX32(hash,state,key)
-        case_155_SBOX32(hash,state,key)
-        case_154_SBOX32(hash,state,key)
-        case_153_SBOX32(hash,state,key)
-        case_152_SBOX32(hash,state,key)
-        case_151_SBOX32(hash,state,key)
-        case_150_SBOX32(hash,state,key)
-        case_149_SBOX32(hash,state,key)
-        case_148_SBOX32(hash,state,key)
-        case_147_SBOX32(hash,state,key)
-        case_146_SBOX32(hash,state,key)
-        case_145_SBOX32(hash,state,key)
-        case_144_SBOX32(hash,state,key)
-        case_143_SBOX32(hash,state,key)
-        case_142_SBOX32(hash,state,key)
-        case_141_SBOX32(hash,state,key)
-        case_140_SBOX32(hash,state,key)
-        case_139_SBOX32(hash,state,key)
-        case_138_SBOX32(hash,state,key)
-        case_137_SBOX32(hash,state,key)
-        case_136_SBOX32(hash,state,key)
-        case_135_SBOX32(hash,state,key)
-        case_134_SBOX32(hash,state,key)
-        case_133_SBOX32(hash,state,key)
-        case_132_SBOX32(hash,state,key)
-        case_131_SBOX32(hash,state,key)
-        case_130_SBOX32(hash,state,key)
-        case_129_SBOX32(hash,state,key)
-        case_128_SBOX32(hash,state,key)
-        case_127_SBOX32(hash,state,key)
-        case_126_SBOX32(hash,state,key)
-        case_125_SBOX32(hash,state,key)
-        case_124_SBOX32(hash,state,key)
-        case_123_SBOX32(hash,state,key)
-        case_122_SBOX32(hash,state,key)
-        case_121_SBOX32(hash,state,key)
-        case_120_SBOX32(hash,state,key)
-        case_119_SBOX32(hash,state,key)
-        case_118_SBOX32(hash,state,key)
-        case_117_SBOX32(hash,state,key)
-        case_116_SBOX32(hash,state,key)
-        case_115_SBOX32(hash,state,key)
-        case_114_SBOX32(hash,state,key)
-        case_113_SBOX32(hash,state,key)
-        case_112_SBOX32(hash,state,key)
-        case_111_SBOX32(hash,state,key)
-        case_110_SBOX32(hash,state,key)
-        case_109_SBOX32(hash,state,key)
-        case_108_SBOX32(hash,state,key)
-        case_107_SBOX32(hash,state,key)
-        case_106_SBOX32(hash,state,key)
-        case_105_SBOX32(hash,state,key)
-        case_104_SBOX32(hash,state,key)
-        case_103_SBOX32(hash,state,key)
-        case_102_SBOX32(hash,state,key)
-        case_101_SBOX32(hash,state,key)
-        case_100_SBOX32(hash,state,key)
-        case_99_SBOX32(hash,state,key)
-        case_98_SBOX32(hash,state,key)
-        case_97_SBOX32(hash,state,key)
-        case_96_SBOX32(hash,state,key)
-        case_95_SBOX32(hash,state,key)
-        case_94_SBOX32(hash,state,key)
-        case_93_SBOX32(hash,state,key)
-        case_92_SBOX32(hash,state,key)
-        case_91_SBOX32(hash,state,key)
-        case_90_SBOX32(hash,state,key)
-        case_89_SBOX32(hash,state,key)
-        case_88_SBOX32(hash,state,key)
-        case_87_SBOX32(hash,state,key)
-        case_86_SBOX32(hash,state,key)
-        case_85_SBOX32(hash,state,key)
-        case_84_SBOX32(hash,state,key)
-        case_83_SBOX32(hash,state,key)
-        case_82_SBOX32(hash,state,key)
-        case_81_SBOX32(hash,state,key)
-        case_80_SBOX32(hash,state,key)
-        case_79_SBOX32(hash,state,key)
-        case_78_SBOX32(hash,state,key)
-        case_77_SBOX32(hash,state,key)
-        case_76_SBOX32(hash,state,key)
-        case_75_SBOX32(hash,state,key)
-        case_74_SBOX32(hash,state,key)
-        case_73_SBOX32(hash,state,key)
-        case_72_SBOX32(hash,state,key)
-        case_71_SBOX32(hash,state,key)
-        case_70_SBOX32(hash,state,key)
-        case_69_SBOX32(hash,state,key)
-        case_68_SBOX32(hash,state,key)
-        case_67_SBOX32(hash,state,key)
-        case_66_SBOX32(hash,state,key)
-        case_65_SBOX32(hash,state,key)
-        case_64_SBOX32(hash,state,key)
-        case_63_SBOX32(hash,state,key)
-        case_62_SBOX32(hash,state,key)
-        case_61_SBOX32(hash,state,key)
-        case_60_SBOX32(hash,state,key)
-        case_59_SBOX32(hash,state,key)
-        case_58_SBOX32(hash,state,key)
-        case_57_SBOX32(hash,state,key)
-        case_56_SBOX32(hash,state,key)
-        case_55_SBOX32(hash,state,key)
-        case_54_SBOX32(hash,state,key)
-        case_53_SBOX32(hash,state,key)
-        case_52_SBOX32(hash,state,key)
-        case_51_SBOX32(hash,state,key)
-        case_50_SBOX32(hash,state,key)
-        case_49_SBOX32(hash,state,key)
-        case_48_SBOX32(hash,state,key)
-        case_47_SBOX32(hash,state,key)
-        case_46_SBOX32(hash,state,key)
-        case_45_SBOX32(hash,state,key)
-        case_44_SBOX32(hash,state,key)
-        case_43_SBOX32(hash,state,key)
-        case_42_SBOX32(hash,state,key)
-        case_41_SBOX32(hash,state,key)
-        case_40_SBOX32(hash,state,key)
-        case_39_SBOX32(hash,state,key)
-        case_38_SBOX32(hash,state,key)
-        case_37_SBOX32(hash,state,key)
-        case_36_SBOX32(hash,state,key)
-        case_35_SBOX32(hash,state,key)
-        case_34_SBOX32(hash,state,key)
-        case_33_SBOX32(hash,state,key)
-        case_32_SBOX32(hash,state,key)
-        case_31_SBOX32(hash,state,key)
-        case_30_SBOX32(hash,state,key)
-        case_29_SBOX32(hash,state,key)
-        case_28_SBOX32(hash,state,key)
-        case_27_SBOX32(hash,state,key)
-        case_26_SBOX32(hash,state,key)
-        case_25_SBOX32(hash,state,key)
-        case_24_SBOX32(hash,state,key)
-        case_23_SBOX32(hash,state,key)
-        case_22_SBOX32(hash,state,key)
-        case_21_SBOX32(hash,state,key)
-        case_20_SBOX32(hash,state,key)
-        case_19_SBOX32(hash,state,key)
-        case_18_SBOX32(hash,state,key)
-        case_17_SBOX32(hash,state,key)
-        case_16_SBOX32(hash,state,key)
-        case_15_SBOX32(hash,state,key)
-        case_14_SBOX32(hash,state,key)
-        case_13_SBOX32(hash,state,key)
-        case_12_SBOX32(hash,state,key)
-        case_11_SBOX32(hash,state,key)
-        case_10_SBOX32(hash,state,key)
-        case_9_SBOX32(hash,state,key)
-        case_8_SBOX32(hash,state,key)
-        case_7_SBOX32(hash,state,key)
-        case_6_SBOX32(hash,state,key)
-        case_5_SBOX32(hash,state,key)
-        case_4_SBOX32(hash,state,key)
-        case_3_SBOX32(hash,state,key)
-        case_2_SBOX32(hash,state,key)
-        case_1_SBOX32(hash,state,key)
+        case_256_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_255_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_254_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_253_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_252_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_251_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_250_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_249_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_248_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_247_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_246_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_245_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_244_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_243_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_242_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_241_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_240_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_239_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_238_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_237_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_236_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_235_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_234_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_233_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_232_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_231_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_230_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_229_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_228_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_227_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_226_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_225_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_224_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_223_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_222_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_221_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_220_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_219_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_218_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_217_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_216_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_215_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_214_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_213_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_212_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_211_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_210_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_209_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_208_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_207_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_206_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_205_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_204_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_203_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_202_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_201_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_200_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_199_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_198_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_197_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_196_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_195_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_194_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_193_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_192_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_191_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_190_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_189_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_188_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_187_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_186_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_185_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_184_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_183_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_182_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_181_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_180_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_179_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_178_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_177_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_176_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_175_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_174_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_173_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_172_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_171_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_170_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_169_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_168_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_167_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_166_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_165_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_164_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_163_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_162_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_161_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_160_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_159_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_158_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_157_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_156_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_155_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_154_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_153_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_152_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_151_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_150_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_149_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_148_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_147_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_146_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_145_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_144_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_143_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_142_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_141_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_140_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_139_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_138_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_137_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_136_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_135_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_134_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_133_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_132_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_131_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_130_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_129_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_128_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_127_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_126_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_125_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_124_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_123_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_122_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_121_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_120_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_119_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_118_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_117_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_116_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_115_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_114_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_113_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_112_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_111_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_110_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_109_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_108_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_107_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_106_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_105_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_104_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_103_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_102_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_101_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_100_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_99_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_98_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_97_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_96_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_95_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_94_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_93_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_92_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_91_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_90_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_89_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_88_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_87_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_86_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_85_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_84_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_83_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_82_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_81_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_80_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_79_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_78_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_77_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_76_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_75_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_74_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_73_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_72_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_71_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_70_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_69_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_68_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_67_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_66_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_65_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_64_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_63_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_62_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_61_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_60_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_59_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_58_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_57_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_56_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_55_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_54_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_53_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_52_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_51_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_50_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_49_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_48_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_47_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_46_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_45_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_44_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_43_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_42_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_41_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_40_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_39_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_38_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_37_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_36_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_35_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_34_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_33_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_32_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_31_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_30_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_29_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_28_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_27_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_26_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_25_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_24_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_23_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_22_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_21_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_20_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_19_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_18_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_17_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_16_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_15_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_14_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_13_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_12_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_11_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_10_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_9_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_8_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_7_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_6_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_5_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_4_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_3_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_2_SBOX32(hash,state,key) /* FALLTHROUGH */
+        case_1_SBOX32(hash,state,key) /* FALLTHROUGH */
         case 0: break;
     }
     return hash;
