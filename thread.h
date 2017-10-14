@@ -16,8 +16,7 @@
 
 #ifdef WIN32
 #  include <win32thread.h>
-#else
-#ifdef NETWARE
+#elif defined(NETWARE)
 #  include <nw5thread.h>
 #else
 #  ifdef OLD_PTHREADS_API /* Here be dragons. */
@@ -71,7 +70,6 @@
 #    define pthread_mutexattr_default NULL
 #    define pthread_condattr_default  NULL
 #  endif
-#endif	/* NETWARE */
 #endif
 
 #ifndef PTHREAD_CREATE
@@ -169,16 +167,12 @@
 #ifndef YIELD
 #  ifdef SCHED_YIELD
 #    define YIELD SCHED_YIELD
-#  else
-#    ifdef HAS_SCHED_YIELD
-#      define YIELD sched_yield()
-#    else
-#      ifdef HAS_PTHREAD_YIELD
+#  elif defined(HAS_SCHED_YIELD)
+#    define YIELD sched_yield()
+#  elif defined(HAS_PTHREAD_YIELD)
     /* pthread_yield(NULL) platforms are expected
      * to have #defined YIELD for themselves. */
-#        define YIELD pthread_yield()
-#      endif
-#    endif
+#    define YIELD pthread_yield()
 #  endif
 #endif
 
