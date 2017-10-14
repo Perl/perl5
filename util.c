@@ -2148,8 +2148,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #       else /* ! HAS_UNSETENV */
         (void)setenv(nam, val, 1);
 #       endif /* HAS_UNSETENV */
-#   else
-#       if defined(HAS_UNSETENV)
+#   elif defined(HAS_UNSETENV)
         if (val == NULL) {
             if (environ) /* old glibc can crash with null environ */
                 (void)unsetenv(nam);
@@ -2161,7 +2160,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
             my_setenv_format(new_env, nam, nlen, val, vlen);
             (void)putenv(new_env);
         }
-#       else /* ! HAS_UNSETENV */
+#   else /* ! HAS_UNSETENV */
         char *new_env;
 	const int nlen = strlen(nam);
 	int vlen;
@@ -2173,7 +2172,6 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
         (void)putenv(new_env);
-#       endif /* HAS_UNSETENV */
 #   endif /* __CYGWIN__ */
 #ifndef PERL_USE_SAFE_PUTENV
     }
@@ -2509,8 +2507,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	 PerlLIO_close(pp[0]);
     return PerlIO_fdopen(p[This], mode);
 }
-#else
-#if defined(DJGPP)
+#elif defined(DJGPP)
 FILE *djgpp_popen();
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
@@ -2522,15 +2519,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     */
     return PerlIO_importFILE(djgpp_popen(cmd, mode), 0);
 }
-#else
-#if defined(__LIBCATAMOUNT__)
+#elif defined(__LIBCATAMOUNT__)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
     return NULL;
 }
-#endif
-#endif
 
 #endif /* !DOSISH */
 
@@ -2848,14 +2842,12 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
        : 0
     );
 }
-#else
-#if defined(__LIBCATAMOUNT__)
+#elif defined(__LIBCATAMOUNT__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     return -1;
 }
-#endif
 #endif /* !DOSISH */
 
 #if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(__LIBCATAMOUNT__)
@@ -3312,12 +3304,10 @@ Perl_get_context(void)
     if (error)
 	Perl_croak_nocontext("panic: pthread_getspecific, error=%d", error);
     return (void*)t;
-#  else
-#    ifdef I_MACH_CTHREADS
+#  elif defined(I_MACH_CTHREADS)
     return (void*)cthread_data(cthread_self());
-#    else
+#  else
     return (void*)PTHREAD_GETSPECIFIC(PL_thr_key);
-#    endif
 #  endif
 #else
     return (void*)NULL;
@@ -3433,23 +3423,15 @@ Perl_my_fflush_all(pTHX)
     long open_max = -1;
 #   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
     open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
-#   else
-#    if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+#   elif defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
-#     else
-#      ifdef FOPEN_MAX
+#   elif defined(FOPEN_MAX)
     open_max = FOPEN_MAX;
-#      else
-#       ifdef OPEN_MAX
+#   elif defined(OPEN_MAX)
     open_max = OPEN_MAX;
-#       else
-#        ifdef _NFILE
+#   elif defined(_NFILE)
     open_max = _NFILE;
-#        endif
-#       endif
-#      endif
-#     endif
-#    endif
+#   endif
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
@@ -4269,12 +4251,10 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
   abort_tidy_up_and_fail:
 #ifdef ECONNABORTED
   errno = ECONNABORTED;	/* This would be the standard thing to do. */
-#else
-#  ifdef ECONNREFUSED
+#elif defined(ECONNREFUSED)
   errno = ECONNREFUSED;	/* E.g. Symbian does not have ECONNABORTED. */
-#  else
+#else
   errno = ETIMEDOUT;	/* Desperation time. */
-#  endif
 #endif
   tidy_up_and_fail:
     {
