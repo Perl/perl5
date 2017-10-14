@@ -100,12 +100,6 @@
  * we'll use ours, since it gives us the full VMS exit status. */
 #define waitpid my_waitpid
 
-/* Don't redeclare standard RTL routines in Perl's header files;
- * VMS history or extensions makes some of the formal protoypes
- * differ from the common Unix forms.
- */
-#define DONT_DECLARE_STD 1
-
 /* Our own contribution to PerlShr's global symbols . . . */
 
 #if !defined(PERL_IMPLICIT_CONTEXT)

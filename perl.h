@@ -560,10 +560,6 @@
 #define DOSISH 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
-# define DONT_DECLARE_STD 1
-#endif
-
 /* These exist only for back-compat with XS modules. */
 #ifndef PERL_CORE
 #define VOL volatile
@@ -4008,15 +4004,6 @@ static PERL_MG_UFUNC(foo_get, index, val)
 #define PERL_MG_UFUNC(name,ix,sv) I32 name(pTHX_ IV ix, SV *sv)
 #endif
 
-/* Fix these up for __STDC__ */
-#ifndef DONT_DECLARE_STD
-char *mktemp (char*);
-#ifndef atof
-double atof (const char*);
-#endif
-#endif
-
-
 #ifdef I_MATH
 #    include <math.h>
 #    ifdef __VMS
@@ -4045,18 +4032,6 @@ END_EXTERN_C
 char *crypt (const char*, const char*);
 #endif
 #  endif /* !WIN32 */
-#  ifndef DONT_DECLARE_STD
-#    ifndef getenv
-char *getenv (const char*);
-#    endif /* !getenv */
-#    if !defined(HAS_LSEEK_PROTO) && !defined(__hpux)
-#      ifdef _FILE_OFFSET_BITS
-#        if _FILE_OFFSET_BITS == 64
-Off_t lseek (int,Off_t,int);
-#        endif
-#      endif
-#    endif
-#  endif /* !DONT_DECLARE_STD */
 #  ifndef WIN32
 #    ifndef getlogin
 char *getlogin (void);
@@ -4251,8 +4226,7 @@ typedef void (*despatch_signals_proc_t) (pTHX);
 #  define environ (*_NSGetEnviron())
 #elif defined(USE_ENVIRON_ARRAY)
    /* VMS and some other platforms don't use the environ array */
-#    if !defined(DONT_DECLARE_STD) || \
-        (defined(__svr4__) && defined(__GNUC__) && defined(__sun)) || \
+#    if (defined(__svr4__) && defined(__GNUC__) && defined(__sun)) || \
         defined(__sgi)
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
