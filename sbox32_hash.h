@@ -1,8 +1,6 @@
 #ifndef DEBUG_SBOX32_HASH
 #define DEBUG_SBOX32_HASH 0
 
-GCC_DIAG_IGNORE(-Wimplicit-fallthrough)
-
 #include "zaphod32_hash.h"
 
 #if DEBUG_SBOX32_HASH == 1
