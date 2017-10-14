@@ -112,21 +112,17 @@ typedef union {
 /* CROSSCOMPILE and MULTIARCH are going to affect pp_pack() and pp_unpack().
    --jhi Feb 1999 */
 
-#if U16SIZE > SIZE16 || U32SIZE > SIZE32
-#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
-#    define OFF16(p)	((char*)(p))
-#    define OFF32(p)	((char*)(p))
-#  else
-#    if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
-#      define OFF16(p)	((char*)(p) + (sizeof(U16) - SIZE16))
-#      define OFF32(p)	((char*)(p) + (sizeof(U32) - SIZE32))
-#    else
-       ++++ bad cray byte order
-#    endif
-#  endif
-#else
+#if U16SIZE <= SIZE16 && U32SIZE <= SIZE32
 #  define OFF16(p)     ((char *) (p))
 #  define OFF32(p)     ((char *) (p))
+#elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
+#  define OFF16(p)	((char*)(p))
+#  define OFF32(p)	((char*)(p))
+#elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
+#  define OFF16(p)	((char*)(p) + (sizeof(U16) - SIZE16))
+#  define OFF32(p)	((char*)(p) + (sizeof(U32) - SIZE32))
+#else
+#  error "bad cray byte order"
 #endif
 
 #define PUSH16(utf8, cur, p, needs_swap)                        \
