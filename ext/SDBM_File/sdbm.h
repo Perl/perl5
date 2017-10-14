@@ -186,10 +186,6 @@ Free_t   Perl_mfree(Malloc_t where);
 # include <strings.h>
 #endif
 
-#ifdef I_MEMORY
-#include <memory.h>
-#endif      
-
 #define memzero(d,l) memset(d,0,l)
 
 #ifdef BUGGY_MSC

@@ -959,10 +959,6 @@ EXTERN_C int usleep(unsigned int);
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
 #define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
 
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-
 #ifndef memzero
 #   define memzero(d,l) memset(d,0,l)
 #endif

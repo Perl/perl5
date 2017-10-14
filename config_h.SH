@@ -673,12 +673,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_locale	I_LOCALE		/**/
 
-/* I_MEMORY:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <memory.h>.
- */
-#$i_memory I_MEMORY		/**/
-
 /* I_NETINET_IN:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <netinet/in.h>. Otherwise, you may try <sys/in.h>.

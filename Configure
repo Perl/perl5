@@ -991,7 +991,6 @@ i_locale=''
 i_machcthr=''
 i_malloc=''
 i_mallocmalloc=''
-i_memory=''
 i_mntent=''
 d_gdbm_ndbm_h_uses_prototypes=''
 d_gdbmndbm_h_uses_prototypes=''
@@ -22659,30 +22658,6 @@ else
 	i_machcthr="$undef"
 fi
 
-: see if memory.h is available.
-val=''
-set memory.h val
-eval $inhdr
-
-: See if it conflicts with string.h
-case "$val" in
-$define)
-	case "$strings" in
-	'') ;;
-	*)
-		$cppstdin $cppflags $cppminus < $strings > mem.h
-		if $contains 'memcpy' mem.h >/dev/null 2>&1; then
-			echo " "
-			echo "We won't be including <memory.h>."
-			val="$undef"
-		fi
-		$rm -f mem.h
-		;;
-	esac
-esac
-set i_memory
-eval $setvar
-
 : see if this is a mntent.h system
 set mntent.h i_mntent
 eval $inhdr
@@ -24428,7 +24403,6 @@ i_locale='$i_locale'
 i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
 i_mallocmalloc='$i_mallocmalloc'
-i_memory='$i_memory'
 i_mntent='$i_mntent'
 i_ndbm='$i_ndbm'
 i_netdb='$i_netdb'
