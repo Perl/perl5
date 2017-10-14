@@ -214,9 +214,6 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	? ((struct perl_memory_debug_header *)((char *)where - PERL_MEMORY_DEBUG_HEADER_SIZE))->size
 	: 0;
 #endif
-#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) && !defined(PERL_MICRO)
-    Malloc_t PerlMem_realloc();
-#endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
     if (!size) {
 	safesysfree(where);
