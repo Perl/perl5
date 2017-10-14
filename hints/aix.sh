@@ -94,7 +94,7 @@ cc=${cc:-cc}
 
 ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
 case "$cc" in
-    *gcc*) ;;
+    *gcc*|*g++*) ;;
     *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias -qlanglvl=extc99" ;;
     esac
 nm_opt='-B'
@@ -109,7 +109,7 @@ d_setreuid='undef'
 cccdlflags='none'	# All AIX code is position independent
    cc_type=xlc		# do not export to config.sh
 case "$cc" in
-    *gcc*)
+    *gcc*|*g++*)
 	cc_type=gcc
 	ccdlflags='-Xlinker'
 	if [ "X$gccversion" = "X" ]; then
@@ -189,7 +189,7 @@ case $cc_type in
     esac
 
 case "$cc" in
-    *gcc*) ;;
+    *gcc*|*g++*) ;;
 
     cc*|xlc*) # cc should've been set by line 116 or so if empty.
 	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
@@ -238,7 +238,7 @@ case "$usethreads" in
 
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
-	    *gcc*) 
+	    *gcc*|*g++*) 
 	      ccflags="-D_THREAD_SAFE $ccflags" 
 	      ;;
 	    cc_r) 
@@ -429,7 +429,7 @@ EOM
 	ccflags="`echo $ccflags | sed -e 's@-q32@@'`"
 	ldflags="`echo $ldflags | sed -e 's@-b32@@'`"
 	case "$cc" in
-	    *gcc*)
+	    *gcc*|*g++*)
 		ccflags="`echo $ccflags | sed -e 's@-q64@-maix64@'`"
 		ccflags_uselargefiles="`echo $ccflags_uselargefiles | sed -e 's@-q64@-maix64@'`"
 		qacflags="`echo $qacflags | sed -e 's@-q64@-maix64@'`"
@@ -474,8 +474,8 @@ if test $usenativedlopen = 'true' ; then
     #			    libraries. AIX allows both .so and .a libraries to
     #			    contain dynamic shared objects.
     case "$cc" in
-	*gcc*) ldflags="$ldflags -Wl,-brtl -Wl,-bdynamic" ;;
-	*)     ldflags="$ldflags -brtl -bdynamic" ;;
+	*gcc*|*g++*) ldflags="$ldflags -Wl,-brtl -Wl,-bdynamic" ;;
+	*)           ldflags="$ldflags -brtl -bdynamic" ;;
 	esac
 elif test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
     # If the C++ libraries, libC and libC_r, are available we will
