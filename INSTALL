@@ -519,7 +519,7 @@ shared library path might be required.  For example, if you want to run
 something like the following with the newly-built but not-yet-installed
 ./perl:
 
-        ./perl -MTestInit t/misc/failing_test.t
+        ./perl -I. -MTestInit t/misc/failing_test.t
 
 or
 
