@@ -4210,7 +4210,6 @@ ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/strict.t		see if re 'strict' subpragma works
 ext/SDBM_File/biblio	SDBM kit
 ext/SDBM_File/CHANGES	SDBM kit
-ext/SDBM_File/COMPARE	SDBM kit
 ext/SDBM_File/dba.c	SDBM kit
 ext/SDBM_File/dbd.c	SDBM kit
 ext/SDBM_File/dbe.1	SDBM kit
