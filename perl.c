@@ -3921,12 +3921,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		close(tmpfd);
 	    } else
 		Perl_croak(aTHX_ err);
-#else
-#  ifdef HAS_MKTEMP
-	    scriptname = mktemp(tmpname);
-	    if (!scriptname)
-		Perl_croak(aTHX_ err);
-#  endif
 #endif
 	}
 #endif
