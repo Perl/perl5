@@ -164,6 +164,11 @@ if ($TAP && !-d '.git' && !-f 'lib/.gitignore') {
     exit 0;
 }
 
+if ($ENV{'PERL_BUILD_PACKAGING'}) {
+    print "ok # skip explicitly disabled git tests by PERL_BUILD_PACKAGING\n";
+    exit 0;
+}
+
 $fh = open_new('lib/.gitignore', '>',
                { by => $0,
                  from => 'MANIFEST and parsing files in cpan/ dist/ and ext/'});

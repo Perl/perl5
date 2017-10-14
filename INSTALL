@@ -2714,4 +2714,5 @@ This document is part of the Perl package and may be distributed under
 the same terms as perl itself, with the following additional request:
 If you are distributing a modified version of perl (perhaps as part of
 a larger package) please B<do> modify these installation instructions
-and the contact information to match your distribution.
+and the contact information to match your distribution. Additional
+information for packagers is in F<PACKAGING>.

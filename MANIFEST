@@ -4932,6 +4932,7 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.h			generated overload enum (public)
 overload.inc			generated overload name table (implementation)
+PACKAGING			notes and best practice for packaging perl 5
 packsizetables.inc		The generated packprops array used in pp_pack.c
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
