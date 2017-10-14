@@ -560,10 +560,6 @@
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined(NETWARE) || defined(__SYMBIAN32__)
-# define STANDARD_C 1
-#endif
-
 #if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
 # define DONT_DECLARE_STD 1
 #endif
@@ -4019,17 +4015,6 @@ char *mktemp (char*);
 double atof (const char*);
 #endif
 #endif
-
-#ifndef STANDARD_C
-/* All of these are in stdlib.h or time.h for ANSI C */
-Time_t time();
-struct tm *gmtime(), *localtime();
-#if defined(OEMVS)
-char *(strcpy)(), *(strcat)();
-#else
-char *strcpy(), *strcat();
-#endif
-#endif /* ! STANDARD_C */
 
 
 #ifdef I_MATH

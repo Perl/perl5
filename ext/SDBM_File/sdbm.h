@@ -111,10 +111,6 @@ extern long sdbm_hash(const char *, int);
 #   endif
 #endif
 
-#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
-# define STANDARD_C 1
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <setjmp.h>

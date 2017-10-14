@@ -62,10 +62,6 @@ union control_un {
 #  endif
 #endif
 
-#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE) && !defined(PERL_MICRO)
-char *getenv (char *); /* Usually in <stdlib.h> */
-#endif
-
 static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
