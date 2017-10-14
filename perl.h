@@ -901,11 +901,7 @@ EXTERN_C int usleep(unsigned int);
 #endif
 
 #ifndef __SYMBIAN32__
-#  if defined(I_STRING) || defined(__cplusplus)
-#     include <string.h>
-#  else
-#     include <strings.h>
-#  endif
+#  include <string.h>
 #endif
 
 /* This comes after <stdlib.h> so we don't try to change the standard

@@ -1022,8 +1022,6 @@ i_socks=''
 i_stdbool=''
 i_stdint=''
 i_stdlib=''
-i_string=''
-strings=''
 i_sunmath=''
 i_sysaccess=''
 i_sysdir=''
@@ -10047,46 +10045,6 @@ esac
 prefixvar=vendorscript
 . ./installprefix
 
-: script used to emit important warnings
-cat >warn <<EOS
-$startsh
-if test \$# -gt 0; then
-	echo "\$@" >msg
-else
-	cat >msg
-fi
-echo "*** WARNING:" >&4
-sed -e 's/^/*** /' <msg >&4
-echo "*** " >&4
-cat msg >>config.msg
-echo " " >>config.msg
-rm -f msg
-EOS
-chmod +x warn
-$eunicefix warn
-
-: see which of string.h or strings.h is needed
-echo " "
-strings=`./findhdr string.h`
-if $test "$strings" && $test -r "$strings"; then
-	echo "Using <string.h> instead of <strings.h>." >&4
-	val="$define"
-else
-	val="$undef"
-	strings=`./findhdr strings.h`
-	if $test "$strings" && $test -r "$strings"; then
-		echo "Using <strings.h> instead of <string.h>." >&4
-	else
-		./warn "No string header found -- You'll surely have problems."
-	fi
-fi
-set i_string
-eval $setvar
-case "$i_string" in
-"$undef") strings=`./findhdr strings.h`;;
-*)	  strings=`./findhdr string.h`;;
-esac
-
 : see if qgcvt exists
 set qgcvt d_qgcvt
 eval $inlibc
@@ -10443,12 +10401,7 @@ char *myname = "sprintf";
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
+#include <string.h>
 
 int checkit(char *expect, char *got)
 {
@@ -13298,12 +13251,7 @@ extern int errno;
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 $signal_t blech(int x) { exit(3); }
 EOCP
 	$cat >> try.c <<'EOCP'
@@ -16075,7 +16023,6 @@ REENTRANT_PROTO*)
 #$i_unistd	I_UNISTD
 #$i_time	I_TIME
 #$i_stdlib	I_STDLIB
-#$i_string	I_STRING
 #$i_malloc	I_MALLOC
 #ifdef I_SYS_TYPES
 #  include <sys/types.h>
@@ -16089,11 +16036,7 @@ REENTRANT_PROTO*)
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
+#include <string.h>
 #ifdef I_MALLOC
 #  include <malloc.h>
 #endif
@@ -16784,12 +16727,7 @@ $cat <<EOP >try.c
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
+#include <string.h>
 #include <sys/types.h>
 #include <signal.h>
 #ifdef SIGFPE
@@ -18703,7 +18641,7 @@ set strerror_r d_strerror_r
 eval $inlibc
 case "$d_strerror_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_string string.h"
+	hdrs="$i_systypes sys/types.h define stdio.h define string.h"
 	case "$d_strerror_r_proto:$usethreads" in
 	":define")	d_strerror_r_proto=define
 		set d_strerror_r_proto strerror_r $hdrs
@@ -19098,10 +19036,7 @@ $cat >try.c <<EOCP
 #ifdef I_STDLIB
 #  include <stdlib.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#endif
+#include <string.h>
 #$i_langinfo I_LANGINFO
 #ifdef I_LANGINFO
 #  include <langinfo.h>
@@ -20029,11 +19964,8 @@ $cat >try.c <<EOP
 #define LONG_DOUBLESIZE $longdblsize
 #define LONG_DOUBLEKIND $longdblkind
 #endif
-#$i_string I_STRING
 #include <math.h>
-#ifdef I_STRING
-#  include <string.h>
-#endif
+#include <string.h>
 #include <stdio.h>
 /* Note that whether the sign bit is on or off
  * for NaN depends on the CPU/FPU, and possibly
@@ -22945,6 +22877,24 @@ case "$gccversion" in
 	;;
 esac
 
+: script used to emit important warnings
+cat >warn <<EOS
+$startsh
+if test \$# -gt 0; then
+	echo "\$@" >msg
+else
+	cat >msg
+fi
+echo "*** WARNING:" >&4
+sed -e 's/^/*** /' <msg >&4
+echo "*** " >&4
+cat msg >>config.msg
+echo " " >>config.msg
+rm -f msg
+EOS
+chmod +x warn
+$eunicefix warn
+
 : see if this is a termio system
 val="$undef"
 val2="$undef"
@@ -24421,7 +24371,6 @@ i_socks='$i_socks'
 i_stdbool='$i_stdbool'
 i_stdint='$i_stdint'
 i_stdlib='$i_stdlib'
-i_string='$i_string'
 i_sunmath='$i_sunmath'
 i_sysaccess='$i_sysaccess'
 i_sysdir='$i_sysdir'
@@ -24729,7 +24678,6 @@ stdio_filbuf='$stdio_filbuf'
 stdio_ptr='$stdio_ptr'
 stdio_stream_array='$stdio_stream_array'
 strerror_r_proto='$strerror_r_proto'
-strings='$strings'
 submit='$submit'
 subversion='$subversion'
 sysman='$sysman'

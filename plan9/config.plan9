@@ -676,12 +676,6 @@
  */
 #define I_NETINET_IN	/* config-skip */
 
-/* I_STRING:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <string.h> (USG systems) instead of <strings.h> (BSD systems).
- */
-#define I_STRING		/**/
-
 /* I_SYS_DIR:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/dir.h>.

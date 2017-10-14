@@ -3564,10 +3564,6 @@ i_stdint (i_stdint.U):
 	indicates to the C program that <stdint.h> exists and should
 	be included.
 
-i_string (i_string.U):
-	This variable conditionally defines the I_STRING symbol, which
-	indicates that <string.h> should be included rather than <strings.h>.
-
 i_sunmath (i_sunmath.U):
 	This variable conditionally defines the I_SUNMATH symbol, and indicates
 	whether a C program should include <sunmath.h>.
@@ -5228,10 +5224,6 @@ strerror_r_proto (d_strerror_r.U):
 	It is zero if d_strerror_r is undef, and one of the
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_strerror_r
 	is defined.
-
-strings (i_string.U):
-	This variable holds the full path of the string header that will be
-	used. Typically /usr/include/string.h or /usr/include/strings.h.
 
 submit (Loc.U):
 	This variable is defined but not used by Configure.

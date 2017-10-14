@@ -23,13 +23,7 @@
 # include <sys/file.h>
 #endif
 
-#ifdef I_STRING
-# ifndef __ultrix__
-#  include <string.h>
-# endif
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 /*
  * externals

@@ -178,13 +178,7 @@ Free_t   Perl_mfree(Malloc_t where);
 
 #endif /* MYMALLOC */
 
-#ifdef I_STRING
-# ifndef __ultrix__
-#  include <string.h>
-# endif
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #define memzero(d,l) memset(d,0,l)
 
