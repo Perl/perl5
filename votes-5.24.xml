@@ -37,6 +37,9 @@ Correct: As noted on the ticket, it was listed here in the hope that it could be
 
 <div><h3>Regression Fixes</h3>
 
+See also #130080
+<commit votes="tonyc" id="622584734f799751a284558aaebad21acd3270bf" ticket="128967" desc="Inconsistency between doc and code for chown using negative argument: -1"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
