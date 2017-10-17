@@ -95,7 +95,8 @@ close(OTHER);
 }
 {
     no warnings 'unopened';
-    is(tell(OTHER), -1, "tell() for unopened file returns -1");
+    # this must be a handle that has never been opened
+    is(tell(UNOPENED), -1, "tell() for unopened file returns -1");
 }
 
 # ftell(STDIN) (or any std streams) is undefined, it can return -1 or
