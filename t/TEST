@@ -41,7 +41,6 @@ my %abs = (
 	   '../cpan/Archive-Tar' => 1,
 	   '../cpan/AutoLoader' => 1,
 	   '../cpan/CPAN' => 1,
-	   '../cpan/Devel-PPPort' => 1,
 	   '../cpan/Encode' => 1,
 	   '../cpan/ExtUtils-Constant' => 1,
 	   '../cpan/ExtUtils-Install' => 1,
@@ -57,6 +56,7 @@ my %abs = (
 	   '../cpan/Test-Simple' => 1,
 	   '../cpan/podlators' => 1,
 	   '../dist/Cwd' => 1,
+	   '../dist/Devel-PPPort' => 1,
 	   '../dist/ExtUtils-ParseXS' => 1,
 	   '../dist/Tie-File' => 1,
 	  );

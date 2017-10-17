@@ -1,4 +1,4 @@
-Devel::PPPort cpan/Devel-PPPort/parts/embed.fnc e030719d9c6921810554a8e2d398543348b4878c
+Devel::PPPort dist/Devel-PPPort/parts/embed.fnc e030719d9c6921810554a8e2d398543348b4878c
 Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 198ea6c6c584f5ea79a0fd7e9d411d0878f3b2af

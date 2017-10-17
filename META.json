@@ -21,6 +21,7 @@
          "dist/Carp",
          "dist/constant",
          "dist/Data-Dumper",
+         "dist/Devel-PPPort",
          "dist/Devel-SelfStubber",
          "dist/Dumpvalue",
          "dist/encoding-warnings",

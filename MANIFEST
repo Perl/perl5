@@ -463,374 +463,6 @@ cpan/DB_File/t/db-hash.t	See if DB_File works
 cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
-cpan/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
-cpan/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
-cpan/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
-cpan/Devel-PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
-cpan/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
-cpan/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
-cpan/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
-cpan/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
-cpan/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
-cpan/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
-cpan/Devel-PPPort/mktests.PL		Devel::PPPort test file writer
-cpan/Devel-PPPort/module2.c		Devel::PPPort test file
-cpan/Devel-PPPort/module3.c		Devel::PPPort test file
-cpan/Devel-PPPort/parts/apicheck.pl	Devel::PPPort apicheck generator
-cpan/Devel-PPPort/parts/apidoc.fnc	Devel::PPPort Perl API listing
-cpan/Devel-PPPort/parts/base/5003070	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5004000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5004010	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5004020	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5004030	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5004040	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5004050	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5005000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5005010	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5005020	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5005030	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5005040	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5006000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5006001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5006002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5007000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5007001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5007002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5007003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5008009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5009000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5009001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5009002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5009003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5009004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5009005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5010000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5010001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5011005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5012000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5012001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5012002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5012003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5012004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5012005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013010	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5013011	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5014000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5014001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5014002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5014003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5014004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5015009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5016000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5016001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5016002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5016003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017010	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5017011	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5018000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5018001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5018002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5018003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5018004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019010	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5019011	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5020000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5020001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5020002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5020003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021010	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5021011	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5022000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5022001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023001	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023002	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023003	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023004	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023005	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023006	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023007	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023008	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5023009	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/base/5024000	Devel::PPPort baseline todo file
-cpan/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
-cpan/Devel-PPPort/parts/inc/call	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/cop		Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/exception	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/format	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/grok	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/gv		Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/limits	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/magic	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/memory	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/misc	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/newRV	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/newSVpv	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/podtest	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/ppphbin	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/ppphdoc	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/ppphtest	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/pv_tools	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/pvs		Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/shared_pv	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/snprintf	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/sprintf	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/strlfuncs	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/Sv_set	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/sv_xpvf	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/SvPV	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/SvREFCNT	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/threads	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/uv		Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/variables	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/version	Devel::PPPort include
-cpan/Devel-PPPort/parts/inc/warn	Devel::PPPort include
-cpan/Devel-PPPort/parts/ppport.fnc	Devel::PPPort API listing
-cpan/Devel-PPPort/parts/ppptools.pl	Devel::PPPort various utilities
-cpan/Devel-PPPort/parts/todo/5003070	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5004000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5004010	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5004020	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5004030	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5004040	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5004050	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5005000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5005010	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5005020	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5005030	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5005040	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5006000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5006001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5006002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5007000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5007001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5007002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5007003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5008009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5009000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5009001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5009002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5009003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5009004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5009005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5010000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5010001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5011005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5012000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5012001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5012002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5012003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5012004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5012005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013010	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5013011	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5014000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5014001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5014002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5014003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5014004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5015009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5016000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5016001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5016002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5016003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017010	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5017011	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5018000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5018001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5018002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5018003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5018004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019010	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5019011	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5020000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5020001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5020002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5020003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021010	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5021011	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5022000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5022001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023000	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023001	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023002	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023003	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023004	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023005	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023006	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023007	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023008	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5023009	Devel::PPPort todo file
-cpan/Devel-PPPort/parts/todo/5024000	Devel::PPPort todo file
-cpan/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
-cpan/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
-cpan/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
-cpan/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
-cpan/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
-cpan/Devel-PPPort/t/call.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/cop.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/exception.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/format.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/grok.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/gv.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/limits.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/magic.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/memory.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/misc.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
-cpan/Devel-PPPort/t/newRV.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
-cpan/Devel-PPPort/t/newSVpv.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/podtest.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/ppphtest.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/pv_tools.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/pvs.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/shared_pv.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/snprintf.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/sprintf.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/strlfuncs.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/Sv_set.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/sv_xpvf.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/SvPV.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/SvREFCNT.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/testutil.pl		Devel::PPPort test utilities
-cpan/Devel-PPPort/t/threads.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/uv.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/variables.t		Devel::PPPort test file
-cpan/Devel-PPPort/t/warn.t		Devel::PPPort test file
-cpan/Devel-PPPort/typemap		Devel::PPPort Typemap
 cpan/Digest/Digest.pm		Digest extensions
 cpan/Digest/Digest/base.pm	Digest extensions
 cpan/Digest/Digest/file.pm	Digest extensions
@@ -3365,6 +2997,374 @@ dist/Data-Dumper/t/toaster.t	See if Data::Dumper::Toaster works
 dist/Data-Dumper/t/trailing_comma.t	See if Data::Dumper::Trailingcomma works
 dist/Data-Dumper/t/values.t	See if Data::Dumper::Values works
 dist/Data-Dumper/Todo		Data pretty printer, futures
+dist/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
+dist/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
+dist/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
+dist/Devel-PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
+dist/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
+dist/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
+dist/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
+dist/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
+dist/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
+dist/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
+dist/Devel-PPPort/mktests.PL		Devel::PPPort test file writer
+dist/Devel-PPPort/module2.c		Devel::PPPort test file
+dist/Devel-PPPort/module3.c		Devel::PPPort test file
+dist/Devel-PPPort/parts/apicheck.pl	Devel::PPPort apicheck generator
+dist/Devel-PPPort/parts/apidoc.fnc	Devel::PPPort Perl API listing
+dist/Devel-PPPort/parts/base/5003070	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5004000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5004010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5004020	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5004030	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5004040	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5004050	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5005000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5005010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5005020	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5005030	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5005040	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5006000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5006001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5006002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5007000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5007001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5007002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5007003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5008009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5009000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5009001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5009002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5009003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5009004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5009005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5010000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5010001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5011000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5011001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5011002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5011003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5011004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5011005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5012000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5012001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5012002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5012003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5012004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5012005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5013011	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5014000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5014001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5014002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5014003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5014004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5015009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5016000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5016001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5016002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5016003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5017011	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5018000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5018001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5018002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5018003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5018004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5019011	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5020000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5020001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5020002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5020003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5021011	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5022000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5022001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023004	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023005	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023006	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023007	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023008	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5023009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5024000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
+dist/Devel-PPPort/parts/inc/call	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/cop		Devel::PPPort include
+dist/Devel-PPPort/parts/inc/exception	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/format	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/grok	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/gv		Devel::PPPort include
+dist/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/limits	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/magic	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/memory	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/misc	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/newRV	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/newSVpv	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/podtest	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/ppphbin	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/ppphdoc	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/ppphtest	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/pv_tools	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/pvs		Devel::PPPort include
+dist/Devel-PPPort/parts/inc/shared_pv	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/snprintf	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/sprintf	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/strlfuncs	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/Sv_set	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/sv_xpvf	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/SvPV	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/SvREFCNT	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/threads	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/uv		Devel::PPPort include
+dist/Devel-PPPort/parts/inc/variables	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/version	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/warn	Devel::PPPort include
+dist/Devel-PPPort/parts/ppport.fnc	Devel::PPPort API listing
+dist/Devel-PPPort/parts/ppptools.pl	Devel::PPPort various utilities
+dist/Devel-PPPort/parts/todo/5003070	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5004000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5004010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5004020	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5004030	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5004040	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5004050	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5005000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5005010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5005020	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5005030	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5005040	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5006000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5006001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5006002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5007000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5007001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5007002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5007003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5008009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5009000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5009001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5009002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5009003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5009004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5009005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5010000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5010001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5011000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5011001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5011002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5011003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5011004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5011005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5012000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5012001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5012002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5012003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5012004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5012005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5013011	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5014000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5014001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5014002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5014003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5014004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5015009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5016000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5016001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5016002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5016003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5017011	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5018000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5018001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5018002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5018003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5018004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5019011	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5020000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5020001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5020002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5020003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5021011	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5022000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5022001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023004	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023005	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023006	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023007	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023008	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5023009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5024000	Devel::PPPort todo file
+dist/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
+dist/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
+dist/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
+dist/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
+dist/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
+dist/Devel-PPPort/t/call.t		Devel::PPPort test file
+dist/Devel-PPPort/t/cop.t		Devel::PPPort test file
+dist/Devel-PPPort/t/exception.t		Devel::PPPort test file
+dist/Devel-PPPort/t/format.t		Devel::PPPort test file
+dist/Devel-PPPort/t/grok.t		Devel::PPPort test file
+dist/Devel-PPPort/t/gv.t		Devel::PPPort test file
+dist/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
+dist/Devel-PPPort/t/limits.t		Devel::PPPort test file
+dist/Devel-PPPort/t/magic.t		Devel::PPPort test file
+dist/Devel-PPPort/t/memory.t		Devel::PPPort test file
+dist/Devel-PPPort/t/misc.t		Devel::PPPort test file
+dist/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
+dist/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file
+dist/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
+dist/Devel-PPPort/t/newRV.t		Devel::PPPort test file
+dist/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
+dist/Devel-PPPort/t/newSVpv.t		Devel::PPPort test file
+dist/Devel-PPPort/t/podtest.t		Devel::PPPort test file
+dist/Devel-PPPort/t/ppphtest.t		Devel::PPPort test file
+dist/Devel-PPPort/t/pv_tools.t		Devel::PPPort test file
+dist/Devel-PPPort/t/pvs.t		Devel::PPPort test file
+dist/Devel-PPPort/t/shared_pv.t		Devel::PPPort test file
+dist/Devel-PPPort/t/snprintf.t		Devel::PPPort test file
+dist/Devel-PPPort/t/sprintf.t		Devel::PPPort test file
+dist/Devel-PPPort/t/strlfuncs.t		Devel::PPPort test file
+dist/Devel-PPPort/t/Sv_set.t		Devel::PPPort test file
+dist/Devel-PPPort/t/sv_xpvf.t		Devel::PPPort test file
+dist/Devel-PPPort/t/SvPV.t		Devel::PPPort test file
+dist/Devel-PPPort/t/SvREFCNT.t		Devel::PPPort test file
+dist/Devel-PPPort/t/testutil.pl		Devel::PPPort test utilities
+dist/Devel-PPPort/t/threads.t		Devel::PPPort test file
+dist/Devel-PPPort/t/uv.t		Devel::PPPort test file
+dist/Devel-PPPort/t/variables.t		Devel::PPPort test file
+dist/Devel-PPPort/t/warn.t		Devel::PPPort test file
+dist/Devel-PPPort/typemap		Devel::PPPort Typemap
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
 dist/Dumpvalue/lib/Dumpvalue.pm	Screen dump of perl values

@@ -339,9 +339,7 @@ use File::Glob qw(:case);
 
     'Devel::PPPort' => {
         'DISTRIBUTION' => 'WOLFSAGE/Devel-PPPort-3.36.tar.gz',
-        # RJBS has asked MHX to have UPSTREAM be 'blead'
-        # (i.e. move this from cpan/ to dist/)
-        'FILES'        => q[cpan/Devel-PPPort],
+        'FILES'        => q[dist/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
         ],

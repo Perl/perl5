@@ -507,7 +507,8 @@ soak - Test Perl modules with multiple Perl releases
 
   --make=program     override name of make program ($Config{make})
   --min=version      use at least this version of perl
-  --mmargs=options   pass options to Makefile.PL (multiple --mmargs possible)
+  --mmargs=options   pass options to Makefile.PL (multiple --mmargs
+                     possible)
   --verbose          be verbose
   --nocolor          don't use colored output
 

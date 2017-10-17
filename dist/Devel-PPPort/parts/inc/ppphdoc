@@ -50,8 +50,8 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
   --nochanges                 don't suggest changes
   --nofilter                  don't filter input files
 
-  --strip                     strip all script and doc functionality from
-                              ppport.h
+  --strip                     strip all script and doc functionality
+                              from ppport.h
 
   --list-provided             list provided API
   --list-unsupported          list unsupported API
