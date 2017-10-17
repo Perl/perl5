@@ -13210,7 +13210,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
                         : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv));
 #else
-                elen = my_sprintf(PL_efloatbuf, ptr, fv);
+                elen = my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv);
 #endif
                 GCC_DIAG_RESTORE;
 	    }
