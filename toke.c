@@ -2969,9 +2969,9 @@ S_scan_const(pTHX_ char *start)
 
                 /* Here, we don't think we're in a range.  If the new character
                  * is not a hyphen; or if it is a hyphen, but it's too close to
-                 * either edge to indicate a range, then it's a regular
-                 * character. */
-                if (*s != '-' || s >= send - 1 || s == start) {
+                 * either edge to indicate a range, or if we haven't output any
+                 * characters yet then it's a regular character. */
+                if (*s != '-' || s >= send - 1 || s == start || d == SvPVX(sv)) {
 
                     /* A regular character.  Process like any other, but first
                      * clear any flags */

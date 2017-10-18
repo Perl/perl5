@@ -413,3 +413,9 @@ EXPECT
 Illegal operator following parameter in a subroutine signature at - line 3, near "($a += 1"
 syntax error at - line 3, near "($a += 1"
 Execution of - aborted due to compilation errors.
+########
+# NAME tr/// range with empty \N{} at the start
+tr//\N{}-0/;
+EXPECT
+Unknown charname '' at - line 1, within string
+Execution of - aborted due to compilation errors.
