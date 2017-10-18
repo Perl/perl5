@@ -10953,16 +10953,16 @@ Perl_vms_do_aexec(pTHX_ SV *really,SV **mark,SV **sp)
   bool exec_sts;
   char * cmd;
 
-  if (sp > mark) {
-    if (vfork_called) {           /* this follows a vfork - act Unixish */
-      vfork_called--;
-      if (vfork_called < 0) {
-        Perl_warn(aTHX_ "Internal inconsistency in tracking vforks");
-        vfork_called = 0;
-      }
-      else return do_aexec(really,mark,sp);
+  if (vfork_called) {           /* this follows a vfork - act Unixish */
+    vfork_called--;
+    if (vfork_called < 0) {
+      Perl_warn(aTHX_ "Internal inconsistency in tracking vforks");
+      vfork_called = 0;
     }
+    else return do_aexec(really,mark,sp);
+  }
                                            /* no vfork - act VMSish */
+  if (sp > mark) {
     cmd = setup_argstr(aTHX_ really,mark,sp);
     exec_sts = vms_do_exec(cmd);
     Safefree(cmd);  /* Clean up from setup_argstr() */

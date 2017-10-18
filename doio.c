@@ -1924,7 +1924,8 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 #if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
-    if (sp > mark) {
+    assert(sp >= mark);
+    {
 	const char **a;
 	const char *tmps = NULL;
 	Newx(PL_Argv, sp - mark + 1, const char*);
@@ -1939,17 +1940,19 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	*a = NULL;
 	if (really)
 	    tmps = SvPV_nolen_const(really);
-	if ((!really && *PL_Argv[0] != '/') ||
+        if ((!really && PL_Argv[0] && *PL_Argv[0] != '/') ||
 	    (really && *tmps != '/'))		/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
 	PERL_FPU_PRE_EXEC
 	if (really && *tmps) {
             PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
-	} else {
+        } else if (PL_Argv[0]) {
             PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
-	}
+        } else {
+            SETERRNO(ENOENT,RMS_FNF);
+        }
 	PERL_FPU_POST_EXEC
- 	S_exec_failed(aTHX_ (really ? tmps : PL_Argv[0]), fd, do_report);
+        S_exec_failed(aTHX_ (really ? tmps : PL_Argv[0] ? PL_Argv[0] : ""), fd, do_report);
     }
     do_execfree();
 #endif
