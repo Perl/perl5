@@ -362,7 +362,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Calling L<exec PROGRAM LIST|perlfunc/exec PROGRAM LIST> with an empty C<LIST>
+has been fixed.  This should call C<execvp()> with an empty C<argv> array
+(containing only the terminating C<NULL> pointer), but was instead just
+returning false (and not setting L<C<$!>|perlvar/$!>).
+L<[perl #131730]|https://rt.perl.org/Public/Bug/Display.html?id=131730>
 
 =back
 
