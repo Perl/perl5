@@ -1323,7 +1323,6 @@ use File::Glob qw(:case);
                 ext/Win32CORE/
                 ext/XS-APItest/
                 ext/XS-Typemap/
-                ext/arybase/
                 ext/attributes/
                 ext/mro/
                 ext/re/

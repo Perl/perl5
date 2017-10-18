@@ -1699,22 +1699,6 @@ Deprecated use of my() in false conditional. This will be a fatal error in Perl 
 Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 8.
 ########
 # op.c
-$[ = 1;
-($[) = 1;
-use warnings 'deprecated';
-$[ = 2;
-($[) = 2;
-$[ = 0;
-no warnings 'deprecated';
-$[ = 3;
-($[) = 3;
-EXPECT
-Use of assignment to $[ is deprecated, and will be fatal in Perl 5.30 at - line 2.
-Use of assignment to $[ is deprecated, and will be fatal in Perl 5.30 at - line 3.
-Use of assignment to $[ is deprecated, and will be fatal in Perl 5.30 at - line 5.
-Use of assignment to $[ is deprecated, and will be fatal in Perl 5.30 at - line 6.
-########
-# op.c
 use warnings 'void';
 @x = split /y/, "z";
 $x = split /y/, "z";

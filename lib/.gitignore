@@ -187,7 +187,6 @@
 /Win32CORE.pm
 /XS/
 /XSLoader.pm
-/arybase.pm
 /attributes.pm
 /autodie.pm
 /autodie/

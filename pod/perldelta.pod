@@ -45,6 +45,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Assigning non-zero to C<$[> is fatal
+
+Setting L<< C<$[>|perlvar/$[ >> to a non-zero value has been deprecated since
+Perl 5.12 and now throws a fatal error.
+See L<<< perldeprecation/Assigning non-zero to C<< $[ >> is fatal >>>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

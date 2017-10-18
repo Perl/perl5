@@ -3910,22 +3910,6 @@ ext/Amiga-Exec/Exec.xs	Amiga::Exec extension
 ext/Amiga-Exec/Makefile.PL			Amiga::Exec extension
 ext/Amiga-Exec/tagtypes.h	Amiga::Exec extension
 ext/Amiga-Exec/typemap		Amiga::Exec extension
-ext/arybase/arybase.pm		For $[
-ext/arybase/arybase.xs		For $[
-ext/arybase/ptable.h		For $[
-ext/arybase/t/aeach.t		For $[
-ext/arybase/t/aelem.t		For $[
-ext/arybase/t/akeys.t		For $[
-ext/arybase/t/arybase.t		For $[
-ext/arybase/t/aslice.t		For $[
-ext/arybase/t/av2arylen.t	For $[
-ext/arybase/t/index.t		For $[
-ext/arybase/t/lslice.t		For $[
-ext/arybase/t/pos.t		For $[
-ext/arybase/t/scope.t		For $[
-ext/arybase/t/scope_0.pm	For $[
-ext/arybase/t/splice.t		For $[
-ext/arybase/t/substr.t		For $[
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/B/B.pm		Compiler backend support functions and methods
@@ -5459,6 +5443,7 @@ t/lib/Devel/switchd_goto.pm	Module for t/run/switchd.t
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
+t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
 t/lib/h2ph.h			Test header file for h2ph
@@ -5597,7 +5582,6 @@ t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works
 t/op/args.t			See if operations on @_ work
 t/op/array.t			See if array operations work
-t/op/array_base.t		Tests for the remnant of $[
 t/op/assignwarn.t		See if OP= operators warn correctly for undef targets
 t/op/attrhand.t			See if attribute handlers work
 t/op/attrproto.t		See if the prototype attribute works

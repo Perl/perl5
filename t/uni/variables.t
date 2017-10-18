@@ -6,7 +6,6 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    skip_all_if_miniperl("miniperl, no arybase");
     skip_all_without_unicode_tables();
 }
 
@@ -15,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66894);
+plan (tests => 66892);
 
 # ${single:colon} should not be treated as a simple variable, but as a
 # block with a label inside.
@@ -56,9 +55,8 @@ plan (tests => 66894);
 }
 
 # Checking that at least some of the special variables work
-for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
+for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 ] ! @ / \ = )) {
   SKIP: {
-    skip_if_miniperl('No $[ under miniperl', 2) if $v eq '[';
     local $@;
     evalbytes "\$$v;";
     is $@, '', "No syntax error for \$$v";
