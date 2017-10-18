@@ -16,7 +16,7 @@ use Test2::API qw/context run_subtest test2_stack/;
 use Test2::Hub::Interceptor();
 use Test2::Hub::Interceptor::Terminator();
 
-our $VERSION = '1.302101';
+our $VERSION = '1.302103';
 
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 our @EXPORT = qw{
@@ -188,10 +188,10 @@ sub todo {
             my ($active_hub, $event) = @_;
             if ($active_hub == $hub) {
                 $event->set_todo($reason) if $event->can('set_todo');
-                $event->add_amnesty([todo => $reason]);
+                $event->add_amnesty({tag => 'TODO', details => $reason});
             }
             else {
-                $event->add_amnesty({tag => 'todo', details => $reason, inherited => 1});
+                $event->add_amnesty({tag => 'TODO', details => $reason, inherited => 1});
             }
             return $event;
         },
