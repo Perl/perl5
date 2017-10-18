@@ -1064,15 +1064,10 @@ EXTERN_C off_t ftello(FILE *);
 
 #if defined(__SUNPRO_CC) /* SUNWspro CC (C++) */
 EXTERN_C char *crypt(const char *, const char *);
-EXTERN_C char **environ;
 #endif
 
-#if defined(__cplusplus)
-#  if defined(BSDish)
-EXTERN_C char **environ;
-#  elif defined(__CYGWIN__)
+#if defined(__cplusplus) && defined(__CYGWIN__)
 EXTERN_C char *crypt(const char *, const char *);
-#endif
 #endif
 
 #ifdef SETERRNO
@@ -4198,12 +4193,9 @@ typedef void (*despatch_signals_proc_t) (pTHX);
 #if defined(__DYNAMIC__) && defined(PERL_DARWIN) && defined(PERL_CORE)
 #  include <crt_externs.h>	/* for the env array */
 #  define environ (*_NSGetEnviron())
-#elif defined(USE_ENVIRON_ARRAY)
+#elif defined(USE_ENVIRON_ARRAY) && !defined(environ)
    /* VMS and some other platforms don't use the environ array */
-#    if (defined(__svr4__) && defined(__GNUC__) && defined(__sun)) || \
-        defined(__sgi)
-extern char **	environ;	/* environment variables supplied via exec */
-#    endif
+EXTERN_C char **environ;  /* environment variables supplied via exec */
 #endif
 
 #define PERL_PATCHLEVEL_H_IMPLICIT
