@@ -2595,6 +2595,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
     if (!SvCUR(res)) {
+        SvREFCNT_dec_NN(res);
         /* diag_listed_as: Unknown charname '%s' */
         yyerror("Unknown charname ''");
         return NULL;
