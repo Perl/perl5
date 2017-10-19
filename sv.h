@@ -1170,7 +1170,11 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvMAGIC(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #  define SvSTASH(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
 #else
+# ifdef PERL_CORE
+#  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
+# else
 #  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
+# endif
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -1183,6 +1187,16 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
 	    &((_svpvx)->sv_u.svu_pv);					\
 	 }))
+#   ifdef PERL_CORE
+#    define SvCUR(sv)							\
+	({ const SV *const _svcur = (const SV *)(sv);			\
+	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
+	    assert(!isGV_with_GP(_svcur));				\
+	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
+		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
+	    (((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+	 })
+#   else
 #    define SvCUR(sv)							\
 	(*({ const SV *const _svcur = (const SV *)(sv);			\
 	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
@@ -1191,6 +1205,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
 	    &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
 	 }))
+#   endif
 #    define SvIVX(sv)							\
 	(*({ const SV *const _svivx = (const SV *)(sv);			\
 	    assert(PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK]);	\

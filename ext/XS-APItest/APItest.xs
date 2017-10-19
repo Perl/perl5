@@ -1339,7 +1339,7 @@ my_ck_rv2cv(pTHX_ OP *o)
     {
 	SvGROW(ref, SvCUR(ref)+2);
 	*SvEND(ref) = '_';
-	SvCUR(ref)++;
+	SvCUR(ref)++; /* Not _set, so we don't accidentally break non-PERL_CORE */
 	*SvEND(ref) = '\0';
     }
     return old_ck_rv2cv(aTHX_ o);

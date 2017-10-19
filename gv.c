@@ -1266,7 +1266,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	    if (SvUTF8(cv))
 		sv_utf8_upgrade_flags_grow(tmpsv, 0, CvPROTOLEN(cv) + 2);
 	    ulen = SvCUR(tmpsv);
-	    SvCUR(tmpsv)++; /* include null in string */
+	    SvCUR_set(tmpsv, SvCUR(tmpsv) + 1); /* include null in string */
 	    sv_catpvn_flags(
 		tmpsv, proto, CvPROTOLEN(cv), SV_CATBYTES*!SvUTF8(cv)
 	    );
@@ -1275,7 +1275,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	    SvTEMP_off(tmpsv);
 	    SvREFCNT_dec_NN(tmpsv);
 	    SvLEN_set(cv, SvCUR(cv) + 1);
-	    SvCUR(cv) = ulen;
+	    SvCUR_set(cv, ulen);
 	}
 	else {
 	  sv_setpvn((SV *)cv, name, len);
