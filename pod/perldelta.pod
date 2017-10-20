@@ -89,8 +89,8 @@ There may well be none in a stable release.
 
 =item *
 
-Calls to C<require> for an already loaded module are now slightly
-faster.  [perl #132171]
+Calls to C<require> for an already loaded module are now slightly faster.
+L<[perl #132171]|https://rt.perl.org/Public/Bug/Display.html?id=132171>
 
 =back
 
@@ -421,9 +421,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item CentOS
 
-XXX
+Compilation on CentOS 5 is now fixed.
 
 =back
 
@@ -462,10 +462,25 @@ L<[perl #131730]|https://rt.perl.org/Public/Bug/Display.html?id=131730>
 
 =item *
 
-The C<gv_fetchmeth_sv> C function stopped working properly in Perl 5.22
-when fetching a constant with a UTF-8 name if that constant subroutine was
-stored in the stash as a simple scalar reference, rather than a full
-typeglob.  This has been corrected.
+The C<gv_fetchmeth_sv> C function stopped working properly in Perl 5.22 when
+fetching a constant with a UTF-8 name if that constant subroutine was stored in
+the stash as a simple scalar reference, rather than a full typeglob.  This has
+been corrected.
+
+=item *
+
+Single-letter debugger commands followed by an argument which starts with
+punctuation  (e.g. C<p$^V> and C<x@ARGV>) now work again.  They had been
+wrongly requiring a space between the command and the argument.
+L<[perl #120174]|https://rt.perl.org/Public/Bug/Display.html?id=120174>
+
+=item *
+
+L<splice()|perlfunc/splice()> now throws an exception ("Modification of a
+read-only value attempted") when modifying a read-only array.  Until now it had
+been silently modifying the array.  The new behaviour is consistent with the
+behaviour of L<push()|perlfunc/push()> and L<unshift()|perlfunc/unshift()>.
+L<[perl #131000]|https://rt.perl.org/Public/Bug/Display.html?id=131000>
 
 =back
 
