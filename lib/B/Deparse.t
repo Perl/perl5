@@ -162,7 +162,7 @@ $a = readpipe qq|$^X $path "-MO=Deparse"|
              .qq| -e "#line 123 four-five-six"|
              .qq| -e "package G; sub g(){0} sub s{}" 2>&1|;
 $a =~ s/-e syntax OK\n//g;
-like($a, qr/sub F::f \(\) \{\s*0;\s*}/,
+like($a, qr/sub F::f \(\) \{\s*0;?\s*}/,
    "Constant is dumped in package in which other subs are dumped");
 unlike($a, qr/sub g/,
    "Constant is not dumped in package in which other subs are not dumped");
