@@ -166,7 +166,10 @@ for my $test (
     ],
     [
         "--sort=Ir:myperl ./miniperl ./perl",
-        "Error: --sort: unrecognised perl 'myperl'\n",
+        "Error: --sort: unrecognised perl 'myperl'\n"
+        . "Valid perl names are:\n"
+        . "    ./miniperl\n"
+        . "    ./perl\n",
         "croak: select-a-perl unrecognised"
     ],
     [

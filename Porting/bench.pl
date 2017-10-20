@@ -624,8 +624,16 @@ sub select_a_perl {
         my @perl = grep    $perls->[$_][0] eq $perl
                         || $perls->[$_][1] eq $perl,
                         0..$#$perls;
-        die "Error: $who: unrecognised perl '$perl'\n"
-                                        unless @perl;
+        unless (@perl) {
+            my $valid = '';
+            for (@$perls) {
+                $valid .= "    $_->[1]";
+                $valid .= "  $_->[0]" if $_->[0] ne  $_->[1];
+                $valid .= "\n";
+            }
+            die "Error: $who: unrecognised perl '$perl'\n"
+              . "Valid perl names are:\n$valid";
+        }
         die "Error: $who: ambiguous perl '$perl'\n"
                                         if @perl > 1;
         return $perl[0];
