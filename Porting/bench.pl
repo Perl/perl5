@@ -1652,10 +1652,19 @@ sub grind_print_compact {
     printf " %*s", $width, '------' for @fields;
     print "\n";
 
+    my $name_width = 0;
+    for (@test_names) {
+        $name_width = length if length > $name_width;
+    }
+
     for my $test_name (@test_names) {
         my $doing_ave = ($test_name eq 'AVERAGE');
         my $res = $doing_ave ? $averages : $results->{$test_name};
         $res = $res->{$perls->[$which_perl][1]};
+        my $desc = $doing_ave
+            ? $test_name
+            : sprintf "%-*s   %s", $name_width, $test_name,
+                                 $tests->{$test_name}{desc};
 
         for my $field (@fields) {
             my $p = $res->{$field};
@@ -1671,7 +1680,7 @@ sub grind_print_compact {
 
         }
 
-        print "  $test_name\n";
+        print "  $desc\n";
     }
 }
 

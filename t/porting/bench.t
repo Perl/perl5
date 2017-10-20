@@ -750,7 +750,7 @@ Results for p1
 
      Ir     Dr     Dw   COND    IND COND_m  IND_m  Ir_m1  Dr_m1  Dw_m1  Ir_mm  Dr_mm  Dw_mm
  ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------
- NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN  call::sub::empty
+ NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN NNN.NN  call::sub::empty   function call with no args or body
 # ===================================================================
 FORMAT: compact_fields
 %%STD_HEADER%%
@@ -764,7 +764,7 @@ Results for p1
 
      Ir     Dr
  ------ ------
- NNN.NN NNN.NN  call::sub::empty
+ NNN.NN NNN.NN  call::sub::empty   function call with no args or body
 # ===================================================================
 FORMAT: 1field
 %%STD_HEADER%%
@@ -818,5 +818,5 @@ Results for p0
 
       Ir      Dr      Dw    COND     IND  COND_m   IND_m   Ir_m1   Dr_m1   Dw_m1   Ir_mm   Dr_mm   Dw_mm
   ------  ------  ------  ------  ------  ------  ------  ------  ------  ------  ------  ------  ------
- NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N  call::sub::empty
+ NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N NNNNN.N  call::sub::empty   function call with no args or body
 # ===================================================================
