@@ -401,7 +401,7 @@ here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.25.5..HEAD
+  perl Porting/acknowledgements.pl v5.27.5..HEAD
 
 =head1 Reporting Bugs
 
