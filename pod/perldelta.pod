@@ -126,7 +126,99 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<arybase> has been upgraded from version 0.13 to 0.14.
+
+=item *
+
+L<B> has been upgraded from version 1.69 to 1.70.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.001 to 1.002.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.28 to 0.29.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.96 to 5.98.
+
+=item *
+
+L<Encode> has been upgraded from version 2.92 to 2.93.
+
+=item *
+
+L<encoding> has been upgraded from version 2.20 to 2.21.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.52 to 0.54.
+
+=item *
+
+L<File::Path> has been upgraded from version 2.14 to 2.15.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.52 to 3.54.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999806 to 1.999811.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5005 to 0.5006.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170920 to 5.20171020.
+
+=item *
+
+L<NEXT> has been upgraded from version 0.67 to 0.67_01.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.28 to 3.2801.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.77 to 1.78.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<Sub::Util> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<Sys::Hostname> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302073 to 1.302103.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9743 to 1.9746.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.3201 to 1.3202.
 
 =back
 
