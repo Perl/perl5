@@ -303,7 +303,21 @@ If only one field is selected, the output is in more compact form.
 --norm=I<foo>
 
 Specify which perl column in the output to treat as the 100% norm.
-It may be a column number (0..N-1) or a perl executable name or label.
+It may be:
+
+=over
+
+* a column number (0..N-1),
+
+* a negative column number (-1..-N) which counts from the right (so -1 is
+the right-most column),
+
+* or a perl executable name,
+
+* or a perl executable label.
+
+=back
+
 It defaults to the leftmost column.
 
 =item *
@@ -614,10 +628,19 @@ sub read_tests_file {
 
 sub select_a_perl {
     my ($perl, $perls, $who) = @_;
-    $perls||=[];
-    if ($perl =~ /^[0-9]$/) {
+    $perls ||= [];
+    my $n = @$perls;
+
+    if ($perl =~ /^-([0-9]+)$/) {
+        my $p = $1;
+        die "Error: $who value $perl outside range -1..-$n\n"
+                                        if $p < 1 || $p > $n;
+        return $n - $p;
+    }
+
+    if ($perl =~ /^[0-9]+$/) {
         die "Error: $who value $perl outside range 0.." . $#$perls . "\n"
-                                        unless $perl < @$perls;
+                                        unless $perl < $n;
         return $perl;
     }
     else {

@@ -165,6 +165,16 @@ for my $test (
         "croak: select-a-perl out of range"
     ],
     [
+        "--norm=-0 ./miniperl ./perl",
+        "Error: --norm value -0 outside range -1..-2\n",
+        "croak: select-a-perl out of range"
+    ],
+    [
+        "--norm=-3 ./miniperl ./perl",
+        "Error: --norm value -3 outside range -1..-2\n",
+        "croak: select-a-perl out of range"
+    ],
+    [
         "--sort=Ir:myperl ./miniperl ./perl",
         "Error: --sort: unrecognised perl 'myperl'\n"
         . "Valid perl names are:\n"
@@ -417,6 +427,11 @@ like $out, $format_qrs{percent2}, "basic cachegrind percent format; 2 perls";
 
 $out = qx($bench_cmd --read=$resultfile2 --norm=0 2>&1);
 like $out, $format_qrs{percent2}, "basic cachegrind percent format, norm; 2 perls";
+
+# ditto with negative norm
+
+$out = qx($bench_cmd --read=$resultfile2 --norm=-2 2>&1);
+like $out, $format_qrs{percent2}, "basic cachegrind percent format, norm -2; 2 perls";
 
 # read back the results in relative-percent form with sort
 
