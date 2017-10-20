@@ -244,7 +244,7 @@ for my $test (
     ],
     [
         "--grindargs=Boz --debug --tests=call::sub::empty ./perl=A ./perl=B",
-        qr{Error: while executing call::sub::empty/A empty/short loop:\nunexpected code or cachegrind output:\n},
+        qr{Error: .*?(unexpected code or cachegrind output|gave return status)}s,
         "croak: cachegrind output format "
     ],
     [
