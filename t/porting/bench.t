@@ -535,7 +535,7 @@ EOF
 $cmd =~ s/\n\s+/ /g;
 $out = qx($cmd);
 $out =~ s{^\./perl}{p0}m;
-$out =~ s{\Q       ./perl  perl2      0      1}
+$out =~ s{\Q       ./perl  perl2    p-0    p-1}
          {           p0     p1     p2     p3};
 like $out, $format_qrs{percent4}, "4 perls with autolabel and args and env";
 

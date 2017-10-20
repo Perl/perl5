@@ -188,6 +188,9 @@ but is actually only stripped down to:
 
     5.20.0  5.22.0  5.24.0
 
+If the final results are plain integers, they are prefixed with "p"
+to avoid looking like column numbers to switches like C<--norm=2>.
+
 
 =item *
 
@@ -777,6 +780,17 @@ sub process_executables_list {
             # add back any initial "version-ish" suffix
             $post =~ s/^([0-9\.]*).*$/$1/;
             $labels[$_][0] .= $post for 0..$#labels;
+
+            # avoid degenerate empty string for single executable name
+            $labels[0][0] = '0' if @labels == 1 && !length $labels[0][0];
+
+            # if the auto-generated labels are plain integers, prefix
+            # them with 'p' (for perl) to distinguish them from column
+            # indices (otherwise e.g. --norm=2 is ambiguous)
+
+            if ($labels[0][0] =~ /^\d*$/) {
+                $labels[$_][0] = "p$labels[$_][0]" for 0..$#labels;
+            }
 
             # now de-duplicate labels
 
