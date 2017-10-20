@@ -167,10 +167,11 @@ L<[perl #120174]|https://rt.perl.org/Public/Bug/Display.html?id=120174>
 
 =item *
 
-L<splice()|perlfunc/splice()> now throws an exception ("Modification of a
-read-only value attempted") when modifying a read-only array.  Until now it had
-been silently modifying the array.  The new behaviour is consistent with the
-behaviour of L<push()|perlfunc/push()> and L<unshift()|perlfunc/unshift()>.
+L<splice|perlfunc/splice ARRAY,OFFSET,LENGTH,LIST> now throws an exception
+("Modification of a read-only value attempted") when modifying a read-only
+array.  Until now it had been silently modifying the array.  The new behaviour
+is consistent with the behaviour of L<push|perlfunc/push ARRAY,LIST> and
+L<unshift|perlfunc/unshift ARRAY,LIST>.
 L<[perl #131000]|https://rt.perl.org/Public/Bug/Display.html?id=131000>
 
 =back
