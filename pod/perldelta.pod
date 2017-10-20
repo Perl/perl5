@@ -368,6 +368,13 @@ has been fixed.  This should call C<execvp()> with an empty C<argv> array
 returning false (and not setting L<C<$!>|perlvar/$!>).
 L<[perl #131730]|https://rt.perl.org/Public/Bug/Display.html?id=131730>
 
+=item *
+
+The C<gv_fetchmeth_sv> C function stopped working properly in Perl 5.22
+when fetching a constant with a UTF-8 name if that constant subroutine was
+stored in the stash as a simple scalar reference, rather than a full
+typeglob.  This has been corrected.
+
 =back
 
 =head1 Known Problems
