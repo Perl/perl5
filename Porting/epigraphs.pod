@@ -17,6 +17,23 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.5 - Frank Birch, Dilly Knox & G. P. Mackeson, "Alice in I.D.25"
+
+L<Announced on 2017-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2017/10/msg246785.html>
+
+  'Can I do anything?' Alice suggested timidly, thinking that something
+dreadful must have happened.
+  The Waterflap jumped as if it had been shot. 'What are you doing
+here?' it snapped. 'Take this at once into the Directional room,' and it
+thrust the paper which had caused all the fuss into her hands.
+  'But where is the Directional room?' she inquired, bewildered.
+  'Why, there of course,' howled the Waterflap, pointing to a door.
+  'How could I possibly know that!' Alice exclaimed, angered by his
+rudeness.
+  'Silly girl,' it hissed. 'Why, it's called the Directional room
+because it's in that direction,' and it pushed her roughly through the
+doorway.
+
 =head2 v5.27.4 - Richard Brautigan, "All Watched Over By Machines Of Loving Grace"
 
 L<Announced on 2017-09-20 by John SJ Anderson|https://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246371.html>
