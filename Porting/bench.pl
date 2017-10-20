@@ -99,7 +99,7 @@ I<selftest>, which runs some basic sanity checks and produces TAP output.
 
 --debug
 
-Enable verbose debugging output.
+Enable debugging output.
 
 =item *
 
@@ -109,6 +109,7 @@ Display basic usage information.
 
 =item *
 
+-v
 --verbose
 
 Display progress information.
@@ -382,7 +383,7 @@ General options:
                         selftest   perform a selftest; produce TAP output
   --debug            Enable verbose debugging output.
   --help             Display this help.
-  --verbose          Display progress information.
+  -v|--verbose       Display progress information.
 
 
 Selection:
@@ -495,7 +496,7 @@ my %OPTS = (
         'show'        => \$OPTS{show},
         'sort=s'      => \$OPTS{sort},
         'tests=s'     => \$OPTS{tests},
-        'verbose'     => \$OPTS{verbose},
+        'v|verbose'   => \$OPTS{verbose},
         'write|w=s'   => \$OPTS{write},
     ) or die "Use the -h option for usage information.\n";
 
