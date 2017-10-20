@@ -289,7 +289,7 @@ sub do_update_existing {
   my ( $existing, $old, $new ) = @_;
 
   my ( $added, $removed, $updated, $manuallyCheck ) = corelist_delta( $old => $new );
-  if ($manuallyCheck) {
+  if (@{$manuallyCheck}) {
     print "It cannot be determined whether the following distributions have changed.\n";
     print "Please check and list accordingly:\n";
     say "\t* $_" for sort @{$manuallyCheck};
