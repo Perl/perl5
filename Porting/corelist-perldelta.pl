@@ -162,9 +162,16 @@ sub corelist_delta {
   my %distToModules = (
     'IO-Compress' => [
       {
-        'name' => 'IO-Compress',
+        'name'         => 'IO-Compress',
         'modification' => $getModifyType->( $changes{'IO::Compress::Base'} ),
-        'data' => $changes{'IO::Compress::Base'}
+        'data'         => $changes{'IO::Compress::Base'}
+      }
+    ],
+    'libnet' => [
+      {
+        'name'         => 'libnet',
+        'modification' => $getModifyType->( $changes{'Net::Cmd'} ),
+        'data'         => $changes{'Net::Cmd'}
       }
     ],
     'Locale-Codes' => [
@@ -181,6 +188,13 @@ sub corelist_delta {
         'data'         => $changes{'Cwd'}
       }
     ],
+    'podlators' => [
+      {
+        'name'         => 'podlators',
+        'modification' => $getModifyType->( $changes{'Pod::Text'} ),
+        'data'         => $changes{'Pod::Text'}
+      }
+    ],
     'Scalar-List-Utils' => [
       {
         'name'         => 'List::Util',
@@ -191,6 +205,11 @@ sub corelist_delta {
         'name'         => 'Scalar::Util',
         'modification' => $getModifyType->( $changes{'Scalar::Util'} ),
         'data'         => $changes{'Scalar::Util'}
+      },
+      {
+        'name'         => 'Sub::Util',
+        'modification' => $getModifyType->( $changes{'Sub::Util'} ),
+        'data'         => $changes{'Sub::Util'}
       }
     ],
     'Text-Tabs+Wrap' => [
