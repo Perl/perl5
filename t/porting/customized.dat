@@ -25,3 +25,4 @@ perlfaq cpan/perlfaq/lib/perlfaq8.pod bffbc0c8fa828aead24e0891a5e789369a8e0743
 podlators pod/perlpodstyle.pod c6500c9950b46e8228d4adbc09a3ee2ef23de2d0
 version cpan/version/lib/version.pm bee369df1bd84e09107a90d72ec12c38bcb97cce
 version vutil.c 7aaa76516123ced7445abe3a015c58007854be85
+version vxs.inc 8498104713e5ce189602dda55dca38bee780c297
