@@ -20010,54 +20010,57 @@ thread_start(void * arg)
 }
 
 int main() {
-    char * main_buffer;
-    char save_main_buffer[1000];
-    pthread_t subthread;
-    pthread_attr_t attr;
+	char * main_buffer;
+	char save_main_buffer[1000];
+        pthread_t subthread;
+        pthread_attr_t attr;
+	
+	main_buffer = nl_langinfo_l(CODESET, newlocale(LC_ALL_MASK, "C", 0));
 
-    main_buffer = nl_langinfo_l(CODESET, newlocale(LC_ALL_MASK, "C", 0));
+	/* If too large for our generous allowance, just assume we don't have
+	 * it. */
+	if (strlen(main_buffer) >= sizeof(save_main_buffer)) {
+	    exit(1);
+	}
 
-    /* If too large for our generous allowance, just assume we don't have
-     * it. */
-    if (strlen(main_buffer) >= sizeof(save_main_buffer)) {
-        exit(1);
-    }
+	strcpy(save_main_buffer, main_buffer);
 
-    strcpy(save_main_buffer, main_buffer);
+	if (pthread_attr_init(&attr) != 0) {
+	    exit(1);
+	}
 
-    if (pthread_attr_init(&attr) != 0) {
-        exit(1);
-    }
+	if (pthread_create(&subthread, &attr, thread_start, NULL) != 0) {
+	    exit(1);
+	}
 
-    if (pthread_create(&subthread, &attr, thread_start, NULL) != 0) {
-        exit(1);
-    }
+	if (pthread_join(subthread, NULL) != 0) {
+	    exit(1);
+	}
 
-    if (pthread_join(subthread, NULL) != 0) {
-        exit(1);
-    }
-
-    exit(! (strcmp(main_buffer, save_main_buffer) == 0));
+        exit(! (strcmp(main_buffer, save_main_buffer) == 0));
 }
 EOCP
 case "$usethreads" in
     define)
-        set try
-        if eval $compile; then
-            echo "Your system has nl_langinfo_l()..." >&4
-            if $run ./try; then
-                echo "and it is thread-safe (just as I'd hoped)." >&4
-                d_thread_safe_nl_langinfo_l="$define"
-                echo "$d_thread_safe_nl_langinfo_l" >&4
-            else
-                echo "but it isn't thread-safe, so we won't use it." >&4
-            fi
-        else
-            echo "your system does not have nl_langinfo_l()" >&4
-        fi
-        ;;
+	set try
+	if eval $compile; then
+		echo "Your system has nl_langinfo_l()..." >&4
+		if $run ./try; then
+		    echo "and it is thread-safe (just as I'd hoped)." >&4
+		    d_thread_safe_nl_langinfo_l="$define"
+		    echo "$d_thread_safe_nl_langinfo_l" >&4
+		else
+		    echo "but it isn't thread-safe, so we won't use it." >&4
+		fi
+	else
+		echo "your system does not have nl_langinfo_l()" >&4
+	fi
+	;;
     *) echo "Since threads aren't selected, we won't bother looking for nl_langinfo_l()" >&4
-    esac
+esac
+if test X"$d_thread_safe_nl_langinfo_l" = X; then
+	d_thread_safe_nl_langinfo_l="$undef"
+fi
 $rm_try
 
 : see if time exists
