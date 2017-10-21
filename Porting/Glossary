@@ -108,12 +108,12 @@ archlibexp (archlib.U):
 	This variable is the same as the archlib variable, but is
 	filename expanded at configuration time, for convenient use.
 
+archname64 (use64bits.U):
+	This variable is used for the 64-bitness part of $archname.
+
 archname (archname.U):
 	This variable is a short name to characterize the current
 	architecture.  It is used mainly to construct the default archlib.
-
-archname64 (use64bits.U):
-	This variable is used for the 64-bitness part of $archname.
 
 archobjs (Unix.U):
 	This variable defines any additional objects that must be linked
@@ -504,6 +504,11 @@ d_bsdsetpgrp (d_setpgrp.U):
 	setpgrp needs two arguments whereas USG one needs none.
 	See also d_setpgid for a POSIX interface.
 
+d_builtin_add_overflow (d_builtin_overflow.U):
+	This variable conditionally defines HAS_BUILTIN_ADD_OVERFLOW, which
+	indicates that the compiler supports __builtin_add_overflow(x,y,&z)
+	for safely adding x and y into z while checking for overflow.
+
 d_builtin_choose_expr (d_builtin.U):
 	This conditionally defines HAS_BUILTIN_CHOOSE_EXPR, which
 	indicates that the compiler supports __builtin_choose_expr(x,y,z).
@@ -517,6 +522,16 @@ d_builtin_expect (d_builtin.U):
 	that the compiler supports __builtin_expect(exp,c).  You may use
 	__builtin_expect to provide the compiler with branch prediction
 	information.
+
+d_builtin_mul_overflow (d_builtin_overflow.U):
+	This variable conditionally defines HAS_BUILTIN_MUL_OVERFLOW, which
+	indicates that the compiler supports __builtin_mul_overflow(x,y,&z)
+	for safely multiplying x and y into z while checking for overflow.
+
+d_builtin_sub_overflow (d_builtin_overflow.U):
+	This variable conditionally defines HAS_BUILTIN_SUB_OVERFLOW, which
+	indicates that the compiler supports __builtin_sub_overflow(x,y,&z)
+	for safely subtracting y from x into z while checking for overflow.
 
 d_c99_variadic_macros (d_c99_variadic.U):
 	This variable conditionally defines the HAS_C99_VARIADIC_MACROS
@@ -621,24 +636,19 @@ d_cuserid (d_cuserid.U):
 	indicates to the C program that the cuserid() routine is available
 	to get character login names.
 
-d_dbl_dig (d_dbl_dig.U):
-	This variable conditionally defines d_dbl_dig if this system's
-	header files provide DBL_DIG, which is the number of significant
-	digits in a double precision number.
-
 d_dbminitproto (d_dbminitproto.U):
 	This variable conditionally defines the HAS_DBMINIT_PROTO symbol,
 	which indicates to the C program that the system provides
 	a prototype for the dbminit() function.  Otherwise, it is
 	up to the program to supply one.
 
-d_difftime (d_difftime.U):
-	This variable conditionally defines the HAS_DIFFTIME symbol, which
-	indicates to the C program that the difftime() routine is available.
-
 d_difftime64 (d_timefuncs64.U):
 	This variable conditionally defines the HAS_DIFFTIME64 symbol, which
 	indicates to the C program that the difftime64 () routine is available.
+
+d_difftime (d_difftime.U):
+	This variable conditionally defines the HAS_DIFFTIME symbol, which
+	indicates to the C program that the difftime() routine is available.
 
 d_dir_dd_fd (d_dir_dd_fd.U):
 	This variable conditionally defines the HAS_DIR_DD_FD symbol, which
@@ -683,7 +693,7 @@ d_double_has_inf (longdblfio.U):
 	which indicates that the double type has an infinity.
 
 d_double_has_nan (longdblfio.U):
-	This variable conditionally defines the symbol DOUBLE_HAS_INF
+	This variable conditionally defines the symbol DOUBLE_HAS_NAN
 	which indicates that the double type has a not-a-number.
 
 d_double_has_negative_zero (longdblfio.U):
@@ -1215,14 +1225,14 @@ d_getpgid (d_getpgid.U):
 	indicates to the C program that the getpgid(pid) function
 	is available to get the process group id.
 
-d_getpgrp (d_getpgrp.U):
-	This variable conditionally defines HAS_GETPGRP if getpgrp() is
-	available to get the current process group.
-
 d_getpgrp2 (d_getpgrp2.U):
 	This variable conditionally defines the HAS_GETPGRP2 symbol, which
 	indicates to the C program that the getpgrp2() (as in DG/UX) routine
 	is available to get the current process group.
+
+d_getpgrp (d_getpgrp.U):
+	This variable conditionally defines HAS_GETPGRP if getpgrp() is
+	available to get the current process group.
 
 d_getppid (d_getppid.U):
 	This variable conditionally defines the HAS_GETPPID symbol, which
@@ -1530,6 +1540,10 @@ d_llroundl (d_llroundl.U):
 	indicates to the C program that the llroundl() routine is available
 	to return the long long value nearest to x away from zero.
 
+d_localeconv_l (d_localeconv_l.U):
+	This variable conditionally defines the HAS_LOCALECONV_L symbol, which
+	indicates to the C program that the localeconv_l() routine is available.
+
 d_localtime64 (d_timefuncs64.U):
 	This variable conditionally defines the HAS_LOCALTIME64 symbol, which
 	indicates to the C program that the localtime64 () routine is available.
@@ -1647,6 +1661,16 @@ d_mblen (d_mblen.U):
 	indicates to the C program that the mblen() routine is available
 	to find the number of bytes in a multibye character.
 
+d_mbrlen (d_mbrlen.U):
+	This variable conditionally defines the HAS_MBRLEN symbol if the
+	mbrlen() routine is available to be used to get the length of
+	multi-byte character strings.
+
+d_mbrtowc (d_mbrtowc.U):
+	This variable conditionally defines the HAS_MBRTOWC symbol if the
+	mbrtowc() routine is available to be used to convert a multi-byte
+	character into a wide character.
+
 d_mbstowcs (d_mbstowcs.U):
 	This variable conditionally defines the HAS_MBSTOWCS symbol, which
 	indicates to the C program that the mbstowcs() routine is available
@@ -1694,13 +1718,13 @@ d_mkstemps (d_mkstemps.U):
 	to exclusively create and open a uniquely named (with a suffix)
 	temporary file.
 
-d_mktime (d_mktime.U):
-	This variable conditionally defines the HAS_MKTIME symbol, which
-	indicates to the C program that the mktime() routine is available.
-
 d_mktime64 (d_timefuncs64.U):
 	This variable conditionally defines the HAS_MKTIME64 symbol, which
 	indicates to the C program that the mktime64 () routine is available.
+
+d_mktime (d_mktime.U):
+	This variable conditionally defines the HAS_MKTIME symbol, which
+	indicates to the C program that the mktime() routine is available.
 
 d_mmap (d_mmap.U):
 	This variable conditionally defines HAS_MMAP if mmap() is
@@ -1785,6 +1809,10 @@ d_mymalloc (mallocsrc.U):
 d_nan (d_nan.U):
 	This variable conditionally defines HAS_NAN if nan() is
 	available to generate NaN.
+
+d_nanosleep (d_nanosleep.U):
+	This variable conditionally defines HAS_NANOSLEEP
+	if nanosleep() is available to sleep with 1E-9 sec accuracy.
 
 d_ndbm (i_ndbm.U):
 	This variable conditionally defines the HAS_NDBM symbol, which
@@ -2055,14 +2083,14 @@ d_re_comp (d_regcmp.U):
 	for regular patern matching (usally on BSD). If so, it is likely that
 	re_exec() exists.
 
-d_readdir (d_readdir.U):
-	This variable conditionally defines HAS_READDIR if readdir() is
-	available to read directory entries.
-
 d_readdir64_r (d_readdir64_r.U):
 	This variable conditionally defines the HAS_READDIR64_R symbol,
 	which indicates to the C program that the readdir64_r()
 	routine is available.
+
+d_readdir (d_readdir.U):
+	This variable conditionally defines HAS_READDIR if readdir() is
+	available to read directory entries.
 
 d_readdir_r (d_readdir_r.U):
 	This variable conditionally defines the HAS_READDIR_R symbol,
@@ -2261,14 +2289,14 @@ d_setpgid (d_setpgid.U):
 	This variable conditionally defines the HAS_SETPGID symbol if the
 	setpgid(pid, gpid) function is available to set process group ID.
 
-d_setpgrp (d_setpgrp.U):
-	This variable conditionally defines HAS_SETPGRP if setpgrp() is
-	available to set the current process group.
-
 d_setpgrp2 (d_setpgrp2.U):
 	This variable conditionally defines the HAS_SETPGRP2 symbol, which
 	indicates to the C program that the setpgrp2() (as in DG/UX) routine
 	is available to set the current process group.
+
+d_setpgrp (d_setpgrp.U):
+	This variable conditionally defines HAS_SETPGRP if setpgrp() is
+	available to set the current process group.
 
 d_setprior (d_setprior.U):
 	This variable conditionally defines HAS_SETPRIORITY if setpriority()
@@ -2575,6 +2603,10 @@ d_strlcpy (d_strlcpy.U):
 	This variable conditionally defines the HAS_STRLCPY symbol, which
 	indicates to the C program that the strlcpy () routine is available.
 
+d_strnlen (d_strnlen.U):
+	This variable conditionally defines the HAS_STRNLEN symbol, which
+	indicates to the C program that the strnlen () routine is available.
+
 d_strtod (d_strtod.U):
 	This variable conditionally defines the HAS_STRTOD symbol, which
 	indicates to the C program that the strtod() routine is available
@@ -2588,6 +2620,10 @@ d_strtol (d_strtol.U):
 d_strtold (d_strtold.U):
 	This variable conditionally defines the HAS_STRTOLD symbol, which
 	indicates to the C program that the strtold() routine is available.
+
+d_strtold_l (d_strtold_l.U):
+	This variable conditionally defines the HAS_STRTOLD_L symbol, which
+	indicates to the C program that the strtold_l() routine is available.
 
 d_strtoll (d_strtoll.U):
 	This variable conditionally defines the HAS_STRTOLL symbol, which
@@ -2674,6 +2710,11 @@ d_tgamma (d_tgamma.U):
 	This variable conditionally defines the HAS_TGAMMA symbol, which
 	indicates to the C program that the tgamma() routine is available
 	for the gamma function.  See also d_lgamma.
+
+d_thread_safe_nl_langinfo_l (d_nl_langinfo_l.U):
+	This variable contains the eventual value of the
+	HAS_THREAD_SAFE_NL_LANGINFO_L symbol, which indicates if the
+	nl_langinfo_l() function exists and is thread-safe.
 
 d_time (d_time.U):
 	This variable conditionally defines the HAS_TIME symbol, which indicates
@@ -3564,6 +3605,9 @@ i_stdint (i_stdint.U):
 	indicates to the C program that <stdint.h> exists and should
 	be included.
 
+i_stdlib (i_stdlib.U):
+	This variable unconditionally defines the I_STDLIB symbol.
+
 i_sunmath (i_sunmath.U):
 	This variable conditionally defines the I_SUNMATH symbol, and indicates
 	whether a C program should include <sunmath.h>.
@@ -3702,7 +3746,7 @@ i_termios (i_termio.U):
 	to be included.
 
 i_time (i_time.U):
-	This variable conditionally defines I_TIME, which indicates
+	This variable unconditionally defines I_TIME, which indicates
 	to the C program that it should include <time.h>.
 
 i_unistd (i_unistd.U):
@@ -3720,6 +3764,10 @@ i_utime (i_utime.U):
 i_vfork (i_vfork.U):
 	This variable conditionally defines the I_VFORK symbol, and indicates
 	whether a C program should include vfork.h.
+
+i_wchar (i_wchar.U):
+	This variable conditionally defines the I_WCHAR symbol,
+	that indicates whether a C program may include <wchar.h>.
 
 i_xlocale (d_newlocale.U):
 	This symbol, if defined, indicates to the C program that it should
@@ -4197,7 +4245,7 @@ make_set_make (make.U):
 	make_set_make="MAKE=$make"	# if it doesn't.
 
 	This uses a comment character so that we can distinguish a
-	'set' value (from a previous config.sh or Configure '-D' option)
+	'set' value (from a previous config.sh or Configure -D option)
 	from an uncomputed value.
 
 mallocobj (mallocsrc.U):
@@ -4309,7 +4357,7 @@ myuname (Oldconfig.U):
 	removed.
 
 n (n.U):
-	This variable contains the '-n' flag if that is what causes the echo
+	This variable contains the -n flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	$echo $n "prompt for a question: $c".
 
@@ -4489,15 +4537,15 @@ path_sep (Unix.U):
 	This is an old synonym for p_ in Head.U, the character
 	used to separate elements in the command shell search PATH.
 
-perl (Loc.U):
-	This variable is used internally by Configure to determine the
-	full pathname (if any) of the perl program.  After Configure runs,
-	the value is reset to a plain "perl" and is not useful.
-
 perl5 (perl5.U):
 	This variable contains the full path (if any) to a previously
 	installed perl5.005 or later suitable for running the script
 	to determine inc_version_list.
+
+perl (Loc.U):
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the perl program.  After Configure runs,
+	the value is reset to a plain "perl" and is not useful.
 
 PERL_API_REVISION (patchlevel.h):
 	This number describes the earliest compatible PERL_REVISION of
@@ -4524,11 +4572,6 @@ PERL_CONFIG_SH (Oldsyms.U):
 	This is set to 'true' in config.sh so that a shell script
 	sourcing config.sh can tell if it has been sourced already.
 
-PERL_PATCHLEVEL (Oldsyms.U):
-	This symbol reflects the patchlevel, if available. Will usually
-	come from the .patch file, which is available when the perl
-	source tree was fetched with rsync.
-
 perl_patchlevel (patchlevel.U):
 	This is the Perl patch level, a numeric change identifier,
 	as defined by whichever source code maintenance system
@@ -4536,6 +4579,11 @@ perl_patchlevel (patchlevel.U):
 	It does not correlate with the Perl version numbers or
 	the maintenance versus development dichotomy except
 	by also being increasing.
+
+PERL_PATCHLEVEL (Oldsyms.U):
+	This symbol reflects the patchlevel, if available. Will usually
+	come from the .patch file, which is available when the perl
+	source tree was fetched with rsync.
 
 PERL_REVISION (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 5.
@@ -4813,9 +4861,9 @@ sh (sh.U):
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
 	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
 	D:/bin/sh.exe.
-	This unit comes before Options.U, so you can't set sh with a '-D'
+	This unit comes before Options.U, so you can't set sh with a -D
 	option, though you can override this (and startsh)
-	with '-O -Dsh=/bin/whatever -Dstartsh=whatever'
+	with -O -Dsh=/bin/whatever -Dstartsh=whatever
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
@@ -5074,7 +5122,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep '-v' for # comments.
+	shell on this system.  It is either cat or a grep -v for # comments.
 
 sPRId64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to
