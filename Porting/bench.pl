@@ -636,6 +636,9 @@ sub read_tests_file {
                 die "Error: '$file': invalid key '$_' for test '$name'\n"
                     unless exists $valid{$_};
             }
+
+            # make description default to the code
+            $hash->{desc} = $hash->{code} unless exists $hash->{desc};
         }
     }
 
