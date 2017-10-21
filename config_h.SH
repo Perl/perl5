@@ -344,6 +344,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_mktime HAS_MKTIME		/**/
 
+/* HAS_MSG:
+ *	This symbol, if defined, indicates that the entire msg*(2) library is
+ *	supported (IPC mechanism based on message queues).
+ */
+#$d_msg HAS_MSG		/**/
+
 /* HAS_MSYNC:
  *	This symbol, if defined, indicates that the msync system call is
  *	available to synchronize a mapped file.
@@ -452,6 +458,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	is used, <sys/time.h> may need to be included.
  */
 #$d_select HAS_SELECT	/**/
+
+/* HAS_SEM:
+ *	This symbol, if defined, indicates that the entire sem*(2) library is
+ *	supported.
+ */
+#$d_sem HAS_SEM		/**/
 
 /* HAS_SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
@@ -2040,18 +2052,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_mmap HAS_MMAP		/**/
 #define Mmap_t $mmaptype	/**/
 
-/* HAS_MSG:
- *	This symbol, if defined, indicates that the entire msg*(2) library is
- *	supported (IPC mechanism based on message queues).
- */
-#$d_msg HAS_MSG		/**/
-
-/* HAS_SEM:
- *	This symbol, if defined, indicates that the entire sem*(2) library is
- *	supported.
- */
-#$d_sem HAS_SEM		/**/
-
 /* HAS_SETGRENT:
  *	This symbol, if defined, indicates that the setgrent routine is
  *	available for initializing sequential access of the group database.
@@ -2585,6 +2585,22 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_builtin_expect HAS_BUILTIN_EXPECT	/**/
 #$d_builtin_choose_expr HAS_BUILTIN_CHOOSE_EXPR	/**/
+
+/* HAS_BUILTIN_ADD_OVERFLOW:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_add_overflow for adding integers with overflow checks.
+ */
+/* HAS_BUILTIN_SUB_OVERFLOW:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_sub_overflow for subtracting integers with overflow checks.
+ */
+/* HAS_BUILTIN_MUL_OVERFLOW:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_mul_overflow for multiplying integers with overflow checks.
+ */
+#$d_builtin_add_overflow HAS_BUILTIN_ADD_OVERFLOW	/**/
+#$d_builtin_sub_overflow HAS_BUILTIN_SUB_OVERFLOW	/**/
+#$d_builtin_mul_overflow HAS_BUILTIN_MUL_OVERFLOW	/**/
 
 /* HAS_C99_VARIADIC_MACROS:
  *	If defined, the compiler supports C99 variadic macros.
@@ -3292,6 +3308,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_nan HAS_NAN		/**/
 
+/* HAS_NANOSLEEP:
+ *	This symbol, if defined, indicates that the nanosleep
+ *	system call is available to sleep with 1E-9 sec accuracy.
+ */
+#$d_nanosleep HAS_NANOSLEEP		/**/
+
 /* HAS_NEARBYINT:
  *	This symbol, if defined, indicates that the nearbyint routine is
  *	available to return the integral value closest to (according to
@@ -3602,6 +3624,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to do string copying.
  */
 #$d_strlcpy HAS_STRLCPY		/**/
+
+/* HAS_STRNLEN:
+ *	This symbol, if defined, indicates that the strnlen () routine is
+ *	available to check the length of a string up to a maximum.
+ */
+#$d_strnlen HAS_STRNLEN		/**/
 
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
@@ -3995,6 +4023,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_ustat	I_USTAT		/**/
 
+/* I_WCHAR:
+ *     This symbol, if defined, indicates to the C program that <wchar.h>
+ *     is available for inclusion
+ */
+#$i_wchar   I_WCHAR	/**/
+
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
  *	hexadecimal bytes for the double precision infinity.
@@ -4263,7 +4297,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
 #define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
-#define	NV_OVERFLOWS_INTEGERS_AT	$nv_overflows_integers_at
+#define	NV_OVERFLOWS_INTEGERS_AT	($nv_overflows_integers_at)
 #$d_nv_zero_is_allbits_zero	NV_ZERO_IS_ALLBITS_ZERO
 #if UVSIZE == 8
 #   ifdef BYTEORDER
@@ -5004,6 +5038,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_gmtime_r HAS_GMTIME_R	   /**/
 #define GMTIME_R_PROTO $gmtime_r_proto	   /**/
 
+/* HAS_LOCALECONV_L:
+ *	This symbol, if defined, indicates that the localeconv_l routine is
+ *	available to query certain information about a locale.
+ */
+#$d_localeconv_l HAS_LOCALECONV_L		/**/
+
 /* HAS_LOCALTIME_R:
  *	This symbol, if defined, indicates that the localtime_r routine
  *	is available to localtime re-entrantly.
@@ -5029,6 +5069,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_localtime_r HAS_LOCALTIME_R	   /**/
 #define LOCALTIME_R_PROTO $localtime_r_proto	   /**/
+
+/* HAS_MBRLEN:
+ *	This symbol, if defined, indicates that the mbrlen routine is
+ *	available to get the length of multi-byte character strings.
+ */
+#$d_mbrlen HAS_MBRLEN	/**/
+
+/* HAS_MBRTOWC:
+ *	This symbol, if defined, indicates that the mbrtowc routine is
+ *	available to convert a multi-byte character into a wide character.
+ */
+#$d_mbrtowc HAS_MBRTOWC	/**/
+
+/* HAS_THREAD_SAFE_NL_LANGINFO_L:
+ *	This symbol, when defined, indicates presence of the nl_langinfo_l()
+ *	function, and that it is thread-safe.
+ */
+#$d_thread_safe_nl_langinfo_l HAS_THREAD_SAFE_NL_LANGINFO_L	/**/
 
 /* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
@@ -5233,6 +5291,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_strerror_r HAS_STRERROR_R	   /**/
 #define STRERROR_R_PROTO $strerror_r_proto	   /**/
+
+/* HAS_STRTOLD_L:
+ *	This symbol, if defined, indicates that the strtold_l routine is
+ *	available to convert strings to long doubles.
+ */
+#$d_strtold_l HAS_STRTOLD_L		/**/
 
 /* HAS_TMPNAM_R:
  *	This symbol, if defined, indicates that the tmpnam_r routine

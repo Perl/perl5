@@ -395,6 +395,9 @@ d_bcmp=''
 d_bcopy=''
 d_builtin_choose_expr=''
 d_builtin_expect=''
+d_builtin_add_overflow=''
+d_builtin_mul_overflow=''
+d_builtin_sub_overflow=''
 d_bzero=''
 d_c99_variadic_macros=''
 d_casti32=''
@@ -628,6 +631,7 @@ d_llrint=''
 d_llrintl=''
 d_llround=''
 d_llroundl=''
+d_localeconv_l=''
 d_localtime_r=''
 d_localtime_r_needs_tzset=''
 localtime_r_proto=''
@@ -657,6 +661,8 @@ d_madvise=''
 d_malloc_good_size=''
 d_malloc_size=''
 d_mblen=''
+d_mbrlen=''
+d_mbrtowc=''
 d_mbstowcs=''
 d_mbtowc=''
 d_memchr=''
@@ -686,6 +692,7 @@ d_msgsnd=''
 d_msync=''
 d_munmap=''
 d_nan=''
+d_nanosleep=''
 d_nearbyint=''
 d_duplocale=''
 d_freelocale=''
@@ -697,6 +704,7 @@ d_nextafter=''
 d_nexttoward=''
 d_nice=''
 d_nl_langinfo=''
+d_thread_safe_nl_langinfo_l=''
 d_off64_t=''
 d_open3=''
 d_fpathconf=''
@@ -877,9 +885,11 @@ strerror_r_proto=''
 d_strftime=''
 d_strlcat=''
 d_strlcpy=''
+d_strnlen=''
 d_strtod=''
 d_strtol=''
 d_strtold=''
+d_strtold_l=''
 d_strtoll=''
 d_strtoq=''
 d_strtoul=''
@@ -1090,6 +1100,7 @@ i_stdarg=''
 i_varargs=''
 i_varhdr=''
 i_vfork=''
+i_wchar=''
 d_inc_version_list=''
 inc_version_list=''
 inc_version_list_init=''
@@ -11498,6 +11509,117 @@ set d_bsdsetpgrp
 eval $setvar
 $rm_try
 
+: Look for GCC-style __builtin_add_overflow
+case "$d_builtin_add_overflow" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_add_overflow ..." >&4
+    $cat >try.c <<'EOCP'
+int main(void) {
+    const unsigned int uint_max = ~0u;
+    int target_int = 0;
+    if (__builtin_add_overflow(1, 2, &target_int) || target_int != 3) {
+        return 1;
+    }
+    if (!__builtin_add_overflow((int)(uint_max >> 1), 1, &target_int)) {
+        return 1;
+    }
+    if (!__builtin_add_overflow(uint_max, -1, &target_int)) {
+        return 1;
+    }
+    return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try; then
+        echo "Your C compiler supports __builtin_add_overflow."
+        val="$define"
+    else
+        echo "Your C compiler doesn't seem to understand __builtin_add_overflow."
+        val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_add_overflow" ;;
+esac
+
+set d_builtin_add_overflow
+eval $setvar
+$rm_try
+
+: Look for GCC-style __builtin_sub_overflow
+case "$d_builtin_sub_overflow" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_sub_overflow ..." >&4
+    $cat >try.c <<'EOCP'
+int main(void) {
+    const unsigned int uint_max = ~0u;
+    int target_int = 0;
+    if (__builtin_sub_overflow(1, -2, &target_int) || target_int != 3) {
+        return 1;
+    }
+    if (!__builtin_sub_overflow(-(int)(uint_max >> 1), 2, &target_int)) {
+        return 1;
+    }
+    if (!__builtin_sub_overflow(uint_max, 1, &target_int)) {
+        return 1;
+    }
+    return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try; then
+        echo "Your C compiler supports __builtin_sub_overflow."
+        val="$define"
+    else
+        echo "Your C compiler doesn't seem to understand __builtin_sub_overflow."
+        val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_sub_overflow" ;;
+esac
+
+set d_builtin_sub_overflow
+eval $setvar
+$rm_try
+
+: Look for GCC-style __builtin_mul_overflow
+case "$d_builtin_mul_overflow" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_mul_overflow ..." >&4
+    $cat >try.c <<'EOCP'
+int main(void) {
+    const unsigned int uint_max = ~0u;
+    int target_int = 0;
+    if (__builtin_mul_overflow(2, 3, &target_int) || target_int != 6) {
+        return 1;
+    }
+    if (!__builtin_mul_overflow((int)(uint_max >> 1), 2, &target_int)) {
+        return 1;
+    }
+    if (!__builtin_mul_overflow(uint_max, 1, &target_int)) {
+        return 1;
+    }
+    return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try; then
+        echo "Your C compiler supports __builtin_mul_overflow."
+        val="$define"
+    else
+        echo "Your C compiler doesn't seem to understand __builtin_mul_overflow."
+        val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_mul_overflow" ;;
+esac
+
+set d_builtin_mul_overflow
+eval $setvar
+$rm_try
+
 : Look for GCC-style __builtin_choose_expr
 case "$d_builtin_choose_expr" in
 '')
@@ -16309,6 +16431,10 @@ eval $inlibc
 set llroundl d_llroundl
 eval $inlibc
 
+: see if localeconv_l exists
+set localeconv_l d_localeconv_l
+eval $inlibc
+
 : see if localtime_r exists
 set localtime_r d_localtime_r
 eval $inlibc
@@ -16483,6 +16609,14 @@ eval $inlibc
 
 : see if mblen exists
 set mblen d_mblen
+eval $inlibc
+
+: see if mbrlen exists
+set mbrlen d_mbrlen
+eval $inlibc
+
+: see if mbrtowc exists
+set mbrtowc d_mbrtowc
 eval $inlibc
 
 : see if mbstowcs exists
@@ -16712,6 +16846,10 @@ eval $inlibc
 
 : see if nan exists
 set nan d_nan
+eval $inlibc
+
+: see if nanosleep exists
+set nanosleep d_nanosleep
 eval $inlibc
 
 : see if nearbyint exists
@@ -19521,6 +19659,10 @@ eval $inlibc
 set strlcpy d_strlcpy
 eval $inlibc
 
+: see if strnlen exists
+set strnlen d_strnlen
+eval $inlibc
+
 : see if strtod exists
 set strtod d_strtod
 eval $inlibc
@@ -19531,6 +19673,10 @@ eval $inlibc
 
 : see if strtold exists
 set strtold d_strtold
+eval $inlibc
+
+: see if strtold_l exists
+set strtold_l d_strtold_l
 eval $inlibc
 
 : see if strtoll exists
@@ -19829,6 +19975,90 @@ eval $hasproto
 : see if tgamma exists
 set tgamma d_tgamma
 eval $inlibc
+
+: check for thread_safe_nl_langinfo_l item
+$cat <<EOM
+
+Checking to see if you have nl_langinfo_l() and that it is thread-safe
+EOM
+$cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#  include <stdlib.h>
+#endif
+#$i_string I_STRING
+#ifdef I_STRING
+#  include <string.h>
+#endif
+#$i_langinfo I_LANGINFO
+#ifdef I_LANGINFO
+#  include <langinfo.h>
+#endif
+#$i_pthread I_PTHREAD
+#ifdef I_PTHREAD
+#  include <pthread.h>
+#endif
+#$i_locale I_LOCALE
+#ifdef I_LOCALE
+#  include <locale.h>
+#endif
+
+void *
+thread_start(void * arg)
+{
+    nl_langinfo(RADIXCHAR);
+}
+
+int main() {
+    char * main_buffer;
+    char save_main_buffer[1000];
+    pthread_t subthread;
+    pthread_attr_t attr;
+
+    main_buffer = nl_langinfo_l(CODESET, newlocale(LC_ALL_MASK, "C", 0));
+
+    /* If too large for our generous allowance, just assume we don't have
+     * it. */
+    if (strlen(main_buffer) >= sizeof(save_main_buffer)) {
+        exit(1);
+    }
+
+    strcpy(save_main_buffer, main_buffer);
+
+    if (pthread_attr_init(&attr) != 0) {
+        exit(1);
+    }
+
+    if (pthread_create(&subthread, &attr, thread_start, NULL) != 0) {
+        exit(1);
+    }
+
+    if (pthread_join(subthread, NULL) != 0) {
+        exit(1);
+    }
+
+    exit(! (strcmp(main_buffer, save_main_buffer) == 0));
+}
+EOCP
+case "$usethreads" in
+    define)
+        set try
+        if eval $compile; then
+            echo "Your system has nl_langinfo_l()..." >&4
+            if $run ./try; then
+                echo "and it is thread-safe (just as I'd hoped)." >&4
+                d_thread_safe_nl_langinfo_l="$define"
+                echo "$d_thread_safe_nl_langinfo_l" >&4
+            else
+                echo "but it isn't thread-safe, so we won't use it." >&4
+            fi
+        else
+            echo "your system does not have nl_langinfo_l()" >&4
+        fi
+        ;;
+    *) echo "Since threads aren't selected, we won't bother looking for nl_langinfo_l()" >&4
+    esac
+$rm_try
 
 : see if time exists
 echo " "
@@ -23845,6 +24075,10 @@ case "$d_vfork" in
 	;;
 esac
 
+: see if wchar.h is present
+set wchar.h i_wchar
+eval $inhdr
+
 : Check extensions
 echo " "
 echo "Looking for extensions..." >&4
@@ -24484,8 +24718,11 @@ d_bcopy='$d_bcopy'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdsetpgrp='$d_bsdsetpgrp'
+d_builtin_add_overflow='$d_builtin_add_overflow'
 d_builtin_choose_expr='$d_builtin_choose_expr'
 d_builtin_expect='$d_builtin_expect'
+d_builtin_mul_overflow='$d_builtin_mul_overflow'
+d_builtin_sub_overflow='$d_builtin_sub_overflow'
 d_bzero='$d_bzero'
 d_c99_variadic_macros='$d_c99_variadic_macros'
 d_casti32='$d_casti32'
@@ -24704,6 +24941,7 @@ d_llrint='$d_llrint'
 d_llrintl='$d_llrintl'
 d_llround='$d_llround'
 d_llroundl='$d_llroundl'
+d_localeconv_l='$d_localeconv_l'
 d_localtime64='$d_localtime64'
 d_localtime_r='$d_localtime_r'
 d_localtime_r_needs_tzset='$d_localtime_r_needs_tzset'
@@ -24729,6 +24967,8 @@ d_madvise='$d_madvise'
 d_malloc_good_size='$d_malloc_good_size'
 d_malloc_size='$d_malloc_size'
 d_mblen='$d_mblen'
+d_mbrlen='$d_mbrlen'
+d_mbrtowc='$d_mbrtowc'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
 d_memchr='$d_memchr'
@@ -24764,6 +25004,7 @@ d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nan='$d_nan'
+d_nanosleep='$d_nanosleep'
 d_ndbm='$d_ndbm'
 d_ndbm_h_uses_prototypes='$d_ndbm_h_uses_prototypes'
 d_nearbyint='$d_nearbyint'
@@ -24932,9 +25173,11 @@ d_strerror_r='$d_strerror_r'
 d_strftime='$d_strftime'
 d_strlcat='$d_strlcat'
 d_strlcpy='$d_strlcpy'
+d_strnlen='$d_strnlen'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'
+d_strtold_l='$d_strtold_l'
 d_strtoll='$d_strtoll'
 d_strtoq='$d_strtoq'
 d_strtoul='$d_strtoul'
@@ -24954,6 +25197,7 @@ d_tcsetpgrp='$d_tcsetpgrp'
 d_telldir='$d_telldir'
 d_telldirproto='$d_telldirproto'
 d_tgamma='$d_tgamma'
+d_thread_safe_nl_langinfo_l='$d_thread_safe_nl_langinfo_l'
 d_time='$d_time'
 d_timegm='$d_timegm'
 d_times='$d_times'
@@ -25191,6 +25435,7 @@ i_values='$i_values'
 i_varargs='$i_varargs'
 i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
+i_wchar='$i_wchar'
 i_xlocale='$i_xlocale'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'

@@ -309,6 +309,12 @@
  */
 /*#define HAS_MKTIME		/ **/
 
+/* HAS_MSG:
+ *	This symbol, if defined, indicates that the entire msg*(2) library is
+ *	supported (IPC mechanism based on message queues).
+ */
+/*#define HAS_MSG		/ **/
+
 /* HAS_MSYNC:
  *	This symbol, if defined, indicates that the msync system call is
  *	available to synchronize a mapped file.
@@ -417,6 +423,12 @@
  *	is used, <sys/time.h> may need to be included.
  */
 /*#define HAS_SELECT	/ **/
+
+/* HAS_SEM:
+ *	This symbol, if defined, indicates that the entire sem*(2) library is
+ *	supported.
+ */
+/*#define HAS_SEM		/ **/
 
 /* HAS_SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
@@ -2005,18 +2017,6 @@
 /*#define HAS_MMAP		/ **/
 #define Mmap_t void *	/**/
 
-/* HAS_MSG:
- *	This symbol, if defined, indicates that the entire msg*(2) library is
- *	supported (IPC mechanism based on message queues).
- */
-/*#define HAS_MSG		/ **/
-
-/* HAS_SEM:
- *	This symbol, if defined, indicates that the entire sem*(2) library is
- *	supported.
- */
-/*#define HAS_SEM		/ **/
-
 /* HAS_SETGRENT:
  *	This symbol, if defined, indicates that the setgrent routine is
  *	available for initializing sequential access of the group database.
@@ -2550,6 +2550,22 @@
  */
 /*#define HAS_BUILTIN_EXPECT	/ **/
 /*#define HAS_BUILTIN_CHOOSE_EXPR	/ **/
+
+/* HAS_BUILTIN_ADD_OVERFLOW:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_add_overflow for adding integers with overflow checks.
+ */
+/* HAS_BUILTIN_SUB_OVERFLOW:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_sub_overflow for subtracting integers with overflow checks.
+ */
+/* HAS_BUILTIN_MUL_OVERFLOW:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_mul_overflow for multiplying integers with overflow checks.
+ */
+/*#define HAS_BUILTIN_ADD_OVERFLOW	/ **/
+/*#define HAS_BUILTIN_SUB_OVERFLOW	/ **/
+/*#define HAS_BUILTIN_MUL_OVERFLOW	/ **/
 
 /* HAS_C99_VARIADIC_MACROS:
  *	If defined, the compiler supports C99 variadic macros.
@@ -3257,6 +3273,12 @@
  */
 /*#define HAS_NAN		/ **/
 
+/* HAS_NANOSLEEP:
+ *	This symbol, if defined, indicates that the nanosleep
+ *	system call is available to sleep with 1E-9 sec accuracy.
+ */
+/*#define HAS_NANOSLEEP		/ **/
+
 /* HAS_NEARBYINT:
  *	This symbol, if defined, indicates that the nearbyint routine is
  *	available to return the integral value closest to (according to
@@ -3567,6 +3589,12 @@
  *	available to do string copying.
  */
 /*#define HAS_STRLCPY		/ **/
+
+/* HAS_STRNLEN:
+ *	This symbol, if defined, indicates that the strnlen () routine is
+ *	available to check the length of a string up to a maximum.
+ */
+/*#define HAS_STRNLEN		/ **/
 
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
@@ -3960,6 +3988,12 @@
  */
 /*#define	I_USTAT		/ **/
 
+/* I_WCHAR:
+ *     This symbol, if defined, indicates to the C program that <wchar.h>
+ *     is available for inclusion
+ */
+/*#define   I_WCHAR	/ **/
+
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
  *	hexadecimal bytes for the double precision infinity.
@@ -4228,7 +4262,7 @@
 #define	NVSIZE		8		/**/
 #undef	NV_PRESERVES_UV
 #define	NV_PRESERVES_UV_BITS	0
-#define	NV_OVERFLOWS_INTEGERS_AT	256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0
+#define	NV_OVERFLOWS_INTEGERS_AT	(256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0)
 #undef	NV_ZERO_IS_ALLBITS_ZERO
 #if UVSIZE == 8
 #   ifdef BYTEORDER
@@ -4969,6 +5003,12 @@
 /*#define HAS_GMTIME_R	   / **/
 #define GMTIME_R_PROTO 0	   /**/
 
+/* HAS_LOCALECONV_L:
+ *	This symbol, if defined, indicates that the localeconv_l routine is
+ *	available to query certain information about a locale.
+ */
+/*#define HAS_LOCALECONV_L		/ **/
+
 /* HAS_LOCALTIME_R:
  *	This symbol, if defined, indicates that the localtime_r routine
  *	is available to localtime re-entrantly.
@@ -4994,6 +5034,24 @@
  */
 /*#define HAS_LOCALTIME_R	   / **/
 #define LOCALTIME_R_PROTO 0	   /**/
+
+/* HAS_MBRLEN:
+ *	This symbol, if defined, indicates that the mbrlen routine is
+ *	available to get the length of multi-byte character strings.
+ */
+/*#define HAS_MBRLEN	/ **/
+
+/* HAS_MBRTOWC:
+ *	This symbol, if defined, indicates that the mbrtowc routine is
+ *	available to convert a multi-byte character into a wide character.
+ */
+/*#define HAS_MBRTOWC	/ **/
+
+/* HAS_THREAD_SAFE_NL_LANGINFO_L:
+ *	This symbol, when defined, indicates presence of the nl_langinfo_l()
+ *	function, and that it is thread-safe.
+ */
+/*#define HAS_THREAD_SAFE_NL_LANGINFO_L	/ **/
 
 /* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
@@ -5199,6 +5257,12 @@
 /*#define HAS_STRERROR_R	   / **/
 #define STRERROR_R_PROTO 0	   /**/
 
+/* HAS_STRTOLD_L:
+ *	This symbol, if defined, indicates that the strtold_l routine is
+ *	available to convert strings to long doubles.
+ */
+/*#define HAS_STRTOLD_L		/ **/
+
 /* HAS_TMPNAM_R:
  *	This symbol, if defined, indicates that the tmpnam_r routine
  *	is available to tmpnam re-entrantly.
@@ -5382,6 +5446,6 @@
 #endif
 
 /* Generated from:
- * 2de7484af521c1029bb9853f03e27d74d89b7f91d1ce1228865d6c4808d4131d config_h.SH
- * 7e93e67e8d10f41bf582fd383aa099ab2479b61979a341e2f1bd96f8873442cc uconfig.sh
+ * 8bcb3af139b8925875e1a7668bd8c60e79e7c500716150ca1796b1f4c5a70d28 config_h.SH
+ * 87ef7239e9f1bcc49ca2154767871e12218452256a40624296ecdc662311bd91 uconfig.sh
  * ex: set ro: */
