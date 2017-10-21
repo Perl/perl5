@@ -1479,6 +1479,12 @@ EXTERN_C char *crypt(const char *, const char *);
 #  define my_strlcpy	Perl_my_strlcpy
 #endif
 
+#ifdef HAS_STRNLEN
+#  define my_strnlen	strnlen
+#else
+#  define my_strnlen	Perl_my_strnlen
+#endif
+
 /*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.

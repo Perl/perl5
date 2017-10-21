@@ -3858,6 +3858,11 @@ PERL_CALLCONV Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
 #if !defined(HAS_STRLCPY)
 PERL_CALLCONV Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
 #endif
+#if !defined(HAS_STRNLEN)
+PERL_CALLCONV Size_t	Perl_my_strnlen(const char *str, Size_t maxlen);
+#define PERL_ARGS_ASSERT_MY_STRNLEN	\
+	assert(str)
+#endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 PERL_CALLCONV I32	Perl_my_chsize(pTHX_ int fd, Off_t length)
 			__attribute__warn_unused_result__;

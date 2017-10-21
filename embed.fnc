@@ -3038,6 +3038,10 @@ Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 Apnod	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
+#ifndef HAS_STRNLEN
+Apnod	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
+#endif
+
 #ifndef HAS_MKSTEMP
 pno	|int	|my_mkstemp	|NN char *templte
 #endif
