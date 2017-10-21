@@ -250,9 +250,35 @@ L</Platform Support> section, instead.
 
 =over 4
 
-=item *
+=item New probes
 
-XXX
+=over 2
+
+=item HAS_BUILTIN_ADD_OVERFLOW
+
+=item HAS_BUILTIN_MUL_OVERFLOW
+
+=item HAS_BUILTIN_SUB_OVERFLOW
+
+=item HAS_THREAD_SAFE_NL_LANGINFO_L
+
+=item HAS_LOCALECONV_L
+
+=item HAS_MBRLEN
+
+=item HAS_MBRTOWC
+
+=item HAS_MEMRCHR
+
+=item HAS_NANOSLEEP
+
+=item HAS_STRNLEN
+
+=item HAS_STRTOLD_L
+
+=item I_WCHAR
+
+=back
 
 =back
 
