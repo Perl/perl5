@@ -1505,6 +1505,21 @@ sub sorted_test_names {
 }
 
 
+# format one cell data item
+
+sub grind_format_cell {
+    my ($val, $width) = @_;
+    if (!defined $val) {
+        return sprintf " %*s", $width, '-';
+    }
+    elsif ($OPTS{raw}) {
+        return sprintf " %*.1f", $width, $val;
+    }
+    else {
+        return sprintf " %*.2f", $width, $val * 100;
+    }
+}
+
 # grind_print(): display the tabulated results of all the cachegrinds.
 #
 # Arguments are of the form:
@@ -1522,7 +1537,9 @@ sub grind_print {
     $perl_labels{$_->[0]} = $_->[1] for @$perls;
 
     my $field_label_width = 6;
-    # Calculate the width to display for each column.
+
+    # Calculate the width to display for each column based on label widths
+
     my $min_width = $OPTS{raw} ? 8 : 6;
     my @widths = map { length($_) < $min_width ? $min_width : length($_) }
     			@perl_labels;
@@ -1608,16 +1625,7 @@ sub grind_print {
 
             for my $i (0..$#widths) {
                 my $res2 = $res1->{$perl_labels[$i]};
-                my $p = $res2->{$field};
-                if (!defined $p) {
-                    printf " %*s", $widths[$i], '-';
-                }
-                elsif ($OPTS{raw}) {
-                    printf " %*.1f", $widths[$i], $p;
-                }
-                else {
-                    printf " %*.2f", $widths[$i], $p * 100;
-                }
+                print grind_format_cell($res2->{$field}, $widths[$i]);
             }
             print "\n";
         }
@@ -1681,19 +1689,7 @@ sub grind_print_compact {
             : sprintf "%-*s   %s", $name_width, $test_name,
                                  $tests->{$test_name}{desc};
 
-        for my $field (@fields) {
-            my $p = $res->{$field};
-            if (!defined $p) {
-                printf " %*s", $width, '-';
-            }
-            elsif ($OPTS{raw}) {
-                printf " %*.1f", $width, $p;
-            }
-            else {
-                printf " %*.2f", $width, $p * 100;
-            }
-
-        }
+        print grind_format_cell($res->{$_}, $width) for @fields;
 
         print "  $desc\n";
     }
