@@ -1509,14 +1509,15 @@ sub sorted_test_names {
 
 sub grind_format_cell {
     my ($val, $width) = @_;
+    my $s;
     if (!defined $val) {
-        return sprintf " %*s", $width, '-';
+        return sprintf "%*s", $width, '-';
     }
     elsif ($OPTS{raw}) {
-        return sprintf " %*.1f", $width, $val;
+        return sprintf "%*.1f", $width, $val;
     }
     else {
-        return sprintf " %*.2f", $width, $val * 100;
+        return sprintf "%*.2f", $width, $val * 100;
     }
 }
 
@@ -1527,6 +1528,7 @@ sub grind_format_cell {
 #    $averages->{perl_label}{field_name} = M
 #    $perls = [ [ perl-exe, perl-label ], ... ]
 #    $tests->{test_name}{desc => ..., ...}
+#    $order = [ 'foo::bar1', ... ]  # order to display tests
 
 sub grind_print {
     my ($results, $averages, $perls, $tests, $order) = @_;
@@ -1536,96 +1538,103 @@ sub grind_print {
     my %perl_labels;
     $perl_labels{$_->[0]} = $_->[1] for @$perls;
 
-    my $field_label_width = 6;
-
-    # Calculate the width to display for each column based on label widths
-
-    my $min_width = $OPTS{raw} ? 8 : 6;
-    my @widths = map { length($_) < $min_width ? $min_width : length($_) }
-    			@perl_labels;
-
     # Print standard header.
     grind_blurb($perls);
 
     my @test_names = sorted_test_names($results, $order, $perls);
 
+    my @fields = qw(Ir Dr Dw COND IND
+                     COND_m IND_m
+                     Ir_m1 Dr_m1 Dw_m1
+                     Ir_mm Dr_mm Dw_mm
+                  );
+
+    if ($OPTS{fields}) {
+        @fields = grep exists $OPTS{fields}{$_}, @fields;
+    }
+
     # If only a single field is to be displayed, use a more compact
     # format with only a single line of output per test.
 
-    my $one_field = defined $OPTS{fields} &&  keys(%{$OPTS{fields}}) == 1;
+    my $one_field = @fields == 1;
 
-    if ($one_field) {
-        print "\nResults for field " . (keys(%{$OPTS{fields}}))[0] . ".\n";
+    # The width of column 0: this is either field names, or for
+    # $one_field, test names
 
-        # The first column will now contain test names rather than
-        # field names; Calculate the max width.
+    my $width0 = 0;
+    for ($one_field ? @test_names : @fields) {
+        $width0 = length if length > $width0;
+    }
 
-        $field_label_width = 0;
-        for (@test_names) {
-            $field_label_width = length if length > $field_label_width;
-        }
+    # Calculate the widths of the data columns
 
-        # Print the perl executables header.
+    my @widths = map length, @perl_labels;
 
-        print "\n";
-        for my $i (0,1) {
-            print " " x $field_label_width;
-            for (0..$#widths) {
-                printf " %*s", $widths[$_],
-                    $i ? ('-' x$widths[$_]) :  $perl_labels[$_];
+    for my $test (@test_names) {
+        my $res = ($test eq 'AVERAGE') ? $averages : $results->{$test};
+        for my $field (@fields) {
+            for my $i (0..$#widths) {
+                my $l = length grind_format_cell(
+                                    $res->{$perl_labels[$i]}{$field}, 1);
+                $widths[$i] = $l if $l > $widths[$i];
             }
-            print "\n";
         }
     }
 
-    # Dump the results for each test.
+    # Print the results for each test
 
-    for my $test_name (@test_names) {
+    for my $test (0..$#test_names) {
+        my $test_name = $test_names[$test];
         my $doing_ave = ($test_name eq 'AVERAGE');
-        my $res1 = $doing_ave ? $averages : $results->{$test_name};
+        my $res = $doing_ave ? $averages : $results->{$test_name};
 
-        unless ($one_field) {
+        # print per-test header
+
+        if ($one_field) {
+            print "\nResults for field $fields[0]\n\n" if $test == 0;
+        }
+        else {
             print "\n$test_name";
             print "\n$tests->{$test_name}{desc}" unless $doing_ave;
             print "\n\n";
+        }
 
-            # Print the perl executables header.
+        # Print the perl executable names header.
+
+        if (!$one_field || $test == 0) {
             for my $i (0,1) {
-                print " " x $field_label_width;
+                print " " x $width0;
                 for (0..$#widths) {
                     printf " %*s", $widths[$_],
-                        $i ? ('-' x$widths[$_]) :  $perl_labels[$_];
+                        $i ? ('-' x$widths[$_]) : $perl_labels[$_];
                 }
                 print "\n";
             }
         }
 
-        for my $field (qw(Ir Dr Dw COND IND
-                          N
-                          COND_m IND_m
-                          N
-                          Ir_m1 Dr_m1 Dw_m1
-                          N
-                          Ir_mm Dr_mm Dw_mm
-                      ))
-        {
-            next if $OPTS{fields} and ! exists $OPTS{fields}{$field};
+        my $field_suffix = '';
 
-            if ($field eq 'N') {
-                print "\n";
-                next;
-            }
+        # print a line of data
 
+        for my $field (@fields) {
             if ($one_field) {
-                printf "%-*s", $field_label_width, $test_name;
+                printf "%-*s", $width0, $test_name;
             }
             else {
-                printf "%*s", $field_label_width, $field;
+                # If there are enough fields, print a blank line
+                # between groups of fields that have the same suffix
+                if (@fields > 4) {
+                    my $s = '';
+                    $s = $1 if $field =~ /(_\w+)$/;
+                    print "\n" if $s ne $field_suffix;
+                    $field_suffix = $s;
+                }
+                printf "%*s", $width0, $field;
             }
 
             for my $i (0..$#widths) {
-                my $res2 = $res1->{$perl_labels[$i]};
-                print grind_format_cell($res2->{$field}, $widths[$i]);
+                print " ", grind_format_cell($res->{$perl_labels[$i]}{$field},
+                                            $widths[$i]);
             }
             print "\n";
         }
@@ -1643,13 +1652,10 @@ sub grind_print {
 #    $averages->{perl_label}{field_name} = M
 #    $perls = [ [ perl-exe, perl-label ], ... ]
 #    $tests->{test_name}{desc => ..., ...}
+#    $order = [ 'foo::bar1', ... ]  # order to display tests
 
 sub grind_print_compact {
     my ($results, $averages, $which_perl, $perls, $tests, $order) = @_;
-
-
-    # the width to display for each column.
-    my $width = $OPTS{raw} ? 7 : 6;
 
     # Print standard header.
     grind_blurb($perls);
@@ -1670,15 +1676,34 @@ sub grind_print_compact {
         @fields = grep exists $OPTS{fields}{$_}, @fields;
     }
 
-    printf " %*s", $width, $_      for @fields;
-    print "\n";
-    printf " %*s", $width, '------' for @fields;
-    print "\n";
+    # calculate the the max width of the test names
 
     my $name_width = 0;
     for (@test_names) {
         $name_width = length if length > $name_width;
     }
+
+    # Calculate the widths of the data columns
+
+    my @widths = map length, @fields;
+
+    for my $test (@test_names) {
+        my $res = ($test eq 'AVERAGE') ? $averages : $results->{$test};
+        $res = $res->{$perls->[$which_perl][1]};
+        for my $i (0..$#fields) {
+            my $l = length grind_format_cell($res->{$fields[$i]}, 1);
+            $widths[$i] = $l if $l > $widths[$i];
+        }
+    }
+
+    # Print header
+
+    printf " %*s", $widths[$_], $fields[$_] for 0..$#fields;
+    print "\n";
+    printf " %*s", $_, ('-' x $_) for @widths;
+    print "\n";
+
+    # Print the results for each test
 
     for my $test_name (@test_names) {
         my $doing_ave = ($test_name eq 'AVERAGE');
@@ -1689,8 +1714,9 @@ sub grind_print_compact {
             : sprintf "%-*s   %s", $name_width, $test_name,
                                  $tests->{$test_name}{desc};
 
-        print grind_format_cell($res->{$_}, $width) for @fields;
-
+        for my $i (0..$#fields) {
+            print " ", grind_format_cell($res->{$fields[$i]}, $widths[$i]);
+        }
         print "  $desc\n";
     }
 }

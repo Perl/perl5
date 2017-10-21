@@ -81,6 +81,15 @@ my %format_qrs;
                     . ($l + 1)
                     . ",}-)"
                }ge;
+
+        # convert run of space chars into ' +' or ' *'
+
+        $f =~ s/(\A|\n)(\\ )+/$1 */g;
+        $f =~ s/(\\ )+/ +/g;
+
+        # convert '---' placeholders into a regex
+        $f =~ s/(\\-){2,}/-+/g;
+
         $format_qrs{$name} = qr/\A$f\z/;
     }
 }
@@ -546,12 +555,21 @@ done_testing();
 # Templates for expected output formats.
 #
 # Lines starting with '#' are skipped.
+#
 # Lines of the form 'FORMAT: foo' start and name a new template
+#
 # All other lines are part of the template
+#
 # Entries of the form NNNN.NN are converted into a regex of the form
 #    ( \s* -? \d+\.\d\d | - )
 # i.e. it expects number with a fixed number of digits after the point,
 # or a '-'.
+#
+# Any runs of space chars (but not tab) are converted into ' +',
+# or ' *' if at the start of a line
+#
+# Entries of the form --- are converted into [-]+
+#
 # Lines of the form %%FOO%% are substituted with format 'FOO'
 
 
@@ -774,7 +792,7 @@ p0 at 100.0%.
 Higher is better: for example, using half as many instructions gives 200%,
 while using twice as many gives 50%.
 
-Results for field Ir.
+Results for field Ir
 
                      p0     p1
                  ------ ------
