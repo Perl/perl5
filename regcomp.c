@@ -628,7 +628,7 @@ static const scan_data_t zero_scan_data = {
     UTF8fARG(UTF,                                                           \
              (xI(xC) > eC) /* Don't run off end */                          \
               ? eC - sC   /* Length before the <--HERE */                   \
-              : xI_offset(xC),                                              \
+              : ( __ASSERT_(xI_offset(xC) >= 0) xI_offset(xC) ),            \
              sC),         /* The input pattern printed up to the <--HERE */ \
     UTF8fARG(UTF,                                                           \
              (xI(xC) > eC) ? 0 : eC - xI(xC), /* Length after <--HERE */    \
