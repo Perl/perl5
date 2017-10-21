@@ -4257,6 +4257,24 @@ $ tmp = "memrchr"
 $ GOSUB inlibc
 $ d_memrchr = tmp
 $!
+$! Check for strnlen
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <string.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "size_t len;"
+$ WS "len = strnlen(""foot"", 3);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "strnlen"
+$ GOSUB inlibc
+$ d_strnlen = tmp
+$!
 $! Check for strtoull
 $!
 $ OS
@@ -6400,7 +6418,7 @@ $ WC "d_strcoll='" + d_strcoll + "'"
 $ WC "d_strftime='define'"
 $ WC "d_strlcat='undef'"
 $ WC "d_strlcpy='undef'"
-$ WC "d_strnlen='undef'"
+$ WC "d_strnlen='" + d_strnlen + "'"
 $ WC "d_strtod='define'"
 $ WC "d_strtol='define'"
 $ WC "d_strtold='" + d_strtold + "'"
