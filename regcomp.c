@@ -12165,7 +12165,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         }
 
         /* Fail if caller doesn't want to handle a multi-code-point sequence.
-         * But don't backup up the pointer if the caller want to know how many
+         * But don't backup up the pointer if the caller wants to know how many
          * code points there are (they can then handle things) */
         if (! node_p) {
             if (! cp_count) {
