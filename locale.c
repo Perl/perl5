@@ -1195,40 +1195,14 @@ Perl_langinfo(const int item)
 #endif
 {
     bool toggle = TRUE;
+    dTHX;
 
 #if defined(HAS_NL_LANGINFO)
-#  if ! defined(USE_ITHREADS)
 
-    /* Single-thread, and nl_langinfo() is available.  Call it, switching to
-     * underlying LC_NUMERIC for those items dependent on it */
-
-    const char * retval;
-
-    if (toggle) {
-        if (item == PERL_RADIXCHAR || item == PERL_THOUSEP) {
-            setlocale(LC_NUMERIC, PL_numeric_name);
-        }
-        else {
-            toggle = FALSE;
-        }
-    }
-
-    retval = nl_langinfo(item);
-
-    if (toggle) {
-        setlocale(LC_NUMERIC, "C");
-    }
-
-    return retval;
-
-
-#  else
-
-    /* Multi-threaded, with native nl_langinfo().  Use it, copying result to
-     * per-thread buffer, and toggling LC_NUMERIC if necessary, all within a
-     * crtical section */
-
-    dTHX;
+    /* nl_langinfo() is available.  Call it, switching to underlying LC_NUMERIC
+     * for those items dependent on it.  This must be copied to a buffer before
+     * switching back, as some systems destroy the buffer when setlocale() is
+     * called */
 
     LOCALE_LOCK;
 
@@ -1251,11 +1225,7 @@ Perl_langinfo(const int item)
 
     return PL_langinfo_buf;
 
-#  endif
 #else   /* Below, emulate nl_langinfo as best we can */
-
-    dTHX;
-
 #  ifdef HAS_LOCALECONV
 
     const struct lconv* lc;
