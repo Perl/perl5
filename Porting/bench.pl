@@ -619,7 +619,7 @@ sub read_tests_file {
     # validate and process each test
 
     {
-        my %valid = map { $_ => 1 } qw(desc setup code);
+        my %valid = map { $_ => 1 } qw(desc setup code pre post);
         my @tests = @$ta;
         if (!@tests || @tests % 2 != 0) {
             die "Error: '$file' does not contain evenly paired test names and hashes\n";
@@ -846,19 +846,33 @@ sub process_executables_list {
 
 
 
-# Return a string containing perl test code wrapped in a loop
-# that runs $ARGV[0] times
+# Return a string containing a perl program which runs the benchmark code
+# $ARGV[0] times. If $body is true, include the main body (setup) in
+# the loop; otherwise create an empty loop with just pre and post.
+# Note that an empty body is handled with '1;' so that a completely empty
+# loop has a single nextstate rather than a stub op, so more closely
+# matches the active loop; e.g.:
+#   {1;}    => nextstate;                       unstack
+#   {$x=1;} => nextstate; const; gvsv; sassign; unstack
+# Note also that each statement is prefixed with a label; this avoids
+# adjacent nextstate ops being optimised away
 
 sub make_perl_prog {
-    my ($test, $desc, $setup, $code) = @_;
+    my ($name, $test, $body) = @_;
+    my ($desc, $setup, $code, $pre, $post) =
+                                    @$test{qw(desc setup code pre post)};
 
+    $pre  = defined $pre  ? "_PRE_: $pre; " : "";
+    $post = defined $post ? "_POST_: $post; " : "";
+    $code = $body ? $code : "1";
+    $code = "_CODE_: $code; ";
     return <<EOF;
 # $desc
-package $test;
+package $name;
 BEGIN { srand(0) }
 $setup;
 for my \$__loop__ (1..\$ARGV[0]) {
-    $code;
+    $pre$code$post
 }
 EOF
 }
@@ -1143,14 +1157,9 @@ sub grind_run {
     for my $test (grep $tests->{$_}, @$order) {
 
         # Create two test progs: one with an empty loop and one with code.
-        # Note that the empty loop is actually '{1;}' rather than '{}';
-        # this causes the loop to have a single nextstate rather than a
-        # stub op, so more closely matches the active loop; e.g.:
-        #   {1;}    => nextstate;                       unstack
-        #   {$x=1;} => nextstate; const; gvsv; sassign; unstack
         my @prog = (
-            make_perl_prog($test, @{$tests->{$test}}{qw(desc setup)}, '1'),
-            make_perl_prog($test, @{$tests->{$test}}{qw(desc setup code)}),
+            make_perl_prog($test, $tests->{$test}, 0),
+            make_perl_prog($test, $tests->{$test}, 1),
         );
 
         for my $p (@$perls) {
