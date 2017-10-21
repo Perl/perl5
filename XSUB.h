@@ -127,24 +127,18 @@ is a lexical C<$_> in scope.
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
 #  define XS_INTERNAL(name) STATIC XSPROTO(name)
-#endif
-#if defined(__SYMBIAN32__)
+#elif defined(__SYMBIAN32__)
 #  define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
 #  define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
-#endif
-#ifndef XS_EXTERNAL
-#  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
-#    define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
-#    define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
-#  else
-#    ifdef __cplusplus
-#      define XS_EXTERNAL(name) extern "C" XSPROTO(name)
-#      define XS_INTERNAL(name) static XSPROTO(name)
-#    else
-#      define XS_EXTERNAL(name) XSPROTO(name)
-#      define XS_INTERNAL(name) STATIC XSPROTO(name)
-#    endif
-#  endif
+#elif defined(__cplusplus)
+#  define XS_EXTERNAL(name) extern "C" XSPROTO(name)
+#  define XS_INTERNAL(name) static XSPROTO(name)
+#elif defined(HASATTRIBUTE_UNUSED)
+#  define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
+#  define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
+#else
+#  define XS_EXTERNAL(name) XSPROTO(name)
+#  define XS_INTERNAL(name) STATIC XSPROTO(name)
 #endif
 
 /* We do export xsub symbols by default for the public XS macro.

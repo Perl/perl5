@@ -34,17 +34,13 @@ static int not_here(const char *s);
 #ifdef WIN32
 #include <sys/errno2.h>
 #endif
-#ifdef I_FLOAT
 #include <float.h>
-#endif
 #ifdef I_FENV
 #if !(defined(__vax__) && defined(__NetBSD__))
 #include <fenv.h>
 #endif
 #endif
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
 #include <locale.h>
 #include <math.h>
 #ifdef I_PWD
@@ -53,10 +49,7 @@ static int not_here(const char *s);
 #include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
-
-#ifdef I_STDDEF
 #include <stddef.h>
-#endif
 
 #ifdef I_UNISTD
 #include <unistd.h>
@@ -1336,9 +1329,7 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
 #if defined(I_TERMIOS)
 #include <termios.h>
 #endif
-#ifdef I_STDLIB
 #include <stdlib.h>
-#endif
 #ifndef __ultrix__
 #include <string.h>
 #endif

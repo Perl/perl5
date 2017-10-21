@@ -18,7 +18,7 @@ START_EXTERN_C
 
 extern REGEXP*	my_re_compile (pTHX_ SV * const pattern, const U32 pm_flags);
 extern REGEXP*	my_re_op_compile (pTHX_ SV ** const patternp, int pat_count,
-		    OP *expr, const regexp_engine* eng, REGEXP *VOL old_re,
+		    OP *expr, const regexp_engine* eng, REGEXP *volatile old_re,
 		     bool *is_bare_re, U32 rx_flags, U32 pm_flags);
 
 extern I32	my_regexec (pTHX_ REGEXP * const prog, char* stringarg, char* strend,

@@ -122,7 +122,7 @@ Perl_taint_env(pTHX)
     while (1) {
         MAGIC* mg;
 	if (i)
-	    len = my_sprintf(name,"DCL$PATH;%d", i);
+	    len = my_snprintf(name, sizeof name, "DCL$PATH;%d", i);
 	svp = hv_fetch(GvHVn(PL_envgv), name, len, FALSE);
 	if (!svp || *svp == &PL_sv_undef)
 	    break;

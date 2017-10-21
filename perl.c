@@ -62,10 +62,6 @@ union control_un {
 #  endif
 #endif
 
-#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE) && !defined(PERL_MICRO)
-char *getenv (char *); /* Usually in <stdlib.h> */
-#endif
-
 static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
@@ -427,14 +423,10 @@ perl_construct(pTHXx)
 	    Perl_croak(aTHX_ "panic: sysconf: pagesize unknown");
 	}
       }
-#else
-#   ifdef HAS_GETPAGESIZE
+#elif defined(HAS_GETPAGESIZE)
       PL_mmap_page_size = getpagesize();
-#   else
-#       if defined(I_SYS_PARAM) && defined(PAGESIZE)
+#elif defined(I_SYS_PARAM) && defined(PAGESIZE)
       PL_mmap_page_size = PAGESIZE;       /* compiletime, bad */
-#       endif
-#   endif
 #endif
       if (PL_mmap_page_size <= 0)
 	Perl_croak(aTHX_ "panic: bad pagesize %" IVdf,
@@ -611,7 +603,7 @@ int
 perl_destruct(pTHXx)
 {
     dVAR;
-    VOL signed char destruct_level;  /* see possible values in intrpvar.h */
+    volatile signed char destruct_level;  /* see possible values in intrpvar.h */
     HV *hv;
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
     pid_t child;
@@ -2838,14 +2830,14 @@ See L<perlcall>.
 */
 
 I32
-Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
+Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
           		/* See G_* flags in cop.h */
 {
     dVAR;
     LOGOP myop;		/* fake syntax tree node */
     METHOP method_op;
     I32 oldmark;
-    VOL I32 retval = 0;
+    volatile I32 retval = 0;
     bool oldcatch = CATCH_GET;
     int ret;
     OP* const oldop = PL_op;
@@ -2993,8 +2985,8 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 {
     dVAR;
     UNOP myop;		/* fake syntax tree node */
-    VOL I32 oldmark;
-    VOL I32 retval = 0;
+    volatile I32 oldmark;
+    volatile I32 retval = 0;
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;
@@ -4638,12 +4630,10 @@ S_init_perllib(pTHX)
     s = PerlEnv_lib_path(PERL_FS_VERSION, &len);
     if (s)
 	incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#else
-#  ifdef NETWARE
+#elif defined(NETWARE)
     S_incpush_use_sep(aTHX_ PRIVLIB_EXP, 0, INCPUSH_CAN_RELOCATE);
-#  else
+#else
     S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
-#  endif
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
@@ -4720,12 +4710,10 @@ S_init_perllib(pTHX)
 
 #if defined(DOSISH) || defined(__SYMBIAN32__)
 #    define PERLLIB_SEP ';'
-#else
-#  if defined(__VMS)
+#elif defined(__VMS)
 #    define PERLLIB_SEP PL_perllib_sep
-#  else
+#else
 #    define PERLLIB_SEP ':'
-#  endif
 #endif
 #ifndef PERLLIB_MANGLE
 #  define PERLLIB_MANGLE(s,n) (s)
@@ -5051,7 +5039,7 @@ void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
     SV *atsv;
-    VOL const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
+    volatile const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
     CV *cv;
     STRLEN len;
     int ret;

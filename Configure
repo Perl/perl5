@@ -336,7 +336,6 @@ rm_try=''
 afs=''
 afsroot=''
 alignbytes=''
-ansi2knr=''
 archlib=''
 archlibexp=''
 d_archlib=''
@@ -391,14 +390,11 @@ d_attribute_unused=''
 d_attribute_warn_unused_result=''
 d_printf_format_null=''
 d_backtrace=''
-d_bcmp=''
-d_bcopy=''
 d_builtin_choose_expr=''
 d_builtin_expect=''
 d_builtin_add_overflow=''
 d_builtin_mul_overflow=''
 d_builtin_sub_overflow=''
-d_bzero=''
 d_c99_variadic_macros=''
 d_casti32=''
 castflags=''
@@ -428,7 +424,6 @@ d_ctermid_r=''
 ctime_r_proto=''
 d_ctime_r=''
 d_cuserid=''
-d_dbl_dig=''
 d_dbminitproto=''
 d_difftime=''
 d_dir_dd_fd=''
@@ -665,13 +660,8 @@ d_mbrlen=''
 d_mbrtowc=''
 d_mbstowcs=''
 d_mbtowc=''
-d_memchr=''
-d_memcmp=''
-d_memcpy=''
 d_memmem=''
-d_memmove=''
 d_memrchr=''
-d_memset=''
 d_mkdir=''
 d_mkdtemp=''
 d_mkfifo=''
@@ -748,9 +738,6 @@ d_rename=''
 d_rint=''
 d_rmdir=''
 d_round=''
-d_safebcpy=''
-d_safemcpy=''
-d_sanemcmp=''
 d_sbrkproto=''
 d_scalbn=''
 d_scalbnl=''
@@ -820,8 +807,6 @@ d_signbit=''
 d_sigprocmask=''
 d_sigsetjmp=''
 usesitecustomize=''
-d_snprintf=''
-d_vsnprintf=''
 d_sockatmark=''
 d_sockatmarkproto=''
 d_ip_mreq=''
@@ -844,7 +829,6 @@ sockethdr=''
 socketlib=''
 d_socklen_t=''
 d_socks5_init=''
-d_sprintf_returns_strlen=''
 d_sqrtl=''
 d_srand48_r=''
 srand48_r_proto=''
@@ -871,12 +855,7 @@ stdio_bufsiz=''
 stdio_cnt=''
 stdio_filbuf=''
 stdio_ptr=''
-d_index=''
-d_strchr=''
 d_strcoll=''
-d_strctcpy=''
-d_strerrm=''
-d_strerror=''
 d_sysernlst=''
 d_syserrlst=''
 d_strerror_l=''
@@ -940,9 +919,6 @@ d_vfork=''
 usevfork=''
 d_voidsig=''
 signal_t=''
-d_volatile=''
-d_charvspr=''
-d_vprintf=''
 d_wait4=''
 d_waitpid=''
 d_wcscmp=''
@@ -985,7 +961,6 @@ html3dir=''
 html3direxp=''
 installhtml3dir=''
 i_arpainet=''
-i_assert=''
 i_bfd=''
 i_crypt=''
 db_hashtype=''
@@ -1003,7 +978,6 @@ i_dlfcn=''
 i_execinfo=''
 i_fcntl=''
 i_fenv=''
-i_float=''
 i_fp=''
 i_fp_class=''
 i_gdbm=''
@@ -1013,13 +987,10 @@ i_ieeefp=''
 i_inttypes=''
 i_langinfo=''
 i_libutil=''
-i_limits=''
 i_locale=''
 i_machcthr=''
 i_malloc=''
 i_mallocmalloc=''
-i_math=''
-i_memory=''
 i_mntent=''
 d_gdbm_ndbm_h_uses_prototypes=''
 d_gdbmndbm_h_uses_prototypes=''
@@ -1049,11 +1020,8 @@ i_quadmath=''
 i_shadow=''
 i_socks=''
 i_stdbool=''
-i_stddef=''
 i_stdint=''
 i_stdlib=''
-i_string=''
-strings=''
 i_sunmath=''
 i_sysaccess=''
 i_sysdir=''
@@ -1095,10 +1063,6 @@ timeincl=''
 i_unistd=''
 i_ustat=''
 i_utime=''
-i_values=''
-i_stdarg=''
-i_varargs=''
-i_varhdr=''
 i_vfork=''
 i_wchar=''
 d_inc_version_list=''
@@ -1260,7 +1224,6 @@ prefixexp=''
 installprivlib=''
 privlib=''
 privlibexp=''
-prototype=''
 ptrsize=''
 d_PRIXU64=''
 d_PRId64=''
@@ -1382,7 +1345,6 @@ usethreads=''
 incpath=''
 mips_type=''
 usrinc=''
-vaproto=''
 d_vendorarch=''
 installvendorarch=''
 vendorarch=''
@@ -5813,6 +5775,107 @@ mc_file=$1;
 shift;
 $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs;'
 
+: stub, used only to satisfy other units
+i_stdlib='define'
+
+: check for lengths of integral types
+echo " "
+case "$intsize" in
+'')
+	echo "Checking to see how big your integers are..." >&4
+	$cat >try.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main()
+{
+	printf("intsize=%d;\n", (int)sizeof(int));
+	printf("longsize=%d;\n", (int)sizeof(long));
+	printf("shortsize=%d;\n", (int)sizeof(short));
+	exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok && $run ./try > /dev/null; then
+		eval `$run ./try`
+		echo "Your integers are $intsize bytes long."
+		echo "Your long integers are $longsize bytes long."
+		echo "Your short integers are $shortsize bytes long."
+	else
+		$cat >&4 <<EOM
+!
+Help! I can't compile and run the intsize test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
+!
+EOM
+		dflt=4
+		rp="What is the size of an integer (in bytes)?"
+		. ./myread
+		intsize="$ans"
+		dflt=$intsize
+		rp="What is the size of a long integer (in bytes)?"
+		. ./myread
+		longsize="$ans"
+		dflt=2
+		rp="What is the size of a short integer (in bytes)?"
+		. ./myread
+		shortsize="$ans"
+	fi
+	;;
+esac
+$rm_try
+
+: check for long long
+echo " "
+echo "Checking to see if you have long long..." >&4
+echo 'int main() { long long x = 7; return 0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long long."
+else
+	val="$undef"
+	echo "You do not have long long."
+fi
+$rm_try
+set d_longlong
+eval $setvar
+
+: check for length of long long
+case "${d_longlong}${longlongsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long longs are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(long long));
+    return(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		longlongsize=`$run ./try`
+		echo "Your long longs are $longlongsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long long (in bytes)?"
+		. ./myread
+		longlongsize="$ans"
+	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi
+	;;
+esac
+$rm_try
+
 : determine filename position in cpp output
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
@@ -5924,108 +5987,6 @@ do set $yyy; var=$2; eval "was=\$$2";
 	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
 	set $yyy; shift; shift; yyy=$@;
 done'
-
-: see if stdlib is available
-set stdlib.h i_stdlib
-eval $inhdr
-
-: check for lengths of integral types
-echo " "
-case "$intsize" in
-'')
-	echo "Checking to see how big your integers are..." >&4
-	$cat >try.c <<EOCP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main()
-{
-	printf("intsize=%d;\n", (int)sizeof(int));
-	printf("longsize=%d;\n", (int)sizeof(long));
-	printf("shortsize=%d;\n", (int)sizeof(short));
-	exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok && $run ./try > /dev/null; then
-		eval `$run ./try`
-		echo "Your integers are $intsize bytes long."
-		echo "Your long integers are $longsize bytes long."
-		echo "Your short integers are $shortsize bytes long."
-	else
-		$cat >&4 <<EOM
-!
-Help! I can't compile and run the intsize test program: please enlighten me!
-(This is probably a misconfiguration in your system or libraries, and
-you really ought to fix it.  Still, I'll try anyway.)
-!
-EOM
-		dflt=4
-		rp="What is the size of an integer (in bytes)?"
-		. ./myread
-		intsize="$ans"
-		dflt=$intsize
-		rp="What is the size of a long integer (in bytes)?"
-		. ./myread
-		longsize="$ans"
-		dflt=2
-		rp="What is the size of a short integer (in bytes)?"
-		. ./myread
-		shortsize="$ans"
-	fi
-	;;
-esac
-$rm_try
-
-: check for long long
-echo " "
-echo "Checking to see if you have long long..." >&4
-echo 'int main() { long long x = 7; return 0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long long."
-else
-	val="$undef"
-	echo "You do not have long long."
-fi
-$rm_try
-set d_longlong
-eval $setvar
-
-: check for length of long long
-case "${d_longlong}${longlongsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long longs are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(long long));
-    return(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		longlongsize=`$run ./try`
-		echo "Your long longs are $longlongsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a long long (in bytes)?"
-		. ./myread
-		longlongsize="$ans"
-	fi
-	if $test "X$longsize" = "X$longlongsize"; then
-		echo "(That isn't any different from an ordinary long.)"
-	fi
-	;;
-esac
-$rm_try
 
 : see if inttypes.h is available
 : we want a real compile instead of Inhdr because some systems
@@ -6922,10 +6883,6 @@ EOCP
 esac
 $rm_try
 
-: see if this is a float.h system
-set float.h i_float
-eval $inhdr
-
 : check for long doubles
 echo " "
 echo "Checking to see if you have long double..." >&4
@@ -6984,13 +6941,10 @@ $echo "Checking the kind of long doubles you have..." >&4
 case "$d_longdbl" in
 define)
 $cat <<EOP >try.c
-#$i_float I_FLOAT
 #$i_stdlib I_STDLIB
 #define LONGDBLSIZE $longdblsize
 #define DOUBLESIZE $doublesize
-#ifdef I_FLOAT
 #include <float.h>
-#endif
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
@@ -8122,52 +8076,6 @@ case "$otherlibdirs" in
 esac
 set d_perl_otherlibdirs
 eval $setvar
-
-: Cruising for prototypes
-echo " "
-echo "Checking out function prototypes..." >&4
-$cat >prototype.c <<EOCP
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main(int argc, char *argv[]) {
-	exit(0);}
-EOCP
-if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
-	echo "Your C compiler appears to support function prototypes."
-	val="$define"
-else
-	echo "Your C compiler doesn't seem to understand function prototypes."
-	val="$undef"
-fi
-set prototype
-eval $setvar
-$rm -f prototype*
-
-: Check if ansi2knr is required
-case "$prototype" in
-"$define") ;;
-*)	ansi2knr='ansi2knr'
-	echo " "
-	cat <<EOM >&4
-
-$me:  FATAL ERROR:
-This version of $package can only be compiled by a compiler that
-understands function prototypes.  Unfortunately, your C compiler
-	$cc $ccflags
-doesn't seem to understand them.  Sorry about that.
-
-If GNU cc is available for your system, perhaps you could try that instead.
-
-Eventually, we hope to support building Perl with pre-ANSI compilers.
-If you would like to help in that effort, please contact <perlbug@perl.org>.
-
-Aborting Configure now.
-EOM
-	exit 2
-	;;
-esac
 
 : DTrace support
 dflt_dtrace='/usr/sbin/dtrace'
@@ -10137,46 +10045,6 @@ esac
 prefixvar=vendorscript
 . ./installprefix
 
-: script used to emit important warnings
-cat >warn <<EOS
-$startsh
-if test \$# -gt 0; then
-	echo "\$@" >msg
-else
-	cat >msg
-fi
-echo "*** WARNING:" >&4
-sed -e 's/^/*** /' <msg >&4
-echo "*** " >&4
-cat msg >>config.msg
-echo " " >>config.msg
-rm -f msg
-EOS
-chmod +x warn
-$eunicefix warn
-
-: see which of string.h or strings.h is needed
-echo " "
-strings=`./findhdr string.h`
-if $test "$strings" && $test -r "$strings"; then
-	echo "Using <string.h> instead of <strings.h>." >&4
-	val="$define"
-else
-	val="$undef"
-	strings=`./findhdr strings.h`
-	if $test "$strings" && $test -r "$strings"; then
-		echo "Using <strings.h> instead of <string.h>." >&4
-	else
-		./warn "No string header found -- You'll surely have problems."
-	fi
-fi
-set i_string
-eval $setvar
-case "$i_string" in
-"$undef") strings=`./findhdr strings.h`;;
-*)	  strings=`./findhdr string.h`;;
-esac
-
 : see if qgcvt exists
 set qgcvt d_qgcvt
 eval $inlibc
@@ -10533,12 +10401,7 @@ char *myname = "sprintf";
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
+#include <string.h>
 
 int checkit(char *expect, char *got)
 {
@@ -10817,7 +10680,6 @@ $startsh
 cc="$cc"
 optimize="$optimize"
 ccflags="$ccflags"
-prototype="$prototype"
 define="$define"
 rm_try="$rm_try"
 usethreads=$usethreads
@@ -10845,13 +10707,8 @@ while test $# -ge 2; do
     fi
     shift 2
 done
-test "$prototype" = "$define"  && echo '#define CAN_PROTOTYPE' >> try.c
 cat >> try.c <<'EOCP'
-#ifdef CAN_PROTOTYPE
 #define	_(args) args
-#else
-#define	_(args) ()
-#endif
 EOCP
 echo "$foo" >> try.c
 echo 'int no_real_function_has_this_name _((void)) { return 0; }' >> try.c
@@ -10910,16 +10767,15 @@ set $varname;
 eval $setvar;
 $rm_try'
 
-: see if we should include time.h, sys/time.h, or both
+: see if we should include sys/time.h
 echo " "
+i_time='define'
 if test "X$timeincl" = X; then
-	echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
+	echo "Testing to see if we should include <sys/time.h>." >&4
 	$echo $n "I'm now running the test program...$c"
 	$cat >try.c <<EOCP
 #include <sys/types.h>
-#ifdef I_TIME
 #include <time.h>
-#endif
 #ifdef I_SYSTIME
 #ifdef SYSTIMEKERNEL
 #define KERNEL
@@ -10956,13 +10812,12 @@ EOCP
 	sysselect=''
 	for s_timeval in '-DS_TIMEVAL' ''; do
 	for i_systimek in '' '-DSYSTIMEKERNEL'; do
-	for i_time in '' '-DI_TIME'; do
 	for i_systime in '-DI_SYSTIME' ''; do
 		case "$flags" in
 		'') $echo $n ".$c"
-			set try $i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone
+			set try $i_systime $i_systimek $sysselect $s_timeval $s_timezone
 			if eval $compile; then
-				set X $i_time $i_systime $i_systimek $sysselect $s_timeval
+				set X $i_systime $i_systimek $sysselect $s_timeval
 				shift
 				flags="$*"
 				echo " "
@@ -10974,7 +10829,6 @@ EOCP
 	done
 	done
 	done
-	done
 	timeincl=''
 	echo " "
 	case "$flags" in
@@ -10982,12 +10836,6 @@ EOCP
 		timeincl=`./findhdr sys/time.h`
 		echo "We'll include <sys/time.h> with KERNEL defined." >&4;;
 	*) i_systimek="$undef";;
-	esac
-	case "$flags" in
-	*I_TIME*) i_time="$define"
-		timeincl=`./findhdr time.h`" $timeincl"
-		echo "We'll include <time.h>." >&4;;
-	*) i_time="$undef";;
 	esac
 	case "$flags" in
 	*I_SYSTIME*) i_systime="$define"
@@ -11369,14 +11217,6 @@ set d_attribute_warn_unused_result
 eval $setvar
 $rm -f attrib*
 
-: see if bcmp exists
-set bcmp d_bcmp
-eval $inlibc
-
-: see if bcopy exists
-set bcopy d_bcopy
-eval $inlibc
-
 : see if getpgrp exists
 set getpgrp d_getpgrp
 eval $inlibc
@@ -11687,124 +11527,9 @@ set d_builtin_expect
 eval $setvar
 $rm_try
 
-: see if bzero exists
-set bzero d_bzero
-eval $inlibc
-
-: see if stdarg is available
-echo " "
-if $test `./findhdr stdarg.h`; then
-	echo "<stdarg.h> found." >&4
-	valstd="$define"
-else
-	echo "<stdarg.h> NOT found." >&4
-	valstd="$undef"
-fi
-
-: see if varargs is available
-echo " "
-if $test `./findhdr varargs.h`; then
-	echo "<varargs.h> found." >&4
-else
-	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
-fi
-
-: set up the varargs testing programs
-$cat > varargs.c <<EOP
-#ifdef I_STDARG
-#include <stdarg.h>
-#endif
-#ifdef I_VARARGS
-#include <varargs.h>
-#endif
-
-#ifdef I_STDARG
-int f(char *p, ...)
-#else
-int f(va_alist)
-va_dcl
-#endif
-{
-	va_list ap;
-#ifndef I_STDARG
-	char *p;
-#endif
-#ifdef I_STDARG
-	va_start(ap,p);
-#else
-	va_start(ap);
-	p = va_arg(ap, char *);
-#endif
-	va_end(ap);
-	return 0;
-}
-EOP
-$cat > varargs <<EOP
-$startsh
-if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
-	echo "true"
-else
-	echo "false"
-fi
-$rm -f varargs$_o
-EOP
-chmod +x varargs
-
-: now check which varargs header should be included
-echo " "
-i_varhdr=''
-val=''
-case "$valstd" in
-"$define")
-	if `./varargs I_STDARG`; then
-		val='stdarg.h'
-	elif `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-*)
-	if `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-esac
-case "$val" in
-'')
-	echo " "
-	echo "*** WHOA THERE!!! ***" >&4
-	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
-	case "$knowitall" in
-	'')
-	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
-		exit 1
-		;;
-	esac
-echo "I could not find the definition for va_dcl... You have problems..." >&4
-	val="$undef"; set i_stdarg; eval $setvar
-	val="$undef"; set i_varargs; eval $setvar
-	;;
-*)
-	set i_varhdr
-	eval $setvar
-	case "$i_varhdr" in
-	stdarg.h)
-		val="$define"; set i_stdarg; eval $setvar
-		val="$undef"; set i_varargs; eval $setvar
-		;;
-	varargs.h)
-		val="$undef"; set i_stdarg; eval $setvar
-		val="$define"; set i_varargs; eval $setvar
-		;;
-	esac
-	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
-esac
-$rm -f varargs*
-
 : see if the Compiler supports C99 variadic macros
-case "$i_stdarg$i_stdlib" in
-    "$define$define")
-    echo "You have <stdarg.h> and <stdlib.h>, so checking for C99 variadic macros." >&4
-    $cat >try.c <<EOCP
+echo "Checking for C99 variadic macros." >&4
+$cat >try.c <<EOCP
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -11817,29 +11542,23 @@ int main() {
   return 0;
 }
 EOCP
-    set try
-    if eval $compile && $run ./try 2>&1 >/dev/null; then
-	case "`$run ./try`" in
-	    "123 456 789")
-	    echo "You have C99 variadic macros." >&4
-	    d_c99_variadic_macros="$define"
-	    ;;
-	    *)
-	    echo "You don't have functional C99 variadic macros." >&4
-	    d_c99_variadic_macros="$undef"
-	    ;;
-	esac
-    else
-	echo "I couldn't compile and run the test program, so I assume that you don't have functional C99 variadic macros." >&4
+set try
+if eval $compile && $run ./try 2>&1 >/dev/null; then
+    case "`$run ./try`" in
+	"123 456 789")
+	echo "You have C99 variadic macros." >&4
+	d_c99_variadic_macros="$define"
+	;;
+	*)
+	echo "You don't have functional C99 variadic macros." >&4
 	d_c99_variadic_macros="$undef"
-    fi
-    $rm_try
-    ;;
-    *)
-    echo "You don't have <stdarg.h> and <stdlib.h>, so not checking for C99 variadic macros." >&4
+	;;
+    esac
+else
+    echo "I couldn't compile and run the test program, so I assume that you don't have functional C99 variadic macros." >&4
     d_c99_variadic_macros="$undef"
-    ;;
-esac
+fi
+$rm_try
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
@@ -12051,87 +11770,6 @@ $rm_try
 : see if cbrt exists
 set cbrt d_cbrt
 eval $inlibc
-
-: see if vprintf exists
-echo " "
-if set vprintf val -f d_vprintf; eval $csym; $val; then
-	echo 'vprintf() found.' >&4
-	val="$define"
-	$cat >try.c <<EOF
-#$i_stdarg I_STDARG  /* Only one of these can be defined by i_varhrd */
-#$i_varargs I_VARARGS
-
-#$i_stdlib I_STDLIB
-#$i_unistd I_UNISTD
-
-#ifdef I_STDARG
-#  include <stdarg.h>
-#else /* I_VARARGS */
-#  include <varargs.h>
-#endif
-
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-
-#include <stdio.h> /* vsprintf prototype */
-
-#ifdef I_STDARG
-void xxx(int n, ...)
-{
-    va_list args;
-    char buf[10];
-    va_start(args, n);
-    exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
-}
-int main() { xxx(1, "foo"); }
-
-#else /* I_VARARGS */
-
-xxx(va_alist)
-va_dcl
-{
-    va_list args;
-    char buf[10];
-    va_start(args);
-    exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
-}
-int main() { xxx("foo"); }
-
-#endif
-
-EOF
-	set try
-	if eval $compile_ok; then
-		if $run ./try; then
-			echo "Your vsprintf() returns (int)." >&4
-			val2="$undef"
-		else
-			echo "Your vsprintf() returns (char*)." >&4
-			val2="$define"
-		fi
-	else
-		echo 'I am unable to compile the vsprintf() test program.' >&4
-		# We shouldn't get here.  If we do, assume the standard signature,
-		# not the old BSD one.
-		echo 'Guessing that vsprintf() returns (int).' >&4
-		val2="$undef"
-	fi
-else
-	echo 'vprintf() NOT found.' >&4
-	val="$undef"
-	val2="$undef"
-fi
-$rm_try
-set d_vprintf
-eval $setvar
-val=$val2
-set d_charvspr
-eval $setvar
 
 : see if chown exists
 set chown d_chown
@@ -12626,37 +12264,6 @@ esac
 set cuserid d_cuserid
 eval $inlibc
 
-: see if this is a limits.h system
-set limits.h i_limits
-eval $inhdr
-
-: See if number of significant digits in a double precision number is known
-echo " "
-$cat >dbl_dig.c <<EOM
-#$i_limits I_LIMITS
-#$i_float I_FLOAT
-#ifdef I_LIMITS
-#include <limits.h>
-#endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifdef DBL_DIG
-printf("Contains DBL_DIG");
-#endif
-EOM
-$cppstdin $cppflags $cppminus < dbl_dig.c >dbl_dig.E 2>/dev/null
-if $contains 'DBL_DIG' dbl_dig.E >/dev/null 2>&1; then
-	echo "DBL_DIG found." >&4
-	val="$define"
-else
-	echo "DBL_DIG NOT found." >&4
-	val="$undef"
-fi
-$rm -f dbl_dig.?
-set d_dbl_dig
-eval $setvar
-
 : see if dbm.h is available
 : see if dbmclose exists
 set dbmclose d_dbmclose
@@ -12829,11 +12436,7 @@ $cat >dirfd.c <<EOM
 #include <sys/ndir.h>
 #else
 #ifdef I_SYS_DIR
-#ifdef hp9000s500
-#include <ndir.h>	/* may be wrong in the future */
-#else
 #include <sys/dir.h>
-#endif
 #endif
 #endif
 #endif
@@ -13648,12 +13251,7 @@ extern int errno;
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 $signal_t blech(int x) { exit(3); }
 EOCP
 	$cat >> try.c <<'EOCP'
@@ -14320,17 +13918,10 @@ eval $inlibc
 set fp_class d_fp_class
 eval $inlibc
 
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
-
 : check for fpclassify
 echo "Checking to see if you have fpclassify..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return fpclassify(1.0) == FP_NORMAL ? 0 : 1; }
 EOCP
 set try
@@ -16064,39 +15655,6 @@ eval $inlibc
 set ilogbl d_ilogbl
 eval $inlibc
 
-: index or strchr
-echo " "
-if set index val -f; eval $csym; $val; then
-	if set strchr val -f d_strchr; eval $csym; $val; then
-		if $contains strchr "$strings" >/dev/null 2>&1 ; then
-			val="$define"
-			vali="$undef"
-			echo "strchr() found." >&4
-		else
-			val="$undef"
-			vali="$define"
-			echo "index() found." >&4
-		fi
-	else
-		val="$undef"
-		vali="$define"
-		echo "index() found." >&4
-	fi
-else
-	if set strchr val -f d_strchr; eval $csym; $val; then
-		val="$define"
-		vali="$undef"
-		echo "strchr() found." >&4
-	else
-		echo "No index() or strchr() found!" >&4
-		val="$undef"
-		vali="$undef"
-	fi
-fi
-set d_strchr; eval $setvar
-val="$vali"
-set d_index; eval $setvar
-
 : check whether inet_aton exists
 set inet_aton d_inetaton
 eval $inlibc
@@ -16165,10 +15723,7 @@ $rm -f isblank*
 : check for isfinite
 echo "Checking to see if you have isfinite..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isfinite(0.0); }
 EOCP
 set try
@@ -16190,10 +15745,7 @@ eval $inlibc
 : check for isinf
 echo "Checking to see if you have isinf..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isinf(0.0); }
 EOCP
 set try
@@ -16215,10 +15767,7 @@ eval $inlibc
 : check for isless
 echo "Checking to see if you have isless..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isless(0.0); }
 EOCP
 set try
@@ -16236,10 +15785,7 @@ eval $setvar
 : check for isnan
 echo "Checking to see if you have isnan..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isnan(0.0); }
 EOCP
 set try
@@ -16261,10 +15807,7 @@ eval $inlibc
 : check for isnormal
 echo "Checking to see if you have isnormal..." >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
 #include <math.h>
-#endif
 int main() { return isnormal(0.0); }
 EOCP
 set try
@@ -16351,14 +15894,8 @@ eval $setvar
 : See if number of significant digits in a double precision number is known
 echo " "
 $cat >ldbl_dig.c <<EOM
-#$i_limits I_LIMITS
-#$i_float I_FLOAT
-#ifdef I_LIMITS
 #include <limits.h>
-#endif
-#ifdef I_FLOAT
 #include <float.h>
-#endif
 #ifdef LDBL_DIG
 printf("Contains LDBL_DIG");
 #endif
@@ -16385,11 +15922,9 @@ eval $inlibc
 
 : check to see if math.h defines _LIB_VERSION
 d_libm_lib_version="$undef"
-case $i_math in
-    $define)
-	echo " "
-	echo "Checking to see if your libm supports _LIB_VERSION..." >&4
-	$cat >try.c <<EOCP
+echo " "
+echo "Checking to see if your libm supports _LIB_VERSION..." >&4
+$cat >try.c <<EOCP
 #include <unistd.h>
 #include <math.h>
 int main (int argc, char *argv[])
@@ -16398,18 +15933,15 @@ int main (int argc, char *argv[])
     return (0);
     } /* main */
 EOCP
-	set try
-	if eval $compile; then
-	    foo=`$run ./try`
-	    echo "Yes, it does ($foo)" >&4
-	    d_libm_lib_version="$define"
-	else
-	    echo "No, it does not (probably harmless)" >&4
-	    fi
-	$rm_try
-	;;
-
-    esac
+set try
+if eval $compile; then
+    foo=`$run ./try`
+    echo "Yes, it does ($foo)" >&4
+    d_libm_lib_version="$define"
+else
+    echo "No, it does not (probably harmless)" >&4
+    fi
+$rm_try
 
 : see if link exists
 set link d_link
@@ -16491,7 +16023,6 @@ REENTRANT_PROTO*)
 #$i_unistd	I_UNISTD
 #$i_time	I_TIME
 #$i_stdlib	I_STDLIB
-#$i_string	I_STRING
 #$i_malloc	I_MALLOC
 #ifdef I_SYS_TYPES
 #  include <sys/types.h>
@@ -16505,11 +16036,7 @@ REENTRANT_PROTO*)
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
+#include <string.h>
 #ifdef I_MALLOC
 #  include <malloc.h>
 #endif
@@ -16627,32 +16154,12 @@ eval $inlibc
 set mbtowc d_mbtowc
 eval $inlibc
 
-: see if memchr exists
-set memchr d_memchr
-eval $inlibc
-
-: see if memcmp exists
-set memcmp d_memcmp
-eval $inlibc
-
-: see if memcpy exists
-set memcpy d_memcpy
-eval $inlibc
-
 : see if memmem exists
 set memmem d_memmem
 eval $inlibc
 
-: see if memmove exists
-set memmove d_memmove
-eval $inlibc
-
 : see if memrchr exists
 set memrchr d_memrchr
-eval $inlibc
-
-: see if memset exists
-set memset d_memset
 eval $inlibc
 
 : see if mkdir exists
@@ -16724,7 +16231,7 @@ eval $inlibc
 
 : see if prototype for modfl is available
 echo " "
-set d_modflproto modfl $i_math math.h
+set d_modflproto modfl define math.h
 eval $hasproto
 
 if $test "$uselongdouble" = "$define"; then
@@ -16879,37 +16386,6 @@ eval $inlibc
 : see if this is a quadmath.h system
 set quadmath.h i_quadmath
 eval $inhdr
-
-: check for volatile keyword
-echo " "
-echo 'Checking to see if your C compiler knows about "volatile"...' >&4
-$cat >try.c <<'EOCP'
-int main()
-{
-	typedef struct _goo_struct goo_struct;
-	goo_struct * volatile goo = ((goo_struct *)0);
-	struct _goo_struct {
-		long long_int;
-		int reg_int;
-		char char_var;
-	};
-	typedef unsigned short foo_t;
-	char *volatile foo;
-	volatile int bar;
-	volatile foo_t blech;
-	foo = foo;
-}
-EOCP
-if $cc -c $ccflags try.c >/dev/null 2>&1 ; then
-	val="$define"
-	echo "Yup, it does."
-else
-	val="$undef"
-	echo "Nope, it doesn't."
-fi
-set d_volatile
-eval $setvar
-$rm_try
 
 : Check basic sizes
 echo " "
@@ -17104,10 +16580,6 @@ case "$i64type" in
 esac
 
 $echo "Checking how many bits of your UVs your NVs can preserve..." >&4
-: volatile so that the compiler has to store it out to memory.
-if test X"$d_volatile" = X"$define"; then
-	volatile=volatile
-fi
 $cat <<EOP >try.c
 #include <stdio.h>
 #$i_stdlib I_STDLIB
@@ -17117,7 +16589,8 @@ $cat <<EOP >try.c
 #include <sys/types.h>
 #include <signal.h>
 #ifdef SIGFPE
-$volatile int bletched = 0;
+/* volatile so that the compiler has to store it out to memory */
+volatile int bletched = 0;
 $signal_t blech(int s) { bletched = 1; }
 #endif
 int main() {
@@ -17168,10 +16641,6 @@ esac
 $rm_try
 
 $echo "Checking to find the largest integer value your NVs can hold..." >&4
-: volatile so that the compiler has to store it out to memory.
-if test X"$d_volatile" = X"$define"; then
-	volatile=volatile
-fi
 $cat <<EOP >try.c
 #include <stdio.h>
 
@@ -17183,10 +16652,11 @@ main() {
   int count = 1;
 
   while(count < 256) {
-    $volatile NV up = value + 1.0;
-    $volatile NV negated = -value;
-    $volatile NV down = negated - 1.0;
-    $volatile NV got_up = up - value;
+    /* volatile so that the compiler has to store it out to memory */
+    volatile NV up = value + 1.0;
+    volatile NV negated = -value;
+    volatile NV down = negated - 1.0;
+    volatile NV got_up = up - value;
     int up_good = got_up == 1.0;
     int got_down = down - negated;
     int down_good = got_down == -1.0;
@@ -17251,26 +16721,18 @@ fi
 $rm_try
 
 $echo "Checking whether NV 0.0 is all bits zero in memory..." >&4
-: volatile so that the compiler has to store it out to memory.
-if test X"$d_volatile" = X"$define"; then
-	volatile=volatile
-fi
 $cat <<EOP >try.c
 #include <stdio.h>
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
+#include <string.h>
 #include <sys/types.h>
 #include <signal.h>
 #ifdef SIGFPE
-$volatile int bletched = 0;
+/* volatile so that the compiler has to store it out to memory */
+volatile int bletched = 0;
 $signal_t blech(int s) { bletched = 1; }
 #endif
 
@@ -17900,236 +17362,6 @@ eval $inlibc
 : see if round exists
 set round d_round
 eval $inlibc
-
-: see if memory.h is available.
-val=''
-set memory.h val
-eval $inhdr
-
-: See if it conflicts with string.h
-case "$val" in
-$define)
-	case "$strings" in
-	'') ;;
-	*)
-		$cppstdin $cppflags $cppminus < $strings > mem.h
-		if $contains 'memcpy' mem.h >/dev/null 2>&1; then
-			echo " "
-			echo "We won't be including <memory.h>."
-			val="$undef"
-		fi
-		$rm -f mem.h
-		;;
-	esac
-esac
-set i_memory
-eval $setvar
-
-: can bcopy handle overlapping blocks?
-echo " "
-val="$undef"
-case "$d_memmove" in
-"$define") echo "I'll use memmove() instead of bcopy() for overlapping copies." ;;
-*)	case "$d_bcopy" in
-	"$define")
-		echo "Checking to see if bcopy() can do overlapping copies..." >&4
-		$cat >try.c <<EOCP
-#$i_memory I_MEMORY
-#$i_stdlib I_STDLIB
-#$i_string I_STRING
-#$i_unistd I_UNISTD
-EOCP
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#ifdef I_UNISTD
-#  include <unistd.h>  /* Needed for NetBSD */
-#endif
-int main()
-{
-char buf[128], abc[128];
-char *b;
-int len;
-int off;
-int align;
-
-/* Copy "abcde..." string to char abc[] so that gcc doesn't
-   try to store the string in read-only memory. */
-bcopy("abcdefghijklmnopqrstuvwxyz0123456789", abc, 36);
-
-for (align = 7; align >= 0; align--) {
-	for (len = 36; len; len--) {
-		b = buf+align;
-		bcopy(abc, b, len);
-		for (off = 1; off <= len; off++) {
-			bcopy(b, b+off, len);
-			bcopy(b+off, b, len);
-			if (bcmp(b, abc, len))
-				exit(1);
-		}
-	}
-}
-exit(0);
-}
-EOCP
-		set try
-		if eval $compile_ok; then
-			if $run ./try 2>/dev/null; then
-				echo "Yes, it can."
-				val="$define"
-			else
-				echo "It can't, sorry."
-			fi
-		else
-			echo "(I can't compile the test program, so we'll assume not...)"
-		fi
-		;;
-	esac
-	$rm_try
-	;;
-esac
-set d_safebcpy
-eval $setvar
-
-: can memcpy handle overlapping blocks?
-echo " "
-val="$undef"
-case "$d_memmove" in
-"$define") echo "I'll use memmove() instead of memcpy() for overlapping copies." ;;
-*)	case "$d_memcpy" in
-	"$define")
-		echo "Checking to see if memcpy() can do overlapping copies..." >&4
-		$cat >try.c <<EOCP
-#$i_memory I_MEMORY
-#$i_stdlib I_STDLIB
-#$i_string I_STRING
-#$i_unistd I_UNISTD
-EOCP
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#ifdef I_UNISTD
-#  include <unistd.h>  /* Needed for NetBSD */
-#endif
-int main()
-{
-char buf[128], abc[128];
-char *b;
-int len;
-int off;
-int align;
-
-/* Copy "abcde..." string to char abc[] so that gcc doesn't
-   try to store the string in read-only memory. */
-memcpy(abc, "abcdefghijklmnopqrstuvwxyz0123456789", 36);
-
-for (align = 7; align >= 0; align--) {
-	for (len = 36; len; len--) {
-		b = buf+align;
-		memcpy(b, abc, len);
-		for (off = 1; off <= len; off++) {
-			memcpy(b+off, b, len);
-			memcpy(b, b+off, len);
-			if (memcmp(b, abc, len))
-				exit(1);
-		}
-	}
-}
-exit(0);
-}
-EOCP
-		set try
-		if eval $compile_ok; then
-			if $run ./try 2>/dev/null; then
-				echo "Yes, it can."
-				val="$define"
-			else
-				echo "It can't, sorry."
-			fi
-		else
-			echo "(I can't compile the test program, so we'll assume not...)"
-		fi
-		;;
-	esac
-	$rm_try
-	;;
-esac
-set d_safemcpy
-eval $setvar
-
-: can memcmp be trusted to compare relative magnitude?
-val="$undef"
-case "$d_memcmp" in
-"$define")
-	echo " "
-	echo "Checking if your memcmp() can compare relative magnitude..." >&4
-	$cat >try.c <<EOCP
-#$i_memory I_MEMORY
-#$i_stdlib I_STDLIB
-#$i_string I_STRING
-#$i_unistd I_UNISTD
-EOCP
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#ifdef I_UNISTD
-#  include <unistd.h>  /* Needed for NetBSD */
-#endif
-int main()
-{
-char a = -1;
-char b = 0;
-if ((a < b) && memcmp(&a, &b, 1) < 0)
-	exit(1);
-exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		if $run ./try 2>/dev/null; then
-			echo "Yes, it can."
-			val="$define"
-		else
-			echo "No, it can't (it uses signed chars)."
-		fi
-	else
-		echo "(I can't compile the test program, so we'll assume not...)"
-	fi
-	;;
-esac
-$rm_try
-set d_sanemcmp
-eval $setvar
 
 : see if prototype for sbrk is available
 echo " "
@@ -19010,11 +18242,8 @@ eval $inhdr
 : see if signbit exists
 $echo $n "Checking to see if you have signbit() available to work on $nvtype... $c" >&4
 $cat >try.c <<EOCP
-#$i_math I_MATH
 #$i_sunmath I_SUNMATH
-#ifdef I_MATH
-#  include <math.h>
-#endif
+#include <math.h>
 #ifdef I_SUNMATH  /* Solaris special math library */
 #  include <sunmath.h>
 #endif
@@ -19101,71 +18330,6 @@ set d_sigsetjmp
 eval $setvar
 $rm_try
 
-: see if snprintf exists
-set snprintf d_snprintf
-eval $inlibc
-
-: see if vsnprintf exists
-set vsnprintf d_vsnprintf
-eval $inlibc
-
-case "$d_snprintf-$d_vsnprintf" in
-"$define-$define")
-    $cat <<EOM
-Checking whether your snprintf() and vsnprintf() work okay...
-EOM
-    $cat >try.c <<'EOCP'
-/* v?snprintf testing logic courtesy of Russ Allbery.
- * According to C99:
- * - if the buffer is too short it still must be \0-terminated
- * - if the buffer is too short the potentially required length
- *   must be returned and not -1
- * - if the buffer is NULL the potentially required length
- *   must be returned and not -1 or core dump
- */
-#include <stdio.h>
-#include <stdarg.h>
-
-char buf[2];
-
-int test (char *format, ...)
-{
-    va_list args;
-    int count;
-
-    va_start (args, format);
-    count = vsnprintf (buf, sizeof buf, format, args);
-    va_end (args);
-    return count;
-}
-
-int main ()
-{
-    return ((test ("%s", "abcd") == 4 && buf[0] == 'a' && buf[1] == '\0'
-             && snprintf (NULL, 0, "%s", "abcd") == 4) ? 0 : 1);
-}
-EOCP
-    set try
-    if eval $compile; then
-	`$run ./try`
-	case "$?" in
-	0) echo "Your snprintf() and vsnprintf() seem to be working okay." ;;
-	*) cat <<EOM >&4
-Your snprintf() and snprintf() don't seem to be working okay.
-EOM
-	   d_snprintf="$undef"
-	   d_vsnprintf="$undef"
-	   ;;
-	esac
-    else
-	echo "(I can't seem to compile the test program--assuming they don't)"
-	d_snprintf="$undef"
-	d_vsnprintf="$undef"
-    fi
-    $rm_try
-    ;;
-esac
-
 : see if sockatmark exists
 set sockatmark d_sockatmark
 eval $inlibc
@@ -19178,69 +18342,6 @@ eval $hasproto
 : see if socks5_init exists
 set socks5_init d_socks5_init
 eval $inlibc
-
-: see if sprintf returns the length of the string in the buffer as per ANSI
-$echo "Checking whether sprintf returns the length of the string..." >&4
-$cat <<EOP >try.c
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-
-char buffer[256];
-
-int check (size_t expect, int test) {
-  size_t got = strlen(buffer);
-  if (expect == got)
-    return 0;
-
-  printf("expected %ld, got %ld in test %d '%s'\n", (long) expect, (long) got,
-       test, buffer);
-  exit (test);
-}
-
-int main(int argc, char **argv) {
-  int test = 0;
-
-  check(sprintf(buffer, ""), ++test);
-  check(sprintf(buffer, "%s %s", "perl", "rules"), ++test);
-  check(sprintf(buffer, "I like %g", atan2(0,-1)), ++test);
-
-  return 0;
-}
-EOP
-set try
-
-if eval $compile; then
-    xxx="`$run ./try`"
-    case "$?" in
-	0) cat >&4 <<EOM
-sprintf returns the length of the string (as ANSI says it should)
-EOM
-	d_sprintf_returns_strlen="$define"
-	;;
-	*) cat >&4 <<EOM
-sprintf does not return the length of the string (how old is this system?)
-EOM
-	d_sprintf_returns_strlen="$undef"
-        ;;
-    esac
-else
-    echo "(I can't seem to compile the test program--assuming it doesn't)" >&4
-    d_sprintf_returns_strlen="$undef"
-fi
-$rm_try
 
 : see if srand48_r exists
 set srand48_r d_srand48_r
@@ -19531,69 +18632,6 @@ esac
 set strcoll d_strcoll
 eval $inlibc
 
-: check for structure copying
-echo " "
-echo "Checking to see if your C compiler can copy structs..." >&4
-$cat >try.c <<'EOCP'
-int main()
-{
-	struct blurfl {
-		int dyick;
-	} foo, bar;
-
-	foo = bar;
-}
-EOCP
-if $cc -c try.c >/dev/null 2>&1 ; then
-	val="$define"
-	echo "Yup, it can."
-else
-	val="$undef"
-	echo "Nope, it can't."
-fi
-set d_strctcpy
-eval $setvar
-$rm_try
-
-: see if strerror and/or sys_errlist[] exist
-echo " "
-if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
-    if set strerror val -f d_strerror; eval $csym; $val; then
-		echo 'strerror() found.' >&4
-		d_strerror="$define"
-		d_strerrm='strerror(e)'
-		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-			echo "(You also have sys_errlist[], so we could roll our own strerror.)"
-			d_syserrlst="$define"
-		else
-			echo "(Since you don't have sys_errlist[], strerror() is welcome.)"
-			d_syserrlst="$undef"
-		fi
-    elif xxx=`./findhdr string.h`; test "$xxx" || xxx=`./findhdr strings.h`; \
-			$contains '#[ 	]*define.*strerror' "$xxx" >/dev/null 2>&1; then
-		echo 'strerror() found in string header.' >&4
-		d_strerror="$define"
-		d_strerrm='strerror(e)'
-		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-			echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
-				d_syserrlst="$define"
-		else
-			echo "(You don't appear to have any sys_errlist[], how can this be?)"
-			d_syserrlst="$undef"
-		fi
-    elif set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-		echo "strerror() not found, but you have sys_errlist[] so we'll use that." >&4
-		d_strerror="$undef"
-		d_syserrlst="$define"
-		d_strerrm='((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e])'
-    else
-		echo 'strerror() and sys_errlist[] NOT found.' >&4
-		d_strerror="$undef"
-		d_syserrlst="$undef"
-		d_strerrm='"unknown"'
-    fi
-fi
-
 : see if strerror_l exists
 set strerror_l d_strerror_l
 eval $inlibc
@@ -19603,7 +18641,7 @@ set strerror_r d_strerror_r
 eval $inlibc
 case "$d_strerror_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_string string.h"
+	hdrs="$i_systypes sys/types.h define stdio.h define string.h"
 	case "$d_strerror_r_proto:$usethreads" in
 	":define")	d_strerror_r_proto=define
 		set d_strerror_r_proto strerror_r $hdrs
@@ -19955,6 +18993,18 @@ eval $hasproto
 set sysconf d_sysconf
 eval $inlibc
 
+: see if sys_errlist[] exists
+echo " "
+if test "X$d_syserrlst" = X; then
+	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
+		echo "You have sys_errlist[], so we could roll our own strerror."
+		d_syserrlst="$define"
+	else
+		echo "You don't have sys_errlist[], so strerror() is welcome."
+		d_syserrlst="$undef"
+	fi
+fi
+
 : see if system exists
 set system d_system
 eval $inlibc
@@ -19986,10 +19036,7 @@ $cat >try.c <<EOCP
 #ifdef I_STDLIB
 #  include <stdlib.h>
 #endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#endif
+#include <string.h>
 #$i_langinfo I_LANGINFO
 #ifdef I_LANGINFO
 #  include <langinfo.h>
@@ -20465,11 +19512,7 @@ case "$d_closedir" in
 #include <sys/ndir.h>
 #else
 #ifdef I_SYS_DIR
-#ifdef hp9000s500
-#include <ndir.h>	/* may be wrong in the future */
-#else
 #include <sys/dir.h>
-#endif
 #endif
 #endif
 #endif
@@ -20921,14 +19964,8 @@ $cat >try.c <<EOP
 #define LONG_DOUBLESIZE $longdblsize
 #define LONG_DOUBLEKIND $longdblkind
 #endif
-#$i_math I_MATH
-#$i_string I_STRING
-#ifdef I_MATH
 #include <math.h>
-#endif
-#ifdef I_STRING
-#  include <string.h>
-#endif
+#include <string.h>
 #include <stdio.h>
 /* Note that whether the sign bit is on or off
  * for NaN depends on the CPU/FPU, and possibly
@@ -21117,11 +20154,8 @@ $rm_try
 : Check the length of the double mantissa
 $echo "Checking how many mantissa bits your doubles have..." >&4
 $cat >try.c <<EOP
-#$i_float I_FLOAT
 #$i_sunmath I_SUNMATH
-#ifdef I_FLOAT
-# include <float.h>
-#endif
+#include <float.h>
 #ifdef I_SUNMATH
 # include <sunmath.h>
 #endif
@@ -21147,11 +20181,8 @@ $rm_try
 : Check the length of the longdouble mantissa
 $echo "Checking how many mantissa bits your long doubles have..." >&4
 $cat >try.c <<EOP
-#$i_float I_FLOAT
 #$i_sunmath I_SUNMATH
-#ifdef I_FLOAT
-# include <float.h>
-#endif
+#include <float.h>
 #ifdef I_SUNMATH
 # include <sunmath.h>
 #endif
@@ -22037,15 +21068,10 @@ eval $typedef_ask
 
 : see if we need va_copy
 echo " "
-case "$i_stdarg" in
-"$define")
-	$cat >try.c <<EOCP
+$cat >try.c <<EOCP
 #include <stdarg.h>
 #include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
 #include <stdlib.h>
-#endif
 #include <signal.h>
 
 int
@@ -22077,28 +21103,23 @@ main(int ac, char **av)
   exit(0);
 }
 EOCP
-	set try
-	if eval $compile && $run ./try 2>&1 >/dev/null; then
-		case "`$run ./try`" in
-		"that's all right, then")
-			okay=yes
-			;;
-		esac
-	fi
-	case "$okay" in
-	yes)	echo "It seems that you don't need va_copy()." >&4
-		need_va_copy="$undef"
-		;;
-	*)	echo "It seems that va_copy() or similar will be needed." >&4
-		need_va_copy="$define"
+set try
+if eval $compile && $run ./try 2>&1 >/dev/null; then
+	case "`$run ./try`" in
+	"that's all right, then")
+		okay=yes
 		;;
 	esac
-	$rm_try
-	;;
-*)	echo "You don't have <stdarg.h>, not checking for va_copy()." >&4
+fi
+case "$okay" in
+yes)	echo "It seems that you don't need va_copy()." >&4
 	need_va_copy="$undef"
 	;;
+*)	echo "It seems that va_copy() or similar will be needed." >&4
+	need_va_copy="$define"
+	;;
 esac
+$rm_try
 
 : see what type is used for size_t
 rp="What is the type used for the length parameter for string functions?"
@@ -22317,17 +21338,8 @@ else
 fi
 $rm -f foo* bar*
 
-: see if this is a values.h system
-set values.h i_values
-eval $inhdr
-
 : Check the max offset that gmtime and localtime accept
 echo "Checking max offsets that gmtime () accepts"
-
-case $i_values in
-    define) yyy="#include <values.h>" ;;
-    *)      yyy="" ;;
-    esac
 
 case "$sGMTIME_min/$sGMTIME_max" in
     0/0|/)
@@ -22335,7 +21347,6 @@ case "$sGMTIME_min/$sGMTIME_max" in
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
-$yyy
 
 int i;
 struct tm *tmp;
@@ -22414,7 +21425,6 @@ case "$sLOCALTIME_min/$sLOCALTIME_max" in
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
-$yyy
 
 int i;
 struct tm *tmp;
@@ -23490,21 +22500,6 @@ case "$usesitecustomize" in
 	;;
     esac
 
-: see if prototypes support variable argument declarations
-echo " "
-case "$prototype$i_stdarg" in
-$define$define)
-	echo "It appears we'll be able to prototype varargs functions." >&4
-	val="$define"
-	;;
-*)
-	echo "Too bad... We won't be using prototyped varargs functions..." >&4
-	val="$undef"
-	;;
-esac
-set vaproto
-eval $setvar
-
 : determine compiler compiler
 case "$yacc" in
 '')
@@ -23535,10 +22530,6 @@ case "$yacc" in
 	esac
 	;;
 esac
-
-: see if this is a assert.h system
-set assert.h i_assert
-eval $inhdr
 
 : see if this is a bfd.h system
 set bfd.h i_bfd
@@ -23663,7 +22654,7 @@ FAVOR_BSD FILE_OFFSET_BITS FORTIFY_SOURCE FreeBSD
 GCC_NEW_VARARGS gcos gcx gimpel GLIBC GLIBC_MINOR GNUC GNUC_MINOR
 GNU_LIBRARY GNU_SOURCE GO32 gould GOULD_PN
 H3050R H3050RX hbullx20 hcx host_mips hp200 hp300 HP700 hp700
-hp800 hp9000 hp9000s200 hp9000s300 hp9000s400 hp9000s500
+hp800 hp9000 hp9000s200 hp9000s300 hp9000s400
 hp9000s700 hp9000s800 hp9k8 hppa hpux HPUX_SOURCE hp_osf
 i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960 IA32 IA64
 iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
@@ -23886,6 +22877,24 @@ case "$gccversion" in
 	;;
 esac
 
+: script used to emit important warnings
+cat >warn <<EOS
+$startsh
+if test \$# -gt 0; then
+	echo "\$@" >msg
+else
+	cat >msg
+fi
+echo "*** WARNING:" >&4
+sed -e 's/^/*** /' <msg >&4
+echo "*** " >&4
+cat msg >>config.msg
+echo " " >>config.msg
+rm -f msg
+EOS
+chmod +x warn
+$eunicefix warn
+
 : see if this is a termio system
 val="$undef"
 val2="$undef"
@@ -23969,10 +22978,6 @@ fi
 $rm_try
 set i_stdbool
 eval $setvar
-
-: see if stddef is available
-set stddef.h i_stddef
-eval $inhdr
 
 : see if stdint is available
 set stdint.h i_stdint
@@ -24619,7 +23624,6 @@ _o='$_o'
 afs='$afs'
 afsroot='$afsroot'
 alignbytes='$alignbytes'
-ansi2knr='$ansi2knr'
 aphostname='$aphostname'
 api_revision='$api_revision'
 api_subversion='$api_subversion'
@@ -24716,8 +23720,6 @@ d_attribute_pure='$d_attribute_pure'
 d_attribute_unused='$d_attribute_unused'
 d_attribute_warn_unused_result='$d_attribute_warn_unused_result'
 d_backtrace='$d_backtrace'
-d_bcmp='$d_bcmp'
-d_bcopy='$d_bcopy'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdsetpgrp='$d_bsdsetpgrp'
@@ -24726,12 +23728,10 @@ d_builtin_choose_expr='$d_builtin_choose_expr'
 d_builtin_expect='$d_builtin_expect'
 d_builtin_mul_overflow='$d_builtin_mul_overflow'
 d_builtin_sub_overflow='$d_builtin_sub_overflow'
-d_bzero='$d_bzero'
 d_c99_variadic_macros='$d_c99_variadic_macros'
 d_casti32='$d_casti32'
 d_castneg='$d_castneg'
 d_cbrt='$d_cbrt'
-d_charvspr='$d_charvspr'
 d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
@@ -24751,7 +23751,6 @@ d_ctermid_r='$d_ctermid_r'
 d_ctime64='$d_ctime64'
 d_ctime_r='$d_ctime_r'
 d_cuserid='$d_cuserid'
-d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
 d_difftime64='$d_difftime64'
 d_difftime='$d_difftime'
@@ -24908,7 +23907,6 @@ d_hypot='$d_hypot'
 d_ilogb='$d_ilogb'
 d_ilogbl='$d_ilogbl'
 d_inc_version_list='$d_inc_version_list'
-d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_inetntop='$d_inetntop'
 d_inetpton='$d_inetpton'
@@ -24974,13 +23972,8 @@ d_mbrlen='$d_mbrlen'
 d_mbrtowc='$d_mbrtowc'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
-d_memchr='$d_memchr'
-d_memcmp='$d_memcmp'
-d_memcpy='$d_memcpy'
 d_memmem='$d_memmem'
-d_memmove='$d_memmove'
 d_memrchr='$d_memrchr'
-d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkdtemp='$d_mkdtemp'
 d_mkfifo='$d_mkfifo'
@@ -25069,9 +24062,6 @@ d_rewinddir='$d_rewinddir'
 d_rint='$d_rint'
 d_rmdir='$d_rmdir'
 d_round='$d_round'
-d_safebcpy='$d_safebcpy'
-d_safemcpy='$d_safemcpy'
-d_sanemcmp='$d_sanemcmp'
 d_sbrkproto='$d_sbrkproto'
 d_scalbn='$d_scalbn'
 d_scalbnl='$d_scalbnl'
@@ -25138,7 +24128,6 @@ d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
 d_sin6_scope_id='$d_sin6_scope_id'
 d_sitearch='$d_sitearch'
-d_snprintf='$d_snprintf'
 d_sockaddr_in6='$d_sockaddr_in6'
 d_sockaddr_sa_len='$d_sockaddr_sa_len'
 d_sockatmark='$d_sockatmark'
@@ -25147,7 +24136,6 @@ d_socket='$d_socket'
 d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_socks5_init='$d_socks5_init'
-d_sprintf_returns_strlen='$d_sprintf_returns_strlen'
 d_sqrtl='$d_sqrtl'
 d_srand48_r='$d_srand48_r'
 d_srandom_r='$d_srandom_r'
@@ -25166,11 +24154,7 @@ d_stdio_ptr_lval_sets_cnt='$d_stdio_ptr_lval_sets_cnt'
 d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
-d_strchr='$d_strchr'
 d_strcoll='$d_strcoll'
-d_strctcpy='$d_strctcpy'
-d_strerrm='$d_strerrm'
-d_strerror='$d_strerror'
 d_strerror_l='$d_strerror_l'
 d_strerror_r='$d_strerror_r'
 d_strftime='$d_strftime'
@@ -25232,9 +24216,6 @@ d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
 d_voidtty='$d_voidtty'
-d_volatile='$d_volatile'
-d_vprintf='$d_vprintf'
-d_vsnprintf='$d_vsnprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcscmp='$d_wcscmp'
@@ -25348,7 +24329,6 @@ i64type='$i64type'
 i8size='$i8size'
 i8type='$i8type'
 i_arpainet='$i_arpainet'
-i_assert='$i_assert'
 i_bfd='$i_bfd'
 i_bsdioctl='$i_bsdioctl'
 i_crypt='$i_crypt'
@@ -25359,7 +24339,6 @@ i_dlfcn='$i_dlfcn'
 i_execinfo='$i_execinfo'
 i_fcntl='$i_fcntl'
 i_fenv='$i_fenv'
-i_float='$i_float'
 i_fp='$i_fp'
 i_fp_class='$i_fp_class'
 i_gdbm='$i_gdbm'
@@ -25370,13 +24349,10 @@ i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
 i_langinfo='$i_langinfo'
 i_libutil='$i_libutil'
-i_limits='$i_limits'
 i_locale='$i_locale'
 i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
 i_mallocmalloc='$i_mallocmalloc'
-i_math='$i_math'
-i_memory='$i_memory'
 i_mntent='$i_mntent'
 i_ndbm='$i_ndbm'
 i_netdb='$i_netdb'
@@ -25392,12 +24368,9 @@ i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
 i_socks='$i_socks'
-i_stdarg='$i_stdarg'
 i_stdbool='$i_stdbool'
-i_stddef='$i_stddef'
 i_stdint='$i_stdint'
 i_stdlib='$i_stdlib'
-i_string='$i_string'
 i_sunmath='$i_sunmath'
 i_sysaccess='$i_sysaccess'
 i_sysdir='$i_sysdir'
@@ -25434,9 +24407,6 @@ i_time='$i_time'
 i_unistd='$i_unistd'
 i_ustat='$i_ustat'
 i_utime='$i_utime'
-i_values='$i_values'
-i_varargs='$i_varargs'
-i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
 i_wchar='$i_wchar'
 i_xlocale='$i_xlocale'
@@ -25598,7 +24568,6 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 procselfexe='$procselfexe'
-prototype='$prototype'
 ptrsize='$ptrsize'
 quadkind='$quadkind'
 quadtype='$quadtype'
@@ -25709,7 +24678,6 @@ stdio_filbuf='$stdio_filbuf'
 stdio_ptr='$stdio_ptr'
 stdio_stream_array='$stdio_stream_array'
 strerror_r_proto='$strerror_r_proto'
-strings='$strings'
 submit='$submit'
 subversion='$subversion'
 sysman='$sysman'
@@ -25790,7 +24758,6 @@ uvsize='$uvsize'
 uvtype='$uvtype'
 uvuformat='$uvuformat'
 uvxformat='$uvxformat'
-vaproto='$vaproto'
 vendorarch='$vendorarch'
 vendorarchexp='$vendorarchexp'
 vendorbin='$vendorbin'

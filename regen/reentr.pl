@@ -540,16 +540,12 @@ EOF
 	PL_reentrant_buffer->$sz = sysconf($sc);
 	if (PL_reentrant_buffer->$sz == (size_t) -1)
 		PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
-#   else
-#       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
+#   elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->$sz = SIABUFSIZ;
-#       else
-#           ifdef __sgi
+#   elif defined(__sgi)
 	PL_reentrant_buffer->$sz = BUFSIZ;
-#           else
+#   else
 	PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
-#           endif
-#       endif
 #   endif 
 EOF
 	    pushinitfree $genfunc;

@@ -1055,12 +1055,6 @@ s	|void	|move_proto_attr|NN OP **proto|NN OP **attrs \
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
 Ap	|NV	|my_atof	|NN const char *s
-#if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
-Anp	|void*	|my_bcopy	|NN const void* vfrom|NN void* vto|size_t len
-#endif
-#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-Anp	|void*	|my_bzero	|NN void* vloc|size_t len
-#endif
 Apr	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Ap	|I32	|my_fflush_all
@@ -1069,12 +1063,6 @@ Anp	|void	|atfork_lock
 Anp	|void	|atfork_unlock
 Apmb	|I32	|my_lstat
 pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-AnpP	|int	|my_memcmp	|NN const void* vs1|NN const void* vs2|size_t len
-#endif
-#if !defined(HAS_MEMSET)
-Anp	|void*	|my_memset	|NN void* vloc|int ch|size_t len
-#endif
 #if !defined(PERL_IMPLICIT_SYS)
 Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
 Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
@@ -1249,7 +1237,7 @@ Ap	|void	|call_atexit	|ATEXIT_t fn|NULLOK void *ptr
 ApdO	|I32	|call_argv	|NN const char* sub_name|I32 flags|NN char** argv
 ApdO	|I32	|call_method	|NN const char* methname|I32 flags
 ApdO	|I32	|call_pv	|NN const char* sub_name|I32 flags
-ApdO	|I32	|call_sv	|NN SV* sv|VOL I32 flags
+ApdO	|I32	|call_sv	|NN SV* sv|volatile I32 flags
 Ap	|void	|despatch_signals
 Ap	|OP *	|doref		|NN OP *o|I32 type|bool set_op_ref
 ApdO	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
@@ -3016,10 +3004,6 @@ ApoP	|bool	|ckwarn_d	|U32 w
 : FIXME - exported for ByteLoader - public or private?
 XEopMR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
-
-#ifndef SPRINTF_RETURNS_STRLEN
-Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
-#endif
 
 Apnodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
 Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap

@@ -11642,8 +11642,7 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     /* In this case there is an implicit bit,
      * and therefore the exponent is shifted by one. */
     exponent--;
-#  else
-#    ifdef NV_X86_80_BIT
+#  elif defined(NV_X86_80_BIT)
     if (subnormal) {
         /* The subnormals of the x86-80 have a base exponent of -16382,
          * (while the physical exponent bits are zero) but the frexp()
@@ -11657,7 +11656,6 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     } else {
         exponent -= 4;
     }
-#    endif
     /* TBD: other non-implicit-bit platforms than the x86-80. */
 #  endif
 #endif
@@ -13210,7 +13208,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
                         : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv));
 #else
-                elen = my_sprintf(PL_efloatbuf, ptr, fv);
+                elen = my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv);
 #endif
                 GCC_DIAG_RESTORE;
 	    }

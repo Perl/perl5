@@ -199,7 +199,6 @@ struct utsname {
 #endif
 #endif
 
-#define  STANDARD_C	1
 #define  DOSISH		1		/* no escaping our roots */
 #define  OP_BINARY	O_BINARY	/* mistake in in pp_sys.c? */
 

@@ -4452,7 +4452,6 @@ hints/esix4.sh			Hints for named architecture
 hints/fps.sh			Hints for named architecture
 hints/freebsd.sh		Hints for named architecture
 hints/freemint.sh		Hints for named architecture
-hints/genix.sh			Hints for named architecture
 hints/gnu.sh			Hints for named architecture
 hints/gnukfreebsd.sh		Hints for named architecture
 hints/gnuknetbsd.sh		Hints for named architecture
@@ -4485,7 +4484,6 @@ hints/os2.sh			Hints for named architecture
 hints/os390.sh			Hints for named architecture
 hints/os400.sh			Hints for named architecture
 hints/posix-bc.sh		Hints for named architecture
-hints/powerux.sh		Hints for named architecture
 hints/qnx.sh			Hints for named architecture
 hints/README.hints		Notes about hints
 hints/riscos.sh			Hints for named architecture

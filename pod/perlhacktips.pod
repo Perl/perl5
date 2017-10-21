@@ -20,8 +20,7 @@ to do that first.
 
 =head1 COMMON PROBLEMS
 
-Perl source plays by ANSI C89 rules: no C99 (or C++) extensions.  In
-some cases we have to take pre-ANSI requirements into consideration.
+Perl source plays by ANSI C89 rules: no C99 (or C++) extensions.
 You don't care about some particular platform having broken Perl? I
 hear there is still a strong demand for J2EE programmers.
 
@@ -653,10 +652,6 @@ malloc(0), realloc(0), calloc(0, 0) are non-portable.  To be portable
 allocate at least one byte.  (In general you should rarely need to work
 at this low level, but instead use the various malloc wrappers.)
 
-=item *
-
-snprintf() - the return type is unportable.  Use my_snprintf() instead.
-
 =back
 
 =head2 Security problems
@@ -690,19 +685,11 @@ domain implementation of INN).
 
 Do not use sprintf() or vsprintf()
 
-If you really want just plain byte strings, use my_snprintf() and
-my_vsnprintf() instead, which will try to use snprintf() and
-vsnprintf() if those safer APIs are available.  If you want something
+If you really want just plain byte strings, use snprintf() and
+vsnprintf() instead.  If you want something
 fancier than a plain byte string, use
 L<C<Perl_form>()|perlapi/form> or SVs and
 L<C<Perl_sv_catpvf()>|perlapi/sv_catpvf>.
-
-Note that glibc C<printf()>, C<sprintf()>, etc. are buggy before glibc
-version 2.17.  They won't allow a C<%.s> format with a precision to
-create a string that isn't valid UTF-8 if the current underlying locale
-of the program is UTF-8.  What happens is that the C<%s> and its operand are
-simply skipped without any notice.
-L<https://sourceware.org/bugzilla/show_bug.cgi?id=6530>.
 
 =item *
 

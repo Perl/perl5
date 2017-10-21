@@ -59,16 +59,12 @@ Perl_reentrant_size(pTHX) {
 	PL_reentrant_buffer->_grent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (PL_reentrant_buffer->_grent_size == (size_t) -1)
 		PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
-#   else
-#       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
+#   elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_grent_size = SIABUFSIZ;
-#       else
-#           ifdef __sgi
+#   elif defined(__sgi)
 	PL_reentrant_buffer->_grent_size = BUFSIZ;
-#           else
+#   else
 	PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
-#           endif
-#       endif
 #   endif 
 #endif /* HAS_GETGRNAM_R */
 #ifdef HAS_GETHOSTBYNAME_R
@@ -94,16 +90,12 @@ Perl_reentrant_size(pTHX) {
 	PL_reentrant_buffer->_pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (PL_reentrant_buffer->_pwent_size == (size_t) -1)
 		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
-#   else
-#       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
+#   elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_pwent_size = SIABUFSIZ;
-#       else
-#           ifdef __sgi
+#   elif defined(__sgi)
 	PL_reentrant_buffer->_pwent_size = BUFSIZ;
-#           else
+#   else
 	PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
-#           endif
-#       endif
 #   endif 
 #endif /* HAS_GETPWNAM_R */
 #ifdef HAS_GETSERVBYNAME_R
@@ -116,16 +108,12 @@ Perl_reentrant_size(pTHX) {
 	PL_reentrant_buffer->_spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (PL_reentrant_buffer->_spent_size == (size_t) -1)
 		PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
-#   else
-#       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
+#   elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_spent_size = SIABUFSIZ;
-#       else
-#           ifdef __sgi
+#   elif defined(__sgi)
 	PL_reentrant_buffer->_spent_size = BUFSIZ;
-#           else
+#   else
 	PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
-#           endif
-#       endif
 #   endif 
 #endif /* HAS_GETSPNAM_R */
 #ifdef HAS_READDIR_R

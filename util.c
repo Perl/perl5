@@ -214,9 +214,6 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	? ((struct perl_memory_debug_header *)((char *)where - PERL_MEMORY_DEBUG_HEADER_SIZE))->size
 	: 0;
 #endif
-#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) && !defined(PERL_MICRO)
-    Malloc_t PerlMem_realloc();
-#endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
     if (!size) {
 	safesysfree(where);
@@ -2148,8 +2145,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #       else /* ! HAS_UNSETENV */
         (void)setenv(nam, val, 1);
 #       endif /* HAS_UNSETENV */
-#   else
-#       if defined(HAS_UNSETENV)
+#   elif defined(HAS_UNSETENV)
         if (val == NULL) {
             if (environ) /* old glibc can crash with null environ */
                 (void)unsetenv(nam);
@@ -2161,7 +2157,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
             my_setenv_format(new_env, nam, nlen, val, vlen);
             (void)putenv(new_env);
         }
-#       else /* ! HAS_UNSETENV */
+#   else /* ! HAS_UNSETENV */
         char *new_env;
 	const int nlen = strlen(nam);
 	int vlen;
@@ -2173,7 +2169,6 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
         (void)putenv(new_env);
-#       endif /* HAS_UNSETENV */
 #   endif /* __CYGWIN__ */
 #ifndef PERL_USE_SAFE_PUTENV
     }
@@ -2222,140 +2217,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
     return retries ? 0 : -1;
 }
 #endif
-
-/* this is a drop-in replacement for bcopy(), except for the return
- * value, which we need to be able to emulate memcpy()  */
-#if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
-void *
-Perl_my_bcopy(const void *vfrom, void *vto, size_t len)
-{
-#if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
-    bcopy(vfrom, vto, len);
-#else
-    const unsigned char *from = (const unsigned char *)vfrom;
-    unsigned char *to = (unsigned char *)vto;
-
-    PERL_ARGS_ASSERT_MY_BCOPY;
-
-    if (from - to >= 0) {
-	while (len--)
-	    *to++ = *from++;
-    }
-    else {
-	to += len;
-	from += len;
-	while (len--)
-	    *(--to) = *(--from);
-    }
-#endif
-
-    return vto;
-}
-#endif
-
-/* this is a drop-in replacement for memset() */
-#ifndef HAS_MEMSET
-void *
-Perl_my_memset(void *vloc, int ch, size_t len)
-{
-    unsigned char *loc = (unsigned char *)vloc;
-
-    PERL_ARGS_ASSERT_MY_MEMSET;
-
-    while (len--)
-	*loc++ = ch;
-    return vloc;
-}
-#endif
-
-/* this is a drop-in replacement for bzero() */
-#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-void *
-Perl_my_bzero(void *vloc, size_t len)
-{
-    unsigned char *loc = (unsigned char *)vloc;
-
-    PERL_ARGS_ASSERT_MY_BZERO;
-
-    while (len--)
-	*loc++ = 0;
-    return vloc;
-}
-#endif
-
-/* this is a drop-in replacement for memcmp() */
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-int
-Perl_my_memcmp(const void *vs1, const void *vs2, size_t len)
-{
-    const U8 *a = (const U8 *)vs1;
-    const U8 *b = (const U8 *)vs2;
-    int tmp;
-
-    PERL_ARGS_ASSERT_MY_MEMCMP;
-
-    while (len--) {
-        if ((tmp = *a++ - *b++))
-	    return tmp;
-    }
-    return 0;
-}
-#endif /* !HAS_MEMCMP || !HAS_SANE_MEMCMP */
-
-#ifndef HAS_VPRINTF
-/* This vsprintf replacement should generally never get used, since
-   vsprintf was available in both System V and BSD 2.11.  (There may
-   be some cross-compilation or embedded set-ups where it is needed,
-   however.)
-
-   If you encounter a problem in this function, it's probably a symptom
-   that Configure failed to detect your system's vprintf() function.
-   See the section on "item vsprintf" in the INSTALL file.
-
-   This version may compile on systems with BSD-ish <stdio.h>,
-   but probably won't on others.
-*/
-
-#ifdef USE_CHAR_VSPRINTF
-char *
-#else
-int
-#endif
-vsprintf(char *dest, const char *pat, void *args)
-{
-    FILE fakebuf;
-
-#if defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
-    FILE_ptr(&fakebuf) = (STDCHAR *) dest;
-    FILE_cnt(&fakebuf) = 32767;
-#else
-    /* These probably won't compile -- If you really need
-       this, you'll have to figure out some other method. */
-    fakebuf._ptr = dest;
-    fakebuf._cnt = 32767;
-#endif
-#ifndef _IOSTRG
-#define _IOSTRG 0
-#endif
-    fakebuf._flag = _IOWRT|_IOSTRG;
-    _doprnt(pat, args, &fakebuf);	/* what a kludge */
-#if defined(STDIO_PTR_LVALUE)
-    *(FILE_ptr(&fakebuf)++) = '\0';
-#else
-    /* PerlIO has probably #defined away fputc, but we want it here. */
-#  ifdef fputc
-#    undef fputc  /* XXX Should really restore it later */
-#  endif
-    (void)fputc('\0', &fakebuf);
-#endif
-#ifdef USE_CHAR_VSPRINTF
-    return(dest);
-#else
-    return 0;		/* perl doesn't use return value */
-#endif
-}
-
-#endif /* HAS_VPRINTF */
 
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
@@ -2643,8 +2504,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	 PerlLIO_close(pp[0]);
     return PerlIO_fdopen(p[This], mode);
 }
-#else
-#if defined(DJGPP)
+#elif defined(DJGPP)
 FILE *djgpp_popen();
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
@@ -2656,15 +2516,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     */
     return PerlIO_importFILE(djgpp_popen(cmd, mode), 0);
 }
-#else
-#if defined(__LIBCATAMOUNT__)
+#elif defined(__LIBCATAMOUNT__)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
     return NULL;
 }
-#endif
-#endif
 
 #endif /* !DOSISH */
 
@@ -2982,14 +2839,12 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
        : 0
     );
 }
-#else
-#if defined(__LIBCATAMOUNT__)
+#elif defined(__LIBCATAMOUNT__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     return -1;
 }
-#endif
 #endif /* !DOSISH */
 
 #if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(__LIBCATAMOUNT__)
@@ -3446,12 +3301,10 @@ Perl_get_context(void)
     if (error)
 	Perl_croak_nocontext("panic: pthread_getspecific, error=%d", error);
     return (void*)t;
-#  else
-#    ifdef I_MACH_CTHREADS
+#  elif defined(I_MACH_CTHREADS)
     return (void*)cthread_data(cthread_self());
-#    else
+#  else
     return (void*)PTHREAD_GETSPECIFIC(PL_thr_key);
-#    endif
 #  endif
 #else
     return (void*)NULL;
@@ -3567,23 +3420,15 @@ Perl_my_fflush_all(pTHX)
     long open_max = -1;
 #   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
     open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
-#   else
-#    if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+#   elif defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
-#     else
-#      ifdef FOPEN_MAX
+#   elif defined(FOPEN_MAX)
     open_max = FOPEN_MAX;
-#      else
-#       ifdef OPEN_MAX
+#   elif defined(OPEN_MAX)
     open_max = OPEN_MAX;
-#       else
-#        ifdef _NFILE
+#   elif defined(_NFILE)
     open_max = _NFILE;
-#        endif
-#       endif
-#      endif
-#     endif
-#    endif
+#   endif
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
@@ -4403,12 +4248,10 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
   abort_tidy_up_and_fail:
 #ifdef ECONNABORTED
   errno = ECONNABORTED;	/* This would be the standard thing to do. */
-#else
-#  ifdef ECONNREFUSED
+#elif defined(ECONNREFUSED)
   errno = ECONNREFUSED;	/* E.g. Symbian does not have ECONNABORTED. */
-#  else
+#else
   errno = ETIMEDOUT;	/* Desperation time. */
-#  endif
 #endif
   tidy_up_and_fail:
     {
@@ -5002,28 +4845,6 @@ Perl_mem_log_del_sv(const SV *sv,
 #endif /* PERL_MEM_LOG */
 
 /*
-=for apidoc my_sprintf
-
-The C library C<sprintf>, wrapped if necessary, to ensure that it will return
-the length of the string written to the buffer.  Only rare pre-ANSI systems
-need the wrapper function - usually this is a direct call to C<sprintf>.
-
-=cut
-*/
-#ifndef SPRINTF_RETURNS_STRLEN
-int
-Perl_my_sprintf(char *buffer, const char* pat, ...)
-{
-    va_list args;
-    PERL_ARGS_ASSERT_MY_SPRINTF;
-    va_start(args, pat);
-    vsprintf(buffer, pat, args);
-    va_end(args);
-    return strlen(buffer);
-}
-#endif
-
-/*
 =for apidoc quadmath_format_single
 
 C<quadmath_snprintf()> is very strict about its C<format> string and will
@@ -5132,12 +4953,8 @@ Perl_quadmath_format_needed(const char* format)
 /*
 =for apidoc my_snprintf
 
-The C library C<snprintf> functionality, if available and
-standards-compliant (uses C<vsnprintf>, actually).  However, if the
-C<vsnprintf> is not available, will unfortunately use the unsafe
-C<vsprintf> which can overrun the buffer (there is an overrun check,
-but that may be too late).  Consider using C<sv_vcatpvf> instead, or
-getting C<vsnprintf>.
+The C library C<snprintf> functionality (using C<vsnprintf>).
+Consider using C<sv_vcatpvf> instead.
 
 =cut
 */
@@ -5147,9 +4964,6 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     int retval = -1;
     va_list ap;
     PERL_ARGS_ASSERT_MY_SNPRINTF;
-#ifndef HAS_VSNPRINTF
-    PERL_UNUSED_VAR(len);
-#endif
     va_start(ap, format);
 #ifdef USE_QUADMATH
     {
@@ -5180,14 +4994,14 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
          * Handling the "Q-less" cases right would require walking
          * through the va_list and rewriting the format, calling
          * quadmath for the NVs, building a new va_list, and then
-         * letting vsnprintf/vsprintf to take care of the other
+         * letting vsnprintf to take care of the other
          * arguments.  This may be doable.
          *
          * We do not attempt that now.  But for paranoia, we here try
          * to detect some common (but not all) cases where the
          * "Q-less" %[efgaEFGA] formats are present, and die if
          * detected.  This doesn't fix the problem, but it stops the
-         * vsnprintf/vsprintf pulling doubles off the va_list when
+         * vsnprintf pulling doubles off the va_list when
          * __float128 NVs should be pulled off instead.
          *
          * If quadmath_format_needed() returns false, we are reasonably
@@ -5198,20 +5012,10 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     }
 #endif
     if (retval == -1)
-#ifdef HAS_VSNPRINTF
         retval = vsnprintf(buffer, len, format, ap);
-#else
-        retval = vsprintf(buffer, format, ap);
-#endif
     va_end(ap);
-    /* vsprintf() shows failure with < 0 */
-    if (retval < 0
-#ifdef HAS_VSNPRINTF
     /* vsnprintf() shows failure with >= len */
-        ||
-        (len > 0 && (Size_t)retval >= len) 
-#endif
-    )
+    if (len > 0 && (Size_t)retval >= len)
 	Perl_croak_nocontext("panic: my_snprintf buffer overflow");
     return retval;
 }
@@ -5219,11 +5023,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 /*
 =for apidoc my_vsnprintf
 
-The C library C<vsnprintf> if available and standards-compliant.
-However, if if the C<vsnprintf> is not available, will unfortunately
-use the unsafe C<vsprintf> which can overrun the buffer (there is an
-overrun check, but that may be too late).  Consider using
-C<sv_vcatpvf> instead, or getting C<vsnprintf>.
+The C library C<vsnprintf>.  Consider using C<sv_vcatpvf> instead.
 
 =cut
 */
@@ -5245,29 +5045,13 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
 
     PERL_ARGS_ASSERT_MY_VSNPRINTF;
     Perl_va_copy(ap, apc);
-# ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
-# else
-    PERL_UNUSED_ARG(len);
-    retval = vsprintf(buffer, format, apc);
-# endif
     va_end(apc);
 #else
-# ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
-# else
-    PERL_UNUSED_ARG(len);
-    retval = vsprintf(buffer, format, ap);
-# endif
 #endif /* #ifdef NEED_VA_COPY */
-    /* vsprintf() shows failure with < 0 */
-    if (retval < 0
-#ifdef HAS_VSNPRINTF
     /* vsnprintf() shows failure with >= len */
-        ||
-        (len > 0 && (Size_t)retval >= len) 
-#endif
-    )
+    if (len > 0 && (Size_t)retval >= len)
 	Perl_croak_nocontext("panic: my_vsnprintf buffer overflow");
     return retval;
 #endif

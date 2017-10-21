@@ -278,7 +278,7 @@ PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags);
 PERL_CALLCONV I32	Perl_call_pv(pTHX_ const char* sub_name, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_PV	\
 	assert(sub_name)
-PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, VOL I32 flags);
+PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, volatile I32 flags);
 #define PERL_ARGS_ASSERT_CALL_SV	\
 	assert(sv)
 PERL_CALLCONV const PERL_CONTEXT *	Perl_caller_cx(pTHX_ I32 level, const PERL_CONTEXT **dbcxp);
@@ -3822,33 +3822,10 @@ PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 	assert(sv); assert(mg)
 
 #endif
-#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-PERL_CALLCONV void*	Perl_my_bzero(void* vloc, size_t len);
-#define PERL_ARGS_ASSERT_MY_BZERO	\
-	assert(vloc)
-#endif
 #if !defined(HAS_GETENV_LEN)
 PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len);
 #define PERL_ARGS_ASSERT_GETENV_LEN	\
 	assert(env_elem); assert(len)
-#endif
-#if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-PERL_CALLCONV int	Perl_my_memcmp(const void* vs1, const void* vs2, size_t len)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-#define PERL_ARGS_ASSERT_MY_MEMCMP	\
-	assert(vs1); assert(vs2)
-
-#endif
-#if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
-PERL_CALLCONV void*	Perl_my_bcopy(const void* vfrom, void* vto, size_t len);
-#define PERL_ARGS_ASSERT_MY_BCOPY	\
-	assert(vfrom); assert(vto)
-#endif
-#if !defined(HAS_MEMSET)
-PERL_CALLCONV void*	Perl_my_memset(void* vloc, int ch, size_t len);
-#define PERL_ARGS_ASSERT_MY_MEMSET	\
-	assert(vloc)
 #endif
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #  if defined(PERL_IN_PP_SYS_C)
@@ -4081,11 +4058,6 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 #define PERL_ARGS_ASSERT_VALIDATE_SUID	\
 	assert(rsfp)
 #  endif
-#endif
-#if !defined(SPRINTF_RETURNS_STRLEN)
-PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
-#define PERL_ARGS_ASSERT_MY_SPRINTF	\
-	assert(buffer); assert(pat)
 #endif
 #if !defined(USE_QUADMATH)
 #  if defined(PERL_IN_NUMERIC_C)

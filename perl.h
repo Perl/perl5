@@ -145,15 +145,13 @@
 #  endif
 #endif
 
-#ifdef PERL_GLOBAL_STRUCT
-#  ifndef PERL_GET_VARS
+#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GET_VARS)
 #    ifdef PERL_GLOBAL_STRUCT_PRIVATE
        EXTERN_C struct perl_vars* Perl_GetVarsPrivate();
 #      define PERL_GET_VARS() Perl_GetVarsPrivate() /* see miniperlmain.c */
 #    else
 #      define PERL_GET_VARS() PL_VarsPtr
 #    endif
-#  endif
 #endif
 
 /* this used to be off by default, now its on, see perlio.h */
@@ -562,18 +560,10 @@
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined(NETWARE) || defined(__SYMBIAN32__)
-# define STANDARD_C 1
-#endif
-
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
-# define DONT_DECLARE_STD 1
-#endif
-
-#if defined(HASVOLATILE) || defined(STANDARD_C)
-#	define VOL volatile
-#else
-#   define VOL
+/* These exist only for back-compat with XS modules. */
+#ifndef PERL_CORE
+#define VOL volatile
+#define CAN_PROTOTYPE
 #endif
 
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
@@ -643,14 +633,10 @@
 */
 #ifdef HAS_SETPGID
 #  define BSD_SETPGRP(pid, pgrp)	setpgid((pid), (pgrp))
-#else
-#  if defined(HAS_SETPGRP) && defined(USE_BSD_SETPGRP)
-#    define BSD_SETPGRP(pid, pgrp)	setpgrp((pid), (pgrp))
-#  else
-#    ifdef HAS_SETPGRP2  /* DG/UX */
-#      define BSD_SETPGRP(pid, pgrp)	setpgrp2((pid), (pgrp))
-#    endif
-#  endif
+#elif defined(HAS_SETPGRP) && defined(USE_BSD_SETPGRP)
+#  define BSD_SETPGRP(pid, pgrp)	setpgrp((pid), (pgrp))
+#elif defined(HAS_SETPGRP2)
+#  define BSD_SETPGRP(pid, pgrp)	setpgrp2((pid), (pgrp))
 #endif
 #if defined(BSD_SETPGRP) && !defined(HAS_SETPGRP)
 #  define HAS_SETPGRP  /* Well, effectively it does . . . */
@@ -661,14 +647,10 @@
 */
 #ifdef HAS_GETPGID
 #  define BSD_GETPGRP(pid)		getpgid((pid))
-#else
-#  if defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)
-#    define BSD_GETPGRP(pid)		getpgrp((pid))
-#  else
-#    ifdef HAS_GETPGRP2  /* DG/UX */
-#      define BSD_GETPGRP(pid)		getpgrp2((pid))
-#    endif
-#  endif
+#elif defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)
+#  define BSD_GETPGRP(pid)		getpgrp((pid))
+#elif defined(HAS_GETPGRP2)
+#  define BSD_GETPGRP(pid)		getpgrp2((pid))
 #endif
 #if defined(BSD_GETPGRP) && !defined(HAS_GETPGRP)
 #  define HAS_GETPGRP  /* Well, effectively it does . . . */
@@ -693,12 +675,6 @@
 
 #include <sys/types.h>
 
-#ifdef __cplusplus
-#  ifndef I_STDARG
-#    define I_STDARG 1
-#  endif
-#endif
-
 /* EVC 4 SDK headers includes a bad definition of MB_CUR_MAX in stdlib.h
   which is included from stdarg.h. Bad definition not present in SD 2008
   SDK headers. wince.h is not yet included, so we cant fix this from there
@@ -708,19 +684,16 @@
 #if defined(UNDER_CE) && (_MSC_VER < 1300)
 #  define MB_CUR_MAX 1
 #endif
-#ifdef I_STDARG
-#  include <stdarg.h>
-#else
-#  ifdef I_VARARGS
-#    include <varargs.h>
-#  endif
-#endif
+
+# include <stdarg.h>
 
 #ifdef I_STDINT
 # include <stdint.h>
 #endif
 
 #include <ctype.h>
+#include <float.h>
+#include <limits.h>
 
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
 #undef METHOD
@@ -782,10 +755,8 @@
 #   endif
 #endif
 
-/* Use all the "standard" definitions? */
-#if defined(STANDARD_C) && defined(I_STDLIB)
-#   include <stdlib.h>
-#endif
+/* Use all the "standard" definitions */
+#include <stdlib.h>
 
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
@@ -921,12 +892,8 @@ EXTERN_C int usleep(unsigned int);
 #  define PERL_STRLEN_EXPAND_SHIFT 2
 #endif
 
-#if defined(STANDARD_C) && defined(I_STDDEF) && !defined(PERL_GCC_PEDANTIC)
-#   include <stddef.h>
-#   define STRUCT_OFFSET(s,m)  offsetof(s,m)
-#else
-#   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
-#endif
+#include <stddef.h>
+#define STRUCT_OFFSET(s,m)  offsetof(s,m)
 
 /* ptrdiff_t is C11, so undef it under pedantic builds */
 #ifdef PERL_GCC_PEDANTIC
@@ -934,11 +901,7 @@ EXTERN_C int usleep(unsigned int);
 #endif
 
 #ifndef __SYMBIAN32__
-#  if defined(I_STRING) || defined(__cplusplus)
-#     include <string.h>
-#  else
-#     include <strings.h>
-#  endif
+#  include <string.h>
 #endif
 
 /* This comes after <stdlib.h> so we don't try to change the standard
@@ -992,86 +955,9 @@ EXTERN_C int usleep(unsigned int);
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
 #define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
 
-#if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
-#define strchr index
-#define strrchr rindex
-#endif
-
-#ifdef I_MEMORY
-#  include <memory.h>
-#endif
-
-#ifdef HAS_MEMCPY
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcpy
-        extern char * memcpy (char*, char*, int);
-#    endif
-#  endif
-#else
-#   ifndef memcpy
-#	define memcpy(d,s,l) my_bcopy(s,d,l)
-#   endif
-#endif /* HAS_MEMCPY */
-
-#ifdef HAS_MEMSET
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memset
-	extern char *memset (char*, int, int);
-#    endif
-#  endif
-#else
-#  undef  memset
-#  define memset(d,c,l) my_memset(d,c,l)
-#endif /* HAS_MEMSET */
-
-#if !defined(HAS_MEMMOVE) && !defined(memmove)
-#   if defined(HAS_MEMCPY) && defined(HAS_SAFE_MEMCPY)
-#	define memmove(d,s,l) memcpy(d,s,l)
-#   else
-#	define memmove(d,s,l) my_bcopy(s,d,l)
-#   endif
-#endif
-
-#if defined(mips) && defined(ultrix) && !defined(__STDC__)
-#   undef HAS_MEMCMP
-#endif
-
-#if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
-#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
-#    ifndef memcmp
-	extern int memcmp (char*, char*, int);
-#    endif
-#  endif
-#else
-#   undef memcmp
-#   define memcmp   my_memcmp
-#endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
-
 #ifndef memzero
-#   ifdef HAS_MEMSET
-#	define memzero(d,l) memset(d,0,l)
-#   else
-#	ifdef HAS_BZERO
-#	    define memzero(d,l) bzero(d,l)
-#	else
-#	    define memzero(d,l) my_bzero(d,l)
-#	endif
-#   endif
+#   define memzero(d,l) memset(d,0,l)
 #endif
-
-#ifndef PERL_MICRO
-#ifndef memchr
-#   ifndef HAS_MEMCHR
-#       define memchr(s,c,n) ninstr((char*)(s), ((char*)(s)) + n, &(c), &(c) + 1)
-#   endif
-#endif
-#endif
-
-#ifndef HAS_BCMP
-#   ifndef bcmp
-#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
-#   endif
-#endif /* !HAS_BCMP */
 
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>
@@ -1110,9 +996,7 @@ EXTERN_C int usleep(unsigned int);
 #   undef S_ISLNK
 #endif
 
-#ifdef I_TIME
-#   include <time.h>
-#endif
+#include <time.h>
 
 #ifdef I_SYS_TIME
 #   ifdef I_SYS_TIME_KERNEL
@@ -1126,10 +1010,6 @@ EXTERN_C int usleep(unsigned int);
 
 #if defined(HAS_TIMES) && defined(I_SYS_TIMES)
 #    include <sys/times.h>
-#endif
-
-#if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
-#   undef HAS_STRERROR
 #endif
 
 #include <errno.h>
@@ -1184,15 +1064,10 @@ EXTERN_C off_t ftello(FILE *);
 
 #if defined(__SUNPRO_CC) /* SUNWspro CC (C++) */
 EXTERN_C char *crypt(const char *, const char *);
-EXTERN_C char **environ;
 #endif
 
-#if defined(__cplusplus)
-#  if defined(BSDish)
-EXTERN_C char **environ;
-#  elif defined(__CYGWIN__)
+#if defined(__cplusplus) && defined(__CYGWIN__)
 EXTERN_C char *crypt(const char *, const char *);
-#endif
 #endif
 
 #ifdef SETERRNO
@@ -1314,26 +1189,10 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #define UNKNOWN_ERRNO_MSG "(unknown)"
 
-#ifdef HAS_STRERROR
-#   ifndef DONT_DECLARE_STD
-#       ifdef VMS
-	char *strerror (int,...);
-#       else
-	char *strerror (int);
-#       endif
-#    endif
-#    ifndef Strerror
-#       define Strerror strerror
-#    endif
+#if VMS
+#define Strerror(e) strerror((e), vaxc$errno)
 #else
-#    ifdef HAS_SYS_ERRLIST
-	extern int sys_nerr;
-	extern char *sys_errlist[];
-#       ifndef Strerror
-#           define Strerror(e) \
-		((e) < 0 || (e) >= sys_nerr ? UNKNOWN_ERRNO_MSG : sys_errlist[e])
-#       endif
-#   endif
+#define Strerror(e) strerror(e)
 #endif
 
 #ifdef I_SYS_IOCTL
@@ -1367,19 +1226,11 @@ EXTERN_C char *crypt(const char *, const char *);
 
 /* Configure already sets Direntry_t */
 #if defined(I_DIRENT)
-#   include <dirent.h>
-#else
-#   ifdef I_SYS_NDIR
-#	include <sys/ndir.h>
-#   else
-#	ifdef I_SYS_DIR
-#	    ifdef hp9000s500
-#		include <ndir.h>	/* may be wrong in the future */
-#	    else
-#		include <sys/dir.h>
-#	    endif
-#	endif
-#   endif
+#  include <dirent.h>
+#elif defined(I_SYS_NDIR)
+#  include <sys/ndir.h>
+#elif defined(I_SYS_DIR)
+#  include <sys/dir.h>
 #endif
 
 /*
@@ -1429,35 +1280,27 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 #ifndef S_ISLNK
-#   ifdef _S_ISLNK
-#	define S_ISLNK(m) _S_ISLNK(m)
-#   else
-#	ifdef _S_IFLNK
-#	    define S_ISLNK(m) ((m & S_IFMT) == _S_IFLNK)
-#	else
-#	    ifdef S_IFLNK
-#		define S_ISLNK(m) ((m & S_IFMT) == S_IFLNK)
-#	    else
-#		define S_ISLNK(m) (0)
-#	    endif
-#	endif
-#   endif
+#  ifdef _S_ISLNK
+#    define S_ISLNK(m) _S_ISLNK(m)
+#  elif defined(_S_IFLNK)
+#    define S_ISLNK(m) ((m & S_IFMT) == _S_IFLNK)
+#  elif defined(S_IFLNK)
+#    define S_ISLNK(m) ((m & S_IFMT) == S_IFLNK)
+#  else
+#    define S_ISLNK(m) (0)
+#  endif
 #endif
 
 #ifndef S_ISSOCK
-#   ifdef _S_ISSOCK
-#	define S_ISSOCK(m) _S_ISSOCK(m)
-#   else
-#	ifdef _S_IFSOCK
-#	    define S_ISSOCK(m) ((m & S_IFMT) == _S_IFSOCK)
-#	else
-#	    ifdef S_IFSOCK
-#		define S_ISSOCK(m) ((m & S_IFMT) == S_IFSOCK)
-#	    else
-#		define S_ISSOCK(m) (0)
-#	    endif
-#	endif
-#   endif
+#  ifdef _S_ISSOCK
+#    define S_ISSOCK(m) _S_ISSOCK(m)
+#  elif defined(_S_IFSOCK)
+#    define S_ISSOCK(m) ((m & S_IFMT) == _S_IFSOCK)
+#  elif defined(S_IFSOCK)
+#    define S_ISSOCK(m) ((m & S_IFMT) == S_IFSOCK)
+#  else
+#    define S_ISSOCK(m) (0)
+#  endif
 #endif
 
 #ifndef S_IRUSR
@@ -1540,15 +1383,13 @@ EXTERN_C char *crypt(const char *, const char *);
 #undef UV
 #endif
 
-/* For the times when you want the return value of sprintf, and you want it
-   to be the length. Can't have a thread variable passed in, because C89 has
-   no varargs macros.
-*/
-#ifdef SPRINTF_RETURNS_STRLEN
-#  define my_sprintf sprintf
-#else
-#  define my_sprintf Perl_my_sprintf
-#endif
+/* This used to be conditionally defined based on whether we had a sprintf()
+ * that correctly returns the string length (as required by C89), but we no
+ * longer need that. XS modules can (and do) use this name, so it must remain
+ * a part of the API that's visible to modules. But we no longer document it
+ * either (because using sprintf() rather than snprintf() is almost always
+ * a bad idea). */
+#define my_sprintf sprintf
 
 /*
  * If we have v?snprintf() and the C99 variadic macros, we can just
@@ -1561,18 +1402,15 @@ EXTERN_C char *crypt(const char *, const char *);
  */
 
 /* Note that we do not check against snprintf()/vsnprintf() returning
- * negative values because that is non-standard behaviour and we use
- * snprintf/vsnprintf only iff HAS_VSNPRINTF has been defined, and
- * that should be true only if the snprintf()/vsnprintf() are true
- * to the standard. */
+ * negative values because that is non-standard behaviour and we now
+ * assume a working C89 implementation. */
 
 #define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len > (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
 
 #ifdef USE_QUADMATH
 #  define my_snprintf Perl_my_snprintf
 #  define PERL_MY_SNPRINTF_GUARDED
-#else
-#if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
+#elif defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_snprintf(buffer, max, ...) ({ int len = snprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, snprintf); len; })
 #      define PERL_MY_SNPRINTF_GUARDED
@@ -1583,11 +1421,10 @@ EXTERN_C char *crypt(const char *, const char *);
 #  define my_snprintf  Perl_my_snprintf
 #  define PERL_MY_SNPRINTF_GUARDED
 #endif
-#endif
 
 /* There is no quadmath_vsnprintf, and therefore my_vsnprintf()
  * dies if called under USE_QUADMATH. */
-#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
+#if defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_vsnprintf(buffer, max, ...) ({ int len = vsnprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, vsnprintf); len; })
 #      define PERL_MY_VSNPRINTF_GUARDED
@@ -1729,13 +1566,11 @@ typedef UVTYPE UV;
 #if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
 #  define PTRV			UV
 #  define INT2PTR(any,d)	(any)(d)
+#elif PTRSIZE == LONGSIZE
+#  define PTRV			unsigned long
+#  define PTR2ul(p)		(unsigned long)(p)
 #else
-#  if PTRSIZE == LONGSIZE
-#    define PTRV		unsigned long
-#    define PTR2ul(p)		(unsigned long)(p)
-#  else
-#    define PTRV		unsigned
-#  endif
+#  define PTRV			unsigned
 #endif
 
 #ifndef INT2PTR
@@ -1772,88 +1607,21 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
-#ifdef OVR_DBL_DIG
-/* Use an overridden DBL_DIG */
-# ifdef DBL_DIG
-#  undef DBL_DIG
-# endif
-# define DBL_DIG OVR_DBL_DIG
-#else
-/* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert
-   (see config.h). (It also has other uses, such as figuring out if
-   a given precision of printing can be done with a double instead of
-   a long double - Allen).
-*/
-#ifdef I_LIMITS
-#include <limits.h>
-#endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifndef HAS_DBL_DIG
-#define DBL_DIG	15   /* A guess that works lots of places */
-#endif
-#endif
-
-#ifdef OVR_LDBL_DIG
-/* Use an overridden LDBL_DIG */
-# ifdef LDBL_DIG
-#  undef LDBL_DIG
-# endif
-# define LDBL_DIG OVR_LDBL_DIG
-#else
 /* The following is all to get LDBL_DIG, in order to pick a nice
    default value for printing floating point numbers in Gconvert.
    (see config.h)
 */
-# ifdef I_LIMITS
-#   include <limits.h>
-# endif
-# ifdef I_FLOAT
-#  include <float.h>
-# endif
-# ifndef HAS_LDBL_DIG
+#ifndef HAS_LDBL_DIG
 #  if LONG_DOUBLESIZE == 10
-#   define LDBL_DIG 18 /* assume IEEE */
-#  else
-#   if LONG_DOUBLESIZE == 12
+#    define LDBL_DIG 18 /* assume IEEE */
+#  elif LONG_DOUBLESIZE == 12
 #    define LDBL_DIG 18 /* gcc? */
-#   else
-#    if LONG_DOUBLESIZE == 16
-#     define LDBL_DIG 33 /* assume IEEE */
-#    else
-#     if LONG_DOUBLESIZE == DOUBLESIZE
-#      define LDBL_DIG DBL_DIG /* bummer */
-#     endif
-#    endif
-#   endif
+#  elif LONG_DOUBLESIZE == 16
+#    define LDBL_DIG 33 /* assume IEEE */
+#  elif LONG_DOUBLESIZE == DOUBLESIZE
+#    define LDBL_DIG DBL_DIG /* bummer */
 #  endif
-# endif
 #endif
-
-/*
- * This is for making sure we have a good DBL_MAX value, if possible,
- * either for usage as NV_MAX or for usage in figuring out if we can
- * fit a given long double into a double, if bug-fixing makes it
- * necessary to do so. - Allen <allens@cpan.org>
- */
-
-#ifdef I_LIMITS
-#  include <limits.h>
-#endif
-
-#ifdef I_VALUES
-#  if !(defined(DBL_MIN) && defined(DBL_MAX) && defined(I_LIMITS))
-#    include <values.h>
-#    if defined(MAXDOUBLE) && !defined(DBL_MAX)
-#      define DBL_MAX MAXDOUBLE
-#    endif
-#    if defined(MINDOUBLE) && !defined(DBL_MIN)
-#      define DBL_MIN MINDOUBLE
-#    endif
-#  endif
-#endif /* defined(I_VALUES) */
 
 typedef NVTYPE NV;
 
@@ -1907,10 +1675,8 @@ typedef NVTYPE NV;
 #       ifdef LDBL_MAX
 #           define NV_MAX LDBL_MAX
 /* Having LDBL_MAX doesn't necessarily mean that we have LDBL_MIN... -Allen */
-#       else
-#           ifdef HUGE_VALL
-#               define NV_MAX HUGE_VALL
-#           endif
+#       elif defined(HUGE_VALL)
+#           define NV_MAX HUGE_VALL
 #       endif
 #   endif
 #   if defined(HAS_SQRTL)
@@ -1951,20 +1717,16 @@ EXTERN_C long double modfl(long double, long double *);
 #   ifndef Perl_frexp
 #       ifdef HAS_FREXPL
 #           define Perl_frexp(x,y) frexpl(x,y)
-#       else
-#           if defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
+#       elif defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
 extern long double Perl_my_frexpl(long double x, int *e);
-#               define Perl_frexp(x,y) Perl_my_frexpl(x,y)
-#           endif
+#           define Perl_frexp(x,y) Perl_my_frexpl(x,y)
 #       endif
 #   endif
 #   ifndef Perl_ldexp
 #       ifdef HAS_LDEXPL
 #           define Perl_ldexp(x, y) ldexpl(x,y)
-#       else
-#           if defined(HAS_SCALBNL) && FLT_RADIX == 2
-#               define Perl_ldexp(x,y) scalbnl(x,y)
-#           endif
+#       elif defined(HAS_SCALBNL) && FLT_RADIX == 2
+#           define Perl_ldexp(x,y) scalbnl(x,y)
 #       endif
 #   endif
 #   ifndef Perl_isnan
@@ -2030,38 +1792,16 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_fp_class_zero(x)   (Perl_fp_class(x) == 0)
 #else
 #   define NV_DIG DBL_DIG
-#   ifdef DBL_MANT_DIG
-#       define NV_MANT_DIG DBL_MANT_DIG
-#   endif
-#   ifdef DBL_MIN
-#       define NV_MIN DBL_MIN
-#   endif
-#   ifdef DBL_MAX
-#       define NV_MAX DBL_MAX
-#   endif
-#   ifdef DBL_MIN_EXP
-#       define NV_MIN_EXP DBL_MIN_EXP
-#   endif
-#   ifdef DBL_MAX_EXP
-#       define NV_MAX_EXP DBL_MAX_EXP
-#   endif
-#   ifdef DBL_MIN_10_EXP
-#       define NV_MIN_10_EXP DBL_MIN_10_EXP
-#   endif
-#   ifdef DBL_MAX_10_EXP
-#       define NV_MAX_10_EXP DBL_MAX_10_EXP
-#   endif
-#   ifdef DBL_EPSILON
-#       define NV_EPSILON DBL_EPSILON
-#   endif
-#   ifdef DBL_MAX               /* XXX Does DBL_MAX imply having DBL_MIN? */
-#       define NV_MAX DBL_MAX
-#       define NV_MIN DBL_MIN
-#   else
-#       ifdef HUGE_VAL
-#           define NV_MAX HUGE_VAL
-#       endif
-#   endif
+#   define NV_MANT_DIG DBL_MANT_DIG
+#   define NV_MIN DBL_MIN
+#   define NV_MAX DBL_MAX
+#   define NV_MIN_EXP DBL_MIN_EXP
+#   define NV_MAX_EXP DBL_MAX_EXP
+#   define NV_MIN_10_EXP DBL_MIN_10_EXP
+#   define NV_MAX_10_EXP DBL_MAX_10_EXP
+#   define NV_EPSILON DBL_EPSILON
+#   define NV_MAX DBL_MAX
+#   define NV_MIN DBL_MIN
 
 /* These math interfaces are C89. */
 #   define Perl_acos acos
@@ -2344,12 +2084,10 @@ int isnan(double d);
 #ifndef Perl_isnan
 #   ifdef Perl_fp_class_nan
 #       define Perl_isnan(x) Perl_fp_class_nan(x)
+#   elif defined(HAS_UNORDERED)
+#       define Perl_isnan(x) unordered((x), 0.0)
 #   else
-#       ifdef HAS_UNORDERED
-#           define Perl_isnan(x) unordered((x), 0.0)
-#       else
-#           define Perl_isnan(x) ((x)!=(x))
-#       endif
+#       define Perl_isnan(x) ((x)!=(x))
 #   endif
 #endif
 
@@ -2425,56 +2163,6 @@ int isnan(double d);
 #   define Perl_atof2(s, n) ((n) = atof(s))
 #endif
 
-/* Previously these definitions used hardcoded figures.
- * It is hoped these formula are more portable, although
- * no data one way or another is presently known to me.
- * The "PERL_" names are used because these calculated constants
- * do not meet the ANSI requirements for LONG_MAX, etc., which
- * need to be constants acceptable to #if - kja
- *    define PERL_LONG_MAX        2147483647L
- *    define PERL_LONG_MIN        (-LONG_MAX - 1)
- *    define PERL ULONG_MAX       4294967295L
- */
-
-#ifdef I_LIMITS  /* Needed for cast_xxx() functions below. */
-#  include <limits.h>
-#endif
-/* Included values.h above if necessary; still including limits.h down here,
- * despite doing above, because math.h might have overridden... XXX - Allen */
-
-/*
- * Try to figure out max and min values for the integral types.  THE CORRECT
- * SOLUTION TO THIS MESS: ADAPT enquire.c FROM GCC INTO CONFIGURE.  The
- * following hacks are used if neither limits.h or values.h provide them:
- * U<TYPE>_MAX: for types >= int: ~(unsigned TYPE)0
- *              for types <  int:  (unsigned TYPE)~(unsigned)0
- *	The argument to ~ must be unsigned so that later signed->unsigned
- *	conversion can't modify the value's bit pattern (e.g. -0 -> +0),
- *	and it must not be smaller than int because ~ does integral promotion.
- * <type>_MAX: (<type>) (U<type>_MAX >> 1)
- * <type>_MIN: -<type>_MAX - <is_twos_complement_architecture: (3 & -1) == 3>.
- *	The latter is a hack which happens to work on some machines but
- *	does *not* catch any random system, or things like integer types
- *	with NaN if that is possible.
- *
- * All of the types are explicitly cast to prevent accidental loss of
- * numeric range, and in the hope that they will be less likely to confuse
- * over-eager optimizers.
- *
- */
-
-#define PERL_UCHAR_MIN ((unsigned char)0)
-
-#ifdef UCHAR_MAX
-#  define PERL_UCHAR_MAX ((unsigned char)UCHAR_MAX)
-#else
-#  ifdef MAXUCHAR
-#    define PERL_UCHAR_MAX ((unsigned char)MAXUCHAR)
-#  else
-#    define PERL_UCHAR_MAX       ((unsigned char)~(unsigned)0)
-#  endif
-#endif
-
 /*
  * CHAR_MIN and CHAR_MAX are not included here, as the (char) type may be
  * ambiguous. It may be equivalent to (signed char) or (unsigned char)
@@ -2484,121 +2172,32 @@ int isnan(double d);
  *                                                           - kja
  */
 
+#define PERL_UCHAR_MIN ((unsigned char)0)
+#define PERL_UCHAR_MAX ((unsigned char)UCHAR_MAX)
+
 #define PERL_USHORT_MIN ((unsigned short)0)
+#define PERL_USHORT_MAX ((unsigned short)USHRT_MAX)
 
-#ifdef USHORT_MAX
-#  define PERL_USHORT_MAX ((unsigned short)USHORT_MAX)
-#else
-#  ifdef MAXUSHORT
-#    define PERL_USHORT_MAX ((unsigned short)MAXUSHORT)
-#  else
-#    ifdef USHRT_MAX
-#      define PERL_USHORT_MAX ((unsigned short)USHRT_MAX)
-#    else
-#      define PERL_USHORT_MAX       ((unsigned short)~(unsigned)0)
-#    endif
-#  endif
-#endif
+#define PERL_SHORT_MAX ((short)SHRT_MAX)
+#define PERL_SHORT_MIN ((short)SHRT_MIN)
 
-#ifdef SHORT_MAX
-#  define PERL_SHORT_MAX ((short)SHORT_MAX)
-#else
-#  ifdef MAXSHORT    /* Often used in <values.h> */
-#    define PERL_SHORT_MAX ((short)MAXSHORT)
-#  else
-#    ifdef SHRT_MAX
-#      define PERL_SHORT_MAX ((short)SHRT_MAX)
-#    else
-#      define PERL_SHORT_MAX      ((short) (PERL_USHORT_MAX >> 1))
-#    endif
-#  endif
-#endif
-
-#ifdef SHORT_MIN
-#  define PERL_SHORT_MIN ((short)SHORT_MIN)
-#else
-#  ifdef MINSHORT
-#    define PERL_SHORT_MIN ((short)MINSHORT)
-#  else
-#    ifdef SHRT_MIN
-#      define PERL_SHORT_MIN ((short)SHRT_MIN)
-#    else
-#      define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
-#    endif
-#  endif
-#endif
-
-#ifdef UINT_MAX
-#  define PERL_UINT_MAX ((unsigned int)UINT_MAX)
-#else
-#  ifdef MAXUINT
-#    define PERL_UINT_MAX ((unsigned int)MAXUINT)
-#  else
-#    define PERL_UINT_MAX       (~(unsigned int)0)
-#  endif
-#endif
-
+#define PERL_UINT_MAX ((unsigned int)UINT_MAX)
 #define PERL_UINT_MIN ((unsigned int)0)
 
-#ifdef INT_MAX
-#  define PERL_INT_MAX ((int)INT_MAX)
-#else
-#  ifdef MAXINT    /* Often used in <values.h> */
-#    define PERL_INT_MAX ((int)MAXINT)
-#  else
-#    define PERL_INT_MAX        ((int)(PERL_UINT_MAX >> 1))
-#  endif
-#endif
+#define PERL_INT_MAX ((int)INT_MAX)
+#define PERL_INT_MIN ((int)INT_MIN)
 
-#ifdef INT_MIN
-#  define PERL_INT_MIN ((int)INT_MIN)
-#else
-#  ifdef MININT
-#    define PERL_INT_MIN ((int)MININT)
-#  else
-#    define PERL_INT_MIN        (-PERL_INT_MAX - ((3 & -1) == 3))
-#  endif
-#endif
-
-#ifdef ULONG_MAX
-#  define PERL_ULONG_MAX ((unsigned long)ULONG_MAX)
-#else
-#  ifdef MAXULONG
-#    define PERL_ULONG_MAX ((unsigned long)MAXULONG)
-#  else
-#    define PERL_ULONG_MAX       (~(unsigned long)0)
-#  endif
-#endif
-
+#define PERL_ULONG_MAX ((unsigned long)ULONG_MAX)
 #define PERL_ULONG_MIN ((unsigned long)0L)
 
-#ifdef LONG_MAX
-#  define PERL_LONG_MAX ((long)LONG_MAX)
-#else
-#  ifdef MAXLONG    /* Often used in <values.h> */
-#    define PERL_LONG_MAX ((long)MAXLONG)
-#  else
-#    define PERL_LONG_MAX        ((long) (PERL_ULONG_MAX >> 1))
-#  endif
-#endif
-
-#ifdef LONG_MIN
-#  define PERL_LONG_MIN ((long)LONG_MIN)
-#else
-#  ifdef MINLONG
-#    define PERL_LONG_MIN ((long)MINLONG)
-#  else
-#    define PERL_LONG_MIN        (-PERL_LONG_MAX - ((3 & -1) == 3))
-#  endif
-#endif
+#define PERL_LONG_MAX ((long)LONG_MAX)
+#define PERL_LONG_MIN ((long)LONG_MIN)
 
 #ifdef UV_IS_QUAD
-
 #    define PERL_UQUAD_MAX	(~(UV)0)
 #    define PERL_UQUAD_MIN	((UV)0)
 #    define PERL_QUAD_MAX 	((IV) (PERL_UQUAD_MAX >> 1))
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
-
 #endif
 
 typedef MEM_SIZE STRLEN;
@@ -2829,60 +2428,28 @@ typedef struct padname PADNAME;
 #endif
 
 /* NSIG logic from Configure --> */
-/* Strange style to avoid deeply-nested #if/#else/#endif */
 #ifndef NSIG
 #  ifdef _NSIG
 #    define NSIG (_NSIG)
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef SIGMAX
+#  elif defined(SIGMAX)
 #    define NSIG (SIGMAX+1)
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef SIG_MAX
+#  elif defined(SIG_MAX)
 #    define NSIG (SIG_MAX+1)
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef _SIG_MAX
+#  elif defined(_SIG_MAX)
 #    define NSIG (_SIG_MAX+1)
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef MAXSIG
+#  elif defined(MAXSIG)
 #    define NSIG (MAXSIG+1)
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef MAX_SIG
+#  elif defined(MAX_SIG)
 #    define NSIG (MAX_SIG+1)
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef SIGARRAYSIZE
+#  elif defined(SIGARRAYSIZE)
 #    define NSIG SIGARRAYSIZE /* Assume ary[SIGARRAYSIZE] */
-#  endif
-#endif
-
-#ifndef NSIG
-#  ifdef _sys_nsig
+#  elif defined(_sys_nsig)
 #    define NSIG (_sys_nsig) /* Solaris 2.5 */
-#  endif
-#endif
-
-/* Default to some arbitrary number that's big enough to get most
-   of the common signals.
-*/
-#ifndef NSIG
+#  else
+     /* Default to some arbitrary number that's big enough to get most
+      * of the common signals.  */
 #    define NSIG 50
+#  endif
 #endif
 /* <-- NSIG logic from Configure */
 
@@ -2903,15 +2470,12 @@ typedef struct padname PADNAME;
    and then they have the gall to warn that a value computed is not used. Hence
    cast to void.  */
 #    define PERL_FPU_INIT (void)fpsetmask(0)
+#  elif defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
+#    define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
+#    define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
+#    define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #  else
-#    if defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
-#      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
-#      define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
-#      define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
-#    else
-#      define PERL_FPU_INIT
-
-#    endif
+#    define PERL_FPU_INIT
 #  endif
 #endif
 #ifndef PERL_FPU_PRE_EXEC
@@ -3166,32 +2730,24 @@ freeing any remaining Perl interpreters.
 
 #if defined(USE_ITHREADS)
 #  ifdef NETWARE
-#   include <nw5thread.h>
-#  else
-#    ifdef WIN32
-#      include <win32thread.h>
-#    else
-#      ifdef OS2
-#        include "os2thread.h"
-#      else
-#        ifdef I_MACH_CTHREADS
-#          include <mach/cthreads.h>
+#    include <nw5thread.h>
+#  elif defined(WIN32)
+#    include <win32thread.h>
+#  elif defined(OS2)
+#    include "os2thread.h"
+#  elif defined(I_MACH_CTHREADS)
+#    include <mach/cthreads.h>
 typedef cthread_t	perl_os_thread;
 typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
 typedef void *		perl_key;
-#        else /* Posix threads */
-#          ifdef I_PTHREAD
-#            include <pthread.h>
-#          endif
+#  elif defined(I_PTHREAD) /* Posix threads */
+#    include <pthread.h>
 typedef pthread_t	perl_os_thread;
 typedef pthread_mutex_t PERL_TSA_CAPABILITY("mutex") perl_mutex;
 typedef pthread_cond_t	perl_cond;
 typedef pthread_key_t	perl_key;
-#        endif /* I_MACH_CTHREADS */
-#      endif /* OS2 */
-#    endif /* WIN32 */
-#  endif /* NETWARE */
+#  endif
 #endif /* USE_ITHREADS */
 
 #ifdef PERL_TSA_ACTIVE
@@ -3514,12 +3070,10 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #ifndef PERL_FLUSHALL_FOR_CHILD
 # if defined(USE_PERLIO) || defined(FFLUSH_NULL)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
+# elif defined(FFLUSH_ALL)
+#  define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
 # else
-#  ifdef FFLUSH_ALL
-#   define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
-#  else
-#   define PERL_FLUSHALL_FOR_CHILD	NOOP
-#  endif
+#  define PERL_FLUSHALL_FOR_CHILD	NOOP
 # endif
 #endif
 
@@ -3597,10 +3151,8 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef UVf
-#else
-#  ifndef UVf
-#    define UVf UVuf
-#  endif
+#elif !defined(UVf)
+#  define UVf UVuf
 #endif
 
 #ifdef HASATTRIBUTE_DEPRECATED
@@ -3654,12 +3206,10 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define __attribute__warn_unused_result__
 #endif
 
-#ifdef I_ASSERT
-#  if !defined(DEBUGGING) && !defined(NDEBUG)
-#    define NDEBUG 1
-#  endif
-#  include <assert.h>
+#if !defined(DEBUGGING) && !defined(NDEBUG)
+#  define NDEBUG 1
 #endif
+#include <assert.h>
 
 /* For functions that are marked as __attribute__noreturn__, it's not
    appropriate to call return.  In either case, include the lint directive.
@@ -3776,14 +3326,12 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #   ifdef IOCPARM_MASK
 	/* on BSDish systems we're safe */
 #	define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
-#   else
-#	if defined(_IOC_SIZE) && defined(__GLIBC__)
+#   elif defined(_IOC_SIZE) && defined(__GLIBC__)
 	/* on Linux systems we're safe; except when we're not [perl #38223] */
-#	    define IOCPARM_LEN(x) (_IOC_SIZE(x) < 256 ? 256 : _IOC_SIZE(x))
-#	else
+#	define IOCPARM_LEN(x) (_IOC_SIZE(x) < 256 ? 256 : _IOC_SIZE(x))
+#   else
 	/* otherwise guess at what's safe */
-#	    define IOCPARM_LEN(x)	256
-#	endif
+#	define IOCPARM_LEN(x)	256
 #   endif
 #endif
 
@@ -4402,7 +3950,7 @@ Gid_t getegid (void);
 			"\", line %d", STRINGIFY(what), __LINE__),	\
              (void) 0)), ((void)0))
 
-/* assert() gets defined if DEBUGGING (and I_ASSERT).
+/* assert() gets defined if DEBUGGING.
  * If no DEBUGGING, the <assert.h> has not been included. */
 #ifndef assert
 #  define assert(what)	Perl_assert(what)
@@ -4441,48 +3989,10 @@ static PERL_MG_UFUNC(foo_get, index, val)
 #define PERL_MG_UFUNC(name,ix,sv) I32 name(pTHX_ IV ix, SV *sv)
 #endif
 
-/* Fix these up for __STDC__ */
-#ifndef DONT_DECLARE_STD
-char *mktemp (char*);
-#ifndef atof
-double atof (const char*);
-#endif
-#endif
-
-#ifndef STANDARD_C
-/* All of these are in stdlib.h or time.h for ANSI C */
-Time_t time();
-struct tm *gmtime(), *localtime();
-#if defined(OEMVS)
-char *(strchr)(), *(strrchr)();
-char *(strcpy)(), *(strcat)();
-#else
-char *strchr(), *strrchr();
-char *strcpy(), *strcat();
-#endif
-#endif /* ! STANDARD_C */
-
-
-#ifdef I_MATH
-#    include <math.h>
-#    ifdef __VMS
+#include <math.h>
+#ifdef __VMS
      /* isfinite and others are here rather than in math.h as C99 stipulates */
-#        include <fp.h>
-#    endif
-#else
-START_EXTERN_C
-	    double exp (double);
-	    double log (double);
-	    double log10 (double);
-	    double sqrt (double);
-	    double frexp (double,int*);
-	    double ldexp (double,int);
-	    double modf (double,double*);
-	    double sin (double);
-	    double cos (double);
-	    double atan2 (double,double);
-	    double pow (double,double);
-END_EXTERN_C
+#    include <fp.h>
 #endif
 
 #ifndef __cplusplus
@@ -4491,18 +4001,6 @@ END_EXTERN_C
 char *crypt (const char*, const char*);
 #endif
 #  endif /* !WIN32 */
-#  ifndef DONT_DECLARE_STD
-#    ifndef getenv
-char *getenv (const char*);
-#    endif /* !getenv */
-#    if !defined(HAS_LSEEK_PROTO) && !defined(__hpux)
-#      ifdef _FILE_OFFSET_BITS
-#        if _FILE_OFFSET_BITS == 64
-Off_t lseek (int,Off_t,int);
-#        endif
-#      endif
-#    endif
-#  endif /* !DONT_DECLARE_STD */
 #  ifndef WIN32
 #    ifndef getlogin
 char *getlogin (void);
@@ -4695,15 +4193,9 @@ typedef void (*despatch_signals_proc_t) (pTHX);
 #if defined(__DYNAMIC__) && defined(PERL_DARWIN) && defined(PERL_CORE)
 #  include <crt_externs.h>	/* for the env array */
 #  define environ (*_NSGetEnviron())
-#else
+#elif defined(USE_ENVIRON_ARRAY) && !defined(environ)
    /* VMS and some other platforms don't use the environ array */
-#  ifdef USE_ENVIRON_ARRAY
-#    if !defined(DONT_DECLARE_STD) || \
-        (defined(__svr4__) && defined(__GNUC__) && defined(__sun)) || \
-        defined(__sgi)
-extern char **	environ;	/* environment variables supplied via exec */
-#    endif
-#  endif
+EXTERN_C char **environ;  /* environment variables supplied via exec */
 #endif
 
 #define PERL_PATCHLEVEL_H_IMPLICIT
@@ -6399,14 +5891,12 @@ expression, but with an empty argument list, like this:
 #           define semun gccbug_semun
 #	endif
 #       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
-#   else
-#       ifdef USE_SEMCTL_SEMID_DS
+#   elif defined(USE_SEMCTL_SEMID_DS)
 #           ifdef EXTRA_F_IN_SEMUN_BUF
 #               define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buff)
 #           else
 #               define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
 #           endif
-#       endif
 #   endif
 #endif
 

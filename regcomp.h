@@ -1063,7 +1063,7 @@ re.pm, especially to the documentation.
 
 #ifdef DEBUGGING
 
-#define GET_RE_DEBUG_FLAGS_DECL VOL IV re_debug_flags  = 0; \
+#define GET_RE_DEBUG_FLAGS_DECL volatile IV re_debug_flags = 0; \
         PERL_UNUSED_VAR(re_debug_flags); GET_RE_DEBUG_FLAGS;
 
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2) \

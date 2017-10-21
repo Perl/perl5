@@ -1440,15 +1440,9 @@ PP(pp_divide)
        can be too large to preserve, so don't need to compile the code to
        test the size of UVs.  */
 
-#ifdef SLOPPYDIVIDE
+#if defined(SLOPPYDIVIDE) || (defined(PERL_PRESERVE_IVUV) && !defined(NV_PRESERVES_UV))
 #  define PERL_TRY_UV_DIVIDE
     /* ensure that 20./5. == 4. */
-#else
-#  ifdef PERL_PRESERVE_IVUV
-#    ifndef NV_PRESERVES_UV
-#      define PERL_TRY_UV_DIVIDE
-#    endif
-#  endif
 #endif
 
 #ifdef PERL_TRY_UV_DIVIDE
