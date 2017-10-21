@@ -1513,6 +1513,11 @@ sub grind_format_cell {
     if (!defined $val) {
         return sprintf "%*s", $width, '-';
     }
+    elsif (abs($val) >= 1_000_000) {
+        # avoid displaying very large numbers (which might be the
+        # result of e.g. 1 / 0.000001)
+        return sprintf "%*s", $width, 'Inf';
+    }
     elsif ($OPTS{raw}) {
         return sprintf "%*.1f", $width, $val;
     }
