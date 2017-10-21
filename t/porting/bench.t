@@ -169,6 +169,21 @@ for my $test (
         "croak: --benchfile which returns 0"
     ],
     [
+        "--benchfile=t/porting/bench/oddentry perl",
+        qr{\AError: 't/porting/bench/oddentry' does not contain evenly paired test names and hashes\n},
+        "croak: --benchfile with odd number of entries"
+    ],
+    [
+        "--benchfile=t/porting/bench/badname perl",
+        qr{\AError: 't/porting/bench/badname': invalid test name: '1='\n},
+        "croak: --benchfile with invalid test name"
+    ],
+    [
+        "--benchfile=t/porting/bench/badhash perl",
+        qr{\AError: 't/porting/bench/badhash': invalid key 'blah' for test 'foo::bar'\n},
+        "croak: --benchfile with invalid test hash key"
+    ],
+    [
         "--norm=2 ./miniperl ./perl",
         "Error: --norm value 2 outside range 0..1\n",
         "croak: select-a-perl out of range"

@@ -616,6 +616,29 @@ sub read_tests_file {
         die "Error: can't read '$file': $!\n";
     }
 
+    # validate and process each test
+
+    {
+        my %valid = map { $_ => 1 } qw(desc setup code);
+        my @tests = @$ta;
+        if (!@tests || @tests % 2 != 0) {
+            die "Error: '$file' does not contain evenly paired test names and hashes\n";
+        }
+        while (@tests) {
+            my $name = shift @tests;
+            my $hash = shift @tests;
+
+            unless ($name =~ /^[a-zA-Z]\w*(::\w+)*$/) {
+                die "Error: '$file': invalid test name: '$name'\n";
+            }
+
+            for (sort keys %$hash) {
+                die "Error: '$file': invalid key '$_' for test '$name'\n"
+                    unless exists $valid{$_};
+            }
+        }
+    }
+
     my @orig_order;
     for (my $i=0; $i < @$ta; $i += 2) {
         push @orig_order, $ta->[$i];
