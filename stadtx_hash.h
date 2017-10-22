@@ -223,12 +223,10 @@ STADTX_STATIC_INLINE U64 stadtx_hash_with_state(
             /* FALLTHROUGH */
             case 4: v1 += (U64)U8TO32_LE(key);
                     break;
-            /* FALLTHROUGH */
             case 3: v0 += (U64)key[2] << 48;
             /* FALLTHROUGH */
             case 2: v1 += (U64)U8TO16_LE(key);
                     break;
-            /* FALLTHROUGH */
             case 1: v0 += (U64)key[0];
             /* FALLTHROUGH */
             case 0: v1 = ROTL64(v1, 32) ^ 0xFF;
@@ -278,22 +276,18 @@ STADTX_STATIC_INLINE U64 stadtx_hash_with_state(
             case 6: v2 += (U64)U8TO16_LE(key+4);
                     v3 += (U64)U8TO32_LE(key);
                     break;
-            /* FALLTHROUGH */
             case 5: v1 += (U64)key[4];
             /* FALLTHROUGH */
             case 4: v2 += (U64)U8TO32_LE(key);
                     break;
-            /* FALLTHROUGH */
             case 3: v3 += (U64)key[2];
             /* FALLTHROUGH */
             case 2: v1 += (U64)U8TO16_LE(key);
                     break;
-            /* FALLTHROUGH */
             case 1: v2 += (U64)key[0];
             /* FALLTHROUGH */
             case 0: v3 = ROTL64(v3, 32) ^ 0xFF;
                     break;
-            /* FALLTHROUGH */
         }
 
         v1 -= v2;
