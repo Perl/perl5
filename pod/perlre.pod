@@ -1627,7 +1627,7 @@ constructs (like C<\g{NAME}>) and can be accessed by name
 after a successful match via C<%+> or C<%->. See L<perlvar>
 for more details on the C<%+> and C<%-> hashes.
 
-If multiple distinct capture groups have the same name then the
+If multiple distinct capture groups have the same name, then
 C<$+{NAME}> will refer to the leftmost defined group in the match.
 
 The forms C<(?'NAME'pattern)> and C<< (?<NAME>pattern) >> are equivalent.

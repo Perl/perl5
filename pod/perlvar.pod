@@ -1121,6 +1121,9 @@ For example, C<$+{foo}> is equivalent to C<$1> after the following match:
 The keys of the C<%+> hash list only the names of buffers that have
 captured (and that are thus associated to defined values).
 
+If multiple distinct capture groups have the same name, then
+C<$+{NAME}> will refer to the leftmost defined group in the match.
+
 The underlying behaviour of C<%+> is provided by the
 L<Tie::Hash::NamedCapture> module.
 
