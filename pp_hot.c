@@ -607,19 +607,37 @@ PP(pp_add)
         U32 flags = (svl->sv_flags & svr->sv_flags);
         if (flags & SVf_IOK) {
             /* both args are simple IVs */
-            UV topl, topr;
+            IV iresult;
+            bool safe;
             il = SvIVX(svl);
             ir = SvIVX(svr);
-          do_iv:
-            topl = ((UV)il) >> (UVSIZE * 8 - 2);
-            topr = ((UV)ir) >> (UVSIZE * 8 - 2);
 
-            /* if both are in a range that can't under/overflow, do a
-             * simple integer add: if the top of both numbers
-             * are 00  or 11, then it's safe */
-            if (!( ((topl+1) | (topr+1)) & 2)) {
+#ifdef HAS_BUILTIN_ADD_OVERFLOW
+          do_iv:
+            safe = !__builtin_add_overflow(il, ir, &iresult);
+#else
+            {
+                UV topl, topr;
+          do_iv:
+                topl = ((UV)il) >> (UVSIZE * 8 - 2);
+                topr = ((UV)ir) >> (UVSIZE * 8 - 2);
+
+                /* if both are in a range that can't under/overflow, do a
+                 * simple integer add: if the top of both numbers
+                 * are 00  or 11, then it's safe */
+                if (!( ((topl+1) | (topr+1)) & 2)) {
+                    iresult = il + ir;
+                    safe = TRUE;
+                }
+                else {
+                    safe = FALSE;
+                }
+            }
+#endif
+
+            if (safe) {
                 SP--;
-                TARGi(il + ir, 0); /* args not GMG, so can't be tainted */
+                TARGi(iresult, 0); /* args not GMG, so can't be tainted */
                 SETs(TARG);
                 RETURN;
             }
@@ -650,6 +668,71 @@ PP(pp_add)
   generic:
 
     useleft = USE_LEFT(svl);
+#ifdef HAS_BUILTIN_ADD_OVERFLOW
+    if (SvIV_please_nomg(svr)) {
+        if (!useleft) {
+            SP--;
+            if (SvUOK(svr)) {
+                SETu(SvUVX(svr));
+            }
+            else {
+                SETi(SvIVX(svr));
+            }
+            RETURN;
+        }
+        if (SvIV_please_nomg(svl)) {
+            bool overflowed, result_is_uv;
+            IV iresult;
+            UV uresult;
+            const bool auvok = SvUOK(svl), buvok = SvUOK(svr);
+            if (auvok && buvok) {
+                result_is_uv = TRUE;
+                overflowed = __builtin_add_overflow(SvUVX(svl), SvUVX(svr), &uresult);
+            }
+            else if (!auvok && !buvok) {
+                const IV ivl = SvIVX(svl), ivr = SvIVX(svr);
+                if (!__builtin_add_overflow(ivl, ivr, &iresult)) {
+                    result_is_uv = FALSE;
+                    overflowed = FALSE;
+                }
+                else if (!__builtin_add_overflow(ivl, ivr, &uresult)) {
+                    result_is_uv = TRUE;
+                    overflowed = FALSE;
+                }
+                else {
+                    overflowed = TRUE;
+                }
+            }
+            else {
+                const IV iv = auvok ? SvIVX(svr) : SvIVX(svl);
+                const UV uv = auvok ? SvUVX(svl) : SvUVX(svr);
+                assert(auvok != buvok);
+                if (!__builtin_add_overflow(iv, uv, &iresult)) {
+                    result_is_uv = FALSE;
+                    overflowed = FALSE;
+                }
+                else if (!__builtin_add_overflow(iv, uv, &uresult)) {
+                    result_is_uv = TRUE;
+                    overflowed = FALSE;
+                }
+                else {
+                    overflowed = TRUE;
+                }
+            }
+
+            if (!overflowed) {
+                SP--;
+                if (result_is_uv) {
+                    SETu(uresult);
+                }
+                else {
+                    SETi(iresult);
+                }
+                RETURN;
+            }
+        }
+    }
+#else
     /* We must see if we can perform the addition with integers if possible,
        as the integer code detects overflow while the NV code doesn't.
        If either argument hasn't had a numeric conversion yet attempt to get
@@ -793,6 +876,7 @@ PP(pp_add)
 	    } /* Overflow, drop through to NVs.  */
 	}
     }
+#endif
 
 #else
     useleft = USE_LEFT(svl);
