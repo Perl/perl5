@@ -198,29 +198,39 @@ STADTX_STATIC_INLINE U64 stadtx_hash_with_state(
             v0= ROTR64(v0, 17) ^ v1;
             v1= ROTR64(v1, 53) + v0;
             key += 8;
+            /* FALLTHROUGH */
             case 2:
             v0 += U8TO64_LE(key) * STADTX_K3_U64;
             v0= ROTR64(v0, 17) ^ v1;
             v1= ROTR64(v1, 53) + v0;
             key += 8;
+            /* FALLTHROUGH */
             case 1:
             v0 += U8TO64_LE(key) * STADTX_K3_U64;
             v0= ROTR64(v0, 17) ^ v1;
             v1= ROTR64(v1, 53) + v0;
             key += 8;
+            /* FALLTHROUGH */
             case 0:
             default: break;
         }
         switch ( len & 0x7 ) {
             case 7: v0 += (U64)key[6] << 32;
+            /* FALLTHROUGH */
             case 6: v1 += (U64)key[5] << 48;
+            /* FALLTHROUGH */
             case 5: v0 += (U64)key[4] << 16;
+            /* FALLTHROUGH */
             case 4: v1 += (U64)U8TO32_LE(key);
                     break;
+            /* FALLTHROUGH */
             case 3: v0 += (U64)key[2] << 48;
+            /* FALLTHROUGH */
             case 2: v1 += (U64)U8TO16_LE(key);
                     break;
+            /* FALLTHROUGH */
             case 1: v0 += (U64)key[0];
+            /* FALLTHROUGH */
             case 0: v1 = ROTL64(v1, 32) ^ 0xFF;
                     break;
         }
@@ -253,25 +263,37 @@ STADTX_STATIC_INLINE U64 stadtx_hash_with_state(
 
         switch ( len >> 3 ) {
             case 3: v0 += ((U64)U8TO64_LE(key) * STADTX_K2_U32); key += 8; v0= ROTL64(v0,57) ^ v3;
+            /* FALLTHROUGH */
             case 2: v1 += ((U64)U8TO64_LE(key) * STADTX_K3_U32); key += 8; v1= ROTL64(v1,63) ^ v2;
+            /* FALLTHROUGH */
             case 1: v2 += ((U64)U8TO64_LE(key) * STADTX_K4_U32); key += 8; v2= ROTR64(v2,47) + v0;
+            /* FALLTHROUGH */
             case 0: v3 = ROTR64(v3,11) - v1;
+            /* FALLTHROUGH */
         }
         v0 ^= (len+1) * STADTX_K3_U64;
         switch ( len & 0x7 ) {
             case 7: v1 += (U64)key[6];
+            /* FALLTHROUGH */
             case 6: v2 += (U64)U8TO16_LE(key+4);
                     v3 += (U64)U8TO32_LE(key);
                     break;
+            /* FALLTHROUGH */
             case 5: v1 += (U64)key[4];
+            /* FALLTHROUGH */
             case 4: v2 += (U64)U8TO32_LE(key);
                     break;
+            /* FALLTHROUGH */
             case 3: v3 += (U64)key[2];
+            /* FALLTHROUGH */
             case 2: v1 += (U64)U8TO16_LE(key);
                     break;
+            /* FALLTHROUGH */
             case 1: v2 += (U64)key[0];
+            /* FALLTHROUGH */
             case 0: v3 = ROTL64(v3, 32) ^ 0xFF;
                     break;
+            /* FALLTHROUGH */
         }
 
         v1 -= v2;
