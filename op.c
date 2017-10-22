@@ -2585,8 +2585,8 @@ S_finalize_op(pTHX_ OP* o)
     case OP_CONST:
 	if (cSVOPo->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(o);
-	/* FALLTHROUGH */
 #ifdef USE_ITHREADS
+        /* FALLTHROUGH */
     case OP_HINTSEVAL:
         op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
 #endif
