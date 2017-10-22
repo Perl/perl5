@@ -14294,6 +14294,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		else
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 		if (isREGEXP(sstr)) goto duprex;
+		/* FALLTHROUGH */
 	    case SVt_PVGV:
 		/* non-GP case already handled above */
 		if(isGV_with_GP(sstr)) {
