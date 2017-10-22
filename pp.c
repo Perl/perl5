@@ -1241,24 +1241,42 @@ PP(pp_multiply)
         U32 flags = (svl->sv_flags & svr->sv_flags);
         if (flags & SVf_IOK) {
             /* both args are simple IVs */
-            UV topl, topr;
+            IV iresult;
+            bool safe;
             il = SvIVX(svl);
             ir = SvIVX(svr);
-          do_iv:
-            topl = ((UV)il) >> (UVSIZE * 4 - 1);
-            topr = ((UV)ir) >> (UVSIZE * 4 - 1);
 
-            /* if both are in a range that can't under/overflow, do a
-             * simple integer multiply: if the top halves(*) of both numbers
-             * are 00...00  or 11...11, then it's safe.
-             * (*) for 32-bits, the "top half" is the top 17 bits,
-             *     for 64-bits, its 33 bits */
-            if (!(
-                      ((topl+1) | (topr+1))
-                    & ( (((UV)1) << (UVSIZE * 4 + 1)) - 2) /* 11..110 */
-            )) {
+#ifdef HAS_BUILTIN_MUL_OVERFLOW
+          do_iv:
+            safe = !__builtin_mul_overflow(il, ir, &iresult);
+#else
+            {
+                UV topl, topr;
+          do_iv:
+                topl = ((UV)il) >> (UVSIZE * 4 - 1);
+                topr = ((UV)ir) >> (UVSIZE * 4 - 1);
+
+                /* if both are in a range that can't under/overflow, do a
+                 * simple integer multiply: if the top halves(*) of both numbers
+                 * are 00...00  or 11...11, then it's safe.
+                 * (*) for 32-bits, the "top half" is the top 17 bits,
+                 *     for 64-bits, its 33 bits */
+                if (!(
+                          ((topl+1) | (topr+1))
+                        & ( (((UV)1) << (UVSIZE * 4 + 1)) - 2) /* 11..110 */
+                )) {
+                    iresult = il * ir;
+                    safe = TRUE;
+                }
+                else {
+                    safe = FALSE;
+                }
+            }
+#endif
+
+            if (safe) {
                 SP--;
-                TARGi(il * ir, 0); /* args not GMG, so can't be tainted */
+                TARGi(iresult, 0); /* args not GMG, so can't be tainted */
                 SETs(TARG);
                 RETURN;
             }
@@ -1295,6 +1313,59 @@ PP(pp_multiply)
 
   generic:
 
+#ifdef HAS_BUILTIN_MUL_OVERFLOW
+    if (SvIV_please_nomg(svr) && SvIV_please_nomg(svl)) {
+        bool overflowed, result_is_uv;
+        IV iresult;
+        UV uresult;
+        const bool auvok = SvUOK(svl), buvok = SvUOK(svr);
+        if (auvok && buvok) {
+            result_is_uv = TRUE;
+            overflowed = __builtin_mul_overflow(SvUVX(svl), SvUVX(svr), &uresult);
+        }
+        else if (!auvok && !buvok) {
+            const IV ivl = SvIVX(svl), ivr = SvIVX(svr);
+            if (!__builtin_mul_overflow(ivl, ivr, &iresult)) {
+                result_is_uv = FALSE;
+                overflowed = FALSE;
+            }
+            else if (!__builtin_mul_overflow(ivl, ivr, &uresult)) {
+                result_is_uv = TRUE;
+                overflowed = FALSE;
+            }
+            else {
+                overflowed = TRUE;
+            }
+        }
+        else {
+            const IV iv = auvok ? SvIVX(svr) : SvIVX(svl);
+            const UV uv = auvok ? SvUVX(svl) : SvUVX(svr);
+            assert(auvok != buvok);
+            if (!__builtin_mul_overflow(iv, uv, &iresult)) {
+                result_is_uv = FALSE;
+                overflowed = FALSE;
+            }
+            else if (!__builtin_mul_overflow(iv, uv, &uresult)) {
+                result_is_uv = TRUE;
+                overflowed = FALSE;
+            }
+            else {
+                overflowed = TRUE;
+            }
+        }
+
+        if (!overflowed) {
+            SP--;
+            if (result_is_uv) {
+                SETu(uresult);
+            }
+            else {
+                SETi(iresult);
+            }
+            RETURN;
+        }
+    }
+#else
     if (SvIV_please_nomg(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
@@ -1407,6 +1478,7 @@ PP(pp_multiply)
 	    } /* ahigh && bhigh */
 	} /* SvIOK(svl) */
     } /* SvIOK(svr) */
+#endif
 #endif
     {
       NV right = SvNV_nomg(svr);
