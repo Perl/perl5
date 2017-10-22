@@ -565,6 +565,7 @@
 #define VOL volatile
 #define CAN_PROTOTYPE
 #define _(args) args
+#define I_STDARG
 #endif
 
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
