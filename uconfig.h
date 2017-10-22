@@ -4994,6 +4994,12 @@
 /*#define HAS_STRERROR_R	   / **/
 #define STRERROR_R_PROTO 0	   /**/
 
+/* HAS_STRTOD_L:
+ *	This symbol, if defined, indicates that the strtod_l routine is
+ *	available to convert strings to long doubles.
+ */
+/*#define HAS_STRTOD_L		/ **/
+
 /* HAS_STRTOLD_L:
  *	This symbol, if defined, indicates that the strtold_l routine is
  *	available to convert strings to long doubles.

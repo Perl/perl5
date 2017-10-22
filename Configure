@@ -866,6 +866,7 @@ d_strlcat=''
 d_strlcpy=''
 d_strnlen=''
 d_strtod=''
+d_strtod_l=''
 d_strtol=''
 d_strtold=''
 d_strtold_l=''
@@ -18705,6 +18706,10 @@ eval $inlibc
 set strtod d_strtod
 eval $inlibc
 
+: see if strtod_l exists
+set strtod_l d_strtod_l
+eval $inlibc
+
 : see if strtol exists
 set strtol d_strtol
 eval $inlibc
@@ -24162,6 +24167,7 @@ d_strlcat='$d_strlcat'
 d_strlcpy='$d_strlcpy'
 d_strnlen='$d_strnlen'
 d_strtod='$d_strtod'
+d_strtod_l='$d_strtod_l'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'
 d_strtold_l='$d_strtold_l'

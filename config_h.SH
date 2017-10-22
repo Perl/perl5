@@ -5029,6 +5029,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_strerror_r HAS_STRERROR_R	   /**/
 #define STRERROR_R_PROTO $strerror_r_proto	   /**/
 
+/* HAS_STRTOD_L:
+ *	This symbol, if defined, indicates that the strtod_l routine is
+ *	available to convert strings to long doubles.
+ */
+#$d_strtod_l HAS_STRTOD_L		/**/
+
 /* HAS_STRTOLD_L:
  *	This symbol, if defined, indicates that the strtold_l routine is
  *	available to convert strings to long doubles.
