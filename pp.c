@@ -1822,19 +1822,36 @@ PP(pp_subtract)
         U32 flags = (svl->sv_flags & svr->sv_flags);
         if (flags & SVf_IOK) {
             /* both args are simple IVs */
-            UV topl, topr;
+            IV iresult;
+            bool safe;
             il = SvIVX(svl);
             ir = SvIVX(svr);
-          do_iv:
-            topl = ((UV)il) >> (UVSIZE * 8 - 2);
-            topr = ((UV)ir) >> (UVSIZE * 8 - 2);
 
-            /* if both are in a range that can't under/overflow, do a
-             * simple integer subtract: if the top of both numbers
-             * are 00  or 11, then it's safe */
-            if (!( ((topl+1) | (topr+1)) & 2)) {
+#ifdef HAS_BUILTIN_SUB_OVERFLOW
+          do_iv:
+            safe = !__builtin_sub_overflow(il, ir, &iresult);
+#else
+            {
+                UV topl, topr;
+          do_iv:
+                topl = ((UV)il) >> (UVSIZE * 8 - 2);
+                topr = ((UV)ir) >> (UVSIZE * 8 - 2);
+
+                /* if both are in a range that can't under/overflow, do a
+                 * simple integer subtract: if the top of both numbers
+                 * are 00  or 11, then it's safe */
+                if (!( ((topl+1) | (topr+1)) & 2)) {
+                    iresult = il - ir;
+                    safe = TRUE;
+                }
+                else {
+                    safe = FALSE;
+                }
+            }
+#endif
+            if (safe) {
                 SP--;
-                TARGi(il - ir, 0); /* args not GMG, so can't be tainted */
+                TARGi(iresult, 0); /* args not GMG, so can't be tainted */
                 SETs(TARG);
                 RETURN;
             }
@@ -1865,6 +1882,99 @@ PP(pp_subtract)
   generic:
 
     useleft = USE_LEFT(svl);
+#ifdef HAS_BUILTIN_SUB_OVERFLOW
+    if (SvIV_please_nomg(svr)) {
+        IV ivl = 0;
+        UV uvl;
+        bool auvok, a_valid = TRUE;
+        if (!useleft) {
+            ivl = 0;
+            auvok = FALSE;
+        }
+        else if (SvIV_please_nomg(svl)) {
+            auvok = SvUOK(svl);
+            if (auvok) {
+                uvl = SvUVX(svl);
+            }
+            else {
+                ivl = SvIVX(svl);
+            }
+        }
+        else {
+            a_valid = FALSE;
+        }
+        if (a_valid) {
+            bool overflowed, result_is_uv;
+            IV iresult;
+            UV uresult;
+            const bool buvok = SvUOK(svr);
+            if (auvok && buvok) {
+                const UV uvr = SvUVX(svr);
+                if (!__builtin_sub_overflow(uvl, uvr, &iresult)) {
+                    result_is_uv = FALSE;
+                    overflowed = FALSE;
+                }
+                else if (!__builtin_sub_overflow(uvl, uvr, &uresult)) {
+                    result_is_uv = TRUE;
+                    overflowed = FALSE;
+                }
+                else {
+                    overflowed = TRUE;
+                }
+            }
+            else if (!auvok && !buvok) {
+                const IV ivr = SvIVX(svr);
+                if (!__builtin_sub_overflow(ivl, ivr, &iresult)) {
+                    result_is_uv = FALSE;
+                    overflowed = FALSE;
+                }
+                else if (!__builtin_sub_overflow(ivl, ivr, &uresult)) {
+                    result_is_uv = TRUE;
+                    overflowed = FALSE;
+                }
+                else {
+                    overflowed = TRUE;
+                }
+            }
+            else if (auvok && !buvok) {
+                const IV ivr = SvIVX(svr);
+                if (!__builtin_sub_overflow(uvl, ivr, &iresult)) {
+                    result_is_uv = FALSE;
+                    overflowed = FALSE;
+                }
+                else if (!__builtin_sub_overflow(uvl, ivr, &uresult)) {
+                    result_is_uv = TRUE;
+                    overflowed = FALSE;
+                }
+                else {
+                    overflowed = TRUE;
+                }
+            }
+            else {
+                const UV uvr = SvUVX(svr);
+                assert(!auvok && buvok);
+                if (!__builtin_sub_overflow(ivl, uvr, &iresult)) {
+                    result_is_uv = FALSE;
+                    overflowed = FALSE;
+                }
+                else {
+                    overflowed = TRUE;
+                }
+            }
+
+            if (!overflowed) {
+                SP--;
+                if (result_is_uv) {
+                    SETu(uresult);
+                }
+                else {
+                    SETi(iresult);
+                }
+                RETURN;
+            }
+        }
+    }
+#else
     /* See comments in pp_add (in pp_hot.c) about Overflow, and how
        "bad things" happen if you rely on signed integers wrapping.  */
     if (SvIV_please_nomg(svr)) {
@@ -1962,6 +2072,7 @@ PP(pp_subtract)
 	    } /* Overflow, drop through to NVs.  */
 	}
     }
+#endif
 #else
     useleft = USE_LEFT(svl);
 #endif
