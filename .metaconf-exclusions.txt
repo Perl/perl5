@@ -20,6 +20,7 @@
 # to be included, even before specific code using the relevant symbols has been
 # written.
 
+I_LIMITS
 I_STDARG
 index
 rindex

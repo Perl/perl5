@@ -212,6 +212,19 @@ my $in_v     = 0;
 my %Data     = ();
 my $quote;
 
+# These variables were set in older versions of Perl, but are no longer needed
+# by the core. However, some CPAN modules may rely on them; in particular, Tk
+# (at least up to version 804.034) fails to build without them. We force them
+# to be emitted to Config_heavy.pl for backcompat with such modules (and we may
+# find that this set needs to be extended in future). See RT#132347.
+my @v_forced = map "$_\n", split /\n+/, <<'EOT';
+i_limits='define'
+i_stdlib='define'
+i_string='define'
+i_time='define'
+prototype='define'
+EOT
+
 
 my %seen_quotes;
 {
@@ -567,7 +580,7 @@ $heavy_txt .= join('',
     map {
         /^([^=]+)/ ? [ $1, $_ ]
                    : [ $_, $_ ] # shouldnt happen
-    } @v_others
+    } @v_others, @v_forced
 ) . "!END!\n";
 
 # Only need the dynamic byteorder code in Config.pm if 'byteorder' is one of
