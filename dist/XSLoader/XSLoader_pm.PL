@@ -143,13 +143,8 @@ print OUT <<'EOT';
     my $bs = $file;
     $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
 
-    if (-s $bs) { # only read file if it's not empty
-#       print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
-        # This calls DynaLoader::bootstrap, which loads the .bs file
-	goto \&XSLoader::bootstrap_inherit;
-    }
-
-    goto \&XSLoader::bootstrap_inherit if not -f $file;
+    # This calls DynaLoader::bootstrap, which will load the .bs file if present
+    goto \&XSLoader::bootstrap_inherit if not -f $file or -s $bs;
 
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
