@@ -5806,9 +5806,12 @@ t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
 t/porting/bench.t		Check Porting/bench.pl runs ok
+t/porting/bench/badhash		a test file for t/porting/bench.t
+t/porting/bench/badname		a test file for t/porting/bench.t
 t/porting/bench/badversion.json	a test file for t/porting/bench.t
 t/porting/bench/callsub.json	a test file for t/porting/bench.t
 t/porting/bench/callsub2.json	a test file for t/porting/bench.t
+t/porting/bench/oddentry	a test file for t/porting/bench.t
 t/porting/bench/ret0		a test file for t/porting/bench.t
 t/porting/bench/synerr		a test file for t/porting/bench.t
 t/porting/bench_selftest.t	run Porting/bench.pl's selftest facility

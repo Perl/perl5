@@ -39,15 +39,24 @@
 #     string::   string handling
 #
 #
-# Each hash has three fields:
+# Each hash has up to five fields:
 #
-#   desc is a description of the test
-#   setup is a string containing setup code
+#   desc  is a description of the test; if not present, it defaults
+#           to the same value as the 'code' field
+#
+#   setup is an optional string containing setup code that is run once
+#
 #   code  is a string containing the code to run in a loop
 #
-# So typically a benchmark tool might do something like
+#   pre   is an optional string containing setup code which is executed
+#         just before 'code' for every iteration, but whose execution
+#         time is not included in the result
 #
-#   eval "package $token; $setup; for (1..1000000) { $code }"
+#   post  like pre, but executed just after 'code'.
+#
+# So typically a benchmark tool might execute variations on something like
+#
+#   eval "package $name; $setup; for (1..1000000) { $pre; $code; $post }"
 #
 # Currently the only tool that uses this file is Porting/bench.pl;
 # try C<perl Porting/bench.pl --help> for more info
@@ -57,7 +66,9 @@
 # Note: for the cachegrind variant, an entry like
 #    'foo::bar' => {
 #     setup   => 'SETUP',
+#     pre     => 'PRE',
 #     code    => 'CODE',
+#     post    => 'POST',
 #   }
 # creates two temporary perl sources looking like:
 #
@@ -65,12 +76,12 @@
 #        BEGIN { srand(0) }
 #        SETUP;
 #        for my $__loop__ (1..$ARGV[0]) {
-#            1;
+#            PRE; 1; POST;
 #        }
 #
-# and as above, but with the '1;' in the loop  body replaced with:
+# and as above, but with the loop body replaced with:
 #
-#            CODE;
+#            PRE; CODE; POST;
 #
 # It then pipes each of the two sources into
 #
@@ -79,11 +90,25 @@
 # where N is set to 10 and then 20.
 #
 # It then uses the result of those four cachegrind runs to subtract out
-# the perl startup and loop overheads. So only what's in SETUP and CODE
-# can affect the benchmark, and if the loop happens to leave some state
-# changed (such as storing a value in a hash), then the final benchmark
-# timing is the result of running CODE with the hash entry populated
-# rather than empty.
+# the perl startup and loop overheads (including SETUP, PRE and POST), leaving
+# (in theory only CODE);
+#
+# Note that misleading results may be obtained if each iteration is
+# not identical. For example with
+#
+#     code => '$x .= "foo"',
+#
+# the string $x gets longer on each iteration. Similarly, a hash might be
+# empty on the first iteration, but have entries on subsequent iterations.
+#
+# To avoid this, use 'pre' or 'post', e.g.
+#
+#     pre  => '$x  = ""',
+#     code => '$x .= "foo"',
+#
+# Finally, the optional 'compile' key causes the code body to be wrapped
+# in eval qw{ sub { ... }}, so that compile time rather than execution
+# time is measured.
 
 
 [
@@ -1052,12 +1077,10 @@
     },
 
     'expr::arith::preinc' => {
-        desc    => '++$x',
         setup   => 'my $x = 1;',
         code    => '++$x',
     },
     'expr::arith::predec' => {
-        desc    => '--$x',
         setup   => 'my $x = 1;',
         code    => '--$x',
     },
@@ -1779,7 +1802,6 @@
 
 
     'regex::anyof_plus::anchored' => {
-        desc    => '/^[acgt]+/',
         setup   => '$_ = "a" x 100;',
         code    => '/^[acgt]+/',
     },

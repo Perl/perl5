@@ -99,7 +99,7 @@ I<selftest>, which runs some basic sanity checks and produces TAP output.
 
 --debug
 
-Enable verbose debugging output.
+Enable debugging output.
 
 =item *
 
@@ -109,6 +109,7 @@ Display basic usage information.
 
 =item *
 
+-v
 --verbose
 
 Display progress information.
@@ -187,6 +188,9 @@ stripped to unique parts would be:
 but is actually only stripped down to:
 
     5.20.0  5.22.0  5.24.0
+
+If the final results are plain integers, they are prefixed with "p"
+to avoid looking like column numbers to switches like C<--norm=2>.
 
 
 =item *
@@ -303,7 +307,21 @@ If only one field is selected, the output is in more compact form.
 --norm=I<foo>
 
 Specify which perl column in the output to treat as the 100% norm.
-It may be a column number (0..N-1) or a perl executable name or label.
+It may be:
+
+=over
+
+* a column number (0..N-1),
+
+* a negative column number (-1..-N) which counts from the right (so -1 is
+the right-most column),
+
+* or a perl executable name,
+
+* or a perl executable label.
+
+=back
+
 It defaults to the leftmost column.
 
 =item *
@@ -365,7 +383,7 @@ General options:
                         selftest   perform a selftest; produce TAP output
   --debug            Enable verbose debugging output.
   --help             Display this help.
-  --verbose          Display progress information.
+  -v|--verbose       Display progress information.
 
 
 Selection:
@@ -478,7 +496,7 @@ my %OPTS = (
         'show'        => \$OPTS{show},
         'sort=s'      => \$OPTS{sort},
         'tests=s'     => \$OPTS{tests},
-        'verbose'     => \$OPTS{verbose},
+        'v|verbose'   => \$OPTS{verbose},
         'write|w=s'   => \$OPTS{write},
     ) or die "Use the -h option for usage information.\n";
 
@@ -598,6 +616,32 @@ sub read_tests_file {
         die "Error: can't read '$file': $!\n";
     }
 
+    # validate and process each test
+
+    {
+        my %valid = map { $_ => 1 } qw(desc setup code pre post compile);
+        my @tests = @$ta;
+        if (!@tests || @tests % 2 != 0) {
+            die "Error: '$file' does not contain evenly paired test names and hashes\n";
+        }
+        while (@tests) {
+            my $name = shift @tests;
+            my $hash = shift @tests;
+
+            unless ($name =~ /^[a-zA-Z]\w*(::\w+)*$/) {
+                die "Error: '$file': invalid test name: '$name'\n";
+            }
+
+            for (sort keys %$hash) {
+                die "Error: '$file': invalid key '$_' for test '$name'\n"
+                    unless exists $valid{$_};
+            }
+
+            # make description default to the code
+            $hash->{desc} = $hash->{code} unless exists $hash->{desc};
+        }
+    }
+
     my @orig_order;
     for (my $i=0; $i < @$ta; $i += 2) {
         push @orig_order, $ta->[$i];
@@ -614,18 +658,35 @@ sub read_tests_file {
 
 sub select_a_perl {
     my ($perl, $perls, $who) = @_;
-    $perls||=[];
-    if ($perl =~ /^[0-9]$/) {
+    $perls ||= [];
+    my $n = @$perls;
+
+    if ($perl =~ /^-([0-9]+)$/) {
+        my $p = $1;
+        die "Error: $who value $perl outside range -1..-$n\n"
+                                        if $p < 1 || $p > $n;
+        return $n - $p;
+    }
+
+    if ($perl =~ /^[0-9]+$/) {
         die "Error: $who value $perl outside range 0.." . $#$perls . "\n"
-                                        unless $perl < @$perls;
+                                        unless $perl < $n;
         return $perl;
     }
     else {
         my @perl = grep    $perls->[$_][0] eq $perl
                         || $perls->[$_][1] eq $perl,
                         0..$#$perls;
-        die "Error: $who: unrecognised perl '$perl'\n"
-                                        unless @perl;
+        unless (@perl) {
+            my $valid = '';
+            for (@$perls) {
+                $valid .= "    $_->[1]";
+                $valid .= "  $_->[0]" if $_->[0] ne  $_->[1];
+                $valid .= "\n";
+            }
+            die "Error: $who: unrecognised perl '$perl'\n"
+              . "Valid perl names are:\n$valid";
+        }
         die "Error: $who: ambiguous perl '$perl'\n"
                                         if @perl > 1;
         return $perl[0];
@@ -747,6 +808,17 @@ sub process_executables_list {
             $post =~ s/^([0-9\.]*).*$/$1/;
             $labels[$_][0] .= $post for 0..$#labels;
 
+            # avoid degenerate empty string for single executable name
+            $labels[0][0] = '0' if @labels == 1 && !length $labels[0][0];
+
+            # if the auto-generated labels are plain integers, prefix
+            # them with 'p' (for perl) to distinguish them from column
+            # indices (otherwise e.g. --norm=2 is ambiguous)
+
+            if ($labels[0][0] =~ /^\d*$/) {
+                $labels[$_][0] = "p$labels[$_][0]" for 0..$#labels;
+            }
+
             # now de-duplicate labels
 
             my (%seen, %index);
@@ -774,19 +846,43 @@ sub process_executables_list {
 
 
 
-# Return a string containing perl test code wrapped in a loop
-# that runs $ARGV[0] times
+# Return a string containing a perl program which runs the benchmark code
+# $ARGV[0] times. If $body is true, include the main body (setup) in
+# the loop; otherwise create an empty loop with just pre and post.
+# Note that an empty body is handled with '1;' so that a completely empty
+# loop has a single nextstate rather than a stub op, so more closely
+# matches the active loop; e.g.:
+#   {1;}    => nextstate;                       unstack
+#   {$x=1;} => nextstate; const; gvsv; sassign; unstack
+# Note also that each statement is prefixed with a label; this avoids
+# adjacent nextstate ops being optimised away.
+#
+# A final 1; statement is added so that the code is always in void
+# context.
+#
+# It the compile flag is set for a test, the body of the loop is wrapped in
+# eval 'sub { .... }' to measure compile time rather than execution time
 
 sub make_perl_prog {
-    my ($test, $desc, $setup, $code) = @_;
+    my ($name, $test, $body) = @_;
+    my ($desc, $setup, $code, $pre, $post, $compile) =
+                                @$test{qw(desc setup code pre post compile)};
+
+    $setup //= '';
+    $pre  = defined $pre  ? "_PRE_: $pre; " : "";
+    $post = defined $post ? "_POST_: $post; " : "";
+    $code = $body ? $code : "1";
+    $code = "_CODE_: $code; ";
+    my $full = "$pre$code$post _CXT_: 1; ";
+    $full = "eval q{sub { $full }};" if $compile;
 
     return <<EOF;
 # $desc
-package $test;
+package $name;
 BEGIN { srand(0) }
 $setup;
 for my \$__loop__ (1..\$ARGV[0]) {
-    $code;
+    $full
 }
 EOF
 }
@@ -1071,14 +1167,9 @@ sub grind_run {
     for my $test (grep $tests->{$_}, @$order) {
 
         # Create two test progs: one with an empty loop and one with code.
-        # Note that the empty loop is actually '{1;}' rather than '{}';
-        # this causes the loop to have a single nextstate rather than a
-        # stub op, so more closely matches the active loop; e.g.:
-        #   {1;}    => nextstate;                       unstack
-        #   {$x=1;} => nextstate; const; gvsv; sassign; unstack
         my @prog = (
-            make_perl_prog($test, @{$tests->{$test}}{qw(desc setup)}, '1'),
-            make_perl_prog($test, @{$tests->{$test}}{qw(desc setup code)}),
+            make_perl_prog($test, $tests->{$test}, 0),
+            make_perl_prog($test, $tests->{$test}, 1),
         );
 
         for my $p (@$perls) {
@@ -1459,6 +1550,27 @@ sub sorted_test_names {
 }
 
 
+# format one cell data item
+
+sub grind_format_cell {
+    my ($val, $width) = @_;
+    my $s;
+    if (!defined $val) {
+        return sprintf "%*s", $width, '-';
+    }
+    elsif (abs($val) >= 1_000_000) {
+        # avoid displaying very large numbers (which might be the
+        # result of e.g. 1 / 0.000001)
+        return sprintf "%*s", $width, 'Inf';
+    }
+    elsif ($OPTS{raw}) {
+        return sprintf "%*.1f", $width, $val;
+    }
+    else {
+        return sprintf "%*.2f", $width, $val * 100;
+    }
+}
+
 # grind_print(): display the tabulated results of all the cachegrinds.
 #
 # Arguments are of the form:
@@ -1466,6 +1578,7 @@ sub sorted_test_names {
 #    $averages->{perl_label}{field_name} = M
 #    $perls = [ [ perl-exe, perl-label ], ... ]
 #    $tests->{test_name}{desc => ..., ...}
+#    $order = [ 'foo::bar1', ... ]  # order to display tests
 
 sub grind_print {
     my ($results, $averages, $perls, $tests, $order) = @_;
@@ -1475,103 +1588,103 @@ sub grind_print {
     my %perl_labels;
     $perl_labels{$_->[0]} = $_->[1] for @$perls;
 
-    my $field_label_width = 6;
-    # Calculate the width to display for each column.
-    my $min_width = $OPTS{raw} ? 8 : 6;
-    my @widths = map { length($_) < $min_width ? $min_width : length($_) }
-    			@perl_labels;
-
     # Print standard header.
     grind_blurb($perls);
 
     my @test_names = sorted_test_names($results, $order, $perls);
 
+    my @fields = qw(Ir Dr Dw COND IND
+                     COND_m IND_m
+                     Ir_m1 Dr_m1 Dw_m1
+                     Ir_mm Dr_mm Dw_mm
+                  );
+
+    if ($OPTS{fields}) {
+        @fields = grep exists $OPTS{fields}{$_}, @fields;
+    }
+
     # If only a single field is to be displayed, use a more compact
     # format with only a single line of output per test.
 
-    my $one_field = defined $OPTS{fields} &&  keys(%{$OPTS{fields}}) == 1;
+    my $one_field = @fields == 1;
 
-    if ($one_field) {
-        print "\nResults for field " . (keys(%{$OPTS{fields}}))[0] . ".\n";
+    # The width of column 0: this is either field names, or for
+    # $one_field, test names
 
-        # The first column will now contain test names rather than
-        # field names; Calculate the max width.
+    my $width0 = 0;
+    for ($one_field ? @test_names : @fields) {
+        $width0 = length if length > $width0;
+    }
 
-        $field_label_width = 0;
-        for (@test_names) {
-            $field_label_width = length if length > $field_label_width;
-        }
+    # Calculate the widths of the data columns
 
-        # Print the perl executables header.
+    my @widths = map length, @perl_labels;
 
-        print "\n";
-        for my $i (0,1) {
-            print " " x $field_label_width;
-            for (0..$#widths) {
-                printf " %*s", $widths[$_],
-                    $i ? ('-' x$widths[$_]) :  $perl_labels[$_];
+    for my $test (@test_names) {
+        my $res = ($test eq 'AVERAGE') ? $averages : $results->{$test};
+        for my $field (@fields) {
+            for my $i (0..$#widths) {
+                my $l = length grind_format_cell(
+                                    $res->{$perl_labels[$i]}{$field}, 1);
+                $widths[$i] = $l if $l > $widths[$i];
             }
-            print "\n";
         }
     }
 
-    # Dump the results for each test.
+    # Print the results for each test
 
-    for my $test_name (@test_names) {
+    for my $test (0..$#test_names) {
+        my $test_name = $test_names[$test];
         my $doing_ave = ($test_name eq 'AVERAGE');
-        my $res1 = $doing_ave ? $averages : $results->{$test_name};
+        my $res = $doing_ave ? $averages : $results->{$test_name};
 
-        unless ($one_field) {
+        # print per-test header
+
+        if ($one_field) {
+            print "\nResults for field $fields[0]\n\n" if $test == 0;
+        }
+        else {
             print "\n$test_name";
             print "\n$tests->{$test_name}{desc}" unless $doing_ave;
             print "\n\n";
+        }
 
-            # Print the perl executables header.
+        # Print the perl executable names header.
+
+        if (!$one_field || $test == 0) {
             for my $i (0,1) {
-                print " " x $field_label_width;
+                print " " x $width0;
                 for (0..$#widths) {
                     printf " %*s", $widths[$_],
-                        $i ? ('-' x$widths[$_]) :  $perl_labels[$_];
+                        $i ? ('-' x$widths[$_]) : $perl_labels[$_];
                 }
                 print "\n";
             }
         }
 
-        for my $field (qw(Ir Dr Dw COND IND
-                          N
-                          COND_m IND_m
-                          N
-                          Ir_m1 Dr_m1 Dw_m1
-                          N
-                          Ir_mm Dr_mm Dw_mm
-                      ))
-        {
-            next if $OPTS{fields} and ! exists $OPTS{fields}{$field};
+        my $field_suffix = '';
 
-            if ($field eq 'N') {
-                print "\n";
-                next;
-            }
+        # print a line of data
 
+        for my $field (@fields) {
             if ($one_field) {
-                printf "%-*s", $field_label_width, $test_name;
+                printf "%-*s", $width0, $test_name;
             }
             else {
-                printf "%*s", $field_label_width, $field;
+                # If there are enough fields, print a blank line
+                # between groups of fields that have the same suffix
+                if (@fields > 4) {
+                    my $s = '';
+                    $s = $1 if $field =~ /(_\w+)$/;
+                    print "\n" if $s ne $field_suffix;
+                    $field_suffix = $s;
+                }
+                printf "%*s", $width0, $field;
             }
 
             for my $i (0..$#widths) {
-                my $res2 = $res1->{$perl_labels[$i]};
-                my $p = $res2->{$field};
-                if (!defined $p) {
-                    printf " %*s", $widths[$i], '-';
-                }
-                elsif ($OPTS{raw}) {
-                    printf " %*.1f", $widths[$i], $p;
-                }
-                else {
-                    printf " %*.2f", $widths[$i], $p * 100;
-                }
+                print " ", grind_format_cell($res->{$perl_labels[$i]}{$field},
+                                            $widths[$i]);
             }
             print "\n";
         }
@@ -1589,13 +1702,10 @@ sub grind_print {
 #    $averages->{perl_label}{field_name} = M
 #    $perls = [ [ perl-exe, perl-label ], ... ]
 #    $tests->{test_name}{desc => ..., ...}
+#    $order = [ 'foo::bar1', ... ]  # order to display tests
 
 sub grind_print_compact {
     my ($results, $averages, $which_perl, $perls, $tests, $order) = @_;
-
-
-    # the width to display for each column.
-    my $width = $OPTS{raw} ? 7 : 6;
 
     # Print standard header.
     grind_blurb($perls);
@@ -1616,31 +1726,48 @@ sub grind_print_compact {
         @fields = grep exists $OPTS{fields}{$_}, @fields;
     }
 
-    printf " %*s", $width, $_      for @fields;
+    # calculate the the max width of the test names
+
+    my $name_width = 0;
+    for (@test_names) {
+        $name_width = length if length > $name_width;
+    }
+
+    # Calculate the widths of the data columns
+
+    my @widths = map length, @fields;
+
+    for my $test (@test_names) {
+        my $res = ($test eq 'AVERAGE') ? $averages : $results->{$test};
+        $res = $res->{$perls->[$which_perl][1]};
+        for my $i (0..$#fields) {
+            my $l = length grind_format_cell($res->{$fields[$i]}, 1);
+            $widths[$i] = $l if $l > $widths[$i];
+        }
+    }
+
+    # Print header
+
+    printf " %*s", $widths[$_], $fields[$_] for 0..$#fields;
     print "\n";
-    printf " %*s", $width, '------' for @fields;
+    printf " %*s", $_, ('-' x $_) for @widths;
     print "\n";
+
+    # Print the results for each test
 
     for my $test_name (@test_names) {
         my $doing_ave = ($test_name eq 'AVERAGE');
         my $res = $doing_ave ? $averages : $results->{$test_name};
         $res = $res->{$perls->[$which_perl][1]};
+        my $desc = $doing_ave
+            ? $test_name
+            : sprintf "%-*s   %s", $name_width, $test_name,
+                                 $tests->{$test_name}{desc};
 
-        for my $field (@fields) {
-            my $p = $res->{$field};
-            if (!defined $p) {
-                printf " %*s", $width, '-';
-            }
-            elsif ($OPTS{raw}) {
-                printf " %*.1f", $width, $p;
-            }
-            else {
-                printf " %*.2f", $width, $p * 100;
-            }
-
+        for my $i (0..$#fields) {
+            print " ", grind_format_cell($res->{$fields[$i]}, $widths[$i]);
         }
-
-        print "  $test_name\n";
+        print "  $desc\n";
     }
 }
 
