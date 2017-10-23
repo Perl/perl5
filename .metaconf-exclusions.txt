@@ -21,3 +21,5 @@
 # written.
 
 I_STDARG
+index
+rindex
