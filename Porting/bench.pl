@@ -619,7 +619,7 @@ sub read_tests_file {
     # validate and process each test
 
     {
-        my %valid = map { $_ => 1 } qw(desc setup code pre post);
+        my %valid = map { $_ => 1 } qw(desc setup code pre post compile);
         my @tests = @$ta;
         if (!@tests || @tests % 2 != 0) {
             die "Error: '$file' does not contain evenly paired test names and hashes\n";
@@ -855,24 +855,33 @@ sub process_executables_list {
 #   {1;}    => nextstate;                       unstack
 #   {$x=1;} => nextstate; const; gvsv; sassign; unstack
 # Note also that each statement is prefixed with a label; this avoids
-# adjacent nextstate ops being optimised away
+# adjacent nextstate ops being optimised away.
+#
+# A final 1; statement is added so that the code is always in void
+# context.
+#
+# It the compile flag is set for a test, the body of the loop is wrapped in
+# eval 'sub { .... }' to measure compile time rather than execution time
 
 sub make_perl_prog {
     my ($name, $test, $body) = @_;
-    my ($desc, $setup, $code, $pre, $post) =
-                                    @$test{qw(desc setup code pre post)};
+    my ($desc, $setup, $code, $pre, $post, $compile) =
+                                @$test{qw(desc setup code pre post compile)};
 
     $pre  = defined $pre  ? "_PRE_: $pre; " : "";
     $post = defined $post ? "_POST_: $post; " : "";
     $code = $body ? $code : "1";
     $code = "_CODE_: $code; ";
+    my $full = "$pre$code$post _CXT_: 1; ";
+    $full = "eval q{sub { $full }};" if $compile;
+
     return <<EOF;
 # $desc
 package $name;
 BEGIN { srand(0) }
 $setup;
 for my \$__loop__ (1..\$ARGV[0]) {
-    $pre$code$post
+    $full
 }
 EOF
 }

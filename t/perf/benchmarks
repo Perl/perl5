@@ -106,6 +106,9 @@
 #     pre  => '$x  = ""',
 #     code => '$x .= "foo"',
 #
+# Finally, the optional 'compile' key causes the code body to be wrapped
+# in eval qw{ sub { ... }}, so that compile time rather than execution
+# time is measured.
 
 
 [
