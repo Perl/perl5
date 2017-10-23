@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '7.30';
+our $VERSION = '7.30_01';
 $VERSION = eval $VERSION;
 
 use Carp;
@@ -712,7 +712,7 @@ clean :: clean_subdirs
     my @files = sort values %{$self->{XS}}; # .c files from *.xs files
     push @files, map {
 	my $file = $_;
-	map { $file.$_ } $self->{OBJ_EXT}, qw(.def _def.old .bs .bso .exp .base);
+	map { $file.$_ } $self->{OBJ_EXT}, qw(.def _def.old .exp .base), $] < 5.027006 ? qw(.bs .bso) : ();
     } $self->_xs_list_basenames;
     my @dirs  = qw(blib);
 
@@ -741,10 +741,11 @@ clean :: clean_subdirs
                     MYMETA.json MYMETA.yml perlmain.c tmon.out mon.out so_locations
                     blibdirs.ts pm_to_blib pm_to_blib.ts
                     *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
-                    $(BOOTSTRAP) $(BASEEXT).bso
                     $(BASEEXT).def lib$(BASEEXT).def
                     $(BASEEXT).exp $(BASEEXT).x
-                   ]);
+               ]);
+
+    push(@files, qw[$(BOOTSTRAP) $(BASEEXT).bso]) if $] < 5.027006;
 
     push(@files, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
     push(@files, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.ld'));
@@ -1035,10 +1036,15 @@ sub dynamic {
 # --- Dynamic Loading Sections ---
 
     my($self) = shift;
-    '
+    $] < 5.027006 ? '
 dynamic :: $(FIRST_MAKEFILE) config $(INST_BOOT) $(INST_DYNAMIC)
 	$(NOECHO) $(NOOP)
-';
+'
+    : '
+dynamic :: $(FIRST_MAKEFILE) config $(INST_DYNAMIC)
+	$(NOECHO) $(NOOP)
+'
+    ;
 }
 
 
@@ -2452,7 +2458,7 @@ sub init_others {
     }
     $self->{OBJECT} =~ s/\n+/ \\\n\t/g;
 
-    $self->{BOOTDEP}  = (-f "$self->{BASEEXT}_BS") ? "$self->{BASEEXT}_BS" : "";
+    $self->{BOOTDEP}  = (-f "$self->{BASEEXT}_BS") ? "$self->{BASEEXT}_BS" : "" if $] < 5.027006;
     $self->{PERLMAINCC} ||= '$(CC)';
     $self->{LDFROM} = '$(OBJECT)' unless $self->{LDFROM};
 

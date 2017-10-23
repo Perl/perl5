@@ -390,8 +390,10 @@ sub list_dynamic {
   (
     [ 'basic', '', '' ],
     $^O ne 'MSWin32' ? (
-        [ 'bscode', '', '' ],
-        [ 'bscodemulti', '', '' ],
+        $] < 5.027006 ? (
+          [ 'bscode', '', '' ],
+          [ 'bscodemulti', '', '' ],
+        ) : (),
         $^O !~ m!^(VMS|aix)$! ? ([ 'subdirscomplex', '', '' ]) : (),
     ) : (), # DynaLoader different
     [ 'subdirs', '', '' ],

@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.30';
+$VERSION = '7.30_01';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -478,8 +478,11 @@ INST_ARCHAUTODIR = $self->{INST_ARCHAUTODIR}
 
 INST_STATIC      = $self->{INST_STATIC}
 INST_DYNAMIC     = $self->{INST_DYNAMIC}
-INST_BOOT        = $self->{INST_BOOT}
 };
+
+    push @m, qq{
+INST_BOOT        = $self->{INST_BOOT}
+} if $] < 5.027006;
 
     push @m, qq{
 # Extra linker info
@@ -880,6 +883,7 @@ Defines targets for bootstrap files.
 
 sub dynamic_bs {
     my($self, %attribs) = @_;
+    return "" if $] >= 5.027006;
     return "\nBOOTSTRAP =\n" unless $self->has_link_code();
     my @exts;
     if ($self->{XSMULTI}) {
@@ -2160,7 +2164,7 @@ sub init_xs {
         $self->{INST_DYNAMIC} =
           $self->catfile('$(INST_ARCHAUTODIR)', '$(DLBASE).$(DLEXT)');
         $self->{INST_BOOT}    =
-          $self->catfile('$(INST_ARCHAUTODIR)', '$(BASEEXT).bs');
+          $self->catfile('$(INST_ARCHAUTODIR)', '$(BASEEXT).bs') if $] < 5.027006;
 	if ($self->{XSMULTI}) {
 	    my @exts = $self->_xs_list_basenames;
 	    my (@statics, @dynamics, @boots);
@@ -2184,12 +2188,12 @@ sub init_xs {
 	    }
 	    $self->{INST_STATIC} = join ' ', @statics;
 	    $self->{INST_DYNAMIC} = join ' ', @dynamics;
-	    $self->{INST_BOOT} = join ' ', @boots;
+	    $self->{INST_BOOT} = join ' ', @boots if $] < 5.027006;;
 	}
     } else {
         $self->{INST_STATIC}  = '';
         $self->{INST_DYNAMIC} = '';
-        $self->{INST_BOOT}    = '';
+        $self->{INST_BOOT}    = '' if $] < 5.027006;
     }
 }
 
