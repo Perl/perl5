@@ -56,6 +56,21 @@ ok( join('', sort @syms) eq join('', sort keys %Subs), 'all symbols found' );
 # Make sure we only hit them each once.
 ok( (!grep $_ != 1, values %Subs), '...and found once' );
 
+
+# Make sure method caches are not present when walking the sym tab
+@Testing::Method::Caches::Foo::ISA='Testing::Method::Caches::Bar';
+sub Testing::Method::Caches::Bar::foo{}
+Testing::Method::Caches::Foo->foo; # caches the sub in the *foo glob
+
+my $have_cv;
+sub B::GV::method_cache_test { ${shift->CV} and ++$have_cv }
+
+B::walksymtable(\%Testing::Method::Caches::, 'method_cache_test',
+                 sub { 1 }, 'Testing::Method::Caches::');
+# $have_cv should only have been incremented for ::Bar::foo
+is $have_cv, 1, 'walksymtable clears cached methods';
+
+
 # Tests for MAGIC / MOREMAGIC
 ok( B::svref_2object(\$.)->MAGIC->TYPE eq "\0", '$. has \0 magic' );
 {
