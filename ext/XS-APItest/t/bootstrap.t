@@ -11,7 +11,7 @@ use strict;
 use Test::More;
 use XS::APItest;
 
-is $::bs_file_got_executed, 1, "BS file was executed";
+is $::bs_file_got_executed, 1, "BS file was executed once";
 
 done_testing();
 
