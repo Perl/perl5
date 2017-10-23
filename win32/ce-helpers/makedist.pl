@@ -198,10 +198,9 @@ sub bootstrap_inherit {
     bootstrap(@_);
 }
 sub bootstrap {
-    # use local vars to enable $module.bs script to edit values
-    local(@args) = @_;
-    local($module) = $args[0];
-    local(@dirs, $file);
+    my @args = @_;
+    my $module = $args[0];
+    my (@dirs, $file);
 
     unless ($module) {
 	require Carp;
@@ -232,15 +231,6 @@ sub bootstrap {
 
     (my $bootname = "boot_$module") =~ s/\W/_/g;
     @dl_require_symbols = ($bootname);
-
-    # optional '.bootstrap' perl script
-    my $bs = $file;
-    $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/;
-    if (-s $bs) { # only read file if it's not empty
-        local @INC = ('.');
-        do $bs;
-        warn "$bs: $@\n" if $@;
-    }
 
     my $libref = dl_load_file($file, 0) or
 	croak("Can't load '$file' for module $module: ".dl_error());

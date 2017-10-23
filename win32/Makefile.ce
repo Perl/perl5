@@ -1011,13 +1011,10 @@ dumperdll: $(DUMPER_DLL)
 
 dlls: socketdll iodll dumperdll
 	-xmkdir -p $(MACHINE)/lib/auto/IO
-	copy ../lib/auto/IO/IO.bs $(MACHINE)/lib/auto/IO
 	copy ../lib/auto/IO/IO.dll $(MACHINE)/lib/auto/IO
 	-xmkdir $(MACHINE)/lib/auto/Socket
-	copy ../lib/auto/Socket/Socket.bs $(MACHINE)/lib/auto/Socket
 	copy ../lib/auto/Socket/Socket.dll $(MACHINE)/lib/auto/Socket
 	-xmkdir -p $(MACHINE)/lib/auto/Data/Dumper
-	copy ../lib/auto/Data/Dumper/Dumper.bs $(MACHINE)/lib/auto/Data/Dumper
 	copy ../lib/auto/Data/Dumper/Dumper.dll $(MACHINE)/lib/auto/Data/Dumper
 
 makedist: all dlls

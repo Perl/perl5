@@ -11,7 +11,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.27";
+$VERSION = "0.28";
 
 #use strict;
 
@@ -140,6 +140,9 @@ print OUT <<'EOT';
 
 #   print STDERR "XSLoader::load for $module ($file)\n" if $dl_debug;
 
+EOT
+
+print OUT <<'EOT' if $] < 5.027006;
     my $bs = $file;
     $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
 
@@ -150,6 +153,9 @@ print OUT <<'EOT';
 	goto \&XSLoader::bootstrap_inherit;
     }
 
+EOT
+
+print OUT <<'EOT';
     goto \&XSLoader::bootstrap_inherit if not -f $file;
 
     my $bootname = "boot_$module";

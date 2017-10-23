@@ -40,12 +40,8 @@ The file dl_dlopen.xs is a reference implementation by Paul Marquess
 which is a good place to start if porting from scratch. The dlutils.c file
 holds some common definitions that are #included into the dl_*.xs files.
 
-After the initial implementation of a new DynaLoader dl_*.xs file you
-may need to edit or create ext/MODULE/MODULE.bs files (library bootstrap
-files) to reflect the needs of your platform and linking software.
-
-Refer to DynaLoader.pm, lib/ExtUtils/MakeMaker.pm and any existing
-ext/MODULE/MODULE.bs files for more information.
+Refer to DynaLoader.pm and lib/ExtUtils/MakeMaker.pm for more
+information.
 
 Tim Bunce.
 August 1994

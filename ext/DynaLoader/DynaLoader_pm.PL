@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.42';
+    $VERSION = '1.43';
 }
 
 EOT
@@ -294,10 +294,9 @@ sub bootstrap_inherit {
 }
 
 sub bootstrap {
-    # use local vars to enable $module.bs script to edit values
-    local(@args) = @_;
-    local($module) = $args[0];
-    local(@dirs, $file);
+    my @args = @_;
+    my $module = $args[0];
+    my (@dirs, $file);
 
     unless ($module) {
 	require Carp;
@@ -319,7 +318,6 @@ sub bootstrap {
     <</$^O-eq-os2>>
     my @modparts = split(/::/,$module);
     my $modfname = $modparts[-1];
-    my $modfname_orig = $modfname; # For .bs file search
 
     # Some systems have restrictions on files names for DLL's etc.
     # mod2fname returns appropriate file base name (typically truncated)
@@ -363,19 +361,6 @@ sub bootstrap {
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
     @dl_require_symbols = ($bootname);
-
-    # Execute optional '.bootstrap' perl script for this module.
-    # The .bs file can be used to configure @dl_resolve_using etc to
-    # match the needs of the individual module on this architecture.
-    # N.B. The .bs file does not following the naming convention used
-    # by mod2fname.
-    my $bs = "$dir/$modfname_orig";
-    $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
-    if (-s $bs) { # only read file if it's not empty
-        print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
-        eval { local @INC = ('.'); do $bs; };
-        warn "$bs: $@\n" if $@;
-    }
 
     my $boot_symbol_ref;
 
@@ -936,12 +921,6 @@ uses dl_findfile() to determine the filename to load
 =item *
 
 sets @dl_require_symbols to C<("boot_$module")>
-
-=item *
-
-executes an F<auto/$module/$module.bs> file if it exists
-(typically used to add to @dl_resolve_using any files which
-are required to load the module on the current platform)
 
 =item *
 

@@ -1301,9 +1301,9 @@ nwclean:
 	@if exist .\perl.imp del /f /q .\perl.imp
 	-del /f /q *.obj *.lib *.def *.sym *.map *.xdc *.err *.nlm
 	cd testnlm\echo
-	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb *.bs
+	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb
 	cd ..\type
-	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb *.bs
+	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb
 	cd ..\..\
 
 utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT)
@@ -1355,17 +1355,17 @@ distclean: clean nwclean
 	-del /f /q $(CONFIGPM)
 	-del /f /q bin\*.bat
 	cd $(EXTDIR)
-    -del /s /q /f *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err *.obj *.sym
+    -del /s /q /f *.lib *.def *.map *.pdb Makefile *$(o) pm_to_blib *.xdc *.err *.obj *.sym
 	cd ..\netware
 !if "$(NW_EXTNS)"=="yes"
 	cd cgi2perl
-	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
+	-del /f /q *.obj Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
 	cd ..
 	cd Perl2UCS
-	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
+	-del /f /q *.obj Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
 	cd ..\..\netware
 	cd UCSExt
-	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
+	-del /f /q *.obj Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
 	cd ..\..\netware
 !endif
 	-rmdir /s /q $(AUTODIR)

@@ -45,6 +45,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<.bs> files are no longer loaded
+
+L<XSLoader> and L<DynaLoader> no longer load C<.bs> files.  This feature was
+only used for L<DB_File> on NeXT, support for which was dropped in 5.22.0.  On
+CPAN, the only distribution with a C<_BS> file is C<HTML::Embperl>, which is
+long abandoned.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
