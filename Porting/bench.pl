@@ -868,6 +868,7 @@ sub make_perl_prog {
     my ($desc, $setup, $code, $pre, $post, $compile) =
                                 @$test{qw(desc setup code pre post compile)};
 
+    $setup //= '';
     $pre  = defined $pre  ? "_PRE_: $pre; " : "";
     $post = defined $post ? "_POST_: $post; " : "";
     $code = $body ? $code : "1";
