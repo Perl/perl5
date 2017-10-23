@@ -8,7 +8,7 @@ sub has_subsecond_file_times {
   my $dirname =  dirname($filename);
   require Cwd;
   $dirname = &Cwd::getcwd if $dirname eq '.';
-  print(STDERR "\n# Testing for subsecond file timestamps (mtime) in $dirname\n");
+  print("\n# Testing for subsecond file timestamps (mtime) in $dirname\n");
   close $fh;
   my @mtimes;
   for (1..2) {
@@ -22,7 +22,7 @@ sub has_subsecond_file_times {
   # print STDERR "mtimes = @mtimes, delta = $delta\n";
   unlink $filename;
   my $ok = $delta > 0 && $delta < 1;
-  printf(STDERR "# Subsecond file timestamps in $dirname: %s\n",
+  printf("# Subsecond file timestamps in $dirname: %s\n",
          $ok ? "OK" : "NO");
   return $ok;
 }
