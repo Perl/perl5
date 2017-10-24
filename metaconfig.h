@@ -13,9 +13,6 @@
  * Symbols should only be here temporarily. Once they are actually used,
  * they should be removed from here.
  *
- * HAS_BUILTIN_ADD_OVERFLOW
- * HAS_BUILTIN_MUL_OVERFLOW
- * HAS_BUILTIN_SUB_OVERFLOW
  * HAS_THREAD_SAFE_NL_LANGINFO_L
  * HAS_LOCALECONV_L
  * HAS_MBRLEN
