@@ -612,10 +612,10 @@ PP(pp_add)
             il = SvIVX(svl);
             ir = SvIVX(svr);
 
-#ifdef HAS_BUILTIN_ADD_OVERFLOW
+#  ifdef HAS_BUILTIN_ADD_OVERFLOW
           do_iv:
             safe = !__builtin_add_overflow(il, ir, &iresult);
-#else
+#  else
             {
                 UV topl, topr;
           do_iv:
@@ -633,7 +633,7 @@ PP(pp_add)
                     safe = FALSE;
                 }
             }
-#endif
+#  endif
 
             if (safe) {
                 SP--;
@@ -649,12 +649,12 @@ PP(pp_add)
             NV nr = SvNVX(svr);
 
             if (
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+#  if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
                 !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
                 && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
-#else
+#  else
                 nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
-#endif
+#  endif
                 )
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
@@ -668,7 +668,7 @@ PP(pp_add)
   generic:
 
     useleft = USE_LEFT(svl);
-#ifdef HAS_BUILTIN_ADD_OVERFLOW
+#  ifdef HAS_BUILTIN_ADD_OVERFLOW
     if (SvIV_please_nomg(svr)) {
         if (!useleft) {
             SP--;
@@ -732,7 +732,7 @@ PP(pp_add)
             }
         }
     }
-#else
+#  else
     /* We must see if we can perform the addition with integers if possible,
        as the integer code detects overflow while the NV code doesn't.
        If either argument hasn't had a numeric conversion yet attempt to get
@@ -876,7 +876,7 @@ PP(pp_add)
 	    } /* Overflow, drop through to NVs.  */
 	}
     }
-#endif
+#  endif
 
 #else
     useleft = USE_LEFT(svl);

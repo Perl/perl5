@@ -1246,10 +1246,10 @@ PP(pp_multiply)
             il = SvIVX(svl);
             ir = SvIVX(svr);
 
-#ifdef HAS_BUILTIN_MUL_OVERFLOW
+#  ifdef HAS_BUILTIN_MUL_OVERFLOW
           do_iv:
             safe = !__builtin_mul_overflow(il, ir, &iresult);
-#else
+#  else
             {
                 UV topl, topr;
           do_iv:
@@ -1272,7 +1272,7 @@ PP(pp_multiply)
                     safe = FALSE;
                 }
             }
-#endif
+#  endif
 
             if (safe) {
                 SP--;
@@ -1289,12 +1289,12 @@ PP(pp_multiply)
             NV result;
 
             if (
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+#  if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
                 !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
                 && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
-#else
+#  else
                 nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
-#endif
+#  endif
                 )
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
@@ -1313,7 +1313,7 @@ PP(pp_multiply)
 
   generic:
 
-#ifdef HAS_BUILTIN_MUL_OVERFLOW
+#  ifdef HAS_BUILTIN_MUL_OVERFLOW
     if (SvIV_please_nomg(svr) && SvIV_please_nomg(svl)) {
         bool overflowed, result_is_uv;
         IV iresult;
@@ -1365,7 +1365,7 @@ PP(pp_multiply)
             RETURN;
         }
     }
-#else
+#  else
     if (SvIV_please_nomg(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
@@ -1478,7 +1478,7 @@ PP(pp_multiply)
 	    } /* ahigh && bhigh */
 	} /* SvIOK(svl) */
     } /* SvIOK(svr) */
-#endif
+#  endif
 #endif
     {
       NV right = SvNV_nomg(svr);
@@ -1899,10 +1899,10 @@ PP(pp_subtract)
             il = SvIVX(svl);
             ir = SvIVX(svr);
 
-#ifdef HAS_BUILTIN_SUB_OVERFLOW
+#  ifdef HAS_BUILTIN_SUB_OVERFLOW
           do_iv:
             safe = !__builtin_sub_overflow(il, ir, &iresult);
-#else
+#  else
             {
                 UV topl, topr;
           do_iv:
@@ -1920,7 +1920,7 @@ PP(pp_subtract)
                     safe = FALSE;
                 }
             }
-#endif
+#  endif
             if (safe) {
                 SP--;
                 TARGi(iresult, 0); /* args not GMG, so can't be tainted */
@@ -1935,12 +1935,12 @@ PP(pp_subtract)
             NV nr = SvNVX(svr);
 
             if (
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+#  if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
                 !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
                 && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
-#else
+#  else
                 nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
-#endif
+#  endif
                 )
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
@@ -1954,7 +1954,7 @@ PP(pp_subtract)
   generic:
 
     useleft = USE_LEFT(svl);
-#ifdef HAS_BUILTIN_SUB_OVERFLOW
+#  ifdef HAS_BUILTIN_SUB_OVERFLOW
     if (SvIV_please_nomg(svr)) {
         IV ivl = 0;
         UV uvl;
@@ -2046,7 +2046,7 @@ PP(pp_subtract)
             }
         }
     }
-#else
+#  else
     /* See comments in pp_add (in pp_hot.c) about Overflow, and how
        "bad things" happen if you rely on signed integers wrapping.  */
     if (SvIV_please_nomg(svr)) {
@@ -2144,7 +2144,7 @@ PP(pp_subtract)
 	    } /* Overflow, drop through to NVs.  */
 	}
     }
-#endif
+#  endif
 #else
     useleft = USE_LEFT(svl);
 #endif
