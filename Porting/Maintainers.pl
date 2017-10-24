@@ -825,7 +825,7 @@ use File::Glob qw(:case);
     },
 
     'Net::Ping' => {
-        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.55.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.61.tar.gz',
         'FILES'        => q[dist/Net-Ping],
         'EXCLUDED'     => [
             qw(README.md.PL),
@@ -836,9 +836,7 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             qw( t/000_load.t
                 t/001_new.t
-                t/010_pingecho.t
-                t/500_ping_icmp.t
-                t/510_ping_udp.t),
+                t/500_ping_icmp.t),
         ],
 
     },
