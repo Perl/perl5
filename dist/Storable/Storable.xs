@@ -589,7 +589,7 @@ static stcxt_t *Context_ptr = NULL;
 #define MMASK	(MGROW - 1)
 
 #define round_mgrow(x)	\
-    ((unsigned long) (((unsigned long) (x) + MMASK) & ~MMASK))
+    ((STRLEN) (((STRLEN) (x) + MMASK) & ~MMASK))
 #define trunc_int(x)	\
     ((unsigned long) ((unsigned long) (x) & ~(sizeof(int)-1)))
 #define int_aligned(x)	\
@@ -2123,7 +2123,7 @@ cleanup_recursive_av(pTHX_ AV* av) {
 
 static void
 cleanup_recursive_hv(pTHX_ HV* hv) {
-    long int i = HvTOTALKEYS(hv);
+    SSize_t i = HvTOTALKEYS(hv);
     HE** arr = HvARRAY(hv);
     if (SvMAGICAL(hv)) return;
     while (i >= 0) {
