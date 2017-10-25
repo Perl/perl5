@@ -248,8 +248,8 @@ SKIP: {
 
 SKIP: {
   my $dir = "${$}a\nx";
-  mkdir $dir or skip "OS does not support dir names containing LF";
-  chdir $dir or skip "OS cannot chdir into LF";
+  mkdir $dir or skip "OS does not support dir names containing LF", 1;
+  chdir $dir or skip "OS cannot chdir into LF", 1;
   eval { Cwd::fast_abs_path() };
   is $@, "", 'fast_abs_path does not die in dir whose name contains LF';
   chdir File::Spec->updir;
