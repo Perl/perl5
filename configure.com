@@ -4222,23 +4222,6 @@ $   echo4 "Nope, since you don't even have fcntl()."
 $ ENDIF
 $ d_fcntl_can_lock = tmp
 $!
-$! Check for memchr
-$!
-$ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#include <stdlib.h>"
-$ WS "#endif"
-$ WS "#include <string.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "char * place;"
-$ WS "place = (char *)memchr(""foo"", 47, 3);"
-$ WS "exit(0);"
-$ WS "}"
-$ CS
-$ tmp = "memchr"
-$ GOSUB inlibc
-$!
 $! Check for memrchr
 $!
 $ OS
@@ -4417,42 +4400,6 @@ $ CS
 $ tmp = "acess"
 $ GOSUB inlibc
 $ d_access = tmp
-$!
-$! Check for bzero
-$!
-$ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#include <stdlib.h>"
-$ WS "#endif"
-$ WS "#include <stdio.h>"
-$ WS "#include <strings.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "char foo[10];"
-$ WS "bzero(foo, 10);"
-$ WS "exit(0);"
-$ WS "}"
-$ CS
-$ tmp = "bzero"
-$ GOSUB inlibc
-$!
-$! Check for bcopy
-$!
-$ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#include <stdlib.h>"
-$ WS "#endif"
-$ WS "#include <stdio.h>"
-$ WS "#include <strings.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "char foo[10], bar[10];"
-$ WS "bcopy(""foo"", bar, 3);"
-$ WS "exit(0);"
-$ WS "}"
-$ CS
-$ tmp = "bcopy"
-$ GOSUB inlibc
 $!
 $! Check for mkstemp
 $!
