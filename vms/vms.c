@@ -293,7 +293,7 @@ is_unix_filespec(const char *path)
 
 	    /* If the user wants UNIX files, "." needs to be treated as in UNIX */
 	    if (decc_filename_unix_report || decc_filename_unix_only) {
-	    if (strEQ(path,".")
+	      if (strEQ(path,"."))
 		ret_val = 1;
 	    }
 	}
