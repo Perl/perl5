@@ -517,6 +517,11 @@ if ($ARGS{PLATFORM} eq 'vms' && !$define{KILL_BY_SIGPRC}) {
     ++$skip{PL_sig_handlers_initted} unless !$define{HAS_SIGACTION};
 }
 
+if ($define{'HAS_STRNLEN'})
+{
+    ++$skip{Perl_my_strnlen};
+}
+
 unless ($define{USE_LOCALE_COLLATE}) {
     ++$skip{$_} foreach qw(
 		    PL_collation_ix
