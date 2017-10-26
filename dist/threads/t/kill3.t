@@ -36,8 +36,9 @@ BEGIN {
 
 {
     $SIG{'KILL'} = undef;
-    chdir '/tmp';
-    my $dir = File::Spec->catdir( '/tmp', "toberead$$" );
+    my $tmp = File::Spec->tmpdir();
+    chdir $tmp;
+    my $dir = File::Spec->catdir( $tmp, "toberead$$" );
     mkdir $dir;
     chdir $dir;
     for ('a'..'e') {
@@ -77,8 +78,9 @@ EOI
 
 {
     $SIG{'KILL'} = undef;
-    chdir '/tmp';
-    my $dir = File::Spec->catdir( '/tmp', "shouldberead$$" );
+    my $tmp = File::Spec->tmpdir();
+    chdir $tmp;
+    my $dir = File::Spec->catdir( $tmp, "shouldberead$$" );
     mkdir $dir;
     chdir $dir;
     for ('a'..'e') {
