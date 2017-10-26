@@ -1197,9 +1197,10 @@ Perl_langinfo(const int item)
     bool toggle = TRUE;
     dTHX;
 
-#if defined(HAS_NL_LANGINFO)
+#if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
+#if   ! defined(HAS_POSIX_2008_LOCALE)
 
-    /* nl_langinfo() is available.  Call it, switching to underlying LC_NUMERIC
+    /* Here, use plain nl_langinfo(), switching to the underlying LC_NUMERIC
      * for those items dependent on it.  This must be copied to a buffer before
      * switching back, as some systems destroy the buffer when setlocale() is
      * called */
@@ -1225,6 +1226,32 @@ Perl_langinfo(const int item)
 
     return PL_langinfo_buf;
 
+#  else /* Use nl_langinfo_l(), avoiding both a mutex and changing the locale */
+
+    bool do_free = FALSE;
+    locale_t cur = uselocale((locale_t) 0);
+
+    if (cur == LC_GLOBAL_LOCALE) {
+        cur = duplocale(LC_GLOBAL_LOCALE);
+        do_free = TRUE;
+    }
+
+    if (   toggle
+        && (item == PERL_RADIXCHAR || item == PERL_THOUSEP))
+    {
+        cur = newlocale(LC_NUMERIC_MASK, PL_numeric_name, cur);
+        do_free = TRUE;
+    }
+
+    save_to_buffer(nl_langinfo_l(item, cur),
+                   &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+    if (do_free) {
+        freelocale(cur);
+    }
+
+    return PL_langinfo_buf;
+
+#    endif
 #else   /* Below, emulate nl_langinfo as best we can */
 #  ifdef HAS_LOCALECONV
 
