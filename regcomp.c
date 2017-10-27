@@ -4892,6 +4892,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	else if (OP(scan) == EXACT || OP(scan) == EXACTL) {
 	    SSize_t l = STR_LEN(scan);
 	    UV uc;
+            assert(l);
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
 		uc = utf8_to_uvchr_buf(s, s + l, NULL);
