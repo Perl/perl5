@@ -3627,11 +3627,12 @@ S_scan_const(pTHX_ char *start)
                  * For non-patterns, the named characters are converted to
                  * their string equivalents.  In patterns, named characters are
                  * not converted to their ultimate forms for the same reasons
-                 * that other escapes aren't.  Instead, they are converted to
-                 * the \N{U+...} form to get the value from the charnames that
-                 * is in effect right now, while preserving the fact that it
-                 * was a named character, so that the regex compiler knows
-                 * this.
+                 * that other escapes aren't (mainly that the ultimate
+                 * character could be considered a meta-symbol by the regex
+                 * compiler).  Instead, they are converted to the \N{U+...}
+                 * form to get the value from the charnames that is in effect
+                 * right now, while preserving the fact that it was a named
+                 * character, so that the regex compiler knows this.
                  *
 		 * The structure of this section of code (besides checking for
 		 * errors and upgrading to utf8) is:
