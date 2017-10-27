@@ -12216,7 +12216,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         RExC_recode_x_to_native = 1;
 #endif
 
-        if (node_p) {
             if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
                 if (flags & (RESTART_PASS1|NEED_UTF8)) {
                     *flagp = flags & (RESTART_PASS1|NEED_UTF8);
@@ -12226,7 +12225,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                     (UV) flags);
             }
             *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
-        }
 
         /* Restore the saved values */
 	RExC_start = RExC_adjusted_start = save_start;
