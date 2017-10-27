@@ -828,7 +828,7 @@ PERLVARA(I, op_exec_cnt, OP_max+2, UV)	/* Counts of executed OPs of the given ty
 
 PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
 
-PERLVARI(I, dump_re_max_len, STRLEN, 0)
+PERLVARI(I, dump_re_max_len, STRLEN, 60)
 
 /* For internal uses of randomness, this ensures the sequence of
  * random numbers returned by rand() isn't modified by perl's internal

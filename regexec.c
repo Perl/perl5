@@ -3379,7 +3379,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             regprop(prog, prop, c, reginfo, NULL);
 	    {
 		RE_PV_QUOTED_DECL(quoted,utf8_target,PERL_DEBUG_PAD_ZERO(1),
-		    s,strend-s,60);
+		    s,strend-s,PL_dump_re_max_len);
                 Perl_re_printf( aTHX_
 		    "Matching stclass %.*s against %s (%d bytes)\n",
 		    (int)SvCUR(prop), SvPVX_const(prop),
@@ -3899,10 +3899,10 @@ S_debug_start_match(pTHX_ const REGEXP *prog, const bool utf8_target,
             reginitcolors();    
     {
         RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            RX_PRECOMP_const(prog), RX_PRELEN(prog), 60);   
+            RX_PRECOMP_const(prog), RX_PRELEN(prog), PL_dump_re_max_len);
         
         RE_PV_QUOTED_DECL(s1, utf8_target, PERL_DEBUG_PAD_ZERO(1),
-            start, end - start, 60); 
+            start, end - start, PL_dump_re_max_len);
         
         Perl_re_printf( aTHX_
             "%s%s REx%s %s against %s\n", 
@@ -3958,11 +3958,11 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 	const int is_uni = utf8_target ? 1 : 0;
 
 	RE_PV_COLOR_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
-	    (locinput - pref_len),pref0_len, 60, 4, 5);
+	    (locinput - pref_len),pref0_len, PL_dump_re_max_len, 4, 5);
 	
 	RE_PV_COLOR_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
 		    (locinput - pref_len + pref0_len),
-		    pref_len - pref0_len, 60, 2, 3);
+		    pref_len - pref0_len, PL_dump_re_max_len, 2, 3);
 	
 	RE_PV_COLOR_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
 		    locinput, loc_regeol - locinput, 10, 0, 1);

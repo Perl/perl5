@@ -6907,7 +6907,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         if (   ! dump_len_string
             || ! grok_atoUV(dump_len_string, (UV *)&PL_dump_re_max_len, NULL))
         {
-            PL_dump_re_max_len = 0;
+            PL_dump_re_max_len = 60;    /* A reasonable default */
         }
 #endif
     }
@@ -7036,7 +7036,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     });
     DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, 60);
+            RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, PL_dump_re_max_len);
             Perl_re_printf( aTHX_  "%sCompiling REx%s %s\n",
                           PL_colors[4],PL_colors[5],s);
         });
@@ -18981,7 +18981,7 @@ Perl_regdump(pTHX_ const regexp *r)
             RE_PV_QUOTED_DECL(s, 0, dsv,
                             SvPVX_const(r->substrs->data[i].substr),
                             RE_SV_DUMPLEN(r->substrs->data[i].substr),
-                            30);
+                            PL_dump_re_max_len);
             Perl_re_printf( aTHX_
                           "%s %s%s at %" IVdf "..%" UVuf " ",
                           i ? "floating" : "anchored",
@@ -19131,7 +19131,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	 * is a crude hack but it may be the best for now since
 	 * we have no flag "this EXACTish node was UTF-8"
 	 * --jhi */
-	pv_pretty(sv, STRING(o), STR_LEN(o), 60, PL_colors[0], PL_colors[1],
+	pv_pretty(sv, STRING(o), STR_LEN(o), PL_dump_re_max_len,
+                  PL_colors[0], PL_colors[1],
 		  PERL_PV_ESCAPE_UNI_DETECT |
 		  PERL_PV_ESCAPE_NONASCII   |
 		  PERL_PV_PRETTY_ELLIPSES   |
@@ -19355,7 +19356,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             SV* contents;
 
             /* See if truncation size is overridden */
-            const STRLEN dump_len = (PL_dump_re_max_len)
+            const STRLEN dump_len = (PL_dump_re_max_len > 256)
                                     ? PL_dump_re_max_len
                                     : 256;
 
@@ -19482,7 +19483,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 		      PL_colors[5],PL_colors[0],
 		      s,
 		      PL_colors[1],
-		      (strlen(s) > 60 ? "..." : ""));
+		      (strlen(s) > PL_dump_re_max_len ? "..." : ""));
 	} );
 
     /* use UTF8 check substring if regexp pattern itself is in UTF8 */
@@ -19667,7 +19668,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	{
 	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RX_UTF8(rx),
-                dsv, RX_PRECOMP(rx), RX_PRELEN(rx), 60);
+                dsv, RX_PRECOMP(rx), RX_PRELEN(rx), PL_dump_re_max_len);
             Perl_re_printf( aTHX_ "%sFreeing REx:%s %s\n",
                 PL_colors[4],PL_colors[5],s);
         }
@@ -20798,7 +20799,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                     indent+3,
                     elem_ptr
                     ? pv_pretty(sv, SvPV_nolen_const(*elem_ptr),
-                                SvCUR(*elem_ptr), 60,
+                                SvCUR(*elem_ptr), PL_dump_re_max_len,
                                 PL_colors[0], PL_colors[1],
                                 (SvUTF8(*elem_ptr)
                                  ? PERL_PV_ESCAPE_UNI
