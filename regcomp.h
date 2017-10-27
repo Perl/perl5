@@ -1073,6 +1073,7 @@ re.pm, especially to the documentation.
             PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII |((isuni) ? PERL_PV_ESCAPE_UNI : 0) );         \
     const int rlen = SvCUR(dsv)
 
+/* This is currently unsed in the core */
 #define RE_SV_ESCAPE(rpv,isuni,dsv,sv,m)                            \
     const char * const rpv =                                        \
         pv_pretty((dsv), (SvPV_nolen_const(sv)), (SvCUR(sv)), (m),  \
