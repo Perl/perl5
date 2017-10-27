@@ -12110,22 +12110,22 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         /* Convert code point from hex */
 	length_of_hex = (STRLEN)(endchar - RExC_parse);
 	grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
-                           | PERL_SCAN_DISALLOW_PREFIX
+                       | PERL_SCAN_DISALLOW_PREFIX
 
-                             /* No errors in the first pass (See [perl
-                              * #122671].)  We let the code below find the
-                              * errors when there are multiple chars. */
-                           | ((SIZE_ONLY)
-                              ? PERL_SCAN_SILENT_ILLDIGIT
-                              : 0);
+                           /* No errors in the first pass (See [perl
+                            * #122671].)  We let the code below find the
+                            * errors when there are multiple chars. */
+                       | ((SIZE_ONLY)
+                          ? PERL_SCAN_SILENT_ILLDIGIT
+                          : 0);
 
         /* This routine is the one place where both single- and double-quotish
          * \N{U+xxxx} are evaluated.  The value is a Unicode code point which
          * must be converted to native. */
 	*code_point_p = UNI_TO_NATIVE(grok_hex(RExC_parse,
-                                         &length_of_hex,
-                                         &grok_hex_flags,
-                                         NULL));
+                                               &length_of_hex,
+                                               &grok_hex_flags,
+                                               NULL));
 
 	/* The tokenizer should have guaranteed validity, but it's possible to
          * bypass it by using single quoting, so check.  Don't do the check
