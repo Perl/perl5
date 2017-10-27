@@ -12216,15 +12216,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         RExC_recode_x_to_native = 1;
 #endif
 
-            if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
-                if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                    return FALSE;
-                }
-                FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#" UVxf,
-                    (UV) flags);
-            }
-            *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+        *node_p = reg(pRExC_state, 1, &flags, depth+1);
 
         /* Restore the saved values */
 	RExC_start = RExC_adjusted_start = save_start;
@@ -12233,8 +12225,18 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 #ifdef EBCDIC
         RExC_recode_x_to_native = 0;
 #endif
-
         SvREFCNT_dec_NN(substitute_parse);
+
+        if (! *node_p) {
+            if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
+                return FALSE;
+            }
+            FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#" UVxf,
+                (UV) flags);
+        }
+        *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+
         nextchar(pRExC_state);
 
         return TRUE;
