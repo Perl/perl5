@@ -330,9 +330,6 @@ YAML::Syck
 YAML::Tiny
 dist/data-dumper/changes	Verbatim line length including indents exceeds 79 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
-dist/devel-ppport/devel/buildperl.pl	Verbatim line length including indents exceeds 79 by	5
-dist/devel-ppport/hackers	? Should you be using F<...> or maybe L<...> instead of	5
-dist/devel-ppport/hackers	Apparent broken link	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =dontwarn	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =implementation	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =provides	1

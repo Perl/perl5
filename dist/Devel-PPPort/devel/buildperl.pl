@@ -536,7 +536,8 @@ buildperl.pl - build/install perl distributions
                               [default: /tmp/perl/build/<config>]
 
   --prefix=directory          use this installation prefix [EXPAND]
-                              [default: /tmp/perl/install/<config>/<perl>]
+                              [default:
+                              /tmp/perl/install/<config>/<perl>]
 
   --config=configuration      build this configuration [MULTI]
                               [default: all possible configurations]
@@ -544,16 +545,19 @@ buildperl.pl - build/install perl distributions
   --perl=version              build this version of perl [MULTI]
                               [default: all possible versions]
 
-  --force                     rebuild and install already installed versions
+  --force                     rebuild and install already installed
+                              versions
 
   --test                      run test suite after building
 
   --noinstall                 don't install after building
 
-  --patch                     only patch the perl source in the current directory
+  --patch                     only patch the perl source in the current
+                              directory
 
-  --oneshot                   build from the perl source in the current directory
-                              (extra arguments are passed to Configure)
+  --oneshot                   build from the perl source in the current
+                              directory (extra arguments are passed to
+                              Configure)
 
   options tagged with [MULTI] can be given multiple times
 
@@ -587,7 +591,8 @@ and don't install them, run:
 To build and install a single version of perl with special configuration
 options, use:
 
-  buildperl.pl --perl=5.6.0 --prefix=/opt/p560ld --oneshot -- -des -Duselongdouble
+  buildperl.pl --perl=5.6.0 --prefix=/opt/p560ld --oneshot -- -des \
+                                                   -Duselongdouble
 
 =head1 COPYRIGHT
 
