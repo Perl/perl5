@@ -13559,7 +13559,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * character we are appending, hence we can delay getting
                      * its representation until PASS2. */
                     if (SIZE_ONLY) {
-                        if (UTF) {
+                        if (UTF && ! UVCHR_IS_INVARIANT(ender)) {
                             const STRLEN unilen = UVCHR_SKIP(ender);
                             s += unilen;
 
@@ -13577,7 +13577,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                     } else { /* PASS2 */
                       not_fold_common:
-                        if (UTF) {
+                        if (UTF && ! UVCHR_IS_INVARIANT(ender)) {
                             U8 * new_s = uvchr_to_utf8((U8*)s, ender);
                             len += (char *) new_s - s - 1;
                             s = (char *) new_s;
