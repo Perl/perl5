@@ -206,16 +206,16 @@ C<"[">, and matches its literal self:
 The list of characters within the character class gives the set of
 characters matched by the class.  C<"[abc]"> matches a single "a" or "b"
 or "c".  But if the first character after the C<"["> is C<"^">, the
-class matches any character not in the list.  Within a list, the C<"-">
-character specifies a range of characters, so that C<a-z> represents all
-characters between "a" and "z", inclusive.  If you want either C<"-"> or
-C<"]"> itself to be a member of a class, put it at the start of the list
-(possibly after a C<"^">), or escape it with a backslash.  C<"-"> is
-also taken literally when it is at the end of the list, just before the
-closing C<"]">.  (The following all specify the same class of three
-characters: C<[-az]>, C<[az-]>, and C<[a\-z]>.  All are different from
-C<[a-z]>, which specifies a class containing twenty-six characters, even
-on EBCDIC-based character sets.)
+class instead matches any character not in the list.  Within a list, the
+C<"-"> character specifies a range of characters, so that C<a-z>
+represents all characters between "a" and "z", inclusive.  If you want
+either C<"-"> or C<"]"> itself to be a member of a class, put it at the
+start of the list (possibly after a C<"^">), or escape it with a
+backslash.  C<"-"> is also taken literally when it is at the end of the
+list, just before the closing C<"]">.  (The following all specify the
+same class of three characters: C<[-az]>, C<[az-]>, and C<[a\-z]>.  All
+are different from C<[a-z]>, which specifies a class containing
+twenty-six characters, even on EBCDIC-based character sets.)
 
 There is lots more to bracketed character classes; full details are in
 L<perlrecharclass/Bracketed Character Classes>.
