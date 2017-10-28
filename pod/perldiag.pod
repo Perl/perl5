@@ -7282,14 +7282,42 @@ known at compile time.  For positive lookbehind, you can use the C<\K>
 regex construct as a way to get the equivalent functionality.  See
 L<(?<=pattern) and \K in perlre|perlre/\K>.
 
-There are non-obvious Unicode rules under C</i> that can match variably,
-but which you might not think could.  For example, the substring C<"ss">
-can match the single character LATIN SMALL LETTER SHARP S.  There are
-other sequences of ASCII characters that can match single ligature
-characters, such as LATIN SMALL LIGATURE FFI matching C<qr/ffi/i>.
-Starting in Perl v5.16, if you only care about ASCII matches, adding the
-C</aa> modifier to the regex will exclude all these non-obvious matches,
-thus getting rid of this message.  You can also say C<S<use re qw(/aa)>>
+Starting in Perl 5.18, there are non-obvious Unicode rules under C</i>
+that can match variably, but which you might not think could.  For
+example, the substring C<"ss"> can match the single character LATIN
+SMALL LETTER SHARP S.  Here's a complete list of the current ones
+affecting ASCII characters:
+
+   ASCII
+  sequence      Matches single letter under /i
+    FF          U+FB00 LATIN SMALL LIGATURE FF
+    FFI         U+FB03 LATIN SMALL LIGATURE FFI
+    FFL         U+FB04 LATIN SMALL LIGATURE FFL
+    FI          U+FB01 LATIN SMALL LIGATURE FI
+    FL          U+FB02 LATIN SMALL LIGATURE FL
+    SS          U+00DF LATIN SMALL LETTER SHARP S
+                U+1E9E LATIN CAPITAL LETTER SHARP S
+    ST          U+FB06 LATIN SMALL LIGATURE ST
+                U+FB05 LATIN SMALL LIGATURE LONG S T
+
+This list is subject to change, but is quite unlikely to.
+Each ASCII sequence can be any combination of upper- and lowercase.
+
+You can avoid this by using a bracketed character class in the
+lookbehind assertion, like
+
+ (?<![sS]t)
+ (?<![fF]f[iI])
+
+This fools Perl into not matching the ligatures.
+
+Another option for Perls starting with 5.16, if you only care about
+ASCII matches, is to add the C</aa> modifier to the regex.  This will
+exclude all these non-obvious matches, thus getting rid of this message.
+You can also say
+
+ use if $] ge 5.016, re => '/aa';
+
 to apply C</aa> to all regular expressions compiled within its scope.
 See L<re>.
 
