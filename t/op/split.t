@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 172;
+plan tests => 176;
 
 $FS = ':';
 
@@ -244,7 +244,7 @@ is($cnt, scalar(@ary));
 }
 
 {
-    # bug id 20000427.003 (#3173) 
+    # bug id 20000427.003 (#3173)
 
     use warnings;
     use strict;
@@ -651,3 +651,19 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
 fresh_perl_is(<<'CODE', '', {}, "scalar split stack overflow");
 map{int"";split//.0>60for"0000000000000000"}split// for"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 CODE
+
+# RT #132334: /o modifier no longer has side effects on split
+{
+    my @records = (
+        { separator => '0', effective => '',  text => 'ab' },
+        { separator => ';', effective => ';', text => 'a;b' },
+    );
+
+    for (@records) {
+        my ($separator, $effective, $text) = @$_{qw(separator effective text)};
+        $separator =~ s/0//o;
+        is($separator,$effective,"Going to split '$text' with '$separator'");
+        my @result = split($separator,$text);
+        ok(eq_array(\@result,['a','b']), "Resulting in ('a','b')");
+    }
+}
