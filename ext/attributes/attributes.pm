@@ -1,6 +1,6 @@
 package attributes;
 
-our $VERSION = 0.31;
+our $VERSION = 0.32;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -18,6 +18,8 @@ sub carp {
     goto &Carp::carp;
 }
 
+# Hash of SV type (CODE, SCALAR, etc.) to regex matching deprecated
+# attributes for that type.
 my %deprecated;
 
 my %msg = (
@@ -28,7 +30,7 @@ my %msg = (
 
 sub _modify_attrs_and_deprecate {
     my $svtype = shift;
-    # Now that we've removed handling of locked from the XS code, we need to
+    # After we've removed a deprecated attribute from the XS code, we need to
     # remove it here, else it ends up in @badattrs. (If we do the deprecation in
     # XS, we can't control the warning based on *our* caller's lexical settings,
     # and the warned line is in this package)
