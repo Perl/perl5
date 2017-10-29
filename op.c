@@ -8596,7 +8596,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	   sub is stored in.  */
 	const I32 flags =
 	   ec ? GV_NOADD_NOINIT
-	      :   PL_curstash != CopSTASH(PL_curcop)
+	      :   (IN_PERL_RUNTIME && PL_curstash != CopSTASH(PL_curcop))
 	       || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
 		    ? gv_fetch_flags
 		    : GV_ADDMULTI | GV_NOINIT | GV_NOTQUAL;
