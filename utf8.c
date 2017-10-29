@@ -2351,8 +2351,13 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
         append_utf8_from_native_byte(*s, &d);
         s++;
     }
+
     *d = '\0';
     *lenp = d-dst;
+
+    /* Trim unused space */
+    Renew(dst, *lenp + 1, U8);
+
     return dst;
 }
 
