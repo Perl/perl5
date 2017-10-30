@@ -584,7 +584,7 @@ fi
 # The missing math functions affect the POSIX extension math interfaces.
 
 case "$uselongdouble" in
-'')
+$define)
   echo "Checking if your infinity is working with long doubles..." >&4
   cat > inf$$.c <<EOF
 #include <math.h>
