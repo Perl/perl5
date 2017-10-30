@@ -1995,7 +1995,6 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
     assert(send > s);
 
-    /* Call the low level routine, asking for checks */
     return NATIVE_TO_UNI(utf8_to_uvchr_buf(s, send, retlen));
 }
 
