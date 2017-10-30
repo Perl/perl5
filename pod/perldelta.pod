@@ -399,6 +399,17 @@ The in-place reverse optimisation now correctly strengthens weak
 references using the L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
 API function.
 
+=item *
+
+Fixed a read before buffer when parsing a range starting with C<\N{}>
+at the beginning of the character set for the transliteration
+operator.  [perl #132245]
+
+=item *
+
+Fixed a leaked SV when parsing an empty C<\N{}> at compile-time.
+[perl #132245]
+
 =back
 
 =head1 Known Problems
