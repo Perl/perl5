@@ -1422,7 +1422,6 @@ test_valid_utf8_to_uvchr(s)
     PREINIT:
         STRLEN retlen;
         UV ret;
-        STRLEN slen;
 
     CODE:
         /* Call utf8n_to_uvchr() with the inputs.  It always asks for the
@@ -1433,8 +1432,7 @@ test_valid_utf8_to_uvchr(s)
         RETVAL = newAV();
         sv_2mortal((SV*)RETVAL);
 
-        ret
-         = valid_utf8_to_uvchr((U8*) SvPV(s, slen), &retlen);
+        ret = valid_utf8_to_uvchr((U8*) SvPV_nolen(s), &retlen);
 
         /* Returns the return value in [0]; <retlen> in [1] */
         av_push(RETVAL, newSVuv(ret));
