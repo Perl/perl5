@@ -4277,6 +4277,17 @@ string_without_null(SV *sv)
     OUTPUT:
         RETVAL
 
+CV *
+get_cv(SV *sv)
+    CODE:
+    {
+        STRLEN len;
+        const char *s = SvPV(sv, len);
+        RETVAL = get_cvn_flags(s, len, 0);
+    }
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
