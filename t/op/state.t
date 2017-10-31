@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 124;
+plan tests => 126;
 
 # Before loading feature.pm, test it with CORE::
 ok eval 'CORE::state $x = 1;', 'CORE::state outside of feature.pm scope';
@@ -438,6 +438,13 @@ sub rt_123029 {
     return defined $s;
 }
 ok(rt_123029(), "state variables don't surprisingly disappear when accessed");
+
+# make sure multiconcat doesn't break state
+
+for (1,2) {
+    state $s = "-$_-";
+    is($s, "-1-", "state with multiconcat pass $_");
+}
 
 __DATA__
 state ($a) = 1;

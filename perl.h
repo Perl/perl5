@@ -863,6 +863,26 @@ EXTERN_C int usleep(unsigned int);
 
 #endif /* PERL_CORE */
 
+/* Maximum number of args that may be passed to an OP_MULTICONCAT op.
+ * It determines the size of local arrays in S_maybe_multiconcat() and
+ * pp_multiconcat().
+ */
+#define PERL_MULTICONCAT_MAXARG 64
+
+/* The indexes of fields of a multiconcat aux struct.
+ * The fixed fields are followed by nargs+1 const segment lengths,
+ * and if utf8 and non-utf8 differ, a second nargs+1 set for utf8.
+ */
+
+#define PERL_MULTICONCAT_IX_NARGS     0 /* number of arguments */
+#define PERL_MULTICONCAT_IX_PLAIN_PV  1 /* non-utf8 constant string */
+#define PERL_MULTICONCAT_IX_PLAIN_LEN 2 /* non-utf8 constant string length */
+#define PERL_MULTICONCAT_IX_UTF8_PV   3 /* utf8 constant string */
+#define PERL_MULTICONCAT_IX_UTF8_LEN  4 /* utf8 constant string length */
+#define PERL_MULTICONCAT_IX_LENGTHS   5 /* first of nargs+1 const segment lens */
+#define PERL_MULTICONCAT_HEADER_SIZE 5 /* The number of fields of a
+                                           multiconcat header */
+
 /* We no longer default to creating a new SV for GvSV.
    Do this before embed.  */
 #ifndef PERL_CREATE_GVSV

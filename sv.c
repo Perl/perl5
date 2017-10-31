@@ -16996,6 +16996,9 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
     if (PL_op) {
 	desc = PL_op->op_type == OP_STRINGIFY && PL_op->op_folded
 		? "join or string"
+                : PL_op->op_type == OP_MULTICONCAT
+                    && (PL_op->op_private & OPpMULTICONCAT_FAKE)
+                ? "sprintf"
 		: OP_DESC(PL_op);
 	if (uninit_sv && PL_curpad) {
 	    varname = find_uninit_var(PL_op, uninit_sv, 0, &desc);

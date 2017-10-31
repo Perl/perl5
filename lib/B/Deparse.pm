@@ -19,6 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
          OPpSPLIT_ASSIGN OPpSPLIT_LEX
          OPpPADHV_ISKEYS OPpRV2HV_ISKEYS
+         OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
          OPpTRUEBOOL OPpINDEX_BOOLNEG
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
@@ -50,7 +51,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.43';
+$VERSION = '1.44';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -365,7 +366,7 @@ BEGIN {
 
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
-		 kvaslice kvhslice
+		 kvaslice kvhslice padsv
                  nextstate dbstate rv2av rv2hv helem custom ]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
@@ -4404,6 +4405,142 @@ sub multideref_var_name {
 }
 
 
+# deparse an OP_MULTICONCAT. If $in_dq is 1, we're within
+# a double-quoted string, so for example.
+#     "abc\Qdef$x\Ebar"
+# might get compiled as
+#    multiconcat("abc", metaquote(multiconcat("def", $x)), "bar")
+# and the inner multiconcat should be deparsed as C<def$x> rather than
+# the normal C<def . $x>
+# Ditto if  $in_dq is 2, handle qr/...\Qdef$x\E.../.
+
+sub do_multiconcat {
+    my $self = shift;
+    my($op, $cx, $in_dq) = @_;
+
+    my $kid;
+    my @kids;
+    my $assign;
+    my $append;
+    my $lhs = "";
+
+    for ($kid = $op->first; !null $kid; $kid = $kid->sibling) {
+        # skip the consts and/or padsv we've optimised away
+        push @kids, $kid
+            unless $kid->type == OP_NULL
+              && (   $kid->targ == OP_PADSV
+                  || $kid->targ == OP_CONST
+                  || $kid->targ == OP_PUSHMARK);
+    }
+
+    $append = ($op->private & OPpMULTICONCAT_APPEND);
+
+    if ($op->private & OPpTARGET_MY) {
+        # '$lex  = ...' or '$lex .= ....' or 'my $lex = '
+        $lhs = $self->padname($op->targ);
+        $lhs = "my $lhs" if ($op->private & OPpLVAL_INTRO);
+        $assign = 1;
+    }
+    elsif ($op->flags & OPf_STACKED) {
+        # 'expr  = ...' or 'expr .= ....'
+        my $expr = $append ? shift(@kids) : pop(@kids);
+        $lhs = $self->deparse($expr, 7);
+        $assign = 1;
+    }
+
+    if ($assign) {
+        $lhs .=  $append ? ' .= ' : ' = ';
+    }
+
+    my ($nargs, $const_str, @const_lens) = $op->aux_list($self->{curcv});
+
+    my @consts;
+    my $i = 0;
+    for (@const_lens) {
+        if ($_ == -1) {
+            push @consts, undef;
+        }
+        else {
+            push @consts, substr($const_str, $i, $_);
+        my @args;
+            $i += $_;
+        }
+    }
+
+    my $rhs = "";
+
+    if (   $in_dq
+        || (($op->private & OPpMULTICONCAT_STRINGIFY) && !$self->{'unquote'}))
+    {
+        # "foo=$foo bar=$bar "
+        my $not_first;
+        while (@consts) {
+            $rhs = dq_disambiguate($rhs, $self->dq(shift(@kids), 18))
+                if $not_first;
+            $not_first = 1;
+            my $c = shift @consts;
+            if (defined $c) {
+                if ($in_dq == 2) {
+                    # in pattern: don't convert newline to '\n' etc etc
+                    my $s = re_uninterp(escape_re(re_unback($c)));
+                    $rhs = re_dq_disambiguate($rhs, $s)
+                }
+                else {
+                    my $s = uninterp(escape_str(unback($c)));
+                    $rhs = dq_disambiguate($rhs, $s)
+                }
+            }
+        }
+        return $rhs if $in_dq;
+        $rhs = single_delim("qq", '"', $rhs, $self);
+    }
+    elsif ($op->private & OPpMULTICONCAT_FAKE) {
+        # sprintf("foo=%s bar=%s ", $foo, $bar)
+
+        my @all;
+        @consts = map { $_ //= ''; s/%/%%/g; $_ } @consts;
+        my $fmt = join '%s', @consts;
+        push @all, $self->quoted_const_str($fmt);
+
+        # the following is a stripped down copy of sub listop {}
+        my $parens = $assign || ($cx >= 5) || $self->{'parens'};
+        my $fullname = $self->keyword('sprintf');
+        push @all, map $self->deparse($_, 6), @kids;
+
+        $rhs = $parens
+                ? "$fullname(" . join(", ", @all) . ")"
+                : "$fullname " . join(", ", @all);
+    }
+    else {
+        # "foo=" . $foo . " bar=" . $bar
+        my @all;
+        my $not_first;
+        while (@consts) {
+            push @all, $self->deparse(shift(@kids), 18) if $not_first;
+            $not_first = 1;
+            my $c = shift @consts;
+            if (defined $c) {
+                push @all, $self->quoted_const_str($c);
+            }
+        }
+        $rhs .= join ' . ', @all;
+    }
+
+    my $text = $lhs . $rhs;
+
+    $text = "($text)" if     ($cx >= (($assign) ? 7 : 18+1))
+                          || $self->{'parens'};
+
+    return $text;
+}
+
+
+sub pp_multiconcat {
+    my $self = shift;
+    $self->do_multiconcat(@_, 0);
+}
+
+
 sub pp_multideref {
     my $self = shift;
     my($op, $cx) = @_;
@@ -4786,7 +4923,7 @@ sub retscalar {
                  |study|pos|preinc|i_preinc|predec|i_predec|postinc
                  |i_postinc|postdec|i_postdec|pow|multiply|i_multiply
                  |divide|i_divide|modulo|i_modulo|add|i_add|subtract
-                 |i_subtract|concat|stringify|left_shift|right_shift|lt
+                 |i_subtract|concat|multiconcat|stringify|left_shift|right_shift|lt
                  |i_lt|gt|i_gt|le|i_le|ge|i_ge|eq|i_eq|ne|i_ne|ncmp|i_ncmp
                  |slt|sgt|sle|sge|seq|sne|scmp|[sn]?bit_(?:and|x?or)|negate
                  |i_negate|not|[sn]?complement|smartmatch|atan2|sin|cos
@@ -5162,6 +5299,20 @@ sub split_float {
     return ($mantissa, $exponent);
 }
 
+
+# suitably single- or double-quote a literal constant string
+
+sub quoted_const_str {
+    my ($self, $str) =@_;
+    if ($str =~ /[[:^print:]]/a) {
+        return single_delim("qq", '"',
+                             uninterp(escape_str unback $str), $self);
+    } else {
+        return single_delim("q", "'", unback($str), $self);
+    }
+}
+
+
 sub const {
     my $self = shift;
     my($sv, $cx) = @_;
@@ -5275,12 +5426,7 @@ sub const {
 	return $self->maybe_parens("\\$const", $cx, 20);
     } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
-	if ($str =~ /[[:^print:]]/a) {
-	    return single_delim("qq", '"',
-				 uninterp(escape_str unback $str), $self);
-	} else {
-	    return single_delim("q", "'", unback($str), $self);
-	}
+        return $self->quoted_const_str($str);
     } else {
 	return "undef";
     }
@@ -5340,6 +5486,25 @@ sub pp_const {
     return $self->const($sv, $cx);
 }
 
+
+# Join two components of a double-quoted string, disambiguating
+# "${foo}bar", "${foo}{bar}", "${foo}[1]", "$foo\::bar"
+
+sub dq_disambiguate {
+    my ($first, $last) = @_;
+    ($last =~ /^[A-Z\\\^\[\]_?]/ &&
+        $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
+        || ($last =~ /^[:'{\[\w_]/ && #'
+            $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
+    return $first . $last;
+}
+
+
+# Deparse a double-quoted optree. For example, "$a[0]\Q$b\Efo\"o" gets
+# compiled to concat(concat($[0],quotemeta($b)),const("fo\"o")), and this
+# sub deparses it back to $a[0]\Q$b\Efo"o
+# (It does not add delimiters)
+
 sub dq {
     my $self = shift;
     my $op = shift;
@@ -5348,16 +5513,9 @@ sub dq {
 	return '$[' if $op->private & OPpCONST_ARYBASE;
 	return uninterp(escape_str(unback($self->const_sv($op)->as_string)));
     } elsif ($type eq "concat") {
-	my $first = $self->dq($op->first);
-	my $last  = $self->dq($op->last);
-
-	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]", "$foo\::bar"
-	($last =~ /^[A-Z\\\^\[\]_?]/ &&
-	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
-	    || ($last =~ /^[:'{\[\w_]/ && #'
-		$first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
-
-	return $first . $last;
+        return dq_disambiguate($self->dq($op->first), $self->dq($op->last));
+    } elsif ($type eq "multiconcat") {
+        return $self->do_multiconcat($op, 26, 1);
     } elsif ($type eq "uc") {
 	return '\U' . $self->dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {
@@ -5682,9 +5840,11 @@ sub pp_trans {
 
 sub pp_transr { push @_, 'r'; goto &pp_trans }
 
+# Join two components of a double-quoted re, disambiguating
+# "${foo}bar", "${foo}{bar}", "${foo}[1]".
+
 sub re_dq_disambiguate {
     my ($first, $last) = @_;
-    # Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
     ($last =~ /^[A-Z\\\^\[\]_?]/ &&
 	$first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
 	|| ($last =~ /^[{\[\w_]/ &&
@@ -5706,6 +5866,8 @@ sub re_dq {
 	my $first = $self->re_dq($op->first);
 	my $last  = $self->re_dq($op->last);
 	return re_dq_disambiguate($first, $last);
+    } elsif ($type eq "multiconcat") {
+        return $self->do_multiconcat($op, 26, 2);
     } elsif ($type eq "uc") {
 	return '\U' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {
@@ -5753,6 +5915,31 @@ sub pure_string {
     elsif ($type eq 'concat') {
 	return $self->pure_string($op->first)
             && $self->pure_string($op->last);
+    }
+    elsif ($type eq 'multiconcat') {
+        my ($kid, @kids);
+        for ($kid = $op->first; !null $kid; $kid = $kid->sibling) {
+            # skip the consts and/or padsv we've optimised away
+            push @kids, $kid
+                unless $kid->type == OP_NULL
+                  && (   $kid->targ == OP_PADSV
+                      || $kid->targ == OP_CONST
+                      || $kid->targ == OP_PUSHMARK);
+        }
+
+        if ($op->flags & OPf_STACKED) {
+            # remove expr from @kids where 'expr  = ...' or 'expr .= ....'
+            if ($op->private & OPpMULTICONCAT_APPEND) {
+                shift(@kids);
+            }
+            else {
+                pop(@kids);
+            }
+        }
+        for (@kids) {
+            return 0 unless $self->pure_string($_);
+        }
+        return 1;
     }
     elsif (is_scalar($op) || $type =~ /^[ah]elem$/) {
 	return 1;

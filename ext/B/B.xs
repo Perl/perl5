@@ -1183,6 +1183,10 @@ string(o, cv)
     PPCODE:
         aux = cUNOP_AUXo->op_aux;
         switch (o->op_type) {
+        case OP_MULTICONCAT:
+            ret = multiconcat_stringify(o);
+            break;
+
         case OP_MULTIDEREF:
             ret = multideref_stringify(o, cv);
             break;
@@ -1237,6 +1241,61 @@ aux_list(o, cv)
             PUSHs(sv_2mortal(aux[2].iv ? Perl_newSVpvf(aTHX_ "%c",
                                 (char)aux[2].iv) : &PL_sv_no));
             break;
+
+        case OP_MULTICONCAT:
+            {
+                UV nargs = aux[0].uv;
+                char *p;
+                STRLEN len;
+                U32 utf8 = 0;
+                SV *sv;
+                UNOP_AUX_item *lens;
+
+                /* return (nargs, const string, segment len 0, 1, 2, ...) */
+
+                /* if this changes, this block of code probably needs fixing */
+                assert(PERL_MULTICONCAT_HEADER_SIZE == 5);
+                nargs = aux[PERL_MULTICONCAT_IX_NARGS].uv;
+                EXTEND(SP, ((SSize_t)(2 + (nargs+1))));
+                PUSHs(sv_2mortal(newSViv(nargs)));
+
+                p   = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+                len = aux[PERL_MULTICONCAT_IX_PLAIN_LEN].size;
+                if (!p) {
+                    p   = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
+                    len = aux[PERL_MULTICONCAT_IX_UTF8_LEN].size;
+                    utf8 = SVf_UTF8;
+                }
+                sv = newSVpvn(p, len);
+                SvFLAGS(sv) |= utf8;
+                PUSHs(sv_2mortal(sv));
+
+                lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
+                nargs++; /* loop (nargs+1) times */
+                if (utf8) {
+                    U8 *p = (U8*)SvPVX(sv);
+                    while (nargs--) {
+                        SSize_t bytes = lens->size;
+                        SSize_t chars;
+                        if (bytes <= 0)
+                            chars = bytes;
+                        else {
+                            /* return char lengths rather than byte lengths */
+                            chars = utf8_length(p, p + bytes);
+                            p += bytes;
+                        }
+                        lens++;
+                        PUSHs(sv_2mortal(newSViv(chars)));
+                    }
+                }
+                else {
+                    while (nargs--) {
+                        PUSHs(sv_2mortal(newSViv(lens->size)));
+                        lens++;
+                    }
+                }
+                break;
+            }
 
         case OP_MULTIDEREF:
 #ifdef USE_ITHREADS

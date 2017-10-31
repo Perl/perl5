@@ -320,6 +320,809 @@ PP(pp_concat)
   }
 }
 
+
+/* pp_multiconcat()
+
+Concatenate one or more args, possibly interleaved with constant string
+segments. The result may be assigned to, or appended to, a variable or
+expression.
+
+Several op_flags and/or op_private bits indicate what the target is, and
+whether it's appended to. Valid permutations are:
+
+    -                                  (PADTMP) = (A.B.C....)
+    OPpTARGET_MY                       $lex     = (A.B.C....)
+    OPpTARGET_MY,OPpLVAL_INTRO         my $lex  = (A.B.C....)
+    OPpTARGET_MY,OPpMULTICONCAT_APPEND $lex    .= (A.B.C....)
+    OPf_STACKED                        expr     = (A.B.C....)
+    OPf_STACKED,OPpMULTICONCAT_APPEND  expr    .= (A.B.C....)
+
+Other combinations like (A.B).(C.D) are not optimised into a multiconcat
+op, as it's too hard to get the correct ordering of ties, overload etc.
+
+In addition:
+
+    OPpMULTICONCAT_FAKE:       not a real concat, instead an optimised
+                               sprintf "...%s...". Don't call '.'
+                               overloading: only use '""' overloading.
+
+    OPpMULTICONCAT_STRINGIFY:  (for Deparse's benefit) the RHS was of the
+                               form "...$a...$b..." rather than
+                               "..." . $a . "..." . $b . "..."
+
+An OP_MULTICONCAT is of type UNOP_AUX. The fixed slots of the aux array are
+defined with PERL_MULTICONCAT_IX_FOO constants, where:
+
+
+    FOO       index description
+    --------  ----- ----------------------------------
+    NARGS     0     number of arguments
+    PLAIN_PV  1     non-utf8 constant string
+    PLAIN_LEN 2     non-utf8 constant string length
+    UTF8_PV   3     utf8 constant string
+    UTF8_LEN  4     utf8 constant string length
+    LENGTHS   5     first of nargs+1 const segment lengths
+
+The idea is that a general string concatenation will have a fixed (known
+at compile time) number of variable args, interspersed with constant
+strings, e.g. "a=$a b=$b\n"
+
+All the constant string segments "a=", " b=" and "\n" are stored as a
+single string "a= b=\n", pointed to from the PLAIN_PV/UTF8_PV slot, along
+with a series of segment lengths: e.g. 2,3,1. In the case where the
+constant string is plain but has a different utf8 representation, both
+variants are stored, and two sets of (nargs+1) segments lengths are stored
+in the slots beginning at PERL_MULTICONCAT_IX_LENGTHS.
+
+A segment length of -1 indicates that there is no constant string at that
+point; this distinguishes between e.g. ($a . $b) and ($a . "" . $b), which
+have differing overloading behaviour.
+
+*/
+
+PP(pp_multiconcat)
+{
+    dSP;
+    SV *targ;                /* The SV to be assigned or appended to */
+    SV *dsv;                 /* the SV to concat args to (often == targ) */
+    char *dsv_pv;            /* where within SvPVX(dsv) we're writing to */
+    STRLEN targ_len;         /* SvCUR(targ) */
+    SV **toparg;             /* the highest arg position on the stack */
+    UNOP_AUX_item *aux;      /* PL_op->op_aux buffer */
+    UNOP_AUX_item *const_lens; /* the segment length array part of aux */
+    const char *const_pv;    /* the current segment of the const string buf */
+    UV nargs;                /* how many args were expected */
+    UV stack_adj;            /* how much to adjust SP on return */
+    STRLEN grow;             /* final size of destination string (dsv) */
+    UV targ_count;           /* how many times targ has appeared on the RHS */
+    bool is_append;          /* OPpMULTICONCAT_APPEND flag is set */
+    bool slow_concat;        /* args too complex for quick concat */
+    U32  dst_utf8;           /* the result will be utf8 (indicate this with
+                                SVf_UTF8 in a U32, rather than using bool,
+                                for ease of testing and setting) */
+    /* for each arg, holds the result of an SvPV() call */
+    struct multiconcat_svpv {
+        char          *pv;
+        SSize_t       len;
+    }
+        *targ_chain,         /* chain of slots where targ has appeared on RHS */
+        *svpv_p,             /* ptr for looping through svpv_buf */
+        *svpv_base,          /* first slot (may be greater than svpv_buf), */
+        *svpv_end,           /* and slot after highest result so far, of: */
+        svpv_buf[PERL_MULTICONCAT_MAXARG]; /* buf for storing SvPV() results */
+
+    aux   = cUNOP_AUXx(PL_op)->op_aux;
+    stack_adj = nargs = aux[PERL_MULTICONCAT_IX_NARGS].uv;
+    is_append = cBOOL(PL_op->op_private & OPpMULTICONCAT_APPEND);
+
+    /* get targ from the stack or pad */
+
+    if (PL_op->op_flags & OPf_STACKED) {
+        if (is_append) {
+            /* for 'expr .= ...', expr is the bottom item on the stack */
+            targ = SP[-nargs];
+            stack_adj++;
+        }
+        else
+            /* for 'expr = ...', expr is the top item on the stack */
+            targ = POPs;
+    }
+    else {
+        SV **svp = &(PAD_SVl(PL_op->op_targ));
+        targ = *svp;
+        if (PL_op->op_private & OPpLVAL_INTRO) {
+            assert(PL_op->op_private & OPpTARGET_MY);
+            save_clearsv(svp);
+        }
+        if (!nargs)
+            /* $lex .= "const" doesn't cause anything to be pushed */
+            EXTEND(SP,1);
+    }
+
+    toparg = SP;
+    SP -= (nargs - 1);
+    dsv           = targ; /* Set the destination for all concats. This is
+                             initially targ; later on, dsv may be switched
+                             to point to a TEMP SV if overloading is
+                             encountered.  */
+    grow          = 1;    /* allow for '\0' at minimum */
+    targ_count    = 0;
+    targ_chain    = NULL;
+    targ_len      = 0;
+    svpv_end      = svpv_buf;
+                    /* only utf8 variants of the const strings? */
+    dst_utf8      = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv ? 0 : SVf_UTF8;
+
+
+    /* --------------------------------------------------------------
+     * Phase 1:
+     *
+     * stringify (i.e. SvPV()) every arg and store the resultant pv/len/utf8
+     * triplets in svpv_buf[]. Also increment 'grow' by the args' lengths.
+     *
+     * utf8 is indicated by storing a negative length.
+     *
+     * Where an arg is actually targ, the stringification is deferred:
+     * the length is set to 0, and the slot is added to targ_chain.
+     *
+     * If an overloaded arg is found, the loop is abandoned at that point,
+     * and dsv is set to an SvTEMP SV where the results-so-far will be
+     * accumulated.
+     */
+
+    for (; SP <= toparg; SP++, svpv_end++) {
+        bool simple_flags;
+        U32 utf8;
+        STRLEN len;
+        SV *sv;
+
+        assert(svpv_end - svpv_buf < PERL_MULTICONCAT_MAXARG);
+
+        sv = *SP;
+        simple_flags = (SvFLAGS(sv) & (SVs_GMG|SVf_ROK|SVf_POK)) == SVf_POK;
+
+        /* this if/else chain is arranged so that common/simple cases
+         * take few conditionals */
+
+        if (LIKELY(simple_flags && (sv != targ))) {
+            /* common case: sv is a simple PV and not the targ */
+            svpv_end->pv  = SvPVX(sv);
+            len           = SvCUR(sv);
+        }
+        else if (simple_flags) {
+            /* sv is targ (but can't be magic or overloaded).
+             * Delay storing PV pointer; instead, add slot to targ_chain
+             * so it can be populated later, after targ has been grown and
+             * we know its final SvPVX() address.
+             */
+          targ_on_rhs:
+            svpv_end->len = 0; /* zerojng here means we can skip
+                                  updating later if targ_len == 0 */
+            svpv_end->pv  = (char*)targ_chain;
+            targ_chain    = svpv_end;
+            targ_count++;
+            continue;
+        }
+        else {
+            if (UNLIKELY(SvFLAGS(sv) & (SVs_GMG|SVf_ROK))) {
+                /* its got magic, is tied, and/or is overloaded */
+                SvGETMAGIC(sv);
+
+                if (UNLIKELY(SvAMAGIC(sv))
+                    && !(PL_op->op_private & OPpMULTICONCAT_FAKE))
+                {
+                    /* One of the RHS args is overloaded. Abandon stringifying
+                     * the args at this point, then in the concat loop later
+                     * on, concat the plain args stringified so far into a
+                     * TEMP SV. At the end of this function the remaining
+                     * args (including the current one) will be handled
+                     * specially, using overload calls.
+                     * FAKE implies an optimised sprintf which doesn't use
+                     * concat overloading, only "" overloading.
+                     */
+                  setup_overload:
+                    dsv = newSVpvn_flags("", 0, SVs_TEMP);
+
+                    if (targ_chain) {
+                        /* Get the string value of targ and populate any
+                         * RHS slots which use it */
+                        char *pv = SvPV_nomg(targ, len);
+                        dst_utf8 |= (SvFLAGS(targ) & SVf_UTF8);
+                        grow += len * targ_count;
+                        do {
+                            struct multiconcat_svpv *p = targ_chain;
+                            targ_chain = (struct multiconcat_svpv *)(p->pv);
+                            p->pv  = pv;
+                            p->len = len;
+                        } while (targ_chain);
+                    }
+                    else if (is_append)
+                        SvGETMAGIC(targ);
+
+                    goto phase3;
+                }
+
+                if (SvFLAGS(sv) & SVs_RMG) {
+                    /* probably tied; copy it to guarantee separate values
+                     * each time it's used, e.g. "-$tied-$tied-$tied-",
+                     * since FETCH() isn't necessarily idempotent */
+                    SV *nsv = newSV(0);
+                    sv_setsv_flags(nsv, sv, SV_NOSTEAL);
+                    sv_2mortal(nsv);
+                    if (   sv == targ
+                        && is_append
+                        && nargs == 1
+                        /* no const string segments */
+                        && aux[PERL_MULTICONCAT_IX_LENGTHS].size   == -1
+                        && aux[PERL_MULTICONCAT_IX_LENGTHS+1].size == -1)
+                    {
+                        /* special-case $tied .= $tied.
+                         *
+                         * For something like
+                         *    sub FETCH { $i++ }
+                         * then
+                         *    $tied .= $tied . $tied . $tied;
+                         * will STORE "4123"
+                         * while
+                         *    $tied .= $tied
+                         * will STORE "12"
+                         *
+                         * i.e. for a single mutator concat, the LHS is
+                         * retrieved first; in all other cases it is
+                         * retrieved last. Whether this is sane behaviour
+                         * is open to debate; but for now, multiconcat (as
+                         * it is an optimisation) tries to reproduce
+                         * existing behaviour.
+                         */
+                        sv_catsv(nsv, sv);
+                        sv_setsv(sv,nsv);
+                        SP++;
+                        goto phase7; /* just return targ as-is */
+                    }
+
+                    sv = nsv;
+                }
+            }
+
+            if (sv == targ) {
+                /* must warn for each RH usage of targ, except that
+                 * we will later get one warning when doing
+                 * SvPV_force(targ), *except* on '.=' */
+                if (   !SvOK(sv)
+                    && (targ_chain || is_append)
+                    && ckWARN(WARN_UNINITIALIZED)
+                )
+                    report_uninit(sv);
+                goto targ_on_rhs;
+            }
+
+            /* stringify general SV */
+            svpv_end->pv = sv_2pv_flags(sv, &len, 0);
+        }
+
+        utf8 = (SvFLAGS(sv) & SVf_UTF8);
+        dst_utf8   |= utf8;
+        ASSUME(len < SSize_t_MAX);
+        svpv_end->len = utf8 ? -(SSize_t)len : (SSize_t)len;
+        grow += len;
+    }
+
+    /* --------------------------------------------------------------
+     * Phase 2:
+     *
+     * Stringify targ:
+     *
+     * if targ appears on the RHS or is appended to, force stringify it;
+     * otherwise set it to "". Then set targ_len.
+     */
+
+    if (is_append) {
+        if (UNLIKELY(SvFLAGS(targ) & (SVs_GMG|SVf_ROK))) {
+            SvGETMAGIC(targ); /* must do before SvAMAGIC() check */
+            if (UNLIKELY(SvAMAGIC(targ))) {
+                /* $overloaded .= ....;
+                 * accumulate RHS in a temp SV rather than targ,
+                 * then append tmp to targ at the end using overload
+                 */
+                assert(!targ_chain);
+                dsv = newSVpvn_flags("", 0, SVs_TEMP);
+                goto phase3;
+            }
+        }
+
+        if (SvOK(targ)) {
+            U32 targ_utf8;
+          stringify_targ:
+            SvPV_force_nomg_nolen(targ);
+            targ_utf8 = SvFLAGS(targ) & SVf_UTF8;
+            if (UNLIKELY(dst_utf8 & ~targ_utf8)) {
+                 if (LIKELY(!IN_BYTES))
+                    sv_utf8_upgrade_nomg(targ);
+            }
+            else
+                dst_utf8 |= targ_utf8;
+
+            targ_len = SvCUR(targ);
+            grow += targ_len * (targ_count + is_append);
+            goto phase3;
+        }
+    }
+    else if (UNLIKELY(SvTYPE(targ) >= SVt_REGEXP)) {
+        /* Assigning to some weird LHS type. Don't force the LHS to be an
+         * empty string; instead, do things 'long hand' by using the
+         * overload code path, which concats to a TEMP sv and does
+         * sv_catsv() calls rather than COPY()s. This ensures that even
+         * bizarre code like this doesn't break or crash:
+         *    *F = *F . *F.
+         * (which makes the 'F' typeglob an alias to the
+         * '*main::F*main::F' typeglob).
+         */
+        goto setup_overload;
+    }
+    else if (targ_chain) {
+        /* targ was found on RHS.
+         * We don't need the SvGETMAGIC() call and SvAMAGIC() test as
+         * both were already done earlier in the SvPV() loop; other
+         * than that we can share the same code with the append
+         * branch below.
+         * Note that this goto jumps directly into the SvOK() branch
+         * even if targ isn't SvOK(), to force an 'uninitialised'
+         * warning; e.g.
+         *   $undef .= ....           targ only on LHS: don't warn
+         *   $undef .= $undef ....    targ on RHS too:  warn
+         */
+        assert(!SvAMAGIC(targ));
+        goto stringify_targ;
+    }
+
+
+    /* unrolled SvPVCLEAR() - mostly: no need to grow or set SvCUR() to 0;
+     * those will be done later. */
+    assert(targ == dsv);
+    SV_CHECK_THINKFIRST_COW_DROP(targ);
+    SvUPGRADE(targ, SVt_PV);
+    SvFLAGS(targ) &= ~(SVf_OK|SVf_IVisUV|SVf_UTF8);
+    SvFLAGS(targ) |= (SVf_POK|SVp_POK|dst_utf8);
+
+  phase3:
+
+    /* --------------------------------------------------------------
+     * Phase 3:
+     *
+     * UTF-8 tweaks and grow dsv:
+     *
+     * Now that we know the length and utf8-ness of both the targ and
+     * args, grow dsv to the size needed to accumulate all the args, based
+     * on whether targ appears on the RHS, whether we're appending, and
+     * whether any non-utf8 args expand in size if converted to utf8.
+     *
+     * For the latter, if dst_utf8 we scan non-utf8 args looking for
+     * variant chars, and adjust the svpv->len value of those args to the
+     * utf8 size and negate it to flag them. At the same time we un-negate
+     * the lens of any utf8 args since after this phase we no longer care
+     * whether an arg is utf8 or not.
+     *
+     * Finally, initialise const_lens and const_pv based on utf8ness.
+     * Note that there are 3 permutations:
+     *
+     * * If the constant string is invariant whether utf8 or not (e.g. "abc"),
+     *   then aux[PERL_MULTICONCAT_IX_PLAIN_PV/LEN] are the same as
+     *        aux[PERL_MULTICONCAT_IX_UTF8_PV/LEN] and there is one set of
+     *   segment lengths.
+     *
+     * * If the string is fully utf8, e.g. "\x{100}", then
+     *   aux[PERL_MULTICONCAT_IX_PLAIN_PV/LEN] == (NULL,0) and there is
+     *   one set of segment lengths.
+     *
+     * * If the string has different plain and utf8 representations
+     *   (e.g. "\x80"), then then aux[PERL_MULTICONCAT_IX_PLAIN_PV/LEN]]
+     *   holds the plain rep, while aux[PERL_MULTICONCAT_IX_UTF8_PV/LEN]
+     *   holds the utf8 rep, and there are 2 sets of segment lengths,
+     *   with the utf8 set following after the plain set.
+     *
+     * On entry to this section the (pv,len) pairs in svpv_buf have the
+     * following meanings:
+     *    (pv,  len) a plain string
+     *    (pv, -len) a utf8 string
+     *    (NULL,  0) left-most targ \ linked together R-to-L
+     *    (next,  0) other targ     / in targ_chain
+     */
+
+    /* turn off utf8 handling if 'use bytes' is in scope */
+    if (UNLIKELY(dst_utf8 && IN_BYTES)) {
+        dst_utf8 = 0;
+        SvUTF8_off(dsv);
+        /* undo all the negative lengths which flag utf8-ness */
+        for (svpv_p = svpv_buf; svpv_p < svpv_end; svpv_p++) {
+            SSize_t len = svpv_p->len;
+            if (len < 0)
+                svpv_p->len = -len;
+        }
+    }
+
+    /* grow += total of lengths of constant string segments */
+    {
+        SSize_t len;
+        len = aux[dst_utf8 ? PERL_MULTICONCAT_IX_UTF8_LEN
+                           : PERL_MULTICONCAT_IX_PLAIN_LEN].size;
+        slow_concat = cBOOL(len);
+        grow += len;
+    }
+
+    const_lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
+
+    if (dst_utf8) {
+        const_pv = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
+        if (   aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv
+            && const_pv != aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv)
+            /* separate sets of lengths for plain and utf8 */
+            const_lens += nargs + 1;
+
+        /* If the result is utf8 but some of the args aren't,
+         * calculate how much extra growth is needed for all the chars
+         * which will expand to two utf8 bytes.
+         * Also, if the growth is non-zero, negate the length to indicate
+         * that this this is a variant string. Conversely, un-negate the
+         * length on utf8 args (which was only needed to flag non-utf8
+         * args in this loop */
+        for (svpv_p = svpv_buf; svpv_p < svpv_end; svpv_p++) {
+            char *p;
+            SSize_t len, l, extra;
+
+            len = svpv_p->len;
+            if (len <= 0) {
+                svpv_p->len = -len;
+                continue;
+            }
+
+            p = svpv_p->pv;
+            extra = 0;
+            l = len;
+            while (l--)
+                extra += !UTF8_IS_INVARIANT(*p++);
+            if (UNLIKELY(extra)) {
+                grow       += extra;
+                              /* -ve len indicates special handling */
+                svpv_p->len = -(len + extra);
+                slow_concat = TRUE;
+            }
+        }
+    }
+    else
+        const_pv = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+
+    /* unrolled SvGROW(), except don't check for SVf_IsCOW, which should
+     * already have been dropped */
+    assert(!SvIsCOW(dsv));
+    dsv_pv = (SvLEN(dsv) < (grow) ? sv_grow(dsv,grow) : SvPVX(dsv));
+
+
+    /* --------------------------------------------------------------
+     * Phase 4:
+     *
+     * Now that dsv (which is probably targ) has been grown, we know the
+     * final address of the targ PVX, if needed. Preserve / move targ
+     * contents if appending or if targ appears on RHS.
+     *
+     * Also update svpv_buf slots in targ_chain.
+     *
+     * Don't bother with any of this if the target length is zero:
+     * targ_len is set to zero unless we're appending or targ appears on
+     * RHS.  And even if it is, we can optimise by skipping this chunk of
+     * code for zero targ_len. In the latter case, we don't need to update
+     * the slots in targ_chain with the (zero length) target string, since
+     * we set the len in such slots to 0 earlier, and since the Copy() is
+     * skipped on zero length, it doesn't matter what svpv_p->pv contains.
+     *
+     * On entry to this section the (pv,len) pairs in svpv_buf have the
+     * following meanings:
+     *    (pv,  len)         a pure-plain or utf8 string
+     *    (pv, -(len+extra)) a plain string which will expand by 'extra'
+     *                         bytes when converted to utf8
+     *    (NULL,  0)         left-most targ \ linked together R-to-L
+     *    (next,  0)         other targ     / in targ_chain
+     *
+     * On exit, the targ contents will have been moved to the
+     * earliest place they are needed (e.g. $x = "abc$x" will shift them
+     * 3 bytes, while $x .= ... will leave them at the beginning);
+     * and dst_pv will point to the location within SvPVX(dsv) where the
+     * next arg should be copied.
+     */
+
+    svpv_base = svpv_buf;
+
+    if (targ_len) {
+        struct multiconcat_svpv *tc_stop;
+        char *targ_pv = dsv_pv;
+
+        assert(targ == dsv);
+        assert(is_append || targ_count);
+
+        if (is_append) {
+            dsv_pv += targ_len;
+            tc_stop = NULL;
+        }
+        else {
+            /* The targ appears on RHS, e.g. '$t = $a . $t . $t'.
+             * Move the current contents of targ to the first
+             * position where it's needed, and use that as the src buffer
+             * for any further uses (such as the second RHS $t above).
+             * In calculating the first position, we need to sum the
+             * lengths of all consts and args before that.
+             */
+
+            UNOP_AUX_item *lens = const_lens;
+                                /* length of first const string segment */
+            STRLEN offset       = lens->size > 0 ? lens->size : 0;
+
+            assert(targ_chain);
+            svpv_p = svpv_base;
+
+            for (;;) {
+                SSize_t len;
+                if (!svpv_p->pv)
+                    break; /* the first targ argument */
+                /* add lengths of the next arg and const string segment */
+                len = svpv_p->len;
+                if (len < 0)  /* variant args have this */
+                    len = -len;
+                offset += (STRLEN)len;
+                len = (++lens)->size;
+                offset += (len >= 0) ? (STRLEN)len : 0;
+                if (!offset) {
+                    /* all args and consts so far are empty; update
+                     * the start position for the concat later */
+                    svpv_base++;
+                    const_lens++;
+                }
+                svpv_p++;
+                assert(svpv_p < svpv_end);
+            }
+
+            if (offset) {
+                targ_pv += offset;
+                Move(dsv_pv, targ_pv, targ_len, char);
+                /* a negative length implies don't Copy(), but do increment */
+                svpv_p->len = -targ_len;
+                slow_concat = TRUE;
+            }
+            else {
+                /* skip the first targ copy */
+                svpv_base++;
+                const_lens++;
+                dsv_pv += targ_len;
+            }
+
+            /* Don't populate the first targ slot in the loop below; it's
+             * either not used because we advanced svpv_base beyond it, or
+             * we already stored the special -targ_len value in it
+             */
+            tc_stop = svpv_p;
+        }
+
+        /* populate slots in svpv_buf representing targ on RHS */
+        while (targ_chain != tc_stop) {
+            struct multiconcat_svpv *p = targ_chain;
+            targ_chain = (struct multiconcat_svpv *)(p->pv);
+            p->pv  = targ_pv;
+            p->len = (SSize_t)targ_len;
+        }
+    }
+
+
+    /* --------------------------------------------------------------
+     * Phase 5:
+     *
+     * Append all the args in svpv_buf, plus the const strings, to dsv.
+     *
+     * On entry to this section the (pv,len) pairs in svpv_buf have the
+     * following meanings:
+     *    (pv,  len)         a pure-plain or utf8 string (which may be targ)
+     *    (pv, -(len+extra)) a plain string which will expand by 'extra'
+     *                         bytes when converted to utf8
+     *    (0,  -len)         left-most targ, whose content has already
+     *                         been copied. Just advance dsv_pv by len.
+     */
+
+    /* If there are no constant strings and no special case args
+     * (svpv_p->len < 0), use a simpler, more efficient concat loop
+     */
+    if (!slow_concat) {
+        for (svpv_p = svpv_base; svpv_p < svpv_end; svpv_p++) {
+            SSize_t len = svpv_p->len;
+            if (!len)
+                continue;
+            Copy(svpv_p->pv, dsv_pv, len, char);
+            dsv_pv += len;
+        }
+        const_lens += (svpv_end - svpv_base + 1);
+    }
+    else {
+        /* Note that we iterate the loop nargs+1 times: to append nargs
+         * arguments and nargs+1 constant strings. For example, "-$a-$b-"
+         */
+        svpv_p = svpv_base - 1;
+
+        for (;;) {
+            SSize_t len = (const_lens++)->size;
+
+            /* append next const string segment */
+            if (len > 0) {
+                Copy(const_pv, dsv_pv, len, char);
+                dsv_pv   += len;
+                const_pv += len;
+            }
+
+            if (++svpv_p == svpv_end)
+                break;
+
+            /* append next arg */
+            len = svpv_p->len;
+
+            if (LIKELY(len > 0)) {
+                Copy(svpv_p->pv, dsv_pv, len, char);
+                dsv_pv += len;
+            }
+            else if (UNLIKELY(len < 0)) {
+                /* negative length indicates two special cases */
+                const char *p = svpv_p->pv;
+                len = -len;
+                if (UNLIKELY(p)) {
+                    /* copy plain-but-variant pv to a utf8 targ */
+                    assert(dst_utf8);
+                    while (len--) {
+                        U8 c = (U8) *p++;
+                        if (UTF8_IS_INVARIANT(c))
+                            *dsv_pv++ = c;
+                        else {
+                            *dsv_pv++ = UTF8_EIGHT_BIT_HI(c);
+                            *dsv_pv++ = UTF8_EIGHT_BIT_LO(c);
+                            len--;
+                        }
+                    }
+                }
+                else
+                    /* arg is already-copied targ */
+                    dsv_pv += len;
+            }
+
+        }
+    }
+
+    *dsv_pv = '\0';
+    SvCUR_set(dsv, dsv_pv - SvPVX(dsv));
+    assert(grow >= SvCUR(dsv) + 1);
+    assert(SvLEN(dsv) >= SvCUR(dsv) + 1);
+
+    /* --------------------------------------------------------------
+     * Phase 6:
+     *
+     * Handle overloading. If an overloaded arg or targ was detected
+     * earlier, dsv will have been set to a new mortal, and any args and
+     * consts to the left of the first overloaded arg will have been
+     * accumulated to it. This section completes any further concatenation
+     * steps with overloading handled.
+     */
+
+    if (UNLIKELY(dsv != targ)) {
+        SV *res;
+
+        SvFLAGS(dsv) |= dst_utf8;
+
+        if (SP <= toparg) {
+            /* Stringifying the RHS was abandoned because *SP
+             * is overloaded. dsv contains all the concatted strings
+             * before *SP. Apply the rest of the args using overloading.
+             */
+            SV *left, *right, *res;
+            int i;
+            bool getmg = FALSE;
+            SV *constsv = NULL;
+                               /* number of args already concatted */
+            STRLEN n          = (nargs - 1) - (toparg - SP);
+                               /* current arg is either the first
+                                * or second value to be concatted
+                                * (including constant strings), so would
+                                * form part of the first concat */
+            bool first_concat = (    n == 0
+                                 || (n == 1 && const_lens[-2].size < 0
+                                            && const_lens[-1].size < 0));
+            int  f_assign     = first_concat ? 0 : AMGf_assign;
+
+            left = dsv;
+
+            for (; n < nargs; n++) {
+                /* loop twice, first applying the arg, then the const segment */
+                for (i = 0; i < 2; i++) {
+                    if (i) {
+                        /* append next const string segment */
+                        STRLEN len = (STRLEN)((const_lens++)->size);
+                        /* a length of -1 implies no constant string
+                         * rather than a zero-length one, e.g.
+                         * ($a . $b) versus ($a . "" . $b)
+                         */
+                        if ((SSize_t)len < 0)
+                            continue;
+
+                        /* set constsv to the next constant string segment */
+                        if (constsv) {
+                            sv_setpvn(constsv, const_pv, len);
+                            if (dst_utf8)
+                                SvUTF8_on(constsv);
+                            else
+                                SvUTF8_off(constsv);
+                        }
+                        else
+                            constsv = newSVpvn_flags(const_pv, len,
+                                                    (dst_utf8 | SVs_TEMP));
+
+                        right = constsv;
+                        const_pv += len;
+                    }
+                    else {
+                        /* append next arg */
+                        right = *SP++;
+                        if (getmg)
+                            SvGETMAGIC(right);
+                        else
+                            /* SvGETMAGIC already called on this SV just
+                             * before we broke from the loop earlier */
+                            getmg = TRUE;
+
+                        if (first_concat && n == 0 && const_lens[-1].size < 0) {
+                            /* nothing before the current arg; repeat the
+                             * loop to get a second arg */
+                            left = right;
+                            first_concat = FALSE;
+                            continue;
+                        }
+                    }
+
+                    if ((SvAMAGIC(left) || SvAMAGIC(right))
+                        && (res = amagic_call(left, right, concat_amg, f_assign))
+                    )
+                        left = res;
+                    else {
+                        if (left != dsv) {
+                            sv_setsv(dsv, left);
+                            left = dsv;
+                        }
+                        sv_catsv_nomg(left, right);
+                    }
+                    f_assign = AMGf_assign;
+                }
+            }
+            dsv = left;
+        }
+
+        /* assign/append RHS (dsv) to LHS (targ) */
+        if (is_append)  {
+            if ((SvAMAGIC(targ) || SvAMAGIC(dsv))
+                && (res = amagic_call(targ, dsv, concat_amg, AMGf_assign))
+            )
+                sv_setsv(targ, res);
+            else
+                sv_catsv_nomg(targ, dsv);
+        }
+        else
+            sv_setsv(targ, dsv);
+    }
+
+    /* --------------------------------------------------------------
+     * Phase 7:
+     *
+     * return result
+     */
+
+  phase7:
+
+    SP -= stack_adj;
+    SvTAINT(targ);
+    SETTARG;
+    RETURN;
+}
+
+
 /* push the elements of av onto the stack.
  * Returns PL_op->op_next to allow tail-call optimisation of its callers */
 

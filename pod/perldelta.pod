@@ -89,7 +89,37 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Many string concatenation expressions are now considerably faster, due
+to the introduction internally of a C<multiconcat> opcode which combines
+multiple concatenations, and optionally a C<=> or C<.=>, into a single
+action. For example, apart from retrieving C<$s>, C<$a> and C<$b>, this
+whole expression is now handled as a single op:
+
+    $s .= "a=$a b=$b\n"
+
+As a special case, if the LHS of an assign is a lexical variable or
+C<my $s>, the op itself handles retrieving the lexical variable, which
+is faster.
+
+In general, the more the expression includes a mix of constant strings and
+variable expressions, the longer the expression, and the more it mixes
+together non-utf8 and utf8 strings, the more marked the performance
+improvement. For example on a C<x86_64> system, this code has been
+benchmarked running four times faster:
+
+    my $s;
+    my $a = "ab\x{100}cde";
+    my $b = "fghij";
+    my $c = "\x{101}klmn";
+
+    for my $i (1..10_000_000) {
+        $s = "\x{100}wxyz";
+        $s .= "foo=$a bar=$b baz=$c";
+    }
+
+In addition, C<sprintf> expressions which have a constant format
+containing only C<%s> and C<%%> format elements, and which have a fixed
+number of arguments, are now also optimised into a C<multiconcat> op.
 
 =back
 
@@ -380,7 +410,26 @@ well.
 
 =item *
 
-XXX
+A new optimisation phase has been added to the compiler,
+C<optimize_optree()>, which does a top-down scan of a complete optree
+just before the peephole optimiser is run. This phase is not currently
+hookable.
+
+=item *
+
+An C<OP_MULTICONCAT> op has been added. At C<optimize_optree()> time, a
+chain of C<OP_CONCAT> and C<OP_CONST> ops, together optionally with an
+C<OP_STRINGIFY> and/or C<OP_SASSIGN>, are combined into a single
+C<OP_MULTICONCAT> op. The op is of type C<UNOP_AUX>, and the aux array
+contains the argument count, plus a pointer to a constant string and a set
+of segment lengths. For example with
+
+    my $x = "foo=$foo, bar=$bar\n";
+
+the constant string would be C<"foo=, bar=\n"> and the segment lengths
+would be (4,6,1). If the string contains characters such as C<\x80>, whose
+representation changes under utf8, two sets of strings plus lengths are
+precomputed and stored.
 
 =back
 

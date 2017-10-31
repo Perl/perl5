@@ -395,6 +395,7 @@ Afp	|void	|deb		|NN const char* pat|...
 Ap	|void	|vdeb		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|debprofdump
 EXp	|SV*	|multideref_stringify	|NN const OP* o|NULLOK CV *cv
+EXp	|SV*	|multiconcat_stringify	|NN const OP* o
 Ap	|I32	|debop		|NN const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
@@ -1046,7 +1047,9 @@ Apn	|void	|mini_mktime	|NN struct tm *ptm
 AMmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
 poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 p	|void	|finalize_optree		|NN OP* o
+p	|void	|optimize_optree|NN OP* o
 #if defined(PERL_IN_OP_C)
+s	|void	|optimize_op	|NN OP* o
 s	|void	|finalize_op	|NN OP* o
 s	|void	|move_proto_attr|NN OP **proto|NN OP **attrs \
 				|NN const GV *name|bool curstash
