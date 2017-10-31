@@ -1013,7 +1013,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     s++;
   if (s >= send)
     return numtype;
-  if (len == 10 && _memEQs(pv, "0 but true")) {
+  if (memEQs(pv, len, "0 but true")) {
     if (valuep)
       *valuep = 0;
     return IS_NUMBER_IN_UV;

@@ -2618,8 +2618,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         SvTYPE(rv) == SVt_PVCV) && ((stash = CvSTASH(rv)) != NULL))
     {
         const char * const name = HvNAME(stash);
-        if (HvNAMELEN(stash) == sizeof("_charnames")-1
-         && strEQ(name, "_charnames")) {
+         if (memEQs(name, HvNAMELEN(stash), "_charnames")) {
            return res;
        }
     }
@@ -4603,7 +4602,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 
     PERL_ARGS_ASSERT_FIND_IN_MY_STASH;
 
-    if (len == 11 && *pkgname == '_' && strEQ(pkgname, "__PACKAGE__"))
+    if (memEQs(pkgname, len, "__PACKAGE__"))
         return PL_curstash;
 
     if (len > 2
@@ -5950,16 +5949,15 @@ Perl_yylex(pTHX)
 		else {
 		    /* NOTE: any CV attrs applied here need to be part of
 		       the CVf_BUILTIN_ATTRS define in cv.h! */
-		    if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "lvalue", len)) {
+		    if (!PL_in_my && memEQs(SvPVX(sv), len, "lvalue")) {
 			sv_free(sv);
 			CvLVALUE_on(PL_compcv);
 		    }
-		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "method", len)) {
+		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
 			sv_free(sv);
 			CvMETHOD_on(PL_compcv);
 		    }
-		    else if (!PL_in_my && len == 5
-			  && strnEQ(SvPVX(sv), "const", len))
+		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "const"))
 		    {
 			sv_free(sv);
 			Perl_ck_warner_d(aTHX_
@@ -7048,7 +7046,7 @@ Perl_yylex(pTHX)
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!anydelim && *s == ':' && s[1] == ':') {
-	    if (strEQ(PL_tokenbuf, "CORE")) goto case_KEY_CORE;
+	    if (memEQs(PL_tokenbuf, len, "CORE")) goto case_KEY_CORE;
 	    goto just_a_word;
 	}
 
@@ -7821,7 +7819,7 @@ Perl_yylex(pTHX)
 		*PL_tokenbuf = '&';
 		d = scan_word(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
 			      1, &len);
-		if (len && (len != 4 || strNE(PL_tokenbuf+1, "CORE"))
+		if (len && memNEs(PL_tokenbuf+1, len, "CORE")
 		 && !keyword(PL_tokenbuf + 1, len, 0)) {
                     SSize_t off = s-SvPVX(PL_linestr);
 		    d = skipspace(d);
@@ -8199,7 +8197,7 @@ Perl_yylex(pTHX)
 	    s = skipspace(s);
             if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-		if (len == 3 && strBEGINs(PL_tokenbuf, "sub"))
+		if (memEQs(PL_tokenbuf, len, "sub"))
 		    goto really_sub;
 		PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
 		if (!PL_in_my_stash) {

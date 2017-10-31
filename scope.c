@@ -349,7 +349,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	bool isa_changed = 0;
 
 	if (stash && HvENAME(stash)) {
-	    if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
+	    if (memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
 		isa_changed = TRUE;
 	    else if (GvCVu(gv))
 		/* taking a method out of circulation ("local")*/
@@ -1091,9 +1091,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gp_free(a0.any_gv);
 	    GvGP_set(a0.any_gv, (GP*)a1.any_ptr);
 	    if ((hv=GvSTASH(a0.any_gv)) && HvENAME_get(hv)) {
-	        if (   GvNAMELEN(a0.any_gv) == 3
-                    && strnEQ(GvNAME(a0.any_gv), "ISA", 3)
-                )
+	        if (memEQs(GvNAME(a0.any_gv), GvNAMELEN(a0.any_gv), "ISA"))
 	            mro_isa_changed_in(hv);
                 else if (had_method || GvCVu(a0.any_gv))
                     /* putting a method back into circulation ("local")*/	

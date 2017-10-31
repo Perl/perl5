@@ -11825,7 +11825,7 @@ Perl_ck_method(pTHX_ OP *o)
         return newMETHOP_named(OP_METHOD_NAMED, 0, methsv);
     }
 
-    if (nsplit == 7 && memEQ(method, "SUPER::", nsplit)) { /* $proto->SUPER::method() */
+    if (memEQs(method, nsplit, "SUPER::")) { /* $proto->SUPER::method() */
         op_free(o);
         return newMETHOP_named(OP_METHOD_SUPER, 0, methsv);
     }

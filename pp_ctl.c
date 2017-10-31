@@ -3849,7 +3849,7 @@ S_require_file(pTHX_ SV *sv)
                    directory, or (*nix) hidden filenames.  Also sanity check
                    that the generated filename ends .pm  */
                 if (!path_searchable || len < 3 || name[0] == '.'
-                    || !memEQ(name + package_len, ".pm", 3))
+                    || !memEQs(name + package_len, len - package_len, ".pm"))
                     DIE(aTHX_ "Bareword in require maps to disallowed filename \"%" SVf "\"", sv);
                 if (memchr(name, 0, package_len)) {
                     /* diag_listed_as: Bareword in require contains "%s" */

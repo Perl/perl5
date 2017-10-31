@@ -12794,8 +12794,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }*/
                 switch (*RExC_parse) {
                     case 'g':
-                        if (length != 1
-                            && (length != 3 || strnNE(RExC_parse + 1, "cb", 2)))
+                        if (    length != 1
+                            && (memNEs(RExC_parse + 1, length - 1, "cb")))
                         {
                             goto bad_bound_type;
                         }
@@ -14616,7 +14616,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
          * */
         switch (name_len) {
             case 4:
-                if (memEQ(name_start, "word", 4)) {
+                if (memEQs(name_start, 4, "word")) {
                     /* this is not POSIX, this is the Perl \w */
                     class_number = ANYOF_WORDCHAR;
                 }
@@ -14671,7 +14671,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                 }
                 break;
             case 6:
-                if (memEQ(name_start, "xdigit", 6))
+                if (memEQs(name_start, 6, "xdigit"))
                     class_number = ANYOF_XDIGIT;
                 break;
         }
@@ -16440,7 +16440,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                          * referred to outside it. [perl #121777] */
                         if (! has_pkg && curpkg) {
                             char* pkgname = HvNAME(curpkg);
-                            if (strNE(pkgname, "main")) {
+                            if (memNEs(pkgname, HvNAMELEN(curpkg), "main")) {
                                 char* full_name = Perl_form(aTHX_
                                                             "%s::%s",
                                                             pkgname,

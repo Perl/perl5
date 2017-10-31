@@ -83,8 +83,8 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     if (!*where)
     {
 	*where = newSV_type(type);
-	    if (type == SVt_PVAV && GvNAMELEN(gv) == 3
-	     && strBEGINs(GvNAME(gv), "ISA"))
+	    if (type == SVt_PVAV
+	     && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
 	    sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
     }
     return gv;
@@ -780,8 +780,8 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
             return 0;
         }
 	else if (stash == cachestash
-	      && len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4
-              && strBEGINs(hvname, "CORE")
+	      && len > 1 /* shortest is uc */
+              && memEQs(hvname, HvNAMELEN_get(stash), "CORE")
               && S_maybe_add_coresub(aTHX_ NULL,topgv,name,len))
 	    goto have_gv;
     }
@@ -2410,8 +2410,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    if (len == 1 && stash == PL_defstash) {
                 maybe_multimagic_gv(gv, name, sv_type);
 	    }
-	    else if (len == 3 && sv_type == SVt_PVAV
-	          && strBEGINs(name, "ISA")
+            else if (sv_type == SVt_PVAV
+	          && memEQs(name, len, "ISA")
 	          && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
 		gv_magicalize_isa(gv);
 	}
@@ -2816,9 +2816,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
             const HEK * const gvhek = CvGvNAME_HEK(cv);
             const HEK * const stashek =
                 HvNAME_HEK(CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv)));
-            if (HEK_LEN(gvhek) == 3 && strEQ(HEK_KEY(gvhek), "nil")
-             && stashek && HEK_LEN(stashek) == 8
-             && strEQ(HEK_KEY(stashek), "overload")) {
+            if (memEQs(HEK_KEY(gvhek), HEK_LEN(gvhek), "nil")
+             && stashek
+             && memEQs(HEK_KEY(stashek), HEK_LEN(stashek), "overload")) {
 		/* This is a hack to support autoloading..., while
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
