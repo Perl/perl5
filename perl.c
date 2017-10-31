@@ -2704,6 +2704,9 @@ Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
 
     PERL_ARGS_ASSERT_GET_CVN_FLAGS;
 
+    if (gv && UNLIKELY(SvROK(gv)) && SvTYPE(SvRV((SV *)gv)) == SVt_PVCV)
+	return SvRV((SV *)gv);
+
     /* XXX this is probably not what they think they're getting.
      * It has the same effect as "sub name;", i.e. just a forward
      * declaration! */

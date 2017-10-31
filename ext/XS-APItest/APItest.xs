@@ -4288,6 +4288,17 @@ get_cv(SV *sv)
     OUTPUT:
         RETVAL
 
+CV *
+get_cv_flags(SV *sv, UV flags)
+    CODE:
+    {
+        STRLEN len;
+        const char *s = SvPV(sv, len);
+        RETVAL = get_cvn_flags(s, len, flags);
+    }
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
