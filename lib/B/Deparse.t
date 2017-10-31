@@ -2851,3 +2851,8 @@ $x = `$a-$b`;
 # multiconcat within qr//
 my($r, $a, $b);
 $r = qr/abc\Q$a-$b\Exyz/;
+####
+# tr with unprintable characters
+my $str;
+$str = 'foo';
+$str =~ tr/\cA//;

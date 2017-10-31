@@ -5632,7 +5632,7 @@ sub pchr { # ASCII
     } elsif ($n == ord "\r") {
 	return '\\r';
     } elsif ($n >= ord("\cA") and $n <= ord("\cZ")) {
-	return '\\c' . unctrl{chr $n};
+	return '\\c' . $unctrl{chr $n};
     } else {
 #	return '\x' . sprintf("%02x", $n);
 	return '\\' . sprintf("%03o", $n);
