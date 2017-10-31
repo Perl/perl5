@@ -2312,6 +2312,7 @@ PREINIT:
     I32 retcnt;
     SV * errsv;
     char * errstr;
+    STRLEN errlen;
     SV * miscsv = sv_newmortal();
     HV * hv = (HV*)sv_2mortal((SV*)newHV());
 CODE:
@@ -2345,8 +2346,8 @@ CODE:
     SPAGAIN;
     SP -= retcnt;
     errsv = ERRSV;
-    errstr = SvPV_nolen(errsv);
-    if(strBEGINs(errstr, "Undefined subroutine &main:: called at")) {
+    errstr = SvPV(errsv, errlen);
+    if(memBEGINs(errstr, errlen, "Undefined subroutine &main:: called at")) {
         PUSHMARK(SP);
         retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
         SPAGAIN;
@@ -2357,8 +2358,8 @@ CODE:
     SPAGAIN;
     SP -= retcnt;
     errsv = ERRSV;
-    errstr = SvPV_nolen(errsv);
-    if(strBEGINs(errstr, "Can't use an undefined value as a subroutine reference at")) {
+    errstr = SvPV(errsv, errlen);
+    if(memBEGINs(errstr, errlen, "Can't use an undefined value as a subroutine reference at")) {
         PUSHMARK(SP);
         retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
         SPAGAIN;
@@ -2369,8 +2370,8 @@ CODE:
     SPAGAIN;
     SP -= retcnt;
     errsv = ERRSV;
-    errstr = SvPV_nolen(errsv);
-    if(strBEGINs(errstr, "Not a CODE reference at")) {
+    errstr = SvPV(errsv, errlen);
+    if(memBEGINs(errstr, errlen, "Not a CODE reference at")) {
         PUSHMARK(SP);
         retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
         SPAGAIN;
