@@ -243,7 +243,7 @@ checkOptree ( name	=> '-exec sub { foreach (1..10) {print "foo $_"} }',
 # 6  <{> enteriter(next->c last->f redo->7) KS/DEF
 # d  <0> iter s
 # e  <|> and(other->7) K/1
-# 7      <;> nextstate(main 1659 optree_samples.t:234) v
+# 7      <;> nextstate(main 1659 optree_samples.t:234) v:>,<,%
 # 8      <0> pushmark s
 # 9      <#> gvsv[*_] s
 # a      <+> multiconcat("foo ",4,-1)[t5] sK/STRINGIFY
