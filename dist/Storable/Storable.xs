@@ -247,6 +247,16 @@ struct extendable {
 typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 
 /*
+ * Make the tag type 64-bit on 64-bit platforms.
+ *
+ * If the tag number is low enough it's stored as a 32-bit value, but
+ * with very large arrays and hashes it's possible to go over 2**32
+ * scalars.
+ */
+
+typedef STRLEN ntag_t;
+
+/*
  * The following "thread-safe" related defines were contributed by
  * Murray Nesbitt <murray@activestate.com> and integrated by RAM, who
  * only renamed things a little bit to ensure consistency with surrounding
@@ -531,6 +541,16 @@ static stcxt_t *Context_ptr = NULL;
 #else
 #define LOW_32BITS(x)	((I32) ((unsigned long) (x) & 0xffffffffUL))
 #endif
+
+/*
+ * PTR2TAG(x)
+ *
+ * Convert a pointer into an ntag_t.
+ */
+
+#define PTR2TAG(x) ((ntag_t)(x))
+
+#define TAG2PTR(x, type) ((y)(x))
 
 /*
  * oI, oS, oC
@@ -4089,9 +4109,8 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
     svh = hv_fetch(hseen, (char *) &sv, sizeof(sv), FALSE);
 #endif
     if (svh) {
-        I32 tagval;
-
-        if (sv == &PL_sv_undef) {
+	ntag_t tagval;
+	if (sv == &PL_sv_undef) {
             /* We have seen PL_sv_undef before, but fake it as
                if we have not.
 
@@ -4122,17 +4141,41 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
         }
 
 #ifdef USE_PTR_TABLE
-        tagval = htonl(LOW_32BITS(((char *)svh)-1));
+	tagval = PTR2TAG(((char *)svh)-1);
 #else
-        tagval = htonl(LOW_32BITS(*svh));
+	tagval = PTR2TAG(*svh);
 #endif
+#ifdef HAS_U64
 
-        TRACEME(("object 0x%" UVxf " seen as #%d", PTR2UV(sv),
-                 ntohl(tagval)));
+       /* older versions of Storable streat the tag as a signed value
+          used in an array lookup, corrupting the data structure.
+          Ensure only a newer Storable will be able to parse this tag id
+          if it's over the 2G mark.
+        */
+	if (tagval > I32_MAX) {
 
-        PUTMARK(SX_OBJECT);
-        WRITE_I32(tagval);
-        return 0;
+	    TRACEME(("object 0x%" UVxf " seen as #%" UVdf, PTR2UV(sv),
+		     tagval));
+
+	    PUTMARK(SX_LOBJECT);
+	    PUTMARK(SX_OBJECT);
+	    W64LEN(tagval);
+	    return 0;
+	}
+	else
+#endif
+	{
+	    I32 ltagval;
+
+	    ltagval = htonl((I32)tagval)
+
+	    TRACEME(("object 0x%" UVxf " seen as #%d", PTR2UV(sv),
+		     ntohl(ltagval)));
+
+	    PUTMARK(SX_OBJECT);
+	    WRITE_I32(ltagval);
+	    return 0;
+	}
     }
 
     /*
@@ -5648,6 +5691,18 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
     TRACEME(("wlen %" UVuf, len));
     switch (type) {
+    case SX_OBJECT:
+        {
+            /* not a large object, just a large index */
+            SV **svh = av_fetch(cxt->aseen, len, FALSE);
+            if (!svh)
+                CROAK(("Object #%" UVuf " should have been retrieved already",
+                      len));
+            sv = *svh;
+            TRACEME(("had retrieved #%" UVuf " at 0x%" UVxf, len, PTR2UV(sv)));
+            SvREFCNT_inc(sv);
+        }
+        break;
     case SX_LSCALAR:
         sv = get_lstring(aTHX_ cxt, len, 0, cname);
         break;
@@ -6844,7 +6899,19 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
         I32 tag;
         READ_I32(tag);
         tag = ntohl(tag);
-        svh = av_fetch(cxt->aseen, tag, FALSE);
+#ifndef HAS_U64
+        /* A 32-bit system can't have over 2**31 objects anyway */
+        if (tag < 0)
+            CROAK(("Object #%" IVdf " out of range", (IV)tag);
+#endif
+        /* Older versions of Storable on with 64-bit support on 64-bit
+           systems can produce values above the 2G boundary (or wrapped above
+           the 4G boundary, which we can't do much about), treat those as
+           unsigned.
+           This same commit stores tag ids over the 2G boundary as long tags
+           since older Storables will mis-handle them as short tags.
+         */
+        svh = av_fetch(cxt->aseen, (U32)tag, FALSE);
         if (!svh)
             CROAK(("Object #%" IVdf " should have been retrieved already",
                    (IV) tag));
