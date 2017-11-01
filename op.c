@@ -3237,19 +3237,13 @@ S_maybe_multiconcat(pTHX_ OP *o)
         aux[PERL_MULTICONCAT_IX_UTF8_LEN].size = ulen;
 
         for (n = 0; n < (nargs + 1); n++) {
-            SSize_t l, ul, i;
-            l = ul = (lens++)->size;
-            for (i = 0; i < l; i++) {
+            SSize_t i;
+            char * orig_up = up;
+            for (i = (lens++)->size; i > 0; i--) {
                 U8 c = *p++;
-                if (UTF8_IS_INVARIANT(c))
-                    *up++ = c;
-                else {
-                    *up++ = UTF8_EIGHT_BIT_HI(c);
-                    *up++ = UTF8_EIGHT_BIT_LO(c);
-                    ul++;
-                }
+                append_utf8_from_native_byte(c, (U8**)&up);
             }
-            (ulens++)->size = ul;
+            (ulens++)->size = (i < 0) ? i : up - orig_up;
         }
     }
 

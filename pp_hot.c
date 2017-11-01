@@ -969,16 +969,11 @@ PP(pp_multiconcat)
                 len = -len;
                 if (UNLIKELY(p)) {
                     /* copy plain-but-variant pv to a utf8 targ */
+                    char * end_pv = dsv_pv + len;
                     assert(dst_utf8);
-                    while (len--) {
+                    while (dsv_pv < end_pv) {
                         U8 c = (U8) *p++;
-                        if (UTF8_IS_INVARIANT(c))
-                            *dsv_pv++ = c;
-                        else {
-                            *dsv_pv++ = UTF8_EIGHT_BIT_HI(c);
-                            *dsv_pv++ = UTF8_EIGHT_BIT_LO(c);
-                            len--;
-                        }
+                        append_utf8_from_native_byte(c, (U8**)&dsv_pv);
                     }
                 }
                 else
