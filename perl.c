@@ -3958,12 +3958,20 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     return rsfp;
 }
 
-/* Mention
+/* In the days of suidperl, we refused to execute a setuid script stored on
+ * a filesystem mounted nosuid and/or noexec. This meant that we probed for the
+ * existence of the appropriate filesystem-statting function, and behaved
+ * accordingly. But even though suidperl is long gone, we must still include
+ * those probes for the benefit of modules like Filesys::Df, which expect the
+ * results of those probes to be stored in %Config; see RT#126368. So mention
+ * the relevant cpp symbols here, to ensure that metaconfig will include their
+ * probes in the generated Configure:
+ *
  * I_SYSSTATVFS	HAS_FSTATVFS
  * I_SYSMOUNT
  * I_STATFS	HAS_FSTATFS	HAS_GETFSSTAT
  * I_MNTENT	HAS_GETMNTENT	HAS_HASMNTOPT
- * here so that metaconfig picks them up. */
+ */
 
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
