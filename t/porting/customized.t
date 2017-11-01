@@ -74,10 +74,16 @@ my $data_fh;
 
 if ( $regen ) {
   open $data_fh, '>:raw', $customised or die "Can't open $customised";
+  print $data_fh <<'#';
+# Regenerate this file using:
+#     cd t
+#     ./perl -I../lib porting/customized.t --regen
+#
 }
 else {
   open $data_fh, '<:raw', $customised or die "Can't open $customised";
   while (<$data_fh>) {
+    next if /^#/;
     chomp;
     my ($module,$file,$sha) = split ' ';
     $customised{ $module }->{ $file } = $sha;
