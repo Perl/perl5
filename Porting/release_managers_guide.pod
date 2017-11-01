@@ -46,7 +46,7 @@ The checklist of a typical release cycle is as follows:
     ...time passes...
 
     a few weeks before the release, a number of steps are performed,
-	including bumping the version to 5.10.2
+        including bumping the version to 5.10.2
 
     ...a few weeks pass...
 
@@ -55,7 +55,7 @@ The checklist of a typical release cycle is as follows:
     perl-5.10.2 is released
 
     post-release actions are performed, including creating new
-	perldelta.pod
+        perldelta.pod
 
     ... the cycle continues ...
 
@@ -1279,7 +1279,7 @@ First, add a new feature bundle to F<regen/feature.pl>, initially by just
 copying the exiting entry, and bump the file's $VERSION (after the __END__
 marker); e.g.
 
-	 "5.14" => [qw(switch say state unicode_strings)],
+         "5.14" => [qw(switch say state unicode_strings)],
     +    "5.15" => [qw(switch say state unicode_strings)],
 
 Run F<regen/feature.pl> to propagate the changes to F<lib/feature.pm>.
