@@ -904,6 +904,7 @@ sub _calc_trace_wrapper
             ['.', 'main::foo', 6],
         )
     );
+    printf "c=[%s]\n", $wrapper->_contents();
     $wrapper->contents_like(
         # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
         qr/^$re_text/ms,
