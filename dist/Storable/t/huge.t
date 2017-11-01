@@ -58,7 +58,7 @@ my @cases = (
 # virtual memory. On darwin it is evtl killed.
 if ($Config{ptrsize} > 4 and !$has_too_many) {
     # needs 20-55G virtual memory, 4.6M heap and several minutes on a fast machine 
-    if ($ENV{PERL_TEST_MEMORY} >= 8) {
+    if ($ENV{PERL_TEST_MEMORY} >= 55) {
         push @cases,
           [ 'huge array',
             sub { my @x; $x[$huge] = undef; \@x } ];
@@ -72,7 +72,7 @@ if ($Config{ptrsize} > 4 and !$has_too_many) {
 # Unfortunately even older 32bit perls do allow this.
 if (!$has_too_many) {
     # needs >90G virtual mem, and is evtl. killed
-    if ($ENV{PERL_TEST_MEMORY} >= 16) {
+    if ($ENV{PERL_TEST_MEMORY} >= 96) {
         # number of keys >I32. impossible to handle with perl5, but Storable can.
         push @cases,
           ['huge hash',
