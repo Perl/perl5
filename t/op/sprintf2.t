@@ -1114,6 +1114,14 @@ like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
     }
 }
 
+# variant chars in constant format (not utf8, but change if upgraded)
+
+{
+    my $x = "\x{100}";
+    my $y = sprintf "%sa\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80", $x;
+    is $y, "\x{100}a\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80",
+        "\\x80 in format";
+}
 
 
 done_testing();

@@ -2552,7 +2552,7 @@ S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
     for (p = s; p < e; p++) {
         if (*p != '%') {
             total_len++;
-            if (UTF8_IS_INVARIANT(*p))
+            if (!UTF8_IS_INVARIANT(*p))
                 variant++;
             continue;
         }
