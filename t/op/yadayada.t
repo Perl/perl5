@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan 9;
+plan 12;
 
 my $err;
 my $err1 = "Unimplemented at $0 line ";
@@ -40,6 +40,22 @@ $@ = '';
 $err = $err1 . ( __LINE__ + 1 ) . $err2;
 eval { @transformed = map {;... } @input; };
 is $@, $err, "Disambiguation case 4";
+$@ = '';
+
+note("RT #132150: ... is a term, not an operator");
+$err = $err1 . ( __LINE__ + 1 ) . $err2;
+eval { ... + 0 };
+is $@, $err, "... + 0 parses";
+$@ = '';
+
+$err = $err1 . ( __LINE__ + 1 ) . $err2;
+eval { ... % 1 };
+is $@, $err, "... % 1 parses";
+$@ = '';
+
+$err = $err1 . ( __LINE__ + 1 ) . $err2;
+eval { ... / 1 };
+is $@, $err, "... / 1 parses";
 $@ = '';
 
 #
