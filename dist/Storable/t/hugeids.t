@@ -29,114 +29,108 @@ BEGIN {
         unless $Config{d_fork};
 }
 
-plan tests => 4;
+plan tests => 6;
 
 my $skips = $ENV{PERL_STORABLE_SKIP_ID_TEST} || '';
 
-SKIP:
-{
-    # test object ids between the 2G and 4G marks
+freeze_thaw_test
+  (
+   name => "object ids between 2G and 4G",
+   freeze => \&make_2g_data,
+   thaw => \&check_2g_data,
+   id => "2g",
+   memory => 34,
+  );
 
-    # We now output these as 64-bit ids since older Storables treat
-    # the object id incorrectly and product an incorrect output
-    # structure.
-    #
-    # This uses a lot of memory, we use child processes to ensure the
-    # memory is freed 
-    $ENV{PERL_TEST_MEMORY} >= 34
-        or skip "Not enough memory to test 2G-4G object ids", 2;
-    $skips =~ /\b2g\b/
-      and skip "You requested this test be skipped", 2;
-    # IPC::Run would be handy here
-    my $stored;
-    if (defined(my $pid = open(my $fh, "-|"))) {
-        unless ($pid) {
-	    # child
-	    open my $cfh, "|-", "gzip"
-	      or die "Cannot pipe to gzip: $!";
-	    binmode $cfh;
-	    make_2g_data($cfh);
-	    exit;
+freeze_thaw_test
+  (
+   name => "object ids over 4G",
+   freeze => \&make_4g_data,
+   thaw => \&check_4g_data,
+   id => "4g",
+   memory => 70,
+  );
+
+freeze_thaw_test
+  (
+   name => "hook object ids over 4G",
+   freeze => \&make_hook_data,
+   thaw => \&check_hook_data,
+   id => "hook4g",
+   memory => 70,
+  );
+
+sub freeze_thaw_test {
+    my %opts = @_;
+
+    my $freeze = $opts{freeze}
+      or die "Missing freeze";
+    my $thaw = $opts{thaw}
+      or die "Missing thaw";
+    my $id = $opts{id}
+      or die "Missing id";
+    my $name = $opts{name}
+      or die "Missing name";
+    my $memory = $opts{memory}
+      or die "Missing memory";
+    my $todo_thaw = $opts{todo_thaw} || "";
+
+  SKIP:
+    {
+	# IPC::Run would be handy here
+
+	$ENV{PERL_TEST_MEMORY} >= $memory
+	  or skip "Not enough memory to test $name", 2;
+	$skips =~ /\b\Q$id\E\b/
+	  and skip "You requested test $name be skipped", 2;
+	my $stored;
+	if (defined(my $pid = open(my $fh, "-|"))) {
+	    unless ($pid) {
+		# child
+		open my $cfh, "|-", "gzip"
+		  or die "Cannot pipe to gzip: $!";
+		binmode $cfh;
+		$freeze->($cfh);
+		exit;
+	    }
+	    # parent
+	    $stored = do { local $/; <$fh> };
+	    close $fh;
 	}
-	# parent
-	$stored = do { local $/; <$fh> };
-	close $fh;
-    }
-    else {
-        skip "Cannot fork", 2;
-    }
-    ok($stored, "we got 2G+ id output data");
-    my ($tfh, $tname) = tempfile();
-    print $tfh $stored;
-    close $tfh;
+	else {
+	    skip "$name: Cannot fork for freeze", 2;
+	}
+	ok($stored, "$name: we got output data")
+	  or skip "$name: skipping thaw test", 1;
+
+	my ($tfh, $tname) = tempfile();
+
+	#my $tname = "$id.store.gz";
+	#open my $tfh, ">", $tname or die;
+	#binmode $tfh;
+
+	print $tfh $stored;
+	close $tfh;
     
-    if (defined(my $pid = open(my $fh, "-|"))) {
-        unless ($pid) {
-	    # child
-	    open my $bfh, "-|", "gunzip <$tname"
-	      or die "Cannot pipe from gunzip: $!";
-	    binmode $bfh;
-	    check_2g_data($bfh);
-	    exit;
-        }
-	my $out = do { local $/; <$fh> };
-	chomp $out;
-	is($out, "OK", "check 2G+ id result");
-    }
-    else {
-        skip "Cannot fork", 1;
+	if (defined(my $pid = open(my $fh, "-|"))) {
+	    unless ($pid) {
+		# child
+		open my $bfh, "-|", "gunzip <$tname"
+		  or die "Cannot pipe from gunzip: $!";
+		binmode $bfh;
+		$thaw->($bfh);
+		exit;
+	    }
+	    my $out = do { local $/; <$fh> };
+	    chomp $out;
+	    local $TODO = $todo_thaw;
+	    is($out, "OK", "$name: check result");
+	}
+	else {
+	    skip "$name: Cannot fork for thaw", 1;
+	}
     }
 }
-
-SKIP:
-{
-    # test object ids over 4G
-
-    $ENV{PERL_TEST_MEMORY} >= 70
-        or skip "Not enough memory to test 2G-4G object ids", 2;
-    $skips =~ /\b4g\b/
-      and skip "You requested this test be skipped", 2;
-    # IPC::Run would be handy here
-    my $stored;
-    if (defined(my $pid = open(my $fh, "-|"))) {
-        unless ($pid) {
-	    # child
-	    open my $cfh, "|-", "gzip"
-	      or die "Cannot pipe to gzip: $!";
-	    binmode $cfh;
-	    make_4g_data($cfh);
-	    exit;
-	}
-	# parent
-	$stored = do { local $/; <$fh> };
-	close $fh;
-    }
-    else {
-        skip "Cannot fork", 2;
-    }
-    ok($stored, "we got 4G+ id output data");
-    my ($tfh, $tname) = tempfile();
-    print $tfh $stored;
-    close $tfh;
-    
-    if (defined(my $pid = open(my $fh, "-|"))) {
-        unless ($pid) {
-	    # child
-	    open my $bfh, "-|", "gunzip <$tname"
-	      or die "Cannot pipe from gunzip: $!";
-	    binmode $bfh;
-	    check_4g_data($bfh);
-	    exit;
-        }
-	my $out = do { local $/; <$fh> };
-	chomp $out;
-	is($out, "OK", "check 4G+ id result");
-    }
-    else {
-        skip "Cannot fork", 1;
-    }
-}
-
 
 
 sub make_2g_data {
@@ -184,5 +178,68 @@ sub check_4g_data {
     or die "First entry mismatch";
   $x->[$g4+1] == $x->[$g4+2]
     or die "4G+ entry mismatch";
+  ${$x->[$g4+1]} == 2
+    or die "Incorrect value in 4G+ entry";
   print "OK";
+}
+
+sub make_hook_data {
+    my ($fh) = @_;
+    my @x;
+    my $y = HookLargeIds->new(101, { name => "one" });
+    my $z = HookLargeIds->new(201, { name => "two" });
+    my $g4 = 2*0x8000_0000;
+    $x[0] = $y;
+    $x[$g4] = $y;
+    $x[$g4+1] = $z;
+    $x[$g4+2] = $z;
+    store_fd(\@x, $fh);
+}
+
+sub check_hook_data {
+    my ($fh) = @_;
+    my $x = retrieve_fd($fh);
+    my $g4 = 2*0x8000_0000;
+    my $y = $x->[$g4+1];
+    $y = $x->[$g4+1];
+    $y->id == 201
+      or die "Incorrect id in 4G+ object";
+    ref($y->data) eq 'HASH'
+      or die "data isn't a ref";
+    $y->data->{name} eq "two"
+      or die "data name not 'one'";
+    print "OK";
+}
+
+package HookLargeIds;
+
+sub new {
+    my $class = shift;
+    my ($id, $data) = @_;
+    return bless { id => $id, data => $data }, $class;
+}
+
+sub STORABLE_freeze {
+    #print STDERR "freeze called\n";
+    #Devel::Peek::Dump($_[0]);
+
+    return $_[0]->id, $_[0]->data;
+}
+
+sub STORABLE_thaw {
+    my ($self, $cloning, $ser, $data) = @_;
+
+    #Devel::Peek::Dump(\@_);
+    #print STDERR "thaw called\n";
+    #Devel::Peek::Dump($self);
+    $self->{id} = $ser+0;
+    $self->{data} = $data;
+}
+
+sub id {
+    $_[0]{id};
+}
+
+sub data {
+    $_[0]{data};
 }
