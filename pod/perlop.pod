@@ -2346,7 +2346,8 @@ equivalent to:
 
     split(" ", q/STRING/);
 
-the differences being that it generates a real list at compile time, and
+the differences being that it only splits on ASCII whitespace,
+generates a real list at compile time, and
 in scalar context it returns the last element in the list.  So
 this expression:
 
