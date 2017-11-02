@@ -12059,10 +12059,11 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     if (! endbrace) { /* no trailing brace */
         vFAIL2("Missing right brace on \\%c{}", 'N');
     }
-    else if(!(endbrace == RExC_parse		/* nothing between the {} */
-              || (endbrace - RExC_parse >= 2	/* U+ (bad hex is checked... */
-                  && strBEGINs(RExC_parse, "U+")))) /* ... below for a better
-                                                     error msg) */
+    else if (!(   endbrace == RExC_parse	/* nothing between the {} */
+               || memBEGINs(RExC_parse,   /* U+ (bad hex is checked below
+                                                   for a  better error msg) */
+                                  (STRLEN) (RExC_end - RExC_parse),
+                                 "U+")))
     {
 	RExC_parse = endbrace;	/* position msg's '<--HERE' */
 	vFAIL("\\N{NAME} must be resolved by the lexer");

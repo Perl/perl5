@@ -4877,8 +4877,11 @@ Perl_yylex(pTHX)
 	    }
 	    else {
 		I32 tmp;
-                if (strBEGINs(s, "L\\u") || strBEGINs(s, "U\\l"))
+                if (   memBEGINs(s, (STRLEN) (PL_bufend - s), "L\\u")
+                    || memBEGINs(s, (STRLEN) (PL_bufend - s), "U\\l"))
+                {
                     tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
+                }
 		if ((*s == 'L' || *s == 'U' || *s == 'F')
                     && (strpbrk(PL_lex_casestack, "LUF")))
                 {
@@ -5643,7 +5646,7 @@ Perl_yylex(pTHX)
 	    while (s < PL_bufend && SPACE_OR_TAB(*s))
 		s++;
 
-	    if (strBEGINs(s,"=>")) {
+	    if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=>")) {
 		s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
 		DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
 		OPERATOR('-');		/* unary minus */
@@ -6254,7 +6257,7 @@ Perl_yylex(pTHX)
 			PL_expect = XTERM;
 			break;
 		    }
-		    if (strBEGINs(s, "sub")) {
+		    if (memBEGINs(s, (STRLEN) (PL_bufend - s), "sub")) {
                         PL_bufptr = s;
 			d = s + 3;
 			d = skipspace(d);
@@ -6390,7 +6393,9 @@ Perl_yylex(pTHX)
 	{
 	    const char tmp = *s++;
 	    if (tmp == '=') {
-	        if ((s == PL_linestart+2 || s[-3] == '\n') && strBEGINs(s, "=====")) {
+                if (   (s == PL_linestart+2 || s[-3] == '\n')
+                    && memBEGINs(s, (STRLEN) (PL_bufend - s), "====="))
+                {
 	            s = vcs_conflict_marker(s + 5);
 	            goto retry;
 	        }
@@ -6510,7 +6515,9 @@ Perl_yylex(pTHX)
 	    if (s[1] != '<' && !strchr(s,'>'))
 		check_uni();
 	    if (s[1] == '<' && s[2] != '>') {
-	        if ((s == PL_linestart || s[-1] == '\n') && strBEGINs(s+2, "<<<<<")) {
+                if (   (s == PL_linestart || s[-1] == '\n')
+                    && memBEGINs(s+2, (STRLEN) (PL_bufend - (s+2)), "<<<<<"))
+                {
 	            s = vcs_conflict_marker(s + 7);
 	            goto retry;
 	        }
@@ -6525,7 +6532,9 @@ Perl_yylex(pTHX)
 	{
 	    char tmp = *s++;
 	    if (tmp == '<') {
-	        if ((s == PL_linestart+2 || s[-3] == '\n') && strBEGINs(s, "<<<<<")) {
+                if (   (s == PL_linestart+2 || s[-3] == '\n')
+                    && memBEGINs(s, (STRLEN) (PL_bufend - s), "<<<<<"))
+                {
                     s = vcs_conflict_marker(s + 5);
 	            goto retry;
 	        }
@@ -6569,7 +6578,9 @@ Perl_yylex(pTHX)
 	{
 	    const char tmp = *s++;
 	    if (tmp == '>') {
-	        if ((s == PL_linestart+2 || s[-3] == '\n') && strBEGINs(s, ">>>>>")) {
+	        if (   (s == PL_linestart+2 || s[-3] == '\n')
+                    && memBEGINs(s, (STRLEN) (PL_bufend - s), ">>>>>"))
+                {
 	            s = vcs_conflict_marker(s + 5);
 	            goto retry;
 	        }
@@ -9369,7 +9380,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             || isDIGIT_A((U8)s[1])
             || s[1] == '$'
             || s[1] == '{'
-            || strBEGINs(s+1,"::")) )
+            || memBEGINs(s+1, (STRLEN) (PL_bufend - (s+1)), "::")) )
     {
         /* Dereferencing a value in a scalar variable.
            The alternatives are different syntaxes for a scalar variable.
@@ -11724,12 +11735,11 @@ S_swallow_bom(pTHX_ U8 *s)
 	}
 	break;
     case BOM_UTF8_FIRST_BYTE: {
-        const STRLEN len = sizeof(BOM_UTF8_TAIL) - 1; /* Exclude trailing NUL */
-        if (slen > len && memEQ(s+1, BOM_UTF8_TAIL, len)) {
+        if (memBEGINs(s+1, slen - 1, BOM_UTF8_TAIL)) {
 #ifdef DEBUGGING
             if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
 #endif
-            s += len + 1;                      /* UTF-8 */
+            s += sizeof(BOM_UTF8) - 1;                     /* UTF-8 */
         }
         break;
     }
