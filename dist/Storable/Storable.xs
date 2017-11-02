@@ -1167,6 +1167,19 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
         }                                                       \
     } STMT_END
 
+#define READ_U64(x)                                                       \
+    STMT_START {                                                          \
+	ASSERT(sizeof(x) == 8, ("R64LEN reading a U64"));                 \
+	if (cxt->netorder) {                                              \
+	    U32 buf[2];                                                   \
+	    READ((void *)buf, sizeof(buf));                               \
+	    (x) = ((UV)ntohl(buf[0]) << 32) + buf[1];			  \
+	}                                                                 \
+	else {                                                            \
+	    READ(&(x), sizeof(x));                                        \
+	}                                                                 \
+    } STMT_END
+
 /*
  * SEEN() is used at retrieve time, to remember where object 'y', bearing a
  * given tag 'tagnum', has been retrieved. Next time we see an SX_OBJECT marker,
@@ -3455,6 +3468,9 @@ static int store_hook(
     int clone = cxt->optype & ST_CLONE;
     char mtype = '\0';		/* for blessed ref to tied structures */
     unsigned char eflags = '\0'; /* used when object type is SHT_EXTRA */
+#ifdef HAS_U64
+    int need_large_oids = 0;
+#endif
 
     TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), (int)cxt->tagnum));
 
@@ -3702,6 +3718,10 @@ static int store_hook(
         ary[i] = tag;
         TRACEME(("listed object %d at 0x%" UVxf " is tag #%" UVuf,
                  i-1, PTR2UV(xsv), PTR2UV(tag)));
+#ifdef HAS_U64
+       if ((U32)PTR2TAG(tag) != PTR2TAG(tag))
+           need_large_oids = 1;
+#endif
     }
 
     /*
@@ -3736,6 +3756,10 @@ static int store_hook(
         flags |= SHF_HAS_LIST;
     if (count > (LG_SCALAR + 1))
         flags |= SHF_LARGE_LISTLEN;
+#ifdef HAS_U64
+    if (need_large_oids)
+        flags |= SHF_LARGE_LISTLEN;
+#endif
 
     /*
      * We're ready to emit either serialized form:
@@ -3791,8 +3815,14 @@ static int store_hook(
     /* [<len3> <object-IDs>] */
     if (flags & SHF_HAS_LIST) {
         int len3 = count - 1;
-        if (flags & SHF_LARGE_LISTLEN)
+        if (flags & SHF_LARGE_LISTLEN) {
+#ifdef HAS_U64
+  	    int tlen3 = need_large_oids ? -len3 : len3;
+	    WLEN(tlen3);
+#else
             WLEN(len3);
+#endif
+	}
         else {
             unsigned char clen = (unsigned char) len3;
             PUTMARK(clen);
@@ -3801,12 +3831,24 @@ static int store_hook(
         /*
          * NOTA BENE, for 64-bit machines: the ary[i] below does not yield a
          * real pointer, rather a tag number, well under the 32-bit limit.
+         * Which is wrong... if we have more than 2**32 SVs we can get ids over
+         * the 32-bit limit.
          */
 
         for (i = 1; i < count; i++) {
-            I32 tagval = htonl(LOW_32BITS(ary[i]));
-            WRITE_I32(tagval);
-            TRACEME(("object %d, tag #%d", i-1, ntohl(tagval)));
+#ifdef HAS_U64
+            if (need_large_oids) {
+                ntag_t tag = PTR2TAG(ary[i]);
+                W64LEN(tag);
+                TRACEME(("object %d, tag #%" UVdf, i-1, (UV)tag));
+            }
+            else
+#endif
+            {
+                I32 tagval = htonl(LOW_32BITS(ary[i]));
+                WRITE_I32(tagval);
+                TRACEME(("object %d, tag #%d", i-1, ntohl(tagval)));
+            }
         }
     }
 
@@ -4636,6 +4678,9 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
     int clone = cxt->optype & ST_CLONE;
     char mtype = '\0';
     unsigned int extra_type = 0;
+#ifdef HAS_U64
+    int has_large_oids = 0;
+#endif
 
     PERL_UNUSED_ARG(cname);
     TRACEME(("retrieve_hook (#%d)", (int)cxt->tagnum));
@@ -4811,9 +4856,19 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
      */
 
     if (flags & SHF_HAS_LIST) {
-        if (flags & SHF_LARGE_LISTLEN)
+        if (flags & SHF_LARGE_LISTLEN) {
             RLEN(len3);
-        else
+	    if (len3 < 0) {
+#ifdef HAS_U64
+	        ++has_large_oids;
+		len3 = -len3;
+#else
+		CROAK(("Large object ids in hook data not supported on 32-bit platforms"));
+#endif
+	        
+	    }
+	}
+	else
             GETMARK(len3);
         if (len3) {
             av = newAV();
@@ -4838,12 +4893,24 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
         SV **ary = AvARRAY(av);
         int i;
         for (i = 1; i <= len3; i++) {	/* We leave [0] alone */
-            I32 tag;
+            ntag_t tag;
             SV **svh;
             SV *xsv;
 
-            READ_I32(tag);
-            tag = ntohl(tag);
+#ifdef HAS_U64
+	    if (has_large_oids) {
+		READ_U64(tag);
+	    }
+	    else {
+		U32 tmp;
+		READ_I32(tmp);
+		tag = ntohl(tmp);
+	    }
+#else
+	    READ_I32(tag);
+	    tag = ntohl(tag);
+#endif
+
             svh = av_fetch(cxt->aseen, tag, FALSE);
             if (!svh) {
                 if (tag == cxt->where_is_undef) {
