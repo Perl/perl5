@@ -2952,19 +2952,24 @@ PP(pp_stat)
     }
     else {
         const char *file;
+        const char *temp;
+        STRLEN len;
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
             io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
             goto do_fstat_have_io; 
         }
-        
 	SvTAINTED_off(PL_statname); /* previous tainting irrelevant */
-	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
+        temp = SvPV_nomg_const(sv, len);
+	sv_setpv(PL_statname, temp);
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
         file = SvPV_nolen_const(PL_statname);
-	if (PL_op->op_type == OP_LSTAT)
+        if (!IS_SAFE_PATHNAME(temp, len, OP_NAME(PL_op))) {
+            PL_laststatval = -1;
+        }
+	else if (PL_op->op_type == OP_LSTAT)
 	    PL_laststatval = PerlLIO_lstat(file, &PL_statcache);
 	else
 	    PL_laststatval = PerlLIO_stat(file, &PL_statcache);
@@ -3198,8 +3203,12 @@ PP(pp_ftrread)
 
     if (use_access) {
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
-	const char *name = SvPV_nolen(*PL_stack_sp);
-	if (effective) {
+        STRLEN len;
+	const char *name = SvPV(*PL_stack_sp, len);
+        if (!IS_SAFE_PATHNAME(name, len, OP_NAME(PL_op))) {
+            result = -1;
+        }
+	else if (effective) {
 #  ifdef PERL_EFF_ACCESS
 	    result = PERL_EFF_ACCESS(name, access_mode);
 #  else
@@ -3524,10 +3533,18 @@ PP(pp_fttext)
     }
     else {
         const char *file;
+        const char *temp;
+        STRLEN temp_len;
         int fd; 
 
         assert(sv);
-	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
+        temp = SvPV_nomg_const(sv, temp_len);
+	sv_setpv(PL_statname, temp);
+        if (!IS_SAFE_PATHNAME(temp, temp_len, OP_NAME(PL_op))) {
+            PL_laststatval = -1;
+            PL_laststype = OP_STAT;
+            FT_RETURNUNDEF;
+        }
       really_filename:
         file = SvPVX_const(PL_statname);
 	PL_statgv = NULL;

@@ -25,7 +25,7 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
-plan tests => 108;
+plan tests => 110;
 
 my $Perl = which_perl();
 
@@ -624,6 +624,16 @@ SKIP:
       unless $Errno_loaded;
     is $error, &Errno::ENOENT,
       'stat on an array of valid paths should return ENOENT';
+}
+
+# [perl #131895] stat() doesn't fail on filenames containing \0 / NUL
+ok !stat("TEST\0-"), 'stat on filename with \0';
+SKIP: {
+    my $link = "TEST.symlink.$$";
+    my $can_symlink = eval { symlink "TEST", $link };
+    skip "cannot symlink", 1 unless $can_symlink;
+    ok !lstat("$link\0-"), 'lstat on filename with \0';
+    unlink $link;
 }
 
 END {

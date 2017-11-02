@@ -444,6 +444,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
+C<stat()>, C<lstat()>, and file test operators now fail if given a
+filename containing a nul character, in the same way that C<open()>
+already fails.
+
+=item *
+
 The in-place reverse optimisation now correctly strengthens weak
 references using the L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
 API function.

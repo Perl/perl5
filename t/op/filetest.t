@@ -9,7 +9,7 @@ BEGIN {
     set_up_inc(qw '../lib ../cpan/Perl-OSType/lib');
 }
 
-plan(tests => 53 + 27*14);
+plan(tests => 57 + 27*14);
 
 if ($^O =~ /MSWin32|cygwin|msys/ && !is_miniperl) {
   require Win32; # for IsAdminUser()
@@ -393,3 +393,11 @@ SKIP: {
     is $failed_stat2, $failed_stat1,
 	'failed -r($gv_with_io_but_no_fp) with and w/out fatal warnings';
 } 
+
+{
+    # [perl #131895] stat() doesn't fail on filenames containing \0 / NUL
+    ok(!-T "TEST\0-", '-T on name with \0');
+    ok(!-B "TEST\0-", '-B on name with \0');
+    ok(!-f "TEST\0-", '-f on name with \0');
+    ok(!-r "TEST\0-", '-r on name with \0');
+}

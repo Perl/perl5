@@ -1808,7 +1808,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	return PL_laststatval;
     else {
 	SV* const sv = TOPs;
-	const char *s;
+	const char *s, *d;
 	STRLEN len;
 	if ((gv = MAYBE_DEREF_GV_flags(sv,flags))) {
 	    goto do_fstat;
@@ -1822,9 +1822,14 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	s = SvPV_flags_const(sv, len, flags);
 	PL_statgv = NULL;
 	sv_setpvn(PL_statname, s, len);
-	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
+	d = SvPVX_const(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
-	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
+        if (!IS_SAFE_PATHNAME(s, len, OP_NAME(PL_op))) {
+            PL_laststatval = -1;
+        }
+        else {
+            PL_laststatval = PerlLIO_stat(d, &PL_statcache);
+        }
 	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && should_warn_nl(s)) {
             GCC_DIAG_IGNORE(-Wformat-nonliteral); /* PL_warn_nl is constant */
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
@@ -1841,6 +1846,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     static const char* const no_prev_lstat = "The stat preceding -l _ wasn't an lstat";
     dSP;
     const char *file;
+    STRLEN len;
     SV* const sv = TOPs;
     bool isio = FALSE;
     if (PL_op->op_flags & OPf_REF) {
@@ -1884,9 +1890,14 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
                               HEKfARG(GvENAME_HEK((const GV *)
                                           (SvROK(sv) ? SvRV(sv) : sv))));
     }
-    file = SvPV_flags_const_nolen(sv, flags);
+    file = SvPV_flags_const(sv, len, flags);
     sv_setpv(PL_statname,file);
-    PL_laststatval = PerlLIO_lstat(file,&PL_statcache);
+    if (!IS_SAFE_PATHNAME(file, len, OP_NAME(PL_op))) {
+        PL_laststatval = -1;
+    }
+    else {
+        PL_laststatval = PerlLIO_lstat(file,&PL_statcache);
+    }
     if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
         GCC_DIAG_IGNORE(-Wformat-nonliteral); /* PL_warn_nl is constant */
         Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "lstat");
