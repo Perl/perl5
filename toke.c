@@ -1734,6 +1734,8 @@ S_incline(pTHX_ const char *s, const char *end)
 
     PERL_ARGS_ASSERT_INCLINE;
 
+    assert(end >= s);
+
     COPLINE_INC_WITH_HERELINES;
     if (!PL_rsfp && !PL_parser->filtered && PL_lex_state == LEX_NORMAL
      && s+1 == PL_bufend && *s == ';') {
@@ -1745,8 +1747,8 @@ S_incline(pTHX_ const char *s, const char *end)
 	return;
     while (SPACE_OR_TAB(*s))
 	s++;
-    if (strBEGINs(s, "line"))
-	s += 4;
+    if (memBEGINs(s, (STRLEN) (end - s), "line"))
+	s += sizeof("line") - 1;
     else
 	return;
     if (SPACE_OR_TAB(*s))
