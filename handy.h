@@ -476,8 +476,6 @@ Returns zero if non-equal, or non-zero if equal.
 #define strnNE(s1,s2,l) (strncmp(s1,s2,l) != 0)
 #define strnEQ(s1,s2,l) (strncmp(s1,s2,l) == 0)
 
-#define strBEGINs(s1,s2) (strncmp(s1,"" s2 "", sizeof(s2)-1) == 0)
-
 #define memNE(s1,s2,l) (memcmp(s1,s2,l) != 0)
 #define memEQ(s1,s2,l) (memcmp(s1,s2,l) == 0)
 
@@ -485,6 +483,11 @@ Returns zero if non-equal, or non-zero if equal.
 #define memEQs(s1, l, s2) \
         (((sizeof(s2)-1) == (l)) && memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
 #define memNEs(s1, l, s2) (! memEQs(s1, l, s2))
+
+/* Keep these private until we decide it was a good idea */
+#if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_EXT_POSIX)
+
+#define strBEGINs(s1,s2) (strncmp(s1,"" s2 "", sizeof(s2)-1) == 0)
 
 #define memBEGINs(s1, l, s2)                                                \
             (   (l) >= sizeof(s2) - 1                                       \
@@ -498,6 +501,7 @@ Returns zero if non-equal, or non-zero if equal.
 #define memENDPs(s1, l, s2)                                                 \
             (   (l) > sizeof(s2)                                            \
              && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
+#endif  /* End of making macros private */
 
 #define memLT(s1,s2,l) (memcmp(s1,s2,l) < 0)
 #define memLE(s1,s2,l) (memcmp(s1,s2,l) <= 0)
