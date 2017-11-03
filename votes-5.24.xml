@@ -40,6 +40,8 @@ Correct: As noted on the ticket, it was listed here in the hope that it could be
 See also #130080
 <commit votes="tonyc" id="622584734f799751a284558aaebad21acd3270bf" ticket="128967" desc="Inconsistency between doc and code for chown using negative argument: -1"/>
 
+<commit votes="jhi" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
