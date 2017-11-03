@@ -463,6 +463,51 @@ are not equal.  The C<len> parameter indicates the number of bytes to compare.
 Returns zero if non-equal, or non-zero if equal.
 
 =cut
+
+New macros should use the following conventions for their names (which are
+based on the underlying C library functions):
+
+  (mem | str n? ) (EQ | NE | LT | GT | GE | (( BEGIN | END ) P? )) l? s?
+
+  Each has two main parameters, string-like operands that are compared
+  against each other, as specified by the macro name.  Some macros may
+  additionally have one or potentially even two length parameters.  If a length
+  parameter applies to both string parameters, it will be positioned third;
+  otherwise any length parameter immediately follows the string parameter it
+  applies to.
+
+  If the prefix to the name is 'str', the string parameter is a pointer to a C
+  language string.  Such a string does not contain embedded NUL bytes; its
+  length may be unknown, but can be calculated by C<strlen()>, since it is
+  terminated by a NUL, which isn't included in its length.
+
+  The optional 'n' following 'str' means that that there is a third parameter,
+  giving the maximum number of bytes to look at in each string.  Even if both
+  strings are longer than the length parameter, those extra bytes will be
+  unexamined.
+
+  The 's' suffix means that the 2nd byte string parameter is a literal C
+  double-quoted string.  Its length will automatically be calculated by the
+  macro, so no length parameter will ever be needed for it.
+
+  If the prefix is 'mem', the string parameters don't have to be C strings;
+  they may contain embedded NUL bytes, do not necessarily have a terminating
+  NUL, and their lengths can be known only through other means, which in
+  practice are additional parameter(s) passed to the function.  All 'mem'
+  functions have at least one length parameter.  Barring any 'l' or 's' suffix,
+  there is a single length parameter, in position 3, which applies to both
+  string parameters.  The 's' suffix means, as described above, that the 2nd
+  string is a literal double-quoted C string (hence its length is calculated by
+  the macro, and the length parameter to the function applies just to the first
+  string parameter, and hence is positioned just after it).  An 'l' suffix
+  means that the 2nd string parameter has its own length parameter, and the
+  signature will look like memFOOl(s1, l1, s2, l2).
+
+  BEGIN (and END) are for testing if the 2nd string is an initial (or final)
+  substring  of the 1st string.  'P' if present indicates that the substring
+  must be a "proper" one in tha mathematical sense that the first one must be
+  strictly larger than the 2nd.
+
 */
 
 
