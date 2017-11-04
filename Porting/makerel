@@ -34,8 +34,8 @@ usage: $0 [ -r rootdir ] [-s suffix ] [ -b ] [ -n ]
     -s suffix    suffix to append to to the perl-x.y.z dir and tarball name
 		 defaults to the concatenation of the local_patches entry
 		 in patchlevel.h (or blank, if none)
-    -b           make a .bz2 file in addtion to a .gz file
-    -x           make a .xz file in addtion to a .gz file
+    -b           make a .bz2 file in addition to a .gz file
+    -x           make a .xz file in addition to a .gz file
     -n           do not make any tarballs, just the directory
 EOF
 
