@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5326;
+plan tests => 5331;
 
 use Scalar::Util qw(tainted);
 
@@ -2994,4 +2994,43 @@ package Concat {
     cc '$r.=sprintf("%s%s%s",$a,$B,$c)', 'raBc', 0, '("",[B],u,)';
     cc '$R.=sprintf("%s%s%s",$a,$B,$c)', 'RaBc', 1, '("",[B],u,)(.=,[R],aBc,u)'
                                                    .'("",[RaBc],u,)';
+}
+
+# RT #132385
+# The first arg of a reversed concat shouldn't be stringified:
+#      $left . $right
+#  where $right is overloaded, should invoke
+#      concat($right, $left, 1)
+#  rather than
+#      concat($right, "$left", 1)
+
+package RT132385 {
+
+    use constant C => [ "constref" ];
+
+    use overload '.' => sub {
+                            my ($r, $l, $rev) = @_;
+                            die "expected reverse\n" unless $rev;
+                            my $res = ref $l ? $l->[0] : "$l";
+                            $res .= "-" . $r->[0];
+                            $res;
+                        }
+    ;
+
+    my $r1 = [ "ref1" ];
+    my $r2 = [ "ref2" ];
+    my $s1 =   "str1";
+
+    my $o = bless [ "obj" ];
+
+    # try variations that will call either pp_concat or pp_multiconcat,
+    # with the ref as the first or a later arg
+
+    ::is($r1.$o,        "ref1-obj",             "RT #132385 r1.o");
+    ::is($r1.$o.$s1 ,   "ref1-objstr1",         "RT #132385 r1.o.s1");
+    ::is("const".$o.$s1 ,"const-objstr1",       "RT #132385 const.o.s1");
+    ::is(C.$o.$s1       ,"constref-objstr1",    "RT #132385 C.o.s1");
+
+    ::like($r1.$r2.$o,   qr/^ARRAY\(0x\w+\)ARRAY\(0x\w+\)-obj/,
+                                                "RT #132385 r1.r2.o");
 }
