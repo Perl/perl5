@@ -159,7 +159,8 @@ sub export_fail { shift; $Verbose = shift if $_[0] eq 'verbose'; @_ }
 
 sub _cgc {
     no strict 'refs';
-    return defined &{"CORE::GLOBAL::caller"} ? \&{"CORE::GLOBAL::caller"} : undef;
+    return \&{"CORE::GLOBAL::caller"} if defined &{"CORE::GLOBAL::caller"};
+    return;
 }
 
 sub longmess {
@@ -279,11 +280,11 @@ sub caller_info {
 # Transform an argument to a function into a string.
 our $in_recurse;
 sub format_arg {
-    my ($arg) = @_;
+    my $arg = shift;
 
     if ( ref($arg) ) {
          # legitimate, let's not leak it.
-        if (!$in_recurse && UNIVERSAL::isa( $arg, 'UNIVERSAL' ) &&
+        if (!$in_recurse &&
 	    do {
                 local $@;
 	        local $in_recurse = 1;
@@ -331,15 +332,14 @@ sub format_arg {
 	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
 		unless is_safe_printable_codepoint($o);
 	}
-      downgrade($arg, 1);
-    } elsif ($arg =~ tr{"\\@$}{} || $arg =~ tr/ !"\$\%#'()*+,\-.\/0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]^_`abcdefghijklmnopqrstuvwxyz\{|}~//c) {
+    } else {
 	$arg =~ s/([\"\\\$\@])/\\$1/g;
         # This is all the ASCII printables spelled-out.  It is portable to all
         # Perl versions and platforms (such as EBCDIC).  There are other more
         # compact ways to do this, but may not work everywhere every version.
         $arg =~ s/([^ !"#\$\%\&'()*+,\-.\/0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]^_`abcdefghijklmnopqrstuvwxyz\{|}~])/sprintf("\\x{%x}",ord($1))/eg;
-        downgrade($arg, 1);
     }
+    downgrade($arg, 1);
     return "\"".$arg."\"".$suffix;
 }
 
@@ -383,7 +383,7 @@ sub get_status {
 # Takes the info from caller() and figures out the name of
 # the sub/require/eval
 sub get_subname {
-    my ($info) = @_;
+    my $info = shift;
     if ( defined( $info->{evaltext} ) ) {
         my $eval = $info->{evaltext};
         if ( $info->{is_require} ) {
@@ -397,7 +397,7 @@ sub get_subname {
 
     # this can happen on older perls when the sub (or the stash containing it)
     # has been deleted
-    elsif ( !defined( $info->{sub} ) ) {
+    if ( !defined( $info->{sub} ) ) {
         return '__ANON__::__ANON__';
     }
 
@@ -409,9 +409,9 @@ sub get_subname {
 sub long_error_loc {
     my $i;
     my $lvl = $CarpLevel;
-    my $cgc = _cgc();
     {
         ++$i;
+        my $cgc = _cgc();
         my @caller = $cgc ? $cgc->($i) : caller($i);
         my $pkg = $caller[0];
         unless ( defined($pkg) ) {
@@ -508,8 +508,8 @@ sub short_error_loc {
     my $cache = {};
     my $i     = 1;
     my $lvl   = $CarpLevel;
-    my $cgc = _cgc();
     {
+        my $cgc = _cgc();
         my $called = $cgc ? $cgc->($i) : caller($i);
         $i++;
         my $caller = $cgc ? $cgc->($i) : caller($i);
