@@ -155,7 +155,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Carp> has been upgraded from version 1.43 to 1.44.
+
+If a package on the call stack contains a constant named C<ISA>, Carp no
+longer throws a "Not a GLOB reference" error.
 
 =back
 
