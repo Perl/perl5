@@ -8341,7 +8341,7 @@ If more than one variable is listed, the list must be placed in
 parentheses.  With a parenthesised list, L<C<undef>|/undef EXPR> can be
 used as a
 dummy placeholder.  However, since initialization of state variables in
-list context is currently not possible this would serve no purpose.
+such lists is currently not possible this would serve no purpose.
 
 L<C<state>|/state VARLIST> is available only if the
 L<C<"state"> feature|feature/The 'state' feature> is enabled or if it is

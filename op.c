@@ -7599,6 +7599,33 @@ S_assignment_type(pTHX_ const OP *o)
     return ret;
 }
 
+static OP *
+S_newONCEOP(pTHX_ OP *initop, OP *padop)
+{
+    const PADOFFSET target = padop->op_targ;
+    OP *const other = newOP(OP_PADSV,
+			    padop->op_flags
+			    | ((padop->op_private & ~OPpLVAL_INTRO) << 8));
+    OP *const first = newOP(OP_NULL, 0);
+    OP *const nullop = newCONDOP(0, first, initop, other);
+    /* XXX targlex disabled for now; see ticket #124160
+	newCONDOP(0, first, S_maybe_targlex(aTHX_ initop), other);
+     */
+    OP *const condop = first->op_next;
+
+    OpTYPE_set(condop, OP_ONCE);
+    other->op_targ = target;
+    nullop->op_flags |= OPf_WANT_SCALAR;
+
+    /* Store the initializedness of state vars in a separate
+       pad entry.  */
+    condop->op_targ =
+      pad_add_name_pvn("$",1,padadd_NO_DUP_CHECK|padadd_STATE,0,0);
+    /* hijacking PADSTALE for uninitialized state variables */
+    SvPADSTALE_on(PAD_SVl(condop->op_targ));
+
+    return nullop;
+}
 
 /*
 =for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
@@ -7643,8 +7670,9 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     }
 
     if ((assign_type = assignment_type(left)) == ASSIGN_LIST) {
+	OP *state_var_op = NULL;
 	static const char no_list_state[] = "Initialization of state variables"
-	    " in list context currently forbidden";
+	    " in list currently forbidden";
 	OP *curop;
 
 	if (left->op_type == OP_ASLICE || left->op_type == OP_HSLICE)
@@ -7658,16 +7686,29 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
 	if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
 	{
-	    OP* lop = ((LISTOP*)left)->op_first;
-	    while (lop) {
-		if ((lop->op_type == OP_PADSV ||
-		     lop->op_type == OP_PADAV ||
-		     lop->op_type == OP_PADHV ||
-		     lop->op_type == OP_PADANY)
-		  && (lop->op_private & OPpPAD_STATE)
-                )
-                    yyerror(no_list_state);
-		lop = OpSIBLING(lop);
+	    OP *lop = ((LISTOP*)left)->op_first, *vop, *eop;
+	    if (!(left->op_flags & OPf_PARENS) &&
+		    lop->op_type == OP_PUSHMARK &&
+		    (vop = OpSIBLING(lop)) &&
+		    (vop->op_type == OP_PADAV || vop->op_type == OP_PADHV) &&
+		    !(vop->op_flags & OPf_PARENS) &&
+		    (vop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) ==
+			(OPpLVAL_INTRO|OPpPAD_STATE) &&
+		    (eop = OpSIBLING(vop)) &&
+		    eop->op_type == OP_ENTERSUB &&
+		    !OpHAS_SIBLING(eop)) {
+		state_var_op = vop;
+	    } else {
+		while (lop) {
+		    if ((lop->op_type == OP_PADSV ||
+			 lop->op_type == OP_PADAV ||
+			 lop->op_type == OP_PADHV ||
+			 lop->op_type == OP_PADANY)
+		      && (lop->op_private & OPpPAD_STATE)
+		    )
+			yyerror(no_list_state);
+		    lop = OpSIBLING(lop);
+		}
 	    }
 	}
 	else if (  (left->op_private & OPpLVAL_INTRO)
@@ -7687,7 +7728,10 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		   state (%a) = ...
 		   (state %a) = ...
 		*/
-		yyerror(no_list_state);
+                if (left->op_flags & OPf_PARENS)
+		    yyerror(no_list_state);
+		else
+		    state_var_op = left;
 	}
 
         /* optimise @a = split(...) into:
@@ -7779,6 +7823,9 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                 }
             }
 	}
+
+	if (state_var_op)
+	    o = S_newONCEOP(aTHX_ o, state_var_op);
 	return o;
     }
     if (assign_type == ASSIGN_REF)
@@ -11724,30 +11771,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    )
 		&& (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
 		    == (OPpLVAL_INTRO|OPpPAD_STATE)) {
-	    const PADOFFSET target = kkid->op_targ;
-	    OP *const other = newOP(OP_PADSV,
-				    kkid->op_flags
-				    | ((kkid->op_private & ~OPpLVAL_INTRO) << 8));
-	    OP *const first = newOP(OP_NULL, 0);
-	    OP *const nullop =
-		newCONDOP(0, first, o, other);
-	    /* XXX targlex disabled for now; see ticket #124160
-		newCONDOP(0, first, S_maybe_targlex(aTHX_ o), other);
-	     */
-	    OP *const condop = first->op_next;
-
-            OpTYPE_set(condop, OP_ONCE);
-	    other->op_targ = target;
-	    nullop->op_flags |= OPf_WANT_SCALAR;
-
-	    /* Store the initializedness of state vars in a separate
-	       pad entry.  */
-	    condop->op_targ =
-	      pad_add_name_pvn("$",1,padadd_NO_DUP_CHECK|padadd_STATE,0,0);
-	    /* hijacking PADSTALE for uninitialized state variables */
-	    SvPADSTALE_on(PAD_SVl(condop->op_targ));
-
-	    return nullop;
+	    return S_newONCEOP(aTHX_ o, kkid);
 	}
     }
     return S_maybe_targlex(aTHX_ o);

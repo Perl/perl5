@@ -736,10 +736,11 @@ And this example uses anonymous subroutines to create separate counters:
 Also, since C<$x> is lexical, it can't be reached or modified by any Perl
 code outside.
 
-When combined with variable declaration, simple scalar assignment to C<state>
+When combined with variable declaration, simple assignment to C<state>
 variables (as in C<state $x = 42>) is executed only the first time.  When such
 statements are evaluated subsequent times, the assignment is ignored.  The
-behavior of this sort of assignment to non-scalar variables is undefined.
+behavior of assignment to C<state> declarations where the left hand side
+of the assignment involves any parentheses is currently undefined.
 
 =head3 Persistent variables with closures
 

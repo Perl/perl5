@@ -152,13 +152,13 @@ Execution of - aborted due to compilation errors.
 # NAME ($_, state $x) = ...
 ($_, CORE::state $x) = ();
 EXPECT
-Initialization of state variables in list context currently forbidden at - line 1, near ");"
+Initialization of state variables in list currently forbidden at - line 1, near ");"
 Execution of - aborted due to compilation errors.
 ########
 # NAME my $y; ($y, state $x) = ...
 my $y; ($y, CORE::state $x) = ();
 EXPECT
-Initialization of state variables in list context currently forbidden at - line 1, near ");"
+Initialization of state variables in list currently forbidden at - line 1, near ");"
 Execution of - aborted due to compilation errors.
 ########
 # NAME delete BAD

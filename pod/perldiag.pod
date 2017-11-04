@@ -2827,12 +2827,12 @@ for instance C</(?{ s!!! })/>, which resulted in re-executing
 the same pattern, which is an infinite loop which is broken by
 throwing an exception.
 
-=item Initialization of state variables in list context currently forbidden
+=item Initialization of state variables in list currently forbidden
 
-(F) C<state> only permits initializing a single scalar variable, in scalar
-context.  So C<state $a = 42> is allowed, but not C<state ($a) = 42>.  To apply
-state semantics to a hash or array, store a hash or array reference in a
-scalar variable.
+(F) C<state> only permits initializing a single variable, specified
+without parentheses.  So C<state $a = 42> and C<state @a = qw(a b c)> are
+allowed, but not C<state ($a) = 42> or C<(state $a) = 42>.  To initialize
+more than one C<state> variable, initialize them one at a time.
 
 =item %%s[%s] in scalar context better written as $%s[%s]
 

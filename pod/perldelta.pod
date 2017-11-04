@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Initialisation of aggregate state variables
+
+A persistent lexical array or hash variable can now be initialized,
+by an expression such as C<state @a = qw(x y z)>.  Initialization of a
+list of persistent lexical variables is still not possible.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -254,6 +260,13 @@ XXX L<message|perldiag/"message">
 XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
+
+=item *
+
+The diagnostic C<Initialization of state variables in list context
+currently forbidden> has changed to C<Initialization of state variables
+in list currently forbidden>, because list-context initialization of
+single aggregate state variables is now permitted.
 
 =item *
 
