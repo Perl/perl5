@@ -51,7 +51,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.44';
+$VERSION = '1.45';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -3118,7 +3118,7 @@ sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
 
 sub pp_smartmatch {
     my ($self, $op, $cx) = @_;
-    if ($op->flags & OPf_SPECIAL) {
+    if (($op->flags & OPf_SPECIAL) && $self->{expand} < 2) {
 	return $self->deparse($op->last, $cx);
     }
     else {
