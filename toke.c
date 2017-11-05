@@ -5074,6 +5074,7 @@ Perl_yylex(pTHX)
 
 	return yylex();
     case LEX_FORMLINE:
+	assert(PL_lex_formbrack);
 	s = scan_formline(PL_bufptr);
 	if (!PL_lex_formbrack)
 	{
@@ -6281,6 +6282,7 @@ Perl_yylex(pTHX)
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
 	    TOKEN(0);
       rightbracket:
+	assert(s != PL_bufend);
 	s++;
 	if (PL_lex_brackets <= 0)
 	    /* diag_listed_as: Unmatched right %s bracket */
@@ -6311,7 +6313,7 @@ Perl_yylex(pTHX)
 	    return yylex();		/* ignore fake brackets */
 	}
 	force_next(formbrack ? '.' : '}');
-	if (formbrack) LEAVE;
+	if (formbrack) LEAVE_with_name("lex_format");
 	if (formbrack == 2) { /* means . where arguments were expected */
 	    force_next(';');
 	    TOKEN(FORMRBRACK);
@@ -6457,7 +6459,7 @@ Perl_yylex(pTHX)
 		t++;
 	    if (*t == '\n' || *t == '#') {
 		formbrack = 1;
-		ENTER;
+		ENTER_with_name("lex_format");
 		SAVEI8(PL_parser->form_lex_state);
 		SAVEI32(PL_lex_formbrack);
 		PL_parser->form_lex_state = PL_lex_state;
