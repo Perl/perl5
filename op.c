@@ -9672,7 +9672,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
 	PL_compcv = 0;
 	if (name && block) {
-	    const char *s = (char *) memrchr(name, ':', namlen);
+	    const char *s = (char *) my_memrchr(name, ':', namlen);
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
 		if (PL_in_eval & EVAL_KEEPERR)
