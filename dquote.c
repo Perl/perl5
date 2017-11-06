@@ -56,7 +56,8 @@ Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
 }
 
 bool
-Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
+Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
+                      const char** error_msg,
                       const bool output_warning, const bool strict,
                       const bool silence_non_portable,
                       const bool UTF)
@@ -68,13 +69,16 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
  *  It guarantees that the returned codepoint, *uv, when expressed as
  *  utf8 bytes, would fit within the skipped "\o{...}" bytes.
  *  On input:
- *	s   is the address of a pointer to a NULL terminated string that begins
- *	    with 'o', and the previous character was a backslash.  At exit, *s
- *	    will be advanced to the byte just after those absorbed by this
- *	    function.  Hence the caller can continue parsing from there.  In
- *	    the case of an error, this routine has generally positioned *s to
- *	    point just to the right of the first bad spot, so that a message
- *	    that has a "<--" to mark the spot will be correctly positioned.
+ *	s   is the address of a pointer to a string.  **s is 'o', and the
+ *	    previous character was a backslash.  At exit, *s will be advanced
+ *	    to the byte just after those absorbed by this function.  Hence the
+ *	    caller can continue parsing from there.  In the case of an error,
+ *	    this routine has generally positioned *s to point just to the right
+ *	    of the first bad spot, so that a message that has a "<--" to mark
+ *	    the spot will be correctly positioned.
+ *	send - 1  gives a limit in *s that this function is not permitted to
+ *	    look beyond.  That is, the function may look at bytes only in the
+ *	    range *s..send-1
  *	uv  points to a UV that will hold the output value, valid only if the
  *	    return from the function is TRUE
  *      error_msg is a pointer that will be set to an internal buffer giving an
@@ -107,7 +111,7 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
 	return FALSE;
     }
 
-    e = strchr(*s, '}');
+    e = (char *) memchr(*s, '}', send - *s);
     if (!e) {
         (*s)++;  /* Move past the '{' */
         while (isOCTAL(**s)) { /* Position beyond the legal digits */
@@ -158,7 +162,8 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
 }
 
 bool
-Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
+Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
+                      const char** error_msg,
                       const bool output_warning, const bool strict,
                       const bool silence_non_portable,
                       const bool UTF)
@@ -171,13 +176,16 @@ Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
  *  utf8 bytes, would fit within the skipped "\x{...}" bytes.
  *
  *  On input:
- *	s   is the address of a pointer to a NULL terminated string that begins
- *	    with 'x', and the previous character was a backslash.  At exit, *s
- *	    will be advanced to the byte just after those absorbed by this
- *	    function.  Hence the caller can continue parsing from there.  In
- *	    the case of an error, this routine has generally positioned *s to
- *	    point just to the right of the first bad spot, so that a message
- *	    that has a "<--" to mark the spot will be correctly positioned.
+ *	s   is the address of a pointer to a string.  **s is 'x', and the
+ *	    previous character was a backslash.  At exit, *s will be advanced
+ *	    to the byte just after those absorbed by this function.  Hence the
+ *	    caller can continue parsing from there.  In the case of an error,
+ *	    this routine has generally positioned *s to point just to the right
+ *	    of the first bad spot, so that a message that has a "<--" to mark
+ *	    the spot will be correctly positioned.
+ *	send - 1  gives a limit in *s that this function is not permitted to
+ *	    look beyond.  That is, the function may look at bytes only in the
+ *	    range *s..send-1
  *	uv  points to a UV that will hold the output value, valid only if the
  *	    return from the function is TRUE
  *      error_msg is a pointer that will be set to an internal buffer giving an
@@ -226,7 +234,7 @@ Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
 	return TRUE;
     }
 
-    e = strchr(*s, '}');
+    e = (char *) memchr(*s, '}', send - *s);
     if (!e) {
         (*s)++;  /* Move past the '{' */
         while (isXDIGIT(**s)) { /* Position beyond the legal digits */

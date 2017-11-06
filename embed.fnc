@@ -918,14 +918,18 @@ p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
-EMpRX	|bool	|grok_bslash_x	|NN char** s|NN UV* uv           \
+EMpRX	|bool	|grok_bslash_x	|NN char** s		 \
+				|NN const char* const send	 \
+				|NN UV* uv			 \
 				|NN const char** error_msg       \
 				|const bool output_warning       \
 				|const bool strict               \
 				|const bool silence_non_portable \
 				|const bool utf8
 EMpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
-EMpRX	|bool	|grok_bslash_o	|NN char** s|NN UV* uv           \
+EMpRX	|bool	|grok_bslash_o	|NN char** s		 \
+				|NN const char* const send	 \
+				|NN UV* uv			 \
 				|NN const char** error_msg       \
 				|const bool output_warning       \
 				|const bool strict               \
@@ -2680,11 +2684,11 @@ s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|force_ident_maybe_lex|char pit
-s	|void	|incline	|NN const char *s
+s	|void	|incline	|NN const char *s|NN const char *end
 s	|int	|intuit_method	|NN char *s|NULLOK SV *ioname|NULLOK CV *cv
-s	|int	|intuit_more	|NN char *s
+s	|int	|intuit_more	|NN char *s|NN char *e
 s	|I32	|lop		|I32 f|U8 x|NN char *s
-rs	|void	|missingterm	|NULLOK char *s
+rs	|void	|missingterm	|NULLOK char *s|const STRLEN len
 s	|void	|no_op		|NN const char *const what|NULLOK char *s
 s	|int	|pending_ident
 sR	|I32	|sublex_done

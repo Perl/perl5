@@ -5268,12 +5268,13 @@ static I32
 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     const char * const p  = SvPVX_const(PL_e_script);
-    const char *nl = strchr(p, '\n');
+    const char * const e  = SvEND(PL_e_script);
+    const char *nl = (char *) memchr(p, '\n', e - p);
 
     PERL_UNUSED_ARG(idx);
     PERL_UNUSED_ARG(maxlen);
 
-    nl = (nl) ? nl+1 : SvEND(PL_e_script);
+    nl = (nl) ? nl+1 : e;
     if (nl-p == 0) {
 	filter_del(read_e_script);
 	return 0;

@@ -261,7 +261,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             STRLEN nlen = 0;
 	    /* New style explicit name, type is just mode and layer info */
 #ifdef USE_STDIO
-	    if (SvROK(*svp) && !strchr(oname,'&')) {
+	    if (SvROK(*svp) && !memchr(oname, '&', len)) {
 		if (ckWARN(WARN_IO))
 		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Can't open a reference");
@@ -1630,7 +1630,7 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 	    else {
 		const char *end;
   fail_discipline:
-		end = strchr(s+1, ':');
+		end = (char *) memchr(s+1, ':', len);
 		if (!end)
 		    end = s+len;
 #ifndef PERLIO_LAYERS
