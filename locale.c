@@ -1971,8 +1971,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 {
                 char **e;
                 for (e = environ; *e; e++) {
-                    if (strEQs(*e, "LC_")
-                            && strNEs(*e, "LC_ALL=")
+                    if (strBEGINs(*e, "LC_")
+                            && ! strBEGINs(*e, "LC_ALL=")
                             && (p = strchr(*e, '=')))
                         PerlIO_printf(Perl_error_log, "\t%.*s = \"%s\",\n",
                                         (int)(p - *e), *e, p + 1);
@@ -3224,15 +3224,9 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #ifdef WIN32
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
-    if (final_pos >= 4
-        && *(save_input_locale + final_pos - 0) == '1'
-        && *(save_input_locale + final_pos - 1) == '0'
-        && *(save_input_locale + final_pos - 2) == '0'
-        && *(save_input_locale + final_pos - 3) == '5'
-        && *(save_input_locale + final_pos - 4) == '6')
-    {
+    if (memENDs(save_input_locale, final_pos, "65001")) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                        "Locale %s ends with 10056 in name, is UTF-8 locale\n",
+                        "Locale %s ends with 65001 in name, is UTF-8 locale\n",
                         save_input_locale));
         Safefree(save_input_locale);
         return TRUE;

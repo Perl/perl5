@@ -916,7 +916,7 @@ PP(pp_formline)
 			    *t++ = ' ';
 		    }
 		    s1 = t - 3;
-		    if (strnEQ(s1,"   ",3)) {
+		    if (strBEGINs(s1,"   ")) {
 			while (s1 > SvPVX_const(PL_formtarget) && isSPACE(s1[-1]))
 			    s1--;
 		    }
@@ -3614,7 +3614,7 @@ S_doopen_pm(pTHX_ SV *name)
     if (!IS_SAFE_PATHNAME(p, namelen, "require"))
         return NULL;
 
-    if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
+    if (memENDPs(p, namelen, ".pm")) {
 	SV *const pmcsv = sv_newmortal();
 	PerlIO * pmcio;
 
@@ -3849,7 +3849,7 @@ S_require_file(pTHX_ SV *sv)
                    directory, or (*nix) hidden filenames.  Also sanity check
                    that the generated filename ends .pm  */
                 if (!path_searchable || len < 3 || name[0] == '.'
-                    || !memEQ(name + package_len, ".pm", 3))
+                    || !memEQs(name + package_len, len - package_len, ".pm"))
                     DIE(aTHX_ "Bareword in require maps to disallowed filename \"%" SVf "\"", sv);
                 if (memchr(name, 0, package_len)) {
                     /* diag_listed_as: Bareword in require contains "%s" */
@@ -4133,12 +4133,12 @@ S_require_file(pTHX_ SV *sv)
 		    SSize_t i;
 		    SV *const msg = newSVpvs_flags("", SVs_TEMP);
 		    SV *const inc = newSVpvs_flags("", SVs_TEMP);
-                    const char *e = name + len - 3; /* possible .pm */
 		    for (i = 0; i <= AvFILL(ar); i++) {
 			sv_catpvs(inc, " ");
 			sv_catsv(inc, *av_fetch(ar, i, TRUE));
 		    }
-		    if (e > name && _memEQs(e, ".pm")) {
+		    if (memENDPs(name, len, ".pm")) {
+                        const char *e = name + len - (sizeof(".pm") - 1);
 			const char *c;
                         bool utf8 = cBOOL(SvUTF8(sv));
 
@@ -4180,10 +4180,10 @@ S_require_file(pTHX_ SV *sv)
                             sv_catpv(msg, " module)");
                         }
 		    }
-		    else if (len >= 2 && memEQ(name + len - 2, ".h", 3)) {
+		    else if (memENDs(name, len, ".h")) {
 			sv_catpv(msg, " (change .h to .ph maybe?) (did you run h2ph?)");
 		    }
-		    else if (len >= 3 && memEQ(name + len - 3, ".ph", 4)) {
+		    else if (memENDs(name, len, ".ph")) {
 			sv_catpv(msg, " (did you run h2ph?)");
 		    }
 

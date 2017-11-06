@@ -1849,7 +1849,7 @@ win32_getenv(const char *name)
 	else {
 	    /* last ditch: allow any environment variables that begin with 'PERL'
 	       to be obtained from the registry, if found there */
-	    if (strncmp(name, "PERL", 4) == 0)
+	    if (strBEGINs(name, "PERL"))
 		(void)get_regstr(name, &curitem);
 	}
 #endif

@@ -11178,8 +11178,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     ret = reganode(pRExC_state,NGROUPP,num);
                     goto insert_if_check_paren;
 		}
-		else if (RExC_end - RExC_parse >= DEFINE_len
-                        && strnEQ(RExC_parse, "DEFINE", DEFINE_len))
+		else if (memBEGINs(RExC_parse,
+                                   (STRLEN) (RExC_end - RExC_parse),
+                                   "DEFINE"))
                 {
 		    ret = reganode(pRExC_state,DEFINEP,0);
 		    RExC_parse += DEFINE_len;
@@ -12059,10 +12060,11 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     if (! endbrace) { /* no trailing brace */
         vFAIL2("Missing right brace on \\%c{}", 'N');
     }
-    else if(!(endbrace == RExC_parse		/* nothing between the {} */
-              || (endbrace - RExC_parse >= 2	/* U+ (bad hex is checked... */
-                  && strnEQ(RExC_parse, "U+", 2)))) /* ... below for a better
-                                                       error msg) */
+    else if (!(   endbrace == RExC_parse	/* nothing between the {} */
+               || memBEGINs(RExC_parse,   /* U+ (bad hex is checked below
+                                                   for a  better error msg) */
+                                  (STRLEN) (RExC_end - RExC_parse),
+                                 "U+")))
     {
 	RExC_parse = endbrace;	/* position msg's '<--HERE' */
 	vFAIL("\\N{NAME} must be resolved by the lexer");
@@ -12794,8 +12796,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }*/
                 switch (*RExC_parse) {
                     case 'g':
-                        if (length != 1
-                            && (length != 3 || strnNE(RExC_parse + 1, "cb", 2)))
+                        if (    length != 1
+                            && (memNEs(RExC_parse + 1, length - 1, "cb")))
                         {
                             goto bad_bound_type;
                         }
@@ -14616,7 +14618,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
          * */
         switch (name_len) {
             case 4:
-                if (memEQ(name_start, "word", 4)) {
+                if (memEQs(name_start, 4, "word")) {
                     /* this is not POSIX, this is the Perl \w */
                     class_number = ANYOF_WORDCHAR;
                 }
@@ -14627,51 +14629,51 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                  * Offset 4 gives the best switch position.  */
                 switch (name_start[4]) {
                     case 'a':
-                        if (memEQ(name_start, "alph", 4)) /* alpha */
+                        if (memBEGINs(name_start, 5, "alph")) /* alpha */
                             class_number = ANYOF_ALPHA;
                         break;
                     case 'e':
-                        if (memEQ(name_start, "spac", 4)) /* space */
+                        if (memBEGINs(name_start, 5, "spac")) /* space */
                             class_number = ANYOF_SPACE;
                         break;
                     case 'h':
-                        if (memEQ(name_start, "grap", 4)) /* graph */
+                        if (memBEGINs(name_start, 5, "grap")) /* graph */
                             class_number = ANYOF_GRAPH;
                         break;
                     case 'i':
-                        if (memEQ(name_start, "asci", 4)) /* ascii */
+                        if (memBEGINs(name_start, 5, "asci")) /* ascii */
                             class_number = ANYOF_ASCII;
                         break;
                     case 'k':
-                        if (memEQ(name_start, "blan", 4)) /* blank */
+                        if (memBEGINs(name_start, 5, "blan")) /* blank */
                             class_number = ANYOF_BLANK;
                         break;
                     case 'l':
-                        if (memEQ(name_start, "cntr", 4)) /* cntrl */
+                        if (memBEGINs(name_start, 5, "cntr")) /* cntrl */
                             class_number = ANYOF_CNTRL;
                         break;
                     case 'm':
-                        if (memEQ(name_start, "alnu", 4)) /* alnum */
+                        if (memBEGINs(name_start, 5, "alnu")) /* alnum */
                             class_number = ANYOF_ALPHANUMERIC;
                         break;
                     case 'r':
-                        if (memEQ(name_start, "lowe", 4)) /* lower */
+                        if (memBEGINs(name_start, 5, "lowe")) /* lower */
                             class_number = (FOLD) ? ANYOF_CASED : ANYOF_LOWER;
-                        else if (memEQ(name_start, "uppe", 4)) /* upper */
+                        else if (memBEGINs(name_start, 5, "uppe")) /* upper */
                             class_number = (FOLD) ? ANYOF_CASED : ANYOF_UPPER;
                         break;
                     case 't':
-                        if (memEQ(name_start, "digi", 4)) /* digit */
+                        if (memBEGINs(name_start, 5, "digi")) /* digit */
                             class_number = ANYOF_DIGIT;
-                        else if (memEQ(name_start, "prin", 4)) /* print */
+                        else if (memBEGINs(name_start, 5, "prin")) /* print */
                             class_number = ANYOF_PRINT;
-                        else if (memEQ(name_start, "punc", 4)) /* punct */
+                        else if (memBEGINs(name_start, 5, "punc")) /* punct */
                             class_number = ANYOF_PUNCT;
                         break;
                 }
                 break;
             case 6:
-                if (memEQ(name_start, "xdigit", 6))
+                if (memEQs(name_start, 6, "xdigit"))
                     class_number = ANYOF_XDIGIT;
                 break;
         }
@@ -16440,7 +16442,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                          * referred to outside it. [perl #121777] */
                         if (! has_pkg && curpkg) {
                             char* pkgname = HvNAME(curpkg);
-                            if (strNE(pkgname, "main")) {
+                            if (memNEs(pkgname, HvNAMELEN(curpkg), "main")) {
                                 char* full_name = Perl_form(aTHX_
                                                             "%s::%s",
                                                             pkgname,

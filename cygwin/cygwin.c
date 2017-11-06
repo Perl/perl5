@@ -98,7 +98,7 @@ do_spawn (char *cmd)
     while (*cmd && isSPACE(*cmd))
 	cmd++;
 
-    if (strnEQ (cmd,"/bin/sh",7) && isSPACE (cmd[7]))
+    if (strBEGINs (cmd,"/bin/sh") && isSPACE (cmd[7]))
         cmd+=5;
 
     /* save an extra exec if possible */
@@ -107,7 +107,7 @@ do_spawn (char *cmd)
 	goto doshell;
     if (*cmd=='.' && isSPACE (cmd[1]))
 	goto doshell;
-    if (strnEQ (cmd,"exec",4) && isSPACE (cmd[4]))
+    if (strBEGINs (cmd,"exec") && isSPACE (cmd[4]))
 	goto doshell;
     for (s=cmd; *s && isALPHA (*s); s++) ;	/* catch VAR=val gizmo */
 	if (*s=='=')

@@ -83,8 +83,8 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     if (!*where)
     {
 	*where = newSV_type(type);
-	    if (type == SVt_PVAV && GvNAMELEN(gv) == 3
-	     && strEQs(GvNAME(gv), "ISA"))
+	    if (type == SVt_PVAV
+	     && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
 	    sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
     }
     return gv;
@@ -780,8 +780,8 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
             return 0;
         }
 	else if (stash == cachestash
-	      && len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4
-              && strEQs(hvname, "CORE")
+	      && len > 1 /* shortest is uc */
+              && memEQs(hvname, HvNAMELEN_get(stash), "CORE")
               && S_maybe_add_coresub(aTHX_ NULL,topgv,name,len))
 	    goto have_gv;
     }
@@ -808,7 +808,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
         if (!gvp) {
             if (len > 1 && HvNAMELEN_get(cstash) == 4) {
                 const char *hvname = HvNAME(cstash); assert(hvname);
-                if (strEQs(hvname, "CORE")
+                if (strBEGINs(hvname, "CORE")
                  && (candidate =
                       S_maybe_add_coresub(aTHX_ cstash,NULL,name,len)
                     ))
@@ -1073,8 +1073,9 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvENAME_get(stash), name) );
 	}
-        else if ( sep_len >= 7 &&
-		 strEQs(last_separator - 7, "::SUPER")) {
+        else if (memBEGINs(last_separator - sizeof("::SUPER") - 1,
+                            sep_len, "::SUPER"))
+        {
             /* don't autovifify if ->NoSuchStash::SUPER::method */
             stash = gv_stashpvn(origname, sep_len - 7, is_utf8);
 	    if (stash) flags |= GV_SUPER;
@@ -1675,7 +1676,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                     *stash = GvHV(*gv) = newHV();
                     if (!HvNAME_get(*stash)) {
                         if (GvSTASH(*gv) == PL_defstash && *len == 6
-                            && strEQs(*name, "CORE"))
+                            && strBEGINs(*name, "CORE"))
                             hv_name_sets(*stash, "CORE", 0);
                         else
                             hv_name_set(
@@ -1934,7 +1935,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
 	  /* Avoid null warning: */
 	  const char * const stashname = HvNAME(stash); assert(stashname);
-	  if (strEQs(stashname, "CORE"))
+	  if (strBEGINs(stashname, "CORE"))
 	    S_maybe_add_coresub(aTHX_ 0, gv, name, len);
 	}
     }
@@ -2410,8 +2411,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    if (len == 1 && stash == PL_defstash) {
                 maybe_multimagic_gv(gv, name, sv_type);
 	    }
-	    else if (len == 3 && sv_type == SVt_PVAV
-	          && strEQs(name, "ISA")
+            else if (sv_type == SVt_PVAV
+	          && memEQs(name, len, "ISA")
 	          && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
 		gv_magicalize_isa(gv);
 	}
@@ -2487,7 +2488,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 
     if (hv && (name = HvNAME(hv))) {
       const STRLEN len = HvNAMELEN(hv);
-      if (keepmain || strnNE(name, "main", len)) {
+      if (keepmain || ! memBEGINs(name, len, "main")) {
 	sv_catpvn_flags(sv,name,len,HvNAMEUTF8(hv)?SV_CATUTF8:SV_CATBYTES);
 	sv_catpvs(sv,"::");
       }
@@ -2816,9 +2817,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
             const HEK * const gvhek = CvGvNAME_HEK(cv);
             const HEK * const stashek =
                 HvNAME_HEK(CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv)));
-            if (HEK_LEN(gvhek) == 3 && strEQ(HEK_KEY(gvhek), "nil")
-             && stashek && HEK_LEN(stashek) == 8
-             && strEQ(HEK_KEY(stashek), "overload")) {
+            if (memEQs(HEK_KEY(gvhek), HEK_LEN(gvhek), "nil")
+             && stashek
+             && memEQs(HEK_KEY(stashek), HEK_LEN(stashek), "overload")) {
 		/* This is a hack to support autoloading..., while
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */

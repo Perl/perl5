@@ -162,7 +162,7 @@ do_spawn2 (pTHX_ char *cmd,int execf)
     while (*cmd && isSPACE(*cmd))
 	cmd++;
 
-    if (strnEQ (cmd,"/bin/sh",7) && isSPACE (cmd[7]))
+    if (strBEGINs (cmd,"/bin/sh") && isSPACE (cmd[7]))
         cmd+=5;
 
     /* save an extra exec if possible */
@@ -173,7 +173,7 @@ do_spawn2 (pTHX_ char *cmd,int execf)
     {
         if (*cmd=='.' && isSPACE (cmd[1]))
             goto doshell;
-        if (strnEQ (cmd,"exec",4) && isSPACE (cmd[4]))
+        if (strBEGINs (cmd,"exec") && isSPACE (cmd[4]))
             goto doshell;
         for (s=cmd; *s && isALPHA (*s); s++) ;	/* catch VAR=val gizmo */
             if (*s=='=')
@@ -265,7 +265,7 @@ glob_handler (__FSEXT_Fnumber n,int *rv,va_list args)
             STRLEN len;
             glob_t pglob;
 
-            if (strnNE (name,"/dev/dosglob/",13))
+            if (! strBEGINs (name,"/dev/dosglob/"))
                 break;
             if ((gi=searchfd (-1)) == NULL)
                 break;

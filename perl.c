@@ -3845,7 +3845,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	/* if find_script() returns, it returns a malloc()-ed value */
 	scriptname = PL_origfilename = find_script(scriptname, dosearch, NULL, 1);
 
-	if (strEQs(scriptname, "/dev/fd/")
+	if (strBEGINs(scriptname, "/dev/fd/")
             && isDIGIT(scriptname[8])
             && grok_atoUV(scriptname + 8, &uv, &s)
             && uv <= PERL_INT_MAX
@@ -3921,9 +3921,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 #endif
 	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #ifdef FAKE_BIT_BUCKET
-	if (memEQ(scriptname, FAKE_BIT_BUCKET_PREFIX,
-		  sizeof(FAKE_BIT_BUCKET_PREFIX) - 1)
-	    && strlen(scriptname) == sizeof(tmpname) - 1) {
+        if (   strBEGINs(scriptname, FAKE_BIT_BUCKET_PREFIX)
+	    && strlen(scriptname) == sizeof(tmpname) - 1)
+        {
 	    unlink(scriptname);
 	}
 	scriptname = BIT_BUCKET;
@@ -4028,7 +4028,7 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
     if (*s++ == '-') {
 	while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 	       || s2[-1] == '_') s2--;
-	if (strEQs(s2-4,"perl"))
+	if (strBEGINs(s2-4,"perl"))
 	    while ((s = moreswitches(s)))
 		;
     }
@@ -4807,7 +4807,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 */
 	    const char *libpath = SvPVX(libdir);
 	    STRLEN libpath_len = SvCUR(libdir);
-	    if (libpath_len >= 4 && memEQ (libpath, ".../", 4)) {
+	    if (memBEGINs(libpath, libpath_len, ".../")) {
 		/* Game on!  */
 		SV * const caret_X = get_sv("\030", 0);
 		/* Going to use the SV just as a scratch buffer holding a C
@@ -4843,7 +4843,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		if (lastslash) {
 		    SV *tempsv;
 		    while ((*lastslash = '\0'), /* Do that, come what may.  */
-                           (libpath_len >= 3 && _memEQs(libpath, "../")
+                           (   memBEGINs(libpath, libpath_len, "../")
 			    && (lastslash =
                                   (char *) my_memrchr(prefix, '/',
                                                    SvEND(prefix_sv) - prefix))))

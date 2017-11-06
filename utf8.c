@@ -3594,17 +3594,12 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
 	if (flags & FOLD_FLAGS_LOCALE) {
 
 #           define LONG_S_T      LATIN_SMALL_LIGATURE_LONG_S_T_UTF8
-            const unsigned int long_s_t_len    = sizeof(LONG_S_T) - 1;
-
 #         ifdef LATIN_CAPITAL_LETTER_SHARP_S_UTF8
 #           define CAP_SHARP_S   LATIN_CAPITAL_LETTER_SHARP_S_UTF8
 
-            const unsigned int cap_sharp_s_len = sizeof(CAP_SHARP_S) - 1;
-
             /* Special case these two characters, as what normally gets
              * returned under locale doesn't work */
-            if (UTF8SKIP(p) == cap_sharp_s_len
-                && memEQ((char *) p, CAP_SHARP_S, cap_sharp_s_len))
+            if (memEQs((char *) p, UTF8SKIP(p), CAP_SHARP_S))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
@@ -3614,8 +3609,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
             }
             else
 #endif
-                 if (UTF8SKIP(p) == long_s_t_len
-                     && memEQ((char *) p, LONG_S_T, long_s_t_len))
+                 if (memEQs((char *) p, UTF8SKIP(p), LONG_S_T))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
@@ -3634,9 +3628,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
              * 255/256 boundary which is forbidden under /l, and so the code
              * wouldn't catch that they are equivalent (which they are only in
              * this release) */
-            else if (UTF8SKIP(p) == sizeof(DOTTED_I) - 1
-                     && memEQ((char *) p, DOTTED_I, sizeof(DOTTED_I) - 1))
-            {
+            else if (memEQs((char *) p, UTF8SKIP(p), DOTTED_I)) {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
                               "Can't do fc(\"\\x{0130}\") on non-UTF-8 locale; "

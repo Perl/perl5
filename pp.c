@@ -384,7 +384,7 @@ PP(pp_prototype)
     if (SvGMAGICAL(TOPs)) SETs(sv_mortalcopy(TOPs));
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * s = SvPVX_const(TOPs);
-	if (strnEQ(s, "CORE::", 6)) {
+        if (memBEGINs(s, SvCUR(TOPs), "CORE::")) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (!code)
 		DIE(aTHX_ "Can't find an opnumber for \"%" UTF8f "\"",

@@ -285,7 +285,7 @@ is_unix_filespec(const char *path)
     const char * pch1;
 
     ret_val = 0;
-    if (strncmp(path,"\"^UP^",5) != 0) {
+    if (! strBEGINs(path,"\"^UP^")) {
 	pch1 = strchr(path, '/');
 	if (pch1 != NULL)
 	    ret_val = 1;
@@ -1078,7 +1078,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
     }
 
     for (cp1 = lnm, cp2 = eqv; *cp1; cp1++,cp2++) *cp2 = toUPPER_A(*cp1);
-    if (cp1 - lnm == 7 && !strncmp(eqv,"DEFAULT",7)) {
+    if (memEQs(eqv, cp1 - lnm, "DEFAULT")) {
       int len;
       getcwd(eqv,LNM$C_NAMLENGTH);
 
@@ -1174,7 +1174,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
     }
 
     for (cp1 = lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = toUPPER_A(*cp1);
-    if (cp1 - lnm == 7 && !strncmp(buf,"DEFAULT",7)) {
+    if (memEQs(buf, cp1 - lnm, "DEFAULT")) {
     char * zeros;
 
       getcwd(buf,LNM$C_NAMLENGTH);
@@ -6427,7 +6427,7 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
           if (!cp1) cp1 = strstr(my_esa,"]<");
           dirlen = cp1 - my_esa;
           memcpy(buf, my_esa, dirlen);
-          if (!strncmp(cp1+2,"000000]",7)) {
+          if (strBEGINs(cp1+2,"000000]")) {
             buf[dirlen-1] = '\0';
 	    /* fix-me Not full ODS-5, just extra dots in directories for now */
 	    cp1 = buf + dirlen - 1;
@@ -7032,7 +7032,7 @@ int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
    * glob passes filenames with trailing '\n' and expects this preserved.
    */
   if (decc_posix_compliant_pathnames) {
-    if (strncmp(spec, "\"^UP^", 5) == 0) {
+    if (! strBEGINs(spec, "\"^UP^")) {
       char * uspec;
       char *tunix;
       int tunix_len;
@@ -7246,7 +7246,7 @@ int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       if (*(cp2+1) == ']' || *(cp2+1) == '>') {
         while (*(cp2+1) == ']' || *(cp2+1) == '>' ||
                *(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
-        if (!strncmp(cp2,"[000000",7) && (*(cp2+7) == ']' ||
+        if (memEQs(cp2,"[000000") && (*(cp2+7) == ']' ||
             *(cp2+7) == '>' || *(cp2+7) == '.')) cp2 += 7;
       }
       else if ( *(cp2+1) == '.' && *(cp2+2) == '.') {
@@ -7463,7 +7463,7 @@ posix_root_to_vms(char *vmspath, int vmspath_len,
 #if __CRTL_VER >= 80200000
   /* If not a posix spec already, convert it */
   if (decc_posix_compliant_pathnames) {
-    if (strncmp(unixpath,"\"^UP^",5) != 0) {
+    if (! strBEGINs(unixpath,"\"^UP^")) {
       sprintf(vmspath,"\"^UP^%s\"",unixpath);
     }
     else {
@@ -7578,7 +7578,7 @@ posix_root_to_vms(char *vmspath, int vmspath_len,
   /* on any failure, returned the POSIX ^UP^ filespec */
   if (!(sts & 1)) {
      /* This can happen if user does not have permission to read directories */
-     if (strncmp(unixpath,"\"^UP^",5) != 0)
+     if (! strBEGINs(unixpath,"\"^UP^"))
        sprintf(vmspath,"\"^UP^%s\"",unixpath);
      else
        my_strlcpy(vmspath, unixpath, vmspath_len + 1);
@@ -7717,7 +7717,7 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 
   quoted = 0;
   /* This could have a "^UP^ on the front */
-  if (strncmp(unixptr,"\"^UP^",5) == 0) {
+  if (strBEGINs(unixptr,"\"^UP^")) {
     quoted = 1;
     unixptr+= 5;
     unixlen-= 5;
@@ -7990,13 +7990,9 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
     nextslash = strchr(&unixptr[1],'/');
     seg_len = 0;
     if (nextslash != NULL) {
-      int cmp;
       seg_len = nextslash - &unixptr[1];
       my_strlcpy(vmspath, unixptr, seg_len + 2);
-      cmp = 1;
-      if (seg_len == 3) {
-	cmp = strncmp(vmspath, "dev", 4);
-	if (cmp == 0) {
+      if (memEQs(vmspath, seg_len, "dev")) {
 	    sts = slash_dev_special_to_vms(unixptr, vmspath, vmspath_len);
 	    if (sts == SS$_NORMAL)
 		return SS$_NORMAL;
@@ -8439,7 +8435,7 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
   /*--------------------------------------------------*/
 #if __CRTL_VER >= 80200000
   if (decc_posix_compliant_pathnames) {
-    if (strncmp(path,"\"^UP^",5) == 0) {
+    if (strBEGINs(path,"\"^UP^")) {
       posix_to_vmsspec_hardway(rslt, rslt_len, path, dir_flag, utf8_flag);
       return rslt;
     }
@@ -8580,7 +8576,7 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
 	islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
       }
       else if (strEQ(rslt,"dev")) {
-	if (strncmp(cp2,"/null", 5) == 0) {
+	if (strBEGINs(cp2,"/null")) {
 	  if ((cp2[5] == 0) || (cp2[5] == '/')) {
 	    strcpy(rslt,"NLA0");
 	    cp1 = rslt + 4;
@@ -11842,7 +11838,7 @@ static int
 is_null_device(const char *name)
 {
   if (decc_bug_devnull != 0) {
-    if (strncmp("/dev/null", name, 9) == 0)
+    if (strBEGINs(name, "/dev/null"))
       return 1;
   }
     /* The VMS null device is named "_NLA0:", usually abbreviated as "NL:".

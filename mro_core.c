@@ -790,7 +790,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	if (name_count < 0) ++namep, name_count = -name_count - 1;
     }
     if (name_count == 1) {
-	if (HEK_LEN(*namep) == 4 && strnEQ(HEK_KEY(*namep), "main", 4)) {
+	if (memEQs(HEK_KEY(*namep), HEK_LEN(*namep), "main")) {
 	    namesv = GvNAMELEN(gv) == 1
 		? newSVpvs_flags(":", SVs_TEMP)
 		: newSVpvs_flags("",  SVs_TEMP);
@@ -812,7 +812,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	SV *aname;
 	namesv = sv_2mortal((SV *)newAV());
 	while (name_count--) {
-	    if(HEK_LEN(*namep) == 4 && strnEQ(HEK_KEY(*namep), "main", 4)){
+	    if(memEQs(HEK_KEY(*namep), HEK_LEN(*namep), "main")){
 		aname = GvNAMELEN(gv) == 1
 		         ? newSVpvs(":")
 		         : newSVpvs("");

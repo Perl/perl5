@@ -3919,15 +3919,14 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
        glob to begin with. */
     if(dtype == SVt_PVGV) {
         const char * const name = GvNAME((const GV *)dstr);
-        if(
-            strEQ(name,"ISA")
+        const STRLEN len = GvNAMELEN(dstr);
+        if(memEQs(name, len, "ISA")
          /* The stash may have been detached from the symbol table, so
             check its name. */
          && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
         )
             mro_changes = 2;
         else {
-            const STRLEN len = GvNAMELEN(dstr);
             if ((len > 1 && name[len-2] == ':' && name[len-1] == ':')
              || (len == 1 && name[0] == ':')) {
                 mro_changes = 3;
@@ -4140,7 +4139,7 @@ Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
 	}
 	else if (
 	    stype == SVt_PVAV && sref != dref
-	 && strEQ(GvNAME((GV*)dstr), "ISA")
+	 && memEQs(GvNAME((GV*)dstr), GvNAMELEN((GV*)dstr), "ISA")
 	 /* The stash may have been detached from the symbol table, so
 	    check its name before doing anything. */
 	 && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
