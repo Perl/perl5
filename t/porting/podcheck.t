@@ -29,6 +29,10 @@ BEGIN {
         print "1..0 # $^O cannot handle this test\n";
         exit(0);
     }
+    if ( $ENV{'PERL_BUILD_PACKAGING'} ) {
+        print "1..0 # This distro may have modified some files in cpan/. Skipping validation. \n";
+        exit 0;
+    }
     require '../regen/regen_lib.pl';
 }
 
