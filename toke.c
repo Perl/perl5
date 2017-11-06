@@ -563,7 +563,7 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
     bool uni = FALSE;
     SV *sv;
     if (s) {
-	char * const nl = (char *) memrchr(s, '\n', len);
+	char * const nl = (char *) my_memrchr(s, '\n', len);
 	if (nl)
 	    *nl = '\0';
 	uni = UTF;
@@ -585,7 +585,7 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
 	}
 	s = tmpbuf;
     }
-    q = memrchr(s, '"', len) ? '\'' : '"';
+    q = my_memrchr(s, '"', len) ? '\'' : '"';
     sv = sv_2mortal(newSVpv(s,0));
     if (uni)
 	SvUTF8_on(sv);
