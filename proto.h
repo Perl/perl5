@@ -5728,19 +5728,19 @@ STATIC SV*	S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* con
 #define PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME	\
 	assert(s); assert(e)
 
-STATIC void	S_incline(pTHX_ const char *s);
+STATIC void	S_incline(pTHX_ const char *s, const char *end);
 #define PERL_ARGS_ASSERT_INCLINE	\
-	assert(s)
+	assert(s); assert(end)
 STATIC int	S_intuit_method(pTHX_ char *s, SV *ioname, CV *cv);
 #define PERL_ARGS_ASSERT_INTUIT_METHOD	\
 	assert(s)
-STATIC int	S_intuit_more(pTHX_ char *s);
+STATIC int	S_intuit_more(pTHX_ char *s, char *e);
 #define PERL_ARGS_ASSERT_INTUIT_MORE	\
-	assert(s)
+	assert(s); assert(e)
 STATIC I32	S_lop(pTHX_ I32 f, U8 x, char *s);
 #define PERL_ARGS_ASSERT_LOP	\
 	assert(s)
-PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s)
+PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s, const STRLEN len)
 			__attribute__noreturn__;
 
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen);
