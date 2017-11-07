@@ -7246,7 +7246,7 @@ int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       if (*(cp2+1) == ']' || *(cp2+1) == '>') {
         while (*(cp2+1) == ']' || *(cp2+1) == '>' ||
                *(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
-        if (memEQs(cp2,"[000000") && (*(cp2+7) == ']' ||
+        if (memEQs(cp2,7,"[000000") && (*(cp2+7) == ']' ||
             *(cp2+7) == '>' || *(cp2+7) == '.')) cp2 += 7;
       }
       else if ( *(cp2+1) == '.' && *(cp2+2) == '.') {
@@ -7996,7 +7996,6 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 	    sts = slash_dev_special_to_vms(unixptr, vmspath, vmspath_len);
 	    if (sts == SS$_NORMAL)
 		return SS$_NORMAL;
-	}
       }
       sts = posix_root_to_vms(esa, vmspath_len, vmspath, utf8_fl);
     }
