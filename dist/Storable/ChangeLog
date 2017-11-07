@@ -1,3 +1,9 @@
+?????? p5p <perl5-porters@perl.org>
+    Version 2.65
+
+	* Replace multiple 'use vars' by 'our'
+	* remove Config dependency
+
 Wed Jul  2 16:25:25 IST 2014   Abhijit Menon-Sen <ams@toroid.org>
     Version 2.51
 

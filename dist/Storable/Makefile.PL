@@ -13,16 +13,30 @@ WriteMakefile(
     DISTNAME            => "Storable",
 # We now ship this in t/
 #    PREREQ_PM           => { 'Test::More' => '0.41' },
+    PL_FILES        => { 'Storable.pm.PL'  => 'Storable.pm' },
+    PM              => { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' },
     PREREQ_PM           => { XSLoader => 0 },
     INSTALLDIRS => ($] >= 5.007 && $] < 5.012) ? 'perl' : 'site',
-    VERSION_FROM        => 'Storable.pm',
+    VERSION_FROM    => '__Storable__.pm',
+    ABSTRACT_FROM   => '__Storable__.pm',
     ($ExtUtils::MakeMaker::VERSION > 6.45 ?
      (META_MERGE        => { resources =>
-                               { bugtracker => 'http://rt.perl.org/perlbug/' }
+                               { bugtracker => 'http://rt.perl.org/perlbug/' },
+                            provides    => {
+                                'Storable'  => {
+                                    file        => 'Storable_pm.PL',
+                                    version     => $NEW_VERSION,
+                                },
+                            },
+
                            },
     ) : ()),
     dist                => { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
+    clean               => { FILES => 'Storable-* Storable.pm' },
 );
+
+# Unlink the .pm file included with the distribution
+1 while unlink "Storable.pm";
 
 my $ivtype = $Config{ivtype};
 
