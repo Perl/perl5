@@ -4581,134 +4581,24 @@ S_init_perllib(pTHX)
     /* miniperl gets just -I..., the split of $ENV{PERL5LIB}, and "." in @INC
        (and not the architecture specific directories from $ENV{PERL5LIB}) */
 
+#include "perl_inc_macro.h"
 /* Use the ~-expanded versions of APPLLIB (undocumented),
     SITEARCH, SITELIB, VENDORARCH, VENDORLIB, ARCHLIB and PRIVLIB
 */
-#ifdef APPLLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP),
-		      INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#endif
+    INCPUSH_APPLLIB_EXP
+    INCPUSH_SITEARCH_EXP
+    INCPUSH_SITELIB_EXP
+    INCPUSH_PERL_VENDORARCH_EXP
+    INCPUSH_PERL_VENDORLIB_EXP
+    INCPUSH_ARCHLIB_EXP
+    INCPUSH_PRIVLIB_EXP
+    INCPUSH_PERL_OTHERLIBDIRS
+    INCPUSH_PERL5LIB
+    INCPUSH_APPLLIB_OLD_EXP
+    INCPUSH_SITELIB_STEM
+    INCPUSH_PERL_VENDORLIB_STEM
+    INCPUSH_PERL_OTHERLIBDIRS_ARCHONLY
 
-#ifdef SITEARCH_EXP
-    /* sitearch is always relative to sitelib on Windows for
-     * DLL-based path intuition to work correctly */
-#  if !defined(WIN32)
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP),
-			  INCPUSH_CAN_RELOCATE);
-#  endif
-#endif
-
-#ifdef SITELIB_EXP
-#  if defined(WIN32)
-    /* this picks up sitearch as well */
-	s = PerlEnv_sitelib_path(PERL_FS_VERSION, &len);
-	if (s)
-	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#  else
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_EXP), INCPUSH_CAN_RELOCATE);
-#  endif
-#endif
-
-#ifdef PERL_VENDORARCH_EXP
-    /* vendorarch is always relative to vendorlib on Windows for
-     * DLL-based path intuition to work correctly */
-#  if !defined(WIN32)
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP),
-		      INCPUSH_CAN_RELOCATE);
-#  endif
-#endif
-
-#ifdef PERL_VENDORLIB_EXP
-#  if defined(WIN32)
-    /* this picks up vendorarch as well */
-	s = PerlEnv_vendorlib_path(PERL_FS_VERSION, &len);
-	if (s)
-	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#  else
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP),
-			  INCPUSH_CAN_RELOCATE);
-#  endif
-#endif
-
-#ifdef ARCHLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
-#endif
-
-#ifndef PRIVLIB_EXP
-#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
-#endif
-
-#if defined(WIN32)
-    s = PerlEnv_lib_path(PERL_FS_VERSION, &len);
-    if (s)
-	incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#elif defined(NETWARE)
-    S_incpush_use_sep(aTHX_ PRIVLIB_EXP, 0, INCPUSH_CAN_RELOCATE);
-#else
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
-#endif
-
-#ifdef PERL_OTHERLIBDIRS
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS),
-		      INCPUSH_ADD_VERSIONED_SUB_DIRS|INCPUSH_NOT_BASEDIR
-		      |INCPUSH_CAN_RELOCATE);
-#endif
-
-    if (!TAINTING_get) {
-#ifndef VMS
-/*
- * It isn't possible to delete an environment variable with
- * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
- * case we treat PERL5LIB as undefined if it has a zero-length value.
- */
-#if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
-	if (perl5lib && *perl5lib != '\0')
-#else
-	if (perl5lib)
-#endif
-	    incpush_use_sep(perl5lib, 0,
-			    INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
-#else /* VMS */
-	/* Treat PERL5?LIB as a possible search list logical name -- the
-	 * "natural" VMS idiom for a Unix path string.  We allow each
-	 * element to be a set of |-separated directories for compatibility.
-	 */
-	char buf[256];
-	int idx = 0;
-	if (vmstrnenv("PERL5LIB",buf,0,NULL,0))
-	    do {
-		incpush_use_sep(buf, 0,
-				INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
-	    } while (vmstrnenv("PERL5LIB",buf,++idx,NULL,0));
-#endif /* VMS */
-    }
-
-/* Use the ~-expanded versions of APPLLIB (undocumented),
-    SITELIB and VENDORLIB for older versions
-*/
-#ifdef APPLLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_OLD_VERS
-		      |INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
-#endif
-
-#if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
-    /* Search for version-specific dirs below here */
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM),
-		      INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
-#endif
-
-
-#if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
-    /* Search for version-specific dirs below here */
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM),
-		      INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
-#endif
-
-#ifdef PERL_OTHERLIBDIRS
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS),
-		      INCPUSH_ADD_OLD_VERS|INCPUSH_ADD_ARCHONLY_SUB_DIRS
-		      |INCPUSH_CAN_RELOCATE);
-#endif
 #endif /* !PERL_IS_MINIPERL */
 
     if (!TAINTING_get) {
