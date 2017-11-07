@@ -585,7 +585,7 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
 	}
 	s = tmpbuf;
     }
-    q = my_memrchr(s, '"', len) ? '\'' : '"';
+    q = memchr(s, '"', len) ? '\'' : '"';
     sv = sv_2mortal(newSVpv(s,0));
     if (uni)
 	SvUTF8_on(sv);
