@@ -401,6 +401,8 @@
 #define PL_Ghints_mutex		(my_vars->Ghints_mutex)
 #define PL_keyword_plugin	(my_vars->Gkeyword_plugin)
 #define PL_Gkeyword_plugin	(my_vars->Gkeyword_plugin)
+#define PL_keyword_plugin_mutex	(my_vars->Gkeyword_plugin_mutex)
+#define PL_Gkeyword_plugin_mutex	(my_vars->Gkeyword_plugin_mutex)
 #define PL_locale_mutex		(my_vars->Glocale_mutex)
 #define PL_Glocale_mutex	(my_vars->Glocale_mutex)
 #define PL_malloc_mutex		(my_vars->Gmalloc_mutex)

@@ -224,9 +224,15 @@ at a chain of handler functions, all of which have an opportunity to
 handle keywords, and only the last function in the chain (built into
 the Perl core) will normally return C<KEYWORD_PLUGIN_DECLINE>.
 
+For thread safety, modules should not set this variable directly.
+Instead, use the function L</wrap_keyword_plugin>.
+
 =cut
 */
 
+#if defined(USE_ITHREADS)
+PERLVAR(G, keyword_plugin_mutex, perl_mutex)   /* Mutex for PL_keyword_plugin */
+#endif
 PERLVARI(G, keyword_plugin, Perl_keyword_plugin_t, Perl_keyword_plugin_standard)
 
 PERLVARI(G, op_sequence, HV *, NULL)	/* dump.c */

@@ -3764,6 +3764,9 @@ PERL_CALLCONV I32	Perl_whichsig_pvn(pTHX_ const char* sig, STRLEN len);
 PERL_CALLCONV I32	Perl_whichsig_sv(pTHX_ SV* sigsv);
 #define PERL_ARGS_ASSERT_WHICHSIG_SV	\
 	assert(sigsv)
+PERL_CALLCONV void	Perl_wrap_keyword_plugin(pTHX_ Perl_keyword_plugin_t new_plugin, Perl_keyword_plugin_t *old_plugin_p);
+#define PERL_ARGS_ASSERT_WRAP_KEYWORD_PLUGIN	\
+	assert(new_plugin); assert(old_plugin_p)
 PERL_CALLCONV void	Perl_wrap_op_checker(pTHX_ Optype opcode, Perl_check_t new_checker, Perl_check_t *old_checker_p);
 #define PERL_ARGS_ASSERT_WRAP_OP_CHECKER	\
 	assert(new_checker); assert(old_checker_p)
