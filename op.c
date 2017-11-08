@@ -3095,14 +3095,14 @@ S_maybe_multiconcat(pTHX_ OP *o)
             if (*p == '%') {
                 p++;
                 if (*p != '%') {
-                    (lenp++)->uv = q - oldq;
+                    (lenp++)->size = q - oldq;
                     oldq = q;
                     continue;
                 }
             }
             *q++ = *p;
         }
-        lenp->uv = q - oldq;
+        lenp->size = q - oldq;
         assert((STRLEN)(q - const_str) == total_len);
 
         /* Attach all the args (i.e. the kids of the sprintf) to o (which
