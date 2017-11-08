@@ -6,10 +6,15 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B;
-use strict;
 
-require Exporter;
 @B::ISA = qw(Exporter);
+
+# If B is loaded without imports, we do not want to unnecessarily pollute the stash with Exporter.
+sub import {
+    return unless scalar @_ > 1; # Called as a method call.
+    require Exporter;
+    B->export_to_level(1, @_);
+}
 
 # walkoptree_slow comes from B.pm (you are there),
 # walkoptree comes from B.xs
@@ -74,12 +79,12 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 
 @B::SPECIAL::ISA = 'B::OBJECT';
 
-@B::optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP
+our @optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP
                 METHOP UNOP_AUX);
 # bytecode.pl contained the following comment:
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
-@B::specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
+our @specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
 			(SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD
                         &PL_sv_zero);
 
@@ -115,15 +120,17 @@ sub B::IV::int_value {
 }
 
 sub B::NULL::as_string() {""}
-*B::IV::as_string = \*B::IV::int_value;
-*B::PV::as_string = \*B::PV::PV;
+*B::IV::as_string = *B::IV::as_string = \*B::IV::int_value;
+*B::PV::as_string = *B::PV::as_string = \*B::PV::PV;
 
 #  The input typemap checking makes no distinction between different SV types,
 #  so the XS body will generate the same C code, despite the different XS
 #  "types". So there is no change in behaviour from doing "newXS" like this,
 #  compared with the old approach of having a (near) duplicate XS body.
 #  We should fix the typemap checking.
-*B::IV::RV = \*B::PV::RV if $] > 5.012;
+
+#  Since perl 5.12.0
+*B::IV::RV = *B::IV::RV = \*B::PV::RV;
 
 my $debug;
 my $op_count = 0;
