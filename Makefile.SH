@@ -1177,50 +1177,39 @@ EOT
 done
 
 if test "X$hostperl" != X; then
+	LOCAL_PERL='$(HOST_PERL)'
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 install.perl:	$(INSTALL_DEPENDENCE) installperl
 	$(HOST_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
 	-@test ! -s extras.lst || $(MAKE) extras.install
-
-install.man:	all installman
-	$(HOST_PERL) installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
-
-# XXX Experimental. Hardwired values, but useful for testing.
-# Eventually Configure could ask for some of these values.
-install.html: all installhtml
-	-@test -f README.vms && cd vms && $(LNS) ../README.vms README_vms.pod && cd ..
-	$(HOST_PERL) installhtml   \
-      --podroot=. --podpath=. --recurse  \
-      --htmldir=$(privlib)/html   \
-      --htmlroot=$(privlib)/html  \
-      --splithead=pod/perlipc     \
-      --splititem=pod/perlfunc    \
-      --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \
-      --verbose
 !NO!SUBS!
 else
+	LOCAL_PERL='$(RUN_PERL)'
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 install.perl:	$(INSTALL_DEPENDENCE) installperl
 	$(RUN_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
 	-@test ! -s extras.lst || PATH="`pwd`:\${PATH}" PERL5LIB="`pwd`/lib" \$(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
+!NO!SUBS!
+fi
+
+$spitshell >>$Makefile <<!GROK!THIS!
 install.man:	all installman
-	$(RUN_PERL) installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
+	${LOCAL_PERL} installman --destdir=\$(DESTDIR) \$(INSTALLFLAGS)
 
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
 install.html: all installhtml
-	-@test -f README.vms && cd vms && $(LNS) ../README.vms README_vms.pod && cd ..
-	$(RUN_PERL) installhtml   \
-      --podroot=. --podpath=. --recurse  \
-      --htmldir=$(privlib)/html   \
-      --htmlroot=$(privlib)/html  \
-      --splithead=pod/perlipc     \
-      --splititem=pod/perlfunc    \
-      --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \
+	-@test -f README.vms && cd vms && \$(LNS) ../README.vms README_vms.pod && cd ..
+	${LOCAL_PERL} installhtml   \\
+      --podroot=. --podpath=. --recurse  \\
+      --htmldir=\$(privlib)/html   \\
+      --htmlroot=\$(privlib)/html  \\
+      --splithead=pod/perlipc     \\
+      --splititem=pod/perlfunc    \\
+      --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \\
       --verbose
-!NO!SUBS!
-fi
+!GROK!THIS!
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
