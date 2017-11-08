@@ -556,7 +556,7 @@ S_no_op(pTHX_ const char *const what, char *s)
  */
 
 STATIC void
-S_missingterm(pTHX_ char *s, const STRLEN len)
+S_missingterm(pTHX_ char *s, STRLEN len)
 {
     char tmpbuf[UTF8_MAXBYTES + 1];
     char q;
@@ -564,8 +564,10 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
     SV *sv;
     if (s) {
 	char * const nl = (char *) my_memrchr(s, '\n', len);
-	if (nl)
-	    *nl = '\0';
+        if (nl) {
+            *nl = '\0';
+            len = nl - s;
+        }
 	uni = UTF;
     }
     else if (PL_multi_close < 32) {
@@ -573,24 +575,28 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
 	tmpbuf[1] = (char)toCTRL(PL_multi_close);
 	tmpbuf[2] = '\0';
 	s = tmpbuf;
+        len = 2;
     }
     else {
 	if (LIKELY(PL_multi_close < 256)) {
 	    *tmpbuf = (char)PL_multi_close;
 	    tmpbuf[1] = '\0';
+            len = 1;
 	}
 	else {
+            char *end = (char *)uvchr_to_utf8((U8 *)tmpbuf, PL_multi_close);
+            *end = '\0';
+            len = end - tmpbuf;
 	    uni = TRUE;
-	    *uvchr_to_utf8((U8 *)tmpbuf, PL_multi_close) = 0;
 	}
 	s = tmpbuf;
     }
     q = memchr(s, '"', len) ? '\'' : '"';
-    sv = sv_2mortal(newSVpv(s,0));
+    sv = sv_2mortal(newSVpvn(s, len));
     if (uni)
 	SvUTF8_on(sv);
-    Perl_croak(aTHX_ "Can't find string terminator %c%" SVf
-		     "%c anywhere before EOF",q,SVfARG(sv),q);
+    Perl_croak(aTHX_ "Can't find string terminator %c%" SVf "%c"
+                     " anywhere before EOF", q, SVfARG(sv), q);
 }
 
 #include "feature.h"

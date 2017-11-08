@@ -92,6 +92,11 @@ Can't find string terminator "/" anywhere before EOF at - line 1.
 EXPECT
 Can't find string terminator "'" anywhere before EOF at - line 1.
 ########
+# NAME Unterminated ""
+"
+EXPECT
+Can't find string terminator '"' anywhere before EOF at - line 1.
+########
 # NAME Unterminated q// with non-ASCII delimiter, under utf8
 BEGIN { binmode STDERR, ":utf8" }
 use utf8;
