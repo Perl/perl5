@@ -1193,7 +1193,19 @@ install.perl:	$(INSTALL_DEPENDENCE) installperl
 !NO!SUBS!
 fi
 
-$spitshell >>$Makefile <<!GROK!THIS!
+# installdocs: any other value than 0 will enable the install.man and install.html targets
+if test "X$installdocs" = "X0"; then
+	# disable install.man and install.html targets when specified
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+install.man:
+	@echo "install.man target is disabled by Configure '-Dinstalldocs=0' option"
+
+install.html:
+	@echo "install.html target is disabled by Configure '-Dinstalldocs=0' option"
+
+!NO!SUBS!
+else
+	$spitshell >>$Makefile <<!GROK!THIS!
 install.man:	all installman
 	${LOCAL_PERL} installman --destdir=\$(DESTDIR) \$(INSTALLFLAGS)
 
@@ -1209,10 +1221,11 @@ install.html: all installhtml
       --splititem=pod/perlfunc    \\
       --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \\
       --verbose
+
 !GROK!THIS!
+fi
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-
 # I now supply perly.c with the kits, so the following section is
 # used only if you force bison to run by saying
 # 	make regen_perly

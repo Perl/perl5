@@ -334,6 +334,11 @@ L</Platform Support> section, instead.
 
 =back
 
+=item Disable installation of man and html pages
+
+New variable 'installdocs' allows disabling installation of man and HTML pages.
+sample usage: -Dinstalldocs=0
+
 =back
 
 =head1 Testing

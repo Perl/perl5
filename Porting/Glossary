@@ -3830,6 +3830,12 @@ installbin (bin.U):
 	the user is explicitly prompted for it. This variable should always
 	be used in your makefiles for maximum portability.
 
+installdocs (installdocs.U):
+	This variable allows you disable the installation of man and html pages.
+	Docs are installed by default. To disable man and html pages installation
+	you need to set this value to '0' -Dinstalldocs=0 (any other value will
+	install docs).
+
 installhtml1dir (html1dir.U):
 	This variable is really the same as html1direxp, unless you are
 	using a different installprefix.  For extra portability, you
