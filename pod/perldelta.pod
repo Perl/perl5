@@ -485,6 +485,15 @@ would be (4,6,1). If the string contains characters such as C<\x80>, whose
 representation changes under utf8, two sets of strings plus lengths are
 precomputed and stored.
 
+=item *
+
+Direct access to L<C<PL_keyword_plugin>|perlapi/PL_keyword_plugin> is not
+safe in the presence of multithreading. A new
+L<C<wrap_keyword_plugin>|perlapi/wrap_keyword_plugin> function has been
+added to allow XS modules to safely define custom keywords even when
+loaded from a thread, analoguous to L<C<PL_check>|perlapi/PL_check> /
+L<C<wrap_op_checker>|perlapi/wrap_op_checker>.
+
 =back
 
 =head1 Selected Bug Fixes
