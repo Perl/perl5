@@ -6,6 +6,9 @@
 # standard way to find out what it is, so the only portable way to go it so
 # attempt 2 reparentings and see if the PID both orphaned grandchildren get is
 # the same. (and not ours)
+#
+# NOTE: Docker and Linux containers set parent to 0 on orphaned tests.
+# We have to adjust to this below.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -34,8 +37,10 @@ sub fork_and_retrieve {
 	die "Garbled output '$_'"
 	    unless my ($how, $first, $second) = /^([a-z]+),(\d+),(\d+)\z/;
 	cmp_ok ($first, '>=', 1, "Parent of $which grandchild");
-	my $message = "grandchild waited until '$how'";
-	cmp_ok ($second, '>=', 1, "New parent of orphaned $which grandchild")
+
+    my $message = "grandchild waited until '$how'";
+    my $min_getppid_result = is_linux_container() ? 0 : 1;
+	cmp_ok ($second, '>=', $min_getppid_result, "New parent of orphaned $which grandchild")
 	    ? note ($message) : diag ($message);
 
 	SKIP: {
@@ -111,3 +116,17 @@ SKIP: {
     is ($first, $second, "Both orphaned grandchildren get the same new parent");
 }
 isnt ($first, $$, "And that new parent isn't this process");
+
+# Orphaned Docker or Linux containers do not necessarily attach to PID 1. They might attach to 0 instead.
+sub is_linux_container {
+
+    if ($^O eq 'linux' && open my $fh, '<', '/proc/1/cgroup') {
+        while(<$fh>) {
+            if (m{^\d+:pids:(.*)} && $1 ne '/init.scope') {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
