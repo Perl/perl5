@@ -6,6 +6,9 @@
 # standard way to find out what it is, so the only portable way to go it so
 # attempt 2 reparentings and see if the PID both orphaned grandchildren get is
 # the same. (and not ours)
+#
+# NOTE: Docker containers set parent to 0 on orphaned tests. We work around
+# this below.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -17,6 +20,9 @@ use strict;
 
 skip_all_without_config(qw(d_pipe d_fork d_waitpid d_getppid));
 plan (8);
+
+# Some containers don't set this file but the more exact check is complex.
+my $is_docker = -e '/.dockerenv';
 
 # No, we don't want any zombies. kill 0, $ppid spots zombies :-(
 $SIG{CHLD} = 'IGNORE';
@@ -98,6 +104,10 @@ sub fork_and_retrieve {
 		sleep 2;
 	    }
 	    my $ppid2 = getppid();
+
+        # Docker containers do not attach to PID 1. They set to 0 instead.
+        $ppid2 = 1 if( defined $ppid2 && $ppid2 == 0 && $is_docker);
+
 	    print $w "$how,$ppid1,$ppid2\n";
 	}
 	exit 0;
