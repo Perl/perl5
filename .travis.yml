@@ -8,9 +8,11 @@ compiler:
   - gcc
   - clang
 
+sudo: required
+
 env:
     global:
-        - PERL_BUILD_PACKAGING=1
+        - JOBS=4
     matrix:
         - CONFIGURE_ARGS='-Uusethreads'
         - CONFIGURE_ARGS='-Dusethreads'
@@ -23,7 +25,7 @@ matrix:
     os: osx
 
 script:
-  - ./Configure -des -Dusedevel -Uversiononly -Dcc=$CC $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING && TEST_JOBS=8 make -j8 test_harness_notty && make -j8 install && $HOME/perl-blead/bin/perlivp
+  - ./Configure -des -Dusedevel -Uversiononly -Dcc=$CC $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING && TEST_JOBS=$JOBS make -j$JOBS test_harness_notty && make -j$JOBS install && $HOME/perl-blead/bin/perlivp
 
 addons:
     apt:
