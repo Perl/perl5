@@ -1,4 +1,5 @@
 #define PERL_EXT_POSIX
+#define PERL_EXT
 
 #ifdef NETWARE
 	#define _POSIX_
