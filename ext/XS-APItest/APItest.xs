@@ -1242,6 +1242,7 @@ static int my_keyword_plugin(pTHX_
 	*op_ptr = parse_join_with_space();
 	return KEYWORD_PLUGIN_EXPR;
     } else {
+        assert(next_keyword_plugin != my_keyword_plugin);
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
     }
 }
@@ -3893,8 +3894,7 @@ BOOT:
     hintkey_DEFSV_sv = newSVpvs_share("XS::APItest/DEFSV");
     hintkey_with_vars_sv = newSVpvs_share("XS::APItest/with_vars");
     hintkey_join_with_space_sv = newSVpvs_share("XS::APItest/join_with_space");
-    next_keyword_plugin = PL_keyword_plugin;
-    PL_keyword_plugin = my_keyword_plugin;
+    wrap_keyword_plugin(my_keyword_plugin, &next_keyword_plugin);
 }
 
 void
