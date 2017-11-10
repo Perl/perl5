@@ -11921,7 +11921,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
     const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
     /* Times 4: a decimal digit takes more than 3 binary digits.
-     * NV_DIG: mantissa takes than many decimal digits.
+     * NV_DIG: mantissa takes that many decimal digits.
      * Plus 32: Playing safe. */
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
