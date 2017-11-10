@@ -2700,4 +2700,12 @@ if (! ok(@warnings == 0, "No warnings were generated")) {
     diag(join "\n", "The warnings are:", @warnings);
 }
 
+# And make sure that the max code point returned actually fits in an IV, which
+# currently range iterators are.
+my $count = 0;
+for my $i ($Unicode::UCD::MAX_CP - 1 .. $Unicode::UCD::MAX_CP) {
+    $count++;
+}
+is($count, 2, "MAX_CP isn't too large");
+
 done_testing();
