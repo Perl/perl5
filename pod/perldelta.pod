@@ -51,6 +51,22 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Yada-yada is now strictly a statement
+
+By the time of its initial stable release in Perl 5.12, the C<...>
+(yada-yada) operator was explicitly intended to serve as a statement,
+not an expression.  However, the original implementation was confused
+on this point, leading to inconsistent parsing.  The operator was
+accidentally accepted in a few situations where it did not serve as a
+complete statement, such as
+
+    ... . "foo";
+    ... if $a < $b;
+
+The parsing has now been made consistent, permitting yada-yada only as
+a statement.  Affected code can use C<do{...}> to put a yada-yada into
+an arbitrary expression context.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

@@ -90,7 +90,7 @@
 %left <ival> ','
 %right <ival> ASSIGNOP
 %right <ival> '?' ':'
-%nonassoc DOTDOT YADAYADA
+%nonassoc DOTDOT
 %left <ival> OROR DORDOR
 %left <ival> ANDAND
 %left <ival> BITOROP
@@ -480,6 +480,11 @@ barestmt:	PLUGSTMT
 	|	sideff ';'
 			{
 			  $$ = $1;
+			}
+	|	YADAYADA ';'
+			{
+			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
+				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
 			}
 	|	';'
 			{
@@ -1210,11 +1215,6 @@ term	:	termbinop
 			{ $$ = pmruntime($1, $4, $5, 1, $<ival>2); }
 	|	BAREWORD
 	|	listop
-	|	YADAYADA
-			{
-			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
-			}
 	|	PLUGEXPR
 	;
 

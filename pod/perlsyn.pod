@@ -754,12 +754,7 @@ X<whatever operator>
 X<triple-dot operator>
 
 Beginning in Perl 5.12, Perl accepts an ellipsis, "C<...>", as a
-placeholder for code that you haven't implemented yet.  This form of
-ellipsis, the unimplemented statement, should not be confused with the
-binary flip-flop C<...> operator.  One is a statement and the other an
-operator.  (Perl doesn't usually confuse them because usually Perl can tell
-whether it wants an operator or a statement, but see below for exceptions.)
-
+placeholder for code that you haven't implemented yet.
 When Perl 5.12 or later encounters an ellipsis statement, it parses this
 without error, but if and when you should actually try to execute it, Perl
 throws an exception with the text C<Unimplemented>:
@@ -771,8 +766,11 @@ throws an exception with the text C<Unimplemented>:
         say "I found an ellipsis!";
     }
 
-You can only use the elliptical statement to stand in for a
-complete statement.  These examples of how the ellipsis works:
+You can only use the elliptical statement to stand in for a complete
+statement.  Syntactically, "C<...;>" is a complete statement, but,
+as with other kinds of semicolon-terminated statement, the semicolon
+may be omitted if "C<...>" appears immediately before a closing brace.
+These examples show how the ellipsis works:
 
     use v5.12;
     { ... }
@@ -791,9 +789,7 @@ complete statement.  These examples of how the ellipsis works:
     };
 
 The elliptical statement cannot stand in for an expression that
-is part of a larger statement, since the C<...> is also the three-dot
-version of the flip-flop operator (see L<perlop/"Range Operators">).
-
+is part of a larger statement.
 These examples of attempts to use an ellipsis are syntax errors:
 
     use v5.12;
@@ -801,22 +797,17 @@ These examples of attempts to use an ellipsis are syntax errors:
     print ...;
     open(my $fh, ">", "/dev/passwd") or ...;
     if ($condition && ... ) { say "Howdy" };
+    ... if $a > $b;
+    say "Cromulent" if ...;
+    $flub = 5 + ...;
 
 There are some cases where Perl can't immediately tell the difference
 between an expression and a statement.  For instance, the syntax for a
 block and an anonymous hash reference constructor look the same unless
 there's something in the braces to give Perl a hint.  The ellipsis is a
-syntax error if Perl doesn't guess that the C<{ ... }> is a block.  In that
-case, it doesn't think the C<...> is an ellipsis because it's expecting an
-expression instead of a statement:
-
-    @transformed = map { ... } @input;    # syntax error
-
+syntax error if Perl doesn't guess that the C<{ ... }> is a block.
 Inside your block, you can use a C<;> before the ellipsis to denote that the
-C<{ ... }> is a block and not a hash reference constructor.  Now the ellipsis
-works:
-
-    @transformed = map {; ... } @input;   # ';' disambiguates
+C<{ ... }> is a block and not a hash reference constructor.
 
 Note: Some folks colloquially refer to this bit of punctuation as a
 "yada-yada" or "triple-dot", but its true name

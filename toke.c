@@ -6887,7 +6887,7 @@ Perl_yylex(pTHX)
 	}
 	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
 	    s += 3;
-	    TERM(YADAYADA);
+	    OPERATOR(YADAYADA);
 	}
 	if (PL_expect == XOPERATOR || !isDIGIT(s[1])) {
 	    char tmp = *s++;
