@@ -4,6 +4,9 @@
  *
  */
 
+/* We now depend on handy.h macros that are not public API. */
+#define PERL_EXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
