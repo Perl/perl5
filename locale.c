@@ -1408,29 +1408,13 @@ S_my_nl_langinfo(const int item, bool toggle)
             if (! lc) {
                 retval = "";
             }
-            else switch (item) {
-                case PERL_RADIXCHAR:
-                    if (! lc->decimal_point) {
-                        retval = "";
-                    }
-                    else {
-                        retval = lc->decimal_point;
-                    }
-                    break;
-
-                case PERL_THOUSEP:
-                    if (! lc->thousands_sep || strEQ("", lc->thousands_sep)) {
-                        retval = "";
-                    }
-                    else {
-                        retval = lc->thousands_sep;
-                    }
-                    break;
-
-                default:
-                    LOCALE_UNLOCK;
-                    Perl_croak(aTHX_ "panic: %s: %d: switch case: %d problem",
-                                            __FILE__, __LINE__, item);
+            else {
+                retval = (item == PERL_RADIXCHAR)
+                         ? lc->decimal_point
+                         : lc->thousands_sep;
+                if (! retval) {
+                    retval = "";
+                }
             }
 
             save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
