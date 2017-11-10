@@ -2258,7 +2258,7 @@ foreach my $Locale (@Locale) {
                                                       # OS X 10.9.3
 
     report_result($Locale, ++$locales_test_number, $ok21);
-    $test_names{$locales_test_number} = '"$!" is ASCII only outside of locale scope';
+    $test_names{$locales_test_number} = '"$!" is ASCII-only outside of locale scope';
 
     debug "$first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 
