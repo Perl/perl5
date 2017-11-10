@@ -140,6 +140,7 @@ t/perl
 t/test_state
 *.output
 *.tmp
+*.bak
 t/*.ph
 t/lib/*.ph
 
