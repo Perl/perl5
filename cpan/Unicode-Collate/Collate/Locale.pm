@@ -5,15 +5,15 @@ use warnings;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '1.19';
+our $VERSION = '1.21';
 
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
-   af ar as az be bn ca cs cy da ee eo es et fa fi fil fo
-   gu ha haw he hi hr hu hy ig is ja kk kl kn ko kok ln lt lv
-   mk ml mr mt nb nn nso om or pa pl ro sa se si sk sl sq
-   sr sv ta te th tn to tr uk ur vi vo wae wo yo zh
+   af ar as az be bn ca cs cy da dsb ee eo es et fa fi fil fo gu
+   ha haw he hi hr hu hy ig is ja kk kl kn ko kok lkt ln lt lv
+   mk ml mr mt nb nn nso om or pa pl ro sa se si sk sl sq sr sv
+   ta te th tn to tr uk ur vi vo wae wo yo zh
 );
    $LocaleFile{'default'} = '';
 # aliases
@@ -260,6 +260,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       da                Danish
       de__phonebook     German (umlaut as 'ae', 'oe', 'ue')
       de_AT_phonebook   Austrian German (umlaut primary greater)
+      dsb               Lower Sorbian
       ee                Ewe
       eo                Esperanto
       es                Spanish
@@ -287,6 +288,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       kn                Kannada
       ko                Korean [2]
       kok               Konkani
+      lkt               Lakota
       ln                Lingala
       lt                Lithuanian
       lv                Latvian
@@ -323,7 +325,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       uk                Ukrainian
       ur                Urdu
       vi                Vietnamese
-      vo                Volapuk
+      vo                Volapu"k
       wae               Walser
       wo                Wolof
       yo                Yoruba
@@ -369,14 +371,30 @@ greater than, the corresponding hangul syllable.
 [3] zh__pinyin, zh__stroke and zh__zhuyin: implemented alt='short',
 where a smaller number of ideographs are tailored.
 
-Note: 'pinyin' is in latin, 'zhuyin' is in bopomofo.
+=head2 A list of variant codes and their aliases
+
+      variant code       alias
+    ------------------------------------------
+      dictionary         dict
+      phonebook          phone     phonebk
+      reformed           reform
+      traditional        trad
+    ------------------------------------------
+      big5han            big5
+      gb2312han          gb2312
+      pinyin
+      stroke
+      zhuyin
+    ------------------------------------------
+
+Note: 'pinyin' is Han in Latin, 'zhuyin' is Han in Bopomofo.
 
 =head1 INSTALL
 
 Installation of C<Unicode::Collate::Locale> requires F<Collate/Locale.pm>,
 F<Collate/Locale/*.pm>, F<Collate/CJK/*.pm> and F<Collate/allkeys.txt>.
-On building, C<Unicode::Collate::Locale> doesn't require any of F<data/*.txt>,
-F<gendata/*>, and F<mklocale>.
+On building, C<Unicode::Collate::Locale> doesn't require
+any of F<data/*.txt>, F<gendata/*>, and F<mklocale>.
 Tests for C<Unicode::Collate::Locale> are named F<t/loc_*.t>.
 
 =head1 CAVEAT
@@ -403,11 +421,11 @@ The order of any groups including scripts is not changed.
       locale            based CLDR or other reference
     --------------------------------------------------------------------
       af                30 = 1.8.1
-      ar                22.1 = 1.9.0
+      ar                30 = 28 ("compat" wo [reorder Arab]) = 1.9.0
       as                30 = 28 (without [reorder Beng..]) = 23
-      az                30 = 24 (type="standard" without [reorder Latn Cyrl])
+      az                30 = 24 ("standard" wo [reorder Latn Cyrl])
       be                30 = 28 (without [reorder Cyrl])
-      bn                30 = 28 (type="standard" wo [reorder Beng..]) = 2.0.1
+      bn                30 = 28 ("standard" wo [reorder Beng..]) = 2.0.1
       bs                30 = 28 (type="standard": [import hr])
       bs_Cyrl           30 = 28 (type="standard": [import sr])
       ca                30 = 23 (alt="proposed" type="standard")
@@ -416,7 +434,8 @@ The order of any groups including scripts is not changed.
       da                22.1 = 1.8.1 (type="standard")
       de__phonebook     30 = 2.0 (type="phonebook")
       de_AT_phonebook   30 = 27 (type="phonebook")
-      ee                22.1 = 22
+      dsb               30 = 26
+      ee                30 = 21
       eo                30 = 1.8.1
       es                30 = 1.9.0 (type="standard")
       es__traditional   30 = 1.8.1 (type="traditional")
@@ -427,12 +446,12 @@ The order of any groups including scripts is not changed.
       fil               30 = 1.9.0 (type="standard") = 1.8.1
       fo                22.1 = 1.8.1 (alt="proposed" type="standard")
       fr_CA             30 = 1.9.0
-      gu                30 = 28 (type="standard" wo [reorder Gujr..]) = 1.9.0
+      gu                30 = 28 ("standard" wo [reorder Gujr..]) = 1.9.0
       ha                30 = 1.9.0
       haw               30 = 24
       he                30 = 28 (without [reorder Hebr]) = 23
       hi                30 = 28 (without [reorder Deva..]) = 1.9.0
-      hr                22.1 = 1.9.0 (type="standard")
+      hr                30 = 28 ("standard" wo [reorder Latn Cyrl]) = 1.9.0
       hu                22.1 = 1.8.1 (alt="proposed" type="standard")
       hy                30 = 28 (without [reorder Armn]) = 1.8.1
       ig                30 = 1.8.1
@@ -440,9 +459,10 @@ The order of any groups including scripts is not changed.
       ja                22.1 = 1.8.1 (type="standard")
       kk                30 = 28 (without [reorder Cyrl])
       kl                22.1 = 1.8.1 (type="standard")
-      kn                30 = 28 (type="standard" wo [reorder Knda..]) = 1.9.0
+      kn                30 = 28 ("standard" wo [reorder Knda..]) = 1.9.0
       ko                22.1 = 1.8.1 (type="standard")
       kok               30 = 28 (without [reorder Deva..]) = 1.8.1
+      lkt               30 = 25
       ln                30 = 2.0 (type="standard") = 1.8.1
       lt                22.1 = 1.9.0
       lv                22.1 = 1.9.0 (type="standard") = 1.8.1
@@ -460,8 +480,8 @@ The order of any groups including scripts is not changed.
       ro                30 = 1.9.0 (type="standard")
       sa            [*] 1.9.1 = 1.8.1 (type="standard" alt="proposed")
       se                22.1 = 1.8.1 (type="standard")
-      si                30 = 28 (type="standard" wo [reorder Sinh..]) = 1.9.0
-      si__dictionary    30 = 28 (type="dictionary" wo [reorder Sinh..]) = 1.9.0
+      si                30 = 28 ("standard" wo [reorder Sinh..]) = 1.9.0
+      si__dictionary    30 = 28 ("dictionary" wo [reorder Sinh..]) = 1.9.0
       sk                22.1 = 1.9.0 (type="standard")
       sl                22.1 = 1.8.1 (type="standard" alt="proposed")
       sq                22.1 = 1.8.1 (alt="proposed" type="standard")
@@ -497,7 +517,7 @@ The order of any groups including scripts is not changed.
 
 The Unicode::Collate::Locale module for perl was written
 by SADAHIRO Tomoyuki, <SADAHIRO@cpan.org>.
-This module is Copyright(C) 2004-2016, SADAHIRO Tomoyuki. Japan.
+This module is Copyright(C) 2004-2017, SADAHIRO Tomoyuki. Japan.
 All rights reserved.
 
 This module is free software; you can redistribute it and/or

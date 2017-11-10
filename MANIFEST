@@ -2628,6 +2628,7 @@ cpan/Unicode-Collate/Collate/Locale/cy.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/da.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/de_at_ph.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/de_phone.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/dsb.pl
 cpan/Unicode-Collate/Collate/Locale/ee.pl
 cpan/Unicode-Collate/Collate/Locale/eo.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/es.pl			Unicode::Collate
@@ -2655,6 +2656,7 @@ cpan/Unicode-Collate/Collate/Locale/kl.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kn.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ko.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kok.pl	Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/lkt.pl
 cpan/Unicode-Collate/Collate/Locale/ln.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lt.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lv.pl			Unicode::Collate
@@ -2742,6 +2744,7 @@ cpan/Unicode-Collate/t/loc_da.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_de.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_deat.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_deph.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_dsb.t
 cpan/Unicode-Collate/t/loc_ee.t
 cpan/Unicode-Collate/t/loc_eo.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_es.t			Unicode::Collate
@@ -2772,6 +2775,7 @@ cpan/Unicode-Collate/t/loc_kl.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kn.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ko.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kok.t	Unicode::Collate
+cpan/Unicode-Collate/t/loc_lkt.t
 cpan/Unicode-Collate/t/loc_ln.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_lt.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_lv.t			Unicode::Collate
@@ -2830,6 +2834,7 @@ cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate
 cpan/Unicode-Collate/t/override.t		Unicode::Collate
 cpan/Unicode-Collate/t/rearrang.t		Unicode::Collate
 cpan/Unicode-Collate/t/rewrite.t			Unicode::Collate
+cpan/Unicode-Collate/t/tangut.t
 cpan/Unicode-Collate/t/test.t			Unicode::Collate
 cpan/Unicode-Collate/t/trailwt.t		Unicode::Collate
 cpan/Unicode-Collate/t/variable.t		Unicode::Collate

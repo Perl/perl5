@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..258\n"; } # 11 + 19 x @Versions
+BEGIN { $| = 1; print "1..277\n"; } # 11 + 19 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -66,7 +66,7 @@ ok($overCJK->lt("a\x{4E03}", "A\x{4E01}"));
 # 9FCC       is  CJK UI since UCA_Version 24 (Unicode 6.1).
 # 9FCD..9FD5 are CJK UI since UCA_Version 32 (Unicode 8.0).
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32);
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34);
 
 for my $v (@Versions) {
     $overCJK->change(UCA_Version => $v);

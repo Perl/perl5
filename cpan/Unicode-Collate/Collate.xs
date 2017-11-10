@@ -74,6 +74,11 @@ static const STDCHAR UnifiedCompat[] = {
       1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,1,1,1
 }; /* E F 0 1 2 3 4 5 6 7 8 9 A B C D E F 0 1 2 3 4 5 6 7 8 9 */
 
+#define TangIdeoIni  (0x17000) /* Unicode 9.0 */
+#define TangIdeoFin  (0x187EC) /* Unicode 9.0 */
+#define TangCompIni  (0x18800) /* Unicode 9.0 */
+#define TangCompFin  (0x18AF2) /* Unicode 9.0 */
+
 #define codeRange(bcode, ecode)	((bcode) <= code && code <= (ecode))
 
 MODULE = Unicode::Collate	PACKAGE = Unicode::Collate
@@ -270,13 +275,14 @@ _derivCE_9 (code)
     _derivCE_22 = 4
     _derivCE_24 = 5
     _derivCE_32 = 6
+    _derivCE_34 = 7
   PREINIT:
     UV base, aaaa, bbbb;
     U8 a[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
     U8 b[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-    bool basic_unified = 0;
+    bool basic_unified = 0, tangut = 0;
   PPCODE:
-    if (CJK_UidIni <= code) {
+    if (codeRange(CJK_UidIni, CJK_CompFin)) {
 	if (codeRange(CJK_CompIni, CJK_CompFin))
 	    basic_unified = (bool)UnifiedCompat[code - CJK_CompIni];
 	else
@@ -286,8 +292,13 @@ _derivCE_9 (code)
 			     ix == 2 ? (code <= CJK_UidF51) :
 			     ix == 1 ? (code <= CJK_UidF41) :
 				       (code <= CJK_UidFin));
+    } else if (ix >= 7) {
+	tangut = (codeRange(TangIdeoIni, TangIdeoFin) ||
+		  codeRange(TangCompIni, TangCompFin));
     }
-    base = (basic_unified)
+    base = tangut
+	    ? 0xFB00 :
+	   basic_unified
 	    ? 0xFB40 : /* CJK */
 	   ((codeRange(CJK_ExtAIni, CJK_ExtAFin))
 		||
@@ -300,8 +311,8 @@ _derivCE_9 (code)
 	    (ix >= 6 && codeRange(CJK_ExtEIni, CJK_ExtEFin)))
 	    ? 0xFB80   /* CJK ext. */
 	    : 0xFBC0;  /* others */
-    aaaa =  base + (code >> 15);
-    bbbb = (code & 0x7FFF) | 0x8000;
+    aaaa = tangut ? base : base + (code >> 15);
+    bbbb = (tangut ? (code - TangIdeoIni) : (code & 0x7FFF)) | 0x8000;
     a[1] = (U8)(aaaa >> 8);
     a[2] = (U8)(aaaa & 0xFF);
     b[1] = (U8)(bbbb >> 8);

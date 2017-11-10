@@ -94,14 +94,14 @@ ok($objEt->eq("U\x{308}", pack('U', 0xDC)));
 
 # 40
 
-ok($objEt->eq("o\x{303}\x{301}","\x{1E4D}"));
-ok($objEt->eq("O\x{303}\x{301}","\x{1E4C}"));
+ok($objEt->eq("o\x{303}\x{301}", "\x{1E4D}"));
+ok($objEt->eq("O\x{303}\x{301}", "\x{1E4C}"));
 ok($objEt->eq("o\x{303}\x{304}", "\x{22D}"));
 ok($objEt->eq("O\x{303}\x{304}", "\x{22C}"));
-ok($objEt->eq("o\x{303}\x{308}","\x{1E4F}"));
-ok($objEt->eq("O\x{303}\x{308}","\x{1E4E}"));
-ok($objEt->eq("o\x{303}\x{31B}","\x{1EE1}"));
-ok($objEt->eq("O\x{303}\x{31B}","\x{1EE0}"));
+ok($objEt->eq("o\x{303}\x{308}", "\x{1E4F}"));
+ok($objEt->eq("O\x{303}\x{308}", "\x{1E4E}"));
+ok($objEt->eq("o\x{303}\x{31B}", "\x{1EE1}"));
+ok($objEt->eq("O\x{303}\x{31B}", "\x{1EE0}"));
 ok($objEt->eq("a\x{308}\x{304}", "\x{1DF}"));
 ok($objEt->eq("A\x{308}\x{304}", "\x{1DE}"));
 ok($objEt->eq("o\x{308}\x{304}", "\x{22B}"));
