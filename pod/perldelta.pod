@@ -79,6 +79,24 @@ The parsing has now been made consistent, permitting yada-yada only as
 a statement.  Affected code can use C<do{...}> to put a yada-yada into
 an arbitrary expression context.
 
+=head2 Subroutines no longer need typeglobs
+
+Perl 5.22.0 introduced an optimization allowing subroutines to be stored in
+packages as simple sub refs, not requiring a full typeglob (thus
+potentially saving large amounts of memeory).  However, the optimization
+was flawed: it only applied to the main package.
+
+This optimization has now been extended to all packages.  This may break
+compatibility with introspection code that looks inside stashes and expects
+everything in them to be a typeglob.
+
+When this optimization happens, the typeglob still notionally exists, so
+accessing it will cause the stash entry to be upgraded to a typeglob.  The
+optimization does not apply to XSUBs or exported subroutines, and calling a
+method will undo it, since method calls cache things in typeglobs.
+
+[perl #129916] [perl #132252]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -154,6 +172,12 @@ benchmarked running four times faster:
 In addition, C<sprintf> expressions which have a constant format
 containing only C<%s> and C<%%> format elements, and which have a fixed
 number of arguments, are now also optimised into a C<multiconcat> op.
+
+=item *
+
+Subroutines in packages no longer need to be stored in typeglobs, saving
+large amounts of memory.  See L</Subroutines no longer need typeglobs>
+under L</Incompatible Changes>, above.
 
 =back
 
