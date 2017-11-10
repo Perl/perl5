@@ -1655,7 +1655,7 @@ morecore(int bucket)
   		return;
 #ifndef NO_PERL_MALLOC_ENV
 	if (!were_called) {
-	    /* It's the our first time.  Initialize ourselves */
+	    /* It's our first time.  Initialize ourselves */
 	    were_called = 1;	/* Avoid a loop */
 	    if (!MallocCfg[MallocCfg_skip_cfg_env]) {
 		char *s = getenv("PERL_MALLOC_OPT"), *t = s, *off;
