@@ -27,4 +27,13 @@ the codebase for this string.
 An alternative strategy would be to skip all porting tests, but many of
 them are useful if additional patches might be applied.
 
+=head1 Customizing patchlevel to advertise your local patches
+
+You can advertise your custom local patches by using patchlevel.h as a
+standalone Perl script.
+
+=head2 Sample usage:
+
+		perl -x patchlevel.h "This is a custom patch"
+
 =cut
