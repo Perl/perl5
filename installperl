@@ -11,8 +11,8 @@ BEGIN {
 }
 
 use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare $Is_AmigaOS
-	    %opts $packlist);
+our ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $Is_Darwin, $Is_NetWare, $Is_AmigaOS,
+	    %opts, $packlist);
 my $versiononly;
 
 BEGIN {

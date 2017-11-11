@@ -2,10 +2,10 @@ package Module::CoreList::Utils;
 
 use strict;
 use warnings;
-use vars qw[$VERSION %utilities];
 use Module::CoreList;
 
-$VERSION = '5.20171120';
+our $VERSION = '5.20171120';
+our %utilities;
 
 sub utilities {
     my $perl = shift;

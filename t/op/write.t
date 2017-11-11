@@ -111,7 +111,7 @@ plan $tests;
 ## Section 1
 ############
 
-use vars qw($fox $multiline $foo $good);
+our ($fox, $multiline, $foo, $good);
 
 format OUT =
 the quick brown @<<
@@ -251,7 +251,7 @@ $right = <<EOT;
 EOT
 
 my $was1 = my $was2 = '';
-use vars '$format2';
+our $format2;
 for (0..10) {           
   # lexical picture
   $^A = '';
@@ -327,6 +327,7 @@ close  OUT4a or die "Could not close: $!";
 is cat('Op_write.tmp'), "Nasdaq dropping\n", 'skipspace inside "${...}"'
     and unlink_all "Op_write.tmp";
 
+our $test1;
 eval <<'EOFORMAT';
 format OUT10 =
 @####.## @0###.##
@@ -336,7 +337,6 @@ EOFORMAT
 
 open(OUT10, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
-use vars '$test1';
 $test1 = 12.95;
 write(OUT10);
 close OUT10 or die "Could not close: $!";

@@ -14,7 +14,7 @@ BEGIN{
 use Test::More tests => 36;
 
 use strict;
-use vars qw/$bad $bad7 $ok10 $bad18 $ok/;
+our ( $bad, $bad7, $ok10, $bad18, $ok );
 
 $^W=1;
 

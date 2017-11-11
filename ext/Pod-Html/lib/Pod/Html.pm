@@ -2,11 +2,10 @@ package Pod::Html;
 use strict;
 require Exporter;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.2202;
-@ISA = qw(Exporter);
-@EXPORT = qw(pod2html htmlify);
-@EXPORT_OK = qw(anchorify);
+our $VERSION = 1.2203;
+our @ISA = qw(Exporter);
+our @EXPORT = qw(pod2html htmlify);
+our @EXPORT_OK = qw(anchorify);
 
 use Carp;
 use Config;

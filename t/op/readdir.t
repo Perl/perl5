@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use warnings;
-use vars qw($fh @fh %fh);
+our ($fh, @fh, %fh);
 
 eval 'opendir(NOSUCH, "no/such/directory");';
 skip_all($@) if $@;

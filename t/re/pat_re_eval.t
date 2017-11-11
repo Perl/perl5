@@ -21,6 +21,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+our @global;
 
 plan tests => 497;  # Update this when adding/deleting tests.
 
@@ -1066,7 +1067,6 @@ sub run_tests {
     {
 	use Tie::Array;
 
-	use vars '@global';
 	local @global;
 	my @array;
 	my @refs = (0, \@array, 2);

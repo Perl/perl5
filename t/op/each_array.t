@@ -7,7 +7,7 @@ BEGIN {
 }
 use strict;
 use warnings;
-use vars qw(@array @r $k $v $c);
+our (@array, @r, $k, $v, $c);
 
 plan tests => 65;
 

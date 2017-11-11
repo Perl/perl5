@@ -41,7 +41,7 @@ use Safe;
 
 #$Storable::DEBUGME = 1;
 
-use vars qw($freezed $thawed @obj @res $blessed_code);
+our ($freezed, $thawed, @obj, @res, $blessed_code);
 
 $blessed_code = bless sub { "blessed" }, "Some::Package";
 { package Another::Package; sub foo { __PACKAGE__ } }

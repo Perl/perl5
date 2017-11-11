@@ -1,12 +1,11 @@
 package ExtUtils::CBuilder::Platform::aix;
-$ExtUtils::CBuilder::Platform::aix::VERSION = '0.280228';
 use warnings;
 use strict;
 use ExtUtils::CBuilder::Platform::Unix;
 use File::Spec;
 
-use vars qw(@ISA);
-@ISA = qw(ExtUtils::CBuilder::Platform::Unix);
+our $VERSION = '0.280229';
+our @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 sub need_prelink { 1 }
 

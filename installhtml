@@ -164,7 +164,7 @@ usage("") unless @ARGV;
 # See vms/descrip_mms.template -> descrip.mms for invocation.
 if ( $^O eq 'VMS' ) { @ARGV = split(/\s+/,$ARGV[0]); }
 
-use vars qw( %Options );
+our %Options;
 
 # parse the command-line
 my $result = GetOptions( \%Options, qw(

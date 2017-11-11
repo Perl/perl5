@@ -1,9 +1,8 @@
 package File::Spec::Unix;
 
 use strict;
-use vars qw($VERSION);
 
-$VERSION = '3.68';
+our $VERSION = '3.69';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 

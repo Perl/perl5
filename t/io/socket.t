@@ -23,6 +23,8 @@ BEGIN {
 use strict;
 use Socket;
 
+our $TODO;
+
 $| = 1; # ensure test output is synchronous so processes don't conflict
 
 my $tcp = getprotobyname('tcp')
@@ -102,9 +104,7 @@ SKIP: {
 	    my $buf;
 	    my $recv_peer = recv($child, $buf, 1000, 0);
 	    {
-		use vars '$TODO';
-		local $TODO;
-		$TODO = "[perl #122657] Hurd doesn't populate sin_len correctly"
+        local $TODO = "[perl #122657] Hurd doesn't populate sin_len correctly"
 		    if $^O eq "gnu";
 		# [perl #118843]
 		ok_child($recv_peer eq '' || $recv_peer eq getpeername $child,

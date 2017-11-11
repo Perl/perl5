@@ -35,7 +35,7 @@ usage: $0  [ options ]
 EOF
 
 use strict;
-use vars qw(%Config $Config_SH_expanded);
+our (%Config, $Config_SH_expanded);
 
 my $how_many_common = 22;
 
@@ -155,7 +155,7 @@ $config_txt .= sprintf << 'EOT', $], $export_funcs;
 package Config;
 use strict;
 use warnings;
-use vars '%%Config', '$VERSION';
+our ( %%Config, $VERSION );
 
 $VERSION = "%s";
 
@@ -469,7 +469,7 @@ $heavy_txt .= sprintf <<'ENDOFBEG', $osname, $osname, $from, $osname, $env_cygwi
 package Config;
 use strict;
 use warnings;
-use vars '%%Config';
+our %%Config;
 
 sub bincompat_options {
     return split ' ', (Internals::V())[0];

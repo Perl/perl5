@@ -98,11 +98,8 @@ sub convert_from_ascii {
 
 use strict;
 use warnings FATAL=>"all";
-use vars qw($bang $ffff $nulnul); # used by the tests
-use vars qw($qr $skip_amp $qr_embed $qr_embed_thr $regex_sets
-            $no_null); # set by our callers
-
-
+our ($bang, $ffff, $nulnul); # used by the tests
+our ($qr, $skip_amp, $qr_embed, $qr_embed_thr, $regex_sets, $no_null); # set by our callers
 
 if (!defined $file) {
     open TESTS, 're/re_tests' or die "Can't open re/re_tests: $!";

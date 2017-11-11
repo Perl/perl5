@@ -75,8 +75,7 @@ SKIP: {
 # include_dirs should be settable as string or list
 {
   package Sub;
-  use vars '@ISA';
-  @ISA = ('ExtUtils::CBuilder');
+  our @ISA = ('ExtUtils::CBuilder');
   my $saw = 0;
   sub do_system {
     if ($^O eq "MSWin32") {
