@@ -2295,7 +2295,7 @@ PoisonWith(0xEF) for catching access to freed memory.
 #define NEWSV(x,len)	newSV(len)
 #endif
 
-#define MEM_SIZE_MAX ((MEM_SIZE)~0)
+#define MEM_SIZE_MAX ((MEM_SIZE)-1)
 
 #define _PERL_STRLEN_ROUNDUP_UNCHECKED(n) (((n) - 1 + PERL_STRLEN_ROUNDUP_QUANTUM) & ~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM - 1))
 
