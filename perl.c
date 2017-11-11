@@ -5231,8 +5231,9 @@ Perl_my_failure_exit(pTHX)
 
 #else
     int exitstatus;
-    if (errno & 255)
-	STATUS_UNIX_SET(errno);
+    int eno = errno;
+    if (eno & 255)
+	STATUS_UNIX_SET(eno);
     else {
 	exitstatus = STATUS_UNIX >> 8;
 	if (exitstatus & 255)

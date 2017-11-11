@@ -619,6 +619,7 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
     int status;
     int flag = P_WAIT;
     int index = 0;
+    int eno;
 
     PERL_ARGS_ASSERT_DO_ASPAWN;
 
@@ -645,7 +646,7 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 			   (const char*)(really ? SvPV_nolen(really) : argv[0]),
 			   (const char* const*)argv);
 
-    if (status < 0 && (errno == ENOEXEC || errno == ENOENT)) {
+    if (status < 0 && (eno = errno, (eno == ENOEXEC || eno == ENOENT))) {
 	/* possible shell-builtin, invoke with shell */
 	int sh_items;
 	sh_items = w32_perlshell_items;
