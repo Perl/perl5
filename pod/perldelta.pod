@@ -205,6 +205,8 @@ The usage of "use vars" has been discouraged since the introduction of our in
 Perl 5.6.0. Where possible the usage of this pragma has now been removed from
 the Perl source code.
 
+This had a slight effect (for the better) on the output of WARNING_BITS in B::Deparse.
+
 =back
 
 =head2 New Modules and Pragmata
