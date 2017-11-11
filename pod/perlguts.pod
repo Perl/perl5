@@ -798,68 +798,116 @@ Perl uses a reference count-driven garbage collection mechanism.  SVs,
 AVs, or HVs (xV for short in the following) start their life with a
 reference count of 1.  If the reference count of an xV ever drops to 0,
 then it will be destroyed and its memory made available for reuse.
-
-This normally doesn't happen at the Perl level unless a variable is
-undef'ed or the last variable holding a reference to it is changed or
-overwritten.  At the internal level, however, reference counts can be
-manipulated with the following macros:
+At the most basic internal level, reference counts can be manipulated
+with the following macros:
 
     int SvREFCNT(SV* sv);
     SV* SvREFCNT_inc(SV* sv);
     void SvREFCNT_dec(SV* sv);
 
-However, there is one other function which manipulates the reference
-count of its argument.  The C<newRV_inc> function, you will recall,
-creates a reference to the specified argument.  As a side effect,
-it increments the argument's reference count.  If this is not what
-you want, use C<newRV_noinc> instead.
+(There are also suffixed versions of the increment and decrement macros,
+for situations where the full generality of these basic macros can be
+exchanged for some performance.)
 
-For example, imagine you want to return a reference from an XSUB function.
-Inside the XSUB routine, you create an SV which initially has a reference
-count of one.  Then you call C<newRV_inc>, passing it the just-created SV.
-This returns the reference as a new SV, but the reference count of the
-SV you passed to C<newRV_inc> has been incremented to two.  Now you
-return the reference from the XSUB routine and forget about the SV.
-But Perl hasn't!  Whenever the returned reference is destroyed, the
-reference count of the original SV is decreased to one and nothing happens.
-The SV will hang around without any way to access it until Perl itself
-terminates.  This is a memory leak.
+However, the way a programmer should think about references is not so
+much in terms of the bare reference count, but in terms of I<ownership>
+of references.  A reference to an xV can be owned by any of a variety
+of entities: another xV, the Perl interpreter, an XS data structure,
+a piece of running code, or a dynamic scope.  An xV generally does not
+know what entities own the references to it; it only knows how many
+references there are, which is the reference count.
 
-The correct procedure, then, is to use C<newRV_noinc> instead of
-C<newRV_inc>.  Then, if and when the last reference is destroyed,
-the reference count of the SV will go to zero and it will be destroyed,
-stopping any memory leak.
+To correctly maintain reference counts, it is essential to keep track
+of what references the XS code is manipulating.  The programmer should
+always know where a reference has come from and who owns it, and be
+aware of any creation or destruction of references, and any transfers
+of ownership.  Because ownership isn't represented explicitly in the xV
+data structures, only the reference count need be actually maintained
+by the code, and that means that this understanding of ownership is not
+actually evident in the code.  For example, transferring ownership of a
+reference from one owner to another doesn't change the reference count
+at all, so may be achieved with no actual code.  (The transferring code
+doesn't touch the referenced object, but does need to ensure that the
+former owner knows that it no longer owns the reference, and that the
+new owner knows that it now does.)
+
+An xV that is visible at the Perl level should not become unreferenced
+and thus be destroyed.  Normally, an object will only become unreferenced
+when it is no longer visible, often by the same means that makes it
+invisible.  For example, a Perl reference value (RV) owns a reference to
+its referent, so if the RV is overwritten that reference gets destroyed,
+and the no-longer-reachable referent may be destroyed as a result.
+
+Many functions have some kind of reference manipulation as
+part of their purpose.  Sometimes this is documented in terms
+of ownership of references, and sometimes it is (less helpfully)
+documented in terms of changes to reference counts.  For example, the
+L<newRV_inc()|perlapi/newRV_inc> function is documented to create a new RV
+(with reference count 1) and increment the reference count of the referent
+that was supplied by the caller.  This is best understood as creating
+a new reference to the referent, which is owned by the created RV,
+and returning to the caller ownership of the sole reference to the RV.
+The L<newRV_noinc()|perlapi/newRV_noinc> function instead does not
+increment the reference count of the referent, but the RV nevertheless
+ends up owning a reference to the referent.  It is therefore implied
+that the caller of C<newRV_noinc()> is relinquishing a reference to the
+referent, making this conceptually a more complicated operation even
+though it does less to the data structures.
+
+For example, imagine you want to return a reference from an XSUB
+function.  Inside the XSUB routine, you create an SV which initially
+has just a single reference, owned by the XSUB routine.  This reference
+needs to be disposed of before the routine is complete, otherwise it
+will leak, preventing the SV from ever being destroyed.  So to create
+an RV referencing the SV, it is most convenient to pass the SV to
+C<newRV_noinc()>, which consumes that reference.  Now the XSUB routine
+no longer owns a reference to the SV, but does own a reference to the RV,
+which in turn owns a reference to the SV.  The ownership of the reference
+to the RV is then transferred by the process of returning the RV from
+the XSUB.
 
 There are some convenience functions available that can help with the
 destruction of xVs.  These functions introduce the concept of "mortality".
-An xV that is mortal has had its reference count marked to be decremented,
-but not actually decremented, until "a short time later".  Generally the
-term "short time later" means a single Perl statement, such as a call to
-an XSUB function.  The actual determinant for when mortal xVs have their
-reference count decremented depends on two macros, SAVETMPS and FREETMPS.
-See L<perlcall> and L<perlxs> for more details on these macros.
+Much documentation speaks of an xV itself being mortal, but this is
+misleading.  It is really I<a reference to> an xV that is mortal, and it
+is possible for there to be more than one mortal reference to a single xV.
+For a reference to be mortal means that it is owned by the temps stack,
+one of perl's many internal stacks, which will destroy that reference
+"a short time later".  Usually the "short time later" is the end of
+the current Perl statement.  However, it gets more complicated around
+dynamic scopes: there can be multiple sets of mortal references hanging
+around at the same time, with different death dates.  Internally, the
+actual determinant for when mortal xV references are destroyed depends
+on two macros, SAVETMPS and FREETMPS.  See L<perlcall> and L<perlxs>
+for more details on these macros.
 
-"Mortalization" then is at its simplest a deferred C<SvREFCNT_dec>.
-However, if you mortalize a variable twice, the reference count will
-later be decremented twice.
+Mortal references are mainly used for xVs that are placed on perl's
+main stack.  The stack is problematic for reference tracking, because it
+contains a lot of xV references, but doesn't own those references: they
+are not counted.  Currently, there are many bugs resulting from xVs being
+destroyed while referenced by the stack, because the stack's uncounted
+references aren't enough to keep the xVs alive.  So when putting an
+(uncounted) reference on the stack, it is vitally important to ensure that
+there will be a counted reference to the same xV that will last at least
+as long as the uncounted reference.  But it's also important that that
+counted reference be cleaned up at an appropriate time, and not unduly
+prolong the xV's life.  For there to be a mortal reference is often the
+best way to satisfy this requirement, especially if the xV was created
+especially to be put on the stack and would otherwise be unreferenced.
 
-"Mortal" SVs are mainly used for SVs that are placed on perl's stack.
-For example an SV which is created just to pass a number to a called sub
-is made mortal to have it cleaned up automatically when it's popped off
-the stack.  Similarly, results returned by XSUBs (which are pushed on the
-stack) are often made mortal.
-
-To create a mortal variable, use the functions:
+To create a mortal reference, use the functions:
 
     SV*  sv_newmortal()
-    SV*  sv_2mortal(SV*)
     SV*  sv_mortalcopy(SV*)
+    SV*  sv_2mortal(SV*)
 
-The first call creates a mortal SV (with no value), the second converts an existing
-SV to a mortal SV (and thus defers a call to C<SvREFCNT_dec>), and the
-third creates a mortal copy of an existing SV.
-Because C<sv_newmortal> gives the new SV no value, it must normally be given one
-via C<sv_setpv>, C<sv_setiv>, etc. :
+C<sv_newmortal()> creates an SV (with the undefined value) whose sole
+reference is mortal.  C<sv_mortalcopy()> creates an xV whose value is a
+copy of a supplied xV and whose sole reference is mortal.  C<sv_2mortal()>
+mortalises an existing xV reference: it transfers ownership of a reference
+from the caller to the temps stack.  Because C<sv_newmortal> gives the new
+SV no value, it must normally be given one via C<sv_setpv>, C<sv_setiv>,
+etc. :
 
     SV *tmp = sv_newmortal();
     sv_setiv(tmp, an_integer);
@@ -867,17 +915,6 @@ via C<sv_setpv>, C<sv_setiv>, etc. :
 As that is multiple C statements it is quite common so see this idiom instead:
 
     SV *tmp = sv_2mortal(newSViv(an_integer));
-
-
-You should be careful about creating mortal variables.  Strange things
-can happen if you make the same value mortal within multiple contexts,
-or if you make a variable mortal multiple
-times.  Thinking of "Mortalization"
-as deferred C<SvREFCNT_dec> should help to minimize such problems.
-For example if you are passing an SV which you I<know> has a high enough REFCNT
-to survive its use on the stack you need not do any mortalization.
-If you are not sure then doing an C<SvREFCNT_inc> and C<sv_2mortal>, or
-making a C<sv_mortalcopy> is safer.
 
 The mortal routines are not just for SVs; AVs and HVs can be
 made mortal by passing their address (type-casted to C<SV*>) to the
