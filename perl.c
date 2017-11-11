@@ -92,6 +92,7 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 	PERL_SET_THX(my_perl);
 	OP_REFCNT_INIT;
 	OP_CHECK_MUTEX_INIT;
+        KEYWORD_PLUGIN_MUTEX_INIT;
 	HINTS_REFCNT_INIT;
         LOCALE_INIT;
 	MUTEX_INIT(&PL_dollarzero_mutex);

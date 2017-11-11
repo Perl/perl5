@@ -12072,6 +12072,79 @@ Perl_keyword_plugin_standard(pTHX_
     return KEYWORD_PLUGIN_DECLINE;
 }
 
+/*
+=for apidoc Amx|void|wrap_keyword_plugin|Perl_keyword_plugin_t new_plugin|Perl_keyword_plugin_t *old_plugin_p
+
+Puts a C function into the chain of keyword plugins.  This is the
+preferred way to manipulate the L</PL_keyword_plugin> variable.
+C<new_plugin> is a pointer to the C function that is to be added to the
+keyword plugin chain, and C<old_plugin_p> points to the storage location
+where a pointer to the next function in the chain will be stored.  The
+value of C<new_plugin> is written into the L</PL_keyword_plugin> variable,
+while the value previously stored there is written to C<*old_plugin_p>.
+
+L</PL_keyword_plugin> is global to an entire process, and a module wishing
+to hook keyword parsing may find itself invoked more than once per
+process, typically in different threads.  To handle that situation, this
+function is idempotent.  The location C<*old_plugin_p> must initially
+(once per process) contain a null pointer.  A C variable of static
+duration (declared at file scope, typically also marked C<static> to give
+it internal linkage) will be implicitly initialised appropriately, if it
+does not have an explicit initialiser.  This function will only actually
+modify the plugin chain if it finds C<*old_plugin_p> to be null.  This
+function is also thread safe on the small scale.  It uses appropriate
+locking to avoid race conditions in accessing L</PL_keyword_plugin>.
+
+When this function is called, the function referenced by C<new_plugin>
+must be ready to be called, except for C<*old_plugin_p> being unfilled.
+In a threading situation, C<new_plugin> may be called immediately, even
+before this function has returned.  C<*old_plugin_p> will always be
+appropriately set before C<new_plugin> is called.  If C<new_plugin>
+decides not to do anything special with the identifier that it is given
+(which is the usual case for most calls to a keyword plugin), it must
+chain the plugin function referenced by C<*old_plugin_p>.
+
+Taken all together, XS code to install a keyword plugin should typically
+look something like this:
+
+    static Perl_keyword_plugin_t next_keyword_plugin;
+    static OP *my_keyword_plugin(pTHX_
+        char *keyword_plugin, STRLEN keyword_len, OP **op_ptr)
+    {
+        if (memEQs(keyword_ptr, keyword_len,
+                   "my_new_keyword")) {
+            ...
+        } else {
+            return next_keyword_plugin(aTHX_
+                keyword_ptr, keyword_len, op_ptr);
+        }
+    }
+    BOOT:
+        wrap_keyword_plugin(my_keyword_plugin,
+                            &next_keyword_plugin);
+
+Direct access to L</PL_keyword_plugin> should be avoided.
+
+=cut
+*/
+
+void
+Perl_wrap_keyword_plugin(pTHX_
+    Perl_keyword_plugin_t new_plugin, Perl_keyword_plugin_t *old_plugin_p)
+{
+    dVAR;
+
+    PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_WRAP_KEYWORD_PLUGIN;
+    if (*old_plugin_p) return;
+    KEYWORD_PLUGIN_MUTEX_LOCK;
+    if (!*old_plugin_p) {
+        *old_plugin_p = PL_keyword_plugin;
+        PL_keyword_plugin = new_plugin;
+    }
+    KEYWORD_PLUGIN_MUTEX_UNLOCK;
+}
+
 #define parse_recdescent(g,p) S_parse_recdescent(aTHX_ g,p)
 static void
 S_parse_recdescent(pTHX_ int gramtype, I32 fakeeof)

@@ -5420,6 +5420,18 @@ typedef struct am_table_short AMTS;
 
 #define PERLDB_LINE_OR_SAVESRC (PL_perldb & (PERLDBf_LINE | PERLDBf_SAVESRC))
 
+#ifdef USE_ITHREADS
+#  define KEYWORD_PLUGIN_MUTEX_INIT    MUTEX_INIT(&PL_keyword_plugin_mutex)
+#  define KEYWORD_PLUGIN_MUTEX_LOCK    MUTEX_LOCK(&PL_keyword_plugin_mutex)
+#  define KEYWORD_PLUGIN_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_keyword_plugin_mutex)
+#  define KEYWORD_PLUGIN_MUTEX_TERM    MUTEX_DESTROY(&PL_keyword_plugin_mutex)
+#else
+#  define KEYWORD_PLUGIN_MUTEX_INIT    NOOP
+#  define KEYWORD_PLUGIN_MUTEX_LOCK    NOOP
+#  define KEYWORD_PLUGIN_MUTEX_UNLOCK  NOOP
+#  define KEYWORD_PLUGIN_MUTEX_TERM    NOOP
+#endif
+
 #ifdef USE_LOCALE
 /* These locale things are all subject to change */
 
