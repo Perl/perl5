@@ -3010,9 +3010,11 @@ PP(pp_stat)
 	     */
 	    bool neg;
 	    Stat_t s;
+	    CLANG_DIAG_IGNORE(-Wtautological-compare);
 	    GCC_DIAG_IGNORE(-Wtype-limits);
 	    neg = PL_statcache.st_ino < 0;
 	    GCC_DIAG_RESTORE;
+	    CLANG_DIAG_RESTORE;
 	    if (neg) {
 		s.st_ino = (IV)PL_statcache.st_ino;
 		if (LIKELY(s.st_ino == PL_statcache.st_ino)) {
