@@ -255,6 +255,12 @@ to be considered variable length, and hence disallowed.
 
 =item *
 
+The section on reference counting in L<perlguts> has been heavily revised,
+to describe references in the way a programmer needs to think about them
+rather than in terms of the physical data structures.
+
+=item *
+
 XXX Description of the change here
 
 =back
