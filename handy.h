@@ -2312,7 +2312,8 @@ PoisonWith(0xEF) for catching access to freed memory.
  */
 
 #  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
-    (8 * sizeof(n) + sizeof(t) > sizeof(MEM_SIZE))
+    (  sizeof(MEM_SIZE) < sizeof(n) \
+    || sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
 
 /* This is written in a slightly odd way to avoid various spurious
  * compiler warnings. We *want* to write the expression as
