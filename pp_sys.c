@@ -2995,13 +2995,61 @@ PP(pp_stat)
 	EXTEND(SP, max);
 	EXTEND_MORTAL(max);
 	mPUSHi(PL_statcache.st_dev);
-#if ST_INO_SIZE > IVSIZE
-	mPUSHn(PL_statcache.st_ino);
-#elif ST_INO_SIGN <= 0
-	mPUSHi(PL_statcache.st_ino);
-#else
-	mPUSHu(PL_statcache.st_ino);
-#endif
+	{
+	    /*
+	     * We try to represent st_ino as a native IV or UV where
+	     * possible, but fall back to a decimal string where
+	     * necessary.  The code to generate these decimal strings
+	     * is quite obtuse, because (a) we're portable to non-POSIX
+	     * platforms where st_ino might be signed; (b) we didn't
+	     * necessarily detect at Configure time whether st_ino is
+	     * signed; (c) we're portable to non-POSIX platforms where
+	     * ino_t isn't defined, so have no name for the type of
+	     * st_ino; and (d) sprintf() doesn't necessarily support
+	     * integers as large as st_ino.
+	     */
+	    bool neg;
+	    Stat_t s;
+	    GCC_DIAG_IGNORE(-Wtype-limits);
+	    neg = PL_statcache.st_ino < 0;
+	    GCC_DIAG_RESTORE;
+	    if (neg) {
+		s.st_ino = (IV)PL_statcache.st_ino;
+		if (LIKELY(s.st_ino == PL_statcache.st_ino)) {
+		    mPUSHi(s.st_ino);
+		} else {
+		    char buf[sizeof(s.st_ino)*3+1], *p;
+		    s.st_ino = PL_statcache.st_ino;
+		    for (p = buf + sizeof(buf); p != buf+1; ) {
+			Stat_t t;
+			t.st_ino = s.st_ino / 10;
+			*--p = '0' + (int)(t.st_ino*10 - s.st_ino);
+			s.st_ino = t.st_ino;
+		    }
+		    while (*p == '0')
+			p++;
+		    *--p = '-';
+		    mPUSHp(p, buf+sizeof(buf) - p);
+		}
+	    } else {
+		s.st_ino = (UV)PL_statcache.st_ino;
+		if (LIKELY(s.st_ino == PL_statcache.st_ino)) {
+		    mPUSHu(s.st_ino);
+		} else {
+		    char buf[sizeof(s.st_ino)*3], *p;
+		    s.st_ino = PL_statcache.st_ino;
+		    for (p = buf + sizeof(buf); p != buf; ) {
+			Stat_t t;
+			t.st_ino = s.st_ino / 10;
+			*--p = '0' + (int)(s.st_ino - t.st_ino*10);
+			s.st_ino = t.st_ino;
+		    }
+		    while (*p == '0')
+			p++;
+		    mPUSHp(p, buf+sizeof(buf) - p);
+		}
+	    }
+	}
 	mPUSHu(PL_statcache.st_mode);
 	mPUSHu(PL_statcache.st_nlink);
 	

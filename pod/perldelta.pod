@@ -33,6 +33,18 @@ A persistent lexical array or hash variable can now be initialized,
 by an expression such as C<state @a = qw(x y z)>.  Initialization of a
 list of persistent lexical variables is still not possible.
 
+=head2 Full-size inode numbers
+
+On platforms where inode numbers are of a type larger than perl's native
+integer numerical types, L<stat|perlfunc/stat> will preserve the full
+content of large inode numbers by returning them in the form of strings of
+decimal digits.  Exact comparison of inode numbers can thus be achieved by
+comparing with C<eq> rather than C<==>.  Comparison with C<==>, and other
+numerical operations (which are usually meaningless on inode numbers),
+work as well as they did before, which is to say they fall back to
+floating point, and ultimately operate on a fairly useless rounded inode
+number if the real inode number is too big for the floating point format.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
