@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-use vars qw(@ary %ary %hash);
+my (@ary, %ary, %hash);
 
 plan 74;
 

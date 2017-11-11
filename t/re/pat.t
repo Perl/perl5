@@ -387,7 +387,7 @@ sub run_tests {
         $_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
         my $expect = "(bla()) ((l)u((e))) (l(e)e)";
 
-        use vars '$c';
+        our $c;
         sub matchit {
           m/
              (

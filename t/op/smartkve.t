@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 no warnings 'experimental::refaliasing';
-use vars qw($data $array $values $hash $errpat);
+our ($data, $array, $values, $hash, $errpat);
 
 plan 'no_plan';
 

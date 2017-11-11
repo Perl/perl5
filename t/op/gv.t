@@ -497,7 +497,7 @@ $::{borage} = \&ok;
 eval 'borage("sub ref in stash")' or fail "sub ref in stash";
 
 {
-    use vars qw($glook $smek $foof);
+    our ($glook, $smek, $foof);
     # Check reference assignment isn't affected by the SV type (bug #38439)
     $glook = 3;
     $smek = 4;

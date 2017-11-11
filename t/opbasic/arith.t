@@ -423,9 +423,8 @@ print "not "x($a ne $b), "ok ", $T++, qq ' - something % \$1 vs "\$1"\n';
 
 my $vms_no_ieee;
 if ($^O eq 'VMS') {
-  use vars '%Config';
-  eval {require Config; import Config};
-  $vms_no_ieee = 1 unless defined($Config{useieee});
+  eval { require Config };
+  $vms_no_ieee = 1 unless defined($Config::Config{useieee});
 }
 
 if ($^O eq 'vos') {

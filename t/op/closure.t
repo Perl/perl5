@@ -168,7 +168,7 @@ ok($foo[4]->()->(4));
 {
     use strict;
 
-    use vars qw!$test!;
+    our $test;
     my($debugging, %expected, $inner_type, $where_declared, $within);
     my($nc_attempt, $call_outer, $call_inner, $undef_outer);
     my($code, $inner_sub_test, $expected, $line, $errors, $output);
