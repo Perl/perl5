@@ -1,6 +1,7 @@
 package File::Spec::Mac;
 
 use strict;
+use Cwd ();
 require File::Spec::Unix;
 
 our $VERSION = '3.69';
@@ -668,7 +669,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-	$base = $self->_cwd();
+	$base = Cwd::getcwd();
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -736,7 +737,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute($path) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-	    $base = $self->_cwd();
+	    $base = Cwd::getcwd();
         }
         elsif ( ! $self->file_name_is_absolute($base) ) {
             $base = $self->rel2abs($base) ;
