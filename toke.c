@@ -1935,7 +1935,7 @@ S_check_uni(pTHX)
     s = PL_last_uni;
     while (isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF) || *s == '-')
 	s += UTF ? UTF8SKIP(s) : 1;
-    if (memchr(s, '(', PL_bufptr - s))
+    if (s < PL_bufptr && memchr(s, '(', PL_bufptr - s))
 	return;
 
     Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
