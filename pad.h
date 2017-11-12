@@ -492,9 +492,9 @@ Clone the state variables associated with running and compiling pads.
     PL_cop_seqmax		= proto_perl->Icop_seqmax;
 
 /*
-=for apidoc Am|PADOFFSET|pad_add_name_pvs|const char *name|U32 flags|HV *typestash|HV *ourstash
+=for apidoc Am|PADOFFSET|pad_add_name_pvs|"literal string" name|U32 flags|HV *typestash|HV *ourstash
 
-Exactly like L</pad_add_name_pvn>, but takes a C<NUL>-terminated literal string
+Exactly like L</pad_add_name_pvn>, but takes a literal string
 instead of a string/length pair.
 
 =cut
@@ -504,9 +504,9 @@ instead of a string/length pair.
     Perl_pad_add_name_pvn(aTHX_ STR_WITH_LEN(name), flags, typestash, ourstash)
 
 /*
-=for apidoc Am|PADOFFSET|pad_findmy_pvs|const char *name|U32 flags
+=for apidoc Am|PADOFFSET|pad_findmy_pvs|"literal string" name|U32 flags
 
-Exactly like L</pad_findmy_pvn>, but takes a C<NUL>-terminated literal string
+Exactly like L</pad_findmy_pvn>, but takes a literal string
 instead of a string/length pair.
 
 =cut
