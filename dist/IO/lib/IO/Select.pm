@@ -11,7 +11,7 @@ use warnings::register;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = "1.22";
+$VERSION = "1.23";
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -315,10 +315,13 @@ Return an array of all registered handles.
 
 =item can_read ( [ TIMEOUT ] )
 
-Return an array of handles that are ready for reading. C<TIMEOUT> is
-the maximum amount of time to wait before returning an empty list, in
-seconds, possibly fractional. If C<TIMEOUT> is not given and any
-handles are registered then the call will block.
+Return an array of handles that are ready for reading.  C<TIMEOUT> is the
+maximum amount of time to wait before returning an empty list (with C<$!>
+unchanged), in seconds, possibly fractional.  If C<TIMEOUT> is not given
+and any handles are registered then the call will block indefinitely.
+Upon error, an empty list is returned, with C<$!> set to indicate the
+error.  To distinguish between timeout and error, set C<$!> to zero
+before calling this method, and check it after an empty list is returned.
 
 =item can_write ( [ TIMEOUT ] )
 
@@ -346,9 +349,14 @@ like C<new>. C<READ>, C<WRITE> and C<EXCEPTION> are either C<undef> or
 C<IO::Select> objects. C<TIMEOUT> is optional and has the same effect as
 for the core select call.
 
-The result will be an array of 3 elements, each a reference to an array
-which will hold the handles that are ready for reading, writing and have
-exceptions respectively. Upon error an empty list is returned.
+If at least one handle is ready for the specified kind of operation,
+the result will be an array of 3 elements, each a reference to an array
+which will hold the handles that are ready for reading, writing and
+have exceptions respectively.  Upon timeout, an empty list is returned,
+with C<$!> unchanged.  Upon error, an empty list is returned, with C<$!>
+set to indicate the error.  To distinguish between timeout and error,
+set C<$!> to zero before calling this method, and check it after an
+empty list is returned.
 
 =back
 
