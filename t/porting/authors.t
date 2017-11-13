@@ -2,17 +2,20 @@
 # Test that there are no missing authors in AUTHORS
 
 BEGIN {
-    @INC = '..' if -f '../TestInit.pm';
+    chdir 't' if -d 't';
+    require "./test.pl";
+    set_up_inc('../lib', '..');
 }
-use TestInit qw(T); # T is chdir to the top level
+
+use TestInit qw(T);    # T is chdir to the top level
 use strict;
 
-require './t/test.pl';
 find_git_or_skip('all');
-skip_all("This distro may have modified some files in cpan/. Skipping validation.") if $ENV{'PERL_BUILD_PACKAGING'};
+skip_all(
+    "This distro may have modified some files in cpan/. Skipping validation.")
+  if $ENV{'PERL_BUILD_PACKAGING'};
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
-my $quote = $^O =~ /^mswin/i ? q(") : q(');
-system("git log --pretty=format:${quote}Author: %an <%ae>%n${quote} | $^X Porting/checkAUTHORS.pl --tap -");
+print qx{git log --pretty=format:"Author: %an <%ae>" | $^X Porting/checkAUTHORS.pl --tap -};
 
 # EOF
