@@ -790,6 +790,10 @@ want to use a .3pm suffix for perl man pages, you can do that with
 
 	sh Configure -Dman3ext=3pm
 
+You can disable installation of man pages completely using
+
+	sh Configure -Dman1dir=none -Dman3dir=none
+
 =item HTML pages
 
 Currently, the standard perl installation does not do anything with
