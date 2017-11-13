@@ -589,7 +589,7 @@ package and method name):
   my $mp3 = File::MP3->new( 'Regin.mp3', $data );
   $mp3->File::save();
 
-When you a fully qualified method name like C<File::save>, the method
+When you call a fully qualified method name like C<File::save>, the method
 resolution search for the C<save> method starts in the C<File> class,
 skipping any C<save> method the C<File::MP3> class may have defined. It
 still searches the C<File> class's parents if necessary.
