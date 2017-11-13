@@ -12,8 +12,8 @@ compiler:
 install:
   - git fetch --unshallow --tags # t/porting/cmp_version.t
   # install & enable ccache on osx
-  - if [ -d /Applications ]; then brew install ccache; fi
-  - if [ -d /Applications ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install ccache; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
 env:
     global:
