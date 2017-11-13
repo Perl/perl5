@@ -332,7 +332,7 @@ die if $@;
 
 # Calculation for the keys for byteorder
 # This is somewhat grim, but I need to run fetch_string here.
-our $Config_SH_expanded = join "\n", '', @v_others;
+$Config_SH_expanded = join "\n", '', @v_others;
 
 my $t = fetch_string ({}, 'ivtype');
 my $s = fetch_string ({}, 'ivsize');
