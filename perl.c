@@ -420,13 +420,8 @@ perl_construct(pTHXx)
 	PL_mmap_page_size = sysconf(_SC_MMAP_PAGE_SIZE);
 #   endif
 	if ((long) PL_mmap_page_size < 0) {
-	  if (errno) {
-	    SV * const error = ERRSV;
-	    SvUPGRADE(error, SVt_PV);
-	    Perl_croak(aTHX_ "panic: sysconf: %s", SvPV_nolen_const(error));
-	  }
-	  else
-	    Perl_croak(aTHX_ "panic: sysconf: pagesize unknown");
+	    Perl_croak(aTHX_ "panic: sysconf: %s",
+		errno ? Strerror(errno) : "pagesize unknown");
 	}
       }
 #elif defined(HAS_GETPAGESIZE)
