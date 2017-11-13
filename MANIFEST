@@ -5372,6 +5372,7 @@ t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
 t/comp/decl.t			See if declarations work
+t/comp/filter_exception.t	See if $@ survives source filters
 t/comp/final_line_num.t		See if line numbers are correct at EOF
 t/comp/fold.t			See if constant folding works
 t/comp/form_scope.t		See if format scoping works

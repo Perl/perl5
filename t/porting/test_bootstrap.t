@@ -18,6 +18,7 @@ open my $fh, '<', '../MANIFEST' or die "Can't open MANIFEST: $!";
 
 # Some tests in t/comp need to use require or use to get their job done:
 my %exceptions = (
+    filter_exception => "require './test.pl'",
     hints => "require './test.pl'",
     parser => 'use DieDieDie',
     parser_run => "require './test.pl'",
