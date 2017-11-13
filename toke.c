@@ -10078,8 +10078,9 @@ S_scan_heredoc(pTHX_ char *s)
 
 		    /* No whitespace or all! */
 		    if (backup == s || *backup == '\n') {
-			Newxz(indent, indent_len + 1, char);
+			Newx(indent, indent_len + 1, char);
 			memcpy(indent, backup + 1, indent_len);
+			indent[indent_len] = 0;
 			s--; /* before our delimiter */
 			PL_parser->herelines--; /* this line doesn't count */
 			break;
@@ -10213,8 +10214,9 @@ S_scan_heredoc(pTHX_ char *s)
 
 		/* All whitespace or none! */
 		if (backup == found || SPACE_OR_TAB(*backup)) {
-		    Newxz(indent, indent_len + 1, char);
+		    Newx(indent, indent_len + 1, char);
 		    memcpy(indent, backup, indent_len);
+		    indent[indent_len] = 0;
 		    SvREFCNT_dec(PL_linestr);
 		    PL_linestr = linestr_save;
 		    PL_linestart = SvPVX(linestr_save);

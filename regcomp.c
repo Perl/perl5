@@ -1117,7 +1117,7 @@ PERL_STATIC_INLINE item*
 push(UV key,item* curr)
 {
     item* head;
-    Newxz(head, 1, item);
+    Newx(head, 1, item);
     head->key = key;
     head->value = 0;
     head->next = curr;
@@ -1187,7 +1187,7 @@ S_edit_distance(const UV* src,
     PERL_ARGS_ASSERT_EDIT_DISTANCE;
 
     /* intialize matrix start values */
-    Newxz(scores, ( (x + 2) * (y + 2)), UV);
+    Newx(scores, ( (x + 2) * (y + 2)), UV);
     scores[0] = score_ceil;
     scores[1 * (y + 2) + 0] = score_ceil;
     scores[0 * (y + 2) + 1] = score_ceil;
@@ -2422,7 +2422,7 @@ is the recommended Unicode-aware way of saying
 } STMT_END
 
 #define TRIE_LIST_NEW(state) STMT_START {                       \
-    Newxz( trie->states[ state ].trans.list,               \
+    Newx( trie->states[ state ].trans.list,                     \
 	4, reg_trie_trans_le );                                 \
      TRIE_LIST_CUR( state ) = 1;                                \
      TRIE_LIST_LEN( state ) = 4;                                \
@@ -3617,7 +3617,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
     aho->trie=trie_offset;
     aho->states=(reg_trie_state *)PerlMemShared_malloc( numstates * sizeof(reg_trie_state) );
     Copy( trie->states, aho->states, numstates, reg_trie_state );
-    Newxz( q, numstates, U32);
+    Newx( q, numstates, U32);
     aho->fail = (U32 *) PerlMemShared_calloc( numstates, sizeof(U32) );
     aho->refcount = 1;
     fail = aho->fail;
@@ -7372,7 +7372,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        3-units-long substrs field. */
     Newx(r->substrs, 1, struct reg_substr_data);
     if (RExC_recurse_count) {
-        Newxz(RExC_recurse,RExC_recurse_count,regnode *);
+        Newx(RExC_recurse,RExC_recurse_count,regnode *);
         SAVEFREEPV(RExC_recurse);
     }
 
@@ -7754,7 +7754,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (RExC_seen & REG_RECURSE_SEEN ) {
         r->intflags |= PREGf_RECURSE_SEEN;
-        Newxz(r->recurse_locinput, r->nparens + 1, char *);
+        Newx(r->recurse_locinput, r->nparens + 1, char *);
     }
     if (RExC_seen & REG_GPOS_SEEN)
         r->intflags |= PREGf_GPOS_SEEN;
@@ -19641,7 +19641,7 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
     drx->mother_re = ReREFCNT_inc(srx->mother_re ? srx->mother_re : ssv);
     SvREFCNT_inc_void(drx->qr_anoncv);
     if (srx->recurse_locinput)
-        Newxz(drx->recurse_locinput,srx->nparens + 1,char *);
+        Newx(drx->recurse_locinput,srx->nparens + 1,char *);
 
     return dsv;
 }
@@ -19851,7 +19851,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
     RXp_PAREN_NAMES(ret) = hv_dup_inc(RXp_PAREN_NAMES(ret), param);
     ret->qr_anoncv = MUTABLE_CV(sv_dup_inc((const SV *)ret->qr_anoncv, param));
     if (r->recurse_locinput)
-        Newxz(ret->recurse_locinput,r->nparens + 1,char *);
+        Newx(ret->recurse_locinput,r->nparens + 1,char *);
 
     if (ret->pprivate)
 	RXi_SET(ret,CALLREGDUPE_PVT(dstr,param));

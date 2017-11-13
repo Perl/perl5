@@ -13503,13 +13503,6 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     Newxz(parser, 1, yy_parser);
     ptr_table_store(PL_ptr_table, proto, parser);
 
-    /* XXX these not yet duped */
-    parser->old_parser = NULL;
-    parser->stack = NULL;
-    parser->ps = NULL;
-    parser->stack_max1 = 0;
-    /* XXX parser->stack->state = 0; */
-
     /* XXX eventually, just Copy() most of the parser struct ? */
 
     parser->lex_brackets = proto->lex_brackets;
@@ -13551,7 +13544,6 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     parser->sig_optelems= proto->sig_optelems;
     parser->sig_slurpy  = proto->sig_slurpy;
     parser->recheck_utf8_validity = proto->recheck_utf8_validity;
-    parser->linestr	= sv_dup_inc(proto->linestr, param);
 
     {
 	char * const ols = SvPVX(proto->linestr);
@@ -14347,7 +14339,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    SSize_t items = AvFILLp((const AV *)sstr) + 1;
 
 		    src_ary = AvARRAY((const AV *)sstr);
-		    Newxz(dst_ary, AvMAX((const AV *)sstr)+1, SV*);
+		    Newx(dst_ary, AvMAX((const AV *)sstr)+1, SV*);
 		    ptr_table_store(PL_ptr_table, src_ary, dst_ary);
 		    AvARRAY(MUTABLE_AV(dstr)) = dst_ary;
 		    AvALLOC((const AV *)dstr) = dst_ary;
@@ -14679,7 +14671,7 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 	return nsi;
 
     /* create anew and remember what it is */
-    Newxz(nsi, 1, PERL_SI);
+    Newx(nsi, 1, PERL_SI);
     ptr_table_store(PL_ptr_table, si, nsi);
 
     nsi->si_stack	= av_dup_inc(si->si_stack, param);
@@ -14690,6 +14682,9 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
     nsi->si_prev	= si_dup(si->si_prev, param);
     nsi->si_next	= si_dup(si->si_next, param);
     nsi->si_markoff	= si->si_markoff;
+#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+    nsi->si_stack_hwm   = 0;
+#endif
 
     return nsi;
 }
@@ -14771,7 +14766,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
     PERL_ARGS_ASSERT_SS_DUP;
 
-    Newxz(nss, max, ANY);
+    Newx(nss, max, ANY);
 
     while (ix > 0) {
 	const UV uv = POPUV(ss,ix);
@@ -15734,7 +15729,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
 	i = proto_perl->Imarkstack_max - proto_perl->Imarkstack;
-	Newxz(PL_markstack, i, I32);
+	Newx(PL_markstack, i, I32);
 	PL_markstack_max	= PL_markstack + (proto_perl->Imarkstack_max
 						  - proto_perl->Imarkstack);
 	PL_markstack_ptr	= PL_markstack + (proto_perl->Imarkstack_ptr
@@ -15744,11 +15739,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 	/* next push_scope()/ENTER sets PL_scopestack[PL_scopestack_ix]
 	 * NOTE: unlike the others! */
-	Newxz(PL_scopestack, PL_scopestack_max, I32);
+	Newx(PL_scopestack, PL_scopestack_max, I32);
 	Copy(proto_perl->Iscopestack, PL_scopestack, PL_scopestack_ix, I32);
 
 #ifdef DEBUGGING
-	Newxz(PL_scopestack_name, PL_scopestack_max, const char *);
+	Newx(PL_scopestack_name, PL_scopestack_max, const char *);
 	Copy(proto_perl->Iscopestack_name, PL_scopestack_name, PL_scopestack_ix, const char *);
 #endif
         /* reset stack AV to correct length before its duped via

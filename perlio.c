@@ -4281,7 +4281,7 @@ PerlIOBuf_get_base(pTHX_ PerlIO *f)
     if (!b->buf) {
 	if (!b->bufsiz)
 	    b->bufsiz = PERLIOBUF_DEFAULT_BUFSIZ;
-	Newxz(b->buf,b->bufsiz, STDCHAR);
+	Newx(b->buf,b->bufsiz, STDCHAR);
 	if (!b->buf) {
 	    b->buf = (STDCHAR *) & b->oneword;
 	    b->bufsiz = sizeof(b->oneword);
