@@ -1,4 +1,5 @@
 language: c
+cache: ccache
 
 os:
   - linux
@@ -10,6 +11,9 @@ compiler:
 
 install:
   - git fetch --unshallow --tags # t/porting/cmp_version.t
+  # install & enable ccache on osx
+  - if [ -d /Applications ]; then brew install ccache; fi
+  - if [ -d /Applications ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
 env:
     global:
@@ -18,6 +22,7 @@ env:
         - CONFIGURE_ARGS='-Uusethreads'
         - CONFIGURE_ARGS='-Dusethreads'
 
+# only use gcc on linux, and only use clang on osx for now
 matrix:
   exclude:
   - compiler: clang
@@ -26,7 +31,12 @@ matrix:
     os: osx
 
 script:
-  - ./Configure -des -Dusedevel -Uversiononly -Dcc=$CC $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING && TEST_JOBS=$JOBS make -j$JOBS test_harness_notty && make -j$JOBS install && $HOME/perl-blead/bin/perlivp
+  - ./Configure -des -Dusedevel -Uversiononly -Dcc="ccache $CC" $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING
+# all script commands are always run
+# rather than using one very long oneliner using '&&', just always check the build status
+  - if [ "x$TRAVIS_TEST_RESULT" = "x0" ]; then TEST_JOBS=$JOBS make -j$JOBS test_harness_notty; fi
+  - if [ "x$TRAVIS_TEST_RESULT" = "x0" ]; then make -j$JOBS install; fi
+  - if [ "x$TRAVIS_TEST_RESULT" = "x0" ]; then $HOME/perl-blead/bin/perlivp; fi
 
 addons:
     apt:
@@ -37,3 +47,24 @@ addons:
             - libgdbm-dev
             - zlib1g-dev
             - libbz2-dev
+
+notifications:
+## use dedicated email for smoking ?
+#  email:
+#    recipients:
+#      - perl5-porters@perl.org
+#    on_success: never  # default: change
+#    on_failure: always # default: always
+  irc:
+    nick: travisci
+    channels:
+      - "irc.perl.org#p5p-qa"
+#      - "irc.perl.org#bot-test"
+    template:
+      - "Report for %{repository} (%{commit}) from %{author} (%{elapsed_time})"
+      - "Status: %{message}"
+      - "Build URL: %{build_url}"
+      - "GitHub URL: https://github.com/p5h/perl5demo/commit/%{commit}" # adjust this url to use the production repo
+    on_success: change # default: always
+    on_failure: always # default: always
+#    use_notice: true
