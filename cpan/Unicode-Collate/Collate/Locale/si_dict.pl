@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.21,
+   locale_version => 1.23,
    entry => <<'ENTRY', # for DUCET v9.0.0
 0D82      ; [.28E1.0020.0002][.FFF1.0000.0000] # SINHALA SIGN ANUSVARAYA
 0D83      ; [.28E1.0020.0002][.FFF2.0000.0000] # SINHALA SIGN VISARGAYA

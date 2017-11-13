@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.21,
+   locale_version => 1.23,
    entry => <<'ENTRY', # for DUCET v9.0.0
 1EB9      ; [.1CAB.0020.0002] # LATIN SMALL LETTER E WITH DOT BELOW
 0065 0323 ; [.1CAB.0020.0002] # LATIN SMALL LETTER E WITH DOT BELOW

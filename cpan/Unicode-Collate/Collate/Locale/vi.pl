@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.21,
+   locale_version => 1.23,
 # 0306 is not a Vietnamese tone, just to avoid \x{306} eq. to something.
    entry => <<'ENTRY', # for DUCET v9.0.0
 0309      ; [.0000.0026.0002][.0000.00F0.0000] # COMBINING HOOK ABOVE

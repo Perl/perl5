@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.21,
+   locale_version => 1.23,
    entry => <<'ENTRY', # for DUCET v9.0.0
 0623      ; [.230B.0021.0002] # ARABIC LETTER ALEF WITH HAMZA ABOVE
 0627 0654 ; [.230B.0021.0002] # ARABIC LETTER ALEF WITH HAMZA ABOVE

@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.21,
+   locale_version => 1.23,
    suppress => [0x0418, 0x0438],
    entry => <<'ENTRY', # for DUCET v9.0.0
 0453      ; [.2056.0020.0002] # CYRILLIC SMALL LETTER GJE

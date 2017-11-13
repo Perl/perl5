@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.21';
+our $VERSION = '1.23';
 
 my %u2p;
 my $wt = 0x8000;

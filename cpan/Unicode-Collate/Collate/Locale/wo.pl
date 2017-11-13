@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.21,
+   locale_version => 1.23,
 # eng doesn't require tailoring
    entry => <<'ENTRY', # for DUCET v9.0.0
 00E0      ; [.1C48.0020.0002] # LATIN SMALL LETTER A WITH GRAVE

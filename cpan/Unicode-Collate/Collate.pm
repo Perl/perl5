@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.21';
+our $VERSION = '1.23';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -191,6 +191,7 @@ my %DerivCode = (
    30 => \&_derivCE_24, # 30 == 24
    32 => \&_derivCE_32,
    34 => \&_derivCE_34,
+   36 => \&_derivCE_36,
 );
 
 sub checkCollator {
@@ -440,13 +441,17 @@ sub parseEntry
 	# if and only if "all" CEs are [.0000.0000.0000].
     }
 
+    # mapping: be an array ref or not exists (any false value is disallowed)
     $self->{mapping}{$entry} = $is_L3_ignorable ? [] : \@key;
 
+    # maxlength: be more than 1 or not exists (any false value is disallowed)
     if (@uv > 1) {
 	if (!$self->{maxlength}{$uv[0]} || $self->{maxlength}{$uv[0]} < @uv) {
 	    $self->{maxlength}{$uv[0]} = @uv;
 	}
     }
+
+    # contraction: be 1 or not exists (any false value is disallowed)
     while (@uv > 2) {
 	pop @uv;
 	my $fake_entry = join(CODE_SEP, @uv); # in JCPS
@@ -515,7 +520,7 @@ sub splitEnt
 	if ($vers <= 20 && _isIllegal($src[$i])) {
 	    $src[$i] = undef;
 	} elsif ($ver9) {
-	    $src[$i] = undef if $map->{ $src[$i] }
+	    $src[$i] = undef if exists $map->{ $src[$i] }
 			   ? @{ $map->{ $src[$i] } } == 0
 			   : $uXS && _ignorable_simple($src[$i]); ### XS only
 	}
@@ -535,7 +540,7 @@ sub splitEnt
 	my $i_orig = $i;
 
 	# find contraction
-	if ($max->{$jcps}) {
+	if (exists $max->{$jcps}) {
 	    my $temp_jcps = $jcps;
 	    my $jcpsLen = 1;
 	    my $maxLen = $max->{$jcps};
@@ -544,7 +549,7 @@ sub splitEnt
 		next if ! defined $src[$p];
 		$temp_jcps .= CODE_SEP . $src[$p];
 		$jcpsLen++;
-		if ($map->{$temp_jcps}) {
+		if (exists $map->{$temp_jcps}) {
 		    $jcps = $temp_jcps;
 		    $i = $p;
 		}
@@ -571,7 +576,7 @@ sub splitEnt
 		    last unless $curCC;
 		    my $tail = CODE_SEP . $src[$p];
 
-		    if ($preCC != $curCC && $map->{$jcps.$tail}) {
+		    if ($preCC != $curCC && exists $map->{$jcps.$tail}) {
 			$jcps .= $tail;
 			push @out, $p;
 		    } else {
@@ -580,8 +585,9 @@ sub splitEnt
 
 		    next if !$long;
 
-		    if ($preCC_uc != $curCC && ($map->{$jcps_uc.$tail} ||
-					       $cont->{$jcps_uc.$tail})) {
+		    if ($preCC_uc != $curCC &&
+			    (exists $map->{$jcps_uc.$tail} ||
+			    exists $cont->{$jcps_uc.$tail})) {
 			$jcps_uc .= $tail;
 			push @out_uc, $p;
 		    } else {
@@ -589,7 +595,7 @@ sub splitEnt
 		    }
 		}
 
-		if (@out_uc && $map->{$jcps_uc}) {
+		if (@out_uc && exists $map->{$jcps_uc}) {
 		    $jcps = $jcps_uc;
 		    $src[$_] = undef for @out_uc;
 		} else {
@@ -599,7 +605,7 @@ sub splitEnt
 	}
 
 	# skip completely ignorable
-	if ($map->{$jcps} ? @{ $map->{$jcps} } == 0 :
+	if (exists $map->{$jcps} ? @{ $map->{$jcps} } == 0 :
 	    $uXS && $jcps !~ /;/ && _ignorable_simple($jcps)) { ### XS only
 	    if ($wLen && @buf) {
 		$buf[-1][2] = $i + 1;
@@ -648,7 +654,7 @@ sub getWt
     $u = 0xFFFD if $u !~ /;/ && 0x10FFFF < $u && !$out;
 
     my @ce;
-    if ($map->{$u}) {
+    if (exists $map->{$u}) {
 	@ce = @{ $map->{$u} }; # $u may be a contraction
 ### begin XS only ###
     } elsif ($uXS && _exists_simple($u)) {
@@ -666,27 +672,27 @@ sub getWt
 
 	    if (@decH == 2) {
 		my $contract = join(CODE_SEP, @decH);
-		@decH = ($contract) if $map->{$contract};
+		@decH = ($contract) if exists $map->{$contract};
 	    } else { # must be <@decH == 3>
-		if ($max->{$decH[0]}) {
+		if (exists $max->{$decH[0]}) {
 		    my $contract = join(CODE_SEP, @decH);
-		    if ($map->{$contract}) {
+		    if (exists $map->{$contract}) {
 			@decH = ($contract);
 		    } else {
 			$contract = join(CODE_SEP, @decH[0,1]);
-			$map->{$contract} and @decH = ($contract, $decH[2]);
+			exists $map->{$contract} and @decH = ($contract, $decH[2]);
 		    }
 		    # even if V's ignorable, LT contraction is not supported.
 		    # If such a situation were required, NFD should be used.
 		}
-		if (@decH == 3 && $max->{$decH[1]}) {
+		if (@decH == 3 && exists $max->{$decH[1]}) {
 		    my $contract = join(CODE_SEP, @decH[1,2]);
-		    $map->{$contract} and @decH = ($decH[0], $contract);
+		    exists $map->{$contract} and @decH = ($decH[0], $contract);
 		}
 	    }
 
 	    @ce = map({
-		    $map->{$_} ? @{ $map->{$_} } :
+		    exists $map->{$_} ? @{ $map->{$_} } :
 		$uXS && _exists_simple($_) ? _fetch_simple($_) : ### XS only
 		    $der->($_);
 		} @decH);
@@ -1117,6 +1123,7 @@ The following revisions are supported.  The default is 34.
      30             7.0.0               7.0.0 (7.0.0)
      32             8.0.0               8.0.0 (8.0.0)
      34             9.0.0               9.0.0 (9.0.0)
+     36            10.0.0              10.0.0(10.0.0)
 
 * See below for C<long_contraction> with C<UCA_Version> 22 and 24.
 
@@ -1457,12 +1464,14 @@ those in the CJK Unified Ideographs Extension A etc.
     U+4E00..U+9FCB if UCA_Version is 20 or 22.
     U+4E00..U+9FCC if UCA_Version is 24 to 30.
     U+4E00..U+9FD5 if UCA_Version is 32 or 34.
+    U+4E00..U+9FEA if UCA_Version is 36.
 
     In the CJK Unified Ideographs Extension blocks:
     Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version.
     Ext.C (U+2A700..U+2B734) if UCA_Version is 20 or later.
     Ext.D (U+2B740..U+2B81D) if UCA_Version is 22 or later.
     Ext.E (U+2B820..U+2CEA1) if UCA_Version is 32 or later.
+    Ext.F (U+2CEB0..U+2EBE0) if UCA_Version is 36.
 
 Through C<overrideCJK>, ordering of CJK unified ideographs (including
 extensions) can be overridden.

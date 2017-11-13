@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..355\n"; } # 5 + 25 x @Versions
+BEGIN { $| = 1; print "1..380\n"; } # 5 + 25 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -33,7 +33,7 @@ ok(1);
 
 #########################
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34);
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36);
 
 my $Collator = Unicode::Collate->new(
     table => 'keys.txt',
