@@ -3872,6 +3872,7 @@ dist/Time-HiRes/t/usleep.t		Test for Time::HiRes
 dist/Time-HiRes/t/utime.t		Test for Time::HiRes
 dist/Time-HiRes/t/Watchdog.pm		Test for Time::HiRes
 dist/Time-HiRes/typemap			Time::HiRes extension
+dist/Unicode-Normalize/Changes		Unicode::Normalize
 dist/Unicode-Normalize/Makefile.PL	Unicode::Normalize
 dist/Unicode-Normalize/mkheader		Unicode::Normalize
 dist/Unicode-Normalize/Normalize.pm	Unicode::Normalize
