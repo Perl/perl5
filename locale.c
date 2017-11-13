@@ -2963,7 +2963,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 
             if (   len != STRLENs(REPLACEMENT_CHARACTER_UTF8)
-                || wc != (wchar_t) 0xFFFD)
+                || wc != (wchar_t) UNICODE_REPLACEMENT)
             {
                 is_utf8 = FALSE;
                 DEBUG_L(PerlIO_printf(Perl_debug_log, "\replacement=U+%x\n",
