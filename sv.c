@@ -14974,8 +14974,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_AELEM:		/* array element */
 	    sv = (const SV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = SvREFCNT_inc(sv_dup_inc(sv, param));
-	    i = POPINT(ss,ix);
-	    TOPINT(nss,ix) = i;
+	    iv = POPIV(ss,ix);
+	    TOPIV(nss,ix) = iv;
 	    av = (const AV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = av_dup_inc(av, param);
 	    break;
