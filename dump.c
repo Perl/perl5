@@ -2757,10 +2757,10 @@ Perl_multiconcat_stringify(pTHX_ const OP *o)
 
     nargs = aux[PERL_MULTICONCAT_IX_NARGS].uv;
     s   = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
-    len = aux[PERL_MULTICONCAT_IX_PLAIN_LEN].size;
+    len = aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize;
     if (!s) {
         s   = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
-        len = aux[PERL_MULTICONCAT_IX_UTF8_LEN].size;
+        len = aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize;
         sv_catpvs(out, "UTF8 ");
     }
     pv_pretty(out, s, len, 50,
@@ -2772,7 +2772,7 @@ Perl_multiconcat_stringify(pTHX_ const OP *o)
     lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
     nargs++;
     while (nargs-- > 0) {
-        Perl_sv_catpvf(aTHX_ out, ",%" IVdf, (IV)lens->size);
+        Perl_sv_catpvf(aTHX_ out, ",%" IVdf, (IV)lens->ssize);
         lens++;
     }
     return out;

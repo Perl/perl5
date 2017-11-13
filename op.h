@@ -189,7 +189,7 @@ typedef union  {
     IV        iv;
     UV        uv;
     char      *pv;
-    SSize_t   size;
+    SSize_t   ssize;
 } UNOP_AUX_item;
 
 #ifdef USE_ITHREADS

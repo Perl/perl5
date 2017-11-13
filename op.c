@@ -3095,14 +3095,14 @@ S_maybe_multiconcat(pTHX_ OP *o)
             if (*p == '%') {
                 p++;
                 if (*p != '%') {
-                    (lenp++)->size = q - oldq;
+                    (lenp++)->ssize = q - oldq;
                     oldq = q;
                     continue;
                 }
             }
             *q++ = *p;
         }
-        lenp->size = q - oldq;
+        lenp->ssize = q - oldq;
         assert((STRLEN)(q - const_str) == total_len);
 
         /* Attach all the args (i.e. the kids of the sprintf) to o (which
@@ -3123,7 +3123,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
         p = const_str;
         lenp = aux + PERL_MULTICONCAT_IX_LENGTHS;
 
-        lenp->size = -1;
+        lenp->ssize = -1;
 
         /* Concatenate all const strings into const_str.
          * Note that args[] contains the RHS args in reverse order, so
@@ -3133,15 +3133,15 @@ S_maybe_multiconcat(pTHX_ OP *o)
         for (argp = toparg; argp >= args; argp--) {
             if (!argp->p)
                 /* not a const op */
-                (++lenp)->size = -1;
+                (++lenp)->ssize = -1;
             else {
                 STRLEN l = argp->len;
                 Copy(argp->p, p, l, char);
                 p += l;
-                if (lenp->size == -1)
-                    lenp->size = l;
+                if (lenp->ssize == -1)
+                    lenp->ssize = l;
                 else
-                    lenp->size += l;
+                    lenp->ssize += l;
             }
         }
 
@@ -3217,9 +3217,9 @@ S_maybe_multiconcat(pTHX_ OP *o)
 
     aux[PERL_MULTICONCAT_IX_NARGS].uv       = nargs;
     aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv    = utf8 ? NULL : const_str;
-    aux[PERL_MULTICONCAT_IX_PLAIN_LEN].size = utf8 ?    0 : total_len;
+    aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize = utf8 ?    0 : total_len;
     aux[PERL_MULTICONCAT_IX_UTF8_PV].pv     = const_str;
-    aux[PERL_MULTICONCAT_IX_UTF8_LEN].size  = total_len;
+    aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize  = total_len;
 
     /* if variant > 0, calculate a variant const string and lengths where
      * the utf8 version of the string will take 'variant' more bytes than
@@ -3234,16 +3234,16 @@ S_maybe_multiconcat(pTHX_ OP *o)
         UV                 n;
 
         aux[PERL_MULTICONCAT_IX_UTF8_PV].pv    = up;
-        aux[PERL_MULTICONCAT_IX_UTF8_LEN].size = ulen;
+        aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize = ulen;
 
         for (n = 0; n < (nargs + 1); n++) {
             SSize_t i;
             char * orig_up = up;
-            for (i = (lens++)->size; i > 0; i--) {
+            for (i = (lens++)->ssize; i > 0; i--) {
                 U8 c = *p++;
                 append_utf8_from_native_byte(c, (U8**)&up);
             }
-            (ulens++)->size = (i < 0) ? i : up - orig_up;
+            (ulens++)->ssize = (i < 0) ? i : up - orig_up;
         }
     }
 
