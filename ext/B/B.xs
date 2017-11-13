@@ -1244,7 +1244,7 @@ aux_list(o, cv)
 
         case OP_MULTICONCAT:
             {
-                UV nargs = aux[0].uv;
+                SSize_t nargs;
                 char *p;
                 STRLEN len;
                 U32 utf8 = 0;
@@ -1255,9 +1255,9 @@ aux_list(o, cv)
 
                 /* if this changes, this block of code probably needs fixing */
                 assert(PERL_MULTICONCAT_HEADER_SIZE == 5);
-                nargs = aux[PERL_MULTICONCAT_IX_NARGS].uv;
+                nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
                 EXTEND(SP, ((SSize_t)(2 + (nargs+1))));
-                PUSHs(sv_2mortal(newSViv(nargs)));
+                PUSHs(sv_2mortal(newSViv((IV)nargs)));
 
                 p   = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
                 len = aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize;

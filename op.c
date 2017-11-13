@@ -2489,7 +2489,7 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
 /* info returned by S_sprintf_is_multiconcatable() */
 
 struct sprintf_ismc_info {
-    UV     nargs;     /* num of args to sprintf (not including the format) */
+    SSize_t nargs;    /* num of args to sprintf (not including the format) */
     char  *start;     /* start of raw format string */
     char  *end;       /* bytes after end of raw format string */
     STRLEN total_len; /* total length (in bytes) of format string, not
@@ -2517,7 +2517,7 @@ S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
     OP    *pm, *constop, *kid;
     SV    *sv;
     char  *s, *e, *p;
-    UV     nargs, nformats;
+    SSize_t nargs, nformats;
     STRLEN cur, total_len, variant;
     bool   utf8;
 
@@ -2660,8 +2660,8 @@ S_maybe_multiconcat(pTHX_ OP *o)
         STRLEN len;   /* ... len set to SvPV(..., len) */
     } *argp, *toparg, args[PERL_MULTICONCAT_MAXARG*2 + 1];
 
-    UV nargs  = 0;
-    UV nconst = 0;
+    SSize_t nargs  = 0;
+    SSize_t nconst = 0;
     STRLEN variant;
     bool utf8 = FALSE;
     bool kid_is_last = FALSE; /* most args will be the RHS kid of a concat op;
@@ -3215,7 +3215,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
 
     /* Populate the aux struct */
 
-    aux[PERL_MULTICONCAT_IX_NARGS].uv       = nargs;
+    aux[PERL_MULTICONCAT_IX_NARGS].ssize     = nargs;
     aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv    = utf8 ? NULL : const_str;
     aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize = utf8 ?    0 : total_len;
     aux[PERL_MULTICONCAT_IX_UTF8_PV].pv     = const_str;
@@ -3231,7 +3231,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
         UNOP_AUX_item  *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
         UNOP_AUX_item *ulens = lens + (nargs + 1);
         char             *up = (char*)PerlMemShared_malloc(ulen);
-        UV                 n;
+        SSize_t            n;
 
         aux[PERL_MULTICONCAT_IX_UTF8_PV].pv    = up;
         aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize = ulen;

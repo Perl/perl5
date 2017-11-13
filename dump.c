@@ -1142,8 +1142,8 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     }
 
     case OP_MULTICONCAT:
-	S_opdump_indent(aTHX_ o, level, bar, file, "NARGS = %" UVuf "\n",
-            cUNOP_AUXo->op_aux[PERL_MULTICONCAT_IX_NARGS].uv);
+	S_opdump_indent(aTHX_ o, level, bar, file, "NARGS = %" IVdf "\n",
+            (IV)cUNOP_AUXo->op_aux[PERL_MULTICONCAT_IX_NARGS].ssize);
         /* XXX really ought to dump each field individually,
          * but that's too much like hard work */
 	S_opdump_indent(aTHX_ o, level, bar, file, "CONSTS = (%" SVf ")\n",
@@ -2749,13 +2749,13 @@ Perl_multiconcat_stringify(pTHX_ const OP *o)
     UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
     UNOP_AUX_item *lens;
     STRLEN len;
-    UV nargs;
+    SSize_t nargs;
     char *s;
     SV *out = newSVpvn_flags("", 0, SVs_TEMP);
 
     PERL_ARGS_ASSERT_MULTICONCAT_STRINGIFY;
 
-    nargs = aux[PERL_MULTICONCAT_IX_NARGS].uv;
+    nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
     s   = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
     len = aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize;
     if (!s) {
@@ -2770,8 +2770,7 @@ Perl_multiconcat_stringify(pTHX_ const OP *o)
                 |PERL_PV_PRETTY_ELLIPSES));
 
     lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
-    nargs++;
-    while (nargs-- > 0) {
+    while (nargs-- >= 0) {
         Perl_sv_catpvf(aTHX_ out, ",%" IVdf, (IV)lens->ssize);
         lens++;
     }

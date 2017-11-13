@@ -391,8 +391,8 @@ PP(pp_multiconcat)
     UNOP_AUX_item *aux;      /* PL_op->op_aux buffer */
     UNOP_AUX_item *const_lens; /* the segment length array part of aux */
     const char *const_pv;    /* the current segment of the const string buf */
-    UV nargs;                /* how many args were expected */
-    UV stack_adj;            /* how much to adjust SP on return */
+    SSize_t nargs;           /* how many args were expected */
+    SSize_t stack_adj;       /* how much to adjust SP on return */
     STRLEN grow;             /* final size of destination string (dsv) */
     UV targ_count;           /* how many times targ has appeared on the RHS */
     bool is_append;          /* OPpMULTICONCAT_APPEND flag is set */
@@ -412,7 +412,7 @@ PP(pp_multiconcat)
         svpv_buf[PERL_MULTICONCAT_MAXARG]; /* buf for storing SvPV() results */
 
     aux   = cUNOP_AUXx(PL_op)->op_aux;
-    stack_adj = nargs = aux[PERL_MULTICONCAT_IX_NARGS].uv;
+    stack_adj = nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
     is_append = cBOOL(PL_op->op_private & OPpMULTICONCAT_APPEND);
 
     /* get targ from the stack or pad */
@@ -1049,7 +1049,7 @@ PP(pp_multiconcat)
             bool getmg = FALSE;
             SV *constsv = NULL;
                                /* number of args already concatted */
-            STRLEN n          = (nargs - 1) - (toparg - SP);
+            SSize_t n         = (nargs - 1) - (toparg - SP);
                                /* current arg is either the first
                                 * or second value to be concatted
                                 * (including constant strings), so would
