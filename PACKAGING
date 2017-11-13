@@ -36,4 +36,15 @@ standalone Perl script.
 
 		perl -x patchlevel.h "This is a custom patch"
 
+=head1 Disabling known flapping tests
+
+Some tests could fail under heavy load, whereas in most cases
+they would simply succeed. Usually, continuous integration systems
+will at one point or the other reach that problem.
+
+To disable these known tests, please set the environment
+variable CI to true.
+
+        CI=true
+
 =cut
