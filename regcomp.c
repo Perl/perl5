@@ -110,7 +110,6 @@ typedef struct scan_frame {
     regnode *next_regnode;      /* next node to process when last is reached */
     U32 prev_recursed_depth;
     I32 stopparen;              /* what stopparen do we use */
-    U32 is_top_frame;           /* what flags do we use? */
 
     struct scan_frame *this_prev_frame; /* this previous frame */
     struct scan_frame *prev_frame;      /* previous frame */
