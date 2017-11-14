@@ -24,13 +24,13 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 232 ;
+        $count = 237 ;
     }
     elsif ($] >= 5.006) {
-        $count = 320 ;
+        $count = 325 ;
     }
     else {
-        $count = 275 ;
+        $count = 280 ;
     }
 
     plan tests => $count + $extra;
@@ -934,6 +934,33 @@ SKIP:
 
 {
     title "repeated calls to flush - no compression";
+
+    my $hello = "I am a HAL 9000 computer" ;
+    my ($err, $x, $X, $status); 
+ 
+    ok( ($x, $err) = new Compress::Raw::Zlib::Deflate ( ), "Create deflate object" );
+    isa_ok $x, "Compress::Raw::Zlib::deflateStream" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+    
+    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "flush returned Z_OK" ;    
+    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "second flush returned Z_OK" ; 
+    is $X, "", "no output from second flush";
+}
+
+{
+    title "crc32";
+
+    is eval('Compress::Raw::Zlib::crc32("A" x 0x100, 0, 0x100); 0x1234'), 0x1234;
+    is $@,  '';
+
+    is eval('Compress::Raw::Zlib::crc32("A" x 0x100, 0, 0x101); 0x1234'), undef;
+    like $@,  mkErr("^Offset out of range in Compress::Raw::Zlib::crc32") ;
+
+}
+
+if (0)
+{
+    title "RT #122695: sync flush appending extra empty uncompressed block";
 
     my $hello = "I am a HAL 9000 computer" ;
     my ($err, $x, $X, $status); 

@@ -180,8 +180,7 @@ typedef di_stream * inflateStream ;
 typedef di_stream * Compress__Raw__Zlib__inflateStream ;
 typedef di_stream * Compress__Raw__Zlib__inflateScanStream ;
 
-#define ZMALLOC(to, typ) ((to = (typ *)safemalloc(sizeof(typ))), \
-                                Zero(to,1,typ))
+#define ZMALLOC(to, typ) (to = (typ *)safecalloc(sizeof(typ), 1))
 
 /* Figure out the Operating System */
 #ifdef MSDOS
@@ -506,7 +505,8 @@ DispStream(s, message)
 voidpf my_zcalloc (voidpf opaque, unsigned items, unsigned size)
 {
     PERL_UNUSED_VAR(opaque);
-    return safemalloc(items * size);
+    return safecalloc(items, size);
+    /* return safemalloc(items* size); */
 }
 
 
@@ -832,6 +832,9 @@ Zip_crc32(buf, crc=crcInitial, offset=0)
          croak("Wide character in Compress::Raw::Zlib::crc32");
 #endif         
 	buf = (Byte*)SvPVbyte(sv, len) ;
+
+	if (offset > len)
+	  croak("Offset out of range in Compress::Raw::Zlib::crc32");
 
 	if (items < 2)
 	  crc = crcInitial;
@@ -1193,6 +1196,7 @@ flush(s, output, f=Z_FINISH)
     uLong     availableout = NO_INIT    
   CODE:
     bufinc = s->bufsize;
+    
   
   
     /* retrieve the output buffer */
