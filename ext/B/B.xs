@@ -468,9 +468,7 @@ typedef IO	*B__IO;
 typedef MAGIC	*B__MAGIC;
 typedef HE      *B__HE;
 typedef struct refcounted_he	*B__RHE;
-#ifdef PadlistARRAY
 typedef PADLIST	*B__PADLIST;
-#endif
 typedef PADNAMELIST *B__PADNAMELIST;
 typedef PADNAME	*B__PADNAME;
 
@@ -628,10 +626,6 @@ BOOT:
     ASSIGN_COMMON_ALIAS(I, defstash);
     cv = newXS("B::curstash", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, curstash);
-#ifdef PL_formfeed
-    cv = newXS("B::formfeed", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(I, formfeed);
-#endif
 #ifdef USE_ITHREADS
     cv = newXS("B::regex_padav", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, regex_padav);
@@ -648,14 +642,10 @@ BOOT:
 #endif
 }
 
-#ifndef PL_formfeed
-
 void
 formfeed()
     PPCODE:
 	PUSHs(make_sv_object(aTHX_ GvSV(gv_fetchpvs("\f", GV_ADD, SVt_PV))));
-
-#endif
 
 long 
 amagic_generation()
@@ -669,16 +659,12 @@ comppadlist()
     PREINIT:
 	PADLIST *padlist = CvPADLIST(PL_main_cv ? PL_main_cv : PL_compcv);
     PPCODE:
-#ifdef PadlistARRAY
 	{
 	    SV * const rv = sv_newmortal();
 	    sv_setiv(newSVrv(rv, padlist ? "B::PADLIST" : "B::NULL"),
 		     PTR2IV(padlist));
 	    PUSHs(rv);
 	}
-#else
-	PUSHs(make_sv_object(aTHX_ (SV *)padlist));
-#endif
 
 void
 sv_undef()
@@ -1667,19 +1653,12 @@ PV(sv)
 	U32 utf8 = 0;
     CODE:
 	if (ix == 3) {
-#ifndef PERL_FBM_TABLE_OFFSET
 	    const MAGIC *const mg = mg_find(sv, PERL_MAGIC_bm);
 
 	    if (!mg)
                 croak("argument to B::BM::TABLE is not a PVBM");
 	    p = mg->mg_ptr;
 	    len = mg->mg_len;
-#else
-	    p = SvPV(sv, len);
-	    /* Boyer-Moore table is just after string and its safety-margin \0 */
-	    p += len + PERL_FBM_TABLE_OFFSET;
-	    len = 256;
-#endif
 	} else if (ix == 2) {
 	    /* This used to read 257. I think that that was buggy - should have
 	       been 258. (The "\0", the flags byte, and 256 for the table.)
@@ -1697,38 +1676,22 @@ PV(sv)
 	       5.15 and later store the BM table via MAGIC, so the compiler
 	       should handle this just fine without changes if PVBM now
 	       always returns the SvPVX() buffer.  */
-#ifdef isREGEXP
 	    p = isREGEXP(sv)
 		 ? RX_WRAPPED_const((REGEXP*)sv)
 		 : SvPVX_const(sv);
-#else
-	    p = SvPVX_const(sv);
-#endif
-#ifdef PERL_FBM_TABLE_OFFSET
-	    len = SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0);
-#else
 	    len = SvCUR(sv);
-#endif
 	} else if (ix) {
-#ifdef isREGEXP
 	    p = isREGEXP(sv) ? RX_WRAPPED((REGEXP*)sv) : SvPVX(sv);
-#else
-	    p = SvPVX(sv);
-#endif
 	    len = strlen(p);
 	} else if (SvPOK(sv)) {
 	    len = SvCUR(sv);
 	    p = SvPVX_const(sv);
 	    utf8 = SvUTF8(sv);
-        }
-#ifdef isREGEXP
-	else if (isREGEXP(sv)) {
+        } else if (isREGEXP(sv)) {
 	    len = SvCUR(sv);
 	    p = RX_WRAPPED_const((REGEXP*)sv);
 	    utf8 = SvUTF8(sv);
-	}
-#endif
-        else {
+	} else {
             /* XXX for backward compatibility, but should fail */
             /* croak( "argument is not SvPOK" ); */
 	    p = NULL;
@@ -2008,8 +1971,6 @@ I32
 CvDEPTH(cv)
         B::CV   cv
 
-#ifdef PadlistARRAY
-
 B::PADLIST
 CvPADLIST(cv)
 	B::CV	cv
@@ -2017,17 +1978,6 @@ CvPADLIST(cv)
 	RETVAL = CvISXSUB(cv) ? NULL : CvPADLIST(cv);
     OUTPUT:
 	RETVAL
-
-#else
-
-B::AV
-CvPADLIST(cv)
-	B::CV	cv
-    PPCODE:
-	PUSHs(make_sv_object(aTHX_ (SV *)CvPADLIST(cv)));
-
-
-#endif
 
 SV *
 CvHSCXT(cv)
@@ -2129,8 +2079,6 @@ HASH(h)
 	RETVAL
 
 
-#ifdef PadlistARRAY
-
 MODULE = B	PACKAGE = B::PADLIST	PREFIX = Padlist
 
 SSize_t
@@ -2189,8 +2137,6 @@ PadlistREFCNT(padlist)
 	RETVAL = PadlistREFCNT(padlist);
     OUTPUT:
 	RETVAL
-
-#endif
 
 MODULE = B	PACKAGE = B::PADNAMELIST	PREFIX = Padnamelist
 

@@ -48,12 +48,12 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 @B::IV::ISA = 'B::SV';
 @B::NV::ISA = 'B::SV';
 # RV is eliminated with 5.11.0, but effectively is a specialisation of IV now.
-@B::RV::ISA = $] >= 5.011 ? 'B::IV' : 'B::SV';
+@B::RV::ISA = 'B::IV';
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PVIV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
-@B::REGEXP::ISA = 'B::PVMG' if $] >= 5.011;
-@B::INVLIST::ISA = 'B::PV'  if $] >= 5.019;
+@B::REGEXP::ISA = 'B::PVMG';
+@B::INVLIST::ISA = 'B::PV';
 @B::PVLV::ISA = 'B::GV';
 @B::BM::ISA = 'B::GV';
 @B::AV::ISA = 'B::PVMG';
@@ -549,52 +549,10 @@ give incomprehensible results, or worse.
 
 =head2 SV-RELATED CLASSES
 
-B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM (5.9.5 and
-earlier), B::PVLV, B::AV, B::HV, B::CV, B::GV, B::FM, B::IO.  These classes
+B::IV, B::NV, B::PV, B::PVIV, B::PVNV, B::PVMG,
+B::PVLV, B::AV, B::HV, B::CV, B::GV, B::FM, B::IO.  These classes
 correspond in the obvious way to the underlying C structures of similar names.
-The inheritance hierarchy mimics the underlying C "inheritance".  For the
-5.10.x branch, (I<ie> 5.10.0, 5.10.1 I<etc>) this is:
-
-                           B::SV
-                             |
-                +------------+------------+------------+
-                |            |            |            |
-              B::PV        B::IV        B::NV        B::RV
-                  \         /           /
-                   \       /           /
-                    B::PVIV           /
-                         \           /
-                          \         /
-                           \       /
-                            B::PVNV
-                               |
-                               |
-                            B::PVMG
-                               |
-                   +-----+-----+-----+-----+
-                   |     |     |     |     |
-                 B::AV B::GV B::HV B::CV B::IO
-                         |           |
-                         |           |
-                      B::PVLV      B::FM
-
-For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, and BM is still
-present as a distinct type, so the base of this diagram is
-
-
-                               |
-                               |
-                            B::PVMG
-                               |
-            +------+-----+-----+-----+-----+-----+
-            |      |     |     |     |     |     |
-         B::PVLV B::BM B::AV B::GV B::HV B::CV B::IO
-                                           |
-                                           |
-                                         B::FM
-
-For 5.11.0 and later, B::RV is abolished, and IVs can be used to store
-references, and a new type B::REGEXP is introduced, giving this structure:
+The inheritance hierarchy mimics the underlying C "inheritance":
 
                            B::SV
                              |
@@ -958,17 +916,6 @@ IoIFP($io) == PerlIO_stderr().
 Like C<ARRAY>, but takes an index as an argument to get only one element,
 rather than a list of all of them.
 
-=item OFF
-
-This method is deprecated if running under Perl 5.8, and is no longer present
-if running under Perl 5.9
-
-=item AvFLAGS
-
-This method returns the AV specific
-flags.  In Perl 5.9 these are now stored
-in with the main SV flags, so this method is no longer present.
-
 =back
 
 =head2 B::CV Methods
@@ -989,8 +936,7 @@ in with the main SV flags, so this method is no longer present.
 
 =item PADLIST
 
-Returns a B::PADLIST object under Perl 5.18 or higher, or a B::AV in
-earlier versions.
+Returns a B::PADLIST object.
 
 =item OUTSIDE
 
@@ -1027,11 +973,6 @@ Returns the name of a lexical sub, otherwise C<undef>.
 =item NAME
 
 =item ARRAY
-
-=item PMROOT
-
-This method is not present if running under Perl 5.9, as the PMROOT
-information is no longer stored directly in the hash.
 
 =back
 
@@ -1175,15 +1116,7 @@ op is contained within.
 
 =item pmreplstart
 
-=item pmnext
-
-Only up to Perl 5.9.4
-
 =item pmflags
-
-=item extflags
-
-Since Perl 5.9.5
 
 =item precomp
 
@@ -1300,10 +1233,8 @@ Perl 5.22 introduced the B::PADNAMELIST and B::PADNAME classes.
 
 =item ARRAY
 
-A list of pads.  The first one contains the names.
-
-The first one is a B::PADNAMELIST under Perl 5.22, and a B::AV under
-earlier versions.  The rest are currently B::AV objects, but that could
+A list of pads.  The first one is a B::PADNAMELIST containing the names.
+The rest are currently B::AV objects, but that could
 change in future versions.
 
 =item ARRAYelt
