@@ -158,7 +158,7 @@ $result = runperl( progfile => $extracted_program, stderr => 1, args => ['-o'] )
 like($result, qr/^\s*This program is designed/, "No leading error messages with help from invalid arg.");
 
 $result = runperl( progfile => $extracted_program, stderr => 1, args => ['--help'] ); # Invalid option
-like($result, qr/^\s*perlbug version \d+\.\d+\n\nThis program is designed/, "No leading error messages with help from --help and version is displayed.");
+like($result, qr/^\s*perlbug version \d+\.\d+\n+This program is designed/, "No leading error messages with help from --help and version is displayed.");
 
 $result = runperl( progfile => $extracted_program, stderr => 1, args => ['--version'] ); # Invalid option
 like($result, qr/^perlbug version \d+\.\d+\n$/, "No leading error messages with --version");
