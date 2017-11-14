@@ -380,7 +380,7 @@ L</Platform Support> section, instead.
 =item C89 requirement
 
 Perl has been documented as requiring a C89 compiler to build since October
-1998.  A variety of simpliifcations have now been made to Perl's internals to
+1998.  A variety of simplifications have now been made to Perl's internals to
 rely on the features specified by the C89 standard. We believe that this
 internal change hasn't altered the set of platforms that Perl builds on, but
 please report a bug if Perl now has new problems building on your platform.
