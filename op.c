@@ -7193,9 +7193,10 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 
 Constructs, checks, and returns an op of any type that involves an
 embedded C-level pointer (PV).  C<type> is the opcode.  C<flags> gives
-the eight bits of C<op_flags>.  C<pv> supplies the C-level pointer, which
-must have been allocated using C<PerlMemShared_malloc>; the memory will
-be freed when the op is destroyed.
+the eight bits of C<op_flags>.  C<pv> supplies the C-level pointer.
+Depending on the op type, the memory referenced by C<pv> may be freed
+when the op is destroyed.  If the op is of a freeing type, C<pv> must
+have been allocated using C<PerlMemShared_malloc>.
 
 =cut
 */
