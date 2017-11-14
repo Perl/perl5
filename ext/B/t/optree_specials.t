@@ -6,6 +6,12 @@
 # output is matched losely. If the match fails even though the "got" and
 # "expected" output look exactly the same, then watch for trailing, invisible
 # spaces.
+#
+# Note that if this test is mysteriously failing smokes and is hard to
+# reproduce, try running with LC_ALL=en_US.UTF-8 PERL_UNICODE="".
+# This causes nextstate ops to have a bunch of extra hint info, which
+# needs adding to the expected output (for both thraded and non-threaded
+# versions)
 
 BEGIN {
     unshift @INC, 't';
@@ -121,7 +127,7 @@ checkOptree ( name	=> 'BEGIN',
 # BEGIN 7:
 # 1p <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->1p
-# 1m       <;> nextstate(main 3 -e:1) v:{ ->1n
+# 1m       <;> nextstate(main 3 -e:1) v:>,<,%,{ ->1n
 # 1o       <1> postinc[t3] sK/1 ->1p
 # -           <1> ex-rv2sv sKRM/1 ->1o
 # 1n             <#> gvsv[*beg] s ->1o
@@ -210,7 +216,7 @@ EOT_EOT
 # BEGIN 7:
 # 1p <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->1p
-# 1m       <;> nextstate(main 3 -e:1) v:{ ->1n
+# 1m       <;> nextstate(main 3 -e:1) v:>,<,%,{ ->1n
 # 1o       <1> postinc[t2] sK/1 ->1p
 # -           <1> ex-rv2sv sKRM/1 ->1o
 # 1n             <$> gvsv(*beg) s ->1o
@@ -374,27 +380,27 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # 1k <1> entersub[t1] KRS*/TARG,STRICT
 # 1l <1> leavesub[1 ref] K/REFC,1
 # BEGIN 7:
-# 1m <;> nextstate(main 3 -e:1) v:{
+# 1m <;> nextstate(main 3 -e:1) v:>,<,%,{
 # 1n <#> gvsv[*beg] s
 # 1o <1> postinc[t3] sK/1
 # 1p <1> leavesub[1 ref] K/REFC,1
 # END 1:
-# 1q <;> nextstate(main 9 -e:1) v:{
+# 1q <;> nextstate(main 9 -e:1) v:>,<,%,{
 # 1r <#> gvsv[*end] s
 # 1s <1> postinc[t3] sK/1
 # 1t <1> leavesub[1 ref] K/REFC,1
 # INIT 1:
-# 1u <;> nextstate(main 7 -e:1) v:{
+# 1u <;> nextstate(main 7 -e:1) v:>,<,%,{
 # 1v <#> gvsv[*init] s
 # 1w <1> postinc[t3] sK/1
 # 1x <1> leavesub[1 ref] K/REFC,1
 # CHECK 1:
-# 1y <;> nextstate(main 5 -e:1) v:{
+# 1y <;> nextstate(main 5 -e:1) v:>,<,%,{
 # 1z <#> gvsv[*chk] s
 # 20 <1> postinc[t3] sK/1
 # 21 <1> leavesub[1 ref] K/REFC,1
 # UNITCHECK 1:
-# 22 <;> nextstate(main 11 -e:1) v:{
+# 22 <;> nextstate(main 11 -e:1) v:>,<,%,{
 # 23 <#> gvsv[*uc] s
 # 24 <1> postinc[t3] sK/1
 # 25 <1> leavesub[1 ref] K/REFC,1
@@ -463,27 +469,27 @@ EOT_EOT
 # 1k <1> entersub[t1] KRS*/TARG,STRICT
 # 1l <1> leavesub[1 ref] K/REFC,1
 # BEGIN 7:
-# 1m <;> nextstate(main 3 -e:1) v:{
+# 1m <;> nextstate(main 3 -e:1) v:>,<,%,{
 # 1n <$> gvsv(*beg) s
 # 1o <1> postinc[t2] sK/1
 # 1p <1> leavesub[1 ref] K/REFC,1
 # END 1:
-# 1q <;> nextstate(main 9 -e:1) v:{
+# 1q <;> nextstate(main 9 -e:1) v:>,<,%,{
 # 1r <$> gvsv(*end) s
 # 1s <1> postinc[t2] sK/1
 # 1t <1> leavesub[1 ref] K/REFC,1
 # INIT 1:
-# 1u <;> nextstate(main 7 -e:1) v:{
+# 1u <;> nextstate(main 7 -e:1) v:>,<,%,{
 # 1v <$> gvsv(*init) s
 # 1w <1> postinc[t2] sK/1
 # 1x <1> leavesub[1 ref] K/REFC,1
 # CHECK 1:
-# 1y <;> nextstate(main 5 -e:1) v:{
+# 1y <;> nextstate(main 5 -e:1) v:>,<,%,{
 # 1z <$> gvsv(*chk) s
 # 20 <1> postinc[t2] sK/1
 # 21 <1> leavesub[1 ref] K/REFC,1
 # UNITCHECK 1:
-# 22 <;> nextstate(main 11 -e:1) v:{
+# 22 <;> nextstate(main 11 -e:1) v:>,<,%,{
 # 23 <$> gvsv(*uc) s
 # 24 <1> postinc[t2] sK/1
 # 25 <1> leavesub[1 ref] K/REFC,1
