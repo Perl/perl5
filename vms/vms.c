@@ -10954,6 +10954,7 @@ Perl_vms_do_aexec(pTHX_ SV *really,SV **mark,SV **sp)
     return exec_sts;
   }
 
+  SETERRNO(ENOENT, RMS_FNF);
   return FALSE;
 }  /* end of vms_do_aexec() */
 /*}}}*/
