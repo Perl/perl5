@@ -866,6 +866,7 @@ d_strlcat=''
 d_strlcpy=''
 d_strnlen=''
 d_strtod=''
+d_strtod_l=''
 d_strtol=''
 d_strtold=''
 d_strtold_l=''
@@ -16186,7 +16187,7 @@ eval $inlibc
 set mktime d_mktime
 eval $inlibc
 
-: see if this is a sys/mman.h system
+: see if sys/mman.h has to be included
 set sys/mman.h i_sysmman
 eval $inhdr
 
@@ -18703,6 +18704,10 @@ eval $inlibc
 
 : see if strtod exists
 set strtod d_strtod
+eval $inlibc
+
+: see if strtod_l exists
+set strtod_l d_strtod_l
 eval $inlibc
 
 : see if strtol exists
@@ -24162,6 +24167,7 @@ d_strlcat='$d_strlcat'
 d_strlcpy='$d_strlcpy'
 d_strnlen='$d_strnlen'
 d_strtod='$d_strtod'
+d_strtod_l='$d_strtod_l'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'
 d_strtold_l='$d_strtold_l'

@@ -5,6 +5,13 @@
 #
 # See Porting/config_h.pl
 
+#!/bin/sh
+#
+# THIS IS A GENERATED FILE
+# DO NOT HAND-EDIT
+#
+# See Porting/config_h.pl
+
 : Set up for generating config_h.SH
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh;;
@@ -28,6 +35,9 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+case "$CONFIG_H" in
+already-done) echo "Not re-extracting config.h" ;;
+*)
 case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
@@ -5029,6 +5039,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_strerror_r HAS_STRERROR_R	   /**/
 #define STRERROR_R_PROTO $strerror_r_proto	   /**/
 
+/* HAS_STRTOD_L:
+ *	This symbol, if defined, indicates that the strtod_l routine is
+ *	available to convert strings to long doubles.
+ */
+#$d_strtod_l HAS_STRTOD_L		/**/
+
 /* HAS_STRTOLD_L:
  *	This symbol, if defined, indicates that the strtold_l routine is
  *	available to convert strings to long doubles.
@@ -5217,5 +5233,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 #endif
 !GROK!THIS!
+;;
+esac
 ;;
 esac
