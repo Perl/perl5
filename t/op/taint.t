@@ -123,7 +123,7 @@ sub violates_taint {
 }
 
 # We need an external program to call.
-my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
+my $ECHO = ($Is_MSWin32 ? ".\\tmpecho$$" : ($Is_NetWare ? "tmpecho$$" : "./tmpecho$$"));
 END { unlink $ECHO }
 open my $fh, '>', $ECHO or die "Can't create $ECHO: $!";
 print $fh 'print "@ARGV\n"', "\n";

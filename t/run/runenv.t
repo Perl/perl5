@@ -140,18 +140,18 @@ try({PERL5OPT => '-Mstrict -Mwarnings'},
     "ok",
     "");
 
-open my $fh, ">", "Oooof.pm" or die "Can't write Oooof.pm: $!";
-print $fh "package Oooof; 1;\n";
+open my $fh, ">", "tmpOooof.pm" or die "Can't write tmpOooof.pm: $!";
+print $fh "package tmpOooof; 1;\n";
 close $fh;
-END { 1 while unlink "Oooof.pm" }
+END { 1 while unlink "tmpOooof.pm" }
 
-try({PERL5OPT => '-I. -MOooof'}, 
-    ['-e', 'print "ok" if $INC{"Oooof.pm"} eq "Oooof.pm"'],
+try({PERL5OPT => '-I. -MtmpOooof'}, 
+    ['-e', 'print "ok" if $INC{"tmpOooof.pm"} eq "tmpOooof.pm"'],
     "ok",
     "");
 
-try({PERL5OPT => '-I./ -MOooof'}, 
-    ['-e', 'print "ok" if $INC{"Oooof.pm"} eq "Oooof.pm"'],
+try({PERL5OPT => '-I./ -MtmpOooof'}, 
+    ['-e', 'print "ok" if $INC{"tmpOooof.pm"} eq "tmpOooof.pm"'],
     "ok",
     "");
 

@@ -917,7 +917,7 @@ $::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
 my $tempfile_count = 0;
 sub tempfile {
     while(1){
-	my $try = "tmp$$";
+	my $try = (-d "t" ? "t/" : "")."tmp$$";
         my $alpha = _num_to_alpha($tempfile_count,2);
         last unless defined $alpha;
         $try = $try . $alpha;
