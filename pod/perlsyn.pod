@@ -116,16 +116,6 @@ C<do {}> that I<look> like compound statements, but aren't--they're just
 TERMs in an expression--and thus need an explicit termination when used
 as the last item in a statement.
 
-=head2 Truth and Falsehood
-X<truth> X<falsehood> X<true> X<false> X<!> X<not> X<negation> X<0>
-
-The number 0, the strings C<'0'> and C<"">, the empty list C<()>, and
-C<undef> are all false in a boolean context.  All other values are true.
-Negation of a true value by C<!> or C<not> returns a special false value.
-When evaluated as a string it is treated as C<"">, but as a number, it
-is treated as 0.  Most Perl operators
-that return true or false behave this way.
-
 =head2 Statement Modifiers
 X<statement modifier> X<modifier> X<if> X<unless> X<while>
 X<until> X<when> X<foreach> X<for>
@@ -304,7 +294,7 @@ language construct, as everyone reading your code will have to think at least
 twice before they can understand what's going on.
 
 The C<while> statement executes the block as long as the expression is
-L<true|/"Truth and Falsehood">.
+true.
 The C<until> statement executes the block as long as the expression is
 false.
 The LABEL is optional, and if present, consists of an identifier followed

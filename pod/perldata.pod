@@ -320,12 +320,17 @@ are considered pretty much the same thing for nearly all purposes,
 references are strongly-typed, uncastable pointers with builtin
 reference-counting and destructor invocation.
 
+X<truth> X<falsehood> X<true> X<false> X<!> X<not> X<negation> X<0>
+X<boolean> X<bool>
 A scalar value is interpreted as FALSE in the Boolean sense
 if it is undefined, the null string or the number 0 (or its
 string equivalent, "0"), and TRUE if it is anything else.  The
 Boolean context is just a special kind of scalar context where no 
 conversion to a string or a number is ever performed.
-X<boolean> X<bool> X<true> X<false> X<truth>
+Negation of a true value by C<!> or C<not> returns a special false value.
+When evaluated as a string it is treated as C<"">, but as a number, it
+is treated as 0.  Most Perl operators
+that return true or false behave this way.
 
 There are actually two varieties of null strings (sometimes referred
 to as "empty" strings), a defined one and an undefined one.  The

@@ -290,6 +290,12 @@ rather than in terms of the physical data structures.
 
 =item *
 
+The section "Truth and Falsehood" in L<perlsyn> has been removed from
+that document, where it didn't belong, and merged into the existing
+paragraph on the same topic in L<perldata>.
+
+=item *
+
 XXX Description of the change here
 
 =back
