@@ -3043,7 +3043,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
                          + ((nargs + 1) * (variant ? 2 : 1))
                         )
                     );
-    const_str = (char *)PerlMemShared_malloc(total_len);
+    const_str = (char *)PerlMemShared_malloc(total_len ? total_len : 1);
 
     /* Extract all the non-const expressions from the concat tree then
      * dispose of the old tree, e.g. convert the tree from this:
