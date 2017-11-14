@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "1.002";
+our $VERSION   = "1.003";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -30,7 +30,8 @@ use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS OPf_SPECIAL
          OPf_STACKED
          OPpSPLIT_ASSIGN OPpSPLIT_LEX
-	 CVf_ANON PAD_FAKELEX_ANON PAD_FAKELEX_MULTI SVf_ROK);
+	 CVf_ANON CVf_LEXICAL CVf_NAMED
+	 PAD_FAKELEX_ANON PAD_FAKELEX_MULTI SVf_ROK);
 
 my %style =
   ("terse" =>
@@ -741,6 +742,29 @@ sub concise_sv {
 	    $hr->{svval} .= cstring($sv->PV);
 	} elsif (class($sv) eq "HV") {
 	    $hr->{svval} .= 'HASH';
+	} elsif (class($sv) eq "AV") {
+	    $hr->{svval} .= 'ARRAY';
+	} elsif (class($sv) eq "CV") {
+	    if ($sv->CvFLAGS & CVf_ANON) {
+		$hr->{svval} .= 'CODE';
+	    } elsif ($sv->CvFLAGS & CVf_NAMED) {
+		$hr->{svval} .= "&";
+		unless ($sv->CvFLAGS & CVf_LEXICAL) {
+		    my $stash = $sv->STASH;
+		    unless (class($stash) eq "SPECIAL") {
+			$hr->{svval} .= $stash->NAME . "::";
+		    }
+		}
+		$hr->{svval} .= $sv->NAME_HEK;
+	    } else {
+		$hr->{svval} .= "&";
+		$sv = $sv->GV;
+		my $stash = $sv->STASH;
+		unless (class($stash) eq "SPECIAL") {
+		    $hr->{svval} .= $stash->NAME . "::";
+		}
+		$hr->{svval} .= $sv->SAFENAME;
+	    }
 	}
 
 	$hr->{svval} = 'undef' unless defined $hr->{svval};

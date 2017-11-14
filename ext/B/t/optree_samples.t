@@ -574,7 +574,7 @@ checkOptree ( name	=> 'map $_+42, 10..20',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 497 (eval 20):1) v
 # 2  <0> pushmark s
-# 3  <$> const[AV ] s
+# 3  <$> const[AV ARRAY] s
 # 4  <1> rv2av lKPM/1
 # 5  <@> mapstart K
 # 6  <|> mapwhile(other->7)[t5] K
@@ -586,7 +586,7 @@ checkOptree ( name	=> 'map $_+42, 10..20',
 EOT_EOT
 # 1  <;> nextstate(main 511 (eval 26):1) v
 # 2  <0> pushmark s
-# 3  <$> const(AV ) s
+# 3  <$> const(AV ARRAY) s
 # 4  <1> rv2av lKPM/1
 # 5  <@> mapstart K
 # 6  <|> mapwhile(other->7)[t4] K

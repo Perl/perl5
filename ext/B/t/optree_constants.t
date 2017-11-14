@@ -16,9 +16,20 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 67;
+plan tests => 99;
 
 #################################
+
+my sub lleexx {}
+sub tsub0 {}
+sub tsub1 {} $tsub1 = 1;
+sub t::tsub2 {}
+sub t::tsub3 {} $tsub3 = 1;
+{
+    package t;
+    sub tsub4 {}
+    sub tsub5 {} $tsub5 = 1;
+}
 
 use constant {		# see also t/op/gv.t line 358
     myaref	=> [ 1,2,3 ],
@@ -31,6 +42,14 @@ use constant {		# see also t/op/gv.t line 358
     mysub	=> \&ok,
     myundef	=> undef,
     myunsub	=> \&nosuch,
+    myanonsub	=> sub {},
+    mylexsub	=> \&lleexx,
+    tsub0	=> \&tsub0,
+    tsub1	=> \&tsub1,
+    tsub2	=> \&t::tsub2,
+    tsub3	=> \&t::tsub3,
+    tsub4	=> \&t::tsub4,
+    tsub5	=> \&t::tsub5,
 };
 
 sub myyes() { 1==1 }
@@ -44,12 +63,20 @@ my $want = {	# expected types, how value renders in-line, todos (maybe)
     myhref	=> [ $RV_class, '\\\\HASH'],
     pi		=> [ 'NV', pi ],
     myglob	=> [ $RV_class, '\\\\' ],
-    mysub	=> [ $RV_class, '\\\\' ],
-    myunsub	=> [ $RV_class, '\\\\' ],
+    mysub	=> [ $RV_class, '\\\\&main::ok' ],
+    myunsub	=> [ $RV_class, '\\\\&main::nosuch' ],
+    myanonsub	=> [ $RV_class, '\\\\CODE' ],
+    mylexsub	=> [ $RV_class, '\\\\&lleexx' ],
+    tsub0	=> [ $RV_class, '\\\\&main::tsub0' ],
+    tsub1	=> [ $RV_class, '\\\\&main::tsub1' ],
+    tsub2	=> [ $RV_class, '\\\\&t::tsub2' ],
+    tsub3	=> [ $RV_class, '\\\\&t::tsub3' ],
+    tsub4	=> [ $RV_class, '\\\\&t::tsub4' ],
+    tsub5	=> [ $RV_class, '\\\\&t::tsub5' ],
     # these are not inlined, at least not per BC::Concise
     #myyes	=> [ $RV_class, ],
     #myno	=> [ $RV_class, ],
-    myaref	=> [ $RV_class, '\\\\' ],
+    myaref	=> [ $RV_class, '\\\\ARRAY' ],
     myfl	=> [ 'NV', myfl ],
     myint	=> [ 'IV', myint ],
     $] >= 5.011 ? (
