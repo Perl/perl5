@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Symbol;
 
-our $VERSION = '3.35';
+our $VERSION = '3.36';
 
 =head1 NAME
 

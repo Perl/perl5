@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.36
+  - Make generated code avoid warnings about the "items" variable
+    being unused
+
 3.35 - Mon Jul 31 17:50:00 CET 2017
   - Fix ExtUtils-ParseXS/t/*.t that needed '.' in @INC (David Mitchell)
   - Remove impediment to compiling under C++11 (Karl Williamson)

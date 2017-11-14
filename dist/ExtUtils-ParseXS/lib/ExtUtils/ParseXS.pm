@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.35';
+  $VERSION = '3.36';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -519,9 +519,10 @@ EOF
 EOF
     }
     else {
-    # cv likely to be unused
+    # cv and items likely to be unused
     print Q(<<"EOF");
 #    PERL_UNUSED_VAR(cv); /* -W */
+#    PERL_UNUSED_VAR(items); /* -W */
 EOF
     }
 
@@ -871,6 +872,7 @@ EOF
 #XS_EUPXS(XS_$self->{Packid}_nil)
 #{
 #   dXSARGS;
+#   PERL_UNUSED_VAR(items);
 #   XSRETURN_EMPTY;
 #}
 #

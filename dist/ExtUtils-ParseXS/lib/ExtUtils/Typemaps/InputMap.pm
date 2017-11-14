@@ -2,7 +2,7 @@ package ExtUtils::Typemaps::InputMap;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '3.35';
+our $VERSION = '3.36';
 
 =head1 NAME
 
