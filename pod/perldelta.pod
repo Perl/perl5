@@ -233,6 +233,12 @@ longer throws a "Not a GLOB reference" error.
 L<File::Copy> has been upgraded from version 2.32 to 2.33.  It will now use
 Time::HiRes utime where available (RT #132401).
 
+=item *
+
+To address a security vulnerability in older versions of the 'zlib' library
+(which is bundled with Compress-Raw-Zlib), L<Compress::Raw::Zlib> has been
+upgraded to CPAN version 2.075.
+
 =back
 
 =head2 Removed Modules and Pragmata
