@@ -35,8 +35,9 @@ use File::Glob qw(:case);
 # which have an obvious top-level module associated with them will usually
 # have a key named for that module, e.g. 'Archive::Extract' for
 # Archive-Extract-N.NN.tar.gz; the remaining keys are likely to be based
-# on the name of the distribution, e.g. 'Locale-Codes' for
-# Locale-Codes-N.NN.tar.gz'.
+# on the name of the distribution,
+# e.g. 'libnet' for 'libnet-N.NN.tar.gz'
+# or 'Scalar-List-Utils' for 'Scalar-List-Utils-N.NN.tar.gz'
 
 # UPSTREAM indicates where patches should go.  This is generally now
 # inferred from the FILES: modules with files in dist/, ext/ and lib/
@@ -670,21 +671,6 @@ use File::Glob qw(:case);
                 ),
             qr(^demos/),
             qr(^t/external/),
-        ],
-    },
-
-    'Locale-Codes' => {
-        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.54.tar.gz',
-        'FILES'        => q[cpan/Locale-Codes],
-        'EXCLUDED'     => [
-            qw( README.first
-                t/pod_coverage.ign
-                t/pod_coverage.t
-                t/pod.t),
-            qr{^t/runtests},
-            qr{^t/runtests\.bat},
-            qr{^internal/},
-            qr{^examples/},
         ],
     },
 

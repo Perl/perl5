@@ -303,13 +303,9 @@ Reference to a hash with a structure like this:
     $found = {
       'MODULE' => {
         'CPAN::Bundle' => 'lib/CPAN/Bundle.pm',
-        'Locale::Codes::Script_Retired' =>
-            'lib/Locale/Codes/Script_Retired.pm',
         'Pod::Simple::DumpAsText' =>
             'lib/Pod/Simple/DumpAsText.pm',
         # ...
-        'Locale::Codes::LangVar' =>
-            'lib/Locale/Codes/LangVar.pod'
       },
       'PRAGMA' => {
         'fields' => 'lib/fields.pm',
