@@ -66,7 +66,7 @@ MAIN: {
         ABSTRACT => 'Collection of network protocol modules',
         AUTHOR   => 'Graham Barr <gbarr@pobox.com>, Steve Hay <shay@cpan.org>',
         LICENSE  => 'perl_5',
-        VERSION  => '3.10',
+        VERSION  => '3.11',
 
         META_MERGE => {
             'meta-spec' => {

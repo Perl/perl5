@@ -20,11 +20,12 @@ CPAN Request Tracker at
 
 =head1 Author and Copyright Information
 
-Copyright (c) 1997-1998 Graham Barr. All rights reserved.
+Copyright (C) 1997-1998 Graham Barr.  All rights reserved.
 This document is free; you can redistribute it and/or modify it
 under the terms of the Artistic License.
 
-Currently maintained by Steve Hay <shay@cpan.org>.
+Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
+1.22_02.
 
 =head2 Disclaimer
 
@@ -297,6 +298,4 @@ being sent or response being received.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997 Graham Barr.
-All rights reserved.
-
+Copyright (C) 1997-1998 Graham Barr.  All rights reserved.
