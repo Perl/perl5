@@ -84,18 +84,13 @@ $opt{version_patchlevel_string} = "version $opt{PERL_VERSION} subversion $opt{PE
 $opt{version_patchlevel_string} .= " patch $opt{PERL_PATCHLEVEL}" if exists $opt{PERL_PATCHLEVEL};
 
 my $ver = `ver 2>nul`;
-if ($ver =~ /Version (\d+\.\d+)/) {
-    $opt{osvers} = $1;
-}
-else {
-    $opt{osvers} = '4.0';
-}
+$opt{osvers} = $ver =~ /\b(\d+(?:\.\d+)+)\b/ ? $1 : '4.0';
 
 if (exists $opt{cc}) {
     # cl version detection borrowed from Test::Smoke's configsmoke.pl
     if ($opt{cc} =~ /\b(?:cl|icl)/) { #MSVC can come as clarm.exe, icl=Intel C
-        my $output = `$opt{cc} --version 2>&1`;
-        $opt{ccversion} = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
+        my $output = `$opt{cc} 2>&1`;
+        $opt{ccversion} = $output =~ /\b(\d+(?:\.\d+)+)\b/ ? $1 : '?';
     }
     elsif ($opt{cc} =~ /\bgcc\b/) {
         chomp($opt{gccversion} = `$opt{cc} -dumpversion`);
@@ -274,7 +269,7 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
-    if($ccversion < 13) { #VC6
+    if ($ccversion < 13) { #VC6
 	$opt{ar} ='lib';
     }
     if ($ccversion >= 19) { # VC14
@@ -287,9 +282,9 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 }
 #find out which MSVC this ICC is using
 elsif ($opt{cc} =~ /\bicl/) {
-    my $output = `cl --version 2>&1`;
-    my $num_ver = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
-    if($num_ver =~ /^(\d+)/ && $1 >= 14) {
+    my $output = `cl 2>&1`;
+    my $num_ver = $output =~ /\b(\d+(?:\.\d+)+)\b/ ? $1 : '?';
+    if ($num_ver =~ /^(\d+)/ && $1 >= 14) {
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
