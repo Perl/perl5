@@ -501,9 +501,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Visual C++ compiler version detection has been improved to work on non-English
+language systems.
 
 =back
 
