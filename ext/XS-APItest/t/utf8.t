@@ -15,6 +15,30 @@ $|=1;
 
 use XS::APItest;
 
+
+my $s = "A" x 100 ;
+my $ret_ref = test_is_utf8_invariant_string_loc($s, 0, length $s);
+is($ret_ref->[0], 1, "is_utf8_invariant_string_loc returns TRUE for invariant");
+
+my $above_word_length = 9;
+for my $initial (0 .. $above_word_length) {
+    for my $offset (0 .. $above_word_length) {
+        for my $trailing (0 .. $above_word_length) {
+            if ($initial >= $offset) {
+                my $variant_pos = $initial - $offset;
+                $s = "A" x $initial . "\x80" . "A" x $trailing;
+                my $ret_ref = test_is_utf8_invariant_string_loc($s, $offset,
+                                                                length $s);
+                is($ret_ref->[0], 0, "is_utf8_invariant_string_loc returns"
+                                   . " FALSE for variant at $variant_pos,"
+                                   . " first $offset ignored)");
+                is($ret_ref->[1], $variant_pos,
+                                        "   And returns the correct position");
+            }
+        }
+    }
+}
+
 my $pound_sign = chr utf8::unicode_to_native(163);
 
 # This  test file can't use byte_utf8a_to_utf8n() from t/charset_tools.pl
