@@ -499,6 +499,37 @@ unless (@ARGV) {
 	_find_tests('bigmem') if $ENV{PERL_TEST_MEMORY};
     }
 }
+@ARGV= do {
+    my @order= (
+	"base",
+	"comp",
+	"run",
+	"cmd",
+	"io",
+	"re",
+	"opbasic",
+	"op",
+	"uni",
+	"mro",
+	"lib",
+	"ext",
+	"dist",
+	"cpan",
+	"perf",
+	"porting",
+    );
+    my %order= map { $order[$_] => 1+$_ } 0..$#order;
+    my $idx= 0;
+    map {
+	$_->[0]
+    } sort {
+	    $a->[3] <=> $b->[3] ||
+	    $a->[1] <=> $b->[1]
+    } map {
+	my $root= /(\w+)/ ? $1 : "";
+	[ $_, $idx++, $root, $order{$root}||=0 ]
+    } @ARGV;
+};
 
 if ($::deparse) {
     _testprogs('deparse', '',   @ARGV);
