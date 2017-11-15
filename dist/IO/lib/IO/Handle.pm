@@ -271,7 +271,7 @@ use IO ();	# Load the XS module
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.36";
+$VERSION = "1.37";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
@@ -366,7 +366,7 @@ sub fdopen {
     my ($io, $fd, $mode) = @_;
     local(*GLOB);
 
-    if (ref($fd) && "".$fd =~ /GLOB\(/o) {
+    if (ref($fd) && "$fd" =~ /GLOB\(/o) {
 	# It's a glob reference; Alias it as we cannot get name of anon GLOBs
 	my $n = qualify(*GLOB);
 	*GLOB = *{*$fd};
@@ -494,7 +494,7 @@ sub stat {
 ##
 
 sub autoflush {
-    my $old = new SelectSaver qualify($_[0], caller);
+    my $old = SelectSaver->new(qualify($_[0], caller));
     my $prev = $|;
     $| = @_ > 1 ? $_[1] : 1;
     $prev;
@@ -534,7 +534,7 @@ sub input_line_number {
 
 sub format_page_number {
     my $old;
-    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    $old = SelectSaver->new(qualify($_[0], caller)) if ref($_[0]);
     my $prev = $%;
     $% = $_[1] if @_ > 1;
     $prev;
@@ -542,7 +542,7 @@ sub format_page_number {
 
 sub format_lines_per_page {
     my $old;
-    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    $old = SelectSaver->new(qualify($_[0], caller)) if ref($_[0]);
     my $prev = $=;
     $= = $_[1] if @_ > 1;
     $prev;
@@ -550,7 +550,7 @@ sub format_lines_per_page {
 
 sub format_lines_left {
     my $old;
-    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    $old = SelectSaver->new(qualify($_[0], caller)) if ref($_[0]);
     my $prev = $-;
     $- = $_[1] if @_ > 1;
     $prev;
@@ -558,7 +558,7 @@ sub format_lines_left {
 
 sub format_name {
     my $old;
-    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    $old = SelectSaver->new(qualify($_[0], caller)) if ref($_[0]);
     my $prev = $~;
     $~ = qualify($_[1], caller) if @_ > 1;
     $prev;
@@ -566,7 +566,7 @@ sub format_name {
 
 sub format_top_name {
     my $old;
-    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    $old = SelectSaver->new(qualify($_[0], caller)) if ref($_[0]);
     my $prev = $^;
     $^ = qualify($_[1], caller) if @_ > 1;
     $prev;
@@ -640,7 +640,7 @@ sub constant {
 sub printflush {
     my $io = shift;
     my $old;
-    $old = new SelectSaver qualify($io, caller) if ref($io);
+    $old = SelectSaver->new(qualify($io, caller)) if ref($io);
     local $| = 1;
     if(ref($io)) {
         print $io @_;
