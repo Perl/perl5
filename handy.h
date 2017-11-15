@@ -2448,6 +2448,9 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
+/* assert that a valid ptr has been supplied - use this instead of assert(ptr)  *
+ * as it handles cases like constant string arguments without throwing warnings *
+ * the cast is required, as is the inequality check, to avoid warnings          */
 #define perl_assert_ptr(p) assert( ((void*)(p)) != 0 )
 
 
