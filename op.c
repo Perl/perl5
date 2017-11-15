@@ -9243,6 +9243,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     PERL_ARGS_ASSERT_NEWMYSUB;
 
+    PL_hints |= HINT_BLOCK_SCOPE;
+
     /* Find the pad slot for storing the new sub.
        We cannot use PL_comppad, as it is the pad owned by the new sub.  We
        need to look in CvOUTSIDE and find the pad belonging to the enclos-

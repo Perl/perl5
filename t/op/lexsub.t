@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 149;
+plan 150;
 
 # -------------------- our -------------------- #
 
@@ -957,3 +957,6 @@ like runperl(
 {
   my sub h; sub{my $x; sub{h}}
 }
+
+is join("-", qw(aa bb), do { my sub lleexx; 123 }, qw(cc dd)),
+  "aa-bb-123-cc-dd", 'do { my sub...} in a list [perl #132442]';
