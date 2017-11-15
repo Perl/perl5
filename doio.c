@@ -1779,8 +1779,11 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
       do_fstat:
-        if (gv == PL_defgv)
+        if (gv == PL_defgv) {
+	    if (PL_laststatval < 0)
+		SETERRNO(EBADF,RMS_IFI);
             return PL_laststatval;
+	}
 	io = GvIO(gv);
         do_fstat_have_io:
         PL_laststype = OP_STAT;
@@ -1791,6 +1794,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
                 int fd = PerlIO_fileno(IoIFP(io));
                 if (fd < 0) {
                     /* E.g. PerlIO::scalar has no real fd. */
+		    SETERRNO(EBADF,RMS_IFI);
                     return (PL_laststatval = -1);
                 } else {
                     return (PL_laststatval = PerlLIO_fstat(fd, &PL_statcache));
@@ -1801,6 +1805,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
         }
 	PL_laststatval = -1;
 	report_evil_fh(gv);
+	SETERRNO(EBADF,RMS_IFI);
 	return -1;
     }
     else if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
@@ -1853,6 +1858,8 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "%s", no_prev_lstat);
+	    if (PL_laststatval < 0)
+		SETERRNO(EBADF,RMS_IFI);
 	    return PL_laststatval;
 	}
 	PL_laststatval = -1;
@@ -1862,6 +1869,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 		              "Use of -l on filehandle %" HEKf,
 			      HEKfARG(GvENAME_HEK(cGVOP_gv)));
 	}
+	SETERRNO(EBADF,RMS_IFI);
 	return -1;
     }
     if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))

@@ -2915,10 +2915,11 @@ PP(pp_stat)
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
 	}
 
-	if (gv != PL_defgv) {
-	    bool havefp;
+	if (gv == PL_defgv) {
+	    if (PL_laststatval < 0)
+		SETERRNO(EBADF,RMS_IFI);
+	} else {
           do_fstat_have_io:
-	    havefp = FALSE;
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv ? gv : (GV *)io;
             SvPVCLEAR(PL_statname);
@@ -2929,22 +2930,25 @@ PP(pp_stat)
                     if (IoIFP(io)) {
                         int fd = PerlIO_fileno(IoIFP(io));
                         if (fd < 0) {
+			    report_evil_fh(gv);
                             PL_laststatval = -1;
                             SETERRNO(EBADF,RMS_IFI);
                         } else {
                             PL_laststatval = PerlLIO_fstat(fd, &PL_statcache);
-                            havefp = TRUE;
                         }
                     } else if (IoDIRP(io)) {
                         PL_laststatval =
                             PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache);
-                        havefp = TRUE;
                     } else {
+			report_evil_fh(gv);
                         PL_laststatval = -1;
+			SETERRNO(EBADF,RMS_IFI);
                     }
-            }
-	    else PL_laststatval = -1;
-	    if (PL_laststatval < 0 && !havefp) report_evil_fh(gv);
+            } else {
+		report_evil_fh(gv);
+		PL_laststatval = -1;
+		SETERRNO(EBADF,RMS_IFI);
+	    }
         }
 
 	if (PL_laststatval < 0) {
@@ -3489,7 +3493,7 @@ PP(pp_fttty)
     else if (name && isDIGIT(*name) && grok_atoUV(name, &uv, NULL) && uv <= PERL_INT_MAX)
         fd = (int)uv;
     else
-	FT_RETURNUNDEF;
+	fd = -1;
     if (fd < 0) {
         SETERRNO(EBADF,RMS_IFI);
 	FT_RETURNUNDEF;
