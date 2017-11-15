@@ -1111,14 +1111,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 goto set_undef;
 	    }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
-		/* Get the bit mask for $warnings::Bits{all}, because
-		 * it could have been extended by warnings::register */
-		HV * const bits = get_hv("warnings::Bits", 0);
-		SV ** const bits_all = bits ? hv_fetchs(bits, "all", FALSE) : NULL;
-		if (bits_all)
-		    sv_copypv(sv, *bits_all);
-	        else
-		    sv_setpvn(sv, WARN_ALLstring, WARNsize);
+		sv_setpvn(sv, WARN_ALLstring, WARNsize);
 	    }
             else {
 	        sv_setpvn(sv, (char *) (PL_compiling.cop_warnings + 1),
@@ -2909,25 +2902,18 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		}
 		{
 		    STRLEN len, i;
-		    int accumulate = 0 ;
-		    int any_fatals = 0 ;
-		    const char * const ptr = SvPV_const(sv, len) ;
+		    int not_none = 0, not_all = 0;
+		    const U8 * const ptr = (const U8 *)SvPV_const(sv, len) ;
 		    for (i = 0 ; i < len ; ++i) {
-		        accumulate |= ptr[i] ;
-		        any_fatals |= (ptr[i] & 0xAA) ;
+			not_none |= ptr[i];
+			not_all |= ptr[i] ^ 0x55;
 		    }
-		    if (!accumulate) {
+		    if (!not_none) {
 		        if (!specialWARN(PL_compiling.cop_warnings))
 			    PerlMemShared_free(PL_compiling.cop_warnings);
 			PL_compiling.cop_warnings = pWARN_NONE;
-		    }
-		    /* Yuck. I can't see how to abstract this:  */
-		    else if (isWARN_on(
-                                ((STRLEN *)SvPV_nolen_const(sv)) - 1,
-                                WARN_ALL)
-                            && !any_fatals)
-                    {
-			if (!specialWARN(PL_compiling.cop_warnings))
+		    } else if (len >= WARNsize && !not_all) {
+		        if (!specialWARN(PL_compiling.cop_warnings))
 			    PerlMemShared_free(PL_compiling.cop_warnings);
 	                PL_compiling.cop_warnings = pWARN_ALL;
 	                PL_dowarn |= G_WARN_ONCE ;

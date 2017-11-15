@@ -883,10 +883,10 @@ def abc43 enabled
 def all enabled
 abc43 self not enabled
 abc43 def enabled
-abc43 all not enabled
+abc43 all enabled
 def self enabled
 def abc43 not enabled
-def all not enabled
+def all enabled
 ########
 -w
 --FILE-- abc44.pm
@@ -1291,7 +1291,7 @@ ok2
 --FILE-- fatal4.pm
 package fatal4 ;
 no warnings ;
-print "ok1\n" if !warnings::fatal_enabled('all') ;
+print "ok1\n" if warnings::fatal_enabled('all') ;
 print "ok2\n" if warnings::fatal_enabled("void") ;
 print "ok3\n" if !warnings::fatal_enabled("syntax") ;
 1;
@@ -1302,3 +1302,52 @@ EXPECT
 ok1
 ok2
 ok3
+########
+{ Quux::quux(); }
+{ no warnings; Quux::quux(); }
+{ no warnings; use warnings "void"; Quux::quux(); }
+{ use warnings; Quux::quux(); }
+{ use warnings; no warnings "void"; Quux::quux(); }
+use warnings ();
+BEGIN { warnings::register_categories(qw(wibble wobble wabble wubble)); }
+package Quux {
+  sub quux {
+    warnings::warnif($_, "My $_ is flanged")
+      foreach qw(wibble wobble wabble wubble);
+    ();
+  }
+}
+{ Quux::quux(); }
+{ no warnings; Quux::quux(); }
+{ no warnings; use warnings "void"; Quux::quux(); }
+{ use warnings; Quux::quux(); }
+{ use warnings; no warnings "void"; Quux::quux(); }
+{ no warnings; use warnings qw(wibble wabble); Quux::quux(); }
+{ no warnings; use warnings qw(wobble wubble); Quux::quux(); }
+{ use warnings; no warnings qw(wibble wabble); Quux::quux(); }
+{ use warnings; no warnings qw(wobble wubble); Quux::quux(); }
+EXPECT
+My wibble is flanged at - line 4.
+My wobble is flanged at - line 4.
+My wabble is flanged at - line 4.
+My wubble is flanged at - line 4.
+My wibble is flanged at - line 5.
+My wobble is flanged at - line 5.
+My wabble is flanged at - line 5.
+My wubble is flanged at - line 5.
+My wibble is flanged at - line 18.
+My wobble is flanged at - line 18.
+My wabble is flanged at - line 18.
+My wubble is flanged at - line 18.
+My wibble is flanged at - line 19.
+My wobble is flanged at - line 19.
+My wabble is flanged at - line 19.
+My wubble is flanged at - line 19.
+My wibble is flanged at - line 20.
+My wabble is flanged at - line 20.
+My wobble is flanged at - line 21.
+My wubble is flanged at - line 21.
+My wobble is flanged at - line 22.
+My wubble is flanged at - line 22.
+My wibble is flanged at - line 23.
+My wabble is flanged at - line 23.

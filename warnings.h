@@ -221,13 +221,15 @@ is by default enabled even if not within the scope of S<C<use warnings>>.
 #define unpackWARN4(x)		(((x) >>24) & 0xFF)
 
 #define ckDEAD(x)							\
-	   (PL_curcop &&                                                \
-            !specialWARN(PL_curcop->cop_warnings) &&			\
-	    ( isWARNf_on(PL_curcop->cop_warnings, WARN_ALL) || 		\
-	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	\
-	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	\
-	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
-	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x))))
+   (PL_curcop &&                                                        \
+    !specialWARN(PL_curcop->cop_warnings) &&			        \
+    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	        \
+      (unpackWARN2(x) &&                                                \
+	(isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	        \
+	  (unpackWARN3(x) &&                                            \
+	    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
+	      (unpackWARN4(x) &&                                        \
+		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
 
 /* end of file warnings.h */
 

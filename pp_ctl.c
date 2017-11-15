@@ -2007,16 +2007,7 @@ PP(pp_caller)
             mask = &PL_sv_undef ;
         else if (old_warnings == pWARN_ALL ||
 		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON)) {
-	    /* Get the bit mask for $warnings::Bits{all}, because
-	     * it could have been extended by warnings::register */
-	    SV **bits_all;
-	    HV * const bits = get_hv("warnings::Bits", 0);
-	    if (bits && (bits_all=hv_fetchs(bits, "all", FALSE))) {
-		mask = newSVsv(*bits_all);
-	    }
-	    else {
-		mask = newSVpvn(WARN_ALLstring, WARNsize) ;
-	    }
+	    mask = newSVpvn(WARN_ALLstring, WARNsize) ;
 	}
         else
             mask = newSVpvn((char *) (old_warnings + 1), old_warnings[0]);
