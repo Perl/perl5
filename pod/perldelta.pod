@@ -568,6 +568,11 @@ already fails.
 
 =item *
 
+C<stat()>, C<lstat()>, and file test operators now reliably set C<$!> when
+failing due to being applied to a closed or otherwise invalid file handle.
+
+=item *
+
 The in-place reverse optimisation now correctly strengthens weak
 references using the L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
 API function.
