@@ -939,6 +939,9 @@ containing the current underlying locale's formatting values.  Users of this fun
 should also read L<perllocale>, which provides a comprehensive
 discussion of Perl locale handling, including
 L<a section devoted to this function|perllocale/The localeconv function>.
+It should not be used in a threaded application unless it's certain that
+the underlying locale is C or POSIX.  This is because it otherwise
+changes the locale, which globally affects all threads simultaneously.
 
 Here is how to query the database for the B<de> (Deutsch or German) locale.
 
@@ -1804,7 +1807,10 @@ may not check for overflow, and therefore will never set C<$!>.
 
 C<strtod> respects any POSIX C<setlocale()> C<LC_TIME> settings,
 regardless of whether or not it is called from Perl code that is within
-the scope of S<C<use locale>>.
+the scope of S<C<use locale>>.  This means it should not be used in a
+threaded application unless it's certain that the underlying locale is C
+or POSIX.  This is because it otherwise changes the locale, which
+globally affects all threads simultaneously.
 
 To parse a string C<$str> as a floating point number use
 
