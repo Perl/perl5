@@ -588,6 +588,12 @@ Fixed a leaked SV when parsing an empty C<\N{}> at compile-time.
 Calling C<do $path> on a directory or block device now yields a meaningful
 error code in C<$!>.  [perl #125774]
 
+=item *
+
+Lexical sub declarations in C<do> blocks such as C<do { my sub lex; 123 }>
+could corrupt the stack, erasing items already on the stack in the
+enclosing statement.  This has been fixed.  [perl #132442]
+
 =back
 
 =head1 Known Problems
