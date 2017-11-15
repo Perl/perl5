@@ -529,7 +529,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.52';
+$VERSION = '1.53';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -6631,19 +6631,15 @@ sub dump_trace {
         $i++
     )
     {
-
-        # Go through the arguments and save them for later.
-        my $save_args = _dump_trace_calc_save_args($nothard);
+        # if the sub has args ($h true), make an anonymous array of the
+        # dumped args.
+        my $args = $h ? _dump_trace_calc_save_args($nothard) : undef;
 
         # If context is true, this is array (@)context.
         # If context is false, this is scalar ($) context.
         # If neither, context isn't defined. (This is apparently a 'can't
         # happen' trap.)
         $context = $context ? '@' : ( defined $context ? "\$" : '.' );
-
-        # if the sub has args ($h true), make an anonymous array of the
-        # dumped args.
-        $args = $h ? $save_args : undef;
 
         # remove trailing newline-whitespace-semicolon-end of line sequence
         # from the eval text, if any.
