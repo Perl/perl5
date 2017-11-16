@@ -1778,6 +1778,7 @@ sub gv_name {
     {
 	$stash = "";
     } else {
+	$stash = "::$stash" if $stash eq "CORE";
 	$stash = $stash . "::";
     }
     if (!$raw and $name =~ /^(\^..|{)/) {

@@ -2856,3 +2856,6 @@ $r = qr/abc\Q$a-$b\Exyz/;
 my $str;
 $str = 'foo';
 $str =~ tr/\cA//;
+####
+# CORE::foo special case in bareword parsing
+print ::CORE::foo $a;
