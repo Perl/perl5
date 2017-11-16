@@ -1309,11 +1309,11 @@ ok3
 { use warnings; Quux::quux(); }
 { use warnings; no warnings "void"; Quux::quux(); }
 use warnings ();
-BEGIN { warnings::register_categories(qw(wibble wobble wabble wubble)); }
+BEGIN { warnings::register_categories(qw(wibble wobble wabble wubble webble)); }
 package Quux {
   sub quux {
     warnings::warnif($_, "My $_ is flanged")
-      foreach qw(wibble wobble wabble wubble);
+      foreach qw(wibble wobble wabble wubble webble);
     ();
   }
 }
@@ -1322,32 +1322,47 @@ package Quux {
 { no warnings; use warnings "void"; Quux::quux(); }
 { use warnings; Quux::quux(); }
 { use warnings; no warnings "void"; Quux::quux(); }
-{ no warnings; use warnings qw(wibble wabble); Quux::quux(); }
+{ no warnings; use warnings qw(wibble wabble webble); Quux::quux(); }
 { no warnings; use warnings qw(wobble wubble); Quux::quux(); }
-{ use warnings; no warnings qw(wibble wabble); Quux::quux(); }
+{ use warnings; no warnings qw(wibble wabble webble); Quux::quux(); }
 { use warnings; no warnings qw(wobble wubble); Quux::quux(); }
+{ use warnings qw(wubble NONFATAL void); Quux::quux(); }
+{ use warnings qw(wubble); no warnings "void"; Quux::quux(); }
+{ no warnings "webble"; Quux::quux(); }
+{ use warnings qw(NONFATAL webble); Quux::quux(); }
+print "done\n";
 EXPECT
 My wibble is flanged at - line 4.
 My wobble is flanged at - line 4.
 My wabble is flanged at - line 4.
 My wubble is flanged at - line 4.
+My webble is flanged at - line 4.
 My wibble is flanged at - line 5.
 My wobble is flanged at - line 5.
 My wabble is flanged at - line 5.
 My wubble is flanged at - line 5.
+My webble is flanged at - line 5.
 My wibble is flanged at - line 18.
 My wobble is flanged at - line 18.
 My wabble is flanged at - line 18.
 My wubble is flanged at - line 18.
+My webble is flanged at - line 18.
 My wibble is flanged at - line 19.
 My wobble is flanged at - line 19.
 My wabble is flanged at - line 19.
 My wubble is flanged at - line 19.
+My webble is flanged at - line 19.
 My wibble is flanged at - line 20.
 My wabble is flanged at - line 20.
+My webble is flanged at - line 20.
 My wobble is flanged at - line 21.
 My wubble is flanged at - line 21.
 My wobble is flanged at - line 22.
 My wubble is flanged at - line 22.
 My wibble is flanged at - line 23.
 My wabble is flanged at - line 23.
+My webble is flanged at - line 23.
+My wubble is flanged at - line 24.
+My wubble is flanged at - line 25.
+My webble is flanged at - line 27.
+done
