@@ -20,6 +20,7 @@ Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
 Socket cpan/Socket/Socket.pm ee83312b6e3e0185af8d41a18635913d84b1b651
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
+Test::Simple cpan/Test-Simple/t/Legacy/Tester/tbt_09do.t 59e2880e287e75ed5c129e7136dfa43344ee3d3b
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
 perlfaq cpan/perlfaq/lib/perlfaq5.pod bcc1b6af3b6dff3973643acf8d5e741463374123
 perlfaq cpan/perlfaq/lib/perlfaq8.pod bffbc0c8fa828aead24e0891a5e789369a8e0743
