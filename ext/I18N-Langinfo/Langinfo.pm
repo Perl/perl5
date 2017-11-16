@@ -72,7 +72,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 XSLoader::load();
 
@@ -173,6 +173,11 @@ you can wrap the import in an eval like this:
 =head2 EXPORT
 
 By default only the C<langinfo()> function is exported.
+
+=head1 BUGS
+
+Before Perl 5.28, the returned values are unreliable for the C<RADIXCHAR> and
+C<THOUSEP> locale constants.
 
 =head1 SEE ALSO
 
