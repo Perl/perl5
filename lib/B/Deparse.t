@@ -2858,4 +2858,50 @@ $str = 'foo';
 $str =~ tr/\cA//;
 ####
 # CORE::foo special case in bareword parsing
-print ::CORE::foo $a;
+print $CORE::foo, $CORE::foo::bar;
+print @CORE::foo, @CORE::foo::bar;
+print %CORE::foo, %CORE::foo::bar;
+print $CORE::foo{'a'}, $CORE::foo::bar{'a'};
+print &CORE::foo, &CORE::foo::bar;
+print &CORE::foo(), &CORE::foo::bar();
+print *CORE::foo, *CORE::foo::bar;
+print stat CORE::foo::, stat CORE::foo::bar;
+print CORE::foo:: 1;
+print CORE::foo::bar 2;
+####
+# trailing colons on glob names
+no strict 'vars';
+$Foo::::baz = 1;
+print $foo, $foo::, $foo::::;
+print @foo, @foo::, @foo::::;
+print %foo, %foo::, %foo::::;
+print $foo{'a'}, $foo::{'a'}, $foo::::{'a'};
+print &foo, &foo::, &foo::::;
+print &foo(), &foo::(), &foo::::();
+print *foo, *foo::, *foo::::;
+print stat Foo, stat Foo::::;
+print Foo 1;
+print Foo:::: 2;
+####
+# trailing colons mixed with CORE
+no strict 'vars';
+print $CORE, $CORE::, $CORE::::;
+print @CORE, @CORE::, @CORE::::;
+print %CORE, %CORE::, %CORE::::;
+print $CORE{'a'}, $CORE::{'a'}, $CORE::::{'a'};
+print &CORE, &CORE::, &CORE::::;
+print &CORE(), &CORE::(), &CORE::::();
+print *CORE, *CORE::, *CORE::::;
+print stat CORE, stat CORE::::;
+print CORE 1;
+print CORE:::: 2;
+print $CORE::foo, $CORE::foo::, $CORE::foo::::;
+print @CORE::foo, @CORE::foo::, @CORE::foo::::;
+print %CORE::foo, %CORE::foo::, %CORE::foo::::;
+print $CORE::foo{'a'}, $CORE::foo::{'a'}, $CORE::foo::::{'a'};
+print &CORE::foo, &CORE::foo::, &CORE::foo::::;
+print &CORE::foo(), &CORE::foo::(), &CORE::foo::::();
+print *CORE::foo, *CORE::foo::, *CORE::foo::::;
+print stat CORE::foo::, stat CORE::foo::::;
+print CORE::foo:: 1;
+print CORE::foo:::: 2;

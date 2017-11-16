@@ -1778,7 +1778,6 @@ sub gv_name {
     {
 	$stash = "";
     } else {
-	$stash = "::$stash" if $stash eq "CORE";
 	$stash = $stash . "::";
     }
     if (!$raw and $name =~ /^(\^..|{)/) {
@@ -1794,7 +1793,7 @@ sub gv_name {
 sub stash_variable {
     my ($self, $prefix, $name, $cx) = @_;
 
-    return "$prefix$name" if $name =~ /::/;
+    return $prefix.$self->maybe_qualify($prefix, $name) if $name =~ /::/;
 
     unless ($prefix eq '$' || $prefix eq '@' || $prefix eq '&' || #'
 	    $prefix eq '%' || $prefix eq '$#') {
@@ -1870,11 +1869,16 @@ sub stash_variable_name {
 sub maybe_qualify {
     my ($self,$prefix,$name) = @_;
     my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;
-    return $name if !$prefix || $name =~ /::/;
+    if ($prefix eq "") {
+	$name .= "::" if $name =~ /(?:\ACORE::[^:]*|::)\z/;
+	return $name;
+    }
+    return $name if $name =~ /::/;
     return $self->{'curstash'}.'::'. $name
 	if
 	    $name =~ /^(?!\d)\w/         # alphabetic
 	 && $v    !~ /^\$[ab]\z/	 # not $a or $b
+	 && $v =~ /\A[\$\@\%]/           # scalar, array, or hash
 	 && !$globalnames{$name}         # not a global name
 	 && $self->{hints} & $strict_bits{vars}  # strict vars
 	 && !$self->lex_in_scope($v,1)   # no "our"
@@ -4052,7 +4056,7 @@ sub pp_gv {
     my $self = shift;
     my($op, $cx) = @_;
     my $gv = $self->gv_or_padgv($op);
-    return $self->gv_name($gv);
+    return $self->maybe_qualify("", $self->gv_name($gv));
 }
 
 sub pp_aelemfast_lex {
@@ -4089,7 +4093,8 @@ sub rv2x {
     }
     my $kid = $op->first;
     if ($kid->name eq "gv") {
-	return $self->stash_variable($type, $self->deparse($kid, 0), $cx);
+	return $self->stash_variable($type,
+		    $self->gv_name($self->gv_or_padgv($kid)), $cx);
     } elsif (is_scalar $kid) {
 	my $str = $self->deparse($kid, 0);
 	if ($str =~ /^\$([^\w\d])\z/) {
@@ -4572,6 +4577,7 @@ sub pp_gelem {
     my $scope = is_scope($glob);
     $glob = $self->deparse($glob, 0);
     $part = $self->deparse($part, 1);
+    $glob =~ s/::\z// unless $scope;
     return "*" . ($scope ? "{$glob}" : $glob) . "{$part}";
 }
 
@@ -4877,7 +4883,7 @@ sub pp_entersub {
 	    $proto = $cv->PV if $cv->FLAGS & SVf_POK;
 	}
 	$simple = 1; # only calls of named functions can be prototyped
-	$kid = $self->deparse($kid, 24);
+	$kid = $self->maybe_qualify("&", $self->gv_name($gv));
 	my $fq;
 	# Fully qualify any sub name that conflicts with a lexical.
 	if ($self->lex_in_scope("&$kid")
