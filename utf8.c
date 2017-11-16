@@ -2005,8 +2005,8 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 =for apidoc utf8_length
 
 Return the length of the UTF-8 char encoded string C<s> in characters.
-Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
-up past C<e>, croaks.
+Stops at C<e> (i.e. the C<*e> byte does not form part of the character).
+If C<e E<lt> s> or if the scan would end up past C<e>, it croaks.
 
 =cut
 */
