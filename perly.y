@@ -962,7 +962,7 @@ subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
     ;
 
 /* Binary operators between terms */
-termbinop:	term ASSIGNOP term                     /* $x = $y */
+termbinop:	term ASSIGNOP term                     /* $x = $y, $x += $y */
 			{ $$ = newASSIGNOP(OPf_STACKED, $1, $2, $3); }
 	|	term POWOP term                        /* $x ** $y */
 			{ $$ = newBINOP($2, 0, scalar($1), scalar($3)); }
