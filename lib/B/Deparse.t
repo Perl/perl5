@@ -2935,3 +2935,30 @@ use strict 'vars';
 print exists &main::foo;
 print exists &{foo};
 print exists &main::bar;
+# precedence of optimised-away 'keys' (OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS)
+my($r1, %h1, $res);
+our($r2, %h2);
+$res = keys %h1;
+$res = keys %h2;
+$res = keys %$r1;
+$res = keys %$r2;
+$res = keys(%h1) / 2 - 1;
+$res = keys(%h2) / 2 - 1;
+$res = keys(%$r1) / 2 - 1;
+$res = keys(%$r2) / 2 - 1;
+####
+# ditto in presence of sub keys {}
+# CONTEXT sub keys {}
+no warnings;
+my($r1, %h1, $res);
+our($r2, %h2);
+CORE::keys %h1;
+CORE::keys(%h1) / 2;
+$res = CORE::keys %h1;
+$res = CORE::keys %h2;
+$res = CORE::keys %$r1;
+$res = CORE::keys %$r2;
+$res = CORE::keys(%h1) / 2 - 1;
+$res = CORE::keys(%h2) / 2 - 1;
+$res = CORE::keys(%$r1) / 2 - 1;
+$res = CORE::keys(%$r2) / 2 - 1;
