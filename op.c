@@ -12185,8 +12185,6 @@ Perl_ck_sort(pTHX_ OP *o)
 	    SV ** const svp = hv_fetchs(hinthv, "sort", FALSE);
 	    if (svp) {
 		const I32 sorthints = (I32)SvIV(*svp);
-		if ((sorthints & HINT_SORT_QUICKSORT) != 0)
-		    o->op_private |= OPpSORT_QSORT;
 		if ((sorthints & HINT_SORT_STABLE) != 0)
 		    o->op_private |= OPpSORT_STABLE;
 		if ((sorthints & HINT_SORT_UNSTABLE) != 0)

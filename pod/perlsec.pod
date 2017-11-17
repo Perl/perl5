@@ -574,7 +574,7 @@ Perl running out of memory.
 =item *
 
 Sorting - the quicksort algorithm used in Perls before 5.8.0 to
-implement the sort() function is very easy to trick into misbehaving
+implement the sort() function was very easy to trick into misbehaving
 so that it consumes a lot of time.  Starting from Perl 5.8.0 a different
 sorting algorithm, mergesort, is used by default.  Mergesort cannot
 misbehave on any input.

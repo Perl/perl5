@@ -13,7 +13,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-plan tests => 40;
+plan tests => 38;
 
 =head1 f_sort.t
 
@@ -678,44 +678,6 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{use sort 'stable'; @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old; },
 	    expect => $expect, expect_nt => $expect_nt);
-
-=for gentest
-
-# chunk: # force use of mergesort (not portable outside Perl 5.8)
-use sort '_mergesort';
-@new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-
-=cut
-
-checkOptree(note   => q{},
-	    bcopts => q{-exec},
-	    code   => q{use sort '_mergesort'; @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old; },
-	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 662 (eval 42):1) v:%,{
-# 2  <0> pushmark s
-# 3  <0> pushmark s
-# 4  <#> gv[*old] s
-# 5  <1> rv2av[t9] lKM/1
-# 6  <@> sort lKS*
-# 7  <0> pushmark s
-# 8  <#> gv[*new] s
-# 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t14] KS/COM_AGG
-# b  <1> leavesub[1 ref] K/REFC,1
-EOT_EOT
-# 1  <;> nextstate(main 578 (eval 15):1) v:%,{
-# 2  <0> pushmark s
-# 3  <0> pushmark s
-# 4  <$> gv(*old) s
-# 5  <1> rv2av[t5] lKM/1
-# 6  <@> sort lKS*
-# 7  <0> pushmark s
-# 8  <$> gv(*new) s
-# 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t6] KS/COM_AGG
-# b  <1> leavesub[1 ref] K/REFC,1
-EONT_EONT
-    
 
 =for gentest
 

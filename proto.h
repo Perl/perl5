@@ -5042,9 +5042,6 @@ STATIC I32	S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b);
 STATIC I32	S_amagic_ncmp(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_AMAGIC_NCMP	\
 	assert(a); assert(b)
-STATIC void	S_qsortsvu(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t compare);
-#define PERL_ARGS_ASSERT_QSORTSVU	\
-	assert(compare)
 STATIC I32	S_sortcv(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_SORTCV	\
 	assert(a); assert(b)

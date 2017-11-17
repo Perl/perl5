@@ -97,6 +97,18 @@ method will undo it, since method calls cache things in typeglobs.
 
 [perl #129916] [perl #132252]
 
+=head2 Sort algorithm can no longer be specified
+
+Since Perl 5.8, the L<sort> pragma has had subpragmata C<_mergesort>,
+C<_quicksort>, and C<_qsort> that can be used to specify which algorithm
+perl should use to implement the L<sort|perlfunc/sort> builtin.
+This was always considered a dubious feature that might not last,
+hence the underscore spellings, and they were documented as not being
+portable beyond Perl 5.8.  These subpragmata have now been deleted,
+and any attempt to use them is an error.  The L<sort> pragma otherwise
+remains, and the algorithm-neutral C<stable> subpragma can be used to
+control sorting behaviour.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

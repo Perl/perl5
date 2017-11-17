@@ -7264,7 +7264,7 @@ sockets but not socketpair.
 Portability issues: L<perlport/socketpair>.
 
 =item sort SUBNAME LIST
-X<sort> X<qsort> X<quicksort> X<mergesort>
+X<sort>
 
 =item sort BLOCK LIST
 
@@ -7316,19 +7316,9 @@ L<C<grep>|/grep BLOCK LIST>)
 actually modifies the element in the original list.  This is usually
 something to be avoided when writing clear code.
 
-Perl 5.6 and earlier used a quicksort algorithm to implement sort.
-That algorithm was not stable and I<could> go quadratic.  (A I<stable> sort
-preserves the input order of elements that compare equal.  Although
-quicksort's run time is O(NlogN) when averaged over all arrays of
-length N, the time can be O(N**2), I<quadratic> behavior, for some
-inputs.)  In 5.7, the quicksort implementation was replaced with
-a stable mergesort algorithm whose worst-case behavior is O(NlogN).
-But benchmarks indicated that for some inputs, on some platforms,
-the original quicksort was faster.  5.8 has a L<sort> pragma for
-limited control of the sort.  Its rather blunt control of the
-underlying algorithm may not persist into future Perls, but the
-ability to characterize the input or output in implementation
-independent ways quite probably will.
+Historically Perl has varied in whether sorting is stable by default.
+If stability matters, it can be controlled explicitly by using the
+L<sort> pragma.
 
 Examples:
 
@@ -7411,12 +7401,8 @@ Examples:
     package main;
     my @new = sort Other::backwards @old;
 
-    # guarantee stability, regardless of algorithm
+    # guarantee stability
     use sort 'stable';
-    my @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-
-    # force use of mergesort (not portable outside Perl 5.8)
-    use sort '_mergesort';  # note discouraging _
     my @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
 
 Warning: syntactical care is required when sorting the list returned from
@@ -9418,7 +9404,7 @@ pragmas are:
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
     use warnings qw(all);
-    use sort     qw(stable _quicksort _mergesort);
+    use sort     qw(stable);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like L<C<strict>|strict> or L<C<integer>|integer>, unlike
