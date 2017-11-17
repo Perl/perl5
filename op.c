@@ -10850,7 +10850,10 @@ Perl_ck_concat(pTHX_ OP *o)
     /* reuse the padtmp returned by the concat child */
     if (kid->op_type == OP_CONCAT && !(kid->op_private & OPpTARGET_MY) &&
 	    !(kUNOP->op_first->op_flags & OPf_MOD))
+    {
         o->op_flags |= OPf_STACKED;
+        o->op_private |= OPpCONCAT_NESTED;
+    }
     return o;
 }
 
