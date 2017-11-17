@@ -2962,3 +2962,8 @@ $res = CORE::keys(%h1) / 2 - 1;
 $res = CORE::keys(%h2) / 2 - 1;
 $res = CORE::keys(%$r1) / 2 - 1;
 $res = CORE::keys(%$r2) / 2 - 1;
+####
+# concat: STACKED: ambiguity between .= and optimised nested
+my($a, $b);
+$b = $a . $a . $a;
+(($a .= $a) .= $a) .= $a;
