@@ -330,11 +330,16 @@ operator is not as well defined for negative operands, but it will
 execute faster.
 X<%> X<remainder> X<modulo> X<mod>
 
-Binary C<"x"> is the repetition operator.  In scalar context or if the left
-operand is not enclosed in parentheses, it returns a string consisting
-of the left operand repeated the number of times specified by the right
-operand.  In list context, if the left operand is enclosed in
-parentheses or is a list formed by C<qw/I<STRING>/>, it repeats the list.
+Binary C<x> is the repetition operator.  In scalar context, or if the
+left operand is neither enclosed in parentheses nor a C<qw//> list,
+it performs a string repetition.  In that case it supplies scalar
+context to the left operand, and returns a string consisting of the
+left operand string repeated the number of times specified by the right
+operand.  If the C<x> is in list context, and the left operand is either
+enclosed in parentheses or a C<qw//> list, it performs a list repetition.
+In that case it supplies list context to the left operand, and returns
+a list consisting of the left operand list repeated the number of times
+specified by the right operand.
 If the right operand is zero or negative (raising a warning on
 negative), it returns an empty string
 or an empty list, depending on the context.

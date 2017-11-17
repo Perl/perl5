@@ -316,6 +316,10 @@ paragraph on the same topic in L<perldata>.
 
 =item *
 
+The description of the C<x> operator in L<perlop> has been clarified.
+
+=item *
+
 XXX Description of the change here
 
 =back
