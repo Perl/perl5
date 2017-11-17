@@ -290,7 +290,9 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<perldiag/Variable length lookbehind not implemented in regex m/%s/>
+=over 4
+
+=item * L<perldiag/Variable length lookbehind not implemented in regex m/%s/>
 
 This now gives more ideas as to workarounds to the issue that was
 introduced in Perl 5.18 (but not documented explicitly in its perldelta)
@@ -299,8 +301,6 @@ for the fact that some Unicode C</i> rules cause a few sequences such as
  (?<!st)
 
 to be considered variable length, and hence disallowed.
-
-=over 4
 
 =item *
 
