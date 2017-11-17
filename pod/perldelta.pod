@@ -576,6 +576,13 @@ failing due to being applied to a closed or otherwise invalid file handle.
 
 =item *
 
+File test operators for Unix permission bits that don't exist on a
+particular platform, such as C<-k> (sticky bit) on Windows, now check that
+the file being tested exists before returning the blanket false result,
+and yield the appropriate errors if the argument doesn't refer to a file.
+
+=item *
+
 The in-place reverse optimisation now correctly strengthens weak
 references using the L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
 API function.
