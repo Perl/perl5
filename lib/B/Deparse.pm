@@ -1878,7 +1878,7 @@ sub maybe_qualify {
 	if
 	    $name =~ /^(?!\d)\w/         # alphabetic
 	 && $v    !~ /^\$[ab]\z/	 # not $a or $b
-	 && $v =~ /\A[\$\@\%]/           # scalar, array, or hash
+	 && $v =~ /\A[\$\@\%\&]/         # scalar, array, hash, or sub
 	 && !$globalnames{$name}         # not a global name
 	 && $self->{hints} & $strict_bits{vars}  # strict vars
 	 && !$self->lex_in_scope($v,1)   # no "our"
@@ -4883,7 +4883,7 @@ sub pp_entersub {
 	    $proto = $cv->PV if $cv->FLAGS & SVf_POK;
 	}
 	$simple = 1; # only calls of named functions can be prototyped
-	$kid = $self->maybe_qualify("&", $self->gv_name($gv));
+	$kid = $self->maybe_qualify("!", $self->gv_name($gv));
 	my $fq;
 	# Fully qualify any sub name that conflicts with a lexical.
 	if ($self->lex_in_scope("&$kid")

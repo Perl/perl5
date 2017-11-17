@@ -2864,6 +2864,7 @@ print %CORE::foo, %CORE::foo::bar;
 print $CORE::foo{'a'}, $CORE::foo::bar{'a'};
 print &CORE::foo, &CORE::foo::bar;
 print &CORE::foo(), &CORE::foo::bar();
+print \&CORE::foo, \&CORE::foo::bar;
 print *CORE::foo, *CORE::foo::bar;
 print stat CORE::foo::, stat CORE::foo::bar;
 print CORE::foo:: 1;
@@ -2878,6 +2879,7 @@ print %foo, %foo::, %foo::::;
 print $foo{'a'}, $foo::{'a'}, $foo::::{'a'};
 print &foo, &foo::, &foo::::;
 print &foo(), &foo::(), &foo::::();
+print \&foo, \&foo::, \&foo::::;
 print *foo, *foo::, *foo::::;
 print stat Foo, stat Foo::::;
 print Foo 1;
@@ -2891,6 +2893,7 @@ print %CORE, %CORE::, %CORE::::;
 print $CORE{'a'}, $CORE::{'a'}, $CORE::::{'a'};
 print &CORE, &CORE::, &CORE::::;
 print &CORE(), &CORE::(), &CORE::::();
+print \&CORE, \&CORE::, \&CORE::::;
 print *CORE, *CORE::, *CORE::::;
 print stat CORE, stat CORE::::;
 print CORE 1;
@@ -2901,7 +2904,34 @@ print %CORE::foo, %CORE::foo::, %CORE::foo::::;
 print $CORE::foo{'a'}, $CORE::foo::{'a'}, $CORE::foo::::{'a'};
 print &CORE::foo, &CORE::foo::, &CORE::foo::::;
 print &CORE::foo(), &CORE::foo::(), &CORE::foo::::();
+print \&CORE::foo, \&CORE::foo::, \&CORE::foo::::;
 print *CORE::foo, *CORE::foo::, *CORE::foo::::;
 print stat CORE::foo::, stat CORE::foo::::;
 print CORE::foo:: 1;
 print CORE::foo:::: 2;
+####
+# \&foo
+my sub foo {
+    1;
+}
+no strict 'vars';
+print \&main::foo;
+print \&{foo};
+print \&bar;
+use strict 'vars';
+print \&main::foo;
+print \&{foo};
+print \&main::bar;
+####
+# exists(&foo)
+my sub foo {
+    1;
+}
+no strict 'vars';
+print exists &main::foo;
+print exists &{foo};
+print exists &bar;
+use strict 'vars';
+print exists &main::foo;
+print exists &{foo};
+print exists &main::bar;
