@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Mon Aug 28 13:35:42 EDT 2017
+#    Generated on: Fri Nov 17 10:39:14 EST 2017
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.54';
+$VERSION='3.55';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -137,6 +137,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(new romanian leu) => [ q(RON), q(New Romanian Leu) ],
    q(new zaire) => [ q(ZRN), q(New Zaire) ],
    q(nuevo sol) => [ q(PEN), q(Nuevo Sol) ],
+   q(philippine peso) => [ q(PHP), q(Philippine Peso) ],
    q(portuguese escudo) => [ q(PTE), q(Portuguese Escudo) ],
    q(saint helena pound) => [ q(SHP), q(Saint Helena Pound) ],
    q(schilling) => [ q(ATS), q(Schilling) ],
@@ -177,6 +178,7 @@ $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
    q(new manat) => [ q(934), q(New Manat) ],
    q(new romanian leu) => [ q(946), q(New Romanian Leu) ],
    q(nuevo sol) => [ q(604), q(Nuevo Sol) ],
+   q(philippine peso) => [ q(608), q(Philippine Peso) ],
    q(saint helena pound) => [ q(654), q(Saint Helena Pound) ],
    q(unidades de fomento) => [ q(990), q(Unidades de fomento) ],
    q(us dollar (same day)) => [ q(998), q(US Dollar (Same day)) ],

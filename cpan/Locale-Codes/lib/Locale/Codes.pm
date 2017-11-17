@@ -12,10 +12,11 @@ use warnings;
 require 5.006;
 
 use Carp;
+use if $] >= 5.027007, 'deprecate';
 use Locale::Codes::Constants;
 
 our($VERSION);
-$VERSION='3.54';
+$VERSION='3.55';
 
 use Exporter qw(import);
 our(@EXPORT_OK,%EXPORT_TAGS);
@@ -67,18 +68,24 @@ sub type {
    my($self,$type) = @_;
 
    if (! exists $ALL_CODESETS{$type}) {
+      # uncoverable branch false
       carp "ERROR: type: invalid argument: $type\n"  if ($$self{'err'});
       return;
    }
 
+   # uncoverable branch false
    if (! $ALL_CODESETS{$type}{'loaded'}) {
       my $label = $ALL_CODESETS{$type}{'module'};
       eval "require Locale::Codes::${label}_Codes";
+      # uncoverable branch true
       if ($@) {
+         # uncoverable statement
          croak "ERROR: type: unable to load module: ${label}_Codes\n";
       }
       eval "require Locale::Codes::${label}_Retired";
+      # uncoverable branch true
       if ($@) {
+         # uncoverable statement
          croak "ERROR: type: unable to load module: ${label}_Retired\n";
       }
       $ALL_CODESETS{$type}{'loaded'} = 1;
@@ -93,6 +100,7 @@ sub codeset {
 
    my $type           = $$self{'type'};
    if (! exists $ALL_CODESETS{$type}{'codesets'}{$codeset}) {
+      # uncoverable branch false
       carp "ERROR: codeset: invalid argument: $codeset\n"  if ($$self{'err'});
    }
 
@@ -100,7 +108,10 @@ sub codeset {
 }
 
 sub version {
+  # uncoverable subroutine
+  # uncoverable statement
   my($self) = @_;
+  # uncoverable statement
   return $VERSION;
 }
 
@@ -128,8 +139,11 @@ sub _code {
    $code                    = ''  if (! defined($code));
    $codeset                 = lc($codeset)  if (defined($codeset));
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return (1);
    }
    my $type = $$self{'type'};
@@ -167,7 +181,9 @@ sub _code {
          $code    = sprintf("%.${l}d", $code);
 
       } else {
+         # uncoverable statement
          carp "ERROR: _code: invalid numeric code: $code\n"  if ($$self{'err'});
+         # uncoverable statement
          return (1);
       }
    }
@@ -201,8 +217,11 @@ sub code2name {
       $retired       = 1;
    }
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return (1);
    }
    my $type = $$self{'type'};
@@ -237,8 +256,11 @@ sub name2code {
       $retired       = 1;
    }
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return (1);
    }
    my $type = $$self{'type'};
@@ -268,8 +290,11 @@ sub name2code {
 sub code2code {
    my($self,@args) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return (1);
    }
    my $type = $$self{'type'};
@@ -279,6 +304,7 @@ sub code2code {
    if (@args == 2) {
       ($code,$codeset2)      = @args;
       ($err,$code,$codeset1) = $self->_code($code);
+      # uncoverable branch true
       return undef  if ($err);
 
    } elsif (@args == 3) {
@@ -286,6 +312,7 @@ sub code2code {
       ($err,$code)                = $self->_code($code,$codeset1);
       return undef  if ($err);
       ($err)                      = $self->_code('',$codeset2);
+      # uncoverable branch true
       return undef  if ($err);
    }
 
@@ -310,8 +337,11 @@ sub all_codes {
       $retired       = 1;
    }
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return (1);
    }
    my $type = $$self{'type'};
@@ -332,8 +362,11 @@ sub all_names {
       $retired       = 1;
    }
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return (1);
    }
    my $type = $$self{'type'};
@@ -371,8 +404,11 @@ sub all_names {
 sub rename_code {
    my($self,$code,$new_name,$codeset) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -438,8 +474,11 @@ sub rename_code {
 sub add_code {
    my($self,$code,$name,$codeset) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -498,8 +537,11 @@ sub add_code {
 sub delete_code {
    my($self,$code,$codeset) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -507,9 +549,12 @@ sub delete_code {
    # Make sure $code/$codeset are both valid
 
    my($err,$c,$cs) = $self->_code($code,$codeset);
+   # uncoverable branch true
    if ($err) {
+      # uncoverable statement
       carp "ERROR: rename: Unknown code/codeset: $code [$codeset]\n"
         if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    ($code,$codeset) = ($c,$cs);
@@ -552,8 +597,11 @@ sub delete_code {
 sub add_alias {
    my($self,$name,$new_name) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -595,8 +643,11 @@ sub add_alias {
 sub delete_alias {
    my($self,$name) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -654,8 +705,11 @@ sub delete_alias {
 sub replace_code {
    my($self,$code,$new_code,$codeset) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -731,8 +785,11 @@ sub replace_code {
 sub add_code_alias {
    my($self,$code,$new_code,$codeset) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -754,6 +811,7 @@ sub add_code_alias {
 
    if (exists $Data{$type}{'code2id'}{$codeset}{$new_code}  ||
        exists $Data{$type}{'codealias'}{$codeset}{$new_code}) {
+      # uncoverable branch true
       carp "add_code_alias: code already in use: $new_code\n"  if ($$self{'err'});
       return 0;
    }
@@ -774,8 +832,11 @@ sub add_code_alias {
 sub delete_code_alias {
    my($self,$code,$codeset) = @_;
 
+   # uncoverable branch true
    if (! $$self{'type'}) {
+      # uncoverable statement
       carp "ERROR: no type set for Locale::Codes object\n"  if ($$self{'err'});
+      # uncoverable statement
       return 0;
    }
    my $type = $$self{'type'};
@@ -784,6 +845,7 @@ sub delete_code_alias {
 
    my($err,$c,$cs) = $self->_code($code,$codeset);
    if ($err) {
+      # uncoverable branch true
       carp "ERROR: rename: Unknown code/codeset: $code [$codeset]\n"
         if ($$self{'err'});
       return 0;
@@ -793,6 +855,7 @@ sub delete_code_alias {
    # Check that $code exists in the codeset as an alias.
 
    if (! exists $Data{$type}{'codealias'}{$codeset}{$code}) {
+      # uncoverable branch true
       carp "delete_code_alias(): no alias defined: $code\n"  if ($$self{'err'});
       return 0;
    }

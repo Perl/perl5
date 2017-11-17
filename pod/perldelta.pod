@@ -69,7 +69,7 @@ not usually on concerns over their design.
 
 =over
 
-=item XXX
+=item L<Locale::Codes> and its associated Country, Currency and Language modules
 
 XXX Note that deprecated modules should be listed here even if they are listed
 as an updated module in the L</Modules and Pragmata> section.
@@ -125,9 +125,10 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Locale::Codes> has been upgraded from version 3.54 to 3.55
 
-If there was something important to note about this change, include that here.
+B<NOTE>: L<Locale::Codes> is deprecated in core and will be removed
+from Perl 5.30.
 
 =back
 

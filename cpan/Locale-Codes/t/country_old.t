@@ -12,7 +12,7 @@ if ( -f "t/do_tests.pl" ) {
   die "ERROR: cannot find do_tests.pl\n";
 }
 
-do_tests('country','old');
+do_tests('country','','old');
 
 1;
 # Local Variables:

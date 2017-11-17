@@ -19,10 +19,11 @@ my %type = ('country'  => 'Country',
 my $generic_tests;
 
 sub do_tests {
-   my($data_type,$test_type) = @_;
+   my($data_type,$inp_file,$test_type,$codeset,$show_errs) = @_;
    my $type = $type{$data_type};
    $::data_type = $data_type;
    $::test_type = $test_type;
+   $inp_file    = $data_type  if (! $inp_file);
 
    my($runtests) = shift(@ARGV);
 
@@ -31,12 +32,12 @@ sub do_tests {
    my($dir,$tdir);
    if ( -f "t/testfunc.pl" ) {
      require "./t/testfunc.pl";
-     require "./t/vals_${data_type}.pl";
+     require "./t/vals_${inp_file}.pl";
      $dir="./lib";
      $tdir="t";
    } elsif ( -f "testfunc.pl" ) {
      require "./testfunc.pl";
-     require "./vals_${data_type}.pl";
+     require "./vals_${inp_file}.pl";
      $dir="../lib";
      $tdir=".";
    } else {
@@ -45,7 +46,7 @@ sub do_tests {
 
    unshift(@INC,$dir);
 
-   $::tests .= $generic_tests;
+   $::tests .= $generic_tests  if (! defined($show_errs));
 
    if ($test_type eq 'old') {
       $::module = "Locale::$type";
@@ -57,6 +58,15 @@ sub do_tests {
       eval("use $::module");
       my $tmp   = $::module . "::show_errors";
       &{ $tmp }(0);
+   } elsif (defined($codeset)) {
+      eval("use Locale::Codes");
+      $::obj = Locale::Codes->new($data_type,$codeset,$show_errs);
+      $::obj->show_errors(1);
+   } elsif (defined($show_errs)) {
+      eval("use Locale::Codes");
+      $::obj = Locale::Codes->new();
+      $::obj->type($data_type);
+      $::obj->show_errors($show_errs);
    } else {
       eval("use Locale::Codes");
       $::obj = new Locale::Codes $data_type;
@@ -68,6 +78,26 @@ sub do_tests {
 }
 
 sub test {
+   my ($op,@test) = @_;
+   my @ret;
+
+   my $stderr = '';
+   {
+      local *STDERR;
+      open STDERR, '>', \$stderr;
+      @ret = _test($op,@test);
+   }
+
+   if ($stderr) {
+      $stderr =~ s/\n.*//m;
+      chomp($stderr);
+      return $stderr;
+   } else {
+      return @ret;
+   }
+}
+
+sub _test {
    my    ($op,@test) = @_;
 
    if ($op eq '2code') {
@@ -180,6 +210,18 @@ sub test {
          return $::obj->delete_code_alias(@test);
       } else {
          return &{ "${::module}::delete_${::data_type}_code_alias" }(@test)
+      }
+   } elsif ($op eq 'codeset') {
+      if ($::obj) {
+         return $::obj->codeset(@test);
+      } else {
+         return &{ "${::module}::codeset" }(@test)
+      }
+   } elsif ($op eq 'type') {
+      if ($::obj) {
+         return $::obj->type(@test);
+      } else {
+         return &{ "${::module}::type" }(@test)
       }
    }
 }

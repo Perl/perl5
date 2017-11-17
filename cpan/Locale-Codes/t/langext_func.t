@@ -12,7 +12,7 @@ if ( -f "t/do_tests.pl" ) {
   die "ERROR: cannot find do_tests.pl\n";
 }
 
-do_tests('langext','func');
+do_tests('langext','','func');
 
 1;
 # Local Variables:

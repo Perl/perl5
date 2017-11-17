@@ -3,7 +3,7 @@ Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Mon Aug 28 13:19:56 EDT 2017
+#    Generated on: Thu Nov 16 07:56:18 EST 2017
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.54';
+$VERSION='3.55';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0177';
 
@@ -377,7 +377,7 @@ $Locale::Codes::Data{'currency'}{'id2names'} = {
       q(Sol),
       ],
    q(0121) => [
-      q(Philippine Peso),
+      q(Philippine Piso),
       ],
    q(0122) => [
       q(Zloty),
@@ -1007,7 +1007,7 @@ $Locale::Codes::Data{'currency'}{'alias2id'} = {
       q(0160),
       q(0),
       ],
-   q(philippine peso) => [
+   q(philippine piso) => [
       q(0121),
       q(0),
       ],
