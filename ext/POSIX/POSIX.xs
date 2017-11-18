@@ -3565,11 +3565,11 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             GCC_DIAG_RESTORE;
             sv = sv_newmortal();
 	    if (buf) {
+                const U8 * first_variant;
                 STRLEN len = strlen(buf);
 		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
-		if (SvUTF8(fmt)
-                    || (! is_utf8_invariant_string((U8*) buf, len)
-                        && is_utf8_string((U8*) buf, len)
+		if (       SvUTF8(fmt)
+                    || (   is_utf8_non_invariant_string((U8*) buf, len)
 #ifdef USE_LOCALE_TIME
                         && _is_cur_LC_category_utf8(LC_TIME)
 #endif
