@@ -484,27 +484,7 @@ C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 =cut
 */
 
-PERL_STATIC_INLINE bool
-Perl_is_utf8_string(const U8 *s, const STRLEN len)
-{
-    /* This is now marked pure in embed.fnc, because isUTF8_CHAR now is pure.
-     * Be aware of possible changes to that */
-
-    const U8* const send = s + (len ? len : strlen((const char *)s));
-    const U8* x = s;
-
-    PERL_ARGS_ASSERT_IS_UTF8_STRING;
-
-    while (x < send) {
-        const STRLEN cur_len = isUTF8_CHAR(x, send);
-        if (UNLIKELY(! cur_len)) {
-            return FALSE;
-        }
-        x += cur_len;
-    }
-
-    return TRUE;
-}
+#define is_utf8_string(s, len)  is_utf8_string_loclen(s, len, NULL, NULL)
 
 /*
 =for apidoc is_strict_utf8_string
@@ -542,24 +522,7 @@ C<L</is_c9strict_utf8_string_loclen>>.
 =cut
 */
 
-PERL_STATIC_INLINE bool
-S_is_strict_utf8_string(const U8 *s, const STRLEN len)
-{
-    const U8* const send = s + (len ? len : strlen((const char *)s));
-    const U8* x = s;
-
-    PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING;
-
-    while (x < send) {
-        const STRLEN cur_len = isSTRICT_UTF8_CHAR(x, send);
-        if (UNLIKELY(! cur_len)) {
-            return FALSE;
-        }
-        x += cur_len;
-    }
-
-    return TRUE;
-}
+#define is_strict_utf8_string(s, len)  is_strict_utf8_string_loclen(s, len, NULL, NULL)
 
 /*
 =for apidoc is_c9strict_utf8_string
@@ -599,28 +562,7 @@ C<L</is_c9strict_utf8_string_loclen>>.
 =cut
 */
 
-PERL_STATIC_INLINE bool
-S_is_c9strict_utf8_string(const U8 *s, const STRLEN len)
-{
-    const U8* const send = s + (len ? len : strlen((const char *)s));
-    const U8* x = s;
-
-    PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING;
-
-    while (x < send) {
-        const STRLEN cur_len = isC9_STRICT_UTF8_CHAR(x, send);
-        if (UNLIKELY(! cur_len)) {
-            return FALSE;
-        }
-        x += cur_len;
-    }
-
-    return TRUE;
-}
-
-/* The above 3 functions could have been moved into the more general one just
- * below, and made #defines that call it with the right 'flags'.  They are
- * currently kept separate to increase their chances of getting inlined */
+#define is_c9strict_utf8_string(s, len)  is_c9strict_utf8_string_loclen(s, len, NULL, 0)
 
 /*
 =for apidoc is_utf8_string_flags

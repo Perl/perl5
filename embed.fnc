@@ -786,11 +786,11 @@ AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
 AmnpdRP	|bool	|is_invariant_string|NN const U8* const s|const STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
-AnipdR	|bool	|is_utf8_string	|NN const U8 *s|const STRLEN len
+AnmdpR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 AnidR	|bool	|is_utf8_string_flags					    \
 		|NN const U8 *s|STRLEN len|const U32 flags
-AnidR	|bool	|is_strict_utf8_string|NN const U8 *s|const STRLEN len
-AnidR	|bool	|is_c9strict_utf8_string|NN const U8 *s|const STRLEN len
+AnmdpR	|bool	|is_strict_utf8_string|NN const U8 *s|STRLEN len
+AnmdpR	|bool	|is_c9strict_utf8_string|NN const U8 *s|STRLEN len
 Anpdmb	|bool	|is_utf8_string_loc					    \
 		|NN const U8 *s|const STRLEN len|NN const U8 **ep
 Andm	|bool	|is_utf8_string_loc_flags				    \

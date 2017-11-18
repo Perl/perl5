@@ -1379,12 +1379,8 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_c9strict_utf8_string(const U8 *s, const STRLEN len)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING	\
-	assert(s)
-#endif
+/* PERL_CALLCONV bool	Perl_is_c9strict_utf8_string(const U8 *s, STRLEN len)
+			__attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool	is_c9strict_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -1406,12 +1402,8 @@ PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, cons
 	assert(pv); assert(what); assert(op_name)
 #endif
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_strict_utf8_string(const U8 *s, const STRLEN len)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING	\
-	assert(s)
-#endif
+/* PERL_CALLCONV bool	Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
+			__attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool	is_strict_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -1684,12 +1676,8 @@ PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_SPACE	\
 	assert(p)
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	Perl_is_utf8_string(const U8 *s, const STRLEN len)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_STRING	\
-	assert(s)
-#endif
+/* PERL_CALLCONV bool	Perl_is_utf8_string(const U8 *s, STRLEN len)
+			__attribute__warn_unused_result__; */
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	S_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
