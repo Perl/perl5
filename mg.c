@@ -824,9 +824,8 @@ S_fixup_errno_string(pTHX_ SV* sv)
          * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
          * potential that we will get it wrong however, especially on short
          * error message text, so do an additional check. */
-        if (   ! IN_BYTES  /* respect 'use bytes' */
-            && ! is_utf8_invariant_string((U8*) SvPVX_const(sv), SvCUR(sv))
-            &&   is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv))
+        if ( ! IN_BYTES  /* respect 'use bytes' */
+            && is_utf8_non_invariant_string((U8*) SvPVX_const(sv), SvCUR(sv))
 
 #ifdef USE_LOCALE_MESSAGES
 
