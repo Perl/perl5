@@ -784,6 +784,10 @@ AnidR	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
 		|NULLOK const U8 ** ep
 AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
 AmnpdRP	|bool	|is_invariant_string|NN const U8* const s|const STRLEN len
+#if defined(PERL_CORE) || defined (PERL_EXT)
+EXnidR	|bool	|is_utf8_non_invariant_string|NN const U8* const s	    \
+		|STRLEN len
+#endif
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 AnmdpR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len

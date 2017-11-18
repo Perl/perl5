@@ -486,6 +486,51 @@ C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 
 #define is_utf8_string(s, len)  is_utf8_string_loclen(s, len, NULL, NULL)
 
+#if defined(PERL_CORE) || defined (PERL_EXT)
+
+/*
+=for apidoc is_utf8_non_invariant_string
+
+Returns TRUE if L<perlapi/is_utf8_invariant_string> returns FALSE for the first
+C<len> bytes of the string C<s>, but they are, nonetheless, legal Perl-extended
+UTF-8; otherwise returns FALSE.
+
+A TRUE return means that at least one code point represented by the sequence
+either is a wide character not representable as a single byte, or the
+representation differs depending on whether the sequence is encoded in UTF-8 or
+not.
+
+See also
+C<L<perlapi/is_utf8_invariant_string>>,
+C<L<perlapi/is_utf8_string>>
+
+=cut
+
+This is commonly used to determine if a SV's UTF-8 flag should be turned on.
+It needn't be if its string is entirely UTF-8 invariant, and it shouldn't be if
+it otherwise contains invalid UTF-8.
+
+It is an internal function because khw thinks that XS code shouldn't be working
+at this low a level.  A valid use case could change that.
+
+*/
+
+PERL_STATIC_INLINE bool
+S_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
+{
+    const U8 * first_variant;
+
+    PERL_ARGS_ASSERT_IS_UTF8_NON_INVARIANT_STRING;
+
+    if (is_utf8_invariant_string_loc(s, len, &first_variant)) {
+        return FALSE;
+    }
+
+    return is_utf8_string(first_variant, len - (first_variant - s));
+}
+
+#endif
+
 /*
 =for apidoc is_strict_utf8_string
 
