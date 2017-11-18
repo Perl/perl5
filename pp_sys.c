@@ -3499,6 +3499,7 @@ PP(pp_fttext)
     SV *sv = NULL;
     GV *gv;
     PerlIO *fp;
+    const U8 * first_variant;
 
     tryAMAGICftest_MG(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
@@ -3632,11 +3633,14 @@ PP(pp_fttext)
 #endif
 
     assert(len);
-    if (! is_utf8_invariant_string((U8 *) s, len)) {
+    if (! is_utf8_invariant_string_loc((U8 *) s, len, &first_variant)) {
 
         /* Here contains a variant under UTF-8 .  See if the entire string is
          * UTF-8. */
-        if (is_utf8_fixed_width_buf_flags((U8 *) s, len, 0)) {
+        if (is_utf8_fixed_width_buf_flags(first_variant,
+                                          len - ((char *) first_variant - s),
+                                          0))
+        {
             if (PL_op->op_type == OP_FTTEXT) {
                 FT_RETURNYES;
             }
