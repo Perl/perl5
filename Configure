@@ -16186,7 +16186,7 @@ eval $inlibc
 set mktime d_mktime
 eval $inlibc
 
-: see if this is a sys/mman.h system
+: see if sys/mman.h has to be included
 set sys/mman.h i_sysmman
 eval $inhdr
 
