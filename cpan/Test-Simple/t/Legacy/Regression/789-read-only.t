@@ -1,6 +1,7 @@
 use Test::More;
 use strict;
 use warnings;
+# HARNESS-NO-STREAM
 
 # See https://github.com/Test-More/test-more/issues/789
 

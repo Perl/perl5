@@ -5,7 +5,7 @@ use Test::Tester;
 use Data::Dumper qw(Dumper);
 
 my $test = Test::Builder->new;
-$test->plan(tests => 105);
+$test->plan(tests => 139);
 
 my $cap;
 
@@ -95,6 +95,34 @@ my @tests = (
 			depth => 0,
 		},
 	],
+    [
+        'pass diag qr',
+        '$cap->ok(1, "pass diag qr");
+        $cap->diag("pass diag qr");',
+        {
+            name => "pass diag qr",
+            ok => 1,
+            actual_ok => 1,
+            reason => "",
+            type => "",
+            diag => qr/pass diag qr/,
+            depth => 0,
+        },
+    ],
+    [
+        'fail diag qr',
+        '$cap->ok(0, "fail diag qr");
+        $cap->diag("fail diag qr");',
+        {
+            name => "fail diag qr",
+            ok => 0,
+            actual_ok => 0,
+            reason => "",
+            type => "",
+            diag => qr/fail diag qr/,
+            depth => 0,
+        },
+    ],
 );
 
 my $big_code = "";

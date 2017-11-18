@@ -2440,6 +2440,7 @@ cpan/Test-Simple/t/Legacy/useing.t
 cpan/Test-Simple/t/Legacy/utf8.t
 cpan/Test-Simple/t/Legacy/versions.t
 cpan/Test-Simple/t/Legacy_And_Test2/builder_loaded_late.t
+cpan/Test-Simple/t/Legacy_And_Test2/diag_event_on_ok.t
 cpan/Test-Simple/t/Legacy_And_Test2/hidden_warnings.t
 cpan/Test-Simple/t/Legacy_And_Test2/preload_diag_note.t
 cpan/Test-Simple/t/lib/Dev/Null.pm

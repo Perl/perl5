@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-STREAM
 
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;

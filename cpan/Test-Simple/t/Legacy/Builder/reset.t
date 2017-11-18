@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-STREAM
 
 # Test Test::Builder->reset;
 

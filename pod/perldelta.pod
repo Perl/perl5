@@ -253,6 +253,10 @@ To address a security vulnerability in older versions of the 'zlib' library
 (which is bundled with Compress-Raw-Zlib), L<Compress::Raw::Zlib> has been
 upgraded to CPAN version 2.075.
 
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302103 to 1.302111.
+
 =back
 
 =head2 Removed Modules and Pragmata

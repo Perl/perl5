@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302103';
+our $VERSION = '1.302111';
 
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
@@ -334,11 +334,12 @@ sub enable_ipc_polling {
             return $_[0]->{hub}->cull unless $self->{+IPC_SHM_ID};
 
             my $val;
-            {
-                shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE}) or return;
-
+            if(shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE})) {
                 return if $val eq $self->{+IPC_SHM_LAST};
                 $self->{+IPC_SHM_LAST} = $val;
+            }
+            else {
+                warn "SHM Read error: $!\n";
             }
 
             $_[0]->{hub}->cull;
@@ -368,10 +369,14 @@ sub ipc_enable_shm {
 
         my $ipc_key = IPC::SysV::IPC_PRIVATE();
         my $shm_size = $self->{+IPC}->can('shm_size') ? $self->{+IPC}->shm_size : 64;
-        my $shm_id = shmget($ipc_key, $shm_size, 0666) or die;
+        my $shm_id = shmget($ipc_key, $shm_size, 0666) or die "Could not get shm: $!";
 
         my $initial = 'a' x $shm_size;
-        shmwrite($shm_id, $initial, 0, $shm_size) or die;
+        shmwrite($shm_id, $initial, 0, $shm_size) or die "Could not write to shm: $!";
+        my $val;
+        shmread($shm_id, $val, 0, $shm_size) or die "Could not read from shm: $!";
+        die "Read SHM value does not match the initial value ('$val' vs '$initial')"
+            unless $val eq $initial;
 
         $self->{+IPC_SHM_SIZE} = $shm_size;
         $self->{+IPC_SHM_ID}   = $shm_id;

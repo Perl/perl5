@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302103';
+our $VERSION = '1.302111';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -700,8 +700,7 @@ sub _ok_debug {
 
     my (undef, $file, $line) = $trace->call;
     if (defined $orig_name) {
-        $self->diag(qq[  $msg test '$orig_name'\n]);
-        $self->diag(qq[  at $file line $line.\n]);
+        $self->diag(qq[  $msg test '$orig_name'\n  at $file line $line.\n]);
     }
     else {
         $self->diag(qq[  $msg test at $file line $line.\n]);

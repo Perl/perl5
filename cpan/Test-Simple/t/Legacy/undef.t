@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# HARNESS-NO-FORK
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
