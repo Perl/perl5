@@ -1082,9 +1082,6 @@ use File::Glob qw(:case);
                 t/zzz-check-breaks.t
                 ),
         ],
-        'CUSTOMIZED'   => [ qw[
-            t/Legacy/Tester/tbt_09do.t
-        ] ],
 
     },
 
