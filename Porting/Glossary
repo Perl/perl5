@@ -2456,6 +2456,11 @@ d_sitearch (sitearch.U):
 	of architecture-dependent library files for $package.  If
 	$sitearch is the same as $archlib, then this is set to undef.
 
+d_snprintf (d_snprintf.U):
+	This variable conditionally defines the HAS_SNPRINTF symbol, which
+	indicates to the C program that the snprintf () library function
+	is available.
+
 d_sockaddr_in6 (d_socket.U):
 	This variable conditionally defines the HAS_SOCKADDR_IN6 symbol, which
 	indicates the availability of a struct sockaddr_in6.
@@ -2850,6 +2855,11 @@ d_voidtty (i_sysioctl.U):
 	ioctl() call with TIOCNOTTY should be used to void tty association.
 	Otherwise (on USG probably), it is enough to close the standard file
 	descriptors and do a setpgrp().
+
+d_vsnprintf (d_snprintf.U):
+	This variable conditionally defines the HAS_VSNPRINTF symbol, which
+	indicates to the C program that the vsnprintf () library function
+	is available.
 
 d_wait4 (d_wait4.U):
 	This variable conditionally defines the HAS_WAIT4 symbol, which

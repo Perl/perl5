@@ -4953,8 +4953,12 @@ Perl_quadmath_format_needed(const char* format)
 /*
 =for apidoc my_snprintf
 
-The C library C<snprintf> functionality (using C<vsnprintf>).
-Consider using C<sv_vcatpvf> instead.
+The C library C<snprintf> functionality, if available and
+standards-compliant (uses C<vsnprintf>, actually).  However, if the
+C<vsnprintf> is not available, will unfortunately use the unsafe
+C<vsprintf> which can overrun the buffer (there is an overrun check,
+but that may be too late).  Consider using C<sv_vcatpvf> instead, or
+getting C<vsnprintf>.
 
 =cut
 */
@@ -4964,6 +4968,9 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     int retval = -1;
     va_list ap;
     PERL_ARGS_ASSERT_MY_SNPRINTF;
+#ifndef HAS_VSNPRINTF
+    PERL_UNUSED_VAR(len);
+#endif
     va_start(ap, format);
 #ifdef USE_QUADMATH
     {
@@ -4994,14 +5001,14 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
          * Handling the "Q-less" cases right would require walking
          * through the va_list and rewriting the format, calling
          * quadmath for the NVs, building a new va_list, and then
-         * letting vsnprintf to take care of the other
+         * letting vsnprintf/vsprintf to take care of the other
          * arguments.  This may be doable.
          *
          * We do not attempt that now.  But for paranoia, we here try
          * to detect some common (but not all) cases where the
          * "Q-less" %[efgaEFGA] formats are present, and die if
          * detected.  This doesn't fix the problem, but it stops the
-         * vsnprintf pulling doubles off the va_list when
+         * vsnprintf/vsprintf pulling doubles off the va_list when
          * __float128 NVs should be pulled off instead.
          *
          * If quadmath_format_needed() returns false, we are reasonably
@@ -5012,10 +5019,20 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     }
 #endif
     if (retval == -1)
+#ifdef HAS_VSNPRINTF
         retval = vsnprintf(buffer, len, format, ap);
+#else
+        retval = vsprintf(buffer, format, ap);
+#endif
     va_end(ap);
+    /* vsprintf() shows failure with < 0 */
+    if (retval < 0
+#ifdef HAS_VSNPRINTF
     /* vsnprintf() shows failure with >= len */
-    if (len > 0 && (Size_t)retval >= len)
+        ||
+        (len > 0 && (Size_t)retval >= len)
+#endif
+    )
 	Perl_croak_nocontext("panic: my_snprintf buffer overflow");
     return retval;
 }
@@ -5023,7 +5040,11 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 /*
 =for apidoc my_vsnprintf
 
-The C library C<vsnprintf>.  Consider using C<sv_vcatpvf> instead.
+The C library C<vsnprintf> if available and standards-compliant.
+However, if if the C<vsnprintf> is not available, will unfortunately
+use the unsafe C<vsprintf> which can overrun the buffer (there is an
+overrun check, but that may be too late).  Consider using
+C<sv_vcatpvf> instead, or getting C<vsnprintf>.
 
 =cut
 */
@@ -5045,13 +5066,29 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
 
     PERL_ARGS_ASSERT_MY_VSNPRINTF;
     Perl_va_copy(ap, apc);
+# ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
+# else
+    PERL_UNUSED_ARG(len);
+    retval = vsprintf(buffer, format, apc);
+# endif
     va_end(apc);
 #else
+# ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
+# else
+    PERL_UNUSED_ARG(len);
+    retval = vsprintf(buffer, format, ap);
+# endif
 #endif /* #ifdef NEED_VA_COPY */
+    /* vsprintf() shows failure with < 0 */
+    if (retval < 0
+#ifdef HAS_VSNPRINTF
     /* vsnprintf() shows failure with >= len */
-    if (len > 0 && (Size_t)retval >= len)
+        ||
+        (len > 0 && (Size_t)retval >= len)
+#endif
+    )
 	Perl_croak_nocontext("panic: my_vsnprintf buffer overflow");
     return retval;
 #endif

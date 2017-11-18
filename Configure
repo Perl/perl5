@@ -807,6 +807,8 @@ d_signbit=''
 d_sigprocmask=''
 d_sigsetjmp=''
 usesitecustomize=''
+d_snprintf=''
+d_vsnprintf=''
 d_sockatmark=''
 d_sockatmarkproto=''
 d_ip_mreq=''
@@ -18330,6 +18332,71 @@ set d_sigsetjmp
 eval $setvar
 $rm_try
 
+: see if snprintf exists
+set snprintf d_snprintf
+eval $inlibc
+
+: see if vsnprintf exists
+set vsnprintf d_vsnprintf
+eval $inlibc
+
+case "$d_snprintf-$d_vsnprintf" in
+"$define-$define")
+    $cat <<EOM
+Checking whether your snprintf() and vsnprintf() work okay...
+EOM
+    $cat >try.c <<'EOCP'
+/* v?snprintf testing logic courtesy of Russ Allbery.
+ * According to C99:
+ * - if the buffer is too short it still must be \0-terminated
+ * - if the buffer is too short the potentially required length
+ *   must be returned and not -1
+ * - if the buffer is NULL the potentially required length
+ *   must be returned and not -1 or core dump
+ */
+#include <stdio.h>
+#include <stdarg.h>
+
+char buf[2];
+
+int test (char *format, ...)
+{
+    va_list args;
+    int count;
+
+    va_start (args, format);
+    count = vsnprintf (buf, sizeof buf, format, args);
+    va_end (args);
+    return count;
+}
+
+int main ()
+{
+    return ((test ("%s", "abcd") == 4 && buf[0] == 'a' && buf[1] == '\0'
+             && snprintf (NULL, 0, "%s", "abcd") == 4) ? 0 : 1);
+}
+EOCP
+    set try
+    if eval $compile; then
+	`$run ./try`
+	case "$?" in
+	0) echo "Your snprintf() and vsnprintf() seem to be working okay." ;;
+	*) cat <<EOM >&4
+Your snprintf() and snprintf() don't seem to be working okay.
+EOM
+	   d_snprintf="$undef"
+	   d_vsnprintf="$undef"
+	   ;;
+	esac
+    else
+	echo "(I can't seem to compile the test program--assuming they don't)"
+	d_snprintf="$undef"
+	d_vsnprintf="$undef"
+    fi
+    $rm_try
+    ;;
+esac
+
 : see if sockatmark exists
 set sockatmark d_sockatmark
 eval $inlibc
@@ -24128,6 +24195,7 @@ d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
 d_sin6_scope_id='$d_sin6_scope_id'
 d_sitearch='$d_sitearch'
+d_snprintf='$d_snprintf'
 d_sockaddr_in6='$d_sockaddr_in6'
 d_sockaddr_sa_len='$d_sockaddr_sa_len'
 d_sockatmark='$d_sockatmark'
@@ -24216,6 +24284,7 @@ d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
 d_voidtty='$d_voidtty'
+d_vsnprintf='$d_vsnprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcscmp='$d_wcscmp'

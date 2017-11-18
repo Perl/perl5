@@ -5254,6 +5254,8 @@ $  endif
 $  d_setgrent = "define"
 $  d_ttyname_r = "define"
 $  ttyname_r_proto = "1"
+$  d_snprintf = "define"
+$  d_vsnprintf = "define"
 $!
 $! VMS V7.3-2 powered options
 $! We know that it is only available for V7.3-2 and later on 64 bit platforms.
@@ -6428,6 +6430,7 @@ $ WC "d_vms_shorten_long_symbols='" + d_vms_shorten_long_symbols + "'" ! VMS
 $ WC "d_void_closedir='define'"
 $ WC "d_voidsig='undef'"
 $ WC "d_voidtty='" + "'"
+$ WC "d_vsnprintf='" + d_vsnprintf + "'"
 $ WC "d_wait4='" + d_wait4 + "'"
 $ WC "d_waitpid='define'"
 $ WC "d_wcscmp='define'"
@@ -6910,6 +6913,7 @@ $ WC "d_setnetent_r='undef'"
 $ WC "d_setprotoent_r='undef'"
 $ WC "d_setpwent_r='undef'"
 $ WC "d_setservent_r='undef'"
+$ WC "d_snprintf='" + d_snprintf + "'"
 $ WC "d_srand48_r='undef'"
 $ WC "d_srandom_r='undef'"
 $ WC "d_strerror_l='undef'"
