@@ -259,6 +259,8 @@ BOM string
 
 U+FFFD string
 
+U+10FFFF string MAX_UNICODE
+
 NBSP native
 NBSP string
 

@@ -73,6 +73,8 @@ bytes.
 
 #   define REPLACEMENT_CHARACTER_UTF8  "\xEF\xBF\xBD"    /* U+FFFD */
 
+#   define MAX_UNICODE_UTF8  "\xF4\x8F\xBF\xBF"    /* U+10FFFF */
+
 #   define NBSP_NATIVE  0xA0    /* U+00A0 */
 #   define NBSP_UTF8  "\xC2\xA0"    /* U+00A0 */
 
@@ -116,6 +118,8 @@ bytes.
 
 #   define REPLACEMENT_CHARACTER_UTF8  "\xDD\x73\x73\x71"    /* U+FFFD */
 
+#   define MAX_UNICODE_UTF8  "\xEE\x42\x73\x73\x73"    /* U+10FFFF */
+
 #   define NBSP_NATIVE  0x41    /* U+00A0 */
 #   define NBSP_UTF8  "\x80\x41"    /* U+00A0 */
 
@@ -158,6 +162,8 @@ bytes.
 #   define BOM_UTF8  "\xDD\x72\x65\x72"    /* U+FEFF */
 
 #   define REPLACEMENT_CHARACTER_UTF8  "\xDD\x72\x72\x70"    /* U+FFFD */
+
+#   define MAX_UNICODE_UTF8  "\xEE\x42\x72\x72\x72"    /* U+10FFFF */
 
 #   define NBSP_NATIVE  0x41    /* U+00A0 */
 #   define NBSP_UTF8  "\x78\x41"    /* U+00A0 */
