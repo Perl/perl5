@@ -62,6 +62,8 @@ See also #130080
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="xsawyerx" id="9b79e9e3431d11e79a4f85268f70130b7b4369f6" ticket="" desc="perluniprops out of date regarding \p{Word}"/>
+
 </div>
 
 </data>
