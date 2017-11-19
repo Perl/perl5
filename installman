@@ -54,7 +54,7 @@ foreach my $pre (qw(man1 man3)) {
 }
 $opts{verbose} ||= $opts{notify};
 
-# Explicitely disabled installation of man pages
+# Explicitly disabled installation of man pages
 if ($opts{man1dir} eq '' && $opts{man3dir} eq '') {
     warn "Manual page installation was disabled by Configure\n";
     exit 0;
