@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '2.18';      # remember to update version in POD!
+our $VERSION = '2.19';      # remember to update version in POD!
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 2.18
+This document describes threads version 2.19
 
 =head1 WARNING
 
