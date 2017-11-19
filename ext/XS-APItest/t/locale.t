@@ -83,12 +83,14 @@ my %correct_C_responses = (
                             MON_8 => 'August',
                             MON_9 => 'September',
                             NOEXPR => undef,
+                            NOSTR => undef,
                             PM_STR => 'PM',
                             RADIXCHAR => '.',
                             THOUSEP => '',
                             T_FMT => undef,
                             T_FMT_AMPM => undef,
                             YESEXPR => undef,
+                            YESSTR => undef,
                         );
 
 my $hdr = "../../perl_langinfo.h";

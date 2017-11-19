@@ -283,15 +283,25 @@
 #else
 #  define PERL_YESEXPR -53
 #endif
+#ifdef YESSTR
+#  define PERL_YESSTR YESSTR
+#else
+#  define PERL_YESSTR -54
+#endif
 #ifdef NOEXPR
 #  define PERL_NOEXPR NOEXPR
 #else
-#  define PERL_NOEXPR -54
+#  define PERL_NOEXPR -55
+#endif
+#ifdef NOSTR
+#  define PERL_NOSTR NOSTR
+#else
+#  define PERL_NOSTR -56
 #endif
 #ifdef CRNCYSTR
 #  define PERL_CRNCYSTR CRNCYSTR
 #else
-#  define PERL_CRNCYSTR -55
+#  define PERL_CRNCYSTR -57
 #endif
 
 #endif
