@@ -272,7 +272,7 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 1.00 of Attribute::Handlers.
+This document describes version 1.01 of Attribute::Handlers.
 
 =head1 SYNOPSIS
 
