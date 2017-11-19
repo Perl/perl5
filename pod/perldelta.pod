@@ -484,6 +484,14 @@ XXX
 
 =back
 
+=head1 Packaging
+
+For the past few years we have released perl using three different archive
+formats: bzip (C<.bz2>), LZMA2 (C<.xz>) and gzip (C<.gz>). Since xz compresses
+better and decompresses faster, and gzip is more compatible and uses less memory,
+we have dropped the C<.bz2> archive format with this release.
+(If this poses a problem, do let us know; see L</Reporting Bugs>, below.)
+
 =head1 Platform Support
 
 XXX Any changes to platform support should be listed in the sections below.
