@@ -213,9 +213,9 @@ PP(pp_substcont)
 	SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
 
     	/* See "how taint works" above pp_subst() */
-	if (SvTAINTED(TOPs))
-	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
+	if (UNLIKELY(TAINT_get))
+	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	if (CxONCE(cx) || s < orig ||
                 !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 			     (s == m), cx->sb_targ, NULL,

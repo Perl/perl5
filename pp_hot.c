@@ -4260,7 +4260,7 @@ PP(pp_subst)
 	    doutf8 = DO_UTF8(dstr);
 	}
 
-	if (SvTAINTED(dstr))
+	if (UNLIKELY(TAINT_get))
 	    rxtainted |= SUBST_TAINT_REPL;
     }
     else {
@@ -4435,8 +4435,6 @@ PP(pp_subst)
 	    }
 	    else {
 		sv_catsv(dstr, repl);
-		if (UNLIKELY(SvTAINTED(repl)))
-		    rxtainted |= SUBST_TAINT_REPL;
 	    }
 	    if (once)
 		break;

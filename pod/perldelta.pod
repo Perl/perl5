@@ -629,6 +629,12 @@ error code in C<$!>.  [perl #125774]
 
 =item *
 
+Regexp substitution using an overloaded replacement value that provides
+a tainted stringification now correctly taints the resulting string.
+[perl #115266]
+
+=item *
+
 Lexical sub declarations in C<do> blocks such as C<do { my sub lex; 123 }>
 could corrupt the stack, erasing items already on the stack in the
 enclosing statement.  This has been fixed.  [perl #132442]

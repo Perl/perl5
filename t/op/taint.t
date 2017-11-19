@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 828;
+plan tests => 1040;
 
 $| = 1;
 
@@ -83,6 +83,8 @@ EndOfCleanup
 # Sources of taint:
 #   The empty tainted value, for tainting strings
 my $TAINT = substr($^X, 0, 0);
+#   A tainted non-empty string
+my $TAINTXYZ = "xyz".$TAINT;
 #   A tainted zero, useful for tainting numbers
 my $TAINT0;
 {
@@ -565,7 +567,7 @@ my $TEST = 'TEST';
         is($one, 'abcd',   "$desc: \$1 value");
     }
 
-    $desc = "substitution with replacement tainted";
+    $desc = "substitution with partial replacement tainted";
 
     $s = 'abcd';
     $res = $s =~ s/(.+)/xyz$TAINT/;
@@ -577,7 +579,7 @@ my $TEST = 'TEST';
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
-    $desc = "substitution /g with replacement tainted";
+    $desc = "substitution /g with partial replacement tainted";
 
     $s = 'abcd';
     $res = $s =~ s/(.)/x$TAINT/g;
@@ -589,7 +591,7 @@ my $TEST = 'TEST';
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
 
-    $desc = "substitution /ge with replacement tainted";
+    $desc = "substitution /ge with partial replacement tainted";
 
     $s = 'abc';
     {
@@ -618,10 +620,75 @@ my $TEST = 'TEST';
     is($res, 3,        "$desc: res value");
     is($one, 'c',      "$desc: \$1 value");
 
-    $desc = "substitution /r with replacement tainted";
+    $desc = "substitution /r with partial replacement tainted";
 
     $s = 'abcd';
     $res = $s =~ s/(.+)/xyz$TAINT/r;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s,   'abcd',   "$desc: s value");
+    is($res, 'xyz',    "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution with whole replacement tainted";
+
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$TAINTXYZ/;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s,  'xyz',     "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /g with whole replacement tainted";
+
+    $s = 'abcd';
+    $res = $s =~ s/(.)/$TAINTXYZ/g;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s,  'xyz' x 4, "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with whole replacement tainted";
+
+    $s = 'abc';
+    {
+	my $i = 0;
+	my $j;
+	$res = $s =~ s{(.)}{
+		    $j = $i; # make sure code not tainted
+		    $one = $1;
+		    isnt_tainted($j, "$desc: code not tainted within /e");
+		    $i++;
+		    if ($i == 1) {
+			isnt_tainted($s,   "$desc: s not tainted loop 1");
+		    }
+		    else {
+			is_tainted($s,     "$desc: s tainted loop $i");
+		    }
+		    isnt_tainted($one, "$desc: \$1 not tainted within /e");
+		    $TAINTXYZ;
+		}ge;
+	$one = $1;
+    }
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s,  'xyz' x 3, "$desc: s value");
+    is($res, 3,        "$desc: res value");
+    is($one, 'c',      "$desc: \$1 value");
+
+    $desc = "substitution /r with whole replacement tainted";
+
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$TAINTXYZ/r;
     $one = $1;
     isnt_tainted($s,   "$desc: s not tainted");
     is_tainted($res,   "$desc: res tainted");
@@ -955,7 +1022,7 @@ my $TEST = 'TEST';
         is($one, 'abcd',   "$desc: \$1 value");
     }
 
-	$desc = "use re 'taint': substitution with replacement tainted";
+	$desc = "use re 'taint': substitution with partial replacement tainted";
 
 	$s = 'abcd';
 	$res = $s =~ s/(.+)/xyz$TAINT/;
@@ -967,7 +1034,7 @@ my $TEST = 'TEST';
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
-	$desc = "use re 'taint': substitution /g with replacement tainted";
+	$desc = "use re 'taint': substitution /g with partial replacement tainted";
 
 	$s = 'abcd';
 	$res = $s =~ s/(.)/x$TAINT/g;
@@ -979,7 +1046,7 @@ my $TEST = 'TEST';
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
 
-	$desc = "use re 'taint': substitution /ge with replacement tainted";
+	$desc = "use re 'taint': substitution /ge with partial replacement tainted";
 
 	$s = 'abc';
 	{
@@ -1008,10 +1075,75 @@ my $TEST = 'TEST';
 	is($res, 3,        "$desc: res value");
 	is($one, 'c',      "$desc: \$1 value");
 
-	$desc = "use re 'taint': substitution /r with replacement tainted";
+	$desc = "use re 'taint': substitution /r with partial replacement tainted";
 
 	$s = 'abcd';
 	$res = $s =~ s/(.+)/xyz$TAINT/r;
+	$one = $1;
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
+	is($s,   'abcd',   "$desc: s value");
+	is($res, 'xyz',    "$desc: res value");
+	is($one, 'abcd',   "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution with whole replacement tainted";
+
+	$s = 'abcd';
+	$res = $s =~ s/(.+)/$TAINTXYZ/;
+	$one = $1;
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
+	is($s,  'xyz',     "$desc: s value");
+	is($res, 1,        "$desc: res value");
+	is($one, 'abcd',   "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution /g with whole replacement tainted";
+
+	$s = 'abcd';
+	$res = $s =~ s/(.)/$TAINTXYZ/g;
+	$one = $1;
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
+	is($s,  'xyz' x 4, "$desc: s value");
+	is($res, 4,        "$desc: res value");
+	is($one, 'd',      "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution /ge with whole replacement tainted";
+
+	$s = 'abc';
+	{
+	    my $i = 0;
+	    my $j;
+	    $res = $s =~ s{(.)}{
+			$j = $i; # make sure code not tainted
+			$one = $1;
+			isnt_tainted($j, "$desc: code not tainted within /e");
+			$i++;
+			if ($i == 1) {
+			    isnt_tainted($s,   "$desc: s not tainted loop 1");
+			}
+			else {
+			    is_tainted($s,     "$desc: s tainted loop $i");
+			}
+			    isnt_tainted($one, "$desc: \$1 not tainted");
+			$TAINTXYZ;
+		    }ge;
+	    $one = $1;
+	}
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
+	is($s,  'xyz' x 3, "$desc: s value");
+	is($res, 3,        "$desc: res value");
+	is($one, 'c',      "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution /r with whole replacement tainted";
+
+	$s = 'abcd';
+	$res = $s =~ s/(.+)/$TAINTXYZ/r;
 	$one = $1;
 	isnt_tainted($s,   "$desc: s not tainted");
 	is_tainted($res,   "$desc: res tainted");
@@ -2453,6 +2585,284 @@ is eval { eval $::x.1 }, 1, 'reset does not taint undef';
 # sary since it aborts when it fails.)
 () = defined $^X && ref \$^X;
 
+# taint passing through overloading
+package OvTaint {
+    sub new { bless({ t => $_[1] }, $_[0]) }
+    use overload '""' => sub { $_[0]->{t} ? "hi".$TAINT : "hello" };
+}
+my $ovclean = OvTaint->new(0);
+my $ovtaint = OvTaint->new(1);
+isnt_tainted("$ovclean", "overload preserves cleanliness");
+is_tainted("$ovtaint", "overload preserves taint");
+
+# substitutions with overloaded replacement
+{
+    my ($desc, $s, $res, $one);
+
+    $desc = "substitution with partial replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/xyz$ovclean/;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xyzhello', "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution with partial replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/xyz$ovtaint/;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xyzhi',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution with whole replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$ovclean/;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hello',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution with whole replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$ovtaint/;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hi',       "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with partial replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/"xyz".$ovclean/e;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xyzhello', "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with partial replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/"xyz".$ovtaint/e;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xyzhi',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with whole replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$ovclean/e;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hello',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with whole replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$ovtaint/e;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hi',       "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with extra code and partial replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/(my $z++), "xyz".$ovclean/e;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xyzhello', "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with extra code and partial replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/(my $z++), "xyz".$ovtaint/e;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xyzhi',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with extra code and whole replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/(my $z++), $ovclean/e;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hello',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /e with extra code and whole replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/(my $z++), $ovtaint/e;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hi',       "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /r with partial replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/xyz$ovclean/r;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'abcd',     "$desc: s value");
+    is($res, 'xyzhello', "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /r with partial replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/xyz$ovtaint/r;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'abcd',     "$desc: s value");
+    is($res, 'xyzhi',  "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /r with whole replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$ovclean/r;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'abcd',     "$desc: s value");
+    is($res, 'hello',  "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /r with whole replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.+)/$ovtaint/r;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'abcd',     "$desc: s value");
+    is($res, 'hi',     "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
+    $desc = "substitution /g with partial replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/x$ovclean/g;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xhello' x 4, "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /g with partial replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/x$ovtaint/g;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xhi' x 4,  "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /g with whole replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/$ovclean/g;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hello' x 4, "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /g with whole replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/$ovtaint/g;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hi' x 4,   "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with partial replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/"x".$ovclean/ge;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xhello' x 4, "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with partial replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/"x".$ovtaint/ge;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'xhi' x 4,  "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with whole replacement overloaded and clean";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/$ovclean/ge;
+    $one = $1;
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hello' x 4, "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with whole replacement overloaded and tainted";
+    $s = 'abcd';
+    $res = $s =~ s/(.)/$ovtaint/ge;
+    $one = $1;
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
+    is($s, 'hi' x 4,   "$desc: s value");
+    is($res, 4,        "$desc: res value");
+    is($one, 'd',      "$desc: \$1 value");
+}
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
