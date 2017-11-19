@@ -324,7 +324,11 @@ The description of the C<x> operator in L<perlop> has been clarified.
 
 =item *
 
-XXX Description of the change here
+L<perluniprops> has been updated to note that C<\p{Word}> now includes
+code points matching the C<\p{Join_Control}> property.  The change to
+the property was made in Perl 5.18, but not documented until now.  There
+are currently only two code points that match this property U+200C (ZERO
+WIDTH NON-JOINER) and U+200D (ZERO WIDTH JOINER).
 
 =back
 
