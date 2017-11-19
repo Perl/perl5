@@ -1893,7 +1893,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
     
     if (stash != PL_defstash) { /* not the main stash */
 	/* We only have to check for a few names here: a, b, EXPORT, ISA
-	   and VERSION. All the others apply only to the main stash or to
+           and VERSION, and the special case DB::args.
+           All the others apply only to the main stash or to
 	   CORE (which is checked right after this). */
 	if (len) {
 	    switch (*name) {
