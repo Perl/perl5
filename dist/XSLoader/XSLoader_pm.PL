@@ -11,7 +11,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.28";
+$VERSION = "0.28"; # remember to update version in POD!
 
 #use strict;
 
@@ -249,7 +249,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.24
+Version 0.28
 
 =head1 SYNOPSIS
 
