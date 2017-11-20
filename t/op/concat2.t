@@ -12,7 +12,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 2;
+plan 3;
 
 # This test is in the file because overload.pm uses concatenation.
 { package o; use overload '""' => sub { $_[0][0] } }
@@ -22,6 +22,19 @@ $x->[0] = "\xff";
 $x.= chr 257;
 $x.= chr 257;
 is $x, "\xff\x{101}\x{101}", '.= is not confused by changing utf8ness';
+
+# RT #132385
+# in multiconcat, each const TEMP used for overloading should be distinct
+
+package RT132385 {
+    my @a;
+    use overload '.' => sub { push @a, \$_[1]; $_[0] };
+    my $o = bless [];
+    my $x = $o . "A" . $o . 'B';
+    ::is "${$a[0]}${$a[2]}", "AB", "RT #132385";
+}
+
+
 
 # Ops should not share the same TARG between recursion levels.  This may
 # affect other ops, too, but concat seems more susceptible to this than
