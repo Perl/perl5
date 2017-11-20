@@ -681,9 +681,36 @@ was made for perl 5.27.5 but was mistakenly omitted from its perldelta.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.27.6 represents approximately 4 weeks of development since Perl 5.27.5
+and contains approximately 110,000 lines of changes across 1,100 files from 30
+authors.
 
-  perl Porting/acknowledgements.pl v5.27.5..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 20,000 lines of changes to 430 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.27.6:
+
+Aaron Crane, Andrew Fresh, Ask Bjöern Hansen, Chris 'BinGOs' Williams, Craig
+A. Berry, Dagfinn Ilmari Mannsåker, Daniel Dragan, David Cantrell, David
+Mitchell, Dominic Hargreaves, Father Chrysostomos, Harald Jörg, H.Merijn
+Brand, James E Keenan, Jarkko Hietaniemi, J. Nick Koston, John Lightsey, Karen
+Etheridge, Karl Williamson, Lukas Mai, Matthew Horsfall, Nicolas R., Paul
+Marquess, Sawyer X, Slaven Rezic, Steve Hay, Todd Rinaldo, Tony Cook, Yves
+Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
