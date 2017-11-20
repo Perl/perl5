@@ -39,7 +39,7 @@ usage: $0 [ -r rootdir ] [-s suffix ] [ -x ] [ -n ]
 EOF
 
 my %opts;
-getopts('bxnr:s:', \%opts) or usage;
+getopts('xnr:s:', \%opts) or usage;
 @ARGV && usage;
 
 $relroot = defined $opts{r} ? $opts{r} : "..";
