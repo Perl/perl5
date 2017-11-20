@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.6 - Ogden Nash, "Behold the Duck"
+
+  Behold the duck,
+  it does not cluck;
+  a cluck it lacks,
+  it quacks!
+
+  It is 'specially fond
+  of puddles or ponds;
+  when it dines or sups
+  it bottoms ups.
+
+
 =head2 v5.27.5 - Frank Birch, Dilly Knox & G. P. Mackeson, "Alice in I.D.25"
 
 L<Announced on 2017-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2017/10/msg246785.html>
