@@ -809,6 +809,8 @@ d_sigsetjmp=''
 usesitecustomize=''
 d_snprintf=''
 d_vsnprintf=''
+d_snprintf_l=''
+d_vsnprintf_l=''
 d_sockatmark=''
 d_sockatmarkproto=''
 d_ip_mreq=''
@@ -18397,6 +18399,23 @@ EOM
     ;;
 esac
 
+: see if snprintf_l exists
+set snprintf_l d_snprintf_l
+eval $inlibc
+
+: see if vsnprintf_l exists
+set vsnprintf_l d_vsnprintf_l
+eval $inlibc
+
+case "$d_snprintf-$d_vsnprintf-$d_snprintf_l-$d_vsnprintf_l" in
+"$define-$define-$define-$define")
+    ;;
+*) echo "(These require the basic snprintf and vsnprintf to also be available, which they aren't"
+	d_snprintf_l="$undef"
+	d_vsnprintf_l="$undef"
+    ;;
+esac
+
 : see if sockatmark exists
 set sockatmark d_sockatmark
 eval $inlibc
@@ -24196,6 +24215,7 @@ d_sigsetjmp='$d_sigsetjmp'
 d_sin6_scope_id='$d_sin6_scope_id'
 d_sitearch='$d_sitearch'
 d_snprintf='$d_snprintf'
+d_snprintf_l='$d_snprintf_l'
 d_sockaddr_in6='$d_sockaddr_in6'
 d_sockaddr_sa_len='$d_sockaddr_sa_len'
 d_sockatmark='$d_sockatmark'
@@ -24285,6 +24305,7 @@ d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
 d_voidtty='$d_voidtty'
 d_vsnprintf='$d_vsnprintf'
+d_vsnprintf_l='$d_vsnprintf_l'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcscmp='$d_wcscmp'

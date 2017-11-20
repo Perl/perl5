@@ -5,6 +5,13 @@
 #
 # See Porting/config_h.pl
 
+#!/bin/sh
+#
+# THIS IS A GENERATED FILE
+# DO NOT HAND-EDIT
+#
+# See Porting/config_h.pl
+
 : Set up for generating config_h.SH
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh;;
@@ -28,6 +35,9 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+case "$CONFIG_H" in
+already-done) echo "Not re-extracting config.h" ;;
+*)
 case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
@@ -5001,6 +5011,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_setservent_r HAS_SETSERVENT_R	   /**/
 #define SETSERVENT_R_PROTO $setservent_r_proto	   /**/
 
+/* HAS_SNPRINTF_L:
+ *	This symbol, if defined, indicates that the snprintf_l () library
+ *	function is available for use.
+ */
+/* HAS_VSNPRINTF_L:
+ *	This symbol, if defined, indicates that the vsnprintf_l () library
+ *	function is available for use.
+ */
+#$d_snprintf_l HAS_SNPRINTF_L	/**/
+#$d_vsnprintf_l HAS_VSNPRINTF_L	/**/
+
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine
  *	is available to srand48 re-entrantly.
@@ -5228,5 +5249,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 #endif
 !GROK!THIS!
+;;
+esac
 ;;
 esac

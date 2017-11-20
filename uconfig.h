@@ -4966,6 +4966,17 @@
 /*#define HAS_SETSERVENT_R	   / **/
 #define SETSERVENT_R_PROTO 0	   /**/
 
+/* HAS_SNPRINTF_L:
+ *	This symbol, if defined, indicates that the snprintf_l () library
+ *	function is available for use.
+ */
+/* HAS_VSNPRINTF_L:
+ *	This symbol, if defined, indicates that the vsnprintf_l () library
+ *	function is available for use.
+ */
+/*#define HAS_SNPRINTF_L	/ **/
+/*#define HAS_VSNPRINTF_L	/ **/
+
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine
  *	is available to srand48 re-entrantly.
@@ -5194,6 +5205,6 @@
 #endif
 
 /* Generated from:
- * 84ef0e3b4e27374e35a7ac6726cf1c0149b1d4ba726bd58e06d9a9ce18acbb04 config_h.SH
- * 9df6179826b20eb8e1d8db749dfd77913897fae551371f686571273075f78092 uconfig.sh
+ * d73a991befb7bc3a2b8dead56dc1d3eb5032c997aecc93d0345c8ae9149ec691 config_h.SH
+ * dc226589adb7a6f0b541264f4a60b5043b449b87ee10b9c73d007738c0133ddd uconfig.sh
  * ex: set ro: */
