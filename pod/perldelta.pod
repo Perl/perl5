@@ -154,10 +154,49 @@ to a desire to maintain more backwards compatibility.
 
 =item *
 
+L<Attribute::Handlers> has been upgraded from version 1.00 to 1.01.
+
+=item *
+
+L<attributes> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<B> has been upgraded from version 1.70 to 1.72.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.002 to 1.003.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.43 to 1.45.
+
+=item *
+
+L<base> has been upgraded from version 2.26 to 2.27.
+
+=item *
+
+L<blib> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
 L<Carp> has been upgraded from version 1.43 to 1.44.
 
 If a package on the call stack contains a constant named C<ISA>, Carp no
 longer throws a "Not a GLOB reference" error.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.074 to 2.075.
+
+This addresses a security vulnerability in older versions of the 'zlib' library
+(which is bundled with Compress-Raw-Zlib).
+
+=item *
+
+L<Config::Extensions> has been upgraded from version 0.01 to 0.02.
 
 =item *
 
@@ -170,28 +209,192 @@ to be updated after the fact.
 
 =item *
 
+L<DynaLoader> has been upgraded from version 1.42 to 1.44.
+
+=item *
+
+L<experimental> has been upgraded from version 0.016 to 0.017.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280228 to 0.280229.
+
+=item *
+
+L<ExtUtils::Embed> has been upgraded from version 1.34 to 1.35.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.35 to 3.36.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.35 to 3.36.
+
+=item *
+
+L<ExtUtils::XSSymSet> has been upgraded from version 1.3 to 1.4.
+
+=item *
+
+L<fields> has been upgraded from version 2.23 to 2.24.
+
+=item *
+
 L<File::Copy> has been upgraded from version 2.32 to 2.33.  It will now use
 Time::HiRes utime where available (perl #132401).
 
 =item *
 
-To address a security vulnerability in older versions of the 'zlib' library
-(which is bundled with Compress-Raw-Zlib), L<Compress::Raw::Zlib> has been
-upgraded to CPAN version 2.075.
+L<File::Spec> has been upgraded from version 3.68 to 3.70.
+
+=item *
+
+L<File::stat> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<FileCache> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.94 to 0.95.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.19 to 1.20.
+
+=item *
+
+L<I18N::Langinfo> has been upgraded from version 0.14 to 0.15.
+
+=item *
+
+L<I18N::LangTags> has been upgraded from version 0.42 to 0.43.
+
+=item *
+
+The libnet distribution has been upgraded from version 3.10 to 3.11.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.28 to 1.29.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20171020 to 5.20171120.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.55 to 2.62.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.40 to 1.41.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.2202 to 1.2203.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.78 to 1.80.
+
+=item *
+
+L<re> has been upgraded from version 0.35 to 0.36.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<Socket> has been upgraded from version 2.020_03 to 2.020_04.
+
+=item *
+
+L<sort> has been upgraded from version 2.03 to 2.04.
+
+=item *
+
+L<Storable> has been upgraded from version 2.64 to 2.65.
+
+=item *
+
+L<Test> has been upgraded from version 1.30 to 1.31.
 
 =item *
 
 L<Test::Simple> has been upgraded from version 1.302103 to 1.302111.
 
-=back
+=item *
 
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<threads> has been upgraded from version 2.18 to 2.19.
 
 =item *
 
-XXX
+L<Tie::Array> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<Tie::StdHandle> has been upgraded from version 4.4 to 4.5.
+
+=item *
+
+L<Time::gmtime> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9746 to 1.9747.
+
+=item *
+
+L<Time::localtime> has been upgraded from version 1.02 to 1.03.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.19 to 1.23.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
+L<User::grent> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<User::pwent> has been upgraded from version 1.00 to 1.01.
+
+=item *
+
+L<VMS::DCLsym> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.42 to 2.44.
+
+=item *
+
+L<warnings> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.27 to 0.28.
 
 =back
 
