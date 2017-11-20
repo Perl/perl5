@@ -91,8 +91,8 @@ For a release on a stable branch, follows this formula:
 
 For the start of a new stable branch, follows this formula:
 
-    This document describes differences between the 5.12.0 release
-    and the 5.10.0 release.
+    This document describes differences between the 5.10.0 release
+    and the 5.12.0 release.
 
 Clearly this sets the scope of which changes are to be summarised in the rest
 of the document.
