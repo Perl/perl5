@@ -12,6 +12,26 @@ release.
 If you are upgrading from an earlier release such as 5.27.3, first read
 L<perl5274delta>, which describes differences between 5.27.3 and 5.27.4.
 
+=head1 Incompatible Changes
+
+=head2 Subroutines no longer need typeglobs
+
+Perl 5.22.0 introduced an optimization allowing subroutines to be stored in
+packages as simple sub refs, not requiring a full typeglob (thus
+potentially saving large amounts of memeory).  However, the optimization
+was flawed: it only applied to the main package.
+
+This optimization has now been extended to all packages.  This may break
+compatibility with introspection code that looks inside stashes and expects
+everything in them to be a typeglob.
+
+When this optimization happens, the typeglob still notionally exists, so
+accessing it will cause the stash entry to be upgraded to a typeglob.  The
+optimization does not apply to XSUBs or exported subroutines, and calling a
+method will undo it, since method calls cache things in typeglobs.
+
+[perl #129916] [perl #132252]
+
 =head1 Performance Enhancements
 
 =over 4
