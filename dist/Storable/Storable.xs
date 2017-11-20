@@ -3598,6 +3598,12 @@ static int store_hook(
         }
     }
 
+#ifdef HAS_U64
+    if (count > I32_MAX) {
+	CROAK(("Too many references returned by STORABLE_freeze()"));
+    }
+#endif
+
     /*
      * If they returned more than one item, we need to serialize some
      * extra references if not already done.
