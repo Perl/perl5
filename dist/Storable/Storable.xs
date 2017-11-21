@@ -5758,9 +5758,11 @@ static SV *retrieve_integer(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    SV *sv;
     int type;
+#ifdef HAS_U64
     UV  len;
+    SV *sv;
+#endif
 
     TRACEME(("retrieve_lobject (#%d)", (int)cxt->tagnum));
 
@@ -5768,14 +5770,6 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     TRACEME(("object type %d", type));
 #ifdef HAS_U64
     READ_U64(len);
-#else
-    /* previously this (brokenly) checked the length value and only failed if 
-       the length was over 4G.
-       Since this op should only occur with objects over 4GB (or 2GB) we can just
-       reject it.
-    */
-    CROAK(("Invalid large object op for this 32bit system"));
-#endif
     TRACEME(("wlen %" UVuf, len));
     switch (type) {
     case SX_OBJECT:
@@ -5802,18 +5796,10 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     /* <5.12 you could store larger hashes, but cannot iterate over them.
        So we reject them, it's a bug. */
     case SX_FLAG_HASH:
-#ifdef HAS_U64
         sv = get_lhash(aTHX_ cxt, len, 1, cname);
-#else
-        CROAK(("Invalid large object for this 32bit system"));
-#endif
         break;
     case SX_HASH:
-#ifdef HAS_U64
         sv = get_lhash(aTHX_ cxt, len, 0, cname);
-#else
-        CROAK(("Invalid large object for this 32bit system"));
-#endif
         break;
     default:
         CROAK(("Unexpected type %d in retrieve_lobject\n", type));
@@ -5821,6 +5807,14 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 
     TRACEME(("ok (retrieve_lobject at 0x%" UVxf ")", PTR2UV(sv)));
     return sv;
+#else
+    /* previously this (brokenly) checked the length value and only failed if 
+       the length was over 4G.
+       Since this op should only occur with objects over 4GB (or 2GB) we can just
+       reject it.
+    */
+    CROAK(("Invalid large object op for this 32bit system"));
+#endif
 }
 
 /*
