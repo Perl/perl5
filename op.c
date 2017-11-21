@@ -8851,88 +8851,6 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
     return o;
 }
 
-/* Does this look like a boolean operation? For these purposes
-   a boolean operation is:
-     - a subroutine call [*]
-     - a logical connective
-     - a comparison operator
-     - a filetest operator, with the exception of -s -M -A -C
-     - defined(), exists() or eof()
-     - /$re/ or $foo =~ /$re/
-   
-   [*] possibly surprising
- */
-STATIC bool
-S_looks_like_bool(pTHX_ const OP *o)
-{
-    PERL_ARGS_ASSERT_LOOKS_LIKE_BOOL;
-
-    switch(o->op_type) {
-	case OP_OR:
-	case OP_DOR:
-	    return looks_like_bool(cLOGOPo->op_first);
-
-	case OP_AND:
-        {
-            OP* sibl = OpSIBLING(cLOGOPo->op_first);
-            ASSUME(sibl);
-	    return (
-	    	looks_like_bool(cLOGOPo->op_first)
-	     && looks_like_bool(sibl));
-        }
-
-	case OP_NULL:
-	case OP_SCALAR:
-	    return (
-		o->op_flags & OPf_KIDS
-	    && looks_like_bool(cUNOPo->op_first));
-
-	case OP_ENTERSUB:
-
-	case OP_NOT:	case OP_XOR:
-
-	case OP_EQ:	case OP_NE:	case OP_LT:
-	case OP_GT:	case OP_LE:	case OP_GE:
-
-	case OP_I_EQ:	case OP_I_NE:	case OP_I_LT:
-	case OP_I_GT:	case OP_I_LE:	case OP_I_GE:
-
-	case OP_SEQ:	case OP_SNE:	case OP_SLT:
-	case OP_SGT:	case OP_SLE:	case OP_SGE:
-	
-	case OP_SMARTMATCH:
-	
-	case OP_FTRREAD:  case OP_FTRWRITE: case OP_FTREXEC:
-	case OP_FTEREAD:  case OP_FTEWRITE: case OP_FTEEXEC:
-	case OP_FTIS:     case OP_FTEOWNED: case OP_FTROWNED:
-	case OP_FTZERO:   case OP_FTSOCK:   case OP_FTCHR:
-	case OP_FTBLK:    case OP_FTFILE:   case OP_FTDIR:
-	case OP_FTPIPE:   case OP_FTLINK:   case OP_FTSUID:
-	case OP_FTSGID:   case OP_FTSVTX:   case OP_FTTTY:
-	case OP_FTTEXT:   case OP_FTBINARY:
-	
-	case OP_DEFINED: case OP_EXISTS:
-	case OP_MATCH:	 case OP_EOF:
-
-	case OP_FLOP:
-
-	    return TRUE;
-	
-	case OP_CONST:
-	    /* Detect comparisons that have been optimized away */
-	    if (cSVOPo->op_sv == &PL_sv_yes
-	    ||  cSVOPo->op_sv == &PL_sv_no)
-	    
-		return TRUE;
-	    else
-		return FALSE;
-
-	/* FALLTHROUGH */
-	default:
-	    return FALSE;
-    }
-}
-
 /*
 =for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
 
@@ -8962,8 +8880,7 @@ Constructs, checks, and returns an op tree expressing a C<when> block.
 C<cond> supplies the test expression, and C<block> supplies the block
 that will be executed if the test evaluates to true; they are consumed
 by this function and become part of the constructed op tree.  C<cond>
-will be interpreted DWIMically, often as a comparison against C<$_>,
-and may be null to generate a C<default> block.
+may be null to generate a C<default> block.
 
 =cut
 */
@@ -8971,20 +8888,8 @@ and may be null to generate a C<default> block.
 OP *
 Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 {
-    const bool cond_llb = (!cond || looks_like_bool(cond));
-    OP *cond_op;
-
     PERL_ARGS_ASSERT_NEWWHENOP;
-
-    if (cond_llb)
-	cond_op = cond;
-    else {
-	cond_op = newBINOP(OP_SMARTMATCH, OPf_SPECIAL,
-		newDEFSVOP(),
-		scalar(ref_array_or_hash(cond)));
-    }
-    
-    return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
+    return newGIVWHENOP(cond, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
 /* must not conflict with SVf_UTF8 */

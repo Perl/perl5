@@ -653,7 +653,7 @@ $r = runperl(
 is( $r, "Hello, world!\n", "-E ~~" );
 
 $r = runperl(
-    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; given(undef) {when(undef) { say q(Hello, world!)"}}']
+    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; given(undef) {when(!defined) { say q(Hello, world!)"}}']
 );
 is( $r, "Hello, world!\n", "-E given" );
 

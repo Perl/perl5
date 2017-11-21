@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 193;
+plan tests => 170;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -60,9 +60,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {    
     my $ok;
     given(3) {
-	when(2) { $ok = 'two'; }
-	when(3) { $ok = 'three'; }
-	when(4) { $ok = 'four'; }
+	when($_ == 2) { $ok = 'two'; }
+	when($_ == 3) { $ok = 'three'; }
+	when($_ == 4) { $ok = 'four'; }
 	default { $ok = 'd'; }
     }
     is($ok, 'three', "numeric comparison");
@@ -72,9 +72,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $ok;
     use integer;
     given(3.14159265) {
-	when(2) { $ok = 'two'; }
-	when(3) { $ok = 'three'; }
-	when(4) { $ok = 'four'; }
+	when($_ == 2) { $ok = 'two'; }
+	when($_ == 3) { $ok = 'three'; }
+	when($_ == 4) { $ok = 'four'; }
 	default { $ok = 'd'; }
     }
     is($ok, 'three', "integer comparison");
@@ -83,9 +83,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {    
     my ($ok1, $ok2);
     given(3) {
-	when(3.1)   { $ok1 = 'n'; }
-	when(3.0)   { $ok1 = 'y'; continue }
-	when("3.0") { $ok2 = 'y'; }
+	when($_ == 3.1)   { $ok1 = 'n'; }
+	when($_ == 3.0)   { $ok1 = 'y'; continue }
+	when($_ == "3.0") { $ok2 = 'y'; }
 	default     { $ok2 = 'n'; }
     }
     is($ok1, 'y', "more numeric (pt. 1)");
@@ -95,9 +95,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given("c") {
-	when("b") { $ok = 'B'; }
-	when("c") { $ok = 'C'; }
-	when("d") { $ok = 'D'; }
+	when($_ eq "b") { $ok = 'B'; }
+	when($_ eq "c") { $ok = 'C'; }
+	when($_ eq "d") { $ok = 'D'; }
 	default   { $ok = 'def'; }
     }
     is($ok, 'C', "string comparison");
@@ -106,9 +106,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given("c") {
-	when("b") { $ok = 'B'; }
-	when("c") { $ok = 'C'; continue }
-	when("c") { $ok = 'CC'; }
+	when($_ eq "b") { $ok = 'B'; }
+	when($_ eq "c") { $ok = 'C'; continue }
+	when($_ eq "c") { $ok = 'CC'; }
 	default   { $ok = 'D'; }
     }
     is($ok, 'CC', "simple continue");
@@ -117,20 +117,8 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 # Definedness
 {
     my $ok = 1;
-    given (0) { when(undef) {$ok = 0} }
-    is($ok, 1, "Given(0) when(undef)");
-}
-{
-    my $undef;
-    my $ok = 1;
-    given (0) { when($undef) {$ok = 0} }
-    is($ok, 1, 'Given(0) when($undef)');
-}
-{
-    my $undef;
-    my $ok = 0;
-    given (0) { when($undef++) {$ok = 1} }
-    is($ok, 1, "Given(0) when($undef++)");
+    given (0) { when(!defined) {$ok = 0} }
+    is($ok, 1, "Given(0) when(!defined)");
 }
 {
     no warnings "uninitialized";
@@ -148,51 +136,26 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 ########
 {
     my $ok = 1;
-    given ("") { when(undef) {$ok = 0} }
-    is($ok, 1, 'Given("") when(undef)');
-}
-{
-    my $undef;
-    my $ok = 1;
-    given ("") { when($undef) {$ok = 0} }
-    is($ok, 1, 'Given("") when($undef)');
+    given ("") { when(!defined) {$ok = 0} }
+    is($ok, 1, 'Given("") when(!defined)');
 }
 {
     no warnings "uninitialized";
     my $ok = 1;
-    given (undef) { when("") {$ok = 0} }
-    is($ok, 1, 'Given(undef) when("")');
-}
-{
-    no warnings "uninitialized";
-    my $undef;
-    my $ok = 1;
-    given ($undef) { when("") {$ok = 0} }
-    is($ok, 1, 'Given($undef) when("")');
+    given (undef) { when(0) {$ok = 0} }
+    is($ok, 1, 'Given(undef) when(0)');
 }
 ########
 {
     my $ok = 0;
-    given (undef) { when(undef) {$ok = 1} }
-    is($ok, 1, "Given(undef) when(undef)");
+    given (undef) { when(!defined) {$ok = 1} }
+    is($ok, 1, "Given(undef) when(!defined)");
 }
 {
     my $undef;
     my $ok = 0;
-    given (undef) { when($undef) {$ok = 1} }
-    is($ok, 1, 'Given(undef) when($undef)');
-}
-{
-    my $undef;
-    my $ok = 0;
-    given ($undef) { when(undef) {$ok = 1} }
-    is($ok, 1, 'Given($undef) when(undef)');
-}
-{
-    my $undef;
-    my $ok = 0;
-    given ($undef) { when($undef) {$ok = 1} }
-    is($ok, 1, 'Given($undef) when($undef)');
+    given ($undef) { when(!defined) {$ok = 1} }
+    is($ok, 1, 'Given($undef) when(!defined)');
 }
 
 
@@ -401,7 +364,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given(23) {
-        when (scalar 24) { $ok = 'n'; continue }
+        when ($_ == scalar 24) { $ok = 'n'; continue }
         default { $ok = 'y' }
     }
     is($ok,'y','scalar()');
@@ -497,10 +460,10 @@ sub notfoo {"bar"}
     my $ok = 1;
     given("foo") {
 	when((1 == 1) && "bar") {
-	    $ok = 0;
+	    $ok = 2;
 	}
 	when((1 == 1) && $_ eq "foo") {
-	    $ok = 2;
+	    $ok = 0;
 	}
     }
     is($ok, 2, "((1 == 1) && \"bar\") not smartmatched");
@@ -535,7 +498,7 @@ sub notfoo {"bar"}
 	    $ok = 1;
 	}
     }
-    ok($ok, '((1 == $ok) || "foo") smartmatched');
+    ok($ok, '((1 == $ok) || "foo")');
 }
 
 {
@@ -545,7 +508,7 @@ sub notfoo {"bar"}
 	    $ok = 1;
 	}
     }
-    ok($ok, '((1 == $ok || undef) // "foo") smartmatched');
+    ok($ok, '((1 == $ok || undef) // "foo")');
 }
 
 # Make sure we aren't invoking the get-magic more than once
@@ -578,11 +541,11 @@ my $f = tie my $v, "FetchCounter";
 {   my $test_name = "Multiple FETCHes in given, due to aliasing";
     my $ok;
     given($v = 23) {
-    	when(undef) {}
+    	when(!defined) {}
     	when(sub{0}->()) {}
-	when(21) {}
-	when("22") {}
-	when(23) {$ok = 1}
+	when($_ == 21) {}
+	when($_ == "22") {}
+	when($_ == 23) {$ok = 1}
 	when(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
@@ -594,11 +557,11 @@ my $f = tie my $v, "FetchCounter";
     $v = 23;
     is($f->count(), 0, "Sanity check: $test_name");
     given(23) {
-    	when(undef) {}
+    	when(!defined) {}
     	when(sub{0}->()) {}
-	when(21) {}
-	when("22") {}
-	when($v) {$ok = 1}
+	when($_ == 21) {}
+	when($_ == "22") {}
+	when($_ == $v) {$ok = 1}
 	when(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
@@ -610,28 +573,12 @@ my $f = tie my $v, "FetchCounter";
     $v = "23";
     is($f->count(), 0, "Sanity check: $test_name");
     given("23") {
-    	when(undef) {}
+    	when(!defined) {}
     	when(sub{0}->()) {}
-	when("21") {}
-	when("22") {}
-	when($v) {$ok = 1}
+	when($_ eq "21") {}
+	when($_ eq "22") {}
+	when($_ eq $v) {$ok = 1}
 	when(/24/) {$ok = 0}
-    }
-    is($ok, 1, "precheck: $test_name");
-    is($f->count(), 1, $test_name);
-}
-
-{   my $test_name = "Only one FETCH (undef)";
-    my $ok;
-    $v = undef;
-    is($f->count(), 0, "Sanity check: $test_name");
-    no warnings "uninitialized";
-    given(my $undef) {
-    	when(sub{0}->()) {}
-	when("21")  {}
-	when("22")  {}
-    	when($v)    {$ok = 1}
-	when(undef) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
@@ -641,13 +588,13 @@ my $f = tie my $v, "FetchCounter";
 {
     my $first = 1;
     for (1, "two") {
-	when ("two") {
+	when ($_ eq "two") {
 	    is($first, 0, "Loop: second");
 	    eval {break};
 	    like($@, qr/^Can't "break" in a loop topicalizer/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
-	when (1) {
+	when ($_ == 1) {
 	    is($first, 1, "Loop: first");
 	    $first = 0;
 	    # Implicit break is okay
@@ -658,13 +605,13 @@ my $f = tie my $v, "FetchCounter";
 {
     my $first = 1;
     for $_ (1, "two") {
-	when ("two") {
+	when ($_ eq "two") {
 	    is($first, 0, "Explicit \$_: second");
 	    eval {break};
 	    like($@, qr/^Can't "break" in a loop topicalizer/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
-	when (1) {
+	when ($_ == 1) {
 	    is($first, 1, "Explicit \$_: first");
 	    $first = 0;
 	    # Implicit break is okay
@@ -681,8 +628,8 @@ my $f = tie my $v, "FetchCounter";
     sub bar {$called_bar = 1; "@_" eq "bar"}
     my ($matched_foo, $matched_bar) = (0, 0);
     given("foo") {
-	when(\&bar) {$matched_bar = 1}
-	when(\&foo) {$matched_foo = 1}
+	when((\&bar)->($_)) {$matched_bar = 1}
+	when((\&foo)->($_)) {$matched_foo = 1}
     }
     is($called_foo, 1,  "foo() was called");
     is($called_bar, 1,  "bar() was called");
@@ -699,7 +646,7 @@ sub contains_x {
     given("foxy!") {
 	when(contains_x($_))
 	    { $ok1 = 1; continue }
-	when(\&contains_x)
+	when((\&contains_x)->($_))
 	    { $ok2 = 1; continue }
     }
     is($ok1, 1, "Calling sub directly (true)");
@@ -708,116 +655,40 @@ sub contains_x {
     given("foggy") {
 	when(contains_x($_))
 	    { $ok1 = 2; continue }
-	when(\&contains_x)
+	when((\&contains_x)->($_))
 	    { $ok2 = 2; continue }
     }
     is($ok1, 1, "Calling sub directly (false)");
     is($ok2, 1, "Calling sub indirectly (false)");
 }
 
-SKIP: {
-    skip_if_miniperl("no dynamic loading on miniperl, no Scalar::Util", 14);
-    # Test overloading
-    { package OverloadTest;
-
-      use overload '""' => sub{"string value of obj"};
-      use overload 'eq' => sub{"$_[0]" eq "$_[1]"};
-
-      use overload "~~" => sub {
-	  my ($self, $other, $reversed) = @_;
-	  if ($reversed) {
-	      $self->{left}  = $other;
-	      $self->{right} = $self;
-	      $self->{reversed} = 1;
-	  } else {
-	      $self->{left}  = $self;
-	      $self->{right} = $other;
-	      $self->{reversed} = 0;
-	  }
-	  $self->{called} = 1;
-	  return $self->{retval};
-      };
-    
-      sub new {
-	  my ($pkg, $retval) = @_;
-	  bless {
-		 called => 0,
-		 retval => $retval,
-		}, $pkg;
-      }
-  }
-
-    {
-	my $test = "Overloaded obj in given (true)";
-	my $obj = OverloadTest->new(1);
-	my $matched;
-	given($obj) {
-	    when ("other arg") {$matched = 1}
-	    default {$matched = 0}
-	}
-    
-	is($obj->{called}, 1, "$test: called");
-	ok($matched, "$test: matched");
+{
+    my($ea, $eb, $ec) = (0, 0, 0);
+    my $r;
+    given(3) {
+	when(do { $ea++; $_ == 2 }) { $r = "two"; }
+	when(do { $eb++; $_ == 3 }) { $r = "three"; }
+	when(do { $ec++; $_ == 4 }) { $r = "four"; }
     }
-
-    {
-	my $test = "Overloaded obj in given (false)";
-	my $obj = OverloadTest->new(0);
-	my $matched;
-	given($obj) {
-	    when ("other arg") {$matched = 1}
-	}
-    
-	is($obj->{called}, 1, "$test: called");
-	ok(!$matched, "$test: not matched");
-    }
-
-    {
-	my $test = "Overloaded obj in when (true)";
-	my $obj = OverloadTest->new(1);
-	my $matched;
-	given("topic") {
-	    when ($obj) {$matched = 1}
-	    default {$matched = 0}
-	}
-    
-	is($obj->{called},  1, "$test: called");
-	ok($matched, "$test: matched");
-	is($obj->{left}, "topic", "$test: left");
-	is($obj->{right}, "string value of obj", "$test: right");
-	ok($obj->{reversed}, "$test: reversed");
-    }
-
-    {
-	my $test = "Overloaded obj in when (false)";
-	my $obj = OverloadTest->new(0);
-	my $matched;
-	given("topic") {
-	    when ($obj) {$matched = 1}
-	    default {$matched = 0}
-	}
-    
-	is($obj->{called}, 1, "$test: called");
-	ok(!$matched, "$test: not matched");
-	is($obj->{left}, "topic", "$test: left");
-	is($obj->{right}, "string value of obj", "$test: right");
-	ok($obj->{reversed}, "$test: reversed");
-    }
+    is $r, "three", "evaluation count";
+    is $ea, 1, "evaluation count";
+    is $eb, 1, "evaluation count";
+    is $ec, 0, "evaluation count";
 }
 
 # Postfix when
 {
     my $ok;
     given (undef) {
-	$ok = 1 when undef;
+	$ok = 1 when !defined;
     }
-    is($ok, 1, "postfix undef");
+    is($ok, 1, "postfix !defined");
 }
 {
     my $ok;
     given (2) {
-	$ok += 1 when 7;
-	$ok += 2 when 9.1685;
+	$ok += 1 when $_ == 7;
+	$ok += 2 when $_ == 9.1685;
 	$ok += 4 when $_ > 4;
 	$ok += 8 when $_ < 2.5;
     }
@@ -828,7 +699,7 @@ SKIP: {
     given ("apple") {
 	$ok = 1, continue when $_ eq "apple";
 	$ok += 2;
-	$ok = 0 when "banana";
+	$ok = 0 when $_ eq "banana";
     }
     is($ok, 3, "postfix string");
 }
@@ -869,7 +740,7 @@ $letter = '';
 for ("a".."e") {
     given ($_) {
 	$letter = $_;
-	when ("b") { last }
+	when ($_ eq "b") { last }
     }
     $letter = "z";
 }
@@ -879,7 +750,7 @@ $letter = '';
 LETTER1: for ("a".."e") {
     given ($_) {
 	$letter = $_;
-	when ("b") { last LETTER1 }
+	when ($_ eq "b") { last LETTER1 }
     }
     $letter = "z";
 }
@@ -911,7 +782,7 @@ is($letter, "a,c,e,", "next LABEL in when");
     goto GIVEN1;
     $flag = 1;
     GIVEN1: given ($flag) {
-	when (0) { break; }
+	when ($_ == 0) { break; }
 	$flag = 2;
     }
     is($flag, 0, "goto GIVEN1");
@@ -919,7 +790,7 @@ is($letter, "a,c,e,", "next LABEL in when");
 {
     my $flag = 0;
     given ($flag) {
-	when (0) { $flag = 1; }
+	when ($_ == 0) { $flag = 1; }
 	goto GIVEN2;
 	$flag = 2;
     }
@@ -929,7 +800,7 @@ GIVEN2:
 {
     my $flag = 0;
     given ($flag) {
-	when (0) { $flag = 1; goto GIVEN3; $flag = 2; }
+	when ($_ == 0) { $flag = 1; goto GIVEN3; $flag = 2; }
 	$flag = 3;
     }
 GIVEN3:
@@ -938,7 +809,7 @@ GIVEN3:
 {
     my $flag = 0;
     for ($flag) {
-	when (0) { $flag = 1; goto GIVEN4; $flag = 2; }
+	when ($_ == 0) { $flag = 1; goto GIVEN4; $flag = 2; }
 	$flag = 3;
     }
 GIVEN4:
@@ -948,8 +819,8 @@ GIVEN4:
     my $flag = 0;
 GIVEN5:
     given ($flag) {
-	when (0) { $flag = 1; goto GIVEN5; $flag = 2; }
-	when (1) { break; }
+	when ($_ == 0) { $flag = 1; goto GIVEN5; $flag = 2; }
+	when ($_ == 1) { break; }
 	$flag = 3;
     }
     is($flag, 1, "goto inside given and when to the given stmt");
@@ -972,8 +843,8 @@ unreified_check(undef,"");
     no warnings 'void';
     for (0, 1, 2) {
 	my $scalar = do { given ($_) {
-	    when (0) { $lexical }
-	    when (2) { 'void'; 8, 9 }
+	    when ($_ == 0) { $lexical }
+	    when ($_ == 2) { 'void'; 8, 9 }
 	    @things;
 	} };
 	is($scalar, shift(@exp), "rvalue given - simple scalar [$_]");
@@ -986,8 +857,8 @@ unreified_check(undef,"");
     for (0, 1, 2) {
 	no warnings 'void';
 	my $scalar = do { given ($_) {
-	    $lexical when 0;
-	    8, 9     when 2;
+	    $lexical when $_ == 0;
+	    8, 9     when $_ == 2;
 	    6, 7;
 	} };
 	is($scalar, shift(@exp), "rvalue given - postfix scalar [$_]");
@@ -999,7 +870,7 @@ unreified_check(undef,"");
     for (0, 1, 2) {
 	my $scalar = do { given ($_) {
 	    no warnings 'void';
-	    when (0) { 5 }
+	    when ($_ == 0) { 5 }
 	    default  { 8, 9 }
 	    6, 7;
 	} };
@@ -1012,8 +883,8 @@ unreified_check(undef,"");
     my @exp = ('3 4 5', '11 12 13', '8 9');
     for (0, 1, 2) {
 	my @list = do { given ($_) {
-	    when (0) { 3 .. 5 }
-	    when (2) { my $fake = 'void'; 8, 9 }
+	    when ($_ == 0) { 3 .. 5 }
+	    when ($_ == 2) { my $fake = 'void'; 8, 9 }
 	    @things;
 	} };
 	is("@list", shift(@exp), "rvalue given - simple list [$_]");
@@ -1025,8 +896,8 @@ unreified_check(undef,"");
     my @exp = ('3 4 5', '6 7', '12');
     for (0, 1, 2) {
 	my @list = do { given ($_) {
-	    3 .. 5  when 0;
-	    @things when 2;
+	    3 .. 5  when $_ == 0;
+	    @things when $_ == 2;
 	    6, 7;
 	} };
 	is("@list", shift(@exp), "rvalue given - postfix list [$_]");
@@ -1038,7 +909,7 @@ unreified_check(undef,"");
     my @exp = ('m o o', '8 10', '8 10');
     for (0, 1, 2) {
 	my @list = do { given ($_) {
-	    when (0) { "moo" =~ /(.)/g }
+	    when ($_ == 0) { "moo" =~ /(.)/g }
 	    default  { 8, scalar(@things) }
 	    6, 7;
 	} };
@@ -1051,8 +922,8 @@ unreified_check(undef,"");
     for (0, 1, 2, 3) {
 	my @list = do { given ($_) {
 	    continue when $_ <= 1;
-	    break    when 1;
-	    next     when 2;
+	    break    when $_ == 1;
+	    next     when $_ == 2;
 	    6, 7;
 	} };
 	is("@list", shift(@exp), "rvalue given - default list [$_]");
@@ -1062,9 +933,9 @@ unreified_check(undef,"");
     # Context propagation
     my $smart_hash = sub {
 	do { given ($_[0]) {
-	    'undef' when undef;
-	    when ([ 1 .. 3 ]) { 1 .. 3 }
-	    when (4) { my $fake; do { 4, 5 } }
+	    'undef' when !defined;
+	    when ($_ >= 1 && $_ <= 3) { 1 .. 3 }
+	    when ($_ == 4) { my $fake; do { 4, 5 } }
 	} };
     };
 
@@ -1092,44 +963,6 @@ unreified_check(undef,"");
 
     @list = $smart_hash->(999);
     is("@list", '',      "rvalue given - list context propagation [999]");
-}
-{
-    # Array slices
-    my @list = 10 .. 15;
-    my @in_list;
-    my @in_slice;
-    for (5, 10, 15) {
-        given ($_) {
-            when (@list) {
-                push @in_list, $_;
-                continue;
-            }
-            when (@list[0..2]) {
-                push @in_slice, $_;
-            }
-        }
-    }
-    is("@in_list", "10 15", "when(array)");
-    is("@in_slice", "10", "when(array slice)");
-}
-{
-    # Hash slices
-    my %list = map { $_ => $_ } "a" .. "f";
-    my @in_list;
-    my @in_slice;
-    for ("a", "e", "i") {
-        given ($_) {
-            when (%list) {
-                push @in_list, $_;
-                continue;
-            }
-            when (@list{"a".."c"}) {
-                push @in_slice, $_;
-            }
-        }
-    }
-    is("@in_list", "a e", "when(hash)");
-    is("@in_slice", "a", "when(hash slice)");
 }
 
 { # RT#84526 - Handle magical TARG
@@ -1161,19 +994,19 @@ unreified_check(undef,"");
 	    our $given_glob  = 5;
 	    local $given_loc = 6;
 
-	    when (0) { 0 }
+	    when ($_ == 0) { 0 }
 
-	    when (1) { my $when_lex    = 1 }
-	    when (2) { our $when_glob  = 2 }
-	    when (3) { local $when_loc = 3 }
+	    when ($_ == 1) { my $when_lex    = 1 }
+	    when ($_ == 2) { our $when_glob  = 2 }
+	    when ($_ == 3) { local $when_loc = 3 }
 
-	    when (4) { $given_lex }
-	    when (5) { $given_glob }
-	    when (6) { $given_loc }
+	    when ($_ == 4) { $given_lex }
+	    when ($_ == 5) { $given_glob }
+	    when ($_ == 6) { $given_loc }
 
-	    when (7) { $ext_lex }
-	    when (8) { $ext_glob }
-	    when (9) { $ext_loc }
+	    when ($_ == 7) { $ext_lex }
+	    when ($_ == 8) { $ext_glob }
+	    when ($_ == 9) { $ext_loc }
 
 	    'fallback';
 	}
@@ -1255,10 +1088,10 @@ unreified_check(undef,"");
 	    my $res = do {
 		given ($id) {
 		    my $x;
-		    when (0) { Fmurrr->new($destroyed, 0) }
-		    when (1) { my $y = Fmurrr->new($destroyed, 1); break }
-		    when (2) { $x = Fmurrr->new($destroyed, 2); continue }
-		    when (2) { $x }
+		    when ($_ == 0) { Fmurrr->new($destroyed, 0) }
+		    when ($_ == 1) { my $y = Fmurrr->new($destroyed, 1); break }
+		    when ($_ == 2) { $x = Fmurrr->new($destroyed, 2); continue }
+		    when ($_ == 2) { $x }
 		    default  { Fmurrr->new($destroyed, 3) }
 		}
 	    };
@@ -1312,27 +1145,27 @@ unreified_check(undef,"");
 
     $i = 0;
     for (1..3) {
-        when (1) {$i +=    1 }
-        when (2) {$i +=   10 }
-        when (3) {$i +=  100 }
+        when ($_ == 1) {$i +=    1 }
+        when ($_ == 2) {$i +=   10 }
+        when ($_ == 3) {$i +=  100 }
         default { $i += 1000 }
     }
     is($i, 111, "when in for 1..3");
 
     $i = 0;
     for ('a'..'c') {
-        when ('a') {$i +=    1 }
-        when ('b') {$i +=   10 }
-        when ('c') {$i +=  100 }
+        when ($_ eq 'a') {$i +=    1 }
+        when ($_ eq 'b') {$i +=   10 }
+        when ($_ eq 'c') {$i +=  100 }
         default { $i += 1000 }
     }
     is($i, 111, "when in for a..c");
 
     $i = 0;
     for (1,2,3) {
-        when (1) {$i +=    1 }
-        when (2) {$i +=   10 }
-        when (3) {$i +=  100 }
+        when ($_ == 1) {$i +=    1 }
+        when ($_ == 2) {$i +=   10 }
+        when ($_ == 3) {$i +=  100 }
         default { $i += 1000 }
     }
     is($i, 111, "when in for 1,2,3");
@@ -1340,9 +1173,9 @@ unreified_check(undef,"");
     $i = 0;
     my @a = (1,2,3);
     for (@a) {
-        when (1) {$i +=    1 }
-        when (2) {$i +=   10 }
-        when (3) {$i +=  100 }
+        when ($_ == 1) {$i +=    1 }
+        when ($_ == 2) {$i +=   10 }
+        when ($_ == 3) {$i +=  100 }
         default { $i += 1000 }
     }
     is($i, 111, 'when in for @a');
