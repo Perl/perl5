@@ -50,7 +50,7 @@ my %F = (
 my %T = (
    'null' => sub { "" },
    'json' => sub {
-      my $json = JSON::PP->new;
+      my $json = JSON::PP->new->utf8;
       $json->$_() for @json_opt;
       $json->encode( $_ );
    },

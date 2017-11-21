@@ -27,7 +27,7 @@ $json->convert_blessed->allow_blessed;
 
 my $num  = $json->decode(q|100000000000000000000000000000000000000|);
 
-isa_ok($num, 'Math::BigInt');
+ok($num->isa('Math::BigInt'));
 is("$num", $fix . '100000000000000000000000000000000000000');
 is($json->encode($num), $fix . '100000000000000000000000000000000000000');
 
@@ -40,7 +40,7 @@ ok(!(ref $num and $num->isa('Math::BigFloat')), 'small integer is not a BigFloat
 
 $num  = $json->decode(q|2.0000000000000000001|);
 
-isa_ok($num, 'Math::BigFloat');
+ok($num->isa('Math::BigFloat'));
 is("$num", '2.0000000000000000001');
 is($json->encode($num), '2.0000000000000000001');
 

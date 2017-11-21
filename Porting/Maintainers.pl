@@ -644,7 +644,7 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-2.94.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-2.97000.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
     },
 

@@ -14,7 +14,7 @@ use JSON::PP::Boolean;
 use Carp ();
 #use Devel::Peek;
 
-$JSON::PP::VERSION = '2.94';
+$JSON::PP::VERSION = '2.97000';
 
 @JSON::PP::EXPORT = qw(encode_json decode_json from_json to_json);
 
@@ -1405,7 +1405,7 @@ BEGIN {
 $JSON::PP::true  = do { bless \(my $dummy = 1), "JSON::PP::Boolean" };
 $JSON::PP::false = do { bless \(my $dummy = 0), "JSON::PP::Boolean" };
 
-sub is_bool { defined $_[0] and UNIVERSAL::isa($_[0], "JSON::PP::Boolean"); }
+sub is_bool { blessed $_[0] and $_[0]->isa("JSON::PP::Boolean"); }
 
 sub true  { $JSON::PP::true  }
 sub false { $JSON::PP::false }
@@ -1654,7 +1654,7 @@ JSON::PP - JSON::XS compatible pure-Perl module.
 
 =head1 VERSION
 
-    2.91_04
+    2.97000
 
 =head1 DESCRIPTION
 
