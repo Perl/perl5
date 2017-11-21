@@ -1028,13 +1028,13 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
     STMT_START {							\
         ASSERT(sizeof(x) == 8, ("W64LEN writing a U64"));               \
         if (cxt->netorder) {                                            \
-            union u64_t { U32 a; U32 b; } y;                            \
-            y.b = htonl(x & 0xffffffffUL);                                \
-            y.a = htonl(x >> 32);                                       \
+            U32 buf[2];      						\
+            buf[1] = htonl(x & 0xffffffffUL);                           \
+            buf[0] = htonl(x >> 32);                                    \
             if (!cxt->fio)                                              \
-                MBUF_PUTLONG(y);                                        \
-            else if (PerlIO_write(cxt->fio,oI(&y),                      \
-                                  oS(sizeof(y))) != oS(sizeof(y)))      \
+                MBUF_PUTLONG(buf);                                      \
+            else if (PerlIO_write(cxt->fio, buf,                        \
+                                  sizeof(buf)) != sizeof(buf))          \
                 return -1;                                              \
         } else {                                                        \
             if (!cxt->fio)                                              \
@@ -5767,15 +5767,14 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     GETMARK(type);
     TRACEME(("object type %d", type));
 #ifdef HAS_U64
-    READ(&len, 8);
+    READ_U64(len);
 #else
-    READ(&len, 4);
-    /* little-endian: ignore lower word */
-# if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
-    READ(&len, 4);
-# endif
-    if (len > 0)
-        CROAK(("Invalid large object for this 32bit system"));
+    /* previously this (brokenly) checked the length value and only failed if 
+       the length was over 4G.
+       Since this op should only occur with objects over 4GB (or 2GB) we can just
+       reject it.
+    */
+    CROAK(("Invalid large object op for this 32bit system"));
 #endif
     TRACEME(("wlen %" UVuf, len));
     switch (type) {
