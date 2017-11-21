@@ -8937,8 +8937,8 @@ S_looks_like_bool(pTHX_ const OP *o)
 =for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
 
 Constructs, checks, and returns an op tree expressing a C<given> block.
-C<cond> supplies the expression that will be locally assigned to a lexical
-variable, and C<block> supplies the body of the C<given> construct; they
+C<cond> supplies the expression to whose value C<$_> will be locally
+aliased, and C<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
 C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
 
