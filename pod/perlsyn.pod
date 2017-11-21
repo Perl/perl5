@@ -622,6 +622,8 @@ example:
 
     use v5.14;
 
+The "switch" feature is considered highly
+experimental; it is subject to change with little notice.
 Under the "switch" feature, Perl gains the experimental keywords
 C<given>, C<when>, C<default>, C<continue>, and C<break>.
 Starting from Perl 5.16, one can prefix the switch
@@ -683,6 +685,94 @@ On versions of Perl preceding Perl 5.28, C<given> and C<when> behave
 somewhat differently from their present behaviour.
 If your code needs to run on older versions,
 avoid C<given> and C<when>.
+
+=head3 Breaking out
+
+You can use the C<break> keyword to break out of the enclosing
+C<given> block.  Every C<when> block is implicitly ended with
+a C<break>.
+
+=head3 Fall-through
+
+You can use the C<continue> keyword to fall through from one
+case to the next immediate C<when> or C<default>:
+
+    given($foo) {
+        when (/x/) { say '$foo contains an x'; continue }
+        when (/y/) { say '$foo contains a y'            }
+        default    { say '$foo does not contain a y'    }
+    }
+
+=head3 Return value
+
+When a C<given> statement is also a valid expression (for example,
+when it's the last statement of a block), it evaluates to:
+
+=over 4
+
+=item *
+
+An empty list as soon as an explicit C<break> is encountered.
+
+=item *
+
+The value of the last evaluated expression of the successful
+C<when>/C<default> clause, if there happens to be one.
+
+=item *
+
+The value of the last evaluated expression of the C<given> block if no
+condition is true.
+
+=back
+
+In both last cases, the last expression is evaluated in the context that
+was applied to the C<given> block.
+
+Note that, unlike C<if> and C<unless>, failed C<when> statements always
+evaluate to an empty list.
+
+    my $price = do {
+        given ($item) {
+            when (["pear", "apple"]) { 1 }
+            break when "vote";      # My vote cannot be bought
+            1e10  when /Mona Lisa/;
+            "unknown";
+        }
+    };
+
+Currently, C<given> blocks can't always
+be used as proper expressions.  This
+may be addressed in a future version of Perl.
+
+=head3 Switching in a loop
+
+Instead of using C<given()>, you can use a C<foreach()> loop.
+For example, here's one way to count how many times a particular
+string occurs in an array:
+
+    use v5.10.1;
+    my $count = 0;
+    for (@array) {
+        when ("foo") { ++$count }
+    }
+    print "\@array contains $count copies of 'foo'\n";
+
+Or in a more recent version:
+
+    use v5.14;
+    my $count = 0;
+    for (@array) {
+        ++$count when "foo";
+    }
+    print "\@array contains $count copies of 'foo'\n";
+
+At the end of all C<when> blocks, there is an implicit C<next>.
+You can override that with an explicit C<last> if you're
+interested in only the first match alone.
+
+This doesn't work if you explicitly specify a loop variable, as
+in C<for $item (@array)>.  You have to use the default variable C<$_>.
 
 =head2 Goto
 X<goto>
@@ -892,100 +982,5 @@ shell:
     print $@;
     __END__
     foo at goop line 345.
-
-=head2 Experimental Details on given and when
-
-As previously mentioned, the "switch" feature is considered highly
-experimental; it is subject to change with little notice.
-Before Perl 5.28, C<given> and C<when> had tricky behaviours that you should
-beware of if your code must run on older versions of Perl.
-
-=head3 Breaking out
-
-You can use the C<break> keyword to break out of the enclosing
-C<given> block.  Every C<when> block is implicitly ended with
-a C<break>.
-
-=head3 Fall-through
-
-You can use the C<continue> keyword to fall through from one
-case to the next immediate C<when> or C<default>:
-
-    given($foo) {
-        when (/x/) { say '$foo contains an x'; continue }
-        when (/y/) { say '$foo contains a y'            }
-        default    { say '$foo does not contain a y'    }
-    }
-
-=head3 Return value
-
-When a C<given> statement is also a valid expression (for example,
-when it's the last statement of a block), it evaluates to:
-
-=over 4
-
-=item *
-
-An empty list as soon as an explicit C<break> is encountered.
-
-=item *
-
-The value of the last evaluated expression of the successful
-C<when>/C<default> clause, if there happens to be one.
-
-=item *
-
-The value of the last evaluated expression of the C<given> block if no
-condition is true.
-
-=back
-
-In both last cases, the last expression is evaluated in the context that
-was applied to the C<given> block.
-
-Note that, unlike C<if> and C<unless>, failed C<when> statements always
-evaluate to an empty list.
-
-    my $price = do {
-        given ($item) {
-            when (["pear", "apple"]) { 1 }
-            break when "vote";      # My vote cannot be bought
-            1e10  when /Mona Lisa/;
-            "unknown";
-        }
-    };
-
-Currently, C<given> blocks can't always
-be used as proper expressions.  This
-may be addressed in a future version of Perl.
-
-=head3 Switching in a loop
-
-Instead of using C<given()>, you can use a C<foreach()> loop.
-For example, here's one way to count how many times a particular
-string occurs in an array:
-
-    use v5.10.1;
-    my $count = 0;
-    for (@array) {
-        when ("foo") { ++$count }
-    }
-    print "\@array contains $count copies of 'foo'\n";
-
-Or in a more recent version:
-
-    use v5.14;
-    my $count = 0;
-    for (@array) {
-        ++$count when "foo";
-    }
-    print "\@array contains $count copies of 'foo'\n";
-
-At the end of all C<when> blocks, there is an implicit C<next>.
-You can override that with an explicit C<last> if you're
-interested in only the first match alone.
-
-This doesn't work if you explicitly specify a loop variable, as
-in C<for $item (@array)>.  You have to use the default variable C<$_>.
 
 =cut

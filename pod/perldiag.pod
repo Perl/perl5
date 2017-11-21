@@ -2480,7 +2480,7 @@ L<perlfunc/getsockopt>.
 (S experimental::smartmatch) C<given> depends on smartmatch, which
 is experimental, so its behavior may change or even be removed
 in any future release of perl.  See the explanation under
-L<perlsyn/Experimental Details on given and when>.
+L<perlsyn/Switch Statements>.
 
 =item Global symbol "%s" requires explicit package name (did you forget to
 declare "my %s"?)
@@ -7436,7 +7436,7 @@ So put in parentheses to say what you really mean.
 experimental.  Additionally, it has several special cases that may
 not be immediately obvious, and their behavior may change or
 even be removed in any future release of perl.  See the explanation
-under L<perlsyn/Experimental Details on given and when>.
+under L<perlsyn/Switch Statements>.
 
 =item Wide character in %s
 
