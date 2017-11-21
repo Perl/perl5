@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 use Config;
-use Storable qw(store_fd retrieve_fd);
+use Storable qw(store_fd retrieve_fd nstore_fd);
 use Test::More;
 use File::Temp qw(tempfile);
 use Devel::Peek;
@@ -21,15 +21,15 @@ BEGIN {
         if $Config{ptrsize} < 8 and $] > 5.013;
     plan skip_all => 'Need 64-bit int for this test on older versions'
         if $Config{uvsize} < 8 and $] < 5.013;
-    plan skip_all => 'Need ~34 GiB memory for this test, set PERL_TEST_MEMORY >= 34'
-        if !$ENV{PERL_TEST_MEMORY} || $ENV{PERL_TEST_MEMORY} < 34;
+    plan skip_all => 'Need ~8 GiB memory for this test, set PERL_TEST_MEMORY >= 8'
+        if !$ENV{PERL_TEST_MEMORY} || $ENV{PERL_TEST_MEMORY} < 8;
     plan skip_all => 'These tests are slow, set PERL_RUN_SLOW_TESTS'
         unless $ENV{PERL_RUN_SLOW_TESTS};
     plan skip_all => "Need fork for this test",
         unless $Config{d_fork};
 }
 
-plan tests => 6;
+plan tests => 8;
 
 my $skips = $ENV{PERL_STORABLE_SKIP_ID_TEST} || '';
 
@@ -58,6 +58,17 @@ freeze_thaw_test
    thaw => \&check_hook_data,
    id => "hook4g",
    memory => 70,
+  );
+
+# not really an id test, but the infrastructure here makes tests
+# easier
+freeze_thaw_test
+  (
+   name => "network store large PV",
+   freeze => \&make_net_large_pv,
+   thaw => \&check_net_large_pv,
+   id => "netlargepv",
+   memory => 8,
   );
 
 sub freeze_thaw_test {
@@ -208,6 +219,26 @@ sub check_hook_data {
       or die "data isn't a ref";
     $y->data->{name} eq "two"
       or die "data name not 'one'";
+    print "OK";
+}
+
+sub make_net_large_pv {
+    my ($fh) = @_;
+    my $x = "x"; # avoid constant folding making a 4G scalar
+    my $g4 = 2*0x80000000;
+    my $y = $x x ($g4 + 5);
+    nstore_fd(\$y, $fh);
+}
+
+sub check_net_large_pv {
+    my ($fh) = @_;
+    my $x = retrieve_fd($fh);
+    my $g4 = 2*0x80000000;
+    ref $x && ref($x) eq "SCALAR"
+      or die "Not a scalar ref ", ref $x;
+
+    length($$x) == $g4+5
+      or die "Incorect length";
     print "OK";
 }
 
