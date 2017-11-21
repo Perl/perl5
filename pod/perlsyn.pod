@@ -211,18 +211,14 @@ it.  Future versions of perl might do something different from the
 version of perl you try it out on.  Here be dragons.
 X<my>
 
-The C<when> modifier is an experimental feature that first appeared in Perl
-5.14.  To use it, you should include a C<use v5.14> declaration.
-(Technically, it requires only the C<switch> feature, but that aspect of it
-was not available before 5.14.)  Operative only from within a C<foreach>
-loop or a C<given> block, it executes the statement only if the smartmatch
-C<< $_ ~~ I<EXPR> >> is true.  If the statement executes, it is followed by
-a C<next> from inside a C<foreach> and C<break> from inside a C<given>.
-
-Under the current implementation, the C<foreach> loop can be
-anywhere within the C<when> modifier's dynamic scope, but must be
-within the C<given> block's lexical scope.  This restriction may
-be relaxed in a future release.  See L</"Switch Statements"> below.
+The C<when> modifier is an experimental feature that first appeared in
+Perl 5.12, but behaved quite differently from its present form prior
+to Perl 5.28.  To use it, you should include a C<use feature 'switch'>
+declaration, or a declaration that implies it.  It behaves like the full
+C<when> statement with block, described in L</"Switch Statements"> below.
+It executes the statement only if the I<EXPR> is true.  If the statement
+executes, control then implicitly jumps to the end of the dynamically
+enclosing C<foreach> or C<given> block.
 
 =head2 Compound Statements
 X<statement, compound> X<block> X<bracket, curly> X<curly bracket> X<brace>
@@ -250,6 +246,9 @@ The following compound statements may be used to control flow:
 
     given (EXPR) BLOCK
 
+    when (EXPR) BLOCK
+    default BLOCK
+
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
 
@@ -269,8 +268,9 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
-The experimental C<given> statement is I<not automatically enabled>; see
-L</"Switch Statements"> below for how to do so, and the attendant caveats.
+The experimental C<given>, C<when>, and C<default> statements are I<not
+automatically enabled>; see L</"Switch Statements"> below for how to do
+so, and the attendant caveats.
 
 Unlike in C and Pascal, in Perl these are all defined in terms of BLOCKs,
 not statements.  This means that the curly brackets are I<required>--no
@@ -603,99 +603,90 @@ and a switch:
 
 Such constructs are quite frequently used, both because older versions of
 Perl had no official C<switch> statement, and also because the new version
-described immediately below remains experimental and can sometimes be confusing.
+described immediately below remains experimental.
 
 =head2 Switch Statements
 
 X<switch> X<case> X<given> X<when> X<default>
 
-Starting from Perl 5.10.1 (well, 5.10.0, but it didn't work
-right), you can say
+C<given>, C<when>, and related keywords make up an experimental feature
+that first appeared in Perl 5.10, but behaved quite differently from
+its present form prior to Perl 5.28.  To use it, you should declare
 
     use feature "switch";
 
-to enable an experimental switch feature.  This is loosely based on an
-old version of a Perl 6 proposal, but it no longer resembles the Perl 6
-construct.   You also get the switch feature whenever you declare that your
+You also get the switch feature whenever you declare that your
 code prefers to run under a version of Perl that is 5.10 or later.  For
 example:
 
     use v5.14;
 
-The "switch" feature is considered highly
-experimental; it is subject to change with little notice.
-Under the "switch" feature, Perl gains the experimental keywords
-C<given>, C<when>, C<default>, C<continue>, and C<break>.
-Starting from Perl 5.16, one can prefix the switch
-keywords with C<CORE::> to access the feature without a C<use feature>
-statement.  The keywords C<given> and
-C<when> are analogous to C<switch> and
-C<case> in other languages -- though C<continue> is not -- so the code
-in the previous section could be rewritten as
+Under the "switch" feature, Perl gains the experimental keywords C<given>,
+C<when>, C<default>, and C<break>.  Starting from Perl 5.16, one can
+prefix the switch keywords with C<CORE::> to access the feature without
+a C<use feature> statement.
 
-    use v5.10.1;
-    for ($var) {
-        when (/^abc/) { $abc = 1 }
-        when (/^def/) { $def = 1 }
-        when (/^xyz/) { $xyz = 1 }
-        default       { $nothing = 1 }
-    }
+The "switch" feature is considered highly experimental; it is subject
+to change with little notice.  Uses of the C<given> and C<when> keywords
+will by default warn about their experimental status.  Due to historical
+links between the two features, these warnings are in the same category
+as warnings about the C<~~> (smartmatch) operator being experimental.
 
-The C<foreach> is the non-experimental way to set a topicalizer.
-If you wish to use the highly experimental C<given>, that could be
-written like this:
+The keywords C<given> and C<when> are analogous to C<switch> and C<case>
+in C.  They're meant to be used together, but can actually be used
+independently and mixed with other kinds of compound statement.
 
-    use v5.10.1;
-    given ($var) {
-        when (/^abc/) { $abc = 1 }
-        when (/^def/) { $def = 1 }
-        when (/^xyz/) { $xyz = 1 }
-        default       { $nothing = 1 }
-    }
+C<given> evaluates its argument in scalar context, and executes its block
+with the C<$_> variable locally aliased to the result of evaluating the
+argument expression.  It is much like a C<foreach> loop that always has
+exactly one item to iterate over.  Either a C<given> or a C<foreach>
+construct serves as a I<topicalizer>: C<when> and C<default> can only
+be used in the dynamic scope of a topicalizer.
 
-As of 5.14, that can also be written this way:
-
-    use v5.14;
-    for ($var) {
-        $abc = 1 when /^abc/;
-        $def = 1 when /^def/;
-        $xyz = 1 when /^xyz/;
-        default { $nothing = 1 }
-    }
-
-Or if you don't care to play it safe, like this:
-
-    use v5.14;
-    given ($var) {
-        $abc = 1 when /^abc/;
-        $def = 1 when /^def/;
-        $xyz = 1 when /^xyz/;
-        default { $nothing = 1 }
-    }
-
-The arguments to C<given> and C<when> are in scalar context.
-C<given> aliases the C<$_> variable to the result of evaluating its
-topic expression.
 C<when> evaluates its argument as a truth value.  If the argument
 was false then it does not execute its block, and proceeds to the
 following statement.  If the argument was true, it executes the block,
-then implicitly jumps to the end of the topicalizer.
+then implicitly jumps to the end of the closest dynamically enclosing
+topicalizer.  (In the case of a C<foreach> topicalizer, this jump
+behaves as a C<next>, moving on to the next iteration, not a C<last>,
+which would exit the loop.)
 
-On versions of Perl preceding Perl 5.28, C<given> and C<when> behave
-somewhat differently from their present behaviour.
-If your code needs to run on older versions,
-avoid C<given> and C<when>.
+C<default> always executes its block and then implicitly jumps to the
+end of the closest dynamically enclosing topicalizer.  It is precisely
+equivalent to C<when(1)>.
 
-=head3 Breaking out
+Putting this together, the code in the previous section could be
+rewritten as
 
-You can use the C<break> keyword to break out of the enclosing
-C<given> block.  Every C<when> block is implicitly ended with
-a C<break>.
+    use v5.10.1;
+    given ($var) {
+        when (/^abc/) { $abc = 1 }
+        when (/^def/) { $def = 1 }
+        when (/^xyz/) { $xyz = 1 }
+        default       { $nothing = 1 }
+    }
 
-=head3 Fall-through
+Or if you prefer the modifier form of C<when>, it can be written with
+less punctuation as
 
-You can use the C<continue> keyword to fall through from one
-case to the next immediate C<when> or C<default>:
+    use v5.14;
+    given ($var) {
+        $abc = 1 when /^abc/;
+        $def = 1 when /^def/;
+        $xyz = 1 when /^xyz/;
+        default { $nothing = 1 }
+    }
+
+You can use the C<break> keyword to break out of the dynamically enclosing
+topicalizer, if it's a C<given> block.  This resembles the jump to the end
+of the topicalizer that implicitly happens at the end of every C<when>
+or C<default> block, except that the explicit C<break> can only break
+out of a C<given> topicalizer, not a C<foreach>.
+
+You can use the C<continue> keyword to exit a C<when> or C<default>
+block, proceeding to the following statement.  This is most commonly
+done last thing inside the block, to override the implicit jump to the
+end of the topicalizer.  For example
 
     given($foo) {
         when (/x/) { say '$foo contains an x'; continue }
@@ -703,10 +694,9 @@ case to the next immediate C<when> or C<default>:
         default    { say '$foo does not contain a y'    }
     }
 
-=head3 Return value
-
-When a C<given> statement is also a valid expression (for example,
-when it's the last statement of a block), it evaluates to:
+When a C<given> statement is executed in a position where it will provide
+a value, for example when it's the last statement of a subroutine and
+so providing the subroutine's return value, it evaluates to:
 
 =over 4
 
@@ -728,51 +718,12 @@ condition is true.
 
 In both last cases, the last expression is evaluated in the context that
 was applied to the C<given> block.
-
 Note that, unlike C<if> and C<unless>, failed C<when> statements always
 evaluate to an empty list.
 
-    my $price = do {
-        given ($item) {
-            when (["pear", "apple"]) { 1 }
-            break when "vote";      # My vote cannot be bought
-            1e10  when /Mona Lisa/;
-            "unknown";
-        }
-    };
-
-Currently, C<given> blocks can't always
-be used as proper expressions.  This
-may be addressed in a future version of Perl.
-
-=head3 Switching in a loop
-
-Instead of using C<given()>, you can use a C<foreach()> loop.
-For example, here's one way to count how many times a particular
-string occurs in an array:
-
-    use v5.10.1;
-    my $count = 0;
-    for (@array) {
-        when ("foo") { ++$count }
-    }
-    print "\@array contains $count copies of 'foo'\n";
-
-Or in a more recent version:
-
-    use v5.14;
-    my $count = 0;
-    for (@array) {
-        ++$count when "foo";
-    }
-    print "\@array contains $count copies of 'foo'\n";
-
-At the end of all C<when> blocks, there is an implicit C<next>.
-You can override that with an explicit C<last> if you're
-interested in only the first match alone.
-
-This doesn't work if you explicitly specify a loop variable, as
-in C<for $item (@array)>.  You have to use the default variable C<$_>.
+On versions of Perl preceding Perl 5.28, C<given> and C<when> behave
+quite differently from their present behaviour.  If your code needs to
+run on older versions, avoid C<given> and C<when>.
 
 =head2 Goto
 X<goto>

@@ -912,7 +912,9 @@ See L<perlmod/"Perl Modules">.
 
 =for Pod::Functions +switch break out of a C<given> block
 
-Break out of a C<given> block.
+Break out of a C<given> block.  Will signal an error if there is a
+closer C<foreach> block.  The search is for the closest dynamically
+enclosing topicalizer.
 
 L<C<break>|/break> is available only if the
 L<C<"switch"> feature|feature/The 'switch' feature> is enabled or if it
@@ -1338,9 +1340,10 @@ using an empty one, logically enough, so L<C<next>|/next LABEL> goes
 directly back to check the condition at the top of the loop.
 
 When there is no BLOCK, L<C<continue>|/continue BLOCK> is a function
-that falls through the current C<when> or C<default> block instead of
-iterating a dynamically enclosing C<foreach> or exiting a lexically
-enclosing C<given>.  In Perl 5.14 and earlier, this form of
+that exits the current C<when> or C<default> block, avoiding the jump
+to the end of the enclosing topicalizer that implicitly happens when
+execution reaches the end of such a block.
+In Perl 5.14 and earlier, this form of
 L<C<continue>|/continue BLOCK> was only available when the
 L<C<"switch"> feature|feature/The 'switch' feature> was enabled.  See
 L<feature> and L<perlsyn/"Switch Statements"> for more information.
