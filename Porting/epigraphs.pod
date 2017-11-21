@@ -19,6 +19,8 @@ Consult your favorite dictionary for details.
 
 =head2 v5.27.6 - Ogden Nash, "Behold the Duck"
 
+L<Announced on 2017-11-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2017/11/msg247489.html>
+
   Behold the duck,
   it does not cluck;
   a cluck it lacks,
