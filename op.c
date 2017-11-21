@@ -8952,11 +8952,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
     PERL_UNUSED_ARG(defsv_off);
 
     assert(!defsv_off);
-    return newGIVWHENOP(
-    	ref_array_or_hash(cond),
-    	block,
-	OP_ENTERGIVEN, OP_LEAVEGIVEN,
-	0);
+    return newGIVWHENOP(cond, block, OP_ENTERGIVEN, OP_LEAVEGIVEN, 0);
 }
 
 /*

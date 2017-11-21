@@ -672,7 +672,8 @@ Or if you don't care to play it safe, like this:
     }
 
 The arguments to C<given> and C<when> are in scalar context,
-and C<given> assigns the C<$_> variable its topic value.
+and C<given> aliases the C<$_> variable to the result of evaluating its
+topic expression.
 
 Exactly what the I<EXPR> argument to C<when> does is hard to describe
 precisely, but in general, it tries to guess what you want done.  Sometimes
@@ -909,7 +910,7 @@ As previously mentioned, the "switch" feature is considered highly
 experimental; it is subject to change with little notice.  In particular,
 C<when> has tricky behaviours that are expected to change to become less
 tricky in the future.  Do not rely upon its current (mis)implementation.
-Before Perl 5.18, C<given> also had tricky behaviours that you should still
+Before Perl 5.28, C<given> also had tricky behaviours that you should still
 beware of if your code must run on older versions of Perl.
 
 Here is a longer example of C<given>:
@@ -949,6 +950,10 @@ it was only lexically scoped, not dynamically scoped, you could not do the
 things with it that you are used to in a C<foreach> loop.  In particular,
 it did not work for arbitrary function calls if those functions might try
 to access $_.  Best stick to C<foreach> for that.
+
+Before Perl 5.28, if the I<EXPR> in C<given(EXPR)> was an array or hash
+reference then the topic would be a reference to that array or hash,
+rather than the result of evaluating the array or hash in scalar context.
 
 Most of the power comes from the implicit smartmatching that can
 sometimes apply.  Most of the time, C<when(EXPR)> is treated as an
