@@ -8809,16 +8809,13 @@ S_ref_array_or_hash(pTHX_ OP *cond)
  */
 
 STATIC OP *
-S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
-		   I32 enter_opcode, I32 leave_opcode,
-		   PADOFFSET entertarg)
+S_newGIVWHENOP(pTHX_ OP *cond, OP *block, I32 enter_opcode, I32 leave_opcode)
 {
     dVAR;
     LOGOP *enterop;
     OP *o;
 
     PERL_ARGS_ASSERT_NEWGIVWHENOP;
-    PERL_UNUSED_ARG(entertarg); /* used to indicate targ of lexical $_ */
 
     enterop = alloc_LOGOP(enter_opcode, block, NULL);
     enterop->op_targ = 0;
@@ -8870,7 +8867,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
     PERL_UNUSED_ARG(defsv_off);
 
     assert(!defsv_off);
-    return newGIVWHENOP(cond, block, OP_ENTERGIVEN, OP_LEAVEGIVEN, 0);
+    return newGIVWHENOP(cond, block, OP_ENTERGIVEN, OP_LEAVEGIVEN);
 }
 
 /*
@@ -8889,7 +8886,7 @@ OP *
 Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 {
     PERL_ARGS_ASSERT_NEWWHENOP;
-    return newGIVWHENOP(cond, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
+    return newGIVWHENOP(cond, block, OP_ENTERWHEN, OP_LEAVEWHEN);
 }
 
 /* must not conflict with SVf_UTF8 */
