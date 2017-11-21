@@ -49,6 +49,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 Assignment to C<$[> will be fatal in Perl 5.30
+
+Assigning a non-zero value to L<C<$[>|perlvar/$[> has been deprecated
+since Perl 5.12, but was never given a deadline for removal.  This has
+now been scheduled for Perl 5.30.
+
 =head2 Module removals
 
 XXX Remove this section if not applicable.

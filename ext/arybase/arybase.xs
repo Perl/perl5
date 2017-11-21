@@ -159,6 +159,7 @@ STATIC void ab_process_assignment(pTHX_ OP *left, OP *right) {
   if (base) {
     Perl_ck_warner_d(aTHX_
      packWARN(WARN_DEPRECATED), "Use of assignment to $[ is deprecated"
+                                ", and will be fatal in Perl 5.30"
     );
   }
  }

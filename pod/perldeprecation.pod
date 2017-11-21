@@ -81,6 +81,15 @@ error in Perl 5.30.
 To specify how numbers are formatted when printed, one is adviced
 to use C<< printf >> or C<< sprintf >> instead.
 
+=head3 Assigning non-zero to C<< $[ >> will be fatal
+
+This variable (and the corresponding C<array_base> feature and
+L<arybase> module) allows changing the base for array and string
+indexing operations.
+
+Setting this to a non-zero value has been deprecated since Perl 5.12 and
+will become fatal in Perl 5.30.
+
 =head3 C<< File::Glob::glob() >> will disappear
 
 C<< File::Glob >> has a function called C<< glob >>, which just calls
