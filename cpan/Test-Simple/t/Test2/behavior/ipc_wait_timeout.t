@@ -3,9 +3,12 @@ use warnings;
 
 # The things done in this test can trigger a buggy return value on some
 # platforms. This prevents that. The harness should catch actual failures. If
-# no harness is active then we will NOT sanitize the exit value, false fails ar
-# ebetter than false passes.
+# no harness is active then we will NOT sanitize the exit value, false fails
+# are better than false passes.
 END { $? = 0 if $ENV{HARNESS_ACTIVE} }
+
+# Some platforms throw a sigpipe in this test, we can ignore it.
+BEGIN { $SIG{PIPE} = 'IGNORE' }
 
 BEGIN { local ($@, $?, $!); eval { require threads } }
 use Test2::Tools::Tiny;
@@ -15,7 +18,7 @@ use Test2::API qw/test2_ipc_set_timeout test2_ipc_get_timeout/;
 
 my $plan = 2;
 $plan += 2 if CAN_REALLY_FORK;
-$plan += 2 if CAN_THREAD;
+$plan += 2 if CAN_THREAD && threads->can('is_joinable');
 plan $plan;
 
 is(test2_ipc_get_timeout(), 30, "got default timeout");
