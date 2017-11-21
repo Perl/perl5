@@ -692,7 +692,7 @@ Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.27.6:
 
-Aaron Crane, Andrew Fresh, Ask Bjöern Hansen, Chris 'BinGOs' Williams, Craig
+Aaron Crane, Andrew Fresh, Ask Bjørn Hansen, Chris 'BinGOs' Williams, Craig
 A. Berry, Dagfinn Ilmari Mannsåker, Daniel Dragan, David Cantrell, David
 Mitchell, Dominic Hargreaves, Father Chrysostomos, Harald Jörg, H.Merijn
 Brand, James E Keenan, Jarkko Hietaniemi, J. Nick Koston, John Lightsey, Karen
