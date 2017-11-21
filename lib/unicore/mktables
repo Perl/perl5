@@ -8012,13 +8012,23 @@ sub trace { return main::trace(@_); }
         # complement's if it has one.
 
         my $self = shift;
-        my $complement;
-        if (($complement = $self->complement) != 0) {
-            return ~ $complement->_range_list;
+        my $complement = $self->complement;
+
+        # In order to avoid re-complementing on each access, only do the
+        # complement the first time, and store the result in this table's
+        # range list to use henceforth.  However, this wouldn't work if the
+        # controlling (complement) table changed after we do this, so lock it.
+        # Currently, the value of the complement isn't needed until after it
+        # is fully constructed, so this works.  If this were to change, the
+        # each_range iteration functionality would no longer work on this
+        # complement.
+        if ($complement != 0 && $self->SUPER::_range_list->count == 0) {
+            $self->_set_range_list($self->SUPER::_range_list
+                                + ~ $complement->_range_list);
+            $complement->lock;
         }
-        else {
-            return $self->SUPER::_range_list;
-        }
+
+        return $self->SUPER::_range_list;
     }
 
     sub add_alias {
