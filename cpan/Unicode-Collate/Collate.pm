@@ -17,17 +17,16 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
-require DynaLoader;
-our @ISA = qw(DynaLoader);
-bootstrap Unicode::Collate $VERSION;
+use XSLoader ();
+XSLoader::load('Unicode::Collate', $VERSION);
 ### end XS only ###
 
 my @Path = qw(Unicode Collate);
-my $KeyFile = "allkeys.txt";
+my $KeyFile = 'allkeys.txt';
 
 # Perl's boolean
 use constant TRUE  => 1;
