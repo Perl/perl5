@@ -1,4 +1,4 @@
-version 1.44
+version 1.45
 
   * Optimize format_arg when arguments contain many references
 
