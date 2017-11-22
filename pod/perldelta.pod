@@ -45,6 +45,33 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Smartmatch and switch simplification
+
+The experimental smart match operator (C<~~>) and switch
+(C<given>/C<when>) constructs have been drastically simplified, in a
+way that will require most uses of them to be updated.
+
+The smart match operator no longer has its large table of matching rules.
+Instead there is just one rule: the right-hand operand must overload
+the operator.  Overloaded objects now bear the entire responsibility
+for determining what kind of match to perform.  The operator also no
+longer implicitly enreferences certain kinds of operand (such as arrays);
+instead the operands get regular scalar context.
+
+The C<when> construct no longer has its complicated rules about how to
+treat its argument.  It now always uses the argument as a truth value;
+it never implicitly smart matches.  Like the smart match operator,
+it also no longer implicitly enreferences certain kinds of argument,
+instead supplying regular scalar context.
+
+The C<given> construct also no longer implicitly enreferences certain
+kinds of arguments, instead supplying regular scalar context.  In this
+case, the implicit enreferencement was undocumented anyway.
+
+It is known that these changes will break some users of L<autodie>,
+the documentation of which has long recommended some uses of these
+experimental features that are not portable across these changes.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
