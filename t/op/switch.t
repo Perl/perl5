@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 170;
+plan tests => 166;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -825,13 +825,6 @@ GIVEN5:
     }
     is($flag, 1, "goto inside given and when to the given stmt");
 }
-
-# test with unreified @_ in smart match [perl #71078]
-sub unreified_check { ok([@_] ~~ \@_) } # should always match
-unreified_check(1,2,"lala");
-unreified_check(1,2,undef);
-unreified_check(undef);
-unreified_check(undef,"");
 
 # Test do { given } as a rvalue
 

@@ -726,6 +726,13 @@ which makes no sense.  Maybe you meant '%s', or just stringifying it?
 (F) C<caller> tried to set C<@DB::args>, but found it tied.  Tying C<@DB::args>
 is not supported.  (Before this error was added, it used to crash.)
 
+=item Cannot smart match without a matcher object
+
+(F) You tried to perform a smart match (C<~~>), but the right hand operand
+was not an object overloading the smart match operation.  Such a matcher
+object is required, in order to determine what kind of matching operation
+to apply to the left hand operand.
+
 =item Cannot tie unreifiable array
 
 (P) You somehow managed to call C<tie> on an array that does not
@@ -5665,20 +5672,12 @@ requested.
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
 
-=item Smart matching a non-overloaded object breaks encapsulation
-
-(F) You should not use the C<~~> operator on an object that does not
-overload it: Perl refuses to use the object's underlying structure
-for the smart match.
-
 =item Smartmatch is experimental
 
 (S experimental::smartmatch) This warning is emitted if you
 use the smartmatch (C<~~>) operator.  This is currently an experimental
 feature, and its details are subject to change in future releases of
-Perl.  Particularly, its current behavior is noticed for being
-unnecessarily complex and unintuitive, and is very likely to be
-overhauled.
+Perl.
 
 =item Sorry, hash keys must be smaller than 2**31 bytes
 

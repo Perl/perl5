@@ -156,8 +156,15 @@ use File::Glob qw(:case);
                 t/system.t
                 )
         ],
-        # CPAN RT 105344
-        'CUSTOMIZED'   => [ qw[ t/mkdir.t ] ],
+        'CUSTOMIZED'   => [
+	    # CPAN RT 105344
+	    't/mkdir.t',
+	    # smartmatch changes
+	    'lib/autodie/exception.pm',
+	    'lib/autodie/hints.pm',
+	    't/exceptions.t',
+	    't/lib/Hints_pod_examples.pm',
+        ],
     },
 
     'AutoLoader' => {
@@ -409,6 +416,10 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'LEONT/experimental-0.017.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
+        'CUSTOMIZED'   => [
+	    # smartmatch changes
+	    't/basic.t',
+        ],
     },
 
     'Exporter' => {

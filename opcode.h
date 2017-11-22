@@ -1488,7 +1488,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_bitop,		/* complement */
 	Perl_ck_bitop,		/* ncomplement */
 	Perl_ck_bitop,		/* scomplement */
-	Perl_ck_smartmatch,	/* smartmatch */
+	Perl_ck_null,		/* smartmatch */
 	Perl_ck_fun,		/* atan2 */
 	Perl_ck_fun,		/* sin */
 	Perl_ck_fun,		/* cos */
@@ -1897,7 +1897,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000110e,	/* complement */
 	0x0000111e,	/* ncomplement */
 	0x0000111e,	/* scomplement */
-	0x00000204,	/* smartmatch */
+	0x00011206,	/* smartmatch */
 	0x0001141e,	/* atan2 */
 	0x00009b9e,	/* sin */
 	0x00009b9e,	/* cos */

@@ -35,8 +35,8 @@ END
 if ($] >= 5.010001) {
 	is (eval <<'END', 1, 'smartmatch compiles') or diag $@;
 	use experimental 'smartmatch';
-	sub bar { 1 };
-	is(1 ~~ \&bar, 1, "is 1");
+	{ package Bar; use overload "~~" => sub { 1 }; }
+	is(1 ~~ bless({}, "Bar"), 1, "is 1");
 	1;
 END
 }
