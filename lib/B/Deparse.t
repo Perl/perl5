@@ -2993,3 +2993,12 @@ $x = "\$$a";
 # CONTEXT use feature "state";
 state @a = (1, 2, 3);
 state %h = ('a', 1, 'b', 2);
+####
+# state var with attribute
+# CONTEXT use feature "state";
+state $x :shared;
+state $y :shared = 1;
+state @a :shared;
+state @b :shared = (1, 2);
+state %h :shared;
+state %i :shared = ('a', 1, 'b', 2);

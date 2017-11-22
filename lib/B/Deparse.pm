@@ -3502,8 +3502,8 @@ BEGIN {
 }
 
 
-# Look for a my attribute declaration in a list or ex-list. Returns undef
-# if not found, 'my($x, @a) :Foo(bar)' etc otherwise.
+# Look for a my/state attribute declaration in a list or ex-list.
+# Returns undef if not found, 'my($x, @a) :Foo(bar)' etc otherwise.
 #
 # There are three basic tree structs that are expected:
 #
@@ -3548,7 +3548,7 @@ BEGIN {
 #           <$> const[PV "foo"] sM ->a
 #           <.> method_named[PV "import"] ->b
 
-sub maybe_my_attr {
+sub maybe_var_attr {
     my ($self, $op, $cx) = @_;
 
     my $kid = $op->first->sibling; # skip pushmark
@@ -3561,13 +3561,13 @@ sub maybe_my_attr {
     # @padops and @entersubops. Return if anything else seen.
     # Also determine what class (if any) all the pad vars belong to
     my $class;
+    my $decl; # 'my' or 'state'
     my (@padops, @entersubops);
     for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
 	my $lopname = $lop->name;
 	my $loppriv = $lop->private;
         if ($lopname =~ /^pad[sah]v$/) {
             return unless $loppriv & OPpLVAL_INTRO;
-            return if     $loppriv & OPpPAD_STATE;
 
             my $padname = $self->padname_sv($lop->targ);
             my $thisclass = ($padname->FLAGS & SVpad_TYPED)
@@ -3576,6 +3576,14 @@ sub maybe_my_attr {
             # all pad vars must be in the same class
             $class //= $thisclass;
             return unless $thisclass eq $class;
+
+            # all pad vars must be the same sort of declaration
+            # (all my, all state, etc)
+            my $this = ($loppriv & OPpPAD_STATE) ? 'state' : 'my';
+            if (defined $decl) {
+                return unless $this eq $decl;
+            }
+            $decl = $this;
 
             push @padops, $lop;
         }
@@ -3641,7 +3649,7 @@ sub maybe_my_attr {
         return if $$kid;
     }
 
-    my $res = 'my';
+    my $res = $decl;
     $res .= " $class " if $class ne 'main';
     $res .=
             (@varnames > 1)
@@ -3658,7 +3666,7 @@ sub pp_list {
 
     {
         # might be my ($s,@a,%h) :Foo(bar);
-        my $my_attr = maybe_my_attr($self, $op, $cx);
+        my $my_attr = maybe_var_attr($self, $op, $cx);
         return $my_attr if defined $my_attr;
     }
 
@@ -3962,7 +3970,7 @@ sub pp_null {
 
     # might be 'my $s :Foo(bar);'
     if ($op->targ == OP_LIST) {
-        my $my_attr = maybe_my_attr($self, $op, $cx);
+        my $my_attr = maybe_var_attr($self, $op, $cx);
         return $my_attr if defined $my_attr;
     }
 
