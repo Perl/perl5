@@ -2145,12 +2145,18 @@ sub pp_nextstate {
 
 sub declare_warnings {
     my ($self, $from, $to) = @_;
-    if (($to & WARN_MASK) eq (warnings::bits("all") & WARN_MASK)) {
-	return $self->keyword("use") . " warnings;\n";
+    $from //= '';
+    my $all = (warnings::bits("all") & WARN_MASK);
+    unless ((($from & WARN_MASK) & ~$all) =~ /[^\0]/) {
+        # no FATAL bits need turning off
+        if (   ($to & WARN_MASK) eq $all) {
+            return $self->keyword("use") . " warnings;\n";
+        }
+        elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
+            return $self->keyword("no") . " warnings;\n";
+        }
     }
-    elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
-	return $self->keyword("no") . " warnings;\n";
-    }
+
     return "BEGIN {\${^WARNING_BITS} = \""
            . join("", map { sprintf("\\x%02x", ord $_) } split "", $to)
            . "\"}\n\cK";
