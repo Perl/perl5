@@ -51,7 +51,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.45';
+$VERSION = '1.46';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -3001,6 +3001,7 @@ sub pp_i_ge { binop(@_, ">=", 15) }
 sub pp_i_le { binop(@_, "<=", 15) }
 sub pp_i_ncmp { maybe_targmy(@_, \&binop, "<=>", 14) }
 
+sub pp_smartmatch { binop(@_, "~~", 14) }
 sub pp_seq { binop(@_, "eq", 14) }
 sub pp_sne { binop(@_, "ne", 14) }
 sub pp_slt { binop(@_, "lt", 15) }
@@ -3011,16 +3012,6 @@ sub pp_scmp { maybe_targmy(@_, \&binop, "cmp", 14) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
 sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
-
-sub pp_smartmatch {
-    my ($self, $op, $cx) = @_;
-    if (($op->flags & OPf_SPECIAL) && $self->{expand} < 2) {
-	return $self->deparse($op->last, $cx);
-    }
-    else {
-	binop(@_, "~~", 14);
-    }
-}
 
 # '.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
