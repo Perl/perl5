@@ -323,15 +323,9 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 
     s = (U8*)SvPV_nomg(sv, len);
     if (!SvUTF8(sv)) {
-	const U8 *t = s;
-	const U8 * const e = s + len;
-	while (t < e) {
-	    const U8 ch = *t++;
-	    hibit = !NATIVE_BYTE_IS_INVARIANT(ch);
-	    if (hibit) {
-		s = bytes_to_utf8(s, &len);
-		break;
-	    }
+        hibit = ! is_utf8_invariant_string(s, len);
+        if (hibit) {
+            s = bytes_to_utf8(s, &len);
 	}
     }
     send = s + len;
@@ -423,15 +417,9 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 
     s = (const U8*)SvPV_nomg_const(sv, len);
     if (!SvUTF8(sv)) {
-	const U8 *t = s;
-	const U8 * const e = s + len;
-	while (t < e) {
-	    const U8 ch = *t++;
-	    hibit = !NATIVE_BYTE_IS_INVARIANT(ch);
-	    if (hibit) {
-		start = s = bytes_to_utf8(s, &len);
-		break;
-	    }
+        hibit = ! is_utf8_invariant_string(s, len);
+        if (hibit) {
+            start = s = bytes_to_utf8(s, &len);
 	}
     }
     send = s + len;
@@ -477,15 +465,9 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX_UTF8;
 
     if (!SvUTF8(sv)) {
-	const U8 *t = s;
-	const U8 * const e = s + len;
-	while (t < e) {
-	    const U8 ch = *t++;
-	    hibit = !NATIVE_BYTE_IS_INVARIANT(ch);
-	    if (hibit) {
-		s = bytes_to_utf8(s, &len);
-		break;
-	    }
+        hibit = ! is_utf8_invariant_string(s, len);
+        if (hibit) {
+            s = bytes_to_utf8(s, &len);
 	}
     }
     send = s + len;
