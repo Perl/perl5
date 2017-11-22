@@ -747,8 +747,7 @@ EOT
 	# Deparse? Should it have passed or failed?
 	if ($type eq 'deparse' && $test =~ $deparse_failures) {
 	    if (!$failure) {
-		# Wait, it didn't fail? Great news! Tell someone!
-		$failure = "FAILED--all tests passed but test should have failed";
+		# Wait, it didn't fail? Great news!
 		push @unexpected_pass, $test;
 	    } else {
 		# Bah, still failing. Mask it.
