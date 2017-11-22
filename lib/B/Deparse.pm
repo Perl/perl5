@@ -4405,8 +4405,12 @@ sub do_multiconcat {
         # "foo=$foo bar=$bar "
         my $not_first;
         while (@consts) {
-            $rhs = dq_disambiguate($rhs, $self->dq(shift(@kids), 18))
-                if $not_first;
+            if ($not_first) {
+                my $s = $self->dq(shift(@kids), 18);
+                # don't deparse "a${$}b" as "a$$b"
+                $s = '${$}' if $s eq '$$';
+                $rhs = dq_disambiguate($rhs, $s);
+            }
             $not_first = 1;
             my $c = shift @consts;
             if (defined $c) {
