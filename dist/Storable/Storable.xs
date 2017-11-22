@@ -1371,7 +1371,7 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname);
 static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname);
 #ifdef HAS_U64
-static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int flagged, const char *cname);
+static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cname);
 static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags);
 #endif
 static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char hash_flags);
@@ -5762,6 +5762,7 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 #ifdef HAS_U64
     UV  len;
     SV *sv;
+    int hash_flags = 0;
 #endif
 
     TRACEME(("retrieve_lobject (#%d)", (int)cxt->tagnum));
@@ -5769,6 +5770,16 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     GETMARK(type);
     TRACEME(("object type %d", type));
 #ifdef HAS_U64
+
+    if (type == SX_FLAG_HASH) {
+	/* we write the flags immediately after the op.  I could have
+	   changed the writer, but this may allow someone to recover
+	   data they're already frozen, though such a very large hash
+	   seems unlikely.
+	*/
+	GETMARK(hash_flags);
+    }
+
     READ_U64(len);
     TRACEME(("wlen %" UVuf, len));
     switch (type) {
@@ -5796,7 +5807,7 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     /* <5.12 you could store larger hashes, but cannot iterate over them.
        So we reject them, it's a bug. */
     case SX_FLAG_HASH:
-        sv = get_lhash(aTHX_ cxt, len, 1, cname);
+        sv = get_lhash(aTHX_ cxt, len, hash_flags, cname);
         break;
     case SX_HASH:
         sv = get_lhash(aTHX_ cxt, len, 0, cname);
