@@ -2965,7 +2965,7 @@ sub binop {
     my $leftop = $left;
     $left = $self->deparse_binop_left($op, $left, $prec);
     $left = "($left)" if $flags & LIST_CONTEXT
-		     and    $left !~ /^(my|our|local|)[\@\(]/
+		     and    $left !~ /^(my|our|local|state|)\s*[\@%\(]/
 			 || do {
 				# Parenthesize if the left argument is a
 				# lone repeat op.
@@ -3739,6 +3739,10 @@ sub pp_list {
 	push @exprs, $expr;
     }
     if ($local) {
+        if (@exprs == 1 && ($local eq 'state' || $local eq 'CORE::state')) {
+            # 'state @a = ...' is legal, while 'state(@a) = ...' currently isn't
+            return "$local $exprs[0]";
+        }
 	return "$local(" . join(", ", @exprs) . ")";
     } else {
 	return $self->maybe_parens( join(", ", @exprs), $cx, 6);	

@@ -2988,3 +2988,8 @@ $b = $a . $a . $a;
 my($a, $x);
 $x = "${$}abc";
 $x = "\$$a";
+####
+# single state aggregate assignment
+# CONTEXT use feature "state";
+state @a = (1, 2, 3);
+state %h = ('a', 1, 'b', 2);
