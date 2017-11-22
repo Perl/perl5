@@ -34,7 +34,7 @@ package MatchAbc { use overload "~~" => sub { $_[1] eq "abc" }, fallback => 1; }
 my $matchabc = bless({}, "MatchAbc");
 my $regexpabc = qr/\Aabc\z/;
 
-plan tests => (2+@notov)*@notov + 4*(2+@notov) + 13;
+plan tests => (2+@notov)*@notov + 4*(2+@notov) + 15;
 
 foreach my $matcher (@notov) {
     foreach my $matchee ($matchabc, $regexpabc, @notov) {
@@ -102,5 +102,10 @@ my $matchyieldfive = bless({}, "MatchYieldFive");
 
 is +("abc" ~~ $matchyieldundef), !!0;
 is +("abc" ~~ $matchyieldfive), !!1;
+
+package MatchCheckSwap { use overload "~~" => sub { ::ok $_[2]; 1 }; }
+my $matchcheckswap = bless({}, "MatchCheckSwap");
+
+ok "abc" ~~ $matchcheckswap;
 
 1;
