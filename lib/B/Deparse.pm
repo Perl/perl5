@@ -656,7 +656,8 @@ sub stash_subs {
 	if ($seen ||= {})->{
 	    $INC{"overload.pm"} ? overload::StrVal($stash) : $stash
 	   }++;
-    my %stash = svref_2object($stash)->ARRAY;
+    my $stashobj = svref_2object($stash);
+    my %stash = $stashobj->ARRAY;
     while (my ($key, $val) = each %stash) {
 	my $flags = $val->FLAGS;
 	if ($flags & SVf_ROK) {
@@ -697,7 +698,20 @@ sub stash_subs {
 	} elsif (class($val) eq "GV") {
 	    if (class(my $cv = $val->CV) ne "SPECIAL") {
 		next if $self->{'subs_done'}{$$val}++;
-		next if $$val != ${$cv->GV};   # Ignore imposters
+
+                # Ignore imposters (aliases etc)
+                my $name = $cv->NAME_HEK;
+                if(defined $name) {
+                    # avoid using $cv->GV here because if the $val GV is
+                    # an alias, CvGV() could upgrade the real stash entry
+                    # from an RV to a GV
+                    next unless $name eq $key;
+                    next unless $$stashobj == ${$cv->STASH};
+                }
+                else {
+                   next if $$val != ${$cv->GV};
+                }
+
 		$self->todo($cv, 0);
 	    }
 	    if (class(my $cv = $val->FORM) ne "SPECIAL") {
