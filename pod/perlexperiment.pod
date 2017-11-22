@@ -16,17 +16,22 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
-=item Smart match (C<~~>)
+=item Smart match (C<~~>) and switch (given/when)
 
 Introduced in Perl 5.10.0
 
-Modified in Perl 5.10.1, 5.12.0
+Modified in Perl 5.10.1, 5.12.0, 5.28.0
 
 Using this feature triggers warnings in the category
 C<experimental::smartmatch>.
 
 The ticket for this feature is
 L<[perl #119317]|https://rt.perl.org/rt3/Ticket/Display.html?id=119317>.
+
+For historical reasons, the single experiment covers both the smart
+match operator (C<~~>) and the switch-related compound statements
+(given/when), which apart from the shared warning category are now
+unrelated in behaviour.
 
 =item Pluggable keywords
 
