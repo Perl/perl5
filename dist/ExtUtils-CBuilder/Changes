@@ -1,5 +1,18 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280230 - 2017-11-22
+
+  Fixed:
+
+  - Updated Changes
+  - Used OurPkgVersion instead of PkgVersion
+
+0.280229 - 2017-10-13
+
+  Fixed:
+
+  - Remove dependency to 'vars' package.
+
 0.280228 - 2017-07-20
 
   Fixed:

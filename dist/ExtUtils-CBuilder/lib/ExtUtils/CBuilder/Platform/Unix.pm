@@ -1,9 +1,10 @@
 package ExtUtils::CBuilder::Platform::Unix;
+
 use warnings;
 use strict;
 use ExtUtils::CBuilder::Base;
 
-our $VERSION = '0.280229';
+our $VERSION = '0.280230'; # VERSION
 our @ISA = qw(ExtUtils::CBuilder::Base);
 
 sub link_executable {
