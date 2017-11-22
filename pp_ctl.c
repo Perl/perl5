@@ -4645,7 +4645,7 @@ PP(pp_smartmatch)
     if (SvAMAGIC(right) &&
 		(result = amagic_call(left, right, smart_amg, AMGf_noleft))) {
 	SPAGAIN;
-	SETs(result);
+	SETs(boolSV(SvTRUE_NN(result)));
 	return NORMAL;
     }
     Perl_croak(aTHX_ "Cannot smart match without a matcher object");
