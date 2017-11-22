@@ -34,7 +34,7 @@ package MatchAbc { use overload "~~" => sub { $_[1] eq "abc" }, fallback => 1; }
 my $matchabc = bless({}, "MatchAbc");
 my $regexpabc = qr/\Aabc\z/;
 
-plan tests => (2+@notov)*@notov + 4*(2+@notov) + 7;
+plan tests => (2+@notov)*@notov + 4*(2+@notov) + 11;
 
 foreach my $matcher (@notov) {
     foreach my $matchee ($matchabc, $regexpabc, @notov) {
@@ -67,5 +67,32 @@ my %h = qw(a b c d);
 ok !(%h ~~ $matchref);
 my $res = eval { "abc" ~~ %$matchabc };
 like $@, qr/\ACannot smart match without a matcher object /;
+
+package MatchDie { use overload "~~" => sub { die "wibble" }; }
+my $matchdie = bless({}, "MatchDie");
+
+$res = eval { "abc" ~~ $matchdie };
+like $@, qr/\Awibble /;
+
+package MatchScalarContextCheck { 
+    use overload "~~" => sub {
+	die "array context" if wantarray;
+	die "void context" unless defined wantarray;
+	1;
+    };
+}
+my $matchscalarcontextcheck = bless({}, "MatchScalarContextCheck");
+package MatchVoidContextCheck { 
+    use overload "~~" => sub {
+	die "array context" if wantarray;
+	die "scalar context" if defined wantarray;
+	1;
+    };
+}
+my $matchvoidcontextcheck = bless({}, "MatchVoidContextCheck");
+
+ok scalar("abc" ~~ $matchscalarcontextcheck);
+ok ["abc" ~~ $matchscalarcontextcheck]->[0];
+ok do { no warnings "void"; "abc" ~~ $matchvoidcontextcheck; 1 };
 
 1;
