@@ -807,6 +807,17 @@ for (qw(index rindex)) {
     addbits($_, 6 => qw(OPpINDEX_BOOLNEG NEG));
 }
 
+
+addbits('concat',
+    # OPf_STACKED normally indicates .=; but it also gets set to optimise
+    # $a . $b . $c into ($a . $b) .= $c
+    # so that the first concat's PADTMP (which holds the result of $a.$b)
+    # can be reused. Set a flag in this case to help deparse and warn
+    # distinguish the cases.
+    6 => qw(OPpCONCAT_NESTED NESTED),
+);
+
+
 addbits('multiconcat',
   # 7       OPpLVAL_INTRO
     6 => qw(OPpMULTICONCAT_APPEND APPEND), # $x .= ....
