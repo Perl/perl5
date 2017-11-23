@@ -505,8 +505,9 @@ DispStream(s, message)
 voidpf my_zcalloc (voidpf opaque, unsigned items, unsigned size)
 {
     PERL_UNUSED_VAR(opaque);
-    return safecalloc(items, size);
-    /* return safemalloc(items* size); */
+    /* TODO - put back to calloc */
+    /* return safecalloc(items, size); */
+    return safemalloc(items* size);
 }
 
 
@@ -822,7 +823,7 @@ Zip_crc32(buf, crc=crcInitial, offset=0)
         uLong    crc = NO_INIT
         STRLEN   len = NO_INIT
         Bytef *  buf = NO_INIT
-        int      offset       
+        STRLEN   offset       
 	SV *	 sv = ST(0) ;
 	INIT:
     	/* If the buffer is a reference, dereference it */

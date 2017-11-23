@@ -477,6 +477,7 @@ int ZEXPORT inflateBack(
             }
             Tracev((stderr, "inflate:       codes ok\n"));
             state->mode = LEN;
+            /* FALLTHROUGH */
 
         case LEN:
             /* use inflate_fast() if we have enough input and output */
