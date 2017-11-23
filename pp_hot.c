@@ -814,8 +814,7 @@ PP(pp_multiconcat)
          * length on utf8 args (which was only needed to flag non-utf8
          * args in this loop */
         for (svpv_p = svpv_buf; svpv_p < svpv_end; svpv_p++) {
-            char *p;
-            SSize_t len, l, extra;
+            SSize_t len, extra;
 
             len = svpv_p->len;
             if (len <= 0) {
@@ -823,11 +822,8 @@ PP(pp_multiconcat)
                 continue;
             }
 
-            p = svpv_p->pv;
-            extra = 0;
-            l = len;
-            while (l--)
-                extra += !UTF8_IS_INVARIANT(*p++);
+            extra = variant_under_utf8_count((U8 *) svpv_p->pv,
+                                             (U8 *) svpv_p->pv + len);
             if (UNLIKELY(extra)) {
                 grow       += extra;
                               /* -ve len indicates special handling */
