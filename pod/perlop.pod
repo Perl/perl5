@@ -1528,7 +1528,7 @@ of C<"msixpluadn"> will be propagated appropriately.  The effect that the
 C</o> modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
-The last four modifiers listed above, added in Perl 5.14,
+The C</a>, C</d>, C</l>, and C</u> modifiers (added in Perl 5.14)
 control the character set rules, but C</a> is the only one you are likely
 to want to specify explicitly; the other three are selected
 automatically by various pragmas.
