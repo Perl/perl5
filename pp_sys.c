@@ -213,8 +213,8 @@ void endservent(void);
 #endif
 
 #if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESSX) && defined(ACC_SELF)
-    /* AIX */
-#   define PERL_EFF_ACCESS(p,f) (accessx((p), (f), ACC_SELF))
+    /* AIX's accessx() doesn't declare its argument const, unlike every other platform */
+#   define PERL_EFF_ACCESS(p,f) (accessx((char*)(p), (f), ACC_SELF))
 #endif
 
 
