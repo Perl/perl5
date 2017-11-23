@@ -2306,8 +2306,8 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
     }
 
   finish_and_return:
-        *d = '\0';
-        *lenp = d - converted_start;
+    *d = '\0';
+    *lenp = d - converted_start;
 
     /* Trim unused space */
     Renew(converted_start, *lenp + 1, U8);
