@@ -67,7 +67,7 @@ unless(GetOptions(\%options,
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
                   'module=s', 'with-module=s', 'cpan-config-dir=s',
-                  'no-module-tests',
+                  'test-module=s', 'no-module-tests',
                   'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -128,11 +128,21 @@ if (defined $target && $target =~ /\.t\z/) {
 }
 
 pod2usage(exitval => 255, verbose => 1)
-    unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'} || defined $options{module};
+    unless @ARGV || $match || $options{'test-build'}
+        || defined $options{'one-liner'} || defined $options{module}
+        || defined $options{'test-module'};
 pod2usage(exitval => 255, verbose => 1)
     if !$options{'one-liner'} && ($options{l} || $options{w});
 if ($options{'no-module-tests'} && $options{module}) {
     print STDERR "--module and --no-module-tests are exclusive.\n\n";
+    pod2usage(exitval => 255, verbose => 1)
+}
+if ($options{'no-module-tests'} && $options{'test-module'}) {
+    print STDERR "--test-module and --no-module-tests are exclusive.\n\n";
+    pod2usage(exitval => 255, verbose => 1)
+}
+if ($options{module} && $options{'test-module'}) {
+    print STDERR "--module and --test-module are exclusive.\n\n";
     pod2usage(exitval => 255, verbose => 1)
 }
 
@@ -612,6 +622,21 @@ For example:
 
   .../Porting/bisect.pl --with-module=Moose --no-module-tests \
        -e 'use Moose; ...'
+
+=item *
+
+--test-module
+
+This is like I<--module>, but just runs the module's tests, instead of
+installing it.
+
+WARNING: This is a somewhat experimental option, known to work on recent
+CPAN shell versions.  If you use this option and strange things happen,
+please report them.
+
+Usually, you can just use I<--module>, but if you are getting inconsistent
+installation failures and you just want to see when the tests started
+failing, you might find this option useful.
 
 =item *
 
@@ -1398,7 +1423,8 @@ push @ARGS, map {"-A$_"} @{$options{A}};
 my $prefix;
 
 # Testing a module? We need to install perl/cpan modules to a temp dir
-if ($options{module} || $options{'with-module'}) {
+if ($options{module} || $options{'with-module'} || $options{'test-module'})
+{
   $prefix = tempdir(CLEANUP => 1);
 
   push @ARGS, "-Dprefix=$prefix";
@@ -1489,11 +1515,13 @@ if ($target ne 'miniperl') {
 }
 
 # Testing a cpan module? See if it will install
-if ($options{module} || $options{'with-module'}) {
+my $just_testing;
+if (my $mod_opt = $options{module} || $options{'with-module'}
+               || ($just_testing++, $options{'test-module'})) {
   # First we need to install this perl somewhere
   system_or_die('./installperl');
 
-  my @m = split(',', $options{module} || $options{'with-module'});
+  my @m = split(',', $mod_opt);
 
   my $bdir = File::Temp::tempdir(
     CLEANUP => 1,
@@ -1526,15 +1554,18 @@ if ($options{module} || $options{'with-module'}) {
     s/-/::/g if /-/ and !m|/|;
   }
   my $install = join ",", map { "'$_'" } @m;
-  if ($options{'no-module-tests'}) {
+  if ($just_testing) {
+    $install = "test($install)";
+  } elsif ($options{'no-module-tests'}) {
     $install = "notest('install',$install)";
   } else {
     $install = "install($install)";
   }
   my $last = $m[-1];
-  my $shellcmd = "$install; die unless CPAN::Shell->expand(Module => '$last')->uptodate;";
+  my $status_method = $just_testing ? 'test' : 'uptodate';
+  my $shellcmd = "$install; die unless CPAN::Shell->expand(Module => '$last')->$status_method;";
 
-  if ($options{module}) {
+  if ($options{module} || $options{'test-module'}) {
     run_report_and_exit(@cpanshell, $shellcmd);
   } else {
     my $ret = run_with_options({setprgp => $options{setpgrp},
