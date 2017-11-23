@@ -1022,13 +1022,9 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	if (flags & LEX_STUFF_UTF8) {
 	    goto plain_copy;
 	} else {
-	    STRLEN highhalf = 0;    /* Count of variants */
-	    const char *p, *e = pv+len;
-	    for (p = pv; p != e; p++) {
-		if (! UTF8_IS_INVARIANT(*p)) {
-                    highhalf++;
-                }
-            }
+	    STRLEN highhalf = variant_under_utf8_count((U8 *) pv,
+                                                       (U8 *) pv + len);
+            const char *p, *e = pv+len;;
 	    if (!highhalf)
 		goto plain_copy;
 	    lex_grow_linestr(SvCUR(PL_parser->linestr)+1+len+highhalf);
