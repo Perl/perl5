@@ -1035,13 +1035,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	    	SvCUR(PL_parser->linestr) + len+highhalf);
 	    PL_parser->bufend += len+highhalf;
 	    for (p = pv; p != e; p++) {
-		U8 c = (U8)*p;
-		if (! UTF8_IS_INVARIANT(c)) {
-		    *bufptr++ = UTF8_TWO_BYTE_HI(c);
-		    *bufptr++ = UTF8_TWO_BYTE_LO(c);
-		} else {
-		    *bufptr++ = (char)c;
-		}
+                append_utf8_from_native_byte(*p, (U8 **) &bufptr);
 	    }
 	}
     } else {
