@@ -3102,13 +3102,8 @@ S_maybe_multiconcat(pTHX_ OP *o)
         
         /* see if any strings would grow if converted to utf8 */
         if (!utf8) {
-            char *p    = (char*)argp->p;
-            STRLEN len = argp->len;
-            while (len--) {
-                U8 c = *p++;
-                if (!UTF8_IS_INVARIANT(c))
-                    variant++;
-            }
+            variant += variant_under_utf8_count((U8 *) argp->p,
+                                                (U8 *) argp->p + argp->len);
         }
     }
 
