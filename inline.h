@@ -449,9 +449,6 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
         } while (x + PERL_WORDSIZE <= send);
     }
 
-#  undef PERL_WORDSIZE
-#  undef PERL_WORD_BOUNDARY_MASK
-#  undef PERL_VARIANTS_WORD_MASK
 #endif
 
     /* Process per-byte */
@@ -469,6 +466,146 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
     return TRUE;
 }
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
+
+/*
+=for apidoc variant_under_utf8_count
+
+This function looks at the sequence of bytes between C<s> and C<e>, which are
+assumed to be encoded in ASCII/Latin1, and returns how many of them would
+change should the string be translated into UTF-8.  Due to the nature of UTF-8,
+each of these would occupy two bytes instead of the single one in the input
+string.  Thus, this function returns the precise number of bytes the string
+would expand by when translated to UTF-8.
+
+Unlike most of the other functions that have C<utf8> in their name, the input
+to this function is NOT a UTF-8-encoded string.  The function name is slightly
+I<odd> to emphasize this.
+
+This function is internal to Perl because khw thinks that any XS code that
+would want this is probably operating too close to the internals.  Presenting a
+valid use case could change that.
+
+See also
+C<L<perlapi/is_utf8_invariant_string>>
+and
+C<L<perlapi/is_utf8_invariant_string_loc>>,
+
+=cut
+
+*/
+
+PERL_STATIC_INLINE Size_t
+S_variant_under_utf8_count(const U8* const s, const U8* const e)
+{
+    const U8* x = s;
+    Size_t count = 0;
+
+    PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT;
+
+#  ifndef EBCDIC
+
+    if ((STRLEN) (e - x) >= PERL_WORDSIZE
+                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(x)
+                          - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))
+    {
+
+        /* Process per-byte until reach word boundary.  XXX This loop could be
+         * eliminated if we knew that this platform had fast unaligned reads */
+        while (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK) {
+            count += ! UTF8_IS_INVARIANT(*x++);
+        }
+
+        /* Process per-word as long as we have at least a full word left */
+        do {
+
+            /* It's easier to look at a 16-bit word size to see how this works.
+             * The expression would be:
+             *
+             *  (((*x & 0x8080) >> 7) * 0x0101) >> 8;
+             *
+             * Suppose the value of *x is the 16 bits
+             *
+             *      0by_______z_______
+             *
+             * where the 14 bits represented by '_' could be any combination of
+             * 0's or 1's (we don't care), and 'y' is the high bit of one byte,
+             * and 'z' is the high bit for the other (endianness doesn't
+             * matter).  On ASCII platforms a byte is variant if the high bit
+             * is set; invariant otherwise.  Thus, our goal, the count of
+             * variants in this 2-byte word is
+             *
+             *      y + z
+             *
+             * To turn 0by_______z_______ into (y + z) we mask the intial value
+             * with 0x8080 to turn it into
+             *
+             *      0by0000000z0000000
+             *
+             * Then right shifting by 7 yields
+             *
+             *      0by0000000z
+             *
+             * Viewed as a number, this is
+             *
+             *      2**8 * y + z
+             *
+             * We then multiply by 0x0101 (which is = 2**8 + 1), so
+             *
+             *       (2**8 * y + z) * (2**8 + 1)
+             *     = (2**8 * y * 2**8) + (z * 2**8) + (2**8 * y * 1) + (z * 1)
+             *     = (2**16 * y) + (2**8 * (y + z)) + z
+             *
+             * However (2**16 * y) doesn't fit in a 16-bit word (unless 'y' is
+             * zero in which case it is 0), and since this is unsigned
+             * multiplication, the C standard says that this component just
+             * gets ignored, so we are left with
+             *
+             *     =  2**8 * (y + z) + z
+             *
+             * We then shift right by 8 bits, which divides by 2**8, and gets
+             * rid of the lone 'z', leaving us with
+             *
+             *     =  y + z
+             *
+             * The same principles apply for longer word sizes.  For 32 bit
+             * words we end up with
+             *
+             *     =  2**24 * (w + x + y + z) + (lots of other expressions
+             *                                   below 2**24)
+             *
+             * with anything above 2**24 having overflowed and been chopped
+             * off.  Shifting right by 24 yields (w + x + y + z)
+             */
+
+            count += ((((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK) >> 7)
+                      * PERL_COUNT_MULTIPLIER)
+                    >> ((PERL_WORDSIZE - 1) * CHARBITS);
+            x += PERL_WORDSIZE;
+        } while (x + PERL_WORDSIZE <= e);
+    }
+
+#  endif
+
+    /* Process per-byte */
+    while (x < e) {
+	if (! UTF8_IS_INVARIANT(*x)) {
+            count++;
+        }
+
+        x++;
+    }
+
+    return count;
+}
+
+#endif
+
+#undef PERL_WORDSIZE
+#undef PERL_COUNT_MULTIPLIER
+#undef PERL_WORD_BOUNDARY_MASK
+#undef PERL_VARIANTS_WORD_MASK
 
 /*
 =for apidoc is_utf8_string

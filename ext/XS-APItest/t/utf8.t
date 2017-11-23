@@ -67,6 +67,63 @@ for my $pos (0.. length($all_invariants) - 1) {
     }
 }
 
+# Now work on variant_under_utf8_count().
+pass("The tests below are for variant_under_utf8_count() with string"
+   . " starting $offset bytes after a word boundary");
+is(test_variant_under_utf8_count($all_invariants, $offset,
+                                length $all_invariants),
+                                0,
+                                "$display_all_invariants contains 0 variants");
+
+# First, put a variant in each possible position in the flanking partial words
+for my $pos (0 .. $word_length - $offset,
+             2 * $word_length .. length($all_invariants) - 1)
+{
+    my $test_string = $all_invariants;
+    my $test_display = $display_all_invariants;
+
+    substr($test_string, $pos, 1) = $variant;
+    substr($test_display, $pos * 2, 2) = $display_variant;
+    is(test_variant_under_utf8_count($test_string, $offset, length $test_string),
+                                     1,
+                                     "$test_display contains 1 variant");
+}
+
+# Then try all possible combinations of variant/invariant in the full word in
+# the middle  (We've already tested the case with 0 variants, so start at 1.)
+for my $bit_pattern (1 .. (1 << $word_length) - 1) {
+    my $bits = $bit_pattern;
+    my $display_word = "";
+    my $test_word = "";
+    my $count = 0;
+
+    # Every 1 bit gets the variant for this particular $bit_pattern.
+    for my $bit (0 .. 7) {
+        if ($bits & 1) {
+            $count++;
+            $test_word .= $variant;
+            $display_word .= $display_variant;
+        }
+        else {
+            $test_word .= $invariant;
+            $display_word .= $display_invariant;
+        }
+        $bits >>= 1;
+    }
+
+    my $test_string = $variant x ($word_length - 1)
+                    . $test_word
+                    . $variant x ($word_length - 1);
+    my $display_string = $display_variant x ($word_length - 1)
+                        . $display_word
+                        . $display_variant x ($word_length - 1);
+    my $expected_count = $count + 2 * $word_length - 2;
+    is(test_variant_under_utf8_count($test_string, $offset,
+                        length $test_string), $expected_count,
+                        "$display_string contains $expected_count variants");
+}
+
+
 my $pound_sign = chr utf8::unicode_to_native(163);
 
 # This  test file can't use byte_utf8a_to_utf8n() from t/charset_tools.pl

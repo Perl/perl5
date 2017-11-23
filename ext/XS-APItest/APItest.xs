@@ -6056,6 +6056,18 @@ test_is_utf8_invariant_string_loc(unsigned char *s, STRLEN offset, STRLEN len)
         RETVAL
 
 STRLEN
+test_variant_under_utf8_count(unsigned char *s, STRLEN offset, STRLEN len)
+    PREINIT:
+        PERL_UINTMAX_T * copy;
+    CODE:
+        Newx(copy, 1 + ((len + WORDSIZE - 1) / WORDSIZE), PERL_UINTMAX_T);
+        Copy(s, (U8 *) copy + offset, len, U8);
+        RETVAL = variant_under_utf8_count((U8 *) copy + offset, (U8 *) copy + offset + len);
+        Safefree(copy);
+    OUTPUT:
+        RETVAL
+
+STRLEN
 test_utf8_length(unsigned char *s, STRLEN offset, STRLEN len)
 CODE:
     RETVAL = utf8_length(s + offset, s + len);

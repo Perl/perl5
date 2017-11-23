@@ -994,6 +994,9 @@
 #define is_utf8_non_invariant_string	S_is_utf8_non_invariant_string
 #define sv_or_pv_pos_u2b(a,b,c,d)	S_sv_or_pv_pos_u2b(aTHX_ a,b,c,d)
 #  endif
+#  if defined(PERL_CORE) || defined(PERL_EXT)
+#define variant_under_utf8_count	S_variant_under_utf8_count
+#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _make_exactf_invlist(a,b)	S__make_exactf_invlist(aTHX_ a,b)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
