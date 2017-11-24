@@ -4,13 +4,14 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
+    skip_all_if_miniperl("miniperl can't load PerlIO::scalar");
 }
 
 plan(tests => 2*11*29);
 
 use Errno qw(EBADF ENOENT);
 
-open(SCALARFILE, "<", \"wibble") or die $!;
+open(SCALARFILE, "<", \"wibble") or die $!; # needs PerlIO::scalar
 open(CLOSEDFILE, "<", "./test.pl") or die $!;
 close(CLOSEDFILE) or die $!;
 opendir(CLOSEDDIR, "../lib") or die $!;

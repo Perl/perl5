@@ -5,6 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
+    skip_all_if_miniperl("miniperl can't load attributes");
 }
 
 use strict;
