@@ -2008,7 +2008,7 @@ S_force_next(pTHX_ I32 type)
  * S_postderef
  *
  * This subroutine handles postfix deref syntax after the arrow has already
- * been emitted.  @* $* etc. are emitted as two separate token right here.
+ * been emitted.  @* $* etc. are emitted as two separate tokens right here.
  * @[ @{ %[ %{ *{ are emitted also as two tokens, but this function emits
  * only the first, leaving yylex to find the next.
  */
