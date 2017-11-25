@@ -3784,7 +3784,7 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
     PERL_ARGS_ASSERT_SV_UTF8_DECODE;
 
     if (SvPOKp(sv)) {
-        const U8 *start, *c;
+        const U8 *start, *c, *first_variant;
 
 	/* The octets may have got themselves encoded - get them back as
 	 * bytes
@@ -3796,9 +3796,9 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
          * we want to make sure everything inside is valid utf8 first.
          */
         c = start = (const U8 *) SvPVX_const(sv);
-	if (!is_utf8_string(c, SvCUR(sv)))
-	    return FALSE;
-        if (! is_utf8_invariant_string(c, SvCUR(sv))) {
+        if (! is_utf8_invariant_string_loc(c, SvCUR(sv), &first_variant)) {
+            if (!is_utf8_string(first_variant, SvCUR(sv) - (first_variant -c)))
+                return FALSE;
             SvUTF8_on(sv);
         }
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
