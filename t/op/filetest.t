@@ -222,22 +222,6 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     is( $rv,        "-$op",         "correct return value for overloaded -$op");
 
     my ($exp, $is) = (1, "is");
-    if (
-	(
-	  !$fcntl_not_available and
-	  (
-	    $op eq "u" and not eval { Fcntl::S_ISUID() } or
-	    $op eq "g" and not eval { Fcntl::S_ISGID() } or
-	    $op eq "k" and not eval { Fcntl::S_ISVTX() }
-	  )
-	)
-	||
-	# the Fcntl test is meaningless in miniperl and
-	# S_ISVTX isn't available on Win32
-	( $^O eq 'MSWin32' && $op eq 'k' && is_miniperl )
-    ) {
-        ($exp, $is) = (0, "not");
-    }
 
     $over = 0;
     $rv = eval "-$op \$str";
