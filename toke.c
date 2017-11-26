@@ -5136,7 +5136,7 @@ Perl_yylex(pTHX)
                 /* read var name, including sigil, into PL_tokenbuf */
                 PL_tokenbuf[0] = sigil;
                 parse_ident(&s, &dest, dest + sizeof(PL_tokenbuf) - 1,
-                    0, cBOOL(UTF), FALSE);
+                    0, cBOOL(UTF), FALSE, FALSE);
                 *dest = '\0';
                 assert(PL_tokenbuf[1]); /* we have a variable name */
             }
@@ -9274,8 +9274,10 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 
 PERL_STATIC_INLINE void
 S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
-                    bool is_utf8, bool check_dollar)
+                    bool is_utf8, bool check_dollar, bool tick_warn)
 {
+    int saw_tick = 0;
+    const char *olds = *s;
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
     while (*s < PL_bufend) {
@@ -9309,6 +9311,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
             *(*d)++ = ':';
             *(*d)++ = ':';
             (*s)++;
+            saw_tick++;
         }
         else if (allow_package && **s == ':' && (*s)[1] == ':'
            /* Disallow things like Foo::$bar. For the curious, this is
@@ -9321,6 +9324,29 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
         }
         else
             break;
+    }
+    if (UNLIKELY(tick_warn && saw_tick && PL_lex_state == LEX_INTERPNORMAL
+              && !PL_lex_brackets && ckWARN(WARN_SYNTAX))) {
+        char *d;
+	char *d2;
+        Newx(d, *s - olds + saw_tick + 2, char); /* +2 for $# */
+        d2 = d;
+        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                         "Old package separator used in string");
+        if (olds[-1] == '#')
+            *d2++ = olds[-2];
+        *d2++ = olds[-1];
+        while (olds < *s) {
+            if (*olds == '\'') {
+                *d2++ = '\\';
+                *d2++ = *olds++;
+            }
+	    else
+                *d2++ = *olds++;
+        }
+        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                         "\t(Did you mean \"%" UTF8f "\" instead?)\n",
+                          UTF8fARG(is_utf8, d2-d, d));
     }
     return;
 }
@@ -9337,7 +9363,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 
     PERL_ARGS_ASSERT_SCAN_WORD;
 
-    parse_ident(&s, &d, e, allow_package, is_utf8, TRUE);
+    parse_ident(&s, &d, e, allow_package, is_utf8, TRUE, FALSE);
     *d = '\0';
     *slp = d - dest;
     return s;
@@ -9385,7 +9411,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	}
     }
     else {  /* See if it is a "normal" identifier */
-        parse_ident(&s, &d, e, 1, is_utf8, FALSE);
+        parse_ident(&s, &d, e, 1, is_utf8, FALSE, TRUE);
     }
     *d = '\0';
     d = dest;
@@ -9463,7 +9489,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
                    (the later check for } being at the expected point will trap
                    cases where this doesn't pan out.)  */
                 d += is_utf8 ? UTF8SKIP(d) : 1;
-                parse_ident(&s, &d, e, 1, is_utf8, TRUE);
+                parse_ident(&s, &d, e, 1, is_utf8, TRUE, TRUE);
                 *d = '\0';
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
