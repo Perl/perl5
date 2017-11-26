@@ -1316,15 +1316,15 @@ loops once.  See L<perlfunc/redo>.
 file.  Perl was unable to remove the original file to replace it with
 the modified file.  The file was left unmodified.
 
-=item Can't rename %s to %s: %s, skipping file
-
-(F) The rename done by the B<-i> switch failed for some reason,
-probably because you don't have write permission to the directory.
-
 =item Can't rename in-place work file '%s' to '%s': %s
 
 (F) When closed implicitly, the temporary file for in-place editing
 couldn't be renamed to the original filename.
+
+=item Can't rename %s to %s: %s, skipping file
+
+(F) The rename done by the B<-i> switch failed for some reason,
+probably because you don't have write permission to the directory.
 
 =item Can't reopen input pipe (name: %s) in binary mode
 
@@ -1393,6 +1393,11 @@ with Perl, though, if you really want to do that.
 (F) You can't undefine a routine that's currently running.  You can,
 however, redefine it while it's running, and you can even undef the
 redefined subroutine while the old routine is running.  Go figure.
+
+=item Can't unweaken a nonreference
+
+(F) You attempted to unweaken something that was not a reference.  Only
+references can be unweakened.
 
 =item Can't upgrade %s (%d) to %d
 
@@ -1535,11 +1540,6 @@ backreference to a matched substring is valid only as part of a regular
 expression pattern.  Trying to do this in ordinary Perl code produces a
 value that prints out looking like SCALAR(0xdecaf).  Use the $1 form
 instead.
-
-=item Can't unweaken a nonreference
-
-(F) You attempted to unweaken something that was not a reference.  Only
-references can be unweakened.
 
 =item Can't weaken a nonreference
 
@@ -2652,17 +2652,6 @@ this error when Perl was built using standard options.  For some
 reason, your version of Perl appears to have been built without
 this support.  Talk to your Perl administrator.
 
-=item Illegal operator following parameter in a subroutine signature
-
-(F) A parameter in a subroutine signature, was followed by something
-other than C<=> introducing a default, C<,> or C<)>.
-
-    use feature 'signatures';
-    sub foo ($=1) {}           # legal
-    sub foo ($a = 1) {}        # legal
-    sub foo ($a += 1) {}       # illegal
-    sub foo ($a == 1) {}       # illegal
-
 =item Illegal character following sigil in a subroutine signature
 
 (F) A parameter in a subroutine signature contained an unexpected character
@@ -2726,6 +2715,17 @@ two from 1 to 32 (or 64, if your platform supports that).
 
 (W digit) You may have tried to use an 8 or 9 in an octal number.
 Interpretation of the octal number stopped before the 8 or 9.
+
+=item Illegal operator following parameter in a subroutine signature
+
+(F) A parameter in a subroutine signature, was followed by something
+other than C<=> introducing a default, C<,> or C<)>.
+
+    use feature 'signatures';
+    sub foo ($=1) {}           # legal
+    sub foo ($a = 1) {}        # legal
+    sub foo ($a += 1) {}       # illegal
+    sub foo ($a == 1) {}       # illegal
 
 =item Illegal pattern in regex; marked by S<<-- HERE> in m/%s/
 
