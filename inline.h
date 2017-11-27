@@ -682,13 +682,13 @@ S_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
         const U8* const send = s + len;
         const U8* x = first_variant;
 
-    while (x < send) {
-        STRLEN cur_len = isUTF8_CHAR_flags(x, send, flags);
-        if (UNLIKELY(! cur_len)) {
-            return FALSE;
+        while (x < send) {
+            STRLEN cur_len = isUTF8_CHAR_flags(x, send, flags);
+            if (UNLIKELY(! cur_len)) {
+                return FALSE;
+            }
+            x += cur_len;
         }
-        x += cur_len;
-    }
     }
 
     return TRUE;
@@ -750,23 +750,23 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
         const U8* x = first_variant;
         STRLEN outlen = first_variant - s;
 
-    while (x < send) {
-        const STRLEN cur_len = isUTF8_CHAR(x, send);
-        if (UNLIKELY(! cur_len)) {
-            break;
+        while (x < send) {
+            const STRLEN cur_len = isUTF8_CHAR(x, send);
+            if (UNLIKELY(! cur_len)) {
+                break;
+            }
+            x += cur_len;
+            outlen++;
         }
-        x += cur_len;
-        outlen++;
-    }
 
-    if (el)
-        *el = outlen;
+        if (el)
+            *el = outlen;
 
-    if (ep) {
-        *ep = x;
-    }
+        if (ep) {
+            *ep = x;
+        }
 
-    return (x == send);
+        return (x == send);
     }
 }
 
@@ -827,23 +827,23 @@ S_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *e
         const U8* x = first_variant;
         STRLEN outlen = first_variant - s;
 
-    while (x < send) {
-        const STRLEN cur_len = isSTRICT_UTF8_CHAR(x, send);
-        if (UNLIKELY(! cur_len)) {
-            break;
+        while (x < send) {
+            const STRLEN cur_len = isSTRICT_UTF8_CHAR(x, send);
+            if (UNLIKELY(! cur_len)) {
+                break;
+            }
+            x += cur_len;
+            outlen++;
         }
-        x += cur_len;
-        outlen++;
-    }
 
-    if (el)
-        *el = outlen;
+        if (el)
+            *el = outlen;
 
-    if (ep) {
-        *ep = x;
-    }
+        if (ep) {
+            *ep = x;
+        }
 
-    return (x == send);
+        return (x == send);
     }
 }
 
@@ -904,23 +904,23 @@ S_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN 
         const U8* x = first_variant;
         STRLEN outlen = first_variant - s;
 
-    while (x < send) {
-        const STRLEN cur_len = isC9_STRICT_UTF8_CHAR(x, send);
-        if (UNLIKELY(! cur_len)) {
-            break;
+        while (x < send) {
+            const STRLEN cur_len = isC9_STRICT_UTF8_CHAR(x, send);
+            if (UNLIKELY(! cur_len)) {
+                break;
+            }
+            x += cur_len;
+            outlen++;
         }
-        x += cur_len;
-        outlen++;
-    }
 
-    if (el)
-        *el = outlen;
+        if (el)
+            *el = outlen;
 
-    if (ep) {
-        *ep = x;
-    }
+        if (ep) {
+            *ep = x;
+        }
 
-    return (x == send);
+        return (x == send);
     }
 }
 
@@ -969,7 +969,7 @@ S_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el
                           |UTF8_DISALLOW_PERL_EXTENDED)));
 
     if (len == 0) {
-        len = strlen((const char *)s);
+        len = strlen((const char *) s);
     }
 
     if (flags == 0) {
@@ -1004,23 +1004,23 @@ S_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el
         const U8* x = first_variant;
         STRLEN outlen = first_variant - s;
 
-    while (x < send) {
-        const STRLEN cur_len = isUTF8_CHAR_flags(x, send, flags);
-        if (UNLIKELY(! cur_len)) {
-            break;
+        while (x < send) {
+            const STRLEN cur_len = isUTF8_CHAR_flags(x, send, flags);
+            if (UNLIKELY(! cur_len)) {
+                break;
+            }
+            x += cur_len;
+            outlen++;
         }
-        x += cur_len;
-        outlen++;
-    }
 
-    if (el)
-        *el = outlen;
+        if (el)
+            *el = outlen;
 
-    if (ep) {
-        *ep = x;
-    }
+        if (ep) {
+            *ep = x;
+        }
 
-    return (x == send);
+        return (x == send);
     }
 }
 
