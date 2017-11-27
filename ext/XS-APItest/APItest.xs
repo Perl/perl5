@@ -6008,7 +6008,7 @@ AV *
 test_is_utf8_invariant_string_loc(char *s, STRLEN offset, STRLEN len)
     PREINIT:
         AV *av;
-        const U8 * ep;
+        const U8 * ep = NULL;
     CODE:
         av = newAV();
         av_push(av, newSViv(is_utf8_invariant_string_loc((U8 *) s + offset, len, &ep)));
