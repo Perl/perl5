@@ -1382,13 +1382,13 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 /* PERL_CALLCONV bool	Perl_is_c9strict_utf8_string(const U8 *s, STRLEN len)
 			__attribute__warn_unused_result__; */
 
-/* PERL_CALLCONV bool	is_c9strict_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
+/* PERL_CALLCONV bool	is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_c9strict_utf8_string_loclen(const U8 *s, const STRLEN len, const U8 **ep, STRLEN *el);
+PERL_STATIC_INLINE bool	S_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
 #define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOCLEN	\
 	assert(s)
 #endif
-/* PERL_CALLCONV bool	Perl_is_invariant_string(const U8* const s, const STRLEN len)
+/* PERL_CALLCONV bool	Perl_is_invariant_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */
 
@@ -1405,9 +1405,9 @@ PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, cons
 /* PERL_CALLCONV bool	Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
 			__attribute__warn_unused_result__; */
 
-/* PERL_CALLCONV bool	is_strict_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
+/* PERL_CALLCONV bool	is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_strict_utf8_string_loclen(const U8 *s, const STRLEN len, const U8 **ep, STRLEN *el);
+PERL_STATIC_INLINE bool	S_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
 #define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOCLEN	\
 	assert(s)
 #endif
@@ -1593,10 +1593,10 @@ PERL_CALLCONV bool	Perl_is_utf8_digit(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_DIGIT	\
 	assert(p)
 
-/* PERL_CALLCONV bool	is_utf8_fixed_width_buf_flags(const U8 * const s, const STRLEN len, const U32 flags); */
-/* PERL_CALLCONV bool	is_utf8_fixed_width_buf_loc_flags(const U8 * const s, const STRLEN len, const U8 **ep, const U32 flags); */
+/* PERL_CALLCONV bool	is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags); */
+/* PERL_CALLCONV bool	is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s, const STRLEN len, const U8 **ep, STRLEN *el, const U32 flags);
+PERL_STATIC_INLINE bool	S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags);
 #define PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOCLEN_FLAGS	\
 	assert(s)
 #endif
@@ -1687,7 +1687,7 @@ PERL_STATIC_INLINE bool	S_is_utf8_string_flags(const U8 *s, STRLEN len, const U3
 #endif
 
 #ifndef NO_MATHOMS
-PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep);
+PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC	\
 	assert(s); assert(ep)
 #endif
