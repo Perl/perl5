@@ -1,4 +1,5 @@
-Check warnings::enabled & warnings::warn
+Check warnings::enabled, warnings::warn and other functionality of
+warnings.pm.
 
 __END__
 
