@@ -9331,6 +9331,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
 	char *d2;
         Newx(d, *s - olds + saw_tick + 2, char); /* +2 for $# */
         d2 = d;
+        SAVEFREEPV(d);
         Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                          "Old package separator used in string");
         if (olds[-1] == '#')
