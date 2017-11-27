@@ -207,7 +207,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Old package separator used in string|perldiag/"Old package separator used in string">
+
+(W syntax) You used the old package separator, "'", in a variable
+named inside a double-quoted string; e.g., C<"In $name's house">.  This
+is equivalent to C<"In $name::s house">.  If you meant the former, put
+a backslash before the apostrophe (C<"In $name\'s house">).
 
 =back
 
