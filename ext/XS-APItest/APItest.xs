@@ -6017,6 +6017,13 @@ test_is_utf8_invariant_string_loc(char *s, STRLEN offset, STRLEN len)
     OUTPUT:
         RETVAL
 
+STRLEN
+test_utf8_length(unsigned char *s, STRLEN offset, STRLEN len)
+CODE:
+    RETVAL = utf8_length(s + offset, s + len);
+OUTPUT:
+    RETVAL
+
 AV *
 test_is_utf8_string_loc(char *s, STRLEN len)
     PREINIT:
