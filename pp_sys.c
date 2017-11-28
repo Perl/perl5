@@ -3019,7 +3019,7 @@ PP(pp_stat)
 #if ST_INO_SIGN == -1
 	    neg = PL_statcache.st_ino < 0;
 #else
-	    neg = false;
+	    neg = FALSE;
 #endif
 	    GCC_DIAG_RESTORE;
 	    CLANG_DIAG_RESTORE;
