@@ -400,7 +400,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #    define PERL_VARIANTS_WORD_MASK 0x80808080
 #    define PERL_WORD_BOUNDARY_MASK 0x3
 #  elif PERL_WORDSIZE == 8
-#    define PERL_VARIANTS_WORD_MASK 0x8080808080808080
+#    define PERL_VARIANTS_WORD_MASK UINT64_C(0x8080808080808080)
 #    define PERL_WORD_BOUNDARY_MASK 0x7
 #  else
 #    error Unexpected word size
