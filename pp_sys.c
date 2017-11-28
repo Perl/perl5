@@ -3016,7 +3016,11 @@ PP(pp_stat)
 	    Stat_t s;
 	    CLANG_DIAG_IGNORE(-Wtautological-compare);
 	    GCC_DIAG_IGNORE(-Wtype-limits);
+#if ST_INO_SIGN == -1
 	    neg = PL_statcache.st_ino < 0;
+#else
+	    neg = false;
+#endif
 	    GCC_DIAG_RESTORE;
 	    CLANG_DIAG_RESTORE;
 	    if (neg) {
