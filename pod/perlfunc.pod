@@ -241,7 +241,7 @@ L<C<chroot>|/chroot FILENAME>,
 L<C<fcntl>|/fcntl FILEHANDLE,FUNCTION,SCALAR>, L<C<glob>|/glob EXPR>,
 L<C<ioctl>|/ioctl FILEHANDLE,FUNCTION,SCALAR>,
 L<C<link>|/link OLDFILE,NEWFILE>, L<C<lstat>|/lstat FILEHANDLE>,
-L<C<mkdir>|/mkdir FILENAME,MASK>, L<C<open>|/open FILEHANDLE,EXPR>,
+L<C<mkdir>|/mkdir FILENAME,MODE>, L<C<open>|/open FILEHANDLE,EXPR>,
 L<C<opendir>|/opendir DIRHANDLE,EXPR>, L<C<readlink>|/readlink EXPR>,
 L<C<rename>|/rename OLDNAME,NEWNAME>, L<C<rmdir>|/rmdir FILENAME>,
 L<C<select>|/select FILEHANDLE>, L<C<stat>|/stat FILEHANDLE>,
@@ -4148,7 +4148,7 @@ or to force an anon hash constructor use C<+{>:
 
 to get a list of anonymous hashes each with only one entry apiece.
 
-=item mkdir FILENAME,MASK
+=item mkdir FILENAME,MODE
 X<mkdir> X<md> X<directory, create>
 
 =item mkdir FILENAME
@@ -4158,19 +4158,19 @@ X<mkdir> X<md> X<directory, create>
 =for Pod::Functions create a directory
 
 Creates the directory specified by FILENAME, with permissions
-specified by MASK (as modified by L<C<umask>|/umask EXPR>).  If it
+specified by MODE (as modified by L<C<umask>|/umask EXPR>).  If it
 succeeds it returns true; otherwise it returns false and sets
 L<C<$!>|perlvar/$!> (errno).
-MASK defaults to 0777 if omitted, and FILENAME defaults
+MODE defaults to 0777 if omitted, and FILENAME defaults
 to L<C<$_>|perlvar/$_> if omitted.
 
-In general, it is better to create directories with a permissive MASK
+In general, it is better to create directories with a permissive MODE
 and let the user modify that with their L<C<umask>|/umask EXPR> than it
 is to supply
-a restrictive MASK and give the user no way to be more permissive.
+a restrictive MODE and give the user no way to be more permissive.
 The exceptions to this rule are when the file or directory should be
 kept private (mail files, for instance).  The documentation for
-L<C<umask>|/umask EXPR> discusses the choice of MASK in more detail.
+L<C<umask>|/umask EXPR> discusses the choice of MODE in more detail.
 
 Note that according to the POSIX 1003.1-1996 the FILENAME may have any
 number of trailing slashes.  Some operating and filesystems do not get
@@ -9093,7 +9093,7 @@ The Unix permission C<rwxr-x---> is represented as three sets of three
 bits, or three octal digits: C<0750> (the leading 0 indicates octal
 and isn't one of the digits).  The L<C<umask>|/umask EXPR> value is such
 a number representing disabled permissions bits.  The permission (or
-"mode") values you pass L<C<mkdir>|/mkdir FILENAME,MASK> or
+"mode") values you pass L<C<mkdir>|/mkdir FILENAME,MODE> or
 L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE> are modified by your
 umask, so even if you tell
 L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE> to create a file with
@@ -9106,7 +9106,7 @@ file with mode C<0640> (because C<0666 &~ 027> is C<0640>).
 
 Here's some advice: supply a creation mode of C<0666> for regular
 files (in L<C<sysopen>|/sysopen FILEHANDLE,FILENAME,MODE>) and one of
-C<0777> for directories (in L<C<mkdir>|/mkdir FILENAME,MASK>) and
+C<0777> for directories (in L<C<mkdir>|/mkdir FILENAME,MODE>) and
 executable files.  This gives users the freedom of
 choice: if they want protected files, they might choose process umasks
 of C<022>, C<027>, or even the particularly antisocial mask of C<077>.
