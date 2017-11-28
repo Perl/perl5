@@ -8791,20 +8791,9 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block, I32 enter_opcode, I32 leave_opcode)
 
     o = newUNOP(leave_opcode, 0, (OP *) enterop);
 
-    if (cond) {
-        /* prepend cond if we have one */
-        op_sibling_splice((OP*)enterop, NULL, 0, scalar(cond));
-
-	o->op_next = LINKLIST(cond);
-	cond->op_next = (OP *) enterop;
-    }
-    else {
-	/* This is a default {} block */
-	enterop->op_flags |= OPf_SPECIAL;
-	o      ->op_flags |= OPf_SPECIAL;
-
-	o->op_next = (OP *) enterop;
-    }
+    op_sibling_splice((OP*)enterop, NULL, 0, scalar(cond));
+    o->op_next = LINKLIST(cond);
+    cond->op_next = (OP *) enterop;
 
     CHECKOP(enter_opcode, enterop); /* Currently does nothing, since
     				       entergiven and enterwhen both
@@ -8844,8 +8833,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 Constructs, checks, and returns an op tree expressing a C<when> block.
 C<cond> supplies the test expression, and C<block> supplies the block
 that will be executed if the test evaluates to true; they are consumed
-by this function and become part of the constructed op tree.  C<cond>
-may be null to generate a C<default> block.
+by this function and become part of the constructed op tree.
 
 =cut
 */

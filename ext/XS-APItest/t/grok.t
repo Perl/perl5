@@ -42,9 +42,7 @@ foreach my $leader ('', ' ', '  ') {
 		    @NV = qw(18446744073709551616 18446744073709551617
 			     18446744073709551620 18446744073709551624);
 		}
-		default {
-		    die "Unknown IV size $_";
-		}
+		die "Unknown IV size $_";
 	    }
 	    foreach (@UV) {
 		my $string = $leader . $_ . $trailer;

@@ -269,7 +269,7 @@ L<C<wantarray>|/wantarray>
 L<C<break>|/break> is available only if you enable the experimental
 L<C<"switch"> feature|feature/The 'switch' feature> or use the C<CORE::>
 prefix.  The L<C<"switch"> feature|feature/The 'switch' feature> also
-enables the C<default>, C<given> and C<when> statements, which are
+enables the C<given> and C<when> statements, which are
 documented in L<perlsyn/"Switch Statements">.
 The L<C<"switch"> feature|feature/The 'switch' feature> is enabled
 automatically with a C<use v5.10> (or higher) declaration in the current
@@ -426,7 +426,7 @@ L<C<time>|/time>, L<C<times>|/times>
 =for Pod::Functions =!Non-functions
 
 C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
-C<default>, C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
+C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
 C<eq>, C<for>, C<foreach>, C<ge>, C<given>, C<gt>, C<if>, C<INIT>, C<le>,
 C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<when>,
 C<while>, C<x>, C<xor>
@@ -1340,7 +1340,7 @@ using an empty one, logically enough, so L<C<next>|/next LABEL> goes
 directly back to check the condition at the top of the loop.
 
 When there is no BLOCK, L<C<continue>|/continue BLOCK> is a function
-that exits the current C<when> or C<default> block, avoiding the jump
+that exits the current C<when> block, avoiding the jump
 to the end of the enclosing topicalizer that implicitly happens when
 execution reaches the end of such a block.
 In Perl 5.14 and earlier, this form of
@@ -10102,8 +10102,6 @@ Statements">.
 =back
 
 =over
-
-=item default
 
 =item given
 

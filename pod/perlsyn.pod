@@ -247,7 +247,6 @@ The following compound statements may be used to control flow:
     given (EXPR) BLOCK
 
     when (EXPR) BLOCK
-    default BLOCK
 
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
@@ -268,7 +267,7 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
-The experimental C<given>, C<when>, and C<default> statements are I<not
+The experimental C<given> and C<when> statements are I<not
 automatically enabled>; see L</"Switch Statements"> below for how to do
 so, and the attendant caveats.
 
@@ -607,7 +606,7 @@ described immediately below remains experimental.
 
 =head2 Switch Statements
 
-X<switch> X<case> X<given> X<when> X<default>
+X<switch> X<case> X<given> X<when>
 
 C<given>, C<when>, and related keywords make up an experimental feature
 that first appeared in Perl 5.10, but behaved quite differently from
@@ -622,7 +621,7 @@ example:
     use v5.14;
 
 Under the "switch" feature, Perl gains the experimental keywords C<given>,
-C<when>, C<default>, and C<break>.  Starting from Perl 5.16, one can
+C<when>, and C<break>.  Starting from Perl 5.16, one can
 prefix the switch keywords with C<CORE::> to access the feature without
 a C<use feature> statement.
 
@@ -640,7 +639,7 @@ C<given> evaluates its argument in scalar context, and executes its block
 with the C<$_> variable locally aliased to the result of evaluating the
 argument expression.  It is much like a C<foreach> loop that always has
 exactly one item to iterate over.  Either a C<given> or a C<foreach>
-construct serves as a I<topicalizer>: C<when> and C<default> can only
+construct serves as a I<topicalizer>: C<when> can only
 be used in the dynamic scope of a topicalizer.
 
 C<when> evaluates its argument as a truth value.  If the argument
@@ -651,10 +650,6 @@ topicalizer.  (In the case of a C<foreach> topicalizer, this jump
 behaves as a C<next>, moving on to the next iteration, not a C<last>,
 which would exit the loop.)
 
-C<default> always executes its block and then implicitly jumps to the
-end of the closest dynamically enclosing topicalizer.  It is precisely
-equivalent to C<when(1)>.
-
 Putting this together, the code in the previous section could be
 rewritten as
 
@@ -663,7 +658,7 @@ rewritten as
         when (/^abc/) { $abc = 1 }
         when (/^def/) { $def = 1 }
         when (/^xyz/) { $xyz = 1 }
-        default       { $nothing = 1 }
+        $nothing = 1;
     }
 
 Or if you prefer the modifier form of C<when>, it can be written with
@@ -674,16 +669,16 @@ less punctuation as
         $abc = 1 when /^abc/;
         $def = 1 when /^def/;
         $xyz = 1 when /^xyz/;
-        default { $nothing = 1 }
+        $nothing = 1;
     }
 
 You can use the C<break> keyword to break out of the dynamically enclosing
 topicalizer, if it's a C<given> block.  This resembles the jump to the end
 of the topicalizer that implicitly happens at the end of every C<when>
-or C<default> block, except that the explicit C<break> can only break
+block, except that the explicit C<break> can only break
 out of a C<given> topicalizer, not a C<foreach>.
 
-You can use the C<continue> keyword to exit a C<when> or C<default>
+You can use the C<continue> keyword to exit a C<when>
 block, proceeding to the following statement.  This is most commonly
 done last thing inside the block, to override the implicit jump to the
 end of the topicalizer.  For example
@@ -691,7 +686,7 @@ end of the topicalizer.  For example
     given($foo) {
         when (/x/) { say '$foo contains an x'; continue }
         when (/y/) { say '$foo contains a y'            }
-        default    { say '$foo does not contain a y'    }
+        say '$foo does not contain a y';
     }
 
 When a C<given> statement is executed in a position where it will provide
@@ -707,7 +702,7 @@ An empty list as soon as an explicit C<break> is encountered.
 =item *
 
 The value of the last evaluated expression of the successful
-C<when>/C<default> clause, if there happens to be one.
+C<when> clause, if there happens to be one.
 
 =item *
 

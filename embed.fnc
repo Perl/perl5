@@ -1166,7 +1166,7 @@ ApdR	|SV*	|newSV_type	|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 ApdR	|OP*	|newUNOP_AUX	|I32 type|I32 flags|NULLOK OP* first \
 				|NULLOK UNOP_AUX_item *aux
-ApdR	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
+ApdR	|OP*	|newWHENOP	|NN OP* cond|NN OP* block
 ApdR	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my

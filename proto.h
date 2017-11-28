@@ -2353,7 +2353,7 @@ PERL_CALLCONV OP*	Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP* first, UNOP_AU
 PERL_CALLCONV OP*	Perl_newWHENOP(pTHX_ OP* cond, OP* block)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWWHENOP	\
-	assert(block)
+	assert(cond); assert(block)
 
 PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, OP* expr, OP* block, OP* cont, I32 has_my)
 			__attribute__warn_unused_result__;

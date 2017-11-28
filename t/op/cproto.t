@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 254;
+plan tests => 253;
 
 while (<DATA>) {
     chomp;
@@ -69,7 +69,6 @@ cos (_)
 crypt ($$)
 dbmclose (\%)
 dbmopen (\%$$)
-default undef
 defined undef
 delete undef
 die (@)

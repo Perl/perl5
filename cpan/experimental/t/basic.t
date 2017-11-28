@@ -24,9 +24,7 @@ if ($] >= 5.010001) {
 		when (\&bar) {
 			pass("bar matches 1");
 		}
-		default {
-			fail("bar matches 1");
-		}
+		fail("bar matches 1");
 	}
 	1;
 END

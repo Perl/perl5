@@ -2411,7 +2411,6 @@ end
 	    given ($_) {
 		when ('x') { $letter }
 		when ('y') { goto leavegiven }
-		default    { $letter }
 		leavegiven:  $letter
 	    }
 	};

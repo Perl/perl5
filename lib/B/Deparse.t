@@ -1029,7 +1029,7 @@ my $d = \[];
 given ('foo') {
     when ('bar') { continue; }
     when ($_ ~~ 'quux') { continue; }
-    default { 0; }
+    0;
 }
 ####
 # conditions in elsifs (regression in change #33710 which fixed bug #37302)
@@ -1514,9 +1514,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::default {
-        CORE::break;
-    }
+    CORE::break;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1532,9 +1530,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::default {
-        CORE::break;
-    }
+    CORE::break;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1545,9 +1541,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::default {
-        CORE::break;
-    }
+    CORE::break;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1563,9 +1557,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::default {
-        CORE::break;
-    }
+    CORE::break;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1578,9 +1570,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::default {
-        CORE::break;
-    }
+    CORE::break;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1588,7 +1578,6 @@ CORE::evalbytes '';
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
 # lexical subroutines and keywords of the same name
 # CONTEXT use feature 'lexical_subs', 'switch'; no warnings 'experimental';
-my sub default;
 my sub else;
 my sub elsif;
 my sub for;
@@ -1611,7 +1600,6 @@ my sub until;
 my sub use;
 my sub when;
 my sub while;
-CORE::default { die; }
 CORE::if ($1) { die; }
 CORE::if ($1) { die; }
 CORE::elsif ($1) { die; }

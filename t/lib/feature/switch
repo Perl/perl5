@@ -16,13 +16,6 @@ EXPECT
 Unquoted string "when" may clash with future reserved word at - line 3.
 when
 ########
-# No switch; default should be a bareword.
-use warnings; no warnings 'experimental::smartmatch';
-print STDOUT default;
-EXPECT
-Unquoted string "default" may clash with future reserved word at - line 3.
-default
-########
 # No switch; break should be a bareword.
 use warnings; no warnings 'experimental::smartmatch';
 print STDOUT break;
@@ -44,12 +37,6 @@ okay
 # Use switch; so when is a keyword
 use feature 'switch'; no warnings 'experimental::smartmatch';
 given(1) { when(1) { print "okay" } }
-EXPECT
-okay
-########
-# Use switch; so default is a keyword
-use feature 'switch'; no warnings 'experimental::smartmatch';
-given(1) { default { print "okay" } }
 EXPECT
 okay
 ########
@@ -80,17 +67,6 @@ EXPECT
 Unquoted string "when" may clash with future reserved word at - line 6.
 Okay here
 when
-########
-# switch out of scope; default should be a bareword.
-use warnings; no warnings 'experimental::smartmatch';
-{ use feature 'switch';
-  given (1) { default {print "Okay here\n";} }
-}
-print STDOUT default;
-EXPECT
-Unquoted string "default" may clash with future reserved word at - line 6.
-Okay here
-default
 ########
 # switch out of scope; break should be a bareword.
 use warnings; no warnings 'experimental::smartmatch';

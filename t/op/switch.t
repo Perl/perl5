@@ -20,7 +20,7 @@ plan tests => 166;
 # Before loading feature, test the switch ops with CORE::
 CORE::given(3) {
     CORE::when(3) { pass "CORE::given and CORE::when"; continue }
-    CORE::default { pass "continue (without feature) and CORE::default" }
+    pass "continue (without feature)";
 }
 
 
@@ -63,7 +63,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when($_ == 2) { $ok = 'two'; }
 	when($_ == 3) { $ok = 'three'; }
 	when($_ == 4) { $ok = 'four'; }
-	default { $ok = 'd'; }
+	$ok = 'd';
     }
     is($ok, 'three', "numeric comparison");
 }
@@ -75,7 +75,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when($_ == 2) { $ok = 'two'; }
 	when($_ == 3) { $ok = 'three'; }
 	when($_ == 4) { $ok = 'four'; }
-	default { $ok = 'd'; }
+	$ok = 'd';
     }
     is($ok, 'three', "integer comparison");
 }
@@ -86,7 +86,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when($_ == 3.1)   { $ok1 = 'n'; }
 	when($_ == 3.0)   { $ok1 = 'y'; continue }
 	when($_ == "3.0") { $ok2 = 'y'; }
-	default     { $ok2 = 'n'; }
+	$ok2 = 'n';
     }
     is($ok1, 'y', "more numeric (pt. 1)");
     is($ok2, 'y', "more numeric (pt. 2)");
@@ -98,7 +98,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when($_ eq "b") { $ok = 'B'; }
 	when($_ eq "c") { $ok = 'C'; }
 	when($_ eq "d") { $ok = 'D'; }
-	default   { $ok = 'def'; }
+	$ok = 'def';
     }
     is($ok, 'C', "string comparison");
 }
@@ -109,7 +109,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when($_ eq "b") { $ok = 'B'; }
 	when($_ eq "c") { $ok = 'C'; continue }
 	when($_ eq "c") { $ok = 'CC'; }
-	default   { $ok = 'D'; }
+	$ok = 'D';
     }
     is($ok, 'CC', "simple continue");
 }
@@ -186,7 +186,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ < 20) { $ok = "twenty" }
 	when ($_ < 30) { $ok = "thirty" }
 	when ($_ < 40) { $ok = "forty" }
-	default        { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "thirty", $test);
 }
@@ -201,7 +201,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ < 20) { $ok = "twenty" }
 	when ($_ < 30) { $ok = "thirty" }
 	when ($_ < 40) { $ok = "forty" }
-	default        { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "thirty", $test);
 }
@@ -215,7 +215,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ <= 20) { $ok = "twenty" }
 	when ($_ <= 30) { $ok = "thirty" }
 	when ($_ <= 40) { $ok = "forty" }
-	default         { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "thirty", $test);
 }
@@ -230,7 +230,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ <= 20) { $ok = "twenty" }
 	when ($_ <= 30) { $ok = "thirty" }
 	when ($_ <= 40) { $ok = "forty" }
-	default         { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "thirty", $test);
 }
@@ -245,7 +245,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ > 30) { $ok = "thirty" }
 	when ($_ > 20) { $ok = "twenty" }
 	when ($_ > 10) { $ok = "ten" }
-	default        { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "twenty", $test);
 }
@@ -259,7 +259,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ >= 30) { $ok = "thirty" }
 	when ($_ >= 20) { $ok = "twenty" }
 	when ($_ >= 10) { $ok = "ten" }
-	default         { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "twenty", $test);
 }
@@ -274,7 +274,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ > 30) { $ok = "thirty" }
 	when ($_ > 20) { $ok = "twenty" }
 	when ($_ > 10) { $ok = "ten" }
-	default        { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "twenty", $test);
 }
@@ -289,7 +289,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ >= 30) { $ok = "thirty" }
 	when ($_ >= 20) { $ok = "twenty" }
 	when ($_ >= 10) { $ok = "ten" }
-	default         { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "twenty", $test);
 }
@@ -304,7 +304,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ lt "20") { $ok = "twenty" }
 	when ($_ lt "30") { $ok = "thirty" }
 	when ($_ lt "40") { $ok = "forty" }
-	default           { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "thirty", $test);
 }
@@ -318,7 +318,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ le "20") { $ok = "twenty" }
 	when ($_ le "30") { $ok = "thirty" }
 	when ($_ le "40") { $ok = "forty" }
-	default           { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "thirty", $test);
 }
@@ -332,7 +332,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ ge "30") { $ok = "thirty" }
 	when ($_ ge "20") { $ok = "twenty" }
 	when ($_ ge "10") { $ok = "ten" }
-	default           { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "twenty", $test);
 }
@@ -346,7 +346,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ ge "30") { $ok = "thirty" }
 	when ($_ ge "20") { $ok = "twenty" }
 	when ($_ ge "10") { $ok = "ten" }
-	default           { $ok = "default" }
+	$ok = "default";
     }
     is($ok, "twenty", $test);
 }
@@ -365,7 +365,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $ok;
     given(23) {
         when ($_ == scalar 24) { $ok = 'n'; continue }
-        default { $ok = 'y' }
+        $ok = 'y';
     }
     is($ok,'y','scalar()');
 }
@@ -474,7 +474,7 @@ sub notfoo {"bar"}
     for my $l (qw(a b c d)) {
 	given ($l) {
 	    when ($_ eq "b" .. $_ eq "c") { $n = 1 }
-	    default { $n = 0 }
+	    $n = 0;
 	}
 	ok(($n xor $l =~ /[ad]/), 'when(E1..E2) evaluates in boolean context');
     }
@@ -485,7 +485,7 @@ sub notfoo {"bar"}
     for my $l (qw(a b c d)) {
 	given ($l) {
 	    when ($_ eq "b" ... $_ eq "c") { $n = 1 }
-	    default { $n = 0 }
+	    $n = 0;
 	}
 	ok(($n xor $l =~ /[ad]/), 'when(E1...E2) evaluates in boolean context');
     }
@@ -709,7 +709,7 @@ sub contains_x {
 	do { $ok = 1; continue } when /pea/;
 	$ok += 2;
 	$ok = 0 when /pie/;
-	default { $ok += 4 }
+	$ok += 4; break;
 	$ok = 0;
     }
     is($ok, 7, "postfix regex");
@@ -864,8 +864,7 @@ GIVEN5:
 	my $scalar = do { given ($_) {
 	    no warnings 'void';
 	    when ($_ == 0) { 5 }
-	    default  { 8, 9 }
-	    6, 7;
+	    8, 9;
 	} };
 	is($scalar, shift(@exp), "rvalue given - default scalar [$_]");
     }
@@ -903,8 +902,7 @@ GIVEN5:
     for (0, 1, 2) {
 	my @list = do { given ($_) {
 	    when ($_ == 0) { "moo" =~ /(.)/g }
-	    default  { 8, scalar(@things) }
-	    6, 7;
+	    8, scalar(@things);
 	} };
 	is("@list", shift(@exp), "rvalue given - default list [$_]");
     }
@@ -1037,10 +1035,7 @@ GIVEN5:
 			456;
 		    }
 		};
-		default {
-		    $tester->($id_plus_1);
-		}
-		'XXX';
+		$tester->($id_plus_1);
 	    }
 	};
 	is $res, $id, "across continue and default - $desc";
@@ -1085,7 +1080,7 @@ GIVEN5:
 		    when ($_ == 1) { my $y = Fmurrr->new($destroyed, 1); break }
 		    when ($_ == 2) { $x = Fmurrr->new($destroyed, 2); continue }
 		    when ($_ == 2) { $x }
-		    default  { Fmurrr->new($destroyed, 3) }
+		    Fmurrr->new($destroyed, 3);
 		}
 	    };
 	    $res_id = $res->{id};
@@ -1141,7 +1136,7 @@ GIVEN5:
         when ($_ == 1) {$i +=    1 }
         when ($_ == 2) {$i +=   10 }
         when ($_ == 3) {$i +=  100 }
-        default { $i += 1000 }
+        $i += 1000;
     }
     is($i, 111, "when in for 1..3");
 
@@ -1150,7 +1145,7 @@ GIVEN5:
         when ($_ eq 'a') {$i +=    1 }
         when ($_ eq 'b') {$i +=   10 }
         when ($_ eq 'c') {$i +=  100 }
-        default { $i += 1000 }
+        $i += 1000;
     }
     is($i, 111, "when in for a..c");
 
@@ -1159,7 +1154,7 @@ GIVEN5:
         when ($_ == 1) {$i +=    1 }
         when ($_ == 2) {$i +=   10 }
         when ($_ == 3) {$i +=  100 }
-        default { $i += 1000 }
+        $i += 1000;
     }
     is($i, 111, "when in for 1,2,3");
 
@@ -1169,7 +1164,7 @@ GIVEN5:
         when ($_ == 1) {$i +=    1 }
         when ($_ == 2) {$i +=   10 }
         when ($_ == 3) {$i +=  100 }
-        default { $i += 1000 }
+        $i += 1000;
     }
     is($i, 111, 'when in for @a');
 }

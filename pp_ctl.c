@@ -4663,7 +4663,7 @@ PP(pp_enterwhen)
        to the op that follows the leavewhen.
        RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
-    if (!(PL_op->op_flags & OPf_SPECIAL) && !SvTRUEx(POPs))
+    if (!SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
     cx = cx_pushblock(CXt_WHEN, gimme, SP, PL_savestack_ix);
@@ -4685,9 +4685,7 @@ PP(pp_leavewhen)
 
     cxix = dopoptogivenfor(cxstack_ix);
     if (cxix < 0)
-	/* diag_listed_as: Can't "when" outside a topicalizer */
-	DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
-	           PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
+	DIE(aTHX_ "Can't \"when\" outside a topicalizer");
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)

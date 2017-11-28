@@ -40,7 +40,6 @@ my %feature_kw = (
     say       => 'say',
     given     => 'switch',
     when      => 'switch',
-    default   => 'switch',
     # continue is already a keyword
     break     => 'switch',
     evalbytes => 'evalbytes',
@@ -147,7 +146,6 @@ __END__
 -crypt
 -dbmclose
 -dbmopen
-+default
 +defined
 +delete
 -die

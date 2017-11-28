@@ -2247,7 +2247,6 @@ my %feature_keywords = (
     say     => 'say',
     given   => 'switch',
     when    => 'switch',
-    default => 'switch',
     break   => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
@@ -2547,19 +2546,11 @@ sub givwhen {
     my($op, $cx, $givwhen) = @_;
 
     my $enterop = $op->first;
-    my ($head, $block);
-    if ($enterop->flags & OPf_SPECIAL) {
-	$head = $self->keyword("default");
-	$block = $self->deparse($enterop->first, 0);
-    }
-    else {
-	my $cond = $enterop->first;
-	my $cond_str = $self->deparse($cond, 1);
-	$head = "$givwhen ($cond_str)";
-	$block = $self->deparse($cond->sibling, 0);
-    }
+    my $cond = $enterop->first;
+    my $cond_str = $self->deparse($cond, 1);
+    my $block = $self->deparse($cond->sibling, 0);
 
-    return "$head {\n".
+    return "$givwhen ($cond_str) {\n".
 	"\t$block\n".
 	"\b}\cK";
 }

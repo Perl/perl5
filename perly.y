@@ -53,7 +53,7 @@
 %token <pval> LABEL
 %token <ival> FORMAT SUB ANONSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
-%token <ival> GIVEN WHEN DEFAULT
+%token <ival> GIVEN WHEN
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> RELOP EQOP MULOP ADDOP
@@ -380,8 +380,6 @@ barestmt:	PLUGSTMT
 			}
 	|	WHEN '(' remember mexpr ')' mblock
 			{ $$ = block_end($3, newWHENOP($4, op_scope($6))); }
-	|	DEFAULT block
-			{ $$ = newWHENOP(0, op_scope($2)); }
 	|	WHILE '(' remember texpr ')' mintro mblock cont
 			{
 			  $$ = block_end($3,

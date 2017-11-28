@@ -316,7 +316,6 @@ static struct debug_tokens {
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
     { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
-    { DEFAULT,		TOKENTYPE_NONE,		"DEFAULT" },
     { DO,		TOKENTYPE_NONE,		"DO" },
     { DOLSHARP,		TOKENTYPE_NONE,		"DOLSHARP" },
     { DORDOR,		TOKENTYPE_NONE,		"DORDOR" },
@@ -7846,9 +7845,6 @@ Perl_yylex(pTHX)
 
 	case KEY_chroot:
 	    UNI(OP_CHROOT);
-
-	case KEY_default:
-	    PREBLOCK(DEFAULT);
 
 	case KEY_do:
 	    s = skipspace(s);

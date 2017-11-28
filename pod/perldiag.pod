@@ -833,8 +833,7 @@ but then $foo no longer contains a glob.
 
 =item Can't "continue" outside a when block
 
-(F) You called C<continue>, but you're not inside a C<when>
-or C<default> block.
+(F) You called C<continue>, but you're not inside a C<when> block.
 
 =item Can't create pipe mailbox
 
@@ -845,13 +844,6 @@ quotas or other plumbing problems.
 
 (F) Only scalar, array, and hash variables may be declared as "my", "our" or
 "state" variables.  They must have ordinary identifiers as names.
-
-=item Can't "default" outside a topicalizer
-
-(F) You have used a C<default> block that is neither inside a
-C<foreach> loop nor a C<given> block.  (Note that this error is
-issued on exit from the C<default> block, so you won't get the
-error if you use an explicit C<continue>.)
 
 =item Can't determine class of operator %s, assuming BASEOP
 
