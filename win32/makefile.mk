@@ -452,6 +452,9 @@ ARCHNAME	!:= $(ARCHNAME)-ld
 .IF "$(GCCCROSS)" == "define"
 CCINCDIR *= $(CCHOME)\x86_64-w64-mingw32\include
 CCLIBDIR *= $(CCHOME)\x86_64-w64-mingw32\lib
+.ELIF "$(CCTYPE)" == "GCC"
+CCINCDIR *= $(CCHOME)\include
+CCLIBDIR *= $(CCHOME)\lib
 .ELSE
 CCINCDIR *= $(CCHOME)\include
 .IF "$(CCTYPE)" == "MSVC141"
@@ -461,7 +464,11 @@ CCLIBDIR *= $(CCHOME)\lib\x64
 CCLIBDIR *= $(CCHOME)\lib\x86
 .ENDIF
 .ELSE
+.IF "$(WIN64)" == "define"
+CCLIBDIR *= $(CCHOME)\lib\amd64
+.ELSE
 CCLIBDIR *= $(CCHOME)\lib
+.ENDIF
 .ENDIF
 .ENDIF
 

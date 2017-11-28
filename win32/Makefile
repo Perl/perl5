@@ -446,7 +446,11 @@ CCLIBDIR	= $(CCHOME)\lib\x64
 CCLIBDIR	= $(CCHOME)\lib\x86
 !  ENDIF
 !ELSE
+!  IF "$(WIN64)" == "define"
+CCLIBDIR	= $(CCHOME)\lib\amd64
+!  ELSE
 CCLIBDIR	= $(CCHOME)\lib
+!  ENDIF
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
