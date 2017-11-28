@@ -478,6 +478,10 @@ ifneq ($(GCCCROSS),)
 CCINCDIR := $(CCHOME)\$(GCCCROSS)\include
 CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
 ARCHPREFIX := $(GCCCROSS)-
+else ifeq ($(CCTYPE),GCC)
+CCINCDIR := $(CCHOME)\include
+CCLIBDIR := $(CCHOME)\lib
+ARCHPREFIX :=
 else
 CCINCDIR := $(CCHOME)\include
 ifeq ($(CCTYPE),MSVC141)
@@ -487,7 +491,11 @@ else
 CCLIBDIR := $(CCHOME)\lib\x86
 endif
 else
+ifeq ($(WIN64),define)
+CCLIBDIR := $(CCHOME)\lib\amd64
+else
 CCLIBDIR := $(CCHOME)\lib
+endif
 endif
 ARCHPREFIX :=
 endif
