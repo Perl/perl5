@@ -3642,7 +3642,7 @@ PP(pp_fttext)
         /* Here contains a variant under UTF-8 .  See if the entire string is
          * UTF-8. */
         if (is_utf8_fixed_width_buf_flags(first_variant,
-                                          len - ((char *) first_variant - s),
+                                          len - ((char *) first_variant - (char *) s),
                                           0))
         {
             if (PL_op->op_type == OP_FTTEXT) {
