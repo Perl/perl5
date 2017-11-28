@@ -2694,6 +2694,8 @@ S_maybe_multiconcat(pTHX_ OP *o)
            || o->op_type == OP_SPRINTF
            || o->op_type == OP_STRINGIFY);
 
+    Zero(&sprintf_info, 1, struct sprintf_ismc_info);
+
     /* first see if, at the top of the tree, there is an assign,
      * append and/or stringify */
 
