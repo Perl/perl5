@@ -2895,8 +2895,8 @@ S_scan_const(pTHX_ char *start)
                                            should we have to convert to
                                            UTF-8) */
     SV *res;		                /* result from charnames */
-    STRLEN offset_to_max;   /* The offset in the output to where the range
-                               high-end character is temporarily placed */
+    STRLEN offset_to_max = 0;   /* The offset in the output to where the range
+                                   high-end character is temporarily placed */
 
     /* Does something require special handling in tr/// ?  This avoids extra
      * work in a less likely case.  As such, khw didn't feel it was worth
