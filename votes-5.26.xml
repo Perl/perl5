@@ -48,6 +48,7 @@ Both of these or neither
 <div><h3>Build and Installation Fixes</h3>
 
 <commit votes="steveh" id="488307ffa67ce70fc9755e560a74dac04bdcb0e4" ticket="" desc="Revert &quot;Revert &quot;Fallbacks for Perl_fp_class_denorm().&quot;&quot;"/>
+<commit votes="steveh" id="6f669bf58bbfaf8d7ef367574be9252df84c08d1" ticket="132484" desc="Fix $Config{libpth} for x64 builds with VC++ earlier than 14.1 (VS2017)"/>
 
 </div>
 
