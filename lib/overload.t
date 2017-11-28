@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5331;
+plan tests => 5332;
 
 use Scalar::Util qw(tainted);
 
@@ -3003,17 +3003,20 @@ package Concat {
 #      concat($right, $left, 1)
 #  rather than
 #      concat($right, "$left", 1)
+# There's a similar issue with
+#      $left .= $right
+# when left is overloaded
 
 package RT132385 {
 
     use constant C => [ "constref" ];
 
     use overload '.' => sub {
-                            my ($r, $l, $rev) = @_;
-                            die "expected reverse\n" unless $rev;
-                            my $res = ref $l ? $l->[0] : "$l";
-                            $res .= "-" . $r->[0];
-                            $res;
+                            my ($l, $r, $rev) = @_;
+                            ($l,$r) = ($r,$l) if $rev;
+                            $l = ref $l ? $l->[0] : "$l";
+                            $r = ref $r ? $r->[0] : "$r";
+                            "$l-$r";
                         }
     ;
 
@@ -3033,4 +3036,7 @@ package RT132385 {
 
     ::like($r1.$r2.$o,   qr/^ARRAY\(0x\w+\)ARRAY\(0x\w+\)-obj/,
                                                 "RT #132385 r1.r2.o");
+
+    # ditto with a mutator
+    ::is($o .= $r1,     "obj-ref1",             "RT #132385 o.=r1");
 }
