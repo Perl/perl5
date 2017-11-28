@@ -336,9 +336,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+We now set C<$Config{libpth}> correctly for 64-bit builds using Visual C++
+versions earlier than 14.1.
 
 =back
 
