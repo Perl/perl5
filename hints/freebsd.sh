@@ -318,8 +318,20 @@ esac
 # of FreeBSD.
 d_printf_format_null='undef'
 
-# As of 10.3-RELEASE FreeBSD.  See [perl #128867]
-d_uselocale='undef'
+# See [perl #128867]
+# Interpreting: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=211743#c10
+# khw workaround no longer needed in the following FREEBSD_KERNEL_VERSIONs
+#1200004 and up
+#1100502 >= version < 1200000
+#1003507 >= version < 1100000
+
+FREEBSD_KERNEL_VERSION=`uname -U`
+if  [ $FREEBSD_KERNEL_VERSION -lt 1003507 ] || \
+    [ $FREEBSD_KERNEL_VERSION -ge 1100000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1100502 ] || \
+    [ $FREEBSD_KERNEL_VERSION -ge 1200000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1200004 ]
+then
+    d_uselocale='undef'
+fi
 
 # https://rt.perl.org/Ticket/Display.html?id=131337
 # Reported in 11.0-CURRENT with g++-4.8.5:
