@@ -11711,6 +11711,7 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
              * the top non-zero nybble. */
             for (i = vfnz[0], n = 0; i > 1; i >>= 1, n++) { }
             assert(n < 4);
+            assert(vlnz);
             vlnz[1] = 0;
             for (vshr = vlnz; vshr >= vfnz; vshr--) {
               vshr[1] |= (vshr[0] & (0xF >> (4 - n))) << (4 - n);
