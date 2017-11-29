@@ -1701,6 +1701,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             regnode_charclass_posixl temp;
             int add = 1;    /* To calculate the index of the complement */
 
+            Zero(&temp, 1, regnode_charclass_posixl);
             ANYOF_POSIXL_ZERO(&temp);
             for (i = 0; i < ANYOF_MAX; i++) {
                 assert(i % 2 != 0
@@ -4178,6 +4179,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     PERL_ARGS_ASSERT_STUDY_CHUNK;
     RExC_study_started= 1;
 
+    Zero(&data_fake, 1, scan_data_t);
 
     if ( depth == 0 ) {
         while (first_non_open && OP(first_non_open) == OPEN)

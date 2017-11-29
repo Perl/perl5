@@ -621,6 +621,8 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 
     PERL_ARGS_ASSERT_OPENN_CLEANUP;
 
+    Zero(&statbuf, 1, Stat_t);
+
     if (!fp) {
 	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
 	    && should_warn_nl(oname)
