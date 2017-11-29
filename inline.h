@@ -1636,7 +1636,7 @@ S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_PUSHWHEN;
 
-    cx->blk_givwhen.leave_op = cLOGOP->op_other;
+    cx->blk_when.leave_op = cLOGOP->op_other;
 }
 
 

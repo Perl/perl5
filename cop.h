@@ -721,10 +721,9 @@ struct block_loop {
 
 
 
-/* given/when context */
-struct block_givwhen {
+/* when context */
+struct block_when {
 	OP *leave_op;
-        SV *defsv_save; /* the original $_ */
 };
 
 
@@ -748,7 +747,7 @@ struct block {
 	struct block_format	blku_format;
 	struct block_eval	blku_eval;
 	struct block_loop	blku_loop;
-	struct block_givwhen	blku_givwhen;
+	struct block_when	blku_when;
     } blk_u;
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
@@ -764,7 +763,7 @@ struct block {
 #define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
-#define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
+#define blk_when	cx_u.cx_blk.blk_u.blku_when
 
 #define CX_DEBUG(cx, action)						\
     DEBUG_l(								\

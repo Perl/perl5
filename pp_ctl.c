@@ -4733,7 +4733,7 @@ PP(pp_continue)
     CX_LEAVE_SCOPE(cx);
     cx_popwhen(cx);
     cx_popblock(cx);
-    nextop = cx->blk_givwhen.leave_op->op_next;
+    nextop = cx->blk_when.leave_op->op_next;
     CX_POP(cx);
 
     return nextop;
