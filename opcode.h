@@ -2007,7 +2007,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000e40,	/* method_super */
 	0x00000e40,	/* method_redir */
 	0x00000e40,	/* method_redir_super */
-	0x00000340,	/* entergiven */
+	0x00000940,	/* entergiven */
 	0x00000100,	/* leavegiven */
 	0x00000340,	/* enterwhen */
 	0x00000100,	/* leavewhen */
@@ -2673,7 +2673,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* method_super */
        0, /* method_redir */
        0, /* method_redir_super */
-       0, /* entergiven */
+      -1, /* entergiven */
        0, /* leavegiven */
        0, /* enterwhen */
        0, /* leavewhen */
@@ -2871,7 +2871,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
     0x2f3c, 0x4039, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0578, 0x19b0, 0x40ec, 0x3ba8, 0x3385, /* const */
@@ -3165,7 +3165,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* METHOD_SUPER */ (OPpARG1_MASK),
     /* METHOD_REDIR */ (OPpARG1_MASK),
     /* METHOD_REDIR_SUPER */ (OPpARG1_MASK),
-    /* ENTERGIVEN */ (OPpARG1_MASK),
+    /* ENTERGIVEN */ (0),
     /* LEAVEGIVEN */ (OPpARG1_MASK),
     /* ENTERWHEN  */ (OPpARG1_MASK),
     /* LEAVEWHEN  */ (OPpARG1_MASK),

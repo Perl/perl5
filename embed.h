@@ -1654,7 +1654,6 @@
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
 #define move_proto_attr(a,b,c,d)	S_move_proto_attr(aTHX_ a,b,c,d)
 #define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
-#define newGIVWHENOP(a,b,c,d)	S_newGIVWHENOP(aTHX_ a,b,c,d)
 #define newMETHOP_internal(a,b,c,d)	S_newMETHOP_internal(aTHX_ a,b,c,d)
 #define new_logop(a,b,c,d)	S_new_logop(aTHX_ a,b,c,d)
 #define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)

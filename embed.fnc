@@ -2140,8 +2140,6 @@ s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags
 s	|OP*	|too_many_arguments_pv|NN OP *o|NN const char* name|U32 flags
-s	|OP*	|newGIVWHENOP	|NULLOK OP* cond|NN OP *block \
-				|I32 enter_opcode|I32 leave_opcode
 s	|bool	|process_special_blocks	|I32 floor \
 					|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv

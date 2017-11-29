@@ -4739,9 +4739,6 @@ STATIC void	S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name, bool
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 #define PERL_ARGS_ASSERT_MY_KID	\
 	assert(imopsp)
-STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave_opcode);
-#define PERL_ARGS_ASSERT_NEWGIVWHENOP	\
-	assert(block)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE OP*	S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth);
 #endif

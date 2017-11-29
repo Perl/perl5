@@ -1657,7 +1657,7 @@ S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 {
     PERL_ARGS_ASSERT_CX_PUSHGIVEN;
 
-    cx->blk_givwhen.leave_op = cLOGOP->op_other;
+    cx->blk_givwhen.leave_op = cLOOP->op_lastop;
     cx->blk_givwhen.defsv_save = orig_defsv;
 }
 

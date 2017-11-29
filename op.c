@@ -8766,45 +8766,6 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
     return o;
 }
 
-/* These construct the optree fragments representing given()
-   and when() blocks.
-
-   entergiven and enterwhen are LOGOPs; the op_other pointer
-   points up to the associated leave op. We need this so we
-   can put it in the context and make break/continue work.
-   (Also, of course, pp_enterwhen will jump straight to
-   op_other if the match fails.)
- */
-
-STATIC OP *
-S_newGIVWHENOP(pTHX_ OP *cond, OP *block, I32 enter_opcode, I32 leave_opcode)
-{
-    dVAR;
-    LOGOP *enterop;
-    OP *o;
-
-    PERL_ARGS_ASSERT_NEWGIVWHENOP;
-
-    enterop = alloc_LOGOP(enter_opcode, block, NULL);
-    enterop->op_targ = 0;
-    enterop->op_private = 0;
-
-    o = newUNOP(leave_opcode, 0, (OP *) enterop);
-
-    op_sibling_splice((OP*)enterop, NULL, 0, scalar(cond));
-    o->op_next = LINKLIST(cond);
-    cond->op_next = (OP *) enterop;
-
-    CHECKOP(enter_opcode, enterop); /* Currently does nothing, since
-    				       entergiven and enterwhen both
-    				       use ck_null() */
-
-    enterop->op_next = LINKLIST(block);
-    block->op_next = enterop->op_other = o;
-
-    return o;
-}
-
 /*
 =for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
 
@@ -8820,11 +8781,28 @@ C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
 OP *
 Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 {
+    OP *enterop, *leaveop;
     PERL_ARGS_ASSERT_NEWGIVENOP;
     PERL_UNUSED_ARG(defsv_off);
-
     assert(!defsv_off);
-    return newGIVWHENOP(cond, block, OP_ENTERGIVEN, OP_LEAVEGIVEN);
+
+    NewOpSz(1101, enterop, sizeof(LOOP));
+    OpTYPE_set(enterop, OP_ENTERGIVEN);
+    cLOOPx(enterop)->op_first = scalar(cond);
+    cLOOPx(enterop)->op_last = block;
+    OpMORESIB_set(cond, block);
+    OpLASTSIB_set(block, enterop);
+    enterop->op_flags = OPf_KIDS;
+
+    leaveop = newUNOP(OP_LEAVEGIVEN, 0, enterop);
+    leaveop->op_next = LINKLIST(cond);
+    cond->op_next = enterop;
+    enterop = CHECKOP(OP_ENTERGIVEN, enterop);
+    cLOOPx(enterop)->op_redoop = enterop->op_next = LINKLIST(block);
+    cLOOPx(enterop)->op_lastop = cLOOPx(enterop)->op_nextop = block->op_next =
+	leaveop;
+
+    return leaveop;
 }
 
 /*
@@ -8841,8 +8819,24 @@ by this function and become part of the constructed op tree.
 OP *
 Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 {
+    OP *enterop, *leaveop;
     PERL_ARGS_ASSERT_NEWWHENOP;
-    return newGIVWHENOP(cond, block, OP_ENTERWHEN, OP_LEAVEWHEN);
+
+    NewOpSz(1101, enterop, sizeof(LOGOP));
+    OpTYPE_set(enterop, OP_ENTERWHEN);
+    cLOGOPx(enterop)->op_first = scalar(cond);
+    OpMORESIB_set(cond, block);
+    OpLASTSIB_set(block, enterop);
+    enterop->op_flags = OPf_KIDS;
+
+    leaveop = newUNOP(OP_LEAVEWHEN, 0, enterop);
+    leaveop->op_next = LINKLIST(cond);
+    cond->op_next = enterop;
+    enterop = CHECKOP(OP_ENTERWHEN, enterop);
+    enterop->op_next = LINKLIST(block);
+    cLOGOPx(enterop)->op_other = block->op_next = leaveop;
+
+    return leaveop;
 }
 
 /* must not conflict with SVf_UTF8 */
@@ -15527,6 +15521,7 @@ Perl_rpeep(pTHX_ OP *o)
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
+	case OP_ENTERGIVEN:
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
 	    while (cLOOP->op_nextop->op_type == OP_NULL)

@@ -304,7 +304,6 @@ $bits{dorassign}{0} = $bf[0];
 $bits{dump}{0} = $bf[0];
 $bits{each}{0} = $bf[0];
 @{$bits{entereval}}{5,4,3,2,1,0} = ('OPpEVAL_RE_REPARSING', 'OPpEVAL_COPHH', 'OPpEVAL_BYTES', 'OPpEVAL_UNICODE', 'OPpEVAL_HAS_HH', $bf[0]);
-$bits{entergiven}{0} = $bf[0];
 $bits{enteriter}{3} = 'OPpITER_DEF';
 @{$bits{entersub}}{5,4,0} = ($bf[8], $bf[8], 'OPpENTERSUB_INARGS');
 $bits{entertry}{0} = $bf[0];
