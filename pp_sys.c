@@ -3012,18 +3012,13 @@ PP(pp_stat)
 	     * st_ino; and (d) sprintf() doesn't necessarily support
 	     * integers as large as st_ino.
 	     */
-	    bool neg;
 	    Stat_t s;
 	    CLANG_DIAG_IGNORE(-Wtautological-compare);
 	    GCC_DIAG_IGNORE(-Wtype-limits);
-#if ST_INO_SIGN == -1
-	    neg = PL_statcache.st_ino < 0;
-#else
-	    neg = FALSE;
-#endif
 	    GCC_DIAG_RESTORE;
 	    CLANG_DIAG_RESTORE;
-	    if (neg) {
+#if ST_INO_SIGN == -1
+	    if (PL_statcache.st_ino < 0) {
 		s.st_ino = (IV)PL_statcache.st_ino;
 		if (LIKELY(s.st_ino == PL_statcache.st_ino)) {
 		    mPUSHi(s.st_ino);
@@ -3041,7 +3036,9 @@ PP(pp_stat)
 		    *--p = '-';
 		    mPUSHp(p, buf+sizeof(buf) - p);
 		}
-	    } else {
+	    } else
+#endif
+            {
 		s.st_ino = (UV)PL_statcache.st_ino;
 		if (LIKELY(s.st_ino == PL_statcache.st_ino)) {
 		    mPUSHu(s.st_ino);
