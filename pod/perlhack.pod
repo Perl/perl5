@@ -219,6 +219,9 @@ email from our ticket tracking system.  This email will give you a
 ticket number.  Once your patch has made it to the ticket tracking
 system, it will also be sent to the perl5-porters@perl.org list.
 
+If your patch is related to an already-opened ticket you can also
+attach your patch to that ticket, without having to use perlbug.
+
 Patches are reviewed and discussed on the p5p list.  Simple,
 uncontroversial patches will usually be applied without any discussion.
 When the patch is applied, the ticket will be updated and you will
