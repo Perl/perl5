@@ -686,7 +686,7 @@
   cewchar.h includes a correct definition of MB_CUR_MAX and it is copied here
   since cewchar.h can't be included this early */
 #if defined(UNDER_CE) && (_MSC_VER < 1300)
-#  define MB_CUR_MAX 1
+#  define MB_CUR_MAX 1uL
 #endif
 
 # include <stdarg.h>
