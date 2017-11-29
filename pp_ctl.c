@@ -2160,8 +2160,6 @@ PP(pp_enteriter)
             itersave = GvSV(sv);
             SvREFCNT_inc_simple_void(itersave);
             cxflags = CXp_FOR_GV;
-            if (PL_op->op_private & OPpITER_DEF)
-                cxflags |= CXp_FOR_DEF;
         }
         else {                          /* LV ref: for \$foo (...) */
             assert(SvTYPE(sv) == SVt_PVMG);
@@ -2171,8 +2169,6 @@ PP(pp_enteriter)
             cxflags = CXp_FOR_LVREF;
         }
     }
-    /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
-    assert((cxflags & CXp_FOR_GV) || !(PL_op->op_private & OPpITER_DEF));
 
     /* Note that this context is initially set as CXt_NULL. Further on
      * down it's changed to one of the CXt_LOOP_*. Before it's changed,

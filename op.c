@@ -8604,16 +8604,6 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
 	    iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
             OpTYPE_set(sv, OP_RV2GV);
-
-	    /* The op_type check is needed to prevent a possible segfault
-	     * if the loop variable is undeclared and 'strict vars' is in
-	     * effect. This is illegal but is nonetheless parsed, so we
-	     * may reach this point with an OP_CONST where we're expecting
-	     * an OP_GV.
-	     */
-	    if (cUNOPx(sv)->op_first->op_type == OP_GV
-	     && cGVOPx_gv(cUNOPx(sv)->op_first) == PL_defgv)
-		iterpflags |= OPpITER_DEF;
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
 	    iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
@@ -8627,17 +8617,9 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	    NOOP;
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
-	if (padoff) {
-	    PADNAME * const pn = PAD_COMPNAME(padoff);
-	    const char * const name = PadnamePV(pn);
-
-	    if (PadnameLEN(pn) == 2 && name[0] == '$' && name[1] == '_')
-		iterpflags |= OPpITER_DEF;
-	}
     }
     else {
 	sv = newGVOP(OP_GV, 0, PL_defgv);
-	iterpflags |= OPpITER_DEF;
     }
 
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
