@@ -638,7 +638,11 @@ independently and mixed with other kinds of compound statement.
 C<given> evaluates its argument in scalar context, and executes its block
 with the C<$_> variable locally aliased to the result of evaluating the
 argument expression.  It is much like a C<foreach> loop that always has
-exactly one item to iterate over.  Either a C<given> or a C<foreach>
+exactly one item to iterate over.
+A C<given> construct even counts as a one-iteration loop for the purposes
+of loop control, so the C<redo> operator can be used to restart its block,
+and C<next> or C<last> can be used to exit the block early.
+Either a C<given> or a C<foreach>
 construct serves as a I<topicalizer>: C<when> can only
 be used in the dynamic scope of a topicalizer.
 
@@ -697,7 +701,8 @@ so providing the subroutine's return value, it evaluates to:
 
 =item *
 
-An empty list as soon as an explicit C<break> is encountered.
+An empty list as soon as an explicit C<break>, C<next>, or C<last>
+is encountered.
 
 =item *
 

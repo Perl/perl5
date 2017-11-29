@@ -3776,7 +3776,8 @@ value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
 to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
-Note that a block by itself is semantically identical to a loop
+Note that a block by itself or a C<given> construct
+is semantically identical to a loop
 that executes once.  Thus L<C<last>|/last LABEL> can be used to effect
 an early exit out of such a block.
 
@@ -4306,7 +4307,8 @@ value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
 to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
-Note that a block by itself is semantically identical to a loop
+Note that a block by itself or a C<given> construct
+is semantically identical to a loop
 that executes once.  Thus L<C<next>|/next LABEL> will exit such a block
 early.
 
@@ -6259,7 +6261,8 @@ value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
 to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
-Note that a block by itself is semantically identical to a loop
+Note that a block by itself or a C<given> construct
+is semantically identical to a loop
 that executes once.  Thus L<C<redo>|/redo LABEL> inside such a block
 will effectively turn it into a looping construct.
 

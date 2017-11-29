@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 39;
+plan tests => 55;
 
 CORE::given(3) {
     pass "CORE::given without feature flag";
@@ -129,6 +129,110 @@ is join(",", 111, 222,
 given(()) {
     is $_, undef, "stub topic value";
     is \$_, \undef, "stub topic identity";
+}
+
+foreach my $test (
+    [ "no", "[aA][bB][cB][dA]" ],
+    [ "last", "[aA][bB][dA]" ],
+    [ "next", "[aA][bB][dA]" ],
+    [ "redo", "[aA][bB][bB][cB][dA]" ],
+) {
+    my($loopex, $expect_act) = @$test;
+    my $act = "";
+    my $i = 0;
+    {
+	local $_ = "A";
+	$act .= "[a$_]";
+	given("B") {
+	    $act .= "[b$_]";
+	    $i++;
+	    if($i < 2) {
+		if($loopex eq "last") {
+		    last;
+		} elsif($loopex eq "next") {
+		    next;
+		} elsif($loopex eq "redo") {
+		    redo;
+		}
+	    }
+	    $act .= "[c$_]";
+	}
+	$act .= "[d$_]";
+    }
+    is $act, $expect_act, "given unlabelled $loopex loop exit";
+    $act = "";
+    $i = 0;
+    {
+	local $_ = "A";
+	$act .= "[a$_]";
+	G: given("B") {
+	    $act .= "[b$_]";
+	    {
+		$i++;
+		if($i < 2) {
+		    if($loopex eq "last") {
+			last G;
+		    } elsif($loopex eq "next") {
+			next G;
+		    } elsif($loopex eq "redo") {
+			redo G;
+		    }
+		}
+	    }
+	    $act .= "[c$_]";
+	}
+	$act .= "[d$_]";
+    }
+    is $act, $expect_act, "given labelled $loopex loop exit";
+    $act = "";
+    $i = 0;
+    {
+	local $_ = "A";
+	$act .= "[a$_]";
+	given("B") {
+	    $act .= "[b$_]";
+	    {
+		$i++;
+		if($i < 2) {
+		    if($loopex eq "last") {
+			last;
+		    } elsif($loopex eq "next") {
+			next;
+		    } elsif($loopex eq "redo") {
+			redo;
+		    }
+		}
+	    }
+	    $act .= "[c$_]";
+	}
+	$act .= "[d$_]";
+    }
+    is $act, "[aA][bB][cB][dA]", "interior $loopex loop exit";
+    $act = "";
+    $i = 0;
+    {
+	local $_ = "A";
+	$act .= "[a$_]";
+	B: {
+	    local $_ = "B";
+	    $act .= "[b$_]";
+	    given("C") {
+		$i++;
+		if($i < 2) {
+		    if($loopex eq "last") {
+			last B;
+		    } elsif($loopex eq "next") {
+			next B;
+		    } elsif($loopex eq "redo") {
+			redo B;
+		    }
+		}
+	    }
+	    $act .= "[c$_]";
+	}
+	$act .= "[d$_]";
+    }
+    is $act, $expect_act, "exterior $loopex loop exit";
 }
 
 1;

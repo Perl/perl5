@@ -1287,7 +1287,7 @@ static const char * const context_name[] = {
     "pseudo-block",
     NULL, /* CXt_WHEN never actually needs "block" */
     NULL, /* CXt_BLOCK never actually needs "block" */
-    NULL, /* CXt_GIVEN never actually needs "block" */
+    NULL, /* CXt_LOOP_GIVEN never actually needs "block" */
     NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
     NULL, /* CXt_LOOP_LAZYIV never actually needs "loop" */
     NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
@@ -1320,6 +1320,7 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 	    if (CxTYPE(cx) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
+	case CXt_LOOP_GIVEN:
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1468,6 +1469,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    if ((CxTYPE(cx)) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
+	case CXt_LOOP_GIVEN:
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1491,7 +1493,7 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
-	case CXt_GIVEN:
+	case CXt_LOOP_GIVEN:
 	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found given at cx=%ld)\n", (long)i));
 	    return i;
 	case CXt_LOOP_PLAIN:
@@ -1564,6 +1566,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_EVAL:
 	    cx_popeval(cx);
 	    break;
+	case CXt_LOOP_GIVEN:
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1573,9 +1576,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	case CXt_WHEN:
 	    cx_popwhen(cx);
-	    break;
-	case CXt_GIVEN:
-	    cx_popgiven(cx);
 	    break;
 	case CXt_BLOCK:
 	case CXt_NULL:
@@ -2990,7 +2990,7 @@ PP(pp_goto)
             case CXt_LOOP_LAZYSV:
             case CXt_LOOP_LIST:
             case CXt_LOOP_ARY:
-	    case CXt_GIVEN:
+	    case CXt_LOOP_GIVEN:
 	    case CXt_WHEN:
 		gotoprobe = OpSIBLING(cx->blk_oldcop);
 		break;
@@ -4599,8 +4599,8 @@ PP(pp_entergiven)
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
     GvSV(PL_defgv) = SvREFCNT_inc(newsv);
 
-    cx = cx_pushblock(CXt_GIVEN, gimme, SP, PL_savestack_ix);
-    cx_pushgiven(cx, origsv);
+    cx = cx_pushblock(CXt_LOOP_GIVEN|CXp_FOR_GV, gimme, SP, PL_savestack_ix);
+    cx_pushloop_given(cx, origsv);
 
     RETURN;
 }
@@ -4613,7 +4613,7 @@ PP(pp_leavegiven)
     PERL_UNUSED_CONTEXT;
 
     cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_GIVEN);
+    assert(CxTYPE(cx) == CXt_LOOP_GIVEN);
     oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
@@ -4623,7 +4623,7 @@ PP(pp_leavegiven)
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
     CX_LEAVE_SCOPE(cx);
-    cx_popgiven(cx);
+    cx_poploop(cx);
     cx_popblock(cx);
     CX_POP(cx);
 

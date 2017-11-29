@@ -14606,6 +14606,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
                 /* FALLTHROUGH */
 	    case CXt_LOOP_LIST:
 	    case CXt_LOOP_LAZYIV:
+	    case CXt_LOOP_GIVEN:
                 /* code common to all 'for' CXt_LOOP_* types */
 		ncx->blk_loop.itersave =
                                     sv_dup_inc(ncx->blk_loop.itersave, param);
@@ -14637,10 +14638,6 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_format.gv	= gv_dup(ncx->blk_format.gv, param);
 		ncx->blk_format.dfoutgv	= gv_dup_inc(ncx->blk_format.dfoutgv,
 						     param);
-		break;
-	    case CXt_GIVEN:
-		ncx->blk_loop.itersave =
-                                sv_dup_inc(ncx->blk_loop.itersave, param);
 		break;
 	    case CXt_BLOCK:
 	    case CXt_NULL:

@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 166;
+plan tests => 164;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -737,16 +737,6 @@ sub contains_x {
 my $letter;
 
 $letter = '';
-for ("a".."e") {
-    given ($_) {
-	$letter = $_;
-	when ($_ eq "b") { last }
-    }
-    $letter = "z";
-}
-is($letter, "b", "last in when");
-
-$letter = '';
 LETTER1: for ("a".."e") {
     given ($_) {
 	$letter = $_;
@@ -755,16 +745,6 @@ LETTER1: for ("a".."e") {
     $letter = "z";
 }
 is($letter, "b", "last LABEL in when");
-
-$letter = '';
-for ("a".."e") {
-    given ($_) {
-	when (/b|d/) { next }
-	$letter .= $_;
-    }
-    $letter .= ',';
-}
-is($letter, "a,c,e,", "next in when");
 
 $letter = '';
 LETTER2: for ("a".."e") {
@@ -910,11 +890,11 @@ GIVEN5:
 {
     # Switch control
     my @exp = ('6 7', '', '6 7');
-    for (0, 1, 2, 3) {
+    F: for (0, 1, 2, 3) {
 	my @list = do { given ($_) {
 	    continue when $_ <= 1;
 	    break    when $_ == 1;
-	    next     when $_ == 2;
+	    next F   when $_ == 2;
 	    6, 7;
 	} };
 	is("@list", shift(@exp), "rvalue given - default list [$_]");

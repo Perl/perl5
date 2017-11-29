@@ -3155,11 +3155,10 @@ AiM	|void	|cx_popeval      |NN PERL_CONTEXT *cx
 AiM	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
 AiM	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
 				 |NN void *itervarp|NULLOK SV *itersave
+AiM	|void	|cx_pushloop_given    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
 AiM	|void	|cx_poploop      |NN PERL_CONTEXT *cx
 AiM	|void	|cx_pushwhen     |NN PERL_CONTEXT *cx
 AiM	|void	|cx_popwhen      |NN PERL_CONTEXT *cx
-AiM	|void	|cx_pushgiven    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
-AiM	|void	|cx_popgiven     |NN PERL_CONTEXT *cx
 #endif
 
 #ifdef USE_DTRACE

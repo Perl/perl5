@@ -858,14 +858,9 @@ struct context {
 #define CXt_NULL	0 /* currently only used for sort BLOCK */
 #define CXt_WHEN	1
 #define CXt_BLOCK	2
-/* When micro-optimising :-) keep GIVEN next to the LOOPs, as these 5 share a
-   jump table in pp_ctl.c
-   The first 4 don't have a 'case' in at least one switch statement in pp_ctl.c
-*/
-#define CXt_GIVEN	3
-
-/* be careful of the ordering of these five. Macros like CxTYPE_is_LOOP,
+/* be careful of the ordering of these six. Macros like CxTYPE_is_LOOP,
  * CxFOREACH compare ranges */
+#define CXt_LOOP_GIVEN	3 /* given (...)    { ...; } */
 #define CXt_LOOP_ARY	4 /* for (@ary)     { ...; } */
 #define CXt_LOOP_LAZYSV	5 /* for ('a'..'z') { ...; } */
 #define CXt_LOOP_LAZYIV	6 /* for (1..9)     { ...; } */
@@ -904,7 +899,7 @@ struct context {
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_ARY                \
+#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_GIVEN              \
                            && CxTYPE(cx) <= CXt_LOOP_PLAIN)
 #define CxMULTICALL(c)	((c)->cx_type & CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXTYPEMASK|CXp_REAL))		\

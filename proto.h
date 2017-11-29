@@ -3988,11 +3988,6 @@ PERL_STATIC_INLINE void	S_cx_popformat(pTHX_ PERL_CONTEXT *cx);
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popgiven(pTHX_ PERL_CONTEXT *cx);
-#define PERL_ARGS_ASSERT_CX_POPGIVEN	\
-	assert(cx)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_cx_poploop(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPLOOP	\
 	assert(cx)
@@ -4033,14 +4028,14 @@ PERL_STATIC_INLINE void	S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *reto
 	assert(cx); assert(cv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
-#define PERL_ARGS_ASSERT_CX_PUSHGIVEN	\
-	assert(cx)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV *itersave);
 #define PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR	\
 	assert(cx); assert(itervarp)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_cx_pushloop_given(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
+#define PERL_ARGS_ASSERT_CX_PUSHLOOP_GIVEN	\
+	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);

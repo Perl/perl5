@@ -1596,6 +1596,17 @@ S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
 }
 
 
+PERL_STATIC_INLINE void
+S_cx_pushloop_given(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHLOOP_GIVEN;
+
+    cx->blk_loop.my_op = cLOOP;
+    cx->blk_loop.itervar_u.gv = PL_defgv;
+    cx->blk_loop.itersave = orig_defsv;
+}
+
+
 /* pop all loop types, including plain */
 
 PERL_STATIC_INLINE void
@@ -1651,30 +1662,6 @@ S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
     /* currently NOOP */
 }
 
-
-PERL_STATIC_INLINE void
-S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
-{
-    PERL_ARGS_ASSERT_CX_PUSHGIVEN;
-
-    cx->blk_loop.my_op = cLOOP;
-    cx->blk_loop.itersave = orig_defsv;
-}
-
-
-PERL_STATIC_INLINE void
-S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
-{
-    SV *sv;
-
-    PERL_ARGS_ASSERT_CX_POPGIVEN;
-    assert(CxTYPE(cx) == CXt_GIVEN);
-
-    sv = GvSV(PL_defgv);
-    GvSV(PL_defgv) = cx->blk_loop.itersave;
-    cx->blk_loop.itersave = NULL;
-    SvREFCNT_dec(sv);
-}
 
 /* ------------------ util.h ------------------------------------------- */
 
