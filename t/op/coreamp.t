@@ -370,18 +370,6 @@ like join(" ", &CORE::bless([],'parcel')),
      qr/^parcel=ARRAY(?!.* )/, "&bless in list context";
 like &mybless([]), qr/^main=ARRAY/, '&bless with one arg';
 
-test_proto 'break';
-{ $tests ++;
-  my $tmp;
-  CORE::given(1) {
-    CORE::when(1) {
-      &mybreak;
-      $tmp = 'bad';
-    }
-  }
-  is $tmp, undef, '&break';
-}
-
 test_proto 'caller';
 $tests += 4;
 sub caller_test {

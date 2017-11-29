@@ -950,7 +950,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 5: /* 39 tokens of length 5 */
+    case 5: /* 38 tokens of length 5 */
       switch (name[0])
       {
         case 'B':
@@ -1003,31 +1003,15 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           }
 
         case 'b':
-          switch (name[1])
-          {
-            case 'l':
-              if (name[2] == 'e' &&
-                  name[3] == 's' &&
-                  name[4] == 's')
-              {                                   /* bless            */
-                return -KEY_bless;
-              }
-
-              goto unknown;
-
-            case 'r':
-              if (name[2] == 'e' &&
-                  name[3] == 'a' &&
-                  name[4] == 'k')
-              {                                   /* break            */
-                return (all_keywords || FEATURE_SWITCH_IS_ENABLED ? -KEY_break : 0);
-              }
-
-              goto unknown;
-
-            default:
-              goto unknown;
+          if (name[1] == 'l' &&
+              name[2] == 'e' &&
+              name[3] == 's' &&
+              name[4] == 's')
+          {                                       /* bless            */
+            return -KEY_bless;
           }
+
+          goto unknown;
 
         case 'c':
           switch (name[1])
@@ -3417,5 +3401,5 @@ unknown:
 }
 
 /* Generated from:
- * 1e6a65fdd2e2d8aec28927cb9cbfed6e8a33ba077f0114b420746a04b0df8792 regen/keywords.pl
+ * 50664fad65e719c51bf369702163eb7ade79f997461f928cc20f1e1bcf8369b8 regen/keywords.pl
  * ex: set ro: */

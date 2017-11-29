@@ -332,7 +332,6 @@ entergiven	given()			ck_null		d{
 leavegiven	leave given block	ck_null		1
 enterwhen	when()			ck_null		d|
 leavewhen	leave when block	ck_null		1
-break		break			ck_null		0
 continue	continue		ck_null		0
 
 # I/O.

@@ -4739,29 +4739,6 @@ PP(pp_continue)
     return nextop;
 }
 
-PP(pp_break)
-{
-    I32 cxix;
-    PERL_CONTEXT *cx;
-
-    cxix = dopoptogivenfor(cxstack_ix);
-    if (cxix < 0)
-	DIE(aTHX_ "Can't \"break\" outside a given block");
-
-    cx = &cxstack[cxix];
-    if (CxFOREACH(cx))
-	DIE(aTHX_ "Can't \"break\" in a loop topicalizer");
-
-    if (cxix < cxstack_ix)
-        dounwind(cxix);
-
-    /* Restore the sp at the time we entered the given block */
-    cx = CX_CUR();
-    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
-
-    return cx->blk_loop.my_op->op_nextop;
-}
-
 static MAGIC *
 S_doparseform(pTHX_ SV *sv)
 {

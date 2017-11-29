@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 253;
+plan tests => 252;
 
 while (<DATA>) {
     chomp;
@@ -51,7 +51,6 @@ atan2 ($$)
 bind (*$)
 binmode (*;$)
 bless ($;$)
-break ()
 caller (;$)
 chdir (;$)
 chmod (@)

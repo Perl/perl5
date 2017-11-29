@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 164;
+plan tests => 161;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -28,9 +28,6 @@ use feature 'switch';
 
 eval { continue };
 like($@, qr/^Can't "continue" outside/, "continue outside");
-
-eval { break };
-like($@, qr/^Can't "break" outside/, "break outside");
 
 # Scoping rules
 
@@ -590,14 +587,10 @@ my $f = tie my $v, "FetchCounter";
     for (1, "two") {
 	when ($_ eq "two") {
 	    is($first, 0, "Loop: second");
-	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
-	    	q{Can't "break" in a loop topicalizer});
 	}
 	when ($_ == 1) {
 	    is($first, 1, "Loop: first");
 	    $first = 0;
-	    # Implicit break is okay
 	}
     }
 }
@@ -607,14 +600,10 @@ my $f = tie my $v, "FetchCounter";
     for $_ (1, "two") {
 	when ($_ eq "two") {
 	    is($first, 0, "Explicit \$_: second");
-	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
-	    	q{Can't "break" in a loop topicalizer});
 	}
 	when ($_ == 1) {
 	    is($first, 1, "Explicit \$_: first");
 	    $first = 0;
-	    # Implicit break is okay
 	}
     }
 }
@@ -709,7 +698,7 @@ sub contains_x {
 	do { $ok = 1; continue } when /pea/;
 	$ok += 2;
 	$ok = 0 when /pie/;
-	$ok += 4; break;
+	$ok += 4; next;
 	$ok = 0;
     }
     is($ok, 7, "postfix regex");
@@ -762,7 +751,7 @@ is($letter, "a,c,e,", "next LABEL in when");
     goto GIVEN1;
     $flag = 1;
     GIVEN1: given ($flag) {
-	when ($_ == 0) { break; }
+	when ($_ == 0) { next; }
 	$flag = 2;
     }
     is($flag, 0, "goto GIVEN1");
@@ -800,7 +789,7 @@ GIVEN4:
 GIVEN5:
     given ($flag) {
 	when ($_ == 0) { $flag = 1; goto GIVEN5; $flag = 2; }
-	when ($_ == 1) { break; }
+	when ($_ == 1) { next; }
 	$flag = 3;
     }
     is($flag, 1, "goto inside given and when to the given stmt");
@@ -893,7 +882,7 @@ GIVEN5:
     F: for (0, 1, 2, 3) {
 	my @list = do { given ($_) {
 	    continue when $_ <= 1;
-	    break    when $_ == 1;
+	    next     when $_ == 1;
 	    next F   when $_ == 2;
 	    6, 7;
 	} };
@@ -1041,7 +1030,7 @@ GIVEN5:
 
     my @descriptions = qw<
 	when
-	break
+	next
 	continue
 	default
     >;
@@ -1057,7 +1046,7 @@ GIVEN5:
 		given ($id) {
 		    my $x;
 		    when ($_ == 0) { Fmurrr->new($destroyed, 0) }
-		    when ($_ == 1) { my $y = Fmurrr->new($destroyed, 1); break }
+		    when ($_ == 1) { my $y = Fmurrr->new($destroyed, 1); next }
 		    when ($_ == 2) { $x = Fmurrr->new($destroyed, 2); continue }
 		    when ($_ == 2) { $x }
 		    Fmurrr->new($destroyed, 3);
@@ -1065,25 +1054,25 @@ GIVEN5:
 	    };
 	    $res_id = $res->{id};
 	}
-	$res_id = $id if $id == 1; # break doesn't return anything
+	$res_id = $id if $id == 1; # next doesn't return anything
 
 	is $res_id,    $id, "given/when returns the right object - $desc";
 	is $destroyed, 1,   "given/when does not leak - $desc";
     };
 }
 
-# break() must reset the stack
+# next() must reset the stack
 {
     my @res = (1, do {
 	given ("x") {
 	    2, 3, do {
 		when (/[a-z]/) {
-		    4, 5, 6, break
+		    4, 5, 6, next
 		}
 	    }
 	}
     });
-    is "@res", "1", "break resets the stack";
+    is "@res", "1", "next resets the stack";
 }
 
 # RT #94682:

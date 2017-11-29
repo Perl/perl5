@@ -1514,7 +1514,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::break;
+    next;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1530,7 +1530,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::break;
+    next;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1541,7 +1541,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::break;
+    next;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1557,7 +1557,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::break;
+    next;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
@@ -1570,7 +1570,7 @@ CORE::given ($x) {
     CORE::when (3) {
         continue;
     }
-    CORE::break;
+    next;
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;

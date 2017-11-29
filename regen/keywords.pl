@@ -41,7 +41,6 @@ my %feature_kw = (
     given     => 'switch',
     when      => 'switch',
     # continue is already a keyword
-    break     => 'switch',
     evalbytes => 'evalbytes',
     __SUB__   => '__SUB__',
     fc        => 'fc',
@@ -128,7 +127,6 @@ __END__
 -bind
 -binmode
 -bless
--break
 -caller
 -chdir
 -chmod

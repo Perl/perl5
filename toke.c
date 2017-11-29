@@ -7782,9 +7782,6 @@ Perl_yylex(pTHX)
 	case KEY_bless:
 	    LOP(OP_BLESS,XTERM);
 
-	case KEY_break:
-	    FUN0(OP_BREAK);
-
 	case KEY_chop:
 	    UNI(OP_CHOP);
 

@@ -367,7 +367,6 @@ EXTCONST char* const PL_op_name[] = {
 	"leavegiven",
 	"enterwhen",
 	"leavewhen",
-	"break",
 	"continue",
 	"open",
 	"close",
@@ -772,7 +771,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"leave given block",
 	"when()",
 	"leave when block",
-	"break",
 	"continue",
 	"open",
 	"close",
@@ -1189,7 +1187,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_leavegiven,
 	Perl_pp_enterwhen,
 	Perl_pp_leavewhen,
-	Perl_pp_break,
 	Perl_pp_continue,
 	Perl_pp_open,
 	Perl_pp_close,
@@ -1602,7 +1599,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* leavegiven */
 	Perl_ck_null,		/* enterwhen */
 	Perl_ck_null,		/* leavewhen */
-	Perl_ck_null,		/* break */
 	Perl_ck_null,		/* continue */
 	Perl_ck_open,		/* open */
 	Perl_ck_fun,		/* close */
@@ -2011,7 +2007,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000100,	/* leavegiven */
 	0x00000340,	/* enterwhen */
 	0x00000100,	/* leavewhen */
-	0x00000000,	/* break */
 	0x00000000,	/* continue */
 	0x0029640d,	/* open */
 	0x0000eb04,	/* close */
@@ -2677,7 +2672,6 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* leavegiven */
        0, /* enterwhen */
        0, /* leavewhen */
-      -1, /* break */
       -1, /* continue */
      189, /* open */
       52, /* close */
@@ -3169,7 +3163,6 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* LEAVEGIVEN */ (OPpARG1_MASK),
     /* ENTERWHEN  */ (OPpARG1_MASK),
     /* LEAVEWHEN  */ (OPpARG1_MASK),
-    /* BREAK      */ (0),
     /* CONTINUE   */ (0),
     /* OPEN       */ (OPpARG4_MASK|OPpOPEN_IN_RAW|OPpOPEN_IN_CRLF|OPpOPEN_OUT_RAW|OPpOPEN_OUT_CRLF),
     /* CLOSE      */ (OPpARG4_MASK),

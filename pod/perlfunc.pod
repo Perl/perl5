@@ -255,7 +255,7 @@ X<control flow>
 
 =for Pod::Functions =Flow
 
-L<C<break>|/break>, L<C<caller>|/caller EXPR>,
+L<C<caller>|/caller EXPR>,
 L<C<continue>|/continue BLOCK>, L<C<die>|/die LIST>, L<C<do>|/do BLOCK>,
 L<C<dump>|/dump LABEL>, L<C<eval>|/eval EXPR>,
 L<C<evalbytes>|/evalbytes EXPR>, L<C<exit>|/exit EXPR>,
@@ -266,16 +266,9 @@ L<C<redo>|/redo LABEL>, L<C<return>|/return EXPR>,
 L<C<sub>|/sub NAME BLOCK>, L<C<__SUB__>|/__SUB__>,
 L<C<wantarray>|/wantarray>
 
-L<C<break>|/break> is available only if you enable the experimental
-L<C<"switch"> feature|feature/The 'switch' feature> or use the C<CORE::>
-prefix.  The L<C<"switch"> feature|feature/The 'switch' feature> also
-enables the C<given> and C<when> statements, which are
-documented in L<perlsyn/"Switch Statements">.
-The L<C<"switch"> feature|feature/The 'switch' feature> is enabled
-automatically with a C<use v5.10> (or higher) declaration in the current
-scope.  In Perl v5.14 and earlier, L<C<continue>|/continue BLOCK>
-required the L<C<"switch"> feature|feature/The 'switch' feature>, like
-the other keywords.
+In Perl v5.14 and earlier, L<C<continue>|/continue BLOCK>
+required the L<C<"switch"> feature|feature/The 'switch' feature> to
+be enabled.
 
 L<C<evalbytes>|/evalbytes EXPR> is only available with the
 L<C<"evalbytes"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
@@ -907,21 +900,6 @@ confusion, you may wish to avoid such package names as well.  Make sure
 that CLASSNAME is a true value.
 
 See L<perlmod/"Perl Modules">.
-
-=item break
-
-=for Pod::Functions +switch break out of a C<given> block
-
-Break out of a C<given> block.  Will signal an error if there is a
-closer C<foreach> block.  The search is for the closest dynamically
-enclosing topicalizer.
-
-L<C<break>|/break> is available only if the
-L<C<"switch"> feature|feature/The 'switch' feature> is enabled or if it
-is prefixed with C<CORE::>. The
-L<C<"switch"> feature|feature/The 'switch' feature> is enabled
-automatically with a C<use v5.10> (or higher) declaration in the current
-scope.
 
 =item caller EXPR
 X<caller> X<call stack> X<stack> X<stack trace>

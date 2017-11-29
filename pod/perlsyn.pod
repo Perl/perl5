@@ -620,8 +620,8 @@ example:
 
     use v5.14;
 
-Under the "switch" feature, Perl gains the experimental keywords C<given>,
-C<when>, and C<break>.  Starting from Perl 5.16, one can
+Under the "switch" feature, Perl gains the experimental keywords C<given>
+and C<when>.  Starting from Perl 5.16, one can
 prefix the switch keywords with C<CORE::> to access the feature without
 a C<use feature> statement.
 
@@ -676,12 +676,6 @@ less punctuation as
         $nothing = 1;
     }
 
-You can use the C<break> keyword to break out of the dynamically enclosing
-topicalizer, if it's a C<given> block.  This resembles the jump to the end
-of the topicalizer that implicitly happens at the end of every C<when>
-block, except that the explicit C<break> can only break
-out of a C<given> topicalizer, not a C<foreach>.
-
 You can use the C<continue> keyword to exit a C<when>
 block, proceeding to the following statement.  This is most commonly
 done last thing inside the block, to override the implicit jump to the
@@ -701,8 +695,7 @@ so providing the subroutine's return value, it evaluates to:
 
 =item *
 
-An empty list as soon as an explicit C<break>, C<next>, or C<last>
-is encountered.
+An empty list as soon as an explicit C<next> or C<last> is encountered.
 
 =item *
 

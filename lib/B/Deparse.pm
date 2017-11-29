@@ -2247,7 +2247,6 @@ my %feature_keywords = (
     say     => 'say',
     given   => 'switch',
     when    => 'switch',
-    break   => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
@@ -2539,7 +2538,6 @@ sub pp_ggrgid { unop(@_, "getgrgid") }
 sub pp_lock { unop(@_, "lock") }
 
 sub pp_continue { unop(@_, "continue"); }
-sub pp_break { unop(@_, "break"); }
 
 sub givwhen {
     my $self = shift;
