@@ -3565,7 +3565,6 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             GCC_DIAG_RESTORE;
             sv = sv_newmortal();
 	    if (buf) {
-                const U8 * first_variant;
                 STRLEN len = strlen(buf);
 		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
 		if (       SvUTF8(fmt)
