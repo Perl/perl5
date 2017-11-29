@@ -218,7 +218,7 @@ declaration, or a declaration that implies it.  It behaves like the full
 C<when> statement with block, described in L</"Switch Statements"> below.
 It executes the statement only if the I<EXPR> is true.  If the statement
 executes, control then implicitly jumps to the end of the dynamically
-enclosing C<foreach> or C<given> block.
+enclosing loop (usually a C<given> block).
 
 =head2 Compound Statements
 X<statement, compound> X<block> X<bracket, curly> X<curly bracket> X<brace>
@@ -589,8 +589,8 @@ The BLOCK construct can be used to emulate case structures.
         $nothing = 1;
     }
 
-You'll also find that C<foreach> loop used to create a topicalizer
-and a switch:
+You'll also find the C<foreach> loop used to establish a topic for
+a switch:
 
     SWITCH:
     for ($var) {
@@ -642,17 +642,12 @@ exactly one item to iterate over.
 A C<given> construct even counts as a one-iteration loop for the purposes
 of loop control, so the C<redo> operator can be used to restart its block,
 and C<next> or C<last> can be used to exit the block early.
-Either a C<given> or a C<foreach>
-construct serves as a I<topicalizer>: C<when> can only
-be used in the dynamic scope of a topicalizer.
 
 C<when> evaluates its argument as a truth value.  If the argument
 was false then it does not execute its block, and proceeds to the
 following statement.  If the argument was true, it executes the block,
-then implicitly jumps to the end of the closest dynamically enclosing
-topicalizer.  (In the case of a C<foreach> topicalizer, this jump
-behaves as a C<next>, moving on to the next iteration, not a C<last>,
-which would exit the loop.)
+then implicitly performs a C<next>, jumping to the end of the closest
+dynamically enclosing C<given> block or other kind of loop.
 
 Putting this together, the code in the previous section could be
 rewritten as
@@ -678,8 +673,8 @@ less punctuation as
 
 You can use the C<continue> keyword to exit a C<when>
 block, proceeding to the following statement.  This is most commonly
-done last thing inside the block, to override the implicit jump to the
-end of the topicalizer.  For example
+done last thing inside the block, to override the implicit C<next>.
+For example
 
     given($foo) {
         when (/x/) { say '$foo contains an x'; continue }

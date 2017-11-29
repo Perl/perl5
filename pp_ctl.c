@@ -1482,36 +1482,6 @@ S_dopoptoloop(pTHX_ I32 startingblock)
     return i;
 }
 
-/* find the next GIVEN or FOR (with implicit $_) loop context block */
-
-STATIC I32
-S_dopoptogivenfor(pTHX_ I32 startingblock)
-{
-    I32 i;
-    for (i = startingblock; i >= 0; i--) {
-	const PERL_CONTEXT *cx = &cxstack[i];
-	switch (CxTYPE(cx)) {
-	default:
-	    continue;
-	case CXt_LOOP_GIVEN:
-	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found given at cx=%ld)\n", (long)i));
-	    return i;
-	case CXt_LOOP_PLAIN:
-            assert(!(cx->cx_type & CXp_FOR_DEF));
-	    break;
-	case CXt_LOOP_LAZYIV:
-	case CXt_LOOP_LAZYSV:
-	case CXt_LOOP_LIST:
-	case CXt_LOOP_ARY:
-            if (cx->cx_type & CXp_FOR_DEF) {
-		DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found foreach at cx=%ld)\n", (long)i));
-		return i;
-	    }
-	}
-    }
-    return i;
-}
-
 STATIC I32
 S_dopoptowhen(pTHX_ I32 startingblock)
 {
@@ -4683,9 +4653,9 @@ PP(pp_leavewhen)
     assert(CxTYPE(cx) == CXt_WHEN);
     gimme = cx->blk_gimme;
 
-    cxix = dopoptogivenfor(cxstack_ix);
+    cxix = dopoptoloop(cxstack_ix);
     if (cxix < 0)
-	DIE(aTHX_ "Can't \"when\" outside a topicalizer");
+	DIE(aTHX_ "Can't leave \"when\" outside a loop");
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)
@@ -4693,18 +4663,19 @@ PP(pp_leavewhen)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
-    /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
+    /* pop the WHEN, BLOCK and anything else before the loop */
     assert(cxix < cxstack_ix);
     dounwind(cxix);
 
     cx = &cxstack[cxix];
 
-    if (CxFOREACH(cx)) {
+    if (CxTYPE(cx) != CXt_LOOP_GIVEN) {
         /* emulate pp_next. Note that any stack(s) cleanup will be
          * done by the pp_unstack which op_nextop should point to */
         cx = CX_CUR();
 	cx_topblock(cx);
 	PL_curcop = cx->blk_oldcop;
+	PERL_ASYNC_CHECK();
 	return cx->blk_loop.my_op->op_nextop;
     }
     else {

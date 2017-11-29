@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 39;
+plan tests => 42;
 
 foreach(3) {
     CORE::when(3) {
@@ -176,5 +176,32 @@ foreach(3) {
     when(()) { fail; }
     pass;
 }
+
+foreach my $z (3) {
+    when(1) { pass; }
+    fail;
+}
+
+my @a = qw(x y z);
+my $act = "";
+while(@a) {
+    $act .= "[a@{[0+@a]}]";
+    when(shift(@a) eq "y") {
+	$act .= "[b]";
+    }
+    $act .= "[c]";
+}
+is $act, "[a3][c][a2][b][a1][c]";
+
+$act = "";
+{
+    $act .= "[a]";
+    when(0) { $act .= "[b]"; }
+    $act .= "[c]";
+    when(1) { $act .= "[d]"; }
+    $act .= "[e]";
+    when(1) { $act .= "[f]"; }
+}
+is $act, "[a][c][d]";
 
 1;

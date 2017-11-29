@@ -1318,9 +1318,8 @@ using an empty one, logically enough, so L<C<next>|/next LABEL> goes
 directly back to check the condition at the top of the loop.
 
 When there is no BLOCK, L<C<continue>|/continue BLOCK> is a function
-that exits the current C<when> block, avoiding the jump
-to the end of the enclosing topicalizer that implicitly happens when
-execution reaches the end of such a block.
+that exits the current C<when> block, avoiding the implicit C<next>
+that happens when execution reaches the end of such a block.
 In Perl 5.14 and earlier, this form of
 L<C<continue>|/continue BLOCK> was only available when the
 L<C<"switch"> feature|feature/The 'switch' feature> was enabled.  See

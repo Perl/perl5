@@ -1076,6 +1076,16 @@ usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
 
+=item Can't leave "when" outside a loop
+
+(F) Control reached the end of a C<when> block that isn't inside any
+loop (including a C<given> block).  An implicit C<next> occurs here,
+which requires a loop to jump to.  You probably wanted the C<when> to be
+inside a C<given> block.  Note that you won't get this error if the match
+controlling the C<when> fails, or if you use an explicit C<continue> to
+avoid reaching the end of the block.  But if you rely on not reaching the
+implicit C<next> then you probably didn't want C<when>, but rather C<if>.
+
 =item Can't linearize anonymous symbol table
 
 (F) Perl tried to calculate the method resolution order (MRO) of a
@@ -1535,13 +1545,6 @@ references can be unweakened.
 
 (F) You attempted to weaken something that was not a reference.  Only
 references can be weakened.
-
-=item Can't "when" outside a topicalizer
-
-(F) You have used a C<when> block that is neither inside a C<foreach>
-loop nor a C<given> block.  (Note that this error is issued on exit
-from the C<when> block, so you won't get the error if the match fails,
-or if you use an explicit C<continue>.)
 
 =item Can't x= to read-only value
 
