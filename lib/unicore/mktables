@@ -16581,27 +16581,69 @@ sub pod_alphanumeric_sort {
         return -1
     }
 
-    # Determine if the two operands are numeric property values or not.
-    # A numeric property will look like xyz: 3.  But the number
-    # can begin with an optional minus sign, and may have a
-    # fraction or rational component, like xyz: 3/2.  If either
-    # isn't numeric, use alphabetic sort.
-    my ($a_initial, $a_number) =
-        ($a =~ /^ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
-    return $a cmp $b unless defined $a_number;
-    my ($b_initial, $b_number) =
-        ($b =~ /^ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
-    return $a cmp $b unless defined $b_number;
+    # Determine if the two operands are compound or not, and if so if are
+    # "numeric" property values or not, like \p{Age: 3.0}.  But there are also
+    # things like \p{Canonical_Combining_Class: CCC133} and \p{Age: V10_0},
+    # all of which this considers numeric, and for sorting, looks just at the
+    # numeric parts.  It can also be a rational like \p{Numeric Value=-1/2}.
+    my $split_re = qr/
+        ^ ( [^:=]+ ) # $1 is undef if not a compound form, otherwise is the
+                     # property name
+        [:=] \s*     # The syntax for the compound form
+        (?:          # followed by ...
+            (        # $2 gets defined if what follows is a "numeric"
+                     # expression, which is ...
+              ( -? \d+ (?: [.\/] \d+)?  # An integer, float, or rational
+                                        # number, optionally signed
+               | [[:alpha:]]{2,} \d+ $ ) # or something like CCC131.  Either
+                                         # of these go into $3
+             | ( V \d+ _ \d+ )           # or a Unicode's Age property version
+                                         # number, into $4
+            )
+            | .* $    # If not "numeric", accept anything so that $1 gets
+                      # defined if it is any compound form
+        ) /ix;
+    my ($a_initial, $a_numeric, $a_number, $a_version) = ($a =~ $split_re);
+    my ($b_initial, $b_numeric, $b_number, $b_version) = ($b =~ $split_re);
 
-    # Here they are both numeric, but use alphabetic sort if the
-    # initial parts don't match
-    return $a cmp $b if $a_initial ne $b_initial;
+    # Sort alphabeticlly on the whole property name if either operand isn't
+    # compound, or they differ.
+    return $a cmp $b if   ! defined $a_initial
+                       || ! defined $b_initial
+                       || $a_initial ne $b_initial;
+
+    if (! defined $a_numeric) {
+
+        # If neither is numeric, use alpha sort
+        return $a cmp $b if ! defined $b_numeric;
+        return 1;  # Sort numeric ahead of alpha
+    }
+
+    # Here $a is numeric
+    return -1 if ! defined $b_numeric;  # Numeric sorts before alpha
+
+    # Here they are both numeric in the same property.
+    # Convert version numbers into regular numbers
+    if (defined $a_version) {
+        ($a_number = $a_version) =~ s/^V//i;
+        $a_number =~ s/_/./;
+    }
+    else {  # Otherwise get rid of the, e.g., CCC in CCC9 */
+        $a_number =~ s/ ^ [[:alpha:]]+ //x;
+    }
+    if (defined $b_version) {
+        ($b_number = $b_version) =~ s/^V//i;
+        $b_number =~ s/_/./;
+    }
+    else {
+        $b_number =~ s/ ^ [[:alpha:]]+ //x;
+    }
 
     # Convert rationals to floating for the comparison.
     $a_number = eval $a_number if $a_number =~ qr{/};
     $b_number = eval $b_number if $b_number =~ qr{/};
 
-    return $a_number <=> $b_number;
+    return $a_number <=> $b_number || $a cmp $b;
 }
 
 sub make_pod () {
