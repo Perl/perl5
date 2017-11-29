@@ -4709,8 +4709,8 @@ PP(pp_leavewhen)
     }
     else {
 	PERL_ASYNC_CHECK();
-        assert(cx->blk_givwhen.leave_op->op_type == OP_LEAVEGIVEN);
-	return cx->blk_givwhen.leave_op;
+        assert(cx->blk_loop.my_op->op_nextop->op_type == OP_LEAVEGIVEN);
+	return cx->blk_loop.my_op->op_nextop;
     }
 }
 
@@ -4759,7 +4759,7 @@ PP(pp_break)
     cx = CX_CUR();
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
 
-    return cx->blk_givwhen.leave_op;
+    return cx->blk_loop.my_op->op_nextop;
 }
 
 static MAGIC *

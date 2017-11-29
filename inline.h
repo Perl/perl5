@@ -1657,8 +1657,8 @@ S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 {
     PERL_ARGS_ASSERT_CX_PUSHGIVEN;
 
-    cx->blk_givwhen.leave_op = cLOOP->op_lastop;
-    cx->blk_givwhen.defsv_save = orig_defsv;
+    cx->blk_loop.my_op = cLOOP;
+    cx->blk_loop.itersave = orig_defsv;
 }
 
 
@@ -1671,8 +1671,8 @@ S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     sv = GvSV(PL_defgv);
-    GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
-    cx->blk_givwhen.defsv_save = NULL;
+    GvSV(PL_defgv) = cx->blk_loop.itersave;
+    cx->blk_loop.itersave = NULL;
     SvREFCNT_dec(sv);
 }
 
