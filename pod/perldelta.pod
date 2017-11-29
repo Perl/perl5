@@ -64,9 +64,21 @@ it never implicitly smart matches.  Like the smart match operator,
 it also no longer implicitly enreferences certain kinds of argument,
 instead supplying regular scalar context.
 
+The C<default> construct, which was misleading and essentially useless,
+has been removed.
+
 The C<given> construct also no longer implicitly enreferences certain
 kinds of arguments, instead supplying regular scalar context.  In this
 case, the implicit enreferencement was undocumented anyway.
+
+Flow control of switch constructs has been unified with loop flow
+control.  The concept of "topicalizer" (referring to a C<given> block
+or a C<foreach> loop acting on C<$_>) has been abolished.  A C<given>
+construct now counts as a one-iteration loop, so responds to the loop
+control keywords.  The C<break> keyword has consequently been removed,
+in favour of using C<next> or C<last> to exit a C<given>.  The implicit
+jump at the end of a C<when> block is now a C<next>, and so is applicable
+not just to C<given> and some kinds of C<foreach> but to any loop.
 
 It is known that these changes will break some users of L<autodie>,
 the documentation of which has long recommended some uses of these
