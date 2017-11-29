@@ -10,4 +10,4 @@ Can't find label foo at - line 3.
 use 5.01; no warnings 'experimental::smartmatch';
 when(!defined){}
 EXPECT
-Can't leave "when" outside a loop at - line 2.
+Can't leave "when" outside a loop block at - line 2.

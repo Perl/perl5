@@ -4651,7 +4651,7 @@ PP(pp_leavewhen)
 
     cxix = dopoptoloop(cxstack_ix);
     if (cxix < 0)
-	DIE(aTHX_ "Can't leave \"when\" outside a loop");
+	DIE(aTHX_ "Can't leave \"when\" outside a loop block");
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)

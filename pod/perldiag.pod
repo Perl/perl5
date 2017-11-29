@@ -1076,7 +1076,7 @@ usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
 
-=item Can't leave "when" outside a loop
+=item Can't leave "when" outside a loop block
 
 (F) Control reached the end of a C<when> block that isn't inside any
 loop (including a C<given> block).  An implicit C<next> occurs here,
