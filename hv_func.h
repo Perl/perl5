@@ -184,10 +184,10 @@ do {                                    \
     v0 = v2 = U8TO64_LE(key + 0);       \
     v1 = v3 = U8TO64_LE(key + 8);       \
   /* "somepseudorandomlygeneratedbytes" */  \
-    v0 ^= 0x736f6d6570736575ull;        \
-    v1 ^= 0x646f72616e646f6dull;        \
-    v2 ^= 0x6c7967656e657261ull;        \
-    v3 ^= 0x7465646279746573ull;        \
+    v0 ^= UINT64_C(0x736f6d6570736575);  \
+    v1 ^= UINT64_C(0x646f72616e646f6d);      \
+    v2 ^= UINT64_C(0x6c7967656e657261);      \
+    v3 ^= UINT64_C(0x7465646279746573);      \
 } while (0)
 
 PERL_STATIC_INLINE

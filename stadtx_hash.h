@@ -149,10 +149,10 @@ STADTX_STATIC_INLINE void stadtx_seed_state (
     /* hex expansion of pi, skipping first two digits. pi= 3.2[43f6...]*/
     /* pi value in hex from here:
      * http://turner.faculty.swau.edu/mathematics/materialslibrary/pi/pibases.html*/
-    state[0]= seed[0] ^ 0x43f6a8885a308d31UL;
-    state[1]= seed[1] ^ 0x3198a2e03707344aUL;
-    state[2]= seed[0] ^ 0x4093822299f31d00UL;
-    state[3]= seed[1] ^ 0x82efa98ec4e6c894UL;
+    state[0]= seed[0] ^ UINT64_C(0x43f6a8885a308d31);
+    state[1]= seed[1] ^ UINT64_C(0x3198a2e03707344a);
+    state[2]= seed[0] ^ UINT64_C(0x4093822299f31d00);
+    state[3]= seed[1] ^ UINT64_C(0x82efa98ec4e6c894);
     if (!state[0]) state[0]=1;
     if (!state[1]) state[1]=2;
     if (!state[2]) state[2]=4;
@@ -162,20 +162,20 @@ STADTX_STATIC_INLINE void stadtx_seed_state (
      * bits in the seed - IOW, by the time we are hashing the
      * four state vectors should be completely different and utterly
      * uncognizable from the input seed bits */
-    STADTX_SCRAMBLE64(state[0],0x801178846e899d17UL);
-    STADTX_SCRAMBLE64(state[0],0xdd51e5d1c9a5a151UL);
-    STADTX_SCRAMBLE64(state[1],0x93a7d6c8c62e4835UL);
-    STADTX_SCRAMBLE64(state[1],0x803340f36895c2b5UL);
-    STADTX_SCRAMBLE64(state[2],0xbea9344eb7565eebUL);
-    STADTX_SCRAMBLE64(state[2],0xcd95d1e509b995cdUL);
-    STADTX_SCRAMBLE64(state[3],0x9999791977e30c13UL);
-    STADTX_SCRAMBLE64(state[3],0xaab8b6b05abfc6cdUL);
+    STADTX_SCRAMBLE64(state[0],UINT64_C(0x801178846e899d17));
+    STADTX_SCRAMBLE64(state[0],UINT64_C(0xdd51e5d1c9a5a151));
+    STADTX_SCRAMBLE64(state[1],UINT64_C(0x93a7d6c8c62e4835));
+    STADTX_SCRAMBLE64(state[1],UINT64_C(0x803340f36895c2b5));
+    STADTX_SCRAMBLE64(state[2],UINT64_C(0xbea9344eb7565eeb));
+    STADTX_SCRAMBLE64(state[2],UINT64_C(0xcd95d1e509b995cd));
+    STADTX_SCRAMBLE64(state[3],UINT64_C(0x9999791977e30c13));
+    STADTX_SCRAMBLE64(state[3],UINT64_C(0xaab8b6b05abfc6cd));
 }
 
-#define STADTX_K0_U64 0xb89b0f8e1655514fUL
-#define STADTX_K1_U64 0x8c6f736011bd5127UL
-#define STADTX_K2_U64 0x8f29bd94edce7b39UL
-#define STADTX_K3_U64 0x9c1b8e1e9628323fUL
+#define STADTX_K0_U64 UINT64_C(0xb89b0f8e1655514f)
+#define STADTX_K1_U64 UINT64_C(0x8c6f736011bd5127)
+#define STADTX_K2_U64 UINT64_C(0x8f29bd94edce7b39)
+#define STADTX_K3_U64 UINT64_C(0x9c1b8e1e9628323f)
 
 #define STADTX_K2_U32 0x802910e3
 #define STADTX_K3_U32 0x819b13af
