@@ -850,7 +850,11 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
     else
         sv_setpvs(temp_out_name, "XXXXXXXX");
 
-    fd = Perl_my_mkstemp(SvPVX(temp_out_name));
+    {
+      int old_umask = umask(0177);
+      fd = Perl_my_mkstemp(SvPVX(temp_out_name));
+      umask(old_umask);
+    }
 
     if (fd < 0)
         return FALSE;
