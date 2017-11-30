@@ -1237,7 +1237,7 @@ S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath) 
 #endif
 
 static bool
-S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg, bool is_explicit) {
+S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
     Stat_t statbuf;
 
 #ifdef ARGV_USE_STAT_INO
@@ -1275,8 +1275,8 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg, bool is_explicit) {
     return TRUE;
 }
 
-#define dir_unchanged(orig_psv, mg, is_explicit) \
-    S_dir_unchanged(aTHX_ (orig_psv), (mg), (is_explicit))
+#define dir_unchanged(orig_psv, mg) \
+    S_dir_unchanged(aTHX_ (orig_psv), (mg))
 
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
@@ -1360,7 +1360,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
             }
 #endif
 #ifndef ARGV_USE_ATFUNCTIONS
-            if (!dir_unchanged(orig_pv, mg, not_implicit))
+            if (!dir_unchanged(orig_pv, mg))
                 goto abort_inplace;
 #endif
             if (back_psv && *back_psv) {
@@ -1369,7 +1369,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #  ifdef ARGV_USE_ATFUNCTIONS
                     linkat(dfd, orig_pv, dfd, SvPVX(*back_psv), 0) < 0 &&
                     !(UNLIKELY(NotSupported(errno)) &&
-                      dir_unchanged(orig_pv, mg, not_implicit) &&
+                      dir_unchanged(orig_pv, mg) &&
                                link(orig_pv, SvPVX(*back_psv)) == 0)
 #  else
                     link(orig_pv, SvPVX(*back_psv)) < 0
@@ -1382,7 +1382,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #  ifdef ARGV_USE_ATFUNCTIONS
                         S_my_renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0 &&
                         !(UNLIKELY(NotSupported(errno)) &&
-                          dir_unchanged(orig_pv, mg, not_implicit) &&
+                          dir_unchanged(orig_pv, mg) &&
                           PerlLIO_rename(orig_pv, SvPVX(*back_psv)) == 0)
 #  else
                         PerlLIO_rename(orig_pv, SvPVX(*back_psv)) < 0
@@ -1392,7 +1392,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #  ifdef ARGV_USE_ATFUNCTIONS
                             if (unlinkat(dfd, SvPVX_const(*temp_psv), 0) < 0 &&
                                 UNLIKELY(NotSupported(errno)) &&
-                                dir_unchanged(orig_pv, mg, not_implicit))
+                                dir_unchanged(orig_pv, mg))
                                 (void)UNLINK(SvPVX_const(*temp_psv));
 #  else
                             UNLINK(SvPVX(*temp_psv));
@@ -1429,7 +1429,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #elif defined(ARGV_USE_ATFUNCTIONS)
 		S_my_renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0 &&
                 !(UNLIKELY(NotSupported(errno)) &&
-                  dir_unchanged(orig_pv, mg, not_implicit) &&
+                  dir_unchanged(orig_pv, mg) &&
                   PerlLIO_rename(SvPVX(*temp_psv), orig_pv) == 0)
 #else
                 PerlLIO_rename(SvPVX(*temp_psv), orig_pv) < 0
