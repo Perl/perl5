@@ -16929,14 +16929,16 @@ constructs, both single and compound forms.
 B<Compound forms> consist of two components, separated by an equals sign or a
 colon.  The first component is the property name, and the second component is
 the particular value of the property to match against, for example,
-C<\\p{Script: Greek}> and C<\\p{Script=Greek}> both mean to match characters
-whose Script property value is Greek.
+C<\\p{Script_Extensions: Greek}> and C<\\p{Script_Extensions=Greek}> both mean
+to match characters whose Script_Extensions property value is Greek.
+(C<Script_Extensions> is an improved version of the C<Script> property.)
 
 B<Single forms>, like C<\\p{Greek}>, are mostly Perl-defined shortcuts for
 their equivalent compound forms.  The table shows these equivalences.  (In our
-example, C<\\p{Greek}> is a just a shortcut for C<\\p{Script=Greek}>.)
-There are also a few Perl-defined single forms that are not shortcuts for a
-compound form.  One such is C<\\p{Word}>.  These are also listed in the table.
+example, C<\\p{Greek}> is a just a shortcut for
+C<\\p{Script_Extensions=Greek}>).  There are also a few Perl-defined single
+forms that are not shortcuts for a compound form.  One such is C<\\p{Word}>.
+These are also listed in the table.
 
 In parsing these constructs, Perl always ignores Upper/lower case differences
 everywhere within the {braces}.  Thus C<\\p{Greek}> means the same thing as
