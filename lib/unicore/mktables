@@ -8161,7 +8161,19 @@ sub trace { return main::trace(@_); }
                                                             # add_alias()
                                                             # instead for same
                                                             # property
-                     && ! $other->perl_extension)
+                     && ! $other->perl_extension
+
+                         # We allow the sc and scx properties to be marked as
+                         # related.  They are in fact related, and this allows
+                         # the pod to show that better.  This test isn't valid
+                         # if this is an early Unicode release without the scx
+                         # property (having that also implies the sc property
+                         # exists, so don't have to test for no 'sc')
+                     && (   ! defined $scx
+                         && ! (   (   $self->property == $script
+                                   || $self->property == $scx)
+                               && (   $self->property == $script
+                                   || $self->property == $scx))))
             {
                 Carp::my_carp_bug("set_equivalent_to should have 'Related => 0 for equivalencing two Unicode properties.  Assuming $self is not related to $other");
                 $related = 0;
@@ -13768,6 +13780,22 @@ END
                 $script_table += $table;
             }
             $scx->delete_match_table($table);
+        }
+
+        # Mark the scx table as the parent of the corresponding sc table for
+        # those which are identical.  This causes the pod for the script table
+        # to refer to the corresponding scx one.
+        #
+        # This has to be in a separate loop from above, so as to wait until
+        # the tables are stabilized before checking for equivalency.
+        if (defined $pod_directory) {
+            my $sc = property_ref("Script");
+            foreach my $table ($scx->tables) {
+                my $plain_sc_equiv = $sc->table($table->name);
+                if ($table->matches_identically_to($plain_sc_equiv)) {
+                    $plain_sc_equiv->set_equivalent_to($table, Related => 1);
+                }
+            }
         }
     }
 
