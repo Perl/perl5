@@ -14611,7 +14611,12 @@ sub compile_perl() {
                                         Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
     $perl->add_match_table("PosixCntrl",
-                            Description => "ASCII control characters: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EOM, SUB, ESC, FS, GS, RS, US, and DEL",
+                            Description => "ASCII control characters "
+                                         . "ACK, BEL, BS, CAN, CR, DC1, DC2,"
+                                         . " DC3, DC4, DEL, DLE, ENQ, EOM,"
+                                         . " EOT, ESC, ETB, ETX, FF, FS, GS,"
+                                         . " HT, LF, NAK, NUL, RS, SI, SO,"
+                                         . " SOH, STX, SUB, SYN, US, VT",
                             Initialize => $Cntrl & $ASCII,
                             );
 
