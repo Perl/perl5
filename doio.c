@@ -1267,7 +1267,7 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
     if (!PERL_FILE_IS_ABSOLUTE(orig_pv)
         && PerlLIO_stat(SvPVX(*temp_psv), &statbuf) < 0) {
         Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
-                   *orig_psv,
+                   orig_pv,
                    "Work file is missing - did you change directory?");
     }
 #endif
