@@ -8068,7 +8068,7 @@ sub trace { return main::trace(@_); }
         # disambiguate with).
         if (defined $conflicting_object) {
             foreach my $alias ($self->aliases) {
-                if ($alias->name eq $conflicting_name) {
+                if (standardize($alias->name) eq standardize($conflicting_name)) {
 
                     # Here, there is an exact match.  This results in
                     # ambiguous comments, so disambiguate by changing the
