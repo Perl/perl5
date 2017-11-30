@@ -1,10 +1,10 @@
 package experimental;
-$experimental::VERSION = '0.017';
+$experimental::VERSION = '0.018';
 use strict;
 use warnings;
 use version ();
 
-use feature ();
+BEGIN { eval { require feature } };
 use Carp qw/croak carp/;
 
 my %warnings = map { $_ => 1 } grep { /^experimental::/ } keys %warnings::Offsets;
@@ -130,7 +130,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 SYNOPSIS
 

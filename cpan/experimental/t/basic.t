@@ -1,5 +1,8 @@
 #! perl
 
+use strict;
+use warnings;
+
 use Test::More 0.89;
 
 local $SIG{__WARN__} = sub { fail("Got unexpected warning"); diag($_[0]) };
@@ -11,9 +14,6 @@ if ($] >= 5.010000) {
 	is($foo, 1, '$foo is 1');
 	1;
 END
-}
-else {
-	fail("No experimental features available on perl $]");
 }
 
 if ($] >= 5.010001) {
@@ -35,8 +35,8 @@ END
 if ($] >= 5.010001) {
 	is (eval <<'END', 1, 'smartmatch compiles') or diag $@;
 	use experimental 'smartmatch';
-	sub bar { 1 };
-	is(1 ~~ \&bar, 1, "is 1");
+	sub baz { 1 };
+	is(1 ~~ \&baz, 1, "is 1");
 	1;
 END
 }
@@ -53,6 +53,7 @@ END
 if ($] >= 5.021005) {
 	is (eval <<'END', 1, 'ref aliasing compiles') or diag $@;
 	use experimental 'refaliasing';
+	my (@a, @b);
 	\@a = \@b;
 	is(\@a, \@b, '@a and @b are the same after \@a=\@b');
 	1;
