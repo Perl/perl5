@@ -1453,6 +1453,7 @@ my $Assigned;   # All assigned characters in this Unicode release
 my $DI;         # Default_Ignorable_Code_Point property
 my $NChar;      # Noncharacter_Code_Point property
 my $script;
+my $scx;        # Script_Extensions property
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
 my $has_In_conflicts = 0;
@@ -13160,7 +13161,7 @@ sub setup_script_extensions {
     # The Script_Extensions property starts out with a clone of the Script
     # property.
 
-    my $scx = property_ref("Script_Extensions");
+    $scx = property_ref("Script_Extensions");
     $scx = Property->new("scx", Full_Name => "Script_Extensions")
                                                             if ! defined $scx;
     $scx->_set_format($STRING_WHITE_SPACE_LIST);
@@ -13755,7 +13756,6 @@ END
     # data is retained in the map table for reference, but the spurious match
     # tables are deleted.
 
-    my $scx = property_ref("Script_Extensions");
     if (defined $scx) {
         foreach my $table ($scx->tables) {
             next unless $table->name =~ /\s/;   # All the new and only the new
@@ -15389,7 +15389,6 @@ sub add_perl_synonyms() {
 
     # If the version of Unicode includes the Script Extensions (preferably),
     # or Script property, add its tables
-    my $scx = property_ref("Script_Extensions");
     if (defined $scx) {
         push @tables, $scx->tables;
     }
