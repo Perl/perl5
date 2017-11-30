@@ -18171,7 +18171,11 @@ sub write_all_tables() {
                         foreach my $comparison
                                             (@{$match_tables_to_write{$hash}})
                         {
-                            if ($table->matches_identically_to($comparison)) {
+                            # If the table doesn't point back to this one, we
+                            # see if it matches identically
+                            if (   $comparison->leader != $table
+                                && $table->matches_identically_to($comparison))
+                            {
                                 $table->set_equivalent_to($comparison,
                                                                 Related => 0);
                                 next TABLE;
