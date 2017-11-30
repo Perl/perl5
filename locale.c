@@ -2939,7 +2939,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * Unicode code point.  Since UTF-8 is the only non-single byte
          * encoding we handle, we just say any such encoding is UTF-8, and if
          * turns out to be wrong, other things will fail */
-        is_utf8 = MB_CUR_MAX >= STRLENs(MAX_UNICODE_UTF8);
+        is_utf8 = (unsigned) MB_CUR_MAX >= STRLENs(MAX_UNICODE_UTF8);
 
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                               "\tMB_CUR_MAX=%d; ?UTF8 locale=%d\n",
