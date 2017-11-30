@@ -877,10 +877,8 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 /* Win32 doesn't necessarily return useful information
  * in st_dev, st_ino.
  */
-#ifndef ARGV_USE_ATFUNCTIONS
-#  ifndef DOSISH
-#    define ARGV_USE_STAT_INO
-#  endif
+#ifndef DOSISH
+#  define ARGV_USE_STAT_INO
 #endif
 
 #define ARGVMG_BACKUP_NAME 0
@@ -889,21 +887,32 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 #define ARGVMG_ORIG_MODE 3
 #define ARGVMG_ORIG_PID 4
 
-#if defined(ARGV_USE_ATFUNCTIONS)
-#define ARGVMG_ORIG_DIRP 5
-#elif defined(ARGV_USE_STAT_INO)
 /* we store the entire stat_t since the ino_t and dev_t values might
    not fit in an IV.  I could have created a new structure and
    transferred them across, but this seemed too much effort for very
    little win.
+
+   We store it even when the *at() functions are available, since
+   while the C runtime might have definitions for these functions, the
+   operating system or a specific filesystem might not implement them.
+   eg. NetBSD 6 implements linkat() but only where the fds are AT_FDCWD.
  */
-#define ARGVMG_ORIG_CWD_STAT 5
+#ifdef ARGV_USE_STAT_INO
+#  define ARGVMG_ORIG_CWD_STAT 5
+#endif
+
+#ifdef ARGV_USE_ATFUNCTIONS
+#  define ARGVMG_ORIG_DIRP 6
+#endif
+
+#ifdef ENOTSUP
+#define NotSupported(e) ((e) == ENOSYS || (e) == ENOTSUP)
+#else
+#define NotSupported(e) ((e) == ENOSYS)
 #endif
 
 static int
 S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
-    SV **temp_psv;
-
     PERL_UNUSED_ARG(io);
 
     /* note this can be entered once the file has been
@@ -930,20 +939,24 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
             /* if we get here the file hasn't been closed explicitly by the
                user and hadn't been closed implicitly by nextargv(), so
                abandon the edit */
+            SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+            const char *temp_pv = SvPVX(*temp_psv);
+
+            assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
             (void)PerlIO_close(iop);
             IoIFP(io) = IoOFP(io) = NULL;
-            temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
-            assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
 #ifdef ARGV_USE_ATFUNCTIONS
             dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
             assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
             dir = INT2PTR(DIR *, SvIV(*dir_psv));
             if (dir) {
-                (void)unlinkat(my_dirfd(dir), SvPVX(*temp_psv), 0);
+                if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
+                    NotSupported(errno))
+                    (void)UNLINK(temp_pv);
                 closedir(dir);
             }
 #else
-            (void)UNLINK(SvPVX(*temp_psv));
+            (void)UNLINK(temp_pv);
 #endif
         }
     }
@@ -970,8 +983,11 @@ S_argvout_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param) {
    4: pid of the process we opened at, to prevent doing the renaming
       etc in both the child and the parent after a fork
 
+If we have useful inode/device ids in stat_t we also keep:
+   5: a stat of the original current working directory
+
 If we have unlinkat(), renameat(), fchmodat(), dirfd() we also keep:
-   5: the DIR * for the current directory when we open the file, stored as an IV
+   6: the DIR * for the current directory when we open the file, stored as an IV
  */
 
 static const MGVTBL argvout_vtbl =
@@ -1220,6 +1236,48 @@ S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath) 
 #  endif /* if defined(__FreeBSD__) */
 #endif
 
+static bool
+S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg, bool is_explicit) {
+    Stat_t statbuf;
+
+#ifdef ARGV_USE_STAT_INO
+    SV **stat_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_CWD_STAT, FALSE);
+    Stat_t *orig_cwd_stat = stat_psv && *stat_psv ? (Stat_t *)SvPVX(*stat_psv) : NULL;
+
+    /* if the path is absolute the possible moving of cwd (which the file
+       might be in) isn't our problem.
+       This code tries to be reasonably balanced about detecting a changed
+       CWD, if we have the information needed to check that curdir has changed, we
+       check it
+    */
+    if (!PERL_FILE_IS_ABSOLUTE(orig_pv)
+        && orig_cwd_stat
+        && PerlLIO_stat(".", &statbuf) >= 0
+        && ( statbuf.st_dev != orig_cwd_stat->st_dev
+                     || statbuf.st_ino != orig_cwd_stat->st_ino)) {
+        Perl_croak(aTHX_ "Cannot complete in-place edit of %s: %s",
+                   orig_pv, "Current directory has changed");
+    }
+#else
+    SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+
+    /* Some platforms don't have useful st_ino etc, so just
+       check we can see the work file.
+    */
+    if (!PERL_FILE_IS_ABSOLUTE(orig_pv)
+        && PerlLIO_stat(SvPVX(*temp_psv), &statbuf) < 0) {
+        Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
+                   *orig_psv,
+                   "Work file is missing - did you change directory?");
+    }
+#endif
+
+    return TRUE;
+}
+
+#define dir_unchanged(orig_psv, mg, is_explicit) \
+    S_dir_unchanged(aTHX_ (orig_psv), (mg), (is_explicit))
+
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
 Perl_do_close(pTHX_ GV *gv, bool not_implicit)
@@ -1256,12 +1314,6 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         SV **dir_psv  = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
         DIR *dir;
         int dfd;
-#elif defined(ARGV_USE_STAT_INO)
-        SV **stat_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_CWD_STAT, FALSE);
-        Stat_t *orig_cwd_stat = stat_psv && *stat_psv ? (Stat_t *)SvPVX(*stat_psv) : NULL;
-#endif
-#ifndef ARGV_USE_ATFUNCTIONS
-        Stat_t statbuf;
 #endif
         UV mode;
         int fd;
@@ -1300,34 +1352,6 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         }
 
         if (retval) {
-#ifdef ARGV_USE_STAT_INO
-            /* if the path is absolute the possible moving of cwd (which the file
-               might be in) isn't our problem.
-               This code tries to be reasonably balanced about detecting a changed
-               CWD, if we have the information needed to check that curdir has changed, we
-               check it
-            */
-            if (!PERL_FILE_IS_ABSOLUTE(SvPVX(*orig_psv))
-                && orig_cwd_stat
-                && PerlLIO_stat(".", &statbuf) >= 0
-                && ( statbuf.st_dev != orig_cwd_stat->st_dev
-                     || statbuf.st_ino != orig_cwd_stat->st_ino)) {
-                Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
-                           *orig_psv, "Current directory has changed");
-            }
-#endif
-#if !defined(ARGV_USE_ATFUNCTIONS) && !defined(ARGV_USE_STAT_INO)
-            /* Some platforms don't have useful st_ino etc, so just
-               check we can see the work file.
-            */
-            if (!PERL_FILE_IS_ABSOLUTE(SvPVX(*orig_psv))
-                && PerlLIO_stat(SvPVX(*temp_psv), &statbuf) < 0) {
-                Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
-                           *orig_psv,
-                           "Work file is missing - did you change directory?");
-            }
-#endif
-
 #if defined(DOSISH) || defined(__CYGWIN__)
             if (PL_argvgv && GvIOp(PL_argvgv)
                 && IoIFP(GvIOp(PL_argvgv))
@@ -1335,11 +1359,18 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
                 do_close(PL_argvgv, FALSE);
             }
 #endif
+#ifndef ARGV_USE_ATFUNCTIONS
+            if (!dir_unchanged(orig_pv, mg, not_implicit))
+                goto abort_inplace;
+#endif
             if (back_psv && *back_psv) {
 #if defined(HAS_LINK) && !defined(DOSISH) && !defined(__CYGWIN__) && defined(HAS_RENAME)
                 if (
 #  ifdef ARGV_USE_ATFUNCTIONS
-                    linkat(dfd, orig_pv, dfd, SvPVX(*back_psv), 0) < 0
+                    linkat(dfd, orig_pv, dfd, SvPVX(*back_psv), 0) < 0 &&
+                    !(UNLIKELY(NotSupported(errno)) &&
+                      dir_unchanged(orig_pv, mg, not_implicit) &&
+                               link(orig_pv, SvPVX(*back_psv)) == 0)
 #  else
                     link(orig_pv, SvPVX(*back_psv)) < 0
 #  endif
@@ -1349,14 +1380,20 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #ifdef HAS_RENAME
                     if (
 #  ifdef ARGV_USE_ATFUNCTIONS
-                        S_my_renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0
+                        S_my_renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0 &&
+                        !(UNLIKELY(NotSupported(errno)) &&
+                          dir_unchanged(orig_pv, mg, not_implicit) &&
+                          PerlLIO_rename(orig_pv, SvPVX(*back_psv)) == 0)
 #  else
                         PerlLIO_rename(orig_pv, SvPVX(*back_psv)) < 0
 #  endif
                         ) {
                         if (!not_implicit) {
 #  ifdef ARGV_USE_ATFUNCTIONS
-                            (void)unlinkat(dfd, SvPVX_const(*temp_psv), 0);
+                            if (unlinkat(dfd, SvPVX_const(*temp_psv), 0) < 0 &&
+                                UNLIKELY(NotSupported(errno)) &&
+                                dir_unchanged(orig_pv, mg, not_implicit))
+                                (void)UNLINK(SvPVX_const(*temp_psv));
 #  else
                             UNLINK(SvPVX(*temp_psv));
 #  endif
@@ -1390,14 +1427,19 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #if !defined(HAS_RENAME)
                 link(SvPVX(*temp_psv), orig_pv) < 0
 #elif defined(ARGV_USE_ATFUNCTIONS)
-		S_my_renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0
+		S_my_renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0 &&
+                !(UNLIKELY(NotSupported(errno)) &&
+                  dir_unchanged(orig_pv, mg, not_implicit) &&
+                  PerlLIO_rename(SvPVX(*temp_psv), orig_pv) == 0)
 #else
                 PerlLIO_rename(SvPVX(*temp_psv), orig_pv) < 0
 #endif
                 ) {
                 if (!not_implicit) {
 #ifdef ARGV_USE_ATFUNCTIONS
-                    (void)unlinkat(dfd, SvPVX_const(*temp_psv), 0);
+                    if (unlinkat(dfd, SvPVX_const(*temp_psv), 0) < 0 &&
+                        NotSupported(errno))
+                        UNLINK(SvPVX(*temp_psv));
 #else
                     UNLINK(SvPVX(*temp_psv));
 #endif
@@ -1414,7 +1456,10 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         }
         else {
 #ifdef ARGV_USE_ATFUNCTIONS
-            unlinkat(dfd, SvPVX_const(*temp_psv), 0);
+            if (unlinkat(dfd, SvPVX_const(*temp_psv), 0) &&
+                NotSupported(errno))
+                UNLINK(SvPVX_const(*temp_psv));
+                
 #else
             UNLINK(SvPVX_const(*temp_psv));
 #endif

@@ -473,6 +473,9 @@ __EOF__
               && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
               && $Config{d_linkat}
               && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
+        my ($osvers) = ($Config{osvers} =~ /^(\d+(?:\.\d+)?)/);
+        skip "NetBSD 6 libc defines at functions, but they're incomplete", 3
+            if $^O eq "netbsd" && $osvers < 7;
         fresh_perl_is(<<'CODE', "ok\n", { },
 @ARGV = ("tmpinplace/foo");
 $^I = "";
@@ -537,7 +540,7 @@ print "ok\n";
 CODE
                       "fork while in-place editing");
         ok(open($fh, "<", $work), "open out file");
-        is(scalar <$fh>, "yy\n", "file successfully saved after chdir");
+        is(scalar <$fh>, "yy\n", "file successfully saved after fork");
         close $fh;
     }
 
