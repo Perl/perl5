@@ -135,7 +135,7 @@ my $map_directory = 'To';        # Where map files go.
 # each one of the tens of thousands individually.
 #
 # In a match table, the value of a range is irrelevant (and hence the type as
-# well, which will always be 0), and arbitrarily set to the null string.
+# well, which will always be 0), and arbitrarily set to the empty string.
 # Using the example above, there would be two match tables for those two
 # entries, one named Upper would contain the 0x41..0x5A range, and the other
 # named Lower would contain 0x61..0x7A.
@@ -1143,8 +1143,9 @@ my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 # We work with above-Unicode code points, up to IV_MAX, but we may want to use
 # sentinels above that number.  Therefore for internal use, we use a much
 # smaller number, translating it to IV_MAX only for output.  The exact number
-# is immaterial (all Unicode code points are treated exactly the same), but
-# the algorithm requires it to be at least 2 * $MAX_UNICODE_CODEPOINTS + 1;
+# is immaterial (all above-Unicode code points are treated exactly the same),
+# but the algorithm requires it to be at least
+# 2 * $MAX_UNICODE_CODEPOINTS + 1
 my $MAX_WORKING_CODEPOINTS= $MAX_UNICODE_CODEPOINT * 8;
 my $MAX_WORKING_CODEPOINT = $MAX_WORKING_CODEPOINTS - 1;
 my $MAX_WORKING_CODEPOINT_STRING = sprintf("%X", $MAX_WORKING_CODEPOINT);
@@ -18121,18 +18122,19 @@ sub write_all_tables() {
                     make_re_pod_entries($table) if defined $pod_directory;
 
                     # See if the table matches identical code points with
-                    # something that has already been output.  In that case,
-                    # no need to have two files with the same code points in
-                    # them.  We use the table's hash() method to store these
-                    # in buckets, so that it is quite likely that if two
-                    # tables are in the same bucket they will be identical, so
-                    # don't have to compare tables frequently.  The tables
-                    # have to have the same status to share a file, so add
-                    # this to the bucket hash.  (The reason for this latter is
-                    # that Heavy.pl associates a status with a file.)
-                    # We don't check tables that are inverses of others, as it
-                    # would lead to some coding complications, and checking
-                    # all the regular ones should find everything.
+                    # something that has already been processed and is ready
+                    # for output.  In that case, no need to have two files
+                    # with the same code points in them.  We use the table's
+                    # hash() method to store these in buckets, so that it is
+                    # quite likely that if two tables are in the same bucket
+                    # they will be identical, so don't have to compare tables
+                    # frequently.  The tables have to have the same status to
+                    # share a file, so add this to the bucket hash.  (The
+                    # reason for this latter is that Heavy.pl associates a
+                    # status with a file.) We don't check tables that are
+                    # inverses of others, as it would lead to some coding
+                    # complications, and checking all the regular ones should
+                    # find everything.
                     if ($table->complement == 0) {
                         my $hash = $table->hash . ';' . $table->status;
 
