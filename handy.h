@@ -173,7 +173,13 @@ typedef U64TYPE U64;
 /* INT64_C/UINT64_C are C99 from <stdint.h> (so they will not be
  * available in strict C89 mode), but they are nice, so let's define
  * them if necessary. */
-#if defined(HAS_QUAD)
+
+/* N.B.  We would like to say HAS_QUAD here, but that doesn't actually mean what
+ * it has always been documented to mean (see RT #119753) and is explicitly turned
+ * off in perl.h outside of core with dire warnings about removing the undef.
+ */
+
+#if defined(QUADKIND)
 #  undef PeRl_INT64_C
 #  undef PeRl_UINT64_C
 /* Prefer the native integer types (int and long) over long long
