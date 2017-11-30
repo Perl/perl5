@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302113';
+our $VERSION = '1.302120';
 
 
 use Test2::API::Instance;
@@ -10,6 +10,7 @@ use Test2::Util qw/get_tid/;
 use Test2::API qw{
     test2_init_done
     test2_ipc
+    test2_has_ipc
     test2_ipc_enable_polling
     test2_pid
     test2_stack
@@ -23,7 +24,7 @@ our @EXPORT_OK = qw/cull/;
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
 sub import {
-    goto &Exporter::import unless test2_init_done();
+    goto &Exporter::import if test2_has_ipc || !test2_init_done();
 
     confess "Cannot add IPC in a child process (" . test2_pid() . " vs $$)" if test2_pid() != $$;
     confess "Cannot add IPC in a child thread (" . test2_tid() . " vs " . get_tid() . ")"  if test2_tid() != get_tid();

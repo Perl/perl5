@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302113';
+our $VERSION = '1.302120';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -318,6 +318,10 @@ sub subtest {
         unless $code && reftype($code) eq 'CODE';
 
     $name ||= "Child of " . $self->name;
+
+
+    $_->($name,$code,@args)
+        for Test2::API::test2_list_pre_subtest_callbacks();
 
     $ctx->note("Subtest: $name");
 

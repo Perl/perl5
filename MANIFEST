@@ -2409,6 +2409,7 @@ cpan/Test-Simple/t/Legacy/strays.t
 cpan/Test-Simple/t/Legacy/subtest/args.t
 cpan/Test-Simple/t/Legacy/subtest/bail_out.t
 cpan/Test-Simple/t/Legacy/subtest/basic.t
+cpan/Test-Simple/t/Legacy/subtest/callback.t
 cpan/Test-Simple/t/Legacy/subtest/die.t
 cpan/Test-Simple/t/Legacy/subtest/do.t
 cpan/Test-Simple/t/Legacy/subtest/events.t
@@ -2504,6 +2505,7 @@ cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
 cpan/Test-Simple/t/Test2/behavior/special_names.t
 cpan/Test-Simple/t/Test2/behavior/subtest_bailout.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t
+cpan/Test-Simple/t/Test2/behavior/Subtest_callback.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_todo.t

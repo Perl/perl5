@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302113';
+our $VERSION = '1.302120';
 
 
 my $INST;
@@ -93,6 +93,9 @@ our @EXPORT_OK = qw{
     test2_tid
     test2_stack
     test2_no_wait
+    test2_ipc_wait_enable
+    test2_ipc_wait_disable
+    test2_ipc_wait_enabled
 
     test2_add_callback_context_aquire
     test2_add_callback_context_acquire
@@ -100,14 +103,17 @@ our @EXPORT_OK = qw{
     test2_add_callback_context_release
     test2_add_callback_exit
     test2_add_callback_post_load
+    test2_add_callback_pre_subtest
     test2_list_context_aquire_callbacks
     test2_list_context_acquire_callbacks
     test2_list_context_init_callbacks
     test2_list_context_release_callbacks
     test2_list_exit_callbacks
     test2_list_post_load_callbacks
+    test2_list_pre_subtest_callbacks
 
     test2_ipc
+    test2_has_ipc
     test2_ipc_drivers
     test2_ipc_add_driver
     test2_ipc_polling
@@ -158,9 +164,13 @@ sub test2_start_preload { $ENV{T2_IN_PRELOAD} = 1; $INST->start_preload }
 sub test2_stop_preload  { $ENV{T2_IN_PRELOAD} = 0; $INST->stop_preload }
 sub test2_in_preload    { $INST->preload }
 
-sub test2_pid     { $INST->pid }
-sub test2_tid     { $INST->tid }
-sub test2_stack   { $INST->stack }
+sub test2_pid              { $INST->pid }
+sub test2_tid              { $INST->tid }
+sub test2_stack            { $INST->stack }
+sub test2_ipc_wait_enable  { $INST->set_no_wait(0) }
+sub test2_ipc_wait_disable { $INST->set_no_wait(1) }
+sub test2_ipc_wait_enabled { !$INST->no_wait }
+
 sub test2_no_wait {
     $INST->set_no_wait(@_) if @_;
     $INST->no_wait;
@@ -172,14 +182,17 @@ sub test2_add_callback_context_init      { $INST->add_context_init_callback(@_) 
 sub test2_add_callback_context_release   { $INST->add_context_release_callback(@_) }
 sub test2_add_callback_exit              { $INST->add_exit_callback(@_) }
 sub test2_add_callback_post_load         { $INST->add_post_load_callback(@_) }
+sub test2_add_callback_pre_subtest       { $INST->add_pre_subtest_callback(@_) }
 sub test2_list_context_aquire_callbacks  { @{$INST->context_acquire_callbacks} }
 sub test2_list_context_acquire_callbacks { @{$INST->context_acquire_callbacks} }
 sub test2_list_context_init_callbacks    { @{$INST->context_init_callbacks} }
 sub test2_list_context_release_callbacks { @{$INST->context_release_callbacks} }
 sub test2_list_exit_callbacks            { @{$INST->exit_callbacks} }
 sub test2_list_post_load_callbacks       { @{$INST->post_load_callbacks} }
+sub test2_list_pre_subtest_callbacks     { @{$INST->pre_subtest_callbacks} }
 
 sub test2_ipc                 { $INST->ipc }
+sub test2_has_ipc             { $INST->has_ipc }
 sub test2_ipc_add_driver      { $INST->add_ipc_driver(@_) }
 sub test2_ipc_drivers         { @{$INST->ipc_drivers} }
 sub test2_ipc_polling         { $INST->ipc_polling }
@@ -509,6 +522,9 @@ sub _intercept {
 
 sub run_subtest {
     my ($name, $code, $params, @args) = @_;
+
+    $_->($name,$code,@args)
+        for Test2::API::test2_list_pre_subtest_callbacks();
 
     $params = {buffered => $params} unless ref $params;
     my $inherit_trace = delete $params->{inherit_trace};
@@ -1206,9 +1222,26 @@ Check if Test2 believes it is the END phase.
 This will return the global L<Test2::API::Stack> instance. If this has not
 yet been initialized it will be initialized now.
 
+=item test2_ipc_wait_enable()
+
+=item test2_ipc_wait_disable()
+
+=item $bool = test2_ipc_wait_enabled()
+
+These can be used to turn IPC waiting on and off, or check the current value of
+the flag.
+
+Waiting is turned on by default. Waiting will cause the parent process/thread
+to wait until all child processes and threads are finished before exiting. You
+will almost never want to turn this off.
+
 =item $bool = test2_no_wait()
 
 =item test2_no_wait($bool)
+
+B<DISCOURAGED>: This is a confusing interface, it is better to use
+C<test2_ipc_wait_enable()>, C<test2_ipc_wait_disable()> and
+C<test2_ipc_wait_enabled()>.
 
 This can be used to get/set the no_wait status. Waiting is turned on by
 default. Waiting will cause the parent process/thread to wait until all child
@@ -1294,6 +1327,12 @@ callback will receive the newly created context as its only argument.
 Add a callback that will be called every time a context is released. The
 callback will receive the released context as its only argument.
 
+=item test2_add_callback_pre_subtest(sub { ... })
+
+Add a callback that will be called every time a subtest is going to be
+run. The callback will receive the subtest name, coderef, and any
+arguments.
+
 =item @list = test2_list_context_acquire_callbacks()
 
 Return all the context acquire callback references.
@@ -1314,6 +1353,10 @@ Returns all the exit callback references.
 
 Returns all the post load callback references.
 
+=item @list = test2_list_pre_subtest_callbacks()
+
+Returns all the pre-subtest callback references.
+
 =back
 
 =head2 IPC AND CONCURRENCY
@@ -1321,6 +1364,10 @@ Returns all the post load callback references.
 These let you access, or specify, the IPC system internals.
 
 =over 4
+
+=item $bool = test2_has_ipc()
+
+Check if IPC is enabled.
 
 =item $ipc = test2_ipc()
 

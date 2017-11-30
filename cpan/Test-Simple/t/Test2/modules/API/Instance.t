@@ -36,6 +36,7 @@ is_deeply(
         context_acquire_callbacks => [],
         context_init_callbacks    => [],
         context_release_callbacks => [],
+        pre_subtest_callbacks     => [],
 
         stack => [],
     },
@@ -69,6 +70,7 @@ is_deeply(
         context_acquire_callbacks => [],
         context_init_callbacks    => [],
         context_release_callbacks => [],
+        pre_subtest_callbacks     => [],
 
         stack => [],
     },
@@ -154,6 +156,18 @@ like(
     "Exit callbacks must be coderefs"
 );
 
+$one->reset;
+$one->add_pre_subtest_callback($callback);
+is(@{$one->pre_subtest_callbacks}, 1, "added a pre-subtest callback");
+$one->add_pre_subtest_callback($callback);
+is(@{$one->pre_subtest_callbacks}, 2, "added another pre-subtest callback");
+
+like(
+    exception { $one->add_pre_subtest_callback({}) },
+    qr/Pre-subtest callbacks must be coderefs/,
+    "Pre-subtest callbacks must be coderefs"
+);
+
 if (CAN_REALLY_FORK) {
     $one->reset;
     my $pid = fork;
@@ -170,7 +184,18 @@ if (CAN_REALLY_FORK) {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
         is(Test2::API::Instance::_ipc_wait, 255, "Process exited badly");
     }
-    like($warnings[0], qr/Process .* did not exit cleanly \(status: 255\)/, "Warn about exit");
+    like($warnings[0], qr/Process .* did not exit cleanly \(wstat: \S+, exit: 255, sig: 0\)/, "Warn about exit");
+
+    $pid = fork;
+    die "Failed to fork!" unless defined $pid;
+    unless($pid) { sleep 20; exit 0 }
+    kill('TERM', $pid) or die "Failed to send signal";
+    @warnings = ();
+    {
+        local $SIG{__WARN__} = sub { push @warnings => @_ };
+        is(Test2::API::Instance::_ipc_wait, 255, "Process exited badly");
+    }
+    like($warnings[0], qr/Process .* did not exit cleanly \(wstat: \S+, exit: 0, sig: 15\)/, "Warn about exit");
 }
 
 if (CAN_THREAD && $] ge '5.010') {

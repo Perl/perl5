@@ -2,12 +2,12 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302113';
+our $VERSION = '1.302120';
 
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
-use Test2::Util::HashBase qw{tempdir event_id tid pid globals};
+use Test2::Util::HashBase qw{tempdir event_ids read_ids timeouts tid pid globals};
 
 use Scalar::Util qw/blessed/;
 use File::Temp();
@@ -39,7 +39,9 @@ sub init {
     print STDERR "\nIPC Temp Dir: $tmpdir\n\n"
         if $ENV{T2_KEEP_TEMPDIR};
 
-    $self->{+EVENT_ID} = 1;
+    $self->{+EVENT_IDS} = {};
+    $self->{+READ_IDS} = {};
+    $self->{+TIMEOUTS} = {};
 
     $self->{+TID} = get_tid();
     $self->{+PID} = $$;
@@ -66,8 +68,11 @@ sub event_file {
     $self->abort("'$e' is not an event object!")
         unless $type->isa('Test2::Event');
 
+    my $tid = get_tid();
+    my $eid = $self->{+EVENT_IDS}->{$hid}->{$$}->{$tid} += 1;
+
     my @type = split '::', $type;
-    my $name = join(ipc_separator, $hid, $$, get_tid(), $self->{+EVENT_ID}++, @type);
+    my $name = join(ipc_separator, $hid, $$, $tid, $eid, @type);
 
     return File::Spec->catfile($tempdir, $name);
 }
@@ -193,6 +198,20 @@ Error: $err
     return 1;
 }
 
+sub driver_abort {
+    my $self = shift;
+    my ($msg) = @_;
+
+    local ($@, $!, $?, $^E);
+    eval {
+        my $abort = File::Spec->catfile($self->{+TEMPDIR}, "ABORT");
+        open(my $fh, '>>', $abort) or die "Could not open abort file: $!";
+        print $fh $msg, "\n";
+        close($fh) or die "Could not close abort file: $!";
+        1;
+    } or warn $@;
+}
+
 sub cull {
     my $self = shift;
     my ($hid) = @_;
@@ -201,8 +220,25 @@ sub cull {
 
     opendir(my $dh, $tempdir) or $self->abort("could not open IPC temp dir ($tempdir)!");
 
+    my $read = $self->{+READ_IDS};
+    my $timeouts = $self->{+TIMEOUTS};
+
     my @out;
     for my $info (sort cmp_events map { $self->should_read_event($hid, $_) } readdir($dh)) {
+        unless ($info->{global}) {
+            my $next = $self->{+READ_IDS}->{$info->{hid}}->{$info->{pid}}->{$info->{tid}} ||= 1;
+
+            $timeouts->{$info->{file}} ||= time;
+
+            if ($next != $info->{eid}) {
+                # Wait up to N seconds for missing events
+                next unless 5 < time - $timeouts->{$info->{file}};
+                $self->abort("Missing event HID: $info->{hid}, PID: $info->{pid}, TID: $info->{tid}, EID: $info->{eid}.");
+            }
+
+            $self->{+READ_IDS}->{$info->{hid}}->{$info->{pid}}->{$info->{tid}} = $info->{eid} + 1;
+        }
+
         my $full = $info->{full_path};
         my $obj = $self->read_event_file($full);
         push @out => $obj;
@@ -239,6 +275,7 @@ sub parse_event_filename {
     my $type = join '::' => @parts;
 
     return {
+        file     => $file,
         ready    => $ready,
         complete => $complete,
         global   => $global,
@@ -255,6 +292,8 @@ sub should_read_event {
     my ($hid, $file) = @_;
 
     return if substr($file, 0, 1) eq '.';
+    return if substr($file, 0, 3) eq 'HUB';
+    CORE::exit(255) if $file eq 'ABORT';
 
     my $parsed = $self->parse_event_filename($file);
 
@@ -329,6 +368,14 @@ sub DESTROY {
 
     my $tempdir = $self->{+TEMPDIR};
 
+    my $aborted = 0;
+    my $abort_file = File::Spec->catfile($self->{+TEMPDIR}, "ABORT");
+    if (-e $abort_file) {
+        $aborted = 1;
+        my ($ok, $err) = do_unlink($abort_file);
+        warn $err unless $ok;
+    }
+
     opendir(my $dh, $tempdir) or $self->abort("Could not open temp dir! ($tempdir)");
     while(my $file = readdir($dh)) {
         next if $file =~ m/^\.+$/;
@@ -336,7 +383,7 @@ sub DESTROY {
         my $full = File::Spec->catfile($tempdir, $file);
 
         my $sep = ipc_separator;
-        if ($file =~ m/^(GLOBAL|HUB$sep)/) {
+        if ($aborted || $file =~ m/^(GLOBAL|HUB$sep)/) {
             $full =~ m/^(.*)$/;
             $full = $1; # Untaint it
             next if $ENV{T2_KEEP_TEMPDIR};
@@ -354,6 +401,8 @@ sub DESTROY {
         return;
     }
 
+    my $abort = File::Spec->catfile($self->{+TEMPDIR}, "ABORT");
+    unlink($abort) if -e $abort;
     rmdir($tempdir) or warn "Could not remove IPC temp dir ($tempdir)";
 }
 

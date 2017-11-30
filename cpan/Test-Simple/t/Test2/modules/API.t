@@ -148,6 +148,12 @@ ok($CLASS->can('test2_no_wait')->(), "no_wait is set");
 $CLASS->can('test2_no_wait')->(undef);
 ok(!$CLASS->can('test2_no_wait')->(), "no_wait is not set");
 
+ok($CLASS->can('test2_ipc_wait_enabled')->(), "IPC waiting enabled");
+$CLASS->can('test2_ipc_wait_disable')->();
+ok(!$CLASS->can('test2_ipc_wait_enabled')->(), "IPC waiting disabled");
+$CLASS->can('test2_ipc_wait_enable')->();
+ok($CLASS->can('test2_ipc_wait_enabled')->(), "IPC waiting enabled");
+
 my $pctx;
 sub tool_a($;$) {
     Test2::API::context_do {

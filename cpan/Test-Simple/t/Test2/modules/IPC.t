@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test2::IPC qw/cull/;
-use Test2::API qw/context test2_ipc_drivers test2_ipc/;
+use Test2::API qw/context test2_ipc_drivers test2_ipc intercept/;
 
 use Test2::Tools::Tiny;
 
@@ -15,5 +15,7 @@ is_deeply(
 );
 
 ok(__PACKAGE__->can('cull'), "Imported cull");
+
+ok(eval { intercept { Test2::IPC->import }; 1 }, "Can re-import Test2::IPC without error") or diag $@;
 
 done_testing;
