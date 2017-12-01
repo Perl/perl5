@@ -596,7 +596,7 @@ CODE
         chmod 0700, "tmpinplace" or die "Cannot make tmpinplace writable again: $!";
         skip "Cannot make tmpinplace read only", 1
           if $canwrite;
-        fresh_perl_like(<<'CODE', qr/Can't rename/, { stderr => 1 }, "fail final rename");
+        fresh_perl_like(<<'CODE', qr/failed to rename/, { stderr => 1 }, "fail final rename");
 @ARGV = ("tmpinplace/foo");
 $^I = "";
 while (<>) {
