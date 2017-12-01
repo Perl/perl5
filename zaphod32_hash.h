@@ -269,7 +269,10 @@ U32 zaphod32_hash_with_state(
         return v0 ^ v2;
     }
 
-    if (len >= 8) {
+/*  if (len >= 8) */ /* this block is only reached by a goto above, so this condition
+                        is commented out, but if the above block is removed it would
+                        be necessary to use this. */
+    {
 zaphod32_read8:
         len = key_len & 0x7;
         end = key + key_len - len;
