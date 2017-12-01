@@ -381,7 +381,7 @@ XXX
 =item *
 
 Perl's own C<malloc> no longer gets confused by attempts to allocate
-more than 4 GiB on a 64-bit platform.  [perl #119829]
+more than a gigabyte on a 64-bit platform.  [perl #119829]
 
 =back
 
