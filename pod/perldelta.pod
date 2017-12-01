@@ -378,6 +378,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+Perl's own C<malloc> no longer gets confused by attempts to allocate
+more than 4 GiB on a 64-bit platform.  [perl #119829]
+
 =back
 
 =head1 Known Problems

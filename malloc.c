@@ -466,12 +466,12 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
   };
 #  define BUCKET_SIZE_NO_SURPLUS(i) ((i) % 2 ? buck_size[i] : (1 << ((i) >> BUCKET_POW2_SHIFT)))
 #  define BUCKET_SIZE_REAL(i) ((i) <= MAX_BUCKET_BY_TABLE		\
-			       ? buck_size[i] 				\
-			       : ((1 << ((i) >> BUCKET_POW2_SHIFT))	\
+			       ? ((size_t)buck_size[i])			\
+			       : ((((size_t)1) << ((i) >> BUCKET_POW2_SHIFT)) \
 				  - MEM_OVERHEAD(i)			\
 				  + POW2_OPTIMIZE_SURPLUS(i)))
 #else
-#  define BUCKET_SIZE_NO_SURPLUS(i) (1 << ((i) >> BUCKET_POW2_SHIFT))
+#  define BUCKET_SIZE_NO_SURPLUS(i) (((size_t)1) << ((i) >> BUCKET_POW2_SHIFT))
 #  define BUCKET_SIZE(i) (BUCKET_SIZE_NO_SURPLUS(i) + POW2_OPTIMIZE_SURPLUS(i))
 #  define BUCKET_SIZE_REAL(i) (BUCKET_SIZE(i) - MEM_OVERHEAD(i))
 #endif 
@@ -686,7 +686,7 @@ static const u_short blk_shift[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
 
 #ifdef PACK_MALLOC
 #  define MEM_OVERHEAD(bucket) \
-  (bucket <= MAX_PACKED ? 0 : M_OVERHEAD)
+  (bucket <= MAX_PACKED ? ((size_t)0) : M_OVERHEAD)
 #  ifdef SMALL_BUCKET_VIA_TABLE
 #    define START_SHIFTS_BUCKET ((MAX_PACKED_POW2 + 1) * BUCKETS_PER_POW2)
 #    define START_SHIFT MAX_PACKED_POW2
@@ -752,11 +752,11 @@ static const char bucket_of[] =
 #  define POW2_OPTIMIZE_ADJUST(nbytes)				\
    ((nbytes >= FIRST_BIG_BOUND) ? nbytes -= PERL_PAGESIZE : 0)
 #  define POW2_OPTIMIZE_SURPLUS(bucket)				\
-   ((bucket >= FIRST_BIG_POW2 * BUCKETS_PER_POW2) ? PERL_PAGESIZE : 0)
+   ((size_t)((bucket >= FIRST_BIG_POW2 * BUCKETS_PER_POW2) ? PERL_PAGESIZE : 0))
 
 #else  /* !TWO_POT_OPTIMIZE */
 #  define POW2_OPTIMIZE_ADJUST(nbytes)
-#  define POW2_OPTIMIZE_SURPLUS(bucket) 0
+#  define POW2_OPTIMIZE_SURPLUS(bucket) ((size_t)0)
 #endif /* !TWO_POT_OPTIMIZE */
 
 #define BARK_64K_LIMIT(what,nbytes,size)
