@@ -4287,6 +4287,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
             /* we suppose the run is continuous, last=next...
              * NOTE we dont use the return here! */
+            /* DEFINEP study_chunk() recursion */
             (void)study_chunk(pRExC_state, &scan, &minlen,
                               &deltanext, next, &data_fake, stopparen,
                               recursed_depth, NULL, f, depth+1);
@@ -4354,6 +4355,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			f |= SCF_WHILEM_VISITED_POS;
 
 		    /* we suppose the run is continuous, last=next...*/
+                    /* recurse study_chunk() for each BRANCH in an alternation */
 		    minnext = study_chunk(pRExC_state, &scan, minlenp,
                                       &deltanext, next, &data_fake, stopparen,
                                       recursed_depth, NULL, f,depth+1);
@@ -5090,6 +5092,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    f &= ~SCF_WHILEM_VISITED_POS;
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
+                /* recurse study_chunk() on loop bodies */
 		minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext,
                                   last, data, stopparen, recursed_depth, NULL,
                                   (mincount == 0
@@ -5252,6 +5255,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			}
 #endif
 			/* Optimize again: */
+                        /* recurse study_chunk() on optimised CURLYX => CURLYM */
 			study_chunk(pRExC_state, &nxt1, minlenp, &deltanext, nxt,
                                     NULL, stopparen, recursed_depth, NULL, 0,depth+1);
 		    }
@@ -5642,6 +5646,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     f |= SCF_WHILEM_VISITED_POS;
                 next = regnext(scan);
                 nscan = NEXTOPER(NEXTOPER(scan));
+
+                /* recurse study_chunk() for lookahead body */
                 minnext = study_chunk(pRExC_state, &nscan, minlenp, &deltanext,
                                       last, &data_fake, stopparen,
                                       recursed_depth, NULL, f, depth+1);
@@ -5732,6 +5738,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 next = regnext(scan);
                 nscan = NEXTOPER(NEXTOPER(scan));
 
+                /* positive lookahead study_chunk() recursion */
                 *minnextp = study_chunk(pRExC_state, &nscan, minnextp,
                                         &deltanext, last, &data_fake,
                                         stopparen, recursed_depth, NULL,
@@ -5893,6 +5900,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                         /* We go from the jump point to the branch that follows
                            it. Note this means we need the vestigal unused
                            branches even though they arent otherwise used. */
+                        /* optimise study_chunk() for TRIE */
                         minnext = study_chunk(pRExC_state, &scan, minlenp,
                             &deltanext, (regnode *)nextbranch, &data_fake,
                             stopparen, recursed_depth, NULL, f,depth+1);
@@ -7573,6 +7581,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	data.last_closep = &last_close;
 
         DEBUG_RExC_seen();
+        /*
+         * MAIN ENTRY FOR study_chunk() FOR m/PATTERN/
+         * (NO top level branches)
+         */
 	minlen = study_chunk(pRExC_state, &first, &minlen, &fake,
                              scan + RExC_size, /* Up to end */
             &data, -1, 0, NULL,
@@ -7698,6 +7710,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	data.last_closep = &last_close;
 
         DEBUG_RExC_seen();
+        /*
+         * MAIN ENTRY FOR study_chunk() FOR m/P1|P2|.../
+         * (patterns WITH top level branches)
+         */
 	minlen = study_chunk(pRExC_state,
             &scan, &minlen, &fake, scan + RExC_size, &data, -1, 0, NULL,
             SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS|(restudied
