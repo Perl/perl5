@@ -1266,7 +1266,7 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
     */
     if (!PERL_FILE_IS_ABSOLUTE(orig_pv)
         && PerlLIO_stat(SvPVX(*temp_psv), &statbuf) < 0) {
-        Perl_croak(aTHX_ "Cannot complete in-place edit of %" SVf ": %s",
+        Perl_croak(aTHX_ "Cannot complete in-place edit of %s: %s",
                    orig_pv,
                    "Work file is missing - did you change directory?");
     }
@@ -1443,8 +1443,9 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #else
                     UNLINK(SvPVX(*temp_psv));
 #endif
-                    Perl_croak(aTHX_ "Can't rename in-place work file '%s' to '%s': %s\n",
-                               SvPVX(*temp_psv), SvPVX(*orig_psv), Strerror(errno));
+                    /* diag_listed_as: Cannot complete in-place edit of %s: %s */
+                    Perl_croak(aTHX_ "Cannot complete in-place edit of %s: failed to rename work file '%s' to '%s': %s",
+                               orig_pv, SvPVX(*temp_psv), orig_pv, Strerror(errno));
                 }
             abort_inplace:
                 UNLINK(SvPVX_const(*temp_psv));
