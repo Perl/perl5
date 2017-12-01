@@ -1300,29 +1300,21 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    i = 0; else i -= 4;
 	    }
             if (globname_needs_quote(c,i)) {
-#ifdef GvNAMEUTF8
-	      if (GvNAMEUTF8(val)) {
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '*'; r[1] = '{';
 		SvCUR_set(retval, SvCUR(retval)+2);
-                esc_q_utf8(aTHX_ retval, c, i, 1, style->useqq);
+                esc_q_utf8(aTHX_ retval, c, i,
+#ifdef GvNAMEUTF8
+			!!GvNAMEUTF8(val)
+#else
+			0
+#endif
+			, style->useqq);
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
 		i = 1;
-	      }
-	      else
-#endif
-	      {
-		sv_grow(retval, SvCUR(retval)+6+2*i);
-		r = SvPVX(retval)+SvCUR(retval);
-		r[0] = '*'; r[1] = '{';	r[2] = '\'';
-		i += esc_q(r+3, c, i);
-		i += 3;
-		r[i++] = '\''; r[i++] = '}';
-		r[i] = '\0';
-	      }
 	    }
 	    else {
 		sv_grow(retval, SvCUR(retval)+i+2);
