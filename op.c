@@ -13388,7 +13388,10 @@ Perl_ck_substr(pTHX_ OP *o)
 	if (kid->op_type == OP_NULL)
 	    kid = OpSIBLING(kid);
 	if (kid)
-	    op_lvalue(kid, o->op_type);
+	    /* Historically, substr(delete $foo{bar},...) has been allowed
+	       with 4-arg substr.  Keep it working by applying entersub
+	       lvalue context.  */
+	    op_lvalue(kid, OP_ENTERSUB);
 
     }
     return o;
