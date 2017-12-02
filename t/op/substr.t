@@ -912,7 +912,7 @@ fresh_perl_is('$0 = "/usr/bin/perl"; substr($0, 0, 0, $0)', '', {}, "(perl #1293
 { # [perl #132527]
     use feature 'refaliasing';
     no warnings 'experimental::refaliasing';
-    my $h;
+    my %h;
     \$h{foo} = \(my $bar = "baz");
     substr delete $h{foo}, 1, 1, o=>;
     is $bar, boz => 'first arg to 4-arg substr is loose lvalue context';
