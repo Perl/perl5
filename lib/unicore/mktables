@@ -7810,6 +7810,10 @@ use parent '-norequire', '_Base_Table';
 #    version.  But manual intervention to decide what the actual behavior
 #    should be may be required should this happen.  The introductory comments
 #    have more to say about this.
+#
+# 4) Definition.  This is a string for human consumption that specifies the
+#    code points that this table matches.  This is used only for the generated
+#    pod file.
 
 sub standardize { return main::standardize($_[0]); }
 sub trace { return main::trace(@_); }
@@ -7854,6 +7858,10 @@ sub trace { return main::trace(@_); }
     # none.
     main::set_access('complement', \%complement, 'r');
 
+    my %definition;
+    # Human readable string of the code points matched by this table
+    main::set_access('definition', \%definition, 'r', 's');
+
     sub new {
         my $class = shift;
 
@@ -7870,6 +7878,7 @@ sub trace { return main::trace(@_); }
         my $initialize = delete $args{'Initialize'};
         my $matches_all = delete $args{'Matches_All'} || 0;
         my $format = delete $args{'Format'};
+        my $definition = delete $args{'Definition'} // "";
         # Rest of parameters passed on.
 
         my $range_list = Range_List->new(Initialize => $initialize,
@@ -7904,6 +7913,7 @@ sub trace { return main::trace(@_); }
         $leader{$addr} = $self;
         $parent{$addr} = $self;
         $complement{$addr} = 0;
+        $definition{$addr} = $definition;
 
         if (defined $format && $format ne $EMPTY_FORMAT) {
             Carp::my_carp_bug("'Format' must be '$EMPTY_FORMAT' in a match table instead of '$format'.  Using '$EMPTY_FORMAT'");
@@ -9381,6 +9391,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     containing_range
                     count
                     default_map
+                    definition
                     delete_range
                     description
                     each_range
@@ -14221,8 +14232,8 @@ sub compile_perl() {
     }
 
     my $Any = $perl->add_match_table('Any',
-                                     Description  => "All Unicode code points: [\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
-                                     );
+                                     Description  => "All Unicode code points",
+                                     Definition => "[\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]");
     $Any->add_range(0, $MAX_UNICODE_CODEPOINT);
     $Any->add_alias('Unicode');
 
@@ -14235,7 +14246,7 @@ sub compile_perl() {
             ->set_equivalent_to(property_ref('ccc')->table('Above'),
                                                                 Related => 1);
 
-    my $ASCII = $perl->add_match_table('ASCII', Description => '[[:ASCII:]]');
+    my $ASCII = $perl->add_match_table('ASCII');
     if (defined $block) {   # This is equivalent to the block if have it.
         my $Unicode_ASCII = $block->table('Basic_Latin');
         if (defined $Unicode_ASCII && ! $Unicode_ASCII->is_empty) {
@@ -14295,7 +14306,7 @@ sub compile_perl() {
         $Lower += $temp & $Assigned;
     }
     my $Posix_Lower = $perl->add_match_table("PosixLower",
-                            Description => "[a-z]",
+                            Definition => "[a-z]",
                             Initialize => $Lower & $ASCII,
                             );
 
@@ -14313,7 +14324,7 @@ sub compile_perl() {
         $Upper->add_range(0x24B6, 0x24CF);  # Circled Latin upper case letters
     }
     my $Posix_Upper = $perl->add_match_table("PosixUpper",
-                            Description => "[A-Z]",
+                            Definition => "[A-Z]",
                             Initialize => $Upper & $ASCII,
                             );
 
@@ -14521,7 +14532,7 @@ sub compile_perl() {
         $Alpha->add_alias('Alphabetic');
     }
     my $Posix_Alpha = $perl->add_match_table("PosixAlpha",
-                            Description => "[A-Za-z]",
+                            Definition => "[A-Za-z]",
                             Initialize => $Alpha & $ASCII,
                             );
     $Posix_Upper->set_caseless_equivalent($Posix_Alpha);
@@ -14532,7 +14543,7 @@ sub compile_perl() {
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
     $perl->add_match_table("PosixAlnum",
-                            Description => "[A-Za-z0-9]",
+                            Definition => "[A-Za-z0-9]",
                             Initialize => $Alnum & $ASCII,
                             );
 
@@ -14559,7 +14570,8 @@ sub compile_perl() {
 
     # This is a Perl extension, so the name doesn't begin with Posix.
     my $PerlWord = $perl->add_match_table('PosixWord',
-                    Description => '\w, restricted to ASCII = [A-Za-z0-9_]',
+                    Description => '\w, restricted to ASCII',
+                    Definition =>  '[A-Za-z0-9_]',
                     Initialize => $Word & $ASCII,
                     );
     $PerlWord->add_alias('PerlWord');
@@ -14576,7 +14588,7 @@ sub compile_perl() {
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
     $perl->add_match_table("PosixBlank",
-                            Description => "\\t and ' '",
+                            Definition => "\\t and ' '",
                             Initialize => $Blank & $ASCII,
                             );
 
@@ -14602,7 +14614,7 @@ sub compile_perl() {
     $Space->add_alias('Space') if $v_version lt v4.1.0;
 
     my $Posix_space = $perl->add_match_table("PosixSpace",
-                            Description => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
+                            Definition => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
                             Initialize => $Space & $ASCII,
                             );
     $Posix_space->add_alias('PerlSpace'); # A pre-existing synonym
@@ -14611,8 +14623,8 @@ sub compile_perl() {
                                         Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
     $perl->add_match_table("PosixCntrl",
-                            Description => "ASCII control characters "
-                                         . "ACK, BEL, BS, CAN, CR, DC1, DC2,"
+                            Description => "ASCII control characters",
+                            Definition =>  "ACK, BEL, BS, CAN, CR, DC1, DC2,"
                                          . " DC3, DC4, DEL, DLE, ENQ, EOM,"
                                          . " EOT, ESC, ETB, ETX, FF, FS, GS,"
                                          . " HT, LF, NAK, NUL, RS, SI, SO,"
@@ -14640,7 +14652,7 @@ sub compile_perl() {
                         Initialize => ~ ($Space + $controls),
                         );
     $perl->add_match_table("PosixGraph",
-                            Description =>
+                            Definition =>
                                 '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~0-9A-Za-z]',
                             Initialize => $Graph & $ASCII,
                             );
@@ -14650,7 +14662,7 @@ sub compile_perl() {
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
     $perl->add_match_table("PosixPrint",
-                            Description =>
+                            Definition =>
                               '[- 0-9A-Za-z!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
                             Initialize => $print & $ASCII,
                             );
@@ -14666,7 +14678,7 @@ sub compile_perl() {
                                 Perl_Extension => 1
         );
     $perl->add_match_table('PosixPunct', Perl_Extension => 1,
-        Description => '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
+        Definition => '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
         Initialize => $ASCII & $XPosixPunct,
         );
 
@@ -14674,7 +14686,7 @@ sub compile_perl() {
                             Description => '[0-9] + all other decimal digits');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
     my $PosixDigit = $perl->add_match_table("PosixDigit",
-                                            Description => '[0-9]',
+                                            Definition => '[0-9]',
                                             Initialize => $Digit & $ASCII,
                                             );
 
@@ -14689,7 +14701,7 @@ sub compile_perl() {
                               ord('A') .. ord('F'),
                               ord('a') .. ord('f'),
                               0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
-        $Xdigit->add_description('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
+        $Xdigit->set_definition('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
 
     # AHex was not present in early releases
@@ -14703,7 +14715,7 @@ sub compile_perl() {
         $PosixXDigit->add_alias('AHex');
         $PosixXDigit->add_alias('Ascii_Hex_Digit');
     }
-    $PosixXDigit->add_description('[0-9A-Fa-f]');
+    $PosixXDigit->set_definition('[0-9A-Fa-f]');
 
     my $any_folds = $perl->add_match_table("_Perl_Any_Folds",
                     Description => "Code points that particpate in some fold",
@@ -16382,7 +16394,10 @@ sub make_re_pod_entries($) {
             if ($table_property != $perl && $table->perl_extension) {
                 push @info, '(Perl extension)';
             }
-            push @info, "($string_count)";
+            my $definition = $table->definition // "";
+            $definition = "" if $entry_for_first_alias;
+            $definition = ": $definition" if $definition;
+            push @info, "($string_count$definition)";
 
             # Now, we have both the entry and info so add them to the
             # list of all the properties.
