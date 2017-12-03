@@ -57,6 +57,22 @@ sub fixup_expect ($$) {
     return wantarray ? @new_expect : join "", @new_expect;
 }
 
+sub add_markers {
+    my ($element)= @_;
+    $element =~ s/ at .* line \d+\.?\n$//;
+    $element =~ s/in regex; marked by <-- HERE in/{#}/;
+    $element =~ s/ <-- HERE /{#}/;
+    return $element;
+}
+
+sub _qq {
+    my ($str)= @_;
+    $str =~ s/\\/\\\\/g;
+    $str =~ s/\$/\\\$/g;
+    return qq("$str");
+}
+
+
 ## Because we don't "use utf8" in this file, we need to do some extra legwork
 ## for the utf8 tests: Prepend 'use utf8' to the pattern, and mark the strings
 ## to check against as UTF-8, but for this all to work properly, the character
@@ -690,7 +706,14 @@ for my $strict ("", "use re 'strict';") {
                     my $eval_string = "$strict $regex";
                     $_ = "x";
                     eval $eval_string;
-                    like($@, qr/\Q$expect/, $eval_string);
+                    my $error= $@;
+                    if ($error =~ qr/\Q$expect/) {
+                        ok(1,$eval_string);
+                    } else {
+                        ok(0,$eval_string);
+                        diag("Have: " . _qq(add_markers($error)));
+                        diag("Want: " . _qq($death[$i+1]));
+                    }
                 }, undef, "... and died without any other warnings");
     }
 }
