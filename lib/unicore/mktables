@@ -7813,7 +7813,9 @@ use parent '-norequire', '_Base_Table';
 #
 # 4) Definition.  This is a string for human consumption that specifies the
 #    code points that this table matches.  This is used only for the generated
-#    pod file.
+#    pod file.  It may be specified explicitly, or automatically computed.
+#    Only the first portion of complicated definitions is computed and
+#    displayed.
 
 sub standardize { return main::standardize($_[0]); }
 sub trace { return main::trace(@_); }
@@ -7859,7 +7861,8 @@ sub trace { return main::trace(@_); }
     main::set_access('complement', \%complement, 'r');
 
     my %definition;
-    # Human readable string of the code points matched by this table
+    # Human readable string of the first few ranges of code points matched by
+    # this table
     main::set_access('definition', \%definition, 'r', 's');
 
     sub new {
@@ -8304,6 +8307,235 @@ sub trace { return main::trace(@_); }
             $child->set_fate($fate, $reason);
         }
         return;
+    }
+
+    sub calculate_table_definition
+    {
+        # Returns a human-readable string showing some or all of the code
+        # points matched by this table.  The string will include a
+        # bracketed-character class for all characters matched in the 00-FF
+        # range, and the first few ranges matched beyond that.
+        my $max_ranges = 6;
+
+        my $self = shift;
+        my $definition = $self->definition || "";
+
+        # Skip this if already have a definition.
+        return $definition if $definition;
+
+        my $lows_string = "";   # The string representation of the 0-FF
+                                # characters
+        my $string_range = "";  # The string rep. of the above FF ranges
+        my $range_count = 0;    # How many ranges in $string_rage
+
+        my @lows_invlist;       # The inversion list of the 0-FF code points
+        my $first_non_control = ord(" ");   # Everything below this is a
+                                            # control, on ASCII or EBCDIC
+        my $max_table_code_point = $self->max;
+
+        # On ASCII platforms, the range 80-FF contains no printables.
+        my $highest_printable = ((main::NON_ASCII_PLATFORM) ? 255 : 126);
+
+
+        # Look through the first few ranges matched by this table.
+        $self->reset_each_range;    # Defensive programming
+        while (defined (my $range = $self->each_range())) {
+            my $start = $range->start;
+            my $end = $range->end;
+
+            # Accumulate an inversion list of the 00-FF code points
+            if ($start < 256 && ($start > 0 || $end < 256)) {
+                push @lows_invlist, $start;
+                push @lows_invlist, 1 + (($end < 256) ? $end : 255);
+
+                # Get next range if there are more ranges below 256
+                next if $end < 256 && $end < $max_table_code_point;
+
+                # If the range straddles the 255/256 boundary, we split it
+                # there.  We already added above the low portion to the
+                # inversion list
+                $start = 256 if $end > 256;
+            }
+
+            # Here, @lows_invlist contains the code points below 256, and
+            # there is no other range, or the current one starts at or above
+            # 256.  Generate the [char class] for the 0-255 ones.
+            while (@lows_invlist) {
+
+                # If this range (necessarily the first one, by the way) starts
+                # at 0 ...
+                if ($lows_invlist[0] == 0) {
+
+                    # If it ends within the block of controls, that means that
+                    # some controls are in it and some aren't.  Since Unicode
+                    # properties pretty much only know about a few of the
+                    # controls, like \n, \t, this means that its one of them
+                    # that isn't in the range.  Complement the inversion list
+                    # which will likely cause these to be output using their
+                    # mnemonics, hence being clearer.
+                    if ($lows_invlist[1] < $first_non_control) {
+                        $lows_string .= '^';
+                        shift @lows_invlist;
+                        push @lows_invlist, 256;
+                    }
+                    elsif ($lows_invlist[1] <= $highest_printable) {
+
+                        # Here, it extends into the printables block.  Split
+                        # into two ranges so that the controls are separate.
+                        $lows_string .= sprintf "\\x00-\\x%02x",
+                                                    $first_non_control - 1;
+                        $lows_invlist[0] = $first_non_control;
+                    }
+                }
+
+                # If the range completely contains the printables, don't
+                # individually spell out the printables.
+                if (    $lows_invlist[0] <= $first_non_control
+                    && $lows_invlist[1] > $highest_printable)
+                {
+                    $lows_string .= sprintf "\\x%02x-\\x%02x",
+                                        $lows_invlist[0], $lows_invlist[1] - 1;
+                    shift @lows_invlist;
+                    shift @lows_invlist;
+                    next;
+                }
+
+                # Here, the range may include some but not all printables.
+                # Look at each one individually
+                foreach my $ord (shift @lows_invlist .. shift(@lows_invlist) - 1) {
+                    my $char = chr $ord;
+
+                    # If there is already something in the list, an
+                    # alphanumeric char could be the next in sequence.  If so,
+                    # we start or extend a range.  That is, we could have so
+                    # far something like 'a-c', and the next char is a 'd', so
+                    # we change it to 'a-d'.  We use native_to_unicode()
+                    # because a-z on EBCDIC means 26 chars, and excludes the
+                    # gap ones.
+                    if ($lows_string ne "" && $char =~ /[[:alnum:]]/) {
+                        my $prev = substr($lows_string, -1);
+                        if (   $prev !~ /[[:alnum:]]/
+                            ||   utf8::native_to_unicode(ord $prev) + 1
+                              != utf8::native_to_unicode(ord $char))
+                        {
+                            # Not extending the range
+                            $lows_string .= $char;
+                        }
+                        elsif (   length $lows_string > 1
+                               && substr($lows_string, -2, 1) eq '-')
+                        {
+                            # We had a sequence like '-c' and the current
+                            # character is 'd'.  Extend the range.
+                            substr($lows_string, -1, 1) = $char;
+                        }
+                        else {
+                            # We had something like 'd' and this is 'e'.
+                            # Start a range.
+                            $lows_string .= "-$char";
+                        }
+                    }
+                    elsif ($char =~ /[[:graph:]]/) {
+
+                        # We output a graphic char as-is, preceded by a
+                        # backslash if it is a metacharacter
+                        $lows_string .= '\\'
+                                if $char =~ /[\\\^\$\@\%\|()\[\]\{\}\-\/"']/;
+                        $lows_string .= $char;
+                    } # Otherwise use mnemonic for any that have them
+                    elsif ($char =~ /[\a]/) {
+                        $lows_string .= '\a';
+                    }
+                    elsif ($char =~ /[\b]/) {
+                        $lows_string .= '\b';
+                    }
+                    elsif ($char eq "\e") {
+                        $lows_string .= '\e';
+                    }
+                    elsif ($char eq "\f") {
+                        $lows_string .= '\f';
+                    }
+                    elsif ($char eq "\cK") {
+                        $lows_string .= '\cK';
+                    }
+                    elsif ($char eq "\n") {
+                        $lows_string .= '\n';
+                    }
+                    elsif ($char eq "\r") {
+                        $lows_string .= '\r';
+                    }
+                    elsif ($char eq "\t") {
+                        $lows_string .= '\t';
+                    }
+                    else {
+
+                        # Here is a non-graphic without a mnemonic.  We use \x
+                        # notation.  But if the ordinal of this is one above
+                        # the previous, create or extend the range
+                        my $hex_representation = sprintf("%02x", ord $char);
+                        if (   length $lows_string >= 4
+                            && substr($lows_string, -4, 2) eq '\\x'
+                            && hex(substr($lows_string, -2)) + 1 == ord $char)
+                        {
+                            if (       length $lows_string >= 5
+                                &&     substr($lows_string, -5, 1) eq '-'
+                                && (   length $lows_string == 5
+                                    || substr($lows_string, -6, 1) ne '\\'))
+                            {
+                                substr($lows_string, -2) = $hex_representation;
+                            }
+                            else {
+                                $lows_string .= '-\\x' . $hex_representation;
+                            }
+                        }
+                        else {
+                            $lows_string .= '\\x' . $hex_representation;
+                        }
+                    }
+                }
+            }
+
+            # Done with assembling the string of all lows.  If there are only
+            # lows in the property, are completely done.
+            if ($max_table_code_point < 256) {
+                $self->reset_each_range;
+                last;
+            }
+
+            # Otherwise, quit if reached max number of non-lows ranges.  If
+            # there are lows, count them as one unit towards the maximum.
+            $range_count++;
+            if ($range_count > (($lows_string eq "") ? $max_ranges : $max_ranges - 1)) {
+                $string_range .= " ...";
+                $self->reset_each_range;
+                last;
+            }
+
+            # Otherwise add this range.
+            $string_range .= ", " if $string_range ne "";
+            if ($start == $end) {
+                $string_range .= sprintf("U+%04X", $start);
+            }
+            elsif ($end >= $MAX_WORKING_CODEPOINT)  {
+                $string_range .= sprintf("U+%04X..infinity", $start);
+            }
+            else  {
+                $string_range .= sprintf("U+%04X..%04X",
+                                        $start, $end);
+            }
+        }
+
+        # Done with all the ranges we're going to look at.  Assemble the
+        # definition from the lows + non-lows.
+
+        if ($lows_string ne "" || $string_range ne "") {
+            if ($lows_string ne "") {
+                $definition .= "[$lows_string]";
+                $definition .= ", " if $string_range;
+            }
+            $definition .= $string_range;
+        }
+
+        return $definition;
     }
 
     sub write {
@@ -14232,8 +14464,7 @@ sub compile_perl() {
     }
 
     my $Any = $perl->add_match_table('Any',
-                                     Description  => "All Unicode code points",
-                                     Definition => "[\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]");
+                                    Description  => "All Unicode code points");
     $Any->add_range(0, $MAX_UNICODE_CODEPOINT);
     $Any->add_alias('Unicode');
 
@@ -14306,7 +14537,6 @@ sub compile_perl() {
         $Lower += $temp & $Assigned;
     }
     my $Posix_Lower = $perl->add_match_table("PosixLower",
-                            Definition => "[a-z]",
                             Initialize => $Lower & $ASCII,
                             );
 
@@ -14324,7 +14554,6 @@ sub compile_perl() {
         $Upper->add_range(0x24B6, 0x24CF);  # Circled Latin upper case letters
     }
     my $Posix_Upper = $perl->add_match_table("PosixUpper",
-                            Definition => "[A-Z]",
                             Initialize => $Upper & $ASCII,
                             );
 
@@ -14532,7 +14761,6 @@ sub compile_perl() {
         $Alpha->add_alias('Alphabetic');
     }
     my $Posix_Alpha = $perl->add_match_table("PosixAlpha",
-                            Definition => "[A-Za-z]",
                             Initialize => $Alpha & $ASCII,
                             );
     $Posix_Upper->set_caseless_equivalent($Posix_Alpha);
@@ -14543,7 +14771,6 @@ sub compile_perl() {
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
     $perl->add_match_table("PosixAlnum",
-                            Definition => "[A-Za-z0-9]",
                             Initialize => $Alnum & $ASCII,
                             );
 
@@ -14571,7 +14798,6 @@ sub compile_perl() {
     # This is a Perl extension, so the name doesn't begin with Posix.
     my $PerlWord = $perl->add_match_table('PosixWord',
                     Description => '\w, restricted to ASCII',
-                    Definition =>  '[A-Za-z0-9_]',
                     Initialize => $Word & $ASCII,
                     );
     $PerlWord->add_alias('PerlWord');
@@ -14588,7 +14814,6 @@ sub compile_perl() {
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
     $perl->add_match_table("PosixBlank",
-                            Definition => "\\t and ' '",
                             Initialize => $Blank & $ASCII,
                             );
 
@@ -14614,7 +14839,6 @@ sub compile_perl() {
     $Space->add_alias('Space') if $v_version lt v4.1.0;
 
     my $Posix_space = $perl->add_match_table("PosixSpace",
-                            Definition => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
                             Initialize => $Space & $ASCII,
                             );
     $Posix_space->add_alias('PerlSpace'); # A pre-existing synonym
@@ -14652,8 +14876,6 @@ sub compile_perl() {
                         Initialize => ~ ($Space + $controls),
                         );
     $perl->add_match_table("PosixGraph",
-                            Definition =>
-                                '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~0-9A-Za-z]',
                             Initialize => $Graph & $ASCII,
                             );
 
@@ -14662,8 +14884,6 @@ sub compile_perl() {
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
     $perl->add_match_table("PosixPrint",
-                            Definition =>
-                              '[- 0-9A-Za-z!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
                             Initialize => $print & $ASCII,
                             );
 
@@ -14678,7 +14898,6 @@ sub compile_perl() {
                                 Perl_Extension => 1
         );
     $perl->add_match_table('PosixPunct', Perl_Extension => 1,
-        Definition => '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
         Initialize => $ASCII & $XPosixPunct,
         );
 
@@ -14686,7 +14905,6 @@ sub compile_perl() {
                             Description => '[0-9] + all other decimal digits');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
     my $PosixDigit = $perl->add_match_table("PosixDigit",
-                                            Definition => '[0-9]',
                                             Initialize => $Digit & $ASCII,
                                             );
 
@@ -14701,7 +14919,6 @@ sub compile_perl() {
                               ord('A') .. ord('F'),
                               ord('a') .. ord('f'),
                               0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
-        $Xdigit->set_definition('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
 
     # AHex was not present in early releases
@@ -14715,7 +14932,6 @@ sub compile_perl() {
         $PosixXDigit->add_alias('AHex');
         $PosixXDigit->add_alias('Ascii_Hex_Digit');
     }
-    $PosixXDigit->set_definition('[0-9A-Fa-f]');
 
     my $any_folds = $perl->add_match_table("_Perl_Any_Folds",
                     Description => "Code points that particpate in some fold",
@@ -16099,7 +16315,18 @@ sub make_re_pod_entries($) {
         $unicode_count = $count;
         $non_unicode_string = "";
     }
+
     my $string_count = clarify_number($unicode_count) . $non_unicode_string;
+
+    my $definition = $input_table->calculate_table_definition;
+    if ($definition) {
+
+        # Save the definition for later use.
+        $input_table->set_definition($definition);
+
+        $definition = ": $definition";
+    }
+
     my $status = $input_table->status;
     my $status_info = $input_table->status_info;
     my $caseless_equivalent = $input_table->caseless_equivalent;
@@ -16501,8 +16728,23 @@ sub make_ucd_table_pod_entries {
         }
     }
 
+    my $definition;
+    my $definition_table;
+    my $type = $table->property->type;
+    if ($type == $BINARY || $type == $FORCED_BINARY) {
+        $definition_table = $table->property->table('Y');
+    }
+    elsif ($table->isa('Match_Table')) {
+        $definition_table = $table;
+    }
+
+    $definition = $definition_table->calculate_table_definition
+                                            if defined $definition_table
+                                                    && $definition_table != 0;
+
     # Add any extra annotations to the full name entry
     foreach my $more_info ($table->description,
+                            $definition,
                             $table->note,
                             $table->status_info)
     {
@@ -16928,6 +17170,7 @@ END
     $ucd_pod =  format_pod_line($indent_info_column, 'NAME', '  INFO')
                 . "\n"
                 . $ucd_pod;
+    my $space_hex = sprintf("%02x", ord " ");
     local $" = "";
 
     # Everything is ready to assemble.
@@ -17121,8 +17364,16 @@ All single forms are Perl extensions; a few compound forms are as well, and
 are noted as such.
 
 Numbers in (parentheses) indicate the total number of Unicode code points
-matched by the property.  For emphasis, those properties that match no code
-points at all are listed as well in a separate section following the table.
+matched by the property.  For the entries that give the longest, most
+descriptive version of the property, the count is followed by a list of some
+of the code points matched by it.  The list includes all the matched
+characters in the 0-255 range, enclosed in the familiar [brackets] the same as
+a regular expression bracketed character class.  Following that, the next few
+higher matching ranges are also given.  To avoid visual ambiguity, the SPACE
+character is represented as C<\\x$space_hex>.
+
+For emphasis, those properties that match no code points at all are listed as
+well in a separate section following the table.
 
 Most properties match the same code points regardless of whether C<"/i">
 case-insensitive matching is specified or not.  But a few properties are
@@ -17227,7 +17478,11 @@ an alternative name, if any, plus possibly some annotations.  The alternative
 name is the property's full name, unless that would simply repeat the first
 column, in which case the second column indicates the property's short name
 (if different).  The annotations are given only in the entry for the full
-name.  If a property is obsolete, etc, the entry will be flagged with the same
+name.  The annotations for binary properties include a list of the first few
+ranges that the property matches.  To avoid any ambiguity, the SPACE character
+is represented as C<\\x$space_hex>.
+
+If a property is obsolete, etc, the entry will be flagged with the same
 characters used in the table in the L<section above|/Properties accessible
 through \\p{} and \\P{}>, like B<$DEPRECATED> or B<$STABILIZED>.
 

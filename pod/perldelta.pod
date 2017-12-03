@@ -173,7 +173,11 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perluniprops>
+
+For each binary table or property, the documentation now includes which
+characters in the range C<\x00-\xFF> it matches, as well as a list of
+the first few ranges of code points matched above that.
 
 =over 4
 
