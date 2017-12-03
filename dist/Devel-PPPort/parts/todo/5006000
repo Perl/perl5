@@ -90,7 +90,6 @@ is_utf8_space                  # U
 is_utf8_upper                  # U
 is_utf8_xdigit                 # U
 magic_dump                     # U
-mess                           # E (Perl_mess)
 my_atof                        # U
 my_fflush_all                  # U
 newANONATTRSUB                 # U
@@ -147,6 +146,5 @@ utf8_distance                  # U
 utf8_hop                       # U
 vcroak                         # U
 vform                          # U
-vmess                          # U
 vwarn                          # U
 vwarner                        # U
