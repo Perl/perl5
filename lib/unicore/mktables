@@ -16425,38 +16425,49 @@ sub make_ucd_table_pod_entries {
                    : $table->parent->property;
 
     my $perl_extension = $table->perl_extension;
+    my $is_perl_extension_match_table_but_not_dollar_perl
+                                                        = $property != $perl
+                                                       && $perl_extension
+                                                       && $property != $table;
 
     # Get the more official name for for perl extensions that aren't
     # stand-alone properties
-    if ($perl_extension && $property != $table) {
-        if ($property == $perl ||$property->type == $BINARY) {
-            $meaning = $table->complete_name;
+    if ($is_perl_extension_match_table_but_not_dollar_perl) {
+        if ($property->type == $BINARY) {
+            $meaning = $property->full_name;
         }
         else {
-            $meaning = $property->full_name . "=$full_name";
+            $meaning = $table->parent->complete_name;
         }
     }
 
     # There are three types of info column.  One for the short name, one for
     # the full name, and one for everything else.  They mostly are the same,
     # so initialize in the same loop.
+
     foreach my $info_ref (\$full_info, \$short_info, \$other_info) {
-        if ($perl_extension && $property != $table) {
+        if ($info_ref != \$full_info) {
+
+            # The non-full name columns include the full name
+            $$info_ref .= $full_name;
+        }
+
+
+        if ($is_perl_extension_match_table_but_not_dollar_perl) {
 
             # Add the synonymous name for the non-full name entries; and to
             # the full-name entry if it adds extra information
-            if ($info_ref == \$other_info
-                || ($info_ref == \$short_info
-                    && $standard_short_name ne $standard_full_name)
-                || standardize($meaning) ne $standard_full_name
-            ) {
-                $$info_ref .= "$meaning.";
+            if (   standardize($meaning) ne $standard_full_name
+                || $info_ref == \$other_info
+                || $info_ref == \$short_info)
+            {
+                my $parenthesized =  $info_ref != \$full_info;
+                $$info_ref .= " " if $$info_ref && $parenthesized;
+                $$info_ref .= "(=" if $parenthesized;
+                $$info_ref .= "$meaning";
+                $$info_ref .= ")" if $parenthesized;
+                $$info_ref .= ".";
             }
-        }
-        elsif ($info_ref != \$full_info) {
-
-            # Otherwise, the non-full name columns include the full name
-            $$info_ref .= $full_name;
         }
 
         # And the full-name entry includes the short name, if shorter
