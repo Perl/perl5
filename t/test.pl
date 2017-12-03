@@ -1519,6 +1519,7 @@ sub capture_warnings {
 
     local @::__capture;
     local $SIG {__WARN__} = \&__capture;
+    local $Level = 1;
     &$code;
     return @::__capture;
 }
