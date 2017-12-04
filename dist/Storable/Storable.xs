@@ -320,7 +320,7 @@ typedef STRLEN ntag_t;
 #endif
 
 /* Needed for 32bit with lengths > 2G - 4G, and 64bit */
-#if UVSIZE > 4
+#if PTRSIZE > 4
 #define HAS_U64
 #endif
 
