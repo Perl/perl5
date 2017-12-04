@@ -10307,6 +10307,78 @@ Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
     );
 }
 
+/*
+=for apidoc m|CV *|newXS_len_flags|const char *name|STRLEN len|XSUBADDR_t subaddr|const char *const filename|NULLOK const char *const proto|NULLOK SV **const_svp|U32 flags
+
+Construct an XS subroutine, also performing some surrounding jobs.
+
+The subroutine will have the entry point C<subaddr>.  It will have
+the prototype specified by the nul-terminated string C<proto>, or
+no prototype if C<proto> is null.  The prototype string is copied;
+the caller can mutate the supplied string afterwards.  If C<filename>
+is non-null, it must be a nul-terminated filename, and the subroutine
+will have its C<CvFILE> set accordingly.  By default C<CvFILE> is set to
+point directly to the supplied string, which must be static.  If C<flags>
+has the C<XS_DYNAMIC_FILENAME> bit set, then a copy of the string will
+be taken instead.
+
+Other aspects of the subroutine will be left in their default state.
+If anything else needs to be done to the subroutine for it to function
+correctly, it is the caller's responsibility to do that after this
+function has constructed it.  However, beware of the subroutine
+potentially being destroyed before this function returns, as described
+below.
+
+If C<name> is null then the subroutine will be anonymous, with its
+C<CvGV> referring to an C<__ANON__> glob.  If C<name> is non-null then the
+subroutine will be named accordingly, referenced by the appropriate glob.
+C<name> is a string of length C<len> bytes giving a sigilless symbol name,
+in UTF-8 if C<flags> has the C<SVf_UTF8> bit set and in Latin-1 otherwise.
+The name may be either qualified or unqualified, with the stash defaulting
+in the same manner as for C<gv_fetchpvn_flags>.  C<flags> may contain
+flag bits understood by C<gv_fetchpvn_flags> with the same meaning as
+they have there, such as C<GV_ADDWARN>.  The symbol is always added to
+the stash if necessary, with C<GV_ADDMULTI> semantics.
+
+If there is already a subroutine of the specified name, then the new sub
+will replace the existing one in the glob.  A warning may be generated
+about the redefinition.  If the old subroutine was C<CvCONST> then the
+decision about whether to warn is influenced by an expectation about
+whether the new subroutine will become a constant of similar value.
+That expectation is determined by C<const_svp>.  (Note that the call to
+this function doesn't make the new subroutine C<CvCONST> in any case;
+that is left to the caller.)  If C<const_svp> is null then it indicates
+that the new subroutine will not become a constant.  If C<const_svp>
+is non-null then it indicates that the new subroutine will become a
+constant, and it points to an C<SV*> that provides the constant value
+that the subroutine will have.
+
+If the subroutine has one of a few special names, such as C<BEGIN> or
+C<END>, then it will be claimed by the appropriate queue for automatic
+running of phase-related subroutines.  In this case the relevant glob will
+be left not containing any subroutine, even if it did contain one before.
+In the case of C<BEGIN>, the subroutine will be executed and the reference
+to it disposed of before this function returns, and also before its
+prototype is set.  If a C<BEGIN> subroutine would not be sufficiently
+constructed by this function to be ready for execution then the caller
+must prevent this happening by giving the subroutine a different name.
+
+The function returns a pointer to the constructed subroutine.  If the sub
+is anonymous then ownership of one counted reference to the subroutine
+is transferred to the caller.  If the sub is named then the caller does
+not get ownership of a reference.  In most such cases, where the sub
+has a non-phase name, the sub will be alive at the point it is returned
+by virtue of being contained in the glob that names it.  A phase-named
+subroutine will usually be alive by virtue of the reference owned by the
+phase's automatic run queue.  But a C<BEGIN> subroutine, having already
+been executed, will quite likely have been destroyed already by the
+time this function returns, making it erroneous for the caller to make
+any use of the returned pointer.  It is the caller's responsibility to
+ensure that it knows which of these situations applies.
+
+=cut
+*/
+
 CV *
 Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 			   XSUBADDR_t subaddr, const char *const filename,
