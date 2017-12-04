@@ -256,6 +256,9 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 
 typedef STRLEN ntag_t;
 
+/* used for where_is_undef - marks an unset value */
+#define UNSET_NTAG_T (~(ntag_t)0)
+
 /*
  * The following "thread-safe" related defines were contributed by
  * Murray Nesbitt <murray@activestate.com> and integrated by RAM, who
@@ -343,7 +346,7 @@ typedef struct stcxt {
     HV *hseen;
     AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
     AV *aseen;			/* which objects have been seen, retrieve time */
-    IV where_is_undef;		/* index in aseen of PL_sv_undef */
+    ntag_t where_is_undef;		/* index in aseen of PL_sv_undef */
     HV *hclass;			/* which classnames have been seen, store time */
     AV *aclass;			/* which classnames have been seen, retrieve time */
     HV *hook;			/* cache for hook methods per class name */
@@ -1024,6 +1027,9 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
                 return -1;                                              \
         }                                                               \
     } STMT_END
+
+#  ifdef HAS_U64
+
 #define W64LEN(x)							\
     STMT_START {							\
         ASSERT(sizeof(x) == 8, ("W64LEN writing a U64"));               \
@@ -1044,6 +1050,13 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
                 return -1;                                              \
         }                                                               \
     } STMT_END
+
+#  else
+
+#define W64LEN(x) CROAK(("No 64bit UVs"))
+
+#  endif
+
 #else
 #define WLEN(x)	WRITE_I32(x)
 #ifdef HAS_U64
@@ -1369,8 +1382,8 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname);
 /* helpers for U64 lobjects */
 
 static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname);
-static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname);
 #ifdef HAS_U64
+static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname);
 static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cname);
 static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags);
 #endif
@@ -1734,7 +1747,7 @@ static void init_retrieve_context(pTHX_
                   ? newHV() : 0);
 
     cxt->aseen = newAV();	/* Where retrieved objects are kept */
-    cxt->where_is_undef = -1;	/* Special case for PL_sv_undef */
+    cxt->where_is_undef = UNSET_NTAG_T;	/* Special case for PL_sv_undef */
     cxt->aclass = newAV();	/* Where seen classnames are kept */
     cxt->tagnum = 0;		/* Have to count objects... */
     cxt->classnum = 0;		/* ...and class names as well */
@@ -1768,7 +1781,7 @@ static void clean_retrieve_context(pTHX_ stcxt_t *cxt)
         av_undef(aseen);
         sv_free((SV *) aseen);
     }
-    cxt->where_is_undef = -1;
+    cxt->where_is_undef = UNSET_NTAG_T;
 
     if (cxt->aclass) {
         AV *aclass = cxt->aclass;
@@ -5819,6 +5832,8 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     TRACEME(("ok (retrieve_lobject at 0x%" UVxf ")", PTR2UV(sv)));
     return sv;
 #else
+    PERL_UNUSED_ARG(cname);
+
     /* previously this (brokenly) checked the length value and only failed if 
        the length was over 4G.
        Since this op should only occur with objects over 4GB (or 2GB) we can just
@@ -5945,8 +5960,8 @@ static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, const char *cname)
     /* Special case PL_sv_undef, as av_fetch uses it internally to mark
        deleted elements, and will return NULL (fetch failed) whenever it
        is fetched.  */
-    if (cxt->where_is_undef == -1) {
-        cxt->where_is_undef = (int)cxt->tagnum;
+    if (cxt->where_is_undef == UNSET_NTAG_T) {
+        cxt->where_is_undef = cxt->tagnum;
     }
     stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
     SEEN_NN(sv, stash, 1);
@@ -6063,6 +6078,8 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
     return (SV *) av;
 }
 
+#ifdef HAS_U64
+
 /* internal method with len already read */
 
 static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname)
@@ -6110,7 +6127,6 @@ static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname)
     return (SV *) av;
 }
 
-#ifdef HAS_U64
 /*
  * get_lhash
  *
@@ -6994,7 +7010,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 #ifndef HAS_U64
         /* A 32-bit system can't have over 2**31 objects anyway */
         if (tag < 0)
-            CROAK(("Object #%" IVdf " out of range", (IV)tag);
+            CROAK(("Object #%" IVdf " out of range", (IV)tag));
 #endif
         /* Older versions of Storable on with 64-bit support on 64-bit
            systems can produce values above the 2G boundary (or wrapped above
