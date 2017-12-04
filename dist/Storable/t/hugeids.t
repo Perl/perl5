@@ -29,9 +29,10 @@ BEGIN {
         unless $Config{d_fork};
 }
 
-plan tests => 8;
+plan tests => 10;
 
 my $skips = $ENV{PERL_STORABLE_SKIP_ID_TEST} || '';
+my $keeps = $ENV{PERL_STORABLE_KEEP_ID_TEST};
 
 freeze_thaw_test
   (
@@ -71,6 +72,15 @@ freeze_thaw_test
    memory => 8,
   );
 
+freeze_thaw_test
+    (
+     name => "hook store with 2g data",
+     freeze => \&make_2g_hook_data,
+     thaw => \&check_2g_hook_data,
+     id => "hook2gdata",
+     memory => 8,
+    );
+
 sub freeze_thaw_test {
     my %opts = @_;
 
@@ -93,7 +103,9 @@ sub freeze_thaw_test {
 	$ENV{PERL_TEST_MEMORY} >= $memory
 	  or skip "Not enough memory to test $name", 2;
 	$skips =~ /\b\Q$id\E\b/
-	  and skip "You requested test $name be skipped", 2;
+	  and skip "You requested test $name ($id) be skipped", 2;
+        defined $keeps && $keeps !~ /\b\Q$id\E\b/
+            and skip "You didn't request test $name ($id)", 2;
 	my $stored;
 	if (defined(my $pid = open(my $fh, "-|"))) {
 	    unless ($pid) {
@@ -242,6 +254,23 @@ sub check_net_large_pv {
     print "OK";
 }
 
+sub make_2g_hook_data {
+    my ($fh) = @_;
+
+    my $g2 = 0x80000000;
+    my $x = HookLargeData->new($g2);
+    store_fd($x, $fh);
+}
+
+sub check_2g_hook_data {
+    my ($fh) = @_;
+    my $x = retrieve_fd($fh);
+    my $g2 = 0x80000000;
+    $x->size == $g2
+        or die "Size incorrect ", $x->size;
+    print "OK";
+}
+
 package HookLargeIds;
 
 sub new {
@@ -273,4 +302,26 @@ sub id {
 
 sub data {
     $_[0]{data};
+}
+
+package HookLargeData;
+
+sub new {
+    my ($class, $size) = @_;
+
+    return bless { size => $size }, $class;
+}
+
+sub STORABLE_freeze {
+    return "x" x $_[0]{size};
+}
+
+sub STORABLE_thaw {
+    my ($self, $cloning, $ser) = @_;
+
+    $self->{size} = length $ser;
+}
+
+sub size {
+    $_[0]{size};
 }
