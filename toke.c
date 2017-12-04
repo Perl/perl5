@@ -7266,21 +7266,7 @@ Perl_yylex(pTHX)
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
 		bool safebw;
-
-
-		/* Get the rest if it looks like a package qualifier */
-
-		if (*s == '\'' || (*s == ':' && s[1] == ':')) {
-		    STRLEN morelen;
-		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
-				  TRUE, &morelen);
-		    if (!morelen)
-			Perl_croak(aTHX_ "Bad name after %" UTF8f "%s",
-				UTF8fARG(UTF, len, PL_tokenbuf),
-				*s == '\'' ? "'" : "::");
-		    len += morelen;
-		    pkgname = 1;
-		}
+		bool no_op_error = FALSE;
 
 		if (PL_expect == XOPERATOR) {
 		    if (PL_bufptr == PL_linestart) {
@@ -7289,8 +7275,32 @@ Perl_yylex(pTHX)
 			CopLINE_inc(PL_curcop);
 		    }
 		    else
-			no_op("Bareword",s);
+			/* We want to call no_op with s pointing after the
+			   bareword, so defer it.  But we want it to come
+			   before the Bad name croak.  */
+			no_op_error = TRUE;
 		}
+
+		/* Get the rest if it looks like a package qualifier */
+
+		if (*s == '\'' || (*s == ':' && s[1] == ':')) {
+		    STRLEN morelen;
+		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
+				  TRUE, &morelen);
+		    if (no_op_error) {
+			no_op("Bareword",s);
+			no_op_error = FALSE;
+		    }
+		    if (!morelen)
+			Perl_croak(aTHX_ "Bad name after %" UTF8f "%s",
+				UTF8fARG(UTF, len, PL_tokenbuf),
+				*s == '\'' ? "'" : "::");
+		    len += morelen;
+		    pkgname = 1;
+		}
+
+		if (no_op_error)
+			no_op("Bareword",s);
 
 		/* See if the name is "Foo::",
 		   in which case Foo is a bareword

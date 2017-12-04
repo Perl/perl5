@@ -289,6 +289,44 @@ Too many arguments for undef operator at - line 11, near "2)"
 Constant(q) unknown at - line 12, near ""a""
 - has too many errors.
 ########
+# NAME Bad name after ' (with other helpful messages)
+sub has{}
+has erdef => (
+    isa => 'Int',
+    is => 'ro,
+    default => sub { 1 }
+);
+
+has cxxc => (
+    isa => 'Int',
+    is => 'ro',
+    default => sub { 1 }
+);
+EXPECT
+Bareword found where operator expected at - line 9, near "isa => 'Int"
+  (Might be a runaway multi-line '' string starting on line 4)
+	(Do you need to predeclare isa?)
+Bad name after Int' at - line 9.
+########
+# NAME Bad name after :: (with other helpful messages)
+sub has{}
+has erdef => (
+    isa => 'Int',
+    is => "ro,
+    default => sub { 1 }
+);
+
+has cxxc => (
+    isa => "Foo::$subpackage",
+    is => 'ro',
+    default => sub { 1 }
+);
+EXPECT
+Bareword found where operator expected at - line 9, near "isa => "Foo"
+  (Might be a runaway multi-line "" string starting on line 4)
+	(Do you need to predeclare isa?)
+Bad name after Foo:: at - line 9.
+########
 # NAME Unterminated delimiter for here document
 <<"foo
 EXPECT
