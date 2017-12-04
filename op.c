@@ -2933,6 +2933,33 @@ S_maybe_multiconcat(pTHX_ OP *o)
     if (stacked_last)
         return; /* we don't support ((A.=B).=C)...) */
 
+    /* look for two adjacent consts and don't fold them together:
+     *     $o . "a" . "b"
+     * should do
+     *     $o->concat("a")->concat("b")
+     * rather than
+     *     $o->concat("ab")
+     * (but $o .=  "a" . "b" should still fold)
+     */
+    {
+        bool seen_nonconst = FALSE;
+        for (argp = toparg; argp >= args; argp--) {
+            if (argp->p == NULL) {
+                seen_nonconst = TRUE;
+                continue;
+            }
+            if (!seen_nonconst)
+                continue;
+            if (argp[1].p) {
+                /* both previous and current arg were constants;
+                 * leave the current OP_CONST as-is */
+                argp->p = NULL;
+                nconst--;
+                nargs++;
+            }
+        }
+    }
+
     /* -----------------------------------------------------------------
      * Phase 2:
      *

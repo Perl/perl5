@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5332;
+plan tests => 5338;
 
 use Scalar::Util qw(tainted);
 
@@ -2891,7 +2891,7 @@ package Concat {
     my ($r, $R);
 
 
-    # like c, but with $is_ref set to 1
+    # like cc, but with $is_ref set to 1
     sub c {
         my ($expr, $expect, $exp_id) = @_;
         cc($expr, $expect, 1, $exp_id);
@@ -2994,6 +2994,13 @@ package Concat {
     cc '$r.=sprintf("%s%s%s",$a,$B,$c)', 'raBc', 0, '("",[B],u,)';
     cc '$R.=sprintf("%s%s%s",$a,$B,$c)', 'RaBc', 1, '("",[B],u,)(.=,[R],aBc,u)'
                                                    .'("",[RaBc],u,)';
+
+    # multiple constants should individually overload (RT #132385)
+
+    c '$r=$A."b"."c"', 'Abc',  '(.,[A],b,)(.=,[Ab],c,u)("",[Abc],u,)';
+
+    # ... except for this
+    c '$R.="a"."b"',   'Rab',  '(.=,[R],ab,u)("",[Rab],u,)';
 }
 
 # RT #132385

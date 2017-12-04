@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2579;
+plan 2582;
 
 use B ();
 
@@ -633,4 +633,33 @@ test_opcount(0, "state works with multiconcat",
                     sassign     => 0,
                     once        => 1,
                     padsv       => 2, # one each for the next/once branches
+                });
+
+# multiple concats of constants preceded by at least one non-constant
+# shouldn't get constant-folded so that a concat overload method is called
+# for each arg. So every second constant string is left as an OP_CONST
+
+test_opcount(0, "multiconcat: 2 adjacent consts",
+                sub { my ($a, $b); $a = $b . "c" . "d" },
+                {
+                    const       => 1,
+                    multiconcat => 1,
+                    concat      => 0,
+                    sassign     => 0,
+                });
+test_opcount(0, "multiconcat: 3 adjacent consts",
+                sub { my ($a, $b); $a = $b . "c" . "d" . "e" },
+                {
+                    const       => 1,
+                    multiconcat => 1,
+                    concat      => 0,
+                    sassign     => 0,
+                });
+test_opcount(0, "multiconcat: 4 adjacent consts",
+                sub { my ($a, $b); $a = $b . "c" . "d" . "e" ."f" },
+                {
+                    const       => 2,
+                    multiconcat => 1,
+                    concat      => 0,
+                    sassign     => 0,
                 });
