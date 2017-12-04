@@ -5607,7 +5607,7 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
  */
 static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    I32 len;
+    U32 len;
     RLEN(len);
     return get_lstring(aTHX_ cxt, len, 0, cname);
 }
@@ -5656,7 +5656,7 @@ static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    int len;
+    U32 len;
 
     TRACEME(("retrieve_lutf8str"));
 
