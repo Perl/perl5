@@ -29,7 +29,7 @@ BEGIN {
         unless $Config{d_fork};
 }
 
-plan tests => 10;
+plan tests => 12;
 
 my $skips = $ENV{PERL_STORABLE_SKIP_ID_TEST} || '';
 my $keeps = $ENV{PERL_STORABLE_KEEP_ID_TEST};
@@ -78,6 +78,15 @@ freeze_thaw_test
      freeze => \&make_2g_hook_data,
      thaw => \&check_2g_hook_data,
      id => "hook2gdata",
+     memory => 4,
+    );
+
+freeze_thaw_test
+    (
+     name => "hook store with 4g data",
+     freeze => \&make_4g_hook_data,
+     thaw => \&check_4g_hook_data,
+     id => "hook4gdata",
      memory => 8,
     );
 
@@ -267,6 +276,25 @@ sub check_2g_hook_data {
     my $x = retrieve_fd($fh);
     my $g2 = 0x80000000;
     $x->size == $g2
+        or die "Size incorrect ", $x->size;
+    print "OK";
+}
+
+sub make_4g_hook_data {
+    my ($fh) = @_;
+
+    my $g2 = 0x80000000;
+    my $g4 = 2 * $g2;
+    my $x = HookLargeData->new($g4+1);
+    store_fd($x, $fh);
+}
+
+sub check_4g_hook_data {
+    my ($fh) = @_;
+    my $x = retrieve_fd($fh);
+    my $g2 = 0x80000000;
+    my $g4 = 2 * $g2;
+    $x->size == $g4+1
         or die "Size incorrect ", $x->size;
     print "OK";
 }

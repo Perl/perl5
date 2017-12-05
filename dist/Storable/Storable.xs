@@ -1428,6 +1428,8 @@ static const sv_retrieve_t sv_old_retrieve[] = {
     (sv_retrieve_t)retrieve_other,  	/* SX_LOBJECT not supported */
 };
 
+static SV *retrieve_hook_common(pTHX_ stcxt_t *cxt, const char *cname, int large);
+
 static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, const char *cname);
@@ -3694,7 +3696,11 @@ static int store_hook(
 
         /* [SX_HOOK] <flags> [<extra>] <object>*/
         if (!recursed++) {
-            PUTMARK(SX_HOOK);
+#ifdef HAS_U64
+            if (len2 > INT32_MAX)
+                PUTMARK(SX_LOBJECT);
+#endif
+	    PUTMARK(SX_HOOK);
             PUTMARK(flags);
             if (obj_type == SHT_EXTRA)
                 PUTMARK(eflags);
@@ -3810,7 +3816,11 @@ static int store_hook(
 
     /* SX_HOOK <flags> [<extra>] */
     if (!recursed) {
-        PUTMARK(SX_HOOK);
+#ifdef HAS_U64
+        if (len2 > INT32_MAX)
+	    PUTMARK(SX_LOBJECT);
+#endif
+	PUTMARK(SX_HOOK);
         PUTMARK(flags);
         if (obj_type == SHT_EXTRA)
             PUTMARK(eflags);
@@ -3836,8 +3846,14 @@ static int store_hook(
     }
 
     /* <len2> <frozen-str> */
+#ifdef HAS_U64
+    if (len2 > INT32_MAX) {
+        W64LEN(len2);
+    }
+    else
+#endif
     if (flags & SHF_LARGE_STRLEN) {
-        I32 wlen2 = len2;		/* STRLEN might be 8 bytes */
+        U32 wlen2 = len2;		/* STRLEN might be 8 bytes */
         WLEN(wlen2);			/* Must write an I32 for 64-bit machines */
     } else {
         unsigned char clen = (unsigned char) len2;
@@ -4693,13 +4709,13 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
  * processing (since we won't have seen the magic object by the time the hook
  * is called).  See comments below for why it was done that way.
  */
-static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
+static SV *retrieve_hook_common(pTHX_ stcxt_t *cxt, const char *cname, int large)
 {
     U32 len;
     char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
     char *classname = buf;
     unsigned int flags;
-    U32 len2;
+    STRLEN len2;
     SV *frozen;
     I32 len3 = 0;
     AV *av = 0;
@@ -4719,6 +4735,11 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
     PERL_UNUSED_ARG(cname);
     TRACEME(("retrieve_hook (#%d)", (int)cxt->tagnum));
     ASSERT(!cname, ("no bless-into class given here, got %s", cname));
+
+#ifndef HAS_U64
+    assert(!large);
+    PERL_UNUSED_ARG(large);
+#endif
 
     /*
      * Read flags, which tell us about the type, and whether we need
@@ -4868,8 +4889,17 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
      * To understand that code, read retrieve_scalar()
      */
 
-    if (flags & SHF_LARGE_STRLEN)
-        RLEN(len2);
+#ifdef HAS_U64
+    if (large) {
+        READ_U64(len2);
+    }
+    else
+#endif
+    if (flags & SHF_LARGE_STRLEN) {
+        U32 len32;
+        RLEN(len32);
+        len2 = len32;
+    }
     else
         GETMARK(len2);
 
@@ -5154,6 +5184,10 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
     SvREFCNT_dec(rv);			/* Undo refcnt inc from sv_magic() */
 
     return sv;
+}
+
+static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname) {
+    return retrieve_hook_common(aTHX_ cxt, cname, FALSE);
 }
 
 /*
@@ -5791,6 +5825,9 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 	   seems unlikely.
 	*/
 	GETMARK(hash_flags);
+    }
+    else if (type == SX_HOOK) {
+        return retrieve_hook_common(aTHX_ cxt, cname, TRUE);
     }
 
     READ_U64(len);
