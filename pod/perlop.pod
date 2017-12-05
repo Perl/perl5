@@ -27,17 +27,37 @@ X<operator, precedence> X<precedence> X<associativity>
 Operator precedence and associativity work in Perl more or less like
 they do in mathematics.
 
-I<Operator precedence> means some operators are evaluated before
-others.  For example, in S<C<2 + 4 * 5>>, the multiplication has higher
-precedence so S<C<4 * 5>> is evaluated first yielding S<C<2 + 20 ==
-22>> and not S<C<6 * 5 == 30>>.
+I<Operator precedence> means some operators group more tightly than others.
+For example, in C<2 + 4 * 5>, the multiplication has higher precedence, so C<4
+* 5> is grouped together as the right-hand operand of the addition, rather
+than C<2 + 4> being grouped together as the left-hand operand of the
+multiplication. It is as if the expression were written C<2 + (4 * 5)>, not
+C<(2 + 4) * 5>. So the expression yields C<2 + 20 == 22>, rather than
+C<6 * 5 == 30>.
 
-I<Operator associativity> defines what happens if a sequence of the
-same operators is used one after another: whether the evaluator will
-evaluate the left operations first, or the right first.  For example, in
-S<C<8 - 4 - 2>>, subtraction is left associative so Perl evaluates the
-expression left to right.  S<C<8 - 4>> is evaluated first making the
-expression S<C<4 - 2 == 2>> and not S<C<8 - 2 == 6>>.
+I<Operator associativity> defines what happens if a sequence of the same
+operators is used one after another: whether they will be grouped at the left
+or the right. For example, in C<9 - 3 - 2>, subtraction is left associative,
+so C<9 - 3> is grouped together as the left-hand operand of the second
+subtraction, rather than C<3 - 2> being grouped together as the right-hand
+operand of the first subtraction. It is as if the expression were written
+C<(9 - 3) - 2>, not C<9 - (3 - 2)>. So the expression yields C<6 - 2 == 4>,
+rather than C<9 - 1 == 8>.
+
+For simple operators that evaluate all their operands and then combine the
+values in some way, precedence and associativity (and parentheses) imply some
+ordering requirements on those combining operations. For example, in C<2 + 4 *
+5>, the grouping implied by precedence means that the multiplication of 4 and
+5 must be performed before the addition of 2 and 20, simply because the result
+of that multiplication is required as one of the operands of the addition. But
+the order of operations is not fully determined by this: in C<2 * 2 + 4 * 5>
+both multiplications must be performed before the addition, but the grouping
+does not say anything about the order in which the two multiplications are
+performed. In fact Perl has a general rule that the operands of an operator
+are evaluated in left-to-right order. A few operators such as C<&&=> have
+special evaluation rules that can result in an operand not being evaluated at
+all; in general, the top-level operator in an expression has control of
+operand evaluation.
 
 Perl operators have the following associativity and precedence,
 listed from highest precedence to lowest.  Operators borrowed from
