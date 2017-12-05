@@ -10185,9 +10185,11 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 }
 
 /*
-=for apidoc newCONSTSUB
+=for apidoc Am|CV *|newCONSTSUB|HV *stash|const char *name|SV *sv
 
-See L</newCONSTSUB_flags>.
+Behaves like L</newCONSTSUB_flags>, except that C<name> is nul-terminated
+rather than of counted length, and no flags are set.  (This means that
+C<name> is always interpreted as Latin-1.)
 
 =cut
 */
@@ -10199,20 +10201,71 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 }
 
 /*
-=for apidoc newCONSTSUB_flags
+=for apidoc Am|CV *|newCONSTSUB_flags|HV *stash|const char *name|STRLEN len|U32 flags|SV *sv
 
-Creates a constant sub equivalent to Perl S<C<sub FOO () { 123 }>> which is
-eligible for inlining at compile-time.
+Construct a constant subroutine, also performing some surrounding
+jobs.  A scalar constant-valued subroutine is eligible for inlining
+at compile-time, and in Perl code can be created by S<C<sub FOO () {
+123 }>>.  Other kinds of constant subroutine have other treatment.
 
-Currently, the only useful value for C<flags> is C<SVf_UTF8>.
+The subroutine will have an empty prototype and will ignore any arguments
+when called.  Its constant behaviour is determined by C<sv>.  If C<sv>
+is null, the subroutine will yield an empty list.  If C<sv> points to a
+scalar, the subroutine will always yield that scalar.  If C<sv> points
+to an array, the subroutine will always yield a list of the elements of
+that array in list context, or the number of elements in the array in
+scalar context.  This function takes ownership of one counted reference
+to the scalar or array, and will arrange for the object to live as long
+as the subroutine does.  If C<sv> points to a scalar then the inlining
+assumes that the value of the scalar will never change, so the caller
+must ensure that the scalar is not subsequently written to.  If C<sv>
+points to an array then no such assumption is made, so it is ostensibly
+safe to mutate the array or its elements, but whether this is really
+supported has not been determined.
 
-The newly created subroutine takes ownership of a reference to the passed in
-SV.
+The subroutine will have C<CvFILE> set according to C<PL_curcop>.
+Other aspects of the subroutine will be left in their default state.
+The caller is free to mutate the subroutine beyond its initial state
+after this function has returned.
 
-Passing C<NULL> for SV creates a constant sub equivalent to S<C<sub BAR () {}>>,
-which won't be called if used as a destructor, but will suppress the overhead
-of a call to C<AUTOLOAD>.  (This form, however, isn't eligible for inlining at
-compile time.)
+If C<name> is null then the subroutine will be anonymous, with its
+C<CvGV> referring to an C<__ANON__> glob.  If C<name> is non-null then the
+subroutine will be named accordingly, referenced by the appropriate glob.
+C<name> is a string of length C<len> bytes giving a sigilless symbol
+name, in UTF-8 if C<flags> has the C<SVf_UTF8> bit set and in Latin-1
+otherwise.  The name may be either qualified or unqualified.  If the
+name is unqualified then it defaults to being in the stash specified by
+C<stash> if that is non-null, or to C<PL_curstash> if C<stash> is null.
+The symbol is always added to the stash if necessary, with C<GV_ADDMULTI>
+semantics.
+
+C<flags> should not have bits set other than C<SVf_UTF8>.
+
+If there is already a subroutine of the specified name, then the new sub
+will replace the existing one in the glob.  A warning may be generated
+about the redefinition.
+
+If the subroutine has one of a few special names, such as C<BEGIN> or
+C<END>, then it will be claimed by the appropriate queue for automatic
+running of phase-related subroutines.  In this case the relevant glob will
+be left not containing any subroutine, even if it did contain one before.
+Execution of the subroutine will likely be a no-op, unless C<sv> was
+a tied array or the caller modified the subroutine in some interesting
+way before it was executed.  In the case of C<BEGIN>, the treatment is
+buggy: the sub will be executed when only half built, and may be deleted
+prematurely, possibly causing a crash.
+
+The function returns a pointer to the constructed subroutine.  If the sub
+is anonymous then ownership of one counted reference to the subroutine
+is transferred to the caller.  If the sub is named then the caller does
+not get ownership of a reference.  In most such cases, where the sub
+has a non-phase name, the sub will be alive at the point it is returned
+by virtue of being contained in the glob that names it.  A phase-named
+subroutine will usually be alive by virtue of the reference owned by
+the phase's automatic run queue.  A C<BEGIN> subroutine may have been
+destroyed already by the time this function returns, but currently bugs
+occur in that case before the caller gets control.  It is the caller's
+responsibility to ensure that it knows which of these situations applies.
 
 =cut
 */
