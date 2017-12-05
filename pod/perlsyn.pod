@@ -233,8 +233,16 @@ Sometimes a block is delimited by the file containing it (in the case
 of a required file, or the program as a whole), and sometimes a block
 is delimited by the extent of a string (in the case of an eval).
 
-But generally, a block is delimited by curly brackets, also known as braces.
-We will call this syntactic construct a BLOCK.
+But generally, a block is delimited by curly brackets, also known as
+braces.  We will call this syntactic construct a BLOCK.  Because enclosing
+braces are also the syntax for hash reference constructor expressions
+(see L<perlref>), you may occasionally need to disambiguate by placing a
+C<;> immediately after an opening brace so that Perl realises the brace
+is the start of a block.  You will more frequently need to disambiguate
+the other way, by placing a C<+> immediately before an opening brace to
+force it to be interpreted as a hash reference constructor expression.
+It is considered good style to use these disambiguating mechanisms
+liberally, not only when Perl would otherwise guess incorrectly.
 
 The following compound statements may be used to control flow:
 
