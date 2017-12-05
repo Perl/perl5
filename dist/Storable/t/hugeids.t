@@ -12,7 +12,7 @@ use Config;
 use Storable qw(store_fd retrieve_fd nstore_fd);
 use Test::More;
 use File::Temp qw(tempfile);
-use Devel::Peek;
+use File::Spec;
 
 BEGIN {
     plan skip_all => 'Storable was not built'
@@ -28,6 +28,11 @@ BEGIN {
     plan skip_all => "Need fork for this test",
         unless $Config{d_fork};
 }
+
+find_exe("gzip")
+    or plan skip_all => "Need gzip for this test";
+find_exe("gunzip")
+    or plan skip_all => "Need gunzip for this test";
 
 plan tests => 12;
 
@@ -297,6 +302,18 @@ sub check_4g_hook_data {
     $x->size == $g4+1
         or die "Size incorrect ", $x->size;
     print "OK";
+}
+
+sub find_exe {
+    my ($exe) = @_;
+
+    $exe .= $Config{_exe};
+    my @path = split /\Q$Config{path_sep}/, $ENV{PATH};
+    for my $dir (@path) {
+        my $abs = File::Spec->catfile($dir, $exe);
+        -x $abs
+            and return $abs;
+    }
 }
 
 package HookLargeIds;
