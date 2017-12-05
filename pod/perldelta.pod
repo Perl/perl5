@@ -27,6 +27,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2  The C<sprintf> C<%j> format size modifier is now available with
+pre-C99 compilers
+
+The actual size used depends on the platform, so remains unportable.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
