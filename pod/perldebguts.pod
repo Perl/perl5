@@ -95,8 +95,8 @@ unless C<< $^D & (1<<30) >> is true.
 
 When execution of the program reaches a subroutine call, a call to
 C<&DB::sub>(I<args>) is made instead, with C<$DB::sub> holding the
-name of the called subroutine. (This doesn't happen if the subroutine
-was compiled in the C<DB> package.)
+name of the called subroutine. (This doesn't happen if the calling
+subroutine was compiled in the C<DB> package.)
 
 X<&DB::lsub>If the call is to an lvalue subroutine, and C<&DB::lsub>
 is defined C<&DB::lsub>(I<args>) is called instead, otherwise falling
