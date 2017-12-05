@@ -82,7 +82,7 @@ C<PerlIO *> takes the place of FILE *. Like FILE * it should be
 treated as opaque (it is probably safe to assume it is a pointer to
 something).
 
-There are currently three implementations:
+There are currently two implementations:
 
 =over 4
 
