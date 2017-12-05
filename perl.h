@@ -4660,7 +4660,7 @@ EXTCONST char* const PL_block_type[] = {
 	"NULL",
 	"WHEN",
 	"BLOCK",
-	"GIVEN",
+	"LOOP_GIVEN",
 	"LOOP_ARY",
 	"LOOP_LAZYSV",
 	"LOOP_LAZYIV",
