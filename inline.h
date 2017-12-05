@@ -387,24 +387,14 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     send = s + len;
 
 #ifndef EBCDIC
-    /* Try to get the widest word on this platform */
-#  ifdef HAS_LONG_LONG
-#    define PERL_WORDCAST unsigned long long
-#    define PERL_WORDSIZE LONGLONGSIZE
-#  else
-#    define PERL_WORDCAST UV
-#    define PERL_WORDSIZE UVSIZE
-#  endif
 
-#  if PERL_WORDSIZE == 4
-#    define PERL_VARIANTS_WORD_MASK 0x80808080
-#    define PERL_WORD_BOUNDARY_MASK 0x3
-#  elif PERL_WORDSIZE == 8
-#    define PERL_VARIANTS_WORD_MASK UINT64_C(0x8080808080808080)
-#    define PERL_WORD_BOUNDARY_MASK 0x7
-#  else
-#    error Unexpected word size
-#  endif
+/* This looks like 0x010101... */
+#define PERL_COUNT_MULTIPLIER   (~ (UINTMAX_C(0)) / 0xFF)
+
+/* This looks like 0x808080... */
+#define PERL_VARIANTS_WORD_MASK (PERL_COUNT_MULTIPLIER * 0x80)
+#define PERL_WORDSIZE            sizeof(PERL_COUNT_MULTIPLIER)
+#define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
 
     if ((STRLEN) (send - x) >= PERL_WORDSIZE) {
 
@@ -423,7 +413,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
         /* Process per-word as long as we have at least a full word left */
         while (x + PERL_WORDSIZE <= send) {
-            if ((* (PERL_WORDCAST *) x) & PERL_VARIANTS_WORD_MASK)  {
+            if ((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK)  {
 
                 /* Found a variant.  Just return if caller doesn't want its
                  * exact position */
@@ -438,7 +428,6 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
         }
     }
 
-#  undef PERL_WORDCAST
 #  undef PERL_WORDSIZE
 #  undef PERL_WORD_BOUNDARY_MASK
 #  undef PERL_VARIANTS_WORD_MASK
