@@ -426,7 +426,7 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     entertry leavetry -- can be used to 'hide' fatal errors
 
-    entergiven leavegiven
+    entergiven
     enterwhen leavewhen
     continue
     smartmatch

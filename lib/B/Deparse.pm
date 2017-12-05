@@ -2539,22 +2539,15 @@ sub pp_lock { unop(@_, "lock") }
 
 sub pp_continue { unop(@_, "continue"); }
 
-sub givwhen {
-    my $self = shift;
-    my($op, $cx, $givwhen) = @_;
-
+sub pp_leavewhen {
+    my($self, $op, $cx) = @_;
+    my $when = $self->keyword("when");
     my $enterop = $op->first;
     my $cond = $enterop->first;
     my $cond_str = $self->deparse($cond, 1);
     my $block = $self->deparse($cond->sibling, 0);
-
-    return "$givwhen ($cond_str) {\n".
-	"\t$block\n".
-	"\b}\cK";
+    return "$when ($cond_str) {\n\t$block\n\b}\cK";
 }
-
-sub pp_leavegiven { givwhen(@_, $_[0]->keyword("given")); }
-sub pp_leavewhen  { givwhen(@_, $_[0]->keyword("when")); }
 
 sub pp_exists {
     my $self = shift;
@@ -3792,6 +3785,13 @@ sub loop_common {
 	    $bare = 1;
 	}
 	$body = $kid;
+    } elsif ($enter->name eq "entergiven") { # given
+	my $given = $self->keyword("given");
+	my $enterop = $op->first;
+	my $topic = $enterop->first;
+	my $topic_str = $self->deparse($topic, 1);
+	my $block = $self->deparse($topic->sibling, 0);
+	return "$given ($topic_str) {\n\t$block\n\b}\cK";
     } elsif ($enter->name eq "enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;

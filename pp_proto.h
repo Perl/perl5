@@ -134,7 +134,6 @@ PERL_CALLCONV OP *Perl_pp_lc(pTHX);
 PERL_CALLCONV OP *Perl_pp_le(pTHX);
 PERL_CALLCONV OP *Perl_pp_leave(pTHX);
 PERL_CALLCONV OP *Perl_pp_leaveeval(pTHX);
-PERL_CALLCONV OP *Perl_pp_leavegiven(pTHX);
 PERL_CALLCONV OP *Perl_pp_leaveloop(pTHX);
 PERL_CALLCONV OP *Perl_pp_leavesub(pTHX);
 PERL_CALLCONV OP *Perl_pp_leavesublv(pTHX);

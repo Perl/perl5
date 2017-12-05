@@ -405,7 +405,6 @@ $bits{lc}{0} = $bf[0];
 $bits{lcfirst}{0} = $bf[0];
 @{$bits{le}}{1,0} = ($bf[1], $bf[1]);
 $bits{leaveeval}{0} = $bf[0];
-$bits{leavegiven}{0} = $bf[0];
 @{$bits{leaveloop}}{1,0} = ($bf[1], $bf[1]);
 $bits{leavesub}{0} = $bf[0];
 $bits{leavesublv}{0} = $bf[0];

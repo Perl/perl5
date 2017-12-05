@@ -2210,7 +2210,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_LEAVETRY:
         case OP_LEAVELOOP:
         case OP_LINESEQ:
-        case OP_LEAVEGIVEN:
         case OP_LEAVEWHEN:
         kids:
             for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
@@ -8776,7 +8775,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
     OpLASTSIB_set(block, enterop);
     enterop->op_flags = OPf_KIDS;
 
-    leaveop = newUNOP(OP_LEAVEGIVEN, 0, enterop);
+    leaveop = newBINOP(OP_LEAVELOOP, 0, enterop, newOP(OP_NULL, 0));
     leaveop->op_next = LINKLIST(cond);
     cond->op_next = enterop;
     enterop = CHECKOP(OP_ENTERGIVEN, enterop);

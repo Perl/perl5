@@ -4571,31 +4571,6 @@ PP(pp_entergiven)
     RETURN;
 }
 
-PP(pp_leavegiven)
-{
-    PERL_CONTEXT *cx;
-    U8 gimme;
-    SV **oldsp;
-    PERL_UNUSED_CONTEXT;
-
-    cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_LOOP_GIVEN);
-    oldsp = PL_stack_base + cx->blk_oldsp;
-    gimme = cx->blk_gimme;
-
-    if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
-    else
-        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
-
-    CX_LEAVE_SCOPE(cx);
-    cx_poploop(cx);
-    cx_popblock(cx);
-    CX_POP(cx);
-
-    return NORMAL;
-}
-
 PP(pp_smartmatch)
 {
     dSP;
@@ -4676,7 +4651,7 @@ PP(pp_leavewhen)
     }
     else {
 	PERL_ASYNC_CHECK();
-        assert(cx->blk_loop.my_op->op_nextop->op_type == OP_LEAVEGIVEN);
+        assert(cx->blk_loop.my_op->op_nextop->op_type == OP_LEAVELOOP);
 	return cx->blk_loop.my_op->op_nextop;
     }
 }
