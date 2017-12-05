@@ -425,7 +425,7 @@
 #define newSVuv(a)		Perl_newSVuv(aTHX_ a)
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newUNOP_AUX(a,b,c,d)	Perl_newUNOP_AUX(aTHX_ a,b,c,d)
-#define newWHENOP(a,b)		Perl_newWHENOP(aTHX_ a,b)
+#define newWHERESOOP(a,b)	Perl_newWHERESOOP(aTHX_ a,b)
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
 #define newXS(a,b,c)		Perl_newXS(aTHX_ a,b,c)
 #define newXS_flags(a,b,c,d,e)	Perl_newXS_flags(aTHX_ a,b,c,d,e)
@@ -792,7 +792,7 @@
 #define cx_popsub(a)		S_cx_popsub(aTHX_ a)
 #define cx_popsub_args(a)	S_cx_popsub_args(aTHX_ a)
 #define cx_popsub_common(a)	S_cx_popsub_common(aTHX_ a)
-#define cx_popwhen(a)		S_cx_popwhen(aTHX_ a)
+#define cx_popwhereso(a)	S_cx_popwhereso(aTHX_ a)
 #define cx_pushblock(a,b,c,d)	S_cx_pushblock(aTHX_ a,b,c,d)
 #define cx_pusheval(a,b,c)	S_cx_pusheval(aTHX_ a,b,c)
 #define cx_pushformat(a,b,c,d)	S_cx_pushformat(aTHX_ a,b,c,d)
@@ -800,7 +800,7 @@
 #define cx_pushloop_given(a,b)	S_cx_pushloop_given(aTHX_ a,b)
 #define cx_pushloop_plain(a)	S_cx_pushloop_plain(aTHX_ a)
 #define cx_pushsub(a,b,c,d)	S_cx_pushsub(aTHX_ a,b,c,d)
-#define cx_pushwhen(a)		S_cx_pushwhen(aTHX_ a)
+#define cx_pushwhereso(a)	S_cx_pushwhereso(aTHX_ a)
 #define cx_topblock(a)		S_cx_topblock(aTHX_ a)
 #endif
 #if defined(DEBUGGING)
@@ -1719,7 +1719,7 @@
 #define dopoptolabel(a,b,c)	S_dopoptolabel(aTHX_ a,b,c)
 #define dopoptoloop(a)		S_dopoptoloop(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
-#define dopoptowhen(a)		S_dopoptowhen(aTHX_ a)
+#define dopoptowhereso(a)	S_dopoptowhereso(aTHX_ a)
 #define num_overflow		S_num_overflow
 #define path_is_searchable	S_path_is_searchable
 #define run_user_filter(a,b,c)	S_run_user_filter(aTHX_ a,b,c)

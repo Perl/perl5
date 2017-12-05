@@ -1166,7 +1166,7 @@ ApdR	|SV*	|newSV_type	|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 ApdR	|OP*	|newUNOP_AUX	|I32 type|I32 flags|NULLOK OP* first \
 				|NULLOK UNOP_AUX_item *aux
-ApdR	|OP*	|newWHENOP	|NN OP* cond|NN OP* block
+ApdR	|OP*	|newWHERESOOP	|NN OP* cond|NN OP* block
 ApdR	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
@@ -2230,7 +2230,7 @@ sR	|I32	|dopoptoeval	|I32 startingblock
 sR	|I32	|dopoptolabel	|NN const char *label|STRLEN len|U32 flags
 sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
-sR	|I32	|dopoptowhen	|I32 startingblock
+sR	|I32	|dopoptowhereso	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 s	|bool	|doeval_compile	|U8 gimme \
 				|NULLOK CV* outside|U32 seq|NULLOK HV* hh
@@ -3156,8 +3156,8 @@ AiM	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
 				 |NN void *itervarp|NULLOK SV *itersave
 AiM	|void	|cx_pushloop_given    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
 AiM	|void	|cx_poploop      |NN PERL_CONTEXT *cx
-AiM	|void	|cx_pushwhen     |NN PERL_CONTEXT *cx
-AiM	|void	|cx_popwhen      |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushwhereso  |NN PERL_CONTEXT *cx
+AiM	|void	|cx_popwhereso   |NN PERL_CONTEXT *cx
 #endif
 
 #ifdef USE_DTRACE

@@ -721,8 +721,8 @@ struct block_loop {
 
 
 
-/* when context */
-struct block_when {
+/* whereso context */
+struct block_whereso {
 	OP *leave_op;
 };
 
@@ -747,7 +747,7 @@ struct block {
 	struct block_format	blku_format;
 	struct block_eval	blku_eval;
 	struct block_loop	blku_loop;
-	struct block_when	blku_when;
+	struct block_whereso	blku_whereso;
     } blk_u;
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
@@ -763,7 +763,7 @@ struct block {
 #define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
-#define blk_when	cx_u.cx_blk.blk_u.blku_when
+#define blk_whereso	cx_u.cx_blk.blk_u.blku_whereso
 
 #define CX_DEBUG(cx, action)						\
     DEBUG_l(								\
@@ -856,7 +856,7 @@ struct context {
    and a static array of context names in pp_ctl.c  */
 #define CXTYPEMASK	0xf
 #define CXt_NULL	0 /* currently only used for sort BLOCK */
-#define CXt_WHEN	1
+#define CXt_WHERESO	1
 #define CXt_BLOCK	2
 /* be careful of the ordering of these six. Macros like CxTYPE_is_LOOP,
  * CxFOREACH compare ranges */

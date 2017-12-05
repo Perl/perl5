@@ -1285,7 +1285,7 @@ PP(pp_flop)
 
 static const char * const context_name[] = {
     "pseudo-block",
-    NULL, /* CXt_WHEN never actually needs "block" */
+    NULL, /* CXt_WHERESO never actually needs "block" */
     NULL, /* CXt_BLOCK never actually needs "block" */
     NULL, /* CXt_LOOP_GIVEN never actually needs "block" */
     NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
@@ -1483,7 +1483,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 }
 
 STATIC I32
-S_dopoptowhen(pTHX_ I32 startingblock)
+S_dopoptowhereso(pTHX_ I32 startingblock)
 {
     I32 i;
     for (i = startingblock; i >= 0; i--) {
@@ -1491,8 +1491,8 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
-	case CXt_WHEN:
-	    DEBUG_l( Perl_deb(aTHX_ "(dopoptowhen(): found when at cx=%ld)\n", (long)i));
+	case CXt_WHERESO:
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptowhereso(): found whereso at cx=%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1544,8 +1544,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_LOOP_ARY:
 	    cx_poploop(cx);
 	    break;
-	case CXt_WHEN:
-	    cx_popwhen(cx);
+	case CXt_WHERESO:
+	    cx_popwhereso(cx);
 	    break;
 	case CXt_BLOCK:
 	case CXt_NULL:
@@ -2957,7 +2957,7 @@ PP(pp_goto)
             case CXt_LOOP_LIST:
             case CXt_LOOP_ARY:
 	    case CXt_LOOP_GIVEN:
-	    case CXt_WHEN:
+	    case CXt_WHERESO:
 		gotoprobe = OpSIBLING(cx->blk_oldcop);
 		break;
 	    case CXt_SUBST:
@@ -4592,7 +4592,7 @@ PP(pp_smartmatch)
     Perl_croak(aTHX_ "Cannot smart match without a matcher object");
 }
 
-PP(pp_enterwhen)
+PP(pp_enterwhereso)
 {
     dSP;
     PERL_CONTEXT *cx;
@@ -4601,19 +4601,19 @@ PP(pp_enterwhen)
     /* This is essentially an optimization: if the match
        fails, we don't want to push a context and then
        pop it again right away, so we skip straight
-       to the op that follows the leavewhen.
+       to the op that follows the leavewhereso.
        RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
     if (!SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    cx = cx_pushblock(CXt_WHEN, gimme, SP, PL_savestack_ix);
-    cx_pushwhen(cx);
+    cx = cx_pushblock(CXt_WHERESO, gimme, SP, PL_savestack_ix);
+    cx_pushwhereso(cx);
 
     RETURN;
 }
 
-PP(pp_leavewhen)
+PP(pp_leavewhereso)
 {
     I32 cxix;
     PERL_CONTEXT *cx;
@@ -4621,7 +4621,7 @@ PP(pp_leavewhen)
     SV **oldsp;
 
     cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_WHEN);
+    assert(CxTYPE(cx) == CXt_WHERESO);
     gimme = cx->blk_gimme;
 
     cxix = dopoptoloop(cxstack_ix);
@@ -4634,7 +4634,7 @@ PP(pp_leavewhen)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
-    /* pop the WHEN, BLOCK and anything else before the loop */
+    /* pop the WHERESO, BLOCK and anything else before the loop */
     assert(cxix < cxstack_ix);
     dounwind(cxix);
 
@@ -4662,7 +4662,7 @@ PP(pp_continue)
     PERL_CONTEXT *cx;
     OP *nextop;
     
-    cxix = dopoptowhen(cxstack_ix); 
+    cxix = dopoptowhereso(cxstack_ix); 
     if (cxix < 0)   
 	DIE(aTHX_ "Can't \"continue\" outside a whereso block");
 
@@ -4670,12 +4670,12 @@ PP(pp_continue)
         dounwind(cxix);
     
     cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_WHEN);
+    assert(CxTYPE(cx) == CXt_WHERESO);
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     CX_LEAVE_SCOPE(cx);
-    cx_popwhen(cx);
+    cx_popwhereso(cx);
     cx_popblock(cx);
-    nextop = cx->blk_when.leave_op->op_next;
+    nextop = cx->blk_whereso.leave_op->op_next;
     CX_POP(cx);
 
     return nextop;

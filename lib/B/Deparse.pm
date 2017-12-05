@@ -2539,7 +2539,7 @@ sub pp_lock { unop(@_, "lock") }
 
 sub pp_continue { unop(@_, "continue"); }
 
-sub pp_leavewhen {
+sub pp_leavewhereso {
     my($self, $op, $cx) = @_;
     my $whereso = $self->keyword("whereso");
     my $enterop = $op->first;

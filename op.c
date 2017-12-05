@@ -1832,7 +1832,7 @@ Perl_scalar(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = OpSIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHEN
+	    if (sib && kid->op_type != OP_LEAVEWHERESO
 	     && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
 		|| (  sib->op_targ != OP_NEXTSTATE
 		   && sib->op_targ != OP_DBSTATE  )))
@@ -1923,7 +1923,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         want = o->op_flags & OPf_WANT;
         if ((want && want != OPf_WANT_SCALAR)
             || (PL_parser && PL_parser->error_count)
-            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
+            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHERESO)
         {
             continue;
         }
@@ -2186,7 +2186,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_DOR:
         case OP_COND_EXPR:
         case OP_ENTERGIVEN:
-        case OP_ENTERWHEN:
+        case OP_ENTERWHERESO:
             for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
                 if (!(kid->op_flags & OPf_KIDS))
                     scalarvoid(kid);
@@ -2210,7 +2210,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_LEAVETRY:
         case OP_LEAVELOOP:
         case OP_LINESEQ:
-        case OP_LEAVEWHEN:
+        case OP_LEAVEWHERESO:
         kids:
             for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
                 if (!(kid->op_flags & OPf_KIDS))
@@ -2350,7 +2350,7 @@ Perl_list(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = OpSIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHEN)
+	    if (sib && kid->op_type != OP_LEAVEWHERESO)
 		scalarvoid(kid);
 	    else
 		list(kid);
@@ -8787,7 +8787,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 }
 
 /*
-=for apidoc Am|OP *|newWHENOP|OP *cond|OP *block
+=for apidoc Am|OP *|newWHERESOOP|OP *cond|OP *block
 
 Constructs, checks, and returns an op tree expressing a C<whereso> block.
 C<cond> supplies the test expression, and C<block> supplies the block
@@ -8798,22 +8798,22 @@ by this function and become part of the constructed op tree.
 */
 
 OP *
-Perl_newWHENOP(pTHX_ OP *cond, OP *block)
+Perl_newWHERESOOP(pTHX_ OP *cond, OP *block)
 {
     OP *enterop, *leaveop;
-    PERL_ARGS_ASSERT_NEWWHENOP;
+    PERL_ARGS_ASSERT_NEWWHERESOOP;
 
     NewOpSz(1101, enterop, sizeof(LOGOP));
-    OpTYPE_set(enterop, OP_ENTERWHEN);
+    OpTYPE_set(enterop, OP_ENTERWHERESO);
     cLOGOPx(enterop)->op_first = scalar(cond);
     OpMORESIB_set(cond, block);
     OpLASTSIB_set(block, enterop);
     enterop->op_flags = OPf_KIDS;
 
-    leaveop = newUNOP(OP_LEAVEWHEN, 0, enterop);
+    leaveop = newUNOP(OP_LEAVEWHERESO, 0, enterop);
     leaveop->op_next = LINKLIST(cond);
     cond->op_next = enterop;
-    enterop = CHECKOP(OP_ENTERWHEN, enterop);
+    enterop = CHECKOP(OP_ENTERWHERESO, enterop);
     enterop->op_next = LINKLIST(block);
     cLOGOPx(enterop)->op_other = block->op_next = leaveop;
 

@@ -1643,19 +1643,19 @@ S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
+S_cx_pushwhereso(pTHX_ PERL_CONTEXT *cx)
 {
-    PERL_ARGS_ASSERT_CX_PUSHWHEN;
+    PERL_ARGS_ASSERT_CX_PUSHWHERESO;
 
-    cx->blk_when.leave_op = cLOGOP->op_other;
+    cx->blk_whereso.leave_op = cLOGOP->op_other;
 }
 
 
 PERL_STATIC_INLINE void
-S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
+S_cx_popwhereso(pTHX_ PERL_CONTEXT *cx)
 {
-    PERL_ARGS_ASSERT_CX_POPWHEN;
-    assert(CxTYPE(cx) == CXt_WHEN);
+    PERL_ARGS_ASSERT_CX_POPWHERESO;
+    assert(CxTYPE(cx) == CXt_WHERESO);
 
     PERL_UNUSED_ARG(cx);
     PERL_UNUSED_CONTEXT;

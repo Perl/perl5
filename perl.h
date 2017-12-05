@@ -4658,7 +4658,7 @@ EXTCONST unsigned char PL_freq[];
 #ifdef DOINIT
 EXTCONST char* const PL_block_type[] = {
 	"NULL",
-	"WHEN",
+	"WHERESO",
 	"BLOCK",
 	"LOOP_GIVEN",
 	"LOOP_ARY",

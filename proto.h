@@ -2350,9 +2350,9 @@ PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first)
 PERL_CALLCONV OP*	Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP* first, UNOP_AUX_item *aux)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV OP*	Perl_newWHENOP(pTHX_ OP* cond, OP* block)
+PERL_CALLCONV OP*	Perl_newWHERESOOP(pTHX_ OP* cond, OP* block)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_NEWWHENOP	\
+#define PERL_ARGS_ASSERT_NEWWHERESOOP	\
 	assert(cond); assert(block)
 
 PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, OP* expr, OP* block, OP* cont, I32 has_my)
@@ -4008,8 +4008,8 @@ PERL_STATIC_INLINE void	S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx);
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popwhen(pTHX_ PERL_CONTEXT *cx);
-#define PERL_ARGS_ASSERT_CX_POPWHEN	\
+PERL_STATIC_INLINE void	S_cx_popwhereso(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPWHERESO	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -4048,8 +4048,8 @@ PERL_STATIC_INLINE void	S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, 
 	assert(cx); assert(cv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx);
-#define PERL_ARGS_ASSERT_CX_PUSHWHEN	\
+PERL_STATIC_INLINE void	S_cx_pushwhereso(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_PUSHWHERESO	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -4911,7 +4911,7 @@ STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 #define PERL_ARGS_ASSERT_DOPOPTOSUB_AT	\
 	assert(cxstk)
 
-STATIC I32	S_dopoptowhen(pTHX_ I32 startingblock)
+STATIC I32	S_dopoptowhereso(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
 STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize)
