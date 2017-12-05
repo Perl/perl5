@@ -798,56 +798,124 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
-#ifdef PERL_CORE
-
-/* macros for correct constant construction */
-# if INTSIZE >= 2
-#  define U16_CONST(x) ((U16)x##U)
-# else
-#  define U16_CONST(x) ((U16)x##UL)
-# endif
-
-# if INTSIZE >= 4
-#  define U32_CONST(x) ((U32)x##U)
-# else
-#  define U32_CONST(x) ((U32)x##UL)
-# endif
-
-# ifdef HAS_QUAD
-#  if INTSIZE >= 8
-#   define U64_CONST(x) ((U64)x##U)
-#  elif LONGSIZE >= 8
-#   define U64_CONST(x) ((U64)x##UL)
-#  elif QUADKIND == QUAD_IS_LONG_LONG
-#   define U64_CONST(x) ((U64)x##ULL)
-#  elif QUADKIND == QUAD_IS___INT64
-#   define U64_CONST(x) ((U64)x##UI64)
-#  else /* best guess we can make */
-#   define U64_CONST(x) ((U64)x##UL)
+/* macros for correct constant construction.  These are in C99 <stdint.h>
+ * (so they will not be available in strict C89 mode), but they are nice, so
+ * let's define them if necessary. */
+#ifndef UINT16_C
+#  if INTSIZE >= 2
+#    define UINT16_C(x) ((U16_TYPE)x##U)
+#  else
+#    define UINT16_C(x) ((U16_TYPE)x##UL)
 #  endif
-# endif
+#endif
+
+#ifndef UINT32_C
+#  if INTSIZE >= 4
+#    define UINT32_C(x) ((U32_TYPE)x##U)
+#  else
+#    define UINT32_C(x) ((U32_TYPE)x##UL)
+#  endif
+#endif
+
+#ifdef I_STDINT
+    typedef intmax_t  PERL_INTMAX_T;
+    typedef uintmax_t PERL_UINTMAX_T;
+#endif
+
+/* N.B.  We use QUADKIND here instead of HAS_QUAD here, because that doesn't
+ * actually mean what it has always been documented to mean (see RT #119753)
+ * and is explicitly turned off outside of core with dire warnings about
+ * removing the undef. */
+
+#if defined(QUADKIND)
+#  undef PeRl_INT64_C
+#  undef PeRl_UINT64_C
+/* Prefer the native integer types (int and long) over long long
+ * (which is not C89) and Win32-specific __int64. */
+#  if QUADKIND == QUAD_IS_INT && INTSIZE == 8
+#    define PeRl_INT64_C(c)	(c)
+#    define PeRl_UINT64_C(c)	CAT2(c,U)
+#  endif
+#  if QUADKIND == QUAD_IS_LONG && LONGSIZE == 8
+#    define PeRl_INT64_C(c)	CAT2(c,L)
+#    define PeRl_UINT64_C(c)	CAT2(c,UL)
+#  endif
+#  if QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LONG_LONG)
+#    define PeRl_INT64_C(c)	CAT2(c,LL)
+#    define PeRl_UINT64_C(c)	CAT2(c,ULL)
+#  endif
+#  if QUADKIND == QUAD_IS___INT64
+#    define PeRl_INT64_C(c)	CAT2(c,I64)
+#    define PeRl_UINT64_C(c)	CAT2(c,UI64)
+#  endif
+#  ifndef PeRl_INT64_C
+#    define PeRl_INT64_C(c)	((I64)(c)) /* last resort */
+#    define PeRl_UINT64_C(c)	((U64TYPE)(c))
+#  endif
+/* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
+ * not fly with C89-pedantic gcc, so let's undefine them first so that
+ * we can redefine them with our native integer preferring versions. */
+#  if defined(PERL_DARWIN) && defined(PERL_GCC_PEDANTIC)
+#    undef INT64_C
+#    undef UINT64_C
+#  endif
+#  ifndef INT64_C
+#    define INT64_C(c) PeRl_INT64_C(c)
+#  endif
+#  ifndef UINT64_C
+#    define UINT64_C(c) PeRl_UINT64_C(c)
+#  endif
+
+#  ifndef I_STDINT
+    typedef I64TYPE PERL_INTMAX_T;
+    typedef U64TYPE PERL_UINTMAX_T;
+#  endif
+#  ifndef INTMAX_C
+#    define INTMAX_C(c) INT64_C(c)
+#  endif
+#  ifndef UINTMAX_C
+#    define UINTMAX_C(c) UINT64_C(c)
+#  endif
+
+#else  /* below QUADKIND is undefined */
+
+/* Perl doesn't work on 16 bit systems, so must be 32 bit */
+#  ifndef I_STDINT
+    typedef I32TYPE PERL_INTMAX_T;
+    typedef U32TYPE PERL_UINTMAX_T;
+#  endif
+#  ifndef INTMAX_C
+#    define INTMAX_C(c) INT32_C(c)
+#  endif
+#  ifndef UINTMAX_C
+#    define UINTMAX_C(c) UINT32_C(c)
+#  endif
+
+#endif  /* no QUADKIND */
+
+#ifdef PERL_CORE
 
 /* byte-swapping functions for big-/little-endian conversion */
 # define _swab_16_(x) ((U16)( \
-         (((U16)(x) & U16_CONST(0x00ff)) << 8) | \
-         (((U16)(x) & U16_CONST(0xff00)) >> 8) ))
+         (((U16)(x) & UINT16_C(0x00ff)) << 8) | \
+         (((U16)(x) & UINT16_C(0xff00)) >> 8) ))
 
 # define _swab_32_(x) ((U32)( \
-         (((U32)(x) & U32_CONST(0x000000ff)) << 24) | \
-         (((U32)(x) & U32_CONST(0x0000ff00)) <<  8) | \
-         (((U32)(x) & U32_CONST(0x00ff0000)) >>  8) | \
-         (((U32)(x) & U32_CONST(0xff000000)) >> 24) ))
+         (((U32)(x) & UINT32_C(0x000000ff)) << 24) | \
+         (((U32)(x) & UINT32_C(0x0000ff00)) <<  8) | \
+         (((U32)(x) & UINT32_C(0x00ff0000)) >>  8) | \
+         (((U32)(x) & UINT32_C(0xff000000)) >> 24) ))
 
 # ifdef HAS_QUAD
 #  define _swab_64_(x) ((U64)( \
-          (((U64)(x) & U64_CONST(0x00000000000000ff)) << 56) | \
-          (((U64)(x) & U64_CONST(0x000000000000ff00)) << 40) | \
-          (((U64)(x) & U64_CONST(0x0000000000ff0000)) << 24) | \
-          (((U64)(x) & U64_CONST(0x00000000ff000000)) <<  8) | \
-          (((U64)(x) & U64_CONST(0x000000ff00000000)) >>  8) | \
-          (((U64)(x) & U64_CONST(0x0000ff0000000000)) >> 24) | \
-          (((U64)(x) & U64_CONST(0x00ff000000000000)) >> 40) | \
-          (((U64)(x) & U64_CONST(0xff00000000000000)) >> 56) ))
+          (((U64)(x) & UINT64_C(0x00000000000000ff)) << 56) | \
+          (((U64)(x) & UINT64_C(0x000000000000ff00)) << 40) | \
+          (((U64)(x) & UINT64_C(0x0000000000ff0000)) << 24) | \
+          (((U64)(x) & UINT64_C(0x00000000ff000000)) <<  8) | \
+          (((U64)(x) & UINT64_C(0x000000ff00000000)) >>  8) | \
+          (((U64)(x) & UINT64_C(0x0000ff0000000000)) >> 24) | \
+          (((U64)(x) & UINT64_C(0x00ff000000000000)) >> 40) | \
+          (((U64)(x) & UINT64_C(0xff00000000000000)) >> 56) ))
 # endif
 
 /* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,

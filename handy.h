@@ -170,55 +170,6 @@ typedef I64TYPE I64;
 typedef U64TYPE U64;
 #endif
 
-/* INT64_C/UINT64_C are C99 from <stdint.h> (so they will not be
- * available in strict C89 mode), but they are nice, so let's define
- * them if necessary. */
-
-/* N.B.  We would like to say HAS_QUAD here, but that doesn't actually mean what
- * it has always been documented to mean (see RT #119753) and is explicitly turned
- * off in perl.h outside of core with dire warnings about removing the undef.
- */
-
-#if defined(QUADKIND)
-#  undef PeRl_INT64_C
-#  undef PeRl_UINT64_C
-/* Prefer the native integer types (int and long) over long long
- * (which is not C89) and Win32-specific __int64. */
-#  if QUADKIND == QUAD_IS_INT && INTSIZE == 8
-#    define PeRl_INT64_C(c)	(c)
-#    define PeRl_UINT64_C(c)	CAT2(c,U)
-#  endif
-#  if QUADKIND == QUAD_IS_LONG && LONGSIZE == 8
-#    define PeRl_INT64_C(c)	CAT2(c,L)
-#    define PeRl_UINT64_C(c)	CAT2(c,UL)
-#  endif
-#  if QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LONG_LONG)
-#    define PeRl_INT64_C(c)	CAT2(c,LL)
-#    define PeRl_UINT64_C(c)	CAT2(c,ULL)
-#  endif
-#  if QUADKIND == QUAD_IS___INT64
-#    define PeRl_INT64_C(c)	CAT2(c,I64)
-#    define PeRl_UINT64_C(c)	CAT2(c,UI64)
-#  endif
-#  ifndef PeRl_INT64_C
-#    define PeRl_INT64_C(c)	((I64)(c)) /* last resort */
-#    define PeRl_UINT64_C(c)	((U64)(c))
-#  endif
-/* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
- * not fly with C89-pedantic gcc, so let's undefine them first so that
- * we can redefine them with our native integer preferring versions. */
-#  if defined(PERL_DARWIN) && defined(PERL_GCC_PEDANTIC)
-#    undef INT64_C
-#    undef UINT64_C
-#  endif
-#  ifndef INT64_C
-#    define INT64_C(c) PeRl_INT64_C(c)
-#  endif
-#  ifndef UINT64_C
-#    define UINT64_C(c) PeRl_UINT64_C(c)
-#  endif
-#endif
-
 #if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
 
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.

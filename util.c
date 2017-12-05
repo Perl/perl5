@@ -5714,9 +5714,9 @@ Perl_get_re_arg(pTHX_ SV *sv) {
 
 #ifdef PERL_DRAND48_QUAD
 
-#define DRAND48_MULT U64_CONST(0x5deece66d)
+#define DRAND48_MULT UINT64_C(0x5deece66d)
 #define DRAND48_ADD  0xb
-#define DRAND48_MASK U64_CONST(0xffffffffffff)
+#define DRAND48_MASK UINT64_C(0xffffffffffff)
 
 #else
 
