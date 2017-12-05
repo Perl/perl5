@@ -259,7 +259,12 @@ that would otherwise be interpreted as the complete list of function
 arguments.  (See examples above under L</Terms and List Operators (Leftward)>.)
 X<+>
 
-Unary C<"\"> creates a reference to whatever follows it.  See L<perlreftut>
+Unary C<"\"> creates references.  If its operand is a single sigilled
+thing, it creates a reference to that object.  If its operand is a
+parenthesised list, then it creates references to the things mentioned
+in the list.  Otherwise it puts its operand in list context, and creates
+a list of references to the scalars in the list provided by the operand.
+See L<perlreftut>
 and L<perlref>.  Do not confuse this behavior with the behavior of
 backslash within a string, although both forms do convey the notion
 of protecting the next thing from interpolation.
