@@ -2486,10 +2486,6 @@ This happens anywhere the arrow operator is used, including even here:
     if (exists $ref->{"Some key"})    { }
     print $ref;  # prints HASH(0x80d3d5c)
 
-This surprising autovivification in what does not at first--or even
-second--glance appear to be an lvalue context may be fixed in a future
-release.
-
 Use of a subroutine call, rather than a subroutine name, as an argument
 to L<C<exists>|/exists EXPR> is an error.
 
