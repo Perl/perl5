@@ -6012,16 +6012,26 @@ test_is_utf8_string(char *s, STRLEN len)
     OUTPUT:
         RETVAL
 
+#define WORDSIZE            sizeof(PERL_UINTMAX_T)
+
 AV *
-test_is_utf8_invariant_string_loc(char *s, STRLEN offset, STRLEN len)
+test_is_utf8_invariant_string_loc(unsigned char *s, STRLEN offset, STRLEN len)
     PREINIT:
         AV *av;
         const U8 * ep = NULL;
+        PERL_UINTMAX_T* copy;
     CODE:
+        /* 'offset' is number of bytes past a word boundary the testing of 's'
+         * is to start at.  Allocate space that does start at the word
+         * boundary, and copy 's' to the correct offset past it.  Then call the
+         * tested function with that position */
+        Newx(copy, (len + WORDSIZE - 1) / WORDSIZE, PERL_UINTMAX_T);
+        Copy(s, (U8 *) copy + offset, len, U8);
         av = newAV();
-        av_push(av, newSViv(is_utf8_invariant_string_loc((U8 *) s + offset, len, &ep)));
-        av_push(av, newSViv(ep - ((U8 *) s + offset)));
+        av_push(av, newSViv(is_utf8_invariant_string_loc((U8 *) copy + offset, len, &ep)));
+        av_push(av, newSViv(ep - ((U8 *) copy + offset)));
         RETVAL = av;
+        Safefree(copy);
     OUTPUT:
         RETVAL
 
