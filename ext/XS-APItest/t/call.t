@@ -33,7 +33,7 @@ sub i {
     $call_sv_count++;
 }
 call_sv_C();
-is($call_sv_count, 6, "call_sv_C passes");
+is($call_sv_count, 7, "call_sv_C passes");
 
 sub d {
     die "its_dead_jim\n";

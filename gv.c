@@ -1091,9 +1091,10 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	/* This is the special case that exempts Foo->import and
 	   Foo->unimport from being an error even if there's no
 	  import/unimport subroutine */
-	if (strEQ(name,"import") || strEQ(name,"unimport"))
-	    gv = MUTABLE_GV(&PL_sv_yes);
-	else if (autoload)
+	if (strEQ(name,"import") || strEQ(name,"unimport")) {
+	    gv = (GV*)sv_2mortal((SV*)newCONSTSUB_flags(NULL,
+						NULL, 0, 0, NULL));
+	} else if (autoload)
 	    gv = gv_autoload_pvn(
 		ostash, name, name_end - name, GV_AUTOLOAD_ISMETHOD|flags
 	    );

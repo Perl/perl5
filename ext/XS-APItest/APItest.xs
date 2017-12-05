@@ -2339,9 +2339,17 @@ CODE:
        only current internal behavior, these tests can be changed in the
        future if necessery */
     PUSHMARK(SP);
-    retcnt = call_sv(&PL_sv_yes, 0); /* does nothing */
+    retcnt = call_sv(&PL_sv_yes, G_EVAL);
     SPAGAIN;
     SP -= retcnt;
+    errsv = ERRSV;
+    errstr = SvPV(errsv, errlen);
+    if(memBEGINs(errstr, errlen, "Undefined subroutine &main::1 called at")) {
+        PUSHMARK(SP);
+        retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
+        SPAGAIN;
+        SP -= retcnt;
+    }
     PUSHMARK(SP);
     retcnt = call_sv(&PL_sv_no, G_EVAL);
     SPAGAIN;
