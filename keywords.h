@@ -260,7 +260,7 @@
 #define KEY_waitpid		244
 #define KEY_wantarray		245
 #define KEY_warn		246
-#define KEY_when		247
+#define KEY_whereso		247
 #define KEY_while		248
 #define KEY_write		249
 #define KEY_x			250
@@ -268,5 +268,5 @@
 #define KEY_y			252
 
 /* Generated from:
- * 50664fad65e719c51bf369702163eb7ade79f997461f928cc20f1e1bcf8369b8 regen/keywords.pl
+ * fa7d552d13fad7c3ad101e3f8d5301a9780147c26623ecb3e75f0ec7f0d24cc3 regen/keywords.pl
  * ex: set ro: */

@@ -276,7 +276,7 @@ wait ()
 waitpid ($$)
 wantarray ()
 warn (@)
-when undef
+whereso undef
 while undef
 write (;*)
 x undef

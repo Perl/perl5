@@ -2246,7 +2246,7 @@ my %feature_keywords = (
     state   => 'state',
     say     => 'say',
     given   => 'switch',
-    when    => 'switch',
+    whereso => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
@@ -2541,12 +2541,12 @@ sub pp_continue { unop(@_, "continue"); }
 
 sub pp_leavewhen {
     my($self, $op, $cx) = @_;
-    my $when = $self->keyword("when");
+    my $whereso = $self->keyword("whereso");
     my $enterop = $op->first;
     my $cond = $enterop->first;
     my $cond_str = $self->deparse($cond, 1);
     my $block = $self->deparse($cond->sibling, 0);
-    return "$when ($cond_str) {\n\t$block\n\b}\cK";
+    return "$whereso ($cond_str) {\n\t$block\n\b}\cK";
 }
 
 sub pp_exists {

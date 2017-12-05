@@ -21,7 +21,7 @@ if ($] >= 5.010001) {
 	use experimental 'switch';
 	sub bar { 1 };
 	given(1) {
-		when (\&bar) {
+		whereso (\&bar) {
 			pass("bar matches 1");
 		}
 		fail("bar matches 1");

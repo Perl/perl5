@@ -822,9 +822,9 @@ You CAN say
 
 but then $foo no longer contains a glob.
 
-=item Can't "continue" outside a when block
+=item Can't "continue" outside a whereso block
 
-(F) You called C<continue>, but you're not inside a C<when> block.
+(F) You called C<continue>, but you're not inside a C<whereso> block.
 
 =item Can't create pipe mailbox
 
@@ -1076,15 +1076,15 @@ usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
 
-=item Can't leave "when" outside a loop block
+=item Can't leave "whereso" outside a loop block
 
-(F) Control reached the end of a C<when> block that isn't inside any
+(F) Control reached the end of a C<whereso> block that isn't inside any
 loop (including a C<given> block).  An implicit C<next> occurs here,
-which requires a loop to jump to.  You probably wanted the C<when> to be
+which requires a loop to jump to.  You probably wanted the C<whereso> to be
 inside a C<given> block.  Note that you won't get this error if the match
-controlling the C<when> fails, or if you use an explicit C<continue> to
+controlling the C<whereso> fails, or if you use an explicit C<continue> to
 avoid reaching the end of the block.  But if you rely on not reaching the
-implicit C<next> then you probably didn't want C<when>, but rather C<if>.
+implicit C<next> then you probably didn't want C<whereso>, but rather C<if>.
 
 =item Can't linearize anonymous symbol table
 
@@ -7414,9 +7414,9 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item when is experimental
+=item whereso is experimental
 
-(S experimental::smartmatch) C<when> is experimental, and its behavior
+(S experimental::smartmatch) C<whereso> is experimental, and its behavior
 may change or it may even be removed in any future release of perl.
 See the explanation under L<perlsyn/Switch Statements>.
 

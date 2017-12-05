@@ -421,7 +421,7 @@ L<C<time>|/time>, L<C<times>|/times>
 C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
 C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
 C<eq>, C<for>, C<foreach>, C<ge>, C<given>, C<gt>, C<if>, C<INIT>, C<le>,
-C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<when>,
+C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<whereso>,
 C<while>, C<x>, C<xor>
 
 =back
@@ -1318,7 +1318,7 @@ using an empty one, logically enough, so L<C<next>|/next LABEL> goes
 directly back to check the condition at the top of the loop.
 
 When there is no BLOCK, L<C<continue>|/continue BLOCK> is a function
-that exits the current C<when> block, avoiding the implicit C<next>
+that exits the current C<whereso> block, avoiding the implicit C<next>
 that happens when execution reaches the end of such a block.
 In Perl 5.14 and earlier, this form of
 L<C<continue>|/continue BLOCK> was only available when the
@@ -10085,7 +10085,7 @@ Statements">.
 
 =item given
 
-=item when
+=item whereso
 
 These flow-control keywords related to the experimental switch feature are
 documented in L<perlsyn/"Switch Statements">.

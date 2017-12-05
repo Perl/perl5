@@ -86,7 +86,7 @@ extern int yydebug;
     CONTINUE = 289,
     FOR = 290,
     GIVEN = 291,
-    WHEN = 292,
+    WHERESO = 292,
     LOOPEX = 293,
     DOTDOT = 294,
     YADAYADA = 295,
@@ -180,6 +180,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 233778626e1c4f8b4103ca96d66b107b4527a7b7304f05e373aef634cc4b6f81 perly.y
+ * 03a4b1d58244383edfcce2549f649e112744b3efc4083221c08bb0e1e4d221c5 perly.y
  * b6fae5748f9bef6db4740aa5e122b84ac5181852d42474d0ecad621fa4253306 regen_perly.pl
  * ex: set ro: */

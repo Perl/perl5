@@ -450,7 +450,7 @@ SKIP:
 test_proto 'continue';
 $tests ++;
 CORE::given(1) {
-  CORE::when(1) {
+  CORE::whereso(1) {
     &mycontinue();
   }
   pass "&continue";
@@ -1152,12 +1152,11 @@ like $@, qr'^Undefined format "STDOUT" called',
     if (m?__END__?..${\0} and /^[-+](.*)/) {
       my $word = $1;
       next if
-       $word =~ /^(?:s(?:tate|ort|ay|ub)?|d(?:ef
-                  ault|ump|o)|p(?:rintf?|ackag
+       $word =~ /^(?:s(?:tate|ort|ay|ub)?|d(?:ump|o)|p(?:rintf?|ackag
                   e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
-                  AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|en)
+                  AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|ereso)
                   |(?:ou?|t)r|m(?:ap|y)?|UNITCHECK|q[qrwx]?|x(?:or)?|DEST
                   ROY|BEGIN|INIT|and|cmp|if|y)\z/x;
       $tests ++;

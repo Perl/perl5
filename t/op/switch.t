@@ -19,7 +19,7 @@ plan tests => 161;
 
 # Before loading feature, test the switch ops with CORE::
 CORE::given(3) {
-    CORE::when(3) { pass "CORE::given and CORE::when"; continue }
+    CORE::whereso(3) { pass "CORE::given and CORE::whereso"; continue }
     pass "continue (without feature)";
 }
 
@@ -42,7 +42,7 @@ like($@, qr/^Can't "continue" outside/, "continue outside");
 sub be_true {1}
 
 given(my $x = "foo") {
-    when(be_true(my $x = "bar")) {
+    whereso(be_true(my $x = "bar")) {
 	is($x, "bar", "given scope starts");
     }
     is($x, "foo", "given scope ends");
@@ -57,9 +57,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {    
     my $ok;
     given(3) {
-	when($_ == 2) { $ok = 'two'; }
-	when($_ == 3) { $ok = 'three'; }
-	when($_ == 4) { $ok = 'four'; }
+	whereso($_ == 2) { $ok = 'two'; }
+	whereso($_ == 3) { $ok = 'three'; }
+	whereso($_ == 4) { $ok = 'four'; }
 	$ok = 'd';
     }
     is($ok, 'three', "numeric comparison");
@@ -69,9 +69,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $ok;
     use integer;
     given(3.14159265) {
-	when($_ == 2) { $ok = 'two'; }
-	when($_ == 3) { $ok = 'three'; }
-	when($_ == 4) { $ok = 'four'; }
+	whereso($_ == 2) { $ok = 'two'; }
+	whereso($_ == 3) { $ok = 'three'; }
+	whereso($_ == 4) { $ok = 'four'; }
 	$ok = 'd';
     }
     is($ok, 'three', "integer comparison");
@@ -80,9 +80,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {    
     my ($ok1, $ok2);
     given(3) {
-	when($_ == 3.1)   { $ok1 = 'n'; }
-	when($_ == 3.0)   { $ok1 = 'y'; continue }
-	when($_ == "3.0") { $ok2 = 'y'; }
+	whereso($_ == 3.1)   { $ok1 = 'n'; }
+	whereso($_ == 3.0)   { $ok1 = 'y'; continue }
+	whereso($_ == "3.0") { $ok2 = 'y'; }
 	$ok2 = 'n';
     }
     is($ok1, 'y', "more numeric (pt. 1)");
@@ -92,9 +92,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given("c") {
-	when($_ eq "b") { $ok = 'B'; }
-	when($_ eq "c") { $ok = 'C'; }
-	when($_ eq "d") { $ok = 'D'; }
+	whereso($_ eq "b") { $ok = 'B'; }
+	whereso($_ eq "c") { $ok = 'C'; }
+	whereso($_ eq "d") { $ok = 'D'; }
 	$ok = 'def';
     }
     is($ok, 'C', "string comparison");
@@ -103,9 +103,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given("c") {
-	when($_ eq "b") { $ok = 'B'; }
-	when($_ eq "c") { $ok = 'C'; continue }
-	when($_ eq "c") { $ok = 'CC'; }
+	whereso($_ eq "b") { $ok = 'B'; }
+	whereso($_ eq "c") { $ok = 'C'; continue }
+	whereso($_ eq "c") { $ok = 'CC'; }
 	$ok = 'D';
     }
     is($ok, 'CC', "simple continue");
@@ -114,45 +114,45 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 # Definedness
 {
     my $ok = 1;
-    given (0) { when(!defined) {$ok = 0} }
-    is($ok, 1, "Given(0) when(!defined)");
+    given (0) { whereso(!defined) {$ok = 0} }
+    is($ok, 1, "Given(0) whereso(!defined)");
 }
 {
     no warnings "uninitialized";
     my $ok = 1;
-    given (undef) { when(0) {$ok = 0} }
-    is($ok, 1, "Given(undef) when(0)");
+    given (undef) { whereso(0) {$ok = 0} }
+    is($ok, 1, "Given(undef) whereso(0)");
 }
 {
     no warnings "uninitialized";
     my $undef;
     my $ok = 1;
-    given ($undef) { when(0) {$ok = 0} }
-    is($ok, 1, 'Given($undef) when(0)');
+    given ($undef) { whereso(0) {$ok = 0} }
+    is($ok, 1, 'Given($undef) whereso(0)');
 }
 ########
 {
     my $ok = 1;
-    given ("") { when(!defined) {$ok = 0} }
-    is($ok, 1, 'Given("") when(!defined)');
+    given ("") { whereso(!defined) {$ok = 0} }
+    is($ok, 1, 'Given("") whereso(!defined)');
 }
 {
     no warnings "uninitialized";
     my $ok = 1;
-    given (undef) { when(0) {$ok = 0} }
-    is($ok, 1, 'Given(undef) when(0)');
+    given (undef) { whereso(0) {$ok = 0} }
+    is($ok, 1, 'Given(undef) whereso(0)');
 }
 ########
 {
     my $ok = 0;
-    given (undef) { when(!defined) {$ok = 1} }
-    is($ok, 1, "Given(undef) when(!defined)");
+    given (undef) { whereso(!defined) {$ok = 1} }
+    is($ok, 1, "Given(undef) whereso(!defined)");
 }
 {
     my $undef;
     my $ok = 0;
-    given ($undef) { when(!defined) {$ok = 1} }
-    is($ok, 1, 'Given($undef) when(!defined)');
+    given ($undef) { whereso(!defined) {$ok = 1} }
+    is($ok, 1, 'Given($undef) whereso(!defined)');
 }
 
 
@@ -160,13 +160,13 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my ($ok1, $ok2);
     given("Hello, world!") {
-	when(/lo/)
+	whereso(/lo/)
 	    { $ok1 = 'y'; continue}
-	when(/no/)
+	whereso(/no/)
 	    { $ok1 = 'n'; continue}
-	when(/^(Hello,|Goodbye cruel) world[!.?]/)
+	whereso(/^(Hello,|Goodbye cruel) world[!.?]/)
 	    { $ok2 = 'Y'; continue}
-	when(/^(Hello cruel|Goodbye,) world[!.?]/)
+	whereso(/^(Hello cruel|Goodbye,) world[!.?]/)
 	    { $ok2 = 'n'; continue}
     }
     is($ok1, 'y', "regex 1");
@@ -179,10 +179,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ < 10) { $ok = "ten" }
-	when ($_ < 20) { $ok = "twenty" }
-	when ($_ < 30) { $ok = "thirty" }
-	when ($_ < 40) { $ok = "forty" }
+	whereso ($_ < 10) { $ok = "ten" }
+	whereso ($_ < 20) { $ok = "twenty" }
+	whereso ($_ < 30) { $ok = "thirty" }
+	whereso ($_ < 40) { $ok = "forty" }
 	$ok = "default";
     }
     is($ok, "thirty", $test);
@@ -194,10 +194,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ < 10) { $ok = "ten" }
-	when ($_ < 20) { $ok = "twenty" }
-	when ($_ < 30) { $ok = "thirty" }
-	when ($_ < 40) { $ok = "forty" }
+	whereso ($_ < 10) { $ok = "ten" }
+	whereso ($_ < 20) { $ok = "twenty" }
+	whereso ($_ < 30) { $ok = "thirty" }
+	whereso ($_ < 40) { $ok = "forty" }
 	$ok = "default";
     }
     is($ok, "thirty", $test);
@@ -208,10 +208,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ <= 10) { $ok = "ten" }
-	when ($_ <= 20) { $ok = "twenty" }
-	when ($_ <= 30) { $ok = "thirty" }
-	when ($_ <= 40) { $ok = "forty" }
+	whereso ($_ <= 10) { $ok = "ten" }
+	whereso ($_ <= 20) { $ok = "twenty" }
+	whereso ($_ <= 30) { $ok = "thirty" }
+	whereso ($_ <= 40) { $ok = "forty" }
 	$ok = "default";
     }
     is($ok, "thirty", $test);
@@ -223,10 +223,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ <= 10) { $ok = "ten" }
-	when ($_ <= 20) { $ok = "twenty" }
-	when ($_ <= 30) { $ok = "thirty" }
-	when ($_ <= 40) { $ok = "forty" }
+	whereso ($_ <= 10) { $ok = "ten" }
+	whereso ($_ <= 20) { $ok = "twenty" }
+	whereso ($_ <= 30) { $ok = "thirty" }
+	whereso ($_ <= 40) { $ok = "forty" }
 	$ok = "default";
     }
     is($ok, "thirty", $test);
@@ -238,10 +238,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ > 40) { $ok = "forty" }
-	when ($_ > 30) { $ok = "thirty" }
-	when ($_ > 20) { $ok = "twenty" }
-	when ($_ > 10) { $ok = "ten" }
+	whereso ($_ > 40) { $ok = "forty" }
+	whereso ($_ > 30) { $ok = "thirty" }
+	whereso ($_ > 20) { $ok = "twenty" }
+	whereso ($_ > 10) { $ok = "ten" }
 	$ok = "default";
     }
     is($ok, "twenty", $test);
@@ -252,10 +252,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ >= 40) { $ok = "forty" }
-	when ($_ >= 30) { $ok = "thirty" }
-	when ($_ >= 20) { $ok = "twenty" }
-	when ($_ >= 10) { $ok = "ten" }
+	whereso ($_ >= 40) { $ok = "forty" }
+	whereso ($_ >= 30) { $ok = "thirty" }
+	whereso ($_ >= 20) { $ok = "twenty" }
+	whereso ($_ >= 10) { $ok = "ten" }
 	$ok = "default";
     }
     is($ok, "twenty", $test);
@@ -267,10 +267,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ > 40) { $ok = "forty" }
-	when ($_ > 30) { $ok = "thirty" }
-	when ($_ > 20) { $ok = "twenty" }
-	when ($_ > 10) { $ok = "ten" }
+	whereso ($_ > 40) { $ok = "forty" }
+	whereso ($_ > 30) { $ok = "thirty" }
+	whereso ($_ > 20) { $ok = "twenty" }
+	whereso ($_ > 10) { $ok = "ten" }
 	$ok = "default";
     }
     is($ok, "twenty", $test);
@@ -282,10 +282,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ >= 40) { $ok = "forty" }
-	when ($_ >= 30) { $ok = "thirty" }
-	when ($_ >= 20) { $ok = "twenty" }
-	when ($_ >= 10) { $ok = "ten" }
+	whereso ($_ >= 40) { $ok = "forty" }
+	whereso ($_ >= 30) { $ok = "thirty" }
+	whereso ($_ >= 20) { $ok = "twenty" }
+	whereso ($_ >= 10) { $ok = "ten" }
 	$ok = "default";
     }
     is($ok, "twenty", $test);
@@ -297,10 +297,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = "25";
     my $ok;
     given($twenty_five) {
-	when ($_ lt "10") { $ok = "ten" }
-	when ($_ lt "20") { $ok = "twenty" }
-	when ($_ lt "30") { $ok = "thirty" }
-	when ($_ lt "40") { $ok = "forty" }
+	whereso ($_ lt "10") { $ok = "ten" }
+	whereso ($_ lt "20") { $ok = "twenty" }
+	whereso ($_ lt "30") { $ok = "thirty" }
+	whereso ($_ lt "40") { $ok = "forty" }
 	$ok = "default";
     }
     is($ok, "thirty", $test);
@@ -311,10 +311,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = "25";
     my $ok;
     given($twenty_five) {
-	when ($_ le "10") { $ok = "ten" }
-	when ($_ le "20") { $ok = "twenty" }
-	when ($_ le "30") { $ok = "thirty" }
-	when ($_ le "40") { $ok = "forty" }
+	whereso ($_ le "10") { $ok = "ten" }
+	whereso ($_ le "20") { $ok = "twenty" }
+	whereso ($_ le "30") { $ok = "thirty" }
+	whereso ($_ le "40") { $ok = "forty" }
 	$ok = "default";
     }
     is($ok, "thirty", $test);
@@ -325,10 +325,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ ge "40") { $ok = "forty" }
-	when ($_ ge "30") { $ok = "thirty" }
-	when ($_ ge "20") { $ok = "twenty" }
-	when ($_ ge "10") { $ok = "ten" }
+	whereso ($_ ge "40") { $ok = "forty" }
+	whereso ($_ ge "30") { $ok = "thirty" }
+	whereso ($_ ge "20") { $ok = "twenty" }
+	whereso ($_ ge "10") { $ok = "ten" }
 	$ok = "default";
     }
     is($ok, "twenty", $test);
@@ -339,10 +339,10 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ ge "40") { $ok = "forty" }
-	when ($_ ge "30") { $ok = "thirty" }
-	when ($_ ge "20") { $ok = "twenty" }
-	when ($_ ge "10") { $ok = "ten" }
+	whereso ($_ ge "40") { $ok = "forty" }
+	whereso ($_ ge "30") { $ok = "thirty" }
+	whereso ($_ ge "20") { $ok = "twenty" }
+	whereso ($_ ge "10") { $ok = "ten" }
 	$ok = "default";
     }
     is($ok, "twenty", $test);
@@ -352,8 +352,8 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given(23) {
-	when (2 + 2 == 4) { $ok = 'y'; continue }
-	when (2 + 2 == 5) { $ok = 'n' }
+	whereso (2 + 2 == 4) { $ok = 'y'; continue }
+	whereso (2 + 2 == 5) { $ok = 'n' }
     }
     is($ok, 'y', "Optimized-away comparison");
 }
@@ -361,7 +361,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given(23) {
-        when ($_ == scalar 24) { $ok = 'n'; continue }
+        whereso ($_ == scalar 24) { $ok = 'n'; continue }
         $ok = 'y';
     }
     is($ok,'y','scalar()');
@@ -375,9 +375,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my ($ok_d, $ok_f, $ok_r);
     given("op") {
-	when(-d)  {$ok_d = 1; continue}
-	when(!-f) {$ok_f = 1; continue}
-	when(-r)  {$ok_r = 1; continue}
+	whereso(-d)  {$ok_d = 1; continue}
+	whereso(!-f) {$ok_f = 1; continue}
+	whereso(-r)  {$ok_r = 1; continue}
     }
     ok($ok_d, "Filetest -d");
     ok($ok_f, "Filetest -f");
@@ -389,7 +389,7 @@ sub notfoo {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when(notfoo()) {$ok = 1}
+	whereso(notfoo()) {$ok = 1}
     }
     ok($ok, "Sub call acts as boolean")
 }
@@ -397,7 +397,7 @@ sub notfoo {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when(main->notfoo()) {$ok = 1}
+	whereso(main->notfoo()) {$ok = 1}
     }
     ok($ok, "Class-method call acts as boolean")
 }
@@ -406,7 +406,7 @@ sub notfoo {"bar"}
     my $ok = 0;
     my $obj = bless [];
     given("foo") {
-	when($obj->notfoo()) {$ok = 1}
+	whereso($obj->notfoo()) {$ok = 1}
     }
     ok($ok, "Object-method call acts as boolean")
 }
@@ -415,7 +415,7 @@ sub notfoo {"bar"}
 {
     my $ok = 0;
     given(12) {
-        when( /(\d+)/ and ( 1 <= $1 and $1 <= 12 ) ) {
+        whereso( /(\d+)/ and ( 1 <= $1 and $1 <= 12 ) ) {
             $ok = 1;
         }
     }
@@ -425,7 +425,7 @@ sub notfoo {"bar"}
 {
     my $ok = 0;
     given(0) {
-	when(eof(DATA)) {
+	whereso(eof(DATA)) {
 	    $ok = 1;
 	}
     }
@@ -436,7 +436,7 @@ sub notfoo {"bar"}
     my $ok = 0;
     my %foo = ("bar", 0);
     given(0) {
-	when(exists $foo{bar}) {
+	whereso(exists $foo{bar}) {
 	    $ok = 1;
 	}
     }
@@ -446,7 +446,7 @@ sub notfoo {"bar"}
 {
     my $ok = 0;
     given(0) {
-	when(defined $ok) {
+	whereso(defined $ok) {
 	    $ok = 1;
 	}
     }
@@ -456,10 +456,10 @@ sub notfoo {"bar"}
 {
     my $ok = 1;
     given("foo") {
-	when((1 == 1) && "bar") {
+	whereso((1 == 1) && "bar") {
 	    $ok = 2;
 	}
-	when((1 == 1) && $_ eq "foo") {
+	whereso((1 == 1) && $_ eq "foo") {
 	    $ok = 0;
 	}
     }
@@ -470,10 +470,10 @@ sub notfoo {"bar"}
     my $n = 0;
     for my $l (qw(a b c d)) {
 	given ($l) {
-	    when ($_ eq "b" .. $_ eq "c") { $n = 1 }
+	    whereso ($_ eq "b" .. $_ eq "c") { $n = 1 }
 	    $n = 0;
 	}
-	ok(($n xor $l =~ /[ad]/), 'when(E1..E2) evaluates in boolean context');
+	ok(($n xor $l =~ /[ad]/), 'whereso(E1..E2) evaluates in boolean context');
     }
 }
 
@@ -481,17 +481,17 @@ sub notfoo {"bar"}
     my $n = 0;
     for my $l (qw(a b c d)) {
 	given ($l) {
-	    when ($_ eq "b" ... $_ eq "c") { $n = 1 }
+	    whereso ($_ eq "b" ... $_ eq "c") { $n = 1 }
 	    $n = 0;
 	}
-	ok(($n xor $l =~ /[ad]/), 'when(E1...E2) evaluates in boolean context');
+	ok(($n xor $l =~ /[ad]/), 'whereso(E1...E2) evaluates in boolean context');
     }
 }
 
 {
     my $ok = 0;
     given("foo") {
-	when((1 == $ok) || "foo") {
+	whereso((1 == $ok) || "foo") {
 	    $ok = 1;
 	}
     }
@@ -501,7 +501,7 @@ sub notfoo {"bar"}
 {
     my $ok = 0;
     given("foo") {
-	when((1 == $ok || undef) // "foo") {
+	whereso((1 == $ok || undef) // "foo") {
 	    $ok = 1;
 	}
     }
@@ -538,44 +538,44 @@ my $f = tie my $v, "FetchCounter";
 {   my $test_name = "Multiple FETCHes in given, due to aliasing";
     my $ok;
     given($v = 23) {
-    	when(!defined) {}
-    	when(sub{0}->()) {}
-	when($_ == 21) {}
-	when($_ == "22") {}
-	when($_ == 23) {$ok = 1}
-	when(/24/) {$ok = 0}
+    	whereso(!defined) {}
+    	whereso(sub{0}->()) {}
+	whereso($_ == 21) {}
+	whereso($_ == "22") {}
+	whereso($_ == 23) {$ok = 1}
+	whereso(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
     is($f->count(), 4, $test_name);
 }
 
-{   my $test_name = "Only one FETCH (numeric when)";
+{   my $test_name = "Only one FETCH (numeric whereso)";
     my $ok;
     $v = 23;
     is($f->count(), 0, "Sanity check: $test_name");
     given(23) {
-    	when(!defined) {}
-    	when(sub{0}->()) {}
-	when($_ == 21) {}
-	when($_ == "22") {}
-	when($_ == $v) {$ok = 1}
-	when(/24/) {$ok = 0}
+    	whereso(!defined) {}
+    	whereso(sub{0}->()) {}
+	whereso($_ == 21) {}
+	whereso($_ == "22") {}
+	whereso($_ == $v) {$ok = 1}
+	whereso(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
 }
 
-{   my $test_name = "Only one FETCH (string when)";
+{   my $test_name = "Only one FETCH (string whereso)";
     my $ok;
     $v = "23";
     is($f->count(), 0, "Sanity check: $test_name");
     given("23") {
-    	when(!defined) {}
-    	when(sub{0}->()) {}
-	when($_ eq "21") {}
-	when($_ eq "22") {}
-	when($_ eq $v) {$ok = 1}
-	when(/24/) {$ok = 0}
+    	whereso(!defined) {}
+    	whereso(sub{0}->()) {}
+	whereso($_ eq "21") {}
+	whereso($_ eq "22") {}
+	whereso($_ eq $v) {$ok = 1}
+	whereso(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
@@ -585,10 +585,10 @@ my $f = tie my $v, "FetchCounter";
 {
     my $first = 1;
     for (1, "two") {
-	when ($_ eq "two") {
+	whereso ($_ eq "two") {
 	    is($first, 0, "Loop: second");
 	}
-	when ($_ == 1) {
+	whereso ($_ == 1) {
 	    is($first, 1, "Loop: first");
 	    $first = 0;
 	}
@@ -598,10 +598,10 @@ my $f = tie my $v, "FetchCounter";
 {
     my $first = 1;
     for $_ (1, "two") {
-	when ($_ eq "two") {
+	whereso ($_ eq "two") {
 	    is($first, 0, "Explicit \$_: second");
 	}
-	when ($_ == 1) {
+	whereso ($_ == 1) {
 	    is($first, 1, "Explicit \$_: first");
 	    $first = 0;
 	}
@@ -617,8 +617,8 @@ my $f = tie my $v, "FetchCounter";
     sub bar {$called_bar = 1; "@_" eq "bar"}
     my ($matched_foo, $matched_bar) = (0, 0);
     given("foo") {
-	when((\&bar)->($_)) {$matched_bar = 1}
-	when((\&foo)->($_)) {$matched_foo = 1}
+	whereso((\&bar)->($_)) {$matched_bar = 1}
+	whereso((\&foo)->($_)) {$matched_foo = 1}
     }
     is($called_foo, 1,  "foo() was called");
     is($called_bar, 1,  "bar() was called");
@@ -633,18 +633,18 @@ sub contains_x {
 {
     my ($ok1, $ok2) = (0,0);
     given("foxy!") {
-	when(contains_x($_))
+	whereso(contains_x($_))
 	    { $ok1 = 1; continue }
-	when((\&contains_x)->($_))
+	whereso((\&contains_x)->($_))
 	    { $ok2 = 1; continue }
     }
     is($ok1, 1, "Calling sub directly (true)");
     is($ok2, 1, "Calling sub indirectly (true)");
 
     given("foggy") {
-	when(contains_x($_))
+	whereso(contains_x($_))
 	    { $ok1 = 2; continue }
-	when((\&contains_x)->($_))
+	whereso((\&contains_x)->($_))
 	    { $ok2 = 2; continue }
     }
     is($ok1, 1, "Calling sub directly (false)");
@@ -655,9 +655,9 @@ sub contains_x {
     my($ea, $eb, $ec) = (0, 0, 0);
     my $r;
     given(3) {
-	when(do { $ea++; $_ == 2 }) { $r = "two"; }
-	when(do { $eb++; $_ == 3 }) { $r = "three"; }
-	when(do { $ec++; $_ == 4 }) { $r = "four"; }
+	whereso(do { $ea++; $_ == 2 }) { $r = "two"; }
+	whereso(do { $eb++; $_ == 3 }) { $r = "three"; }
+	whereso(do { $ec++; $_ == 4 }) { $r = "four"; }
     }
     is $r, "three", "evaluation count";
     is $ea, 1, "evaluation count";
@@ -665,39 +665,39 @@ sub contains_x {
     is $ec, 0, "evaluation count";
 }
 
-# Postfix when
+# Postfix whereso
 {
     my $ok;
     given (undef) {
-	$ok = 1 when !defined;
+	$ok = 1 whereso !defined;
     }
     is($ok, 1, "postfix !defined");
 }
 {
     my $ok;
     given (2) {
-	$ok += 1 when $_ == 7;
-	$ok += 2 when $_ == 9.1685;
-	$ok += 4 when $_ > 4;
-	$ok += 8 when $_ < 2.5;
+	$ok += 1 whereso $_ == 7;
+	$ok += 2 whereso $_ == 9.1685;
+	$ok += 4 whereso $_ > 4;
+	$ok += 8 whereso $_ < 2.5;
     }
     is($ok, 8, "postfix numeric");
 }
 {
     my $ok;
     given ("apple") {
-	$ok = 1, continue when $_ eq "apple";
+	$ok = 1, continue whereso $_ eq "apple";
 	$ok += 2;
-	$ok = 0 when $_ eq "banana";
+	$ok = 0 whereso $_ eq "banana";
     }
     is($ok, 3, "postfix string");
 }
 {
     my $ok;
     given ("pear") {
-	do { $ok = 1; continue } when /pea/;
+	do { $ok = 1; continue } whereso /pea/;
 	$ok += 2;
-	$ok = 0 when /pie/;
+	$ok = 0 whereso /pie/;
 	$ok += 4; next;
 	$ok = 0;
     }
@@ -708,50 +708,50 @@ sub contains_x {
     my $x = "what";
     given(my $x = "foo") {
 	do {
-	    is($x, "foo", "scope inside ... when my \$x = ...");
+	    is($x, "foo", "scope inside ... whereso my \$x = ...");
 	    continue;
-	} when be_true(my $x = "bar");
-	is($x, "bar", "scope after ... when my \$x = ...");
+	} whereso be_true(my $x = "bar");
+	is($x, "bar", "scope after ... whereso my \$x = ...");
     }
 }
 {
     my $x = 0;
     given(my $x = 1) {
-	my $x = 2, continue when be_true();
-        is($x, undef, "scope after my \$x = ... when ...");
+	my $x = 2, continue whereso be_true();
+        is($x, undef, "scope after my \$x = ... whereso ...");
     }
 }
 
-# Tests for last and next in when clauses
+# Tests for last and next in whereso clauses
 my $letter;
 
 $letter = '';
 LETTER1: for ("a".."e") {
     given ($_) {
 	$letter = $_;
-	when ($_ eq "b") { last LETTER1 }
+	whereso ($_ eq "b") { last LETTER1 }
     }
     $letter = "z";
 }
-is($letter, "b", "last LABEL in when");
+is($letter, "b", "last LABEL in whereso");
 
 $letter = '';
 LETTER2: for ("a".."e") {
     given ($_) {
-	when (/b|d/) { next LETTER2 }
+	whereso (/b|d/) { next LETTER2 }
 	$letter .= $_;
     }
     $letter .= ',';
 }
-is($letter, "a,c,e,", "next LABEL in when");
+is($letter, "a,c,e,", "next LABEL in whereso");
 
-# Test goto with given/when
+# Test goto with given/whereso
 {
     my $flag = 0;
     goto GIVEN1;
     $flag = 1;
     GIVEN1: given ($flag) {
-	when ($_ == 0) { next; }
+	whereso ($_ == 0) { next; }
 	$flag = 2;
     }
     is($flag, 0, "goto GIVEN1");
@@ -759,7 +759,7 @@ is($letter, "a,c,e,", "next LABEL in when");
 {
     my $flag = 0;
     given ($flag) {
-	when ($_ == 0) { $flag = 1; }
+	whereso ($_ == 0) { $flag = 1; }
 	goto GIVEN2;
 	$flag = 2;
     }
@@ -769,30 +769,30 @@ GIVEN2:
 {
     my $flag = 0;
     given ($flag) {
-	when ($_ == 0) { $flag = 1; goto GIVEN3; $flag = 2; }
+	whereso ($_ == 0) { $flag = 1; goto GIVEN3; $flag = 2; }
 	$flag = 3;
     }
 GIVEN3:
-    is($flag, 1, "goto inside given and when");
+    is($flag, 1, "goto inside given and whereso");
 }
 {
     my $flag = 0;
     for ($flag) {
-	when ($_ == 0) { $flag = 1; goto GIVEN4; $flag = 2; }
+	whereso ($_ == 0) { $flag = 1; goto GIVEN4; $flag = 2; }
 	$flag = 3;
     }
 GIVEN4:
-    is($flag, 1, "goto inside for and when");
+    is($flag, 1, "goto inside for and whereso");
 }
 {
     my $flag = 0;
 GIVEN5:
     given ($flag) {
-	when ($_ == 0) { $flag = 1; goto GIVEN5; $flag = 2; }
-	when ($_ == 1) { next; }
+	whereso ($_ == 0) { $flag = 1; goto GIVEN5; $flag = 2; }
+	whereso ($_ == 1) { next; }
 	$flag = 3;
     }
-    is($flag, 1, "goto inside given and when to the given stmt");
+    is($flag, 1, "goto inside given and whereso to the given stmt");
 }
 
 # Test do { given } as a rvalue
@@ -805,8 +805,8 @@ GIVEN5:
     no warnings 'void';
     for (0, 1, 2) {
 	my $scalar = do { given ($_) {
-	    when ($_ == 0) { $lexical }
-	    when ($_ == 2) { 'void'; 8, 9 }
+	    whereso ($_ == 0) { $lexical }
+	    whereso ($_ == 2) { 'void'; 8, 9 }
 	    @things;
 	} };
 	is($scalar, shift(@exp), "rvalue given - simple scalar [$_]");
@@ -819,8 +819,8 @@ GIVEN5:
     for (0, 1, 2) {
 	no warnings 'void';
 	my $scalar = do { given ($_) {
-	    $lexical when $_ == 0;
-	    8, 9     when $_ == 2;
+	    $lexical whereso $_ == 0;
+	    8, 9     whereso $_ == 2;
 	    6, 7;
 	} };
 	is($scalar, shift(@exp), "rvalue given - postfix scalar [$_]");
@@ -832,7 +832,7 @@ GIVEN5:
     for (0, 1, 2) {
 	my $scalar = do { given ($_) {
 	    no warnings 'void';
-	    when ($_ == 0) { 5 }
+	    whereso ($_ == 0) { 5 }
 	    8, 9;
 	} };
 	is($scalar, shift(@exp), "rvalue given - default scalar [$_]");
@@ -844,8 +844,8 @@ GIVEN5:
     my @exp = ('3 4 5', '11 12 13', '8 9');
     for (0, 1, 2) {
 	my @list = do { given ($_) {
-	    when ($_ == 0) { 3 .. 5 }
-	    when ($_ == 2) { my $fake = 'void'; 8, 9 }
+	    whereso ($_ == 0) { 3 .. 5 }
+	    whereso ($_ == 2) { my $fake = 'void'; 8, 9 }
 	    @things;
 	} };
 	is("@list", shift(@exp), "rvalue given - simple list [$_]");
@@ -857,8 +857,8 @@ GIVEN5:
     my @exp = ('3 4 5', '6 7', '12');
     for (0, 1, 2) {
 	my @list = do { given ($_) {
-	    3 .. 5  when $_ == 0;
-	    @things when $_ == 2;
+	    3 .. 5  whereso $_ == 0;
+	    @things whereso $_ == 2;
 	    6, 7;
 	} };
 	is("@list", shift(@exp), "rvalue given - postfix list [$_]");
@@ -870,7 +870,7 @@ GIVEN5:
     my @exp = ('m o o', '8 10', '8 10');
     for (0, 1, 2) {
 	my @list = do { given ($_) {
-	    when ($_ == 0) { "moo" =~ /(.)/g }
+	    whereso ($_ == 0) { "moo" =~ /(.)/g }
 	    8, scalar(@things);
 	} };
 	is("@list", shift(@exp), "rvalue given - default list [$_]");
@@ -881,9 +881,9 @@ GIVEN5:
     my @exp = ('6 7', '', '6 7');
     F: for (0, 1, 2, 3) {
 	my @list = do { given ($_) {
-	    continue when $_ <= 1;
-	    next     when $_ == 1;
-	    next F   when $_ == 2;
+	    continue whereso $_ <= 1;
+	    next     whereso $_ == 1;
+	    next F   whereso $_ == 2;
 	    6, 7;
 	} };
 	is("@list", shift(@exp), "rvalue given - default list [$_]");
@@ -893,9 +893,9 @@ GIVEN5:
     # Context propagation
     my $smart_hash = sub {
 	do { given ($_[0]) {
-	    'undef' when !defined;
-	    when ($_ >= 1 && $_ <= 3) { 1 .. 3 }
-	    when ($_ == 4) { my $fake; do { 4, 5 } }
+	    'undef' whereso !defined;
+	    whereso ($_ >= 1 && $_ <= 3) { 1 .. 3 }
+	    whereso ($_ == 4) { my $fake; do { 4, 5 } }
 	} };
     };
 
@@ -954,19 +954,19 @@ GIVEN5:
 	    our $given_glob  = 5;
 	    local $given_loc = 6;
 
-	    when ($_ == 0) { 0 }
+	    whereso ($_ == 0) { 0 }
 
-	    when ($_ == 1) { my $when_lex    = 1 }
-	    when ($_ == 2) { our $when_glob  = 2 }
-	    when ($_ == 3) { local $when_loc = 3 }
+	    whereso ($_ == 1) { my $when_lex    = 1 }
+	    whereso ($_ == 2) { our $when_glob  = 2 }
+	    whereso ($_ == 3) { local $when_loc = 3 }
 
-	    when ($_ == 4) { $given_lex }
-	    when ($_ == 5) { $given_glob }
-	    when ($_ == 6) { $given_loc }
+	    whereso ($_ == 4) { $given_lex }
+	    whereso ($_ == 5) { $given_glob }
+	    whereso ($_ == 6) { $given_loc }
 
-	    when ($_ == 7) { $ext_lex }
-	    when ($_ == 8) { $ext_glob }
-	    when ($_ == 9) { $ext_loc }
+	    whereso ($_ == 7) { $ext_lex }
+	    whereso ($_ == 8) { $ext_glob }
+	    whereso ($_ == 9) { $ext_loc }
 
 	    'fallback';
 	}
@@ -975,9 +975,9 @@ GIVEN5:
     my @descriptions = qw<
 	constant
 
-	when-lexical
-	when-global
-	when-local
+	whereso-lexical
+	whereso-global
+	whereso-local
 
 	given-lexical
 	given-global
@@ -998,7 +998,7 @@ GIVEN5:
 	    my $id_plus_1 = $id + 1;
 	    given ($id_plus_1) {
 		do {
-		    when (/\d/) {
+		    whereso (/\d/) {
 			--$id_plus_1;
 			continue;
 			456;
@@ -1011,7 +1011,7 @@ GIVEN5:
     }
 }
 
-# Check that values returned from given/when are destroyed at the right time.
+# Check that values returned from given/whereso are destroyed at the right time.
 {
     {
 	package Fmurrr;
@@ -1029,7 +1029,7 @@ GIVEN5:
     }
 
     my @descriptions = qw<
-	when
+	whereso
 	next
 	continue
 	default
@@ -1045,10 +1045,10 @@ GIVEN5:
 	    my $res = do {
 		given ($id) {
 		    my $x;
-		    when ($_ == 0) { Fmurrr->new($destroyed, 0) }
-		    when ($_ == 1) { my $y = Fmurrr->new($destroyed, 1); next }
-		    when ($_ == 2) { $x = Fmurrr->new($destroyed, 2); continue }
-		    when ($_ == 2) { $x }
+		    whereso ($_ == 0) { Fmurrr->new($destroyed, 0) }
+		    whereso ($_ == 1) { my $y = Fmurrr->new($destroyed, 1); next }
+		    whereso ($_ == 2) { $x = Fmurrr->new($destroyed, 2); continue }
+		    whereso ($_ == 2) { $x }
 		    Fmurrr->new($destroyed, 3);
 		}
 	    };
@@ -1056,8 +1056,8 @@ GIVEN5:
 	}
 	$res_id = $id if $id == 1; # next doesn't return anything
 
-	is $res_id,    $id, "given/when returns the right object - $desc";
-	is $destroyed, 1,   "given/when does not leak - $desc";
+	is $res_id,    $id, "given/whereso returns the right object - $desc";
+	is $destroyed, 1,   "given/whereso does not leak - $desc";
     };
 }
 
@@ -1066,7 +1066,7 @@ GIVEN5:
     my @res = (1, do {
 	given ("x") {
 	    2, 3, do {
-		when (/[a-z]/) {
+		whereso (/[a-z]/) {
 		    4, 5, 6, next
 		}
 	    }
@@ -1095,47 +1095,47 @@ GIVEN5:
     f2();
 }
 
-# check that 'when' handles all 'for' loop types
+# check that 'whereso' handles all 'for' loop types
 
 {
     my $i;
 
     $i = 0;
     for (1..3) {
-        when ($_ == 1) {$i +=    1 }
-        when ($_ == 2) {$i +=   10 }
-        when ($_ == 3) {$i +=  100 }
+        whereso ($_ == 1) {$i +=    1 }
+        whereso ($_ == 2) {$i +=   10 }
+        whereso ($_ == 3) {$i +=  100 }
         $i += 1000;
     }
-    is($i, 111, "when in for 1..3");
+    is($i, 111, "whereso in for 1..3");
 
     $i = 0;
     for ('a'..'c') {
-        when ($_ eq 'a') {$i +=    1 }
-        when ($_ eq 'b') {$i +=   10 }
-        when ($_ eq 'c') {$i +=  100 }
+        whereso ($_ eq 'a') {$i +=    1 }
+        whereso ($_ eq 'b') {$i +=   10 }
+        whereso ($_ eq 'c') {$i +=  100 }
         $i += 1000;
     }
-    is($i, 111, "when in for a..c");
+    is($i, 111, "whereso in for a..c");
 
     $i = 0;
     for (1,2,3) {
-        when ($_ == 1) {$i +=    1 }
-        when ($_ == 2) {$i +=   10 }
-        when ($_ == 3) {$i +=  100 }
+        whereso ($_ == 1) {$i +=    1 }
+        whereso ($_ == 2) {$i +=   10 }
+        whereso ($_ == 3) {$i +=  100 }
         $i += 1000;
     }
-    is($i, 111, "when in for 1,2,3");
+    is($i, 111, "whereso in for 1,2,3");
 
     $i = 0;
     my @a = (1,2,3);
     for (@a) {
-        when ($_ == 1) {$i +=    1 }
-        when ($_ == 2) {$i +=   10 }
-        when ($_ == 3) {$i +=  100 }
+        whereso ($_ == 1) {$i +=    1 }
+        whereso ($_ == 2) {$i +=   10 }
+        whereso ($_ == 3) {$i +=  100 }
         $i += 1000;
     }
-    is($i, 111, 'when in for @a');
+    is($i, 111, 'whereso in for @a');
 }
 
 

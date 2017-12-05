@@ -39,7 +39,7 @@ my %feature_kw = (
     state     => 'state',
     say       => 'say',
     given     => 'switch',
-    when      => 'switch',
+    whereso   => 'switch',
     # continue is already a keyword
     evalbytes => 'evalbytes',
     __SUB__   => '__SUB__',
@@ -352,7 +352,7 @@ __END__
 -waitpid
 -wantarray
 -warn
-+when
++whereso
 +while
 -write
 -x

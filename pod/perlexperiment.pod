@@ -30,7 +30,7 @@ L<[perl #119317]|https://rt.perl.org/rt3/Ticket/Display.html?id=119317>.
 
 For historical reasons, the single experiment covers both the smart
 match operator (C<~~>) and the switch-related compound statements
-(given/when), which apart from the shared warning category are now
+(C<given>/C<whereso>), which apart from the shared warning category are now
 unrelated in behaviour.
 
 =item Pluggable keywords

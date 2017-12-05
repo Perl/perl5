@@ -1023,12 +1023,12 @@ my $b = \{};
 my $c = [];
 my $d = \[];
 ####
-# SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
+# SKIP ?$] < 5.010 && "smartmatch and given/whereso not implemented on this Perl version"
 # CONTEXT use feature ':5.10'; no warnings 'experimental::smartmatch';
-# implicit smartmatch in given/when
+# implicit smartmatch in given/whereso
 given ('foo') {
-    when ('bar') { continue; }
-    when ($_ ~~ 'quux') { continue; }
+    whereso ('bar') { continue; }
+    whereso ($_ ~~ 'quux') { continue; }
     0;
 }
 ####
@@ -1511,7 +1511,7 @@ $a[0] = 1;
 CORE::state $x;
 CORE::say $x;
 CORE::given ($x) {
-    CORE::when (3) {
+    CORE::whereso (3) {
         continue;
     }
     next;
@@ -1527,7 +1527,7 @@ use 1;
 CORE::say $_;
 CORE::state $x;
 CORE::given ($x) {
-    CORE::when (3) {
+    CORE::whereso (3) {
         continue;
     }
     next;
@@ -1538,7 +1538,7 @@ CORE::evalbytes '';
 CORE::say $_;
 CORE::state $x;
 CORE::given ($x) {
-    CORE::when (3) {
+    CORE::whereso (3) {
         continue;
     }
     next;
@@ -1554,7 +1554,7 @@ use 1;
 CORE::say $_;
 CORE::state $x;
 CORE::given ($x) {
-    CORE::when (3) {
+    CORE::whereso (3) {
         continue;
     }
     next;
@@ -1567,7 +1567,7 @@ use feature ':default';
 CORE::say $_;
 CORE::state $x;
 CORE::given ($x) {
-    CORE::when (3) {
+    CORE::whereso (3) {
         continue;
     }
     next;
@@ -1598,7 +1598,7 @@ my sub tr;
 my sub unless;
 my sub until;
 my sub use;
-my sub when;
+my sub whereso;
 my sub while;
 CORE::if ($1) { die; }
 CORE::if ($1) { die; }
@@ -1621,7 +1621,7 @@ CORE::unless ($1) { die; }
 CORE::until ($1) { die; }
 die CORE::until $1;
 CORE::use strict;
-CORE::when ($1 ~~ $2) { die; }
+CORE::whereso ($1 ~~ $2) { die; }
 CORE::while ($1) { die; }
 die CORE::while $1;
 ####

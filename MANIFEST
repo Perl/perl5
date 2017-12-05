@@ -5806,7 +5806,7 @@ t/op/ver.t			See if v-strings and the %v format flag work
 t/op/waitpid.t			See if waitpid works
 t/op/wantarray.t		See if wantarray works
 t/op/warn.t			See if warn works
-t/op/when.t			See if when works
+t/op/whereso.t			See if whereso works
 t/op/while.t			See if while loops work
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works

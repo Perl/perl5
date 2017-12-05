@@ -53,7 +53,7 @@
 %token <pval> LABEL
 %token <ival> FORMAT SUB ANONSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
-%token <ival> GIVEN WHEN
+%token <ival> GIVEN WHERESO
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> RELOP EQOP MULOP ADDOP
@@ -378,7 +378,7 @@ barestmt:	PLUGSTMT
 			  $$ = block_end($3, newGIVENOP($4, op_scope($6), 0));
 			  parser->copline = (line_t)$1;
 			}
-	|	WHEN '(' remember mexpr ')' mblock
+	|	WHERESO '(' remember mexpr ')' mblock
 			{ $$ = block_end($3, newWHENOP($4, op_scope($6))); }
 	|	WHILE '(' remember texpr ')' mintro mblock cont
 			{
@@ -531,7 +531,7 @@ sideff	:	error
 	|	expr FOR expr
 			{ $$ = newFOROP(0, NULL, $3, $1, NULL);
 			  parser->copline = (line_t)$2; }
-	|	expr WHEN expr
+	|	expr WHERESO expr
 			{ $$ = newWHENOP($3, op_scope($1)); }
 	;
 

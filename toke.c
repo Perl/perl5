@@ -374,7 +374,7 @@ static struct debug_tokens {
     { UNLESS,		TOKENTYPE_IVAL,		"UNLESS" },
     { UNTIL,		TOKENTYPE_IVAL,		"UNTIL" },
     { USE,		TOKENTYPE_IVAL,		"USE" },
-    { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
+    { WHERESO,		TOKENTYPE_IVAL,		"WHERESO" },
     { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
     { BAREWORD,		TOKENTYPE_OPVAL,	"BAREWORD" },
     { YADAYADA,		TOKENTYPE_IVAL,		"YADAYADA" },
@@ -8844,14 +8844,14 @@ Perl_yylex(pTHX)
 	case KEY_vec:
 	    LOP(OP_VEC,XTERM);
 
-	case KEY_when:
+	case KEY_whereso:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
             Perl_ck_warner_d(aTHX_
                 packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
-                "when is experimental");
-	    OPERATOR(WHEN);
+                "whereso is experimental");
+	    OPERATOR(WHERESO);
 
 	case KEY_while:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)

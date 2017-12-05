@@ -648,7 +648,7 @@ is( $r, "Hello, world!\n", "-E say" );
 
 
 $r = runperl(
-    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; given(undef) {when(!defined) { say q(Hello, world!)"}}']
+    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; given(undef) {whereso(!defined) { say q(Hello, world!)"}}']
 );
 is( $r, "Hello, world!\n", "-E given" );
 

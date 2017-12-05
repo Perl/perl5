@@ -4626,7 +4626,7 @@ PP(pp_leavewhen)
 
     cxix = dopoptoloop(cxstack_ix);
     if (cxix < 0)
-	DIE(aTHX_ "Can't leave \"when\" outside a loop block");
+	DIE(aTHX_ "Can't leave \"whereso\" outside a loop block");
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)
@@ -4664,7 +4664,7 @@ PP(pp_continue)
     
     cxix = dopoptowhen(cxstack_ix); 
     if (cxix < 0)   
-	DIE(aTHX_ "Can't \"continue\" outside a when block");
+	DIE(aTHX_ "Can't \"continue\" outside a whereso block");
 
     if (cxix < cxstack_ix)
         dounwind(cxix);

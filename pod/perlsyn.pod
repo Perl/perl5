@@ -118,7 +118,7 @@ as the last item in a statement.
 
 =head2 Statement Modifiers
 X<statement modifier> X<modifier> X<if> X<unless> X<while>
-X<until> X<when> X<foreach> X<for>
+X<until> X<whereso> X<foreach> X<for>
 
 Any simple statement may optionally be followed by a I<SINGLE> modifier,
 just before the terminating semicolon (or block ending).  The possible
@@ -130,7 +130,7 @@ modifiers are:
     until EXPR
     for LIST
     foreach LIST
-    when EXPR
+    whereso EXPR
 
 The C<EXPR> following the modifier is referred to as the "condition".
 Its truth or falsehood determines how the modifier will behave.
@@ -211,11 +211,11 @@ it.  Future versions of perl might do something different from the
 version of perl you try it out on.  Here be dragons.
 X<my>
 
-The C<when> modifier is an experimental feature that first appeared in
-Perl 5.12, but behaved quite differently from its present form prior
-to Perl 5.28.  To use it, you should include a C<use feature 'switch'>
+The C<whereso> modifier is an experimental feature that first appeared
+with this spelling in Perl 5.28.
+To use it, you should include a C<use feature 'switch'>
 declaration, or a declaration that implies it.  It behaves like the full
-C<when> statement with block, described in L</"Switch Statements"> below.
+C<whereso> statement with block, described in L</"Switch Statements"> below.
 It executes the statement only if the I<EXPR> is true.  If the statement
 executes, control then implicitly jumps to the end of the dynamically
 enclosing loop (usually a C<given> block).
@@ -246,7 +246,7 @@ The following compound statements may be used to control flow:
 
     given (EXPR) BLOCK
 
-    when (EXPR) BLOCK
+    whereso (EXPR) BLOCK
 
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
@@ -267,7 +267,7 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
-The experimental C<given> and C<when> statements are I<not
+The experimental C<given> and C<whereso> statements are I<not
 automatically enabled>; see L</"Switch Statements"> below for how to do
 so, and the attendant caveats.
 
@@ -606,9 +606,9 @@ described immediately below remains experimental.
 
 =head2 Switch Statements
 
-X<switch> X<case> X<given> X<when>
+X<switch> X<case> X<given> X<whereso>
 
-C<given>, C<when>, and related keywords make up an experimental feature
+C<given>, C<whereso>, and related keywords make up an experimental feature
 that first appeared in Perl 5.10, but behaved quite differently from
 its present form prior to Perl 5.28.  To use it, you should declare
 
@@ -621,17 +621,17 @@ example:
     use v5.14;
 
 Under the "switch" feature, Perl gains the experimental keywords C<given>
-and C<when>.  Starting from Perl 5.16, one can
+and C<whereso>.  Starting from Perl 5.16, one can
 prefix the switch keywords with C<CORE::> to access the feature without
 a C<use feature> statement.
 
 The "switch" feature is considered highly experimental; it is subject
-to change with little notice.  Uses of the C<given> and C<when> keywords
+to change with little notice.  Uses of the C<given> and C<whereso> keywords
 will by default warn about their experimental status.  Due to historical
 links between the two features, these warnings are in the same category
 as warnings about the C<~~> (smartmatch) operator being experimental.
 
-The keywords C<given> and C<when> are analogous to C<switch> and C<case>
+The keywords C<given> and C<whereso> are analogous to C<switch> and C<case>
 in C.  They're meant to be used together, but can actually be used
 independently and mixed with other kinds of compound statement.
 
@@ -643,7 +643,7 @@ A C<given> construct even counts as a one-iteration loop for the purposes
 of loop control, so the C<redo> operator can be used to restart its block,
 and C<next> or C<last> can be used to exit the block early.
 
-C<when> evaluates its argument as a truth value.  If the argument
+C<whereso> evaluates its argument as a truth value.  If the argument
 was false then it does not execute its block, and proceeds to the
 following statement.  If the argument was true, it executes the block,
 then implicitly performs a C<next>, jumping to the end of the closest
@@ -654,31 +654,31 @@ rewritten as
 
     use v5.10.1;
     given ($var) {
-        when (/^abc/) { $abc = 1 }
-        when (/^def/) { $def = 1 }
-        when (/^xyz/) { $xyz = 1 }
+        whereso (/^abc/) { $abc = 1 }
+        whereso (/^def/) { $def = 1 }
+        whereso (/^xyz/) { $xyz = 1 }
         $nothing = 1;
     }
 
-Or if you prefer the modifier form of C<when>, it can be written with
+Or if you prefer the modifier form of C<whereso>, it can be written with
 less punctuation as
 
     use v5.14;
     given ($var) {
-        $abc = 1 when /^abc/;
-        $def = 1 when /^def/;
-        $xyz = 1 when /^xyz/;
+        $abc = 1 whereso /^abc/;
+        $def = 1 whereso /^def/;
+        $xyz = 1 whereso /^xyz/;
         $nothing = 1;
     }
 
-You can use the C<continue> keyword to exit a C<when>
+You can use the C<continue> keyword to exit a C<whereso>
 block, proceeding to the following statement.  This is most commonly
 done last thing inside the block, to override the implicit C<next>.
 For example
 
     given($foo) {
-        when (/x/) { say '$foo contains an x'; continue }
-        when (/y/) { say '$foo contains a y'            }
+        whereso (/x/) { say '$foo contains an x'; continue }
+        whereso (/y/) { say '$foo contains a y'            }
         say '$foo does not contain a y';
     }
 
@@ -695,7 +695,7 @@ An empty list as soon as an explicit C<next> or C<last> is encountered.
 =item *
 
 The value of the last evaluated expression of the successful
-C<when> clause, if there happens to be one.
+C<whereso> clause, if there happens to be one.
 
 =item *
 
@@ -706,12 +706,12 @@ condition is true.
 
 In both last cases, the last expression is evaluated in the context that
 was applied to the C<given> block.
-Note that, unlike C<if> and C<unless>, failed C<when> statements always
+Note that, unlike C<if> and C<unless>, failed C<whereso> statements always
 evaluate to an empty list.
 
-On versions of Perl preceding Perl 5.28, C<given> and C<when> behave
+On versions of Perl preceding Perl 5.28, C<given> and C<whereso> behave
 quite differently from their present behaviour.  If your code needs to
-run on older versions, avoid C<given> and C<when>.
+run on older versions, avoid C<given> and C<whereso>.
 
 =head2 Goto
 X<goto>

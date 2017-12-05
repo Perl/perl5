@@ -329,8 +329,8 @@ method_redir	redirect method with known name	ck_null	d.
 method_redir_super	redirect super method with known name	ck_null	d.
 
 entergiven	given()			ck_null		d{
-enterwhen	when()			ck_null		d|
-leavewhen	leave when block	ck_null		1
+enterwhen	whereso()		ck_null		d|
+leavewhen	leave whereso block	ck_null		1
 continue	continue		ck_null		0
 
 # I/O.

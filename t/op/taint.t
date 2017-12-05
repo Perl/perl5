@@ -2400,7 +2400,7 @@ end
     use feature 'switch';
     no warnings 'experimental::smartmatch';
 
-    my @descriptions = ('when', 'given end', 'default');
+    my @descriptions = ('whereso', 'given end', 'default');
 
     for (qw<x y z>) {
 	my $letter = "$_$TAINT";
@@ -2409,8 +2409,8 @@ end
 
 	my $res = do {
 	    given ($_) {
-		when ('x') { $letter }
-		when ('y') { goto leavegiven }
+		whereso ('x') { $letter }
+		whereso ('y') { goto leavegiven }
 		leavegiven:  $letter
 	    }
 	};

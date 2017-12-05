@@ -8789,7 +8789,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 /*
 =for apidoc Am|OP *|newWHENOP|OP *cond|OP *block
 
-Constructs, checks, and returns an op tree expressing a C<when> block.
+Constructs, checks, and returns an op tree expressing a C<whereso> block.
 C<cond> supplies the test expression, and C<block> supplies the block
 that will be executed if the test evaluates to true; they are consumed
 by this function and become part of the constructed op tree.
