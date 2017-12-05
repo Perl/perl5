@@ -1995,7 +1995,7 @@ AnpMd	|SV*	|sv_get_backrefs|NN SV *const sv
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
 Am	|CV*	|newATTRSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
-pX	|CV*	|newATTRSUB_x	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
+pdX	|CV*	|newATTRSUB_x	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
 				 |NULLOK OP *attrs|NULLOK OP *block \
 				 |bool o_is_gv
 Ap	|CV *	|newMYSUB	|I32 floor|NN OP *o|NULLOK OP *proto \

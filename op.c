@@ -9602,6 +9602,85 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     return cv;
 }
 
+/*
+=for apidoc m|CV *|newATTRSUB_x|I32 floor|OP *o|OP *proto|OP *attrs|OP *block|bool o_is_gv
+
+Construct a Perl subroutine, also performing some surrounding jobs.
+
+This function is expected to be called in a Perl compilation context,
+and some aspects of the subroutine are taken from global variables
+associated with compilation.  In particular, C<PL_compcv> represents
+the subroutine that is currently being compiled.  It must be non-null
+when this function is called, and some aspects of the subroutine being
+constructed are taken from it.  The constructed subroutine may actually
+be a reuse of the C<PL_compcv> object, but will not necessarily be so.
+
+If C<block> is null then the subroutine will have no body, and for the
+time being it will be an error to call it.  This represents a forward
+subroutine declaration such as S<C<sub foo ($$);>>.  If C<block> is
+non-null then it provides the Perl code of the subroutine body, which
+will be executed when the subroutine is called.  This body includes
+any argument unwrapping code resulting from a subroutine signature or
+similar.  The pad use of the code must correspond to the pad attached
+to C<PL_compcv>.  The code is not expected to include a C<leavesub> or
+C<leavesublv> op; this function will add such an op.  C<block> is consumed
+by this function and will become part of the constructed subroutine.
+
+C<proto> specifies the subroutine's prototype, unless one is supplied
+as an attribute (see below).  If C<proto> is null, then the subroutine
+will not have a prototype.  If C<proto> is non-null, it must point to a
+C<const> op whose value is a string, and the subroutine will have that
+string as its prototype.  If a prototype is supplied as an attribute, the
+attribute takes precedence over C<proto>, but in that case C<proto> should
+preferably be null.  In any case, C<proto> is consumed by this function.
+
+C<attrs> supplies attributes to be applied the subroutine.  A handful of
+attributes take effect by built-in means, being applied to C<PL_compcv>
+immediately when seen.  Other attributes are collected up and attached
+to the subroutine by this route.  C<attrs> may be null to supply no
+attributes, or point to a C<const> op for a single attribute, or point
+to a C<list> op whose children apart from the C<pushmark> are C<const>
+ops for one or more attributes.  Each C<const> op must be a string,
+giving the attribute name optionally followed by parenthesised arguments,
+in the manner in which attributes appear in Perl source.  The attributes
+will be applied to the sub by this function.  C<attrs> is consumed by
+this function.
+
+If C<o_is_gv> is false and C<o> is null, then the subroutine will
+be anonymous.  If C<o_is_gv> is false and C<o> is non-null, then C<o>
+must point to a C<const> op, which will be consumed by this function,
+and its string value supplies a name for the subroutine.  The name may
+be qualified or unqualified, and if it is unqualified then a default
+stash will be selected in some manner.  If C<o_is_gv> is true, then C<o>
+doesn't point to an C<OP> at all, but is instead a cast pointer to a C<GV>
+by which the subroutine will be named.
+
+If there is already a subroutine of the specified name, then the new
+sub will either replace the existing one in the glob or be merged with
+the existing one.  A warning may be generated about redefinition.
+
+If the subroutine has one of a few special names, such as C<BEGIN> or
+C<END>, then it will be claimed by the appropriate queue for automatic
+running of phase-related subroutines.  In this case the relevant glob will
+be left not containing any subroutine, even if it did contain one before.
+In the case of C<BEGIN>, the subroutine will be executed and the reference
+to it disposed of before this function returns.
+
+The function returns a pointer to the constructed subroutine.  If the sub
+is anonymous then ownership of one counted reference to the subroutine
+is transferred to the caller.  If the sub is named then the caller does
+not get ownership of a reference.  In most such cases, where the sub
+has a non-phase name, the sub will be alive at the point it is returned
+by virtue of being contained in the glob that names it.  A phase-named
+subroutine will usually be alive by virtue of the reference owned by the
+phase's automatic run queue.  But a C<BEGIN> subroutine, having already
+been executed, will quite likely have been destroyed already by the
+time this function returns, making it erroneous for the caller to make
+any use of the returned pointer.  It is the caller's responsibility to
+ensure that it knows which of these situations applies.
+
+=cut
+*/
 
 /* _x = extended */
 CV *
