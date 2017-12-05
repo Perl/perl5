@@ -2160,10 +2160,10 @@ PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, OP* sv, OP* expr, OP* block, OP
 #define PERL_ARGS_ASSERT_NEWFOROP	\
 	assert(expr)
 
-PERL_CALLCONV OP*	Perl_newGIVENOP(pTHX_ OP* cond, OP* block, PADOFFSET defsv_off)
+PERL_CALLCONV OP*	Perl_newGIVENOP(pTHX_ OP* topic, OP* block, PADOFFSET defsv_off)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWGIVENOP	\
-	assert(cond); assert(block)
+	assert(topic); assert(block)
 
 PERL_CALLCONV GP *	Perl_newGP(pTHX_ GV *const gv);
 #define PERL_ARGS_ASSERT_NEWGP	\

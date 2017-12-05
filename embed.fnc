@@ -1097,7 +1097,7 @@ Apd	|CV*	|newCONSTSUB_flags|NULLOK HV* stash \
 				  |U32 flags|NULLOK SV* sv
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 ApdR	|OP*	|newFOROP	|I32 flags|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
-ApdR	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
+ApdR	|OP*	|newGIVENOP	|NN OP* topic|NN OP* block|PADOFFSET defsv_off
 ApdR	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
 pM	|LOGOP*	|alloc_LOGOP	|I32 type|NULLOK OP *first|NULLOK OP *other
 ApdR	|OP*	|newLOOPEX	|I32 type|NN OP* label

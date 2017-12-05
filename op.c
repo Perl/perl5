@@ -8748,10 +8748,10 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 }
 
 /*
-=for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
+=for apidoc Am|OP *|newGIVENOP|OP *topic|OP *block|PADOFFSET defsv_off
 
 Constructs, checks, and returns an op tree expressing a C<given> block.
-C<cond> supplies the expression to whose value C<$_> will be locally
+C<topic> supplies the expression to whose value C<$_> will be locally
 aliased, and C<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
 C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
@@ -8760,7 +8760,7 @@ C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
 */
 
 OP *
-Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
+Perl_newGIVENOP(pTHX_ OP *topic, OP *block, PADOFFSET defsv_off)
 {
     OP *enterop, *leaveop;
     PERL_ARGS_ASSERT_NEWGIVENOP;
@@ -8769,15 +8769,15 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 
     NewOpSz(1101, enterop, sizeof(LOOP));
     OpTYPE_set(enterop, OP_ENTERGIVEN);
-    cLOOPx(enterop)->op_first = scalar(cond);
+    cLOOPx(enterop)->op_first = scalar(topic);
     cLOOPx(enterop)->op_last = block;
-    OpMORESIB_set(cond, block);
+    OpMORESIB_set(topic, block);
     OpLASTSIB_set(block, enterop);
     enterop->op_flags = OPf_KIDS;
 
     leaveop = newBINOP(OP_LEAVELOOP, 0, enterop, newOP(OP_NULL, 0));
-    leaveop->op_next = LINKLIST(cond);
-    cond->op_next = enterop;
+    leaveop->op_next = LINKLIST(topic);
+    topic->op_next = enterop;
     enterop = CHECKOP(OP_ENTERGIVEN, enterop);
     cLOOPx(enterop)->op_redoop = enterop->op_next = LINKLIST(block);
     cLOOPx(enterop)->op_lastop = cLOOPx(enterop)->op_nextop = block->op_next =
