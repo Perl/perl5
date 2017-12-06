@@ -10485,7 +10485,7 @@ vms_execfree(struct dsc$descriptor_s *vmscmd)
 static char *
 setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
 {
-  char *junk, *tmps = NULL;
+  char *junk, *tmps = NULL, *cmd;
   size_t cmdlen = 0;
   size_t rlen;
   SV **idx;
@@ -10506,22 +10506,23 @@ setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
       cmdlen += rlen ? rlen + 1 : 0;
     }
   }
-  Newx(PL_Cmd, cmdlen+1, char);
+  Newx(cmd, cmdlen+1, char);
+  SAVEFREEPV(cmd);
 
   if (tmps && *tmps) {
-    my_strlcpy(PL_Cmd, tmps, cmdlen + 1);
+    my_strlcpy(cmd, tmps, cmdlen + 1);
     mark++;
   }
-  else *PL_Cmd = '\0';
+  else *cmd = '\0';
   while (++mark <= sp) {
     if (*mark) {
       char *s = SvPVx(*mark,n_a);
       if (!*s) continue;
-      if (*PL_Cmd) my_strlcat(PL_Cmd, " ", cmdlen+1);
-      my_strlcat(PL_Cmd, s, cmdlen+1);
+      if (*cmd) my_strlcat(cmd, " ", cmdlen+1);
+      my_strlcat(cmd, s, cmdlen+1);
     }
   }
-  return PL_Cmd;
+  return cmd;
 
 }  /* end of setup_argstr() */
 
@@ -10948,9 +10949,10 @@ Perl_vms_do_aexec(pTHX_ SV *really,SV **mark,SV **sp)
   }
                                            /* no vfork - act VMSish */
   if (sp > mark) {
+    ENTER;
     cmd = setup_argstr(aTHX_ really,mark,sp);
     exec_sts = vms_do_exec(cmd);
-    Safefree(cmd);  /* Clean up from setup_argstr() */
+    LEAVE;
     return exec_sts;
   }
 
@@ -11039,8 +11041,10 @@ Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)
     else
         flags = 0;
 
+    ENTER;
     cmd = setup_argstr(aTHX_ really, mark, sp);
     sts = do_spawn2(aTHX_ cmd, flags);
+    LEAVE;
     /* pp_sys will clean up cmd */
     return sts;
   }
@@ -11074,9 +11078,6 @@ int
 do_spawn2(pTHX_ const char *cmd, int flags)
 {
   unsigned long int sts, substs;
-
-  /* The caller of this routine expects to Safefree(PL_Cmd) */
-  Newx(PL_Cmd,10,char);
 
   TAINT_ENV();
   TAINT_PROPER("spawn");

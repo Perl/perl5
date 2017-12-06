@@ -90,11 +90,13 @@ int
 do_spawn (char *cmd)
 {
     dTHX;
-    char const **a;
+    char const **argv, **a;
     char *s;
     char const *metachars = "$&*(){}[]'\";\\?>|<~`\n";
     const char *command[4];
+    int result;
 
+    ENTER;
     while (*cmd && isSPACE(*cmd))
 	cmd++;
 
@@ -127,13 +129,16 @@ do_spawn (char *cmd)
 	    command[2] = cmd;
 	    command[3] = NULL;
 
-	    return do_spawnvp("sh",command);
+	    result = do_spawnvp("sh",command);
+	    goto leave;
 	}
 
-    Newx (PL_Argv, (s-cmd)/2+2, const char*);
-    PL_Cmd=savepvn (cmd,s-cmd);
-    a=PL_Argv;
-    for (s=PL_Cmd; *s;) {
+    Newx (argv, (s-cmd)/2+2, const char*);
+    SAVEFREEPV(argv);
+    cmd=savepvn (cmd,s-cmd);
+    SAVEFREEPV(cmd);
+    a=argv;
+    for (s=cmd; *s;) {
 	while (*s && isSPACE (*s)) s++;
 	if (*s)
 	    *(a++)=s;
@@ -142,10 +147,13 @@ do_spawn (char *cmd)
 	    *s++='\0';
     }
     *a = (char*)NULL;
-    if (!PL_Argv[0])
-        return -1;
-
-    return do_spawnvp(PL_Argv[0],(const char * const *)PL_Argv);
+    if (!argv[0])
+        result = -1;
+    else
+	result = do_spawnvp(argv[0],(const char * const *)argv);
+leave:
+    LEAVE;
+    return result;
 }
 
 #if (CYGWIN_VERSION_API_MINOR >= 181)

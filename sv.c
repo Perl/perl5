@@ -15174,8 +15174,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_filemode		= proto_perl->Ifilemode;
     PL_lastfd		= proto_perl->Ilastfd;
     PL_oldname		= proto_perl->Ioldname;		/* XXX not quite right */
-    PL_Argv		= NULL;
-    PL_Cmd		= NULL;
     PL_gensym		= proto_perl->Igensym;
 
     PL_laststatval	= proto_perl->Ilaststatval;

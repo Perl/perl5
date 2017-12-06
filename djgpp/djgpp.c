@@ -150,9 +150,10 @@ do_aspawn (pTHX_ SV *really,SV **mark,SV **sp)
 int
 do_spawn2 (pTHX_ char *cmd,int execf)
 {
-    char **a,*s,*shell,*metachars;
-    int  rc,unixysh;
+    char **argv,**a,*s,*shell,*metachars;
+    int  rc,unixysh,result;
 
+    ENTER;
     if ((shell=getenv("SHELL"))==NULL && (shell=getenv("COMSPEC"))==NULL)
     	shell="c:\\command.com" EXTRA;
 
@@ -189,14 +190,18 @@ do_spawn2 (pTHX_ char *cmd,int execf)
 	    }
 doshell:
 	    if (execf==EXECF_EXEC)
-                return convretcode (execl (shell,shell,unixysh ? "-c" : "/c",cmd,NULL),cmd,execf);
-            return convretcode (system (cmd),cmd,execf);
+                result = convretcode (execl (shell,shell,unixysh ? "-c" : "/c",cmd,NULL),cmd,execf);
+	    else
+		result = convretcode (system (cmd),cmd,execf);
+	    goto leave;
 	}
 
-    Newx (PL_Argv,(s-cmd)/2+2,char*);
-    PL_Cmd=savepvn (cmd,s-cmd);
-    a=PL_Argv;
-    for (s=PL_Cmd; *s;) {
+    Newx (argv,(s-cmd)/2+2,char*);
+    SAVEFREEPV(argv);
+    cmd=savepvn (cmd,s-cmd);
+    SAVEFREEPV(cmd);
+    a=argv;
+    for (s=cmd; *s;) {
 	while (*s && isSPACE (*s)) s++;
 	if (*s)
 	    *(a++)=s;
@@ -205,14 +210,19 @@ doshell:
 	    *s++='\0';
     }
     *a=NULL;
-    if (!PL_Argv[0])
-        return -1;
+    if (!argv[0]) {
+        result = -1;
+	goto leave;
+    }
 
     if (execf==EXECF_EXEC)
-        rc=execvp (PL_Argv[0],PL_Argv);
+        rc=execvp (argv[0],argv);
     else
-        rc=spawnvp (P_WAIT,PL_Argv[0],PL_Argv);
-    return convretcode (rc,PL_Argv[0],execf);
+        rc=spawnvp (P_WAIT,argv[0],argv);
+    result = convretcode (rc,argv[0],execf);
+leave:
+    LEAVE;
+    return result;
 }
 
 int

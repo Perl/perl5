@@ -437,7 +437,6 @@ Ap	|int	|do_spawn_nowait|NN char* cmd
 #if !defined(WIN32)
 p	|bool|do_exec3	|NN const char *incmd|int fd|int do_report
 #endif
-p	|void	|do_execfree
 #if defined(PERL_IN_DOIO_C)
 s	|void	|exec_failed	|NN const char *cmd|int fd|int do_report
 #endif

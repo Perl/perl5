@@ -744,7 +744,6 @@ PERL_CALLCONV void	Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padl
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_DO_EOF	\
 	assert(gv)
-PERL_CALLCONV void	Perl_do_execfree(pTHX);
 PERL_CALLCONV void	Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv);
 #define PERL_ARGS_ASSERT_DO_GV_DUMP	\
 	assert(file); assert(name)
