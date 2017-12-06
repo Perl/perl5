@@ -4903,12 +4903,12 @@ static SV *retrieve_hook_common(pTHX_ stcxt_t *cxt, const char *cname, int large
     else
         GETMARK(len2);
 
-    frozen = NEWSV(10002, len2);
+    frozen = NEWSV(10002, len2 ? len2 : 1);
     if (len2) {
         SAFEREAD(SvPVX(frozen), len2, frozen);
-        SvCUR_set(frozen, len2);
-        *SvEND(frozen) = '\0';
     }
+    SvCUR_set(frozen, len2);
+    *SvEND(frozen) = '\0';
     (void) SvPOK_only(frozen);		/* Validates string pointer */
     if (cxt->s_tainted)			/* Is input source tainted? */
         SvTAINT(frozen);
