@@ -22,9 +22,18 @@ names and their release dates.
  ======================================================================
  5.8.8   2006-Jan-31
                      RHEL 5 / CentOS 5                      2007-Mar-15
+ 5.10.0  2007-Dec-18
+                     Debian 5.0 (Lenny)                     2009-Feb-14
  5.10.1  2009-Aug-22
                      RHEL 6 / CentOS 6                      2010-Nov-10
+                     Debian 6.0 (Squeeze)                   2011-Feb-06
+ 5.14.2  2011-Sep-26
+                     Debian 7.0 (Wheezy)                    2013-May-07
  5.16.3  2013-Mar-11
                      RHEL 7 / CentOS 7                      2013-Dec-11
+ 5.20.2  2015-Feb-14
+                     Debian 8.0 (Jessie)                    2015-Apr-25
+ 5.24.1  2017-Jan-14
+                     Debian 9.0 (Stretch)                   2017-Jun-17
 
 =cut
