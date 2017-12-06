@@ -364,7 +364,7 @@ string/length pair.
 Like C<hv_fetch>, but takes a literal string instead of a
 string/length pair.
 
-=for apidoc Am|SV**|hv_stores|HV* tb|"literal string" key|NULLOK SV* val
+=for apidoc Am|SV**|hv_stores|HV* tb|"literal string" key|SV* val
 Like C<hv_store>, but takes a literal string instead of a
 string/length pair
 and omits the hash parameter.

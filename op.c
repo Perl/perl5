@@ -10440,7 +10440,7 @@ Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
 }
 
 /*
-=for apidoc m|CV *|newXS_len_flags|const char *name|STRLEN len|XSUBADDR_t subaddr|const char *const filename|NULLOK const char *const proto|NULLOK SV **const_svp|U32 flags
+=for apidoc m|CV *|newXS_len_flags|const char *name|STRLEN len|XSUBADDR_t subaddr|const char *const filename|const char *const proto|SV **const_svp|U32 flags
 
 Construct an XS subroutine, also performing some surrounding jobs.
 

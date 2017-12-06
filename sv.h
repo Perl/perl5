@@ -1649,7 +1649,7 @@ Like C<sv_setsv> but doesn't process magic.
 =for apidoc Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Like C<sv_catsv> but doesn't process magic.
 
-=for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|NN SV *sv
+=for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|SV *sv
 
 Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 
@@ -2180,7 +2180,7 @@ struct clone_params {
 };
 
 /*
-=for apidoc Am|SV*|newSVpvn_utf8|NULLOK const char* s|STRLEN len|U32 utf8
+=for apidoc Am|SV*|newSVpvn_utf8|const char* s|STRLEN len|U32 utf8
 
 Creates a new SV and copies a string (which may contain C<NUL> (C<\0>)
 characters) into it.  If C<utf8> is true, calls
@@ -2202,7 +2202,7 @@ Creates a new SV containing the pad name.
 #define newSVpadname(pn) newSVpvn_utf8(PadnamePV(pn), PadnameLEN(pn), TRUE)
 
 /*
-=for apidoc Am|void|SvOOK_offset|NN SV*sv|STRLEN len
+=for apidoc Am|void|SvOOK_offset|SV*sv|STRLEN len
 
 Reads into C<len> the offset from C<SvPVX> back to the true start of the
 allocated buffer, which will be non-zero if C<sv_chop> has been used to
