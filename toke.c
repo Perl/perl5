@@ -11143,7 +11143,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                             }
 #else /* HEXFP_NV */
                             if (accumulate) {
-                                nv_mult /= 16.0;
+                                nv_mult /= nvshift[shift];
                                 if (nv_mult > 0.0)
                                     hexfp_nv += b * nv_mult;
                                 else
