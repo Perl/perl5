@@ -118,7 +118,7 @@ as the last item in a statement.
 
 =head2 Statement Modifiers
 X<statement modifier> X<modifier> X<if> X<unless> X<while>
-X<until> X<whereso> X<foreach> X<for>
+X<until> X<whereis> X<whereso> X<foreach> X<for>
 
 Any simple statement may optionally be followed by a I<SINGLE> modifier,
 just before the terminating semicolon (or block ending).  The possible
@@ -130,6 +130,7 @@ modifiers are:
     until EXPR
     for LIST
     foreach LIST
+    whereis EXPR
     whereso EXPR
 
 The C<EXPR> following the modifier is referred to as the "condition".
@@ -211,12 +212,13 @@ it.  Future versions of perl might do something different from the
 version of perl you try it out on.  Here be dragons.
 X<my>
 
-The C<whereso> modifier is an experimental feature that first appeared
-with this spelling in Perl 5.28.
-To use it, you should include a C<use feature 'switch'>
-declaration, or a declaration that implies it.  It behaves like the full
-C<whereso> statement with block, described in L</"Switch Statements"> below.
-It executes the statement only if the I<EXPR> is true.  If the statement
+The C<whereis> and C<whereso> modifiers are an experimental feature
+that first appeared with this spelling in Perl 5.28.  To use them, you
+should include a C<use feature 'switch'> declaration, or a declaration
+that implies it.  They behave like the full C<whereis> or C<whereso>
+statement with block, described in L</"Switch Statements"> below.
+They executes the statement only if the I<EXPR> is true for C<whereso>,
+or C<$_> smartmatches the I<EXPR> for C<whereis>.  If the statement
 executes, control then implicitly jumps to the end of the dynamically
 enclosing loop (usually a C<given> block).
 
@@ -246,6 +248,7 @@ The following compound statements may be used to control flow:
 
     given (EXPR) BLOCK
 
+    whereis (EXPR) BLOCK
     whereso (EXPR) BLOCK
 
     LABEL while (EXPR) BLOCK
@@ -267,7 +270,7 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
-The experimental C<given> and C<whereso> statements are I<not
+The experimental C<given>, C<whereis>, and C<whereso> statements are I<not
 automatically enabled>; see L</"Switch Statements"> below for how to do
 so, and the attendant caveats.
 
@@ -606,7 +609,7 @@ described immediately below remains experimental.
 
 =head2 Switch Statements
 
-X<switch> X<case> X<given> X<whereso>
+X<switch> X<case> X<given> X<whereis> X<whereso>
 
 C<given>, C<whereso>, and related keywords make up an experimental feature
 that first appeared in Perl 5.10, but behaved quite differently from
@@ -620,18 +623,19 @@ example:
 
     use v5.14;
 
-Under the "switch" feature, Perl gains the experimental keywords C<given>
-and C<whereso>.  Starting from Perl 5.16, one can
+Under the "switch" feature, Perl gains the experimental keywords C<given>,
+C<whereis>, and C<whereso>.  Starting from Perl 5.16, one can
 prefix the switch keywords with C<CORE::> to access the feature without
 a C<use feature> statement.
 
 The "switch" feature is considered highly experimental; it is subject
-to change with little notice.  Uses of the C<given> and C<whereso> keywords
-will by default warn about their experimental status.  Due to historical
-links between the two features, these warnings are in the same category
-as warnings about the C<~~> (smartmatch) operator being experimental.
+to change with little notice.  Uses of the C<given>, C<whereis>, and
+C<whereso> keywords will by default warn about their experimental status.
+These warnings are in the same category as warnings about the C<~~>
+(smartmatch) operator being experimental.
 
-The keywords C<given> and C<whereso> are analogous to C<switch> and C<case>
+The keywords C<given> and C<whereis> or C<whereso>
+are analogous to C<switch> and C<case>
 in C.  They're meant to be used together, but can actually be used
 independently and mixed with other kinds of compound statement.
 
@@ -648,6 +652,14 @@ was false then it does not execute its block, and proceeds to the
 following statement.  If the argument was true, it executes the block,
 then implicitly performs a C<next>, jumping to the end of the closest
 dynamically enclosing C<given> block or other kind of loop.
+
+C<whereis> evaluates its argument and uses it as a smartmatch object,
+checking whether C<$_> matches it.  If C<$_> did not match then it does
+not execute its block, and proceeds to the following statement.  If C<$_>
+did match, it executes the block, then implicitly performs a C<next>,
+jumping to the end of the closest dynamically enclosing C<given> block
+or other kind of loop.  This is exactly like C<whereso>, except for the
+implicit use of smartmatch.
 
 Putting this together, the code in the previous section could be
 rewritten as
@@ -671,7 +683,7 @@ less punctuation as
         $nothing = 1;
     }
 
-You can use the C<continue> keyword to exit a C<whereso>
+You can use the C<continue> keyword to exit a C<whereis> or C<whereso>
 block, proceeding to the following statement.  This is most commonly
 done last thing inside the block, to override the implicit C<next>.
 For example
@@ -695,7 +707,7 @@ An empty list as soon as an explicit C<next> or C<last> is encountered.
 =item *
 
 The value of the last evaluated expression of the successful
-C<whereso> clause, if there happens to be one.
+C<whereis> or C<whereso> clause, if there happens to be one.
 
 =item *
 
@@ -706,12 +718,13 @@ condition is true.
 
 In both last cases, the last expression is evaluated in the context that
 was applied to the C<given> block.
-Note that, unlike C<if> and C<unless>, failed C<whereso> statements always
+Note that, unlike C<if> and C<unless>,
+failed C<whereis>/C<whereso> statements always
 evaluate to an empty list.
 
-On versions of Perl preceding Perl 5.28, C<given> and C<whereso> behave
-quite differently from their present behaviour.  If your code needs to
-run on older versions, avoid C<given> and C<whereso>.
+On versions of Perl preceding Perl 5.28, C<given> and the related keywords
+behave quite differently from their present behaviour.  If your code needs
+to run on older versions, avoid C<given>, C<whereis>, and C<whereso>.
 
 =head2 Goto
 X<goto>

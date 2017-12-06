@@ -379,7 +379,13 @@ barestmt:	PLUGSTMT
 			  parser->copline = (line_t)$1;
 			}
 	|	WHERESO '(' remember mexpr ')' mblock
-			{ $$ = block_end($3, newWHERESOOP($4, op_scope($6))); }
+			{
+			  OP *cond = $4;
+			  if ($1)
+			    cond = newBINOP(OP_SMARTMATCH, 0, newDEFSVOP(),
+					    scalar(cond));
+			  $$ = block_end($3, newWHERESOOP(cond, op_scope($6)));
+			}
 	|	WHILE '(' remember texpr ')' mintro mblock cont
 			{
 			  $$ = block_end($3,
@@ -532,7 +538,13 @@ sideff	:	error
 			{ $$ = newFOROP(0, NULL, $3, $1, NULL);
 			  parser->copline = (line_t)$2; }
 	|	expr WHERESO expr
-			{ $$ = newWHERESOOP($3, op_scope($1)); }
+			{
+			  OP *cond = $3;
+			  if ($2)
+			    cond = newBINOP(OP_SMARTMATCH, 0, newDEFSVOP(),
+					    scalar(cond));
+			  $$ = newWHERESOOP(cond, op_scope($1));
+			}
 	;
 
 /* else and elsif blocks */

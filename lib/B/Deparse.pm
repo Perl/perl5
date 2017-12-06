@@ -2246,6 +2246,7 @@ my %feature_keywords = (
     state   => 'state',
     say     => 'say',
     given   => 'switch',
+    whereis => 'switch',
     whereso => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
@@ -2539,14 +2540,28 @@ sub pp_lock { unop(@_, "lock") }
 
 sub pp_continue { unop(@_, "continue"); }
 
+sub _op_is_defsv {
+    my($self, $op) = @_;
+    $op->name eq "null" && !null($op->first) && null($op->first->sibling)
+	and $op = $op->first;
+    $op->name eq "gvsv" && $self->gv_name($self->gv_or_padgv($op)) eq "_";
+}
+
 sub pp_leavewhereso {
     my($self, $op, $cx) = @_;
-    my $whereso = $self->keyword("whereso");
     my $enterop = $op->first;
     my $cond = $enterop->first;
+    my $block = $cond->sibling;
+    my $keyword = "whereso";
+    if ($cond->name eq "smartmatch" && $self->{expand} < 2 &&
+		$self->_op_is_defsv($cond->first)) {
+	$cond = $cond->last;
+	$keyword = "whereis";
+    }
     my $cond_str = $self->deparse($cond, 1);
-    my $block = $self->deparse($cond->sibling, 0);
-    return "$whereso ($cond_str) {\n\t$block\n\b}\cK";
+    $keyword = $self->keyword($keyword);
+    $block = $self->deparse($block, 0);
+    return "$keyword ($cond_str) {\n\t$block\n\b}\cK";
 }
 
 sub pp_exists {

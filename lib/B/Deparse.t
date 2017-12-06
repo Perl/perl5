@@ -1028,7 +1028,8 @@ my $d = \[];
 # implicit smartmatch in given/whereso
 given ('foo') {
     whereso ('bar') { continue; }
-    whereso ($_ ~~ 'quux') { continue; }
+    whereso ($_ == 3) { continue; }
+    whereis ('quux') { continue; }
     0;
 }
 ####
@@ -1514,6 +1515,9 @@ CORE::given ($x) {
     CORE::whereso (3) {
         continue;
     }
+    CORE::whereis (5) {
+        continue;
+    }
     next;
 }
 CORE::evalbytes '';
@@ -1530,6 +1534,9 @@ CORE::given ($x) {
     CORE::whereso (3) {
         continue;
     }
+    CORE::whereis (5) {
+        continue;
+    }
     next;
 }
 CORE::evalbytes '';
@@ -1539,6 +1546,9 @@ CORE::say $_;
 CORE::state $x;
 CORE::given ($x) {
     CORE::whereso (3) {
+        continue;
+    }
+    CORE::whereis (5) {
         continue;
     }
     next;
@@ -1557,6 +1567,9 @@ CORE::given ($x) {
     CORE::whereso (3) {
         continue;
     }
+    CORE::whereis (5) {
+        continue;
+    }
     next;
 }
 CORE::evalbytes '';
@@ -1568,6 +1581,9 @@ CORE::say $_;
 CORE::state $x;
 CORE::given ($x) {
     CORE::whereso (3) {
+        continue;
+    }
+    CORE::whereis (5) {
         continue;
     }
     next;
@@ -1598,6 +1614,7 @@ my sub tr;
 my sub unless;
 my sub until;
 my sub use;
+my sub whereis;
 my sub whereso;
 my sub while;
 CORE::if ($1) { die; }
@@ -1621,6 +1638,7 @@ CORE::unless ($1) { die; }
 CORE::until ($1) { die; }
 die CORE::until $1;
 CORE::use strict;
+CORE::whereis (5) { die; }
 CORE::whereso ($1 ~~ $2) { die; }
 CORE::while ($1) { die; }
 die CORE::while $1;

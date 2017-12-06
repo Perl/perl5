@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 252;
+plan tests => 253;
 
 while (<DATA>) {
     chomp;
@@ -276,6 +276,7 @@ wait ()
 waitpid ($$)
 wantarray ()
 warn (@)
+whereis undef
 whereso undef
 while undef
 write (;*)

@@ -1156,7 +1156,8 @@ like $@, qr'^Undefined format "STDOUT" called',
                   e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
-                  AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|ereso)
+                  AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)
+		  |wh(?:ile|ere(?:is|so))
                   |(?:ou?|t)r|m(?:ap|y)?|UNITCHECK|q[qrwx]?|x(?:or)?|DEST
                   ROY|BEGIN|INIT|and|cmp|if|y)\z/x;
       $tests ++;

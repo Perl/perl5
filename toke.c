@@ -8844,13 +8844,15 @@ Perl_yylex(pTHX)
 	case KEY_vec:
 	    LOP(OP_VEC,XTERM);
 
+	case KEY_whereis:
 	case KEY_whereso:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
-	    pl_yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = tmp == KEY_whereis;
+	    /* diag_listed_as: whereso is experimental */
             Perl_ck_warner_d(aTHX_
                 packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
-                "whereso is experimental");
+                "%" UTF8f " is experimental", UTF8fARG(UTF, len, PL_tokenbuf));
 	    OPERATOR(WHERESO);
 
 	case KEY_while:

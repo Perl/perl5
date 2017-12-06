@@ -378,6 +378,7 @@ my %not_tested = map { $_ => 1} qw(
     unless
     until
     use
+    whereis
     whereso
     while
     y

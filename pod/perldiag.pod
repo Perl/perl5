@@ -824,7 +824,8 @@ but then $foo no longer contains a glob.
 
 =item Can't "continue" outside a whereso block
 
-(F) You called C<continue>, but you're not inside a C<whereso> block.
+(F) You called C<continue>, but you're not inside a C<whereis> or
+C<whereso> block.
 
 =item Can't create pipe mailbox
 
@@ -1078,13 +1079,14 @@ L<perlfunc/last>.
 
 =item Can't leave "whereso" outside a loop block
 
-(F) Control reached the end of a C<whereso> block that isn't inside any
-loop (including a C<given> block).  An implicit C<next> occurs here,
-which requires a loop to jump to.  You probably wanted the C<whereso> to be
-inside a C<given> block.  Note that you won't get this error if the match
-controlling the C<whereso> fails, or if you use an explicit C<continue> to
-avoid reaching the end of the block.  But if you rely on not reaching the
-implicit C<next> then you probably didn't want C<whereso>, but rather C<if>.
+(F) Control reached the end of a C<whereis> or C<whereso> block that
+isn't inside any loop (including a C<given> block).  An implicit C<next>
+occurs here, which requires a loop to jump to.  You probably wanted the
+C<whereis> or C<whereso> to be inside a C<given> block.  Note that you
+won't get this error if the match controlling the C<whereis> or C<whereso>
+fails, or if you use an explicit C<continue> to avoid reaching the end
+of the block.  But if you rely on not reaching the implicit C<next>
+then you probably didn't want C<whereis> or C<whereso>, but rather C<if>.
 
 =item Can't linearize anonymous symbol table
 
@@ -7413,6 +7415,12 @@ but in actual fact, you got
     rand(+5);
 
 So put in parentheses to say what you really mean.
+
+=item whereis is experimental
+
+(S experimental::smartmatch) C<whereis> is experimental, and its behavior
+may change or it may even be removed in any future release of perl.
+See the explanation under L<perlsyn/Switch Statements>.
 
 =item whereso is experimental
 
