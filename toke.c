@@ -10997,6 +10997,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		  digit:
 		    just_zero = FALSE;
 		    if (!overflowed) {
+			assert(shift >= 0);
 			x = u << shift;	/* make room for the digit */
 
                         total_bits += shift;
@@ -11086,6 +11087,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                 if (significant_bits < NV_MANT_DIG) {
                                     /* We are in the long "run" of xdigits,
                                      * accumulate the full four bits. */
+				    assert(shift >= 0);
                                     hexfp_uquad <<= shift;
                                     hexfp_uquad |= b;
                                     hexfp_frac_bits += shift;
@@ -11098,7 +11100,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                       significant_bits - NV_MANT_DIG;
                                     if (tail <= 0)
                                        tail += shift;
+				    assert(tail >= 0);
                                     hexfp_uquad <<= tail;
+				    assert((shift - tail) >= 0);
                                     hexfp_uquad |= b >> (shift - tail);
                                     hexfp_frac_bits += tail;
 
