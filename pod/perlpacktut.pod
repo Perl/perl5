@@ -799,7 +799,7 @@ C<A4> or C<Z*>:
    my $txt = unpack( 'A4/A*', $buf );
 
 C</> is not implemented in Perls before 5.6, so if your code is required to
-work on older Perls you'll need to C<unpack( 'Z* Z* C')> to get the length,
+work on ancient Perls you'll need to C<unpack( 'Z* Z* C')> to get the length,
 then use it to make a new unpack string. For example
 
    # pack a message: ASCIIZ, ASCIIZ, length, string, byte

@@ -2025,8 +2025,8 @@ The last example should print:
 Notice that the final match matched C<q> instead of C<p>, which a match
 without the C<\G> anchor would have done.  Also note that the final match
 did not update C<pos>.  C<pos> is only updated on a C</g> match.  If the
-final match did indeed match C<p>, it's a good bet that you're running a
-very old (pre-5.6.0) version of Perl.
+final match did indeed match C<p>, it's a good bet that you're running an
+ancient (pre-5.6.0) version of Perl.
 
 A useful idiom for C<lex>-like scanners is C</\G.../gc>.  You can
 combine several regexps like this to process a string part-by-part,

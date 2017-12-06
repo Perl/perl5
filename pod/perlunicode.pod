@@ -681,7 +681,7 @@ A complete list of scripts and their shortcuts is in L<perluniprops>.
 
 =head3 B<Use of the C<"Is"> Prefix>
 
-For backward compatibility (with Perl 5.6), all properties writable
+For backward compatibility (with ancient Perl 5.6), all properties writable
 without using the compound form mentioned
 so far may have C<Is> or C<Is_> prepended to their name, so C<\P{Is_Lu}>, for
 example, is equal to C<\P{Lu}>, and C<\p{IsScript:Arabic}> is equal to
