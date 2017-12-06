@@ -2047,7 +2047,7 @@ some such.
 
 =item (Did you mean "local" instead of "our"?)
 
-(W misc) Remember that "our" does not localize the declared global
+(W shadow) Remember that "our" does not localize the declared global
 variable.  You have declared it again in the same lexical scope, which
 seems superfluous.
 
@@ -4402,7 +4402,7 @@ have a specific default.  You probably want "$a = undef".
 
 =item "our" variable %s redeclared
 
-(W misc) You seem to have already declared the same global once before
+(W shadow) You seem to have already declared the same global once before
 in the current lexical scope.
 
 =item Out of memory!
@@ -5797,7 +5797,7 @@ being executed, so its &a is not available for capture.
 
 =item "%s" subroutine &%s masks earlier declaration in same %s
 
-(W misc) A "my" or "state" subroutine has been redeclared in the
+(W shadow) A "my" or "state" subroutine has been redeclared in the
 current scope or statement, effectively eliminating all access to
 the previous instance.  This is almost always a typographical error.
 Note that the earlier subroutine will still exist until the end of
@@ -7326,7 +7326,7 @@ See L<re>.
 
 =item "%s" variable %s masks earlier declaration in same %s
 
-(W misc) A "my", "our" or "state" variable has been redeclared in the
+(W shadow) A "my", "our" or "state" variable has been redeclared in the
 current scope or statement, effectively eliminating all access to the
 previous instance.  This is almost always a typographical error.  Note
 that the earlier variable will still exist until the end of the scope

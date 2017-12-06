@@ -236,6 +236,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+Warnings that a variable or subroutine "masks earlier declaration in same
+...", or that an C<our> variable has been redeclared, have been moved to a
+new warnings category "shadow".  Previously they were in category "misc".
+
 =back
 
 =head1 Utility Changes

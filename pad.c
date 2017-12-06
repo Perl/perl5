@@ -857,7 +857,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
     assert((flags & ~padadd_OUR) == 0);
 
-    if (PadnamelistMAX(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
+    if (PadnamelistMAX(PL_comppad_name) < 0 || !ckWARN(WARN_SHADOW))
 	return; /* nothing to check */
 
     svp = PadnamelistARRAY(PL_comppad_name);
@@ -875,7 +875,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
 	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
-	    Perl_warner(aTHX_ packWARN(WARN_MISC),
+	    Perl_warner(aTHX_ packWARN(WARN_SHADOW),
 		"\"%s\" %s %" PNf " masks earlier declaration in same %s",
 		(   is_our                         ? "our"   :
                     PL_parser->in_my == KEY_my     ? "my"    :
@@ -901,10 +901,10 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 		&& SvOURSTASH(sv) == ourstash
 		&& memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
 	    {
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
+		Perl_warner(aTHX_ packWARN(WARN_SHADOW),
 		    "\"our\" variable %" PNf " redeclared", PNfARG(sv));
 		if (off <= PL_comppad_name_floor)
-		    Perl_warner(aTHX_ packWARN(WARN_MISC),
+		    Perl_warner(aTHX_ packWARN(WARN_SHADOW),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		break;
 	    }
