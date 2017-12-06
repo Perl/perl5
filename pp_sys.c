@@ -3116,7 +3116,7 @@ S_ft_return_false(pTHX_ SV *ret) {
     PUTBACK;
 
     if (PL_op->op_private & OPpFT_STACKING) {
-        while (OP_IS_FILETEST(next->op_type)
+        while (next && OP_IS_FILETEST(next->op_type)
                && next->op_private & OPpFT_STACKED)
             next = next->op_next;
     }
