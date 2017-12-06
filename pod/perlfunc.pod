@@ -9310,14 +9310,13 @@ The importation can be made conditional by using the L<if> module.
 
 In the C<use VERSION> form, VERSION may be either a v-string such as
 v5.24.1, which will be compared to L<C<$^V>|perlvar/$^V> (aka
-$PERL_VERSION), or a numeric argument of the form 5.024001, which will be
-compared to L<C<$]>|perlvar/$]>.  An
-exception is raised if VERSION is greater than the version of the
-current Perl interpreter; Perl will not attempt to parse the rest of the
-file.  Compare with L<C<require>|/require VERSION>, which can do a
-similar check at run time.
-Symmetrically, C<no VERSION> allows you to specify that you want a version
-of Perl older than the specified one.
+$PERL_VERSION), or a numeric argument of the form 5.024001, which will
+be compared to L<C<$]>|perlvar/$]>.  An exception is raised if VERSION
+is greater than the version of the current Perl interpreter; Perl will
+not attempt to parse the rest of the file.  Compare with
+L<C<require>|/require VERSION>, which can do a similar check at run
+time.  Symmetrically, C<no VERSION> allows you to specify that you
+want a version of Perl older than the specified one.
 
 Specifying VERSION as a numeric argument of the form 5.024001 should
 generally be avoided as older less readable syntax compared to
