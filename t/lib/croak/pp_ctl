@@ -1,4 +1,11 @@
 __END__
+# NAME goto into foreach
+no warnings 'deprecated';
+goto f;
+foreach(1){f:}
+EXPECT
+Can't "goto" into the middle of a foreach loop at - line 3.
+########
 # NAME dump with computed label
 no warnings 'deprecated';
 my $label = "foo";
