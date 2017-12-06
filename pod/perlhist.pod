@@ -64,6 +64,9 @@ the strings?).
 
 =head1 THE RECORDS
 
+Perl versions and release dates, for what perl versions were bundled
+as part of other well-known software see L<perldisthist>.
+
  Pump-  Release         Date            Notes
  king                                   (by no means
                                          comprehensive,

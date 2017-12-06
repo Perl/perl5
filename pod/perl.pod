@@ -180,6 +180,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perldoc		Look up Perl documentation in Pod format
 
     perlhist		Perl history records
+    perldisthist	Perl releases bundled with other software
     perldelta		Perl changes since previous version
     perl5276delta	Perl changes in version 5.27.6
     perl5275delta	Perl changes in version 5.27.5

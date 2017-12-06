@@ -1,0 +1,30 @@
+=encoding utf8
+
+=head1 NAME
+
+perldisthist - Perl releases bundled with other software
+
+=head1 DESCRIPTION
+
+This document aims to record the Perl releases bundles as part of
+other publicly released software, e.g. OS distributions.
+
+It's intended e.g. that you only need to support perl 5.10.1 and later
+when targeting F</usr/bin/perl> on some site that runs RHEL 6 and
+later.
+
+=head1 THE RECORDS
+
+Perl versions and release dates (see L<perlhist>), along with "Distro"
+names and their release dates.
+
+ Release Date        Distro                                 Distro date
+ ======================================================================
+ 5.8.8   2006-Jan-31
+                     RHEL 5 / CentOS 5                      2007-Mar-15
+ 5.10.1  2009-Aug-22
+                     RHEL 6 / CentOS 6                      2010-Nov-10
+ 5.16.3  2013-Mar-11
+                     RHEL 7 / CentOS 7                      2013-Dec-11
+
+=cut
