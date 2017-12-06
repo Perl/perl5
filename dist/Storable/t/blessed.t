@@ -44,7 +44,7 @@ use Storable qw(freeze thaw store retrieve);
    'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),
    LVALUE         => \(my $substr  = substr((my $str = "foo"), 0, 3)));
 
-my $test = 12;
+my $test = 13;
 my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
 plan(tests => $tests);
 
@@ -321,4 +321,39 @@ is(ref $t, 'STRESS_THE_STACK');
             is_deeply($thawn, $obj, "get the right value back");
         }
     }
+}
+
+{
+    # [perl #118551]
+    {
+        package RT118551;
+
+        sub new {
+            my $class = shift;
+            my $string = shift;
+            die 'Bad data' unless defined $string;
+            my $self = { string => $string };
+            return bless $self, $class;
+        }
+
+        sub STORABLE_freeze {
+            my $self = shift;
+            my $cloning = shift;
+            return if $cloning;
+            return ($self->{string});
+        }
+
+        sub STORABLE_attach {
+            my $class = shift;
+            my $cloning = shift;
+            my $string = shift;
+            return $class->new($string);
+        }
+    }
+
+    my $x = [ RT118551->new('a'), RT118551->new('') ];
+
+    $y = freeze($x);
+
+    ok(eval {thaw($y)}, "empty serialized") or diag $@; # <-- dies here with "Bad data"
 }
