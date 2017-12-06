@@ -2709,6 +2709,17 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 }
 
 
+static void
+S_check_op_type(pTHX_ OP * const o)
+{
+    /* Eventually we may want to stack the needed arguments
+     * for each op.  For now, we punt on the hard ones. */
+    /* XXX This comment seems to me like wishful thinking.  --sprout */
+    if (o->op_type == OP_ENTERITER)
+        Perl_croak(aTHX_
+                  "Can't \"goto\" into the middle of a foreach loop");
+}
+
 /* also used for: pp_dump() */
 
 PP(pp_goto)
@@ -3050,8 +3061,7 @@ PP(pp_goto)
 	if (leaving_eval && *enterops && enterops[1]) {
 	    I32 i;
             for (i = 1; enterops[i]; i++)
-                if (enterops[i]->op_type == OP_ENTERITER)
-                    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
+                S_check_op_type(aTHX_ enterops[i]);
 	}
 
 	if (*enterops && enterops[1]) {
@@ -3077,10 +3087,7 @@ PP(pp_goto)
 	    ix = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
 	    for (; enterops[ix]; ix++) {
 		PL_op = enterops[ix];
-		/* Eventually we may want to stack the needed arguments
-		 * for each op.  For now, we punt on the hard ones. */
-		if (PL_op->op_type == OP_ENTERITER)
-		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
+		S_check_op_type(aTHX_ PL_op);
 		PL_op->op_ppaddr(aTHX);
 	    }
 	    PL_op = oldop;
