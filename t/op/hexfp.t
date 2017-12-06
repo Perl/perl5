@@ -10,7 +10,7 @@ use strict;
 
 use Config;
 
-plan(tests => 109);
+plan(tests => 112);
 
 # Test hexfloat literals.
 
@@ -253,6 +253,16 @@ SKIP: {
     is(0x1p-1075,  2.47032822920623272e-324, '[perl #128919]');
     is(0x1p-1076,  1.23516411460311636e-324);
     is(0x1p-16445, 3.6451995318824746e-4951);
+}
+
+# [perl #131894] parsing long binaryish floating point literals used to
+# perform illegal bit shifts
+SKIP: {
+    skip("non-64-bit NVs", 1)
+      unless $Config{nvsize} == 8 && $Config{d_double_style_ieee};
+    is sprintf("%a", eval("0x030000000000000.1p0")), "0x1.8p+53";
+    is sprintf("%a", eval("01400000000000000000.1p0")), "0x1.8p+54";
+    is sprintf("%a", eval("0b110000000000000000000000000000000000000000000000000000000.1p0")), "0x1.8p+56";
 }
 
 # sprintf %a/%A testing is done in sprintf2.t,

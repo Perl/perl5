@@ -11091,7 +11091,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                     hexfp_uquad <<= shift;
                                     hexfp_uquad |= b;
                                     hexfp_frac_bits += shift;
-                                } else {
+                                } else if (significant_bits - shift < NV_MANT_DIG) {
                                     /* We are at a hexdigit either at,
                                      * or straddling, the edge of mantissa.
                                      * We will try grabbing as many as
