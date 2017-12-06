@@ -50,7 +50,7 @@ changes to the variable that it closes over, add an explicit C<return>:
 
 This usage has been deprecated, and will no longer be allowed in Perl 5.32.
 
-=head2 Use of strings with code points over 0xFF as arguments to C<vec>
+=head3 Use of strings with code points over 0xFF as arguments to C<vec>
 
 C<vec> views its string argument as a sequence of bits.  A string
 containing a code point over 0xFF is nonsensical.  This usage is
