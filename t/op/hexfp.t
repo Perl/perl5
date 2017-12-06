@@ -163,84 +163,82 @@ sub get_warn() {
 # Test warnings.
 SKIP:
 {
-    if ($Config{nv_preserves_uv_bits} == 53) {
-        local $^W = 1;
+    skip "nv_preserves_uv_bits is $Config{nv_preserves_uv_bits} not 53", 26
+        unless $Config{nv_preserves_uv_bits} == 53;
 
-        eval '0x1_0000_0000_0000_0p0';
-        is(get_warn(), undef);
+    local $^W = 1;
 
-        eval '0x2_0000_0000_0000_0p0';
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    eval '0x1_0000_0000_0000_0p0';
+    is(get_warn(), undef);
 
-        eval '0x1.0000_0000_0000_0p0';
-        is(get_warn(), undef);
+    eval '0x2_0000_0000_0000_0p0';
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
 
-        eval '0x2.0000_0000_0000_0p0';
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    eval '0x1.0000_0000_0000_0p0';
+    is(get_warn(), undef);
 
-        eval '0x.1p-1021';
-        is(get_warn(), undef);
+    eval '0x2.0000_0000_0000_0p0';
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
 
-        eval '0x.1p-1023';
-        like(get_warn(), qr/^Hexadecimal float: exponent underflow/);
+    eval '0x.1p-1021';
+    is(get_warn(), undef);
 
-        eval '0x1.fffffffffffffp+1023';
-        is(get_warn(), undef);
+    eval '0x.1p-1023';
+    like(get_warn(), qr/^Hexadecimal float: exponent underflow/);
 
-        eval '0x1.fffffffffffffp+1024';
-        like(get_warn(), qr/^Hexadecimal float: exponent overflow/);
+    eval '0x1.fffffffffffffp+1023';
+    is(get_warn(), undef);
 
-        undef $a;
-        eval '$a = 0x111.0000000000000p+0'; # 12 zeros.
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
-        is($a, 273);
+    eval '0x1.fffffffffffffp+1024';
+    like(get_warn(), qr/^Hexadecimal float: exponent overflow/);
 
-        # The 13 zeros would be enough to push the hi-order digits
-        # off the high-end.
+    undef $a;
+    eval '$a = 0x111.0000000000000p+0'; # 12 zeros.
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    is($a, 273);
 
-        undef $a;
-        eval '$a = 0x111.0000000000000p+0'; # 13 zeros.
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
-        is($a, 273);
+    # The 13 zeros would be enough to push the hi-order digits
+    # off the high-end.
 
-        undef $a;
-        eval '$a = 0x111.00000000000000p+0';  # 14 zeros.
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
-        is($a, 273);
+    undef $a;
+    eval '$a = 0x111.0000000000000p+0'; # 13 zeros.
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    is($a, 273);
 
-        undef $a;
-        eval '$a = 0xfffffffffffffp0';  # 52 bits.
-        is(get_warn(), undef);
-        is($a, 4.5035996273705e+15);
+    undef $a;
+    eval '$a = 0x111.00000000000000p+0'; # 14 zeros.
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    is($a, 273);
 
-        undef $a;
-        eval '$a = 0xfffffffffffff.8p0';  # 53 bits.
-        is(get_warn(), undef);
-        is($a, 4.5035996273705e+15);
+    undef $a;
+    eval '$a = 0xfffffffffffffp0'; # 52 bits.
+    is(get_warn(), undef);
+    is($a, 4.5035996273705e+15);
 
-        undef $a;
-        eval '$a = 0xfffffffffffff.cp0';  # 54 bits.
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
-        is($a, 4.5035996273705e+15);
+    undef $a;
+    eval '$a = 0xfffffffffffff.8p0'; # 53 bits.
+    is(get_warn(), undef);
+    is($a, 4.5035996273705e+15);
 
-        undef $a;
-        eval '$a = 0xf.ffffffffffffp0';  # 52 bits.
-        is(get_warn(), undef);
-        is($a, 16);
+    undef $a;
+    eval '$a = 0xfffffffffffff.cp0'; # 54 bits.
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    is($a, 4.5035996273705e+15);
 
-        undef $a;
-        eval '$a = 0xf.ffffffffffff8p0';  # 53 bits.
-        is(get_warn(), undef);
-        is($a, 16);
+    undef $a;
+    eval '$a = 0xf.ffffffffffffp0'; # 52 bits.
+    is(get_warn(), undef);
+    is($a, 16);
 
-        undef $a;
-        eval '$a = 0xf.ffffffffffffcp0';  # 54 bits.
-        like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
-        is($a, 16);
-    } else {
-        print "# skipping warning tests\n";
-        skip "nv_preserves_uv_bits is $Config{nv_preserves_uv_bits} not 53", 26;
-    }
+    undef $a;
+    eval '$a = 0xf.ffffffffffff8p0'; # 53 bits.
+    is(get_warn(), undef);
+    is($a, 16);
+
+    undef $a;
+    eval '$a = 0xf.ffffffffffffcp0'; # 54 bits.
+    like(get_warn(), qr/^Hexadecimal float: mantissa overflow/);
+    is($a, 16);
 }
 
 # [perl #128919] limited exponent range in hex fp literal with long double
