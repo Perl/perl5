@@ -56,6 +56,16 @@ C<vec> views its string argument as a sequence of bits.  A string
 containing a code point over 0xFF is nonsensical.  This usage is
 deprecated in Perl 5.28, and will be removed in Perl 5.32.
 
+=head3 hostname() doesn't accept any arguments
+
+The function C<hostname()> in the L<Sys::Hostname> module has always
+been documented to be called with no arguments.  Historically it has not
+enforced this, and has actually accepted and ignored any arguments.  As a
+result, some users have got the mistaken impression that an argument does
+something useful.  To avoid these bugs, the function is being made strict.
+Passing arguments was deprecated in Perl 5.28, and will become fatal in
+Perl 5.32.
+
 =head2 Perl 5.30
 
 =head3 C<< $* >> is no longer supported
