@@ -58,10 +58,11 @@ for determining what kind of match to perform.  The operator also no
 longer implicitly enreferences certain kinds of operand (such as arrays);
 instead the operands get regular scalar context.
 
-The C<when> construct no longer has its complicated rules about how to
-treat its argument.  It now always uses the argument as a truth value;
-it never implicitly smart matches.  Like the smart match operator,
-it also no longer implicitly enreferences certain kinds of argument,
+The C<when> construct no longer has its complicated rules about how
+to treat its argument.  Instead it has been split into two distinct
+constructs.  C<whereso> always uses the argument as a truth value,
+and C<whereis> always smart matches.  Like the smart match operator,
+these also no longer implicitly enreference certain kinds of argument,
 instead supplying regular scalar context.
 
 The C<default> construct, which was misleading and essentially useless,
