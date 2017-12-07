@@ -778,6 +778,53 @@ As of Perl 5.22, you can also use C<(undef)x2> instead of C<undef, undef>.
 (You can also do C<($x) x 2>, which is less useful, because it assigns to
 the same variable twice, clobbering the first value assigned.)
 
+When you assign a list of scalars to an array, all previous values in that
+array are wiped out and the number of elements in the array will now be equal to
+the number of elements in the right-hand list -- the list from which
+assignment was made.  The array will automatically resize itself to precisely
+accommodate each element in the right-hand list.
+
+    use warnings;
+    my (@xyz, $x, $y, $z);
+
+    @xyz = (1, 2, 3);
+    print "@xyz\n";                             # 1 2 3
+
+    @xyz = ('al', 'be', 'ga', 'de');
+    print "@xyz\n";                             # al be ga de
+
+    @xyz = (101, 102);
+    print "@xyz\n";                             # 101 102
+
+When, however, you assign a list of scalars to another list of scalars, the
+results differ according to whether the left-hand list -- the list being
+assigned to -- has the same, more or fewer elements than the right-hand list.
+
+    ($x, $y, $z) = (1, 2, 3);
+    print "$x $y $z\n";                         # 1 2 3
+
+    ($x, $y, $z) = ('al', 'be', 'ga', 'de');
+    print "$x $y $z\n";                         # al be ga
+
+    ($x, $y, $z) = (101, 102);
+    print "$x $y $z\n";                         # 101 102
+    # Use of uninitialized value $z in concatenation (.)
+    # or string at [program] line [line number].
+
+If the number of scalars in the left-hand list is less than that in the
+right-hand list, the "extra" scalars in the right-hand list will simply not be
+assigned.
+
+If the number of scalars in the left-hand list is greater than that in the
+left-hand list, the "missing" scalars will become undefined.
+
+    ($x, $y, $z) = (101, 102);
+    for my $el ($x, $y, $z) {
+        (defined $el) ? print "$el " : print "<undef>";
+    }
+    print "\n";
+                                                # 101 102 <undef>
+
 List assignment in scalar context returns the number of elements
 produced by the expression on the right side of the assignment:
 
