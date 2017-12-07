@@ -319,6 +319,29 @@ typedef STRLEN ntag_t;
 #define USE_PTR_TABLE
 #endif
 
+/* do we need/want to clear padding on NVs? */
+#if defined(LONG_DOUBLEKIND) && defined(USE_LONG_DOUBLE)
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+#    define NV_PADDING (NVSIZE - 10)
+#  else
+#    define NV_PADDING 0
+#  endif
+#else
+/* This is kind of a guess - it means we'll get an unneeded clear on 128-bit NV
+   but an upgraded perl will fix that
+*/
+#  if NVSIZE > 8
+#    define NV_CLEAR
+#  endif
+#  define NV_PADDING 0
+#endif
+
+typedef union {
+    NV nv;
+    U8 bytes[sizeof(NV)];
+} NV_bytes;
+
 /* Needed for 32bit with lengths > 2G - 4G, and 64bit */
 #if PTRSIZE > 4
 #define HAS_U64
@@ -2483,13 +2506,19 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 
         TRACEME(("ok (integer 0x%" UVxf ", value = %" IVdf ")", PTR2UV(sv), iv));
     } else if (flags & SVf_NOK) {
-        NV nv;
+        NV_bytes nv;
+#ifdef NV_CLEAR
+        /* if we can't tell if there's padding, clear the whole NV and hope the
+           compiler leaves the padding alone
+        */
+        Zero(&nv, 1, NV_bytes);
+#endif
 #if (PATCHLEVEL <= 6)
-        nv = SvNV(sv);
+        nv.nv = SvNV(sv);
         /*
          * Watch for number being an integer in disguise.
          */
-        if (nv == (NV) (iv = I_V(nv))) {
+        if (nv.nv == (NV) (iv = I_V(nv.nv))) {
             TRACEME(("double %" NVff " is actually integer %" IVdf, nv, iv));
             goto integer;		/* Share code above */
         }
@@ -2500,18 +2529,21 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             iv = SvIV(sv);
             goto integer;		/* Share code above */
         }
-        nv = SvNV(sv);
+        nv.nv = SvNV(sv);
 #endif
 
         if (cxt->netorder) {
-            TRACEME(("double %" NVff " stored as string", nv));
+            TRACEME(("double %" NVff " stored as string", nv.nv));
             goto string_readlen;		/* Share code below */
         }
+#if NV_PADDING
+        Zero(nv.bytes + NVSIZE - NV_PADDING, NV_PADDING, char);
+#endif
 
         PUTMARK(SX_DOUBLE);
         WRITE(&nv, sizeof(nv));
 
-        TRACEME(("ok (double 0x%" UVxf ", value = %" NVff ")", PTR2UV(sv), nv));
+        TRACEME(("ok (double 0x%" UVxf ", value = %" NVff ")", PTR2UV(sv), nv.nv));
 
     } else if (flags & (SVp_POK | SVp_NOK | SVp_IOK)) {
 #ifdef SvVOK
