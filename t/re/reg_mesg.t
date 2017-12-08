@@ -706,8 +706,8 @@ for my $strict ("", "use re 'strict';") {
                         ok(1,$eval_string);
                     } else {
                         ok(0,$eval_string);
-                        diag("Have: " . _qq(add_markers($error)));
-                        diag("Want: " . _qq($death[$i+1]));
+                        diag("Have: " . _q(add_markers($error)));
+                        diag("Want: " . _q($death[$i+1]));
                     }
                 }, undef, "... and died without any other warnings");
     }
