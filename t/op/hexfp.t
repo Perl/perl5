@@ -254,10 +254,10 @@ SKIP: {
 }
 
 # [perl #131894] parsing long binaryish floating point literals used to
-# perform illegal bit shifts
+# perform illegal bit shifts.  Need 64-bit ints to test.
 SKIP: {
-    skip("non-64-bit NVs", 3)
-      unless $Config{nvsize} == 8 && $Config{d_double_style_ieee};
+    skip("non-64-bit NVs or no 64-bit ints to test with", 3)
+      unless $Config{nvsize} == 8 && $Config{d_double_style_ieee} && $Config{use64bitint};
     is sprintf("%a", eval("0x030000000000000.1p0")), "0x1.8p+53";
     is sprintf("%a", eval("01400000000000000000.1p0")), "0x1.8p+54";
     is sprintf("%a", eval("0b110000000000000000000000000000000000000000000000000000000.1p0")), "0x1.8p+56";
