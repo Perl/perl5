@@ -65,14 +65,6 @@ sub add_markers {
     return $element;
 }
 
-sub _qq {
-    my ($str)= @_;
-    $str =~ s/\\/\\\\/g;
-    $str =~ s/\$/\\\$/g;
-    return qq("$str");
-}
-
-
 ## Because we don't "use utf8" in this file, we need to do some extra legwork
 ## for the utf8 tests: Prepend 'use utf8' to the pattern, and mark the strings
 ## to check against as UTF-8, but for this all to work properly, the character
