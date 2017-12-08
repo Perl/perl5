@@ -165,7 +165,7 @@ typedef U16TYPE U16;
 typedef I32TYPE I32;
 typedef U32TYPE U32;
 
-#ifdef HAS_QUAD
+#ifdef QUADKIND
 typedef I64TYPE I64;
 typedef U64TYPE U64;
 #endif
