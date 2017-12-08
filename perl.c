@@ -3783,8 +3783,9 @@ STATIC void
 S_init_main_stash(pTHX)
 {
     GV *gv;
+    HV *hv = newHV();
 
-    PL_curstash = PL_defstash = (HV *)SvREFCNT_inc_simple_NN(newHV());
+    PL_curstash = PL_defstash = (HV *)SvREFCNT_inc_simple_NN(hv);
     /* We know that the string "main" will be in the global shared string
        table, so it's a small saving to use it rather than allocate another
        8 bytes.  */
