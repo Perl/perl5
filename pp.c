@@ -5613,13 +5613,16 @@ PP(pp_reverse)
 	STRLEN len;
 
 	SvUTF8_off(TARG);				/* decontaminate */
-	if (SP - MARK > 1)
+	if (SP - MARK > 1) {
 	    do_join(TARG, &PL_sv_no, MARK, SP);
-	else if (SP > MARK)
+	    SP = MARK + 1;
+	    SETs(TARG);
+	} else if (SP > MARK) {
 	    sv_setsv(TARG, *SP);
-        else {
+	    SETs(TARG);
+        } else {
 	    sv_setsv(TARG, DEFSV);
-            EXTEND(SP, 1);
+	    XPUSHs(TARG);
 	}
 
 	up = SvPV_force(TARG, len);
@@ -5657,8 +5660,6 @@ PP(pp_reverse)
 	    }
 	    (void)SvPOK_only_UTF8(TARG);
 	}
-	SP = MARK + 1;
-	SETTARG;
     }
     RETURN;
 }
