@@ -4143,7 +4143,7 @@ S_unwind_scan_frames(pTHX_ const void *p)
     } while (f);
 }
 
-
+/* the return from this sub is the minimum length that could possibly match */
 STATIC SSize_t
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         SSize_t *minlenp, SSize_t *deltap,
