@@ -408,34 +408,34 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
     if ((STRLEN) (send - x) >= PERL_WORDSIZE) {
 
-    /* Process per-byte until reach word boundary.  XXX This loop could be
-     * eliminated if we knew that this platform had fast unaligned reads */
+        /* Process per-byte until reach word boundary.  XXX This loop could be
+         * eliminated if we knew that this platform had fast unaligned reads */
         while (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK) {
-        if (! UTF8_IS_INVARIANT(*x)) {
-            if (ep) {
-                *ep = x;
-            }
+            if (! UTF8_IS_INVARIANT(*x)) {
+                if (ep) {
+                    *ep = x;
+                }
 
-            return FALSE;
-        }
-        x++;
-    }
-
-    /* Process per-word as long as we have at least a full word left */
-    while (x + PERL_WORDSIZE <= send) {
-        if ((* (PERL_WORDCAST *) x) & PERL_VARIANTS_WORD_MASK)  {
-
-            /* Found a variant.  Just return if caller doesn't want its exact
-             * position */
-            if (! ep) {
                 return FALSE;
             }
-
-            /* Otherwise fall into final loop to find which byte it is */
-            break;
+            x++;
         }
-        x += PERL_WORDSIZE;
-    }
+
+        /* Process per-word as long as we have at least a full word left */
+        while (x + PERL_WORDSIZE <= send) {
+            if ((* (PERL_WORDCAST *) x) & PERL_VARIANTS_WORD_MASK)  {
+
+                /* Found a variant.  Just return if caller doesn't want its
+                 * exact position */
+                if (! ep) {
+                    return FALSE;
+                }
+
+                /* Otherwise fall into final loop to find which byte it is */
+                break;
+            }
+            x += PERL_WORDSIZE;
+        }
     }
 
 #  undef PERL_WORDCAST
