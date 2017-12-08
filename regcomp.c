@@ -17721,6 +17721,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 if (_invlist_len(only_non_utf8_list) != 0) {
                     ANYOF_FLAGS(ret) |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
                 }
+                SvREFCNT_dec_NN(only_non_utf8_list);
             }
             else {
                 /* Here there were no complemented posix classes.  That means
