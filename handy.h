@@ -1088,11 +1088,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 */
 
-/* Specify the widest unsigned type on the platform.  Use U64TYPE because U64
- * is known only in the perl core, and this macro can be called from outside
- * that */
-#ifdef HAS_QUAD
-#   define WIDEST_UTYPE U64TYPE
+/* Specify the widest unsigned type on the platform. */
+#ifdef QUADKIND
+#   define WIDEST_UTYPE U64
 #else
 #   define WIDEST_UTYPE U32
 #endif
