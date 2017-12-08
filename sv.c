@@ -3548,16 +3548,16 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
              * the string, copying and expanding as we go, stopping when we
              * get to the part that is invariant the rest of the way down */
 
-		e--;
-		while (e >= t) {
-		    if (NATIVE_BYTE_IS_INVARIANT(*e)) {
-			*d-- = *e;
-		    } else {
-			*d-- = UTF8_EIGHT_BIT_LO(*e);
-			*d-- = UTF8_EIGHT_BIT_HI(*e);
-		    }
-                    e--;
-		}
+            e--;
+            while (e >= t) {
+                if (NATIVE_BYTE_IS_INVARIANT(*e)) {
+                    *d-- = *e;
+                } else {
+                    *d-- = UTF8_EIGHT_BIT_LO(*e);
+                    *d-- = UTF8_EIGHT_BIT_HI(*e);
+                }
+                e--;
+            }
 
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 		/* Update pos. We do it at the end rather than during
