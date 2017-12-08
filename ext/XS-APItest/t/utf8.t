@@ -82,10 +82,10 @@ foreach ([0, '', '', 'empty'],
     my ($expect, $left, $right, $desc) = @$_;
     my $copy = $right;
     utf8::encode($copy);
-    is(bytes_cmp_utf8($left, $copy), $expect, $desc);
+    is(bytes_cmp_utf8($left, $copy), $expect, "bytes_cmp_utf8: $desc");
     next if $right =~ tr/\0-\377//c;
     utf8::encode($left);
-    is(bytes_cmp_utf8($right, $left), -$expect, "$desc reversed");
+    is(bytes_cmp_utf8($right, $left), -$expect, "... and $desc reversed");
 }
 
 # The keys to this hash are Unicode code points, their values are the native
