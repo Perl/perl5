@@ -217,6 +217,26 @@ typedef U64TYPE U64;
 
 #endif
 
+/* These C99 typedefs are useful sometimes for, say, loop variables whose
+ * maximum values are small, but for which speed trumps size.  If we have a C99
+ * compiler, use that.  Otherwise, a plain 'int' should be good enough.
+ *
+ * Restrict these to core for now until we are more certain this is a good
+ * idea. */
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#  ifdef I_STDINT
+    typedef  int_fast8_t  PERL_INT_FAST8_T;
+    typedef uint_fast8_t  PERL_UINT_FAST8_T;
+    typedef  int_fast16_t PERL_INT_FAST16_T;
+    typedef uint_fast16_t PERL_UINT_FAST16_T;
+#  else
+    typedef int           PERL_INT_FAST8_T;
+    typedef unsigned int  PERL_UINT_FAST8_T;
+    typedef int           PERL_INT_FAST16_T;
+    typedef unsigned int  PERL_UINT_FAST16_T;
+#  endif
+#endif
+
 /* log(2) (i.e., log base 10 of 2) is pretty close to 0.30103, just in case
  * anyone is grepping for it */
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log10(2) =~ 146/485 */
