@@ -8943,6 +8943,7 @@ S_pending_ident(pTHX)
 
     DEBUG_T({ PerlIO_printf(Perl_debug_log,
           "### Pending identifier '%s'\n", PL_tokenbuf); });
+    assert(tokenbuf_len >= 2);
 
     /* if we're in a my(), we can't allow dynamics here.
        $foo'bar has already been turned into $foo::bar, so
