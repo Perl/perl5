@@ -406,9 +406,11 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #    error Unexpected word size
 #  endif
 
+    if ((STRLEN) (send - x) >= PERL_WORDSIZE) {
+
     /* Process per-byte until reach word boundary.  XXX This loop could be
      * eliminated if we knew that this platform had fast unaligned reads */
-    while (x < send && (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK)) {
+        while (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK) {
         if (! UTF8_IS_INVARIANT(*x)) {
             if (ep) {
                 *ep = x;
@@ -433,6 +435,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
             break;
         }
         x += PERL_WORDSIZE;
+    }
     }
 
 #  undef PERL_WORDCAST
