@@ -585,7 +585,7 @@ struct passwd {
 #endif
 
 typedef unsigned mydev_t;
-#ifndef _LARGEFILE
+#if !defined(_USE_STD_STAT) && !defined(_LARGEFILE)
 typedef unsigned myino_t;
 #else
 typedef __ino64_t myino_t;
@@ -595,7 +595,7 @@ struct mystat
 {
     struct stat crtl_stat;
     myino_t st_ino;
-#ifndef _LARGEFILE
+#if !defined(_USE_STD_STAT) && !defined(_LARGEFILE)
     unsigned rvn; /* FID (num,seq,rvn) + pad */
 #endif
     mydev_t st_dev;
@@ -616,7 +616,7 @@ struct mystat
 #define st_fab_fsz crtl_stat.st_fab_fsz
 #define st_fab_mrs crtl_stat.st_fab_mrs
 
-#ifdef _USE_STD_STAT
+#if defined(_USE_STD_STAT) || defined(_LARGEFILE)
 #define VMS_INO_T_COMPARE(__a, __b) (__a != __b)
 #define VMS_INO_T_COPY(__a, __b) __a = __b
 #else
