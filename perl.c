@@ -593,9 +593,33 @@ Perl_dump_sv_child(pTHX_ SV *sv)
 #endif
 
 /*
-=for apidoc perl_destruct
+=for apidoc Am|int|perl_destruct|PerlInterpreter *my_perl
 
-Shuts down a Perl interpreter.  See L<perlembed>.
+Shuts down a Perl interpreter.  See L<perlembed> for a tutorial.
+
+C<my_perl> points to the Perl interpreter.  It must have been previously
+created through the use of L</perl_alloc> and L</perl_construct>.  It may
+have been initialised through L</perl_parse>, and may have been used
+through L</perl_run> and other means.  This function should be called for
+any Perl interpreter that has been constructed with L</perl_construct>,
+even if subsequent operations on it failed, for example if L</perl_parse>
+returned a non-zero value.
+
+If the interpreter's C<PL_exit_flags> word has the
+C<PERL_EXIT_DESTRUCT_END> flag set, then this function will execute code
+in C<END> blocks before performing the rest of destruction.  If it is
+desired to make any use of the interpreter between L</perl_parse> and
+L</perl_destruct> other than just calling L</perl_run>, then this flag
+should be set early on.  This matters if L</perl_run> will not be called,
+or if anything else will be done in addition to calling L</perl_run>.
+
+Returns a value be a suitable value to pass to the C library function
+C<exit> (or to return from C<main>), to serve as an exit code indicating
+the nature of the way the interpreter terminated.  This takes into account
+any failure of L</perl_parse> and any early exit from L</perl_run>.
+The exit code is of the type required by the host operating system,
+so because of differing exit code conventions it is not portable to
+interpret specific numeric values as having specific meanings.
 
 =cut
 */
@@ -1570,9 +1594,62 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 }
 
 /*
-=for apidoc perl_parse
+=for apidoc Am|int|perl_parse|PerlInterpreter *my_perl|XSINIT_t xsinit|int argc|char **argv|char **env
 
-Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
+Tells a Perl interpreter to parse a Perl script.  This performs most
+of the initialisation of a Perl interpreter.  See L<perlembed> for
+a tutorial.
+
+C<my_perl> points to the Perl interpreter that is to parse the script.
+It must have been previously created through the use of L</perl_alloc>
+and L</perl_construct>.  C<xsinit> points to a callback function that
+will be called to set up the ability for this Perl interpreter to load
+XS extensions, or may be null to perform no such setup.
+
+C<argc> and C<argv> supply a set of command-line arguments to the Perl
+interpreter, as would normally be passed to the C<main> function of
+a C program.  C<argv[argc]> must be null.  These arguments are where
+the script to parse is specified, either by naming a script file or by
+providing a script in a C<-e> option.
+
+C<env> specifies a set of environment variables that will be used by
+this Perl interpreter.  If non-null, it must point to a null-terminated
+array of environment strings.  If null, the Perl interpreter will use
+the environment supplied by the C<environ> global variable.
+
+This function initialises the interpreter, and parses and compiles the
+script specified by the command-line arguments.  This includes executing
+code in C<BEGIN>, C<UNITCHECK>, and C<CHECK> blocks.  It does not execute
+C<INIT> blocks or the main program.
+
+Returns an integer of slightly tricky interpretation.  The correct
+use of the return value is as a truth value indicating whether there
+was a failure in initialisation.  If zero is returned, this indicates
+that initialisation was successful, and it is safe to proceed to call
+L</perl_run> and make other use of it.  If a non-zero value is returned,
+this indicates some problem that means the interpreter wants to terminate.
+The interpreter should not be just abandoned upon such failure; the caller
+should proceed to shut the interpreter down cleanly with L</perl_destruct>
+and free it with L</perl_free>.
+
+For historical reasons, the non-zero return value also attempts to
+be a suitable value to pass to the C library function C<exit> (or to
+return from C<main>), to serve as an exit code indicating the nature
+of the way initialisation terminated.  However, this isn't portable,
+due to differing exit code conventions.  An attempt is made to return
+an exit code of the type required by the host operating system, but
+because it is constrained to be non-zero, it is not necessarily possible
+to indicate every type of exit.  It is only reliable on Unix, where a
+zero exit code can be augmented with a set bit that will be ignored.
+In any case, this function is not the correct place to acquire an exit
+code: one should get that from L</perl_destruct>.
+
+In most cases, if something happens during initialisation and parsing
+that causes the Perl interpreter to want to exit, this will cause this
+function to return normally with a non-zero return value.  Historically,
+a call to the Perl built-in function C<exit> from inside a C<BEGIN>
+block has been an exception, causing the process to actually exit.
+That behaviour may change in the future.
 
 =cut
 */
@@ -1774,6 +1851,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	    call_list(oldscope, PL_checkav);
 	}
 	ret = STATUS_EXIT;
+	if (ret == 0) ret = 0x100;
 	break;
     case 3:
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");
@@ -2483,9 +2561,47 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 }
 
 /*
-=for apidoc perl_run
+=for apidoc Am|int|perl_run|PerlInterpreter *my_perl
 
-Tells a Perl interpreter to run.  See L<perlembed>.
+Tells a Perl interpreter to run its main program.  See L<perlembed>
+for a tutorial.
+
+C<my_perl> points to the Perl interpreter.  It must have been previously
+created through the use of L</perl_alloc> and L</perl_construct>, and
+initialised through L</perl_parse>.  This function should not be called
+if L</perl_parse> returned a non-zero value, indicating a failure in
+initialisation or compilation.
+
+This function executes code in C<INIT> blocks, and then executes the
+main program.  The code to be executed is that established by the prior
+call to L</perl_parse>.  If the interpreter's C<PL_exit_flags> word
+does not have the C<PERL_EXIT_DESTRUCT_END> flag set, then this function
+will also execute code in C<END> blocks.  If it is desired to make any
+further use of the interpreter after calling this function, then C<END>
+blocks should be postponed to L</perl_destruct> time by setting that flag.
+
+Returns an integer of slightly tricky interpretation.  The correct use
+of the return value is as a truth value indicating whether the program
+terminated non-locally.  If zero is returned, this indicates that
+the program ran to completion, and it is safe to make other use of the
+interpreter (provided that the C<PERL_EXIT_DESTRUCT_END> flag was set as
+described above).  If a non-zero value is returned, this indicates that
+the interpreter wants to terminate early.  The interpreter should not be
+just abandoned because of this desire to terminate; the caller should
+proceed to shut the interpreter down cleanly with L</perl_destruct>
+and free it with L</perl_free>.
+
+For historical reasons, the non-zero return value also attempts to
+be a suitable value to pass to the C library function C<exit> (or to
+return from C<main>), to serve as an exit code indicating the nature of
+the way the program terminated.  However, this isn't portable, due to
+differing exit code conventions.  An attempt is made to return an exit
+code of the type required by the host operating system, but because
+it is constrained to be non-zero, it is not necessarily possible to
+indicate every type of exit.  It is only reliable on Unix, where a zero
+exit code can be augmented with a set bit that will be ignored.  In any
+case, this function is not the correct place to acquire an exit code:
+one should get that from L</perl_destruct>.
 
 =cut
 */
@@ -2494,7 +2610,7 @@ int
 perl_run(pTHXx)
 {
     I32 oldscope;
-    int ret = 0;
+    int ret = 0, exit_called = 0;
     dJMPENV;
 
     PERL_ARGS_ASSERT_PERL_RUN;
@@ -2515,8 +2631,10 @@ perl_run(pTHXx)
     case 0:				/* normal completion */
  redo_body:
 	run_body(oldscope);
-	/* FALLTHROUGH */
+	goto handle_exit;
     case 2:				/* my_exit() */
+	exit_called = 1;
+    handle_exit:
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
 	FREETMPS;
@@ -2530,7 +2648,12 @@ perl_run(pTHXx)
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	ret = STATUS_EXIT;
+	if (exit_called) {
+	    ret = STATUS_EXIT;
+	    if (ret == 0) ret = 0x100;
+	} else {
+	    ret = 0;
+	}
 	break;
     case 3:
 	if (PL_restartop) {

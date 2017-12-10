@@ -192,6 +192,7 @@ version of I<miniperlmain.c> containing the essentials of embedding:
         perl_destruct(my_perl);
         perl_free(my_perl);
 	PERL_SYS_TERM();
+	exit(EXIT_SUCCESS);
  }
 
 Notice that we don't use the C<env> pointer.  Normally handed to
@@ -267,6 +268,7 @@ That's shown below, in a program I'll call I<showtime.c>.
         perl_destruct(my_perl);
         perl_free(my_perl);
 	PERL_SYS_TERM();
+	exit(EXIT_SUCCESS);
     }
 
 where I<showtime> is a Perl subroutine that takes no arguments (that's the
@@ -325,7 +327,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
  main (int argc, char **argv, char **env)
  {
-     char *embedding[] = { "", "-e", "0" };
+     char *embedding[] = { "", "-e", "0", NULL };
 
      PERL_SYS_INIT3(&argc,&argv,&env);
      my_perl = perl_alloc();
@@ -504,7 +506,7 @@ been wrapped here):
 
  main (int argc, char **argv, char **env)
  {
-     char *embedding[] = { "", "-e", "0" };
+     char *embedding[] = { "", "-e", "0", NULL };
      AV *match_list;
      I32 num_matches, i;
      SV *text;
@@ -645,7 +647,7 @@ deep breath...
 
  int main (int argc, char **argv, char **env)
  {
-   char *my_argv[] = { "", "power.pl" };
+   char *my_argv[] = { "", "power.pl", NULL };
 
    PERL_SYS_INIT3(&argc,&argv,&env);
    my_perl = perl_alloc();
@@ -660,6 +662,7 @@ deep breath...
    perl_destruct(my_perl);
    perl_free(my_perl);
    PERL_SYS_TERM();
+   exit(EXIT_SUCCESS);
  }
 
 
@@ -794,25 +797,25 @@ with L<perlfunc/my> whenever possible.
  int
  main(int argc, char **argv, char **env)
  {
-     char *embedding[] = { "", "persistent.pl" };
+     char *embedding[] = { "", "persistent.pl", NULL };
      char *args[] = { "", DO_CLEAN, NULL };
      char filename[BUFFER_SIZE];
-     int exitstatus = 0;
+     int failing, exitstatus;
 
      PERL_SYS_INIT3(&argc,&argv,&env);
      if((my_perl = perl_alloc()) == NULL) {
         fprintf(stderr, "no memory!");
-        exit(1);
+        exit(EXIT_FAILURE);
      }
      perl_construct(my_perl);
 
      PL_origalen = 1; /* don't let $0 assignment update the
                          proctitle or embedding[0] */
-     exitstatus = perl_parse(my_perl, NULL, 2, embedding, NULL);
+     failing = perl_parse(my_perl, NULL, 2, embedding, NULL);
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-     if(!exitstatus) {
-        exitstatus = perl_run(my_perl);
-
+     if(!failing)
+	failing = perl_run(my_perl);
+     if(!failing) {
         while(printf("Enter file name: ") &&
               fgets(filename, BUFFER_SIZE, stdin)) {
 
@@ -830,7 +833,7 @@ with L<perlfunc/my> whenever possible.
      }
 
      PL_perl_destruct_level = 0;
-     perl_destruct(my_perl);
+     exitstatus = perl_destruct(my_perl);
      perl_free(my_perl);
      PERL_SYS_TERM();
      exit(exitstatus);
@@ -951,8 +954,8 @@ Let's give it a try:
  int main(int argc, char **argv, char **env)
  {
      PerlInterpreter *one_perl, *two_perl;
-     char *one_args[] = { "one_perl", SAY_HELLO };
-     char *two_args[] = { "two_perl", SAY_HELLO };
+     char *one_args[] = { "one_perl", SAY_HELLO, NULL };
+     char *two_args[] = { "two_perl", SAY_HELLO, NULL };
 
      PERL_SYS_INIT3(&argc,&argv,&env);
      one_perl = perl_alloc();
@@ -983,6 +986,7 @@ Let's give it a try:
      PERL_SET_CONTEXT(two_perl);
      perl_free(two_perl);
      PERL_SYS_TERM();
+     exit(EXIT_SUCCESS);
  }
 
 Note the calls to PERL_SET_CONTEXT().  These are necessary to initialize

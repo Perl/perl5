@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 11;
+plan tests => 18;
 
 my @expect = qw(
 b1
@@ -146,11 +146,16 @@ expEct
 fresh_perl_is('END { print "ok\n" } INIT { bless {} and exit }', "ok\n",
 	       {}, 'null PL_curcop in newGP');
 
-fresh_perl_is('BEGIN{exit 0}; print "still here"', '', {}, 'RT #2754: BEGIN{exit 0} should exit');
-TODO: {
-    local $TODO = 'RT #2754: CHECK{exit 0} is broken';
-    fresh_perl_is('CHECK{exit 0}; print "still here"', '', {}, 'RT #2754: CHECK{exit 0} should exit');
-}
+# [perl #2754] exit(0) didn't exit from inside a UNITCHECK or CHECK block
+fresh_perl_is('BEGIN{exit 0}; print "still here"', '', {}, 'BEGIN{exit 0} should exit');
+fresh_perl_is('BEGIN{exit 1}; print "still here"', '', {}, 'BEGIN{exit 1} should exit');
+fresh_perl_like('BEGIN{die}; print "still here"', qr/\ADied[^\n]*\.\nBEGIN failed[^\n]*\.\z/, {}, 'BEGIN{die} should exit');
+fresh_perl_is('UNITCHECK{exit 0}; print "still here"', '', {}, 'UNITCHECK{exit 0} should exit');
+fresh_perl_is('UNITCHECK{exit 1}; print "still here"', '', {}, 'UNITCHECK{exit 1} should exit');
+fresh_perl_like('UNITCHECK{die}; print "still here"', qr/\ADied[^\n]*\.\nUNITCHECK failed[^\n]*\.\z/, {}, 'UNITCHECK{die} should exit');
+fresh_perl_is('CHECK{exit 0}; print "still here"', '', {}, 'CHECK{exit 0} should exit');
+fresh_perl_is('CHECK{exit 1}; print "still here"', '', {}, 'CHECK{exit 1} should exit');
+fresh_perl_like('CHECK{die}; print "still here"', qr/\ADied[^\n]*\.\nCHECK failed[^\n]*\.\z/, {}, 'CHECK{die} should exit');
 
 TODO: {
     local $TODO = 'RT #2917: INIT{} in eval is wrongly considered too late';
