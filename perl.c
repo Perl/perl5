@@ -1693,6 +1693,13 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     }
 #endif
 
+    {
+	int i;
+	assert(argc >= 0);
+	for(i = 0; i != argc; i++)
+	    assert(argv[i]);
+	assert(!argv[argc]);
+    }
     PL_origargc = argc;
     PL_origargv = argv;
 
