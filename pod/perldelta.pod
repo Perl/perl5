@@ -212,7 +212,10 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Can't "goto" into a "given" block|perldiag/"Can't E<quot>gotoE<quot> into a E<quot>givenE<quot> block">
+
+(F) A "goto" statement was executed to jump into the middle of a C<given>
+block.  You can't get there from here.  See L<perlfunc/goto>.
 
 =back
 

@@ -6,6 +6,21 @@ foreach(1){f:}
 EXPECT
 Can't "goto" into the middle of a foreach loop at - line 3.
 ########
+# NAME goto into given
+no warnings 'deprecated';
+goto f;
+CORE::given(1){f:}
+EXPECT
+given is experimental at - line 3.
+Can't "goto" into a "given" block at - line 3.
+########
+# NAME goto from given topic expression
+no warnings 'deprecated';
+CORE::given(goto f){f:}
+EXPECT
+given is experimental at - line 2.
+Can't "goto" into a "given" block at - line 2.
+########
 # NAME dump with computed label
 no warnings 'deprecated';
 my $label = "foo";

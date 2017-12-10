@@ -1031,6 +1031,11 @@ pipe, Perl can't retrieve its name for later use.
 (P) An error peculiar to VMS.  Perl asked $GETSYI how big you want your
 mailbox buffers to be, and didn't get an answer.
 
+=item Can't "goto" into a "given" block
+
+(F) A "goto" statement was executed to jump into the middle of a C<given>
+block.  You can't get there from here.  See L<perlfunc/goto>.
+
 =item Can't "goto" into the middle of a foreach loop
 
 (F) A "goto" statement was executed to jump into the middle of a foreach

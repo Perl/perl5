@@ -3400,7 +3400,8 @@ assignment.
 Use of C<goto LABEL> or C<goto EXPR> to jump into a construct is
 deprecated and will issue a warning.  Even then, it may not be used to
 go into any construct that requires initialization, such as a
-subroutine or a C<foreach> loop.  It also can't be used to go into a
+subroutine, a C<foreach> loop, or a C<given>
+block.  It also can't be used to go into a
 construct that is optimized away.
 
 The C<goto &NAME> form is quite different from the other forms of
