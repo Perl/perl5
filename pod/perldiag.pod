@@ -2276,6 +2276,26 @@ to denote a capturing group of the form
 L<C<(?I<PARNO>)>|perlre/(?PARNO) (?-PARNO) (?+PARNO) (?R) (?0)>,
 but omitted the C<")">.
 
+=item Expecting close paren for nested extended charclass in regex; marked
+by <-- HERE in m/%s/
+
+(F) While parsing a nested extended character class like:
+
+    (?[ ... (?flags:(?[ ... ])) ... ])
+                             ^
+
+we expected to see a close paren ')' (marked by ^) but did not.
+
+=item Expecting close paren for wrapper for nested extended charclass in
+regex; marked by <-- HERE in m/%s/
+
+(F) While parsing a nested extended character class like:
+
+    (?[ ... (?flags:(?[ ... ])) ... ])
+                              ^
+
+we expected to see a close paren ')' (marked by ^) but did not.
+
 =item Expecting '(?flags:(?[...' in regex; marked by S<<-- HERE> in m/%s/
 
 (F) The C<(?[...])> extended character class regular expression construct
@@ -6446,31 +6466,6 @@ to find out why that isn't happening.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
-=item Unexpected ']' with no following ')' in (?[... in regex; marked by <-- HERE in m/%s/
-
-(F) While parsing an extended character class a ']' character was encountered
-at a point in the definition where the only legal use of ']' is to close the
-character class definition as part of a '])', you may have forgotten the close
-paren, or otherwise confused the parser.
-
-=item Expecting close paren for nested extended charclass in regex; marked by <-- HERE in m/%s/
-
-(F) While parsing a nested extended character class like:
-
-    (?[ ... (?flags:(?[ ... ])) ... ])
-                             ^
-
-we expected to see a close paren ')' (marked by ^) but did not.
-
-=item Expecting close paren for wrapper for nested extended charclass in regex; marked by <-- HERE in m/%s/
-
-(F) While parsing a nested extended character class like:
-
-    (?[ ... (?flags:(?[ ... ])) ... ])
-                              ^
-
-we expected to see a close paren ')' (marked by ^) but did not.
-
 =item Unexpected binary operator '%c' with no preceding operand in regex;
 marked by S<<-- HERE> in m/%s/
 
@@ -6519,6 +6514,14 @@ C<PL_exit_flags>.
 The C<")"> is out-of-place.  Something apparently was supposed to
 be combined with the digits, or the C<"+"> shouldn't be there, or
 something like that.  Perl can't figure out what was intended.
+
+=item Unexpected ']' with no following ')' in (?[... in regex; marked by
+<-- HERE in m/%s/
+
+(F) While parsing an extended character class a ']' character was
+encountered at a point in the definition where the only legal use of
+']' is to close the character class definition as part of a '])', you
+may have forgotten the close paren, or otherwise confused the parser.
 
 =item Unexpected '(' with no preceding operator in regex; marked by
 S<<-- HERE> in m/%s/
