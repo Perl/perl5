@@ -1644,13 +1644,6 @@ zero exit code can be augmented with a set bit that will be ignored.
 In any case, this function is not the correct place to acquire an exit
 code: one should get that from L</perl_destruct>.
 
-In most cases, if something happens during initialisation and parsing
-that causes the Perl interpreter to want to exit, this will cause this
-function to return normally with a non-zero return value.  Historically,
-a call to the Perl built-in function C<exit> from inside a C<BEGIN>
-block has been an exception, causing the process to actually exit.
-That behaviour may change in the future.
-
 =cut
 */
 
