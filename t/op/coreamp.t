@@ -881,7 +881,7 @@ is &myselect, select, '&select with no args';
   my $prev = select;
   is &myselect(my $fh), $prev, '&select($arg) retval';
   is lc ref $fh, 'glob', '&select autovivifies';
-  is select=~s/\*//rug, (*$fh."")=~s/\*//rug, '&select selects';
+  is select, $fh, '&select selects';
   select $prev;
 }
 eval { &myselect(1,2) };
