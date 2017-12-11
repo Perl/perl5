@@ -9,6 +9,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+typedef FILE NativeFile;
+
 #include "fakesdio.h"   /* Causes us to use PerlIO below */
 
 typedef SV *SVREF;
@@ -4312,6 +4315,9 @@ PerlIO_stdout()
 
 InputStream
 PerlIO_stdin()
+
+#undef FILE
+#define FILE NativeFile
 
 FILE *
 PerlIO_exportFILE(PerlIO *f, const char *mode)
