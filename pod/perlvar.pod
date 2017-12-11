@@ -2363,6 +2363,8 @@ Mnemonic: [ begins subscripts.
 
 Deprecated in Perl v5.12.0.
 
+Assigning a non-zero value be fatal in Perl v5.30.0.
+
 =back
 
 =cut
