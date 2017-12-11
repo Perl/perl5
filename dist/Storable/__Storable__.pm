@@ -275,7 +275,10 @@ sub _store {
     if (!(close(FILE) or undef $ret) || $@) {
         unlink($file) or warn "Can't unlink $file: $!\n";
     }
-    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    if ($@) {
+        $@ =~ s/\.?\n$/,/ unless ref $@;
+        logcroak $@;
+    }
     $@ = $da;
     return $ret;
 }
@@ -348,7 +351,10 @@ sub _freeze {
     my $ret;
     # Call C routine mstore or net_mstore, depending on network order
     eval { $ret = &$xsptr($self) };
-    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    if ($@) {
+        $@ =~ s/\.?\n$/,/ unless ref $@;
+        logcroak $@;
+    }
     $@ = $da;
     return $ret ? $ret : undef;
 }
@@ -397,7 +403,10 @@ sub _retrieve {
     }
     eval { $self = pretrieve($FILE, $flags) };		# Call C routine
     close($FILE);
-    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    if ($@) {
+        $@ =~ s/\.?\n$/,/ unless ref $@;
+        logcroak $@;
+    }
     $@ = $da;
     return $self;
 }
@@ -415,7 +424,10 @@ sub fd_retrieve {
     my $self;
     my $da = $@;				# Could be from exception handler
     eval { $self = pretrieve($file, $flags) };	# Call C routine
-    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    if ($@) {
+        $@ =~ s/\.?\n$/,/ unless ref $@;
+        logcroak $@;
+    }
     $@ = $da;
     return $self;
 }
@@ -440,7 +452,10 @@ sub thaw {
     my $self;
     my $da = $@;			        # Could be from exception handler
     eval { $self = mretrieve($frozen, $flags) };# Call C routine
-    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    if ($@) {
+        $@ =~ s/\.?\n$/,/ unless ref $@;
+        logcroak $@;
+    }
     $@ = $da;
     return $self;
 }
