@@ -852,6 +852,9 @@ on other OSes test the change before you commit it to blead.
 Fortunately, there is a way to get your change smoke-tested on various
 OSes: push it to a "smoke-me" branch and wait for certain automated
 smoke-testers to report the results from their OSes.
+A "smoke-me" branch is identified by the branch name: specifically, as
+seen on perl5.git.perl.org it must be a local branch whose first name
+component is precisely C<smoke-me>.
 
 The procedure for doing this is roughly as follows (using the example of
 of tonyc's smoke-me branch called win32stat):
