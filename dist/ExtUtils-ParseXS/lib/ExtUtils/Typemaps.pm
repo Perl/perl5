@@ -781,7 +781,9 @@ corresponding OUTPUT code:
                 $var.context.value().size());
   ',
     'T_OUT' => '    {
-            GV *gv = newGVgen("$Package");
+            GV *gv = (GV *)sv_newmortal();
+            gv_init_pvn(gv, gv_stashpvs("$Package",1),
+                       "__ANONIO__",10,0);
             if ( do_open(gv, "+>&", 3, FALSE, 0, 0, $var) )
                 sv_setsv(
                   $arg,
