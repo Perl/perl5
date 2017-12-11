@@ -7546,8 +7546,10 @@ the end of the string being unpacked.  See L<perlfunc/pack>.
 
 (F) And you probably never will, because you probably don't have the
 sources to your kernel, and your vendor probably doesn't give a rip
-about what you want.  Your best bet is to put a setuid C wrapper around
-your script.
+about what you want.  There is a vulnerability anywhere that you have a
+set-id script, and to close it you need to remove the set-id bit from
+the script that you're attempting to run.  To actually run the script
+set-id, your best bet is to put a set-id C wrapper around your script.
 
 =item You need to quote "%s"
 
