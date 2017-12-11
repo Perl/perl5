@@ -399,8 +399,8 @@ T_ARRAY
 T_STDIO
 	{
 	    GV *gv = (GV *)sv_newmortal();
-	    gv_init_pvn(gv, gv_stashpvs("$Package",1),"__ANONIO__",10,0);
 	    PerlIO *fp = PerlIO_importFILE($var,0);
+	    gv_init_pvn(gv, gv_stashpvs("$Package",1),"__ANONIO__",10,0);
 	    if ( fp && do_open(gv, "+<&", 3, FALSE, 0, 0, fp) ) {
 		SV *rv = newRV_inc((SV*)gv);
 		rv = sv_bless(rv, GvSTASH(gv));
