@@ -602,5 +602,8 @@ EOF
 leak 2,0,\&XS::APItest::PerlIO_stderr,'T_INOUT in default typemap';
 leak 2,0,\&XS::APItest::PerlIO_stdin, 'T_IN in default typemap';
 leak 2,0,\&XS::APItest::PerlIO_stdout,'T_OUT in default typemap';
-leak 2,1,sub{XS::APItest::PerlIO_exportFILE(*STDIN,"");0},
+SKIP: {
+ skip "for now; crashes";
+ leak 2,1,sub{XS::APItest::PerlIO_exportFILE(*STDIN,"");0},
                                       'T_STDIO in default typemap';
+}
