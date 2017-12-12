@@ -9389,6 +9389,15 @@ The L<default C<VERSION> method|UNIVERSAL/C<VERSION ( [ REQUIRE ] )>>,
 inherited from the L<C<UNIVERSAL>|UNIVERSAL> class, croaks if the given
 version is larger than the value of the variable C<$Module::VERSION>.
 
+The VERSION argument cannot be an arbitrary expression.  It only counts
+as a VERSION argument if it is a version number literal, starting with
+either a digit or C<v> followed by a digit.  Anything that doesn't
+look like a version literal will be parsed as the start of the LIST.
+Nevertheless, many attempts to use an arbitrary expression as a VERSION
+argument will appear to work, because L<Exporter>'s C<import> method
+handles numeric arguments specially, performing version checks rather
+than treating them as things to export.
+
 Again, there is a distinction between omitting LIST (L<C<import>|/import
 LIST> called with no arguments) and an explicit empty LIST C<()>
 (L<C<import>|/import LIST> not called).  Note that there is no comma
