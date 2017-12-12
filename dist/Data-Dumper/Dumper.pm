@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.168'; # Don't forget to set version and release
+    $VERSION = '2.169'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -627,7 +627,7 @@ sub Reset {
 
 sub Indent {
   my($s, $v) = @_;
-  if (defined($v)) {
+  if (@_ >= 2) {
     if ($v == 0) {
       $s->{xpad} = "";
       $s->{sep} = "";
@@ -646,92 +646,92 @@ sub Indent {
 
 sub Trailingcomma {
   my($s, $v) = @_;
-  defined($v) ? (($s->{trailingcomma} = $v), return $s) : $s->{trailingcomma};
+  @_ >= 2 ? (($s->{trailingcomma} = $v), return $s) : $s->{trailingcomma};
 }
 
 sub Pair {
     my($s, $v) = @_;
-    defined($v) ? (($s->{pair} = $v), return $s) : $s->{pair};
+    @_ >= 2 ? (($s->{pair} = $v), return $s) : $s->{pair};
 }
 
 sub Pad {
   my($s, $v) = @_;
-  defined($v) ? (($s->{pad} = $v), return $s) : $s->{pad};
+  @_ >= 2 ? (($s->{pad} = $v), return $s) : $s->{pad};
 }
 
 sub Varname {
   my($s, $v) = @_;
-  defined($v) ? (($s->{varname} = $v), return $s) : $s->{varname};
+  @_ >= 2 ? (($s->{varname} = $v), return $s) : $s->{varname};
 }
 
 sub Purity {
   my($s, $v) = @_;
-  defined($v) ? (($s->{purity} = $v), return $s) : $s->{purity};
+  @_ >= 2 ? (($s->{purity} = $v), return $s) : $s->{purity};
 }
 
 sub Useqq {
   my($s, $v) = @_;
-  defined($v) ? (($s->{useqq} = $v), return $s) : $s->{useqq};
+  @_ >= 2 ? (($s->{useqq} = $v), return $s) : $s->{useqq};
 }
 
 sub Terse {
   my($s, $v) = @_;
-  defined($v) ? (($s->{terse} = $v), return $s) : $s->{terse};
+  @_ >= 2 ? (($s->{terse} = $v), return $s) : $s->{terse};
 }
 
 sub Freezer {
   my($s, $v) = @_;
-  defined($v) ? (($s->{freezer} = $v), return $s) : $s->{freezer};
+  @_ >= 2 ? (($s->{freezer} = $v), return $s) : $s->{freezer};
 }
 
 sub Toaster {
   my($s, $v) = @_;
-  defined($v) ? (($s->{toaster} = $v), return $s) : $s->{toaster};
+  @_ >= 2 ? (($s->{toaster} = $v), return $s) : $s->{toaster};
 }
 
 sub Deepcopy {
   my($s, $v) = @_;
-  defined($v) ? (($s->{deepcopy} = $v), return $s) : $s->{deepcopy};
+  @_ >= 2 ? (($s->{deepcopy} = $v), return $s) : $s->{deepcopy};
 }
 
 sub Quotekeys {
   my($s, $v) = @_;
-  defined($v) ? (($s->{quotekeys} = $v), return $s) : $s->{quotekeys};
+  @_ >= 2 ? (($s->{quotekeys} = $v), return $s) : $s->{quotekeys};
 }
 
 sub Bless {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'bless'} = $v), return $s) : $s->{'bless'};
+  @_ >= 2 ? (($s->{'bless'} = $v), return $s) : $s->{'bless'};
 }
 
 sub Maxdepth {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'maxdepth'} = $v), return $s) : $s->{'maxdepth'};
+  @_ >= 2 ? (($s->{'maxdepth'} = $v), return $s) : $s->{'maxdepth'};
 }
 
 sub Maxrecurse {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'maxrecurse'} = $v), return $s) : $s->{'maxrecurse'};
+  @_ >= 2 ? (($s->{'maxrecurse'} = $v), return $s) : $s->{'maxrecurse'};
 }
 
 sub Useperl {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'useperl'} = $v), return $s) : $s->{'useperl'};
+  @_ >= 2 ? (($s->{'useperl'} = $v), return $s) : $s->{'useperl'};
 }
 
 sub Sortkeys {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'sortkeys'} = $v), return $s) : $s->{'sortkeys'};
+  @_ >= 2 ? (($s->{'sortkeys'} = $v), return $s) : $s->{'sortkeys'};
 }
 
 sub Deparse {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'deparse'} = $v), return $s) : $s->{'deparse'};
+  @_ >= 2 ? (($s->{'deparse'} = $v), return $s) : $s->{'deparse'};
 }
 
 sub Sparseseen {
   my($s, $v) = @_;
-  defined($v) ? (($s->{'noseen'} = $v), return $s) : $s->{'noseen'};
+  @_ >= 2 ? (($s->{'noseen'} = $v), return $s) : $s->{'noseen'};
 }
 
 # used by qquote below
@@ -1474,7 +1474,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.168
+Version 2.169
 
 =head1 SEE ALSO
 
