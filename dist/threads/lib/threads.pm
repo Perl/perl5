@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '2.19';      # remember to update version in POD!
+our $VERSION = '2.20';      # remember to update version in POD!
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 2.19
+This document describes threads version 2.20
 
 =head1 WARNING
 
@@ -987,13 +987,6 @@ L</"THREAD SIGNALLING"> to relay the signal to the thread:
 On some platforms, it might not be possible to destroy I<parent> threads while
 there are still existing I<child> threads.
 
-=item Creating threads inside special blocks
-
-Creating threads inside C<BEGIN>, C<CHECK> or C<INIT> blocks should not be
-relied upon.  Depending on the Perl version and the application code, results
-may range from success, to (apparently harmless) warnings of leaked scalar, or
-all the way up to crashing of the Perl interpreter.
-
 =item Unsafe signals
 
 Since Perl 5.8.0, signals have been made safer in Perl by postponing their
@@ -1018,16 +1011,27 @@ signalling behavior is only in effect in the following situations:
 If unsafe signals is in effect, then signal handling is not thread-safe, and
 the C<-E<gt>kill()> signalling method cannot be used.
 
-=item Returning closures from threads
+=item Identity of objects returned from threads
 
-Returning closures from threads should not be relied upon.  Depending on the
-Perl version and the application code, results may range from success, to
-(apparently harmless) warnings of leaked scalar, or all the way up to crashing
-of the Perl interpreter.
+When a value is returned from a thread through a C<join> operation,
+the value and everything that it references is copied across to the
+joining thread, in much the same way that values are copied upon thread
+creation.  This works fine for most kinds of value, including arrays,
+hashes, and subroutines.  The copying recurses through array elements,
+reference scalars, variables closed over by subroutines, and other kinds
+of reference.
 
-=item Returning objects from threads
+However, everything referenced by the returned value is a fresh copy in
+the joining thread, even if a returned object had in the child thread
+been a copy of something that previously existed in the parent thread.
+After joining, the parent will therefore have a duplicate of each such
+object.  This sometimes matters, especially if the object gets mutated;
+this can especially matter for private data to which a returned subroutine
+provides access.
 
-Returning objects from threads does not work.  Depending on the classes
+=item Returning blessed objects from threads
+
+Returning blessed objects from threads does not work.  Depending on the classes
 involved, you may be able to work around this by returning a serialized
 version of the object (e.g., using L<Data::Dumper> or L<Storable>), and then
 reconstituting it in the joining thread.  If you're using Perl 5.10.0 or
