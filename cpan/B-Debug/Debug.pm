@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 BEGIN { if ($] >= 5.027001) { require deprecate; import deprecate; } }
 
 use strict;

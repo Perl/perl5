@@ -32,17 +32,18 @@ use File::Spec;
 my $a;
 my $X = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
 
-my $path = join " ", map { qq["-I$_"] } (File::Spec->catfile("blib","lib"), @INC);
+local $ENV{PERL5LIB} =
+  join $Config{path_sep}, File::Spec->catfile("blib","lib"), @INC;
 my $redir = $^O =~ /VMS|MSWin32|MacOS/ ? "" : "2>&1";
 
-$a = `$X $path "-MO=Debug" -e 1 $redir`;
+$a = `$X "-MO=Debug" -e 1 $redir`;
 like($a, qr/\bLISTOP\b.*\bOP\b.*\bCOP\b.*\bOP\b/s);
 
 
-$a = `$X $path "-MO=Terse" -e 1 $redir`;
+$a = `$X "-MO=Terse" -e 1 $redir`;
 like($a, qr/\bLISTOP\b.*leave.*\n    OP\b.*enter.*\n    COP\b.*nextstate.*\n    OP\b.*null/s);
 
-$a = `$X $path "-MO=Terse" -ane "s/foo/bar/" $redir`;
+$a = `$X "-MO=Terse" -ane "s/foo/bar/" $redir`;
 $a =~ s/\(0x[^)]+\)//g;
 $a =~ s/\[[^\]]+\]//g;
 $a =~ s/-e syntax OK//;
@@ -81,14 +82,14 @@ is($a, $b);
 like(B::Debug::_printop(B::main_root),  qr/LISTOP\s+\[OP_LEAVE\]/);
 like(B::Debug::_printop(B::main_start), qr/OP\s+\[OP_ENTER\]/);
 
-$a = `$X $path "-MO=Debug" -e "B::main_root->debug" $redir`;
+$a = `$X "-MO=Debug" -e "B::main_root->debug" $redir`;
 like($a, qr/op_next\s+0x0/m);
-$a = `$X $path "-MO=Debug" -e "B::main_start->debug" $redir`;
+$a = `$X "-MO=Debug" -e "B::main_start->debug" $redir`;
 like($a, qr/\[OP_ENTER\]/m);
 
 # pass missing FETCHSIZE, fixed with 1.06
 my $e = q(BEGIN{tie @a, __PACKAGE__;sub TIEARRAY {bless{}} sub FETCH{1}};print $a[1]);
-$a = `$X $path "-MO=Debug" -e"$e" $redir`;
+$a = `$X "-MO=Debug" -e"$e" $redir`;
 unlike($a, qr/locate object method "FETCHSIZE"/m);
 
 # NV assertion with CV, fixed with 1.13
@@ -96,7 +97,7 @@ my $tmp = "tmp.pl";
 open TMP, ">", $tmp;
 print TMP 'my $p=1;$g=2;sub p($){my $i=1;$i+1};print p(0)+$g;';
 close TMP;
-$a = `$X $path "-MO=Debug" $tmp $redir`;
+$a = `$X "-MO=Debug" $tmp $redir`;
 ok(! $?);
 unlike($a, qr/assertion "SvTYPE(sv) != SVt_PVCV" failed.*function: S_sv_2iuv_common/m);
 unlike($a, qr/Use of uninitialized value in print/m);
