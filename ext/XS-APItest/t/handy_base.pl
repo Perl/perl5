@@ -168,6 +168,7 @@ my %utf8_param_code = (
 
 # This test is split into this number of files.
 my $num_test_files = $ENV{TEST_JOBS} || 1;
+$::TEST_CHUNK = 0 if $num_test_files == 1 && ! defined $::TEST_CHUNK;
 $num_test_files = 10 if $num_test_files > 10;
 
 my $property_count = -1;
