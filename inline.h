@@ -396,7 +396,27 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #define PERL_WORDSIZE            sizeof(PERL_COUNT_MULTIPLIER)
 #define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
 
-    if ((STRLEN) (send - x) >= PERL_WORDSIZE) {
+/* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1, by
+ * or'ing together the lowest bits of 'x'.  Hopefully the final term gets
+ * optimized out completely on a 32-bit system, and its mask gets optimized out
+ * on a 64-bit system */
+#define PERL_IS_SUBWORD_ADDR(x) (1 & (     PTR2nat(x)                      \
+                                      |   (PTR2nat(x) >> 1)                \
+                                      | ( (PTR2nat(x) >> 2)                \
+                                         & PERL_WORD_BOUNDARY_MASK)))
+
+    /* Do the word-at-a-time iff there is at least one usable full word.  That
+     * means that after advancing to a word boundary, there still is at least a
+     * full word left.  The number of bytes needed to advance is 'wordsize -
+     * offset' unless offset is 0. */
+    if ((STRLEN) (send - x) >= PERL_WORDSIZE
+
+                            /* This term is wordsize if subword; 0 if not */
+                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(x)
+
+                            /* 'offset' */
+                          - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))
+    {
 
         /* Process per-byte until reach word boundary.  XXX This loop could be
          * eliminated if we knew that this platform had fast unaligned reads */
@@ -411,8 +431,9 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
             x++;
         }
 
-        /* Process per-word as long as we have at least a full word left */
-        while (x + PERL_WORDSIZE <= send) {
+        /* Here, we know we have at least one full word to process.  Process
+         * per-word as long as we have at least a full word left */
+        do {
             if ((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK)  {
 
                 /* Found a variant.  Just return if caller doesn't want its
@@ -425,7 +446,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
                 break;
             }
             x += PERL_WORDSIZE;
-        }
+        } while (x + PERL_WORDSIZE <= send);
     }
 
 #  undef PERL_WORDSIZE

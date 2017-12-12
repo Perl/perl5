@@ -6045,7 +6045,7 @@ test_is_utf8_invariant_string_loc(unsigned char *s, STRLEN offset, STRLEN len)
          * is to start at.  Allocate space that does start at the word
          * boundary, and copy 's' to the correct offset past it.  Then call the
          * tested function with that position */
-        Newx(copy, (len + WORDSIZE - 1) / WORDSIZE, PERL_UINTMAX_T);
+        Newx(copy, 1 + ((len + WORDSIZE - 1) / WORDSIZE), PERL_UINTMAX_T);
         Copy(s, (U8 *) copy + offset, len, U8);
         av = newAV();
         av_push(av, newSViv(is_utf8_invariant_string_loc((U8 *) copy + offset, len, &ep)));
