@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 198);
+plan(tests => 200);
 
 # these shouldn't hang
 {
@@ -1170,4 +1170,27 @@ SKIP:
     my @in = ( "0", "20000000000000001", "20000000000000000" );
     my @out = sort { $a <=> $b } @in;
     is($out[1], "20000000000000000", "check sort order");
+}
+
+# [perl #92264] refcounting of GvSV slot of *a and *b
+{
+    my $act;
+    package ReportDestruction {
+	sub new { bless({ p => $_[1] }, $_[0]) }
+	sub DESTROY { $act .= $_[0]->{p}; }
+    }
+    $act = "";
+    my $filla = \(ReportDestruction->new("[filla]"));
+    () = sort { my $r = $a cmp $b; $act .= "0"; *a = \$$filla; $act .= "1"; $r }
+	    ReportDestruction->new("[sorta]"), "foo";
+    $act .= "2";
+    $filla = undef;
+    is $act, "01[sorta]2[filla]";
+    $act = "";
+    my $fillb = \(ReportDestruction->new("[fillb]"));
+    () = sort { my $r = $a cmp $b; $act .= "0"; *b = \$$fillb; $act .= "1"; $r }
+	    "foo", ReportDestruction->new("[sortb]");
+    $act .= "2";
+    $fillb = undef;
+    is $act, "01[sortb]2[fillb]";
 }
