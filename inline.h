@@ -518,67 +518,8 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
         }
 
         /* Process per-word as long as we have at least a full word left */
-        do {
-
-            /* It's easier to look at a 16-bit word size to see how this works.
-             * The expression would be:
-             *
-             *  (((*x & 0x8080) >> 7) * 0x0101) >> 8;
-             *
-             * Suppose the value of *x is the 16 bits
-             *
-             *      0by_______z_______
-             *
-             * where the 14 bits represented by '_' could be any combination of
-             * 0's or 1's (we don't care), and 'y' is the high bit of one byte,
-             * and 'z' is the high bit for the other (endianness doesn't
-             * matter).  On ASCII platforms a byte is variant if the high bit
-             * is set; invariant otherwise.  Thus, our goal, the count of
-             * variants in this 2-byte word is
-             *
-             *      y + z
-             *
-             * To turn 0by_______z_______ into (y + z) we mask the intial value
-             * with 0x8080 to turn it into
-             *
-             *      0by0000000z0000000
-             *
-             * Then right shifting by 7 yields
-             *
-             *      0by0000000z
-             *
-             * Viewed as a number, this is
-             *
-             *      2**8 * y + z
-             *
-             * We then multiply by 0x0101 (which is = 2**8 + 1), so
-             *
-             *       (2**8 * y + z) * (2**8 + 1)
-             *     = (2**8 * y * 2**8) + (z * 2**8) + (2**8 * y * 1) + (z * 1)
-             *     = (2**16 * y) + (2**8 * (y + z)) + z
-             *
-             * However (2**16 * y) doesn't fit in a 16-bit word (unless 'y' is
-             * zero in which case it is 0), and since this is unsigned
-             * multiplication, the C standard says that this component just
-             * gets ignored, so we are left with
-             *
-             *     =  2**8 * (y + z) + z
-             *
-             * We then shift right by 8 bits, which divides by 2**8, and gets
-             * rid of the lone 'z', leaving us with
-             *
-             *     =  y + z
-             *
-             * The same principles apply for longer word sizes.  For 32 bit
-             * words we end up with
-             *
-             *     =  2**24 * (w + x + y + z) + (lots of other expressions
-             *                                   below 2**24)
-             *
-             * with anything above 2**24 having overflowed and been chopped
-             * off.  Shifting right by 24 yields (w + x + y + z)
-             */
-
+        do {    /* Commit 03c1e4ab1d6ee9062fb3f94b0ba31db6698724b1 contains an
+                   explanation of how this works */
             count += ((((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK) >> 7)
                       * PERL_COUNT_MULTIPLIER)
                     >> ((PERL_WORDSIZE - 1) * CHARBITS);
