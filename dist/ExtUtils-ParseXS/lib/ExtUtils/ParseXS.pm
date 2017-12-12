@@ -11,13 +11,17 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.36';
+  $VERSION = '3.37';
+  $VERSION = eval $VERSION if $VERSION =~ /_/;
 }
-use ExtUtils::ParseXS::Constants $VERSION;
-use ExtUtils::ParseXS::CountLines $VERSION;
-use ExtUtils::ParseXS::Utilities $VERSION;
-use ExtUtils::ParseXS::Eval $VERSION;
-$VERSION = eval $VERSION if $VERSION =~ /_/;
+use ExtUtils::ParseXS::Constants ();
+use ExtUtils::ParseXS::CountLines ();
+use ExtUtils::ParseXS::Utilities;
+use ExtUtils::ParseXS::Eval ();
+BEGIN {
+  "ExtUtils::ParseXS::$_"->VERSION($VERSION)
+    foreach qw(Constants CountLines Utilities Eval);
+}
 
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations

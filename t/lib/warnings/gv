@@ -280,3 +280,86 @@ if ($ㄒ) {
 EXPECT
 Name "팣칵ぇ::ʎ" used only once: possible typo at - line 11.
 Use of uninitialized value $팣칵ぇ::ʎ in print at - line 11.
+########
+# fake import method
+use warnings;
+my($a, @a);
+$a = "Unknown"->import;
+@a = "Unknown"->import;
+$a = "Unknown"->import("foo");
+@a = "Unknown"->import("foo");
+$a = bless({}, "Unknown")->import;
+@a = bless({}, "Unknown")->import;
+$a = bless({}, "Unknown")->import("foo");
+@a = bless({}, "Unknown")->import("foo");
+no warnings "deprecated";
+$a = "Unknown"->import;
+@a = "Unknown"->import;
+$a = "Unknown"->import("foo");
+@a = "Unknown"->import("foo");
+$a = bless({}, "Unknown")->import;
+@a = bless({}, "Unknown")->import;
+$a = bless({}, "Unknown")->import("foo");
+@a = bless({}, "Unknown")->import("foo");
+EXPECT
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 6.
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 7.
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 10.
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 11.
+########
+# fake import method being faked by UNIVERSAL
+use UNIVERSAL ();
+use warnings;
+my($a, @a);
+$a = "Unknown"->import;
+@a = "Unknown"->import;
+$a = "Unknown"->import("foo");
+@a = "Unknown"->import("foo");
+$a = bless({}, "Unknown")->import;
+@a = bless({}, "Unknown")->import;
+$a = bless({}, "Unknown")->import("foo");
+@a = bless({}, "Unknown")->import("foo");
+no warnings "deprecated";
+$a = "Unknown"->import;
+@a = "Unknown"->import;
+$a = "Unknown"->import("foo");
+@a = "Unknown"->import("foo");
+$a = bless({}, "Unknown")->import;
+@a = bless({}, "Unknown")->import;
+$a = bless({}, "Unknown")->import("foo");
+@a = bless({}, "Unknown")->import("foo");
+EXPECT
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 7.
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 8.
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 11.
+Calling undefined "import" method with arguments via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 12.
+########
+# fake unimport method
+use warnings;
+my($a, @a);
+$a = "Unknown"->unimport;
+@a = "Unknown"->unimport;
+$a = "Unknown"->unimport("foo");
+@a = "Unknown"->unimport("foo");
+$a = bless({}, "Unknown")->unimport;
+@a = bless({}, "Unknown")->unimport;
+$a = bless({}, "Unknown")->unimport("foo");
+@a = bless({}, "Unknown")->unimport("foo");
+no warnings "deprecated";
+$a = "Unknown"->unimport;
+@a = "Unknown"->unimport;
+$a = "Unknown"->unimport("foo");
+@a = "Unknown"->unimport("foo");
+$a = bless({}, "Unknown")->unimport;
+@a = bless({}, "Unknown")->unimport;
+$a = bless({}, "Unknown")->unimport("foo");
+@a = bless({}, "Unknown")->unimport("foo");
+EXPECT
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 4.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 5.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 6.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 7.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 8.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 9.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 10.
+Calling undefined "unimport" method via package "Unknown" is deprecated. This will be fatal in Perl 5.32 at - line 11.

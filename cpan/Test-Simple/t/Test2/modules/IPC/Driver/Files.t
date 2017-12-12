@@ -1,7 +1,7 @@
 use Test2::Tools::Tiny;
 use Test2::Util qw/get_tid USE_THREADS try ipc_separator/;
 use File::Temp qw/tempfile/;
-use File::Spec qw/catfile/;
+use File::Spec ();
 use List::Util qw/shuffle/;
 use strict;
 use warnings;

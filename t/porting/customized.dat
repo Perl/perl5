@@ -1,8 +1,10 @@
 # Regenerate this file using:
 #     cd t
 #     ./perl -I../lib porting/customized.t --regen
+CPAN cpan/CPAN/scripts/cpan be00f141fab6c19a3298e59281704f5acf865ef0
 Devel::PPPort dist/Devel-PPPort/parts/embed.fnc e030719d9c6921810554a8e2d398543348b4878c
 Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
+IO-Compress cpan/IO-Compress/lib/IO/Compress/Zip.pm 053e3aecd12e2d732ec519b1b86f97eaebe88909
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 198ea6c6c584f5ea79a0fd7e9d411d0878f3b2af
 Math::Complex cpan/Math-Complex/t/Complex.t 4f307ed6fc59f1e5fb0e6b11103fc631b6bdb335
@@ -18,6 +20,7 @@ Pod::Checker cpan/Pod-Checker/t/pod/selfcheck.t 8ce3cfd38e4b9bcf5bc7fe7f2a14195e
 Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916e3d8a16
 Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5facf5b3b
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
+Test::Simple cpan/Test-Simple/t/Test2/modules/IPC/Driver/Files.t e5ae2ec6c4144269674ad3b11b1777366f37543c
 autodie cpan/autodie/lib/autodie/exception.pm b99e4e35a9ed36de94d54437888822ced4936207
 autodie cpan/autodie/lib/autodie/hints.pm e1998fec61fb4e82fe46585bd82c73200be6f262
 autodie cpan/autodie/t/exceptions.t ad315a208f875e06b0964012ce8d65daa438c036

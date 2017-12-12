@@ -291,6 +291,10 @@ use File::Glob qw(:case);
                 t/yaml_code.yml
                 ),
         ],
+        'CUSTOMIZED'   => [
+	    # [perl #132425]
+	    'scripts/cpan',
+        ],
     },
 
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated
@@ -628,6 +632,10 @@ use File::Glob qw(:case);
             't/010examples-bzip2.t',
             't/010examples-zlib.t',
             't/cz-05examples.t',
+        ],
+        'CUSTOMIZED'   => [
+	    # [perl #132425]
+	    'lib/IO/Compress/Zip.pm',
         ],
     },
 
@@ -1092,6 +1100,10 @@ use File::Glob qw(:case);
                 t/00-report.t
                 t/zzz-check-breaks.t
                 ),
+        ],
+        'CUSTOMIZED'   => [
+	    # [perl #132425]
+	    't/Test2/modules/IPC/Driver/Files.t',
         ],
     },
 

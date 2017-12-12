@@ -627,6 +627,10 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     return gv;
 }
 
+static void S_xsub_defimport(pTHX_ CV* cv);
+static void S_xsub_defunimport(pTHX_ CV* cv);
+static MGVTBL const defimport_mgvtbl = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
 /*
 =for apidoc gv_fetchmeth
 
@@ -1092,8 +1096,35 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	   Foo->unimport from being an error even if there's no
 	  import/unimport subroutine */
 	if (strEQ(name,"import") || strEQ(name,"unimport")) {
-	    gv = (GV*)sv_2mortal((SV*)newCONSTSUB_flags(NULL,
-						NULL, 0, 0, NULL));
+	    SV *savedname;
+	    CV *cv;
+	    MAGIC *mg;
+	    cv = newXS_len_flags(NULL, 0,
+			name[0] == 'u' ? S_xsub_defunimport : S_xsub_defimport,
+			__FILE__, NULL, NULL, 0);
+	    sv_2mortal((SV*)cv);
+	    gv = (GV*)cv;
+	    if (stash) {
+		HEK *stname = HvNAME_HEK(stash);
+		savedname = newSVhek(stname);
+	    } else {
+		char const *pv;
+		STRLEN len;
+		int flags;
+		if (last_separator) {
+		    pv = origname;
+		    len = last_separator - origname;
+		    flags = is_utf8 ? SVf_UTF8 : 0;
+		} else {
+		    pv = SvPV(error_report, len);
+		    flags = SvUTF8(error_report) ? SVf_UTF8 : 0;
+		}
+		savedname = newSVpvn_flags(pv, len, flags);
+	    }
+	    mg = sv_magicext((SV*)cv, NULL, PERL_MAGIC_ext, &defimport_mgvtbl,
+				NULL, 0);
+	    mg->mg_obj = savedname;
+	    mg->mg_flags |= MGf_REFCOUNTED;
 	} else if (autoload)
 	    gv = gv_autoload_pvn(
 		ostash, name, name_end - name, GV_AUTOLOAD_ISMETHOD|flags
@@ -3724,6 +3755,36 @@ core_xsub(pTHX_ CV* cv)
     Perl_croak(aTHX_
        "&CORE::%s cannot be called directly", GvNAME(CvGV(cv))
     );
+}
+
+static void
+S_xsub_defimport(pTHX_ CV* cv)
+{
+    SV *savedname =
+	mg_findext((SV*)cv, PERL_MAGIC_ext, &defimport_mgvtbl)->mg_obj;
+    dXSARGS;
+    if (items > 1)
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+	    "Calling undefined \"import\" method with arguments"
+	    " via package \"%" SVf "\""
+	    " is deprecated. This will be fatal in Perl 5.32",
+	    SVfARG(savedname));
+    XSRETURN(0);
+}
+
+static void
+S_xsub_defunimport(pTHX_ CV* cv)
+{
+    SV *savedname =
+	mg_findext((SV*)cv, PERL_MAGIC_ext, &defimport_mgvtbl)->mg_obj;
+    dXSARGS;
+    PERL_UNUSED_ARG(items);
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+	"Calling undefined \"unimport\" method"
+	" via package \"%" SVf "\""
+	" is deprecated. This will be fatal in Perl 5.32",
+	SVfARG(savedname));
+    XSRETURN(0);
 }
 
 /*

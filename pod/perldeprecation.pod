@@ -50,6 +50,46 @@ changes to the variable that it closes over, add an explicit C<return>:
 
 This usage has been deprecated, and will no longer be allowed in Perl 5.32.
 
+=head3 Calling undefined "import" method with arguments
+
+As a special exception to method lookup rules, calling an C<import> method
+on a package that has no such method has historically been permitted,
+with Perl pretending that there is a method that ignores its arguments
+and successfully returns nothing.  Such method calls commonly arise from
+C<use> declarations, and are sometimes OK: if the C<use> declaration was
+only intended to load a module, and the module has nothing to export.
+But if the caller was expecting to import something, they silently
+get nothing.  This hides bugs involving misunderstandings about what a
+module exports, package name misspellings, and some others.
+
+To reduce the potential for hidden bugs, calling an undefined C<import>
+method with arguments is being deprecated.  Passing arguments is a
+strong indicator that the caller expected something more than just
+module loading.  Calls with no arguments are not deprecated: they can
+still hide bugs, but they're much more often OK, so deprecating them
+outright would cause a lot of noise.
+
+These calls were deprecated in Perl 5.28, and will become fatal in
+Perl 5.32.
+
+=head3 Calling undefined "unimport" method
+
+As a special exception to method lookup rules, calling an C<unimport>
+method on a package that has no such method has historically been
+permitted, with Perl pretending that there is a method that ignores its
+arguments and successfully returns nothing.  Such method calls commonly
+arise from C<no> declarations.  Generally the caller was expecting the
+declaration to have some effect, typically cancelling some lexical status
+previously established through C<use>, but they silently get nothing.
+This hides bugs involving misunderstandings about how a module controls
+lexical status, package name misspellings, and some others.
+
+To reduce the potential for hidden bugs, calling an undefined C<unimport>
+method is being deprecated.
+
+These calls were deprecated in Perl 5.28, and will become fatal in
+Perl 5.32.
+
 =head3 Use of strings with code points over 0xFF as arguments to C<vec>
 
 C<vec> views its string argument as a sequence of bits.  A string

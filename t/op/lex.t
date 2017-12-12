@@ -50,7 +50,7 @@ curr_test(3);
 {
  delete local $ENV{PERL_UNICODE};
  fresh_perl_is(
-  'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"} } "\N{a}"',
+  'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"} } sub charnames::import {} sub _charnames::import {} "\N{a}"',
   'Constant(\N{a}) unknown at - line 1, within string' . "\n"
  ."Execution of - aborted due to compilation errors.\n",
    { stderr => 1 },

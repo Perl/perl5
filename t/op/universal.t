@@ -11,7 +11,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 143;
+plan tests => 150;
 
 $a = {};
 bless $a, "Bob";
@@ -199,9 +199,14 @@ ok $x->isa('UNIVERSAL');
 
 
 # Check that the "historical accident" of UNIVERSAL having an import()
-# method doesn't effect anyone else.
-eval { Some::Package->import("bar") };
-is $@, '';
+# method doesn't affect anyone else.
+foreach my $meth (qw(import unimport)) {
+    foreach my $args ([], ["foo"]) {
+	no warnings "deprecated";
+	is join(",", map { $_ // "u" } "a", "b", "Unknown"->$meth(@$args), "c", "d"), "a,b,c,d", "Unknown->$meth(@$args) in list context";
+	is join(",", map { $_ // "u" } "a", "b", scalar("Unknown"->$meth(@$args)), "c", "d"), "a,b,u,c,d", "Unknown->$meth(@$args) in scalar context";
+    }
+}
 
 
 # This segfaulted in a blead.

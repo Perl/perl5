@@ -652,6 +652,74 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
+=item Calling undefined "import" method with arguments via package "%s" is deprecated. This will be fatal in Perl 5.32
+
+(D deprecated) You called the C<import> method on a package that doesn't
+define such a method.  Most likely you didn't call the method directly,
+but it was called on your behalf by a C<use> declaration.  For historical
+reasons, unlike any other method names, it is not an error to call this
+method where it doesn't exist; Perl pretends that there was an empty
+method.  Calling the method with no arguments is not deprecated, because
+that kind of C<use> declaration likely just indicates a desire to load
+a module.  But calling the pretend method with arguments is deprecated,
+and will become fatal in Perl 5.32, because it tends to hide bugs.
+You were probably trying to import a subroutine, or perform a version
+check via C<Exporter>'s C<import> method, and the pretend method won't
+give you that behaviour.
+
+If it appears to you that the package does define the C<import> method,
+or inherit it from C<Exporter> or some other base class, carefully
+check its C<package> declaration against the package name given in the
+diagnostic.  It sometimes occurs that the package is declared with a
+name that doesn't match the name of the module file that contains it.
+The same problem can also arise from a module file being accessible
+under a different name from that which it is intended to have, for
+example due to a case-insensitive filesystem.
+
+If you want C<import> to be callable with arguments on the package in
+question, then you should put a real C<import> method in that package
+(or in one of its base classes).  It is advised that the method should
+look at its arguments, and signal an error if called with arguments that
+it wasn't intended to be called with.  For a package that has nothing to
+export, normally C<import> should not accept any arguments.  However,
+if you are retrofitting an C<import> method to an established module
+which has users not under your control, the more conservative approach
+is to add an empty method, to preserve the old behaviour.  Either way,
+adding an explicit C<import> method makes your desired behaviour apply
+independent of Perl version.
+
+=item Calling undefined "unimport" method via package "%s" is deprecated. This will be fatal in Perl 5.32
+
+(D deprecated) You called the C<unimport> method on a package that doesn't
+define such a method.  Most likely you didn't call the method directly,
+but it was called on your behalf by a C<no> declaration.  For historical
+reasons, unlike any other method names, it is not an error to call this
+method where it doesn't exist; Perl pretends that there was an empty
+method.  The pretend method is deprecated, and will be removed in Perl
+5.32, because it tends to hide bugs.  You were probably trying to cancel
+some lexical status, and the pretend method won't give you that behaviour.
+
+If it appears to you that the package does define the C<unimport>
+method, or inherit it from some base class, carefully check its
+C<package> declaration against the package name given in the diagnostic.
+It sometimes occurs that the package is declared with a name that doesn't
+match the name of the module file that contains it.  The same problem
+can also arise from a module file being accessible under a different
+name from that which it is intended to have, for example due to a
+case-insensitive filesystem.
+
+If you want C<unimport> to be callable on the package in question, then
+you should put a real C<unimport> method in that package (or in one of
+its base classes).  It is advised that the method should look at its
+arguments, and signal an error if called with arguments that it wasn't
+intended to be called with.  Most packages have nothing to unexport, so
+normally C<unimport> should signal an error regardless of its arguments.
+However, if you are retrofitting an C<unimport> method to an established
+module which has users not under your control, the more conservative
+approach is to add an empty method, to preserve the old behaviour.
+Either way, adding an explicit C<unimport> method makes your desired
+behaviour apply independent of Perl version.
+
 =item Cannot chr %f
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.

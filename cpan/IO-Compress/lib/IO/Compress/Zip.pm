@@ -19,15 +19,15 @@ use Compress::Raw::Zlib  2.074 ();
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.074 ; 
+           VERSION IO::Compress::Adapter::Bzip2 2.074 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.074 ; 
+           VERSION IO::Compress::Bzip2 2.074 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.074 ; 
+           VERSION IO::Compress::Adapter::Lzma 2.074 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.074 ; 
+           VERSION IO::Compress::Lzma 2.074 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.074';
+$VERSION = '2.074001';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);

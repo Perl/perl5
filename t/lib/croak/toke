@@ -207,9 +207,11 @@ Execution of - aborted due to compilation errors.
 # NAME \N{...} when charnames fails to load but without an error
 # SKIP ? exists $ENV{PERL_UNICODE} ? "Unreliable under some PERL_UNICODE settings" : 0
 BEGIN { ++$_ for @INC{"charnames.pm","_charnames.pm"} }
+sub charnames::import {}
+sub _charnames::import {}
 "\N{a}"
 EXPECT
-Constant(\N{a}) unknown at - line 2, within string
+Constant(\N{a}) unknown at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
 # NAME Integer constant overloading returning undef

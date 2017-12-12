@@ -4,8 +4,8 @@ BEGIN { pop @INC if $INC[-1] eq '.' }
 use strict;
 use vars qw($VERSION);
 
-use App::Cpan '1.64';
-$VERSION = '1.64';
+use App::Cpan 1.64;
+$VERSION = '1.6401';
 
 my $rc = App::Cpan->run( @ARGV );
 

@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 162);
+plan(tests => 166);
 
 {
     # RT #126042 &{1==1} * &{1==1} would crash
@@ -24,8 +24,11 @@ plan(tests => 162);
     # method was broken in scalar context, messing up the stack.  We test
     # for that on its own.
     foreach my $meth (qw(import unimport)) {
-	is join(",", map { $_ // "u" } "a", "b", "Unknown"->$meth, "c", "d"), "a,b,c,d", "Unknown->$meth in list context";
-	is join(",", map { $_ // "u" } "a", "b", scalar("Unknown"->$meth), "c", "d"), "a,b,u,c,d", "Unknown->$meth in scalar context";
+	foreach my $args ([], ["foo"]) {
+	    no warnings "deprecated";
+	    is join(",", map { $_ // "u" } "a", "b", "Unknown"->$meth(@$args), "c", "d"), "a,b,c,d", "Unknown->$meth(@$args) in list context";
+	    is join(",", map { $_ // "u" } "a", "b", scalar("Unknown"->$meth(@$args)), "c", "d"), "a,b,u,c,d", "Unknown->$meth(@$args) in scalar context";
+	}
     }
     # The second issue is that the fake method wasn't actually a CV or
     # anything referencing a CV, but was &PL_sv_yes being used as a magic

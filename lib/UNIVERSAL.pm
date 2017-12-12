@@ -1,18 +1,26 @@
 package UNIVERSAL;
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 # UNIVERSAL should not contain any extra subs/methods beyond those
 # that it exists to define. The existence of import() below is a historical
 # accident that can't be fixed without breaking code.
 
-# Make sure that even though the import method is called, it doesn't do
-# anything unless called on UNIVERSAL.
+# Make sure that the import method behaves identically to the core's
+# fake import method unless called on UNIVERSAL.
 sub import {
-    return unless $_[0] eq __PACKAGE__;
     return unless @_ > 1;
-    require Carp;
-    Carp::croak("UNIVERSAL does not export anything");
+    if ($_[0] eq __PACKAGE__) {
+	require Carp;
+	Carp::croak("UNIVERSAL does not export anything");
+    } else {
+	my $class = ref($_[0]) eq "" ? $_[0] : ref($_[0]);
+	require warnings;
+	warnings::warnif("deprecated",
+	    "Calling undefined \"import\" method with arguments".
+	    " via package \"$class\"".
+	    " is deprecated. This will be fatal in Perl 5.32");
+    }
 }
 
 1;

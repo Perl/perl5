@@ -9416,13 +9416,19 @@ features back into the current package.  The module can implement its
 L<C<import>|/import LIST> method any way it likes, though most modules
 just choose to derive their L<C<import>|/import LIST> method via
 inheritance from the C<Exporter> class that is defined in the
-L<C<Exporter>|Exporter> module.  See L<Exporter>.  If no
-L<C<import>|/import LIST> method can be found, then the call is skipped,
-even if there is an AUTOLOAD method.
+L<C<Exporter>|Exporter> module.  See L<Exporter>.
+
+If no L<C<import>|/import LIST> method can be found, then the call is
+skipped, even if there is an AUTOLOAD method.  This behaviour tends to
+hide bugs, so calling a non-existent C<import> method with arguments
+has been deprecated since Perl 5.28.  In the present version of Perl
+it warns by default.  Starting in Perl 5.32 it will signal an error.
+Calling a non-existent C<import> with no arguments is not deprecated.
 
 If you do not want to call the package's L<C<import>|/import LIST>
 method (for instance,
-to stop your namespace from being altered), explicitly supply the empty list:
+to stop your namespace from being altered, or if you know the package
+has nothing to export), explicitly supply the empty list:
 
     use Module ();
 
@@ -9490,8 +9496,10 @@ There's a corresponding L<C<no>|/no MODULE VERSION LIST> declaration
 that unimports meanings imported by L<C<use>|/use Module VERSION LIST>,
 i.e., it calls C<< Module->unimport(LIST) >> instead of
 L<C<import>|/import LIST>.  It behaves just as L<C<import>|/import LIST>
-does with VERSION, an omitted or empty LIST,
-or no unimport method being found.
+does with VERSION or an omitted or empty LIST
+or no C<unimport> method being found, with one exception.  The exception
+is that it is deprecated to call a non-existent C<unimport> method even
+if no arguments are supplied.
 
     no integer;
     no strict 'refs';
