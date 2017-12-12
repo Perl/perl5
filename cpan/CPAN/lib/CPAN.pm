@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.18';
+$CPAN::VERSION = '2.20';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -564,7 +564,10 @@ sub _yaml_loadfile {
             }
         } elsif ($code = UNIVERSAL::can($yaml_module, "Load")) {
             local *FH;
-            open FH, $local_file or die "Could not open '$local_file': $!";
+            unless (open FH, $local_file) {
+                $CPAN::Frontend->mywarn("Could not open '$local_file': $!");
+                return +[];
+            }
             local $/;
             my $ystream = <FH>;
             eval { @yaml = $code->($ystream); };
@@ -856,11 +859,12 @@ this variable in either a CPAN/MyConfig.pm or a CPAN/Config.pm in your
         }
         my $sleep = 1;
         while (!CPAN::_flock($fh, LOCK_EX|LOCK_NB)) {
-            if ($sleep>10) {
-                $CPAN::Frontend->mydie("Giving up\n");
+            my $err = $! || "unknown error";
+            if ($sleep>3) {
+                $CPAN::Frontend->mydie("Could not lock '$lockfile' with flock: $err; giving up\n");
             }
-            $CPAN::Frontend->mysleep($sleep++);
-            $CPAN::Frontend->mywarn("Could not lock lockfile with flock: $!; retrying\n");
+            $CPAN::Frontend->mysleep($sleep+=0.1);
+            $CPAN::Frontend->mywarn("Could not lock '$lockfile' with flock: $err; retrying\n");
         }
 
         seek $fh, 0, 0;
@@ -1038,6 +1042,11 @@ sub has_usable {
 
                'CPAN::Meta::Requirements' => [
                             sub {
+                                if (defined $CPAN::Meta::Requirements::VERSION
+                                    && CPAN::Version->vlt($CPAN::Meta::Requirements::VERSION, "2.120920")
+                                   ) {
+                                    delete $INC{"CPAN/Meta/Requirements.pm"};
+                                }
                                 require CPAN::Meta::Requirements;
                                 unless (CPAN::Version->vge(CPAN::Meta::Requirements->VERSION, 2.120920)) {
                                     for ("Will not use CPAN::Meta::Requirements, need version 2.120920\n") {

@@ -248,7 +248,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.18-TRIAL.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.20-TRIAL.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -259,6 +259,7 @@ use File::Glob qw(:case);
             qw( lib/CPAN/Admin.pm
                 scripts/cpan-mirrors
                 PAUSE2015.pub
+                PAUSE2019.pub
                 SlayMakefile
                 t/00signature.t
                 t/04clean_load.t

@@ -6,7 +6,7 @@ use vars qw($VERSION);
 
 use if $] < 5.008 => 'IO::Scalar';
 
-$VERSION = '1.66';
+$VERSION = '1.67';
 
 =head1 NAME
 
@@ -545,7 +545,13 @@ package
   Local::Null::Logger; # hide from PAUSE
 
 sub new { bless \ my $x, $_[0] }
-sub AUTOLOAD { 1 }
+sub AUTOLOAD {
+    my $autoload = our $AUTOLOAD;
+    $autoload =~ s/.*://;
+    return if $autoload =~ /^(debug|trace)$/;
+    $CPAN::Frontend->mywarn(">($autoload): $_\n")
+        for split /[\r\n]+/, $_[1];
+}
 sub DESTROY { 1 }
 }
 
@@ -566,7 +572,7 @@ sub _init_logger
 
     unless( $log4perl_loaded )
         {
-        print STDERR "Loading internal null logger. Install Log::Log4perl for logging messages\n";
+        print STDOUT "Loading internal logger. Log::Log4perl recommended for better logging\n";
         $logger = Local::Null::Logger->new;
         return $logger;
         }
@@ -624,6 +630,8 @@ sub _default
 
 	# How do I handle exit codes for multiple arguments?
 	my @errors = ();
+
+	$options->{x} or _disable_guessers();
 
 	foreach my $arg ( @$args )
 		{
@@ -1517,13 +1525,18 @@ sub _expand_module
 	}
 
 my $guessers = [
-	[ qw( Text::Levenshtein::XS distance 7 ) ],
-	[ qw( Text::Levenshtein::Damerau::XS     xs_edistance 7 ) ],
+	[ qw( Text::Levenshtein::XS distance 7 1 ) ],
+	[ qw( Text::Levenshtein::Damerau::XS     xs_edistance 7 1 ) ],
 
-	[ qw( Text::Levenshtein     distance 7 ) ],
-	[ qw( Text::Levenshtein::Damerau::PP     pp_edistance 7 ) ],
+	[ qw( Text::Levenshtein     distance 7 1 ) ],
+	[ qw( Text::Levenshtein::Damerau::PP     pp_edistance 7 1 ) ],
 
 	];
+
+sub _disable_guessers
+	{
+	$_->[-1] = 0 for @$guessers;
+	}
 
 # for -x
 sub _guess_namespace
@@ -1553,25 +1566,40 @@ sub _list_all_namespaces {
 
 BEGIN {
 my $distance;
+my $_threshold;
+my $can_guess;
+my $shown_help = 0;
 sub _guess_at_module_name
 	{
 	my( $target, $threshold ) = @_;
 
 	unless( defined $distance ) {
 		foreach my $try ( @$guessers ) {
-			my $can_guess = eval "require $try->[0]; 1" or next;
+			$can_guess = eval "require $try->[0]; 1" or next;
 
+			$try->[-1] or next; # disabled
 			no strict 'refs';
 			$distance = \&{ join "::", @$try[0,1] };
 			$threshold ||= $try->[2];
 			}
 		}
+	$_threshold ||= $threshold;
 
 	unless( $distance ) {
-		my $modules = join ", ", map { $_->[0] } @$guessers;
-		substr $modules, rindex( $modules, ',' ), 1, ', and';
+		unless( $shown_help ) {
+			my $modules = join ", ", map { $_->[0] } @$guessers;
+			substr $modules, rindex( $modules, ',' ), 1, ', and';
 
-		$logger->info( "I can suggest names if you install one of $modules" );
+			# Should this be colorized?
+			if( $can_guess ) {
+				$logger->info( "I can suggest names if you provide the -x option on invocation." );
+				}
+			else {
+				$logger->info( "I can suggest names if you install one of $modules" );
+				$logger->info( "and you provide the -x option on invocation." );
+				}
+			$shown_help++;
+			}
 		return;
 		}
 
@@ -1581,7 +1609,7 @@ sub _guess_at_module_name
 	my %guesses;
 	foreach my $guess ( @$modules ) {
 		my $distance = $distance->( $target, $guess );
-		next if $distance > $threshold;
+		next if $distance > $_threshold;
 		$guesses{$guess} = $distance;
 		}
 
