@@ -931,15 +931,22 @@ argument. It does not receive any additional arguments. However, the
 C<$_[0]> variable will be read-only in the destructor, so you cannot
 assign a value to it.
 
-If your C<DESTROY> method throws an error, this error will be ignored.
-It will not be sent to C<STDERR> and it will not cause the program to
-die. However, if your destructor is running inside an C<eval {}> block,
-then the error will change the value of C<$@>.
+If your C<DESTROY> method throws an exception, this will not cause
+any control transfer beyond exiting the method.  The exception will be
+reported to C<STDERR> as a warning, marked "(in cleanup)", and Perl will
+continue with whatever it was doing before.
 
-Because C<DESTROY> methods can be called at any time, you should
-localize any global variables you might update in your C<DESTROY>. In
-particular, if you use C<eval {}> you should localize C<$@>, and if you
-use C<system> or backticks you should localize C<$?>.
+Because C<DESTROY> methods can be called at any time, you should localize
+any global status variables that might be set by anything you do in
+your C<DESTROY> method.  If you are in doubt about a particular status
+variable, it doesn't hurt to localize it.  There are five global status
+variables, and the safest way is to localize all five of them:
+
+  sub DESTROY {
+      local($., $@, $!, $^E, $?);
+      my $self = shift;
+      ...;
+  }
 
 If you define an C<AUTOLOAD> in your class, then Perl will call your
 C<AUTOLOAD> to handle the C<DESTROY> method. You can prevent this by
