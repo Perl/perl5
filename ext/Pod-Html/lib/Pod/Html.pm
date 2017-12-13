@@ -2,7 +2,7 @@ package Pod::Html;
 use strict;
 require Exporter;
 
-our $VERSION = 1.2203;
+our $VERSION = 1.23;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(pod2html htmlify);
 our @EXPORT_OK = qw(anchorify);
@@ -15,6 +15,7 @@ use File::Spec;
 use File::Spec::Unix;
 use Getopt::Long;
 use Pod::Simple::Search;
+use Pod::Simple::SimpleTree ();
 use locale; # make \w work right in non-ASCII lands
 
 =head1 NAME
@@ -222,6 +223,19 @@ This program is distributed under the Artistic License.
 
 =cut
 
+# This sub duplicates the guts of Pod::Simple::FromTree.  We could have
+# used that module, except that it would have been a non-core dependency.
+sub feed_tree_to_parser {
+    my($parser, $tree) = @_;
+    if(ref($tree) eq "") {
+	$parser->_handle_text($tree);
+    } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
+	$parser->_handle_element_start($tree->[0], $tree->[1]);
+	feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
+	$parser->_handle_element_end($tree->[0]);
+    }
+}
+
 my $Cachedir; 
 my $Dircache;
 my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
@@ -273,7 +287,7 @@ sub init_globals {
     $Doindex = 1;               # non-zero if we should generate an index
     $Backlink = 0;              # no backlinks added by default
     $Header = 0;                # produce block header/footer
-    $Title = '';                # title to give the pod(s)
+    $Title = undef;             # title to give the pod(s)
 }
 
 sub pod2html {
@@ -339,24 +353,59 @@ sub pod2html {
         close $cache or die "error closing $Dircache: $!";
     }
 
-    # set options for the parser
-    my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    my $input;
+    unless (@ARGV && $ARGV[0]) {
+        if ($Podfile and $Podfile ne '-') {
+            $input = $Podfile;
+        } else {
+            $input = '-'; # XXX: make a test case for this
+        }
+    } else {
+        $Podfile = $ARGV[0];
+        $input = *ARGV;
+    }
+
+    # set options for input parser
+    my $parser = Pod::Simple::SimpleTree->new;
+    $parser->codes_in_verbatim(0);
+    $parser->accept_targets(qw(html HTML));
+    $parser->no_errata_section(!$Poderrors); # note the inverse
+
+    warn "Converting input file $Podfile\n" if $Verbose;
+    my $podtree = $parser->parse_file($input)->root;
+
+    unless(defined $Title) {
+	if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
+		$podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
+		ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
+		ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
+		@{$podtree->[3]} >= 3 &&
+		!(grep { ref($_) ne "" }
+		    @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
+		(@$podtree == 4 ||
+		    (ref($podtree->[4]) eq "ARRAY" &&
+			$podtree->[4]->[0] eq "head1"))) {
+	    $Title = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+	}
+    }
+
+    $Title //= "";
+    $Title = html_escape($Title);
+
+    # set options for the HTML generator
+    $parser = Pod::Simple::XHTML::LocalPodLinks->new();
     $parser->codes_in_verbatim(0);
     $parser->anchor_items(1); # the old Pod::Html always did
     $parser->backlink($Backlink); # linkify =head1 directives
+    $parser->force_title($Title);
     $parser->htmldir($Htmldir);
     $parser->htmlfileurl($Htmlfileurl);
     $parser->htmlroot($Htmlroot);
     $parser->index($Doindex);
-    $parser->no_errata_section(!$Poderrors); # note the inverse
     $parser->output_string(\my $output); # written to file later
     $parser->pages(\%Pages);
     $parser->quiet($Quiet);
     $parser->verbose($Verbose);
-
-    # XXX: implement default title generator in pod::simple::xhtml
-    # copy the way the old Pod::Html did it
-    $Title = html_escape($Title);
 
     # We need to add this ourselves because we use our own header, not
     # ::XHTML's header. We need to set $parser->backlink to linkify
@@ -404,20 +453,7 @@ $block
 </html>
 HTMLFOOT
 
-    my $input;
-    unless (@ARGV && $ARGV[0]) {
-        if ($Podfile and $Podfile ne '-') {
-            $input = $Podfile;
-        } else {
-            $input = '-'; # XXX: make a test case for this
-        }
-    } else {
-        $Podfile = $ARGV[0];
-        $input = *ARGV;
-    }
-
-    warn "Converting input file $Podfile\n" if $Verbose;
-    $parser->parse_file($input);
+    feed_tree_to_parser($parser, $podtree);
 
     # Write output to file
     $Htmlfile = "-" unless $Htmlfile; # stdout
@@ -619,8 +655,7 @@ sub html_escape {
     $rest   =~ s/</&lt;/g;
     $rest   =~ s/>/&gt;/g;
     $rest   =~ s/"/&quot;/g;
-    # &apos; is only in XHTML, not HTML4.  Be conservative
-    #$rest   =~ s/'/&apos;/g;
+    $rest =~ s/([^ -~])/sprintf("&#x%x;", ord($1))/eg;
     return $rest;
 }
 
