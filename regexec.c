@@ -637,6 +637,9 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
  *   /\d+abc/:  "abc" is anchored to neither the pattern nor the string;
  *   /^\d+abc/: "abc" is anchored to neither the pattern nor the string,
  *                    but the pattern is anchored to the string.
+ *
+ * Note the variables names suffixed with _c represent character counts
+ * while _b represent byte counts
  */
 
 char *
@@ -650,9 +653,16 @@ Perl_re_intuit_start(pTHX_
                     re_scream_pos_data *data)
 {
     struct regexp *const prog = ReANY(rx);
-    SSize_t start_shift = prog->check_offset_min;
-    /* Should be nonnegative! */
-    SSize_t end_shift   = 0;
+
+    /* Minimum number of chars which *must* precede the check substring to
+     * be capable of matching, e.g. 2 in /[ab]cd?substring/. */
+    SSize_t check_min_offset_c = prog->check_offset_min;
+
+    /* Minimum number of chars which *must* follow the check substring to
+     * be capable of matching, e.g. 2 in /substring[ab]cd?/.
+     * Should be nonnegative! */
+
+    SSize_t check_end_shift_c   = 0;
     /* current lowest pos in string where the regex can start matching */
     char *rx_origin = strpos;
     SV *check;
@@ -797,7 +807,7 @@ Perl_re_intuit_start(pTHX_
 
 	    if (prog->check_offset_min == prog->check_offset_max) {
 	        /* Substring at constant offset from beg-of-str... */
-	        SSize_t slen = SvCUR(check);
+	        SSize_t slen_b = SvCUR(check);
                 char *s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
@@ -807,23 +817,23 @@ Perl_re_intuit_start(pTHX_
 	        if (SvTAIL(check)) {
                     /* In this case, the regex is anchored at the end too.
                      * Unless it's a multiline match, the lengths must match
-                     * exactly, give or take a \n.  NB: slen >= 1 since
+                     * exactly, give or take a \n.  NB: slen_b >= 1 since
                      * the last char of check is \n */
 		    if (!multiline
-                        && (   strend - s > slen
-                            || strend - s < slen - 1
-                            || (strend - s == slen && strend[-1] != '\n')))
+                        && (   strend - s > slen_b
+                            || strend - s < slen_b - 1
+                            || (strend - s == slen_b && strend[-1] != '\n')))
                     {
                         DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "  String too long...\n"));
                         goto fail_finish;
                     }
-                    /* Now should match s[0..slen-2] */
-                    slen--;
+                    /* Now should match s[0..slen_b-2] */
+                    slen_b--;
                 }
-                if (slen && (strend - s < slen
+                if (slen_b && (strend - s < slen_b
                     || *SvPVX_const(check) != *s
-                    || (slen > 1 && (memNE(SvPVX_const(check), s, slen)))))
+                    || (slen_b > 1 && (memNE(SvPVX_const(check), s, slen_b)))))
                 {
                     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                     "  String not equal...\n"));
@@ -836,12 +846,12 @@ Perl_re_intuit_start(pTHX_
 	}
     }
 
-    end_shift = prog->check_end_shift;
+    check_end_shift_c = prog->check_end_shift;
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
-    if (end_shift < 0)
+    if (check_end_shift_c < 0)
 	Perl_croak(aTHX_ "panic: end_shift: %" IVdf " pattern:\n%s\n ",
-		   (IV)end_shift, RX_PRECOMP(rx));
+		   (IV)check_end_shift_c, RX_PRECOMP(rx));
 #endif
 
   restart:
@@ -849,7 +859,7 @@ Perl_re_intuit_start(pTHX_
     /* This is the (re)entry point of the main loop in this function.
      * The goal of this loop is to:
      * 1) find the "check" substring in the region rx_origin..strend
-     *    (adjusted by start_shift / end_shift). If not found, reject
+     *    (adjusted by check_min_offset_c / check_end_shift_c). If not found, reject
      *    immediately.
      * 2) If it exists, look for the "other" substr too if defined; for
      *    example, if the check substr maps to the anchored substr, then
@@ -882,15 +892,15 @@ Perl_re_intuit_start(pTHX_
                 " Real end Shift: %" IVdf "\n",
                 (IV)(rx_origin - strbeg),
                 (IV)prog->check_offset_min,
-                (IV)start_shift,
-                (IV)end_shift,
+                (IV)check_min_offset_c,
+                (IV)check_end_shift_c,
                 (IV)prog->check_end_shift);
         });
         
-        end_point = HOPBACK3(strend, end_shift, rx_origin);
+        end_point = HOPBACK3(strend, check_end_shift_c, rx_origin);
         if (!end_point)
             goto fail_finish;
-        start_point = HOPMAYBE3(rx_origin, start_shift, end_point);
+        start_point = HOPMAYBE3(rx_origin, check_min_offset_c, end_point);
         if (!start_point)
             goto fail_finish;
 
@@ -907,12 +917,12 @@ Perl_re_intuit_start(pTHX_
             && prog->intflags & PREGf_ANCH
             && prog->check_offset_max != SSize_t_MAX)
         {
-            SSize_t check_len = SvCUR(check) - !!SvTAIL(check);
+            SSize_t check_len_b = SvCUR(check) - !!SvTAIL(check);
             const char * const anchor =
                         (prog->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
-            SSize_t targ_len = (char*)end_point - anchor;
+            SSize_t targ_len_b = (char*)end_point - anchor;
 
-            if (check_len > targ_len) {
+            if (check_len_b > targ_len_b) {
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
 			      "Anchored string too short...\n"));
                 goto fail_finish;
@@ -922,13 +932,13 @@ Perl_re_intuit_start(pTHX_
              * so it skips doing the HOP if the result can't possibly end
              * up earlier than the old value of end_point.
              */
-            assert(anchor + check_len <= (char *)end_point);
-            if (prog->check_offset_max + check_len < targ_len) {
+            assert(anchor + check_len_b <= (char *)end_point);
+            if (prog->check_offset_max + check_len_b < targ_len_b) {
                 end_point = HOP3lim((U8*)anchor,
                                 prog->check_offset_max,
-                                end_point - check_len
+                                end_point - check_len_b
                             )
-                            + check_len;
+                            + check_len_b;
             }
         }
 
@@ -1064,8 +1074,8 @@ Perl_re_intuit_start(pTHX_
                     : (char*)HOP3lim(rx_origin, other->max_offset, last1);
         }
         else {
-            assert(strpos + start_shift <= check_at);
-            last = HOP4c(check_at, other->min_offset - start_shift,
+            assert(strpos + check_min_offset_c <= check_at);
+            last = HOP4c(check_at, other->min_offset - check_min_offset_c,
                         strbeg, strend);
         }
 
@@ -1270,8 +1280,10 @@ Perl_re_intuit_start(pTHX_
     if (progi->regstclass && PL_regkind[OP(progi->regstclass)]!=TRIE) {
         const U8* const str = (U8*)STRING(progi->regstclass);
 
-        /* XXX this value could be pre-computed */
-        const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
+        /* The length (in chars) if the character class. This is almost
+         * always 1.
+         * XXX this value could be pre-computed */
+        const int class_len_c = (PL_regkind[OP(progi->regstclass)] == EXACT
 		    ?  (reginfo->is_utf8_pat
                         ? utf8_distance(str + STR_LEN(progi->regstclass), str)
                         : STR_LEN(progi->regstclass))
@@ -1306,18 +1318,20 @@ Perl_re_intuit_start(pTHX_
          */
 
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos = HOP3clim(rx_origin, (prog->minlen ? cl_l : 0), strend);
+            endpos = HOP3clim(rx_origin,
+                              (prog->minlen ? class_len_c : 0),
+                              strend);
         else if (prog->float_substr || prog->float_utf8) {
-	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
-	    endpos = HOP3clim(rx_max_float, cl_l, strend);
+	    rx_max_float = HOP3c(check_at, -check_min_offset_c, strbeg);
+	    endpos = HOP3clim(rx_max_float, class_len_c, strend);
         }
         else 
             endpos= strend;
 		    
         DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
-            "  looking for class: start_shift: %" IVdf " check_at: %" IVdf
+            "  looking for class: check_min_offset: %" IVdf " check_at: %" IVdf
             " rx_origin: %" IVdf " endpos: %" IVdf "\n",
-              (IV)start_shift, (IV)(check_at - strbeg),
+              (IV)check_min_offset_c, (IV)(check_at - strbeg),
               (IV)(rx_origin - strbeg), (IV)(endpos - strbeg)));
 
         s = find_byclass(prog, progi->regstclass, rx_origin, endpos,
@@ -1338,8 +1352,8 @@ Perl_re_intuit_start(pTHX_
 	    if (prog->anchored_substr || prog->anchored_utf8) {
                 if (prog->substrs->check_ix == 1) { /* check is float */
                     /* Have both, check_string is floating */
-                    assert(rx_origin + start_shift <= check_at);
-                    if (rx_origin + start_shift != check_at) {
+                    assert(rx_origin + check_min_offset_c <= check_at);
+                    if (rx_origin + check_min_offset_c != check_at) {
                         /* not at latest position float substr could match:
                          * Recheck anchored substring, but not floating.
                          * The condition above is in bytes rather than
@@ -1393,7 +1407,7 @@ Perl_re_intuit_start(pTHX_
             /* uses bytes rather than char calculations for efficiency.
              * It's conservative: it errs on the side of doing 'goto restart',
              * where there is code that does a proper char-based test */
-            if (rx_origin + start_shift + end_shift > strend) {
+            if (rx_origin + check_min_offset_c + check_end_shift_c > strend) {
                 DEBUG_EXECUTE_r( Perl_re_printf( aTHX_
                                        "  Could not match STCLASS...\n") );
                 goto fail;
@@ -1401,7 +1415,7 @@ Perl_re_intuit_start(pTHX_
             DEBUG_EXECUTE_r( Perl_re_printf( aTHX_
                 "  about to look for %s substr starting at offset %ld (rx_origin now %" IVdf ")...\n",
                 (prog->substrs->check_ix ? "floating" : "anchored"),
-                (long)(rx_origin + start_shift - strbeg),
+                (long)(rx_origin + check_min_offset_c - strbeg),
                 (IV)(rx_origin - strbeg)
             ));
             goto restart;
