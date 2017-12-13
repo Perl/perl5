@@ -1985,6 +1985,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?xx)[a b]/x	\N{SPACE}	n	-	-
 /(?-x:[a b])/xx	\N{SPACE}	yS	$&	 	# Note a space char here
 ^a?bcd\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff	ABCDEFGHIJKLMNOPQRSTUVWXYZ	n	-	-	# [perl #132187] for valgrind's benefit
+^Xaaa?Xaa	aaa\x{400000}	n	-	-	# [perl #132552] for valgrind's benefit
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

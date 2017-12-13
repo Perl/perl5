@@ -9486,7 +9486,10 @@ S_reghop3(U8 *s, SSize_t off, const U8* lim)
     if (off >= 0) {
 	while (off-- && s < lim) {
 	    /* XXX could check well-formedness here */
-	    s += UTF8SKIP(s);
+	    U8 *new_s = s + UTF8SKIP(s);
+            if (new_s > lim) /* lim may be in the middle of a long character */
+                return s;
+            s = new_s;
 	}
     }
     else {
