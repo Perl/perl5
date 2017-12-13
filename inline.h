@@ -400,10 +400,10 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
  * or'ing together the lowest bits of 'x'.  Hopefully the final term gets
  * optimized out completely on a 32-bit system, and its mask gets optimized out
  * on a 64-bit system */
-#define PERL_IS_SUBWORD_ADDR(x) (1 & (     PTR2nat(x)                      \
-                                      |   (PTR2nat(x) >> 1)                \
-                                      | ( (PTR2nat(x) >> 2)                \
-                                         & PERL_WORD_BOUNDARY_MASK)))
+#define PERL_IS_SUBWORD_ADDR(x) (1 & (       PTR2nat(x)                       \
+                                      |   (  PTR2nat(x) >> 1)                 \
+                                      | ( ( (PTR2nat(x)                       \
+                                           & PERL_WORD_BOUNDARY_MASK) >> 2))))
 
     /* Do the word-at-a-time iff there is at least one usable full word.  That
      * means that after advancing to a word boundary, there still is at least a
