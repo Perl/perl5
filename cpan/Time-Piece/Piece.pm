@@ -2,13 +2,11 @@ package Time::Piece;
 
 use strict;
 
-require DynaLoader;
+use XSLoader ();
 use Time::Seconds;
 use Carp;
 use Time::Local;
 
-our @ISA = qw(DynaLoader);
- 
 use Exporter ();
 
 our @EXPORT = qw(
@@ -20,9 +18,9 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.3202';
+our $VERSION = '1.3203';
 
-bootstrap Time::Piece $VERSION;
+XSLoader::load( 'Time::Piece', $VERSION );
 
 my $DATE_SEP = '-';
 my $TIME_SEP = ':';
@@ -71,7 +69,10 @@ sub new {
 
     my $self;
 
-    if (defined($time)) {
+    if (ref($time)) {
+        $self = $time->[c_islocal] ? $class->localtime($time) : $class->gmtime($time);
+    }
+    elsif (defined($time)) {
         $self = $class->localtime($time);
     }
     elsif (ref($class) && $class->isa(__PACKAGE__)) {
@@ -109,10 +110,11 @@ sub _mktime {
            ? ref $class
            : $class;
     if (ref($time)) {
-        my @tm_parts = (@{$time}[c_sec .. c_mon], $time->[c_year]+1900);
-        $time->[c_epoch] = $islocal ? timelocal(@tm_parts) : timegm(@tm_parts);
+        my @new_time = @$time;
+        my @tm_parts = (@new_time[c_sec .. c_mon], $new_time[c_year]+1900);
+        $new_time[c_epoch] = $islocal ? timelocal(@tm_parts) : timegm(@tm_parts);
 
-        return wantarray ? @$time : bless [@$time[0..9], $islocal], $class;
+        return wantarray ? @new_time : bless [@new_time[0..9], $islocal], $class;
     }
     _tzset();
     my @time = $islocal ?
