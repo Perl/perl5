@@ -3239,6 +3239,17 @@ Even though it looks as though they're the same method calls (uid),
 they aren't, because a C<File::stat> object is different from
 a C<User::pwent> object.
 
+Many of these functions are not safe in a multi-threaded environment
+where more than one thread can be using them.  In particular, functions
+like C<getpwent()> iterate per-process and not per-thread, so if two
+threads are simultaneously iterating, neither will get all the records.
+
+Some systems have thread-safe versions of some of the functions, such as
+C<getpwnam_r()> instead of C<getpwnam()>.  There, Perl automatically and
+invisibly substitutes the thread-safe version, without notice.  This
+means that code that safely runs on some systems can fail on others that
+lack the thread-safe versions.
+
 Portability issues: L<perlport/getpwnam> to L<perlport/endservent>.
 
 =item getsockname SOCKET
