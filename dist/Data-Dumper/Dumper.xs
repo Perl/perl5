@@ -16,7 +16,7 @@
 #  ifdef my_strlcpy
 #    define strlcpy(d,s,l) my_strlcpy(d,s,l)
 #  else
-#    define strlcpy(d,s,l) strlcpy(d,s)
+#    define strlcpy(d,s,l) strcpy(d,s)
 #  endif
 #endif
 
