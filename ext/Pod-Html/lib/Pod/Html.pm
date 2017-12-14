@@ -5,7 +5,7 @@ require Exporter;
 our $VERSION = 1.23;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(pod2html htmlify);
-our @EXPORT_OK = qw(anchorify);
+our @EXPORT_OK = qw(anchorify relativize_url);
 
 use Carp;
 use Config;
@@ -661,19 +661,12 @@ sub html_escape {
 
 #
 # htmlify - converts a pod section specification to a suitable section
-# specification for HTML. Note that we keep spaces and special characters
-# except ", ? (Netscape problem) and the hyphen (writer's problem...).
+# specification for HTML.  We adopt the mechanism used by the formatter
+# that we use.
 #
 sub htmlify {
     my( $heading) = @_;
-    $heading =~ s/(\s+)/ /g;
-    $heading =~ s/\s+\Z//;
-    $heading =~ s/\A\s+//;
-    # The hyphen is a disgrace to the English language.
-    # $heading =~ s/[-"?]//g;
-    $heading =~ s/["?]//g;
-    $heading = lc( $heading );
-    return $heading;
+    return Pod::Simple::XHTML->can("idify")->(undef, $heading, 1);
 }
 
 #
@@ -801,7 +794,7 @@ sub resolve_pod_page_link {
         # then $self->htmlroot eq '' (by definition of htmlfileurl) so
         # $self->htmldir needs to be prepended to link to get the absolute path
         # that will be relativized
-        $url = relativize_url(
+        $url = Pod::Html::relativize_url(
             File::Spec::Unix->catdir(Pod::Html::_unixify($self->htmldir), $url),
             $self->htmlfileurl # already unixified
         );
@@ -809,6 +802,8 @@ sub resolve_pod_page_link {
 
     return $url . ".html$section";
 }
+
+package Pod::Html;
 
 #
 # relativize_url - convert an absolute URL to one relative to a base URL.

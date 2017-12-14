@@ -7,7 +7,7 @@ use Config;		# for config options in the makefile
 use File::Spec::Functions qw(rel2abs no_upwards);
 use Getopt::Long;	# for command-line parsing
 use Cwd;
-use Pod::Html 'anchorify';
+use Pod::Html 1.23 qw(anchorify relativize_url);
 
 =head1 NAME
 
@@ -240,10 +240,10 @@ foreach my $dir (@splithead) {
     $/ = "";
     my @data = ();
     while (<H>) {
-	last if /name="name"/i;
+	last if m!<h1 id="NAME">NAME</h1>!;
 	$_ =~ s{href="#(.*)">}{
-	    my $url = "$pod/$1.html" ;
-	    $url = Pod::Html::relativize_url( $url, "$file.html" )
+	    my $url = "$file/@{[anchorify(qq($1))]}.html" ;
+	    $url = relativize_url( $url, "$file.html" )
 	    if ( ! defined $Options{htmlroot} || $Options{htmlroot} eq '' );
 	    "href=\"$url\">" ;
 	}egi;
@@ -254,7 +254,7 @@ foreach my $dir (@splithead) {
     # now rewrite the file
     open(H, '>', "$file.html") ||
 	die "$0: error opening $file.html for output: $!\n";
-    print H "@data", "\n";
+    print H @data, "</body>\n\n</html>\n\n\n";
     close(H);
 }
 
@@ -321,9 +321,9 @@ sub create_index {
 		m#<h1 id="NAME">NAME</h1>\s*<p>\s*(\S+)\s+-\s+(\S.*?\S)</p>#);
 	defined $lcp1 or die "$0: can't find NAME section in $dir/$file\n";
 
-	my $url= "$pod/$file" ;
+	my $url= "$dir/$file" ;
 	if ( ! defined $Options{htmlroot} || $Options{htmlroot} eq '' ) {
-	    $url = Pod::Html::relativize_url( "$pod/$file", $html ) ;
+	    $url = relativize_url( $url, $html ) ;
 	}
 
 	print HTML qq(<DT><A HREF="$url">);
