@@ -23,7 +23,7 @@
  */
 
 #ifndef PERL_REENTR_API
-# if defined(PERL_CORE) || defined(PERL_EXT)
+# if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_REENTRANT)
 #  define PERL_REENTR_API 1
 # else
 #  define PERL_REENTR_API 0

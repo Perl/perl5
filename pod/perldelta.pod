@@ -373,13 +373,25 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+XS modules can now automatically get reentrant versions of system
+functions on threaded perls.
+
+By saying
+
+ #define PERL_REENTRANT
+
+near the beginning of an C<XS> file, it will be compiled so that
+whatever reentrant functions perl knows about on that system will
+automatically and invisibly be used instead of the plain, non-reentrant
+versions.  For example, if you write C<getpwnam()> in your code, on a
+system that has C<pwnam_r()> all calls to the former will be translated
+invisibly into the latter.  This does not happen except on threaded
+perls, as they aren't needed otherwise.  Be aware that which functions
+have reentrant versions varies from system to system.
 
 =back
 

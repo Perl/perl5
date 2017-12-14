@@ -2051,11 +2051,18 @@ you need to do is to instantiate a Perl interpreter.
 
 This wrapping happens always when compiling Perl core source
 (PERL_CORE is defined) or the Perl core extensions (PERL_EXT is
-defined).  When compiling XS code outside of Perl core the wrapping
-does not take place.  Note, however, that intermixing the _r-forms
-(as Perl compiled for multithreaded operation will do) and the _r-less
-forms is neither well-defined (inconsistent results, data corruption,
-or even crashes become more likely), nor is it very portable.
+defined).  When compiling XS code outside of the Perl core, the wrapping
+does not take place before Perl 5.28.  Starting in that release you can
+
+ #define PERL_REENTRANT
+
+in your code to enable the wrapping.  It is advisable to do so if you
+are using such functions, as intermixing the C<_r>-forms (as Perl compiled
+for multithreaded operation will do) and the C<_r>-less forms is neither
+well-defined (inconsistent results, data corruption, or even crashes
+become more likely), nor is it very portable.  Unfortunately, not all
+systems have all the C<_r> forms, but using this C<#define> gives you
+whatever protection that Perl is aware is available on each system.
 
 =head1 EXAMPLES
 
