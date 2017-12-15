@@ -410,6 +410,13 @@ L</Platform Support> section, instead.
 
 XXX
 
+=item *
+
+Where an HTML version of the doucmentation is installed, the HTML
+documents now use relative links to refer to each other.  Links from
+the index page of L<perlipc> to the individual section documents are
+now correct.  [perl #110056]
+
 =back
 
 =head1 Testing
