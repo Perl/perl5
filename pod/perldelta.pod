@@ -428,6 +428,13 @@ XXX
 
 =item *
 
+The canonical truth value no longer has a spurious special meaning as
+a callable.  It used to be a magic placeholder for a missing C<import>
+or C<unimport> method.  It is now treated like any other string C<1>.
+[perl #126042]
+
+=item *
+
 Perl's own C<malloc> no longer gets confused by attempts to allocate
 more than a gigabyte on a 64-bit platform.  [perl #119829]
 
