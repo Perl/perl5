@@ -535,6 +535,12 @@ thus ensuring that it doesn't corrupt the stack at runtime.  [perl #4574]
 
 =item *
 
+C<sort> now performs correct reference counting when aliasing C<$a> and
+C<$b>, thus avoiding premature destruction and leakage of scalars if they
+are re-aliased during execution of the sort comparator.  [perl #92264]
+
+=item *
+
 Perl's own C<malloc> no longer gets confused by attempts to allocate
 more than a gigabyte on a 64-bit platform.  [perl #119829]
 
