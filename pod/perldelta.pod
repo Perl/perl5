@@ -199,6 +199,12 @@ been corrected and clarified.  [perl #127391]
 The documentation for the C<\> referencing operator now explains the
 unusual context that it supplies to its operand.  [perl #131061]
 
+=head3 L<perlsyn>
+
+The means to disambiguate between code blocks and hash constructors,
+already documented in L<perlref>, are now documented in L<perlsyn> too.
+[perl #130958]
+
 =head3 L<perlfunc>
 
 The documentation for the C<exists> operator no longer says that
