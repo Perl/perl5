@@ -262,6 +262,10 @@ has been clarified.  [perl #131672]
 The internal functions C<newXS_len_flags()> and C<newATTRSUB_x()> are
 now documented.
 
+=head3 L<perlgit>
+
+The precise rules for identifying C<smoke-me> branches are now stated.
+
 =over 4
 
 =item *
