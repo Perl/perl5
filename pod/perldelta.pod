@@ -586,6 +586,12 @@ danger of corrupting the stack.  [perl #132544]
 
 =item *
 
+C<exec>, C<system>, et al are no longer liable to have their argument
+lists corrupted by reentrant calls and by magic such as tied scalars.
+[perl #129888]
+
+=item *
+
 Perl's own C<malloc> no longer gets confused by attempts to allocate
 more than a gigabyte on a 64-bit platform.  [perl #119829]
 
