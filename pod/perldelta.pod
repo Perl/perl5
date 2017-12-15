@@ -433,6 +433,11 @@ handle.  [perl #115814]
 The default typemap, by avoiding C<newGVgen>, now no longer leaks when
 XSUBs return file handles (C<PerlIO *> or C<FILE *>).  [perl #115814]
 
+=item *
+
+Creating a C<BEGIN> block as an XS subroutine with a prototype no longer
+crashes because of the early freeing of the subroutine.
+
 =back
 
 =head1 Known Problems
