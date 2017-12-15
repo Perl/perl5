@@ -105,7 +105,7 @@ Here are Perl's functions (including things that look like
 functions, like some keywords and named operators)
 arranged by category.  Some functions appear in more
 than one place.  Any warnings, including those produced by
-+keywords, are described in L<perldiag> and L<warnings>.
+keywords, are described in L<perldiag> and L<warnings>.
 
 =over 4
 
