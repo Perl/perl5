@@ -234,6 +234,10 @@ We've determined that we're not going to change the default behaviour.
 A couple of small details in the documentation for the C<bless> operator
 have been clarified.  [perl #124428]
 
+The description of C<@INC> hooks in the documentation for C<require>
+has been corrected to say that filter subroutines receive a useless
+first argument.  [perl #115754]
+
 =head3 L<perluniprops>
 
 For each binary table or property, the documentation now includes which
