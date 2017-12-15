@@ -494,6 +494,11 @@ more than a gigabyte on a 64-bit platform.  [perl #119829]
 
 =item *
 
+Stacked file test operators in a sort comparator expression no longer
+cause a crash.  [perl #129347]
+
+=item *
+
 An identity C<tr///> transformation on a reference is no longer mistaken
 for that reference for the purposes of deciding whether it can be
 assigned to.  [perl #130578]
