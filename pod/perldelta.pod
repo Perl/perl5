@@ -238,6 +238,13 @@ For each binary table or property, the documentation now includes which
 characters in the range C<\x00-\xFF> it matches, as well as a list of
 the first few ranges of code points matched above that.
 
+=head3 L<perlsec>
+
+The documentation about set-id scripts has been updated and revised.
+[perl #74142]
+
+A section about using C<sudo> to run Perl scripts has been added.
+
 =head3 L<perlembed>
 
 The examples in L<perlembed> have been made more portable in the way
@@ -326,6 +333,12 @@ new warnings category "shadow".  Previously they were in category "misc".
 The deprecation warning from C<Sys::Hostname::hostname()> saying that
 it doesn't accept arguments now states the Perl version in which the
 warning will be upgraded to an error.  [perl #124349]
+
+=item *
+
+The L<perldiag> entry for the error regarding a set-id script has been
+expanded to make clear that the error is reporting a specific security
+vulnerability, and to advise how to fix it.
 
 =back
 
