@@ -50,6 +50,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Over-radix digits in floating point literals
+
+Octal and binary floating point literals used to permit any hexadecimal
+digit to appear after the radix point.  The digits are now restricted
+to those appropriate for the radix, as digits before the radix point
+always were.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
