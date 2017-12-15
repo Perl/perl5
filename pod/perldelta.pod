@@ -209,6 +209,11 @@ For each binary table or property, the documentation now includes which
 characters in the range C<\x00-\xFF> it matches, as well as a list of
 the first few ranges of code points matched above that.
 
+=head3 L<perldebguts>
+
+The description of the conditions under which C<DB::sub()> will be called
+has been clarified.  [perl #131672]
+
 =head3 L<perlintern>
 
 The internal functions C<newXS_len_flags()> and C<newATTRSUB_x()> are
