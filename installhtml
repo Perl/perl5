@@ -4,6 +4,7 @@
 
 use strict;
 use Config;		# for config options in the makefile
+use File::Path qw(remove_tree);
 use File::Spec::Functions qw(rel2abs no_upwards);
 use Getopt::Long;	# for command-line parsing
 use Cwd;
@@ -258,6 +259,8 @@ foreach my $dir (@splithead) {
     close(H);
 }
 
+remove_tree(@splitdirs, {safe=>1});
+
 ##############################################################################
 
 
@@ -378,10 +381,9 @@ sub split_on_item {
 
 	# split the pod
 	push(@$splitdirs, "$podroot/$dirname");
-	if (! -d "$podroot/$dirname") {
-	    mkdir("$podroot/$dirname", 0755) ||
+	-d "$podroot/$dirname" and remove_tree("$podroot/$dirname", {safe=>1});
+	mkdir("$podroot/$dirname", 0755) ||
 		    die "$0: error creating directory $podroot/$dirname: $!\n";
-	}
 	chdir("$podroot/$dirname") ||
 	    die "$0: error changing to directory $podroot/$dirname: $!\n";
 	die "$splitter not found. Use '-splitpod dir' option.\n"
@@ -437,9 +439,9 @@ sub splitpod {
     my $dir = $pod;
     $dir =~ s/\.pod//g;
     push(@$splitdirs, "$poddir/$dir");
+    -d "$poddir/$dir" and remove_tree("$poddir/$dir", {safe=>1});
     mkdir("$poddir/$dir", 0755) ||
-	die "$0: could not create directory $poddir/$dir: $!\n"
-	unless -d "$poddir/$dir";
+	die "$0: could not create directory $poddir/$dir: $!\n";
 
     $poddata[0] =~ /^\s*=head[1-6]\s+(.*)/;
     $section    = "";
