@@ -6288,59 +6288,46 @@ X<ref> X<reference>
 
 =for Pod::Functions find out the type of thing being referenced
 
-Returns a non-empty string if EXPR is a reference, the empty
-string otherwise.  If EXPR is not specified, L<C<$_>|perlvar/$_> will be
-used.  The value returned depends on the type of thing the reference is
-a reference to.
+Examines the value of EXPR, expecting it to be a reference, and returns
+a string giving information about the reference and the type of referent.
+If EXPR is not specified, L<C<$_>|perlvar/$_> will be used.
 
-Builtin types include:
+If the operand is not a reference, then the empty string will be returned.
+An empty string will only be returned in this situation.  C<ref> is often
+useful to just test whether a value is a reference, which can be done
+by comparing the result to the empty string.  It is a common mistake
+to use the result of C<ref> directly as a truth value: this goes wrong
+because C<0> (which is false) can be returned for a reference.
 
-    SCALAR
-    ARRAY
-    HASH
-    CODE
-    REF
-    GLOB
-    LVALUE
-    FORMAT
-    IO
-    VSTRING
-    Regexp
+If the operand is a reference to a blessed object, then the name of
+the class into which the referent is blessed will be returned.  C<ref>
+doesn't care what the physical type of the referent is; blessing takes
+precedence over such concerns.  Beware that exact comparison of C<ref>
+results against a class name doesn't perform a class membership test:
+a class's members also include objects blessed into subclasses, for
+which C<ref> will return the name of the subclass.  Also beware that
+class names can clash with the built-in type names (described below).
 
-You can think of L<C<ref>|/ref EXPR> as a C<typeof> operator.
+If the operand is a reference to an unblessed object, then the return
+value indicates the type of object.  If the unblessed referent is not
+a scalar, then the return value will be one of the strings C<ARRAY>,
+C<HASH>, C<CODE>, C<FORMAT>, or C<IO>, indicating only which kind of
+object it is.  If the unblessed referent is a scalar, then the return
+value will be one of the strings C<SCALAR>, C<VSTRING>, C<REF>, C<GLOB>,
+C<LVALUE>, or C<REGEXP>, depending on the kind of value the scalar
+currently has.  Beware that these built-in type names can also be used as
+class names, so C<ref> returning one of these names doesn't unambiguously
+indicate that the referent is of the kind to which the name refers.
 
-    if (ref($r) eq "HASH") {
-        print "r is a reference to a hash.\n";
-    }
-    unless (ref($r)) {
-        print "r is not a reference at all.\n";
-    }
+The ambiguity between built-in type names and class names significantly
+limits the utility of C<ref>.  For unambiguous information, use
+L<C<Scalar::Util::blessed()>|Scalar::Util/blessed> for information about
+blessing, and L<C<Scalar::Util::reftype()>|Scalar::Util/reftype> for
+information about physical types.  Use L<the C<isa> method|UNIVERSAL/C<<
+$obj->isa( TYPE ) >>> for class membership tests, though one must be
+sure of blessedness before attempting a method call.
 
-The return value C<LVALUE> indicates a reference to an lvalue that is not
-a variable.  You get this from taking the reference of function calls like
-L<C<pos>|/pos SCALAR> or
-L<C<substr>|/substr EXPR,OFFSET,LENGTH,REPLACEMENT>.  C<VSTRING> is
-returned if the reference points to a
-L<version string|perldata/"Version Strings">.
-
-The result C<Regexp> indicates that the argument is a regular expression
-resulting from L<C<qrE<sol>E<sol>>|/qrE<sol>STRINGE<sol>>.
-
-If the referenced object has been blessed into a package, then that package
-name is returned instead.  But don't use that, as it's now considered
-"bad practice".  For one reason, an object could be using a class called
-C<Regexp> or C<IO>, or even C<HASH>.  Also, L<C<ref>|/ref EXPR> doesn't
-take into account subclasses, like
-L<C<isa>|UNIVERSAL/C<< $obj->isa( TYPE ) >>> does.
-
-Instead, use L<C<blessed>|Scalar::Util/blessed> (in the L<Scalar::Util>
-module) for boolean checks, L<C<isa>|UNIVERSAL/C<< $obj->isa( TYPE ) >>>
-for specific class checks and L<C<reftype>|Scalar::Util/reftype> (also
-from L<Scalar::Util>) for type checks.  (See L<perlobj> for details and
-a L<C<blessed>|Scalar::Util/blessed>/L<C<isa>|UNIVERSAL/C<< $obj->isa( TYPE ) >>>
-example.)
-
-See also L<perlref>.
+See also L<perlref> and L<perlobj>.
 
 =item rename OLDNAME,NEWNAME
 X<rename> X<move> X<mv> X<ren>

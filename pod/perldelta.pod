@@ -256,6 +256,8 @@ The description of C<@INC> hooks in the documentation for C<require>
 has been corrected to say that filter subroutines receive a useless
 first argument.  [perl #115754]
 
+The documentation of C<ref> has been rewritten for clarity.
+
 The documentation of C<use> now explains what syntactically qualifies
 as a version number for its module version checking feature.
 
