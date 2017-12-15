@@ -176,6 +176,12 @@ default from a "NAME" section in the POD document, as it used to be
 before the module was rewritten to use L<Pod::Simple::XHTML> to do the
 core of its job.  [perl #110520]
 
+=item *
+
+L<GDBM_File> has been upgraded from version 1.16 to 1.17.
+Its documentation now explains that C<each> and C<delete> don't mix in
+hashes tied to this module.
+
 =back
 
 =head2 Removed Modules and Pragmata
