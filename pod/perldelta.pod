@@ -141,6 +141,11 @@ L<Locale::Codes> has been upgraded from version 3.54 to 3.55
 B<NOTE>: L<Locale::Codes> is deprecated in core and will be removed
 from Perl 5.30.
 
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.167_02 to 2.168.
+Quoting of glob names now obeys the Useqq option [perl #119831].
+
 =back
 
 =head2 Removed Modules and Pragmata
