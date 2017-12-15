@@ -67,6 +67,12 @@ Assigning a non-zero value to L<C<$[>|perlvar/$[> has been deprecated
 since Perl 5.12, but was never given a deadline for removal.  This has
 now been scheduled for Perl 5.30.
 
+=head2 hostname() won't accept arguments in Perl 5.32
+
+Passing arguments to C<Sys::Hostname::hostname()> was already deprecated,
+but didn't have a removal date.  This has now been scheduled for Perl
+5.32.  [perl #124349]
+
 =head2 Module removals
 
 XXX Remove this section if not applicable.
@@ -300,6 +306,12 @@ XXX Describe change here
 Warnings that a variable or subroutine "masks earlier declaration in same
 ...", or that an C<our> variable has been redeclared, have been moved to a
 new warnings category "shadow".  Previously they were in category "misc".
+
+=item *
+
+The deprecation warning from C<Sys::Hostname::hostname()> saying that
+it doesn't accept arguments now states the Perl version in which the
+warning will be upgraded to an error.  [perl #124349]
 
 =back
 
