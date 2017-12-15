@@ -178,6 +178,11 @@ section.
 
 Additionally, the following selected changes have been made:
 
+=head3 L<perlapi>
+
+The documentation of C<newGIVENOP()> has been belatedly updated to
+account for the removal of lexical C<$_>.
+
 =head3 L<perluniprops>
 
 For each binary table or property, the documentation now includes which
