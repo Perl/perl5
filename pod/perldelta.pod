@@ -466,6 +466,12 @@ more than a gigabyte on a 64-bit platform.  [perl #119829]
 
 =item *
 
+An identity C<tr///> transformation on a reference is no longer mistaken
+for that reference for the purposes of deciding whether it can be
+assigned to.  [perl #130578]
+
+=item *
+
 C<open $$scalarref...> and similar invocations no longer leak the file
 handle.  [perl #115814]
 
