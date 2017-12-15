@@ -517,6 +517,11 @@ handle.  [perl #115814]
 
 =item *
 
+Some convoluted kinds of regexp no longer cause an arithmetic overflow
+when compiled.  [perl #131893]
+
+=item *
+
 The default typemap, by avoiding C<newGVgen>, now no longer leaks when
 XSUBs return file handles (C<PerlIO *> or C<FILE *>).  [perl #115814]
 
