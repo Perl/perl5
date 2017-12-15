@@ -578,6 +578,11 @@ are re-aliased during execution of the sort comparator.  [perl #92264]
 
 =item *
 
+C<reverse> with no operand, reversing C<$_> by default, is no longer in
+danger of corrupting the stack.  [perl #132544]
+
+=item *
+
 Perl's own C<malloc> no longer gets confused by attempts to allocate
 more than a gigabyte on a 64-bit platform.  [perl #119829]
 
