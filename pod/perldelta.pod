@@ -198,6 +198,10 @@ Additionally, the following selected changes have been made:
 
 =head3 L<perlapi>
 
+The API functions C<perl_parse()>, C<perl_run()>, and C<perl_destruct()>
+are now documented comprehensively, where previously the only
+documentation was a reference to the L<perlembed> tutorial.
+
 The documentation of C<newGIVENOP()> has been belatedly updated to
 account for the removal of lexical C<$_>.
 
@@ -233,6 +237,13 @@ have been clarified.  [perl #124428]
 For each binary table or property, the documentation now includes which
 characters in the range C<\x00-\xFF> it matches, as well as a list of
 the first few ranges of code points matched above that.
+
+=head3 L<perlembed>
+
+The examples in L<perlembed> have been made more portable in the way
+they exit, and the example that gets an exit code from the embedded Perl
+interpreter now gets it from the right place.  The examples that pass
+a constructed argv to Perl now show the mandatory null C<argv[argc]>.
 
 =head3 L<perldebguts>
 
@@ -479,6 +490,12 @@ XXX
 Digits past the radix point in octal and binary floating point literals
 now have the correct weight on platforms where a floating point
 significand doesn't fit into an integer type.
+
+=item *
+
+C<exit(0)> in a C<UNITCHECK> or C<CHECK> block no longer permits the
+main program to run, and C<exit(0)> in a C<BEGIN> block no longer permits
+C<INIT> blocks to run before exiting.  [perl #2754]
 
 =item *
 
