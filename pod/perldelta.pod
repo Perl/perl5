@@ -193,6 +193,9 @@ documented much more comprehensively than before.
 
 =head3 L<perlop>
 
+The general explanation of operator precedence and associativity has
+been corrected and clarified.  [perl #127391]
+
 The documentation for the C<\> referencing operator now explains the
 unusual context that it supplies to its operand.  [perl #131061]
 
