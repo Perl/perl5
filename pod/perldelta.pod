@@ -476,6 +476,12 @@ XXX
 
 =item *
 
+Digits past the radix point in octal and binary floating point literals
+now have the correct weight on platforms where a floating point
+significand doesn't fit into an integer type.
+
+=item *
+
 The canonical truth value no longer has a spurious special meaning as
 a callable.  It used to be a magic placeholder for a missing C<import>
 or C<unimport> method.  It is now treated like any other string C<1>.
