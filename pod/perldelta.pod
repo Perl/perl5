@@ -254,6 +254,12 @@ For each binary table or property, the documentation now includes which
 characters in the range C<\x00-\xFF> it matches, as well as a list of
 the first few ranges of code points matched above that.
 
+=head3 L<perlobj>
+
+The documentation about C<DESTROY> methods has been corrected, updated,
+and revised, especially in regard to how they interact with exceptions.
+[perl #122753]
+
 =head3 L<perlsec>
 
 The documentation about set-id scripts has been updated and revised.
