@@ -156,6 +156,13 @@ from Perl 5.30.
 
 =item *
 
+L<threads> has been upgraded from version 2.19 to 2.20.
+The documentation now better describes the problems that arise when
+returning values from threads, and no longer warns about creating threads
+in C<BEGIN> blocks.  [perl #96538]
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.167_02 to 2.169.
 Quoting of glob names now obeys the Useqq option [perl #119831].
 Attempts to set an option to C<undef> through a combined getter/setter
