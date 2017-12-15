@@ -156,8 +156,10 @@ from Perl 5.30.
 
 =item *
 
-L<Data::Dumper> has been upgraded from version 2.167_02 to 2.168.
+L<Data::Dumper> has been upgraded from version 2.167_02 to 2.169.
 Quoting of glob names now obeys the Useqq option [perl #119831].
+Attempts to set an option to C<undef> through a combined getter/setter
+method are no longer mistaken for getter calls [perl #113090].
 
 =back
 
