@@ -1673,22 +1673,27 @@ X<die> X<throw> X<exception> X<raise> X<$@> X<abort>
 
 =for Pod::Functions raise an exception or bail out
 
-L<C<die>|/die LIST> raises an exception.  Inside an
-L<C<eval>|/eval EXPR> the error message is stuffed into
-L<C<$@>|perlvar/$@> and the L<C<eval>|/eval EXPR> is terminated with the
-undefined value.  If the exception is outside of all enclosing
-L<C<eval>|/eval EXPR>s, then the uncaught exception prints LIST to
-C<STDERR> and exits with a non-zero value.  If you need to exit the
-process with a specific exit code, see L<C<exit>|/exit EXPR>.
+L<C<die>|/die LIST> raises an exception.  Inside an L<C<eval>|/eval EXPR>
+the exception is stuffed into L<C<$@>|perlvar/$@> and the L<C<eval>|/eval
+EXPR> is terminated with the undefined value.  If the exception is
+outside of all enclosing L<C<eval>|/eval EXPR>s, then the uncaught
+exception is printed to C<STDERR> and perl exits with an exit code
+indicating failure.  If you need to exit the process with a specific
+exit code, see L<C<exit>|/exit EXPR>.
 
 Equivalent examples:
 
     die "Can't cd to spool: $!\n" unless chdir '/usr/spool/news';
     chdir '/usr/spool/news' or die "Can't cd to spool: $!\n"
 
-If the last element of LIST does not end in a newline, the current
-script line number and input line number (if any) are also printed,
-and a newline is supplied.  Note that the "input line number" (also
+Most of the time, C<die> is called with a string to use as the exception.
+You may either give a single non-reference operand to serve as the
+exception, or a list of two or more items, which will be stringified
+and concatenated to make the exception.
+
+If the string exception does not end in a newline, the current
+script line number and input line number (if any) and a newline
+are appended to it.  Note that the "input line number" (also
 known as "chunk") is subject to whatever notion of "line" happens to
 be currently in effect, and is also available as the special variable
 L<C<$.>|perlvar/$.>.  See L<perlvar/"$/"> and L<perlvar/"$.">.
@@ -1705,20 +1710,60 @@ produce, respectively
     /etc/games is no good at canasta line 123.
     /etc/games is no good, stopped at canasta line 123.
 
-If the output is empty and L<C<$@>|perlvar/$@> already contains a value
-(typically from a previous L<C<eval>|/eval EXPR>) that value is reused after
+If LIST was empty or made an empty string, and L<C<$@>|perlvar/$@>
+already contains an exception value (typically from a previous
+L<C<eval>|/eval EXPR>), then that value is reused after
 appending C<"\t...propagated">.  This is useful for propagating exceptions:
 
     eval { ... };
     die unless $@ =~ /Expected exception/;
 
-If the output is empty and L<C<$@>|perlvar/$@> contains an object
+If LIST was empty or made an empty string,
+and L<C<$@>|perlvar/$@> contains an object
 reference that has a C<PROPAGATE> method, that method will be called
 with additional file and line number parameters.  The return value
 replaces the value in L<C<$@>|perlvar/$@>;  i.e., as if
 C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >> were called.
 
-If L<C<$@>|perlvar/$@> is empty, then the string C<"Died"> is used.
+If LIST was empty or made an empty string, and L<C<$@>|perlvar/$@>
+is also empty, then the string C<"Died"> is used.
+
+You can also call L<C<die>|/die LIST> with a reference argument, and if
+this is trapped within an L<C<eval>|/eval EXPR>, L<C<$@>|perlvar/$@>
+contains that reference.  This permits more elaborate exception handling
+using objects that maintain arbitrary state about the exception.  Such a
+scheme is sometimes preferable to matching particular string values of
+L<C<$@>|perlvar/$@> with regular expressions.
+
+Because Perl stringifies uncaught exception messages before display,
+you'll probably want to overload stringification operations on
+exception objects.  See L<overload> for details about that.
+The stringified message should be non-empty, and should end in a newline,
+in order to fit in with the treatment of string exceptions.
+Also, because an exception object reference cannot be stringified
+without detroying it, Perl doesn't attempt to append location or other
+information to a reference exception.  If you want location information
+with a complex exception object, you'll have to arrange to put the
+location information into the object yourself.
+
+Because L<C<$@>|perlvar/$@> is a global variable, be careful that
+analyzing an exception caught by C<eval> doesn't replace the reference
+in the global variable.  It's
+easiest to make a local copy of the reference before any manipulations.
+Here's an example:
+
+    use Scalar::Util "blessed";
+
+    eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
+    if (my $ev_err = $@) {
+        if (blessed($ev_err)
+            && $ev_err->isa("Some::Module::Exception")) {
+            # handle Some::Module::Exception
+        }
+        else {
+            # handle all other possible exceptions
+        }
+    }
 
 If an uncaught exception results in interpreter exit, the exit code is
 determined from the values of L<C<$!>|perlvar/$!> and
@@ -1739,39 +1784,11 @@ any system call, this means that the value of the exit code used by
 L<C<die>|/die LIST> can be non-predictable, so should not be relied
 upon, other than to be non-zero.
 
-You can also call L<C<die>|/die LIST> with a reference argument, and if
-this is trapped within an L<C<eval>|/eval EXPR>, L<C<$@>|perlvar/$@>
-contains that reference.  This permits more elaborate exception handling
-using objects that maintain arbitrary state about the exception.  Such a
-scheme is sometimes preferable to matching particular string values of
-L<C<$@>|perlvar/$@> with regular expressions.  Because
-L<C<$@>|perlvar/$@> is a global variable and L<C<eval>|/eval EXPR> may
-be used within object implementations, be careful that analyzing the
-error object doesn't replace the reference in the global variable.  It's
-easiest to make a local copy of the reference before any manipulations.
-Here's an example:
-
-    use Scalar::Util "blessed";
-
-    eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
-    if (my $ev_err = $@) {
-        if (blessed($ev_err)
-            && $ev_err->isa("Some::Module::Exception")) {
-            # handle Some::Module::Exception
-        }
-        else {
-            # handle all other possible exceptions
-        }
-    }
-
-Because Perl stringifies uncaught exception messages before display,
-you'll probably want to overload stringification operations on
-exception objects.  See L<overload> for details about that.
-
 You can arrange for a callback to be run just before the
 L<C<die>|/die LIST> does its deed, by setting the
 L<C<$SIG{__DIE__}>|perlvar/%SIG> hook.  The associated handler is called
-with the error text and can change the error message, if it sees fit, by
+with the exception as an argument, and can change the exception,
+if it sees fit, by
 calling L<C<die>|/die LIST> again.  See L<perlvar/%SIG> for details on
 setting L<C<%SIG>|perlvar/%SIG> entries, and L<C<eval>|/eval EXPR> for some
 examples.  Although this feature was to be run only right before your
@@ -9893,21 +9910,19 @@ X<warn> X<warning> X<STDERR>
 
 =for Pod::Functions print debugging info
 
-Prints the value of LIST to STDERR.  If the last element of LIST does
-not end in a newline, it appends the same file/line number text as
-L<C<die>|/die LIST> does.
+Emits a warning, usually by printing it to C<STDERR>.  C<warn> interprets
+its operand LIST in the same way as C<die>, but is slightly different
+in what it defaults to when LIST is empty or makes an empty string.
+If it is empty and L<C<$@>|perlvar/$@> already contains an exception
+value then that value is used after appending C<"\t...caught">.  If it
+is empty and C<$@> is also empty then the string C<"Warning: Something's
+wrong"> is used.
 
-If the output is empty and L<C<$@>|perlvar/$@> already contains a value
-(typically from a previous eval) that value is used after appending
-C<"\t...caught"> to L<C<$@>|perlvar/$@>.  This is useful for staying
-almost, but not entirely similar to L<C<die>|/die LIST>.
-
-If L<C<$@>|perlvar/$@> is empty, then the string
-C<"Warning: Something's wrong"> is used.
-
-No message is printed if there is a L<C<$SIG{__WARN__}>|perlvar/%SIG>
-handler
-installed.  It is the handler's responsibility to deal with the message
+By default, the exception derived from the operand LIST is stringified
+and printed to C<STDERR>.  This behaviour can be altered by installing
+a L<C<$SIG{__WARN__}>|perlvar/%SIG> handler.  If there is such a
+handler then no message is automatically printed; it is the handler's
+responsibility to deal with the exception
 as it sees fit (like, for instance, converting it into a
 L<C<die>|/die LIST>).  Most
 handlers must therefore arrange to actually display the

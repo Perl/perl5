@@ -275,6 +275,12 @@ The documentation of C<ref> has been rewritten for clarity.
 The documentation of C<use> now explains what syntactically qualifies
 as a version number for its module version checking feature.
 
+The documentation of C<warn> has been updated to reflect that since Perl
+5.14 it has treated complex exception objects in a manner equivalent
+to C<die>.  [perl #121372]
+
+The documentation of C<die> and C<warn> has been revised for clarity.
+
 =head3 L<perluniprops>
 
 For each binary table or property, the documentation now includes which
