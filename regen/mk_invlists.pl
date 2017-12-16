@@ -310,143 +310,142 @@ sub output_invmap ($$$$$$$) {
             @enums = uniques(@$invmap);
         }
 
-        if (! @enums) {
-            die "Only enum properties are currently handled; '$prop_name' isn't one";
+
+        die "Only enum properties are currently handled; '$prop_name' isn't one"
+                                                                  unless @enums;
+
+        my @expected_enums = @{$hard_coded_enums{lc $short_name}};
+        my @canonical_input_enums;
+        if (@expected_enums) {
+            if (@expected_enums < @enums) {
+                die 'You need to update %hard_coded_enums to reflect new'
+                . " entries in this Unicode version\n"
+                . "Expected: " . join(", ", sort @expected_enums) . "\n"
+                . "     Got: " . join(", ", sort @enums);
+            }
+
+            if (! defined prop_aliases($prop_name)) {
+
+                # Convert the input enums into canonical form and
+                # save for use below
+                @canonical_input_enums = map { lc ($_ =~ s/_//gr) }
+                                                                @enums;
+            }
+            @enums = sort @expected_enums;
         }
-        else {
-            my @expected_enums = @{$hard_coded_enums{lc $short_name}};
-            my @canonical_input_enums;
-            if (@expected_enums) {
-                if (@expected_enums < @enums) {
-                    die 'You need to update %hard_coded_enums to reflect new'
-                    . " entries in this Unicode version\n"
-                    . "Expected: " . join(", ", sort @expected_enums) . "\n"
-                    . "     Got: " . join(", ", sort @enums);
-                }
 
-                if (! defined prop_aliases($prop_name)) {
+        # The internal enums come last, and in the order specified
+        my @extras;
+        if ($extra_enums ne "") {
+            @extras = split /,/, $extra_enums;
+            push @enums, @extras;
+        }
 
-                    # Convert the input enums into canonical form and
-                    # save for use below
-                    @canonical_input_enums = map { lc ($_ =~ s/_//gr) }
-                                                                    @enums;
-                }
-                @enums = sort @expected_enums;
-            }
+        # Assign a value to each element of the enum.  The default
+        # value always gets 0; the others are arbitrarily assigned.
+        my $enum_val = 0;
+        my $canonical_default = prop_value_aliases($prop_name, $default);
+        $default = $canonical_default if defined $canonical_default;
+        $enums{$default} = $enum_val++;
+        for my $enum (@enums) {
+            $enums{$enum} = $enum_val++ unless exists $enums{$enum};
+        }
 
-            # The internal enums come last, and in the order specified
-            my @extras;
-            if ($extra_enums ne "") {
-                @extras = split /,/, $extra_enums;
-                push @enums, @extras;
-            }
+        # Calculate the enum values for certain properties like
+        # _Perl_GCB and _Perl_LB, because we output special tables for
+        # them.
+        if ($name =~ / ^  _Perl_ (?: GCB | LB | WB ) $ /x) {
 
-            # Assign a value to each element of the enum.  The default
-            # value always gets 0; the others are arbitrarily assigned.
-            my $enum_val = 0;
-            my $canonical_default = prop_value_aliases($prop_name, $default);
-            $default = $canonical_default if defined $canonical_default;
-            $enums{$default} = $enum_val++;
-            for my $enum (@enums) {
-                $enums{$enum} = $enum_val++ unless exists $enums{$enum};
-            }
+            # We use string evals to allow the same code to work on
+            # all tables we're doing.
+            my $type = lc $prop_name;
 
-            # Calculate the enum values for certain properties like
-            # _Perl_GCB and _Perl_LB, because we output special tables for
-            # them.
-            if ($name =~ / ^  _Perl_ (?: GCB | LB | WB ) $ /x) {
+            # We use lowercase single letter names for any property
+            # values not in the release of Unicode being compiled now.
+            my $placeholder = "a";
 
-                # We use string evals to allow the same code to work on
-                # all tables we're doing.
-                my $type = lc $prop_name;
+            # Skip if we've already done this code, which populated
+            # this hash
+            if (eval "! \%${type}_enums") {
 
-                # We use lowercase single letter names for any property
-                # values not in the release of Unicode being compiled now.
-                my $placeholder = "a";
+                # For each enum ...
+                foreach my $enum (sort keys %enums) {
+                    my $value = $enums{$enum};
+                    my $short;
+                    my $abbreviated_from;
 
-                # Skip if we've already done this code, which populated
-                # this hash
-                if (eval "! \%${type}_enums") {
+                    # Special case this wb property value to make the
+                    # name more clear
+                    if ($enum eq 'Perl_Tailored_HSpace') {
+                        $short = 'hs';
+                        $abbreviated_from = $enum;
+                    }
+                    elsif (grep { $_ eq $enum } @extras) {
 
-                    # For each enum ...
-                    foreach my $enum (sort keys %enums) {
-                        my $value = $enums{$enum};
-                        my $short;
-                        my $abbreviated_from;
+                        # The 'short' name for one of the property
+                        # values added by this file is just the
+                        # lowercase of it
+                        $short = lc $enum;
+                    }
+                    elsif (grep {$_ eq lc ( $enum =~ s/_//gr) }
+                                                @canonical_input_enums)
+                    {   # On Unicode versions that predate the
+                        # official property, we have set up this array
+                        # to be the canonical form of each enum in the
+                        # substitute property.  If the enum we're
+                        # looking at is canonically the same as one of
+                        # these, use its name instead of generating a
+                        # placeholder one in the next clause (which
+                        # will happen because prop_value_aliases()
+                        # will fail because it only works on official
+                        # properties)
+                        $short = $enum;
+                    }
+                    else {
+                        # Use the official short name for the other
+                        # property values, which should all be
+                        # official ones.
+                        ($short) = prop_value_aliases($type, $enum);
 
-                        # Special case this wb property value to make the
-                        # name more clear
-                        if ($enum eq 'Perl_Tailored_HSpace') {
-                            $short = 'hs';
-                            $abbreviated_from = $enum;
-                        }
-                        elsif (grep { $_ eq $enum } @extras) {
+                        # But create a placeholder for ones not in
+                        # this Unicode version.
+                        $short = $placeholder++ unless defined $short;
+                    }
 
-                            # The 'short' name for one of the property
-                            # values added by this file is just the
-                            # lowercase of it
-                            $short = lc $enum;
-                        }
-                        elsif (grep {$_ eq lc ( $enum =~ s/_//gr) }
-                                                    @canonical_input_enums)
-                        {   # On Unicode versions that predate the
-                            # official property, we have set up this array
-                            # to be the canonical form of each enum in the
-                            # substitute property.  If the enum we're
-                            # looking at is canonically the same as one of
-                            # these, use its name instead of generating a
-                            # placeholder one in the next clause (which
-                            # will happen because prop_value_aliases()
-                            # will fail because it only works on official
-                            # properties)
-                            $short = $enum;
-                        }
-                        else {
-                            # Use the official short name for the other
-                            # property values, which should all be
-                            # official ones.
-                            ($short) = prop_value_aliases($type, $enum);
-
-                            # But create a placeholder for ones not in
-                            # this Unicode version.
-                            $short = $placeholder++ unless defined $short;
-                        }
-
-                        # If our short name is too long, or we already
-                        # know that the name is an abbreviation, truncate
-                        # to make sure it's short enough, and remember
-                        # that we did this so we can later place in a
-                        # comment in the generated file
-                        if (   $abbreviated_from
-                            || length $short > $max_hdr_len)
-                            {
-                            $short = substr($short, 0, $max_hdr_len);
-                            $abbreviated_from = $enum
-                                                unless $abbreviated_from;
-                            # If the name we are to display conflicts, try
-                            # another.
-                            while (eval "exists
-                                            \$${type}_abbreviations{$short}")
-                            {
-                                die $@ if $@;
-                                $short++;
-                            }
-
-                            eval "\$${type}_abbreviations{$short} = '$enum'";
+                    # If our short name is too long, or we already
+                    # know that the name is an abbreviation, truncate
+                    # to make sure it's short enough, and remember
+                    # that we did this so we can later place in a
+                    # comment in the generated file
+                    if (   $abbreviated_from
+                        || length $short > $max_hdr_len)
+                        {
+                        $short = substr($short, 0, $max_hdr_len);
+                        $abbreviated_from = $enum
+                                            unless $abbreviated_from;
+                        # If the name we are to display conflicts, try
+                        # another.
+                        while (eval "exists
+                                        \$${type}_abbreviations{$short}")
+                        {
                             die $@ if $@;
+                            $short++;
                         }
 
-                        # Remember the mapping from the property value
-                        # (enum) name to its value.
-                        eval "\$${type}_enums{$enum} = $value";
-                        die $@ if $@;
-
-                        # Remember the inverse mapping to the short name
-                        # so that we can properly label the generated
-                        # table's rows and columns
-                        eval "\$${type}_short_enums[$value] = '$short'";
+                        eval "\$${type}_abbreviations{$short} = '$enum'";
                         die $@ if $@;
                     }
+
+                    # Remember the mapping from the property value
+                    # (enum) name to its value.
+                    eval "\$${type}_enums{$enum} = $value";
+                    die $@ if $@;
+
+                    # Remember the inverse mapping to the short name
+                    # so that we can properly label the generated
+                    # table's rows and columns
+                    eval "\$${type}_short_enums[$value] = '$short'";
+                    die $@ if $@;
                 }
             }
         }
