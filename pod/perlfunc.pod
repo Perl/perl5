@@ -1741,7 +1741,7 @@ exception objects.  See L<overload> for details about that.
 The stringified message should be non-empty, and should end in a newline,
 in order to fit in with the treatment of string exceptions.
 Also, because an exception object reference cannot be stringified
-without detroying it, Perl doesn't attempt to append location or other
+without destroying it, Perl doesn't attempt to append location or other
 information to a reference exception.  If you want location information
 with a complex exception object, you'll have to arrange to put the
 location information into the object yourself.
