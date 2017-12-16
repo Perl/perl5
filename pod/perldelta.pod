@@ -596,6 +596,13 @@ or C<unimport> method.  It is now treated like any other string C<1>.
 
 =item *
 
+C<system> now reduces its arguments to strings in the parent process, so
+any effects of stringifying them (such as overload methods being called
+or warnings being emitted) are visible in the way the program expects.
+[perl #121105]
+
+=item *
+
 The C<readpipe()> built-in function now checks at compile time that
 it has only one parameter expression, and puts it in scalar context,
 thus ensuring that it doesn't corrupt the stack at runtime.  [perl #4574]
