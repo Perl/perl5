@@ -186,7 +186,7 @@ core of its job.  [perl #110520]
 
 L<GDBM_File> has been upgraded from version 1.16 to 1.17.
 Its documentation now explains that C<each> and C<delete> don't mix in
-hashes tied to this module.
+hashes tied to this module [perl #117449].
 
 =back
 
