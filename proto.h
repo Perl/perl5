@@ -3553,10 +3553,10 @@ PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
 PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
 PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags);
-PERL_CALLCONV I32	Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags);
+PERL_CALLCONV SSize_t	Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags);
 #define PERL_ARGS_ASSERT_UNPACK_STR	\
 	assert(pat); assert(patend); assert(s); assert(strend)
-PERL_CALLCONV I32	Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, const char *strend, U32 flags);
+PERL_CALLCONV SSize_t	Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, const char *strend, U32 flags);
 #define PERL_ARGS_ASSERT_UNPACKSTRING	\
 	assert(pat); assert(patend); assert(s); assert(strend)
 PERL_CALLCONV void	Perl_unshare_hek(pTHX_ HEK* hek);
@@ -4992,7 +4992,7 @@ STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
 STATIC char	S_first_symbol(const char *pat, const char *patend);
 #define PERL_ARGS_ASSERT_FIRST_SYMBOL	\
 	assert(pat); assert(patend)
-STATIC const char *	S_get_num(pTHX_ const char *patptr, I32 *lenptr)
+STATIC const char *	S_get_num(pTHX_ const char *patptr, SSize_t *lenptr)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_NUM	\
 	assert(patptr); assert(lenptr)
@@ -5005,7 +5005,7 @@ STATIC SV*	S_is_an_int(pTHX_ const char *s, STRLEN l)
 #define PERL_ARGS_ASSERT_IS_AN_INT	\
 	assert(s)
 
-STATIC I32	S_measure_struct(pTHX_ struct tempsym* symptr);
+STATIC SSize_t	S_measure_struct(pTHX_ struct tempsym* symptr);
 #define PERL_ARGS_ASSERT_MEASURE_STRUCT	\
 	assert(symptr)
 STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m);
@@ -5030,7 +5030,7 @@ STATIC char *	S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
 #define PERL_ARGS_ASSERT_SV_EXP_GROW	\
 	assert(sv)
 
-STATIC I32	S_unpack_rec(pTHX_ struct tempsym* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s);
+STATIC SSize_t	S_unpack_rec(pTHX_ struct tempsym* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s);
 #define PERL_ARGS_ASSERT_UNPACK_REC	\
 	assert(symptr); assert(s); assert(strbeg); assert(strend)
 #endif

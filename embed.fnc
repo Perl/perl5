@@ -1789,10 +1789,10 @@ pn	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|NN const char* f
 #endif
-Apd	|I32	|unpack_str	|NN const char *pat|NN const char *patend|NN const char *s \
+Apd	|SSize_t|unpack_str	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NULLOK const char *strbeg|NN const char *strend|NULLOK char **new_s \
 				|I32 ocnt|U32 flags
-Apd	|I32	|unpackstring	|NN const char *pat|NN const char *patend|NN const char *s \
+Apd	|SSize_t|unpackstring	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NN const char *strend|U32 flags
 Ap	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
 : Used in gv.c, hv.c
@@ -2214,17 +2214,17 @@ pRxo	|GV*	|softref2xv	|NN SV *const sv|NN const char *const what \
 #endif
 
 #if defined(PERL_IN_PP_PACK_C)
-s	|I32	|unpack_rec	|NN struct tempsym* symptr|NN const char *s \
+s	|SSize_t|unpack_rec	|NN struct tempsym* symptr|NN const char *s \
 				|NN const char *strbeg|NN const char *strend|NULLOK const char **new_s
 s	|SV **	|pack_rec	|NN SV *cat|NN struct tempsym* symptr|NN SV **beglist|NN SV **endlist
 s	|SV*	|mul128		|NN SV *sv|U8 m
-s	|I32	|measure_struct	|NN struct tempsym* symptr
+s	|SSize_t|measure_struct	|NN struct tempsym* symptr
 s	|bool	|next_symbol	|NN struct tempsym* symptr
 sR	|SV*	|is_an_int	|NN const char *s|STRLEN l
 s	|int	|div128		|NN SV *pnum|NN bool *done
 s	|const char *|group_end	|NN const char *patptr|NN const char *patend \
 				|char ender
-sR	|const char *|get_num	|NN const char *patptr|NN I32 *lenptr
+sR	|const char *|get_num	|NN const char *patptr|NN SSize_t *lenptr
 ns	|bool	|need_utf8	|NN const char *pat|NN const char *patend
 ns	|char	|first_symbol	|NN const char *pat|NN const char *patend
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed

@@ -45,11 +45,11 @@ typedef struct tempsym {
   const char*    grpbeg;   /* 1st char of ()-group  */
   const char*    grpend;   /* end of ()-group       */
   I32      code;     /* template code (!<>)   */
-  I32      length;   /* length/repeat count   */
-  howlen_t howlen;   /* how length is given   */ 
-  int      level;    /* () nesting level      */
   U32      flags;    /* /=4, comma=2, pack=1  */
                      /*   and group modifiers */
+  SSize_t  length;   /* length/repeat count   */
+  howlen_t howlen;   /* how length is given   */ 
+  int      level;    /* () nesting level      */
   STRLEN   strbeg;   /* offset of group start */
   struct tempsym *previous; /* previous group */
 } tempsym_t;
@@ -273,7 +273,7 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
 	*(U8 *)(s)++)
 
 STATIC bool
-S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len, I32 datumtype)
+S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t buf_len, I32 datumtype)
 {
     UV val;
     STRLEN retlen;
@@ -307,7 +307,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_
 	if (bad & 1) {
 	    /* Rewalk the string fragment while warning */
 	    const char *ptr;
-	    const int flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+	    const U32 flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 	    for (ptr = *s; ptr < from; ptr += UTF8SKIP(ptr)) {
 		if (ptr >= end) break;
 		utf8n_to_uvchr((U8 *) ptr, end-ptr, &retlen, flags);
@@ -408,16 +408,15 @@ static const char *_action( const tempsym_t* symptr )
 }
 
 /* Returns the sizeof() struct described by pat */
-STATIC I32
+STATIC SSize_t
 S_measure_struct(pTHX_ tempsym_t* symptr)
 {
-    I32 total = 0;
+    SSize_t total = 0;
 
     PERL_ARGS_ASSERT_MEASURE_STRUCT;
 
     while (next_symbol(symptr)) {
-	I32 len;
-	int size;
+	SSize_t len, size;
 
         switch (symptr->howlen) {
 	  case e_star:
@@ -432,7 +431,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 
 	size = packprops[TYPE_NO_ENDIANNESS(symptr->code)] & PACK_SIZE_MASK;
 	if (!size) {
-            int star;
+            SSize_t star;
 	    /* endianness doesn't influence the size of a type */
 	    switch(TYPE_NO_ENDIANNESS(symptr->code)) {
 	    default:
@@ -551,16 +550,17 @@ S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
  * Advances char pointer to 1st non-digit char and returns number
  */
 STATIC const char *
-S_get_num(pTHX_ const char *patptr, I32 *lenptr )
+S_get_num(pTHX_ const char *patptr, SSize_t *lenptr )
 {
-  I32 len = *patptr++ - '0';
+  SSize_t len = *patptr++ - '0';
 
   PERL_ARGS_ASSERT_GET_NUM;
 
   while (isDIGIT(*patptr)) {
-    if (len >= 0x7FFFFFFF/10)
+    SSize_t nlen = (len * 10) + (*patptr++ - '0');
+    if (nlen < 0 || nlen/10 != len)
       Perl_croak(aTHX_ "pack/unpack repeat count overflow");
-    len = (len * 10) + (*patptr++ - '0');
+    len = nlen;
   }
   *lenptr = len;
   return patptr;
@@ -808,7 +808,7 @@ example).
 
 =cut */
 
-I32
+SSize_t
 Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, const char *strend, U32 flags)
 {
     tempsym_t sym;
@@ -834,17 +834,17 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
     return unpack_rec(&sym, s, s, strend, NULL );
 }
 
-STATIC I32
+STATIC SSize_t
 S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s )
 {
     dSP;
     SV *sv = NULL;
-    const I32 start_sp_offset = SP - PL_stack_base;
+    const SSize_t start_sp_offset = SP - PL_stack_base;
     howlen_t howlen;
-    I32 checksum = 0;
+    SSize_t checksum = 0;
     UV cuv = 0;
     NV cdouble = 0.0;
-    const int bits_in_uv = CHAR_BIT * sizeof(cuv);
+    const SSize_t bits_in_uv = CHAR_BIT * sizeof(cuv);
     bool beyond = FALSE;
     bool explicit_length;
     const bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
@@ -856,7 +856,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 
     while (next_symbol(symptr)) {
 	packprops_t props;
-	I32 len;
+	SSize_t len;
         I32 datumtype = symptr->code;
         bool needs_swap;
 	/* do first one only unless in list context
@@ -884,8 +884,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	props = packprops[TYPE_NO_ENDIANNESS(datumtype)];
 	if (props) {
 	    /* props nonzero means we can process this letter. */
-            const long size = props & PACK_SIZE_MASK;
-            const long howmany = (strend - s) / size;
+            const SSize_t size = props & PACK_SIZE_MASK;
+            const SSize_t howmany = (strend - s) / size;
 	    if (len > howmany)
 		len = howmany;
 
@@ -976,7 +976,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
  		len = 1;
 	    if (utf8) {
 		const char *hop, *last;
-		I32 l = len;
+		SSize_t l = len;
 		hop = last = strbeg;
 		while (hop < s) {
 		    hop += UTF8SKIP(hop);
@@ -1010,7 +1010,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
  	case 'x' | TYPE_IS_SHRIEKING: {
-            I32 ai32;
+            SSize_t ai32;
  	    if (!len)			/* Avoid division by 0 */
  		len = 1;
 	    if (utf8) ai32 = utf8_length((U8 *) strbeg, (U8 *) s) % len;
@@ -1045,7 +1045,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		goto W_checksum;
 	    }
 	    if (utf8) {
-		I32 l;
+		SSize_t l;
 		const char *hop;
 		for (l=len, hop=s; l>0; l--, hop += UTF8SKIP(hop)) {
 		    if (hop >= strend) {
@@ -1139,7 +1139,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    str = SvPVX(sv);
 	    if (datumtype == 'b') {
 		U8 bits = 0;
-		const I32 ai32 = len;
+		const SSize_t ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 7) bits >>= 1;
 		    else if (utf8) {
@@ -1150,7 +1150,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		}
 	    } else {
 		U8 bits = 0;
-		const I32 ai32 = len;
+		const SSize_t ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 7) bits <<= 1;
 		    else if (utf8) {
@@ -1178,7 +1178,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    if (datumtype == 'h') {
 		U8 bits = 0;
-		I32 ai32 = len;
+		SSize_t ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 1) bits >>= 4;
 		    else if (utf8) {
@@ -1190,7 +1190,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		}
 	    } else {
 		U8 bits = 0;
-		const I32 ai32 = len;
+		const SSize_t ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 1) bits <<= 4;
 		    else if (utf8) {
@@ -1571,7 +1571,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'w':
 	    {
 		UV auv = 0;
-		U32 bytes = 0;
+		size_t bytes = 0;
 
 		while (len > 0 && s < strend) {
 		    U8 ch;
@@ -1838,7 +1838,7 @@ PP(pp_unpack)
     const char *s   = SvPV_const(right, rlen);
     const char *strend = s + rlen;
     const char *patend = pat + llen;
-    I32 cnt;
+    SSize_t cnt;
 
     PUTBACK;
     cnt = unpackstring(pat, patend, s, strend,
@@ -1852,7 +1852,7 @@ PP(pp_unpack)
 }
 
 STATIC U8 *
-doencodes(U8 *h, const U8 *s, I32 len)
+doencodes(U8 *h, const U8 *s, SSize_t len)
 {
     *h++ = PL_uuemap[len];
     while (len > 2) {
@@ -2085,7 +2085,7 @@ SV **
 S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 {
     tempsym_t lookahead;
-    I32 items  = endlist - beglist;
+    SSize_t items  = endlist - beglist;
     bool found = next_symbol(symptr);
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
     bool warn_utf8 = ckWARN(WARN_UTF8);
@@ -2103,7 +2103,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
     while (found) {
 	SV *fromstr;
 	STRLEN fromlen;
-	I32 len;
+	SSize_t len;
 	SV *lengthcode = NULL;
         I32 datumtype = symptr->code;
         howlen_t howlen = symptr->howlen;
@@ -2251,7 +2251,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		len = 1;
 	    if (utf8) {
 		char *hop, *last;
-		I32 l = len;
+		SSize_t l = len;
 		hop = last = start;
 		while (hop < cur) {
 		    hop += UTF8SKIP(hop);
@@ -2300,7 +2300,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    }
 	    break;
 	case 'x' | TYPE_IS_SHRIEKING: {
-	    I32 ai32;
+	    SSize_t ai32;
 	    if (!len)			/* Avoid division by 0 */
 		len = 1;
 	    if (utf8) ai32 = utf8_length((U8 *) start, (U8 *) cur) % len;
@@ -2336,7 +2336,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		s = aptr;
 		end = aptr + fromlen;
 		fromlen = datumtype == 'Z' ? len-1 : len;
-		while ((I32) fromlen > 0 && s < end) {
+		while ((SSize_t) fromlen > 0 && s < end) {
 		    s += UTF8SKIP(s);
 		    fromlen--;
 		}
@@ -2360,8 +2360,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		if (!S_utf8_to_bytes(aTHX_ &aptr, end, cur, fromlen,
 				  datumtype | TYPE_IS_PACK))
 		    Perl_croak(aTHX_ "panic: predicted utf8 length not available, "
-			       "for '%c', aptr=%p end=%p cur=%p, fromlen=%" UVuf,
-			       (int)datumtype, aptr, end, cur, (UV)fromlen);
+			       "for '%c', aptr=%p end=%p cur=%p, fromlen=%zu",
+			       (int)datumtype, aptr, end, cur, fromlen);
 		cur += fromlen;
 		len -= fromlen;
 	    } else if (utf8) {
@@ -2369,7 +2369,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    len = fromlen;
 		    if (datumtype == 'Z') len++;
 		}
-		if (len <= (I32) fromlen) {
+		if (len <= (SSize_t) fromlen) {
 		    fromlen = len;
 		    if (datumtype == 'Z' && fromlen > 0) fromlen--;
 		}
@@ -2389,7 +2389,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    len = fromlen;
 		    if (datumtype == 'Z') len++;
 		}
-		if (len <= (I32) fromlen) {
+		if (len <= (SSize_t) fromlen) {
 		    fromlen = len;
 		    if (datumtype == 'Z' && fromlen > 0) fromlen--;
 		}
@@ -2406,7 +2406,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	case 'B':
 	case 'b': {
 	    const char *str, *end;
-	    I32 l, field_len;
+	    SSize_t l, field_len;
 	    U8 bits;
 	    bool utf8_source;
 	    U32 utf8_flags;
@@ -2424,7 +2424,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (howlen == e_star) len = fromlen;
 	    field_len = (len+7)/8;
 	    GROWING(utf8, cat, start, cur, field_len);
-	    if (len > (I32)fromlen) len = fromlen;
+	    if (len > (SSize_t)fromlen) len = fromlen;
 	    bits = 0;
 	    l = 0;
 	    if (datumtype == 'B')
@@ -2475,7 +2475,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	case 'H':
 	case 'h': {
 	    const char *str, *end;
-	    I32 l, field_len;
+	    SSize_t l, field_len;
 	    U8 bits;
 	    bool utf8_source;
 	    U32 utf8_flags;
@@ -2493,7 +2493,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (howlen == e_star) len = fromlen;
 	    field_len = (len+1)/2;
 	    GROWING(utf8, cat, start, cur, field_len);
-	    if (!utf8_source && len > (I32)fromlen) len = fromlen;
+	    if (!utf8_source && len > (SSize_t)fromlen) len = fromlen;
 	    bits = 0;
 	    l = 0;
 	    if (datumtype == 'H')
@@ -3077,10 +3077,10 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    GROWING(utf8, cat, start, cur, (fromlen+2) / 3 * 4 + (fromlen+len-1)/len * 2);
 	    while (fromlen > 0) {
 		U8 *end;
-		I32 todo;
+		SSize_t todo;
 		U8 hunk[1+63/3*4+1];
 
-		if ((I32)fromlen > len)
+		if ((SSize_t)fromlen > len)
 		    todo = len;
 		else
 		    todo = fromlen;
@@ -3091,8 +3091,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			*cur = '\0';
 			SvCUR_set(cat, cur - start);
 			Perl_croak(aTHX_ "panic: string is shorter than advertised, "
-				   "aptr=%p, aend=%p, buffer=%p, todo=%ld",
-				   aptr, aend, buffer, (long) todo);
+				   "aptr=%p, aend=%p, buffer=%p, todo=%zd",
+				   aptr, aend, buffer, todo);
 		    }
 		    end = doencodes(hunk, (const U8 *)buffer, todo);
 		} else {

@@ -819,7 +819,7 @@ C<unpackstring> instead.
 
 =cut */
 
-I32
+SSize_t
 Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 		const char *strbeg, const char *strend, char **new_s, I32 ocnt,
 		U32 flags)

@@ -57,6 +57,12 @@ digit to appear after the radix point.  The digits are now restricted
 to those appropriate for the radix, as digits before the radix point
 always were.
 
+=head2 Return type of C<unpackstring()>
+
+The return types of the C API functions C<unpackstring()> and
+C<unpack_str()> have changed from C<I32> to C<SSize_t>, in order to
+accommodate datasets of more than two billion items.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -555,6 +561,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 =item *
 
 XXX
+
+=item *
+
+C<pack> and C<unpack> can now handle repeat counts and lengths that
+exceed two billion.  [perl #119367]
 
 =item *
 
