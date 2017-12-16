@@ -442,16 +442,7 @@
 #define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
 
 #define NOOP /*EMPTY*/(void)0
-/* cea2e8a9dd23747f accidentally lost the comment originally from the first
-   check in of thread.h, explaining why we need dNOOP at all:  */
-/* Rats: if dTHR is just blank then the subsequent ";" throws an error */
-/* Declaring a *function*, instead of a variable, ensures that we don't rely
-   on being able to suppress "unused" warnings.  */
-#ifdef __cplusplus
-#define dNOOP (void)0
-#else
-#define dNOOP extern int Perl___notused(void)
-#endif
+#define dNOOP struct Perl___notused_struct
 
 #ifndef pTHX
 /* Don't bother defining tTHX ; using it outside
