@@ -35,6 +35,17 @@
 #  endif
 #endif
 
+#ifndef CLANG_DIAG_IGNORE
+# define CLANG_DIAG_IGNORE(x)
+# define CLANG_DIAG_RESTORE
+#endif
+#ifndef CLANG_DIAG_IGNORE_STMT
+# define CLANG_DIAG_IGNORE_STMT(x) CLANG_DIAG_IGNORE(x) NOOP
+# define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
+# define CLANG_DIAG_IGNORE_DECL(x) CLANG_DIAG_IGNORE(x) dNOOP
+# define CLANG_DIAG_RESTORE_DECL CLANG_DIAG_RESTORE dNOOP
+#endif
+
 #ifdef USE_ITHREADS
 
 #ifdef __amigaos4__
@@ -1019,15 +1030,10 @@ S_ithread_create(
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     return (thread);
 
-#if defined(CLANG_DIAG_IGNORE)
-    CLANG_DIAG_IGNORE(-Wthread-safety);
+    CLANG_DIAG_IGNORE_STMT(-Wthread-safety);
     /* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
-#endif
 }
-/* perl.h defines CLANG_DIAG_* but only in 5.24+ */
-#if defined(CLANG_DIAG_RESTORE)
-CLANG_DIAG_RESTORE
-#endif
+CLANG_DIAG_RESTORE_DECL;
 
 #endif /* USE_ITHREADS */
 
@@ -1165,10 +1171,10 @@ ithread_create(...)
 
         /* Let thread run. */
         /* See S_ithread_run() for more detail. */
-        CLANG_DIAG_IGNORE(-Wthread-safety);
+        CLANG_DIAG_IGNORE_STMT(-Wthread-safety);
         /* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
         MUTEX_UNLOCK(&thread->mutex);
-        CLANG_DIAG_RESTORE;
+        CLANG_DIAG_RESTORE_STMT;
 
         /* XSRETURN(1); - implied */
 

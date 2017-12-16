@@ -868,9 +868,9 @@ PP(pp_formline)
                 }
 #else
                 /* we generate fmt ourselves so it is safe */
-                GCC_DIAG_IGNORE(-Wformat-nonliteral);
+                GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
                 len = my_snprintf(t, max, fmt, (int) fieldsize, (int) arg, value);
-                GCC_DIAG_RESTORE;
+                GCC_DIAG_RESTORE_STMT;
 #endif
                 PERL_MY_SNPRINTF_POST_GUARD(len, max);
                 RESTORE_LC_NUMERIC();

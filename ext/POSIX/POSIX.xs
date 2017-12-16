@@ -3560,9 +3560,9 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             /* allowing user-supplied (rather than literal) formats
              * is normally frowned upon as a potential security risk;
              * but this is part of the API so we have to allow it */
-            GCC_DIAG_IGNORE(-Wformat-nonliteral);
+            GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
 	    buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
-            GCC_DIAG_RESTORE;
+            GCC_DIAG_RESTORE_STMT;
             sv = sv_newmortal();
 	    if (buf) {
                 STRLEN len = strlen(buf);

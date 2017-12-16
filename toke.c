@@ -456,9 +456,9 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
 
     PERL_ARGS_ASSERT_PRINTBUF;
 
-    GCC_DIAG_IGNORE(-Wformat-nonliteral); /* fmt checked by caller */
+    GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
     PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
-    GCC_DIAG_RESTORE;
+    GCC_DIAG_RESTORE_STMT;
     SvREFCNT_dec(tmp);
 }
 
@@ -7611,10 +7611,10 @@ Perl_yylex(pTHX)
 			    if (!*d && !gv_stashpv(PL_tokenbuf, UTF ? SVf_UTF8 : 0))
                             {
                                 /* PL_warn_reserved is constant */
-                                GCC_DIAG_IGNORE(-Wformat-nonliteral);
+                                GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
-                                GCC_DIAG_RESTORE;
+                                GCC_DIAG_RESTORE_STMT;
                             }
 			}
 		    }
@@ -8967,13 +8967,13 @@ S_pending_ident(pTHX)
             if (has_colon) {
                 /* "my" variable %s can't be in a package */
                 /* PL_no_myglob is constant */
-                GCC_DIAG_IGNORE(-Wformat-nonliteral);
+                GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
                 yyerror_pv(Perl_form(aTHX_ PL_no_myglob,
                             PL_in_my == KEY_my ? "my" : "state",
                             *PL_tokenbuf == '&' ? "subroutin" : "variabl",
                             PL_tokenbuf),
                             UTF ? SVf_UTF8 : 0);
-                GCC_DIAG_RESTORE;
+                GCC_DIAG_RESTORE_STMT;
             }
 
             if (PL_in_my == KEY_sigvar) {

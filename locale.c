@@ -640,11 +640,9 @@ Perl__warn_problematic_locale()
      * _CHECK_AND_WARN_PROBLEMATIC_LOCALE */
 
     if (PL_warn_locale) {
-        /*GCC_DIAG_IGNORE(-Wformat-security);   Didn't work */
         Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
                              SvPVX(PL_warn_locale),
                              0 /* dummy to avoid compiler warning */ );
-        /* GCC_DIAG_RESTORE; */
         SvREFCNT_dec_NN(PL_warn_locale);
         PL_warn_locale = NULL;
     }

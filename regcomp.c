@@ -20337,9 +20337,9 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 #else
         format = "\\x%02" UVXf "-\\x%02" UVXf;
 #endif
-        GCC_DIAG_IGNORE(-Wformat-nonliteral);
+        GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
         Perl_sv_catpvf(aTHX_ sv, format, start, this_end);
-        GCC_DIAG_RESTORE;
+        GCC_DIAG_RESTORE_STMT;
         break;
     }
 }

@@ -2981,9 +2981,9 @@ PP(pp_stat)
 	if (PL_laststatval < 0) {
 	    if (ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
                 /* PL_warn_nl is constant */
-                GCC_DIAG_IGNORE(-Wformat-nonliteral);
+                GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
-                GCC_DIAG_RESTORE;
+                GCC_DIAG_RESTORE_STMT;
             }
 	    max = 0;
 	}
@@ -3014,11 +3014,11 @@ PP(pp_stat)
 	     */
 	    bool neg;
 	    Stat_t s;
-	    CLANG_DIAG_IGNORE(-Wtautological-compare);
-	    GCC_DIAG_IGNORE(-Wtype-limits);
+	    CLANG_DIAG_IGNORE_STMT(-Wtautological-compare);
+	    GCC_DIAG_IGNORE_STMT(-Wtype-limits);
 	    neg = PL_statcache.st_ino < 0;
-	    GCC_DIAG_RESTORE;
-	    CLANG_DIAG_RESTORE;
+	    GCC_DIAG_RESTORE_STMT;
+	    CLANG_DIAG_RESTORE_STMT;
 	    if (neg) {
 		s.st_ino = (IV)PL_statcache.st_ino;
 		if (LIKELY(s.st_ino == PL_statcache.st_ino)) {
@@ -3593,9 +3593,9 @@ PP(pp_fttext)
 	    }
 	    if (ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
                 /* PL_warn_nl is constant */
-                GCC_DIAG_IGNORE(-Wformat-nonliteral);
+                GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
-                GCC_DIAG_RESTORE;
+                GCC_DIAG_RESTORE_STMT;
             }
 	    FT_RETURNUNDEF;
 	}

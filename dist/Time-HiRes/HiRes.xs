@@ -46,6 +46,15 @@ extern "C" {
 #define PERL_VERSION_GE(r,v,s) \
 	(PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
 
+#ifndef GCC_DIAG_IGNORE
+# define GCC_DIAG_IGNORE(x)
+# define GCC_DIAG_RESTORE
+#endif
+#ifndef GCC_DIAG_IGNORE_STMT
+# define GCC_DIAG_IGNORE_STMT(x) GCC_DIAG_IGNORE(x) NOOP
+# define GCC_DIAG_RESTORE_STMT GCC_DIAG_RESTORE NOOP
+#endif
+
 /* At least ppport.h 3.13 gets this wrong: one really cannot
  * have NVgf as anything else than "g" under Perl 5.6.x. */
 #if PERL_REVISION == 5 && PERL_VERSION == 6
@@ -1338,9 +1347,7 @@ setitimer(which, seconds, interval = 0)
         /* on some platforms the 1st arg to setitimer is an enum, which
          * causes -Wc++-compat to complain about passing an int instead
          */
-#ifdef GCC_DIAG_IGNORE
-        GCC_DIAG_IGNORE(-Wc++-compat);
-#endif
+        GCC_DIAG_IGNORE_STMT(-Wc++-compat);
 	if (setitimer(which, &newit, &oldit) == 0) {
 	  EXTEND(sp, 1);
 	  PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
@@ -1349,9 +1356,7 @@ setitimer(which, seconds, interval = 0)
 	    PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
 	  }
 	}
-#ifdef GCC_DIAG_RESTORE
-        GCC_DIAG_RESTORE;
-#endif
+        GCC_DIAG_RESTORE_STMT;
 
 void
 getitimer(which)
@@ -1362,9 +1367,7 @@ getitimer(which)
         /* on some platforms the 1st arg to getitimer is an enum, which
          * causes -Wc++-compat to complain about passing an int instead
          */
-#ifdef GCC_DIAG_IGNORE
-        GCC_DIAG_IGNORE(-Wc++-compat);
-#endif
+        GCC_DIAG_IGNORE_STMT(-Wc++-compat);
 	if (getitimer(which, &nowit) == 0) {
 	  EXTEND(sp, 1);
 	  PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
@@ -1373,9 +1376,7 @@ getitimer(which)
 	    PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_interval))));
 	  }
 	}
-#ifdef GCC_DIAG_RESTORE
-        GCC_DIAG_RESTORE;
-#endif
+        GCC_DIAG_RESTORE_STMT;
 
 #endif /* #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER) */
 
