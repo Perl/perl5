@@ -1102,6 +1102,8 @@ re.pm, especially to the documentation.
 
 #endif /* DEBUG RELATED DEFINES */
 
+#define FIRST_NON_ASCII_DECIMAL_DIGIT 0x660
+
 typedef enum {
 	TRADITIONAL_BOUND = _CC_WORDCHAR,
 	GCB_BOUND,

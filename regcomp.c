@@ -17005,7 +17005,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                           " be some subset of \"0-9\","
                                           " \"A-Z\", or \"a-z\"");
                     }
-                    else if (prevvalue >= 0x660) { /* ARABIC_INDIC_DIGIT_ZERO */
+                    else if (prevvalue >= FIRST_NON_ASCII_DECIMAL_DIGIT) {
                         SSize_t index_start;
                         SSize_t index_final;
 
@@ -17013,8 +17013,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                          * can't do the same checks for above-ASCII ranges,
                          * except in the case of digit ones.  These should
                          * contain only digits from the same group of 10.  The
-                         * ASCII case is handled just above.  0x660 is the
-                         * first digit character beyond ASCII.  Hence here, the
+                         * ASCII case is handled just above.  Hence here, the
                          * range could be a range of digits.  First some
                          * unlikely special cases.  Grandfather in that a range
                          * ending in 19DA (NEW TAI LUE THAM DIGIT ONE) is bad
