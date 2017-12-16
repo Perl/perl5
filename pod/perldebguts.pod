@@ -681,7 +681,7 @@ will be lost.
 
  # OPEN,CLOSE,GROUPP     ...are numbered at compile time.
  OPEN            num 1      Mark this point in input as start of #n.
- CLOSE           num 1      Analogous to OPEN.
+ CLOSE           num 1      Close corresponding OPEN of #n.
 
  REF             num 1      Match some already matched string
  REFF            num 1      Match already matched string, folded using

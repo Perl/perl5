@@ -61,7 +61,7 @@
 #define	CURLYX                	47	/* 0x2f Match this complex thing {n,m} times. */
 #define	WHILEM                	48	/* 0x30 Do curly processing and see if rest matches. */
 #define	OPEN                  	49	/* 0x31 Mark this point in input as start of #n. */
-#define	CLOSE                 	50	/* 0x32 Analogous to OPEN. */
+#define	CLOSE                 	50	/* 0x32 Close corresponding OPEN of #n. */
 #define	REF                   	51	/* 0x33 Match some already matched string */
 #define	REFF                  	52	/* 0x34 Match already matched string, folded using native charset rules for non-utf8 */
 #define	REFFL                 	53	/* 0x35 Match already matched string, folded in loc. */
