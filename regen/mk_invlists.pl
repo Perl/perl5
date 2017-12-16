@@ -1943,7 +1943,7 @@ for my $charset (get_supported_code_pages()) {
                     # will be converted back later (using a vertical tab as
                     # the separator).  Even if the mapping is to code points,
                     # we don't translate to native here because the code
-                    # output_map() calls to output these arrays assumes the
+                    # output_invmap() calls to output these arrays assumes the
                     # input is Unicode, not native.
                     if (ref $invmap[0]) {
                         $bucket = join "\cK", @{$invmap[0]};
