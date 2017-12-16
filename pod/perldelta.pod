@@ -190,6 +190,18 @@ hashes tied to this module [perl #117449].
 It will now retry opening with an acceptable block size if asking gdbm
 to default the block size failed [perl #119623].
 
+=item *
+
+L<XSLoader> has been upgraded from version 0.28 to 0.29.
+Its documentation now shows the use of C<__PACKAGE__>, and direct object
+syntax for example C<DynaLoader> usage [perl #132247].
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.44 to 1.45.
+Its documentation now shows the use of C<__PACKAGE__> and direct object
+syntax [perl #132247].
+
 =back
 
 =head2 Removed Modules and Pragmata

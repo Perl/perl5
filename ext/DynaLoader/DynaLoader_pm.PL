@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.44';
+    $VERSION = '1.45';
 }
 
 EOT
@@ -564,7 +564,7 @@ DynaLoader - Dynamically load C libraries into Perl code
     package YourPackage;
     require DynaLoader;
     @ISA = qw(... DynaLoader ...);
-    bootstrap YourPackage;
+    __PACKAGE__->bootstrap;
 
     # optional method for 'global' loading
     sub dl_load_flags { 0x01 }     

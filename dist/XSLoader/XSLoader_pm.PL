@@ -11,7 +11,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.28"; # remember to update version in POD!
+$VERSION = "0.29"; # remember to update version in POD!
 
 #use strict;
 
@@ -249,14 +249,14 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.28
+Version 0.29
 
 =head1 SYNOPSIS
 
     package YourPackage;
     require XSLoader;
 
-    XSLoader::load();
+    XSLoader::load(__PACKAGE__, $VERSION);
 
 =head1 DESCRIPTION
 
@@ -277,7 +277,7 @@ A typical module using L<DynaLoader|DynaLoader> starts like this:
 
     our @ISA = qw( OnePackage OtherPackage DynaLoader );
     our $VERSION = '0.01';
-    bootstrap YourPackage $VERSION;
+    __PACKAGE__->bootstrap($VERSION);
 
 Change this to
 
@@ -286,7 +286,7 @@ Change this to
 
     our @ISA = qw( OnePackage OtherPackage );
     our $VERSION = '0.01';
-    XSLoader::load 'YourPackage', $VERSION;
+    XSLoader::load(__PACKAGE__, $VERSION);
 
 In other words: replace C<require DynaLoader> by C<use XSLoader>, remove
 C<DynaLoader> from C<@ISA>, change C<bootstrap> by C<XSLoader::load>.  Do not
@@ -303,10 +303,9 @@ one can remove this reference to C<@ISA> together with the C<@ISA> assignment.
 
 If no C<$VERSION> was specified on the C<bootstrap> line, the last line becomes
 
-    XSLoader::load 'YourPackage';
+    XSLoader::load(__PACKAGE__);
 
-If the call to C<load> is from C<YourPackage>, then that can be further
-simplified to
+in which case it can be further simplified to
 
     XSLoader::load();
 
@@ -323,12 +322,12 @@ boilerplate.
     our $VERSION = '0.01';
     eval {
        require XSLoader;
-       XSLoader::load('YourPackage', $VERSION);
+	XSLoader::load(__PACKAGE__, $VERSION);
        1;
     } or do {
        require DynaLoader;
        push @ISA, 'DynaLoader';
-       bootstrap YourPackage $VERSION;
+       __PACKAGE__->bootstrap($VERSION);
     };
 
 The parentheses about C<XSLoader::load()> arguments are needed since we replaced
@@ -394,7 +393,7 @@ boilerplate as
 
        # Put Perl code used in the BOOT: section here
 
-       XSLoader::load 'YourPackage', $VERSION;
+       XSLoader::load(__PACKAGE__, $VERSION);
     }
 
     # Put Perl code making calls into XSUBs here
@@ -414,7 +413,7 @@ this:
     BEGIN {
        @ISA = qw( OnePackage OtherPackage );
        $VERSION = '0.01';
-       XSLoader::load 'YourPackage', $VERSION;
+       XSLoader::load(__PACKAGE__, $VERSION);
     }
 
     # Put Perl code used in onBOOT() function here; calls to XSUBs are
