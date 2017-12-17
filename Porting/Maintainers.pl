@@ -156,8 +156,15 @@ use File::Glob qw(:case);
                 t/system.t
                 )
         ],
-        # CPAN RT 105344
-        'CUSTOMIZED'   => [ qw[ t/mkdir.t ] ],
+        'CUSTOMIZED'   => [
+	    # CPAN RT 105344
+	    't/mkdir.t',
+	    # smartmatch changes
+	    'lib/autodie/exception.pm',
+	    'lib/autodie/hints.pm',
+	    't/exceptions.t',
+	    't/lib/Hints_pod_examples.pm',
+        ],
     },
 
     'AutoLoader' => {
@@ -412,6 +419,11 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^xt/},
             qr{nytprof.*}
+        ],
+        'EXCLUDED'     => [qr{^xt/}],
+        'CUSTOMIZED'   => [
+	    # smartmatch changes
+	    't/basic.t',
         ],
     },
 

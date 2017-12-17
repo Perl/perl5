@@ -50,6 +50,46 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Smartmatch and switch simplification
+
+The experimental smart match operator (C<~~>) and switch
+(C<given>/C<when>) constructs have been drastically simplified, in a
+way that will require most uses of them to be updated.
+
+The smart match operator no longer has its large table of matching rules.
+Instead there is just one rule: the right-hand operand must overload
+the operator.  Overloaded objects now bear the entire responsibility
+for determining what kind of match to perform.  The operator also no
+longer implicitly enreferences certain kinds of operand (such as arrays);
+instead the operands get regular scalar context.
+
+The C<when> construct no longer has its complicated rules about how
+to treat its argument.  Instead it has been split into two distinct
+constructs.  C<whereso> always uses the argument as a truth value,
+and C<whereis> always smart matches.  Like the smart match operator,
+these also no longer implicitly enreference certain kinds of argument,
+instead supplying regular scalar context.
+
+The C<default> construct, which was misleading and essentially useless,
+has been removed.
+
+The C<given> construct also no longer implicitly enreferences certain
+kinds of arguments, instead supplying regular scalar context.  In this
+case, the implicit enreferencement was undocumented anyway.
+
+Flow control of switch constructs has been unified with loop flow
+control.  The concept of "topicalizer" (referring to a C<given> block
+or a C<foreach> loop acting on C<$_>) has been abolished.  A C<given>
+construct now counts as a one-iteration loop, so responds to the loop
+control keywords.  The C<break> keyword has consequently been removed,
+in favour of using C<next> or C<last> to exit a C<given>.  The implicit
+jump at the end of a C<when> block is now a C<next>, and so is applicable
+not just to C<given> and some kinds of C<foreach> but to any loop.
+
+It is known that these changes will break some users of L<autodie>,
+the documentation of which has long recommended some uses of these
+experimental features that are not portable across these changes.
+
 =head2 Over-radix digits in floating point literals
 
 Octal and binary floating point literals used to permit any hexadecimal

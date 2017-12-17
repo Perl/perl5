@@ -1530,6 +1530,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PTR2UV(cx->blk_eval.retop));
 	break;
 
+    case CXt_LOOP_GIVEN:
     case CXt_LOOP_PLAIN:
     case CXt_LOOP_LAZYIV:
     case CXt_LOOP_LAZYSV:
@@ -1543,7 +1544,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
                     PTR2UV(CxITERVAR(cx)));
             PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%" UVxf "\n",
                     PTR2UV(cx->blk_loop.itersave));
-            /* XXX: not accurate for LAZYSV/IV/LIST */
+	}
+	if (CxTYPE(cx) == CXt_LOOP_ARY) {
             PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%" UVxf "\n",
                     PTR2UV(cx->blk_loop.state_u.ary.ary));
             PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",

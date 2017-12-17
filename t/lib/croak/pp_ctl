@@ -28,14 +28,8 @@ dump $label;
 EXPECT
 Can't find label foo at - line 3.
 ########
-# NAME when outside given
+# NAME whereso outside given
 use 5.01; no warnings 'experimental::smartmatch';
-when(undef){}
+whereso(!defined){}
 EXPECT
-Can't "when" outside a topicalizer at - line 2.
-########
-# NAME default outside given
-use 5.01;
-default{}
-EXPECT
-Can't "default" outside a topicalizer at - line 2.
+Can't leave "whereso" outside a loop block at - line 2.

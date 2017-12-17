@@ -179,7 +179,7 @@ ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
 # warning is gone, this can change to ck_null.
 scomplement	string 1's complement (~)	ck_bitop	fsT1	S
 
-smartmatch	smart match		ck_smartmatch	s2
+smartmatch	smart match		ck_null		ifs2	S S
 
 # High falutin' math.
 
@@ -328,11 +328,9 @@ method_super	super with known name	ck_null		d.
 method_redir	redirect method with known name	ck_null	d.
 method_redir_super	redirect super method with known name	ck_null	d.
 
-entergiven	given()			ck_null		d|
-leavegiven	leave given block	ck_null		1
-enterwhen	when()			ck_null		d|
-leavewhen	leave when block	ck_null		1
-break		break			ck_null		0
+entergiven	given()			ck_null		d{
+enterwhereso	whereso()		ck_null		d|
+leavewhereso	leave whereso block	ck_null		1
 continue	continue		ck_null		0
 
 # I/O.

@@ -21,12 +21,10 @@ if ($] >= 5.010001) {
 	use experimental 'switch';
 	sub bar { 1 };
 	given(1) {
-		when (\&bar) {
+		whereso (\&bar) {
 			pass("bar matches 1");
 		}
-		default {
-			fail("bar matches 1");
-		}
+		fail("bar matches 1");
 	}
 	1;
 END
@@ -35,8 +33,8 @@ END
 if ($] >= 5.010001) {
 	is (eval <<'END', 1, 'smartmatch compiles') or diag $@;
 	use experimental 'smartmatch';
-	sub baz { 1 };
-	is(1 ~~ \&baz, 1, "is 1");
+	{ package Baz; use overload "~~" => sub { 1 }; }
+	is(1 ~~ bless({}, "Baz"), 1, "is 1");
 	1;
 END
 }

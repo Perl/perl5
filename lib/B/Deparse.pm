@@ -2267,9 +2267,8 @@ my %feature_keywords = (
     state   => 'state',
     say     => 'say',
     given   => 'switch',
-    when    => 'switch',
-    default => 'switch',
-    break   => 'switch',
+    whereis => 'switch',
+    whereso => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
@@ -2561,32 +2560,30 @@ sub pp_ggrgid { unop(@_, "getgrgid") }
 sub pp_lock { unop(@_, "lock") }
 
 sub pp_continue { unop(@_, "continue"); }
-sub pp_break { unop(@_, "break"); }
 
-sub givwhen {
-    my $self = shift;
-    my($op, $cx, $givwhen) = @_;
-
-    my $enterop = $op->first;
-    my ($head, $block);
-    if ($enterop->flags & OPf_SPECIAL) {
-	$head = $self->keyword("default");
-	$block = $self->deparse($enterop->first, 0);
-    }
-    else {
-	my $cond = $enterop->first;
-	my $cond_str = $self->deparse($cond, 1);
-	$head = "$givwhen ($cond_str)";
-	$block = $self->deparse($cond->sibling, 0);
-    }
-
-    return "$head {\n".
-	"\t$block\n".
-	"\b}\cK";
+sub _op_is_defsv {
+    my($self, $op) = @_;
+    $op->name eq "null" && !null($op->first) && null($op->first->sibling)
+	and $op = $op->first;
+    $op->name eq "gvsv" && $self->gv_name($self->gv_or_padgv($op)) eq "_";
 }
 
-sub pp_leavegiven { givwhen(@_, $_[0]->keyword("given")); }
-sub pp_leavewhen  { givwhen(@_, $_[0]->keyword("when")); }
+sub pp_leavewhereso {
+    my($self, $op, $cx) = @_;
+    my $enterop = $op->first;
+    my $cond = $enterop->first;
+    my $block = $cond->sibling;
+    my $keyword = "whereso";
+    if ($cond->name eq "smartmatch" && $self->{expand} < 2 &&
+		$self->_op_is_defsv($cond->first)) {
+	$cond = $cond->last;
+	$keyword = "whereis";
+    }
+    my $cond_str = $self->deparse($cond, 1);
+    $keyword = $self->keyword($keyword);
+    $block = $self->deparse($block, 0);
+    return "$keyword ($cond_str) {\n\t$block\n\b}\cK";
+}
 
 sub pp_exists {
     my $self = shift;
@@ -3022,6 +3019,7 @@ sub pp_i_ge { binop(@_, ">=", 15) }
 sub pp_i_le { binop(@_, "<=", 15) }
 sub pp_i_ncmp { maybe_targmy(@_, \&binop, "<=>", 14) }
 
+sub pp_smartmatch { binop(@_, "~~", 14) }
 sub pp_seq { binop(@_, "eq", 14) }
 sub pp_sne { binop(@_, "ne", 14) }
 sub pp_slt { binop(@_, "lt", 15) }
@@ -3032,16 +3030,6 @@ sub pp_scmp { maybe_targmy(@_, \&binop, "cmp", 14) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
 sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
-
-sub pp_smartmatch {
-    my ($self, $op, $cx) = @_;
-    if (($op->flags & OPf_SPECIAL) && $self->{expand} < 2) {
-	return $self->deparse($op->last, $cx);
-    }
-    else {
-	binop(@_, "~~", 14);
-    }
-}
 
 # '.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
@@ -3846,6 +3834,13 @@ sub loop_common {
 	    $bare = 1;
 	}
 	$body = $kid;
+    } elsif ($enter->name eq "entergiven") { # given
+	my $given = $self->keyword("given");
+	my $enterop = $op->first;
+	my $topic = $enterop->first;
+	my $topic_str = $self->deparse($topic, 1);
+	my $block = $self->deparse($topic->sibling, 0);
+	return "$given ($topic_str) {\n\t$block\n\b}\cK";
     } elsif ($enter->name eq "enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;

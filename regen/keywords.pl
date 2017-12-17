@@ -39,10 +39,9 @@ my %feature_kw = (
     state     => 'state',
     say       => 'say',
     given     => 'switch',
-    when      => 'switch',
-    default   => 'switch',
+    whereis   => 'switch',
+    whereso   => 'switch',
     # continue is already a keyword
-    break     => 'switch',
     evalbytes => 'evalbytes',
     __SUB__   => '__SUB__',
     fc        => 'fc',
@@ -129,7 +128,6 @@ __END__
 -bind
 -binmode
 -bless
--break
 -caller
 -chdir
 -chmod
@@ -147,7 +145,6 @@ __END__
 -crypt
 -dbmclose
 -dbmopen
-+default
 +defined
 +delete
 -die
@@ -356,7 +353,8 @@ __END__
 -waitpid
 -wantarray
 -warn
-+when
++whereis
++whereso
 +while
 -write
 -x

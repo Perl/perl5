@@ -1285,9 +1285,9 @@ PP(pp_flop)
 
 static const char * const context_name[] = {
     "pseudo-block",
-    NULL, /* CXt_WHEN never actually needs "block" */
+    NULL, /* CXt_WHERESO never actually needs "block" */
     NULL, /* CXt_BLOCK never actually needs "block" */
-    NULL, /* CXt_GIVEN never actually needs "block" */
+    NULL, /* CXt_LOOP_GIVEN never actually needs "block" */
     NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
     NULL, /* CXt_LOOP_LAZYIV never actually needs "loop" */
     NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
@@ -1320,6 +1320,7 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 	    if (CxTYPE(cx) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
+	case CXt_LOOP_GIVEN:
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1468,6 +1469,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    if ((CxTYPE(cx)) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
+	case CXt_LOOP_GIVEN:
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1480,10 +1482,8 @@ S_dopoptoloop(pTHX_ I32 startingblock)
     return i;
 }
 
-/* find the next GIVEN or FOR (with implicit $_) loop context block */
-
 STATIC I32
-S_dopoptogivenfor(pTHX_ I32 startingblock)
+S_dopoptowhereso(pTHX_ I32 startingblock)
 {
     I32 i;
     for (i = startingblock; i >= 0; i--) {
@@ -1491,36 +1491,8 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
-	case CXt_GIVEN:
-	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found given at cx=%ld)\n", (long)i));
-	    return i;
-	case CXt_LOOP_PLAIN:
-            assert(!(cx->cx_type & CXp_FOR_DEF));
-	    break;
-	case CXt_LOOP_LAZYIV:
-	case CXt_LOOP_LAZYSV:
-	case CXt_LOOP_LIST:
-	case CXt_LOOP_ARY:
-            if (cx->cx_type & CXp_FOR_DEF) {
-		DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found foreach at cx=%ld)\n", (long)i));
-		return i;
-	    }
-	}
-    }
-    return i;
-}
-
-STATIC I32
-S_dopoptowhen(pTHX_ I32 startingblock)
-{
-    I32 i;
-    for (i = startingblock; i >= 0; i--) {
-	const PERL_CONTEXT *cx = &cxstack[i];
-	switch (CxTYPE(cx)) {
-	default:
-	    continue;
-	case CXt_WHEN:
-	    DEBUG_l( Perl_deb(aTHX_ "(dopoptowhen(): found when at cx=%ld)\n", (long)i));
+	case CXt_WHERESO:
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptowhereso(): found whereso at cx=%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1564,6 +1536,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_EVAL:
 	    cx_popeval(cx);
 	    break;
+	case CXt_LOOP_GIVEN:
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1571,11 +1544,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_LOOP_ARY:
 	    cx_poploop(cx);
 	    break;
-	case CXt_WHEN:
-	    cx_popwhen(cx);
-	    break;
-	case CXt_GIVEN:
-	    cx_popgiven(cx);
+	case CXt_WHERESO:
+	    cx_popwhereso(cx);
 	    break;
 	case CXt_BLOCK:
 	case CXt_NULL:
@@ -2190,8 +2160,6 @@ PP(pp_enteriter)
             itersave = GvSV(sv);
             SvREFCNT_inc_simple_void(itersave);
             cxflags = CXp_FOR_GV;
-            if (PL_op->op_private & OPpITER_DEF)
-                cxflags |= CXp_FOR_DEF;
         }
         else {                          /* LV ref: for \$foo (...) */
             assert(SvTYPE(sv) == SVt_PVMG);
@@ -2201,8 +2169,6 @@ PP(pp_enteriter)
             cxflags = CXp_FOR_LVREF;
         }
     }
-    /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
-    assert((cxflags & CXp_FOR_GV) || !(PL_op->op_private & OPpITER_DEF));
 
     /* Note that this context is initially set as CXt_NULL. Further on
      * down it's changed to one of the CXt_LOOP_*. Before it's changed,
@@ -2658,8 +2624,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 	o->op_type == OP_SCOPE ||
 	o->op_type == OP_LEAVELOOP ||
 	o->op_type == OP_LEAVESUB ||
-	o->op_type == OP_LEAVETRY ||
-	o->op_type == OP_LEAVEGIVEN)
+	o->op_type == OP_LEAVETRY)
     {
 	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
@@ -3005,8 +2970,8 @@ PP(pp_goto)
             case CXt_LOOP_LAZYSV:
             case CXt_LOOP_LIST:
             case CXt_LOOP_ARY:
-	    case CXt_GIVEN:
-	    case CXt_WHEN:
+	    case CXt_LOOP_GIVEN:
+	    case CXt_WHERESO:
 		gotoprobe = OpSIBLING(cx->blk_oldcop);
 		break;
 	    case CXt_SUBST:
@@ -4610,572 +4575,34 @@ PP(pp_entergiven)
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
     GvSV(PL_defgv) = SvREFCNT_inc(newsv);
 
-    cx = cx_pushblock(CXt_GIVEN, gimme, SP, PL_savestack_ix);
-    cx_pushgiven(cx, origsv);
+    cx = cx_pushblock(CXt_LOOP_GIVEN|CXp_FOR_GV, gimme, SP, PL_savestack_ix);
+    cx_pushloop_given(cx, origsv);
 
     RETURN;
 }
 
-PP(pp_leavegiven)
-{
-    PERL_CONTEXT *cx;
-    U8 gimme;
-    SV **oldsp;
-    PERL_UNUSED_CONTEXT;
-
-    cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_GIVEN);
-    oldsp = PL_stack_base + cx->blk_oldsp;
-    gimme = cx->blk_gimme;
-
-    if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
-    else
-        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
-
-    CX_LEAVE_SCOPE(cx);
-    cx_popgiven(cx);
-    cx_popblock(cx);
-    CX_POP(cx);
-
-    return NORMAL;
-}
-
-/* Helper routines used by pp_smartmatch */
-STATIC PMOP *
-S_make_matcher(pTHX_ REGEXP *re)
-{
-    PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
-
-    PERL_ARGS_ASSERT_MAKE_MATCHER;
-
-    PM_SETRE(matcher, ReREFCNT_inc(re));
-
-    SAVEFREEOP((OP *) matcher);
-    ENTER_with_name("matcher"); SAVETMPS;
-    SAVEOP();
-    return matcher;
-}
-
-STATIC bool
-S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
-{
-    dSP;
-    bool result;
-
-    PERL_ARGS_ASSERT_MATCHER_MATCHES_SV;
-    
-    PL_op = (OP *) matcher;
-    XPUSHs(sv);
-    PUTBACK;
-    (void) Perl_pp_match(aTHX);
-    SPAGAIN;
-    result = SvTRUEx(POPs);
-    PUTBACK;
-
-    return result;
-}
-
-STATIC void
-S_destroy_matcher(pTHX_ PMOP *matcher)
-{
-    PERL_ARGS_ASSERT_DESTROY_MATCHER;
-    PERL_UNUSED_ARG(matcher);
-
-    FREETMPS;
-    LEAVE_with_name("matcher");
-}
-
-/* Do a smart match */
 PP(pp_smartmatch)
 {
-    DEBUG_M(Perl_deb(aTHX_ "Starting smart match resolution\n"));
-    return do_smartmatch(NULL, NULL, 0);
-}
-
-/* This version of do_smartmatch() implements the
- * table of smart matches that is found in perlsyn.
- */
-STATIC OP *
-S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
-{
     dSP;
-    
-    bool object_on_left = FALSE;
-    SV *e = TOPs;	/* e is for 'expression' */
-    SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
+    SV *right = POPs;
+    SV *left = TOPs;
+    SV *result;
 
-    /* Take care only to invoke mg_get() once for each argument.
-     * Currently we do this by copying the SV if it's magical. */
-    if (d) {
-	if (!copied && SvGMAGICAL(d))
-	    d = sv_mortalcopy(d);
-    }
-    else
-	d = &PL_sv_undef;
-
-    assert(e);
-    if (SvGMAGICAL(e))
-	e = sv_mortalcopy(e);
-
-    /* First of all, handle overload magic of the rightmost argument */
-    if (SvAMAGIC(e)) {
-	SV * tmpsv;
-	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
-	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
-
-	tmpsv = amagic_call(d, e, smart_amg, AMGf_noleft);
-	if (tmpsv) {
-	    SPAGAIN;
-	    (void)POPs;
-	    SETs(tmpsv);
-	    RETURN;
-	}
-	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
-    }
-
-    SP -= 2;	/* Pop the values */
     PUTBACK;
-
-    /* ~~ undef */
-    if (!SvOK(e)) {
-	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-undef\n"));
-	if (SvOK(d))
-	    RETPUSHNO;
-	else
-	    RETPUSHYES;
-    }
-
-    if (SvROK(e) && SvOBJECT(SvRV(e)) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) {
-	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
-	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
-    }
-    if (SvROK(d) && SvOBJECT(SvRV(d)) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
-	object_on_left = TRUE;
-
-    /* ~~ sub */
-    if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVCV) {
-	I32 c;
-	if (object_on_left) {
-	    goto sm_any_sub; /* Treat objects like scalars */
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
-	    /* Test sub truth for each key */
-	    HE *he;
-	    bool andedresults = TRUE;
-	    HV *hv = (HV*) SvRV(d);
-	    I32 numkeys = hv_iterinit(hv);
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-CodeRef\n"));
-	    if (numkeys == 0)
-		RETPUSHYES;
-	    while ( (he = hv_iternext(hv)) ) {
-		DEBUG_M(Perl_deb(aTHX_ "        testing hash key...\n"));
-		ENTER_with_name("smartmatch_hash_key_test");
-		SAVETMPS;
-		PUSHMARK(SP);
-		PUSHs(hv_iterkeysv(he));
-		PUTBACK;
-		c = call_sv(e, G_SCALAR);
-		SPAGAIN;
-		if (c == 0)
-		    andedresults = FALSE;
-		else
-		    andedresults = SvTRUEx(POPs) && andedresults;
-		FREETMPS;
-		LEAVE_with_name("smartmatch_hash_key_test");
-	    }
-	    if (andedresults)
-		RETPUSHYES;
-	    else
-		RETPUSHNO;
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
-	    /* Test sub truth for each element */
-	    SSize_t i;
-	    bool andedresults = TRUE;
-	    AV *av = (AV*) SvRV(d);
-	    const I32 len = av_tindex(av);
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-CodeRef\n"));
-	    if (len == -1)
-		RETPUSHYES;
-	    for (i = 0; i <= len; ++i) {
-		SV * const * const svp = av_fetch(av, i, FALSE);
-		DEBUG_M(Perl_deb(aTHX_ "        testing array element...\n"));
-		ENTER_with_name("smartmatch_array_elem_test");
-		SAVETMPS;
-		PUSHMARK(SP);
-		if (svp)
-		    PUSHs(*svp);
-		PUTBACK;
-		c = call_sv(e, G_SCALAR);
-		SPAGAIN;
-		if (c == 0)
-		    andedresults = FALSE;
-		else
-		    andedresults = SvTRUEx(POPs) && andedresults;
-		FREETMPS;
-		LEAVE_with_name("smartmatch_array_elem_test");
-	    }
-	    if (andedresults)
-		RETPUSHYES;
-	    else
-		RETPUSHNO;
-	}
-	else {
-	  sm_any_sub:
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
-	    ENTER_with_name("smartmatch_coderef");
-	    SAVETMPS;
-	    PUSHMARK(SP);
-	    PUSHs(d);
-	    PUTBACK;
-	    c = call_sv(e, G_SCALAR);
-	    SPAGAIN;
-	    if (c == 0)
-		PUSHs(&PL_sv_no);
-	    else if (SvTEMP(TOPs))
-		SvREFCNT_inc_void(TOPs);
-	    FREETMPS;
-	    LEAVE_with_name("smartmatch_coderef");
-	    RETURN;
-	}
-    }
-    /* ~~ %hash */
-    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVHV) {
-	if (object_on_left) {
-	    goto sm_any_hash; /* Treat objects like scalars */
-	}
-	else if (!SvOK(d)) {
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash ($a undef)\n"));
-	    RETPUSHNO;
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
-	    /* Check that the key-sets are identical */
-	    HE *he;
-	    HV *other_hv = MUTABLE_HV(SvRV(d));
-	    bool tied;
-	    bool other_tied;
-	    U32 this_key_count  = 0,
-	        other_key_count = 0;
-	    HV *hv = MUTABLE_HV(SvRV(e));
-
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Hash\n"));
-	    /* Tied hashes don't know how many keys they have. */
-	    tied = cBOOL(SvTIED_mg((SV*)hv, PERL_MAGIC_tied));
-	    other_tied = cBOOL(SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied));
-	    if (!tied ) {
-		if(other_tied) {
-		    /* swap HV sides */
-		    HV * const temp = other_hv;
-		    other_hv = hv;
-		    hv = temp;
-		    tied = TRUE;
-		    other_tied = FALSE;
-		}
-		else if(HvUSEDKEYS((const HV *) hv) != HvUSEDKEYS(other_hv))
-		    RETPUSHNO;
-	    }
-
-	    /* The hashes have the same number of keys, so it suffices
-	       to check that one is a subset of the other. */
-	    (void) hv_iterinit(hv);
-	    while ( (he = hv_iternext(hv)) ) {
-		SV *key = hv_iterkeysv(he);
-
-		DEBUG_M(Perl_deb(aTHX_ "        comparing hash key...\n"));
-	    	++ this_key_count;
-	    	
-	    	if(!hv_exists_ent(other_hv, key, 0)) {
-	    	    (void) hv_iterinit(hv);	/* reset iterator */
-		    RETPUSHNO;
-	    	}
-	    }
-	    
-	    if (other_tied) {
-		(void) hv_iterinit(other_hv);
-		while ( hv_iternext(other_hv) )
-		    ++other_key_count;
-	    }
-	    else
-		other_key_count = HvUSEDKEYS(other_hv);
-	    
-	    if (this_key_count != other_key_count)
-		RETPUSHNO;
-	    else
-		RETPUSHYES;
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
-	    AV * const other_av = MUTABLE_AV(SvRV(d));
-	    const SSize_t other_len = av_tindex(other_av) + 1;
-	    SSize_t i;
-	    HV *hv = MUTABLE_HV(SvRV(e));
-
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Hash\n"));
-	    for (i = 0; i < other_len; ++i) {
-		SV ** const svp = av_fetch(other_av, i, FALSE);
-		DEBUG_M(Perl_deb(aTHX_ "        checking for key existence...\n"));
-		if (svp) {	/* ??? When can this not happen? */
-		    if (hv_exists_ent(hv, *svp, 0))
-		        RETPUSHYES;
-		}
-	    }
-	    RETPUSHNO;
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Regex-Hash\n"));
-	  sm_regex_hash:
-	    {
-		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
-		HE *he;
-		HV *hv = MUTABLE_HV(SvRV(e));
-
-		(void) hv_iterinit(hv);
-		while ( (he = hv_iternext(hv)) ) {
-		    DEBUG_M(Perl_deb(aTHX_ "        testing key against pattern...\n"));
-                    PUTBACK;
-		    if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
-                        SPAGAIN;
-			(void) hv_iterinit(hv);
-			destroy_matcher(matcher);
-			RETPUSHYES;
-		    }
-                    SPAGAIN;
-		}
-		destroy_matcher(matcher);
-		RETPUSHNO;
-	    }
-	}
-	else {
-	  sm_any_hash:
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash\n"));
-	    if (hv_exists_ent(MUTABLE_HV(SvRV(e)), d, 0))
-		RETPUSHYES;
-	    else
-		RETPUSHNO;
-	}
-    }
-    /* ~~ @array */
-    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_PVAV) {
-	if (object_on_left) {
-	    goto sm_any_array; /* Treat objects like scalars */
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
-	    AV * const other_av = MUTABLE_AV(SvRV(e));
-	    const SSize_t other_len = av_tindex(other_av) + 1;
-	    SSize_t i;
-
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Array\n"));
-	    for (i = 0; i < other_len; ++i) {
-		SV ** const svp = av_fetch(other_av, i, FALSE);
-
-		DEBUG_M(Perl_deb(aTHX_ "        testing for key existence...\n"));
-		if (svp) {	/* ??? When can this not happen? */
-		    if (hv_exists_ent(MUTABLE_HV(SvRV(d)), *svp, 0))
-		        RETPUSHYES;
-		}
-	    }
-	    RETPUSHNO;
-	}
-	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
-	    AV *other_av = MUTABLE_AV(SvRV(d));
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Array\n"));
-	    if (av_tindex(MUTABLE_AV(SvRV(e))) != av_tindex(other_av))
-		RETPUSHNO;
-	    else {
-	    	SSize_t i;
-                const SSize_t other_len = av_tindex(other_av);
-
-		if (NULL == seen_this) {
-		    seen_this = newHV();
-		    (void) sv_2mortal(MUTABLE_SV(seen_this));
-		}
-		if (NULL == seen_other) {
-		    seen_other = newHV();
-		    (void) sv_2mortal(MUTABLE_SV(seen_other));
-		}
-		for(i = 0; i <= other_len; ++i) {
-		    SV * const * const this_elem = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		    SV * const * const other_elem = av_fetch(other_av, i, FALSE);
-
-		    if (!this_elem || !other_elem) {
-			if ((this_elem && SvOK(*this_elem))
-				|| (other_elem && SvOK(*other_elem)))
-			    RETPUSHNO;
-		    }
-		    else if (hv_exists_ent(seen_this,
-				sv_2mortal(newSViv(PTR2IV(*this_elem))), 0) ||
-			    hv_exists_ent(seen_other,
-				sv_2mortal(newSViv(PTR2IV(*other_elem))), 0))
-		    {
-			if (*this_elem != *other_elem)
-			    RETPUSHNO;
-		    }
-		    else {
-			(void)hv_store_ent(seen_this,
-				sv_2mortal(newSViv(PTR2IV(*this_elem))),
-				&PL_sv_undef, 0);
-			(void)hv_store_ent(seen_other,
-				sv_2mortal(newSViv(PTR2IV(*other_elem))),
-				&PL_sv_undef, 0);
-			PUSHs(*other_elem);
-			PUSHs(*this_elem);
-			
-			PUTBACK;
-			DEBUG_M(Perl_deb(aTHX_ "        recursively comparing array element...\n"));
-			(void) do_smartmatch(seen_this, seen_other, 0);
-			SPAGAIN;
-			DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
-			
-			if (!SvTRUEx(POPs))
-			    RETPUSHNO;
-		    }
-		}
-		RETPUSHYES;
-	    }
-	}
-	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Regex-Array\n"));
-	  sm_regex_array:
-	    {
-		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
-		const SSize_t this_len = av_tindex(MUTABLE_AV(SvRV(e)));
-		SSize_t i;
-
-		for(i = 0; i <= this_len; ++i) {
-		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		    DEBUG_M(Perl_deb(aTHX_ "        testing element against pattern...\n"));
-                    PUTBACK;
-		    if (svp && matcher_matches_sv(matcher, *svp)) {
-                        SPAGAIN;
-			destroy_matcher(matcher);
-			RETPUSHYES;
-		    }
-                    SPAGAIN;
-		}
-		destroy_matcher(matcher);
-		RETPUSHNO;
-	    }
-	}
-	else if (!SvOK(d)) {
-	    /* undef ~~ array */
-	    const SSize_t this_len = av_tindex(MUTABLE_AV(SvRV(e)));
-	    SSize_t i;
-
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Undef-Array\n"));
-	    for (i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		DEBUG_M(Perl_deb(aTHX_ "        testing for undef element...\n"));
-		if (!svp || !SvOK(*svp))
-		    RETPUSHYES;
-	    }
-	    RETPUSHNO;
-	}
-	else {
-	  sm_any_array:
-	    {
-		SSize_t i;
-		const SSize_t this_len = av_tindex(MUTABLE_AV(SvRV(e)));
-
-		DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Array\n"));
-		for (i = 0; i <= this_len; ++i) {
-		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
-		    if (!svp)
-			continue;
-
-		    PUSHs(d);
-		    PUSHs(*svp);
-		    PUTBACK;
-		    /* infinite recursion isn't supposed to happen here */
-		    DEBUG_M(Perl_deb(aTHX_ "        recursively testing array element...\n"));
-		    (void) do_smartmatch(NULL, NULL, 1);
-		    SPAGAIN;
-		    DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
-		    if (SvTRUEx(POPs))
-			RETPUSHYES;
-		}
-		RETPUSHNO;
-	    }
-	}
-    }
-    /* ~~ qr// */
-    else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_REGEXP) {
-	if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
-	    SV *t = d; d = e; e = t;
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Regex\n"));
-	    goto sm_regex_hash;
-	}
-	else if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
-	    SV *t = d; d = e; e = t;
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Regex\n"));
-	    goto sm_regex_array;
-	}
-	else {
-	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
-            bool result;
-
-	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Regex\n"));
-	    PUTBACK;
-	    result = matcher_matches_sv(matcher, d);
-            SPAGAIN;
-	    PUSHs(result ? &PL_sv_yes : &PL_sv_no);
-	    destroy_matcher(matcher);
-	    RETURN;
-	}
-    }
-    /* ~~ scalar */
-    /* See if there is overload magic on left */
-    else if (object_on_left && SvAMAGIC(d)) {
-	SV *tmpsv;
-	DEBUG_M(Perl_deb(aTHX_ "    applying rule Object-Any\n"));
-	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
-	PUSHs(d); PUSHs(e);
-	PUTBACK;
-	tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
-	if (tmpsv) {
-	    SPAGAIN;
-	    (void)POPs;
-	    SETs(tmpsv);
-	    RETURN;
-	}
-	SP -= 2;
-	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; falling back...\n"));
-	goto sm_any_scalar;
-    }
-    else if (!SvOK(d)) {
-	/* undef ~~ scalar ; we already know that the scalar is SvOK */
-	DEBUG_M(Perl_deb(aTHX_ "    applying rule undef-Any\n"));
-	RETPUSHNO;
-    }
-    else
-  sm_any_scalar:
-    if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {
-	DEBUG_M(if (SvNIOK(e))
-		    Perl_deb(aTHX_ "    applying rule Any-Num\n");
-		else
-		    Perl_deb(aTHX_ "    applying rule Num-numish\n");
-	);
-	/* numeric comparison */
-	PUSHs(d); PUSHs(e);
-	PUTBACK;
-	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
-	    (void) Perl_pp_i_eq(aTHX);
-	else
-	    (void) Perl_pp_eq(aTHX);
+    if (SvGMAGICAL(left))
+	left = sv_mortalcopy(left);
+    if (SvGMAGICAL(right))
+	right = sv_mortalcopy(right);
+    if (SvAMAGIC(right) &&
+		(result = amagic_call(left, right, smart_amg, AMGf_noleft))) {
 	SPAGAIN;
-	if (SvTRUEx(POPs))
-	    RETPUSHYES;
-	else
-	    RETPUSHNO;
+	SETs(boolSV(SvTRUE_NN(result)));
+	return NORMAL;
     }
-    
-    /* As a last resort, use string comparison */
-    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
-    PUSHs(d); PUSHs(e);
-    PUTBACK;
-    return Perl_pp_seq(aTHX);
+    Perl_croak(aTHX_ "Cannot smart match without a matcher object");
 }
 
-PP(pp_enterwhen)
+PP(pp_enterwhereso)
 {
     dSP;
     PERL_CONTEXT *cx;
@@ -5184,19 +4611,19 @@ PP(pp_enterwhen)
     /* This is essentially an optimization: if the match
        fails, we don't want to push a context and then
        pop it again right away, so we skip straight
-       to the op that follows the leavewhen.
+       to the op that follows the leavewhereso.
        RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
-    if (!(PL_op->op_flags & OPf_SPECIAL) && !SvTRUEx(POPs))
+    if (!SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    cx = cx_pushblock(CXt_WHEN, gimme, SP, PL_savestack_ix);
-    cx_pushwhen(cx);
+    cx = cx_pushblock(CXt_WHERESO, gimme, SP, PL_savestack_ix);
+    cx_pushwhereso(cx);
 
     RETURN;
 }
 
-PP(pp_leavewhen)
+PP(pp_leavewhereso)
 {
     I32 cxix;
     PERL_CONTEXT *cx;
@@ -5204,14 +4631,12 @@ PP(pp_leavewhen)
     SV **oldsp;
 
     cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_WHEN);
+    assert(CxTYPE(cx) == CXt_WHERESO);
     gimme = cx->blk_gimme;
 
-    cxix = dopoptogivenfor(cxstack_ix);
+    cxix = dopoptoloop(cxstack_ix);
     if (cxix < 0)
-	/* diag_listed_as: Can't "when" outside a topicalizer */
-	DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
-	           PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
+	DIE(aTHX_ "Can't leave \"whereso\" outside a loop block");
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)
@@ -5219,24 +4644,25 @@ PP(pp_leavewhen)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
-    /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
+    /* pop the WHERESO, BLOCK and anything else before the loop */
     assert(cxix < cxstack_ix);
     dounwind(cxix);
 
     cx = &cxstack[cxix];
 
-    if (CxFOREACH(cx)) {
+    if (CxTYPE(cx) != CXt_LOOP_GIVEN) {
         /* emulate pp_next. Note that any stack(s) cleanup will be
          * done by the pp_unstack which op_nextop should point to */
         cx = CX_CUR();
 	cx_topblock(cx);
 	PL_curcop = cx->blk_oldcop;
+	PERL_ASYNC_CHECK();
 	return cx->blk_loop.my_op->op_nextop;
     }
     else {
 	PERL_ASYNC_CHECK();
-        assert(cx->blk_givwhen.leave_op->op_type == OP_LEAVEGIVEN);
-	return cx->blk_givwhen.leave_op;
+        assert(cx->blk_loop.my_op->op_nextop->op_type == OP_LEAVELOOP);
+	return cx->blk_loop.my_op->op_nextop;
     }
 }
 
@@ -5246,46 +4672,23 @@ PP(pp_continue)
     PERL_CONTEXT *cx;
     OP *nextop;
     
-    cxix = dopoptowhen(cxstack_ix); 
+    cxix = dopoptowhereso(cxstack_ix); 
     if (cxix < 0)   
-	DIE(aTHX_ "Can't \"continue\" outside a when block");
+	DIE(aTHX_ "Can't \"continue\" outside a whereso block");
 
     if (cxix < cxstack_ix)
         dounwind(cxix);
     
     cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_WHEN);
+    assert(CxTYPE(cx) == CXt_WHERESO);
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     CX_LEAVE_SCOPE(cx);
-    cx_popwhen(cx);
+    cx_popwhereso(cx);
     cx_popblock(cx);
-    nextop = cx->blk_givwhen.leave_op->op_next;
+    nextop = cx->blk_whereso.leave_op->op_next;
     CX_POP(cx);
 
     return nextop;
-}
-
-PP(pp_break)
-{
-    I32 cxix;
-    PERL_CONTEXT *cx;
-
-    cxix = dopoptogivenfor(cxstack_ix);
-    if (cxix < 0)
-	DIE(aTHX_ "Can't \"break\" outside a given block");
-
-    cx = &cxstack[cxix];
-    if (CxFOREACH(cx))
-	DIE(aTHX_ "Can't \"break\" in a loop topicalizer");
-
-    if (cxix < cxstack_ix)
-        dounwind(cxix);
-
-    /* Restore the sp at the time we entered the given block */
-    cx = CX_CUR();
-    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
-
-    return cx->blk_givwhen.leave_op;
 }
 
 static MAGIC *

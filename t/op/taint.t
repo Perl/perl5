@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 1040;
+plan tests => 1038;
 
 $| = 1;
 
@@ -2400,7 +2400,7 @@ end
     use feature 'switch';
     no warnings 'experimental::smartmatch';
 
-    my @descriptions = ('when', 'given end', 'default');
+    my @descriptions = ('whereso', 'given end', 'default');
 
     for (qw<x y z>) {
 	my $letter = "$_$TAINT";
@@ -2409,9 +2409,8 @@ end
 
 	my $res = do {
 	    given ($_) {
-		when ('x') { $letter }
-		when ('y') { goto leavegiven }
-		default    { $letter }
+		whereso ('x') { $letter }
+		whereso ('y') { goto leavegiven }
 		leavegiven:  $letter
 	    }
 	};
@@ -2430,14 +2429,6 @@ end
     ok(!tainted "", "tainting not broken yet");
     index(undef, C);
     ok(!tainted "", "tainting still works after index() of the constant");
-}
-
-# Tainted values with smartmatch
-# [perl #93590] S_do_smartmatch stealing its own string buffers
-{
-no warnings 'experimental::smartmatch';
-ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
-ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
 }
 
 # Tainted values and ref()

@@ -326,8 +326,8 @@ running the program.  Using C<strict> is highly recommended.
 
 =head2 Conditional and looping constructs
 
-Perl has most of the usual conditional and looping constructs.  As of Perl
-5.10, it even has a case/switch statement (spelled C<given>/C<when>).  See
+Perl has most of the usual conditional and looping constructs.
+It even has a switch/case statement (spelled C<given>/C<whereso>).  See
 L<perlsyn/"Switch Statements"> for more details.
 
 The conditions can be any Perl expression.  See the list of operators in
