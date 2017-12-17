@@ -268,6 +268,7 @@ behaviors.  See L</Modifiers>.
        sequence
  }   End sequence started by {
  -   Indicates a range                            Only in [] interior
+ #   Beginning of comment, extends to line end    Only with /x modifier
 
 Notice that most of the metacharacters lose their special meaning when
 they occur in a bracketed character class, except C<"^"> has a different
