@@ -23,7 +23,7 @@ WriteMakefile(
     DISTNAME            => "Storable",
 # We now ship this in t/
 #    PREREQ_PM           => { 'Test::More' => '0.41' },
-    PL_FILES        => { 'Storable.pm.PL'  => 'Storable.pm' },
+    PL_FILES        => { }, # prevent default behaviour
     PM              => { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' },
     PREREQ_PM           => { XSLoader => 0 },
     INSTALLDIRS => ($] >= 5.007 && $] < 5.012) ? 'perl' : 'site',
@@ -94,4 +94,14 @@ release : dist
 	git push
 	git push --tags
 "
+}
+
+sub postamble {
+'
+all :: Storable.pm
+	$(NOECHO) $(NOOP)
+
+Storable.pm :: Storable.pm.PL __Storable__.pm
+	$(PERLRUN) Storable.pm.PL
+'
 }
