@@ -1381,10 +1381,10 @@ warnings::register like this:
 
 =head1 FUNCTIONS
 
-=over 4
-
 Note: The functions with names ending in C<_at_level> were added in Perl
 5.28.
+
+=over 4
 
 =item use warnings::register
 
