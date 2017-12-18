@@ -61,6 +61,9 @@ my @tests = (
 [ "Unix->catfile('a', do { my \$x = 'b'.chr(0xaf); use utf8 (); utf8::upgrade(\$x); \$x })",   'a/b'.chr(0xaf)   ],
 ) : ()),
 [ "Unix->catfile(substr('foo', 2))", 'o' ],
+# https://rt.cpan.org/Ticket/Display.html?id=121633
+# https://rt.perl.org/Ticket/Display.html?id=131296
+[ "Unix->catfile('.', 'hints', 'Makefile.PL')", 'hints/Makefile.PL' ],
 
 [ "Unix->splitpath('file')",            ',,file'            ],
 [ "Unix->splitpath('/d1/d2/d3/')",      ',/d1/d2/d3/,'      ],
