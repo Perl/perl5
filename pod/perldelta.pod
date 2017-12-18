@@ -612,6 +612,11 @@ invisibly into the latter.  This does not happen except on threaded
 perls, as they aren't needed otherwise.  Be aware that which functions
 have reentrant versions varies from system to system.
 
+=item *
+
+The C<PERL_NO_OP_PARENT> build define is no longer supported, which means
+that perl is now always built with C<PERL_OP_PARENT> enabled.
+
 =back
 
 =head1 Selected Bug Fixes
