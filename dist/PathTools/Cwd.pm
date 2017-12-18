@@ -135,15 +135,6 @@ my %METHOD_MAP =
     realpath		=> 'fast_abs_path',
    },
 
-   epoc =>
-   {
-    cwd			=> '_epoc_cwd',
-    getcwd	        => '_epoc_cwd',
-    fastgetcwd		=> '_epoc_cwd',
-    fastcwd		=> '_epoc_cwd',
-    abs_path		=> 'fast_abs_path',
-   },
-
    MacOS =>
    {
     getcwd		=> 'cwd',
@@ -665,11 +656,6 @@ sub _qnx_abs_path {
     chomp $realpath;
     return $realpath;
 }
-
-sub _epoc_cwd {
-    return $ENV{'PWD'} = EPOC::getcwd();
-}
-
 
 # Now that all the base-level functions are set up, alias the
 # user-level functions to the right places
