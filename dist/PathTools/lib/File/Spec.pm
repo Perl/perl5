@@ -5,7 +5,7 @@ use strict;
 our $VERSION = '3.70';
 $VERSION =~ tr/_//d;
 
-my %module = (MacOS   => 'Mac',
+my %module = (
 	      MSWin32 => 'Win32',
 	      os2     => 'OS2',
 	      VMS     => 'VMS',

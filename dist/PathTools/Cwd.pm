@@ -135,14 +135,6 @@ my %METHOD_MAP =
     realpath		=> 'fast_abs_path',
    },
 
-   MacOS =>
-   {
-    getcwd		=> 'cwd',
-    fastgetcwd		=> 'cwd',
-    fastcwd		=> 'cwd',
-    abs_path		=> 'fast_abs_path',
-   },
-
    amigaos =>
    {
     getcwd              => '_backtick_pwd',
@@ -235,8 +227,7 @@ unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
 	}
     }
 
-    # MacOS has some special magic to make `pwd` work.
-    if( $os eq 'MacOS' || $found_pwd_cmd )
+    if( $found_pwd_cmd )
     {
 	*cwd = \&_backtick_pwd;
     }
@@ -364,9 +355,6 @@ sub chdir {
 
     if ($^O eq 'VMS') {
 	return $ENV{'PWD'} = $ENV{'DEFAULT'}
-    }
-    elsif ($^O eq 'MacOS') {
-	return $ENV{'PWD'} = cwd();
     }
     elsif ($^O eq 'MSWin32') {
 	$ENV{'PWD'} = $newpwd;
