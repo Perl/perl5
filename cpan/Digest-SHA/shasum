@@ -4,8 +4,8 @@
 	##
 	## Copyright (C) 2003-2017 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.98
-	## Wed Oct  4 00:40:02 MST 2017
+	## Version: 6.00
+	## Fri Dec  8 22:44:44 MST 2017
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum. Add
 	## "-a" option for algorithm selection,
@@ -35,6 +35,7 @@ shasum - Print or Check SHA Checksums
    -a, --algorithm   1 (default), 224, 256, 384, 512, 512224, 512256
    -b, --binary      read in binary mode
    -c, --check       read SHA sums from the FILEs and check them
+       --tag         create a BSD-style checksum
    -t, --text        read in text mode (default)
    -U, --UNIVERSAL   read in Universal Newlines mode
                          produces same digest on Windows/Unix/Mac
@@ -104,7 +105,7 @@ I<shasum> is implemented using the Perl module L<Digest::SHA>.
 
 END_OF_POD
 
-my $VERSION = "5.98";
+my $VERSION = "6.00";
 
 sub usage {
 	my($err, $msg) = @_;
@@ -132,7 +133,7 @@ select((select(STDERR), $| = 1)[0]);
 	## Collect options from command line
 
 my ($alg, $binary, $check, $text, $status, $quiet, $warn, $help);
-my ($version, $BITS, $UNIVERSAL);
+my ($version, $BITS, $UNIVERSAL, $tag);
 
 eval { Getopt::Long::Configure ("bundling") };
 GetOptions(
@@ -143,6 +144,7 @@ GetOptions(
 	'h|help' => \$help, 'v|version' => \$version,
 	'0|01' => \$BITS,
 	'U|UNIVERSAL' => \$UNIVERSAL,
+	'tag' => \$tag,
 ) or usage(1, "");
 
 
@@ -159,13 +161,23 @@ usage(1, "shasum: --status option used only when verifying checksums\n")
 	if $status && !$check;
 usage(1, "shasum: --quiet option used only when verifying checksums\n")
 	if $quiet && !$check;
+usage(1, "shasum: --tag does not support --text mode\n")
+	if $tag && $text;
+usage(1, "shasum: --tag does not support Universal Newlines mode\n")
+	if $tag && $UNIVERSAL;
+usage(1, "shasum: --tag does not support BITS mode\n")
+	if $tag && $BITS;
 
 
 	## Default to SHA-1 unless overridden by command line option
 
+my %isAlg = map { $_ => 1 } (1, 224, 256, 384, 512, 512224, 512256);
 $alg = 1 unless defined $alg;
-grep { $_ == $alg } (1, 224, 256, 384, 512, 512224, 512256)
-	or usage(1, "shasum: Unrecognized algorithm\n");
+usage(1, "shasum: Unrecognized algorithm\n") unless $isAlg{$alg};
+
+my %Tag = map { $_ => "SHA$_" } (1, 224, 256, 384, 512);
+$Tag{512224} = "SHA512/224";
+$Tag{512256} = "SHA512/256";
 
 
 	## Display version information if requested
@@ -237,13 +249,21 @@ sub verify {
 		or die "shasum: $checkfile: $!\n";
 	while (<FH>) {
 		next if /^#/; $num_lines++;
-		($bslash, $sum, $modesym, $fname) =
+		if (/^[ \t]*\\?SHA/) {
+			$modesym = '*';
+			($bslash, $alg, $fname, $sum) =
+			/^[ \t]*(\\?)SHA(\S+) \((.+)\) = ([\da-fA-F]+)/;
+			$alg =~ tr{/}{}d if defined $alg;
+		}
+		else {
+			($bslash, $sum, $modesym, $fname) =
 			/^[ \t]*(\\?)([\da-fA-F]+)[ \t]([ *^U])(.+)/;
-		$alg = defined $sum ? $len2alg{length($sum)} : undef;
-		if (grep { ! defined $_ } ($alg, $sum, $modesym, $fname)) {
-			$alg = 1 unless defined $alg;
+			$alg = defined $sum ? $len2alg{length($sum)} : undef;
+		}
+		if (grep { ! defined $_ } ($alg, $sum, $modesym, $fname) or
+			! $isAlg{$alg}) {
 			warn("shasum: $checkfile: $.: improperly " .
-				"formatted SHA$alg checksum line\n") if $warn;
+				"formatted SHA checksum line\n") if $warn;
 			$fmt_errs++;
 			next;
 		}
@@ -284,16 +304,16 @@ sub verify {
 	## Verify or compute SHA checksums of requested files
 
 my($file, $digest);
-
 my $STATUS = 0;
 for $file (@ARGV) {
 	if ($check) { $STATUS = 1 unless verify($file) }
 	elsif ($digest = sumfile($file)) {
 		if ($file =~ /[\n\\]/) {
 			$file =~ s/\\/\\\\/g; $file =~ s/\n/\\n/g;
-			$digest = "\\$digest";
+			print "\\";
 		}
-		print "$digest $modesym", "$file\n";
+		unless ($tag) { print "$digest $modesym$file\n" }
+		else          { print "$Tag{$alg} ($file) = $digest\n" }
 	}
 	else { $STATUS = 1 }
 }

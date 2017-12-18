@@ -8,11 +8,10 @@ use vars qw($VERSION @ISA @EXPORT_OK);
 use Fcntl qw(O_RDONLY);
 use integer;
 
-$VERSION = '5.98';
+$VERSION = '6.00';
 
 require Exporter;
-require DynaLoader;
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(
 	hmac_sha1	hmac_sha1_base64	hmac_sha1_hex
 	hmac_sha224	hmac_sha224_base64	hmac_sha224_hex
@@ -124,7 +123,7 @@ sub addfile {
 	if ($BITS) {
 		my ($n, $buf) = (0, "");
 		while (($n = read(FH, $buf, 4096))) {
-			$buf =~ s/[^01]//g;
+			$buf =~ tr/01//cd;
 			$self->add_bits($buf);
 		}
 		_bail("Read failed") unless defined $n;
@@ -236,7 +235,15 @@ sub load {
 	$class->putstate($str);
 }
 
-Digest::SHA->bootstrap($VERSION);
+eval {
+	require XSLoader;
+	XSLoader::load('Digest::SHA', $VERSION);
+	1;
+} or do {
+	require DynaLoader;
+	push @ISA, 'DynaLoader';
+	Digest::SHA->bootstrap($VERSION);
+};
 
 1;
 __END__

@@ -1,20 +1,13 @@
-use strict;
-use FileHandle;
-
-my $MODULE;
-
-BEGIN {
-	$MODULE = (-d "src") ? "Digest::SHA" : "Digest::SHA::PurePerl";
-	eval "require $MODULE" || die $@;
-	$MODULE->import(qw());
-}
-
 BEGIN {
 	if ($ENV{PERL_CORE}) {
 		chdir 't' if -d 't';
 		@INC = '../lib';
 	}
 }
+
+use strict;
+use FileHandle;
+use Digest::SHA;
 
 my @out = (
 	"ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0",
@@ -28,11 +21,11 @@ print "1..$numtests\n";
 
 my $testnum = 1;
 my $NSA = "SHA-42";	# No Such Algorithm
-print "not " if $MODULE->new($NSA);
+print "not " if Digest::SHA->new($NSA);
 print "ok ", $testnum++, "\n";
 
 my $tempfile = "methods.tmp";
-END { 1 while unlink $tempfile }
+END { unlink $tempfile if $tempfile }
 
 	# test OO methods using first two SHA-256 vectors from NIST
 
@@ -41,7 +34,7 @@ binmode($fh);
 print $fh "bcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
 $fh->close;
 
-my $sha = $MODULE->new()->reset("SHA-256")->new();
+my $sha = Digest::SHA->new()->reset("SHA-256")->new();
 $sha->add_bits("a", 5)->add_bits("001");
 
 my $rsp = shift(@out);

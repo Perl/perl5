@@ -1,13 +1,3 @@
-use strict;
-
-my $MODULE;
-
-BEGIN {
-	$MODULE = (-d "src") ? "Digest::SHA" : "Digest::SHA::PurePerl";
-	eval "require $MODULE" || die $@;
-	$MODULE->import(qw());
-}
-
 BEGIN {
 	if ($ENV{PERL_CORE}) {
 		chdir 't' if -d 't';
@@ -20,12 +10,15 @@ BEGIN {
 # Adapted from Julius Duque's original script (t/24-ireland.tmp)
 #	- modified to use state cache via putstate method
 
+use strict;
+use Digest::SHA;
+
 print "1..1\n";
 
 my $rsp = "b9045a713caed5dff3d3b783e98d1ce5778d8bc331ee4119d707072312af06a7";
 
 my $sha;
-if ($sha = $MODULE->putstate(join('', <DATA>))) {
+if ($sha = Digest::SHA->putstate(join('', <DATA>))) {
 	$sha->add("aa");
 	print "not " unless $sha->hexdigest eq $rsp;
 	print "ok 1\n";
