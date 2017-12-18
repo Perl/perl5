@@ -238,6 +238,12 @@ core of its job.  [perl #110520]
 
 =item *
 
+L<warnings> has been upgraded from version 1.38 to 1.39.
+It now includes new functions with names ending in C<_at_level>, allowing
+callers to specify the exact call frame.  [perl #132468]
+
+=item *
+
 L<XSLoader> has been upgraded from version 0.28 to 0.29.
 Its documentation now shows the use of C<__PACKAGE__>, and direct object
 syntax for example C<DynaLoader> usage [perl #132247].
