@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.39';
+$VERSION = '1.40';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -107,6 +107,8 @@ my $tree = {
                                     [ 5.021, DEFAULT_ON ],
                                 'experimental::declared_refs' =>
                                     [ 5.025, DEFAULT_ON ],
+                                'experimental::script_run' =>
+                                    [ 5.027, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
