@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-		chdir 't' if -d 't';
-		@INC = '../lib';
-	}
-}
-
 # Test against SHA-1 Sample Vectors from NIST
 
 use strict;

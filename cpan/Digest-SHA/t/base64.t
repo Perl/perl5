@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-		chdir 't' if -d 't';
-		@INC = '../lib';
-	}
-}
-
 use strict;
 use Digest::SHA qw(sha1_base64 sha224_base64 sha256_base64
 	sha384_base64 sha512_base64);

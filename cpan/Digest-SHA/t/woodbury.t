@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-		chdir 't' if -d 't';
-		@INC = '../lib';
-	}
-}
-
 # Test Vectors for HMAC-SHA-256/384/512
 #
 # Vectors and initial script courtesy of Adam Woodbury, The MITRE Corporation

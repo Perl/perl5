@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-		chdir 't' if -d 't';
-		@INC = '../lib';
-	}
-}
-
 # HMAC-SHA-256 test vectors from draft-ietf-ipsec-ciph-sha-256-01.txt
 
 use strict;

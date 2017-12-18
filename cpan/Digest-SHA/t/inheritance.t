@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-		chdir 't' if -d 't';
-		@INC = '../lib';
-	}
-}
-
 # Adapted from script by Mark Lawrence (ref. rt.cpan.org #94830)
 
 use strict;

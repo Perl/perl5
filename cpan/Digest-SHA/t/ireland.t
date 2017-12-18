@@ -1,10 +1,3 @@
-BEGIN {
-	if ($ENV{PERL_CORE}) {
-		chdir 't' if -d 't';
-		@INC = '../lib';
-	}
-}
-
 # David Ireland's test vector - SHA-256 digest of "a" x 536870912
 
 # Adapted from Julius Duque's original script (t/24-ireland.tmp)
