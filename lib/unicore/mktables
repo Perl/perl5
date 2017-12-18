@@ -14032,9 +14032,8 @@ END
         # This has to be in a separate loop from above, so as to wait until
         # the tables are stabilized before checking for equivalency.
         if (defined $pod_directory) {
-            my $sc = property_ref("Script");
             foreach my $table ($scx->tables) {
-                my $plain_sc_equiv = $sc->table($table->name);
+                my $plain_sc_equiv = $script->table($table->name);
                 if ($table->matches_identically_to($plain_sc_equiv)) {
                     $plain_sc_equiv->set_equivalent_to($table, Related => 1);
                 }
