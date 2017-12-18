@@ -670,6 +670,7 @@ sub unimport
 
 my %builtin_type; @builtin_type{qw(SCALAR ARRAY HASH CODE REF GLOB LVALUE Regexp)} = ();
 
+sub LEVEL () { 8 };
 sub MESSAGE () { 4 };
 sub FATAL () { 2 };
 sub NORMAL () { 1 };
@@ -681,8 +682,18 @@ sub __chk
     my $isobj = 0 ;
     my $wanted = shift;
     my $has_message = $wanted & MESSAGE;
+    my $has_level   = $wanted & LEVEL  ;
 
-    unless (@_ == 1 || @_ == ($has_message ? 2 : 0)) {
+    if ($has_level) {
+	if (@_ != ($has_message ? 3 : 2)) {
+	    my $sub = (caller 1)[3];
+	    my $syntax = $has_message
+		? "category, level, 'message'"
+		: 'category, level';
+	    Croaker("Usage: $sub($syntax)");
+        }
+    }
+    elsif (not @_ == 1 || @_ == ($has_message ? 2 : 0)) {
 	my $sub = (caller 1)[3];
 	my $syntax = $has_message ? "[category,] 'message'" : '[category]';
 	Croaker("Usage: $sub($syntax)");
@@ -720,6 +731,9 @@ sub __chk
 	}
 	$i -= 2 ;
     }
+    elsif ($has_level) {
+	$i = 2 + shift;
+    }
     else {
 	$i = _error_loc(); # see where Carp will allocate the error
     }
@@ -742,8 +756,17 @@ sub __chk
     return $results[0] unless $has_message;
 
     # &warnif, and the category is neither enabled as warning nor as fatal
-    return if $wanted == (NORMAL | FATAL | MESSAGE)
+    return if ($wanted & (NORMAL | FATAL | MESSAGE))
+		      == (NORMAL | FATAL | MESSAGE)
 	&& !($results[0] || $results[1]);
+
+    # If we have an explicit level, bypass Carp.
+    if ($has_level and @callers_bitmask) {
+	my $stuff = " at " . join " line ", (caller $i)[1,2];
+	$stuff .= ", <" . *${^LAST_FH}{NAME} . "> line $." if ${^LAST_FH};
+	die "$message$stuff.\n" if $results[0];
+	return warn "$message$stuff.\n";
+    }
 
     require Carp;
     Carp::croak($message) if $results[0];
@@ -803,9 +826,29 @@ sub warnif
     return __chk(NORMAL | FATAL | MESSAGE, @_);
 }
 
+sub enabled_at_level
+{
+    return __chk(NORMAL | LEVEL, @_);
+}
+
+sub fatal_enabled_at_level
+{
+    return __chk(FATAL | LEVEL, @_);
+}
+
+sub warn_at_level
+{
+    return __chk(FATAL | MESSAGE | LEVEL, @_);
+}
+
+sub warnif_at_level
+{
+    return __chk(NORMAL | FATAL | MESSAGE | LEVEL, @_);
+}
+
 # These are not part of any public interface, so we can delete them to save
 # space.
-delete @warnings::{qw(NORMAL FATAL MESSAGE)};
+delete @warnings::{qw(NORMAL FATAL MESSAGE LEVEL)};
 
 1;
 __END__
@@ -1340,6 +1383,9 @@ warnings::register like this:
 
 =over 4
 
+Note: The functions with names ending in C<_at_level> were added in Perl
+5.28.
+
 =item use warnings::register
 
 Creates a new warnings category with the same name as the package where
@@ -1367,6 +1413,11 @@ Return TRUE if that warnings category is enabled in the first scope
 where the object is used.
 Otherwise returns FALSE.
 
+=item warnings::enabled_at_level($category, $level)
+
+Like C<warnings::enabled>, but $level specifies the exact call frame, 0
+being the immediate caller.
+
 =item warnings::fatal_enabled()
 
 Return TRUE if the warnings category with the same name as the current
@@ -1387,6 +1438,11 @@ warnings category.
 Return TRUE if that warnings category has been set to FATAL in the first
 scope where the object is used.
 Otherwise returns FALSE.
+
+=item warnings::fatal_enabled_at_level($category, $level)
+
+Like C<warnings::fatal_enabled>, but $level specifies the exact call frame,
+0 being the immediate caller.
 
 =item warnings::warn($message)
 
@@ -1414,6 +1470,10 @@ warnings category.
 If that warnings category has been set to "FATAL" in the scope where C<$object>
 is first used then die. Otherwise return.
 
+=item warnings::warn_at_level($category, $level, $message)
+
+Like C<warnings::warn>, but $level specifies the exact call frame,
+0 being the immediate caller.
 
 =item warnings::warnif($message)
 
@@ -1435,6 +1495,11 @@ Equivalent to:
 
     if (warnings::enabled($object))
       { warnings::warn($object, $message) }
+
+=item warnings::warnif_at_level($category, $level, $message)
+
+Like C<warnings::warnif>, but $level specifies the exact call frame,
+0 being the immediate caller.
 
 =item warnings::register_categories(@names)
 

@@ -1367,3 +1367,72 @@ My wubble is flanged at - line 24.
 My wubble is flanged at - line 25.
 My webble is flanged at - line 27.
 done
+########
+# NAME _at_level
+select STDERR;
+{ use warnings "utf8"; foo() }
+sub foo { use warnings "syntax"; bar() }
+sub bar {
+ use warnings "unpack";
+ local $\="\n";
+ print "1. ", warnings::enabled_at_level("unpack", 0)||0;
+ print "2. ", warnings::enabled_at_level("unpack", 1)||0;
+ print "3. ", warnings::enabled_at_level("unpack", 2)||0;
+ print "4. ", warnings::enabled_at_level("syntax", 0)||0;
+ print "5. ", warnings::enabled_at_level("syntax", 1)||0;
+ print "6. ", warnings::enabled_at_level("syntax", 2)||0;
+ print "7. ", warnings::enabled_at_level("utf8", 0)||0;
+ print "8. ", warnings::enabled_at_level("utf8", 1)||0;
+ print "9. ", warnings::enabled_at_level("utf8", 2)||0;
+ warnings::warn_at_level  ("misc",0,"A mandatory foo warning");
+ warnings::warn_at_level  ("misc",1,"A mandatory top-level warning");
+ warnings::warnif_at_level("syntax",0,"A conditional syntax warning");
+ warnings::warnif_at_level("syntax",1,"A conditional syntax warning");
+ warnings::warnif_at_level("utf8",0,"A conditional utf8 warning");
+ warnings::warnif_at_level("utf8",1,"A conditional utf8 warning");
+}
+{ use warnings "syntax"; use warnings FATAL => "utf8"; foo2() }
+sub foo2 {
+  use warnings FATAL => "syntax"; use warnings "utf8"; bar2()
+}
+sub bar2 {
+ $\="\n";
+ print "10. ", warnings::fatal_enabled_at_level("syntax", 0)||0;
+ print "11. ", warnings::fatal_enabled_at_level("syntax", 1)||0;
+ print "12. ", warnings::fatal_enabled_at_level("utf8", 0)||0;
+ print "13. ", warnings::fatal_enabled_at_level("utf8", 1)||0;
+ undef $\;
+ eval { warnings::warn_at_level  ("syntax",1,"A fatal warning") };
+ print "Died: $@" if $@;
+ eval { warnings::warnif_at_level("syntax",1,"A fatal syntax warning") };
+ print "Died: $@" if $@;
+ eval { warnings::warnif_at_level("syntax",2,"A syntax warning") };
+ print "Died: $@" if $@;
+ eval { warnings::warnif_at_level("utf8",1,"A utf8 warning") };
+ print "Died: $@" if $@;
+ eval { warnings::warnif_at_level("utf8",2,"A fatal utf8 warning") };
+ print "Died: $@" if $@;
+}
+EXPECT
+1. 0
+2. 0
+3. 0
+4. 1
+5. 0
+6. 0
+7. 0
+8. 1
+9. 0
+A mandatory foo warning at - line 3.
+A mandatory top-level warning at - line 2.
+A conditional syntax warning at - line 3.
+A conditional utf8 warning at - line 2.
+10. 1
+11. 0
+12. 0
+13. 1
+Died: A fatal warning at - line 25.
+Died: A fatal syntax warning at - line 25.
+A syntax warning at - line 23.
+A utf8 warning at - line 25.
+Died: A fatal utf8 warning at - line 23.
