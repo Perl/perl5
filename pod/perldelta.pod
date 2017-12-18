@@ -225,8 +225,7 @@ in C<BEGIN> blocks.  [perl #96538]
 
 L<Locale::Codes> has been upgraded from version 3.54 to 3.55
 
-B<NOTE>: L<Locale::Codes> is deprecated in core and will be removed
-from Perl 5.30.
+B<NOTE>: L<Locale::Codes> scheduled to be removed from core in Perl 5.30.
 
 =item *
 
