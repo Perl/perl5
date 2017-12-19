@@ -56,6 +56,24 @@ C<vec> views its string argument as a sequence of bits.  A string
 containing a code point over 0xFF is nonsensical.  This usage is
 deprecated in Perl 5.28, and will be removed in Perl 5.32.
 
+=head3 Use of code points over 0xFF in string bitwise operators
+
+The string bitwise operators, C<&>, C<|>, C<^>, and C<~>, treat their
+operands as strings of bytes. As such, values above 0xFF are
+nonsensical. Some instances of these have been deprecated since Perl
+5.24, and were made fatal in 5.28, but it turns out that in cases where
+the wide characters did not affect the end result, no deprecation
+notice was raised, and so remain legal.  Now, all occurrences either are
+fatal or raise a deprecation warning, so that the remaining legal
+occurrences will be fatal in 5.32.
+
+An example of this is
+
+ "" & "\x{100}"
+
+The wide character is not used in the C<&> operation because the left
+operand is shorter.  This now warns anyway.
+
 =head3 hostname() doesn't accept any arguments
 
 The function C<hostname()> in the L<Sys::Hostname> module has always

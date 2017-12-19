@@ -1112,6 +1112,10 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 static const char * const fatal_above_ff_msg
     = "Use of strings with code points over 0xFF as arguments to "
       "%s operator is not allowed";
+static const char * const deprecated_above_ff_msg
+    = "Use of strings with code points over 0xFF as arguments to "
+      "%s operator is deprecated. This will be a fatal error in "
+      "Perl 5.32";
 #endif
 
 

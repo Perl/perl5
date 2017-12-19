@@ -18,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 491;
+plan tests => 504;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -612,9 +612,74 @@ foreach my $op_info ([and => "&"], [or => "|"], [xor => "^"]) {
          "(~) is not allowed";
 }
 
-is("abc" & "abc\x{100}", "abc", '"abc" & "abc\x{100}" works');
-is("abc" | "abc\x{100}", "abc\x{100}", '"abc" | "abc\x{100}" works');
-is("abc" ^ "abc\x{100}", "\0\0\0\x{100}", '"abc" ^ "abc\x{100}" works');
-is("abc\x{100}" & "abc", "abc", '"abc\x{100}" & "abc" works');
-is("abc\x{100}" | "abc", "abc\x{100}", '"abc\x{100}" | "abc" works');
-is("abc\x{100}" ^ "abc", "\0\0\0\x{100}", '"abc\x{100}" ^ "abc" works');
+{
+    # Since these are temporary, and it was a pain to make them into loops,
+    # the code is just rolled out.
+    local $SIG{__WARN__} = sub { push @warnings, @_; };
+
+    undef @warnings;
+    is("abc" & "abc\x{100}", "abc", '"abc" & "abc\x{100}" works');
+    if (! is(@warnings, 1, "... but returned a single warning")) {
+        diag join "\n", @warnings;
+    }
+    like ($warnings[0], qr /^Use of strings with code points over 0xFF as (?#
+                            )arguments to bitwise and \(&\) operator (?#
+                            )is deprecated/,
+                        "... which is the expected warning");
+    undef @warnings;
+    is("abc" | "abc\x{100}", "abc\x{100}", '"abc" | "abc\x{100}" works');
+    if (! is(@warnings, 1, "... but returned a single warning")) {
+        diag join "\n", @warnings;
+    }
+    like ($warnings[0], qr /^Use of strings with code points over 0xFF as (?#
+                            )arguments to bitwise or \(|\) operator (?#
+                            )is deprecated/,
+                        "... which is the expected warning");
+    undef @warnings;
+    is("abc" ^ "abc\x{100}", "\0\0\0\x{100}", '"abc" ^ "abc\x{100}" works');
+    if (! is(@warnings, 1, "... but returned a single warning")) {
+        diag join "\n", @warnings;
+    }
+    like ($warnings[0], qr /^Use of strings with code points over 0xFF as (?#
+                            )arguments to bitwise xor \(\^\) operator (?#
+                            )is deprecated/,
+                        "... which is the expected warning");
+    undef @warnings;
+    is("abc\x{100}" & "abc", "abc", '"abc\x{100}" & "abc" works');
+    if (! is(@warnings, 1, "... but returned a single warning")) {
+        diag join "\n", @warnings;
+    }
+    like ($warnings[0], qr /^Use of strings with code points over 0xFF as (?#
+                            )arguments to bitwise and \(&\) operator (?#
+                            )is deprecated/,
+                        "... which is the expected warning");
+    undef @warnings;
+    is("abc\x{100}" | "abc", "abc\x{100}", '"abc\x{100}" | "abc" works');
+    if (! is(@warnings, 1, "... but returned a single warning")) {
+        diag join "\n", @warnings;
+    }
+    like ($warnings[0], qr /^Use of strings with code points over 0xFF as (?#
+                            )arguments to bitwise or \(|\) operator (?#
+                            )is deprecated/,
+                        "... which is the expected warning");
+    undef @warnings;
+    is("abc\x{100}" ^ "abc", "\0\0\0\x{100}", '"abc\x{100}" ^ "abc" works');
+    if (! is(@warnings, 1, "... but returned a single warning")) {
+        diag join "\n", @warnings;
+    }
+    like ($warnings[0], qr /^Use of strings with code points over 0xFF as (?#
+                            )arguments to bitwise xor \(\^\) operator (?#
+                            )is deprecated/,
+                        "... which is the expected warning");
+    no warnings 'deprecated';
+    undef @warnings;
+    my $foo = "abc" & "abc\x{100}";
+    $foo = "abc" | "abc\x{100}";
+    $foo = "abc" ^ "abc\x{100}";
+    $foo = "abc\x{100}" & "abc";
+    $foo = "abc\x{100}" | "abc";
+    $foo = "abc\x{100}" ^ "abc";
+    if (! is(@warnings, 0, "... And none of the last 6 main tests warns when 'deprecated' is off")) {
+        diag join "\n", @warnings;
+    }
+}

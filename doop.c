@@ -1095,6 +1095,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
      * portion.  That means that at least one of the operands has to be
      * entirely non-UTF-8, and the length of that operand has to be before the
      * first above-FF in the other */
+    if (left_utf8 || right_utf8) {
     if (left_utf8) {
         if (right_utf8 || rightlen > leftlen) {
             Perl_croak(aTHX_ fatal_above_ff_msg, PL_op_desc[optype]);
@@ -1106,6 +1107,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
             Perl_croak(aTHX_ fatal_above_ff_msg, PL_op_desc[optype]);
         }
         len = leftlen;
+    }
+
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                               deprecated_above_ff_msg, PL_op_desc[optype]);
     }
     else {  /* Neither is UTF-8 */
         len = MIN(leftlen, rightlen);
