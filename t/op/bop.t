@@ -617,4 +617,4 @@ is("abc" | "abc\x{100}", "abc\x{100}", '"abc" | "abc\x{100}" works');
 is("abc" ^ "abc\x{100}", "\0\0\0\x{100}", '"abc" ^ "abc\x{100}" works');
 is("abc\x{100}" & "abc", "abc", '"abc\x{100}" & "abc" works');
 is("abc\x{100}" | "abc", "abc\x{100}", '"abc\x{100}" | "abc" works');
-is("abc\x{100}" ^ "abc", "\0\0\0\x{100}", '"abc\x{100}" | "abc" works');
+is("abc\x{100}" ^ "abc", "\0\0\0\x{100}", '"abc\x{100}" ^ "abc" works');
