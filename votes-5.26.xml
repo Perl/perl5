@@ -39,7 +39,8 @@ Both of these or neither
 
 <commit votes="jhi" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
 
-<commit votes="xsawyerx" id="b2cd5cb1d8b3c8a7a7f033784d5134d2fbd8cad8" ticket="" desc="Unicode::UCD: max code point is now IV_MAX"
+<commit votes="xsawyerx khw" id="b2cd5cb1d8b3c8a7a7f033784d5134d2fbd8cad8" ticket="" desc="Unicode::UCD: max code point is now IV_MAX"
+<commit votes="khw" id="0202c428e2e1febe76c0cfbb1a64a76cd3f6f756" ticket="" desc="update perldiag to account for max code point being signed"
 
 </div>
 
