@@ -3857,6 +3857,11 @@ STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
 
 #  endif
 #endif
+#if !defined(HAS_MKOSTEMP)
+PERL_CALLCONV int	Perl_my_mkostemp(char *templte, int flags);
+#define PERL_ARGS_ASSERT_MY_MKOSTEMP	\
+	assert(templte)
+#endif
 #if !defined(HAS_MKSTEMP)
 PERL_CALLCONV int	Perl_my_mkstemp(char *templte);
 #define PERL_ARGS_ASSERT_MY_MKSTEMP	\

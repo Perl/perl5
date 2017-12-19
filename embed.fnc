@@ -3076,6 +3076,9 @@ Apnod	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t si
 Apnod	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
 #endif
 
+#ifndef HAS_MKOSTEMP
+pno	|int	|my_mkostemp	|NN char *templte|int flags
+#endif
 #ifndef HAS_MKSTEMP
 pno	|int	|my_mkstemp	|NN char *templte
 #endif

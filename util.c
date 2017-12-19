@@ -5627,24 +5627,22 @@ Perl_my_dirfd(DIR * dir) {
 #endif 
 }
 
-#ifndef HAS_MKSTEMP
+#if !defined(HAS_MKOSTEMP) || !defined(HAS_MKSTEMP)
 
 #define TEMP_FILE_CH "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz0123456789"
 #define TEMP_FILE_CH_COUNT (sizeof(TEMP_FILE_CH)-1)
 
-int
-Perl_my_mkstemp(char *templte) {
+static int
+S_my_mkostemp(char *templte, int flags) {
     dTHX;
     STRLEN len = strlen(templte);
     int fd;
     int attempts = 0;
 
-    PERL_ARGS_ASSERT_MY_MKSTEMP;
-
     if (len < 6 ||
         templte[len-1] != 'X' || templte[len-2] != 'X' || templte[len-3] != 'X' ||
         templte[len-4] != 'X' || templte[len-5] != 'X' || templte[len-6] != 'X') {
-        errno = EINVAL;
+        SETERRNO(EINVAL, LIB_INVARG);
         return -1;
     }
 
@@ -5653,12 +5651,30 @@ Perl_my_mkstemp(char *templte) {
         for (i = 1; i <= 6; ++i) {
             templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
         }
-        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL, 0600);
+        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
     } while (fd == -1 && errno == EEXIST && ++attempts <= 100);
 
     return fd;
 }
 
+#endif
+
+#ifndef HAS_MKOSTEMP
+int
+Perl_my_mkostemp(char *templte, int flags)
+{
+    PERL_ARGS_ASSERT_MY_MKOSTEMP;
+    return S_my_mkostemp(templte, flags);
+}
+#endif
+
+#ifndef HAS_MKSTEMP
+int
+Perl_my_mkstemp(char *templte)
+{
+    PERL_ARGS_ASSERT_MY_MKSTEMP;
+    return S_my_mkostemp(templte, 0);
+}
 #endif
 
 REGEXP *
