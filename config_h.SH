@@ -3044,6 +3044,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_mkdtemp HAS_MKDTEMP		/**/
 
+/* HAS_MKOSTEMP:
+ *	This symbol, if defined, indicates that the mkostemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+#$d_mkostemp HAS_MKOSTEMP		/**/
+
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to exclusively create and open a uniquely named

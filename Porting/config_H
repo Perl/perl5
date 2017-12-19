@@ -13,7 +13,7 @@
 
 /* Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Dec 22 15:55:04 GMT 2017
+ * Configuration time: Fri Dec 22 16:17:32 GMT 2017
  * Configured by     : yourname
  * Target system     : linux barba.rous.org 3.16.0-4-amd64 #1 smp debian 3.16.43-2+deb8u2 (2017-06-26) x86_64 gnulinux 
  */
@@ -3012,6 +3012,13 @@
  *	available to exclusively create a uniquely named temporary directory.
  */
 #define HAS_MKDTEMP		/**/
+
+/* HAS_MKOSTEMP:
+ *	This symbol, if defined, indicates that the mkostemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+#define HAS_MKOSTEMP		/**/
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Fri Dec 22 15:55:04 GMT 2017
+# Configuration time: Fri Dec 22 16:17:32 GMT 2017
 # Configured by     : yourname
 # Target system     : linux barba.rous.org 3.16.0-4-amd64 #1 smp debian 3.16.43-2+deb8u2 (2017-06-26) x86_64 gnulinux 
 
@@ -76,7 +76,7 @@ ccsymbols=''
 ccversion=''
 cf_by='yourname'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Fri Dec 22 15:55:04 GMT 2017'
+cf_time='Fri Dec 22 16:17:32 GMT 2017'
 charbits='8'
 charsize='1'
 chgrp=''
@@ -397,6 +397,7 @@ d_memrchr='define'
 d_mkdir='define'
 d_mkdtemp='define'
 d_mkfifo='define'
+d_mkostemp='define'
 d_mkstemp='define'
 d_mkstemps='define'
 d_mktime64='undef'

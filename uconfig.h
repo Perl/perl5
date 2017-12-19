@@ -3009,6 +3009,13 @@
  */
 /*#define HAS_MKDTEMP		/ **/
 
+/* HAS_MKOSTEMP:
+ *	This symbol, if defined, indicates that the mkostemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+/*#define HAS_MKOSTEMP		/ **/
+
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to exclusively create and open a uniquely named
@@ -5212,6 +5219,6 @@
 #endif
 
 /* Generated from:
- * 7e8e752fea0ea763029b7c6520f3272c8c86c36221269040b1d39493cf12aa13 config_h.SH
- * 1aa1a771df9d5ae1df4e6419f0b30a12a974527ec226712787d96d0d770010e7 uconfig.sh
+ * b35fd150a5540d0fe06540db67bc67864b14dd744550f105e13b78ef97a953d5 config_h.SH
+ * 02e3ab990e287cd32a5d000bc0b75168aa96496175b82315bdd47f898d00b0a6 uconfig.sh
  * ex: set ro: */

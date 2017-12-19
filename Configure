@@ -667,6 +667,7 @@ d_memrchr=''
 d_mkdir=''
 d_mkdtemp=''
 d_mkfifo=''
+d_mkostemp=''
 d_mkstemp=''
 d_mkstemps=''
 d_mktime=''
@@ -16187,6 +16188,10 @@ eval $inlibc
 set mkfifo d_mkfifo
 eval $inlibc
 
+: see if mkostemp exists
+set mkostemp d_mkostemp
+eval $inlibc
+
 : see if mkstemp exists
 set mkstemp d_mkstemp
 eval $inlibc
@@ -24061,6 +24066,7 @@ d_memrchr='$d_memrchr'
 d_mkdir='$d_mkdir'
 d_mkdtemp='$d_mkdtemp'
 d_mkfifo='$d_mkfifo'
+d_mkostemp='$d_mkostemp'
 d_mkstemp='$d_mkstemp'
 d_mkstemps='$d_mkstemps'
 d_mktime64='$d_mktime64'
