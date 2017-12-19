@@ -1108,7 +1108,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
         len = leftlen;
     }
     else {  /* Neither is UTF-8 */
-        len = leftlen < rightlen ? leftlen : rightlen;
+        len = MIN(leftlen, rightlen);
     }
 
     lensave = len;
