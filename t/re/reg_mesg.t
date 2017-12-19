@@ -226,12 +226,8 @@ my @death =
  '/\b{gc}/' => "'gc' is an unknown bound type {#} m/\\b{gc{#}}/",
  '/\B{gc}/' => "'gc' is an unknown bound type {#} m/\\B{gc{#}}/",
 
-
  '/(?[[[::]]])/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[[[::]]{#}])/",
  '/(?[[[:w:]]])/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[[[:w:]]{#}])/",
- '/(?[[:w:]])/' => "",
- '/([.].*)[.]/'   => "",    # [perl #127582]
- '/[.].*[.]/'     => "",    # [perl #127604]
  '/(?[a])/' =>  'Unexpected character {#} m/(?[a{#}])/',
  '/(?[ + \t ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ +{#} \t ])/',
  '/(?[ \cK - ( + \t ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ \cK - ( +{#} \t ) ])/',
@@ -298,10 +294,6 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
- '/abc/xix' => "",
- '/(?xmsixp:abc)/' => "",
- '/(?xmsixp)abc/' => "",
- '/(?xxxx:abc)/' => "",
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
 
 );
@@ -443,7 +435,6 @@ my @death_utf8 = mark_as_utf8(
  '/ネ[\x{ネ]/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]/',
 
  '/ネ\o{ネ/' => 'Missing right brace on \o{ {#} m/ネ\o{{#}ネ/',
- '/ネ[[:ネ:]]ネ/' => "",
 
  '/[ネ-a]ネ/' => 'Invalid [] range "ネ-a" {#} m/[ネ-a{#}]ネ/',
 
@@ -453,7 +444,6 @@ my @death_utf8 = mark_as_utf8(
  '/ネ(?[[[:ネ: ])ネ/' => "Syntax error in (?[...]) {#} m/ネ(?[[[:ネ: ])ネ{#}/",
  '/ネ(?[[[::]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[::]]{#}])ネ/",
  '/ネ(?[[[:ネ:]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[:ネ:]]{#}])ネ/",
- '/ネ(?[[:ネ:]])ネ/' => "",
  '/ネ(?[ネ])ネ/' =>  'Unexpected character {#} m/ネ(?[ネ{#}])ネ/',
  '/ネ(?[ + [ネ] ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ +{#} [ネ] ])/',
  '/ネ(?[ \cK - ( + [ネ] ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ \cK - ( +{#} [ネ] ) ])/',
@@ -602,6 +592,14 @@ my @warning = (
                                 ],
    '/[][[:alpha:]]/' => "",        # [perl #127581]
    '/[][[:alpha:]\\@\\\\^_?]/' => "", # [perl #131522]
+    '/(?[[:w:]])/' => "",
+    '/([.].*)[.]/'   => "",    # [perl #127582]
+    '/[.].*[.]/'     => "",    # [perl #127604]
+    '/abc/xix' => "",
+    '/(?xmsixp:abc)/' => "",
+    '/(?xmsixp)abc/' => "",
+    '/(?xxxx:abc)/' => "",
+
 ); # See comments before this for why '\x{100}' is generally needed
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -615,6 +613,8 @@ my @warnings_utf8 = mark_as_utf8(
         'Useless (?g) - use /g modifier {#} m/utf8 ネ (?og{#}c) ネ/',
         'Useless (?c) - use /gc modifier {#} m/utf8 ネ (?ogc{#}) ネ/',
     ],
+   '/ネ[[:ネ:]]ネ/' => "",
+   '/ネ(?[[:ネ:]])ネ/' => "",
 
 );
 
