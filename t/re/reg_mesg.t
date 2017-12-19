@@ -306,10 +306,11 @@ my @death =
 
 );
 
-# These are messages that are warnings when not strict; death under 'use re
-# "strict".  See comment before @warning as to why some have a \x{100} in
-# them.  This array has 3 elements per construct.  [0] is the regex to use;
-# [1] is the message under no strict, and [2] is under strict.
+# These are messages that are death under 'use re "strict"', and may or may
+# not warn otherwise.  See comment before @warning as to why some have a
+# \x{100} in them.  This array has 3 elements per construct.  [0] is the regex
+# to use; [1] is the message under no strict (empty to not warn), and [2] is
+# under strict.
 my @death_only_under_strict = (
     'm/\xABC/' => "",
                => 'Use \x{...} for more than two hex characters {#} m/\xABC{#}/',
