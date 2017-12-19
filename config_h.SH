@@ -2314,6 +2314,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d__fwalk HAS__FWALK		/**/
 
+/* HAS_ACCEPT4:
+ *	This symbol, if defined, indicates that the accept4
+ *	system call is available to accept socket connections.
+ */
+#$d_accept4 HAS_ACCEPT4		/**/
+
 /* HAS_ACOSH:
  *	This symbol, if defined, indicates that the acosh routine is
  *	available to do the inverse hyperbolic cosine function.
@@ -2444,6 +2450,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	case if you're using dl_dlopen.xs.
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
+
+/* HAS_DUP3:
+ *	This symbol, if defined, indicates that the dup3
+ *	system call is available to duplicate file descriptors.
+ */
+#$d_dup3 HAS_DUP3		/**/
 
 /* HAS_ERF:
  *	This symbol, if defined, indicates that the erf routine is
@@ -3135,6 +3147,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol will be defined if the C compiler supports off64_t.
  */
 #$d_off64_t	HAS_OFF64_T    		/**/
+
+/* HAS_PIPE2:
+ *	This symbol, if defined, indicates that the pipe2
+ *	system call is available to create inter-process pipes.
+ */
+#$d_pipe2 HAS_PIPE2		/**/
 
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is

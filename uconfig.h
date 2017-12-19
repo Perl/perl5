@@ -2279,6 +2279,12 @@
  */
 /*#define HAS__FWALK		/ **/
 
+/* HAS_ACCEPT4:
+ *	This symbol, if defined, indicates that the accept4
+ *	system call is available to accept socket connections.
+ */
+/*#define HAS_ACCEPT4		/ **/
+
 /* HAS_ACOSH:
  *	This symbol, if defined, indicates that the acosh routine is
  *	available to do the inverse hyperbolic cosine function.
@@ -2409,6 +2415,12 @@
  *	case if you're using dl_dlopen.xs.
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
+
+/* HAS_DUP3:
+ *	This symbol, if defined, indicates that the dup3
+ *	system call is available to duplicate file descriptors.
+ */
+/*#define HAS_DUP3		/ **/
 
 /* HAS_ERF:
  *	This symbol, if defined, indicates that the erf routine is
@@ -3100,6 +3112,12 @@
  *	This symbol will be defined if the C compiler supports off64_t.
  */
 /*#define	HAS_OFF64_T    		/ **/
+
+/* HAS_PIPE2:
+ *	This symbol, if defined, indicates that the pipe2
+ *	system call is available to create inter-process pipes.
+ */
+/*#define HAS_PIPE2		/ **/
 
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
@@ -5194,6 +5212,6 @@
 #endif
 
 /* Generated from:
- * 84ef0e3b4e27374e35a7ac6726cf1c0149b1d4ba726bd58e06d9a9ce18acbb04 config_h.SH
- * 9df6179826b20eb8e1d8db749dfd77913897fae551371f686571273075f78092 uconfig.sh
+ * 7e8e752fea0ea763029b7c6520f3272c8c86c36221269040b1d39493cf12aa13 config_h.SH
+ * 1aa1a771df9d5ae1df4e6419f0b30a12a974527ec226712787d96d0d770010e7 uconfig.sh
  * ex: set ro: */

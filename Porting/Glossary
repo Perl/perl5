@@ -393,6 +393,10 @@ d__fwalk (d__fwalk.U):
 	This variable conditionally defines HAS__FWALK if _fwalk() is
 	available to apply a function to all the file handles.
 
+d_accept4 (d_accept4.U):
+	This variable conditionally defines HAS_ACCEPT4
+	if accept4() is available to accept socket connections.
+
 d_access (d_access.U):
 	This variable conditionally defines HAS_ACCESS if the access() system
 	call is available to check for access permissions using real IDs.
@@ -734,6 +738,10 @@ d_drand48proto (d_drand48proto.U):
 d_dup2 (d_dup2.U):
 	This variable conditionally defines HAS_DUP2 if dup2() is
 	available to duplicate file descriptors.
+
+d_dup3 (d_dup3.U):
+	This variable conditionally defines HAS_DUP3
+	if dup3() is available to duplicate file descriptors.
 
 d_duplocale (d_newlocale.U):
 	This variable conditionally defines the HAS_DUPLOCALE symbol, which
@@ -1918,6 +1926,10 @@ d_pipe (d_pipe.U):
 	This variable conditionally defines the HAS_PIPE symbol, which
 	indicates to the C program that the pipe() routine is available
 	to create an inter-process channel.
+
+d_pipe2 (d_pipe2.U):
+	This variable conditionally defines HAS_PIPE2
+	if pipe2() is available to create inter-process pipes.
 
 d_poll (d_poll.U):
 	This variable conditionally defines the HAS_POLL symbol, which
