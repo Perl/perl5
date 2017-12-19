@@ -4032,16 +4032,12 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	};
 	const char * const err = "Failed to create a fake bit bucket";
 	if (strEQ(scriptname, BIT_BUCKET)) {
-#ifdef HAS_MKSTEMP /* Hopefully mkstemp() is safe here. */
-            int old_umask = umask(0177);
-	    int tmpfd = mkstemp(tmpname);
-            umask(old_umask);
+	    int tmpfd = Perl_my_mkstemp(tmpname);
 	    if (tmpfd > -1) {
 		scriptname = tmpname;
 		close(tmpfd);
 	    } else
 		Perl_croak(aTHX_ err);
-#endif
 	}
 #endif
 	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);

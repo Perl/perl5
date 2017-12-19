@@ -241,6 +241,11 @@ means arg not present, 1 is empty string/null byte */
                              (little), (lend) - (little)))
 #endif
 
+#ifdef __Lynx__
+/* Missing proto on LynxOS */
+int mkstemp(char*);
+#endif
+
 #if defined(HAS_MKOSTEMP) && defined(PERL_CORE)
 #   define Perl_my_mkostemp(templte, flags) mkostemp(templte, flags)
 #endif

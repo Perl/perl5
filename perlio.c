@@ -49,11 +49,6 @@
 
 #include "XSUB.h"
 
-#ifdef __Lynx__
-/* Missing proto on LynxOS */
-int mkstemp(char*);
-#endif
-
 #ifdef VMS
 #include <rms.h>
 #endif
@@ -5034,32 +5029,29 @@ PerlIO_tmpfile(void)
      const int fd = win32_tmpfd();
      if (fd >= 0)
 	  f = PerlIO_fdopen(fd, "w+b");
-#elif defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
+#elif ! defined(VMS) && ! defined(OS2)
      int fd = -1;
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = TAINTING_get ? NULL : PerlEnv_getenv("TMPDIR");
      SV * sv = NULL;
      int old_umask = umask(0177);
-     /*
-      * I have no idea how portable mkstemp() is ... NI-S
-      */
      if (tmpdir && *tmpdir) {
 	 /* if TMPDIR is set and not empty, we try that first */
 	 sv = newSVpv(tmpdir, 0);
 	 sv_catpv(sv, tempname + 4);
-	 fd = mkstemp(SvPVX(sv));
+	 fd = Perl_my_mkstemp(SvPVX(sv));
      }
      if (fd < 0) {
 	 SvREFCNT_dec(sv);
 	 sv = NULL;
 	 /* else we try /tmp */
-	 fd = mkstemp(tempname);
+	 fd = Perl_my_mkstemp(tempname);
      }
      if (fd < 0) {
          /* Try cwd */
          sv = newSVpvs(".");
          sv_catpv(sv, tempname + 4);
-         fd = mkstemp(SvPVX(sv));
+         fd = Perl_my_mkstemp(SvPVX(sv));
      }
      umask(old_umask);
      if (fd >= 0) {
