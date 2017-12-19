@@ -464,13 +464,14 @@ Apmb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
 				|NN SV *svs|I32 num
-p	|void	|setfd_cloexec|int fd
-p	|void	|setfd_inhexec|int fd
+pn	|void	|setfd_cloexec|int fd
+pn	|void	|setfd_inhexec|int fd
 p	|void	|setfd_inhexec_for_sysfd|int fd
 pR	|int	|PerlLIO_dup_cloexec|int oldfd
 pR	|int	|PerlLIO_dup2_cloexec|int oldfd|int newfd
 pR	|int	|PerlLIO_open_cloexec|NN const char *file|int flag
 pR	|int	|PerlLIO_open3_cloexec|NN const char *file|int flag|int perm
+pnoR	|int	|my_mkstemp_cloexec|NN char *templte
 #ifdef HAS_PIPE
 pR	|int	|PerlProc_pipe_cloexec|NN int *pipefd
 #endif

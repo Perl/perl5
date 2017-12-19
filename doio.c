@@ -61,7 +61,7 @@
 #include <signal.h>
 
 void
-Perl_setfd_cloexec(pTHX_ int fd)
+Perl_setfd_cloexec(int fd)
 {
     assert(fd >= 0);
 #if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
@@ -70,7 +70,7 @@ Perl_setfd_cloexec(pTHX_ int fd)
 }
 
 void
-Perl_setfd_inhexec(pTHX_ int fd)
+Perl_setfd_inhexec(int fd)
 {
     assert(fd >= 0);
 #if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
@@ -218,6 +218,19 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 	PerlLIO_open3(file, flag, perm));
 #else
     DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_open3(file, flag, perm));
+#endif
+}
+
+int
+Perl_my_mkstemp_cloexec(char *templte)
+{
+    PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	Perl_my_mkostemp(templte, O_CLOEXEC),
+	Perl_my_mkstemp(templte));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
 #endif
 }
 

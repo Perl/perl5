@@ -1382,8 +1382,8 @@
 #define set_caret_X()		Perl_set_caret_X(aTHX)
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define set_numeric_underlying()	Perl_set_numeric_underlying(aTHX)
-#define setfd_cloexec(a)	Perl_setfd_cloexec(aTHX_ a)
-#define setfd_inhexec(a)	Perl_setfd_inhexec(aTHX_ a)
+#define setfd_cloexec		Perl_setfd_cloexec
+#define setfd_inhexec		Perl_setfd_inhexec
 #define setfd_inhexec_for_sysfd(a)	Perl_setfd_inhexec_for_sysfd(aTHX_ a)
 #define sub_crush_depth(a)	Perl_sub_crush_depth(aTHX_ a)
 #define sv_2num(a)		Perl_sv_2num(aTHX_ a)
