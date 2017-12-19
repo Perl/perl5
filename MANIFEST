@@ -3715,6 +3715,7 @@ dist/Storable/t/make_overload.pl	Make test data for overload.t
 dist/Storable/t/malice.t		See if Storable copes with corrupt files
 dist/Storable/t/overload.t		See if Storable works
 dist/Storable/t/recurse.t		See if Storable works
+dist/Storable/t/regexp.t		See if Storable works with regexps
 dist/Storable/t/restrict.t		See if Storable works
 dist/Storable/t/retrieve.t		See if Storable works
 dist/Storable/t/robust.t		See if it survives mangled %INC
