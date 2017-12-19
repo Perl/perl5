@@ -307,7 +307,7 @@ my @death =
 );
 
 # These are messages that are warnings when not strict; death under 'use re
-# "strict".  See comment before @warnings as to why some have a \x{100} in
+# "strict".  See comment before @warning as to why some have a \x{100} in
 # them.  This array has 3 elements per construct.  [0] is the regex to use;
 # [1] is the message under no strict, and [2] is under strict.
 my @death_only_under_strict = (
