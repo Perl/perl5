@@ -3473,7 +3473,7 @@ not be portable
 
 (S non_unicode) Perl allows strings to contain a superset of
 Unicode code points; each code point may be as large as what is storable
-in an unsigned integer on your system, but these may not be accepted by
+in a signed integer on your system, but these may not be accepted by
 other languages/systems.  This message occurs when you matched a string
 containing such a code point against a regular expression pattern, and
 the code point was matched against a Unicode property, C<\p{...}> or
