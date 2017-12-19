@@ -4470,7 +4470,10 @@ PP(pp_subst)
 	    SvPV_set(dstr, NULL);
 
 	    SPAGAIN;
-	    mPUSHi(iters);
+            if (PL_op->op_private & OPpTRUEBOOL)
+                PUSHs(iters ? &PL_sv_yes : &PL_sv_zero);
+            else
+                mPUSHi(iters);
 	}
     }
 
