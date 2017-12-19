@@ -60,6 +60,220 @@
 
 #include <signal.h>
 
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+#  define DO_ONESET_CLOEXEC(fd) ((void) fcntl(fd, F_SETFD, FD_CLOEXEC))
+#else
+#  define DO_ONESET_CLOEXEC(fd) ((void) 0)
+#endif
+#define DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSET_CLOEXEC) \
+	do { \
+	    int res = (GENOPEN_NORMAL); \
+	    if(LIKELY(res != -1)) GENSET_CLOEXEC; \
+	    return res; \
+	} while(0)
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC) && \
+			defined(F_GETFD)
+enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
+#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
+			GENOPEN_NORMAL, GENSET_CLOEXEC) \
+	do { \
+	    static int strategy = CLOEXEC_EXPERIMENT; \
+	    switch (strategy) { \
+		case CLOEXEC_EXPERIMENT: default: { \
+		    int res = (GENOPEN_CLOEXEC), eno; \
+		    if (LIKELY(res != -1)) { \
+			int fdflags = fcntl((TESTFD), F_GETFD); \
+			if (LIKELY(fdflags != -1) && \
+				LIKELY(fdflags & FD_CLOEXEC)) { \
+			    strategy = CLOEXEC_AT_OPEN; \
+			} else { \
+			    strategy = CLOEXEC_AFTER_OPEN; \
+			    GENSET_CLOEXEC; \
+			} \
+		    } else if (UNLIKELY((eno = errno) == EINVAL || \
+						eno == ENOSYS)) { \
+			res = (GENOPEN_NORMAL); \
+			if (LIKELY(res != -1)) { \
+			    strategy = CLOEXEC_AFTER_OPEN; \
+			    GENSET_CLOEXEC; \
+			} else if (!LIKELY((eno = errno) == EINVAL || \
+						eno == ENOSYS)) { \
+			    strategy = CLOEXEC_AFTER_OPEN; \
+			} \
+		    } \
+		    return res; \
+		} \
+		case CLOEXEC_AT_OPEN: \
+		    return (GENOPEN_CLOEXEC); \
+		case CLOEXEC_AFTER_OPEN: \
+		    DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSET_CLOEXEC); \
+	    } \
+	} while(0)
+#else
+#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
+			GENOPEN_NORMAL, GENSET_CLOEXEC) \
+	DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSET_CLOEXEC)
+#endif
+
+#define DO_ONEOPEN_THEN_CLOEXEC(ONEOPEN_NORMAL) \
+	do { \
+	    int fd; \
+	    DO_GENOPEN_THEN_CLOEXEC(fd = (ONEOPEN_NORMAL), \
+		DO_ONESET_CLOEXEC(fd)); \
+	} while(0)
+#define DO_ONEOPEN_EXPERIMENTING_CLOEXEC(ONEOPEN_CLOEXEC, ONEOPEN_NORMAL) \
+	do { \
+	    int fd; \
+	    DO_GENOPEN_EXPERIMENTING_CLOEXEC(fd, fd = (ONEOPEN_CLOEXEC), \
+		fd = (ONEOPEN_NORMAL), DO_ONESET_CLOEXEC(fd)); \
+	} while(0)
+
+#define DO_PIPESET_CLOEXEC(PIPEFD) \
+	do { \
+	    DO_ONESET_CLOEXEC((PIPEFD)[0]); \
+	    DO_ONESET_CLOEXEC((PIPEFD)[1]); \
+	} while(0)
+#define DO_PIPEOPEN_THEN_CLOEXEC(PIPEFD, PIPEOPEN_NORMAL) \
+	DO_GENOPEN_THEN_CLOEXEC(PIPEOPEN_NORMAL, DO_PIPESET_CLOEXEC(PIPEFD))
+#define DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PIPEFD, PIPEOPEN_CLOEXEC, \
+			PIPEOPEN_NORMAL) \
+	DO_GENOPEN_EXPERIMENTING_CLOEXEC((PIPEFD)[0], PIPEOPEN_CLOEXEC, \
+	    PIPEOPEN_NORMAL, DO_PIPESET_CLOEXEC(PIPEFD))
+
+int
+Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
+{
+#if !defined(PERL_IMPLICIT_SYS) && defined(F_DUPFD_CLOEXEC)
+    /*
+     * struct IPerlLIO doesn't cover fcntl(), and there's no clear way
+     * to extend it, so for the time being this just isn't available on
+     * PERL_IMPLICIT_SYS builds.
+     */
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	fcntl(oldfd, F_DUPFD_CLOEXEC, 0),
+	PerlLIO_dup(oldfd));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_dup(oldfd));
+#endif
+}
+
+int
+Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+{
+#if !defined(PERL_IMPLICIT_SYS) && defined(HAS_DUP3) && defined(O_CLOEXEC)
+    /*
+     * struct IPerlLIO doesn't cover dup3(), and there's no clear way
+     * to extend it, so for the time being this just isn't available on
+     * PERL_IMPLICIT_SYS builds.
+     */
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	dup3(oldfd, newfd, O_CLOEXEC),
+	PerlLIO_dup2(oldfd, newfd));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_dup2(oldfd, newfd));
+#endif
+}
+
+int
+Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
+{
+    PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PerlLIO_open(file, flag | O_CLOEXEC),
+	PerlLIO_open(file, flag));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_open(file, flag));
+#endif
+}
+
+int
+Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
+{
+    PERL_ARGS_ASSERT_PERLLIO_OPEN3_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PerlLIO_open3(file, flag | O_CLOEXEC, perm),
+	PerlLIO_open3(file, flag, perm));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_open3(file, flag, perm));
+#endif
+}
+
+#ifdef HAS_PIPE
+int
+Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
+{
+    PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC;
+    /*
+     * struct IPerlProc doesn't cover pipe2(), and there's no clear way
+     * to extend it, so for the time being this just isn't available on
+     * PERL_IMPLICIT_SYS builds.
+     */
+#  if !defined(PERL_IMPLICIT_SYS) && defined(HAS_PIPE2) && defined(O_CLOEXEC)
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(pipefd,
+	pipe2(pipefd, O_CLOEXEC),
+	PerlProc_pipe(pipefd));
+#  else
+    DO_PIPEOPEN_THEN_CLOEXEC(pipefd, PerlProc_pipe(pipefd));
+#  endif
+}
+#endif
+
+#ifdef HAS_SOCKET
+
+int
+Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
+{
+#  if defined(SOCK_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PerlSock_socket(domain, type | SOCK_CLOEXEC, protocol),
+	PerlSock_socket(domain, type, protocol));
+#  else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlSock_socket(domain, type, protocol));
+#  endif
+}
+
+int
+Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr,
+    Sock_size_t *addrlen)
+{
+#  if !defined(PERL_IMPLICIT_SYS) && \
+	defined(HAS_ACCEPT4) && defined(SOCK_CLOEXEC)
+    /*
+     * struct IPerlSock doesn't cover accept4(), and there's no clear
+     * way to extend it, so for the time being this just isn't available
+     * on PERL_IMPLICIT_SYS builds.
+     */
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	accept4(listenfd, addr, addrlen, SOCK_CLOEXEC),
+	PerlSock_accept(listenfd, addr, addrlen));
+#  else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlSock_accept(listenfd, addr, addrlen));
+#  endif
+}
+
+#endif
+
+#if defined (HAS_SOCKETPAIR) || \
+    (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && \
+	defined(AF_INET) && defined(PF_INET))
+int
+Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol,
+    int *pairfd)
+{
+    PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC;
+#  ifdef SOCK_CLOEXEC
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(pairfd,
+	PerlSock_socketpair(domain, type | SOCK_CLOEXEC, protocol, pairfd),
+	PerlSock_socketpair(domain, type, protocol, pairfd));
+#  else
+    DO_PIPEOPEN_THEN_CLOEXEC(pairfd,
+	PerlSock_socketpair(domain, type, protocol, pairfd));
+#  endif
+}
+#endif
+
 static IO *
 S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp,
               int *savefd,  char *savetype)
