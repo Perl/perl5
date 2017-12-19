@@ -391,6 +391,8 @@ my @death_only_under_strict = (
                              => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
   'default_on/\\${[^\\}]*}/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\\${{#}[^\\}]*}/',
                              => 'Unescaped left brace in regex is illegal here {#} m/\\${{#}[^\\}]*}/',
+    '/[ab]/'          => "",
+                        => 'Literal vertical space in [] is illegal except under /x {#} m/[a{#}b]/',
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()

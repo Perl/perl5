@@ -3320,6 +3320,22 @@ L<perlfunc/listen>.
 form of C<open> does not support pipes, such as C<open($pipe, '|-', @args)>.
 Use the two-argument C<open($pipe, '|prog arg1 arg2...')> form instead.
 
+=item Literal vertical space in [] is illegal except under /x in regex;
+marked by S<<-- HERE> in m/%s/
+
+(F) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+Likely you forgot the C</x> modifier or there was a typo in the pattern.
+For example, did you really mean to match a form-feed?  If so, all the
+ASCII vertical space control characters are representable by escape
+sequences which won't present such a jarring appearance as your pattern
+does when displayed.
+
+  \r    carriage return
+  \f    form feed
+  \n    line feed
+  \cK   vertical tab
+
 =item %s: loadable library and perl binaries are mismatched (got handshake key %p, needed %p)
 
 (P) A dynamic loading library C<.so> or C<.dll> was being loaded into the

@@ -16225,6 +16225,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         do_posix_warnings ? &posix_warnings : NULL,
                         TRUE /* checking only */);
         }
+        else if (  strict && ! skip_white
+                 && (   _generic_isCC(value, _CC_VERTSPACE)
+                     || is_VERTWS_cp_high(value)))
+        {
+            vFAIL("Literal vertical space in [] is illegal except under /x");
+        }
         else if (value == '\\') {
             /* Is a backslash; get the code point of the char after it */
 
