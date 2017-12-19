@@ -5443,6 +5443,7 @@ t/io/sem.t			See if SysV semaphores work
 t/io/semctl.t			See if SysV semaphore semctl works
 t/io/shm.t			See if SysV shared memory works
 t/io/socket.t			See if socket functions work
+t/io/socketpair.t		See if socketpair function works
 t/io/tell.t			See if file seeking works
 t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works

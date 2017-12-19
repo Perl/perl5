@@ -2928,6 +2928,9 @@ PERL_CALLCONV void	Perl_set_numeric_underlying(pTHX);
 PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_SETDEFOUT	\
 	assert(gv)
+PERL_CALLCONV void	Perl_setfd_cloexec(pTHX_ int fd);
+PERL_CALLCONV void	Perl_setfd_inhexec(pTHX_ int fd);
+PERL_CALLCONV void	Perl_setfd_inhexec_for_sysfd(pTHX_ int fd);
 PERL_CALLCONV char*	Perl_setlocale(int category, const char* locale);
 PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, SSize_t len, U32 hash);
 #define PERL_ARGS_ASSERT_SHARE_HEK	\

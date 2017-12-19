@@ -60,22 +60,43 @@
 
 #include <signal.h>
 
+void
+Perl_setfd_cloexec(pTHX_ int fd)
+{
+    assert(fd >= 0);
 #if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-#  define DO_ONESET_CLOEXEC(fd) ((void) fcntl(fd, F_SETFD, FD_CLOEXEC))
-#else
-#  define DO_ONESET_CLOEXEC(fd) ((void) 0)
+    (void) fcntl(fd, F_SETFD, FD_CLOEXEC);
 #endif
-#define DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSET_CLOEXEC) \
+}
+
+void
+Perl_setfd_inhexec(pTHX_ int fd)
+{
+    assert(fd >= 0);
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+    (void) fcntl(fd, F_SETFD, 0);
+#endif
+}
+
+void
+Perl_setfd_inhexec_for_sysfd(pTHX_ int fd)
+{
+    assert(fd >= 0);
+    if(fd <= PL_maxsysfd)
+	setfd_inhexec(fd);
+}
+
+#define DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
 	do { \
 	    int res = (GENOPEN_NORMAL); \
-	    if(LIKELY(res != -1)) GENSET_CLOEXEC; \
+	    if(LIKELY(res != -1)) GENSETFD_CLOEXEC; \
 	    return res; \
 	} while(0)
 #if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC) && \
 			defined(F_GETFD)
 enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
 #  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
-			GENOPEN_NORMAL, GENSET_CLOEXEC) \
+			GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
 	do { \
 	    static int strategy = CLOEXEC_EXPERIMENT; \
 	    switch (strategy) { \
@@ -88,14 +109,14 @@ enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
 			    strategy = CLOEXEC_AT_OPEN; \
 			} else { \
 			    strategy = CLOEXEC_AFTER_OPEN; \
-			    GENSET_CLOEXEC; \
+			    GENSETFD_CLOEXEC; \
 			} \
 		    } else if (UNLIKELY((eno = errno) == EINVAL || \
 						eno == ENOSYS)) { \
 			res = (GENOPEN_NORMAL); \
 			if (LIKELY(res != -1)) { \
 			    strategy = CLOEXEC_AFTER_OPEN; \
-			    GENSET_CLOEXEC; \
+			    GENSETFD_CLOEXEC; \
 			} else if (!LIKELY((eno = errno) == EINVAL || \
 						eno == ENOSYS)) { \
 			    strategy = CLOEXEC_AFTER_OPEN; \
@@ -106,39 +127,39 @@ enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
 		case CLOEXEC_AT_OPEN: \
 		    return (GENOPEN_CLOEXEC); \
 		case CLOEXEC_AFTER_OPEN: \
-		    DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSET_CLOEXEC); \
+		    DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC); \
 	    } \
 	} while(0)
 #else
 #  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
-			GENOPEN_NORMAL, GENSET_CLOEXEC) \
-	DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSET_CLOEXEC)
+			GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
+	DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC)
 #endif
 
 #define DO_ONEOPEN_THEN_CLOEXEC(ONEOPEN_NORMAL) \
 	do { \
 	    int fd; \
 	    DO_GENOPEN_THEN_CLOEXEC(fd = (ONEOPEN_NORMAL), \
-		DO_ONESET_CLOEXEC(fd)); \
+		setfd_cloexec(fd)); \
 	} while(0)
 #define DO_ONEOPEN_EXPERIMENTING_CLOEXEC(ONEOPEN_CLOEXEC, ONEOPEN_NORMAL) \
 	do { \
 	    int fd; \
 	    DO_GENOPEN_EXPERIMENTING_CLOEXEC(fd, fd = (ONEOPEN_CLOEXEC), \
-		fd = (ONEOPEN_NORMAL), DO_ONESET_CLOEXEC(fd)); \
+		fd = (ONEOPEN_NORMAL), setfd_cloexec(fd)); \
 	} while(0)
 
-#define DO_PIPESET_CLOEXEC(PIPEFD) \
+#define DO_PIPESETFD_CLOEXEC(PIPEFD) \
 	do { \
-	    DO_ONESET_CLOEXEC((PIPEFD)[0]); \
-	    DO_ONESET_CLOEXEC((PIPEFD)[1]); \
+	    setfd_cloexec((PIPEFD)[0]); \
+	    setfd_cloexec((PIPEFD)[1]); \
 	} while(0)
 #define DO_PIPEOPEN_THEN_CLOEXEC(PIPEFD, PIPEOPEN_NORMAL) \
-	DO_GENOPEN_THEN_CLOEXEC(PIPEOPEN_NORMAL, DO_PIPESET_CLOEXEC(PIPEFD))
+	DO_GENOPEN_THEN_CLOEXEC(PIPEOPEN_NORMAL, DO_PIPESETFD_CLOEXEC(PIPEFD))
 #define DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PIPEFD, PIPEOPEN_CLOEXEC, \
 			PIPEOPEN_NORMAL) \
 	DO_GENOPEN_EXPERIMENTING_CLOEXEC((PIPEFD)[0], PIPEOPEN_CLOEXEC, \
-	    PIPEOPEN_NORMAL, DO_PIPESET_CLOEXEC(PIPEFD))
+	    PIPEOPEN_NORMAL, DO_PIPESETFD_CLOEXEC(PIPEFD))
 
 int
 Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)

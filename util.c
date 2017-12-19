@@ -2241,7 +2241,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     if (PerlProc_pipe(p) < 0)
 	return NULL;
     /* Try for another pipe pair for error return */
-    if (PerlProc_pipe(pp) >= 0)
+    if (PerlProc_pipe_cloexec(pp) >= 0)
 	did_pipes = 1;
     while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
@@ -2263,14 +2263,8 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 #define THIS that
 #define THAT This
 	/* Close parent's end of error status pipe (if any) */
-	if (did_pipes) {
+	if (did_pipes)
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-	    /* Close error pipe automatically if exec works */
-	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
-                return NULL;
-#endif
-	}
 	/* Now dup our end of _the_ pipe to right position */
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
@@ -2386,7 +2380,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     }
     if (PerlProc_pipe(p) < 0)
 	return NULL;
-    if (doexec && PerlProc_pipe(pp) >= 0)
+    if (doexec && PerlProc_pipe_cloexec(pp) >= 0)
 	did_pipes = 1;
     while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
@@ -2409,13 +2403,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #undef THAT
 #define THIS that
 #define THAT This
-	if (did_pipes) {
+	if (did_pipes)
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-            if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
-                return NULL;
-#endif
-	}
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
@@ -4443,7 +4432,7 @@ Perl_seed(pTHX)
 #    define PERL_RANDOM_DEVICE "/dev/urandom"
 #  endif
 #endif
-    fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
+    fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {
     	if (PerlLIO_read(fd, (void*)&u, sizeof u) != sizeof u)
 	    u = 0;
