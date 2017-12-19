@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 1038;
+plan tests => 1039;
 
 $| = 1;
 
@@ -2853,6 +2853,15 @@ is_tainted("$ovtaint", "overload preserves taint");
     is($s, 'hi' x 4,   "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
+}
+
+# RT #132385
+# It was trying to taint a boolean return from s/// (e.g. PL_sv_yes)
+# and was thus crashing with 'Modification of a read-only value'.
+
+{
+    my $s = "abcd" . $TAINT;
+    ok(!!($s =~ s/a/x/g), "RT #132385");
 }
 
 # This may bomb out with the alarm signal so keep it last

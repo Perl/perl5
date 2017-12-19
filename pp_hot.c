@@ -4190,8 +4190,8 @@ PP(pp_subst)
 	    (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
 	  | (RXp_ISTAINTED(prog) ? SUBST_TAINT_PAT : 0)
 	  | ((pm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
-	  | ((once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
-		? SUBST_TAINT_BOOLRET : 0));
+	  | ((  (once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
+             || (PL_op->op_private & OPpTRUEBOOL)) ? SUBST_TAINT_BOOLRET : 0));
 	TAINT_NOT;
     }
 
