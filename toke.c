@@ -7668,14 +7668,11 @@ Perl_yylex(pTHX)
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
 		IoIFP(GvIOp(gv)) = PL_rsfp;
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
 		{
 		    const int fd = PerlIO_fileno(PL_rsfp);
-                    if (fd >= 3) {
-                        fcntl(fd,F_SETFD, FD_CLOEXEC);
-                    }
+                    if (fd >= 3)
+			setfd_cloexec(fd);
 		}
-#endif
 		/* Mark this internal pseudo-handle as clean */
 		IoFLAGS(GvIOp(gv)) |= IOf_UNTAINT;
 		if ((PerlIO*)PL_rsfp == PerlIO_stdin())
