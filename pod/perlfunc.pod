@@ -6372,7 +6372,7 @@ compile time.
 
 Specifying VERSION as a numeric argument of the form 5.024001 should
 generally be avoided as older less readable syntax compared to
-v5.24.1. Before perl 5.8.0 released in 2002 the more verbose numeric
+v5.24.1. Before perl 5.8.0 (released in 2002), the more verbose numeric
 form was the only supported syntax, which is why you might see it in
 older code.
 
