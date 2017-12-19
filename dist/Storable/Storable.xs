@@ -193,7 +193,7 @@
 #define SX_VSTRING	C(29)	/* vstring forthcoming (small) */
 #define SX_LVSTRING	C(30)	/* vstring forthcoming (large) */
 #define SX_SVUNDEF_ELEM	C(31)	/* array element set to &PL_sv_undef */
-#define SX_ERROR	C(32)	/* Error */
+#define SX_REGEXP	C(32)	/* Regexp */
 #define SX_LOBJECT	C(33)	/* Large object: string, array or hash (size >2G) */
 #define SX_LAST		C(34)	/* invalid. marker only */
 
@@ -853,7 +853,8 @@ static stcxt_t *Context_ptr = NULL;
 #define svis_TIED		4
 #define svis_TIED_ITEM		5
 #define svis_CODE		6
-#define svis_OTHER		7
+#define svis_REGEXP		7
+#define svis_OTHER		8
 
 /*
  * Flags for SX_HOOK.
@@ -905,6 +906,12 @@ static stcxt_t *Context_ptr = NULL;
  */
 #define FLAG_BLESS_OK 2
 #define FLAG_TIE_OK   4
+
+/*
+ * Flags for SX_REGEXP.
+ */
+
+#define SHR_U32_RE_LEN		0x01
 
 /*
  * Before 0.6, the magic string was "perl-store" (binary version number 0).
@@ -1384,6 +1391,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv);
 static int store_tied(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_code(pTHX_ stcxt_t *cxt, CV *cv);
+static int store_regexp(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_other(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_blessed(pTHX_ stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
@@ -1397,6 +1405,7 @@ static const sv_store_t sv_store[] = {
     (sv_store_t)store_tied,	/* svis_TIED */
     (sv_store_t)store_tied_item,/* svis_TIED_ITEM */
     (sv_store_t)store_code,	/* svis_CODE */
+    (sv_store_t)store_regexp,	/* svis_REGEXP */
     (sv_store_t)store_other,	/* svis_OTHER */
 };
 
@@ -1423,6 +1432,7 @@ static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_other(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname);
 
 /* helpers for U64 lobjects */
 
@@ -1469,8 +1479,9 @@ static const sv_retrieve_t sv_old_retrieve[] = {
     (sv_retrieve_t)retrieve_other,	/* SX_VSTRING not supported */
     (sv_retrieve_t)retrieve_other,	/* SX_LVSTRING not supported */
     (sv_retrieve_t)retrieve_other,	/* SX_SVUNDEF_ELEM not supported */
-    (sv_retrieve_t)retrieve_other,	/* SX_ERROR */
+    (sv_retrieve_t)retrieve_other,	/* SX_REGEXP */
     (sv_retrieve_t)retrieve_other,  	/* SX_LOBJECT not supported */
+    (sv_retrieve_t)retrieve_other,  	/* SX_LAST */
 };
 
 static SV *retrieve_hook_common(pTHX_ stcxt_t *cxt, const char *cname, int large);
@@ -1527,11 +1538,12 @@ static const sv_retrieve_t sv_retrieve[] = {
     (sv_retrieve_t)retrieve_vstring,	/* SX_VSTRING */
     (sv_retrieve_t)retrieve_lvstring,	/* SX_LVSTRING */
     (sv_retrieve_t)retrieve_svundef_elem,/* SX_SVUNDEF_ELEM */
-    (sv_retrieve_t)retrieve_other,	/* SX_ERROR */
+    (sv_retrieve_t)retrieve_regexp,	/* SX_REGEXP */
     (sv_retrieve_t)retrieve_lobject,	/* SX_LOBJECT */
+    (sv_retrieve_t)retrieve_other,  	/* SX_LAST */
 };
 
-#define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_LAST ? SX_ERROR : (x)])
+#define RETRIEVE(c,x) ((x) >= SX_LAST ? retrieve_other : *(c)->retrieve_vtbl[x])
 
 static SV *mbuf2sv(pTHX);
 
@@ -3372,6 +3384,86 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 #endif
 }
 
+#if PERL_VERSION < 8
+#   define PERL_MAGIC_qr                  'r' /* precompiled qr// regex */
+#   define BFD_Svs_SMG_OR_RMG SVs_RMG
+#elif ((PERL_VERSION==8) && (PERL_SUBVERSION >= 1) || (PERL_VERSION>8))
+#   define BFD_Svs_SMG_OR_RMG SVs_SMG
+#   define MY_PLACEHOLDER PL_sv_placeholder
+#else
+#   define BFD_Svs_SMG_OR_RMG SVs_RMG
+#   define MY_PLACEHOLDER PL_sv_undef
+#endif
+
+static int get_regexp(pTHX_ stcxt_t *cxt, SV* sv, SV **re, SV **flags) {
+    dSP;
+    SV* rv;
+#if PERL_VERSION >= 12
+    CV *cv = get_cv("re::regexp_pattern", 0);
+#else
+    CV *cv = get_cv("Storable::_regexp_pattern", 0);
+#endif
+    I32 count;
+
+    assert(cv);
+
+    ENTER;
+    SAVETMPS;
+    rv = sv_2mortal((SV*)newRV_inc(sv));
+    PUSHMARK(sp);
+    XPUSHs(rv);
+    PUTBACK;
+    /* optimize to call the XS directly later */
+    count = call_sv((SV*)cv, G_ARRAY);
+    SPAGAIN;
+    if (count < 2)
+      CROAK(("re::regexp_pattern returned only %d results", count));
+    *flags = POPs;
+    SvREFCNT_inc(*flags);
+    *re = POPs;
+    SvREFCNT_inc(*re);
+
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+
+    return 1;
+}
+
+static int store_regexp(pTHX_ stcxt_t *cxt, SV *sv) {
+    SV *re = NULL;
+    SV *flags = NULL;
+    const char *re_pv;
+    const char *flags_pv;
+    STRLEN re_len;
+    STRLEN flags_len;
+    U8 op_flags = 0;
+
+    if (!get_regexp(aTHX_ cxt, sv, &re, &flags))
+      return -1;
+
+    re_pv = SvPV(re, re_len);
+    flags_pv = SvPV(flags, flags_len);
+
+    if (re_len > 0xFF) {
+      op_flags |= SHR_U32_RE_LEN;
+    }
+    
+    PUTMARK(SX_REGEXP);
+    PUTMARK(op_flags);
+    if (op_flags & SHR_U32_RE_LEN) {
+      U32 re_len32 = re_len;
+      WLEN(re_len32);
+    }
+    else
+      PUTMARK(re_len);
+    WRITE(re_pv, re_len);
+    PUTMARK(flags_len);
+    WRITE(flags_pv, flags_len);
+
+    return 0;
+}
+
 /*
  * store_tied
  *
@@ -4196,6 +4288,13 @@ static int sv_type(pTHX_ SV *sv)
          */
         return SvROK(sv) ? svis_REF : svis_SCALAR;
     case SVt_PVMG:
+#if PERL_VERSION <= 10
+        if ((SvFLAGS(sv) & (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
+	          == (SVs_OBJECT|BFD_Svs_SMG_OR_RMG)
+	    && mg_find(sv, PERL_MAGIC_qr)) {
+	      return svis_REGEXP;
+	}
+#endif
     case SVt_PVLV:		/* Workaround for perl5.004_04 "LVALUE" bug */
         if ((SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG)) ==
             (SVs_GMG|SVs_SMG|SVs_RMG) &&
@@ -4222,6 +4321,10 @@ static int sv_type(pTHX_ SV *sv)
         return svis_CODE;
 #if PERL_VERSION > 8
 	/* case SVt_INVLIST: */
+#endif
+#if PERL_VERSION > 10
+    case SVt_REGEXP:
+        return svis_REGEXP;
 #endif
     default:
         break;
@@ -6675,6 +6778,76 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
 }
 
+static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname) {
+#if PERL_VERSION >= 8
+    int op_flags;
+    U32 re_len;
+    STRLEN flags_len;
+    SV *re;
+    SV *flags;
+    SV *re_ref;
+    SV *sv;
+    dSP;
+    I32 count;
+
+    PERL_UNUSED_ARG(cname);
+
+    ENTER;
+    SAVETMPS;
+
+    GETMARK(op_flags);
+    if (op_flags & SHR_U32_RE_LEN) {
+        RLEN(re_len);
+    }
+    else
+        GETMARK(re_len);
+
+    re = sv_2mortal(NEWSV(10002, re_len ? re_len : 1));
+    READ(SvPVX(re), re_len);
+    SvCUR_set(re, re_len);
+    *SvEND(re) = '\0';
+    SvPOK_only(re);
+
+    GETMARK(flags_len);
+    flags = sv_2mortal(NEWSV(10002, flags_len ? flags_len : 1));
+    READ(SvPVX(flags), flags_len);
+    SvCUR_set(flags, flags_len);
+    *SvEND(flags) = '\0';
+    SvPOK_only(flags);
+
+    PUSHMARK(SP);
+
+    XPUSHs(re);
+    XPUSHs(flags);
+
+    PUTBACK;
+
+    count = call_pv("Storable::_make_re", G_SCALAR);
+
+    SPAGAIN;
+
+    if (count != 1)
+        CROAK(("Bad count %d calling _make_re", count));
+
+    re_ref = POPs;
+
+    PUTBACK;
+
+    if (!SvROK(re_ref))
+      CROAK(("_make_re didn't return a reference"));
+
+    sv = SvRV(re_ref);
+    SvREFCNT_inc(sv);
+    
+    FREETMPS;
+    LEAVE;
+
+    return sv;
+#else
+    CROAK(("retrieve_regexp does not work with 5.6 or earlier"));
+#endif
+}
+
 /*
  * old_retrieve_array
  *
@@ -7135,7 +7308,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
         TRACEME(("had retrieved #%d at 0x%" UVxf, (int)tag, PTR2UV(sv)));
         SvREFCNT_inc(sv);	/* One more reference to this same sv */
         return sv;		/* The SV pointer where object was retrieved */
-    } else if (type >= SX_ERROR && cxt->ver_minor > STORABLE_BIN_MINOR) {
+    } else if (type >= SX_LAST && cxt->ver_minor > STORABLE_BIN_MINOR) {
         if (cxt->accept_future_minor < 0)
             cxt->accept_future_minor
                 = (SvTRUE(get_sv("Storable::accept_future_minor",
@@ -7145,7 +7318,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
             CROAK(("Storable binary image v%d.%d contains data of type %d. "
                    "This Storable is v%d.%d and can only handle data types up to %d",
                    cxt->ver_major, cxt->ver_minor, type,
-                   STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR, SX_ERROR - 1));
+                   STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR, SX_LAST - 1));
         }
     }
 
@@ -7231,10 +7404,10 @@ static SV *do_retrieve(
 
     ASSERT(sizeof(sv_old_retrieve) == sizeof(sv_retrieve),
            ("old and new retrieve dispatch table have same size"));
-    ASSERT(sv_old_retrieve[(int)SX_ERROR] == retrieve_other,
-           ("SX_ERROR entry correctly initialized in old dispatch table"));
-    ASSERT(sv_retrieve[(int)SX_ERROR] == retrieve_other,
-           ("SX_ERROR entry correctly initialized in new dispatch table"));
+    ASSERT(sv_old_retrieve[(int)SX_LAST] == retrieve_other,
+           ("SX_LAST entry correctly initialized in old dispatch table"));
+    ASSERT(sv_retrieve[(int)SX_LAST] == retrieve_other,
+           ("SX_LAST entry correctly initialized in new dispatch table"));
 
     /*
      * Workaround for CROAK leak: if they enter with a "dirty" context,

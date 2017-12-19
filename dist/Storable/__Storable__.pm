@@ -460,6 +460,53 @@ sub thaw {
     return $self;
 }
 
+#
+# _make_re($re, $flags)
+#
+# Internal function used to thaw a regular expression.
+#
+
+my $re_flags;
+BEGIN {
+    if ($] < 5.010) {
+        $re_flags = qr/\A[imsx]*\z/;
+    }
+    elsif ($] < 5.014) {
+        $re_flags = qr/\A[msixp]*\z/;
+    }
+    elsif ($] < 5.022) {
+        $re_flags = qr/\A[msixpdual]*\z/;
+    }
+    else {
+        $re_flags = qr/\A[msixpdualn]*\z/;
+    }
+}
+
+sub _make_re {
+    my ($re, $flags) = @_;
+
+    $flags =~ $re_flags
+        or die "regexp flags invalid";
+
+    my $qr = eval "qr/\$re/$flags";
+    die $@ if $@;
+
+    $qr;
+}
+
+if ($] < 5.012) {
+    eval <<'EOS'
+sub _regexp_pattern {
+    my $re = "" . shift;
+    $re =~ /\A\(\?([xism]*)(?:-[xism]*)?:(.*)\)\z/s
+        or die "Cannot parse regexp /$re/";
+    return ($2, $1);
+}
+1
+EOS
+      or die "Cannot define _regexp_pattern: $@";
+}
+
 1;
 __END__
 
@@ -1158,9 +1205,42 @@ populated, sorted and freed.  Some tests have shown a halving of the
 speed of storing -- the exact penalty will depend on the complexity of
 your data.  There is no slowdown on retrieval.
 
+=head1 REGULAR EXPRESSIONS
+
+Storable now has experimental support for storing regular expressions,
+but there are significant limitations:
+
+=over
+
+=item *
+
+perl 5.8 or later is required.
+
+=item *
+
+regular expressions with code blocks, ie C</(?{ ... })/> or C</(??{
+... })/> will throw an exception when thawed.
+
+=item *
+
+regular expression syntax and flags have changed over the history of
+perl, so a regular expression that you freeze in one version of perl
+may fail to thaw or behave differently in another version of perl.
+
+=item *
+
+depending on the version of perl, regular expressions can change in
+behaviour depending on the context, but later perls will bake that
+behaviour into the regexp.
+
+=back
+
+Storable will throw an exception if a frozen regular expression cannot
+be thawed.
+
 =head1 BUGS
 
-You can't store GLOB, FORMLINE, REGEXP, etc.... If you can define semantics
+You can't store GLOB, FORMLINE, etc.... If you can define semantics
 for those operations, feel free to enhance Storable so that it can
 deal with them.
 
