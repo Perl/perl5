@@ -417,7 +417,7 @@ PP(pp_warn)
     }
     else if (SP == MARK) {
 	exsv = &PL_sv_no;
-	EXTEND(SP, 1);
+	MEXTEND(SP, 1);
 	SP = MARK + 1;
     }
     else {
