@@ -632,6 +632,7 @@ the strings?).
  John      5.27.4       2017-Sep-20
  Steve     5.27.5       2017-Oct-20
  Ether     5.27.6       2017-Nov-20
+ BinGOs    5.27.7       2017-Dec-20
 
 =head2 SELECTED RELEASE SIZES
 
