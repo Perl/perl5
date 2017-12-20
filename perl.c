@@ -4032,7 +4032,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	};
 	const char * const err = "Failed to create a fake bit bucket";
 	if (strEQ(scriptname, BIT_BUCKET)) {
-	    int tmpfd = Perl_my_mkstemp(tmpname);
+	    int tmpfd = Perl_my_mkstemp_cloexec(tmpname);
 	    if (tmpfd > -1) {
 		scriptname = tmpname;
 		close(tmpfd);
