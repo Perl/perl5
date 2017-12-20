@@ -253,7 +253,7 @@ RunPerl(int argc, char **argv, char **env)
 #endif
     }
 
-    perl_destruct(my_perl);
+    exitstatus = perl_destruct(my_perl);
     perl_free(my_perl);
 #ifdef USE_ITHREADS
     if (new_perl) {
