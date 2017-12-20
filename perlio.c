@@ -355,14 +355,14 @@ PerlIO_debug(const char *fmt, ...)
 	    PerlProc_getgid() == PerlProc_getegid()) {
 	    const char * const s = PerlEnv_getenv("PERLIO_DEBUG");
 	    if (s && *s)
-		PL_perlio_debug_fd
-		    = PerlLIO_open3(s, O_WRONLY | O_CREAT | O_APPEND, 0666);
+		PL_perlio_debug_fd = PerlLIO_open3_cloexec(s,
+					O_WRONLY | O_CREAT | O_APPEND, 0666);
 	    else
-		PL_perlio_debug_fd = PerlLIO_dup(2); /* stderr */
+		PL_perlio_debug_fd = PerlLIO_dup_cloexec(2); /* stderr */
 	} else {
 	    /* tainting or set*id, so ignore the environment and send the
                debug output to stderr, like other -D switches.  */
-	    PL_perlio_debug_fd = PerlLIO_dup(2); /* stderr */
+	    PL_perlio_debug_fd = PerlLIO_dup_cloexec(2); /* stderr */
 	}
     }
     if (PL_perlio_debug_fd > 0) {
