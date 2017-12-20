@@ -17,6 +17,34 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.7 - Terry Pratchett, "Hogfather"
+
+L<Announced on 2017-12-20 by Chris 'BinGOs' Williams|https://www.nntp.perl.org/group/perl.perl5.porters/2017/12/msg248274.html>
+
+  Death looked at the sacks.
+
+  It was a strange but demonstrable fact that the sacks of
+  toys carried by the Hogfather, no matter what they
+  really contained, always appeared to have sticking out
+  of the top a teddy bear, a toy soldier in the kind of
+  colorful uniform that would stand out in a disco, a
+  drum and a red-and-white candy cane. The actual
+  contents always turned out to be something a bit
+  garish and costing $5.99.
+
+  Death had investigated one or two. There had been a
+  Real Agatean Ninja, for example, with Fearsome
+  Death Grip, and a Captain Carrot One-Man Night
+  Watch with a complete wardrobe of toy weapons, each
+  of which cost as much as the original wooden doll in
+  the first place.
+
+  Mind you, the stuff for the girls was just as
+  depressing. It seemed to be nearly all horses. Most of
+  them were grinning. Horses, Death felt, shouldn't grin.
+
+  Any horse that was grinning was planning something.
+
 =head2 v5.27.6 - Ogden Nash, "Behold the Duck"
 
 L<Announced on 2017-11-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2017/11/msg247489.html>
