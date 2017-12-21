@@ -70,8 +70,7 @@ needs, the stacks, and so on.
 
 Now we pass Perl the command line options, and tell it to go:
 
- exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
- if (!exitstatus)
+ if (!perl_parse(my_perl, xs_init, argc, argv, (char **)NULL))
      perl_run(my_perl);
 
  exitstatus = perl_destruct(my_perl);
