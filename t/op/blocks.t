@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 18;
+plan tests => 22;
 
 my @expect = qw(
 b1
@@ -147,15 +147,21 @@ fresh_perl_is('END { print "ok\n" } INIT { bless {} and exit }', "ok\n",
 	       {}, 'null PL_curcop in newGP');
 
 # [perl #2754] exit(0) didn't exit from inside a UNITCHECK or CHECK block
-fresh_perl_is('BEGIN{exit 0}; print "still here"', '', {}, 'BEGIN{exit 0} should exit');
-fresh_perl_is('BEGIN{exit 1}; print "still here"', '', {}, 'BEGIN{exit 1} should exit');
-fresh_perl_like('BEGIN{die}; print "still here"', qr/\ADied[^\n]*\.\nBEGIN failed[^\n]*\.\z/, {}, 'BEGIN{die} should exit');
-fresh_perl_is('UNITCHECK{exit 0}; print "still here"', '', {}, 'UNITCHECK{exit 0} should exit');
-fresh_perl_is('UNITCHECK{exit 1}; print "still here"', '', {}, 'UNITCHECK{exit 1} should exit');
-fresh_perl_like('UNITCHECK{die}; print "still here"', qr/\ADied[^\n]*\.\nUNITCHECK failed[^\n]*\.\z/, {}, 'UNITCHECK{die} should exit');
-fresh_perl_is('CHECK{exit 0}; print "still here"', '', {}, 'CHECK{exit 0} should exit');
-fresh_perl_is('CHECK{exit 1}; print "still here"', '', {}, 'CHECK{exit 1} should exit');
-fresh_perl_like('CHECK{die}; print "still here"', qr/\ADied[^\n]*\.\nCHECK failed[^\n]*\.\z/, {}, 'CHECK{die} should exit');
+my $testblocks = join(" ", "BEGIN { \$| = 1; }", (map { "@{[uc($_)]} { print \"$_\\n\"; }" } qw(begin unitcheck check init end)), "print \"main\\n\";");
+fresh_perl_is($testblocks, "begin\nunitcheck\ncheck\ninit\nmain\nend", {}, 'blocks execute in right order');
+fresh_perl_is("$testblocks BEGIN { exit 0; }", "begin\nunitcheck\ncheck\nend", {}, "BEGIN{exit 0} should exit");
+fresh_perl_is("$testblocks BEGIN { exit 1; }", "begin\nunitcheck\ncheck\nend", {}, "BEGIN{exit 1} should exit");
+fresh_perl_like("$testblocks BEGIN { die; }", qr/\Abegin\nDied[^\n]*\.\nBEGIN failed[^\n]*\.\nunitcheck\ncheck\nend\z/, {}, "BEGIN{die} should exit");
+fresh_perl_is("$testblocks UNITCHECK { exit 0; }", "begin\nunitcheck\ncheck\nend", {}, "UNITCHECK{exit 0} should exit");
+fresh_perl_is("$testblocks UNITCHECK { exit 1; }", "begin\nunitcheck\ncheck\nend", {}, "UNITCHECK{exit 1} should exit");
+fresh_perl_like("$testblocks UNITCHECK { die; }", qr/\Abegin\nDied[^\n]*\.\nUNITCHECK failed[^\n]*\.\nunitcheck\ncheck\nend\z/, {}, "UNITCHECK{die} should exit");
+fresh_perl_is("$testblocks CHECK { exit 0; }", "begin\nunitcheck\ncheck\nend", {}, "CHECK{exit 0} should exit");
+fresh_perl_is("$testblocks CHECK { exit 1; }", "begin\nunitcheck\ncheck\nend", {}, "CHECK{exit 1} should exit");
+fresh_perl_like("$testblocks CHECK { die; }", qr/\Abegin\nunitcheck\nDied[^\n]*\.\nCHECK failed[^\n]*\.\ncheck\nend\z/, {}, "CHECK{die} should exit");
+
+fresh_perl_is("$testblocks INIT { exit 0; }", "begin\nunitcheck\ncheck\ninit\nend", {}, "INIT{exit 0} should exit");
+fresh_perl_is("$testblocks INIT { exit 1; }", "begin\nunitcheck\ncheck\ninit\nend", {}, "INIT{exit 1} should exit");
+fresh_perl_like("$testblocks INIT { die; }", qr/\Abegin\nunitcheck\ncheck\ninit\nDied[^\n]*\.\nINIT failed[^\n]*\.\nend\z/, {}, "INIT{die} should exit");
 
 TODO: {
     local $TODO = 'RT #2917: INIT{} in eval is wrongly considered too late';
