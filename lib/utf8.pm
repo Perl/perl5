@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 
 sub import {
     $^H |= $utf8::hint_bits;
@@ -136,14 +136,12 @@ use L<Encode> instead.
 =item * C<$success = utf8::downgrade($string[, $fail_ok])>
 
 (Since Perl v5.8.0)
-Converts in-place the internal representation of the string from
-UTF-8 to the equivalent octet sequence in the native encoding (Latin-1
-or EBCDIC). The logical character sequence itself is unchanged. If
-I<$string> is already stored as native 8 bit, then this is a no-op.  Can
-be used to
-make sure that the UTF-8 flag is off, e.g. when you want to make sure
-that the substr() or length() function works with the usually faster
-byte algorithm.
+Converts in-place the internal representation of the string from UTF-8 to the
+equivalent octet sequence in the native encoding (Latin-1 or EBCDIC). The
+logical character sequence itself is unchanged. If I<$string> is already
+stored as native 8 bit, then this is a no-op.  Can be used to make sure that
+the UTF-8 flag is off, e.g. when you want to make sure that the substr() or
+length() function works with the usually faster byte algorithm.
 
 Fails if the original UTF-8 sequence cannot be represented in the
 native 8 bit encoding. On failure dies or, if the value of I<$fail_ok> is
@@ -167,8 +165,8 @@ use L<Encode> instead.
 
 (Since Perl v5.8.0)
 Converts in-place the character sequence to the corresponding octet
-sequence in UTF-8. That is, every (possibly wide) character gets
-replaced with a sequence of one or more characters that represent the
+sequence in Perl's extended UTF-8. That is, every (possibly wide) character
+gets replaced with a sequence of one or more characters that represent the
 individual UTF-8 bytes of the character.  The UTF8 flag is turned off.
 Returns nothing.
 
@@ -188,12 +186,12 @@ use L<Encode> instead.
 =item * C<$success = utf8::decode($string)>
 
 (Since Perl v5.8.0)
-Attempts to convert in-place the octet sequence encoded as UTF-8 to the
-corresponding character sequence. That is, it replaces each sequence of
-characters in the string whose ords represent a valid UTF-8 byte
-sequence, with the corresponding single character.  The UTF-8 flag is
-turned on only if the source string contains multiple-byte UTF-8
-characters.  If I<$string> is invalid as UTF-8, returns false;
+Attempts to convert in-place the octet sequence encoded in Perl's extended
+UTF-8 to the corresponding character sequence. That is, it replaces each
+sequence of characters in the string whose ords represent a valid (extended)
+UTF-8 byte sequence, with the corresponding single character.  The UTF-8 flag
+is turned on only if the source string contains multiple-byte UTF-8
+characters.  If I<$string> is invalid as extended UTF-8, returns false;
 otherwise returns true.
 
  my $x = "\xc4\x80"; # $x contains two characters, with ords
