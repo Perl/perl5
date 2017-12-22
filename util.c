@@ -4176,6 +4176,10 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 	return -1;
     }
 
+#ifdef SOCK_CLOEXEC
+    type &= ~SOCK_CLOEXEC;
+#endif
+
 #ifdef EMULATE_SOCKETPAIR_UDP
     if (type == SOCK_DGRAM)
 	return S_socketpair_udp(fd);
