@@ -742,7 +742,7 @@ perl_destruct(pTHXx)
 	   fail gracefully  */
 	int fd[2];
 
-	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd)) {
+	if(PerlSock_socketpair_cloexec(AF_UNIX, SOCK_STREAM, 0, fd)) {
 	    perror("Debug leaking scalars socketpair failed");
 	    abort();
 	}
@@ -841,7 +841,7 @@ perl_destruct(pTHXx)
 		   back into Perl_debug_log, as if we never actually closed it
 		*/
 		if(got_fd != debug_fd) {
-		    if (dup2(got_fd, debug_fd) == -1) {
+		    if (PerlLIO_dup2_cloexec(got_fd, debug_fd) == -1) {
 			where = "dup2";
 			goto abort;
 		    }
@@ -4032,16 +4032,12 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	};
 	const char * const err = "Failed to create a fake bit bucket";
 	if (strEQ(scriptname, BIT_BUCKET)) {
-#ifdef HAS_MKSTEMP /* Hopefully mkstemp() is safe here. */
-            int old_umask = umask(0177);
-	    int tmpfd = mkstemp(tmpname);
-            umask(old_umask);
+	    int tmpfd = Perl_my_mkstemp_cloexec(tmpname);
 	    if (tmpfd > -1) {
 		scriptname = tmpname;
 		close(tmpfd);
 	    } else
 		Perl_croak(aTHX_ err);
-#endif
 	}
 #endif
 	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
@@ -4063,15 +4059,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		    CopFILE(PL_curcop), Strerror(errno));
     }
     fd = PerlIO_fileno(rsfp);
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    if (fd >= 0) {
-        /* ensure close-on-exec */
-        if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) {
-            Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
-                       CopFILE(PL_curcop), Strerror(errno));
-        }
-    }
-#endif
 
     if (fd < 0 ||
         (PerlLIO_fstat(fd, &tmpstatbuf) >= 0

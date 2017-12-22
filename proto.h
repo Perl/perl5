@@ -35,6 +35,20 @@ PERL_CALLCONV UV	NATIVE_TO_NEED(const UV enc, const UV ch)
 #endif
 
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
+PERL_CALLCONV int	Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd);
+PERL_CALLCONV int	Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV int	Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_PERLLIO_OPEN3_CLOEXEC	\
+	assert(file)
+
+PERL_CALLCONV int	Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC	\
+	assert(file)
+
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
 			__attribute__warn_unused_result__;
 
@@ -2078,6 +2092,11 @@ PERL_CALLCONV Pid_t	Perl_my_fork(void);
 PERL_CALLCONV I32	Perl_my_lstat(pTHX);
 #endif
 PERL_CALLCONV I32	Perl_my_lstat_flags(pTHX_ const U32 flags);
+PERL_CALLCONV int	Perl_my_mkstemp_cloexec(char *templte)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC	\
+	assert(templte)
+
 PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ const char* mode, int n, SV ** args);
 #define PERL_ARGS_ASSERT_MY_POPEN_LIST	\
 	assert(mode); assert(args)
@@ -2912,6 +2931,11 @@ PERL_CALLCONV void	Perl_set_numeric_underlying(pTHX);
 PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_SETDEFOUT	\
 	assert(gv)
+PERL_CALLCONV void	Perl_setfd_cloexec(int fd);
+PERL_CALLCONV void	Perl_setfd_cloexec_for_nonsysfd(pTHX_ int fd);
+PERL_CALLCONV void	Perl_setfd_cloexec_or_inhexec_by_sysfdness(pTHX_ int fd);
+PERL_CALLCONV void	Perl_setfd_inhexec(int fd);
+PERL_CALLCONV void	Perl_setfd_inhexec_for_sysfd(pTHX_ int fd);
 PERL_CALLCONV char*	Perl_setlocale(int category, const char* locale);
 PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, SSize_t len, U32 hash);
 #define PERL_ARGS_ASSERT_SHARE_HEK	\
@@ -3838,6 +3862,11 @@ STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
 
 #  endif
 #endif
+#if !defined(HAS_MKOSTEMP)
+PERL_CALLCONV int	Perl_my_mkostemp(char *templte, int flags);
+#define PERL_ARGS_ASSERT_MY_MKOSTEMP	\
+	assert(templte)
+#endif
 #if !defined(HAS_MKSTEMP)
 PERL_CALLCONV int	Perl_my_mkstemp(char *templte);
 #define PERL_ARGS_ASSERT_MY_MKSTEMP	\
@@ -4080,6 +4109,13 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 #define PERL_ARGS_ASSERT_DO_EXEC3	\
 	assert(incmd)
 #endif
+#if defined (HAS_SOCKETPAIR) ||     (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && 	defined(AF_INET) && defined(PF_INET))
+PERL_CALLCONV int	Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol, int *pairfd)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC	\
+	assert(pairfd)
+
+#endif
 #if defined(DEBUGGING)
 PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 			__attribute__warn_unused_result__;
@@ -4226,9 +4262,24 @@ STATIC const char*	S_my_nl_langinfo(const nl_item item, bool toggle);
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);
 #endif
+#if defined(HAS_PIPE)
+PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC	\
+	assert(pipefd)
+
+#endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig, siginfo_t *info, void *uap);
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig, siginfo_t *info, void *uap);
+#endif
+#if defined(HAS_SOCKET)
+PERL_CALLCONV int	Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr, Sock_size_t *addrlen)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV int	Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
+			__attribute__warn_unused_result__;
+
 #endif
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);

@@ -2238,10 +2238,10 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
-    if (PerlProc_pipe(p) < 0)
+    if (PerlProc_pipe_cloexec(p) < 0)
 	return NULL;
     /* Try for another pipe pair for error return */
-    if (PerlProc_pipe(pp) >= 0)
+    if (PerlProc_pipe_cloexec(pp) >= 0)
 	did_pipes = 1;
     while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
@@ -2263,14 +2263,8 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 #define THIS that
 #define THAT This
 	/* Close parent's end of error status pipe (if any) */
-	if (did_pipes) {
+	if (did_pipes)
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-	    /* Close error pipe automatically if exec works */
-	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
-                return NULL;
-#endif
-	}
 	/* Now dup our end of _the_ pipe to right position */
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
@@ -2304,7 +2298,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	PerlLIO_close(pp[1]);
     /* Keep the lower of the two fd numbers */
     if (p[that] < p[This]) {
-	PerlLIO_dup2(p[This], p[that]);
+	PerlLIO_dup2_cloexec(p[This], p[that]);
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
@@ -2384,9 +2378,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
-    if (PerlProc_pipe(p) < 0)
+    if (PerlProc_pipe_cloexec(p) < 0)
 	return NULL;
-    if (doexec && PerlProc_pipe(pp) >= 0)
+    if (doexec && PerlProc_pipe_cloexec(pp) >= 0)
 	did_pipes = 1;
     while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
@@ -2409,13 +2403,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #undef THAT
 #define THIS that
 #define THAT This
-	if (did_pipes) {
+	if (did_pipes)
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-            if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
-                return NULL;
-#endif
-	}
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
@@ -2461,7 +2450,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     if (did_pipes)
 	PerlLIO_close(pp[1]);
     if (p[that] < p[This]) {
-	PerlLIO_dup2(p[This], p[that]);
+	PerlLIO_dup2_cloexec(p[This], p[that]);
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
@@ -4187,6 +4176,10 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 	return -1;
     }
 
+#ifdef SOCK_CLOEXEC
+    type &= ~SOCK_CLOEXEC;
+#endif
+
 #ifdef EMULATE_SOCKETPAIR_UDP
     if (type == SOCK_DGRAM)
 	return S_socketpair_udp(fd);
@@ -4443,7 +4436,7 @@ Perl_seed(pTHX)
 #    define PERL_RANDOM_DEVICE "/dev/urandom"
 #  endif
 #endif
-    fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
+    fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {
     	if (PerlLIO_read(fd, (void*)&u, sizeof u) != sizeof u)
 	    u = 0;
@@ -5638,24 +5631,22 @@ Perl_my_dirfd(DIR * dir) {
 #endif 
 }
 
-#ifndef HAS_MKSTEMP
+#if !defined(HAS_MKOSTEMP) || !defined(HAS_MKSTEMP)
 
 #define TEMP_FILE_CH "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz0123456789"
 #define TEMP_FILE_CH_COUNT (sizeof(TEMP_FILE_CH)-1)
 
-int
-Perl_my_mkstemp(char *templte) {
+static int
+S_my_mkostemp(char *templte, int flags) {
     dTHX;
     STRLEN len = strlen(templte);
     int fd;
     int attempts = 0;
 
-    PERL_ARGS_ASSERT_MY_MKSTEMP;
-
     if (len < 6 ||
         templte[len-1] != 'X' || templte[len-2] != 'X' || templte[len-3] != 'X' ||
         templte[len-4] != 'X' || templte[len-5] != 'X' || templte[len-6] != 'X') {
-        errno = EINVAL;
+        SETERRNO(EINVAL, LIB_INVARG);
         return -1;
     }
 
@@ -5664,12 +5655,30 @@ Perl_my_mkstemp(char *templte) {
         for (i = 1; i <= 6; ++i) {
             templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
         }
-        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL, 0600);
+        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
     } while (fd == -1 && errno == EEXIST && ++attempts <= 100);
 
     return fd;
 }
 
+#endif
+
+#ifndef HAS_MKOSTEMP
+int
+Perl_my_mkostemp(char *templte, int flags)
+{
+    PERL_ARGS_ASSERT_MY_MKOSTEMP;
+    return S_my_mkostemp(templte, flags);
+}
+#endif
+
+#ifndef HAS_MKSTEMP
+int
+Perl_my_mkstemp(char *templte)
+{
+    PERL_ARGS_ASSERT_MY_MKSTEMP;
+    return S_my_mkostemp(templte, 0);
+}
 #endif
 
 REGEXP *

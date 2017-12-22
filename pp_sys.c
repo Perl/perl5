@@ -690,7 +690,7 @@ PP(pp_pipe_op)
     if (IoIFP(wstio))
 	do_close(wgv, FALSE);
 
-    if (PerlProc_pipe(fd) < 0)
+    if (PerlProc_pipe_cloexec(fd) < 0)
 	goto badexit;
 
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r" PIPE_OPEN_MODE);
@@ -711,12 +711,6 @@ PP(pp_pipe_op)
 	    PerlLIO_close(fd[1]);
 	goto badexit;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    /* ensure close-on-exec */
-    if ((fd[0] > PL_maxsysfd && fcntl(fd[0], F_SETFD, FD_CLOEXEC) < 0) ||
-        (fd[1] > PL_maxsysfd && fcntl(fd[1], F_SETFD, FD_CLOEXEC) < 0))
-        goto badexit;
-#endif
     RETPUSHYES;
 
   badexit:
@@ -2379,7 +2373,7 @@ PP(pp_truncate)
                  */
                 mode |= O_BINARY;
 #endif
-                tmpfd = PerlLIO_open(name, mode);
+                tmpfd = PerlLIO_open_cloexec(name, mode);
 
 		if (tmpfd < 0) {
 		    result = 0;
@@ -2521,7 +2515,7 @@ PP(pp_socket)
 	do_close(gv, FALSE);
 
     TAINT_PROPER("socket");
-    fd = PerlSock_socket(domain, type, protocol);
+    fd = PerlSock_socket_cloexec(domain, type, protocol);
     if (fd < 0) {
 	RETPUSHUNDEF;
     }
@@ -2534,11 +2528,6 @@ PP(pp_socket)
 	if (!IoIFP(io) && !IoOFP(io)) PerlLIO_close(fd);
 	RETPUSHUNDEF;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    /* ensure close-on-exec */
-    if (fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
-	RETPUSHUNDEF;
-#endif
 
     RETPUSHYES;
 }
@@ -2564,7 +2553,7 @@ PP(pp_sockpair)
 	do_close(gv2, FALSE);
 
     TAINT_PROPER("socketpair");
-    if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
+    if (PerlSock_socketpair_cloexec(domain, type, protocol, fd) < 0)
 	RETPUSHUNDEF;
     IoIFP(io1) = PerlIO_fdopen(fd[0], "r" SOCKET_OPEN_MODE);
     IoOFP(io1) = PerlIO_fdopen(fd[0], "w" SOCKET_OPEN_MODE);
@@ -2581,12 +2570,6 @@ PP(pp_sockpair)
 	if (!IoIFP(io2) && !IoOFP(io2)) PerlLIO_close(fd[1]);
 	RETPUSHUNDEF;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    /* ensure close-on-exec */
-    if ((fd[0] > PL_maxsysfd && fcntl(fd[0], F_SETFD, FD_CLOEXEC) < 0) ||
-        (fd[1] > PL_maxsysfd && fcntl(fd[1], F_SETFD, FD_CLOEXEC) < 0))
-	RETPUSHUNDEF;
-#endif
 
     RETPUSHYES;
 #else
@@ -2673,7 +2656,7 @@ PP(pp_accept)
 	goto nuts;
 
     nstio = GvIOn(ngv);
-    fd = PerlSock_accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *) namebuf, &len);
+    fd = PerlSock_accept_cloexec(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *) namebuf, &len);
 #if defined(OEMVS)
     if (len == 0) {
 	/* Some platforms indicate zero length when an AF_UNIX client is
@@ -2698,11 +2681,6 @@ PP(pp_accept)
 	if (!IoIFP(nstio) && !IoOFP(nstio)) PerlLIO_close(fd);
 	goto badexit;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    /* ensure close-on-exec */
-    if (fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
-        goto badexit;
-#endif
 
 #ifdef __SCO_VERSION__
     len = sizeof (struct sockaddr_in); /* OpenUNIX 8 somehow truncates info */
@@ -4449,7 +4427,7 @@ PP(pp_system)
 	sigset_t newset, oldset;
 #endif
 
-	if (PerlProc_pipe(pp) >= 0)
+	if (PerlProc_pipe_cloexec(pp) >= 0)
 	    did_pipes = 1;
 #ifdef __amigaos4__
         amigaos_fork_set_userdata(aTHX_
@@ -4546,13 +4524,8 @@ PP(pp_system)
 #ifdef HAS_SIGPROCMASK
 	sigprocmask(SIG_SETMASK, &oldset, NULL);
 #endif
-	if (did_pipes) {
+	if (did_pipes)
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
-                RETPUSHUNDEF;
-#endif
-	}
 	if (PL_op->op_flags & OPf_STACKED) {
 	    SV * const really = *++MARK;
 	    value = (I32)do_aexec5(really, MARK, SP, pp[1], did_pipes);

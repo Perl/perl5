@@ -10,7 +10,17 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 161;
+plan tests => 187;
+
+sub ok_cloexec {
+    SKIP: {
+	skip "no fcntl", 1 unless $Config{d_fcntl};
+	my $fd = fileno($_[0]);
+	fresh_perl_is(qq(
+	    print open(F, "+<&=$fd") ? 1 : 0, "\\n";
+	), "0\n", {}, "not inherited across exec");
+    }
+}
 
 my $Perl = which_perl();
 
@@ -20,6 +30,7 @@ my $afile = tempfile();
 
     $! = 0;  # the -f above will set $! if $afile doesn't exist.
     ok( open(my $f,"+>$afile"),  'open(my $f, "+>...")' );
+    ok_cloexec($f);
 
     binmode $f;
     ok( -f $afile,              '       its a file');
@@ -40,6 +51,7 @@ my $afile = tempfile();
 
 {
     ok( open(my $f,'>', $afile),        "open(my \$f, '>', $afile)" );
+    ok_cloexec($f);
     ok( (print $f "a row\n"),           '       print');
     ok( close($f),                      '       close' );
     ok( -s $afile < 10,                 '       -s' );
@@ -47,6 +59,7 @@ my $afile = tempfile();
 
 {
     ok( open(my $f,'>>', $afile),       "open(my \$f, '>>', $afile)" );
+    ok_cloexec($f);
     ok( (print $f "a row\n"),           '       print' );
     ok( close($f),                      '       close' );
     ok( -s $afile > 10,                 '       -s'    );
@@ -54,6 +67,7 @@ my $afile = tempfile();
 
 {
     ok( open(my $f, '<', $afile),       "open(my \$f, '<', $afile)" );
+    ok_cloexec($f);
     my @rows = <$f>;
     is( scalar @rows, 2,                '       readline, list context' );
     is( $rows[0], "a row\n",            '       first line read' );
@@ -65,6 +79,7 @@ my $afile = tempfile();
     ok( -s $afile < 20,                 '-s' );
 
     ok( open(my $f, '+<', $afile),      'open +<' );
+    ok_cloexec($f);
     my @rows = <$f>;
     is( scalar @rows, 2,                '       readline, list context' );
     ok( seek($f, 0, 1),                 '       seek cur' );
@@ -79,6 +94,7 @@ my $afile = tempfile();
     $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
 
+    ok_cloexec($f);
     my @rows = <$f>;
     is( scalar @rows, 2,                '       readline, list context' );
     ok( close($f),                      '       close' );
@@ -88,6 +104,7 @@ EOC
     $Perl -pe "s/^not //"
 EOC
 
+    ok_cloexec($f);
     my @rows = <$f>;
     my $test = curr_test;
     print $f "not ok $test - piped in\n";
@@ -120,6 +137,7 @@ like( $@, qr/Bad filehandle:\s+some_glob/,          '       right error' );
     unlink($afile) if -f $afile;
 
     ok( open(local $f,"+>$afile"),       'open local $f, "+>", ...' );
+    ok_cloexec($f);
     binmode $f;
 
     ok( -f $afile,                      '       -f' );
@@ -140,6 +158,7 @@ like( $@, qr/Bad filehandle:\s+some_glob/,          '       right error' );
 
 {
     ok( open(local $f,'>', $afile),     'open local $f, ">", ...' );
+    ok_cloexec($f);
     ok( (print $f "a row\n"),           '       print');
     ok( close($f),                      '       close');
     ok( -s $afile < 10,                 '       -s' );
@@ -147,6 +166,7 @@ like( $@, qr/Bad filehandle:\s+some_glob/,          '       right error' );
 
 {
     ok( open(local $f,'>>', $afile),    'open local $f, ">>", ...' );
+    ok_cloexec($f);
     ok( (print $f "a row\n"),           '       print');
     ok( close($f),                      '       close');
     ok( -s $afile > 10,                 '       -s' );
@@ -154,6 +174,7 @@ like( $@, qr/Bad filehandle:\s+some_glob/,          '       right error' );
 
 {
     ok( open(local $f, '<', $afile),    'open local $f, "<", ...' );
+    ok_cloexec($f);
     my @rows = <$f>;
     is( scalar @rows, 2,                '       readline list context' );
     ok( close($f),                      '       close' );
@@ -163,6 +184,7 @@ ok( -s $afile < 20,                     '       -s' );
 
 {
     ok( open(local $f, '+<', $afile),  'open local $f, "+<", ...' );
+    ok_cloexec($f);
     my @rows = <$f>;
     is( scalar @rows, 2,                '       readline list context' );
     ok( seek($f, 0, 1),                 '       seek cur' );
@@ -177,6 +199,7 @@ ok( -s $afile < 20,                     '       -s' );
     ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
     $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
+    ok_cloexec($f);
     my @rows = <$f>;
 
     is( scalar @rows, 2,                '       readline list context' );
@@ -188,6 +211,7 @@ EOC
     $Perl -pe "s/^not //"
 EOC
 
+    ok_cloexec($f);
     my @rows = <$f>;
     my $test = curr_test;
     print $f "not ok $test - piping\n";
@@ -209,12 +233,14 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
     local *F;
     for (1..2) {
 	ok( open(F, qq{$Perl -le "print 'ok'"|}), 'open to pipe' );
+	ok_cloexec(\*F);
 	is(scalar <F>, "ok\n",  '       readline');
 	ok( close F,            '       close' );
     }
 
     for (1..2) {
 	ok( open(F, "-|", qq{$Perl -le "print 'ok'"}), 'open -|');
+	ok_cloexec(\*F);
 	is( scalar <F>, "ok\n", '       readline');
 	ok( close F,            '       close' );
     }
@@ -224,19 +250,23 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
 # other dupping techniques
 {
     ok( open(my $stdout, ">&", \*STDOUT),       'dup \*STDOUT into lexical fh');
+    ok_cloexec($stdout);
     ok( open(STDOUT,     ">&", $stdout),        'restore dupped STDOUT from lexical fh');
 
     {
 	use strict; # the below should not warn
 	ok( open(my $stdout, ">&", STDOUT),         'dup STDOUT into lexical fh');
+	ok_cloexec($stdout);
     }
 
     # used to try to open a file [perl #17830]
     ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh') or _diag $!;
+    ok_cloexec($stdin);
 
     fileno(STDIN) =~ /(.)/;
     ok open($stdin, "<&", $1), 'open ... "<&", $magical_fileno',
 	||  _diag $!;
+    ok_cloexec($stdin);
 }
 
 SKIP: {
@@ -266,20 +296,24 @@ SKIP: {
     }
 
     open($fh0[0], "TEST");
+    ok_cloexec($fh0[0]);
     gimme($fh0[0]);
     like($@, qr/<\$fh0\[...\]> line 1\./, "autoviv fh package aelem");
 
     open($fh1{k}, "TEST");
+    ok_cloexec($fh1{h});
     gimme($fh1{k});
     like($@, qr/<\$fh1\{...}> line 1\./, "autoviv fh package helem");
 
     my @fh2;
     open($fh2[0], "TEST");
+    ok_cloexec($fh2[0]);
     gimme($fh2[0]);
     like($@, qr/<\$fh2\[...\]> line 1\./, "autoviv fh lexical aelem");
 
     my %fh3;
     open($fh3{k}, "TEST");
+    ok_cloexec($fh3{h});
     gimme($fh3{k});
     like($@, qr/<\$fh3\{...}> line 1\./, "autoviv fh lexical helem");
 

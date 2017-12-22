@@ -1143,6 +1143,10 @@
 #  endif
 #endif
 #ifdef PERL_CORE
+#define PerlLIO_dup2_cloexec(a,b)	Perl_PerlLIO_dup2_cloexec(aTHX_ a,b)
+#define PerlLIO_dup_cloexec(a)	Perl_PerlLIO_dup_cloexec(aTHX_ a)
+#define PerlLIO_open3_cloexec(a,b,c)	Perl_PerlLIO_open3_cloexec(aTHX_ a,b,c)
+#define PerlLIO_open_cloexec(a,b)	Perl_PerlLIO_open_cloexec(aTHX_ a,b)
 #define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
 #define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
 #define _is_in_locale_category(a,b)	Perl__is_in_locale_category(aTHX_ a,b)
@@ -1378,6 +1382,11 @@
 #define set_caret_X()		Perl_set_caret_X(aTHX)
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define set_numeric_underlying()	Perl_set_numeric_underlying(aTHX)
+#define setfd_cloexec		Perl_setfd_cloexec
+#define setfd_cloexec_for_nonsysfd(a)	Perl_setfd_cloexec_for_nonsysfd(aTHX_ a)
+#define setfd_cloexec_or_inhexec_by_sysfdness(a)	Perl_setfd_cloexec_or_inhexec_by_sysfdness(aTHX_ a)
+#define setfd_inhexec		Perl_setfd_inhexec
+#define setfd_inhexec_for_sysfd(a)	Perl_setfd_inhexec_for_sysfd(aTHX_ a)
 #define sub_crush_depth(a)	Perl_sub_crush_depth(aTHX_ a)
 #define sv_2num(a)		Perl_sv_2num(aTHX_ a)
 #define sv_clean_all()		Perl_sv_clean_all(aTHX)
@@ -1473,6 +1482,9 @@
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
+#  if defined (HAS_SOCKETPAIR) ||     (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && 	defined(AF_INET) && defined(PF_INET))
+#define PerlSock_socketpair_cloexec(a,b,c,d)	Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
+#  endif
 #  if defined(DEBUGGING)
 #define get_debug_opts(a,b)	Perl_get_debug_opts(aTHX_ a,b)
 #define set_padlist		Perl_set_padlist
@@ -1510,8 +1522,15 @@
 #define my_nl_langinfo		S_my_nl_langinfo
 #    endif
 #  endif
+#  if defined(HAS_PIPE)
+#define PerlProc_pipe_cloexec(a)	Perl_PerlProc_pipe_cloexec(aTHX_ a)
+#  endif
 #  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #define sighandler		Perl_sighandler
+#  endif
+#  if defined(HAS_SOCKET)
+#define PerlSock_accept_cloexec(a,b,c)	Perl_PerlSock_accept_cloexec(aTHX_ a,b,c)
+#define PerlSock_socket_cloexec(a,b,c)	Perl_PerlSock_socket_cloexec(aTHX_ a,b,c)
 #  endif
 #  if defined(MYMALLOC)
 #define malloc_good_size	Perl_malloc_good_size

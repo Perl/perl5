@@ -60,6 +60,272 @@
 
 #include <signal.h>
 
+void
+Perl_setfd_cloexec(int fd)
+{
+    assert(fd >= 0);
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+    (void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+#endif
+}
+
+void
+Perl_setfd_inhexec(int fd)
+{
+    assert(fd >= 0);
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+    (void) fcntl(fd, F_SETFD, 0);
+#endif
+}
+
+void
+Perl_setfd_cloexec_for_nonsysfd(pTHX_ int fd)
+{
+    assert(fd >= 0);
+    if(fd > PL_maxsysfd)
+	setfd_cloexec(fd);
+}
+
+void
+Perl_setfd_inhexec_for_sysfd(pTHX_ int fd)
+{
+    assert(fd >= 0);
+    if(fd <= PL_maxsysfd)
+	setfd_inhexec(fd);
+}
+void
+Perl_setfd_cloexec_or_inhexec_by_sysfdness(pTHX_ int fd)
+{
+    assert(fd >= 0);
+    if(fd <= PL_maxsysfd)
+	setfd_inhexec(fd);
+    else
+	setfd_cloexec(fd);
+}
+
+
+#define DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
+	do { \
+	    int res = (GENOPEN_NORMAL); \
+	    if(LIKELY(res != -1)) GENSETFD_CLOEXEC; \
+	    return res; \
+	} while(0)
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC) && \
+			defined(F_GETFD)
+enum { CLOEXEC_EXPERIMENT, CLOEXEC_AT_OPEN, CLOEXEC_AFTER_OPEN };
+#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
+			GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
+	do { \
+	    static int strategy = CLOEXEC_EXPERIMENT; \
+	    switch (strategy) { \
+		case CLOEXEC_EXPERIMENT: default: { \
+		    int res = (GENOPEN_CLOEXEC), eno; \
+		    if (LIKELY(res != -1)) { \
+			int fdflags = fcntl((TESTFD), F_GETFD); \
+			if (LIKELY(fdflags != -1) && \
+				LIKELY(fdflags & FD_CLOEXEC)) { \
+			    strategy = CLOEXEC_AT_OPEN; \
+			} else { \
+			    strategy = CLOEXEC_AFTER_OPEN; \
+			    GENSETFD_CLOEXEC; \
+			} \
+		    } else if (UNLIKELY((eno = errno) == EINVAL || \
+						eno == ENOSYS)) { \
+			res = (GENOPEN_NORMAL); \
+			if (LIKELY(res != -1)) { \
+			    strategy = CLOEXEC_AFTER_OPEN; \
+			    GENSETFD_CLOEXEC; \
+			} else if (!LIKELY((eno = errno) == EINVAL || \
+						eno == ENOSYS)) { \
+			    strategy = CLOEXEC_AFTER_OPEN; \
+			} \
+		    } \
+		    return res; \
+		} \
+		case CLOEXEC_AT_OPEN: \
+		    return (GENOPEN_CLOEXEC); \
+		case CLOEXEC_AFTER_OPEN: \
+		    DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC); \
+	    } \
+	} while(0)
+#else
+#  define DO_GENOPEN_EXPERIMENTING_CLOEXEC(TESTFD, GENOPEN_CLOEXEC, \
+			GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
+	DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC)
+#endif
+
+#define DO_ONEOPEN_THEN_CLOEXEC(ONEOPEN_NORMAL) \
+	do { \
+	    int fd; \
+	    DO_GENOPEN_THEN_CLOEXEC(fd = (ONEOPEN_NORMAL), \
+		setfd_cloexec(fd)); \
+	} while(0)
+#define DO_ONEOPEN_EXPERIMENTING_CLOEXEC(ONEOPEN_CLOEXEC, ONEOPEN_NORMAL) \
+	do { \
+	    int fd; \
+	    DO_GENOPEN_EXPERIMENTING_CLOEXEC(fd, fd = (ONEOPEN_CLOEXEC), \
+		fd = (ONEOPEN_NORMAL), setfd_cloexec(fd)); \
+	} while(0)
+
+#define DO_PIPESETFD_CLOEXEC(PIPEFD) \
+	do { \
+	    setfd_cloexec((PIPEFD)[0]); \
+	    setfd_cloexec((PIPEFD)[1]); \
+	} while(0)
+#define DO_PIPEOPEN_THEN_CLOEXEC(PIPEFD, PIPEOPEN_NORMAL) \
+	DO_GENOPEN_THEN_CLOEXEC(PIPEOPEN_NORMAL, DO_PIPESETFD_CLOEXEC(PIPEFD))
+#define DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PIPEFD, PIPEOPEN_CLOEXEC, \
+			PIPEOPEN_NORMAL) \
+	DO_GENOPEN_EXPERIMENTING_CLOEXEC((PIPEFD)[0], PIPEOPEN_CLOEXEC, \
+	    PIPEOPEN_NORMAL, DO_PIPESETFD_CLOEXEC(PIPEFD))
+
+int
+Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
+{
+#if !defined(PERL_IMPLICIT_SYS) && defined(F_DUPFD_CLOEXEC)
+    /*
+     * struct IPerlLIO doesn't cover fcntl(), and there's no clear way
+     * to extend it, so for the time being this just isn't available on
+     * PERL_IMPLICIT_SYS builds.
+     */
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	fcntl(oldfd, F_DUPFD_CLOEXEC, 0),
+	PerlLIO_dup(oldfd));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_dup(oldfd));
+#endif
+}
+
+int
+Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+{
+#if !defined(PERL_IMPLICIT_SYS) && defined(HAS_DUP3) && defined(O_CLOEXEC)
+    /*
+     * struct IPerlLIO doesn't cover dup3(), and there's no clear way
+     * to extend it, so for the time being this just isn't available on
+     * PERL_IMPLICIT_SYS builds.
+     */
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	dup3(oldfd, newfd, O_CLOEXEC),
+	PerlLIO_dup2(oldfd, newfd));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_dup2(oldfd, newfd));
+#endif
+}
+
+int
+Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
+{
+    PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PerlLIO_open(file, flag | O_CLOEXEC),
+	PerlLIO_open(file, flag));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_open(file, flag));
+#endif
+}
+
+int
+Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
+{
+    PERL_ARGS_ASSERT_PERLLIO_OPEN3_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PerlLIO_open3(file, flag | O_CLOEXEC, perm),
+	PerlLIO_open3(file, flag, perm));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlLIO_open3(file, flag, perm));
+#endif
+}
+
+int
+Perl_my_mkstemp_cloexec(char *templte)
+{
+    PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
+#if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	Perl_my_mkostemp(templte, O_CLOEXEC),
+	Perl_my_mkstemp(templte));
+#else
+    DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
+#endif
+}
+
+#ifdef HAS_PIPE
+int
+Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
+{
+    PERL_ARGS_ASSERT_PERLPROC_PIPE_CLOEXEC;
+    /*
+     * struct IPerlProc doesn't cover pipe2(), and there's no clear way
+     * to extend it, so for the time being this just isn't available on
+     * PERL_IMPLICIT_SYS builds.
+     */
+#  if !defined(PERL_IMPLICIT_SYS) && defined(HAS_PIPE2) && defined(O_CLOEXEC)
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(pipefd,
+	pipe2(pipefd, O_CLOEXEC),
+	PerlProc_pipe(pipefd));
+#  else
+    DO_PIPEOPEN_THEN_CLOEXEC(pipefd, PerlProc_pipe(pipefd));
+#  endif
+}
+#endif
+
+#ifdef HAS_SOCKET
+
+int
+Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
+{
+#  if defined(SOCK_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PerlSock_socket(domain, type | SOCK_CLOEXEC, protocol),
+	PerlSock_socket(domain, type, protocol));
+#  else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlSock_socket(domain, type, protocol));
+#  endif
+}
+
+int
+Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr,
+    Sock_size_t *addrlen)
+{
+#  if !defined(PERL_IMPLICIT_SYS) && \
+	defined(HAS_ACCEPT4) && defined(SOCK_CLOEXEC)
+    /*
+     * struct IPerlSock doesn't cover accept4(), and there's no clear
+     * way to extend it, so for the time being this just isn't available
+     * on PERL_IMPLICIT_SYS builds.
+     */
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	accept4(listenfd, addr, addrlen, SOCK_CLOEXEC),
+	PerlSock_accept(listenfd, addr, addrlen));
+#  else
+    DO_ONEOPEN_THEN_CLOEXEC(PerlSock_accept(listenfd, addr, addrlen));
+#  endif
+}
+
+#endif
+
+#if defined (HAS_SOCKETPAIR) || \
+    (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && \
+	defined(AF_INET) && defined(PF_INET))
+int
+Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol,
+    int *pairfd)
+{
+    PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC;
+#  ifdef SOCK_CLOEXEC
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(pairfd,
+	PerlSock_socketpair(domain, type | SOCK_CLOEXEC, protocol, pairfd),
+	PerlSock_socketpair(domain, type, protocol, pairfd));
+#  else
+    DO_PIPEOPEN_THEN_CLOEXEC(pairfd,
+	PerlSock_socketpair(domain, type, protocol, pairfd));
+#  endif
+}
+#endif
+
 static IO *
 S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp,
               int *savefd,  char *savetype)
@@ -452,7 +718,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 		    }
 		    else {
 			if (dodup)
-                            wanted_fd = PerlLIO_dup(wanted_fd);
+                            wanted_fd = PerlLIO_dup_cloexec(wanted_fd);
 			else
 			    was_fdopen = TRUE;
                         if (!(fp = PerlIO_openn(aTHX_ type,mode,wanted_fd,0,0,NULL,num_svs,svp))) {
@@ -743,33 +1009,15 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	    if (was_fdopen) {
                 /* need to close fp without closing underlying fd */
                 int ofd = PerlIO_fileno(fp);
-                int dupfd = ofd >= 0 ? PerlLIO_dup(ofd) : -1;
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-		/* Assume if we have F_SETFD we have F_GETFD. */
-                /* Get a copy of all the fd flags. */
-                int fd_flags = ofd >= 0 ? fcntl(ofd, F_GETFD) : -1;
-                if (fd_flags < 0) {
-                    if (dupfd >= 0)
-                        PerlLIO_close(dupfd);
-                    goto say_false;
-                }
-#endif
+                int dupfd = ofd >= 0 ? PerlLIO_dup_cloexec(ofd) : -1;
                 if (ofd < 0 || dupfd < 0) {
                     if (dupfd >= 0)
                         PerlLIO_close(dupfd);
                     goto say_false;
                 }
                 PerlIO_close(fp);
-                PerlLIO_dup2(dupfd, ofd);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-		/* The dup trick has lost close-on-exec on ofd,
-                 * and possibly any other flags, so restore them. */
-		if (fcntl(ofd,F_SETFD, fd_flags) < 0) {
-                    if (dupfd >= 0)
-                        PerlLIO_close(dupfd);
-                    goto say_false;
-                }
-#endif
+                PerlLIO_dup2_cloexec(dupfd, ofd);
+                setfd_inhexec_for_sysfd(ofd);
                 PerlLIO_close(dupfd);
 	    }
             else
@@ -779,12 +1027,6 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	PerlIO_clearerr(fp);
 	fd = PerlIO_fileno(fp);
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    if (fd >= 0 && fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) {
-        PerlLIO_close(fd);
-        goto say_false;
-    }
-#endif
     IoIFP(io) = fp;
 
     IoFLAGS(io) &= ~IOf_NOLINE;
@@ -854,7 +1096,7 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 
     {
       int old_umask = umask(0177);
-      fd = Perl_my_mkstemp(SvPVX(temp_out_name));
+      fd = Perl_my_mkstemp_cloexec(SvPVX(temp_out_name));
       umask(old_umask);
     }
 

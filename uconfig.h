@@ -2279,6 +2279,12 @@
  */
 /*#define HAS__FWALK		/ **/
 
+/* HAS_ACCEPT4:
+ *	This symbol, if defined, indicates that the accept4
+ *	system call is available to accept socket connections.
+ */
+/*#define HAS_ACCEPT4		/ **/
+
 /* HAS_ACOSH:
  *	This symbol, if defined, indicates that the acosh routine is
  *	available to do the inverse hyperbolic cosine function.
@@ -2409,6 +2415,12 @@
  *	case if you're using dl_dlopen.xs.
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
+
+/* HAS_DUP3:
+ *	This symbol, if defined, indicates that the dup3
+ *	system call is available to duplicate file descriptors.
+ */
+/*#define HAS_DUP3		/ **/
 
 /* HAS_ERF:
  *	This symbol, if defined, indicates that the erf routine is
@@ -2997,6 +3009,13 @@
  */
 /*#define HAS_MKDTEMP		/ **/
 
+/* HAS_MKOSTEMP:
+ *	This symbol, if defined, indicates that the mkostemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+/*#define HAS_MKOSTEMP		/ **/
+
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to exclusively create and open a uniquely named
@@ -3100,6 +3119,12 @@
  *	This symbol will be defined if the C compiler supports off64_t.
  */
 /*#define	HAS_OFF64_T    		/ **/
+
+/* HAS_PIPE2:
+ *	This symbol, if defined, indicates that the pipe2
+ *	system call is available to create inter-process pipes.
+ */
+/*#define HAS_PIPE2		/ **/
 
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
@@ -5194,6 +5219,6 @@
 #endif
 
 /* Generated from:
- * 84ef0e3b4e27374e35a7ac6726cf1c0149b1d4ba726bd58e06d9a9ce18acbb04 config_h.SH
- * 9df6179826b20eb8e1d8db749dfd77913897fae551371f686571273075f78092 uconfig.sh
+ * b35fd150a5540d0fe06540db67bc67864b14dd744550f105e13b78ef97a953d5 config_h.SH
+ * 02e3ab990e287cd32a5d000bc0b75168aa96496175b82315bdd47f898d00b0a6 uconfig.sh
  * ex: set ro: */

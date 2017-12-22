@@ -464,6 +464,31 @@ Apmb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
 				|NN SV *svs|I32 num
+pn	|void	|setfd_cloexec|int fd
+pn	|void	|setfd_inhexec|int fd
+p	|void	|setfd_cloexec_for_nonsysfd|int fd
+p	|void	|setfd_inhexec_for_sysfd|int fd
+p	|void	|setfd_cloexec_or_inhexec_by_sysfdness|int fd
+pR	|int	|PerlLIO_dup_cloexec|int oldfd
+p	|int	|PerlLIO_dup2_cloexec|int oldfd|int newfd
+pR	|int	|PerlLIO_open_cloexec|NN const char *file|int flag
+pR	|int	|PerlLIO_open3_cloexec|NN const char *file|int flag|int perm
+pnoR	|int	|my_mkstemp_cloexec|NN char *templte
+#ifdef HAS_PIPE
+pR	|int	|PerlProc_pipe_cloexec|NN int *pipefd
+#endif
+#ifdef HAS_SOCKET
+pR	|int	|PerlSock_socket_cloexec|int domain|int type|int protocol
+pR	|int	|PerlSock_accept_cloexec|int listenfd \
+				|NULLOK struct sockaddr *addr \
+				|NULLOK Sock_size_t *addrlen
+#endif
+#if defined (HAS_SOCKETPAIR) || \
+    (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && \
+	defined(AF_INET) && defined(PF_INET))
+pR	|int	|PerlSock_socketpair_cloexec|int domain|int type|int protocol \
+				|NN int *pairfd
+#endif
 #if defined(PERL_IN_DOIO_C)
 s	|IO *	|openn_setup    |NN GV *gv|NN char *mode|NN PerlIO **saveifp \
 				|NN PerlIO **saveofp|NN int *savefd \
@@ -3054,6 +3079,9 @@ Apnod	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t si
 Apnod	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
 #endif
 
+#ifndef HAS_MKOSTEMP
+pno	|int	|my_mkostemp	|NN char *templte|int flags
+#endif
 #ifndef HAS_MKSTEMP
 pno	|int	|my_mkstemp	|NN char *templte
 #endif

@@ -10,7 +10,7 @@ if (!$Config{'d_fork'}) {
     skip_all("fork required to pipe");
 }
 else {
-    plan(tests => 24);
+    plan(tests => 25);
 }
 
 my $Perl = which_perl();
@@ -137,6 +137,18 @@ close WRITER;
 sleep 1;
 next_test;
 pass();
+
+SKIP: {
+    skip "no fcntl", 1 unless $Config{d_fcntl};
+    my($r, $w);
+    pipe($r, $w) || die "pipe: $!";
+    my $fdr = fileno($r);
+    my $fdw = fileno($w);
+    fresh_perl_is(qq(
+	print open(F, "<&=$fdr") ? 1 : 0, "\\n";
+	print open(F, ">&=$fdw") ? 1 : 0, "\\n";
+    ), "0\n0\n", {}, "pipe endpoints not inherited across exec");
+}
 
 # VMS doesn't like spawning subprocesses that are still connected to
 # STDOUT.  Someone should modify these tests to work with VMS.
