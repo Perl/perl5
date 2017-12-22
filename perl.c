@@ -841,7 +841,7 @@ perl_destruct(pTHXx)
 		   back into Perl_debug_log, as if we never actually closed it
 		*/
 		if(got_fd != debug_fd) {
-		    if (dup2(got_fd, debug_fd) == -1) {
+		    if (PerlLIO_dup2_cloexec(got_fd, debug_fd) == -1) {
 			where = "dup2";
 			goto abort;
 		    }
@@ -4059,8 +4059,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		    CopFILE(PL_curcop), Strerror(errno));
     }
     fd = PerlIO_fileno(rsfp);
-    if (fd >= 0)
-	setfd_cloexec(fd);
 
     if (fd < 0 ||
         (PerlLIO_fstat(fd, &tmpstatbuf) >= 0

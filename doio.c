@@ -79,12 +79,30 @@ Perl_setfd_inhexec(int fd)
 }
 
 void
+Perl_setfd_cloexec_for_nonsysfd(pTHX_ int fd)
+{
+    assert(fd >= 0);
+    if(fd > PL_maxsysfd)
+	setfd_cloexec(fd);
+}
+
+void
 Perl_setfd_inhexec_for_sysfd(pTHX_ int fd)
 {
     assert(fd >= 0);
     if(fd <= PL_maxsysfd)
 	setfd_inhexec(fd);
 }
+void
+Perl_setfd_cloexec_or_inhexec_by_sysfdness(pTHX_ int fd)
+{
+    assert(fd >= 0);
+    if(fd <= PL_maxsysfd)
+	setfd_inhexec(fd);
+    else
+	setfd_cloexec(fd);
+}
+
 
 #define DO_GENOPEN_THEN_CLOEXEC(GENOPEN_NORMAL, GENSETFD_CLOEXEC) \
 	do { \
@@ -700,7 +718,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 		    }
 		    else {
 			if (dodup)
-                            wanted_fd = PerlLIO_dup(wanted_fd);
+                            wanted_fd = PerlLIO_dup_cloexec(wanted_fd);
 			else
 			    was_fdopen = TRUE;
                         if (!(fp = PerlIO_openn(aTHX_ type,mode,wanted_fd,0,0,NULL,num_svs,svp))) {
@@ -991,33 +1009,15 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	    if (was_fdopen) {
                 /* need to close fp without closing underlying fd */
                 int ofd = PerlIO_fileno(fp);
-                int dupfd = ofd >= 0 ? PerlLIO_dup(ofd) : -1;
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-		/* Assume if we have F_SETFD we have F_GETFD. */
-                /* Get a copy of all the fd flags. */
-                int fd_flags = ofd >= 0 ? fcntl(ofd, F_GETFD) : -1;
-                if (fd_flags < 0) {
-                    if (dupfd >= 0)
-                        PerlLIO_close(dupfd);
-                    goto say_false;
-                }
-#endif
+                int dupfd = ofd >= 0 ? PerlLIO_dup_cloexec(ofd) : -1;
                 if (ofd < 0 || dupfd < 0) {
                     if (dupfd >= 0)
                         PerlLIO_close(dupfd);
                     goto say_false;
                 }
                 PerlIO_close(fp);
-                PerlLIO_dup2(dupfd, ofd);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-		/* The dup trick has lost close-on-exec on ofd,
-                 * and possibly any other flags, so restore them. */
-		if (fcntl(ofd,F_SETFD, fd_flags) < 0) {
-                    if (dupfd >= 0)
-                        PerlLIO_close(dupfd);
-                    goto say_false;
-                }
-#endif
+                PerlLIO_dup2_cloexec(dupfd, ofd);
+                setfd_inhexec_for_sysfd(ofd);
                 PerlLIO_close(dupfd);
 	    }
             else
@@ -1026,10 +1026,6 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	fp = saveifp;
 	PerlIO_clearerr(fp);
 	fd = PerlIO_fileno(fp);
-    }
-    if (fd >= 0) {
-	setfd_cloexec(fd);
-	setfd_inhexec_for_sysfd(fd);
     }
     IoIFP(io) = fp;
 
@@ -1100,7 +1096,7 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 
     {
       int old_umask = umask(0177);
-      fd = Perl_my_mkstemp(SvPVX(temp_out_name));
+      fd = Perl_my_mkstemp_cloexec(SvPVX(temp_out_name));
       umask(old_umask);
     }
 
