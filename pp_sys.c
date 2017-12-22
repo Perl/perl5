@@ -4393,12 +4393,39 @@ PP(pp_system)
 # endif
 
     while (++MARK <= SP) {
-	SV *origsv = *MARK;
+	SV *origsv = *MARK, *copysv;
 	STRLEN len;
 	char *pv;
-	pv = SvPV(origsv, len);
-	*MARK = newSVpvn_flags(pv, len,
-		    (SvFLAGS(origsv) & SVf_UTF8) | SVs_TEMP);
+	SvGETMAGIC(origsv);
+#ifdef WIN32
+	/*
+	 * Because of a nasty platform-specific variation on the meaning
+	 * of arguments to this op, we must preserve numeric arguments
+	 * as numeric, not just retain the string value.
+	 */
+	if (SvNIOK(origsv) || SvNIOKp(origsv)) {
+	    copysv = newSV_type(SVt_PVNV);
+	    sv_2mortal(copysv);
+	    if (SvPOK(origsv) || SvPOKp(origsv)) {
+		pv = SvPV_nomg(origsv, len);
+		sv_setpvn(copysv, pv, len);
+		SvPOK_off(copysv);
+	    }
+	    if (SvIOK(origsv) || SvIOKp(origsv))
+		SvIV_set(copysv, SvIVX(origsv));
+	    if (SvNOK(origsv) || SvNOKp(origsv))
+		SvNV_set(copysv, SvNVX(origsv));
+	    SvFLAGS(copysv) |= SvFLAGS(origsv) &
+		(SVf_IOK|SVf_NOK|SVf_POK|SVp_IOK|SVp_NOK|SVp_POK|
+		    SVf_UTF8|SVf_IVisUV);
+	} else
+#endif
+	{
+	    pv = SvPV_nomg(origsv, len);
+	    copysv = newSVpvn_flags(pv, len,
+			(SvFLAGS(origsv) & SVf_UTF8) | SVs_TEMP);
+	}
+	*MARK = copysv;
     }
     MARK = ORIGMARK;
 
