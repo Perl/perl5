@@ -27,6 +27,19 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Close-on-exec flag set atomically
+
+When opening a file descriptor, perl now generally opens it with its
+close-on-exec flag already set, on platforms that support doing so.
+This improves thread safety, because it means that an C<exec> initiated
+by one thread can no longer cause a file descriptor in the process
+of being opened by another thread to be accidentally passed to the
+executed program.
+
+Additionally, perl now sets the close-on-exec flag more reliably, whether
+it does so atomically or not.  Most file descriptors were getting the
+flag set, but some were being missed.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
