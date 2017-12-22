@@ -742,7 +742,7 @@ perl_destruct(pTHXx)
 	   fail gracefully  */
 	int fd[2];
 
-	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd)) {
+	if(PerlSock_socketpair_cloexec(AF_UNIX, SOCK_STREAM, 0, fd)) {
 	    perror("Debug leaking scalars socketpair failed");
 	    abort();
 	}
