@@ -62,6 +62,7 @@ ClsPerlHost::PerlCreate(PerlInterpreter *my_perl)
 /*	if (!(my_perl = perl_alloc()))		// Allocate memory for Perl.
 		return (1);*/
     perl_construct(my_perl);
+    PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
 	return 1;
 }

@@ -141,6 +141,10 @@ void CPerlBase::ConstructL()
     User::LeaveIfNull(iPerl);
     iState = EPerlAllocated;
     perl_construct(iPerl); // returns void
+    {
+	PerlInterpreter *my_perl = iPerl;
+	PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+    }
     if (!iStdioInitFunc) {
         iConsole =
           Console::NewL(_L("Perl Console"),
