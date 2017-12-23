@@ -429,7 +429,13 @@ sub output_invmap ($$$$$$$) {
                                         \$${type}_abbreviations{$short}")
                         {
                             die $@ if $@;
-                            $short++;
+
+                            # The increment operator on strings doesn't work
+                            # on those containing an '_', so just use the
+                            # final portion.
+                            my @short = split '_', $short;
+                            $short[-1]++;
+                            $short = join "_", @short;
                         }
 
                         eval "\$${type}_abbreviations{$short} = '$enum'";
