@@ -349,8 +349,9 @@ sub output_invmap ($$$$$$$) {
         $short_name = uc($short_name) if length($short_name) < 3
                                       || substr($short_name, 0, 1) =~ /[[:lower:]]/;
         $name_prefix = "${short_name}_";
-        my $enum_count = keys %enums;
-        print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
+
+        # Currently unneeded
+        #print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
 
         if ($input_format eq 'sl') {
             print $out_fh
