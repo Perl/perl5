@@ -13655,7 +13655,7 @@ sub filter_all_caps_script_names {
 
     my ($range, $script, @remainder)
         = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
-    my @words = split "_", $script;
+    my @words = split /[_-]/, $script;
     for my $word (@words) {
         $word =
             ucfirst(lc($word)) if $word ne 'CJK';
