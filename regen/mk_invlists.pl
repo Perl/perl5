@@ -183,14 +183,29 @@ sub output_invmap ($$$$$$$) {
     my %enums;
     my $name_prefix;
 
-    if ($input_format eq 's') {
+    if ($input_format =~ / ^ s l? $ /x) {
         $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
         my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
         my @input_enums;
 
         # Find all the possible input values.  These become the enum names
-        # that comprise the inversion map.
+        # that comprise the inversion map.  For inputs that don't have sub
+        # lists, we can just get the unique values.  Otherwise, we have to
+        # expand the sublists first.
+        if ($input_format ne 'sl') {
             @input_enums = sort(uniques(@$invmap));
+        }
+        else {
+            foreach my $element (@$invmap) {
+                if (ref $element) {
+                    push @input_enums, @$element;
+                }
+                else {
+                    push @input_enums, $element;
+                }
+            }
+            @input_enums = sort(uniques(@input_enums));
+        }
 
         # The internal enums come last, and in the order specified.
         my @enums = @input_enums;
@@ -337,6 +352,14 @@ sub output_invmap ($$$$$$$) {
         my $enum_count = keys %enums;
         print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
 
+        if ($input_format eq 'sl') {
+            print $out_fh
+            "\n/* Negative enum values indicate the need to use an auxiliary"
+          . " table\n * consisting of the list of enums this one expands to."
+          . "  The absolute\n * values of the negative enums are indices into"
+          . " a table of the auxiliary\n * tables' addresses */";
+        }
+
         # Start the enum definition for this map
         print $out_fh "\ntypedef enum {\n";
         my @enum_list;
@@ -344,16 +367,111 @@ sub output_invmap ($$$$$$$) {
             $enum_list[$enums{$enum}] = $enum;
         }
         foreach my $i (0 .. @enum_list - 1) {
+            print $out_fh  ",\n" if $i > 0;
+
             my $name = $enum_list[$i];
             print $out_fh  "\t${name_prefix}$name = $i";
-            print $out_fh "," if $i < $enum_count - 1;
-            print $out_fh "\n";
         }
+
+        # For an 'sl' property, we need extra enums, because some of the
+        # elements are lists.  Each such distinct list is placed in its own
+        # auxiliary map table.  Here, we go through the inversion map, and for
+        # each distinct list found, create an enum value for it, numbered -1,
+        # -2, ....
+        my %multiples;
+        my $aux_table_prefix = "AUX_TABLE_";
+        if ($input_format eq 'sl') {
+            foreach my $element (@$invmap) {
+
+                # A regular scalar is not one of the lists we're looking for
+                # at this stage.
+                next unless ref $element;
+
+                my $joined = join ",", sort @$element;
+                my $already_found = exists $multiples{$joined};
+
+                my $i;
+                if ($already_found) {   # Use any existing one
+                    $i = $multiples{$joined};
+                }
+                else {  # Otherwise increment to get a new table number
+                    $i = keys(%multiples) + 1;
+                    $multiples{$joined} = $i;
+                }
+
+                # This changes the inversion map for this entry to not be the
+                # list
+                $element = "use_$aux_table_prefix$i";
+
+                # And add to the enum values
+                if (! $already_found) {
+                    print $out_fh  ",\n\t${name_prefix}$element = -$i";
+                }
+            }
+        }
+
+        print $out_fh "\n";
         $declaration_type = "${name_prefix}enum";
         print $out_fh "} $declaration_type;\n";
         # Finished with the enum defintion.
 
         $output_format = "${name_prefix}%s";
+
+        # If there are auxiliary tables, output them.
+        if (%multiples) {
+
+            print $out_fh "\n#define HAS_${name_prefix}AUX_TABLES\n";
+
+            # Invert keys and values
+            my %inverted_mults;
+            while (my ($key, $value) = each %multiples) {
+                $inverted_mults{$value} = $key;
+            }
+
+            # Output them in sorted order
+            my @sorted_table_list = sort { $a <=> $b } keys %inverted_mults;
+
+            # Keep track of how big each aux table is
+            my @aux_counts;
+
+            # Output each aux table.
+            foreach my $table_number (@sorted_table_list) {
+                my $table = $inverted_mults{$table_number};
+                print $out_fh "\nstatic const $declaration_type $name_prefix$aux_table_prefix$table_number\[] = {\n";
+
+                # Earlier, we joined the elements of this table together with a comma
+                my @elements = split ",", $table;
+
+                $aux_counts[$table_number] = scalar @elements;
+                for my $i (0 .. @elements - 1) {
+                    print $out_fh  ",\n" if $i > 0;
+                    print $out_fh "\t${name_prefix}$elements[$i]";
+                }
+                print $out_fh "\n};\n";
+            }
+
+            # Output the table that is indexed by the absolute value of the
+            # aux table enum and contains pointers to the tables output just
+            # above
+            print $out_fh "\nstatic const $declaration_type * const ${name_prefix}${aux_table_prefix}ptrs\[] = {\n";
+            print $out_fh "\tNULL,\t/* Placeholder */\n";
+            for my $i (1 .. @sorted_table_list) {
+                print $out_fh  ",\n" if $i > 1;
+                print $out_fh  "\t$name_prefix$aux_table_prefix$i";
+            }
+            print $out_fh "\n};\n";
+
+            print $out_fh
+              "\n/* Parallel table to the above, giving the number of elements"
+            . " in each table\n * pointed to */\n";
+            print $out_fh "static const U8 ${name_prefix}${aux_table_prefix}lengths\[] = {\n";
+            print $out_fh "\t0,\t/* Placeholder */\n";
+            for my $i (1 .. @sorted_table_list) {
+                print $out_fh  ",\n" if $i > 1;
+                print $out_fh  "\t$aux_counts[$i]\t/* $name_prefix$aux_table_prefix$i */";
+            }
+            print $out_fh "\n};\n";
+        } # End of outputting the auxiliary and associated tables
     }
     else {
         die "'$input_format' invmap() format for '$prop_name' unimplemented";
