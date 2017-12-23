@@ -189,6 +189,13 @@ Scalar value @a[...] better written as $a[...] at - line 13.
 Scalar value @a{...} better written as $a{...} at - line 14.
 ########
 # op.c
+# [perl #132645]
+use warnings 'syntax';
+@inf[3];
+EXPECT
+Scalar value @inf[3] better written as $inf[3] at - line 4.
+########
+# op.c
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'syntax' ;

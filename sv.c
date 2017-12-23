@@ -11814,7 +11814,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     STRLEN origlen;
     Size_t svix = 0;
     static const char nullstr[] = "(null)";
-    SV *argsv = NULL;
     bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
     const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
     /* Times 4: a decimal digit takes more than 3 binary digits.
@@ -11919,6 +11918,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	Size_t efix      = 0;         /* explicit format parameter index */
 	const Size_t osvix  = svix;   /* original index in case of bad fmt */
 
+	SV *argsv        = NULL;
 	bool is_utf8     = FALSE;     /* is this item utf8?   */
         bool arg_missing = FALSE;     /* give "Missing argument" warning */
 	char esignbuf[4];             /* holds sign prefix, e.g. "-0x" */
