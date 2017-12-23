@@ -149,6 +149,8 @@ for each item in the LIST (with C<$_> aliased to each item in turn).
     print "Hello $_!\n" for qw(world Dolly nurse);
 
 C<while> repeats the statement I<while> the condition is true.
+Postfix C<while> has the same magic treatment of some kinds of condition
+that prefix C<while> has.
 C<until> does the opposite, it repeats the statement I<until> the
 condition is true (or while the condition is false):
 
@@ -316,6 +318,20 @@ looking back your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the C<use warnings>
 pragma or the B<-w> flag.
 
+If the condition expression of a C<while> statement is based
+on any of a group of iterative expression types then it gets
+some magic treatment.  The affected iterative expression types
+are L<C<readline>|perlfunc/readline EXPR>, the L<C<< <FILEHANDLE>
+>>|perlop/"I/O Operators"> input operator, L<C<readdir>|perlfunc/readdir
+DIRHANDLE>, L<C<glob>|perlfunc/glob EXPR>, the L<C<< <PATTERN>
+>>|perlop/"I/O Operators"> globbing operator, and L<C<each>|perlfunc/each
+HASH>.  If the condition expression is one of these expression types, then
+the value yielded by the iterative operator will be implicitly assigned
+to C<$_>.  If the condition expression is one of these expression types
+or an explicit assignment of one of them to a scalar, then the condition
+actually tests for definedness of the expression's value, not for its
+regular truth value.
+
 If there is a C<continue> BLOCK, it is always executed just before the
 conditional is about to be evaluated again.  Thus it can be used to
 increment a loop variable, even when the loop has been continued via
@@ -469,14 +485,8 @@ X<eof> X<end-of-file> X<end of file>
         # do something
     }
 
-Using C<readline> (or the operator form, C<< <EXPR> >>) as the
-conditional of a C<for> loop is shorthand for the following.  This
-behaviour is the same as a C<while> loop conditional.
-X<readline> X<< <> >>
-
-    for ( prompt(); defined( $_ = <STDIN> ); prompt() ) {
-        # do something
-    }
+The condition expression of a C<for> loop gets the same magic treatment of
+C<readline> et al that the condition expression of a C<while> loop gets.
 
 =head2 Foreach Loops
 X<for> X<foreach>

@@ -2829,9 +2829,12 @@ destroying whatever was there previously.  (This may seem like an
 odd thing to you, but you'll use the construct in almost every Perl
 script you write.)  The C<$_> variable is not implicitly localized.
 You'll have to put a S<C<local $_;>> before the loop if you want that
-to happen.
+to happen.  Furthermore, if the input symbol or an explicit assignment
+of the input symbol to a scalar is used as a C<while>/C<for> condition,
+then the condition actually tests for definedness of the expression's
+value, not for its regular truth value.
 
-The following lines are equivalent:
+Thus the following lines are equivalent:
 
     while (defined($_ = <STDIN>)) { print; }
     while ($_ = <STDIN>) { print; }
@@ -3036,6 +3039,13 @@ to become confused with the indirect filehandle notation.
 
     @files = glob("$dir/*.[ch]");
     @files = glob($files[$i]);
+
+If an angle-bracket-based globbing expression is used as the condition of
+a C<while> or C<for> loop, then it will be implicitly assigned to C<$_>.
+If either a globbing expression or an explicit assignment of a globbing
+expression to a scalar is used as a C<while>/C<for> condition, then
+the condition actually tests for definedness of the expression's value,
+not for its regular truth value.
 
 =head2 Constant Folding
 X<constant folding> X<folding>

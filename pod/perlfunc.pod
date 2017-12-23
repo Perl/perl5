@@ -1990,6 +1990,10 @@ been deemed unsuccessful, and was removed as of Perl 5.24.
 
 As of Perl 5.18 you can use a bare L<C<each>|/each HASH> in a C<while>
 loop, which will set L<C<$_>|perlvar/$_> on every iteration.
+If either an C<each> expression or an explicit assignment of an C<each>
+expression to a scalar is used as a C<while>/C<for> condition, then
+the condition actually tests for definedness of the expression's value,
+not for its regular truth value.
 
     while (each %ENV) {
 	print "$_=$ENV{$_}\n";
@@ -3366,6 +3370,13 @@ This operator is implemented using the standard C<File::Glob> extension.
 See L<File::Glob> for details, including
 L<C<bsd_glob>|File::Glob/C<bsd_glob>>, which does not treat whitespace
 as a pattern separator.
+
+If a C<glob> expression is used as the condition of a C<while> or C<for>
+loop, then it will be implicitly assigned to C<$_>.  If either a C<glob>
+expression or an explicit assignment of a C<glob> expression to a scalar
+is used as a C<while>/C<for> condition, then the condition actually
+tests for definedness of the expression's value, not for its regular
+truth value.
 
 Portability issues: L<perlport/glob>.
 
@@ -6120,6 +6131,10 @@ it would have been testing the wrong file.
 
 As of Perl 5.12 you can use a bare L<C<readdir>|/readdir DIRHANDLE> in a
 C<while> loop, which will set L<C<$_>|perlvar/$_> on every iteration.
+If either a C<readdir> expression or an explicit assignment of a
+C<readdir> expression to a scalar is used as a C<while>/C<for> condition,
+then the condition actually tests for definedness of the expression's
+value, not for its regular truth value.
 
     opendir(my $dh, $some_dir) || die "Can't open $some_dir: $!";
     while (readdir $dh) {
@@ -6188,6 +6203,13 @@ L<C<eof>|/eof FILEHANDLE> handles C<ARGV> differently.
             ...
         }
     }
+
+Like the C<< <EXPR> >> operator, if a C<readline> expression is
+used as the condition of a C<while> or C<for> loop, then it will be
+implicitly assigned to C<$_>.  If either a C<readline> expression or
+an explicit assignment of a C<readline> expression to a scalar is used
+as a C<while>/C<for> condition, then the condition actually tests for
+definedness of the expression's value, not for its regular truth value.
 
 =item readlink EXPR
 X<readlink>
