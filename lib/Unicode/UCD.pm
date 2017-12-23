@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.69';
+our $VERSION = '0.70';
 
 require Exporter;
 
@@ -699,14 +699,14 @@ that are internal-only.
 
 =cut
 
-sub charprop ($$) {
-    my ($input_cp, $prop) = @_;
+sub charprop ($$;$) {
+    my ($input_cp, $prop, $internal_ok) = @_;
 
     my $cp = _getcode($input_cp);
     croak __PACKAGE__, "::charprop: unknown code point '$input_cp'" unless defined $cp;
 
     my ($list_ref, $map_ref, $format, $default)
-                                      = prop_invmap($prop);
+                                      = prop_invmap($prop, $internal_ok);
     return undef unless defined $list_ref;
 
     my $i = search_invlist($list_ref, $cp);
