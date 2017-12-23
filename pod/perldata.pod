@@ -619,6 +619,17 @@ introduced, __END__ behaves like __DATA__ in the top level script (but
 not in files loaded with C<require> or C<do>) and leaves the remaining
 contents of the file accessible via C<main::DATA>.
 
+The C<DATA> file handle by default has whatever PerlIO layers were
+in place when Perl read the file to parse the source.  Normally that
+means that the file is being read bytewise, as if it were encoded in
+Latin-1, but there are two major ways for it to be otherwise.  Firstly,
+if the C<__END__>/C<__DATA__> token is in the scope of a C<use utf8>
+pragma then the C<DATA> handle will be in UTF-8 mode.  And secondly,
+if the source is being read from perl's standard input then the C<DATA>
+file handle is actually aliased to the C<STDIN> file handle, and may
+be in UTF-8 mode because of the C<PERL_UNICODE> environment variable or
+perl's command-line switches.
+
 See L<SelfLoader> for more description of __DATA__, and
 an example of its use.  Note that you cannot read from the DATA
 filehandle in a BEGIN block: the BEGIN block is executed as soon
