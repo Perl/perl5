@@ -3554,7 +3554,7 @@ sub trace { return main::trace(@_); }
     main::set_access('end', \%end, 'r', 's');
 
     my %value;
-    main::set_access('value', \%value, 'r');
+    main::set_access('value', \%value, 'r', 's');
 
     my %type;
     main::set_access('type', \%type, 'r');
@@ -13418,8 +13418,8 @@ sub setup_script_extensions {
     # property.
 
     $scx = property_ref("Script_Extensions");
-    $scx = Property->new("scx", Full_Name => "Script_Extensions")
-                                                            if ! defined $scx;
+    return unless defined $scx;
+
     $scx->_set_format($STRING_WHITE_SPACE_LIST);
     $scx->initialize($script);
     $scx->set_default_map($script->default_map);
@@ -15603,6 +15603,71 @@ END
                     $perl_lb->add_map($i, $i, 'Alphabetic',
                                       Replace => $UNCONDITIONALLY);
                 }
+            }
+        }
+    }
+
+    # This property is a modification of the scx property
+    my $perl_scx = Property->new('_Perl_SCX',
+                                 Fate => $INTERNAL_ONLY,
+                                 Perl_Extension => 1,
+                                 Directory => $map_directory,
+                                 Type => $ENUM);
+    my $source;
+
+    # Use scx if available; otherwise sc;  if neither is there (a very old
+    # Unicode version, just say that everything is 'Common'
+    if (defined $scx) {
+        $source = $scx;
+        $perl_scx->set_default_map('Unknown');
+    }
+    elsif (defined $script) {
+        $source = $script;
+
+        # Early versions of 'sc', had everything be 'Common'
+        if (defined $script->table('Unknown')) {
+            $perl_scx->set_default_map('Unknown');
+        }
+        else {
+            $perl_scx->set_default_map('Common');
+        }
+    } else {
+        $perl_scx->add_match_table('Common');
+        $perl_scx->add_map(0, $MAX_UNICODE_CODEPOINT, 'Common');
+
+        $perl_scx->add_match_table('Unknown');
+        $perl_scx->set_default_map('Unknown');
+    }
+
+    $perl_scx->_set_format($STRING_WHITE_SPACE_LIST);
+    $perl_scx->set_pre_declared_maps(0); # PropValueAliases doesn't list these
+
+    if (defined $source) {
+        $perl_scx->initialize($source);
+
+        # UTS 39 says that the scx property should be modified for these
+        # countries where certain mixed scripts are commonly used.
+        for my $range ($perl_scx->ranges) {
+            my $value = $range->value;
+            my $changed = $value =~ s/ ( \b Han i? \b ) /$1 Hanb Jpan Kore/xi;
+             $changed |=  $value =~ s/ ( \b Hira (gana)? \b ) /$1 Jpan/xi;
+             $changed |=  $value =~ s/ ( \b Kata (kana)? \b ) /$1 Jpan/xi;
+             $changed |=  $value =~ s{ ( \b Katakana_or_Hiragana \b ) }
+                                     {$1 Katakana Hiragana Jpan}xi;
+             $changed |=  $value =~ s/ ( \b Hang (ul)? \b ) /$1 Kore/xi;
+             $changed |=  $value =~ s/ ( \b Bopo (mofo)? \b ) /$1 Hanb/xi;
+
+            if ($changed) {
+                $value = join " ", uniques split " ", $value;
+                $range->set_value($value)
+            }
+        }
+
+        foreach my $table ($source->tables) {
+            my $scx_table = $perl_scx->add_match_table($table->name,
+                                    Full_Name => $table->full_name);
+            foreach my $alias ($table->aliases) {
+                $scx_table->add_alias($alias->name);
             }
         }
     }
@@ -19834,6 +19899,9 @@ my @input_file_objects = (
                    ),
     Input_file->new('ScriptExtensions.txt', v6.0.0,
                     Property => 'Script_Extensions',
+                    Early => [ sub {} ], # Doesn't do anything but ensures
+                                         # that this isn't skipped for early
+                                         # versions
                     Pre_Handler => \&setup_script_extensions,
                     Each_Line_Handler => \&filter_script_extensions_line,
                     Has_Missings_Defaults => (($v_version le v6.0.0)
