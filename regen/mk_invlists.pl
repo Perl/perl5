@@ -1499,6 +1499,7 @@ sub output_WB_table() {
 
     my @wb_table;
     my $table_size = @wb_short_enums - 1;   # -1 because we don't use UNKNOWN
+    die "UNKNOWN must be final WB enum" unless $wb_short_enums[-1] =~ /unk/i;
 
     # Otherwise, break everywhere (including around ideographs).
     # WB99  Any  ÷  Any
