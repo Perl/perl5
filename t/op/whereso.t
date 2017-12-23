@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 42;
+plan tests => 44;
 
 foreach(3) {
     CORE::whereso(3) {
@@ -203,5 +203,15 @@ $act = "";
     whereso(1) { $act .= "[f]"; }
 }
 is $act, "[a][c][d]";
+
+{
+    no warnings "void";
+    my @a = (qw(a b c), do { whereso(0) { qw(x y) } }, qw(d e f));
+    is join(",", map { $_ // "u" } @a), "a,b,c,d,e,f",
+	"list value of false whereso";
+    @a = (qw(a b c), scalar do { whereso(0) { qw(x y) } }, qw(d e f));
+    is join(",", map { $_ // "u" } @a), "a,b,c,u,d,e,f",
+	"scalar value of false whereso";
+}
 
 1;

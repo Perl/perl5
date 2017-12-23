@@ -9,7 +9,7 @@ use strict;
 use warnings;
 no warnings qw(uninitialized experimental::smartmatch);
 
-plan tests => 19;
+plan tests => 21;
 
 foreach(3) {
     CORE::whereis(qr/\A3\z/) {
@@ -73,6 +73,16 @@ foreach my $matcher ($matchabc, $regexpabc) {
 	is $@, "";
 	is !!$res, $matchee eq "abc";
     }
+}
+
+foreach("xyz") {
+    no warnings "void";
+    my @a = (qw(a b c), do { whereis($matchabc) { qw(x y) } }, qw(d e f));
+    is join(",", map { $_ // "u" } @a), "a,b,c,d,e,f",
+	"list value of false whereis";
+    @a = (qw(a b c), scalar do { whereis($matchabc) { qw(x y) } }, qw(d e f));
+    is join(",", map { $_ // "u" } @a), "a,b,c,u,d,e,f",
+	"scalar value of false whereis";
 }
 
 1;

@@ -4616,8 +4616,11 @@ PP(pp_enterwhereso)
        to the op that follows the leavewhereso.
        RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
-    if (!SvTRUEx(POPs))
+    if (!SvTRUEx(POPs)) {
+	if (gimme == G_SCALAR)
+	    PUSHs(&PL_sv_undef);
 	RETURNOP(cLOGOP->op_other->op_next);
+    }
 
     cx = cx_pushblock(CXt_WHERESO, gimme, SP, PL_savestack_ix);
     cx_pushwhereso(cx);
