@@ -1947,7 +1947,8 @@ its own internal iterator, accessed by L<C<each>|/each HASH>,
 L<C<keys>|/keys HASH>, and L<C<values>|/values HASH>.  The iterator is
 implicitly reset when L<C<each>|/each HASH> has reached the end as just
 described; it can be explicitly reset by calling L<C<keys>|/keys HASH>
-or L<C<values>|/values HASH> on the hash or array.  If you add or delete
+or L<C<values>|/values HASH> on the hash or array, or by referencing
+the hash (but not array) in list context.  If you add or delete
 a hash's elements while iterating over it, the effect on the iterator is
 unspecified; for example, entries may be skipped or duplicated--so don't
 do that.  Exception: It is always safe to delete the item most recently
@@ -1960,6 +1961,21 @@ returned by L<C<each>|/each HASH>, so the following code works properly:
 
 Tied hashes may have a different ordering behaviour to perl's hash
 implementation.
+
+The iterator used by C<each> is attached to the hash or array, and is
+shared between all iteration operations applied to the same hash or array.
+Thus all uses of C<each> on a single hash or array advance the same
+iterator location.  All uses of C<each> are also subject to having the
+iterator reset by any use of C<keys> or C<values> on the same hash or
+array, or by the hash (but not array) being referenced in list context.
+This makes C<each>-based loops quite fragile: it is easy to arrive at
+such a loop with the iterator already part way through the object, or to
+accidentally clobber the iterator state during execution of the loop body.
+It's easy enough to explicitly reset the iterator before starting a loop,
+but there is no way to insulate the iterator state used by a loop from
+the iterator state used by anything else that might execute during the
+loop body.  To avoid these problems, use a C<foreach> loop rather than
+C<while>-C<each>.
 
 This prints out your environment like the L<printenv(1)> program,
 but in a different order:
