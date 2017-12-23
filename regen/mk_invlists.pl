@@ -58,121 +58,6 @@ my %exceptions_to_where_to_define =
                           _Perl_IDStart              => 'PERL_IN_UTF8_C',
                         );
 
-# This hash contains the properties with enums that have hard-coded references
-# to them in C code.  It is neeed to make sure that if perl is compiled
-# with an older Unicode data set, that all the enum values the code is
-# expecting will still be in the enum typedef.  Thus the code doesn't have to
-# change.  The Unicode version won't have any code points that have the enum
-# values not in that version, so the code that handles them will not get
-# exercised.  This is far better than having to #ifdef things.  The names here
-# should be the long names of the respective property values.  The reason for
-# this is because regexec.c uses them as case labels, and the long name is
-# generally more understandable than the short.
-my %hard_coded_enums =
- ( gcb => [
-            'Control',
-            'CR',
-            'E_Base',
-            'E_Base_GAZ',
-            'E_Modifier',
-            'Extend',
-            'Glue_After_Zwj',
-            'L',
-            'LF',
-            'LV',
-            'LVT',
-            'Other',
-            'Prepend',
-            'Regional_Indicator',
-            'SpacingMark',
-            'T',
-            'V',
-            'ZWJ',
-        ],
-    lb => [
-            'Alphabetic',
-            'Break_After',
-            'Break_Before',
-            'Break_Both',
-            'Break_Symbols',
-            'Carriage_Return',
-            'Close_Parenthesis',
-            'Close_Punctuation',
-            'Combining_Mark',
-            'Contingent_Break',
-            'E_Base',
-            'E_Modifier',
-            'Exclamation',
-            'Glue',
-            'H2',
-            'H3',
-            'Hebrew_Letter',
-            'Hyphen',
-            'Ideographic',
-            'Infix_Numeric',
-            'Inseparable',
-            'JL',
-            'JT',
-            'JV',
-            'Line_Feed',
-            'Mandatory_Break',
-            'Next_Line',
-            'Nonstarter',
-            'Numeric',
-            'Open_Punctuation',
-            'Postfix_Numeric',
-            'Prefix_Numeric',
-            'Quotation',
-            'Regional_Indicator',
-            'Space',
-            'Word_Joiner',
-            'ZWJ',
-            'ZWSpace',
-        ],
-   sb  => [
-            'ATerm',
-            'Close',
-            'CR',
-            'Extend',
-            'Format',
-            'LF',
-            'Lower',
-            'Numeric',
-            'OLetter',
-            'Other',
-            'SContinue',
-            'Sep',
-            'Sp',
-            'STerm',
-            'Upper',
-        ],
-   wb  => [
-            'ALetter',
-            'CR',
-            'Double_Quote',
-            'E_Base',
-            'E_Base_GAZ',
-            'E_Modifier',
-            'Extend',
-            'ExtendNumLet',
-            'Format',
-            'Glue_After_Zwj',
-            'Hebrew_Letter',
-            'Katakana',
-            'LF',
-            'MidLetter',
-            'MidNum',
-            'MidNumLet',
-            'Newline',
-            'Numeric',
-            'Other',
-            'Perl_Tailored_HSpace',
-            'Regional_Indicator',
-            'Single_Quote',
-            'ZWJ',
-        ],
-);
-
 my %gcb_enums;
 my @gcb_short_enums;
 my %gcb_abbreviations;
@@ -299,76 +184,57 @@ sub output_invmap ($$$$$$$) {
     my $name_prefix;
 
     if ($input_format eq 's') {
-        my $orig_prop_name = $prop_name;
         $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
         my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
-        my @enums;
-        if ($orig_prop_name eq $prop_name) {
-            @enums = prop_values($prop_name);
-        }
-        else {
-            @enums = uniques(@$invmap);
-        }
+        my @input_enums;
 
+        # Find all the possible input values.  These become the enum names
+        # that comprise the inversion map.
+            @input_enums = sort(uniques(@$invmap));
 
-        die "Only enum properties are currently handled; '$prop_name' isn't one"
-                                                                  unless @enums;
-
-        my @expected_enums = @{$hard_coded_enums{lc $short_name}};
-        my @canonical_input_enums;
-        if (@expected_enums) {
-            if (@expected_enums < @enums) {
-                die 'You need to update %hard_coded_enums to reflect new'
-                . " entries in this Unicode version\n"
-                . "Expected: " . join(", ", sort @expected_enums) . "\n"
-                . "     Got: " . join(", ", sort @enums);
-            }
-
-            if (! defined prop_aliases($prop_name)) {
-
-                # Convert the input enums into canonical form and
-                # save for use below
-                @canonical_input_enums = map { lc ($_ =~ s/_//gr) }
-                                                                @enums;
-            }
-            @enums = sort @expected_enums;
-        }
-
-        # The internal enums come last, and in the order specified
+        # The internal enums come last, and in the order specified.
+        my @enums = @input_enums;
         my @extras;
         if ($extra_enums ne "") {
             @extras = split /,/, $extra_enums;
-            push @enums, @extras;
+
+            # Don't add if already there.
+            foreach my $this_extra (@extras) {
+                next if grep { $_ eq $this_extra } @enums;
+
+                push @enums, $this_extra;
+            }
         }
 
-        # Assign a value to each element of the enum.  The default
-        # value always gets 0; the others are arbitrarily assigned.
+        # Assign a value to each element of the enum type we are creating.
+        # The default value always gets 0; the others are arbitrarily
+        # assigned.
         my $enum_val = 0;
         my $canonical_default = prop_value_aliases($prop_name, $default);
         $default = $canonical_default if defined $canonical_default;
         $enums{$default} = $enum_val++;
+
         for my $enum (@enums) {
             $enums{$enum} = $enum_val++ unless exists $enums{$enum};
         }
 
-        # Calculate the enum values for certain properties like
-        # _Perl_GCB and _Perl_LB, because we output special tables for
-        # them.
+        # Calculate the data for the special tables output for these properties.
         if ($name =~ / ^  _Perl_ (?: GCB | LB | WB ) $ /x) {
 
+            # The data includes the hashes %gcb_enums, %lb_enums, etc.
+            # Similarly we calculate column headings for the tables.
+            #
             # We use string evals to allow the same code to work on
-            # all tables we're doing.
+            # all the tables
             my $type = lc $prop_name;
 
-            # We use lowercase single letter names for any property
-            # values not in the release of Unicode being compiled now.
             my $placeholder = "a";
 
             # Skip if we've already done this code, which populated
             # this hash
             if (eval "! \%${type}_enums") {
 
-                # For each enum ...
+                # For each enum in the type ...
                 foreach my $enum (sort keys %enums) {
                     my $value = $enums{$enum};
                     my $short;
@@ -380,43 +246,47 @@ sub output_invmap ($$$$$$$) {
                         $short = 'hs';
                         $abbreviated_from = $enum;
                     }
-                    elsif (grep { $_ eq $enum } @extras) {
-
-                        # The 'short' name for one of the property
-                        # values added by this file is just the
-                        # lowercase of it
-                        $short = lc $enum;
-                    }
-                    elsif (grep {$_ eq lc ( $enum =~ s/_//gr) }
-                                                @canonical_input_enums)
-                    {   # On Unicode versions that predate the
-                        # official property, we have set up this array
-                        # to be the canonical form of each enum in the
-                        # substitute property.  If the enum we're
-                        # looking at is canonically the same as one of
-                        # these, use its name instead of generating a
-                        # placeholder one in the next clause (which
-                        # will happen because prop_value_aliases()
-                        # will fail because it only works on official
-                        # properties)
-                        $short = $enum;
-                    }
                     else {
-                        # Use the official short name for the other
-                        # property values, which should all be
-                        # official ones.
+
+                        # Use the official short name, if found.
                         ($short) = prop_value_aliases($type, $enum);
 
-                        # But create a placeholder for ones not in
-                        # this Unicode version.
-                        $short = $placeholder++ unless defined $short;
+                        if (! defined $short) {
+
+                            # But if there is no official name, use the name
+                            # that came from the data (if any).  Otherwise,
+                            # the name had to come from the extras list.
+                            # There are two types of values in that list.
+                            #
+                            # First are those enums that are not part of the
+                            # property, but are defined by this code.  By
+                            # convention these have all-caps names of at least
+                            # 4 characters.  We use the lowercased name for
+                            # thse.
+                            #
+                            # Second are enums that are needed to get
+                            # regexec.c to compile, but don't exist in all
+                            # Unicode releases.  To get here, we must be
+                            # compiling an earlier Unicode release that
+                            # doesn't have that enum, so just use a unique
+                            # anonymous name for it.
+                            if (grep { $_ eq $enum } @input_enums) {
+                                $short = $enum
+                            }
+                            elsif ($enum !~ / ^ [A-Z]{4,} $ /x) {
+                                $short = $placeholder++;
+                            }
+                            else {
+                                $short = lc $enum;
+                            }
+                        }
                     }
 
                     # If our short name is too long, or we already
                     # know that the name is an abbreviation, truncate
                     # to make sure it's short enough, and remember
-                    # that we did this so we can later place in a
-                    # comment in the generated file
+                    # that we did this so we can later add a comment in the
+                    # generated file
                     if (   $abbreviated_from
                         || length $short > $max_hdr_len)
                         {
@@ -462,11 +332,12 @@ sub output_invmap ($$$$$$$) {
         # The short names tend to be two lower case letters, but it looks
         # better for those if they are upper. XXX
         $short_name = uc($short_name) if length($short_name) < 3
-                                            || substr($short_name, 0, 1) =~ /[[:lower:]]/;
+                                      || substr($short_name, 0, 1) =~ /[[:lower:]]/;
         $name_prefix = "${short_name}_";
         my $enum_count = keys %enums;
         print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
 
+        # Start the enum definition for this map
         print $out_fh "\ntypedef enum {\n";
         my @enum_list;
         foreach my $enum (keys %enums) {
@@ -480,6 +351,7 @@ sub output_invmap ($$$$$$$) {
         }
         $declaration_type = "${name_prefix}enum";
         print $out_fh "} $declaration_type;\n";
+        # Finished with the enum defintion.
 
         $output_format = "${name_prefix}%s";
     }
@@ -491,6 +363,7 @@ sub output_invmap ($$$$$$$) {
                                              && ref $invmap eq 'ARRAY'
                                              && $count;
 
+    # Now output the inversion map proper
     print $out_fh "\nstatic const $declaration_type ${name}_invmap[] = {";
     print $out_fh " /* for $charset */" if $charset;
     print $out_fh "\n";
@@ -1751,6 +1624,10 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
 
     @a2n = @{get_a2n($charset)};
+    # Below is the list of property names to generate.  '&' means to use the
+    # subroutine to generate the inversion list instead of the generic code
+    # below.  Some properties have a comma-separated list after the name,
+    # These are extra enums to add to those found in the Unicode tables.
     no warnings 'qw';
                          # Ignore non-alpha in sort
     for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
@@ -1778,11 +1655,18 @@ for my $charset (get_supported_code_pages()) {
                              &UpperLatin1
                              _Perl_IDStart
                              _Perl_IDCont
-                             _Perl_GCB,EDGE
-                             _Perl_LB,EDGE
-                             _Perl_SB,EDGE
-                             _Perl_WB,EDGE,UNKNOWN
+                             _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
+                             _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
+                             _Perl_SB,SContinue,CR,Extend,LF,EDGE
+                             _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
                            )
+                           # NOTE that the convention is that extra enum
+                           # values come after the property name, separated by
+                           # commas, with the enums that aren't ever defined
+                           # by Unicode coming last, at least 4 all-uppercase
+                           # characters.  The others are enum names that are
+                           # needed by perl, but aren't in all Unicode
+                           # releases.
     ) {
 
         # For the Latin1 properties, we change to use the eXtended version of the
