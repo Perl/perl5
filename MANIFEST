@@ -5923,6 +5923,7 @@ t/re/regexp_unicode_prop.t	See if unicode properties work in regular expressions
 t/re/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/re/rt122747.t			Test rt122747 assert faile (requires DEBUGGING)
 t/re/rxcode.t			See if /(?{ code })/ works
+t/re/script_run.t		See if script runs works
 t/re/speed.t			See if optimisations are keeping things fast
 t/re/speed_thr.t		ditto under threads
 t/re/subst.t			See if substitution works

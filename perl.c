@@ -469,6 +469,7 @@ perl_construct(pTHXx)
     PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
     PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
     PL_Assigned_invlist = _new_invlist_C_array(Assigned_invlist);
+    PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
 #ifdef HAS_POSIX_2008_LOCALE
     PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", NULL);
 #endif
@@ -1204,6 +1205,7 @@ perl_destruct(pTHXx)
     PL_GCB_invlist = NULL;
     PL_LB_invlist = NULL;
     PL_SB_invlist = NULL;
+    PL_SCX_invlist = NULL;
     PL_WB_invlist = NULL;
     PL_Assigned_invlist = NULL;
 

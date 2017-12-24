@@ -284,6 +284,9 @@ my @death =
  'm/\cß/' => "Character following \"\\c\" must be printable ASCII",
  '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', the \'(\' and \'?\' must be adjacent {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
  '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
+ '/((?# This is a comment in the middle of a token)+script_run:foo)/' => 'In \'(+...)\', the \'(\' and \'+\' must be adjacent {#} m/((?# This is a comment in the middle of a token)+{#}script_run:foo)/',
+
+ '/(+script_runfoo)/' => 'Unknown (+ pattern {#} m/(+script_runfoo{#})/',
  '/(?[\ &!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ &!{#}])/',    # [perl #126180]
  '/(?[\ +!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ +!{#}])/',    # [perl #126180]
  '/(?[\ -!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ -!{#}])/',    # [perl #126180]
@@ -664,6 +667,12 @@ my @experimental_regex_sets = (
     '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
+my @experimental_script_run = (
+    '/(+script_run:paypal.com)/' => 'The script_run feature is experimental {#} m/(+script_run:{#}paypal.com)/',
+    'use utf8; /utf8 ネ (+script_run:ネ)/' => do { use utf8; 'The script_run feature is experimental {#} m/utf8 ネ (+script_run:{#}ネ)/' },
+    '/noutf8 ネ (+script_run:ネ)/' => 'The script_run feature is experimental {#} m/noutf8 ネ (+script_run:{#}ネ)/',
+);
+
 my @deprecated = (
  '/^{/'          => "",
  '/foo|{/'       => "",
@@ -702,6 +711,7 @@ for my $strict ("", "use re 'strict';") {
         }
         else {
             no warnings 'experimental::regex_sets';
+            no warnings 'experimental::script_run';
             no warnings 'experimental::re_strict';
 
             warning_is(sub {
@@ -754,23 +764,36 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
     }
 
-    foreach my $ref (\@warning_tests, \@experimental_regex_sets, \@deprecated) {
+    foreach my $ref (\@warning_tests,
+                     \@experimental_regex_sets,
+                     \@experimental_script_run,
+                     \@deprecated)
+    {
         my $warning_type;
         my $turn_off_warnings = "";
         my $default_on;
         if ($ref == \@warning_tests) {
             $warning_type = 'regexp, digit';
-            $turn_off_warnings = "no warnings 'experimental::regex_sets';";
+            $turn_off_warnings = "no warnings 'experimental::regex_sets';"
+                               . "no warnings 'experimental::script_run';";
             $default_on = $strict;
         }
         elsif ($ref == \@deprecated) {
             $warning_type = 'regexp, deprecated';
             $default_on = 1;
         }
-        else {
+        elsif ($ref == \@experimental_regex_sets) {
             $warning_type = 'experimental::regex_sets';
             $default_on = 1;
         }
+        elsif ($ref == \@experimental_script_run) {
+            $warning_type = 'experimental::script_run';
+            $default_on = 1;
+        }
+        else {
+            fail("$0: Internal error: Unexpected loop variable");
+        }
+
         for (my $i = 0; $i < @$ref; $i += 2) {
             my $this_default_on = $default_on;
             my $regex = $ref->[$i];
