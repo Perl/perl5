@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 
 
-our $VERSION = '3.71';
+our $VERSION = '3.72';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -387,8 +387,7 @@ sub _perl_abs_path
 
     unless (@cst = stat( $start ))
     {
-	_carp("stat($start): $!");
-	return '';
+	return undef;
     }
 
     unless (-d _) {
@@ -428,9 +427,10 @@ sub _perl_abs_path
 	}
 	unless (@cst = stat($dotdots))
 	{
-	    _carp("stat($dotdots): $!");
+	    my $e = $!;
 	    closedir(PARENT);
-	    return '';
+	    $! = $e;
+	    return undef;
 	}
 	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
 	{
@@ -442,9 +442,10 @@ sub _perl_abs_path
 	    {
 		unless (defined ($dir = readdir(PARENT)))
 	        {
-		    _carp("readdir($dotdots): $!");
 		    closedir(PARENT);
-		    return '';
+		    require Errno;
+		    $! = Errno::ENOENT();
+		    return undef;
 		}
 		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
 	    }
@@ -701,7 +702,8 @@ absolute path of the current working directory.
 
     my $cwd = getcwd();
 
-Returns the current working directory.
+Returns the current working directory.  On error returns C<undef>,
+with C<$!> set to indicate the error.
 
 Exposes the POSIX function getcwd(3) or re-implements it if it's not
 available.
@@ -764,7 +766,8 @@ given they'll use the current working directory.
 
 Uses the same algorithm as getcwd().  Symbolic links and relative-path
 components ("." and "..") are resolved to return the canonical
-pathname, just like realpath(3).
+pathname, just like realpath(3).  On error returns C<undef>, with C<$!>
+set to indicate the error.
 
 =item realpath
 

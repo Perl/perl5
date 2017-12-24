@@ -3632,6 +3632,7 @@ dist/PathTools/Makefile.PL			makefile writer for Cwd
 dist/PathTools/t/abs2rel.t		See if File::Spec->abs2rel works
 dist/PathTools/t/crossplatform.t		See if File::Spec works crossplatform
 dist/PathTools/t/cwd.t			See if Cwd works
+dist/PathTools/t/cwd_enoent.t			See if getcwd errors correctly
 dist/PathTools/t/Functions.t			See if File::Spec::Functions works
 dist/PathTools/t/rel2abs2rel.t		See if File::Spec->rel2abs/abs2rel works
 dist/PathTools/t/Spec.t			See if File::Spec works
