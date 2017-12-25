@@ -39,7 +39,7 @@ sub is {
     return $ok;
 }
 
-print "1..251\n";
+print "1..252\n";
 
 ($a, $b, $c) = qw(foo bar);
 
@@ -809,4 +809,34 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
         my $expected = join $empty, @a[0..$i];
         is($got, $expected, "long concat chain $i");
     }
+}
+
+# RT #132646
+# with adjacent consts, the second const is treated as an arg rather than a
+# consts. Make sure this doesn't exceeed the maximum allowed number of
+# args
+{
+    my $x = 'X';
+    my $got =
+          'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        . 'A' . $x . 'B' . 'C' . $x . 'D'
+        ;
+    is ($got,
+        "AXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXD",
+        "RT #132646");
 }
