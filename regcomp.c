@@ -149,7 +149,7 @@ struct RExC_state_t {
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
     SSize_t	size;			/* Code size. */
-    I32                npar;            /* Capture buffer count, (OPEN) plus
+    I32         npar;                   /* Capture buffer count, (OPEN) plus
                                            one. ("par" 0 is the whole
                                            pattern)*/
     I32		nestroot;		/* root parens we are in - used by
@@ -10719,6 +10719,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 if (RExC_parse >= RExC_end) {
                     goto unterminated_verb_pattern;
                 }
+
 	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
 	        while ( RExC_parse < RExC_end && *RExC_parse != ')' )
                     RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
