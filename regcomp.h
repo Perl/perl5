@@ -1102,7 +1102,7 @@ re.pm, especially to the documentation.
 
 #endif /* DEBUG RELATED DEFINES */
 
-#define FIRST_NON_ASCII_DECIMAL_DIGIT 0x660
+#define FIRST_NON_ASCII_DECIMAL_DIGIT 0x660  /* ARABIC_INDIC_DIGIT_ZERO */
 
 typedef enum {
 	TRADITIONAL_BOUND = _CC_WORDCHAR,
