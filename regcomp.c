@@ -212,6 +212,7 @@ struct RExC_state_t {
     bool        seen_unfolded_sharp_s;
     bool        strict;
     bool        study_started;
+    bool        in_script_run;
 };
 
 #define RExC_flags	(pRExC_state->flags)
@@ -278,6 +279,7 @@ struct RExC_state_t {
 #define RExC_strict (pRExC_state->strict)
 #define RExC_study_started      (pRExC_state->study_started)
 #define RExC_warn_text (pRExC_state->warn_text)
+#define RExC_in_script_run      (pRExC_state->in_script_run)
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
  * a flag to disable back-off on the fixed/floating substrings - if it's
@@ -7037,6 +7039,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_seen_unfolded_sharp_s = 0;
     RExC_contains_locale = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
+    RExC_in_script_run = 0;
     RExC_study_started = 0;
     pRExC_state->runtime_code_qr = NULL;
     RExC_frame_head= NULL;
@@ -10671,13 +10674,28 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
          * here (if paren ==2).  The forms '(*VERB' and '(?...' disallow such
          * intervening space, as the sequence is a token, and a token should be
          * indivisible */
-        bool has_intervening_patws = paren == 2 && *(RExC_parse - 1) != '(';
+        bool has_intervening_patws = (paren == 2 || paren == 's')
+                                  && *(RExC_parse - 1) != '(';
 
         if (RExC_parse >= RExC_end) {
 	    vFAIL("Unmatched (");
         }
 
-        if ( *RExC_parse == '*') { /* (*VERB:ARG) */
+        if (paren == 's') {
+
+            /* A nested script run  is a no-op besides clustering */
+            if (RExC_in_script_run) {
+                paren = ':';
+                nextchar(pRExC_state);
+                ret = NULL;
+                goto parse_rest;
+            }
+            RExC_in_script_run = 1;
+
+	    ret = reg_node(pRExC_state, SROPEN);
+            is_open = 1;
+        }
+        else if ( *RExC_parse == '*') { /* (*VERB:ARG) */
 	    char *start_verb = RExC_parse + 1;
 	    STRLEN verb_len;
 	    char *start_arg = NULL;
@@ -10787,6 +10805,47 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             }
 	    nextchar(pRExC_state);
 	    return ret;
+        }
+        else if (*RExC_parse == '+') { /* (+...) */
+            RExC_parse++;
+
+            if (has_intervening_patws) {
+                /* XXX Note that a potential gotcha is that outside of /x '( +
+                 * ...)' means to match a space at least once ...   This is a
+                 * problem elsewhere too */
+                vFAIL("In '(+...)', the '(' and '+' must be adjacent");
+            }
+
+            if (! memBEGINPs(RExC_parse, (STRLEN) (RExC_end - RExC_parse),
+                             "script_run:"))
+            {
+                RExC_parse += strcspn(RExC_parse, ":)");
+                vFAIL("Unknown (+ pattern");
+            }
+            else {
+
+                /* This indicates Unicode rules. */
+                REQUIRE_UNI_RULES(flagp, NULL);
+
+                RExC_parse += sizeof("script_run:") - 1;
+
+                if (PASS2) {
+                    Perl_ck_warner_d(aTHX_
+                        packWARN(WARN_EXPERIMENTAL__SCRIPT_RUN),
+                        "The script_run feature is experimental"
+                        REPORT_LOCATION, REPORT_LOCATION_ARGS(RExC_parse));
+                }
+
+                ret = reg(pRExC_state, 's', &flags, depth+1);
+                if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
+                    return NULL;
+                }
+
+                nextchar(pRExC_state);
+
+                return ret;
+            }
         }
         else if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
@@ -11472,6 +11531,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    }
             Set_Node_Offset(ender,RExC_parse+1); /* MJD */
             Set_Node_Length(ender,1); /* MJD */
+	    break;
+	case 's':
+	    ender = reg_node(pRExC_state, SRCLOSE);
+            RExC_in_script_run = 0;
 	    break;
 	case '<':
 	case ',':
@@ -20777,7 +20840,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	/* While that wasn't END last time... */
 	NODE_ALIGN(node);
 	op = OP(node);
-	if (op == CLOSE || op == WHILEM)
+	if (op == CLOSE || op == SRCLOSE || op == WHILEM)
 	    indent--;
 	next = regnext((regnode *)node);
 
@@ -20901,7 +20964,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    node = NEXTOPER(node);
 	    node += regarglen[(U8)op];
 	}
-	if (op == CURLYX || op == OPEN)
+	if (op == CURLYX || op == OPEN || op == SROPEN)
 	    indent++;
     }
     CLEAR_OPTSTART;

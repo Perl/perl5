@@ -7,6 +7,7 @@ use Unicode::UCD qw(prop_aliases
                     prop_value_aliases
                     prop_invlist
                     prop_invmap search_invlist
+                    charprop
                    );
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
@@ -473,6 +474,76 @@ sub output_invmap ($$$$$$$) {
             }
             print $out_fh "\n};\n";
         } # End of outputting the auxiliary and associated tables
+
+        # The scx property used in regexec.c needs a specialized table which
+        # is most convenient to output here, while the data structures set up
+        # above are still extant.  This table contains the code point that is
+        # the zero digit of each script, indexed by script enum value.
+        if (lc $short_name eq 'scx') {
+            my @decimals_invlist = prop_invlist("Numeric_Type=Decimal");
+            my %script_zeros;
+
+            # Find all the decimal digits.  The 0 of each range is always the
+            # 0th element, except in some early Unicode releases, so check for
+            # that.
+            for (my $i = 0; $i < @decimals_invlist; $i += 2) {
+                my $code_point = $decimals_invlist[$i];
+                next if chr($code_point) !~ /\p{Nv=0}/;
+
+                # Turn the scripts this zero is in into a list.
+                my @scripts = split ",",
+                  charprop($code_point, "_Perl_SCX", '_perl_core_internal_ok');
+                $code_point = sprintf("0x%x", $code_point);
+
+                foreach my $script (@scripts) {
+                    if (! exists $script_zeros{$script}) {
+                        $script_zeros{$script} = $code_point;
+                    }
+                    elsif (ref $script_zeros{$script}) {
+                        push $script_zeros{$script}->@*, $code_point;
+                    }
+                    else {  # Turn into a list if this is the 2nd zero of the
+                            # script
+                        my $existing = $script_zeros{$script};
+                        undef $script_zeros{$script};
+                        push $script_zeros{$script}->@*, $existing, $code_point;
+                    }
+                }
+            }
+
+            # @script_zeros contains the zero, sorted by the script's enum
+            # value
+            my @script_zeros;
+            foreach my $script (keys %script_zeros) {
+                my $enum_value = $enums{$script};
+                $script_zeros[$enum_value] = $script_zeros{$script};
+            }
+
+            print $out_fh
+            "\n/* This table, indexed by the script enum, gives the zero"
+          . " code point for that\n * script; 0 if the script has multiple"
+          . " digit sequences.  Scripts without a\n * digit sequence use"
+          . " ASCII [0-9], hence are marked '0' */\n";
+            print $out_fh "static const UV script_zeros[] = {\n";
+            for my $i (0 .. @script_zeros - 1) {
+                my $code_point = $script_zeros[$i];
+                if (defined $code_point) {
+                    $code_point = " 0" if ref $code_point;
+                    print $out_fh "\t$code_point";
+                }
+                elsif (lc $enum_list[$i] eq 'inherited') {
+                    print $out_fh "\t 0";
+                }
+                else {  # The only digits a script without its own set accepts
+                        # is [0-9]
+                    print $out_fh "\t'0'";
+                }
+                print $out_fh "," if $i < @script_zeros - 1;
+                print $out_fh "\t/* $enum_list[$i] */";
+                print $out_fh "\n";
+            }
+            print $out_fh "};\n";
+        } # End of special handling of scx
     }
     else {
         die "'$input_format' invmap() format for '$prop_name' unimplemented";
@@ -1778,6 +1849,7 @@ for my $charset (get_supported_code_pages()) {
                              _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
                              _Perl_SB,SContinue,CR,Extend,LF,EDGE
                              _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
+                             _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
                            )
                            # NOTE that the convention is that extra enum
                            # values come after the property name, separated by

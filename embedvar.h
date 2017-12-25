@@ -65,6 +65,7 @@
 #define PL_Posix_ptrs		(vTHX->IPosix_ptrs)
 #define PL_Proc			(vTHX->IProc)
 #define PL_SB_invlist		(vTHX->ISB_invlist)
+#define PL_SCX_invlist		(vTHX->ISCX_invlist)
 #define PL_Sock			(vTHX->ISock)
 #define PL_StdIO		(vTHX->IStdIO)
 #define PL_Sv			(vTHX->ISv)
