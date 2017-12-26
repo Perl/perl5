@@ -72,6 +72,9 @@ NPOSIXU     NPOSIXD,    none 0 S   ; complement of POSIXU, [[:^class:]]
 NPOSIXA     NPOSIXD,    none 0 S   ; complement of POSIXA, [[:^class:]]
 # End of order is important
 
+ASCII       ASCII,      none 0 S   ; [[:ascii:]]
+NASCII      ASCII,      none 0 S   ; [[:^ascii:]]
+
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation
