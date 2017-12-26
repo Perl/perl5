@@ -681,8 +681,6 @@ Perl_do_trans(pTHX_ SV *sv)
 	(void)SvPOK_only_UTF8(sv);
     }
 
-    DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
-
     /* If we use only OPpTRANS_IDENTICAL to bypass the READONLY check,
      * we must also rely on it to choose the readonly strategy.
      */
