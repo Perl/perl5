@@ -1,7 +1,27 @@
 Revision history for the Perl extension Time::HiRes.
 
-1.9747 [???]
- - Switch to XSLoader from Dynaloader
+1.9750 [2017-12-22]
+ - update META.yml and META.json for XSLoader instead of DynaLoader
+   [rt.cpan.org #123933]
+
+1.9749 [2017-12-21]
+ - CPAN release
+ - Quieten Time-HiRes test noise: blead 0f009486
+ - Switch some core modules to XSLoader: blead b9a5a78f [rt.cpan.org #129789]
+ - disable a flapping test for CI: blead cd2a978d
+ - Avoid newGVgen in blead-upstream modules: blead 732d3893
+ - Declaration after statement in typemap: blead d269f586
+ - semicolon-friendly diagnostic control: blead 7347ee54
+ - in macOS (OS X) check properly in runtime whether futimens()
+   and utimensat() are available
+
+1.9748 [2017-12-16]
+ - bleadperl only
+ - semicolon-friendly diagnostic control: blead 7347ee54
+
+1.9747 [2017-09-13]
+ - bleadperl only
+ - Switch some core modules to XSLoader: blead b9a5a78f [rt.cpan.org #129789]
 
 1.9746 [2017-08-17]
  - Unreliable t/usleep.t and t/utime.t tests [rt.cpan.org #122819]
