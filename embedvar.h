@@ -62,7 +62,6 @@
 #define PL_MemParse		(vTHX->IMemParse)
 #define PL_MemShared		(vTHX->IMemShared)
 #define PL_NonL1NonFinalFold	(vTHX->INonL1NonFinalFold)
-#define PL_Posix_ptrs		(vTHX->IPosix_ptrs)
 #define PL_Proc			(vTHX->IProc)
 #define PL_SB_invlist		(vTHX->ISB_invlist)
 #define PL_SCX_invlist		(vTHX->ISCX_invlist)
