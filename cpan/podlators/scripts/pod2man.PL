@@ -47,7 +47,7 @@ print {$out} <<'SCRIPT_BODY' or die "Cannot write to $file: $!\n";
 # pod2man -- Convert POD data to formatted *roff input.
 #
 # Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012, 2013, 2014, 2015,
-#     2016 Russ Allbery <rra@cpan.org>
+#     2016, 2017 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -113,7 +113,11 @@ do {
     $parser->parse_from_file (@files);
     if ($parser->{CONTENTLESS}) {
         $status = 1;
-        warn "$0: unable to format $files[0]\n";
+        if (defined $files[0]) {
+            warn "$0: unable to format $files[0]\n";
+        } else {
+            warn "$0: unable to format standard input\n";
+        }
         if (defined ($files[1]) and $files[1] ne '-') {
             unlink $files[1] unless (-s $files[1]);
         }
@@ -428,7 +432,7 @@ B<pod2man> by Larry Wall and Tom Christiansen.
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012, 2013, 2014,
-2015, 2016 Russ Allbery <rra@cpan.org>
+2015, 2016, 2017 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

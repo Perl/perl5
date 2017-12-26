@@ -2,7 +2,7 @@
 Soft hyphens
 
 [input]
-=head1 Soft Hypen Testing
+=head1 Soft Hyphen Testing
 
 sigE<shy>action
 manuE<shy>script
@@ -21,8 +21,8 @@ manuE<0x00AD>script
 JarkE<0x00AD>ko HieE<0x00AD>taE<0x00AD>nieE<0x00AD>mi
 
 [output]
-.SH "Soft Hypen Testing"
-.IX Header "Soft Hypen Testing"
+.SH "Soft Hyphen Testing"
+.IX Header "Soft Hyphen Testing"
 sig\%action
 manu\%script
 Jark\%ko Hie\%ta\%nie\%mi

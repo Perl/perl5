@@ -31,7 +31,7 @@ use Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(parselink);
 
-$VERSION = '4.09';
+$VERSION = '4.10';
 
 ##############################################################################
 # Implementation
