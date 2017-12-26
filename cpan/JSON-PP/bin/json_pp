@@ -20,7 +20,7 @@ GetOptions(
    't=s' => \( my $opt_to = 'json' ),
    'json_opt=s' => \( my $json_opt = 'pretty' ),
    'V'   => \( my $version ),
-) or die "Usage: $0 [-V] [-f from_format] [-t to_format] [-json_opt options]\n";
+) or die "Usage: $0 [-V] [-f from_format] [-t to_format] [-json_opt options_to_json1[,options_to_json2[,...]]]\n";
 
 
 if ( $version ) {
@@ -94,7 +94,7 @@ json_pp - JSON::PP command utility
 
 =head1 SYNOPSIS
 
-    json_pp [-v] [-f from_format] [-t to_format] [-json_opt options_to_json]
+    json_pp [-v] [-f from_format] [-t to_format] [-json_opt options_to_json1[,options_to_json2[,...]]]
 
 =head1 DESCRIPTION
 
@@ -153,6 +153,12 @@ Acceptable options are:
 
     ascii latin1 utf8 pretty indent space_before space_after relaxed canonical allow_nonref
     allow_singlequote allow_barekey allow_bignum loose escape_slash
+
+Multiple options must be separated by commas:
+
+    Right: -json_opt pretty,canonical
+
+    Wrong: -json_opt pretty -json_opt canonical
 
 =head2 -v
 
