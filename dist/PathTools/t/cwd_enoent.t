@@ -1,8 +1,6 @@
 use warnings;
 use strict;
 
-use Test::More skip_all => "infinite loop seen on FreeBSD [perl #132651]";
-
 use Config;
 use Errno qw(ENOENT);
 use File::Temp qw(tempdir);

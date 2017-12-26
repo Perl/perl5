@@ -421,9 +421,7 @@ sub _perl_abs_path
 	local *PARENT;
 	unless (opendir(PARENT, $dotdots))
 	{
-	    # probably a permissions issue.  Try the native command.
-	    require File::Spec;
-	    return File::Spec->rel2abs( $start, _backtick_pwd() );
+	    return undef;
 	}
 	unless (@cst = stat($dotdots))
 	{
