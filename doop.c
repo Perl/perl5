@@ -27,6 +27,14 @@
 #include <signal.h>
 #endif
 
+
+/* Helper function for do_trans().
+ * Handles non-utf8 cases(*) not involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search and replacement charlists are non-utf8. sv may
+ * or may not be utf8.
+ */
+
 STATIC I32
 S_do_trans_simple(pTHX_ SV * const sv)
 {
@@ -95,6 +103,17 @@ S_do_trans_simple(pTHX_ SV * const sv)
     return matches;
 }
 
+
+/* Helper function for do_trans().
+ * Handles non-utf8 cases(*) where search and replacement charlists are
+ * identical: so the string isn't modified, and only a count of modifiable
+ * chars is needed.
+ * Note that it doesn't handle /d or /s, since these modify the string
+ * even if the replacement list is empty.
+ * (*) i.e. where the search and replacement charlists are non-utf8. sv may
+ * or may not be utf8.
+ */
+
 STATIC I32
 S_do_trans_count(pTHX_ SV * const sv)
 {
@@ -131,6 +150,14 @@ S_do_trans_count(pTHX_ SV * const sv)
 
     return matches;
 }
+
+
+/* Helper function for do_trans().
+ * Handles non-utf8 cases(*) involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search and replacement charlists are non-utf8. sv may
+ * or may not be utf8.
+ */
 
 STATIC I32
 S_do_trans_complex(pTHX_ SV * const sv)
@@ -214,6 +241,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 			d += len;
 		    }
 		    else {
+                        /* use the implicit 0x100..0x7fffffff search range */
 			matches++;
 			if (!del) {
 			    ch = (rlen == 0) ? (I32)comp :
@@ -259,6 +287,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 			d += len;
 		    }
 		    else {
+                        /* use the implicit 0x100..0x7fffffff search range */
 			matches++;
 			if (!del) {
 			    if (comp - 0x100 < rlen)
@@ -294,6 +323,14 @@ S_do_trans_complex(pTHX_ SV * const sv)
     SvSETMAGIC(sv);
     return matches;
 }
+
+
+/* Helper function for do_trans().
+ * Handles utf8 cases(*) not involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search or replacement charlists are utf8. sv may
+ * or may not be utf8.
+ */
 
 STATIC I32
 S_do_trans_simple_utf8(pTHX_ SV * const sv)
@@ -393,6 +430,17 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
     return matches;
 }
 
+
+/* Helper function for do_trans().
+ * Handles utf8 cases(*) where search and replacement charlists are
+ * identical: so the string isn't modified, and only a count of modifiable
+ * chars is needed.
+ * Note that it doesn't handle /d or /s, since these modify the string
+ * even if the replacement charlist is empty.
+ * (*) i.e. where the search or replacement charlists are utf8. sv may
+ * or may not be utf8.
+ */
+
 STATIC I32
 S_do_trans_count_utf8(pTHX_ SV * const sv)
 {
@@ -435,6 +483,14 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 
     return matches;
 }
+
+
+/* Helper function for do_trans().
+ * Handles utf8 cases(*) involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search or replacement charlists are utf8. sv may
+ * or may not be utf8.
+ */
 
 STATIC I32
 S_do_trans_complex_utf8(pTHX_ SV * const sv)
@@ -596,6 +652,13 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 
     return matches;
 }
+
+
+/* Execute a tr//. sv is the value to be translated, while PL_op
+ * should be an OP_TRANS or OP_TRANSR op, whose op_pv field contains a
+ * translation table or whose op_sv field contains a swash.
+ * Returns a count of number of characters translated
+ */
 
 I32
 Perl_do_trans(pTHX_ SV *sv)

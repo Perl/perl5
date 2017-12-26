@@ -6294,6 +6294,10 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
 
+/* Helper function for S_pmtrans(): comparison function to sort an array
+ * of codepoint range pairs. Sorts by start point, or if equal, by end
+ * point */
+
 static int uvcompare(const void *a, const void *b)
     __attribute__nonnull__(1)
     __attribute__nonnull__(2)
@@ -6310,6 +6314,22 @@ static int uvcompare(const void *a, const void *b)
 	return 1;
     return 0;
 }
+
+/* Given an OP_TRANS / OP_TRANSR op o, plus OP_CONST ops expr and repl
+ * containing the search and replacement strings, assemble into
+ * a translation table attached as o->op_pv.
+ * Free expr and repl.
+ * It expects the toker to have already set the
+ *   OPpTRANS_COMPLEMENT
+ *   OPpTRANS_SQUASH
+ *   OPpTRANS_DELETE
+ * flags as appropriate; this function may add
+ *   OPpTRANS_FROM_UTF
+ *   OPpTRANS_TO_UTF
+ *   OPpTRANS_IDENTICAL
+ *   OPpTRANS_GROWS
+ * flags
+ */
 
 static OP *
 S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
@@ -6342,6 +6362,14 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         o->op_private |= OPpTRANS_TO_UTF;
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
+
+        /* for utf8 translations, op_sv will be set to point to a swash
+         * containing codepoint ranges. This is done by first assembling
+         * a textual representation of the ranges in listsv then compiling
+         * it using swash_init(). For more details of the textual format,
+         * see L<perlunicode.pod/"User-Defined Character Properties"> .
+         */
+
 	SV* const listsv = newSVpvs("# comment\n");
 	SV* transv = NULL;
 	const U8* tend = t + tlen;
@@ -6383,15 +6411,24 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
  * odd.  */
 
 	if (complement) {
+            /* utf8 and /c:
+             * replace t/tlen/tend with a version that has the ranges
+             * complemented
+             */
 	    U8 tmpbuf[UTF8_MAXBYTES+1];
 	    UV *cp;
 	    UV nextmin = 0;
 	    Newx(cp, 2*tlen, UV);
 	    i = 0;
 	    transv = newSVpvs("");
+
+            /* convert search string into array of (start,end) range
+             * codepoint pairs stored in cp[]. Most "ranges" will start
+             * and end at the same char */
 	    while (t < tend) {
 		cp[2*i] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
 		t += ulen;
+                /* the toker converts X-Y into (X, ILLEGAL_UTF8_BYTE, Y) */
 		if (t < tend && *t == ILLEGAL_UTF8_BYTE) {
 		    t++;
 		    cp[2*i+1] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
@@ -6402,7 +6439,19 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 		i++;
 	    }
+
+            /* sort the ranges */
 	    qsort(cp, i, 2*sizeof(UV), uvcompare);
+
+            /* Create a utf8 string containing the complement of the
+             * codepoint ranges. For example if cp[] contains [A,B], [C,D],
+             * then transv will contain the equivalent of:
+             * join '', map chr, 0,     ILLEGAL_UTF8_BYTE, A - 1,
+             *                   B + 1, ILLEGAL_UTF8_BYTE, C - 1,
+             *                   D + 1, ILLEGAL_UTF8_BYTE, 0x7fffffff;
+             * A range of a single char skips the ILLEGAL_UTF8_BYTE and
+             * end cp.
+             */
 	    for (j = 0; j < i; j++) {
 		UV  val = cp[2*j];
 		diff = val - nextmin;
@@ -6420,6 +6469,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
+
 	    t = uvchr_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    {
@@ -6436,6 +6486,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	else if (!rlen && !del) {
 	    r = t; rlen = tlen; rend = tend;
 	}
+
 	if (!squash) {
 		if ((!rlen && !del) || t == r ||
 		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
@@ -6443,6 +6494,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    o->op_private |= OPpTRANS_IDENTICAL;
 		}
 	}
+
+        /* extract char ranges from t and r and append them to listsv */
 
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
@@ -6516,6 +6569,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    tfirst += diff + 1;
 	}
 
+        /* compile listsv into a swash and attach to o */
+
 	none = ++max;
 	if (del)
 	    del = ++max;
@@ -6557,12 +6612,36 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	goto warnins;
     }
 
+    /* Non-utf8 case: set o->op_pv to point to a simple 256-entry lookup
+     * table. Entries with the value -1 indicate chars not to be
+     * translated, while -2 indicates a search char without a
+     * corresponding replacement char under /d.
+     *
+     * With /c, an extra length arg is stored at the end of the table to
+     * indicate the number of chars in the replacement string, plus any
+     * excess replacement chars not paired with search chars. The extra
+     * chars are needed for utf8 strings. For example,
+     * tr/\x00-\xfd/abcd/c is logically equivalent to
+     * tr/\xfe\xff\x{100}\x{101}.../abcdddd.../, so the c,d chars need to
+     * be kept even though they aren't paired with any chars in the table
+     * (which represents chars \x00-\xff). Even without excess chars, the
+     * last replacement char needs to be kept.
+     *
+     * The toker will have already expanded char ranges in t and r.
+     */
+
     tbl = (short*)PerlMemShared_calloc(
+                    /* one slot for 'extra len' count and one slot
+                     * for possible storing of last replacement char */
 	(o->op_private & OPpTRANS_COMPLEMENT) &&
 	    !(o->op_private & OPpTRANS_DELETE) ? 258 : 256,
 	sizeof(short));
     cPVOPo->op_pv = (char*)tbl;
+
     if (complement) {
+        /* in this branch, j is a count of 'consumed' (i.e. paired off
+         * with a search char) replacement chars (so j <= rlen always)
+         */
 	for (i = 0; i < (I32)tlen; i++)
 	    tbl[t[i]] = -1;
 	for (i = 0, j = 0; i < 256; i++) {
@@ -6584,13 +6663,16 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
 	if (!del) {
 	    if (!rlen) {
+                /* empty replacement list */
 		j = rlen;
 		if (!squash)
 		    o->op_private |= OPpTRANS_IDENTICAL;
 	    }
 	    else if (j >= (I32)rlen)
+                /* no more replacement chars than search chars */
 		j = rlen - 1;
 	    else {
+                /* more replacement chars than search chars */
 		tbl = 
 		    (short *)
 		    PerlMemShared_realloc(tbl,
@@ -6598,6 +6680,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		cPVOPo->op_pv = (char*)tbl;
 	    }
 	    tbl[0x100] = (short)(rlen - j);
+            /* store any excess replacement chars at end of main table */
 	    for (i=0; i < (I32)rlen - j; i++)
 		tbl[0x101+i] = r[j+i];
 	}
@@ -6631,6 +6714,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
     }
 
+    /* both non-utf8 and utf8 code paths end up here */
+
   warnins:
     if(del && rlen == tlen) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
@@ -6645,6 +6730,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     return o;
 }
+
 
 /*
 =for apidoc Am|OP *|newPMOP|I32 type|I32 flags

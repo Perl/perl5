@@ -513,14 +513,15 @@ addbits('sassign',
 
 for (qw(trans transr)) {
     addbits($_,
-        0 => qw(OPpTRANS_FROM_UTF   <UTF),
-        1 => qw(OPpTRANS_TO_UTF     >UTF),
+        0 => qw(OPpTRANS_FROM_UTF   <UTF),    # search chars are utf8
+        1 => qw(OPpTRANS_TO_UTF     >UTF),    # replacement chars are utf8
         2 => qw(OPpTRANS_IDENTICAL  IDENT),   # right side is same as left
-        3 => qw(OPpTRANS_SQUASH     SQUASH),
+        3 => qw(OPpTRANS_SQUASH     SQUASH),  # /s
         # 4 is used for OPpTARGET_MY
-        5 => qw(OPpTRANS_COMPLEMENT COMPL),
-        6 => qw(OPpTRANS_GROWS      GROWS),
-        7 => qw(OPpTRANS_DELETE     DEL),
+        5 => qw(OPpTRANS_COMPLEMENT COMPL),   # /c
+        6 => qw(OPpTRANS_GROWS      GROWS),   # replacement chars longer than
+                                              #    src chars
+        7 => qw(OPpTRANS_DELETE     DEL),     # /d
     );
 }
 
