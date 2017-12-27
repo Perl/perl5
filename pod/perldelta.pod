@@ -406,6 +406,15 @@ platform specific bugs also go here.
 
 XXX
 
+=item *
+
+The bugfix for [perl #2754] in Perl 5.27.7 turned out to cause so much
+trouble on CPAN [perl #132577] that it is being postponed.  The bug has
+been restored, so C<exit(0)> in a C<UNITCHECK> or C<CHECK> block now
+once again permits the main program to run, and C<exit(0)> in a C<BEGIN>
+block once again permits C<INIT> blocks to run before exiting.  The bug
+will be fixed again for Perl 5.30.
+
 =back
 
 =head1 Errata From Previous Releases
