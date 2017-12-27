@@ -96,6 +96,12 @@ static const char* const non_utf8_target_but_utf8_required
                 = "Can't match, because target string needs to be in UTF-8\n";
 #endif
 
+/* Returns a boolean as to whether the input unsigned number is a power of 2
+ * (2**0, 2**1, etc).  In other words if it has just a single bit set.
+ * If not, subtracting 1 would leave the uppermost bit set, so the & would
+ * yield non-zero */
+#define isPOWER_OF_2(n) ((n & (n-1)) == 0)
+
 #define NON_UTF8_TARGET_BUT_UTF8_REQUIRED(target) STMT_START {           \
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%s", non_utf8_target_but_utf8_required));\
     goto target;                                                         \
@@ -8504,12 +8510,37 @@ NULL
 			       UCHARAT(locinput) != ST.c1)
 			    locinput++;
 		    }
-		    else {
+                    else {
+                        U8 c1_c2_bits_differing = ST.c1 ^ ST.c2;
+
+                        if (! isPOWER_OF_2(c1_c2_bits_differing)) {
 			while (locinput <= ST.maxpos
 			       && UCHARAT(locinput) != ST.c1
 			       && UCHARAT(locinput) != ST.c2)
 			    locinput++;
-		    }
+                        }
+                        else {
+                            /* If c1 and c2 only differ by a single bit, we can
+                             * avoid a conditional each time through the loop,
+                             * at the expense of a little preliminary setup and
+                             * an extra mask each iteration.  By masking out
+                             * that bit, we match exactly two characters, c1
+                             * and c2, and so we don't have to test for both.
+                             * On both ASCII and EBCDIC platforms, most of the
+                             * ASCII-range and Latin1-range folded equivalents
+                             * differ only in a single bit, so this is actually
+                             * the most common case. (e.g. 'A' 0x41 vs 'a'
+                             * 0x61). */
+                            U8 c1_masked = ST.c1 &~ c1_c2_bits_differing;
+                            U8 c1_c2_mask = ~ c1_c2_bits_differing;
+                            while (   locinput <= ST.maxpos
+                                   && (UCHARAT(locinput) & c1_c2_mask)
+                                                                != c1_masked)
+                            {
+                                locinput++;
+                            }
+                        }
+                    }
 		    n = locinput - ST.oldloc;
 		}
 		if (locinput > ST.maxpos)
@@ -9301,10 +9332,26 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 }
             }
             else {
+                /* See comments in regmatch() CURLY_B_min_known_fail.  We avoid
+                 * a conditional each time through the loop if the characters
+                 * differ only in a single bit, as is the usual situation */
+                U8 c1_c2_bits_differing = c1 ^ c2;
+
+                if (isPOWER_OF_2(c1_c2_bits_differing)) {
+                    U8 c1_masked = c1 & ~ c1_c2_bits_differing;
+                    U8 c1_c2_mask = ~ c1_c2_bits_differing;
+                    while (   scan < loceol
+                           && (UCHARAT(scan) & c1_c2_mask) == c1_masked)
+                    {
+                        scan++;
+                    }
+                }
+                else {
                 while (scan < loceol &&
                     (UCHARAT(scan) == c1 || UCHARAT(scan) == c2))
                 {
                     scan++;
+                }
                 }
             }
 	}
