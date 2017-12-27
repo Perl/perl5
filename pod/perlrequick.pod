@@ -67,12 +67,13 @@ Perl will always match at the earliest possible point in the string:
     "That hat is red" =~ /hat/; # matches 'hat' in 'That'
 
 Not all characters can be used 'as is' in a match.  Some characters,
-called B<metacharacters>, are reserved for use in regex notation.
-The metacharacters are
+called B<metacharacters>, are considered special, and reserved for use
+in regex notation.  The metacharacters are
 
     {}[]()^$.|*+?\
 
-A metacharacter can be matched by putting a backslash before it:
+A metacharacter can be matched literally by putting a backslash before
+it:
 
     "2+2=4" =~ /2+2/;    # doesn't match, + is a metacharacter
     "2+2=4" =~ /2\+2/;   # matches, \+ is treated like an ordinary +
@@ -82,6 +83,12 @@ A metacharacter can be matched by putting a backslash before it:
 In the last regex, the forward slash C<'/'> is also backslashed,
 because it is used to delimit the regex.
 
+Most of the metacharacters aren't always special, and other characters
+(such as the ones delimitting the pattern) become special under various
+circumstances.  This can be confusing and lead to unexpected results.
+L<S<C<use re 'strict'>>|re/'strict' mode> can notify you of potential
+pitfalls.
+
 Non-printable ASCII characters are represented by B<escape sequences>.
 Common examples are C<\t> for a tab, C<\n> for a newline, and C<\r>
 for a carriage return.  Arbitrary bytes are represented by octal
@@ -89,7 +96,7 @@ escape sequences, e.g., C<\033>, or hexadecimal escape sequences,
 e.g., C<\x1B>:
 
     "1000\t2000" =~ m(0\t2)  # matches
-    "cat" =~ /\143\x61\x74/  # matches in ASCII, but 
+    "cat" =~ /\143\x61\x74/  # matches in ASCII, but
                              # a weird way to spell cat
 
 Regexes are treated mostly as double-quoted strings, so variable
@@ -116,8 +123,13 @@ end of the string.  Some examples:
 
 A B<character class> allows a set of possible characters, rather than
 just a single character, to match at a particular point in a regex.
-Character classes are denoted by brackets C<[...]>, with the set of
-characters to be possibly matched inside.  Here are some examples:
+There are a number of different types of character classes, but usually
+when people use this term, they are referring to the type described in
+this section, which are technically called "Bracketed character
+classes", because they are denoted by brackets C<[...]>, with the set of
+characters to be possibly matched inside.  But we'll drop the "bracketed"
+below to correspond with common usage.  Here are some examples of
+(bracketed) character classes:
 
     /cat/;            # matches 'cat'
     /[bcr]at/;        # matches 'bat', 'cat', or 'rat'
