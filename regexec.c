@@ -9003,8 +9003,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 		hardcount++;
 	    }
 	} else {
-	    while (scan < loceol && *scan != '\n')
-		scan++;
+            scan = (char *) memchr(scan, '\n', loceol - scan);
+            if (! scan) {
+                scan = loceol;
+            }
 	}
 	break;
     case SANY:
