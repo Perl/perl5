@@ -1360,6 +1360,10 @@ an escape sequence.   Examples:
  # for the  closing ')' to match
  qr/\(?#the backslash means this isn't a comment)p{Any}/
 
+ # Comments can be used to fold long patterns into multiple lines
+ qr/First part of a long regex(?#
+   )remaining part/
+
 =item C<(?adlupimnsx-imnsx)>
 
 =item C<(?^alupimnsx)>
