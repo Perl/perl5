@@ -819,10 +819,19 @@ use charnames ();   # Don't use \N{} on things not in original Unicode
                     # version; else will get a compilation error when this .t
                     # is run on an older version.
 
+my $ret_len;
 is(num("0"), 0, 'Verify num("0") == 0');
-is(num("98765"), 98765, 'Verify num("98765") == 98765');
-ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"),
+is(num("0", \$ret_len), 0, 'Verify num("0", \$ret_len) == 0');
+is($ret_len, 1, "... and the returned length is 1");
+ok(! defined num("", \$ret_len), 'Verify num("", \$ret_len) isnt defined');
+is($ret_len, 0, "... and the returned length is 0");
+ok(! defined num("A", \$ret_len), 'Verify num("A") isnt defined');
+is($ret_len, 0, "... and the returned length is 0");
+is(num("98765", \$ret_len), 98765, 'Verify num("98765") == 98765');
+is($ret_len, 5, "... and the returned length is 5");
+ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}", \$ret_len),
    'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
+is($ret_len, 5, "... but the returned length is 5");
 my $tai_lue_2;
 if ($v_unicode_version ge v4.1.0) {
     my $tai_lue_1 = charnames::string_vianame("NEW TAI LUE DIGIT ONE");
@@ -834,8 +843,13 @@ if ($v_unicode_version ge v4.1.0) {
 }
 if ($v_unicode_version ge v5.2.0) {
     ok(! defined num($tai_lue_2
-         . charnames::string_vianame("NEW TAI LUE THAM DIGIT ONE")),
+         . charnames::string_vianame("NEW TAI LUE THAM DIGIT ONE"), \$ret_len),
          'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}") isnt defined');
+    is($ret_len, 1, "... but the returned length is 1");
+    ok(! defined num(charnames::string_vianame("NEW TAI LUE THAM DIGIT ONE")
+                     .  $tai_lue_2, \$ret_len),
+         'Verify num("\N{NEW TAI LUE THAM DIGIT ONE}\N{NEW TAI LUE DIGIT TWO}") isnt defined');
+    is($ret_len, 1, "... but the returned length is 1");
 }
 if ($v_unicode_version ge v5.1.0) {
     my $cham_0 = charnames::string_vianame("CHAM DIGIT ZERO");
@@ -843,8 +857,10 @@ if ($v_unicode_version ge v5.1.0) {
        'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
     if ($v_unicode_version ge v5.2.0) {
         ok(! defined num(  $cham_0
-                         . charnames::string_vianame("JAVANESE DIGIT NINE")),
+                         . charnames::string_vianame("JAVANESE DIGIT NINE"),
+                         \$ret_len),
         'Verify num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}") isnt defined');
+    is($ret_len, 1, "... but the returned length is 1");
     }
 }
 is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');

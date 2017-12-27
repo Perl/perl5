@@ -1865,14 +1865,18 @@ sub _numeric {
 
     my $val = num("123");
     my $one_quarter = num("\N{VULGAR FRACTION 1/4}");
+    my ($val = num("12a", \$valid_length);  # $valid_length contains 2
 
 C<num()> returns the numeric value of the input Unicode string; or C<undef> if it
 doesn't think the entire string has a completely valid, safe numeric value.
+If called with an optional second parameter, a reference to a scalar, C<num()>
+will set the scalar to the length of any valid initial substring; or to 0 if none.
 
 If the string is just one character in length, the Unicode numeric value
-is returned if it has one, or C<undef> otherwise.  Note that this need
-not be a whole number.  C<num("\N{TIBETAN DIGIT HALF ZERO}")>, for
-example returns -0.5.
+is returned if it has one, or C<undef> otherwise.  If the optional scalar ref
+is passed, it would be set to 1 if the return is valid; or 0 if the return is
+C<undef>.  Note that the numeric value returned need not be a whole number.
+C<num("\N{TIBETAN DIGIT HALF ZERO}")>, for example returns -0.5.
 
 =cut
 
@@ -1894,7 +1898,9 @@ is returned.  A further restriction is that the digits all have to be of
 the same form.  A half-width digit mixed with a full-width one will
 return C<undef>.  The Arabic script has two sets of digits;  C<num> will
 return C<undef> unless all the digits in the string come from the same
-set.
+set.  In all cases, the optional scalar ref parameter is set to how
+long any valid initial substring of digits is; hence it will be set to the
+entire string length if the main return value is not C<undef>.
 
 C<num> errs on the side of safety, and there may be valid strings of
 decimal digits that it doesn't recognize.  Note that Unicode defines
@@ -1918,16 +1924,30 @@ change these into digits, and then call C<num> on the result.
 # consider those, and return the <decomposition> type in the second
 # array element.
 
-sub num {
-    my $string = $_[0];
+sub num ($;$) {
+    my ($string, $retlen_ref) = @_;
+
+    use feature 'unicode_strings';
 
     _numeric unless %NUMERIC;
+    $$retlen_ref = 0 if $retlen_ref;    # Assume will fail
 
-    my $length = length($string);
-    return $NUMERIC{ord($string)} if $length == 1;
-    return if $string =~ /\D/;
+    my $length = length $string;
+    return if $length == 0;
+
     my $first_ord = ord(substr($string, 0, 1));
+    return if ! exists  $NUMERIC{$first_ord}
+           || ! defined $NUMERIC{$first_ord};
+
+    # Here, we know the first character is numeric
     my $value = $NUMERIC{$first_ord};
+    $$retlen_ref = 1 if $retlen_ref;    # Assume only this one is numeric
+
+    return $value if $length == 1;
+
+    # Here, the input is longer than a single character.  To be valid, it must
+    # be entirely decimal digits, which means it must start with one.
+    return if $string =~ / ^ \D /x;
 
     # To be a valid decimal number, it should be in a block of 10 consecutive
     # characters, whose values are 0, 1, 2, ... 9.  Therefore this digit's
@@ -1939,7 +1959,8 @@ sub num {
     # release, we verify that this first character is a member of such a
     # block.  That is, that the block of characters surrounding this one
     # consists of all \d characters whose numeric values are the expected
-    # ones.
+    # ones.  If not, then this single character is numeric, but the string as
+    # a whole is not considered to be.
     UnicodeVersion() unless defined $v_unicode_version;
     if ($v_unicode_version lt v6.0.0) {
         for my $i (0 .. 9) {
@@ -1961,10 +1982,14 @@ sub num {
         # function.
         my $ord = ord(substr($string, $i, 1));
         my $digit = $ord - $zero_ord;
-        return unless $digit >= 0 && $digit <= 9;
+        if ($digit < 0 || $digit > 9) {
+            $$retlen_ref = $i if $retlen_ref;
+            return;
+        }
         $value = $value * 10 + $digit;
     }
 
+    $$retlen_ref = $length if $retlen_ref;
     return $value;
 }
 
