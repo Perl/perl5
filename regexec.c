@@ -8653,9 +8653,12 @@ NULL
 		}
 		else {  /* Not utf8_target */
 		    if (ST.c1 == ST.c2) {
-			while (locinput <= ST.maxpos &&
-			       UCHARAT(locinput) != ST.c1)
-			    locinput++;
+                        locinput = (char *) memchr(locinput,
+                                                   ST.c1,
+                                                   ST.maxpos + 1 - locinput);
+                        if (! locinput) {
+                            locinput = ST.maxpos + 1;
+                        }
 		    }
                     else {
                         U8 c1_c2_bits_differing = ST.c1 ^ ST.c2;
