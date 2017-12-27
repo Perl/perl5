@@ -5451,8 +5451,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     }));
 
     while (scan != NULL) {
-
-
 	next = scan + NEXT_OFF(scan);
 	if (next == scan)
 	    next = NULL;
@@ -8514,10 +8512,12 @@ NULL
                         U8 c1_c2_bits_differing = ST.c1 ^ ST.c2;
 
                         if (! isPOWER_OF_2(c1_c2_bits_differing)) {
-			while (locinput <= ST.maxpos
-			       && UCHARAT(locinput) != ST.c1
-			       && UCHARAT(locinput) != ST.c2)
-			    locinput++;
+                            while (   locinput <= ST.maxpos
+                                   && UCHARAT(locinput) != ST.c1
+                                   && UCHARAT(locinput) != ST.c2)
+                            {
+                                locinput++;
+                            }
                         }
                         else {
                             /* If c1 and c2 only differ by a single bit, we can
@@ -9340,6 +9340,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 if (isPOWER_OF_2(c1_c2_bits_differing)) {
                     U8 c1_masked = c1 & ~ c1_c2_bits_differing;
                     U8 c1_c2_mask = ~ c1_c2_bits_differing;
+
                     while (   scan < loceol
                            && (UCHARAT(scan) & c1_c2_mask) == c1_masked)
                     {
@@ -9347,11 +9348,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                     }
                 }
                 else {
-                while (scan < loceol &&
-                    (UCHARAT(scan) == c1 || UCHARAT(scan) == c2))
-                {
-                    scan++;
-                }
+                    while (    scan < loceol
+                           && (UCHARAT(scan) == c1 || UCHARAT(scan) == c2))
+                    {
+                        scan++;
+                    }
                 }
             }
 	}
