@@ -170,10 +170,16 @@ always match at the earliest possible point in the string:
 
 With respect to character matching, there are a few more points you
 need to know about.   First of all, not all characters can be used "as
-is" in a match.  Some characters, called I<metacharacters>, are reserved
-for use in regexp notation.  The metacharacters are
+is" in a match.  Some characters, called I<metacharacters>, are
+generally reserved for use in regexp notation.  The metacharacters are
 
-    {}[]()^$.|*+?-\
+    {}[]()^$.|*+?-#\
+
+This list is not as definitive as it may appear (or be claimed to be in
+other documentation).  For example, C<"#"> is a metacharacter only when
+the C</x> pattern modifier (described below) is used, and both C<"}">
+and C<"]"> are metacharacters only when paired with opening C<"{"> or
+C<"["> respectively; other gotchas apply.
 
 The significance of each of these will be explained
 in the rest of the tutorial, but for now, it is important only to know
