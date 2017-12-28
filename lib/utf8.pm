@@ -255,7 +255,8 @@ C<utf8::upgrade($string)> unconditionally.
 =item * C<$flag = utf8::valid($string)>
 
 [INTERNAL] Test whether I<$string> is in a consistent state regarding
-UTF-8.  Will return true if it is well-formed UTF-8 and has the UTF-8 flag
+UTF-8.  Will return true if it is well-formed Perl extended UTF-8 and has the
+UTF-8 flag
 on B<or> if I<$string> is held as bytes (both these states are 'consistent').
 Main reason for this routine is to allow Perl's test suite to check
 that operations have left strings in a consistent state.
