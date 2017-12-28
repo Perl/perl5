@@ -140,28 +140,18 @@ Note that the largest code point in Unicode is U+10FFFF.
 
 =cut
 
-my $BLOCKSFH;
-my $VERSIONFH;
-my $CASEFOLDFH;
-my $CASESPECFH;
-my $NAMEDSEQFH;
 my $v_unicode_version;  # v-string.
 
 sub openunicode {
-    my ($rfh, @path) = @_;
-    my $f;
-    unless (defined $$rfh) {
-	for my $d (@INC) {
-	    use File::Spec;
-	    $f = File::Spec->catfile($d, "unicore", @path);
-	    last if open($$rfh, '<', $f);
-	    undef $f;
-	}
-	croak __PACKAGE__, ": failed to find ",
-              File::Spec->catfile(@path), " in @INC"
-	    unless defined $f;
+    my (@path) = @_;
+    my $rfh;
+    for my $d (@INC) {
+        use File::Spec;
+        my $f = File::Spec->catfile($d, "unicore", @path);
+        return $rfh if open($rfh, '<', $f);
     }
-    return $f;
+    croak __PACKAGE__, ": failed to find ",
+        File::Spec->catfile("unicore", @path), " in @INC";
 }
 
 sub _dclone ($) {   # Use Storable::dclone if available; otherwise emulate it.
@@ -880,10 +870,11 @@ sub _charblocks {
             push @BLOCKS, $subrange;
             push @{$BLOCKS{'No_Block'}}, $subrange;
         }
-        elsif (openunicode(\$BLOCKSFH, "Blocks.txt")) {
+        else {
+            my $blocksfh = openunicode("Blocks.txt");
 	    local $_;
 	    local $/ = "\n";
-	    while (<$BLOCKSFH>) {
+	    while (<$blocksfh>) {
 
                 # Old versions used a different syntax to mark the range.
                 $_ =~ s/;\s+/../ if $v_unicode_version lt v3.1.0;
@@ -895,7 +886,6 @@ sub _charblocks {
 		    push @{$BLOCKS{$3}}, $subrange;
 		}
 	    }
-	    close($BLOCKSFH);
             if (! IS_ASCII_PLATFORM) {
                 # The first two blocks, through 0xFF, are wrong on EBCDIC
                 # platforms.
@@ -1648,13 +1638,11 @@ my %CASESPEC;
 sub _casespec {
     unless (%CASESPEC) {
         UnicodeVersion() unless defined $v_unicode_version;
-        if ($v_unicode_version lt v2.1.8) {
-            %CASESPEC = {};
-        }
-	elsif (openunicode(\$CASESPECFH, "SpecialCasing.txt")) {
+        if ($v_unicode_version ge v2.1.8) {
+            my $casespecfh = openunicode("SpecialCasing.txt");
 	    local $_;
 	    local $/ = "\n";
-	    while (<$CASESPECFH>) {
+	    while (<$casespecfh>) {
 		if (/^([0-9A-F]+); ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; (\w+(?: \w+)*)?/) {
 
 		    my ($hexcode, $lower, $title, $upper, $condition) =
@@ -1719,7 +1707,6 @@ sub _casespec {
 		    }
 		}
 	    }
-	    close($CASESPECFH);
 	}
     }
 }
@@ -1769,19 +1756,17 @@ my %NAMEDSEQ;
 
 sub _namedseq {
     unless (%NAMEDSEQ) {
-	if (openunicode(\$NAMEDSEQFH, "Name.pl")) {
-	    local $_;
-	    local $/ = "\n";
-	    while (<$NAMEDSEQFH>) {
-		if (/^ [0-9A-F]+ \  /x) {
-                    chomp;
-                    my ($sequence, $name) = split /\t/;
-		    my @s = map { chr(hex($_)) } split(' ', $sequence);
-		    $NAMEDSEQ{$name} = join("", @s);
-		}
-	    }
-	    close($NAMEDSEQFH);
-	}
+        my $namedseqfh = openunicode("Name.pl");
+        local $_;
+        local $/ = "\n";
+        while (<$namedseqfh>) {
+            if (/^ [0-9A-F]+ \  /x) {
+                chomp;
+                my ($sequence, $name) = split /\t/;
+                my @s = map { chr(hex($_)) } split(' ', $sequence);
+                $NAMEDSEQ{$name} = join("", @s);
+            }
+        }
     }
 }
 
@@ -4121,10 +4106,9 @@ my $UNICODEVERSION;
 
 sub UnicodeVersion {
     unless (defined $UNICODEVERSION) {
-	openunicode(\$VERSIONFH, "version");
+	my $versionfh = openunicode("version");
 	local $/ = "\n";
-	chomp($UNICODEVERSION = <$VERSIONFH>);
-	close($VERSIONFH);
+	chomp($UNICODEVERSION = <$versionfh>);
 	croak __PACKAGE__, "::VERSION: strange version '$UNICODEVERSION'"
 	    unless $UNICODEVERSION =~ /^\d+(?:\.\d+)+$/;
     }
