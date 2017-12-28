@@ -2,7 +2,7 @@ package Pod::Html;
 use strict;
 require Exporter;
 
-our $VERSION = 1.23;
+our $VERSION = 1.24;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(pod2html htmlify);
 our @EXPORT_OK = qw(anchorify relativize_url);
@@ -655,7 +655,7 @@ sub html_escape {
     $rest   =~ s/</&lt;/g;
     $rest   =~ s/>/&gt;/g;
     $rest   =~ s/"/&quot;/g;
-    $rest =~ s/([^ -~])/sprintf("&#x%x;", ord($1))/eg;
+    $rest =~ s/([[:^print:]])/sprintf("&#x%x;", ord($1))/aeg;
     return $rest;
 }
 
