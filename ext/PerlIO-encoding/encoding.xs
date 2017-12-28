@@ -5,6 +5,10 @@
 #define U8 U8
 
 #define OUR_DEFAULT_FB	"Encode::PERLQQ"
+#define OUR_STOP_AT_PARTIAL "Encode::STOP_AT_PARTIAL"
+
+/* This will be set during BOOT */
+static unsigned int encode_stop_at_partial = 0;
 
 #if defined(USE_PERLIO)
 
@@ -164,6 +168,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     }
 
     e->chk = newSVsv(get_sv("PerlIO::encoding::fallback", 0));
+    SvUV_set(e->chk, SvUV(e->chk) | encode_stop_at_partial);
     e->inEncodeCall = 0;
 
     FREETMPS;
@@ -662,6 +667,16 @@ BOOT:
     }
     SPAGAIN;
     sv_setsv(chk, POPs);
+
+    PUSHMARK(sp);
+    PUTBACK;
+    if (call_pv(OUR_STOP_AT_PARTIAL, G_SCALAR) != 1) {
+	    /* should never happen */
+	    Perl_die(aTHX_ "%s did not return a value", OUR_STOP_AT_PARTIAL);
+    }
+    SPAGAIN;
+    encode_stop_at_partial = POPu;
+
     PUTBACK;
 #ifdef PERLIO_LAYERS
     PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_encode));
