@@ -8548,6 +8548,8 @@ in the SV (typically, C<SvCUR(sv)> is a suitable choice).
 =cut
 */
 
+#define DEFAULT_BUFFER_SIZE 8192
+
 char *
 Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 {
@@ -8557,7 +8559,9 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     SSize_t cnt;
     int i = 0;
     int rspara = 0;
-    STDCHAR buf[8192];
+    STDCHAR buf[DEFAULT_BUFFER_SIZE];
+    char *bufptr = NULL;
+    size_t bufsize = 0;
 
 
     PERL_ARGS_ASSERT_SV_GETS;
@@ -8611,10 +8615,13 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 #ifdef PERL_COPY_ON_WRITE
                 /* Add an extra byte for the sake of copy-on-write's
                  * buffer reference count. */
-                (void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 2));
+            STRLEN length = (st.st_size - offset) + append + 2;
 #else
-                (void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 1));
+            STRLEN length = (st.st_size - offset) + append + 1;
 #endif
+        (void) SvGROW(sv, length);
+                bufptr = SvPVX(sv);
+                bufsize = length;
             }
         }
         rsptr = NULL;
@@ -8664,45 +8671,50 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
         }
     }
 
+    if (bufptr == NULL) {
+        bufptr = (char*)buf;
+        bufsize = DEFAULT_BUFFER_SIZE;
+    }
+
       screamer:
     if (rslen)
-        cnt = PerlIO_readdelim(fp, buf, sizeof(buf), rslast);
+        cnt = PerlIO_readdelim(fp, bufptr, bufsize, rslast);
     else
-        cnt = PerlIO_read(fp,(char*)buf, sizeof(buf));
+        cnt = PerlIO_read(fp, bufptr, bufsize);
 
     /* Accommodate broken VAXC compiler, which applies U8 cast to
      * both args of ?: operator, causing EOF to change into 255
      */
     if (cnt > 0)
-        i = (U8)buf[cnt - 1];
+        i = (U8)bufptr[cnt - 1];
     else
         i = EOF;
 
     if (cnt < 0)
         cnt = 0;  /* we do need to re-set the sv even when cnt <= 0 */
     if (append)
-        sv_catpvn_nomg(sv, (char *) buf, cnt);
+        sv_catpvn_nomg(sv, (char *) bufptr, cnt);
     else
-        sv_setpvn(sv, (char *) buf, cnt);   /* "nomg" is implied */
+        sv_setpvn(sv, (char *) bufptr, cnt);   /* "nomg" is implied */
 
     if (cnt > 0 &&			/* joy */
-        (!rslen ||
-         SvCUR(sv) < rslen ||
-         memNE(SvPVX_const(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
-    {
-        append = -1;
-        /*
-         * If we're reading from a TTY and we get a short read,
-         * indicating that the user hit his EOF character, we need
-         * to notice it now, because if we try to read from the TTY
-         * again, the EOF condition will disappear.
-         *
-         * The comparison of cnt to sizeof(buf) is an optimization
-         * that prevents unnecessary calls to feof().
-         *
-         * - jik 9/25/96
-         */
-        if (!(cnt < (I32)sizeof(buf) && PerlIO_eof(fp)))
+            (!rslen ||
+             SvCUR(sv) < rslen ||
+             memNE(SvPVX_const(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
+        {
+            append = -1;
+            /*
+             * If we're reading from a TTY and we get a short read,
+             * indicating that the user hit his EOF character, we need
+             * to notice it now, because if we try to read from the TTY
+             * again, the EOF condition will disappear.
+             *
+             * The comparison of cnt to sizeof(buf) is an optimization
+             * that prevents unnecessary calls to feof().
+             *
+             * - jik 9/25/96
+             */
+        if (!(cnt < (I32)bufsize && PerlIO_eof(fp)))
             goto screamer;
     }
 
