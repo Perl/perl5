@@ -856,10 +856,6 @@ CHMOD_W = chmod +w
 # with your existing copy of perl
 # (make regen_headers is kept for backwards compatibility)
 
-AUTOGEN_FILES = opcode.h opnames.h pp_proto.h proto.h embed.h embedvar.h \
-		perlapi.h perlapi.c regnodes.h warnings.h lib/warnings.pm \
-		lib/feature.pm feature.h
-
 .PHONY: regen_headers regen_all
 
 regen regen_headers:	FORCE
