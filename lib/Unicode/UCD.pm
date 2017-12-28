@@ -1865,7 +1865,7 @@ sub _numeric {
 
     my $val = num("123");
     my $one_quarter = num("\N{VULGAR FRACTION 1/4}");
-    my ($val = num("12a", \$valid_length);  # $valid_length contains 2
+    my $val = num("12a", \$valid_length);  # $valid_length contains 2
 
 C<num()> returns the numeric value of the input Unicode string; or C<undef> if it
 doesn't think the entire string has a completely valid, safe numeric value.
