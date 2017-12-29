@@ -246,7 +246,7 @@ dealing with filenames, you should probably read L<perlunitut> and
 L<perlunifaq/What is "the UTF8 flag"?>.
 
 Don't use this flag as a marker to distinguish character and binary
-data, that should be decided for each variable when you write your
+data: that should be decided for each variable when you write your
 code.
 
 To force unicode semantics in code portable to perl 5.8 and 5.10, call
@@ -258,7 +258,7 @@ C<utf8::upgrade($string)> unconditionally.
 UTF-8.  Will return true if it is well-formed Perl extended UTF-8 and has the
 UTF-8 flag
 on B<or> if I<$string> is held as bytes (both these states are 'consistent').
-Main reason for this routine is to allow Perl's test suite to check
+The main reason for this routine is to allow Perl's test suite to check
 that operations have left strings in a consistent state.
 
 =back
