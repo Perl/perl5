@@ -5556,20 +5556,25 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     }
                     break;
 
+                case NASCII:
+                    invert = 1;
+                    /* FALLTHROUGH */
+		case ASCII:
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[_CC_ASCII]);
+
+                    /* This can be handled as a Posix class */
+                    goto join_posix_and_ascii;
+
                 case NPOSIXA:   /* For these, we always know the exact set of
                                    what's matched */
                     invert = 1;
                     /* FALLTHROUGH */
 		case POSIXA:
-                    if (FLAGS(scan) == _CC_ASCII) {
-                        my_invlist = invlist_clone(PL_XPosix_ptrs[_CC_ASCII]);
-                    }
-                    else {
-                        _invlist_intersection(PL_XPosix_ptrs[FLAGS(scan)],
-                                              PL_XPosix_ptrs[_CC_ASCII],
-                                              &my_invlist);
-                    }
-                    goto join_posix;
+                    assert(FLAGS(scan) != _CC_ASCII);
+                    _invlist_intersection(PL_XPosix_ptrs[FLAGS(scan)],
+                                          PL_XPosix_ptrs[_CC_ASCII],
+                                          &my_invlist);
+                    goto join_posix_and_ascii;
 
 		case NPOSIXD:
 		case NPOSIXU:
@@ -5589,7 +5594,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                                           &my_invlist);
                     }
 
-                  join_posix:
+                  join_posix_and_ascii:
 
                     if (flags & SCF_DO_STCLASS_AND) {
                         ssc_intersection(data->start_class, my_invlist, invert);
@@ -17377,14 +17382,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* The actual POSIXish node for all the rest depends on the
                  * charset modifier.  The ones in the first set depend only on
                  * ASCII or, if available on this platform, also locale */
+
                 case ANYOF_ASCII:
                 case ANYOF_NASCII:
+
 #ifdef HAS_ISASCII
-                    op = (LOC) ? POSIXL : POSIXA;
-#else
-                    op = POSIXA;
+                    if (LOC) {
+                        op = POSIXL;
+                        goto join_posix;
+                    }
 #endif
-                    goto join_posix;
+                    /* (named_class - ANY_OF_ASCII) is 0 or 1. xor'ing with
+                     * invert converts that to 1 or 0 */
+                    op = ASCII + ((namedclass - ANYOF_ASCII) ^ invert);
+                    break;
 
                 /* The following don't have any matches in the upper Latin1
                  * range, hence /d is equivalent to /u for them.  Making it /u
@@ -17525,6 +17536,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
                                            TRUE /* downgradable to EXACT */
                                            );
+            }
+            else {
+                *flagp |= HASWIDTH|SIMPLE;
             }
 
             RExC_parse = (char *) cur_parse;

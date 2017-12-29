@@ -539,10 +539,12 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
 
 #endif
 
-#undef PERL_WORDSIZE
-#undef PERL_COUNT_MULTIPLIER
-#undef PERL_WORD_BOUNDARY_MASK
-#undef PERL_VARIANTS_WORD_MASK
+#ifndef PERL_IN_REGEXEC_C   /* Keep  these around for that file */
+#  undef PERL_WORDSIZE
+#  undef PERL_COUNT_MULTIPLIER
+#  undef PERL_WORD_BOUNDARY_MASK
+#  undef PERL_VARIANTS_WORD_MASK
+#endif
 
 /*
 =for apidoc is_utf8_string

@@ -2521,6 +2521,8 @@ ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *stren
 
 #if defined(PERL_IN_REGEXEC_C)
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
+ERns	|char *|find_next_ascii|NN char* s|NN const char * send|const bool is_utf8
+ERns	|char *|find_next_non_ascii|NN char* s|NN const char * send|const bool is_utf8
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 WERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN const regnode *p \
