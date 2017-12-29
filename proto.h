@@ -5577,6 +5577,11 @@ STATIC char *	S_find_next_non_ascii(char* s, const char * send, const bool is_ut
 #define PERL_ARGS_ASSERT_FIND_NEXT_NON_ASCII	\
 	assert(s); assert(send)
 
+STATIC char *	S_find_span_end(char* s, const char * send, const char span_byte)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FIND_SPAN_END	\
+	assert(s); assert(send)
+
 STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISFOO_UTF8_LC	\

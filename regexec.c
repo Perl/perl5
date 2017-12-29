@@ -676,6 +676,71 @@ S_find_next_non_ascii(char * s, const char * send, const bool utf8_target)
 
 }
 
+STATIC char *
+S_find_span_end(char * s, const char * send, const char span_byte)
+{
+    /* Returns the position of the first byte in the sequence between 's' and
+     * 'send-1' inclusive that isn't 'span_byte'; returns 'send' if none found.
+     * */
+
+    PERL_ARGS_ASSERT_FIND_SPAN_END;
+
+    assert(send >= s);
+
+    if ((STRLEN) (send - s) >= PERL_WORDSIZE
+                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
+                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
+    {
+        PERL_UINTMAX_T span_word;
+
+        /* Process per-byte until reach word boundary.  XXX This loop could be
+         * eliminated if we knew that this platform had fast unaligned reads */
+        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
+            if (*s != span_byte) {
+                return s;
+            }
+            s++;
+        }
+
+        /* Create a word filled with the bytes we are spanning */
+        span_word = PERL_COUNT_MULTIPLIER * span_byte;
+
+        /* Process per-word as long as we have at least a full word left */
+        do {
+
+            /* Keep going if the whole word is composed of 'span_byte's */
+            if ((* (PERL_UINTMAX_T *) s) == span_word)  {
+                s += PERL_WORDSIZE;
+                continue;
+            }
+
+            /* Here, at least one byte in the word isn't 'span_byte'.  This xor
+             * leaves 1 bits only in those non-matching bytes */
+            span_word ^= * (PERL_UINTMAX_T *) s;
+
+            /* Make sure the upper bit of each non-matching byte is set.  This
+             * makes each such byte look like an ASCII platform variant byte */
+            span_word |= span_word << 1;
+            span_word |= span_word << 2;
+            span_word |= span_word << 4;
+
+            /* That reduces the problem to what this function solves */
+            return s + _variant_byte_number(span_word);
+
+        } while (s + PERL_WORDSIZE <= send);
+    }
+
+    /* Process the straggler bytes beyond the final word boundary */
+    while (s < send) {
+        if (*s != span_byte) {
+            return s;
+        }
+        s++;
+    }
+
+    return s;
+}
+
 /*
  * pregexec and friends
  */
@@ -9030,7 +9095,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
 	c = (U8)*STRING(p);
 
-        /* Can use a simple loop if the pattern char to match on is invariant
+        /* Can use a simple find if the pattern char to match on is invariant
          * under UTF-8, or both target and pattern aren't UTF-8.  Note that we
          * can use UTF8_IS_INVARIANT() even if the pattern isn't UTF-8, as it's
          * true iff it doesn't matter if the argument is in UTF-8 or not */
@@ -9040,9 +9105,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                  * since here, to match at all, 1 char == 1 byte */
                 loceol = scan + max;
             }
-	    while (scan < loceol && UCHARAT(scan) == c) {
-		scan++;
-	    }
+            scan = find_span_end(scan, loceol, (U8) c);
 	}
 	else if (reginfo->is_utf8_pat) {
             if (utf8_target) {
@@ -9062,11 +9125,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             else if (! UTF8_IS_ABOVE_LATIN1(c)) {
 
                 /* Target isn't utf8; convert the character in the UTF-8
-                 * pattern to non-UTF8, and do a simple loop */
+                 * pattern to non-UTF8, and do a simple find */
                 c = EIGHT_BIT_UTF8_TO_NATIVE(c, *(STRING(p) + 1));
-                while (scan < loceol && UCHARAT(scan) == c) {
-                    scan++;
-                }
+                scan = find_span_end(scan, loceol, (U8) c);
             } /* else pattern char is above Latin1, can't possibly match the
                  non-UTF-8 target */
         }
@@ -9164,9 +9225,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 }
             }
             else if (c1 == c2) {
-                while (scan < loceol && UCHARAT(scan) == c1) {
-                    scan++;
-                }
+                scan = find_span_end(scan, loceol, c1);
             }
             else {
                 /* See comments in regmatch() CURLY_B_min_known_fail.  We avoid
