@@ -17,17 +17,38 @@ END
 }
 
 if ($] >= 5.010001) {
-	is (eval <<'END', 1, 'switch compiles') or diag $@;
-	use experimental 'switch';
-	sub bar { 1 };
-	given(1) {
-		whereso (\&bar) {
-			pass("bar matches 1");
+	if (eval '
+		no warnings "experimental";
+		use feature "switch";
+		if(0) { when(3) {} }
+		1;
+	') {
+		is (eval <<'END', 1, 'switch compiles') or diag $@;
+		use experimental 'switch';
+		sub bar { 1 };
+		given(1) {
+			when (\&bar) {
+				pass("bar matches 1");
+			}
+			default {
+				fail("bar matches 1");
+			}
 		}
-		fail("bar matches 1");
-	}
-	1;
+		1;
 END
+	} else {
+		is (eval <<'END', 1, 'switch compiles') or diag $@;
+		use experimental 'switch';
+		sub bar { 1 };
+		given(1) {
+			whereso (\&bar) {
+				pass("bar matches 1");
+			}
+			fail("bar matches 1");
+		}
+		1;
+END
+	}
 }
 
 if ($] >= 5.010001) {
