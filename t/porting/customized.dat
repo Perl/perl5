@@ -20,7 +20,7 @@ Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
 Socket cpan/Socket/Socket.pm ee83312b6e3e0185af8d41a18635913d84b1b651
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
-autodie cpan/autodie/lib/autodie/exception.pm 69eb9198238b0cd013fcb774df11ee939f667beb
+autodie cpan/autodie/lib/autodie/exception.pm b99e4e35a9ed36de94d54437888822ced4936207
 autodie cpan/autodie/lib/autodie/hints.pm e1998fec61fb4e82fe46585bd82c73200be6f262
 autodie cpan/autodie/t/exceptions.t ad315a208f875e06b0964012ce8d65daa438c036
 autodie cpan/autodie/t/lib/Hints_pod_examples.pm 6944c218e9754b3613c8d0c90a5ae8aceccb5c99

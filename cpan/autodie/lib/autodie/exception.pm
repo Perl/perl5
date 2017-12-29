@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '2.29001';
+our $VERSION = '2.29002';
 # ABSTRACT: Exceptions from autodying functions.
 
 our $DEBUG = 0;
@@ -222,10 +222,11 @@ See L<autodie/CATEGORIES> for further information.
 On Perl 5.10 and above, using smart-match (C<~~>) with an
 C<autodie::exception> object will use C<matches> underneath.  This module
 used to recommend using smart-match with the exception object on the left
-hand side, but in newer Perls that no longer works.  The smart-match
-facility of this class can now only be used with the exception object
-on the right hand side.  Having the exception object on the right also
-works on older Perls, back to 5.10.  Beware that this facility can only
+hand side, but in future Perls that is likely to stop working.
+The smart-match facility of this class should only be used with the
+exception object on the right hand side.  Having the exception object on
+the right is both future-proof and portable to older Perls, back to 5.10.
+Beware that this facility can only
 be relied upon when it is certain that the exception object actually is
 an C<autodie::exception> object; it is no more capable than an explicit
 call to the C<matches> method.
