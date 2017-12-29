@@ -70,6 +70,14 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Smartmatch and switch reversion
+
+The changes to the experimental smart match operator (C<~~>) and switch
+(C<given>/C<when>) constructs that were made in Perl 5.27.7 have been
+reverted due to the extent of the trouble caused to CPAN modules.
+It is expected that smartmatch will be changed again in the future,
+but preceded by some kind of explicit deprecation.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
