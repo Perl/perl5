@@ -18097,7 +18097,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * can be executed unnecessarily.  It will still give the
                  * correct answer. */
 
-            if (cp_list_array[cp_list_len-1] > 0x2029) {
+            if (cp_list_array[cp_list_len-1] >= 0x2029) {
                 for (posix_class = 0;
                      posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
                      posix_class++)
