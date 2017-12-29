@@ -129,6 +129,9 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_DBSTATE, indicates breakpoint
 				 *    (runtime property) */
 				/*  On OP_REQUIRE, was seen as CORE::require */
+				/*  On OP_(ENTER|LEAVE)WHEN, there's
+				    no condition */
+				/*  On OP_SMARTMATCH, an implicit smartmatch */
 				/*  On OP_ANONHASH and OP_ANONLIST, create a
 				    reference to the new anon hash or array */
 				/*  On OP_HELEM, OP_MULTIDEREF and OP_HSLICE,

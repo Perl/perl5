@@ -256,7 +256,7 @@ X<control flow>
 
 =for Pod::Functions =Flow
 
-L<C<caller>|/caller EXPR>,
+L<C<break>|/break>, L<C<caller>|/caller EXPR>,
 L<C<continue>|/continue BLOCK>, L<C<die>|/die LIST>, L<C<do>|/do BLOCK>,
 L<C<dump>|/dump LABEL>, L<C<eval>|/eval EXPR>,
 L<C<evalbytes>|/evalbytes EXPR>, L<C<exit>|/exit EXPR>,
@@ -267,9 +267,16 @@ L<C<redo>|/redo LABEL>, L<C<return>|/return EXPR>,
 L<C<sub>|/sub NAME BLOCK>, L<C<__SUB__>|/__SUB__>,
 L<C<wantarray>|/wantarray>
 
-In Perl v5.14 and earlier, L<C<continue>|/continue BLOCK>
-required the L<C<"switch"> feature|feature/The 'switch' feature> to
-be enabled.
+L<C<break>|/break> is available only if you enable the experimental
+L<C<"switch"> feature|feature/The 'switch' feature> or use the C<CORE::>
+prefix.  The L<C<"switch"> feature|feature/The 'switch' feature> also
+enables the C<default>, C<given> and C<when> statements, which are
+documented in L<perlsyn/"Switch Statements">.
+The L<C<"switch"> feature|feature/The 'switch' feature> is enabled
+automatically with a C<use v5.10> (or higher) declaration in the current
+scope.  In Perl v5.14 and earlier, L<C<continue>|/continue BLOCK>
+required the L<C<"switch"> feature|feature/The 'switch' feature>, like
+the other keywords.
 
 L<C<evalbytes>|/evalbytes EXPR> is only available with the
 L<C<"evalbytes"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
@@ -420,10 +427,10 @@ L<C<time>|/time>, L<C<times>|/times>
 =for Pod::Functions =!Non-functions
 
 C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
-C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
+C<default>, C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
 C<eq>, C<for>, C<foreach>, C<ge>, C<given>, C<gt>, C<if>, C<INIT>, C<le>,
-C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>,
-C<whereis>, C<whereso>, C<while>, C<x>, C<xor>
+C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<when>,
+C<while>, C<x>, C<xor>
 
 =back
 
@@ -905,6 +912,19 @@ uses the result of L<C<ref>|/ref EXPR> as a truth value.
 
 See L<perlmod/"Perl Modules">.
 
+=item break
+
+=for Pod::Functions +switch break out of a C<given> block
+
+Break out of a C<given> block.
+
+L<C<break>|/break> is available only if the
+L<C<"switch"> feature|feature/The 'switch' feature> is enabled or if it
+is prefixed with C<CORE::>. The
+L<C<"switch"> feature|feature/The 'switch' feature> is enabled
+automatically with a C<use v5.10> (or higher) declaration in the current
+scope.
+
 =item caller EXPR
 X<caller> X<call stack> X<stack> X<stack trace>
 
@@ -1322,10 +1342,9 @@ using an empty one, logically enough, so L<C<next>|/next LABEL> goes
 directly back to check the condition at the top of the loop.
 
 When there is no BLOCK, L<C<continue>|/continue BLOCK> is a function
-that exits the current C<whereis> or C<whereso> block,
-avoiding the implicit C<next>
-that happens when execution reaches the end of such a block.
-In Perl 5.14 and earlier, this form of
+that falls through the current C<when> or C<default> block instead of
+iterating a dynamically enclosing C<foreach> or exiting a lexically
+enclosing C<given>.  In Perl 5.14 and earlier, this form of
 L<C<continue>|/continue BLOCK> was only available when the
 L<C<"switch"> feature|feature/The 'switch' feature> was enabled.  See
 L<feature> and L<perlsyn/"Switch Statements"> for more information.
@@ -3810,8 +3829,7 @@ value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
 to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
-Note that a block by itself or a C<given> construct
-is semantically identical to a loop
+Note that a block by itself is semantically identical to a loop
 that executes once.  Thus L<C<last>|/last LABEL> can be used to effect
 an early exit out of such a block.
 
@@ -4341,8 +4359,7 @@ value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
 to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
-Note that a block by itself or a C<given> construct
-is semantically identical to a loop
+Note that a block by itself is semantically identical to a loop
 that executes once.  Thus L<C<next>|/next LABEL> will exit such a block
 early.
 
@@ -6306,8 +6323,7 @@ value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
 to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
-Note that a block by itself or a C<given> construct
-is semantically identical to a loop
+Note that a block by itself is semantically identical to a loop
 that executes once.  Thus L<C<redo>|/redo LABEL> inside such a block
 will effectively turn it into a looping construct.
 
@@ -10146,11 +10162,11 @@ Statements">.
 
 =over
 
+=item default
+
 =item given
 
-=item whereis
-
-=item whereso
+=item when
 
 These flow-control keywords related to the experimental switch feature are
 documented in L<perlsyn/"Switch Statements">.

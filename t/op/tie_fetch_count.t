@@ -9,7 +9,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan (tests => 342);
+plan (tests => 343);
 
 use strict;
 use warnings;
@@ -164,6 +164,10 @@ $dummy  = -e -e -e $var ; check_count '-e -e';
 $_ = "foo";
 $dummy  =  $var =~ m/ / ; check_count 'm//';
 $dummy  =  $var =~ s/ //; check_count 's///';
+{
+    no warnings 'experimental::smartmatch';
+    $dummy  =  $var ~~    1 ; check_count '~~';
+}
 $dummy  =  $var =~ y/ //; check_count 'y///';
            $var = \1;
 $dummy  =  $var =~y/ /-/; check_count '$ref =~ y///';

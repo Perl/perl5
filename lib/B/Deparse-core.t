@@ -36,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 3874;
+plan tests => 3886;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -381,8 +381,7 @@ my %not_tested = map { $_ => 1} qw(
     unless
     until
     use
-    whereis
-    whereso
+    when
     while
     y
 );
@@ -465,6 +464,7 @@ atan2            2     p
 bind             2     p
 binmode          12    p
 bless            1     p
+break            0     -
 caller           0     -
 chdir            01    -
 chmod            @     p1

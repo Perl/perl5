@@ -1200,7 +1200,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 
     case OP_ENTERITER:
     case OP_ENTERLOOP:
-    case OP_ENTERGIVEN:
 	S_opdump_indent(aTHX_ o, level, bar, file, "REDO");
         S_opdump_link(aTHX_ cLOOPo->op_redoop, file);
 	S_opdump_indent(aTHX_ o, level, bar, file, "NEXT");
@@ -1222,7 +1221,8 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_DORASSIGN:
     case OP_ANDASSIGN:
     case OP_ARGDEFELEM:
-    case OP_ENTERWHERESO:
+    case OP_ENTERGIVEN:
+    case OP_ENTERWHEN:
     case OP_ENTERTRY:
     case OP_ONCE:
 	S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");

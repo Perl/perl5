@@ -316,6 +316,7 @@ static struct debug_tokens {
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
     { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
+    { DEFAULT,		TOKENTYPE_NONE,		"DEFAULT" },
     { DO,		TOKENTYPE_NONE,		"DO" },
     { DOLSHARP,		TOKENTYPE_NONE,		"DOLSHARP" },
     { DORDOR,		TOKENTYPE_NONE,		"DORDOR" },
@@ -374,7 +375,7 @@ static struct debug_tokens {
     { UNLESS,		TOKENTYPE_IVAL,		"UNLESS" },
     { UNTIL,		TOKENTYPE_IVAL,		"UNTIL" },
     { USE,		TOKENTYPE_IVAL,		"USE" },
-    { WHERESO,		TOKENTYPE_IVAL,		"WHERESO" },
+    { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
     { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
     { BAREWORD,		TOKENTYPE_OPVAL,	"BAREWORD" },
     { YADAYADA,		TOKENTYPE_IVAL,		"YADAYADA" },
@@ -7777,6 +7778,9 @@ Perl_yylex(pTHX)
 	case KEY_bless:
 	    LOP(OP_BLESS,XTERM);
 
+	case KEY_break:
+	    FUN0(OP_BREAK);
+
 	case KEY_chop:
 	    UNI(OP_CHOP);
 
@@ -7837,6 +7841,9 @@ Perl_yylex(pTHX)
 
 	case KEY_chroot:
 	    UNI(OP_CHROOT);
+
+	case KEY_default:
+	    PREBLOCK(DEFAULT);
 
 	case KEY_do:
 	    s = skipspace(s);
@@ -8839,16 +8846,14 @@ Perl_yylex(pTHX)
 	case KEY_vec:
 	    LOP(OP_VEC,XTERM);
 
-	case KEY_whereis:
-	case KEY_whereso:
+	case KEY_when:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
-	    pl_yylval.ival = tmp == KEY_whereis;
-	    /* diag_listed_as: whereso is experimental */
+	    pl_yylval.ival = CopLINE(PL_curcop);
             Perl_ck_warner_d(aTHX_
                 packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
-                "%" UTF8f " is experimental", UTF8fARG(UTF, len, PL_tokenbuf));
-	    OPERATOR(WHERESO);
+                "when is experimental");
+	    OPERATOR(WHEN);
 
 	case KEY_while:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)

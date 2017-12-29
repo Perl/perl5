@@ -626,6 +626,7 @@ addbits('rv2gv',
 
 addbits('enteriter',
                     1 => qw(OPpITER_REVERSED REVERSED),# for (reverse ...)
+                    3 => qw(OPpITER_DEF      DEF),     # 'for $_'
 );
 addbits('iter',     1 => qw(OPpITER_REVERSED REVERSED));
 

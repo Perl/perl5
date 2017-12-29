@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5392;
+plan tests => 5338;
 
 use Scalar::Util qw(tainted);
 
@@ -1622,11 +1622,6 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($y, $o, "copy constructor falls back to assignment (preinc)");
 }
 
-{
-    package MatchAbc;
-    use overload '~~' => sub { $_[1] eq "abc" };
-}
-
 # only scalar 'x' should currently overload
 
 {
@@ -1840,10 +1835,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 	$e = '"abc" ~~ (%s)';
 	$subs{'~~'} = $e;
-	push @tests, [ bless({}, "MatchAbc"), $e, '(~~)', '(NM:~~)',
-			[ 1, 1, 0 ], 0 ];
-	$e = '(%s) ~~ bless({}, "MatchAbc")';
-	push @tests, [ "xyz", $e, '(eq)', '(NM:eq)', [ 1, 1, 0 ], 0 ];
+	push @tests, [ "abc", $e, '(~~)', '(NM:~~)', [ 1, 1, 0 ], 0 ];
 
 	$subs{'-X'} = 'do { my $f = (%s);'
 		    . '$_[1] eq "r" ? (-r ($f)) :'

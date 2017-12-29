@@ -986,34 +986,6 @@ XS(XS_re_regexp_pattern)
     NOT_REACHED; /* NOTREACHED */
 }
 
-XS(XS_Regexp_smartmatch); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Regexp_smartmatch)
-{
-    dXSARGS;
-    SV *regexp_sv, *matchee_sv;
-    REGEXP *rx;
-    regexp *prog;
-    const char *strstart, *strend;
-    STRLEN len;
-
-    if (items != 3)
-	croak_xs_usage(cv, "regexp, matchee, swap");
-    matchee_sv = SP[-1];
-    regexp_sv = SP[-2];
-    SP -= 2;
-    PUTBACK;
-    assert(SvROK(regexp_sv));
-    rx = (REGEXP*)SvRV(regexp_sv);
-    assert(SvTYPE((SV*)rx) == SVt_REGEXP);
-    prog = ReANY(rx);
-    strstart = SvPV_const(matchee_sv, len);
-    assert(strstart);
-    strend = strstart + len;
-    TOPs = boolSV((RXp_MINLEN(prog) < 0 || len >= (STRLEN)RXp_MINLEN(prog)) &&
-		CALLREGEXEC(rx, (char*)strstart, (char *)strend,
-		    (char*)strstart, 0, matchee_sv, NULL, 0));
-}
-
 #include "vutil.h"
 #include "vxs.inc"
 
@@ -1048,9 +1020,6 @@ static const struct xsub_details details[] = {
     {"re::regnames", XS_re_regnames, ";$"},
     {"re::regnames_count", XS_re_regnames_count, ""},
     {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
-    {"Regexp::((", XS_Regexp_smartmatch, NULL},
-    {"Regexp::()", XS_Regexp_smartmatch, NULL},
-    {"Regexp::(~~", XS_Regexp_smartmatch, NULL},
 };
 
 STATIC OP*
@@ -1139,9 +1108,6 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	*cvfile = (char *)file;
 	Safefree(oldfile);
     }
-
-    /* overload fallback flag for Regexp */
-    sv_setiv(get_sv("Regexp::()", GV_ADD), 1);
 }
 
 /*

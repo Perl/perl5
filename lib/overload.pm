@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -522,8 +522,33 @@ This overload was introduced in Perl 5.12.
 =item * I<Matching>
 
 The key C<"~~"> allows you to override the smart matching logic used by
-the C<~~> operator.  See L<perlop/"Smartmatch Operator">.
-Unusually, the overloaded only takes effect for the right-hand operand.
+the C<~~> operator and the switch construct (C<given>/C<when>).  See
+L<perlsyn/Switch Statements> and L<feature>.
+
+Unusually, the overloaded implementation of the smart match operator
+does not get full control of the smart match behaviour.
+In particular, in the following code:
+
+    package Foo;
+    use overload '~~' => 'match';
+
+    my $obj =  Foo->new();
+    $obj ~~ [ 1,2,3 ];
+
+the smart match does I<not> invoke the method call like this:
+
+    $obj->match([1,2,3],0);
+
+rather, the smart match distributive rule takes precedence, so $obj is
+smart matched against each array element in turn until a match is found,
+so you may see between one and three of these calls instead:
+
+    $obj->match(1,0);
+    $obj->match(2,0);
+    $obj->match(3,0);
+
+Consult the match table in  L<perlop/"Smartmatch Operator"> for
+details of when overloading is invoked.
 
 =item * I<Dereferencing>
 

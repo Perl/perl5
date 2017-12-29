@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 253;
+plan tests => 254;
 
 while (<DATA>) {
     chomp;
@@ -51,6 +51,7 @@ atan2 ($$)
 bind (*$)
 binmode (*;$)
 bless ($;$)
+break ()
 caller (;$)
 chdir (;$)
 chmod (@)
@@ -68,6 +69,7 @@ cos (_)
 crypt ($$)
 dbmclose (\%)
 dbmopen (\%$$)
+default undef
 defined undef
 delete undef
 die (@)
@@ -276,8 +278,7 @@ wait ()
 waitpid ($$)
 wantarray ()
 warn (@)
-whereis undef
-whereso undef
+when undef
 while undef
 write (;*)
 x undef

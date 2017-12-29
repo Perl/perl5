@@ -1832,7 +1832,7 @@ Perl_scalar(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = OpSIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHERESO
+	    if (sib && kid->op_type != OP_LEAVEWHEN
 	     && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
 		|| (  sib->op_targ != OP_NEXTSTATE
 		   && sib->op_targ != OP_DBSTATE  )))
@@ -1923,7 +1923,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         want = o->op_flags & OPf_WANT;
         if ((want && want != OPf_WANT_SCALAR)
             || (PL_parser && PL_parser->error_count)
-            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHERESO)
+            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
         {
             continue;
         }
@@ -2191,7 +2191,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_DOR:
         case OP_COND_EXPR:
         case OP_ENTERGIVEN:
-        case OP_ENTERWHERESO:
+        case OP_ENTERWHEN:
             for (kid = OpSIBLING(cUNOPo->op_first); kid; kid = OpSIBLING(kid))
                 if (!(kid->op_flags & OPf_KIDS))
                     scalarvoid(kid);
@@ -2215,7 +2215,8 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_LEAVETRY:
         case OP_LEAVELOOP:
         case OP_LINESEQ:
-        case OP_LEAVEWHERESO:
+        case OP_LEAVEGIVEN:
+        case OP_LEAVEWHEN:
         kids:
             for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
                 if (!(kid->op_flags & OPf_KIDS))
@@ -2355,7 +2356,7 @@ Perl_list(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = OpSIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHERESO)
+	    if (sib && kid->op_type != OP_LEAVEWHEN)
 		scalarvoid(kid);
 	    else
 		list(kid);
@@ -8647,6 +8648,16 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
 	    iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
             OpTYPE_set(sv, OP_RV2GV);
+
+	    /* The op_type check is needed to prevent a possible segfault
+	     * if the loop variable is undeclared and 'strict vars' is in
+	     * effect. This is illegal but is nonetheless parsed, so we
+	     * may reach this point with an OP_CONST where we're expecting
+	     * an OP_GV.
+	     */
+	    if (cUNOPx(sv)->op_first->op_type == OP_GV
+	     && cGVOPx_gv(cUNOPx(sv)->op_first) == PL_defgv)
+		iterpflags |= OPpITER_DEF;
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
 	    iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
@@ -8660,9 +8671,17 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	    NOOP;
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
+	if (padoff) {
+	    PADNAME * const pn = PAD_COMPNAME(padoff);
+	    const char * const name = PadnamePV(pn);
+
+	    if (PadnameLEN(pn) == 2 && name[0] == '$' && name[1] == '_')
+		iterpflags |= OPpITER_DEF;
+	}
     }
     else {
 	sv = newGVOP(OP_GV, 0, PL_defgv);
+	iterpflags |= OPpITER_DEF;
     }
 
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
@@ -8791,11 +8810,178 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
     return o;
 }
 
+/* if the condition is a literal array or hash
+   (or @{ ... } etc), make a reference to it.
+ */
+STATIC OP *
+S_ref_array_or_hash(pTHX_ OP *cond)
+{
+    if (cond
+    && (cond->op_type == OP_RV2AV
+    ||  cond->op_type == OP_PADAV
+    ||  cond->op_type == OP_RV2HV
+    ||  cond->op_type == OP_PADHV))
+
+	return newUNOP(OP_REFGEN, 0, op_lvalue(cond, OP_REFGEN));
+
+    else if(cond
+    && (cond->op_type == OP_ASLICE
+    ||  cond->op_type == OP_KVASLICE
+    ||  cond->op_type == OP_HSLICE
+    ||  cond->op_type == OP_KVHSLICE)) {
+
+	/* anonlist now needs a list from this op, was previously used in
+	 * scalar context */
+	cond->op_flags &= ~(OPf_WANT_SCALAR | OPf_REF);
+	cond->op_flags |= OPf_WANT_LIST;
+
+	return newANONLIST(op_lvalue(cond, OP_ANONLIST));
+    }
+
+    else
+	return cond;
+}
+
+/* These construct the optree fragments representing given()
+   and when() blocks.
+
+   entergiven and enterwhen are LOGOPs; the op_other pointer
+   points up to the associated leave op. We need this so we
+   can put it in the context and make break/continue work.
+   (Also, of course, pp_enterwhen will jump straight to
+   op_other if the match fails.)
+ */
+
+STATIC OP *
+S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
+		   I32 enter_opcode, I32 leave_opcode,
+		   PADOFFSET entertarg)
+{
+    dVAR;
+    LOGOP *enterop;
+    OP *o;
+
+    PERL_ARGS_ASSERT_NEWGIVWHENOP;
+    PERL_UNUSED_ARG(entertarg); /* used to indicate targ of lexical $_ */
+
+    enterop = alloc_LOGOP(enter_opcode, block, NULL);
+    enterop->op_targ = 0;
+    enterop->op_private = 0;
+
+    o = newUNOP(leave_opcode, 0, (OP *) enterop);
+
+    if (cond) {
+        /* prepend cond if we have one */
+        op_sibling_splice((OP*)enterop, NULL, 0, scalar(cond));
+
+	o->op_next = LINKLIST(cond);
+	cond->op_next = (OP *) enterop;
+    }
+    else {
+	/* This is a default {} block */
+	enterop->op_flags |= OPf_SPECIAL;
+	o      ->op_flags |= OPf_SPECIAL;
+
+	o->op_next = (OP *) enterop;
+    }
+
+    CHECKOP(enter_opcode, enterop); /* Currently does nothing, since
+    				       entergiven and enterwhen both
+    				       use ck_null() */
+
+    enterop->op_next = LINKLIST(block);
+    block->op_next = enterop->op_other = o;
+
+    return o;
+}
+
+/* Does this look like a boolean operation? For these purposes
+   a boolean operation is:
+     - a subroutine call [*]
+     - a logical connective
+     - a comparison operator
+     - a filetest operator, with the exception of -s -M -A -C
+     - defined(), exists() or eof()
+     - /$re/ or $foo =~ /$re/
+   
+   [*] possibly surprising
+ */
+STATIC bool
+S_looks_like_bool(pTHX_ const OP *o)
+{
+    PERL_ARGS_ASSERT_LOOKS_LIKE_BOOL;
+
+    switch(o->op_type) {
+	case OP_OR:
+	case OP_DOR:
+	    return looks_like_bool(cLOGOPo->op_first);
+
+	case OP_AND:
+        {
+            OP* sibl = OpSIBLING(cLOGOPo->op_first);
+            ASSUME(sibl);
+	    return (
+	    	looks_like_bool(cLOGOPo->op_first)
+	     && looks_like_bool(sibl));
+        }
+
+	case OP_NULL:
+	case OP_SCALAR:
+	    return (
+		o->op_flags & OPf_KIDS
+	    && looks_like_bool(cUNOPo->op_first));
+
+	case OP_ENTERSUB:
+
+	case OP_NOT:	case OP_XOR:
+
+	case OP_EQ:	case OP_NE:	case OP_LT:
+	case OP_GT:	case OP_LE:	case OP_GE:
+
+	case OP_I_EQ:	case OP_I_NE:	case OP_I_LT:
+	case OP_I_GT:	case OP_I_LE:	case OP_I_GE:
+
+	case OP_SEQ:	case OP_SNE:	case OP_SLT:
+	case OP_SGT:	case OP_SLE:	case OP_SGE:
+	
+	case OP_SMARTMATCH:
+	
+	case OP_FTRREAD:  case OP_FTRWRITE: case OP_FTREXEC:
+	case OP_FTEREAD:  case OP_FTEWRITE: case OP_FTEEXEC:
+	case OP_FTIS:     case OP_FTEOWNED: case OP_FTROWNED:
+	case OP_FTZERO:   case OP_FTSOCK:   case OP_FTCHR:
+	case OP_FTBLK:    case OP_FTFILE:   case OP_FTDIR:
+	case OP_FTPIPE:   case OP_FTLINK:   case OP_FTSUID:
+	case OP_FTSGID:   case OP_FTSVTX:   case OP_FTTTY:
+	case OP_FTTEXT:   case OP_FTBINARY:
+	
+	case OP_DEFINED: case OP_EXISTS:
+	case OP_MATCH:	 case OP_EOF:
+
+	case OP_FLOP:
+
+	    return TRUE;
+	
+	case OP_CONST:
+	    /* Detect comparisons that have been optimized away */
+	    if (cSVOPo->op_sv == &PL_sv_yes
+	    ||  cSVOPo->op_sv == &PL_sv_no)
+	    
+		return TRUE;
+	    else
+		return FALSE;
+
+	/* FALLTHROUGH */
+	default:
+	    return FALSE;
+    }
+}
+
 /*
-=for apidoc Am|OP *|newGIVENOP|OP *topic|OP *block|PADOFFSET defsv_off
+=for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
 
 Constructs, checks, and returns an op tree expressing a C<given> block.
-C<topic> supplies the expression to whose value C<$_> will be locally
+C<cond> supplies the expression to whose value C<$_> will be locally
 aliased, and C<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
 C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
@@ -8804,64 +8990,49 @@ C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
 */
 
 OP *
-Perl_newGIVENOP(pTHX_ OP *topic, OP *block, PADOFFSET defsv_off)
+Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 {
-    OP *enterop, *leaveop;
     PERL_ARGS_ASSERT_NEWGIVENOP;
     PERL_UNUSED_ARG(defsv_off);
+
     assert(!defsv_off);
-
-    NewOpSz(1101, enterop, sizeof(LOOP));
-    OpTYPE_set(enterop, OP_ENTERGIVEN);
-    cLOOPx(enterop)->op_first = scalar(topic);
-    cLOOPx(enterop)->op_last = block;
-    OpMORESIB_set(topic, block);
-    OpLASTSIB_set(block, enterop);
-    enterop->op_flags = OPf_KIDS;
-
-    leaveop = newBINOP(OP_LEAVELOOP, 0, enterop, newOP(OP_NULL, 0));
-    leaveop->op_next = LINKLIST(topic);
-    topic->op_next = enterop;
-    enterop = CHECKOP(OP_ENTERGIVEN, enterop);
-    cLOOPx(enterop)->op_redoop = enterop->op_next = LINKLIST(block);
-    cLOOPx(enterop)->op_lastop = cLOOPx(enterop)->op_nextop = block->op_next =
-	leaveop;
-
-    return leaveop;
+    return newGIVWHENOP(
+    	ref_array_or_hash(cond),
+    	block,
+	OP_ENTERGIVEN, OP_LEAVEGIVEN,
+	0);
 }
 
 /*
-=for apidoc Am|OP *|newWHERESOOP|OP *cond|OP *block
+=for apidoc Am|OP *|newWHENOP|OP *cond|OP *block
 
-Constructs, checks, and returns an op tree expressing a C<whereso> block.
+Constructs, checks, and returns an op tree expressing a C<when> block.
 C<cond> supplies the test expression, and C<block> supplies the block
 that will be executed if the test evaluates to true; they are consumed
-by this function and become part of the constructed op tree.
+by this function and become part of the constructed op tree.  C<cond>
+will be interpreted DWIMically, often as a comparison against C<$_>,
+and may be null to generate a C<default> block.
 
 =cut
 */
 
 OP *
-Perl_newWHERESOOP(pTHX_ OP *cond, OP *block)
+Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 {
-    OP *enterop, *leaveop;
-    PERL_ARGS_ASSERT_NEWWHERESOOP;
+    const bool cond_llb = (!cond || looks_like_bool(cond));
+    OP *cond_op;
 
-    NewOpSz(1101, enterop, sizeof(LOGOP));
-    OpTYPE_set(enterop, OP_ENTERWHERESO);
-    cLOGOPx(enterop)->op_first = scalar(cond);
-    OpMORESIB_set(cond, block);
-    OpLASTSIB_set(block, enterop);
-    enterop->op_flags = OPf_KIDS;
+    PERL_ARGS_ASSERT_NEWWHENOP;
 
-    leaveop = newUNOP(OP_LEAVEWHERESO, 0, enterop);
-    leaveop->op_next = LINKLIST(cond);
-    cond->op_next = enterop;
-    enterop = CHECKOP(OP_ENTERWHERESO, enterop);
-    enterop->op_next = LINKLIST(block);
-    cLOGOPx(enterop)->op_other = block->op_next = leaveop;
-
-    return leaveop;
+    if (cond_llb)
+	cond_op = cond;
+    else {
+	cond_op = newBINOP(OP_SMARTMATCH, OPf_SPECIAL,
+		newDEFSVOP(),
+		scalar(ref_array_or_hash(cond)));
+    }
+    
+    return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
 /* must not conflict with SVf_UTF8 */
@@ -11785,6 +11956,40 @@ Perl_ck_listiob(pTHX_ OP *o)
     if (o->op_type == OP_PRTF) return modkids(listkids(o), OP_PRTF);
     return listkids(o);
 }
+
+OP *
+Perl_ck_smartmatch(pTHX_ OP *o)
+{
+    dVAR;
+    PERL_ARGS_ASSERT_CK_SMARTMATCH;
+    if (0 == (o->op_flags & OPf_SPECIAL)) {
+	OP *first  = cBINOPo->op_first;
+	OP *second = OpSIBLING(first);
+	
+	/* Implicitly take a reference to an array or hash */
+
+        /* remove the original two siblings, then add back the
+         * (possibly different) first and second sibs.
+         */
+        op_sibling_splice(o, NULL, 1, NULL);
+        op_sibling_splice(o, NULL, 1, NULL);
+	first  = ref_array_or_hash(first);
+	second = ref_array_or_hash(second);
+        op_sibling_splice(o, NULL, 0, second);
+        op_sibling_splice(o, NULL, 0, first);
+	
+	/* Implicitly take a reference to a regular expression */
+	if (first->op_type == OP_MATCH && !(first->op_flags & OPf_STACKED)) {
+            OpTYPE_set(first, OP_QR);
+	}
+	if (second->op_type == OP_MATCH && !(second->op_flags & OPf_STACKED)) {
+            OpTYPE_set(second, OP_QR);
+        }
+    }
+    
+    return o;
+}
+
 
 static OP *
 S_maybe_targlex(pTHX_ OP *o)
@@ -15772,7 +15977,6 @@ Perl_rpeep(pTHX_ OP *o)
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
-	case OP_ENTERGIVEN:
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
 	    while (cLOOP->op_nextop->op_type == OP_NULL)

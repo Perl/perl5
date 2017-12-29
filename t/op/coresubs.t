@@ -20,7 +20,7 @@ my %unsupported = map +($_=>1), qw (
   format ge given goto grep gt if last le local lt m map my ne next
   no  or  our  package  print  printf  q  qq  qr  qw  qx  redo  require
   return s say sort state sub tr unless until use
-  whereis whereso while x xor y
+  when while x xor y
 );
 my %args_for = (
   dbmopen  => '%1,$2,$3',

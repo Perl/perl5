@@ -53,7 +53,7 @@
 %token <pval> LABEL
 %token <ival> FORMAT SUB ANONSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
-%token <ival> GIVEN WHERESO
+%token <ival> GIVEN WHEN DEFAULT
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> RELOP EQOP MULOP ADDOP
@@ -378,14 +378,10 @@ barestmt:	PLUGSTMT
 			  $$ = block_end($3, newGIVENOP($4, op_scope($6), 0));
 			  parser->copline = (line_t)$1;
 			}
-	|	WHERESO '(' remember mexpr ')' mblock
-			{
-			  OP *cond = $4;
-			  if ($1)
-			    cond = newBINOP(OP_SMARTMATCH, 0, newDEFSVOP(),
-					    scalar(cond));
-			  $$ = block_end($3, newWHERESOOP(cond, op_scope($6)));
-			}
+	|	WHEN '(' remember mexpr ')' mblock
+			{ $$ = block_end($3, newWHENOP($4, op_scope($6))); }
+	|	DEFAULT block
+			{ $$ = newWHENOP(0, op_scope($2)); }
 	|	WHILE '(' remember texpr ')' mintro mblock cont
 			{
 			  $$ = block_end($3,
@@ -537,14 +533,8 @@ sideff	:	error
 	|	expr FOR expr
 			{ $$ = newFOROP(0, NULL, $3, $1, NULL);
 			  parser->copline = (line_t)$2; }
-	|	expr WHERESO expr
-			{
-			  OP *cond = $3;
-			  if ($2)
-			    cond = newBINOP(OP_SMARTMATCH, 0, newDEFSVOP(),
-					    scalar(cond));
-			  $$ = newWHERESOOP(cond, op_scope($1));
-			}
+	|	expr WHEN expr
+			{ $$ = newWHENOP($3, op_scope($1)); }
 	;
 
 /* else and elsif blocks */

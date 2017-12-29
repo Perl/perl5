@@ -342,8 +342,8 @@ my @spam = qw [spam ham bacon beans];
 foreach my $spam (@spam) {
     no warnings 'experimental::smartmatch';
     given (state $spam = $spam) {
-        whereso ($spam [0]) {ok 1, "given"}
-        ok 0, "given";
+        when ($spam [0]) {ok 1, "given"}
+        default          {ok 0, "given"}
     }
 }
 

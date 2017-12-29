@@ -726,13 +726,6 @@ which makes no sense.  Maybe you meant '%s', or just stringifying it?
 (F) C<caller> tried to set C<@DB::args>, but found it tied.  Tying C<@DB::args>
 is not supported.  (Before this error was added, it used to crash.)
 
-=item Cannot smart match without a matcher object
-
-(F) You tried to perform a smart match (C<~~>), but the right hand operand
-was not an object overloading the smart match operation.  Such a matcher
-object is required, in order to determine what kind of matching operation
-to apply to the left hand operand.
-
 =item Cannot tie unreifiable array
 
 (P) You somehow managed to call C<tie> on an array that does not
@@ -758,6 +751,15 @@ to compress something else.  See L<perlfunc/pack>.
 
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
+
+=item Can't "break" in a loop topicalizer
+
+(F) You called C<break>, but you're in a C<foreach> block rather than
+a C<given> block.  You probably meant to use C<next> or C<last>.
+
+=item Can't "break" outside a given block
+
+(F) You called C<break>, but you're not inside a C<given> block.
 
 =item Can't call method "%s" on an undefined value
 
@@ -822,10 +824,10 @@ You CAN say
 
 but then $foo no longer contains a glob.
 
-=item Can't "continue" outside a whereso block
+=item Can't "continue" outside a when block
 
-(F) You called C<continue>, but you're not inside a C<whereis> or
-C<whereso> block.
+(F) You called C<continue>, but you're not inside a C<when>
+or C<default> block.
 
 =item Can't create pipe mailbox
 
@@ -836,6 +838,13 @@ quotas or other plumbing problems.
 
 (F) Only scalar, array, and hash variables may be declared as "my", "our" or
 "state" variables.  They must have ordinary identifiers as names.
+
+=item Can't "default" outside a topicalizer
+
+(F) You have used a C<default> block that is neither inside a
+C<foreach> loop nor a C<given> block.  (Note that this error is
+issued on exit from the C<default> block, so you won't get the
+error if you use an explicit C<continue>.)
 
 =item Can't determine class of operator %s, assuming BASEOP
 
@@ -1081,17 +1090,6 @@ block, as doesn't a block given to sort(), map() or grep().  You can
 usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
-
-=item Can't leave "whereso" outside a loop block
-
-(F) Control reached the end of a C<whereis> or C<whereso> block that
-isn't inside any loop (including a C<given> block).  An implicit C<next>
-occurs here, which requires a loop to jump to.  You probably wanted the
-C<whereis> or C<whereso> to be inside a C<given> block.  Note that you
-won't get this error if the match controlling the C<whereis> or C<whereso>
-fails, or if you use an explicit C<continue> to avoid reaching the end
-of the block.  But if you rely on not reaching the implicit C<next>
-then you probably didn't want C<whereis> or C<whereso>, but rather C<if>.
 
 =item Can't linearize anonymous symbol table
 
@@ -1552,6 +1550,13 @@ instead.
 
 (F) You attempted to weaken something that was not a reference.  Only
 references can be weakened.
+
+=item Can't "when" outside a topicalizer
+
+(F) You have used a when() block that is neither inside a C<foreach>
+loop nor a C<given> block.  (Note that this error is issued on exit
+from the C<when> block, so you won't get the error if the match fails,
+or if you use an explicit C<continue>.)
 
 =item Can't x= to read-only value
 
@@ -2497,9 +2502,10 @@ L<perlfunc/getsockopt>.
 
 =item given is experimental
 
-(S experimental::smartmatch) C<given> is experimental, and its behavior
-may change or it may even be removed in any future release of perl.
-See the explanation under L<perlsyn/Switch Statements>.
+(S experimental::smartmatch) C<given> depends on smartmatch, which
+is experimental, so its behavior may change or even be removed
+in any future release of perl.  See the explanation under
+L<perlsyn/Experimental Details on given and when>.
 
 =item Global symbol "%s" requires explicit package name (did you forget to
 declare "my %s"?)
@@ -5711,12 +5717,20 @@ requested.
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
 
+=item Smart matching a non-overloaded object breaks encapsulation
+
+(F) You should not use the C<~~> operator on an object that does not
+overload it: Perl refuses to use the object's underlying structure
+for the smart match.
+
 =item Smartmatch is experimental
 
 (S experimental::smartmatch) This warning is emitted if you
 use the smartmatch (C<~~>) operator.  This is currently an experimental
 feature, and its details are subject to change in future releases of
-Perl.
+Perl.  Particularly, its current behavior is noticed for being
+unnecessarily complex and unintuitive, and is very likely to be
+overhauled.
 
 =item Sorry, hash keys must be smaller than 2**31 bytes
 
@@ -7488,17 +7502,13 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item whereis is experimental
+=item when is experimental
 
-(S experimental::smartmatch) C<whereis> is experimental, and its behavior
-may change or it may even be removed in any future release of perl.
-See the explanation under L<perlsyn/Switch Statements>.
-
-=item whereso is experimental
-
-(S experimental::smartmatch) C<whereso> is experimental, and its behavior
-may change or it may even be removed in any future release of perl.
-See the explanation under L<perlsyn/Switch Statements>.
+(S experimental::smartmatch) C<when> depends on smartmatch, which is
+experimental.  Additionally, it has several special cases that may
+not be immediately obvious, and their behavior may change or
+even be removed in any future release of perl.  See the explanation
+under L<perlsyn/Experimental Details on given and when>.
 
 =item Wide character in %s
 

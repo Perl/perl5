@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.50';
+our $VERSION = '1.51';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -151,7 +151,7 @@ explicitly disabled the warning:
 
     no warnings "experimental::smartmatch";
 
-C<use feature 'switch'> tells the compiler to enable the
+C<use feature 'switch'> tells the compiler to enable the Perl 6
 given/when construct.
 
 See L<perlsyn/"Switch Statements"> for details.

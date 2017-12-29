@@ -512,6 +512,11 @@ PERL_CALLCONV OP *	Perl_ck_shift(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_SHIFT	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_smartmatch(pTHX_ OP *o)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CK_SMARTMATCH	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_sort(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CK_SORT	\
@@ -2166,10 +2171,10 @@ PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, OP* sv, OP* expr, OP* block, OP
 #define PERL_ARGS_ASSERT_NEWFOROP	\
 	assert(expr)
 
-PERL_CALLCONV OP*	Perl_newGIVENOP(pTHX_ OP* topic, OP* block, PADOFFSET defsv_off)
+PERL_CALLCONV OP*	Perl_newGIVENOP(pTHX_ OP* cond, OP* block, PADOFFSET defsv_off)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWGIVENOP	\
-	assert(topic); assert(block)
+	assert(cond); assert(block)
 
 PERL_CALLCONV GP *	Perl_newGP(pTHX_ GV *const gv);
 #define PERL_ARGS_ASSERT_NEWGP	\
@@ -2356,10 +2361,10 @@ PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first)
 PERL_CALLCONV OP*	Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP* first, UNOP_AUX_item *aux)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV OP*	Perl_newWHERESOOP(pTHX_ OP* cond, OP* block)
+PERL_CALLCONV OP*	Perl_newWHENOP(pTHX_ OP* cond, OP* block)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_NEWWHERESOOP	\
-	assert(cond); assert(block)
+#define PERL_ARGS_ASSERT_NEWWHENOP	\
+	assert(block)
 
 PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, OP* expr, OP* block, OP* cont, I32 has_my)
 			__attribute__warn_unused_result__;
@@ -4003,6 +4008,11 @@ PERL_STATIC_INLINE void	S_cx_popformat(pTHX_ PERL_CONTEXT *cx);
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_cx_popgiven(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPGIVEN	\
+	assert(cx)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_cx_poploop(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPLOOP	\
 	assert(cx)
@@ -4023,8 +4033,8 @@ PERL_STATIC_INLINE void	S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx);
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_popwhereso(pTHX_ PERL_CONTEXT *cx);
-#define PERL_ARGS_ASSERT_CX_POPWHERESO	\
+PERL_STATIC_INLINE void	S_cx_popwhen(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPWHEN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -4043,14 +4053,14 @@ PERL_STATIC_INLINE void	S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *reto
 	assert(cx); assert(cv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
+#define PERL_ARGS_ASSERT_CX_PUSHGIVEN	\
+	assert(cx)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV *itersave);
 #define PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR	\
 	assert(cx); assert(itervarp)
-#endif
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushloop_given(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
-#define PERL_ARGS_ASSERT_CX_PUSHLOOP_GIVEN	\
-	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);
@@ -4063,8 +4073,8 @@ PERL_STATIC_INLINE void	S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, 
 	assert(cx); assert(cv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_cx_pushwhereso(pTHX_ PERL_CONTEXT *cx);
-#define PERL_ARGS_ASSERT_CX_PUSHWHERESO	\
+PERL_STATIC_INLINE void	S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_PUSHWHEN	\
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -4780,6 +4790,9 @@ STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 	assert(o)
 
 STATIC OP*	S_listkids(pTHX_ OP* o);
+STATIC bool	S_looks_like_bool(pTHX_ const OP* o);
+#define PERL_ARGS_ASSERT_LOOKS_LIKE_BOOL	\
+	assert(o)
 STATIC OP*	S_modkids(pTHX_ OP *o, I32 type);
 STATIC void	S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name, bool curstash);
 #define PERL_ARGS_ASSERT_MOVE_PROTO_ATTR	\
@@ -4787,6 +4800,9 @@ STATIC void	S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name, bool
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 #define PERL_ARGS_ASSERT_MY_KID	\
 	assert(imopsp)
+STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave_opcode, PADOFFSET entertarg);
+#define PERL_ARGS_ASSERT_NEWGIVWHENOP	\
+	assert(block)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE OP*	S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth);
 #endif
@@ -4822,6 +4838,7 @@ STATIC OP*	S_pmtrans(pTHX_ OP* o, OP* expr, OP* repl);
 STATIC bool	S_process_special_blocks(pTHX_ I32 floor, const char *const fullname, GV *const gv, CV *const cv);
 #define PERL_ARGS_ASSERT_PROCESS_SPECIAL_BLOCKS	\
 	assert(fullname); assert(gv); assert(cv)
+STATIC OP*	S_ref_array_or_hash(pTHX_ OP* cond);
 STATIC OP*	S_refkids(pTHX_ OP* o, I32 type);
 STATIC bool	S_scalar_mod_type(const OP *o, I32 type)
 			__attribute__warn_unused_result__;
@@ -4936,6 +4953,10 @@ STATIC PerlIO *	S_check_type_and_open(pTHX_ SV *name)
 #define PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN	\
 	assert(name)
 
+STATIC void	S_destroy_matcher(pTHX_ PMOP* matcher);
+#define PERL_ARGS_ASSERT_DESTROY_MATCHER	\
+	assert(matcher)
+STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other, const bool copied);
 STATIC OP*	S_docatch(pTHX_ Perl_ppaddr_t firstpp)
 			__attribute__warn_unused_result__;
 
@@ -4951,6 +4972,9 @@ STATIC MAGIC *	S_doparseform(pTHX_ SV *sv);
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
+STATIC I32	S_dopoptogivenfor(pTHX_ I32 startingblock)
+			__attribute__warn_unused_result__;
+
 STATIC I32	S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOPOPTOLABEL	\
@@ -4964,8 +4988,18 @@ STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 #define PERL_ARGS_ASSERT_DOPOPTOSUB_AT	\
 	assert(cxstk)
 
-STATIC I32	S_dopoptowhereso(pTHX_ I32 startingblock)
+STATIC I32	S_dopoptowhen(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
+
+STATIC PMOP*	S_make_matcher(pTHX_ REGEXP* re)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MAKE_MATCHER	\
+	assert(re)
+
+STATIC bool	S_matcher_matches_sv(pTHX_ PMOP* matcher, SV* sv)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MATCHER_MATCHES_SV	\
+	assert(matcher); assert(sv)
 
 STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 			__attribute__warn_unused_result__;

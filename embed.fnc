@@ -1129,7 +1129,7 @@ Apd	|CV*	|newCONSTSUB_flags|NULLOK HV* stash \
 				  |U32 flags|NULLOK SV* sv
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 ApdR	|OP*	|newFOROP	|I32 flags|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
-ApdR	|OP*	|newGIVENOP	|NN OP* topic|NN OP* block|PADOFFSET defsv_off
+ApdR	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 ApdR	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
 pM	|LOGOP*	|alloc_LOGOP	|I32 type|NULLOK OP *first|NULLOK OP *other
 ApdR	|OP*	|newLOOPEX	|I32 type|NN OP* label
@@ -1198,7 +1198,7 @@ ApdR	|SV*	|newSV_type	|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 ApdR	|OP*	|newUNOP_AUX	|I32 type|I32 flags|NULLOK OP* first \
 				|NULLOK UNOP_AUX_item *aux
-ApdR	|OP*	|newWHERESOOP	|NN OP* cond|NN OP* block
+ApdR	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
 ApdR	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
@@ -2172,6 +2172,11 @@ s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags
 s	|OP*	|too_many_arguments_pv|NN OP *o|NN const char* name|U32 flags
+s	|bool	|looks_like_bool|NN const OP* o
+s	|OP*	|newGIVWHENOP	|NULLOK OP* cond|NN OP *block \
+				|I32 enter_opcode|I32 leave_opcode \
+				|PADOFFSET entertarg
+s	|OP*	|ref_array_or_hash|NULLOK OP* cond
 s	|bool	|process_special_blocks	|I32 floor \
 					|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv
@@ -2259,10 +2264,11 @@ sR	|OP*	|dofindlabel	|NN OP *o|NN const char *label|STRLEN len \
 s	|MAGIC *|doparseform	|NN SV *sv
 snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 sR	|I32	|dopoptoeval	|I32 startingblock
+sR	|I32	|dopoptogivenfor|I32 startingblock
 sR	|I32	|dopoptolabel	|NN const char *label|STRLEN len|U32 flags
 sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
-sR	|I32	|dopoptowhereso	|I32 startingblock
+sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 s	|bool	|doeval_compile	|U8 gimme \
 				|NULLOK CV* outside|U32 seq|NULLOK HV* hh
@@ -2272,6 +2278,11 @@ sR	|PerlIO *|doopen_pm	|NN SV *name
 #endif
 iRn	|bool	|path_is_searchable|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
+sR	|PMOP*	|make_matcher	|NN REGEXP* re
+sR	|bool	|matcher_matches_sv|NN PMOP* matcher|NN SV* sv
+s	|void	|destroy_matcher|NN PMOP* matcher
+s	|OP*	|do_smartmatch	|NULLOK HV* seen_this \
+				|NULLOK HV* seen_other|const bool copied
 #endif
 
 #if defined(PERL_IN_PP_HOT_C)
@@ -3190,10 +3201,11 @@ AiM	|void	|cx_popeval      |NN PERL_CONTEXT *cx
 AiM	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
 AiM	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
 				 |NN void *itervarp|NULLOK SV *itersave
-AiM	|void	|cx_pushloop_given    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
 AiM	|void	|cx_poploop      |NN PERL_CONTEXT *cx
-AiM	|void	|cx_pushwhereso  |NN PERL_CONTEXT *cx
-AiM	|void	|cx_popwhereso   |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushwhen     |NN PERL_CONTEXT *cx
+AiM	|void	|cx_popwhen      |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushgiven    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
+AiM	|void	|cx_popgiven     |NN PERL_CONTEXT *cx
 #endif
 
 #ifdef USE_DTRACE

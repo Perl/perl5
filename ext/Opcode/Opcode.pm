@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.42";
+$VERSION = "1.43";
 
 use Carp;
 use Exporter ();
@@ -426,9 +426,9 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     entertry leavetry -- can be used to 'hide' fatal errors
 
-    entergiven
-    enterwhereso leavewhereso
-    continue
+    entergiven leavegiven
+    enterwhen leavewhen
+    break continue
     smartmatch
 
     custom -- where should this go

@@ -369,7 +369,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.50';
+our $VERSION = '1.51';
 
 FEATURES
 
@@ -461,7 +461,7 @@ explicitly disabled the warning:
 
     no warnings "experimental::smartmatch";
 
-C<use feature 'switch'> tells the compiler to enable the
+C<use feature 'switch'> tells the compiler to enable the Perl 6
 given/when construct.
 
 See L<perlsyn/"Switch Statements"> for details.

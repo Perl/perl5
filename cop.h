@@ -721,9 +721,10 @@ struct block_loop {
 
 
 
-/* whereso context */
-struct block_whereso {
+/* given/when context */
+struct block_givwhen {
 	OP *leave_op;
+        SV *defsv_save; /* the original $_ */
 };
 
 
@@ -747,7 +748,7 @@ struct block {
 	struct block_format	blku_format;
 	struct block_eval	blku_eval;
 	struct block_loop	blku_loop;
-	struct block_whereso	blku_whereso;
+	struct block_givwhen	blku_givwhen;
     } blk_u;
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
@@ -763,7 +764,7 @@ struct block {
 #define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
-#define blk_whereso	cx_u.cx_blk.blk_u.blku_whereso
+#define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
 
 #define CX_DEBUG(cx, action)						\
     DEBUG_l(								\
@@ -856,11 +857,16 @@ struct context {
    and a static array of context names in pp_ctl.c  */
 #define CXTYPEMASK	0xf
 #define CXt_NULL	0 /* currently only used for sort BLOCK */
-#define CXt_WHERESO	1
+#define CXt_WHEN	1
 #define CXt_BLOCK	2
-/* be careful of the ordering of these six. Macros like CxTYPE_is_LOOP,
+/* When micro-optimising :-) keep GIVEN next to the LOOPs, as these 5 share a
+   jump table in pp_ctl.c
+   The first 4 don't have a 'case' in at least one switch statement in pp_ctl.c
+*/
+#define CXt_GIVEN	3
+
+/* be careful of the ordering of these five. Macros like CxTYPE_is_LOOP,
  * CxFOREACH compare ranges */
-#define CXt_LOOP_GIVEN	3 /* given (...)    { ...; } */
 #define CXt_LOOP_ARY	4 /* for (@ary)     { ...; } */
 #define CXt_LOOP_LAZYSV	5 /* for ('a'..'z') { ...; } */
 #define CXt_LOOP_LAZYIV	6 /* for (1..9)     { ...; } */
@@ -886,6 +892,8 @@ struct context {
 
 /* private flags for CXt_LOOP */
 
+/* this is only set in conjunction with CXp_FOR_GV */
+#define CXp_FOR_DEF	0x10	/* foreach using $_ */
 /* these 3 are mutually exclusive */
 #define CXp_FOR_LVREF	0x20	/* foreach using \$var */
 #define CXp_FOR_GV	0x40	/* foreach using package var */
@@ -897,7 +905,7 @@ struct context {
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_GIVEN              \
+#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_ARY                \
                            && CxTYPE(cx) <= CXt_LOOP_PLAIN)
 #define CxMULTICALL(c)	((c)->cx_type & CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXTYPEMASK|CXp_REAL))		\

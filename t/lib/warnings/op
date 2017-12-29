@@ -421,7 +421,7 @@ eval { getgrgid 1 };	# OP_GGRGID
 eval { getpwnam 1 };	# OP_GPWNAM
 eval { getpwuid 1 };	# OP_GPWUID
 prototype "foo";	# OP_PROTOTYPE
-$a ~~ $b if rand(1)>2;	# OP_SMARTMATCH
+$a ~~ $b;		# OP_SMARTMATCH
 $a <=> $b;		# OP_NCMP
 "dsatrewq";
 "diatrewq";
