@@ -2533,6 +2533,8 @@ ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERns	|char *|find_next_ascii|NN char* s|NN const char * send|const bool is_utf8
 ERns	|char *|find_next_non_ascii|NN char* s|NN const char * send|const bool is_utf8
 ERns	|char *|find_span_end	|NN char* s|NN const char * send|const char span_byte
+ERns	|U8 *|find_span_end_mask|NN U8 * s|NN const U8 * send	\
+				|const U8 span_byte|const U8 mask
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 WERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN const regnode *p \

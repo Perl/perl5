@@ -1119,6 +1119,7 @@
 #define find_next_ascii		S_find_next_ascii
 #define find_next_non_ascii	S_find_next_non_ascii
 #define find_span_end		S_find_span_end
+#define find_span_end_mask	S_find_span_end_mask
 #define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
 #define isGCB(a,b,c,d,e)	S_isGCB(aTHX_ a,b,c,d,e)
 #define isLB(a,b,c,d,e,f)	S_isLB(aTHX_ a,b,c,d,e,f)

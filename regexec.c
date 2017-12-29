@@ -741,6 +741,63 @@ S_find_span_end(char * s, const char * send, const char span_byte)
     return s;
 }
 
+STATIC U8 *
+S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
+{
+    /* Returns the position of the first byte in the sequence between 's' and
+     * 'send-1' inclusive that when ANDed with 'mask' isn't 'span_byte'.
+     * 'span_byte' should have been ANDed with 'mask' in the call of this
+     * function.  Returns 'send' if none found.  Works like find_span_end(),
+     * except for the AND */
+
+    PERL_ARGS_ASSERT_FIND_SPAN_END_MASK;
+
+    assert(send >= s);
+    assert((span_byte & mask) == span_byte);
+
+    if ((STRLEN) (send - s) >= PERL_WORDSIZE
+                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
+                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
+    {
+        PERL_UINTMAX_T span_word, mask_word;
+
+        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
+            if (((* (U8 *) s) & mask) != span_byte) {
+                return s;
+            }
+            s++;
+        }
+
+        span_word = PERL_COUNT_MULTIPLIER * span_byte;
+        mask_word = PERL_COUNT_MULTIPLIER * mask;
+
+        do {
+            PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
+
+            if (masked == span_word) {
+                s += PERL_WORDSIZE;
+                continue;
+            }
+
+            masked ^= span_word;
+            masked |= masked << 1;
+            masked |= masked << 2;
+            masked |= masked << 4;
+            return s + _variant_byte_number(masked);
+
+        } while (s + PERL_WORDSIZE <= send);
+    }
+
+    while (s < send) {
+        if (((* (U8 *) s) & mask) != span_byte) {
+            return s;
+        }
+        s++;
+    }
+
+    return s;
+}
+
 /*
  * pregexec and friends
  */
@@ -9234,14 +9291,12 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 U8 c1_c2_bits_differing = c1 ^ c2;
 
                 if (isPOWER_OF_2(c1_c2_bits_differing)) {
-                    U8 c1_masked = c1 & ~ c1_c2_bits_differing;
                     U8 c1_c2_mask = ~ c1_c2_bits_differing;
 
-                    while (   scan < loceol
-                           && (UCHARAT(scan) & c1_c2_mask) == c1_masked)
-                    {
-                        scan++;
-                    }
+                    scan = (char *) find_span_end_mask((U8 *) scan,
+                                                       (U8 *) loceol,
+                                                       c1 & c1_c2_mask,
+                                                       c1_c2_mask);
                 }
                 else {
                     while (    scan < loceol
