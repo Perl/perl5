@@ -18096,30 +18096,43 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             const UV* cp_list_array = invlist_array(cp_list);
 
             /* Here, didn't find an optimization.  See if this matches any of
-                 * the POSIX classes.  The POSIXA ones are about
+             * the POSIX classes.  First try ASCII */
+
+            if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 0)) {
+                op = ASCII;
+                *flagp |= HASWIDTH|SIMPLE;
+            }
+            else if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 1)) {
+                op = NASCII;
+                *flagp |= HASWIDTH|SIMPLE;
+            }
+            else if (cp_list_array[cp_list_len-1] >= 0x2029) {
+
+                /* Then try the other POSIX classes.  The POSIXA ones are about
                  * the same speed as ANYOF ops, but the ones that have
                  * above-Latin1 code point matches are somewhat faster than
                  * ANYOF.  So optimize those, but don't bother with the POSIXA
-                 * ones nor the 2 that have no above-Latin1 matches.  If
+                 * ones nor [:cntrl:] which has no above-Latin1 matches.  If
                  * this ANYOF node has a lower highest possible matching code
                  * point than any of the XPosix ones, we know that it can't
                  * possibly be the same as any of them, so we can avoid
-                 * executing this code.  The 0x2029 for the lowest max
+                 * executing this code.  The 0x2029 above for the lowest max
                  * was determined by manual inspection of the classes, and
                  * comes from \v.  Suppose Unicode in a later version adds a
                  * higher code point to \v.  All that means is that this code
                  * can be executed unnecessarily.  It will still give the
                  * correct answer. */
 
-            if (cp_list_array[cp_list_len-1] >= 0x2029) {
                 for (posix_class = 0;
                      posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
                      posix_class++)
                 {
                     int try_inverted;
-                    if (posix_class == _CC_ASCII || posix_class == _CC_CNTRL) {
+
+                    if (posix_class == _CC_CNTRL) {
                         continue;
                     }
+
                     for (try_inverted = 0; try_inverted < 2; try_inverted++) {
 
                         /* Check if matches normal or inverted */
