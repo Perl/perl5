@@ -2412,12 +2412,19 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
 
         to_complement = 1;
-        /* FALLTHROUGH */
+        goto posixa;
 
     case POSIXA:
-      posixa:
         /* Don't need to worry about utf8, as it can match only a single
-         * byte invariant character. */
+         * byte invariant character.  But we do anyway for performance reasons,
+         * as otherwise we would have to examine all the continuation
+         * characters */
+        if (utf8_target) {
+            REXEC_FBC_UTF8_CLASS_SCAN(_generic_isCC_A(*s, FLAGS(c)));
+            break;
+        }
+
+      posixa:
         REXEC_FBC_CLASS_SCAN(
                         to_complement ^ cBOOL(_generic_isCC_A(*s, FLAGS(c))));
         break;
