@@ -18082,15 +18082,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             const UV* cp_list_array = invlist_array(cp_list);
 
             /* Here, didn't find an optimization.  See if this matches any of
-             * the POSIX classes.  These run slightly faster for above-Unicode
-             * code points, so don't bother with POSIXA ones nor the 2 that
-             * have no above-Unicode matches.  We can avoid these checks unless
-             * the ANYOF matches at least as high as the lowest POSIX one
-             * (which was manually found to be \v.  The actual code point may
-             * increase in later Unicode releases, if a higher code point is
-             * assigned to be \v, but this code will never break.  It would
-             * just mean we could execute the checks for posix optimizations
-             * unnecessarily) */
+                 * the POSIX classes.  The POSIXA ones are about
+                 * the same speed as ANYOF ops, but the ones that have
+                 * above-Latin1 code point matches are somewhat faster than
+                 * ANYOF.  So optimize those, but don't bother with the POSIXA
+                 * ones nor the 2 that have no above-Latin1 matches.  If
+                 * this ANYOF node has a lower highest possible matching code
+                 * point than any of the XPosix ones, we know that it can't
+                 * possibly be the same as any of them, so we can avoid
+                 * executing this code.  The 0x2029 for the lowest max
+                 * was determined by manual inspection of the classes, and
+                 * comes from \v.  Suppose Unicode in a later version adds a
+                 * higher code point to \v.  All that means is that this code
+                 * can be executed unnecessarily.  It will still give the
+                 * correct answer. */
 
             if (cp_list_array[cp_list_len-1] > 0x2029) {
                 for (posix_class = 0;
