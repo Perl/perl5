@@ -395,9 +395,11 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 		if (name && PadnamePV(name) && *PadnamePV(name) == '&')
 		    {
 			CV * const innercv = MUTABLE_CV(curpad[ix]);
-			U32 inner_rc = SvREFCNT(innercv);
-			assert(inner_rc);
+			U32 inner_rc;
+			assert(innercv);
 			assert(SvTYPE(innercv) != SVt_PVFM);
+			inner_rc = SvREFCNT(innercv);
+			assert(inner_rc);
 
 			if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
 			    curpad[ix] = NULL;
