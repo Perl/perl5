@@ -663,14 +663,19 @@ X<-m> X<-M>
 =item B<-[mM]>[B<->]I<module=arg[,arg]...>
 
 B<-m>I<module> executes C<use> I<module> C<();> before executing your
-program.
+program.  This loads the module, but does not call its C<import> method,
+so does not import subroutines and does not give effect to a pragma.
 
 B<-M>I<module> executes C<use> I<module> C<;> before executing your
-program.  You can use quotes to add extra code after the module name,
+program.  This loads the module and calls its C<import> method, causing
+the module to have its default effect, typically importing subroutines
+or giving effect to a pragma.
+You can use quotes to add extra code after the module name,
 e.g., C<'-MI<MODULE> qw(foo bar)'>.
 
 If the first character after the B<-M> or B<-m> is a dash (B<->)
 then the 'use' is replaced with 'no'.
+This makes no difference for B<-m>.
 
 A little builtin syntactic sugar means you can also say
 B<-mI<MODULE>=foo,bar> or B<-MI<MODULE>=foo,bar> as a shortcut for
@@ -680,7 +685,8 @@ C<use module split(/,/,q{foo,bar})>.  Note that the C<=> form
 removes the distinction between B<-m> and B<-M>; that is,
 B<-mI<MODULE>=foo,bar> is the same as B<-MI<MODULE>=foo,bar>.
 
-A consequence of this is that B<-MI<MODULE>=number> never does a version check,
+A consequence of the C<split> formulation
+is that B<-MI<MODULE>=number> never does a version check,
 unless C<I<MODULE>::import()> itself is set up to do a version check, which
 could happen for example if I<MODULE> inherits from L<Exporter>.
 
