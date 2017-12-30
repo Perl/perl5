@@ -2295,6 +2295,11 @@ Amd	|bool	|sv_utf8_downgrade_nomg|NN SV *const sv|const bool fail_ok
 Apd	|bool	|sv_utf8_downgrade_flags|NN SV *const sv|const bool fail_ok|const U32 flags
 Apd	|void	|sv_utf8_encode |NN SV *const sv
 Apd	|bool	|sv_utf8_decode |NN SV *const sv
+Apd	|bool	|sv_utf8_decode_flags			    \
+		|NN SV *const sv			    \
+		|const U32 flags			    \
+		|NULLOK const U8 ** errloc		    \
+		|NULLOK U32 * errors
 ApdMb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *const sv|const U32 flags
 pX	|SSize_t|tmps_grow_p	|SSize_t ix

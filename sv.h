@@ -2055,6 +2055,10 @@ Like C<sv_catsv> but doesn't process magic.
 	: sv_len_utf8(sv))
 #endif
 
+/* We don't allow these 'ALLOW' flags, so can re-use them in
+ * sv_utf8_decode_flags */
+#define SV_UTF8_DECODE_FLAGS_SANITIZE  UTF8_ALLOW_EMPTY
+
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv
 
