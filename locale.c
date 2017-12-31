@@ -568,10 +568,19 @@ S_new_ctype(pTHX_ const char *newctype)
             if (    check_for_problems
                 && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
             {
-                if ((    isALPHANUMERIC_A(i) && ! isALPHANUMERIC_LC(i))
-                     || (isPUNCT_A(i) && ! isPUNCT_LC(i))
-                     || (isBLANK_A(i) && ! isBLANK_LC(i))
-                     || (i == '\n' && ! isCNTRL_LC(i)))
+                if (   cBOOL(isalnum(i)) != cBOOL(isALPHANUMERIC(i))
+                    || cBOOL(isalpha(i)) != cBOOL(isALPHA_A(i))
+                    || cBOOL(isdigit(i)) != cBOOL(isDIGIT_A(i))
+                    || cBOOL(isgraph(i)) != cBOOL(isGRAPH_A(i))
+                    || cBOOL(islower(i)) != cBOOL(isLOWER_A(i))
+                    || cBOOL(isprint(i)) != cBOOL(isPRINT_A(i))
+                    || cBOOL(ispunct(i)) != cBOOL(isPUNCT_A(i))
+                    || cBOOL(isspace(i)) != cBOOL(isSPACE_A(i))
+                    || cBOOL(isupper(i)) != cBOOL(isUPPER_A(i))
+                    || cBOOL(isxdigit(i))!= cBOOL(isXDIGIT_A(i))
+                    || tolower(i) != (int) toLOWER_A(i)
+                    || toupper(i) != (int) toUPPER_A(i)
+                    || (i == '\n' && ! isCNTRL_LC(i)))
                 {
                     if (bad_count) {    /* Separate multiple entries with a
                                            blank */
