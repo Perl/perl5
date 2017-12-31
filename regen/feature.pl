@@ -63,7 +63,7 @@ my %feature_bundle = (
     "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq)],
     "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq)],
+		    evalbytes current_sub fc postderef_qq bitwise)],
 );
 
 my @noops = qw( postderef lexical_subs );

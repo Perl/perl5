@@ -18,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 477;
+plan tests => 491;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -354,6 +354,38 @@ SKIP: {
      do { use integer; 1 << ($bits - 1) } == -$cusp);
  ok (($cusp >> 1) == ($cusp / 2) &&
     do { use integer; abs($cusp >> 1) } == ($cusp / 2));
+}
+# Repeat some of those, with 'use v5.27'
+{
+  use v5.27;
+
+  is "22" & "66", 2,    'numeric & with strings';
+  is "22" | "66", 86,   'numeric | with strings';
+  is "22" ^ "66", 84,   'numeric ^ with strings';
+  is ~"22" & 0xff, 233, 'numeric ~ with string';
+  is 22 &. 66, 22,     '&. with numbers';
+  is 22 |. 66, 66,     '|. with numbers';
+  is 22 ^. 66, "\4\4", '^. with numbers';
+  if ($::IS_EBCDIC) {
+    # ord('2') is 0xF2 on EBCDIC
+    is ~.22, "\x0d\x0d", '~. with number';
+  }
+  else {
+    # ord('2') is 0x32 on ASCII
+    is ~.22, "\xcd\xcd", '~. with number';
+  }
+  $_ = "22";
+  is $_ &= "66", 2,  'numeric &= with strings';
+  $_ = "22";
+  is $_ |= "66", 86, 'numeric |= with strings';
+  $_ = "22";
+  is $_ ^= "66", 84, 'numeric ^= with strings';
+  $_ = 22;
+  is $_ &.= 66, 22,     '&.= with numbers';
+  $_ = 22;
+  is $_ |.= 66, 66,     '|.= with numbers';
+  $_ = 22;
+  is $_ ^.= 66, "\4\4", '^.= with numbers';
 }
 
 # ref tests
