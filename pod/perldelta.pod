@@ -122,7 +122,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+The performance of pattern matching C<[[:ascii:]]> and C<[[:^ascii:]]>
+has been improved significantly except on EBCDIC platforms.
 
 =back
 
