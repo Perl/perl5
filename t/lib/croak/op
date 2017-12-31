@@ -69,7 +69,6 @@ No such class field "c" in variable $f of type main at - line 3.
 use feature 'bitwise';
 @a &= 1;
 EXPECT
-The bitwise feature is experimental at - line 2.
 Can't modify array dereference in numeric bitwise and (&) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
@@ -77,7 +76,6 @@ Execution of - aborted due to compilation errors.
 use feature 'bitwise';
 @a |= 1;
 EXPECT
-The bitwise feature is experimental at - line 2.
 Can't modify array dereference in numeric bitwise or (|) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
@@ -85,7 +83,6 @@ Execution of - aborted due to compilation errors.
 use feature 'bitwise';
 @a ^= 1;
 EXPECT
-The bitwise feature is experimental at - line 2.
 Can't modify array dereference in numeric bitwise xor (^) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
@@ -93,7 +90,6 @@ Execution of - aborted due to compilation errors.
 use feature 'bitwise';
 @a &.= 1;
 EXPECT
-The bitwise feature is experimental at - line 2.
 Can't modify array dereference in string bitwise and (&.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
@@ -101,7 +97,6 @@ Execution of - aborted due to compilation errors.
 use feature 'bitwise';
 @a |.= 1;
 EXPECT
-The bitwise feature is experimental at - line 2.
 Can't modify array dereference in string bitwise or (|.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
@@ -109,7 +104,6 @@ Execution of - aborted due to compilation errors.
 use feature 'bitwise';
 @a ^.= 1;
 EXPECT
-The bitwise feature is experimental at - line 2.
 Can't modify array dereference in string bitwise xor (^.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
