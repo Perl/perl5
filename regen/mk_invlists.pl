@@ -57,6 +57,7 @@ my %exceptions_to_where_to_define =
                           _Perl_Folds_To_Multi_Char  => 'PERL_IN_REGCOMP_C',
                           _Perl_IDCont               => 'PERL_IN_UTF8_C',
                           _Perl_IDStart              => 'PERL_IN_UTF8_C',
+                          Currency_Symbol            => 'PERL_IN_LOCALE_C',
                         );
 
 my %gcb_enums;
@@ -1824,6 +1825,7 @@ for my $charset (get_supported_code_pages()) {
                              Assigned
                              ASCII
                              Cased
+                             Currency_Symbol
                              VertSpace
                              XPerlSpace
                              XPosixAlnum
