@@ -11,7 +11,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.29"; # remember to update version in POD!
+$VERSION = "0.30"; # remember to update version in POD!
 
 #use strict;
 
@@ -66,6 +66,7 @@ sub load {
 
     my @modparts = split(/::/,$module);
     my $modfname = $modparts[-1];
+    my $modfname_orig = $modfname; # For .bs file search
 
 EOT
 
@@ -140,8 +141,10 @@ print OUT <<'EOT';
 
 #   print STDERR "XSLoader::load for $module ($file)\n" if $dl_debug;
 
-    my $bs = $file;
-    $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
+    # N.B. The .bs file does not following the naming convention used
+    # by mod2fname, so use the unedited version of the name.
+
+    my $bs = "$modlibname/auto/$modpname/$modfname_orig.bs";
 
     # This calls DynaLoader::bootstrap, which will load the .bs file if present
     goto \&XSLoader::bootstrap_inherit if not -f $file or -s $bs;
@@ -249,7 +252,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.29
+Version 0.30
 
 =head1 SYNOPSIS
 
