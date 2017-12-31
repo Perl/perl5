@@ -7471,8 +7471,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             SCX_enum * intersection = NULL;
             PERL_UINT_FAST8_T intersection_len = 0;
 
-            const char * s = script_run_begin;
-            const char * strend = locinput;
+            const U8 * s = (U8 *) script_run_begin;
+            const U8 * strend = (U8 *) locinput;
 
             assert(s);
 
