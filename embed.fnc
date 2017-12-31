@@ -2758,6 +2758,7 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
+sn	|const char*|category_name |const int category
 #  ifdef HAS_NL_LANGINFO
 sn	|const char*|my_nl_langinfo|const nl_item item|bool toggle
 #  else

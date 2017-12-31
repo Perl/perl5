@@ -201,6 +201,50 @@ const char * category_names[] = {
  * checked for at compile time by using the #define LC_ALL_INDEX which is only
  * defined if we do have LC_ALL. */
 
+STATIC const char *
+S_category_name(const int category)
+{
+    unsigned int i;
+
+#ifdef LC_ALL
+
+    if (category == LC_ALL) {
+        return "LC_ALL";
+    }
+
+#endif
+
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        if (category == categories[i]) {
+            return category_names[i];
+        }
+    }
+
+    {
+        const char suffix[] = " (unknown)";
+        int temp = category;
+        Size_t length = sizeof(suffix) + 1;
+        char * unknown;
+        dTHX;
+
+        if (temp < 0) {
+            length++;
+            temp = - temp;
+        }
+
+        /* Calculate the number of digits */
+        while (temp >= 10) {
+            temp /= 10;
+            length++;
+        }
+
+        Newx(unknown, length, char);
+        my_snprintf(unknown, length, "%d%s", category, suffix);
+        SAVEFREEPV(unknown);
+        return unknown;
+    }
+}
+
 /* Now create LC_foo_INDEX #defines for just those categories on this system */
 #  ifdef USE_LOCALE_NUMERIC
 #    define LC_NUMERIC_INDEX            0
@@ -3614,34 +3658,9 @@ S_setlocale_debug_string(const int category,        /* category number,
     static char ret[128] = "If you can read this, thank your buggy C"
                            " library strlcpy(), and change your hints file"
                            " to undef it";
-    unsigned int i;
-
-#  ifdef LC_ALL
-
-    const unsigned int highest_index = LC_ALL_INDEX;
-
-#  else
-
-    const unsigned int highest_index = NOMINAL_LC_ALL_INDEX - 1;
-
-#endif
-
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
-
-    /* Look for category in our list, and if found, add its name */
-    for (i = 0; i <= highest_index; i++) {
-        if (category == categories[i]) {
-            my_strlcat(ret, category_names[i], sizeof(ret));
-            goto found_category;
-        }
-    }
-
-    /* Unknown category to us */
-    my_snprintf(ret, sizeof(ret), "%s? %d", ret, category);
-
-  found_category:
-
+    my_strlcat(ret, category_name(category), sizeof(ret));
     my_strlcat(ret, ", ", sizeof(ret));
 
     if (locale) {
