@@ -29,7 +29,7 @@ my $max_bad_category_number = -1000000;
 # where 6 is the value of &POSIX::LC_CTYPE
 my %category_name;
 my %category_number;
-unless ($@) {
+if ($has_locale_h) {
     my $number_for_missing_category = $max_bad_category_number;
     foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
         my $number = eval "&POSIX::LC_$name";
