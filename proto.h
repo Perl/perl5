@@ -1388,6 +1388,11 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 #define PERL_ARGS_ASSERT_ISIDFIRST_LAZY	\
 	assert(p)
 
+PERL_CALLCONV bool	Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ISSCRIPT_RUN	\
+	assert(s); assert(send)
+
 /* PERL_CALLCONV bool	Perl_is_ascii_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */

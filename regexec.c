@@ -5550,7 +5550,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = FALSE;
     I32 orig_savestack_ix = PL_savestack_ix;
-    char * script_run_begin = NULL;
+    U8 * script_run_begin = NULL;
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -7387,7 +7387,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
         case SROPEN: /*  (*SCRIPT_RUN:  */
-            script_run_begin = locinput;
+            script_run_begin = (U8 *) locinput;
             break;
 
 /* XXX really need to log other places start/end are set too */
@@ -7416,360 +7416,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
         case SRCLOSE:  /*  (*SCRIPT_RUN: ... )   */
-          {
-            /* Checks that every character in the sequence started by SROPEN
-             * and ending here is one of three scripts: Common, Inherited, and
-             * possibly one other.  Additionally all decimal digits must come
-             * from the same consecutive sequence of 10.
-             *
-             * Basically, it looks at each character in the sequence to see if
-             * the above conditions are met; if not it fails.  It uses an
-             * inversion map to find the enum corresponding to the script of
-             * each character.  But this is complicated by the fact that a few
-             * code points can be in any of several scripts.  The data has been
-             * constructed so that there are additional enum values (all
-             * negative) for these situations.  The absolute value of those is
-             * an index into another table which contains pointers to auxiliary
-             * tables for each such situation.  Each aux array lists all the
-             * scripts for the given situation.  There is another, parallel,
-             * table that gives the number of entries in each aux table.  These
-             * are all defined in charclass_invlists.h */
 
-            /* XXX Here are the additional things UTS 39 says could be done:
-             * Mark Chinese strings as “mixed script” if they contain both
-             * simplified (S) and traditional (T) Chinese characters, using the
-             * Unihan data in the Unicode Character Database [UCD].  The
-             * criterion can only be applied if the language of the string is
-             * known to be Chinese. So, for example, the string
-             * “写真だけの結婚式 ” is Japanese, and should not be marked as
-             * mixed script because of a mixture of S and T characters.
-             * Testing for whether a character is S or T needs to be based not
-             * on whether the character has a S or T variant , but whether the
-             * character is an S or T variant. khw notes that the sample
-             * contains a Hiragana character, and it is unclear if absence of
-             * any foreign script marks the script as "Chinese"
-             *
-             * Forbid sequences of the same nonspacing mark
-             *
-             * Check to see that all the characters are in the sets of exemplar
-             * characters for at least one language in the Unicode Common
-             * Locale Data Repository [CLDR]. */
-
-
-            /* Things that match /\d/u */
-            SV * decimals_invlist = PL_XPosix_ptrs[_CC_DIGIT];
-            UV * decimals_array = invlist_array(decimals_invlist);
-
-            /* What code point is the digit '0' of the script run? */
-            UV zero_of_run = 0;
-            SCX_enum script_of_run  = SCX_INVALID;   /* Illegal value */
-            SCX_enum script_of_char = SCX_INVALID;
-
-            /* If the script remains not fully determined from iteration to
-             * iteration, this is the current intersection of the possiblities.
-             * */
-            SCX_enum * intersection = NULL;
-            PERL_UINT_FAST8_T intersection_len = 0;
-
-            const U8 * s = (U8 *) script_run_begin;
-            const U8 * strend = (U8 *) locinput;
-
-            assert(s);
-
-            /* Look at each character in the sequence */
-            while (s < strend) {
-                UV cp;
-
-                /* The code allows all scripts to use the ASCII digits.  This
-                 * is because they are used in commerce even in scripts that
-                 * have their own set.  Hence any ASCII ones found are ok,
-                 * unless a digit from another set has already been
-                 * encountered.  (The other digit ranges in Common are not
-                 * similarly blessed */
-                if (UNLIKELY(isDIGIT(*s))) {
-                    if (zero_of_run > 0) {
-                        if (zero_of_run != '0') {
-                            Safefree(intersection);
-                            sayNO;
-                        }
-                    }
-                    else {
-                        zero_of_run = '0';
-                    }
-                    s++;
-                    continue;
-                }
-
-                /* Here, isn't an ASCII digit.  Find the code point of the
-                 * character */
-                if (utf8_target && ! UTF8_IS_INVARIANT(*s)) {
-                    Size_t len;
-                    cp = valid_utf8_to_uvchr((U8 *) s, &len);
-                    s += len;
-                }
-                else {
-                    cp = *(s++);
-                }
-
-                /* If is within the range [+0 .. +9] of the script's zero, it
-                 * also is a digit in that script.  We can skip the rest of
-                 * this code for this character. */
-                if (UNLIKELY(   zero_of_run > 0
-                             && cp >= zero_of_run
-                             && cp - zero_of_run <= 9))
-                {
-                    continue;
-                }
-
-                /* Find the character's script.  The correct values are
-                 * hard-coded here for small-enough code points. */
-                if (cp < 0x2B9) {   /* From inspection of Unicode db; extremely
-                                       unlikely to change */
-                    if (       cp > 255
-                        || (   isALPHA_L1(cp)
-                            && LIKELY(cp != MICRO_SIGN_NATIVE)))
-                    {
-                        script_of_char = SCX_Latin;
-                    }
-                    else {
-                        script_of_char = SCX_Common;
-                    }
-                }
-                else {
-                    script_of_char = _Perl_SCX_invmap[
-                           _invlist_search(PL_SCX_invlist, cp)];
-                }
-
-                /* We arbitrarily accept a single unassigned character, but not
-                 * in combination with anything else, and not a run of them. */
-                if (   UNLIKELY(script_of_run == SCX_Unknown)
-                    || UNLIKELY(   script_of_run != SCX_INVALID
-                                && script_of_char == SCX_Unknown))
-                {
-                    Safefree(intersection);
-                    sayNO;
-                }
-
-                if (UNLIKELY(script_of_char == SCX_Unknown)) {
-                        script_of_run = SCX_Unknown;
-                        continue;
-                }
-
-                /* We accept 'inherited' script characters currently even at
-                 * the beginning.  (We know that no characters in Inherited
-                 * are digits, or we'd have to check for that) */
-                if (UNLIKELY(script_of_char == SCX_Inherited)) {
-                    continue;
-                }
-
-                /* If unknown, the run's script is set to the char's */
-                if (UNLIKELY(script_of_run == SCX_INVALID)) {
-                    script_of_run = script_of_char;
-                }
-
-                /* All decimal digits must be from the same sequence of 10.
-                 * Above, we handled any ASCII digits without descending to
-                 * here.  We also handled the case where we already knew what
-                 * digit sequence is the one to use, and the character is in
-                 * that sequence.  Now that we know the script, we can use
-                 * script_zeros[] to directly find which sequence the script
-                 * uses, except in a few cases it returns 0 */
-                if (UNLIKELY(zero_of_run == 0) && script_of_char >= 0) {
-                    zero_of_run = script_zeros[script_of_char];
-                }
-
-                /* Now we can see if the script of the character is the same as
-                 * that of the run, or 'Common' which is considered to be in
-                 * every script */
-                if (LIKELY(   script_of_char == script_of_run
-                           || script_of_char == SCX_Common))
-                {   /* By far the most common case */
-                    goto scripts_match;
-                }
-
-#ifndef HAS_SCX_AUX_TABLES
-
-                /* Too early a Unicode version to have a code point belonging
-                 * to more than one script, so, if the scripts don't exactly
-                 * match, fail */
-                Safefree(intersection);
+            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput, utf8_target))
+            {
                 sayNO;
+            }
 
-#else
-
-                /* Here there is no exact match between the character's script
-                 * and the run's.  Negative script numbers signify that the
-                 * value may be any of several scripts, and we need to look at
-                 * auxiliary information to make our deterimination.  But if
-                 * both are non-negative, we can fail now */
-                if (LIKELY(script_of_char >= 0)) {
-                    const SCX_enum * search_in;
-                    PERL_UINT_FAST8_T search_in_len;
-                    PERL_UINT_FAST8_T i;
-
-                    if (LIKELY(script_of_run >= 0)) {
-                        Safefree(intersection);
-                        sayNO;
-                    }
-
-                    /* Use any previously constructed set of possible scripts.
-                     * */
-                    if (intersection) {
-                        search_in = intersection;
-                        search_in_len = intersection_len;
-                    }
-                    else {
-                        search_in = SCX_AUX_TABLE_ptrs[-script_of_run];
-                        search_in_len = SCX_AUX_TABLE_lengths[-script_of_run];
-                    }
-
-                    for (i = 0; i < search_in_len; i++) {
-                        if (search_in[i] == script_of_char) {
-                            script_of_run = script_of_char;
-                            goto scripts_match;
-                        }
-                    }
-
-                    Safefree(intersection);
-                    sayNO;
-                }
-                else if (LIKELY(script_of_run >= 0)) {
-                    /* script of character could be one of several, but run is
-                     * a single script */
-                    const SCX_enum * search_in
-                                        = SCX_AUX_TABLE_ptrs[-script_of_char];
-                    const PERL_UINT_FAST8_T search_in_len
-                                     = SCX_AUX_TABLE_lengths[-script_of_char];
-                    PERL_UINT_FAST8_T i;
-
-                    for (i = 0; i < search_in_len; i++) {
-                        if (search_in[i] == script_of_run) {
-                            script_of_char = script_of_run;
-                            goto scripts_match;
-                        }
-                    }
-
-                    Safefree(intersection);
-                    sayNO;
-                }
-                else {
-                    /* Both run and char could be in one of several scripts.
-                     * If the intersection is empty, then this character isn't
-                     * in this script run.  Otherwise, we need to calculate the
-                     * intersection to use for future iterations of the loop,
-                     * unless we are already at the final character */
-                    const SCX_enum * search_char
-                                        = SCX_AUX_TABLE_ptrs[-script_of_char];
-                    const PERL_UINT_FAST8_T char_len
-                                     = SCX_AUX_TABLE_lengths[-script_of_char];
-                    const SCX_enum * search_run;
-                    PERL_UINT_FAST8_T run_len;
-
-                    SCX_enum * new_overlap = NULL;
-                    PERL_UINT_FAST8_T i, j;
-
-                    if (intersection) {
-                        search_run = intersection;
-                        run_len = intersection_len;
-                    }
-                    else {
-                        search_run = SCX_AUX_TABLE_ptrs[-script_of_run];
-                        run_len = SCX_AUX_TABLE_lengths[-script_of_run];
-                    }
-
-                    intersection_len = 0;
-
-                    for (i = 0; i < run_len; i++) {
-                        for (j = 0; j < char_len; j++) {
-                            if (search_run[i] == search_char[j]) {
-
-                                /* Here, the script at i,j matches.  That means
-                                 * this character is in the run.  But continue
-                                 * on to find the complete intersection, for
-                                 * the next loop iteration, and for the digit
-                                 * check after it.
-                                 *
-                                 * On the first found common script, we malloc
-                                 * space for the intersection list for the worst
-                                 * case of the intersection, which is the
-                                 * minimum of the number of scripts remaining
-                                 * in each set. */
-                                if (intersection_len == 0) {
-                                    Newx(new_overlap,
-                                         MIN(run_len - i, char_len - j),
-                                         SCX_enum);
-                                }
-                                new_overlap[intersection_len++] = search_run[i];
-                            }
-                        }
-                    }
-
-                    /* Here we've looked through everything.  If they have no
-                     * scripts in common, not a run */
-                    if (intersection_len == 0) {
-                        Safefree(intersection);
-                        sayNO;
-                    }
-
-
-                    /* If there is only a single script in common, set to that.
-                     * Otherwise, use the intersection going forward */
-                    Safefree(intersection);
-                    if (intersection_len == 1) {
-                        script_of_run = script_of_char = new_overlap[0];
-                        Safefree(new_overlap);
-                    }
-                    else {
-                        intersection = new_overlap;
-                    }
-                }
-
-#endif
-
-          scripts_match: ;
-
-                /* Here, the script of the character is compatible with that of
-                 * the run.  Either they match exactly, or one or both can be
-                 * any of several scripts, and the intersection is not empty.
-                 * If the character is not a decimal digit, we are done with
-                 * it.  Otherwise, it could still fail if it is from a
-                 * different set of 10 than seen already (or we may not have
-                 * seen any, and we need to set the sequence).  If we have
-                 * determined a single script and that script only has one set
-                 * of digits (almost all scripts are like that), then this
-                 * isn't a problem, as any digit must come from the same
-                 * sequence.  The only scripts that have multiple sequences
-                 * have been constructed to be 0 in 'script_zeros[]'.
-                 *
-                 * Here we check if it is a digit. */
-                if (    cp >= FIRST_NON_ASCII_DECIMAL_DIGIT
-                    && (   (          zero_of_run == 0
-                            || (  (   script_of_char >= 0
-                                   && script_zeros[script_of_char] == 0)
-                                ||    intersection))))
-                {
-                    SSize_t range_zero_index;
-                    range_zero_index = _invlist_search(decimals_invlist, cp);
-                    if (   LIKELY(range_zero_index >= 0)
-                        && ELEMENT_RANGE_MATCHES_INVLIST(range_zero_index))
-                    {
-                        UV range_zero = decimals_array[range_zero_index];
-                        if (zero_of_run) {
-                            if (zero_of_run != range_zero) {
-                                Safefree(intersection);
-                                sayNO;
-                            }
-                        }
-                        else {
-                            zero_of_run = range_zero;
-                        }
-                    }
-                }
-            } /* end of looping through CLOSESR text */
-
-            Safefree(intersection);
             break;
-          }
+
 
         case ACCEPT:  /*  (*ACCEPT)  */
             if (scan->flags)
@@ -10414,6 +10068,349 @@ Perl__is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, cons
 
 #endif
 
+bool
+Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
+{
+    /* Checks that every character in the sequence from 's' to 'send' is one of
+     * three scripts: Common, Inherited, and possibly one other.  Additionally
+     * all decimal digits must come from the same consecutive sequence of 10.
+     * 'utf8_target' is TRUE iff the sequence is encoded in UTF-8.
+     *
+     * Basically, it looks at each character in the sequence to see if the
+     * above conditions are met; if not it fails.  It uses an inversion map to
+     * find the enum corresponding to the script of each character.  But this
+     * is complicated by the fact that a few code points can be in any of
+     * several scripts.  The data has been constructed so that there are
+     * additional enum values (all negative) for these situations.  The
+     * absolute value of those is an index into another table which contains
+     * pointers to auxiliary tables for each such situation.  Each aux array
+     * lists all the scripts for the given situation.  There is another,
+     * parallel, table that gives the number of entries in each aux table.
+     * These are all defined in charclass_invlists.h */
+
+    /* XXX Here are the additional things UTS 39 says could be done:
+     * Mark Chinese strings as “mixed script” if they contain both simplified
+     * (S) and traditional (T) Chinese characters, using the Unihan data in the
+     * Unicode Character Database [UCD].  The criterion can only be applied if
+     * the language of the string is known to be Chinese. So, for example, the
+     * string “写真だけの結婚式 ” is Japanese, and should not be marked as
+     * mixed script because of a mixture of S and T characters.  Testing for
+     * whether a character is S or T needs to be based not on whether the
+     * character has a S or T variant , but whether the character is an S or T
+     * variant. khw notes that the sample contains a Hiragana character, and it
+     * is unclear if absence of any foreign script marks the script as
+     * "Chinese"
+     *
+     * Forbid sequences of the same nonspacing mark
+     *
+     * Check to see that all the characters are in the sets of exemplar
+     * characters for at least one language in the Unicode Common Locale Data
+     * Repository [CLDR]. */
+
+
+    /* Things that match /\d/u */
+    SV * decimals_invlist = PL_XPosix_ptrs[_CC_DIGIT];
+    UV * decimals_array = invlist_array(decimals_invlist);
+
+    /* What code point is the digit '0' of the script run? */
+    UV zero_of_run = 0;
+    SCX_enum script_of_run  = SCX_INVALID;   /* Illegal value */
+    SCX_enum script_of_char = SCX_INVALID;
+
+    /* If the script remains not fully determined from iteration to iteration,
+     * this is the current intersection of the possiblities.  */
+    SCX_enum * intersection = NULL;
+    PERL_UINT_FAST8_T intersection_len = 0;
+
+    bool retval = TRUE;
+
+    assert(send > s);
+
+    PERL_ARGS_ASSERT_ISSCRIPT_RUN;
+
+    /* Look at each character in the sequence */
+    while (s < send) {
+        UV cp;
+
+        /* The code allows all scripts to use the ASCII digits.  This is
+         * because they are used in commerce even in scripts that have their
+         * own set.  Hence any ASCII ones found are ok, unless a digit from
+         * another set has already been encountered.  (The other digit ranges
+         * in Common are not similarly blessed */
+        if (UNLIKELY(isDIGIT(*s))) {
+            if (zero_of_run > 0) {
+                if (zero_of_run != '0') {
+                    retval = FALSE;
+                    break;
+                }
+            }
+            else {
+                zero_of_run = '0';
+            }
+            s++;
+            continue;
+        }
+
+        /* Here, isn't an ASCII digit.  Find the code point of the character */
+        if (utf8_target && ! UTF8_IS_INVARIANT(*s)) {
+            Size_t len;
+            cp = valid_utf8_to_uvchr((U8 *) s, &len);
+            s += len;
+        }
+        else {
+            cp = *(s++);
+        }
+
+        /* If is within the range [+0 .. +9] of the script's zero, it also is a
+         * digit in that script.  We can skip the rest of this code for this
+         * character. */
+        if (UNLIKELY(   zero_of_run > 0
+                     && cp >= zero_of_run
+                     && cp - zero_of_run <= 9))
+        {
+            continue;
+        }
+
+        /* Find the character's script.  The correct values are hard-coded here
+         * for small-enough code points. */
+        if (cp < 0x2B9) {   /* From inspection of Unicode db; extremely
+                               unlikely to change */
+            if (       cp > 255
+                || (   isALPHA_L1(cp)
+                    && LIKELY(cp != MICRO_SIGN_NATIVE)))
+            {
+                script_of_char = SCX_Latin;
+            }
+            else {
+                script_of_char = SCX_Common;
+            }
+        }
+        else {
+            script_of_char = _Perl_SCX_invmap[
+                                       _invlist_search(PL_SCX_invlist, cp)];
+        }
+
+        /* We arbitrarily accept a single unassigned character, but not in
+         * combination with anything else, and not a run of them. */
+        if (   UNLIKELY(script_of_run == SCX_Unknown)
+            || UNLIKELY(   script_of_run != SCX_INVALID
+                        && script_of_char == SCX_Unknown))
+        {
+            retval = FALSE;
+            break;
+        }
+
+        if (UNLIKELY(script_of_char == SCX_Unknown)) {
+                script_of_run = SCX_Unknown;
+                continue;
+        }
+
+        /* We accept 'inherited' script characters currently even at the
+         * beginning.  (We know that no characters in Inherited are digits, or
+         * we'd have to check for that) */
+        if (UNLIKELY(script_of_char == SCX_Inherited)) {
+            continue;
+        }
+
+        /* If unknown, the run's script is set to the char's */
+        if (UNLIKELY(script_of_run == SCX_INVALID)) {
+            script_of_run = script_of_char;
+        }
+
+        /* All decimal digits must be from the same sequence of 10.  Above, we
+         * handled any ASCII digits without descending to here.  We also
+         * handled the case where we already knew what digit sequence is the
+         * one to use, and the character is in that sequence.  Now that we know
+         * the script, we can use script_zeros[] to directly find which
+         * sequence the script uses, except in a few cases it returns 0 */
+        if (UNLIKELY(zero_of_run == 0) && script_of_char >= 0) {
+            zero_of_run = script_zeros[script_of_char];
+        }
+
+        /* Now we can see if the script of the character is the same as that of
+         * the run, or 'Common' which is considered to be in every script */
+        if (LIKELY(   script_of_char == script_of_run
+                   || script_of_char == SCX_Common))
+        {   /* By far the most common case */
+            goto scripts_match;
+        }
+
+#ifndef HAS_SCX_AUX_TABLES
+
+        /* Too early a Unicode version to have a code point belonging to more
+         * than one script, so, if the scripts don't exactly match, fail */
+        retval = FALSE;
+        break;
+
+#else
+
+        /* Here there is no exact match between the character's script and the
+         * run's.  Negative script numbers signify that the value may be any of
+         * several scripts, and we need to look at auxiliary information to
+         * make our deterimination.  But if both are non-negative, we can fail
+         * now */
+        if (LIKELY(script_of_char >= 0)) {
+            const SCX_enum * search_in;
+            PERL_UINT_FAST8_T search_in_len;
+            PERL_UINT_FAST8_T i;
+
+            if (LIKELY(script_of_run >= 0)) {
+                retval = FALSE;
+                break;
+            }
+
+            /* Use any previously constructed set of possible scripts.
+             * */
+            if (intersection) {
+                search_in = intersection;
+                search_in_len = intersection_len;
+            }
+            else {
+                search_in = SCX_AUX_TABLE_ptrs[-script_of_run];
+                search_in_len = SCX_AUX_TABLE_lengths[-script_of_run];
+            }
+
+            for (i = 0; i < search_in_len; i++) {
+                if (search_in[i] == script_of_char) {
+                    script_of_run = script_of_char;
+                    goto scripts_match;
+                }
+            }
+
+            retval = FALSE;
+            break;
+        }
+        else if (LIKELY(script_of_run >= 0)) {
+            /* script of character could be one of several, but run is a single
+             * script */
+            const SCX_enum * search_in = SCX_AUX_TABLE_ptrs[-script_of_char];
+            const PERL_UINT_FAST8_T search_in_len
+                                     = SCX_AUX_TABLE_lengths[-script_of_char];
+            PERL_UINT_FAST8_T i;
+
+            for (i = 0; i < search_in_len; i++) {
+                if (search_in[i] == script_of_run) {
+                    script_of_char = script_of_run;
+                    goto scripts_match;
+                }
+            }
+
+            retval = FALSE;
+            break;
+        }
+        else {
+            /* Both run and char could be in one of several scripts.  If the
+             * intersection is empty, then this character isn't in this script
+             * run.  Otherwise, we need to calculate the intersection to use
+             * for future iterations of the loop, unless we are already at the
+             * final character */
+            const SCX_enum * search_char = SCX_AUX_TABLE_ptrs[-script_of_char];
+            const PERL_UINT_FAST8_T char_len
+                                      = SCX_AUX_TABLE_lengths[-script_of_char];
+            const SCX_enum * search_run;
+            PERL_UINT_FAST8_T run_len;
+
+            SCX_enum * new_overlap = NULL;
+            PERL_UINT_FAST8_T i, j;
+
+            if (intersection) {
+                search_run = intersection;
+                run_len = intersection_len;
+            }
+            else {
+                search_run = SCX_AUX_TABLE_ptrs[-script_of_run];
+                run_len = SCX_AUX_TABLE_lengths[-script_of_run];
+            }
+
+            intersection_len = 0;
+
+            for (i = 0; i < run_len; i++) {
+                for (j = 0; j < char_len; j++) {
+                    if (search_run[i] == search_char[j]) {
+
+                        /* Here, the script at i,j matches.  That means this
+                         * character is in the run.  But continue on to find
+                         * the complete intersection, for the next loop
+                         * iteration, and for the digit check after it.
+                         *
+                         * On the first found common script, we malloc space
+                         * for the intersection list for the worst case of the
+                         * intersection, which is the minimum of the number of
+                         * scripts remaining in each set. */
+                        if (intersection_len == 0) {
+                            Newx(new_overlap,
+                                 MIN(run_len - i, char_len - j),
+                                 SCX_enum);
+                        }
+                        new_overlap[intersection_len++] = search_run[i];
+                    }
+                }
+            }
+
+            /* Here we've looked through everything.  If they have no scripts
+             * in common, not a run */
+            if (intersection_len == 0) {
+                retval = FALSE;
+                break;
+            }
+
+            /* If there is only a single script in common, set to that.
+             * Otherwise, use the intersection going forward */
+            Safefree(intersection);
+            if (intersection_len == 1) {
+                script_of_run = script_of_char = new_overlap[0];
+                Safefree(new_overlap);
+            }
+            else {
+                intersection = new_overlap;
+            }
+        }
+
+#endif
+
+  scripts_match: ;
+
+        /* Here, the script of the character is compatible with that of the
+         * run.  Either they match exactly, or one or both can be any of
+         * several scripts, and the intersection is not empty.  If the
+         * character is not a decimal digit, we are done with it.  Otherwise,
+         * it could still fail if it is from a different set of 10 than seen
+         * already (or we may not have seen any, and we need to set the
+         * sequence).  If we have determined a single script and that script
+         * only has one set of digits (almost all scripts are like that), then
+         * this isn't a problem, as any digit must come from the same sequence.
+         * The only scripts that have multiple sequences have been constructed
+         * to be 0 in 'script_zeros[]'.
+         *
+         * Here we check if it is a digit. */
+        if (    cp >= FIRST_NON_ASCII_DECIMAL_DIGIT
+            && (   (          zero_of_run == 0
+                    || (  (   script_of_char >= 0
+                           && script_zeros[script_of_char] == 0)
+                        ||    intersection))))
+        {
+            SSize_t range_zero_index;
+            range_zero_index = _invlist_search(decimals_invlist, cp);
+            if (   LIKELY(range_zero_index >= 0)
+                && ELEMENT_RANGE_MATCHES_INVLIST(range_zero_index))
+            {
+                UV range_zero = decimals_array[range_zero_index];
+                if (zero_of_run) {
+                    if (zero_of_run != range_zero) {
+                        retval = FALSE;
+                        break;
+                    }
+                }
+                else {
+                    zero_of_run = range_zero;
+                }
+            }
+        }
+    } /* end of looping through CLOSESR text */
+
+    Safefree(intersection);
+    return retval;
+}
 
 
 /*
