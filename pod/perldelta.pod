@@ -52,6 +52,38 @@ And the digits matched will all be from the same set of 10.  You won't
 get a look-alike digit from a different script that has a different
 value than what it appears to be.
 
+=head2 String- and number-specific bitwise ops are no longer experimental
+
+The new string-specific (C<&. |. ^. ~.>) and number-specific (C<& | ^ ~>)
+bitwise operators introduced in Perl 5.22 are no longer experimental.
+Because the number-specific ops are spelled the same way as the existing
+operators that choose their behaviour based on their operands, these
+operators must still be enabled via the "bitwise" feature, in either of
+these two ways:
+
+    use feature "bitwise";
+
+    use v5.28; # "bitwise" now included
+
+They are also now enabled by the B<-E> command-line switch.
+
+The "bitwise" feature no longer emits a warning.  Existing code that
+disables the "experimental::bitwise" warning category that the feature
+previously used will continue to work.
+
+One caveat that module authors ought to be aware of is that the numeric
+operators now pass a fifth TRUE argument to overload methods.  Any methods
+that check the number of operands may croak if they do not expect so many.
+XS authors in particular should be aware that this:
+
+    SV *
+    bitop_handler (lobj, robj, swap)
+
+may need to be changed to this:
+
+    SV *
+    bitop_handler (lobj, robj, swap, ...)
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
