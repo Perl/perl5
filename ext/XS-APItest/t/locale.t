@@ -33,7 +33,7 @@ SKIP: {
 }
 
 my %correct_C_responses = (
-        # Commented out entries are ones which there is room for variation
+        # Entries that are undef could have varying returns
                             ABDAY_1 => 'Sun',
                             ABDAY_2 => 'Mon',
                             ABDAY_3 => 'Tue',
@@ -55,8 +55,8 @@ my %correct_C_responses = (
                             ABMON_9 => 'Sep',
                             ALT_DIGITS => '',
                             AM_STR => 'AM',
-                            #CODESET => 'ANSI_X3.4-1968',
-                            #CRNCYSTR => '-',
+                            CODESET => undef,
+                            CRNCYSTR => undef,
                             DAY_1 => 'Sunday',
                             DAY_2 => 'Monday',
                             DAY_3 => 'Tuesday',
@@ -64,12 +64,12 @@ my %correct_C_responses = (
                             DAY_5 => 'Thursday',
                             DAY_6 => 'Friday',
                             DAY_7 => 'Saturday',
-                            #D_FMT => '%m/%d/%y',
-                            #D_T_FMT => '%a %b %e %H:%M:%S %Y',
+                            D_FMT => undef,
+                            D_T_FMT => undef,
                             ERA => '',
-                            #ERA_D_FMT => '',
-                            #ERA_D_T_FMT => '',
-                            #ERA_T_FMT => '',
+                            ERA_D_FMT => undef,
+                            ERA_D_T_FMT => undef,
+                            ERA_T_FMT => undef,
                             MON_1 => 'January',
                             MON_10 => 'October',
                             MON_11 => 'November',
@@ -82,13 +82,13 @@ my %correct_C_responses = (
                             MON_7 => 'July',
                             MON_8 => 'August',
                             MON_9 => 'September',
-                            #NOEXPR => '^[nN]',
+                            NOEXPR => undef,
                             PM_STR => 'PM',
                             RADIXCHAR => '.',
                             THOUSEP => '',
-                            #T_FMT => '%H:%M:%S',
-                            #T_FMT_AMPM => '%I:%M:%S %p',
-                            #YESEXPR => '^[yY]',
+                            T_FMT => undef,
+                            T_FMT_AMPM => undef,
+                            YESEXPR => undef,
                         );
 
 my $hdr = "../../perl_langinfo.h";
@@ -111,14 +111,15 @@ SKIP: {
     # For non-nl_langinfo systems, those values are arbitrary negative numbers
     # set in the header.  Otherwise they are the nl_langinfo approved values,
     # which for the moment is the item name.
+    # The relevant lines look like: #  define PERL_YESSTR -54
     while (<$fh>) {
         chomp;
         next unless / - \d+ $ /x;
-        s/ ^ .* PERL_//x;
+        s/ ^ .* PERL_ //x;
         m/ (.*) \  (.*) /x;
         $items{$1} = ($has_nl_langinfo)
-                     ? $1
-                     : $2;
+                     ? $1       # Yields 'YESSTR'
+                     : $2;      # Yields -54
     }
 
     # Get the translation from item name to numeric value.
@@ -127,10 +128,16 @@ SKIP: {
     foreach my $formal_item (sort keys %items) {
         if (exists $correct_C_responses{$formal_item}) {
             my $item = eval $items{$formal_item};
-            next if $@;
-            is (test_Perl_langinfo($item),
-                $correct_C_responses{$formal_item},
-                "Returns expected value for $formal_item");
+            skip "This platform apparently doesn't support $formal_item", 1 if $@;
+            if (defined $correct_C_responses{$formal_item}) {
+                is (test_Perl_langinfo($item),
+                    $correct_C_responses{$formal_item},
+                    "Returns expected value for $formal_item");
+            }
+            else {
+                ok (defined test_Perl_langinfo($item),
+                    "Returns a value for $formal_item");
+            }
         }
     }
 }
