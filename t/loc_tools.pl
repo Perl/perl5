@@ -53,6 +53,17 @@ if ($has_locale_h) {
     }
 }
 
+sub _my_diag($) {
+    my $message = shift;
+    if (defined &main::diag) {
+        diag($message);
+    }
+    else {
+        local($\, $", $,) = (undef, ' ', '');
+        print STDERR $message, "\n";
+    }
+}
+
 sub _my_fail($) {
     my $message = shift;
     if (defined &main::fail) {
@@ -363,6 +374,8 @@ sub find_locales ($;$) {
         foreach my $line (@Data) {
             my ($locale_name, $language_codes, $country_codes, $encodings) =
                 split /:/, $line;
+            _my_diag(__FILE__ . ":" . __LINE__ . ": Unexpected syntax in '$line'")
+                                                     unless defined $locale_name;
             my @enc = _decode_encodings($encodings);
             foreach my $loc (split(/ /, $locale_name)) {
                 _trylocale($loc, $categories, \@Locale, $allow_incompatible);
