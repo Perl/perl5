@@ -1,6 +1,5 @@
 # Common tools for test files files to find the locales which exist on the
-# system.  Caller should have defined ok() for the unlikely event that setup
-# here fails, and should have verified that this isn't miniperl before calling
+# system.  Caller should have verified that this isn't miniperl before calling
 # the functions.
 
 # Note that it's okay that some languages have their native names
@@ -54,6 +53,17 @@ if ($has_locale_h) {
     }
 }
 
+sub _my_fail($) {
+    my $message = shift;
+    if (defined &main::fail) {
+        fail($message);
+    }
+    else {
+        local($\, $", $,) = (undef, ' ', '');
+        print "not ok 0 $message\n";
+    }
+}
+
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
@@ -99,7 +109,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     }
 
     if ($badutf8) {
-        ok(0, "Verify locale name doesn't contain malformed utf8");
+        _my_fail("Verify locale name doesn't contain malformed utf8");
         return;
     }
     push @$list, $locale if $plays_well || $allow_incompatible;
