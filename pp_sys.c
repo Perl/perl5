@@ -4375,7 +4375,7 @@ PP(pp_system)
 	STRLEN len;
 	char *pv;
 	SvGETMAGIC(origsv);
-#ifdef WIN32
+#if defined(WIN32) || defined(__VMS)
 	/*
 	 * Because of a nasty platform-specific variation on the meaning
 	 * of arguments to this op, we must preserve numeric arguments
