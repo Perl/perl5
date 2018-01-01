@@ -198,11 +198,15 @@ package CountRead {
 }
 my $cr;
 tie $cr, "CountRead";
-is system($^X, "-e", "exit(\$ARGV[0] eq '1' ? 0 : 1)", $cr), 0,
+my $exit_statement = "exit(\$ARGV[0] eq '1' ? 0 : 1)";
+$exit_statement = qq/"$exit_statement"/ if $^O eq 'VMS';
+is system($^X, "-e", $exit_statement, $cr), 0,
     "system args have magic processed exactly once";
 is tied($cr)->{n}, 1, "system args have magic processed before fork";
 
-is system($^X, "-e", "exit(\$ARGV[0] eq \$ARGV[1] ? 0 : 1)", "$$", $$), 0,
+$exit_statement = "exit(\$ARGV[0] eq \$ARGV[1] ? 0 : 1)";
+$exit_statement = qq/"$exit_statement"/ if $^O eq 'VMS';
+is system($^X, "-e", $exit_statement, "$$", $$), 0,
     "system args have magic processed before fork";
 
 my $test = curr_test();
