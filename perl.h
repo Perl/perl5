@@ -5767,7 +5767,7 @@ expression, but with an empty argument list, like this:
  * contrary be noops, in the dynamic scope by setting PL_numeric_standard to 2.
  * */
 #  define _NOT_IN_NUMERIC_UNDERLYING                                        \
-                        (! PL_numeric_underlying && PL_numeric_standard < 2)
+                    (! PL_numeric_underlying && PL_numeric_standard < 2)
 
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION                           \
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL
@@ -5805,21 +5805,21 @@ expression, but with an empty argument list, like this:
 /* The rest of these LC_NUMERIC macros toggle to one or the other state, with
  * the RESTORE_foo ones called to switch back, but only if need be */
 #  define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()                        \
-	bool _was_underlying = _NOT_IN_NUMERIC_STANDARD;                         \
+	bool _was_underlying = _NOT_IN_NUMERIC_STANDARD;                    \
 	if (_was_underlying) Perl_set_numeric_standard(aTHX);
 
 /* Doesn't change to underlying locale unless within the scope of some form of
  * 'use locale'.  This is the usual desired behavior. */
-#  define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()        \
+#  define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()                        \
 	bool _was_standard = _NOT_IN_NUMERIC_UNDERLYING                     \
                             && IN_LC(LC_NUMERIC);                           \
 	if (_was_standard) Perl_set_numeric_underlying(aTHX);
 
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
-#  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()            \
+#  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()                            \
     if (_NOT_IN_NUMERIC_UNDERLYING) {                                       \
-        Perl_set_numeric_underlying(aTHX);                                       \
+        Perl_set_numeric_underlying(aTHX);                                  \
         _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;          \
     }
 
