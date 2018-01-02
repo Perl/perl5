@@ -2382,11 +2382,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  if defined(USE_PERLIO) && defined(USE_LOCALE_CTYPE)
 
     /* Set PL_utf8locale to TRUE if using PerlIO _and_ the current LC_CTYPE
-     * locale is UTF-8.  If PL_utf8locale and PL_unicode (set by -C or by
-     * $ENV{PERL_UNICODE}) are true, perl.c:S_parse_body() will turn on the
-     * PerlIO :utf8 layer on STDIN, STDOUT, STDERR, _and_ the default open
-     * discipline.  */
-    PL_utf8locale = _is_cur_LC_category_utf8(LC_CTYPE);
+     * locale is UTF-8.  The call to new_ctype() just above has already
+     * calculated the latter value and saved it in PL_in_utf8_CTYPE_locale. If
+     * both PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE})
+     * are true, perl.c:S_parse_body() will turn on the PerlIO :utf8 layer on
+     * STDIN, STDOUT, STDERR, _and_ the default open discipline.  */
+    PL_utf8locale = PL_in_utf8_CTYPE_locale;
 
     /* Set PL_unicode to $ENV{PERL_UNICODE} if using PerlIO.
        This is an alternative to using the -C command line switch
