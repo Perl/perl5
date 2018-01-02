@@ -5506,7 +5506,7 @@ typedef struct am_table_short AMTS;
       &&   defined(HAS_USELOCALE)               \
       && ! defined(NO_POSIX_2008_LOCALE)
 
-    /* The code is written for simplicity to assume that any platform advanced
+    /* For simplicity, the code is written to assume that any platform advanced
      * enough to have the Posix 2008 locale functions has LC_ALL.  The test
      * above makes sure that assumption is valid */
 
@@ -5751,6 +5751,15 @@ expression, but with an empty argument list, like this:
 =cut
 
 */
+
+/* The numeric locale is generally kept in the C locale instead of the
+ * underlying locale.  The current status is known by looking at two words.
+ * One is non-zero if the current numeric locale is the standard C/POSIX one.
+ * The other is non-zero if the current locale is the underlying locale.  Both
+ * can be non-zero if, as often happens, the underlying locale is C.
+ *
+ * khw believes the reason for the variables instead of the bits in a single
+ * word is to avoid having to have masking instructions. */
 
 #  define _NOT_IN_NUMERIC_STANDARD (! PL_numeric_standard)
 
