@@ -547,10 +547,10 @@ S_new_ctype(pTHX_ const char *newctype)
         unsigned int bad_count = 0;         /* Count of bad characters */
 
         for (i = 0; i < 256; i++) {
-            if (isUPPER_LC((U8) i))
-                PL_fold_locale[i] = (U8) toLOWER_LC((U8) i);
-            else if (isLOWER_LC((U8) i))
-                PL_fold_locale[i] = (U8) toUPPER_LC((U8) i);
+            if (isupper(i))
+                PL_fold_locale[i] = (U8) tolower(i);
+            else if (islower(i))
+                PL_fold_locale[i] = (U8) toupper(i);
             else
                 PL_fold_locale[i] = (U8) i;
 
