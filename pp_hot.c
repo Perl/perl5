@@ -927,7 +927,7 @@ PP(pp_multiconcat)
                 targ_pv += offset;
                 Move(dsv_pv, targ_pv, targ_len, char);
                 /* a negative length implies don't Copy(), but do increment */
-                svpv_p->len = -targ_len;
+                svpv_p->len = -((SSize_t)targ_len);
                 slow_concat = TRUE;
             }
             else {
