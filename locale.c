@@ -74,24 +74,46 @@ static bool debug_initialization = FALSE;
 
 #ifdef USE_LOCALE
 
-/*
- * Standardize the locale name from a string returned by 'setlocale', possibly
- * modifying that string.
+/* This code keeps a LRU cache of the UTF-8ness of the locales it has so-far
+ * looked up.  This is in the form of a C string:  */
+
+#define UTF8NESS_SEP     "\v"
+#define UTF8NESS_PREFIX  "\f"
+
+/* So, the string looks like:
  *
- * The typical return value of setlocale() is either
- * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
- * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
- *     (the space-separated values represent the various sublocales,
- *      in some unspecified order).  This is not handled by this function.
+ *      \vC\a0\vPOSIX\a0\vam_ET\a0\vaf_ZA.utf8\a1\ven_US.UTF-8\a1\0
  *
- * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
- * which is harmful for further use of the string in setlocale().  This
- * function removes the trailing new line and everything up through the '='
- *
- */
+ * where the digit 0 after the \a indicates that the locale starting just
+ * after the preceding \v is not UTF-8, and the digit 1 mean it is. */
+
+STATIC_ASSERT_DECL(STRLENs(UTF8NESS_SEP) == 1);
+STATIC_ASSERT_DECL(STRLENs(UTF8NESS_PREFIX) == 1);
+
+#define C_and_POSIX_utf8ness    UTF8NESS_SEP "C"     UTF8NESS_PREFIX "0"    \
+                                UTF8NESS_SEP "POSIX" UTF8NESS_PREFIX "0"
+
+/* The cache is initialized to C_and_POSIX_utf8ness at start up.  These are
+ * kept there always.  The remining portion of the cache is LRU, with the
+ * oldest looked-up locale at the tail end */
+
 STATIC char *
 S_stdize_locale(pTHX_ char *locs)
 {
+    /* Standardize the locale name from a string returned by 'setlocale',
+     * possibly modifying that string.
+     *
+     * The typical return value of setlocale() is either
+     * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
+     * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
+     *     (the space-separated values represent the various sublocales,
+     *      in some unspecified order).  This is not handled by this function.
+     *
+     * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
+     * which is harmful for further use of the string in setlocale().  This
+     * function removes the trailing new line and everything up through the '='
+     * */
+
     const char * const s = strchr(locs, '=');
     bool okay = TRUE;
 
@@ -2018,6 +2040,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     assert(NOMINAL_LC_ALL_INDEX == LC_ALL_INDEX);
 #    endif
 #  endif    /* DEBUGGING */
+
+    /* Initialize the cache of the program's UTF-8ness for the always known
+     * locales C and POSIX */
+    my_strlcpy(PL_locale_utf8ness, C_and_POSIX_utf8ness,
+               sizeof(PL_locale_utf8ness));
+
 #  ifdef LOCALE_ENVIRON_REQUIRED
 
     /*
@@ -2374,8 +2402,24 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  endif
 
-
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+
+#  if defined(USE_ITHREADS)
+
+        /* This caches whether each category's locale is UTF-8 or not.  This
+         * may involve changing the locale.  It is ok to do this at
+         * initialization time before any threads have started, but not later.
+         * Caching means that if the program heeds our dictate not to change
+         * locales in threaded applications, this data will remain valid, and
+         * it may get queried without changing locales.  If the environment is
+         * such that all categories have the same locale, this isn't needed, as
+         * the code will not change the locale; but this handles the uncommon
+         * case where the environment has disparate locales for the categories
+         * */
+        (void) _is_cur_LC_category_utf8(categories[i]);
+
+#  endif
+
         Safefree(curlocales[i]);
     }
 
@@ -3024,8 +3068,29 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * English, it comes down to if the locale's name ends in something like
      * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
 
+    /* Name of current locale corresponding to the input category */
     const char *save_input_locale = NULL;
+
+    bool is_utf8 = FALSE;                /* The return value */
     STRLEN final_pos;
+
+    /* The variables below are for the cache of previous lookups using this
+     * function.  The cache is a C string, described at the definition for
+     * 'C_and_POSIX_utf8ness'.
+     *
+     * The first part of the cache is fixed, for the C and POSIX locales.  The
+     * varying part starts just after them. */
+    char * utf8ness_cache = PL_locale_utf8ness + STRLENs(C_and_POSIX_utf8ness);
+
+    Size_t utf8ness_cache_size; /* Size of the varying portion */
+    Size_t input_name_len;      /* Length in bytes of save_input_locale */
+    Size_t input_name_len_with_overhead;    /* plus extra chars used to store
+                                               the name in the cache */
+    char * delimited;           /* The name plus the delimiters used to store
+                                   it in the cache */
+    char * name_pos;            /* position of 'delimited' in the cache, or 0
+                                   if not there */
+
 
 #  ifdef LC_ALL
 
@@ -3033,22 +3098,68 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #  endif
 
-    /* First dispose of the trivial cases */
+    /* Get the desired category's locale */
     save_input_locale = do_setlocale_r(category, NULL);
     if (! save_input_locale) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "Could not find current locale for category %d\n",
-                              category));
-        return FALSE;   /* XXX maybe should croak */
+        Perl_croak(aTHX_
+             "panic: %s: %d: Could not find current locale for %s\n",
+                     __FILE__, __LINE__, category_name(category));
     }
+
     save_input_locale = stdize_locale(savepv(save_input_locale));
-    if (isNAME_C_OR_POSIX(save_input_locale)) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "Current locale for category %d is %s\n",
-                              category, save_input_locale));
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "Current locale for %s is %s\n",
+                          category_name(category), save_input_locale));
+
+    input_name_len = strlen(save_input_locale);
+
+    /* In our cache, each name is accompanied by two delimiters and a single
+     * utf8ness digit */
+    input_name_len_with_overhead = input_name_len + 3;
+
+    /* Allocate and populate space for a copy of the name surrounded by the
+     * delimiters */
+    Newx(delimited, input_name_len_with_overhead, char);
+    delimited[0] = UTF8NESS_SEP[0];
+    Copy(save_input_locale, delimited + 1, input_name_len, char);
+    delimited[input_name_len+1] = UTF8NESS_PREFIX[0];
+    delimited[input_name_len+2] = '\0';
+
+    /* And see if that is in the cache */
+    name_pos = instr(PL_locale_utf8ness, delimited);
+    if (name_pos) {
+        is_utf8 = *(name_pos + input_name_len_with_overhead - 1) - '0';
+
+#  ifdef DEBUGGING
+
+        if (DEBUG_Lv_TEST || debug_initialization) {
+            PerlIO_printf(Perl_debug_log, "UTF8ness for locale %s=%d, \n",
+                                          save_input_locale, is_utf8);
+        }
+
+#  endif
+
+        /* And, if not already in that position, move it to the beginning of
+         * the non-constant portion of the list, since it is the most recently
+         * used.  (We don't have to worry about overflow, since just moving
+         * existing names around) */
+        if (name_pos > utf8ness_cache) {
+            Move(utf8ness_cache,
+                 utf8ness_cache + input_name_len_with_overhead,
+                 name_pos - utf8ness_cache, char);
+            Copy(delimited,
+                 utf8ness_cache,
+                 input_name_len_with_overhead - 1, char);
+            utf8ness_cache[input_name_len_with_overhead - 1] = is_utf8 + '0';
+        }
+
+        Safefree(delimited);
         Safefree(save_input_locale);
-        return FALSE;
+        return is_utf8;
     }
+
+    /* Here we don't have stored the utf8ness for the input locale.  We have to
+     * calculate it */
 
 #  if defined(USE_LOCALE_CTYPE)    \
     && (defined(MB_CUR_MAX) || (defined(HAS_NL_LANGINFO) && defined(CODESET)))
@@ -3056,7 +3167,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     { /* Next try nl_langinfo or MB_CUR_MAX if available */
 
         char *save_ctype_locale = NULL;
-        bool is_utf8;
 
         if (category != LC_CTYPE) { /* These work only on LC_CTYPE */
 
@@ -3117,8 +3227,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                        "\tnllanginfo returned CODESET '%s'; ?UTF8 locale=%d\n",
                                                      codeset,         is_utf8));
-                Safefree(save_input_locale);
-                return is_utf8;
+                goto finish_and_return;
             }
         }
 
@@ -3175,7 +3284,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             Safefree(save_ctype_locale);
         }
 
-        return is_utf8;
+        goto finish_and_return;
 
 #    endif
 
@@ -3200,7 +3309,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     {
         char *save_monetary_locale = NULL;
         bool only_ascii = FALSE;
-        bool is_utf8 = FALSE;
         struct lconv* lc;
 
         /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
@@ -3257,8 +3365,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              * is non-ascii UTF-8. */
             DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
                                     save_input_locale, is_utf8));
-            Safefree(save_input_locale);
-            return is_utf8;
+            goto finish_and_return;
         }
     }
   cant_use_monetary:
@@ -3343,8 +3450,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
                                 save_input_locale,
                                 is_utf8_string((U8 *) formatted_time, 0)));
-            Safefree(save_input_locale);
-            return is_utf8_string((U8 *) formatted_time, 0);
+            is_utf8 = is_utf8_string((U8 *) formatted_time, 0);
+            goto finish_and_return;
         }
 
         /* Falling off the end of the loop indicates all the names were just
@@ -3375,7 +3482,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
  * are much more likely to have been translated.  */
     {
         int e;
-        bool is_utf8 = FALSE;
         bool non_ascii = FALSE;
         char *save_messages_locale = NULL;
         const char * errmsg = NULL;
@@ -3439,8 +3545,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?error messages for %s are UTF-8=%d\n",
                                 save_input_locale,
                                 is_utf8));
-            Safefree(save_input_locale);
-            return is_utf8;
+            goto finish_and_return;
         }
 
         DEBUG_L(PerlIO_printf(Perl_debug_log, "All error messages for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
@@ -3484,8 +3589,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                                       "Locale %s ends with UTF-8 in name\n",
                                       save_input_locale));
-                Safefree(save_input_locale);
-                return TRUE;
+                is_utf8 = TRUE;
+                goto finish_and_return;
             }
         }
         DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -3501,8 +3606,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                         "Locale %s ends with 65001 in name, is UTF-8 locale\n",
                         save_input_locale));
-        Safefree(save_input_locale);
-        return TRUE;
+        is_utf8 = TRUE;
+        goto finish_and_return;
     }
 
 #  endif
@@ -3516,16 +3621,81 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                              "Locale %s has 8859 in name, not UTF-8 locale\n",
                              save_input_locale));
-        Safefree(save_input_locale);
-        return FALSE;
+        is_utf8 = FALSE;
+        goto finish_and_return;
     }
 #  endif
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "Assuming locale %s is not a UTF-8 locale\n",
                                     save_input_locale));
+    is_utf8 = FALSE;
+
+  finish_and_return:
+
+    /* Cache this result so we don't have to go through all this next time. */
+    utf8ness_cache_size = sizeof(PL_locale_utf8ness)
+                       - (utf8ness_cache - PL_locale_utf8ness);
+
+    /* But we can't save it if it is too large for the total space available */
+    if (LIKELY(input_name_len_with_overhead < utf8ness_cache_size)) {
+        Size_t utf8ness_cache_len = strlen(utf8ness_cache);
+
+        /* Here it can fit, but we may need to clear out the oldest cached
+         * result(s) to do so.  Check */
+        if (utf8ness_cache_len + input_name_len_with_overhead
+                                                        >= utf8ness_cache_size)
+        {
+            /* Here we have to clear something out to make room for this.
+             * Start looking at the rightmost place where it could fit and find
+             * the beginning of the entry that extends past that. */
+            char * cutoff = (char *) my_memrchr(utf8ness_cache,
+                                                UTF8NESS_SEP[0],
+                                                utf8ness_cache_size
+                                              - input_name_len_with_overhead);
+
+            assert(cutoff);
+            assert(cutoff >= utf8ness_cache);
+
+            /* This and all subsequent entries must be removed */
+            *cutoff = '\0';
+            utf8ness_cache_len = strlen(utf8ness_cache);
+        }
+
+        /* Make space for the new entry */
+        Move(utf8ness_cache,
+             utf8ness_cache + input_name_len_with_overhead,
+             utf8ness_cache_len + 1 /* Incl. trailing NUL */, char);
+
+        /* And insert it */
+        Copy(delimited, utf8ness_cache, input_name_len_with_overhead - 1, char);
+        utf8ness_cache[input_name_len_with_overhead - 1] = is_utf8 + '0';
+
+        if ((PL_locale_utf8ness[strlen(PL_locale_utf8ness)-1]
+                                                & (PERL_UINTMAX_T) ~1) != '0')
+        {
+            Perl_croak(aTHX_
+             "panic: %s: %d: Corrupt utf8ness_cache=%s\nlen=%u,"
+             " inserted_name=%s, its_len=%u\n",
+                __FILE__, __LINE__,
+                PL_locale_utf8ness, strlen(PL_locale_utf8ness),
+                delimited, input_name_len_with_overhead);
+        }
+    }
+
+#  ifdef DEBUGGING
+
+    if (DEBUG_Lv_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log,
+                "PL_locale_utf8ness is now %s; returning %d\n",
+                                     PL_locale_utf8ness, is_utf8);
+    }
+
+#  endif
+
+    Safefree(delimited);
     Safefree(save_input_locale);
-    return FALSE;
+    return is_utf8;
 }
 
 #endif
