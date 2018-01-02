@@ -1980,7 +1980,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
                 trial_locale = system_default_locale;
             }
-#    endif /* WIN32 */
+#    else
+#      error SYSTEM_DEFAULT_LOCALE only implemented for Win32
+#    endif
 #  endif /* SYSTEM_DEFAULT_LOCALE */
 
         }   /* For i > 0 */
