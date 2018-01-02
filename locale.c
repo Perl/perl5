@@ -1829,6 +1829,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                          /* disallow with "" or "0" */
                                          *bad_lang_use_once
                                        && strNE("0", bad_lang_use_once)))));
+
     /* setlocale() return vals; not copied so must be looked at immediately */
     const char * sl_result[NOMINAL_LC_ALL_INDEX + 1];
 
@@ -1910,27 +1911,27 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     {
         bool done = FALSE;
-    if (lang) {
-	sl_result[LC_ALL_INDEX] = do_setlocale_c(LC_ALL, setlocale_init);
-        DEBUG_LOCALE_INIT(LC_ALL, setlocale_init, sl_result[LC_ALL_INDEX]);
-	if (sl_result[LC_ALL_INDEX])
-	    done = TRUE;
-	else
-	    setlocale_failure = TRUE;
-    }
-    if (! setlocale_failure) {
-        const char * locale_param;
-        for (i = 0; i < LC_ALL_INDEX; i++) {
-            locale_param = (! done && (lang || PerlEnv_getenv(category_names[i])))
-                           ? setlocale_init
-                           : NULL;
-            sl_result[i] = do_setlocale_r(categories[i], locale_param);
-            if (! sl_result[i]) {
+        if (lang) {
+            sl_result[LC_ALL_INDEX] = do_setlocale_c(LC_ALL, setlocale_init);
+            DEBUG_LOCALE_INIT(LC_ALL, setlocale_init, sl_result[LC_ALL_INDEX]);
+            if (sl_result[LC_ALL_INDEX])
+                done = TRUE;
+            else
                 setlocale_failure = TRUE;
-            }
-            DEBUG_LOCALE_INIT(categories[i], locale_param, sl_result[i]);
         }
-    }
+        if (! setlocale_failure) {
+            const char * locale_param;
+            for (i = 0; i < LC_ALL_INDEX; i++) {
+                locale_param = (! done && (lang || PerlEnv_getenv(category_names[i])))
+                            ? setlocale_init
+                            : NULL;
+                sl_result[i] = do_setlocale_r(categories[i], locale_param);
+                if (! sl_result[i]) {
+                    setlocale_failure = TRUE;
+                }
+                DEBUG_LOCALE_INIT(categories[i], locale_param, sl_result[i]);
+            }
+        }
     }
 
 #    endif /* LC_ALL */
