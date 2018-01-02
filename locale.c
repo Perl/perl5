@@ -1747,7 +1747,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                     Newx(mod_format, mod_size, char);
                     Newx(temp_result, PL_langinfo_bufsize, char);
-                    *mod_format = '\a';
+                    *mod_format = ' ';
                     my_strlcpy(mod_format + 1, format, mod_size);
                     len = strftime(temp_result,
                                    PL_langinfo_bufsize,
