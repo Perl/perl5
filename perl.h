@@ -5773,6 +5773,11 @@ expression, but with an empty argument list, like this:
  * The other is non-zero if the current locale is the underlying locale.  Both
  * can be non-zero if, as often happens, the underlying locale is C.
  *
+ * Its slightly more complicated than this, as the PL_numeric_standard variable
+ * is set if the current numeric locale is indistinguishable from the C locale.
+ * This happens when the radix character is a dot, and the thousands separator
+ * is the empty string.
+ *
  * khw believes the reason for the variables instead of the bits in a single
  * word is to avoid having to have masking instructions. */
 

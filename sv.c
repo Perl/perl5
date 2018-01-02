@@ -15223,6 +15223,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #ifdef USE_LOCALE_NUMERIC
     PL_numeric_standard	= proto_perl->Inumeric_standard;
     PL_numeric_underlying	= proto_perl->Inumeric_underlying;
+    PL_numeric_underlying_is_standard	= proto_perl->Inumeric_underlying_is_standard;
 #endif /* !USE_LOCALE_NUMERIC */
 
     /* Did the locale setup indicate UTF-8? */

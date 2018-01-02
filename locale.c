@@ -452,13 +452,17 @@ Perl_new_numeric(pTHX_ const char *newnum)
      *                  that the current locale is the program's underlying
      *                  locale
      * PL_numeric_standard An int indicating if the toggled state is such
-     *                  that the current locale is the C locale.  If non-zero,
-     *                  it is in C; if > 1, it means it may not be toggled away
+     *                  that the current locale is the C locale or
+     *                  indistinguishable from the C locale.  If non-zero, it
+     *                  is in C; if > 1, it means it may not be toggled away
      *                  from C.
-     * Note that both of the last two variables can be true at the same time,
-     * if the underlying locale is C.  (Toggling is a no-op under these
-     * circumstances.)
-     *
+     * PL_numeric_underlying_is_standard   A bool kept by this function
+     *                  indicating that the underlying locale and the standard
+     *                  C locale are indistinguishable for the purposes of
+     *                  LC_NUMERIC.  This happens when both of the above two
+     *                  variables are true at the same time.  (Toggling is a
+     *                  no-op under these circumstances.)  This variable is
+     *                  used to avoid having to recalculate.
      * Any code changing the locale (outside this file) should use
      * POSIX::setlocale, which calls this function.  Therefore this function
      * should be called directly only from this file and from
@@ -471,20 +475,36 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	PL_numeric_name = NULL;
 	PL_numeric_standard = TRUE;
 	PL_numeric_underlying = TRUE;
+	PL_numeric_underlying_is_standard = TRUE;
 	return;
     }
 
     save_newnum = stdize_locale(savepv(newnum));
-
-    PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
     PL_numeric_underlying = TRUE;
+    PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
 
+    /* If its name isn't C nor POSIX, it could still be indistinguishable from
+     * them */
+    if (! PL_numeric_standard) {
+        PL_numeric_standard = cBOOL(strEQ(".", my_nl_langinfo(PERL_RADIXCHAR,
+                                            FALSE /* Don't toggle locale */  ))
+                                 && strEQ("",  my_nl_langinfo(PERL_THOUSEP,
+                                                              FALSE)));
+    }
+
+    /* Save the new name if it isn't the same as the previous one, if any */
     if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
 	Safefree(PL_numeric_name);
 	PL_numeric_name = save_newnum;
     }
     else {
 	Safefree(save_newnum);
+    }
+
+    PL_numeric_underlying_is_standard = PL_numeric_standard;
+
+    if (DEBUG_L_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log, "Called new_numeric with %s, PL_numeric_name=%s\n", newnum, PL_numeric_name);
     }
 
     /* Keep LC_NUMERIC in the C locale.  This is for XS modules, so they don't
@@ -510,7 +530,7 @@ Perl_set_numeric_standard(pTHX)
 
     do_setlocale_c(LC_NUMERIC, "C");
     PL_numeric_standard = TRUE;
-    PL_numeric_underlying = isNAME_C_OR_POSIX(PL_numeric_name);
+    PL_numeric_underlying = PL_numeric_underlying_is_standard;
     set_numeric_radix(0);
 
 #  ifdef DEBUGGING
@@ -538,7 +558,7 @@ Perl_set_numeric_underlying(pTHX)
      * wrong if some XS code has changed the locale behind our back) */
 
     do_setlocale_c(LC_NUMERIC, PL_numeric_name);
-    PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
+    PL_numeric_standard = PL_numeric_underlying_is_standard;
     PL_numeric_underlying = TRUE;
     set_numeric_radix(1);
 

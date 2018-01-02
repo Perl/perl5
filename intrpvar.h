@@ -614,6 +614,7 @@ PERLVARI(I, numeric_standard, int, TRUE)
 					/* Assume C locale numerics */
 PERLVARI(I, numeric_underlying, bool, TRUE)
 					/* Assume underlying locale numerics */
+PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
 PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 

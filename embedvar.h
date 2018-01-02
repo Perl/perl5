@@ -221,6 +221,7 @@
 #define PL_numeric_radix_sv	(vTHX->Inumeric_radix_sv)
 #define PL_numeric_standard	(vTHX->Inumeric_standard)
 #define PL_numeric_underlying	(vTHX->Inumeric_underlying)
+#define PL_numeric_underlying_is_standard	(vTHX->Inumeric_underlying_is_standard)
 #define PL_ofsgv		(vTHX->Iofsgv)
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_op			(vTHX->Iop)
