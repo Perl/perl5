@@ -52,8 +52,9 @@ static bool debug_initialization = FALSE;
 #  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #endif
 
-/* strlen() of a literal string constant.  XXX We might want this more general,
- * but using it in just this file for now */
+/* strlen() of a literal string constant.  We might want this more general,
+ * but using it in just this file for now.  A problem with more generality is
+ * the compiler warnings about comparing unlike signs */
 #define STRLENs(s)  (sizeof("" s "") - 1)
 
 /* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
@@ -364,7 +365,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
 
 #else
 
-    /* Called after all libc setlocale() calls affecting LC_NUMERIC, to tell
+    /* Called after each libc setlocale() call affecting LC_NUMERIC, to tell
      * core Perl this and that 'newnum' is the name of the new locale.
      * It installs this locale as the current underlying default.
      *
@@ -501,7 +502,7 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #else
 
-    /* Called after all libc setlocale() calls affecting LC_CTYPE, to tell
+    /* Called after each libc setlocale() call affecting LC_CTYPE, to tell
      * core Perl this and that 'newctype' is the name of the new locale.
      *
      * This function sets up the folding arrays for all 256 bytes, assuming
@@ -712,7 +713,7 @@ S_new_collate(pTHX_ const char *newcoll)
 
 #else
 
-    /* Called after all libc setlocale() calls affecting LC_COLLATE, to tell
+    /* Called after each libc setlocale() call affecting LC_COLLATE, to tell
      * core Perl this and that 'newcoll' is the name of the new locale.
      *
      * The design of locale collation is that every locale change is given an
@@ -1027,11 +1028,10 @@ Perl_setlocale(int category, const char * locale)
 
 #ifdef USE_LOCALE_NUMERIC
 
-    /* A NULL locale means only query what the current one is.  We
-     * have the LC_NUMERIC name saved, because we are normally switched
-     * into the C locale for it.  Switch back so an LC_ALL query will yield
-     * the correct results; all other categories don't require special
-     * handling */
+    /* A NULL locale means only query what the current one is.  We have the
+     * LC_NUMERIC name saved, because we are normally switched into the C
+     * locale for it.  For an LC_ALL query, switch back to get the correct
+     * results.  All other categories don't require special handling */
     if (locale == NULL) {
         if (category == LC_NUMERIC) {
             return savepv(PL_numeric_name);
@@ -1431,6 +1431,9 @@ S_my_nl_langinfo(const int item, bool toggle)
 
             LOCALE_LOCK;
 
+            /* We don't bother with localeconv_l() because any system that has
+             * it is likely to also have nl_langinfo() */
+
             lc = localeconv();
             if (! lc || ! lc->currency_symbol || strEQ("", lc->currency_symbol))
             {
@@ -1819,13 +1822,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                          *bad_lang_use_once
                                        && strNE("0", bad_lang_use_once)))));
     bool done = FALSE;
-    char * sl_result[NOMINAL_LC_ALL_INDEX + 1];   /* setlocale() return vals;
-                                                     not copied so must be
-                                                     looked at immediately */
-    char * curlocales[NOMINAL_LC_ALL_INDEX + 1];  /* current locale for given
-                                                     category; should have been
-                                                     copied so aren't volatile
-                                                   */
+    /* setlocale() return vals; not copied so must be looked at immediately */
+    char * sl_result[NOMINAL_LC_ALL_INDEX + 1];
+
+    /* current locale for given category; should have been copied so aren't
+     * volatile */
+    char * curlocales[NOMINAL_LC_ALL_INDEX + 1];
+
     char * locale_param;
 
 #  ifdef WIN32
@@ -1945,7 +1948,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             setlocale_failure = FALSE;
 
 #  ifdef SYSTEM_DEFAULT_LOCALE
-#    ifdef WIN32
+#    ifdef WIN32    /* Note that assumes Win32 has LC_ALL */
 
             /* On Windows machines, an entry of "" after the 0th means to use
              * the system default locale, which we now proceed to get. */
@@ -1972,7 +1975,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             }
 #    endif /* WIN32 */
 #  endif /* SYSTEM_DEFAULT_LOCALE */
-        }
+
+        }   /* For i > 0 */
 
 #  ifdef LC_ALL
 
@@ -2436,7 +2440,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         } /* End of determining the character that is to replace NULs */
 
         /* If the replacement is variant under UTF-8, it must match the
-         * UTF8-ness as the original */
+         * UTF8-ness of the original */
         if ( ! UVCHR_IS_INVARIANT(PL_strxfrm_NUL_replacement) && utf8) {
             this_replacement_char[0] =
                                 UTF8_EIGHT_BIT_HI(PL_strxfrm_NUL_replacement);
@@ -2962,9 +2966,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * should give the correct results */
 
 #    if defined(HAS_NL_LANGINFO) && defined(CODESET)
-     /* The task is easiest if has this POSIX 2001 function */
 
-        {
+        { /* The task is easiest if the platform has this POSIX 2001 function */
             const char *codeset = my_nl_langinfo(PERL_CODESET, FALSE);
                                           /* FALSE => already in dest locale */
 
