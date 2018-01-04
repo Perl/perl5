@@ -10228,10 +10228,32 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         }
 
         /* Now we can see if the script of the character is the same as that of
-         * the run, or 'Common' which is considered to be in every script */
-        if (LIKELY(   script_of_char == script_of_run
-                   || script_of_char == SCX_Common))
-        {   /* By far the most common case */
+         * the run */
+        if (LIKELY(script_of_char == script_of_run)) {
+            /* By far the most common case */
+            goto scripts_match;
+        }
+
+        /* Here, the scripts of the run and the current character don't match
+         * exactly.  The run could so far have been entirely characters from
+         * Common.  It's now time to change its script to that of this
+         * non-Common character */
+        if (script_of_run == SCX_Common) {
+
+            /* But Common contains several sets of digits.  Only the '0' set
+             * can be part of another script. */
+            if (zero_of_run > 0 && zero_of_run != '0') {
+                retval = FALSE;
+                break;
+            }
+
+            script_of_run = script_of_char;
+            goto scripts_match;
+        }
+
+        /* Here, the script of the run isn't Common.  But characters in Common
+         * match any script */
+        if (script_of_char == SCX_Common) {
             goto scripts_match;
         }
 
