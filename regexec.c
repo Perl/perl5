@@ -10267,10 +10267,12 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 #else
 
         /* Here there is no exact match between the character's script and the
-         * run's.  Negative script numbers signify that the value may be any of
-         * several scripts, and we need to look at auxiliary information to
-         * make our deterimination.  But if both are non-negative, we can fail
-         * now */
+         * run's.  And we've handled the special cases of scripts Unknown,
+         * Inherited, and Common.
+         *
+         * Negative script numbers signify that the value may be any of several
+         * scripts, and we need to look at auxiliary information to make our
+         * deterimination.  But if both are non-negative, we can fail now */
         if (LIKELY(script_of_char >= 0)) {
             const SCX_enum * search_in;
             PERL_UINT_FAST8_T search_in_len;
@@ -10281,7 +10283,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
                 break;
             }
 
-            /* Use any previously constructed set of possible scripts.
+            /* Use the previously constructed set of possible scripts, if any.
              * */
             if (intersection) {
                 search_in = intersection;
