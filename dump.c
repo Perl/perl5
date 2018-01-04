@@ -1263,10 +1263,42 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 
     case OP_TRANS:
     case OP_TRANSR:
+        if (o->op_private & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF)) {
+            /* utf8: table stored as a swash */
+#ifndef USE_ITHREADS
+	/* with ITHREADS, swash is stored in the pad, and the right pad
+	 * may not be active here, so skip */
             S_opdump_indent(aTHX_ o, level, bar, file,
-                            "PV = 0x%" UVxf "\n",
-                            PTR2UV(cPVOPo->op_pv));
-            break;
+                            "SWASH = 0x%" UVxf "\n",
+                            PTR2UV(MUTABLE_SV(cSVOPo->op_sv)));
+#endif
+        }
+        else {
+            const OPtrans_map * const tbl = (OPtrans_map*)cPVOPo->op_pv;
+            SSize_t i, size = tbl->size;
+
+            S_opdump_indent(aTHX_ o, level, bar, file,
+                            "TABLE = 0x%" UVxf "\n",
+                            PTR2UV(tbl));
+            S_opdump_indent(aTHX_ o, level, bar, file,
+                "  SIZE: 0x%" UVxf "\n", (UV)size);
+
+            /* dump size+1 values, to include the extra slot at the end */
+            for (i = 0; i <= size; i++) {
+                short val = tbl->map[i];
+                if ((i & 0xf) == 0)
+                    S_opdump_indent(aTHX_ o, level, bar, file,
+                        " %4" UVxf ":", (UV)i);
+                if (val < 0)
+                    PerlIO_printf(file, " %2"  IVdf, (IV)val);
+                else
+                    PerlIO_printf(file, " %02" UVxf, (UV)val);
+
+                if ( i == size || (i & 0xf) == 0xf)
+                    PerlIO_printf(file, "\n");
+            }
+        }
+        break;
 
 
     default:
