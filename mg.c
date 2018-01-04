@@ -818,9 +818,9 @@ S_fixup_errno_string(pTHX_ SV* sv)
          * avoid as many possible backward compatibility issues as possible, we
          * don't turn on the flag unless we have to.  So the flag stays off for
          * an entirely invariant string.  We assume that if the string looks
-         * like UTF-8, it really is UTF-8:  "text in any other encoding that
-         * uses bytes with the high bit set is extremely unlikely to pass a
-         * UTF-8 validity test"
+         * like UTF-8 in a single script, it really is UTF-8:  "text in any
+         * other encoding that uses bytes with the high bit set is extremely
+         * unlikely to pass a UTF-8 validity test"
          * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
          * potential that we will get it wrong however, especially on short
          * error message text, so do an additional check. */
@@ -831,6 +831,12 @@ S_fixup_errno_string(pTHX_ SV* sv)
 
             &&  _is_cur_LC_category_utf8(LC_MESSAGES)
 
+#else   /* If can't check directly, at least can see if script is consistent,
+           under UTF-8, which gives us an extra measure of confidence. */
+
+            && isSCRIPT_RUN((const U8 *) SvPVX_const(sv), (U8 *) SvEND(sv),
+                            TRUE, /* Means assume UTF-8 */
+                            NULL)
 #endif
 
         ) {
