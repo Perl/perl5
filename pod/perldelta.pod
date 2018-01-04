@@ -88,6 +88,17 @@ but preceded by some kind of explicit deprecation.
 Some uses of these already are illegal after a previous deprecation
 cycle.  This deprecates the remaining uses.  See L<perldeprecation>.
 
+=head2 Use of unescaped C<"{"> immediately after a C<"(">
+
+Using unescaped left braces is officially deprecated everywhere, but it
+is not enforced in contexts where their use does not interfere with
+expected extensions to the language.  A deprecation is added in this
+release when the brace appears immediately after an opening parenthesis.
+Before this, even if the brace was part of a legal quantifier, it was
+not interpreted as such, but as the literal characters, unlike other
+quantifiers that follow a C<"("> which are considered errors.  Now,
+their use will raise a deprecation message, unless turned off.
+
 =head1 Performance Enhancements
 
 =over 4

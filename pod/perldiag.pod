@@ -6361,6 +6361,8 @@ Check the #! line, or manually feed your script into Perl yourself.
 
 =item Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in m/%s/
 
+=item Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.32), passed through in regex; marked by S<<-- HERE> in m/%s/
+
 (D deprecated, regexp)  The simple rule to remember, if you want to
 match a literal C<{> character (U+007B C<LEFT CURLY BRACKET>) in a
 regular expression pattern, is to escape each literal instance of it in
@@ -6382,7 +6384,7 @@ still just deprecated.  This is because of an oversight:  some uses of a
 literal C<{> that should have raised a deprecation warning starting in
 v5.20 did not warn until v5.26.  By making the already-warned uses fatal
 now, some of the planned extensions can be made to the language sooner.
-The cases which are still allowed will be fatal in Perl 5.30.
+The cases which are still allowed will be fatal in Perl 5.30 or 5.32.
 
 The contexts where no warnings or errors are raised are:
 
