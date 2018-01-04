@@ -10848,8 +10848,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     return NULL;
                 }
 
-                nextchar(pRExC_state);
-
                 return ret;
             }
         }
