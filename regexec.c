@@ -10392,7 +10392,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
 #endif
 
-  scripts_match: ;
+  scripts_match:
 
         /* Here, the script of the character is compatible with that of the
          * run.  Either they match exactly, or one or both can be any of
