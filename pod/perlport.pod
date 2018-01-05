@@ -2140,8 +2140,12 @@ may fall back to trying the shell if the first C<spawn()> fails.
 Does not automatically flush output handles on some platforms.
 
 (VMS)
-The return value is POSIX-like (shifted up by 8 bits), which only allows
-room for a made-up value derived from the severity bits of the native
+As with Win32, C<system(1, @args)> spawns an external process and
+immediately returns its process designator without waiting for the
+process to terminate.  In this case the return value may be used subsequently
+in L<C<wait>|perlfunc/wait> or L<C<waitpid>|perlfunc/waitpid PID,FLAGS>.
+Otherwise the return value is POSIX-like (shifted up by 8 bits), which only
+allows room for a made-up value derived from the severity bits of the native
 32-bit condition code (unless overridden by
 L<C<use vmsish 'status'>|vmsish/C<vmsish status>>).  If the native
 condition code is one that has a POSIX value encoded, the POSIX value will
