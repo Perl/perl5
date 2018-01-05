@@ -3219,10 +3219,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                     Safefree(save_ctype_locale);
                 }
 
-                is_utf8 = (   (   strlen(codeset) == STRLENs("UTF-8")
-                               && foldEQ(codeset, STR_WITH_LEN("UTF-8")))
-                           || (   strlen(codeset) == STRLENs("UTF8")
-                               && foldEQ(codeset, STR_WITH_LEN("UTF8"))));
+                              /* If the implementation of foldEQ() somehow were
+                               * to change to not go byte-by-byte, this could
+                               * read past end of string, as only one length is
+                               * checked.  But currently, a premature NUL will
+                               * compare false, and it will stop there */
+                is_utf8 = cBOOL(   foldEQ(codeset, STR_WITH_LEN("UTF-8"))
+                                || foldEQ(codeset, STR_WITH_LEN("UTF8")));
 
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                        "\tnllanginfo returned CODESET '%s'; ?UTF8 locale=%d\n",
