@@ -546,8 +546,16 @@ CODE
 
     {
         # test we handle the rename to the backup failing
-        # make it fail by creating a directory of the backup name
-        mkdir "$work.bak" or die "Cannot make mask backup directory: $!";
+        if ($^O eq 'VMS') {
+            # make it fail by creating a .bak file with a version than which no higher can be created
+            # can't make a directory because foo.bak and foo^.bak.DIR do not conflict.
+            open my $fh, '>', "$work.bak;32767" or die "Cannot make mask backup file: $!";
+            close $fh or die "Failed to close: $!";
+        }
+        else {
+            # make it fail by creating a directory of the backup name
+            mkdir "$work.bak" or die "Cannot make mask backup directory: $!";
+        }
         fresh_perl_like(<<'CODE', qr/Can't rename/, { stderr => 1 }, "fail backup rename");
 @ARGV = ("tmpinplace/foo");
 $^I = ".bak";
@@ -556,7 +564,12 @@ while (<>) {
 }
 print "ok\n";
 CODE
-        rmdir "$work.bak" or die "Cannot remove mask backup directory: $!";
+        if ($^O eq 'VMS') {
+            1 while unlink "$work.bak";
+        }
+        else {
+            rmdir "$work.bak" or die "Cannot remove mask backup directory: $!";
+        }
     }
 
     {
@@ -575,7 +588,7 @@ CODE
     # we now use temp files for in-place editing, make sure we didn't leave
     # any behind in the above test
     opendir my $d, "tmpinplace" or die "Cannot opendir tmpinplace: $!";
-    my @names = grep !/^\.\.?$/ && $_ ne 'foo', readdir $d;
+    my @names = grep !/^\.\.?$/ && $_ ne 'foo' && $_ ne 'foo.', readdir $d;
     closedir $d;
     is(scalar(@names), 0, "no extra files")
       or diag "Found @names, expected none";
