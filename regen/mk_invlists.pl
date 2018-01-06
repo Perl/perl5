@@ -59,6 +59,7 @@ my %exceptions_to_where_to_define =
                           _Perl_IDStart              => 'PERL_IN_UTF8_C',
                           Currency_Symbol            => 'PERL_IN_LOCALE_C',
                         );
+my %where_to_define_enums = ();
 
 my %gcb_enums;
 my @gcb_short_enums;
@@ -350,8 +351,12 @@ sub output_invmap ($$$$$$$) {
             }
         }
 
-        # Inversion map stuff is currently used only by regexec
-        switch_pound_if($name, 'PERL_IN_REGEXEC_C');
+        # Inversion map stuff is used only by regexec, unless it is in the
+        # enum exception list
+        my $where = (exists $where_to_define_enums{$name})
+                    ? $where_to_define_enums{$name}
+                    : 'PERL_IN_REGEXEC_C';
+        switch_pound_if($name, $where);
 
         # The short names tend to be two lower case letters, but it looks
         # better for those if they are upper. XXX
