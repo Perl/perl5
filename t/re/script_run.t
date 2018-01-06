@@ -41,6 +41,8 @@ like("\N{ARABIC-INDIC DIGIT ZERO}\N{ARABIC-INDIC DIGIT ONE}\N{ARABIC-INDIC DIGIT
 like("abc\N{MODIFIER LETTER SMALL Y}", $script_run, "All Latin is a script run");
 like("abc\N{MODIFIER LETTER PRIME}", $script_run, "Latin then Common is a script run");
 like(":a", $script_run, "Common then Latin is a script run");
+like("-\N{SINHALA LETTER RAYANNA}", $script_run, "Common then Sinhala (which has its own 0) is a script run");
+
 like("\N{HEBREW LETTER ALEF}\N{HEBREW LETTER TAV}\N{MODIFIER LETTER PRIME}", $script_run, "Hebrew then Common is a script run");
 unlike("\N{HEBREW LETTER ALEF}\N{HEBREW LETTER TAV}\N{MODIFIER LETTER SMALL Y}", $script_run, "Hebrew then Latin isn't a script run");
 like("9876543210\N{DESERET SMALL LETTER WU}", $script_run, "0-9 are the digits for Deseret");

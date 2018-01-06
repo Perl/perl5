@@ -10453,6 +10453,20 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             script_of_run = script_of_char;
         }
 
+        /* If the run so far is Common, and the new character isn't, change the
+         * run's script to that of this character */
+        if (script_of_run == SCX_Common && script_of_char != SCX_Common) {
+
+            /* But Common contains several sets of digits.  Only the '0' set
+             * can be part of another script. */
+            if (zero_of_run > 0 && zero_of_run != '0') {
+                retval = FALSE;
+                break;
+            }
+
+            script_of_run = script_of_char;
+        }
+
         /* All decimal digits must be from the same sequence of 10.  Above, we
          * handled any ASCII digits without descending to here.  We also
          * handled the case where we already knew what digit sequence is the
@@ -10470,22 +10484,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             goto scripts_match;
         }
 
-        /* Here, the scripts of the run and the current character don't match
-         * exactly.  The run could so far have been entirely characters from
-         * Common.  It's now time to change its script to that of this
-         * non-Common character */
-        if (script_of_run == SCX_Common) {
-
-            /* But Common contains several sets of digits.  Only the '0' set
-             * can be part of another script. */
-            if (zero_of_run > 0 && zero_of_run != '0') {
-                retval = FALSE;
-                break;
-            }
-
-            script_of_run = script_of_char;
-            goto scripts_match;
-        }
 
         /* Here, the script of the run isn't Common.  But characters in Common
          * match any script */
