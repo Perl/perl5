@@ -59,7 +59,8 @@ my %exceptions_to_where_to_define =
                           _Perl_IDStart              => 'PERL_IN_UTF8_C',
                           Currency_Symbol            => 'PERL_IN_LOCALE_C',
                         );
-my %where_to_define_enums = ();
+my %where_to_define_enums = ( _Perl_SCX => [ qw(PERL_CORE PERL_EXT) ],
+                            );
 
 my %gcb_enums;
 my @gcb_short_enums;
