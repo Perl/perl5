@@ -3363,34 +3363,36 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * UTF-8, we infer that the locale is too, as the odds of a non-UTF8
          * string being valid UTF-8 are quite small */
 
-#    ifdef HAS_LOCALECONV
-#      ifdef USE_LOCALE_MONETARY
+#    ifdef USE_LOCALE_MONETARY
+
+        /* If have LC_MONETARY, we can look at the currency symbol.  Often that
+         * will be in the native script.  We do this one first because there is
+         * just one string to examine, so potentially avoids work */
 
         {
             const char *original_monetary_locale
-                            = switch_category_locale_to_template(LC_MONETARY,
-                                                                 category,
-                                                                 save_input_locale);
+                        = switch_category_locale_to_template(LC_MONETARY,
+                                                             category,
+                                                             save_input_locale);
             bool only_ascii = FALSE;
-            struct lconv* lc;
+            const U8 * currency_string
+                            = (const U8 *) my_nl_langinfo(PERL_CRNCYSTR, FALSE);
+                                      /* 2nd param not relevant for this item */
+            const U8 * first_variant;
 
-            /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
-             * the desired category, if it isn't that locale already */
+            assert(   *currency_string == '-'
+                   || *currency_string == '+'
+                   || *currency_string == '.');
 
+            currency_string++;
 
-            /* Here the current LC_MONETARY is set to the locale of the category
-             * whose information is desired. */
-
-            lc = localeconv();
-            if (! lc
-                || ! lc->currency_symbol
-                || is_utf8_invariant_string((U8 *) lc->currency_symbol, 0))
+            if (is_utf8_invariant_string_loc(currency_string, 0, &first_variant))
             {
                 DEBUG_L(PerlIO_printf(Perl_debug_log, "Couldn't get currency symbol for %s, or contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
                 only_ascii = TRUE;
             }
             else {
-                is_utf8 = is_utf8_string((U8 *) lc->currency_symbol, 0);
+                is_utf8 = is_strict_utf8_string(first_variant, 0);
             }
 
             restore_switched_locale(LC_MONETARY, original_monetary_locale);
@@ -3406,9 +3408,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             }
         }
 
-#      endif /* USE_LOCALE_MONETARY */
-#    endif /* HAS_LOCALECONV */
-
+#    endif /* USE_LOCALE_MONETARY */
 #    if defined(HAS_STRFTIME) && defined(USE_LOCALE_TIME)
 
     /* Still haven't found a non-ASCII string to disambiguate UTF-8 or not.  Try
