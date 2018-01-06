@@ -3057,6 +3057,87 @@ S_print_bytes_for_locale(pTHX_
 
 #ifdef USE_LOCALE
 
+STATIC const char *
+S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale)
+{
+    /* Changes the locale for LC_'switch_category" to that of
+     * LC_'template_category', if they aren't already the same.  If not NULL,
+     * 'template_locale' is the locale that 'template_category' is in.
+     *
+     * Returns the original locale for 'switch_category' so can be switched
+     * back to with the companion function restore_switched_locale(),  (NULL if
+     * no restoral is necessary.) */
+
+    char * restore_to_locale = NULL;
+
+    if (switch_category == template_category) { /* No changes needed */
+        return NULL;
+    }
+
+    /* Find the original locale of the category we may need to change, so that
+     * it can be restored to later */
+    restore_to_locale = do_setlocale_r(switch_category, NULL);
+    if (! restore_to_locale) {
+        Perl_croak(aTHX_
+             "panic: %s: %d: Could not find current %s locale, errno=%d\n",
+                __FILE__, __LINE__, category_name(switch_category), errno);
+    }
+    restore_to_locale = stdize_locale(savepv(restore_to_locale));
+
+    /* If the locale of the template category wasn't passed in, find it now */
+    if (template_locale == NULL) {
+        template_locale = do_setlocale_r(template_category, NULL);
+        if (! template_locale) {
+            Perl_croak(aTHX_
+             "panic: %s: %d: Could not find current %s locale, errno=%d\n",
+                   __FILE__, __LINE__, category_name(template_category), errno);
+        }
+    }
+
+    /* It the locales are the same, there's nothing to do */
+    if (strEQ(restore_to_locale, template_locale)) {
+        Safefree(restore_to_locale);
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
+                            category_name(switch_category), restore_to_locale));
+
+        return NULL;
+    }
+
+    /* Finally, change the locale to the template one */
+    if (! do_setlocale_r(switch_category, template_locale)) {
+        Perl_croak(aTHX_
+         "panic: %s: %d: Could not change %s locale to %s, errno=%d\n",
+                            __FILE__, __LINE__, category_name(switch_category),
+                                                       template_locale, errno);
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale switched to %s\n",
+                            category_name(switch_category), template_locale));
+
+    return restore_to_locale;
+}
+
+STATIC void
+S_restore_switched_locale(pTHX_ const int category, const char * const original_locale)
+{
+    /* Restores the locale for LC_'category' to 'original_locale', or do
+     * nothing if the latter parameter is NULL */
+
+    if (original_locale == NULL) {
+        return;
+    }
+
+    if (! do_setlocale_r(category, original_locale)) {
+        Perl_croak(aTHX_
+             "panic: %s: %d: setlocale %s restore to %s failed, errno=%d\n",
+                 __FILE__, __LINE__,
+                             category_name(category), original_locale, errno);
+    }
+
+    Safefree(original_locale);
+}
+
 bool
 Perl__is_cur_LC_category_utf8(pTHX_ int category)
 {
@@ -3165,37 +3246,10 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          || (defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)))
 
     {
-        const char *save_ctype_locale = NULL;
-
-        if (category != LC_CTYPE) {
-
-            /* Get the current LC_CTYPE locale */
-            save_ctype_locale = do_setlocale_c(LC_CTYPE, NULL);
-            if (! save_ctype_locale) {
-                Perl_croak(aTHX_
-                     "panic: %s: %d: Could not find current LC_CTYPE locale,"
-                     " errno=%d\n", __FILE__, __LINE__, errno);
-            }
-            save_ctype_locale = stdize_locale(savepv(save_ctype_locale));
-
-            /* If LC_CTYPE and the desired category use the same locale, this
-             * means that finding the value for LC_CTYPE is the same as finding
-             * the value for the desired category.  Otherwise, switch LC_CTYPE
-             * to the desired category's locale */
-            if (strEQ(save_ctype_locale, save_input_locale)) {
-                Safefree(save_ctype_locale);
-                save_ctype_locale = NULL;
-            }
-            else if (! do_setlocale_c(LC_CTYPE, save_input_locale)) {
-                Safefree(save_ctype_locale);
-                Perl_croak(aTHX_
-                 "panic: %s: %d: Could not change LC_CTYPE locale to %s,"
-                 " errno=%d\n", __FILE__, __LINE__, save_input_locale, errno);
-            }
-        }
-
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "Current LC_CTYPE locale=%s\n",
-                                              save_input_locale));
+        const char *original_ctype_locale
+                        = switch_category_locale_to_template(LC_CTYPE,
+                                                             category,
+                                                             save_input_locale);
 
         /* Here the current LC_CTYPE is set to the locale of the category whose
          * information is desired.  This means that nl_langinfo() and mbtowc()
@@ -3295,11 +3349,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
       finish_ctype:
 
-        /* If we switched LC_CTYPE, switch back */
-        if (save_ctype_locale) {
-            do_setlocale_c(LC_CTYPE, save_ctype_locale);
-            Safefree(save_ctype_locale);
-        }
+        restore_switched_locale(LC_CTYPE, original_ctype_locale);
 
         goto finish_and_return;
     }
@@ -3318,34 +3368,16 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #      ifdef USE_LOCALE_MONETARY
 
     {
-        char *save_monetary_locale = NULL;
+        const char *original_monetary_locale
+                        = switch_category_locale_to_template(LC_MONETARY,
+                                                             category,
+                                                             save_input_locale);
         bool only_ascii = FALSE;
         struct lconv* lc;
 
         /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
          * the desired category, if it isn't that locale already */
 
-        if (category != LC_MONETARY) {
-
-            save_monetary_locale = do_setlocale_c(LC_MONETARY, NULL);
-            if (! save_monetary_locale) {
-                Perl_croak(aTHX_
-                 "panic: %s: %d: Could not find current LC_MONETARY locale,"
-                 " errno=%d\n", __FILE__, __LINE__, errno);
-            }
-            save_monetary_locale = stdize_locale(savepv(save_monetary_locale));
-
-            if (strEQ(save_monetary_locale, save_input_locale)) {
-                Safefree(save_monetary_locale);
-                save_monetary_locale = NULL;
-            }
-            else if (! do_setlocale_c(LC_MONETARY, save_input_locale)) {
-                Safefree(save_monetary_locale);
-                Perl_croak(aTHX_
-                 "panic: %s: %d: Could not change LC_MONETARY locale to %s,"
-                 " errno=%d\n", __FILE__, __LINE__, save_input_locale, errno);
-            }
-        }
 
         /* Here the current LC_MONETARY is set to the locale of the category
          * whose information is desired. */
@@ -3362,11 +3394,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             is_utf8 = is_utf8_string((U8 *) lc->currency_symbol, 0);
         }
 
-        /* If we changed it, restore LC_MONETARY to its original locale */
-        if (save_monetary_locale) {
-            do_setlocale_c(LC_MONETARY, save_monetary_locale);
-            Safefree(save_monetary_locale);
-        }
+        restore_switched_locale(LC_MONETARY, original_monetary_locale);
 
         if (! only_ascii) {
 
@@ -3387,39 +3415,16 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 /* Still haven't found a non-ASCII string to disambiguate UTF-8 or not.  Try
  * the names of the months and weekdays, timezone, and am/pm indicator */
     {
-        char *save_time_locale = NULL;
+        const char *original_time_locale
+                        = switch_category_locale_to_template(LC_TIME,
+                                                             category,
+                                                             save_input_locale);
         int hour = 10;
         bool is_dst = FALSE;
         int dom = 1;
         int month = 0;
         int i;
         char * formatted_time;
-
-
-        /* Like above for LC_MONETARY, we set LC_TIME to the locale of the
-         * desired category, if it isn't that locale already */
-
-        if (category != LC_TIME) {
-
-            save_time_locale = do_setlocale_c(LC_TIME, NULL);
-            if (! save_time_locale) {
-                Perl_croak(aTHX_
-                     "panic: %s: %d: Could not find current LC_TIME locale,"
-                     " errno=%d\n", __FILE__, __LINE__, errno);
-            }
-            save_time_locale = stdize_locale(savepv(save_time_locale));
-
-            if (strEQ(save_time_locale, save_input_locale)) {
-                Safefree(save_time_locale);
-                save_time_locale = NULL;
-            }
-            else if (! do_setlocale_c(LC_TIME, save_input_locale)) {
-                Safefree(save_time_locale);
-                Perl_croak(aTHX_
-                 "panic: %s: %d: Could not change LC_TIME locale to %s,"
-                 " errno=%d\n", __FILE__, __LINE__, save_input_locale, errno);
-            }
-        }
 
         /* Here the current LC_TIME is set to the locale of the category
          * whose information is desired.  Look at all the days of the week and
@@ -3450,10 +3455,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             /* Here, we have a non-ASCII.  Return TRUE is it is valid UTF8;
              * false otherwise.  But first, restore LC_TIME to its original
              * locale if we changed it */
-            if (save_time_locale) {
-                do_setlocale_c(LC_TIME, save_time_locale);
-                Safefree(save_time_locale);
-            }
+            restore_switched_locale(LC_TIME, original_time_locale);
 
             DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
                                 save_input_locale,
@@ -3465,10 +3467,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         /* Falling off the end of the loop indicates all the names were just
          * ASCII.  Go on to the next test.  If we changed it, restore LC_TIME
          * to its original locale */
-        if (save_time_locale) {
-            do_setlocale_c(LC_TIME, save_time_locale);
-            Safefree(save_time_locale);
-        }
+        restore_switched_locale(LC_TIME, original_time_locale);
         DEBUG_L(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
     }
 
@@ -3490,33 +3489,11 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     {
         int e;
         bool non_ascii = FALSE;
-        char *save_messages_locale = NULL;
+        const char *original_messages_locale
+                        = switch_category_locale_to_template(LC_MESSAGES,
+                                                             category,
+                                                             save_input_locale);
         const char * errmsg = NULL;
-
-        /* Like above, we set LC_MESSAGES to the locale of the desired
-         * category, if it isn't that locale already */
-
-        if (category != LC_MESSAGES) {
-
-            save_messages_locale = do_setlocale_c(LC_MESSAGES, NULL);
-            if (! save_messages_locale) {
-                Perl_croak(aTHX_
-                     "panic: %s: %d: Could not find current LC_MESSAGES locale,"
-                     " errno=%d\n", __FILE__, __LINE__, errno);
-            }
-            save_messages_locale = stdize_locale(savepv(save_messages_locale));
-
-            if (strEQ(save_messages_locale, save_input_locale)) {
-                Safefree(save_messages_locale);
-                save_messages_locale = NULL;
-            }
-            else if (! do_setlocale_c(LC_MESSAGES, save_input_locale)) {
-                Safefree(save_messages_locale);
-                Perl_croak(aTHX_
-                 "panic: %s: %d: Could not change LC_MESSAGES locale to %s,"
-                 " errno=%d\n", __FILE__, __LINE__, save_input_locale, errno);
-            }
-        }
 
         /* Here the current LC_MESSAGES is set to the locale of the category
          * whose information is desired.  Look through all the messages.  We
@@ -3538,11 +3515,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         }
         Safefree(errmsg);
 
-        /* And, if we changed it, restore LC_MESSAGES to its original locale */
-        if (save_messages_locale) {
-            do_setlocale_c(LC_MESSAGES, save_messages_locale);
-            Safefree(save_messages_locale);
-        }
+        restore_switched_locale(LC_MESSAGES, original_messages_locale);
 
         if (non_ascii) {
 

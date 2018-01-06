@@ -2778,6 +2778,8 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
 
 #if defined(PERL_IN_LOCALE_C)
 sn	|const char*|category_name |const int category
+s	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
+s	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
 #  ifdef HAS_NL_LANGINFO
 sn	|const char*|my_nl_langinfo|const nl_item item|bool toggle
 #  else
