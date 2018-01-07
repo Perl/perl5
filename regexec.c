@@ -7653,7 +7653,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case SRCLOSE:  /*  (*SCRIPT_RUN: ... )   */
 
-            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput, utf8_target))
+            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput, utf8_target, NULL))
             {
                 sayNO;
             }
@@ -10305,7 +10305,7 @@ Perl__is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, cons
 }
 
 bool
-Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
+Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, SCX_enum * ret_script)
 {
     /* Checks that every character in the sequence from 's' to 'send' is one of
      * three scripts: Common, Inherited, and possibly one other.  Additionally
@@ -10667,6 +10667,16 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
     } /* end of looping through CLOSESR text */
 
     Safefree(intersection);
+
+    if (ret_script != NULL) {
+        if (retval) {
+            *ret_script = script_of_run;
+        }
+        else {
+            *ret_script = SCX_INVALID;
+        }
+    }
+
     return retval;
 }
 
