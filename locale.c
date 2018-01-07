@@ -3550,50 +3550,50 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * be a UTF-8 locale.  Similarly for the other common names */
 
     {
-    const Size_t final_pos = strlen(save_input_locale) - 1;
+        const Size_t final_pos = strlen(save_input_locale) - 1;
 
-    if (final_pos >= 3) {
-        const char *name = save_input_locale;
+        if (final_pos >= 3) {
+            const char *name = save_input_locale;
 
-        /* Find next 'U' or 'u' and look from there */
-        while ((name += strcspn(name, "Uu") + 1)
-                                            <= save_input_locale + final_pos - 2)
-        {
-            if (   isALPHA_FOLD_NE(*name, 't')
-                || isALPHA_FOLD_NE(*(name + 1), 'f'))
+            /* Find next 'U' or 'u' and look from there */
+            while ((name += strcspn(name, "Uu") + 1)
+                                        <= save_input_locale + final_pos - 2)
             {
-                continue;
-            }
-            name += 2;
-            if (*(name) == '-') {
-                if ((name > save_input_locale + final_pos - 1)) {
-                    break;
+                if (   isALPHA_FOLD_NE(*name, 't')
+                    || isALPHA_FOLD_NE(*(name + 1), 'f'))
+                {
+                    continue;
                 }
-                name++;
+                name += 2;
+                if (*(name) == '-') {
+                    if ((name > save_input_locale + final_pos - 1)) {
+                        break;
+                    }
+                    name++;
+                }
+                if (*(name) == '8') {
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                        "Locale %s ends with UTF-8 in name\n",
+                                        save_input_locale));
+                    is_utf8 = TRUE;
+                    goto finish_and_return;
+                }
             }
-            if (*(name) == '8') {
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "Locale %s ends with UTF-8 in name\n",
-                                      save_input_locale));
-                is_utf8 = TRUE;
-                goto finish_and_return;
-            }
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                "Locale %s doesn't end with UTF-8 in name\n",
+                                    save_input_locale));
         }
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "Locale %s doesn't end with UTF-8 in name\n",
-                                save_input_locale));
-    }
 
 #      ifdef WIN32
 
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
-    if (memENDs(save_input_locale, final_pos, "65001")) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
+        /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
+        if (memENDs(save_input_locale, final_pos, "65001")) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
                         "Locale %s ends with 65001 in name, is UTF-8 locale\n",
                         save_input_locale));
-        is_utf8 = TRUE;
-        goto finish_and_return;
-    }
+            is_utf8 = TRUE;
+            goto finish_and_return;
+        }
     }
 
 #      endif
