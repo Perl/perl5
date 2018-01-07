@@ -20,6 +20,9 @@ if ($^O eq 'solaris') {
 if ($^O eq 'aix' && $Config{uselongdouble}) {
     push @libs, qw(c128);
 }
+if ($^O eq 'cygwin' && $Config{usequadmath}) {
+    push @libs, qw(quadmath);
+}
 WriteMakefile(
     NAME	=> 'POSIX',
     @libs ? ( 'LIBS' => [ join(" ", map { "-l$_" } @libs) ] ) : (),
