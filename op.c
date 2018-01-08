@@ -6632,9 +6632,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     tbl = (short*)PerlMemShared_calloc(
                     /* one slot for 'extra len' count and one slot
                      * for possible storing of last replacement char */
-	(o->op_private & OPpTRANS_COMPLEMENT) &&
-	    !(o->op_private & OPpTRANS_DELETE) ? 258 : 256,
-	sizeof(short));
+                    (complement && !del) ? 258 : 256,
+                    sizeof(short));
     cPVOPo->op_pv = (char*)tbl;
 
     if (complement) {
