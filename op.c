@@ -1545,7 +1545,8 @@ Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
     OpTYPE_set(logop, type);
     logop->op_first = first;
     logop->op_other = other;
-    logop->op_flags = OPf_KIDS;
+    if (first)
+        logop->op_flags = OPf_KIDS;
     while (kid && OpHAS_SIBLING(kid))
         kid = OpSIBLING(kid);
     if (kid)
