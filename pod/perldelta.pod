@@ -276,7 +276,10 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Can't "goto" into a binary or list expression|perldiag/"Can't E<quot>gotoE<quot> into a binary or list expression">
+
+Use of C<goto> to jump into the parameter of a binary or list operator has
+been prohibited, to prevent crashes and stack corruption.  [perl #130936]
 
 =back
 
