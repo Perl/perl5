@@ -1031,6 +1031,20 @@ pipe, Perl can't retrieve its name for later use.
 (P) An error peculiar to VMS.  Perl asked $GETSYI how big you want your
 mailbox buffers to be, and didn't get an answer.
 
+=item Can't "goto" into a binary or list expression
+
+(F) A "goto" statement was executed to jump into the middle of a binary
+or list expression.  You can't get there from here.  The reason for this
+restriction is that the interpreter would get confused as to how many
+arguments there are, resulting in stack corruption or crashes.  This
+error occurs in cases such as these:
+
+    goto F;
+    print do { F: }; # Can't jump into the arguments to print
+
+    goto G;
+    $x + do { G: $y }; # How is + supposed to get its first operand?
+
 =item Can't "goto" into a "given" block
 
 (F) A "goto" statement was executed to jump into the middle of a C<given>

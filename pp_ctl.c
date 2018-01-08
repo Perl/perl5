@@ -2644,6 +2644,8 @@ PP(pp_redo)
     return redo_op;
 }
 
+#define UNENTERABLE (OP *)1
+
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 {
@@ -2662,9 +2664,22 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 	o->op_type == OP_LEAVEGIVEN)
     {
 	*ops++ = cUNOPo->op_first;
-	if (ops >= oplimit)
-	    Perl_croak(aTHX_ "%s", too_deep);
     }
+    else if (o->op_flags & OPf_KIDS
+	  && cUNOPo->op_first->op_type == OP_PUSHMARK) {
+	*ops++ = UNENTERABLE;
+    }
+    else if (o->op_flags & OPf_KIDS && PL_opargs[o->op_type]
+	  && OP_CLASS(o) != OA_LOGOP
+	  && o->op_type != OP_LINESEQ
+	  && o->op_type != OP_SREFGEN
+	  && o->op_type != OP_RV2CV) {
+	OP * const kid = cUNOPo->op_first;
+	if (OP_GIMME(kid, 0) != G_SCALAR || OpHAS_SIBLING(kid))
+	    *ops++ = UNENTERABLE;
+    }
+    if (ops >= oplimit)
+	Perl_croak(aTHX_ "%s", too_deep);
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
@@ -2695,8 +2710,9 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
 	        if (ops == opstack)
 		    *ops++ = kid;
-		else if (ops[-1]->op_type == OP_NEXTSTATE ||
-		         ops[-1]->op_type == OP_DBSTATE)
+		else if (ops[-1] != UNENTERABLE
+		      && (ops[-1]->op_type == OP_NEXTSTATE ||
+		          ops[-1]->op_type == OP_DBSTATE))
 		    ops[-1] = kid;
 		else
 		    *ops++ = kid;
@@ -2716,6 +2732,9 @@ S_check_op_type(pTHX_ OP * const o)
     /* Eventually we may want to stack the needed arguments
      * for each op.  For now, we punt on the hard ones. */
     /* XXX This comment seems to me like wishful thinking.  --sprout */
+    if (o == UNENTERABLE)
+	Perl_croak(aTHX_
+                  "Can't \"goto\" into a binary or list expression");
     if (o->op_type == OP_ENTERITER)
         Perl_croak(aTHX_
                   "Can't \"goto\" into the middle of a foreach loop");
@@ -3069,7 +3088,10 @@ PP(pp_goto)
 	}
 
 	if (*enterops && enterops[1]) {
-	    I32 i = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
+	    I32 i = enterops[1] != UNENTERABLE
+		 && enterops[1]->op_type == OP_ENTER && in_block
+		    ? 2
+		    : 1;
 	    if (enterops[i])
 		deprecate("\"goto\" to jump into a construct");
 	}
@@ -3088,7 +3110,10 @@ PP(pp_goto)
 
 	if (*enterops && enterops[1]) {
 	    OP * const oldop = PL_op;
-	    ix = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
+	    ix = enterops[1] != UNENTERABLE
+	      && enterops[1]->op_type == OP_ENTER && in_block
+		   ? 2
+		   : 1;
 	    for (; enterops[ix]; ix++) {
 		PL_op = enterops[ix];
 		S_check_op_type(aTHX_ PL_op);

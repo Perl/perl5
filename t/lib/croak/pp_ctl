@@ -21,6 +21,18 @@ EXPECT
 given is experimental at - line 2.
 Can't "goto" into a "given" block at - line 2.
 ########
+# NAME goto into expression
+no warnings 'deprecated';
+eval { goto a; 1 + do { a: } }; warn $@;
+eval { goto b; meth { b: }   }; warn $@;
+eval { goto c; map { c: } () }; warn $@;
+eval { goto d; f(do { d: })  }; die  $@;
+EXPECT
+Can't "goto" into a binary or list expression at - line 2.
+Can't "goto" into a binary or list expression at - line 3.
+Can't "goto" into a binary or list expression at - line 4.
+Can't "goto" into a binary or list expression at - line 5.
+########
 # NAME dump with computed label
 no warnings 'deprecated';
 my $label = "foo";

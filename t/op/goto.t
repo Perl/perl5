@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 100;
+plan tests => 121;
 our $TODO;
 
 my $deprecated = 0;
@@ -810,3 +810,51 @@ sub revnumcmp ($$) {
 }
 is eval { join(":", sort revnumcmp (9,5,1,3,7)) }, "9:7:5:3:1",
   "can goto at top level of multicalled sub";
+
+# A bit strange, but goingto these constructs should not cause any stack
+# problems.  Let’s test them to make sure that is the case.
+no warnings 'deprecated';
+is \sub :lvalue { goto d; ${*{scalar(do { d: \*foo })}} }->(), \$foo,
+   'goto into rv2sv, rv2gv and scalar';
+is sub { goto e; $#{; do { e: \@_ } } }->(1..7), 6,
+   'goto into $#{...}';
+is sub { goto f; prototype \&{; do { f: sub ($) {} } } }->(), '$',
+   'goto into srefgen, prototype and rv2cv';
+is sub { goto g; ref do { g: [] } }->(), 'ARRAY',
+   'goto into ref';
+is sub { goto j; defined undef ${; do { j: \(my $foo = "foo") } } }->(),'',
+   'goto into defined and undef';
+is sub { goto k; study ++${; do { k: \(my $foo = "foo") } } }->(),'1',
+   'goto into study and preincrement';
+is sub { goto l; ~-!${; do { l: \(my $foo = 0) } }++ }->(),~-1,
+   'goto into complement, not, negation and postincrement';
+like sub { goto n; sin cos exp log sqrt do { n: 1 } }->(),qr/^0\.51439/,
+   'goto into sin, cos, exp, log, and sqrt';
+ok sub { goto o; srand do { o: 0 } }->(),
+   'goto into srand';
+cmp_ok sub { goto p; rand do { p: 1 } }->(), '<', 1,
+   'goto into rand';
+is sub { goto r; chr ord length int hex oct abs do { r: -15.5 } }->(), 2,
+   'goto into chr, ord, length, int, hex, oct and abs';
+is sub { goto t; ucfirst lcfirst uc lc do { t: "q" } }->(), 'Q',
+   'goto into ucfirst, lcfirst, uc and lc';
+{ no strict;
+  is sub { goto u; \@{; quotemeta do { u: "." } } }->(), \@{'\.'},
+   'goto into rv2av and quotemeta';
+}
+is join(" ",sub { goto v; %{; do { v: +{1..2} } } }->()), '1 2',
+   'goto into rv2hv';
+is join(" ",sub { goto w; $_ || do { w: "w" } }->()), 'w',
+   'goto into rhs of or';
+is join(" ",sub { goto x; $_ && do { x: "w" } }->()), 'w',
+   'goto into rhs of and';
+is join(" ",sub { goto z; $_ ? do { z: "w" } : 0 }->()), 'w',
+   'goto into first leg of ?:';
+is join(" ",sub { goto z; $_ ? 0 : do { z: "w" } }->()), 'w',
+   'goto into second leg of ?:';
+is sub { goto z; caller do { z: 0 } }->(), 'main',
+   'goto into caller';
+is sub { goto z; exit do { z: return "foo" } }->(), 'foo',
+   'goto into exit';
+is sub { goto z; eval do { z: "'foo'" } }->(), 'foo',
+   'goto into eval';
