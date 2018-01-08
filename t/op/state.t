@@ -5,7 +5,6 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    skip_all_if_miniperl("miniperl can't load attributes");
 }
 
 use strict;
@@ -171,6 +170,10 @@ is stateful_init_hash(), "a,b,c,d,foo,3";
 
 # declarations with attributes
 
+SKIP: {
+skip "no attributes in miniperl", 3, if is_miniperl;
+
+eval q{
 sub stateful_attr {
     state $a :shared;
     state $b :shared = 3;
@@ -187,10 +190,13 @@ sub stateful_attr {
     return join(",", $a, $b, join(":", @c), join(":", @d), join(":", %e),
 	    join(":", map { ($_, $f{$_}) } sort keys %f));
 }
+};
 
 is stateful_attr(), "1,4,x,a:b:c:x,e:1,a:b:c:d:e:1";
 is stateful_attr(), "2,5,x:x,a:b:c:x:x,e:2,a:b:c:d:e:2";
 is stateful_attr(), "3,6,x:x:x,a:b:c:x:x:x,e:3,a:b:c:d:e:3";
+}
+
 
 # Recursion
 
@@ -388,7 +394,11 @@ foreach my $forbidden (<DATA>) {
     chomp $forbidden;
     no strict 'vars';
     eval $forbidden;
-    like $@, qr/Initialization of state variables in list currently forbidden/, "Currently forbidden: $forbidden";
+    like $@,
+         qr/dynamic loading not available(?x:
+          )|Attempt to reload attributes\.pm aborted(?x:
+          )|Initialization of state variables in list currently forbidden/,
+        "Currently forbidden: $forbidden";
 }
 
 # [perl #49522] state variable not available
