@@ -365,7 +365,6 @@ sub find_locales ($;$) {
         my $data_file = ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/)
                         ? "./lib/locale/utf8"
                         : "./lib/locale/latin1";
-        $data_file='khw foobar';
         if (-e $data_file) {
             @Data = do $data_file;
         }
