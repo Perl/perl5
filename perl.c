@@ -297,6 +297,29 @@ perl_construct(pTHXx)
     JMPENV_BOOTSTRAP;
     STATUS_ALL_SUCCESS;
 
+    PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
+    PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(XPosixAlnum_invlist);
+    PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(XPosixAlpha_invlist);
+    PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
+    PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(Cased_invlist);
+    PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
+    PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(XPosixDigit_invlist);
+    PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(XPosixGraph_invlist);
+    PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(XPosixLower_invlist);
+    PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(XPosixPrint_invlist);
+    PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(XPosixPunct_invlist);
+    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
+    PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(XPosixUpper_invlist);
+    PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
+    PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
+    PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
+    PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
+    PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
+    PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
+    PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
+    PL_Assigned_invlist = _new_invlist_C_array(Assigned_invlist);
+    PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
+
     init_i18nl10n(1);
 
 #if defined(LOCAL_PATCH_COUNT)
@@ -448,28 +471,6 @@ perl_construct(pTHXx)
     /* Start with 1 bucket, for DFS.  It's unlikely we'll need more.  */
     HvMAX(PL_registered_mros) = 0;
 
-    PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
-    PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(XPosixAlnum_invlist);
-    PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(XPosixAlpha_invlist);
-    PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
-    PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(Cased_invlist);
-    PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
-    PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(XPosixDigit_invlist);
-    PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(XPosixGraph_invlist);
-    PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(XPosixLower_invlist);
-    PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(XPosixPrint_invlist);
-    PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(XPosixPunct_invlist);
-    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
-    PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(XPosixUpper_invlist);
-    PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
-    PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
-    PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
-    PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
-    PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
-    PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
-    PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
-    PL_Assigned_invlist = _new_invlist_C_array(Assigned_invlist);
-    PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
 #ifdef HAS_POSIX_2008_LOCALE
     PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", NULL);
 #endif
