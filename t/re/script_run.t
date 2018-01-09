@@ -17,7 +17,7 @@ $|=1;
 
 no warnings "experimental::script_run";
 
-my $script_run = qr/ ^ (+script_run: .+ ) $ /x;
+my $script_run = qr/ ^ (+script_run: .* ) $ /x;
 
 unlike("\N{CYRILLIC SMALL LETTER ER}\N{CYRILLIC SMALL LETTER A}\N{CYRILLIC SMALL LETTER U}}\N{CYRILLIC SMALL LETTER ER}\N{CYRILLIC SMALL LETTER A}l", $script_run, "Cyrillic 'paypal' with a Latin 'l' is not a script run");
 unlike("A\N{GREEK CAPITAL LETTER GAMMA}", $script_run, "Latin followed by Greek isn't a script run");
@@ -73,6 +73,8 @@ like("\N{DEVANAGARI DOUBLE DANDA}\N{DEVANAGARI DANDA}\N{DEVANAGARI STRESS SIGN U
 
 unlike("\N{JAVANESE PANGRANGKEP}\N{GEORGIAN PARAGRAPH SEPARATOR}", $script_run, "Two code points each in multiple scripts that don't intersect aren't a script run");
 like("\N{DEVANAGARI SIGN CANDRABINDU VIRAMA}\N{VEDIC TONE YAJURVEDIC KATHAKA INDEPENDENT SVARITA}", $script_run, "Two code points each in multiple scripts that 't intersect singly are a script run");
+
+like("", $script_run, "An empty string is a script run");
 
 use utf8;
 

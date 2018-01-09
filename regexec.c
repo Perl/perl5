@@ -10360,7 +10360,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
 
     bool retval = TRUE;
 
-    assert(send > s);
+    assert(send >= s);
 
     PERL_ARGS_ASSERT_ISSCRIPT_RUN;
 
