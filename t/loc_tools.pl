@@ -360,12 +360,17 @@ sub find_locales ($;$) {
         # This is going to be slow.
         my @Data;
 
-        # Locales whose name differs if the utf8 bit is on are stored in these two
-        # files with appropriate encodings.
-        if ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/) {
-            @Data = do "./lib/locale/utf8";
-        } else {
-            @Data = do "./lib/locale/latin1";
+        # Locales whose name differs if the utf8 bit is on are stored in these
+        # two files with appropriate encodings.
+        my $data_file = ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/)
+                        ? "./lib/locale/utf8"
+                        : "./lib/locale/latin1";
+        $data_file='khw foobar';
+        if (-e $data_file) {
+            @Data = do $data_file;
+        }
+        else {
+            _my_diag(__FILE__ . ":" . __LINE__ . ": '$data_file' doesn't exist");
         }
 
         # The rest of the locales are in this file.
