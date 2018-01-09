@@ -1,5 +1,5 @@
 #
-# $Id: decode.t,v 1.4 2017/10/06 22:21:53 dankogai Exp dankogai $
+# $Id: decode.t,v 1.4 2017/10/06 22:21:53 dankogai Exp $
 #
 use strict;
 use Encode qw(decode_utf8 FB_CROAK find_encoding decode);

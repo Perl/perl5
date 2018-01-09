@@ -1,5 +1,5 @@
 #
-# $Id: Encode.pm,v 2.93 2017/10/06 22:21:33 dankogai Exp $
+# $Id: Encode.pm,v 2.94 2018/01/09 05:53:00 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
@@ -7,7 +7,7 @@ use warnings;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 our $VERSION;
 BEGIN {
-    $VERSION = sprintf "%d.%02d", q$Revision: 2.93 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%02d", q$Revision: 2.94 $ =~ /(\d+)/g;
     require XSLoader;
     XSLoader::load( __PACKAGE__, $VERSION );
 }
@@ -949,37 +949,10 @@ different kinds of strings and string-operations in Perl: one a
 byte-oriented mode  for when the internal UTF8 flag is off, and the other a
 character-oriented mode for when the internal UTF8 flag is on.
 
-Here is how C<Encode> handles the UTF8 flag.
-
-=over 2
-
-=item *
-
-When you I<encode>, the resulting UTF8 flag is always B<off>.
-
-=item *
-
-When you I<decode>, the resulting UTF8 flag is B<on>--I<unless> you can
-unambiguously represent data.  Here is what we mean by "unambiguously".
-After C<$str = decode("foo", $octet)>,
-
-  When $octet is...    The UTF8 flag in $str is
-  ---------------------------------------------
-  In ASCII only (or EBCDIC only)            OFF
-  In ISO-8859-1                              ON
-  In any other Encoding                      ON
-  ---------------------------------------------
-
-As you see, there is one exception: in ASCII.  That way you can assume
-Goal #1.  And with C<Encode>, Goal #2 is assumed but you still have to be
-careful in the cases mentioned in the B<CAVEAT> paragraphs above.
-
 This UTF8 flag is not visible in Perl scripts, exactly for the same reason
 you cannot (or rather, you I<don't have to>) see whether a scalar contains
 a string, an integer, or a floating-point number.   But you can still peek
 and poke these if you will.  See the next section.
-
-=back
 
 =head2 Messing with Perl's Internals
 
@@ -994,6 +967,13 @@ release.
 [INTERNAL] Tests whether the UTF8 flag is turned on in the I<STRING>.
 If I<CHECK> is true, also checks whether I<STRING> contains well-formed
 UTF-8.  Returns true if successful, false otherwise.
+
+Typically only necessary for debugging and testing.  Don't use this flag as
+a marker to distinguish character and binary data, that should be decided
+for each variable when you write your code.
+
+B<CAVEAT>: If I<STRING> has UTF8 flag set, it does B<NOT> mean that
+I<STRING> is UTF-8 encoded and vice-versa.
 
 As of Perl 5.8.1, L<utf8> also has the C<utf8::is_utf8> function.
 
