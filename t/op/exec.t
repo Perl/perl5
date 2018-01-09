@@ -188,7 +188,7 @@ TODO: {
     local $! = 0;
     my $err = $!;
     ok !(exec {""} ()), 'empty exec PROGRAM LIST fails';
-    ok $! == 2 || $! =~ qr/\bno\b.*\bfile\b/, 'errno = ENOENT'
+    ok $! == 2 || $! =~ qr/\bno\b.*\bfile\b/i, 'errno = ENOENT'
         or diag sprintf "\$! eq %d, '%s'\n", $!, $!;
 }
 
