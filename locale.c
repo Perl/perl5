@@ -3366,168 +3366,168 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #    ifdef HAS_LOCALECONV
 #      ifdef USE_LOCALE_MONETARY
 
-    {
-        const char *original_monetary_locale
-                        = switch_category_locale_to_template(LC_MONETARY,
-                                                             category,
-                                                             save_input_locale);
-        bool only_ascii = FALSE;
-        struct lconv* lc;
-
-        /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
-         * the desired category, if it isn't that locale already */
-
-
-        /* Here the current LC_MONETARY is set to the locale of the category
-         * whose information is desired. */
-
-        lc = localeconv();
-        if (! lc
-            || ! lc->currency_symbol
-            || is_utf8_invariant_string((U8 *) lc->currency_symbol, 0))
         {
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "Couldn't get currency symbol for %s, or contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
-            only_ascii = TRUE;
-        }
-        else {
-            is_utf8 = is_utf8_string((U8 *) lc->currency_symbol, 0);
-        }
+            const char *original_monetary_locale
+                            = switch_category_locale_to_template(LC_MONETARY,
+                                                                 category,
+                                                                 save_input_locale);
+            bool only_ascii = FALSE;
+            struct lconv* lc;
 
-        restore_switched_locale(LC_MONETARY, original_monetary_locale);
+            /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
+             * the desired category, if it isn't that locale already */
 
-        if (! only_ascii) {
 
-            /* It isn't a UTF-8 locale if the symbol is not legal UTF-8;
-             * otherwise assume the locale is UTF-8 if and only if the symbol
-             * is non-ascii UTF-8. */
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
-                                    save_input_locale, is_utf8));
-            goto finish_and_return;
+            /* Here the current LC_MONETARY is set to the locale of the category
+             * whose information is desired. */
+
+            lc = localeconv();
+            if (! lc
+                || ! lc->currency_symbol
+                || is_utf8_invariant_string((U8 *) lc->currency_symbol, 0))
+            {
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "Couldn't get currency symbol for %s, or contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
+                only_ascii = TRUE;
+            }
+            else {
+                is_utf8 = is_utf8_string((U8 *) lc->currency_symbol, 0);
+            }
+
+            restore_switched_locale(LC_MONETARY, original_monetary_locale);
+
+            if (! only_ascii) {
+
+                /* It isn't a UTF-8 locale if the symbol is not legal UTF-8;
+                 * otherwise assume the locale is UTF-8 if and only if the symbol
+                 * is non-ascii UTF-8. */
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
+                                        save_input_locale, is_utf8));
+                goto finish_and_return;
+            }
         }
-    }
 
 #      endif /* USE_LOCALE_MONETARY */
 #    endif /* HAS_LOCALECONV */
 
 #    if defined(HAS_STRFTIME) && defined(USE_LOCALE_TIME)
 
-/* Still haven't found a non-ASCII string to disambiguate UTF-8 or not.  Try
- * the names of the months and weekdays, timezone, and am/pm indicator */
-    {
-        const char *original_time_locale
-                        = switch_category_locale_to_template(LC_TIME,
-                                                             category,
-                                                             save_input_locale);
-        int hour = 10;
-        bool is_dst = FALSE;
-        int dom = 1;
-        int month = 0;
-        int i;
-        char * formatted_time;
+    /* Still haven't found a non-ASCII string to disambiguate UTF-8 or not.  Try
+     * the names of the months and weekdays, timezone, and am/pm indicator */
+        {
+            const char *original_time_locale
+                            = switch_category_locale_to_template(LC_TIME,
+                                                                 category,
+                                                                 save_input_locale);
+            int hour = 10;
+            bool is_dst = FALSE;
+            int dom = 1;
+            int month = 0;
+            int i;
+            char * formatted_time;
 
-        /* Here the current LC_TIME is set to the locale of the category
-         * whose information is desired.  Look at all the days of the week and
-         * month names, and the timezone and am/pm indicator for UTF-8 variant
-         * characters.  The first such a one found will tell us if the locale
-         * is UTF-8 or not */
+            /* Here the current LC_TIME is set to the locale of the category
+             * whose information is desired.  Look at all the days of the week and
+             * month names, and the timezone and am/pm indicator for UTF-8 variant
+             * characters.  The first such a one found will tell us if the locale
+             * is UTF-8 or not */
 
-        for (i = 0; i < 7 + 12; i++) {  /* 7 days; 12 months */
-            formatted_time = my_strftime("%A %B %Z %p",
-                            0, 0, hour, dom, month, 2012 - 1900, 0, 0, is_dst);
-            if ( ! formatted_time
-                || is_utf8_invariant_string((U8 *) formatted_time, 0))
-            {
+            for (i = 0; i < 7 + 12; i++) {  /* 7 days; 12 months */
+                formatted_time = my_strftime("%A %B %Z %p",
+                                0, 0, hour, dom, month, 2012 - 1900, 0, 0, is_dst);
+                if ( ! formatted_time
+                    || is_utf8_invariant_string((U8 *) formatted_time, 0))
+                {
 
-                /* Here, we didn't find a non-ASCII.  Try the next time through
-                 * with the complemented dst and am/pm, and try with the next
-                 * weekday.  After we have gotten all weekdays, try the next
-                 * month */
-                is_dst = ! is_dst;
-                hour = (hour + 12) % 24;
-                dom++;
-                if (i > 6) {
-                    month++;
+                    /* Here, we didn't find a non-ASCII.  Try the next time through
+                     * with the complemented dst and am/pm, and try with the next
+                     * weekday.  After we have gotten all weekdays, try the next
+                     * month */
+                    is_dst = ! is_dst;
+                    hour = (hour + 12) % 24;
+                    dom++;
+                    if (i > 6) {
+                        month++;
+                    }
+                    continue;
                 }
-                continue;
+
+                /* Here, we have a non-ASCII.  Return TRUE is it is valid UTF8;
+                 * false otherwise.  But first, restore LC_TIME to its original
+                 * locale if we changed it */
+                restore_switched_locale(LC_TIME, original_time_locale);
+
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
+                                    save_input_locale,
+                                    is_utf8_string((U8 *) formatted_time, 0)));
+                is_utf8 = is_utf8_string((U8 *) formatted_time, 0);
+                goto finish_and_return;
             }
 
-            /* Here, we have a non-ASCII.  Return TRUE is it is valid UTF8;
-             * false otherwise.  But first, restore LC_TIME to its original
-             * locale if we changed it */
+            /* Falling off the end of the loop indicates all the names were just
+             * ASCII.  Go on to the next test.  If we changed it, restore LC_TIME
+             * to its original locale */
             restore_switched_locale(LC_TIME, original_time_locale);
-
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
-                                save_input_locale,
-                                is_utf8_string((U8 *) formatted_time, 0)));
-            is_utf8 = is_utf8_string((U8 *) formatted_time, 0);
-            goto finish_and_return;
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
         }
-
-        /* Falling off the end of the loop indicates all the names were just
-         * ASCII.  Go on to the next test.  If we changed it, restore LC_TIME
-         * to its original locale */
-        restore_switched_locale(LC_TIME, original_time_locale);
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
-    }
 
 #    endif
 
 #    if 0 && defined(USE_LOCALE_MESSAGES) && defined(HAS_SYS_ERRLIST)
 
-/* This code is ifdefd out because it was found to not be necessary in testing
- * on our dromedary test machine, which has over 700 locales.  There, this
- * added no value to looking at the currency symbol and the time strings.  I
- * left it in so as to avoid rewriting it if real-world experience indicates
- * that dromedary is an outlier.  Essentially, instead of returning abpve if we
- * haven't found illegal utf8, we continue on and examine all the strerror()
- * messages on the platform for utf8ness.  If all are ASCII, we still don't
- * know the answer; but otherwise we have a pretty good indication of the
- * utf8ness.  The reason this doesn't help much is that the messages may not
- * have been translated into the locale.  The currency symbol and time strings
- * are much more likely to have been translated.  */
-    {
-        int e;
-        bool non_ascii = FALSE;
-        const char *original_messages_locale
-                        = switch_category_locale_to_template(LC_MESSAGES,
-                                                             category,
-                                                             save_input_locale);
-        const char * errmsg = NULL;
+    /* This code is ifdefd out because it was found to not be necessary in testing
+     * on our dromedary test machine, which has over 700 locales.  There, this
+     * added no value to looking at the currency symbol and the time strings.  I
+     * left it in so as to avoid rewriting it if real-world experience indicates
+     * that dromedary is an outlier.  Essentially, instead of returning abpve if we
+     * haven't found illegal utf8, we continue on and examine all the strerror()
+     * messages on the platform for utf8ness.  If all are ASCII, we still don't
+     * know the answer; but otherwise we have a pretty good indication of the
+     * utf8ness.  The reason this doesn't help much is that the messages may not
+     * have been translated into the locale.  The currency symbol and time strings
+     * are much more likely to have been translated.  */
+        {
+            int e;
+            bool non_ascii = FALSE;
+            const char *original_messages_locale
+                            = switch_category_locale_to_template(LC_MESSAGES,
+                                                                 category,
+                                                                 save_input_locale);
+            const char * errmsg = NULL;
 
-        /* Here the current LC_MESSAGES is set to the locale of the category
-         * whose information is desired.  Look through all the messages.  We
-         * can't use Strerror() here because it may expand to code that
-         * segfaults in miniperl */
+            /* Here the current LC_MESSAGES is set to the locale of the category
+             * whose information is desired.  Look through all the messages.  We
+             * can't use Strerror() here because it may expand to code that
+             * segfaults in miniperl */
 
-        for (e = 0; e <= sys_nerr; e++) {
-            errno = 0;
-            errmsg = sys_errlist[e];
-            if (errno || !errmsg) {
-                break;
+            for (e = 0; e <= sys_nerr; e++) {
+                errno = 0;
+                errmsg = sys_errlist[e];
+                if (errno || !errmsg) {
+                    break;
+                }
+                errmsg = savepv(errmsg);
+                if (! is_utf8_invariant_string((U8 *) errmsg, 0)) {
+                    non_ascii = TRUE;
+                    is_utf8 = is_utf8_string((U8 *) errmsg, 0);
+                    break;
+                }
             }
-            errmsg = savepv(errmsg);
-            if (! is_utf8_invariant_string((U8 *) errmsg, 0)) {
-                non_ascii = TRUE;
-                is_utf8 = is_utf8_string((U8 *) errmsg, 0);
-                break;
+            Safefree(errmsg);
+
+            restore_switched_locale(LC_MESSAGES, original_messages_locale);
+
+            if (non_ascii) {
+
+                /* Any non-UTF-8 message means not a UTF-8 locale; if all are valid,
+                 * any non-ascii means it is one; otherwise we assume it isn't */
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?error messages for %s are UTF-8=%d\n",
+                                    save_input_locale,
+                                    is_utf8));
+                goto finish_and_return;
             }
+
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "All error messages for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
         }
-        Safefree(errmsg);
-
-        restore_switched_locale(LC_MESSAGES, original_messages_locale);
-
-        if (non_ascii) {
-
-            /* Any non-UTF-8 message means not a UTF-8 locale; if all are valid,
-             * any non-ascii means it is one; otherwise we assume it isn't */
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?error messages for %s are UTF-8=%d\n",
-                                save_input_locale,
-                                is_utf8));
-            goto finish_and_return;
-        }
-
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "All error messages for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
-    }
 
 #    endif
 #    ifndef EBCDIC  /* On os390, even if the name ends with "UTF-8', it isn't a
