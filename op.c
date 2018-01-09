@@ -6631,7 +6631,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     tbl = (short*)PerlMemShared_calloc(
                     /* one slot for 'extra len' count and one slot
-                     * for possible storing of last replacement char */
+                     * for storing of last replacement char */
                     (complement && !del) ? 258 : 256,
                     sizeof(short));
     cPVOPo->op_pv = (char*)tbl;
@@ -6661,28 +6661,48 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
 
         assert(j <= (I32)rlen);
+
 	if (!del) {
-	    if (!rlen) {
-                /* empty replacement list */
-		j = rlen;
-		if (!squash)
-		    o->op_private |= OPpTRANS_IDENTICAL;
-	    }
-	    else if (j == (I32)rlen)
-                /* no more replacement chars than search chars */
-		j = rlen - 1;
-	    else {
-                /* more replacement chars than search chars */
-		tbl = 
-		    (short *)
-		    PerlMemShared_realloc(tbl,
-					  (0x101+rlen-j) * sizeof(short));
+                    /* the repeat char: it may be used to fill the 0x100+
+                     * range. For example,
+                     *     tr/\x00-AE-\xff/bcd/c
+                     * is equivalent to
+                     *     tr/BCD\x{100}-\x{7fffffff}/bcd/
+                     * which is equivalent to
+                     *     tr/BCD\x{100}-\x{7fffffff}/bcddddddddd..../
+                     * So remember the 'd'.
+                     */
+            short   repeat_char;
+            SSize_t excess = rlen - (SSize_t)j;
+
+	    if (excess) {
+                /* More replacement chars than search chars:
+                 * store excess replacement chars at end of main table.
+                 */
+
+		tbl = (short *) PerlMemShared_realloc(tbl,
+					  (0x102+excess) * sizeof(short));
 		cPVOPo->op_pv = (char*)tbl;
+                for (i = 0; i < (I32)excess; i++)
+                    tbl[0x102+i] = r[j+i];
+                repeat_char = r[rlen-1];
 	    }
-	    tbl[0x100] = (short)(rlen - j);
-            /* store any excess replacement chars at end of main table */
-	    for (i=0; i < (I32)rlen - j; i++)
-		tbl[0x101+i] = r[j+i];
+	    else {
+                /* no more replacement chars than search chars */
+
+                if (rlen)
+                    repeat_char = r[rlen - 1];
+                else {
+                    /* empty replacement list */
+                    repeat_char = 0; /* this value isn't used at runtime */
+                    /* -1 excess count indicates empty replacement charlist */
+                    excess = -1;
+                    if (!squash)
+                        o->op_private |= OPpTRANS_IDENTICAL;
+                }
+	    }
+            tbl[0x100] = (short)excess;      /* excess char count */
+            tbl[0x101] = (short)repeat_char; /* repeated replace char */
 	}
     }
     else {

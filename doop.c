@@ -217,7 +217,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	const I32 del = PL_op->op_private & OPpTRANS_DELETE;
 	U8 *d;
 	U8 *dstart;
-	STRLEN rlen = 0;
+	SSize_t excess = 0;
 
 	if (grows)
 	    Newx(d, len*2+1, U8);
@@ -225,7 +225,9 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	    d = s;
 	dstart = d;
 	if (complement && !del)
-	    rlen = tbl[0x100];
+            /* number of replacement chars in excess of any 0x00..0xff
+             * search characters */
+	    excess = (SSize_t)tbl[0x100];
 
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    UV pch = 0xfeedface;
@@ -244,9 +246,10 @@ S_do_trans_complex(pTHX_ SV * const sv)
                         /* use the implicit 0x100..0x7fffffff search range */
 			matches++;
 			if (!del) {
-			    ch = (rlen == 0) ? (I32)comp :
-				(comp - 0x100 < rlen) ?
-				tbl[comp+1] : tbl[0x100+rlen];
+			    ch =    (excess == -1)             ? (I32)comp :
+                                 (   excess ==  0
+                                  || excess < (IV)comp - 0xff) ? tbl[0x101]
+                                                               : tbl[comp+2];
 			    if ((UV)ch != pch) {
 				d = uvchr_to_utf8(d, ch);
 				pch = (UV)ch;
@@ -290,10 +293,13 @@ S_do_trans_complex(pTHX_ SV * const sv)
                         /* use the implicit 0x100..0x7fffffff search range */
 			matches++;
 			if (!del) {
-			    if (comp - 0x100 < rlen)
-				d = uvchr_to_utf8(d, tbl[comp+1]);
-			    else
-				d = uvchr_to_utf8(d, tbl[0x100+rlen]);
+                            /* tr/...//c should call S_do_trans_count
+                             * instead */
+                            assert(excess != -1);
+			    ch = (   excess ==  0
+                                  || excess < (IV)comp - 0xff) ? tbl[0x101]
+                                                               : tbl[comp+2];
+                            d = uvchr_to_utf8(d, ch);
 			}
 		    }
 		}
