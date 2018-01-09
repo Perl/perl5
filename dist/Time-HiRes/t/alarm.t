@@ -42,6 +42,9 @@ SKIP: {
 	# Perl's deferred signals may be too wimpy to break through
 	# a restartable select(), so use POSIX::sigaction if available.
 
+        # In perl 5.6.2 you will get a likely bogus warning of
+        # "Use of uninitialized value in subroutine entry" from
+        # the following line.
 	POSIX::sigaction(&POSIX::SIGALRM,
 			 POSIX::SigAction->new("tick"),
 			 $oldaction)

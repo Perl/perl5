@@ -1008,9 +1008,11 @@ sub doConstants {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 	    } elsif ($macro =~ /^(d_hires_stat)$/) {
 		my $d_hires_stat = $1 if ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/);
-		push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
-			      default => ["IV", "0"]};
-		next;
+                if (defined $d_hires_stat) {
+                    push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
+                                  default => ["IV", "0"]};
+                    next;
+                }
 	    } elsif ($macro =~ /^(d_hires_utime)$/) {
 		my $d_hires_utime =
 		    ($DEFINE =~ /-DHAS_FUTIMENS/ ||
@@ -1049,9 +1051,11 @@ sub doConstants {
 }
 
 sub main {
-    if (-f "xdefine" && !(@ARGV  && $ARGV[0] eq '--configure')) {
+    if (-f "xdefine" && !(@ARGV  && $ARGV[0] =~ /^--(?:configure|force)$/)) {
 	print qq[$0: The "xdefine" exists, skipping the configure step.\n];
-	print qq[("$^X $0 --configure" to force the configure step)\n];
+	print qq[Use "$^X $0 --configure"\n];
+	print qq[or: "$^X $0 --force\n];
+	print qq[to force the configure step.\n];
     } else {
 	print "Configuring Time::HiRes...\n";
 	1 while unlink("define");

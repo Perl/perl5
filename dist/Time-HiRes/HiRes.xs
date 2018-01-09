@@ -947,7 +947,7 @@ static int th_clock_nanosleep(clockid_t clock_id, int flags,
 # define FUTIMENS_AVAILABLE 0
 #endif
 #ifdef HAS_UTIMENSAT
-# ifdef PERL_DARWIN
+# if defined(PERL_DARWIN) && __has_builtin(__builtin_available)
 #  define UTIMENSAT_AVAILABLE __builtin_available(macOS 10.13, *)
 # else
 #  define UTIMENSAT_AVAILABLE 1
@@ -1479,7 +1479,7 @@ PROTOTYPE: $$@
                       tot++;
                     }
                   } else {
-                    croak("futimens unimplemented in this platform");
+                    croak("utimensat unimplemented in this platform");
                   }
 #else  /* HAS_UTIMENSAT */
 	          croak("utimensat unimplemented in this platform");

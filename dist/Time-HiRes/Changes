@@ -1,5 +1,35 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9752 [2018-01-04]
+ - fix an error in the error message of utimensat() not available:
+   it said futimens() not available
+ - add --force alias for Makefile.PL --configure
+
+1.9751 [2018-01-02]
+ - in macOS/OSX/Darwin, use __has_builtin() check also for utimensat(),
+   can cause errors like
+   "HiRes.xs:1474:16: error: unrecognized platform name macOS"
+   [rt.cpan.org #123994]
+   (oversight from 1.9749)
+ - do not define TIME_HIRES_STAT/d_hires_stat if none was found, instead
+   of defining it to be zero, which case has no implementation in hrstatns()
+   (thanks to Nigel Horne)
+ - in t/utime.t try to divine if the filesystem of the tempfiles has been
+   mounted with the 'noatime' option, which can prohibit updating the
+   access time timestamp.  Also document this in HiRes.pm.
+   (thanks to Nigel Horne, original analysis by Slaven Rezic)
+ - synchronize the constant lists in HiRes.pm:@EXPORT_OK
+   and Makefile.PL:doConstants and regenerate fallback/const-c.inc
+   and fallback/const-xs.inc, this fixes Perl 5.6.2 issue with
+   d_futimens not allegedly being a valid macro in t/utime.t
+   (using Perl 5.26.1 for the regenerating, not 5.6.2)
+   (thanks to Nigel Horne)
+ - in t/utime.t define a nop sub done_testing for ancient Perls
+   (like Perl 5.6.2)
+ - in Perl 5.6.2 a bogus warning
+   "Use of uninitialized value in subroutine entry"
+   is issued from t/alarm.t: add a comment documenting that
+
 1.9750 [2017-12-22]
  - update META.yml and META.json for XSLoader instead of DynaLoader
    [rt.cpan.org #123933]
