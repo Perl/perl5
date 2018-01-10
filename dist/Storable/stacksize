@@ -1,13 +1,14 @@
 #!/usr/bin/perl
 # binary search maximum stack depth for arrays and hashes
-# and store it in stacksize.h
+# and store it in lib/Storable/Limit.pm
 
 use Config;
 use Cwd;
+use strict;
 
-my $f;
-my $fn = "stacksize.h";
-my ($bad1, $bad2) = (45000, 25000);
+my $fn = "lib/Storable/Limit.pm";
+my $ptrsize = $Config{ptrsize};
+my ($bad1, $bad2) = (65001, 25000);
 sub QUIET () {
     (defined $ENV{MAKEFLAGS} and $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/
      and !defined($ENV{TRAVIS}))
@@ -27,8 +28,14 @@ sub is_miniperl {
 }
 
 if (is_miniperl()) {
-    print "skip miniperl\n" unless QUIET;
-    exit;
+    die "Should not run during miniperl\n";
+}
+if ($^O eq "MSWin32") {
+    # prevent Windows popping up a dialog each time we overflow
+    # the stack
+    require Win32API::File;
+    Win32API::File->import(qw(SetErrorMode SEM_NOGPFAULTERRORBOX SEM_FAILCRITICALERRORS));
+    SetErrorMode(SEM_NOGPFAULTERRORBOX() | SEM_FAILCRITICALERRORS());
 }
 if (@ARGV and $ARGV[0] eq '--core') {
     $ENV{PERL_CORE} = 1;
@@ -54,23 +61,16 @@ if ($ENV{PERL_CORE}) {
     }
 }
 
-if (open $f, "<", $fn) {
-    my $s;
-    while ($s = <$f>) {
-        #print $s unless $QUIET;
-        if ($s =~ m|^/\* bisected|) {
-            print "already bisected\n" unless QUIET;
-            exit;
-        }
-    }
-    close $f;
-}
+-d "lib" or mkdir "lib";
+-d "lib/Storable" or mkdir "lib/Storable";
 
 my ($n, $good, $bad, $found) =
-    (35000, 100, $bad1, undef);
-my $try = '$t=[$t]';
+    (65000, 100, $bad1, undef);
 print "probe for max. stack sizes...\n" unless QUIET;
-my $mblib = '-Mblib';
+# -I. since we're run before pm_to_blib (which is going to copy the
+# file we create) and need to load our Storable.pm, not the already
+# installed Storable.pm
+my $mblib = '-Mblib -I.';
 if ($ENV{PERL_CORE}) {
     if ($^O eq 'MSWin32') {
         $mblib = '-I..\..\lib\auto -I..\..\lib';
@@ -84,27 +84,14 @@ if (PARALLEL) {
     print "parallel build race - wait for linker ...\n" unless QUIET;
     sleep(2.0);
 }
-for my $i (0..1) {
-    my $probe ="$PERL $mblib -e\"require Storable or die; Storable::dclone([]) or die;\"";
-    if (system($probe) != 0) {
-        print "Storable not yet usable: $probe\n" unless QUIET;
-        unless ($i) { # XXX race?
-            system($Config{make});
-            # and try again
-        } else {
-            exit;
-        }
-    } else {
-        last;
-    }
-}
 
 sub cmd {
-    my $i = shift;
+    my ($i, $try, $limit_name) = @_;
     die unless $i;
-    ($^O eq 'MSWin32')
-      ? "$PERL $mblib -MStorable=dclone -e\"my \$t; $try for 1..$i;dclone(\$t);\""
-      : "$PERL $mblib -MStorable=dclone -e'my \$t; $try for 1..$i;dclone(\$t);'"
+    my $code = "my \$t; \$Storable::$limit_name = -1; $try for 1..$i;dclone(\$t);";
+    my $q = ($^O eq 'MSWin32') ? '"' : "'";
+
+    "$PERL $mblib -MStorable=dclone -e$q$code$q"
 }
 # try more
 sub good {
@@ -131,7 +118,7 @@ sub bad {
 }
 
 while (!$found) {
-    my $cmd = cmd($n);
+    my $cmd = cmd($n, '$t=[$t]', 'recursion_limit');
     #print "$cmd\n" unless $QUIET;
     if (system($cmd) == 0) {
         $n = good($n);
@@ -147,12 +134,11 @@ my $max_depth = $n;
 # pack j only since 5.8
 my $max = ($] > 5.007 and length(pack "j", 0) < 8)
   ? ($^O eq 'MSWin32' ? 3000 : 8000)
-  : $bad2;
+  : $max_depth;
 $n = $max if $n > $max;
 $bad = $max if $bad > $max;
-$try = '$t={1=>$t}';
 while (!$found) {
-    my $cmd = cmd($n);
+    my $cmd = cmd($n, '$t={1=>$t}', 'recursion_limit_hash');
     #print "$cmd\n" unless $QUIET;
     if (system($cmd) == 0) {
         $n = good($n);
@@ -173,8 +159,36 @@ if ($max_depth == $bad1-1
 print "MAX_DEPTH_HASH = $n\n" unless QUIET;
 my $max_depth_hash = $n;
 
+# Previously this calculation was done in the macro, calculate it here
+# instead so a user setting of either variable more closely matches
+# the limits the use sees.
+
+# be fairly aggressive in trimming this, smoke testing showed several
+# several apparently random failures here, eg. working in one
+# configuration, but not in a very similar configuration.
+$max_depth = int(0.6 * $max_depth);
+$max_depth_hash = int(0.6 * $max_depth);
+
+my $stack_reserve = $^O eq "MSWin32" ? 32 : 16;
+if ($] ge "5.016" && !($^O eq "cygwin" && $ptrsize == 8)) {
+    $max_depth -= $stack_reserve;
+    $max_depth_hash -= $stack_reserve;
+}
+else {
+    # within the exception we need another stack depth to recursively
+    # cleanup the hash
+    $max_depth = ($max_depth >> 1) - $stack_reserve;
+    $max_depth_hash = ($max_depth_hash >> 1) - $stack_reserve * 2;
+}
+
+my $f;
 open $f, ">", $fn or die "$fn $!";
-print $f "/* bisected with stacksize.pl */\n";
-print $f "#define PST_STACK_MAX_DEPTH	$max_depth\n";
-print $f "#define PST_STACK_MAX_DEPTH_HASH $max_depth_hash\n";
+print $f <<EOS;
+# bisected by stacksize
+\$Storable::recursion_limit = $max_depth
+  unless defined \$Storable::recursion_limit;
+\$Storable::recursion_limit_hash = $max_depth_hash
+  unless defined \$Storable::recursion_limit_hash;
+1;
+EOS
 close $f;
