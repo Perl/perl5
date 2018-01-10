@@ -343,3 +343,10 @@ case "$cc" in
   ;;
 esac
 
+case `uname -p` in
+arm|mips)
+  ;;
+*)
+  test "$optimize" || optimize='-O2'
+  ;;
+esac
