@@ -108,7 +108,7 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
-$TMAX = 456;
+$TMAX = 468;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1772,4 +1772,34 @@ EOT
   TEST (q(Data::Dumper->Dump([\@globs], ["globs"])), 'globs: Dump()');
   TEST (q(Data::Dumper->Dumpxs([\@globs], ["globs"])), 'globs: Dumpxs()')
     if $XS;
+}
+#############
+$WANT = <<'EOT';
+#$v = {
+#  a => \*::ppp,
+#  b => \*{'::a/b'},
+#  c => \*{"::a\x{2603}b"}
+#};
+#*::ppp = {
+#  a => 1
+#};
+#*{'::a/b'} = {
+#  b => 3
+#};
+#*{"::a\x{2603}b"} = {
+#  c => 5
+#};
+EOT
+{
+  *ppp = { a => 1 };
+  *{"a/b"} = { b => 3 };
+  *{"a\x{2603}b"} = { c => 5 };
+  our $v = { a => \*ppp, b => \*{"a/b"}, c => \*{"a\x{2603}b"} };
+  local $Data::Dumper::Purity = 1;
+  TEST (q(Data::Dumper->Dump([$v], ["v"])), 'glob purity: Dump()');
+  TEST (q(Data::Dumper->Dumpxs([$v], ["v"])), 'glob purity: Dumpxs()') if $XS;
+  $WANT =~ tr/'/"/;
+  local $Data::Dumper::Useqq = 1;
+  TEST (q(Data::Dumper->Dump([$v], ["v"])), 'glob purity: Dump()');
+  TEST (q(Data::Dumper->Dumpxs([$v], ["v"])), 'glob purity: Dumpxs()') if $XS;
 }

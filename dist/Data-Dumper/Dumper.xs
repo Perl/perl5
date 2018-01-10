@@ -1314,11 +1314,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    i = 0; else i -= 4;
 	    }
             if (globname_needs_quote(c,i)) {
-		sv_grow(retval, SvCUR(retval)+2);
+		sv_grow(retval, SvCUR(retval)+3);
 		r = SvPVX(retval)+SvCUR(retval);
-		r[0] = '*'; r[1] = '{';
+		r[0] = '*'; r[1] = '{'; r[2] = 0;
 		SvCUR_set(retval, SvCUR(retval)+2);
-                esc_q_utf8(aTHX_ retval, c, i,
+                i = 3 + esc_q_utf8(aTHX_ retval, c, i,
 #ifdef GvNAMEUTF8
 			!!GvNAMEUTF8(val)
 #else
@@ -1328,15 +1328,16 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
-		i = 1;
+		SvCUR_set(retval, SvCUR(retval)+1);
+		r = r+1 - i;
 	    }
 	    else {
 		sv_grow(retval, SvCUR(retval)+i+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '*'; strlcpy(r+1, c, SvLEN(retval));
 		i++;
+		SvCUR_set(retval, SvCUR(retval)+i);
 	    }
-	    SvCUR_set(retval, SvCUR(retval)+i);
 
             if (style->purity) {
 		static const char* const entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };
