@@ -363,8 +363,8 @@ sub find_locales ($;$) {
         # Locales whose name differs if the utf8 bit is on are stored in these
         # two files with appropriate encodings.
         my $data_file = ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/)
-                        ? "./lib/locale/utf8"
-                        : "./lib/locale/latin1";
+                        ? _source_location() . "/lib/locale/utf8"
+                        : _source_location() . "/lib/locale/latin1";
         if (-e $data_file) {
             @Data = do $data_file;
         }
@@ -485,6 +485,20 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
     }
 
     return;
+}
+
+# returns full path to the directory containing the current source
+# file, inspired by mauke's Dir::Self
+sub _source_location {
+    require File::Spec;
+
+    my $caller_filename = (caller)[1];
+
+    return File::Spec->rel2abs(
+        File::Spec->catpath(
+            (File::Spec->splitpath($caller_filename))[0, 1]
+        )
+    );
 }
 
 1
