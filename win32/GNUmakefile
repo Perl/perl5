@@ -1164,7 +1164,7 @@ CFG_VARS	=					\
 
 .PHONY: all info
 
-all : info rebasePE Extensions_nonxs $(PERLSTATIC)
+all : info rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
 
 info :
 	@echo # CCTYPE=$(CCTYPE)
@@ -1597,6 +1597,15 @@ Extensions_clean :
 Extensions_realclean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
 
+PostExt : ..\lib\Storable\Limit.pm
+
+# we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
+# rebasePE covers just about that, including adjustment for static builds
+..\lib\Storable\Limit.pm : rebasePE
+	$(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize --core
+	if not exist ..\lib\Storable mkdir ..\lib\Storable
+	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
+
 # all PE files need to be built by the time this target runs, PP files can still
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
@@ -1676,7 +1685,7 @@ distclean: realclean
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
 	-del /f $(LIBDIR)\File\Glob.pm
-	-del /f $(LIBDIR)\Storable.pm
+	-del /f $(LIBDIR)\Storable.pm $(LIBDIR)\Storable\Limit.pm
 	-del /f $(LIBDIR)\Sys\Hostname.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm

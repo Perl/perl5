@@ -29,6 +29,16 @@ our ($canonical, $forgive_me);
 
 our $VERSION = '2.65';
 
+our $recursion_limit;
+our $recursion_limit_hash;
+
+do "Storable/Limit.pm";
+
+$recursion_limit = 512
+  unless defined $recursion_limit;
+$recursion_limit_hash = 256
+  unless defined $recursion_limit_hash;
+
 BEGIN {
     if (eval {
         local $SIG{__DIE__};
@@ -936,6 +946,34 @@ arrays and hashes to a maximal depth of ~1200-35000, otherwise we might
 fall into a stack-overflow.  On JSON::XS this limit is 512 btw.  With
 references not immediately referencing each other there's no such
 limit yet, so you might fall into such a stack-overflow segfault.
+
+This probing and the checks performed have some limitations:
+
+=over
+
+=item *
+
+the stack size at build time might be different at run time, eg. the
+stack size may have been modified with ulimit(1).  If it's larger at
+run time Storable may fail the freeze() or thaw() unnecessarily.
+
+=item *
+
+the stack size might be different in a thread.
+
+=item *
+
+array and hash recursion limits are checked separately against the
+same recursion depth, a frozen structure with a large sequence of
+nested arrays within many nested hashes may exhaust the processor
+stack without triggering Storable's recursion protection.
+
+=back
+
+You can control the maximum array and hash recursion depths by
+modifying C<$Storable::recursion_limit> and
+C<$Storable::recursion_limit_hash> respectively.  Either can be set to
+C<-1> to prevent any depth checks, though this isn't recommended.
 
 =item *
 

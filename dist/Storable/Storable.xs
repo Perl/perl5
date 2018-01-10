@@ -421,38 +421,18 @@ typedef struct stcxt {
     SV *recur_sv;               /* check only one recursive SV */
     int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
     int flags;			/* controls whether to bless or tie objects */
-    U16 recur_depth;        	/* avoid stack overflows RT #97526 */
+    IV recur_depth;        	/* avoid stack overflows RT #97526 */
+    IV max_recur_depth;        /* limit for recur_depth */
+    IV max_recur_depth_hash;   /* limit for recur_depth for hashes */
 #ifdef DEBUGME
     int traceme;                /* TRACEME() produces output */
 #endif
 } stcxt_t;
 
-/* Note: We dont count nested scalars. This will have to count all refs
-   without any recursion detection. */
-/* JSON::XS has 512 */
-/* sizes computed with stacksize. use some reserve for the croak cleanup. */
-#include "stacksize.h"
-/* esp. cygwin64 cannot 32, cygwin32 can. mingw needs more */
-#if defined(WIN32)
-# define STACK_RESERVE 32
-#else
-/* 8 should be enough, but some systems, esp. 32bit, need more */
-# define STACK_RESERVE 16
-#endif
-#ifdef PST_STACK_MAX_DEPTH
-# if (PERL_VERSION > 14) && !(defined(__CYGWIN__) && (PTRSIZE == 8))
-#  define MAX_DEPTH       (PST_STACK_MAX_DEPTH - STACK_RESERVE)
-#  define MAX_DEPTH_HASH  (PST_STACK_MAX_DEPTH_HASH - STACK_RESERVE)
-# else
-/* within the exception we need another stack depth to recursively cleanup the hash */
-#  define MAX_DEPTH       ((PST_STACK_MAX_DEPTH >> 1) - STACK_RESERVE)
-#  define MAX_DEPTH_HASH  ((PST_STACK_MAX_DEPTH_HASH >> 1) - (STACK_RESERVE*2))
-# endif
-#else
-/* uninitialized (stacksize failed): safe */
-# define MAX_DEPTH        512
-# define MAX_DEPTH_HASH   256
-#endif
+#define RECURSION_TOO_DEEP() \
+    (cxt->max_recur_depth != -1 && ++cxt->recur_depth > cxt->max_recur_depth)
+#define RECURSION_TOO_DEEP_HASH() \
+    (cxt->max_recur_depth_hash != -1 && ++cxt->recur_depth > cxt->max_recur_depth_hash)
 #define MAX_DEPTH_ERROR "Max. recursion depth with nested structures exceeded"
 
 static int storable_free(pTHX_ SV *sv, MAGIC* mg);
@@ -1681,6 +1661,9 @@ static void init_store_context(pTHX_
      */
 
     cxt->hook_seen = newAV(); /* Lists SVs returned by STORABLE_freeze */
+
+    cxt->max_recur_depth = SvIV(get_sv("Storable::recursion_limit", GV_ADD));
+    cxt->max_recur_depth_hash = SvIV(get_sv("Storable::recursion_limit_hash", GV_ADD));
 }
 
 /*
@@ -1825,6 +1808,9 @@ static void init_retrieve_context(pTHX_
 #endif
     cxt->accept_future_minor = -1;/* Fetched from perl if needed */
     cxt->in_retrieve_overloaded = 0;
+
+    cxt->max_recur_depth = SvIV(get_sv("Storable::recursion_limit", GV_ADD));
+    cxt->max_recur_depth_hash = SvIV(get_sv("Storable::recursion_limit_hash", GV_ADD));
 }
 
 /*
@@ -2374,10 +2360,10 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
     } else
         PUTMARK(is_weak ? SX_WEAKREF : SX_REF);
 
-    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+    TRACEME(("recur_depth %" IVdf ", recur_sv (0x%" UVxf ")", cxt->recur_depth,
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == sv) {
-        if (++cxt->recur_depth > MAX_DEPTH) {
+        if (RECURSION_TOO_DEEP()) {
 #if PERL_VERSION < 15
             cleanup_recursive_data(aTHX_ (SV*)sv);
 #endif
@@ -2388,7 +2374,7 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 
     retval = store(aTHX_ cxt, sv);
     if (cxt->entry && cxt->recur_sv == sv && cxt->recur_depth > 0) {
-        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        TRACEME(("recur_depth --%" IVdf, cxt->recur_depth));
         --cxt->recur_depth;
     }
     return retval;
@@ -2673,10 +2659,10 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
         TRACEME(("size = %d", (int)l));
     }
 
-    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+    TRACEME(("recur_depth %" IVdf ", recur_sv (0x%" UVxf ")", cxt->recur_depth,
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)av) {
-        if (++cxt->recur_depth > MAX_DEPTH) {
+        if (RECURSION_TOO_DEEP()) {
             /* with <= 5.14 it recurses in the cleanup also, needing 2x stack size */
 #if PERL_VERSION < 15
             cleanup_recursive_data(aTHX_ (SV*)av);
@@ -2716,7 +2702,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
     }
 
     if (cxt->entry && cxt->recur_sv == (SV*)av && cxt->recur_depth > 0) {
-        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        TRACEME(("recur_depth --%" IVdf, cxt->recur_depth));
         --cxt->recur_depth;
     }
     TRACEME(("ok (array)"));
@@ -2831,10 +2817,10 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
         TRACEME(("size = %d, used = %d", (int)l, (int)HvUSEDKEYS(hv)));
     }
 
-    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+    TRACEME(("recur_depth %" IVdf ", recur_sv (0x%" UVxf ")", cxt->recur_depth,
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)hv) {
-        if (++cxt->recur_depth > MAX_DEPTH_HASH) {
+        if (RECURSION_TOO_DEEP_HASH()) {
 #if PERL_VERSION < 15
             cleanup_recursive_data(aTHX_ (SV*)hv);
 #endif
@@ -3122,7 +3108,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 
  out:
     if (cxt->entry && cxt->recur_sv == (SV*)hv && cxt->recur_depth > 0) {
-        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        TRACEME(("recur_depth --%" IVdf , cxt->recur_depth));
         --cxt->recur_depth;
     }
     HvRITER_set(hv, riter);		/* Restore hash iterator state */
@@ -3243,10 +3229,10 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
     }
     TRACEME(("size = %" UVuf ", used = %" UVuf, len, (UV)HvUSEDKEYS(hv)));
 
-    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+    TRACEME(("recur_depth %" IVdf ", recur_sv (0x%" UVxf ")", cxt->recur_depth,
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)hv) {
-        if (++cxt->recur_depth > MAX_DEPTH_HASH) {
+        if (RECURSION_TOO_DEEP_HASH()) {
 #if PERL_VERSION < 15
             cleanup_recursive_data(aTHX_ (SV*)hv);
 #endif
@@ -3267,7 +3253,7 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
         }
     }
     if (cxt->entry && cxt->recur_sv == (SV*)hv && cxt->recur_depth > 0) {
-        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        TRACEME(("recur_depth --%" IVdf, cxt->recur_depth));
         --cxt->recur_depth;
     }
     assert(ix == len);
@@ -7874,18 +7860,17 @@ CODE:
     }
     ST(0) = boolSV(result);
 
-# so far readonly. we rather probe at install to be safe.
 
 IV
 stack_depth()
 CODE:
-    RETVAL = MAX_DEPTH;
+    RETVAL = SvIV(get_sv("Storable::recursion_limit", GV_ADD));
 OUTPUT:
     RETVAL
 
 IV
 stack_depth_hash()
 CODE:
-    RETVAL = MAX_DEPTH_HASH;
+    RETVAL = SvIV(get_sv("Storable::recursion_limit_hash", GV_ADD));
 OUTPUT:
     RETVAL

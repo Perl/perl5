@@ -18,13 +18,19 @@ if (-f $fn) {
     copy $in, $fn;
 }
 
+my $pm = { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' };
+unless ($ENV{PERL_CORE}) {
+    # the core Makefile takes care of this for core builds
+    $pm->{"lib/Storable/Limit.pm"} = '$(INST_ARCHLIB)/Storable/Limit.pm';
+}
+
 WriteMakefile(
     NAME                => 'Storable',
     DISTNAME            => "Storable",
 # We now ship this in t/
 #    PREREQ_PM           => { 'Test::More' => '0.41' },
     PL_FILES        => { }, # prevent default behaviour
-    PM              => { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' },
+    PM              => $pm,
     PREREQ_PM           => { XSLoader => 0 },
     INSTALLDIRS => ($] >= 5.007 && $] < 5.012) ? 'perl' : 'site',
     VERSION_FROM    => '__Storable__.pm',
@@ -42,7 +48,7 @@ WriteMakefile(
                            },
     ) : ()),
     dist                => { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
-    clean               => { FILES => 'Storable-* Storable.pm' },
+    clean               => { FILES => 'Storable-* Storable.pm lib/Storable/Limit.pm' },
 );
 
 # Unlink the .pm file included with the distribution
@@ -72,21 +78,22 @@ EOM
 package MY;
 
 # FORCE finish of INST_DYNAMIC, avoid loading the old Storable (failed XS_VERSION check)
-sub linkext {
+sub xlinkext {
     my $s = shift->SUPER::linkext(@_);
     $s =~ s|( :: .*)| $1 FORCE stacksize|;
     $s
 }
 
 sub depend {
+    my $extra_deps = "";
+    unless ($ENV{PERL_CORE}) {
+        # blib.pm needs arch/lib
+        $extra_deps = ' Storable.pm';
+    }
     "
-stacksize: Makefile \$(LINKEXT)
+lib/Storable/Limit.pm : \$(INST_DYNAMIC)$extra_deps
+	\$(MKPATH) \$(INST_LIB)
 	\$(PERLRUNINST) stacksize
-
-stacksize.h: stacksize_in.h
-	\$(CP) stacksize_in.h stacksize.h
-
-Storable\$(OBJ_EXT) Storable.c: stacksize.h
 
 release : dist
 	git tag \$(VERSION)
@@ -94,6 +101,18 @@ release : dist
 	git push
 	git push --tags
 "
+}
+
+sub test {
+    my ($self, %attr) = @_;
+
+    my $out = $self->SUPER::test(%attr);
+
+    if ($ENV{PERL_CORE}) {
+        $out =~ s!^(test(?:db)?_(?:static|dynamic)\b.*)!$1 lib/Storable/Limit.pm!gm;
+    }
+
+    $out;
 }
 
 sub postamble {
