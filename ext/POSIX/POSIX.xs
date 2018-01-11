@@ -3285,6 +3285,21 @@ mbtowc(pwc, s, n)
 	wchar_t *	pwc
 	char *		s
 	size_t		n
+    PREINIT:
+#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
+        mbstate_t ps;
+#endif
+    CODE:
+#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
+        memset(&ps, 0, sizeof(ps));;
+        PERL_UNUSED_RESULT(mbrtowc(pwc, NULL, 0, &ps));/* Reset any shift state */
+        errno = 0;
+        RETVAL = mbrtowc(pwc, s, n, &ps);   /* Prefer reentrant version */
+#else
+        RETVAL = mbtowc(pwc, s, n);
+#endif
+    OUTPUT:
+        RETVAL
 
 int
 wcstombs(s, pwcs, n)
