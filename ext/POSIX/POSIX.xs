@@ -3252,10 +3252,27 @@ write(fd, buffer, nbytes)
 void
 abort()
 
+#ifdef I_WCHAR
+#  include <wchar.h>
+#endif
+
 int
 mblen(s, n)
 	char *		s
 	size_t		n
+    PREINIT:
+#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
+        mbstate_t ps;
+#endif
+    CODE:
+#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
+        PERL_UNUSED_RESULT(mbrlen(NULL, 0, &ps));   /* Initialize state */
+        RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
+#else
+        RETVAL = mblen(s, n);
+#endif
+    OUTPUT:
+        RETVAL
 
 size_t
 mbstowcs(s, pwcs, n)
