@@ -257,12 +257,12 @@ S_do_trans_complex(pTHX_ SV * const sv)
                                                                    : tbl[comp+2]
                                      )
                                );
-			    if (ch != pch) {
-				d = uvchr_to_utf8(d, ch);
-				pch = ch;
-			    }
-			    s += len;
-			    continue;
+                        if (ch != pch) {
+                            d = uvchr_to_utf8(d, ch);
+                            pch = ch;
+                        }
+                        s += len;
+                        continue;
 		    }
 		}
 		else if ((sch = tbl[comp]) >= 0) {
