@@ -44,15 +44,12 @@
 /* If the environment says to, we can output debugging information during
  * initialization.  This is done before option parsing, and before any thread
  * creation, so can be a file-level static */
-#ifdef DEBUGGING
-#  ifdef PERL_GLOBAL_STRUCT
-  /* no global syms allowed */
-#    define debug_initialization 0
-#    define DEBUG_INITIALIZATION_set(v)
-#  else
+#if ! defined(DEBUGGING) || defined(PERL_GLOBAL_STRUCT)
+#  define debug_initialization 0
+#  define DEBUG_INITIALIZATION_set(v)
+#else
 static bool debug_initialization = FALSE;
-#    define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
-#  endif
+#  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #endif
 
 /* strlen() of a literal string constant.  XXX We might want this more general,
