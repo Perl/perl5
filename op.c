@@ -6632,7 +6632,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     tbl = (short*)PerlMemShared_calloc(
                     /* one slot for 'extra len' count and one slot
                      * for storing of last replacement char */
-                    (complement && !del) ? 258 : 256,
+                    complement  ? 258 : 256,
                     sizeof(short));
     cPVOPo->op_pv = (char*)tbl;
 
@@ -6662,7 +6662,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         assert(j <= (I32)rlen);
 
-	if (!del) {
+        /* populate extended portion of table */
+
+	{
                     /* the repeat char: it may be used to fill the 0x100+
                      * range. For example,
                      *     tr/\x00-AE-\xff/bcd/c
@@ -6697,7 +6699,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     repeat_char = 0; /* this value isn't used at runtime */
                     /* -1 excess count indicates empty replacement charlist */
                     excess = -1;
-                    if (!squash)
+                    if (!(squash | del))
                         o->op_private |= OPpTRANS_IDENTICAL;
                 }
 	    }

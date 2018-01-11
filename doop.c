@@ -224,7 +224,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	else
 	    d = s;
 	dstart = d;
-	if (complement && !del)
+	if (complement)
             /* number of replacement chars in excess of any 0x00..0xff
              * search characters */
 	    excess = (SSize_t)tbl[0x100];
@@ -235,7 +235,8 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		STRLEN len;
 		const UV comp = utf8n_to_uvchr(s, send - s, &len,
 					       UTF8_ALLOW_DEFAULT);
-		I32 ch;
+		UV     ch;
+                short sch;
 
 		if (comp > 0xff) {
 		    if (!complement) {
@@ -245,34 +246,40 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		    else {
                         /* use the implicit 0x100..0x7fffffff search range */
 			matches++;
-			if (!del) {
-			    ch =    (excess == -1)             ? (I32)comp :
-                                 (   excess ==  0
-                                  || excess < (IV)comp - 0xff) ? tbl[0x101]
-                                                               : tbl[comp+2];
-			    if ((UV)ch != pch) {
+                        ch = del
+                               /* setting ch to pch forces char to be deleted */
+                             ? ((excess >= (IV)comp - 0xff) ? (UV)tbl[comp+2]
+                                                            : pch           )
+
+			     : (        (excess == -1)             ? comp :
+                                 (UV)((  excess ==  0
+                                      || excess < (IV)comp - 0xff) ? tbl[0x101]
+                                                                   : tbl[comp+2]
+                                     )
+                               );
+			    if (ch != pch) {
 				d = uvchr_to_utf8(d, ch);
-				pch = (UV)ch;
+				pch = ch;
 			    }
 			    s += len;
 			    continue;
-			}
 		    }
 		}
-		else if ((ch = tbl[comp]) >= 0) {
+		else if ((sch = tbl[comp]) >= 0) {
+                    ch = (UV)sch;
 		    matches++;
-		    if ((UV)ch != pch) {
+		    if (ch != pch) {
 		        d = uvchr_to_utf8(d, ch);
-		        pch = (UV)ch;
+		        pch = ch;
 		    }
 		    s += len;
 		    continue;
 		}
-		else if (ch == -1) {	/* -1 is unmapped character */
+		else if (sch == -1) {	/* -1 is unmapped character */
 		    Move(s, d, len, U8);
 		    d += len;
 		}
-		else if (ch == -2)      /* -2 is delete character */
+		else if (sch == -2)      /* -2 is delete character */
 		    matches++;
 		s += len;
 		pch = 0xfeedface;
@@ -283,7 +290,8 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		STRLEN len;
 		const UV comp = utf8n_to_uvchr(s, send - s, &len,
 					       UTF8_ALLOW_DEFAULT);
-		I32 ch;
+		UV     ch;
+		short sch;
 		if (comp > 0xff) {
 		    if (!complement) {
 			Move(s, d, len, U8);
@@ -292,26 +300,32 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		    else {
                         /* use the implicit 0x100..0x7fffffff search range */
 			matches++;
-			if (!del) {
+                        if (del) {
+                             if (excess >= (IV)comp - 0xff) {
+                                ch = (UV)tbl[comp+2];
+                                d = uvchr_to_utf8(d, ch);
+                            }
+                        }
+                        else {
                             /* tr/...//c should call S_do_trans_count
                              * instead */
                             assert(excess != -1);
-			    ch = (   excess ==  0
-                                  || excess < (IV)comp - 0xff) ? tbl[0x101]
-                                                               : tbl[comp+2];
+			    ch = (UV)(   excess ==  0
+                                      || excess < (IV)comp-0xff) ? tbl[0x101]
+                                                                 : tbl[comp+2];
                             d = uvchr_to_utf8(d, ch);
-			}
+                        }
 		    }
 		}
-		else if ((ch = tbl[comp]) >= 0) {
-		    d = uvchr_to_utf8(d, ch);
+		else if ((sch = tbl[comp]) >= 0) {
+		    d = uvchr_to_utf8(d, (UV)sch);
 		    matches++;
 		}
-		else if (ch == -1) {	/* -1 is unmapped character */
+		else if (sch == -1) {	/* -1 is unmapped character */
 		    Move(s, d, len, U8);
 		    d += len;
 		}
-		else if (ch == -2)      /* -2 is delete character */
+		else if (sch == -2)      /* -2 is delete character */
 		    matches++;
 		s += len;
 	    }
