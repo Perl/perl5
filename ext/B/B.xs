@@ -1033,7 +1033,7 @@ next(o)
                                                 (OPtrans_map_ex*)cPVOPo->op_pv;
                     char *end = (char*)(&(extbl->map[256]));
                     if (cPVOPo->op_private & OPpTRANS_COMPLEMENT) {
-                        short excess_len = extbl->excess_len;
+                        SSize_t excess_len = extbl->excess_len;
                         end = (char*)(&(extbl->map_ex[excess_len]));
                     }
 		    ret = newSVpvn_flags(cPVOPo->op_pv,

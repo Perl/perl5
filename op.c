@@ -6702,7 +6702,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                         o->op_private |= OPpTRANS_IDENTICAL;
                 }
 	    }
-            extbl->excess_len  = (short)excess;      /* excess char count */
+            extbl->excess_len  = excess;      /* excess char count */
             extbl->repeat_char = (short)repeat_char; /* repeated replace char */
 	}
     }

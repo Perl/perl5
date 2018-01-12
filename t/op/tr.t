@@ -13,7 +13,7 @@ BEGIN {
 
 use utf8;
 
-plan tests => 296;
+plan tests => 300;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -443,6 +443,31 @@ like $@,
             ),
         "/csd <U";
     is $c, 0x120, "/csd <U count";
+}
+
+{
+    # RT #132608
+    # the 'extra length' for tr///c was stored as a short, so if the
+    # replacement string had more than 0x7fff chars not paired with
+    # search chars, bad things could happen
+
+    my ($c, $e, $s);
+
+    $s = "\x{9000}\x{9001}\x{9002}";
+    $e =    "\$c = \$s =~ tr/\\x00-\\xff/"
+          . ("ABCDEFGHIJKLMNO" x (0xa000 / 15))
+          . "/c; 1; ";
+    eval $e or die $@;
+    is $s, "IJK", "RT #132608 len=0xa000";
+    is $c, 3, "RT #132608 len=0xa000 count";
+
+    $s = "\x{9003}\x{9004}\x{9005}";
+    $e =    "\$c = \$s =~ tr/\\x00-\\xff/"
+          . ("ABCDEFGHIJKLMNO" x (0x12000 / 15))
+          . "/c; 1; ";
+    eval $e or die $@;
+    is $s, "LMN", "RT #132608 len=0x12000";
+    is $c, 3, "RT #132608 len=0x12000 count";
 }
 
 

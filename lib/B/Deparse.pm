@@ -58,6 +58,8 @@ our $AUTOLOAD;
 use warnings ();
 require feature;
 
+use Config;
+
 BEGIN {
     # List version-specific constants here.
     # Easiest way to keep this code portable between version looks to
@@ -5607,7 +5609,8 @@ sub collapse {
 
 sub tr_decode_byte {
     my($table, $flags) = @_;
-    my (@table) = unpack("s256sss*", $table);
+    my $ssize_t = $Config{ptrsize} == 8 ? 'q' : 'l';
+    my (@table) = unpack("s256${ssize_t}ss*", $table);
     my ($excess_len, $repeat_char) = splice(@table, 256, 2);
 
     my($c, $tr, @from, @to, @delfrom, $delhyphen);

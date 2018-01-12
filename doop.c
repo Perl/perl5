@@ -227,7 +227,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	if (complement)
             /* number of replacement chars in excess of any 0x00..0xff
              * search characters */
-	    excess = (SSize_t)extbl->excess_len;
+	    excess = extbl->excess_len;
 
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    UV pch = 0xfeedface;
