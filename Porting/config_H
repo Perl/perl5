@@ -13,9 +13,9 @@
 
 /* Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Dec 22 16:17:32 GMT 2017
+ * Configuration time: Thu Jan 11 22:34:57 MST 2018
  * Configured by     : yourname
- * Target system     : linux barba.rous.org 3.16.0-4-amd64 #1 smp debian 3.16.43-2+deb8u2 (2017-06-26) x86_64 gnulinux 
+ * Target system     : linux khw 4.10.0-42-generic #46-ubuntu smp mon dec 4 14:38:01 utc 2017 x86_64 x86_64 x86_64 gnulinux 
  */
 
 #ifndef _config_h_
@@ -616,7 +616,7 @@
  *	This symbol, if defined, indicates that <rpcsvc/dbm.h> exists and
  *	should be included.
  */
-#define I_DBM	/**/
+/*#define I_DBM	/ **/
 /*#define I_RPCSVC_DBM	/ **/
 
 /* I_DLFCN:
@@ -634,7 +634,7 @@
  *	This symbol, if defined, indicates that <gdbm.h> exists and should
  *	be included.
  */
-#define I_GDBM	/**/
+/*#define I_GDBM	/ **/
 
 /* I_LOCALE:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1082,13 +1082,13 @@
  *	This symbol is defined if using the FILE_ptr macro as an lvalue
  *	to increase the pointer by n leaves File_cnt(fp) unchanged.
  */
-#define USE_STDIO_PTR 	/**/
+/*#define USE_STDIO_PTR 	/ **/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	((fp)->_IO_read_ptr)
-#define STDIO_PTR_LVALUE 		/**/
+/*#define STDIO_PTR_LVALUE 		/ **/
 #define FILE_cnt(fp)	((fp)->_IO_read_end - (fp)->_IO_read_ptr)
 /*#define STDIO_CNT_LVALUE 		/ **/
-#define STDIO_PTR_LVAL_SETS_CNT	/**/
+/*#define STDIO_PTR_LVAL_SETS_CNT	/ **/
 /*#define STDIO_PTR_LVAL_NOCHANGE_CNT	/ **/
 #endif
 
@@ -1112,7 +1112,7 @@
  *	structure pointed to its argument. This macro will always be defined
  *	if USE_STDIO_BASE is defined.
  */
-#define USE_STDIO_BASE 	/**/
+/*#define USE_STDIO_BASE 	/ **/
 #ifdef USE_STDIO_BASE
 #define FILE_base(fp)	((fp)->_IO_read_base)
 #define FILE_bufsiz(fp)	((fp)->_IO_read_end - (fp)->_IO_read_base)
@@ -1379,7 +1379,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "linux"		/**/
-#define OSVERS "3.16.0-4-amd64"		/**/
+#define OSVERS "4.10.0-42-generic"		/**/
 
 /* CAT2:
  *	This macro concatenates 2 tokens together.
@@ -1500,9 +1500,9 @@
 /* CSH:
  *	This symbol, if defined, contains the full pathname of csh.
  */
-#define HAS_CSH		/**/
+/*#define HAS_CSH		/ **/
 #ifdef HAS_CSH
-#define CSH "/bin/csh"	/**/
+#define CSH "csh"	/**/
 #endif
 
 /* HAS_DLADDR:
@@ -2088,7 +2088,7 @@
  */
 /*#define I_NDBM	/ **/
 /*#define I_GDBMNDBM	/ **/
-#define I_GDBM_NDBM	/**/
+/*#define I_GDBM_NDBM	/ **/
 /*#define NDBM_H_USES_PROTOTYPES	/ **/
 /*#define GDBMNDBM_H_USES_PROTOTYPES	/ **/
 /*#define GDBM_NDBM_H_USES_PROTOTYPES	/ **/
@@ -2335,9 +2335,9 @@
  *	This symbol, if defined, indicates that the compiler supports
  *	__builtin_mul_overflow for multiplying integers with overflow checks.
  */
-/*#define HAS_BUILTIN_ADD_OVERFLOW	/ **/
-/*#define HAS_BUILTIN_SUB_OVERFLOW	/ **/
-/*#define HAS_BUILTIN_MUL_OVERFLOW	/ **/
+#define HAS_BUILTIN_ADD_OVERFLOW	/**/
+#define HAS_BUILTIN_SUB_OVERFLOW	/**/
+#define HAS_BUILTIN_MUL_OVERFLOW	/**/
 
 /* HAS_C99_VARIADIC_MACROS:
  *	If defined, the compiler supports C99 variadic macros.
@@ -2398,7 +2398,7 @@
  *	to the program to supply one.  A good guess is
  *		extern int dbminit(char *);
  */
-#define	HAS_DBMINIT_PROTO	/**/
+/*#define	HAS_DBMINIT_PROTO	/ **/
 
 /* HAS_DIR_DD_FD:
  *	This symbol, if defined, indicates that the the DIR* dirstream
@@ -2454,7 +2454,7 @@
  *	This symbol, if defined, indicates that the "fast stdio"
  *	is available to manipulate the stdio buffers directly.
  */
-#define HAS_FAST_STDIO		/**/
+/*#define HAS_FAST_STDIO		/ **/
 
 /* HAS_FCHDIR:
  *	This symbol, if defined, indicates that the fchdir routine is
@@ -3606,9 +3606,9 @@
  */
 #define DB_Hash_t	u_int32_t		/**/
 #define DB_Prefix_t	size_t  	/**/
-#define DB_VERSION_MAJOR_CFG	5  	/**/
-#define DB_VERSION_MINOR_CFG	1  	/**/
-#define DB_VERSION_PATCH_CFG	29  	/**/
+#define DB_VERSION_MAJOR_CFG	  	/**/
+#define DB_VERSION_MINOR_CFG	  	/**/
+#define DB_VERSION_PATCH_CFG	  	/**/
 
 /* I_FENV:
  *	This symbol, if defined, indicates to the C program that it should
@@ -4153,8 +4153,8 @@
  */
 #define GMTIME_MAX		67768036191676799	/**/
 #define GMTIME_MIN		-62167219200	/**/
-#define LOCALTIME_MAX	67768036191676799	/**/
-#define LOCALTIME_MIN	-62167219125	/**/
+#define LOCALTIME_MAX	67768036191701999	/**/
+#define LOCALTIME_MIN	-62167194004	/**/
 
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
@@ -5065,6 +5065,12 @@
  */
 /*#define HAS_TTYNAME_R	   / **/
 #define TTYNAME_R_PROTO 0	   /**/
+
+/* HAS_WCRTOMB:
+ *	This symbol, if defined, indicates that the wcrtomb routine is
+ *	available to convert a wide character into a multi-byte character.
+ */
+#define HAS_WCRTOMB	/**/
 
 /* I_MACH_CTHREADS:
  *     This symbol, if defined, indicates to the C program that it should

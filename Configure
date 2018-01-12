@@ -371,7 +371,6 @@ cppminus=''
 cpprun=''
 cppstdin=''
 d__fwalk=''
-d_accept4=''
 d_access=''
 d_accessx=''
 d_acosh=''
@@ -439,7 +438,6 @@ d_drand48_r=''
 drand48_r_proto=''
 d_drand48proto=''
 d_dup2=''
-d_dup3=''
 d_eaccess=''
 d_endgrent=''
 d_endgrent_r=''
@@ -667,7 +665,6 @@ d_memrchr=''
 d_mkdir=''
 d_mkdtemp=''
 d_mkfifo=''
-d_mkostemp=''
 d_mkstemp=''
 d_mkstemps=''
 d_mktime=''
@@ -703,7 +700,6 @@ d_open3=''
 d_fpathconf=''
 d_pathconf=''
 d_pause=''
-d_pipe2=''
 d_pipe=''
 d_poll=''
 d_portable=''
@@ -927,6 +923,7 @@ d_voidsig=''
 signal_t=''
 d_wait4=''
 d_waitpid=''
+d_wcrtomb=''
 d_wcscmp=''
 d_wcstombs=''
 d_wcsxfrm=''
@@ -10588,10 +10585,6 @@ $rm_try
 set fwalk d__fwalk
 eval $inlibc
 
-: see if accept4 exists
-set accept4 d_accept4
-eval $inlibc
-
 : Initialize h_fcntl
 h_fcntl=false
 
@@ -12645,10 +12638,6 @@ eval $hasproto
 
 : see if dup2 exists
 set dup2 d_dup2
-eval $inlibc
-
-: see if dup3 exists
-set dup3 d_dup3
 eval $inlibc
 
 : see if eaccess exists
@@ -16188,10 +16177,6 @@ eval $inlibc
 set mkfifo d_mkfifo
 eval $inlibc
 
-: see if mkostemp exists
-set mkostemp d_mkostemp
-eval $inlibc
-
 : see if mkstemp exists
 set mkstemp d_mkstemp
 eval $inlibc
@@ -16933,10 +16918,6 @@ fi
 
 : see if pause exists
 set pause d_pause
-eval $inlibc
-
-: see if pipe2 exists
-set pipe2 d_pipe2
 eval $inlibc
 
 : see if poll exists
@@ -19633,6 +19614,10 @@ eval $inlibc
 
 : see if waitpid exists
 set waitpid d_waitpid
+eval $inlibc
+
+: see if wcrtomb exists
+set wcrtomb d_wcrtomb
 eval $inlibc
 
 : look for wcscmp
@@ -23786,7 +23771,6 @@ d_PRIu64='$d_PRIu64'
 d_PRIx64='$d_PRIx64'
 d_SCNfldbl='$d_SCNfldbl'
 d__fwalk='$d__fwalk'
-d_accept4='$d_accept4'
 d_access='$d_access'
 d_accessx='$d_accessx'
 d_acosh='$d_acosh'
@@ -23861,7 +23845,6 @@ d_double_style_vax='$d_double_style_vax'
 d_drand48_r='$d_drand48_r'
 d_drand48proto='$d_drand48proto'
 d_dup2='$d_dup2'
-d_dup3='$d_dup3'
 d_duplocale='$d_duplocale'
 d_eaccess='$d_eaccess'
 d_endgrent='$d_endgrent'
@@ -24066,7 +24049,6 @@ d_memrchr='$d_memrchr'
 d_mkdir='$d_mkdir'
 d_mkdtemp='$d_mkdtemp'
 d_mkfifo='$d_mkfifo'
-d_mkostemp='$d_mkostemp'
 d_mkstemp='$d_mkstemp'
 d_mkstemps='$d_mkstemps'
 d_mktime64='$d_mktime64'
@@ -24111,7 +24093,6 @@ d_pathconf='$d_pathconf'
 d_pause='$d_pause'
 d_perl_otherlibdirs='$d_perl_otherlibdirs'
 d_phostname='$d_phostname'
-d_pipe2='$d_pipe2'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
@@ -24311,6 +24292,7 @@ d_voidtty='$d_voidtty'
 d_vsnprintf='$d_vsnprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
+d_wcrtomb='$d_wcrtomb'
 d_wcscmp='$d_wcscmp'
 d_wcstombs='$d_wcstombs'
 d_wcsxfrm='$d_wcsxfrm'

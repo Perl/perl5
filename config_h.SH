@@ -5,6 +5,13 @@
 #
 # See Porting/config_h.pl
 
+#!/bin/sh
+#
+# THIS IS A GENERATED FILE
+# DO NOT HAND-EDIT
+#
+# See Porting/config_h.pl
+
 : Set up for generating config_h.SH
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh;;
@@ -28,6 +35,9 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+case "$CONFIG_H" in
+already-done) echo "Not re-extracting config.h" ;;
+*)
 case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
@@ -2314,12 +2324,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d__fwalk HAS__FWALK		/**/
 
-/* HAS_ACCEPT4:
- *	This symbol, if defined, indicates that the accept4
- *	system call is available to accept socket connections.
- */
-#$d_accept4 HAS_ACCEPT4		/**/
-
 /* HAS_ACOSH:
  *	This symbol, if defined, indicates that the acosh routine is
  *	available to do the inverse hyperbolic cosine function.
@@ -2450,12 +2454,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	case if you're using dl_dlopen.xs.
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
-
-/* HAS_DUP3:
- *	This symbol, if defined, indicates that the dup3
- *	system call is available to duplicate file descriptors.
- */
-#$d_dup3 HAS_DUP3		/**/
 
 /* HAS_ERF:
  *	This symbol, if defined, indicates that the erf routine is
@@ -3044,13 +3042,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_mkdtemp HAS_MKDTEMP		/**/
 
-/* HAS_MKOSTEMP:
- *	This symbol, if defined, indicates that the mkostemp routine is
- *	available to exclusively create and open a uniquely named
- *	temporary file.
- */
-#$d_mkostemp HAS_MKOSTEMP		/**/
-
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to exclusively create and open a uniquely named
@@ -3154,12 +3145,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol will be defined if the C compiler supports off64_t.
  */
 #$d_off64_t	HAS_OFF64_T    		/**/
-
-/* HAS_PIPE2:
- *	This symbol, if defined, indicates that the pipe2
- *	system call is available to create inter-process pipes.
- */
-#$d_pipe2 HAS_PIPE2		/**/
 
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
@@ -5097,6 +5082,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_ttyname_r HAS_TTYNAME_R	   /**/
 #define TTYNAME_R_PROTO $ttyname_r_proto	   /**/
 
+/* HAS_WCRTOMB:
+ *	This symbol, if defined, indicates that the wcrtomb routine is
+ *	available to convert a wide character into a multi-byte character.
+ */
+#$d_wcrtomb HAS_WCRTOMB	/**/
+
 /* I_MACH_CTHREADS:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <mach/cthreads.h>.
@@ -5253,5 +5244,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 #endif
 !GROK!THIS!
+;;
+esac
 ;;
 esac
