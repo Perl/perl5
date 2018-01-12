@@ -2673,6 +2673,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 	  && OP_CLASS(o) != OA_LOGOP
 	  && o->op_type != OP_LINESEQ
 	  && o->op_type != OP_SREFGEN
+	  && o->op_type != OP_ENTEREVAL
 	  && o->op_type != OP_RV2CV) {
 	OP * const kid = cUNOPo->op_first;
 	if (OP_GIMME(kid, 0) != G_SCALAR || OpHAS_SIBLING(kid))
