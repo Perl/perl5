@@ -5607,8 +5607,9 @@ sub collapse {
 
 sub tr_decode_byte {
     my($table, $flags) = @_;
-    my(@table) = unpack("s*", $table);
-    splice @table, 0x100, 1;   # Number of subsequent elements
+    my (@table) = unpack("s256sss*", $table);
+    my ($excess_len, $repeat_char) = splice(@table, 256, 2);
+
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and
 	$table[ord("-") - 1] == -1 || $table[ord("-") + 1] == -1)
