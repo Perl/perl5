@@ -627,6 +627,23 @@ typedef enum {
 #define ref(o, type) doref(o, type, TRUE)
 #endif
 
+
+/* basic and extended translation tables attached to OP_TRANS/OP_TRANSR ops */
+
+typedef struct {
+    short map[256];
+} OPtrans_map;
+
+/* used in the presence of tr///c to record any replacement chars that
+ * are paired with the implicit 0x100..0x7fffffff search chars */
+typedef struct {
+    short map[256];
+    short excess_len; /* number of entries in map_ex[] */
+    short repeat_char;
+    short map_ex[1];  /* Unwarranted chumminess */
+} OPtrans_map_ex;
+
+
 /*
 =head1 Optree Manipulation Functions
 

@@ -42,7 +42,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv,len);
     U8 * const send = s+len;
-    const short * const tbl = (short*)cPVOP->op_pv;
+    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_SIMPLE;
 
@@ -52,7 +52,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
     /* First, take care of non-UTF-8 input strings, because they're easy */
     if (!SvUTF8(sv)) {
 	while (s < send) {
-	    const I32 ch = tbl[*s];
+	    const I32 ch = tbl->map[*s];
 	    if (ch >= 0) {
 		matches++;
 		*s = (U8)ch;
@@ -78,7 +78,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
 
 	    /* Need to check this, otherwise 128..255 won't match */
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
-	    if (c < 0x100 && (ch = tbl[c]) >= 0) {
+	    if (c < 0x100 && (ch = tbl->map[c]) >= 0) {
 		matches++;
 		d = uvchr_to_utf8(d, ch);
 		s += ulen;
@@ -121,7 +121,7 @@ S_do_trans_count(pTHX_ SV * const sv)
     const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
     I32 matches = 0;
-    const short * const tbl = (short*)cPVOP->op_pv;
+    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT;
 
@@ -130,7 +130,7 @@ S_do_trans_count(pTHX_ SV * const sv)
 
     if (!SvUTF8(sv)) {
 	while (s < send) {
-            if (tbl[*s++] >= 0)
+            if (tbl->map[*s++] >= 0)
                 matches++;
 	}
     }
@@ -140,7 +140,7 @@ S_do_trans_count(pTHX_ SV * const sv)
 	    STRLEN ulen;
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
 	    if (c < 0x100) {
-		if (tbl[c] >= 0)
+		if (tbl->map[c] >= 0)
 		    matches++;
 	    } else if (complement)
 		matches++;
@@ -166,11 +166,11 @@ S_do_trans_complex(pTHX_ SV * const sv)
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
     I32 matches = 0;
-    const short * const tbl = (short*)cPVOP->op_pv;
+    const OPtrans_map_ex * const extbl = (OPtrans_map_ex*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
 
-    if (!tbl)
+    if (!extbl)
 	Perl_croak(aTHX_ "panic: do_trans_complex line %d",__LINE__);
 
     if (!SvUTF8(sv)) {
@@ -180,7 +180,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    const U8* p = send;
 	    while (s < send) {
-		const I32 ch = tbl[*s];
+		const I32 ch = extbl->map[*s];
 		if (ch >= 0) {
 		    *d = (U8)ch;
 		    matches++;
@@ -196,7 +196,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	}
 	else {
 	    while (s < send) {
-		const I32 ch = tbl[*s];
+		const I32 ch = extbl->map[*s];
 		if (ch >= 0) {
 		    matches++;
 		    *d++ = (U8)ch;
@@ -227,7 +227,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	if (complement)
             /* number of replacement chars in excess of any 0x00..0xff
              * search characters */
-	    excess = (SSize_t)tbl[0x100];
+	    excess = (SSize_t)extbl->excess_len;
 
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    UV pch = 0xfeedface;
@@ -245,16 +245,19 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		    }
 		    else {
                         /* use the implicit 0x100..0x7fffffff search range */
+                        UV comp100 = comp - 0x100;
 			matches++;
                         ch = del
                                /* setting ch to pch forces char to be deleted */
-                             ? ((excess >= (IV)comp - 0xff) ? (UV)tbl[comp+2]
-                                                            : pch           )
+                             ? ((excess > (IV)comp100)
+                                            ? (UV)extbl->map_ex[comp100]
+                                            : pch           )
 
-			     : (        (excess == -1)             ? comp :
+			     : (        (excess == -1) ? comp :
                                  (UV)((  excess ==  0
-                                      || excess < (IV)comp - 0xff) ? tbl[0x101]
-                                                                   : tbl[comp+2]
+                                      || excess <= (IV)comp100)
+                                            ? extbl->repeat_char
+                                            : extbl->map_ex[comp100]
                                      )
                                );
                         if (ch != pch) {
@@ -265,7 +268,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
                         continue;
 		    }
 		}
-		else if ((sch = tbl[comp]) >= 0) {
+		else if ((sch = extbl->map[comp]) >= 0) {
                     ch = (UV)sch;
 		    matches++;
 		    if (ch != pch) {
@@ -299,10 +302,11 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		    }
 		    else {
                         /* use the implicit 0x100..0x7fffffff search range */
+                        UV comp100 = comp - 0x100;
 			matches++;
                         if (del) {
-                             if (excess >= (IV)comp - 0xff) {
-                                ch = (UV)tbl[comp+2];
+                             if (excess > (IV)comp100) {
+                                ch = (UV)extbl->map_ex[comp100];
                                 d = uvchr_to_utf8(d, ch);
                             }
                         }
@@ -310,14 +314,15 @@ S_do_trans_complex(pTHX_ SV * const sv)
                             /* tr/...//c should call S_do_trans_count
                              * instead */
                             assert(excess != -1);
-			    ch = (UV)(   excess ==  0
-                                      || excess < (IV)comp-0xff) ? tbl[0x101]
-                                                                 : tbl[comp+2];
+			    ch = (   excess ==  0
+                                      || excess <= (IV)comp100)
+                                            ? (UV)extbl->repeat_char
+                                            : (UV)extbl->map_ex[comp100];
                             d = uvchr_to_utf8(d, ch);
                         }
 		    }
 		}
-		else if ((sch = tbl[comp]) >= 0) {
+		else if ((sch = extbl->map[comp]) >= 0) {
 		    d = uvchr_to_utf8(d, (UV)sch);
 		    matches++;
 		}

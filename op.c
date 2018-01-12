@@ -6343,7 +6343,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     I32 i;
     I32 j;
     I32 grows = 0;
-    short *tbl;
+    OPtrans_map *tbl;
 
     const I32 complement = o->op_private & OPpTRANS_COMPLEMENT;
     const I32 squash     = o->op_private & OPpTRANS_SQUASH;
@@ -6629,11 +6629,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * The toker will have already expanded char ranges in t and r.
      */
 
-    tbl = (short*)PerlMemShared_calloc(
-                    /* one slot for 'extra len' count and one slot
-                     * for storing of last replacement char */
-                    complement  ? 258 : 256,
-                    sizeof(short));
+    tbl = (OPtrans_map*)PerlMemShared_calloc(
+                    complement  ? sizeof(OPtrans_map_ex) : sizeof(OPtrans_map),
+                    sizeof(char));
     cPVOPo->op_pv = (char*)tbl;
 
     if (complement) {
@@ -6641,21 +6639,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
          * with a search char) replacement chars (so j <= rlen always)
          */
 	for (i = 0; i < (I32)tlen; i++)
-	    tbl[t[i]] = -1;
+	    tbl->map[t[i]] = -1;
 	for (i = 0, j = 0; i < 256; i++) {
-	    if (!tbl[i]) {
+	    if (!tbl->map[i]) {
 		if (j == (I32)rlen) {
 		    if (del)
-			tbl[i] = -2;
+			tbl->map[i] = -2;
 		    else if (rlen)
-			tbl[i] = r[j-1];
+			tbl->map[i] = r[j-1];
 		    else
-			tbl[i] = (short)i;
+			tbl->map[i] = (short)i;
 		}
 		else {
 		    if (UVCHR_IS_INVARIANT(i) && ! UVCHR_IS_INVARIANT(r[j]))
 			grows = 1;
-		    tbl[i] = r[j++];
+		    tbl->map[i] = r[j++];
 		}
 	    }
 	}
@@ -6676,17 +6674,18 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      */
             short   repeat_char;
             SSize_t excess = rlen - (SSize_t)j;
+            OPtrans_map_ex *extbl = (OPtrans_map_ex*)tbl;
 
 	    if (excess) {
                 /* More replacement chars than search chars:
                  * store excess replacement chars at end of main table.
                  */
 
-		tbl = (short *) PerlMemShared_realloc(tbl,
-					  (0x102+excess) * sizeof(short));
-		cPVOPo->op_pv = (char*)tbl;
+		extbl = (OPtrans_map_ex *) PerlMemShared_realloc(extbl,
+                            sizeof(OPtrans_map_ex) + excess * sizeof(short));
+		cPVOPo->op_pv = (char*)extbl;
                 for (i = 0; i < (I32)excess; i++)
-                    tbl[0x102+i] = r[j+i];
+                    extbl->map_ex[i] = r[j+i];
                 repeat_char = r[rlen-1];
 	    }
 	    else {
@@ -6703,8 +6702,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                         o->op_private |= OPpTRANS_IDENTICAL;
                 }
 	    }
-            tbl[0x100] = (short)excess;      /* excess char count */
-            tbl[0x101] = (short)repeat_char; /* repeated replace char */
+            extbl->excess_len  = (short)excess;      /* excess char count */
+            extbl->repeat_char = (short)repeat_char; /* repeated replace char */
 	}
     }
     else {
@@ -6717,21 +6716,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    o->op_private |= OPpTRANS_IDENTICAL;
 	}
 	for (i = 0; i < 256; i++)
-	    tbl[i] = -1;
+	    tbl->map[i] = -1;
 	for (i = 0, j = 0; i < (I32)tlen; i++,j++) {
 	    if (j >= (I32)rlen) {
 		if (del) {
-		    if (tbl[t[i]] == -1)
-			tbl[t[i]] = -2;
+		    if (tbl->map[t[i]] == -1)
+			tbl->map[t[i]] = -2;
 		    continue;
 		}
 		--j;
 	    }
-	    if (tbl[t[i]] == -1) {
+	    if (tbl->map[t[i]] == -1) {
                 if (     UVCHR_IS_INVARIANT(t[i])
                     && ! UVCHR_IS_INVARIANT(r[j]))
 		    grows = 1;
-		tbl[t[i]] = r[j];
+		tbl->map[t[i]] = r[j];
 	    }
 	}
     }
