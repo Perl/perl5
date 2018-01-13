@@ -438,10 +438,23 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
                     return FALSE;
                 }
 
-                /* Otherwise fall into final loop to find which byte it is */
+#if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
+   || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+
+                *ep = x + _variant_byte_number(* (PERL_UINTMAX_T *) x);
+                assert(*ep >= s && *ep < send);
+
+                return FALSE;
+
+#else   /* If weird byte order, drop into next loop to do byte-at-a-time
+           checks. */
+
                 break;
+#endif
             }
+
             x += PERL_WORDSIZE;
+
         } while (x + PERL_WORDSIZE <= send);
     }
 
@@ -463,6 +476,97 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
+#ifndef EBCDIC
+
+PERL_STATIC_INLINE unsigned int
+S__variant_byte_number(PERL_UINTMAX_T word)
+{
+
+    /* This returns the position in a word (0..7) of the first variant byte in
+     * it.  This is a helper function.  Note that there are no branches */
+
+    assert(word);
+
+    /* Get just the msb bits of each byte */
+    word &= PERL_VARIANTS_WORD_MASK;
+
+#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+
+    /* Bytes are stored like
+     *  Byte8 ... Byte2 Byte1
+     *  63..56...15...8 7...0
+     *
+     *  Isolate the lsb;
+     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
+     *
+     * The word will look this this, with a rightmost set bit in position 's':
+     * ('x's are don't cares)
+     *      s
+     *  x..x100..0
+     *  x..xx10..0      Right shift (rightmost 0 is shifted off)
+     *  x..xx01..1      Subtract 1, turns all the trailing zeros into 1's and
+     *                  the 1 just to their left into a 0; the remainder is
+     *                  untouched
+     *  0..0011..1      The xor with x..xx10..0 clears that remainder, sets
+     *                  bottom to all 1
+     *  0..0100..0      Add 1 to clear the word except for the bit in 's'
+     *
+     * Another method is to do 'word &= -word'; but it generates a compiler
+     * message on some platforms about taking the negative of an unsigned */
+
+    word >>= 1;
+    word = 1 + (word ^ (word - 1));
+
+#  elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+
+    /* Bytes are stored like
+     *  Byte1 Byte2  ... Byte8
+     * 63..56 55..47 ... 7...0
+     *
+     * Isolate the msb; http://codeforces.com/blog/entry/10330
+     *
+     * Only the most significant set bit matters.  Or'ing word with its right
+     * shift of 1 makes that bit and the next one to its right both 1.  Then
+     * right shifting by 2 makes for 4 1-bits in a row. ...  We end with the
+     * msb and all to the right being 1. */
+    word |= word >>  1;
+    word |= word >>  2;
+    word |= word >>  4;
+    word |= word >>  8;
+    word |= word >> 16;
+    word |= word >> 32;  /* This should get optimized out on 32-bit systems. */
+
+    /* Then subtracting the right shift by 1 clears all but the left-most of
+     * the 1 bits, which is our desired result */
+    word -= (word >> 1);
+
+#  else
+#    error Unexpected byte order
+#  endif
+
+    /* Here 'word' has a single bit set, the  msb is of the first byte which
+     * has it set.  Calculate that position in the word.  We can use this
+     * specialized solution: https://stackoverflow.com/a/32339674/1626653,
+     * assumes an 8-bit byte */
+    word = (word >> 7) * (( 7ULL << 56) | (15ULL << 48) | (23ULL << 40)
+                        | (31ULL << 32) | (39ULL << 24) | (47ULL << 16)
+                        | (55ULL <<  8) | (63ULL <<  0));
+    word >>= PERL_WORDSIZE * 7; /* >> by either 56 or 24 */
+
+    /* Here, word contains the position 7..63 of that bit.  Convert to 0..7 */
+    word = ((word + 1) >> 3) - 1;
+
+#  if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+
+    /* And invert the result */
+    word = CHARBITS - word - 1;
+
+#  endif
+
+    return (unsigned int) word;
+}
+
+#endif /* ! EBCDIC */
 #if defined(PERL_CORE) || defined(PERL_EXT)
 
 /*

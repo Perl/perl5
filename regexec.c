@@ -584,10 +584,24 @@ S_find_next_ascii(char * s, const char * send, const bool utf8_target)
         /* Here, we know we have at least one full word to process.  Process
          * per-word as long as we have at least a full word left */
         do {
-            if ( ~ (* (PERL_UINTMAX_T *) s) & PERL_VARIANTS_WORD_MASK)  {
+            PERL_UINTMAX_T complemented = ~ * (PERL_UINTMAX_T *) s;
+            if (complemented & PERL_VARIANTS_WORD_MASK)  {
+
+#if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
+   || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+
+                s += _variant_byte_number(complemented);
+                return s;
+
+#else   /* If weird byte order, drop into next loop to do byte-at-a-time
+           checks. */
+
                 break;
+#endif
             }
+
             s += PERL_WORDSIZE;
+
         } while (s + PERL_WORDSIZE <= send);
     }
 
