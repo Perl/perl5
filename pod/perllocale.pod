@@ -368,7 +368,7 @@ will be locale aware.  Everything else is unaffected.
 
 Since Perl doesn't currently do anything with the C<LC_MONETARY>
 category, specifying C<:monetary> does effectively nothing.  Some
-systems have other categories, such as C<LC_PAPER_SIZE>, but Perl
+systems have other categories, such as C<LC_PAPER>, but Perl
 also doesn't know anything about them, and there is no way to specify
 them in this pragma's arguments.
 
