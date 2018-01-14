@@ -1591,6 +1591,10 @@ in the SYSTEM environment settings.
 Setting the exec bit on some locations (generally F</sdcard>) will return true
 but not actually set the bit.
 
+(VMS)
+A mode argument of zero sets permissions to the user's default permission mask
+rather than disabling all permissions.
+
 =item chown
 
 (S<Plan 9>, S<RISC OS>)

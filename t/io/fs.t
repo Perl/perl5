@@ -192,6 +192,7 @@ SKIP: {
     $mode = (stat "a")[2];
     SKIP: {
         skip "no mode checks", 1 if $skip_mode_checks;
+        skip "chmod(0, FH) means assume user defaults on VMS", 1 if $^O eq 'VMS';
         is($mode & 0777, 0, "perm reset");
     }
     is(chmod($newmode, "a"), 1, "fchmod");

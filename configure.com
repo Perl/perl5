@@ -6021,9 +6021,14 @@ $ WC "d_erfc='" + d_erfc + "'"
 $ WC "d_eunice='undef'"
 $ WC "d_exp2='" + d_exp2 + "'"
 $ WC "d_expm1='" + d_expm1 + "'"
-$ WC "d_fchmod='undef'"
+$ IF ("''F$EXTRACT(1,3, F$GETSYI(""VERSION""))'".GES."8.3")
+$ THEN
+$   WC "d_fchmod='define'"
+$ ELSE
+$   WC "d_fchmod='undef'"
+$ ENDIF
 $ WC "d_fchdir='undef'"
-$ WC "d_fchown='undef'"
+$ WC "d_fchown='define'"
 $ WC "d_fcntl='" + d_fcntl + "'"
 $ WC "d_fcntl_can_lock='" + d_fcntl_can_lock + "'"
 $ WC "d_fd_set='" + d_fd_set + "'"
