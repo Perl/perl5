@@ -1022,22 +1022,17 @@ next(o)
 		ret = make_sv_object(aTHX_ NULL);
 		break;
 	    case 41: /* B::PVOP::pv */
-		/* OP_TRANS uses op_pv to point to a OPtrans_map or
-                 * OPtrans_map_ex struct, whereas other PVOPs point to a
-                 * null terminated string. For trans, for now just return the
-                 * whole struct as a string and let the caller unpack() it */
+                /* OP_TRANS uses op_pv to point to a OPtrans_map struct,
+                 * whereas other PVOPs point to a null terminated string.
+                 * For trans, for now just return the whole struct as a
+                 * string and let the caller unpack() it */
 		if (   cPVOPo->op_type == OP_TRANS
                     || cPVOPo->op_type == OP_TRANSR)
                 {
-                    const OPtrans_map_ex * const extbl =
-                                                (OPtrans_map_ex*)cPVOPo->op_pv;
-                    char *end = (char*)(&(extbl->map[256]));
-                    if (cPVOPo->op_private & OPpTRANS_COMPLEMENT) {
-                        SSize_t excess_len = extbl->excess_len;
-                        end = (char*)(&(extbl->map_ex[excess_len]));
-                    }
+                    const OPtrans_map *const tbl = (OPtrans_map*)cPVOPo->op_pv;
 		    ret = newSVpvn_flags(cPVOPo->op_pv,
-                                            end - (char*)extbl,
+                                              (char*)(&tbl->map[tbl->size + 1])
+                                            - (char*)tbl,
                                             SVs_TEMP);
 		}
 		else

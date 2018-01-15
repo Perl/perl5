@@ -5610,8 +5610,9 @@ sub collapse {
 sub tr_decode_byte {
     my($table, $flags) = @_;
     my $ssize_t = $Config{ptrsize} == 8 ? 'q' : 'l';
-    my (@table) = unpack("s256${ssize_t}ss*", $table);
-    my ($excess_len, $repeat_char) = splice(@table, 256, 2);
+    my ($size, @table) = unpack("${ssize_t}s*", $table);
+    printf "XXX len=%d size=%d scalar\@table=%d\n", length($table), $size, scalar@table;
+    pop @table; # remove the wildcard final entry
 
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and
