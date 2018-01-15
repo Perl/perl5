@@ -5828,12 +5828,6 @@ expression, but with an empty argument list, like this:
 	bool _was_underlying = _NOT_IN_NUMERIC_STANDARD;                    \
 	if (_was_underlying) Perl_set_numeric_standard(aTHX);
 
-/* Doesn't change to underlying locale unless within the scope of some form of
- * 'use locale'.  This is the usual desired behavior. */
-#  define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()                        \
-	bool _was_standard = _NOT_IN_NUMERIC_UNDERLYING                     \
-                            && IN_LC(LC_NUMERIC);                           \
-	if (_was_standard) Perl_set_numeric_underlying(aTHX);
 
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
@@ -5872,7 +5866,6 @@ expression, but with an empty argument list, like this:
 #  define SET_NUMERIC_UNDERLYING()
 #  define IS_NUMERIC_RADIX(a, b)		(0)
 #  define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
-#  define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
 #  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
 #  define RESTORE_LC_NUMERIC_UNDERLYING()
 #  define RESTORE_LC_NUMERIC_STANDARD()
