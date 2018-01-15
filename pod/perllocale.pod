@@ -177,8 +177,8 @@ Another thread may change the locale at any time, which could cause at a
 minimum that a given thread is operating in a locale it isn't expecting
 to be in.  On some platforms, segfaults can also occur.  The locale
 change need not be explicit; some operations cause perl to change the
-locale itself.  You are vulnerable simply by having done a C<"use
-locale">.
+locale itself.  You are vulnerable simply by having done a S<C<"use
+locale">>.
 
 By default, Perl itself (outside the L<POSIX> module)
 ignores the current locale.  The S<C<use locale>>
@@ -907,7 +907,7 @@ characters between lower and uppercase.  This affects the case-mapping
 functions--C<fc()>, C<lc()>, C<lcfirst()>, C<uc()>, and C<ucfirst()>;
 case-mapping
 interpolation with C<\F>, C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted
-strings and C<s///> substitutions; and case-independent regular expression
+strings and C<s///> substitutions; and case-insensitive regular expression
 pattern matching using the C<i> modifier.
 
 Starting in v5.20, Perl supports UTF-8 locales for C<LC_CTYPE>, but
