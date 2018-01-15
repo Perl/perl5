@@ -560,6 +560,7 @@ call_pv();
 #define NEED_eval_pv_GLOBAL
 #define NEED_grok_hex
 #define NEED_newCONSTSUB_GLOBAL
+#define NEED_sv_2pv_flags_GLOBAL
 #include "ppport.h"
 
 newCONSTSUB();

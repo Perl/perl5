@@ -3353,6 +3353,7 @@ dist/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
 dist/Devel-PPPort/t/limits.t		Devel::PPPort test file
 dist/Devel-PPPort/t/magic.t		Devel::PPPort test file
 dist/Devel-PPPort/t/memory.t		Devel::PPPort test file
+dist/Devel-PPPort/t/mess.t		Devel::PPPort test file
 dist/Devel-PPPort/t/misc.t		Devel::PPPort test file
 dist/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
 dist/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file

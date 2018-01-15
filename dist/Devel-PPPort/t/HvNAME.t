@@ -49,7 +49,7 @@ bootstrap Devel::PPPort;
 package main;
 
 ok(Devel::PPPort::HvNAME_get(\%Devel::PPPort::), 'Devel::PPPort');
-ok(Devel::PPPort::HvNAME_get({}), undef);
+ok(!defined Devel::PPPort::HvNAME_get({}));
 
 ok(Devel::PPPort::HvNAMELEN_get(\%Devel::PPPort::), length('Devel::PPPort'));
 ok(Devel::PPPort::HvNAMELEN_get({}), 0);
