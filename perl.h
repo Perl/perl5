@@ -5746,10 +5746,8 @@ argument list, like this:
 
 This is used in conjunction with one of the macros
 L</STORE_LC_NUMERIC_SET_TO_NEEDED>
-and
-L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>
-
-to properly restore the C<LC_NUMERIC> state.
+and L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING> to properly restore the
+C<LC_NUMERIC> state.
 
 A call to L</DECLARATION_FOR_LC_NUMERIC_MANIPULATION> must have been made to
 declare at compile time a private variable used by this macro and the two
@@ -5824,10 +5822,11 @@ expression, but with an empty argument list, like this:
 
 /* The rest of these LC_NUMERIC macros toggle to one or the other state, with
  * the RESTORE_foo ones called to switch back, but only if need be */
-#  define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()                        \
-	bool _was_underlying = _NOT_IN_NUMERIC_STANDARD;                    \
-	if (_was_underlying) Perl_set_numeric_standard(aTHX);
-
+#  define STORE_LC_NUMERIC_SET_STANDARD()                                   \
+    if (_NOT_IN_NUMERIC_STANDARD) {                                         \
+        _restore_LC_NUMERIC_function = &Perl_set_numeric_underlying;        \
+        Perl_set_numeric_standard(aTHX);                                    \
+    }
 
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
@@ -5852,24 +5851,14 @@ expression, but with an empty argument list, like this:
                 }                                           \
             } STMT_END
 
-#  define RESTORE_LC_NUMERIC_UNDERLYING()                       \
-	if (_was_underlying) Perl_set_numeric_underlying(aTHX);
-
-#  define RESTORE_LC_NUMERIC_STANDARD()                     \
-    if (_restore_LC_NUMERIC_function) {                     \
-        _restore_LC_NUMERIC_function(aTHX);                 \
-    }
-
 #else /* !USE_LOCALE_NUMERIC */
 
 #  define SET_NUMERIC_STANDARD()
 #  define SET_NUMERIC_UNDERLYING()
 #  define IS_NUMERIC_RADIX(a, b)		(0)
-#  define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
-#  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
-#  define RESTORE_LC_NUMERIC_UNDERLYING()
-#  define RESTORE_LC_NUMERIC_STANDARD()
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION
+#  define STORE_LC_NUMERIC_SET_STANDARD()
+#  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED()
 #  define RESTORE_LC_NUMERIC()
 #  define LOCK_LC_NUMERIC_STANDARD()
@@ -5890,7 +5879,7 @@ expression, but with an empty argument list, like this:
 #define RESTORE_NUMERIC_STANDARD() RESTORE_LC_NUMERIC_STANDARD()
 #define SET_NUMERIC_LOCAL() SET_NUMERIC_UNDERLYING()
 #define STORE_NUMERIC_LOCAL_SET_STANDARD()                          \
-                    STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
+                    STORE_LC_NUMERIC_SET_STANDARD()
 #define STORE_NUMERIC_STANDARD_SET_LOCAL()                          \
                     STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
 #define STORE_NUMERIC_STANDARD_FORCE_LOCAL()                        \
