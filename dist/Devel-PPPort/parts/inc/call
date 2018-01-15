@@ -69,8 +69,8 @@ eval_pv(char *p, I32 croak_on_error)
     sv = POPs;
     PUTBACK;
 
-    if (croak_on_error && SvTRUE(GvSV(errgv)))
-        croak(SvPVx(GvSV(errgv), na));
+    if (croak_on_error && SvTRUEx(ERRSV))
+        croak_sv(ERRSV);
 
     return sv;
 }

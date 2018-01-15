@@ -3172,6 +3172,7 @@ dist/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/limits	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/magic	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/memory	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/mess	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/misc	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
@@ -3352,6 +3353,7 @@ dist/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
 dist/Devel-PPPort/t/limits.t		Devel::PPPort test file
 dist/Devel-PPPort/t/magic.t		Devel::PPPort test file
 dist/Devel-PPPort/t/memory.t		Devel::PPPort test file
+dist/Devel-PPPort/t/mess.t		Devel::PPPort test file
 dist/Devel-PPPort/t/misc.t		Devel::PPPort test file
 dist/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
 dist/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file
