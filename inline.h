@@ -702,8 +702,8 @@ C<L<perlapi/is_utf8_string>>
 =cut
 
 This is commonly used to determine if a SV's UTF-8 flag should be turned on.
-It needn't be if its string is entirely UTF-8 invariant, and it shouldn't be if
-it otherwise contains invalid UTF-8.
+It generally needn't be if its string is entirely UTF-8 invariant, and it
+shouldn't be if it otherwise contains invalid UTF-8.
 
 It is an internal function because khw thinks that XS code shouldn't be working
 at this low a level.  A valid use case could change that.
