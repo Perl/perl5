@@ -584,7 +584,7 @@ S_find_next_ascii(char * s, const char * send, const bool utf8_target)
         /* Here, we know we have at least one full word to process.  Process
          * per-word as long as we have at least a full word left */
         do {
-            if ((* (PERL_UINTMAX_T *) s) & ~ PERL_VARIANTS_WORD_MASK)  {
+            if ( ~ (* (PERL_UINTMAX_T *) s) & PERL_VARIANTS_WORD_MASK)  {
                 break;
             }
             s += PERL_WORDSIZE;
