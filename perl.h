@@ -5868,26 +5868,6 @@ expression, but with an empty argument list, like this:
 
 #define Atof				my_atof
 
-/* Back-compat names */
-#define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED              \
-                        DECLARATION_FOR_LC_NUMERIC_MANIPULATION
-#define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()                    \
-                DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;     \
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
-#define LOCK_NUMERIC_STANDARD() LOCK_LC_NUMERIC_STANDARD()
-#define RESTORE_NUMERIC_LOCAL() RESTORE_LC_NUMERIC_UNDERLYING()
-#define RESTORE_NUMERIC_STANDARD() RESTORE_LC_NUMERIC_STANDARD()
-#define SET_NUMERIC_LOCAL() SET_NUMERIC_UNDERLYING()
-#define STORE_NUMERIC_LOCAL_SET_STANDARD()                          \
-                    STORE_LC_NUMERIC_SET_STANDARD()
-#define STORE_NUMERIC_STANDARD_SET_LOCAL()                          \
-                    STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
-#define STORE_NUMERIC_STANDARD_FORCE_LOCAL()                        \
-                        STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
-#define UNLOCK_NUMERIC_STANDARD() UNLOCK_LC_NUMERIC_STANDARD()
-
-
-
 #ifdef USE_QUADMATH
 #  define Perl_strtod(s, e) strtoflt128(s, e)
 #elif defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
