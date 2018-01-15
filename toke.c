@@ -11405,7 +11405,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
               floatit = TRUE;
         }
 	if (floatit) {
-            STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD();
 	    /* terminate the string */
 	    *d = '\0';
             if (UNLIKELY(hexfp)) {
@@ -11422,7 +11421,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             } else {
                 nv = Atof(PL_tokenbuf);
             }
-            RESTORE_LC_NUMERIC_UNDERLYING();
             sv = newSVnv(nv);
 	}
 
