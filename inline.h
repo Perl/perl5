@@ -502,6 +502,8 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
 
 #  ifndef EBCDIC
 
+    /* Test if the string is long enough to use word-at-a-time.  (Logic is the
+     * same as for is_utf8_invariant_string()) */
     if ((STRLEN) (e - x) >= PERL_WORDSIZE
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(x)
                           - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))
