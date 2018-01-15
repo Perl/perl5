@@ -3009,6 +3009,13 @@ expression pattern should be an indivisible token, with nothing
 intervening between the C<"("> and the C<"?">, but you separated them
 with whitespace.
 
+=item In '(+...)', the '(' and '+' must be adjacent in regex;
+marked by S<<-- HERE> in m/%s/
+
+(F) The two-character sequence C<"(+"> in this context in a regular
+expression pattern should be an indivisible token, with nothing
+intervening between the C<"("> and the C<"+">, but you separated them.
+
 =item Invalid %s attribute: %s
 
 (F) The indicated attribute for a subroutine or variable was not recognized
@@ -3166,13 +3173,9 @@ an arbitrary reference was blessed into the "version" class.
 =item In '(*VERB...)', the '(' and '*' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
 
-=item In '(+...)', the '(' and '+' must be adjacent in regex;
-marked by S<<-- HERE> in m/%s/
-
-(F) The two-character sequences C<"(+"> and C<"(*"> in
-this context in a regular expression pattern should be
-indivisible tokens, with nothing intervening between the C<"(">
-and the C<"*"> or C<"+">, but you separated them.
+(F) The two-character sequence C<"(*"> in this context in a regular
+expression pattern should be an indivisible token, with nothing
+intervening between the C<"("> and the C<"*">, but you separated them.
 
 =item ioctl is not implemented
 
@@ -6100,6 +6103,12 @@ warning:
 
     no warnings "experimental::regex_sets";
 
+=item The script_run feature is experimental
+
+(S experimental::script_run) This feature is experimental
+and its behavior may in any future release of perl.  See
+L<perlre/Script Runs>.
+
 =item The signatures feature is experimental
 
 (S experimental::signatures) This warning is emitted if you unwrap a
@@ -6111,12 +6120,6 @@ in a future Perl version:
     no warnings "experimental::signatures";
     use feature "signatures";
     sub foo ($left, $right) { ... }
-
-=item The script_run feature is experimental
-
-(S experimental::script_run) This feature is experimental and its
-behavior may in any future release of perl.
-See L<perlre/Script Runs>.
 
 =item The stat preceding %s wasn't an lstat
 
