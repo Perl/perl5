@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 187;
+plan tests => 188;
 
 sub ok_cloexec {
     SKIP: {
@@ -543,4 +543,20 @@ SKIP: {
     $b = undef;
     is $t, "xyz", "buffered write happens on dropping handle ref (complex open)";
     is scalar(grep { /\A_GEN_/ } keys %::), 0, "no gensym appeared in stash";
+}
+
+# [perl #16113] returning handle in localised glob
+{
+    my $tfile = tempfile();
+    open(my $twrite, ">", $tfile) or die $!;
+    print {$twrite} "foo\nbar\n" or die $!;
+    close $twrite or die $!;
+    $twrite = undef;
+    my $tread = do {
+	local *F;
+	open(F, "<", $tfile) or die $!;
+	*F;
+    };
+    is scalar(<$tread>), "foo\n", "IO handle returned in localised glob";
+    close $tread;
 }
