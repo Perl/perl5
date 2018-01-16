@@ -5035,7 +5035,7 @@ giving it to C<sv_usepvn>, and neither should any pointers from "behind"
 that pointer (e.g. ptr + 1) be used.
 
 If S<C<flags & SV_SMAGIC>> is true, will call C<SvSETMAGIC>.  If
-S<C<flags> & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be C<NUL>,
+S<C<flags & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be C<NUL>,
 and the realloc
 will be skipped (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>).
