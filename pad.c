@@ -66,7 +66,7 @@ or resolved at compile time.  These don't have names by which they
 can be looked up from Perl code at run time through eval"" the way
 C<my>/C<our> variables can be.  Since they can't be looked up by "name"
 but only by their index allocated at compile time (which is usually
-in C<PL_op->op_targ>), wasting a name SV for them doesn't make sense.
+in C<< PL_op->op_targ >>), wasting a name SV for them doesn't make sense.
 
 The pad names in the PADNAMELIST have their PV holding the name of
 the variable.  The C<COP_SEQ_RANGE_LOW> and C<_HIGH> fields form a range
