@@ -1163,15 +1163,17 @@ S_pushav(pTHX_ AV* const av)
     if (UNLIKELY(SvRMAGICAL(av))) {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
-            SV ** const svp = av_fetch(av, i, FALSE);
+            SV ** const svp = av_fetch(av, i, TRUE);
             SP[i+1] = svp ? *svp : &PL_sv_undef;
         }
     }
     else {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
-            SV * const sv = AvARRAY(av)[i];
-            SP[i+1] = LIKELY(sv) ? sv : &PL_sv_undef;
+            SV *sv = AvARRAY(av)[i];
+	    if (!LIKELY(sv))
+		AvARRAY(av)[i] = sv = newSV(0);
+	    SP[i+1] = sv;
         }
     }
     SP += maxarg;
