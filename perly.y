@@ -940,19 +940,31 @@ subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
 					jmaybe($3)); }
 	|	term ARROW '(' ')'          /* $subref->() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   newCVREF(0, scalar($1))); }
+				   newCVREF(0, scalar($1)));
+			  if (parser->expect == XBLOCK)
+			      parser->expect = XOPERATOR;
+			}
 	|	term ARROW '(' expr ')'     /* $subref->(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   op_append_elem(OP_LIST, $4,
-				       newCVREF(0, scalar($1)))); }
+				       newCVREF(0, scalar($1))));
+			  if (parser->expect == XBLOCK)
+			      parser->expect = XOPERATOR;
+			}
 
 	|	subscripted '(' expr ')'   /* $foo->{bar}->(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   op_append_elem(OP_LIST, $3,
-					       newCVREF(0, scalar($1)))); }
+					       newCVREF(0, scalar($1))));
+			  if (parser->expect == XBLOCK)
+			      parser->expect = XOPERATOR;
+			}
 	|	subscripted '(' ')'        /* $foo->{bar}->() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   newCVREF(0, scalar($1))); }
+				   newCVREF(0, scalar($1)));
+			  if (parser->expect == XBLOCK)
+			      parser->expect = XOPERATOR;
+			}
 	|	'(' expr ')' '[' expr ']'            /* list slice */
 			{ $$ = newSLICEOP(0, $5, $2); }
 	|	QWLIST '[' expr ']'            /* list literal slice */
