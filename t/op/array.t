@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (178);
+plan (179);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -589,6 +589,10 @@ $#a = -1; $#a++;
     my @qr = \(@q);
     is $qr[$_], \$q[$_], "lazy element creation with refgen" foreach 0..2;
     isnt $qr[1], \undef, "lazy element creation with refgen";
+    my @r;
+    $r[1] = 1;
+    foreach my $re ((), @r) { $re = 5; }
+    is join("", @r), "55", "lazy element creation with foreach";
 }
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
