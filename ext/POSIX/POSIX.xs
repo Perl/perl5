@@ -3295,6 +3295,7 @@ strtod(str)
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
 	num = strtod(str, &unparsed);
+        RESTORE_LC_NUMERIC();
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
@@ -3303,7 +3304,6 @@ strtod(str)
 	    else
 		PUSHs(&PL_sv_undef);
 	}
-        RESTORE_LC_NUMERIC();
 
 #ifdef HAS_STRTOLD
 
@@ -3317,6 +3317,7 @@ strtold(str)
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
 	num = strtold(str, &unparsed);
+        RESTORE_LC_NUMERIC();
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
@@ -3325,7 +3326,6 @@ strtold(str)
 	    else
 		PUSHs(&PL_sv_undef);
 	}
-        RESTORE_LC_NUMERIC();
 
 #endif
 
