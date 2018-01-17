@@ -446,7 +446,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fixed a use after free bug in pp_list introduced in 5.27.1.  [perl #131954]
 
 =back
 
