@@ -2171,19 +2171,19 @@ localeconv()
 		const char *value = *((const char **)(ptr + strings->offset));
 
 		if (value && *value) {
-		    (void) hv_store(RETVAL,
-                        strings->name,
-                        strlen(strings->name),
-                        newSVpvn_utf8(
-                                value,
-                                strlen(value),
+                    const STRLEN value_len = strlen(value);
 
-                                /* We mark it as UTF-8 if a utf8 locale and is
-                                 * valid and variant under UTF-8 */
-                                     is_utf8_locale
-                                && ! is_utf8_invariant_string((U8 *) value, 0)
-                                &&   is_utf8_string((U8 *) value, 0)),
-                    0);
+                    /* We mark it as UTF-8 if a utf8 locale and is valid and
+                     * variant under UTF-8 */
+                    const bool is_utf8 = is_utf8_locale
+                                     &&  is_utf8_non_invariant_string(
+                                                                (U8*) value,
+                                                                value_len);
+		    (void) hv_store(RETVAL,
+                                    strings->name,
+                                    strlen(strings->name),
+                                    newSVpvn_utf8(value, value_len, is_utf8),
+                                    0);
             }
                 strings++;
 	    }
