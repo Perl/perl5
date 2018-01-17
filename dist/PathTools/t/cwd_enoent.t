@@ -17,7 +17,6 @@ unless(mkdir("$tmp/testdir") && chdir("$tmp/testdir") && rmdir("$tmp/testdir")){
 }
 
 plan tests => 8;
-my $EXTRA_ABSPATH_TESTS = ($Config{prefix} =~ m/\//) && $^O ne 'cygwin';
 require Cwd;
 
 foreach my $type (qw(regular perl)) {
