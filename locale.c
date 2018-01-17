@@ -1455,15 +1455,16 @@ S_my_nl_langinfo(const int item, bool toggle)
     {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
-    if (toggle) {
+        if (toggle) {
             STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-    }
+        }
 
-    save_to_buffer(nl_langinfo(item), &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+        save_to_buffer(nl_langinfo(item), &PL_langinfo_buf,
+                                          &PL_langinfo_bufsize, 0);
 
-    if (toggle) {
+        if (toggle) {
             RESTORE_LC_NUMERIC();
-    }
+        }
     }
 
     LOCALE_UNLOCK;
@@ -1471,24 +1472,24 @@ S_my_nl_langinfo(const int item, bool toggle)
 #  else /* Use nl_langinfo_l(), avoiding both a mutex and changing the locale */
 
     {
-    bool do_free = FALSE;
-    locale_t cur = uselocale((locale_t) 0);
+        bool do_free = FALSE;
+        locale_t cur = uselocale((locale_t) 0);
 
-    if (cur == LC_GLOBAL_LOCALE) {
-        cur = duplocale(LC_GLOBAL_LOCALE);
-        do_free = TRUE;
-    }
+        if (cur == LC_GLOBAL_LOCALE) {
+            cur = duplocale(LC_GLOBAL_LOCALE);
+            do_free = TRUE;
+        }
 
-    if (toggle) {
-        cur = newlocale(LC_NUMERIC_MASK, PL_numeric_name, cur);
-        do_free = TRUE;
-    }
+        if (toggle) {
+            cur = newlocale(LC_NUMERIC_MASK, PL_numeric_name, cur);
+            do_free = TRUE;
+        }
 
-    save_to_buffer(nl_langinfo_l(item, cur),
-                   &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
-    if (do_free) {
-        freelocale(cur);
-    }
+        save_to_buffer(nl_langinfo_l(item, cur),
+                       &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+        if (do_free) {
+            freelocale(cur);
+        }
     }
 
 #  endif
