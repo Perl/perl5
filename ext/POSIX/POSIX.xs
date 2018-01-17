@@ -2124,7 +2124,12 @@ localeconv()
 	localeconv(); /* A stub to call not_here(). */
 #else
 	struct lconv *lcbuf;
-
+#  if defined(USE_ITHREADS)                                             \
+   && defined(HAS_POSIX_2008_LOCALE)                                    \
+   && defined(HAS_LOCALECONV_L) /* Prefer this thread-safe version */
+        bool do_free = FALSE;
+        locale_t cur = uselocale((locale_t) 0);
+#  endif
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
         /* localeconv() deals with both LC_NUMERIC and LC_MONETARY, but
@@ -2144,11 +2149,22 @@ localeconv()
 
 	RETVAL = newHV();
 	sv_2mortal((SV*)RETVAL);
+#  if defined(USE_ITHREADS)                         \
+   && defined(HAS_POSIX_2008_LOCALE)                \
+   && defined(HAS_LOCALECONV_L)
 
+        if (cur == LC_GLOBAL_LOCALE) {
+            cur = duplocale(LC_GLOBAL_LOCALE);
+            do_free = TRUE;
+        }
+
+        lcbuf = localeconv_l(cur);
+#  else
         LOCALE_LOCK;    /* Prevent interference with other threads using
                            localeconv() */
-        lcbuf = localeconv();
 
+        lcbuf = localeconv();
+#  endif
 	if (lcbuf) {
 	    const struct lconv_offset *strings = lconv_strings;
 	    const struct lconv_offset *integers = lconv_integers;
@@ -2199,8 +2215,15 @@ localeconv()
                 integers++;
             }
 	}
-
+#  if defined(USE_ITHREADS)                         \
+   && defined(HAS_POSIX_2008_LOCALE)                \
+   && defined(HAS_LOCALECONV_L)
+        if (do_free) {
+            freelocale(cur);
+        }
+#  else
         LOCALE_UNLOCK;
+#  endif
         RESTORE_LC_NUMERIC();
 #endif  /* HAS_LOCALECONV */
     OUTPUT:
