@@ -523,7 +523,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 
     if (IN_LC(LC_NUMERIC)) {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-        STORE_LC_NUMERIC_SET_TO_NEEDED();
+        STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
         if (PL_numeric_radix_sv) {
             STRLEN len;
             const char * const radix = SvPV(PL_numeric_radix_sv, len);
