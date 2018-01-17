@@ -13329,8 +13329,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
     SvTAINT(sv);
 
-    RESTORE_LC_NUMERIC();   /* Done outside loop, so don't have to save/restore
-                               each iteration. */
+    if (lc_numeric_set) {
+        RESTORE_LC_NUMERIC();   /* Done outside loop, so don't have to
+                                   save/restore each iteration. */
+    }
 }
 
 /* =========================================================================
