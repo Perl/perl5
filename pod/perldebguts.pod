@@ -94,9 +94,13 @@ unless C<< $^D & (1<<30) >> is true.
 =item *
 
 When execution of the program reaches a subroutine call, a call to
-C<&DB::sub>(I<args>) is made instead, with C<$DB::sub> holding the
-name of the called subroutine. (This doesn't happen if the calling
-subroutine was compiled in the C<DB> package.)
+C<&DB::sub>(I<args>) is made instead, with C<$DB::sub> set to identify
+the called subroutine.  (This doesn't happen if the calling subroutine
+was compiled in the C<DB> package.)  C<$DB::sub> normally holds the name
+of the called subroutine, if it has a name by which it can be looked up.
+Failing that, C<$DB::sub> will hold a reference to the called subroutine.
+Either way, the C<&DB::sub> subroutine can use C<$DB::sub> as a reference
+by which to call the called subroutine, which it will normally want to do.
 
 X<&DB::lsub>If the call is to an lvalue subroutine, and C<&DB::lsub>
 is defined C<&DB::lsub>(I<args>) is called instead, otherwise falling
@@ -104,10 +108,15 @@ back to C<&DB::sub>(I<args>).
 
 =item *
 
-When execution of the program uses C<goto> to enter a non-XS
-subroutine and the 0x80 bit is set in C<$^P>, a call to C<&DB::goto>
-is made, with C<$DB::sub> holding the name of the subroutine being
-entered.
+When execution of the program uses C<goto> to enter a non-XS subroutine
+and the 0x80 bit is set in C<$^P>, a call to C<&DB::goto> is made, with
+C<$DB::sub> set to identify the subroutine being entered.  The call to
+C<&DB::goto> does not replace the C<goto>; the requested subroutine will
+still be entered once C<&DB::goto> has returned.  C<$DB::sub> normally
+holds the name of the subroutine being entered, if it has one.  Failing
+that, C<$DB::sub> will hold a reference to the subroutine being entered.
+Unlike when C<&DB::sub> is called, it is not guaranteed that C<$DB::sub>
+can be used as a reference to operate on the subroutine being entered.
 
 =back
 
