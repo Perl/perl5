@@ -3076,13 +3076,13 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category, const int 
 
     /* Find the original locale of the category we may need to change, so that
      * it can be restored to later */
-    restore_to_locale = do_setlocale_r(switch_category, NULL);
+    restore_to_locale = stdize_locale(savepv(do_setlocale_r(switch_category,
+                                                            NULL)));
     if (! restore_to_locale) {
         Perl_croak(aTHX_
              "panic: %s: %d: Could not find current %s locale, errno=%d\n",
                 __FILE__, __LINE__, category_name(switch_category), errno);
     }
-    restore_to_locale = stdize_locale(savepv(restore_to_locale));
 
     /* If the locale of the template category wasn't passed in, find it now */
     if (template_locale == NULL) {
@@ -3179,14 +3179,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #  endif
 
     /* Get the desired category's locale */
-    save_input_locale = do_setlocale_r(category, NULL);
+    save_input_locale = stdize_locale(savepv(do_setlocale_r(category, NULL)));
     if (! save_input_locale) {
         Perl_croak(aTHX_
              "panic: %s: %d: Could not find current %s locale, errno=%d\n",
                      __FILE__, __LINE__, category_name(category), errno);
     }
 
-    save_input_locale = stdize_locale(savepv(save_input_locale));
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "Current locale for %s is %s\n",
                           category_name(category), save_input_locale));
