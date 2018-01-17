@@ -256,10 +256,8 @@ CODE:
 void
 die_sv(sv)
     SV *sv
-PREINIT:
-    OP *op;
 CODE:
-    op = die_sv(sv);
+    (void)die_sv(sv);
 
 void
 warn_sv(sv)
