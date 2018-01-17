@@ -1450,8 +1450,6 @@ S_my_nl_langinfo(const int item, bool toggle)
      * switching back, as some systems destroy the buffer when setlocale() is
      * called */
 
-    LOCALE_LOCK;
-
     {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
@@ -1459,15 +1457,19 @@ S_my_nl_langinfo(const int item, bool toggle)
             STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
         }
 
+        LOCALE_LOCK;    /* Prevent interference from another thread executing
+                           this code section (the only call to nl_langinfo in
+                           the core) */
+
         save_to_buffer(nl_langinfo(item), &PL_langinfo_buf,
                                           &PL_langinfo_bufsize, 0);
+
+        LOCALE_UNLOCK;
 
         if (toggle) {
             RESTORE_LC_NUMERIC();
         }
     }
-
-    LOCALE_UNLOCK;
 
 #  else /* Use nl_langinfo_l(), avoiding both a mutex and changing the locale */
 
@@ -1552,10 +1554,11 @@ S_my_nl_langinfo(const int item, bool toggle)
 
             case PERL_CRNCYSTR:
 
-                LOCALE_LOCK;
-
                 /* We don't bother with localeconv_l() because any system that
                  * has it is likely to also have nl_langinfo() */
+
+                LOCALE_LOCK;    /* Prevent interference with other threads
+                                   using localeconv() */
 
                 lc = localeconv();
                 if (   ! lc
@@ -1588,11 +1591,12 @@ S_my_nl_langinfo(const int item, bool toggle)
             case PERL_RADIXCHAR:
             case PERL_THOUSEP:
 
-                LOCALE_LOCK;
-
                 if (toggle) {
                     STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
                 }
+
+                LOCALE_LOCK;    /* Prevent interference with other threads
+                                   using localeconv() */
 
                 lc = localeconv();
                 if (! lc) {
@@ -1610,11 +1614,11 @@ S_my_nl_langinfo(const int item, bool toggle)
                 save_to_buffer(retval, &PL_langinfo_buf,
                                &PL_langinfo_bufsize, 0);
 
+                LOCALE_UNLOCK;
+
                 if (toggle) {
                     RESTORE_LC_NUMERIC();
                 }
-
-                LOCALE_UNLOCK;
 
                 break;
 
