@@ -1613,6 +1613,9 @@ interpreter, as would normally be passed to the C<main> function of
 a C program.  C<argv[argc]> must be null.  These arguments are where
 the script to parse is specified, either by naming a script file or by
 providing a script in a C<-e> option.
+If L<C<$0>|perlvar/$0> will be written to in the Perl interpreter, then
+the argument strings must be in writable memory, and so mustn't just be
+string constants.
 
 C<env> specifies a set of environment variables that will be used by
 this Perl interpreter.  If non-null, it must point to a null-terminated
