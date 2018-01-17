@@ -6,6 +6,11 @@ use Errno qw(ENOENT);
 use File::Temp qw(tempdir);
 use Test::More;
 
+if($^O eq "cygwin") {
+    # This test skipping should be removed when the Cygwin bug is fixed.
+    plan skip_all => "getcwd() fails to fail on Cygwin [perl #132733]";
+}
+
 my $tmp = tempdir(CLEANUP => 1);
 unless(mkdir("$tmp/testdir") && chdir("$tmp/testdir") && rmdir("$tmp/testdir")){
     plan skip_all => "can't be in non-existent directory";
