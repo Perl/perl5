@@ -3571,6 +3571,12 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
                     || (   is_utf8_non_invariant_string((U8*) buf, len)
 #ifdef USE_LOCALE_TIME
                         && _is_cur_LC_category_utf8(LC_TIME)
+#else   /* If can't check directly, at least can see if script is consistent,
+           under UTF-8, which gives us an extra measure of confidence. */
+
+                        && isSCRIPT_RUN((const U8 *) buf, buf + len,
+                                        TRUE, /* Means assume UTF-8 */
+                                        NULL)
 #endif
                 )) {
 		    SvUTF8_on(sv);
