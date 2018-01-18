@@ -15,20 +15,25 @@ X<subroutine, declaration> X<sub>
 
     sub NAME BLOCK		  # A declaration and a definition.
     sub NAME(PROTO) BLOCK	  #  ditto, but with prototypes
-    sub NAME(SIG) BLOCK           #  with a signature instead
     sub NAME : ATTRS BLOCK	  #  with attributes
     sub NAME(PROTO) : ATTRS BLOCK #  with prototypes and attributes
-    sub NAME(SIG) : ATTRS BLOCK   #  with a signature and attributes
+
+    use feature 'signatures';
+    sub NAME(SIG) BLOCK                    # with signature
+    sub NAME :ATTRS (SIG) BLOCK            # with signature, attributes
+    sub NAME :prototype(PROTO) (SIG) BLOCK # with signature, prototype
 
 To define an anonymous subroutine at runtime:
 X<subroutine, anonymous>
 
     $subref = sub BLOCK;		 # no proto
     $subref = sub (PROTO) BLOCK;	 # with proto
-    $subref = sub (SIG) BLOCK;           # with signature
     $subref = sub : ATTRS BLOCK;	 # with attributes
     $subref = sub (PROTO) : ATTRS BLOCK; # with proto and attributes
-    $subref = sub (SIG) : ATTRS BLOCK;   # with signature and attributes
+
+    use feature 'signatures';
+    $subref = sub (SIG) BLOCK;           # with signature
+    $subref = sub : ATTRS(SIG) BLOCK;    # with signature, attributes
 
 To import subroutines:
 X<import>
@@ -317,10 +322,15 @@ a warning unless the "experimental::signatures" warnings category is
 disabled.
 
 The signature is part of a subroutine's body.  Normally the body of a
-subroutine is simply a braced block of code.  When using a signature,
-the signature is a parenthesised list that goes immediately after
-the subroutine name (or, for anonymous subroutines, immediately after
-the C<sub> keyword).  The signature declares lexical variables that are
+subroutine is simply a braced block of code, but when using a signature,
+the signature is a parenthesised list that goes immediately before the
+block, after any name or attributes.
+
+For example,
+
+    sub foo :lvalue ($a, $b = 1, @c) { .... }
+
+The signature declares lexical variables that are
 in scope for the block.  When the subroutine is called, the signature
 takes control first.  It populates the signature variables from the
 list of arguments that were passed.  If the argument list doesn't meet
@@ -490,12 +500,13 @@ a signature.  They do different jobs: the prototype affects compilation
 of calls to the subroutine, and the signature puts argument values into
 lexical variables at runtime.  You can therefore write
 
-    sub foo ($left, $right) : prototype($$) {
+    sub foo :prototype($$) ($left, $right) {
 	return $left + $right;
     }
 
-The prototype attribute, and any other attributes, come after 
-the signature.
+The prototype attribute, and any other attributes, must come before
+the signature.  The signature always immediately precedes the block of
+the subroutine's body.
 
 =head2 Private Variables via my()
 X<my> X<variable, lexical> X<lexical> X<lexical variable> X<scope, lexical>

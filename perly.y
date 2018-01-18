@@ -74,7 +74,7 @@
 %type <opval> formname subname proto optsubbody cont my_scalar my_var
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
-%type <opval> termbinop termunop anonymous termdo
+%type <opval> realsubbody termbinop termunop anonymous termdo
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
 %type <opval> sigelem siglist siglistornull subsignature 
@@ -301,45 +301,6 @@ barestmt:	PLUGSTMT
 			  $2->op_type == OP_CONST
 			      ? newATTRSUB($3, $2, $5, $6, $7)
 			      : newMYSUB($3, $2, $5, $6, $7)
-			  ;
-			  $$ = NULL;
-			  intro_my();
-			  parser->parsed_sub = 1;
-			}
-	|	SUB subname startsub
-			{
-			  if ($2->op_type == OP_CONST) {
-			    const char *const name =
-				SvPV_nolen_const(((SVOP*)$2)->op_sv);
-			    if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
-			      || strEQ(name, "UNITCHECK"))
-			      CvSPECIAL_on(PL_compcv);
-			  }
-			  else
-			  /* State subs inside anonymous subs need to be
-			     clonable themselves. */
-			  if (CvANON(CvOUTSIDE(PL_compcv))
-			   || CvCLONE(CvOUTSIDE(PL_compcv))
-			   || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST(
-						CvOUTSIDE(PL_compcv)
-					     ))[$2->op_targ]))
-			      CvCLONE_on(PL_compcv);
-			  parser->in_my = 0;
-			  parser->in_my_stash = NULL;
-			}
-		remember subsignature subattrlist '{' stmtseq '}'
-			{
-			  OP *body;
-			  if (parser->copline > (line_t)$8)
-			      parser->copline = (line_t)$8;
-			  body = block_end($5,
-				op_append_list(OP_LINESEQ, $6, $9));
-
-			  SvREFCNT_inc_simple_void(PL_compcv);
-			  $2->op_type == OP_CONST
-			      ? newATTRSUB($3, $2, NULL, $7, body)
-			      : newMYSUB($3, $2, NULL, $7, body)
 			  ;
 			  $$ = NULL;
 			  intro_my();
@@ -781,7 +742,8 @@ siglistornull:		/* NULL */
 			{ $$ = $1; }
 
 /* Subroutine signature */
-subsignature:	'('
+subsignature:	/* NULL */ { $$ = (OP*)NULL; }
+	|	'('
                         {
                             ENTER;
                             SAVEIV(parser->sig_elems);
@@ -799,9 +761,9 @@ subsignature:	'('
                             UNOP_AUX_item *aux;
                             OP            *check;
 
-                            if (!parser->error_count) {
-                                assert(FEATURE_SIGNATURES_IS_ENABLED);
-                            }
+			    if (!FEATURE_SIGNATURES_IS_ENABLED)
+			        Perl_croak(aTHX_ "Experimental "
+                                    "subroutine signatures not enabled");
 
                             /* We shouldn't get here otherwise */
                             Perl_ck_warner_d(aTHX_
@@ -825,15 +787,25 @@ subsignature:	'('
                                                 newSTATEOP(0, NULL, NULL));
 
                             parser->in_my = 0;
-                            parser->expect = XATTRBLOCK;
+                            parser->expect = XBLOCK;
                             LEAVE;
 			}
 	;
 
 
+/* Subroutine body - block with optional signature */
+realsubbody:	remember subsignature '{' stmtseq '}'
+			{
+			  if (parser->copline > (line_t)$3)
+			      parser->copline = (line_t)$3;
+			  $$ = block_end($1,
+				op_append_list(OP_LINESEQ, $2, $4));
+ 			}
+ 	;
+
 
 /* Optional subroutine body, for named subroutine declaration */
-optsubbody:	block
+optsubbody:	realsubbody { $$ = $1; }
 	|	';'	{ $$ = NULL; }
 	;
 
@@ -1052,20 +1024,9 @@ anonymous:	'[' expr ']'
 			{ $$ = newANONHASH($2); }
 	|	HASHBRACK ';' '}'	%prec '(' /* { } (';' by tokener) */
 			{ $$ = newANONHASH(NULL); }
-	|	ANONSUB startanonsub proto subattrlist block		%prec '('
+	|	ANONSUB startanonsub proto subattrlist realsubbody	%prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, $3, $4, $5); }
-	|	ANONSUB startanonsub remember subsignature subattrlist '{' stmtseq '}'	%prec '('
-			{
-			  OP *body;
-			  if (parser->copline > (line_t)$6)
-			      parser->copline = (line_t)$6;
-			  body = block_end($3,
-				op_append_list(OP_LINESEQ, $4, $7));
-			  SvREFCNT_inc_simple_void(PL_compcv);
-			  $$ = newANONATTRSUB($2, NULL, $5, body);
-			}
-
     ;
 
 /* Things called with "do" */

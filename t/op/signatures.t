@@ -20,6 +20,16 @@ our $z;
     is $a, 123;
 }
 
+eval "#line 8 foo\nsub t004 :method (\$a) { }";
+is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
+    "error when not enabled";
+
+eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
+is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
+    "error when not enabled";
+
+
+
 no warnings "experimental::signatures";
 use feature "signatures";
 
@@ -1136,7 +1146,7 @@ is eval("\$t103->(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine 'main::__ANON__' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-my $t118 = sub ($a) :prototype($) { $a || "z" };
+my $t118 = sub :prototype($) ($a) { $a || "z" };
 is prototype($t118), "\$";
 is eval("\$t118->()"), undef;
 like $@, qr/\AToo few arguments for subroutine 'main::__ANON__' at \(eval \d+\) line 1\.\n\z/;
@@ -1202,7 +1212,7 @@ is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
 like $@, qr/\AToo many arguments for subroutine 'main::t132' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-sub t104($a) :method { $a || "z" }
+sub t104 :method ($a) { $a || "z" }
 is prototype(\&t104), undef;
 is eval("t104()"), undef;
 like $@, qr/\AToo few arguments for subroutine 'main::t104' at \(eval \d+\) line 1\.\n\z/;
@@ -1214,7 +1224,7 @@ is eval("t104(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine 'main::t104' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-sub t105($a) :prototype($) { $a || "z" }
+sub t105 :prototype($) ($a) { $a || "z" }
 is prototype(\&t105), "\$";
 is eval("t105()"), undef;
 like $@, qr/\ANot enough arguments for main::t105 /;
@@ -1226,7 +1236,7 @@ is eval("t105(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is $a, 123;
 
-sub t106($a) :prototype(@) { $a || "z" }
+sub t106 :prototype(@) ($a) { $a || "z" }
 is prototype(\&t106), "\@";
 is eval("t106()"), undef;
 like $@, qr/\AToo few arguments for subroutine 'main::t106' at \(eval \d+\) line 1\.\n\z/;
@@ -1238,10 +1248,10 @@ is eval("t106(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine 'main::t106' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-eval "#line 8 foo\nsub t107 :method (\$a) { }";
+eval "#line 8 foo\nsub t107(\$a) :method { }";
 isnt $@, "";
 
-eval "#line 8 foo\nsub t108 :prototype(\$) (\$a) { }";
+eval "#line 8 foo\nsub t108 (\$a) :prototype(\$) { }";
 isnt $@, "";
 
 sub t109 { }
@@ -1513,6 +1523,21 @@ while(<$kh>) {
         isnt $@, "", "$word does not swallow trailing comma";
     }
 }
+
+# RT #132141
+# Attributes such as lvalue have to come *before* the signature to
+# ensure that they're applied to any code block within the signature
+
+{
+    my $x;
+    sub f :lvalue ($a = do { $x = "abc"; return substr($x,0,1)}) {
+        die; # notreached
+    }
+
+    f() = "X";
+    is $x, "Xbc", "RT #132141";
+}
+
 
 done_testing;
 
