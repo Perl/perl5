@@ -10460,13 +10460,20 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
             break;
         }
 
+        /* For the first character, or the run is inherited, the run's script
+         * is set to the char's */
+        if (   UNLIKELY(script_of_run == SCX_INVALID)
+            || UNLIKELY(script_of_run == SCX_Inherited))
+        {
+            script_of_run = script_of_char;
+        }
+
         /* For the character's script to be Unknown, it must be the first
          * character in the sequence (for otherwise a test above would have
          * prevented us from reaching here), and we have set the run's script
          * to it.  Nothing further to be done for this character */
         if (UNLIKELY(script_of_char == SCX_Unknown)) {
-                script_of_run = SCX_Unknown;
-                continue;
+            continue;
         }
 
         /* We accept 'inherited' script characters currently even at the
@@ -10474,11 +10481,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
          * we'd have to check for that) */
         if (UNLIKELY(script_of_char == SCX_Inherited)) {
             continue;
-        }
-
-        /* If unknown, the run's script is set to the char's */
-        if (UNLIKELY(script_of_run == SCX_INVALID)) {
-            script_of_run = script_of_char;
         }
 
         /* If the run so far is Common, and the new character isn't, change the

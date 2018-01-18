@@ -67,6 +67,8 @@ unlike("\N{U+03A2}0", $script_run, "... nor with a digit following");
 like("A\N{COMBINING GRAVE ACCENT}", $script_run, "An inherited script matches others");
 like("\N{COMBINING GRAVE ACCENT}A", $script_run, "... even if first in the sequence");
 
+like("\N{COMBINING TILDE}\N{COMBINING GRAVE ACCENT}", $script_run, "A script containing only inherited characters matches");
+
 like("\N{DEVANAGARI DOUBLE DANDA}\N{DEVANAGARI DANDA}\N{DEVANAGARI STRESS SIGN UDATTA}\N{DEVANAGARI STRESS SIGN ANUDATTA}\N{NORTH INDIC FRACTION ONE QUARTER}\N{NORTH INDIC QUANTITY MARK}", $script_run, "A bunch of narrowing down of multiple possible scripts");
 
 unlike("\N{JAVANESE PANGRANGKEP}\N{GEORGIAN PARAGRAPH SEPARATOR}", $script_run, "Two code points each in multiple scripts that don't intersect aren't a script run");
