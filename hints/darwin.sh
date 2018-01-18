@@ -524,3 +524,7 @@ case "$osvers" in
 	d_fchmodat=undef
 	;;
 esac
+
+# mkostemp() was autodetected as present but found to not be linkable
+# on 15.6.0.  Unknown what other OS versions are affected.
+d_mkostemp=undef
