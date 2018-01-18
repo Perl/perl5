@@ -62,6 +62,7 @@ like("\N{U+03A2}", $script_run, "A single unassigned code point is a script run"
 unlike("\N{U+03A2}\N{U+03A2}", $script_run, "But not more than one");
 unlike("A\N{U+03A2}", $script_run, "... and not in combination with an assigned one");
 unlike("\N{U+03A2}A", $script_run, "... in either order");
+unlike("\N{U+03A2}0", $script_run, "... nor with a digit following");
 
 like("A\N{COMBINING GRAVE ACCENT}", $script_run, "An inherited script matches others");
 like("\N{COMBINING GRAVE ACCENT}A", $script_run, "... even if first in the sequence");

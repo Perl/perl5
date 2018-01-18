@@ -10394,6 +10394,10 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
          * another set has already been encountered.  (The other digit ranges
          * in Common are not similarly blessed) */
         if (UNLIKELY(isDIGIT(*s))) {
+            if (UNLIKELY(script_of_run == SCX_Unknown)) {
+                retval = FALSE;
+                break;
+            }
             if (zero_of_run > 0) {
                 if (zero_of_run != '0') {
                     retval = FALSE;
