@@ -10364,6 +10364,26 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
 
     PERL_ARGS_ASSERT_ISSCRIPT_RUN;
 
+    /* All code points in 0..255 are either Common or Latin, so must be a
+     * script run.  We can special case it */
+    if (! utf8_target && LIKELY(send > s)) {
+        if (ret_script == NULL) {
+            return TRUE;
+        }
+
+        /* If any character is Latin, the run is Latin */
+        while (s < send) {
+            if (isALPHA_L1(*s) && LIKELY(*s != MICRO_SIGN_NATIVE)) {
+                *ret_script = SCX_Latin;
+                return TRUE;
+            }
+        }
+
+        /* If all are Common ... */
+        *ret_script = SCX_Common;
+        return TRUE;
+    }
+
     /* Look at each character in the sequence */
     while (s < send) {
         UV cp;
@@ -10388,7 +10408,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
         }
 
         /* Here, isn't an ASCII digit.  Find the code point of the character */
-        if (utf8_target && ! UTF8_IS_INVARIANT(*s)) {
+        if (! UTF8_IS_INVARIANT(*s)) {
             Size_t len;
             cp = valid_utf8_to_uvchr((U8 *) s, &len);
             s += len;
