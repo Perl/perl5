@@ -388,21 +388,21 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 #if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_LOCALECONV)              \
                                     || defined(HAS_NL_LANGINFO))
 
-        const char * radix = (use_locale)
-                             ? my_nl_langinfo(PERL_RADIXCHAR, FALSE)
-                                          /* FALSE => already in dest locale */
-                             : ".";
+    const char * radix = (use_locale)
+                         ? my_nl_langinfo(PERL_RADIXCHAR, FALSE)
+                                        /* FALSE => already in dest locale */
+                         : ".";
 
-                sv_setpv(PL_numeric_radix_sv, radix);
+        sv_setpv(PL_numeric_radix_sv, radix);
 
-            /* If this is valid UTF-8 that isn't totally ASCII, and we are in
-             * a UTF-8 locale, then mark the radix as being in UTF-8 */
-            if (is_utf8_non_invariant_string((U8 *) SvPVX(PL_numeric_radix_sv),
+    /* If this is valid UTF-8 that isn't totally ASCII, and we are in
+        * a UTF-8 locale, then mark the radix as being in UTF-8 */
+    if (is_utf8_non_invariant_string((U8 *) SvPVX(PL_numeric_radix_sv),
                                             SvCUR(PL_numeric_radix_sv))
-                && _is_cur_LC_category_utf8(LC_NUMERIC))
-            {
-                SvUTF8_on(PL_numeric_radix_sv);
-            }
+        && _is_cur_LC_category_utf8(LC_NUMERIC))
+    {
+        SvUTF8_on(PL_numeric_radix_sv);
+    }
 
 #  ifdef DEBUGGING
 
