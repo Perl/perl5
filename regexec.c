@@ -10460,6 +10460,10 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
             break;
         }
 
+        /* For the character's script to be Unknown, it must be the first
+         * character in the sequence (for otherwise a test above would have
+         * prevented us from reaching here), and we have set the run's script
+         * to it.  Nothing further to be done for this character */
         if (UNLIKELY(script_of_char == SCX_Unknown)) {
                 script_of_run = SCX_Unknown;
                 continue;
