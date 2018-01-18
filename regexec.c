@@ -10304,15 +10304,55 @@ Perl__is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, cons
     return isGCB(cp_gcb_val, next_cp_gcb_val, strbeg, s, TRUE);
 }
 
+/*
+=head1 Unicode Support
+
+=for apidoc isSCRIPT_RUN
+
+Returns a bool as to whether or not the sequence of bytes from C<s> up to but
+not including C<send> form a "script run".  C<utf8_target> is TRUE iff the
+sequence starting at C<s> is to be treated as UTF-8.  To be precise, except for
+two degenerate cases given below, this function returns TRUE iff all code
+points in it come from any combination of three "scripts" given by the Unicode
+"Script Extensions" property: Common, Inherited, and possibly one other.
+Additionally all decimal digits must come from the same consecutive sequence of
+10.
+
+For example, if all the characters in the sequence are Greek, or Common, or
+Inherited, this function will return TRUE, provided any decimal digits in it
+are the ASCII digits "0".."9".  For scripts (unlike Greek) that have their own
+digits defined this will accept either digits from that set or from 0..9, but
+not a combination of the two.  Some scripts, such as Arabic, have more than one
+set of digits.  All digits must come from the same set for this function to
+return TRUE.
+
+C<*ret_script>, if C<ret_script> is not NULL, will on return of TRUE
+contain the script found, using the C<SCX_enum> typedef.  Its value will be
+C<SCX_INVALID> if the function returns FALSE.
+
+If the sequence is empty, TRUE is returned, but C<*ret_script> (if asked for)
+will be C<SCX_INVALID>.
+
+If the sequence contains a single code point which is unassigned to a character
+in the version of Unicode being used, the function will return TRUE, and the
+script will be C<SCX_Unknown>.  Any other combination of unassigned code points
+in the input sequence will result in the function treating the input as not
+being a script run.
+
+The returned script will be C<SCX_Inherited> iff all the code points in it are
+from the Inherited script.
+
+Otherwise, the returned script will be C<SCX_Common> iff all the code points in
+it are from the Inherited or Common scripts.
+
+=cut
+
+*/
+
 bool
 Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, SCX_enum * ret_script)
 {
-    /* Checks that every character in the sequence from 's' to 'send' is one of
-     * three scripts: Common, Inherited, and possibly one other.  Additionally
-     * all decimal digits must come from the same consecutive sequence of 10.
-     * 'utf8_target' is TRUE iff the sequence is encoded in UTF-8.
-     *
-     * Basically, it looks at each character in the sequence to see if the
+    /* Basically, it looks at each character in the sequence to see if the
      * above conditions are met; if not it fails.  It uses an inversion map to
      * find the enum corresponding to the script of each character.  But this
      * is complicated by the fact that a few code points can be in any of
