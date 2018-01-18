@@ -518,8 +518,9 @@ Scan and skip for a numeric decimal separator (radix).
 bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 {
-#ifdef USE_LOCALE_NUMERIC
     PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
+
+#ifdef USE_LOCALE_NUMERIC
 
     if (IN_LC(LC_NUMERIC)) {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
@@ -538,8 +539,6 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
     /* always try "." if numeric radix didn't match because
      * we may have data from different locales mixed */
 #endif
-
-    PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
 
     if (*sp < send && **sp == '.') {
         ++*sp;
