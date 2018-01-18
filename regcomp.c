@@ -19364,7 +19364,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if ( k == REF && reginfo) {
             U32 n = ARG(o);  /* which paren pair */
             I32 ln = prog->offs[n].start;
-            if (prog->lastparen < n || ln == -1)
+            if (prog->lastparen < n || ln == -1 || prog->offs[n].end == -1)
                 Perl_sv_catpvf(aTHX_ sv, ": FAIL");
             else if (ln == prog->offs[n].end)
                 Perl_sv_catpvf(aTHX_ sv, ": ACCEPT - EMPTY STRING");
