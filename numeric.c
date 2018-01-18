@@ -1242,13 +1242,17 @@ Perl_my_atof(pTHX_ const char* s)
             const bool use_standard_radix
                     = standard_pos && (!local_pos || standard_pos < local_pos);
 
-            if (use_standard_radix)
+            if (use_standard_radix) {
                 SET_NUMERIC_STANDARD();
+                LOCK_LC_NUMERIC_STANDARD();
+            }
 
             Perl_atof2(s, x);
 
-            if (use_standard_radix)
+            if (use_standard_radix) {
+                UNLOCK_LC_NUMERIC_STANDARD();
                 SET_NUMERIC_UNDERLYING();
+            }
         }
         else
             Perl_atof2(s, x);
