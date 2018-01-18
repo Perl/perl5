@@ -10372,7 +10372,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          * because they are used in commerce even in scripts that have their
          * own set.  Hence any ASCII ones found are ok, unless a digit from
          * another set has already been encountered.  (The other digit ranges
-         * in Common are not similarly blessed */
+         * in Common are not similarly blessed) */
         if (UNLIKELY(isDIGIT(*s))) {
             if (zero_of_run > 0) {
                 if (zero_of_run != '0') {
