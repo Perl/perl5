@@ -394,7 +394,6 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
                                           /* FALSE => already in dest locale */
         /* ... and the character being used isn't a dot */
         if (strNE(radix, ".")) {
-            const U8 * first_variant;
 
             if (PL_numeric_radix_sv) {
                 sv_setpv(PL_numeric_radix_sv, radix);
@@ -403,17 +402,10 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
                 PL_numeric_radix_sv = newSVpv(radix, 0);
             }
 
-            /* If there is a byte variant under UTF-8, and if the remainder of
-             * the string starting there is valid UTF-8, and we are in a UTF-8
-             * locale, then mark the radix as being in UTF-8 */
-            if ( !  is_utf8_invariant_string_loc(
-                                            (U8 *) SvPVX(PL_numeric_radix_sv),
-                                            SvCUR(PL_numeric_radix_sv),
-                                            &first_variant)
-                &&  is_utf8_string(first_variant,
-                                   SvCUR(PL_numeric_radix_sv)
-                                 - ((char *) first_variant
-                                 - SvPVX(PL_numeric_radix_sv)))
+            /* If this is valid UTF-8 that isn't totally ASCII, and we are in
+             * a UTF-8 locale, then mark the radix as being in UTF-8 */
+            if (is_utf8_non_invariant_string((U8 *) SvPVX(PL_numeric_radix_sv),
+                                            SvCUR(PL_numeric_radix_sv))
                 && _is_cur_LC_category_utf8(LC_NUMERIC))
             {
                 SvUTF8_on(PL_numeric_radix_sv);
