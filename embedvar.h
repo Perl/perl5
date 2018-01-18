@@ -338,6 +338,7 @@
 #define PL_tmps_stack		(vTHX->Itmps_stack)
 #define PL_top_env		(vTHX->Itop_env)
 #define PL_toptarget		(vTHX->Itoptarget)
+#define PL_underlying_numeric_obj	(vTHX->Iunderlying_numeric_obj)
 #define PL_unicode		(vTHX->Iunicode)
 #define PL_unitcheckav		(vTHX->Iunitcheckav)
 #define PL_unitcheckav_save	(vTHX->Iunitcheckav_save)

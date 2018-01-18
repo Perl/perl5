@@ -620,6 +620,11 @@ PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
 PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
+#  if defined(HAS_NEWLOCALE) && ! defined(NO_POSIX_2008_LOCALE)
+
+PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
+
+#  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
 /* Unicode inversion lists */

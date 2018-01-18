@@ -498,6 +498,14 @@ Perl_new_numeric(pTHX_ const char *newnum)
 
     PL_numeric_underlying_is_standard = PL_numeric_standard;
 
+#  if defined(HAS_NEWLOCALE) && ! defined(NO_POSIX_2008_LOCALE)
+
+    PL_underlying_numeric_obj = newlocale(LC_NUMERIC_MASK,
+                                          PL_numeric_name,
+                                          PL_underlying_numeric_obj);
+
+#endif
+
     if (DEBUG_L_TEST || debug_initialization) {
         PerlIO_printf(Perl_debug_log, "Called new_numeric with %s, PL_numeric_name=%s\n", newnum, PL_numeric_name);
     }
@@ -1456,8 +1464,13 @@ S_my_nl_langinfo(const int item, bool toggle)
         }
 
         if (toggle) {
-            cur = newlocale(LC_NUMERIC_MASK, PL_numeric_name, cur);
-            do_free = TRUE;
+            if (PL_underlying_numeric_obj) {
+                cur = PL_underlying_numeric_obj;
+            }
+            else {
+                cur = newlocale(LC_NUMERIC_MASK, PL_numeric_name, cur);
+                do_free = TRUE;
+            }
         }
 
         save_to_buffer(nl_langinfo_l(item, cur),

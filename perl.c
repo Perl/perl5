@@ -1159,6 +1159,19 @@ perl_destruct(pTHXx)
         PL_langinfo_buf = NULL;
     }
 
+#ifdef USE_POSIX_2008_LOCALE
+#  ifdef USE_LOCALE_NUMERIC
+
+    if (PL_underlying_numeric_obj) {
+        /* Make sure we aren't using the locale space we are about to free */
+        uselocale(LC_GLOBAL_LOCALE);
+        freelocale(PL_underlying_numeric_obj);
+        PL_underlying_numeric_obj = (locale_t) NULL;
+    }
+
+#  endif
+#endif
+
     /* clear character classes  */
     for (i = 0; i < POSIX_SWASH_COUNT; i++) {
         SvREFCNT_dec(PL_utf8_swash_ptrs[i]);
