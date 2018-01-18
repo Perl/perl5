@@ -388,19 +388,12 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 #if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_LOCALECONV)              \
                                     || defined(HAS_NL_LANGINFO))
 
-    /* We only set up the radix SV if we are to use a locale radix ... */
-    if (use_locale) {
-        const char * radix = my_nl_langinfo(PERL_RADIXCHAR, FALSE);
+        const char * radix = (use_locale)
+                             ? my_nl_langinfo(PERL_RADIXCHAR, FALSE)
                                           /* FALSE => already in dest locale */
-        /* ... and the character being used isn't a dot */
-        if (strNE(radix, ".")) {
+                             : ".";
 
-            if (PL_numeric_radix_sv) {
                 sv_setpv(PL_numeric_radix_sv, radix);
-            }
-            else {
-                PL_numeric_radix_sv = newSVpv(radix, 0);
-            }
 
             /* If this is valid UTF-8 that isn't totally ASCII, and we are in
              * a UTF-8 locale, then mark the radix as being in UTF-8 */
@@ -410,25 +403,13 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
             {
                 SvUTF8_on(PL_numeric_radix_sv);
             }
-            goto done;
-        }
-    }
-
-    SvREFCNT_dec(PL_numeric_radix_sv);
-    PL_numeric_radix_sv = NULL;
-
-  done: ;
 
 #  ifdef DEBUGGING
 
     if (DEBUG_L_TEST || debug_initialization) {
         PerlIO_printf(Perl_debug_log, "Locale radix is '%s', ?UTF-8=%d\n",
-                                          (PL_numeric_radix_sv)
-                                           ? SvPVX(PL_numeric_radix_sv)
-                                           : "NULL",
-                                          (PL_numeric_radix_sv)
-                                           ? cBOOL(SvUTF8(PL_numeric_radix_sv))
-                                           : 0);
+                                           SvPVX(PL_numeric_radix_sv),
+                                           cBOOL(SvUTF8(PL_numeric_radix_sv)));
     }
 
 #  endif
@@ -2045,6 +2026,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * locales C and POSIX */
     my_strlcpy(PL_locale_utf8ness, C_and_POSIX_utf8ness,
                sizeof(PL_locale_utf8ness));
+
+    PL_numeric_radix_sv = newSVpvs(".");
 
 #  ifdef LOCALE_ENVIRON_REQUIRED
 

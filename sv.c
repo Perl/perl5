@@ -11713,7 +11713,7 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 #ifndef USE_LOCALE_NUMERIC
             *p++ = '.';
 #else
-            if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+            if (IN_LC(LC_NUMERIC)) {
                 STRLEN n;
                 const char* r = SvPV(PL_numeric_radix_sv, n);
                 Copy(r, p, n, char);
@@ -12905,7 +12905,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 lc_numeric_set = TRUE;
             }
 
-            if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+            if (IN_LC(LC_NUMERIC)) {
                 /* this can't wrap unless PL_numeric_radix_sv is a string
                  * consuming virtually all the 32-bit or 64-bit address
                  * space
