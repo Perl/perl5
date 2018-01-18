@@ -35,7 +35,9 @@ PERL_CALLCONV UV	NATIVE_TO_NEED(const UV enc, const UV ch)
 #endif
 
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
-PERL_CALLCONV int	Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd);
+PERL_CALLCONV int	Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV int	Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
 			__attribute__warn_unused_result__;
 
@@ -2942,8 +2944,6 @@ PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_SETDEFOUT	\
 	assert(gv)
 PERL_CALLCONV void	Perl_setfd_cloexec(int fd);
-PERL_CALLCONV void	Perl_setfd_cloexec_for_nonsysfd(pTHX_ int fd);
-PERL_CALLCONV void	Perl_setfd_cloexec_or_inhexec_by_sysfdness(pTHX_ int fd);
 PERL_CALLCONV void	Perl_setfd_inhexec(int fd);
 PERL_CALLCONV void	Perl_setfd_inhexec_for_sysfd(pTHX_ int fd);
 PERL_CALLCONV char*	Perl_setlocale(int category, const char* locale);

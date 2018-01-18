@@ -1391,8 +1391,6 @@
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define set_numeric_underlying()	Perl_set_numeric_underlying(aTHX)
 #define setfd_cloexec		Perl_setfd_cloexec
-#define setfd_cloexec_for_nonsysfd(a)	Perl_setfd_cloexec_for_nonsysfd(aTHX_ a)
-#define setfd_cloexec_or_inhexec_by_sysfdness(a)	Perl_setfd_cloexec_or_inhexec_by_sysfdness(aTHX_ a)
 #define setfd_inhexec		Perl_setfd_inhexec
 #define setfd_inhexec_for_sysfd(a)	Perl_setfd_inhexec_for_sysfd(aTHX_ a)
 #define sub_crush_depth(a)	Perl_sub_crush_depth(aTHX_ a)

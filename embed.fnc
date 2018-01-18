@@ -466,11 +466,9 @@ Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|NN SV *svs|I32 num
 pn	|void	|setfd_cloexec|int fd
 pn	|void	|setfd_inhexec|int fd
-p	|void	|setfd_cloexec_for_nonsysfd|int fd
 p	|void	|setfd_inhexec_for_sysfd|int fd
-p	|void	|setfd_cloexec_or_inhexec_by_sysfdness|int fd
 pR	|int	|PerlLIO_dup_cloexec|int oldfd
-p	|int	|PerlLIO_dup2_cloexec|int oldfd|int newfd
+pR	|int	|PerlLIO_dup2_cloexec|int oldfd|int newfd
 pR	|int	|PerlLIO_open_cloexec|NN const char *file|int flag
 pR	|int	|PerlLIO_open3_cloexec|NN const char *file|int flag|int perm
 pnoR	|int	|my_mkstemp_cloexec|NN char *templte

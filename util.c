@@ -2238,7 +2238,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
-    if (PerlProc_pipe_cloexec(p) < 0)
+    if (PerlProc_pipe(p) < 0)
 	return NULL;
     /* Try for another pipe pair for error return */
     if (PerlProc_pipe_cloexec(pp) >= 0)
@@ -2298,7 +2298,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	PerlLIO_close(pp[1]);
     /* Keep the lower of the two fd numbers */
     if (p[that] < p[This]) {
-	PerlLIO_dup2_cloexec(p[This], p[that]);
+	PerlLIO_dup2(p[This], p[that]);
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
@@ -2378,7 +2378,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
-    if (PerlProc_pipe_cloexec(p) < 0)
+    if (PerlProc_pipe(p) < 0)
 	return NULL;
     if (doexec && PerlProc_pipe_cloexec(pp) >= 0)
 	did_pipes = 1;
@@ -2450,7 +2450,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     if (did_pipes)
 	PerlLIO_close(pp[1]);
     if (p[that] < p[This]) {
-	PerlLIO_dup2_cloexec(p[This], p[that]);
+	PerlLIO_dup2(p[This], p[that]);
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
