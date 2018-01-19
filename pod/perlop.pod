@@ -2489,22 +2489,36 @@ Options:
 	untouched.
 
 If the C</c> modifier is specified, the I<SEARCHLIST> character set
-is complemented.  If the C</d> modifier is specified, any characters
+is complemented. So for example these two are equivalent (the exact
+maximum number will depend on your platform):
+
+    tr/\x00-\xfd/ABCD/c
+    tr/\xfe-\x{7fffffff}/ABCD/
+
+If the C</d> modifier is specified, any characters
 specified by I<SEARCHLIST> not found in I<REPLACEMENTLIST> are deleted.
 (Note that this is slightly more flexible than the behavior of some
 B<tr> programs, which delete anything they find in the I<SEARCHLIST>,
-period.)  If the C</s> modifier is specified, sequences of characters
-that were transliterated to the same character are squashed down
-to a single instance of the character.
+period.)
+
+If the C</s> modifier is specified, runs of the same character in the
+result, where each those characters were substituted by the
+transliteration, are squashed down to a single instance of the character.
 
 If the C</d> modifier is used, the I<REPLACEMENTLIST> is always interpreted
 exactly as specified.  Otherwise, if the I<REPLACEMENTLIST> is shorter
 than the I<SEARCHLIST>, the final character is replicated till it is long
 enough.  If the I<REPLACEMENTLIST> is empty, the I<SEARCHLIST> is replicated.
 This latter is useful for counting characters in a class or for
-squashing character sequences in a class.
+squashing character sequences in a class. For example, each of these pairs
+are equivalent:
 
-Examples:
+    tr/abcd//            tr/abcd/abcd/
+    tr/abcd/AB/          tr/abcd/ABBB/
+    tr/abcd//d           s/[abcd]//g
+    tr/abcd/AB/d         (tr/ab/AB/ + s/[cd]//g)  - but run together
+
+Some examples:
 
     $ARGV[1] =~ tr/A-Z/a-z/;	# canonicalize to lower case ASCII
 
