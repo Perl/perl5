@@ -128,6 +128,10 @@ L<XSLoader> has been upgraded from version 0.29 to 0.30.
 Platforms that use C<mod2fname> to edit the names of loadable libraries now look for
 bootstrap (.bs) files under the correct, non-edited name.
 
+=item *
+
+L<Socket> has been upgraded from version 2.025 to 2.027.
+
 =back
 
 =head2 Removed Modules and Pragmata
