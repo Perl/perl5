@@ -6340,15 +6340,14 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     STRLEN rlen;
     const U8 *t = (U8*)SvPV_const(tstr, tlen);
     const U8 *r = (U8*)SvPV_const(rstr, rlen);
-    I32 i;
-    I32 j;
-    I32 grows = 0;
+    Size_t i, j;
+    bool grows = FALSE;
     OPtrans_map *tbl;
     SSize_t struct_size; /* malloced size of table struct */
 
     const bool complement = cBOOL(o->op_private & OPpTRANS_COMPLEMENT);
-    const I32 squash     = o->op_private & OPpTRANS_SQUASH;
-    I32 del              = o->op_private & OPpTRANS_DELETE;
+    const bool squash     = cBOOL(o->op_private & OPpTRANS_SQUASH);
+    const bool del        = cBOOL(o->op_private & OPpTRANS_DELETE);
     SV* swash;
 
     PERL_ARGS_ASSERT_PMTRANS;
@@ -6573,7 +6572,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 	none = ++max;
 	if (del)
-	    del = ++max;
+	    ++max;
 
 	if (max > 0xffff)
 	    bits = 32;
@@ -6641,17 +6640,17 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     cPVOPo->op_pv = (char*)tbl;
 
     if (complement) {
-        SSize_t excess;
+        Size_t excess;
 
         /* in this branch, j is a count of 'consumed' (i.e. paired off
          * with a search char) replacement chars (so j <= rlen always)
          */
-	for (i = 0; i < (I32)tlen; i++)
+	for (i = 0; i < tlen; i++)
 	    tbl->map[t[i]] = -1;
 
 	for (i = 0, j = 0; i < 256; i++) {
 	    if (!tbl->map[i]) {
-		if (j == (I32)rlen) {
+		if (j == rlen) {
 		    if (del)
 			tbl->map[i] = -2;
 		    else if (rlen)
@@ -6666,12 +6665,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     &&  UVCHR_IS_INVARIANT((UV)i)
                     && !UVCHR_IS_INVARIANT((UV)(tbl->map[i]))
                 )
-                    grows = 1;
+                    grows = TRUE;
 	    }
 	}
 
-        assert(j <= (I32)rlen);
-        excess = rlen - (SSize_t)j;
+        ASSUME(j <= rlen);
+        excess = rlen - j;
 
         if (excess) {
             /* More replacement chars than search chars:
@@ -6684,7 +6683,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             tbl->size += excess;
             cPVOPo->op_pv = (char*)tbl;
 
-            for (i = 0; i < (I32)excess; i++)
+            for (i = 0; i < excess; i++)
                 tbl->map[i + 256] = r[j+i];
         }
         else {
@@ -6707,8 +6706,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 	for (i = 0; i < 256; i++)
 	    tbl->map[i] = -1;
-	for (i = 0, j = 0; i < (I32)tlen; i++,j++) {
-	    if (j >= (I32)rlen) {
+	for (i = 0, j = 0; i < tlen; i++,j++) {
+	    if (j >= rlen) {
 		if (del) {
 		    if (tbl->map[t[i]] == -1)
 			tbl->map[t[i]] = -2;
@@ -6719,7 +6718,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (tbl->map[t[i]] == -1) {
                 if (     UVCHR_IS_INVARIANT(t[i])
                     && ! UVCHR_IS_INVARIANT(r[j]))
-		    grows = 1;
+		    grows = TRUE;
 		tbl->map[t[i]] = r[j];
 	    }
 	}
