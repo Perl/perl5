@@ -130,7 +130,7 @@ bootstrap (.bs) files under the correct, non-edited name.
 
 =item *
 
-L<Socket> has been upgraded from version 2.025 to 2.027.
+L<Socket> has been upgraded from version 2.020_04 to 2.027.
 
 =back
 
