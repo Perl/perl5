@@ -6660,10 +6660,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 			tbl->map[i] = (short)i;
 		}
 		else {
-		    if (UVCHR_IS_INVARIANT(i) && ! UVCHR_IS_INVARIANT(r[j]))
-			grows = 1;
 		    tbl->map[i] = r[j++];
 		}
+                if (   tbl->map[i] >= 0
+                    &&  UVCHR_IS_INVARIANT((UV)i)
+                    && !UVCHR_IS_INVARIANT((UV)(tbl->map[i]))
+                )
+                    grows = 1;
 	    }
 	}
 
