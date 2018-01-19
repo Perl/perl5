@@ -287,6 +287,18 @@ Several fix-ups for F<configure.com>, marking function VMS has
 
 =back
 
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The format of the non-utf8 transliteration table attached to the C<op_pv>
+field of C<OP_TRANS>/C<OP_TRANSR> ops has changed. It's now a
+C<struct OPtrans_map>.
+
+=back
+
 =head1 Selected Bug Fixes
 
 =over 4
@@ -331,6 +343,16 @@ Fixes [perl #8910] (reported in April 2002).
 
 Fixed parsing of braced subscript after parens. Fixes [perl #8045]
 (reported in December 2001).
+
+=item *
+
+C<tr/non_utf8/long_non_utf8/c> could give the wrong results when the
+length of the replacement character list was greater than 0x7fff.
+
+=item *
+
+C<tr/non_utf8/non_utf8/cd> failed to add the implied
+C<\x{100}-\x{7fffffff}> to the search character list.
 
 =back
 
