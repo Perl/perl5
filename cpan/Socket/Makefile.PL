@@ -80,7 +80,7 @@ my %defines = (
     # -Dfoo                func()         $Config{key}
     HAS_GETADDRINFO  => [ "getaddrinfo",  "d_getaddrinfo" ],
     HAS_GETNAMEINFO  => [ "getnameinfo",  "d_getnameinfo" ],
-    HAS_GAI_STRERROR => [ "gai_strerror" ],
+    HAS_GAI_STRERROR => [ "gai_strerror", "d_gai_strerror" ],
     HAS_INET_ATON    => [ "inet_aton",    "d_inetaton" ],
     HAS_INETNTOP     => [ "inet_ntop",    "d_inetntop" ],
     HAS_INETPTON     => [ "inet_pton",    "d_inetpton" ],
@@ -231,7 +231,8 @@ my @names = (
 	TCP_FASTOPEN TCP_INFO TCP_INIT_CWND TCP_KEEPALIVE TCP_KEEPCNT
 	TCP_KEEPIDLE TCP_KEEPINTVL TCP_LINGER2 TCP_MAXRT TCP_MAXSEG
 	TCP_MD5SIG TCP_NODELAY TCP_NOOPT TCP_NOPUSH TCP_QUICKACK
-	TCP_SACK_ENABLE TCP_STDURG TCP_SYNCNT TCP_WINDOW_CLAMP
+	TCP_SACK_ENABLE TCP_STDURG TCP_SYNCNT TCP_USER_TIMEOUT
+	TCP_WINDOW_CLAMP
 
 	UIO_MAXIOV
     ),

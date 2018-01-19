@@ -187,7 +187,7 @@ NETINET_DEFINE_CONTEXT
 #endif /* !SvPVx_nolen */
 
 #ifndef croak_sv
-# define croak_sv(sv)	croak(SvPVx_nolen(sv))
+# define croak_sv(sv)	croak("%s", SvPVx_nolen(sv))
 #endif
 
 #ifndef hv_stores
@@ -826,8 +826,9 @@ pack_sockaddr_un(pathname)
 	sun_ad.sun_family = AF_UNIX;
 	pathname_pv = SvPV(pathname,len);
 	if (len > sizeof(sun_ad.sun_path)) {
-	    warn("Path length (%d) is longer than maximum supported length"
-	         " (%d) and will be truncated", len, sizeof(sun_ad.sun_path));
+	    warn("Path length (%" UVuf ") is longer than maximum supported length"
+	         " (%" UVuf ") and will be truncated",
+	         (UV)len, (UV)sizeof(sun_ad.sun_path));
 	    len = sizeof(sun_ad.sun_path);
 	}
 #  ifdef OS2	/* Name should start with \socket\ and contain backslashes! */
