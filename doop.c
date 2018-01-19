@@ -35,10 +35,10 @@
  * or may not be utf8.
  */
 
-STATIC I32
+STATIC Size_t
 S_do_trans_simple(pTHX_ SV * const sv)
 {
-    I32 matches = 0;
+    Size_t matches = 0;
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv,len);
     U8 * const send = s+len;
@@ -114,13 +114,13 @@ S_do_trans_simple(pTHX_ SV * const sv)
  * or may not be utf8.
  */
 
-STATIC I32
+STATIC Size_t
 S_do_trans_count(pTHX_ SV * const sv)
 {
     STRLEN len;
     const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
-    I32 matches = 0;
+    Size_t matches = 0;
     const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT;
@@ -159,13 +159,13 @@ S_do_trans_count(pTHX_ SV * const sv)
  * or may not be utf8.
  */
 
-STATIC I32
+STATIC Size_t
 S_do_trans_complex(pTHX_ SV * const sv)
 {
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
-    I32 matches = 0;
+    Size_t matches = 0;
     const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
@@ -283,7 +283,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
  * or may not be utf8.
  */
 
-STATIC I32
+STATIC Size_t
 S_do_trans_simple_utf8(pTHX_ SV * const sv)
 {
     U8 *s;
@@ -291,7 +291,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
     U8 *d;
     U8 *start;
     U8 *dstart, *dend;
-    I32 matches = 0;
+    Size_t matches = 0;
     const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
     STRLEN len;
     SV* const  rv =
@@ -392,13 +392,13 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
  * or may not be utf8.
  */
 
-STATIC I32
+STATIC Size_t
 S_do_trans_count_utf8(pTHX_ SV * const sv)
 {
     const U8 *s;
     const U8 *start = NULL;
     const U8 *send;
-    I32 matches = 0;
+    Size_t matches = 0;
     STRLEN len;
     SV* const  rv =
 #ifdef USE_ITHREADS
@@ -443,12 +443,12 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
  * or may not be utf8.
  */
 
-STATIC I32
+STATIC Size_t
 S_do_trans_complex_utf8(pTHX_ SV * const sv)
 {
     U8 *start, *send;
     U8 *d;
-    I32 matches = 0;
+    Size_t matches = 0;
     const I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
     const I32 del      = PL_op->op_private & OPpTRANS_DELETE;
     const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
@@ -611,7 +611,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
  * Returns a count of number of characters translated
  */
 
-I32
+Size_t
 Perl_do_trans(pTHX_ SV *sv)
 {
     STRLEN len;

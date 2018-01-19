@@ -689,8 +689,8 @@ PP(pp_trans)
 	PUSHs(newsv);
     }
     else {
-	I32 i = do_trans(sv);
-	mPUSHi(i);
+	Size_t i = do_trans(sv);
+	mPUSHi((UV)i);
     }
     RETURN;
 }
