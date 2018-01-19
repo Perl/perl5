@@ -27,14 +27,22 @@
 #include <signal.h>
 #endif
 
-STATIC I32
+
+/* Helper function for do_trans().
+ * Handles non-utf8 cases(*) not involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search and replacement charlists are non-utf8. sv may
+ * or may not be utf8.
+ */
+
+STATIC Size_t
 S_do_trans_simple(pTHX_ SV * const sv)
 {
-    I32 matches = 0;
+    Size_t matches = 0;
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv,len);
     U8 * const send = s+len;
-    const short * const tbl = (short*)cPVOP->op_pv;
+    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_SIMPLE;
 
@@ -44,7 +52,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
     /* First, take care of non-UTF-8 input strings, because they're easy */
     if (!SvUTF8(sv)) {
 	while (s < send) {
-	    const I32 ch = tbl[*s];
+	    const short ch = tbl->map[*s];
 	    if (ch >= 0) {
 		matches++;
 		*s = (U8)ch;
@@ -54,7 +62,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
 	SvSETMAGIC(sv);
     }
     else {
-	const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
+	const bool grows = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
 	U8 *d;
 	U8 *dstart;
 
@@ -66,13 +74,13 @@ S_do_trans_simple(pTHX_ SV * const sv)
 	dstart = d;
 	while (s < send) {
 	    STRLEN ulen;
-	    I32 ch;
+	    short ch;
 
 	    /* Need to check this, otherwise 128..255 won't match */
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
-	    if (c < 0x100 && (ch = tbl[c]) >= 0) {
+	    if (c < 0x100 && (ch = tbl->map[c]) >= 0) {
 		matches++;
-		d = uvchr_to_utf8(d, ch);
+		d = uvchr_to_utf8(d, (UV)ch);
 		s += ulen;
 	    }
 	    else { /* No match -> copy */
@@ -95,14 +103,25 @@ S_do_trans_simple(pTHX_ SV * const sv)
     return matches;
 }
 
-STATIC I32
+
+/* Helper function for do_trans().
+ * Handles non-utf8 cases(*) where search and replacement charlists are
+ * identical: so the string isn't modified, and only a count of modifiable
+ * chars is needed.
+ * Note that it doesn't handle /d or /s, since these modify the string
+ * even if the replacement list is empty.
+ * (*) i.e. where the search and replacement charlists are non-utf8. sv may
+ * or may not be utf8.
+ */
+
+STATIC Size_t
 S_do_trans_count(pTHX_ SV * const sv)
 {
     STRLEN len;
     const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
-    I32 matches = 0;
-    const short * const tbl = (short*)cPVOP->op_pv;
+    Size_t matches = 0;
+    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT;
 
@@ -111,17 +130,17 @@ S_do_trans_count(pTHX_ SV * const sv)
 
     if (!SvUTF8(sv)) {
 	while (s < send) {
-            if (tbl[*s++] >= 0)
+            if (tbl->map[*s++] >= 0)
                 matches++;
 	}
     }
     else {
-	const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
+	const bool complement = cBOOL(PL_op->op_private & OPpTRANS_COMPLEMENT);
 	while (s < send) {
 	    STRLEN ulen;
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
 	    if (c < 0x100) {
-		if (tbl[c] >= 0)
+		if (tbl->map[c] >= 0)
 		    matches++;
 	    } else if (complement)
 		matches++;
@@ -132,14 +151,22 @@ S_do_trans_count(pTHX_ SV * const sv)
     return matches;
 }
 
-STATIC I32
+
+/* Helper function for do_trans().
+ * Handles non-utf8 cases(*) involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search and replacement charlists are non-utf8. sv may
+ * or may not be utf8.
+ */
+
+STATIC Size_t
 S_do_trans_complex(pTHX_ SV * const sv)
 {
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
-    I32 matches = 0;
-    const short * const tbl = (short*)cPVOP->op_pv;
+    Size_t matches = 0;
+    const OPtrans_map * const tbl = (OPtrans_map*)cPVOP->op_pv;
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
 
@@ -153,7 +180,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    const U8* p = send;
 	    while (s < send) {
-		const I32 ch = tbl[*s];
+		const short ch = tbl->map[*s];
 		if (ch >= 0) {
 		    *d = (U8)ch;
 		    matches++;
@@ -169,7 +196,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	}
 	else {
 	    while (s < send) {
-		const I32 ch = tbl[*s];
+		const short ch = tbl->map[*s];
 		if (ch >= 0) {
 		    matches++;
 		    *d++ = (U8)ch;
@@ -185,102 +212,55 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	SvCUR_set(sv, d - dstart);
     }
     else { /* is utf8 */
-	const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
-	const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
-	const I32 del = PL_op->op_private & OPpTRANS_DELETE;
+	const bool squash = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
+	const bool grows  = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
 	U8 *d;
 	U8 *dstart;
-	STRLEN rlen = 0;
+	Size_t size = tbl->size;
+        UV pch = 0xfeedface;
 
 	if (grows)
 	    Newx(d, len*2+1, U8);
 	else
 	    d = s;
 	dstart = d;
-	if (complement && !del)
-	    rlen = tbl[0x100];
 
-	if (PL_op->op_private & OPpTRANS_SQUASH) {
-	    UV pch = 0xfeedface;
 	    while (s < send) {
 		STRLEN len;
 		const UV comp = utf8n_to_uvchr(s, send - s, &len,
 					       UTF8_ALLOW_DEFAULT);
-		I32 ch;
+		UV     ch;
+                short sch;
 
-		if (comp > 0xff) {
-		    if (!complement) {
-			Move(s, d, len, U8);
-			d += len;
-		    }
-		    else {
-			matches++;
-			if (!del) {
-			    ch = (rlen == 0) ? (I32)comp :
-				(comp - 0x100 < rlen) ?
-				tbl[comp+1] : tbl[0x100+rlen];
-			    if ((UV)ch != pch) {
-				d = uvchr_to_utf8(d, ch);
-				pch = (UV)ch;
-			    }
-			    s += len;
-			    continue;
-			}
-		    }
-		}
-		else if ((ch = tbl[comp]) >= 0) {
+                sch = tbl->map[comp >= size ? size : comp];
+
+		if (sch >= 0) {
+                    ch = (UV)sch;
+                  replace:
 		    matches++;
-		    if ((UV)ch != pch) {
+		    if (LIKELY(!squash || ch != pch)) {
 		        d = uvchr_to_utf8(d, ch);
-		        pch = (UV)ch;
+		        pch = ch;
 		    }
 		    s += len;
 		    continue;
 		}
-		else if (ch == -1) {	/* -1 is unmapped character */
+		else if (sch == -1) {	/* -1 is unmapped character */
 		    Move(s, d, len, U8);
 		    d += len;
 		}
-		else if (ch == -2)      /* -2 is delete character */
+		else if (sch == -2)     /* -2 is delete character */
 		    matches++;
+                else {
+                    assert(sch == -3);  /* -3 is empty replacement */
+                    ch = comp;
+                    goto replace;
+                }
+
 		s += len;
 		pch = 0xfeedface;
 	    }
-	}
-	else {
-	    while (s < send) {
-		STRLEN len;
-		const UV comp = utf8n_to_uvchr(s, send - s, &len,
-					       UTF8_ALLOW_DEFAULT);
-		I32 ch;
-		if (comp > 0xff) {
-		    if (!complement) {
-			Move(s, d, len, U8);
-			d += len;
-		    }
-		    else {
-			matches++;
-			if (!del) {
-			    if (comp - 0x100 < rlen)
-				d = uvchr_to_utf8(d, tbl[comp+1]);
-			    else
-				d = uvchr_to_utf8(d, tbl[0x100+rlen]);
-			}
-		    }
-		}
-		else if ((ch = tbl[comp]) >= 0) {
-		    d = uvchr_to_utf8(d, ch);
-		    matches++;
-		}
-		else if (ch == -1) {	/* -1 is unmapped character */
-		    Move(s, d, len, U8);
-		    d += len;
-		}
-		else if (ch == -2)      /* -2 is delete character */
-		    matches++;
-		s += len;
-	    }
-	}
+
 	if (grows) {
 	    sv_setpvn(sv, (char*)dstart, d - dstart);
 	    Safefree(dstart);
@@ -295,7 +275,15 @@ S_do_trans_complex(pTHX_ SV * const sv)
     return matches;
 }
 
-STATIC I32
+
+/* Helper function for do_trans().
+ * Handles utf8 cases(*) not involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search or replacement charlists are utf8. sv may
+ * or may not be utf8.
+ */
+
+STATIC Size_t
 S_do_trans_simple_utf8(pTHX_ SV * const sv)
 {
     U8 *s;
@@ -303,8 +291,8 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
     U8 *d;
     U8 *start;
     U8 *dstart, *dend;
-    I32 matches = 0;
-    const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
+    Size_t matches = 0;
+    const bool grows = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
     STRLEN len;
     SV* const  rv =
 #ifdef USE_ITHREADS
@@ -393,13 +381,24 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
     return matches;
 }
 
-STATIC I32
+
+/* Helper function for do_trans().
+ * Handles utf8 cases(*) where search and replacement charlists are
+ * identical: so the string isn't modified, and only a count of modifiable
+ * chars is needed.
+ * Note that it doesn't handle /d or /s, since these modify the string
+ * even if the replacement charlist is empty.
+ * (*) i.e. where the search or replacement charlists are utf8. sv may
+ * or may not be utf8.
+ */
+
+STATIC Size_t
 S_do_trans_count_utf8(pTHX_ SV * const sv)
 {
     const U8 *s;
     const U8 *start = NULL;
     const U8 *send;
-    I32 matches = 0;
+    Size_t matches = 0;
     STRLEN len;
     SV* const  rv =
 #ifdef USE_ITHREADS
@@ -436,15 +435,23 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
     return matches;
 }
 
-STATIC I32
+
+/* Helper function for do_trans().
+ * Handles utf8 cases(*) involving the /c, /d, /s flags,
+ * and where search and replacement charlists aren't identical.
+ * (*) i.e. where the search or replacement charlists are utf8. sv may
+ * or may not be utf8.
+ */
+
+STATIC Size_t
 S_do_trans_complex_utf8(pTHX_ SV * const sv)
 {
     U8 *start, *send;
     U8 *d;
-    I32 matches = 0;
-    const I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
-    const I32 del      = PL_op->op_private & OPpTRANS_DELETE;
-    const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
+    Size_t matches = 0;
+    const bool squash   = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
+    const bool del      = cBOOL(PL_op->op_private & OPpTRANS_DELETE);
+    const bool grows    = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
     SV* const  rv =
 #ifdef USE_ITHREADS
 		    PAD_SVl(cPADOP->op_padix);
@@ -597,12 +604,19 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
     return matches;
 }
 
-I32
+
+/* Execute a tr//. sv is the value to be translated, while PL_op
+ * should be an OP_TRANS or OP_TRANSR op, whose op_pv field contains a
+ * translation table or whose op_sv field contains a swash.
+ * Returns a count of number of characters translated
+ */
+
+Size_t
 Perl_do_trans(pTHX_ SV *sv)
 {
     STRLEN len;
-    const I32 flags = PL_op->op_private;
-    const I32 hasutf = flags & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF);
+    const U8 flags = PL_op->op_private;
+    const U8 hasutf = flags & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF);
 
     PERL_ARGS_ASSERT_DO_TRANS;
 
@@ -617,8 +631,6 @@ Perl_do_trans(pTHX_ SV *sv)
 	    (void)SvPV_force_nomg(sv, len);
 	(void)SvPOK_only_UTF8(sv);
     }
-
-    DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
     /* If we use only OPpTRANS_IDENTICAL to bypass the READONLY check,
      * we must also rely on it to choose the readonly strategy.

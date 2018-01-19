@@ -521,7 +521,7 @@ p	|Off_t	|do_sysseek	|NN GV* gv|Off_t pos|int whence
 : Defined in doio.c, used only in pp_sys.c
 pR	|Off_t	|do_tell	|NN GV* gv
 : Defined in doop.c, used only in pp.c
-p	|I32	|do_trans	|NN SV* sv
+p	|Size_t	|do_trans	|NN SV* sv
 : Used in my.c and pp.c
 p	|UV	|do_vecget	|NN SV* sv|STRLEN offset|int size
 : Defined in doop.c, used only in mg.c (with /* XXX slurp this routine */)
@@ -2091,12 +2091,12 @@ Adp	|int	|nothreadhook
 p	|void	|init_constants
 
 #if defined(PERL_IN_DOOP_C)
-sR	|I32	|do_trans_simple	|NN SV * const sv
-sR	|I32	|do_trans_count		|NN SV * const sv
-sR	|I32	|do_trans_complex	|NN SV * const sv
-sR	|I32	|do_trans_simple_utf8	|NN SV * const sv
-sR	|I32	|do_trans_count_utf8	|NN SV * const sv
-sR	|I32	|do_trans_complex_utf8	|NN SV * const sv
+sR	|Size_t	|do_trans_simple	|NN SV * const sv
+sR	|Size_t	|do_trans_count		|NN SV * const sv
+sR	|Size_t	|do_trans_complex	|NN SV * const sv
+sR	|Size_t	|do_trans_simple_utf8	|NN SV * const sv
+sR	|Size_t	|do_trans_count_utf8	|NN SV * const sv
+sR	|Size_t	|do_trans_complex_utf8	|NN SV * const sv
 #endif
 
 #if defined(PERL_IN_GV_C)

@@ -627,6 +627,15 @@ typedef enum {
 #define ref(o, type) doref(o, type, TRUE)
 #endif
 
+
+/* translation table attached to OP_TRANS/OP_TRANSR ops */
+
+typedef struct {
+    Size_t size; /* number of entries in map[], not including final slot */
+    short map[1]; /* Unwarranted chumminess */
+} OPtrans_map;
+
+
 /*
 =head1 Optree Manipulation Functions
 

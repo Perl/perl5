@@ -13,7 +13,7 @@ BEGIN {
 
 use utf8;
 
-plan tests => 216;
+plan tests => 300;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -44,6 +44,432 @@ eval 'tr/\x{101}-\x{100}//;';
 like $@,
      qr/Invalid range "\\x\{0101\}-\\x\{0100\}" in transliteration operator/,
      "UTF-8 range with min > max";
+
+
+# Test /c and variants, with all the search and replace chars being
+# non-utf8, but with both non-utf8 and utf8 strings.
+
+{
+    my $all255            = join '', map chr, 0..0xff;
+    my $all255_twice      = join '', map chr, map { ($_, $_) } 0..0xff;
+    my $all255_plus       = join '', map chr, 0..0x11f;
+    my $all255_twice_plus = join '', map chr, map { ($_, $_) } 0..0x11f;
+    my ($c, $s);
+
+
+    # length(replacement) == 0
+    # non-utf8 string
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf//c;
+    is $s, $all255, "/c   ==0";
+    is $c, 0x80, "/c   ==0  count";
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf//cd;
+    is $s, join('', map chr, 0x40..0xbf), "/cd  ==0";
+    is $c, 0x80, "/cd  ==0  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf//cs;
+    is $s, join('', map chr,
+                0x00..0x3f,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0xc0..0xff,
+            ),
+        "/cs  ==0";
+    is $c, 0x100, "/cs  ==0  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf//csd;
+    is $s, join('', map chr, (map  { ($_, $_) } 0x40..0xbf)), "/csd ==0";
+    is $c, 0x100, "/csd ==0  count";
+
+
+    # length(search) > length(replacement)
+    # non-utf8 string
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/c;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                0x40..0xbf,
+                0x00..0x2f,
+                ((0x2f) x 16),
+            ),
+        "/c   >";
+    is $c, 0x80, "/c   >  count";
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x2f),
+        "/cd  >";
+    is $c, 0x80, "/cd  >  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+            ),
+        "/cs  >";
+    is $c, 0x100, "/cs  >  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+            ),
+        "/csd >";
+    is $c, 0x100, "/csd >  count";
+
+
+    # length(search) == length(replacement)
+    # non-utf8 string
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/c;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x3f), "/c   ==";
+    is $c, 0x80, "/c   == count";
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x3f), "/cd  ==";
+    is $c, 0x80, "/cd  == count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x3f,
+            ),
+        "/cs  ==";
+    is $c, 0x100, "/cs  == count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x3f,
+            ),
+        "/csd ==";
+    is $c, 0x100, "/csd == count";
+
+    # length(search) == length(replacement) - 1
+    # non-utf8 string
+
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x30/c;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x2f, 0xf0..0xff),
+        "/c   =-";
+    is $c, 0x70, "/c   =-  count";
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x30/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x2f, 0xf0..0xff),
+        "/cd  =-";
+    is $c, 0x70, "/cd  =-  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x30/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                (map  { ($_, $_) } 0xf0..0xff),
+            ),
+        "/cs  =-";
+    is $c, 0xe0, "/cs  =-  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x30/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                (map  { ($_, $_) } 0xf0..0xff),
+            ),
+        "/csd =-";
+    is $c, 0xe0, "/csd =-  count";
+
+    # length(search) < length(replacement)
+    # non-utf8 string
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/c;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x2f, 0xf0..0xff),
+        "/c   <";
+    is $c, 0x70, "/c   <  count";
+
+    $s = $all255;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x2f, 0xf0..0xff),
+        "/cd  <";
+    is $c, 0x70, "/cd  <  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                (map  { ($_, $_) } 0xf0..0xff),
+            ),
+        "/cs  <";
+    is $c, 0xe0, "/cs  <  count";
+
+    $s = $all255_twice;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                (map  { ($_, $_) } 0xf0..0xff),
+            ),
+        "/csd <";
+    is $c, 0xe0, "/csd <  count";
+
+
+    # length(replacement) == 0
+    # with some >= 0x100 utf8 chars in the string to be modified
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf//c;
+    is $s, $all255_plus, "/c   ==0U";
+    is $c, 0xa0, "/c   ==0U  count";
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf//cd;
+    is $s, join('', map chr, 0x40..0xbf), "/cd  ==0U";
+    is $c, 0xa0, "/cd  ==0U  count";
+
+    $s = $all255_twice_plus;
+    $c = $s =~ tr/\x40-\xbf//cs;
+    is $s, join('', map chr,
+                0x00..0x3f,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0xc0..0x11f,
+            ),
+        "/cs  ==0U";
+    is $c, 0x140, "/cs  ==0U  count";
+
+    $s = $all255_twice_plus;
+    $c = $s =~ tr/\x40-\xbf//csd;
+    is $s, join('', map chr, (map  { ($_, $_) } 0x40..0xbf)), "/csd ==0U";
+    is $c, 0x140, "/csd ==0U  count";
+
+    # length(search) > length(replacement)
+    # with some >= 0x100 utf8 chars in the string to be modified
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/c;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                0x40..0xbf,
+                0x00..0x2f,
+                ((0x2f) x 48),
+            ),
+        "/c   >U";
+    is $c, 0xa0, "/c   >U count";
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x2f),
+        "/cd  >U";
+    is $c, 0xa0, "/cd  >U count";
+
+    $s = $all255_twice_plus . "\x3f\x3f\x{200}\x{300}";
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                0xbf,
+                0x2f,
+            ),
+        "/cs  >U";
+    is $c, 0x144, "/cs  >U count";
+
+    $s = $all255_twice_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x2f/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+            ),
+        "/csd >U";
+    is $c, 0x140, "/csd >U count";
+
+    # length(search) == length(replacement)
+    # with some >= 0x100 utf8 chars in the string to be modified
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/c;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                0x40..0xbf,
+                0x00..0x3f,
+                ((0x3f) x 32),
+            ),
+        "/c   ==U";
+    is $c, 0xa0, "/c   ==U count";
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x3f), "/cd ==U";
+    is $c, 0xa0, "/cd  ==U count";
+
+    $s = $all255_twice_plus . "\x3f\x3f\x{200}\x{300}";
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x3f,
+                0xbf,
+                0x3f,
+            ),
+        "/cs  ==U";
+    is $c, 0x144, "/cs  ==U count";
+
+    $s = $all255_twice_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x3f/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x3f,
+            ),
+        "/csd ==U";
+    is $c, 0x140, "/csd ==U count";
+
+
+    # length(search) == length(replacement) - 1
+    # with some >= 0x100 utf8 chars in the string to be modified
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x40/c;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                0x40..0xbf,
+                0x00..0x40,
+                ((0x40) x 31),
+            ),
+        "/c   =-U";
+    is $c, 0xa0, "/c   =-U count";
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x40/cd;
+    is $s, join('', map chr, 0x80..0xbf, 0x40..0xbf, 0x00..0x40), "/cd =-U";
+    is $c, 0xa0, "/cd  =-U count";
+
+    $s = $all255_twice_plus . "\x3f\x3f\x{200}\x{300}";
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x40/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x40,
+                0xbf,
+                0x40,
+            ),
+        "/cs  =-U";
+    is $c, 0x144, "/cs  =-U count";
+
+    $s = $all255_twice_plus;
+    $c = $s =~ tr/\x40-\xbf/\x80-\xbf\x00-\x40/csd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x40,
+            ),
+        "/csd =-U";
+    is $c, 0x140, "/csd =-U count";
+
+
+
+    # length(search) < length(replacement),
+    # with some >= 0x100 utf8 chars in the string to be modified
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/c;
+    is $s, join('', map chr,
+                    0x80..0xbf,
+                    0x40..0xbf,
+                    0x00..0x2f,
+                    0xf0..0xff,
+                    0x30..0x3f,
+                    ((0x3f)x 16),
+                ),
+        "/c   <U";
+    is $c, 0x90, "/c   <U count";
+
+    $s = $all255_plus;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/cd;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                0x40..0xbf,
+                0x00..0x2f,
+                0xf0..0xff,
+                0x30..0x3f,
+                ),
+            "/cd  <U";
+    is $c, 0x90, "/cd  <U count";
+
+    $s = $all255_twice_plus . "\x3f\x3f\x{200}\x{300}";
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/cs;
+    is $s, join('', map chr,
+                0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                (map  { ($_, $_) } 0xf0..0xff),
+                0x30..0x3f,
+                0xbf,
+                0x3f,
+            ),
+        "/cs  <U";
+    is $c, 0x124, "/cs  <U count";
+
+    $s = $all255_twice_plus;
+    $c = $s =~ tr/\x40-\xbf\xf0-\xff/\x80-\xbf\x00-\x3f/csd;
+    is $s, join('', map chr, 0x80..0xbf,
+                (map  { ($_, $_) } 0x40..0xbf),
+                0x00..0x2f,
+                (map  { ($_, $_) } 0xf0..0xff),
+                0x30..0x3f,
+            ),
+        "/csd <U";
+    is $c, 0x120, "/csd <U count";
+}
+
+{
+    # RT #132608
+    # the 'extra length' for tr///c was stored as a short, so if the
+    # replacement string had more than 0x7fff chars not paired with
+    # search chars, bad things could happen
+
+    my ($c, $e, $s);
+
+    $s = "\x{9000}\x{9001}\x{9002}";
+    $e =    "\$c = \$s =~ tr/\\x00-\\xff/"
+          . ("ABCDEFGHIJKLMNO" x (0xa000 / 15))
+          . "/c; 1; ";
+    eval $e or die $@;
+    is $s, "IJK", "RT #132608 len=0xa000";
+    is $c, 3, "RT #132608 len=0xa000 count";
+
+    $s = "\x{9003}\x{9004}\x{9005}";
+    $e =    "\$c = \$s =~ tr/\\x00-\\xff/"
+          . ("ABCDEFGHIJKLMNO" x (0x12000 / 15))
+          . "/c; 1; ";
+    eval $e or die $@;
+    is $s, "LMN", "RT #132608 len=0x12000";
+    is $c, 3, "RT #132608 len=0x12000 count";
+}
+
 
 SKIP: {   # Test literal range end point special handling
     unless ($::IS_EBCDIC) {

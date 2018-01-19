@@ -58,6 +58,8 @@ our $AUTOLOAD;
 use warnings ();
 require feature;
 
+use Config;
+
 BEGIN {
     # List version-specific constants here.
     # Easiest way to keep this code portable between version looks to
@@ -5607,8 +5609,11 @@ sub collapse {
 
 sub tr_decode_byte {
     my($table, $flags) = @_;
-    my(@table) = unpack("s*", $table);
-    splice @table, 0x100, 1;   # Number of subsequent elements
+    my $ssize_t = $Config{ptrsize} == 8 ? 'q' : 'l';
+    my ($size, @table) = unpack("${ssize_t}s*", $table);
+    printf "XXX len=%d size=%d scalar\@table=%d\n", length($table), $size, scalar@table;
+    pop @table; # remove the wildcard final entry
+
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and
 	$table[ord("-") - 1] == -1 || $table[ord("-") + 1] == -1)

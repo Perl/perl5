@@ -1022,20 +1022,18 @@ next(o)
 		ret = make_sv_object(aTHX_ NULL);
 		break;
 	    case 41: /* B::PVOP::pv */
-		/* OP_TRANS uses op_pv to point to a table of 256 or >=258
-		 * shorts whereas other PVOPs point to a null terminated
-		 * string.  */
-		if (    (cPVOPo->op_type == OP_TRANS
-			|| cPVOPo->op_type == OP_TRANSR) &&
-			(cPVOPo->op_private & OPpTRANS_COMPLEMENT) &&
-			!(cPVOPo->op_private & OPpTRANS_DELETE))
-		{
-		    const short* const tbl = (short*)cPVOPo->op_pv;
-		    const short entries = 257 + tbl[256];
-		    ret = newSVpvn_flags(cPVOPo->op_pv, entries * sizeof(short), SVs_TEMP);
-		}
-		else if (cPVOPo->op_type == OP_TRANS || cPVOPo->op_type == OP_TRANSR) {
-		    ret = newSVpvn_flags(cPVOPo->op_pv, 256 * sizeof(short), SVs_TEMP);
+                /* OP_TRANS uses op_pv to point to a OPtrans_map struct,
+                 * whereas other PVOPs point to a null terminated string.
+                 * For trans, for now just return the whole struct as a
+                 * string and let the caller unpack() it */
+		if (   cPVOPo->op_type == OP_TRANS
+                    || cPVOPo->op_type == OP_TRANSR)
+                {
+                    const OPtrans_map *const tbl = (OPtrans_map*)cPVOPo->op_pv;
+		    ret = newSVpvn_flags(cPVOPo->op_pv,
+                                              (char*)(&tbl->map[tbl->size + 1])
+                                            - (char*)tbl,
+                                            SVs_TEMP);
 		}
 		else
 		    ret = newSVpvn_flags(cPVOPo->op_pv, strlen(cPVOPo->op_pv), SVs_TEMP);
