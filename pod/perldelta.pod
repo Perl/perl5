@@ -102,7 +102,8 @@ Note that this the second time they have been flipped:
 Some uses of these already are illegal after a previous deprecation
 cycle.  This deprecates the remaining uses.  See L<perldeprecation>.
 
-=head2 Use of unescaped C<"{"> immediately after a C<"(">
+=head2 Use of unescaped C<"{"> immediately after a C<"("> in regular
+expression patterns
 
 Using unescaped left braces is officially deprecated everywhere, but it
 is not enforced in contexts where their use does not interfere with
