@@ -1123,5 +1123,12 @@ like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
         "\\x80 in format";
 }
 
+foreach(
+    0.0, -0.0,
+    4503599627370501, -4503599627370501,
+    4503599627370503, -4503599627370503,
+) {
+    is sprintf("%.0f", $_), sprintf("%-.0f", $_), "special-case %.0f on $_";
+}
 
 done_testing();

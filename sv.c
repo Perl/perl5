@@ -11057,12 +11057,15 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
     assert(!Perl_isinfnan(nv));
     if (neg)
 	nv = -nv;
-    if (nv < UV_MAX) {
+    if (nv != 0.0 && nv < UV_MAX) {
 	char *p = endbuf;
-	nv += 0.5;
 	uv = (UV)nv;
-	if (uv & 1 && uv == nv)
-	    uv--;			/* Round to even */
+	if (uv != nv) {
+	    nv += 0.5;
+	    uv = (UV)nv;
+	    if (uv & 1 && uv == nv)
+		uv--;			/* Round to even */
+	}
 	do {
 	    const unsigned dig = uv % 10;
 	    *--p = '0' + dig;
