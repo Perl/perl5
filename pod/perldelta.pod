@@ -81,6 +81,20 @@ reverted due to the extent of the trouble caused to CPAN modules.
 It is expected that smartmatch will be changed again in the future,
 but preceded by some kind of explicit deprecation.
 
+=head2 Subroutine attribute and signature order
+
+The experimental subroutine signatures feature has been changed so that
+subroutine attributes must now come before the signature rather than
+after. This is because attributes like C<:lvalue> can affect the
+compilation of code within the signature, for example:
+
+    sub f :lvalue ($a = do { $x = "abc"; return substr($x,0,1)}) { ...}
+
+Note that this the second time they have been flipped:
+
+    sub f :lvalue ($a, $b) { 1 }; # 5.20; 5.28 onwards
+    sub f ($a, $b) :lvalue { 1 }; # 5.22 - 5.26
+
 =head1 Deprecations
 
 =head2 Use of code points over 0xFF in string bitwise operators
