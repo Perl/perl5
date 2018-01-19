@@ -52,7 +52,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
     /* First, take care of non-UTF-8 input strings, because they're easy */
     if (!SvUTF8(sv)) {
 	while (s < send) {
-	    const I32 ch = tbl->map[*s];
+	    const short ch = tbl->map[*s];
 	    if (ch >= 0) {
 		matches++;
 		*s = (U8)ch;
@@ -62,7 +62,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
 	SvSETMAGIC(sv);
     }
     else {
-	const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
+	const bool grows = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
 	U8 *d;
 	U8 *dstart;
 
@@ -74,13 +74,13 @@ S_do_trans_simple(pTHX_ SV * const sv)
 	dstart = d;
 	while (s < send) {
 	    STRLEN ulen;
-	    I32 ch;
+	    short ch;
 
 	    /* Need to check this, otherwise 128..255 won't match */
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
 	    if (c < 0x100 && (ch = tbl->map[c]) >= 0) {
 		matches++;
-		d = uvchr_to_utf8(d, ch);
+		d = uvchr_to_utf8(d, (UV)ch);
 		s += ulen;
 	    }
 	    else { /* No match -> copy */
@@ -135,7 +135,7 @@ S_do_trans_count(pTHX_ SV * const sv)
 	}
     }
     else {
-	const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
+	const bool complement = cBOOL(PL_op->op_private & OPpTRANS_COMPLEMENT);
 	while (s < send) {
 	    STRLEN ulen;
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
@@ -180,7 +180,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
 	    const U8* p = send;
 	    while (s < send) {
-		const I32 ch = tbl->map[*s];
+		const short ch = tbl->map[*s];
 		if (ch >= 0) {
 		    *d = (U8)ch;
 		    matches++;
@@ -196,7 +196,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	}
 	else {
 	    while (s < send) {
-		const I32 ch = tbl->map[*s];
+		const short ch = tbl->map[*s];
 		if (ch >= 0) {
 		    matches++;
 		    *d++ = (U8)ch;
@@ -212,8 +212,8 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	SvCUR_set(sv, d - dstart);
     }
     else { /* is utf8 */
-	const bool squash =  cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
-	const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
+	const bool squash = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
+	const bool grows  = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
 	U8 *d;
 	U8 *dstart;
 	Size_t size = tbl->size;
@@ -292,7 +292,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
     U8 *start;
     U8 *dstart, *dend;
     Size_t matches = 0;
-    const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
+    const bool grows = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
     STRLEN len;
     SV* const  rv =
 #ifdef USE_ITHREADS
@@ -449,9 +449,9 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
     U8 *start, *send;
     U8 *d;
     Size_t matches = 0;
-    const I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
-    const I32 del      = PL_op->op_private & OPpTRANS_DELETE;
-    const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
+    const bool squash   = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
+    const bool del      = cBOOL(PL_op->op_private & OPpTRANS_DELETE);
+    const bool grows    = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
     SV* const  rv =
 #ifdef USE_ITHREADS
 		    PAD_SVl(cPADOP->op_padix);
@@ -615,8 +615,8 @@ Size_t
 Perl_do_trans(pTHX_ SV *sv)
 {
     STRLEN len;
-    const I32 flags = PL_op->op_private;
-    const I32 hasutf = flags & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF);
+    const U8 flags = PL_op->op_private;
+    const U8 hasutf = flags & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF);
 
     PERL_ARGS_ASSERT_DO_TRANS;
 
