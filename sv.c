@@ -9323,7 +9323,7 @@ Creates a new SV and copies a string into it, which may contain C<NUL> character
 (C<\0>) and other binary data.  The reference count for the SV is set to 1.
 Note that if C<len> is zero, Perl will create a zero length (Perl) string.  You
 are responsible for ensuring that the source buffer is at least
-C<len> bytes long.  If the C<buffer> argument is NULL the new SV will be
+C<len> bytes long.  If the C<s> argument is NULL the new SV will be
 undefined.
 
 =cut
