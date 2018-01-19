@@ -4081,7 +4081,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_RV2HV:
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
            PL_modcount = RETURN_UNLIMITED_NUMBER;
-	    return o;		/* Treat \(@foo) like ordinary list. */
+           /* Treat \(@foo) like ordinary list, but still mark it as modi-
+              fiable since some contexts need to know.  */
+           o->op_flags |= OPf_MOD;
+           return o;
 	}
 	/* FALLTHROUGH */
     case OP_RV2GV:
@@ -4146,7 +4149,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_PADHV:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS)
-	    return o;		/* Treat \(@foo) like ordinary list. */
+	{
+           /* Treat \(@foo) like ordinary list, but still mark it as modi-
+              fiable since some contexts need to know.  */
+	    o->op_flags |= OPf_MOD;
+	    return o;
+	}
 	if (scalar_mod_type(o, type))
 	    goto nomod;
 	if ((o->op_flags & OPf_WANT) != OPf_WANT_SCALAR
