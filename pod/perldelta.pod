@@ -293,6 +293,11 @@ Several fix-ups for F<configure.com>, marking function VMS has
 
 =item *
 
+The C<printf> format specifier C<%.0f> no longer rounds incorrectly
+[perl #47602], and now shows the correct sign for a negative zero.
+
+=item *
+
 Fixed a use after free bug in pp_list introduced in 5.27.1.  [perl #131954]
 
 =item *
