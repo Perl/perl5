@@ -494,11 +494,13 @@ sub _source_location {
 
     my $caller_filename = (caller)[1];
 
-    return File::Spec->rel2abs(
+    my $loc = File::Spec->rel2abs(
         File::Spec->catpath(
-            (File::Spec->splitpath($caller_filename))[0, 1]
+            (File::Spec->splitpath($caller_filename))[0, 1], ''
         )
     );
+
+    return ($loc =~ /^(.*)$/)[0]; # untaint
 }
 
 1
