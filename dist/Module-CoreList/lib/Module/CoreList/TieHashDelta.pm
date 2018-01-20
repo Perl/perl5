@@ -1,7 +1,7 @@
 # For internal Module::CoreList use only.
 package Module::CoreList::TieHashDelta;
 use strict;
-our $VERSION = '5.20180120';
+our $VERSION = '5.20180220';
 
 sub TIEHASH {
     my ($class, $changed, $removed, $parent) = @_;
