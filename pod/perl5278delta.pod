@@ -1,0 +1,524 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5278delta - what is new for perl v5.27.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.27.7 release and the 5.27.8
+release.
+
+If you are upgrading from an earlier release such as 5.27.6, first read
+L<perl5277delta>, which describes differences between 5.27.6 and 5.27.7.
+
+=head1 Core Enhancements
+
+=head2 Close-on-exec flag set atomically
+
+When opening a file descriptor, perl now generally opens it with its
+close-on-exec flag already set, on platforms that support doing so.
+This improves thread safety, because it means that an C<exec> initiated
+by one thread can no longer cause a file descriptor in the process
+of being opened by another thread to be accidentally passed to the
+executed program.
+
+Additionally, perl now sets the close-on-exec flag more reliably, whether
+it does so atomically or not.  Most file descriptors were getting the
+flag set, but some were being missed.
+
+=head2 Mixed Unicode scripts are now detectable
+
+A mixture of scripts, such as Cyrillic and Latin, in a string is often
+the sign of a spoofing attack.  A new regular expression construct
+now allows for easy detection of these.  For example, you can say
+
+ qr/(?script_run: \d+ \b )/x
+
+And the digits matched will all be from the same set of 10.  You won't
+get a look-alike digit from a different script that has a different
+value than what it appears to be.
+
+=head2 String- and number-specific bitwise ops are no longer experimental
+
+The new string-specific (C<&. |. ^. ~.>) and number-specific (C<& | ^ ~>)
+bitwise operators introduced in Perl 5.22 are no longer experimental.
+Because the number-specific ops are spelled the same way as the existing
+operators that choose their behaviour based on their operands, these
+operators must still be enabled via the "bitwise" feature, in either of
+these two ways:
+
+    use feature "bitwise";
+
+    use v5.28; # "bitwise" now included
+
+They are also now enabled by the B<-E> command-line switch.
+
+The "bitwise" feature no longer emits a warning.  Existing code that
+disables the "experimental::bitwise" warning category that the feature
+previously used will continue to work.
+
+One caveat that module authors ought to be aware of is that the numeric
+operators now pass a fifth TRUE argument to overload methods.  Any methods
+that check the number of operands may croak if they do not expect so many.
+XS authors in particular should be aware that this:
+
+    SV *
+    bitop_handler (lobj, robj, swap)
+
+may need to be changed to this:
+
+    SV *
+    bitop_handler (lobj, robj, swap, ...)
+
+=head1 Incompatible Changes
+
+=head2 Smartmatch and switch reversion
+
+The changes to the experimental smart match operator (C<~~>) and switch
+(C<given>/C<when>) constructs that were made in Perl 5.27.7 have been
+reverted due to the extent of the trouble caused to CPAN modules.
+It is expected that smartmatch will be changed again in the future,
+but preceded by some kind of explicit deprecation.
+
+=head2 Subroutine attribute and signature order
+
+The experimental subroutine signatures feature has been changed so that
+subroutine attributes must now come before the signature rather than
+after. This is because attributes like C<:lvalue> can affect the
+compilation of code within the signature, for example:
+
+    sub f :lvalue ($a = do { $x = "abc"; return substr($x,0,1)}) { ...}
+
+Note that this the second time they have been flipped:
+
+    sub f :lvalue ($a, $b) { 1 }; # 5.20; 5.28 onwards
+    sub f ($a, $b) :lvalue { 1 }; # 5.22 - 5.26
+
+=head1 Deprecations
+
+=head2 Use of code points over 0xFF in string bitwise operators
+
+Some uses of these already are illegal after a previous deprecation
+cycle.  This deprecates the remaining uses.  See L<perldeprecation>.
+
+=head2 Use of unescaped C<"{"> immediately after a C<"("> in regular
+expression patterns
+
+Using unescaped left braces is officially deprecated everywhere, but it
+is not enforced in contexts where their use does not interfere with
+expected extensions to the language.  A deprecation is added in this
+release when the brace appears immediately after an opening parenthesis.
+Before this, even if the brace was part of a legal quantifier, it was
+not interpreted as such, but as the literal characters, unlike other
+quantifiers that follow a C<"("> which are considered errors.  Now,
+their use will raise a deprecation message, unless turned off.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+The performance of pattern matching C<[[:ascii:]]> and C<[[:^ascii:]]>
+has been improved significantly except on EBCDIC platforms.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.73 to 1.74.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.46 to 1.47.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.169 to 2.170.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.37 to 3.38.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 6.00 to 6.01.
+
+=item *
+
+L<Encode> has been upgraded from version 2.93 to 2.94.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<feature> has been upgraded from version 1.50 to 1.51.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.71 to 3.72.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.97000 to 2.97001.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20171220 to 5.20180120.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<overload> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<Pod::Functions> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+The podlators bundle has been upgraded from version 4.09 to 4.10.
+
+Man page references and function names now follow the Linux man page
+formatting standards, instead of the Solaris standard.
+
+=item *
+
+L<Socket> has been upgraded from version 2.020_04 to 2.027.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9748 to 1.9752.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.69 to 0.70.
+
+The function C<num> now accepts an optional parameter to help in
+diagnosing error returns.
+
+=item *
+
+L<utf8> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<warnings> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.29 to 0.30.
+
+Platforms that use C<mod2fname> to edit the names of loadable
+libraries now look for bootstrap (.bs) files under the correct,
+non-edited name.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlembed>
+
+=over 4
+
+=item *
+
+An example in L<perlembed> used the string value of C<ERRSV> as a
+format string when calling croak().  If that string contains format
+codes such as C<%s> this could crash the program.
+
+This has been changed to a call to croak_sv().
+
+An alternative could have been to supply a trivial format string:
+
+  croak("%s", SvPV_nolen(ERRSV));
+
+or as a special case for C<ERRSV> simply:
+
+  croak(NULL);
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Improve the documentation of C<each> with a slightly more
+explicit description of the sharing of iterator state, and with
+caveats regarding the fragility of while-each loops. [perl #132644]
+
+=back
+
+=head3 L<perlfunc>, L<perlop>, L<perlsyn>
+
+=over 4
+
+=item *
+
+Improve the documentation of while condition magic in various
+places. [perl #132644]
+
+=back
+
+=head3 L<perlrun>
+
+=over 4
+
+=item *
+
+Clarify the documentation of B<< -m >>. [perl #131518]
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Can't "goto" into a binary or list expression|perldiag/"Can't E<quot>gotoE<quot> into a binary or list expression">
+
+Use of C<goto> to jump into the parameter of a binary or list operator has
+been prohibited, to prevent crashes and stack corruption.  [perl #130936]
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The C<< Unable to flush stdout >> error message was missing a trailing
+newline. [debian #875361]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+Allow override of watchdog timer count in F<re/pat_psycho.t>.
+
+This test can take a long time to run, so there is a timer to keep
+this in check (currently, 5 minutes). This commit adds checking
+the environment variable C<< PERL_TEST_TIME_OUT_FACTOR >>; if set,
+the time out setting is multiplied by its value.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Cygwin
+
+A build with the quadmath library can now be done on Cygwin.
+
+=item FreeBSD
+
+FreeBSD's F<< /usr/share/mk/sys.mk >> specifies C<< -O2 >> for
+architectures other than arm and mips. By default, compile perl
+with the same optimization levels.
+
+=item VMS
+
+Several fix-ups for F<configure.com>, marking function VMS has
+(or doesn't have).
+
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The format of the non-utf8 transliteration table attached to the C<op_pv>
+field of C<OP_TRANS>/C<OP_TRANSR> ops has changed. It's now a
+C<struct OPtrans_map>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The C<printf> format specifier C<%.0f> no longer rounds incorrectly
+[perl #47602], and now shows the correct sign for a negative zero.
+
+=item *
+
+Fixed a use after free bug in pp_list introduced in 5.27.1.  [perl #131954]
+
+=item *
+
+Don't stringify numeric first arguments to
+C<< system() >> on Windows or VMS. [perl #132633]
+
+=item * 
+
+Fixed an issue where the error C<< Scalar value @arrayname[0] better
+written as $arrayname >> would give an error C<< Cannot printf Inf with 'c' >>
+when arrayname starts with C<< Inf >>. [perl #132645]
+
+=item *
+
+The Perl implementation of C<< getcwd() >> in C<< Cwd >> in the PathTools
+distribution now behaves the same as XS implementation on errors: it
+returns an error, and sets C<< $! >>. [perl #132648]
+
+=item *
+
+Fixed argument counting in multiconcat when concatenating adjacent constants.
+[perl #132646]
+
+=item *
+
+Vivify array elements when putting them on the stack.
+Fixes [perl #8910] (reported in April 2002).
+
+=item *
+
+Fixed parsing of braced subscript after parens. Fixes [perl #8045]
+(reported in December 2001).
+
+=item *
+
+C<tr/non_utf8/long_non_utf8/c> could give the wrong results when the
+length of the replacement character list was greater than 0x7fff.
+
+=item *
+
+C<tr/non_utf8/non_utf8/cd> failed to add the implied
+C<\x{100}-\x{7fffffff}> to the search character list.
+
+=back
+
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+The bugfix for [perl #2754] in Perl 5.27.7 turned out to cause so much
+trouble on CPAN [perl #132577] that it is being postponed.  The bug has
+been restored, so C<exit(0)> in a C<UNITCHECK> or C<CHECK> block now
+once again permits the main program to run, and C<exit(0)> in a C<BEGIN>
+block once again permits C<INIT> blocks to run before exiting.  The bug
+will be fixed again for Perl 5.30.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.27.8 represents approximately 4 weeks of development since Perl
+5.27.7 and contains approximately 33,000 lines of changes across 290 files
+from 17 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 25,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.27.8:
+
+Abigail, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker,
+David Mitchell, Father Chrysostomos, James E Keenan, Karen Etheridge, Karl
+Williamson, Niko Tyni, Pali, Peter John Acklam, Scott Lanning, Tomasz
+Konojacki, Tom Hukins, Tony Cook, Zefram.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
