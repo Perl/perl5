@@ -42,7 +42,7 @@ Both of these or neither
 <commit votes="xsawyerx khw" id="b2cd5cb1d8b3c8a7a7f033784d5134d2fbd8cad8" ticket="" desc="Unicode::UCD: max code point is now IV_MAX" />
 <commit votes="khw" id="0202c428e2e1febe76c0cfbb1a64a76cd3f6f756" ticket="" desc="update perldiag to account for max code point being signed" />
 
-<commit votes="tonyc" id="57bd660029d94312ca4eb88993889d981f41b484" ticket="131954" desc="heap-use-after-free in pp.c:Perl_pp_list()" />
+<commit votes="tonyc xsawyerx" id="57bd660029d94312ca4eb88993889d981f41b484" ticket="131954" desc="heap-use-after-free in pp.c:Perl_pp_list()" />
 
 </div>
 
