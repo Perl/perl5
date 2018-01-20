@@ -233,9 +233,6 @@ non-edited name.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
