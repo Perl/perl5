@@ -17,6 +17,38 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.8 - Jasper Fforde, "Shades of Grey"
+
+L<Announced on 2018-01-20 by Abigail|http://nntp.perl.org/group/perl.perl5.porters/248914>
+
+2.4.16.55.021: Males are to wear dresscode #6 during inter-Collective
+travel. Hats are encouraged, but not required.
+
+9.3.88.32.025: The cucumber and tomato are both fruit; the avocado
+is a nut. To assist with the dietary requirements of vegetarians,
+on the first Tuesday of the month a chicken is officially a vegetable.
+
+5.3.21.01.002: Once allocated, postcodes are permanent, and for life.
+
+6.1.02.11.235: Artifacture from before the Something That Happened
+may be collected, so long it does not appear on the Leapback list
+or possess color above 23 percent saturation.
+
+2.3.06.02.087: Unnecessary sharpening of pencils constitutes a waste
+of public resources, and will be punished as appropriate.
+
+2.1.01.05.002: All children are to attent school until the age of
+sixteen or until they have learned everything, whichever be the sooner.
+
+1.3.02.06.023: There shall be no staring at the sun, however good
+the reason.
+
+1.1.19.02.006: Team sports are mandatory in order to build character.
+Character is there to give purpose to team sports.
+
+2.3.03.01.006: Juggling shall not be practiced after 4:00 pm.
+
+
 =head2 v5.27.7 - Terry Pratchett, "Hogfather"
 
 L<Announced on 2017-12-20 by Chris 'BinGOs' Williams|https://www.nntp.perl.org/group/perl.perl5.porters/2017/12/msg248274.html>
