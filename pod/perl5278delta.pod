@@ -33,7 +33,7 @@ A mixture of scripts, such as Cyrillic and Latin, in a string is often
 the sign of a spoofing attack.  A new regular expression construct
 now allows for easy detection of these.  For example, you can say
 
- qr/(?script_run: \d+ \b )/x
+ qr/(+script_run: \d+ \b )/x
 
 And the digits matched will all be from the same set of 10.  You won't
 get a look-alike digit from a different script that has a different

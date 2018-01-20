@@ -2470,7 +2470,7 @@ own set.  This is because these are often used in commerce even in such
 scripts.  But any mixing of the ASCII and other digits will cause the
 sequence to not be a script run, failing the match.  As an example,
 
- qr/(?script_run: \d+ \b )/x
+ qr/(+script_run: \d+ \b )/x
 
 guarantees that the digits matched will all be from the same set of 10.
 You won't get a look-alike digit from a different script that has a
