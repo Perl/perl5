@@ -127,25 +127,84 @@ has been improved significantly except on EBCDIC platforms.
 
 =head1 Modules and Pragmata
 
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<B> has been upgraded from version 1.73 to 1.74.
 
-If there was something important to note about this change, include that here.
+=item *
+
+L<B::Deparse> has been upgraded from version 1.46 to 1.47.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.169 to 2.170.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.37 to 3.38.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 6.00 to 6.01.
+
+=item *
+
+L<Encode> has been upgraded from version 2.93 to 2.94.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<feature> has been upgraded from version 1.50 to 1.51.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.71 to 3.72.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.97000 to 2.97001.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20171220 to 5.20180120.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<overload> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<Pod::Functions> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+The podlators bundle has been upgraded from version 4.09 to 4.10.
+
+Man page references and function names now follow the Linux man page
+formatting standards, instead of the Solaris standard.
+
+=item *
+
+L<Socket> has been upgraded from version 2.020_04 to 2.027.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9748 to 1.9752.
 
 =item *
 
@@ -156,24 +215,19 @@ diagnosing error returns.
 
 =item *
 
+L<utf8> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<warnings> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
 L<XSLoader> has been upgraded from version 0.29 to 0.30.
 
-Platforms that use C<mod2fname> to edit the names of loadable libraries now look for
-bootstrap (.bs) files under the correct, non-edited name.
-
-=item *
-
-L<Socket> has been upgraded from version 2.020_04 to 2.027.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
+Platforms that use C<mod2fname> to edit the names of loadable
+libraries now look for bootstrap (.bs) files under the correct,
+non-edited name.
 
 =back
 
