@@ -1097,13 +1097,13 @@ to use the system's default locale.  This is often, but not necessarily,
 the "C" or "POSIX" locale.  Absent a S<C<"use locale">> within the perl
 code, this mostly has no effect (but see L<perllocale/Not within the
 scope of "use locale">).  Also, there is not a problem if the
-locale you want to use in your embedded Perl is the same as the system
+locale you want to use in your embedded perl is the same as the system
 default.  However, this doesn't work if you have set up and want to use
 a locale that isn't the system default one.  Starting in Perl v5.20, you
 can tell the embedded Perl interpreter that the locale is already
 properly set up, and to skip doing its own normal initialization.  It
 skips if the environment variable C<PERL_SKIP_LOCALE_INIT> is set (even
-if set to 0 or C<"">).  A Perl that has this capability will define the
+if set to 0 or C<"">).  A perl that has this capability will define the
 C pre-processor symbol C<HAS_SKIP_LOCALE_INIT>.  This allows code that
 has to work with multiple Perl versions to do some sort of work-around
 when confronted with an earlier Perl.
