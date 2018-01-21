@@ -307,6 +307,12 @@ source tree.
 
 XXX
 
+=item VMS
+
+CRTL features can now be set by embedders before invoking Perl by using the
+C<decc$feature_set> and C<decc$feature_set_value> functions.  Previously any attempt
+to set features after image initialization were ignored.
+
 =back
 
 =head2 Discontinued Platforms
