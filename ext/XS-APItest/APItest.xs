@@ -1452,7 +1452,7 @@ test_uvchr_to_utf8_flags(uv, flags)
         SV *uv
         SV *flags
     PREINIT:
-        U8 dest[UTF8_MAXBYTES];
+        U8 dest[UTF8_MAXBYTES + 1];
         U8 *ret;
 
     CODE:

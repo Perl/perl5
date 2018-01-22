@@ -13267,7 +13267,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    char *p;
 	    char *s;
 #define MAX_NODE_STRING_SIZE 127
-	    char foldbuf[MAX_NODE_STRING_SIZE+UTF8_MAXBYTES_CASE];
+	    char foldbuf[MAX_NODE_STRING_SIZE+UTF8_MAXBYTES_CASE+1];
 	    char *s0;
 	    U8 upper_parse = MAX_NODE_STRING_SIZE;
             U8 node_type = compute_EXACTish(pRExC_state);
@@ -17013,7 +17013,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             {
                 /* Here <value> is indeed a multi-char fold.  Get what it is */
 
-                U8 foldbuf[UTF8_MAXBYTES_CASE];
+                U8 foldbuf[UTF8_MAXBYTES_CASE+1];
                 STRLEN foldlen;
 
                 UV folded = _to_uni_fold_flags(

@@ -1288,7 +1288,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		STRLEN retlen;
 		UV auv;
 		if (utf8) {
-		    U8 result[UTF8_MAXLEN];
+		    U8 result[UTF8_MAXLEN+1];
 		    const char *ptr = s;
 		    STRLEN len;
 		    /* Bug: warns about bad utf8 even if we are short on bytes
@@ -2643,7 +2643,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		auv = SvUV_no_inf(fromstr, datumtype);
 		if (utf8) {
-		    U8 buffer[UTF8_MAXLEN], *endb;
+		    U8 buffer[UTF8_MAXLEN+1], *endb;
 		    endb = uvchr_to_utf8_flags(buffer, UNI_TO_NATIVE(auv), 0);
 		    if (cur+(endb-buffer)*UTF8_EXPAND >= end) {
 			*cur = '\0';
