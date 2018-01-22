@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20180220';
+our $VERSION = '5.20180222';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -15051,6 +15051,11 @@ sub is_core
     # On the way if we pass the required module version, we can
     # short-circuit and return true
     if (defined($module_version)) {
+        my $module_version_object = eval { version->parse($module_version) };
+        if (!defined($module_version_object)) {
+            (my $err = $@) =~ s/^Invalid version format\b/Invalid version '$module_version' specified/;
+            die $err;
+        }
         # The Perl releases aren't a linear sequence, but a tree. We need to build the path
         # of releases from 5 to the specified release, and follow the module's version(s)
         # along that path.
@@ -15068,7 +15073,7 @@ sub is_core
             last RELEASE if $prn > $perl_version;
             next unless defined(my $next_module_version
                                    = $delta{$prn}->{changed}->{$module});
-            return 1 if version->parse($next_module_version) >= version->parse($module_version);
+            return 1 if eval { version->parse($next_module_version) >= $module_version_object };
         }
         return 0;
     }
