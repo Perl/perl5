@@ -433,7 +433,9 @@ if ($] ge '5.006') {
     skip 'skip: no utf8 support', 0 for 1..12;
 }
 
-if ($] ge '5.008') {
+if (ord('A') != 65) {
+    skip 'skip: no ASCII support', 0 for 1..24;
+} elsif ($] ge '5.008') {
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv(eval '"\N{U+E1}\n"') };
     ok $@, "\xE1\n";
