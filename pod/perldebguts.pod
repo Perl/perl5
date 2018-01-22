@@ -605,6 +605,8 @@ will be lost.
                             single char match only
  ANYOFD          sv 1       Like ANYOF, but /d is in effect
  ANYOFL          sv 1       Like ANYOF, but /l is in effect
+ ANYOFM          byte 1     Like ANYOF, but matches an invariant byte as
+                            determined by the mask and arg
 
  # POSIX Character Classes:
  POSIXD          none       Some [[:class:]] under /d; the FLAGS field
