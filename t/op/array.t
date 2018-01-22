@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (185);
+plan (188);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -622,6 +622,22 @@ $#a = -1; $#a++;
     is join(",", @existing_elements), "1,2,3,4,5",
        'map {} @a does not vivify elements';
     $#a = -1;
+    {local $a[3] = 12; my @foo=@a};
+    is @a, 0,'unwinding localization of elem past end of array shrinks it';
+}
+{
+    # Again, but with a non-magical array ($#a makes it magical)
+    my @a = 1;
+    delete $a[0];
+    my @b = @a;
+    ok !exists $a[0], 'copying an array via = does not vivify elements';
+    delete $a[0];
+    @a[1..5] = 1..5;
+    my $count;
+    my @existing_elements = map { exists $a[$count++] ? $_ : () } @a;
+    is join(",", @existing_elements), "1,2,3,4,5",
+       'map {} @a does not vivify elements';
+    @a = ();
     {local $a[3] = 12; my @foo=@a};
     is @a, 0, 'unwinding localization of elem past end of array shrinks it'
 }
