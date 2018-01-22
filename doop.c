@@ -1018,7 +1018,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     STRLEN rightlen;
     const char *lc;
     const char *rc;
-    STRLEN len;
+    STRLEN len = 0;
     STRLEN lensave;
     const char *lsave;
     const char *rsave;
