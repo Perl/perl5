@@ -467,6 +467,8 @@ S_refto(pTHX_ SV *sv)
     else if (SvPADTMP(sv)) {
         sv = newSVsv(sv);
     }
+    else if (UNLIKELY(SvSMAGICAL(sv) && mg_find(sv, PERL_MAGIC_nonelem)))
+        sv_unmagic(SvREFCNT_inc_simple_NN(sv), PERL_MAGIC_nonelem);
     else {
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);

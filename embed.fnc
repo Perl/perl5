@@ -282,6 +282,7 @@ ApdR	|SV**	|av_fetch	|NN AV *av|SSize_t key|I32 lval
 Apd	|void	|av_fill	|NN AV *av|SSize_t fill
 ApdR	|SSize_t|av_len		|NN AV *av
 ApdR	|AV*	|av_make	|SSize_t size|NN SV **strp
+p	|SV*	|av_nonelem	|NN AV *av|SSize_t ix
 Apd	|SV*	|av_pop		|NN AV *av
 ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NN AV *av|NN SV *val
@@ -1025,6 +1026,7 @@ p	|int	|magic_freearylen_p|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdebugvar|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdefelem|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setnonelem|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setenv	|NN SV* sv|NN MAGIC* mg
 dp	|int	|magic_sethint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setisa	|NN SV* sv|NN MAGIC* mg

@@ -2516,6 +2516,15 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 }
 
 int
+Perl_magic_setnonelem(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_SETNONELEM;
+    PERL_UNUSED_ARG(mg);
+    sv_unmagic(sv, PERL_MAGIC_nonelem);
+    return 0;
+}
+
+int
 Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_KILLBACKREFS;
