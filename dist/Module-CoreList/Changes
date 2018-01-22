@@ -1,7 +1,5 @@
-5.20180222
-  - Improve handling of broken versions in is_core()
-
 5.20180220
+  - Improve handling of broken versions in is_core()
   - Updated for v5.27.9
 
 5.20180120
