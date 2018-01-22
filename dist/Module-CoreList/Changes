@@ -1,5 +1,6 @@
 5.20180220
   - Improve handling of broken versions in is_core()
+  - Removed Module::CoreList::TieHashDelta
   - Updated for v5.27.9
 
 5.20180120

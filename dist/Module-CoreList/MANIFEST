@@ -3,7 +3,6 @@ corelist
 identify-dependencies
 lib/Module/CoreList.pm
 lib/Module/CoreList.pod
-lib/Module/CoreList/TieHashDelta.pm
 lib/Module/CoreList/Utils.pm
 README
 MANIFEST

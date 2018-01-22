@@ -15021,7 +15021,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'B::Op_private'         => '5.027009',
             'Config'                => '5.027009',
             'Module::CoreList'      => '5.20180220',
-            'Module::CoreList::TieHashDelta'=> '5.20180220',
             'Module::CoreList::Utils'=> '5.20180220',
         },
         removed => {
@@ -15886,6 +15885,7 @@ sub is_core
         changed => {
         },
         removed => {
+            'Module::CoreList::TieHashDelta'=> 1,
         }
     },
 );

@@ -598,7 +598,6 @@ It may also happen that C<Module::CoreList> has been modified in blead, and
 hence has a new version number already.  (But make sure it is not the same
 number as a CPAN release.)
 
-C<$Module::CoreList::TieHashDelta::VERSION> and
 C<$Module::CoreList::Utils::VERSION> should always be equal to
 C<$Module::CoreList::VERSION>. If necessary, bump those two versions to match
 before proceeding.
@@ -614,10 +613,6 @@ F<dist/Module-CoreList/lib/Module/CoreList.pm>
 =item *
 
 F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>
-
-=item *
-
-F<dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm>
 
 =back
 
@@ -1452,9 +1447,8 @@ which should be identical to what is currently in blead.
 
 =item *
 
-Bump the $VERSION in F<dist/Module-CoreList/lib/Module/CoreList.pm>,
-F<dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm> and
-F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
+Bump the $VERSION in F<dist/Module-CoreList/lib/Module/CoreList.pm>
+and F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
 
 =item *
 

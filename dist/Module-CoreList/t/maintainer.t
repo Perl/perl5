@@ -7,7 +7,6 @@ plan skip_all => 'These tests only run in core'
 
 my @mods = qw[
 Module::CoreList
-Module::CoreList::TieHashDelta
 Module::CoreList::Utils
 ];
 

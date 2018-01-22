@@ -97,7 +97,6 @@ my %skip;
     'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'dist/Module-CoreList/lib/Module/CoreList.pm',
-    'dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm',
     'dist/Module-CoreList/lib/Module/CoreList/Utils.pm',
     'lib/Carp/Heavy.pm',
     'lib/Config.pm',		# no version number but contents will vary
