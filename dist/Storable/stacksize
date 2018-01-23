@@ -8,7 +8,7 @@ use strict;
 
 my $fn = "lib/Storable/Limit.pm";
 my $ptrsize = $Config{ptrsize};
-my ($bad1, $bad2) = (45000, 25000);
+my ($bad1, $bad2) = (65001, 25000);
 sub QUIET () {
     (defined $ENV{MAKEFLAGS} and $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/
      and !defined($ENV{TRAVIS}))
