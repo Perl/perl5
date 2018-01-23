@@ -19,10 +19,8 @@ mess_nocontext
 mess
 
 warn_nocontext
-Perl_warn_nocontext
 
 croak_nocontext
-Perl_croak_nocontext
 
 croak_no_modify
 Perl_croak_no_modify
@@ -184,16 +182,8 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 #define warn_nocontext warn
 #endif
 
-#ifndef Perl_warn_nocontext
-#define Perl_warn_nocontext warn_nocontext
-#endif
-
 #ifndef croak_nocontext
 #define croak_nocontext croak
-#endif
-
-#ifndef Perl_croak_nocontext
-#define Perl_croak_nocontext croak_nocontext
 #endif
 
 #ifndef croak_no_modify
