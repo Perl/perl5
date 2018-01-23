@@ -43,7 +43,6 @@ C_ARRAY_LENGTH
 C_ARRAY_END
 SvRX
 SvRXOK
-PERL_MAGIC_qr
 cBOOL
 OpHAS_SIBLING
 OpSIBLING
@@ -52,8 +51,6 @@ OpLASTSIB_set
 OpMAYBESIB_set
 
 =implementation
-
-__UNDEFINED__ PERL_MAGIC_qr             'r'
 
 __UNDEFINED__ cBOOL(cbool) ((cbool) ? (bool)1 : (bool)0)
 __UNDEFINED__ OpHAS_SIBLING(o)      (cBOOL((o)->op_sibling))

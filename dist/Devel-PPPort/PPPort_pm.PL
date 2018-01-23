@@ -620,6 +620,8 @@ __DATA__
 
 %include memory
 
+%include magic
+
 %include misc
 
 %include format
@@ -659,8 +661,6 @@ __DATA__
 %include warn
 
 %include pvs
-
-%include magic
 
 %include cop
 
