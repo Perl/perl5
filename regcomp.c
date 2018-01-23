@@ -17400,7 +17400,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         goto join_posix;
                     }
 #endif
-                    /* (named_class - ANY_OF_ASCII) is 0 or 1. xor'ing with
+                    /* (named_class - ANYOF_ASCII) is 0 or 1. xor'ing with
                      * invert converts that to 1 or 0 */
                     op = ASCII + ((namedclass - ANYOF_ASCII) ^ invert);
                     break;
