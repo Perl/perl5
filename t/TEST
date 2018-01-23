@@ -315,7 +315,8 @@ sub _cmd {
             my $perl_supp = $options->{return_dir} ? "$options->{return_dir}/perl.supp" : "perl.supp";
             my $valgrind_exe = $ENV{VALGRIND} // 'valgrind';
             if ($options->{run_dir}) {
-                $Valgrind_Log = "$options->{run_dir}/$Valgrind_Log";
+                require Cwd;
+                $Valgrind_Log = Cwd::abs_path("$options->{run_dir}/$Valgrind_Log");
             }
             my $vg_opts = $ENV{VG_OPTS}
 	       //   "--log-file=$Valgrind_Log "
