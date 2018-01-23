@@ -494,7 +494,7 @@ copy_expand_unix_filename_escape(char *outspec, const char *inspec, int *output_
 	return 1;
 	break;
     case '?':
-	if (DECC_EFS_CHARSET)
+	if (!DECC_EFS_CHARSET)
 	  outspec[0] = '%';
 	else
 	  outspec[0] = '?';
