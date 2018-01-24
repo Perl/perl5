@@ -119,6 +119,14 @@ This warning is emitted when you try to store a key or a value that
 is too long.  It means that the change was not recorded in the
 database.  See BUGS AND WARNINGS below.
 
+=head1 SECURITY WARNING
+
+B<Do not accept SDBM files from untrusted sources!>
+
+The sdbm file format was designed for speed and convenience, not for
+portability or security.  A maliciously crafted file might cause perl to
+crash or even expose a security vulnerability.
+
 =head1 BUGS AND WARNINGS
 
 There are a number of limits on the size of the data that you can
