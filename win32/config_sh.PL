@@ -260,19 +260,20 @@ else {
     $opt{nvgformat} = '"g"';
 }
 
-# change the s{GM|LOCAL}TIME_{min|max} for VS2005 (aka VC 8) and
-# VS2008 (aka VC 9) or higher (presuming that later versions will have
-# at least the range of that).
+# change some configuration variables based on compiler version
 if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
     my $ccversion = $1;
-    if ($ccversion >= 14) {
+    if ($ccversion < 13) { # VC6
+	$opt{ar} ='lib';
+    }
+    if ($ccversion >= 14) { # VC8+
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
-    if ($ccversion < 13) { #VC6
-	$opt{ar} ='lib';
+    if ($ccversion >= 16) { # VC10+
+	$opt{i_stdint} = 'define';
     }
-    if ($ccversion >= 19) { # VC14
+    if ($ccversion >= 19) { # VC14+
 	$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
 	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
 	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
@@ -280,15 +281,18 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 	$opt{i_stdbool} = 'define';
     }
 }
-#find out which MSVC this ICC is using
+# find out which MSVC this ICC is using
 elsif ($opt{cc} =~ /\bicl/) {
     my $output = `cl 2>&1`;
     my $num_ver = $output =~ /\b(\d+(?:\.\d+)+)\b/ ? $1 : '?';
-    if ($num_ver =~ /^(\d+)/ && $1 >= 14) {
+    if ($num_ver =~ /^(\d+)/ && $1 >= 14) { # VC8+
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
-    if ($num_ver =~ /^(\d+)/ && $1 >= 19) { # VC14
+    if ($num_ver =~ /^(\d+)/ && $1 >= 16) { # VC10+
+	$opt{i_stdint} = 'define';
+    }
+    if ($num_ver =~ /^(\d+)/ && $1 >= 19) { # VC14+
 	$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
 	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
 	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';

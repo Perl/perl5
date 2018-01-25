@@ -3662,7 +3662,7 @@
  *	This symbol, if defined, indicates that <stdint.h> exists and
  *	should be included.
  */
-/*#define I_STDINT		/ **/
+#define I_STDINT		/**/
 
 /* I_SUNMATH:
  *	This symbol, if defined, indicates that <sunmath.h> exists and
