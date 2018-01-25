@@ -20604,9 +20604,9 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      *      was not resolved at the time of the regex compilation (under /u)
      *  'only_utf8_locale_invlist' is an inversion list of the code points that
      *      are valid only if the runtime locale is a UTF-8 one; NULL if none
-     *  'node' is the regex pattern node.  It is needed only when the above two
-     *      parameters are not null, and is passed so that this routine can
-     *      tease apart the various reasons for them.
+     *  'node' is the regex pattern ANYOF node.  It is needed only when the
+     *      above two parameters are not null, and is passed so that this
+     *      routine can tease apart the various reasons for them.
      *  'force_as_is_display' is TRUE if this routine should definitely NOT try
      *      to invert things to see if that leads to a cleaner display.  If
      *      FALSE, this routine is free to use its judgment about doing this.
