@@ -206,7 +206,7 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 #ifndef croak_xs_usage
 #if { NEED croak_xs_usage }
 void
-croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
+croak_xs_usage(const CV *const cv, const char *const params)
 {
     const GV *const gv = CvGV(cv);
 
