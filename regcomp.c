@@ -18100,8 +18100,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         invlist_iterfinish(cp_list);
 
         if (op == END) {
-            const UV cp_list_len = _invlist_len(cp_list);
-            const UV* cp_list_array = invlist_array(cp_list);
 
             /* Here, didn't find an optimization.  See if this matches any of
              * the POSIX classes.  First try ASCII */
@@ -18114,7 +18112,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 op = NASCII;
                 *flagp |= HASWIDTH|SIMPLE;
             }
-            else if (cp_list_array[cp_list_len-1] >= 0x2029) {
+            else if (invlist_highest(cp_list) >= 0x2029) {
 
                 /* Then try the other POSIX classes.  The POSIXA ones are about
                  * the same speed as ANYOF ops, but the ones that have
