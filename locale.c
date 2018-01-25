@@ -1476,349 +1476,363 @@ S_my_nl_langinfo(const int item, bool toggle)
     return PL_langinfo_buf;
 
 #else   /* Below, emulate nl_langinfo as best we can */
+
+    {
+
 #  ifdef HAS_LOCALECONV
 
-    const struct lconv* lc;
+        const struct lconv* lc;
 
 #  endif
 #  ifdef HAS_STRFTIME
 
-    struct tm tm;
-    bool return_format = FALSE; /* Return the %format, not the value */
-    const char * format;
+        struct tm tm;
+        bool return_format = FALSE; /* Return the %format, not the value */
+        const char * format;
 
 #  endif
 
-    /* We copy the results to a per-thread buffer, even if not multi-threaded.
-     * This is in part to simplify this code, and partly because we need a
-     * buffer anyway for strftime(), and partly because a call of localeconv()
-     * could otherwise wipe out the buffer, and the programmer would not be
-     * expecting this, as this is a nl_langinfo() substitute after all, so s/he
-     * might be thinking their localeconv() is safe until another localeconv()
-     * call. */
+        /* We copy the results to a per-thread buffer, even if not
+         * multi-threaded.  This is in part to simplify this code, and partly
+         * because we need a buffer anyway for strftime(), and partly because a
+         * call of localeconv() could otherwise wipe out the buffer, and the
+         * programmer would not be expecting this, as this is a nl_langinfo()
+         * substitute after all, so s/he might be thinking their localeconv()
+         * is safe until another localeconv() call. */
 
-    switch (item) {
-        Size_t len;
-        const char * retval;
+        switch (item) {
+            Size_t len;
+            const char * retval;
 
-        /* These 2 are unimplemented */
-        case PERL_CODESET:
-        case PERL_ERA:	        /* For use with strftime() %E modifier */
+            /* These 2 are unimplemented */
+            case PERL_CODESET:
+            case PERL_ERA:      /* For use with strftime() %E modifier */
 
-        default:
-            return "";
+            default:
+                return "";
 
-        /* We use only an English set, since we don't know any more */
-        case PERL_YESEXPR:   return "^[+1yY]";
-        case PERL_YESSTR:    return "yes";
-        case PERL_NOEXPR:    return "^[-0nN]";
-        case PERL_NOSTR:     return "no";
+            /* We use only an English set, since we don't know any more */
+            case PERL_YESEXPR:   return "^[+1yY]";
+            case PERL_YESSTR:    return "yes";
+            case PERL_NOEXPR:    return "^[-0nN]";
+            case PERL_NOSTR:     return "no";
 
 #  ifdef HAS_LOCALECONV
 
-        case PERL_CRNCYSTR:
+            case PERL_CRNCYSTR:
 
-            LOCALE_LOCK;
+                LOCALE_LOCK;
 
-            /* We don't bother with localeconv_l() because any system that has
-             * it is likely to also have nl_langinfo() */
+                /* We don't bother with localeconv_l() because any system that
+                 * has it is likely to also have nl_langinfo() */
 
-            lc = localeconv();
-            if (! lc || ! lc->currency_symbol || strEQ("", lc->currency_symbol))
-            {
-                LOCALE_UNLOCK;
-                return "";
-            }
+                lc = localeconv();
+                if (   ! lc
+                    || ! lc->currency_symbol
+                    || strEQ("", lc->currency_symbol))
+                {
+                    LOCALE_UNLOCK;
+                    return "";
+                }
 
-            /* Leave the first spot empty to be filled in below */
-            save_to_buffer(lc->currency_symbol, &PL_langinfo_buf,
-                           &PL_langinfo_bufsize, 1);
-            if (lc->mon_decimal_point && strEQ(lc->mon_decimal_point, ""))
-            { /*  khw couldn't figure out how the localedef specifications
-                  would show that the $ should replace the radix; this is
-                  just a guess as to how it might work.*/
-                *PL_langinfo_buf = '.';
-            }
-            else if (lc->p_cs_precedes) {
-                *PL_langinfo_buf = '-';
-            }
-            else {
-                *PL_langinfo_buf = '+';
-            }
-
-            LOCALE_UNLOCK;
-            break;
-
-        case PERL_RADIXCHAR:
-        case PERL_THOUSEP:
-
-            LOCALE_LOCK;
-
-            if (toggle) {
-                if (! PL_numeric_underlying) {
-                    do_setlocale_c(LC_NUMERIC, PL_numeric_name);
+                /* Leave the first spot empty to be filled in below */
+                save_to_buffer(lc->currency_symbol, &PL_langinfo_buf,
+                               &PL_langinfo_bufsize, 1);
+                if (lc->mon_decimal_point && strEQ(lc->mon_decimal_point, ""))
+                { /*  khw couldn't figure out how the localedef specifications
+                      would show that the $ should replace the radix; this is
+                      just a guess as to how it might work.*/
+                    *PL_langinfo_buf = '.';
+                }
+                else if (lc->p_cs_precedes) {
+                    *PL_langinfo_buf = '-';
                 }
                 else {
-                    toggle = FALSE;
+                    *PL_langinfo_buf = '+';
                 }
-            }
 
-            lc = localeconv();
-            if (! lc) {
-                retval = "";
-            }
-            else {
-                retval = (item == PERL_RADIXCHAR)
-                         ? lc->decimal_point
-                         : lc->thousands_sep;
-                if (! retval) {
+                LOCALE_UNLOCK;
+                break;
+
+            case PERL_RADIXCHAR:
+            case PERL_THOUSEP:
+
+                LOCALE_LOCK;
+
+                if (toggle) {
+                    if (! PL_numeric_underlying) {
+                        do_setlocale_c(LC_NUMERIC, PL_numeric_name);
+                    }
+                    else {
+                        toggle = FALSE;
+                    }
+                }
+
+                lc = localeconv();
+                if (! lc) {
                     retval = "";
                 }
-            }
+                else {
+                    retval = (item == PERL_RADIXCHAR)
+                             ? lc->decimal_point
+                             : lc->thousands_sep;
+                    if (! retval) {
+                        retval = "";
+                    }
+                }
 
-            save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+                save_to_buffer(retval, &PL_langinfo_buf,
+                               &PL_langinfo_bufsize, 0);
 
-            if (toggle) {
-                do_setlocale_c(LC_NUMERIC, "C");
-            }
+                if (toggle) {
+                    do_setlocale_c(LC_NUMERIC, "C");
+                }
 
-            LOCALE_UNLOCK;
+                LOCALE_UNLOCK;
 
-            break;
+                break;
 
 #  endif
 #  ifdef HAS_STRFTIME
 
-        /* These are defined by C89, so we assume that strftime supports them,
-         * and so are returned unconditionally; they may not be what the locale
-         * actually says, but should give good enough results for someone using
-         * them as formats (as opposed to trying to parse them to figure out
-         * what the locale says).  The other format items are actually tested to
-         * verify they work on the platform */
-        case PERL_D_FMT:         return "%x";
-        case PERL_T_FMT:         return "%X";
-        case PERL_D_T_FMT:       return "%c";
+            /* These are defined by C89, so we assume that strftime supports
+             * them, and so are returned unconditionally; they may not be what
+             * the locale actually says, but should give good enough results
+             * for someone using them as formats (as opposed to trying to parse
+             * them to figure out what the locale says).  The other format
+             * items are actually tested to verify they work on the platform */
+            case PERL_D_FMT:         return "%x";
+            case PERL_T_FMT:         return "%X";
+            case PERL_D_T_FMT:       return "%c";
 
-        /* These formats are only available in later strfmtime's */
-        case PERL_ERA_D_FMT: case PERL_ERA_T_FMT: case PERL_ERA_D_T_FMT:
-        case PERL_T_FMT_AMPM:
+            /* These formats are only available in later strfmtime's */
+            case PERL_ERA_D_FMT: case PERL_ERA_T_FMT: case PERL_ERA_D_T_FMT:
+            case PERL_T_FMT_AMPM:
 
-        /* The rest can be gotten from most versions of strftime(). */
-        case PERL_ABDAY_1: case PERL_ABDAY_2: case PERL_ABDAY_3:
-        case PERL_ABDAY_4: case PERL_ABDAY_5: case PERL_ABDAY_6:
-        case PERL_ABDAY_7:
-        case PERL_ALT_DIGITS:
-        case PERL_AM_STR: case PERL_PM_STR:
-        case PERL_ABMON_1: case PERL_ABMON_2: case PERL_ABMON_3:
-        case PERL_ABMON_4: case PERL_ABMON_5: case PERL_ABMON_6:
-        case PERL_ABMON_7: case PERL_ABMON_8: case PERL_ABMON_9:
-        case PERL_ABMON_10: case PERL_ABMON_11: case PERL_ABMON_12:
-        case PERL_DAY_1: case PERL_DAY_2: case PERL_DAY_3: case PERL_DAY_4:
-        case PERL_DAY_5: case PERL_DAY_6: case PERL_DAY_7:
-        case PERL_MON_1: case PERL_MON_2: case PERL_MON_3: case PERL_MON_4:
-        case PERL_MON_5: case PERL_MON_6: case PERL_MON_7: case PERL_MON_8:
-        case PERL_MON_9: case PERL_MON_10: case PERL_MON_11: case PERL_MON_12:
+            /* The rest can be gotten from most versions of strftime(). */
+            case PERL_ABDAY_1: case PERL_ABDAY_2: case PERL_ABDAY_3:
+            case PERL_ABDAY_4: case PERL_ABDAY_5: case PERL_ABDAY_6:
+            case PERL_ABDAY_7:
+            case PERL_ALT_DIGITS:
+            case PERL_AM_STR: case PERL_PM_STR:
+            case PERL_ABMON_1: case PERL_ABMON_2: case PERL_ABMON_3:
+            case PERL_ABMON_4: case PERL_ABMON_5: case PERL_ABMON_6:
+            case PERL_ABMON_7: case PERL_ABMON_8: case PERL_ABMON_9:
+            case PERL_ABMON_10: case PERL_ABMON_11: case PERL_ABMON_12:
+            case PERL_DAY_1: case PERL_DAY_2: case PERL_DAY_3: case PERL_DAY_4:
+            case PERL_DAY_5: case PERL_DAY_6: case PERL_DAY_7:
+            case PERL_MON_1: case PERL_MON_2: case PERL_MON_3: case PERL_MON_4:
+            case PERL_MON_5: case PERL_MON_6: case PERL_MON_7: case PERL_MON_8:
+            case PERL_MON_9: case PERL_MON_10: case PERL_MON_11:
+            case PERL_MON_12:
 
-            LOCALE_LOCK;
+                LOCALE_LOCK;
 
-            init_tm(&tm);   /* Precaution against core dumps */
-            tm.tm_sec = 30;
-            tm.tm_min = 30;
-            tm.tm_hour = 6;
-            tm.tm_year = 2017 - 1900;
-            tm.tm_wday = 0;
-            tm.tm_mon = 0;
-            switch (item) {
-                default:
-                    LOCALE_UNLOCK;
-                    Perl_croak(aTHX_ "panic: %s: %d: switch case: %d problem",
-                                             __FILE__, __LINE__, item);
-                    NOT_REACHED; /* NOTREACHED */
+                init_tm(&tm);   /* Precaution against core dumps */
+                tm.tm_sec = 30;
+                tm.tm_min = 30;
+                tm.tm_hour = 6;
+                tm.tm_year = 2017 - 1900;
+                tm.tm_wday = 0;
+                tm.tm_mon = 0;
+                switch (item) {
+                    default:
+                        LOCALE_UNLOCK;
+                        Perl_croak(aTHX_
+                                    "panic: %s: %d: switch case: %d problem",
+                                       __FILE__, __LINE__, item);
+                        NOT_REACHED; /* NOTREACHED */
 
-                case PERL_PM_STR: tm.tm_hour = 18;
-                case PERL_AM_STR:
-                    format = "%p";
+                    case PERL_PM_STR: tm.tm_hour = 18;
+                    case PERL_AM_STR:
+                        format = "%p";
+                        break;
+
+                    case PERL_ABDAY_7: tm.tm_wday++;
+                    case PERL_ABDAY_6: tm.tm_wday++;
+                    case PERL_ABDAY_5: tm.tm_wday++;
+                    case PERL_ABDAY_4: tm.tm_wday++;
+                    case PERL_ABDAY_3: tm.tm_wday++;
+                    case PERL_ABDAY_2: tm.tm_wday++;
+                    case PERL_ABDAY_1:
+                        format = "%a";
+                        break;
+
+                    case PERL_DAY_7: tm.tm_wday++;
+                    case PERL_DAY_6: tm.tm_wday++;
+                    case PERL_DAY_5: tm.tm_wday++;
+                    case PERL_DAY_4: tm.tm_wday++;
+                    case PERL_DAY_3: tm.tm_wday++;
+                    case PERL_DAY_2: tm.tm_wday++;
+                    case PERL_DAY_1:
+                        format = "%A";
+                        break;
+
+                    case PERL_ABMON_12: tm.tm_mon++;
+                    case PERL_ABMON_11: tm.tm_mon++;
+                    case PERL_ABMON_10: tm.tm_mon++;
+                    case PERL_ABMON_9: tm.tm_mon++;
+                    case PERL_ABMON_8: tm.tm_mon++;
+                    case PERL_ABMON_7: tm.tm_mon++;
+                    case PERL_ABMON_6: tm.tm_mon++;
+                    case PERL_ABMON_5: tm.tm_mon++;
+                    case PERL_ABMON_4: tm.tm_mon++;
+                    case PERL_ABMON_3: tm.tm_mon++;
+                    case PERL_ABMON_2: tm.tm_mon++;
+                    case PERL_ABMON_1:
+                        format = "%b";
+                        break;
+
+                    case PERL_MON_12: tm.tm_mon++;
+                    case PERL_MON_11: tm.tm_mon++;
+                    case PERL_MON_10: tm.tm_mon++;
+                    case PERL_MON_9: tm.tm_mon++;
+                    case PERL_MON_8: tm.tm_mon++;
+                    case PERL_MON_7: tm.tm_mon++;
+                    case PERL_MON_6: tm.tm_mon++;
+                    case PERL_MON_5: tm.tm_mon++;
+                    case PERL_MON_4: tm.tm_mon++;
+                    case PERL_MON_3: tm.tm_mon++;
+                    case PERL_MON_2: tm.tm_mon++;
+                    case PERL_MON_1:
+                        format = "%B";
+                        break;
+
+                    case PERL_T_FMT_AMPM:
+                        format = "%r";
+                        return_format = TRUE;
+                        break;
+
+                    case PERL_ERA_D_FMT:
+                        format = "%Ex";
+                        return_format = TRUE;
+                        break;
+
+                    case PERL_ERA_T_FMT:
+                        format = "%EX";
+                        return_format = TRUE;
+                        break;
+
+                    case PERL_ERA_D_T_FMT:
+                        format = "%Ec";
+                        return_format = TRUE;
+                        break;
+
+                    case PERL_ALT_DIGITS:
+                        tm.tm_wday = 0;
+                        format = "%Ow";	/* Find the alternate digit for 0 */
+                        break;
+                }
+
+                /* We can't use my_strftime() because it doesn't look at
+                 * tm_wday  */
+                while (0 == strftime(PL_langinfo_buf, PL_langinfo_bufsize,
+                                     format, &tm))
+                {
+                    /* A zero return means one of:
+                     *  a)  there wasn't enough space in PL_langinfo_buf
+                     *  b)  the format, like a plain %p, returns empty
+                     *  c)  it was an illegal format, though some
+                     *      implementations of strftime will just return the
+                     *      illegal format as a plain character sequence.
+                     *
+                     *  To quickly test for case 'b)', try again but precede
+                     *  the format with a plain character.  If that result is
+                     *  still empty, the problem is either 'a)' or 'c)' */
+
+                    Size_t format_size = strlen(format) + 1;
+                    Size_t mod_size = format_size + 1;
+                    char * mod_format;
+                    char * temp_result;
+
+                    Newx(mod_format, mod_size, char);
+                    Newx(temp_result, PL_langinfo_bufsize, char);
+                    *mod_format = '\a';
+                    my_strlcpy(mod_format + 1, format, mod_size);
+                    len = strftime(temp_result,
+                                   PL_langinfo_bufsize,
+                                   mod_format, &tm);
+                    Safefree(mod_format);
+                    Safefree(temp_result);
+
+                    /* If 'len' is non-zero, it means that we had a case like
+                     * %p which means the current locale doesn't use a.m. or
+                     * p.m., and that is valid */
+                    if (len == 0) {
+
+                        /* Here, still didn't work.  If we get well beyond a
+                         * reasonable size, bail out to prevent an infinite
+                         * loop. */
+
+                        if (PL_langinfo_bufsize > 100 * format_size) {
+                            *PL_langinfo_buf = '\0';
+                        }
+                        else {
+                            /* Double the buffer size to retry;  Add 1 in case
+                             * original was 0, so we aren't stuck at 0.  */
+                            PL_langinfo_bufsize *= 2;
+                            PL_langinfo_bufsize++;
+                            Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
+                            continue;
+                        }
+                    }
+
                     break;
+                }
 
-                case PERL_ABDAY_7: tm.tm_wday++;
-                case PERL_ABDAY_6: tm.tm_wday++;
-                case PERL_ABDAY_5: tm.tm_wday++;
-                case PERL_ABDAY_4: tm.tm_wday++;
-                case PERL_ABDAY_3: tm.tm_wday++;
-                case PERL_ABDAY_2: tm.tm_wday++;
-                case PERL_ABDAY_1:
-                    format = "%a";
-                    break;
-
-                case PERL_DAY_7: tm.tm_wday++;
-                case PERL_DAY_6: tm.tm_wday++;
-                case PERL_DAY_5: tm.tm_wday++;
-                case PERL_DAY_4: tm.tm_wday++;
-                case PERL_DAY_3: tm.tm_wday++;
-                case PERL_DAY_2: tm.tm_wday++;
-                case PERL_DAY_1:
-                    format = "%A";
-                    break;
-
-                case PERL_ABMON_12: tm.tm_mon++;
-                case PERL_ABMON_11: tm.tm_mon++;
-                case PERL_ABMON_10: tm.tm_mon++;
-                case PERL_ABMON_9: tm.tm_mon++;
-                case PERL_ABMON_8: tm.tm_mon++;
-                case PERL_ABMON_7: tm.tm_mon++;
-                case PERL_ABMON_6: tm.tm_mon++;
-                case PERL_ABMON_5: tm.tm_mon++;
-                case PERL_ABMON_4: tm.tm_mon++;
-                case PERL_ABMON_3: tm.tm_mon++;
-                case PERL_ABMON_2: tm.tm_mon++;
-                case PERL_ABMON_1:
-                    format = "%b";
-                    break;
-
-                case PERL_MON_12: tm.tm_mon++;
-                case PERL_MON_11: tm.tm_mon++;
-                case PERL_MON_10: tm.tm_mon++;
-                case PERL_MON_9: tm.tm_mon++;
-                case PERL_MON_8: tm.tm_mon++;
-                case PERL_MON_7: tm.tm_mon++;
-                case PERL_MON_6: tm.tm_mon++;
-                case PERL_MON_5: tm.tm_mon++;
-                case PERL_MON_4: tm.tm_mon++;
-                case PERL_MON_3: tm.tm_mon++;
-                case PERL_MON_2: tm.tm_mon++;
-                case PERL_MON_1:
-                    format = "%B";
-                    break;
-
-                case PERL_T_FMT_AMPM:
-                    format = "%r";
-                    return_format = TRUE;
-                    break;
-
-                case PERL_ERA_D_FMT:
-                    format = "%Ex";
-                    return_format = TRUE;
-                    break;
-
-                case PERL_ERA_T_FMT:
-                    format = "%EX";
-                    return_format = TRUE;
-                    break;
-
-                case PERL_ERA_D_T_FMT:
-                    format = "%Ec";
-                    return_format = TRUE;
-                    break;
-
-                case PERL_ALT_DIGITS:
-                    tm.tm_wday = 0;
-                    format = "%Ow";	/* Find the alternate digit for 0 */
-                    break;
-            }
-
-            /* We can't use my_strftime() because it doesn't look at tm_wday  */
-            while (0 == strftime(PL_langinfo_buf, PL_langinfo_bufsize,
-                                 format, &tm))
-            {
-                /* A zero return means one of:
-                 *  a)  there wasn't enough space in PL_langinfo_buf
-                 *  b)  the format, like a plain %p, returns empty
-                 *  c)  it was an illegal format, though some implementations of
-                 *      strftime will just return the illegal format as a plain
-                 *      character sequence.
+                /* Here, we got a result.
                  *
-                 *  To quickly test for case 'b)', try again but precede the
-                 *  format with a plain character.  If that result is still
-                 *  empty, the problem is either 'a)' or 'c)' */
+                 * If the item is 'ALT_DIGITS', PL_langinfo_buf contains the
+                 * alternate format for wday 0.  If the value is the same as
+                 * the normal 0, there isn't an alternate, so clear the buffer.
+                 * */
+                if (   item == PERL_ALT_DIGITS
+                    && strEQ(PL_langinfo_buf, "0"))
+                {
+                    *PL_langinfo_buf = '\0';
+                }
 
-                Size_t format_size = strlen(format) + 1;
-                Size_t mod_size = format_size + 1;
-                char * mod_format;
-                char * temp_result;
+                /* ALT_DIGITS is problematic.  Experiments on it showed that
+                 * strftime() did not always work properly when going from
+                 * alt-9 to alt-10.  Only a few locales have this item defined,
+                 * and in all of them on Linux that khw was able to find,
+                 * nl_langinfo() merely returned the alt-0 character, possibly
+                 * doubled.  Most Unicode digits are in blocks of 10
+                 * consecutive code points, so that is sufficient information
+                 * for those scripts, as we can infer alt-1, alt-2, ....  But
+                 * for a Japanese locale, a CJK ideographic 0 is returned, and
+                 * the CJK digits are not in code point order, so you can't
+                 * really infer anything.  The localedef for this locale did
+                 * specify the succeeding digits, so that strftime() works
+                 * properly on them, without needing to infer anything.  But
+                 * the nl_langinfo() return did not give sufficient information
+                 * for the caller to understand what's going on.  So until
+                 * there is evidence that it should work differently, this
+                 * returns the alt-0 string for ALT_DIGITS.
+                 *
+                 * wday was chosen because its range is all a single digit.
+                 * Things like tm_sec have two digits as the minimum: '00' */
 
-                Newx(mod_format, mod_size, char);
-                Newx(temp_result, PL_langinfo_bufsize, char);
-                *mod_format = '\a';
-                my_strlcpy(mod_format + 1, format, mod_size);
-                len = strftime(temp_result,
-                               PL_langinfo_bufsize,
-                               mod_format, &tm);
-                Safefree(mod_format);
-                Safefree(temp_result);
+                LOCALE_UNLOCK;
 
-                /* If 'len' is non-zero, it means that we had a case like %p
-                 * which means the current locale doesn't use a.m. or p.m., and
-                 * that is valid */
-                if (len == 0) {
-
-                    /* Here, still didn't work.  If we get well beyond a
-                     * reasonable size, bail out to prevent an infinite loop. */
-
-                    if (PL_langinfo_bufsize > 100 * format_size) {
+                /* If to return the format, not the value, overwrite the buffer
+                 * with it.  But some strftime()s will keep the original format
+                 * if illegal, so change those to "" */
+                if (return_format) {
+                    if (strEQ(PL_langinfo_buf, format)) {
                         *PL_langinfo_buf = '\0';
                     }
-                    else { /* Double the buffer size to retry;  Add 1 in case
-                              original was 0, so we aren't stuck at 0. */
-                        PL_langinfo_bufsize *= 2;
-                        PL_langinfo_bufsize++;
-                        Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
-                        continue;
+                    else {
+                        save_to_buffer(format, &PL_langinfo_buf,
+                                        &PL_langinfo_bufsize, 0);
                     }
                 }
 
                 break;
-            }
-
-            /* Here, we got a result.
-             *
-             * If the item is 'ALT_DIGITS', PL_langinfo_buf contains the
-             * alternate format for wday 0.  If the value is the same as the
-             * normal 0, there isn't an alternate, so clear the buffer. */
-            if (   item == PERL_ALT_DIGITS
-                && strEQ(PL_langinfo_buf, "0"))
-            {
-                *PL_langinfo_buf = '\0';
-            }
-
-            /* ALT_DIGITS is problematic.  Experiments on it showed that
-             * strftime() did not always work properly when going from alt-9 to
-             * alt-10.  Only a few locales have this item defined, and in all
-             * of them on Linux that khw was able to find, nl_langinfo() merely
-             * returned the alt-0 character, possibly doubled.  Most Unicode
-             * digits are in blocks of 10 consecutive code points, so that is
-             * sufficient information for those scripts, as we can infer alt-1,
-             * alt-2, ....  But for a Japanese locale, a CJK ideographic 0 is
-             * returned, and the CJK digits are not in code point order, so you
-             * can't really infer anything.  The localedef for this locale did
-             * specify the succeeding digits, so that strftime() works properly
-             * on them, without needing to infer anything.  But the
-             * nl_langinfo() return did not give sufficient information for the
-             * caller to understand what's going on.  So until there is
-             * evidence that it should work differently, this returns the alt-0
-             * string for ALT_DIGITS.
-             *
-             * wday was chosen because its range is all a single digit.  Things
-             * like tm_sec have two digits as the minimum: '00' */
-
-            LOCALE_UNLOCK;
-
-            /* If to return the format, not the value, overwrite the buffer
-             * with it.  But some strftime()s will keep the original format if
-             * illegal, so change those to "" */
-            if (return_format) {
-                if (strEQ(PL_langinfo_buf, format)) {
-                    *PL_langinfo_buf = '\0';
-                }
-                else {
-                    save_to_buffer(format, &PL_langinfo_buf,
-                                    &PL_langinfo_bufsize, 0);
-                }
-            }
-
-            break;
 
 #  endif
 
+        }
     }
 
     return PL_langinfo_buf;
