@@ -20707,15 +20707,16 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
     /* Accumulate the bit map into the unconditional match list */
     if (bitmap) {
-    for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
-        if (BITMAP_TEST(bitmap, i)) {
-            int start = i++;
-            for (; i < NUM_ANYOF_CODE_POINTS && BITMAP_TEST(bitmap, i); i++) {
-                /* empty */
+        for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
+            if (BITMAP_TEST(bitmap, i)) {
+                int start = i++;
+                for (;
+                     i < NUM_ANYOF_CODE_POINTS && BITMAP_TEST(bitmap, i);
+                     i++)
+                { /* empty */ }
+                invlist = _add_range_to_invlist(invlist, start, i-1);
             }
-            invlist = _add_range_to_invlist(invlist, start, i-1);
         }
-    }
     }
 
     /* Make sure that the conditional match lists don't have anything in them
