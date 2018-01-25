@@ -2727,7 +2727,7 @@ s	|void	|incline	|NN const char *s|NN const char *end
 s	|int	|intuit_method	|NN char *s|NULLOK SV *ioname|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s|NN char *e
 s	|I32	|lop		|I32 f|U8 x|NN char *s
-rs	|void	|missingterm	|NULLOK char *s|const STRLEN len
+rs	|void	|missingterm	|NULLOK char *s|STRLEN len
 s	|void	|no_op		|NN const char *const what|NULLOK char *s
 s	|int	|pending_ident
 sR	|I32	|sublex_done

@@ -5826,7 +5826,7 @@ STATIC int	S_intuit_more(pTHX_ char *s, char *e);
 STATIC I32	S_lop(pTHX_ I32 f, U8 x, char *s);
 #define PERL_ARGS_ASSERT_LOP	\
 	assert(s)
-PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s, const STRLEN len)
+PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s, STRLEN len)
 			__attribute__noreturn__;
 
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen);
