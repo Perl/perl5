@@ -20595,7 +20595,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 {
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class defined by the other arguments:
-     *  'bitmap' points to the bitmap.
+     *  'bitmap' points to the bitmap, or NULL if to ignore that.
      *  'nonbitmap_invlist' is an inversion list of the code points that are in
      *      the bitmap range, but for some reason aren't in the bitmap; NULL if
      *      none.  The reasons for this could be that they require some
@@ -20706,6 +20706,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
     }
 
     /* Accumulate the bit map into the unconditional match list */
+    if (bitmap) {
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST(bitmap, i)) {
             int start = i++;
@@ -20714,6 +20715,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             }
             invlist = _add_range_to_invlist(invlist, start, i-1);
         }
+    }
     }
 
     /* Make sure that the conditional match lists don't have anything in them

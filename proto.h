@@ -4188,7 +4188,7 @@ STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, c
 	assert(r); assert(start); assert(node); assert(sv)
 STATIC bool	S_put_charclass_bitmap_innards(pTHX_ SV* sv, char* bitmap, SV* nonbitmap_invlist, SV* only_utf8_locale_invlist, const regnode * const node, const bool force_as_is_display);
 #define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS	\
-	assert(sv); assert(bitmap)
+	assert(sv)
 STATIC SV*	S_put_charclass_bitmap_innards_common(pTHX_ SV* invlist, SV* posixes, SV* only_utf8, SV* not_utf8, SV* only_utf8_locale, const bool invert);
 #define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_COMMON	\
 	assert(invlist)

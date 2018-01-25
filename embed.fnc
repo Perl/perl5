@@ -2489,7 +2489,7 @@ Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NN SV* sv|I32 indent|U32 depth
 Es	|void	|put_code_point	|NN SV* sv|UV c
 Es	|bool	|put_charclass_bitmap_innards|NN SV* sv		    \
-				|NN char* bitmap		    \
+				|NULLOK char* bitmap		    \
 				|NULLOK SV* nonbitmap_invlist	    \
 				|NULLOK SV* only_utf8_locale_invlist\
 				|NULLOK const regnode * const node  \
