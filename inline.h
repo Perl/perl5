@@ -544,8 +544,8 @@ S__variant_byte_number(PERL_UINTMAX_T word)
 #    error Unexpected byte order
 #  endif
 
-    /* Here 'word' has a single bit set, the  msb is of the first byte which
-     * has it set.  Calculate that position in the word.  We can use this
+    /* Here 'word' has a single bit set: the  msb of the first byte in which it
+     * is set.  Calculate that position in the word.  We can use this
      * specialized solution: https://stackoverflow.com/a/32339674/1626653,
      * assumes an 8-bit byte.  (On a 32-bit machine, the larger numbers should
      * just get shifted off at compile time) */
