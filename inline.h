@@ -547,10 +547,12 @@ S__variant_byte_number(PERL_UINTMAX_T word)
     /* Here 'word' has a single bit set, the  msb is of the first byte which
      * has it set.  Calculate that position in the word.  We can use this
      * specialized solution: https://stackoverflow.com/a/32339674/1626653,
-     * assumes an 8-bit byte */
-    word = (word >> 7) * (( 7ULL << 56) | (15ULL << 48) | (23ULL << 40)
-                        | (31ULL << 32) | (39ULL << 24) | (47ULL << 16)
-                        | (55ULL <<  8) | (63ULL <<  0));
+     * assumes an 8-bit byte.  (On a 32-bit machine, the larger numbers should
+     * just get shifted off at compile time) */
+    word = (word >> 7) * ((UINTMAX_C( 7) << 56) | (UINTMAX_C(15) << 48)
+                        | (UINTMAX_C(23) << 40) | (UINTMAX_C(31) << 32)
+                        |           (39 <<  24) |           (47 <<  16)
+                        |           (55 <<   8) |           (63 <<   0));
     word >>= PERL_WORDSIZE * 7; /* >> by either 56 or 24 */
 
     /* Here, word contains the position 7..63 of that bit.  Convert to 0..7 */
