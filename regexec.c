@@ -1731,28 +1731,38 @@ STMT_START {                                          \
     }                                                 \
 } STMT_END
 
+/* In the next few macros, 'try_it' is a bool indicating whether to actually
+ * try the match or not.  It is used for when the flags indicate that only the
+ * first occurrence of 'x' in a string of them should be considered for
+ * matching.  try_it is initialized to 1, and set to 1 on every failure of the
+ * condition, thus it will be 1 whenever a 'x' happens to be first.  But when
+ * the condition is met, and we don't exit the loop because we have ultimate
+ * success, try_it is set to 'doevery', the latter being FALSE if we only want
+ * the first in a string; otherwise TRUE, so try_it will be 0 when the previous
+ * thing was 'x' and we only want the first 'x' */
+
 #define REXEC_FBC_UTF8_CLASS_SCAN(COND)                        \
 REXEC_FBC_UTF8_SCAN( /* Loops while (s < strend) */            \
     if (COND) {                                                \
-	if (tmp && (reginfo->intuit || regtry(reginfo, &s)))   \
+	if (try_it && (reginfo->intuit || regtry(reginfo, &s)))\
 	    goto got_it;                                       \
 	else                                                   \
-	    tmp = doevery;                                     \
+	    try_it = doevery;                                  \
     }                                                          \
     else                                                       \
-	tmp = 1;                                               \
+	try_it = 1;                                            \
 )
 
 #define REXEC_FBC_CLASS_SCAN(COND)                             \
 REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
     if (COND) {                                                \
-	if (tmp && (reginfo->intuit || regtry(reginfo, &s)))   \
+	if (try_it && (reginfo->intuit || regtry(reginfo, &s)))\
 	    goto got_it;                                       \
 	else                                                   \
-	    tmp = doevery;                                     \
+	    try_it = doevery;                                  \
     }                                                          \
     else                                                       \
-	tmp = 1;                                               \
+	try_it = 1;                                            \
 )
 
 #define REXEC_FBC_CSCAN(CONDUTF8,COND)                         \
@@ -2001,7 +2011,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     U8 c1;
     U8 c2;
     char *e;
-    I32 tmp = 1;	/* Scratch variable? */
+    bool try_it = 1;	/* Use in some macros to control whether to accept this
+                           occurrence of what's being matched, or not */
+    I32 tmp;            /* Scratch variable */
     const bool utf8_target = reginfo->is_utf8_target;
     UV utf8_fold_flags = 0;
     const bool is_utf8_pat = reginfo->is_utf8_pat;
@@ -2601,14 +2613,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                                                       *(s + 1)),
                                               classnum))))
                     {
-                        if (tmp && (reginfo->intuit || regtry(reginfo, &s)))
+                        if (try_it && (reginfo->intuit || regtry(reginfo, &s)))
                             goto got_it;
                         else {
-                            tmp = doevery;
+                            try_it = doevery;
                         }
                     }
                     else {
-                        tmp = 1;
+                        try_it = 1;
                     }
                     s += UTF8SKIP(s);
                 }
