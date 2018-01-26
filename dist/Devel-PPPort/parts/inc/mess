@@ -208,6 +208,7 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 void
 croak_xs_usage(const CV *const cv, const char *const params)
 {
+    dTHX;
     const GV *const gv = CvGV(cv);
 
     PERL_ARGS_ASSERT_CROAK_XS_USAGE;
