@@ -187,15 +187,15 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 #endif
 
 #ifndef croak_no_modify
-#define croak_no_modify() croak("%s", PL_no_modify)
+#define croak_no_modify() croak_nocontext("%s", PL_no_modify)
 #define Perl_croak_no_modify() croak_no_modify()
 #endif
 
 #ifndef croak_memory_wrap
 #if { VERSION >= 5.9.2 } || ( { VERSION >= 5.8.6 } && { VERSION < 5.9.0 } )
-#  define croak_memory_wrap() croak("%s", PL_memory_wrap)
+#  define croak_memory_wrap() croak_nocontext("%s", PL_memory_wrap)
 #else
-#  define croak_memory_wrap() croak("panic: memory wrap")
+#  define croak_memory_wrap() croak_nocontext("panic: memory wrap")
 #endif
 #endif
 
