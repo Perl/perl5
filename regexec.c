@@ -560,7 +560,7 @@ S_find_next_ascii(char * s, const char * send, const bool utf8_target)
 
     PERL_ARGS_ASSERT_FIND_NEXT_ASCII;
 
-#ifndef EBCDIC
+#if ! defined(EBCDIC) && ! defined(USING_MSVC6)
 
     if ((STRLEN) (send - s) >= PERL_WORDSIZE
 

@@ -806,7 +806,7 @@ AndmoR	|bool	|is_utf8_invariant_string|NN const U8* const s		    \
 AnidR	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
 		|STRLEN len						    \
 		|NULLOK const U8 ** ep
-#ifndef EBCDIC
+#if ! defined(EBCDIC) && ! defined USING_MSVC6
 AniR	|unsigned int|_variant_byte_number|PERL_UINTMAX_T word
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
