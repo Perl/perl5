@@ -96,6 +96,10 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     return if ! $locale || grep { $locale eq $_ } @$list;
 
+    # This is a toy (pig latin) locale that is not fully implemented on some
+    # systems
+    return if $locale =~ / ^ pig $ /ix;
+
     $categories = [ $categories ] unless ref $categories;
 
     my $badutf8 = 0;
