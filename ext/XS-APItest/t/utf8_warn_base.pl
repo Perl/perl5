@@ -1669,23 +1669,30 @@ foreach my $test (@tests) {
                       }
                     }
 
-                    is($returned_flags, 0,
-                       "    Got no unexpected return flags")
-                      or diag "The unexpected flags gotten were: "
+                    if (! is($returned_flags, 0,
+                       "    Got no unexpected return flags"))
+                    {
+                        diag "The unexpected flags gotten were: "
                            . (flags_to_text($returned_flags,
                                             \@utf8n_flags_to_text)
                                 # We strip off any prefixes from the flag
                                 # names
                              =~ s/ \b [A-Z] _ //xgr);
-                    is (scalar @scratch_expected_return_flags, 0,
-                        "    Got all expected return flags")
-                        or diag "The expected flags not gotten were: "
+                        diag "Call was: " . utf8n_display_call($eval_text);
+                    }
+
+                    if (! is (scalar @scratch_expected_return_flags, 0,
+                        "    Got all expected return flags"))
+                    {
+                        diag "The expected flags not gotten were: "
                            . (flags_to_text(eval join("|",
                                                 @scratch_expected_return_flags),
                                             \@utf8n_flags_to_text)
                                 # We strip off any prefixes from the flag
                                 # names
                              =~ s/ \b [A-Z] _ //xgr);
+                        diag "Call was: " . utf8n_display_call($eval_text);
+                    }
 
                     if ($which_func) {
                         my @returned_warnings;
