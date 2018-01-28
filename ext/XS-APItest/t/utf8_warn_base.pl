@@ -707,667 +707,667 @@ my $tested_CHECK_ONLY = 0;
 
 my $test_count = -1;
 foreach my $test (@tests) {
-    $test_count++;
-    next if $test_count % $num_test_files != $::TEST_CHUNK;
-
-    my ($testname, $bytes, $allowed_uv, $needed_to_discern_len) = @$test;
-
-    my $length = length $bytes;
-    my $initially_overlong = $testname =~ /overlong/;
-    my $initially_orphan   = $testname =~ /orphan/;
-    my $will_overflow = $allowed_uv < 0;
-
-    my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
-    my $display_bytes = display_bytes($bytes);
-
-    my $controlling_warning_category;
-    my $utf8n_flag_to_warn;
-    my $utf8n_flag_to_disallow;
-    my $uvchr_flag_to_warn;
-    my $uvchr_flag_to_disallow;
-
-    # We want to test that the independent flags are actually independent.
-    # For example, that a surrogate doesn't trigger a non-character warning,
-    # and conversely, turning off an above-Unicode flag doesn't suppress a
-    # surrogate warning.  Earlier versions of this file used nested loops to
-    # test all possible combinations.  But that creates lots of tests, making
-    # this run too long.  What is now done instead is to use the complement of
-    # the category we are testing to greatly reduce the combinatorial
-    # explosion.  For example, if we have a surrogate and we aren't expecting
-    # a warning about it, we set all the flags for non-surrogates to raise
-    # warnings.  If one shows up, it indicates the flags aren't independent.
-    my $utf8n_flag_to_warn_complement;
-    my $utf8n_flag_to_disallow_complement;
-    my $uvchr_flag_to_warn_complement;
-    my $uvchr_flag_to_disallow_complement;
-
-    # Many of the code points being tested are middling in that if code point
-    # edge cases work, these are very likely to as well.  Because this test
-    # file takes a while to execute, we skip testing the edge effects of code
-    # points deemed middling, while testing their basics and continuing to
-    # fully test the non-middling code points.
-    my $skip_most_tests = 0;
-
-    my $cp_message_qr;      # Pattern that matches the message raised when
-                            # that message contains the problematic code
-                            # point.  The message is the same (currently) both
-                            # when going from/to utf8.
-    my $non_cp_trailing_text;   # The suffix text when the message doesn't
-                                # contain a code point.  (This is a result of
-                                # some sort of malformation that means we
-                                # can't get an exact code poin
-    my $extended_cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
-                        \Q requires a Perl extension, and so is not\E
-                        \Q portable\E/x;
-    my $extended_non_cp_trailing_text
-                        = "is a Perl extension, and so is not portable";
-
-    # What bytes should have been used to specify a code point that has been
-    # specified as an overlong.
-    my $correct_bytes_for_overlong;
-
-    # Is this test malformed from the beginning?  If so, we know to generally
-    # expect that the tests will show it isn't valid.
-    my $initially_malformed = 0;
-
-    if ($initially_overlong || $initially_orphan) {
-        $non_cp_trailing_text = "if you see this, there is an error";
-        $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
-        $initially_malformed = 1;
-        $utf8n_flag_to_warn     = 0;
-        $utf8n_flag_to_disallow = 0;
-
-        $utf8n_flag_to_warn_complement =     $::UTF8_WARN_SURROGATE;
-        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE;
-        if (! $will_overflow && $allowed_uv <= 0x10FFFF) {
-            $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_SUPER;
-            $utf8n_flag_to_disallow_complement |= $::UTF8_DISALLOW_SUPER;
-            if (($allowed_uv & 0xFFFF) != 0xFFFF) {
-                $utf8n_flag_to_warn_complement      |= $::UTF8_WARN_NONCHAR;
-                $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_NONCHAR;
-            }
-        }
-        if (! is_extended_utf8($bytes)) {
-            $utf8n_flag_to_warn_complement |= $::UTF8_WARN_PERL_EXTENDED;
-            $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_PERL_EXTENDED;
-        }
-
-        $controlling_warning_category = 'utf8';
-
-        if ($initially_overlong) {
-            if (! defined $needed_to_discern_len) {
-                $needed_to_discern_len = overlong_discern_len($bytes);
-            }
-            $correct_bytes_for_overlong = display_bytes_no_quotes(chr $allowed_uv);
-        }
-    }
-    elsif($will_overflow || $allowed_uv > 0x10FFFF) {
-
-        # Set the SUPER flags; later, we test for PERL_EXTENDED as well.
-        $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
-        $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SUPER;
-        $uvchr_flag_to_warn     = $::UNICODE_WARN_SUPER;
-        $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SUPER;;
-
-        # Below, we add the flags for non-perl_extended to the code points
-        # that don't fit that category.  Special tests are done for this
-        # category in the inner loop.
-        $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
-                                            |$::UTF8_WARN_SURROGATE;
-        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
-                                            |$::UTF8_DISALLOW_SURROGATE;
-        $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
-                                            |$::UNICODE_WARN_SURROGATE;
-        $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
-                                            |$::UNICODE_DISALLOW_SURROGATE;
-        $controlling_warning_category = 'non_unicode';
-
-        if ($will_overflow) {  # This is realy a malformation
-            $non_cp_trailing_text = "if you see this, there is an error";
-            $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
-            $initially_malformed = 1;
-            if (! defined $needed_to_discern_len) {
-                $needed_to_discern_len = overflow_discern_len($length);
-            }
-        }
-        elsif (requires_extended_utf8($allowed_uv)) {
-            $cp_message_qr = $extended_cp_message_qr;
-            $non_cp_trailing_text = $extended_non_cp_trailing_text;
-            $needed_to_discern_len = 1 unless defined $needed_to_discern_len;
-        }
-        else {
-            $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
-                                \Q may not be portable\E/x;
-            $non_cp_trailing_text = "is for a non-Unicode code point, may not"
-                                . " be portable";
-            $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_PERL_EXTENDED;
-            $utf8n_flag_to_disallow_complement
-                                           |= $::UTF8_DISALLOW_PERL_EXTENDED;
-            $uvchr_flag_to_warn_complement |= $::UNICODE_WARN_PERL_EXTENDED;
-            $uvchr_flag_to_disallow_complement
-                                        |= $::UNICODE_DISALLOW_PERL_EXTENDED;
-        }
-    }
-    elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
-        $cp_message_qr = qr/UTF-16 surrogate U\+$uv_string/;
-        $non_cp_trailing_text = "is for a surrogate";
-        $needed_to_discern_len = 2 unless defined $needed_to_discern_len;
-        $skip_most_tests = 1 if $allowed_uv > 0xD800 && $allowed_uv < 0xDFFF;
-
-        $utf8n_flag_to_warn     = $::UTF8_WARN_SURROGATE;
-        $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SURROGATE;
-        $uvchr_flag_to_warn     = $::UNICODE_WARN_SURROGATE;
-        $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SURROGATE;;
-
-        $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
-                                            |$::UTF8_WARN_SUPER
-                                            |$::UTF8_WARN_PERL_EXTENDED;
-        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
-                                            |$::UTF8_DISALLOW_SUPER
-                                            |$::UTF8_DISALLOW_PERL_EXTENDED;
-        $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
-                                            |$::UNICODE_WARN_SUPER
-                                            |$::UNICODE_WARN_PERL_EXTENDED;
-        $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
-                                            |$::UNICODE_DISALLOW_SUPER
-                                            |$::UNICODE_DISALLOW_PERL_EXTENDED;
-        $controlling_warning_category = 'surrogate';
-    }
-    elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
-           || ($allowed_uv & 0xFFFE) == 0xFFFE)
-    {
-        $cp_message_qr = qr/\QUnicode non-character U+$uv_string\E
-                            \Q is not recommended for open interchange\E/x;
-        $non_cp_trailing_text = "if you see this, there is an error";
-        $needed_to_discern_len = $length unless defined $needed_to_discern_len;
-        if (   ($allowed_uv > 0xFDD0 && $allowed_uv < 0xFDEF)
-            || ($allowed_uv > 0xFFFF && $allowed_uv < 0x10FFFE))
-        {
-            $skip_most_tests = 1;
-        }
-
-        $utf8n_flag_to_warn     = $::UTF8_WARN_NONCHAR;
-        $utf8n_flag_to_disallow = $::UTF8_DISALLOW_NONCHAR;
-        $uvchr_flag_to_warn     = $::UNICODE_WARN_NONCHAR;
-        $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_NONCHAR;;
-
-        $utf8n_flag_to_warn_complement     = $::UTF8_WARN_SURROGATE
-                                            |$::UTF8_WARN_SUPER
-                                            |$::UTF8_WARN_PERL_EXTENDED;
-        $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE
-                                            |$::UTF8_DISALLOW_SUPER
-                                            |$::UTF8_DISALLOW_PERL_EXTENDED;
-        $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_SURROGATE
-                                            |$::UNICODE_WARN_SUPER
-                                            |$::UNICODE_WARN_PERL_EXTENDED;
-        $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_SURROGATE
-                                            |$::UNICODE_DISALLOW_SUPER
-                                            |$::UNICODE_DISALLOW_PERL_EXTENDED;
-
-        $controlling_warning_category = 'nonchar';
-    }
-    else {
-        die "Can't figure out what type of warning to test for $testname"
-    }
-
-    die 'Didn\'t set $needed_to_discern_len for ' . $testname
-                                        unless defined $needed_to_discern_len;
-
-    # We try various combinations of malformations that can occur
-    foreach my $short (0, 1) {
-      next if $skip_most_tests && $short;
-      foreach my $unexpected_noncont (0, 1) {
-        next if $skip_most_tests && $unexpected_noncont;
-        foreach my $overlong (0, 1) {
-          next if $overlong && $skip_most_tests;
-          next if $initially_overlong && ! $overlong;
-
-          # If we're creating an overlong, it can't be longer than the
-          # maximum length, so skip if we're already at that length.
-          next if   (! $initially_overlong && $overlong)
-                   &&  $length >= $::max_bytes;
-
-          my $this_cp_message_qr = $cp_message_qr;
-          my $this_non_cp_trailing_text = $non_cp_trailing_text;
-
-          foreach my $malformed_allow_type (0..2) {
-            # 0 don't allow this malformation; ignored if no malformation
-            # 1 allow, with REPLACEMENT CHARACTER returned
-            # 2 allow, with intended code point returned.  All malformations
-            #   other than overlong can't determine the intended code point,
-            #   so this isn't valid for them.
-            next if     $malformed_allow_type == 2
-                    && ($will_overflow || $short || $unexpected_noncont);
-            next if $skip_most_tests && $malformed_allow_type;
-
-            # Here we are in the innermost loop for malformations.  So we
-            # know which ones are in effect.  Can now change the input to be
-            # appropriately malformed.  We also can set up certain other
-            # things now, like whether we expect a return flag from this
-            # malformation, and which flag.
-
-            my $this_bytes = $bytes;
-            my $this_length = $length;
-            my $this_expected_len = $length;
-            my $this_needed_to_discern_len = $needed_to_discern_len;
-
-            my @malformation_names;
-            my @expected_malformation_warnings;
-            my @expected_malformation_return_flags;
-
-            # Contains the flags for any allowed malformations.  Currently no
-            # combinations of on/off are tested for.  It's either all are
-            # allowed, or none are.
-            my $allow_flags = 0;
-            my $overlong_is_in_perl_extended_utf8 = 0;
-            my $dont_use_overlong_cp = 0;
-
-            if ($initially_orphan) {
-                next if $overlong || $short || $unexpected_noncont;
-            }
-
-            if ($overlong) {
-                if (! $initially_overlong) {
-                    my $new_expected_len;
-
-                    # To force this malformation, we convert the original start
-                    # byte into a continuation byte with the same data bits as
-                    # originally. ...
-                    my $start_byte = substr($this_bytes, 0, 1);
-                    my $converted_to_continuation_byte
-                                            = start_byte_to_cont($start_byte);
-
-                    # ... Then we prepend it with a known overlong sequence.
-                    # This should evaluate to the exact same code point as the
-                    # original.  We try to avoid an overlong using Perl
-                    # extended UTF-8.  The code points are the highest
-                    # representable as overlongs on the respective platform
-                    # without using extended UTF-8.
-                    if (native_to_I8($start_byte) lt "\xFC") {
-                        $start_byte = I8_to_native("\xFC");
-                        $new_expected_len = 6;
-                    }
-                    elsif (! isASCII && native_to_I8($start_byte) lt "\xFE") {
-
-                        # FE is not extended UTF-8 on EBCDIC
-                        $start_byte = I8_to_native("\xFE");
-                        $new_expected_len = 7;
-                    }
-                    else {  # Must use extended UTF-8.  On ASCII platforms, we
-                            # could express some overlongs here starting with
-                            # \xFE, but there's no real reason to do so.
-                        $overlong_is_in_perl_extended_utf8 = 1;
-                        $start_byte = I8_to_native("\xFF");
-                        $new_expected_len = $::max_bytes;
-                        $this_cp_message_qr = $extended_cp_message_qr;
-
-                        # The warning that gets raised doesn't include the
-                        # code point in the message if the code point can be
-                        # expressed without using extended UTF-8, but the
-                        # particular overlong sequence used is in extended
-                        # UTF-8.  To do otherwise would be confusing to the
-                        # user, as it would claim the code point requires
-                        # extended, when it doesn't.
-                        $dont_use_overlong_cp = 1
-                                    unless requires_extended_utf8($allowed_uv);
-                        $this_non_cp_trailing_text
-                                              = $extended_non_cp_trailing_text;
-                    }
-
-                    # Splice in the revise continuation byte, preceded by the
-                    # start byte and the proper number of the lowest
-                    # continuation bytes.
-                    $this_bytes =   $start_byte
-                                . ($native_lowest_continuation_chr
-                                    x (  $new_expected_len
-                                       - 1
-                                       - length($this_bytes)))
-                                .  $converted_to_continuation_byte
-                                .  substr($this_bytes, 1);
-                    $this_length = length($this_bytes);
-                    $this_needed_to_discern_len =    $new_expected_len
-                                                - (  $this_expected_len
-                                                - $this_needed_to_discern_len);
-                    $this_expected_len = $new_expected_len;
-                }
-            }
-
-            if ($short) {
-
-                # To force this malformation, just tell the test to not look
-                # as far as it should into the input.
-                $this_length--;
-                $this_expected_len--;
-
-                $allow_flags |= $::UTF8_ALLOW_SHORT if $malformed_allow_type;
-            }
-
-            if ($unexpected_noncont) {
-
-                # To force this malformation, change the final continuation
-                # byte into a start byte.
-                my $pos = ($short) ? -2 : -1;
-                substr($this_bytes, $pos, 1) = $known_start_byte;
-                $this_expected_len--;
-            }
-
-            # The whole point of a test that is malformed from the beginning
-            # is to test for that malformation.  If we've modified things so
-            # much that we don't have enough information to detect that
-            # malformation, there's no point in testing.
-            next if    $initially_malformed
-                    && $this_expected_len < $this_needed_to_discern_len;
-
-            # Here, we've transformed the input with all of the desired
-            # non-overflow malformations.  We are now in a position to
-            # construct any potential warnings for those malformations.  But
-            # it's a pain to get the detailed messages exactly right, so for
-            # now XXX, only do so for those that return an explicit code
-            # point.
-
-            if ($initially_orphan) {
-                push @malformation_names, "orphan continuation";
-                push @expected_malformation_return_flags,
-                                                    $::UTF8_GOT_CONTINUATION;
-                $allow_flags |= $::UTF8_ALLOW_CONTINUATION
-                                                    if $malformed_allow_type;
-                push @expected_malformation_warnings, qr/unexpected continuation/;
-            }
-
-            if ($overlong) {
-                push @malformation_names, 'overlong';
-                push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
-
-                # If one of the other malformation types is also in effect, we
-                # don't know what the intended code point was.
-                if ($short || $unexpected_noncont || $will_overflow) {
-                    push @expected_malformation_warnings, qr/overlong/;
-                }
-                else {
-                    my $wrong_bytes = display_bytes_no_quotes(
-                                         substr($this_bytes, 0, $this_length));
-                    if (! defined $correct_bytes_for_overlong) {
-                        $correct_bytes_for_overlong
-                                            = display_bytes_no_quotes($bytes);
-                    }
-                    my $prefix = (   $allowed_uv > 0x10FFFF
-                                  || ! isASCII && $allowed_uv < 256)
-                                 ? "0x"
-                                 : "U+";
-                    push @expected_malformation_warnings,
-                            qr/\QMalformed UTF-8 character: $wrong_bytes\E
-                               \Q (overlong; instead use\E
-                               \Q $correct_bytes_for_overlong to\E
-                               \Q represent $prefix$uv_string)/x;
-                }
-
-                if ($malformed_allow_type == 2) {
-                    $allow_flags |= $::UTF8_ALLOW_LONG_AND_ITS_VALUE;
-                }
-                elsif ($malformed_allow_type) {
-                    $allow_flags |= $::UTF8_ALLOW_LONG;
-                }
-            }
-            if ($short) {
-                push @malformation_names, 'short';
-                push @expected_malformation_return_flags, $::UTF8_GOT_SHORT;
-                push @expected_malformation_warnings, qr/too short/;
-            }
-            if ($unexpected_noncont) {
-                push @malformation_names, 'unexpected non-continuation';
-                push @expected_malformation_return_flags,
-                                $::UTF8_GOT_NON_CONTINUATION;
-                $allow_flags |= $::UTF8_ALLOW_NON_CONTINUATION
-                                                    if $malformed_allow_type;
-                push @expected_malformation_warnings,
-                                        qr/unexpected non-continuation byte/;
-            }
-
-            # The overflow malformation is done differently than other
-            # malformations.  It comes from manually typed tests in the test
-            # array.  We now make it be treated like one of the other
-            # malformations.  But some has to be deferred until the inner loop
-            my $overflow_msg_pattern;
-            if ($will_overflow) {
-                push @malformation_names, 'overflow';
-
-                $overflow_msg_pattern = display_bytes_no_quotes(
-                                    substr($this_bytes, 0, $this_expected_len));
-                $overflow_msg_pattern = qr/\QMalformed UTF-8 character:\E
-                                           \Q $overflow_msg_pattern\E
-                                           \Q (overflows)\E/x;
-                push @expected_malformation_return_flags, $::UTF8_GOT_OVERFLOW;
-                $allow_flags |= $::UTF8_ALLOW_OVERFLOW if $malformed_allow_type;
-            }
-
-            # And we can create the malformation-related text for the the test
-            # names we eventually will generate.
-            my $malformations_name = "";
-            if (@malformation_names) {
-                $malformations_name .= "dis" unless $malformed_allow_type;
-                $malformations_name .= "allowed ";
-                $malformations_name .= "malformation";
-                $malformations_name .= "s" if @malformation_names > 1;
-                $malformations_name .= ": ";
-                $malformations_name .=  join "/", @malformation_names;
-                $malformations_name =  " ($malformations_name)";
-            }
-
-            # Done setting up the malformation related stuff
-
-            {   # First test the isFOO calls
-                use warnings; # XXX no warnings 'deprecated';   # Make sure these don't raise warnings
-                undef @warnings_gotten;
-
-                my $ret = test_isUTF8_CHAR($this_bytes, $this_length);
-                my $ret_flags
-                        = test_isUTF8_CHAR_flags($this_bytes, $this_length, 0);
-                if ($malformations_name) {
-                    is($ret, 0, "For $testname$malformations_name: isUTF8_CHAR() returns 0");
-                    is($ret_flags, 0, "    And isUTF8_CHAR_flags() returns 0");
-                }
-                else {
-                    is($ret, $this_length, "For $testname: isUTF8_CHAR() returns"
-                                         . " expected length: $this_length");
-                    is($ret_flags, $this_length,
-                       "    And isUTF8_CHAR_flags(...,0) returns expected"
-                     . " length: $this_length");
-                }
-                is(scalar @warnings_gotten, 0,
-                   "    And neither isUTF8_CHAR() nor isUTF8_CHAR()_flags"
-                 . " generated any warnings")
-                or output_warnings(@warnings_gotten);
-
-                undef @warnings_gotten;
-                $ret = test_isSTRICT_UTF8_CHAR($this_bytes, $this_length);
-                if ($malformations_name) {
-                    is($ret, 0, "    And isSTRICT_UTF8_CHAR() returns 0");
-                }
-                else {
-                    my $expected_ret
-                                = (   $testname =~ /surrogate|non-character/
-                                   || $allowed_uv > 0x10FFFF)
-                                  ? 0
-                                  : $this_length;
-                    is($ret, $expected_ret,
-                        "    And isSTRICT_UTF8_CHAR() returns expected"
-                      . " length: $expected_ret");
-                    $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
-                                        $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
-                    is($ret, $expected_ret,
-                       "    And isUTF8_CHAR_flags('"
-                     . "DISALLOW_ILLEGAL_INTERCHANGE') acts like"
-                     . " isSTRICT_UTF8_CHAR");
-                }
-                is(scalar @warnings_gotten, 0,
-                        "    And neither isSTRICT_UTF8_CHAR() nor"
-                      . " isUTF8_CHAR_flags generated any warnings")
-                or output_warnings(@warnings_gotten);
-
-                undef @warnings_gotten;
-                $ret = test_isC9_STRICT_UTF8_CHAR($this_bytes, $this_length);
-                if ($malformations_name) {
-                    is($ret, 0, "    And isC9_STRICT_UTF8_CHAR() returns 0");
-                }
-                else {
-                    my $expected_ret = (   $testname =~ /surrogate/
-                                        || $allowed_uv > 0x10FFFF)
-                                       ? 0
-                                       : $this_expected_len;
-                    is($ret, $expected_ret, "    And isC9_STRICT_UTF8_CHAR()"
-                                          . " returns expected length:"
-                                          . " $expected_ret");
-                    $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
-                                    $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
-                    is($ret, $expected_ret,
-                       "    And isUTF8_CHAR_flags('"
-                     . "DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like"
-                     . " isC9_STRICT_UTF8_CHAR");
-                }
-                is(scalar @warnings_gotten, 0,
-                        "    And neither isC9_STRICT_UTF8_CHAR() nor"
-                      . " isUTF8_CHAR_flags generated any warnings")
-                or output_warnings(@warnings_gotten);
-
-                foreach my $disallow_type (0..2) {
-                    # 0 is don't disallow this type of code point
-                    # 1 is do disallow
-                    # 2 is do disallow, but only code points requiring
-                    #   perl-extended-UTF8
-
-                    my $disallow_flags;
-                    my $expected_ret;
-
-                    if ($malformations_name) {
-
-                        # Malformations are by default disallowed, so testing
-                        # with $disallow_type equal to 0 is sufficicient.
-                        next if $disallow_type;
-
-                        $disallow_flags = 0;
-                        $expected_ret = 0;
-                    }
-                    elsif ($disallow_type == 1) {
-                        $disallow_flags = $utf8n_flag_to_disallow;
-                        $expected_ret = 0;
-                    }
-                    elsif ($disallow_type == 2) {
-                        next if ! requires_extended_utf8($allowed_uv);
-                        $disallow_flags = $::UTF8_DISALLOW_PERL_EXTENDED;
-                        $expected_ret = 0;
-                    }
-                    else {  # type is 0
-                        $disallow_flags = $utf8n_flag_to_disallow_complement;
-                        $expected_ret = $this_length;
-                    }
-
-                    $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
-                                                  $disallow_flags);
-                    is($ret, $expected_ret,
-                             "    And isUTF8_CHAR_flags($display_bytes,"
-                           . " $disallow_flags) returns $expected_ret")
-                      or diag "The flags mean "
-                            . flags_to_text($disallow_flags,
-                                            \@utf8n_flags_to_text);
-                    is(scalar @warnings_gotten, 0,
-                            "    And isUTF8_CHAR_flags(...) generated"
-                          . " no warnings")
-                      or output_warnings(@warnings_gotten);
-
-                    # Test partial character handling, for each byte not a
-                    # full character
-                    my $did_test_partial = 0;
-                    for (my $j = 1; $j < $this_length - 1; $j++) {
-                        $did_test_partial = 1;
-                        my $partial = substr($this_bytes, 0, $j);
-                        my $ret_should_be;
-                        my $comment;
-                        if ($disallow_type || $malformations_name) {
-                            $ret_should_be = 0;
-                            $comment = "disallowed";
-
-                            # The number of bytes required to tell if a
-                            # sequence has something wrong is the smallest of
-                            # all the things wrong with it.  We start with the
-                            # number for this type of code point, if that is
-                            # disallowed; or the whole length if not.  The
-                            # latter is what a couple of the malformations
-                            # require.
-                            my $needed_to_tell = ($disallow_type)
-                                                  ? $this_needed_to_discern_len
-                                                  : $this_expected_len;
-
-                            # Then we see if the malformations that are
-                            # detectable early in the string are present.
-                            if ($overlong) {
-                                my $dl = overlong_discern_len($this_bytes);
-                                $needed_to_tell = $dl if $dl < $needed_to_tell;
-                            }
-                            if ($will_overflow) {
-                                my $dl = overflow_discern_len($length);
-                                $needed_to_tell = $dl if $dl < $needed_to_tell;
-                            }
-
-                            if ($j < $needed_to_tell) {
-                                $ret_should_be = 1;
-                                $comment .= ", but need $needed_to_tell"
-                                          . " bytes to discern:";
-                            }
-                        }
-                        else {
-                            $ret_should_be = 1;
-                            $comment = "allowed";
-                        }
-
-                        undef @warnings_gotten;
-
-                        $ret = test_is_utf8_valid_partial_char_flags($partial,
-                                                        $j, $disallow_flags);
-                        is($ret, $ret_should_be,
-                            "    And is_utf8_valid_partial_char_flags("
-                            . display_bytes($partial)
-                            . ", $disallow_flags), $comment: returns"
-                            . " $ret_should_be")
-                        or diag "The flags mean "
-                        . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
-                    }
-
-                    if ($did_test_partial) {
-                        is(scalar @warnings_gotten, 0,
-                            "    And is_utf8_valid_partial_char_flags()"
-                            . " generated no warnings for any of the lengths")
-                          or output_warnings(@warnings_gotten);
-                    }
-                }
-            }
-
-            # Now test the to/from UTF-8 calls.  There are several orthogonal
-            # variables involved.  We test most possible combinations
-
-            foreach my $do_disallow (0, 1) {
-              if ($do_disallow) {
-                next if $initially_overlong || $initially_orphan;
+  $test_count++;
+  next if $test_count % $num_test_files != $::TEST_CHUNK;
+
+  my ($testname, $bytes, $allowed_uv, $needed_to_discern_len) = @$test;
+
+  my $length = length $bytes;
+  my $initially_overlong = $testname =~ /overlong/;
+  my $initially_orphan   = $testname =~ /orphan/;
+  my $will_overflow = $allowed_uv < 0;
+
+  my $uv_string = sprintf(($allowed_uv < 0x100) ? "%02X" : "%04X", $allowed_uv);
+  my $display_bytes = display_bytes($bytes);
+
+  my $controlling_warning_category;
+  my $utf8n_flag_to_warn;
+  my $utf8n_flag_to_disallow;
+  my $uvchr_flag_to_warn;
+  my $uvchr_flag_to_disallow;
+
+  # We want to test that the independent flags are actually independent.
+  # For example, that a surrogate doesn't trigger a non-character warning,
+  # and conversely, turning off an above-Unicode flag doesn't suppress a
+  # surrogate warning.  Earlier versions of this file used nested loops to
+  # test all possible combinations.  But that creates lots of tests, making
+  # this run too long.  What is now done instead is to use the complement of
+  # the category we are testing to greatly reduce the combinatorial
+  # explosion.  For example, if we have a surrogate and we aren't expecting
+  # a warning about it, we set all the flags for non-surrogates to raise
+  # warnings.  If one shows up, it indicates the flags aren't independent.
+  my $utf8n_flag_to_warn_complement;
+  my $utf8n_flag_to_disallow_complement;
+  my $uvchr_flag_to_warn_complement;
+  my $uvchr_flag_to_disallow_complement;
+
+  # Many of the code points being tested are middling in that if code point
+  # edge cases work, these are very likely to as well.  Because this test
+  # file takes a while to execute, we skip testing the edge effects of code
+  # points deemed middling, while testing their basics and continuing to
+  # fully test the non-middling code points.
+  my $skip_most_tests = 0;
+
+  my $cp_message_qr;      # Pattern that matches the message raised when
+                          # that message contains the problematic code
+                          # point.  The message is the same (currently) both
+                          # when going from/to utf8.
+  my $non_cp_trailing_text;   # The suffix text when the message doesn't
+                              # contain a code point.  (This is a result of
+                              # some sort of malformation that means we
+                              # can't get an exact code poin
+  my $extended_cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
+                      \Q requires a Perl extension, and so is not\E
+                      \Q portable\E/x;
+  my $extended_non_cp_trailing_text
+                      = "is a Perl extension, and so is not portable";
+
+  # What bytes should have been used to specify a code point that has been
+  # specified as an overlong.
+  my $correct_bytes_for_overlong;
+
+  # Is this test malformed from the beginning?  If so, we know to generally
+  # expect that the tests will show it isn't valid.
+  my $initially_malformed = 0;
+
+  if ($initially_overlong || $initially_orphan) {
+      $non_cp_trailing_text = "if you see this, there is an error";
+      $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
+      $initially_malformed = 1;
+      $utf8n_flag_to_warn     = 0;
+      $utf8n_flag_to_disallow = 0;
+
+      $utf8n_flag_to_warn_complement =     $::UTF8_WARN_SURROGATE;
+      $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE;
+      if (! $will_overflow && $allowed_uv <= 0x10FFFF) {
+          $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_SUPER;
+          $utf8n_flag_to_disallow_complement |= $::UTF8_DISALLOW_SUPER;
+          if (($allowed_uv & 0xFFFF) != 0xFFFF) {
+              $utf8n_flag_to_warn_complement      |= $::UTF8_WARN_NONCHAR;
+              $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_NONCHAR;
+          }
+      }
+      if (! is_extended_utf8($bytes)) {
+          $utf8n_flag_to_warn_complement |= $::UTF8_WARN_PERL_EXTENDED;
+          $utf8n_flag_to_disallow_complement  |= $::UTF8_DISALLOW_PERL_EXTENDED;
+      }
+
+      $controlling_warning_category = 'utf8';
+
+      if ($initially_overlong) {
+          if (! defined $needed_to_discern_len) {
+              $needed_to_discern_len = overlong_discern_len($bytes);
+          }
+          $correct_bytes_for_overlong = display_bytes_no_quotes(chr $allowed_uv);
+      }
+  }
+  elsif($will_overflow || $allowed_uv > 0x10FFFF) {
+
+      # Set the SUPER flags; later, we test for PERL_EXTENDED as well.
+      $utf8n_flag_to_warn     = $::UTF8_WARN_SUPER;
+      $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SUPER;
+      $uvchr_flag_to_warn     = $::UNICODE_WARN_SUPER;
+      $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SUPER;;
+
+      # Below, we add the flags for non-perl_extended to the code points
+      # that don't fit that category.  Special tests are done for this
+      # category in the inner loop.
+      $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
+                                          |$::UTF8_WARN_SURROGATE;
+      $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
+                                          |$::UTF8_DISALLOW_SURROGATE;
+      $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
+                                          |$::UNICODE_WARN_SURROGATE;
+      $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
+                                          |$::UNICODE_DISALLOW_SURROGATE;
+      $controlling_warning_category = 'non_unicode';
+
+      if ($will_overflow) {  # This is realy a malformation
+          $non_cp_trailing_text = "if you see this, there is an error";
+          $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
+          $initially_malformed = 1;
+          if (! defined $needed_to_discern_len) {
+              $needed_to_discern_len = overflow_discern_len($length);
+          }
+      }
+      elsif (requires_extended_utf8($allowed_uv)) {
+          $cp_message_qr = $extended_cp_message_qr;
+          $non_cp_trailing_text = $extended_non_cp_trailing_text;
+          $needed_to_discern_len = 1 unless defined $needed_to_discern_len;
+      }
+      else {
+          $cp_message_qr = qr/\QCode point 0x$uv_string is not Unicode,\E
+                              \Q may not be portable\E/x;
+          $non_cp_trailing_text = "is for a non-Unicode code point, may not"
+                              . " be portable";
+          $utf8n_flag_to_warn_complement     |= $::UTF8_WARN_PERL_EXTENDED;
+          $utf8n_flag_to_disallow_complement
+                                          |= $::UTF8_DISALLOW_PERL_EXTENDED;
+          $uvchr_flag_to_warn_complement |= $::UNICODE_WARN_PERL_EXTENDED;
+          $uvchr_flag_to_disallow_complement
+                                      |= $::UNICODE_DISALLOW_PERL_EXTENDED;
+      }
+  }
+  elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
+      $cp_message_qr = qr/UTF-16 surrogate U\+$uv_string/;
+      $non_cp_trailing_text = "is for a surrogate";
+      $needed_to_discern_len = 2 unless defined $needed_to_discern_len;
+      $skip_most_tests = 1 if $allowed_uv > 0xD800 && $allowed_uv < 0xDFFF;
+
+      $utf8n_flag_to_warn     = $::UTF8_WARN_SURROGATE;
+      $utf8n_flag_to_disallow = $::UTF8_DISALLOW_SURROGATE;
+      $uvchr_flag_to_warn     = $::UNICODE_WARN_SURROGATE;
+      $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_SURROGATE;;
+
+      $utf8n_flag_to_warn_complement     = $::UTF8_WARN_NONCHAR
+                                          |$::UTF8_WARN_SUPER
+                                          |$::UTF8_WARN_PERL_EXTENDED;
+      $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_NONCHAR
+                                          |$::UTF8_DISALLOW_SUPER
+                                          |$::UTF8_DISALLOW_PERL_EXTENDED;
+      $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_NONCHAR
+                                          |$::UNICODE_WARN_SUPER
+                                          |$::UNICODE_WARN_PERL_EXTENDED;
+      $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_NONCHAR
+                                          |$::UNICODE_DISALLOW_SUPER
+                                          |$::UNICODE_DISALLOW_PERL_EXTENDED;
+      $controlling_warning_category = 'surrogate';
+  }
+  elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
+          || ($allowed_uv & 0xFFFE) == 0xFFFE)
+  {
+      $cp_message_qr = qr/\QUnicode non-character U+$uv_string\E
+                          \Q is not recommended for open interchange\E/x;
+      $non_cp_trailing_text = "if you see this, there is an error";
+      $needed_to_discern_len = $length unless defined $needed_to_discern_len;
+      if (   ($allowed_uv > 0xFDD0 && $allowed_uv < 0xFDEF)
+          || ($allowed_uv > 0xFFFF && $allowed_uv < 0x10FFFE))
+      {
+          $skip_most_tests = 1;
+      }
+
+      $utf8n_flag_to_warn     = $::UTF8_WARN_NONCHAR;
+      $utf8n_flag_to_disallow = $::UTF8_DISALLOW_NONCHAR;
+      $uvchr_flag_to_warn     = $::UNICODE_WARN_NONCHAR;
+      $uvchr_flag_to_disallow = $::UNICODE_DISALLOW_NONCHAR;;
+
+      $utf8n_flag_to_warn_complement     = $::UTF8_WARN_SURROGATE
+                                          |$::UTF8_WARN_SUPER
+                                          |$::UTF8_WARN_PERL_EXTENDED;
+      $utf8n_flag_to_disallow_complement = $::UTF8_DISALLOW_SURROGATE
+                                          |$::UTF8_DISALLOW_SUPER
+                                          |$::UTF8_DISALLOW_PERL_EXTENDED;
+      $uvchr_flag_to_warn_complement     = $::UNICODE_WARN_SURROGATE
+                                          |$::UNICODE_WARN_SUPER
+                                          |$::UNICODE_WARN_PERL_EXTENDED;
+      $uvchr_flag_to_disallow_complement = $::UNICODE_DISALLOW_SURROGATE
+                                          |$::UNICODE_DISALLOW_SUPER
+                                          |$::UNICODE_DISALLOW_PERL_EXTENDED;
+
+      $controlling_warning_category = 'nonchar';
+  }
+  else {
+      die "Can't figure out what type of warning to test for $testname"
+  }
+
+  die 'Didn\'t set $needed_to_discern_len for ' . $testname
+                                      unless defined $needed_to_discern_len;
+
+  # We try various combinations of malformations that can occur
+  foreach my $short (0, 1) {
+    next if $skip_most_tests && $short;
+    foreach my $unexpected_noncont (0, 1) {
+      next if $skip_most_tests && $unexpected_noncont;
+      foreach my $overlong (0, 1) {
+        next if $overlong && $skip_most_tests;
+        next if $initially_overlong && ! $overlong;
+
+        # If we're creating an overlong, it can't be longer than the
+        # maximum length, so skip if we're already at that length.
+        next if   (! $initially_overlong && $overlong)
+                  &&  $length >= $::max_bytes;
+
+        my $this_cp_message_qr = $cp_message_qr;
+        my $this_non_cp_trailing_text = $non_cp_trailing_text;
+
+        foreach my $malformed_allow_type (0..2) {
+          # 0 don't allow this malformation; ignored if no malformation
+          # 1 allow, with REPLACEMENT CHARACTER returned
+          # 2 allow, with intended code point returned.  All malformations
+          #   other than overlong can't determine the intended code point,
+          #   so this isn't valid for them.
+          next if     $malformed_allow_type == 2
+                  && ($will_overflow || $short || $unexpected_noncont);
+          next if $skip_most_tests && $malformed_allow_type;
+
+          # Here we are in the innermost loop for malformations.  So we
+          # know which ones are in effect.  Can now change the input to be
+          # appropriately malformed.  We also can set up certain other
+          # things now, like whether we expect a return flag from this
+          # malformation, and which flag.
+
+          my $this_bytes = $bytes;
+          my $this_length = $length;
+          my $this_expected_len = $length;
+          my $this_needed_to_discern_len = $needed_to_discern_len;
+
+          my @malformation_names;
+          my @expected_malformation_warnings;
+          my @expected_malformation_return_flags;
+
+          # Contains the flags for any allowed malformations.  Currently no
+          # combinations of on/off are tested for.  It's either all are
+          # allowed, or none are.
+          my $allow_flags = 0;
+          my $overlong_is_in_perl_extended_utf8 = 0;
+          my $dont_use_overlong_cp = 0;
+
+          if ($initially_orphan) {
+              next if $overlong || $short || $unexpected_noncont;
+          }
+
+          if ($overlong) {
+              if (! $initially_overlong) {
+                  my $new_expected_len;
+
+                  # To force this malformation, we convert the original start
+                  # byte into a continuation byte with the same data bits as
+                  # originally. ...
+                  my $start_byte = substr($this_bytes, 0, 1);
+                  my $converted_to_continuation_byte
+                                          = start_byte_to_cont($start_byte);
+
+                  # ... Then we prepend it with a known overlong sequence.
+                  # This should evaluate to the exact same code point as the
+                  # original.  We try to avoid an overlong using Perl
+                  # extended UTF-8.  The code points are the highest
+                  # representable as overlongs on the respective platform
+                  # without using extended UTF-8.
+                  if (native_to_I8($start_byte) lt "\xFC") {
+                      $start_byte = I8_to_native("\xFC");
+                      $new_expected_len = 6;
+                  }
+                  elsif (! isASCII && native_to_I8($start_byte) lt "\xFE") {
+
+                      # FE is not extended UTF-8 on EBCDIC
+                      $start_byte = I8_to_native("\xFE");
+                      $new_expected_len = 7;
+                  }
+                  else {  # Must use extended UTF-8.  On ASCII platforms, we
+                          # could express some overlongs here starting with
+                          # \xFE, but there's no real reason to do so.
+                      $overlong_is_in_perl_extended_utf8 = 1;
+                      $start_byte = I8_to_native("\xFF");
+                      $new_expected_len = $::max_bytes;
+                      $this_cp_message_qr = $extended_cp_message_qr;
+
+                      # The warning that gets raised doesn't include the
+                      # code point in the message if the code point can be
+                      # expressed without using extended UTF-8, but the
+                      # particular overlong sequence used is in extended
+                      # UTF-8.  To do otherwise would be confusing to the
+                      # user, as it would claim the code point requires
+                      # extended, when it doesn't.
+                      $dont_use_overlong_cp = 1
+                                  unless requires_extended_utf8($allowed_uv);
+                      $this_non_cp_trailing_text
+                                            = $extended_non_cp_trailing_text;
+                  }
+
+                  # Splice in the revise continuation byte, preceded by the
+                  # start byte and the proper number of the lowest
+                  # continuation bytes.
+                  $this_bytes =   $start_byte
+                              . ($native_lowest_continuation_chr
+                                  x (  $new_expected_len
+                                      - 1
+                                      - length($this_bytes)))
+                              .  $converted_to_continuation_byte
+                              .  substr($this_bytes, 1);
+                  $this_length = length($this_bytes);
+                  $this_needed_to_discern_len =    $new_expected_len
+                                              - (  $this_expected_len
+                                              - $this_needed_to_discern_len);
+                  $this_expected_len = $new_expected_len;
+              }
+          }
+
+          if ($short) {
+
+              # To force this malformation, just tell the test to not look
+              # as far as it should into the input.
+              $this_length--;
+              $this_expected_len--;
+
+              $allow_flags |= $::UTF8_ALLOW_SHORT if $malformed_allow_type;
+          }
+
+          if ($unexpected_noncont) {
+
+              # To force this malformation, change the final continuation
+              # byte into a start byte.
+              my $pos = ($short) ? -2 : -1;
+              substr($this_bytes, $pos, 1) = $known_start_byte;
+              $this_expected_len--;
+          }
+
+          # The whole point of a test that is malformed from the beginning
+          # is to test for that malformation.  If we've modified things so
+          # much that we don't have enough information to detect that
+          # malformation, there's no point in testing.
+          next if    $initially_malformed
+                  && $this_expected_len < $this_needed_to_discern_len;
+
+          # Here, we've transformed the input with all of the desired
+          # non-overflow malformations.  We are now in a position to
+          # construct any potential warnings for those malformations.  But
+          # it's a pain to get the detailed messages exactly right, so for
+          # now XXX, only do so for those that return an explicit code
+          # point.
+
+          if ($initially_orphan) {
+              push @malformation_names, "orphan continuation";
+              push @expected_malformation_return_flags,
+                                                  $::UTF8_GOT_CONTINUATION;
+              $allow_flags |= $::UTF8_ALLOW_CONTINUATION
+                                                  if $malformed_allow_type;
+              push @expected_malformation_warnings, qr/unexpected continuation/;
+          }
+
+          if ($overlong) {
+              push @malformation_names, 'overlong';
+              push @expected_malformation_return_flags, $::UTF8_GOT_LONG;
+
+              # If one of the other malformation types is also in effect, we
+              # don't know what the intended code point was.
+              if ($short || $unexpected_noncont || $will_overflow) {
+                  push @expected_malformation_warnings, qr/overlong/;
               }
               else {
-                next if $skip_most_tests;
+                  my $wrong_bytes = display_bytes_no_quotes(
+                                        substr($this_bytes, 0, $this_length));
+                  if (! defined $correct_bytes_for_overlong) {
+                      $correct_bytes_for_overlong
+                                          = display_bytes_no_quotes($bytes);
+                  }
+                  my $prefix = (   $allowed_uv > 0x10FFFF
+                                || ! isASCII && $allowed_uv < 256)
+                                ? "0x"
+                                : "U+";
+                  push @expected_malformation_warnings,
+                          qr/\QMalformed UTF-8 character: $wrong_bytes\E
+                              \Q (overlong; instead use\E
+                              \Q $correct_bytes_for_overlong to\E
+                              \Q represent $prefix$uv_string)/x;
               }
 
-              # This tests three functions.  utf8n_to_uvchr_error,
-              # utf8n_to_uvchr_msgs, and uvchr_to_utf8_flags.  But only the
-              # first two are variants of each other.  We use a loop
-              # 'which_func' to determine which of these.  uvchr_to_utf8_flags
-              # is done separately at the end of each iteration, only when
-              # which_func is 0.  which_func is numeric in part so we don't
-              # have to type in the function name and risk misspelling it
-              # somewhere, and also it sets whether we are expecting warnings
-              # or not in certain places.  The _msgs() version of the function
-              # expects warnings even if lexical ones are turned off, so by
-              # making its which_func == 1, we can say we want warnings;
-              # whereas the other one with the value 0, doesn't get them.
-              for my $which_func (0, 1) {
-                my $func = ($which_func)
-                            ? 'utf8n_to_uvchr_msgs'
-                            : 'utf8n_to_uvchr_error';
+              if ($malformed_allow_type == 2) {
+                  $allow_flags |= $::UTF8_ALLOW_LONG_AND_ITS_VALUE;
+              }
+              elsif ($malformed_allow_type) {
+                  $allow_flags |= $::UTF8_ALLOW_LONG;
+              }
+          }
+          if ($short) {
+              push @malformation_names, 'short';
+              push @expected_malformation_return_flags, $::UTF8_GOT_SHORT;
+              push @expected_malformation_warnings, qr/too short/;
+          }
+          if ($unexpected_noncont) {
+              push @malformation_names, 'unexpected non-continuation';
+              push @expected_malformation_return_flags,
+                              $::UTF8_GOT_NON_CONTINUATION;
+              $allow_flags |= $::UTF8_ALLOW_NON_CONTINUATION
+                                                  if $malformed_allow_type;
+              push @expected_malformation_warnings,
+                                      qr/unexpected non-continuation byte/;
+          }
+
+          # The overflow malformation is done differently than other
+          # malformations.  It comes from manually typed tests in the test
+          # array.  We now make it be treated like one of the other
+          # malformations.  But some has to be deferred until the inner loop
+          my $overflow_msg_pattern;
+          if ($will_overflow) {
+              push @malformation_names, 'overflow';
+
+              $overflow_msg_pattern = display_bytes_no_quotes(
+                                  substr($this_bytes, 0, $this_expected_len));
+              $overflow_msg_pattern = qr/\QMalformed UTF-8 character:\E
+                                          \Q $overflow_msg_pattern\E
+                                          \Q (overflows)\E/x;
+              push @expected_malformation_return_flags, $::UTF8_GOT_OVERFLOW;
+              $allow_flags |= $::UTF8_ALLOW_OVERFLOW if $malformed_allow_type;
+          }
+
+          # And we can create the malformation-related text for the the test
+          # names we eventually will generate.
+          my $malformations_name = "";
+          if (@malformation_names) {
+              $malformations_name .= "dis" unless $malformed_allow_type;
+              $malformations_name .= "allowed ";
+              $malformations_name .= "malformation";
+              $malformations_name .= "s" if @malformation_names > 1;
+              $malformations_name .= ": ";
+              $malformations_name .=  join "/", @malformation_names;
+              $malformations_name =  " ($malformations_name)";
+          }
+
+          # Done setting up the malformation related stuff
+
+          {   # First test the isFOO calls
+              use warnings; # XXX no warnings 'deprecated';   # Make sure these don't raise warnings
+              undef @warnings_gotten;
+
+              my $ret = test_isUTF8_CHAR($this_bytes, $this_length);
+              my $ret_flags
+                      = test_isUTF8_CHAR_flags($this_bytes, $this_length, 0);
+              if ($malformations_name) {
+                  is($ret, 0, "For $testname$malformations_name: isUTF8_CHAR() returns 0");
+                  is($ret_flags, 0, "    And isUTF8_CHAR_flags() returns 0");
+              }
+              else {
+                  is($ret, $this_length, "For $testname: isUTF8_CHAR() returns"
+                                        . " expected length: $this_length");
+                  is($ret_flags, $this_length,
+                      "    And isUTF8_CHAR_flags(...,0) returns expected"
+                    . " length: $this_length");
+              }
+              is(scalar @warnings_gotten, 0,
+                  "    And neither isUTF8_CHAR() nor isUTF8_CHAR()_flags"
+                . " generated any warnings")
+              or output_warnings(@warnings_gotten);
+
+              undef @warnings_gotten;
+              $ret = test_isSTRICT_UTF8_CHAR($this_bytes, $this_length);
+              if ($malformations_name) {
+                  is($ret, 0, "    And isSTRICT_UTF8_CHAR() returns 0");
+              }
+              else {
+                  my $expected_ret
+                              = (   $testname =~ /surrogate|non-character/
+                                  || $allowed_uv > 0x10FFFF)
+                                ? 0
+                                : $this_length;
+                  is($ret, $expected_ret,
+                      "    And isSTRICT_UTF8_CHAR() returns expected"
+                    . " length: $expected_ret");
+                  $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
+                                      $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+                  is($ret, $expected_ret,
+                      "    And isUTF8_CHAR_flags('"
+                    . "DISALLOW_ILLEGAL_INTERCHANGE') acts like"
+                    . " isSTRICT_UTF8_CHAR");
+              }
+              is(scalar @warnings_gotten, 0,
+                      "    And neither isSTRICT_UTF8_CHAR() nor"
+                    . " isUTF8_CHAR_flags generated any warnings")
+              or output_warnings(@warnings_gotten);
+
+              undef @warnings_gotten;
+              $ret = test_isC9_STRICT_UTF8_CHAR($this_bytes, $this_length);
+              if ($malformations_name) {
+                  is($ret, 0, "    And isC9_STRICT_UTF8_CHAR() returns 0");
+              }
+              else {
+                  my $expected_ret = (   $testname =~ /surrogate/
+                                      || $allowed_uv > 0x10FFFF)
+                                      ? 0
+                                      : $this_expected_len;
+                  is($ret, $expected_ret, "    And isC9_STRICT_UTF8_CHAR()"
+                                        . " returns expected length:"
+                                        . " $expected_ret");
+                  $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
+                                  $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
+                  is($ret, $expected_ret,
+                      "    And isUTF8_CHAR_flags('"
+                    . "DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like"
+                    . " isC9_STRICT_UTF8_CHAR");
+              }
+              is(scalar @warnings_gotten, 0,
+                      "    And neither isC9_STRICT_UTF8_CHAR() nor"
+                    . " isUTF8_CHAR_flags generated any warnings")
+              or output_warnings(@warnings_gotten);
+
+              foreach my $disallow_type (0..2) {
+                  # 0 is don't disallow this type of code point
+                  # 1 is do disallow
+                  # 2 is do disallow, but only code points requiring
+                  #   perl-extended-UTF8
+
+                  my $disallow_flags;
+                  my $expected_ret;
+
+                  if ($malformations_name) {
+
+                      # Malformations are by default disallowed, so testing
+                      # with $disallow_type equal to 0 is sufficicient.
+                      next if $disallow_type;
+
+                      $disallow_flags = 0;
+                      $expected_ret = 0;
+                  }
+                  elsif ($disallow_type == 1) {
+                      $disallow_flags = $utf8n_flag_to_disallow;
+                      $expected_ret = 0;
+                  }
+                  elsif ($disallow_type == 2) {
+                      next if ! requires_extended_utf8($allowed_uv);
+                      $disallow_flags = $::UTF8_DISALLOW_PERL_EXTENDED;
+                      $expected_ret = 0;
+                  }
+                  else {  # type is 0
+                      $disallow_flags = $utf8n_flag_to_disallow_complement;
+                      $expected_ret = $this_length;
+                  }
+
+                  $ret = test_isUTF8_CHAR_flags($this_bytes, $this_length,
+                                                $disallow_flags);
+                  is($ret, $expected_ret,
+                            "    And isUTF8_CHAR_flags($display_bytes,"
+                          . " $disallow_flags) returns $expected_ret")
+                    or diag "The flags mean "
+                          . flags_to_text($disallow_flags,
+                                          \@utf8n_flags_to_text);
+                  is(scalar @warnings_gotten, 0,
+                          "    And isUTF8_CHAR_flags(...) generated"
+                        . " no warnings")
+                    or output_warnings(@warnings_gotten);
+
+                  # Test partial character handling, for each byte not a
+                  # full character
+                  my $did_test_partial = 0;
+                  for (my $j = 1; $j < $this_length - 1; $j++) {
+                      $did_test_partial = 1;
+                      my $partial = substr($this_bytes, 0, $j);
+                      my $ret_should_be;
+                      my $comment;
+                      if ($disallow_type || $malformations_name) {
+                          $ret_should_be = 0;
+                          $comment = "disallowed";
+
+                          # The number of bytes required to tell if a
+                          # sequence has something wrong is the smallest of
+                          # all the things wrong with it.  We start with the
+                          # number for this type of code point, if that is
+                          # disallowed; or the whole length if not.  The
+                          # latter is what a couple of the malformations
+                          # require.
+                          my $needed_to_tell = ($disallow_type)
+                                                ? $this_needed_to_discern_len
+                                                : $this_expected_len;
+
+                          # Then we see if the malformations that are
+                          # detectable early in the string are present.
+                          if ($overlong) {
+                              my $dl = overlong_discern_len($this_bytes);
+                              $needed_to_tell = $dl if $dl < $needed_to_tell;
+                          }
+                          if ($will_overflow) {
+                              my $dl = overflow_discern_len($length);
+                              $needed_to_tell = $dl if $dl < $needed_to_tell;
+                          }
+
+                          if ($j < $needed_to_tell) {
+                              $ret_should_be = 1;
+                              $comment .= ", but need $needed_to_tell"
+                                        . " bytes to discern:";
+                          }
+                      }
+                      else {
+                          $ret_should_be = 1;
+                          $comment = "allowed";
+                      }
+
+                      undef @warnings_gotten;
+
+                      $ret = test_is_utf8_valid_partial_char_flags($partial,
+                                                      $j, $disallow_flags);
+                      is($ret, $ret_should_be,
+                          "    And is_utf8_valid_partial_char_flags("
+                          . display_bytes($partial)
+                          . ", $disallow_flags), $comment: returns"
+                          . " $ret_should_be")
+                      or diag "The flags mean "
+                      . flags_to_text($disallow_flags, \@utf8n_flags_to_text);
+                  }
+
+                  if ($did_test_partial) {
+                      is(scalar @warnings_gotten, 0,
+                          "    And is_utf8_valid_partial_char_flags()"
+                          . " generated no warnings for any of the lengths")
+                        or output_warnings(@warnings_gotten);
+                  }
+              }
+          }
+
+          # Now test the to/from UTF-8 calls.  There are several orthogonal
+          # variables involved.  We test most possible combinations
+
+          foreach my $do_disallow (0, 1) {
+            if ($do_disallow) {
+              next if $initially_overlong || $initially_orphan;
+            }
+            else {
+              next if $skip_most_tests;
+            }
+
+            # This tests three functions.  utf8n_to_uvchr_error,
+            # utf8n_to_uvchr_msgs, and uvchr_to_utf8_flags.  But only the
+            # first two are variants of each other.  We use a loop
+            # 'which_func' to determine which of these.  uvchr_to_utf8_flags
+            # is done separately at the end of each iteration, only when
+            # which_func is 0.  which_func is numeric in part so we don't
+            # have to type in the function name and risk misspelling it
+            # somewhere, and also it sets whether we are expecting warnings
+            # or not in certain places.  The _msgs() version of the function
+            # expects warnings even if lexical ones are turned off, so by
+            # making its which_func == 1, we can say we want warnings;
+            # whereas the other one with the value 0, doesn't get them.
+            for my $which_func (0, 1) {
+              my $func = ($which_func)
+                          ? 'utf8n_to_uvchr_msgs'
+                          : 'utf8n_to_uvchr_error';
 
               # We classify the warnings into certain "interesting" types,
               # described later
@@ -1825,12 +1825,12 @@ foreach my $test (@tests) {
                       or diag "Call was: " . uvchr_display_call($eval_text);
                 }
               }
-              }
             }
           }
         }
       }
     }
+  }
 }
 
 done_testing;
