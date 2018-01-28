@@ -163,6 +163,12 @@ my $max_depth_hash = $n;
 # instead so a user setting of either variable more closely matches
 # the limits the use sees.
 
+# be fairly aggressive in trimming this, smoke testing showed several
+# several apparently random failures here, eg. working in one
+# configuration, but not in a very similar configuration.
+$max_depth = int(0.6 * $max_depth);
+$max_depth_hash = int(0.6 * $max_depth);
+
 my $stack_reserve = $^O eq "MSWin32" ? 32 : 16;
 if ($] ge "5.016" && !($^O eq "cygwin" && $ptrsize == 8)) {
     $max_depth -= $stack_reserve;
