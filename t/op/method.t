@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 166);
+plan(tests => 163);
 
 {
     # RT #126042 &{1==1} * &{1==1} would crash
@@ -23,8 +23,8 @@ plan(tests => 166);
     # The first bug, the one which caused the crash, is that the fake
     # method was broken in scalar context, messing up the stack.  We test
     # for that on its own.
-    foreach my $meth (qw(import unimport)) {
-	foreach my $args ([], ["foo"]) {
+    foreach my $meth (qw(import)) {
+	foreach my $args ([]) {
 	    no warnings "deprecated";
 	    is join(",", map { $_ // "u" } "a", "b", "Unknown"->$meth(@$args), "c", "d"), "a,b,c,d", "Unknown->$meth(@$args) in list context";
 	    is join(",", map { $_ // "u" } "a", "b", scalar("Unknown"->$meth(@$args)), "c", "d"), "a,b,u,c,d", "Unknown->$meth(@$args) in scalar context";
@@ -43,6 +43,17 @@ plan(tests => 166);
 	is "@res", "123";
 	@res = eval { &$one() };
 	like $@, qr/\ACan't use string \("1"\) as a subroutine ref while "strict refs" in use at /;
+    }
+}
+
+{
+    # fatalisation of import/unimport deprecations
+    foreach my $meth (qw(import unimport)) {
+	foreach my $args ([], ["foo"]) {
+	    next if $meth eq "import" && !@$args;
+	    my $r = eval { "Unknown"->$meth(@$args) };
+	    like $@, qr/\ACalling undefined \"$meth\" method /;
+	}
     }
 }
 

@@ -9423,6 +9423,7 @@ skipped, even if there is an AUTOLOAD method.  This behaviour tends to
 hide bugs, so calling a non-existent C<import> method with arguments
 has been deprecated since Perl 5.28.  In the present version of Perl
 it warns by default.  Starting in Perl 5.32 it will signal an error.
+In this testing version of Perl, this deprecation is fatal.
 Calling a non-existent C<import> with no arguments is not deprecated.
 
 If you do not want to call the package's L<C<import>|/import LIST>

@@ -71,6 +71,7 @@ outright would cause a lot of noise.
 
 These calls were deprecated in Perl 5.28, and will become fatal in
 Perl 5.32.
+In this testing version of Perl, this deprecation is fatal.
 
 =head3 Calling undefined "unimport" method
 
@@ -89,6 +90,7 @@ method is being deprecated.
 
 These calls were deprecated in Perl 5.28, and will become fatal in
 Perl 5.32.
+In this testing version of Perl, this deprecation is fatal.
 
 =head3 Use of strings with code points over 0xFF as arguments to C<vec>
 

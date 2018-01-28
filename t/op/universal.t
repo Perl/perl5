@@ -11,7 +11,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 150;
+plan tests => 147;
 
 $a = {};
 bless $a, "Bob";
@@ -200,13 +200,21 @@ ok $x->isa('UNIVERSAL');
 
 # Check that the "historical accident" of UNIVERSAL having an import()
 # method doesn't affect anyone else.
-foreach my $meth (qw(import unimport)) {
-    foreach my $args ([], ["foo"]) {
+foreach my $meth (qw(import)) {
+    foreach my $args ([]) {
 	no warnings "deprecated";
 	is join(",", map { $_ // "u" } "a", "b", "Unknown"->$meth(@$args), "c", "d"), "a,b,c,d", "Unknown->$meth(@$args) in list context";
 	is join(",", map { $_ // "u" } "a", "b", scalar("Unknown"->$meth(@$args)), "c", "d"), "a,b,u,c,d", "Unknown->$meth(@$args) in scalar context";
     }
 }
+foreach my $meth (qw(import unimport)) {
+    foreach my $args ([], ["foo"]) {
+	next if $meth eq "import" && !@$args;
+	my $r = eval { "Unknown"->$meth(@$args) };
+	like $@, qr/\ACalling undefined \"$meth\" method /;
+    }
+}
+
 
 
 # This segfaulted in a blead.

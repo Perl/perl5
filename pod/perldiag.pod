@@ -652,9 +652,9 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
-=item Calling undefined "import" method with arguments via package "%s" is deprecated. This will be fatal in Perl 5.32
+=item Calling undefined "import" method with arguments via package "%s" is deprecated and fatal in this testing version of Perl
 
-(D deprecated) You called the C<import> method on a package that doesn't
+(F) You called the C<import> method on a package that doesn't
 define such a method.  Most likely you didn't call the method directly,
 but it was called on your behalf by a C<use> declaration.  For historical
 reasons, unlike any other method names, it is not an error to call this
@@ -688,9 +688,11 @@ is to add an empty method, to preserve the old behaviour.  Either way,
 adding an explicit C<import> method makes your desired behaviour apply
 independent of Perl version.
 
-=item Calling undefined "unimport" method via package "%s" is deprecated. This will be fatal in Perl 5.32
+In this testing version of Perl, this deprecation is fatal.
 
-(D deprecated) You called the C<unimport> method on a package that doesn't
+=item Calling undefined "unimport" method via package "%s" is deprecated and fatal in this testing version of Perl
+
+(F) You called the C<unimport> method on a package that doesn't
 define such a method.  Most likely you didn't call the method directly,
 but it was called on your behalf by a C<no> declaration.  For historical
 reasons, unlike any other method names, it is not an error to call this
@@ -719,6 +721,8 @@ module which has users not under your control, the more conservative
 approach is to add an empty method, to preserve the old behaviour.
 Either way, adding an explicit C<unimport> method makes your desired
 behaviour apply independent of Perl version.
+
+In this testing version of Perl, this deprecation is fatal.
 
 =item Cannot chr %f
 

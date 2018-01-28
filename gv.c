@@ -3764,10 +3764,10 @@ S_xsub_defimport(pTHX_ CV* cv)
 	mg_findext((SV*)cv, PERL_MAGIC_ext, &defimport_mgvtbl)->mg_obj;
     dXSARGS;
     if (items > 1)
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+	Perl_croak(aTHX_
 	    "Calling undefined \"import\" method with arguments"
 	    " via package \"%" SVf "\""
-	    " is deprecated. This will be fatal in Perl 5.32",
+	    " is deprecated and fatal in this testing version of Perl",
 	    SVfARG(savedname));
     XSRETURN(0);
 }
@@ -3779,10 +3779,10 @@ S_xsub_defunimport(pTHX_ CV* cv)
 	mg_findext((SV*)cv, PERL_MAGIC_ext, &defimport_mgvtbl)->mg_obj;
     dXSARGS;
     PERL_UNUSED_ARG(items);
-    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+    Perl_croak(aTHX_
 	"Calling undefined \"unimport\" method"
 	" via package \"%" SVf "\""
-	" is deprecated. This will be fatal in Perl 5.32",
+	" is deprecated and fatal in this testing version of Perl",
 	SVfARG(savedname));
     XSRETURN(0);
 }

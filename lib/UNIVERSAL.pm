@@ -15,11 +15,11 @@ sub import {
 	Carp::croak("UNIVERSAL does not export anything");
     } else {
 	my $class = ref($_[0]) eq "" ? $_[0] : ref($_[0]);
-	require warnings;
-	warnings::warnif("deprecated",
+	require Carp;
+	Carp::croak(
 	    "Calling undefined \"import\" method with arguments".
 	    " via package \"$class\"".
-	    " is deprecated. This will be fatal in Perl 5.32");
+	    " is deprecated and fatal in this testing version of Perl");
     }
 }
 
