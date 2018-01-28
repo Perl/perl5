@@ -1380,6 +1380,46 @@ bytes_cmp_utf8(bytes, utf8)
 	RETVAL
 
 AV *
+test_utf8n_to_uvchr_msgs(s, len, flags)
+        char *s
+        STRLEN len
+        U32 flags
+    PREINIT:
+        STRLEN retlen;
+        UV ret;
+        U32 errors;
+        AV *msgs = NULL;
+
+    CODE:
+        RETVAL = newAV();
+        sv_2mortal((SV*)RETVAL);
+
+        ret = utf8n_to_uvchr_msgs((U8*)  s,
+                                         len,
+                                         &retlen,
+                                         flags,
+                                         &errors,
+                                         &msgs);
+
+        /* Returns the return value in [0]; <retlen> in [1], <errors> in [2] */
+        av_push(RETVAL, newSVuv(ret));
+        if (retlen == (STRLEN) -1) {
+            av_push(RETVAL, newSViv(-1));
+        }
+        else {
+            av_push(RETVAL, newSVuv(retlen));
+        }
+        av_push(RETVAL, newSVuv(errors));
+
+        /* And any messages in [3] */
+        if (msgs) {
+            av_push(RETVAL, newRV_noinc((SV*)msgs));
+        }
+
+    OUTPUT:
+        RETVAL
+
+AV *
 test_utf8n_to_uvchr_error(s, len, flags)
 
         SV *s

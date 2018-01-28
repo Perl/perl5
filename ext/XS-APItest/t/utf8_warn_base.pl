@@ -702,6 +702,9 @@ sub do_warnings_test(@)
 my $num_test_files = $ENV{TEST_JOBS} || 1;
 $num_test_files = 10 if $num_test_files > 10;
 
+# We only really need to test utf8n_to_uvchr_msgs() once with this flag.
+my $tested_CHECK_ONLY = 0;
+
 my $test_count = -1;
 foreach my $test (@tests) {
     $test_count++;
@@ -1347,7 +1350,24 @@ foreach my $test (@tests) {
               }
               else {
                 next if $skip_most_tests;
-            }
+              }
+
+              # This tests three functions.  utf8n_to_uvchr_error,
+              # utf8n_to_uvchr_msgs, and uvchr_to_utf8_flags.  But only the
+              # first two are variants of each other.  We use a loop
+              # 'which_func' to determine which of these.  uvchr_to_utf8_flags
+              # is done separately at the end of each iteration, only when
+              # which_func is 0.  which_func is numeric in part so we don't
+              # have to type in the function name and risk misspelling it
+              # somewhere, and also it sets whether we are expecting warnings
+              # or not in certain places.  The _msgs() version of the function
+              # expects warnings even if lexical ones are turned off, so by
+              # making its which_func == 1, we can say we want warnings;
+              # whereas the other one with the value 0, doesn't get them.
+              for my $which_func (0, 1) {
+                my $func = ($which_func)
+                            ? 'utf8n_to_uvchr_msgs'
+                            : 'utf8n_to_uvchr_error';
 
               # We classify the warnings into certain "interesting" types,
               # described later
@@ -1356,6 +1376,12 @@ foreach my $test (@tests) {
                 foreach my $use_warn_flag (0, 1) {
                     if ($use_warn_flag) {
                         next if $initially_overlong || $initially_orphan;
+
+                        # Since utf8n_to_uvchr_msgs() expects warnings even
+                        # when lexical ones are turned off, we can skip
+                        # testing it when they are turned on, with little
+                        # likelihood of missing an error case.
+                        next if $which_func;
                     }
                     else {
                         next if $skip_most_tests;
@@ -1390,9 +1416,9 @@ foreach my $test (@tests) {
                     }
                     elsif ($warning_type == 1) {
                         $eval_warn = "no warnings";
-                        $expect_regular_warnings = 0;
-                        $expect_warnings_for_overflow = 0;
-                        $expect_warnings_for_malformed = 0;
+                        $expect_regular_warnings = $which_func;
+                        $expect_warnings_for_overflow = $which_func;
+                        $expect_warnings_for_malformed = $which_func;
                     }
                     elsif ($warning_type == 2) {
                         $eval_warn = "no warnings; use warnings 'utf8'";
@@ -1407,7 +1433,7 @@ foreach my $test (@tests) {
                         $expect_regular_warnings = $use_warn_flag;
                         $expect_warnings_for_overflow
                             = $controlling_warning_category eq 'non_unicode';
-                        $expect_warnings_for_malformed = 0;
+                        $expect_warnings_for_malformed = $which_func;
                     }
                     elsif ($warning_type == 4) {  # Like type 3, but uses the
                                                   # PERL_EXTENDED flags
@@ -1567,7 +1593,8 @@ foreach my $test (@tests) {
                         }
                     }
 
-                    my $this_name = "utf8n_to_uvchr_error() $testname: ";
+                    my $this_name = "$func() $testname: ";
+                    my @scratch_expected_return_flags = @expected_return_flags;
                     if (! $initially_malformed) {
                         $this_name .= ($disallowed)
                                        ? 'disallowed, '
@@ -1586,7 +1613,7 @@ foreach my $test (@tests) {
                     my $this_flags
                         = $allow_flags|$this_warning_flags|$this_disallow_flags;
                     my $eval_text =      "$eval_warn; \$ret_ref"
-                            . " = test_utf8n_to_uvchr_error("
+                            . " = test_$func("
                             . "'$this_bytes', $this_length, $this_flags)";
                     eval "$eval_text";
                     if (! ok ("$@ eq ''", "$this_name: eval succeeded"))
@@ -1595,6 +1622,7 @@ foreach my $test (@tests) {
                            . utf8n_display_call($eval_text);
                         next;
                     }
+
                     if ($disallowed) {
                         is($ret_ref->[0], 0, "    And returns 0")
                           or diag "Call was: " . utf8n_display_call($eval_text);
@@ -1612,28 +1640,33 @@ foreach my $test (@tests) {
 
                     my $returned_flags = $ret_ref->[2];
 
-                    for (my $i = @expected_return_flags - 1; $i >= 0; $i--) {
-                        if ($expected_return_flags[$i] & $returned_flags) {
-                            if ($expected_return_flags[$i]
-                                                == $::UTF8_GOT_PERL_EXTENDED)
-                            {
-                                pass("    Expected and got return flag for"
-                                   . " PERL_EXTENDED");
-                            }
-                                   # The first entries in this are
-                                   # malformations
-                            elsif ($i > @malformation_names - 1)  {
-                                pass("    Expected and got return flag"
-                                   . " for " . $controlling_warning_category);
-                            }
-                            else {
-                                pass("    Expected and got return flag for "
-                                   . $malformation_names[$i]
-                                   . " malformation");
-                            }
-                            $returned_flags &= ~$expected_return_flags[$i];
-                            splice @expected_return_flags, $i, 1;
-                        }
+                    for (my $i = @scratch_expected_return_flags - 1;
+                         $i >= 0;
+                         $i--)
+                    {
+                      if ($scratch_expected_return_flags[$i] & $returned_flags)
+                      {
+                          if ($scratch_expected_return_flags[$i]
+                                              == $::UTF8_GOT_PERL_EXTENDED)
+                          {
+                              pass("    Expected and got return flag for"
+                                  . " PERL_EXTENDED");
+                          }
+                                  # The first entries in this are
+                                  # malformations
+                          elsif ($i > @malformation_names - 1)  {
+                              pass("    Expected and got return flag"
+                                  . " for " . $controlling_warning_category);
+                          }
+                          else {
+                              pass("    Expected and got return flag for "
+                                  . $malformation_names[$i]
+                                  . " malformation");
+                          }
+                          $returned_flags
+                                      &= ~$scratch_expected_return_flags[$i];
+                          splice @scratch_expected_return_flags, $i, 1;
+                      }
                     }
 
                     is($returned_flags, 0,
@@ -1644,15 +1677,51 @@ foreach my $test (@tests) {
                                 # We strip off any prefixes from the flag
                                 # names
                              =~ s/ \b [A-Z] _ //xgr);
-                    is (scalar @expected_return_flags, 0,
+                    is (scalar @scratch_expected_return_flags, 0,
                         "    Got all expected return flags")
                         or diag "The expected flags not gotten were: "
                            . (flags_to_text(eval join("|",
-                                                        @expected_return_flags),
+                                                @scratch_expected_return_flags),
                                             \@utf8n_flags_to_text)
                                 # We strip off any prefixes from the flag
                                 # names
                              =~ s/ \b [A-Z] _ //xgr);
+
+                    if ($which_func) {
+                        my @returned_warnings;
+                        for my $element_ref (@{$ret_ref->[3]}) {
+                            push @returned_warnings, $element_ref->{'text'};
+                            my $text = $element_ref->{'text'};
+                            my $flag = $element_ref->{'flag_bit'};
+                            my $category = $element_ref->{'warning_category'};
+
+                            if (! ok(($flag & ($flag-1)) == 0,
+                                      "flag for returned msg is a single bit"))
+                            {
+                              diag sprintf("flags are %x; msg=%s", $flag, $text);
+                            }
+                            else {
+                              if (grep { $_ == $flag } @expected_return_flags) {
+                                  pass("flag for returned msg is expected");
+                              }
+                              else {
+                                  fail("flag for returned msg is expected: "
+                                 . flags_to_text($flag, \@utf8n_flags_to_text));
+                              }
+                            }
+
+                            # In perl space, don't know the category numbers
+                            isnt($category, 0,
+                                          "returned category for msg isn't 0");
+                        }
+
+                        ok(@warnings_gotten == 0, "$func raised no warnings;"
+                              . " the next tests are for ones in the returned"
+                              . " variable")
+                            or diag join "\n", "The unexpected warnings were:",
+                                                              @warnings_gotten;
+                        @warnings_gotten = @returned_warnings;
+                    }
 
                     do_warnings_test(@expected_warnings)
                       or diag "Call was: " . utf8n_display_call($eval_text);
@@ -1660,11 +1729,15 @@ foreach my $test (@tests) {
 
                     # Check CHECK_ONLY results when the input is
                     # disallowed.  Do this when actually disallowed,
-                    # not just when the $this_disallow_flags is set
-                    if ($disallowed) {
+                    # not just when the $this_disallow_flags is set.  We only
+                    # test once utf8n_to_uvchr_msgs() with this.
+                    if (   $disallowed
+                        && ($which_func == 0 || ! $tested_CHECK_ONLY))
+                    {
+                        $tested_CHECK_ONLY = 1;
                         my $this_flags = $this_disallow_flags|$::UTF8_CHECK_ONLY;
                         my $eval_text = "use warnings; \$ret_ref ="
-                                      . " test_utf8n_to_uvchr_error('"
+                                      . " test_$func('"
                                       . "$this_bytes', $this_length,"
                                       . " $this_flags)";
                         eval $eval_text;
@@ -1693,6 +1766,7 @@ foreach my $test (@tests) {
                     # existing code point, it hasn't overflowed, and isn't
                     # malformed.
                     next if @malformation_names;
+                    next if $which_func;
 
                     $this_warning_flags = ($use_warn_flag)
                                           ? $this_uvchr_flag_to_warn
@@ -1743,6 +1817,7 @@ foreach my $test (@tests) {
                     do_warnings_test(@expected_warnings)
                       or diag "Call was: " . uvchr_display_call($eval_text);
                 }
+              }
               }
             }
           }
