@@ -1737,12 +1737,7 @@ STMT_START {                                              \
 
 #define REXEC_FBC_CLASS_SCAN_GUTS(UTF8, COND)                  \
     if (COND) {                                                \
-        if (   (   doevery                                     \
-                || s != previous_occurrence_end)               \
-            && (reginfo->intuit || regtry(reginfo, &s)))       \
-        {                                                      \
-            goto got_it;                                       \
-        }                                                      \
+        FBC_CHECK_AND_TRY                                      \
         s += ((UTF8) ? UTF8SKIP(s) : 1);                       \
         previous_occurrence_end = s;                           \
     }                                                          \
@@ -1757,6 +1752,14 @@ STMT_START {                                              \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(0, COND);                         \
     }
+
+#define FBC_CHECK_AND_TRY                                      \
+        if (   (   doevery                                     \
+                || s != previous_occurrence_end)               \
+            && (reginfo->intuit || regtry(reginfo, &s)))       \
+        {                                                      \
+            goto got_it;                                       \
+        }
 
 /* The three macros below are slightly different versions of the same logic.
  *
