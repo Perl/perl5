@@ -1730,11 +1730,6 @@ STMT_START {                                              \
         }                                                   \
     } STMT_END
 
-/* We keep track of where the next character should start after an occurrence
- * of the one we're looking for.  Knowing that, we can see right away if the
- * next occurrence is adjacent to the previous.  When 'doevery' is FALSE, we
- * don't accept the 2nd and succeeding adjacent occurrences */
-
 #define REXEC_FBC_CLASS_SCAN_GUTS(UTF8, COND)                  \
     if (COND) {                                                \
         FBC_CHECK_AND_TRY                                      \
@@ -1753,6 +1748,10 @@ STMT_START {                                              \
 	REXEC_FBC_CLASS_SCAN(0, COND);                         \
     }
 
+/* We keep track of where the next character should start after an occurrence
+ * of the one we're looking for.  Knowing that, we can see right away if the
+ * next occurrence is adjacent to the previous.  When 'doevery' is FALSE, we
+ * don't accept the 2nd and succeeding adjacent occurrences */
 #define FBC_CHECK_AND_TRY                                      \
         if (   (   doevery                                     \
                 || s != previous_occurrence_end)               \
@@ -1760,6 +1759,22 @@ STMT_START {                                              \
         {                                                      \
             goto got_it;                                       \
         }
+
+
+/* This differs from the above macros in that it calls a function which returns
+ * the next occurrence of the thing being looked for in 's'; and 'strend' if
+ * there is no such occurrence. */
+#define REXEC_FBC_FIND_NEXT_SCAN(UTF8, f)                   \
+    while (s < strend) {                                    \
+        s = f;                                              \
+        if (s >= strend) {                                  \
+            break;                                          \
+        }                                                   \
+                                                            \
+        FBC_CHECK_AND_TRY                                   \
+        s += (UTF8) ? UTF8SKIP(s) : 1;                      \
+        previous_occurrence_end = s;                        \
+    }
 
 /* The three macros below are slightly different versions of the same logic.
  *
@@ -1989,7 +2004,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     const char *strend, regmatch_info *reginfo)
 {
     dVAR;
+
+    /* TRUE if x+ need not match at just the 1st pos of run of x's */
     const I32 doevery = (prog->intflags & PREGf_SKIP) == 0;
+
     char *pat_string;   /* The pattern's exactish string */
     char *pat_end;	    /* ptr to end char of pat_string */
     re_fold_t folder;	/* Function for computing non-utf8 folds */
@@ -2510,17 +2528,17 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
 
     case ASCII:
-        s = find_next_ascii(s, strend, utf8_target);
-        if (s < strend && (reginfo->intuit || regtry(reginfo, &s))) {
-            goto got_it;
-        }
-
+        REXEC_FBC_FIND_NEXT_SCAN(0, find_next_ascii(s, strend, utf8_target));
         break;
 
     case NASCII:
-        s = find_next_non_ascii(s, strend, utf8_target);
-        if (s < strend && (reginfo->intuit || regtry(reginfo, &s))) {
-            goto got_it;
+        if (utf8_target) {
+            REXEC_FBC_FIND_NEXT_SCAN(1, find_next_non_ascii(s, strend,
+                                                            utf8_target));
+        }
+        else {
+            REXEC_FBC_FIND_NEXT_SCAN(0, find_next_non_ascii(s, strend,
+                                                            utf8_target));
         }
 
         break;
