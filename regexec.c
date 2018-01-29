@@ -1730,26 +1730,25 @@ STMT_START {                                              \
         }                                                   \
     } STMT_END
 
-/* In the next macro, 'try_it' is a bool indicating whether to actually
- * try the match or not.  It is used for when the flags indicate that only the
- * first occurrence of 'x' in a string of them should be considered for
- * matching.  try_it is initialized to 1, and set to 1 on every failure of the
- * condition, thus it will be 1 whenever a 'x' happens to be first.  But when
- * the condition is met, and we don't exit the loop because we have ultimate
- * success, try_it is set to 'doevery', the latter being FALSE if we only want
- * the first in a string; otherwise TRUE, so try_it will be 0 when the previous
- * thing was 'x' and we only want the first 'x' */
+/* We keep track of where the next character should start after an occurrence
+ * of the one we're looking for.  Knowing that, we can see right away if the
+ * next occurrence is adjacent to the previous.  When 'doevery' is FALSE, we
+ * don't accept the 2nd and succeeding adjacent occurrences */
 
 #define REXEC_FBC_CLASS_SCAN_GUTS(UTF8, COND)                  \
     if (COND) {                                                \
-	if (try_it && (reginfo->intuit || regtry(reginfo, &s)))\
-	    goto got_it;                                       \
-	else                                                   \
-	    try_it = doevery;                                  \
+        if (   (   doevery                                     \
+                || s != previous_occurrence_end)               \
+            && (reginfo->intuit || regtry(reginfo, &s)))       \
+        {                                                      \
+            goto got_it;                                       \
+        }                                                      \
+        s += ((UTF8) ? UTF8SKIP(s) : 1);                       \
+        previous_occurrence_end = s;                           \
     }                                                          \
-    else                                                       \
-	try_it = 1;                                            \
-    s += ((UTF8) ? UTF8SKIP(s) : 1);
+    else {                                                     \
+        s += ((UTF8) ? UTF8SKIP(s) : 1);                       \
+    }
 
 #define REXEC_FBC_CSCAN(CONDUTF8,COND)                         \
     if (utf8_target) {                                         \
@@ -1997,8 +1996,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     U8 c1;
     U8 c2;
     char *e;
-    bool try_it = 1;	/* Use in some macros to control whether to accept this
-                           occurrence of what's being matched, or not */
+
+    /* In some cases we accept only the first occurence of 'x' in a sequence of
+     * them.  This variable points to just beyond the end of the previous
+     * occurrence of 'x', hence we can tell if we are in a sequence.  (Having
+     * it point to beyond the 'x' allows us to work for UTF-8 without having to
+     * hop back.) */
+    char * previous_occurrence_end = 0;
+
     I32 tmp;            /* Scratch variable */
     const bool utf8_target = reginfo->is_utf8_target;
     UV utf8_fold_flags = 0;
