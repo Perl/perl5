@@ -1715,23 +1715,16 @@ STMT_START {                                              \
     }                                                     \
 } STMT_END
 
-#define REXEC_FBC_UTF8_SCAN(CODE)                     \
-STMT_START {                                          \
-    while (s < strend) {                              \
-	CODE                                          \
-	s += UTF8SKIP(s);                             \
-    }                                                 \
-} STMT_END
+#define REXEC_FBC_SCAN(UTF8, CODE)                          \
+    STMT_START {                                            \
+        while (s < strend) {                                \
+            CODE                                            \
+            s += ((UTF8) ? UTF8SKIP(s) : 1);                \
+        }                                                   \
+    } STMT_END
 
-#define REXEC_FBC_SCAN(CODE)                          \
-STMT_START {                                          \
-    while (s < strend) {                              \
-	CODE                                          \
-	s++;                                          \
-    }                                                 \
-} STMT_END
 
-/* In the next few macros, 'try_it' is a bool indicating whether to actually
+/* In the next macro, 'try_it' is a bool indicating whether to actually
  * try the match or not.  It is used for when the flags indicate that only the
  * first occurrence of 'x' in a string of them should be considered for
  * matching.  try_it is initialized to 1, and set to 1 on every failure of the
@@ -1741,20 +1734,8 @@ STMT_START {                                          \
  * the first in a string; otherwise TRUE, so try_it will be 0 when the previous
  * thing was 'x' and we only want the first 'x' */
 
-#define REXEC_FBC_UTF8_CLASS_SCAN(COND)                        \
-REXEC_FBC_UTF8_SCAN( /* Loops while (s < strend) */            \
-    if (COND) {                                                \
-	if (try_it && (reginfo->intuit || regtry(reginfo, &s)))\
-	    goto got_it;                                       \
-	else                                                   \
-	    try_it = doevery;                                  \
-    }                                                          \
-    else                                                       \
-	try_it = 1;                                            \
-)
-
-#define REXEC_FBC_CLASS_SCAN(COND)                             \
-REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
+#define REXEC_FBC_CLASS_SCAN(UTF8, COND)                       \
+REXEC_FBC_SCAN(UTF8, /* Loops while (s < strend) */            \
     if (COND) {                                                \
 	if (try_it && (reginfo->intuit || regtry(reginfo, &s)))\
 	    goto got_it;                                       \
@@ -1767,10 +1748,10 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 
 #define REXEC_FBC_CSCAN(CONDUTF8,COND)                         \
     if (utf8_target) {                                         \
-	REXEC_FBC_UTF8_CLASS_SCAN(CONDUTF8);                   \
+	REXEC_FBC_CLASS_SCAN(1, CONDUTF8);                     \
     }                                                          \
     else {                                                     \
-	REXEC_FBC_CLASS_SCAN(COND);                            \
+	REXEC_FBC_CLASS_SCAN(0, COND);                         \
     }
 
 /* The three macros below are slightly different versions of the same logic.
@@ -1801,7 +1782,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
  * here.  And vice-versa if we are looking for a non-boundary.
  *
  * 'tmp' below in the next three macros in the REXEC_FBC_SCAN and
- * REXEC_FBC_UTF8_SCAN loops is a loop invariant, a bool giving the return of
+ * REXEC_FBC_SCAN loops is a loop invariant, a bool giving the return of
  * TEST_NON_UTF8(s-1).  To see this, note that that's what it is defined to be
  * at entry to the loop, and to get to the IF_FAIL branch, tmp must equal
  * TEST_NON_UTF8(s), and in the opposite branch, IF_SUCCESS, tmp is that
@@ -1812,7 +1793,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 #define FBC_UTF8_A(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)                         \
     tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                      \
     tmp = TEST_NON_UTF8(tmp);                                                  \
-    REXEC_FBC_UTF8_SCAN( /* advances s while s < strend */                     \
+    REXEC_FBC_SCAN(1,  /* 1=>is-utf8; advances s while s < strend */           \
         if (tmp == ! TEST_NON_UTF8((U8) *s)) {                                 \
             tmp = !tmp;                                                        \
             IF_SUCCESS; /* Is a boundary if values for s-1 and s differ */     \
@@ -1836,7 +1817,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
     }                                                                          \
     tmp = TEST_UV(tmp);                                                        \
     LOAD_UTF8_CHARCLASS_ALNUM();                                               \
-    REXEC_FBC_UTF8_SCAN( /* advances s while s < strend */                     \
+    REXEC_FBC_SCAN(1,  /* 1=>is-utf8; advances s while s < strend */           \
         if (tmp == ! (TEST_UTF8((U8 *) s, (U8 *) reginfo->strend))) {          \
             tmp = !tmp;                                                        \
             IF_SUCCESS;                                                        \
@@ -1856,7 +1837,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
     else {  /* Not utf8 */                                                     \
 	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
 	tmp = TEST_NON_UTF8(tmp);                                              \
-	REXEC_FBC_SCAN( /* advances s while s < strend */                      \
+	REXEC_FBC_SCAN(0, /* 0=>not-utf8; advances s while s < strend */       \
 	    if (tmp == ! TEST_NON_UTF8((U8) *s)) {                             \
 		IF_SUCCESS;                                                    \
 		tmp = !tmp;                                                    \
@@ -2039,14 +2020,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case ANYOFD:
     case ANYOF:
         if (utf8_target) {
-            REXEC_FBC_UTF8_CLASS_SCAN(
+            REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
         }
         else if (ANYOF_FLAGS(c)) {
-            REXEC_FBC_CLASS_SCAN(reginclass(prog,c, (U8*)s, (U8*)s+1, 0));
+            REXEC_FBC_CLASS_SCAN(0, reginclass(prog,c, (U8*)s, (U8*)s+1, 0));
         }
         else {
-            REXEC_FBC_CLASS_SCAN(ANYOF_BITMAP_TEST(c, *((U8*)s)));
+            REXEC_FBC_CLASS_SCAN(0, ANYOF_BITMAP_TEST(c, *((U8*)s)));
         }
         break;
 
@@ -2558,8 +2539,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         if (utf8_target) {
             /* The complement of something that matches only ASCII matches all
              * non-ASCII, plus everything in ASCII that isn't in the class. */
-            REXEC_FBC_UTF8_CLASS_SCAN(   ! isASCII_utf8_safe(s, strend)
-                                      || ! _generic_isCC_A(*s, FLAGS(c)));
+            REXEC_FBC_CLASS_SCAN(1,   ! isASCII_utf8_safe(s, strend)
+                                   || ! _generic_isCC_A(*s, FLAGS(c)));
             break;
         }
 
@@ -2572,12 +2553,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * as otherwise we would have to examine all the continuation
          * characters */
         if (utf8_target) {
-            REXEC_FBC_UTF8_CLASS_SCAN(_generic_isCC_A(*s, FLAGS(c)));
+            REXEC_FBC_CLASS_SCAN(1, _generic_isCC_A(*s, FLAGS(c)));
             break;
         }
 
       posixa:
-        REXEC_FBC_CLASS_SCAN(
+        REXEC_FBC_CLASS_SCAN(0, /* 0=>not-utf8 */
                         to_complement ^ cBOOL(_generic_isCC_A(*s, FLAGS(c))));
         break;
 
@@ -2587,7 +2568,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     case POSIXU:
         if (! utf8_target) {
-            REXEC_FBC_CLASS_SCAN(to_complement ^ cBOOL(_generic_isCC(*s,
+            REXEC_FBC_CLASS_SCAN(0, /* 0=>not-utf8 */
+                                 to_complement ^ cBOOL(_generic_isCC(*s,
                                                                     FLAGS(c))));
         }
         else {
@@ -2600,7 +2582,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     /* We avoid loading in the swash as long as possible, but
                      * should we have to, we jump to a separate loop.  This
                      * extra 'if' statement is what keeps this code from being
-                     * just a call to REXEC_FBC_UTF8_CLASS_SCAN() */
+                     * just a call to REXEC_FBC_CLASS_SCAN() */
                     if (UTF8_IS_ABOVE_LATIN1(*s)) {
                         goto found_above_latin1;
                     }
@@ -2628,27 +2610,27 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             else switch (classnum) {    /* These classes are implemented as
                                            macros */
                 case _CC_ENUM_SPACE:
-                    REXEC_FBC_UTF8_CLASS_SCAN(
+                    REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
                         to_complement ^ cBOOL(isSPACE_utf8_safe(s, strend)));
                     break;
 
                 case _CC_ENUM_BLANK:
-                    REXEC_FBC_UTF8_CLASS_SCAN(
+                    REXEC_FBC_CLASS_SCAN(1,
                         to_complement ^ cBOOL(isBLANK_utf8_safe(s, strend)));
                     break;
 
                 case _CC_ENUM_XDIGIT:
-                    REXEC_FBC_UTF8_CLASS_SCAN(
+                    REXEC_FBC_CLASS_SCAN(1,
                        to_complement ^ cBOOL(isXDIGIT_utf8_safe(s, strend)));
                     break;
 
                 case _CC_ENUM_VERTSPACE:
-                    REXEC_FBC_UTF8_CLASS_SCAN(
+                    REXEC_FBC_CLASS_SCAN(1,
                        to_complement ^ cBOOL(isVERTWS_utf8_safe(s, strend)));
                     break;
 
                 case _CC_ENUM_CNTRL:
-                    REXEC_FBC_UTF8_CLASS_SCAN(
+                    REXEC_FBC_CLASS_SCAN(1,
                         to_complement ^ cBOOL(isCNTRL_utf8_safe(s, strend)));
                     break;
 
@@ -2673,7 +2655,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* This is a copy of the loop above for swash classes, though using the
          * FBC macro instead of being expanded out.  Since we've loaded the
          * swash, we don't have to check for that each time through the loop */
-        REXEC_FBC_UTF8_CLASS_SCAN(
+        REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
                 to_complement ^ cBOOL(_generic_utf8_safe(
                                       classnum,
                                       s,
@@ -3400,7 +3382,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                 to_utf8_substr(prog);
             }
             ch = SvPVX_const(prog->anchored_utf8)[0];
-	    REXEC_FBC_SCAN(
+	    REXEC_FBC_SCAN(0,   /* 0=>not-utf8 */
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
 		    if (regtry(reginfo, &s)) goto got_it;
@@ -3418,7 +3400,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                 }
             }
             ch = SvPVX_const(prog->anchored_substr)[0];
-	    REXEC_FBC_SCAN(
+	    REXEC_FBC_SCAN(0,   /* 0=>not-utf8 */
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
 		    if (regtry(reginfo, &s)) goto got_it;
