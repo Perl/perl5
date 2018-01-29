@@ -244,7 +244,8 @@ foreach (@tests) {
                             }
                         }
                         $j--;
-                        $modified .= substr($pat, $i + 1, $j - $i) . " ";
+                        $modified .= substr($pat, $i + 1, $j - $i);
+                        $modified .= " " if $in_brackets;
                         $i = $j;
                     }
                     elsif (ord($curchar) >= ord('0')
@@ -287,12 +288,8 @@ foreach (@tests) {
 
                 # A regular character.
                 if ($curchar ne '[') {
-                    if (! $in_brackets) {
-                        $modified .= $curchar;
-                    }
-                    else {
-                        $modified .= " $curchar ";
-                    }
+                    $modified .= " " if  $in_brackets;
+                    $modified .= $curchar;
                     next;
                 }
 
