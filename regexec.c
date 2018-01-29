@@ -1723,6 +1723,12 @@ STMT_START {                                              \
         }                                                   \
     } STMT_END
 
+#define REXEC_FBC_CLASS_SCAN(UTF8, COND)                    \
+    STMT_START {                                            \
+        while (s < strend) {                                \
+            REXEC_FBC_CLASS_SCAN_GUTS(UTF8, COND)           \
+        }                                                   \
+    } STMT_END
 
 /* In the next macro, 'try_it' is a bool indicating whether to actually
  * try the match or not.  It is used for when the flags indicate that only the
@@ -1734,8 +1740,7 @@ STMT_START {                                              \
  * the first in a string; otherwise TRUE, so try_it will be 0 when the previous
  * thing was 'x' and we only want the first 'x' */
 
-#define REXEC_FBC_CLASS_SCAN(UTF8, COND)                       \
-REXEC_FBC_SCAN(UTF8, /* Loops while (s < strend) */            \
+#define REXEC_FBC_CLASS_SCAN_GUTS(UTF8, COND)                  \
     if (COND) {                                                \
 	if (try_it && (reginfo->intuit || regtry(reginfo, &s)))\
 	    goto got_it;                                       \
@@ -1744,7 +1749,7 @@ REXEC_FBC_SCAN(UTF8, /* Loops while (s < strend) */            \
     }                                                          \
     else                                                       \
 	try_it = 1;                                            \
-)
+    s += ((UTF8) ? UTF8SKIP(s) : 1);
 
 #define REXEC_FBC_CSCAN(CONDUTF8,COND)                         \
     if (utf8_target) {                                         \
@@ -2586,25 +2591,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     if (UTF8_IS_ABOVE_LATIN1(*s)) {
                         goto found_above_latin1;
                     }
-                    if ((UTF8_IS_INVARIANT(*s)
+
+                    REXEC_FBC_CLASS_SCAN_GUTS(1, (UTF8_IS_INVARIANT(*s)
                          && to_complement ^ cBOOL(_generic_isCC((U8) *s,
                                                                 classnum)))
                         || (   UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, strend)
                             && to_complement ^ cBOOL(
                                 _generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*s,
                                                                       *(s + 1)),
-                                              classnum))))
-                    {
-                        if (try_it && (reginfo->intuit || regtry(reginfo, &s)))
-                            goto got_it;
-                        else {
-                            try_it = doevery;
-                        }
-                    }
-                    else {
-                        try_it = 1;
-                    }
-                    s += UTF8SKIP(s);
+                                              classnum))));
                 }
             }
             else switch (classnum) {    /* These classes are implemented as
