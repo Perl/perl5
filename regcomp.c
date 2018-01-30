@@ -18032,7 +18032,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         U8 op = END;  /* The optimzation node-type */
         int posix_class = -1;   /* Illegal value */
         const char * cur_parse= RExC_parse;
-        U8 ANYOFM_mask;
+        U8 ANYOFM_mask = 0xFF;
         U32 anode_arg = 0;
 
         invlist_iterinit(cp_list);
@@ -18204,7 +18204,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             ) {
                 Size_t cp_count = 0;
                 bool first_time = TRUE;
-                unsigned int lowest_cp;
+                unsigned int lowest_cp = 0xFF;
                 U8 bits_differing = 0;
 
                 /* Only needed on EBCDIC, as there, variants and non- are mixed
