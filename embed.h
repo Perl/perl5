@@ -46,6 +46,7 @@
 #define _to_utf8_lower_flags(a,b,c,d,e,f,g)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e,f,g)
 #define _to_utf8_title_flags(a,b,c,d,e,f,g)	Perl__to_utf8_title_flags(aTHX_ a,b,c,d,e,f,g)
 #define _to_utf8_upper_flags(a,b,c,d,e,f,g)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e,f,g)
+#define _variant_byte_number	S__variant_byte_number
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
@@ -773,9 +774,6 @@
 #endif
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
-#endif
-#if !defined(EBCDIC)
-#define _variant_byte_number	S__variant_byte_number
 #endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)

@@ -137,6 +137,11 @@ PERL_CALLCONV UV	Perl__to_utf8_title_flags(pTHX_ const U8 *p, const U8* e, U8* u
 PERL_CALLCONV UV	Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8* ustrp, STRLEN *lenp, bool flags, const char * const file, const int line);
 #define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS	\
 	assert(p); assert(ustrp); assert(file)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned int	S__variant_byte_number(PERL_UINTMAX_T word)
+			__attribute__warn_unused_result__;
+#endif
+
 PERL_CALLCONV void	Perl__warn_problematic_locale(void);
 PERL_CALLCONV_NO_RET void	Perl_abort_execution(pTHX_ const char * const msg, const char * const name)
 			__attribute__noreturn__;
@@ -3859,13 +3864,6 @@ PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET	\
 	assert(sv); assert(mg)
-
-#endif
-#if !defined(EBCDIC)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE unsigned int	S__variant_byte_number(PERL_UINTMAX_T word)
-			__attribute__warn_unused_result__;
-#endif
 
 #endif
 #if !defined(HAS_GETENV_LEN)
