@@ -401,8 +401,6 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
                                       | ( ( (PTR2nat(x)                       \
                                            & PERL_WORD_BOUNDARY_MASK) >> 2))))
 
-#  ifndef USING_MSVC6
-
     /* Do the word-at-a-time iff there is at least one usable full word.  That
      * means that after advancing to a word boundary, there still is at least a
      * full word left.  The number of bytes needed to advance is 'wordsize -
@@ -460,7 +458,6 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
         } while (x + PERL_WORDSIZE <= send);
     }
 
-#  endif    /* End of ! MSVC6 */
 #endif      /* End of ! EBCDIC */
 
     /* Process per-byte */
@@ -479,10 +476,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
-#if ! defined(EBCDIC) && ! defined(USING_MSVC6)
-
-/* Apparent compiler error with MSVC6, so can't use this function.  All callers
- * to it must be compiled to use the EBCDIC fallback on MSVC6 */
+#ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int
 S__variant_byte_number(PERL_UINTMAX_T word)
@@ -496,7 +490,24 @@ S__variant_byte_number(PERL_UINTMAX_T word)
     /* Get just the msb bits of each byte */
     word &= PERL_VARIANTS_WORD_MASK;
 
-#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#  ifdef USING_MSVC6    /* VC6 has some issues with the normal code, and the
+                           easiest thing is to hide that from the callers */
+    {
+        unsigned int i;
+        const U8 * s = (U8 *) &word;
+        dTHX;
+
+        for (i = 0; i < sizeof(word); i++ ) {
+            if (s[i]) {
+                return i;
+            }
+        }
+
+        Perl_croak(aTHX_ "panic: %s: %d: unexpected zero word\n",
+                                 __FILE__, __LINE__);
+    }
+
+#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1
