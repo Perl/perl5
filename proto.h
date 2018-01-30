@@ -5179,6 +5179,11 @@ STATIC int	S_edit_distance(const UV *src, const UV *tgt, const STRLEN x, const S
 #define PERL_ARGS_ASSERT_EDIT_DISTANCE	\
 	assert(src); assert(tgt)
 
+STATIC SV *	S_get_ANYOFM_contents(pTHX_ const regnode * n)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS	\
+	assert(n)
+
 STATIC SV*	S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state, const regnode_charclass* const node);
 #define PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC	\
 	assert(pRExC_state); assert(node)
@@ -5570,6 +5575,11 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 STATIC char *	S_find_next_ascii(char* s, const char * send, const bool is_utf8)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_FIND_NEXT_ASCII	\
+	assert(s); assert(send)
+
+STATIC char *	S_find_next_masked(char * s, const char * send, const U8 byte, const U8 mask)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_FIND_NEXT_MASKED	\
 	assert(s); assert(send)
 
 STATIC char *	S_find_next_non_ascii(char* s, const char * send, const bool is_utf8)

@@ -5516,6 +5516,27 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                                                           (regnode_charclass *) scan);
 		    break;
 
+                case ANYOFM:
+                  {
+                    SV* cp_list = get_ANYOFM_contents(scan);
+
+                    if (flags & SCF_DO_STCLASS_OR) {
+                        ssc_union(data->start_class,
+                                  cp_list,
+                                  FALSE /* don't invert */
+                                  );
+                    }
+                    else if (flags & SCF_DO_STCLASS_AND) {
+                        ssc_intersection(data->start_class,
+                                         cp_list,
+                                         FALSE /* don't invert */
+                                         );
+                    }
+
+                    SvREFCNT_dec_NN(cp_list);
+                    break;
+                  }
+
 		case NPOSIXL:
                     invert = 1;
                     /* FALLTHROUGH */
@@ -17999,25 +18020,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * certain common classes that are easy to test.  Getting to this point in
      * the code means that the class didn't get optimized there.  Since this
      * code is only executed in Pass 2, it is too late to save space--it has
-     * been allocated in Pass 1, and currently isn't given back.  But turning
-     * things into an EXACTish node can allow the optimizer to join it to any
-     * adjacent such nodes.  And if the class is equivalent to things like /./,
-     * expensive run-time swashes can be avoided.  Now that we have more
-     * complete information, we can find things necessarily missed by the
-     * earlier code.  Another possible "optimization" that isn't done is that
-     * something like [Ee] could be changed into an EXACTFU.  khw tried this
-     * and found that the ANYOF is faster, including for code points not in the
-     * bitmap.  This still might make sense to do, provided it got joined with
-     * an adjacent node(s) to create a longer EXACTFU one.  This could be
-     * accomplished by creating a pseudo ANYOF_EXACTFU node type that the join
-     * routine would know is joinable.  If that didn't happen, the node type
-     * could then be made a straight ANYOF */
+     * been allocated in Pass 1, and currently isn't given back.  XXX Why not?
+     * But turning things into an EXACTish node can allow the optimizer to join
+     * it to any adjacent such nodes.  And if the class is equivalent to things
+     * like /./, expensive run-time swashes can be avoided.  Now that we have
+     * more complete information, we can find things necessarily missed by the
+     * earlier code. */
 
     if (optimizable && cp_list && ! invert) {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
         int posix_class = -1;   /* Illegal value */
         const char * cur_parse= RExC_parse;
+        U8 ANYOFM_mask;
+        U32 anode_arg = 0;
 
         invlist_iterinit(cp_list);
         if (! invlist_iternext(cp_list, &start, &end)) {
@@ -18156,6 +18172,106 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 }
               found_posix: ;
             }
+
+            /* If it didn't match a POSIX class, it might be able to be turned
+             * into an ANYOFM node.  Compare two different bytes, bit-by-bit.
+             * In some positions, the bits in each will be 1; and in other
+             * positions both will be 0; and in some positions the bit will be
+             * 1 in one byte, and 0 in the other.  Let 'n' be the number of
+             * positions where the bits differ.  We create a mask which has
+             * exactly 'n' 0 bits, each in a position where the two bytes
+             * differ.  Now take the set of all bytes that when ANDed with the
+             * mask yield the same result.  That set has 2**n elements, and is
+             * representable by just two 8 bit numbers: the result and the
+             * mask.  Importantly, matching the set can be vectorized by
+             * creating a word full of the result bytes, and a word full of the
+             * mask bytes, yielding a significant speed up.  Here, see if this
+             * node matches such a set.  As a concrete example consider [01],
+             * and the byte representing '0' which is 0x30 on ASCII machines.
+             * It has the bits 0011 0000.  Take the mask 1111 1110.  If we AND
+             * 0x31 and 0x30 with that mask we get 0x30.  Any other bytes ANDed
+             * yield something else.  So [01], which is a common usage, is
+             * optimizable into ANYOFM, and can benefit from the speed up.  We
+             * can only do this on UTF-8 invariant bytes, because the variance
+             * would throw this off.  */
+            if (   op == END
+                && invlist_highest(cp_list) <=
+#ifdef EBCDIC
+                                               0xFF
+#else
+                                               0x7F
+#endif
+            ) {
+                Size_t cp_count = 0;
+                bool first_time = TRUE;
+                unsigned int lowest_cp;
+                U8 bits_differing = 0;
+
+                /* Only needed on EBCDIC, as there, variants and non- are mixed
+                 * together.  Could #ifdef it out on ASCII, but probably the
+                 * compiler will optimize it out */
+                bool has_variant = FALSE;
+
+                /* Go through the bytes and find the bit positions that differ */
+                invlist_iterinit(cp_list);
+                while (invlist_iternext(cp_list, &start, &end)) {
+                    unsigned int i = start;
+
+                    cp_count += end - start + 1;
+
+                    if (first_time) {
+                        if (! UVCHR_IS_INVARIANT(i)) {
+                            has_variant = TRUE;
+                            continue;
+                        }
+
+                        first_time = FALSE;
+                        lowest_cp = start;
+
+                        i++;
+                    }
+
+                    /* Find the bit positions that differ from the lowest code
+                     * point in the node.  Keep track of all such positions by
+                     * OR'ing */
+                    for (; i <= end; i++) {
+                        if (! UVCHR_IS_INVARIANT(i)) {
+                            has_variant = TRUE;
+                            continue;
+                        }
+
+                        bits_differing  |= i ^ lowest_cp;
+                    }
+                }
+                invlist_iterfinish(cp_list);
+
+                /* At the end of the loop, we count how many bits differ from
+                 * the bits in lowest code point, call the count 'd'.  If the
+                 * set we found contains 2**d elements, it is the closure of
+                 * all code points that differ only in those bit positions.  To
+                 * convince yourself of that, first note that the number in the
+                 * closure must be a power of 2, which we test for.  The only
+                 * way we could have that count and it be some differing set,
+                 * is if we got some code points that don't differ from the
+                 * lowest code point in any position, but do differ from each
+                 * other in some other position.  That means one code point has
+                 * a 1 in that position, and another has a 0.  But that would
+                 * mean that one of them differs from the lowest code point in
+                 * that position, which possibility we've already excluded. */
+                if ( ! has_variant
+                    && cp_count == 1U << PL_bitcount[bits_differing])
+                {
+                    assert(cp_count > 1);
+                    op = ANYOFM;
+
+                    /* We need to make the bits that differ be 0's */
+                    ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
+
+                    /* The argument is the lowest code point */
+                    anode_arg = lowest_cp;
+                    *flagp |= HASWIDTH|SIMPLE;
+                }
+            }
         }
 
         if (op != END) {
@@ -18163,7 +18279,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             RExC_emit = (regnode *)orig_emit;
 
             if (regarglen[op]) {
-                ret = reganode(pRExC_state, op, 0);
+                ret = reganode(pRExC_state, op, anode_arg);
             } else {
                 ret = reg_node(pRExC_state, op);
             }
@@ -18177,6 +18293,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             else if (PL_regkind[op] == POSIXD || PL_regkind[op] == NPOSIXD) {
                 FLAGS(ret) = posix_class;
+            }
+            else if (PL_regkind[op] == ANYOFM) {
+                FLAGS(ret) = ANYOFM_mask;
             }
 
             SvREFCNT_dec_NN(cp_list);
@@ -19030,6 +19149,36 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
 }
 #endif
 
+STATIC SV*
+S_get_ANYOFM_contents(pTHX_ const regnode * n) {
+
+    /* Returns an inversion list of all the code points matched by the ANYOFM
+     * node 'n' */
+
+    SV * cp_list = _new_invlist(-1);
+    const U8 lowest = ARG(n);
+    unsigned int i;
+    U8 count = 0;
+    U8 needed = 1U << PL_bitcount[ (U8) ~ FLAGS(n)];
+
+    PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS;
+
+    /* Starting with the lowest code point, any code point that ANDed with the
+     * mask yields the lowest code point is in the set */
+    for (i = lowest; i <= 0xFF; i++) {
+        if ((i & FLAGS(n)) == ARG(n)) {
+            cp_list = add_cp_to_invlist(cp_list, i);
+            count++;
+
+            /* We know how many code points (a power of two) that are in the
+             * set.  No use looking once we've got that number */
+            if (count >= needed) break;
+        }
+    }
+
+    return cp_list;
+}
+
 /*
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
@@ -19555,6 +19704,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
         SvREFCNT_dec(unresolved);
+    }
+    else if (k == ANYOFM) {
+        SV * cp_list = get_ANYOFM_contents(o);
+
+	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+        put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, TRUE);
+	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+
+        SvREFCNT_dec(cp_list);
     }
     else if (k == POSIXD || k == NPOSIXD) {
         U8 index = FLAGS(o) * 2;

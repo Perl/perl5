@@ -741,6 +741,78 @@ S_find_span_end(char * s, const char * send, const char span_byte)
     return s;
 }
 
+STATIC char *
+S_find_next_masked(char * s, const char * send, const U8 byte, const U8 mask)
+{
+    /* Returns the position of the first byte in the sequence between 's'
+     * and 'send-1' inclusive that when ANDed with 'mask' yields 'byte';
+     * returns 'send' if none found.  It uses word-level operations instead of
+     * byte to speed up the process */
+
+    PERL_ARGS_ASSERT_FIND_NEXT_MASKED;
+
+    assert(send >= s);
+    assert((byte & mask) == byte);
+
+    if ((STRLEN) (send - s) >= PERL_WORDSIZE
+                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
+                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
+    {
+        PERL_UINTMAX_T word_complemented, mask_word;
+
+        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
+            if (((* (U8 *) s) & mask) == byte) {
+                return s;
+            }
+            s++;
+        }
+
+        word_complemented = ~ (PERL_COUNT_MULTIPLIER * byte);
+        mask_word =            PERL_COUNT_MULTIPLIER * mask;
+
+        do {
+            PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
+
+            /* If 'masked' contains 'byte' within it, anding with the
+             * complement will leave those 8 bits 0 */
+            masked &= word_complemented;
+
+            /* This causes the most significant bit to be set to 1 for any
+             * bytes in the word that aren't completely 0 */
+            masked |= masked << 1;
+            masked |= masked << 2;
+            masked |= masked << 4;
+
+            /* The msbits are the same as what marks a byte as variant, so we
+             * can use this mask.  If all msbits are 1, the word doesn't
+             * contain 'byte' */
+            if ((masked & PERL_VARIANTS_WORD_MASK) == PERL_VARIANTS_WORD_MASK) {
+                s += PERL_WORDSIZE;
+                continue;
+            }
+
+            /* Here, the msbit of bytes in the word that aren't 'byte' are 1,
+             * and any that are, are 0.  Complement and re-AND to swap that */
+            masked = ~ masked;
+            masked &= PERL_VARIANTS_WORD_MASK;
+
+            /* This reduces the problem to that solved by this function */
+            s += _variant_byte_number(masked);
+            return s;
+
+        } while (s + PERL_WORDSIZE <= send);
+    }
+
+    while (s < send) {
+        if (((* (U8 *) s) & mask) == byte) {
+            return s;
+        }
+        s++;
+    }
+
+    return s;
+}
+
 STATIC U8 *
 S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
 {
@@ -2182,6 +2254,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         else {
             REXEC_FBC_CLASS_SCAN(0, ANYOF_BITMAP_TEST(c, *((U8*)s)));
         }
+        break;
+
+    case ANYOFM:    /* ARG() is the base byte; FLAGS() the mask byte */
+        /* UTF-8ness doesn't matter, so use 0 */
+        REXEC_FBC_FIND_NEXT_SCAN(0,
+                                 find_next_masked(s, strend, ARG(c), FLAGS(c)));
         break;
 
     case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
@@ -6659,6 +6737,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 	    break;
 
+        case ANYOFM:
+            if (NEXTCHR_IS_EOS || (UCHARAT(locinput) & FLAGS(scan)) != ARG(scan)) {
+                sayNO;
+            }
+            locinput++;
+            break;
+
         case ASCII:
             if (NEXTCHR_IS_EOS || ! isASCII(UCHARAT(locinput))) {
                 sayNO;
@@ -9338,12 +9423,20 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
 
-    case ASCII:
+    case ANYOFM:
         if (utf8_target && loceol - scan > max) {
 
             /* We didn't adjust <loceol> at the beginning of this routine
              * because is UTF-8, but it is actually ok to do so, since here, to
              * match, 1 char == 1 byte. */
+            loceol = scan + max;
+        }
+
+        scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) loceol, (U8) ARG(p), FLAGS(p));
+        break;
+
+    case ASCII:
+        if (utf8_target && loceol - scan > max) {
             loceol = scan + max;
         }
 
