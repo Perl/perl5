@@ -116,7 +116,7 @@ BEGIN {
 	;
 }
 
-our $VERSION = '1.46';
+our $VERSION = '1.47_01';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
@@ -232,11 +232,22 @@ sub caller_info {
 
     my $sub_name = Carp::get_subname( \%call_info );
     if ( $call_info{has_args} ) {
-        my @args;
-        if (CALLER_OVERRIDE_CHECK_OK && @DB::args == 1
-            && ref $DB::args[0] eq ref \$i
-            && $DB::args[0] == \$i ) {
-            @DB::args = ();    # Don't let anyone see the address of $i
+        # guard our serialization of the stack from stack refcounting bugs
+        my @args = map {
+                my $arg;
+                local $@= $@;
+                eval {
+                    $arg = $_;
+                    1;
+                } or do {
+                    $arg = '** argument not available anymore **';
+                };
+                $arg;
+            } @DB::args;
+        if (CALLER_OVERRIDE_CHECK_OK && @args == 1
+            && ref $args[0] eq ref \$i
+            && $args[0] == \$i ) {
+            @args = ();    # Don't let anyone see the address of $i
             local $@;
             my $where = eval {
                 my $func    = $cgc or return '';
@@ -255,7 +266,6 @@ sub caller_info {
                 = "** Incomplete caller override detected$where; \@DB::args were not set **";
         }
         else {
-            @args = @DB::args;
             my $overflow;
             if ( $MaxArgNums and @args > $MaxArgNums )
             {    # More than we want to show?
