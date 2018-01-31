@@ -3655,8 +3655,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                                 & (PERL_UINTMAX_T) ~1) != '0')
         {
             Perl_croak(aTHX_
-             "panic: %s: %d: Corrupt utf8ness_cache=%s\nlen=%u,"
-             " inserted_name=%s, its_len=%u\n",
+             "panic: %s: %d: Corrupt utf8ness_cache=%s\nlen=%zu,"
+             " inserted_name=%s, its_len=%zu\n",
                 __FILE__, __LINE__,
                 PL_locale_utf8ness, strlen(PL_locale_utf8ness),
                 delimited, input_name_len_with_overhead);
