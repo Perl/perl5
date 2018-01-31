@@ -29,8 +29,6 @@ sub BEGIN {
     }
 }
 
-use Test::More;
-
 use Storable qw(freeze thaw store retrieve);
 
 {
@@ -41,6 +39,8 @@ use Storable qw(freeze thaw store retrieve);
         LVALUE  => \(my $substr  = substr((my $str = "foo"), 0, 3)),
     );
 }
+
+use Test::More;
 
 my $test = 12;
 my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
