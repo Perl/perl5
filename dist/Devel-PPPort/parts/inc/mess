@@ -19,10 +19,8 @@ mess_nocontext
 mess
 
 warn_nocontext
-Perl_warn_nocontext
 
 croak_nocontext
-Perl_croak_nocontext
 
 croak_no_modify
 Perl_croak_no_modify
@@ -184,28 +182,20 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 #define warn_nocontext warn
 #endif
 
-#ifndef Perl_warn_nocontext
-#define Perl_warn_nocontext warn_nocontext
-#endif
-
 #ifndef croak_nocontext
 #define croak_nocontext croak
 #endif
 
-#ifndef Perl_croak_nocontext
-#define Perl_croak_nocontext croak_nocontext
-#endif
-
 #ifndef croak_no_modify
-#define croak_no_modify() croak("%s", PL_no_modify)
+#define croak_no_modify() croak_nocontext("%s", PL_no_modify)
 #define Perl_croak_no_modify() croak_no_modify()
 #endif
 
 #ifndef croak_memory_wrap
 #if { VERSION >= 5.9.2 } || ( { VERSION >= 5.8.6 } && { VERSION < 5.9.0 } )
-#  define croak_memory_wrap() croak("%s", PL_memory_wrap)
+#  define croak_memory_wrap() croak_nocontext("%s", PL_memory_wrap)
 #else
-#  define croak_memory_wrap() croak("panic: memory wrap")
+#  define croak_memory_wrap() croak_nocontext("panic: memory wrap")
 #endif
 #endif
 
@@ -216,8 +206,9 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 #ifndef croak_xs_usage
 #if { NEED croak_xs_usage }
 void
-croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
+croak_xs_usage(const CV *const cv, const char *const params)
 {
+    dTHX;
     const GV *const gv = CvGV(cv);
 
     PERL_ARGS_ASSERT_CROAK_XS_USAGE;
@@ -435,7 +426,7 @@ if ($] ge '5.006') {
 
 if (ord('A') != 65) {
     skip 'skip: no ASCII support', 0 for 1..24;
-} elsif ($] ge '5.008') {
+} elsif ($] ge '5.008' && $] ne '5.012000') {
     undef $die;
     ok !defined eval { Devel::PPPort::croak_sv(eval '"\N{U+E1}\n"') };
     ok $@, "\xE1\n";
