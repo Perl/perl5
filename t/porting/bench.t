@@ -7,9 +7,9 @@
 # See also t/porting/bench_selftest.pl
 
 BEGIN {
-    chdir '..' if -f 'test.pl' && -f 'thread_it.pl';
+    chdir '..' if -f 'test.pl';
+    @INC = ( './lib' );
     require './t/test.pl';
-    push @INC, 'lib';
 }
 
 use warnings;
@@ -22,7 +22,7 @@ use Config;
 # Only test on a platform likely to support forking, pipes, cachegrind
 # etc.  Add other platforms if you think they're safe.
 
-skip_all "not devel"   unless -d ".git";
+skip_all "not devel"   unless -d "./.git";
 skip_all "not linux"   unless $^O eq 'linux';
 skip_all "no valgrind" unless -x '/bin/valgrind' || -x '/usr/bin/valgrind';
 # Address sanitizer clashes horribly with cachegrind
