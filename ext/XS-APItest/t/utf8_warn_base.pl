@@ -1616,7 +1616,7 @@ foreach my $test (@tests) {
                             . " = test_$func("
                             . "'$this_bytes', $this_length, $this_flags)";
                     eval "$eval_text";
-                    if (! ok ("$@ eq ''", "$this_name: eval succeeded"))
+                    if (! ok ($@ eq "", "$this_name: eval succeeded"))
                     {
                         diag "\$@='$@'; call was: "
                            . utf8n_display_call($eval_text);
@@ -1748,7 +1748,7 @@ foreach my $test (@tests) {
                                       . "$this_bytes', $this_length,"
                                       . " $this_flags)";
                         eval $eval_text;
-                        if (! ok ("$@ eq ''",
+                        if (! ok ($@ eq "",
                             "    And eval succeeded with CHECK_ONLY"))
                         {
                             diag "\$@='$@'; Call was: "
@@ -1806,7 +1806,7 @@ foreach my $test (@tests) {
                             . " test_uvchr_to_utf8_flags("
                             . "$allowed_uv, $this_flags)";
                     eval "$eval_text";
-                    if (! ok ("$@ eq ''", "$this_name: eval succeeded"))
+                    if (! ok ($@ eq "", "$this_name: eval succeeded"))
                     {
                         diag "\$@='$@'; call was: "
                            . uvchr_display_call($eval_text);
