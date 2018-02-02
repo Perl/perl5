@@ -13925,11 +13925,24 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * is_PROBLEMATIC_LOCALE_FOLD_cp) */
                     if (! IS_IN_SOME_FOLD_L1(ender)) {
 
-                        /* Start a new node for this non-folding character if
-                         * previous ones in the node were folded */
-                        if (len && node_type != EXACT) {
-                            p = oldp;
-                            goto loopdone;
+                        /* See if the character's fold differs between /d and
+                         * /u.  This includes the multi-char fold SHARP S to
+                         * 'ss' */
+                        if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
+
+                            /* If the node started out having uni rules, we
+                             * wouldn't have gotten here.  So this means
+                             * something in the middle has changed it, but
+                             * didn't think it needed to reparse.  But this
+                             * sharp s now does indicate the need for
+                             * reparsing. */
+                            if (RExC_uni_semantics) {
+                                p = oldp;
+                                goto loopdone;
+                            }
+
+                            RExC_seen_unfolded_sharp_s = 1;
+                            maybe_exactfu = FALSE;
                         }
 
                         *(s++) = (char) ender;
