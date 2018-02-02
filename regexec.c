@@ -1898,17 +1898,6 @@ STMT_START {                                                                    
     dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
                 startpos, doutf8, depth)
 
-#define REXEC_FBC_EXACTISH_SCAN(COND)                     \
-STMT_START {                                              \
-    while (s <= e) {                                      \
-	if ( (COND)                                       \
-	     && (ln == 1 || folder(s+1, pat_string+1, ln-1))\
-	     && (reginfo->intuit || regtry(reginfo, &s)) )\
-	    goto got_it;                                  \
-	s++;                                              \
-    }                                                     \
-} STMT_END
-
 #define REXEC_FBC_SCAN(UTF8, CODE)                          \
     STMT_START {                                            \
         while (s < strend) {                                \
@@ -2348,10 +2337,57 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         c1 = *pat_string;
         c2 = fold_array[c1];
         if (c1 == c2) { /* If char and fold are the same */
-            REXEC_FBC_EXACTISH_SCAN(*(U8*)s == c1);
+            while (s <= e) {
+                s = (char *) memchr(s, c1, e + 1 - s);
+                if (s == NULL) {
+                    break;
+                }
+
+                /* Check that the rest of the node matches */
+                if (   (ln == 1 || folder(s + 1, pat_string + 1, ln - 1))
+                    && (reginfo->intuit || regtry(reginfo, &s)) )
+                {
+                    goto got_it;
+                }
+                s++;
+            }
         }
         else {
-            REXEC_FBC_EXACTISH_SCAN(*(U8*)s == c1 || *(U8*)s == c2);
+            U8 bits_differing = c1 ^ c2;
+
+            /* If the folds differ in one bit position only, we can mask to
+             * match either of them, and can use this faster find method.  Both
+             * ASCII and EBCDIC tend to have their case folds differ in only
+             * one position, so this is very likely */
+            if (LIKELY(PL_bitcount[bits_differing] == 1)) {
+                bits_differing = ~ bits_differing;
+                while (s <= e) {
+                    s = find_next_masked(s, e + 1,
+                                        (c1 & bits_differing), bits_differing);
+                    if (s > e) {
+                        break;
+                    }
+
+                    if (   (ln == 1 || folder(s + 1, pat_string + 1, ln - 1))
+                        && (reginfo->intuit || regtry(reginfo, &s)) )
+                    {
+                        goto got_it;
+                    }
+                    s++;
+                }
+            }
+            else {  /* Otherwise, stuck with looking byte-at-a-time.  This
+                       should actually happen only in EXACTFL nodes */
+                while (s <= e) {
+                    if (    (*(U8*)s == c1 || *(U8*)s == c2)
+                        && (ln == 1 || folder(s + 1, pat_string + 1, ln - 1))
+                        && (reginfo->intuit || regtry(reginfo, &s)) )
+                    {
+                        goto got_it;
+                    }
+                    s++;
+                }
+            }
         }
         break;
 
