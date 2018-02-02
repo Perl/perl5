@@ -2847,6 +2847,9 @@ sn	|NV|mulexp10	|NV value|I32 exponent
 #endif
 
 #if defined(PERL_IN_UTF8_C)
+sR	|HV *	|new_msg_hv |NN const char * const message		    \
+			    |U32 categories				    \
+			    |U32 flag
 sRM	|UV	|check_locale_boundary_crossing				    \
 		|NN const U8* const p					    \
 		|const UV result					    \

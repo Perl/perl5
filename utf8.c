@@ -101,6 +101,29 @@ Perl__force_out_malformed_utf8_message(pTHX_
     }
 }
 
+STATIC HV *
+S_new_msg_hv(pTHX_ const char * const message, /* The message text */
+                   U32 categories,  /* Packed warning categories */
+                   U32 flag)        /* Flag associated with this message */
+{
+    /* Creates, populates, and returns an HV* that describes an error message
+     * for the translators between UTF8 and code point */
+
+    SV* msg_sv = newSVpv(message, 0);
+    SV* category_sv = newSVuv(categories);
+    SV* flag_bit_sv = newSVuv(flag);
+
+    HV* msg_hv = newHV();
+
+    PERL_ARGS_ASSERT_NEW_MSG_HV;
+
+    hv_stores(msg_hv, "text", msg_sv);
+    hv_stores(msg_hv, "warn_categories",  category_sv);
+    hv_stores(msg_hv, "flag_bit", flag_bit_sv);
+
+    return msg_hv;
+}
+
 /*
 =for apidoc uvoffuni_to_utf8_flags
 
@@ -2142,22 +2165,15 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
              * this iteration of the loop */
             if (message) {
                 if (msgs) {
-                    SV* msg_sv = newSVpv(message, 0);
-                    SV* category_sv = newSVuv(pack_warn);
-                    SV* flag_bit_sv = newSVuv(this_flag_bit);
-                    HV* msg_hv = newHV();
-
                     assert(this_flag_bit);
 
                     if (*msgs == NULL) {
                         *msgs = newAV();
                     }
 
-                    hv_stores(msg_hv, "text", msg_sv);
-                    hv_stores(msg_hv, "warn_categories",  category_sv);
-                    hv_stores(msg_hv, "flag_bit", flag_bit_sv);
-
-                    av_push(*msgs, newRV_noinc((SV*)msg_hv));
+                    av_push(*msgs, newRV_noinc((SV*) new_msg_hv(message,
+                                                                pack_warn,
+                                                                this_flag_bit)));
                 }
                 else if (PL_op)
                     Perl_warner(aTHX_ pack_warn, "%s in %s", message,

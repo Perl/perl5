@@ -5992,6 +5992,11 @@ PERL_STATIC_INLINE int	S_is_utf8_overlong_given_start_byte_ok(const U8 * const s
 	assert(s)
 #endif
 
+STATIC HV *	S_new_msg_hv(pTHX_ const char * const message, U32 categories, U32 flag)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEW_MSG_HV	\
+	assert(message)
+
 STATIC U8*	S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val, const bool wants_value, const U8* const typestr)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SWASH_SCAN_LIST_LINE	\
