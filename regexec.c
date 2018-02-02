@@ -1902,7 +1902,7 @@ STMT_START {                                                                    
 STMT_START {                                              \
     while (s <= e) {                                      \
 	if ( (COND)                                       \
-	     && (ln == 1 || folder(s, pat_string, ln))    \
+	     && (ln == 1 || folder(s+1, pat_string+1, ln-1))\
 	     && (reginfo->intuit || regtry(reginfo, &s)) )\
 	    goto got_it;                                  \
 	s++;                                              \
