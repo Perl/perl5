@@ -13287,8 +13287,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    UV ender = 0;
 	    char *p;
 	    char *s;
-#define MAX_NODE_STRING_SIZE 127
+
+/* This allows us to fill a node with just enough spare so that if the final
+ * character folds, its expansion is guaranteed to fit */
+#define MAX_NODE_STRING_SIZE (255-UTF8_MAXBYTES_CASE)
 	    char foldbuf[MAX_NODE_STRING_SIZE+UTF8_MAXBYTES_CASE+1];
+
 	    char *s0;
 	    U8 upper_parse = MAX_NODE_STRING_SIZE;
             U8 node_type = compute_EXACTish(pRExC_state);
@@ -13332,24 +13336,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * use a pseudo regnode like 'EXACT_ORIG_FOLD' */
             maybe_exact = FOLD && PASS2;
 
-	    /* XXX The node can hold up to 255 bytes, yet this only goes to
-             * 127.  I (khw) do not know why.  Keeping it somewhat less than
-             * 255 allows us to not have to worry about overflow due to
-             * converting to utf8 and fold expansion, but that value is
-             * 255-UTF8_MAXBYTES_CASE.  join_exact() may join adjacent nodes
-             * split up by this limit into a single one using the real max of
-             * 255.  Even at 127, this breaks under rare circumstances.  If
-             * folding, we do not want to split a node at a character that is a
-             * non-final in a multi-char fold, as an input string could just
-             * happen to want to match across the node boundary.  The join
-             * would solve that problem if the join actually happens.  But a
-             * series of more than two nodes in a row each of 127 would cause
-             * the first join to succeed to get to 254, but then there wouldn't
-             * be room for the next one, which could at be one of those split
-             * multi-char folds.  I don't know of any fool-proof solution.  One
-             * could back off to end with only a code point that isn't such a
-             * non-final, but it is possible for there not to be any in the
-             * entire node. */
+            /* This breaks under rare circumstances.  If folding, we do not
+             * want to split a node at a character that is a non-final in a
+             * multi-char fold, as an input string could just happen to want to
+             * match across the node boundary.  The code at the end of the loop
+             * looks for this, and backs off until it finds not such a
+             * character, but it is possible (though extremely, extremely
+             * unlikely) for all characters in the node to be non-final fold
+             * ones, in which case we just leave the node fully filled, and
+             * hope that it doesn't match the string in just the wrong place */
 
             assert(   ! UTF     /* Is at the beginning of a character */
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
