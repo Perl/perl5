@@ -391,14 +391,17 @@ foreach my $spam (@spam) {
 
 
 foreach my $forbidden (<DATA>) {
-    chomp $forbidden;
-    no strict 'vars';
-    eval $forbidden;
-    like $@,
-         qr/dynamic loading not available(?x:
-          )|Attempt to reload attributes\.pm aborted(?x:
-          )|Initialization of state variables in list currently forbidden/,
-        "Currently forbidden: $forbidden";
+    SKIP: {
+        skip_if_miniperl("miniperl can't load attributes.pm", 1)
+                if $forbidden =~ /:shared/;
+
+        chomp $forbidden;
+        no strict 'vars';
+        eval $forbidden;
+        like $@,
+            qr/Initialization of state variables in list currently forbidden/,
+            "Currently forbidden: $forbidden";
+    }
 }
 
 # [perl #49522] state variable not available
