@@ -529,6 +529,7 @@ SKIP: {
     # The bug doesn't depend on perlio, but perlio provides this nice
     # way of discerning when a handle actually closes.
     skip("These tests use perlio", 5) unless $Config{useperlio};
+    skip_if_miniperl("miniperl can't load PerlIO::scalar", 5);
     my($a, $b, $s, $t);
     $s = "";
     open($a, ">:scalar:perlio", \$s) or die;
