@@ -13314,7 +13314,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
             /* If a folding node contains only code points that don't
              * participate in folds, it can be changed into an EXACT node,
-             * which allows the optimizer more things to look for */
+             * which allows the optimizer more things to look for, and is
+             * faster to match */
             bool maybe_exact;
 
 	    ret = reg_node(pRExC_state, node_type);
