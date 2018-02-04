@@ -739,7 +739,7 @@
 #define utf8_to_uvuni_buf(a,b,c)	Perl_utf8_to_uvuni_buf(aTHX_ a,b,c)
 #define utf8n_to_uvchr_msgs(a,b,c,d,e,f)	Perl_utf8n_to_uvchr_msgs(aTHX_ a,b,c,d,e,f)
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
-#define uvoffuni_to_utf8_flags(a,b,c)	Perl_uvoffuni_to_utf8_flags(aTHX_ a,b,c)
+#define uvoffuni_to_utf8_flags_msgs(a,b,c,d)	Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
 #define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
 #define valid_utf8_to_uvchr	Perl_valid_utf8_to_uvchr

@@ -1523,6 +1523,36 @@ test_uvchr_to_utf8_flags(uv, flags)
     OUTPUT:
         RETVAL
 
+AV *
+test_uvchr_to_utf8_flags_msgs(uv, flags)
+
+        SV *uv
+        SV *flags
+    PREINIT:
+        U8 dest[UTF8_MAXBYTES + 1];
+        U8 *ret;
+
+    CODE:
+        HV *msgs = NULL;
+        RETVAL = newAV();
+        sv_2mortal((SV*)RETVAL);
+
+        ret = uvchr_to_utf8_flags_msgs(dest, SvUV(uv), SvUV(flags), &msgs);
+
+        if (ret) {
+            av_push(RETVAL, newSVpvn((char *) dest, ret - dest));
+        }
+        else {
+            av_push(RETVAL,  &PL_sv_undef);
+        }
+
+        if (msgs) {
+            av_push(RETVAL, newRV_noinc((SV*)msgs));
+        }
+
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
 
 void

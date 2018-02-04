@@ -1353,20 +1353,19 @@ foreach my $test (@tests) {
               next if $skip_most_tests;
             }
 
-            # This tests three functions.  utf8n_to_uvchr_error,
-            # utf8n_to_uvchr_msgs, and uvchr_to_utf8_flags.  But only the
-            # first two are variants of each other.  We use a loop
-            # 'which_func' to determine which of these.  uvchr_to_utf8_flags
-            # is done separately at the end of each iteration, only when
-            # which_func is 0.  which_func is numeric in part so we don't
-            # have to type in the function name and risk misspelling it
-            # somewhere, and also it sets whether we are expecting warnings
-            # or not in certain places.  The _msgs() version of the function
-            # expects warnings even if lexical ones are turned off, so by
-            # making its which_func == 1, we can say we want warnings;
-            # whereas the other one with the value 0, doesn't get them.
+            # This tests four functions: utf8n_to_uvchr_error,
+            # utf8n_to_uvchr_msgs, uvchr_to_utf8_flags, and
+            # uvchr_to_utf8_msgs.  The first two are variants of each other,
+            # and the final two also form a pair.  We use a loop 'which_func'
+            # to determine which of each pair is being tested.  The main loop
+            # tests either the first and third, or the 2nd and fourth.
+            # which_func is sets whether we are expecting warnings or not in
+            # certain places.  The _msgs() version of the functions expects
+            # warnings even if lexical ones are turned off, so by making its
+            # which_func == 1, we can say we want warnings; whereas the other
+            # one with the value 0, doesn't get them.
             for my $which_func (0, 1) {
-              my $func = ($which_func)
+              my $utf8_func = ($which_func)
                           ? 'utf8n_to_uvchr_msgs'
                           : 'utf8n_to_uvchr_error';
 
@@ -1594,7 +1593,7 @@ foreach my $test (@tests) {
                         }
                     }
 
-                    my $this_name = "$func() $testname: ";
+                    my $this_name = "$utf8_func() $testname: ";
                     my @scratch_expected_return_flags = @expected_return_flags;
                     if (! $initially_malformed) {
                         $this_name .= ($disallowed)
@@ -1614,7 +1613,7 @@ foreach my $test (@tests) {
                     my $this_flags
                         = $allow_flags|$this_warning_flags|$this_disallow_flags;
                     my $eval_text =      "$eval_warn; \$ret_ref"
-                            . " = test_$func("
+                            . " = test_$utf8_func("
                             . "'$this_bytes', $this_length, $this_flags)";
                     eval "$eval_text";
                     if (! ok ($@ eq "", "$this_name: eval succeeded"))
@@ -1713,8 +1712,9 @@ foreach my $test (@tests) {
                                   pass("flag for returned msg is expected");
                               }
                               else {
-                                  fail("flag for returned msg is expected: "
-                                 . flags_to_text($flag, \@utf8n_flags_to_text));
+                                  fail("flag ("
+                                     . flags_to_text($flag, \@utf8n_flags_to_text)
+                                     . ") for returned msg is expected");
                               }
                             }
 
@@ -1723,7 +1723,7 @@ foreach my $test (@tests) {
                                           "returned category for msg isn't 0");
                         }
 
-                        ok(@warnings_gotten == 0, "$func raised no warnings;"
+                        ok(@warnings_gotten == 0, "$utf8_func raised no warnings;"
                               . " the next tests are for ones in the returned"
                               . " variable")
                             or diag join "\n", "The unexpected warnings were:",
@@ -1745,7 +1745,7 @@ foreach my $test (@tests) {
                         $tested_CHECK_ONLY = 1;
                         my $this_flags = $this_disallow_flags|$::UTF8_CHECK_ONLY;
                         my $eval_text = "use warnings; \$ret_ref ="
-                                      . " test_$func('"
+                                      . " test_$utf8_func('"
                                       . "$this_bytes', $this_length,"
                                       . " $this_flags)";
                         eval $eval_text;
@@ -1774,7 +1774,10 @@ foreach my $test (@tests) {
                     # existing code point, it hasn't overflowed, and isn't
                     # malformed.
                     next if @malformation_names;
-                    next if $which_func;
+
+                    my $uvchr_func = ($which_func)
+                                     ? 'uvchr_to_utf8_flags_msgs'
+                                     : 'uvchr_to_utf8_flags';
 
                     $this_warning_flags = ($use_warn_flag)
                                           ? $this_uvchr_flag_to_warn
@@ -1790,10 +1793,10 @@ foreach my $test (@tests) {
                                           ? 'with flag for raising warnings'
                                           : 'no flag for raising warnings');
 
-                    $this_name = "uvchr_to_utf8_flags() $testname: "
-                                            . (($disallowed)
-                                                ? 'disallowed'
-                                                : 'allowed');
+                    $this_name = "$uvchr_func() $testname: "
+                                        . (($disallowed)
+                                           ? 'disallowed'
+                                           : 'allowed');
                     $this_name .= ", $eval_warn";
                     $this_name .= ", " . ((  $this_warning_flags
                                            & $this_uvchr_flag_to_warn)
@@ -1804,7 +1807,7 @@ foreach my $test (@tests) {
                     my $ret;
                     $this_flags = $this_warning_flags|$this_disallow_flags;
                     $eval_text = "$eval_warn; \$ret ="
-                            . " test_uvchr_to_utf8_flags("
+                            . " test_$uvchr_func("
                             . "$allowed_uv, $this_flags)";
                     eval "$eval_text";
                     if (! ok ($@ eq "", "$this_name: eval succeeded"))
@@ -1813,6 +1816,46 @@ foreach my $test (@tests) {
                            . uvchr_display_call($eval_text);
                         next;
                     }
+
+                    if ($which_func) {
+                        if (defined $ret->[1]) {
+                            my @returned_warnings;
+                            push @returned_warnings, $ret->[1]{'text'};
+                            my $text = $ret->[1]{'text'};
+                            my $flag = $ret->[1]{'flag_bit'};
+                            my $category = $ret->[1]{'warning_category'};
+
+                            if (! ok(($flag & ($flag-1)) == 0,
+                                        "flag for returned msg is a single bit"))
+                            {
+                                diag sprintf("flags are %x; msg=%s", $flag, $text);
+                            }
+                            else {
+                                if ($flag & $this_uvchr_flag_to_disallow) {
+                                    pass("flag for returned msg is expected");
+                                }
+                                else {
+                                    fail("flag ("
+                                        . flags_to_text($flag, \@utf8n_flags_to_text)
+                                        . ") for returned msg is expected");
+                                }
+                            }
+
+                            # In perl space, don't know the category numbers
+                            isnt($category, 0,
+                                            "returned category for msg isn't 0");
+
+                            ok(@warnings_gotten == 0, "$uvchr_func raised no warnings;"
+                                . " the next tests are for ones in the returned"
+                                . " variable")
+                                or diag join "\n", "The unexpected warnings were:",
+                                                                @warnings_gotten;
+                            @warnings_gotten = @returned_warnings;
+                        }
+
+                        $ret = $ret->[0];
+                    }
+
                     if ($disallowed) {
                         is($ret, undef, "    And returns undef")
                           or diag "Call was: " . uvchr_display_call($eval_text);

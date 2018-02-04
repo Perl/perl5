@@ -140,6 +140,14 @@ For details, see the description for L</uvchr_to_utf8_flags>.
 =cut
 */
 
+U8 *
+Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
+{
+    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
+
+    return uvoffuni_to_utf8_flags_msgs(d, uv, flags, NULL);
+}
+
 /* All these formats take a single UV code point argument */
 const char surrogate_cp_format[] = "UTF-16 surrogate U+%04" UVXf;
 const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf
@@ -150,22 +158,38 @@ const char perl_extended_cp_format[] = "Code point 0x%" UVXf " is not"        \
                                        " Unicode, requires a Perl extension," \
                                        " and so is not portable";
 
-#define HANDLE_UNICODE_SURROGATE(uv, flags)                         \
+#define HANDLE_UNICODE_SURROGATE(uv, flags, msgs)                   \
     STMT_START {                                                    \
         if (flags & UNICODE_WARN_SURROGATE) {                       \
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),        \
-                                   surrogate_cp_format, uv);        \
+            U32 category = packWARN(WARN_SURROGATE);                \
+            const char * format = surrogate_cp_format;              \
+            if (msgs) {                                             \
+                *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),     \
+                                   category,                        \
+                                   UNICODE_GOT_SURROGATE);          \
+            }                                                       \
+            else {                                                  \
+                Perl_ck_warner_d(aTHX_ category, format, uv);       \
+            }                                                       \
         }                                                           \
         if (flags & UNICODE_DISALLOW_SURROGATE) {                   \
             return NULL;                                            \
         }                                                           \
     } STMT_END;
 
-#define HANDLE_UNICODE_NONCHAR(uv, flags)                           \
+#define HANDLE_UNICODE_NONCHAR(uv, flags, msgs)                     \
     STMT_START {                                                    \
         if (flags & UNICODE_WARN_NONCHAR) {                         \
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),          \
-		                   nonchar_cp_format, uv);          \
+            U32 category = packWARN(WARN_NONCHAR);                  \
+            const char * format = nonchar_cp_format;                \
+            if (msgs) {                                             \
+                *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),     \
+                                   category,                        \
+                                   UNICODE_GOT_NONCHAR);            \
+            }                                                       \
+            else {                                                  \
+                Perl_ck_warner_d(aTHX_ category, format, uv);       \
+            }                                                       \
         }                                                           \
         if (flags & UNICODE_DISALLOW_NONCHAR) {                     \
             return NULL;                                            \
@@ -178,10 +202,62 @@ const char perl_extended_cp_format[] = "Code point 0x%" UVXf " is not"        \
 #define MARK    UTF_CONTINUATION_MARK
 #define MASK    UTF_CONTINUATION_MASK
 
+/*
+=for apidoc uvchr_to_utf8_flags_msgs
+
+THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+
+Most code should use C<L</uvchr_to_utf8_flags>()> rather than call this directly.
+
+This function is for code that wants any warning and/or error messages to be
+returned to the caller rather than be displayed.  All messages that would have
+been displayed if all lexcial warnings are enabled will be returned.
+
+It is just like C<L</uvchr_to_utf8_flags>> but it takes an extra parameter
+placed after all the others, C<msgs>.  If this parameter is 0, this function
+behaves identically to C<L</uvchr_to_utf8_flags>>.  Otherwise, C<msgs> should
+be a pointer to an C<HV *> variable, in which this function creates a new HV to
+contain any appropriate messages.  The hash has three key-value pairs, as
+follows:
+
+=over 4
+
+=item C<text>
+
+The text of the message as a C<SVpv>.
+
+=item C<warn_categories>
+
+The warning category (or categories) packed into a C<SVuv>.
+
+=item C<flag>
+
+A single flag bit associated with this message, in a C<SVuv>.
+The bit corresponds to some bit in the C<*errors> return value,
+such as C<UNICODE_GOT_SURROGATE>.
+
+=back
+
+It's important to note that specifying this parameter as non-null will cause
+any warnings this function would otherwise generate to be suppressed, and
+instead be placed in C<*msgs>.  The caller can check the lexical warnings state
+(or not) when choosing what to do with the returned messages.
+
+The caller, of course, is responsible for freeing any returned HV.
+
+=cut
+*/
+
+/* Undocumented; we don't want people using this.  Instead they should use
+ * uvchr_to_utf8_flags_msgs() */
 U8 *
-Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
+Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
 {
-    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
+    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS_MSGS;
+
+    if (msgs) {
+        *msgs = NULL;
+    }
 
     if (OFFUNI_IS_INVARIANT(uv)) {
 	*d++ = LATIN1_TO_NATIVE(uv);
@@ -213,10 +289,10 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
             if (UNLIKELY(   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)
                          || UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
             {
-                HANDLE_UNICODE_NONCHAR(uv, flags);
+                HANDLE_UNICODE_NONCHAR(uv, flags, msgs);
             }
             else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                HANDLE_UNICODE_SURROGATE(uv, flags);
+                HANDLE_UNICODE_SURROGATE(uv, flags, msgs);
             }
         }
 #endif
@@ -234,17 +310,31 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
         if (UNLIKELY(uv > MAX_EXTERNALLY_LEGAL_CP)) {
             Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_EXTERNALLY_LEGAL_CP);
         }
-        if (      (flags & UNICODE_WARN_SUPER)
-            || (  (flags & UNICODE_WARN_PERL_EXTENDED)
+        if (       (flags & UNICODE_WARN_SUPER)
+            || (   (flags & UNICODE_WARN_PERL_EXTENDED)
                 && UNICODE_IS_PERL_EXTENDED(uv)))
         {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
+            const char * format = super_cp_format;
+            U32 category = packWARN(WARN_NON_UNICODE);
+            U32 flag = UNICODE_GOT_SUPER;
 
-              /* Choose the more dire applicable warning */
-              (UNICODE_IS_PERL_EXTENDED(uv))
-              ? perl_extended_cp_format
-              : super_cp_format,
-             uv);
+            /* Choose the more dire applicable warning */
+            if (UNICODE_IS_PERL_EXTENDED(uv)) {
+                format = perl_extended_cp_format;
+                if (flags & (UNICODE_WARN_PERL_EXTENDED
+                            |UNICODE_DISALLOW_PERL_EXTENDED))
+                {
+                    flag = UNICODE_GOT_PERL_EXTENDED;
+                }
+            }
+
+            if (msgs) {
+                *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),
+                                   category, flag);
+            }
+            else {
+                Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE), format, uv);
+            }
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
             || (   (flags & UNICODE_DISALLOW_PERL_EXTENDED)
@@ -254,7 +344,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
         }
     }
     else if (UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))) {
-        HANDLE_UNICODE_NONCHAR(uv, flags);
+        HANDLE_UNICODE_NONCHAR(uv, flags, msgs);
     }
 
     /* Test for and handle 4-byte result.   In the test immediately below, the
@@ -273,10 +363,10 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
                    characters.  The end-plane non-characters for EBCDIC were
                    handled just above */
         if (UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))) {
-            HANDLE_UNICODE_NONCHAR(uv, flags);
+            HANDLE_UNICODE_NONCHAR(uv, flags, msgs);
         }
         else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-            HANDLE_UNICODE_SURROGATE(uv, flags);
+            HANDLE_UNICODE_SURROGATE(uv, flags, msgs);
         }
 #endif
 
@@ -5937,7 +6027,7 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
     PERL_ARGS_ASSERT_UVUNI_TO_UTF8;
 
-    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, uv, 0);
+    return uvoffuni_to_utf8_flags(d, uv, 0);
 }
 
 /*
