@@ -628,6 +628,17 @@ sub utf8n_display_call($)
          . ')';
 }
 
+my @uvchr_flags_to_text =  ( qw(
+        W_SURROGATE
+        W_NONCHAR
+        W_SUPER
+        W_PERL_EXTENDED
+        D_SURROGATE
+        D_NONCHAR
+        D_SUPER
+        D_PERL_EXTENDED
+) );
+
 sub uvchr_display_call($)
 {
     # Converts an eval string that calls test_uvchr_to_utf8 into a more human
@@ -635,23 +646,13 @@ sub uvchr_display_call($)
     #   test_uvchr_to_utf8n_flags($uv, $flags)
     #diag $_[0];
 
-    my @flags_to_text =  ( qw(
-            W_SURROGATE
-            W_NONCHAR
-            W_SUPER
-            W_PERL_EXTENDED
-            D_SURROGATE
-            D_NONCHAR
-            D_SUPER
-            D_PERL_EXTENDED
-       ) );
 
     $_[0] =~ / ^ ( [^(]* \( ) ( \d+ ) , \s* ( \d+ ) \) $ /x;
     my $text = $1;
     my $cp = sprintf "%X", $2;
     my $flags = $3;
 
-    return "${text}0x$cp, " . flags_to_text($flags, \@flags_to_text) . ')';
+    return "${text}0x$cp, " . flags_to_text($flags, \@uvchr_flags_to_text) . ')';
 }
 
 sub do_warnings_test(@)
