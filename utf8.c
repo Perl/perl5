@@ -488,11 +488,9 @@ there are standards predating it that allow up to 0x7FFF_FFFF (2**31 -1))
 A somewhat misleadingly named synonym for C<UNICODE_WARN_PERL_EXTENDED> is
 retained for backward compatibility: C<UNICODE_WARN_ABOVE_31_BIT>.  Similarly,
 C<UNICODE_DISALLOW_ABOVE_31_BIT> is usable instead of the more accurately named
-C<UNICODE_DISALLOW_PERL_EXTENDED>.  The names are misleading because these
-flags can apply to code points that actually do fit in 31 bits.  This happens
-on EBCDIC platforms, and sometimes when the L<overlong
-malformation|/C<UTF8_GOT_LONG>> is also present.  The new names accurately
-describe the situation in all cases.
+C<UNICODE_DISALLOW_PERL_EXTENDED>.  The names are misleading because on EBCDIC
+platforms,these flags can apply to code points that actually do fit in 31 bits.
+The new names accurately describe the situation in all cases.
 
 =cut
 */
