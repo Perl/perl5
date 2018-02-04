@@ -1378,10 +1378,10 @@ foreach my $test (@tests) {
                     if ($use_warn_flag) {
                         next if $initially_overlong || $initially_orphan;
 
-                        # Since utf8n_to_uvchr_msgs() expects warnings even
-                        # when lexical ones are turned off, we can skip
-                        # testing it when they are turned on, with little
-                        # likelihood of missing an error case.
+                        # Since foo_msgs() expects warnings even when lexical
+                        # ones are turned off, we can skip testing it when
+                        # they are turned on, with little likelihood of
+                        # missing an error case.
                         next if $which_func;
                     }
                     else {
@@ -1406,7 +1406,7 @@ foreach my $test (@tests) {
 
                         # We ordinarily expect overflow warnings here.  But it
                         # is somewhat more complicated, and the final
-                        # determination is deferred to one place in the filw
+                        # determination is deferred to one place in the file
                         # where we handle overflow.
                         $expect_warnings_for_overflow = 1;
 
