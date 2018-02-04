@@ -345,7 +345,7 @@ struct RExC_state_t {
 /* Change from /d into /u rules, and restart the parse if we've already seen
  * something whose size would increase as a result, by setting *flagp and
  * returning 'restart_retval'.  RExC_uni_semantics is a flag that indicates
- * we've change to /u during the parse.  */
+ * we've changed to /u during the parse.  */
 #define REQUIRE_UNI_RULES(flagp, restart_retval)                            \
     STMT_START {                                                            \
             if (DEPENDS_SEMANTICS) {                                        \
