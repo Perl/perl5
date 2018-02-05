@@ -369,7 +369,14 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Failures while compiling code within other constructs, such as with
+string interpolation and the right part of C<s///e> now cause
+compilation to abort earlier.
+
+Previously compilation could continue in order to report other errors,
+but the failed sub-parse could leave partly parsed constructs on the
+parser shift-reduce stack, confusing the parser, leading to perl
+crashes. [perl #125351]
 
 =back
 
