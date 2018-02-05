@@ -3706,14 +3706,16 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  * input nodes.
  *
  * And *unfolded_multi_char is set to indicate whether or not the node contains
- * an unfolded multi-char fold.  This happens when whether the fold is valid or
- * not won't be known until runtime; namely for EXACTF nodes that contain LATIN
- * SMALL LETTER SHARP S, as only if the target string being matched against
- * turns out to be UTF-8 is that fold valid; and also for EXACTFL nodes whose
- * folding rules depend on the locale in force at runtime.  (Multi-char folds
- * whose components are all above the Latin1 range are not run-time locale
- * dependent, and have already been folded by the time this function is
- * called.)
+ * an unfolded multi-char fold.  This happens when it won't be known until
+ * runtime whether the fold is valid or not; namely
+ *  1) for EXACTF nodes that contain LATIN SMALL LETTER SHARP S, as only if the
+ *      target string being matched against turns out to be UTF-8 is that fold
+ *      valid; or
+ *  2) for EXACTFL nodes whose folding rules depend on the locale in force at
+ *      runtime.
+ * (Multi-char folds whose components are all above the Latin1 range are not
+ * run-time locale dependent, and have already been folded by the time this
+ * function is called.)
  *
  * This is as good a place as any to discuss the design of handling these
  * multi-character fold sequences.  It's been wrong in Perl for a very long
@@ -13318,6 +13320,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * faster to match */
             bool maybe_exact;
 
+            /* The node_type may change below, but since the size of the node
+             * doesn't change, it works */
 	    ret = reg_node(pRExC_state, node_type);
 
             /* In pass1, folded, we use a temporary buffer instead of the
@@ -13347,7 +13351,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * ones, in which case we just leave the node fully filled, and
              * hope that it doesn't match the string in just the wrong place */
 
-            assert(   ! UTF     /* Is at the beginning of a character */
+            assert( ! UTF     /* Is at the beginning of a character */
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
                    || UTF8_IS_START(UCHARAT(RExC_parse)));
 
@@ -13649,8 +13653,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    break;
 		} /* End of switch on the literal */
 
-		/* Here, have looked at the literal character and <ender>
-                 * contains its ordinal, <p> points to the character after it.
+		/* Here, have looked at the literal character, and <ender>
+                 * contains its ordinal; <p> points to the character after it.
                  * We need to check if the next non-ignored thing is a
                  * quantifier.  Move <p> to after anything that should be
                  * ignored, which, as a side effect, positions <p> for the next
@@ -13707,6 +13711,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     /* Here are folding under /l, and the code point is
                      * problematic.  First, we know we can't simplify things */
                     maybe_exact = FALSE;
+
+                    /* This code point means we can't simplify things */
                     maybe_exactfu = FALSE;
 
                     /* A problematic code point in this context means that its
@@ -13736,7 +13742,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 #endif
                 )) {
                     /* Here, are folding and are not UTF-8 encoded; therefore
-                     * the character must be in the range 0-255, and is not /l
+                     * the character must be in the range 0-255, and is not /l.
                      * (Not /l because we already handled these under /l in
                      * is_PROBLEMATIC_LOCALE_FOLD_cp) */
                     if (IS_IN_SOME_FOLD_L1(ender)) {
@@ -13763,25 +13769,26 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                     }
 
-                    /* Even when folding, we store just the input character, as
-                     * we have an array that finds its fold quickly */
-                    *(s++) = (char) ender;
+                        /* Even when folding, we store just the input
+                         * character, as we have an array that finds its fold
+                         * quickly */
+                        *(s++) = (char) ender;
                 }
                 else {  /* FOLD, and UTF (or sharp s) */
                     /* Unlike the non-fold case, we do actually have to
-                     * calculate the results here in pass 1.  This is for two
-                     * reasons, the folded length may be longer than the
-                     * unfolded, and we have to calculate how many EXACTish
-                     * nodes it will take; and we may run out of room in a node
-                     * in the middle of a potential multi-char fold, and have
-                     * to back off accordingly.  */
+                     * calculate the fold in pass 1.  This is for two reasons,
+                     * the folded length may be longer than the unfolded, and
+                     * we have to calculate how many EXACTish nodes it will
+                     * take; and we may run out of room in a node in the middle
+                     * of a potential multi-char fold, and have to back off
+                     * accordingly.  */
 
                     UV folded;
                     if (isASCII_uni(ender)) {
                         folded = toFOLD(ender);
                         *(s)++ = (U8) folded;
                     }
-                    else {
+                    else {  /* Not ASCII */
                         STRLEN foldlen;
 
                         folded = _to_uni_fold_flags(
@@ -13876,7 +13883,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     s = (char *) utf8_hop((U8 *) s, -1);
 
                     while (s >= s0) {   /* Search backwards until find
-                                           non-problematic char */
+                                           a non-problematic char */
                         if (UTF8_IS_INVARIANT(*s)) {
 
                             /* There are no ascii characters that participate
@@ -14013,6 +14020,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                   : EXACTFU;
                     }
                 }
+
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender,
                                            FALSE /* Don't look to see if could
                                                     be turned into an EXACT
