@@ -1641,10 +1641,12 @@ Like C<SvPVutf8_or_null>, but does not process get magic.
 Like C<SvPV_nolen>, but converts C<sv> to UTF-8 first if necessary.
 
 =for apidoc Am|char*|SvPVbyte_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts C<sv> to byte representation first if necessary.
+Like C<SvPV_force>, but converts C<sv> to byte representation first if
+necessary.  If the SV cannot be downgraded from UTF-8, this croaks.
 
 =for apidoc Am|char*|SvPVbyte|SV* sv|STRLEN len
-Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
+Like C<SvPV>, but converts C<sv> to byte representation first if necessary.  If
+the SV cannot be downgraded from UTF-8, this croaks.
 
 =for apidoc Am|char*|SvPVbyte_nomg|SV* sv|STRLEN len
 Like C<SvPVbyte>, but does not process get magic.
@@ -1656,7 +1658,8 @@ Like C<SvPVbyte>, but when C<sv> is undef, returns C<NULL>.
 Like C<SvPVbyte_or_null>, but does not process get magic.
 
 =for apidoc Am|char*|SvPVbyte_nolen|SV* sv
-Like C<SvPV_nolen>, but converts C<sv> to byte representation first if necessary.
+Like C<SvPV_nolen>, but converts C<sv> to byte representation first if
+necessary.  If the SV cannot be downgraded from UTF-8, this croaks.
 
 =for apidoc Am|char*|SvPVutf8x_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
@@ -1671,12 +1674,12 @@ otherwise.
 =for apidoc Am|char*|SvPVbytex_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts C<sv> to byte representation first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVbyte_force>
-otherwise.
+otherwise.  If the SV cannot be downgraded from UTF-8, this croaks.
 
 =for apidoc Am|char*|SvPVbytex|SV* sv|STRLEN len
 Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVbyte>
-otherwise.
+otherwise.  If the SV cannot be downgraded from UTF-8, this croaks.
 
 =for apidoc Am|U32|SvIsCOW|SV* sv
 Returns a U32 value indicating whether the SV is Copy-On-Write (either shared
