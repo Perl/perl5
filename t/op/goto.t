@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 121;
+plan tests => 122;
 our $TODO;
 
 my $deprecated = 0;
@@ -858,3 +858,15 @@ is sub { goto z; exit do { z: return "foo" } }->(), 'foo',
    'goto into exit';
 is sub { goto z; eval do { z: "'foo'" } }->(), 'foo',
    'goto into eval';
+
+# [perl #132799]
+# Erroneous inward goto warning, followed by crash.
+# The eval must be in an assignment.
+sub _routine {
+    my $e = eval {
+        goto L2;
+      L2:
+    }
+}
+_routine();
+pass("bug 132799");

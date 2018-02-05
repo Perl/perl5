@@ -2645,6 +2645,7 @@ PP(pp_redo)
 }
 
 #define UNENTERABLE (OP *)1
+#define GOTO_DEPTH 64
 
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
@@ -2665,11 +2666,12 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     {
 	*ops++ = cUNOPo->op_first;
     }
-    else if (o->op_flags & OPf_KIDS
+    else if (oplimit - opstack < GOTO_DEPTH) {
+      if (o->op_flags & OPf_KIDS
 	  && cUNOPo->op_first->op_type == OP_PUSHMARK) {
 	*ops++ = UNENTERABLE;
-    }
-    else if (o->op_flags & OPf_KIDS && PL_opargs[o->op_type]
+      }
+      else if (o->op_flags & OPf_KIDS && PL_opargs[o->op_type]
 	  && OP_CLASS(o) != OA_LOGOP
 	  && o->op_type != OP_LINESEQ
 	  && o->op_type != OP_SREFGEN
@@ -2678,6 +2680,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 	OP * const kid = cUNOPo->op_first;
 	if (OP_GIMME(kid, 0) != G_SCALAR || OpHAS_SIBLING(kid))
 	    *ops++ = UNENTERABLE;
+      }
     }
     if (ops >= oplimit)
 	Perl_croak(aTHX_ "%s", too_deep);
@@ -2752,7 +2755,6 @@ PP(pp_goto)
     OP *retop = NULL;
     I32 ix;
     PERL_CONTEXT *cx;
-#define GOTO_DEPTH 64
     OP *enterops[GOTO_DEPTH];
     const char *label = NULL;
     STRLEN label_len = 0;
