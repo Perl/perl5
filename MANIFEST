@@ -4394,6 +4394,7 @@ ext/XS-APItest/t/underscore_length.t	Test find_rundefsv()
 ext/XS-APItest/t/utf16_to_utf8.t	Test behaviour of utf16_to_utf8{,reversed}
 ext/XS-APItest/t/utf8.t		Tests for code in utf8.c
 ext/XS-APItest/t/utf8_setup.pl	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_to_bytes.t	Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn00.t	Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn01.t	Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn02.t	Tests for code in utf8.c

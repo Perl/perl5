@@ -1380,6 +1380,24 @@ bytes_cmp_utf8(bytes, utf8)
 	RETVAL
 
 AV *
+test_utf8_to_bytes(bytes, lenp)
+        unsigned char * bytes
+        STRLEN lenp
+    PREINIT:
+        char * ret;
+    CODE:
+        RETVAL = newAV();
+        sv_2mortal((SV*)RETVAL);
+
+        ret = (char *) utf8_to_bytes(bytes, &lenp);
+        av_push(RETVAL, newSVpv(ret, 0));
+        av_push(RETVAL, newSViv(lenp));
+        av_push(RETVAL, newSVpv((const char *) bytes, 0));
+
+    OUTPUT:
+        RETVAL
+
+AV *
 test_utf8n_to_uvchr_msgs(s, len, flags)
         char *s
         STRLEN len
