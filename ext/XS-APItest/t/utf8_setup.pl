@@ -11,7 +11,11 @@ sub isASCII { ord "A" == 65 }
 sub display_bytes_no_quotes {
     use bytes;
     my $string = shift;
-    return join("", map { sprintf("\\x%02x", ord $_) } split "", $string)
+    return join("", map {
+                          ($_ =~ /[[:print:]]/)
+                          ? $_
+                          : sprintf("\\x%02x", ord $_)
+                        } split "", $string)
 }
 
 sub display_bytes {
