@@ -13354,10 +13354,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* Here, we have a literal character.  Find the maximal string of
              * them in the input that we can fit into a single EXACTish node.
              * We quit at the first non-literal or when the node gets full */
-	    for (p = RExC_parse;
-	         len < upper_parse && p < RExC_end;
-	         len++)
-	    {
+	    for (p = RExC_parse; len < upper_parse && p < RExC_end; ) {
+
+                /* In most cases each iteration adds one byte to the output.
+                 * The exceptions override this */
+                Size_t added_len = 1;
+
 		oldp = p;
 
                 /* White space has already been ignored */
@@ -13683,15 +13685,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (UTF && ! UVCHR_IS_INVARIANT(ender)) {
                             const STRLEN unilen = UVCHR_SKIP(ender);
                             s += unilen;
-
-                            /* We have to subtract 1 just below (and again in
-                             * the corresponding PASS2 code) because the loop
-                             * increments <len> each time, as all but this path
-                             * (and one other) through it add a single byte to
-                             * the EXACTish node.  But these paths would change
-                             * len to be the correct final value, so cancel out
-                             * the increment that follows */
-                            len += unilen - 1;
+                            added_len = unilen;
                         }
                         else {
                             s++;
@@ -13700,7 +13694,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                       not_fold_common:
                         if (UTF && ! UVCHR_IS_INVARIANT(ender)) {
                             U8 * new_s = uvchr_to_utf8((U8*)s, ender);
-                            len += (char *) new_s - s - 1;
+                            added_len = (char *) new_s - s;
                             s = (char *) new_s;
                         }
                         else {
@@ -13798,13 +13792,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                                         ? FOLD_FLAGS_NOMIX_ASCII
                                                         : 0));
                         s += foldlen;
-
-                        /* The loop increments <len> each time, as all but this
-                         * path (and one other) through it add a single byte to
-                         * the EXACTish node.  But this one has changed len to
-                         * be the correct final value, so subtract one to
-                         * cancel out the increment that follows */
-                        len += foldlen - 1;
+                        added_len = foldlen;
                     }
                     /* If this node only contains non-folding code points so
                      * far, see if this new one is also non-folding */
@@ -13825,13 +13813,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     ender = folded;
 		}
 
+                len += added_len;
+
 		if (next_is_quantifier) {
 
                     /* Here, the next input is a quantifier, and to get here,
-                     * the current character is the only one in the node.
-                     * Also, here <len> doesn't include the final byte for this
-                     * character */
-                    len++;
+                     * the current character is the only one in the node. */
                     goto loopdone;
 		}
 
