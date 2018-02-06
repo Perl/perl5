@@ -7291,6 +7291,14 @@ a range.  For these, what should happen isn't clear at all.  In
 these circumstances, Perl discards all but the first character
 of the returned sequence, which is not likely what you want.
 
+=item Unknown locale category %d; can't set it to %s
+
+(W locale) You used a locale category that perl doesn't recognize, so it
+cannot carry out your request.  Check that you are using a valid
+category.  If so, see L<perllocale/Multi-threaded> for advice on
+reporting this as a bug, and for modifying perl locally to accommodate
+your needs.
+
 =item Using /u for '%s' instead of /%s in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp) You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a

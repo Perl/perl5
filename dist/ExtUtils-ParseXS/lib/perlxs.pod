@@ -2195,7 +2195,7 @@ To summarize, here's what to expect and how to handle locales in XS code:
 =item Non-locale-aware XS code
 
 Keep in mind that even if you think your code is not locale-aware, it
-may call a C library function that is.  Hopefully the man page for such
+may call a library function that is.  Hopefully the man page for such
 a function will indicate that dependency, but the documentation is
 imperfect.
 
@@ -2231,9 +2231,107 @@ L<perlapi/STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>, and
 L<perlapi/RESTORE_LC_NUMERIC> should be used to affect any needed
 change.
 
-However, some alien libraries that may be called do set it, such as
-C<Gtk>.  This can cause problems for the perl core and other modules.
-Starting in v5.20.1, calling the function
+But, starting with Perl v5.28, locales are thread-safe on platforms that
+support this functionality.  Windows has this starting with Visual
+Studio 2005.  Many other modern platforms support the thread-safe POSIX
+2008 functions.  The C C<#define> C<USE_THREAD_SAFE_LOCALE> will be
+defined iff this build is using these.  From Perl-space, the read-only
+variable C<${SAFE_LOCALES}> is 1 if either the build is not threaded, or
+if C<USE_THREAD_SAFE_LOCALE> is defined; otherwise it is 0.
+
+The way this works under-the-hood is that every thread has a choice of
+using a locale specific to it (this is the Windows and POSIX 2008
+functionality), or the global locale that is accessible to all threads
+(this is the functionality that has always been there).  The
+implementations for Windows and POSIX are completely different.  On
+Windows, the runtime can be set up so that the standard
+L<C<setlocale(3)>> function either only knows about the global locale or
+the locale for this thread.  On POSIX, C<setlocale> always deals with
+the global locale, and other functions have been created to handle
+per-thread locales.  Perl makes this transparent to perl-space code.  It
+continues to use C<POSIX::setlocale()>, and the interpreter translates
+that into the per-thread functions.
+
+All other locale-senstive functions automatically use the per-thread
+locale, if that is turned on, and failing that, the global locale.  Thus
+calls to C<setlocale> are ineffective on POSIX systems for the current
+thread if that thread is using a per-thread locale.  If perl is compiled
+for single-thread operation, it does not use the per-thread functions,
+so C<setlocale> does work as expected.
+
+If you have loaded the L<C<POSIX>> module you can use the methods given
+in L<perlcall> to call L<C<POSIX::setlocale>|POSIX/setlocale> to safely
+change or query the locale (on systems where it is safe to do so), or
+you can use the new 5.28 function L<perlapi/Perl_setlocale> instead,
+which is a drop-in replacement for the system L<C<setlocale(3)>>, and
+handles single-threaded and multi-threaded applications transparently.
+
+There are some locale-related library calls that still aren't
+thread-safe because they return data in a buffer global to all threads.
+In the past, these didn't matter as locales weren't thread-safe at all.
+But now you have to be aware of them in case your module is called in a
+multi-threaded application.  The known ones are
+
+ asctime()
+ ctime()
+ gcvt() [POSIX.1-2001 only (function removed in POSIX.1-2008)]
+ getdate()
+ wcrtomb() if its final argument is NULL
+ wcsrtombs() if its final argument is NULL
+ wcstombs()
+ wctomb()
+
+Some of these shouldn't really be called in a Perl application, and for
+others there are thread-safe versions of these already implemented:
+
+ asctime_r()
+ ctime_r()
+ Perl_langinfo()
+
+The C<_r> forms are automatically used, starting in Perl 5.28, if you
+compile your code, with
+
+ #define PERL_REENTRANT
+
+See also L<perlapi/Perl_langinfo>.
+You can use the methods given in L<perlcall>, to get the best available
+locale-safe versions of these
+
+ POSIX::localeconv()
+ POSIX::wcstombs()
+ POSIX::wctomb()
+
+And note, that some items returned by C<Localeconv> are available
+through L<perlapi/Perl_langinfo>.
+
+The others shouldn't be used in a threaded application.
+
+Some modules may call a non-perl library that is locale-aware.  This is
+fine as long as it doesn't try to query or change the locale using the
+system C<setlocale>.  But if these do call the system C<setlocale>,
+those calls may be ineffective.  Instead,
+L<C<Perl_setlocale>|perlapi/Perl_setlocale> works in all circumstances.
+Plain setlocale is ineffective on multi-threaded POSIX 2008 systems.  It
+operates only on the global locale, whereas each thread has its own
+locale, paying no attention to the global one.  Since converting
+these non-Perl libraries to C<Perl_setlocale> is out of the question,
+there is a new function in v5.28
+C<switch_to_global_locale> that will
+switch the thread it is called from so that any system C<setlocale>
+calls will have their desired effect.  The function
+L<C<sync_locale>|perlapi/sync_locale> must be called before returning to
+perl.
+
+This thread can change the locale all it wants and it won't affect any
+other thread, except any that also have been switched to the global
+locale.  This means that a multi-threaded application can have a single
+thread using an alien library without a problem; but no more than a
+single thread can be so-occupied.  Bad results likely will happen.
+
+In perls without multi-thread locale support, some alien libraries,
+such as C<Gtk> change locales.  This can cause problems for the Perl
+core and other modules.  For these, before control is returned to
+perl, starting in v5.20.1, calling the function
 L<sync_locale()|perlapi/sync_locale> from XS should be sufficient to
 avoid most of these problems.  Prior to this, you need a pure Perl
 statement that does this:

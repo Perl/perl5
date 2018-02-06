@@ -3525,6 +3525,8 @@ PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s);
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)
+PERL_CALLCONV void	Perl_thread_locale_init(void);
+PERL_CALLCONV void	Perl_thread_locale_term(void);
 PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, const MAGIC *const mg, const U32 flags, U32 argc, ...);
 #define PERL_ARGS_ASSERT_TIED_METHOD	\
 	assert(methname); assert(sp); assert(sv); assert(mg)
@@ -4713,6 +4715,9 @@ STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
 	assert(locs)
+#    if defined(USE_POSIX_2008_LOCALE)
+STATIC const char*	S_emulate_setlocale(const int category, const char* locale, unsigned int index, const bool is_index_valid);
+#    endif
 #    if defined(WIN32)
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #    endif

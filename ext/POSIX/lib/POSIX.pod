@@ -939,6 +939,7 @@ containing the current underlying locale's formatting values.  Users of this fun
 should also read L<perllocale>, which provides a comprehensive
 discussion of Perl locale handling, including
 L<a section devoted to this function|perllocale/The localeconv function>.
+Prior to Perl 5.28, or when operating in a non thread-safe environment,
 It should not be used in a threaded application unless it's certain that
 the underlying locale is C or POSIX.  This is because it otherwise
 changes the locale, which globally affects all threads simultaneously.

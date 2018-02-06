@@ -576,7 +576,15 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
+#if defined(USE_POSIX_2008_LOCALE)          \
+ && defined(USE_THREAD_SAFE_LOCALE)         \
+ && ! defined(HAS_QUERYLOCALE)
+
+PERLVARA(I, curlocales, 12, char *)
+
+#endif
 #ifdef USE_LOCALE_COLLATE
+
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
 PERLVARI(I, collxfrm_mult,Size_t, 2)	/* Expansion factor in *xfrm() */

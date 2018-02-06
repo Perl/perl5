@@ -240,6 +240,7 @@ provide
 ptar(1)
 ptargrep(1)
 pwd_mkdb(8)
+querylocale(3)
 RDF::Trine
 read(2)
 Readonly

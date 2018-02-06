@@ -106,6 +106,7 @@
 #define PL_cryptseen		(vTHX->Icryptseen)
 #define PL_curcop		(vTHX->Icurcop)
 #define PL_curcopdb		(vTHX->Icurcopdb)
+#define PL_curlocales		(vTHX->Icurlocales)
 #define PL_curpad		(vTHX->Icurpad)
 #define PL_curpm		(vTHX->Icurpm)
 #define PL_curpm_under		(vTHX->Icurpm_under)

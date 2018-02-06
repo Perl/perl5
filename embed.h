@@ -717,6 +717,8 @@
 #define sync_locale()		Perl_sync_locale(aTHX)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
+#define thread_locale_init	Perl_thread_locale_init
+#define thread_locale_term	Perl_thread_locale_term
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
@@ -1635,6 +1637,9 @@
 #define new_numeric(a)		S_new_numeric(aTHX_ a)
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
+#      if defined(USE_POSIX_2008_LOCALE)
+#define emulate_setlocale	S_emulate_setlocale
+#      endif
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #      endif

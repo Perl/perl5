@@ -1146,7 +1146,14 @@ perl_destruct(pTHXx)
     Safefree(PL_collation_name);
     PL_collation_name = NULL;
 #endif
-
+#if   defined(USE_POSIX_2008_LOCALE)      \
+ &&   defined(USE_THREAD_SAFE_LOCALE)     \
+ && ! defined(HAS_QUERYLOCALE)
+    for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
+        Safefree(PL_curlocales[i]);
+        PL_curlocales[i] = NULL;
+    }
+#endif
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
     PL_numeric_name = NULL;
