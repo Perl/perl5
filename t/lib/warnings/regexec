@@ -260,3 +260,10 @@ setlocale(&POSIX::LC_CTYPE, $utf8_locale);
 "k" =~ /(?[ \N{KELVIN SIGN} ])/i;
 ":" =~ /(?[ \: ])/;
 EXPECT
+########
+# NAME perl #132063, read beyond buffer end
+# OPTION fatal
+"\xff" =~ /(?il)\x{100}|\x{100}/;
+EXPECT
+Malformed UTF-8 character: \xff (too short; 1 byte available, need 13) in pattern match (m//) at - line 2.
+Malformed UTF-8 character (fatal) at - line 2.
