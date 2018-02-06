@@ -1306,7 +1306,6 @@ ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
 Xpn	|void	|_warn_problematic_locale
-p	|void	|new_numeric	|NULLOK const char* newcoll
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
 Xp	|bool	|_is_in_locale_category|const bool compiling|const int category
@@ -2796,6 +2795,7 @@ s	|char*	|stdize_locale	|NN char* locs
 s	|void	|new_collate	|NULLOK const char* newcoll
 s	|void	|new_ctype	|NN const char* newctype
 s	|void	|set_numeric_radix|const bool use_locale
+s	|void	|new_numeric	|NULLOK const char* newnum
 #    ifdef WIN32
 s	|char*	|win32_setlocale|int category|NULLOK const char* locale
 #    endif

@@ -427,9 +427,8 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 
 }
 
-
-void
-Perl_new_numeric(pTHX_ const char *newnum)
+STATIC void
+S_new_numeric(pTHX_ const char *newnum)
 {
 
 #ifndef USE_LOCALE_NUMERIC
@@ -468,10 +467,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
      *                  variables are true at the same time.  (Toggling is a
      *                  no-op under these circumstances.)  This variable is
      *                  used to avoid having to recalculate.
-     * Any code changing the locale (outside this file) should use
-     * POSIX::setlocale, which calls this function.  Therefore this function
-     * should be called directly only from this file and from
-     * POSIX::setlocale() */
+     */
 
     char *save_newnum;
 
