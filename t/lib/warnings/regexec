@@ -260,3 +260,10 @@ setlocale(&POSIX::LC_CTYPE, $utf8_locale);
 "k" =~ /(?[ \N{KELVIN SIGN} ])/i;
 ":" =~ /(?[ \: ])/;
 EXPECT
+########
+# NAME perl #132063, read beyond buffer end
+"\xfe" =~ /(?il)\x{100}|\x{100}/;
+EXPECT
+OPTIONS fatal regex
+Malformed UTF-8 character: \\xfe \(too short; 1 byte available, need \d+\) in pattern match \(m//\) at - line 1.
+Malformed UTF-8 character \(fatal\) at - line 1.
