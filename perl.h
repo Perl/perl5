@@ -202,6 +202,12 @@
 #  undef PERL_TRACK_MEMPOOL
 #endif
 
+#ifdef DEBUGGING
+#  define dTHX_DEBUGGING dTHX
+#else
+#  define dTHX_DEBUGGING dNOOP
+#endif
+
 #define STATIC static
 
 #ifndef PERL_CORE
@@ -5546,7 +5552,7 @@ typedef struct am_table_short AMTS;
                     } STMT_END
 #  endif
 
-#  ifndef USE_ITHREADS
+#  if ! defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE)
 #    define LOCALE_INIT
 #    define LOCALE_LOCK
 #    define LOCALE_UNLOCK
