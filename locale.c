@@ -661,7 +661,7 @@ S_new_ctype(pTHX_ const char *newctype)
             if (    check_for_problems
                 && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
             {
-                if (   cBOOL(isalnum(i)) != cBOOL(isALPHANUMERIC(i))
+                if (   cBOOL(isalnum(i)) != cBOOL(isALPHANUMERIC_A(i))
                     || cBOOL(isalpha(i)) != cBOOL(isALPHA_A(i))
                     || cBOOL(isdigit(i)) != cBOOL(isDIGIT_A(i))
                     || cBOOL(isgraph(i)) != cBOOL(isGRAPH_A(i))
