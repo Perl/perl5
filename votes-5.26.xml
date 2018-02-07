@@ -29,6 +29,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="tonyc" id="397baf232086e0a9ad6f881a9614d3dbaea853fc" ticket="132593" desc="PERL-5.26.1 heap_buffer_overflow READ of size 8"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
