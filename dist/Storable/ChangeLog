@@ -1,3 +1,43 @@
+2018-02-07 15:08:00 tonyc
+    Version 3.06
+
+        * support large object ids.  The code in theory supported arrays
+        with more than 2**32 elements, but references to the elements
+        emitted at the end of the array with be retrieved as references to
+        the wrong elements.
+        * 32-bit object ids over 2**31-1 weren't correctly handled.
+        * hook object id generation now supports 64-bit ids where needed
+        * writing 64-bit lengths in network order now works
+        * reading 64-bit lengths in network order now reads the components
+        in the correct order.
+        * retrieving large object tags are now only handled on 64-bit
+        platforms, large object tags should only be emitted for objects
+        that are too large for the 32-bit address space, so it was only
+        wasted code.
+        * reading 32-bit lengths for LSCALAR and LUTF8STR as unsigned
+        (perl #131990)
+        * reading flagged large object hashes didn't read the flags
+        * treat the 32-bit size of hook data as unsigned, values over 2GB
+        were treated as large (close to 2**64) parameters to NEWSV().
+        (perl #131999)
+        * added support for hook data over 4GB in size
+        * zero length data receievd from STORABLE_freeze() no longer
+        results in an invalid SV being passed to STORABLE_thaw/_attach()
+        (perl #118551)
+        * where practical, padding is now cleared when emitting a long
+        double (perl #131136)
+        * cache the value of $Storable::DEBUGME (since cperl enabled
+        Storable TRACEME builds for all -DDEBUGGING builds)
+        * no longer discard exceptions thrown by
+        STORABLE_freeze/_thaw/attach() (perl #25933)
+        * fix dependencies used to build Storable.pm from __Storable__.pm
+        * add experimental support for freezing/thawing regular
+        expressions (perl #50608)
+        * re-work recursion limiting to store the limit in a perl variable
+        instead of baked into Storable.$so.  This allows static Storable
+        builds to work, and avoids the kind of circular reference on
+        Storable.$so.
+
 2017-07-24 13:57:13 rurban
     Version 3.05_13
 
