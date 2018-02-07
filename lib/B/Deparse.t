@@ -1448,15 +1448,15 @@ tr/X//r;
 tr/\000-\375/AB/c;
 tr/\000-\375/A-C/c;
 tr/\000-\375/A-D/c;
-tr/\000-\375/A-Z/c;
+tr/\000-\375/A-I/c;
 tr/\000-\375/AB/cd;
 tr/\000-\375/A-C/cd;
 tr/\000-\375/A-D/cd;
-tr/\000-\375/A-Z/cd;
+tr/\000-\375/A-I/cd;
 tr/\000-\375/AB/cds;
 tr/\000-\375/A-C/cds;
 tr/\000-\375/A-D/cds;
-tr/\000-\375/A-Z/cds;
+tr/\000-\375/A-I/cds;
 ####
 # [perl #119807] s//\(3)/ge should not warn when deparsed (\3 warns)
 s/foo/\(3);/eg;
