@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 845;  # Update this when adding/deleting tests.
+plan tests => 846;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1937,6 +1937,9 @@ EOP
     }
     {
         fresh_perl_is('"AA" =~ m/AA{1,0}/','',{},"handle OPFAIL insert properly");
+    }
+    {
+        fresh_perl_is('$_="0\x{1000000}";/^000?\0000/','',{},"dont throw assert errors trying to fbm past end of string");
     }
 
 } # End of sub run_tests

@@ -1238,7 +1238,7 @@ Perl_re_intuit_start(pTHX_
 
             if (check_len > targ_len) {
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
-			      "Anchored string too short...\n"));
+			      "Target string too short to match required substring...\n"));
                 goto fail_finish;
             }
 
@@ -1253,6 +1253,8 @@ Perl_re_intuit_start(pTHX_
                                 end_point - check_len
                             )
                             + check_len;
+                if (end_point < start_point)
+                    goto fail_finish;
             }
         }
 
