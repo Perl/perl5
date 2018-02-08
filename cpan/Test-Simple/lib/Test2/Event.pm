@@ -2,7 +2,7 @@ package Test2::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302120';
+our $VERSION = '1.302122';
 
 use Test2::Util::HashBase qw/trace -amnesty/;
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
@@ -581,7 +581,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2017 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

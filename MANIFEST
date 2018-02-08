@@ -2297,6 +2297,7 @@ cpan/Test-Simple/lib/Test2/EventFacet/Info.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Meta.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Parent.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Plan.pm
+cpan/Test-Simple/lib/Test2/EventFacet/Render.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Trace.pm
 cpan/Test-Simple/lib/Test2/Formatter.pm
 cpan/Test-Simple/lib/Test2/Formatter/TAP.pm
