@@ -1,10 +1,10 @@
 package bignum;
 
-use 5.006;
+use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.47';
+our $VERSION = '0.49';
 
 use Exporter;
 our @ISA            = qw( bigint );
