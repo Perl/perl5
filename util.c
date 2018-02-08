@@ -690,7 +690,7 @@ Perl_rninstr(const char *big, const char *bigend, const char *little, const char
 
 =for apidoc fbm_compile
 
-Analyses the string in order to make fast searches on it using C<fbm_instr()>
+Analyzes the string in order to make fast searches on it using C<fbm_instr()>
 -- the Boyer-Moore algorithm.
 
 =cut
