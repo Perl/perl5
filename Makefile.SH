@@ -176,11 +176,15 @@ esac
 
 : is Cwd static or dynamic
 static_cwd='define'
+storable_limit_dep=''
+storable_type=''
 list_util_dep='$(PERL_EXE)'
 for f in $dynamic_ext; do
    case $f in
        Cwd) static_cwd='undef' ;;
-       List/Util) list_util_dep=lib/auto/List/Util/Util.$dlext
+       List/Util) list_util_dep=lib/auto/List/Util/Util.$dlext ;;
+       Storable) storable_limit_dep=lib/auto/Storable/Storable.$dlext
+                 storable_type='dynamic' ;;
    esac
 done
 
@@ -217,6 +221,7 @@ for f in $static_ext; do
 $this_target: lib/auto/List/Util/Util\$(LIB_EXT)" ;;
 	Unicode/Normalize) extra_dep="$extra_dep
 $this_target: uni.data" ;;
+        Storable) storable_type='static' ;;
     esac
 done
 
@@ -618,7 +623,7 @@ lintflags = \
 	@echo `$(CCCMDSRC)` -S $*.c
 	@`$(CCCMDSRC)` -S $*.c
 
-all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make $(MANIFEST_SRT)
+all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make $(MANIFEST_SRT) common_build
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -1090,7 +1095,7 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-.PHONY: preplibrary
+.PHONY: preplibrary common_build
 preplibrary: $(MINIPERL_EXE) $(CONFIGPM) $(PREPLIBRARY_LIBPERL)
 
 $(CONFIGPM_FROM_CONFIG_SH): $(CONFIGPOD)
@@ -1109,7 +1114,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 # $(PERL_EXE) and ext because pod_lib.pl needs Digest::MD5
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
-pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
+pod/perltoc.pod: $(perltoc_pod_prereqs) $(PERL_EXE) $(ext) pod/buildtoc
 	$(RUN_PERL) -f pod/buildtoc -q
 
 pod/perlapi.pod: pod/perlintern.pod
@@ -1153,6 +1158,21 @@ no_install no-install: install-notify
 install: install-all
 !NO!SUBS!
 
+if test "$storable_type" != "" ; then
+
+$spitshell >>$Makefile <<EOT
+
+dist/Storable/lib/Storable/Limit.pm : \$(PERL_EXE) dist/Storable/stacksize $storable_limit_dep
+	\$(RUN_PERL) dist/Storable/stacksize --core
+
+lib/Storable/Limit.pm : dist/Storable/lib/Storable/Limit.pm
+	test -d lib/Storable || mkdir lib/Storable
+	cp dist/Storable/lib/Storable/Limit.pm lib/Storable/Limit.pm
+EOT
+
+common_build_deps="$common_build_deps lib/Storable/Limit.pm"
+
+fi
 
 for name in all notify silent strip verbose; do
     flags="--$name";
@@ -1500,7 +1520,7 @@ test_prep_pre: preplibrary utilities $(nonxs_ext)
 case "$targethost" in
 '') $spitshell >>$Makefile <<'!NO!SUBS!'
 test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
-	$(dynamic_ext) $(TEST_PERL_DLL) runtests $(generated_pods)
+	$(dynamic_ext) $(TEST_PERL_DLL) runtests $(generated_pods) common_build
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 
 !NO!SUBS!
@@ -1508,7 +1528,7 @@ test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
 *) $spitshell >>$Makefile <<!GROK!THIS!
 test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE) \
 	\$(dynamic_ext) \$(TEST_PERL_DLL) runtests \
-	\$(generated_pods)
+	\$(generated_pods) common_build
 	$to libperl.*
 	$to t/*
 	$to lib/*
@@ -1642,6 +1662,17 @@ test_reonly test-reonly: test_prep_reonly
 
 test_porting test-porting: test_prep
 	cd t && $(RUN_PERL) harness porting/*.t ../lib/diagnostics.t
+
+!NO!SUBS!
+
+$spitshell>>$Makefile <<!GROK!THIS!
+
+# intended as a common way to add dependencies to test-prep and all
+common_build: $common_build_deps
+
+!GROK!THIS!
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

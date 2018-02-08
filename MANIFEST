@@ -3677,6 +3677,8 @@ dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
 dist/Storable/hints/linux.pl		Hint for Storable for named architecture
 dist/Storable/Makefile.PL		Storable extension
 dist/Storable/README			Storable extension
+dist/Storable/stacksize			compute stack sizes
+dist/Storable/stacksize_in.h		computed stack sizes
 dist/Storable/Storable.xs		Storable extension
 dist/Storable/Storable.pm.PL	perl script to generate Storable.pm from template
 dist/Storable/t/attach.t		Check STORABLE_attach doesn't create objects unnecessarily
@@ -3689,15 +3691,20 @@ dist/Storable/t/code.t			See if Storable works
 dist/Storable/t/compat01.t		See if Storable works
 dist/Storable/t/compat06.t		See if Storable works
 dist/Storable/t/croak.t			See if Storable works
+dist/Storable/t/CVE-2015-1592.inc	See if Storable works
+dist/Storable/t/CVE-2015-1592.t		See if Storable works
 dist/Storable/t/dclone.t		See if Storable works
 dist/Storable/t/destroy.t		Test Storable in global destructon
 dist/Storable/t/downgrade.t		See if Storable works
 dist/Storable/t/file_magic.t		See if file_magic function works
+dist/Storable/t/flags.t			See if Storable works
 dist/Storable/t/forgive.t		See if Storable works
 dist/Storable/t/freeze.t		See if Storable works
 dist/Storable/t/HAS_ATTACH.pm		For auto-requiring of modules for STORABLE_attach
 dist/Storable/t/HAS_HOOK.pm		For auto-requiring of modules for STORABLE_thaw
 dist/Storable/t/HAS_OVERLOAD.pm		For auto-requiring of mdoules for overload
+dist/Storable/t/huge.t			See how Storable handles huge data
+dist/Storable/t/hugeids.t		See how Storable handles huge object ids
 dist/Storable/t/integer.t		See if Storable works
 dist/Storable/t/interwork56.t		Test compatibility kludge for 64bit data under 5.6.x
 dist/Storable/t/just_plain_nasty.t	See if Storable works
@@ -3709,6 +3716,7 @@ dist/Storable/t/make_overload.pl	Make test data for overload.t
 dist/Storable/t/malice.t		See if Storable copes with corrupt files
 dist/Storable/t/overload.t		See if Storable works
 dist/Storable/t/recurse.t		See if Storable works
+dist/Storable/t/regexp.t		See if Storable works with regexps
 dist/Storable/t/restrict.t		See if Storable works
 dist/Storable/t/retrieve.t		See if Storable works
 dist/Storable/t/robust.t		See if it survives mangled %INC
@@ -3720,6 +3728,7 @@ dist/Storable/t/threads.t		Does Storable work with threads?
 dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/tied_hook.t		See if Storable works
 dist/Storable/t/tied_items.t		See if Storable works
+dist/Storable/t/tied_reify.t		See if Storable works
 dist/Storable/t/tied_store.t		See if Storable works
 dist/Storable/t/utf8.t			See if Storable works
 dist/Storable/t/utf8hash.t		See if Storable works
