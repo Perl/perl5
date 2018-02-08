@@ -58,6 +58,8 @@ sub get_filesys_of_tempfile {
 
 sub get_mount_of_filesys {
   my ($filesys) = @_;
+  # netbsd has /sbin/mount
+  local $ENV{PATH} = "$ENV{PATH}:/sbin" if $^O =~ /^(?:netbsd)$/;
   if (defined $filesys) {
     my @fs = split(' ', $filesys);
     if (open(my $mount, "mount |")) {

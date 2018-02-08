@@ -1,5 +1,14 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9753 [2018-01-11]
+ - in t/clock.t in a fast system we need to burn more CPU,
+   reported and fix suggested by Joel C. Maslak <jmaslak@antelope.net>
+   [rt.cpan.org #124025]
+ - for t/utime.t in netbsd we need /sbin in PATH to find the mount command,
+   this is needed for the fix in 1.9751 to actually help netbsd with noatime
+   mounts.
+   (thanks to Nigel Horne)
+
 1.9752 [2018-01-04]
  - fix an error in the error message of utimensat() not available:
    it said futimens() not available
