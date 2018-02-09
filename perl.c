@@ -543,7 +543,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
 	perror("Debug leaking scalars parent sendmsg failed");
 	abort();
     }
-    if(got < sizeof(sv)) {
+    if((Size_t)got < sizeof(sv)) {
 	perror("Debug leaking scalars parent short sendmsg");
 	abort();
     }
@@ -565,7 +565,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
 	PerlIO_flush(PerlIO_stderr());
 	abort();
     }
-    if(got < sizeof(returned_errno) + 1) {
+    if((Size_t)got < sizeof(returned_errno) + 1) {
 	perror("Debug leaking scalars parent short read");
 	PerlIO_flush(PerlIO_stderr());
 	abort();
@@ -816,7 +816,7 @@ perl_destruct(pTHXx)
 		    where = "recv failed";
 		    goto abort;
 		}
-		if(got < sizeof(target)) {
+		if((Size_t)got < sizeof(target)) {
 		    where = "short recv";
 		    goto abort;
 		}
@@ -858,7 +858,7 @@ perl_destruct(pTHXx)
 		    where = "write failed";
 		    goto abort;
 		}
-		if(got < sizeof(success)) {
+		if((Size_t)got < sizeof(success)) {
 		    where = "short write";
 		    goto abort;
 		}
