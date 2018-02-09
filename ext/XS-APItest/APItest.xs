@@ -1382,7 +1382,7 @@ bytes_cmp_utf8(bytes, utf8)
 AV *
 test_utf8_to_bytes(bytes, lenp)
         unsigned char * bytes
-        ssize_t lenp
+        SSize_t lenp
     PREINIT:
         char * ret;
     CODE:

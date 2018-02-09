@@ -498,7 +498,7 @@ Perl_nothreadhook(pTHX)
 void
 Perl_dump_sv_child(pTHX_ SV *sv)
 {
-    ssize_t got;
+    SSize_t got;
     const int sock = PL_dumper_fd;
     const int debug_fd = PerlIO_fileno(Perl_debug_log);
     union control_un control;
@@ -794,7 +794,7 @@ perl_destruct(pTHXx)
 		struct msghdr msg;
 		struct iovec vec[1];
 		struct cmsghdr *cmptr;
-		ssize_t got;
+		SSize_t got;
 		int got_fd;
 
 		msg.msg_control = control.control;
