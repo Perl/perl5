@@ -1380,18 +1380,22 @@ bytes_cmp_utf8(bytes, utf8)
 	RETVAL
 
 AV *
-test_utf8_to_bytes(bytes, lenp)
+test_utf8_to_bytes(bytes, len)
         unsigned char * bytes
-        ssize_t lenp
+        STRLEN len
     PREINIT:
         char * ret;
     CODE:
         RETVAL = newAV();
         sv_2mortal((SV*)RETVAL);
 
-        ret = (char *) utf8_to_bytes(bytes, &lenp);
+        ret = (char *) utf8_to_bytes(bytes, &len);
         av_push(RETVAL, newSVpv(ret, 0));
-        av_push(RETVAL, newSViv(lenp));
+
+        /* utf8_to_bytes uses (STRLEN)-1 to signal errors, and we want to
+         * return that as -1 to perl, so cast to SSize_t in case
+         * sizeof(IV) > sizeof(STRLEN) */
+        av_push(RETVAL, newSViv((SSize_t)len));
         av_push(RETVAL, newSVpv((const char *) bytes, 0));
 
     OUTPUT:
