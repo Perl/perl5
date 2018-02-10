@@ -1625,6 +1625,12 @@ Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
 =for apidoc Am|char*|SvPVutf8_nomg|SV* sv|STRLEN len
 Like C<SvPVutf8>, but does not process get magic.
 
+=for apidoc Am|char*|SvPVutf8_or_null|SV* sv|STRLEN len
+Like C<SvPVutf8>, but when C<sv> is undef then returns C<NULL>.
+
+=for apidoc Am|char*|SvPVutf8_or_null_nomg|SV* sv|STRLEN len
+Like C<SvPVutf8_or_null>, but does not process get magic.
+
 =for apidoc Am|char*|SvPVutf8_nolen|SV* sv
 Like C<SvPV_nolen>, but converts C<sv> to UTF-8 first if necessary.
 
@@ -1636,6 +1642,12 @@ Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
 
 =for apidoc Am|char*|SvPVbyte_nomg|SV* sv|STRLEN len
 Like C<SvPVbyte>, but does not process get magic.
+
+=for apidoc Am|char*|SvPVbyte_or_null|SV* sv|STRLEN len
+Like C<SvPVbyte>, but when C<sv> is undef then returns C<NULL>.
+
+=for apidoc Am|char*|SvPVbyte_or_null_nomg|SV* sv|STRLEN len
+Like C<SvPVbyte_or_null>, but does not process get magic.
 
 =for apidoc Am|char*|SvPVbyte_nolen|SV* sv
 Like C<SvPV_nolen>, but converts C<sv> to byte representation first if necessary.
@@ -1758,9 +1770,19 @@ Like C<sv_catsv> but doesn't process magic.
     (SvPOK_utf8_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
 
+#define SvPVutf8_or_null(sv, lp) \
+    (SvPOK_utf8_nog(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
+     ? sv_2pvutf8_flags(sv, &lp, 0) : ((lp = 0), NULL))
+
 #define SvPVutf8_nomg(sv, lp) \
     (SvPOK_utf8_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8_flags(sv, &lp, 0))
+
+#define SvPVutf8_or_null_nomg(sv, lp) \
+    (SvPOK_utf8_nog(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
+     ? sv_2pvutf8_flags(sv, &lp, 0) : ((lp = 0), NULL))
 
 #define SvPVutf8_force(sv, lp) \
     (SvPOK_utf8_pure_nogthink(sv) \
@@ -1776,9 +1798,19 @@ Like C<sv_catsv> but doesn't process magic.
     (SvPOK_byte_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
 
+#define SvPVbyte_or_null(sv, lp) \
+    (SvPOK_byte_nog(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
+     ? sv_2pvbyte_flags(sv, &lp, 0) : ((lp = 0), NULL))
+
 #define SvPVbyte_nomg(sv, lp) \
     (SvPOK_byte_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte_flags(sv, &lp, 0))
+
+#define SvPVbyte_or_null_nomg(sv, lp) \
+    (SvPOK_utf8_nog(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
+     ? sv_2pvbyte_flags(sv, &lp, 0) : ((lp = 0), NULL))
 
 #define SvPVbyte_force(sv, lp) \
     (SvPOK_byte_pure_nogthink(sv) \
