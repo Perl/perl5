@@ -1769,6 +1769,22 @@ Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
     return sv_utf8_downgrade(sv, fail_ok);
 }
 
+char *
+Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp)
+{
+    PERL_ARGS_ASSERT_SV_2PVUTF8;
+
+    return sv_2pvutf8(sv, lp);
+}
+
+char *
+Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
+{
+    PERL_ARGS_ASSERT_SV_2PVBYTE;
+
+    return sv_2pvbyte(sv, lp);
+}
+
 #endif /* NO_MATHOMS */
 
 /*

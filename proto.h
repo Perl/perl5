@@ -3232,8 +3232,13 @@ PERL_CALLCONV char*	Perl_sv_2pv_nolen(pTHX_ SV* sv)
 	assert(sv)
 #endif
 
+#ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp);
 #define PERL_ARGS_ASSERT_SV_2PVBYTE	\
+	assert(sv)
+#endif
+PERL_CALLCONV char*	Perl_sv_2pvbyte_flags(pTHX_ SV *sv, STRLEN *const lp, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_2PVBYTE_FLAGS	\
 	assert(sv)
 #ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv)
@@ -3242,8 +3247,13 @@ PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv)
 	assert(sv)
 #endif
 
+#ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp);
 #define PERL_ARGS_ASSERT_SV_2PVUTF8	\
+	assert(sv)
+#endif
+PERL_CALLCONV char*	Perl_sv_2pvutf8_flags(pTHX_ SV *sv, STRLEN *const lp, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_2PVUTF8_FLAGS	\
 	assert(sv)
 #ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv)

@@ -1622,6 +1622,9 @@ Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
 =for apidoc Am|char*|SvPVutf8|SV* sv|STRLEN len
 Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
 
+=for apidoc Am|char*|SvPVutf8_nomg|SV* sv|STRLEN len
+Like C<SvPVutf8>, but does not process get magic.
+
 =for apidoc Am|char*|SvPVutf8_nolen|SV* sv
 Like C<SvPV_nolen>, but converts C<sv> to UTF-8 first if necessary.
 
@@ -1630,6 +1633,9 @@ Like C<SvPV_force>, but converts C<sv> to byte representation first if necessary
 
 =for apidoc Am|char*|SvPVbyte|SV* sv|STRLEN len
 Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
+
+=for apidoc Am|char*|SvPVbyte_nomg|SV* sv|STRLEN len
+Like C<SvPVbyte>, but does not process get magic.
 
 =for apidoc Am|char*|SvPVbyte_nolen|SV* sv
 Like C<SvPV_nolen>, but converts C<sv> to byte representation first if necessary.
@@ -1752,6 +1758,10 @@ Like C<sv_catsv> but doesn't process magic.
     (SvPOK_utf8_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
 
+#define SvPVutf8_nomg(sv, lp) \
+    (SvPOK_utf8_nog(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8_flags(sv, &lp, 0))
+
 #define SvPVutf8_force(sv, lp) \
     (SvPOK_utf8_pure_nogthink(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
@@ -1765,6 +1775,10 @@ Like C<sv_catsv> but doesn't process magic.
 #define SvPVbyte(sv, lp) \
     (SvPOK_byte_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
+
+#define SvPVbyte_nomg(sv, lp) \
+    (SvPOK_byte_nog(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte_flags(sv, &lp, 0))
 
 #define SvPVbyte_force(sv, lp) \
     (SvPOK_byte_pure_nogthink(sv) \
@@ -1957,7 +1971,9 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_copypv_nomg(dsv, ssv) sv_copypv_flags(dsv, ssv, 0)
 #define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
 #define sv_2pv_nolen(sv) sv_2pv(sv, 0)
+#define sv_2pvbyte(sv, lp) sv_2pvbyte_flags(sv, lp, SV_GMAGIC)
 #define sv_2pvbyte_nolen(sv) sv_2pvbyte(sv, 0)
+#define sv_2pvutf8(sv, lp) sv_2pvutf8_flags(sv, lp, SV_GMAGIC)
 #define sv_2pvutf8_nolen(sv) sv_2pvutf8(sv, 0)
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)

@@ -3322,18 +3322,19 @@ Usually accessed via the C<SvPVbyte> macro.
 */
 
 char *
-Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
+Perl_sv_2pvbyte_flags(pTHX_ SV *sv, STRLEN *const lp, const U32 flags)
 {
-    PERL_ARGS_ASSERT_SV_2PVBYTE;
+    PERL_ARGS_ASSERT_SV_2PVBYTE_FLAGS;
 
-    SvGETMAGIC(sv);
+    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
+        mg_get(sv);
     if (((SvREADONLY(sv) || SvFAKE(sv)) && !SvIsCOW(sv))
      || isGV_with_GP(sv) || SvROK(sv)) {
 	SV *sv2 = sv_newmortal();
 	sv_copypv_nomg(sv2,sv);
 	sv = sv2;
     }
-    sv_utf8_downgrade(sv,0);
+    sv_utf8_downgrade_nomg(sv,0);
     return lp ? SvPV_nomg(sv,*lp) : SvPV_nomg_nolen(sv);
 }
 
@@ -3349,15 +3350,18 @@ Usually accessed via the C<SvPVutf8> macro.
 */
 
 char *
-Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp)
+Perl_sv_2pvutf8_flags(pTHX_ SV *sv, STRLEN *const lp, const U32 flags)
 {
-    PERL_ARGS_ASSERT_SV_2PVUTF8;
+    PERL_ARGS_ASSERT_SV_2PVUTF8_FLAGS;
 
+    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
+        mg_get(sv);
     if (((SvREADONLY(sv) || SvFAKE(sv)) && !SvIsCOW(sv))
-     || isGV_with_GP(sv) || SvROK(sv))
-	sv = sv_mortalcopy(sv);
-    else
-        SvGETMAGIC(sv);
+     || isGV_with_GP(sv) || SvROK(sv)) {
+        SV *sv2 = sv_newmortal();
+        sv_copypv_nomg(sv2,sv);
+        sv = sv2;
+    }
     sv_utf8_upgrade_nomg(sv);
     return lp ? SvPV_nomg(sv,*lp) : SvPV_nomg_nolen(sv);
 }
