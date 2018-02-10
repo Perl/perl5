@@ -403,6 +403,7 @@ unless ($define{'HAS_NEWLOCALE'} && ! $define{'NO_POSIX_2008_LOCALE'})
 {
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
+        PL_underlying_numeric_obj
     );
 }
 
