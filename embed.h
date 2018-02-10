@@ -854,7 +854,7 @@
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)
 #define sv_usepvn_flags(a,b,c,d)	Perl_sv_usepvn_flags(aTHX_ a,b,c,d)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
-#define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
+#define sv_utf8_downgrade_flags(a,b,c)	Perl_sv_utf8_downgrade_flags(aTHX_ a,b,c)
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_upgrade_flags_grow(a,b,c)	Perl_sv_utf8_upgrade_flags_grow(aTHX_ a,b,c)
 #ifndef NO_MATHOMS

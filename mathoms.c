@@ -1761,6 +1761,14 @@ Perl_newSVsv(pTHX_ SV *const old)
     return newSVsv(old);
 }
 
+bool
+Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
+{
+    PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE;
+
+    return sv_utf8_downgrade(sv, fail_ok);
+}
+
 #endif /* NO_MATHOMS */
 
 /*

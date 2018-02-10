@@ -3649,19 +3649,31 @@ true, croaks.
 This is not a general purpose Unicode to byte encoding interface:
 use the C<Encode> extension for that.
 
+This function process get magic on C<sv>.
+
+=for apidoc sv_utf8_downgrade_nomg
+
+Like C<sv_utf8_downgrade>, but does not process get magic on C<sv>.
+
+=for apidoc sv_utf8_downgrade_flags
+
+Like C<sv_utf8_downgrade>, but with additional C<flags>.
+If C<flags> has C<SV_GMAGIC> bit set, then this function process
+get magic on C<sv>.
+
 =cut
 */
 
 bool
-Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
+Perl_sv_utf8_downgrade_flags(pTHX_ SV *const sv, const bool fail_ok, const U32 flags)
 {
-    PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE;
+    PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE_FLAGS;
 
     if (SvPOKp(sv) && SvUTF8(sv)) {
         if (SvCUR(sv)) {
 	    U8 *s;
 	    STRLEN len;
-	    int mg_flags = SV_GMAGIC;
+            U32 mg_flags = flags & SV_GMAGIC;
 
             if (SvIsCOW(sv)) {
                 S_sv_uncow(aTHX_ sv, 0);
@@ -3671,7 +3683,7 @@ Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
 		MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
 		if (mg && mg->mg_len > 0 && mg->mg_flags & MGf_BYTES) {
 			mg->mg_len = sv_pos_b2u_flags(sv, mg->mg_len,
-						SV_GMAGIC|SV_CONST_RETURN);
+						mg_flags|SV_CONST_RETURN);
 			mg_flags = 0; /* sv_pos_b2u does get magic */
 		}
 		if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
