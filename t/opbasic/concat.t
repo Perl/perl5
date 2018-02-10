@@ -39,7 +39,7 @@ sub is {
     return $ok;
 }
 
-print "1..252\n";
+print "1..253\n";
 
 ($a, $b, $c) = qw(foo bar);
 
@@ -839,4 +839,17 @@ ok(ref(CORE::state $y = "a $o b") eq 'o',
     is ($got,
         "AXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXDAXBCXD",
         "RT #132646");
+}
+
+# RT #132595
+# multiconcat shouldn't affect the order of arg evaluation
+package RT132595 {
+    my $a = "a";
+    my $i = 0;
+    sub TIESCALAR { bless({}, $_[0]) }
+    sub FETCH { ++$i; $a = "b".$i; "c".$i }
+    my $t;
+    tie $t, "RT132595";
+    my $res = $a.$t.$a.$t;
+    ::is($res, "b1c1b1c2", "RT #132595");
 }

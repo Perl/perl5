@@ -480,13 +480,13 @@ PP(pp_multiconcat)
      * Where an arg is actually targ, the stringification is deferred:
      * the length is set to 0, and the slot is added to targ_chain.
      *
-     * If an overloaded arg is found, the loop is abandoned at that point,
-     * and dsv is set to an SvTEMP SV where the results-so-far will be
-     * accumulated.
+     * If a magic, overloaded, or otherwise weird arg is found, which
+     * might have side effects when stringified, the loop is abandoned and
+     * we goto a code block where a more basic 'emulate calling
+     * pp_cpncat() on each arg in turn' is done.
      */
 
     for (; SP <= toparg; SP++, svpv_end++) {
-        bool simple_flags;
         U32 utf8;
         STRLEN len;
         SV *sv;
@@ -494,161 +494,54 @@ PP(pp_multiconcat)
         assert(svpv_end - svpv_buf < PERL_MULTICONCAT_MAXARG);
 
         sv = *SP;
-        simple_flags = (SvFLAGS(sv) & (SVs_GMG|SVf_ROK|SVf_POK)) == SVf_POK;
 
         /* this if/else chain is arranged so that common/simple cases
          * take few conditionals */
 
-        if (LIKELY(simple_flags && (sv != targ))) {
-            /* common case: sv is a simple PV and not the targ */
-            svpv_end->pv  = SvPVX(sv);
+        if (LIKELY((SvFLAGS(sv) & (SVs_GMG|SVf_ROK|SVf_POK)) == SVf_POK)) {
+            /* common case: sv is a simple non-magical PV */
+            if (targ == sv) {
+                /* targ appears on RHS.
+                 * Delay storing PV pointer; instead, add slot to targ_chain
+                 * so it can be populated later, after targ has been grown and
+                 * we know its final SvPVX() address.
+                 */
+              targ_on_rhs:
+                svpv_end->len = 0; /* zerojng here means we can skip
+                                      updating later if targ_len == 0 */
+                svpv_end->pv  = (char*)targ_chain;
+                targ_chain    = svpv_end;
+                targ_count++;
+                continue;
+            }
+
             len           = SvCUR(sv);
+            svpv_end->pv  = SvPVX(sv);
         }
-        else if (simple_flags) {
-            /* sv is targ (but can't be magic or overloaded).
-             * Delay storing PV pointer; instead, add slot to targ_chain
-             * so it can be populated later, after targ has been grown and
-             * we know its final SvPVX() address.
+        else if (UNLIKELY(SvFLAGS(sv) & (SVs_GMG|SVf_ROK)))
+            /* may have side effects: tie, overload etc.
+             * Abandon 'stringify everything first' and handle
+             * args in strict order. Note that already-stringified args
+             * will be reprocessed, which is safe because the each first
+             * stringification would have been idempotent.
              */
-          targ_on_rhs:
-            svpv_end->len = 0; /* zerojng here means we can skip
-                                  updating later if targ_len == 0 */
-            svpv_end->pv  = (char*)targ_chain;
-            targ_chain    = svpv_end;
-            targ_count++;
-            continue;
-        }
-        else {
-            if (UNLIKELY(SvFLAGS(sv) & (SVs_GMG|SVf_ROK))) {
-                /* its got magic, is tied, and/or is overloaded */
-                SvGETMAGIC(sv);
-
-                if (UNLIKELY(SvAMAGIC(sv))
-                    && !(PL_op->op_private & OPpMULTICONCAT_FAKE))
-                {
-                    /* One of the RHS args is overloaded. Abandon stringifying
-                     * the args at this point, then in the concat loop later
-                     * on, concat the plain args stringified so far into a
-                     * TEMP SV. At the end of this function the remaining
-                     * args (including the current one) will be handled
-                     * specially, using overload calls.
-                     * FAKE implies an optimised sprintf which doesn't use
-                     * concat overloading, only "" overloading.
-                     */
-
-                    if (   svpv_end == svpv_buf + 1
-                           /* no const string segments */
-                        && aux[PERL_MULTICONCAT_IX_LENGTHS].ssize     == -1
-                        && aux[PERL_MULTICONCAT_IX_LENGTHS + 1].ssize == -1
-                    ) {
-                        /* special case: if the overloaded sv is the
-                         * second arg in the concat chain, stop at the
-                         * first arg rather than this, so that
-                         *
-                         *   $arg1 . $arg2
-                         *
-                         * invokes overloading as
-                         *
-                         *    concat($arg2, $arg1, 1)
-                         *
-                         * rather than
-                         *
-                         *    concat($arg2, "$arg1", 1)
-                         *
-                         * This means that if for example arg1 is a ref,
-                         * it gets passed as-is to the concat method
-                         * rather than a stringified copy. If it's not the
-                         * first arg, it doesn't matter, as in $arg0 .
-                         * $arg1 .  $arg2, where the result of ($arg0 .
-                         * $arg1) will already be a string.
-                         * THis isn't perfect: we'll have already
-                         * done SvPV($arg1) on the previous iteration;
-                         * and are now throwing away that result and
-                         * hoping arg1 hasn;t been affected.
-                         */
-                        svpv_end--;
-                        SP--;
-                    }
-
-                  setup_overload:
-                    dsv = newSVpvn_flags("", 0, SVs_TEMP);
-
-                    if (targ_chain) {
-                        /* Get the string value of targ and populate any
-                         * RHS slots which use it */
-                        char *pv = SvPV_nomg(targ, len);
-                        dst_utf8 |= (SvFLAGS(targ) & SVf_UTF8);
-                        grow += len * targ_count;
-                        do {
-                            struct multiconcat_svpv *p = targ_chain;
-                            targ_chain = (struct multiconcat_svpv *)(p->pv);
-                            p->pv  = pv;
-                            p->len = len;
-                        } while (targ_chain);
-                    }
-                    else if (is_append)
-                        SvGETMAGIC(targ);
-
-                    goto phase3;
-                }
-
-                if (SvFLAGS(sv) & SVs_RMG) {
-                    /* probably tied; copy it to guarantee separate values
-                     * each time it's used, e.g. "-$tied-$tied-$tied-",
-                     * since FETCH() isn't necessarily idempotent */
-                    SV *nsv = newSV(0);
-                    sv_setsv_flags(nsv, sv, SV_NOSTEAL);
-                    sv_2mortal(nsv);
-                    if (   sv == targ
-                        && is_append
-                        && nargs == 1
-                        /* no const string segments */
-                        && aux[PERL_MULTICONCAT_IX_LENGTHS].ssize   == -1
-                        && aux[PERL_MULTICONCAT_IX_LENGTHS+1].ssize == -1)
-                    {
-                        /* special-case $tied .= $tied.
-                         *
-                         * For something like
-                         *    sub FETCH { $i++ }
-                         * then
-                         *    $tied .= $tied . $tied . $tied;
-                         * will STORE "4123"
-                         * while
-                         *    $tied .= $tied
-                         * will STORE "12"
-                         *
-                         * i.e. for a single mutator concat, the LHS is
-                         * retrieved first; in all other cases it is
-                         * retrieved last. Whether this is sane behaviour
-                         * is open to debate; but for now, multiconcat (as
-                         * it is an optimisation) tries to reproduce
-                         * existing behaviour.
-                         */
-                        sv_catsv(nsv, sv);
-                        sv_setsv(sv,nsv);
-                        SP++;
-                        goto phase7; /* just return targ as-is */
-                    }
-
-                    sv = nsv;
-                }
-            }
-
-            if (sv == targ) {
-                /* must warn for each RH usage of targ, except that
-                 * we will later get one warning when doing
-                 * SvPV_force(targ), *except* on '.=' */
-                if (   !SvOK(sv)
-                    && (targ_chain || is_append)
-                    && ckWARN(WARN_UNINITIALIZED)
-                )
-                    report_uninit(sv);
-                goto targ_on_rhs;
-            }
-
-            /* stringify general SV */
+            goto do_magical;
+        else if (SvNIOK(sv)) {
+            if (targ == sv)
+              goto targ_on_rhs;
+            /* stringify general valid scalar */
             svpv_end->pv = sv_2pv_flags(sv, &len, 0);
         }
+        else if (!SvOK(sv)) {
+            if (ckWARN(WARN_UNINITIALIZED))
+                /* an undef value in the presence of warnings may trigger
+                 * side affects */
+                goto do_magical;
+            svpv_end->pv = (char*)"";
+            len = 0;
+        }
+        else
+            goto do_magical; /* something weird */
 
         utf8 = (SvFLAGS(sv) & SVf_UTF8);
         dst_utf8   |= utf8;
@@ -667,31 +560,9 @@ PP(pp_multiconcat)
      */
 
     if (is_append) {
-        if (UNLIKELY(SvFLAGS(targ) & (SVs_GMG|SVf_ROK))) {
-            SvGETMAGIC(targ); /* must do before SvAMAGIC() check */
-            if (UNLIKELY(SvAMAGIC(targ))) {
-                /* $overloaded .= ....;
-                 * accumulate RHS in a temp SV rather than targ,
-                 * then append tmp to targ at the end using overload
-                 */
-                assert(!targ_chain);
-                dsv = newSVpvn_flags("", 0, SVs_TEMP);
-
-                if (   svpv_end == svpv_buf + 1
-                       /* no const string segments */
-                    && aux[PERL_MULTICONCAT_IX_LENGTHS].ssize == -1
-                ) {
-                    /* special case $overloaded .= $arg1:
-                     * avoid stringifying $arg1.
-                     * Similar to the $arg1 . $arg2 case in phase1
-                     */
-                    svpv_end--;
-                    SP--;
-                }
-
-                goto phase3;
-            }
-        }
+        /* abandon quick route if using targ might have side effects */
+        if (UNLIKELY(SvFLAGS(targ) & (SVs_GMG|SVf_ROK)))
+            goto do_magical;
 
         if (SvOK(targ)) {
             U32 targ_utf8;
@@ -709,6 +580,10 @@ PP(pp_multiconcat)
             grow += targ_len * (targ_count + is_append);
             goto phase3;
         }
+        else if (ckWARN(WARN_UNINITIALIZED))
+            /* warning might have side effects */
+            goto do_magical;
+        /* the undef targ will be silently SvPVCLEAR()ed below */
     }
     else if (UNLIKELY(SvTYPE(targ) >= SVt_REGEXP)) {
         /* Assigning to some weird LHS type. Don't force the LHS to be an
@@ -720,24 +595,16 @@ PP(pp_multiconcat)
          * (which makes the 'F' typeglob an alias to the
          * '*main::F*main::F' typeglob).
          */
-        goto setup_overload;
+        goto do_magical;
     }
-    else if (targ_chain) {
+    else if (targ_chain)
         /* targ was found on RHS.
-         * We don't need the SvGETMAGIC() call and SvAMAGIC() test as
-         * both were already done earlier in the SvPV() loop; other
-         * than that we can share the same code with the append
-         * branch below.
-         * Note that this goto jumps directly into the SvOK() branch
-         * even if targ isn't SvOK(), to force an 'uninitialised'
-         * warning; e.g.
-         *   $undef .= ....           targ only on LHS: don't warn
-         *   $undef .= $undef ....    targ on RHS too:  warn
+         * Force stringify it, using the same code as the append branch
+         * above, except that we don't need the magic/overload/undef
+         * checks as these will already have been done in the phase 1
+         * loop.
          */
-        assert(!SvAMAGIC(targ));
         goto stringify_targ;
-    }
-
 
     /* unrolled SvPVCLEAR() - mostly: no need to grow or set SvCUR() to 0;
      * those will be done later. */
@@ -1051,118 +918,168 @@ PP(pp_multiconcat)
     /* --------------------------------------------------------------
      * Phase 6:
      *
-     * Handle overloading. If an overloaded arg or targ was detected
-     * earlier, dsv will have been set to a new mortal, and any args and
-     * consts to the left of the first overloaded arg will have been
-     * accumulated to it. This section completes any further concatenation
-     * steps with overloading handled.
-     */
-
-    if (UNLIKELY(dsv != targ)) {
-        SV *res;
-
-        SvFLAGS(dsv) |= dst_utf8;
-
-        if (SP <= toparg) {
-            /* Stringifying the RHS was abandoned because *SP
-             * is overloaded. dsv contains all the concatted strings
-             * before *SP. Apply the rest of the args using overloading.
-             */
-            SV *left, *right, *res;
-            int i;
-            bool getmg = FALSE;
-                               /* number of args already concatted */
-            SSize_t n         = (nargs - 1) - (toparg - SP);
-                               /* current arg is either the first
-                                * or second value to be concatted
-                                * (including constant strings), so would
-                                * form part of the first concat */
-            bool first_concat = (    n == 0
-                                 || (n == 1 && const_lens[-2].ssize < 0
-                                            && const_lens[-1].ssize < 0));
-            int  f_assign     = first_concat ? 0 : AMGf_assign;
-
-            left = dsv;
-
-            for (; n < nargs; n++) {
-                /* loop twice, first applying the arg, then the const segment */
-                for (i = 0; i < 2; i++) {
-                    if (i) {
-                        /* append next const string segment */
-                        STRLEN len = (STRLEN)((const_lens++)->ssize);
-                        /* a length of -1 implies no constant string
-                         * rather than a zero-length one, e.g.
-                         * ($a . $b) versus ($a . "" . $b)
-                         */
-                        if ((SSize_t)len < 0)
-                            continue;
-
-                        /* set right to the next constant string segment */
-                        right = newSVpvn_flags(const_pv, len,
-                                                    (dst_utf8 | SVs_TEMP));
-                        const_pv += len;
-                    }
-                    else {
-                        /* append next arg */
-                        right = *SP++;
-                        if (getmg)
-                            SvGETMAGIC(right);
-                        else
-                            /* SvGETMAGIC already called on this SV just
-                             * before we broke from the loop earlier */
-                            getmg = TRUE;
-
-                        if (first_concat && n == 0 && const_lens[-1].ssize < 0) {
-                            /* nothing before the current arg; repeat the
-                             * loop to get a second arg */
-                            left = right;
-                            first_concat = FALSE;
-                            continue;
-                        }
-                    }
-
-                    if ((SvAMAGIC(left) || SvAMAGIC(right))
-                        && (res = amagic_call(left, right, concat_amg, f_assign))
-                    )
-                        left = res;
-                    else {
-                        if (left != dsv) {
-                            sv_setsv(dsv, left);
-                            left = dsv;
-                        }
-                        sv_catsv_nomg(left, right);
-                    }
-                    f_assign = AMGf_assign;
-                }
-            }
-            dsv = left;
-        }
-
-        /* assign/append RHS (dsv) to LHS (targ) */
-        if (is_append)  {
-            if ((SvAMAGIC(targ) || SvAMAGIC(dsv))
-                && (res = amagic_call(targ, dsv, concat_amg, AMGf_assign))
-            )
-                sv_setsv(targ, res);
-            else
-                sv_catsv_nomg(targ, dsv);
-        }
-        else
-            sv_setsv(targ, dsv);
-    }
-
-    /* --------------------------------------------------------------
-     * Phase 7:
-     *
      * return result
      */
-
-  phase7:
 
     SP -= stack_adj;
     SvTAINT(targ);
     SETTARG;
     RETURN;
+
+    /* --------------------------------------------------------------
+     * Phase 7:
+     *
+     * We only get here if any of the args (or targ too in the case of
+     * append) have something which might cause side effects, such
+     * as magic, overload, or an undef value in the presence of warnings.
+     * In that case, any earlier attempt to stringify the args will have
+     * been abandoned, and we come here instead.
+     *
+     * Here, we concat each arg in turn the old-fashioned way: essentially
+     * emulating pp_concat() in a loop. This means that all the weird edge
+     * cases will be handled correctly, if not necessarily speedily.
+     *
+     * Note that some args may already have been stringified - those are
+     * processed again, which is safe, since only args without side-effects
+     * were stringified earlier.
+     */
+
+  do_magical:
+    {
+        SSize_t i, n;
+        SV *left = NULL;
+        SV *right;
+        SV* nexttarg;
+        bool nextappend;
+        U32 utf8 = 0;
+        SV **svp;
+        const char    *cpv  = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+        UNOP_AUX_item *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
+        bool first = TRUE; /* first call to S_do_concat */
+
+        if (!cpv) {
+            cpv = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
+            utf8 = SVf_UTF8;
+        }
+
+        svp = toparg - nargs + 1;
+
+        /* iterate for:
+         *   nargs arguments,
+         *   plus possible nargs+1 consts,
+         *   plus, if appending, a final targ in an extra last iteration
+         */
+
+        n = nargs *2 + 1;
+        for (i = 0; i < n + is_append; i++) {
+            /* get the next arg SV or regen the next const SV */
+            SSize_t len = lens[i >> 1].ssize;
+            if (i == n) {
+                /* handle the final targ .= (....) */
+                right = left;
+                left = targ;
+            }
+            else if (i & 1)
+                right = svp[(i >> 1)];
+            else if (len < 0)
+                continue; /* no const in this position */
+            else {
+                right = newSVpvn_flags(cpv, len, (utf8 | SVs_TEMP));
+                cpv += len;
+            }
+
+            if (!left) {
+                left = right;
+                continue; /* need at least two SVs to concat together */
+            }
+
+            if (first && i < n) {
+                /* for the first concat, create a mortal acting like the
+                 * padtmp from OP_CONST. In later iterations this will
+                 * be appended to */
+                nexttarg = sv_newmortal();
+                nextappend = FALSE;
+                first = FALSE;
+            }
+            else {
+                nexttarg = left;
+                nextappend = TRUE;
+            }
+
+            /* Handle possible overloading.
+             * This is basically an unrolled
+             *     tryAMAGICbin_MG(concat_amg, AMGf_assign);
+             * and
+             *     Perl_try_amagic_bin()
+             * call, but using left and right rather than SP[-1], SP[0],
+             * and not relying on OPf_STACKED implying .=
+             */
+
+            if ((SvFLAGS(left)|SvFLAGS(right)) & (SVf_ROK|SVs_GMG)) {
+                SvGETMAGIC(left);
+                if (left != right)
+                    SvGETMAGIC(right);
+
+                if ((SvAMAGIC(left) || SvAMAGIC(right))
+                    /* sprintf doesn't do concat overloading,
+                     * but allow for $x .= sprintf(...)
+                     */
+                    && (   !(PL_op->op_private & OPpMULTICONCAT_FAKE)
+                        || i == n)
+                    )
+                {
+                    SV * const tmpsv = amagic_call(left, right, concat_amg,
+                                                (nextappend ? AMGf_assign: 0));
+                    if (tmpsv) {
+                        /* NB: tryAMAGICbin_MG() includes an SvPADMY test
+                         * here, which isn;t needed as any implicit
+                         * assign does under OPpTARGET_MY is done after
+                         * this loop */
+                        if (nextappend) {
+                            sv_setsv(left, tmpsv);
+                            SvSETMAGIC(left);
+                        }
+                        else
+                            left = tmpsv;
+                        continue;
+                    }
+                }
+
+                /* if both args are the same magical value, make one a copy */
+                if (left == right && SvGMAGICAL(left)) {
+                    left = sv_newmortal();
+                    /* Print the uninitialized warning now, so it includes the
+                     * variable name. */
+                    if (!SvOK(right)) {
+                        if (ckWARN(WARN_UNINITIALIZED))
+                            report_uninit(right);
+                        sv_setsv_flags(left, &PL_sv_no, 0);
+                    }
+                    else
+                        sv_setsv_flags(left, right, 0);
+                    SvGETMAGIC(right);
+                }
+            }
+
+            /* nexttarg = left . right */
+            S_do_concat(aTHX_ left, right, nexttarg, 0);
+            left = nexttarg;
+        }
+
+        SP = toparg - stack_adj + 1;
+
+        /* Assign result of all RHS concats (left) to LHS (targ).
+         * If we are appending, targ will already have been appended to in
+         * the loop */
+        if (is_append)
+            SvTAINT(targ);
+        else {
+            sv_setsv(targ, left);
+            SvSETMAGIC(targ);
+        }
+        SETs(targ);
+        RETURN;
+    }
 }
 
 

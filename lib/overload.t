@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5338;
+plan tests => 5340;
 
 use Scalar::Util qw(tainted);
 
@@ -3046,4 +3046,27 @@ package RT132385 {
 
     # ditto with a mutator
     ::is($o .= $r1,     "obj-ref1",             "RT #132385 o.=r1");
+}
+
+# the RHS of an overloaded .= should be passed as-is to the overload
+# method, rather than being stringified or otherwise being processed in
+# such a way that it triggers an undef warning
+package RT132783 {
+    use warnings;
+    use overload '.=' => sub { return "foo" };
+    my $w = 0;
+    local $SIG{__WARN__} = sub { $w++ };
+    my $undef;
+    my $ov = bless [];
+    $ov .= $undef;
+    ::is($w, 0, "RT #132783 - should be no warnings");
+}
+
+# changing the overloaded object to a plain string within an overload
+# method should be permanent.
+package RT132827 {
+    use overload '""' => sub { $_[0] = "a" };
+    my $ov = bless [];
+    my $b = $ov . "b";
+    ::is(ref \$ov, "SCALAR", "RT #132827");
 }
