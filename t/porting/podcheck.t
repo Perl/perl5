@@ -400,7 +400,6 @@ my %excluded_files = (
                         canonicalize('cpan/Pod-Perldoc/corpus/perlfunc.pod') => 1,
                         canonicalize('cpan/Pod-Perldoc/corpus/utf8.pod') => 1,
                         canonicalize("lib/unicore/mktables") => 1,
-                        canonicalize("core") => 1,
                     );
 
 # This list should not include anything for which case sensitivity is
@@ -440,6 +439,7 @@ my $non_pods = qr/ (?: \.
                            | ^cxx\$demangler_db\.$ # VMS name mangler database
                            | ^typemap\.?$          # typemap files
                            | ^(?i:Makefile\.PL)$
+                           | ^core$
                 /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
