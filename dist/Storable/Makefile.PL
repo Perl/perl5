@@ -9,6 +9,7 @@
 use ExtUtils::MakeMaker;
 use Config;
 use File::Copy qw(move copy);
+use File::Spec;
 
 unlink "lib/Storable/Limit.pm";
 
@@ -84,8 +85,9 @@ sub depend {
         # blib.pm needs arch/lib
         $extra_deps = ' Storable.pm';
     }
+    my $limit_pm = File::Spec->catfile('lib', 'Storable', 'Limit.pm');
     "
-lib/Storable/Limit.pm : \$(INST_DYNAMIC)$extra_deps
+$limit_pm : \$(INST_DYNAMIC)$extra_deps
 	\$(MKPATH) \$(INST_LIB)
 	\$(PERLRUNINST) stacksize
 
