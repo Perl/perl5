@@ -1436,3 +1436,21 @@ Died: A fatal syntax warning at - line 25.
 A syntax warning at - line 23.
 A utf8 warning at - line 25.
 Died: A fatal utf8 warning at - line 23.
+########
+# NAME _at_level with filehandle
+use warnings;
+# Create temp file for testing handles.
+open oUt, ">tmp" or die $!;
+print oUt "foo\nbar\n";
+close oUt;
+sub bimp {
+ open FH, "tmp";
+ <FH>; <FH>;
+ warnings::warn_at_level("syntax", 0, "Foo warning");
+ close FH;
+ warnings::warn_at_level("syntax", 0, "Bar warning");
+};
+bimp;
+EXPECT
+Foo warning at - line 13, <FH> line 2.
+Bar warning at - line 13.
