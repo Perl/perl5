@@ -9,11 +9,26 @@ BEGIN { @INC = grep { $_ ne "blib/arch" and $_ ne "blib/lib" } @INC }
 
 require 5.005;
 use ExtUtils::MakeMaker;
+
+my @extra;
+push @extra, 'LICENSE' => 'perl_5'
+    unless $ExtUtils::MakeMaker::VERSION < 6.31;
+push @extra, 'META_MERGE' => {
+        resources => {
+            repository  => 'git://perl5.git.perl.org/perl.git',
+            bugtracker  => 'https://rt.perl.org/rt3/',
+            homepage    => "http://dev.perl.org/",
+            license     => [ 'http://dev.perl.org/licenses/' ],
+        },
+    } unless $ExtUtils::MakeMaker::VERSION < 6.46;
+
 WriteMakefile
 (
           'DISTNAME' => 'PathTools',
           'NAME' => 'Cwd',
           'VERSION_FROM' => 'Cwd.pm',
+          'ABSTRACT' => 'Tools for working with directory and file names',
+          'AUTHOR' => 'Perl 5 Porters',
           'DEFINE' => join(" ",
                 "-DDOUBLE_SLASHES_SPECIAL=@{[$^O eq q(qnx) || $^O eq q(nto) ? 1 : 0]}",
                 ((grep { $_ eq 'PERL_CORE=1' } @ARGV) ? '-DNO_PPPORT_H' : ()),
@@ -27,6 +42,7 @@ WriteMakefile
                          },
           ($] > 5.011) ? () : ( INSTALLDIRS => 'perl' ), # CPAN sourced versions should now install to site
           'EXE_FILES' => [],
-          'PL_FILES' => {}
+          'PL_FILES' => {},
+          @extra,
         )
 ;
