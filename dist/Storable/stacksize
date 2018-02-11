@@ -30,12 +30,18 @@ sub is_miniperl {
 if (is_miniperl()) {
     die "Should not run during miniperl\n";
 }
+my $prefix = "";
 if ($^O eq "MSWin32") {
     # prevent Windows popping up a dialog each time we overflow
     # the stack
     require Win32API::File;
     Win32API::File->import(qw(SetErrorMode SEM_NOGPFAULTERRORBOX SEM_FAILCRITICALERRORS));
     SetErrorMode(SEM_NOGPFAULTERRORBOX() | SEM_FAILCRITICALERRORS());
+}
+# the ; here is to ensure system() passes this to the shell
+elsif (system("ulimit -c 0 ;") == 0) {
+    # try to prevent core dumps
+    $prefix = "ulimit -c 0 ; ";
 }
 if (@ARGV and $ARGV[0] eq '--core') {
     $ENV{PERL_CORE} = 1;
@@ -91,7 +97,7 @@ sub cmd {
     my $code = "my \$t; \$Storable::$limit_name = -1; $try for 1..$i;dclone(\$t);";
     my $q = ($^O eq 'MSWin32') ? '"' : "'";
 
-    "$PERL $mblib -MStorable=dclone -e$q$code$q"
+    "$prefix $PERL $mblib -MStorable=dclone -e$q$code$q"
 }
 # try more
 sub good {
