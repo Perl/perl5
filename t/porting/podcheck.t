@@ -432,14 +432,14 @@ my $non_pods = qr/ (?: \.
                            | $dl_ext  # dynamic libraries
                            | gif      # GIF images (example files from CGI.pm)
                            | eg       # examples from libnet
-                           | core
+                           | core .*
                        )
                        $
                     ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
                            | ^cxx\$demangler_db\.$ # VMS name mangler database
                            | ^typemap\.?$          # typemap files
                            | ^(?i:Makefile\.PL)$
-                           | ^core$
+                           | ^core (?: $ | \. .* )
                 /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
