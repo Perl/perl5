@@ -359,6 +359,34 @@ struct RExC_state_t {
             }                                                               \
     } STMT_END
 
+/* Executes a return statement with the value 'X', if 'flags' contains any of
+ * 'RESTART_PASS1', 'NEED_UTF8', or 'extra'.  If so, *flagp is set to those
+ * flags */
+#define RETURN_X_ON_RESTART_OR_FLAGS(X, flags, flagp, extra)                \
+    STMT_START {                                                            \
+            if ((flags) & (RESTART_PASS1|NEED_UTF8|(extra))) {              \
+                *(flagp) = (flags) & (RESTART_PASS1|NEED_UTF8|(extra));     \
+                return X;                                                   \
+            }                                                               \
+    } STMT_END
+
+#define RETURN_NULL_ON_RESTART_OR_FLAGS(flags,flagp,extra)                  \
+                    RETURN_X_ON_RESTART_OR_FLAGS(NULL,flags,flagp,extra)
+
+#define RETURN_X_ON_RESTART(X, flags,flagp)                                 \
+                        RETURN_X_ON_RESTART_OR_FLAGS( X, flags, flagp, 0)
+
+
+#define RETURN_NULL_ON_RESTART_FLAGP_OR_FLAGS(flagp,extra)                  \
+            if (*(flagp) & (RESTART_PASS1|(extra))) return NULL
+
+#define MUST_RESTART(flags) ((flags) & (RESTART_PASS1))
+
+#define RETURN_NULL_ON_RESTART(flags,flagp)                                 \
+                                    RETURN_X_ON_RESTART(NULL, flags,flagp)
+#define RETURN_NULL_ON_RESTART_FLAGP(flagp)                                 \
+                            RETURN_NULL_ON_RESTART_FLAGP_OR_FLAGS(flagp,0)
+
 /* This converts the named class defined in regcomp.h to its equivalent class
  * number defined in handy.h. */
 #define namedclass_to_classnum(class)  ((int) ((class) / 2))
@@ -7203,14 +7231,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         at least some part of the pattern, and therefore must convert the whole
         thing.
         -- dmq */
-        if (flags & RESTART_PASS1) {
+        if (MUST_RESTART(flags)) {
             if (flags & NEED_UTF8) {
                 S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
                 pRExC_state->code_blocks ? pRExC_state->code_blocks->count : 0);
+                DEBUG_PARSE_r(Perl_re_printf( aTHX_ "Need to redo pass 1 after upgrade\n"));
             }
             else {
-                DEBUG_PARSE_r(Perl_re_printf( aTHX_
-                "Need to redo pass 1\n"));
+                DEBUG_PARSE_r(Perl_re_printf( aTHX_ "Need to redo pass 1\n"));
             }
 
             goto redo_first_pass;
@@ -11368,10 +11396,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    ret->flags = 1;
 
                         tail = reg(pRExC_state, 1, &flag, depth+1);
-                        if (flag & (RESTART_PASS1|NEED_UTF8)) {
-                            *flagp = flag & (RESTART_PASS1|NEED_UTF8);
-                            return NULL;
-                        }
+                        RETURN_NULL_ON_RESTART(flag,flagp);
                         REGTAIL(pRExC_state, ret, tail);
 			goto insert_if;
 		    }
@@ -11477,10 +11502,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
 		    if (br == NULL) {
-                        if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                            *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                            return NULL;
-                        }
+                        RETURN_NULL_ON_RESTART(flags,flagp);
                         FAIL2("panic: regbranch returned NULL, flags=%#" UVxf,
                               (UV) flags);
                     } else
@@ -11498,10 +11520,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         lastbr = reganode(pRExC_state, IFTHEN, 0);
 
                         if (!regbranch(pRExC_state, &flags, 1,depth+1)) {
-                            if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                                return NULL;
-                            }
+                            RETURN_NULL_ON_RESTART(flags,flagp);
                             FAIL2("panic: regbranch returned NULL, flags=%#" UVxf,
                                   (UV) flags);
                         }
@@ -11606,10 +11625,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /*     branch_len = (paren != 0); */
 
     if (br == NULL) {
-        if (flags & (RESTART_PASS1|NEED_UTF8)) {
-            *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-            return NULL;
-        }
+        RETURN_NULL_ON_RESTART(flags,flagp);
         FAIL2("panic: regbranch returned NULL, flags=%#" UVxf, (UV) flags);
     }
     if (*RExC_parse == '|') {
@@ -11653,10 +11669,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
 	if (br == NULL) {
-            if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                return NULL;
-            }
+            RETURN_NULL_ON_RESTART(flags,flagp);
             FAIL2("panic: regbranch returned NULL, flags=%#" UVxf, (UV) flags);
         }
         REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
@@ -11879,10 +11892,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	if (latest == NULL) {
 	    if (flags & TRYAGAIN)
 		continue;
-            if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                return NULL;
-            }
+            RETURN_NULL_ON_RESTART(flags,flagp);
             FAIL2("panic: regpiece returned NULL, flags=%#" UVxf, (UV) flags);
 	}
 	else if (ret == NULL)
@@ -11952,11 +11962,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     ret = regatom(pRExC_state, &flags,depth+1);
     if (ret == NULL) {
-	if (flags & (TRYAGAIN|RESTART_PASS1|NEED_UTF8))
-	    *flagp |= flags & (TRYAGAIN|RESTART_PASS1|NEED_UTF8);
-        else
-            FAIL2("panic: regatom returned NULL, flags=%#" UVxf, (UV) flags);
-	return(NULL);
+        RETURN_NULL_ON_RESTART_OR_FLAGS(flags,flagp,TRYAGAIN);
+        FAIL2("panic: regatom returned NULL, flags=%#" UVxf, (UV) flags);
     }
 
     op = *RExC_parse;
@@ -12473,10 +12480,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         SvREFCNT_dec_NN(substitute_parse);
 
         if (! *node_p) {
-            if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                return FALSE;
-            }
+            RETURN_X_ON_RESTART(FALSE, flags,flagp);
             FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#" UVxf,
                 (UV) flags);
         }
@@ -12876,8 +12880,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        NULL,
                        NULL);
         if (ret == NULL) {
-            if (*flagp & (RESTART_PASS1|NEED_UTF8))
-                return NULL;
+            RETURN_NULL_ON_RESTART_FLAGP_OR_FLAGS(flagp,NEED_UTF8);
             FAIL2("panic: regclass returned NULL to regatom, flags=%#" UVxf,
                   (UV) *flagp);
         }
@@ -12901,10 +12904,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    }
 		    goto tryagain;
 		}
-                if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                    return NULL;
-                }
+                RETURN_NULL_ON_RESTART(flags,flagp);
                 FAIL2("panic: reg returned NULL to regatom, flags=%#" UVxf,
                                                                  (UV) flags);
 	}
@@ -13189,8 +13189,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                            TRUE, /* Allow an optimized regnode result */
                            NULL,
                            NULL);
-            if (*flagp & RESTART_PASS1)
-                return NULL;
+            RETURN_NULL_ON_RESTART_FLAGP(flagp);
             /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
              * multi-char folds are allowed.  */
             if (!ret)
@@ -13229,8 +13228,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 break;
             }
 
-            if (*flagp & RESTART_PASS1)
-                return NULL;
+            RETURN_NULL_ON_RESTART_FLAGP(flagp);
 
             /* Here, evaluates to a single code point.  Go get that */
             RExC_parse = parse_start;
@@ -13555,8 +13553,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         ) {
                             if (*flagp & NEED_UTF8)
                                 FAIL("panic: grok_bslash_N set NEED_UTF8");
-                            if (*flagp & RESTART_PASS1)
-                                return NULL;
+                            RETURN_NULL_ON_RESTART_FLAGP(flagp);
 
                             /* Here, it wasn't a single code point.  Go close
                              * up this EXACTish node.  The switch() prior to
@@ -16571,8 +16568,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                         if (*flagp & NEED_UTF8)
                             FAIL("panic: grok_bslash_N set NEED_UTF8");
-                        if (*flagp & RESTART_PASS1)
-                            return NULL;
+
+                        RETURN_NULL_ON_RESTART_FLAGP(flagp);
 
                         if (cp_count < 0) {
                             vFAIL("\\N in a character class must be a named character: \\N{...}");
@@ -17541,7 +17538,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
-	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_PASS1|NEED_UTF8);
+        *flagp |= reg_flags & (HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_PASS1|NEED_UTF8);
 
         /* And restore so can parse the rest of the pattern */
         RExC_parse = save_parse;
