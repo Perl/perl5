@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.16 2017/06/10 17:23:50 dankogai Exp $
+ $Id: Unicode.xs,v 2.17 2018/02/08 00:26:15 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -315,7 +315,7 @@ CODE:
 	    resultbuflen = SvLEN(result);
 	}
 
-	d = uvuni_to_utf8_flags(resultbuf+SvCUR(result), ord,
+	d = uvchr_to_utf8_flags(resultbuf+SvCUR(result), ord,
                                             UNICODE_WARN_ILLEGAL_INTERCHANGE);
 	SvCUR_set(result, d - (U8 *)SvPVX(result));
     }
@@ -407,7 +407,7 @@ CODE:
     }
     while (s < e && s+UTF8SKIP(s) <= e) {
 	STRLEN len;
-	UV ord = utf8n_to_uvuni(s, e-s, &len, (UTF8_DISALLOW_SURROGATE
+	UV ord = utf8n_to_uvchr(s, e-s, &len, (UTF8_DISALLOW_SURROGATE
                                                |UTF8_WARN_SURROGATE
                                                |UTF8_DISALLOW_FE_FF
                                                |UTF8_WARN_FE_FF
