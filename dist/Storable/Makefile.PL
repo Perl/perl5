@@ -10,13 +10,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use File::Copy qw(move copy);
 
-my ($fn, $in) = ("stacksize.h", "stacksize_h.in");
-if (-f $fn) {
-    unlink $fn;
-    move $in, $fn;
-} else {
-    copy $in, $fn;
-}
+unlink "lib/Storable/Limit.pm";
 
 my $pm = { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' };
 unless ($ENV{PERL_CORE}) {

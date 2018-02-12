@@ -3679,7 +3679,6 @@ dist/Storable/hints/linux.pl		Hint for Storable for named architecture
 dist/Storable/Makefile.PL		Storable extension
 dist/Storable/README			Storable extension
 dist/Storable/stacksize			compute stack sizes
-dist/Storable/stacksize_in.h		computed stack sizes
 dist/Storable/Storable.xs		Storable extension
 dist/Storable/Storable.pm.PL	perl script to generate Storable.pm from template
 dist/Storable/t/attach.t		Check STORABLE_attach doesn't create objects unnecessarily
