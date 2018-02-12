@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (188);
+plan (190);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -640,6 +640,23 @@ $#a = -1; $#a++;
     @a = ();
     {local $a[3] = 12; my @foo=@a};
     is @a, 0, 'unwinding localization of elem past end of array shrinks it'
+}
+
+# perl #132729, as it applies to flattening an array in lvalue context
+{
+    my @a;
+    $a[1] = 1;
+    map { unshift @a, 7; $_ = 3; goto aftermap; } @a;
+   aftermap:
+    is "[@a]", "[7 3 1]",
+       'non-elems read from @a do not lose their position';
+    @a = ();
+    $#a++; # make it magical
+    $a[1] = 1;
+    map { unshift @a, 7; $_ = 3; goto aftermath; } @a;
+   aftermath:
+    is "[@a]", "[7 3 1]",
+       'non-elems read from magical @a do not lose their position';
 }
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
