@@ -811,6 +811,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * includes what they used to mean.  The first one's meaning was to allow the
  * just the single non-character 0xFFFF */
 #define UTF8_ALLOW_FFFF 0
+#define UTF8_ALLOW_FE_FF 0
 #define UTF8_ALLOW_SURROGATE 0
 
 /* C9 refers to Unicode Corrigendum #9: allows but discourages non-chars */
