@@ -752,6 +752,22 @@
 #   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
+#ifdef USE_LOCALE /* These locale things are all subject to change */
+
+#  if      defined(HAS_NEWLOCALE)               \
+      &&   defined(LC_ALL_MASK)                 \
+      &&   defined(HAS_FREELOCALE)              \
+      &&   defined(HAS_USELOCALE)               \
+      && ! defined(NO_POSIX_2008_LOCALE)
+
+    /* For simplicity, the code is written to assume that any platform advanced
+     * enough to have the Posix 2008 locale functions has LC_ALL.  The test
+     * above makes sure that assumption is valid */
+
+#    define HAS_POSIX_2008_LOCALE
+#  endif
+#endif
+
 #include <setjmp.h>
 
 #ifdef I_SYS_PARAM
@@ -5511,25 +5527,10 @@ typedef struct am_table_short AMTS;
 #  define KEYWORD_PLUGIN_MUTEX_TERM    NOOP
 #endif
 
-#ifdef USE_LOCALE
-/* These locale things are all subject to change */
+#ifdef USE_LOCALE /* These locale things are all subject to change */
 
-
-#  if      defined(HAS_NEWLOCALE)               \
-      &&   defined(LC_ALL_MASK)                 \
-      &&   defined(HAS_FREELOCALE)              \
-      &&   defined(HAS_USELOCALE)               \
-      && ! defined(NO_POSIX_2008_LOCALE)
-
-    /* For simplicity, the code is written to assume that any platform advanced
-     * enough to have the Posix 2008 locale functions has LC_ALL.  The test
-     * above makes sure that assumption is valid */
-
-#    define HAS_POSIX_2008_LOCALE
-#  endif
-
-/* We create a C locale object unconditionally if we have the functions to do
- * so; hence must destroy it unconditionally at the end */
+    /* We create a C locale object unconditionally if we have the functions to
+     * do so; hence must destroy it unconditionally at the end */
 #  ifndef HAS_POSIX_2008_LOCALE
 #    define _LOCALE_TERM_POSIX_2008  NOOP
 #  else
