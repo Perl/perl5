@@ -810,7 +810,7 @@ Perl__byte_dump_string(pTHX_ const U8 * s, const STRLEN len, const bool format)
 PERL_STATIC_INLINE char *
 S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 
-                                         /* How many bytes to print */
+                                         /* Max number of bytes to print */
                                          STRLEN print_len,
 
                                          /* Which one is the non-continuation */
@@ -826,6 +826,8 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
                                ? "immediately"
                                : Perl_form(aTHX_ "%d bytes",
                                                  (int) non_cont_byte_pos);
+    const U8 * x = s + non_cont_byte_pos;
+    const U8 * e = s + print_len;
 
     PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
 
@@ -833,10 +835,20 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
      * calculated, it's likely faster to pass it; verify under DEBUGGING */
     assert(expect_len == UTF8SKIP(s));
 
+    /* As a defensive coding measure, don't output anything past a NUL.  Such
+     * bytes shouldn't be in the middle of a malformation, and could mark the
+     * end of the allocated string, and what comes after is undefined */
+    for (; x < e; x++) {
+        if (*x == '\0') {
+            x++;            /* Output this particular NUL */
+            break;
+        }
+    }
+
     return Perl_form(aTHX_ "%s: %s (unexpected non-continuation byte 0x%02x,"
                            " %s after start byte 0x%02x; need %d bytes, got %d)",
                            malformed_text,
-                           _byte_dump_string(s, print_len, 0),
+                           _byte_dump_string(s, x - s, 0),
                            *(s + non_cont_byte_pos),
                            where,
                            *s,
