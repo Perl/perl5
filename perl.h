@@ -5632,8 +5632,18 @@ typedef struct am_table_short AMTS;
  * LC_NUMERIC_LOCK may span more operations.  By always following this
  * convention, deadlock should be impossible.  But if necessary, the two
  * mutexes could be combined */
-#    define LOCALE_LOCK         MUTEX_LOCK(&PL_locale_mutex)
-#    define LOCALE_UNLOCK       MUTEX_UNLOCK(&PL_locale_mutex)
+#    define LOCALE_LOCK                                                     \
+        STMT_START {                                                        \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                    "%s: %d: locking locale\n", __FILE__, __LINE__));       \
+            MUTEX_LOCK(&PL_locale_mutex);                                   \
+        } STMT_END
+#    define LOCALE_UNLOCK                                                   \
+        STMT_START {                                                        \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                   "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
+            MUTEX_UNLOCK(&PL_locale_mutex);                                 \
+        } STMT_END
 
 #    define LOCALE_TERM                                                     \
                     STMT_START {                                            \
