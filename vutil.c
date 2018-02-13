@@ -628,6 +628,8 @@ VER_NV:
             /* if it isn't C, set it to C. */
             const char * locale_name_on_entry;
 
+            LC_NUMERIC_LOCK(0);    /* Start critical section */
+
             locale_name_on_entry = setlocale(LC_NUMERIC, NULL);
             if (   strNE(locale_name_on_entry, "C")
                 && strNE(locale_name_on_entry, "POSIX"))
@@ -638,6 +640,7 @@ VER_NV:
                        change the locale */
                 locale_name_on_entry = NULL;
             }
+
             /* Prevent recursed calls from trying to change back */
             LOCK_LC_NUMERIC_STANDARD();
 
@@ -660,6 +663,9 @@ VER_NV:
             if (locale_name_on_entry) {
                 setlocale(LC_NUMERIC, locale_name_on_entry);
             }
+
+            LC_NUMERIC_UNLOCK;  /* End critical section */
+
         }
 
 #endif  /* USE_LOCALE_NUMERIC */

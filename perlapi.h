@@ -131,6 +131,8 @@ END_EXTERN_C
 #define PL_keyword_plugin	(*Perl_Gkeyword_plugin_ptr(NULL))
 #undef  PL_keyword_plugin_mutex
 #define PL_keyword_plugin_mutex	(*Perl_Gkeyword_plugin_mutex_ptr(NULL))
+#undef  PL_lc_numeric_mutex
+#define PL_lc_numeric_mutex	(*Perl_Glc_numeric_mutex_ptr(NULL))
 #undef  PL_locale_mutex
 #define PL_locale_mutex		(*Perl_Glocale_mutex_ptr(NULL))
 #undef  PL_malloc_mutex

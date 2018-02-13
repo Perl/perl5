@@ -2223,8 +2223,14 @@ handled.
 
 If the locale from the user's environment is desired, there should be no
 need for XS code to set the locale except for C<LC_NUMERIC>, as perl has
-already set it up.  XS code should avoid changing the locale, as it can
-adversely affect other, unrelated, code and may not be thread safe.
+already set the others up.  XS code should avoid changing the locale, as
+it can adversely affect other, unrelated, code and may not be
+thread-safe.  To minimize problems, the macros
+L<perlapi/STORE_LC_NUMERIC_SET_TO_NEEDED>,
+L<perlapi/STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>, and
+L<perlapi/RESTORE_LC_NUMERIC> should be used to affect any needed
+change.
+
 However, some alien libraries that may be called do set it, such as
 C<Gtk>.  This can cause problems for the perl core and other modules.
 Starting in v5.20.1, calling the function
@@ -2234,9 +2240,7 @@ statement that does this:
 
  POSIX::setlocale(LC_ALL, POSIX::setlocale(LC_ALL));
 
-In the event that your XS code may need the underlying C<LC_NUMERIC>
-locale, there are macros available to access this; see
-L<perlapi/Locale-related functions and macros>.
+or use the methods given in L<perlcall>.
 
 =back
 
