@@ -502,7 +502,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
 
     PL_numeric_underlying_is_standard = PL_numeric_standard;
 
-#  if defined(HAS_NEWLOCALE) && ! defined(NO_POSIX_2008_LOCALE)
+#  ifdef HAS_POSIX_2008_LOCALE
 
     PL_underlying_numeric_obj = newlocale(LC_NUMERIC_MASK,
                                           PL_numeric_name,

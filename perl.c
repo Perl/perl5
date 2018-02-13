@@ -1152,25 +1152,21 @@ perl_destruct(pTHXx)
     PL_numeric_name = NULL;
     SvREFCNT_dec(PL_numeric_radix_sv);
     PL_numeric_radix_sv = NULL;
-#endif
 
-    if (PL_langinfo_buf) {
-        Safefree(PL_langinfo_buf);
-        PL_langinfo_buf = NULL;
-    }
-
-#ifdef USE_POSIX_2008_LOCALE
-#  ifdef USE_LOCALE_NUMERIC
-
+#  ifdef HAS_POSIX_2008_LOCALE
     if (PL_underlying_numeric_obj) {
         /* Make sure we aren't using the locale space we are about to free */
         uselocale(LC_GLOBAL_LOCALE);
         freelocale(PL_underlying_numeric_obj);
         PL_underlying_numeric_obj = (locale_t) NULL;
     }
-
 #  endif
 #endif
+
+    if (PL_langinfo_buf) {
+        Safefree(PL_langinfo_buf);
+        PL_langinfo_buf = NULL;
+    }
 
     /* clear character classes  */
     for (i = 0; i < POSIX_SWASH_COUNT; i++) {
