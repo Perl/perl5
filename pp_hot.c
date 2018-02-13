@@ -5215,7 +5215,7 @@ PP(pp_entersub)
 		    else sv = AvARRAY(av)[i];
 		    if (sv) SP[i+1] = sv;
 		    else {
-			SP[i+1] = newSVavdefelem(av, i, 1);
+			SP[i+1] = av_nonelem(av, i);
 		    }
 		}
 		SP += items;
