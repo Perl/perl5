@@ -1985,6 +1985,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?x)[a b]/xx	\N{SPACE}	yS	$&	 	# Note a space char here
 /(?xx)[a b]/x	\N{SPACE}	n	-	-
 /(?-x:[a b])/xx	\N{SPACE}	yS	$&	 	# Note a space char here
+(?il)\x{100}|\x{100}|\x{FF}	\xFF	y	$&	\xFF
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
