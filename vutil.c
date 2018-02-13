@@ -618,43 +618,31 @@ VER_NV:
 	    goto VER_PV;
 	}
 #endif
-
 #ifdef USE_LOCALE_NUMERIC
-	{
-	    const char * const cur_numeric = setlocale(LC_NUMERIC, NULL);
-	    assert(cur_numeric);
 
-	    /* XS code can set the locale without us knowing.  To protect the
-	     * version number parsing, which requires the radix character to be a
-	     * dot, update our records as to what the locale is, so that our
-	     * existing macro mechanism can correctly change it to a dot and back
-	     * if necessary.  This code is extremely unlikely to be in a loop, so
-	     * the extra work will have a negligible performance impact.  See [perl
-	     * #121930].
-	     *
-	     * If the current locale is a standard one, but we are expecting it to
-	     * be a different, underlying locale, update our records to make the
-	     * underlying locale this (standard) one.  If the current locale is not
-	     * a standard one, we should be expecting a non-standard one, the same
-	     * one that we have recorded as the underlying locale.  If not, update
-	     * our records. */
-	    if (strEQ(cur_numeric, "C") || strEQ(cur_numeric, "POSIX")) {
-		if (! PL_numeric_standard) {
-		    new_numeric(cur_numeric);
-		}
-	    }
-	    else if (PL_numeric_standard
-		     || ! PL_numeric_name
-		     || strNE(PL_numeric_name, cur_numeric))
-	    {
-		new_numeric(cur_numeric);
-	    }
-	}
+        {
+            /* This may or may not be called from code that has switched
+             * locales without letting perl know, therefore we have to find it
+             * from first principals.  See [perl #121930]. */
+
+            /* if it isn't C, set it to C. */
+            const char * locale_name_on_entry;
+
+            locale_name_on_entry = setlocale(LC_NUMERIC, NULL);
+            if (   strNE(locale_name_on_entry, "C")
+                && strNE(locale_name_on_entry, "POSIX"))
+            {
+                setlocale(LC_NUMERIC, "C");
+            }
+            else {  /* This value indicates to the restore code that we didn't
+                       change the locale */
+                locale_name_on_entry = NULL;
+            }
+            /* Prevent recursed calls from trying to change back */
+            LOCK_LC_NUMERIC_STANDARD();
+
 #endif
-        { /* Braces needed because macro just below declares a variable */
-            DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-            STORE_LC_NUMERIC_SET_STANDARD();
-            LOCK_NUMERIC_STANDARD();
+
             if (sv) {
                 Perl_sv_catpvf(aTHX_ sv, "%.9" NVff, SvNVX(ver));
                 len = SvCUR(sv);
@@ -664,9 +652,18 @@ VER_NV:
                 len = my_snprintf(tbuf, sizeof(tbuf), "%.9" NVff, SvNVX(ver));
                 buf = tbuf;
             }
-            UNLOCK_NUMERIC_STANDARD();
-            RESTORE_LC_NUMERIC();
+
+#ifdef USE_LOCALE_NUMERIC
+
+            UNLOCK_LC_NUMERIC_STANDARD();
+
+            if (locale_name_on_entry) {
+                setlocale(LC_NUMERIC, locale_name_on_entry);
+            }
         }
+
+#endif  /* USE_LOCALE_NUMERIC */
+
 	while (buf[len-1] == '0' && len > 0) len--;
 	if ( buf[len-1] == '.' ) len--; /* eat the trailing decimal */
 	version = savepvn(buf, len);
