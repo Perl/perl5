@@ -24,7 +24,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.33';
+$VERSION = '2.34';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -84,6 +84,9 @@ sub copy {
 			    || UNIVERSAL::isa($from, 'GLOB')
                             || UNIVERSAL::isa($from, 'IO::Handle'))
 			 : (ref(\$from) eq 'GLOB'));
+    if (! $from_a_handle and -d $from) {
+        croak "First argument to copy() must be file or filehandle, not a directory";
+    }
     my $to_a_handle =   (ref($to)
 			 ? (ref($to) eq 'GLOB'
 			    || UNIVERSAL::isa($to, 'GLOB')
