@@ -2067,6 +2067,10 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     goto storeparen;
                 }
 		break;
+            case '\023':
+                if (memEQs(name, len, "\023AFE_LOCALES"))
+		    goto ro_magicalize;
+		break;
 	    case '\024':	/* ${^TAINT} */
                 if (memEQs(name, len, "\024AINT"))
 		    goto ro_magicalize;

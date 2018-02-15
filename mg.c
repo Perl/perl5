@@ -1069,7 +1069,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         sv_setiv(sv, (IV)PL_perldb);
 	break;
     case '\023':		/* ^S */
-        {
+	if (nextchar == '\0') {
 	    if (PL_parser && PL_parser->lex_state != LEX_NOTPARSING)
 		SvOK_off(sv);
 	    else if (PL_in_eval)
@@ -1077,6 +1077,18 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    else
 		sv_setiv(sv, 0);
 	}
+	else if (strEQ(remaining, "AFE_LOCALES")) {
+
+#if ! defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE)
+
+	    sv_setuv(sv, (UV) 1);
+
+#else
+	    sv_setuv(sv, (UV) 0);
+
+#endif
+
+        }
 	break;
     case '\024':		/* ^T */
 	if (nextchar == '\0') {

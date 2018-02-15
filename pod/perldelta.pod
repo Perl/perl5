@@ -27,6 +27,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New read-only predefined variable C<${^SAFE_LOCALES}>
+
+This variable is 1 if the Perl interpreter is operating in an
+environment where it is safe to use and change locales (see
+L<perllocale>.)  Currently this is true only when the perl is
+unthreaded.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
