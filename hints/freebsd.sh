@@ -324,11 +324,13 @@ d_printf_format_null='undef'
 #1200004 and up
 #1100502 >= version < 1200000
 #1003507 >= version < 1100000
+# Experiments have shown that this doesn't fully work.  The first kernel we know it works is 1200056
 
 FREEBSD_KERNEL_VERSION=`uname -U`
-if  [ $FREEBSD_KERNEL_VERSION -lt 1003507 ] || \
-    [ $FREEBSD_KERNEL_VERSION -ge 1100000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1100502 ] || \
-    [ $FREEBSD_KERNEL_VERSION -ge 1200000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1200004 ]
+#if  [ $FREEBSD_KERNEL_VERSION -lt 1003507 ] || \
+#    [ $FREEBSD_KERNEL_VERSION -ge 1100000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1100502 ] || \
+#    [ $FREEBSD_KERNEL_VERSION -ge 1200000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1200004 ]
+if  [ $FREEBSD_KERNEL_VERSION -lt 1200056 ]
 then
     d_uselocale='undef'
 fi
