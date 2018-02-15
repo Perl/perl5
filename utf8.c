@@ -117,9 +117,9 @@ S_new_msg_hv(pTHX_ const char * const message, /* The message text */
 
     PERL_ARGS_ASSERT_NEW_MSG_HV;
 
-    hv_stores(msg_hv, "text", msg_sv);
-    hv_stores(msg_hv, "warn_categories",  category_sv);
-    hv_stores(msg_hv, "flag_bit", flag_bit_sv);
+    (void) hv_stores(msg_hv, "text", msg_sv);
+    (void) hv_stores(msg_hv, "warn_categories",  category_sv);
+    (void) hv_stores(msg_hv, "flag_bit", flag_bit_sv);
 
     return msg_hv;
 }
@@ -1560,7 +1560,7 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
     const U8 * send = s0 + curlen;
     U32 possible_problems = 0;  /* A bit is set here for each potential problem
                                    found as we go along */
-    UV uv;
+    UV uv = (UV) -1;
     STRLEN expectlen   = 0;     /* How long should this sequence be?
                                    (initialized to silence compilers' wrong
                                    warning) */
