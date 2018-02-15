@@ -3379,7 +3379,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             const char *codeset = my_nl_langinfo(PERL_CODESET, FALSE);
                                           /* FALSE => already in dest locale */
 
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                             "\tnllanginfo returned CODESET '%s'\n", codeset));
 
             if (codeset && strNE(codeset, "")) {
@@ -3438,7 +3438,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #      endif
 
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                     "\treturn from mbtowc; len=%d; code_point=%x; errno=%d\n",
                                    len,      (unsigned int) wc, errno));
 
@@ -3499,7 +3499,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 /* It isn't a UTF-8 locale if the symbol is not legal UTF-8;
                  * otherwise assume the locale is UTF-8 if and only if the symbol
                  * is non-ascii UTF-8. */
-                DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
                                         save_input_locale, is_utf8));
                 goto finish_and_return;
             }
@@ -3553,7 +3553,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                  * locale if we changed it */
                 restore_switched_locale(LC_TIME, original_time_locale);
 
-                DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
                                     save_input_locale,
                                     is_utf8_string((U8 *) formatted_time, 0)));
                 is_utf8 = is_utf8_string((U8 *) formatted_time, 0);
@@ -3564,7 +3564,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              * ASCII.  Go on to the next test.  If we changed it, restore LC_TIME
              * to its original locale */
             restore_switched_locale(LC_TIME, original_time_locale);
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
         }
 
 #    endif
@@ -3617,7 +3617,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
                 /* Any non-UTF-8 message means not a UTF-8 locale; if all are valid,
                  * any non-ascii means it is one; otherwise we assume it isn't */
-                DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?error messages for %s are UTF-8=%d\n",
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "\t?error messages for %s are UTF-8=%d\n",
                                     save_input_locale,
                                     is_utf8));
                 goto finish_and_return;
