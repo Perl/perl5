@@ -747,19 +747,8 @@ S_new_ctype(pTHX_ const char *newctype)
              * they are immune to bad ones.  */
             if (IN_LC(LC_CTYPE) || UNLIKELY(DEBUG_L_TEST)) {
 
-                /* We have to save 'newctype' because the setlocale() just
-                 * below may destroy it.  The next setlocale() further down
-                 * should restore it properly so that the intermediate change
-                 * here is transparent to this function's caller */
-                const char * const badlocale = savepv(newctype);
-
-                do_setlocale_c(LC_CTYPE, "C");
-
                 /* The '0' below suppresses a bogus gcc compiler warning */
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE), SvPVX(PL_warn_locale), 0);
-
-                do_setlocale_c(LC_CTYPE, badlocale);
-                Safefree(badlocale);
 
                 if (IN_LC(LC_CTYPE)) {
                     SvREFCNT_dec_NN(PL_warn_locale);
