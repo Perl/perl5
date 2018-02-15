@@ -283,7 +283,8 @@ made:
 
 =item *
 
-XXX
+F<harness> no longer waits for 30 seconds when running
+F<t/io/openpid.t>.  [perl #121028][perl #132867]
 
 =back
 
