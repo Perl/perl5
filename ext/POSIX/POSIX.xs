@@ -2128,7 +2128,7 @@ localeconv()
    && defined(HAS_POSIX_2008_LOCALE)                                    \
    && defined(HAS_LOCALECONV_L) /* Prefer this thread-safe version */
         bool do_free = FALSE;
-        locale_t cur = uselocale((locale_t) 0);
+        locale_t cur;
 #  endif
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
@@ -2153,6 +2153,7 @@ localeconv()
    && defined(HAS_POSIX_2008_LOCALE)                \
    && defined(HAS_LOCALECONV_L)
 
+        cur = uselocale((locale_t) 0);
         if (cur == LC_GLOBAL_LOCALE) {
             cur = duplocale(LC_GLOBAL_LOCALE);
             do_free = TRUE;
