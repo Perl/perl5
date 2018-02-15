@@ -823,6 +823,14 @@ S_new_ctype(pTHX_ const char *newctype)
                             );
             }
 
+#  ifdef HAS_NL_LANGINFO
+
+            Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
+                                    /* parameter FALSE is a don't care here */
+                                    my_nl_langinfo(PERL_CODESET, FALSE));
+
+#  endif
+
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "\n");
 
             /* If we are actually in the scope of the locale or are debugging,
