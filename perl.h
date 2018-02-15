@@ -5927,10 +5927,12 @@ expression, but with an empty argument list, like this:
  * only after being sure that this is what is needed */
 #  define SET_NUMERIC_STANDARD()                                            \
 	STMT_START {                                                        \
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,"%s: %d: standard=%d\n",  \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                               "%s: %d: lc_numeric standard=%d\n",          \
                                 __FILE__, __LINE__, PL_numeric_standard));  \
-            Perl_set_numeric_standard(aTHX);                            \
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s: %d: standard=%d\n", \
+            Perl_set_numeric_standard(aTHX);                                \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                                 "%s: %d: lc_numeric standard=%d\n",        \
                                  __FILE__, __LINE__, PL_numeric_standard)); \
         } STMT_END
 
@@ -5967,21 +5969,25 @@ expression, but with an empty argument list, like this:
  * recursively callable.  [perl #128207] */
 #  define LOCK_LC_NUMERIC_STANDARD()                                        \
         STMT_START {                                                        \
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s: %d: standard=%d\n", \
-                                 __FILE__, __LINE__, PL_numeric_standard)); \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                      "%s: %d: lock lc_numeric_standard: new depth=%d\n",   \
+                      __FILE__, __LINE__, PL_numeric_standard + 1));        \
             __ASSERT_(PL_numeric_standard)                                  \
             PL_numeric_standard++;                                          \
         } STMT_END
 
-#  define UNLOCK_LC_NUMERIC_STANDARD()                      \
-            STMT_START {                                    \
-                if (PL_numeric_standard > 1) {              \
-                    PL_numeric_standard--;                  \
-                }                                           \
-                else {                                      \
-                    assert(0);                              \
-                }                                           \
-            } STMT_END
+#  define UNLOCK_LC_NUMERIC_STANDARD()                                      \
+        STMT_START {                                                        \
+            if (PL_numeric_standard > 1) {                                  \
+                PL_numeric_standard--;                                      \
+            }                                                               \
+            else {                                                          \
+                assert(0);                                                  \
+            }                                                               \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+            "%s: %d: lc_numeric_standard decrement lock, new depth=%d\n",   \
+            __FILE__, __LINE__, PL_numeric_standard));                      \
+        } STMT_END
 
 #else /* !USE_LOCALE_NUMERIC */
 
