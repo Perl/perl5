@@ -645,12 +645,12 @@ S_new_ctype(pTHX_ const char *newctype)
 
         for (i = 0; i < 256; i++) {
             if (! PL_in_utf8_CTYPE_locale) {
-            if (isupper(i))
-                PL_fold_locale[i] = (U8) tolower(i);
-            else if (islower(i))
-                PL_fold_locale[i] = (U8) toupper(i);
-            else
-                PL_fold_locale[i] = (U8) i;
+                if (isupper(i))
+                    PL_fold_locale[i] = (U8) tolower(i);
+                else if (islower(i))
+                    PL_fold_locale[i] = (U8) toupper(i);
+                else
+                    PL_fold_locale[i] = (U8) i;
             }
 
             /* If checking for locale problems, see if the native ASCII-range
