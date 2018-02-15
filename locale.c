@@ -1377,6 +1377,12 @@ both of which are specified in C89, so should be always be available.  Later
 C<strftime()> versions have additional capabilities; C<""> is returned for
 those not available on your system.
 
+It is important to note that on such systems, this calls C<localeconv>, and so
+overwrites the static buffer returned from previous explicit calls to that
+function.  Thus, if the program doesn't use or save the information from an
+explicit C<localeconv> call (which good practice suggests should be done
+anyway), use of this function can break it.
+
 The details for those items which may differ from what this emulation returns
 and what a native C<nl_langinfo()> would return are:
 
