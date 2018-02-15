@@ -56,6 +56,12 @@ static bool debug_initialization = FALSE;
 #  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #endif
 
+
+/* Returns the Unix errno portion; ignoring any others.  This is a macro here
+ * instead of putting it into perl.h, because unclear to khw what should be
+ * done generally. */
+#define GET_ERRNO   saved_errno
+
 /* strlen() of a literal string constant.  We might want this more general,
  * but using it in just this file for now.  A problem with more generality is
  * the compiler warnings about comparing unlike signs */
@@ -1161,8 +1167,12 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     }
 
     result = setlocale(category, locale);
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n", __FILE__, __LINE__,
-                            setlocale_debug_string(category, locale, result)));
+    DEBUG_L(STMT_START {
+                dSAVE_ERRNO;
+                PerlIO_printf(Perl_debug_log, "%s:%d: %s\n", __FILE__, __LINE__,
+                            setlocale_debug_string(category, locale, result));
+                RESTORE_ERRNO;
+            } STMT_END);
 
     if (! override_LC_ALL)  {
         return result;
@@ -1185,9 +1195,13 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     }
 
     result = setlocale(LC_ALL, NULL);
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+    DEBUG_L(STMT_START {
+                dSAVE_ERRNO;
+                PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
                                __FILE__, __LINE__,
-                               setlocale_debug_string(LC_ALL, NULL, result)));
+                               setlocale_debug_string(LC_ALL, NULL, result));
+                RESTORE_ERRNO;
+            } STMT_END);
 
     return result;
 }
@@ -3410,6 +3424,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         {
             wchar_t wc;
             int len;
+            dSAVEDERRNO;
 
 #      if defined(HAS_MBRTOWC) && defined(USE_ITHREADS)
 
@@ -3427,20 +3442,23 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             memset(&ps, 0, sizeof(ps));;
             PERL_UNUSED_RESULT(mbrtowc(&wc, NULL, 0, &ps)); /* Reset any shift
                                                                state */
-            errno = 0;
+            SETERRNO(0, 0);
             len = mbrtowc(&wc, STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8), &ps);
+            SAVE_ERRNO;
 
 #      else
 
             PERL_UNUSED_RESULT(mbtowc(&wc, NULL, 0));/* Reset any shift state */
-            errno = 0;
+            SETERRNO(0, 0);
             len = mbtowc(&wc, STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
+            SAVE_ERRNO;
 
 #      endif
 
+            RESTORE_ERRNO;
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                     "\treturn from mbtowc; len=%d; code_point=%x; errno=%d\n",
-                                   len,      (unsigned int) wc, errno));
+                                   len,      (unsigned int) wc, GET_ERRNO));
 
             is_utf8 = cBOOL(   len == STRLENs(REPLACEMENT_CHARACTER_UTF8)
                             && wc == (wchar_t) UNICODE_REPLACEMENT);
