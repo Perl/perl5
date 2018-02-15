@@ -3709,6 +3709,14 @@ PP(pp_ucfirst)
      * not convert in-place. */
     inplace = !SvREADONLY(source) && SvPADTMP(source);
 
+#ifdef USE_LOCALE_CTYPE
+
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+    }
+
+#endif
+
     /* First calculate what the changed first character should be.  This affects
      * whether we can just swap it out, leaving the rest of the string unchanged,
      * or even if have to convert the dest to UTF-8 when the source isn't */
@@ -3752,7 +3760,6 @@ PP(pp_ucfirst)
 	    /* lower case the first letter: no trickiness for any character */
 #ifdef USE_LOCALE_CTYPE
             if (IN_LC_RUNTIME(LC_CTYPE)) {
-                _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
                 *tmpbuf = toLOWER_LC(*s);
             }
             else
@@ -3770,7 +3777,6 @@ PP(pp_ucfirst)
                 goto do_uni_rules;
             }
 
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             *tmpbuf = (U8) toUPPER_LC(*s); /* This would be a bug if any
                                               locales have upper and title case
                                               different */
@@ -3986,6 +3992,14 @@ PP(pp_uc)
 	SETs(dest);
     }
 
+#ifdef USE_LOCALE_CTYPE
+
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+    }
+
+#endif
+
     /* Overloaded values may have toggled the UTF-8 flag on source, so we need
        to check DO_UTF8 again here.  */
 
@@ -4072,7 +4086,6 @@ PP(pp_uc)
                 if (IN_UTF8_CTYPE_LOCALE) {
                     goto do_uni_rules;
                 }
-                _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 		for (; s < send; d++, s++)
                     *d = (U8) toUPPER_LC(*s);
 	    }
@@ -4226,6 +4239,14 @@ PP(pp_lc)
 	SETs(dest);
     }
 
+#ifdef USE_LOCALE_CTYPE
+
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+    }
+
+#endif
+
     /* Overloaded values may have toggled the UTF-8 flag on source, so we need
        to check DO_UTF8 again here.  */
 
@@ -4279,7 +4300,6 @@ PP(pp_lc)
 	     * whole thing in a tight loop, for speed, */
 #ifdef USE_LOCALE_CTYPE
             if (IN_LC_RUNTIME(LC_CTYPE)) {
-                _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 		for (; s < send; d++, s++)
 		    *d = toLOWER_LC(*s);
             }
@@ -4443,6 +4463,15 @@ PP(pp_fc)
     SETs(dest);
 
     send = s + len;
+
+#ifdef USE_LOCALE_CTYPE
+
+    if ( IN_LC_RUNTIME(LC_CTYPE) ) { /* Under locale */
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+    }
+
+#endif
+
     if (DO_UTF8(source)) { /* UTF-8 flagged string. */
         while (s < send) {
             const STRLEN u = UTF8SKIP(s);
@@ -4467,7 +4496,6 @@ PP(pp_fc)
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_folding;
             }
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             for (; s < send; d++, s++)
                 *d = (U8) toFOLD_LC(*s);
         }

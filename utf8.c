@@ -3103,12 +3103,13 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
     if (flags & FOLD_FLAGS_LOCALE) {
-        /* Treat a UTF-8 locale as not being in locale at all */
+        /* Treat a UTF-8 locale as not being in locale at all, except for
+         * potentially warning */
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (IN_UTF8_CTYPE_LOCALE) {
             flags &= ~FOLD_FLAGS_LOCALE;
         }
         else {
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             goto needs_full_generality;
         }
     }
@@ -3767,12 +3768,10 @@ S_check_and_deprecate(pTHX_ const U8 *p,
                                L1_func_extra_param)                          \
                                                                              \
     if (flags & (locale_flags)) {                                            \
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                  \
         /* Treat a UTF-8 locale as not being in locale at all */             \
         if (IN_UTF8_CTYPE_LOCALE) {                                          \
             flags &= ~(locale_flags);                                        \
-        }                                                                    \
-        else {                                                               \
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                              \
         }                                                                    \
     }                                                                        \
                                                                              \

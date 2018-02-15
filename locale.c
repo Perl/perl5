@@ -611,6 +611,9 @@ S_new_ctype(pTHX_ const char *newctype)
     dVAR;
     UV i;
 
+    /* Don't check for problems if we are suppressing the warnings */
+    bool check_for_problems = ckWARN_d(WARN_LOCALE) || UNLIKELY(DEBUG_L_TEST);
+
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
     /* We will replace any bad locale warning with 1) nothing if the new one is
@@ -627,27 +630,28 @@ S_new_ctype(pTHX_ const char *newctype)
     if (PL_in_utf8_CTYPE_locale) {
         Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
     }
-    else {
+
+    /* We don't populate the other lists if a UTF-8 locale, but do check that
+     * everything works as expected, unless checking turned off */
+    if (check_for_problems || ! PL_in_utf8_CTYPE_locale) {
         /* Assume enough space for every character being bad.  4 spaces each
          * for the 94 printable characters that are output like "'x' "; and 5
          * spaces each for "'\\' ", "'\t' ", and "'\n' "; plus a terminating
          * NUL */
-        char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ];
-
-        /* Don't check for problems if we are suppressing the warnings */
-        bool check_for_problems = ckWARN_d(WARN_LOCALE)
-                               || UNLIKELY(DEBUG_L_TEST);
+        char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ] = { '\0' };
         bool multi_byte_locale = FALSE;     /* Assume is a single-byte locale
                                                to start */
         unsigned int bad_count = 0;         /* Count of bad characters */
 
         for (i = 0; i < 256; i++) {
+            if (! PL_in_utf8_CTYPE_locale) {
             if (isupper(i))
                 PL_fold_locale[i] = (U8) tolower(i);
             else if (islower(i))
                 PL_fold_locale[i] = (U8) toupper(i);
             else
                 PL_fold_locale[i] = (U8) i;
+            }
 
             /* If checking for locale problems, see if the native ASCII-range
              * printables plus \n and \t are in their expected categories in
@@ -661,40 +665,107 @@ S_new_ctype(pTHX_ const char *newctype)
             if (    check_for_problems
                 && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
             {
-                if (   cBOOL(isalnum(i)) != cBOOL(isALPHANUMERIC_A(i))
-                    || cBOOL(isalpha(i)) != cBOOL(isALPHA_A(i))
-                    || cBOOL(isdigit(i)) != cBOOL(isDIGIT_A(i))
-                    || cBOOL(isgraph(i)) != cBOOL(isGRAPH_A(i))
-                    || cBOOL(islower(i)) != cBOOL(isLOWER_A(i))
-                    || cBOOL(isprint(i)) != cBOOL(isPRINT_A(i))
-                    || cBOOL(ispunct(i)) != cBOOL(isPUNCT_A(i))
-                    || cBOOL(isspace(i)) != cBOOL(isSPACE_A(i))
-                    || cBOOL(isupper(i)) != cBOOL(isUPPER_A(i))
-                    || cBOOL(isxdigit(i))!= cBOOL(isXDIGIT_A(i))
-                    || tolower(i) != (int) toLOWER_A(i)
-                    || toupper(i) != (int) toUPPER_A(i)
-                    || (i == '\n' && ! isCNTRL_LC(i)))
-                {
-                    if (bad_count) {    /* Separate multiple entries with a
-                                           blank */
-                        bad_chars_list[bad_count++] = ' ';
+                bool is_bad = FALSE;
+                char name[3] = { '\0' };
+
+                /* Convert the name into a string */
+                if (isPRINT_A(i)) {
+                    name[0] = i;
+                    name[1] = '\0';
+                }
+                else if (i == '\n') {
+                    my_strlcpy(name, "\n", sizeof(name));
+                }
+                else {
+                    my_strlcpy(name, "\t", sizeof(name));
+                }
+
+                /* Check each possibe class */
+                if (UNLIKELY(cBOOL(isalnum(i)) != cBOOL(isALPHANUMERIC_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isalnum('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isalnum(i))));
+                }
+                if (UNLIKELY(cBOOL(isalpha(i)) != cBOOL(isALPHA_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isalpha('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isalpha(i))));
+                }
+                if (UNLIKELY(cBOOL(isdigit(i)) != cBOOL(isDIGIT_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isdigit('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isdigit(i))));
+                }
+                if (UNLIKELY(cBOOL(isgraph(i)) != cBOOL(isGRAPH_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isgraph('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isgraph(i))));
+                }
+                if (UNLIKELY(cBOOL(islower(i)) != cBOOL(isLOWER_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "islower('%s') unexpectedly is %d\n",
+                                          name, cBOOL(islower(i))));
+                }
+                if (UNLIKELY(cBOOL(isprint(i)) != cBOOL(isPRINT_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isprint('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isprint(i))));
+                }
+                if (UNLIKELY(cBOOL(ispunct(i)) != cBOOL(isPUNCT_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "ispunct('%s') unexpectedly is %d\n",
+                                          name, cBOOL(ispunct(i))));
+                }
+                if (UNLIKELY(cBOOL(isspace(i)) != cBOOL(isSPACE_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isspace('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isspace(i))));
+                }
+                if (UNLIKELY(cBOOL(isupper(i)) != cBOOL(isUPPER_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isupper('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isupper(i))));
+                }
+                if (UNLIKELY(cBOOL(isxdigit(i))!= cBOOL(isXDIGIT_A(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                          "isxdigit('%s') unexpectedly is %d\n",
+                                          name, cBOOL(isxdigit(i))));
+                }
+                if (UNLIKELY(tolower(i) != (int) toLOWER_A(i)))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "tolower('%s')=0x%x instead of the expected 0x%x\n",
+                            name, tolower(i), (int) toLOWER_A(i)));
+                }
+                if (UNLIKELY(toupper(i) != (int) toUPPER_A(i)))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "toupper('%s')=0x%x instead of the expected 0x%x\n",
+                            name, toupper(i), (int) toUPPER_A(i)));
+                }
+                if (UNLIKELY((i == '\n' && ! isCNTRL_LC(i))))  {
+                    is_bad = TRUE;
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                "'\\n' (=%02X) is not a control\n", (int) i));
+                }
+
+                /* Add to the list;  Separate multiple entries with a blank */
+                if (is_bad) {
+                    if (bad_count) {
+                        my_strlcat(bad_chars_list, " ", sizeof(bad_chars_list));
                     }
-                    bad_chars_list[bad_count++] = '\'';
-                    if (isPRINT_A(i)) {
-                        bad_chars_list[bad_count++] = (char) i;
-                    }
-                    else {
-                        bad_chars_list[bad_count++] = '\\';
-                        if (i == '\n') {
-                            bad_chars_list[bad_count++] = 'n';
-                        }
-                        else {
-                            assert(i == '\t');
-                            bad_chars_list[bad_count++] = 't';
-                        }
-                    }
-                    bad_chars_list[bad_count++] = '\'';
-                    bad_chars_list[bad_count] = '\0';
+                    my_strlcat(bad_chars_list, name, sizeof(bad_chars_list));
+                    bad_count++;
                 }
             }
         }
@@ -708,7 +779,8 @@ S_new_ctype(pTHX_ const char *newctype)
                  "%s:%d: check_for_problems=%d, MB_CUR_MAX=%d\n",
                  __FILE__, __LINE__, check_for_problems, (int) MB_CUR_MAX));
 
-        if (check_for_problems && MB_CUR_MAX > 1
+        if (   check_for_problems && MB_CUR_MAX > 1
+            && ! PL_in_utf8_CTYPE_locale
 
                /* Some platforms return MB_CUR_MAX > 1 for even the "C"
                 * locale.  Just assume that the implementation for them (plus
@@ -723,8 +795,17 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #  endif
 
-        if (bad_count || multi_byte_locale) {
-            PL_warn_locale = Perl_newSVpvf(aTHX_
+        if (UNLIKELY(bad_count) || UNLIKELY(multi_byte_locale)) {
+            if (UNLIKELY(bad_count) && PL_in_utf8_CTYPE_locale) {
+                PL_warn_locale = Perl_newSVpvf(aTHX_
+                     "Locale '%s' contains (at least) the following characters"
+                     " which have\nnon-standard meanings: %s\nThe Perl program"
+                     " will use the standard meanings",
+                      newctype, bad_chars_list);
+
+            }
+            else {
+                PL_warn_locale = Perl_newSVpvf(aTHX_
                              "Locale '%s' may not work well.%s%s%s\n",
                              newctype,
                              (multi_byte_locale)
@@ -740,6 +821,10 @@ S_new_ctype(pTHX_ const char *newctype)
                               ? bad_chars_list
                               : ""
                             );
+            }
+
+            Perl_sv_catpvf(aTHX_ PL_warn_locale, "\n");
+
             /* If we are actually in the scope of the locale or are debugging,
              * output the message now.  If not in that scope, we save the
              * message to be output at the first operation using this locale,

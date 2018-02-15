@@ -206,7 +206,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Locale '%s' contains (at least) the following characters which have
+non-standard meanings: %s  The Perl program will use the standard
+meanings|perldiag/"Locale '%s' contains (at least) the following
+characters which have non-standard meanings: %s  The Perl program will
+use the standard meanings">.
 
 =back
 

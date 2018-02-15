@@ -3369,6 +3369,30 @@ process that was built against a different build of perl than the
 said library was compiled against.  Reinstalling the XS module will
 likely fix this error.
 
+=item Locale '%s' contains (at least) the following characters which
+have non-standard meanings: %s  The Perl program will use the standard
+meanings
+
+(W locale) You are using the named UTF-8 locale.  UTF-8 locales are
+expected to adhere to the Unicode standard.  This message arises when
+perl found some anomalies in the locale, and is notifying you that there
+are potential problems.
+
+The most common cause of this warning is that, contrary to the claims,
+Unicode is not completely locale insensitive.  Turkish and some related
+languages have two types of C<"I"> characters.  One is dotted in both
+upper- and lowercase, and the other is dotless in both cases.  Unicode
+allows a locale to use either these rules, or the rules used in all
+other instances, where there is only one type of C<"I">, which is
+dotless in the uppercase, and dotted in the lower.  The perl core does
+not (yet) handle the Turkish case, and this warns you of that.  Instead,
+the L<Unicode::Casing> module allows you to mostly implement the Turkish
+casing rules.
+
+But there are other locales which are defective in not following the
+Unicode standard, and this message is raised if one of these is
+detected.
+
 =item Locale '%s' may not work well.%s
 
 (W locale) You are using the named locale, which is a non-UTF-8 one, and
