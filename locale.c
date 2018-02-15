@@ -3448,10 +3448,12 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #      else
 
+            LOCALE_LOCK;
             PERL_UNUSED_RESULT(mbtowc(&wc, NULL, 0));/* Reset any shift state */
             SETERRNO(0, 0);
             len = mbtowc(&wc, STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
             SAVE_ERRNO;
+            LOCALE_UNLOCK;
 
 #      endif
 
