@@ -3774,7 +3774,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                            "panic: %s: %d: Corrupt utf8ness_cache: missing"
                            " separator %.*s<-- HERE %s\n",
                            __FILE__, __LINE__,
-                           s - PL_locale_utf8ness, PL_locale_utf8ness,
+                           (int) (s - PL_locale_utf8ness), PL_locale_utf8ness,
                            s);
             }
             s++;
@@ -3784,7 +3784,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                            "panic: %s: %d: Corrupt utf8ness_cache: missing"
                            " separator %.*s<-- HERE %s\n",
                            __FILE__, __LINE__,
-                           e - PL_locale_utf8ness, PL_locale_utf8ness,
+                           (int) (e - PL_locale_utf8ness), PL_locale_utf8ness,
                            e);
             }
             e++;
@@ -3793,15 +3793,15 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                            "panic: %s: %d: Corrupt utf8ness_cache: utf8ness"
                            " must be [01] %.*s<-- HERE %s\n",
                            __FILE__, __LINE__,
-                           e + 1 - PL_locale_utf8ness, PL_locale_utf8ness,
-                           e + 1);
+                           (int) (e + 1 - PL_locale_utf8ness),
+                           PL_locale_utf8ness, e + 1);
             }
             if (ninstr(PL_locale_utf8ness, s, s-1, e)) {
                 Perl_croak(aTHX_
                            "panic: %s: %d: Corrupt utf8ness_cache: entry"
                            " has duplicate %.*s<-- HERE %s\n",
                            __FILE__, __LINE__,
-                           e - PL_locale_utf8ness, PL_locale_utf8ness,
+                           (int) (e - PL_locale_utf8ness), PL_locale_utf8ness,
                            e);
             }
             s = e + 1;
