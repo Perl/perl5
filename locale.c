@@ -2485,11 +2485,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
          * initialization time before any threads have started, but not later.
          * Caching means that if the program heeds our dictate not to change
          * locales in threaded applications, this data will remain valid, and
-         * it may get queried without changing locales.  If the environment is
-         * such that all categories have the same locale, this isn't needed, as
-         * the code will not change the locale; but this handles the uncommon
-         * case where the environment has disparate locales for the categories
-         * */
+         * it may get queried without having to change locales.  If the
+         * environment is such that all categories have the same locale, this
+         * isn't needed, as the code will not change the locale; but this
+         * handles the uncommon case where the environment has disparate
+         * locales for the categories */
         (void) _is_cur_LC_category_utf8(categories[i]);
 
 #  endif
@@ -2730,6 +2730,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
     /* Make sure the UTF8ness of the string and locale match */
     if (utf8 != PL_in_utf8_COLLATE_locale) {
+        /* XXX convert above Unicode to 10FFFF? */
         const char * const t = s;   /* Temporary so we can later find where the
                                        input was */
 
@@ -3138,9 +3139,9 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category, const int 
      * LC_'template_category', if they aren't already the same.  If not NULL,
      * 'template_locale' is the locale that 'template_category' is in.
      *
-     * Returns the original locale for 'switch_category' so can be switched
-     * back to with the companion function restore_switched_locale(),  (NULL if
-     * no restoral is necessary.) */
+     * Returns a copy of the name of the original locale for 'switch_category'
+     * so can be switched back to with the companion function
+     * restore_switched_locale(),  (NULL if no restoral is necessary.) */
 
     char * restore_to_locale = NULL;
 
@@ -3195,8 +3196,9 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category, const int 
 STATIC void
 S_restore_switched_locale(pTHX_ const int category, const char * const original_locale)
 {
-    /* Restores the locale for LC_'category' to 'original_locale', or do
-     * nothing if the latter parameter is NULL */
+    /* Restores the locale for LC_'category' to 'original_locale' (which is a
+     * copy that will be freed by this function), or do nothing if the latter
+     * parameter is NULL */
 
     if (original_locale == NULL) {
         return;
@@ -3221,7 +3223,14 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * could give the wrong result.  The result will very likely be correct for
      * languages that have commonly used non-ASCII characters, but for notably
      * English, it comes down to if the locale's name ends in something like
-     * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
+     * "UTF-8".  It errs on the side of not being a UTF-8 locale.
+     *
+     * If the platform is early C89, not containing mbtowc(), or we are
+     * compiled to not pay attention to LC_CTYPE, this employs heuristics.
+     * These work very well for non-Latin locales or those whose currency
+     * symbol isn't a '$' nor plain ASCII text.  But without LC_CTYPE and at
+     * least MB_CUR_MAX, English locales with an ASCII currency symbol depend
+     * on the name containing UTF-8 or not. */
 
     /* Name of current locale corresponding to the input category */
     const char *save_input_locale = NULL;
@@ -3351,7 +3360,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              variances from that.  For example, Turkish locales may use the
              alternate dotted I rules, and sometimes it appears to be a
              defective locale definition.  XXX We should probably check for
-             these in the Latin1 range and warn */
+             these in the Latin1 range and warn (but on glibc, requires
+             iswalnum() etc. due to their not handling 80-FF correctly */
             const char *codeset = my_nl_langinfo(PERL_CODESET, FALSE);
                                           /* FALSE => already in dest locale */
 
@@ -3859,9 +3869,10 @@ Perl_my_strerror(pTHX_ const int errnum)
     const char * save_locale = NULL;
     bool locale_is_C = FALSE;
 
-    /* We have a critical section to prevent another thread from changing the
-     * locale out from under us (or zapping the buffer returned from
-     * setlocale() ) */
+    /* We have a critical section to prevent another thread from executing this
+     * same code at the same time.  (On unthreaded perls, the LOCK is a
+     * no-op.)  Since this is the only place in core that changes LC_MESSAGES
+     * (unless the user has called setlocale(), this works to prevent races. */
     LOCALE_LOCK;
 
 #    endif
