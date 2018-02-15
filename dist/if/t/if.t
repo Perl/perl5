@@ -89,7 +89,7 @@ unless (eval 'use open ":std"; 1') {
                 $result = sprintf $test->{fmt}, @{$test->{args}};
                 is($result, $test->{args}->[0], "Got expected string");
                 like($warn, qr/Redundant argument in sprintf/,
-                    "Redundant argument warning generated and capture");
+                    "Redundant argument warning generated and captured");
             }
         }
     }
