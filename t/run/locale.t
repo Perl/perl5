@@ -24,8 +24,23 @@ my $have_strtod = $Config{d_strtod} eq 'define';
 my @locales = find_locales( [ 'LC_ALL', 'LC_CTYPE', 'LC_NUMERIC' ]);
 skip_all("no locales available") unless @locales;
 
+my $debug = 0;
+my $switches = "";
+if (defined $ARGV[0] && $ARGV[0] ne "") {
+    if ($ARGV[0] ne 'debug') {
+        print STDERR "Usage: $0 [ debug ]\n";
+        exit 1
+    }
+    $debug = 1;
+    $switches = "switches => [ '-DLv' ]";
+}
+
 # reset the locale environment
 delete local @ENV{'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
+
+# If user wants this to happen, they set the environment variable AND use
+# 'debug'
+delete local $ENV{'PERL_DEBUG_LOCALE_INIT'} unless $debug;
 
 plan tests => &last;
 
@@ -59,7 +74,7 @@ fresh_perl_is("for (qw(@test_numeric_locales)) {\n" . <<'EOF',
     print "$_ $s\n";
 }
 EOF
-    "", {}, "no locales where LC_NUMERIC breaks");
+    "", { eval $switches }, "no locales where LC_NUMERIC breaks");
 
 SKIP: {
     skip("Windows stores locale defaults in the registry", 1 )
@@ -73,7 +88,7 @@ SKIP: {
         print "$_ $s\n";
     }
 EOF
-    "", {}, "LC_NUMERIC without environment nor setlocale() has no effect in any locale");
+    "", { eval $switches }, "LC_NUMERIC without environment nor setlocale() has no effect in any locale");
 }
 
 # try to find out a locale where LC_NUMERIC makes a difference
@@ -124,7 +139,7 @@ SKIP: {
     {
 	local $ENV{LC_NUMERIC} = $different;
 
-	fresh_perl_is(<<'EOF', "4.2", {},
+	fresh_perl_is(<<'EOF', "4.2", { eval $switches },
 format STDOUT =
 @.#
 4.179
@@ -134,7 +149,7 @@ EOF
 	    "format() does not look at LC_NUMERIC without 'use locale'");
 
         {
-	    fresh_perl_is(<<'EOF', "$difference\n", {},
+	    fresh_perl_is(<<'EOF', "$difference\n", { eval $switches },
 use POSIX;
 use locale;
 format STDOUT =
@@ -147,7 +162,7 @@ EOF
         }
 
         {
-	    fresh_perl_is(<<'EOF', ",,", {},
+	    fresh_perl_is(<<'EOF', ",,", { eval $switches },
 use POSIX;
 print localeconv()->{decimal_point};
 use locale;
@@ -158,7 +173,7 @@ EOF
 
         {
             my $categories = ":collate :characters :collate :ctype :monetary :time";
-            fresh_perl_is(<<"EOF", "4.2", {},
+            fresh_perl_is(<<"EOF", "4.2", { eval $switches },
 use locale qw($categories);
 format STDOUT =
 @.#
@@ -170,7 +185,7 @@ EOF
         }
 
         {
-	    fresh_perl_is(<<'EOF', $difference, {},
+	    fresh_perl_is(<<'EOF', $difference, { eval $switches },
 use locale;
 format STDOUT =
 @.#
@@ -183,7 +198,7 @@ EOF
 
         for my $category (qw(collate characters collate ctype monetary time)) {
             for my $negation ("!", "not_") {
-                fresh_perl_is(<<"EOF", $difference, {},
+                fresh_perl_is(<<"EOF", $difference, { eval $switches },
 use locale ":$negation$category";
 format STDOUT =
 @.#
@@ -197,7 +212,7 @@ EOF
         }
 
         {
-	    fresh_perl_is(<<'EOF', $difference, {},
+	    fresh_perl_is(<<'EOF', $difference, { eval $switches },
 use locale ":numeric";
 format STDOUT =
 @.#
@@ -209,7 +224,7 @@ EOF
         }
 
         {
-	    fresh_perl_is(<<'EOF', "4.2", {},
+	    fresh_perl_is(<<'EOF', "4.2", { eval $switches },
 format STDOUT =
 @.#
 4.179
@@ -220,7 +235,7 @@ EOF
         }
 
         {
-	    fresh_perl_is(<<'EOF', $difference, {},
+	    fresh_perl_is(<<'EOF', $difference, { eval $switches },
 use locale;
 format STDOUT =
 @.#
@@ -245,7 +260,7 @@ EOF
             \$b = sprintf("%.2f", \$i);
             print ".\$a \$b" unless \$a eq \$b
 EOF
-            "", {}, "version does not clobber version");
+            "", { eval $switches }, "version does not clobber version");
 
         fresh_perl_is(<<"EOF",
             use locale;
@@ -257,12 +272,12 @@ EOF
             \$b = sprintf("%.2f", \$i);
             print "\$a \$b" unless \$a eq \$b
 EOF
-            "", {}, "version does not clobber version (via eval)");
+            "", { eval $switches }, "version does not clobber version (via eval)");
     }
 
     {
 	local $ENV{LC_NUMERIC} = $different;
-	fresh_perl_is(<<'EOF', "$difference "x4, {},
+	fresh_perl_is(<<'EOF', "$difference "x4, { eval $switches },
             use locale;
 	    use POSIX qw(locale_h);
 	    my $in = 4.2;
@@ -273,7 +288,7 @@ EOF
 
     {
 	local $ENV{LC_NUMERIC} = $different;
-	fresh_perl_is(<<'EOF', "$difference "x4, {},
+	fresh_perl_is(<<'EOF', "$difference "x4, { eval $switches },
             use locale;
 	    use POSIX qw(locale_h);
 	    my $in = 4.2;
@@ -297,7 +312,7 @@ EOF
             local $ENV{LANG} = $different;
             local $ENV{PERL_BADLANG} = 0;
 
-            if (! fresh_perl_is(<<"EOF", "$difference", { },
+            if (! fresh_perl_is(<<"EOF", "$difference", { eval $switches  },
                 if (\$ENV{LC_ALL} ne "invalid") {
                     # Make the test pass if the sh didn't accept the ENV set
                     print "$difference\n";
@@ -325,7 +340,7 @@ EOF
                 local $ENV{LANG} = "invalid";
                 local $ENV{PERL_BADLANG} = 0;
 
-                if (! fresh_perl_is(<<"EOF", 4.2, { },
+                if (! fresh_perl_is(<<"EOF", 4.2, { eval $switches  },
                     if (\$ENV{LC_ALL} ne "invalid") {
                         print "$difference\n";
                         exit 0;
