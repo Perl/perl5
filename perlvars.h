@@ -104,7 +104,10 @@ PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex for setlocale() changing */
 #endif
 
 /* Proxy for HAS_POSIX_2008_LOCALE, since that is not defined in time for this */
-#if defined(HAS_NEWLOCALE) && ! defined(NO_POSIX_2008_LOCALE)
+#if   defined(HAS_NEWLOCALE)                    \
+ &&   defined(HAS_FREELOCALE)                   \
+ &&   defined(HAS_USELOCALE)                    \
+ && ! defined(NO_POSIX_2008_LOCALE)
 PERLVAR(G, C_locale_obj, locale_t)
 #endif
 

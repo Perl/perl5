@@ -399,7 +399,10 @@ unless ($define{'USE_ITHREADS'}) {
 			 );
 }
 
-unless ($define{'HAS_NEWLOCALE'} && ! $define{'NO_POSIX_2008_LOCALE'})
+unless ( $define{'HAS_NEWLOCALE'}
+    &&   $define{'HAS_FREELOCALE'}
+    &&   $define{'HAS_USELOCALE'}
+    && ! $define{'NO_POSIX_2008_LOCALE'})
 {
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
