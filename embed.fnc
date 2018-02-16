@@ -1309,7 +1309,7 @@ Xpn	|void	|_warn_problematic_locale
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
 Xp	|bool	|_is_in_locale_category|const bool compiling|const int category
-Apd	|void	|sync_locale
+Apdn	|bool	|sync_locale
 ApMn	|void	|thread_locale_init
 ApMn	|void	|thread_locale_term
 ApdO	|void	|require_pv	|NN const char* pv

@@ -4947,19 +4947,67 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 =for apidoc sync_locale
 
-Changing the program's locale should be avoided by XS code.  Nevertheless,
-certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
-happens, Perl needs to be told that the locale has changed.  Use this function
-to do so, before returning to Perl.
+L<C<Perl_setlocale>|perlapi/Perl_setlocale> can be used at any time to query or
+change the locale (though changing the locale is antisocial and dangerous on
+multi-threaded systems that don't have multi-thread safe locale operations.
+(See L<perllocale/Multi-threaded operation>).  Using the system
+L<C<setlocale(3)>> should be avoided.  Nevertheless, certain non-Perl libraries
+called from XS, such as C<Gtk> do so, and this can't be changed.  When the
+locale is changed by XS code that didn't use
+L<C<Perl_setlocale>|perlapi/Perl_setlocale>, Perl needs to be told that the
+locale has changed.  Use this function to do so, before returning to Perl.
+
+The return value is a boolean: TRUE if the global locale at the time of call
+was in effect; and FALSE if a per-thread locale was in effect.  This can be
+used by the caller that needs to restore things as-they-were to decide whether
+or not to call
+L<C<Perl_switch_to_global_locale>|perlapi/switch_to_global_locale>.
 
 =cut
 */
 
-void
-Perl_sync_locale(pTHX)
+bool
+Perl_sync_locale()
 {
     const char * newlocale;
+    dTHX;
 
+#ifdef USE_POSIX_2008_LOCALE
+
+    bool was_in_global_locale = FALSE;
+    locale_t cur_obj = uselocale((locale_t) 0);
+
+    /* On Windows, unless the foreign code has turned off the thread-safe
+     * locale setting, any plain setlocale() will have affected what we see, so
+     * no need to worry.  Otherwise, If the foreign code has done a plain
+     * setlocale(), it will only affect the global locale on POSIX systems, but
+     * will affect the */
+    if (cur_obj == LC_GLOBAL_LOCALE) {
+
+#  ifdef HAS_QUERY_LOCALE
+
+        do_setlocale_c(LC_ALL, setlocale(LC_ALL, NULL));
+
+#  else
+
+        unsigned int i;
+
+        /* We can't trust that we can read the LC_ALL format on the
+         * platform, so do them individually */
+        for (i = 0; i < LC_ALL_INDEX; i++) {
+            do_setlocale_r(categories[i], setlocale(categories[i], NULL));
+        }
+
+#  endif
+
+        was_in_global_locale = TRUE;
+    }
+
+#else
+
+    bool was_in_global_locale = TRUE;
+
+#endif
 #ifdef USE_LOCALE_CTYPE
 
     newlocale = do_setlocale_c(LC_CTYPE, NULL);
@@ -4988,6 +5036,7 @@ Perl_sync_locale(pTHX)
 
 #endif /* USE_LOCALE_NUMERIC */
 
+    return was_in_global_locale;
 }
 
 #if defined(DEBUGGING) && defined(USE_LOCALE)
