@@ -2388,6 +2388,7 @@ S_my_nl_langinfo(const nl_item item, bool toggle)
 S_my_nl_langinfo(const int item, bool toggle)
 #endif
 {
+    const char * retval;
     dTHX;
 
     /* We only need to toggle into the underlying LC_NUMERIC locale for these
@@ -2399,7 +2400,8 @@ S_my_nl_langinfo(const int item, bool toggle)
     }
 
 #if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
-#if   ! defined(HAS_POSIX_2008_LOCALE)
+#  if   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L)      \
+     || ! defined(HAS_POSIX_2008_LOCALE)
 
     /* Here, use plain nl_langinfo(), switching to the underlying LC_NUMERIC
      * for those items dependent on it.  This must be copied to a buffer before
@@ -2417,8 +2419,15 @@ S_my_nl_langinfo(const int item, bool toggle)
                            this code section (the only call to nl_langinfo in
                            the core) */
 
-        save_to_buffer(nl_langinfo(item), &PL_langinfo_buf,
-                                          &PL_langinfo_bufsize, 0);
+        retval = nl_langinfo(item);
+
+#    ifdef USE_ITHREADS
+
+        /* Copy to a per-thread buffer */
+        save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+        retval = PL_langinfo_buf;
+
+#    endif
 
         LOCALE_UNLOCK;
 
@@ -2448,8 +2457,10 @@ S_my_nl_langinfo(const int item, bool toggle)
             }
         }
 
-        save_to_buffer(nl_langinfo_l(item, cur),
-                       &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+        /* We don't have to copy it to a buffer, as this is a thread-safe
+         * function which Configure has made sure of */
+        retval = nl_langinfo_l(item, cur);
+
         if (do_free) {
             freelocale(cur);
         }
@@ -2457,7 +2468,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #  endif
 
-    if (strEQ(PL_langinfo_buf, "")) {
+    if (strEQ(retval, "")) {
         if (item == PERL_YESSTR) {
             return "yes";
         }
@@ -2466,7 +2477,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         }
     }
 
-    return PL_langinfo_buf;
+    return retval;
 
 #else   /* Below, emulate nl_langinfo as best we can */
 
@@ -2496,7 +2507,6 @@ S_my_nl_langinfo(const int item, bool toggle)
 
         switch (item) {
             Size_t len;
-            const char * retval;
 
             /* These 2 are unimplemented */
             case PERL_CODESET:
