@@ -45,16 +45,30 @@ my @perl = ( which_perl(), "-I../lib" );
 # convert them all since I wanted 3-arg open to continue to be
 # exercised here.
 #
-@cmd1 = ( @perl, "-e", "\$|=1; print qq[first process\\n]; sleep 30;" );
-@cmd2 = ( @perl, "-e", "\$|=1; print qq[second process\\n]; sleep 30;" );
+# VMS does not have the list form of piped open, but it also would
+# not create a separate process for an intermediate shell.
+if ($^O eq 'VMS') {
+    $cmd1 = qq/$perl -e "\$|=1; print qq[first process\\n]; sleep 30;"/;
+    $cmd2 = qq/$perl -e "\$|=1; print qq[second process\\n]; sleep 30;"/;
+}
+else {
+    @cmd1 = ( @perl, "-e", "\$|=1; print qq[first process\\n]; sleep 30;" );
+    @cmd2 = ( @perl, "-e", "\$|=1; print qq[second process\\n]; sleep 30;" );
+}
 $cmd3 = qq/$perl -e "print <>;"/; # hangs waiting for end of STDIN
 $cmd4 = qq/$perl -e "print scalar <>;"/;
 
 #warn "#@cmd1\n#@cmd2\n#$cmd3\n#$cmd4\n";
 
 # start the processes
-ok( $pid1 = open(FH1, "-|", @cmd1), 'first process started');
-ok( $pid2 = open(FH2, "-|", @cmd2), '    second' );
+if ($^O eq 'VMS') {
+    ok( $pid1 = open(FH1, "$cmd1 |"), 'first process started');
+    ok( $pid2 = open(FH2, "$cmd2 |"), '    second' );
+}
+else {
+    ok( $pid1 = open(FH1, "-|", @cmd1), 'first process started');
+    ok( $pid2 = open(FH2, "-|", @cmd2), '    second' );
+}
 {
     no warnings 'once';
     ok( $pid3 = open(FH3, "| $cmd3"), '    third'  );
