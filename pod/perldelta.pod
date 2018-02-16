@@ -371,6 +371,10 @@ useful for XS or C code that only need the thread context because their
 debugging statements that get compiled only under C<-DDEBUGGING> need
 one.
 
+=item *
+
+A new API function L<perlapi/Perl_setlocale> has been added.
+
 =back
 
 =head1 Selected Bug Fixes

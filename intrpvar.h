@@ -590,6 +590,8 @@ PERLVARI(I, collation_standard, bool, TRUE)
 
 PERLVARI(I, langinfo_buf, char *, NULL)
 PERLVARI(I, langinfo_bufsize, Size_t, 0)
+PERLVARI(I, setlocale_buf, char *, NULL)
+PERLVARI(I, setlocale_bufsize, Size_t, 0)
 
 #ifdef PERL_SAWAMPERSAND
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */

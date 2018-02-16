@@ -610,8 +610,8 @@ S_new_ctype(pTHX_ const char *newctype)
      * that tofold() is tolc() since fold case is not a concept in POSIX,
      *
      * Any code changing the locale (outside this file) should use
-     * POSIX::setlocale, which calls this function.  Therefore this function
-     * should be called directly only from this file and from
+     * Perl_setlocale or POSIX::setlocale, which call this function.  Therefore
+     * this function should be called directly only from this file and from
      * POSIX::setlocale() */
 
     dVAR;
@@ -1208,13 +1208,43 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
 #endif
 
-char *
-Perl_setlocale(int category, const char * locale)
+/*
+
+=head1 Locale-related functions and macros
+
+=for apidoc Perl_setlocale
+
+This is an (almost) drop-in replacement for the system L<C<setlocale(3)>>,
+taking the same parameters, and returning the same information, except that it
+returns the correct underlying C<LC_NUMERIC> locale, instead of C<C> always, as
+perl keeps that locale category as C<C>, changing it briefly during the
+operations where the underlying one is required.
+
+The other reason it isn't completely a drop-in replacement is that it is
+declared to return S<C<const char *>>, whereas the system setlocale omits the
+C<const>.  (If it were being written today, plain setlocale would be declared
+const, since it is illegal to change the information it returns; doing so leads
+to segfaults.)
+
+C<Perl_setlocale> should not be used to change the locale except on systems
+where the predefined variable C<${^SAFE_LOCALES}> is 1.
+
+The return points to a per-thread static buffer, which is overwritten the next
+time C<Perl_setlocale> is called from the same thread.
+
+=cut
+
+*/
+
+const char *
+Perl_setlocale(const int category, const char * locale)
 {
     /* This wraps POSIX::setlocale() */
 
-    char * retval;
-    char * newlocale;
+    const char * retval;
+    const char * newlocale;
+    dSAVEDERRNO;
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
     dTHX;
 
 #ifdef USE_LOCALE_NUMERIC
@@ -1225,14 +1255,16 @@ Perl_setlocale(int category, const char * locale)
      * results.  All other categories don't require special handling */
     if (locale == NULL) {
         if (category == LC_NUMERIC) {
-            return savepv(PL_numeric_name);
+
+            /* We don't have to copy this return value, as it is a per-thread
+             * variable, and won't change until a future setlocale */
+            return PL_numeric_name;
         }
 
 #  ifdef LC_ALL
 
-        else if (category == LC_ALL && ! PL_numeric_underlying) {
-
-            SET_NUMERIC_UNDERLYING();
+        else if (category == LC_ALL) {
+            STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
         }
 
 #  endif
@@ -1241,26 +1273,32 @@ Perl_setlocale(int category, const char * locale)
 
 #endif
 
-    /* Save retval since subsequent setlocale() calls may overwrite it. */
-    retval = savepv(do_setlocale_r(category, locale));
+    retval = do_setlocale_r(category, locale);
+    SAVE_ERRNO;
+
+#if defined(USE_LOCALE_NUMERIC) && defined(LC_ALL)
+
+    if (locale == NULL && category == LC_ALL) {
+        RESTORE_LC_NUMERIC();
+    }
+
+#endif
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
             setlocale_debug_string(category, locale, retval)));
-    if (! retval) {
-        /* Should never happen that a query would return an error, but be
-         * sure and reset to C locale */
-        if (locale == 0) {
-            SET_NUMERIC_STANDARD();
-        }
 
+    RESTORE_ERRNO;
+
+    if (! retval) {
         return NULL;
     }
 
-    /* If locale == NULL, we are just querying the state, but may have switched
-     * to NUMERIC_UNDERLYING.  Switch back before returning. */
+    save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+    retval = PL_setlocale_buf;
+
+    /* If locale == NULL, we are just querying the state */
     if (locale == NULL) {
-        SET_NUMERIC_STANDARD();
         return retval;
     }
 
@@ -1324,7 +1362,6 @@ Perl_setlocale(int category, const char * locale)
 
     return retval;
 
-
 }
 
 PERL_STATIC_INLINE const char *
@@ -1351,8 +1388,6 @@ S_save_to_buffer(const char * string, char **buf, Size_t *buf_size, const Size_t
 }
 
 /*
-
-=head1 Locale-related functions and macros
 
 =for apidoc Perl_langinfo
 

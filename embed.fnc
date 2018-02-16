@@ -1296,7 +1296,7 @@ ApdO	|AV*	|get_av		|NN const char *name|I32 flags
 ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
-EXnpo	|char*	|setlocale	|int category|NULLOK const char* locale
+Ando	|const char*|Perl_setlocale|const int category|NULLOK const char* locale
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 Ando	|const char*|Perl_langinfo|const nl_item item
 #else

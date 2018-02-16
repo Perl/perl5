@@ -2237,14 +2237,10 @@ setlocale(category, locale = 0)
     PREINIT:
 	char *		retval;
     CODE:
-	retval = Perl_setlocale(category, locale);
-        if (! retval) { /* Should never happen that a query would return an
-                         * error, but be sure */
+	retval = (char *) Perl_setlocale(category, locale);
+        if (! retval) {
             XSRETURN_UNDEF;
         }
-
-        /* Make sure the returned copy gets cleaned up */
-        SAVEFREEPV(retval);
 
         RETVAL = retval;
     OUTPUT:

@@ -1163,6 +1163,11 @@ perl_destruct(pTHXx)
 #  endif
 #endif
 
+    if (PL_setlocale_buf) {
+        Safefree(PL_setlocale_buf);
+        PL_setlocale_buf = NULL;
+    }
+
     if (PL_langinfo_buf) {
         Safefree(PL_langinfo_buf);
         PL_langinfo_buf = NULL;
