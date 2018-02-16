@@ -1135,7 +1135,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC)
+all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
 
 ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
 
@@ -1542,13 +1542,14 @@ Extensions_realclean :
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
 .IF "$(BUILD_STATIC)"=="define"
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) PostExt $(PERLEXESTATIC)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(PERLEXESTATIC)
 .ELSE
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) PostExt
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
 .ENDIF
 	$(NOOP)
 
-PostExt: ..\lib\Storable\Limit.pm
+PostExt : ..\lib\Storable\Limit.pm
+	$(NOOP)
 
 # we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
 # rebasePE covers just about that, including adjustment for static builds
