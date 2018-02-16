@@ -4945,6 +4945,77 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 /*
 
+=for apidoc switch_to_global_locale
+
+On systems without locale support, or on single-threaded builds, or on
+platforms that do not support per-thread locale operations, this function does
+nothing.  On such systems that do have locale support, only a locale global to
+the whole program is available.
+
+On multi-threaded builds on systems that do have per-thread locale operations,
+this function converts the thread it is running in to use the global locale.
+This is for code that has not yet or cannot be updated to handle multi-threaded
+locale operation.  As long as only a single thread is so-converted, everything
+works fine, as all the other threads continue to ignore the global one, so only
+this thread looks at it.
+
+Without this function call, threads that use the L<C<setlocale(3)>> system
+function will not work properly, as all the locale-sensitive functions will
+look at the per-thread locale, and C<setlocale> will have no effect on this
+thread.
+
+Perl code should convert to either call
+L<C<Perl_setlocale>|perlapi/Perl_setlocale> (which is a drop-in for the system
+C<setlocale>) or use the methods given in L<perlcall> to call
+L<C<POSIX::setlocale>|POSIX/setlocale>.  Either one will transparently properly
+handle all cases of single- vs multi-thread, POSIX 2008-supported or not.
+
+Non-Perl libraries, such as C<gtk>, that call the system C<setlocale> can
+continue to work if this function is called before transferring control to the
+library.
+
+Upon return from the code that needs to use the global locale,
+L<C<sync_locale()>|perlapi/sync_locale> should be called to restore the safe
+multi-thread operation.
+
+=cut
+*/
+
+void
+Perl_switch_to_global_locale()
+{
+
+#ifdef USE_THREAD_SAFE_LOCALE
+#  ifdef WIN32
+
+    _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+
+#  else
+#    ifdef HAS_QUERYLOCALE
+
+    setlocale(LC_ALL, querylocale(LC_ALL_MASK, uselocale((locale_t) 0)));
+
+#    else
+
+    {
+        unsigned int i;
+
+        for (i = 0; i < LC_ALL_INDEX; i++) {
+            setlocale(categories[i], do_setlocale_r(categories[i], NULL));
+        }
+    }
+
+#    endif
+
+    uselocale(LC_GLOBAL_LOCALE);
+
+#  endif
+#endif
+
+}
+
+/*
+
 =for apidoc sync_locale
 
 L<C<Perl_setlocale>|perlapi/Perl_setlocale> can be used at any time to query or

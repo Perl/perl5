@@ -2316,7 +2316,7 @@ operates only on the global locale, whereas each thread has its own
 locale, paying no attention to the global one.  Since converting
 these non-Perl libraries to C<Perl_setlocale> is out of the question,
 there is a new function in v5.28
-C<switch_to_global_locale> that will
+L<C<switch_to_global_locale>|perlapi/switch_to_global_locale> that will
 switch the thread it is called from so that any system C<setlocale>
 calls will have their desired effect.  The function
 L<C<sync_locale>|perlapi/sync_locale> must be called before returning to
