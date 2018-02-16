@@ -253,11 +253,17 @@ PP(pp_unstack)
     return NORMAL;
 }
 
-PP(pp_concat)
+
+/* The main body of pp_concat, not including the magic/overload and
+ * stack handling.
+ * It does targ = left . right.
+ * Moved into a separate function so that pp_multiconcat() can use it
+ * too.
+ */
+
+PERL_STATIC_INLINE void
+S_do_concat(pTHX_ SV *left, SV *right, SV *targ, U8 targmy)
 {
-  dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
-  {
-    dPOPTOPssrl;
     bool lbyte;
     STRLEN rlen;
     const char *rpv = NULL;
@@ -285,7 +291,7 @@ PP(pp_concat)
     else { /* $l .= $r   and   left == TARG */
 	if (!SvOK(left)) {
             if ((left == right                          /* $l .= $l */
-                 || (PL_op->op_private & OPpTARGET_MY)) /* $l = $l . $r */
+                 || targmy)                             /* $l = $l . $r */
                 && ckWARN(WARN_UNINITIALIZED)
                 )
                 report_uninit(left);
@@ -314,8 +320,17 @@ PP(pp_concat)
 	}
     }
     sv_catpvn_nomg(TARG, rpv, rlen);
+    SvSETMAGIC(TARG);
+}
 
-    SETTARG;
+
+PP(pp_concat)
+{
+  dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
+  {
+    dPOPTOPssrl;
+    S_do_concat(aTHX_ left, right, targ, PL_op->op_private & OPpTARGET_MY);
+    SETs(TARG);
     RETURN;
   }
 }
