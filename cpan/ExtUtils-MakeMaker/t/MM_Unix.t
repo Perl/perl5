@@ -12,7 +12,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 110;
+        plan tests => 113;
     }
 }
 
@@ -150,6 +150,9 @@ is ($t->has_link_code(),1); is ($t->{HAS_LINK_CODE},1);
 ###############################################################################
 # libscan
 
+is ($t->libscan('Readme.pod'),      '', 'libscan excludes base Readme.pod');
+is ($t->libscan('README.pod'),      '', 'libscan excludes base README.pod');
+is ($t->libscan('lib/Foo/README.pod'),      'lib/Foo/README.pod', 'libscan accepts README.pod in a subdirectory');
 is ($t->libscan('foo/RCS/bar'),     '', 'libscan on RCS');
 is ($t->libscan('CVS/bar/car'),     '', 'libscan on CVS');
 is ($t->libscan('SCCS'),            '', 'libscan on SCCS');

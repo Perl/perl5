@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '7.30';
+our $VERSION = '7.32';
 $VERSION = eval $VERSION;
 
 1;
@@ -613,7 +613,7 @@ ExtUtils::Makemaker, ExtUtils::Liblist and ExtUtils::MM_{Current OS}
 NOTE: The methods in MY are simply copied into PACK### rather than
 MY being a superclass of PACK###.  I don't remember the rationale.
 
-NOTE: ExtUtils::Liblist should be removed from the inheritence hiearchy
+NOTE: ExtUtils::Liblist should be removed from the inheritance hiearchy
 and simply be called as functions.
 
 NOTE: Modules like File::Spec and Exporter have been omitted for clarity.

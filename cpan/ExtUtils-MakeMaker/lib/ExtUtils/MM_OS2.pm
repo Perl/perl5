@@ -5,7 +5,7 @@ use strict;
 use ExtUtils::MakeMaker qw(neatvalue);
 use File::Spec;
 
-our $VERSION = '7.30';
+our $VERSION = '7.32';
 $VERSION = eval $VERSION;
 
 require ExtUtils::MM_Any;
@@ -129,6 +129,14 @@ OS/2 is OS/2
 
 sub os_flavor {
     return('OS/2');
+}
+
+=item xs_static_lib_is_xs
+
+=cut
+
+sub xs_static_lib_is_xs {
+    return 1;
 }
 
 =back

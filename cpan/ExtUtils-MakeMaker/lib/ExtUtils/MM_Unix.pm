@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.30';
+$VERSION = '7.32';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -2530,78 +2530,13 @@ $(MAKE_APERL_FILE) : static $(FIRST_MAKEFILE) pm_to_blib
     $linkcmd =~ s,(perl\.exp),\$(PERL_INC)/$1,;
 
     # Which *.a files could we make use of...
-    my %static;
-    require File::Find;
-    # don't use File::Spec here because on Win32 F::F still uses "/"
-    my $installed_version = join('/',
-	'auto', $self->{FULLEXT}, "$self->{BASEEXT}$self->{LIB_EXT}"
-    );
-    File::Find::find(sub {
-	if ($File::Find::name =~ m{/auto/share\z}) {
-	    # in a subdir of auto/share, prune because e.g.
-	    # Alien::pkgconfig uses File::ShareDir to put .a files
-	    # there. do not want
-	    $File::Find::prune = 1;
-	    return;
-	}
-
-	return unless m/\Q$self->{LIB_EXT}\E$/;
-
-	return unless -f 'extralibs.ld'; # this checks is a "proper" XS installation
-
-        # Skip perl's libraries.
-        return if m/^libperl/ or m/^perl\Q$self->{LIB_EXT}\E$/;
-
-	# Skip purified versions of libraries
-        # (e.g., DynaLoader_pure_p1_c0_032.a)
-	return if m/_pure_\w+_\w+_\w+\.\w+$/ and -f "$File::Find::dir/.pure";
-
-	if( exists $self->{INCLUDE_EXT} ){
-		my $found = 0;
-
-		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
-		$xx =~ s,/?$_,,;
-		$xx =~ s,/,::,g;
-
-		# Throw away anything not explicitly marked for inclusion.
-		# DynaLoader is implied.
-		foreach my $incl ((@{$self->{INCLUDE_EXT}},'DynaLoader')){
-			if( $xx eq $incl ){
-				$found++;
-				last;
-			}
-		}
-		return unless $found;
-	}
-	elsif( exists $self->{EXCLUDE_EXT} ){
-		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
-		$xx =~ s,/?$_,,;
-		$xx =~ s,/,::,g;
-
-		# Throw away anything explicitly marked for exclusion
-		foreach my $excl (@{$self->{EXCLUDE_EXT}}){
-			return if( $xx eq $excl );
-		}
-	}
-
-	# don't include the installed version of this extension. I
-	# leave this line here, although it is not necessary anymore:
-	# I patched minimod.PL instead, so that Miniperl.pm won't
-	# include duplicates
-
-	# Once the patch to minimod.PL is in the distribution, I can
-	# drop it
-	return if $File::Find::name =~ m:\Q$installed_version\E\z:;
-	use Cwd 'cwd';
-	$static{cwd() . "/" . $_}++;
-    }, grep( -d $_, map { $self->catdir($_, 'auto') } @{$searchdirs || []}) );
-
+    my $staticlib21 = $self->_find_static_libs($searchdirs);
     # We trust that what has been handed in as argument, will be buildable
     $static = [] unless $static;
-    @static{@{$static}} = (1) x @{$static};
+    @$staticlib21{@{$static}} = (1) x @{$static};
 
     $extra = [] unless $extra && ref $extra eq 'ARRAY';
-    for (sort keys %static) {
+    for (sort keys %$staticlib21) {
 	next unless /\Q$self->{LIB_EXT}\E\z/;
 	$_ = dirname($_) . "/extralibs.ld";
 	push @$extra, $_;
@@ -2615,7 +2550,7 @@ $(MAKE_APERL_FILE) : static $(FIRST_MAKEFILE) pm_to_blib
 # MAP_STATIC doesn't look into subdirs yet. Once "all" is made and we
 # regenerate the Makefiles, MAP_STATIC and the dependencies for
 # extralibs.all are computed correctly
-    my @map_static = reverse sort keys %static;
+    my @map_static = reverse sort keys %$staticlib21;
     push @m, "
 MAP_LINKCMD   = $linkcmd
 MAP_STATIC    = ", join(" \\\n\t", map { qq{"$_"} } @map_static), "
@@ -2725,6 +2660,92 @@ map_clean :
 };
 
     join '', @m;
+}
+
+# utility method
+sub _find_static_libs {
+    my ($self, $searchdirs) = @_;
+    # don't use File::Spec here because on Win32 F::F still uses "/"
+    my $installed_version = join('/',
+	'auto', $self->{FULLEXT}, "$self->{BASEEXT}$self->{LIB_EXT}"
+    );
+    my %staticlib21;
+    require File::Find;
+    File::Find::find(sub {
+	if ($File::Find::name =~ m{/auto/share\z}) {
+	    # in a subdir of auto/share, prune because e.g.
+	    # Alien::pkgconfig uses File::ShareDir to put .a files
+	    # there. do not want
+	    $File::Find::prune = 1;
+	    return;
+	}
+
+	return unless m/\Q$self->{LIB_EXT}\E$/;
+
+	return unless -f 'extralibs.ld'; # this checks is a "proper" XS installation
+
+        # Skip perl's libraries.
+        return if m/^libperl/ or m/^perl\Q$self->{LIB_EXT}\E$/;
+
+	# Skip purified versions of libraries
+        # (e.g., DynaLoader_pure_p1_c0_032.a)
+	return if m/_pure_\w+_\w+_\w+\.\w+$/ and -f "$File::Find::dir/.pure";
+
+	if( exists $self->{INCLUDE_EXT} ){
+		my $found = 0;
+
+		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
+		$xx =~ s,/?$_,,;
+		$xx =~ s,/,::,g;
+
+		# Throw away anything not explicitly marked for inclusion.
+		# DynaLoader is implied.
+		foreach my $incl ((@{$self->{INCLUDE_EXT}},'DynaLoader')){
+			if( $xx eq $incl ){
+				$found++;
+				last;
+			}
+		}
+		return unless $found;
+	}
+	elsif( exists $self->{EXCLUDE_EXT} ){
+		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
+		$xx =~ s,/?$_,,;
+		$xx =~ s,/,::,g;
+
+		# Throw away anything explicitly marked for exclusion
+		foreach my $excl (@{$self->{EXCLUDE_EXT}}){
+			return if( $xx eq $excl );
+		}
+	}
+
+	# don't include the installed version of this extension. I
+	# leave this line here, although it is not necessary anymore:
+	# I patched minimod.PL instead, so that Miniperl.pm won't
+	# include duplicates
+
+	# Once the patch to minimod.PL is in the distribution, I can
+	# drop it
+	return if $File::Find::name =~ m:\Q$installed_version\E\z:;
+	return if !$self->xs_static_lib_is_xs($_);
+	use Cwd 'cwd';
+	$staticlib21{cwd() . "/" . $_}++;
+    }, grep( -d $_, map { $self->catdir($_, 'auto') } @{$searchdirs || []}) );
+    return \%staticlib21;
+}
+
+=item xs_static_lib_is_xs (o)
+
+Called by a utility method of makeaperl. Checks whether a given file
+is an XS library by seeing whether it defines any symbols starting
+with C<boot_>.
+
+=cut
+
+sub xs_static_lib_is_xs {
+    my ($self, $libfile) = @_;
+    my $devnull = File::Spec->devnull;
+    return `nm $libfile 2>$devnull` =~ /\bboot_/;
 }
 
 =item makefile (o)

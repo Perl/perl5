@@ -3,7 +3,7 @@ package ExtUtils::testlib;
 use strict;
 use warnings;
 
-our $VERSION = '7.30';
+our $VERSION = '7.32';
 $VERSION = eval $VERSION;
 
 use Cwd;

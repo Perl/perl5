@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '7.30';
+our $VERSION = '7.32';
 $VERSION = eval $VERSION;
 
 use Carp;
@@ -2899,13 +2899,19 @@ Takes a path to a file or dir and returns an empty string if we don't
 want to include this file in the library.  Otherwise it returns the
 the $path unchanged.
 
-Mainly used to exclude version control administrative directories from
-installation.
+Mainly used to exclude version control administrative directories
+and base-level F<README.pod> from installation.
 
 =cut
 
 sub libscan {
     my($self,$path) = @_;
+
+    if ($path =~ m<^README\.pod$>i) {
+        warn "WARNING: Older versions of ExtUtils::MakeMaker may errantly install $path as part of this distribution. It is recommended to avoid using this path in CPAN modules.\n";
+        return '';
+    }
+
     my($dirs,$file) = ($self->splitpath($path))[1,2];
     return '' if grep /^(?:RCS|CVS|SCCS|\.svn|_darcs)$/,
                      $self->splitdir($dirs), $file;

@@ -22,7 +22,7 @@ use strict;
 use ExtUtils::MakeMaker::Config;
 use File::Basename;
 
-our $VERSION = '7.30';
+our $VERSION = '7.32';
 $VERSION = eval $VERSION;
 
 require ExtUtils::MM_Win32;
@@ -135,6 +135,14 @@ sub static_lib_pure_cmd {
     sprintf qq{\t\$(AR) %s\n}, ($BORLAND ? '$@ ' . $src
                           : ($GCC ? '-ru $@ ' . $src
                                   : '-type library -o $@ ' . $src));
+}
+
+=item xs_static_lib_is_xs
+
+=cut
+
+sub xs_static_lib_is_xs {
+    return 1;
 }
 
 =item dynamic_lib

@@ -15,7 +15,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '7.30';
+our $VERSION = '7.32';
 $VERSION = eval $VERSION;
 
 require ExtUtils::MM_Any;
@@ -1242,6 +1242,29 @@ sub xs_make_static_lib {
 }
 
 
+=item static_lib_pure_cmd (override)
+
+Use VMS commands to manipulate object library.
+
+=cut
+
+sub static_lib_pure_cmd {
+    my ($self, $from) = @_;
+
+    sprintf <<'MAKE_FRAG', $from;
+	If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
+	Library/Object/Replace $(MMS$TARGET) %s
+MAKE_FRAG
+}
+
+=item xs_static_lib_is_xs
+
+=cut
+
+sub xs_static_lib_is_xs {
+    return 1;
+}
+
 =item extra_clean_files
 
 Clean up some OS specific files.  Plus the temp file used to shorten
@@ -1286,7 +1309,7 @@ sub tarfile_target {
 $(DISTVNAME).tar$(SUFFIX) : distdir
 	$(PREOP)
 	$(TO_UNIX)
-        $(TAR) "$(TARFLAGS)" $(DISTVNAME).tar [.$(DISTVNAME)...]
+	$(TAR) "$(TARFLAGS)" $(DISTVNAME).tar [.$(DISTVNAME)...]
 	$(RM_RF) $(DISTVNAME)
 	$(COMPRESS) $(DISTVNAME).tar
 	$(POSTOP)
@@ -1336,7 +1359,7 @@ pure_install :: pure_$(INSTALLDIRS)_install
 	$(NOECHO) $(NOOP)
 
 doc_install :: doc_$(INSTALLDIRS)_install
-        $(NOECHO) $(NOOP)
+	$(NOECHO) $(NOOP)
 
 pure__install : pure_site_install
 	$(NOECHO) $(ECHO) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
