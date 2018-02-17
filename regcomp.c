@@ -2546,7 +2546,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
     switch (flags) {
         case EXACT: case EXACTL: break;
-	case EXACTFA:
+	case EXACTFAA:
         case EXACTFU_SS:
 	case EXACTFU:
 	case EXACTFLU8: folder = PL_fold_latin1; break;
@@ -3762,7 +3762,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      described in the next item.
  * 3)   A problem remains for unfolded multi-char folds. (These occur when the
  *      validity of the fold won't be known until runtime, and so must remain
- *      unfolded for now.  This happens for the sharp s in EXACTF and EXACTFA
+ *      unfolded for now.  This happens for the sharp s in EXACTF and EXACTFAA
  *      nodes when the pattern isn't in UTF-8.  (Note, BTW, that there cannot
  *      be an EXACTF node with a UTF-8 pattern.)  They also occur for various
  *      folds in EXACTFL nodes, regardless of the UTF-ness of the pattern.)
@@ -3772,28 +3772,28 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      character in the target string.  (And I do mean character, and not byte
  *      here, unlike other parts of the documentation that have never been
  *      updated to account for multibyte Unicode.)  sharp s in EXACTF and
- *      EXACTFL nodes can match the two character string 'ss'; in EXACTFA nodes
- *      it can match "\x{17F}\x{17F}".  These, along with other ones in EXACTFL
- *      nodes, violate the assumption, and they are the only instances where it
- *      is violated.  I'm reluctant to try to change the assumption, as the
- *      code involved is impenetrable to me (khw), so instead the code here
- *      punts.  This routine examines EXACTFL nodes, and (when the pattern
- *      isn't UTF-8) EXACTF and EXACTFA for such unfolded folds, and returns a
+ *      EXACTFL nodes can match the two character string 'ss'; in EXACTFAA
+ *      nodes it can match "\x{17F}\x{17F}".  These, along with other ones in
+ *      EXACTFL nodes, violate the assumption, and they are the only instances
+ *      where it is violated.  I'm reluctant to try to change the assumption,
+ *      as the code involved is impenetrable to me (khw), so instead the code
+ *      here punts.  This routine examines EXACTFL nodes, and (when the pattern
+ *      isn't UTF-8) EXACTF and EXACTFAA for such unfolded folds, and returns a
  *      boolean indicating whether or not the node contains such a fold.  When
  *      it is true, the caller sets a flag that later causes the optimizer in
  *      this file to not set values for the floating and fixed string lengths,
  *      and thus avoids the optimizer code in regexec.c that makes the invalid
  *      assumption.  Thus, there is no optimization based on string lengths for
  *      EXACTFL nodes that contain these few folds, nor for non-UTF8-pattern
- *      EXACTF and EXACTFA nodes that contain the sharp s.  (The reason the
+ *      EXACTF and EXACTFAA nodes that contain the sharp s.  (The reason the
  *      assumption is wrong only in these cases is that all other non-UTF-8
  *      folds are 1-1; and, for UTF-8 patterns, we pre-fold all other folds to
  *      their expanded versions.  (Again, we can't prefold sharp s to 'ss' in
  *      EXACTF nodes because we don't know at compile time if it actually
  *      matches 'ss' or not.  For EXACTF nodes it will match iff the target
  *      string is in UTF-8.  This is in contrast to EXACTFU nodes, where it
- *      always matches; and EXACTFA where it never does.  In an EXACTFA node in
- *      a UTF-8 pattern, sharp s is folded to "\x{17F}\x{17F}, avoiding the
+ *      always matches; and EXACTFAA where it never does.  In an EXACTFAA node
+ *      in a UTF-8 pattern, sharp s is folded to "\x{17F}\x{17F}, avoiding the
  *      problem; but in a non-UTF8 pattern, folding it to that above-Latin1
  *      string would require the pattern to be forced into UTF-8, the overhead
  *      of which we want to avoid.  Similarly the unfolded multi-char folds in
@@ -3802,9 +3802,9 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *
  *      Similarly, the code that generates tries doesn't currently handle
  *      not-already-folded multi-char folds, and it looks like a pain to change
- *      that.  Therefore, trie generation of EXACTFA nodes with the sharp s
- *      doesn't work.  Instead, such an EXACTFA is turned into a new regnode,
- *      EXACTFA_NO_TRIE, which the trie code knows not to handle.  Most people
+ *      that.  Therefore, trie generation of EXACTFAA nodes with the sharp s
+ *      doesn't work.  Instead, such an EXACTFAA is turned into a new regnode,
+ *      EXACTFAA_NO_TRIE, which the trie code knows not to handle.  Most people
  *      using /iaa matching will be doing so almost entirely with ASCII
  *      strings, so this should rarely be encountered in practice */
 
@@ -3984,10 +3984,10 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 }
 
                 /* Nodes with 'ss' require special handling, except for
-                 * EXACTFA-ish for which there is no multi-char fold to this */
+                 * EXACTFAA-ish for which there is no multi-char fold to this */
                 if (len == 2 && *s == 's' && *(s+1) == 's'
-                    && OP(scan) != EXACTFA
-                    && OP(scan) != EXACTFA_NO_TRIE)
+                    && OP(scan) != EXACTFAA
+                    && OP(scan) != EXACTFAA_NO_TRIE)
                 {
                     count = 2;
                     if (OP(scan) != EXACTFL) {
@@ -4001,7 +4001,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     /* Count how many characters are in it.  In the case of
                      * /aa, no folds which contain ASCII code points are
                      * allowed, so check for those, and skip if found. */
-                    if (OP(scan) != EXACTFA && OP(scan) != EXACTFA_NO_TRIE) {
+                    if (OP(scan) != EXACTFAA && OP(scan) != EXACTFAA_NO_TRIE) {
                         count = utf8_length(s, multi_end);
                         s = multi_end;
                     }
@@ -4039,9 +4039,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             *min_subtract += total_count_delta;
             Safefree(folded);
 	}
-	else if (OP(scan) == EXACTFA) {
+	else if (OP(scan) == EXACTFAA) {
 
-            /* Non-UTF-8 pattern, EXACTFA node.  There can't be a multi-char
+            /* Non-UTF-8 pattern, EXACTFAA node.  There can't be a multi-char
              * fold to the ASCII range (and there are no existing ones in the
              * upper latin1 range).  But, as outlined in the comments preceding
              * this function, we need to flag any occurrences of the sharp s.
@@ -4052,7 +4052,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                                       || UNICODE_DOT_DOT_VERSION > 0)
 	    while (s < s_end) {
                 if (*s == LATIN_SMALL_LETTER_SHARP_S) {
-                    OP(scan) = EXACTFA_NO_TRIE;
+                    OP(scan) = EXACTFAA_NO_TRIE;
                     *unfolded_multi_char = TRUE;
                     break;
                 }
@@ -4061,7 +4061,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         }
 	else {
 
-            /* Non-UTF-8 pattern, not EXACTFA node.  Look for the multi-char
+            /* Non-UTF-8 pattern, not EXACTFAA node.  Look for the multi-char
              * folds that are all Latin1.  As explained in the comments
              * preceding this function, we look also for the sharp s in EXACTF
              * and EXACTFL nodes; it can be in the final position.  Otherwise
@@ -4561,7 +4561,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 EXACT           | EXACT
                                 EXACTFU         | EXACTFU
                                 EXACTFU_SS      | EXACTFU
-                                EXACTFA         | EXACTFA
+                                EXACTFAA         | EXACTFAA
                                 EXACTL          | EXACTL
                                 EXACTFLU8       | EXACTFLU8
 
@@ -4573,8 +4573,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                          ? EXACT                                            \
                          : ( EXACTFU == (X) || EXACTFU_SS == (X) )          \
                            ? EXACTFU                                        \
-                           : ( EXACTFA == (X) )                             \
-                             ? EXACTFA                                      \
+                           : ( EXACTFAA == (X) )                             \
+                             ? EXACTFAA                                      \
                              : ( EXACTL == (X) )                            \
                                ? EXACTL                                     \
                                : ( EXACTFLU8 == (X) )                        \
@@ -10271,8 +10271,8 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             /* Some characters match above-Latin1 ones under /i.  This
              * is true of EXACTFL ones when the locale is UTF-8 */
             if (HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(uc)
-                && (! isASCII(uc) || (OP(node) != EXACTFA
-                                    && OP(node) != EXACTFA_NO_TRIE)))
+                && (! isASCII(uc) || (OP(node) != EXACTFAA
+                                    && OP(node) != EXACTFAA_NO_TRIE)))
             {
                 add_above_Latin1_folds(pRExC_state, (U8) uc, &invlist);
             }
@@ -10352,7 +10352,7 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
                     c = SvUV(*c_p);
 
                     /* /aa doesn't allow folds between ASCII and non- */
-                    if ((OP(node) == EXACTFA || OP(node) == EXACTFA_NO_TRIE)
+                    if ((OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
                         && isASCII(c) != isASCII(uc))
                     {
                         continue;
@@ -19163,8 +19163,8 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
                 case EXACT:
                 case EXACTL:
                 case EXACTF:
-                case EXACTFA_NO_TRIE:
-                case EXACTFA:
+                case EXACTFAA_NO_TRIE:
+                case EXACTFAA:
                 case EXACTFU:
                 case EXACTFLU8:
                 case EXACTFU_SS:

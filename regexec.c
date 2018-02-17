@@ -238,13 +238,13 @@ static const char* const non_utf8_target_but_utf8_required
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition.  XXX These are now out-of-sync*/
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTFA_NO_TRIE || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFAA || OP(rn)==EXACTFAA_NO_TRIE || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT || OP(rn)==EXACTL )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFLU8 || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA || OP(rn) == EXACTFA_NO_TRIE)
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFLU8 || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFAA || OP(rn) == EXACTFAA_NO_TRIE)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1812,7 +1812,7 @@ Perl_re_intuit_start(pTHX_
                                  ? (utf8_target ? trie_utf8 : trie_plain)           \
                                  : (scan->flags == EXACTL)                          \
                                     ? (utf8_target ? trie_utf8l : trie_plain)       \
-                                    : (scan->flags == EXACTFA)                      \
+                                    : (scan->flags == EXACTFAA)                     \
                                       ? (utf8_target                                \
                                          ? trie_utf8_exactfa_fold                   \
                                          : trie_latin_utf8_exactfa_fold)            \
@@ -2253,10 +2253,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                  find_next_masked(s, strend, ARG(c), FLAGS(c)));
         break;
 
-    case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
+    case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
 	/* FALLTHROUGH */
-    case EXACTFA:
+    case EXACTFAA:
         if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
             goto do_exactf_utf8;
@@ -4621,7 +4621,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         c2 = SvUV(*c_p);
 
                         /* Folds that cross the 255/256 boundary are forbidden
-                         * if EXACTFL (and isnt a UTF8 locale), or EXACTFA and
+                         * if EXACTFL (and isnt a UTF8 locale), or EXACTFAA and
                          * one is ASCIII.  Since the pattern character is above
                          * 255, and its only other match is below 256, the only
                          * legal match will be to itself.  We have thrown away
@@ -4630,8 +4630,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         if ((c1 < 256) != (c2 < 256)) {
                             if ((OP(text_node) == EXACTFL
                                  && ! IN_UTF8_CTYPE_LOCALE)
-                                || ((OP(text_node) == EXACTFA
-                                    || OP(text_node) == EXACTFA_NO_TRIE)
+                                || ((OP(text_node) == EXACTFAA
+                                    || OP(text_node) == EXACTFAA_NO_TRIE)
                                     && (isASCII(c1) || isASCII(c2))))
                             {
                                 if (c1 < 256) {
@@ -4649,8 +4649,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                 if (utf8_target
                     && HAS_NONLATIN1_FOLD_CLOSURE(c1)
                     && ( ! (OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
-                    && ((OP(text_node) != EXACTFA
-                        && OP(text_node) != EXACTFA_NO_TRIE)
+                    && ((OP(text_node) != EXACTFAA
+                        && OP(text_node) != EXACTFAA_NO_TRIE)
                         || ! isASCII(c1)))
             {
                 /* Here, there could be something above Latin1 in the target
@@ -4682,12 +4682,12 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         }
                         /* FALLTHROUGH */
                         /* /u rules for all these.  This happens to work for
-                        * EXACTFA as nothing in Latin1 folds to ASCII */
-                    case EXACTFA_NO_TRIE:   /* This node only generated for
-                                            non-utf8 patterns */
+                        * EXACTFAA as nothing in Latin1 folds to ASCII */
+                    case EXACTFAA_NO_TRIE:   /* This node only generated for
+                                                non-utf8 patterns */
                         assert(! is_utf8_pat);
                         /* FALLTHROUGH */
-                    case EXACTFA:
+                    case EXACTFAA:
                     case EXACTFU_SS:
                     case EXACTFU:
                         c2 = PL_fold_latin1[c1];
@@ -6418,11 +6418,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_utf8_flags = is_utf8_pat ? FOLDEQ_S1_ALREADY_FOLDED : 0;
 	    goto do_exactf;
 
-        case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8
+        case EXACTFAA_NO_TRIE:   /* This node only generated for non-utf8
                                    patterns */
             assert(! is_utf8_pat);
             /* FALLTHROUGH */
-	case EXACTFA:            /*  /abc/iaa     */
+	case EXACTFAA:            /*  /abc/iaa     */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    fold_utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
@@ -9331,10 +9331,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
 
-    case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
+    case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
         assert(! reginfo->is_utf8_pat);
         /* FALLTHROUGH */
-    case EXACTFA:
+    case EXACTFAA:
         utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	goto do_exactf;
 
