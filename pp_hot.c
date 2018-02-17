@@ -399,8 +399,7 @@ PP(pp_multiconcat)
 {
     dSP;
     SV *targ;                /* The SV to be assigned or appended to */
-    SV *dsv;                 /* the SV to concat args to (often == targ) */
-    char *dsv_pv;            /* where within SvPVX(dsv) we're writing to */
+    char *targ_pv;           /* where within SvPVX(targ) we're writing to */
     STRLEN targ_len;         /* SvCUR(targ) */
     SV **toparg;             /* the highest arg position on the stack */
     UNOP_AUX_item *aux;      /* PL_op->op_aux buffer */
@@ -408,7 +407,7 @@ PP(pp_multiconcat)
     const char *const_pv;    /* the current segment of the const string buf */
     SSize_t nargs;           /* how many args were expected */
     SSize_t stack_adj;       /* how much to adjust SP on return */
-    STRLEN grow;             /* final size of destination string (dsv) */
+    STRLEN grow;             /* final size of destination string (targ) */
     UV targ_count;           /* how many times targ has appeared on the RHS */
     bool is_append;          /* OPpMULTICONCAT_APPEND flag is set */
     bool slow_concat;        /* args too complex for quick concat */
@@ -456,10 +455,6 @@ PP(pp_multiconcat)
 
     toparg = SP;
     SP -= (nargs - 1);
-    dsv           = targ; /* Set the destination for all concats. This is
-                             initially targ; later on, dsv may be switched
-                             to point to a TEMP SV if overloading is
-                             encountered.  */
     grow          = 1;    /* allow for '\0' at minimum */
     targ_count    = 0;
     targ_chain    = NULL;
@@ -608,7 +603,6 @@ PP(pp_multiconcat)
 
     /* unrolled SvPVCLEAR() - mostly: no need to grow or set SvCUR() to 0;
      * those will be done later. */
-    assert(targ == dsv);
     SV_CHECK_THINKFIRST_COW_DROP(targ);
     SvUPGRADE(targ, SVt_PV);
     SvFLAGS(targ) &= ~(SVf_OK|SVf_IVisUV|SVf_UTF8);
@@ -619,10 +613,10 @@ PP(pp_multiconcat)
     /* --------------------------------------------------------------
      * Phase 3:
      *
-     * UTF-8 tweaks and grow dsv:
+     * UTF-8 tweaks and grow targ:
      *
      * Now that we know the length and utf8-ness of both the targ and
-     * args, grow dsv to the size needed to accumulate all the args, based
+     * args, grow targ to the size needed to accumulate all the args, based
      * on whether targ appears on the RHS, whether we're appending, and
      * whether any non-utf8 args expand in size if converted to utf8.
      *
@@ -661,7 +655,7 @@ PP(pp_multiconcat)
     /* turn off utf8 handling if 'use bytes' is in scope */
     if (UNLIKELY(dst_utf8 && IN_BYTES)) {
         dst_utf8 = 0;
-        SvUTF8_off(dsv);
+        SvUTF8_off(targ);
         /* undo all the negative lengths which flag utf8-ness */
         for (svpv_p = svpv_buf; svpv_p < svpv_end; svpv_p++) {
             SSize_t len = svpv_p->len;
@@ -719,16 +713,16 @@ PP(pp_multiconcat)
 
     /* unrolled SvGROW(), except don't check for SVf_IsCOW, which should
      * already have been dropped */
-    assert(!SvIsCOW(dsv));
-    dsv_pv = (SvLEN(dsv) < (grow) ? sv_grow(dsv,grow) : SvPVX(dsv));
+    assert(!SvIsCOW(targ));
+    targ_pv = (SvLEN(targ) < (grow) ? sv_grow(targ,grow) : SvPVX(targ));
 
 
     /* --------------------------------------------------------------
      * Phase 4:
      *
-     * Now that dsv (which is probably targ) has been grown, we know the
-     * final address of the targ PVX, if needed. Preserve / move targ
-     * contents if appending or if targ appears on RHS.
+     * Now that targ has been grown, we know the final address of the targ
+     * PVX, if needed. Preserve / move targ contents if appending or if
+     * targ appears on RHS.
      *
      * Also update svpv_buf slots in targ_chain.
      *
@@ -751,7 +745,7 @@ PP(pp_multiconcat)
      * On exit, the targ contents will have been moved to the
      * earliest place they are needed (e.g. $x = "abc$x" will shift them
      * 3 bytes, while $x .= ... will leave them at the beginning);
-     * and dst_pv will point to the location within SvPVX(dsv) where the
+     * and dst_pv will point to the location within SvPVX(targ) where the
      * next arg should be copied.
      */
 
@@ -759,13 +753,12 @@ PP(pp_multiconcat)
 
     if (targ_len) {
         struct multiconcat_svpv *tc_stop;
-        char *targ_pv = dsv_pv;
+        char *targ_buf = targ_pv; /* ptr to original targ string */
 
-        assert(targ == dsv);
         assert(is_append || targ_count);
 
         if (is_append) {
-            dsv_pv += targ_len;
+            targ_pv += targ_len;
             tc_stop = NULL;
         }
         else {
@@ -806,8 +799,8 @@ PP(pp_multiconcat)
             }
 
             if (offset) {
-                targ_pv += offset;
-                Move(dsv_pv, targ_pv, targ_len, char);
+                targ_buf += offset;
+                Move(targ_pv, targ_buf, targ_len, char);
                 /* a negative length implies don't Copy(), but do increment */
                 svpv_p->len = -((SSize_t)targ_len);
                 slow_concat = TRUE;
@@ -816,7 +809,7 @@ PP(pp_multiconcat)
                 /* skip the first targ copy */
                 svpv_base++;
                 const_lens++;
-                dsv_pv += targ_len;
+                targ_pv += targ_len;
             }
 
             /* Don't populate the first targ slot in the loop below; it's
@@ -830,7 +823,7 @@ PP(pp_multiconcat)
         while (targ_chain != tc_stop) {
             struct multiconcat_svpv *p = targ_chain;
             targ_chain = (struct multiconcat_svpv *)(p->pv);
-            p->pv  = targ_pv;
+            p->pv  = targ_buf;
             p->len = (SSize_t)targ_len;
         }
     }
@@ -839,7 +832,7 @@ PP(pp_multiconcat)
     /* --------------------------------------------------------------
      * Phase 5:
      *
-     * Append all the args in svpv_buf, plus the const strings, to dsv.
+     * Append all the args in svpv_buf, plus the const strings, to targ.
      *
      * On entry to this section the (pv,len) pairs in svpv_buf have the
      * following meanings:
@@ -847,7 +840,7 @@ PP(pp_multiconcat)
      *    (pv, -(len+extra)) a plain string which will expand by 'extra'
      *                         bytes when converted to utf8
      *    (0,  -len)         left-most targ, whose content has already
-     *                         been copied. Just advance dsv_pv by len.
+     *                         been copied. Just advance targ_pv by len.
      */
 
     /* If there are no constant strings and no special case args
@@ -858,8 +851,8 @@ PP(pp_multiconcat)
             SSize_t len = svpv_p->len;
             if (!len)
                 continue;
-            Copy(svpv_p->pv, dsv_pv, len, char);
-            dsv_pv += len;
+            Copy(svpv_p->pv, targ_pv, len, char);
+            targ_pv += len;
         }
         const_lens += (svpv_end - svpv_base + 1);
     }
@@ -874,8 +867,8 @@ PP(pp_multiconcat)
 
             /* append next const string segment */
             if (len > 0) {
-                Copy(const_pv, dsv_pv, len, char);
-                dsv_pv   += len;
+                Copy(const_pv, targ_pv, len, char);
+                targ_pv   += len;
                 const_pv += len;
             }
 
@@ -886,8 +879,8 @@ PP(pp_multiconcat)
             len = svpv_p->len;
 
             if (LIKELY(len > 0)) {
-                Copy(svpv_p->pv, dsv_pv, len, char);
-                dsv_pv += len;
+                Copy(svpv_p->pv, targ_pv, len, char);
+                targ_pv += len;
             }
             else if (UNLIKELY(len < 0)) {
                 /* negative length indicates two special cases */
@@ -895,25 +888,25 @@ PP(pp_multiconcat)
                 len = -len;
                 if (UNLIKELY(p)) {
                     /* copy plain-but-variant pv to a utf8 targ */
-                    char * end_pv = dsv_pv + len;
+                    char * end_pv = targ_pv + len;
                     assert(dst_utf8);
-                    while (dsv_pv < end_pv) {
+                    while (targ_pv < end_pv) {
                         U8 c = (U8) *p++;
-                        append_utf8_from_native_byte(c, (U8**)&dsv_pv);
+                        append_utf8_from_native_byte(c, (U8**)&targ_pv);
                     }
                 }
                 else
                     /* arg is already-copied targ */
-                    dsv_pv += len;
+                    targ_pv += len;
             }
 
         }
     }
 
-    *dsv_pv = '\0';
-    SvCUR_set(dsv, dsv_pv - SvPVX(dsv));
-    assert(grow >= SvCUR(dsv) + 1);
-    assert(SvLEN(dsv) >= SvCUR(dsv) + 1);
+    *targ_pv = '\0';
+    SvCUR_set(targ, targ_pv - SvPVX(targ));
+    assert(grow >= SvCUR(targ) + 1);
+    assert(SvLEN(targ) >= SvCUR(targ) + 1);
 
     /* --------------------------------------------------------------
      * Phase 6:
