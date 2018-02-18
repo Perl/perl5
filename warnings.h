@@ -117,8 +117,9 @@
 
 /* Warnings Categories added in Perl 5.027 */
 
-#define WARN_EXPERIMENTAL__SCRIPT_RUN	 67
-#define WARN_SHADOW			 68
+#define WARN_EXPERIMENTAL__ALPHA_ASSERTIONS 67
+#define WARN_EXPERIMENTAL__SCRIPT_RUN	 68
+#define WARN_SHADOW			 69
 
 #define WARNsize			 18
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"

@@ -109,6 +109,8 @@ my $tree = {
                                     [ 5.025, DEFAULT_ON ],
                                 'experimental::script_run' =>
                                     [ 5.027, DEFAULT_ON ],
+                                'experimental::alpha_assertions' =>
+                                    [ 5.027, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
