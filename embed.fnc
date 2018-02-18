@@ -1306,11 +1306,13 @@ ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
 Xpn	|void	|_warn_problematic_locale
-p	|void	|new_numeric	|NULLOK const char* newcoll
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
 Xp	|bool	|_is_in_locale_category|const bool compiling|const int category
-Apd	|void	|sync_locale
+Apdn	|void	|switch_to_global_locale
+Apdn	|bool	|sync_locale
+ApMn	|void	|thread_locale_init
+ApMn	|void	|thread_locale_term
 ApdO	|void	|require_pv	|NN const char* pv
 Apd	|void	|pack_cat	|NN SV *cat|NN const char *pat|NN const char *patend \
 				|NN SV **beglist|NN SV **endlist|NN SV ***next_in_list|U32 flags
@@ -2796,6 +2798,13 @@ s	|char*	|stdize_locale	|NN char* locs
 s	|void	|new_collate	|NULLOK const char* newcoll
 s	|void	|new_ctype	|NN const char* newctype
 s	|void	|set_numeric_radix|const bool use_locale
+s	|void	|new_numeric	|NULLOK const char* newnum
+#    ifdef USE_POSIX_2008_LOCALE
+sn	|const char*|emulate_setlocale|const int category		\
+				    |NULLOK const char* locale		\
+				    |unsigned int index			\
+				    |const bool is_index_valid
+#    endif
 #    ifdef WIN32
 s	|char*	|win32_setlocale|int category|NULLOK const char* locale
 #    endif

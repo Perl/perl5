@@ -2387,7 +2387,6 @@ PERL_CALLCONV CV *	Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr, 
 PERL_CALLCONV CV *	Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len, XSUBADDR_t subaddr, const char *const filename, const char *const proto, SV **const_svp, U32 flags);
 #define PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS	\
 	assert(subaddr)
-PERL_CALLCONV void	Perl_new_numeric(pTHX_ const char* newcoll);
 PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 			__attribute__warn_unused_result__;
 
@@ -3514,7 +3513,8 @@ PERL_CALLCONV SV*	Perl_swash_init(pTHX_ const char* pkg, const char* name, SV* l
 #define PERL_ARGS_ASSERT_SWASH_INIT	\
 	assert(pkg); assert(name); assert(listsv)
 
-PERL_CALLCONV void	Perl_sync_locale(pTHX);
+PERL_CALLCONV void	Perl_switch_to_global_locale(void);
+PERL_CALLCONV bool	Perl_sync_locale(void);
 PERL_CALLCONV void	Perl_sys_init(int* argc, char*** argv);
 #define PERL_ARGS_ASSERT_SYS_INIT	\
 	assert(argc); assert(argv)
@@ -3526,6 +3526,8 @@ PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s);
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)
+PERL_CALLCONV void	Perl_thread_locale_init(void);
+PERL_CALLCONV void	Perl_thread_locale_term(void);
 PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, const MAGIC *const mg, const U32 flags, U32 argc, ...);
 #define PERL_ARGS_ASSERT_TIED_METHOD	\
 	assert(methname); assert(sp); assert(sv); assert(mg)
@@ -4709,10 +4711,14 @@ STATIC void	S_new_collate(pTHX_ const char* newcoll);
 STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
+STATIC void	S_new_numeric(pTHX_ const char* newnum);
 STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
 	assert(locs)
+#    if defined(USE_POSIX_2008_LOCALE)
+STATIC const char*	S_emulate_setlocale(const int category, const char* locale, unsigned int index, const bool is_index_valid);
+#    endif
 #    if defined(WIN32)
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #    endif

@@ -100,6 +100,7 @@ PERLVARI(G, mmap_page_size, IV, 0)
 #if defined(USE_ITHREADS)
 PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex for setlocale() changing */
+PERLVAR(G, lc_numeric_mutex, perl_mutex)   /* Mutex for switching LC_NUMERIC */
 
 #endif
 

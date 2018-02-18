@@ -171,14 +171,17 @@ L</The setlocale function>.
 
 =head2 The C<"use locale"> pragma
 
-WARNING!  Do NOT use this pragma in scripts that have multiple
-L<threads|threads> active.  The locale is not local to a single thread.
-Another thread may change the locale at any time, which could cause at a
-minimum that a given thread is operating in a locale it isn't expecting
-to be in.  On some platforms, segfaults can also occur.  The locale
-change need not be explicit; some operations cause perl to change the
-locale itself.  You are vulnerable simply by having done a S<C<"use
-locale">>.
+Starting in Perl 5.28, this pragma may be used in
+L<multi-threaded|threads> applications on systems that have thread-safe
+locale ability.  Some caveats apply, see L</Multi-threaded> below.  On
+systems without this capability, or in earlier Perls, do NOT use this
+pragma in scripts that have multiple L<threads|threads> active.  The
+locale in these cases is not local to a single thread.  Another thread
+may change the locale at any time, which could cause at a minimum that a
+given thread is operating in a locale it isn't expecting to be in.  On
+some platforms, segfaults can also occur.  The locale change need not be
+explicit; some operations cause perl to change the locale itself.  You
+are vulnerable simply by having done a S<C<"use locale">>.
 
 By default, Perl itself (outside the L<POSIX> module)
 ignores the current locale.  The S<C<use locale>>
@@ -369,7 +372,7 @@ will be locale aware.  Everything else is unaffected.
 Since Perl doesn't currently do anything with the C<LC_MONETARY>
 category, specifying C<:monetary> does effectively nothing.  Some
 systems have other categories, such as C<LC_PAPER>, but Perl
-also doesn't know anything about them, and there is no way to specify
+also doesn't do anything with them, and there is no way to specify
 them in this pragma's arguments.
 
 You can also easily say to use all categories but one, by either, for
@@ -407,12 +410,13 @@ this, as described in L</Unicode and UTF-8>.
 
 =head2 The setlocale function
 
-WARNING!  Do NOT use this function in a L<thread|threads>.  The locale
-will change in all other threads at the same time, and should your
-thread get paused by the operating system, and another started, that
-thread will not have the locale it is expecting.  On some platforms,
-there can be a race leading to segfaults if two threads call this
-function nearly simultaneously.
+WARNING!  Prior to Perl 5.28 or on a system that does not support
+thread-safe locale operations, do NOT use this function in a
+L<thread|threads>.  The locale will change in all other threads at the
+same time, and should your thread get paused by the operating system,
+and another started, that thread will not have the locale it is
+expecting.  On some platforms, there can be a race leading to segfaults
+if two threads call this function nearly simultaneously.
 
 You can switch locales as often as you wish at run time with the
 C<POSIX::setlocale()> function:
@@ -485,8 +489,58 @@ If C<set_locale()> fails for some reason (for example, an attempt to set
 to a locale unknown to the system), the locale for the category is not
 changed, and the function returns C<undef>.
 
+Starting in Perl 5.28, on multi-threaded perls compiled on systems that
+implement POSIX 2008 thread-safe locale operations, this function
+doesn't actually call the system C<setlocale>.  Instead those
+thread-safe operations are used to emulate the C<setlocale> function,
+but in a thread-safe manner.
 
 For further information about the categories, consult L<setlocale(3)>.
+
+=head2 Multi-threaded operation
+
+Beginning in Perl 5.28, multi-threaded locale operation is supported on
+systems that implement either the POSIX 2008 or Windows-specific
+thread-safe locale operations.  Many modern systems, such as various
+Unix variants and Darwin do have this.
+
+You can tell if using locales is safe on your system by looking at the
+read-only boolean variable C<${^SAFE_LOCALES}>.  The value is 1 if the
+perl is not threaded, or if it is using thread-safe locale operations.
+
+Thread-safe operations are supported in Windows starting in Visual Studio
+2005, and in systems compatible with POSIX 2008.  Some platforms claim
+to support POSIX 2008, but have buggy implementations, so that the hints
+files for compiling to run on them turn off attempting to use
+thread-safety.  C<${^SAFE_LOCALES}> will be 0 on them.
+
+Be aware that writing a multi-threaded application will not be portable
+to a platform which lacks the native thread-safe locale support.  On
+systems that do have it, you automatically get this behavior for
+threaded perls, without having to do anything.  If for some reason, you
+don't want to use this capability (perhaps the POSIX 2008 support is
+buggy on your system), you can manually compile Perl to use the old
+non-thread-safe implementation by passing the argument
+C<-Accflags='-DNO_THREAD_SAFE_LOCALE'> to F<Configure>.
+Except on Windows, this will continue to use certain of the POSIX 2008
+functions in some situations.  If these are buggy, you can pass the
+following to F<Configure> instead or additionally:
+C<-Accflags='-DNO_POSIX_2008_LOCALE'>.  This will also keep the code
+from using thread-safe locales.
+C<${^SAFE_LOCALES}> will be 0 on systems that turn off the thread-safe
+operations.
+
+The initial program is started up using the locale specified from the
+environment, as currently, described in L</ENVIRONMENT>.   All newly
+created threads start with C<LC_ALL> set to C<"C">>.  Each thread may
+use C<POSIX::setlocale()> to query or switch its locale at any time,
+without affecting any other thread.  All locale-dependent operations
+automatically use their thread's locale.
+
+This should be completely transparent to any applications written
+entirely in Perl (minus a few rarely encountered caveats given in the
+L</Multi-threaded> section).  Information for XS module writers is given
+in L<perlxs/Locale-aware XS code>.
 
 =head2 Finding locales
 
@@ -1433,12 +1487,10 @@ the same way, "localization" is often abbreviated to B<l10n>.
 =head2 An imperfect standard
 
 Internationalization, as defined in the C and POSIX standards, can be
-criticized as incomplete, ungainly, and having too large a granularity.
-(Locales apply to a whole process, when it would arguably be more useful
-to have them apply to a single thread, window group, or whatever.)  They
-also have a tendency, like standards groups, to divide the world into
-nations, when we all know that the world can equally well be divided
-into bankers, bikers, gamers, and so on.
+criticized as incomplete and ungainly.  They also have a tendency, like
+standards groups, to divide the world into nations, when we all know
+that the world can equally well be divided into bankers, bikers, gamers,
+and so on.
 
 =head1 Unicode and UTF-8
 
@@ -1608,6 +1660,50 @@ encountered.  But there are cases where a C<NUL> should sort before this
 control, but doesn't.  If two strings do collate identically, the one
 containing the C<NUL> will sort to earlier.  Prior to 5.26, there were
 more bugs.
+
+=head2 Multi-threaded
+
+XS code or C-language libraries called from it that use the system
+L<C<setlocale(3)>> function (except on Windows) likely will not work
+from a multi-threaded application without changes.  See
+L<perlxs/Locale-aware XS code>.
+
+An XS module that is locale-dependent could have been written under the
+assumption that it will never be called in a multi-threaded environment,
+and so uses other non-locale constructs that aren't multi-thread-safe.
+See L<perlxs/Thread-aware system interfaces>.
+
+POSIX does not define a way to get the name of the current per-thread
+locale.  Some systems, such as Darwin and NetBSD do implement a
+function, L<querylocale(3)> to do this.  On non-Windows systems without
+it, such as Linux, there are some additional caveats:
+
+=over
+
+=item *
+
+An embedded perl needs to be started up while the global locale is in
+effect.  See L<perlembed/Using embedded Perl with POSIX locales>.
+
+=item *
+
+It becomes more important for perl to know about all the possible
+locale categories on the platform, even if they aren't apparently used
+in your program.  Perl knows all of the Linux ones.  If your platform
+has others, you can send email to L<mailto:perlbug@perl.org> for
+inclusion of it in the next release.  In the meantime, it is possible to
+edit the Perl source to teach it about the category, and then recompile.
+Search for instances of, say, C<LC_PAPER> in the source, and use that as
+a template to add the omitted one.
+
+=item *
+
+It is possible, though hard to do, to call C<POSIX::setlocale> with a
+locale that it doesn't recognize as syntactically legal, but actually is
+legal on that system.  This should happen only with embedded perls, or
+if you hand-craft a locale name yourself.
+
+=back
 
 =head2 Broken systems
 

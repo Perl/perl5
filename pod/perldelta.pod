@@ -31,8 +31,18 @@ here, but most should go in the L</Performance Enhancements> section.
 
 This variable is 1 if the Perl interpreter is operating in an
 environment where it is safe to use and change locales (see
-L<perllocale>.)  Currently this is true only when the perl is
-unthreaded.
+L<perllocale>.)  This variable is true when the perl is
+unthreaded, or compiled in a platform that supports thread-safe locale
+operation (see next item).
+
+=head2 Locales are now thread-safe on systems that support them
+
+These systems include Windows starting with Visual Studio 2005, and in
+POSIX 2008 systems.
+
+The implication is that you are now free to use locales and changes them
+in a threaded environment.  Your changes affect only your thread.
+See L<perllocale/Multi-threaded operation>
 
 =head1 Security
 
@@ -375,6 +385,11 @@ one.
 
 A new API function L<perlapi/Perl_setlocale> has been added.
 
+=item *
+
+L<perlapi/sync_locale> has been revised to return a boolean as to
+whether the system was using the global locale or not.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -396,6 +411,14 @@ Previously compilation could continue in order to report other errors,
 but the failed sub-parse could leave partly parsed constructs on the
 parser shift-reduce stack, confusing the parser, leading to perl
 crashes. [perl #125351]
+
+=item *
+
+On threaded perls where the decimal point (radix) character is not a
+dot, it has been possible for a race to occur between threads when one
+needs to use the real radix character.  This has now been fixed by use
+of a mutex on systems without thread-safe locales, and the problem just
+doesn't come up on those with thread-safe locales.
 
 =back
 

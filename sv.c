@@ -15235,6 +15235,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_in_utf8_CTYPE_locale = proto_perl->Iin_utf8_CTYPE_locale;
     PL_in_utf8_COLLATE_locale = proto_perl->Iin_utf8_COLLATE_locale;
     my_strlcpy(PL_locale_utf8ness, proto_perl->Ilocale_utf8ness, sizeof(PL_locale_utf8ness));
+    PL_lc_numeric_mutex_depth = 0;
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 
@@ -15548,6 +15549,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
+#if   defined(USE_POSIX_2008_LOCALE)      \
+ &&   defined(USE_THREAD_SAFE_LOCALE)     \
+ && ! defined(HAS_QUERYLOCALE)
+    for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
+        PL_curlocales[i] = savepv("."); /* An illegal value */
+    }
+#endif
 #ifdef USE_LOCALE_CTYPE
     /* Should we warn if uses locale? */
     PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);

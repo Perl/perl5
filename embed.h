@@ -714,9 +714,12 @@
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
-#define sync_locale()		Perl_sync_locale(aTHX)
+#define switch_to_global_locale	Perl_switch_to_global_locale
+#define sync_locale		Perl_sync_locale
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
+#define thread_locale_init	Perl_thread_locale_init
+#define thread_locale_term	Perl_thread_locale_term
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
@@ -1347,7 +1350,6 @@
 #define newSVavdefelem(a,b,c)	Perl_newSVavdefelem(aTHX_ a,b,c)
 #define newXS_deffile(a,b)	Perl_newXS_deffile(aTHX_ a,b)
 #define newXS_len_flags(a,b,c,d,e,f,g)	Perl_newXS_len_flags(aTHX_ a,b,c,d,e,f,g)
-#define new_numeric(a)		Perl_new_numeric(aTHX_ a)
 #define nextargv(a,b)		Perl_nextargv(aTHX_ a,b)
 #define noperl_die		Perl_noperl_die
 #define notify_parser_that_changed_to_utf8()	Perl_notify_parser_that_changed_to_utf8(aTHX)
@@ -1633,8 +1635,12 @@
 #    if defined(USE_LOCALE)
 #define new_collate(a)		S_new_collate(aTHX_ a)
 #define new_ctype(a)		S_new_ctype(aTHX_ a)
+#define new_numeric(a)		S_new_numeric(aTHX_ a)
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
+#      if defined(USE_POSIX_2008_LOCALE)
+#define emulate_setlocale	S_emulate_setlocale
+#      endif
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #      endif

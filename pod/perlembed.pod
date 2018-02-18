@@ -1108,6 +1108,11 @@ C pre-processor symbol C<HAS_SKIP_LOCALE_INIT>.  This allows code that
 has to work with multiple Perl versions to do some sort of work-around
 when confronted with an earlier Perl.
 
+If your program is using the POSIX 2008 multi-thread locale
+functionality, you should switch into the global locale and set that up
+properly before starting the Perl interpreter.  It will then properly
+switch back to using the thread-safe functions.
+
 =head1 Hiding Perl_
 
 If you completely hide the short forms of the Perl public API,

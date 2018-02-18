@@ -360,12 +360,14 @@ unless ($define{'USE_ITHREADS'}) {
     ++$skip{$_} foreach qw(
                     PL_keyword_plugin_mutex
 		    PL_check_mutex
+                    PL_curlocales
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
 		    PL_dollarzero_mutex
 		    PL_hints_mutex
 		    PL_locale_mutex
+		    PL_lc_numeric_mutex
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_stashpad

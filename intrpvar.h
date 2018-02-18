@@ -262,6 +262,7 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
+PERLVARI(I, lc_numeric_mutex_depth, int, 0)   /* Emulate general semaphore */
 PERLVARA(I, locale_utf8ness, 256, char)
 
 #ifdef USE_LOCALE_CTYPE
@@ -575,7 +576,15 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
+#if defined(USE_POSIX_2008_LOCALE)          \
+ && defined(USE_THREAD_SAFE_LOCALE)         \
+ && ! defined(HAS_QUERYLOCALE)
+
+PERLVARA(I, curlocales, 12, char *)
+
+#endif
 #ifdef USE_LOCALE_COLLATE
+
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
 PERLVARI(I, collxfrm_mult,Size_t, 2)	/* Expansion factor in *xfrm() */
