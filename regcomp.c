@@ -19219,7 +19219,7 @@ S_get_ANYOFM_contents(pTHX_ const regnode * n) {
      * node 'n' */
 
     SV * cp_list = _new_invlist(-1);
-    const U8 lowest = ARG(n);
+    const U8 lowest = (U8) ARG(n);
     unsigned int i;
     U8 count = 0;
     U8 needed = 1U << PL_bitcount[ (U8) ~ FLAGS(n)];
