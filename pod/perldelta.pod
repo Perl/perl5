@@ -366,7 +366,10 @@ well.
 
 =item *
 
-XXX
+A new compiler C<#define>, C<dTHX_DEBUGGING>. has been added.  This is
+useful for XS or C code that only need the thread context because their
+debugging statements that get compiled only under C<-DDEBUGGING> need
+one.
 
 =back
 
