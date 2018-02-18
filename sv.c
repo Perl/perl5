@@ -7802,8 +7802,6 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
     STRLEN cur1;
     const char *pv2;
     STRLEN cur2;
-    I32  eq     = 0;
-    SV* svrecode = NULL;
 
     if (!sv1) {
 	pv1 = "";
@@ -7843,11 +7841,9 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
     }
 
     if (cur1 == cur2)
-	eq = (pv1 == pv2) || memEQ(pv1, pv2, cur1);
-	
-    SvREFCNT_dec(svrecode);
-
-    return eq;
+	return (pv1 == pv2) || memEQ(pv1, pv2, cur1);
+    else
+	return 0;
 }
 
 /*
