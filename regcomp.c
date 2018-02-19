@@ -11363,43 +11363,43 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                                 || RExC_parse[1] == '<'
                                 || RExC_parse[1] == '{'))
 		        || (       RExC_parse[0] == '*'        /* (?(*...)) */
-                            && (   memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "pla:")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "plb")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "nla")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "nlb")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "positive_lookahead")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "positive_lookbehind")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "negative_lookahead")
-                                || memBEGINs(RExC_parse +1,
-                                             (Size_t) (RExC_end - (RExC_parse + 1)),
-                                             "negative_lookbehind"))))
-                    ) { /* Lookahead or eval. */
-			I32 flag;
-                        regnode *tail;
+                            && (   memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "pla:")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "plb")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "nla")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "nlb")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "positive_lookahead")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "positive_lookbehind")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "negative_lookahead")
+                                || memBEGINs(RExC_parse + 1,
+                                         (Size_t) (RExC_end - (RExC_parse + 1)),
+                                         "negative_lookbehind"))))
+                ) { /* Lookahead or eval. */
+                    I32 flag;
+                    regnode *tail;
 
-			ret = reg_node(pRExC_state, LOGICAL);
-			if (!SIZE_ONLY)
-			    ret->flags = 1;
+                    ret = reg_node(pRExC_state, LOGICAL);
+                    if (!SIZE_ONLY)
+                        ret->flags = 1;
 
-                        tail = reg(pRExC_state, 1, &flag, depth+1);
-                        RETURN_NULL_ON_RESTART(flag,flagp);
-                        REGTAIL(pRExC_state, ret, tail);
-			goto insert_if;
-		    }
+                    tail = reg(pRExC_state, 1, &flag, depth+1);
+                    RETURN_NULL_ON_RESTART(flag,flagp);
+                    REGTAIL(pRExC_state, ret, tail);
+                    goto insert_if;
+                }
 		else if (   RExC_parse[0] == '<'     /* (?(<NAME>)...) */
 		         || RExC_parse[0] == '\'' ) /* (?('NAME')...) */
 	        {
