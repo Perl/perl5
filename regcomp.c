@@ -10699,45 +10699,48 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
          * here (if paren ==2).  The forms '(*VERB' and '(?...' disallow such
          * intervening space, as the sequence is a token, and a token should be
          * indivisible */
-        bool has_intervening_patws = (paren == 2 || paren == 's')
+        bool has_intervening_patws = (paren == 2)
                                   && *(RExC_parse - 1) != '(';
 
         if (RExC_parse >= RExC_end) {
 	    vFAIL("Unmatched (");
         }
 
-        if (paren == 's') {
-
-            /* A nested script run  is a no-op besides clustering */
-            if (RExC_in_script_run) {
-                paren = ':';
-                nextchar(pRExC_state);
-                ret = NULL;
-                goto parse_rest;
-            }
-            RExC_in_script_run = 1;
-
-	    ret = reg_node(pRExC_state, SROPEN);
-            is_open = 1;
-        }
-        else if ( *RExC_parse == '*') { /* (*VERB:ARG) */
+        if ( *RExC_parse == '*') { /* (*VERB:ARG), (*construct:...) */
 	    char *start_verb = RExC_parse + 1;
 	    STRLEN verb_len;
 	    char *start_arg = NULL;
 	    unsigned char op = 0;
             int arg_required = 0;
             int internal_argval = -1; /* if >-1 we are not allowed an argument*/
+            bool has_upper = FALSE;
 
             if (has_intervening_patws) {
                 RExC_parse++;   /* past the '*' */
-                vFAIL("In '(*VERB...)', the '(' and '*' must be adjacent");
+
+                /* For strict backwards compatibility, don't change the message
+                 * now that we also have lowercase operands */
+                if (isUPPER(*RExC_parse)) {
+                    vFAIL("In '(*VERB...)', the '(' and '*' must be adjacent");
+                }
+                else {
+                    vFAIL("In '(*...)', the '(' and '*' must be adjacent");
+                }
             }
 	    while (RExC_parse < RExC_end && *RExC_parse != ')' ) {
 	        if ( *RExC_parse == ':' ) {
 	            start_arg = RExC_parse + 1;
 	            break;
 	        }
-	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                else if (! UTF) {
+                    if (isUPPER(*RExC_parse)) {
+                        has_upper = TRUE;
+                    }
+                    RExC_parse++;
+                }
+                else {
+                    RExC_parse += UTF8SKIP(RExC_parse);
+                }
 	    }
 	    verb_len = RExC_parse - start_verb;
 	    if ( start_arg ) {
@@ -10746,16 +10749,27 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 }
 
 	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-	        while ( RExC_parse < RExC_end && *RExC_parse != ')' )
+	        while ( RExC_parse < RExC_end && *RExC_parse != ')' ) {
                     RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-	        if ( RExC_parse >= RExC_end || *RExC_parse != ')' )
+                }
+	        if ( RExC_parse >= RExC_end || *RExC_parse != ')' ) {
                   unterminated_verb_pattern:
-	            vFAIL("Unterminated verb pattern argument");
-	        if ( RExC_parse == start_arg )
-	            start_arg = NULL;
+                    if (has_upper) {
+                        vFAIL("Unterminated verb pattern argument");
+                    }
+                    else {
+                        vFAIL("Unterminated '(*...' argument");
+                    }
+                }
 	    } else {
-	        if ( RExC_parse >= RExC_end || *RExC_parse != ')' )
-	            vFAIL("Unterminated verb pattern");
+	        if ( RExC_parse >= RExC_end || *RExC_parse != ')' ) {
+                    if (has_upper) {
+                        vFAIL("Unterminated verb pattern");
+                    }
+                    else {
+                        vFAIL("Unterminated '(*...' construct");
+                    }
+                }
 	    }
 
             /* Here, we know that RExC_parse < RExC_end */
@@ -10798,13 +10812,68 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     RExC_seen |= REG_CUTGROUP_SEEN;
                 }
                 break;
-	    }
+            case 's':
+                if (   memEQs(start_verb, verb_len, "sr")
+                    || memEQs(start_verb, verb_len, "script_run"))
+                {
+                    paren = 's';
+
+                    /* This indicates Unicode rules. */
+                    REQUIRE_UNI_RULES(flagp, NULL);
+
+                    if (! start_arg) {
+                        goto no_colon;
+                    }
+
+                    RExC_parse = start_arg;
+
+                    if (PASS2) {
+                        Perl_ck_warner_d(aTHX_
+                            packWARN(WARN_EXPERIMENTAL__SCRIPT_RUN),
+                            "The script_run feature is experimental"
+                            REPORT_LOCATION, REPORT_LOCATION_ARGS(RExC_parse));
+
+                    }
+
+                    if (RExC_in_script_run) {
+                        paren = ':';
+                        nextchar(pRExC_state);
+                        ret = NULL;
+                        goto parse_rest;
+                    }
+                    RExC_in_script_run = 1;
+
+                    ret = reg_node(pRExC_state, SROPEN);
+
+                    is_open = 1;
+                    goto parse_rest;
+                }
+
+                break;
+
+              no_colon:
+                vFAIL2utf8f(
+                "'(*%" UTF8f "' requires a terminating ':'",
+                UTF8fARG(UTF, verb_len, start_verb));
+		NOT_REACHED; /*NOTREACHED*/
+
+	    } /* End of switch */
 	    if ( ! op ) {
 	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-                vFAIL2utf8f(
+                if (has_upper || verb_len == 0) {
+                    vFAIL2utf8f(
                     "Unknown verb pattern '%" UTF8f "'",
                     UTF8fARG(UTF, verb_len, start_verb));
+                }
+                else {
+                    vFAIL2utf8f(
+                    "Unknown '(*...)' construct '%" UTF8f "'",
+                    UTF8fARG(UTF, verb_len, start_verb));
+                }
 	    }
+            if ( RExC_parse == start_arg ) {
+                start_arg = NULL;
+            }
             if ( arg_required && !start_arg ) {
                 vFAIL3("Verb pattern '%.*s' has a mandatory argument",
                     verb_len, start_verb);
@@ -10831,45 +10900,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             }
 	    nextchar(pRExC_state);
 	    return ret;
-        }
-        else if (*RExC_parse == '+') { /* (+...) */
-            RExC_parse++;
-
-            if (has_intervening_patws) {
-                /* XXX Note that a potential gotcha is that outside of /x '( +
-                 * ...)' means to match a space at least once ...   This is a
-                 * problem elsewhere too */
-                vFAIL("In '(+...)', the '(' and '+' must be adjacent");
-            }
-
-            if (! memBEGINPs(RExC_parse, (STRLEN) (RExC_end - RExC_parse),
-                             "script_run:"))
-            {
-                RExC_parse += strcspn(RExC_parse, ":)");
-                vFAIL("Unknown (+ pattern");
-            }
-            else {
-
-                /* This indicates Unicode rules. */
-                REQUIRE_UNI_RULES(flagp, NULL);
-
-                RExC_parse += sizeof("script_run:") - 1;
-
-                if (PASS2) {
-                    Perl_ck_warner_d(aTHX_
-                        packWARN(WARN_EXPERIMENTAL__SCRIPT_RUN),
-                        "The script_run feature is experimental"
-                        REPORT_LOCATION, REPORT_LOCATION_ARGS(RExC_parse));
-                }
-
-                ret = reg(pRExC_state, 's', &flags, depth+1);
-                if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                    return NULL;
-                }
-
-                return ret;
-            }
         }
         else if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
@@ -11476,7 +11506,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             paren = ':';
 	    ret = NULL;
 	}
-	}
+        }
     }
     else                        /* ! paren */
 	ret = NULL;

@@ -284,9 +284,16 @@ my @death =
  'm/\cß/' => "Character following \"\\c\" must be printable ASCII",
  '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', the \'(\' and \'?\' must be adjacent {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
  '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
- '/((?# This is a comment in the middle of a token)+script_run:foo)/' => 'In \'(+...)\', the \'(\' and \'+\' must be adjacent {#} m/((?# This is a comment in the middle of a token)+{#}script_run:foo)/',
+ '/((?# This is a comment in the middle of a token)*script_run:foo)/' => 'In \'(*...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}script_run:foo)/',
 
- '/(+script_runfoo)/' => 'Unknown (+ pattern {#} m/(+script_runfoo{#})/',
+ '/(*script_runfoo)/' => 'Unknown \'(*...)\' construct \'script_runfoo\' {#} m/(*script_runfoo){#}/',
+ '/(*srfoo)/' => 'Unknown \'(*...)\' construct \'srfoo\' {#} m/(*srfoo){#}/',
+ '/(*script_run)/' => '\'(*script_run\' requires a terminating \':\' {#} m/(*script_run{#})/',
+ '/(*sr)/' => '\'(*sr\' requires a terminating \':\' {#} m/(*sr{#})/',
+ '/(*script_run/' => 'Unterminated \'(*...\' construct {#} m/(*script_run{#}/',
+ '/(*sr/' => 'Unterminated \'(*...\' construct {#} m/(*sr{#}/',
+ '/(*script_run:foo/' => 'Unterminated \'(*...\' argument {#} m/(*script_run:foo{#}/',
+ '/(*sr:foo/' => 'Unterminated \'(*...\' argument {#} m/(*sr:foo{#}/',
  '/(?[\ &!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ &!{#}])/',    # [perl #126180]
  '/(?[\ +!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ +!{#}])/',    # [perl #126180]
  '/(?[\ -!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ -!{#}])/',    # [perl #126180]
@@ -461,7 +468,7 @@ my @death_utf8 = mark_as_utf8(
  '/ネ(?[ \t ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[ \\t ]{#}/",
  '/(?[ \t + \e # ネ This was supposed to be a comment ])/' =>
     "Syntax error in (?[...]) {#} m/(?[ \\t + \\e # ネ This was supposed to be a comment ]){#}/",
- 'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>,
+ 'm/(*ネ)ネ/' => q<Unknown '(*...)' construct 'ネ' {#} m/(*ネ){#}ネ/>,
  '/\cネ/' => "Character following \"\\c\" must be printable ASCII",
  '/\b{ネ}/' => "'ネ' is an unknown bound type {#} m/\\b{ネ{#}}/",
  '/\B{ネ}/' => "'ネ' is an unknown bound type {#} m/\\B{ネ{#}}/",
@@ -668,9 +675,9 @@ my @experimental_regex_sets = (
 );
 
 my @experimental_script_run = (
-    '/(+script_run:paypal.com)/' => 'The script_run feature is experimental {#} m/(+script_run:{#}paypal.com)/',
-    'use utf8; /utf8 ネ (+script_run:ネ)/' => do { use utf8; 'The script_run feature is experimental {#} m/utf8 ネ (+script_run:{#}ネ)/' },
-    '/noutf8 ネ (+script_run:ネ)/' => 'The script_run feature is experimental {#} m/noutf8 ネ (+script_run:{#}ネ)/',
+    '/(*script_run:paypal.com)/' => 'The script_run feature is experimental {#} m/(*script_run:{#}paypal.com)/',
+    'use utf8; /utf8 ネ (*script_run:ネ)/' => do { use utf8; 'The script_run feature is experimental {#} m/utf8 ネ (*script_run:{#}ネ)/' },
+    '/noutf8 ネ (*script_run:ネ)/' => 'The script_run feature is experimental {#} m/noutf8 ネ (*script_run:{#}ネ)/',
 );
 
 my @deprecated = (

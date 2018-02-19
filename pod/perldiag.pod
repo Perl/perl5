@@ -3009,12 +3009,13 @@ expression pattern should be an indivisible token, with nothing
 intervening between the C<"("> and the C<"?">, but you separated them
 with whitespace.
 
-=item In '(+...)', the '(' and '+' must be adjacent in regex;
+=item In '(*...)', the '(' and '*' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
 
-(F) The two-character sequence C<"(+"> in this context in a regular
+(F) The two-character sequence C<"(*"> in this context in a regular
 expression pattern should be an indivisible token, with nothing
-intervening between the C<"("> and the C<"+">, but you separated them.
+intervening between the C<"("> and the C<"*">, but you separated them.
+Fix the pattern and retry.
 
 =item Invalid %s attribute: %s
 
@@ -5423,6 +5424,11 @@ terminates.  You might use ^# instead.  See L<perlform>.
 search list.  So the additional elements in the replacement list
 are meaningless.
 
+=item '(*%s' requires a terminating ':' in regex; marked by <-- HERE in m/%s/
+
+(F) You used a construct that needs a colon and pattern argument.
+Supply these or check that you are using the right construct.
+
 =item '%s' resolved to '\o{%s}%d'
 
 (W misc, regexp)  You wrote something like C<\08>, or C<\179> in a
@@ -6625,6 +6631,11 @@ exactly, regardless of whether C<:loose> is used or not.)  This error may
 also happen if the C<\N{}> is not in the scope of the corresponding
 C<S<use charnames>>.
 
+=item Unknown '(*...)' construct '%s' in regex; marked by <-- HERE in m/%s/
+
+(F) The C<(*> was followed by something that the regular expression
+compiler does not recognize.  Check your spelling.
+
 =item Unknown error
 
 (P) Perl was about to print an error message in C<$@>, but the C<$@> variable
@@ -6643,11 +6654,6 @@ your needs.
 (F) The second argument of 3-argument open() is not among the list
 of valid modes: C<< < >>, C<< > >>, C<<< >> >>>, C<< +< >>,
 C<< +> >>, C<<< +>> >>>, C<-|>, C<|->, C<< <& >>, C<< >& >>.
-
-=item Unknown (+ pattern in regex; marked by S<<-- HERE> in m/%s/
-
-(F) The C<(+> was followed by something that the regular expression
-compiler does not recognize.  Check your spelling.
 
 =item Unknown PerlIO layer "%s"
 
@@ -6841,6 +6847,11 @@ declares it to be in a Unicode encoding that Perl cannot read.
 (F) Your machine doesn't support the Berkeley socket mechanism, or at
 least that's what Configure thought.
 
+=item Unterminated '(*...' argument in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern of the form C<(*...:...)> but did not terminate
+the pattern with a C<)>.  Fix the pattern and retry.
+
 =item Unterminated attribute list
 
 (F) The lexer found something other than a simple identifier at the
@@ -6860,6 +6871,11 @@ character to get your parentheses to balance.  See L<attributes>.
 (F) An argument to unpack("w",...) was incompatible with the BER
 compressed integer format and could not be converted to an integer.
 See L<perlfunc/pack>.
+
+=item Unterminated '(*...' construct in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern of the form C<(*...)> but did not terminate
+the pattern with a C<)>.  Fix the pattern and retry.
 
 =item Unterminated delimiter for here document
 

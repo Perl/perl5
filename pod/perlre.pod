@@ -708,7 +708,7 @@ the pattern uses L</C<(?[ ])>>
 
 =item 8
 
-the pattern uses L<C<(+script_run: ...)>|/Script Runs>
+the pattern uses L<C<(*script_run: ...)>|/Script Runs>
 
 =back
 
@@ -2421,6 +2421,7 @@ where side-effects of lookahead I<might> have influenced the
 following match, see L</C<< (?>pattern) >>>.
 
 =head2 Script Runs
+X<(*script_run:...)> X<(sr:...)>
 
 A script run is basically a sequence of characters, all from the same
 Unicode script (see L<perlunicode/Scripts>), such as Latin or Greek.  In
@@ -2438,9 +2439,11 @@ the real Paypal website, but an attacker would craft a look-alike one to
 attempt to gather sensitive information from the person.
 
 Starting in Perl 5.28, it is now easy to detect strings that aren't
-script runs.  Simply enclose just about any pattern like this:
+script runs.  Simply enclose just about any pattern like either of
+these:
 
- (+script_run:pattern)
+ (*script_run:pattern)
+ (*sr:pattern)
 
 What happens is that after I<pattern> succeeds in matching, it is
 subjected to the additional criterion that every character in it must be
@@ -2451,7 +2454,7 @@ backtracking, but generally, only malicious input will result in this,
 though the slow down could cause a denial of service attack.  If your
 needs permit, it is best to make the pattern atomic.
 
- (+script_run:(?>pattern))
+ (*script_run:(?>pattern))
 
 (See L</C<(?E<gt>pattern)>>.)
 
@@ -2470,7 +2473,7 @@ own set.  This is because these are often used in commerce even in such
 scripts.  But any mixing of the ASCII and other digits will cause the
 sequence to not be a script run, failing the match.  As an example,
 
- qr/(+script_run: \d+ \b )/x
+ qr/(*script_run: \d+ \b )/x
 
 guarantees that the digits matched will all be from the same set of 10.
 You won't get a look-alike digit from a different script that has a
