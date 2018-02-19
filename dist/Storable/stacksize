@@ -103,7 +103,7 @@ sub cmd {
 sub good {
     my $i = shift; # this passed
     my $j = $i + abs(int(($bad - $i) / 2));
-    print "$i passed, try more $j ...\n" unless QUIET;
+    print "Storable: determining recursion limit: $i passed, try more $j ...\n" unless QUIET;
     $good = $i;
     if ($j <= $i) {
         $found++;
@@ -114,7 +114,7 @@ sub good {
 sub bad {
     my $i = shift; # this failed
     my $j = $i - abs(int(($i - $good) / 2));
-    print "$i failed, try less $j ...\n" unless QUIET;
+    print "Storable: determining recursion limit: $i too big, try less $j ...\n" unless QUIET;
     $bad = $i;
     if ($j >= $i) {
         $j = $good;
