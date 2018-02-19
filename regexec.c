@@ -1451,7 +1451,7 @@ Perl_re_intuit_start(pTHX_
 #define DECL_TRIE_TYPE(scan) \
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold,       \
                  trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold,              \
-                 trie_utf8l, trie_flu8 }                                            \
+                 trie_utf8l, trie_flu8, trie_flu8_latin }                           \
                     trie_type = ((scan->flags == EXACT)                             \
                                  ? (utf8_target ? trie_utf8 : trie_plain)           \
                                  : (scan->flags == EXACTL)                          \
@@ -1461,10 +1461,12 @@ Perl_re_intuit_start(pTHX_
                                          ? trie_utf8_exactfa_fold                   \
                                          : trie_latin_utf8_exactfa_fold)            \
                                       : (scan->flags == EXACTFLU8                   \
-                                         ? trie_flu8                                \
+                                         ? (utf8_target                             \
+                                           ? trie_flu8                              \
+                                           : trie_flu8_latin)                       \
                                          : (utf8_target                             \
                                            ? trie_utf8_fold                         \
-                                           :   trie_latin_utf8_fold)))
+                                           : trie_latin_utf8_fold)))
 
 /* 'uscan' is set to foldbuf, and incremented, so below the end of uscan is
  * 'foldbuf+sizeof(foldbuf)' */
@@ -1475,7 +1477,7 @@ STMT_START {                                                                    
     switch (trie_type) {                                                            \
     case trie_flu8:                                                                 \
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
-        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                             \
+        if (UTF8_IS_ABOVE_LATIN1(*uc)) {                                            \
             _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end - uc);                \
         }                                                                           \
         goto do_trie_utf8_fold;                                                     \
@@ -1497,10 +1499,14 @@ STMT_START {                                                                    
             uscan = foldbuf + skiplen;                                              \
         }                                                                           \
         break;                                                                      \
+    case trie_flu8_latin:                                                           \
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        goto do_trie_latin_utf8_fold;                                               \
     case trie_latin_utf8_exactfa_fold:                                              \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
         /* FALLTHROUGH */                                                           \
     case trie_latin_utf8_fold:                                                      \
+      do_trie_latin_utf8_fold:                                                      \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );     \
             foldlen -= len;                                                         \
