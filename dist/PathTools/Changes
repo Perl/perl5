@@ -1,5 +1,8 @@
 Revision history for Perl distribution PathTools.
 
+3.74
+- No changes.
+
 3.73
 - Define NEED_croak_xs_usage, fixing usage of croak_xs_usage()
 - [perl #132853] Add metadata (ABSTRACT, LICENSE, AUTHOR)

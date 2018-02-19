@@ -13,8 +13,8 @@ lib/File/Spec/VMS.pm
 lib/File/Spec/Win32.pm
 Makefile.PL
 MANIFEST			This list of files
-PathTools-3.73/META.json
-PathTools-3.73/META.yml
+META.json
+META.yml
 ppport.h
 t/abs2rel.t
 t/crossplatform.t
