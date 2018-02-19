@@ -3514,6 +3514,9 @@ dist/I18N-LangTags/t/55_supers_strict.t		See whether I18N::LangTags works
 dist/I18N-LangTags/t/80_all_env.t		See whether I18N::LangTags works
 dist/if/Changes			if perl module change log
 dist/if/if.pm			For "use if"
+dist/if/MANIFEST		MANIFEST for if.pm
+dist/if/META.json		META.json for if.pm
+dist/if/META.yml		META.json for if.pm
 dist/if/t/if.t			Tests for "use if"
 dist/IO/ChangeLog		IO perl module change log
 dist/IO/hints/sco.pl		Hint for IO for named architecture
