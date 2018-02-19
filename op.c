@@ -3204,16 +3204,16 @@ S_maybe_multiconcat(pTHX_ OP *o)
             OP *prev;
 
             /* set prev to the sibling *before* the arg to be cut out,
-             * e.g.:
+             * e.g. when cutting EXPR:
              *
              *         |
-             * kid=  CONST
+             * kid=  CONCAT
              *         |
-             * prev= CONST -- EXPR
+             * prev= CONCAT -- EXPR
              *         |
              */
             if (argp == args && kid->op_type != OP_CONCAT) {
-                /* in e.g. '$x . = f(1)' there's no RHS concat tree
+                /* in e.g. '$x .= f(1)' there's no RHS concat tree
                  * so the expression to be cut isn't kid->op_last but
                  * kid itself */
                 OP *o1, *o2;
