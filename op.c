@@ -6952,9 +6952,15 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
 		op_null(scope);
 	    }
 
-	    if (is_compiletime)
-		/* runtime finalizes as part of finalizing whole tree */
-                optimize_optree(o);
+            /* XXX optimize_optree() must be called on o before
+             * CALL_PEEP(), as currently S_maybe_multiconcat() can't
+             * currently cope with a peephole-optimised optree.
+             * Calling optimize_optree() here ensures that condition
+             * is met, but may mean optimize_optree() is applied
+             * to the same optree later (where hopefully it won't do any
+             * harm as it can't convert an op to multiconcat if it's
+             * already been converted */
+            optimize_optree(o);
 
 	    /* have to peep the DOs individually as we've removed it from
 	     * the op_next chain */
