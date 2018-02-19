@@ -390,6 +390,19 @@ A new API function L<perlapi/Perl_setlocale> has been added.
 L<perlapi/sync_locale> has been revised to return a boolean as to
 whether the system was using the global locale or not.
 
+=item *
+
+A new kind of magic scalar, called a "nonelem" scalar, has been introduced.
+It is stored in an array to denote a nonexistent element, whenever such an
+element is accessed in a potential lvalue context.  It replaces the
+existing "defelem" (deferred element) magic wherever this is possible,
+being significantly more efficient.  This means that
+C<some_sub($sparse_array[$nonelem])> no longer has to create a new magic
+defelem scalar each time, as long as the element is within the array.
+
+It partially fixes the rare bug of deferred elements getting out of synch
+with their arrays when the array is shifted or unshifted.  [perl #132729]
+
 =back
 
 =head1 Selected Bug Fixes
