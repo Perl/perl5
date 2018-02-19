@@ -10689,7 +10689,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
      * RExC_parse beyond the '('.  Things like '(?' are indivisible tokens, and
      * this flag alerts us to the need to check for that */
 {
-    regnode *ret;		/* Will be the head of the group. */
+    regnode *ret = NULL;    /* Will be the head of the group. */
     regnode *br;
     regnode *lastbr;
     regnode *ender = NULL;
