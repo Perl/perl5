@@ -6103,7 +6103,7 @@ from under another module inadvertently.  See L<perlvar/$[> and L<arybase>.
 =item The alpha_assertions feature is experimental
 
 (S experimental::alpha_assertions) This feature is experimental
-and its behavior may in any future release of perl.  See
+and its behavior may change in any future release of perl.  See
 L<perlre/Extended Patterns>.
 
 =item The crypt() function is unimplemented due to excessive paranoia.
