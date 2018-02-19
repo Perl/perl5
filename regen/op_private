@@ -824,7 +824,7 @@ addbits('multiconcat',
     6 => qw(OPpMULTICONCAT_APPEND APPEND), # $x .= ....
     5 => qw(OPpMULTICONCAT_FAKE   FAKE),   # sprintf() optimised to MC.
   # 4       OPpTARGET_MY
-    3 => qw(OPpMULTICONCAT_STRINGIFY STRINGIFY), # "$a$b...", (for Deparse.pm)
+    3 => qw(OPpMULTICONCAT_STRINGIFY STRINGIFY), # "$a$b..."
 );
 
 
