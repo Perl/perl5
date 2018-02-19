@@ -11368,25 +11368,25 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                                          "pla:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "plb")
+                                         "plb:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "nla")
+                                         "nla:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "nlb")
+                                         "nlb:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "positive_lookahead")
+                                         "positive_lookahead:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "positive_lookbehind")
+                                         "positive_lookbehind:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "negative_lookahead")
+                                         "negative_lookahead:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "negative_lookbehind"))))
+                                         "negative_lookbehind:"))))
                 ) { /* Lookahead or eval. */
                     I32 flag;
                     regnode *tail;
