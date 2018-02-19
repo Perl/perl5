@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (190);
+plan (194);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -657,6 +657,35 @@ $#a = -1; $#a++;
    aftermath:
     is "[@a]", "[7 3 1]",
        'non-elems read from magical @a do not lose their position';
+}
+# perl #132729, as it applies to ‘holes’ in an array passed to a sub
+# individually
+{
+    my @a;
+    $a[1] = 1;
+    sub { unshift @a, 7; $_[0] = 3; }->($a[0]);
+    is "[@a]", "[7 3 1]",
+       'holes passed to sub do not lose their position (multideref)';
+    @a = ();
+    $#a++; # make it magical
+    $a[1] = 1;
+    sub { unshift @a, 7; $_[0] = 3; }->($a[0]);
+    is "[@a]", "[7 3 1]",
+       'holes passed to sub do not lose their position (multideref, mg)';
+}
+{
+    # Again, with aelem, not multideref
+    my @a;
+    $a[1] = 1;
+    sub { unshift @a, 7; $_[0] = 3; }->($a[${\0}]);
+    is "[@a]", "[7 3 1]",
+       'holes passed to sub do not lose their position (aelem)';
+    @a = ();
+    $#a++; # make it magical
+    $a[1] = 1;
+    sub { unshift @a, 7; $_[0] = 3; }->($a[${\0}]);
+    is "[@a]", "[7 3 1]",
+       'holes passed to sub do not lose their position (aelem, mg)';
 }
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
