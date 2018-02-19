@@ -361,8 +361,8 @@ In addition:
                                sprintf "...%s...". Don't call '.'
                                overloading: only use '""' overloading.
 
-    OPpMULTICONCAT_STRINGIFY:  (for Deparse's benefit) the RHS was of the
-                               form "...$a...$b..." rather than
+    OPpMULTICONCAT_STRINGIFY:  the RHS was of the form
+                               "...$a...$b..." rather than
                                "..." . $a . "..." . $b . "..."
 
 An OP_MULTICONCAT is of type UNOP_AUX. The fixed slots of the aux array are
@@ -948,7 +948,7 @@ PP(pp_multiconcat)
         SV **svp;
         const char    *cpv  = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
         UNOP_AUX_item *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
-        bool first = TRUE; /* first call to S_do_concat */
+        Size_t arg_count = 0; /* how many args have been processed */
 
         if (!cpv) {
             cpv = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
@@ -964,9 +964,44 @@ PP(pp_multiconcat)
          */
 
         n = nargs *2 + 1;
-        for (i = 0; i < n + is_append; i++) {
+        for (i = 0; i <= n; i++) {
+            SSize_t len;
+
+            /* if necessary, stringify the final RHS result in
+             * something like $targ .= "$a$b$c" - simulating
+             * pp_stringify
+             */
+            if (    i == n
+                && (PL_op->op_private &OPpMULTICONCAT_STRINGIFY)
+                && !(SvPOK(left))
+                /* extra conditions for backwards compatibility:
+                 * probably incorrect, but keep the existing behaviour
+                 * for now. The rules are:
+                 *     $x   = "$ov"     single arg: stringify;
+                 *     $x   = "$ov$y"   multiple args: don't stringify,
+                 *     $lex = "$ov$y$z" except TARGMY with at least 2 concats
+                 */
+                && (   arg_count == 1
+                    || (     arg_count >= 3
+                        && !is_append
+                        &&  (PL_op->op_private & OPpTARGET_MY)
+                        && !(PL_op->op_private & OPpLVAL_INTRO)
+                       )
+                   )
+            )
+            {
+                SV *tmp = sv_newmortal();
+                sv_copypv(tmp, left);
+                SvSETMAGIC(tmp);
+                left = tmp;
+            }
+
+            /* do one extra iteration to handle $targ in $targ .= ... */
+            if (i == n && !is_append)
+                break;
+
             /* get the next arg SV or regen the next const SV */
-            SSize_t len = lens[i >> 1].ssize;
+            len = lens[i >> 1].ssize;
             if (i == n) {
                 /* handle the final targ .= (....) */
                 right = left;
@@ -981,18 +1016,19 @@ PP(pp_multiconcat)
                 cpv += len;
             }
 
-            if (!left) {
+            arg_count++;
+
+            if (arg_count <= 1) {
                 left = right;
                 continue; /* need at least two SVs to concat together */
             }
 
-            if (first && i < n) {
+            if (arg_count == 2 && i < n) {
                 /* for the first concat, create a mortal acting like the
                  * padtmp from OP_CONST. In later iterations this will
                  * be appended to */
                 nexttarg = sv_newmortal();
                 nextappend = FALSE;
-                first = FALSE;
             }
             else {
                 nexttarg = left;

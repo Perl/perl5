@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5340;
+plan tests => 5362;
 
 use Scalar::Util qw(tainted);
 
@@ -3069,4 +3069,108 @@ package RT132827 {
     my $ov = bless [];
     my $b = $ov . "b";
     ::is(ref \$ov, "SCALAR", "RT #132827");
+}
+
+# RT #132793
+# An arg like like "$b" in $overloaded .= "$b" should be stringified
+# before being passed to the method
+
+package RT132793 {
+    my $type;
+    my $str = 0;
+    use overload
+        '.=' => sub { $type = ref(\$_[1]); "foo"; },
+        '""' => sub { $str++;              "bar" };
+
+    my $a = bless {};
+    my $b = bless {};
+    $a .= "$b";
+    ::is($type, "SCALAR", "RT #132793 type");
+    ::is($str,  1,        "RT #132793 stringify count");
+}
+
+# RT #132801
+# A second RHS-not-stringified bug
+
+package RT132801 {
+    my $type;
+    my $str    = 0;
+    my $concat = 0;
+    use overload
+        '.'  => sub { $concat++; bless []; },
+        '""' => sub { $str++;    "bar" };
+
+    my $a = "A";
+    my $b = bless [];
+    my $c;
+    $c = "$a-$b";
+    ::is($concat, 1, "RT #132801 concat count");
+    ::is($str,    1, "RT #132801 stringify count");
+}
+
+# General testing of optimising away OP_STRINGIFY, and whether
+# OP_MULTICONCAT emulates existing behaviour.
+#
+# It could well be argued that the existing behaviour is buggy, but
+# for now emulate the old behaviour.
+#
+# In more detail:
+#
+# Since 5.000, any OP_STRINGIFY immediately following an OP_CONCAT
+# is optimised away, on the assumption that since concat will always
+# return a valid string anyway, it doesn't need stringifying.
+# So in "$x", the stringify is needed, but on "$x$y" it isn't.
+# This assumption is flawed once overloading has been introduced, since
+# concat might return an overloaded object which still needs stringifying.
+# However, this flawed behaviour is apparently needed by at least one
+# module, and is tested for in opbasic/concat.t: see RT #124160.
+#
+# There is also a wart with the OPpTARGET_MY optimisation: specifically,
+# in $lex = "...", if $lex is a lexical var, then a chain of 2 or more
+# concats *doesn't* optimise away OP_STRINGIFY:
+#
+# $lex = "$x";        # stringifies
+# $lex = "$x$y";      # doesn't stringify
+# $lex = "$x$y$z..."; # stringifies
+
+package Stringify {
+    my $count;
+    use overload
+        '.'  => sub {
+                        my ($a, $b, $rev) = @_;
+                        bless [ $rev ? "$b" . $a->[0] : $a->[0] . "$b" ];
+            },
+        '""' => sub {  $count++; $_[0][0] },
+    ;
+
+    for my $test(
+        [ 1, '$pkg   =  "$ov"' ],
+        [ 1, '$lex   =  "$ov"' ],
+        [ 1, 'my $a  =  "$ov"' ],
+        [ 1, '$pkg  .=  "$ov"' ],
+        [ 1, '$lex  .=  "$ov"' ],
+        [ 1, 'my $a .=  "$ov"' ],
+
+        [ 0, '$pkg   =  "$ov$x"' ],
+        [ 0, '$lex   =  "$ov$x"' ],
+        [ 0, 'my $a  =  "$ov$x"' ],
+        [ 0, '$pkg  .=  "$ov$x"' ],
+        [ 0, '$lex  .=  "$ov$x"' ],
+        [ 0, 'my $a .=  "$ov$x"' ],
+
+        [ 0, '$pkg   =  "$ov$x$y"' ],
+        [ 1, '$lex   =  "$ov$x$y"' ],  # XXX note the anomaly
+        [ 0, 'my $a  =  "$ov$x$y"' ],
+        [ 0, '$pkg  .=  "$ov$x$y"' ],
+        [ 0, '$lex  .=  "$ov$x$y"' ],
+        [ 0, 'my $a .=  "$ov$x$y"' ],
+    )
+    {
+        my ($stringify, $code) = @$test;
+        our $pkg = 'P';
+        my ($ov, $x, $y, $lex) = (bless(['OV']), qw(X Y L));
+        $count = 0;
+        eval "$code; 1" or die $@;
+        ::is $count, $stringify, $code;
+    }
 }
