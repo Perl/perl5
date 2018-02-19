@@ -10812,6 +10812,40 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     RExC_seen |= REG_CUTGROUP_SEEN;
                 }
                 break;
+            case 'a':
+                if (memEQs(start_verb, verb_len, "atomic")) {
+                    paren = 't';    /* AtOMIC */
+                    goto alpha_assertions;
+                }
+                break;
+            case 'p':
+                if (   memEQs(start_verb, verb_len, "plb")
+                    || memEQs(start_verb, verb_len, "positive_lookbehind"))
+                {
+                    paren = 'b';
+                    goto lookbehind_alpha_assertions;
+                }
+                else if (   memEQs(start_verb, verb_len, "pla")
+                         || memEQs(start_verb, verb_len, "positive_lookahead"))
+                {
+                    paren = 'a';
+                    goto alpha_assertions;
+                }
+                break;
+            case 'n':
+                if (   memEQs(start_verb, verb_len, "nlb")
+                    || memEQs(start_verb, verb_len, "negative_lookbehind"))
+                {
+                    paren = 'B';
+                    goto lookbehind_alpha_assertions;
+                }
+                else if (   memEQs(start_verb, verb_len, "nla")
+                         || memEQs(start_verb, verb_len, "negative_lookahead"))
+                {
+                    paren = 'A';
+                    goto alpha_assertions;
+                }
+                break;
             case 's':
                 if (   memEQs(start_verb, verb_len, "sr")
                     || memEQs(start_verb, verb_len, "script_run"))
@@ -10850,6 +10884,36 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 }
 
                 break;
+
+            lookbehind_alpha_assertions:
+                RExC_seen |= REG_LOOKBEHIND_SEEN;
+                RExC_in_lookbehind++;
+                /*FALLTHROUGH*/
+
+            alpha_assertions:
+
+                if (PASS2) {
+                    Perl_ck_warner_d(aTHX_
+                        packWARN(WARN_EXPERIMENTAL__ALPHA_ASSERTIONS),
+                        "The alpha_assertions feature is experimental"
+                        REPORT_LOCATION, REPORT_LOCATION_ARGS(RExC_parse));
+                }
+
+                RExC_seen_zerolen++;
+
+                if (! start_arg) {
+                    goto no_colon;
+                }
+
+                /* An empty negative lookahead assertion simply is failure */
+                if (paren == 'A' && RExC_parse == start_arg) {
+                    ret=reganode(pRExC_state, OPFAIL, 0);
+                    nextchar(pRExC_state);
+                    return ret;
+	        }
+
+                RExC_parse = start_arg;
+                goto parse_rest;
 
               no_colon:
                 vFAIL2utf8f(
@@ -11033,6 +11097,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    paren = 1;
 		    goto capturing_parens;
 		}
+
                 RExC_seen |= REG_LOOKBEHIND_SEEN;
 		RExC_in_lookbehind++;
 		RExC_parse++;
@@ -11263,12 +11328,37 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    {
 	        int is_define= 0;
                 const int DEFINE_len = sizeof("DEFINE") - 1;
-		if (RExC_parse[0] == '?') {        /* (?(?...)) */
-                    if (   RExC_parse < RExC_end - 1
-                        && (   RExC_parse[1] == '='
-                            || RExC_parse[1] == '!'
-                            || RExC_parse[1] == '<'
-                            || RExC_parse[1] == '{')
+		if (    RExC_parse < RExC_end - 1
+                    && (   (       RExC_parse[0] == '?'        /* (?(?...)) */
+                            && (   RExC_parse[1] == '='
+                                || RExC_parse[1] == '!'
+                                || RExC_parse[1] == '<'
+                                || RExC_parse[1] == '{'))
+		        || (       RExC_parse[0] == '*'        /* (?(*...)) */
+                            && (   memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "pla:")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "plb")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "nla")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "nlb")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "positive_lookahead")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "positive_lookbehind")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "negative_lookahead")
+                                || memBEGINs(RExC_parse +1,
+                                             (Size_t) (RExC_end - (RExC_parse + 1)),
+                                             "negative_lookbehind"))))
                     ) { /* Lookahead or eval. */
 			I32 flag;
                         regnode *tail;
@@ -11285,10 +11375,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         REGTAIL(pRExC_state, ret, tail);
 			goto insert_if;
 		    }
-		    /* Fall through to ‘Unknown switch condition’ at the
-		       end of the if/else chain. */
-		}
-		else if ( RExC_parse[0] == '<'     /* (?(<NAME>)...) */
+		else if (   RExC_parse[0] == '<'     /* (?(<NAME>)...) */
 		         || RExC_parse[0] == '\'' ) /* (?('NAME')...) */
 	        {
 	            char ch = RExC_parse[0] == '<' ? '>' : '\'';
@@ -11601,11 +11688,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             RExC_in_script_run = 0;
 	    break;
 	case '<':
+        case 'a':
+        case 'A':
+        case 'b':
+        case 'B':
 	case ',':
 	case '=':
 	case '!':
 	    *flagp &= ~HASWIDTH;
 	    /* FALLTHROUGH */
+        case 't':   /* aTomic */
 	case '>':
 	    ender = reg_node(pRExC_state, SUCCEED);
 	    break;
@@ -11691,14 +11783,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
     {
         const char *p;
-        static const char parens[] = "=!<,>";
+         /* Even/odd or x=don't care: 010101x10x */
+        static const char parens[] = "=!aA<,>Bbt";
+         /* flag below is set to 0 up through 'A'; 1 for larger */
 
 	if (paren && (p = strchr(parens, paren))) {
 	    U8 node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
-	    int flag = (p - parens) > 1;
+	    int flag = (p - parens) > 3;
 
-	    if (paren == '>')
+	    if (paren == '>' || paren == 't') {
 		node = SUSPEND, flag = 0;
+            }
 	    reginsert(pRExC_state, node,ret, depth+1);
             Set_Node_Cur_Length(ret, parse_start);
 	    Set_Node_Offset(ret, parse_start + 1);

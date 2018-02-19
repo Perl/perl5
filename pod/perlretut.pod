@@ -2355,6 +2355,18 @@ by looking ahead and behind:
                   | (?<=-)  (?=\S)   # a '-' followed by any non-space
                   /x, $str;          # @toks = qw(one two - - - 6 - 8)
 
+Starting in Perl 5.28, experimentally, alphabetic equivalents to these
+assertions are added, so you can use whichever is most memorable for
+your tastes.
+
+ (?=...)        (*pla:...) or (*positive_lookahead:...)
+ (?!...)        (*nla:...) or (*negative_lookahead:...)
+ (?<=...)       (*plb:...) or (*positive_lookbehind:...)
+ (?<!...)       (*nlb:...) or (*negative_lookbehind:...)
+ (?>...)        (*atomic:...)
+
+Using any of these will raise (unless turned off) a warning in the
+C<experimental::alpha_assertions> category.
 
 =head2 Using independent subexpressions to prevent backtracking
 

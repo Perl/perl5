@@ -55,6 +55,24 @@ abbreviated form for it.  The syntax is now either of:
 
 Previously a C<"+"> was used instead of the C<"*">.
 
+=head2 Experimentally, there are now alphabetic synonyms for some
+regular expression assertions
+
+If you find it difficult to remember how to write certain of the pattern
+assertions, there are now alphabetic synonyms.
+
+ CURRENT                NEW SYNONYMS
+ ------                 ------------
+ (?=...)        (*pla:...) or (*positive_lookahead:...)
+ (?!...)        (*nla:...) or (*negative_lookahead:...)
+ (?<=...)       (*plb:...) or (*positive_lookbehind:...)
+ (?<!...)       (*nlb:...) or (*negative_lookbehind:...)
+ (?>...)        (*atomic:...)
+
+These are considered experimental, so using any of these will raise
+(unless turned off) a warning in the C<experimental::alpha_assertions>
+category.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

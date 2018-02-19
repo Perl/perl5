@@ -290,6 +290,7 @@ my @death =
  '/(*srfoo)/' => 'Unknown \'(*...)\' construct \'srfoo\' {#} m/(*srfoo){#}/',
  '/(*script_run)/' => '\'(*script_run\' requires a terminating \':\' {#} m/(*script_run{#})/',
  '/(*sr)/' => '\'(*sr\' requires a terminating \':\' {#} m/(*sr{#})/',
+ '/(*pla)/' => '\'(*pla\' requires a terminating \':\' {#} m/(*pla{#})/',
  '/(*script_run/' => 'Unterminated \'(*...\' construct {#} m/(*script_run{#}/',
  '/(*sr/' => 'Unterminated \'(*...\' construct {#} m/(*sr{#}/',
  '/(*script_run:foo/' => 'Unterminated \'(*...\' argument {#} m/(*script_run:foo{#}/',

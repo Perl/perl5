@@ -99,7 +99,10 @@ sub convert_from_ascii {
 use strict;
 use warnings FATAL=>"all";
 our ($bang, $ffff, $nulnul); # used by the tests
-our ($qr, $skip_amp, $qr_embed, $qr_embed_thr, $regex_sets, $no_null); # set by our callers
+our ($qr, $skip_amp, $qr_embed, $qr_embed_thr, $regex_sets, $alpha_assertions, $no_null); # set by our callers
+
+my $expanded_text = "expanded name from original test number";
+my $expanded_text_re = qr/$expanded_text/;
 
 if (!defined $file) {
     open TESTS, 're/re_tests' or die "Can't open re/re_tests: $!";
@@ -115,7 +118,6 @@ $nulnul = "\0" x 2;
 my $OP = $qr ? 'qr' : 'm';
 
 $| = 1;
-printf "1..%d\n# $iters iterations\n", scalar @tests;
 
 my $test;
 TEST:
@@ -131,6 +133,7 @@ foreach (@tests) {
     chomp;
     s/\\n/\n/g unless $regex_sets;
     my ($pat, $subject, $result, $repl, $expect, $reason, $comment) = split(/\t/,$_,7);
+    $comment = "" unless defined $comment;
     if (!defined $subject) {
         die "Bad test definition on line $test: $_\n";
     }
@@ -180,7 +183,42 @@ foreach (@tests) {
         $comment=~s/^\s*(?:#\s*)?//;
         $testname .= " - $comment" if $comment;
     }
-    if (! $skip && $regex_sets) {
+    if (! $skip && $alpha_assertions) {
+        my $assertions_re = qr/ (?: \Q(?\E (?: > | <? [=>] ) ) /x;
+        if ($pat !~ $assertions_re && $comment !~ $expanded_text_re) {
+            $skip++;
+            $reason = "Pattern doesn't contain assertions";
+        }
+        elsif ($comment !~ $expanded_text_re) {
+            my $expanded_pat = $pat;
+
+            $pat =~ s/\( \? > /(*atomic:/xg;
+
+            if ($pat =~ s/\( \? = /(*pla:/xg) {
+                $expanded_pat =~ s//(*positive_lookahead:/g;
+            }
+            if ($pat =~ s/\( \? ! /(*nla:/xg) {
+                $expanded_pat =~ s//(*negative_lookahead:/g;
+            }
+            if ($pat =~ s/\( \? <= /(*plb:/xg) {
+                $expanded_pat =~ s//(*positive_lookbehind:/g;
+            }
+            if ($pat =~ s/\( \? <! /(*nlb:/xg) {
+                $expanded_pat =~ s//(*negative_lookbehind:/g;
+            }
+            if ($expanded_pat ne $pat) {
+                $comment .= " $expanded_text $test";
+                push @tests, join "\t", $expanded_pat,
+                                        $subject // "",
+                                        $result // "",
+                                        $repl // "",
+                                        $expect // "",
+                                        $reason // "",
+                                        $comment;
+            }
+        }
+    }
+    elsif (! $skip && $regex_sets) {
 
         # If testing regex sets, change the [bracketed] classes into
         # (?[bracketed]).  But note that '\[' and '\c[' don't introduce such a
@@ -412,6 +450,7 @@ EOFCODE
 EOFCODE
         }
         $code = "no warnings 'experimental::regex_sets';$code" if $regex_sets;
+        $code = "no warnings 'experimental::alpha_assertions';$code" if $alpha_assertions;
         #$code.=qq[\n\$expect="$expect";\n];
         #use Devel::Peek;
         #die Dump($code) if $pat=~/\\h/ and $subject=~/\x{A0}/;
@@ -464,5 +503,7 @@ EOFCODE
     }
     print "ok $testname$todo\n";
 }
+
+printf "1..%d\n# $iters iterations\n", scalar @tests;
 
 1;

@@ -1570,13 +1570,30 @@ lookahead matches text following the current match position.
 =over 4
 
 =item C<(?=pattern)>
-X<(?=)> X<look-ahead, positive> X<lookahead, positive>
+
+=item C<(*pla:pattern)>
+
+=item C<(*positive_lookahead:pattern)>
+X<(?=)>
+X<(*pla>
+X<(*positive_lookahead>
+X<look-ahead, positive> X<lookahead, positive>
 
 A zero-width positive lookahead assertion.  For example, C</\w+(?=\t)/>
 matches a word followed by a tab, without including the tab in C<$&>.
 
+The alphabetic forms are experimental; using them yields a warning in the
+C<experimental::alpha_assertions> category.
+
 =item C<(?!pattern)>
-X<(?!)> X<look-ahead, negative> X<lookahead, negative>
+
+=item C<(*nla:pattern)>
+
+=item C<(*negative_lookahead:pattern)>
+X<(?!)>
+X<(*nla>
+X<(*negative_lookahead>
+X<look-ahead, negative> X<lookahead, negative>
 
 A zero-width negative lookahead assertion.  For example C</foo(?!bar)/>
 matches any occurrence of "foo" that isn't followed by "bar".  Note
@@ -1588,10 +1605,20 @@ will not do what you want.  That's because the C<(?!foo)> is just saying that
 the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
 match.  Use lookbehind instead (see below).
 
+The alphabetic forms are experimental; using them yields a warning in the
+C<experimental::alpha_assertions> category.
+
 =item C<(?<=pattern)>
 
 =item C<\K>
-X<(?<=)> X<look-behind, positive> X<lookbehind, positive> X<\K>
+
+=item C<(*plb:pattern)>
+
+=item C<(*positive_lookbehind:pattern)>
+X<(?<=)>
+X<(*plb>
+X<(*positive_lookbehind>
+X<look-behind, positive> X<lookbehind, positive> X<\K>
 
 A zero-width positive lookbehind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
@@ -1615,12 +1642,25 @@ can be rewritten as the much more efficient
 
   s/foo\Kbar//g;
 
+The alphabetic forms (not including C<\K> are experimental; using them
+yields a warning in the C<experimental::alpha_assertions> category.
+
 =item C<(?<!pattern)>
-X<(?<!)> X<look-behind, negative> X<lookbehind, negative>
+
+=item C<(*nlb:pattern)>
+
+=item C<(*negative_lookbehind:pattern)>
+X<(?<!)>
+X<(*nlb>
+X<(*negative_lookbehind>
+X<look-behind, negative> X<lookbehind, negative>
 
 A zero-width negative lookbehind assertion.  For example C</(?<!bar)foo/>
 matches any occurrence of "foo" that does not follow "bar".  Works
 only for fixed-width lookbehind.
+
+The alphabetic forms are experimental; using them yields a warning in the
+C<experimental::alpha_assertions> category.
 
 =back
 
@@ -2096,6 +2136,10 @@ compile the definitions with the C<qr//> operator, and later
 interpolate them in another pattern.
 
 =item C<< (?>pattern) >>
+
+=item C<< (*atomic:pattern) >>
+X<(?E<gt>pattern)>
+X<(*atomic>
 X<backtrack> X<backtracking> X<atomic> X<possessive>
 
 An "independent" subexpression, one which matches the substring
@@ -2203,6 +2247,9 @@ to inside of one of these constructs. The following equivalences apply:
     PAT++               (?>PAT+)
     PAT?+               (?>PAT?)
     PAT{min,max}+       (?>PAT{min,max})
+
+The alphabetic form (C<(*atomic:...)>) is experimental; using it
+yields a warning in the C<experimental::alpha_assertions> category.
 
 =item C<(?[ ])>
 
