@@ -1167,7 +1167,7 @@ S_pushav(pTHX_ AV* const av)
             SP[i+1] = LIKELY(svp)
                        ? *svp
                        : UNLIKELY(PL_op->op_flags & OPf_MOD)
-                          ? newSVavdefelem(av,i,1)
+                          ? av_nonelem(av,i)
                           : &PL_sv_undef;
         }
     }
@@ -1178,7 +1178,7 @@ S_pushav(pTHX_ AV* const av)
 	    SP[i+1] = LIKELY(sv)
                        ? sv
                        : UNLIKELY(PL_op->op_flags & OPf_MOD)
-                          ? newSVavdefelem(av,i,1)
+                          ? av_nonelem(av,i)
                           : &PL_sv_undef;
         }
     }
@@ -3630,13 +3630,19 @@ PP(pp_multideref)
                             if (!defer)
                                 DIE(aTHX_ PL_no_aelem, elem);
                             len = av_tindex(av);
-                            sv = sv_2mortal(newSVavdefelem(av,
-                            /* Resolve a negative index now, unless it points
-                             * before the beginning of the array, in which
-                             * case record it for error reporting in
-                             * magic_setdefelem. */
-                                elem < 0 && len + elem >= 0
-                                    ? len + elem : elem, 1));
+                            /* Resolve a negative index that falls within
+                             * the array.  Leave it negative it if falls
+                             * outside the array.  */
+                             if (elem < 0 && len + elem >= 0)
+                                 elem = len + elem;
+                             if (elem >= 0 && elem <= len)
+                                 /* Falls within the array.  */
+                                 sv = av_nonelem(av,elem);
+                             else
+                                 /* Falls outside the array.  If it is neg-
+                                    ative, magic_setdefelem will use the
+                                    index for error reporting.  */
+                                sv = sv_2mortal(newSVavdefelem(av,elem,1));
                         }
                         else {
                             if (UNLIKELY(localizing)) {
@@ -5215,7 +5221,7 @@ PP(pp_entersub)
 		    else sv = AvARRAY(av)[i];
 		    if (sv) SP[i+1] = sv;
 		    else {
-			SP[i+1] = newSVavdefelem(av, i, 1);
+			SP[i+1] = av_nonelem(av, i);
 		    }
 		}
 		SP += items;
@@ -5363,12 +5369,18 @@ PP(pp_aelem)
 	    if (!defer)
 		DIE(aTHX_ PL_no_aelem, elem);
 	    len = av_tindex(av);
-	    mPUSHs(newSVavdefelem(av,
-	    /* Resolve a negative index now, unless it points before the
-	       beginning of the array, in which case record it for error
-	       reporting in magic_setdefelem. */
-		elem < 0 && len + elem >= 0 ? len + elem : elem,
-		1));
+	    /* Resolve a negative index that falls within the array.  Leave
+	       it negative it if falls outside the array.  */
+	    if (elem < 0 && len + elem >= 0)
+		elem = len + elem;
+	    if (elem >= 0 && elem <= len)
+		/* Falls within the array.  */
+		PUSHs(av_nonelem(av,elem));
+	    else
+		/* Falls outside the array.  If it is negative,
+		   magic_setdefelem will use the index for error reporting.
+		 */
+		mPUSHs(newSVavdefelem(av, elem, 1));
 	    RETURN;
 	}
 	if (UNLIKELY(localizing)) {

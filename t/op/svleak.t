@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 146;
+plan tests => 148;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -214,6 +214,14 @@ leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");
 
 }
 
+# Map plus sparse array
+{
+    my @a;
+    $a[10] = 10;
+    leak(3, 0, sub { my @b = map 1, @a },
+     'map reading from sparse array');
+}
+
 SKIP:
 { # broken by 304474c3, fixed by cefd5c7c, but didn't seem to cause
   # any other test failures
@@ -317,6 +325,10 @@ sub Recursive::Redefinition::DESTROY {
 leak(2, 0, sub {
     bless \&recredef, "Recursive::Redefinition"; eval "sub recredef{}"
 }, 'recursive sub redefinition');
+
+# Sub calls
+leak(2, 0, sub { local *_; $_[1]=1; &re::regname },
+    'passing sparse array to xsub via ampersand call');
 
 # Syntax errors
 eleak(2, 0, '"${<<END}"

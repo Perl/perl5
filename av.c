@@ -1015,6 +1015,9 @@ Perl_av_exists(pTHX_ AV *av, SSize_t key)
 
     if (key <= AvFILLp(av) && AvARRAY(av)[key])
     {
+	if (SvSMAGICAL(AvARRAY(av)[key])
+	 && mg_find(AvARRAY(av)[key], PERL_MAGIC_nonelem))
+	    return FALSE;
 	return TRUE;
     }
     else
@@ -1068,6 +1071,16 @@ Perl_av_iter_p(pTHX_ AV *av) {
 	}
 	return (IV *)mg->mg_ptr;
     }
+}
+
+SV *
+Perl_av_nonelem(pTHX_ AV *av, SSize_t ix) {
+    SV * const sv = newSV(0);
+    PERL_ARGS_ASSERT_AV_NONELEM;
+    if (!av_store(av,ix,sv))
+	return sv_2mortal(sv); /* has tie magic */
+    sv_magic(sv, NULL, PERL_MAGIC_nonelem, NULL, 0);
+    return sv;
 }
 
 /*

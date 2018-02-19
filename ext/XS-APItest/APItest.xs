@@ -4398,6 +4398,13 @@ get_cv_flags(SV *sv, UV flags)
     OUTPUT:
         RETVAL
 
+void
+unshift_and_set_defav(SV *sv,...)
+    CODE:
+	av_unshift(GvAVn(PL_defgv), 1);
+	av_store(GvAV(PL_defgv), 0, newSVuv(42));
+	sv_setuv(sv, 43);
+
 PerlIO *
 PerlIO_stderr()
 
