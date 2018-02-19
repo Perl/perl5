@@ -4,6 +4,7 @@
 
 use Config;
 use Cwd;
+use File::Spec;
 use strict;
 
 my $fn = "lib/Storable/Limit.pm";
@@ -123,6 +124,10 @@ sub bad {
     return $j;
 }
 
+unless ($ENV{STORABLE_NOISY}) {
+    # suppress Segmentation fault messages
+    open STDERR, ">", File::Spec->devnull;
+}
 while (!$found) {
     my $cmd = cmd($n, '$t=[$t]', 'recursion_limit');
     #print "$cmd\n" unless $QUIET;
