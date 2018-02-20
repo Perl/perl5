@@ -55,6 +55,14 @@ abbreviated form for it.  The syntax is now either of:
 
 Previously a C<"+"> was used instead of the C<"*">.
 
+=head2 There is a new form for script runs which combines with
+C<(?E<gt>...)> (or C<*atomic:...)>)
+
+C<(*asr:...> is an easier way to write C<(*sr:(?E<gt>...))>,
+which is expected to be a commonly used idiom.
+C<(*atomic_script_run:...> is also available.  See
+L<perlre/Script Runs>.
+
 =head2 Experimentally, there are now alphabetic synonyms for some
 regular expression assertions
 

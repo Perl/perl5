@@ -2469,6 +2469,7 @@ following match, see L</C<< (?>pattern) >>>.
 
 =head2 Script Runs
 X<(*script_run:...)> X<(sr:...)>
+X<(*atomic_script_run:...)> X<(asr:...)>
 
 A script run is basically a sequence of characters, all from the same
 Unicode script (see L<perlunicode/Scripts>), such as Latin or Greek.  In
@@ -2499,9 +2500,15 @@ backtracking occurs until something all in the same script is found that
 matches, or all possibilities are exhausted.  This can cause a lot of
 backtracking, but generally, only malicious input will result in this,
 though the slow down could cause a denial of service attack.  If your
-needs permit, it is best to make the pattern atomic.
+needs permit, it is best to make the pattern atomic.  This is so likely
+to be what you want, that instead of writing this:
 
  (*script_run:(?>pattern))
+
+you can write either of these:
+
+ (*atomic_script_run:pattern)
+ (*asr:pattern)
 
 (See L</C<(?E<gt>pattern)>>.)
 

@@ -19,7 +19,7 @@ no warnings "experimental::script_run";
 
 # Since there's so few tests currently, we can afford to try each syntax on
 # all of them
-foreach my $type ('script_run', 'sr') {
+foreach my $type ('script_run', 'sr', 'atomic_script_run', 'asr') {
     my $script_run;
     eval '$script_run = qr/ ^ (*$type: .* ) $ /x;';
 
@@ -88,5 +88,8 @@ foreach my $type ('script_run', 'sr') {
 
     # Until fixed, this was skipping the '['
     unlike("abc]c", qr/^ (*sr:a(*sr:[bc]*)c) $/x, "Doesn't skip parts of exact matches");
+
+      like("abc", qr/(*asr:a[bc]*c)/, "Outer asr works on a run");
+    unlike("abc", qr/(*asr:a(*asr:[bc]*)c)/, "Nested asr works to exclude some things");
 
 done_testing();

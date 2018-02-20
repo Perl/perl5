@@ -10734,7 +10734,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    vFAIL("Unmatched (");
         }
 
-        if ( *RExC_parse == '*') { /* (*VERB:ARG), (*construct:...) */
+        if (paren == 'r') {     /* Atomic script run */
+            paren = '>';
+            goto parse_rest;
+        }
+        else if ( *RExC_parse == '*') { /* (*VERB:ARG), (*construct:...) */
 	    char *start_verb = RExC_parse + 1;
 	    STRLEN verb_len;
 	    char *start_arg = NULL;
@@ -10841,7 +10845,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 }
                 break;
             case 'a':
-                if (memEQs(start_verb, verb_len, "atomic")) {
+                if (   memEQs(start_verb, verb_len, "asr")
+                    || memEQs(start_verb, verb_len, "atomic_script_run"))
+                {
+                    paren = 'r';        /* Mnemonic: recursed run */
+                    goto script_run;
+                }
+                else if (memEQs(start_verb, verb_len, "atomic")) {
                     paren = 't';    /* AtOMIC */
                     goto alpha_assertions;
                 }
@@ -10878,7 +10888,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 if (   memEQs(start_verb, verb_len, "sr")
                     || memEQs(start_verb, verb_len, "script_run"))
                 {
+                    regnode * atomic;
+
                     paren = 's';
+
+                   script_run:
 
                     /* This indicates Unicode rules. */
                     REQUIRE_UNI_RULES(flagp, NULL);
@@ -10889,6 +10903,30 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
                     RExC_parse = start_arg;
 
+                    if (RExC_in_script_run) {
+
+                        /*  Nested script runs are treated as no-ops, because
+                         *  if the nested one fails, the outer one must as
+                         *  well.  It could fail sooner, and avoid (??{} with
+                         *  side effects, but that is explicitly documented as
+                         *  undefined behavior. */
+
+                        ret = NULL;
+
+                        if (paren == 's') {
+                            paren = ':';
+                            goto parse_rest;
+                        }
+
+                        /* But, the atomic part of a nested atomic script run
+                         * isn't a no-op, but can be treated just like a '(?>'
+                         * */
+                        paren = '>';
+                        goto parse_rest;
+                    }
+
+                    /* By doing this here, we avoid extra warnings for nested
+                     * script runs */
                     if (PASS2) {
                         Perl_ck_warner_d(aTHX_
                             packWARN(WARN_EXPERIMENTAL__SCRIPT_RUN),
@@ -10897,17 +10935,35 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
                     }
 
-                    if (RExC_in_script_run) {
-                        paren = ':';
-                        ret = NULL;
+                    if (paren == 's') {
+                        /* Here, we're starting a new regular script run */
+                        ret = reg_node(pRExC_state, SROPEN);
+                        RExC_in_script_run = 1;
+                        is_open = 1;
                         goto parse_rest;
                     }
-                    RExC_in_script_run = 1;
+
+                    /* Here, we are starting an atomic script run.  This is
+                     * handled by recursing to deal with the atomic portion
+                     * separately, enclosed in SROPEN ... SRCLOSE nodes */
 
                     ret = reg_node(pRExC_state, SROPEN);
 
-                    is_open = 1;
-                    goto parse_rest;
+                    RExC_in_script_run = 1;
+
+                    atomic = reg(pRExC_state, 'r', &flags, depth);
+                    if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                        *flagp = flags & (RESTART_PASS1|NEED_UTF8);
+                        return NULL;
+                    }
+
+                    REGTAIL(pRExC_state, ret, atomic);
+
+                    REGTAIL(pRExC_state, atomic,
+                           reg_node(pRExC_state, SRCLOSE));
+
+                    RExC_in_script_run = 0;
+                    return ret;
                 }
 
                 break;
@@ -11806,6 +11862,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    if (paren == '>' || paren == 't') {
 		node = SUSPEND, flag = 0;
             }
+
 	    reginsert(pRExC_state, node,ret, depth+1);
             Set_Node_Cur_Length(ret, parse_start);
 	    Set_Node_Offset(ret, parse_start + 1);
