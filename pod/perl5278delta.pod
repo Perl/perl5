@@ -92,8 +92,8 @@ compilation of code within the signature, for example:
 
 Note that this the second time they have been flipped:
 
-    sub f :lvalue ($a, $b) { 1 }; # 5.20; 5.28 onwards
-    sub f ($a, $b) :lvalue { 1 }; # 5.22 - 5.26
+    sub f :lvalue ($a, $b) { ... }; # 5.20; 5.28 onwards
+    sub f ($a, $b) :lvalue { ... }; # 5.22 - 5.26
 
 =head1 Deprecations
 
