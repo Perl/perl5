@@ -251,8 +251,6 @@ is u, undef, 'undef constant is still undef';
 is index('the main road', __PACKAGE__), 4,
     '[perl #119169] __PACKAGE__ as 2nd argument';
 
-} # end of sub run_tests
-
 utf8::upgrade my $substr = "\x{a3}a";
 
 is index($substr, 'a'), 1, 'index reply reflects characters not octets';
@@ -333,3 +331,5 @@ for my $test (
 
 
 }
+
+} # end of sub run_tests
