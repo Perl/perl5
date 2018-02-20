@@ -10899,7 +10899,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
                     if (RExC_in_script_run) {
                         paren = ':';
-                        nextchar(pRExC_state);
                         ret = NULL;
                         goto parse_rest;
                     }

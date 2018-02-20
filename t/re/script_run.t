@@ -86,4 +86,7 @@ foreach my $type ('script_run', 'sr') {
     like("写真だけの結婚式", $script_run, "Mixed Hiragana and Han");
 }
 
+    # Until fixed, this was skipping the '['
+    unlike("abc]c", qr/^ (*sr:a(*sr:[bc]*)c) $/x, "Doesn't skip parts of exact matches");
+
 done_testing();
