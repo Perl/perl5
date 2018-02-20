@@ -6106,14 +6106,20 @@ static SV *retrieve_byte(pTHX_ stcxt_t *cxt, const char *cname)
     SV *sv;
     HV *stash;
     int siv;
+#ifndef _MSC_VER
     signed char tmp;	/* Workaround for AIX cc bug --H.Merijn Brand */
+#endif
 
     TRACEME(("retrieve_byte (#%d)", (int)cxt->tagnum));
 
     GETMARK(siv);
     TRACEME(("small integer read as %d", (unsigned char) siv));
+#ifdef _MSC_VER
+    sv = newSViv(siv - 128);
+#else
     tmp = (unsigned char) siv - 128;
     sv = newSViv(tmp);
+#endif
     stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
     SEEN_NN(sv, stash, 0);	/* Associate this new scalar with tag "tagnum" */
 
