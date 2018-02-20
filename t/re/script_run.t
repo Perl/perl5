@@ -17,7 +17,11 @@ $|=1;
 
 no warnings "experimental::script_run";
 
-my $script_run = qr/ ^ (*script_run: .* ) $ /x;
+# Since there's so few tests currently, we can afford to try each syntax on
+# all of them
+foreach my $type ('script_run', 'sr') {
+    my $script_run;
+    eval '$script_run = qr/ ^ (*$type: .* ) $ /x;';
 
 unlike("\N{CYRILLIC SMALL LETTER ER}\N{CYRILLIC SMALL LETTER A}\N{CYRILLIC SMALL LETTER U}}\N{CYRILLIC SMALL LETTER ER}\N{CYRILLIC SMALL LETTER A}l", $script_run, "Cyrillic 'paypal' with a Latin 'l' is not a script run");
 unlike("A\N{GREEK CAPITAL LETTER GAMMA}", $script_run, "Latin followed by Greek isn't a script run");
@@ -80,5 +84,6 @@ use utf8;
 
 # From UTS 39
 like("写真だけの結婚式", $script_run, "Mixed Hiragana and Han");
+}
 
 done_testing();
