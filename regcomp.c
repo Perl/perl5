@@ -12307,9 +12307,15 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   */
 
     char * endbrace;    /* points to '}' following the name */
-    char *endchar;	/* Points to '.' or '}' ending cur char in the input
+    char * endchar;     /* Points to '.' or '}' ending cur char in the input
                            stream */
     char* p = RExC_parse; /* Temporary */
+
+    SV * substitute_parse;
+    STRLEN len;
+    char *orig_end;
+    char *save_start;
+    I32 flags;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -12334,48 +12340,38 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
      * [^\n].  The latter is assumed when the {...} following the \N is a legal
      * quantifier, or there is no '{' at all */
     if (*p != '{' || regcurly(p)) {
-	RExC_parse = p;
+        RExC_parse = p;
         if (cp_count) {
             *cp_count = -1;
         }
 
-	if (! node_p) {
+        if (! node_p) {
             return FALSE;
         }
 
-	*node_p = reg_node(pRExC_state, REG_ANY);
-	*flagp |= HASWIDTH|SIMPLE;
-	MARK_NAUGHTY(1);
+        *node_p = reg_node(pRExC_state, REG_ANY);
+        *flagp |= HASWIDTH|SIMPLE;
+        MARK_NAUGHTY(1);
         Set_Node_Length(*node_p, 1); /* MJD */
-	return TRUE;
+        return TRUE;
     }
-
-    /* Here, we have decided it should be a named character or sequence */
 
     /* The test above made sure that the next real character is a '{', but
      * under the /x modifier, it could be separated by space (or a comment and
      * \n) and this is not allowed (for consistency with \x{...} and the
      * tokenizer handling of \N{NAME}). */
     if (*RExC_parse != '{') {
-	vFAIL("Missing braces on \\N{}");
+        vFAIL("Missing braces on \\N{}");
     }
 
-    RExC_parse++;	/* Skip past the '{' */
+    RExC_parse++;       /* Skip past the '{' */
 
     endbrace = (char *) memchr(RExC_parse, '}', RExC_end - RExC_parse);
     if (! endbrace) { /* no trailing brace */
         vFAIL2("Missing right brace on \\%c{}", 'N');
     }
-    else if (!(   endbrace == RExC_parse	/* nothing between the {} */
-               || memBEGINs(RExC_parse,   /* U+ (bad hex is checked below
-                                                   for a  better error msg) */
-                                  (STRLEN) (RExC_end - RExC_parse),
-                                 "U+")))
-    {
-	RExC_parse = endbrace;	/* position msg's '<--HERE' */
-	vFAIL("\\N{NAME} must be resolved by the lexer");
-    }
 
+    /* Here, we have decided it should be a named character or sequence */
     REQUIRE_UNI_RULES(flagp, FALSE); /* Unicode named chars imply Unicode
                                         semantics */
 
@@ -12388,7 +12384,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             *cp_count = 0;
         }
         nextchar(pRExC_state);
-	if (! node_p) {
+        if (! node_p) {
             return FALSE;
         }
 
@@ -12396,71 +12392,77 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         return TRUE;
     }
 
-    RExC_parse += 2;	/* Skip past the 'U+' */
-
-    /* Because toke.c has generated a special construct for us guaranteed not
-     * to have NULs, we can use a str function */
-    endchar = RExC_parse + strcspn(RExC_parse, ".}");
-
-    /* Code points are separated by dots.  If none, there is only one code
-     * point, and is terminated by the brace */
-
-    if (endchar >= endbrace) {
-	STRLEN length_of_hex;
-	I32 grok_hex_flags;
-
-        /* Here, exactly one code point.  If that isn't what is wanted, fail */
-        if (! code_point_p) {
-            RExC_parse = p;
-            return FALSE;
-        }
-
-        /* Convert code point from hex */
-	length_of_hex = (STRLEN)(endchar - RExC_parse);
-	grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
-                       | PERL_SCAN_DISALLOW_PREFIX
-
-                           /* No errors in the first pass (See [perl
-                            * #122671].)  We let the code below find the
-                            * errors when there are multiple chars. */
-                       | ((SIZE_ONLY)
-                          ? PERL_SCAN_SILENT_ILLDIGIT
-                          : 0);
-
-        /* This routine is the one place where both single- and double-quotish
-         * \N{U+xxxx} are evaluated.  The value is a Unicode code point which
-         * must be converted to native. */
-	*code_point_p = UNI_TO_NATIVE(grok_hex(RExC_parse,
-                                               &length_of_hex,
-                                               &grok_hex_flags,
-                                               NULL));
-
-	/* The tokenizer should have guaranteed validity, but it's possible to
-         * bypass it by using single quoting, so check.  Don't do the check
-         * here when there are multiple chars; we do it below anyway. */
-        if (length_of_hex == 0
-            || length_of_hex != (STRLEN)(endchar - RExC_parse) )
-        {
-            RExC_parse += length_of_hex;	/* Includes all the valid */
-            RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
-                            ? UTF8SKIP(RExC_parse)
-                            : 1;
-            /* Guard against malformed utf8 */
-            if (RExC_parse >= endchar) {
-                RExC_parse = endchar;
-            }
-            vFAIL("Invalid hexadecimal number in \\N{U+...}");
-        }
-
-        RExC_parse = endbrace + 1;
-        return TRUE;
+    /* If we haven't got something that begins with 'U+', then it didn't get lexed. */
+    if (   endbrace - RExC_parse < 2
+        || strnNE(RExC_parse, "U+", 2))
+    {
+        RExC_parse = endbrace;  /* position msg's '<--HERE' */
+        vFAIL("\\N{NAME} must be resolved by the lexer");
     }
-    else {  /* Is a multiple character sequence */
-	SV * substitute_parse;
-	STRLEN len;
-	char *orig_end = RExC_end;
-	char *save_start = RExC_start;
-        I32 flags;
+
+        RExC_parse += 2;    /* Skip past the 'U+' */
+
+        /* Because toke.c has generated a special construct for us guaranteed
+         * not to have NULs, we can use a str function */
+        endchar = RExC_parse + strcspn(RExC_parse, ".}");
+
+        /* Code points are separated by dots.  If none, there is only one code
+         * point, and is terminated by the brace */
+
+        if (endchar >= endbrace) {
+            STRLEN length_of_hex;
+            I32 grok_hex_flags;
+
+            /* Here, exactly one code point.  If that isn't what is wanted,
+             * fail */
+            if (! code_point_p) {
+                RExC_parse = p;
+                return FALSE;
+            }
+
+            /* Convert code point from hex */
+            length_of_hex = (STRLEN)(endchar - RExC_parse);
+            grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
+                            | PERL_SCAN_DISALLOW_PREFIX
+
+                                /* No errors in the first pass (See [perl
+                                * #122671].)  We let the code below find the
+                                * errors when there are multiple chars. */
+                            | ((SIZE_ONLY)
+                                ? PERL_SCAN_SILENT_ILLDIGIT
+                                : 0);
+
+            /* This routine is the one place where both single- and
+             * double-quotish \N{U+xxxx} are evaluated.  The value is a Unicode
+             * code point which must be converted to native. */
+            *code_point_p = UNI_TO_NATIVE(grok_hex(RExC_parse,
+                                            &length_of_hex,
+                                            &grok_hex_flags,
+                                            NULL));
+
+            /* The tokenizer should have guaranteed validity, but it's possible
+             * to bypass it by using single quoting, so check.  Don't do the
+             * check here when there are multiple chars; we do it below anyway.
+             * */
+            if (length_of_hex == 0
+                || length_of_hex != (STRLEN)(endchar - RExC_parse) )
+            {
+                RExC_parse += length_of_hex;    /* Includes all the valid */
+                RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
+                                ? UTF8SKIP(RExC_parse)
+                                : 1;
+                /* Guard against malformed utf8 */
+                if (RExC_parse >= endchar) {
+                    RExC_parse = endchar;
+                }
+                vFAIL("Invalid hexadecimal number in \\N{U+...}");
+            }
+
+            RExC_parse = endbrace + 1;
+            return TRUE;
+        }
+
+        /* Here, is a multiple character sequence */
 
         /* Count the code points, if desired, in the sequence */
         if (cp_count) {
@@ -12483,39 +12485,35 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             return FALSE;
         }
 
-	/* What is done here is to convert this to a sub-pattern of the form
+        /* What is done here is to convert this to a sub-pattern of the form
          * \x{char1}\x{char2}...  and then call reg recursively to parse it
          * (enclosing in "(?: ... )" ).  That way, it retains its atomicness,
          * while not having to worry about special handling that some code
          * points may have. */
 
-	substitute_parse = newSVpvs("?:");
+        substitute_parse = newSVpvs("?:");
 
-	while (RExC_parse < endbrace) {
+        while (RExC_parse < endbrace) {
 
-	    /* Convert to notation the rest of the code understands */
-	    sv_catpv(substitute_parse, "\\x{");
-	    sv_catpvn(substitute_parse, RExC_parse, endchar - RExC_parse);
-	    sv_catpv(substitute_parse, "}");
+            /* Convert to notation the rest of the code understands */
+            sv_catpv(substitute_parse, "\\x{");
+            sv_catpvn(substitute_parse, RExC_parse, endchar - RExC_parse);
+            sv_catpv(substitute_parse, "}");
 
-	    /* Point to the beginning of the next character in the sequence. */
-	    RExC_parse = endchar + 1;
-	    endchar = RExC_parse + strcspn(RExC_parse, ".}");
+            /* Point to the beginning of the next character in the sequence. */
+            RExC_parse = endchar + 1;
+            endchar = RExC_parse + strcspn(RExC_parse, ".}");
 
-	}
+        }
         sv_catpv(substitute_parse, ")");
 
         len = SvCUR(substitute_parse);
 
-	/* Don't allow empty number */
-	if (len < (STRLEN) 8) {
+        /* Don't allow empty number */
+        if (len < (STRLEN) 8) {
             RExC_parse = endbrace;
 	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
-
-        RExC_parse = RExC_start = RExC_adjusted_start
-                                              = SvPV_nolen(substitute_parse);
-	RExC_end = RExC_parse + len;
 
         /* The values are Unicode, and therefore not subject to recoding, but
          * have to be converted to native on a non-Unicode (meaning non-ASCII)
@@ -12524,28 +12522,35 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         RExC_recode_x_to_native = 1;
 #endif
 
-        *node_p = reg(pRExC_state, 1, &flags, depth+1);
+    save_start = RExC_start;
+    orig_end = RExC_end;
 
-        /* Restore the saved values */
-	RExC_start = RExC_adjusted_start = save_start;
-	RExC_parse = endbrace;
-	RExC_end = orig_end;
+    RExC_parse = RExC_start = RExC_adjusted_start = SvPV(substitute_parse,
+                                                         len);
+    RExC_end = RExC_parse + len;
+
+    *node_p = reg(pRExC_state, 1, &flags, depth+1);
+
+    /* Restore the saved values */
+    RExC_start = RExC_adjusted_start = save_start;
+    RExC_parse = endbrace;
+    RExC_end = orig_end;
 #ifdef EBCDIC
-        RExC_recode_x_to_native = 0;
+    RExC_recode_x_to_native = 0;
 #endif
-        SvREFCNT_dec_NN(substitute_parse);
 
-        if (! *node_p) {
-            RETURN_X_ON_RESTART(FALSE, flags,flagp);
-            FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#" UVxf,
-                (UV) flags);
-        }
-        *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+    SvREFCNT_dec_NN(substitute_parse);
 
-        nextchar(pRExC_state);
-
-        return TRUE;
+    if (! *node_p) {
+        RETURN_X_ON_RESTART(FALSE, flags,flagp);
+        FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#" UVxf,
+            (UV) flags);
     }
+    *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+
+    nextchar(pRExC_state);
+
+    return TRUE;
 }
 
 
