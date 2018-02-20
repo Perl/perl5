@@ -17,6 +17,29 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.9 - Agatha Christie, "The Mysterious Affair at Styles"
+
+L<Announced on 2018-02-20 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2018/02/msg249549.html>
+
+  Poirot was an extraordinary looking little man. He was hardly more
+  than five feet, four inches, but carried himself with great dignity.
+  His head was exactly the shape of an egg, and he always perched it
+  a little on one side. His moustache was very stiff and military.
+  The neatness of his attire was almost incredible. I believe a
+  speck of dust would have caused him more pain than a bullet wound.
+  Yet this quaint dandified little man who, I was sorry to see, now
+  limped badly, had been in his time one of the most celebrated members
+  of the Belgian police. As a detective, his flair had been extraordinary,
+  and he had achieved triumphs by unravelling some of the most baffling
+  cases of the day.
+    He pointed out to me the little house inhabited by him and his fellow
+  Belgians, and I promised to go and see him at an early date. Then he
+  raised his hat with a flourish to Cynthia, and we drove away.
+    "He's a dear little man," said Cynthia. "I'd no idea you knew him."
+    "You've been entertaining a celebrity unawares," I replied.
+    And, for the rest of the way home, I recited to them the various
+  exploits and triumphs of Hercule Poirot.
+
 =head2 v5.27.8 - Jasper Fforde, "Shades of Grey"
 
 L<Announced on 2018-01-20 by Abigail|http://nntp.perl.org/group/perl.perl5.porters/248914>
