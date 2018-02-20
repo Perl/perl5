@@ -2248,6 +2248,18 @@ to inside of one of these constructs. The following equivalences apply:
     PAT?+               (?>PAT?)
     PAT{min,max}+       (?>PAT{min,max})
 
+Nested C<(?E<gt>...)> constructs are not no-ops, even if at first glance
+they might seem to be.  This is because the nested C<(?E<gt>...)> can
+restrict internal backtracking that otherwise might occur.  For example,
+
+ "abc" =~ /(?>a[bc]*c)/
+
+matches, but
+
+ "abc" =~ /(?>a(?>[bc]*)c)/
+
+does not.
+
 The alphabetic form (C<(*atomic:...)>) is experimental; using it
 yields a warning in the C<experimental::alpha_assertions> category.
 
