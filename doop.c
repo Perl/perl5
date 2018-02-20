@@ -225,41 +225,41 @@ S_do_trans_complex(pTHX_ SV * const sv)
 	    d = s;
 	dstart = d;
 
-	    while (s < send) {
-		STRLEN len;
-		const UV comp = utf8n_to_uvchr(s, send - s, &len,
-					       UTF8_ALLOW_DEFAULT);
-		UV     ch;
-                short sch;
+        while (s < send) {
+            STRLEN len;
+            const UV comp = utf8n_to_uvchr(s, send - s, &len,
+                                           UTF8_ALLOW_DEFAULT);
+            UV     ch;
+            short sch;
 
-                sch = tbl->map[comp >= size ? size : comp];
+            sch = tbl->map[comp >= size ? size : comp];
 
-		if (sch >= 0) {
-                    ch = (UV)sch;
-                  replace:
-		    matches++;
-		    if (LIKELY(!squash || ch != pch)) {
-		        d = uvchr_to_utf8(d, ch);
-		        pch = ch;
-		    }
-		    s += len;
-		    continue;
-		}
-		else if (sch == -1) {	/* -1 is unmapped character */
-		    Move(s, d, len, U8);
-		    d += len;
-		}
-		else if (sch == -2)     /* -2 is delete character */
-		    matches++;
-                else {
-                    assert(sch == -3);  /* -3 is empty replacement */
-                    ch = comp;
-                    goto replace;
+            if (sch >= 0) {
+                ch = (UV)sch;
+              replace:
+                matches++;
+                if (LIKELY(!squash || ch != pch)) {
+                    d = uvchr_to_utf8(d, ch);
+                    pch = ch;
                 }
+                s += len;
+                continue;
+            }
+            else if (sch == -1) {	/* -1 is unmapped character */
+                Move(s, d, len, U8);
+                d += len;
+            }
+            else if (sch == -2)     /* -2 is delete character */
+                matches++;
+            else {
+                assert(sch == -3);  /* -3 is empty replacement */
+                ch = comp;
+                goto replace;
+            }
 
-		s += len;
-		pch = 0xfeedface;
-	    }
+            s += len;
+            pch = 0xfeedface;
+        }
 
 	if (grows) {
 	    sv_setpvn(sv, (char*)dstart, d - dstart);
