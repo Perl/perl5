@@ -143,7 +143,15 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Various optimizations have been applied to matching regular expression
+patterns, so under the right circumstances, significant performance
+gains may be noticed.  But in an application with many varied patterns,
+little overall improvement likely will be seen.
+
+=item *
+
+Other optimizations have been applied to UTF-8 handling, but these are
+not typically a major factor in most applications.
 
 =back
 
