@@ -1,10 +1,5 @@
 #!/usr/bin/sh
 
-# The locale 'univ.utf8' is defective on some of these systems, as it doesn't
-# think that 
-#   $ + < = > ^ ` | ~
-# are punctuation.  This is fixed in 11.31
-
 ### SYSTEM ARCHITECTURE
 
 # Determine the architecture type of this system.
