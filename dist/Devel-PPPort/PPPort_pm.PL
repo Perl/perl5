@@ -293,9 +293,9 @@ sub expand_pp_expr
          . "extern $proto;\n"
          . "#endif\n"
          . "\n"
-         . "$embed\n"
+         . "#if defined(NEED_$func) || defined(NEED_${func}_GLOBAL)\n"
          . "\n"
-         . "#if defined(NEED_$func) || defined(NEED_${func}_GLOBAL)";
+         . "$embed\n";
   }
 
   die "cannot expand preprocessor expression '$expr'\n";
