@@ -1534,7 +1534,7 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
     /* sv_2cv might call Perl_croak() or Perl_warner() */
     SV * const oldhook = *hook;
 
-    if (!oldhook)
+    if (!oldhook || oldhook == PERL_WARNHOOK_FATAL)
 	return FALSE;
 
     ENTER;
