@@ -198,12 +198,13 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 #endif
 #endif
 
+#ifndef croak_xs_usage
+#if { NEED croak_xs_usage }
+
 #ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
 #endif
 
-#ifndef croak_xs_usage
-#if { NEED croak_xs_usage }
 void
 croak_xs_usage(const CV *const cv, const char *const params)
 {
