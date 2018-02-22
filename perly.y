@@ -71,13 +71,14 @@
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop method
-%type <opval> formname subname proto optsubbody cont my_scalar my_var
+%type <opval> formname subname proto cont my_scalar my_var
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
-%type <opval> realsubbody termbinop termunop anonymous termdo
+%type <opval> termbinop termunop anonymous termdo
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
-%type <opval> sigelem siglist siglistornull subsignature 
+%type <opval> sigelem siglist siglistornull subsignature optsubsignature
+%type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
 
 %nonassoc <ival> PREC_LOW
@@ -274,12 +275,14 @@ barestmt:	PLUGSTMT
 			  parser->parsed_sub = 1;
 			}
 	|	SUB subname startsub
+                    /* sub declaration or definition not within scope
+                       of 'use feature "signatures"'*/
 			{
                           init_named_cv(PL_compcv, $2);
 			  parser->in_my = 0;
 			  parser->in_my_stash = NULL;
 			}
-		proto subattrlist optsubbody
+                    proto subattrlist optsubbody
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  $2->op_type == OP_CONST
@@ -291,17 +294,21 @@ barestmt:	PLUGSTMT
 			  parser->parsed_sub = 1;
 			}
 	|	SIGSUB subname startsub
+                    /* sub declaration or definition under 'use feature
+                     * "signatures"'. (Note that a signature isn't
+                     * allowed in a declaration)
+                     */
 			{
                           init_named_cv(PL_compcv, $2);
 			  parser->in_my = 0;
 			  parser->in_my_stash = NULL;
 			}
-		proto subattrlist optsubbody
+                    subattrlist optsigsubbody
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  $2->op_type == OP_CONST
-			      ? newATTRSUB($3, $2, $5, $6, $7)
-			      : newMYSUB($3, $2, $5, $6, $7)
+			      ? newATTRSUB($3, $2, NULL, $5, $6)
+			      : newMYSUB(  $3, $2, NULL, $5, $6)
 			  ;
 			  $$ = NULL;
 			  intro_my();
@@ -742,9 +749,14 @@ siglistornull:		/* NULL */
 	|	siglist
 			{ $$ = $1; }
 
+/* optional subroutine signature */
+optsubsignature:	/* NULL */
+			{ $$ = NULL; }
+	|	subsignature
+			{ $$ = $1; }
+
 /* Subroutine signature */
-subsignature:	/* NULL */ { $$ = (OP*)NULL; }
-	|	'('
+subsignature:	'('
                         {
                             ENTER;
                             SAVEIV(parser->sig_elems);
@@ -793,9 +805,29 @@ subsignature:	/* NULL */ { $$ = (OP*)NULL; }
 			}
 	;
 
+/* Optional subroutine body (for named subroutine declaration) */
+optsubbody:	subbody { $$ = $1; }
+	|	';'	{ $$ = NULL; }
+	;
 
-/* Subroutine body - block with optional signature */
-realsubbody:	remember subsignature '{' stmtseq '}'
+
+/* Subroutine body (without signature) */
+subbody:	remember  '{' stmtseq '}'
+			{
+			  if (parser->copline > (line_t)$2)
+			      parser->copline = (line_t)$2;
+			  $$ = block_end($1, $3);
+			}
+	;
+
+
+/* optional [ Subroutine body with optional signature ] (for named
+ * subroutine declaration) */
+optsigsubbody:	sigsubbody { $$ = $1; }
+	|	';'	   { $$ = NULL; }
+
+/* Subroutine body with optional signature */
+sigsubbody:	remember optsubsignature '{' stmtseq '}'
 			{
 			  if (parser->copline > (line_t)$3)
 			      parser->copline = (line_t)$3;
@@ -804,11 +836,6 @@ realsubbody:	remember subsignature '{' stmtseq '}'
  			}
  	;
 
-
-/* Optional subroutine body, for named subroutine declaration */
-optsubbody:	realsubbody { $$ = $1; }
-	|	';'	{ $$ = NULL; }
-	;
 
 /* Ordinary expressions; logical combinations */
 expr	:	expr ANDOP expr
@@ -1025,12 +1052,12 @@ anonymous:	'[' expr ']'
 			{ $$ = newANONHASH($2); }
 	|	HASHBRACK ';' '}'	%prec '(' /* { } (';' by tokener) */
 			{ $$ = newANONHASH(NULL); }
-	|	ANONSUB startanonsub proto subattrlist realsubbody	%prec '('
+	|	ANONSUB     startanonsub proto subattrlist subbody    %prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, $3, $4, $5); }
-	|	ANON_SIGSUB startanonsub proto subattrlist realsubbody	%prec '('
+	|	ANON_SIGSUB startanonsub subattrlist sigsubbody %prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
-			  $$ = newANONATTRSUB($2, $3, $4, $5); }
+			  $$ = newANONATTRSUB($2, NULL, $3, $4); }
     ;
 
 /* Things called with "do" */

@@ -21,13 +21,10 @@ our $z;
 }
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
-is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
-    "error when not enabled";
+like $@, qr{syntax error at foo line 8}, "error when not enabled 1";
 
 eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
-is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
-    "error when not enabled";
-
+like $@, qr{syntax error at foo line 8}, "error when not enabled 2";
 
 
 no warnings "experimental::signatures";
