@@ -51,7 +51,7 @@
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
 %token <pval> LABEL
-%token <ival> FORMAT SUB ANONSUB PACKAGE USE
+%token <ival> FORMAT SUB SIGSUB ANONSUB ANON_SIGSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> GIVEN WHEN DEFAULT
 %token <ival> LOOPEX DOTDOT YADAYADA
@@ -274,6 +274,23 @@ barestmt:	PLUGSTMT
 			  parser->parsed_sub = 1;
 			}
 	|	SUB subname startsub
+			{
+                          init_named_cv(PL_compcv, $2);
+			  parser->in_my = 0;
+			  parser->in_my_stash = NULL;
+			}
+		proto subattrlist optsubbody
+			{
+			  SvREFCNT_inc_simple_void(PL_compcv);
+			  $2->op_type == OP_CONST
+			      ? newATTRSUB($3, $2, $5, $6, $7)
+			      : newMYSUB($3, $2, $5, $6, $7)
+			  ;
+			  $$ = NULL;
+			  intro_my();
+			  parser->parsed_sub = 1;
+			}
+	|	SIGSUB subname startsub
 			{
                           init_named_cv(PL_compcv, $2);
 			  parser->in_my = 0;
@@ -1009,6 +1026,9 @@ anonymous:	'[' expr ']'
 	|	HASHBRACK ';' '}'	%prec '(' /* { } (';' by tokener) */
 			{ $$ = newANONHASH(NULL); }
 	|	ANONSUB startanonsub proto subattrlist realsubbody	%prec '('
+			{ SvREFCNT_inc_simple_void(PL_compcv);
+			  $$ = newANONATTRSUB($2, $3, $4, $5); }
+	|	ANON_SIGSUB startanonsub proto subattrlist realsubbody	%prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, $3, $4, $5); }
     ;

@@ -310,6 +310,7 @@ static struct debug_tokens {
     { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
     { ANDOP,		TOKENTYPE_NONE,		"ANDOP" },
     { ANONSUB,		TOKENTYPE_IVAL,		"ANONSUB" },
+    { ANON_SIGSUB,	TOKENTYPE_IVAL,		"ANON_SIGSUB" },
     { ARROW,		TOKENTYPE_NONE,		"ARROW" },
     { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
     { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
@@ -367,6 +368,7 @@ static struct debug_tokens {
     { RELOP,		TOKENTYPE_OPNUM,	"RELOP" },
     { REQUIRE,		TOKENTYPE_NONE,		"REQUIRE" },
     { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
+    { SIGSUB,		TOKENTYPE_NONE,		"SIGSUB" },
     { SUB,		TOKENTYPE_NONE,		"SUB" },
     { THING,		TOKENTYPE_OPVAL,	"THING" },
     { UMINUS,		TOKENTYPE_NONE,		"UMINUS" },
@@ -8662,6 +8664,7 @@ Perl_yylex(pTHX)
 		bool have_name, have_proto;
 		const int key = tmp;
                 SV *format_name = NULL;
+                bool is_sigsub = FEATURE_SIGNATURES_IS_ENABLED;
 
                 SSize_t off = s-SvPVX(PL_linestr);
 		s = skipspace(s);
@@ -8721,7 +8724,7 @@ Perl_yylex(pTHX)
 		}
 
 		/* Look for a prototype */
-		if (*s == '(' && !FEATURE_SIGNATURES_IS_ENABLED) {
+		if (*s == '(' && !is_sigsub) {
 		    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!s)
@@ -8761,10 +8764,16 @@ Perl_yylex(pTHX)
 			sv_setpvs(PL_subname, "__ANON__");
 		    else
 			sv_setpvs(PL_subname, "__ANON__::__ANON__");
-		    TOKEN(ANONSUB);
+                    if (is_sigsub)
+                        TOKEN(ANON_SIGSUB);
+                    else
+                        TOKEN(ANONSUB);
 		}
 		force_ident_maybe_lex('&');
-		TOKEN(SUB);
+                if (is_sigsub)
+                    TOKEN(SIGSUB);
+                else
+                    TOKEN(SUB);
 	    }
 
 	case KEY_system:
