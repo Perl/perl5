@@ -1511,6 +1511,7 @@ Anp	|Signal_t |csighandler	|int sig
 #endif
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|SSize_t n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
+Xp	|void	|init_named_cv	|NN CV *cv|NN OP *nameop
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV* cv
 Amd	|bool	|sv_2bool	|NN SV *const sv

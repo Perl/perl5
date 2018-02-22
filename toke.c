@@ -11594,6 +11594,39 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     return oldsavestack_ix;
 }
 
+
+/* Do extra initialisation of a CV (typically one just created by
+ * start_subparse()) if that CV is for a named sub
+ */
+
+void
+Perl_init_named_cv(pTHX_ CV *cv, OP *nameop)
+{
+    PERL_ARGS_ASSERT_INIT_NAMED_CV;
+
+    if (nameop->op_type == OP_CONST) {
+        const char *const name = SvPV_nolen_const(((SVOP*)nameop)->op_sv);
+        if (   strEQ(name, "BEGIN")
+            || strEQ(name, "END")
+            || strEQ(name, "INIT")
+            || strEQ(name, "CHECK")
+            || strEQ(name, "UNITCHECK")
+        )
+          CvSPECIAL_on(cv);
+    }
+    else
+    /* State subs inside anonymous subs need to be
+     clonable themselves. */
+    if (   CvANON(CvOUTSIDE(cv))
+        || CvCLONE(CvOUTSIDE(cv))
+        || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST(
+                        CvOUTSIDE(cv)
+                     ))[nameop->op_targ])
+    )
+      CvCLONE_on(cv);
+}
+
+
 static int
 S_yywarn(pTHX_ const char *const s, U32 flags)
 {
