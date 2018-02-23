@@ -1354,7 +1354,12 @@ S_new_numeric(pTHX_ const char *newnum)
     /* Keep LC_NUMERIC in the C locale.  This is for XS modules, so they don't
      * have to worry about the radix being a non-dot.  (Core operations that
      * need the underlying locale change to it temporarily). */
-    set_numeric_standard();
+    if (PL_numeric_standard) {
+        set_numeric_radix(0);
+    }
+    else {
+        set_numeric_standard();
+    }
 
 #endif /* USE_LOCALE_NUMERIC */
 
