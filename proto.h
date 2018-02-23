@@ -5595,7 +5595,7 @@ STATIC char *	S_find_next_ascii(char* s, const char * send, const bool is_utf8)
 #define PERL_ARGS_ASSERT_FIND_NEXT_ASCII	\
 	assert(s); assert(send)
 
-STATIC char *	S_find_next_masked(char * s, const char * send, const U8 byte, const U8 mask)
+STATIC U8 *	S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_FIND_NEXT_MASKED	\
 	assert(s); assert(send)
@@ -5605,7 +5605,7 @@ STATIC char *	S_find_next_non_ascii(char* s, const char * send, const bool is_ut
 #define PERL_ARGS_ASSERT_FIND_NEXT_NON_ASCII	\
 	assert(s); assert(send)
 
-STATIC char *	S_find_span_end(char* s, const char * send, const char span_byte)
+STATIC U8 *	S_find_span_end(U8* s, const U8 * send, const U8 span_byte)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_FIND_SPAN_END	\
 	assert(s); assert(send)

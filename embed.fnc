@@ -2540,12 +2540,12 @@ ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *stren
 
 #if defined(PERL_IN_REGEXEC_C)
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
-ERns	|char *|find_next_ascii|NN char* s|NN const char * send|const bool is_utf8
-ERns	|char *|find_next_non_ascii|NN char* s|NN const char * send|const bool is_utf8
-ERns	|char *	|find_next_masked|NN char * s				\
-				 |NN const char * send			\
+ERns	|char *	|find_next_ascii|NN char* s|NN const char * send|const bool is_utf8
+ERns	|char *	|find_next_non_ascii|NN char* s|NN const char * send|const bool is_utf8
+ERns	|U8 *	|find_next_masked|NN U8 * s				\
+				 |NN const U8 * send			\
 				 |const U8 byte|const U8 mask
-ERns	|char *|find_span_end	|NN char* s|NN const char * send|const char span_byte
+ERns	|U8 *|find_span_end	|NN U8* s|NN const U8 * send|const U8 span_byte
 ERns	|U8 *|find_span_end_mask|NN U8 * s|NN const U8 * send	\
 				|const U8 span_byte|const U8 mask
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog

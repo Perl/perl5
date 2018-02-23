@@ -676,8 +676,8 @@ S_find_next_non_ascii(char * s, const char * send, const bool utf8_target)
 
 }
 
-STATIC char *
-S_find_span_end(char * s, const char * send, const char span_byte)
+STATIC U8 *
+S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 {
     /* Returns the position of the first byte in the sequence between 's' and
      * 'send-1' inclusive that isn't 'span_byte'; returns 'send' if none found.
@@ -741,8 +741,8 @@ S_find_span_end(char * s, const char * send, const char span_byte)
     return s;
 }
 
-STATIC char *
-S_find_next_masked(char * s, const char * send, const U8 byte, const U8 mask)
+STATIC U8 *
+S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 {
     /* Returns the position of the first byte in the sequence between 's'
      * and 'send-1' inclusive that when ANDed with 'mask' yields 'byte';
@@ -761,7 +761,7 @@ S_find_next_masked(char * s, const char * send, const U8 byte, const U8 mask)
         PERL_UINTMAX_T word_complemented, mask_word;
 
         while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
-            if (((* (U8 *) s) & mask) == byte) {
+            if (((*s) & mask) == byte) {
                 return s;
             }
             s++;
@@ -804,7 +804,7 @@ S_find_next_masked(char * s, const char * send, const U8 byte, const U8 mask)
     }
 
     while (s < send) {
-        if (((* (U8 *) s) & mask) == byte) {
+        if (((*s) & mask) == byte) {
             return s;
         }
         s++;
@@ -834,7 +834,7 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
         PERL_UINTMAX_T span_word, mask_word;
 
         while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
-            if (((* (U8 *) s) & mask) != span_byte) {
+            if (((*s) & mask) != span_byte) {
                 return s;
             }
             s++;
@@ -861,7 +861,7 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
     }
 
     while (s < send) {
-        if (((* (U8 *) s) & mask) != span_byte) {
+        if (((*s) & mask) != span_byte) {
             return s;
         }
         s++;
@@ -1951,7 +1951,7 @@ STMT_START {                                                                    
  * there is no such occurrence. */
 #define REXEC_FBC_FIND_NEXT_SCAN(UTF8, f)                   \
     while (s < strend) {                                    \
-        s = f;                                              \
+        s = (f);                                            \
         if (s >= strend) {                                  \
             break;                                          \
         }                                                   \
@@ -2250,7 +2250,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case ANYOFM:    /* ARG() is the base byte; FLAGS() the mask byte */
         /* UTF-8ness doesn't matter, so use 0 */
         REXEC_FBC_FIND_NEXT_SCAN(0,
-                                 find_next_masked(s, strend, ARG(c), FLAGS(c)));
+         (char *) find_next_masked((U8 *) s, (U8 *) strend, ARG(c), FLAGS(c)));
         break;
 
     case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
@@ -2364,7 +2364,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             if (LIKELY(PL_bitcount[bits_differing] == 1)) {
                 bits_differing = ~ bits_differing;
                 while (s <= e) {
-                    s = find_next_masked(s, e + 1,
+                    s = (char *) find_next_masked((U8 *) s, (U8 *) e + 1,
                                         (c1 & bits_differing), bits_differing);
                     if (s > e) {
                         break;
@@ -9285,7 +9285,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                  * since here, to match at all, 1 char == 1 byte */
                 loceol = scan + max;
             }
-            scan = find_span_end(scan, loceol, (U8) c);
+            scan = (char *) find_span_end((U8 *) scan, (U8 *) loceol, (U8) c);
 	}
 	else if (reginfo->is_utf8_pat) {
             if (utf8_target) {
@@ -9307,7 +9307,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 /* Target isn't utf8; convert the character in the UTF-8
                  * pattern to non-UTF8, and do a simple find */
                 c = EIGHT_BIT_UTF8_TO_NATIVE(c, *(STRING(p) + 1));
-                scan = find_span_end(scan, loceol, (U8) c);
+                scan = (char *) find_span_end((U8 *) scan, (U8 *) loceol, (U8) c);
             } /* else pattern char is above Latin1, can't possibly match the
                  non-UTF-8 target */
         }
@@ -9405,7 +9405,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 }
             }
             else if (c1 == c2) {
-                scan = find_span_end(scan, loceol, c1);
+                scan = (char *) find_span_end((U8 *) scan, (U8 *) loceol, (U8) c1);
             }
             else {
                 /* See comments in regmatch() CURLY_B_min_known_fail.  We avoid
