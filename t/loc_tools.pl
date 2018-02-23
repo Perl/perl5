@@ -109,7 +109,10 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     local $SIG{__WARN__} = sub {
         $badutf8 = 1 if grep { /Malformed UTF-8/ } @_;
-        $plays_well = 0 if grep { /Locale .* may not work well/i } @_;
+        $plays_well = 0 if grep {
+                    /Locale .* may not work well(?#
+                   )|The Perl program will use the standard meanings/i
+            } @_;
     };
 
     # Incompatible locales aren't warned about unless using locales.
