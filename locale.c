@@ -2392,7 +2392,6 @@ S_my_nl_langinfo(const nl_item item, bool toggle)
 S_my_nl_langinfo(const int item, bool toggle)
 #endif
 {
-    const char * retval;
     dTHX;
 
     /* We only need to toggle into the underlying LC_NUMERIC locale for these
@@ -2423,15 +2422,12 @@ S_my_nl_langinfo(const int item, bool toggle)
                            this code section (the only call to nl_langinfo in
                            the core) */
 
-        retval = nl_langinfo(item);
 
-#    ifdef USE_ITHREADS
-
-        /* Copy to a per-thread buffer */
-        save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
-        retval = PL_langinfo_buf;
-
-#    endif
+        /* Copy to a per-thread buffer, which is also one that won't be
+         * destroyed by a subsequent setlocale(), such as the
+         * RESTORE_LC_NUMERIC may do just below. */
+        save_to_buffer(nl_langinfo(item),
+                       &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
 
         LOCALE_UNLOCK;
 
@@ -2461,9 +2457,10 @@ S_my_nl_langinfo(const int item, bool toggle)
             }
         }
 
-        /* We don't have to copy it to a buffer, as this is a thread-safe
-         * function which Configure has made sure of */
-        retval = nl_langinfo_l(item, cur);
+        /* We have to save it to a buffer, because the freelocale() just below
+         * can invalidate the internal one */
+        save_to_buffer(nl_langinfo_l(item, cur),
+                       &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
 
         if (do_free) {
             freelocale(cur);
@@ -2472,7 +2469,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #  endif
 
-    if (strEQ(retval, "")) {
+    if (strEQ(PL_langinfo_buf, "")) {
         if (item == PERL_YESSTR) {
             return "yes";
         }
@@ -2481,7 +2478,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         }
     }
 
-    return retval;
+    return PL_langinfo_buf;
 
 #else   /* Below, emulate nl_langinfo as best we can */
 
@@ -2490,6 +2487,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 #  ifdef HAS_LOCALECONV
 
         const struct lconv* lc;
+        const char * temp;
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
 #  endif
@@ -2575,18 +2573,18 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                 lc = localeconv();
                 if (! lc) {
-                    retval = "";
+                    temp = "";
                 }
                 else {
-                    retval = (item == PERL_RADIXCHAR)
+                    temp = (item == PERL_RADIXCHAR)
                              ? lc->decimal_point
                              : lc->thousands_sep;
-                    if (! retval) {
-                        retval = "";
+                    if (! temp) {
+                        temp = "";
                     }
                 }
 
-                save_to_buffer(retval, &PL_langinfo_buf,
+                save_to_buffer(temp, &PL_langinfo_buf,
                                &PL_langinfo_bufsize, 0);
 
                 LOCALE_UNLOCK;
