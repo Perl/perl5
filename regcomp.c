@@ -6394,8 +6394,8 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                     pat = msv;
                 } else {
                     /* a string with no trailing null, we need to copy it
-                     * so it we have a trailing null */
-                    pat = newSVsv(msv);
+                     * so it has a trailing null */
+                    pat = sv_2mortal(newSVsv(msv));
                 }
             }
 
