@@ -2229,7 +2229,7 @@ S_save_to_buffer(const char * string, char **buf, Size_t *buf_size, const Size_t
 
 =for apidoc Perl_langinfo
 
-This is an (almost ª) drop-in replacement for the system C<L<nl_langinfo(3)>>,
+This is an (almost) drop-in replacement for the system C<L<nl_langinfo(3)>>,
 taking the same C<item> parameter values, and returning the same information.
 But it is more thread-safe than regular C<nl_langinfo()>, and hides the quirks
 of Perl's locale handling from your code, and can be used on systems that lack
@@ -2241,34 +2241,56 @@ Expanding on these:
 
 =item *
 
+The reason it isn't quite a drop-in replacement is actually an advantage.  The
+only difference is that it returns S<C<const char *>>, whereas plain
+C<nl_langinfo()> returns S<C<char *>>, but you are (only by documentation)
+forbidden to write into the buffer.  By declaring this C<const>, the compiler
+enforces this restriction, so if it is violated, you know at compilation time,
+rather than getting segfaults at runtime.
+
+=item *
+
 It delivers the correct results for the C<RADIXCHAR> and C<THOUSESEP> items,
 without you having to write extra code.  The reason for the extra code would be
 because these are from the C<LC_NUMERIC> locale category, which is normally
 kept set to the C locale by Perl, no matter what the underlying locale is
 supposed to be, and so to get the expected results, you have to temporarily
-toggle into the underlying locale, and later toggle back.  (You could use
-plain C<nl_langinfo> and C<L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>> for this
-but then you wouldn't get the other advantages of C<Perl_langinfo()>; not
-keeping C<LC_NUMERIC> in the C locale would break a lot of CPAN, which is
-expecting the radix (decimal point) character to be a dot.)
+toggle into the underlying locale, and later toggle back.  (You could use plain
+C<nl_langinfo> and C<L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>> for this but
+then you wouldn't get the other advantages of C<Perl_langinfo()>; not keeping
+C<LC_NUMERIC> in the C locale would break a lot of CPAN, which is expecting the
+radix (decimal point) character to be a dot.)
 
 =item *
 
-Depending on C<item>, it works on systems that don't have C<nl_langinfo>, hence
-makes your code more portable.  Of the fifty-some possible items specified by
-the POSIX 2008 standard,
-L<http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
-only two are completely unimplemented.  It uses various techniques to recover
-the other items, including calling C<L<localeconv(3)>>, and C<L<strftime(3)>>,
-both of which are specified in C89, so should be always be available.  Later
-C<strftime()> versions have additional capabilities; C<""> is returned for
-those not available on your system.
+The system function it replaces can have its static return buffer trashed,
+not only by a subesequent call to that function, but by a C<freelocale>,
+C<setlocale>, or other locale change.  The returned buffer of this function is
+not changed until the next call to it, so the buffer is never in a trashed
+state.
 
-It is important to note that on such systems, this calls C<localeconv>, and so
-overwrites the static buffer returned from previous explicit calls to that
-function.  Thus, if the program doesn't use or save the information from an
-explicit C<localeconv> call (which good practice suggests should be done
-anyway), use of this function can break it.
+=item *
+
+Its return buffer is per-thread, so it also is never overwritten by a call to
+this function from another thread;  unlike the function it replaces.
+
+=item *
+
+But most importantly, it works on systems that don't have C<nl_langinfo>, such
+as Windows, hence makes your code more portable.  Of the fifty-some possible
+items specified by the POSIX 2008 standard,
+L<http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
+only two are completely unimplemented (though the loss of one of these is
+significant).  It uses various techniques to recover the other items, including
+calling C<L<localeconv(3)>>, and C<L<strftime(3)>>, both of which are specified
+in C89, so should be always be available.  Later C<strftime()> versions have
+additional capabilities; C<""> is returned for those not available on your
+system.
+
+It is important to note that when called with an item that is recovered by
+using C<localeconv>, the buffer from any previous explicit call to
+C<localeconv> will be overwritten.  This means you must save that buffer's
+contents if you need to access them after a call to this function.
 
 The details for those items which may differ from what this emulation returns
 and what a native C<nl_langinfo()> would return are:
@@ -2290,8 +2312,8 @@ Unimplemented, so returns C<"">.
 =item C<NOSTR>
 
 Only the values for English are returned.  C<YESSTR> and C<NOSTR> have been
-removed from POSIX 2008, and are retained for backwards compatibility.  Your
-platform's C<nl_langinfo> may not support them.
+removed from POSIX 2008, and are retained here for backwards compatibility.
+Your platform's C<nl_langinfo> may not support them.
 
 =item C<D_FMT>
 
@@ -2332,6 +2354,8 @@ know about them.  C<""> is returned for these on such systems.
 
 =back
 
+=back
+
 When using C<Perl_langinfo> on systems that don't have a native
 C<nl_langinfo()>, you must
 
@@ -2345,23 +2369,6 @@ You also should not use the bare C<langinfo.h> item names, but should preface
 them with C<PERL_>, so use C<PERL_RADIXCHAR> instead of plain C<RADIXCHAR>.
 The C<PERL_I<foo>> versions will also work for this function on systems that do
 have a native C<nl_langinfo>.
-
-=item *
-
-It is thread-friendly, returning its result in a buffer that won't be
-overwritten by another thread, so you don't have to code for that possibility.
-The buffer can be overwritten by the next call to C<nl_langinfo> or
-C<Perl_langinfo> in the same thread.
-
-=item *
-
-ª It returns S<C<const char *>>, whereas plain C<nl_langinfo()> returns S<C<char
-*>>, but you are (only by documentation) forbidden to write into the buffer.
-By declaring this C<const>, the compiler enforces this restriction.  The extra
-C<const> is why this isn't an unequivocal drop-in replacement for
-C<nl_langinfo>.
-
-=back
 
 The original impetus for C<Perl_langinfo()> was so that code that needs to
 find out the current currency symbol, floating point radix character, or digit
