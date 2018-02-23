@@ -642,6 +642,7 @@ S_emulate_setlocale(const int category,
             unsigned int i;
             Size_t names_len = 0;
             char * all_string;
+            bool are_all_categories_the_same_locale = TRUE;
 
             /* If we have a valid LC_ALL value, just return it */
             if (PL_curlocales[LC_ALL_INDEX]) {
@@ -660,7 +661,8 @@ S_emulate_setlocale(const int category,
             /* Otherwise, we need to construct a string of name=value pairs.
              * We use the glibc syntax, like
              *      LC_NUMERIC=C;LC_TIME=en_US.UTF-8;...
-             *  First calculate the needed size. */
+             *  First calculate the needed size.  Along the way, check if all
+             *  the locale names are the same */
             for (i = 0; i < LC_ALL_INDEX; i++) {
 
 #    ifdef DEBUGGING
@@ -675,7 +677,20 @@ S_emulate_setlocale(const int category,
                           + 1                       /* '=' */
                           + strlen(PL_curlocales[i])
                           + 1;                      /* ';' */
+
+                if (i > 0 && strNE(PL_curlocales[i], PL_curlocales[i-1])) {
+                    are_all_categories_the_same_locale = FALSE;
+                }
             }
+
+            /* If they are the same, we don't actually have to construct the
+             * string; we just make the entry in LC_ALL_INDEX valid, and be
+             * that single name */
+            if (are_all_categories_the_same_locale) {
+                PL_curlocales[LC_ALL_INDEX] = savepv(PL_curlocales[0]);
+                return PL_curlocales[LC_ALL_INDEX];
+            }
+
             names_len++;    /* Trailing '\0' */
             SAVEFREEPV(Newx(all_string, names_len, char));
             *all_string = '\0';
