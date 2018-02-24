@@ -218,7 +218,7 @@ U32 zaphod32_hash_with_state(
     STRLEN len = key_len;
     U32 v0= state[0];
     U32 v1= state[1];
-    U32 v2= state[2] ^ (0xC41A7AB1 * (key_len + 1));
+    U32 v2= state[2] ^ (0xC41A7AB1 * ((U32)key_len + 1));
 
     ZAPHOD32_WARN4("v0=%08x v1=%08x v2=%08x ln=%08x HASH START\n",
             (unsigned int)state[0], (unsigned int)state[1],
