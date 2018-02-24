@@ -1,3 +1,9 @@
+version 1.49
+
+ * comment only change, document the change from 1.47 better
+   and create a commit in blead-perl which can be used to
+   reference this issue from the bug report.
+
 version 1.48
 
  * guard against hand-rolled UNIVERSAL::can() implementations
