@@ -343,10 +343,10 @@ sub format_arg {
 		# so we need to use overload::StrVal() below.  But it's
 		# possible that the overload module hasn't been loaded:
 		# overload methods can be installed without it.  So load
-		# the module here.  The bareword form of require is here
-		# eschewed to avoid iths compile-time effect of vivifying
-		# vivifying the target module's stash.
-                require "overload.pm"
+		# the module here.  The eval layer here avoids the
+		# compile-time effect of require vivifying the target
+		# module's stash.
+                eval "require overload; 1"
                     or return "use overload failed";
             }
             my $sub = _fetch_sub(overload => 'StrVal');
