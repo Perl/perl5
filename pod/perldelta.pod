@@ -284,7 +284,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The new (as of 5.27.8) restriction forbidding use of C<goto> to enter the
+argument of a binary or list expression (see L<perldiag/"Can't
+E<quot>gotoE<quot> into a binary or list expression">) has been relaxed to
+allow entering the I<first> argument of an operator that takes a fixed
+number of arguments, since this is a case that will not cause stack
+corruption.  [perl #132854]
 
 =back
 

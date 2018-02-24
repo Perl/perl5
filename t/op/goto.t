@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 122;
+plan tests => 123;
 our $TODO;
 
 my $deprecated = 0;
@@ -870,3 +870,13 @@ sub _routine {
 }
 _routine();
 pass("bug 132799");
+
+# [perl #132854]
+# Goto the *first* parameter of a binary expression, which is harmless.
+eval {
+    goto __GEN_2;
+    my $sent = do {
+        __GEN_2:
+    };
+};
+is $@,'', 'goto the first parameter of a binary expression [perl #132854]';
