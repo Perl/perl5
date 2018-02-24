@@ -8,6 +8,7 @@ Revision history for Perl distribution PathTools.
 - [perl #132853] Add metadata (ABSTRACT, LICENSE, AUTHOR)
 - [perl #132733] Skip cwd_enoent test on Cygwin
 - [perl #132651] Avoid infinite recursion in _perl_abs_path()
+- [rt.cpan.org #114236] Compatibility with File::Path 2.06_04
 
 3.72
 - [perl #132648] Correct error returns from fast_abs_path()
