@@ -336,17 +336,16 @@ sub format_arg {
         }
         else
         {
-            # this particular bit of magic looking code is responsible for disabling overloads
-            # while we are stringifing arguments, otherwise if an overload calls a Carp sub we
-            # could end up in infinite recursion, which means we will exhaust the C stack and
-            # then segfault. Calling Carp obviously should not trigger an untrappable exception
-            # from Carp itself! - Yves
             if ($pack->can("((")) {
-                # this eval is required, or fail the overload test
-                # in dist/Carp/t/vivify_stash.t, which is really quite weird.
-                # Even if we never enter this block, the presence of the require
-                # causes the test to fail. This seems like it might be a bug
-                # in require. Needs further investigation - Yves
+		# Argument is blessed into a class with overloading, and
+		# so might have an overloaded stringification.	We don't
+		# want to risk getting the overloaded stringification,
+		# so we need to use overload::StrVal() below.  But it's
+		# possible that the overload module hasn't been loaded:
+		# overload methods can be installed without it.  So load
+		# the module here.  The eval layer here avoids the
+		# compile-time effect of require vivifying the target
+		# module's stash.
                 eval "require overload; 1"
                     or return "use overload failed";
             }
