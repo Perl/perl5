@@ -2152,8 +2152,7 @@ Perl_setlocale(const int category, const char * locale)
         return NULL;
     }
 
-    save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
-    retval = PL_setlocale_buf;
+    retval = save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
 
     /* If locale == NULL, we are just querying the state */
     if (locale == NULL) {
@@ -2228,9 +2227,15 @@ S_save_to_buffer(const char * string, char **buf, Size_t *buf_size, const Size_t
     /* Copy the NUL-terminated 'string' to 'buf' + 'offset'.  'buf' has size 'buf_size',
      * growing it if necessary */
 
-    const Size_t string_size = strlen(string) + offset + 1;
+    Size_t string_size;
 
     PERL_ARGS_ASSERT_SAVE_TO_BUFFER;
+
+    if (! string) {
+        return NULL;
+    }
+
+    string_size = strlen(string) + offset + 1;
 
     if (*buf_size == 0) {
         Newx(*buf, string_size, char);
@@ -2420,6 +2425,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 #endif
 {
     dTHX;
+    const char * retval;
 
     /* We only need to toggle into the underlying LC_NUMERIC locale for these
      * two items, and only if not already there */
@@ -2453,8 +2459,8 @@ S_my_nl_langinfo(const int item, bool toggle)
         /* Copy to a per-thread buffer, which is also one that won't be
          * destroyed by a subsequent setlocale(), such as the
          * RESTORE_LC_NUMERIC may do just below. */
-        save_to_buffer(nl_langinfo(item),
-                       &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+        retval = save_to_buffer(nl_langinfo(item),
+                                &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
 
         LOCALE_UNLOCK;
 
@@ -2486,8 +2492,8 @@ S_my_nl_langinfo(const int item, bool toggle)
 
         /* We have to save it to a buffer, because the freelocale() just below
          * can invalidate the internal one */
-        save_to_buffer(nl_langinfo_l(item, cur),
-                       &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+        retval = save_to_buffer(nl_langinfo_l(item, cur),
+                                &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
 
         if (do_free) {
             freelocale(cur);
@@ -2496,7 +2502,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #  endif
 
-    if (strEQ(PL_langinfo_buf, "")) {
+    if (strEQ(retval, "")) {
         if (item == PERL_YESSTR) {
             return "yes";
         }
@@ -2505,7 +2511,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         }
     }
 
-    return PL_langinfo_buf;
+    return retval;
 
 #else   /* Below, emulate nl_langinfo as best we can */
 
@@ -2570,19 +2576,19 @@ S_my_nl_langinfo(const int item, bool toggle)
                 }
 
                 /* Leave the first spot empty to be filled in below */
-                save_to_buffer(lc->currency_symbol, &PL_langinfo_buf,
-                               &PL_langinfo_bufsize, 1);
+                retval = save_to_buffer(lc->currency_symbol, &PL_langinfo_buf,
+                                        &PL_langinfo_bufsize, 1);
                 if (lc->mon_decimal_point && strEQ(lc->mon_decimal_point, ""))
                 { /*  khw couldn't figure out how the localedef specifications
                       would show that the $ should replace the radix; this is
                       just a guess as to how it might work.*/
-                    *PL_langinfo_buf = '.';
+                    retval = ".";
                 }
                 else if (lc->p_cs_precedes) {
-                    *PL_langinfo_buf = '-';
+                    retval = "-";
                 }
                 else {
-                    *PL_langinfo_buf = '+';
+                    retval = "+";
                 }
 
                 LOCALE_UNLOCK;
@@ -2611,8 +2617,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                     }
                 }
 
-                save_to_buffer(temp, &PL_langinfo_buf,
-                               &PL_langinfo_bufsize, 0);
+                retval = save_to_buffer(temp, &PL_langinfo_buf,
+                                        &PL_langinfo_bufsize, 0);
 
                 LOCALE_UNLOCK;
 
@@ -2851,10 +2857,11 @@ S_my_nl_langinfo(const int item, bool toggle)
                 if (return_format) {
                     if (strEQ(PL_langinfo_buf, format)) {
                         *PL_langinfo_buf = '\0';
+                        retval = PL_langinfo_buf;
                     }
                     else {
-                        save_to_buffer(format, &PL_langinfo_buf,
-                                        &PL_langinfo_bufsize, 0);
+                        retval = save_to_buffer(format, &PL_langinfo_buf,
+                                                &PL_langinfo_bufsize, 0);
                     }
                 }
 
@@ -2865,7 +2872,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         }
     }
 
-    return PL_langinfo_buf;
+    return retval;
 
 #endif
 

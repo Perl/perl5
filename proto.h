@@ -4707,10 +4707,12 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp);
 STATIC const char*	S_category_name(const int category);
 STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, char **buf, Size_t *buf_size, const Size_t offset);
+PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, char **buf, Size_t *buf_size, const Size_t offset)
+			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVE_TO_BUFFER	\
-	assert(string); assert(buf_size)
+	assert(buf_size)
 #endif
+
 STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
 #  if defined(USE_LOCALE)
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
