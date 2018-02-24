@@ -2131,7 +2131,8 @@ Perl_setlocale(const int category, const char * locale)
 
 #endif
 
-    retval = do_setlocale_r(category, locale);
+    retval = save_to_buffer(do_setlocale_r(category, locale),
+                            &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
     SAVE_ERRNO;
 
 #if defined(USE_LOCALE_NUMERIC) && defined(LC_ALL)
@@ -2151,8 +2152,6 @@ Perl_setlocale(const int category, const char * locale)
     if (! retval) {
         return NULL;
     }
-
-    retval = save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
 
     /* If locale == NULL, we are just querying the state */
     if (locale == NULL) {
