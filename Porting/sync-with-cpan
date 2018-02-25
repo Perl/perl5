@@ -137,7 +137,7 @@ use Archive::Tar;
 use File::Basename qw( basename );
 use File::Path qw( remove_tree );
 use File::Find;
-use File::Spec::Functions qw( tmpdir );
+use File::Spec::Functions qw( tmpdir rel2abs );
 use Config qw( %Config );
 
 $| = 1;
@@ -282,6 +282,8 @@ if (!-d $files [0] || grep { $_ eq $module } @problematic) {
     say "--force is in effect, so we'll soldier on. Wish me luck!";
 }
 
+use Cwd 'cwd';
+my $orig_pwd = cwd();
 
 chdir "cpan";
 
@@ -317,6 +319,7 @@ sub wget {
 my $new_file;
 my $new_version;
 if (defined $tarball) {
+    $tarball = rel2abs( $tarball, $orig_pwd ) ;
     die "Tarball $tarball does not exist\n" if !-e $tarball;
     die "Tarball $tarball is not a plain file\n" if !-f _;
     $new_file     = $tarball;
