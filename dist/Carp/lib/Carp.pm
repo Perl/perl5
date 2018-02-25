@@ -353,7 +353,7 @@ sub format_arg {
             # but this breaks modules that call overloads or croak during can(), for
             # instance Class::Std v0.013, so if we end up here twice, we will just
             # load overload outright.
-            if ($in_recurse || do{ local $in_recurse = 1; $pack->can("((") }) {
+            if ($in_recurse || do{ local $in_recurse = 1; $pack->can("((") || $pack->can("()") }) {
                 # Argument is blessed into a class with overloading, and
                 # so might have an overloaded stringification.  We don't
                 # want to risk getting the overloaded stringification,
