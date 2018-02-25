@@ -45,6 +45,7 @@ elsif (system("ulimit -c 0 ;") == 0) {
 }
 if (@ARGV and $ARGV[0] eq '--core') {
     $ENV{PERL_CORE} = 1;
+    exit if -e "dist/Storable/$fn";
 }
 my $PERL = $^X;
 if ($ENV{PERL_CORE}) {
