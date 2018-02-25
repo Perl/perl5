@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 148;
+plan tests => 149;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -618,4 +618,10 @@ SKIP: {
  skip "for now; crashes";
  leak 2,1,sub{XS::APItest::PerlIO_exportFILE(*STDIN,"");0},
                                       'T_STDIO in default typemap';
+}
+
+{
+    my %rh= ( qr/^foo/ => 1);
+    sub Regex_Key_Leak { my ($r)= keys %rh; "foo"=~$r; }
+    leak 2, 0, \&Regex_Key_Leak,"RT #132892 - regex patterns should not leak";
 }
