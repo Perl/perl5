@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 123;
+plan tests => 124;
 our $TODO;
 
 my $deprecated = 0;
@@ -858,6 +858,8 @@ is sub { goto z; exit do { z: return "foo" } }->(), 'foo',
    'goto into exit';
 is sub { goto z; eval do { z: "'foo'" } }->(), 'foo',
    'goto into eval';
+is join(",",sub { goto z; glob do { z: "foo bar" } }->()), 'foo,bar',
+   'goto into glob';
 
 # [perl #132799]
 # Erroneous inward goto warning, followed by crash.
