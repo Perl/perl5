@@ -6503,14 +6503,16 @@ statements.
 If EXPR is a bareword, L<C<require>|/require VERSION> assumes a F<.pm>
 extension and replaces C<::> with C</> in the filename for you,
 to make it easy to load standard modules.  This form of loading of
-modules does not risk altering your namespace.
+modules does not risk altering your namespace, however it will autovivify
+the stash for the required module.
 
 In other words, if you try this:
 
         require Foo::Bar;     # a splendid bareword
 
 The require function will actually look for the F<Foo/Bar.pm> file in the
-directories specified in the L<C<@INC>|perlvar/@INC> array.
+directories specified in the L<C<@INC>|perlvar/@INC> array, and it will
+autovivify the C<Foo::Bar::> stash at compile time.
 
 But if you try this:
 
@@ -6525,12 +6527,20 @@ will complain about not finding F<Foo::Bar> there.  In this case you can do:
 
         eval "require $class";
 
+or you could do
+
+        require "Foo/Bar.pm";
+
+Neither of these forms will autovivify any stashes at compile time and
+only have run time effects.
+
 Now that you understand how L<C<require>|/require VERSION> looks for
 files with a bareword argument, there is a little extra functionality
 going on behind the scenes.  Before L<C<require>|/require VERSION> looks
 for a F<.pm> extension, it will first look for a similar filename with a
 F<.pmc> extension.  If this file is found, it will be loaded in place of
-any file ending in a F<.pm> extension.
+any file ending in a F<.pm> extension. This applies to both the explicit
+C<require "Foo/Bar.pm";> form and the C<require Foo::Bar;> form.
 
 You can also insert hooks into the import facility by putting Perl code
 directly into the L<C<@INC>|perlvar/@INC> array.  There are three forms
