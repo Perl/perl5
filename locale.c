@@ -2850,13 +2850,14 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                 LOCALE_UNLOCK;
 
+                retval = PL_langinfo_buf;
+
                 /* If to return the format, not the value, overwrite the buffer
                  * with it.  But some strftime()s will keep the original format
                  * if illegal, so change those to "" */
                 if (return_format) {
                     if (strEQ(PL_langinfo_buf, format)) {
                         *PL_langinfo_buf = '\0';
-                        retval = PL_langinfo_buf;
                     }
                     else {
                         retval = save_to_buffer(format, &PL_langinfo_buf,
