@@ -2968,6 +2968,7 @@ dist/Carp/t/baduni.t		See if Carp handles non-char Unicode
 dist/Carp/t/baduni_warnings.t		See if Carp handles non-char Unicode when loaded via warnings.pm
 dist/Carp/t/Carp.t		See if Carp works
 dist/Carp/t/Carp_overload.t		See if Carp handles overloads
+dist/Carp/t/Carp_overloadless.t		See if Carp handles overloads that dont use overload.pm
 dist/Carp/t/errno.t		See if Carp preserves $! and $^E
 dist/Carp/t/heavy.t		See if Carp::Heavy works
 dist/Carp/t/heavy_mismatch.t		See if Carp::Heavy catches version mismatch
