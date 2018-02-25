@@ -6510,7 +6510,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                  * it is properly null terminated or we will fail asserts
                  * later. In theory we probably shouldn't get such SV's,
                  * but if we do we should handle it gracefully. */
-                if ( SvTYPE(msv) != SVt_PV || (SvLEN(msv) > SvCUR(msv) && *(SvEND(msv)) == 0) ) {
+                if ( SvTYPE(msv) != SVt_PV || (SvLEN(msv) > SvCUR(msv) && *(SvEND(msv)) == 0) || SvIsCOW_shared_hash(msv) ) {
                     /* not a string, or a string with a trailing null */
                     pat = msv;
                 } else {
