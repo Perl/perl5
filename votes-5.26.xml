@@ -35,7 +35,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-Both of these or neither
+All of these or none
+<commit votes="yorton" id="f1d945b85ac2d18ddd1ed2e1d4f72011246d905a" ticket="132892" desc="Possibly memory leak when matching strings using pre-compiled regexes stored in hash key (handle shared Keys better)"/>
 <commit votes="xsawyerx yorton" id="910a6a8be166fb3780dcd2520e3526e537383ef2" ticket="132892" desc="Possibly memory leak when matching strings using pre-compiled regexes stored in hash key"/>
 <commit votes="xsawyerx yorton" id="06f26dc89ebc43d50835aaecc477ec160a5a5835" ticket="132892" desc="Possibly memory leak when matching strings using pre-compiled regexes stored in hash key"/>
 
