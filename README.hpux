@@ -565,10 +565,10 @@ expected.
 
 =head2 Locales on HP-UX
 
-HP-UX installs the locale C<univ.utf8> on all systems. Up to and
-including HP-UX 11.23, this local is defective in that it thinks that
-the characters C<< $ + < = > ^ ` | >> and C<~> are punctuation, which
-they are not according to the Unicode standards.
+HP-UX installs the locale C<univ.utf8>  and C<en_US.utf8> on all systems.
+Up to and including HP-UX 11.23, this local is defective in that it
+does not thinks that the characters C<< $ + < = > ^ ` | >> and C<~> are
+punctuation, which they are according to the Unicode standards.
 
 This appears to be fixed on HP-UX 11.31.
 
