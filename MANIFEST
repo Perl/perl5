@@ -2975,6 +2975,7 @@ dist/Carp/t/errno.t		See if Carp preserves $! and $^E
 dist/Carp/t/heavy.t		See if Carp::Heavy works
 dist/Carp/t/heavy_mismatch.t		See if Carp::Heavy catches version mismatch
 dist/Carp/t/rt52610_crash.t		Test that we can gracefully handle serializing the stack with stack-refcounting bugs
+dist/Carp/t/stack_after_err.t	Test stack traces after syntax errors
 dist/Carp/t/stash_deletion.t		See if Carp handles stash deletion
 dist/Carp/t/swash.t		See if Carp avoids breaking swash loading
 dist/Carp/t/vivify_gv.t		See if Carp leaves utf8:: stuff alone

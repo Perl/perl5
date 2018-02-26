@@ -130,12 +130,71 @@ sub _univ_mod_loaded {
     }
 }
 
-# _mycan is either UNIVERSAL::can, or, in the presence of an override,
-# overload::mycan.
+# We need an overload::StrVal or equivalent function, but we must avoid
+# loading any modules on demand, as Carp is used from __DIE__ handlers and
+# may be invoked after a syntax error.
+# We can copy recent implementations of overload::StrVal and use
+# overloading.pm, which is the fastest implementation, so long as
+# overloading is available.  If it is not available, we use our own pure-
+# Perl StrVal.  We never actually use overload::StrVal, for various rea-
+# sons described below.
+# overload versions are as follows:
+#     undef-1.00 (up to perl 5.8.0)   uses bless (avoid!)
+#     1.01-1.17  (perl 5.8.1 to 5.14) uses Scalar::Util
+#     1.18+      (perl 5.16+)         uses overloading
+# The ancient 'bless' implementation (that inspires our pure-Perl version)
+# blesses unblessed references and must be avoided.  Those using
+# Scalar::Util use refaddr, possibly the pure-Perl implementation, which
+# has the same blessing bug, and must be avoided.  Also, Scalar::Util is
+# loaded on demand.  Since we avoid the Scalar::Util implementations, we
+# end up having to implement our own overloading.pm-based version for perl
+# 5.10.1 to 5.14.  Since it also works just as well in more recent ver-
+# sions, we use it there, too.
 BEGIN {
-    *_mycan = _univ_mod_loaded('can')
-        ? do { require "overload.pm"; _fetch_sub overload => 'mycan' }
-        : \&UNIVERSAL::can
+    if (eval { require "overloading.pm" }) {
+        *_StrVal = eval 'sub { no overloading; "$_[0]" }'
+    }
+    else {
+        # Work around the UNIVERSAL::can/isa modules to avoid recursion.
+
+        # _mycan is either UNIVERSAL::can, or, in the presence of an
+        # override, overload::mycan.
+        *_mycan = _univ_mod_loaded('can')
+            ? do { require "overload.pm"; _fetch_sub overload => 'mycan' }
+            : \&UNIVERSAL::can;
+
+        # _blessed is either UNIVERAL::isa(...), or, in the presence of an
+        # override, a hideous, but fairly reliable, workaround.
+        *_blessed = _univ_mod_loaded('isa')
+            ? sub {
+                my $probe = "UNIVERSAL::Carp_probe_" . rand;
+                no strict 'refs';
+                local *$probe = sub { "unlikely string" };
+                local $@;
+                local $SIG{__DIE__} = sub{};
+                (eval { $_[0]->$probe } || '') eq 'unlikely string'
+              }
+            : do {
+                my $isa = _fetch_sub(qw/UNIVERSAL isa/);
+                sub { &$isa($_[0], "UNIVERSAL") }
+              };
+
+        *_StrVal = sub {
+            my $pack = ref $_[0];
+            # Perl's overload mechanism uses the presence of a special
+            # "method" named "((" or "()" to signal it is in effect.
+            # This test seeks to see if it has been set up.  "((" post-
+            # dates overloading.pm, so we can skip it.
+            return "$_[0]" unless _mycan($pack, "()");
+            # Even at this point, the invocant may not be blessed, so
+            # check for that.
+            return "$_[0]" if not _blessed($_[0]);
+            bless $_[0], "Carp";
+            my $str = "$_[0]";
+            bless $_[0], $pack;
+            $pack . substr $str, index $str, "=";
+        }
+    }
 }
 
 
@@ -358,23 +417,11 @@ sub format_arg {
         }
         else
         {
-            # overload uses the presence of a special
-            # "method" named "((" or "()" to signal
-            # it is in effect.  This test seeks to see if it has been set up.
-            if (_mycan($pack, "((") || _mycan($pack, "()")) {
-                # Argument is blessed into a class with overloading, and
-                # so might have an overloaded stringification.  We don't
-                # want to risk getting the overloaded stringification,
-                # so we need to use overload::StrVal() below.  But it's
-                # possible that the overload module hasn't been loaded:
-                # overload methods can be installed without it.  So load
-                # the module here.  The bareword form of require is here
-                # eschewed to avoid this compile-time effect of vivifying
-                # the target module's stash.
-                require "overload.pm";
-            }
-            my $sub = _fetch_sub(overload => 'StrVal');
-            return $sub ? &$sub($arg) : "$arg";
+            # Argument may be blessed into a class with overloading, and so
+            # might have an overloaded stringification.  We don't want to
+            # risk getting the overloaded stringification, so we need to
+            # use _StrVal, our overload::StrVal()-equivalent.
+            return _StrVal $arg;
         }
     }
     return "undef" if !defined($arg);
