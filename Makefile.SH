@@ -1163,7 +1163,7 @@ if test "$storable_type" != "" ; then
 $spitshell >>$Makefile <<EOT
 
 dist/Storable/lib/Storable/Limit.pm : \$(PERL_EXE) dist/Storable/stacksize $storable_limit_dep
-	\$(RUN_PERL) dist/Storable/stacksize --core
+	cd dist/Storable ; \$(LDLIBPTH) \$(MAKE) lib/Storable/Limit.pm
 
 lib/Storable/Limit.pm : dist/Storable/lib/Storable/Limit.pm
 	test -d lib/Storable || mkdir lib/Storable

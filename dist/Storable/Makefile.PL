@@ -81,7 +81,11 @@ sub xlinkext {
 
 sub depend {
     my $extra_deps = "";
-    unless ($ENV{PERL_CORE}) {
+    my $options = "";
+    if ($ENV{PERL_CORE}) {
+        $options = "--core";
+    }
+    else {
         # blib.pm needs arch/lib
         $extra_deps = ' Storable.pm';
     }
@@ -89,7 +93,7 @@ sub depend {
     "
 $limit_pm : \$(INST_DYNAMIC)$extra_deps
 	\$(MKPATH) \$(INST_LIB)
-	\$(PERLRUNINST) stacksize
+	\$(FULLPERLRUNINST) stacksize $options
 
 release : dist
 	git tag \$(VERSION)
