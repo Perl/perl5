@@ -2966,6 +2966,8 @@ dist/Carp/t/arg_regexp.t		See if Carp formats regexp args OK in stack traces
 dist/Carp/t/arg_string.t		See if Carp formats string args OK in stack traces
 dist/Carp/t/baduni.t		See if Carp handles non-char Unicode
 dist/Carp/t/baduni_warnings.t		See if Carp handles non-char Unicode when loaded via warnings.pm
+dist/Carp/t/broken_can.t	Test Carp with bad can implementations
+dist/Carp/t/broken_univ_can.t	Test Carp with bad UNIVERSAL::can
 dist/Carp/t/Carp.t		See if Carp works
 dist/Carp/t/Carp_overload.t		See if Carp handles overloads
 dist/Carp/t/Carp_overloadless.t		See if Carp handles overloads that dont use overload.pm

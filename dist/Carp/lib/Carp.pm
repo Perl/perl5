@@ -116,6 +116,29 @@ BEGIN {
 	;
 }
 
+sub _univ_mod_loaded {
+    return 0 unless exists($::{"UNIVERSAL::"});
+    for ($::{"UNIVERSAL::"}) {
+	return 0 unless ref \$_ eq "GLOB" && *$_{HASH} && exists $$_{"$_[0]::"};
+	for ($$_{"$_[0]::"}) {
+	    return 0 unless ref \$_ eq "GLOB" && *$_{HASH} && exists $$_{"VERSION"};
+	    for ($$_{"VERSION"}) {
+		return 0 unless ref \$_ eq "GLOB";
+		return ${*$_{SCALAR}};
+	    }
+	}
+    }
+}
+
+# _mycan is either UNIVERSAL::can, or, in the presence of an override,
+# overload::mycan.
+BEGIN {
+    *_mycan = _univ_mod_loaded('can')
+        ? do { require "overload.pm"; _fetch_sub overload => 'mycan' }
+        : \&UNIVERSAL::can
+}
+
+
 our $VERSION = '1.49';
 $VERSION =~ tr/_//d;
 
@@ -298,20 +321,6 @@ sub caller_info {
     return wantarray() ? %call_info : \%call_info;
 }
 
-sub _univisa_loaded {
-    return 0 unless exists($::{"UNIVERSAL::"});
-    for ($::{"UNIVERSAL::"}) {
-	return 0 unless ref \$_ eq "GLOB" && *$_{HASH} && exists $$_{"isa::"};
-	for ($$_{"isa::"}) {
-	    return 0 unless ref \$_ eq "GLOB" && *$_{HASH} && exists $$_{"VERSION"};
-	    for ($$_{"VERSION"}) {
-		return 0 unless ref \$_ eq "GLOB";
-		return ${*$_{SCALAR}};
-	    }
-	}
-    }
-}
-
 # Transform an argument to a function into a string.
 our $in_recurse;
 sub format_arg {
@@ -321,7 +330,9 @@ sub format_arg {
 
         # lazy check if the CPAN module UNIVERSAL::isa is used or not
         #   if we use a rogue version of UNIVERSAL this would lead to infinite loop
-        my $isa = _univisa_loaded() ? sub { 1 } : _fetch_sub(UNIVERSAL => "isa");
+        my $isa = _univ_mod_loaded('isa')
+            ? sub { 1 }
+            : _fetch_sub(UNIVERSAL => "isa");
 
          # legitimate, let's not leak it.
         if (!$in_recurse && $isa->( $arg, 'UNIVERSAL' ) &&
@@ -347,13 +358,10 @@ sub format_arg {
         }
         else
         {
-            # overload uses the presence of a special "method" name "((" to signal
+            # overload uses the presence of a special
+            # "method" named "((" or "()" to signal
             # it is in effect.  This test seeks to see if it has been set up.
-            # In theory we should be able to use 'can' without the $in_recurse guard,
-            # but this breaks modules that call overloads or croak during can(), for
-            # instance Class::Std v0.013, so if we end up here twice, we will just
-            # load overload outright.
-            if ($in_recurse || do{ local $in_recurse = 1; $pack->can("((") || $pack->can("()") }) {
+            if (_mycan($pack, "((") || _mycan($pack, "()")) {
                 # Argument is blessed into a class with overloading, and
                 # so might have an overloaded stringification.  We don't
                 # want to risk getting the overloaded stringification,
