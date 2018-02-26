@@ -2581,13 +2581,13 @@ S_my_nl_langinfo(const int item, bool toggle)
                 { /*  khw couldn't figure out how the localedef specifications
                       would show that the $ should replace the radix; this is
                       just a guess as to how it might work.*/
-                    retval = ".";
+                    PL_langinfo_buf[0] = '.';
                 }
                 else if (lc->p_cs_precedes) {
-                    retval = "-";
+                    PL_langinfo_buf[0] = '-';
                 }
                 else {
-                    retval = "+";
+                    PL_langinfo_buf[0] = '+';
                 }
 
                 LOCALE_UNLOCK;
