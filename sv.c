@@ -2667,6 +2667,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvTYPE(sv) < SVt_NV) {
 	/* The logic to use SVt_PVNV if necessary is in sv_upgrade.  */
 	sv_upgrade(sv, SVt_NV);
+        CLANG_DIAG_IGNORE_STMT(-Wthread-safety);
 	DEBUG_c({
             DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
             STORE_LC_NUMERIC_SET_STANDARD();
@@ -2675,6 +2676,8 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 			  PTR2UV(sv), SvNVX(sv));
             RESTORE_LC_NUMERIC();
 	});
+        CLANG_DIAG_RESTORE_STMT;
+
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
@@ -2809,6 +2812,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	   and ideally should be fixed.  */
 	return 0.0;
     }
+    CLANG_DIAG_IGNORE_STMT(-Wthread-safety);
     DEBUG_c({
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_STANDARD();
@@ -2816,6 +2820,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 		      PTR2UV(sv), SvNVX(sv));
         RESTORE_LC_NUMERIC();
     });
+    CLANG_DIAG_RESTORE_STMT;
     return SvNVX(sv);
 }
 

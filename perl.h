@@ -5590,6 +5590,7 @@ typedef struct am_table_short AMTS;
  * this would be an attempt to complement the LC_NUMERIC state, and we're not
  * supposed to because it's locked */
 #    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+        CLANG_DIAG_IGNORE(-Wthread-safety)	     	                    \
         STMT_START {                                                        \
             if (PL_lc_numeric_mutex_depth <= 0) {                           \
                 MUTEX_LOCK(&PL_lc_numeric_mutex);                           \
@@ -5617,7 +5618,7 @@ typedef struct am_table_short AMTS;
                 MUTEX_UNLOCK(&PL_lc_numeric_mutex);                         \
                 PL_lc_numeric_mutex_depth = 0;                              \
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,                      \
-                         "%s: %d: unlocking lc_numeric; depth=0\n",           \
+                         "%s: %d: unlocking lc_numeric; depth=0\n",         \
                          __FILE__, __LINE__));                              \
             }                                                               \
             else {                                                          \
@@ -5626,7 +5627,8 @@ typedef struct am_table_short AMTS;
                         "%s: %d: avoided lc_numeric_unlock; depth=%d\n",    \
                         __FILE__, __LINE__, PL_lc_numeric_mutex_depth));    \
             }                                                               \
-        } STMT_END
+        } STMT_END                                                          \
+        CLANG_DIAG_RESTORE
 
 /* This is used as a generic lock for locale operations.  For example this is
  * used when calling nl_langinfo() so that another thread won't zap the
