@@ -8660,7 +8660,6 @@ Perl_yylex(pTHX)
 	  really_sub:
 	    {
 		char * const tmpbuf = PL_tokenbuf + 1;
-		expectation attrful;
 		bool have_name, have_proto;
 		const int key = tmp;
                 SV *format_name = NULL;
@@ -8675,8 +8674,7 @@ Perl_yylex(pTHX)
                     || (*s == ':' && s[1] == ':'))
 		{
 
-		    PL_expect = XBLOCK;
-		    attrful = XATTRBLOCK;
+		    PL_expect = XATTRBLOCK;
 		    d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
 				  &len);
                     if (key == KEY_format)
@@ -8707,8 +8705,7 @@ Perl_yylex(pTHX)
 			Perl_croak(aTHX_
 				  "Missing name in \"%s\"", PL_bufptr);
 		    }
-		    PL_expect = XTERMBLOCK;
-		    attrful = XATTRTERM;
+		    PL_expect = XATTRTERM;
 		    sv_setpvs(PL_subname,"?");
 		    have_name = FALSE;
 		}
@@ -8738,9 +8735,9 @@ Perl_yylex(pTHX)
 		else
 		    have_proto = FALSE;
 
-		if (*s == ':' && s[1] != ':')
-		    PL_expect = attrful;
-		else if ((*s != '{' && *s != '(') && key != KEY_format) {
+		if (  !(*s == ':' && s[1] != ':')
+                    && (*s != '{' && *s != '(') && key != KEY_format)
+                {
                     assert(key == KEY_sub || key == KEY_AUTOLOAD ||
                            key == KEY_DESTROY || key == KEY_BEGIN ||
                            key == KEY_UNITCHECK || key == KEY_CHECK ||
