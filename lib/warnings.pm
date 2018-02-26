@@ -450,8 +450,11 @@ sub __chk
 
     # If we have an explicit level, bypass Carp.
     if ($has_level and @callers_bitmask) {
+	# logic copied from util.c:mess_sv
 	my $stuff = " at " . join " line ", (caller $i)[1,2];
-	$stuff .= ", <" . *${^LAST_FH}{NAME} . "> line $." if $. && ${^LAST_FH};
+	$stuff .= ", <" . *${^LAST_FH}{NAME} . "> "
+		 . ($/ eq "\n" ? "line" : "chunk") . " $."
+	    if $. && ${^LAST_FH};
 	die "$message$stuff.\n" if $results[0];
 	return warn "$message$stuff.\n";
     }

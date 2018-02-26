@@ -1454,3 +1454,22 @@ bimp;
 EXPECT
 Foo warning at - line 13, <FH> line 2.
 Bar warning at - line 13.
+########
+# NAME _at_level with chunky filehandle
+use warnings;
+# Create temp file for testing handles.
+open oUt, ">tmp" or die $!;
+print oUt "foo7bar7";
+close oUt;
+sub bimp {
+ open FH, "tmp";
+ $/ = 7;
+ <FH>; <FH>;
+ warnings::warn_at_level("syntax", 0, "Foo warning");
+ close FH;
+ warnings::warn_at_level("syntax", 0, "Bar warning");
+};
+bimp;
+EXPECT
+Foo warning at - line 14, <FH> chunk 2.
+Bar warning at - line 14.
