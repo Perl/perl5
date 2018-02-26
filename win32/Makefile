@@ -1228,7 +1228,7 @@ Extensions_realclean:
 PostExt: ..\lib\Storable\Limit.pm
 
 ..\lib\Storable\Limit.pm: $(PERLEXE) Extensions
-	$(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize --core
+	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
 	if not exist ..\lib\Storable mkdir ..\lib\Storable
 	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
 

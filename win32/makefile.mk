@@ -1554,7 +1554,7 @@ PostExt : ..\lib\Storable\Limit.pm
 # we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
 # rebasePE covers just about that, including adjustment for static builds
 ..\lib\Storable\Limit.pm : rebasePE
-	$(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize --core
+	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
 	if not exist ..\lib\Storable mkdir ..\lib\Storable
 	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
 
