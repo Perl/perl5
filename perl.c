@@ -320,7 +320,6 @@ perl_construct(pTHXx)
     PL_Assigned_invlist = _new_invlist_C_array(Assigned_invlist);
     PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
 
-    init_i18nl10n(1);
 
 #if defined(LOCAL_PATCH_COUNT)
     PL_localpatches = local_patches;	/* For possible -v */
@@ -476,6 +475,7 @@ perl_construct(pTHXx)
 #endif
 
     ENTER;
+    init_i18nl10n(1);
 }
 
 /*
