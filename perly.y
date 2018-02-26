@@ -800,7 +800,16 @@ subsignature:	'('
                                                 newSTATEOP(0, NULL, NULL));
 
                             parser->in_my = 0;
-                            parser->expect = XBLOCK;
+                            /* tell the toker that attrributes can follow
+                             * this sig, but only so that the toker
+                             * can skip through any (illegal) trailing
+                             * attribute text then give a useful error
+                             * message about "attributes before sig",
+                             * rather than falling over ina mess at
+                             * unrecognised syntax.
+                             */
+                            parser->expect = XATTRBLOCK;
+                            parser->sig_seen = TRUE;
                             LEAVE;
 			}
 	;

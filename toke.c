@@ -5944,9 +5944,17 @@ Perl_yylex(pTHX)
 	case XATTRTERM:
 	    PL_expect = XTERMBLOCK;
 	 grabattrs:
+            /* NB: as well as parsing normal attributes, we also end up
+             * here if there is something looking like attributes
+             * following a signature (which is illegal, but used to be
+             * legal in 5.20..5.26). If the latter, we still parse the
+             * attributes so that error messages(s) are less confusing,
+             * but ignore them (parser->sig_seen).
+             */
 	    s = skipspace(s);
 	    attrs = NULL;
             while (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+                bool sig = PL_parser->sig_seen;
 		I32 tmp;
 		SV *sv;
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -5989,23 +5997,27 @@ Perl_yylex(pTHX)
 		       the CVf_BUILTIN_ATTRS define in cv.h! */
 		    if (!PL_in_my && memEQs(SvPVX(sv), len, "lvalue")) {
 			sv_free(sv);
-			CvLVALUE_on(PL_compcv);
+			if (!sig)
+                            CvLVALUE_on(PL_compcv);
 		    }
 		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
 			sv_free(sv);
-			CvMETHOD_on(PL_compcv);
+			if (!sig)
+                            CvMETHOD_on(PL_compcv);
 		    }
 		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "const"))
 		    {
 			sv_free(sv);
-			Perl_ck_warner_d(aTHX_
-			    packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
-			   ":const is experimental"
-			);
-			CvANONCONST_on(PL_compcv);
-			if (!CvANON(PL_compcv))
-			    yyerror(":const is not permitted on named "
-				    "subroutines");
+                        if (!sig) {
+                            Perl_ck_warner_d(aTHX_
+                                packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
+                               ":const is experimental"
+                            );
+                            CvANONCONST_on(PL_compcv);
+                            if (!CvANON(PL_compcv))
+                                yyerror(":const is not permitted on named "
+                                        "subroutines");
+                        }
 		    }
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
@@ -6058,6 +6070,14 @@ Perl_yylex(pTHX)
 		}
 	    }
 	got_attrs:
+            if (PL_parser->sig_seen) {
+                /* see comment about about sig_seen and parser error
+                 * handling */
+                if (attrs)
+                    op_free(attrs);
+                Perl_croak(aTHX_ "Subroutine attributes must come "
+                                 "before the signature");
+                }
 	    if (attrs) {
 		NEXTVAL_NEXTTOKE.opval = attrs;
 		force_next(THING);
@@ -8668,6 +8688,9 @@ Perl_yylex(pTHX)
                 SSize_t off = s-SvPVX(PL_linestr);
 		s = skipspace(s);
                 d = SvPVX(PL_linestr)+off;
+
+                SAVEBOOL(PL_parser->sig_seen);
+                PL_parser->sig_seen = FALSE;
 
                 if (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
                     || *s == '\''
