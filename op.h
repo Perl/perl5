@@ -522,7 +522,7 @@ typedef enum {
 #  define	cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
 #endif
 
-#  define	cMETHOPx_meth(v)	cSVOPx_sv(v)
+#define	cMETHOPx_meth(v)	cSVOPx_sv(v)
 
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)
