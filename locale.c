@@ -2274,7 +2274,7 @@ rather than getting segfaults at runtime.
 
 =item *
 
-It delivers the correct results for the C<RADIXCHAR> and C<THOUSESEP> items,
+It delivers the correct results for the C<RADIXCHAR> and C<THOUSEP> items,
 without you having to write extra code.  The reason for the extra code would be
 because these are from the C<LC_NUMERIC> locale category, which is normally
 kept set to the C locale by Perl, no matter what the underlying locale is
