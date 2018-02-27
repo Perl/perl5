@@ -71,6 +71,13 @@ BEGIN {
 	print("1..0 # Skip Unicode tables not built yet\n"), exit
 	    unless eval 'require "unicore/Heavy.pl"';
     }
+
+    # Some of the tests need a locale; which one doesn't much matter, except
+    # that it be valid.  Make sure of that
+    eval { require POSIX;
+            POSIX->import(qw(LC_ALL setlocale));
+            POSIX::setlocale(&LC_ALL, "C");
+    };
 }
 
 sub _comment {
