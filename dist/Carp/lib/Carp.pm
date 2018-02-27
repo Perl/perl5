@@ -130,6 +130,22 @@ sub _univ_mod_loaded {
     }
 }
 
+# _maybe_isa() is usually the UNIVERSAL::isa function.  We have to avoid
+# the latter if the UNIVERSAL::isa module has been loaded, to avoid infi-
+# nite recursion; in that case _maybe_isa simply returns true.
+my $isa;
+BEGIN {
+    if (_univ_mod_loaded('isa')) {
+        *_maybe_isa = sub { 1 }
+    }
+    else {
+        # Since we have already done the check, record $isa for use below
+        # when defining _StrVal.
+        *_maybe_isa = $isa = _fetch_sub(UNIVERSAL => "isa");
+    }
+}
+
+
 # We need an overload::StrVal or equivalent function, but we must avoid
 # loading any modules on demand, as Carp is used from __DIE__ handlers and
 # may be invoked after a syntax error.
@@ -165,18 +181,15 @@ BEGIN {
 
         # _blessed is either UNIVERAL::isa(...), or, in the presence of an
         # override, a hideous, but fairly reliable, workaround.
-        *_blessed = _univ_mod_loaded('isa')
-            ? sub {
+        *_blessed = $isa
+            ? sub { &$isa($_[0], "UNIVERSAL") }
+            : sub {
                 my $probe = "UNIVERSAL::Carp_probe_" . rand;
                 no strict 'refs';
                 local *$probe = sub { "unlikely string" };
                 local $@;
                 local $SIG{__DIE__} = sub{};
                 (eval { $_[0]->$probe } || '') eq 'unlikely string'
-              }
-            : do {
-                my $isa = _fetch_sub(qw/UNIVERSAL isa/);
-                sub { &$isa($_[0], "UNIVERSAL") }
               };
 
         *_StrVal = sub {
@@ -387,14 +400,8 @@ sub format_arg {
 
     if ( my $pack= ref($arg) ) {
 
-        # lazy check if the CPAN module UNIVERSAL::isa is used or not
-        #   if we use a rogue version of UNIVERSAL this would lead to infinite loop
-        my $isa = _univ_mod_loaded('isa')
-            ? sub { 1 }
-            : _fetch_sub(UNIVERSAL => "isa");
-
          # legitimate, let's not leak it.
-        if (!$in_recurse && $isa->( $arg, 'UNIVERSAL' ) &&
+        if (!$in_recurse && _maybe_isa( $arg, 'UNIVERSAL' ) &&
 	    do {
                 local $@;
 	        local $in_recurse = 1;
