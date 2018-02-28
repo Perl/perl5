@@ -15021,7 +15021,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
- );
 );
 
 sub is_core
