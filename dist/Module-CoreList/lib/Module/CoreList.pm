@@ -319,6 +319,7 @@ sub changes_between {
     5.024003 => '2017-09-22',
     5.026001 => '2017-09-22',
     5.027005 => '2017-10-20',
+    5.027006 => '2017-11-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -14587,6 +14588,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Test2::Event::Info'    => 1,
         }
     },
+    5.027006 => {
+        delta_from => 5.027005,
+        changed => {
+            'B::Op_private'         => '5.027006',
+            'Config'                => '5.027006',
+            'Module::CoreList'      => '5.20171120',
+            'Module::CoreList::TieHashDelta'=> '5.20171120',
+            'Module::CoreList::Utils'=> '5.20171120',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -15418,6 +15431,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.027005 => {
         delta_from => 5.027004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027006 => {
+        delta_from => 5.027005,
         changed => {
         },
         removed => {
