@@ -50,13 +50,7 @@ our \@names = qw#
     @names
 #;
 
-our \@enums = qw#
-    @enums
-#;
-
 { my \$i = 0; our %names = map { \$_ => \$i++ } \@names }
-
-{ my \$i = 0; our %enums = map { \$_ => \$i++ } \@enums }
 EOF
 }
 
