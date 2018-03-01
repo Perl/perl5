@@ -4665,7 +4665,6 @@ lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
-lib/overload/numbers.pm		Helper for overloading pragma
 lib/overload64.t		See if operator overloading works with 64-bit ints
 lib/overloading.pm		Pragma to lexically control overloading
 lib/overloading.t		Tests for overloading.pm
