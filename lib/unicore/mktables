@@ -20230,9 +20230,9 @@ if ( $file_list and $make_list ) {
 
     print "Updating '$file_list'\n" if $verbosity >= $PROGRESS;
     foreach my $file (@input_files, @files_actually_output) {
-        my (undef, $directories, $file) = File::Spec->splitpath($file);
-        my @directories = File::Spec->splitdir($directories);
-        $file = join '/', @directories, $file;
+        my (undef, $directories, $basefile) = File::Spec->splitpath($file);
+        my @directories = grep length, File::Spec->splitdir($directories);
+        $file = join '/', @directories, $basefile;
     }
 
     my $ofh;
