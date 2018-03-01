@@ -36,7 +36,7 @@ my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /ax;
 my $enum_name_re = qr / ^ [[:alpha:]] \w* $ /ax;
 
 my $out_fh = open_new('charclass_invlists.h', '>',
-		      {style => '*', by => $0,
+		      {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 
 my $in_file_pound_if = 0;
@@ -2235,10 +2235,11 @@ output_WB_table();
 end_file_pound_if;
 
 my $sources_list = "lib/unicore/mktables.lst";
-my @sources = ($0, qw(lib/unicore/mktables
-                      lib/Unicode/UCD.pm
-                      regen/charset_translations.pl
-                      ));
+my @sources = qw(regen/mk_invlists.pl
+                 lib/unicore/mktables
+                 lib/Unicode/UCD.pm
+                 regen/charset_translations.pl
+               );
 {
     # Depend on mktables’ own sources.  It’s a shorter list of files than
     # those that Unicode::UCD uses.
