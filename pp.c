@@ -2530,7 +2530,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 
 	if (SvUTF8(TARG)) {
             if (len && ! utf8_to_bytes(tmps, &len)) {
-                Perl_croak(aTHX_ fatal_above_ff_msg, PL_op_desc[PL_op->op_type]);
+                Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[PL_op->op_type]);
             }
             SvCUR(TARG) = len;
             SvUTF8_off(TARG);

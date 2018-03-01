@@ -5320,9 +5320,7 @@ PP(pp_aelem)
 	 else if (SvNOK(elemsv))
 	      elem = (IV)SvNV(elemsv);
 	 if (elem > 0) {
-	      static const char oom_array_extend[] =
-		"Out of memory during array extend"; /* Duplicated in av.c */
-	      MEM_WRAP_CHECK_1(elem,SV*,oom_array_extend);
+	      MEM_WRAP_CHECK_s(elem,SV*,"Out of memory during array extend");
 	 }
 #endif
 	if (!svp || !*svp) {

@@ -1109,13 +1109,13 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define MDEREF_SHIFT           7
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
-static const char * const fatal_above_ff_msg
-    = "Use of strings with code points over 0xFF as arguments to "
-      "%s operator is not allowed";
-static const char * const deprecated_above_ff_msg
-    = "Use of strings with code points over 0xFF as arguments to "
-      "%s operator is deprecated. This will be a fatal error in "
-      "Perl 5.32";
+#   define FATAL_ABOVE_FF_MSG                                       \
+      "Use of strings with code points over 0xFF as arguments to "  \
+      "%s operator is not allowed"
+#  define DEPRECATED_ABOVE_FF_MSG                                   \
+      "Use of strings with code points over 0xFF as arguments to "  \
+      "%s operator is deprecated. This will be a fatal error in "   \
+      "Perl 5.32"
 #endif
 
 

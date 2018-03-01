@@ -2317,6 +2317,11 @@ PoisonWith(0xEF) for catching access to freed memory.
 	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
 	&& (Perl_croak_nocontext("%s",(a)),0))
 
+/* "a" arg must be a string literal */
+#  define MEM_WRAP_CHECK_s(n,t,a) \
+	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+	&& (Perl_croak_nocontext("" a ""),0))
+
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
 #define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
@@ -2324,7 +2329,7 @@ PoisonWith(0xEF) for catching access to freed memory.
 
 #define MEM_WRAP_CHECK(n,t)
 #define MEM_WRAP_CHECK_1(n,t,a)
-#define MEM_WRAP_CHECK_2(n,t,a,b)
+#define MEM_WRAP_CHECK_s(n,t,a)
 #define MEM_WRAP_CHECK_(n,t)
 
 #define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
