@@ -21,59 +21,9 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 New read-only predefined variable C<${^SAFE_LOCALES}>
+=head2 XXX
 
-This variable is 1 if the Perl interpreter is operating in an
-environment where it is safe to use and change locales (see
-L<perllocale>.)  This variable is true when the perl is
-unthreaded, or compiled in a platform that supports thread-safe locale
-operation (see next item).
-
-=head2 Locales are now thread-safe on systems that support them
-
-These systems include Windows starting with Visual Studio 2005, and in
-POSIX 2008 systems.
-
-The implication is that you are now free to use locales and changes them
-in a threaded environment.  Your changes affect only your thread.
-See L<perllocale/Multi-threaded operation>
-
-=head2 Script runs now are specified with a different syntax
-
-This isn't really an enhancement, but is being put in this category
-because it changes an enhancement from 5.27.8, and there is a new
-abbreviated form for it.  The syntax is now either of:
-
- (*script_run:...)
- (*sr:...)
-
-Previously a C<"+"> was used instead of the C<"*">.
-
-=head2 There is a new form for script runs which combines with
-C<(?E<gt>...)> (or C<*atomic:...)>)
-
-C<(*asr:...> is an easier way to write C<(*sr:(?E<gt>...))>,
-which is expected to be a commonly used idiom.
-C<(*atomic_script_run:...> is also available.  See
-L<perlre/Script Runs>.
-
-=head2 Experimentally, there are now alphabetic synonyms for some
-regular expression assertions
-
-If you find it difficult to remember how to write certain of the pattern
-assertions, there are now alphabetic synonyms.
-
- CURRENT                NEW SYNONYMS
- ------                 ------------
- (?=...)        (*pla:...) or (*positive_lookahead:...)
- (?!...)        (*nla:...) or (*negative_lookahead:...)
- (?<=...)       (*plb:...) or (*positive_lookbehind:...)
- (?<!...)       (*nlb:...) or (*negative_lookbehind:...)
- (?>...)        (*atomic:...)
-
-These are considered experimental, so using any of these will raise
-(unless turned off) a warning in the C<experimental::alpha_assertions>
-category.
+XXX
 
 =head1 Security
 
@@ -132,15 +82,7 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =item *
 
-Various optimizations have been applied to matching regular expression
-patterns, so under the right circumstances, significant performance
-gains may be noticed.  But in an application with many varied patterns,
-little overall improvement likely will be seen.
-
-=item *
-
-Other optimizations have been applied to UTF-8 handling, but these are
-not typically a major factor in most applications.
+XXX
 
 =back
 
@@ -176,102 +118,9 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<bignum> has been upgraded from version 0.47 to 0.49.
-
-=item *
-
-L<Carp> has been upgraded from version 1.45 to 1.46.
-
-=item *
-
-L<Devel::PPPort> has been upgraded from version 3.38 to 3.39.
-
-=item *
-
-L<Encode> has been upgraded from version 2.94 to 2.96.
-
-=item *
-
-L<encoding> has been upgraded from version 2.21 to 2.22.
-
-=item *
-
-L<Errno> has been upgraded from version 1.28 to 1.29.
-
-=item *
-
-L<ExtUtils::MakeMaker> has been upgraded from version 7.30 to 7.32.
-
-=item *
-
-L<ExtUtils::ParseXS> has been upgraded from version 3.36 to 3.38.
-
-=item *
-
-L<ExtUtils::Typemaps> has been upgraded from version 3.37 to 3.38.
-
-=item *
-
-L<File::Spec> has been upgraded from version 3.72 to 3.74.
-
-=item *
-
-L<if> has been upgraded from version 0.0607 to 0.0608.
-
-=item *
-
-L<IPC::Cmd> has been upgraded from version 0.98 to 1.00.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20180120 to 5.20180220.
-
-=item *
-
-L<mro> has been upgraded from version 1.21 to 1.22.
-
-=item *
-
-L<PerlIO::encoding> has been upgraded from version 0.25 to 0.26.
-
-=item *
-
-L<POSIX> has been upgraded from version 1.81 to 1.82.
-
-=item *
-
-L<Storable> has been upgraded from version 2.65 to 3.06.
-
-=item *
-
-L<Test::Simple> has been upgraded from version 1.302120 to 1.302122.
-
-=item *
-
-L<threads> has been upgraded from version 2.21 to 2.22.
-
-=item *
-
-L<Time::HiRes> has been upgraded from version 1.9752 to 1.9753.
-
-=item *
-
-L<warnings> has been upgraded from version 1.40 to 1.41.
-
-=item *
-
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
-
-=item *
-
-The new (as of 5.27.8) restriction forbidding use of C<goto> to enter the
-argument of a binary or list expression (see L<perldiag/"Can't
-E<quot>gotoE<quot> into a binary or list expression">) has been relaxed to
-allow entering the I<first> argument of an operator that takes a fixed
-number of arguments, since this is a case that will not cause stack
-corruption.  [perl #132854]
 
 =back
 
@@ -299,10 +148,6 @@ XXX Changes which create B<new> files in F<pod/> go here.
 XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
-
-We have attempted to update the documentation to reflect the changes
-listed in this document.  If you find any we have missed, send email
-to L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
@@ -350,11 +195,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-L<Locale '%s' contains (at least) the following characters which have
-non-standard meanings: %s  The Perl program will use the standard
-meanings|perldiag/"Locale '%s' contains (at least) the following
-characters which have non-standard meanings: %s  The Perl program will
-use the standard meanings">.
+XXX
 
 =back
 
@@ -366,7 +207,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The new (as of 5.27.8) restriction forbidding use of C<goto> to enter the
+argument of a binary or list expression (see L<perldiag/"Can't
+E<quot>gotoE<quot> into a binary or list expression">) has been relaxed to
+allow entering the I<first> argument of an operator that takes a fixed
+number of arguments, since this is a case that will not cause stack
+corruption.  [perl #132854]
 
 =back
 
@@ -416,8 +262,7 @@ made:
 
 =item *
 
-F<harness> no longer waits for 30 seconds when running
-F<t/io/openpid.t>.  [perl #121028][perl #132867]
+XXX
 
 =back
 
@@ -427,11 +272,9 @@ F<t/io/openpid.t>.  [perl #121028][perl #132867]
 
 =over 4
 
-=item VMS
+=item That Plaftorm
 
-CRTL features can now be set by embedders before invoking Perl by using the
-C<decc$feature_set> and C<decc$feature_set_value> functions.  Previously any attempt
-to set features after image initialization were ignored.
+XXX
 
 =back
 
@@ -468,32 +311,7 @@ XXX
 
 =item *
 
-A new compiler C<#define>, C<dTHX_DEBUGGING>. has been added.  This is
-useful for XS or C code that only need the thread context because their
-debugging statements that get compiled only under C<-DDEBUGGING> need
-one.
-
-=item *
-
-A new API function L<perlapi/Perl_setlocale> has been added.
-
-=item *
-
-L<perlapi/sync_locale> has been revised to return a boolean as to
-whether the system was using the global locale or not.
-
-=item *
-
-A new kind of magic scalar, called a "nonelem" scalar, has been introduced.
-It is stored in an array to denote a nonexistent element, whenever such an
-element is accessed in a potential lvalue context.  It replaces the
-existing "defelem" (deferred element) magic wherever this is possible,
-being significantly more efficient.  This means that
-C<some_sub($sparse_array[$nonelem])> no longer has to create a new magic
-defelem scalar each time, as long as the element is within the array.
-
-It partially fixes the rare bug of deferred elements getting out of synch
-with their arrays when the array is shifted or unshifted.  [perl #132729]
+XXX
 
 =back
 
@@ -503,22 +321,7 @@ with their arrays when the array is shifted or unshifted.  [perl #132729]
 
 =item *
 
-Failures while compiling code within other constructs, such as with
-string interpolation and the right part of C<s///e> now cause
-compilation to abort earlier.
-
-Previously compilation could continue in order to report other errors,
-but the failed sub-parse could leave partly parsed constructs on the
-parser shift-reduce stack, confusing the parser, leading to perl
-crashes. [perl #125351]
-
-=item *
-
-On threaded perls where the decimal point (radix) character is not a
-dot, it has been possible for a race to occur between threads when one
-needs to use the real radix character.  This has now been fixed by use
-of a mutex on systems without thread-safe locales, and the problem just
-doesn't come up on those with thread-safe locales.
+XXX
 
 =back
 
