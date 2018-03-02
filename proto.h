@@ -4385,7 +4385,7 @@ PERL_STATIC_INLINE STRLEN	S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLE
 #endif
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-PERL_CALLCONV bool	Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target, SCX_enum * ret_script)
+PERL_CALLCONV bool	Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISSCRIPT_RUN	\
 	assert(s); assert(send)

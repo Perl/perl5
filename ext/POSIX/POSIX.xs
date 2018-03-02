@@ -3630,8 +3630,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
            under UTF-8, which gives us an extra measure of confidence. */
 
                         && isSCRIPT_RUN((const U8 *) buf, buf + len,
-                                        TRUE, /* Means assume UTF-8 */
-                                        NULL)
+                                        TRUE) /* Means assume UTF-8 */
 #endif
                 )) {
 		    SvUTF8_on(sv);

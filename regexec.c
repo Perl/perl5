@@ -7691,7 +7691,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case SRCLOSE:  /*  (*SCRIPT_RUN: ... )   */
 
-            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput, utf8_target, NULL))
+            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput, utf8_target))
             {
                 sayNO;
             }
@@ -10388,7 +10388,7 @@ it are from the Inherited or Common scripts.
 */
 
 bool
-Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, SCX_enum * ret_script)
+Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 {
     /* Basically, it looks at each character in the sequence to see if the
      * above conditions are met; if not it fails.  It uses an inversion map to
@@ -10437,6 +10437,9 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target, S
     PERL_UINT_FAST8_T intersection_len = 0;
 
     bool retval = TRUE;
+
+    /* This is supposed to be a return parameter, but currently unused */
+    SCX_enum * ret_script = NULL;
 
     assert(send >= s);
 
