@@ -29,27 +29,15 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="tonyc xsawyerx" id="397baf232086e0a9ad6f881a9614d3dbaea853fc" ticket="132593" desc="PERL-5.26.1 heap_buffer_overflow READ of size 8"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
-
-All of these or none
-<commit votes="xsawyerx yorton" id="f1d945b85ac2d18ddd1ed2e1d4f72011246d905a" ticket="132892" desc="Possibly memory leak when matching strings using pre-compiled regexes stored in hash key (handle shared Keys better)"/>
-<commit votes="xsawyerx yorton" id="910a6a8be166fb3780dcd2520e3526e537383ef2" ticket="132892" desc="Possibly memory leak when matching strings using pre-compiled regexes stored in hash key"/>
-<commit votes="xsawyerx yorton" id="06f26dc89ebc43d50835aaecc477ec160a5a5835" ticket="132892" desc="Possibly memory leak when matching strings using pre-compiled regexes stored in hash key"/>
 
 Both of these or neither
 <commit votes="tonyc steveh" id="d8b61909479178ddb668ad385988877d26f202f2" ticket="132008" desc="Term::ReadLine generates empty &amp;STDERR files"/>
 <commit votes="tonyc steveh" id="1d217c696857b2bf41d87a7e927c43d20cc556e5" ticket="132008" desc="(perl #132008) make sure the test behaves without a tty"/>
 
 <commit votes="jhi" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
-
-<commit votes="xsawyerx khw" id="b2cd5cb1d8b3c8a7a7f033784d5134d2fbd8cad8" ticket="" desc="Unicode::UCD: max code point is now IV_MAX" />
-<commit votes="khw" id="0202c428e2e1febe76c0cfbb1a64a76cd3f6f756" ticket="" desc="update perldiag to account for max code point being signed" />
-
-<commit votes="tonyc xsawyerx" id="57bd660029d94312ca4eb88993889d981f41b484" ticket="131954" desc="heap-use-after-free in pp.c:Perl_pp_list()" />
 
 </div>
 
