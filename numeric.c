@@ -523,27 +523,39 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 #ifdef USE_LOCALE_NUMERIC
 
     if (IN_LC(LC_NUMERIC)) {
+        STRLEN len;
+        char * radix;
+        bool matches_radix = FALSE;
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-        {
-            STRLEN len;
-            const char * const radix = SvPV(PL_numeric_radix_sv, len);
-            if (*sp + len <= send && memEQ(*sp, radix, len)) {
-                *sp += len;
-                RESTORE_LC_NUMERIC();
-                return TRUE;
-            }
-        }
+
+        radix = SvPV(PL_numeric_radix_sv, len);
+        radix = savepvn(radix, len);
+
         RESTORE_LC_NUMERIC();
+
+        if (*sp + len <= send) {
+            matches_radix = memEQ(*sp, radix, len);
+        }
+
+        Safefree(radix);
+
+        if (matches_radix) {
+            *sp += len;
+            return TRUE;
+        }
     }
-    /* always try "." if numeric radix didn't match because
-     * we may have data from different locales mixed */
+
 #endif
 
+    /* always try "." if numeric radix didn't match because
+     * we may have data from different locales mixed */
     if (*sp < send && **sp == '.') {
         ++*sp;
         return TRUE;
     }
+
     return FALSE;
 }
 
