@@ -36,7 +36,7 @@ $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 my $Is_VMS   = $^O eq 'VMS';
 my $Is_Win32 = $^O eq 'MSWin32';
 
-plan(tests => 25);
+plan(tests => 34);
 
 my $Perl = which_perl();
 
@@ -128,8 +128,29 @@ is( <<~`END`,                   "ok\n",     '<<~`HEREDOC`' );
   END
 
 {
-    local $_ = qq($Perl -le "print 'ok'");
-    is( readpipe, "ok\n", 'readpipe default argument' );
+    sub rpecho { qq($Perl -le "print '$_[0]'") }
+    is scalar(readpipe(rpecho("b"))), "b\n",
+	"readpipe with one argument in scalar context";
+    is join(",", "a", readpipe(rpecho("b")), "c"), "a,b\n,c",
+	"readpipe with one argument in list context";
+    local $_ = rpecho("f");
+    is scalar(readpipe), "f\n",
+	"readpipe default argument in scalar context";
+    is join(",", "a", readpipe, "c"), "a,f\n,c",
+	"readpipe default argument in list context";
+    sub rpechocxt {
+	rpecho(wantarray ? "list" : defined(wantarray) ? "scalar" : "void");
+    }
+    is scalar(readpipe(rpechocxt())), "scalar\n",
+	"readpipe argument context in scalar context";
+    is join(",", "a", readpipe(rpechocxt()), "b"), "a,scalar\n,b",
+	"readpipe argument context in list context";
+    foreach my $args ("(\$::p,\$::q)", "((\$::p,\$::q))") {
+	foreach my $lvalue ("my \$r", "my \@r") {
+	    eval("$lvalue = readpipe$args if 0");
+	    like $@, qr/\AToo many arguments for /;
+	}
+    }
 }
 
 package o {

@@ -9610,6 +9610,7 @@ Perl_ck_backtick(pTHX_ OP *o)
     OP *newop = NULL;
     OP *sibl;
     PERL_ARGS_ASSERT_CK_BACKTICK;
+    o = ck_fun(o);
     /* qx and `` have a null pushmark; CORE::readpipe has only one kid. */
     if (o->op_flags & OPf_KIDS && (sibl = OpSIBLING(cUNOPo->op_first))
      && (gv = gv_override("readpipe",8)))
