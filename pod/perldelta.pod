@@ -118,9 +118,22 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Carp> has been upgraded from version 1.46 to 1.4x.
 
-If there was something important to note about this change, include that here.
+XXX Please update the version number.
+
+L<Carp>, when generating stack traces, now attempts to work around
+longstanding bugs resulting from Perl's non-referenced-counted stack.
+[perl #52610]
+
+Carp has been modified to avoid assuming that objects cannot be
+overloaded without the L<overload> module loaded (this can happen with
+objects created by XS modules).  Previously, infinite recursion would
+result if an XS-defined overload method itself called Carp.  [perl #132828]
+
+Carp now avoids using C<overload::StrVal>, partly because older versions
+of L<overload> (included with perl 5.14 and earlier) load L<Scalar::Util>
+at run time, which will fail if Carp has been invoked after a syntax error.
 
 =back
 
