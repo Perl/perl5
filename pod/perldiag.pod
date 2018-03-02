@@ -5856,6 +5856,15 @@ model on-disk files and can only contain bytes.
 stubs.  Stubs should never be implicitly created, but explicit calls to
 C<can> may break this.
 
+=item Subroutine attributes must come before the signature
+
+(F) When subroutine signatures are enabled, any subroutine attributes must
+come before the signature. Note that this order was the opposite in
+versions 5.20..5.26. So:
+
+    sub foo :lvalue ($a, $b) { ... }  # 5.18 and 5.28 +
+    sub foo ($a, $b) :lvalue { ... }  # 5.20 .. 5.26
+
 =item Subroutine "&%s" is not available
 
 (W closure) During compilation, an inner named subroutine or eval is

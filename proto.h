@@ -1366,6 +1366,9 @@ PERL_CALLCONV void	Perl_init_dbargs(pTHX);
 PERL_CALLCONV void	Perl_init_debugger(pTHX);
 PERL_CALLCONV int	Perl_init_i18nl10n(pTHX_ int printwarn);
 PERL_CALLCONV int	Perl_init_i18nl14n(pTHX_ int printwarn);
+PERL_CALLCONV void	Perl_init_named_cv(pTHX_ CV *cv, OP *nameop);
+#define PERL_ARGS_ASSERT_INIT_NAMED_CV	\
+	assert(cv); assert(nameop)
 PERL_CALLCONV void	Perl_init_stacks(pTHX);
 PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm);
 #define PERL_ARGS_ASSERT_INIT_TM	\

@@ -310,6 +310,7 @@ static struct debug_tokens {
     { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
     { ANDOP,		TOKENTYPE_NONE,		"ANDOP" },
     { ANONSUB,		TOKENTYPE_IVAL,		"ANONSUB" },
+    { ANON_SIGSUB,	TOKENTYPE_IVAL,		"ANON_SIGSUB" },
     { ARROW,		TOKENTYPE_NONE,		"ARROW" },
     { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
     { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
@@ -367,6 +368,7 @@ static struct debug_tokens {
     { RELOP,		TOKENTYPE_OPNUM,	"RELOP" },
     { REQUIRE,		TOKENTYPE_NONE,		"REQUIRE" },
     { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
+    { SIGSUB,		TOKENTYPE_NONE,		"SIGSUB" },
     { SUB,		TOKENTYPE_NONE,		"SUB" },
     { THING,		TOKENTYPE_OPVAL,	"THING" },
     { UMINUS,		TOKENTYPE_NONE,		"UMINUS" },
@@ -5942,9 +5944,17 @@ Perl_yylex(pTHX)
 	case XATTRTERM:
 	    PL_expect = XTERMBLOCK;
 	 grabattrs:
+            /* NB: as well as parsing normal attributes, we also end up
+             * here if there is something looking like attributes
+             * following a signature (which is illegal, but used to be
+             * legal in 5.20..5.26). If the latter, we still parse the
+             * attributes so that error messages(s) are less confusing,
+             * but ignore them (parser->sig_seen).
+             */
 	    s = skipspace(s);
 	    attrs = NULL;
             while (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+                bool sig = PL_parser->sig_seen;
 		I32 tmp;
 		SV *sv;
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -5987,23 +5997,27 @@ Perl_yylex(pTHX)
 		       the CVf_BUILTIN_ATTRS define in cv.h! */
 		    if (!PL_in_my && memEQs(SvPVX(sv), len, "lvalue")) {
 			sv_free(sv);
-			CvLVALUE_on(PL_compcv);
+			if (!sig)
+                            CvLVALUE_on(PL_compcv);
 		    }
 		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
 			sv_free(sv);
-			CvMETHOD_on(PL_compcv);
+			if (!sig)
+                            CvMETHOD_on(PL_compcv);
 		    }
 		    else if (!PL_in_my && memEQs(SvPVX(sv), len, "const"))
 		    {
 			sv_free(sv);
-			Perl_ck_warner_d(aTHX_
-			    packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
-			   ":const is experimental"
-			);
-			CvANONCONST_on(PL_compcv);
-			if (!CvANON(PL_compcv))
-			    yyerror(":const is not permitted on named "
-				    "subroutines");
+                        if (!sig) {
+                            Perl_ck_warner_d(aTHX_
+                                packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
+                               ":const is experimental"
+                            );
+                            CvANONCONST_on(PL_compcv);
+                            if (!CvANON(PL_compcv))
+                                yyerror(":const is not permitted on named "
+                                        "subroutines");
+                        }
 		    }
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
@@ -6056,6 +6070,14 @@ Perl_yylex(pTHX)
 		}
 	    }
 	got_attrs:
+            if (PL_parser->sig_seen) {
+                /* see comment about about sig_seen and parser error
+                 * handling */
+                if (attrs)
+                    op_free(attrs);
+                Perl_croak(aTHX_ "Subroutine attributes must come "
+                                 "before the signature");
+                }
 	    if (attrs) {
 		NEXTVAL_NEXTTOKE.opval = attrs;
 		force_next(THING);
@@ -8658,22 +8680,24 @@ Perl_yylex(pTHX)
 	  really_sub:
 	    {
 		char * const tmpbuf = PL_tokenbuf + 1;
-		expectation attrful;
 		bool have_name, have_proto;
 		const int key = tmp;
                 SV *format_name = NULL;
+                bool is_sigsub = FEATURE_SIGNATURES_IS_ENABLED;
 
                 SSize_t off = s-SvPVX(PL_linestr);
 		s = skipspace(s);
                 d = SvPVX(PL_linestr)+off;
+
+                SAVEBOOL(PL_parser->sig_seen);
+                PL_parser->sig_seen = FALSE;
 
                 if (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
                     || *s == '\''
                     || (*s == ':' && s[1] == ':'))
 		{
 
-		    PL_expect = XBLOCK;
-		    attrful = XATTRBLOCK;
+		    PL_expect = XATTRBLOCK;
 		    d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
 				  &len);
                     if (key == KEY_format)
@@ -8704,8 +8728,7 @@ Perl_yylex(pTHX)
 			Perl_croak(aTHX_
 				  "Missing name in \"%s\"", PL_bufptr);
 		    }
-		    PL_expect = XTERMBLOCK;
-		    attrful = XATTRTERM;
+		    PL_expect = XATTRTERM;
 		    sv_setpvs(PL_subname,"?");
 		    have_name = FALSE;
 		}
@@ -8721,7 +8744,7 @@ Perl_yylex(pTHX)
 		}
 
 		/* Look for a prototype */
-		if (*s == '(' && !FEATURE_SIGNATURES_IS_ENABLED) {
+		if (*s == '(' && !is_sigsub) {
 		    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!s)
@@ -8735,9 +8758,9 @@ Perl_yylex(pTHX)
 		else
 		    have_proto = FALSE;
 
-		if (*s == ':' && s[1] != ':')
-		    PL_expect = attrful;
-		else if ((*s != '{' && *s != '(') && key != KEY_format) {
+		if (  !(*s == ':' && s[1] != ':')
+                    && (*s != '{' && *s != '(') && key != KEY_format)
+                {
                     assert(key == KEY_sub || key == KEY_AUTOLOAD ||
                            key == KEY_DESTROY || key == KEY_BEGIN ||
                            key == KEY_UNITCHECK || key == KEY_CHECK ||
@@ -8761,10 +8784,16 @@ Perl_yylex(pTHX)
 			sv_setpvs(PL_subname, "__ANON__");
 		    else
 			sv_setpvs(PL_subname, "__ANON__::__ANON__");
-		    TOKEN(ANONSUB);
+                    if (is_sigsub)
+                        TOKEN(ANON_SIGSUB);
+                    else
+                        TOKEN(ANONSUB);
 		}
 		force_ident_maybe_lex('&');
-		TOKEN(SUB);
+                if (is_sigsub)
+                    TOKEN(SIGSUB);
+                else
+                    TOKEN(SUB);
 	    }
 
 	case KEY_system:
@@ -11593,6 +11622,39 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 
     return oldsavestack_ix;
 }
+
+
+/* Do extra initialisation of a CV (typically one just created by
+ * start_subparse()) if that CV is for a named sub
+ */
+
+void
+Perl_init_named_cv(pTHX_ CV *cv, OP *nameop)
+{
+    PERL_ARGS_ASSERT_INIT_NAMED_CV;
+
+    if (nameop->op_type == OP_CONST) {
+        const char *const name = SvPV_nolen_const(((SVOP*)nameop)->op_sv);
+        if (   strEQ(name, "BEGIN")
+            || strEQ(name, "END")
+            || strEQ(name, "INIT")
+            || strEQ(name, "CHECK")
+            || strEQ(name, "UNITCHECK")
+        )
+          CvSPECIAL_on(cv);
+    }
+    else
+    /* State subs inside anonymous subs need to be
+     clonable themselves. */
+    if (   CvANON(CvOUTSIDE(cv))
+        || CvCLONE(CvOUTSIDE(cv))
+        || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST(
+                        CvOUTSIDE(cv)
+                     ))[nameop->op_targ])
+    )
+      CvCLONE_on(cv);
+}
+
 
 static int
 S_yywarn(pTHX_ const char *const s, U32 flags)

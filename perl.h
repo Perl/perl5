@@ -4983,8 +4983,8 @@ typedef enum {
     XREF,
     XSTATE,
     XBLOCK,
-    XATTRBLOCK,
-    XATTRTERM,
+    XATTRBLOCK, /* next token should be an attribute or block */
+    XATTRTERM,  /* next token should be an attribute, or block in a term */
     XTERMBLOCK,
     XBLOCKTERM,
     XPOSTDEREF,

@@ -21,13 +21,10 @@ our $z;
 }
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
-is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
-    "error when not enabled";
+like $@, qr{syntax error at foo line 8}, "error when not enabled 1";
 
 eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
-is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
-    "error when not enabled";
-
+like $@, qr{syntax error at foo line 8}, "error when not enabled 2";
 
 
 no warnings "experimental::signatures";
@@ -1538,6 +1535,23 @@ while(<$kh>) {
     is $x, "Xbc", "RT #132141";
 }
 
+# RT #132760
+# attributes have been moved back before signatures for 5.28. Ensure that
+# code doing it the old wrong way get a meaningful error message.
+
+{
+    my @errs;
+    local $SIG{__WARN__} = sub { push @errs, @_};
+    eval q{
+        sub rt132760 ($a, $b) :prototype($$) { $a + $b }
+    };
+
+    @errs = split /\n/, $@;
+    is +@errs, 1, "RT 132760 expect 1 error";
+    like $errs[0],
+        qr/^Subroutine attributes must come before the signature at/,
+        "RT 132760 err 0";
+}
 
 done_testing;
 
