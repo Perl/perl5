@@ -123,7 +123,7 @@ L<Carp> has been upgraded from version 1.46 to 1.4x.
 XXX Please update the version number.
 
 L<Carp>, when generating stack traces, now attempts to work around
-longstanding bugs resulting from Perl's non-referenced-counted stack.
+longstanding bugs resulting from Perl's non-reference-counted stack.
 [perl #52610]
 
 Carp has been modified to avoid assuming that objects cannot be
