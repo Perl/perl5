@@ -227,6 +227,14 @@ allow entering the I<first> argument of an operator that takes a fixed
 number of arguments, since this is a case that will not cause stack
 corruption.  [perl #132854]
 
+=item *
+
+The warning added in 5.27.8 concerning UTF-8 locale compatibility was
+misleading.  The new wording and explanation are at
+L<perldiag/Locale '%s' contains (at least) the following characters which
+have unexepected meanings: %s  The Perl program will use the exepected
+meanings>
+
 =back
 
 =head1 Utility Changes

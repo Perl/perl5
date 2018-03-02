@@ -3371,28 +3371,43 @@ said library was compiled against.  Reinstalling the XS module will
 likely fix this error.
 
 =item Locale '%s' contains (at least) the following characters which
-have non-standard meanings: %s  The Perl program will use the standard
+have unexepected meanings: %s  The Perl program will use the exepected
 meanings
 
 (W locale) You are using the named UTF-8 locale.  UTF-8 locales are
-expected to adhere to the Unicode standard.  This message arises when
-perl found some anomalies in the locale, and is notifying you that there
-are potential problems.
+expected to have very particular behavior, which most do.  This message
+arises when perl found some departures from the expectations, and is
+notifying you that the expected behavior overrides these differences.
+In some cases the differences are caused by the locale definition being
+defective, but the most common causes of this warning are when there are
+ambiguities and conflicts in following the Standard, and the locale has
+chosen an approach that differs from Perl's.
 
-The most common cause of this warning is that, contrary to the claims,
-Unicode is not completely locale insensitive.  Turkish and some related
-languages have two types of C<"I"> characters.  One is dotted in both
-upper- and lowercase, and the other is dotless in both cases.  Unicode
-allows a locale to use either these rules, or the rules used in all
-other instances, where there is only one type of C<"I">, which is
-dotless in the uppercase, and dotted in the lower.  The perl core does
-not (yet) handle the Turkish case, and this warns you of that.  Instead,
+One of these is because that, contrary to the claims, Unicode is not
+completely locale insensitive.  Turkish and some related languages have
+two types of C<"I"> characters.  One is dotted in both upper- and
+lowercase, and the other is dotless in both cases.  Unicode allows a
+locale to use either the Turkish rules, or the rules used in all other
+instances, where there is only one type of C<"I">, which is dotless in
+the uppercase, and dotted in the lower.  The perl core does not (yet)
+handle the Turkish case, and this message warns you of that.  Instead,
 the L<Unicode::Casing> module allows you to mostly implement the Turkish
 casing rules.
 
-But there are other locales which are defective in not following the
-Unicode standard, and this message is raised if one of these is
-detected.
+The other common cause is for the characters
+
+ $ + < = > ^ ` | ~
+
+These are probematic.  The C standard says that these should be
+considered punctuation in the C locale (and the POSIX standard defers to
+the C standard), and Unicode is generally considered a superset of the C
+locale.  But Unicode has added an extra category, "Symbol", and
+classifies these particular characters as being symbols.  Most UTF-8
+locales have them treated as punctuation, so that L<ispunct(2)> returns
+non-zero for them.  But a few locales have it return 0.   Perl takes the
+first approach, not using C<ispunct()> at all (see L<Note [5] in
+perlrecharclass|perlrecharclass/[5]>), and this message is raised to
+notify you that you are getting Perl's approach, not the locale's.
 
 =item Locale '%s' may not work well.%s
 

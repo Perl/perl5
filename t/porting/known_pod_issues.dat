@@ -147,6 +147,7 @@ ioctl(2)
 IPC::Run
 IPC::Shareable
 IPC::Signal
+ispunct(2)
 kill(3)
 langinfo(3)
 LaTeX::Encode

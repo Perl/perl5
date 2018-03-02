@@ -1656,10 +1656,9 @@ S_new_ctype(pTHX_ const char *newctype)
             if (UNLIKELY(bad_count) && PL_in_utf8_CTYPE_locale) {
                 PL_warn_locale = Perl_newSVpvf(aTHX_
                      "Locale '%s' contains (at least) the following characters"
-                     " which have\nnon-standard meanings: %s\nThe Perl program"
-                     " will use the standard meanings",
+                     " which have\nunexpected meanings: %s\nThe Perl program"
+                     " will use the expected meanings",
                       newctype, bad_chars_list);
-
             }
             else {
                 PL_warn_locale = Perl_newSVpvf(aTHX_
