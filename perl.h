@@ -5588,7 +5588,11 @@ typedef struct am_table_short AMTS;
  *
  * The single argument is a condition to test for, and if true, to panic, as
  * this would be an attempt to complement the LC_NUMERIC state, and we're not
- * supposed to because it's locked */
+ * supposed to because it's locked.
+ *
+ * Clang improperly gives warnings for this, if not silenced:
+ * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
+ * */
 #    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
         CLANG_DIAG_IGNORE(-Wthread-safety)	     	                    \
         STMT_START {                                                        \
