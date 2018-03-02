@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.68';
+our $VERSION = '0.69';
 
 require Exporter;
 
@@ -2444,8 +2444,8 @@ sub prop_value_aliases ($$) {
     return ( $list_ref->[0], $list_ref->[0] );
 }
 
-# All 1 bits is the largest possible UV.
-$Unicode::UCD::MAX_CP = ~0;
+# All 1 bits but the top one is the largest possible IV.
+$Unicode::UCD::MAX_CP = (~0) >> 1;
 
 =pod
 
@@ -2537,11 +2537,7 @@ code points that have the property-value:
  for (my $i = 0; $i < @invlist; $i += 2) {
     my $upper = ($i + 1) < @invlist
                 ? $invlist[$i+1] - 1      # In range
-                : $Unicode::UCD::MAX_CP;  # To infinity.  You may want
-                                          # to stop much much earlier;
-                                          # going this high may expose
-                                          # perl deficiencies with very
-                                          # large numbers.
+                : $Unicode::UCD::MAX_CP;  # To infinity.
     for my $j ($invlist[$i] .. $upper) {
         push @full_list, $j;
     }
