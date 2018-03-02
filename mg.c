@@ -835,8 +835,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
            under UTF-8, which gives us an extra measure of confidence. */
 
             && isSCRIPT_RUN((const U8 *) SvPVX_const(sv), (U8 *) SvEND(sv),
-                            TRUE, /* Means assume UTF-8 */
-                            NULL)
+                            TRUE) /* Means assume UTF-8 */
 #endif
 
         ) {
