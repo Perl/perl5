@@ -634,6 +634,7 @@ the strings?).
  Ether     5.27.6       2017-Nov-20
  BinGOs    5.27.7       2017-Dec-20
  Abigail   5.27.8       2018-Jan-20
+ Renee     5.27.9       2018-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
