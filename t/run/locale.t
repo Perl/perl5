@@ -118,7 +118,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip("no locale available where LC_NUMERIC makes a difference", &last - 8 )
+    skip("no locale available where LC_NUMERIC makes a difference", &last - 9 )
 	if !$different;     # -7 is 5 tests before this block; 2 after
     note("using the '$different' locale for LC_NUMERIC tests");
     {
@@ -427,18 +427,43 @@ EOF
 
     }
 
-    {
-        fresh_perl(<<"EOF",
-                use locale;
-                use POSIX;
-                POSIX::setlocale(LC_ALL, "LC_NUMERIC=de_DE.utf8;LC_CTYPE=de_DE.utf8;LC_COLLATE=de_DE.utf8;LC_TIME=de_DE.utf8;LC_MESSAGES=de_DE.utf8;LC_MONETARY=de_DE.utf8;LC_ADDRESS=de_DE.utf8;LC_IDENTIFICATION=de_DE.utf8;LC_MEASUREMENT=de_DE.utf8;LC_PAPER=de_DE.utf8;LC_TELEPHONE=de_DE.utf8");
-EOF
-            {});
-        ok ($? == 0, "In complicated LC_ALL, final individ category doesn't need a \';'");
+SKIP: {
 
+    my @valid_categories = valid_locale_categories();
+
+    my $valid_string = "";
+    my $invalid_string = "";
+
+    foreach my $category (@valid_categories) {
+        if ($category ne "LC_ALL") {
+            $invalid_string .= ";" if $invalid_string ne "";
+            $invalid_string .= "$category=foo_BAR";
+
+            $valid_string .= ";" if $valid_string ne "";
+            $valid_string .= "$category=$non_C_locale";
+        }
     }
+
+    fresh_perl(<<"EOF",
+            use locale;
+            use POSIX;
+            POSIX::setlocale(LC_ALL, "$invalid_string");
+EOF
+        {});
+    is ($?, 0, "In setting complicated invalid LC_ALL, final individ category doesn't need a \';'");
+
+    skip("no non-C locale available", 2 ) unless $non_C_locale;
+    fresh_perl(<<"EOF",
+            use locale;
+            use POSIX;
+            POSIX::setlocale(LC_ALL, "$valid_string");
+EOF
+        {});
+    is ($?, 0, "In setting complicated valid LC_ALL, final individ category doesn't need a \';'");
+
+}
 
 # IMPORTANT: When adding tests before the following line, be sure to update
 # its skip count:
 #       skip("no locale available where LC_NUMERIC makes a difference", ...)
-sub last { 38 }
+sub last { 39 }
