@@ -118,7 +118,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip("no locale available where LC_NUMERIC makes a difference", &last - 7 )
+    skip("no locale available where LC_NUMERIC makes a difference", &last - 8 )
 	if !$different;     # -7 is 5 tests before this block; 2 after
     note("using the '$different' locale for LC_NUMERIC tests");
     {
