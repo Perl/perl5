@@ -5171,7 +5171,7 @@ S_setlocale_debug_string(const int category,        /* category number,
 
     /* initialise to a non-null value to keep it out of BSS and so keep
      * -DPERL_GLOBAL_STRUCT_PRIVATE happy */
-    static char ret[128] = "If you can read this, thank your buggy C"
+    static char ret[256] = "If you can read this, thank your buggy C"
                            " library strlcpy(), and change your hints file"
                            " to undef it";
 
