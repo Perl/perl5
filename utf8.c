@@ -2329,7 +2329,9 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
 Only in very rare circumstances should code need to be dealing in Unicode
 (as opposed to native) code points.  In those few cases, use
-C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|/utf8_to_uvchr_buf>> instead.
+C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|/utf8_to_uvchr_buf>> instead.  If you
+are not absolutely sure this is one of those cases, then assume it isn't and
+use plain C<utf8_to_uvchr_buf> instead.
 
 Returns the Unicode (not-native) code point of the first character in the
 string C<s> which
