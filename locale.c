@@ -998,7 +998,6 @@ S_emulate_setlocale(const int category,
 #  endif
 
         if (! uselocale(old_obj)) {
-            SAVE_ERRNO;
 
 #  ifdef DEBUGGING
 
