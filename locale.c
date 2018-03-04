@@ -943,6 +943,7 @@ S_emulate_setlocale(const int category,
 
             /* Find the index of the category name in our lists */
             for (i = 0; i < LC_ALL_INDEX; i++) {
+                char * individ_locale;
 
                 /* Keep going if this isn't the index.  The strnNE() avoids a
                  * Perl_form(), but would fail if ever a category name could be
@@ -961,10 +962,9 @@ S_emulate_setlocale(const int category,
                     goto ready_to_set;
                 }
 
-                if (category == LC_ALL) {
-                    char * individ_locale = Perl_form(aTHX_ "%.*s", (int) (p - s), s);
-                    emulate_setlocale(categories[i], individ_locale, i, TRUE);
-                }
+                assert(category == LC_ALL);
+                individ_locale = Perl_form(aTHX_ "%.*s", (int) (p - s), s);
+                emulate_setlocale(categories[i], individ_locale, i, TRUE);
             }
 
             s = p;
