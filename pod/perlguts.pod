@@ -2909,10 +2909,13 @@ so you can test if you need to do something special with this
 character like this (the C<UTF8_IS_INVARIANT()> is a macro that tests
 whether the byte is encoded as a single byte even in UTF-8):
 
-    U8 *utf;
-    U8 *utf_end; /* 1 beyond buffer pointed to by utf */
-    UV uv;	/* Note: a UV, not a U8, not a char */
-    STRLEN len; /* length of character in bytes */
+    U8 *utf;     /* Initialize this to point to the beginning of the
+                    sequence to convert */
+    U8 *utf_end; /* Initialize this to 1 beyond the end of the sequence
+                    pointed to by 'utf' */
+    UV uv;	 /* Returned code point; note: a UV, not a U8, not a
+                    char */
+    STRLEN len; /* Returned length of character in bytes */
 
     if (!UTF8_IS_INVARIANT(*utf))
         /* Must treat this as UTF-8 */
