@@ -869,7 +869,11 @@ S_emulate_setlocale(const int category,
                                                 && strNE(env_override, ""))
                                                ? env_override
                                                : default_name;
-                    emulate_setlocale(categories[i], this_locale, i, TRUE);
+                    if (! emulate_setlocale(categories[i], this_locale, i, TRUE))
+                    {
+                        Safefree(env_override);
+                        return NULL;
+                    }
 
                     if (strNE(this_locale, default_name)) {
                         did_override = TRUE;
@@ -964,7 +968,10 @@ S_emulate_setlocale(const int category,
 
                 assert(category == LC_ALL);
                 individ_locale = Perl_form(aTHX_ "%.*s", (int) (p - s), s);
-                emulate_setlocale(categories[i], individ_locale, i, TRUE);
+                if (! emulate_setlocale(categories[i], individ_locale, i, TRUE))
+                {
+                    return NULL;
+                }
             }
 
             s = p;
