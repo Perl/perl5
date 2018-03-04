@@ -934,15 +934,19 @@ S_emulate_setlocale(const int category,
 
             /* Parse through the locale name */
             name_start = p;
-            while (isGRAPH(*p) && *p != ';') {
+            while (p < e && *p != ';') {
+                if (! isGRAPH(*p)) {
+                    Perl_croak(aTHX_
+                        "panic: %s: %d: Unexpected character in locale name '%02X",
+                        __FILE__, __LINE__, *(p-1));
+                }
                 p++;
             }
             name_end = p;
 
-            if (*p++ != ';') {
-                Perl_croak(aTHX_
-                    "panic: %s: %d: Unexpected character in locale name '%02X",
-                    __FILE__, __LINE__, *(p-1));
+            /* Space past the semi-colon */
+            if (p < e) {
+                p++;
             }
 
             /* Find the index of the category name in our lists */
@@ -967,7 +971,8 @@ S_emulate_setlocale(const int category,
                 }
 
                 assert(category == LC_ALL);
-                individ_locale = Perl_form(aTHX_ "%.*s", (int) (p - s), s);
+                individ_locale = Perl_form(aTHX_ "%.*s",
+                                    (int) (name_end - name_start), name_start);
                 if (! emulate_setlocale(categories[i], individ_locale, i, TRUE))
                 {
                     return NULL;

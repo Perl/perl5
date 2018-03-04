@@ -427,7 +427,18 @@ EOF
 
     }
 
+    {
+        fresh_perl(<<"EOF",
+                use locale;
+                use POSIX;
+                POSIX::setlocale(LC_ALL, "LC_NUMERIC=de_DE.utf8;LC_CTYPE=de_DE.utf8;LC_COLLATE=de_DE.utf8;LC_TIME=de_DE.utf8;LC_MESSAGES=de_DE.utf8;LC_MONETARY=de_DE.utf8;LC_ADDRESS=de_DE.utf8;LC_IDENTIFICATION=de_DE.utf8;LC_MEASUREMENT=de_DE.utf8;LC_PAPER=de_DE.utf8;LC_TELEPHONE=de_DE.utf8");
+EOF
+            {});
+        ok ($? == 0, "In complicated LC_ALL, final individ category doesn't need a \';'");
+
+    }
+
 # IMPORTANT: When adding tests before the following line, be sure to update
 # its skip count:
 #       skip("no locale available where LC_NUMERIC makes a difference", ...)
-sub last { 37 }
+sub last { 38 }
