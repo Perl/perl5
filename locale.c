@@ -964,7 +964,6 @@ S_emulate_setlocale(const int category,
                 if (category == LC_ALL) {
                     char * individ_locale = Perl_form(aTHX_ "%.*s", (int) (p - s), s);
                     emulate_setlocale(categories[i], individ_locale, i, TRUE);
-                    Safefree(individ_locale);
                 }
             }
 
