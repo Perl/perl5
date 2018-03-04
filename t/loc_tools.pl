@@ -119,7 +119,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         $badutf8 = 1 if grep { /Malformed UTF-8/ } @_;
         $plays_well = 0 if grep {
                     /Locale .* may not work well(?#
-                   )|The Perl program will use the standard meanings/i
+                   )|The Perl program will use the expected meanings/i
             } @_;
     };
 
