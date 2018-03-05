@@ -314,7 +314,7 @@ the current set of allowed keys of a restricted hash.
 
 (F) You wrote C<bless $foo> with one argument after somehow causing
 the current package to be freed.  Perl cannot figure out what to
-do, so it throws up in hands in despair.
+do, so it throws up its hands in despair.
 
 =item Attempt to bless into a reference
 
