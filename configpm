@@ -574,9 +574,11 @@ local *_ = \my $a;
 $_ = <<'!END!';
 EOT
 #proper lexicographical order of the keys
+my %seen_var;
 $heavy_txt .= join('',
     map { $_->[-1] }
     sort {$a->[0] cmp $b->[0] }
+    grep { !$seen_var{ $_->[0] }++ }
     map {
         /^([^=]+)/ ? [ $1, $_ ]
                    : [ $_, $_ ] # shouldnt happen
