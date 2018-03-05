@@ -714,8 +714,15 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
                 continue;
             }
 
-            /* Here, at least one byte in the word isn't 'span_byte'.  This xor
-             * leaves 1 bits only in those non-matching bytes */
+            /* Here, at least one byte in the word isn't 'span_byte'. */
+
+#ifdef EBCDIC
+
+            break;
+
+#else
+
+            /* This xor leaves 1 bits only in those non-matching bytes */
             span_word ^= * (PERL_UINTMAX_T *) s;
 
             /* Make sure the upper bit of each non-matching byte is set.  This
@@ -726,6 +733,8 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 
             /* That reduces the problem to what this function solves */
             return s + _variant_byte_number(span_word);
+
+#endif
 
         } while (s + PERL_WORDSIZE <= send);
     }
@@ -753,6 +762,8 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 
     assert(send >= s);
     assert((byte & mask) == byte);
+
+#ifndef EBCDIC
 
     if ((STRLEN) (send - s) >= PERL_WORDSIZE
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
@@ -803,6 +814,8 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
         } while (s + PERL_WORDSIZE <= send);
     }
 
+#endif
+
     while (s < send) {
         if (((*s) & mask) == byte) {
             return s;
@@ -851,11 +864,19 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
                 continue;
             }
 
+#ifdef EBCDIC
+
+            break;
+
+#else
+
             masked ^= span_word;
             masked |= masked << 1;
             masked |= masked << 2;
             masked |= masked << 4;
             return s + _variant_byte_number(masked);
+
+#endif
 
         } while (s + PERL_WORDSIZE <= send);
     }
