@@ -12,11 +12,11 @@ use Symbol;
 our $VERSION;
 BEGIN {
   $VERSION = '3.38';
+  require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
+  require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
+  require ExtUtils::ParseXS::Utilities; ExtUtils::ParseXS::Utilities->VERSION($VERSION);
+  require ExtUtils::ParseXS::Eval; ExtUtils::ParseXS::Eval->VERSION($VERSION);
 }
-use ExtUtils::ParseXS::Constants $VERSION;
-use ExtUtils::ParseXS::CountLines $VERSION;
-use ExtUtils::ParseXS::Utilities $VERSION;
-use ExtUtils::ParseXS::Eval $VERSION;
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 use ExtUtils::ParseXS::Utilities qw(
