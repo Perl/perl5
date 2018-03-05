@@ -587,17 +587,17 @@ S_find_next_ascii(char * s, const char * send, const bool utf8_target)
             PERL_UINTMAX_T complemented = ~ * (PERL_UINTMAX_T *) s;
             if (complemented & PERL_VARIANTS_WORD_MASK)  {
 
-#if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
-   || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+#  if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
+     || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
                 s += _variant_byte_number(complemented);
                 return s;
 
-#else   /* If weird byte order, drop into next loop to do byte-at-a-time
+#  else   /* If weird byte order, drop into next loop to do byte-at-a-time
            checks. */
 
                 break;
-#endif
+#  endif
             }
 
             s += PERL_WORDSIZE;
