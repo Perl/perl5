@@ -328,7 +328,7 @@ David Gay			<dgay@acm.org>
 David Glasser			<me@davidglasser.net>
 David Golden			<dagolden@cpan.org>
 David H. Adler			<dha@panix.com>
-David H. Gutteridge             <dhgutteridge@sympatico.ca>
+David H. Gutteridge		<dhgutteridge@sympatico.ca>
 David Hammen			<hammen@gothamcity.jsc.nasa.gov>
 David J. Fiander		<davidf@mks.com>
 David Kerry			<davidk@tor.securecomputing.com>
@@ -402,8 +402,8 @@ Eric Promislow			<ericp@ActiveState.com>
 Erich Rickheit
 Eryq				<eryq@zeegee.com>
 Etienne Grossman		<etienne@isr.isr.ist.utl.pt>
-Eugene Alterman			<Eugene.Alterman@bremer-inc.com>
 Eugen Konkov			<kes-kes@yandex.ru>
+Eugene Alterman			<Eugene.Alterman@bremer-inc.com>
 Evan Miller			<eam@frap.net>
 Evan Zacks			<zackse@cpan.org>
 Fabien Tassin			<tassin@eerie.fr>
@@ -698,7 +698,7 @@ Keedi Kim			<keedi@cpan.org>
 Keith Neufeld			<neufeld@fast.pvi.org>
 Keith Thompson			<Keith.S.Thompson@gmail.com>
 Ken Brown			<kbrown@cornell.edu>
-Ken Cotterill                   <kencotterill@netspace.net.au>
+Ken Cotterill			<kencotterill@netspace.net.au>
 Ken Estes			<estes@ms.com>
 Ken Fox				<kfox@ford.com>
 Ken Hirsch			<kenhirsch@ftml.net>
@@ -939,7 +939,7 @@ Ollivier Robert			<roberto@keltia.freenix.fr>
 Osvaldo Villalon		<ovillalon@dextratech.com>
 Owain G. Ainsworth		<oga@nicotinebsd.org>
 Owen Taylor			<owt1@cornell.edu>
-Pali    			<pali@cpan.org>
+Pali				<pali@cpan.org>
 Papp Zoltan			<padre@elte.hu>
 parv				<parv@pair.com>
 Pascal Rigaux			<pixel@mandriva.com>
@@ -973,8 +973,8 @@ Pedro Felipe Horrillo Guerra	<pancho@pancho.name>
 Per Einar Ellefsen		<per.einar@skynet.be>
 Perlover			<perlover@perlover.com>
 Pete Peterson			<petersonp@genrad.com>
+Peter Avalos			<peter@theshell.com>
 Peter BARABAS
-Peter Avalos                    <peter@theshell.com>
 Peter Chines			<pchines@nhgri.nih.gov>
 Peter Dintelmann		<Peter.Dintelmann@Dresdner-Bank.com>
 Peter E. Yee			<yee@trident.arc.nasa.gov>
@@ -1196,7 +1196,6 @@ Thomas Bowditch			<bowditch@inmet.com>
 Thomas Conté			<tom@fr.uu.net>
 Thomas Dorner			<Thomas.Dorner@start.de>
 Thomas Kofler
-Tomasz Konojacki                <me@xenu.pl>
 Thomas König
 Thomas Pfau			<pfau@nbpfaus.net>
 Thomas Sibley			<tsibley@cpan.org>
@@ -1231,6 +1230,7 @@ Tom Hukins			<tom@eborcom.com>
 Tom Phoenix			<rootbeer@teleport.com>
 Tom Spindler			<dogcow@isi.net>
 Tom Wyant			<wyant@cpan.org>
+Tomasz Konojacki		<me@xenu.pl>
 Tomoyuki Sadahiro		<BQW10602@nifty.com>
 Ton Hospel			<cpan@ton.iguana.be>
 Tony Bowden			<tony@kasei.com>
