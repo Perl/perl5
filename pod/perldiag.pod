@@ -3384,8 +3384,8 @@ ambiguities and conflicts in following the Standard, and the locale has
 chosen an approach that differs from Perl's.
 
 One of these is because that, contrary to the claims, Unicode is not
-completely locale insensitive.  Turkish and some related languages have
-two types of C<"I"> characters.  One is dotted in both upper- and
+completely locale insensitive.  Turkish and some related languages
+have two types of C<"I"> characters.  One is dotted in both upper- and
 lowercase, and the other is dotless in both cases.  Unicode allows a
 locale to use either the Turkish rules, or the rules used in all other
 instances, where there is only one type of C<"I">, which is dotless in
@@ -3400,14 +3400,14 @@ The other common cause is for the characters
 
 These are probematic.  The C standard says that these should be
 considered punctuation in the C locale (and the POSIX standard defers to
-the C standard), and Unicode is generally considered a superset of the C
-locale.  But Unicode has added an extra category, "Symbol", and
+the C standard), and Unicode is generally considered a superset of
+the C locale.  But Unicode has added an extra category, "Symbol", and
 classifies these particular characters as being symbols.  Most UTF-8
 locales have them treated as punctuation, so that L<ispunct(2)> returns
-non-zero for them.  But a few locales have it return 0.   Perl takes the
-first approach, not using C<ispunct()> at all (see L<Note [5] in
-perlrecharclass|perlrecharclass/[5]>), and this message is raised to
-notify you that you are getting Perl's approach, not the locale's.
+non-zero for them.  But a few locales have it return 0.   Perl takes
+the first approach, not using C<ispunct()> at all (see L<Note [5] in
+perlrecharclass|perlrecharclass/[5]>), and this message is raised to notify you that you
+are getting Perl's approach, not the locale's.
 
 =item Locale '%s' may not work well.%s
 
