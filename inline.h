@@ -382,8 +382,6 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
     send = s + len;
 
-#ifndef EBCDIC
-
 /* This looks like 0x010101... */
 #  define PERL_COUNT_MULTIPLIER   (~ (UINTMAX_C(0)) / 0xFF)
 
@@ -400,6 +398,8 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
                                       |   (  PTR2nat(x) >> 1)                 \
                                       | ( ( (PTR2nat(x)                       \
                                            & PERL_WORD_BOUNDARY_MASK) >> 2))))
+
+#ifndef EBCDIC
 
     /* Do the word-at-a-time iff there is at least one usable full word.  That
      * means that after advancing to a word boundary, there still is at least a
