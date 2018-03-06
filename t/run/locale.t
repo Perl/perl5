@@ -439,6 +439,7 @@ SKIP: {
             $invalid_string .= ";" if $invalid_string ne "";
             $invalid_string .= "$category=foo_BAR";
 
+            next unless $non_C_locale;
             $valid_string .= ";" if $valid_string ne "";
             $valid_string .= "$category=$non_C_locale";
         }
@@ -452,7 +453,7 @@ EOF
         {});
     is ($?, 0, "In setting complicated invalid LC_ALL, final individ category doesn't need a \';'");
 
-    skip("no non-C locale available", 2 ) unless $non_C_locale;
+    skip("no non-C locale available", 1 ) unless $non_C_locale;
     fresh_perl(<<"EOF",
             use locale;
             use POSIX;
