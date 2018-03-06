@@ -105,56 +105,66 @@ struct reg_code_blocks {
   regexp's data array based on the data item's type.
 */
 
-#define _REGEXP_COMMON							\
-        /* what engine created this regexp? */				\
-	const struct regexp_engine* engine; 				\
-	REGEXP *mother_re; /* what re is this a lightweight copy of? */	\
-	HV *paren_names;   /* Optional hash of paren names */		\
-        /*--------------------------------------------------------*/    \
-	/* Information about the match that the perl core uses to */	\
-	/* manage things */						\
-	U32 extflags;	/* Flags used both externally and internally */	\
-	SSize_t minlen;	/* mininum possible number of chars in string to match */\
-	SSize_t minlenret; /* mininum possible number of chars in $& */		\
-	STRLEN gofs;	/* chars left of pos that we search from */	\
-	/* substring data about strings that must appear in the */	\
-	/* final match, used for optimisations */			\
-	struct reg_substr_data *substrs;				\
-	U32 nparens;	/* number of capture buffers */			\
-	/* private engine specific data */				\
-	U32 intflags;	/* Engine Specific Internal flags */		\
-	void *pprivate;	/* Data private to the regex engine which */	\
-			/* created this object. */			\
-        /*--------------------------------------------------------*/    \
-	/* Data about the last/current match. These are modified */	\
-	/* during matching */						\
-	U32 lastparen;			/* last open paren matched */	\
-	U32 lastcloseparen;		/* last close paren matched */	\
-	/* Array of offsets for (@-) and (@+) */			\
-	regexp_paren_pair *offs;					\
-        char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */ \
-        /*--------------------------------------------------------*/    \
-	/* saved or original string so \digit works forever. */		\
-	char *subbeg;							\
-	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
-	SSize_t sublen;	/* Length of string pointed by subbeg */	\
-	SSize_t suboffset; /* byte offset of subbeg from logical start of str */ \
-	SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */ \
-	/* Information about the match that isn't often used */		\
-        SSize_t maxlen;        /* mininum possible number of chars in string to match */\
-        /*--------------------------------------------------------*/    \
-	/* offset from wrapped to the start of precomp */		\
-	PERL_BITFIELD32 pre_prefix:4;					\
-        /* original flags used to compile the pattern, may differ */    \
-        /* from extflags in various ways */                             \
-        PERL_BITFIELD32 compflags:9;                                    \
-        /*--------------------------------------------------------*/    \
-	CV *qr_anoncv	/* the anon sub wrapped round qr/(?{..})/ */
-
 typedef struct regexp {
-	_XPV_HEAD;
-	_REGEXP_COMMON;
+    _XPV_HEAD;
+    const struct regexp_engine* engine; /* what engine created this regexp? */
+    REGEXP *mother_re; /* what re is this a lightweight copy of? */
+    HV *paren_names;   /* Optional hash of paren names */
+
+    /*----------------------------------------------------------------------
+     * Information about the match that the perl core uses to manage things
+     */
+
+    U32 extflags;      /* Flags used both externally and internally */
+    SSize_t minlen;    /* minimum possible number of chars in string to match */
+    SSize_t minlenret; /* mininum possible number of chars in $& */
+    STRLEN gofs;       /* chars left of pos that we search from */
+                       /* substring data about strings that must appear in
+                        * the final match, used for optimisations */
+    struct reg_substr_data *substrs;
+    U32 nparens;       /* number of capture buffers */
+
+    /* private engine specific data */
+
+    U32 intflags;      /* Engine Specific Internal flags */
+    void *pprivate;    /* Data private to the regex engine which
+                        * created this object. */
+
+    /*----------------------------------------------------------------------
+     * Data about the last/current match. These are modified during matching
+     */
+
+    U32 lastparen;           /* last open paren matched */
+    U32 lastcloseparen;      /* last close paren matched */
+    regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
+    char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
+
+    /*---------------------------------------------------------------------- */
+
+    char *subbeg;       /* saved or original string so \digit works forever. */
+    SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
+    SSize_t sublen;     /* Length of string pointed by subbeg */
+    SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
+    SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
+
+    /* Information about the match that isn't often used */
+
+    SSize_t maxlen;  /* minimum possible number of chars in string to match */
+
+    /*---------------------------------------------------------------------- */
+
+    /* offset from wrapped to the start of precomp */
+    PERL_BITFIELD32 pre_prefix:4;
+
+    /* original flags used to compile the pattern, may differ from
+     * extflags in various ways */
+    PERL_BITFIELD32 compflags:9;
+
+    /*---------------------------------------------------------------------- */
+
+    CV *qr_anoncv;      /* the anon sub wrapped round qr/(?{..})/ */
 } regexp;
+
 
 #define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
 
