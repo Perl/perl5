@@ -362,7 +362,7 @@ This comes down to:
 =head3 monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
-L<http://smoke.procura.nl/index.html>, L<http://perl5.test-smoke.org/>
+L<https://tux.nl/perl5/smoke/index.html>, L<http://perl5.test-smoke.org/>
 and L<http://perl.develop-help.com> for a summary. See also
 L<http://www.nntp.perl.org/group/perl.daily-build.reports/> which has
 the raw reports.
