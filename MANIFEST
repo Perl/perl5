@@ -5485,6 +5485,7 @@ t/lib/croak/pp			Test croak calls from pp.c
 t/lib/croak/pp_ctl		Test croak calls from pp_ctl.c
 t/lib/croak/pp_hot		Test croak calls from pp_hot.c
 t/lib/croak/pp_sys		Test croak calls from pp_sys.c
+t/lib/croak/regcomp		Test croak calls from regcomp.c
 t/lib/croak/toke		Test croak calls from toke.c
 t/lib/croak/toke_l1		Test croak calls from toke.c; file is not UTF-8 encoded
 t/lib/cygwin.t			Builtin cygwin function tests

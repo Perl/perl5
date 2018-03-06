@@ -12307,15 +12307,13 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   */
 
     char * endbrace;    /* points to '}' following the name */
-    char * endchar;     /* Points to '.' or '}' ending cur char in the input
-                           stream */
     char* p = RExC_parse; /* Temporary */
 
     SV * substitute_parse;
-    STRLEN len;
     char *orig_end;
     char *save_start;
     I32 flags;
+    Size_t count = 0;   /* code point count kept internally by this function */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -12400,139 +12398,165 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         vFAIL("\\N{NAME} must be resolved by the lexer");
     }
 
+        /* This code purposely indented below because of future changes coming */
+
+        /* We can get to here when the input is \N{U+...} or when toke.c has
+         * converted a name to the \N{U+...} form.  This include changing a
+         * name that evaluates to multiple code points to \N{U+c1.c2.c3 ...} */
+
         RExC_parse += 2;    /* Skip past the 'U+' */
 
-        /* Because toke.c has generated a special construct for us guaranteed
-         * not to have NULs, we can use a str function */
-        endchar = RExC_parse + strcspn(RExC_parse, ".}");
+        /* Code points are separated by dots.  The '}' terminates the whole
+         * thing. */
 
-        /* Code points are separated by dots.  If none, there is only one code
-         * point, and is terminated by the brace */
-
-        if (endchar >= endbrace) {
-            STRLEN length_of_hex;
-            I32 grok_hex_flags;
-
-            /* Here, exactly one code point.  If that isn't what is wanted,
-             * fail */
-            if (! code_point_p) {
-                RExC_parse = p;
-                return FALSE;
+        do {    /* Loop until the ending brace */
+            UV cp = 0;
+            char * start_digit;     /* The first of the current code point */
+            if (! isXDIGIT(*RExC_parse)) {
+                RExC_parse++;
+                vFAIL("Invalid hexadecimal number in \\N{U+...}");
             }
 
-            /* Convert code point from hex */
-            length_of_hex = (STRLEN)(endchar - RExC_parse);
-            grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
-                            | PERL_SCAN_DISALLOW_PREFIX
+            start_digit = RExC_parse;
+            count++;
 
-                                /* No errors in the first pass (See [perl
-                                * #122671].)  We let the code below find the
-                                * errors when there are multiple chars. */
-                            | ((SIZE_ONLY)
-                                ? PERL_SCAN_SILENT_ILLDIGIT
-                                : 0);
+            /* Loop through the hex digits of the current code point */
+            do {
+                /* Adding this digit will shift the result 4 bits.  If that
+                 * result would be above IV_MAX, it's overflow */
+                if (cp > IV_MAX >> 4) {
 
-            /* This routine is the one place where both single- and
-             * double-quotish \N{U+xxxx} are evaluated.  The value is a Unicode
-             * code point which must be converted to native. */
-            *code_point_p = UNI_TO_NATIVE(grok_hex(RExC_parse,
-                                            &length_of_hex,
-                                            &grok_hex_flags,
-                                            NULL));
+                    /* Find the end of the code point */
+                    do {
+                        RExC_parse ++;
+                    } while (isXDIGIT(*RExC_parse) || *RExC_parse == '_');
 
-            /* The tokenizer should have guaranteed validity, but it's possible
-             * to bypass it by using single quoting, so check.  Don't do the
-             * check here when there are multiple chars; we do it below anyway.
-             * */
-            if (length_of_hex == 0
-                || length_of_hex != (STRLEN)(endchar - RExC_parse) )
-            {
-                RExC_parse += length_of_hex;    /* Includes all the valid */
+                    /* Be sure to synchronize this message with the similar one
+                     * in utf8.c */
+                    vFAIL4("Use of code point 0x%.*s is not allowed; the"
+                        " permissible max is 0x%" UVxf,
+                        (int) (RExC_parse - start_digit), start_digit, IV_MAX);
+                }
+
+                /* Accumulate this (valid) digit into the running total */
+                cp  = (cp << 4) + READ_XDIGIT(RExC_parse);
+
+                /* READ_XDIGIT advanced the input pointer.  Ignore a single
+                 * underscore separator */
+                if (*RExC_parse == '_' && isXDIGIT(RExC_parse[1])) {
+                    RExC_parse++;
+                }
+            } while (isXDIGIT(*RExC_parse));
+
+            /* Here, have accumulated the next code point */
+            if (RExC_parse >= endbrace) {   /* If done ... */
+                if (count != 1) {
+                    goto do_concat;
+                }
+
+                /* Here, is a single code point; fail if doesn't want that */
+                if (! code_point_p) {
+                    RExC_parse = p;
+                    return FALSE;
+                }
+
+                /* A single code point is easy to handle; just return it */
+                *code_point_p = UNI_TO_NATIVE(cp);
+                RExC_parse = endbrace;
+                nextchar(pRExC_state);
+                return TRUE;
+            }
+
+            /* Here, the only legal thing would be a multiple character
+             * sequence (of the form "\N{U+c1.c2. ... }".   So the next
+             * character must be a dot (and the one after that can't be the
+             * endbrace, or we'd have something like \N{U+100.} ) */
+            if (*RExC_parse != '.' || RExC_parse + 1 >= endbrace) {
                 RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
                                 ? UTF8SKIP(RExC_parse)
                                 : 1;
-                /* Guard against malformed utf8 */
-                if (RExC_parse >= endchar) {
-                    RExC_parse = endchar;
+                if (RExC_parse >= endbrace) { /* Guard against malformed utf8 */
+                    RExC_parse = endbrace;
                 }
                 vFAIL("Invalid hexadecimal number in \\N{U+...}");
             }
 
-            RExC_parse = endbrace + 1;
-            return TRUE;
-        }
+            /* Here, looks like its really a multiple character sequence.  Fail
+             * if that's not what the caller wants. */
+            if (! node_p) {
 
-        /* Here, is a multiple character sequence */
+                /* But even if failing, we count the code points if requested, and
+                 * don't back up up the pointer as the caller is expected to
+                 * handle this situation */
+                if (cp_count) {
+                    char * dot = RExC_parse + 1;
+                    do {
+                        dot = (char *) memchr(dot, '.', endbrace - dot);
+                        if (! dot) {
+                            break;
+                        }
+                        count++;
+                        dot++;
+                    } while (dot < endbrace);
+                    count++;
 
-        /* Count the code points, if desired, in the sequence */
-        if (cp_count) {
-            *cp_count = 0;
-            while (RExC_parse < endbrace) {
-                /* Point to the beginning of the next character in the sequence. */
-                RExC_parse = endchar + 1;
-                endchar = RExC_parse + strcspn(RExC_parse, ".}");
-                (*cp_count)++;
+                    *cp_count = count;
+                    RExC_parse = endbrace;
+                    nextchar(pRExC_state);
+                }
+                else {  /* Back up the pointer. */
+                    RExC_parse = p;
+                }
+                return FALSE;
             }
-        }
 
-        /* Fail if caller doesn't want to handle a multi-code-point sequence.
-         * But don't backup up the pointer if the caller wants to know how many
-         * code points there are (they can then handle things) */
-        if (! node_p) {
-            if (! cp_count) {
-                RExC_parse = p;
+            /* What is done here is to convert this to a sub-pattern of the
+             * form \x{char1}\x{char2}...  and then call reg recursively to
+             * parse it (enclosing in "(?: ... )" ).  That way, it retains its
+             * atomicness, while not having to worry about special handling
+             * that some code points may have. */
+
+            if (count == 1) {
+                substitute_parse = newSVpvs("?:");
             }
-            return FALSE;
-        }
 
-        /* What is done here is to convert this to a sub-pattern of the form
-         * \x{char1}\x{char2}...  and then call reg recursively to parse it
-         * (enclosing in "(?: ... )" ).  That way, it retains its atomicness,
-         * while not having to worry about special handling that some code
-         * points may have. */
-
-        substitute_parse = newSVpvs("?:");
-
-        while (RExC_parse < endbrace) {
+          do_concat:
 
             /* Convert to notation the rest of the code understands */
             sv_catpv(substitute_parse, "\\x{");
-            sv_catpvn(substitute_parse, RExC_parse, endchar - RExC_parse);
+            sv_catpvn(substitute_parse, start_digit, RExC_parse - start_digit);
             sv_catpv(substitute_parse, "}");
 
-            /* Point to the beginning of the next character in the sequence. */
-            RExC_parse = endchar + 1;
-            endchar = RExC_parse + strcspn(RExC_parse, ".}");
+            /* Move to after the dot (or ending brace the final time through.)
+             * */
+            RExC_parse++;
 
-        }
+        } while (RExC_parse < endbrace);
+
         sv_catpv(substitute_parse, ")");
 
-        len = SvCUR(substitute_parse);
-
-        /* Don't allow empty number */
-        if (len < (STRLEN) 8) {
-            RExC_parse = endbrace;
-	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
-	}
-
-        /* The values are Unicode, and therefore not subject to recoding, but
-         * have to be converted to native on a non-Unicode (meaning non-ASCII)
-         * platform. */
 #ifdef EBCDIC
+        /* The values are Unicode, and therefore have to be converted to native
+         * on a non-Unicode (meaning non-ASCII) platform. */
         RExC_recode_x_to_native = 1;
 #endif
 
+    /* Here, we have the string the name evaluates to, ready to be parsed,
+     * stored in 'substitute_parse' as a series of valid "\x{...}\x{...}"
+     * constructs.  This can be called from within a substitute parse already.
+     * The error reporting mechanism doesn't work for 2 levels of this, but the
+     * code above has validated this new construct, so there should be no
+     * errors generated by the below.*/
     save_start = RExC_start;
     orig_end = RExC_end;
 
-    RExC_parse = RExC_start = RExC_adjusted_start = SvPV(substitute_parse,
-                                                         len);
-    RExC_end = RExC_parse + len;
+    RExC_parse = RExC_start = SvPVX(substitute_parse);
+    RExC_end = RExC_parse + SvCUR(substitute_parse);
 
     *node_p = reg(pRExC_state, 1, &flags, depth+1);
 
     /* Restore the saved values */
-    RExC_start = RExC_adjusted_start = save_start;
+    RExC_start = save_start;
     RExC_parse = endbrace;
     RExC_end = orig_end;
 #ifdef EBCDIC

@@ -36,6 +36,8 @@
 static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
+
+/* Be sure to synchronize this message with the similar one in regcomp.c */
 static const char cp_above_legal_max[] =
                         "Use of code point 0x%" UVXf " is not allowed; the"
                         " permissible max is 0x%" UVXf;
