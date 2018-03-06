@@ -269,7 +269,17 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<lib/unicore/mktables> now correctly canonicalizes the names of the
+dependencies stored in the files it generates.
+
+F<regen/mk_invlists.pl>, unlike the other F<regen/*.pl> scripts, used
+C<$0> to name itself in the dependencies stored in the files it
+generates.  It now uses a literal so that the path stored in the
+generated files doesn't depend on how F<regen/mk_invlists.pl> is
+invoked.
+
+This lack of canonical names could cause test failures in
+F<t/porting/regen.t>.  [perl #132925]
 
 =back
 
