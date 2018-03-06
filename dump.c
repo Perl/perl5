@@ -610,10 +610,12 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
  */
 
 static void
-S_opdump_link(pTHX_ const OP *o, PerlIO *file)
+S_opdump_link(pTHX_ const OP *base, const OP *o, PerlIO *file)
 {
     PerlIO_puts(file, " ===> ");
-    if (o)
+    if (o == base)
+        PerlIO_puts(file, "[SELF]\n");
+    else if (o)
         PerlIO_printf(file, "%" UVuf " [%s 0x%" UVxf "]\n",
             sequence_num(o), OP_NAME(o), PTR2UV(o));
     else
@@ -994,7 +996,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 
     PerlIO_printf(file, " %s(0x%" UVxf ")",
                     op_class_names[op_class(o)], PTR2UV(o));
-    S_opdump_link(aTHX_ o->op_next, file);
+    S_opdump_link(aTHX_ o, o->op_next, file);
 
     /* print op common fields */
 
@@ -1202,11 +1204,11 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_ENTERITER:
     case OP_ENTERLOOP:
 	S_opdump_indent(aTHX_ o, level, bar, file, "REDO");
-        S_opdump_link(aTHX_ cLOOPo->op_redoop, file);
+        S_opdump_link(aTHX_ o, cLOOPo->op_redoop, file);
 	S_opdump_indent(aTHX_ o, level, bar, file, "NEXT");
-        S_opdump_link(aTHX_ cLOOPo->op_nextop, file);
+        S_opdump_link(aTHX_ o, cLOOPo->op_nextop, file);
 	S_opdump_indent(aTHX_ o, level, bar, file, "LAST");
-        S_opdump_link(aTHX_ cLOOPo->op_lastop, file);
+        S_opdump_link(aTHX_ o, cLOOPo->op_lastop, file);
 	break;
 
     case OP_REGCOMP:
@@ -1227,7 +1229,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_ENTERTRY:
     case OP_ONCE:
 	S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");
-        S_opdump_link(aTHX_ cLOGOPo->op_other, file);
+        S_opdump_link(aTHX_ o, cLOGOPo->op_other, file);
 	break;
     case OP_SPLIT:
     case OP_MATCH:
