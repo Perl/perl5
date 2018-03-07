@@ -11,7 +11,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-plan(tests => 275);
+plan(tests => 276);
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1163,6 +1163,16 @@ __EOF__
     pass("RT #130188");
 }
 
+# RT #131930
+# a multi-line s/// wasn't resetting the cop_line correctly
+{
+    my $l0 = __LINE__;
+    my $s = "a";
+    $s =~ s[a]
+           [b];
+    my $lines = __LINE__ - $l0;
+    is $lines, 4, "RT #131930";
+}
 
 
 
