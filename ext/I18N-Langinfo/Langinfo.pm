@@ -113,11 +113,11 @@ answers for a yes/no question in the current locale.
 In other words, in the "C" (or English) locale the above will probably
 print something like:
 
-    Sun? [yes/no] 
+    Sun? [yes/no]
 
 but under a French locale
 
-    dim? [oui/non] 
+    dim? [oui/non]
 
 The usually available constants are
 
@@ -158,7 +158,8 @@ for the affirmative and negative responses and expressions, and
 
     ERA ERA_D_FMT ERA_D_T_FMT ERA_T_FMT
 
-for the Japanese Emperor eras (naturally only defined under Japanese locales).
+for the eras based on typically some ruler, such as the Japanese Emperor
+(naturally only defined in the appropriate locales).
 
 Starting in Perl 5.28, this module is available even on systems that lack a
 nativeC<nl_langinfo>.  On such systems, it uses various methods to construct
@@ -224,7 +225,7 @@ know about them.  C<""> is returned for these on such systems.
 
 =back
 
-See your L<langinfo(3)> for more information about the available
+See your L<nl_langinfo(3)> for more information about the available
 constants.  (Often this means having to look directly at the
 F<langinfo.h> C header file.)
 
@@ -245,13 +246,13 @@ The langinfo() is just a wrapper for the C nl_langinfo() interface.
 
 =head1 AUTHOR
 
-Jarkko Hietaniemi, E<lt>jhi@hut.fiE<gt>
+Jarkko Hietaniemi, E<lt>jhi@hut.fiE<gt>.  Now maintained by Perl 5 porters.
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2001 by Jarkko Hietaniemi
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
