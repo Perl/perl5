@@ -2154,7 +2154,8 @@ localeconv()
 	sv_2mortal((SV*)RETVAL);
 #  if defined(USE_ITHREADS)                         \
    && defined(HAS_POSIX_2008_LOCALE)                \
-   && defined(HAS_LOCALECONV_L)
+   && defined(HAS_LOCALECONV_L)                     \
+   && defined(HAS_DUPLOCALE)
 
         cur = uselocale((locale_t) 0);
         if (cur == LC_GLOBAL_LOCALE) {
