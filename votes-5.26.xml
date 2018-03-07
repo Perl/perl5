@@ -8,7 +8,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including d819dc506b9fbd0d9bb316e42ca5bbefdd5f1d77 (utf8_to_uvchr() EBCDIC fix)
+Blead changes have been examined up to and including 823ba440369100de3f2693420a3887a645a57d28 (fix line numbers in multi-line s///)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -29,6 +29,28 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+These two together:
+<commit votes="steveh" id="99b847695211f825df6299aa9da91f9494f741e2" ticket="131221" desc="[perl #131221] improve duplication of :via handles"/>
+<commit votes="steveh" id="7b3443d31f11c15859593e5b710c301795a6de01" ticket="131221" desc="[perl #131221] sv_dup/sv_dup_inc are only available under threads"/>
+
+<commit votes="steveh" id="3cb4cde3dd4d2af2f5065053905708bffa5168f9" ticket="124368" desc="(perl #124368) make /foo/o; /$null/ act consistently"/>
+<commit votes="steveh" id="36000cd1c47863d8412b285701db7232dd450239" ticket="131793" desc="(perl #131793) sanely handle PL_linestart > PL_bufptr"/>
+<commit votes="steveh" id="3b8804a4c2320ae4e7e713c5836d340eb210b6cd" ticket="131836" desc="(perl #131836) avoid a use-after-free after parsing a &quot;sub&quot; keyword"/>
+
+Move to public list?:
+<commit votes="steveh" id="1141a2c757171575dd43caa4b731ca4f491c2bcf" ticket="131949" desc="(perl #131949) adjust s in case peekspace() moves the line string"/>
+
+<commit votes="steveh" id="745e740c825d415f535852b90516127e64c24905" ticket="128263" desc="(perl #128263) handle PL_last_in_gv being &amp;PL_sv_undef"/>
+<commit votes="steveh" id="f14cf3632059d421de83cf901c7e849adc1fcd03" ticket="131746" desc="(perl #131746) avoid undefined behaviour in Copy() etc"/>
+
+Move to public list?:
+<commit votes="steveh" id="4dc12118f61b997fbd030230665b46e7c40f32d6" ticket="132017" desc="fix #132017 - OPFAIL insert needs to set flags to 0"/>
+
+<commit votes="steveh" id="6c4f4eb174d1e2e9f874786123a699d11ae741f9" ticket="131893" desc="prevent integer overflow when compiling a regexp"/>
+<commit votes="steveh" id="16ada235c332e017667585e1a5a00ce43a31c529" ticket="92264" desc="fix GvSV refcounting in sort"/>
+<commit votes="steveh" id="bb4e4c3869d9fb6ee5bddd820c2a373601ecc310" ticket="125351" desc="(perl #125351) abort parsing if parse errors happen in a sub lex"/>
+<commit votes="steveh" id="4764858cb80e76fdba33cc1b3be8fcdef26df754" ticket="52610" desc="Fix RT #52610: Carp: Do not crash when reading @DB::args"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -37,7 +59,7 @@ Both of these or neither
 <commit votes="tonyc steveh" id="d8b61909479178ddb668ad385988877d26f202f2" ticket="132008" desc="Term::ReadLine generates empty &amp;STDERR files"/>
 <commit votes="tonyc steveh" id="1d217c696857b2bf41d87a7e927c43d20cc556e5" ticket="132008" desc="(perl #132008) make sure the test behaves without a tty"/>
 
-<commit votes="jhi" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
+<commit votes="jhi steveh" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
 
 </div>
 
@@ -47,22 +69,32 @@ Both of these or neither
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="steveh" id="fa2e45943e2b6ce22cf70dba5b47afe73c8c7c80" ticket="131786" desc="(perl #131786) avoid a duplicate symbol error on _LIB_VERSION"/>
 <commit votes="steveh" id="488307ffa67ce70fc9755e560a74dac04bdcb0e4" ticket="" desc="Revert &quot;Revert &quot;Fallbacks for Perl_fp_class_denorm().&quot;&quot;"/>
+<commit votes="steveh" id="72bbce3da5eeffde81ed89bb421e17a9f4caf8ce" ticket="" desc="miniperl also needs -Ilib for perl.exp on AIX etc"/>
+<commit votes="steveh" id="43b354f1e14ddf43aa09cd475560e87eb8b1e2e9" ticket="132421" desc="Improve cl version detection"/>
 <commit votes="steveh" id="6f669bf58bbfaf8d7ef367574be9252df84c08d1" ticket="132484" desc="Fix $Config{libpth} for x64 builds with VC++ earlier than 14.1 (VS2017)"/>
 
 </div>
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="steveh" id="ac1ba09e8362c54848dc27d3484a5882c4b28f43" ticket="132087" desc="(perl #132087) correct *at() function detection on older darwin"/>
+<commit votes="steveh" id="1444f7108081b769dde07c1c68c06ee4e7bb93c0" ticket="" desc="g++ is like gcc on AIX too"/>
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
+
+<commit votes="steveh" id="0e45f4872e73c83376fcd3a255ffcfc823aec531" ticket="" desc="Fix test failures in GCC &quot;long doubles&quot; builds on Windows"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="xsawyerx" id="9b79e9e3431d11e79a4f85268f70130b7b4369f6" ticket="" desc="perluniprops out of date regarding \p{Word}"/>
+<commit votes="steveh" id="490a0bffed65156cc6a814fa753c05a0621e084f" ticket="" desc="PERL5LIB documentation: '.' is no longer in @INC by default"/>
+<commit votes="xsawyerx steveh" id="9b79e9e3431d11e79a4f85268f70130b7b4369f6" ticket="" desc="perluniprops out of date regarding \p{Word}"/>
+<commit votes="steveh" id="ef7498d2b69936a5c6476ecf1950066f638b2dac" ticket="" desc="perlpolicy: update policy in accordance with recent moderator discussions"/>
 
 </div>
 
