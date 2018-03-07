@@ -2322,7 +2322,12 @@ system.
 It is important to note that when called with an item that is recovered by
 using C<localeconv>, the buffer from any previous explicit call to
 C<localeconv> will be overwritten.  This means you must save that buffer's
-contents if you need to access them after a call to this function.
+contents if you need to access them after a call to this function.  (But note
+that you might not want to be using C<localeconv()> directly anyway, because of
+issues like the ones listed in the second item of this list (above) for
+C<RADIXCHAR> and C<THOUSEP>.  You can use the methods given in L<perlcall> to
+call L<POSIX/localeconv> and avoid all the issues, but then you have a hash to
+unpack).
 
 The details for those items which may deviate from what this emulation returns
 and what a native C<nl_langinfo()> would return are specified in
@@ -2337,7 +2342,8 @@ C<nl_langinfo()>, you must
 
 before the C<perl.h> C<#include>.  You can replace your C<langinfo.h>
 C<#include> with this one.  (Doing it this way keeps out the symbols that plain
-C<langinfo.h> imports into the namespace for code that doesn't need it.)
+C<langinfo.h> would try to import into the namespace for code that doesn't need
+it.)
 
 The original impetus for C<Perl_langinfo()> was so that code that needs to
 find out the current currency symbol, floating point radix character, or digit
