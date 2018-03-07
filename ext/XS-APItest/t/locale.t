@@ -129,13 +129,13 @@ SKIP: {
 
     foreach my $formal_item (sort keys %items) {
         if (exists $correct_C_responses{$formal_item}) {
+            my $correct = $correct_C_responses{$formal_item};
             my $item = eval $items{$formal_item};
             skip "This platform apparently doesn't support $formal_item", 1 if $@;
             my $result = test_Perl_langinfo($item);
-            if (defined $correct_C_responses{$formal_item}) {
-                is ($result,
-                    $correct_C_responses{$formal_item},
-                    "Returns expected value ('$result') for $formal_item");
+            if (defined $correct) {
+                is ($result, $correct,
+                    "Returns expected value" . "('$correct') for $formal_item");
             }
             else {
                 ok (defined $result,
