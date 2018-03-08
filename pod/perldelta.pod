@@ -143,6 +143,9 @@ L<detailed in its documentation|I18N::Langinfo>, the most severe being
 that the C<CODESET> item is not implemented on those systems, always
 returning C<"">.
 
+It now sets the UTF-8 flag in its returned scalar if the string contains
+legal non-ASCII UTF-8, and the locale is UTF-8 ([perl #127288].
+
 =back
 
 =head2 Removed Modules and Pragmata

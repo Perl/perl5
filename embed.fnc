@@ -2831,7 +2831,8 @@ snR	|char *	|setlocale_debug_string	|const int category		    \
 #if        defined(USE_LOCALE)		\
     && (   defined(PERL_IN_LOCALE_C)	\
         || defined(PERL_IN_MG_C)	\
-	|| defined (PERL_EXT_POSIX))
+	|| defined (PERL_EXT_POSIX)	\
+	|| defined (PERL_EXT_LANGINFO))
 ApM	|bool	|_is_cur_LC_category_utf8|int category
 #endif
 
