@@ -135,6 +135,14 @@ Carp now avoids using C<overload::StrVal>, partly because older versions
 of L<overload> (included with perl 5.14 and earlier) load L<Scalar::Util>
 at run time, which will fail if Carp has been invoked after a syntax error.
 
+L<I18N::Langinfo> has been upgraded from version 0.15 to 0.16.
+
+This module is now available on all platforms, emulating the system
+L<nl_langinfo(3)> on systems that lack it.  Some caveats apply, as
+L<detailed in its documentation|I18N::Langinfo>, the most severe being
+that the C<CODESET> item is not implemented on those systems, always
+returning C<"">.
+
 =back
 
 =head2 Removed Modules and Pragmata

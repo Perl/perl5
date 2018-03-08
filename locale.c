@@ -2324,67 +2324,9 @@ using C<localeconv>, the buffer from any previous explicit call to
 C<localeconv> will be overwritten.  This means you must save that buffer's
 contents if you need to access them after a call to this function.
 
-The details for those items which may differ from what this emulation returns
-and what a native C<nl_langinfo()> would return are:
-
-=over
-
-=item C<CODESET>
-
-=item C<ERA>
-
-Unimplemented, so returns C<"">.
-
-=item C<YESEXPR>
-
-=item C<YESSTR>
-
-=item C<NOEXPR>
-
-=item C<NOSTR>
-
-Only the values for English are returned.  C<YESSTR> and C<NOSTR> have been
-removed from POSIX 2008, and are retained here for backwards compatibility.
-Your platform's C<nl_langinfo> may not support them.
-
-=item C<D_FMT>
-
-Always evaluates to C<%x>, the locale's appropriate date representation.
-
-=item C<T_FMT>
-
-Always evaluates to C<%X>, the locale's appropriate time representation.
-
-=item C<D_T_FMT>
-
-Always evaluates to C<%c>, the locale's appropriate date and time
-representation.
-
-=item C<CRNCYSTR>
-
-The return may be incorrect for those rare locales where the currency symbol
-replaces the radix character.
-Send email to L<mailto:perlbug@perl.org> if you have examples of it needing
-to work differently.
-
-=item C<ALT_DIGITS>
-
-Currently this gives the same results as Linux does.
-Send email to L<mailto:perlbug@perl.org> if you have examples of it needing
-to work differently.
-
-=item C<ERA_D_FMT>
-
-=item C<ERA_T_FMT>
-
-=item C<ERA_D_T_FMT>
-
-=item C<T_FMT_AMPM>
-
-These are derived by using C<strftime()>, and not all versions of that function
-know about them.  C<""> is returned for these on such systems.
-
-=back
+The details for those items which may deviate from what this emulation returns
+and what a native C<nl_langinfo()> would return are specified in
+L<I18N::Langinfo>.
 
 =back
 
@@ -4330,7 +4272,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * calculate it */
 
 #  if        defined(USE_LOCALE_CTYPE)                                  \
-     && (   (defined(HAS_NL_LANGINFO) && defined(CODESET))              \
+     && (    defined(HAS_NL_LANGINFO)                                   \
          || (defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)))
 
     {
@@ -4358,7 +4300,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             }
 
 #    endif
-#    if defined(HAS_NL_LANGINFO) && defined(CODESET)
+#    if defined(HAS_NL_LANGINFO)
 
         { /* The task is easiest if the platform has this POSIX 2001 function.
              Except on some platforms it can wrongly return "", so have to have

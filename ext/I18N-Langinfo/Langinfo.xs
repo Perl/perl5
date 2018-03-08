@@ -7,6 +7,8 @@
 #ifdef I_LANGINFO
 #   define __USE_GNU 1 /* Enables YESSTR, otherwise only __YESSTR. */
 #   include <langinfo.h>
+#else
+#   include <perl_langinfo.h>
 #endif
 
 #include "const-c.inc"
@@ -30,7 +32,7 @@ langinfo(code)
             RETVAL = newSVpv(Perl_langinfo(code), 0);
         }
 #else
-	croak("nl_langinfo() not implemented on this architecture");
+        RETVAL = newSVpv(Perl_langinfo(code), 0);
 #endif
   OUTPUT:
 	RETVAL

@@ -229,6 +229,7 @@ extensions=''
 known_extensions=''
 nonxs_ext=''
 static_ext=''
+usei18n_lang=''
 useopcode=''
 useposix=''
 extras=''
@@ -1464,6 +1465,8 @@ ignore_versioned_solibs=''
 ccname=''
 ccversion=''
 perllibs=''
+: set usei18n_lang=false in your hint file to disable the I18N_Langinfo extension.
+usei18n_lang=true
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
@@ -23273,8 +23276,8 @@ for xxx in $xs_extensions ; do
 		esac
 		;;
 	I18N/Langinfo|i18n_lan)
-		case "$i_langinfo$d_nl_langinfo" in
-		$define$define) avail_ext="$avail_ext $xxx" ;;
+		case "$usei18n_lang" in
+		true|define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	IPC/SysV|ipc/sysv)
@@ -24820,6 +24823,7 @@ usedevel='$usedevel'
 usedl='$usedl'
 usedtrace='$usedtrace'
 usefaststdio='$usefaststdio'
+usei18n_lang='$i18n_lang'
 useithreads='$useithreads'
 usekernprocpathname='$usekernprocpathname'
 uselargefiles='$uselargefiles'
