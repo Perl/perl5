@@ -858,9 +858,11 @@ is sub { goto z; exit do { z: return "foo" } }->(), 'foo',
    'goto into exit';
 is sub { goto z; eval do { z: "'foo'" } }->(), 'foo',
    'goto into eval';
-is join(",",sub { goto z; glob do { z: "foo bar" } }->()), 'foo,bar',
-   'goto into glob';
-
+TODO: {
+    local $TODO = "glob() does not currently return a list on VMS" if $^O eq 'VMS';
+    is join(",",sub { goto z; glob do { z: "foo bar" } }->()), 'foo,bar',
+       'goto into glob';
+}
 # [perl #132799]
 # Erroneous inward goto warning, followed by crash.
 # The eval must be in an assignment.
