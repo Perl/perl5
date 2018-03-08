@@ -5543,6 +5543,106 @@ typedef struct am_table_short AMTS;
 
 #ifdef USE_LOCALE /* These locale things are all subject to change */
 
+   /* Returns TRUE if the plain locale pragma without a parameter is in effect.
+    * */
+#  define IN_LOCALE_RUNTIME	(PL_curcop                                  \
+                              && CopHINTS_get(PL_curcop) & HINT_LOCALE)
+
+   /* Returns TRUE if either form of the locale pragma is in effect */
+#  define IN_SOME_LOCALE_FORM_RUNTIME                                       \
+        cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+
+#  define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
+#  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
+                        cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+
+#  define IN_LOCALE                                                         \
+        (IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
+#  define IN_SOME_LOCALE_FORM                                               \
+                    (IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME  \
+                                         : IN_SOME_LOCALE_FORM_RUNTIME)
+
+#  define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
+#  define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
+
+#  define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
+#  define IN_LC_PARTIAL_RUNTIME                                             \
+              (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+
+#  define IN_LC_COMPILETIME(category)                                       \
+       (       IN_LC_ALL_COMPILETIME                                        \
+        || (   IN_LC_PARTIAL_COMPILETIME                                    \
+            && Perl__is_in_locale_category(aTHX_ TRUE, (category))))
+#  define IN_LC_RUNTIME(category)                                           \
+      (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
+                 && Perl__is_in_locale_category(aTHX_ FALSE, (category))))
+#  define IN_LC(category)  \
+                    (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
+
+#  if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
+
+     /* This internal macro should be called from places that operate under
+      * locale rules.  It there is a problem with the current locale that
+      * hasn't been raised yet, it will output a warning this time.  Because
+      * this will so rarely  be true, there is no point to optimize for time;
+      * instead it makes sense to minimize space used and do all the work in
+      * the rarely called function */
+#    ifdef USE_LOCALE_CTYPE
+#      define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                              \
+                STMT_START {                                                  \
+                    if (UNLIKELY(PL_warn_locale)) {                           \
+                        Perl__warn_problematic_locale();                      \
+                    }                                                         \
+                }  STMT_END
+#    else
+#      define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
+#    endif
+
+
+     /* These two internal macros are called when a warning should be raised,
+      * and will do so if enabled.  The first takes a single code point
+      * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
+      * string, and an end position which it won't try to read past */
+#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                        \
+	STMT_START {                                                        \
+            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
+                                       "Wide character (U+%" UVXf ") in %s",\
+                                       (UV) cp, OP_DESC(PL_op));            \
+            }                                                               \
+        }  STMT_END
+
+#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
+	STMT_START { /* Check if to warn before doing the conversion work */\
+            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
+                UV cp = utf8_to_uvchr_buf((U8 *) s, (U8 *) send, NULL);     \
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
+                    "Wide character (U+%" UVXf ") in %s",                   \
+                    (cp == 0)                                               \
+                     ? UNICODE_REPLACEMENT                                  \
+                     : (UV) cp,                                             \
+                    OP_DESC(PL_op));                                        \
+            }                                                               \
+        }  STMT_END
+
+#  endif   /* PERL_CORE or PERL_IN_XSUB_RE */
+#else   /* No locale usage */
+#  define IN_LOCALE_RUNTIME                0
+#  define IN_SOME_LOCALE_FORM_RUNTIME      0
+#  define IN_LOCALE_COMPILETIME            0
+#  define IN_SOME_LOCALE_FORM_COMPILETIME  0
+#  define IN_LOCALE                        0
+#  define IN_SOME_LOCALE_FORM              0
+#  define IN_LC_ALL_COMPILETIME            0
+#  define IN_LC_ALL_RUNTIME                0
+#  define IN_LC_PARTIAL_COMPILETIME        0
+#  define IN_LC_PARTIAL_RUNTIME            0
+#  define IN_LC_COMPILETIME(category)      0
+#  define IN_LC_RUNTIME(category)          0
+#  define IN_LC(category)                  0
+#endif
+
+#ifdef USE_LOCALE /* These locale things are all subject to change */
     /* We create a C locale object unconditionally if we have the functions to
      * do so; hence must destroy it unconditionally at the end */
 #  ifndef HAS_POSIX_2008_LOCALE
@@ -5666,107 +5766,11 @@ typedef struct am_table_short AMTS;
                         _LOCALE_TERM_POSIX_2008;                            \
                     } STMT_END
 #  endif
-
-/* Returns TRUE if the plain locale pragma without a parameter is in effect
- */
-#   define IN_LOCALE_RUNTIME	(PL_curcop \
-                                && CopHINTS_get(PL_curcop) & HINT_LOCALE)
-
-/* Returns TRUE if either form of the locale pragma is in effect */
-#   define IN_SOME_LOCALE_FORM_RUNTIME   \
-           cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
-
-#   define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
-#   define IN_SOME_LOCALE_FORM_COMPILETIME \
-                          cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
-
-#   define IN_LOCALE \
-	(IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
-#   define IN_SOME_LOCALE_FORM \
-	(IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME \
-	                     : IN_SOME_LOCALE_FORM_RUNTIME)
-
-#   define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
-#   define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
-
-#   define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
-#   define IN_LC_PARTIAL_RUNTIME  \
-               (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
-
-#   define IN_LC_COMPILETIME(category)                                       \
-       (IN_LC_ALL_COMPILETIME || (IN_LC_PARTIAL_COMPILETIME                  \
-                  && Perl__is_in_locale_category(aTHX_ TRUE, (category))))
-#   define IN_LC_RUNTIME(category)                                           \
-       (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
-                  && Perl__is_in_locale_category(aTHX_ FALSE, (category))))
-#   define IN_LC(category)  \
-                    (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
-
-#   if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
-
-        /* This internal macro should be called from places that operate under
-         * locale rules.  It there is a problem with the current locale that
-         * hasn't been raised yet, it will output a warning this time.  Because
-         * this will so rarely  be true, there is no point to optimize for
-         * time; instead it makes sense to minimize space used and do all the
-         * work in the rarely called function */
-#       ifdef USE_LOCALE_CTYPE
-#           define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                         \
-                STMT_START {                                                  \
-                    if (UNLIKELY(PL_warn_locale)) {                           \
-                        Perl__warn_problematic_locale();                      \
-                    }                                                         \
-                }  STMT_END
-#       else
-#           define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
-#       endif
-
-
-    /* These two internal macros are called when a warning should be raised,
-     * and will do so if enabled.  The first takes a single code point
-     * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
-     * string, and an end position which it won't try to read past */
-#   define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                         \
-	STMT_START {                                                        \
-            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
-                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                                       "Wide character (U+%" UVXf ") in %s",\
-                                       (UV) cp, OP_DESC(PL_op));            \
-            }                                                               \
-        }  STMT_END
-
-#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                   \
-	STMT_START { /* Check if to warn before doing the conversion work */\
-            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
-                UV cp = utf8_to_uvchr_buf((U8 *) s, (U8 *) send, NULL);     \
-                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                    "Wide character (U+%" UVXf ") in %s",                   \
-                    (cp == 0)                                               \
-                     ? UNICODE_REPLACEMENT                                  \
-                     : (UV) cp,                                             \
-                    OP_DESC(PL_op));                                        \
-            }                                                               \
-        }  STMT_END
-
-#   endif   /* PERL_CORE or PERL_IN_XSUB_RE */
-#else   /* No locale usage */
+#else   /* Below is no locale usage */
 #   define LOCALE_INIT
 #   define LOCALE_TERM
 #   define LOCALE_LOCK
 #   define LOCALE_UNLOCK
-#   define IN_LOCALE_RUNTIME                0
-#   define IN_SOME_LOCALE_FORM_RUNTIME      0
-#   define IN_LOCALE_COMPILETIME            0
-#   define IN_SOME_LOCALE_FORM_COMPILETIME  0
-#   define IN_LOCALE                        0
-#   define IN_SOME_LOCALE_FORM              0
-#   define IN_LC_ALL_COMPILETIME            0
-#   define IN_LC_ALL_RUNTIME                0
-#   define IN_LC_PARTIAL_COMPILETIME        0
-#   define IN_LC_PARTIAL_RUNTIME            0
-#   define IN_LC_COMPILETIME(category)      0
-#   define IN_LC_RUNTIME(category)          0
-#   define IN_LC(category)                  0
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
