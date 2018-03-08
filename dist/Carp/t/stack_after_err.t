@@ -3,8 +3,12 @@ use warnings;
 use Config;
 use IPC::Open3 1.0103 qw(open3);
 
-
-
+BEGIN {
+    if ($^O eq 'VMS') {
+        print "1..0 # IPC::Open3 needs porting\n";
+        exit;
+    }
+}
 
 my @tests=(
     # Make sure we don’t try to load modules on demand in the presence of over-
