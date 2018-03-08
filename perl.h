@@ -5767,10 +5767,6 @@ typedef struct am_table_short AMTS;
 #   define IN_LC_COMPILETIME(category)      0
 #   define IN_LC_RUNTIME(category)          0
 #   define IN_LC(category)                  0
-
-#   define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
-#   define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(a)
-#   define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(a,b)
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
