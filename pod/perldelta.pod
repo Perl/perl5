@@ -140,8 +140,8 @@ L<I18N::Langinfo> has been upgraded from version 0.15 to 0.16.
 This module is now available on all platforms, emulating the system
 L<nl_langinfo(3)> on systems that lack it.  Some caveats apply, as
 L<detailed in its documentation|I18N::Langinfo>, the most severe being
-that the C<CODESET> item is not implemented on those systems, always
-returning C<"">.
+that, except for MS Windows, the C<CODESET> item is not implemented on
+those systems, always returning C<"">.
 
 It now sets the UTF-8 flag in its returned scalar if the string contains
 legal non-ASCII UTF-8, and the locale is UTF-8 ([perl #127288].

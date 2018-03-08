@@ -2312,12 +2312,12 @@ But most importantly, it works on systems that don't have C<nl_langinfo>, such
 as Windows, hence makes your code more portable.  Of the fifty-some possible
 items specified by the POSIX 2008 standard,
 L<http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
-only two are completely unimplemented (though the loss of one of these is
-significant).  It uses various techniques to recover the other items, including
-calling C<L<localeconv(3)>>, and C<L<strftime(3)>>, both of which are specified
-in C89, so should be always be available.  Later C<strftime()> versions have
-additional capabilities; C<""> is returned for those not available on your
-system.
+only one is completely unimplemented, though on non-Windows platforms, another
+significant one is also not implemented).  It uses various techniques to
+recover the other items, including calling C<L<localeconv(3)>>, and
+C<L<strftime(3)>>, both of which are specified in C89, so should be always be
+available.  Later C<strftime()> versions have additional capabilities; C<""> is
+returned for those not available on your system.
 
 It is important to note that when called with an item that is recovered by
 using C<localeconv>, the buffer from any previous explicit call to
@@ -2493,8 +2493,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         switch (item) {
             Size_t len;
 
-            /* These 2 are unimplemented */
-            case CODESET:
+            /* This is unimplemented */
             case ERA:      /* For use with strftime() %E modifier */
 
             default:
@@ -2506,7 +2505,66 @@ S_my_nl_langinfo(const int item, bool toggle)
             case NOEXPR:    return "^[-0nN]";
             case NOSTR:     return "no";
 
+            case CODESET:
 
+#  ifndef WIN32
+
+                /* On non-windows, this is unimplemented, in part because of
+                 * inconsistencies between vendors.  The Darwin native
+                 * nl_langinfo() implementation simply looks at everything past
+                 * any dot in the name, but that doesn't work for other
+                 * vendors.  Many Linux locales that don't have UTF-8 in their
+                 * names really are UTF-8, for example; z/OS locales that do
+                 * have UTF-8 in their names, aren't really UTF-8 */
+                return "";
+
+#  else
+
+                {   /* But on Windows, the name does seem to be consistent, so
+                       use that. */
+                    const char * p;
+                    const char * first;
+                    Size_t offset = 0;
+                    const char * name = my_setlocale(LC_CTYPE, NULL);
+
+                    if (isNAME_C_OR_POSIX(name)) {
+                        return "ANSI_X3.4-1968";
+                    }
+
+                    /* Find the dot in the locale name */
+                    first = (const char *) strchr(name, '.');
+                    if (! first) {
+                        first = name;
+                        goto has_nondigit;
+                    }
+
+                    /* Look at everything past the dot */
+                    first++;
+                    p = first;
+
+                    while (*p) {
+                        if (! isDIGIT(*p)) {
+                            goto has_nondigit;
+                        }
+
+                        p++;
+                    }
+
+                    /* Here everything past the dot is a digit.  Treat it as a
+                     * code page */
+                    save_to_buffer("CP", &PL_langinfo_buf,
+                                         &PL_langinfo_bufsize, 0);
+                    offset = STRLENs("CP");
+
+                  has_nondigit:
+
+                    retval = save_to_buffer(first, &PL_langinfo_buf,
+                                            &PL_langinfo_bufsize, offset);
+                }
+
+                break;
+
+#  endif
 #  ifdef HAS_LOCALECONV
 
             case CRNCYSTR:

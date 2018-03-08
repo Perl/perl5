@@ -168,11 +168,14 @@ glitches.  These are the items that could be different:
 
 =over
 
-=item C<CODESET>
-
 =item C<ERA>
 
 Unimplemented, so returns C<"">.
+
+=item C<CODESET>
+
+Unimplemented, except on Windows, due to the vagaries of vendor locale names,
+returning C<""> on non-Windows.
 
 =item C<YESEXPR>
 
