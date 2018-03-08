@@ -342,7 +342,10 @@ XXX
 
 =item *
 
-XXX
+The item names passed to the function L<perlapi/Perl_langinfo>,
+introduced in 5.27.4, may no longer be prefixed with C<PERL_>.  For
+example, if you want the current floating point radix character, you
+must call it like C<Perl_langinfo(RADIXCHAR)>.
 
 =back
 

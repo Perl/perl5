@@ -113,11 +113,11 @@ SKIP: {
     # For non-nl_langinfo systems, those values are arbitrary negative numbers
     # set in the header.  Otherwise they are the nl_langinfo approved values,
     # which for the moment is the item name.
-    # The relevant lines look like: #  define PERL_YESSTR -54
+    # The relevant lines look like: #  define YESSTR -54
     while (<$fh>) {
         chomp;
         next unless / - \d+ $ /x;
-        s/ ^ .* PERL_ //x;
+        s/ ^ \# \s* define \s*//x;
         m/ (.*) \  (.*) /x;
         $items{$1} = ($has_nl_langinfo)
                      ? $1       # Yields 'YESSTR'

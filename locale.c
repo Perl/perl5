@@ -1259,7 +1259,7 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
                                     || defined(HAS_NL_LANGINFO))
 
     const char * radix = (use_locale)
-                         ? my_nl_langinfo(PERL_RADIXCHAR, FALSE)
+                         ? my_nl_langinfo(RADIXCHAR, FALSE)
                                         /* FALSE => already in dest locale */
                          : ".";
 
@@ -1347,10 +1347,9 @@ S_new_numeric(pTHX_ const char *newnum)
     /* If its name isn't C nor POSIX, it could still be indistinguishable from
      * them */
     if (! PL_numeric_standard) {
-        PL_numeric_standard = cBOOL(strEQ(".", my_nl_langinfo(PERL_RADIXCHAR,
+        PL_numeric_standard = cBOOL(strEQ(".", my_nl_langinfo(RADIXCHAR,
                                             FALSE /* Don't toggle locale */  ))
-                                 && strEQ("",  my_nl_langinfo(PERL_THOUSEP,
-                                                              FALSE)));
+                                 && strEQ("",  my_nl_langinfo(THOUSEP, FALSE)));
     }
 
     /* Save the new name if it isn't the same as the previous one, if any */
@@ -1693,7 +1692,7 @@ S_new_ctype(pTHX_ const char *newctype)
 
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
                                     /* parameter FALSE is a don't care here */
-                                    my_nl_langinfo(PERL_CODESET, FALSE));
+                                    my_nl_langinfo(CODESET, FALSE));
 
 #  endif
 
@@ -2398,11 +2397,6 @@ before the C<perl.h> C<#include>.  You can replace your C<langinfo.h>
 C<#include> with this one.  (Doing it this way keeps out the symbols that plain
 C<langinfo.h> imports into the namespace for code that doesn't need it.)
 
-You also should not use the bare C<langinfo.h> item names, but should preface
-them with C<PERL_>, so use C<PERL_RADIXCHAR> instead of plain C<RADIXCHAR>.
-The C<PERL_I<foo>> versions will also work for this function on systems that do
-have a native C<nl_langinfo>.
-
 The original impetus for C<Perl_langinfo()> was so that code that needs to
 find out the current currency symbol, floating point radix character, or digit
 grouping separator can use, on all systems, the simpler and more
@@ -2437,7 +2431,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
     /* We only need to toggle into the underlying LC_NUMERIC locale for these
      * two items, and only if not already there */
-    if (toggle && ((   item != PERL_RADIXCHAR && item != PERL_THOUSEP)
+    if (toggle && ((   item != RADIXCHAR && item != THOUSEP)
                     || PL_numeric_underlying))
     {
         toggle = FALSE;
@@ -2511,10 +2505,10 @@ S_my_nl_langinfo(const int item, bool toggle)
 #  endif
 
     if (strEQ(retval, "")) {
-        if (item == PERL_YESSTR) {
+        if (item == YESSTR) {
             return "yes";
         }
-        if (item == PERL_NOSTR) {
+        if (item == NOSTR) {
             return "no";
         }
     }
@@ -2552,21 +2546,22 @@ S_my_nl_langinfo(const int item, bool toggle)
             Size_t len;
 
             /* These 2 are unimplemented */
-            case PERL_CODESET:
-            case PERL_ERA:      /* For use with strftime() %E modifier */
+            case CODESET:
+            case ERA:      /* For use with strftime() %E modifier */
 
             default:
                 return "";
 
             /* We use only an English set, since we don't know any more */
-            case PERL_YESEXPR:   return "^[+1yY]";
-            case PERL_YESSTR:    return "yes";
-            case PERL_NOEXPR:    return "^[-0nN]";
-            case PERL_NOSTR:     return "no";
+            case YESEXPR:   return "^[+1yY]";
+            case YESSTR:    return "yes";
+            case NOEXPR:    return "^[-0nN]";
+            case NOSTR:     return "no";
+
 
 #  ifdef HAS_LOCALECONV
 
-            case PERL_CRNCYSTR:
+            case CRNCYSTR:
 
                 /* We don't bother with localeconv_l() because any system that
                  * has it is likely to also have nl_langinfo() */
@@ -2602,8 +2597,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                 LOCALE_UNLOCK;
                 break;
 
-            case PERL_RADIXCHAR:
-            case PERL_THOUSEP:
+            case RADIXCHAR:
+            case THOUSEP:
 
                 if (toggle) {
                     STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
@@ -2617,7 +2612,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                     temp = "";
                 }
                 else {
-                    temp = (item == PERL_RADIXCHAR)
+                    temp = (item == RADIXCHAR)
                              ? lc->decimal_point
                              : lc->thousands_sep;
                     if (! temp) {
@@ -2645,30 +2640,26 @@ S_my_nl_langinfo(const int item, bool toggle)
              * for someone using them as formats (as opposed to trying to parse
              * them to figure out what the locale says).  The other format
              * items are actually tested to verify they work on the platform */
-            case PERL_D_FMT:         return "%x";
-            case PERL_T_FMT:         return "%X";
-            case PERL_D_T_FMT:       return "%c";
+            case D_FMT:         return "%x";
+            case T_FMT:         return "%X";
+            case D_T_FMT:       return "%c";
 
             /* These formats are only available in later strfmtime's */
-            case PERL_ERA_D_FMT: case PERL_ERA_T_FMT: case PERL_ERA_D_T_FMT:
-            case PERL_T_FMT_AMPM:
+            case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT: case T_FMT_AMPM:
 
             /* The rest can be gotten from most versions of strftime(). */
-            case PERL_ABDAY_1: case PERL_ABDAY_2: case PERL_ABDAY_3:
-            case PERL_ABDAY_4: case PERL_ABDAY_5: case PERL_ABDAY_6:
-            case PERL_ABDAY_7:
-            case PERL_ALT_DIGITS:
-            case PERL_AM_STR: case PERL_PM_STR:
-            case PERL_ABMON_1: case PERL_ABMON_2: case PERL_ABMON_3:
-            case PERL_ABMON_4: case PERL_ABMON_5: case PERL_ABMON_6:
-            case PERL_ABMON_7: case PERL_ABMON_8: case PERL_ABMON_9:
-            case PERL_ABMON_10: case PERL_ABMON_11: case PERL_ABMON_12:
-            case PERL_DAY_1: case PERL_DAY_2: case PERL_DAY_3: case PERL_DAY_4:
-            case PERL_DAY_5: case PERL_DAY_6: case PERL_DAY_7:
-            case PERL_MON_1: case PERL_MON_2: case PERL_MON_3: case PERL_MON_4:
-            case PERL_MON_5: case PERL_MON_6: case PERL_MON_7: case PERL_MON_8:
-            case PERL_MON_9: case PERL_MON_10: case PERL_MON_11:
-            case PERL_MON_12:
+            case ABDAY_1: case ABDAY_2: case ABDAY_3:
+            case ABDAY_4: case ABDAY_5: case ABDAY_6: case ABDAY_7:
+            case ALT_DIGITS:
+            case AM_STR: case PM_STR:
+            case ABMON_1: case ABMON_2: case ABMON_3: case ABMON_4:
+            case ABMON_5: case ABMON_6: case ABMON_7: case ABMON_8:
+            case ABMON_9: case ABMON_10: case ABMON_11: case ABMON_12:
+            case DAY_1: case DAY_2: case DAY_3: case DAY_4:
+            case DAY_5: case DAY_6: case DAY_7:
+            case MON_1: case MON_2: case MON_3: case MON_4:
+            case MON_5: case MON_6: case MON_7: case MON_8:
+            case MON_9: case MON_10: case MON_11: case MON_12:
 
                 LOCALE_LOCK;
 
@@ -2687,82 +2678,82 @@ S_my_nl_langinfo(const int item, bool toggle)
                                        __FILE__, __LINE__, item);
                         NOT_REACHED; /* NOTREACHED */
 
-                    case PERL_PM_STR: tm.tm_hour = 18;
-                    case PERL_AM_STR:
+                    case PM_STR: tm.tm_hour = 18;
+                    case AM_STR:
                         format = "%p";
                         break;
 
-                    case PERL_ABDAY_7: tm.tm_wday++;
-                    case PERL_ABDAY_6: tm.tm_wday++;
-                    case PERL_ABDAY_5: tm.tm_wday++;
-                    case PERL_ABDAY_4: tm.tm_wday++;
-                    case PERL_ABDAY_3: tm.tm_wday++;
-                    case PERL_ABDAY_2: tm.tm_wday++;
-                    case PERL_ABDAY_1:
+                    case ABDAY_7: tm.tm_wday++;
+                    case ABDAY_6: tm.tm_wday++;
+                    case ABDAY_5: tm.tm_wday++;
+                    case ABDAY_4: tm.tm_wday++;
+                    case ABDAY_3: tm.tm_wday++;
+                    case ABDAY_2: tm.tm_wday++;
+                    case ABDAY_1:
                         format = "%a";
                         break;
 
-                    case PERL_DAY_7: tm.tm_wday++;
-                    case PERL_DAY_6: tm.tm_wday++;
-                    case PERL_DAY_5: tm.tm_wday++;
-                    case PERL_DAY_4: tm.tm_wday++;
-                    case PERL_DAY_3: tm.tm_wday++;
-                    case PERL_DAY_2: tm.tm_wday++;
-                    case PERL_DAY_1:
+                    case DAY_7: tm.tm_wday++;
+                    case DAY_6: tm.tm_wday++;
+                    case DAY_5: tm.tm_wday++;
+                    case DAY_4: tm.tm_wday++;
+                    case DAY_3: tm.tm_wday++;
+                    case DAY_2: tm.tm_wday++;
+                    case DAY_1:
                         format = "%A";
                         break;
 
-                    case PERL_ABMON_12: tm.tm_mon++;
-                    case PERL_ABMON_11: tm.tm_mon++;
-                    case PERL_ABMON_10: tm.tm_mon++;
-                    case PERL_ABMON_9: tm.tm_mon++;
-                    case PERL_ABMON_8: tm.tm_mon++;
-                    case PERL_ABMON_7: tm.tm_mon++;
-                    case PERL_ABMON_6: tm.tm_mon++;
-                    case PERL_ABMON_5: tm.tm_mon++;
-                    case PERL_ABMON_4: tm.tm_mon++;
-                    case PERL_ABMON_3: tm.tm_mon++;
-                    case PERL_ABMON_2: tm.tm_mon++;
-                    case PERL_ABMON_1:
+                    case ABMON_12: tm.tm_mon++;
+                    case ABMON_11: tm.tm_mon++;
+                    case ABMON_10: tm.tm_mon++;
+                    case ABMON_9: tm.tm_mon++;
+                    case ABMON_8: tm.tm_mon++;
+                    case ABMON_7: tm.tm_mon++;
+                    case ABMON_6: tm.tm_mon++;
+                    case ABMON_5: tm.tm_mon++;
+                    case ABMON_4: tm.tm_mon++;
+                    case ABMON_3: tm.tm_mon++;
+                    case ABMON_2: tm.tm_mon++;
+                    case ABMON_1:
                         format = "%b";
                         break;
 
-                    case PERL_MON_12: tm.tm_mon++;
-                    case PERL_MON_11: tm.tm_mon++;
-                    case PERL_MON_10: tm.tm_mon++;
-                    case PERL_MON_9: tm.tm_mon++;
-                    case PERL_MON_8: tm.tm_mon++;
-                    case PERL_MON_7: tm.tm_mon++;
-                    case PERL_MON_6: tm.tm_mon++;
-                    case PERL_MON_5: tm.tm_mon++;
-                    case PERL_MON_4: tm.tm_mon++;
-                    case PERL_MON_3: tm.tm_mon++;
-                    case PERL_MON_2: tm.tm_mon++;
-                    case PERL_MON_1:
+                    case MON_12: tm.tm_mon++;
+                    case MON_11: tm.tm_mon++;
+                    case MON_10: tm.tm_mon++;
+                    case MON_9: tm.tm_mon++;
+                    case MON_8: tm.tm_mon++;
+                    case MON_7: tm.tm_mon++;
+                    case MON_6: tm.tm_mon++;
+                    case MON_5: tm.tm_mon++;
+                    case MON_4: tm.tm_mon++;
+                    case MON_3: tm.tm_mon++;
+                    case MON_2: tm.tm_mon++;
+                    case MON_1:
                         format = "%B";
                         break;
 
-                    case PERL_T_FMT_AMPM:
+                    case T_FMT_AMPM:
                         format = "%r";
                         return_format = TRUE;
                         break;
 
-                    case PERL_ERA_D_FMT:
+                    case ERA_D_FMT:
                         format = "%Ex";
                         return_format = TRUE;
                         break;
 
-                    case PERL_ERA_T_FMT:
+                    case ERA_T_FMT:
                         format = "%EX";
                         return_format = TRUE;
                         break;
 
-                    case PERL_ERA_D_T_FMT:
+                    case ERA_D_T_FMT:
                         format = "%Ec";
                         return_format = TRUE;
                         break;
 
-                    case PERL_ALT_DIGITS:
+                    case ALT_DIGITS:
                         tm.tm_wday = 0;
                         format = "%Ow";	/* Find the alternate digit for 0 */
                         break;
@@ -2830,7 +2821,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                  * alternate format for wday 0.  If the value is the same as
                  * the normal 0, there isn't an alternate, so clear the buffer.
                  * */
-                if (   item == PERL_ALT_DIGITS
+                if (   item == ALT_DIGITS
                     && strEQ(PL_langinfo_buf, "0"))
                 {
                     *PL_langinfo_buf = '\0';
@@ -4377,7 +4368,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              defective locale definition.  XXX We should probably check for
              these in the Latin1 range and warn (but on glibc, requires
              iswalnum() etc. due to their not handling 80-FF correctly */
-            const char *codeset = my_nl_langinfo(PERL_CODESET, FALSE);
+            const char *codeset = my_nl_langinfo(CODESET, FALSE);
                                           /* FALSE => already in dest locale */
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -4480,7 +4471,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                                              save_input_locale);
             bool only_ascii = FALSE;
             const U8 * currency_string
-                            = (const U8 *) my_nl_langinfo(PERL_CRNCYSTR, FALSE);
+                            = (const U8 *) my_nl_langinfo(CRNCYSTR, FALSE);
                                       /* 2nd param not relevant for this item */
             const U8 * first_variant;
 
