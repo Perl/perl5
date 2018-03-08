@@ -29,18 +29,14 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-There doesn't seem to be a blead commit for this ticket, so nothing to backport. -arc
-Correct: As noted on the ticket, it was listed here in the hope that it could be fixed in time, but it hasn't happened yet. -steveh
-<commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
 
 See also #130080
-<commit votes="tonyc" id="622584734f799751a284558aaebad21acd3270bf" ticket="128967" desc="Inconsistency between doc and code for chown using negative argument: -1"/>
+<commit votes="tonyc steveh" id="622584734f799751a284558aaebad21acd3270bf" ticket="128967" desc="Inconsistency between doc and code for chown using negative argument: -1"/>
 
-<commit votes="jhi" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
+<commit votes="jhi steveh" id="4ea0a103754f8e4f9459019cb6f8750bde08cd2d" ticket="" desc="AIX doubledouble longdouble hints"/>
 
 </div>
 
@@ -62,7 +58,7 @@ See also #130080
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="xsawyerx" id="9b79e9e3431d11e79a4f85268f70130b7b4369f6" ticket="" desc="perluniprops out of date regarding \p{Word}"/>
+<commit votes="xsawyerx steveh" id="9b79e9e3431d11e79a4f85268f70130b7b4369f6" ticket="" desc="perluniprops out of date regarding \p{Word}"/>
 
 </div>
 
