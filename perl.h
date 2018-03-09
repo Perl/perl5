@@ -5643,8 +5643,14 @@ typedef struct am_table_short AMTS;
 #  define IN_LC(category)                  0
 #endif
 
-#ifdef USE_LOCALE /* These locale things are all subject to change */
-#  ifndef USE_POSIX_2008_LOCALE
+/* Locale/thread synchronization macros.  These aren't needed if using
+ * thread-safe locale operations */
+#if    defined(USE_LOCALE)                                                  \
+ &&    defined(USE_ITHREADS)                                                \
+ && ! defined(USE_THREAD_SAFE_LOCALE)
+
+/* We have a locale object holding the 'C' locale for Posix 2008 */
+#ifndef USE_POSIX_2008_LOCALE
 #    define _LOCALE_TERM_POSIX_2008  NOOP
 #  else
 #    define _LOCALE_TERM_POSIX_2008                                         \
@@ -5658,16 +5664,7 @@ typedef struct am_table_short AMTS;
                         }                                                   \
                     } STMT_END
 #  endif
-
-#  if ! defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE)
-#    define LOCALE_INIT
-#    define LOCALE_LOCK
-#    define LOCALE_UNLOCK
-#    define LC_NUMERIC_LOCK(cond)
-#    define LC_NUMERIC_UNLOCK
-#    define LOCALE_TERM  STMT_START { _LOCALE_TERM_POSIX_2008; } STMT_END
-#  else
-#    define LOCALE_INIT         STMT_START {                                \
+#  define LOCALE_INIT         STMT_START {                                  \
                                     MUTEX_INIT(&PL_locale_mutex);           \
                                     MUTEX_INIT(&PL_lc_numeric_mutex);       \
                                 } STMT_END
@@ -5692,7 +5689,7 @@ typedef struct am_table_short AMTS;
  * Clang improperly gives warnings for this, if not silenced:
  * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
  * */
-#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+#  define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                  \
         CLANG_DIAG_IGNORE(-Wthread-safety)	     	                    \
         STMT_START {                                                        \
             if (PL_lc_numeric_mutex_depth <= 0) {                           \
@@ -5715,7 +5712,7 @@ typedef struct am_table_short AMTS;
             }                                                               \
         } STMT_END
 
-#    define LC_NUMERIC_UNLOCK                                               \
+#  define LC_NUMERIC_UNLOCK                                                 \
         STMT_START {                                                        \
             if (PL_lc_numeric_mutex_depth <= 1) {                           \
                 MUTEX_UNLOCK(&PL_lc_numeric_mutex);                         \
@@ -5745,31 +5742,32 @@ typedef struct am_table_short AMTS;
  * LC_NUMERIC_LOCK may span more operations.  By always following this
  * convention, deadlock should be impossible.  But if necessary, the two
  * mutexes could be combined */
-#    define LOCALE_LOCK                                                     \
+#  define LOCALE_LOCK                                                       \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                     "%s: %d: locking locale\n", __FILE__, __LINE__));       \
             MUTEX_LOCK(&PL_locale_mutex);                                   \
         } STMT_END
-#    define LOCALE_UNLOCK                                                   \
+#  define LOCALE_UNLOCK                                                     \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                    "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
             MUTEX_UNLOCK(&PL_locale_mutex);                                 \
         } STMT_END
 
-#    define LOCALE_TERM                                                     \
+#  define LOCALE_TERM                                                       \
                     STMT_START {                                            \
                         MUTEX_DESTROY(&PL_locale_mutex);                    \
                         MUTEX_DESTROY(&PL_lc_numeric_mutex);                \
                         _LOCALE_TERM_POSIX_2008;                            \
                     } STMT_END
-#  endif
-#else   /* Below is no locale usage */
-#   define LOCALE_INIT
-#   define LOCALE_TERM
-#   define LOCALE_LOCK
-#   define LOCALE_UNLOCK
+#else   /* Below is no locale sync needed */
+#  define LOCALE_INIT
+#  define LOCALE_LOCK
+#  define LOCALE_UNLOCK
+#  define LC_NUMERIC_LOCK(cond)
+#  define LC_NUMERIC_UNLOCK
+#  define LOCALE_TERM
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
