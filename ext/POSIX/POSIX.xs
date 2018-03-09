@@ -2129,6 +2129,9 @@ localeconv()
    && defined(HAS_LOCALECONV_L) /* Prefer this thread-safe version */
         bool do_free = FALSE;
         locale_t cur;
+#  elif defined(TS_W32_BROKEN_LOCALECONV)
+        const char * save_global;
+        const char * save_thread;
 #  endif
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
@@ -2161,9 +2164,23 @@ localeconv()
 
         lcbuf = localeconv_l(cur);
 #  else
-        LOCALE_LOCK;    /* Prevent interference with other threads using
+        LOCALE_LOCK_V;  /* Prevent interference with other threads using
                            localeconv() */
+#    ifdef TS_W32_BROKEN_LOCALECONV
+        /* This is a workaround for a Windows bug prior to VS 15, in which
+         * localeconv only looks at the global locale.  We toggle to the global
+         * locale; populate the return; then toggle back.  We have to use
+         * LC_ALL instead of the individual ones because of another bug in
+         * Windows */
 
+        save_thread  = savepv(Perl_setlocale(LC_NUMERIC, NULL));
+
+        _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+
+        save_global  = savepv(Perl_setlocale(LC_ALL, NULL));
+
+        Perl_setlocale(LC_ALL,  save_thread);
+#    endif
         lcbuf = localeconv();
 #  endif
 	if (lcbuf) {
@@ -2223,7 +2240,17 @@ localeconv()
             freelocale(cur);
         }
 #  else
-        LOCALE_UNLOCK;
+#    ifdef TS_W32_BROKEN_LOCALECONV
+        Perl_setlocale(LC_ALL, save_global);
+
+        _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+
+        Perl_setlocale(LC_ALL, save_thread);
+
+        Safefree(save_global);
+        Safefree(save_thread);
+#    endif
+        LOCALE_UNLOCK_V;
 #  endif
         RESTORE_LC_NUMERIC();
 #endif  /* HAS_LOCALECONV */

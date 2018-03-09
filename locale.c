@@ -1344,13 +1344,19 @@ S_new_numeric(pTHX_ const char *newnum)
     PL_numeric_underlying = TRUE;
     PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
 
+#ifndef TS_W32_BROKEN_LOCALECONV
+
     /* If its name isn't C nor POSIX, it could still be indistinguishable from
-     * them */
+     * them.  But on broken Windows systems calling my_nl_langinfo() for
+     * THOUSEP can currently (but rarely) cause a race, so avoid doing that,
+     * and just always change the locale if not C nor POSIX on those systems */
     if (! PL_numeric_standard) {
         PL_numeric_standard = cBOOL(strEQ(".", my_nl_langinfo(RADIXCHAR,
                                             FALSE /* Don't toggle locale */  ))
                                  && strEQ("",  my_nl_langinfo(THOUSEP, FALSE)));
     }
+
+#endif
 
     /* Save the new name if it isn't the same as the previous one, if any */
     if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
@@ -2473,6 +2479,16 @@ S_my_nl_langinfo(const int item, bool toggle)
         const char * temp;
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
+#    ifdef TS_W32_BROKEN_LOCALECONV
+
+        const char * save_global;
+        const char * save_thread;
+        int needed_size;
+        char * ptr;
+        char * e;
+        char * item_start;
+
+#    endif
 #  endif
 #  ifdef HAS_STRFTIME
 
@@ -2572,15 +2588,35 @@ S_my_nl_langinfo(const int item, bool toggle)
                 /* We don't bother with localeconv_l() because any system that
                  * has it is likely to also have nl_langinfo() */
 
-                LOCALE_LOCK;    /* Prevent interference with other threads
-                                   using localeconv() */
+                LOCALE_LOCK_V;    /* Prevent interference with other threads
+                                     using localeconv() */
+
+#    ifdef TS_W32_BROKEN_LOCALECONV
+
+                /* This is a workaround for a Windows bug prior to VS 15.
+                 * What we do here is, while locked, switch to the global
+                 * locale so localeconv() works; then switch back just before
+                 * the unlock.  This can screw things up if some thread is
+                 * already using the global locale while assuming no other is.
+                 * A different workaround would be to call GetCurrencyFormat on
+                 * a known value, and parse it; patches welcome
+                 *
+                 * We have to use LC_ALL instead of LC_MONETARY because of
+                 * another bug in Windows */
+
+                save_thread = savepv(my_setlocale(LC_ALL, NULL));
+                _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+                save_global= savepv(my_setlocale(LC_ALL, NULL));
+                my_setlocale(LC_ALL, save_thread);
+
+#    endif
 
                 lc = localeconv();
                 if (   ! lc
                     || ! lc->currency_symbol
                     || strEQ("", lc->currency_symbol))
                 {
-                    LOCALE_UNLOCK;
+                    LOCALE_UNLOCK_V;
                     return "";
                 }
 
@@ -2600,18 +2636,115 @@ S_my_nl_langinfo(const int item, bool toggle)
                     PL_langinfo_buf[0] = '+';
                 }
 
-                LOCALE_UNLOCK;
+#    ifdef TS_W32_BROKEN_LOCALECONV
+
+                my_setlocale(LC_ALL, save_global);
+                _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+                my_setlocale(LC_ALL, save_thread);
+                Safefree(save_global);
+                Safefree(save_thread);
+
+#    endif
+
+                LOCALE_UNLOCK_V;
                 break;
 
+#    ifdef TS_W32_BROKEN_LOCALECONV
+
             case RADIXCHAR:
+
+                /* For this, we output a known simple floating point number to
+                 * a buffer, and parse it, looking for the radix */
+
+                if (toggle) {
+                    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+                }
+
+                if (PL_langinfo_bufsize < 10) {
+                    PL_langinfo_bufsize = 10;
+                    Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
+                }
+
+                needed_size = my_snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
+                                          "%.1f", 1.5);
+                if (needed_size >= (int) PL_langinfo_bufsize) {
+                    PL_langinfo_bufsize = needed_size + 1;
+                    Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
+                    needed_size = my_snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
+                                             "%.1f", 1.5);
+                    assert(needed_size < (int) PL_langinfo_bufsize);
+                }
+
+                ptr = PL_langinfo_buf;
+                e = PL_langinfo_buf + PL_langinfo_bufsize;
+
+                /* Find the '1' */
+                while (ptr < e && *ptr != '1') {
+                    ptr++;
+                }
+                ptr++;
+
+                /* Find the '5' */
+                item_start = ptr;
+                while (ptr < e && *ptr != '5') {
+                    ptr++;
+                }
+
+                /* Everything in between is the radix string */
+                if (ptr >= e) {
+                    PL_langinfo_buf[0] = '?';
+                    PL_langinfo_buf[1] = '\0';
+                }
+                else {
+                    *ptr = '\0';
+                    Move(item_start, PL_langinfo_buf, ptr - PL_langinfo_buf, char);
+                }
+
+                if (toggle) {
+                    RESTORE_LC_NUMERIC();
+                }
+
+                retval = PL_langinfo_buf;
+                break;
+
+#    else
+
+            case RADIXCHAR:     /* No special handling needed */
+
+#    endif
+
             case THOUSEP:
 
                 if (toggle) {
                     STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
                 }
 
-                LOCALE_LOCK;    /* Prevent interference with other threads
-                                   using localeconv() */
+                LOCALE_LOCK_V;    /* Prevent interference with other threads
+                                     using localeconv() */
+
+#    ifdef TS_W32_BROKEN_LOCALECONV
+
+                /* This should only be for the thousands separator.  A
+                 * different work around would be to use GetNumberFormat on a
+                 * known value and parse the result to find the separator */
+                save_thread = savepv(my_setlocale(LC_ALL, NULL));
+                _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+                save_global = savepv(my_setlocale(LC_ALL, NULL));
+                my_setlocale(LC_ALL, save_thread);
+#      if 0
+                /* This is the start of code that for broken Windows replaces
+                 * the above and below code, and instead calls
+                 * GetNumberFormat() and then would parse that to find the
+                 * thousands separator.  It needs to handle UTF-16 vs -8
+                 * issues. */
+
+                needed_size = GetNumberFormatEx(PL_numeric_name, 0, "1234.5", NULL, PL_langinfo_buf, PL_langinfo_bufsize);
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                    "%s: %d: return from GetNumber, count=%d, val=%s\n",
+                    __FILE__, __LINE__, needed_size, PL_langinfo_buf));
+
+#      endif
+#    endif
 
                 lc = localeconv();
                 if (! lc) {
@@ -2629,7 +2762,17 @@ S_my_nl_langinfo(const int item, bool toggle)
                 retval = save_to_buffer(temp, &PL_langinfo_buf,
                                         &PL_langinfo_bufsize, 0);
 
-                LOCALE_UNLOCK;
+#    ifdef TS_W32_BROKEN_LOCALECONV
+
+                my_setlocale(LC_ALL, save_global);
+                _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+                my_setlocale(LC_ALL, save_thread);
+                Safefree(save_global);
+                Safefree(save_thread);
+
+#    endif
+
+                LOCALE_UNLOCK_V;
 
                 if (toggle) {
                     RESTORE_LC_NUMERIC();
@@ -5022,6 +5165,25 @@ This is for code that has not yet or cannot be updated to handle multi-threaded
 locale operation.  As long as only a single thread is so-converted, everything
 works fine, as all the other threads continue to ignore the global one, so only
 this thread looks at it.
+
+However, on Windows systems this isn't quite true prior to Visual Studio 15,
+at which point Microsoft fixed a bug.  A race can occur if you use the
+following operations on earlier Windows platforms:
+
+=over
+
+=item L<POSIX::localeconv|POSIX/localeconv>
+
+=item L<I18N::Langinfo>, items C<CRNCYSTR> and C<THOUSEP>
+
+=item L<perlapi/Perl_langinfo>, items C<CRNCYSTR> and C<THOUSEP>
+
+=back
+
+The first item is not fixable (except by upgrading to a later Visual Studio
+release), but it would be possible to work around the latter two items by using
+the Windows API functions C<GetNumberFormat> and C<GetCurrencyFormat>; patches
+welcome.
 
 Without this function call, threads that use the L<C<setlocale(3)>> system
 function will not work properly, as all the locale-sensitive functions will

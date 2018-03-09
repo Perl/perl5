@@ -437,8 +437,10 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 			 );
 }
 
-if (${^SAFE_LOCALES}) {
-    ++$skip{PL_locale_mutex};
+if (${^SAFE_LOCALES}) {    # Don't need mutexes if have thread-safe operations
+                           # except early versions of Windows need this one
+    ++$skip{PL_locale_mutex} unless $ARGS{PLATFORM} eq 'win32'
+                                && ($ARGS{CCTYPE} =~ s/MSVC//r) < 140;
     ++$skip{PL_lc_numeric_mutex};
 }
 

@@ -241,6 +241,15 @@ By default only the C<langinfo()> function is exported.
 Before Perl 5.28, the returned values are unreliable for the C<RADIXCHAR> and
 C<THOUSEP> locale constants.
 
+Starting in 5.28, changing locales on threaded builds is supported on systems
+that offer thread-safe locale functions.  These include POSIX 2008 systems and
+Windows starting with Visual Studio 2005, and this module will work properly
+in such situations.  However, on threaded builds on Windows prior to Visual
+Studio 2015, retrieving the items C<CRNCYSTR> and C<THOUSEP> can result in a
+race with a thread that has converted to use the global locale.  It is quite
+uncommon for a thread to have done this.  It would be possible to construct a
+workaround for this; patches welcome: see L<perlapi/switch_to_global_locale>.
+
 =head1 SEE ALSO
 
 L<perllocale>, L<POSIX/localeconv>, L<POSIX/setlocale>, L<nl_langinfo(3)>.

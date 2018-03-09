@@ -783,6 +783,16 @@
 #  endif
 #endif
 
+/*  Microsoft documentation reads in the change log for VS 2015:
+ *     "The localeconv function declared in locale.h now works correctly when
+ *     per-thread locale is enabled. In previous versions of the library, this
+ *     function would return the lconv data for the global locale, not the
+ *     thread's locale."
+ */
+#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE) && _MSC_VER < 1900
+#  define TS_W32_BROKEN_LOCALECONV
+#endif
+
 #include <setjmp.h>
 
 #ifdef I_SYS_PARAM
@@ -5643,11 +5653,12 @@ typedef struct am_table_short AMTS;
 #  define IN_LC(category)                  0
 #endif
 
+
 /* Locale/thread synchronization macros.  These aren't needed if using
- * thread-safe locale operations */
+ * thread-safe locale operations, except if something is broken */
 #if    defined(USE_LOCALE)                                                  \
  &&    defined(USE_ITHREADS)                                                \
- && ! defined(USE_THREAD_SAFE_LOCALE)
+ && (! defined(USE_THREAD_SAFE_LOCALE) || defined(TS_W32_BROKEN_LOCALECONV))
 
 /* We have a locale object holding the 'C' locale for Posix 2008 */
 #ifndef USE_POSIX_2008_LOCALE
@@ -5676,21 +5687,40 @@ typedef struct am_table_short AMTS;
  * mutex should be used only in very short sections of code, while
  * LC_NUMERIC_LOCK may span more operations.  By always following this
  * convention, deadlock should be impossible.  But if necessary, the two
- * mutexes could be combined */
-#  define LOCALE_LOCK                                                       \
+ * mutexes could be combined.
+ *
+ * Actually, the two macros just below with the '_V' suffixes are used in just
+ * a few places where there is a broken localeconv(), but otherwise things are
+ * thread safe, and hence don't need locking.  Just below LOCALE_LOCK and
+ * LOCALE_UNLOCK are defined in terms of these for use everywhere else */
+#  define LOCALE_LOCK_V                                                     \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                     "%s: %d: locking locale\n", __FILE__, __LINE__));       \
             MUTEX_LOCK(&PL_locale_mutex);                                   \
         } STMT_END
-#  define LOCALE_UNLOCK                                                     \
+#  define LOCALE_UNLOCK_V                                                   \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                    "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
             MUTEX_UNLOCK(&PL_locale_mutex);                                 \
         } STMT_END
 
-#  define LOCALE_INIT         STMT_START {                                  \
+/* On windows, we just need the mutex for LOCALE_LOCK */
+#  ifdef TS_W32_BROKEN_LOCALECONV
+#    define LOCALE_LOCK     NOOP
+#    define LOCALE_UNLOCK   NOOP
+#    define LOCALE_INIT     MUTEX_INIT(&PL_locale_mutex);
+#    define LOCALE_TERM     MUTEX_DESTROY(&PL_locale_mutex)
+#    define LC_NUMERIC_LOCK(cond)
+#    define LC_NUMERIC_UNLOCK
+#  else
+#    define LOCALE_LOCK     LOCALE_LOCK_V
+#    define LOCALE_UNLOCK   LOCALE_UNLOCK_V
+
+     /* We also need to lock LC_NUMERIC for non-windows (hence Posix 2008)
+      * systems */
+#    define LOCALE_INIT          STMT_START {                               \
                                     MUTEX_INIT(&PL_locale_mutex);           \
                                     MUTEX_INIT(&PL_lc_numeric_mutex);       \
                                 } STMT_END
@@ -5762,10 +5792,13 @@ typedef struct am_table_short AMTS;
         } STMT_END                                                          \
         CLANG_DIAG_RESTORE
 
+#  endif    /* End of needs locking LC_NUMERIC */
 #else   /* Below is no locale sync needed */
 #  define LOCALE_INIT
 #  define LOCALE_LOCK
+#  define LOCALE_LOCK_V
 #  define LOCALE_UNLOCK
+#  define LOCALE_UNLOCK_V
 #  define LC_NUMERIC_LOCK(cond)
 #  define LC_NUMERIC_UNLOCK
 #  define LOCALE_TERM

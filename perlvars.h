@@ -99,8 +99,10 @@ PERLVARI(G, mmap_page_size, IV, 0)
 
 #if defined(USE_ITHREADS)
 PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
-#ifndef USE_THREAD_SAFE_LOCALE
+#  if ! defined(USE_THREAD_SAFE_LOCALE) || defined(TS_W32_BROKEN_LOCALECONV)
 PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex for setlocale() changing */
+#  endif
+#  ifndef USE_THREAD_SAFE_LOCALE
 PERLVAR(G, lc_numeric_mutex, perl_mutex)   /* Mutex for switching LC_NUMERIC */
 #  endif
 #endif
