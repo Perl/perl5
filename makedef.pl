@@ -436,6 +436,11 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 			 );
 }
 
+if (${^SAFE_LOCALES}) {
+    ++$skip{PL_locale_mutex};
+    ++$skip{PL_lc_numeric_mutex};
+}
+
 unless ($define{'PERL_OP_PARENT'}) {
     ++$skip{$_} foreach qw(
 		    Perl_op_parent
