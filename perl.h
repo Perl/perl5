@@ -5664,9 +5664,41 @@ typedef struct am_table_short AMTS;
                         }                                                   \
                     } STMT_END
 #  endif
+
+/* This is used as a generic lock for locale operations.  For example this is
+ * used when calling nl_langinfo() so that another thread won't zap the
+ * contents of its buffer before it gets saved; and it's called when changing
+ * the locale of LC_MESSAGES.  On some systems the latter can cause the
+ * nl_langinfo buffer to be zapped under a race condition.
+ *
+ * If combined with LC_NUMERIC_LOCK, calls to this and its corresponding unlock
+ * should be contained entirely within the locked portion of LC_NUMERIC.  This
+ * mutex should be used only in very short sections of code, while
+ * LC_NUMERIC_LOCK may span more operations.  By always following this
+ * convention, deadlock should be impossible.  But if necessary, the two
+ * mutexes could be combined */
+#  define LOCALE_LOCK                                                       \
+        STMT_START {                                                        \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                    "%s: %d: locking locale\n", __FILE__, __LINE__));       \
+            MUTEX_LOCK(&PL_locale_mutex);                                   \
+        } STMT_END
+#  define LOCALE_UNLOCK                                                     \
+        STMT_START {                                                        \
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
+                   "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
+            MUTEX_UNLOCK(&PL_locale_mutex);                                 \
+        } STMT_END
+
 #  define LOCALE_INIT         STMT_START {                                  \
                                     MUTEX_INIT(&PL_locale_mutex);           \
                                     MUTEX_INIT(&PL_lc_numeric_mutex);       \
+                                } STMT_END
+
+#    define LOCALE_TERM         STMT_START {                                \
+                                    MUTEX_DESTROY(&PL_locale_mutex);        \
+                                    MUTEX_DESTROY(&PL_lc_numeric_mutex);    \
+                                    _LOCALE_TERM_POSIX_2008;                \
                                 } STMT_END
 
 /* This mutex is used to create critical sections where we want the LC_NUMERIC
@@ -5730,37 +5762,6 @@ typedef struct am_table_short AMTS;
         } STMT_END                                                          \
         CLANG_DIAG_RESTORE
 
-/* This is used as a generic lock for locale operations.  For example this is
- * used when calling nl_langinfo() so that another thread won't zap the
- * contents of its buffer before it gets saved; and it's called when changing
- * the locale of LC_MESSAGES.  On some systems the latter can cause the
- * nl_langinfo buffer to be zapped under a race condition.
- *
- * If combined with LC_NUMERIC_LOCK, calls to this and its corresponding unlock
- * should be contained entirely within the locked portion of LC_NUMERIC.  This
- * mutex should be used only in very short sections of code, while
- * LC_NUMERIC_LOCK may span more operations.  By always following this
- * convention, deadlock should be impossible.  But if necessary, the two
- * mutexes could be combined */
-#  define LOCALE_LOCK                                                       \
-        STMT_START {                                                        \
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                    "%s: %d: locking locale\n", __FILE__, __LINE__));       \
-            MUTEX_LOCK(&PL_locale_mutex);                                   \
-        } STMT_END
-#  define LOCALE_UNLOCK                                                     \
-        STMT_START {                                                        \
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                   "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
-            MUTEX_UNLOCK(&PL_locale_mutex);                                 \
-        } STMT_END
-
-#  define LOCALE_TERM                                                       \
-                    STMT_START {                                            \
-                        MUTEX_DESTROY(&PL_locale_mutex);                    \
-                        MUTEX_DESTROY(&PL_lc_numeric_mutex);                \
-                        _LOCALE_TERM_POSIX_2008;                            \
-                    } STMT_END
 #else   /* Below is no locale sync needed */
 #  define LOCALE_INIT
 #  define LOCALE_LOCK
