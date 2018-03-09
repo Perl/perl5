@@ -3110,7 +3110,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #    endif
 #  endif
-#  if defined(LC_ALL_MASK) && defined(HAS_POSIX_2008_LOCALE)
+#  ifdef USE_POSIX_2008_LOCALE
 
     PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
     if (! PL_C_locale_obj) {
@@ -4875,19 +4875,31 @@ Perl_my_strerror(pTHX_ const int errnum)
 
     const bool within_locale_scope = IN_LC(LC_MESSAGES);
 
-#  if defined(HAS_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
+#  ifndef USE_ITHREADS
 
-    /* This function is trivial if we don't have to worry about thread safety
-     * and have strerror_l(), as it handles the switch of locales so we don't
-     * have to deal with that.  We don't have to worry about thread safety if
-     * this is an unthreaded build, or if strerror_r() is also available.  Both
-     * it and strerror_l() are thread-safe.  Plain strerror() isn't thread
-     * safe.  But on threaded builds when strerror_r() is available, the
-     * apparent call to strerror() below is actually a macro that
-     * behind-the-scenes calls strerror_r().
-     */
+    /* This function is trivial without threads. */
+    if (within_locale_scope) {
+        errstr = savepv(strerror(errnum));
+    }
+    else {
+        const char * save_locale = do_setlocale_c(LC_MESSAGES, NULL);
 
-#    if ! defined(USE_ITHREADS) || defined(HAS_STRERROR_R)
+        do_setlocale_c(LC_MESSAGES, "C");
+        errstr = savepv(strerror(errnum));
+        do_setlocale_c(LC_MESSAGES, save_locale);
+    }
+
+#  elif defined(HAS_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
+
+    /* This function is also trivial if we don't have to worry about thread
+     * safety and have strerror_l(), as it handles the switch of locales so we
+     * don't have to deal with that.  We don't have to worry about thread
+     * safety if strerror_r() is also available.  Both it and strerror_l() are
+     * thread-safe.  Plain strerror() isn't thread safe.  But on threaded
+     * builds when strerror_r() is available, the apparent call to strerror()
+     * below is actually a macro that behind-the-scenes calls strerror_r(). */
+
+#    ifdef HAS_STRERROR_R
 
     if (within_locale_scope) {
         errstr = savepv(strerror(errnum));

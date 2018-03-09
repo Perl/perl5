@@ -398,6 +398,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_stashpv_hvname_match
 		    Perl_regdupe_internal
 		    Perl_newPADOP
+                    PL_C_locale_obj
 			 );
 }
 

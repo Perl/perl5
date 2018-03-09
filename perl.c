@@ -470,7 +470,7 @@ perl_construct(pTHXx)
     /* Start with 1 bucket, for DFS.  It's unlikely we'll need more.  */
     HvMAX(PL_registered_mros) = 0;
 
-#ifdef HAS_POSIX_2008_LOCALE
+#ifdef USE_POSIX_2008_LOCALE
     PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", NULL);
 #endif
 

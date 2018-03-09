@@ -5643,9 +5643,7 @@ typedef struct am_table_short AMTS;
 #endif
 
 #ifdef USE_LOCALE /* These locale things are all subject to change */
-    /* We create a C locale object unconditionally if we have the functions to
-     * do so; hence must destroy it unconditionally at the end */
-#  ifndef HAS_POSIX_2008_LOCALE
+#  ifndef USE_POSIX_2008_LOCALE
 #    define _LOCALE_TERM_POSIX_2008  NOOP
 #  else
 #    define _LOCALE_TERM_POSIX_2008                                         \
