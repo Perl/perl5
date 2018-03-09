@@ -52,7 +52,7 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
-/* Note that from here --> to <-- the same logic is
+/* XXX NOTE that from here --> to <-- the same logic is
  * repeated in makedef.pl, so be certain to update
  * both places when editing. */
 
@@ -108,7 +108,8 @@
 #endif
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
-/* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
+/* Win32 has naturally threadsafe libraries, no need to use any _r variants.
+ * XXX KEEP makedef.pl copy of this code in sync */
 #if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32)
 #   define USE_REENTRANT_API
 #endif
