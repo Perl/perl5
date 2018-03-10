@@ -12309,7 +12309,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     char * endbrace;    /* points to '}' following the name */
     char* p = RExC_parse; /* Temporary */
 
-    SV * substitute_parse;
+    SV * substitute_parse = NULL;
     char *orig_end;
     char *save_start;
     I32 flags;
