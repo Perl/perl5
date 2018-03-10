@@ -33,6 +33,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
+<commit votes="sprout" id="790acddeaa0d2c73524596048b129561225cf100" ticket="131085" desc="[perl #131085] Crash with sub-in-stash"/>
+
 See also #130080
 <commit votes="tonyc steveh" id="622584734f799751a284558aaebad21acd3270bf" ticket="128967" desc="Inconsistency between doc and code for chown using negative argument: -1"/>
 
