@@ -571,6 +571,15 @@ sub longmess_heavy {
     return ret_backtrace( $i, @_ );
 }
 
+BEGIN {
+    if("$]" >= 5.017004) {
+        # The LAST_FH constant is a reference to the variable.
+        $Carp::{LAST_FH} = \eval '\${^LAST_FH}';
+    } else {
+        eval '*LAST_FH = sub () { 0 }';
+    }
+}
+
 # Returns a full stack backtrace starting from where it is
 # told.
 sub ret_backtrace {
@@ -587,7 +596,16 @@ sub ret_backtrace {
 
     my %i = caller_info($i);
     $mess = "$err at $i{file} line $i{line}$tid_msg";
-    if( defined $. ) {
+    if( $. ) {
+      # Use ${^LAST_FH} if available.
+      if (LAST_FH) {
+        if (${+LAST_FH}) {
+            $mess .= sprintf ", <%s> %s %d",
+                              *${+LAST_FH}{NAME},
+                              ($/ eq "\n" ? "line" : "chunk"), $.
+        }
+      }
+      else {
         local $@ = '';
         local $SIG{__DIE__};
         eval {
@@ -596,6 +614,7 @@ sub ret_backtrace {
         if($@ =~ /^Died at .*(, <.*?> (?:line|chunk) \d+).$/ ) {
             $mess .= $1;
         }
+      }
     }
     $mess .= "\.\n";
 
