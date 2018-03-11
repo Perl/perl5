@@ -5731,27 +5731,27 @@ typedef struct am_table_short AMTS;
                                     _LOCALE_TERM_POSIX_2008;                \
                                 } STMT_END
 
-/* This mutex is used to create critical sections where we want the LC_NUMERIC
- * locale to be locked into either the C (standard) locale, or the underlying
- * locale, so that other threads interrupting this one don't change it to the
- * wrong state before we've had a chance to complete our operation.  It can
- * stay locked over an entire printf operation, for example.  And so is made
- * distinct from the LOCALE_LOCK mutex.
- *
- * This simulates kind of a general semaphore.  The current thread will lock
- * the mutex if the per-thread variable is zero, and then increments that
- * variable.  Each corresponding UNLOCK decrements the variable until it is 0,
- * at which point it actually unlocks the mutex.  Since the variable is
- * per-thread, there is no race with other threads.
- *
- * The single argument is a condition to test for, and if true, to panic, as
- * this would be an attempt to complement the LC_NUMERIC state, and we're not
- * supposed to because it's locked.
- *
- * Clang improperly gives warnings for this, if not silenced:
- * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
- * */
-#  define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                  \
+    /* This mutex is used to create critical sections where we want the
+     * LC_NUMERIC locale to be locked into either the C (standard) locale, or
+     * the underlying locale, so that other threads interrupting this one don't
+     * change it to the wrong state before we've had a chance to complete our
+     * operation.  It can stay locked over an entire printf operation, for
+     * example.  And so is made distinct from the LOCALE_LOCK mutex.
+     *
+     * This simulates kind of a general semaphore.  The current thread will
+     * lock the mutex if the per-thread variable is zero, and then increments
+     * that variable.  Each corresponding UNLOCK decrements the variable until
+     * it is 0, at which point it actually unlocks the mutex.  Since the
+     * variable is per-thread, there is no race with other threads.
+     *
+     * The single argument is a condition to test for, and if true, to panic,
+     * as this would be an attempt to complement the LC_NUMERIC state, and
+     * we're not supposed to because it's locked.
+     *
+     * Clang improperly gives warnings for this, if not silenced:
+     * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
+     * */
+#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
         CLANG_DIAG_IGNORE(-Wthread-safety)	     	                    \
         STMT_START {                                                        \
             if (PL_lc_numeric_mutex_depth <= 0) {                           \
@@ -5774,7 +5774,7 @@ typedef struct am_table_short AMTS;
             }                                                               \
         } STMT_END
 
-#  define LC_NUMERIC_UNLOCK                                                 \
+#    define LC_NUMERIC_UNLOCK                                               \
         STMT_START {                                                        \
             if (PL_lc_numeric_mutex_depth <= 1) {                           \
                 MUTEX_UNLOCK(&PL_lc_numeric_mutex);                         \
