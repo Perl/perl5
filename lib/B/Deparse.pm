@@ -5613,7 +5613,6 @@ sub tr_decode_byte {
     my($table, $flags) = @_;
     my $ssize_t = $Config{ptrsize} == 8 ? 'q' : 'l';
     my ($size, @table) = unpack("${ssize_t}s*", $table);
-    printf "XXX len=%d size=%d scalar\@table=%d\n", length($table), $size, scalar@table;
     pop @table; # remove the wildcard final entry
 
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
