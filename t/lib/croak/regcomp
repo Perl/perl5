@@ -48,9 +48,9 @@ EXPECT
 Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/\N{U+100_ <-- HERE }/ at - line 1.
 ########
 # NAME [\xDF\N{U+.}]
-my $p00="[ß\\N{U+.}]"; qr/$p00/ui;
+my $p00="[\\xDF\\N{U+.}]"; qr/$p00/ui;
 # The sharp s under /i recodes the parse, and this was causing a segfault when
 # the error message referred to the original pattern
 EXPECT
-Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/[ß\N{U+. <-- HERE }]/ at - line 1.
+Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/[\xDF\N{U+. <-- HERE }]/ at - line 1.
 ########
