@@ -825,7 +825,7 @@ S_emulate_setlocale(const int category,
             }
 
             if (! default_name || strEQ(default_name, "")) {
-                    default_name = "C";
+                default_name = "C";
             }
             else if (PL_scopestack_ix != 0) {
                 SAVEFREEPV(default_name);
