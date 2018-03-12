@@ -1655,8 +1655,10 @@ PP(pp_sort)
                 /* we don't want modifications localized */
                 GvINTRO_off(PL_firstgv);
                 GvINTRO_off(PL_secondgv);
-		SAVESPTR(GvSV(PL_firstgv));
-		SAVESPTR(GvSV(PL_secondgv));
+		SAVEGENERICSV(GvSV(PL_firstgv));
+		SvREFCNT_inc(GvSV(PL_firstgv));
+		SAVEGENERICSV(GvSV(PL_secondgv));
+		SvREFCNT_inc(GvSV(PL_secondgv));
 	    }
 
             gimme = G_SCALAR;
@@ -1789,11 +1791,16 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     I32 result;
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
+    SV *olda, *oldb;
  
     PERL_ARGS_ASSERT_SORTCV;
 
-    GvSV(PL_firstgv) = a;
-    GvSV(PL_secondgv) = b;
+    olda = GvSV(PL_firstgv);
+    GvSV(PL_firstgv) = SvREFCNT_inc_simple_NN(a);
+    SvREFCNT_dec(olda);
+    oldb = GvSV(PL_secondgv);
+    GvSV(PL_secondgv) = SvREFCNT_inc_simple_NN(b);
+    SvREFCNT_dec(oldb);
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
