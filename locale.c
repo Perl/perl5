@@ -2081,9 +2081,13 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
 This is an (almost) drop-in replacement for the system L<C<setlocale(3)>>,
 taking the same parameters, and returning the same information, except that it
-returns the correct underlying C<LC_NUMERIC> locale, instead of C<C> always, as
-perl keeps that locale category as C<C>, changing it briefly during the
-operations where the underlying one is required.
+returns the correct underlying C<LC_NUMERIC> locale.  Regular C<setlocale> will
+instead return C<C> if the underlying locale has a non-dot decimal point
+character, or a non-empty thousands separator for displaying floating point
+numbers.  This is because perl keeps that locale category such that it has a
+dot and empty separator, changing the locale briefly during the operations
+where the underlying one is required. C<Perl_setlocale> knows about this, and
+compensates; regular C<setlocale> doesn't.
 
 Another reason it isn't completely a drop-in replacement is that it is
 declared to return S<C<const char *>>, whereas the system setlocale omits the
@@ -2123,8 +2127,9 @@ Perl_setlocale(const int category, const char * locale)
 
     /* A NULL locale means only query what the current one is.  We have the
      * LC_NUMERIC name saved, because we are normally switched into the C
-     * locale for it.  For an LC_ALL query, switch back to get the correct
-     * results.  All other categories don't require special handling */
+     * (or equivalent) locale for it.  For an LC_ALL query, switch back to get
+     * the correct results.  All other categories don't require special
+     * handling */
     if (locale == NULL) {
         if (category == LC_NUMERIC) {
 
@@ -2291,13 +2296,14 @@ rather than getting segfaults at runtime.
 It delivers the correct results for the C<RADIXCHAR> and C<THOUSEP> items,
 without you having to write extra code.  The reason for the extra code would be
 because these are from the C<LC_NUMERIC> locale category, which is normally
-kept set to the C locale by Perl, no matter what the underlying locale is
-supposed to be, and so to get the expected results, you have to temporarily
-toggle into the underlying locale, and later toggle back.  (You could use plain
-C<nl_langinfo> and C<L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>> for this but
-then you wouldn't get the other advantages of C<Perl_langinfo()>; not keeping
-C<LC_NUMERIC> in the C locale would break a lot of CPAN, which is expecting the
-radix (decimal point) character to be a dot.)
+kept set by Perl so that the radix is a dot, and the separator is the empty
+string, no matter what the underlying locale is supposed to be, and so to get
+the expected results, you have to temporarily toggle into the underlying
+locale, and later toggle back.  (You could use plain C<nl_langinfo> and
+C<L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>> for this but then you wouldn't get
+the other advantages of C<Perl_langinfo()>; not keeping C<LC_NUMERIC> in the C
+(or equivalent) locale would break a lot of CPAN, which is expecting the radix
+(decimal point) character to be a dot.)
 
 =item *
 

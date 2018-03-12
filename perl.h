@@ -5807,7 +5807,10 @@ typedef struct am_table_short AMTS;
 #ifdef USE_LOCALE_NUMERIC
 
 /* These macros are for toggling between the underlying locale (UNDERLYING or
- * LOCAL) and the C locale (STANDARD).
+ * LOCAL) and the C locale (STANDARD).  (Actually we don't have to use the C
+ * locale if the underlying locale is indistinguishable from it in the numeric
+ * operations used by Perl, namely the decimal point, and even the thousands
+ * separator.)
 
 =head1 Locale-related functions and macros
 
@@ -5851,10 +5854,11 @@ close by, and guaranteed to be called.
 
 =for apidoc Am|void|STORE_LC_NUMERIC_SET_TO_NEEDED
 
-This is used to help wrap XS or C code that that is C<LC_NUMERIC> locale-aware.
-This locale category is generally kept set to the C locale by Perl for
-backwards compatibility, and because most XS code that reads floating point
-values can cope only with the decimal radix character being a dot.
+This is used to help wrap XS or C code that is C<LC_NUMERIC> locale-aware.
+This locale category is generally kept set to a locale where the decimal radix
+character is a dot, and the separator between groups of digits is empty.  This
+is because most XS code that reads floating point numbers is expecting them to
+have this syntax.
 
 This macro makes sure the current C<LC_NUMERIC> state is set properly, to be
 aware of locale if the call to the XS or C code from the Perl program is
@@ -5906,16 +5910,14 @@ expression, but with an empty argument list, like this:
 
 */
 
-/* The numeric locale is generally kept in the C locale instead of the
- * underlying locale.  The current status is known by looking at two words.
- * One is non-zero if the current numeric locale is the standard C/POSIX one.
- * The other is non-zero if the current locale is the underlying locale.  Both
- * can be non-zero if, as often happens, the underlying locale is C.
- *
- * Its slightly more complicated than this, as the PL_numeric_standard variable
- * is set if the current numeric locale is indistinguishable from the C locale.
- * This happens when the radix character is a dot, and the thousands separator
- * is the empty string.
+/* If the underlying numeric locale has a non-dot decimal point or has a
+ * non-empty floating point thousands separator, the current locale is instead
+ * generally kept in the C locale instead of that underlying locale.  The
+ * current status is known by looking at two words.  One is non-zero if the
+ * current numeric locale is the standard C/POSIX one or is indistinguishable
+ * from C.  The other is non-zero if the current locale is the underlying
+ * locale.  Both can be non-zero if, as often happens, the underlying locale is
+ * C or indistinguishable from it.
  *
  * khw believes the reason for the variables instead of the bits in a single
  * word is to avoid having to have masking instructions. */
