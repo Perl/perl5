@@ -38,8 +38,6 @@ These three together (if at all)
 Move to public list?:
 <commit votes="steveh tonyc" id="4dc12118f61b997fbd030230665b46e7c40f32d6" ticket="132017" desc="fix #132017 - OPFAIL insert needs to set flags to 0"/>
 
-<commit votes="steveh tonyc xsawyerx" id="6c4f4eb174d1e2e9f874786123a699d11ae741f9" ticket="131893" desc="prevent integer overflow when compiling a regexp"/>
-
 If the parser structure layout is part of the ABI, this shouldn't be backported, or the new parser structure members need to be moved to the end.
 <commit votes="steveh sprout tonyc xsawyerx" id="bb4e4c3869d9fb6ee5bddd820c2a373601ecc310" ticket="125351" desc="(perl #125351) abort parsing if parse errors happen in a sub lex"/>
 
@@ -61,23 +59,13 @@ Also, don’t backport the version change; just add _01 to the maint version.
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh tonyc xsawyerx" id="fa2e45943e2b6ce22cf70dba5b47afe73c8c7c80" ticket="131786" desc="(perl #131786) avoid a duplicate symbol error on _LIB_VERSION"/>
-<commit votes="steveh tonyc xsawyerx" id="488307ffa67ce70fc9755e560a74dac04bdcb0e4" ticket="" desc="Revert &quot;Revert &quot;Fallbacks for Perl_fp_class_denorm().&quot;&quot;"/>
-<commit votes="steveh tonyc xsawyerx" id="72bbce3da5eeffde81ed89bb421e17a9f4caf8ce" ticket="" desc="miniperl also needs -Ilib for perl.exp on AIX etc"/>
-<commit votes="steveh tonyc xsawyerx" id="43b354f1e14ddf43aa09cd475560e87eb8b1e2e9" ticket="132421" desc="Improve cl version detection"/>
-<commit votes="steveh tonyc xsawyerx" id="6f669bf58bbfaf8d7ef367574be9252df84c08d1" ticket="132484" desc="Fix $Config{libpth} for x64 builds with VC++ earlier than 14.1 (VS2017)"/>
-
 </div>
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="steveh tonyc xsawyerx" id="1444f7108081b769dde07c1c68c06ee4e7bb93c0" ticket="" desc="g++ is like gcc on AIX too"/>
-
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
-
-<commit votes="steveh tonyc xsawyerx" id="0e45f4872e73c83376fcd3a255ffcfc823aec531" ticket="" desc="Fix test failures in GCC &quot;long doubles&quot; builds on Windows"/>
 
 </div>
 
