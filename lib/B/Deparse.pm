@@ -5556,7 +5556,9 @@ sub double_delim {
     }
 }
 
+# Escape a characrter.
 # Only used by tr///, so backslashes hyphens
+
 sub pchr { # ASCII
     my($n) = @_;
     if ($n == ord '\\') {
@@ -5590,6 +5592,9 @@ sub pchr { # ASCII
 	return '\\' . sprintf("%03o", $n);
     }
 }
+
+# Convert a list of characters into a string suitable for tr/// search or
+# replacement, with suitable escaping and collapsing of ranges
 
 sub collapse {
     my(@chars) = @_;
