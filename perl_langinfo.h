@@ -13,7 +13,7 @@
 /* NOTE that this file is parsed by ext/XS-APItest/t/locale.t, so be careful
  * with changes */
 
-/* If foo doesn't exist deine it to a negative number. */
+/* If foo doesn't exist define it to a negative number. */
 
 #ifndef CODESET
 #  define CODESET -1
