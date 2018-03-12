@@ -48,9 +48,18 @@ EXPECT
 Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/\N{U+100_ <-- HERE }/ at - line 1.
 ########
 # NAME [\xDF\N{U+.}]
+# SKIP ? ord("A") != 65 && "Test valid only on ASCII machines"
 my $p00="[\\xDF\\N{U+.}]"; qr/$p00/ui;
 # The sharp s under /i recodes the parse, and this was causing a segfault when
 # the error message referred to the original pattern
 EXPECT
 Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/[\xDF\N{U+. <-- HERE }]/ at - line 1.
+########
+# NAME [\x59\N{U+.}]
+# SKIP ? ord("A") == 65 && "Test valid only on EBCDIC machines"
+my $p00="[\\x59\\N{U+.}]"; qr/$p00/ui;
+# The sharp s under /i recodes the parse, and this was causing a segfault when
+# the error message referred to the original pattern
+EXPECT
+Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/[\x59\N{U+. <-- HERE }]/ at - line 1.
 ########
