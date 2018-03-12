@@ -14485,7 +14485,8 @@ sub compile_perl() {
 
     my $Word = $perl->add_match_table('Word', Full_Name => 'XPosixWord',
                                 Description => '\w, including beyond ASCII;'
-                                            . ' = \p{Alnum} + \pM + \p{Pc}',
+                                            . ' = \p{Alnum} + \pM + \p{Pc}'
+                                            . ' + \p{Join_Control}',
                                 Initialize => $Alnum + $gc->table('Mark'),
                                 );
     my $Pc = $gc->table('Connector_Punctuation'); # 'Pc' Not in release 1
