@@ -2091,9 +2091,9 @@ compensates; regular C<setlocale> doesn't.
 
 Another reason it isn't completely a drop-in replacement is that it is
 declared to return S<C<const char *>>, whereas the system setlocale omits the
-C<const>.  (If it were being written today, plain setlocale would be declared
-const, since it is illegal to change the information it returns; doing so leads
-to segfaults.)
+C<const> (presumably because its API was specified long ago, and can't be
+updated; it is illegal to change the information C<setlocale> returns; doing
+so leads to segfaults.)
 
 Finally, C<Perl_setlocale> works under all circumstances, whereas plain
 C<setlocale> can be completely ineffective on some platforms under some
