@@ -206,8 +206,8 @@ The operations that are affected by locale are:
 
 =item B<Not within the scope of C<"use locale">>
 
-Only certain operations originating outside Perl should be affected, as
-follows:
+Only certain operations (all originating outside Perl) should be
+affected, as follows:
 
 =over 4
 
@@ -802,8 +802,7 @@ hash will be missing.
 =head2 I18N::Langinfo
 
 Another interface for querying locale-dependent information is the
-C<I18N::Langinfo::langinfo()> function, available at least in Unix-like
-systems and VMS.
+C<I18N::Langinfo::langinfo()> function.
 
 The following example will import the C<langinfo()> function itself and
 three constants to be used as arguments to C<langinfo()>: a constant for
