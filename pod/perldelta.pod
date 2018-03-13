@@ -314,6 +314,9 @@ L</Modules and Pragmata> section.
 Visual C++ compiler version detection has been improved to work on non-English
 language systems.
 
+We now set C<$Config{libpth}> correctly for 64-bit builds using Visual C++
+versions earlier than 14.1.
+
 =back
 
 =head1 Internal Changes
