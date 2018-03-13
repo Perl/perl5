@@ -34,7 +34,19 @@ Bugs> below.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Module::CoreList> has been upgraded from version 5.20170922_26 to 5.20180315_26.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.16 to 0.17.
+
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.68 to 0.69.
 
 =back
 
