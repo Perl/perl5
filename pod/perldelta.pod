@@ -342,6 +342,10 @@ The C<readpipe()> built-in function now checks at compile time that
 it has only one parameter expression, and puts it in scalar context,
 thus ensuring that it doesn't corrupt the stack at runtime.  [perl #4574]
 
+=item *
+
+Fixed a use after free bug in pp_list introduced in 5.27.1.  [perl #131954]
+
 =back
 
 =head1 Known Problems
