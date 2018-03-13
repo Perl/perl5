@@ -15179,6 +15179,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList'      => '5.20180315_26',
             'Module::CoreList::TieHashDelta'=> '5.20180315_26',
             'Module::CoreList::Utils'=> '5.20180315_26',
+            'PerlIO::via'           => '0.17',
+            'Term::ReadLine'        => '1.17',
+            'Unicode::UCD'          => '0.69',
         },
         removed => {
         }
