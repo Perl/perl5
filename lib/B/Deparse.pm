@@ -5642,7 +5642,12 @@ sub tr_decode_byte {
 	}
     }
     @from = (@from, @delfrom);
+
     if ($flags & OPpTRANS_COMPLEMENT) {
+        unless ($flags & OPpTRANS_DELETE) {
+            @to = () if ("@from" eq "@to");
+        }
+
 	my @newfrom = ();
 	my %from;
 	@from{@from} = (1) x @from;
