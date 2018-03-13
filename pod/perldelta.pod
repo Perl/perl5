@@ -377,6 +377,12 @@ are re-aliased during execution of the sort comparator.  [perl #92264]
 Some convoluted kinds of regexp no longer cause an arithmetic overflow
 when compiled.  [perl #131893]
 
+=item *
+
+Fixed a duplicate symbol failure with C<-flto -mieee-fp> builds.
+F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
+#131786]
+
 =back
 
 =head1 Known Problems
