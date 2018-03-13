@@ -362,6 +362,12 @@ whitespace in a C< ${identifier} > construct.  [perl #131949]
 Accesses to C<${^LAST_FH}> no longer assert after using any of a
 variety of I/O operations on a non-glob.  [perl #128263]
 
+=item *
+
+C<sort> now performs correct reference counting when aliasing C<$a> and
+C<$b>, thus avoiding premature destruction and leakage of scalars if they
+are re-aliased during execution of the sort comparator.  [perl #92264]
+
 =back
 
 =head1 Known Problems
