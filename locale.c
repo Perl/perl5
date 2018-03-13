@@ -2213,20 +2213,23 @@ Perl_setlocale(const int category, const char * locale)
 
 #  ifdef USE_LOCALE_CTYPE
 
-            newlocale = do_setlocale_c(LC_CTYPE, NULL);
+            newlocale = savepv(do_setlocale_c(LC_CTYPE, NULL));
             new_ctype(newlocale);
+            Safefree(newlocale);
 
 #  endif /* USE_LOCALE_CTYPE */
 #  ifdef USE_LOCALE_COLLATE
 
-            newlocale = do_setlocale_c(LC_COLLATE, NULL);
+            newlocale = savepv(do_setlocale_c(LC_COLLATE, NULL));
             new_collate(newlocale);
+            Safefree(newlocale);
 
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
-            newlocale = do_setlocale_c(LC_NUMERIC, NULL);
+            newlocale = savepv(do_setlocale_c(LC_NUMERIC, NULL));
             new_numeric(newlocale);
+            Safefree(newlocale);
 
 #  endif /* USE_LOCALE_NUMERIC */
 #endif /* LC_ALL */
@@ -5032,11 +5035,12 @@ Perl_my_strerror(pTHX_ const int errnum)
         errstr = savepv(strerror(errnum));
     }
     else {
-        const char * save_locale = do_setlocale_c(LC_MESSAGES, NULL);
+        const char * save_locale = savepv(do_setlocale_c(LC_MESSAGES, NULL));
 
         do_setlocale_c(LC_MESSAGES, "C");
         errstr = savepv(strerror(errnum));
         do_setlocale_c(LC_MESSAGES, save_locale);
+        Safefree(save_locale);
     }
 
 #  elif defined(HAS_POSIX_2008_LOCALE)                      \
@@ -5316,29 +5320,32 @@ Perl_sync_locale()
 #endif
 #ifdef USE_LOCALE_CTYPE
 
-    newlocale = do_setlocale_c(LC_CTYPE, NULL);
+    newlocale = savepv(do_setlocale_c(LC_CTYPE, NULL));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
         setlocale_debug_string(LC_CTYPE, NULL, newlocale)));
     new_ctype(newlocale);
+    Safefree(newlocale);
 
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 
-    newlocale = do_setlocale_c(LC_COLLATE, NULL);
+    newlocale = savepv(do_setlocale_c(LC_COLLATE, NULL));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
         setlocale_debug_string(LC_COLLATE, NULL, newlocale)));
     new_collate(newlocale);
+    Safefree(newlocale);
 
 #endif
 #ifdef USE_LOCALE_NUMERIC
 
-    newlocale = do_setlocale_c(LC_NUMERIC, NULL);
+    newlocale = savepv(do_setlocale_c(LC_NUMERIC, NULL));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
         setlocale_debug_string(LC_NUMERIC, NULL, newlocale)));
     new_numeric(newlocale);
+    Safefree(newlocale);
 
 #endif /* USE_LOCALE_NUMERIC */
 
