@@ -372,6 +372,11 @@ C<sort> now performs correct reference counting when aliasing C<$a> and
 C<$b>, thus avoiding premature destruction and leakage of scalars if they
 are re-aliased during execution of the sort comparator.  [perl #92264]
 
+=item *
+
+Some convoluted kinds of regexp no longer cause an arithmetic overflow
+when compiled.  [perl #131893]
+
 =back
 
 =head1 Known Problems
