@@ -338,7 +338,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The C<readpipe()> built-in function now checks at compile time that
+it has only one parameter expression, and puts it in scalar context,
+thus ensuring that it doesn't corrupt the stack at runtime.  [perl #4574]
 
 =back
 
