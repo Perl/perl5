@@ -272,7 +272,7 @@ EOT
     $xs .= "        case PERL_constant_IS$type:\n";
     if (length $XS_Constant{$type}) {
       $xs .= << "EOT";
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           $XS_Constant{$type};
 EOT
