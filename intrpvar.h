@@ -639,13 +639,7 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 #endif /* !USE_LOCALE_NUMERIC */
 
 /* Unicode inversion lists */
-PERLVAR(I, Latin1,	SV *)
-PERLVAR(I, UpperLatin1,	SV *)   /* Code points 128 - 255 */
-PERLVAR(I, AboveLatin1,	SV *)
 PERLVAR(I, InBitmap,	SV *)
-
-PERLVAR(I, NonL1NonFinalFold,   SV *)
-PERLVAR(I, HasMultiCharFold,   SV *)
 
 /* utf8 character class swashes */
 PERLVAR(I, utf8_mark,	SV *)
@@ -657,13 +651,6 @@ PERLVAR(I, utf8_charname_begin, SV *)
 PERLVAR(I, utf8_charname_continue, SV *)
 
 PERLVARA(I, utf8_swash_ptrs, POSIX_SWASH_COUNT, SV *)
-PERLVARA(I, XPosix_ptrs, POSIX_CC_COUNT, SV *)
-PERLVAR(I, GCB_invlist, SV *)
-PERLVAR(I, LB_invlist, SV *)
-PERLVAR(I, SB_invlist, SV *)
-PERLVAR(I, SCX_invlist, SV *)
-PERLVAR(I, WB_invlist, SV *)
-PERLVAR(I, Assigned_invlist, SV *)
 PERLVAR(I, seen_deprecated_macro, HV *)
 
 PERLVAR(I, last_swash_hv, HV *)
@@ -733,13 +720,6 @@ PERLVARI(I, known_layers, PerlIO_list_t *, NULL)
 PERLVARI(I, def_layerlist, PerlIO_list_t *, NULL)
 #endif
 
-PERLVAR(I, utf8_idstart, SV *)
-PERLVAR(I, utf8_idcont,	SV *)
-PERLVAR(I, utf8_xidstart, SV *)
-PERLVAR(I, utf8_perl_idstart, SV *)
-PERLVAR(I, utf8_perl_idcont, SV *)
-PERLVAR(I, utf8_xidcont, SV *)
-
 PERLVAR(I, sort_RealCmp, SVCOMPARE_t)
 
 PERLVARI(I, checkav_save, AV *, NULL)	/* save CHECK{}s when compiling */
@@ -782,10 +762,6 @@ PERLVAR(I, blockhooks,	AV *)
 /* Everything that folds to a given character, for case insensitivity regex
  * matching */
 PERLVARI(I, utf8_foldclosures, HV *, NULL)
-
-/* List of characters that participate in folds (except marks, etc in
- * multi-char folds) */
-PERLVARI(I, utf8_foldable, SV *, NULL)
 
 PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 

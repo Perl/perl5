@@ -271,3 +271,27 @@ PERLVARA(G, hash_chars, (1+256) * sizeof(U32), unsigned char) /* perl.c and hv.h
 #ifdef __VMS
 PERLVAR(G, perllib_sep, char)
 #endif
+
+PERLVAR(G, AboveLatin1,	SV *)
+PERLVAR(G, Assigned_invlist, SV *)
+PERLVAR(G, GCB_invlist, SV *)
+PERLVAR(G, HasMultiCharFold,   SV *)
+PERLVAR(G, Latin1,	SV *)
+PERLVAR(G, LB_invlist, SV *)
+PERLVAR(G, NonL1NonFinalFold,   SV *)
+PERLVAR(G, SB_invlist, SV *)
+PERLVAR(G, SCX_invlist, SV *)
+PERLVAR(G, UpperLatin1,	SV *)   /* Code points 128 - 255 */
+
+/* List of characters that participate in folds (except marks, etc in
+ * multi-char folds) */
+PERLVARI(G, utf8_foldable, SV *, NULL)
+
+PERLVAR(G, utf8_idcont,	SV *)
+PERLVAR(G, utf8_idstart, SV *)
+PERLVAR(G, utf8_perl_idcont, SV *)
+PERLVAR(G, utf8_perl_idstart, SV *)
+PERLVAR(G, utf8_xidcont, SV *)
+PERLVAR(G, utf8_xidstart, SV *)
+PERLVAR(G, WB_invlist, SV *)
+PERLVARA(G, XPosix_ptrs, POSIX_CC_COUNT, SV *)

@@ -1190,16 +1190,8 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_totitle);
     SvREFCNT_dec(PL_utf8_tolower);
     SvREFCNT_dec(PL_utf8_tofold);
-    SvREFCNT_dec(PL_utf8_idstart);
-    SvREFCNT_dec(PL_utf8_idcont);
-    SvREFCNT_dec(PL_utf8_foldable);
     SvREFCNT_dec(PL_utf8_foldclosures);
-    SvREFCNT_dec(PL_AboveLatin1);
     SvREFCNT_dec(PL_InBitmap);
-    SvREFCNT_dec(PL_UpperLatin1);
-    SvREFCNT_dec(PL_Latin1);
-    SvREFCNT_dec(PL_NonL1NonFinalFold);
-    SvREFCNT_dec(PL_HasMultiCharFold);
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
 #endif
@@ -1208,28 +1200,11 @@ perl_destruct(pTHXx)
     PL_utf8_totitle	= NULL;
     PL_utf8_tolower	= NULL;
     PL_utf8_tofold	= NULL;
-    PL_utf8_idstart	= NULL;
-    PL_utf8_idcont	= NULL;
     PL_utf8_foldclosures = NULL;
-    PL_AboveLatin1       = NULL;
     PL_InBitmap          = NULL;
-    PL_HasMultiCharFold  = NULL;
 #ifdef USE_LOCALE_CTYPE
     PL_warn_locale       = NULL;
 #endif
-    PL_Latin1            = NULL;
-    PL_NonL1NonFinalFold = NULL;
-    PL_UpperLatin1       = NULL;
-    for (i = 0; i < POSIX_CC_COUNT; i++) {
-        SvREFCNT_dec(PL_XPosix_ptrs[i]);
-        PL_XPosix_ptrs[i] = NULL;
-    }
-    PL_GCB_invlist = NULL;
-    PL_LB_invlist = NULL;
-    PL_SB_invlist = NULL;
-    PL_SCX_invlist = NULL;
-    PL_WB_invlist = NULL;
-    PL_Assigned_invlist = NULL;
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);

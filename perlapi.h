@@ -99,8 +99,32 @@ END_EXTERN_C
 
 #else	/* !PERL_CORE */
 
+#undef  PL_AboveLatin1
+#define PL_AboveLatin1		(*Perl_GAboveLatin1_ptr(NULL))
+#undef  PL_Assigned_invlist
+#define PL_Assigned_invlist	(*Perl_GAssigned_invlist_ptr(NULL))
 #undef  PL_C_locale_obj
 #define PL_C_locale_obj		(*Perl_GC_locale_obj_ptr(NULL))
+#undef  PL_GCB_invlist
+#define PL_GCB_invlist		(*Perl_GGCB_invlist_ptr(NULL))
+#undef  PL_HasMultiCharFold
+#define PL_HasMultiCharFold	(*Perl_GHasMultiCharFold_ptr(NULL))
+#undef  PL_LB_invlist
+#define PL_LB_invlist		(*Perl_GLB_invlist_ptr(NULL))
+#undef  PL_Latin1
+#define PL_Latin1		(*Perl_GLatin1_ptr(NULL))
+#undef  PL_NonL1NonFinalFold
+#define PL_NonL1NonFinalFold	(*Perl_GNonL1NonFinalFold_ptr(NULL))
+#undef  PL_SB_invlist
+#define PL_SB_invlist		(*Perl_GSB_invlist_ptr(NULL))
+#undef  PL_SCX_invlist
+#define PL_SCX_invlist		(*Perl_GSCX_invlist_ptr(NULL))
+#undef  PL_UpperLatin1
+#define PL_UpperLatin1		(*Perl_GUpperLatin1_ptr(NULL))
+#undef  PL_WB_invlist
+#define PL_WB_invlist		(*Perl_GWB_invlist_ptr(NULL))
+#undef  PL_XPosix_ptrs
+#define PL_XPosix_ptrs		(*Perl_GXPosix_ptrs_ptr(NULL))
 #undef  PL_appctx
 #define PL_appctx		(*Perl_Gappctx_ptr(NULL))
 #undef  PL_check
@@ -181,6 +205,20 @@ END_EXTERN_C
 #define PL_timesbase		(*Perl_Gtimesbase_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_utf8_foldable
+#define PL_utf8_foldable	(*Perl_Gutf8_foldable_ptr(NULL))
+#undef  PL_utf8_idcont
+#define PL_utf8_idcont		(*Perl_Gutf8_idcont_ptr(NULL))
+#undef  PL_utf8_idstart
+#define PL_utf8_idstart		(*Perl_Gutf8_idstart_ptr(NULL))
+#undef  PL_utf8_perl_idcont
+#define PL_utf8_perl_idcont	(*Perl_Gutf8_perl_idcont_ptr(NULL))
+#undef  PL_utf8_perl_idstart
+#define PL_utf8_perl_idstart	(*Perl_Gutf8_perl_idstart_ptr(NULL))
+#undef  PL_utf8_xidcont
+#define PL_utf8_xidcont		(*Perl_Gutf8_xidcont_ptr(NULL))
+#undef  PL_utf8_xidstart
+#define PL_utf8_xidstart	(*Perl_Gutf8_xidstart_ptr(NULL))
 #undef  PL_veto_cleanup
 #define PL_veto_cleanup		(*Perl_Gveto_cleanup_ptr(NULL))
 #undef  PL_watch_pvx
