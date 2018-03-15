@@ -85,7 +85,7 @@
 
 /* now even GCC supports __declspec() */
 /* miniperl has no reason to export anything */
-#if defined(PERL_IS_MINIPERL) && !defined(UNDER_CE) && defined(_MSC_VER)
+#if defined(PERL_IS_MINIPERL) && !defined(UNDER_CE)
 #  define DllExport
 #else
 #  if defined(PERLDLL)
