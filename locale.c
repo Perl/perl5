@@ -2598,7 +2598,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                     /* Here everything past the dot is a digit.  Treat it as a
                      * code page */
-                    (void) save_to_buffer("CP", &PL_langinfo_buf,
+                    retval = save_to_buffer("CP", &PL_langinfo_buf,
                                                 &PL_langinfo_bufsize, 0);
                     offset = STRLENs("CP");
 
