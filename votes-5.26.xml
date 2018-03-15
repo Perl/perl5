@@ -25,24 +25,26 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
+<commit votes="khw" id="no commit yet" ticket="132055" desc="assertion failure, patch given in cb67e6c4-c24e-9620-c22b-39261360be96@khwilliamson.com"/>
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 Note sure about this one, since it may convert non-conforming programs that work into non-conforming programs that assert (on debug builds), and should include 97fcda75b598695644a4ad496e090941f5b7dcbc if it is applied.
 These three together (if at all)
-<commit votes="steveh sprout xsawyerx" id="f14cf3632059d421de83cf901c7e849adc1fcd03" ticket="131746" desc="(perl #131746) avoid undefined behaviour in Copy() etc"/>
-<commit votes="steveh sprout xsawyerx" id="45908e4d120d33a558a8b052036c56cd0c90b898" ticket="131746" desc="avoid  'the address of ... will always evaluate as ...' warns in mem macros"/>
-<commit votes="tonyc" id="97fcda75b598695644a4ad496e090941f5b7dcbc" ticket="131746" desc="threads.xs: don't Copy() null pointer"/>
+<commit votes="steveh sprout xsawyerx khw" id="f14cf3632059d421de83cf901c7e849adc1fcd03" ticket="131746" desc="(perl #131746) avoid undefined behaviour in Copy() etc"/>
+<commit votes="steveh sprout xsawyerx khw" id="45908e4d120d33a558a8b052036c56cd0c90b898" ticket="131746" desc="avoid  'the address of ... will always evaluate as ...' warns in mem macros"/>
+<commit votes="tonyc khw" id="97fcda75b598695644a4ad496e090941f5b7dcbc" ticket="131746" desc="threads.xs: don't Copy() null pointer"/>
 
 Move to public list?:
-<commit votes="steveh tonyc" id="4dc12118f61b997fbd030230665b46e7c40f32d6" ticket="132017" desc="fix #132017 - OPFAIL insert needs to set flags to 0"/>
+<commit votes="steveh tonyc khw" id="4dc12118f61b997fbd030230665b46e7c40f32d6" ticket="132017" desc="fix #132017 - OPFAIL insert needs to set flags to 0"/>
 
 If the parser structure layout is part of the ABI, this shouldn't be backported, or the new parser structure members need to be moved to the end.
-<commit votes="steveh sprout tonyc xsawyerx" id="bb4e4c3869d9fb6ee5bddd820c2a373601ecc310" ticket="125351" desc="(perl #125351) abort parsing if parse errors happen in a sub lex"/>
+<commit votes="steveh sprout tonyc xsawyerx khw" id="bb4e4c3869d9fb6ee5bddd820c2a373601ecc310" ticket="125351" desc="(perl #125351) abort parsing if parse errors happen in a sub lex"/>
 
 This ought to have 02c84d7f0f97e083f5d8ea9856488f3ede09364f as well, though that makes this sound slightly controversial (so maybe it should be rejected for maint?):
-<commit votes="steveh" id="4764858cb80e76fdba33cc1b3be8fcdef26df754" ticket="52610" desc="Fix RT #52610: Carp: Do not crash when reading @DB::args"/>
+<commit votes="steveh khw" id="4764858cb80e76fdba33cc1b3be8fcdef26df754" ticket="52610" desc="Fix RT #52610: Carp: Do not crash when reading @DB::args"/>
 I don’t think 02c84d7f0f97e is necessary.  It is just a large comment.
 Also, don’t backport the version change; just add _01 to the maint version.
 -- sprout
