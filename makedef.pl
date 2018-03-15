@@ -368,6 +368,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_hints_mutex
 		    PL_locale_mutex
 		    PL_lc_numeric_mutex
+		    PL_lc_numeric_mutex_depth
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_stashpad
@@ -442,6 +443,7 @@ if (${^SAFE_LOCALES}) {    # Don't need mutexes if have thread-safe operations
     ++$skip{PL_locale_mutex} unless $ARGS{PLATFORM} eq 'win32'
                                 && ($ARGS{CCTYPE} =~ s/MSVC//r) < 140;
     ++$skip{PL_lc_numeric_mutex};
+    ++$skip{PL_lc_numeric_mutex_depth};
 }
 
 unless ($define{'PERL_OP_PARENT'}) {

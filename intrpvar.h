@@ -262,7 +262,9 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
+#if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
 PERLVARI(I, lc_numeric_mutex_depth, int, 0)   /* Emulate general semaphore */
+#endif
 PERLVARA(I, locale_utf8ness, 256, char)
 
 #ifdef USE_LOCALE_CTYPE
