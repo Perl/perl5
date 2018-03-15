@@ -21,7 +21,6 @@ sv_pvn_force_flags
 
 NEED_sv_2pv_flags
 NEED_sv_2pv_flags_GLOBAL
-DPPP_SVPV_NOLEN_LP_ARG
 
 =implementation
 
@@ -127,9 +126,9 @@ sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 #endif
 
 #if { VERSION < 5.8.8 } || ( { VERSION >= 5.9.0 } && { VERSION < 5.9.3 } )
-# define DPPP_SVPV_NOLEN_LP_ARG &PL_na
+# define D_PPP_SVPV_NOLEN_LP_ARG &PL_na
 #else
-# define DPPP_SVPV_NOLEN_LP_ARG 0
+# define D_PPP_SVPV_NOLEN_LP_ARG 0
 #endif
 
 __UNDEFINED__  SvPV_const(sv, lp)      SvPV_flags_const(sv, lp, SV_GMAGIC)
@@ -147,7 +146,7 @@ __UNDEFINED__  SvPV_flags_const(sv, lp, flags) \
 __UNDEFINED__  SvPV_flags_const_nolen(sv, flags) \
                  ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
                   ? SvPVX_const(sv) : \
-                  (const char*) sv_2pv_flags(sv, DPPP_SVPV_NOLEN_LP_ARG, flags|SV_CONST_RETURN))
+                  (const char*) sv_2pv_flags(sv, D_PPP_SVPV_NOLEN_LP_ARG, flags|SV_CONST_RETURN))
 
 __UNDEFINED__  SvPV_flags_mutable(sv, lp, flags) \
                  ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
@@ -166,7 +165,7 @@ __UNDEFINED__  SvPV_force_flags(sv, lp, flags) \
 
 __UNDEFINED__  SvPV_force_flags_nolen(sv, flags) \
                  ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
-                 ? SvPVX(sv) : sv_pvn_force_flags(sv, DPPP_SVPV_NOLEN_LP_ARG, flags))
+                 ? SvPVX(sv) : sv_pvn_force_flags(sv, D_PPP_SVPV_NOLEN_LP_ARG, flags))
 
 __UNDEFINED__  SvPV_force_flags_mutable(sv, lp, flags) \
                  ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
@@ -175,17 +174,17 @@ __UNDEFINED__  SvPV_force_flags_mutable(sv, lp, flags) \
 
 __UNDEFINED__  SvPV_nolen(sv) \
                  ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-                  ? SvPVX(sv) : sv_2pv_flags(sv, DPPP_SVPV_NOLEN_LP_ARG, SV_GMAGIC))
+                  ? SvPVX(sv) : sv_2pv_flags(sv, D_PPP_SVPV_NOLEN_LP_ARG, SV_GMAGIC))
 
 __UNDEFINED__  SvPV_nolen_const(sv) \
                  ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-                  ? SvPVX_const(sv) : sv_2pv_flags(sv, DPPP_SVPV_NOLEN_LP_ARG, SV_GMAGIC|SV_CONST_RETURN))
+                  ? SvPVX_const(sv) : sv_2pv_flags(sv, D_PPP_SVPV_NOLEN_LP_ARG, SV_GMAGIC|SV_CONST_RETURN))
 
 __UNDEFINED__  SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
 __UNDEFINED__  SvPV_nomg_const(sv, lp) SvPV_flags_const(sv, lp, 0)
 __UNDEFINED__  SvPV_nomg_const_nolen(sv) SvPV_flags_const_nolen(sv, 0)
 __UNDEFINED__  SvPV_nomg_nolen(sv) ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-                                    ? SvPVX(sv) : sv_2pv_flags(sv, DPPP_SVPV_NOLEN_LP_ARG, 0))
+                                    ? SvPVX(sv) : sv_2pv_flags(sv, D_PPP_SVPV_NOLEN_LP_ARG, 0))
 
 __UNDEFINED__  SvPV_renew(sv,n) STMT_START { SvLEN_set(sv, n); \
                  SvPV_set((sv), (char *) saferealloc(          \

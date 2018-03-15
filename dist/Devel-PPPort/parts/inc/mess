@@ -35,7 +35,6 @@ PERL_ARGS_ASSERT_CROAK_XS_USAGE
 NEED_mess
 NEED_mess_nocontext
 NEED_vmess
-_dppp_fix_utf8_errsv
 
 =implementation
 
@@ -51,14 +50,14 @@ _dppp_fix_utf8_errsv
 #ifndef croak_sv
 #if { VERSION >= 5.7.3 } || ( { VERSION >= 5.6.1 } && { VERSION < 5.7.0 } )
 #  if ( { VERSION >= 5.8.0 } && { VERSION < 5.8.9 } ) || ( { VERSION >= 5.9.0 } && { VERSION < 5.10.1 } )
-#    define _dppp_fix_utf8_errsv(errsv, sv)                     \
+#    define D_PPP_FIX_UTF8_ERRSV(errsv, sv)                     \
         STMT_START {                                            \
             if (sv != ERRSV)                                    \
                 SvFLAGS(ERRSV) = (SvFLAGS(ERRSV) & ~SVf_UTF8) | \
                                  (SvFLAGS(sv) & SVf_UTF8);      \
         } STMT_END
 #  else
-#    define _dppp_fix_utf8_errsv(errsv, sv) STMT_START {} STMT_END
+#    define D_PPP_FIX_UTF8_ERRSV(errsv, sv) STMT_START {} STMT_END
 #  endif
 #  define croak_sv(sv)                        \
     STMT_START {                              \
@@ -66,7 +65,7 @@ _dppp_fix_utf8_errsv
             sv_setsv(ERRSV, sv);              \
             croak(NULL);                      \
         } else {                              \
-            _dppp_fix_utf8_errsv(ERRSV, sv);  \
+            D_PPP_FIX_UTF8_ERRSV(ERRSV, sv);  \
             croak("%" SVf, SVfARG(sv));       \
         }                                     \
     } STMT_END
