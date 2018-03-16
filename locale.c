@@ -1548,18 +1548,22 @@ S_new_ctype(pTHX_ const char *newctype)
                 && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
             {
                 bool is_bad = FALSE;
-                char name[3] = { '\0' };
+                char name[4] = { '\0' };
 
                 /* Convert the name into a string */
-                if (isPRINT_A(i)) {
+                if (isGRAPH_A(i)) {
                     name[0] = i;
                     name[1] = '\0';
                 }
                 else if (i == '\n') {
-                    my_strlcpy(name, "\n", sizeof(name));
+                    my_strlcpy(name, "\\n", sizeof(name));
+                }
+                else if (i == '\t') {
+                    my_strlcpy(name, "\\t", sizeof(name));
                 }
                 else {
-                    my_strlcpy(name, "\t", sizeof(name));
+                    assert(i == ' ');
+                    my_strlcpy(name, "' '", sizeof(name));
                 }
 
                 /* Check each possibe class */
