@@ -910,6 +910,7 @@ S_emulate_setlocale(const int category,
          * other platforms do it differently, so we have to handle all cases
          * ourselves */
 
+        unsigned int i;
         const char * s = locale;
         const char * e = locale + strlen(locale);
         const char * p = s;
@@ -917,8 +918,17 @@ S_emulate_setlocale(const int category,
         const char * name_start;
         const char * name_end;
 
+        /* If the string that gives what to set doesn't include all categories,
+         * the omitted ones get set to "C".  To get this behavior, first set
+         * all the individual categories to "C", and override the furnished
+         * ones below */
+        for (i = 0; i < LC_ALL_INDEX; i++) {
+            if (! emulate_setlocale(categories[i], "C", i, TRUE)) {
+                return NULL;
+            }
+        }
+
         while (s < e) {
-            unsigned int i;
 
             /* Parse through the category */
             while (isWORDCHAR(*p)) {

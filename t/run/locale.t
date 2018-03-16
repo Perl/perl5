@@ -434,7 +434,9 @@ SKIP: {
     my $valid_string = "";
     my $invalid_string = "";
 
-    foreach my $category (@valid_categories) {
+    # Deliberately don't include all categories, so as to test this situation
+    for my $i (0 .. @valid_categories - 2) {
+        my $category = $valid_categories[$i];
         if ($category ne "LC_ALL") {
             $invalid_string .= ";" if $invalid_string ne "";
             $invalid_string .= "$category=foo_BAR";
