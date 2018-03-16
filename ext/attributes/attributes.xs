@@ -66,7 +66,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 			bool warn =
 			    !CvISXSUB(MUTABLE_CV(sv))
 			 && CvROOT(MUTABLE_CV(sv))
-			 && !CvLVALUE(MUTABLE_CV(sv)) != negated;
+			 && cBOOL(CvLVALUE(MUTABLE_CV(sv))) == negated;
 			if (negated)
 			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_LVALUE;
 			else
