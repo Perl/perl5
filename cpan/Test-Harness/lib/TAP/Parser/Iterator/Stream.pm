@@ -11,11 +11,11 @@ TAP::Parser::Iterator::Stream - Iterator for filehandle-based TAP sources
 
 =head1 VERSION
 
-Version 3.39
+Version 3.41
 
 =cut
 
-our $VERSION = '3.39';
+our $VERSION = '3.41';
 
 =head1 SYNOPSIS
 
@@ -88,6 +88,16 @@ sub next_raw {
 sub _finish {
     my $self = shift;
     close delete $self->{fh};
+}
+
+sub get_select_handles {
+    my $self = shift;
+
+    # return our handle in case it's a socket or pipe (select()-able)
+    return ( $self->{fh}, )
+        if (-S $self->{fh} || -p $self->{fh});
+
+    return;
 }
 
 1;

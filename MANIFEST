@@ -2122,6 +2122,7 @@ cpan/Test-Harness/t/console.t				Test::Harness test
 cpan/Test-Harness/t/data/catme.1			Test data for Test::Harness
 cpan/Test-Harness/t/data/proverc			Test data for Test::Harness
 cpan/Test-Harness/t/data/sample.yml			Test data for Test::Harness
+cpan/Test-Harness/t/env_opts.t
 cpan/Test-Harness/t/errors.t				Test::Harness test
 cpan/Test-Harness/t/file.t				Test::Harness test
 cpan/Test-Harness/t/glob-to-regexp.t			Test::Harness test
@@ -2207,6 +2208,7 @@ cpan/Test-Harness/t/sample-tests/skipall		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_nomsg		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_v13		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/space_after_plan	Test data for Test::Harness
+cpan/Test-Harness/t/sample-tests/space_after_plan_v13
 cpan/Test-Harness/t/sample-tests/stdout_stderr		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/strict			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/switches		Test data for Test::Harness
@@ -2240,6 +2242,7 @@ cpan/Test-Harness/t/source_tests/source.sh				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.t				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.tap				Test::Harness test
 cpan/Test-Harness/t/source_tests/source_args.sh				Test::Harness test
+cpan/Test-Harness/t/source_tests/test.tap
 cpan/Test-Harness/t/spool.t				Test::Harness test
 cpan/Test-Harness/t/state.t				Test::Harness test
 cpan/Test-Harness/t/state_results.t			Test::Harness test
