@@ -7,6 +7,8 @@ use Test2::Util qw/CAN_THREAD CAN_REALLY_FORK USE_THREADS get_tid/;
 
 ok(1, "Just to get things initialized.");
 
+# We need to control this env var for this test
+$ENV{T2_NO_IPC} = 0;
 # This test relies on TAP being the default formatter for non-canon instances
 $ENV{T2_FORMATTER} = 'TAP';
 
@@ -22,9 +24,12 @@ is_deeply(
         ipc       => undef,
         formatter => undef,
 
-        ipc_polling => undef,
-        ipc_drivers => [],
-        ipc_timeout => 30,
+        add_uuid_via => undef,
+
+        ipc_polling    => undef,
+        ipc_drivers    => [],
+        ipc_timeout    => 30,
+        ipc_disabled   => 0,
 
         formatters => [],
 
@@ -52,9 +57,12 @@ is_deeply(
     {
         contexts => {},
 
-        ipc_polling => undef,
-        ipc_drivers => [],
-        ipc_timeout => 30,
+        ipc_polling  => undef,
+        ipc_drivers  => [],
+        ipc_timeout  => 30,
+        ipc_disabled => 0,
+
+        add_uuid_via => undef,
 
         formatters => [],
 
@@ -499,6 +507,31 @@ if (CAN_REALLY_FORK) {
     $one->set_ipc_shm_last('abc3');
     $one->context_init_callbacks->[0]->({'hub' => 'Fake::Hub'});
     is($cull, 1, "called cull once");
+}
+
+{
+    require Test2::IPC::Driver::Files;
+
+    local $ENV{T2_NO_IPC} = 1;
+    $one->reset;
+    $one->add_ipc_driver('Test2::IPC::Driver::Files');
+    ok($one->ipc_disabled, "IPC is disabled by env var");
+    ok(!$one->ipc, 'IPC not loaded');
+
+    local $ENV{T2_NO_IPC} = 0;
+    $one->reset;
+    ok(!$one->ipc_disabled, "IPC is not disabled by env var");
+    ok($one->ipc, 'IPC loaded');
+    like(
+        exception { $one->ipc_disable },
+        qr/Attempt to disable IPC after it has been initialized/,
+        "Cannot diable IPC once it is initialized"
+    );
+
+    $one->reset;
+    ok(!$one->ipc_disabled, "IPC is not disabled by env var");
+    $one->ipc_disable;
+    ok($one->ipc_disabled, "IPC is disabled directly");
 }
 
 done_testing;

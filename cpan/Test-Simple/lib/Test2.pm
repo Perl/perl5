@@ -2,7 +2,7 @@ package Test2;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 
 1;

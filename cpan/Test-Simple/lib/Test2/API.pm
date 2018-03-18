@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 
 my $INST;
@@ -97,6 +97,8 @@ our @EXPORT_OK = qw{
     test2_ipc_wait_disable
     test2_ipc_wait_enabled
 
+    test2_add_uuid_via
+
     test2_add_callback_context_aquire
     test2_add_callback_context_acquire
     test2_add_callback_context_init
@@ -114,6 +116,8 @@ our @EXPORT_OK = qw{
 
     test2_ipc
     test2_has_ipc
+    test2_ipc_disable
+    test2_ipc_disabled
     test2_ipc_drivers
     test2_ipc_add_driver
     test2_ipc_polling
@@ -191,8 +195,15 @@ sub test2_list_exit_callbacks            { @{$INST->exit_callbacks} }
 sub test2_list_post_load_callbacks       { @{$INST->post_load_callbacks} }
 sub test2_list_pre_subtest_callbacks     { @{$INST->pre_subtest_callbacks} }
 
+sub test2_add_uuid_via {
+    $INST->set_add_uuid_via(@_) if @_;
+    $INST->add_uuid_via();
+}
+
 sub test2_ipc                 { $INST->ipc }
 sub test2_has_ipc             { $INST->has_ipc }
+sub test2_ipc_disable         { $INST->ipc_disable }
+sub test2_ipc_disabled        { $INST->ipc_disabled }
 sub test2_ipc_add_driver      { $INST->add_ipc_driver(@_) }
 sub test2_ipc_drivers         { @{$INST->ipc_drivers} }
 sub test2_ipc_polling         { $INST->ipc_polling }
@@ -229,6 +240,7 @@ sub _contexts_ref                  { $INST->contexts }
 sub _context_acquire_callbacks_ref { $INST->context_acquire_callbacks }
 sub _context_init_callbacks_ref    { $INST->context_init_callbacks }
 sub _context_release_callbacks_ref { $INST->context_release_callbacks }
+sub _add_uuid_via_ref              { \($INST->{Test2::API::Instance::ADD_UUID_VIA()}) }
 
 # Private, for use in Test2::IPC
 sub _set_ipc { $INST->set_ipc(@_) }
@@ -276,6 +288,7 @@ sub no_context(&;$) {
     return;
 };
 
+my $UUID_VIA = _add_uuid_via_ref();
 my $CID = 1;
 sub context {
     # We need to grab these before anything else to ensure they are not
@@ -353,13 +366,18 @@ sub context {
     # hit with how often this needs to be called.
     my $trace = bless(
         {
-            frame    => [$pkg, $file, $line, $sub],
-            pid      => $$,
-            tid      => get_tid(),
-            cid      => 'C' . $CID++,
-            hid      => $hid,
-            nested   => $hub->{nested},
+            frame  => [$pkg, $file, $line, $sub],
+            pid    => $$,
+            tid    => get_tid(),
+            cid    => 'C' . $CID++,
+            hid    => $hid,
+            nested => $hub->{nested},
             buffered => $hub->{buffered},
+
+            $$UUID_VIA ? (
+                huuid => $hub->{uuid},
+                uuid  => ${$UUID_VIA}->('context'),
+            ) : (),
         },
         'Test2::EventFacet::Trace'
     );
@@ -620,7 +638,7 @@ sub run_subtest {
         }
     }
 
-    $hub->finalize($trace->snapshot(hid => $hub->hid, nested => $hub->nested, buffered => $buffered), 1)
+    $hub->finalize($trace->snapshot(huuid => $hub->uuid, hid => $hub->hid, nested => $hub->nested, buffered => $buffered), 1)
         if $ok
         && !$hub->no_ending
         && !$hub->ended;
@@ -628,11 +646,12 @@ sub run_subtest {
     my $pass = $ok && $hub->is_passing;
     my $e = $ctx->build_event(
         'Subtest',
-        pass       => $pass,
-        name       => $name,
-        subtest_id => $hub->id,
-        buffered   => $buffered,
-        subevents  => \@events,
+        pass         => $pass,
+        name         => $name,
+        subtest_id   => $hub->id,
+        subtest_uuid => $hub->uuid,
+        buffered     => $buffered,
+        subevents    => \@events,
     );
 
     my $plan_ok = $hub->check_plan;
@@ -1222,6 +1241,14 @@ Check if Test2 believes it is the END phase.
 This will return the global L<Test2::API::Stack> instance. If this has not
 yet been initialized it will be initialized now.
 
+=item test2_ipc_disable
+
+Disable IPC.
+
+=item $bool = test2_ipc_diabled
+
+Check if IPC is disabled.
+
 =item test2_ipc_wait_enable()
 
 =item test2_ipc_wait_disable()
@@ -1356,6 +1383,22 @@ Returns all the post load callback references.
 =item @list = test2_list_pre_subtest_callbacks()
 
 Returns all the pre-subtest callback references.
+
+=item test2_add_uuid_via(sub { ... })
+
+=item $sub = test2_add_uuid_via()
+
+This allows you to provide a UUID generator. If provided UUIDs will be attached
+to all events, hubs, and contexts. This is useful for storing, tracking, and
+linking these objects.
+
+The sub you provide should always return a unique identifier. Most things will
+expect a proper UUID string, however nothing in Test2::API enforces this.
+
+The sub will receive exactly 1 argument, the type of thing being tagged
+'context', 'hub', or 'event'. In the future additional things may be tagged, in
+which case new strings will be passed in. These are purely informative, you can
+(and usually should) ignore them.
 
 =back
 

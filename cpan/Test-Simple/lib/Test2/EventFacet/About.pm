@@ -2,10 +2,10 @@ package Test2::EventFacet::About;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 BEGIN { require Test2::EventFacet; our @ISA = qw(Test2::EventFacet) }
-use Test2::Util::HashBase qw{ -package -no_display };
+use Test2::Util::HashBase qw{ -package -no_display -uuid };
 
 1;
 
@@ -44,6 +44,12 @@ Event package name.
 =item $bool = $about->no_display()
 
 True if the event should be skipped by formatters.
+
+=item $uuid = $about->{uuid}
+
+=item $uuid = $about->uuid()
+
+Will be set to a uuid if uuid tagging was enabled.
 
 =back
 

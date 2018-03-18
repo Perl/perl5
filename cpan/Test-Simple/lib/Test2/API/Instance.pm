@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
@@ -21,8 +21,11 @@ use Test2::Util::HashBase qw{
     ipc stack formatter
     contexts
 
+    add_uuid_via
+
     -preload
 
+    ipc_disabled
     ipc_shm_size
     ipc_shm_last
     ipc_shm_id
@@ -97,12 +100,15 @@ sub post_preload_reset {
     delete $self->{+_PID};
     delete $self->{+_TID};
 
+    $self->{+ADD_UUID_VIA} = undef unless exists $self->{+ADD_UUID_VIA};
+
     $self->{+CONTEXTS} = {};
 
     $self->{+FORMATTERS} = [];
 
     $self->{+FINALIZED} = undef;
     $self->{+IPC}       = undef;
+    $self->{+IPC_DISABLED} = $ENV{T2_NO_IPC} ? 1 : 0;
 
     $self->{+IPC_TIMEOUT} = DEFAULT_IPC_TIMEOUT() unless defined $self->{+IPC_TIMEOUT};
 
@@ -117,7 +123,9 @@ sub reset {
     delete $self->{+_PID};
     delete $self->{+_TID};
 
-    $self->{+CONTEXTS}    = {};
+    $self->{+ADD_UUID_VIA} = undef;
+
+    $self->{+CONTEXTS} = {};
 
     $self->{+IPC_DRIVERS} = [];
     $self->{+IPC_POLLING} = undef;
@@ -125,8 +133,9 @@ sub reset {
     $self->{+FORMATTERS} = [];
     $self->{+FORMATTER}  = undef;
 
-    $self->{+FINALIZED} = undef;
-    $self->{+IPC}       = undef;
+    $self->{+FINALIZED}    = undef;
+    $self->{+IPC}          = undef;
+    $self->{+IPC_DISABLED} = $ENV{T2_NO_IPC} ? 1 : 0;
 
     $self->{+IPC_TIMEOUT} = DEFAULT_IPC_TIMEOUT() unless defined $self->{+IPC_TIMEOUT};
 
@@ -192,6 +201,7 @@ sub _finalize {
 
     # Turn on IPC if threads are on, drivers are registered, or the Test2::IPC
     # module is loaded.
+    return if $self->{+IPC_DISABLED};
     return unless USE_THREADS || $INC{'Test2/IPC.pm'} || @{$self->{+IPC_DRIVERS}};
 
     # Turn on polling by default, people expect it.
@@ -320,6 +330,15 @@ sub add_exit_callback {
         unless $code && $rtype eq 'CODE';
 
     push @{$self->{+EXIT_CALLBACKS}} => $code;
+}
+
+sub ipc_disable {
+    my $self = shift;
+
+    confess "Attempt to disable IPC after it has been initialized"
+        if $self->{+IPC};
+
+    $self->{+IPC_DISABLED} = 1;
 }
 
 sub add_ipc_driver {
@@ -814,6 +833,14 @@ L<Test2>).
 
 Get the one true IPC instance.
 
+=item $obj->ipc_disable
+
+Turn IPC off
+
+=item $bool = $obj->ipc_disabled
+
+Check if IPC is disabled
+
 =item $stack = $obj->stack
 
 Get the one true hub stack.
@@ -837,6 +864,22 @@ during initialization. If a formatter is added after initialization has occurred
 a warning will be generated:
 
     "Formatter $formatter loaded too late to be used as the global formatter"
+
+=item $obj->set_add_uuid_via(sub { ... })
+
+=item $sub = $obj->add_uuid_via()
+
+This allows you to provide a UUID generator. If provided UUIDs will be attached
+to all events, hubs, and contexts. This is useful for storing, tracking, and
+linking these objects.
+
+The sub you provide should always return a unique identifier. Most things will
+expect a proper UUID string, however nothing in Test2::API enforces this.
+
+The sub will receive exactly 1 argument, the type of thing being tagged
+'context', 'hub', or 'event'. In the future additional things may be tagged, in
+which case new strings will be passed in. These are purely informative, you can
+(and usually should) ignore them.
 
 =back
 

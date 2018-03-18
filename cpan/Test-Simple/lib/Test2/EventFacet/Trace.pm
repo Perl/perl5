@@ -2,14 +2,14 @@ package Test2::EventFacet::Trace;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 BEGIN { require Test2::EventFacet; our @ISA = qw(Test2::EventFacet) }
 
 use Test2::Util qw/get_tid pkg_to_file/;
 use Carp qw/confess/;
 
-use Test2::Util::HashBase qw{^frame ^pid ^tid ^cid -hid -nested details -buffered};
+use Test2::Util::HashBase qw{^frame ^pid ^tid ^cid -hid -nested details -buffered -uuid -huuid};
 
 {
     no warnings 'once';
@@ -134,11 +134,40 @@ The thread ID in which the event was generated.
 
 The ID of the context that was used to create the event.
 
+=item $uuid = $trace->{uuid}
+
+=item $uuid = $trace->uuid()
+
+The UUID of the context that was used to create the event. (If uuid tagging was
+enabled)
+
+=back
+
+=head2 DISCOURAGED HUB RELATED FIELDS
+
+These fields were not always set properly by tools. These are B<MOSTLY>
+deprecated by the L<Test2::EventFacet::Hub> facets. These fields are not
+required, and may only reflect the hub that was current when the event was
+created, which is not necessarily the same as the hub the event was sent
+through.
+
+Some tools did do a good job setting these to the correct hub, but you cannot
+always rely on that. Use the 'hubs' facet list instead.
+
+=over 4
+
 =item $hid = $trace->{hid}
 
 =item $hid = $trace->hid()
 
 The ID of the hub that was current when the event was created.
+
+=item $huuid = $trace->{huuid}
+
+=item $huuid = $trace->huuid()
+
+The UUID of the hub that was current when the event was created. (If uuid
+tagging was enabled).
 
 =item $int = $trace->{nested}
 
@@ -210,9 +239,11 @@ Get the debug-info subroutine name.
 =item $sig = trace->signature
 
 Get a signature string that identifies this trace. This is used to check if
-multiple events are related. The Trace includes pid, tid, file, line number,
-and the cid which is C<'C\d+'> for traces created by a context, or C<'T\d+'>
-for traces created by C<new()>.
+multiple events are related.
+
+If UUID's are enabled then a uuid is returned. Otherwise the signature includes
+pid, tid, file, line number, and the cid which is C<'C\d+'> for traces created
+by a context, or C<'T\d+'> for traces created by C<new()>.
 
 =back
 

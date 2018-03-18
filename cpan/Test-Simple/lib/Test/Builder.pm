@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -21,7 +21,7 @@ BEGIN {
     warn "Test::Builder was loaded after Test2 initialization, this is not recommended."
         if Test2::API::test2_init_done() || Test2::API::test2_load_done();
 
-    if (USE_THREADS) {
+    if (USE_THREADS && ! Test2::API::test2_ipc_disabled()) {
         require Test2::IPC;
         require Test2::IPC::Driver::Files;
         Test2::IPC::Driver::Files->import;
@@ -120,7 +120,7 @@ sub new {
 
         Test2::API::test2_add_callback_exit(sub { $Test->_ending(@_) });
 
-        Test2::API::test2_ipc()->set_no_fatal(1) if USE_THREADS;
+        Test2::API::test2_ipc()->set_no_fatal(1) if Test2::API::test2_has_ipc();
     }
     return $Test;
 }
@@ -221,6 +221,7 @@ sub child {
     $meta->{Test_Results} = [];
     $meta->{subevents} = $subevents;
     $meta->{subtest_id} = $hub->id;
+    $meta->{subtest_uuid} = $hub->uuid;
     $meta->{subtest_buffered} = $parent->format ? 0 : 1;
 
     $self->_add_ts_hooks;
@@ -301,6 +302,7 @@ FAIL
         else {
             $parent->{subevents}  = $meta->{subevents};
             $parent->{subtest_id} = $meta->{subtest_id};
+            $parent->{subtest_uuid} = $meta->{subtest_uuid};
             $parent->{subtest_buffered} = $meta->{subtest_buffered};
             $parent->ok( $chub->is_passing, $meta->{Name} );
         }
@@ -671,11 +673,12 @@ sub ok {
     my @attrs;
     my $subevents  = delete $self->{subevents};
     my $subtest_id = delete $self->{subtest_id};
+    my $subtest_uuid = delete $self->{subtest_uuid};
     my $subtest_buffered = delete $self->{subtest_buffered};
     my $epkg = 'Test2::Event::Ok';
     if ($subevents) {
         $epkg = 'Test2::Event::Subtest';
-        push @attrs => (subevents => $subevents, subtest_id => $subtest_id, buffered => $subtest_buffered);
+        push @attrs => (subevents => $subevents, subtest_id => $subtest_id, subtest_uuid => $subtest_uuid, buffered => $subtest_buffered);
     }
 
     my $e = bless {
@@ -2540,6 +2543,18 @@ bugs to support.
 
 Test::Builder is only thread-aware if threads.pm is loaded I<before>
 Test::Builder.
+
+You can directly disable thread support with one of the following:
+
+    $ENV{T2_NO_IPC} = 1
+
+or
+
+    no Test2::IPC;
+
+or
+
+    Test2::API::test2_ipc_disable()
 
 =head1 MEMORY
 

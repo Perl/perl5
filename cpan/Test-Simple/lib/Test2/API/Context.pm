@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 
 use Carp qw/confess croak/;
@@ -19,7 +19,7 @@ my %LOADED = (
         my $file = "Test2/Event/$_.pm";
         require $file unless $INC{$file};
         ( $pkg => $pkg, $_ => $pkg )
-    } qw/Ok Diag Note Plan Bail Exception Waiting Skip Subtest Pass Fail/
+    } qw/Ok Diag Note Plan Bail Exception Waiting Skip Subtest Pass Fail V2/
 );
 
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
@@ -198,6 +198,42 @@ sub throw {
 sub alert {
     my ($self, $msg) = @_;
     $self->trace->alert($msg);
+}
+
+sub send_ev2_and_release {
+    my $self = shift;
+    my $out  = $self->send_ev2(@_);
+    $self->release;
+    return $out;
+}
+
+sub send_ev2 {
+    my $self = shift;
+
+    my $e;
+    {
+        local $Carp::CarpLevel = $Carp::CarpLevel + 1;
+        $e = Test2::Event::V2->new(
+            trace => $self->{+TRACE}->snapshot,
+            @_,
+        );
+    }
+
+    if ($self->{+_ABORTED}) {
+        my $f = $e->facet_data;
+        ${$self->{+_ABORTED}}++ if $f->{control}->{halt} || defined($f->{control}->{terminate}) || defined($e->terminate);
+    }
+    $self->{+HUB}->send($e);
+}
+
+sub build_ev2 {
+    my $self = shift;
+
+    local $Carp::CarpLevel = $Carp::CarpLevel + 1;
+    Test2::Event::V2->new(
+        trace => $self->{+TRACE}->snapshot,
+        @_,
+    );
 }
 
 sub send_event_and_release {
@@ -614,6 +650,21 @@ The value of C<$@> when the context was created.
 
 =head2 EVENT PRODUCTION METHODS
 
+B<Which one do I use?>
+
+The C<pass*> and C<fail*> are optimal if they meet your situation, using one of
+them will always be the most optimal. That said they are optimal by eliminating
+many features.
+
+Method such as C<ok>, and C<note> are shortcuts for generating common 1-task
+events based on the old API, however they are forward compatible, and easy to
+use. If these meet your needs then go ahead and use them, but please check back
+often for alternatives that may be added.
+
+If you want to generate new style events, events that do many things at once,
+then you want the C<*ev2*> methods. These let you directly specify which facets
+you wish to use.
+
 =over 4
 
 =item $event = $ctx->pass()
@@ -737,7 +788,44 @@ Send an L<Test2::Event::Skip> event.
 This sends an L<Test2::Event::Bail> event. This event will completely
 terminate all testing.
 
+=item $event = $ctx->send_ev2(%facets)
+
+This lets you build and send a V2 event directly from facets. The event is
+returned after it is sent.
+
+This example sends a single assertion, a note (comment for stdout in
+Test::Builder talk) and sets the plan to 1.
+
+    my $event = $ctx->send_event(
+        plan   => {count => 1},
+        assert => {pass  => 1, details => "A passing assert"},
+        info => [{tag => 'NOTE', details => "This is a note"}],
+    );
+
+=item $event = $ctx->build_e2(%facets)
+
+This is the same as C<send_ev2()>, except it builds and returns the event
+without sending it.
+
+=item $event = $ctx->send_ev2_and_release($Type, %parameters)
+
+This is a combination of C<send_ev2()> and C<release()>.
+
+    sub shorthand {
+        my $ctx = context();
+        return $ctx->send_ev2_and_release(assert => {pass => 1, details => 'foo'});
+    }
+
+    sub longform {
+        my $ctx = context();
+        my $event = $ctx->send_ev2(assert => {pass => 1, details => 'foo'});
+        $ctx->release;
+        return $event;
+    }
+
 =item $event = $ctx->send_event($Type, %parameters)
+
+B<It is better to use send_ev2() in new code.>
 
 This lets you build and send an event of any type. The C<$Type> argument should
 be the event package name with C<Test2::Event::> left off, or a fully
@@ -752,10 +840,14 @@ or
 
 =item $event = $ctx->build_event($Type, %parameters)
 
+B<It is better to use build_ev2() in new code.>
+
 This is the same as C<send_event()>, except it builds and returns the event
 without sending it.
 
 =item $event = $ctx->send_event_and_release($Type, %parameters)
+
+B<It is better to use send_ev2_and_release() in new code.>
 
 This is a combination of C<send_event()> and C<release()>.
 

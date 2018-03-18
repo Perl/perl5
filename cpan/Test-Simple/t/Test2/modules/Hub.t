@@ -121,11 +121,8 @@ tests IPC => sub {
         my $old = $hub->format(My::Formatter->new);
 
         ok($old->isa('My::Formatter'), "old formatter");
-        is_deeply(
-            $old,
-            [$e1, $e2, $e3],
-            "Formatter got all events ($name)"
-        );
+        is(@$old, 3, "Formatter got all events ($name)");
+        ok($_->{hubs}, "Set the hubs") for @$old;
     };
 
     if (CAN_REALLY_FORK) {

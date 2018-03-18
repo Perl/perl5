@@ -27,6 +27,18 @@ is_deeply(
         increments_count => 0,
         diagnostics      => 0,
         no_display       => 0,
+        hubs             => [
+            {
+                'buffered' => 0,
+                'details'  => 'Test2::Hub::Interceptor',
+                'hid'      => "$$~0~2",
+                'ipc'      => 0,
+                'nested'   => 0,
+                'pid'      => $$,
+                'tid'      => 0,
+                'uuid'     => undef
+            }
+        ],
     },
     "Defaults"
 );

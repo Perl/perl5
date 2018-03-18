@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
 
 use Test2::API::Instance;
@@ -23,9 +23,12 @@ use Carp qw/confess/;
 our @EXPORT_OK = qw/cull/;
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
+sub unimport { Test2::API::test2_ipc_disable() }
+
 sub import {
     goto &Exporter::import if test2_has_ipc || !test2_init_done();
 
+    confess "IPC is disabled" if Test2::API::test2_ipc_disabled();
     confess "Cannot add IPC in a child process (" . test2_pid() . " vs $$)" if test2_pid() != $$;
     confess "Cannot add IPC in a child thread (" . test2_tid() . " vs " . get_tid() . ")"  if test2_tid() != get_tid();
 
@@ -95,6 +98,11 @@ Test2::IPC - Turn on IPC for threading or forking support.
 You should C<use Test2::IPC;> as early as possible in your test file. If you
 import this module after API initialization it will attempt to retrofit IPC
 onto the existing hubs.
+
+=head2 DISABLING IT
+
+You can use C<no Test2::IPC;> to disable IPC for good. You can also use the
+T2_NO_IPC env var.
 
 =head1 EXPORTS
 

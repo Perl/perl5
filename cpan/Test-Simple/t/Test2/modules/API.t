@@ -37,6 +37,8 @@ ok(Test2::API->can($_), "$_ method is present") for qw{
     test2_list_post_load_callbacks
 
     test2_ipc
+    test2_ipc_disable
+    test2_ipc_disabled
     test2_ipc_drivers
     test2_ipc_add_driver
     test2_ipc_polling

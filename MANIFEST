@@ -2286,6 +2286,7 @@ cpan/Test-Simple/lib/Test2/Event/Plan.pm
 cpan/Test-Simple/lib/Test2/Event/Skip.pm
 cpan/Test-Simple/lib/Test2/Event/Subtest.pm
 cpan/Test-Simple/lib/Test2/Event/TAP/Version.pm
+cpan/Test-Simple/lib/Test2/Event/V2.pm
 cpan/Test-Simple/lib/Test2/Event/Waiting.pm
 cpan/Test-Simple/lib/Test2/EventFacet.pm
 cpan/Test-Simple/lib/Test2/EventFacet/About.pm
@@ -2293,6 +2294,7 @@ cpan/Test-Simple/lib/Test2/EventFacet/Amnesty.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Assert.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Control.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Error.pm
+cpan/Test-Simple/lib/Test2/EventFacet/Hub.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Info.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Meta.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Parent.pm
@@ -2495,6 +2497,10 @@ cpan/Test-Simple/t/Test2/acceptance/try_it_plan.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_skip.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_threads.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_todo.t
+cpan/Test-Simple/t/Test2/behavior/disable_ipc_a.t
+cpan/Test-Simple/t/Test2/behavior/disable_ipc_b.t
+cpan/Test-Simple/t/Test2/behavior/disable_ipc_c.t
+cpan/Test-Simple/t/Test2/behavior/disable_ipc_d.t
 cpan/Test-Simple/t/Test2/behavior/err_var.t
 cpan/Test-Simple/t/Test2/behavior/Formatter.t
 cpan/Test-Simple/t/Test2/behavior/init_croak.t
@@ -2512,6 +2518,7 @@ cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_todo.t
 cpan/Test-Simple/t/Test2/behavior/Taint.t
 cpan/Test-Simple/t/Test2/behavior/trace_signature.t
+cpan/Test-Simple/t/Test2/behavior/uuid.t
 cpan/Test-Simple/t/Test2/legacy/TAP.t
 cpan/Test-Simple/t/Test2/modules/API.t
 cpan/Test-Simple/t/Test2/modules/API/Breakage.t
@@ -2532,6 +2539,7 @@ cpan/Test-Simple/t/Test2/modules/Event/Plan.t
 cpan/Test-Simple/t/Test2/modules/Event/Skip.t
 cpan/Test-Simple/t/Test2/modules/Event/Subtest.t
 cpan/Test-Simple/t/Test2/modules/Event/TAP/Version.t
+cpan/Test-Simple/t/Test2/modules/Event/V2.t
 cpan/Test-Simple/t/Test2/modules/Event/Waiting.t
 cpan/Test-Simple/t/Test2/modules/EventFacet.t
 cpan/Test-Simple/t/Test2/modules/EventFacet/About.t

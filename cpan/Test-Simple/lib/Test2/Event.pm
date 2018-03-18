@@ -2,9 +2,12 @@ package Test2::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302122';
+our $VERSION = '1.302133';
 
-use Test2::Util::HashBase qw/trace -amnesty/;
+use Scalar::Util qw/blessed reftype/;
+use Carp qw/croak/;
+
+use Test2::Util::HashBase qw/trace -amnesty uuid -hubs/;
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
 use Test2::Util qw(pkg_to_file);
 
@@ -18,25 +21,53 @@ use Test2::EventFacet::Meta();
 use Test2::EventFacet::Parent();
 use Test2::EventFacet::Plan();
 use Test2::EventFacet::Trace();
-
-my @FACET_TYPES = qw{
-    Test2::EventFacet::About
-    Test2::EventFacet::Amnesty
-    Test2::EventFacet::Assert
-    Test2::EventFacet::Control
-    Test2::EventFacet::Error
-    Test2::EventFacet::Info
-    Test2::EventFacet::Meta
-    Test2::EventFacet::Parent
-    Test2::EventFacet::Plan
-    Test2::EventFacet::Trace
-};
-
-sub FACET_TYPES() { @FACET_TYPES }
+use Test2::EventFacet::Hub();
 
 # Legacy tools will expect this to be loaded now
 require Test2::Util::Trace;
 
+my %LOADED_FACETS = (
+    'about'   => 'Test2::EventFacet::About',
+    'amnesty' => 'Test2::EventFacet::Amnesty',
+    'assert'  => 'Test2::EventFacet::Assert',
+    'control' => 'Test2::EventFacet::Control',
+    'errors'  => 'Test2::EventFacet::Error',
+    'info'    => 'Test2::EventFacet::Info',
+    'meta'    => 'Test2::EventFacet::Meta',
+    'parent'  => 'Test2::EventFacet::Parent',
+    'plan'    => 'Test2::EventFacet::Plan',
+    'trace'   => 'Test2::EventFacet::Trace',
+    'hubs'    => 'Test2::EventFacet::Hub',
+);
+
+sub FACET_TYPES { sort values %LOADED_FACETS }
+
+sub load_facet {
+    my $class = shift;
+    my ($facet) = @_;
+
+    return $LOADED_FACETS{$facet} if exists $LOADED_FACETS{$facet};
+
+    my @check = ($facet);
+    if ('s' eq substr($facet, -1, 1)) {
+        push @check => substr($facet, 0, -1);
+    }
+    else {
+        push @check => $facet . 's';
+    }
+
+    my $found;
+    for my $check (@check) {
+        my $mod  = "Test2::EventFacet::" . ucfirst($facet);
+        my $file = pkg_to_file($mod);
+        next unless eval { require $file; 1 };
+        $found = $mod;
+        last;
+    }
+
+    return undef unless $found;
+    $LOADED_FACETS{$facet} = $found;
+}
 
 sub causes_fail      { 0 }
 sub increments_count { 0 }
@@ -59,11 +90,23 @@ sub related {
     my $tracea = $self->trace  or return undef;
     my $traceb = $event->trace or return undef;
 
+    my $uuida = $tracea->uuid;
+    my $uuidb = $traceb->uuid;
+    if ($uuida && $uuidb) {
+        return 1 if $uuida eq $uuidb;
+        return 0;
+    }
+
     my $siga = $tracea->signature or return undef;
     my $sigb = $traceb->signature or return undef;
 
     return 1 if $siga eq $sigb;
     return 0;
+}
+
+sub add_hub {
+    my $self = shift;
+    unshift @{$self->{+HUBS}} => @_;
 }
 
 sub add_amnesty {
@@ -83,20 +126,35 @@ sub common_facet_data {
     my %out;
 
     $out{about} = {package => ref($self) || undef};
+    if (my $uuid = $self->uuid) {
+        $out{about}->{uuid} = $uuid;
+    }
 
     if (my $trace = $self->trace) {
         $out{trace} = { %$trace };
     }
 
+    if (my $hubs = $self->hubs) {
+        $out{hubs} = $hubs;
+    }
+
     $out{amnesty} = [map {{ %{$_} }} @{$self->{+AMNESTY}}]
         if $self->{+AMNESTY};
 
-    my $key = Test2::Util::ExternalMeta::META_KEY();
-    if (my $hash = $self->{$key}) {
-        $out{meta} = {%$hash};
+    if (my $meta = $self->meta_facet_data) {
+        $out{meta} = $meta;
     }
 
     return \%out;
+}
+
+sub meta_facet_data {
+    my $self = shift;
+
+    my $key = Test2::Util::ExternalMeta::META_KEY();
+
+    my $hash = $self->{$key} or return undef;
+    return {%$hash};
 }
 
 sub facet_data {
@@ -165,39 +223,98 @@ sub facet_data {
 
 sub facets {
     my $self = shift;
-    my $data = $self->facet_data;
     my %out;
 
-    for my $type (FACET_TYPES()) {
-        my $key = $type->facet_key;
-        next unless $data->{$key};
+    my $data = $self->facet_data;
+    my @errors = $self->validate_facet_data($data);
+    die join "\n" => @errors if @errors;
 
-        if ($type->is_list) {
-            $out{$key} = [map { $type->new($_) } @{$data->{$key}}];
+    for my $facet (keys %$data) {
+        my $class = $self->load_facet($facet);
+        my $val = $data->{$facet};
+
+        unless($class) {
+            $out{$facet} = $val;
+            next;
+        }
+
+        my $is_list = reftype($val) eq 'ARRAY' ? 1 : 0;
+        if ($is_list) {
+            $out{$facet} = [map { $class->new($_) } @$val];
         }
         else {
-            $out{$key} = $type->new($data->{$key});
+            $out{$facet} = $class->new($val);
         }
     }
 
     return \%out;
 }
 
+sub validate_facet_data {
+    my $class_or_self = shift;
+    my ($f, %params);
+
+    $f = shift if @_ && (reftype($_[0]) || '') eq 'HASH';
+    %params = @_;
+
+    $f ||= $class_or_self->facet_data if blessed($class_or_self);
+    croak "No facet data" unless $f;
+
+    my @errors;
+
+    for my $k (sort keys %$f) {
+        my $fclass = $class_or_self->load_facet($k);
+
+        push @errors => "Could not find a facet class for facet '$k'"
+            if $params{require_facet_class} && !$fclass;
+
+        next unless $fclass;
+
+        my $v = $f->{$k};
+        next unless defined($v); # undef is always fine
+
+        my $is_list = $fclass->is_list();
+        my $got_list = reftype($v) eq 'ARRAY' ? 1 : 0;
+
+        push @errors => "Facet '$k' should be a list, but got a single item ($v)"
+            if $is_list && !$got_list;
+
+        push @errors => "Facet '$k' should not be a list, but got a a list ($v)"
+            if $got_list && !$is_list;
+    }
+
+    return @errors;
+}
+
 sub nested {
+    my $self = shift;
+
     Carp::cluck("Use of Test2::Event->nested() is deprecated, use Test2::Event->trace->nested instead")
         if $ENV{AUTHOR_TESTING};
 
-    $_[0]->{+TRACE}->{nested};
+    if (my $hubs = $self->{+HUBS}) {
+        return $hubs->[0]->{nested} if @$hubs;
+    }
+
+    my $trace = $self->{+TRACE} or return undef;
+    return $trace->{nested};
 }
 
 sub in_subtest {
+    my $self = shift;
+
     Carp::cluck("Use of Test2::Event->in_subtest() is deprecated, use Test2::Event->trace->hid instead")
         if $ENV{AUTHOR_TESTING};
 
-    # Return undef if we are not nested, Legacy did not return the hid if nestign was 0.
-    return undef unless $_[0]->{+TRACE}->{nested};
+    my $hubs = $self->{+HUBS};
+    if ($hubs && @$hubs) {
+        return undef unless $hubs->[0]->{nested};
+        return $hubs->[0]->{hid}
+    }
 
-    $_[0]->{+TRACE}->{hid};
+    my $trace = $self->{+TRACE} or return undef;
+    return undef unless $trace->{nested};
+    return $trace->{hid};
 }
 
 1;
@@ -303,6 +420,37 @@ In other words it marks a failure as expected and allowed.
 B<Note:> This is how 'TODO' is implemented under the hood. TODO is essentially
 amnesty with the 'TODO' tag. The details are the reason for the TODO.
 
+=item $uuid = $e->uuid
+
+If UUID tagging is enabled (See L<Test::API>) then any event that has made its
+way through a hub will be tagged with a UUID. A newly created event will not
+yet be tagged in most cases.
+
+=item $class = $e->load_facet($name)
+
+This method is used to load a facet by name (or key). It will attempt to load
+the facet class, if it succeeds it will return the class it loaded. If it fails
+it will return C<undef>. This caches the result at the class level so that
+future calls will be faster.
+
+The C<$name> variable should be the key used to access the facet in a facets
+hashref. For instance the assertion facet has the key 'assert', the information
+facet has the 'info' key, and the error facet has the key 'errors'. You may
+include or omit the 's' at the end of the name, the method is smart enough to
+try both the 's' and no-'s' forms, it will check what you provided first, and
+if that is not found it will add or strip the 's and try again.
+
+=item @classes = $e->FACET_TYPES()
+
+=item @classes = Test2::Event->FACET_TYPES()
+
+This returns a list of all facets that have been loaded using the
+C<load_facet()> method. This will not return any classes that have not been
+loaded, or have been loaded directly without a call to C<load_facet()>.
+
+B<Note:> The core facet types are automatically loaded and populated in this
+list.
+
 =back
 
 =head2 NEW API
@@ -325,7 +473,42 @@ write out explicit facet data.
 =item $hashref = $e->facets()
 
 This takes the hashref from C<facet_data()> and blesses each facet into the
-proper C<Test2::EventFacet::*> subclass.
+proper C<Test2::EventFacet::*> subclass. If no class can be found for any given
+facet it will be passed along unchanged.
+
+=item @errors = $e->validate_facet_data();
+
+=item @errors = $e->validate_facet_data(%params);
+
+=item @errors = $e->validate_facet_data(\%facets, %params);
+
+=item @errors = Test2::Event->validate_facet_data(%params);
+
+=item @errors = Test2::Event->validate_facet_data(\%facets, %params);
+
+This method will validate facet data and return a list of errors. If no errors
+are found this will return an empty list.
+
+This can be called as an object method with no arguments, in which case the
+C<facet_data()> method will be called to get the facet data to be validated.
+
+When used as an object method the C<\%facet_data> argument may be omitted.
+
+When used as a class method the C<\%facet_data> argument is required.
+
+Remaining arguments will be slurped into a C<%params> hash.
+
+Currently only 1 parameter is defined:
+
+=over 4
+
+=item require_facet_class => $BOOL
+
+When set to true (default is false) this will reject any facets where a facet
+class cannot be found. Normally facets without classes are assumed to be custom
+and are ignored.
+
+=back
 
 =back
 
