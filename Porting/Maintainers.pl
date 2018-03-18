@@ -984,8 +984,8 @@ use File::Glob qw(:case);
         'FILES'        => q[dist/Safe],
     },
 
-    'Scalar-List-Utils' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.49.tar.gz',
+    'Scalar::Util' => {
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.50.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 

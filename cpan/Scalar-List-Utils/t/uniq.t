@@ -54,11 +54,15 @@ SKIP: {
                [ $cafe ],
                'uniqstr is happy with Unicode strings' );
 
-    utf8::encode( my $cafebytes = $cafe );
+    SKIP: {
+      skip "utf8::encode not available", 1
+        unless defined &utf8::encode;
+      utf8::encode( my $cafebytes = $cafe );
 
-    is_deeply( [ uniqstr $cafe, $cafebytes ],
-               [ $cafe, $cafebytes ],
-               'uniqstr does not squash bytewise-equal but differently-encoded strings' );
+      is_deeply( [ uniqstr $cafe, $cafebytes ],
+                [ $cafe, $cafebytes ],
+                'uniqstr does not squash bytewise-equal but differently-encoded strings' );
+    }
 
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }
@@ -81,10 +85,14 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
            'uniqnum preserves the special values of +-Inf and Nan' );
 
 {
-    my $maxint = ~0;
+    my $maxuint = ~0;
+    my $maxint = ~0 >> 1;
+    my $minint = -(~0 >> 1) - 1;
 
-    is_deeply( [ uniqnum $maxint, $maxint-1, -1 ],
-               [ $maxint, $maxint-1, -1 ],
+    my @nums = ($maxuint, $maxuint-1, -1, $Inf, $NaN, $maxint, $minint, 1 );
+
+    is_deeply( [ uniqnum @nums, 1.0 ],
+               [ @nums ],
                'uniqnum preserves uniqness of full integer range' );
 }
 
@@ -124,9 +132,7 @@ is_deeply( [ uniq () ],
 
 is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
 
-SKIP: {
-    skip "known to fail on $]", 1 if $] le "5.006002";
-
+{
     package Stringify;
 
     use overload '""' => sub { return $_[0]->{str} };
@@ -137,8 +143,8 @@ SKIP: {
 
     my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
 
-    is_deeply( [ uniqstr @strs ],
-               [ $strs[0], $strs[2] ],
+    is_deeply( [ map "$_", uniqstr @strs ],
+               [ map "$_", $strs[0], $strs[2] ],
                'uniqstr respects stringify overload' );
 }
 

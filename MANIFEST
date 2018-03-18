@@ -1988,8 +1988,10 @@ cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
+cpan/Scalar-List-Utils/t/exotic_names.t
 cpan/Scalar-List-Utils/t/first.t		List::Util
 cpan/Scalar-List-Utils/t/getmagic-once.t
+cpan/Scalar-List-Utils/t/head-tail.t
 cpan/Scalar-List-Utils/t/isvstring.t		Scalar::Util
 cpan/Scalar-List-Utils/t/lln.t			Scalar::Util
 cpan/Scalar-List-Utils/t/max.t			List::Util

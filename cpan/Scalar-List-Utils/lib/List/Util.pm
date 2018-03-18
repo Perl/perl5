@@ -13,9 +13,9 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
-  pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
+  head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.49";
+our $VERSION    = "1.50";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -552,6 +552,32 @@ C<undef> in the returned list is coerced into an empty string, so that the
 entire list of values returned by C<uniqstr> are well-behaved as strings.
 
 =cut
+
+=head2 head
+
+    my @values = head $size, @list;
+
+Returns the first C<$size> elements from C<@list>. If C<$size> is negative, returns
+all but the last C<$size> elements from C<@list>.
+
+    @result = head 2, qw( foo bar baz );
+    # foo, bar
+
+    @result = head -2, qw( foo bar baz );
+    # foo
+
+=head2 tail
+
+    my @values = tail $size, @list;
+
+Returns the last C<$size> elements from C<@list>. If C<$size> is negative, returns
+all but the first C<$size> elements from C<@list>.
+
+    @result = tail 2, qw( foo bar baz );
+    # bar, baz
+
+    @result = tail -2, qw( foo bar baz );
+    # baz
 
 =head1 KNOWN BUGS
 
