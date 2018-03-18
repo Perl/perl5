@@ -347,8 +347,8 @@ _strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm, int *got_GMT)
 {
 	char c;
 	const char *ptr;
-	int i,
-		len;
+	int i;
+	size_t len;
 	int Ealternative, Oalternative;
 
     /* There seems to be a slightly improved version at
@@ -811,12 +811,12 @@ label:
 			for (cp = buf; *cp && isupper((unsigned char)*cp); ++cp)
                             {/*empty*/}
 			if (cp - buf) {
-				zonestr = (char *)malloc(cp - buf + 1);
+				zonestr = (char *)malloc((size_t) (cp - buf + 1));
 				if (!zonestr) {
 				    errno = ENOMEM;
 				    return 0;
 				}
-				strncpy(zonestr, buf, cp - buf);
+				strncpy(zonestr, buf,(size_t) (cp - buf));
 				zonestr[cp - buf] = '\0';
 				my_tzset(aTHX);
 				if (0 == strcmp(zonestr, "GMT")) {
@@ -921,9 +921,9 @@ return_11part_tm(pTHX_ SV ** SP, struct tm *mytm)
 
 static void _populate_C_time_locale(pTHX_ HV* locales )
 {
-    AV* alt_names   = (AV *) SvRV( *hv_fetch(locales, "alt_month", strlen("alt_month"), 0) );
-    AV* long_names  = (AV *) SvRV( *hv_fetch(locales, "month", strlen("month"), 0) );
-    AV* short_names = (AV *) SvRV( *hv_fetch(locales, "mon", strlen("mon"), 0) );
+    AV* alt_names   = (AV *) SvRV( *hv_fetch(locales, "alt_month", 9, 0) );
+    AV* long_names  = (AV *) SvRV( *hv_fetch(locales, "month", 5, 0) );
+    AV* short_names = (AV *) SvRV( *hv_fetch(locales, "mon", 3, 0) );
     int i;
 
     for (i = 0; i < 1 + (int) av_len( long_names ); i++) {
@@ -932,18 +932,18 @@ static void _populate_C_time_locale(pTHX_ HV* locales )
         Locale->mon[i]       = SvPV_nolen( (SV *) *av_fetch(short_names, i, 0) );
     }
 
-    long_names = (AV *) SvRV( *hv_fetch(locales, "weekday", strlen("weekday"), 0) );
-    short_names = (AV *) SvRV( *hv_fetch(locales, "wday", strlen("wday"), 0) );
+    long_names = (AV *) SvRV( *hv_fetch(locales, "weekday", 7, 0) );
+    short_names = (AV *) SvRV( *hv_fetch(locales, "wday", 4, 0) );
 
     for (i = 0; i < 1 + (int) av_len( long_names ); i++) {
         Locale->wday[i]    = SvPV_nolen( (SV *) *av_fetch(short_names, i, 0) );
         Locale->weekday[i] = SvPV_nolen( (SV *) *av_fetch(long_names, i, 0) );
     }
 
-    Locale->am = SvPV_nolen( (SV *) *hv_fetch(locales, "am", strlen("am"), 0) );
-    Locale->pm = SvPV_nolen( (SV *) *hv_fetch(locales, "pm", strlen("pm"), 0) );
-    Locale->AM = SvPV_nolen( (SV *) *hv_fetch(locales, "AM", strlen("AM"), 0) );
-    Locale->PM = SvPV_nolen( (SV *) *hv_fetch(locales, "PM", strlen("PM"), 0) );
+    Locale->am = SvPV_nolen( (SV *) *hv_fetch(locales, "am", 2, 0) );
+    Locale->pm = SvPV_nolen( (SV *) *hv_fetch(locales, "pm", 2, 0) );
+    Locale->AM = SvPV_nolen( (SV *) *hv_fetch(locales, "AM", 2, 0) );
+    Locale->PM = SvPV_nolen( (SV *) *hv_fetch(locales, "PM", 2, 0) );
 
     return;
 }
@@ -987,10 +987,10 @@ _strftime(fmt, epoch, islocal = 1)
         ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
         else {
         /* Possibly buf overflowed - try again with a bigger buf */
-        int     fmtlen = strlen(fmt);
-        int    bufsize = fmtlen + TP_BUF_SIZE;
+        size_t fmtlen = strlen(fmt);
+        size_t bufsize = fmtlen + TP_BUF_SIZE;
         char*     buf;
-        int    buflen;
+        size_t    buflen;
 
         New(0, buf, bufsize, char);
         while (buf) {
@@ -1145,17 +1145,17 @@ _get_localization()
             ++mytm.tm_mon;
         }
 
-        tmp = hv_store(locales, "wday", strlen("wday"), newRV_noinc((SV *) wdays), 0);
-        tmp = hv_store(locales, "weekday", strlen("weekday"), newRV_noinc((SV *) weekdays), 0);
-        tmp = hv_store(locales, "mon", strlen("mon"), newRV_noinc((SV *) mons), 0);
-        tmp = hv_store(locales, "month", strlen("month"), newRV_noinc((SV *) months), 0);
-        tmp = hv_store(locales, "alt_month", strlen("alt_month"), newRV((SV *) months), 0);
+        tmp = hv_store(locales, "wday", 4, newRV_noinc((SV *) wdays), 0);
+        tmp = hv_store(locales, "weekday", 7, newRV_noinc((SV *) weekdays), 0);
+        tmp = hv_store(locales, "mon", 3, newRV_noinc((SV *) mons), 0);
+        tmp = hv_store(locales, "month", 5, newRV_noinc((SV *) months), 0);
+        tmp = hv_store(locales, "alt_month", 9, newRV((SV *) months), 0);
 
         len = strftime(buf, TP_BUF_SIZE, "%p", &mytm);
-        tmp = hv_store(locales, "AM", strlen("AM"), newSVpvn(buf,len), 0);
+        tmp = hv_store(locales, "AM", 2, newSVpvn(buf,len), 0);
         mytm.tm_hour = 18;
         len = strftime(buf, TP_BUF_SIZE, "%p", &mytm);
-        tmp = hv_store(locales, "PM", strlen("PM"), newSVpvn(buf,len), 0);
+        tmp = hv_store(locales, "PM", 2, newSVpvn(buf,len), 0);
 
         if(tmp == NULL || !SvOK( (SV *) *tmp)){
             croak("Failed to get localization.");
