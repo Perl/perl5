@@ -129,6 +129,32 @@ if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'n
     $define{USE_REENTRANT_API} = 1;
 }
 
+if (     $define{USE_ITHREADS}
+    &&   $define{HAS_SETLOCALE}
+    && ! $define{NO_LOCALE}
+    && ! $define{NO_POSIX_2008_LOCALE})
+{
+    $define{HAS_POSIX_2008_LOCALE} = 1 if $define{HAS_NEWLOCALE}
+                                       && $define{HAS_FREELOCALE}
+                                       && $define{HAS_USELOCALE};
+    my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
+    if (    ! $define{NO_THREAD_SAFE_LOCALE}
+        && (  $define{HAS_POSIX_2008_LOCALE}
+            || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
+                                               && $cctype >= 80))))
+    {
+        $define{USE_THREAD_SAFE_LOCALE} = 1;
+        $define{USE_POSIX_2008_LOCALE} = 1 if $define{HAS_POSIX_2008_LOCALE};
+    }
+
+    if (   $ARGS{PLATFORM} eq 'win32'
+        && $define{USE_THREAD_SAFE_LOCALE}
+        && $cctype < 140)
+    {
+        $define{TS_W32_BROKEN_LOCALECONV} = 1;
+    }
+}
+
 # perl.h logic duplication ends
 
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n"
@@ -438,12 +464,12 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 			 );
 }
 
-if (${^SAFE_LOCALES}) {    # Don't need mutexes if have thread-safe operations
-                           # except early versions of Windows need this one
-    ++$skip{PL_locale_mutex} unless $ARGS{PLATFORM} eq 'win32'
-                                && ($ARGS{CCTYPE} =~ s/MSVC//r) < 140;
+if ($define{USE_THREAD_SAFE_LOCALE}) {
     ++$skip{PL_lc_numeric_mutex};
     ++$skip{PL_lc_numeric_mutex_depth};
+    if (! $define{TS_W32_BROKEN_LOCALECONV}) {
+        ++$skip{PL_locale_mutex};
+    }
 }
 
 unless ($define{'PERL_OP_PARENT'}) {

@@ -759,6 +759,9 @@
 #   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
+/* XXX The next few defines are unfortunately duplicated in makedef.pl, and
+ * changes here MUST also be made there */
+
 #ifdef USE_LOCALE /* These locale things are all subject to change */
 #  if      defined(HAS_NEWLOCALE)               \
       &&   defined(LC_ALL_MASK)                 \
