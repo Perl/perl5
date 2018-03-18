@@ -2554,7 +2554,9 @@ C<*lenp> are unchanged, and the return value is the original C<s>.
 
 Otherwise, C<*is_utf8p> is set to 0, and the return value is a pointer to a
 newly created string containing a downgraded copy of C<s>, and whose length is
-returned in C<*lenp>, updated.  The new string is C<NUL>-terminated.
+returned in C<*lenp>, updated.  The new string is C<NUL>-terminated.  The
+caller is responsible for arranging for the memory used by this string to get
+freed.
 
 Upon successful return, the number of variants in the string can be computed by
 having saved the value of C<*lenp> before the call, and subtracting the
@@ -2684,7 +2686,8 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
 Converts a string C<s> of length C<*lenp> bytes from the native encoding into
 UTF-8.
 Returns a pointer to the newly-created string, and sets C<*lenp> to
-reflect the new length in bytes.
+reflect the new length in bytes.  The caller is responsible for arranging for
+the memory used by this string to get freed.
 
 Upon successful return, the number of variants in the string can be computed by
 having saved the value of C<*lenp> before the call, and subtracting it from the
