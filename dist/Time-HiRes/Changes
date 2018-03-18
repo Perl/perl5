@@ -1,5 +1,42 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9577 [2018-03-15]
+ - fix win32 (and cygwin?) builds which have been broken since 1.9755:
+   problem was that gettimeofday() is a macro and needs to stay such
+ - regenerate ppport.h with Perl 5.26.1 (was previously generated with
+   5.25.6) and Devel::PPPort 3.35 (previously 3.36) -- this doesn't
+   change the ppport.h, though
+
+1.9756 [2018-03-14]
+ - division by zero in new test tv_interval.t [rt.cpan.org #124775]:
+   made the test pass even if the difference is zero, but also
+   made it practically impossible to ever be zero by adding
+   a sub-second sleep.
+ - remove comments from inside qw [rt.cpan.org #124777],
+   only seemed to be caught by Perl 5.18.4
+
+1.9755 [2018-03-14]
+ - adjust the error messages of tv_interval()
+ - the NV_1EX constants now cast to be NV so that
+   tv_interval() with long double builds does not
+   produce ugly results [rt.cpan.org #106456]
+ - add tests for tv_interval()
+ - centralize the mygettimeofday() logic
+ - make the mygettimeofday() a function instead of macro
+ - add the OS X 10.12+ clock_gettime() constants
+   CLOCK_MONOTONIC_RAW_APPROX CLOCK_UPTIME_RAW_APPROX
+ - regenerate the fallback files
+
+1.9754 [2018-02-16]
+ - unify the gettimeofday() and time() forked code
+   that had near identical code paths for MacOS Classic
+   (which has two unusual features: unsigned time_t,
+   and a special tz struct member), and for non-MacOS Classic
+ - tv_interval should be implemented in XS
+   [rt.cpan.org #106456]
+   thanks to Sergey Aleynikov (suggested implementation simplified
+   by the above-mentioned MacOS Classic simplification)
+
 1.9753 [2018-01-11]
  - in t/clock.t in a fast system we need to burn more CPU,
    reported and fix suggested by Joel C. Maslak <jmaslak@antelope.net>

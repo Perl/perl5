@@ -392,6 +392,50 @@ constant_19 (pTHX_ const char *name, IV *iv_return) {
 }
 
 static int
+constant_23 (pTHX_ const char *name, IV *iv_return) {
+  /* When generated this function returned values for the list of names given
+     here.  However, subsequent manual editing may have added or removed some.
+     CLOCK_MONOTONIC_PRECISE CLOCK_THREAD_CPUTIME_ID CLOCK_UPTIME_RAW_APPROX */
+  /* Offset 8 gives the best switch position.  */
+  switch (name[8]) {
+  case 'N':
+    if (memEQ(name, "CLOCK_MONOTONIC_PRECISE", 23)) {
+    /*                       ^                     */
+#ifdef CLOCK_MONOTONIC_PRECISE
+      *iv_return = CLOCK_MONOTONIC_PRECISE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
+    if (memEQ(name, "CLOCK_THREAD_CPUTIME_ID", 23)) {
+    /*                       ^                     */
+#ifdef CLOCK_THREAD_CPUTIME_ID
+      *iv_return = CLOCK_THREAD_CPUTIME_ID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'T':
+    if (memEQ(name, "CLOCK_UPTIME_RAW_APPROX", 23)) {
+    /*                       ^                     */
+#ifdef CLOCK_UPTIME_RAW_APPROX
+      *iv_return = CLOCK_UPTIME_RAW_APPROX;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  }
+  return PERL_constant_NOTFOUND;
+}
+
+static int
 constant (pTHX_ const char *name, STRLEN len, IV *iv_return) {
   /* Initially switch on the length of the name.  */
   /* When generated this function returned values for the list of names given
@@ -404,20 +448,21 @@ constant (pTHX_ const char *name, STRLEN len, IV *iv_return) {
      Regenerate these constant functions by feeding this entire source file to
      perl -x
 
-#!/opt/local/perl-5.25.6/bin/perl -w
+#!/opt/local/perl-5.26.1/bin/perl -w
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
 my $types = {map {($_, 1)} qw(IV)};
 my @names = (qw(CLOCKS_PER_SEC CLOCK_BOOTTIME CLOCK_HIGHRES CLOCK_MONOTONIC
 	       CLOCK_MONOTONIC_COARSE CLOCK_MONOTONIC_FAST
 	       CLOCK_MONOTONIC_PRECISE CLOCK_MONOTONIC_RAW
-	       CLOCK_PROCESS_CPUTIME_ID CLOCK_PROF CLOCK_REALTIME
-	       CLOCK_REALTIME_COARSE CLOCK_REALTIME_FAST CLOCK_REALTIME_PRECISE
-	       CLOCK_REALTIME_RAW CLOCK_SECOND CLOCK_SOFTTIME
-	       CLOCK_THREAD_CPUTIME_ID CLOCK_TIMEOFDAY CLOCK_UPTIME
-	       CLOCK_UPTIME_COARSE CLOCK_UPTIME_FAST CLOCK_UPTIME_PRECISE
-	       CLOCK_UPTIME_RAW CLOCK_VIRTUAL ITIMER_PROF ITIMER_REAL
-	       ITIMER_REALPROF ITIMER_VIRTUAL TIMER_ABSTIME),
+	       CLOCK_MONOTONIC_RAW_APPROX CLOCK_PROCESS_CPUTIME_ID CLOCK_PROF
+	       CLOCK_REALTIME CLOCK_REALTIME_COARSE CLOCK_REALTIME_FAST
+	       CLOCK_REALTIME_PRECISE CLOCK_REALTIME_RAW CLOCK_SECOND
+	       CLOCK_SOFTTIME CLOCK_THREAD_CPUTIME_ID CLOCK_TIMEOFDAY
+	       CLOCK_UPTIME CLOCK_UPTIME_COARSE CLOCK_UPTIME_FAST
+	       CLOCK_UPTIME_PRECISE CLOCK_UPTIME_RAW CLOCK_UPTIME_RAW_APPROX
+	       CLOCK_VIRTUAL ITIMER_PROF ITIMER_REAL ITIMER_REALPROF
+	       ITIMER_VIRTUAL TIMER_ABSTIME),
             {name=>"d_clock", type=>"IV", macro=>"TIME_HIRES_CLOCK", value=>"1", default=>["IV", "0"]},
             {name=>"d_clock_getres", type=>"IV", macro=>"TIME_HIRES_CLOCK_GETRES", value=>"1", default=>["IV", "0"]},
             {name=>"d_clock_gettime", type=>"IV", macro=>"TIME_HIRES_CLOCK_GETTIME", value=>"1", default=>["IV", "0"]},
@@ -652,38 +697,22 @@ __END__
     }
     break;
   case 23:
-    /* Names all of length 23.  */
-    /* CLOCK_MONOTONIC_PRECISE CLOCK_THREAD_CPUTIME_ID */
-    /* Offset 22 gives the best switch position.  */
-    switch (name[22]) {
-    case 'D':
-      if (memEQ(name, "CLOCK_THREAD_CPUTIME_I", 22)) {
-      /*                                     D      */
-#ifdef CLOCK_THREAD_CPUTIME_ID
-        *iv_return = CLOCK_THREAD_CPUTIME_ID;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'E':
-      if (memEQ(name, "CLOCK_MONOTONIC_PRECIS", 22)) {
-      /*                                     E      */
-#ifdef CLOCK_MONOTONIC_PRECISE
-        *iv_return = CLOCK_MONOTONIC_PRECISE;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    }
+    return constant_23 (aTHX_ name, iv_return);
     break;
   case 24:
     if (memEQ(name, "CLOCK_PROCESS_CPUTIME_ID", 24)) {
 #ifdef CLOCK_PROCESS_CPUTIME_ID
       *iv_return = CLOCK_PROCESS_CPUTIME_ID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 26:
+    if (memEQ(name, "CLOCK_MONOTONIC_RAW_APPROX", 26)) {
+#ifdef CLOCK_MONOTONIC_RAW_APPROX
+      *iv_return = CLOCK_MONOTONIC_RAW_APPROX;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;

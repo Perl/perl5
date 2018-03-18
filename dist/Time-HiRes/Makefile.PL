@@ -966,39 +966,42 @@ sub doMakefile {
 
 sub doConstants {
     if (eval {require ExtUtils::Constant; 1}) {
-        # More or less this same list is in HiRes.pm.  Should unify.
-	my @names = qw(
-		       CLOCKS_PER_SEC
-		       CLOCK_BOOTTIME
-		       CLOCK_HIGHRES
-		       CLOCK_MONOTONIC
-		       CLOCK_MONOTONIC_COARSE
-		       CLOCK_MONOTONIC_FAST
-		       CLOCK_MONOTONIC_PRECISE
-		       CLOCK_MONOTONIC_RAW
-		       CLOCK_PROF
-		       CLOCK_PROCESS_CPUTIME_ID
-		       CLOCK_REALTIME
-		       CLOCK_REALTIME_COARSE
-		       CLOCK_REALTIME_FAST
-		       CLOCK_REALTIME_PRECISE
-		       CLOCK_REALTIME_RAW
-		       CLOCK_SECOND
-		       CLOCK_SOFTTIME
-		       CLOCK_THREAD_CPUTIME_ID
-		       CLOCK_TIMEOFDAY
-		       CLOCK_UPTIME
-		       CLOCK_UPTIME_COARSE
-		       CLOCK_UPTIME_FAST
-		       CLOCK_UPTIME_PRECISE
-		       CLOCK_UPTIME_RAW
-		       CLOCK_VIRTUAL
-		       ITIMER_PROF
-		       ITIMER_REAL
-		       ITIMER_REALPROF
-		       ITIMER_VIRTUAL
-		       TIMER_ABSTIME
-                      );
+        # TODO: this list is a subset of the @EXPORT_OK in HiRes.pm,
+        # automate this somehow.
+	my @names = qw[
+		 CLOCKS_PER_SEC
+		 CLOCK_BOOTTIME
+		 CLOCK_HIGHRES
+		 CLOCK_MONOTONIC
+		 CLOCK_MONOTONIC_COARSE
+		 CLOCK_MONOTONIC_FAST
+		 CLOCK_MONOTONIC_PRECISE
+		 CLOCK_MONOTONIC_RAW
+		 CLOCK_MONOTONIC_RAW_APPROX
+		 CLOCK_PROCESS_CPUTIME_ID
+		 CLOCK_PROF
+		 CLOCK_REALTIME
+		 CLOCK_REALTIME_COARSE
+		 CLOCK_REALTIME_FAST
+		 CLOCK_REALTIME_PRECISE
+		 CLOCK_REALTIME_RAW
+		 CLOCK_SECOND
+		 CLOCK_SOFTTIME
+		 CLOCK_THREAD_CPUTIME_ID
+		 CLOCK_TIMEOFDAY
+		 CLOCK_UPTIME
+		 CLOCK_UPTIME_COARSE
+		 CLOCK_UPTIME_FAST
+		 CLOCK_UPTIME_PRECISE
+		 CLOCK_UPTIME_RAW
+		 CLOCK_UPTIME_RAW_APPROX
+		 CLOCK_VIRTUAL
+		 ITIMER_PROF
+		 ITIMER_REAL
+		 ITIMER_REALPROF
+		 ITIMER_VIRTUAL
+		 TIMER_ABSTIME
+            ];
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep d_clock_gettime d_clock_getres
 		     d_clock d_clock_nanosleep d_hires_stat
@@ -1037,6 +1040,8 @@ sub doConstants {
 					   NAMES => \@names,
 					  );
     } else {
+        # E.g. perl 5.6 did not have ExtUtils::Constant,
+        # use the pregenerated files instead.
         my $file;
 	foreach $file ('const-c.inc', 'const-xs.inc') {
 	    my $fallback = File::Spec->catfile('fallback', $file);
