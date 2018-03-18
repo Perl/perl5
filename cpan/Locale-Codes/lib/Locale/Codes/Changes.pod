@@ -30,6 +30,8 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.56  (planned 2018-03-01; sbeck)
 
+NEW CODE(s)
+
 =head1 VERSION 3.55  (2017-11-17; sbeck)
 
 NEW CODE(s)
@@ -42,6 +44,9 @@ Because correct usage of any of the Locale::Codes modules requires that
 they be kept up-to-date, I have long felt that it should not be distributed
 as a core module.  After discussion on the perl5-porters list, it is agreed,
 and the deprecation process has been started.
+
+Thanks to p5p-porters (especially Dagfinn Ilmari Mannsaker) for discussion
+and guidance.
 
 =item Changes from a github pull request applied
 
@@ -949,7 +954,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2017 Sullivan Beck
+   Copyright (c) 2010-2018 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

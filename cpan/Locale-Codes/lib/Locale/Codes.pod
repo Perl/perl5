@@ -592,7 +592,7 @@ sent to him using any of the methods listed above.
    Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
    Copyright (c) 2001      Michael Hennecke (Locale::Currency)
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2017 Sullivan Beck
+   Copyright (c) 2010-2018 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

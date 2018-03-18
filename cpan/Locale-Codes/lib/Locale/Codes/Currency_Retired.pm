@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Fri Nov 17 10:39:14 EST 2017
+#    Generated on: Fri Feb 23 12:58:17 EST 2018
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.55';
+$VERSION='3.56';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -40,6 +40,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(LUF) => q(Luxembourg Franc),
    q(LVL) => q(Latvian Lats),
    q(MGF) => q(Malagasy Franc),
+   q(MRO) => q(Ouguiya),
    q(MTL) => q(Maltese Lira),
    q(MZM) => q(Metical),
    q(NLG) => q(Netherlands Guilder),
@@ -51,6 +52,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(SIT) => q(Tolar),
    q(SKK) => q(Slovak Koruna),
    q(SRG) => q(Surinam Guilder),
+   q(STD) => q(Dobra),
    q(TJR) => q(Tajik Ruble),
    q(TMM) => q(Manat),
    q(TPE) => q(Timor Escudo),
@@ -71,7 +73,9 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
 $Locale::Codes::Retired{'currency'}{'num'}{'code'} = {
    q(428) => q(Latvian Lats),
    q(440) => q(Lithuanian Litas),
+   q(478) => q(Ouguiya),
    q(654) => q(Saint Helena Pound),
+   q(678) => q(Dobra),
    q(998) => q(US Dollar (Same day)),
 };
 

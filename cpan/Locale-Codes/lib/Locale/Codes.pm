@@ -1,7 +1,7 @@
 package Locale::Codes;
 # Copyright (C) 2001      Canon Research Centre Europe (CRE).
 # Copyright (C) 2002-2009 Neil Bowers
-# Copyright (c) 2010-2017 Sullivan Beck
+# Copyright (c) 2010-2018 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -16,7 +16,7 @@ use if $] >= 5.027007, 'deprecate';
 use Locale::Codes::Constants;
 
 our($VERSION);
-$VERSION='3.55';
+$VERSION='3.56';
 
 use Exporter qw(import);
 our(@EXPORT_OK,%EXPORT_TAGS);

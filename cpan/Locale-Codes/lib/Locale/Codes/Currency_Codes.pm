@@ -3,7 +3,7 @@ Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Thu Nov 16 07:56:18 EST 2017
+#    Generated on: Fri Feb 23 12:54:50 EST 2018
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.55';
+$VERSION='3.56';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0177';
 
@@ -1635,7 +1635,7 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0095),
          q(0),
          ],
-      q(MRO) => [
+      q(MRU) => [
          q(0101),
          q(0),
          ],
@@ -1787,7 +1787,7 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0138),
          q(0),
          ],
-      q(STD) => [
+      q(STN) => [
          q(0129),
          q(0),
          ],
@@ -2249,10 +2249,6 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0100),
          q(0),
          ],
-      q(478) => [
-         q(0101),
-         q(0),
-         ],
       q(480) => [
          q(0102),
          q(0),
@@ -2351,10 +2347,6 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          ],
       q(654) => [
          q(0127),
-         q(0),
-         ],
-      q(678) => [
-         q(0129),
          q(0),
          ],
       q(682) => [
@@ -2467,6 +2459,14 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          ],
       q(901) => [
          q(0147),
+         q(0),
+         ],
+      q(929) => [
+         q(0101),
+         q(0),
+         ],
+      q(930) => [
+         q(0129),
          q(0),
          ],
       q(931) => [
@@ -2770,7 +2770,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0098) => q(MWK),
       q(0099) => q(MYR),
       q(0100) => q(MVR),
-      q(0101) => q(MRO),
+      q(0101) => q(MRU),
       q(0102) => q(MUR),
       q(0103) => q(XUA),
       q(0104) => q(MXN),
@@ -2798,7 +2798,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0126) => q(RWF),
       q(0127) => q(SHP),
       q(0128) => q(WST),
-      q(0129) => q(STD),
+      q(0129) => q(STN),
       q(0130) => q(SAR),
       q(0131) => q(RSD),
       q(0132) => q(SCR),
@@ -2948,7 +2948,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0098) => q(454),
       q(0099) => q(458),
       q(0100) => q(462),
-      q(0101) => q(478),
+      q(0101) => q(929),
       q(0102) => q(480),
       q(0103) => q(965),
       q(0104) => q(484),
@@ -2976,7 +2976,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0126) => q(646),
       q(0127) => q(654),
       q(0128) => q(882),
-      q(0129) => q(678),
+      q(0129) => q(930),
       q(0130) => q(682),
       q(0131) => q(941),
       q(0132) => q(690),
