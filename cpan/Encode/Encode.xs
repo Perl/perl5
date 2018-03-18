@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.42 2018/02/08 00:26:15 dankogai Exp $
+ $Id: Encode.xs,v 2.43 2018/02/21 12:14:33 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -387,7 +387,7 @@ strict_utf8(pTHX_ SV* sv)
 }
 
 /* Modern perls have the capability to do this more efficiently and portably */
-#ifdef is_utf8_string_loc_flags
+#ifdef utf8n_to_uvchr_msgs
 # define CAN_USE_BASE_PERL
 #endif
 
@@ -533,7 +533,7 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, SV *check_sv,
 
 #else   /* Use code for earlier perls */
 
-        PERL_UNUSED_VAR(flags);
+        ((void)sizeof(flags));  /* Avoid compiler warning */
 
         if (UTF8_IS_INVARIANT(*s)) {
             *d++ = *s++;
