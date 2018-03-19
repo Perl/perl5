@@ -735,56 +735,7 @@ S_emulate_setlocale(const int category,
 
     }
 
-    assert(PL_C_locale_obj);
-
-    /* Otherwise, we are switching locales.  This will generally entail freeing
-     * the current one's space (at the C library's discretion).  We need to
-     * stop using that locale before the switch.  So switch to a known locale
-     * object that we don't otherwise mess with.  This returns the locale
-     * object in effect at the time of the switch. */
-    old_obj = uselocale(PL_C_locale_obj);
-
-#  ifdef DEBUGGING
-
-    if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale was using %p\n", __FILE__, __LINE__, old_obj);
-    }
-
-#  endif
-
-    if (! old_obj) {
-
-#  ifdef DEBUGGING
-
-        if (DEBUG_L_TEST || debug_initialization) {
-            dSAVE_ERRNO;
-            PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale switching to C failed: %d\n", __FILE__, __LINE__, GET_ERRNO);
-            RESTORE_ERRNO;
-        }
-
-#  endif
-
-        return NULL;
-    }
-
-#  ifdef DEBUGGING
-
-    if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale now using %p\n", __FILE__, __LINE__, PL_C_locale_obj);
-    }
-
-#  endif
-
-    /* If we weren't in a thread safe locale, set so that newlocale() below
-     which uses 'old_obj', uses an empty one.  Same for our reserved C object.
-     The latter is defensive coding, so that, even if there is some bug, we
-     will never end up trying to modify either of these, as if passed to
-     newlocale(), they can be. */
-    if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
-        old_obj = (locale_t) 0;
-    }
-
-    /* Create the new locale (it may actually modify the current one). */
+    /* Here, we are switching locales. */
 
 #  ifndef HAS_QUERYLOCALE
 
@@ -1002,7 +953,62 @@ S_emulate_setlocale(const int category,
 
   ready_to_set: ;
 
+    /* Here at the end of having to deal with the absence of querylocale().
+     * Some cases have already been fully handled by recursive calls to this
+     * function.  But at this point, we haven't dealt with those, but are now
+     * prepared to, knowing what the locale name to set this category to is.
+     * This would have come for free if this system had had querylocale() */
+
 #  endif  /* end of ! querylocale */
+
+    assert(PL_C_locale_obj);
+
+    /* Switching locales generally entails freeing the current one's space (at
+     * the C library's discretion).  We need to stop using that locale before
+     * the switch.  So switch to a known locale object that we don't otherwise
+     * mess with.  This returns the locale object in effect at the time of the
+     * switch. */
+    old_obj = uselocale(PL_C_locale_obj);
+
+#  ifdef DEBUGGING
+
+    if (DEBUG_Lv_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale was using %p\n", __FILE__, __LINE__, old_obj);
+    }
+
+#  endif
+
+    if (! old_obj) {
+
+#  ifdef DEBUGGING
+
+        if (DEBUG_L_TEST || debug_initialization) {
+            dSAVE_ERRNO;
+            PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale switching to C failed: %d\n", __FILE__, __LINE__, GET_ERRNO);
+            RESTORE_ERRNO;
+        }
+
+#  endif
+
+        return NULL;
+    }
+
+#  ifdef DEBUGGING
+
+    if (DEBUG_Lv_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale now using %p\n", __FILE__, __LINE__, PL_C_locale_obj);
+    }
+
+#  endif
+
+    /* If we weren't in a thread safe locale, set so that newlocale() below
+     which uses 'old_obj', uses an empty one.  Same for our reserved C object.
+     The latter is defensive coding, so that, even if there is some bug, we
+     will never end up trying to modify either of these, as if passed to
+     newlocale(), they can be. */
+    if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
+        old_obj = (locale_t) 0;
+    }
 
     /* Ready to create a new locale by modification of the exising one */
     new_obj = newlocale(mask, locale, old_obj);
