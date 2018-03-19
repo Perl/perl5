@@ -16,13 +16,19 @@ push @constants, @times;
 
 my %want =
     (
-        ABDAY_1	=> "Sun",
-        DAY_1	=> "Sunday",
-        ABMON_1	=> "Jan",
-        MON_1	=> "January",
         RADIXCHAR	=> ".",
         THOUSEP	=> "",
      );
+
+# Abbreviated and full are swapped in many locales in early netbsd
+if (   $Config{osname} !~ / netbsd /ix
+    || $Config{osvers} !~ / ^ [1-6] \. /x)
+{
+    $want{ABDAY_1} = "Sun";
+    $want{DAY_1}   = "Sunday";
+    $want{ABMON_1} = "Jan";
+    $want{MON_1}   = "January";
+}
 
 my @want = sort keys %want;
 
