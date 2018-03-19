@@ -10,6 +10,7 @@
 # Functions whose names begin with underscore are internal helper functions
 # for this file, and are not to be used by outside callers.
 
+use Config;
 use strict;
 
 eval { require POSIX; import POSIX 'locale_h'; };
@@ -108,6 +109,22 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # systems
     return if $locale =~ / ^ pig $ /ix;
 
+    # As of 6.3, this platform's locale handling is basically broken.  khw
+    # filed a bug report (no ticket number was returned), and it is supposedly
+    # going to change in a future release, so the statements here below sunset
+    # for any larger version, at which point this may start failing and have
+    # to be revisited.
+    #
+    # Given a legal individual category, basically whatever you set the locale
+    # to, the return from setlocale() indicates that it has taken effect, even
+    # if it hasn't.  However, the return from querying LC_ALL won't reflect
+    # this.
+    if ($Config{osname} =~ /openbsd/i && $locale !~ / ^ (?: C | POSIX ) $/ix) {
+        my ($major, $minor) = $Config{osvers} =~ / ^ ( \d+ ) \. ( \d+ ) /ax;
+        return if ! defined $major || ! defined $minor
+                         || $major < 6 || ($major == 6 && $minor <= 3);
+    }
+
     $categories = [ $categories ] unless ref $categories;
 
     my $badutf8 = 0;
@@ -196,8 +213,6 @@ sub locales_enabled(;$) {
     # It is acceptable for the second parameter to be just a simple scalar
     # denoting a single category (either name or number).  No conversion into
     # a number is done in this case.
-
-    use Config;
 
     return 0 unless    $Config{d_setlocale}
                         # I (khw) cargo-culted the '?' in the pattern on the
