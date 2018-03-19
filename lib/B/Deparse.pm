@@ -1355,7 +1355,18 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	else {
 	    $body = $self->deparse($root->first, 0);
 	}
-        $body = "{\n\t$body\n\b}";
+
+        my $l = '';
+        if ($self->{'linenums'}) {
+            # a glob's gp_line is set from the line containing a
+            # sub's closing '}' if the CV is the first use of the GV.
+            # So make sure the linenum is set correctly for '}'
+            my $gv = $cv->GV;
+            my $line = $gv->LINE;
+            my $file = $gv->FILE;
+            $l = "\f#line $line \"$file\"\n";
+        }
+        $body = "{\n\t$body\n$l\b}";
     }
     else {
 	my $sv = $cv->const_sv;
