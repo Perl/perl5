@@ -121,6 +121,9 @@ typedef struct yy_parser {
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
     PERL_BITFIELD16	saw_infix_sigil:1; /* saw & or * or % operator */
     PERL_BITFIELD16	parsed_sub:1;  /* last thing parsed was a sub */
+
+    bool        sub_no_recover; /* can't recover from a sublex error */
+    U8		sub_error_count; /* the number of errors before sublexing */
 } yy_parser;
 
 /* flags for lexer API */
