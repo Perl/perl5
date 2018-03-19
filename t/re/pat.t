@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 839;  # Update this when adding/deleting tests.
+plan tests => 840;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1924,6 +1924,9 @@ EOP
         my $text = "=t=\x{5000}";
         pos($text) = 3;
         ok(scalar($text !~ m{(~*=[a-z]=)}g), "RT #131575");
+    }
+    {
+        fresh_perl_is('"AA" =~ m/AA{1,0}/','',{},"handle OPFAIL insert properly");
     }
 
 } # End of sub run_tests
