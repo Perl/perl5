@@ -1154,20 +1154,33 @@ perl_destruct(pTHXx)
         PL_curlocales[i] = NULL;
     }
 #endif
+#ifdef HAS_POSIX_2008_LOCALE
+    {
+        /* This also makes sure we aren't using a locale object that gets freed
+         * below */
+        const locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
+        if (old_locale != LC_GLOBAL_LOCALE) {
+            freelocale(old_locale);
+        }
+    }
+#  ifdef USE_LOCALE_NUMERIC
+    if (PL_underlying_numeric_obj) {
+        freelocale(PL_underlying_numeric_obj);
+        PL_underlying_numeric_obj = (locale_t) NULL;
+    }
+#  endif
+#  ifdef USE_POSIX_2008_LOCALE
+    if (PL_C_locale_obj) {
+        freelocale(PL_C_locale_obj);
+        PL_C_locale_obj = NULL;
+    }
+#  endif
+#endif
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
     PL_numeric_name = NULL;
     SvREFCNT_dec(PL_numeric_radix_sv);
     PL_numeric_radix_sv = NULL;
-
-#  ifdef HAS_POSIX_2008_LOCALE
-    if (PL_underlying_numeric_obj) {
-        /* Make sure we aren't using the locale space we are about to free */
-        uselocale(LC_GLOBAL_LOCALE);
-        freelocale(PL_underlying_numeric_obj);
-        PL_underlying_numeric_obj = (locale_t) NULL;
-    }
-#  endif
 #endif
 
     if (PL_setlocale_buf) {
