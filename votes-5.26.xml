@@ -31,12 +31,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-Note sure about this one, since it may convert non-conforming programs that work into non-conforming programs that assert (on debug builds), and should include 97fcda75b598695644a4ad496e090941f5b7dcbc if it is applied.
-These three together (if at all)
-<commit votes="steveh sprout xsawyerx khw" id="f14cf3632059d421de83cf901c7e849adc1fcd03" ticket="131746" desc="(perl #131746) avoid undefined behaviour in Copy() etc"/>
-<commit votes="steveh sprout xsawyerx khw" id="45908e4d120d33a558a8b052036c56cd0c90b898" ticket="131746" desc="avoid  'the address of ... will always evaluate as ...' warns in mem macros"/>
-<commit votes="tonyc khw" id="97fcda75b598695644a4ad496e090941f5b7dcbc" ticket="131746" desc="threads.xs: don't Copy() null pointer"/>
-
 This ought to have 02c84d7f0f97e083f5d8ea9856488f3ede09364f as well, though that makes this sound slightly controversial (so maybe it should be rejected for maint?):
 <commit votes="steveh khw" id="4764858cb80e76fdba33cc1b3be8fcdef26df754" ticket="52610" desc="Fix RT #52610: Carp: Do not crash when reading @DB::args"/>
 I don’t think 02c84d7f0f97e is necessary.  It is just a large comment.
