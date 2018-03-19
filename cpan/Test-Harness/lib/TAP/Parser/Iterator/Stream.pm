@@ -11,11 +11,11 @@ TAP::Parser::Iterator::Stream - Iterator for filehandle-based TAP sources
 
 =head1 VERSION
 
-Version 3.41
+Version 3.42
 
 =cut
 
-our $VERSION = '3.41';
+our $VERSION = '3.42';
 
 =head1 SYNOPSIS
 
