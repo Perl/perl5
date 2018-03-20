@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.47';
+$VERSION = '1.48';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -1355,7 +1355,18 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	else {
 	    $body = $self->deparse($root->first, 0);
 	}
-        $body = "{\n\t$body\n\b}";
+
+        my $l = '';
+        if ($self->{'linenums'}) {
+            # a glob's gp_line is set from the line containing a
+            # sub's closing '}' if the CV is the first use of the GV.
+            # So make sure the linenum is set correctly for '}'
+            my $gv = $cv->GV;
+            my $line = $gv->LINE;
+            my $file = $gv->FILE;
+            $l = "\f#line $line \"$file\"\n";
+        }
+        $body = "{\n\t$body\n$l\b}";
     }
     else {
 	my $sv = $cv->const_sv;
@@ -5556,7 +5567,9 @@ sub double_delim {
     }
 }
 
+# Escape a characrter.
 # Only used by tr///, so backslashes hyphens
+
 sub pchr { # ASCII
     my($n) = @_;
     if ($n == ord '\\') {
@@ -5591,6 +5604,9 @@ sub pchr { # ASCII
     }
 }
 
+# Convert a list of characters into a string suitable for tr/// search or
+# replacement, with suitable escaping and collapsing of ranges
+
 sub collapse {
     my(@chars) = @_;
     my($str, $c, $tr) = ("");
@@ -5613,7 +5629,6 @@ sub tr_decode_byte {
     my($table, $flags) = @_;
     my $ssize_t = $Config{ptrsize} == 8 ? 'q' : 'l';
     my ($size, @table) = unpack("${ssize_t}s*", $table);
-    printf "XXX len=%d size=%d scalar\@table=%d\n", length($table), $size, scalar@table;
     pop @table; # remove the wildcard final entry
 
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
@@ -5638,7 +5653,12 @@ sub tr_decode_byte {
 	}
     }
     @from = (@from, @delfrom);
+
     if ($flags & OPpTRANS_COMPLEMENT) {
+        unless ($flags & OPpTRANS_DELETE) {
+            @to = () if ("@from" eq "@to");
+        }
+
 	my @newfrom = ();
 	my %from;
 	@from{@from} = (1) x @from;

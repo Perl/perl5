@@ -1438,11 +1438,34 @@ s/X//r;
 use feature 'unicode_strings';
 s/X//d;
 ####
-# all the flags (tr///)
-tr/X/Y/c;
-tr/X//d;
-tr/X//s;
-tr/X//r;
+# tr/// with all the flags: empty replacement
+tr/B-G//;
+tr/B-G//c;
+tr/B-G//d;
+tr/B-G//s;
+tr/B-G//cd;
+tr/B-G//ds;
+tr/B-G//cs;
+tr/B-G//cds;
+tr/B-G//r;
+####
+# tr/// with all the flags: short replacement
+tr/B-G/b/;
+tr/B-G/b/c;
+tr/B-G/b/d;
+tr/B-G/b/s;
+tr/B-G/b/cd;
+tr/B-G/b/ds;
+tr/B-G/b/cs;
+tr/B-G/b/cds;
+tr/B-G/b/r;
+####
+# tr/// with all the flags: equal length replacement
+tr/B-G/b-g/;
+tr/B-G/b-g/c;
+tr/B-G/b-g/s;
+tr/B-G/b-g/cs;
+tr/B-G/b-g/r;
 ####
 # tr with extended table (/c)
 tr/\000-\375/AB/c;
