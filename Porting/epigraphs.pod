@@ -17,6 +17,17 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.10 - Robert A. Heinlein, Time Enough for Love, p. 248
+
+L<Announced on 2018-03-20 by Todd Rinaldo|https://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250042.html>
+
+  A human being should be able to change a diaper, plan an invasion, butcher
+  a hog, conn a ship, design a building, write a sonnet, balance accounts,
+  build a wall, set a bone, comfort the dying, take orders, give orders,
+  cooperate, act alone, solve equations, analyze a new problem, pitch manure,
+  program a computer, cook a tasty meal, fight efficiently, die gallantly.
+  Specialization is for insects.
+
 =head2 v5.27.9 - Agatha Christie, "The Mysterious Affair at Styles"
 
 L<Announced on 2018-02-20 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2018/02/msg249549.html>
