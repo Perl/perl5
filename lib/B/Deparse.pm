@@ -4194,11 +4194,28 @@ sub pp_rv2hv {
 sub pp_av2arylen {
     my $self = shift;
     my($op, $cx) = @_;
-    if ($op->first->name eq "padav") {
-	return $self->maybe_local($op, $cx, '$#' . $self->padany($op->first));
+    my $kid = $op->first;
+    if ($kid->name eq "padav") {
+	return $self->maybe_local($op, $cx, '$#' . $self->padany($kid));
     } else {
-	return $self->maybe_local($op, $cx,
-				  $self->rv2x($op->first, $cx, '$#'));
+        my $kkid;
+        if (   $kid->name eq "rv2av"
+           && ($kkid = $kid->first)
+           && $kkid->name !~ /^(scope|leave|gv)$/)
+        {
+            # handle (expr)->$#* postfix form
+            my $expr;
+            $expr = $self->deparse($kkid, 24); # 24 is '->'
+            $expr = "$expr->\$#*";
+            # XXX maybe_local is probably wrong here: local($#-expression)
+            # doesn't "do" local (the is no INTRO flag set)
+            return $self->maybe_local($op, $cx, $expr);
+        }
+        else {
+            # handle $#{expr} form
+            # XXX see maybe_local comment above
+            return $self->maybe_local($op, $cx, $self->rv2x($kid, $cx, '$#'));
+        }
     }
 }
 
