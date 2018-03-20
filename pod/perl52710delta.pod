@@ -1,0 +1,330 @@
+=encoding utf8
+
+=head1 NAME
+
+perl52710delta - what is new for perl v5.27.10
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.27.9 release and the 5.27.10
+release.
+
+If you are upgrading from an earlier release such as 5.27.8, first read
+L<perl5279delta>, which describes differences between 5.27.8 and 5.27.9.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.32 to 0.33
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
+L<Carp> has been upgraded from version 1.46 to 1.49.
+
+L<Carp>, when generating stack traces, now attempts to work around
+longstanding bugs resulting from Perl's non-reference-counted stack.
+[perl #52610]
+
+Carp has been modified to avoid assuming that objects cannot be
+overloaded without the L<overload> module loaded (this can happen with
+objects created by XS modules).  Previously, infinite recursion would
+result if an XS-defined overload method itself called Carp.  [perl #132828]
+
+Carp now avoids using C<overload::StrVal>, partly because older versions
+of L<overload> (included with perl 5.14 and earlier) load L<Scalar::Util>
+at run time, which will fail if Carp has been invoked after a syntax error.
+
+L<I18N::Langinfo> has been upgraded from version 0.15 to 0.16.
+
+This module is now available on all platforms, emulating the system
+L<nl_langinfo(3)> on systems that lack it.  Some caveats apply, as
+L<detailed in its documentation|I18N::Langinfo>, the most severe being
+that, except for MS Windows, the C<CODESET> item is not implemented on
+those systems, always returning C<"">.
+
+It now sets the UTF-8 flag in its returned scalar if the string contains
+legal non-ASCII UTF-8, and the locale is UTF-8 ([perl #127288].
+
+=item *
+
+L<Encode> has been upgraded from version 2.96 to 2.97.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.32 to 7.34.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.38 to 3.39
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<I18N::Langinfo> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.55 to 3.56.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20180220 to 5.20180221.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.82 to 1.83.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.39 to 3.42.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302122 to 1.302133.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9753 to 1.9757.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.3203 to 1.3204.
+
+=item *
+
+L<warnings> has been upgraded from version 1.41 to 1.42.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Clarification to require was added to show that
+
+        require "Foo/Bar.pm";
+
+is equivalent to:
+
+        eval "require Foo::Bar";
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Improve documentation related to UTF-8 multibytes.
+
+=back
+
+=head3 L<perlrequick>
+
+=over 4
+
+=item *
+
+Clarifications on metacharacters and character classes
+
+=back
+
+=head3 L<perlretut>
+
+=over 4
+
+=item *
+
+Clarify metacharacters.
+
+=back
+
+=head1 Diagnostics
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The new (as of 5.27.8) restriction forbidding use of C<goto> to enter the
+argument of a binary or list expression (see L<perldiag/"Can't
+E<quot>gotoE<quot> into a binary or list expression">) has been relaxed to
+allow entering the I<first> argument of an operator that takes a fixed
+number of arguments, since this is a case that will not cause stack
+corruption.  [perl #132854]
+
+=item *
+
+The warning added in 5.27.8 concerning UTF-8 locale compatibility was
+misleading.  The new wording and explanation are at
+L<perldiag/Locale '%s' contains (at least) the following characters which
+have unexpected meanings: %s  The Perl program will use the expected
+meanings>
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+F<lib/unicore/mktables> now correctly canonicalizes the names of the
+dependencies stored in the files it generates.
+
+F<regen/mk_invlists.pl>, unlike the other F<regen/*.pl> scripts, used
+C<$0> to name itself in the dependencies stored in the files it
+generates.  It now uses a literal so that the path stored in the
+generated files doesn't depend on how F<regen/mk_invlists.pl> is
+invoked.
+
+This lack of canonical names could cause test failures in
+F<t/porting/regen.t>.  [perl #132925]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The item names passed to the function L<perlapi/Perl_langinfo>,
+introduced in 5.27.4, may no longer be prefixed with C<PERL_>.  For
+example, if you want the current floating point radix character, you
+must call it like C<Perl_langinfo(RADIXCHAR)>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Blead Breaks CPAN: FELIPE/Crypt-Perl [perl #132900]
+
+=item *
+
+Prevent duplicate Config.pm vars [perl #132834]
+
+=item *
+
+Regex assertion failure [perl #132163]
+
+=item *
+
+fix line numbers in multi-line s///
+
+=item *
+
+add an empty file (to be removed next commit)
+
+=item *
+
+warnings.pm: sprintf is faster than concat
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.27.10 represents approximately 4 weeks of development since Perl
+5.27.9 and contains approximately 80,000 lines of changes across 380 files
+from 18 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 75,000 lines of changes to 270 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.27.10:
+
+Aaron Crane, Chris 'BinGOs' Williams, Craig A. Berry, Daniel Dragan, David
+Mitchell, Father Chrysostomos, H.Merijn Brand, James E Keenan, Karl
+Williamson, Pali, Renee Baecker, Sawyer X, Shoichi Kaji, Steve Hay, Todd
+Rinaldo, Tony Cook, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
