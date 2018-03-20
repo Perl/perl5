@@ -3371,7 +3371,7 @@ said library was compiled against.  Reinstalling the XS module will
 likely fix this error.
 
 =item Locale '%s' contains (at least) the following characters which
-have unexepected meanings: %s  The Perl program will use the exepected
+have unexpected meanings: %s  The Perl program will use the expected
 meanings
 
 (W locale) You are using the named UTF-8 locale.  UTF-8 locales are
