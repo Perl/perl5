@@ -20,6 +20,14 @@ L<perl5279delta>, which describes differences between 5.27.8 and 5.27.9.
 
 =item *
 
+L<attributes> has been upgraded from version 0.32 to 0.33
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
 L<Carp> has been upgraded from version 1.46 to 1.49.
 
 L<Carp>, when generating stack traces, now attempts to work around
@@ -52,7 +60,7 @@ L<Encode> has been upgraded from version 2.96 to 2.97.
 
 =item *
 
-L<ExtUtils::MakeMaker> has been upgraded from version 7.33 to 7.34.
+L<ExtUtils::MakeMaker> has been upgraded from version 7.32 to 7.34.
 
 =item *
 
@@ -64,7 +72,15 @@ L<File::Glob> has been upgraded from version 1.30 to 1.31.
 
 =item *
 
+L<I18N::Langinfo> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
 L<Locale::Codes> has been upgraded from version 3.55 to 3.56.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20180220 to 5.20180221.
 
 =item *
 
@@ -84,11 +100,11 @@ L<Test::Simple> has been upgraded from version 1.302122 to 1.302133.
 
 =item *
 
-L<Time::Piece> has been upgraded from version 1.3203 to 1.3204.
+L<Time::HiRes> has been upgraded from version 1.9753 to 1.9757.
 
 =item *
 
-L<attributes> has been upgraded from version 0.32 to 0.33
+L<Time::Piece> has been upgraded from version 1.3203 to 1.3204.
 
 =item *
 
@@ -200,8 +216,7 @@ F<t/porting/regen.t>.  [perl #132925]
 =head1 Testing
 
 Tests were added and changed to reflect the other additions and
-changes in this release.  Furthermore, these significant changes were
-made:
+changes in this release.
 
 =head1 Internal Changes
 
@@ -249,11 +264,11 @@ warnings.pm: sprintf is faster than concat
 =head1 Acknowledgements
 
 Perl 5.27.10 represents approximately 4 weeks of development since Perl
-5.27.9 and contains approximately 79,000 lines of changes across 380 files
+5.27.9 and contains approximately 80,000 lines of changes across 380 files
 from 18 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 74,000 lines of changes to 270 .pm, .t, .c and .h files.
+approximately 75,000 lines of changes to 270 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers. The following people are known to have
