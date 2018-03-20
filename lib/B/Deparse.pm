@@ -1575,7 +1575,7 @@ sub maybe_local {
 	    if $self->{'avoid_local'}{$$op};
 	if ($need_parens) {
 	    return "$our_local($text)";
-	} elsif (want_scalar($op)) {
+	} elsif (want_scalar($op) || $our_local eq 'our') {
 	    return "$our_local $text";
 	} else {
 	    return $self->maybe_parens_func("$our_local", $text, $cx, 16);

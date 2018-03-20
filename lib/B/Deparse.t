@@ -3039,3 +3039,8 @@ state @a :shared;
 state @b :shared = (1, 2);
 state %h :shared;
 state %i :shared = ('a', 1, 'b', 2);
+####
+# \our @a shouldn't be a list
+my $r = \our @a;
+my(@l) = \our((@b));
+@l = \our(@c, @d);
