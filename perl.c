@@ -1169,12 +1169,6 @@ perl_destruct(pTHXx)
         PL_underlying_numeric_obj = (locale_t) NULL;
     }
 #  endif
-#  ifdef USE_POSIX_2008_LOCALE
-    if (PL_C_locale_obj) {
-        freelocale(PL_C_locale_obj);
-        PL_C_locale_obj = NULL;
-    }
-#  endif
 #endif
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
