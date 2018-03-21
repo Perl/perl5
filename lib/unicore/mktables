@@ -15386,6 +15386,9 @@ END
                                                     . $current_age->name
                                                     . ' or earlier',
                                     );
+            foreach my $alias ($current_age->aliases) {
+                $current_in->add_alias($alias->name);
+            }
             $previous_in = $current_in;
 
             # Add clarifying material for the corresponding age file.  This is
