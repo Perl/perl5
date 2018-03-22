@@ -2939,13 +2939,13 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
 
 /* Call the function to convert a UTF-8 encoded character to the specified case.
  * Note that there may be more than one character in the result.
- * INP is a pointer to the first byte of the input character
- * OUTP will be set to the first byte of the string of changed characters.  It
+ * 's' is a pointer to the first byte of the input character
+ * 'd' will be set to the first byte of the string of changed characters.  It
  *	needs to have space for UTF8_MAXBYTES_CASE+1 bytes
- * LENP will be set to the length in bytes of the string of changed characters
+ * 'lenp' will be set to the length in bytes of the string of changed characters
  *
  * The functions return the ordinal of the first character in the string of
- * OUTP */
+ * 'd' */
 #define CALL_UPPER_CASE(uv, s, d, lenp)                                     \
                 _to_utf8_case(uv, s, d, lenp, &PL_utf8_toupper, "ToUc", "")
 #define CALL_TITLE_CASE(uv, s, d, lenp)                                     \
