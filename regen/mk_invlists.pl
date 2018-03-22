@@ -1928,7 +1928,7 @@ for my $charset (get_supported_code_pages()) {
                     @invmap = @$map_ref;
                     $map_format = $format;
                     $map_default = $default;
-                    $maps_to_code_point = $map_format =~ /x/;
+                    $maps_to_code_point = $map_format =~ / a ($ | [^r] ) /x;
                     $to_adjust = $map_format =~ /a/;
                 }
             }
@@ -2032,12 +2032,9 @@ for my $charset (get_supported_code_pages()) {
                     # A hash key can't be a ref (we are only expecting arrays
                     # of scalars here), so convert any such to a string that
                     # will be converted back later (using a vertical tab as
-                    # the separator).  Even if the mapping is to code points,
-                    # we don't translate to native here because the code
-                    # output_invmap() calls to output these arrays assumes the
-                    # input is Unicode, not native.
+                    # the separator).
                     if (ref $invmap[0]) {
-                        $bucket = join "\cK", @{$invmap[0]};
+                        $bucket = join "\cK", map { a2n($_) }  @{$invmap[0]};
                     }
                     elsif ($maps_to_code_point && $invmap[0] =~ $numeric_re) {
 
