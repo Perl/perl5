@@ -740,8 +740,6 @@ formatting, e.g.
     $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
         /tmp/perldelta.html
 
-Another good HTML preview option is L<http://search.cpan.org/pod2html>
-
 If you make changes, be sure to commit them.
 
 =for checklist skip BLEAD-POINT MAINT RC
