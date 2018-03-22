@@ -84,9 +84,20 @@ sub get_mount_of_tempfile {
   return get_mount_of_filesys(get_filesys_of_tempfile());
 }
 
+sub parse_mount_line {
+    my ($dev, $dir, $opt) = ($_[0] =~ m{^(.+) on (.+) \((.+)\)$});
+    my @opt = split(/, /, $opt);
+    return { dev => $dev, dir => $dir, opt => { map { $_ => 1 } @opt } };
+}
+
 sub tempfile_has_noatime_mount {
-  my ($mount) = get_mount_of_tempfile();
-  return $mount =~ /\bnoatime\b/;
+  my ($mount) = parse_mount_line(get_mount_of_tempfile());
+  return $mount->{opt}->{noatime};
+}
+
+sub tempfile_has_hammerfs {
+  my ($mount) = parse_mount_line(get_mount_of_tempfile());
+  return $mount->{opt}->{hammer};
 }
 
 BEGIN {
@@ -135,6 +146,12 @@ if ($^O eq 'cygwin') {
 print "# \$^O = $^O, atime = $atime, mtime = $mtime\n";
 
 my $skip_atime = $^O eq 'netbsd' && tempfile_has_noatime_mount();
+
+if ($^O eq 'dragonfly' && tempfile_is_hammerfs()) {
+    # The HAMMER fs in DragonflyBSD has microsecond timestamps.
+    $atime = 1.111111;
+    $mtime = 2.222222;
+}
 
 if ($skip_atime) {
   printf("# Skipping atime tests because tempfiles seem to be in a filesystem mounted with 'noatime' ($^O)\n'");

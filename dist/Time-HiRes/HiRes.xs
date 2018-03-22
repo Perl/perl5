@@ -40,6 +40,14 @@ extern "C" {
 }
 #endif
 
+#ifdef _MSC_VER /* For Visual C */
+struct timezone
+{
+   int tz_minuteswest; /* of Greenwich */
+   int tz_dsttime;     /* type of dst correction to apply */
+};
+#endif
+
 #define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
 #define PERL_DECIMAL_VERSION \
 	PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)

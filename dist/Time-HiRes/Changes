@@ -1,6 +1,15 @@
 Revision history for the Perl extension Time::HiRes.
 
-1.9577 [2018-03-15]
+1.9758 [2018-03-21]
+ - fix build in Win32 with Visual C by introducing a fake struct timezone
+   [rt.cpan.org #124844]
+ - in utime.t detect better being run in a noatime filesystem,
+   and if so, skip the test (for the HAMMER filesystem of DragonflyBSD)
+ - also for the HAMMER fs (if not in noatime), lower the expected subsecond
+   timestamp granularity to microseconds
+ - fix the version number typo in Changes: 1.9577 -> 1.9757
+
+1.9757 [2018-03-15]
  - fix win32 (and cygwin?) builds which have been broken since 1.9755:
    problem was that gettimeofday() is a macro and needs to stay such
  - regenerate ppport.h with Perl 5.26.1 (was previously generated with
