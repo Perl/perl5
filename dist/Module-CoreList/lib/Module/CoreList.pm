@@ -335,6 +335,7 @@ sub changes_between {
     5.027007 => '2017-12-20',
     5.027008 => '2018-01-20',
     5.027009 => '2018-02-20',
+    5.027010 => '2018-03-20',
     5.026002 => '????-??-??',
   );
 
@@ -15171,6 +15172,46 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList::TieHashDelta'=> 1,
         }
     },
+    5.027010 => {
+        delta_from => 5.027009,
+        changed => {
+            'Carp'                  => '1.49',
+            'Carp::Heavy'           => '1.49',
+            'Config'                => '5.02701',
+            'ExtUtils::Command'     => '7.33_03',
+            'ExtUtils::Command::MM' => '7.33_03',
+            'ExtUtils::Liblist'     => '7.33_03',
+            'ExtUtils::Liblist::Kid'=> '7.33_03',
+            'ExtUtils::MM'          => '7.33_03',
+            'ExtUtils::MM_AIX'      => '7.33_03',
+            'ExtUtils::MM_Any'      => '7.33_03',
+            'ExtUtils::MM_BeOS'     => '7.33_03',
+            'ExtUtils::MM_Cygwin'   => '7.33_03',
+            'ExtUtils::MM_DOS'      => '7.33_03',
+            'ExtUtils::MM_Darwin'   => '7.33_03',
+            'ExtUtils::MM_MacOS'    => '7.33_03',
+            'ExtUtils::MM_NW5'      => '7.33_03',
+            'ExtUtils::MM_OS2'      => '7.33_03',
+            'ExtUtils::MM_QNX'      => '7.33_03',
+            'ExtUtils::MM_UWIN'     => '7.33_03',
+            'ExtUtils::MM_Unix'     => '7.33_03',
+            'ExtUtils::MM_VMS'      => '7.33_03',
+            'ExtUtils::MM_VOS'      => '7.33_03',
+            'ExtUtils::MM_Win32'    => '7.33_03',
+            'ExtUtils::MM_Win95'    => '7.33_03',
+            'ExtUtils::MY'          => '7.33_03',
+            'ExtUtils::MakeMaker'   => '7.33_03',
+            'ExtUtils::MakeMaker::Config'=> '7.33_03',
+            'ExtUtils::MakeMaker::Locale'=> '7.33_03',
+            'ExtUtils::MakeMaker::version'=> '7.33_03',
+            'ExtUtils::MakeMaker::version::regex'=> '7.33_03',
+            'ExtUtils::Mkbootstrap' => '7.33_03',
+            'ExtUtils::Mksymlists'  => '7.33_03',
+            'ExtUtils::testlib'     => '7.33_03',
+        },
+        removed => {
+        }
+    },
     5.026002 => {
         delta_from => 5.026001,
         changed => {
@@ -16039,6 +16080,13 @@ sub is_core
     },
     5.027009 => {
         delta_from => 5.027008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027010 => {
+        delta_from => 5.027009,
         changed => {
         },
         removed => {
