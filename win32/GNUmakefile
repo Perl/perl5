@@ -1600,8 +1600,9 @@ Extensions_realclean :
 PostExt : ..\lib\Storable\Limit.pm
 
 # we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
-# rebasePE covers just about that, including adjustment for static builds
-..\lib\Storable\Limit.pm : rebasePE
+# rebasePE most of that, including adjustment for static builds, so we
+# just need non-xs extensions
+..\lib\Storable\Limit.pm : rebasePE Extensions_nonxs
 	$(PLMAKE) -C ..\dist\Storable lib\Storable\Limit.pm
 	if not exist ..\lib\Storable mkdir ..\lib\Storable
 	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm

@@ -33,13 +33,6 @@ if (is_miniperl()) {
 }
 my $prefix = "";
 if ($^O eq "MSWin32") {
-    require Win32;
-    my ($str, $major, $minor) = Win32::GetOSVersion();
-    if ($major < 6 || $major == 6 && $minor < 1) {
-	print "Using defaults for older Win32\n";
-	write_limits(500, 256);
-	exit;
-    }
     # prevent Windows popping up a dialog each time we overflow
     # the stack
     require Win32API::File;
@@ -78,6 +71,15 @@ if ($ENV{PERL_CORE}) {
 -d "lib" or mkdir "lib";
 -d "lib/Storable" or mkdir "lib/Storable";
 
+if ($^O eq "MSWin32") {
+    require Win32;
+    my ($str, $major, $minor) = Win32::GetOSVersion();
+    if ($major < 6 || $major == 6 && $minor < 1) {
+	print "Using defaults for older Win32\n";
+	write_limits(500, 256);
+	exit;
+    }
+}
 my ($n, $good, $bad, $found) =
     (65000, 100, $bad1, undef);
 print "probe for max. stack sizes...\n" unless QUIET;
@@ -102,7 +104,7 @@ if (PARALLEL) {
 sub cmd {
     my ($i, $try, $limit_name) = @_;
     die unless $i;
-    my $code = "my \$t; \$Storable::$limit_name = -1; $try for 1..$i;dclone(\$t);";
+    my $code = "my \$t; \$Storable::$limit_name = -1; $try for 1..$i;dclone(\$t); print qq/ok\n/";
     my $q = ($^O eq 'MSWin32') ? '"' : "'";
 
     "$prefix $PERL $mblib -MStorable=dclone -e$q$code$q"
@@ -131,14 +133,26 @@ sub bad {
     return $j;
 }
 
+sub array_cmd {
+    my $depth = shift;
+    return cmd($depth, '$t=[$t]', 'recursion_limit');
+}
+
+# first check we can successfully run with a minimum level
+my $cmd = array_cmd(1);
+unless ((my $output = `$cmd`) =~ /\bok\b/) {
+    die "Cannot run probe: '$output', aborting...\n";
+}
+
 unless ($ENV{STORABLE_NOISY}) {
     # suppress Segmentation fault messages
     open STDERR, ">", File::Spec->devnull;
 }
+
 while (!$found) {
-    my $cmd = cmd($n, '$t=[$t]', 'recursion_limit');
+    my $cmd = array_cmd($n);
     #print "$cmd\n" unless $QUIET;
-    if (system($cmd) == 0) {
+    if (`$cmd` =~ /\bok\b/) {
         $n = good($n);
     } else {
         $n = bad($n);
@@ -158,7 +172,7 @@ $bad = $max if $bad > $max;
 while (!$found) {
     my $cmd = cmd($n, '$t={1=>$t}', 'recursion_limit_hash');
     #print "$cmd\n" unless $QUIET;
-    if (system($cmd) == 0) {
+    if (`$cmd` =~ /\bok\b/) {
         $n = good($n);
     } else {
         $n = bad($n);
