@@ -144,6 +144,17 @@ L<[perl #131786]|https://rt.perl.org/Public/Bug/Display.html?id=131786>
 A NULL pointer dereference in the C<S_regmatch()> function has been fixed.
 L<[perl #132017]|https://rt.perl.org/Public/Bug/Display.html?id=132017>
 
+=item *
+
+Failures while compiling code within other constructs, such as with
+string interpolation and the right part of C<s///e> now cause
+compilation to abort earlier.
+
+Previously compilation could continue in order to report other errors,
+but the failed sub-parse could leave partly parsed constructs on the
+parser shift-reduce stack, confusing the parser, leading to perl
+crashes. [perl #125351]
+
 =back
 
 =head1 Acknowledgements
