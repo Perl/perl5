@@ -139,6 +139,11 @@ Fixed a duplicate symbol failure with B<-flto -mieee-fp> builds.  F<pp.c>
 defined C<_LIB_VERSION> which B<-lieee> already defines.
 L<[perl #131786]|https://rt.perl.org/Public/Bug/Display.html?id=131786>
 
+=item *
+
+A NULL pointer dereference in the C<S_regmatch()> function has been fixed.
+L<[perl #132017]|https://rt.perl.org/Public/Bug/Display.html?id=132017>
+
 =back
 
 =head1 Acknowledgements
