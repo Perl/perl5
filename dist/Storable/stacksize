@@ -33,13 +33,6 @@ if (is_miniperl()) {
 }
 my $prefix = "";
 if ($^O eq "MSWin32") {
-    require Win32;
-    my ($str, $major, $minor) = Win32::GetOSVersion();
-    if ($major < 6 || $major == 6 && $minor < 1) {
-	print "Using defaults for older Win32\n";
-	write_limits(500, 256);
-	exit;
-    }
     # prevent Windows popping up a dialog each time we overflow
     # the stack
     require Win32API::File;
@@ -78,6 +71,15 @@ if ($ENV{PERL_CORE}) {
 -d "lib" or mkdir "lib";
 -d "lib/Storable" or mkdir "lib/Storable";
 
+if ($^O eq "MSWin32") {
+    require Win32;
+    my ($str, $major, $minor) = Win32::GetOSVersion();
+    if ($major < 6 || $major == 6 && $minor < 1) {
+	print "Using defaults for older Win32\n";
+	write_limits(500, 256);
+	exit;
+    }
+}
 my ($n, $good, $bad, $found) =
     (65000, 100, $bad1, undef);
 print "probe for max. stack sizes...\n" unless QUIET;
@@ -131,12 +133,24 @@ sub bad {
     return $j;
 }
 
+sub array_cmd {
+    my $depth = shift;
+    return cmd($depth, '$t=[$t]', 'recursion_limit');
+}
+
+# first check we can successfully run with a minimum level
+my $cmd = array_cmd(1);
+unless ((my $output = `$cmd`) =~ "ok") {
+    die "Cannot run probe: '$output', aborting...\n";
+}
+
 unless ($ENV{STORABLE_NOISY}) {
     # suppress Segmentation fault messages
     open STDERR, ">", File::Spec->devnull;
 }
+
 while (!$found) {
-    my $cmd = cmd($n, '$t=[$t]', 'recursion_limit');
+    my $cmd = array_cmd($n);
     #print "$cmd\n" unless $QUIET;
     if (system($cmd) == 0) {
         $n = good($n);
