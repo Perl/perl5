@@ -209,20 +209,20 @@ sub output_invmap ($$$$$$$) {
         # lists, we can just get the unique values.  Otherwise, we have to
         # expand the sublists first.
         if ($input_format !~ / ^ a /x) {
-        if ($input_format ne 'sl') {
-            @input_enums = sort(uniques(@$invmap));
-        }
-        else {
-            foreach my $element (@$invmap) {
-                if (ref $element) {
-                    push @input_enums, @$element;
-                }
-                else {
-                    push @input_enums, $element;
-                }
+            if ($input_format ne 'sl') {
+                @input_enums = sort(uniques(@$invmap));
             }
-            @input_enums = sort(uniques(@input_enums));
-        }
+            else {
+                foreach my $element (@$invmap) {
+                    if (ref $element) {
+                        push @input_enums, @$element;
+                    }
+                    else {
+                        push @input_enums, $element;
+                    }
+                }
+                @input_enums = sort(uniques(@input_enums));
+            }
         }
 
         # The internal enums come last, and in the order specified.
@@ -2019,40 +2019,40 @@ for my $charset (get_supported_code_pages()) {
         # of 0..256, as the remap will also include all of 0..256  (256 not
         # 255 because a re-ordering could cause 256 to need to be in the same
         # range as 255.)
-        if ((@invmap && $maps_to_code_point)
-            || (! $nonl1_only || ($invlist[0] < 256
-                                  && ! ($invlist[0] == 0 && $invlist[1] > 256))))
+        if (          (@invmap && $maps_to_code_point)
+            || (     ! $nonl1_only
+                || (   $invlist[0] < 256
+                    && ! ($invlist[0] == 0 && $invlist[1] > 256))))
         {
-
             if (! @invmap) {    # Straight inversion list
-            # Look at all the ranges that start before 257.
-            my @latin1_list;
-            while (@invlist) {
-                last if $invlist[0] > 256;
-                my $upper = @invlist > 1
-                            ? $invlist[1] - 1      # In range
+                # Look at all the ranges that start before 257.
+                my @latin1_list;
+                while (@invlist) {
+                    last if $invlist[0] > 256;
+                    my $upper = @invlist > 1
+                                ? $invlist[1] - 1      # In range
 
-                              # To infinity.  You may want to stop much much
-                              # earlier; going this high may expose perl
-                              # deficiencies with very large numbers.
-                            : $Unicode::UCD::MAX_CP;
-                for my $j ($invlist[0] .. $upper) {
-                    push @latin1_list, a2n($j);
+                                # To infinity.  You may want to stop much much
+                                # earlier; going this high may expose perl
+                                # deficiencies with very large numbers.
+                                : $Unicode::UCD::MAX_CP;
+                    for my $j ($invlist[0] .. $upper) {
+                        push @latin1_list, a2n($j);
+                    }
+
+                    shift @invlist; # Shift off the range that's in the list
+                    shift @invlist; # Shift off the range not in the list
                 }
 
-                shift @invlist; # Shift off the range that's in the list
-                shift @invlist; # Shift off the range not in the list
-            }
-
-            # Here @invlist contains all the ranges in the original that start
-            # at code points above 256, and @latin1_list contains all the
-            # native code points for ranges that start with a Unicode code
-            # point below 257.  We sort the latter and convert it to inversion
-            # list format.  Then simply prepend it to the list of the higher
-            # code points.
-            @latin1_list = sort { $a <=> $b } @latin1_list;
-            @latin1_list = mk_invlist_from_sorted_cp_list(\@latin1_list);
-            unshift @invlist, @latin1_list;
+                # Here @invlist contains all the ranges in the original that
+                # start at code points above 256, and @latin1_list contains
+                # all the native code points for ranges that start with a
+                # Unicode code point below 257.  We sort the latter and
+                # convert it to inversion list format.  Then simply prepend it
+                # to the list of the higher code points.
+                @latin1_list = sort { $a <=> $b } @latin1_list;
+                @latin1_list = mk_invlist_from_sorted_cp_list(\@latin1_list);
+                unshift @invlist, @latin1_list;
             }
             else {  # Is an inversion map
 
