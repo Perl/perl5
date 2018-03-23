@@ -1627,52 +1627,6 @@ static const UV Cased_invlist[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_PERL_C) */
 
-#if defined(PERL_IN_LOCALE_C)
-
-static const UV Currency_Symbol_invlist[] = { /* for ASCII/Latin1 */
-	35,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x24,
-	0x25,
-	0xA2,
-	0xA6,
-	0x58F,
-	0x590,
-	0x60B,
-	0x60C,
-	0x9F2,
-	0x9F4,
-	0x9FB,
-	0x9FC,
-	0xAF1,
-	0xAF2,
-	0xBF9,
-	0xBFA,
-	0xE3F,
-	0xE40,
-	0x17DB,
-	0x17DC,
-	0x20A0,
-	0x20C0,
-	0xA838,
-	0xA839,
-	0xFDFC,
-	0xFDFD,
-	0xFE69,
-	0xFE6A,
-	0xFF04,
-	0xFF05,
-	0xFFE0,
-	0xFFE2,
-	0xFFE5,
-	0xFFE7
-};
-
-#endif	/* defined(PERL_IN_LOCALE_C) */
-
 #if defined(PERL_IN_REGCOMP_C)
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for ASCII/Latin1 */
@@ -37833,56 +37787,6 @@ static const UV Cased_invlist[] = { /* for EBCDIC 1047 */
 };
 
 #endif	/* defined(PERL_IN_PERL_C) */
-
-#if defined(PERL_IN_LOCALE_C)
-
-static const UV Currency_Symbol_invlist[] = { /* for EBCDIC 1047 */
-	39,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x4A,
-	0x4B,
-	0x5B,
-	0x5C,
-	0x9F,
-	0xA0,
-	0xB1,
-	0xB3,
-	0x58F,
-	0x590,
-	0x60B,
-	0x60C,
-	0x9F2,
-	0x9F4,
-	0x9FB,
-	0x9FC,
-	0xAF1,
-	0xAF2,
-	0xBF9,
-	0xBFA,
-	0xE3F,
-	0xE40,
-	0x17DB,
-	0x17DC,
-	0x20A0,
-	0x20C0,
-	0xA838,
-	0xA839,
-	0xFDFC,
-	0xFDFD,
-	0xFE69,
-	0xFE6A,
-	0xFF04,
-	0xFF05,
-	0xFFE0,
-	0xFFE2,
-	0xFFE5,
-	0xFFE7
-};
-
-#endif	/* defined(PERL_IN_LOCALE_C) */
 
 #if defined(PERL_IN_REGCOMP_C)
 
@@ -74459,56 +74363,6 @@ static const UV Cased_invlist[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_PERL_C) */
 
-#if defined(PERL_IN_LOCALE_C)
-
-static const UV Currency_Symbol_invlist[] = { /* for EBCDIC 037 */
-	39,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x4A,
-	0x4B,
-	0x5B,
-	0x5C,
-	0x9F,
-	0xA0,
-	0xB1,
-	0xB3,
-	0x58F,
-	0x590,
-	0x60B,
-	0x60C,
-	0x9F2,
-	0x9F4,
-	0x9FB,
-	0x9FC,
-	0xAF1,
-	0xAF2,
-	0xBF9,
-	0xBFA,
-	0xE3F,
-	0xE40,
-	0x17DB,
-	0x17DC,
-	0x20A0,
-	0x20C0,
-	0xA838,
-	0xA839,
-	0xFDFC,
-	0xFDFD,
-	0xFE69,
-	0xFE6A,
-	0xFF04,
-	0xFF05,
-	0xFFE0,
-	0xFFE2,
-	0xFFE5,
-	0xFFE7
-};
-
-#endif	/* defined(PERL_IN_LOCALE_C) */
-
 #if defined(PERL_IN_REGCOMP_C)
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 037 */
@@ -109537,5 +109391,5 @@ static const U8 WB_table[24][24] = {
  * ea4dc61a00d2db9bd46f3ddec706b5b7b11e8fcf848fb384b54b507fb70d8e90 lib/unicore/mktables
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * 320fca42ad27e06f90c9ea242cd22d7fcf9ccfde7d21a3a0eda01b3c13ad25e2 regen/mk_invlists.pl
+ * a9bc2e7a8c910b4065e21e30dd2c2976b09a47108ba10cf5c01e8a0dd61efd7e regen/mk_invlists.pl
  * ex: set ro: */
