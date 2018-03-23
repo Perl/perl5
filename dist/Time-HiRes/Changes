@@ -1,5 +1,10 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9759 [2018-03-23]
+ - This version reverts the changes on CPAN that were included in 1.9754 - 1.9758.
+   Several of these changes caused instability on some windows platforms. We can
+   revisit these fixes if necessary in Perl 5.29.0
+
 1.9753 [2018-01-11]
  - in t/clock.t in a fast system we need to burn more CPU,
    reported and fix suggested by Joel C. Maslak <jmaslak@antelope.net>
