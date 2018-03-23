@@ -193,11 +193,13 @@ sub output_invmap ($$$$$$$) {
     my $count = @$invmap;
 
     my $output_format;
-    my $declaration_type;
+    my $invmap_declaration_type;
+    my $enum_declaration_type;
+    my $aux_declaration_type;
     my %enums;
     my $name_prefix;
 
-    if ($input_format =~ / ^ s l? $ /x) {
+    if ($input_format =~ / ^ [as] l? $ /x) {
         $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
         my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
         my @input_enums;
@@ -206,6 +208,7 @@ sub output_invmap ($$$$$$$) {
         # that comprise the inversion map.  For inputs that don't have sub
         # lists, we can just get the unique values.  Otherwise, we have to
         # expand the sublists first.
+        if ($input_format !~ / ^ a /x) {
         if ($input_format ne 'sl') {
             @input_enums = sort(uniques(@$invmap));
         }
@@ -219,6 +222,7 @@ sub output_invmap ($$$$$$$) {
                 }
             }
             @input_enums = sort(uniques(@input_enums));
+        }
         }
 
         # The internal enums come last, and in the order specified.
@@ -355,11 +359,13 @@ sub output_invmap ($$$$$$$) {
             }
         }
 
-        # Inversion map stuff is used only by regexec, unless it is in the
-        # enum exception list
+        # Inversion map stuff is used only by regexec or utf-8 (if it is
+        # for code points) , unless it is in the enum exception list
         my $where = (exists $where_to_define_enums{$name})
                     ? $where_to_define_enums{$name}
-                    : 'PERL_IN_REGEXEC_C';
+                    : ($input_format =~ /a/)
+                       ? 'PERL_IN_UTF8_C'
+                       : 'PERL_IN_REGEXEC_C';
 
         my $is_public_enum = exists $public_enums{$name};
         if ($is_public_enum) {
@@ -388,21 +394,27 @@ sub output_invmap ($$$$$$$) {
             push @enum_definition, "\t${name_prefix}$name = $i";
         }
 
-        # For an 'sl' property, we need extra enums, because some of the
+        # For an 'l' property, we need extra enums, because some of the
         # elements are lists.  Each such distinct list is placed in its own
         # auxiliary map table.  Here, we go through the inversion map, and for
         # each distinct list found, create an enum value for it, numbered -1,
         # -2, ....
         my %multiples;
         my $aux_table_prefix = "AUX_TABLE_";
-        if ($input_format eq 'sl') {
+        if ($input_format =~ /l/) {
             foreach my $element (@$invmap) {
 
                 # A regular scalar is not one of the lists we're looking for
                 # at this stage.
                 next unless ref $element;
 
-                my $joined = join ",", sort @$element;
+                my $joined;
+                if ($input_format =~ /a/) { # These are already ordered
+                    $joined = join ",", @$element;
+                }
+                else {
+                    $joined = join ",", sort @$element;
+                }
                 my $already_found = exists $multiples{$joined};
 
                 my $i;
@@ -425,7 +437,7 @@ sub output_invmap ($$$$$$$) {
             }
         }
 
-        $declaration_type = "${name_prefix}enum";
+        $enum_declaration_type = "${name_prefix}enum";
 
         # Finished with the enum definition.  If it only contains one element,
         # that is a dummy, default one
@@ -449,10 +461,17 @@ sub output_invmap ($$$$$$$) {
             print $out_fh "\ntypedef enum {\n";
             print $out_fh join "", @enum_definition;
             print $out_fh "\n";
-            print $out_fh "} $declaration_type;\n";
+            print $out_fh "} $enum_declaration_type;\n";
         }
 
         switch_pound_if($name, $where) if $is_public_enum;
+
+        $invmap_declaration_type = ($input_format =~ /s/)
+                                 ? $enum_declaration_type
+                                 : "IV";
+        $aux_declaration_type = ($input_format =~ /s/)
+                                 ? $enum_declaration_type
+                                 : "int";
 
         $output_format = "${name_prefix}%s";
 
@@ -476,7 +495,7 @@ sub output_invmap ($$$$$$$) {
             # Output each aux table.
             foreach my $table_number (@sorted_table_list) {
                 my $table = $inverted_mults{$table_number};
-                print $out_fh "\nstatic const $declaration_type $name_prefix$aux_table_prefix$table_number\[] = {\n";
+                print $out_fh "\nstatic const $aux_declaration_type $name_prefix$aux_table_prefix$table_number\[] = {\n";
 
                 # Earlier, we joined the elements of this table together with a comma
                 my @elements = split ",", $table;
@@ -484,7 +503,12 @@ sub output_invmap ($$$$$$$) {
                 $aux_counts[$table_number] = scalar @elements;
                 for my $i (0 .. @elements - 1) {
                     print $out_fh  ",\n" if $i > 0;
-                    print $out_fh "\t${name_prefix}$elements[$i]";
+                    if ($input_format =~ /a/) {
+                        printf $out_fh "\t0x%X", $elements[$i];
+                    }
+                    else {
+                        print $out_fh "\t${name_prefix}$elements[$i]";
+                    }
                 }
                 print $out_fh "\n};\n";
             }
@@ -492,7 +516,7 @@ sub output_invmap ($$$$$$$) {
             # Output the table that is indexed by the absolute value of the
             # aux table enum and contains pointers to the tables output just
             # above
-            print $out_fh "\nstatic const $declaration_type * const ${name_prefix}${aux_table_prefix}ptrs\[] = {\n";
+            print $out_fh "\nstatic const $aux_declaration_type * const ${name_prefix}${aux_table_prefix}ptrs\[] = {\n";
             print $out_fh "\tNULL,\t/* Placeholder */\n";
             for my $i (1 .. @sorted_table_list) {
                 print $out_fh  ",\n" if $i > 1;
@@ -591,7 +615,7 @@ sub output_invmap ($$$$$$$) {
                                              && $count;
 
     # Now output the inversion map proper
-    print $out_fh "\nstatic const $declaration_type ${name}_invmap[] = {";
+    print $out_fh "\nstatic const $invmap_declaration_type ${name}_invmap[] = {";
     print $out_fh " /* for $charset */" if $charset;
     print $out_fh "\n";
 
@@ -599,8 +623,15 @@ sub output_invmap ($$$$$$$) {
     for my $i (0 .. $count - 1) {
         my $element = $invmap->[$i];
         my $full_element_name = prop_value_aliases($prop_name, $element);
+        if ($input_format =~ /a/ && $element !~ /\D/) {
+            $element = ($element == 0)
+                       ? 0
+                       : sprintf("0x%X", $element);
+        }
+        else {
         $element = $full_element_name if defined $full_element_name;
         $element = $name_prefix . $element;
+        }
         print $out_fh "\t$element";
         print $out_fh "," if $i < $count - 1;
         print $out_fh  "\n";
