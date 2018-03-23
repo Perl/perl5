@@ -375,28 +375,17 @@ sub output_invmap ($$$$$$$) {
                                       || substr($short_name, 0, 1) =~ /[[:lower:]]/;
         $name_prefix = "${short_name}_";
 
-        # Currently unneeded
-        #print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
-
-        if ($input_format eq 'sl') {
-            print $out_fh
-            "\n/* Negative enum values indicate the need to use an auxiliary"
-          . " table\n * consisting of the list of enums this one expands to."
-          . "  The absolute\n * values of the negative enums are indices into"
-          . " a table of the auxiliary\n * tables' addresses */";
-        }
-
         # Start the enum definition for this map
-        print $out_fh "\ntypedef enum {\n";
+        my @enum_definition;
         my @enum_list;
         foreach my $enum (keys %enums) {
             $enum_list[$enums{$enum}] = $enum;
         }
         foreach my $i (0 .. @enum_list - 1) {
-            print $out_fh  ",\n" if $i > 0;
+            push @enum_definition, ",\n" if $i > 0;
 
             my $name = $enum_list[$i];
-            print $out_fh  "\t${name_prefix}$name = $i";
+            push @enum_definition, "\t${name_prefix}$name = $i";
         }
 
         # For an 'sl' property, we need extra enums, because some of the
@@ -431,15 +420,37 @@ sub output_invmap ($$$$$$$) {
 
                 # And add to the enum values
                 if (! $already_found) {
-                    print $out_fh  ",\n\t${name_prefix}$element = -$i";
+                    push @enum_definition, ",\n\t${name_prefix}$element = -$i";
                 }
             }
         }
 
-        print $out_fh "\n";
         $declaration_type = "${name_prefix}enum";
-        print $out_fh "} $declaration_type;\n";
-        # Finished with the enum defintion.
+
+        # Finished with the enum definition.  If it only contains one element,
+        # that is a dummy, default one
+        if (scalar @enum_definition > 1) {
+
+            # Currently unneeded
+            #print $out_fh "\n#define ${name_prefix}ENUM_COUNT ",
+            #                                   ..scalar keys %enums, "\n";
+
+            if ($input_format =~ /l/) {
+                print $out_fh
+                "\n",
+                "/* Negative enum values indicate the need to use an",
+                    " auxiliary table\n",
+                " * consisting of the list of enums this one expands to.",
+                    "  The absolute\n",
+                " * values of the negative enums are indices into a table",
+                    " of the auxiliary\n",
+                " * tables' addresses */";
+            }
+            print $out_fh "\ntypedef enum {\n";
+            print $out_fh join "", @enum_definition;
+            print $out_fh "\n";
+            print $out_fh "} $declaration_type;\n";
+        }
 
         switch_pound_if($name, $where) if $is_public_enum;
 
