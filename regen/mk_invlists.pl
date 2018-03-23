@@ -1918,6 +1918,11 @@ for my $charset (get_supported_code_pages()) {
                              _Perl_SB,SContinue,CR,Extend,LF,EDGE
                              _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
                              _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
+                             Lowercase_Mapping
+                             Titlecase_Mapping
+                             Uppercase_Mapping
+                             Simple_Case_Folding
+                             Case_Folding
                            )
                            # NOTE that the convention is that extra enum
                            # values come after the property name, separated by
