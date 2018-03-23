@@ -343,6 +343,7 @@
 #define PL_utf8_swash_ptrs	(vTHX->Iutf8_swash_ptrs)
 #define PL_utf8_tofold		(vTHX->Iutf8_tofold)
 #define PL_utf8_tolower		(vTHX->Iutf8_tolower)
+#define PL_utf8_tosimplefold	(vTHX->Iutf8_tosimplefold)
 #define PL_utf8_totitle		(vTHX->Iutf8_totitle)
 #define PL_utf8_toupper		(vTHX->Iutf8_toupper)
 #define PL_utf8cache		(vTHX->Iutf8cache)

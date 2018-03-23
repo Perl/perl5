@@ -2947,17 +2947,39 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
  * The functions return the ordinal of the first character in the string of
  * 'd' */
 #define CALL_UPPER_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, &PL_utf8_toupper, "ToUc", "")
+                _to_utf8_case(uv, s, d, lenp, PL_utf8_toupper,              \
+                                              Uppercase_Mapping_invmap,     \
+                                              UC_AUX_TABLE_ptrs,            \
+                                              UC_AUX_TABLE_lengths,         \
+                                              "uppercase")
 #define CALL_TITLE_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, &PL_utf8_totitle, "ToTc", "")
+                _to_utf8_case(uv, s, d, lenp, PL_utf8_totitle,              \
+                                              Titlecase_Mapping_invmap,     \
+                                              TC_AUX_TABLE_ptrs,            \
+                                              TC_AUX_TABLE_lengths,         \
+                                              "titlecase")
 #define CALL_LOWER_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, &PL_utf8_tolower, "ToLc", "")
+                _to_utf8_case(uv, s, d, lenp, PL_utf8_tolower,              \
+                                              Lowercase_Mapping_invmap,     \
+                                              LC_AUX_TABLE_ptrs,            \
+                                              LC_AUX_TABLE_lengths,         \
+                                              "lowercase")
+
 
 /* This additionally has the input parameter 'specials', which if non-zero will
  * cause this to use the specials hash for folding (meaning get full case
  * folding); otherwise, when zero, this implies a simple case fold */
 #define CALL_FOLD_CASE(uv, s, d, lenp, specials)                            \
-_to_utf8_case(uv, s, d, lenp, &PL_utf8_tofold, "ToCf", (specials) ? "" : NULL)
+        (specials)                                                          \
+        ?  _to_utf8_case(uv, s, d, lenp, PL_utf8_tofold,                    \
+                                          Case_Folding_invmap,              \
+                                          CF_AUX_TABLE_ptrs,                \
+                                          CF_AUX_TABLE_lengths,             \
+                                          "foldcase")                       \
+        : _to_utf8_case(uv, s, d, lenp, PL_utf8_tosimplefold,               \
+                                         Simple_Case_Folding_invmap,        \
+                                         NULL, NULL,                        \
+                                         "foldcase")
 
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
@@ -3434,8 +3456,7 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
 
     /* change namve uv1 to 'from' */
 STATIC UV
-S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
-		SV **swashp, const char *normal, const char *special)
+S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const IV * const invmap, const int * const * aux_tables, const U8 * const aux_table_lengths, const char * const normal)
 {
     STRLEN len = 0;
 
@@ -3503,7 +3524,6 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
                  * some others */
                 if (uv1 < 0xFB00) {
                     goto cases_to_self;
-
                 }
 
                 if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
@@ -3533,62 +3553,37 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
         }
 
 	/* Note that non-characters are perfectly legal, so no warning should
-         * be given.  There are so few of them, that it isn't worth the extra
-         * tests to avoid swash creation */
+         * be given. */
     }
 
-    if (!*swashp) /* load on-demand */
-         *swashp = _core_swash_init("utf8", normal, &PL_sv_undef,
-                                    4, 0, NULL, NULL);
+    {
+        unsigned int i;
+        const int * cp_list;
+        U8 * d;
+        SSize_t index = _invlist_search(invlist, uv1);
+        IV base = invmap[index];
 
-    if (special) {
-         /* It might be "special" (sometimes, but not always,
-	  * a multicharacter mapping) */
-         HV *hv = NULL;
-	 SV **svp;
+        if (base >= 0) {
+            IV lc;
 
-	 /* If passed in the specials name, use that; otherwise use any
-	  * given in the swash */
-         if (*special != '\0') {
-            hv = get_hv(special, 0);
-        }
-        else {
-            svp = hv_fetchs(MUTABLE_HV(SvRV(*swashp)), "SPECIALS", 0);
-            if (svp) {
-                hv = MUTABLE_HV(SvRV(*svp));
+            if (base == 0) {
+                goto cases_to_self;
             }
+
+            lc = base + uv1 - invlist_array(invlist)[index];
+            *lenp = uvchr_to_utf8(ustrp, lc) - ustrp;
+            return lc;
         }
 
-	 if (hv
-             && (svp = hv_fetch(hv, (const char*)p, UVCHR_SKIP(uv1), FALSE))
-             && (*svp))
-         {
-	     const char *s;
-
-	      s = SvPV_const(*svp, len);
-	      if (len == 1)
-                  /* EIGHTBIT */
-		   len = uvchr_to_utf8(ustrp, *(U8*)s) - ustrp;
-	      else {
-		   Copy(s, ustrp, len, U8);
-	      }
-	 }
-    }
-
-    if (!len && *swashp) {
-	const UV uv2 = swash_fetch(*swashp, p, TRUE /* => is UTF-8 */);
-
-	 if (uv2) {
-	      /* It was "normal" (a single character mapping). */
-	      len = uvchr_to_utf8(ustrp, uv2) - ustrp;
-	 }
-    }
-
-    if (len) {
-        if (lenp) {
-            *lenp = len;
+        cp_list = aux_tables[-base];
+        d = ustrp;
+        for (i = 0; i < aux_table_lengths[-base]; i++) {
+            d = uvchr_to_utf8(d, cp_list[i]);
         }
-        return valid_utf8_to_uvchr(ustrp, 0);
+        *d = '\0';
+        *lenp = d - ustrp;
+
+        return cp_list[0];
     }
 
     /* Here, there was no mapping defined, which means that the code point maps
@@ -5028,7 +5023,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 }
 
 HV*
-Perl__swash_inversion_hash(pTHX_ SV* const swash)
+Perl__swash_inversion_hash(pTHX)
 {
 
    /* Subject to change or removal.  For use only in regcomp.c and regexec.c
@@ -5090,6 +5085,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 
     U8 *l, *lend;
     STRLEN lcur;
+    SV * swash = _core_swash_init("utf8", "ToCf", &PL_sv_undef, 4, 0, NULL, NULL);
     HV *const hv = MUTABLE_HV(SvRV(swash));
 
     /* The string containing the main body of the table.  This will have its
@@ -5107,8 +5103,6 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     SV **specials_p = hv_fetchs(hv, "SPECIALS", 0);
 
     HV* ret = newHV();
-
-    PERL_ARGS_ASSERT__SWASH_INVERSION_HASH;
 
     /* Must have at least 8 bits to get the mappings */
     if (bits != 8 && bits != 16 && bits != 32) {

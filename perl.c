@@ -319,6 +319,12 @@ perl_construct(pTHXx)
     PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
     PL_Assigned_invlist = _new_invlist_C_array(Assigned_invlist);
     PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
+    PL_utf8_toupper = _new_invlist_C_array(Uppercase_Mapping_invlist);
+    PL_utf8_tolower = _new_invlist_C_array(Lowercase_Mapping_invlist);
+    PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
+    PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
+    PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
+
 
 
 #if defined(LOCAL_PATCH_COUNT)
@@ -1197,6 +1203,7 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_totitle);
     SvREFCNT_dec(PL_utf8_tolower);
     SvREFCNT_dec(PL_utf8_tofold);
+    SvREFCNT_dec(PL_utf8_tosimplefold);
     SvREFCNT_dec(PL_utf8_foldclosures);
     SvREFCNT_dec(PL_InBitmap);
 #ifdef USE_LOCALE_CTYPE
@@ -1207,6 +1214,7 @@ perl_destruct(pTHXx)
     PL_utf8_totitle	= NULL;
     PL_utf8_tolower	= NULL;
     PL_utf8_tofold	= NULL;
+    PL_utf8_tosimplefold = NULL;
     PL_utf8_foldclosures = NULL;
     PL_InBitmap          = NULL;
 #ifdef USE_LOCALE_CTYPE

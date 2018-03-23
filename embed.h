@@ -1089,7 +1089,7 @@
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
-#define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
+#define _swash_inversion_hash()	Perl__swash_inversion_hash(aTHX)
 #define get_invlist_offset_addr	S_get_invlist_offset_addr
 #define invlist_array		S_invlist_array
 #  endif
@@ -1899,7 +1899,7 @@
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_UTF8_C)
-#define _to_utf8_case(a,b,c,d,e,f,g)	S__to_utf8_case(aTHX_ a,b,c,d,e,f,g)
+#define _to_utf8_case(a,b,c,d,e,f,g,h,i)	S__to_utf8_case(aTHX_ a,b,c,d,e,f,g,h,i)
 #define check_and_deprecate(a,b,c,d,e,f)	S_check_and_deprecate(aTHX_ a,b,c,d,e,f)
 #define check_locale_boundary_crossing(a,b,c,d)	S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #define does_utf8_overflow	S_does_utf8_overflow

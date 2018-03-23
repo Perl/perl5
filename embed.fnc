@@ -1745,7 +1745,7 @@ EiMRn	|UV	|_invlist_len	|NN SV* const invlist
 EMiRn	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMRn	|SSize_t|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
-EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
+EXMpR	|HV*	|_swash_inversion_hash
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 EXpM	|SV*	|_get_regclass_nonbitmap_data				   \
@@ -1797,9 +1797,11 @@ s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN const U8 *p					\
 				|NN U8* ustrp					\
 				|NULLOK STRLEN *lenp				\
-				|NN SV **swashp					\
-				|NN const char *normal 				\
-				|NULLOK const char *special
+				|NN SV *invlist					\
+				|NN const IV * const invmap			\
+				|NULLOK const int * const * const aux_tables	\
+				|NULLOK const U8 * const aux_table_lengths	\
+				|NN const char * const normal
 #endif
 ApbmdD	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_lower_flags|NN const U8 *p|NULLOK const U8* e		\
