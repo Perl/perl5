@@ -14,11 +14,22 @@ L<perl5243delta>, which describes differences between 5.24.2 and 5.24.3.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 [CVE-2018-6797] heap-buffer-overflow (WRITE of size 1) in S_regatom (regcomp.c)
 
-[ List each security issue as a =head2 entry ]
+A crafted regular expression could cause a heap buffer write overflow, with
+control over the bytes written.
+L<[perl #132227]|https://rt.perl.org/Public/Bug/Display.html?id=132227>
+
+=head2 [CVE-2018-6798] Heap-buffer-overflow in Perl__byte_dump_string (utf8.c)
+
+Matching a crafted locale dependent regular expression could cause a heap
+buffer read overflow and potentially information disclosure.
+L<[perl #132063]|https://rt.perl.org/Public/Bug/Display.html?id=132063>
+
+=head2 [CVE-2018-6913] heap-buffer-overflow in S_pack_rec
+
+C<pack()> could cause a heap buffer write overflow with a large item count.
+L<[perl #131844]|https://rt.perl.org/Public/Bug/Display.html?id=131844>
 
 =head1 Incompatible Changes
 
