@@ -31,6 +31,14 @@ L<[perl #132063]|https://rt.perl.org/Public/Bug/Display.html?id=132063>
 C<pack()> could cause a heap buffer write overflow with a large item count.
 L<[perl #131844]|https://rt.perl.org/Public/Bug/Display.html?id=131844>
 
+=head2 Assertion failure in Perl__core_swash_init (utf8.c)
+
+Control characters in a supposed Unicode property name could cause perl to
+crash.  This has been fixed.
+L<[perl #132055]|https://rt.perl.org/Public/Bug/Display.html?id=132055>
+L<[perl #132553]|https://rt.perl.org/Public/Bug/Display.html?id=132553>
+L<[perl #132658]|https://rt.perl.org/Public/Bug/Display.html?id=132658>
+
 =head1 Incompatible Changes
 
 There are no changes intentionally incompatible with 5.26.1.  If any exist,
