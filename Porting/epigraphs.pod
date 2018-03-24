@@ -257,6 +257,18 @@ L<Announced on 2017-05-31 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.
 
     -- Bertrand Russell, The Road to Happiness
 
+=head2 v5.26.2-RC1 - Desmond Morris, "Catwatching: The Essential Guide to Cat Behaviour"
+
+L<Announced on 2018-03-24 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250103.html>
+
+Cats have a way of endearing themselves to their owners, not just by
+their 'kittenoid' behaviour, which stimulates strong parental feelings,
+but also by their sheer gracefulness. There is an elegance and a
+composure about them that captivates the human eye. To the sensitive
+human being it becomes a privilege to share a room with a cat, exchange
+its glance, feel its greeting rub, or watch it gently luxuriate itself
+into a snoozing ball on a soft cushion.
+
 =head2 v5.26.1 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
 
 L<Announced on 2017-09-22 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/09/msg246408.html>
@@ -544,6 +556,17 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
     Wide fields of asphodel fore’er,
   To find that the utmost reward
     Of daring should be still to dare.
+
+=head2 v5.24.4-RC1 - Desmond Morris, "Catwatching: The Essential Guide to Cat Behaviour"
+
+L<Announced on 2018-03-24 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250102.html>
+
+The domestic cat is a contradiction. No animal has developed such an
+intimate relationship with mankind, while at the same time demanding and
+getting such independence of movement and action. The dog may be man's
+best friend, but it is rarely allowed out on its own to wander from
+garden to garden or street to street. The obedient dog has to be taken
+for a walk. The headstrong cat walks alone.
 
 =head2 v5.24.3 - Samuel Taylor Coleridge, "The Rime of the Ancient Mariner"
 
