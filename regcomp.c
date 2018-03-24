@@ -16214,6 +16214,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    case 'P':
 		{
 		char *e;
+                char *i;
+
 
                 /* We will handle any undefined properties ourselves */
                 U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF
@@ -16257,6 +16259,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    n = e - RExC_parse;
 		    while (isSPACE(*(RExC_parse + n - 1)))
 		        n--;
+
+                    for (i = RExC_parse; i < RExC_parse + n; i++) {
+                        if (isCNTRL(*i) && *i != '\t') {
+                            char * name = Perl_form(aTHX_ "%.*s", (int)n, RExC_parse);
+                            RExC_parse = e + 1;
+                            vFAIL2("Can't find Unicode property definition \"%s\"", name);
+                        }
+                    }
 		}   /* The \p isn't immediately followed by a '{' */
 		else if (! isALPHA(*RExC_parse)) {
                     RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
