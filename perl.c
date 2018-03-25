@@ -324,7 +324,14 @@ perl_construct(pTHXx)
     PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
     PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
-
+    PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
+    PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
+    PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
+    PL_utf8_foldable = _new_invlist_C_array(_Perl_Any_Folds_invlist);
+    PL_HasMultiCharFold = _new_invlist_C_array(
+                                            _Perl_Folds_To_Multi_Char_invlist);
+    PL_NonL1NonFinalFold = _new_invlist_C_array(
+                                            NonL1_Perl_Non_Final_Folds_invlist);
 
 
 #if defined(LOCAL_PATCH_COUNT)

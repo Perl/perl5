@@ -54,12 +54,7 @@ my %public_enums = (
 # single dot c each.  The code knows where most of them go, but this hash
 # gives overrides for the exceptions to the typical place
 my %exceptions_to_where_to_define =
-                        ( NonL1_Perl_Non_Final_Folds => 'PERL_IN_REGCOMP_C',
-                          AboveLatin1                => 'PERL_IN_REGCOMP_C',
-                          Latin1                     => 'PERL_IN_REGCOMP_C',
-                          UpperLatin1                => 'PERL_IN_REGCOMP_C',
-                          _Perl_Any_Folds            => 'PERL_IN_REGCOMP_C',
-                          _Perl_Folds_To_Multi_Char  => 'PERL_IN_REGCOMP_C',
+                        (
                           _Perl_IDCont               => 'PERL_IN_UTF8_C',
                           _Perl_IDStart              => 'PERL_IN_UTF8_C',
                         );

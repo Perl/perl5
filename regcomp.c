@@ -6952,17 +6952,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* Initialize these here instead of as-needed, as is quick and avoids
      * having to test them each time otherwise */
-    if (! PL_AboveLatin1) {
+    if (! PL_InBitmap) {
 #ifdef DEBUGGING
         char * dump_len_string;
 #endif
-
-	PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
-	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
-	PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
-        PL_utf8_foldable = _new_invlist_C_array(_Perl_Any_Folds_invlist);
-        PL_HasMultiCharFold =
-                       _new_invlist_C_array(_Perl_Folds_To_Multi_Char_invlist);
 
         /* This is calculated here, because the Perl program that generates the
          * static global ones doesn't currently have access to
@@ -14135,10 +14128,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     len = s - s0 + 1;
 		}
                 else {
-                    if (!  PL_NonL1NonFinalFold) {
-                        PL_NonL1NonFinalFold = _new_invlist_C_array(
-                                        NonL1_Perl_Non_Final_Folds_invlist);
-                    }
 
                     /* Point to the first byte of the final character */
                     s = (char *) utf8_hop((U8 *) s, -1);
