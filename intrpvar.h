@@ -645,14 +645,8 @@ PERLVAR(I, InBitmap,	SV *)
 
 /* utf8 character class swashes */
 PERLVAR(I, utf8_mark,	SV *)
-PERLVAR(I, utf8_toupper, SV *)
-PERLVAR(I, utf8_totitle, SV *)
-PERLVAR(I, utf8_tolower, SV *)
-PERLVAR(I, utf8_tofold,	SV *)
-PERLVAR(I, utf8_tosimplefold,	SV *)
 PERLVAR(I, utf8_charname_begin, SV *)
 PERLVAR(I, utf8_charname_continue, SV *)
-
 PERLVARA(I, utf8_swash_ptrs, POSIX_SWASH_COUNT, SV *)
 PERLVAR(I, seen_deprecated_macro, HV *)
 

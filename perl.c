@@ -1199,22 +1199,12 @@ perl_destruct(pTHXx)
         PL_utf8_swash_ptrs[i] = NULL;
     }
     SvREFCNT_dec(PL_utf8_mark);
-    SvREFCNT_dec(PL_utf8_toupper);
-    SvREFCNT_dec(PL_utf8_totitle);
-    SvREFCNT_dec(PL_utf8_tolower);
-    SvREFCNT_dec(PL_utf8_tofold);
-    SvREFCNT_dec(PL_utf8_tosimplefold);
     SvREFCNT_dec(PL_utf8_foldclosures);
     SvREFCNT_dec(PL_InBitmap);
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
 #endif
     PL_utf8_mark	= NULL;
-    PL_utf8_toupper	= NULL;
-    PL_utf8_totitle	= NULL;
-    PL_utf8_tolower	= NULL;
-    PL_utf8_tofold	= NULL;
-    PL_utf8_tosimplefold = NULL;
     PL_utf8_foldclosures = NULL;
     PL_InBitmap          = NULL;
 #ifdef USE_LOCALE_CTYPE

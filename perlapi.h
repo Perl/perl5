@@ -215,6 +215,16 @@ END_EXTERN_C
 #define PL_utf8_perl_idcont	(*Perl_Gutf8_perl_idcont_ptr(NULL))
 #undef  PL_utf8_perl_idstart
 #define PL_utf8_perl_idstart	(*Perl_Gutf8_perl_idstart_ptr(NULL))
+#undef  PL_utf8_tofold
+#define PL_utf8_tofold		(*Perl_Gutf8_tofold_ptr(NULL))
+#undef  PL_utf8_tolower
+#define PL_utf8_tolower		(*Perl_Gutf8_tolower_ptr(NULL))
+#undef  PL_utf8_tosimplefold
+#define PL_utf8_tosimplefold	(*Perl_Gutf8_tosimplefold_ptr(NULL))
+#undef  PL_utf8_totitle
+#define PL_utf8_totitle		(*Perl_Gutf8_totitle_ptr(NULL))
+#undef  PL_utf8_toupper
+#define PL_utf8_toupper		(*Perl_Gutf8_toupper_ptr(NULL))
 #undef  PL_utf8_xidcont
 #define PL_utf8_xidcont		(*Perl_Gutf8_xidcont_ptr(NULL))
 #undef  PL_utf8_xidstart

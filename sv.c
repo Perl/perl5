@@ -15592,11 +15592,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
     PL_seen_deprecated_macro = hv_dup_inc(proto_perl->Iseen_deprecated_macro, param);
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
-    PL_utf8_toupper	= sv_dup_inc(proto_perl->Iutf8_toupper, param);
-    PL_utf8_totitle	= sv_dup_inc(proto_perl->Iutf8_totitle, param);
-    PL_utf8_tolower	= sv_dup_inc(proto_perl->Iutf8_tolower, param);
-    PL_utf8_tofold	= sv_dup_inc(proto_perl->Iutf8_tofold, param);
-    PL_utf8_tosimplefold	= sv_dup_inc(proto_perl->Iutf8_tosimplefold, param);
     PL_utf8_charname_begin = sv_dup_inc(proto_perl->Iutf8_charname_begin, param);
     PL_utf8_charname_continue = sv_dup_inc(proto_perl->Iutf8_charname_continue, param);
 
