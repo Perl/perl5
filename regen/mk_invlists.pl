@@ -2148,9 +2148,9 @@ for my $charset (get_supported_code_pages()) {
                 # originals that start with code points above $upper_limit.
                 # Each bucket in %mapped_lists contains all the code points
                 # that map to that bucket.  If the bucket is for a map to a
-                # single code point is a single code point, the bucket has
-                # been converted to native.  If something else (including
-                # multiple code points), no conversion is done.
+                # single code point, the bucket has been converted to native.
+                # If something else (including multiple code points), no
+                # conversion is done.
                 #
                 # Now we recreate the inversion map into %xlated, but this
                 # time for the native character set.
