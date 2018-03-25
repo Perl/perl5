@@ -2140,7 +2140,17 @@ for my $charset (get_supported_code_pages()) {
                             @{$xlated{$range_start}} = split /\cK/, $bucket;
                         }
                         else {
-                            $xlated{$range_start} = $bucket;
+                            # If adjusting, and there is more than one thing
+                            # that maps to the same thing, they must be split
+                            # so that later the adjusting doesn't think the
+                            # subsequent items can go away because of the
+                            # adjusting.
+                            my $range_end = ($to_adjust && $bucket != $map_default)
+                                             ? $mapped_lists{$bucket}->[1] - 1
+                                             : $range_start;
+                            for my $i ($range_start .. $range_end) {
+                                $xlated{$i} = $bucket;
+                            }
                         }
                         shift @{$mapped_lists{$bucket}}; # Discard odd ranges
                         shift @{$mapped_lists{$bucket}}; # Get ready for next
