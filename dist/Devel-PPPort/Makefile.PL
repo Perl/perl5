@@ -40,12 +40,12 @@ WriteMakefile(
     },
     resources => {
       bugtracker => {
-        web => 'https://github.com/mhx/Devel-PPPort/issues/',
+        web => 'https://rt.perl.org/rt3/',
       },
       repository => {
         type => 'git',
-        url  => 'git://github.com/mhx/Devel-PPPort.git',
-        web  => 'https://github.com/mhx/Devel-PPPort/',
+        url  => 'git://perl5.git.perl.org/perl.git',
+        web  => 'https://perl5.git.perl.org/perl.git',
       },
     },
   },
