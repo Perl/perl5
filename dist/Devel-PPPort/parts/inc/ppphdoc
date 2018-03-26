@@ -297,7 +297,7 @@ before sending a bug report.
 
 If F<ppport.h> was generated using the latest version of
 C<Devel::PPPort> and is causing failure of this module, please
-file a bug report here: L<https://github.com/mhx/Devel-PPPort/issues/>
+send a bug report to L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
 Please include the following information:
 

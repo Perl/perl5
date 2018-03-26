@@ -287,9 +287,8 @@ That's it.
 =head2 Submitting Patches
 
 If you've added some functionality to C<Devel::PPPort>, please
-consider submitting a patch with your work to GitHub here:
-L<https://github.com/mhx/Devel-PPPort/issues/>, or by sending a
-Pull Request.
+consider submitting a patch with your work to P5P by sending a mail
+L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
 When submitting patches, please only add the relevant changes
 and don't include the differences of the generated files. You
