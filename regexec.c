@@ -494,7 +494,7 @@ Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 #endif
 
 STATIC bool
-S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
+S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
 {
     /* Returns a boolean as to whether or not the (well-formed) UTF-8-encoded
      * 'character' is a member of the Posix character class given by 'classnum'
@@ -516,7 +516,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
                         EIGHT_BIT_UTF8_TO_NATIVE(*character, *(character + 1)));
     }
 
-    _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, character + UTF8SKIP(character));
+    _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, e);
 
     switch ((_char_class_number) classnum) {
         case _CC_ENUM_SPACE:     return is_XPERLSPACE_high(character);
@@ -525,7 +525,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
         case _CC_ENUM_VERTSPACE: return is_VERTWS_high(character);
         default:
             return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
-                                        valid_utf8_to_uvchr(character, NULL));
+                                        utf8_to_uvchr_buf(character, e, NULL));
     }
 
     return FALSE; /* Things like CNTRL are always below 256 */
@@ -2789,7 +2789,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     case POSIXL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        REXEC_FBC_CSCAN(to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s)),
+        REXEC_FBC_CSCAN(to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s, (U8 *) strend)),
                         to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
         break;
 
@@ -9512,7 +9512,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	} else {
 	    while (hardcount < max && scan < loceol
                    && to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(p),
-                                                                  (U8 *) scan)))
+                                                                  (U8 *) scan,
+                                                                  (U8 *) loceol)))
             {
                 scan += UTF8SKIP(scan);
 		hardcount++;

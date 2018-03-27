@@ -5620,10 +5620,10 @@ STATIC U8 *	S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, co
 #define PERL_ARGS_ASSERT_FIND_SPAN_END_MASK	\
 	assert(s); assert(send)
 
-STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
+STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISFOO_UTF8_LC	\
-	assert(character)
+	assert(character); assert(e)
 
 STATIC bool	S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strbeg, const U8 * const curpos, const bool utf8_target)
 			__attribute__warn_unused_result__;
