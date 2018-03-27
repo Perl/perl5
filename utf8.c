@@ -3464,7 +3464,7 @@ Perl__is_utf8_xidcont(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT__IS_UTF8_XIDCONT;
 
-    return is_utf8_common(p, &PL_utf8_idcont, "XIdContinue", NULL);
+    return is_utf8_common(p, &PL_utf8_xidcont, "XIdContinue", NULL);
 }
 
 bool
