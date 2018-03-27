@@ -6970,8 +6970,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                 sayNO;
                             }
                             break;
-                        default:    /* The rest, e.g. [:cntrl:], can't match
-                                       above Latin1 */
+                        case _CC_ENUM_CNTRL:    /* These can't match above Latin1 */
+                        case _CC_ENUM_ASCII:
                             if (! to_complement) {
                                 sayNO;
                             }
