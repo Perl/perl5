@@ -2844,29 +2844,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
           posix_utf8:
             classnum = (_char_class_number) FLAGS(c);
-            if (classnum < _FIRST_NON_SWASH_CC) {
-                while (s < strend) {
-
-                    /* We avoid loading in the swash as long as possible, but
-                     * should we have to, we jump to a separate loop.  This
-                     * extra 'if' statement is what keeps this code from being
-                     * just a call to REXEC_FBC_CLASS_SCAN() */
-                    if (UTF8_IS_ABOVE_LATIN1(*s)) {
-                        goto found_above_latin1;
-                    }
-
-                    REXEC_FBC_CLASS_SCAN_GUTS(1, (UTF8_IS_INVARIANT(*s)
-                         && to_complement ^ cBOOL(_generic_isCC((U8) *s,
-                                                                classnum)))
-                        || (   UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, strend)
-                            && to_complement ^ cBOOL(
-                                _generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*s,
-                                                                      *(s + 1)),
-                                              classnum))));
-                }
-            }
-            else switch (classnum) {    /* These classes are implemented as
-                                           macros */
+            switch (classnum) {
+                default:
+                    REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
+                        to_complement ^ cBOOL(_invlist_contains_cp(
+                                              PL_XPosix_ptrs[classnum],
+                                              utf8_to_uvchr_buf((U8 *) s,
+                                                                (U8 *) strend,
+                                                                NULL))));
+                    break;
                 case _CC_ENUM_SPACE:
                     REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
                         to_complement ^ cBOOL(isSPACE_utf8_safe(s, strend)));
@@ -2891,35 +2877,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     REXEC_FBC_CLASS_SCAN(1,
                         to_complement ^ cBOOL(isCNTRL_utf8_safe(s, strend)));
                     break;
-
-                default:
-                    Perl_croak(aTHX_ "panic: find_byclass() node %d='%s' has an unexpected character class '%d'", OP(c), PL_reg_name[OP(c)], classnum);
-                    NOT_REACHED; /* NOTREACHED */
             }
         }
-        break;
-
-      found_above_latin1:   /* Here we have to load a swash to get the result
-                               for the current code point */
-        if (! PL_utf8_swash_ptrs[classnum]) {
-            U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-            PL_utf8_swash_ptrs[classnum] =
-                    _core_swash_init("utf8",
-                                     "",
-                                     &PL_sv_undef, 1, 0,
-                                     PL_XPosix_ptrs[classnum], &flags);
-        }
-
-        /* This is a copy of the loop above for swash classes, though using the
-         * FBC macro instead of being expanded out.  Since we've loaded the
-         * swash, we don't have to check for that each time through the loop */
-        REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
-                to_complement ^ cBOOL(_generic_utf8_safe(
-                                      classnum,
-                                      s,
-                                      strend,
-                                      swash_fetch(PL_utf8_swash_ptrs[classnum],
-                                                  (U8 *) s, TRUE))));
         break;
 
     case AHOCORASICKC:
