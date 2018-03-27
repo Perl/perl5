@@ -11323,7 +11323,7 @@ static const GCB_enum _Perl_GCB_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for ASCII/Latin1 */
 	1393,	/* Number of elements */
@@ -13920,10 +13920,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for ASCII/Latin1 */
 	0x2F800,
 	0x2FA1E
 };
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_LB_invlist[] = { /* for ASCII/Latin1 */
 	2313,	/* Number of elements */
@@ -62436,7 +62432,7 @@ static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 1047 */
 	1417,	/* Number of elements */
@@ -65083,10 +65079,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 1047 */
 	0x2F800,
 	0x2FA1E
 };
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_LB_invlist[] = { /* for EBCDIC 1047 */
 	2325,	/* Number of elements */
@@ -114011,7 +114003,7 @@ static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 037 */
 	1413,	/* Number of elements */
@@ -116650,10 +116642,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 037 */
 	0x2F800,
 	0x2FA1E
 };
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_LB_invlist[] = { /* for EBCDIC 037 */
 	2325,	/* Number of elements */
@@ -154245,5 +154233,5 @@ static const U8 WB_table[24][24] = {
  * ea4dc61a00d2db9bd46f3ddec706b5b7b11e8fcf848fb384b54b507fb70d8e90 lib/unicore/mktables
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * 382d6d6415742742c34bf7af76fc9ef0c27031f633c7678068e7165c285ae4b9 regen/mk_invlists.pl
+ * d532927784b83916baf6cda49b5155d29c8895c1bb8e898d64102f39e8de8828 regen/mk_invlists.pl
  * ex: set ro: */

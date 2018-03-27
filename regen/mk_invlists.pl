@@ -55,8 +55,6 @@ my %public_enums = (
 # gives overrides for the exceptions to the typical place
 my %exceptions_to_where_to_define =
                         (
-                          _Perl_IDCont               => 'PERL_IN_UTF8_C',
-                          _Perl_IDStart              => 'PERL_IN_UTF8_C',
                         );
 my %where_to_define_enums = ();
 

@@ -2858,23 +2858,19 @@ Perl__is_utf8_idstart(pTHX_ const U8 *p)
 
     if (*p == '_')
 	return TRUE;
-    return is_utf8_common(p, &PL_utf8_idstart, "IdStart", NULL);
+    return is_utf8_common(p, &PL_utf8_idstart, "IdStart", PL_utf8_idstart);
 }
 
 bool
 Perl__is_uni_perl_idcont(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return _is_utf8_perl_idcont_with_len(tmpbuf, tmpbuf + sizeof(tmpbuf));
+    return _invlist_contains_cp(PL_utf8_perl_idcont, c);
 }
 
 bool
 Perl__is_uni_perl_idstart(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return _is_utf8_perl_idstart_with_len(tmpbuf, tmpbuf + sizeof(tmpbuf));
+    return _invlist_contains_cp(PL_utf8_perl_idstart, c);
 }
 
 UV
@@ -3361,19 +3357,11 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
             case _CC_VERTSPACE:
                 return is_VERTWS_high(p);
             case _CC_IDFIRST:
-                if (! PL_utf8_perl_idstart) {
-                    PL_utf8_perl_idstart
-                                = _new_invlist_C_array(_Perl_IDStart_invlist);
-                }
                 return is_utf8_common(p, &PL_utf8_perl_idstart,
-                                      "_Perl_IDStart", NULL);
+                                      "_Perl_IDStart", PL_utf8_perl_idstart);
             case _CC_IDCONT:
-                if (! PL_utf8_perl_idcont) {
-                    PL_utf8_perl_idcont
-                                = _new_invlist_C_array(_Perl_IDCont_invlist);
-                }
                 return is_utf8_common(p, &PL_utf8_perl_idcont,
-                                      "_Perl_IDCont", NULL);
+                                      "_Perl_IDCont", PL_utf8_perl_idcont);
         }
     }
 
@@ -3424,11 +3412,10 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
 bool
 Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
-
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN;
 
     return is_utf8_common_with_len(p, e, &PL_utf8_perl_idstart,
-                                      "_Perl_IDStart", NULL);
+                                      "_Perl_IDStart", PL_utf8_perl_idstart);
 }
 
 bool
@@ -3444,11 +3431,10 @@ Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
-
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN;
 
     return is_utf8_common_with_len(p, e, &PL_utf8_perl_idcont,
-                                   "_Perl_IDCont", NULL);
+                                   "_Perl_IDCont", PL_utf8_perl_idcont);
 }
 
 bool

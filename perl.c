@@ -324,6 +324,8 @@ perl_construct(pTHXx)
     PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
     PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
+    PL_utf8_perl_idstart = _new_invlist_C_array(_Perl_IDStart_invlist);
+    PL_utf8_perl_idcont = _new_invlist_C_array(_Perl_IDCont_invlist);
     PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
     PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
     PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
