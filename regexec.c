@@ -201,12 +201,6 @@ static const char* const non_utf8_target_but_utf8_required
         LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist)
 #endif
 
-#define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS_DEBUG_TEST(           \
-                                        PL_utf8_swash_ptrs[_CC_WORDCHAR],     \
-                                        "",                                   \
-                                        PL_XPosix_ptrs[_CC_WORDCHAR],         \
-                                        LATIN_SMALL_LIGATURE_LONG_S_T_UTF8);
-
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
@@ -2044,7 +2038,6 @@ STMT_START {                                                                    
                                                        0, UTF8_ALLOW_DEFAULT); \
     }                                                                          \
     tmp = TEST_UV(tmp);                                                        \
-    LOAD_UTF8_CHARCLASS_ALNUM();                                               \
     REXEC_FBC_SCAN(1,  /* 1=>is-utf8; advances s while s < strend */           \
         if (tmp == ! (TEST_UTF8((U8 *) s, (U8 *) reginfo->strend))) {          \
             tmp = !tmp;                                                        \
