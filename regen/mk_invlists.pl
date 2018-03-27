@@ -1906,6 +1906,8 @@ for my $charset (get_supported_code_pages()) {
                              &UpperLatin1
                              _Perl_IDStart
                              _Perl_IDCont
+                             _Perl_Charname_Begin
+                             _Perl_Charname_Continue
                              _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
                              _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
                              _Perl_SB,SContinue,CR,Extend,LF,EDGE
