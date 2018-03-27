@@ -1216,31 +1216,6 @@ typedef enum {
 #define POSIX_SWASH_COUNT _FIRST_NON_SWASH_CC
 #define POSIX_CC_COUNT    (_HIGHEST_REGCOMP_DOT_H_SYNC + 1)
 
-#if defined(PERL_IN_UTF8_C)
-#   if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-       || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
-       || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9
-      #error Need to adjust order of swash_property_names[]
-#   endif
-
-/* This is declared static in each of the few files that this is #defined for
- * to keep them from being publicly accessible.  Hence there is a small amount
- * of wasted space */
-
-static const char* const swash_property_names[] = {
-    "XPosixWord",
-    "XPosixDigit",
-    "XPosixAlpha",
-    "XPosixLower",
-    "XPosixUpper",
-    "XPosixPunct",
-    "XPosixPrint",
-    "XPosixAlnum",
-    "XPosixGraph",
-    "Cased"
-};
-#endif
-
 START_EXTERN_C
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
