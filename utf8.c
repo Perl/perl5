@@ -5332,6 +5332,8 @@ Perl__swash_inversion_hash(pTHX)
 	}
     }
 
+    SvREFCNT_dec(swash);
+
     return ret;
 }
 
