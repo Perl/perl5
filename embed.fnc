@@ -2874,12 +2874,12 @@ sRM	|UV	|check_locale_boundary_crossing				    \
 		|NN U8* const ustrp					    \
 		|NN STRLEN *lenp
 iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
-				|NN SV **swash				    \
+				|NULLOK SV **swash			    \
 				|NN const char * const swashname	    \
 				|NULLOK SV* const invlist
 iR	|bool	|is_utf8_common_with_len|NN const U8 *const p		    \
 					   |NN const U8 *const e	    \
-				    |NN SV **swash			    \
+				    |NULLOK SV **swash			    \
 				    |NN const char * const swashname	    \
 				    |NULLOK SV* const invlist
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span

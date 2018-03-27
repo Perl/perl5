@@ -2858,7 +2858,9 @@ Perl__is_utf8_idstart(pTHX_ const U8 *p)
 
     if (*p == '_')
 	return TRUE;
-    return is_utf8_common(p, &PL_utf8_idstart, "IdStart", PL_utf8_idstart);
+    return is_utf8_common(p, NULL,
+                          "This is buggy if this gets used",
+                          PL_utf8_idstart);
 }
 
 bool
@@ -3216,6 +3218,8 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
         return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
     }
 
+    assert(swash);
+
     if (!*swash) {
         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
         *swash = _core_swash_init("utf8",
@@ -3254,6 +3258,8 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
     if (invlist) {
         return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
     }
+
+    assert(swash);
 
     if (!*swash) {
         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
@@ -3340,8 +3346,8 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
             case _CC_CASED:
 
                 return is_utf8_common(p,
-                                      &PL_utf8_swash_ptrs[classnum],
-                                      swash_property_names[classnum],
+                                      NULL,
+                                      "This is buggy if this gets used",
                                       PL_XPosix_ptrs[classnum]);
 
             case _CC_SPACE:
@@ -3357,11 +3363,13 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
             case _CC_VERTSPACE:
                 return is_VERTWS_high(p);
             case _CC_IDFIRST:
-                return is_utf8_common(p, &PL_utf8_perl_idstart,
-                                      "_Perl_IDStart", PL_utf8_perl_idstart);
+                return is_utf8_common(p, NULL,
+                                      "This is buggy if this gets used",
+                                      PL_utf8_perl_idstart);
             case _CC_IDCONT:
-                return is_utf8_common(p, &PL_utf8_perl_idcont,
-                                      "_Perl_IDCont", PL_utf8_perl_idcont);
+                return is_utf8_common(p, NULL,
+                                      "This is buggy if this gets used",
+                                      PL_utf8_perl_idcont);
         }
     }
 
@@ -3402,10 +3410,8 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
 
     assert(classnum < _FIRST_NON_SWASH_CC);
 
-    return is_utf8_common_with_len(p,
-                                   e,
-                                   &PL_utf8_swash_ptrs[classnum],
-                                   swash_property_names[classnum],
+    return is_utf8_common_with_len(p, e, NULL,
+                                   "This is buggy if this gets used",
                                    PL_XPosix_ptrs[classnum]);
 }
 
@@ -3414,8 +3420,9 @@ Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN;
 
-    return is_utf8_common_with_len(p, e, &PL_utf8_perl_idstart,
-                                      "_Perl_IDStart", PL_utf8_perl_idstart);
+    return is_utf8_common_with_len(p, e, NULL,
+                                   "This is buggy if this gets used",
+                                   PL_utf8_perl_idstart);
 }
 
 bool
@@ -3433,8 +3440,9 @@ Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN;
 
-    return is_utf8_common_with_len(p, e, &PL_utf8_perl_idcont,
-                                   "_Perl_IDCont", PL_utf8_perl_idcont);
+    return is_utf8_common_with_len(p, e, NULL,
+                                   "This is buggy if this gets used",
+                                   PL_utf8_perl_idcont);
 }
 
 bool
