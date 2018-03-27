@@ -518,29 +518,14 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
 
     _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, character + UTF8SKIP(character));
 
-    if (classnum < _FIRST_NON_SWASH_CC) {
-
-        /* Initialize the swash unless done already */
-        if (! PL_utf8_swash_ptrs[classnum]) {
-            U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-            PL_utf8_swash_ptrs[classnum] =
-                    _core_swash_init("utf8",
-                                     "",
-                                     &PL_sv_undef, 1, 0,
-                                     PL_XPosix_ptrs[classnum], &flags);
-        }
-
-        return cBOOL(swash_fetch(PL_utf8_swash_ptrs[classnum], (U8 *)
-                                 character,
-                                 TRUE /* is UTF */ ));
-    }
-
     switch ((_char_class_number) classnum) {
         case _CC_ENUM_SPACE:     return is_XPERLSPACE_high(character);
         case _CC_ENUM_BLANK:     return is_HORIZWS_high(character);
         case _CC_ENUM_XDIGIT:    return is_XDIGIT_high(character);
         case _CC_ENUM_VERTSPACE: return is_VERTWS_high(character);
-        default:                 break;
+        default:
+            return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
+                                        valid_utf8_to_uvchr(character, NULL));
     }
 
     return FALSE; /* Things like CNTRL are always below 256 */
