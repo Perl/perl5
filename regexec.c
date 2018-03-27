@@ -6921,27 +6921,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             else {  /* Handle above Latin-1 code points */
               utf8_posix_above_latin1:
                 classnum = (_char_class_number) FLAGS(scan);
-                if (classnum < _FIRST_NON_SWASH_CC) {
-
-                    /* Here, uses a swash to find such code points.  Load if if
-                     * not done already */
-                    if (! PL_utf8_swash_ptrs[classnum]) {
-                        U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-                        PL_utf8_swash_ptrs[classnum]
-                                = _core_swash_init("utf8",
-                                        "",
-                                        &PL_sv_undef, 1, 0,
-                                        PL_XPosix_ptrs[classnum], &flags);
-                    }
+                switch (classnum) {
+                    default:
                     if (! (to_complement
-                           ^ cBOOL(swash_fetch(PL_utf8_swash_ptrs[classnum],
-                                               (U8 *) locinput, TRUE))))
+                           ^ cBOOL(_invlist_contains_cp(
+                                      PL_XPosix_ptrs[classnum],
+                                      utf8_to_uvchr_buf((U8 *) locinput,
+                                                        (U8 *) reginfo->strend,
+                                                        NULL)))))
                     {
                         sayNO;
                     }
-                }
-                else {  /* Here, uses macros to find above Latin-1 code points */
-                    switch (classnum) {
+                        break;
                         case _CC_ENUM_SPACE:
                             if (! (to_complement
                                         ^ cBOOL(is_XPERLSPACE_high(locinput))))
@@ -6976,7 +6967,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                 sayNO;
                             }
                             break;
-                    }
                 }
                 locinput += UTF8SKIP(locinput);
             }
