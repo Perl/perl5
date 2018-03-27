@@ -3408,8 +3408,6 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
 {
     PERL_ARGS_ASSERT__IS_UTF8_FOO_WITH_LEN;
 
-    assert(classnum < _FIRST_NON_SWASH_CC);
-
     return is_utf8_common_with_len(p, e, NULL,
                                    "This is buggy if this gets used",
                                    PL_XPosix_ptrs[classnum]);

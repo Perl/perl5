@@ -338,7 +338,6 @@
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_foldclosures	(vTHX->Iutf8_foldclosures)
 #define PL_utf8_mark		(vTHX->Iutf8_mark)
-#define PL_utf8_swash_ptrs	(vTHX->Iutf8_swash_ptrs)
 #define PL_utf8cache		(vTHX->Iutf8cache)
 #define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_warn_locale		(vTHX->Iwarn_locale)

@@ -1205,10 +1205,6 @@ perl_destruct(pTHXx)
     }
 
     /* clear character classes  */
-    for (i = 0; i < POSIX_SWASH_COUNT; i++) {
-        SvREFCNT_dec(PL_utf8_swash_ptrs[i]);
-        PL_utf8_swash_ptrs[i] = NULL;
-    }
     SvREFCNT_dec(PL_utf8_mark);
     SvREFCNT_dec(PL_utf8_foldclosures);
     SvREFCNT_dec(PL_InBitmap);
