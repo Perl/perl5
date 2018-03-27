@@ -9531,47 +9531,24 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	else {
           utf8_posix:
             classnum = (_char_class_number) FLAGS(p);
-            if (classnum < _FIRST_NON_SWASH_CC) {
+            switch (classnum) {
+                default:
+                    while (   hardcount < max && scan < loceol
+                           && to_complement ^ cBOOL(_invlist_contains_cp(
+                                              PL_XPosix_ptrs[classnum],
+                                              utf8_to_uvchr_buf((U8 *) scan,
+                                                                (U8 *) loceol,
+                                                                NULL))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                    break;
 
-                /* Here, a swash is needed for above-Latin1 code points.
-                 * Process as many Latin1 code points using the built-in rules.
-                 * Go to another loop to finish processing upon encountering
-                 * the first Latin1 code point.  We could do that in this loop
-                 * as well, but the other way saves having to test if the swash
-                 * has been loaded every time through the loop: extra space to
-                 * save a test. */
-                while (hardcount < max && scan < loceol) {
-                    if (UTF8_IS_INVARIANT(*scan)) {
-                        if (! (to_complement ^ cBOOL(_generic_isCC((U8) *scan,
-                                                                   classnum))))
-                        {
-                            break;
-                        }
-                        scan++;
-                    }
-                    else if (UTF8_IS_DOWNGRADEABLE_START(*scan)) {
-                        if (! (to_complement
-                              ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*scan,
-                                                                     *(scan + 1)),
-                                                    classnum))))
-                        {
-                            break;
-                        }
-                        scan += 2;
-                    }
-                    else {
-                        goto found_above_latin1;
-                    }
-
-                    hardcount++;
-                }
-            }
-            else {
                 /* For these character classes, the knowledge of how to handle
                  * every code point is compiled in to Perl via a macro.  This
                  * code is written for making the loops as tight as possible.
                  * It could be refactored to save space instead */
-                switch (classnum) {
                     case _CC_ENUM_SPACE:
                         while (hardcount < max
                                && scan < loceol
@@ -9622,37 +9599,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                             hardcount++;
                         }
                         break;
-                    default:
-                        Perl_croak(aTHX_ "panic: regrepeat() node %d='%s' has an unexpected character class '%d'", OP(p), PL_reg_name[OP(p)], classnum);
-                }
             }
 	}
-        break;
-
-      found_above_latin1:   /* Continuation of POSIXU and NPOSIXU */
-
-        /* Load the swash if not already present */
-        if (! PL_utf8_swash_ptrs[classnum]) {
-            U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-            PL_utf8_swash_ptrs[classnum] = _core_swash_init(
-                                        "utf8",
-                                        "",
-                                        &PL_sv_undef, 1, 0,
-                                        PL_XPosix_ptrs[classnum], &flags);
-        }
-
-        while (hardcount < max && scan < loceol
-               && to_complement ^ cBOOL(_generic_utf8_safe(
-                                       classnum,
-                                       scan,
-                                       loceol,
-                                       swash_fetch(PL_utf8_swash_ptrs[classnum],
-                                                   (U8 *) scan,
-                                                   TRUE))))
-        {
-            scan += UTF8SKIP(scan);
-            hardcount++;
-        }
         break;
 
     case LNBREAK:
