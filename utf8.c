@@ -2845,9 +2845,7 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 bool
 Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return _is_utf8_FOO_with_len(classnum, tmpbuf, tmpbuf + sizeof(tmpbuf));
+    return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
 }
 
 /* Internal function so we can deprecate the external one, and call
@@ -3218,6 +3216,10 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
         NOT_REACHED; /* NOTREACHED */
     }
 
+    if (invlist) {
+        return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
+    }
+
     if (!*swash) {
         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
         *swash = _core_swash_init("utf8",
@@ -3251,6 +3253,10 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
     if (! isUTF8_CHAR(p, e)) {
         _force_out_malformed_utf8_message(p, e, 0, 1);
         NOT_REACHED; /* NOTREACHED */
+    }
+
+    if (invlist) {
+        return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
     }
 
     if (!*swash) {
@@ -3418,15 +3424,11 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
 bool
 Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
-    SV* invlist = NULL;
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN;
 
-    if (! PL_utf8_perl_idstart) {
-        invlist = _new_invlist_C_array(_Perl_IDStart_invlist);
-    }
     return is_utf8_common_with_len(p, e, &PL_utf8_perl_idstart,
-                                      "_Perl_IDStart", invlist);
+                                      "_Perl_IDStart", NULL);
 }
 
 bool
@@ -3442,15 +3444,11 @@ Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
-    SV* invlist = NULL;
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN;
 
-    if (! PL_utf8_perl_idcont) {
-        invlist = _new_invlist_C_array(_Perl_IDCont_invlist);
-    }
     return is_utf8_common_with_len(p, e, &PL_utf8_perl_idcont,
-                                   "_Perl_IDCont", invlist);
+                                   "_Perl_IDCont", NULL);
 }
 
 bool
