@@ -75,6 +75,7 @@ static void
 dl_unload_all_files(pTHX_ void *unused)
 {
     CV *sub;
+    PERL_UNUSED_ARG(unused);
     if ((sub = get_cvs("DynaLoader::dl_unload_file", 0)) != NULL) {
         AV *dl_librefs = get_av("DynaLoader::dl_librefs", 0);
         SV *dl_libref;
