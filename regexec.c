@@ -6882,50 +6882,50 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 classnum = (_char_class_number) FLAGS(scan);
                 switch (classnum) {
                     default:
-                    if (! (to_complement
+                        if (! (to_complement
                            ^ cBOOL(_invlist_contains_cp(
                                       PL_XPosix_ptrs[classnum],
                                       utf8_to_uvchr_buf((U8 *) locinput,
                                                         (U8 *) reginfo->strend,
                                                         NULL)))))
-                    {
-                        sayNO;
-                    }
+                        {
+                            sayNO;
+                        }
                         break;
-                        case _CC_ENUM_SPACE:
-                            if (! (to_complement
-                                        ^ cBOOL(is_XPERLSPACE_high(locinput))))
-                            {
-                                sayNO;
-                            }
-                            break;
-                        case _CC_ENUM_BLANK:
-                            if (! (to_complement
-                                            ^ cBOOL(is_HORIZWS_high(locinput))))
-                            {
-                                sayNO;
-                            }
-                            break;
-                        case _CC_ENUM_XDIGIT:
-                            if (! (to_complement
-                                            ^ cBOOL(is_XDIGIT_high(locinput))))
-                            {
-                                sayNO;
-                            }
-                            break;
-                        case _CC_ENUM_VERTSPACE:
-                            if (! (to_complement
-                                            ^ cBOOL(is_VERTWS_high(locinput))))
-                            {
-                                sayNO;
-                            }
-                            break;
-                        case _CC_ENUM_CNTRL:    /* These can't match above Latin1 */
-                        case _CC_ENUM_ASCII:
-                            if (! to_complement) {
-                                sayNO;
-                            }
-                            break;
+                    case _CC_ENUM_SPACE:
+                        if (! (to_complement
+                                    ^ cBOOL(is_XPERLSPACE_high(locinput))))
+                        {
+                            sayNO;
+                        }
+                        break;
+                    case _CC_ENUM_BLANK:
+                        if (! (to_complement
+                                        ^ cBOOL(is_HORIZWS_high(locinput))))
+                        {
+                            sayNO;
+                        }
+                        break;
+                    case _CC_ENUM_XDIGIT:
+                        if (! (to_complement
+                                        ^ cBOOL(is_XDIGIT_high(locinput))))
+                        {
+                            sayNO;
+                        }
+                        break;
+                    case _CC_ENUM_VERTSPACE:
+                        if (! (to_complement
+                                        ^ cBOOL(is_VERTWS_high(locinput))))
+                        {
+                            sayNO;
+                        }
+                        break;
+                    case _CC_ENUM_CNTRL:    /* These can't match above Latin1 */
+                    case _CC_ENUM_ASCII:
+                        if (! to_complement) {
+                            sayNO;
+                        }
+                        break;
                 }
                 locinput += UTF8SKIP(locinput);
             }
@@ -9545,60 +9545,62 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                     }
                     break;
 
-                /* For these character classes, the knowledge of how to handle
-                 * every code point is compiled in to Perl via a macro.  This
-                 * code is written for making the loops as tight as possible.
-                 * It could be refactored to save space instead */
-                    case _CC_ENUM_SPACE:
-                        while (hardcount < max
-                               && scan < loceol
-                               && (to_complement
-                                   ^ cBOOL(isSPACE_utf8_safe(scan, loceol))))
-                        {
-                            scan += UTF8SKIP(scan);
-                            hardcount++;
-                        }
-                        break;
-                    case _CC_ENUM_BLANK:
-                        while (hardcount < max
-                               && scan < loceol
-                               && (to_complement
-                                    ^ cBOOL(isBLANK_utf8_safe(scan, loceol))))
-                        {
-                            scan += UTF8SKIP(scan);
-                            hardcount++;
-                        }
-                        break;
-                    case _CC_ENUM_XDIGIT:
-                        while (hardcount < max
-                               && scan < loceol
-                               && (to_complement
-                                   ^ cBOOL(isXDIGIT_utf8_safe(scan, loceol))))
-                        {
-                            scan += UTF8SKIP(scan);
-                            hardcount++;
-                        }
-                        break;
-                    case _CC_ENUM_VERTSPACE:
-                        while (hardcount < max
-                               && scan < loceol
-                               && (to_complement
-                                   ^ cBOOL(isVERTWS_utf8_safe(scan, loceol))))
-                        {
-                            scan += UTF8SKIP(scan);
-                            hardcount++;
-                        }
-                        break;
-                    case _CC_ENUM_CNTRL:
-                        while (hardcount < max
-                               && scan < loceol
-                               && (to_complement
-                                   ^ cBOOL(isCNTRL_utf8_safe(scan, loceol))))
-                        {
-                            scan += UTF8SKIP(scan);
-                            hardcount++;
-                        }
-                        break;
+                    /* For the classes below, the knowledge of how to handle
+                     * every code point is compiled in to Perl via a macro.
+                     * This code is written for making the loops as tight as
+                     * possible.  It could be refactored to save space instead.
+                     * */
+
+                case _CC_ENUM_SPACE:
+                    while (hardcount < max
+                           && scan < loceol
+                           && (to_complement
+                               ^ cBOOL(isSPACE_utf8_safe(scan, loceol))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                    break;
+                case _CC_ENUM_BLANK:
+                    while (hardcount < max
+                           && scan < loceol
+                           && (to_complement
+                                ^ cBOOL(isBLANK_utf8_safe(scan, loceol))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                    break;
+                case _CC_ENUM_XDIGIT:
+                    while (hardcount < max
+                           && scan < loceol
+                           && (to_complement
+                               ^ cBOOL(isXDIGIT_utf8_safe(scan, loceol))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                    break;
+                case _CC_ENUM_VERTSPACE:
+                    while (hardcount < max
+                           && scan < loceol
+                           && (to_complement
+                               ^ cBOOL(isVERTWS_utf8_safe(scan, loceol))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                    break;
+                case _CC_ENUM_CNTRL:
+                    while (hardcount < max
+                           && scan < loceol
+                           && (to_complement
+                               ^ cBOOL(isCNTRL_utf8_safe(scan, loceol))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                    break;
             }
 	}
         break;
