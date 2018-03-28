@@ -235,7 +235,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # extension get statically built.
 # This will result in a very large perl executable, but the main purpose
 # is to have proper linking set so as to be able to create miscellaneous
-# executables with different built-in extensions.
+# executables with different built-in extensions. It implies BUILD_STATIC.
 #
 #ALL_STATIC	:= define
 
@@ -1609,7 +1609,7 @@ PostExt : ..\lib\Storable\Limit.pm
 # all PE files need to be built by the time this target runs, PP files can still
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
-ifeq ($(BUILD_STATIC),define)
+ifeq ($(PERLSTATIC),static)
 rebasePE : Extensions_normalize Extensions $(PERLDLL) $(PERLEXE) $(PERLEXESTATIC)
 else
 rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
