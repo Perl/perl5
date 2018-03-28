@@ -1542,7 +1542,7 @@ Extensions_realclean :
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
 .IF "$(BUILD_STATIC)"=="define"
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(PERLEXESTATIC)
+rebasePE : Extensions_normalize Extensions $(PERLDLL) $(PERLEXE) $(PERLEXESTATIC)
 .ELSE
 rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
 .ENDIF

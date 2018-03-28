@@ -1610,7 +1610,7 @@ PostExt : ..\lib\Storable\Limit.pm
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
 ifeq ($(BUILD_STATIC),define)
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(PERLEXESTATIC)
+rebasePE : Extensions_normalize Extensions $(PERLDLL) $(PERLEXE) $(PERLEXESTATIC)
 else
 rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
 endif
