@@ -227,10 +227,10 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 
 #
 # in addition to BUILD_STATIC the option ALL_STATIC makes *every*
-# extension get statically built
+# extension get statically built.
 # This will result in a very large perl executable, but the main purpose
 # is to have proper linking set so as to be able to create miscellaneous
-# executables with different built-in extensions
+# executables with different built-in extensions.
 #
 #ALL_STATIC	*= define
 
