@@ -681,7 +681,8 @@ for my $i (0 .. @$folds_ref - 1) {
 
 sub _Perl_Non_Final_Folds {
     @is_non_final_fold = sort { $a <=> $b } @is_non_final_fold;
-    return mk_invlist_from_sorted_cp_list(\@is_non_final_fold);
+    my @return = mk_invlist_from_sorted_cp_list(\@is_non_final_fold);
+    return \@return;
 }
 
 sub prop_name_for_cmp ($) { # Sort helper
@@ -696,7 +697,8 @@ sub prop_name_for_cmp ($) { # Sort helper
 }
 
 sub UpperLatin1 {
-    return mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
+    my @return = mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
+    return \@return;
 }
 
 sub output_table_common {
@@ -1959,8 +1961,10 @@ for my $charset (get_supported_code_pages()) {
         my $maps_to_code_point;
         my $to_adjust;
         if ($is_local_sub) {
-            @invlist = eval $lookup_prop;
+            my @return = eval $lookup_prop;
             die $@ if $@;
+            my $invlist_ref = shift @return;
+            @invlist = @$invlist_ref;
         }
         else {
             @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
