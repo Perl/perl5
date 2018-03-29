@@ -753,10 +753,6 @@ PERLVAR(I, registered_mros, HV *)
 /* Compile-time block start/end hooks */
 PERLVAR(I, blockhooks,	AV *)
 
-/* Everything that folds to a given character, for case insensitivity regex
- * matching */
-PERLVARI(I, utf8_foldclosures, HV *, NULL)
-
 PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 
 PERLVAR(I, Xpv,		XPV *)		/* (unused) held temporary value */

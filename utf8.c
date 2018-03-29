@@ -3637,6 +3637,66 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
 }
 
+Size_t
+Perl__inverse_folds(pTHX_ const UV cp, int * first_folds_to, const int ** remaining_folds_to)
+{
+    /* Returns the count of the number of code points that fold to the input
+     * 'cp' (besides itself).
+     *
+     * If the return is 0, there is nothing else that folds to it, and
+     * '*first_folds_to' is set to 0, and '*remaining_folds_to' is set to NULL.
+     *
+     * If the return is 1, '*first_folds_to' is set to the single code point,
+     * and '*remaining_folds_to' is set to NULL.
+     *
+     * Otherwise, '*first_folds_to' is set to a code point, and
+     * '*remaining_fold_to' is set to an array that contains the others.  The
+     * length of this array is the returned count minus 1.
+     *
+     * The reason for this convolution is to avoid having to deal with
+     * allocating and freeing memory.  The lists are already constructed, so
+     * the return can point to them, but single code points aren't, so would
+     * need to be constructed if we didn't employ something like this API */
+
+    SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
+    int base = _Perl_IVCF_invmap[index];
+
+    PERL_ARGS_ASSERT__INVERSE_FOLDS;
+
+    if (base == 0) {            /* No fold */
+        *first_folds_to = 0;
+        *remaining_folds_to = NULL;
+        return 0;
+    }
+
+#ifndef HAS_IVCF_AUX_TABLES     /* This Unicode version only has 1-1 folds */
+
+    assert(base > 0);
+
+#else
+
+    if (UNLIKELY(base < 0)) {   /* Folds to more than one character */
+
+        /* The data structure is set up so that the absolute value of 'base' is
+         * an index into a table of pointers to arrays, with the array
+         * corresponding to the index being the list of code points that fold
+         * to 'cp', and the parallel array containing the length of the list
+         * array */
+        *first_folds_to = IVCF_AUX_TABLE_ptrs[-base][0];
+        *remaining_folds_to = IVCF_AUX_TABLE_ptrs[-base] + 1; /* +1 excludes
+                                                                 *first_folds_to
+                                                                */
+        return IVCF_AUX_TABLE_lengths[-base];
+    }
+
+#endif
+
+    /* Only the single code point.  This works like 'fc(G) = G - A + a' */
+    *first_folds_to = base + cp - invlist_array(PL_utf8_foldclosures)[index];
+    *remaining_folds_to = NULL;
+    return 1;
+}
+
 STATIC UV
 S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
                                        U8* const ustrp, STRLEN *lenp)

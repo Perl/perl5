@@ -4510,47 +4510,25 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         else { /* an EXACTFish node which doesn't begin with a multi-char fold */
             c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
             if (c1 > 255) {
-                /* Load the folds hash, if not already done */
-                SV** listp;
-                if (! PL_utf8_foldclosures) {
-                    _load_PL_utf8_foldclosures();
-                }
+                const int * remaining_folds_to_list;
+                int first_folds_to;
 
-                /* The fold closures data structure is a hash with the keys
-                 * being the UTF-8 of every character that is folded to, like
-                 * 'k', and the values each an array of all code points that
-                 * fold to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ].
-                 * Multi-character folds are not included */
-                if ((! (listp = hv_fetch(PL_utf8_foldclosures,
-                                        (char *) pat,
-                                        UTF8SKIP(pat),
-                                        FALSE))))
-                {
-                    /* Not found in the hash, therefore there are no folds
-                    * containing it, so there is only a single character that
-                    * could match */
-                    c2 = c1;
+                /* Look up what code points (besides c1) fold to c1;  e.g.,
+                 * [ 'K', KELVIN_SIGN ] both fold to 'k'. */
+                Size_t folds_to_count = _inverse_folds(c1,
+                                                     &first_folds_to,
+                                                     &remaining_folds_to_list);
+                if (folds_to_count == 0) {
+                    c2 = c1;    /* there is only a single character that could
+                                   match */
                 }
-                else {  /* Does participate in folds */
-                    AV* list = (AV*) *listp;
-                    if (av_tindex_skip_len_mg(list) != 1) {
-
-                        /* If there aren't exactly two folds to this, it is
-                         * outside the scope of this function */
+                else if (folds_to_count != 1) {
+                    /* If there aren't exactly two folds to this (itself and
+                     * another), it is outside the scope of this function */
                         use_chrtest_void = TRUE;
                     }
-                    else {  /* There are two.  Get them */
-                        SV** c_p = av_fetch(list, 0, FALSE);
-                        if (c_p == NULL) {
-                            Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
-                        }
-                        c1 = SvUV(*c_p);
-
-                        c_p = av_fetch(list, 1, FALSE);
-                        if (c_p == NULL) {
-                            Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
-                        }
-                        c2 = SvUV(*c_p);
+                    else {  /* There are two.  We already have one, get the other */
+                        c2 = first_folds_to;
 
                         /* Folds that cross the 255/256 boundary are forbidden
                          * if EXACTFL (and isnt a UTF8 locale), or EXACTFAA and
@@ -4575,7 +4553,6 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                             }
                         }
                     }
-                }
             }
             else /* Here, c1 is <= 255 */
                 if (utf8_target

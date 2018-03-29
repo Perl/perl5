@@ -336,6 +336,7 @@ perl_construct(pTHXx)
                                             NonL1_Perl_Non_Final_Folds_invlist);
     PL_utf8_charname_begin = _new_invlist_C_array(_Perl_Charname_Begin_invlist);
     PL_utf8_charname_continue = _new_invlist_C_array(_Perl_Charname_Continue_invlist);
+    PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
 
 
 #if defined(LOCAL_PATCH_COUNT)
@@ -1206,13 +1207,11 @@ perl_destruct(pTHXx)
 
     /* clear character classes  */
     SvREFCNT_dec(PL_utf8_mark);
-    SvREFCNT_dec(PL_utf8_foldclosures);
     SvREFCNT_dec(PL_InBitmap);
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
 #endif
     PL_utf8_mark	= NULL;
-    PL_utf8_foldclosures = NULL;
     PL_InBitmap          = NULL;
 #ifdef USE_LOCALE_CTYPE
     PL_warn_locale       = NULL;

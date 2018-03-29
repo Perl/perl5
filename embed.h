@@ -918,6 +918,7 @@
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define _byte_dump_string(a,b,c)	Perl__byte_dump_string(aTHX_ a,b,c)
+#define _inverse_folds(a,b,c)	Perl__inverse_folds(aTHX_ a,b,c)
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
