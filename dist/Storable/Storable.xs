@@ -567,7 +567,7 @@ static stcxt_t *Context_ptr = NULL;
 #if PTRSIZE <= 4
 #define LOW_32BITS(x)	((I32) (x))
 #else
-#define LOW_32BITS(x)	((I32) ((unsigned long) (x) & 0xffffffffUL))
+#define LOW_32BITS(x)	((I32) ((STRLEN) (x) & 0xffffffffUL))
 #endif
 
 /*
@@ -639,9 +639,9 @@ static stcxt_t *Context_ptr = NULL;
 #define round_mgrow(x)	\
     ((STRLEN) (((STRLEN) (x) + MMASK) & ~MMASK))
 #define trunc_int(x)	\
-    ((unsigned long) ((unsigned long) (x) & ~(sizeof(int)-1)))
+    ((STRLEN) ((STRLEN) (x) & ~(sizeof(int)-1)))
 #define int_aligned(x)	\
-    ((unsigned long) (x) == trunc_int(x))
+    ((STRLEN)(x) == trunc_int(x))
 
 #define MBUF_INIT(x)							\
     STMT_START {							\
