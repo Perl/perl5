@@ -104,7 +104,7 @@ if (PARALLEL) {
 sub cmd {
     my ($i, $try, $limit_name) = @_;
     die unless $i;
-    my $code = "my \$t; \$Storable::$limit_name = -1; $try for 1..$i;dclone(\$t);";
+    my $code = "my \$t; \$Storable::$limit_name = -1; $try for 1..$i;dclone(\$t); print qq/ok\n/";
     my $q = ($^O eq 'MSWin32') ? '"' : "'";
 
     "$prefix $PERL $mblib -MStorable=dclone -e$q$code$q"
@@ -140,7 +140,7 @@ sub array_cmd {
 
 # first check we can successfully run with a minimum level
 my $cmd = array_cmd(1);
-unless ((my $output = `$cmd`) =~ "ok") {
+unless ((my $output = `$cmd`) =~ /\bok\b/) {
     die "Cannot run probe: '$output', aborting...\n";
 }
 
@@ -152,7 +152,7 @@ unless ($ENV{STORABLE_NOISY}) {
 while (!$found) {
     my $cmd = array_cmd($n);
     #print "$cmd\n" unless $QUIET;
-    if (system($cmd) == 0) {
+    if (`$cmd` =~ /\bok\b/) {
         $n = good($n);
     } else {
         $n = bad($n);
@@ -172,7 +172,7 @@ $bad = $max if $bad > $max;
 while (!$found) {
     my $cmd = cmd($n, '$t={1=>$t}', 'recursion_limit_hash');
     #print "$cmd\n" unless $QUIET;
-    if (system($cmd) == 0) {
+    if (`$cmd` =~ /\bok\b/) {
         $n = good($n);
     } else {
         $n = bad($n);
