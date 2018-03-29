@@ -1707,7 +1707,7 @@ PERL_STATIC_INLINE bool	S_is_utf8_string_flags(const U8 *s, STRLEN len, const U3
 #endif
 
 #ifndef NO_MATHOMS
-PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep);
+PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC	\
 	assert(s); assert(ep)
 #endif
