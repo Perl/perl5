@@ -175,32 +175,6 @@ static const char* const non_utf8_target_but_utf8_required
     locinput = (p);  \
     SET_nextchr
 
-
-#define LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist) STMT_START {   \
-        if (!swash_ptr) {                                                     \
-            U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;                       \
-            swash_ptr = _core_swash_init("utf8", property_name, &PL_sv_undef, \
-                                         1, 0, invlist, &flags);              \
-            assert(swash_ptr);                                                \
-        }                                                                     \
-    } STMT_END
-
-/* If in debug mode, we test that a known character properly matches */
-#ifdef DEBUGGING
-#   define LOAD_UTF8_CHARCLASS_DEBUG_TEST(swash_ptr,                          \
-                                          property_name,                      \
-                                          invlist,                            \
-                                          utf8_char_in_property)              \
-        LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist);               \
-        assert(swash_fetch(swash_ptr, (U8 *) utf8_char_in_property, TRUE));
-#else
-#   define LOAD_UTF8_CHARCLASS_DEBUG_TEST(swash_ptr,                          \
-                                          property_name,                      \
-                                          invlist,                            \
-                                          utf8_char_in_property)              \
-        LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist)
-#endif
-
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
