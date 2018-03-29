@@ -91,7 +91,7 @@ sub depend {
     }
     my $limit_pm = File::Spec->catfile('lib', 'Storable', 'Limit.pm');
     "
-$limit_pm : \$(INST_DYNAMIC)$extra_deps
+$limit_pm : stacksize \$(INST_DYNAMIC)$extra_deps
 	\$(MKPATH) \$(INST_LIB)
 	\$(FULLPERLRUNINST) stacksize $options
 
