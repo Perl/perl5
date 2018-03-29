@@ -354,7 +354,7 @@ will give the module an opportunity to handle the situation before
 generating an error.  The Exporter will call an export_fail method
 with a list of the failed symbols:
 
-  our @failed_symbols = $module_name->export_fail(@failed_symbols);
+  @failed_symbols = $module_name->export_fail(@failed_symbols);
 
 If the C<export_fail> method returns an empty list then no error is
 recorded and all the requested symbols are exported.  If the returned
