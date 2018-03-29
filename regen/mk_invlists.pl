@@ -461,7 +461,7 @@ sub output_invmap ($$$$$$$) {
 
         $invmap_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
-                                 : "IV";
+                                 : "int";
         $aux_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
                                  : "int";

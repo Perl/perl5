@@ -1798,7 +1798,7 @@ s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN U8* ustrp					\
 				|NULLOK STRLEN *lenp				\
 				|NN SV *invlist					\
-				|NN const IV * const invmap			\
+				|NN const int * const invmap			\
 				|NULLOK const int * const * const aux_tables	\
 				|NULLOK const U8 * const aux_table_lengths	\
 				|NN const char * const normal
