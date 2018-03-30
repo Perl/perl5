@@ -5875,10 +5875,10 @@ C<can> may break this.
 
 (F) When subroutine signatures are enabled, any subroutine attributes must
 come before the signature. Note that this order was the opposite in
-versions 5.20..5.26. So:
+versions 5.22..5.26. So:
 
-    sub foo :lvalue ($a, $b) { ... }  # 5.18 and 5.28 +
-    sub foo ($a, $b) :lvalue { ... }  # 5.20 .. 5.26
+    sub foo :lvalue ($a, $b) { ... }  # 5.20 and 5.28 +
+    sub foo ($a, $b) :lvalue { ... }  # 5.22 .. 5.26
 
 =item Subroutine "&%s" is not available
 
