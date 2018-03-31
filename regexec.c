@@ -4532,24 +4532,18 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
                     /* Folds that cross the 255/256 boundary are forbidden if
                      * EXACTFL (and isnt a UTF8 locale), or EXACTFAA and one is
-                     * ASCIII.  Since the pattern character is above 255, and
-                     * its only other match is below 256, the only legal match
-                     * will be to itself.  We have thrown away the original, so
-                     * have to compute which is the one above 255. */
-                    if ((c1 < 256) != (c2 < 256)) {
-                        if (   (   OP(text_node) == EXACTFL
+                     * ASCIII.  The only other match to c1 is c2, and since c1
+                     * is above 255, c2 better be as well under these
+                     * circumstances.  If it isn't, it means the only legal
+                     * match of c1 is itself. */
+                    if (    c2 < 256
+                        && (   (   OP(text_node) == EXACTFL
                                 && ! IN_UTF8_CTYPE_LOCALE)
                             || ((     OP(text_node) == EXACTFAA
                                    || OP(text_node) == EXACTFAA_NO_TRIE)
-                                && (isASCII(c1) || isASCII(c2))))
-                        {
-                            if (c1 < 256) {
-                                c1 = c2;
-                            }
-                            else {
-                                c2 = c1;
-                            }
-                        }
+                                && (isASCII(c1) || isASCII(c2)))))
+                    {
+                        c2 = c1;
                     }
                 }
             }
