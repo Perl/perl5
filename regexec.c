@@ -4525,34 +4525,33 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                 else if (folds_to_count != 1) {
                     /* If there aren't exactly two folds to this (itself and
                      * another), it is outside the scope of this function */
-                        use_chrtest_void = TRUE;
-                    }
-                    else {  /* There are two.  We already have one, get the other */
-                        c2 = first_folds_to;
+                    use_chrtest_void = TRUE;
+                }
+                else {  /* There are two.  We already have one, get the other */
+                    c2 = first_folds_to;
 
-                        /* Folds that cross the 255/256 boundary are forbidden
-                         * if EXACTFL (and isnt a UTF8 locale), or EXACTFAA and
-                         * one is ASCIII.  Since the pattern character is above
-                         * 255, and its only other match is below 256, the only
-                         * legal match will be to itself.  We have thrown away
-                         * the original, so have to compute which is the one
-                         * above 255. */
-                        if ((c1 < 256) != (c2 < 256)) {
-                            if ((OP(text_node) == EXACTFL
-                                 && ! IN_UTF8_CTYPE_LOCALE)
-                                || ((OP(text_node) == EXACTFAA
-                                    || OP(text_node) == EXACTFAA_NO_TRIE)
-                                    && (isASCII(c1) || isASCII(c2))))
-                            {
-                                if (c1 < 256) {
-                                    c1 = c2;
-                                }
-                                else {
-                                    c2 = c1;
-                                }
+                    /* Folds that cross the 255/256 boundary are forbidden if
+                     * EXACTFL (and isnt a UTF8 locale), or EXACTFAA and one is
+                     * ASCIII.  Since the pattern character is above 255, and
+                     * its only other match is below 256, the only legal match
+                     * will be to itself.  We have thrown away the original, so
+                     * have to compute which is the one above 255. */
+                    if ((c1 < 256) != (c2 < 256)) {
+                        if (   (   OP(text_node) == EXACTFL
+                                && ! IN_UTF8_CTYPE_LOCALE)
+                            || ((     OP(text_node) == EXACTFAA
+                                   || OP(text_node) == EXACTFAA_NO_TRIE)
+                                && (isASCII(c1) || isASCII(c2))))
+                        {
+                            if (c1 < 256) {
+                                c1 = c2;
+                            }
+                            else {
+                                c2 = c1;
                             }
                         }
                     }
+                }
             }
             else /* Here, c1 is <= 255 */
                 if (utf8_target
