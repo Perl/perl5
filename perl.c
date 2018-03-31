@@ -334,6 +334,8 @@ perl_construct(pTHXx)
                                             _Perl_Folds_To_Multi_Char_invlist);
     PL_NonL1NonFinalFold = _new_invlist_C_array(
                                             NonL1_Perl_Non_Final_Folds_invlist);
+    PL_utf8_charname_begin = _new_invlist_C_array(_Perl_Charname_Begin_invlist);
+    PL_utf8_charname_continue = _new_invlist_C_array(_Perl_Charname_Continue_invlist);
 
 
 #if defined(LOCAL_PATCH_COUNT)
