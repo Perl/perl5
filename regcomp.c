@@ -10356,14 +10356,14 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             for (k = 0; k < folds_to_count; k++) {
                 UV c = (k == 0) ? first_folds_to : remaining_folds_to_list[k-1];
 
-                    /* /aa doesn't allow folds between ASCII and non- */
-                    if ((OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
-                        && isASCII(c) != isASCII(fc))
-                    {
-                        continue;
-                    }
+                /* /aa doesn't allow folds between ASCII and non- */
+                if (   (OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
+                    && isASCII(c) != isASCII(fc))
+                {
+                    continue;
+                }
 
-                    invlist = add_cp_to_invlist(invlist, c);
+                invlist = add_cp_to_invlist(invlist, c);
             }
         }
     }
@@ -17921,33 +17921,33 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                      /* Then the remaining ones */
                                    : remaining_folds_to_list[k-2];
 
-                            /* /aa doesn't allow folds between ASCII and non- */
-                            if ((ASCII_FOLD_RESTRICTED
-                                && (isASCII(c) != isASCII(j))))
-                            {
-                                continue;
-                            }
+                        /* /aa doesn't allow folds between ASCII and non- */
+                        if ((   ASCII_FOLD_RESTRICTED
+                            && (isASCII(c) != isASCII(j))))
+                        {
+                            continue;
+                        }
 
-                            /* Folds under /l which cross the 255/256 boundary
-                             * are added to a separate list.  (These are valid
-                             * only when the locale is UTF-8.) */
-                            if (c < 256 && LOC) {
-                                *use_list = add_cp_to_invlist(*use_list, c);
-                                continue;
-                            }
+                        /* Folds under /l which cross the 255/256 boundary are
+                         * added to a separate list.  (These are valid only
+                         * when the locale is UTF-8.) */
+                        if (c < 256 && LOC) {
+                            *use_list = add_cp_to_invlist(*use_list, c);
+                            continue;
+                        }
 
-                            if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS)
-                            {
-                                cp_list = add_cp_to_invlist(cp_list, c);
-                            }
-                            else {
-                                /* Similarly folds involving non-ascii Latin1
-                                * characters under /d are added to their list */
-                                has_upper_latin1_only_utf8_matches
-                                        = add_cp_to_invlist(
-                                           has_upper_latin1_only_utf8_matches,
-                                           c);
-                            }
+                        if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS)
+                        {
+                            cp_list = add_cp_to_invlist(cp_list, c);
+                        }
+                        else {
+                            /* Similarly folds involving non-ascii Latin1
+                             * characters under /d are added to their list */
+                            has_upper_latin1_only_utf8_matches
+                                = add_cp_to_invlist(
+                                            has_upper_latin1_only_utf8_matches,
+                                            c);
+                        }
                     }
                 }
             }
