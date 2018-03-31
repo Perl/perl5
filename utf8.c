@@ -3469,7 +3469,7 @@ STATIC UV
 S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
                       SV *invlist, const int * const invmap,
-                      const int * const * aux_tables,
+                      const int * const * const aux_tables,
                       const U8 * const aux_table_lengths,
                       const char * const normal)
 {
