@@ -2937,6 +2937,29 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
     return converted;
 }
 
+/* If compiled on an early Unicode version, there may not be auxiliary tables
+ * */
+#ifndef HAS_UC_AUX_TABLES
+#  define UC_AUX_TABLE_ptrs     NULL
+#  define UC_AUX_TABLE_lengths  NULL
+#endif
+#ifndef HAS_TC_AUX_TABLES
+#  define TC_AUX_TABLE_ptrs     NULL
+#  define TC_AUX_TABLE_lengths  NULL
+#endif
+#ifndef HAS_LC_AUX_TABLES
+#  define LC_AUX_TABLE_ptrs     NULL
+#  define LC_AUX_TABLE_lengths  NULL
+#endif
+#ifndef HAS_CF_AUX_TABLES
+#  define CF_AUX_TABLE_ptrs     NULL
+#  define CF_AUX_TABLE_lengths  NULL
+#endif
+#ifndef HAS_UC_AUX_TABLES
+#  define UC_AUX_TABLE_ptrs     NULL
+#  define UC_AUX_TABLE_lengths  NULL
+#endif
+
 /* Call the function to convert a UTF-8 encoded character to the specified case.
  * Note that there may be more than one character in the result.
  * 's' is a pointer to the first byte of the input character
