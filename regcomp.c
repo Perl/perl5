@@ -10284,7 +10284,6 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
     }
     else {  /* Pattern is UTF-8 */
         U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
-        STRLEN foldlen = UTF8SKIP(s);
         const U8* e = s + bytelen;
         IV fc;
 
@@ -10323,7 +10322,6 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             /* And set up so the code below that looks in this folded
              * buffer instead of the node's string */
             e = d;
-            foldlen = UTF8SKIP(folded);
             s = folded;
         }
 
