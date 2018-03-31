@@ -3075,8 +3075,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
-                           const unsigned int flags)
+Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 {
     /* Corresponds to to_lower_latin1(); <flags> bits meanings:
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
@@ -3088,7 +3087,6 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
     UV converted;
 
     PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
-    PERL_UNUSED_CONTEXT;
 
     assert (! (flags & FOLD_FLAGS_LOCALE));
 

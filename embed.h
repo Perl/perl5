@@ -1152,7 +1152,7 @@
 #define isFOO_lc(a,b)		Perl_isFOO_lc(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define _to_fold_latin1(a,b,c,d)	Perl__to_fold_latin1(aTHX_ a,b,c,d)
+#define _to_fold_latin1		Perl__to_fold_latin1
 #  endif
 #endif
 #ifdef PERL_CORE
