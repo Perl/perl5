@@ -2265,7 +2265,11 @@ for my $charset (get_supported_code_pages()) {
                 # to look at the whole of the inversion map (or at least to
                 # above Unicode; as the maps of code points above that should
                 # all be to the default).
-                my $upper_limit = ($maps_to_code_point) ? 0x10FFFF : 256;
+                my $upper_limit = (! $maps_to_code_point)
+                                   ? 256
+                                   : (Unicode::UCD::UnicodeVersion() eq '1.1.5')
+                                      ? 0xFFFF
+                                      : 0x10FFFF;
 
                 my %mapped_lists;   # A hash whose keys are the buckets.
                 while (@invlist) {
