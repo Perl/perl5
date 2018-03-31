@@ -2273,7 +2273,7 @@ for my $charset (get_supported_code_pages()) {
 
                     # This shouldn't actually happen, as prop_invmap() returns
                     # an extra element at the end that is beyond $upper_limit
-                    die "inversion map that extends to infinity is unimplemented" unless @invlist > 1;
+                    die "inversion map (for $prop_name) that extends to infinity is unimplemented" unless @invlist > 1;
 
                     my $bucket;
 
