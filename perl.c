@@ -324,6 +324,8 @@ perl_construct(pTHXx)
     PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
     PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
+    PL_utf8_perl_idstart = _new_invlist_C_array(_Perl_IDStart_invlist);
+    PL_utf8_perl_idcont = _new_invlist_C_array(_Perl_IDCont_invlist);
     PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
     PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
     PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
@@ -332,6 +334,9 @@ perl_construct(pTHXx)
                                             _Perl_Folds_To_Multi_Char_invlist);
     PL_NonL1NonFinalFold = _new_invlist_C_array(
                                             NonL1_Perl_Non_Final_Folds_invlist);
+    PL_utf8_charname_begin = _new_invlist_C_array(_Perl_Charname_Begin_invlist);
+    PL_utf8_charname_continue = _new_invlist_C_array(_Perl_Charname_Continue_invlist);
+    PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
 
 
 #if defined(LOCAL_PATCH_COUNT)
@@ -1201,18 +1206,12 @@ perl_destruct(pTHXx)
     }
 
     /* clear character classes  */
-    for (i = 0; i < POSIX_SWASH_COUNT; i++) {
-        SvREFCNT_dec(PL_utf8_swash_ptrs[i]);
-        PL_utf8_swash_ptrs[i] = NULL;
-    }
     SvREFCNT_dec(PL_utf8_mark);
-    SvREFCNT_dec(PL_utf8_foldclosures);
     SvREFCNT_dec(PL_InBitmap);
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
 #endif
     PL_utf8_mark	= NULL;
-    PL_utf8_foldclosures = NULL;
     PL_InBitmap          = NULL;
 #ifdef USE_LOCALE_CTYPE
     PL_warn_locale       = NULL;

@@ -645,9 +645,6 @@ PERLVAR(I, InBitmap,	SV *)
 
 /* utf8 character class swashes */
 PERLVAR(I, utf8_mark,	SV *)
-PERLVAR(I, utf8_charname_begin, SV *)
-PERLVAR(I, utf8_charname_continue, SV *)
-PERLVARA(I, utf8_swash_ptrs, POSIX_SWASH_COUNT, SV *)
 PERLVAR(I, seen_deprecated_macro, HV *)
 
 PERLVAR(I, last_swash_hv, HV *)
@@ -755,10 +752,6 @@ PERLVAR(I, registered_mros, HV *)
 
 /* Compile-time block start/end hooks */
 PERLVAR(I, blockhooks,	AV *)
-
-/* Everything that folds to a given character, for case insensitivity regex
- * matching */
-PERLVARI(I, utf8_foldclosures, HV *, NULL)
 
 PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 

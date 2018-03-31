@@ -205,8 +205,14 @@ END_EXTERN_C
 #define PL_timesbase		(*Perl_Gtimesbase_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_utf8_charname_begin
+#define PL_utf8_charname_begin	(*Perl_Gutf8_charname_begin_ptr(NULL))
+#undef  PL_utf8_charname_continue
+#define PL_utf8_charname_continue	(*Perl_Gutf8_charname_continue_ptr(NULL))
 #undef  PL_utf8_foldable
 #define PL_utf8_foldable	(*Perl_Gutf8_foldable_ptr(NULL))
+#undef  PL_utf8_foldclosures
+#define PL_utf8_foldclosures	(*Perl_Gutf8_foldclosures_ptr(NULL))
 #undef  PL_utf8_idcont
 #define PL_utf8_idcont		(*Perl_Gutf8_idcont_ptr(NULL))
 #undef  PL_utf8_idstart

@@ -15587,13 +15587,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_InBitmap         = sv_dup_inc(proto_perl->IInBitmap, param);
 
     /* utf8 character class swashes */
-    for (i = 0; i < POSIX_SWASH_COUNT; i++) {
-        PL_utf8_swash_ptrs[i] = sv_dup_inc(proto_perl->Iutf8_swash_ptrs[i], param);
-    }
     PL_seen_deprecated_macro = hv_dup_inc(proto_perl->Iseen_deprecated_macro, param);
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
-    PL_utf8_charname_begin = sv_dup_inc(proto_perl->Iutf8_charname_begin, param);
-    PL_utf8_charname_continue = sv_dup_inc(proto_perl->Iutf8_charname_continue, param);
 
     if (proto_perl->Ipsig_pend) {
 	Newxz(PL_psig_pend, SIG_SIZE, int);
@@ -15693,7 +15688,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_registered_mros  = hv_dup_inc(proto_perl->Iregistered_mros, param);
     PL_blockhooks	= av_dup_inc(proto_perl->Iblockhooks, param);
-    PL_utf8_foldclosures = hv_dup_inc(proto_perl->Iutf8_foldclosures, param);
 
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.

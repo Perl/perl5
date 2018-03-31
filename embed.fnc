@@ -1738,14 +1738,13 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 		|NN SV* listsv|I32 minbits|I32 none \
 		|NULLOK SV* invlist|NULLOK U8* const flags_p
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
 EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EiMRn	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMRn	|UV	|_invlist_len	|NN SV* const invlist
 EMiRn	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMRn	|SSize_t|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
-EXMpR	|HV*	|_swash_inversion_hash
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 EXpM	|SV*	|_get_regclass_nonbitmap_data				   \
@@ -1755,7 +1754,6 @@ EXpM	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK SV **listsvp			   \
 				|NULLOK SV **lonly_utf8_locale		   \
 				|NULLOK SV **output_invlist
-EXp	|void|_load_PL_utf8_foldclosures|
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
 EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
@@ -1798,7 +1796,7 @@ s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN U8* ustrp					\
 				|NULLOK STRLEN *lenp				\
 				|NN SV *invlist					\
-				|NN const IV * const invmap			\
+				|NN const int * const invmap			\
 				|NULLOK const int * const * const aux_tables	\
 				|NULLOK const U8 * const aux_table_lengths	\
 				|NN const char * const normal
@@ -1892,6 +1890,9 @@ ApM	|U8*	|uvoffuni_to_utf8_flags_msgs|NN U8 *d|UV uv|const UV flags|NULLOK HV** 
 Ap	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
+EXpR	|Size_t	|_inverse_folds	|const UV cp			    \
+				|NN int * first_folds_to	    \
+				|NN const int ** remaining_folds_to
 : Used by Data::Alias
 EXp	|void	|vivify_defelem	|NN SV* sv
 : Used in pp.c
@@ -2543,7 +2544,7 @@ ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *stren
 #endif
 
 #if defined(PERL_IN_REGEXEC_C)
-ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
+ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character|NN const U8* e
 ERns	|char *	|find_next_ascii|NN char* s|NN const char * send|const bool is_utf8
 ERns	|char *	|find_next_non_ascii|NN char* s|NN const char * send|const bool is_utf8
 ERns	|U8 *	|find_next_masked|NN U8 * s				\
@@ -2874,12 +2875,12 @@ sRM	|UV	|check_locale_boundary_crossing				    \
 		|NN U8* const ustrp					    \
 		|NN STRLEN *lenp
 iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
-				|NN SV **swash				    \
+				|NULLOK SV **swash			    \
 				|NN const char * const swashname	    \
 				|NULLOK SV* const invlist
 iR	|bool	|is_utf8_common_with_len|NN const U8 *const p		    \
 					   |NN const U8 *const e	    \
-				    |NN SV **swash			    \
+				    |NULLOK SV **swash			    \
 				    |NN const char * const swashname	    \
 				    |NULLOK SV* const invlist
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span

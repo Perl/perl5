@@ -918,6 +918,7 @@
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define _byte_dump_string(a,b,c)	Perl__byte_dump_string(aTHX_ a,b,c)
+#define _inverse_folds(a,b,c)	Perl__inverse_folds(aTHX_ a,b,c)
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
@@ -1078,18 +1079,16 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
-#define _load_PL_utf8_foldclosures()	Perl__load_PL_utf8_foldclosures(aTHX)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define re_printf		Perl_re_printf
 #endif
 #define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
-#define _swash_inversion_hash()	Perl__swash_inversion_hash(aTHX)
 #define get_invlist_offset_addr	S_get_invlist_offset_addr
 #define invlist_array		S_invlist_array
 #  endif
@@ -1127,7 +1126,7 @@
 #define find_next_non_ascii	S_find_next_non_ascii
 #define find_span_end		S_find_span_end
 #define find_span_end_mask	S_find_span_end_mask
-#define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
+#define isFOO_utf8_lc(a,b,c)	S_isFOO_utf8_lc(aTHX_ a,b,c)
 #define isGCB(a,b,c,d,e)	S_isGCB(aTHX_ a,b,c,d,e)
 #define isLB(a,b,c,d,e,f)	S_isLB(aTHX_ a,b,c,d,e,f)
 #define isSB(a,b,c,d,e,f)	S_isSB(aTHX_ a,b,c,d,e,f)

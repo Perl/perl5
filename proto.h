@@ -62,6 +62,11 @@ PERL_CALLCONV char *	Perl__byte_dump_string(pTHX_ const U8 * const start, const 
 PERL_CALLCONV void	Perl__force_out_malformed_utf8_message(pTHX_ const U8 *const p, const U8 * const e, const U32 flags, const bool die_here);
 #define PERL_ARGS_ASSERT__FORCE_OUT_MALFORMED_UTF8_MESSAGE	\
 	assert(p); assert(e)
+PERL_CALLCONV Size_t	Perl__inverse_folds(pTHX_ const UV cp, int * first_folds_to, const int ** remaining_folds_to)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT__INVERSE_FOLDS	\
+	assert(first_folds_to); assert(remaining_folds_to)
+
 PERL_CALLCONV bool	Perl__is_in_locale_category(pTHX_ const bool compiling, const int category);
 PERL_CALLCONV bool	Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 			__attribute__warn_unused_result__;
@@ -5436,7 +5441,6 @@ PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
 #define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
 	assert(node)
-PERL_CALLCONV void	Perl__load_PL_utf8_foldclosures(pTHX);
 PERL_CALLCONV int	Perl_re_printf(pTHX_ const char *fmt, ...);
 #define PERL_ARGS_ASSERT_RE_PRINTF	\
 	assert(fmt)
@@ -5444,7 +5448,7 @@ PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode*
 #define PERL_ARGS_ASSERT_REGPROP	\
 	assert(sv); assert(o)
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__GET_SWASH_INVLIST	\
@@ -5468,9 +5472,6 @@ PERL_CALLCONV SSize_t	Perl__invlist_search(SV* const invlist, const UV cp)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__INVLIST_SEARCH	\
 	assert(invlist)
-
-PERL_CALLCONV HV*	Perl__swash_inversion_hash(pTHX)
-			__attribute__warn_unused_result__;
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool*	S_get_invlist_offset_addr(SV* invlist)
@@ -5620,10 +5621,10 @@ STATIC U8 *	S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, co
 #define PERL_ARGS_ASSERT_FIND_SPAN_END_MASK	\
 	assert(s); assert(send)
 
-STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
+STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISFOO_UTF8_LC	\
-	assert(character)
+	assert(character); assert(e)
 
 STATIC bool	S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strbeg, const U8 * const curpos, const bool utf8_target)
 			__attribute__warn_unused_result__;
@@ -5967,7 +5968,7 @@ STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U
 	assert(stash); assert(name)
 #endif
 #if defined(PERL_IN_UTF8_C)
-STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const IV * const invmap, const int * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
+STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const int * const invmap, const int * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
 #define PERL_ARGS_ASSERT__TO_UTF8_CASE	\
 	assert(p); assert(ustrp); assert(invlist); assert(invmap); assert(normal)
 STATIC U32	S_check_and_deprecate(pTHX_ const U8 * p, const U8 ** e, const unsigned type, const bool use_locale, const char * const file, const unsigned line);
@@ -5996,14 +5997,14 @@ PERL_STATIC_INLINE int	S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
 PERL_STATIC_INLINE bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname, SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_COMMON	\
-	assert(p); assert(swash); assert(swashname)
+	assert(p); assert(swashname)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 *const e, SV **swash, const char * const swashname, SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_COMMON_WITH_LEN	\
-	assert(p); assert(e); assert(swash); assert(swashname)
+	assert(p); assert(e); assert(swashname)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS

@@ -10175,11 +10175,6 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level,
     }
 }
 
-void
-Perl__load_PL_utf8_foldclosures (pTHX)
-{
-    PL_utf8_foldclosures = _swash_inversion_hash();
-}
 #endif
 
 #if defined(PERL_ARGS_ASSERT__INVLISTEQ) && !defined(PERL_IN_XSUB_RE)
@@ -10289,11 +10284,10 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
     }
     else {  /* Pattern is UTF-8 */
         U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
-        STRLEN foldlen = UTF8SKIP(s);
         const U8* e = s + bytelen;
-        SV** listp;
+        IV fc;
 
-        uc = utf8_to_uvchr_buf(s, s + bytelen, NULL);
+        fc = uc = utf8_to_uvchr_buf(s, s + bytelen, NULL);
 
         /* The only code points that aren't folded in a UTF EXACTFish
          * node are are the problematic ones in EXACTFL nodes */
@@ -10305,14 +10299,21 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             U8 *d = folded;
             int i;
 
+            fc = -1;
             for (i = 0; i < UTF8_MAX_FOLD_CHAR_EXPAND && s < e; i++) {
                 if (isASCII(*s)) {
                     *(d++) = (U8) toFOLD(*s);
+                    if (fc < 0) {       /* Save the first fold */
+                        fc = *(d-1);
+                    }
                     s++;
                 }
                 else {
                     STRLEN len;
-                    toFOLD_utf8_safe(s, e, d, &len);
+                    UV fold = toFOLD_utf8_safe(s, e, d, &len);
+                    if (fc < 0) {       /* Save the first fold */
+                        fc = fold;
+                    }
                     d += len;
                     s += UTF8SKIP(s);
                 }
@@ -10321,15 +10322,13 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             /* And set up so the code below that looks in this folded
              * buffer instead of the node's string */
             e = d;
-            foldlen = UTF8SKIP(folded);
             s = folded;
         }
 
         /* When we reach here 's' points to the fold of the first
          * character(s) of the node; and 'e' points to far enough along
          * the folded string to be just past any possible multi-char
-         * fold. 'foldlen' is the length in bytes of the first
-         * character in 's'
+         * fold.
          *
          * Unlike the non-UTF-8 case, the macro for determining if a
          * string is a multi-char fold requires all the characters to
@@ -10342,33 +10341,29 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             invlist = _add_range_to_invlist(invlist, 0, UV_MAX);
         }
         else {  /* Single char fold */
+            unsigned int k;
+            int first_folds_to;
+            const int * remaining_folds_to_list;
+            Size_t folds_to_count;
 
-            /* It matches all the things that fold to it, which are
-             * found in PL_utf8_foldclosures (including itself) */
-            invlist = add_cp_to_invlist(invlist, uc);
-            if (! PL_utf8_foldclosures)
-                _load_PL_utf8_foldclosures();
-            if ((listp = hv_fetch(PL_utf8_foldclosures,
-                                (char *) s, foldlen, FALSE)))
-            {
-                AV* list = (AV*) *listp;
-                IV k;
-                for (k = 0; k <= av_tindex_skip_len_mg(list); k++) {
-                    SV** c_p = av_fetch(list, k, FALSE);
-                    UV c;
-                    assert(c_p);
+            /* It matches itself */
+            invlist = add_cp_to_invlist(invlist, fc);
 
-                    c = SvUV(*c_p);
+            /* ... plus all the things that fold to it, which are found in
+             * PL_utf8_foldclosures */
+            folds_to_count = _inverse_folds(fc, &first_folds_to,
+                                                &remaining_folds_to_list);
+            for (k = 0; k < folds_to_count; k++) {
+                UV c = (k == 0) ? first_folds_to : remaining_folds_to_list[k-1];
 
                     /* /aa doesn't allow folds between ASCII and non- */
                     if ((OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
-                        && isASCII(c) != isASCII(uc))
+                        && isASCII(c) != isASCII(fc))
                     {
                         continue;
                     }
 
                     invlist = add_cp_to_invlist(invlist, c);
-                }
             }
         }
     }
@@ -17859,27 +17854,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             _invlist_intersection(PL_utf8_foldable, cp_foldable_list,
                                   &fold_intersection);
 
-            /* The folds for all the Latin1 characters are hard-coded into this
-             * program, but we have to go out to disk to get the others. */
-            if (invlist_highest(cp_foldable_list) >= 256) {
-
-                /* This is a hash that for a particular fold gives all
-                 * characters that are involved in it */
-                if (! PL_utf8_foldclosures) {
-                    _load_PL_utf8_foldclosures();
-                }
-            }
-
             /* Now look at the foldable characters in this class individually */
             invlist_iterinit(fold_intersection);
             while (invlist_iternext(fold_intersection, &start, &end)) {
                 UV j;
+                UV folded;
 
                 /* Look at every character in the range */
                 for (j = start; j <= end; j++) {
                     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
                     STRLEN foldlen;
-                    SV** listp;
+                    unsigned int k;
+                    Size_t folds_to_count;
+                    int first_folds_to;
+                    const int * remaining_folds_to_list;
 
                     if (j < 256) {
 
@@ -17914,29 +17902,24 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * rules hard-coded for it.  First, get its fold.  This is
                      * the simple fold, as the multi-character folds have been
                      * handled earlier and separated out */
-                    _to_uni_fold_flags(j, foldbuf, &foldlen,
+                    folded = _to_uni_fold_flags(j, foldbuf, &foldlen,
                                                         (ASCII_FOLD_RESTRICTED)
                                                         ? FOLD_FLAGS_NOMIX_ASCII
                                                         : 0);
 
-                    /* Single character fold of above Latin1.  Add everything in
-                    * its fold closure to the list that this node should match.
-                    * The fold closures data structure is a hash with the keys
-                    * being the UTF-8 of every character that is folded to, like
-                    * 'k', and the values each an array of all code points that
-                    * fold to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ].
-                    * Multi-character folds are not included */
-                    if ((listp = hv_fetch(PL_utf8_foldclosures,
-                                        (char *) foldbuf, foldlen, FALSE)))
-                    {
-                        AV* list = (AV*) *listp;
-                        IV k;
-                        for (k = 0; k <= av_tindex_skip_len_mg(list); k++) {
-                            SV** c_p = av_fetch(list, k, FALSE);
-                            UV c;
-                            assert(c_p);
+                    /* Single character fold of above Latin1.  Add everything
+                     * in its fold closure to the list that this node should
+                     * match. */
+                    folds_to_count = _inverse_folds(folded, &first_folds_to,
+                                                    &remaining_folds_to_list);
+                    for (k = 0; k <= folds_to_count; k++) {
+                        UV c = (k == 0)     /* First time through use itself */
+                                ? folded
+                                : (k == 1)  /* 2nd time use, the first fold */
+                                   ? first_folds_to
 
-                            c = SvUV(*c_p);
+                                     /* Then the remaining ones */
+                                   : remaining_folds_to_list[k-2];
 
                             /* /aa doesn't allow folds between ASCII and non- */
                             if ((ASCII_FOLD_RESTRICTED
@@ -17965,7 +17948,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                            has_upper_latin1_only_utf8_matches,
                                            c);
                             }
-                        }
                     }
                 }
             }

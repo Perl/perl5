@@ -55,8 +55,6 @@ my %public_enums = (
 # gives overrides for the exceptions to the typical place
 my %exceptions_to_where_to_define =
                         (
-                          _Perl_IDCont               => 'PERL_IN_UTF8_C',
-                          _Perl_IDStart              => 'PERL_IN_UTF8_C',
                         );
 my %where_to_define_enums = ();
 
@@ -463,7 +461,7 @@ sub output_invmap ($$$$$$$) {
 
         $invmap_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
-                                 : "IV";
+                                 : "int";
         $aux_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
                                  : "int";
@@ -661,7 +659,7 @@ sub mk_invlist_from_sorted_cp_list {
 
 # Read in the Case Folding rules, and construct arrays of code points for the
 # properties we need.
-my ($cp_ref, $folds_ref, $format) = prop_invmap("Case_Folding");
+my ($cp_ref, $folds_ref, $format, $default) = prop_invmap("Case_Folding");
 die "Could not find inversion map for Case_Folding" unless defined $format;
 die "Incorrect format '$format' for Case_Folding inversion map"
                                                     unless $format eq 'al'
@@ -683,7 +681,188 @@ for my $i (0 .. @$folds_ref - 1) {
 
 sub _Perl_Non_Final_Folds {
     @is_non_final_fold = sort { $a <=> $b } @is_non_final_fold;
-    return mk_invlist_from_sorted_cp_list(\@is_non_final_fold);
+    my @return = mk_invlist_from_sorted_cp_list(\@is_non_final_fold);
+    return \@return;
+}
+
+sub _Perl_IVCF {
+
+    # This creates a map of the inversion of case folding. i.e., given a
+    # character, it gives all the other characters that fold to it.
+    #
+    # Inversion maps function kind of like a hash, with the inversion list
+    # specifying the buckets (keys) and the inversion maps specifying the
+    # contents of the corresponding bucket.  Effectively this function just
+    # swaps the keys and values of the case fold hash.  But there are
+    # complications.  Most importantly, More than one character can each have
+    # the same fold.  This is solved by having a list of characters that fold
+    # to a given one.
+
+    my %new;
+
+    # Go through the inversion list.
+    for (my $i = 0; $i < @$cp_ref; $i++) {
+
+        # Skip if nothing folds to this
+        next if $folds_ref->[$i] == 0;
+
+        # This entry which is valid from here to up (but not including) the
+        # next entry is for the next $count characters, so that, for example,
+        # A-Z is represented by one entry.
+        my $cur_list = $cp_ref->[$i];
+        my $count = $cp_ref->[$i+1] - $cur_list;
+
+        # The fold of [$i] can be not just a single character, but a sequence
+        # of multiple ones.  We deal with those here by just creating a string
+        # consisting of them.  Otherwise, we use the single code point [$i]
+        # folds to.
+        my $cur_map = (ref $folds_ref->[$i])
+                       ? join "", map { chr } $folds_ref->[$i]->@*
+                       : $folds_ref->[$i];
+
+        # Expand out this range
+        while ($count > 0) {
+            push @{$new{$cur_map}}, $cur_list;
+
+            # A multiple-character fold is a string, and shouldn't need
+            # incrementing anyway
+            if (ref $folds_ref->[$i]) {
+                die sprintf("Case fold for %x is multiple chars; should have"
+                          . " a count of 1, but instead it was $count", $count)
+                                                            unless $count == 1;
+            }
+            else {
+                $cur_map++;
+                $cur_list++;
+            }
+            $count--;
+        }
+    }
+
+    # Now go through and make some adjustments.  We add synthetic entries for
+    # two cases.
+    # 1) Two or more code points can fold to the same multiple character,
+    #    sequence, as U+FB05 and U+FB06 both fold to 'st'.  This code is only
+    #    for single character folds, but FB05 and FB06 are single characters
+    #    that are equivalent folded, so we add entries so that they are
+    #    considered to fold to each other
+    # 2) If two or more above-Latin1 code points fold to the same Latin1 range
+    #    one, we also add entries so that they are considered to fold to each
+    #    other.  This is so that under /aa or /l matching, where folding to
+    #    their Latin1 range code point is illegal, they still can fold to each
+    #    other.  This situation happens in Unicode 3.0.1, but probably no
+    #    other version.
+    foreach my $fold (keys %new) {
+        my $folds_to_string = $fold =~ /\D/a;
+
+        # If the bucket contains only one element, convert from an array to a
+        # scalar
+        if (scalar $new{$fold}->@* == 1) {
+            $new{$fold} = $new{$fold}[0];
+        }
+        else {
+
+            # Otherwise, sort numerically.  This places the highest code point
+            # in the list at the tail end.  This is because Unicode keeps the
+            # lowercase code points as higher ordinals than the uppercase, at
+            # least for the ones that matter so far.  These are synthetic
+            # entries, and we want to predictably have the lowercase (which is
+            # more likely to be what gets folded to) in the same corresponding
+            # position, so that other code can rely on that.  If some new
+            # version of Unicode came along that violated this, we might have
+            # to change so that the sort is based on upper vs lower instead.
+            # (The lower-comes-after isn't true of native EBCDIC, but here we
+            # are dealing strictly with Unicode values).
+            @{$new{$fold}} = sort { $a <=> $b } $new{$fold}->@*
+                                                        unless $folds_to_string;
+            # We will be working with a copy of this sorted entry.
+            my @source_list = $new{$fold}->@*;
+            if (! $folds_to_string) {
+
+                # This handles situation 2) listed above, which only arises if
+                # what is being folded-to (the fold) is in the Latin1 range.
+                if ($fold > 255 ) {
+                    undef @source_list;
+                }
+                else {
+                    # And it only arises if there are two or more folders that
+                    # fold to it above Latin1.  We look at just those.
+                    @source_list = grep { $_ > 255 } @source_list;
+                    undef @source_list if @source_list == 1;
+                }
+            }
+
+            # Here, we've found the items we want to set up synthetic folds
+            # for.  Add entries so that each folds to each other.
+            foreach my $cp (@source_list) {
+                my @rest = grep { $cp != $_ } @source_list;
+                if (@rest == 1) {
+                    $new{$cp} = $rest[0];
+                }
+                else {
+                    push @{$new{$cp}}, @rest;
+                }
+            }
+        }
+
+        # We don't otherwise deal with multiple-character folds
+        delete $new{$fold} if $folds_to_string;
+    }
+
+
+    # Now we have a hash that is the inversion of the case fold property.
+    # Convert it to an inversion map.
+
+    my @sorted_folds = sort { $a <=> $b } keys %new;
+    my (@invlist, @invmap);
+
+    # We know that nothing folds to the controls (whose ordinals start at 0).
+    # And the first real entries are the lowest in the hash.
+    push @invlist, 0, $sorted_folds[0];
+    push @invmap, 0, $new{$sorted_folds[0]};
+
+    # Go through the remainder of the hash keys (which are the folded code
+    # points)
+    for (my $i = 1; $i < @sorted_folds; $i++) {
+
+        # Get the current one, and the one prior to it.
+        my $fold = $sorted_folds[$i];
+        my $prev_fold = $sorted_folds[$i-1];
+
+        # If the current one is not just 1 away from the prior one, we close
+        # out the range containing the previous fold, and know that the gap
+        # doesn't have anything that folds.
+        if ($fold - 1 != $prev_fold) {
+            push @invlist, $prev_fold + 1;
+            push @invmap, 0;
+
+            # And start a new range
+            push @invlist, $fold;
+            push @invmap, $new{$fold};
+        }
+        elsif ($new{$fold} - 1 != $new{$prev_fold}) {
+
+            # Here the current fold is just 1 greater than the previous, but
+            # the new map isn't correspondingly 1 greater than the previous,
+            # the old range is ended, but since there is no gap, we don't have
+            # to insert anything else.
+            push @invlist, $fold;
+            push @invmap, $new{$fold};
+
+        } # else { Otherwise, this new entry just extends the previous }
+
+        die "In IVCF: $invlist[-1] <= $invlist[-2]"
+                                               if $invlist[-1] <= $invlist[-2];
+    }
+
+    # And add an entry that indicates that everything above this, to infinity,
+    # does not have a case fold.
+    push @invlist, $sorted_folds[-1] + 1;
+    push @invmap, 0;
+
+    # All Unicode versions have some places where multiple code points map to
+    # the same one, so the format always has an 'l'
+    return \@invlist, \@invmap, 'al', $default;
 }
 
 sub prop_name_for_cmp ($) { # Sort helper
@@ -698,7 +877,8 @@ sub prop_name_for_cmp ($) { # Sort helper
 }
 
 sub UpperLatin1 {
-    return mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
+    my @return = mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
+    return \@return;
 }
 
 sub output_table_common {
@@ -1908,6 +2088,8 @@ for my $charset (get_supported_code_pages()) {
                              &UpperLatin1
                              _Perl_IDStart
                              _Perl_IDCont
+                             _Perl_Charname_Begin
+                             _Perl_Charname_Continue
                              _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
                              _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
                              _Perl_SB,SContinue,CR,Extend,LF,EDGE
@@ -1918,6 +2100,7 @@ for my $charset (get_supported_code_pages()) {
                              Uppercase_Mapping
                              Simple_Case_Folding
                              Case_Folding
+                            &_Perl_IVCF
                            )
                            # NOTE that the convention is that extra enum
                            # values come after the property name, separated by
@@ -1959,8 +2142,17 @@ for my $charset (get_supported_code_pages()) {
         my $maps_to_code_point;
         my $to_adjust;
         if ($is_local_sub) {
-            @invlist = eval $lookup_prop;
+            my @return = eval $lookup_prop;
             die $@ if $@;
+            my $invlist_ref = shift @return;
+            @invlist = @$invlist_ref;
+            if (@return) {  # If has other values returned , must be an
+                            # inversion map
+                my $invmap_ref = shift @return;
+                @invmap = @$invmap_ref;
+                $map_format = shift @return;
+                $map_default = shift @return;
+            }
         }
         else {
             @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
@@ -2073,7 +2265,11 @@ for my $charset (get_supported_code_pages()) {
                 # to look at the whole of the inversion map (or at least to
                 # above Unicode; as the maps of code points above that should
                 # all be to the default).
-                my $upper_limit = ($maps_to_code_point) ? 0x10FFFF : 256;
+                my $upper_limit = (! $maps_to_code_point)
+                                   ? 256
+                                   : (Unicode::UCD::UnicodeVersion() eq '1.1.5')
+                                      ? 0xFFFF
+                                      : 0x10FFFF;
 
                 my %mapped_lists;   # A hash whose keys are the buckets.
                 while (@invlist) {
@@ -2081,7 +2277,7 @@ for my $charset (get_supported_code_pages()) {
 
                     # This shouldn't actually happen, as prop_invmap() returns
                     # an extra element at the end that is beyond $upper_limit
-                    die "inversion map that extends to infinity is unimplemented" unless @invlist > 1;
+                    die "inversion map (for $prop_name) that extends to infinity is unimplemented" unless @invlist > 1;
 
                     my $bucket;
 

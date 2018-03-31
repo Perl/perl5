@@ -4646,7 +4646,7 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
    || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1		\
                                   && UNICODE_DOT_DOT_VERSION >= 8)
 	                                                        255 /*sharp s*/,
-#else   /* uc() is itself in early unicode */
+#else   /* uc(sharp s) is 'sharp s' itself in early unicode */
 	                                                        223,
 #endif
 	224-32,	225-32,	226-32,	227-32,	228-32,	229-32,	230-32,	231-32,

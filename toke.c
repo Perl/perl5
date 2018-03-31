@@ -39,6 +39,7 @@ Individual members of C<PL_parser> have their own documentation.
 #define PERL_IN_TOKE_C
 #include "perl.h"
 #include "dquote_inline.h"
+#include "invlist_inline.h"
 
 #define new_constant(a,b,c,d,e,f,g)	\
 	S_new_constant(aTHX_ a,b,STR_WITH_LEN(c),d,e,f, g)
@@ -2683,14 +2684,11 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
             s += 2;
         }
         else {
-            if (! PL_utf8_charname_begin) {
-                U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-                PL_utf8_charname_begin = _core_swash_init("utf8",
-                                                        "_Perl_Charname_Begin",
-                                                        &PL_sv_undef,
-                                                        1, 0, NULL, &flags);
-            }
-            if (! swash_fetch(PL_utf8_charname_begin, (U8 *) s, TRUE)) {
+            if (! _invlist_contains_cp(PL_utf8_charname_begin,
+                                       utf8_to_uvchr_buf((U8 *) s,
+                                                         (U8 *) e,
+                                                         NULL)))
+            {
                 goto bad_charname;
             }
             s += UTF8SKIP(s);
@@ -2714,14 +2712,11 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 s += 2;
             }
             else {
-                if (! PL_utf8_charname_continue) {
-                    U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-                    PL_utf8_charname_continue = _core_swash_init("utf8",
-                                                "_Perl_Charname_Continue",
-                                                &PL_sv_undef,
-                                                1, 0, NULL, &flags);
-                }
-                if (! swash_fetch(PL_utf8_charname_continue, (U8 *) s, TRUE)) {
+                if (! _invlist_contains_cp(PL_utf8_charname_continue,
+                                           utf8_to_uvchr_buf((U8 *) s,
+                                                             (U8 *) e,
+                                                             NULL)))
+                {
                     goto bad_charname;
                 }
                 s += UTF8SKIP(s);

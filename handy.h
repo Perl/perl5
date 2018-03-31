@@ -1125,7 +1125,13 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  *
  * The first group of these is ordered in what I (khw) estimate to be the
  * frequency of their use.  This gives a slight edge to exiting a loop earlier
- * (in reginclass() in regexec.c) */
+ * (in reginclass() in regexec.c).  Except \v should be last, as it isn't a
+ * real Posix character class, and some (small) inefficiencies in regular
+ * expression handling would be introduced by putting it in the middle of those
+ * that are.  Also, cntrl and ascii come after the others as it may be useful
+ * to group these which have no members that match above Latin1, (or above
+ * ASCII in the latter case) */
+
 #  define _CC_WORDCHAR           0      /* \w and [:word:] */
 #  define _CC_DIGIT              1      /* \d and [:digit:] */
 #  define _CC_ALPHA              2      /* [:alpha:] */
@@ -1136,17 +1142,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_ALPHANUMERIC       7      /* [:alnum:] */
 #  define _CC_GRAPH              8      /* [:graph:] */
 #  define _CC_CASED              9      /* [:lower:] or [:upper:] under /i */
-
-#define _FIRST_NON_SWASH_CC     10
-/* The character classes above are implemented with swashes.  The second group
- * (just below) contains the ones implemented without.  These are also sorted
- * in rough order of the frequency of their use, except that \v should be last,
- * as it isn't a real Posix character class, and some (small) inefficiencies in
- * regular expression handling would be introduced by putting it in the middle
- * of those that are.  Also, cntrl and ascii come after the others as it may be
- * useful to group these which have no members that match above Latin1, (or
- * above ASCII in the latter case) */
-
 #  define _CC_SPACE             10      /* \s, [:space:] */
 #  define _CC_PSXSPC            _CC_SPACE   /* XXX Temporary, can be removed
                                                when the deprecated isFOO_utf8()
@@ -1213,33 +1208,7 @@ typedef enum {
 } _char_class_number;
 #endif
 
-#define POSIX_SWASH_COUNT _FIRST_NON_SWASH_CC
 #define POSIX_CC_COUNT    (_HIGHEST_REGCOMP_DOT_H_SYNC + 1)
-
-#if defined(PERL_IN_UTF8_C)
-#   if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-       || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
-       || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9
-      #error Need to adjust order of swash_property_names[]
-#   endif
-
-/* This is declared static in each of the few files that this is #defined for
- * to keep them from being publicly accessible.  Hence there is a small amount
- * of wasted space */
-
-static const char* const swash_property_names[] = {
-    "XPosixWord",
-    "XPosixDigit",
-    "XPosixAlpha",
-    "XPosixLower",
-    "XPosixUpper",
-    "XPosixPunct",
-    "XPosixPrint",
-    "XPosixAlnum",
-    "XPosixGraph",
-    "Cased"
-};
-#endif
 
 START_EXTERN_C
 #  ifdef DOINIT
