@@ -3671,7 +3671,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
     assert(UTF8_IS_ABOVE_LATIN1(*p));
 
     /* We know immediately if the first character in the string crosses the
-     * boundary, so can skip */
+     * boundary, so can skip testing */
     if (result > 255) {
 
 	/* Look at every character in the result; if any cross the
