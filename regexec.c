@@ -10627,6 +10627,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
         /* Too early a Unicode version to have a code point belonging to more
          * than one script, so, if the scripts don't exactly match, fail */
+        PERL_UNUSED_VAR(intersection_len);
         retval = FALSE;
         break;
 
