@@ -2223,7 +2223,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case ANYOFM:    /* ARG() is the base byte; FLAGS() the mask byte */
         /* UTF-8ness doesn't matter, so use 0 */
         REXEC_FBC_FIND_NEXT_SCAN(0,
-         (char *) find_next_masked((U8 *) s, (U8 *) strend, ARG(c), FLAGS(c)));
+         (char *) find_next_masked((U8 *) s, (U8 *) strend,
+                                   (U8) ARG(c), FLAGS(c)));
         break;
 
     case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
