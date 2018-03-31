@@ -1079,7 +1079,6 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
-#define _load_PL_utf8_foldclosures()	Perl__load_PL_utf8_foldclosures(aTHX)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define re_printf		Perl_re_printf
 #endif

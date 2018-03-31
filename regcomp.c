@@ -10175,10 +10175,6 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level,
     }
 }
 
-void
-Perl__load_PL_utf8_foldclosures (pTHX)
-{
-}
 #endif
 
 #if defined(PERL_ARGS_ASSERT__INVLISTEQ) && !defined(PERL_IN_XSUB_RE)

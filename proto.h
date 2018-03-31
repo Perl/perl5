@@ -5441,7 +5441,6 @@ PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
 #define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
 	assert(node)
-PERL_CALLCONV void	Perl__load_PL_utf8_foldclosures(pTHX);
 PERL_CALLCONV int	Perl_re_printf(pTHX_ const char *fmt, ...);
 #define PERL_ARGS_ASSERT_RE_PRINTF	\
 	assert(fmt)

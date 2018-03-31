@@ -1754,7 +1754,6 @@ EXpM	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK SV **listsvp			   \
 				|NULLOK SV **lonly_utf8_locale		   \
 				|NULLOK SV **output_invlist
-EXp	|void|_load_PL_utf8_foldclosures|
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
 EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
