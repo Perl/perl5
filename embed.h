@@ -1090,7 +1090,6 @@
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
-#define _swash_inversion_hash()	Perl__swash_inversion_hash(aTHX)
 #define get_invlist_offset_addr	S_get_invlist_offset_addr
 #define invlist_array		S_invlist_array
 #  endif

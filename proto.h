@@ -5474,9 +5474,6 @@ PERL_CALLCONV SSize_t	Perl__invlist_search(SV* const invlist, const UV cp)
 #define PERL_ARGS_ASSERT__INVLIST_SEARCH	\
 	assert(invlist)
 
-PERL_CALLCONV HV*	Perl__swash_inversion_hash(pTHX)
-			__attribute__warn_unused_result__;
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool*	S_get_invlist_offset_addr(SV* invlist)
 			__attribute__warn_unused_result__;
