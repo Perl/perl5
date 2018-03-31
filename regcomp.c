@@ -16080,25 +16080,19 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
 STATIC void
 S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist)
 {
-    /* This hard-codes the Latin1/above-Latin1 folding rules, so that an
-     * innocent-looking character class, like /[ks]/i won't have to go out to
-     * disk to find the possible matches.
+    /* This adds the Latin1/above-Latin1 folding rules.
      *
      * This should be called only for a Latin1-range code points, cp, which is
      * known to be involved in a simple fold with other code points above
      * Latin1.  It would give false results if /aa has been specified.
      * Multi-char folds are outside the scope of this, and must be handled
-     * specially.
-     *
-     * XXX It would be better to generate these via regen, in case a new
-     * version of the Unicode standard adds new mappings, though that is not
-     * really likely, and may be caught by the default: case of the switch
-     * below. */
+     * specially. */
 
     PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS;
 
     assert(HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(cp));
 
+    /* The rules that are valid for all Unicode versions are hard-coded in */
     switch (cp) {
         case 'k':
         case 'K':
@@ -16122,36 +16116,54 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
                                         LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
             break;
 
-#ifdef LATIN_CAPITAL_LETTER_SHARP_S /* not defined in early Unicode releases */
+        default:    /* Other code points are checked against the data for the
+                       current Unicode version */
+          {
+            Size_t folds_to_count;
+            int first_folds_to;
+            const int * remaining_folds_to_list;
+            UV folded_cp;
 
-        case LATIN_SMALL_LETTER_SHARP_S:
-          *invlist = add_cp_to_invlist(*invlist, LATIN_CAPITAL_LETTER_SHARP_S);
-            break;
+            if (isASCII(cp)) {
+                folded_cp = toFOLD(cp);
+            }
+            else {
+                U8 dummy_fold[UTF8_MAXBYTES_CASE+1];
+                Size_t dummy_len;
+                folded_cp = _to_fold_latin1(cp, dummy_fold, &dummy_len, 0);
+            }
 
-#endif
+            if (folded_cp > 255) {
+                *invlist = add_cp_to_invlist(*invlist, folded_cp);
+            }
 
-#if    UNICODE_MAJOR_VERSION < 3                                        \
-   || (UNICODE_MAJOR_VERSION == 3 && UNICODE_DOT_VERSION == 0)
+            folds_to_count = _inverse_folds(folded_cp, &first_folds_to,
+                                                    &remaining_folds_to_list);
+            if (folds_to_count == 0) {
 
-        /* In 3.0 and earlier, U+0130 folded simply to 'i'; and in 3.0.1 so did
-         * U+0131.  */
-        case 'i':
-        case 'I':
-          *invlist =
-             add_cp_to_invlist(*invlist, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
-#   if UNICODE_DOT_DOT_VERSION == 1
-          *invlist = add_cp_to_invlist(*invlist, LATIN_SMALL_LETTER_DOTLESS_I);
-#   endif
-            break;
-#endif
+                /* Use deprecated warning to increase the chances of this being
+                 * output */
+                if (PASS2) {
+                    ckWARN2reg_d(RExC_parse,
+                        "Perl folding rules are not up-to-date for 0x%02X;"
+                        " please use the perlbug utility to report;", cp);
+                }
+            }
+            else {
+                unsigned int i;
 
-        default:
-            /* Use deprecated warning to increase the chances of this being
-             * output */
-            if (PASS2) {
-                ckWARN2reg_d(RExC_parse, "Perl folding rules are not up-to-date for 0x%02X; please use the perlbug utility to report;", cp);
+                if (first_folds_to > 255) {
+                    *invlist = add_cp_to_invlist(*invlist, first_folds_to);
+                }
+                for (i = 0; i < folds_to_count - 1; i++) {
+                    if (remaining_folds_to_list[i] > 255) {
+                        *invlist = add_cp_to_invlist(*invlist,
+                                                    remaining_folds_to_list[i]);
+                    }
+                }
             }
             break;
+         }
     }
 }
 
