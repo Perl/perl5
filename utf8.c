@@ -3477,11 +3477,25 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
     return is_utf8_common(p, &PL_utf8_mark, "IsM", NULL);
 }
 
-    /* change namve uv1 to 'from' */
 STATIC UV
-S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const IV * const invmap, const int * const * aux_tables, const U8 * const aux_table_lengths, const char * const normal)
+S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
+                      U8* ustrp, STRLEN *lenp,
+                      SV *invlist, const IV * const invmap,
+                      const int * const * aux_tables,
+                      const U8 * const aux_table_lengths,
+                      const char * const normal)
 {
     STRLEN len = 0;
+
+    /* Change the case of code point 'uv1' whose UTF-8 representation (assumed
+     * by this routine to be valid) begins at 'p'.  'normal' is a string to use
+     * to name the new case in any generated messages, as a fallback if the
+     * operation being used is not available.  The new case is given by the
+     * data structures in the remaining arguments.
+     *
+     * On return 'ustrp' points to '*lenp' UTF-8 encoded bytes representing the
+     * entire changed case string, and the return value is the first code point
+     * in that string */
 
     PERL_ARGS_ASSERT__TO_UTF8_CASE;
 
@@ -3586,6 +3600,8 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *in
         SSize_t index = _invlist_search(invlist, uv1);
         IV base = invmap[index];
 
+        /* The data structures are set up so that if 'base' is non-negative,
+         * the case change is 1-to-1; and if 0, the change is to itself */
         if (base >= 0) {
             IV lc;
 
@@ -3593,12 +3609,19 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *in
                 goto cases_to_self;
             }
 
+            /* This computes, e.g. lc(H) as 'H - A + a', using the lc table */
             lc = base + uv1 - invlist_array(invlist)[index];
             *lenp = uvchr_to_utf8(ustrp, lc) - ustrp;
             return lc;
         }
 
+        /* Here 'base' is negative.  That means the mapping is 1-to-many, and
+         * requires an auxiliary table look up.  abs(base) gives the index into
+         * a list of such tables which points to the proper aux table.  And a
+         * parallel list gives the length of each corresponding aux table. */
         cp_list = aux_tables[-base];
+
+        /* Create the string of UTF-8 from the mapped-to code points */
         d = ustrp;
         for (i = 0; i < aux_table_lengths[-base]; i++) {
             d = uvchr_to_utf8(d, cp_list[i]);
