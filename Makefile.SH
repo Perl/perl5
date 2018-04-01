@@ -1160,6 +1160,10 @@ install: install-all
 
 if test "$storable_type" != "" ; then
 
+case "$static_cwd" in
+undef) storable_limit_dep="$storable_limit_dep lib/auto/Cwd/Cwd.$dlext" ;;
+esac
+
 $spitshell >>$Makefile <<EOT
 
 dist/Storable/lib/Storable/Limit.pm : \$(PERL_EXE) dist/Storable/stacksize $storable_limit_dep
