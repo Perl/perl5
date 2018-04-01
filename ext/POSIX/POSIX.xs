@@ -2128,7 +2128,7 @@ localeconv()
    && defined(HAS_POSIX_2008_LOCALE)                                    \
    && defined(HAS_LOCALECONV_L) /* Prefer this thread-safe version */
         bool do_free = FALSE;
-        locale_t cur;
+        locale_t cur = NULL;
 #  elif defined(TS_W32_BROKEN_LOCALECONV)
         const char * save_global;
         const char * save_thread;
