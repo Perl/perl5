@@ -5476,7 +5476,9 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 /* Cannot expect anything... */
                 scan_commit(pRExC_state, data, minlenp, is_inf);
     	        data->pos_min += 1;
-	        data->pos_delta += 1;
+                if (data->pos_delta != SSize_t_MAX) {
+                    data->pos_delta += 1;
+                }
 		data->cur_is_floating = 1; /* float */
     	    }
 	}
