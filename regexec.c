@@ -5850,7 +5850,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              */
             if(!NEXTCHR_IS_EOS && !ANYOF_BITMAP_TEST(scan, nextchr)) {
                 DEBUG_EXECUTE_r(
-                    Perl_re_exec_indentf( aTHX_  "%sfailed to match trie start class...%s\n",
+                    Perl_re_exec_indentf( aTHX_  "%sTRIE: failed to match trie start class...%s\n",
                               depth, PL_colors[4], PL_colors[5])
                 );
                 sayNO_SILENT;
@@ -5931,14 +5931,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 {
         	    if (trie->states[ state ].wordnum) {
         	         DEBUG_EXECUTE_r(
-                            Perl_re_exec_indentf( aTHX_  "%smatched empty string...%s\n",
+                            Perl_re_exec_indentf( aTHX_  "%sTRIE: matched empty string...%s\n",
                                           depth, PL_colors[4], PL_colors[5])
                         );
 			if (!trie->jump)
 			    break;
         	    } else {
         	        DEBUG_EXECUTE_r(
-                            Perl_re_exec_indentf( aTHX_  "%sfailed to match trie start class...%s\n",
+                            Perl_re_exec_indentf( aTHX_  "%sTRIE: failed to match trie start class...%s\n",
                                           depth, PL_colors[4], PL_colors[5])
                         );
         	        sayNO_SILENT;
@@ -5994,7 +5994,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                 DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
                                 /* HERE */
                                 PerlIO_printf( Perl_debug_log,
-                                    "%*s%sState: %4" UVxf " Accepted: %c ",
+                                    "%*s%sTRIE: State: %4" UVxf " Accepted: %c ",
                                     INDENT_CHARS(depth), "", PL_colors[4],
 			            (UV)state, (accepted ? 'Y' : 'N'));
 		    });
@@ -6028,7 +6028,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    }
 		    DEBUG_TRIE_EXECUTE_r(
                         Perl_re_printf( aTHX_
-		            "Charid:%3x CP:%4" UVxf " After State: %4" UVxf "%s\n",
+		            "TRIE: Charid:%3x CP:%4" UVxf " After State: %4" UVxf "%s\n",
 		            charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
@@ -6047,7 +6047,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		}
 
 		DEBUG_EXECUTE_r(
-                    Perl_re_exec_indentf( aTHX_  "%sgot %" IVdf " possible matches%s\n",
+                    Perl_re_exec_indentf( aTHX_  "%sTRIE: got %" IVdf " possible matches%s\n",
                         depth,
 			PL_colors[4], (IV)ST.accepted, PL_colors[5] );
 		);
@@ -6180,7 +6180,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         ? av_fetch(trie_words, ST.nextword - 1, 0) : NULL;
 		SV *sv= tmp ? sv_newmortal() : NULL;
 
-                Perl_re_exec_indentf( aTHX_  "%sonly one match left, short-circuiting: #%d <%s>%s\n",
+                Perl_re_exec_indentf( aTHX_  "%sTRIE: only one match left, short-circuiting: #%d <%s>%s\n",
                     depth, PL_colors[4],
 		    ST.nextword,
 		    tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0,
@@ -7412,7 +7412,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
                     debug_start_match(re_sv, utf8_target, locinput,
-                                    reginfo->strend, "Matching embedded");
+                                    reginfo->strend, "EVAL/GOSUB: Matching embedded");
 		);		
 		startpoint = rei->program + 1;
                 EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
@@ -7542,7 +7542,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (n > maxopenparen)
 		maxopenparen = n;
             DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
-		"rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf " tmp; maxopenparen=%" UVuf "\n",
+		"OPEN: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf " tmp; maxopenparen=%" UVuf "\n",
                 depth,
 		PTR2UV(rex),
 		PTR2UV(rex->offs),
@@ -7562,7 +7562,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     rex->offs[n].start = rex->offs[n].start_tmp;                           \
     rex->offs[n].end = locinput - reginfo->strbeg;                         \
     DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
-        "rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "\n", \
+        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "\n", \
         depth,                                                             \
         PTR2UV(rex),                                                       \
         PTR2UV(rex->offs),                                                 \
@@ -7803,7 +7803,7 @@ NULL
 	    ST.cache_mask = 0;
 	    
 
-            DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "whilem: matched %ld out of %d..%d\n",
+            DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: matched %ld out of %d..%d\n",
                   depth, (long)n, min, max)
 	    );
 
@@ -7821,7 +7821,7 @@ NULL
 	    /* If degenerate A matches "", assume A done. */
 
 	    if (locinput == cur_curlyx->u.curlyx.lastloc) {
-                DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "whilem: empty match detected, trying continuation...\n",
+                DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: empty match detected, trying continuation...\n",
                    depth)
 		);
 		goto do_whilem_B_max;
@@ -7889,7 +7889,7 @@ NULL
 			Newxz(aux->poscache, size, char);
 		    }
                     DEBUG_EXECUTE_r( Perl_re_printf( aTHX_
-      "%swhilem: Detected a super-linear match, switching on caching%s...\n",
+      "%sWHILEM: Detected a super-linear match, switching on caching%s...\n",
 			      PL_colors[4], PL_colors[5])
 		    );
 		}
@@ -7905,7 +7905,7 @@ NULL
 		    mask    = 1 << (offset % 8);
 		    offset /= 8;
 		    if (reginfo->info_aux->poscache[offset] & mask) {
-                        DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "whilem: (cache) already tried at this position...\n",
+                        DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: (cache) already tried at this position...\n",
                             depth)
 			);
                         cur_curlyx->u.curlyx.count--;
@@ -7966,7 +7966,7 @@ NULL
 	case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
 	    REGCP_UNWIND(ST.lastcp);
             regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
-            DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "whilem: failed, trying continuation...\n",
+            DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: failed, trying continuation...\n",
                 depth)
 	    );
 	  do_whilem_B_max:
@@ -8007,7 +8007,7 @@ NULL
 		CACHEsayNO;
 	    }
 
-            DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "trying longer...\n", depth)
+            DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: B min fail: trying longer...\n", depth)
 	    );
 	    /* Try grabbing another A and see if it helps. */
 	    cur_curlyx->u.curlyx.lastloc = locinput;
@@ -8638,7 +8638,7 @@ NULL
 		st->u.eval.prev_eval = cur_eval;
                 cur_eval = CUR_EVAL.prev_eval;
 		DEBUG_EXECUTE_r(
-                    Perl_re_exec_indentf( aTHX_  "EVAL trying tail ... (cur_eval=%p)\n",
+                    Perl_re_exec_indentf( aTHX_  "END: EVAL trying tail ... (cur_eval=%p)\n",
                                       depth, cur_eval););
                 if ( nochange_depth )
 	            nochange_depth--;
@@ -8651,7 +8651,7 @@ NULL
 
 	    if (locinput < reginfo->till) {
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
-                                      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
+                                      "%sEND: Match possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
 				      PL_colors[4],
 				      (long)(locinput - startpos),
 				      (long)(reginfo->till - startpos),
@@ -8663,7 +8663,7 @@ NULL
 
 	case SUCCEED: /* successful SUSPEND/UNLESSM/IFMATCH/CURLYM */
 	    DEBUG_EXECUTE_r(
-            Perl_re_exec_indentf( aTHX_  "%ssubpattern success...%s\n",
+            Perl_re_exec_indentf( aTHX_  "%sSUCCEED: subpattern success...%s\n",
                 depth, PL_colors[4], PL_colors[5]));
 	    sayYES;			/* Success! */
 
@@ -8798,7 +8798,7 @@ NULL
                 sv_commit = ST.mark_name;
 
                 DEBUG_EXECUTE_r({
-                        Perl_re_exec_indentf( aTHX_  "%ssetting cutpoint to mark:%" SVf "...%s\n",
+                        Perl_re_exec_indentf( aTHX_  "%sMARKPOINT: next fail: setting cutpoint to mark:%" SVf "...%s\n",
                             depth,
 		            PL_colors[4], SVfARG(sv_commit), PL_colors[5]);
 		});
