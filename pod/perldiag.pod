@@ -7612,13 +7612,20 @@ under L<perlsyn/Experimental Details on given and when>.
 
 =item Wide character in %s
 
-(S utf8) Perl met a wide character (>255) when it wasn't expecting
-one.  This warning is by default on for I/O (like print).  The easiest
-way to quiet this warning is simply to add the C<:utf8> layer to the
-output, e.g. C<binmode STDOUT, ':utf8'>.  Another way to turn off the
-warning is to add C<no warnings 'utf8';> but that is often closer to
+(S utf8) Perl met a wide character (ordinal >255) when it wasn't
+expecting one.  This warning is by default on for I/O (like print).
+
+If this warning does come from I/O, the easiest
+way to quiet it is simply to add the C<:utf8> layer, I<e.g.>,
+S<C<binmode STDOUT, ':utf8'>>.  Another way to turn off the warning is
+to add S<C<no warnings 'utf8';>> but that is often closer to
 cheating.  In general, you are supposed to explicitly mark the
 filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
+
+If the warning comes from other than I/O, this diagnostic probably
+indicates that incorrect results are being obtained.  You should examine
+your code to determine how a wide character is getting to an operation
+that doesn't handle them.
 
 =item Wide character (U+%X) in %s
 
