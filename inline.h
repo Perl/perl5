@@ -641,7 +641,8 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
         /* Process per-word as long as we have at least a full word left */
         do {    /* Commit 03c1e4ab1d6ee9062fb3f94b0ba31db6698724b1 contains an
                    explanation of how this works */
-            count += ((((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK) >> 7)
+            count += (Size_t)
+                    ((((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK) >> 7)
                       * PERL_COUNT_MULTIPLIER)
                     >> ((PERL_WORDSIZE - 1) * CHARBITS);
             x += PERL_WORDSIZE;
