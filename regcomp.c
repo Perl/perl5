@@ -15689,7 +15689,7 @@ redo_curchar:
                  * fence.  Get rid of it */
                 fence_ptr = av_pop(fence_stack);
                 assert(fence_ptr);
-                fence = SvIV(fence_ptr) - 1;
+                fence = SvIV(fence_ptr);
                 SvREFCNT_dec_NN(fence_ptr);
                 fence_ptr = NULL;
 

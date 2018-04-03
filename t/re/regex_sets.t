@@ -204,6 +204,17 @@ for my $char ("٠", "٥", "٩") {
     like("a", qr/$pat/, "/$pat/ compiles and matches 'a'");
 }
 
+{   # [perl #132167]
+    fresh_perl_is('no warnings "experimental::regex_sets";
+        print "c" =~ qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ])/;',
+        1, {},
+        'qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ]) compiles and properly matches');
+    fresh_perl_is('no warnings "experimental::regex_sets";
+        print "b" =~ qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ])/;',
+        "", {},
+        'qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ]) compiles and properly matches');
+}
+
 done_testing();
 
 1;
