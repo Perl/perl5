@@ -3469,7 +3469,7 @@ STATIC UV
 S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
                       SV *invlist, const int * const invmap,
-                      const int * const * const aux_tables,
+                      const unsigned int * const * const aux_tables,
                       const U8 * const aux_table_lengths,
                       const char * const normal)
 {
@@ -3583,7 +3583,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
     {
         unsigned int i;
-        const int * cp_list;
+        const unsigned int * cp_list;
         U8 * d;
         SSize_t index = _invlist_search(invlist, uv1);
         IV base = invmap[index];
@@ -3636,7 +3636,8 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 }
 
 Size_t
-Perl__inverse_folds(pTHX_ const UV cp, int * first_folds_to, const int ** remaining_folds_to)
+Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
+                          const unsigned int ** remaining_folds_to)
 {
     /* Returns the count of the number of code points that fold to the input
      * 'cp' (besides itself).

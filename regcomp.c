@@ -10342,8 +10342,8 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         }
         else {  /* Single char fold */
             unsigned int k;
-            int first_folds_to;
-            const int * remaining_folds_to_list;
+            unsigned int first_folds_to;
+            const unsigned int * remaining_folds_to_list;
             Size_t folds_to_count;
 
             /* It matches itself */
@@ -16120,8 +16120,8 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
                        current Unicode version */
           {
             Size_t folds_to_count;
-            int first_folds_to;
-            const int * remaining_folds_to_list;
+            unsigned int first_folds_to;
+            const unsigned int * remaining_folds_to_list;
             UV folded_cp;
 
             if (isASCII(cp)) {
@@ -17878,8 +17878,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     STRLEN foldlen;
                     unsigned int k;
                     Size_t folds_to_count;
-                    int first_folds_to;
-                    const int * remaining_folds_to_list;
+                    unsigned int first_folds_to;
+                    const unsigned int * remaining_folds_to_list;
 
                     if (j < 256) {
 

@@ -4511,8 +4511,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         else { /* an EXACTFish node which doesn't begin with a multi-char fold */
             c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
             if (c1 > 255) {
-                const int * remaining_folds_to_list;
-                int first_folds_to;
+                const unsigned int * remaining_folds_to_list;
+                unsigned int first_folds_to;
 
                 /* Look up what code points (besides c1) fold to c1;  e.g.,
                  * [ 'K', KELVIN_SIGN ] both fold to 'k'. */

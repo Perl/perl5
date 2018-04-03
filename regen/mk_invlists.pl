@@ -464,7 +464,7 @@ sub output_invmap ($$$$$$$) {
                                  : "int";
         $aux_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
-                                 : "int";
+                                 : "unsigned int";
 
         $output_format = "${name_prefix}%s";
 
