@@ -1122,6 +1122,10 @@ sub build_complete_message {
 sub save_message_to_disk {
     my $file = shift;
 
+        if (-e $file) {
+            my $response = _prompt( '', "Overwrite existing '$file'", 'n' );
+            return undef unless $response =~ / yes | y /xi;
+        }
         open OUTFILE, '>:raw', $file or do { warn  "Couldn't open '$file': $!\n"; return undef};
         binmode(OUTFILE, ':raw :crlf') if $Is_MSWin32;
 
