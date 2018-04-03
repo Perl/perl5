@@ -1897,8 +1897,9 @@ getattr(termios_ref, fd = 0)
     OUTPUT:
 	RETVAL
 
-# If we define TCSANOW here then both a found and not found constant sub
-# are created causing a Constant subroutine TCSANOW redefined warning
+    # If we define TCSANOW here then both a found and not found constant sub
+    # are created causing a Constant subroutine TCSANOW redefined warning
+
 #ifndef TCSANOW
 #  define DEF_SETATTR_ACTION 0
 #else
