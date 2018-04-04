@@ -4668,6 +4668,8 @@ static int do_store(pTHX_
     if (!cxt->fio && res)
         *res = mbuf2sv(aTHX);
 
+    TRACEME(("do_store returns %d", status));
+
     /*
      * Final cleanup.
      *
@@ -4687,8 +4689,6 @@ static int do_store(pTHX_
     clean_store_context(aTHX_ cxt);
     if (cxt->prev && !(cxt->optype & ST_CLONE))
         free_context(aTHX_ cxt);
-
-    TRACEME(("do_store returns %d", status));
 
     return status == 0;
 }
@@ -7533,7 +7533,7 @@ static SV *do_retrieve(
      */
 
     if (!sv) {
-        TRACEME(("retrieve ERROR"));
+        TRACEMED(("retrieve ERROR"));
 #if (PATCHLEVEL <= 4)
         /* perl 5.00405 seems to screw up at this point with an
            'attempt to modify a read only value' error reported in the
@@ -7552,7 +7552,7 @@ static SV *do_retrieve(
 #endif
     }
 
-    TRACEME(("retrieve got %s(0x%" UVxf ")",
+    TRACEMED(("retrieve got %s(0x%" UVxf ")",
              sv_reftype(sv, FALSE), PTR2UV(sv)));
 
     /*
@@ -7566,7 +7566,7 @@ static SV *do_retrieve(
 
     if (pre_06_fmt) {			/* Was not handling overloading by then */
         SV *rv;
-        TRACEME(("fixing for old formats -- pre 0.6"));
+        TRACEMED(("fixing for old formats -- pre 0.6"));
         if (sv_type(aTHX_ sv) == svis_REF && (rv = SvRV(sv)) && SvOBJECT(rv)) {
             TRACEME(("ended do_retrieve() with an object -- pre 0.6"));
             return sv;
@@ -7595,13 +7595,13 @@ static SV *do_retrieve(
         SV *rv = newRV_noinc(sv);
         if (stash && Gv_AMG(stash)) {
             SvAMAGIC_on(rv);
-            TRACEME(("restored overloading on root reference"));
+            TRACEMED(("restored overloading on root reference"));
         }
-        TRACEME(("ended do_retrieve() with an object"));
+        TRACEMED(("ended do_retrieve() with an object"));
         return rv;
     }
 
-    TRACEME(("regular do_retrieve() end"));
+    TRACEMED(("regular do_retrieve() end"));
 
     return newRV_noinc(sv);
 }
@@ -7712,7 +7712,7 @@ static SV *dclone(pTHX_ SV *sv)
     cxt->s_tainted = SvTAINTED(sv);
     out = do_retrieve(aTHX_ (PerlIO*) 0, Nullsv, ST_CLONE, FLAG_BLESS_OK | FLAG_TIE_OK);
 
-    TRACEME(("dclone returns 0x%" UVxf, PTR2UV(out)));
+    TRACEMED(("dclone returns 0x%" UVxf, PTR2UV(out)));
 
     return out;
 }
