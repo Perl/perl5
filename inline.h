@@ -387,7 +387,7 @@ S_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
 /* This looks like 0x808080... */
 #  define PERL_VARIANTS_WORD_MASK (PERL_COUNT_MULTIPLIER * 0x80)
-#  define PERL_WORDSIZE            sizeof(PERL_COUNT_MULTIPLIER)
+#  define PERL_WORDSIZE            sizeof(PERL_UINTMAX_T)
 #  define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
 
 /* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1, by
@@ -1293,9 +1293,9 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
 		s--;
 	}
     }
-    GCC_DIAG_IGNORE_STMT(-Wcast-qual);
+    GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
-    GCC_DIAG_RESTORE_STMT;
+    GCC_DIAG_RESTORE
 }
 
 /*
@@ -1330,16 +1330,16 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
     while (off--) {
         STRLEN skip = UTF8SKIP(s);
         if ((STRLEN)(end - s) <= skip) {
-            GCC_DIAG_IGNORE_STMT(-Wcast-qual);
+            GCC_DIAG_IGNORE(-Wcast-qual)
             return (U8 *)end;
-            GCC_DIAG_RESTORE_STMT;
+            GCC_DIAG_RESTORE
         }
         s += skip;
     }
 
-    GCC_DIAG_IGNORE_STMT(-Wcast-qual);
+    GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
-    GCC_DIAG_RESTORE_STMT;
+    GCC_DIAG_RESTORE
 }
 
 /*
@@ -1377,9 +1377,9 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
             s--;
     }
     
-    GCC_DIAG_IGNORE_STMT(-Wcast-qual);
+    GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
-    GCC_DIAG_RESTORE_STMT;
+    GCC_DIAG_RESTORE
 }
 
 /*
