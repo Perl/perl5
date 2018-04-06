@@ -2212,10 +2212,10 @@ for my $charset (get_supported_code_pages()) {
         # of 0..256, as the remap will also include all of 0..256  (256 not
         # 255 because a re-ordering could cause 256 to need to be in the same
         # range as 255.)
-        if (          (@invmap && $maps_to_code_point)
-            || (     ! $nonl1_only
-                || (   $invlist[0] < 256
-                    && ! ($invlist[0] == 0 && $invlist[1] > 256))))
+        if (       (@invmap && $maps_to_code_point)
+            || (   ($invlist[0] < 256
+                && (    $invlist[0] != 0
+                    || (scalar @invlist != 1 && $invlist[1] < 256)))))
         {
             if (! @invmap) {    # Straight inversion list
                 # Look at all the ranges that start before 257.
