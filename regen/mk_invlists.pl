@@ -55,6 +55,7 @@ my %public_enums = (
 # gives overrides for the exceptions to the typical place
 my %exceptions_to_where_to_define =
                         (
+                            #_Perl_IVCF => 'PERL_IN_REGCOMP_C',
                         );
 my %where_to_define_enums = ();
 
