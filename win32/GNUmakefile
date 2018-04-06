@@ -963,6 +963,7 @@ PERLIMPLIBBASE	?= perl527$(a)
 PERLEXPLIB	?= $(COREDIR)\perl527.exp
 PERLSTATICLIB	?= ..\perl527s$(a)
 PERLDLL		= ..\perl527.dll
+PERLDLLBASE	= perl527.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake
@@ -1478,7 +1479,7 @@ $(PERLEXPLIB) : $(PERLIMPLIB)
 
 $(PERLIMPLIB) : perldll.def
 ifeq ($(CCTYPE),GCC)
-	$(IMPLIB) -k -d perldll.def -l $(PERLIMPLIB) -e $(PERLEXPLIB)
+	$(IMPLIB) -k -d perldll.def -D $(PERLDLLBASE) -l $(PERLIMPLIB) -e $(PERLEXPLIB)
 else
 	lib -def:perldll.def -machine:$(ARCHITECTURE) /OUT:$(PERLIMPLIB)
 endif

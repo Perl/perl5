@@ -103,22 +103,41 @@
  * The XS code in the re extension is special, in that it redefines
  * core APIs locally, so don't mark them as "dllimport" because GCC
  * cannot handle this situation.
+ *
+ * Certain old GCCs will not allow the function pointer of dllimport marked
+ * function to be "const". This was fixed later on. Since this is a
+ * deoptimization, target "gcc version 3.4.5 (mingw-vista special r3)" only,
+ * The GCC bug was fixed in GCC patch "varasm.c (initializer_constant_valid_p):
+ * Don't deny DECL_DLLIMPORT_P on functions", which probably was first released
+ * in GCC 4.3.0, this #if can be expanded upto but not including 4.3.0 if more
+ * deployed GCC are found that wont build with the follow error, initializer
+ * element is a PerlIO func exported from perl5xx.dll.
+ *
+ * encoding.xs:610: error: initializer element is not constant
+ * encoding.xs:610: error: (near initialization for `PerlIO_encode.Open')
  */
-#if !defined(PERLDLL) && !defined(PERL_EXT_RE_BUILD)
-#  ifdef __cplusplus
-#    define PERL_CALLCONV extern "C" __declspec(dllimport)
-#    ifdef _MSC_VER
-#      define PERL_CALLCONV_NO_RET extern "C" __declspec(dllimport) __declspec(noreturn)
+
+#if (defined(__GNUC__) && defined(__MINGW32__) && \
+     !defined(__MINGW64_VERSION_MAJOR) && !defined(__clang__) && \
+	((__GNUC__ < 3) || ((__GNUC__ == 3) && (__GNUC_MINOR__ <= 5))))
+/* use default fallbacks from perl.h for this particular GCC */
+#else
+#  if !defined(PERLDLL) && !defined(PERL_EXT_RE_BUILD)
+#    ifdef __cplusplus
+#      define PERL_CALLCONV extern "C" __declspec(dllimport)
+#      ifdef _MSC_VER
+#        define PERL_CALLCONV_NO_RET extern "C" __declspec(dllimport) __declspec(noreturn)
+#      endif
+#    else
+#      define PERL_CALLCONV __declspec(dllimport)
+#      ifdef _MSC_VER
+#        define PERL_CALLCONV_NO_RET __declspec(dllimport) __declspec(noreturn)
+#      endif
 #    endif
-#  else
-#    define PERL_CALLCONV __declspec(dllimport)
+#  else /* MSVC noreturn support inside the interp */
 #    ifdef _MSC_VER
-#      define PERL_CALLCONV_NO_RET __declspec(dllimport) __declspec(noreturn)
+#      define PERL_CALLCONV_NO_RET __declspec(noreturn)
 #    endif
-#  endif
-#else /* MSVC noreturn support inside the interp */
-#  ifdef _MSC_VER
-#    define PERL_CALLCONV_NO_RET __declspec(noreturn)
 #  endif
 #endif
 
