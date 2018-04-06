@@ -2228,7 +2228,7 @@ for my $charset (get_supported_code_pages()) {
                                 # To infinity.  You may want to stop much much
                                 # earlier; going this high may expose perl
                                 # deficiencies with very large numbers.
-                                : $Unicode::UCD::MAX_CP;
+                                : 256;
                     for my $j ($invlist[0] .. $upper) {
                         push @latin1_list, a2n($j);
                     }
