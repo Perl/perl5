@@ -52,7 +52,7 @@
 #define	EXACTFU               	38	/* 0x26 Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len). */
 #define	EXACTFAA              	39	/* 0x27 Match this string (not guaranteed to be folded) using /iaa rules (w/len). */
 #define	EXACTFU_SS            	40	/* 0x28 Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len). */
-#define	EXACTFLU8             	41	/* 0x29 Rare cirucmstances: like EXACTFU, but is under /l, UTF-8, folded, and everything in it is above 255. */
+#define	EXACTFLU8             	41	/* 0x29 Rare circumstances: like EXACTFU, but is under /l, UTF-8, folded, and everything in it is above 255. */
 #define	EXACTFAA_NO_TRIE      	42	/* 0x2a Match this string (which is not trie-able; not guaranteed to be folded) using /iaa rules (w/len). */
 #define	NOTHING               	43	/* 0x2b Match empty string. */
 #define	TAIL                  	44	/* 0x2c Match empty string. Can jump here from outside. */
