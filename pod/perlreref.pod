@@ -135,7 +135,7 @@ and L<perlunicode> for details.
    \W      A non-word character
    \s      A whitespace character
    \S      A non-whitespace character
-   \h      An horizontal whitespace
+   \h      A horizontal whitespace
    \H      A non horizontal whitespace
    \N      A non newline (when not followed by '{NAME}';;
            not valid in a character class; equivalent to [^\n]; it's

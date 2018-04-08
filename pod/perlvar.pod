@@ -874,9 +874,9 @@ this:
 
     $str =~ /pattern/;
 
-    print $`, $&, $'; # bad: perfomance hit
+    print $`, $&, $'; # bad: performance hit
 
-    print             # good: no perfomance hit
+    print             # good: no performance hit
 	substr($str, 0,     $-[0]),
 	substr($str, $-[0], $+[0]-$-[0]),
 	substr($str, $+[0]);

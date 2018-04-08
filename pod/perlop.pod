@@ -570,7 +570,7 @@ The standard C<L<Unicode::Collate>> and
 C<L<Unicode::Collate::Locale>> modules offer much more powerful
 solutions to collation issues.
 
-For case-insensitive comparisions, look at the L<perlfunc/fc> case-folding
+For case-insensitive comparisons, look at the L<perlfunc/fc> case-folding
 function, available in Perl v5.16 or later:
 
     if ( fc($x) eq fc($y) ) { ... }

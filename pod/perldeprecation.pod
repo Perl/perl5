@@ -131,7 +131,7 @@ used functionality was removed in Perl 5.10. In order to free up
 the variable for a future special meaning, its use will be a fatal
 error in Perl 5.30.
 
-To specify how numbers are formatted when printed, one is adviced
+To specify how numbers are formatted when printed, one is advised
 to use C<< printf >> or C<< sprintf >> instead.
 
 =head3 Assigning non-zero to C<< $[ >> will be fatal
@@ -320,7 +320,7 @@ here-document end at the first empty line. This practise was deprecated
 in Perl 5.000; as of Perl 5.28, using a bare here-document terminator
 throws a fatal error.
 
-You are encouraged to use the explictly quoted form if you wish to
+You are encouraged to use the explicitly quoted form if you wish to
 use an empty line as the terminator of the here-document:
 
   print <<"";

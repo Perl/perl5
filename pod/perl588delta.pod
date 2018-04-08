@@ -1535,7 +1535,7 @@ This is a new warning, produced in situations such as this:
 
 =head2 Non-string passed as bitmask
 
-This is a new warning, produced when number has been passed as a argument to
+This is a new warning, produced when number has been passed as an argument to
 select(), instead of a bitmask.
 
     # Wrong, will now warn

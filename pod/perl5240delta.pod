@@ -96,7 +96,7 @@ platform.
 
 Previously perl would redirect to another interpreter if it found a
 hashbang path unless the path contains "perl" (see L<perlrun>). To improve
-compatability with Perl 6 this behavior has been extended to also redirect
+compatibility with Perl 6 this behavior has been extended to also redirect
 if "perl" is followed by "6".
 
 =head1 Security

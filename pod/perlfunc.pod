@@ -7535,7 +7535,7 @@ With proper care you may mix package and my (or state) C<$a> and/or C<$b>:
 
    # prints tinysmallnormalbighuge
 
-C<$a> and C<$b> are implicitely local to the sort() execution and regain their
+C<$a> and C<$b> are implicitly local to the sort() execution and regain their
 former values upon completing the sort.
 
 Sort subroutines written using C<$a> and C<$b> are bound to their calling
