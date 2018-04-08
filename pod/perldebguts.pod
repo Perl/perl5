@@ -660,7 +660,7 @@ will be lost.
  EXACTFU_SS       str        Match this string (folded iff in UTF-8,
                              length in folding may change even if not in
                              UTF-8) using /iu rules (w/len).
- EXACTFLU8        str        Rare cirucmstances: like EXACTFU, but is
+ EXACTFLU8        str        Rare circumstances: like EXACTFU, but is
                              under /l, UTF-8, folded, and everything in
                              it is above 255.
  EXACTFAA_NO_TRIE str        Match this string (which is not trie-able;
