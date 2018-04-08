@@ -19109,6 +19109,24 @@ EOF_CODE
                                  lc $a->name cmp lc $b->name
                                } property_ref('*'))
     {
+        # Non-binary properties should not match \p{};  Test all for that.
+        if ($property->type != $BINARY) {
+            my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS }
+                                                            $property->aliases;
+            foreach my $property_alias ($property->aliases) {
+                my $name = standardize($property_alias->name);
+
+                # But some names are ambiguous, meaning a binary property with
+                # the same name when used in \p{}, and a different
+                # (non-binary) property in other contexts.
+                next if grep { $name eq $_ } keys %ambiguous_names;
+
+                push @output, <<"EOF_CODE";
+Error('\\p{$name}');
+Error('\\P{$name}');
+EOF_CODE
+            }
+        }
         foreach my $table (sort { $a->has_dependency <=> $b->has_dependency
                                     or
                                   lc $a->name cmp lc $b->name
