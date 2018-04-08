@@ -3881,13 +3881,12 @@ S_check_and_deprecate(pTHX_ const U8 *p,
         }                                                                    \
     }                                                                        \
     else if UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, e) {                          \
+        U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));                         \
         if (flags & (locale_flags)) {                                        \
-            result = LC_L1_change_macro(EIGHT_BIT_UTF8_TO_NATIVE(*p,         \
-                                                                 *(p+1)));   \
+            result = LC_L1_change_macro(c);                                  \
         }                                                                    \
         else {                                                               \
-            return L1_func(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),             \
-                           ustrp, lenp,  L1_func_extra_param);               \
+            return L1_func(c, ustrp, lenp,  L1_func_extra_param);            \
         }                                                                    \
     }                                                                        \
     else {  /* malformed UTF-8 or ord above 255 */                           \
