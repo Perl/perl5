@@ -104,7 +104,7 @@ EXACTFAA    EXACT,      str	  ; Match this string (not guaranteed to be folded) 
 # End of important relative ordering.
 
 EXACTFU_SS  EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len).
-EXACTFLU8   EXACT,      str	  ; Rare cirucmstances: like EXACTFU, but is under /l, UTF-8, folded, and everything in it is above 255.
+EXACTFLU8   EXACT,      str	  ; Rare circumstances: like EXACTFU, but is under /l, UTF-8, folded, and everything in it is above 255.
 EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string (which is not trie-able; not guaranteed to be folded) using /iaa rules (w/len).
 
 #*Do nothing types
