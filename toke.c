@@ -9052,7 +9052,7 @@ S_pending_ident(pTHX)
 		HEK * const stashname = HvNAME_HEK(stash);
 		SV *  const sym = newSVhek(stashname);
                 sv_catpvs(sym, "::");
-                sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len - 1, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
+                sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len > 0 ? tokenbuf_len - 1 : 0, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
                 pl_yylval.opval = newSVOP(OP_CONST, 0, sym);
                 pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 if (pit != '&')
@@ -9080,7 +9080,7 @@ S_pending_ident(pTHX)
         && PL_lex_state != LEX_NORMAL
         && !PL_lex_brackets)
     {
-        GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1,
+        GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len > 0 ? tokenbuf_len - 1 : 0,
                                          ( UTF ? SVf_UTF8 : 0 ) | GV_ADDMG,
                                          SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
@@ -9097,11 +9097,11 @@ S_pending_ident(pTHX)
     /* build ops for a bareword */
     pl_yylval.opval = newSVOP(OP_CONST, 0,
 				   newSVpvn_flags(PL_tokenbuf + 1,
-						      tokenbuf_len - 1,
+                                                      tokenbuf_len > 0 ? tokenbuf_len - 1 : 0,
                                                       UTF ? SVf_UTF8 : 0 ));
     pl_yylval.opval->op_private = OPpCONST_ENTERED;
     if (pit != '&')
-	gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1,
+        gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len > 0 ? tokenbuf_len - 1 : 0,
 		     (PL_in_eval ? GV_ADDMULTI : GV_ADD)
                      | ( UTF ? SVf_UTF8 : 0 ),
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV

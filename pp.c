@@ -3727,6 +3727,7 @@ PP(pp_ucfirst)
     if (! slen) {   /* If empty */
 	need = 1; /* still need a trailing NUL */
 	ulen = 0;
+        *tmpbuf = '\0';
     }
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
