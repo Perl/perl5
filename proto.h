@@ -1387,6 +1387,7 @@ PERL_CALLCONV void	Perl_init_stacks(pTHX);
 PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm);
 #define PERL_ARGS_ASSERT_INIT_TM	\
 	assert(ptm)
+PERL_CALLCONV void	Perl_init_uniprops(pTHX);
 #ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_instr(const char* big, const char* little)
 			__attribute__warn_unused_result__

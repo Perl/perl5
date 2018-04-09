@@ -1441,6 +1441,7 @@
 #define init_constants()	Perl_init_constants(aTHX)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define init_named_cv(a,b)	Perl_init_named_cv(aTHX_ a,b)
+#define init_uniprops()		Perl_init_uniprops(aTHX)
 #define invert(a)		Perl_invert(aTHX_ a)
 #define io_close(a,b,c,d)	Perl_io_close(aTHX_ a,b,c,d)
 #define isinfnansv(a)		Perl_isinfnansv(aTHX_ a)

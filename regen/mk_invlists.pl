@@ -147,7 +147,7 @@ sub output_invlist ($$;$) {
     }
     my $count = @$invlist;
 
-    switch_pound_if ($name, 'PERL_IN_PERL_C');
+    switch_pound_if ($name, 'PERL_IN_UTF8_C');
 
     print $out_fh "\nstatic const UV ${name}_invlist[] = {";
     print $out_fh " /* for $charset */" if $charset;
