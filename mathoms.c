@@ -1081,6 +1081,7 @@ Perl_sv_eq(pTHX_ SV *sv1, SV *sv2)
 char *
 Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
 {
+    PERL_ARGS_ASSERT_SV_COLLXFRM;
     return sv_collxfrm_flags(sv, nxp, SV_GMAGIC);
 }
 
@@ -1100,6 +1101,7 @@ Perl_mem_collxfrm(pTHX_ const char *input_string, STRLEN len, STRLEN *xlen)
 bool
 Perl_sv_2bool(pTHX_ SV *const sv)
 {
+    PERL_ARGS_ASSERT_SV_2BOOL;
     return sv_2bool_flags(sv, SV_GMAGIC);
 }
 

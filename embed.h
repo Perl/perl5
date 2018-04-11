@@ -98,8 +98,12 @@
 #define croak_no_modify		Perl_croak_no_modify
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
 #define croak_xs_usage		Perl_croak_xs_usage
+#ifndef NO_MATHOMS
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
+#endif
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
 #define cv_const_sv		Perl_cv_const_sv
 #define cv_get_call_checker(a,b,c)	Perl_cv_get_call_checker(aTHX_ a,b,c)
@@ -123,7 +127,9 @@
 #define die			Perl_die
 #endif
 #define die_sv(a)		Perl_die_sv(aTHX_ a)
+#ifndef NO_MATHOMS
 #define do_binmode(a,b,c)	Perl_do_binmode(aTHX_ a,b,c)
+#endif
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
 #define do_gvgv_dump(a,b,c,d)	Perl_do_gvgv_dump(aTHX_ a,b,c,d)
@@ -131,7 +137,9 @@
 #define do_join(a,b,c,d)	Perl_do_join(aTHX_ a,b,c,d)
 #define do_magic_dump(a,b,c,d,e,f,g)	Perl_do_magic_dump(aTHX_ a,b,c,d,e,f,g)
 #define do_op_dump(a,b,c)	Perl_do_op_dump(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define do_open9(a,b,c,d,e,f,g,h,i)	Perl_do_open9(aTHX_ a,b,c,d,e,f,g,h,i)
+#endif
 #define do_openn(a,b,c,d,e,f,g,h,i)	Perl_do_openn(aTHX_ a,b,c,d,e,f,g,h,i)
 #define do_pmop_dump(a,b,c)	Perl_do_pmop_dump(aTHX_ a,b,c)
 #define do_sprintf(a,b,c)	Perl_do_sprintf(aTHX_ a,b,c)
@@ -194,7 +202,9 @@
 #define gv_check(a)		Perl_gv_check(aTHX_ a)
 #define gv_const_sv(a)		Perl_gv_const_sv(aTHX_ a)
 #define gv_dump(a)		Perl_gv_dump(aTHX_ a)
+#ifndef NO_MATHOMS
 #define gv_efullname(a,b)	Perl_gv_efullname(aTHX_ a,b)
+#endif
 #define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchfile_flags(a,b,c)	Perl_gv_fetchfile_flags(aTHX_ a,b,c)
@@ -211,7 +221,9 @@
 #define gv_fetchpv(a,b,c)	Perl_gv_fetchpv(aTHX_ a,b,c)
 #define gv_fetchpvn_flags(a,b,c,d)	Perl_gv_fetchpvn_flags(aTHX_ a,b,c,d)
 #define gv_fetchsv(a,b,c)	Perl_gv_fetchsv(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define gv_fullname(a,b)	Perl_gv_fullname(aTHX_ a,b)
+#endif
 #define gv_fullname4(a,b,c,d)	Perl_gv_fullname4(aTHX_ a,b,c,d)
 #define gv_handler(a,b)		Perl_gv_handler(aTHX_ a,b)
 #define gv_init_pv(a,b,c,d)	Perl_gv_init_pv(aTHX_ a,b,c,d)
@@ -240,75 +252,187 @@
 #define hv_rand_set(a,b)	Perl_hv_rand_set(aTHX_ a,b)
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define init_i18nl10n(a)	Perl_init_i18nl10n(aTHX_ a)
+#ifndef NO_MATHOMS
 #define init_i18nl14n(a)	Perl_init_i18nl14n(aTHX_ a)
+#endif
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define init_tm(a)		Perl_init_tm(aTHX_ a)
 #define intro_my()		Perl_intro_my(aTHX)
+#ifndef NO_MATHOMS
 #define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
+#endif
 #define is_c9strict_utf8_string_loclen	S_is_c9strict_utf8_string_loclen
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)
 #define is_strict_utf8_string_loclen	S_is_strict_utf8_string_loclen
+#ifndef NO_MATHOMS
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_alnumc_lc(a)	Perl_is_uni_alnumc_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_alpha(a)		Perl_is_uni_alpha(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_alpha_lc(a)	Perl_is_uni_alpha_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_ascii(a)		Perl_is_uni_ascii(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_ascii_lc(a)	Perl_is_uni_ascii_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_blank(a)		Perl_is_uni_blank(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_blank_lc(a)	Perl_is_uni_blank_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_cntrl(a)		Perl_is_uni_cntrl(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_cntrl_lc(a)	Perl_is_uni_cntrl_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_digit(a)		Perl_is_uni_digit(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_digit_lc(a)	Perl_is_uni_digit_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_graph(a)		Perl_is_uni_graph(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_graph_lc(a)	Perl_is_uni_graph_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_idfirst_lc(a)	Perl_is_uni_idfirst_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_lower(a)		Perl_is_uni_lower(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_lower_lc(a)	Perl_is_uni_lower_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_print(a)		Perl_is_uni_print(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_print_lc(a)	Perl_is_uni_print_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_punct(a)		Perl_is_uni_punct(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_space(a)		Perl_is_uni_space(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_space_lc(a)	Perl_is_uni_space_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_upper(a)		Perl_is_uni_upper(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_upper_lc(a)	Perl_is_uni_upper_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_xdigit(a)	Perl_is_uni_xdigit(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_alpha(a)	Perl_is_utf8_alpha(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_ascii(a)	Perl_is_utf8_ascii(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_blank(a)	Perl_is_utf8_blank(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_digit(a)	Perl_is_utf8_digit(aTHX_ a)
+#endif
 #define is_utf8_fixed_width_buf_loclen_flags	S_is_utf8_fixed_width_buf_loclen_flags
+#ifndef NO_MATHOMS
 #define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_idcont(a)	Perl_is_utf8_idcont(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
+#endif
 #define is_utf8_invariant_string_loc	S_is_utf8_invariant_string_loc
+#ifndef NO_MATHOMS
 #define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_perl_space(a)	Perl_is_utf8_perl_space(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_perl_word(a)	Perl_is_utf8_perl_word(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_posix_digit(a)	Perl_is_utf8_posix_digit(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_print(a)	Perl_is_utf8_print(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_punct(a)	Perl_is_utf8_punct(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
+#endif
 #define is_utf8_string_flags	S_is_utf8_string_flags
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_string_loclen_flags	S_is_utf8_string_loclen_flags
+#ifndef NO_MATHOMS
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
+#endif
 #define is_utf8_valid_partial_char_flags	S_is_utf8_valid_partial_char_flags
+#ifndef NO_MATHOMS
 #define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_xidcont(a)	Perl_is_utf8_xidcont(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_xidfirst(a)	Perl_is_utf8_xidfirst(aTHX_ a)
+#endif
 #define isinfnan		Perl_isinfnan
 #define leave_adjust_stacks(a,b,c,d)	Perl_leave_adjust_stacks(aTHX_ a,b,c,d)
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
@@ -443,7 +567,9 @@
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #define op_scope(a)		Perl_op_scope(aTHX_ a)
 #define op_sibling_splice	Perl_op_sibling_splice
+#ifndef NO_MATHOMS
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
+#endif
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
 #define pad_add_name_pv(a,b,c,d)	Perl_pad_add_name_pv(aTHX_ a,b,c,d)
@@ -542,9 +668,15 @@
 #define save_int(a)		Perl_save_int(aTHX_ a)
 #define save_item(a)		Perl_save_item(aTHX_ a)
 #define save_iv(a)		Perl_save_iv(aTHX_ a)
+#ifndef NO_MATHOMS
 #define save_list(a,b)		Perl_save_list(aTHX_ a,b)
+#endif
+#ifndef NO_MATHOMS
 #define save_long(a)		Perl_save_long(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define save_nogv(a)		Perl_save_nogv(aTHX_ a)
+#endif
 #define save_padsv_and_mortalize(a)	Perl_save_padsv_and_mortalize(aTHX_ a)
 #define save_pptr(a)		Perl_save_pptr(aTHX_ a)
 #define save_pushi32ptr(a,b,c)	Perl_save_pushi32ptr(aTHX_ a,b,c)
@@ -630,7 +762,9 @@
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
 #define sv_isa(a,b)		Perl_sv_isa(aTHX_ a,b)
 #define sv_isobject(a)		Perl_sv_isobject(aTHX_ a)
+#ifndef NO_MATHOMS
 #define sv_iv(a)		Perl_sv_iv(aTHX_ a)
+#endif
 #define sv_len(a)		Perl_sv_len(aTHX_ a)
 #define sv_len_utf8(a)		Perl_sv_len_utf8(aTHX_ a)
 #define sv_magic(a,b,c,d,e)	Perl_sv_magic(aTHX_ a,b,c,d,e)
@@ -641,18 +775,28 @@
 #ifndef NO_MATHOMS
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #endif
+#ifndef NO_MATHOMS
 #define sv_nv(a)		Perl_sv_nv(aTHX_ a)
+#endif
 #define sv_peek(a)		Perl_sv_peek(aTHX_ a)
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
 #define sv_pos_b2u_flags(a,b,c)	Perl_sv_pos_b2u_flags(aTHX_ a,b,c)
 #define sv_pos_u2b(a,b,c)	Perl_sv_pos_u2b(aTHX_ a,b,c)
 #define sv_pos_u2b_flags(a,b,c,d)	Perl_sv_pos_u2b_flags(aTHX_ a,b,c,d)
+#ifndef NO_MATHOMS
 #define sv_pvbyten(a,b)		Perl_sv_pvbyten(aTHX_ a,b)
+#endif
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
+#ifndef NO_MATHOMS
 #define sv_pvn(a,b)		Perl_sv_pvn(aTHX_ a,b)
+#endif
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define sv_pvn_nomg(a,b)	Perl_sv_pvn_nomg(aTHX_ a,b)
+#endif
+#ifndef NO_MATHOMS
 #define sv_pvutf8n(a,b)		Perl_sv_pvutf8n(aTHX_ a,b)
+#endif
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_recode_to_utf8(a,b)	Perl_sv_recode_to_utf8(aTHX_ a,b)
 #define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
@@ -705,7 +849,9 @@
 #define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_upgrade_flags_grow(a,b,c)	Perl_sv_utf8_upgrade_flags_grow(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define sv_uv(a)		Perl_sv_uv(aTHX_ a)
+#endif
 #define sv_vcatpvf(a,b,c)	Perl_sv_vcatpvf(aTHX_ a,b,c)
 #define sv_vcatpvf_mg(a,b,c)	Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
 #define sv_vcatpvfn(a,b,c,d,e,f,g)	Perl_sv_vcatpvfn(aTHX_ a,b,c,d,e,f,g)
@@ -720,12 +866,20 @@
 #define thread_locale_init	Perl_thread_locale_init
 #define thread_locale_term	Perl_thread_locale_term
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
+#endif
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
+#endif
 #define to_uni_upper(a,b,c)	Perl_to_uni_upper(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
 #define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
+#endif
 #define unpackstring(a,b,c,d,e)	Perl_unpackstring(aTHX_ a,b,c,d,e)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #define upg_version(a,b)	Perl_upg_version(aTHX_ a,b)
@@ -737,7 +891,9 @@
 #define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
+#ifndef NO_MATHOMS
 #define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
+#endif
 #define utf8_to_uvuni_buf(a,b,c)	Perl_utf8_to_uvuni_buf(aTHX_ a,b,c)
 #define utf8n_to_uvchr_msgs(a,b,c,d,e,f)	Perl_utf8n_to_uvchr_msgs(aTHX_ a,b,c,d,e,f)
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
@@ -745,7 +901,9 @@
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
 #define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
 #define valid_utf8_to_uvchr	Perl_valid_utf8_to_uvchr
+#ifndef NO_MATHOMS
 #define valid_utf8_to_uvuni(a,b)	Perl_valid_utf8_to_uvuni(aTHX_ a,b)
+#endif
 #define vcmp(a,b)		Perl_vcmp(aTHX_ a,b)
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
 #define vdeb(a,b)		Perl_vdeb(aTHX_ a,b)
@@ -835,11 +993,15 @@
 #define deb_nocontext		Perl_deb_nocontext
 #define die_nocontext		Perl_die_nocontext
 #define form_nocontext		Perl_form_nocontext
+#ifndef NO_MATHOMS
 #define fprintf_nocontext	Perl_fprintf_nocontext
+#endif
 #define load_module_nocontext	Perl_load_module_nocontext
 #define mess_nocontext		Perl_mess_nocontext
 #define newSVpvf_nocontext	Perl_newSVpvf_nocontext
+#ifndef NO_MATHOMS
 #define printf_nocontext	Perl_printf_nocontext
+#endif
 #define sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg_nocontext
 #define sv_catpvf_nocontext	Perl_sv_catpvf_nocontext
 #define sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg_nocontext

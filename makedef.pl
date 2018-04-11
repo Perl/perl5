@@ -731,12 +731,12 @@ unless ($define{'USE_QUADMATH'}) {
 {
     my %seen;
     my ($embed) = setup_embed($ARGS{TARG_DIR});
+    my $excludedre = $define{'NO_MATHOMS'} ? qr/[xmib]/ : qr/[xmi]/;
 
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;
 	next unless $func;
-	if (   ($flags =~ /[AX]/ && $flags !~ /[xmi]/)
-            || ($flags =~ /b/ && ! $define{'NO_MATHOMS'}))
+	if ($flags =~ /[AX]/ && $flags !~ $excludedre)
         {
 	    # public API, so export
 
