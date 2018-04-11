@@ -2673,6 +2673,9 @@ PERL_CALLCONV OP*	Perl_parse_termexpr(pTHX_ U32 flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ const char **popt);
 #define PERL_ARGS_ASSERT_PARSE_UNICODE_OPTS	\
 	assert(popt)
+PERL_CALLCONV SV *	Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const bool to_fold, bool * invert);
+#define PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING	\
+	assert(name); assert(invert)
 PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *parser);
 #define PERL_ARGS_ASSERT_PARSER_FREE	\
 	assert(parser)

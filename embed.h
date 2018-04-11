@@ -1090,6 +1090,7 @@
 #define multiconcat_stringify(a)	Perl_multiconcat_stringify(aTHX_ a)
 #define multideref_stringify(a,b)	Perl_multideref_stringify(aTHX_ a,b)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
+#define parse_uniprop_string(a,b,c,d)	Perl_parse_uniprop_string(aTHX_ a,b,c,d)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #define reg_named_buff(a,b,c,d)	Perl_reg_named_buff(aTHX_ a,b,c,d)
 #define reg_named_buff_iter(a,b,c)	Perl_reg_named_buff_iter(aTHX_ a,b,c)

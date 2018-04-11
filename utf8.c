@@ -5909,6 +5909,20 @@ Perl_init_uniprops(pTHX)
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
 }
 
+SV *
+Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const bool to_fold, bool * invert)
+{
+
+    PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
+
+    PERL_UNUSED_ARG(name);
+    PERL_UNUSED_ARG(len);
+    PERL_UNUSED_ARG(to_fold);
+    PERL_UNUSED_ARG(invert);
+
+    return NULL;
+}
+
 /*
 =for apidoc utf8_to_uvchr
 

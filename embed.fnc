@@ -768,6 +768,10 @@ AMp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
 AbDMpR	|bool	|isIDFIRST_lazy	|NN const char* p
 AbDMpR	|bool	|isALNUM_lazy	|NN const char* p
 p	|void	|init_uniprops
+EpX	|SV *	|parse_uniprop_string|NN const char * const name	   \
+				     |const Size_t len			   \
+				     |const bool to_fold		   \
+				     |NN bool * invert
 #ifdef PERL_IN_UTF8_C
 snR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp  \
 		|const char dummy
