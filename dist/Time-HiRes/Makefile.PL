@@ -403,6 +403,68 @@ int main(int argc, char** argv)
 EOM
 }
 
+sub _stat_code {
+  my ($which) = $DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/
+    or return;
+
+  return @{
+    [
+     [],
+     [ qw/st_atimespec.tv_nsec st_mtimespec.tv_nsec st_ctimespec.tv_nsec/, 1 ],
+     [ qw/st_atimensec st_mtimensec st_ctimensec/, 1 ],
+     [ qw/st_atime_n st_mtime_n st_ctime_n/, 1 ],
+     [ qw/st_atim.tv_nsec st_mtim.tv_nsec st_ctim.tv_nsec/, 1 ],
+     [ qw/st_uatime st_umtime st_uctime/, 1000 ],
+    ]->[$which]};
+}
+
+sub has_utimes {
+    my ($natime, $nmtime, $nctime, $scale) = _stat_code()
+      or return 0;
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+int main(int argc, char** argv)
+{
+    int ret1, ret2;
+    struct timeval ts1[2], ts2[2];
+    struct stat st1, st2;
+
+    if (stat("Changes", &st1) < 0)
+        return 1;
+
+    ts1[0].tv_sec = st1.st_atime-60;
+    ts1[0].tv_usec = st1.$natime ? 1 : 2;
+    ts1[1].tv_sec = st1.st_mtime-60;
+    ts1[1].tv_usec = st1.$nmtime ? 1 : 2;
+
+    ret1 = utimes("Changes", ts1);
+
+    if (stat("Changes", &st2) < 0)
+        return 1;
+
+    /* the file system might not support sub-second timestamps.
+       it might not support accuracy to a second either, so
+       only check that mtime has changed. */
+    if (st1.st_mtime == st2.st_mtime)
+        return 1;
+
+    /* (hopefully) restore the origina m/atimes */
+    ts2[0].tv_sec = st1.st_atime;
+    ts2[0].tv_usec = st1.$natime / $scale;
+    ts2[1].tv_sec = st1.st_mtime;
+    ts2[1].tv_usec = st1.$nmtime / $scale;
+    utimes("Changes", ts2);
+
+    exit(0);
+}
+EOM
+}
+
 sub has_clockid_t{
     return 1 if
     try_compile_and_link(<<EOM);
@@ -731,14 +793,6 @@ EOD
 	print "NOT found.\n";
     }
 
-    my $has_hires_utime = ($has_futimens && $has_utimensat);
-    if ($has_hires_utime) {
-	$DEFINE .= ' -DTIME_HIRES_UTIME';
-        print "You seem to have subsecond timestamp setting.\n";
-    } else {
-        print "You do NOT seem to have subsecond timestamp setting.\n";
-    }
-
     print "Looking for stat() subsecond timestamps...\n";
 
     print "Trying struct stat st_atimespec.tv_nsec...";
@@ -852,6 +906,25 @@ EOM
         DEFINE('TIME_HIRES_STAT', 4);
     } elsif ($has_stat_st_uxtime) {
         DEFINE('TIME_HIRES_STAT', 5);
+    }
+
+    my $has_utimes;
+    unless ($has_utimensat) {
+        print "Looking for the fallback utimes()... ";
+        if (has_utimes()) {
+	    ++$has_utimes;
+	    $DEFINE .= ' -DHAS_UTIMES';
+        }
+	print $has_utimes ? "found.\n" : "NOT found\n";
+    }
+
+    # we need both of these to fully replicate perl's utime
+    my $has_hires_utime = ($has_futimens && ($has_utimensat || $has_utimes));
+    if ($has_hires_utime) {
+	$DEFINE .= ' -DTIME_HIRES_UTIME';
+        print "You seem to have subsecond timestamp setting.\n";
+    } else {
+        print "You do NOT seem to have subsecond timestamp setting.\n";
     }
 
     my $has_hires_stat = ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/) ? $1 : 0;
