@@ -1470,7 +1470,7 @@ PROTOTYPE: $$@
                         }
 		}
 		else {
-#ifdef HAS_UTIMENSAT
+#if defined(HAS_UTIMENSAT)
 	          if (UTIMENSAT_AVAILABLE) {
                     STRLEN len;
                     char * name = SvPV(file, len);
@@ -1481,8 +1481,20 @@ PROTOTYPE: $$@
                   } else {
                     croak("utimensat unimplemented in this platform");
                   }
-#else  /* HAS_UTIMENSAT */
-	          croak("utimensat unimplemented in this platform");
+#elif defined(HAS_UTIMES)
+		  struct timeval tv[2];
+                  STRLEN len;
+                  char * name = SvPV(file, len);
+		  tv[0].tv_sec  = utbuf[0].tv_sec;
+		  tv[0].tv_usec = utbuf[0].tv_nsec / 1000;
+		  tv[1].tv_sec  = utbuf[1].tv_sec;
+		  tv[1].tv_usec = utbuf[1].tv_nsec / 1000;
+                  if (IS_SAFE_PATHNAME(name, len, "utime") &&
+                      utimes(name, tv) == 0) {
+                      tot++;
+                  }
+#else  /* HAS_UTIMES */
+	          croak("Neither utimensat nor utimes unimplemented in this platform");
 #endif /* HAS_UTIMENSAT */
 		}
 	} /* while items */
