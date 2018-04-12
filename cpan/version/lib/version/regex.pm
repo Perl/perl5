@@ -8,7 +8,7 @@ use vars qw(
     $LAX_DECIMAL_VERSION $LAX_DOTTED_DECIMAL_VERSION
 );
 
-$VERSION = 0.9918;
+$VERSION = 0.9921;
 
 #--------------------------------------------------------------------------#
 # Version regexp components

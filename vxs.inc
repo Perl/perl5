@@ -138,7 +138,7 @@ VXS(universal_version)
 			    name, SvPVx_nolen_const(req));
 #else
 		Perl_croak(aTHX_
-			   "%" HEKf " does not define $%"HEKf
+			   "%" HEKf " does not define $%" HEKf
 			   "::VERSION--version check failed",
 			   HEKfARG(name), HEKfARG(name));
 #endif
