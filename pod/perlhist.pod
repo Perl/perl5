@@ -626,6 +626,7 @@ the strings?).
  Steve     5.26.1-RC1   2017-Sep-10
  Steve     5.26.1       2017-Sep-22
  Steve     5.26.2-RC1   2018-Mar-24
+ Steve     5.26.2       2018-Apr-14
 
  Sawyer X  5.27.0       2017-May-31     The 5.27 development track
  Eric      5.27.1       2017-Jun-20
