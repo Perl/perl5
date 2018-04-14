@@ -257,6 +257,22 @@ L<Announced on 2017-05-31 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.
 
     -- Bertrand Russell, The Road to Happiness
 
+=head2 v5.26.2 - Desmond Morris, "Catwatching: The Essential Guide to Cat Behaviour"
+
+L<Announced on 2018-04-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2018/04/msg250440.html>
+
+How does a cat use its whiskers?  The usual answer is that the whiskers
+are feelers that enable a cat to tell whether a gap is wide enough for
+it to squeeze through, but the truth is more complicated and more
+remarkable.  In addition to their obvious role as feelers sensitive to
+touch, the whiskers also operate as air-current detectors.  As the cat
+moves along in the dark it needs to manoeuvre past solid objects without
+touching them.  Each solid object it approaches causes slight eddies in
+the air, minute disturbances in the currents of air movements, and the
+cat's whiskers are so amazingly sensitive that they can read these air
+changes and respond to the presence of solid obstacles even without
+touching them.
+
 =head2 v5.26.2-RC1 - Desmond Morris, "Catwatching: The Essential Guide to Cat Behaviour"
 
 L<Announced on 2018-03-24 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250103.html>
@@ -556,6 +572,21 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
     Wide fields of asphodel fore’er,
   To find that the utmost reward
     Of daring should be still to dare.
+
+=head2 v5.24.4 - Desmond Morris, "Catwatching: The Essential Guide to Cat Behaviour"
+
+L<Announced on 2018-04-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2018/04/msg250439.html>
+
+Cats hate doors.  Doors simply do not register in the evolutionary story
+of the cat family.  They constantly block patrolling activities and
+prevent cats from exploring their home range and then returning to their
+central, secure base at will.  Humans often do not understand that a cat
+needs to make only a brief survey of its territory before returning with
+all the necessary information about the activities of other cats in the
+vicinity.  It likes to make these tours of inspection at frequent
+intervals, but does not want to stay outside for very long, unless there
+has been some special and unexpected change in the condition of the
+local feline population.
 
 =head2 v5.24.4-RC1 - Desmond Morris, "Catwatching: The Essential Guide to Cat Behaviour"
 
