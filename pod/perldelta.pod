@@ -72,7 +72,7 @@ L<[perl #4574]|https://rt.perl.org/Public/Bug/Display.html?id=4574>
 
 =head1 Acknowledgements
 
-Perl 5.24.4 represents approximately 6 months of development since Perl 5.24.3
+Perl 5.24.4 represents approximately 7 months of development since Perl 5.24.3
 and contains approximately 2,400 lines of changes across 49 files from 12
 authors.
 
