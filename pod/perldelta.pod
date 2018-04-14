@@ -178,8 +178,8 @@ L<[perl #125351]|https://rt.perl.org/Public/Bug/Display.html?id=125351>
 
 =head1 Acknowledgements
 
-Perl 5.26.2 represents approximately 6 months of development since Perl 5.26.1
-and contains approximately 3,200 lines of changes across 82 files from 17
+Perl 5.26.2 represents approximately 7 months of development since Perl 5.26.1
+and contains approximately 3,300 lines of changes across 82 files from 17
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
