@@ -330,6 +330,8 @@ sub changes_between {
     5.027008 => '2018-01-20',
     5.027009 => '2018-02-20',
     5.027010 => '2018-03-20',
+    5.024004 => '2018-04-14',
+    5.026002 => '2018-04-14',
     5.027011 => '2018-04-20',
   );
 
@@ -15367,6 +15369,33 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.024004 => {
+        delta_from => 5.024003,
+        changed => {
+            'B::Op_private'         => '5.024004',
+            'Config'                => '5.024004',
+            'Module::CoreList'      => '5.20180414_24',
+            'Module::CoreList::TieHashDelta'=> '5.20180414_24',
+            'Module::CoreList::Utils'=> '5.20180414_24',
+        },
+        removed => {
+        }
+    },
+    5.026002 => {
+        delta_from => 5.026001,
+        changed => {
+            'B::Op_private'         => '5.026002',
+            'Config'                => '5.026002',
+            'Module::CoreList'      => '5.20180414_26',
+            'Module::CoreList::TieHashDelta'=> '5.20180414_26',
+            'Module::CoreList::Utils'=> '5.20180414_26',
+            'PerlIO::via'           => '0.17',
+            'Term::ReadLine'        => '1.17',
+            'Unicode::UCD'          => '0.69',
+        },
+        removed => {
+        }
+    },
     5.027011 => {
         delta_from => 5.027010,
         changed => {
@@ -16237,6 +16266,20 @@ sub is_core
     },
     5.027010 => {
         delta_from => 5.027009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.024004 => {
+        delta_from => 5.024003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.026002 => {
+        delta_from => 5.026001,
         changed => {
         },
         removed => {
