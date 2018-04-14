@@ -5064,8 +5064,10 @@ pod/perl5240delta.pod		Perl changes in version 5.24.0
 pod/perl5241delta.pod		Perl changes in version 5.24.1
 pod/perl5242delta.pod		Perl changes in version 5.24.2
 pod/perl5243delta.pod		Perl changes in version 5.24.3
+pod/perl5244delta.pod		Perl changes in version 5.24.4
 pod/perl5260delta.pod		Perl changes in version 5.26.0
 pod/perl5261delta.pod		Perl changes in version 5.26.1
+pod/perl5262delta.pod		Perl changes in version 5.26.2
 pod/perl5270delta.pod		Perl changes in version 5.27.0
 pod/perl52710delta.pod		Perl changes in version 5.27.10
 pod/perl5271delta.pod		Perl changes in version 5.27.1
