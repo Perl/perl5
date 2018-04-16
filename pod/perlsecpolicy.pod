@@ -1,0 +1,394 @@
+=encoding utf-8
+
+=head1 NAME
+
+perlsecpolicy - how we handle security issues
+
+=head1 DESCRIPTION
+
+B<Under construction.>
+
+At this point this document is intended for comment.
+
+This document describes how the perl project intends to handle
+reported security issues.
+
+This has two purposes:
+
+=over
+
+=item *
+
+improve the consistency of how we categorize and handle security
+issues.
+
+=item *
+
+improve the speed of categorizing and handling security issues.
+
+=back
+
+Hopefully this document will be updated over time as new decisions are
+made and practice changes.
+
+=head1 WHAT ARE SECURITY ISSUES
+
+A security issue is a bug in perl that allows attacker supplied data
+to do any of:
+
+=over
+
+=item *
+
+Crash the perl interpreter - this includes buffer overflows, use of
+freed memory, drefererencing NULL pointers, irregardless of the values
+written or read.
+
+C<Editors Note:> This includes vulnerabilities we haven't previously
+counted as security issues or that we've treated inconsistently.  This
+needs discussion.
+
+Rationale: Any of the above could be a denial of service attack
+against a service written in perl.
+
+Even small overwrites of a fixed value L<can be a
+problem|https://daniel.haxx.se/blog/2016/10/14/a-single-byte-write-opened-a-root-execution-exploit/>.
+
+=item *
+
+Exposes data that shouldn't be exposed, eg. data beyond the end of an
+SV's length(), or before the start for a C<SvOOK()> SV.
+
+FIXME: This is vaguely worded, better wording would be appreciated.
+
+Rationale: Exposing data before or after the program specified regions
+may expose sensitive information.
+
+=item *
+
+Allows the attacker to take control.
+
+Note: Issues like command-line or SQL injection aren't likely to be
+security issues with perl itself.
+
+=back
+
+A security issue in your perl code probably isn't a security issue in
+perl.
+
+=head2 What we don't treat as a security issue
+
+Perl is a programming language, and like any programming language
+we're not responsible for how you shoot your own foot off.
+
+The following exceptions are made either because we don't control the
+mistakes made in your code, or due to long standing policy.
+
+Note that a bug that isn't a security issue is still a bug, and can be
+reported with the C<perlbug> tool.
+
+=over
+
+=item *
+
+Issues requiring feeding code to the interpreter.
+
+Rationale: if an attacker can feed code to the interpreter they can
+feed C< system "rm -rf /" > to it.
+
+=item *
+
+Stack overflows due to excessive recursion.
+
+Rationale: Excessive recursion is often caused by your code not
+setting limits on your data.  Even if it isn't, there's often little
+we can do about it.
+
+=item *
+
+Resource exhaustion, such as out of memory, or out of disk space.
+
+Rationale: If you allow an attacker to supply a large count and supply
+that to C<pack> or the C<x> operator and you run out of memory, you
+need to sanitize your inputs to limit resource usage.
+
+However if perl mis-handles a large value causing a buffer overflow
+that is a likely security issue.
+
+=item *
+
+Escape a L<Safe> compartment.
+
+Rationale: Safe isn't considered a security mechanism.
+
+=item *
+
+Use of the C<p> and C<P> pack templates.
+
+Rationale: These templates are unsafe by design.  If your code breaks
+because you use them you get to keep the pieces.
+
+=item *
+
+Stack not refcounted issues.
+
+These typically present as use-after-free errors or as assertion
+failures on the type of a C<SV>.  This does not mean that all
+use-after-free or assertions are not security issues.
+
+Rationale: Stack not refcounted crashes usually occur because your
+code is both modifying a reference or glob and using the values
+referenced by that glob or reference, so it depends on your code, or
+how your code reacts to attacker supplied data.
+
+Note that stack not refcounted is still a (difficult to fix) bug in
+perl, it just isn't a security issue.
+
+=item *
+
+Thawing attacker supplied data with L<Storable>.
+
+Rationale: With the default flags an attacker can delete specific
+specified files with untrusted Storable data.  Even with the latest
+Storable changes and the most restrictive flags it's simple to cause
+arbitrarily large memory allocations with a very small amount of data
+as a resource exhaustion attack.
+
+=item *
+
+Using attacker supplied L<SDBM_File> databases.
+
+Rationale: Perl5 porters don't support L<SDBM_File>'s file format for
+transferring untrusted data.  Crashes involving corrupted SDBM
+databases will still be treated as bugs, just not as security issues.
+
+=item *
+
+Using attacker supplied L<DB_File>, L<ODBM_File>, or L<GDBM_File>
+databases.
+
+Rationale: These depend on external libraries which may or may not
+themselves support untrusted databases.
+
+Note: There may be cases where perl mishandles a return value from the
+underlying libraries for these formats, that may be a security issue.
+
+=item *
+
+Badly encoded UTF-8 flagged scalars.
+
+Rationale: We make no guarantees on how perl behaves with corrupted
+state, and a badly encoded UTF-8 flagged SV is not a valid SV.
+
+Note: A SV may validly include code points in the surrogate pair
+range, but start bytes without the required number of continuation
+bytes, or continuation bytes without a start byte, or overlongs are
+considered invalid.
+
+The simplest way to get such a badly encoded SV is to use the C<:utf8>
+PerlIO layer and read badly encoded data, or with older perls, use
+sysread() on any layer that returns UTF-8 marked data.
+
+Other ways to received badly encoded SVs usually involve bugs in XS
+modules, or functions like Encode::_utf8_on() that document loudly
+their pre-conditions.
+
+=item *
+
+Issues that exist only in blead, or in a release candidate.
+
+Rationale: blead doesn't receive security support.  Such issues need
+to be fixed, but we don't do the whole security issue song and dance
+for them.
+
+=item *
+
+Issues in CPAN modules not distributed with perl.
+
+Rationale: They are completely irrelevent to core perl in terms of
+security.
+
+=item *
+
+Issues in CPAN sourced modules distributed with perl.
+
+ie. modules under F<cpan/> in the source tree.
+
+Rationale: We don't maintain them.
+
+In most cases these should just be reported to the upstream
+maintainer.
+
+=back
+
+=head2 Border cases
+
+Some issues satisfy the requirements above, but there might be some
+doubt either way.
+
+This section attempts to cover such cases and justify them.
+
+=over
+
+=item *
+
+Compiling or matching regular expressions without C<use re 'eval';>.
+
+Rationale: The C<use re 'eval';> mechanism exists specifically to
+prevent an attacker executing code via regexps.
+
+Note: Compiling a regular expression may still overflow the stack due
+to excessive recursion, and matching may allocate large amounts of
+memory, neither of these is a security issue.
+
+=item *
+
+FIXME: anything else? pack()?
+
+=back
+
+=head1 HOW WE DEAL WITH SECURITY ISSUES
+
+Security issues are sent by a reporter to
+L<perl5-security-report@perl.org|mailto:perl5-security-report@perl.org>
+and end up as a ticket in the C<perl5-security> queue in the L<perl
+Request Tracker|https://rt.perl.org> instance.
+
+Only members of the security team have access to this queue.
+Reporters should have access to any reports they make (FIXME: do
+they?).
+
+Only issues related to security issues with perl itself are accepted
+at this address.  Issues with C<perl.org> infrastructure, CPAN
+modules, other perl sites, etc will be rejected.
+
+Perl5 Porters do not run a bug bounty program.
+L<HackerOne|https://hackerone.com/ibb-perl> do run a bug bounty
+program, which we have no control over, but you can try submitting
+your issues to them.
+
+FIXME: Anything below here is currently rubbish.
+
+Once in the queue an issue goes through the following stages:
+
+=over
+
+=item *
+
+Triage
+
+=item *
+
+Allocate a CVE ID.
+
+=item *
+
+Work up fixes.
+
+=item *
+
+CVE details.
+
+=item *
+
+Notify downstreams.
+
+=item *
+
+Release.
+
+=item *
+
+Publication.
+
+=back
+
+=head2 Triage
+
+Basic diagnosis to decide whether the ticket qualifies as a security
+issue.
+
+If we decide it isn't a security issue, we notify the requestor, who
+has one week to argue that it is. FIXME: vagueness, wording.
+
+After a week, if the requestor hasn't convinced us that the issue is a
+security issue, it's moved to the public C<perl5> queue.
+
+=head2 Allocate a CVE ID
+
+This is only done if an CVE ID has not already been allocated.
+
+CVE IDs are allocated via the form at L<https://cveform.mitre.org/>.
+
+If the issue is private, only minimal details should be provided, and
+the other required fields should indicate that more details will be
+provided once the issue is public.  If the description might reveal
+the underlying issue, don't include it.
+
+Hopefully some basic details can be determined at this point, in
+particular which versions of perl this is an issue for, since
+downstreams shipping older perls will want to know.
+
+If the issue is public, all fields should be filled in fully, and the
+L</CVE Details> step can be skipped.
+
+Requires: Triage.
+
+=head2 Work up fixes
+
+We work up fixes for blead and the two most recent maint branches.
+Patches that apply to each of the branches should be included in the
+ticket.
+
+The maint fixes must be against the most recent maint B<release> on
+that branch, not against the C<HEAD> of the maint branch.
+
+Rationale: The intent is to produce minimal change security releases.
+
+Note: These should be patches produced by C<git format-patch>.
+
+Rationale: Because otherwise we get patches that have to be manually
+applied (#132063 I'm looking at you) and the patches should be easy
+for everyone who gets them to apply and test.
+
+Requires: Triage.
+
+=head2 Notify downstreams
+
+Currently the administrative parts of this are handled by Sawyer.
+
+A publication/release date should be negotiated with downstreams.
+
+There may be some back and forth here, and some iteration on the
+fixes, eg. if they find a bug with the issue.
+
+Downstream may also ask for support with applying the patches to older
+releases.
+
+Requires: Allocate a CVE ID, Work up fixes.
+
+=head2 Release
+
+See L</SECURITY RELEASES>.
+
+Requires: Allocate a CVE ID, Notify downstreams, Work up fixes.
+
+=head2 Publication
+
+
+
+Requires: Release.
+
+=head2 CVE Details
+
+Requires: Publication
+
+=head1 SECURITY ISSUE BATCHES
+
+FIXME
+
+=head1 SECURITY RELEASES
+
+FIXME
+
+=cut
