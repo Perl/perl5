@@ -843,14 +843,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_eaccess HAS_EACCESS		/**/
 
 /* I_SYS_ACCESS:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <sys/access.h>.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/access.h>.
  */
 #$i_sysaccess   I_SYS_ACCESS                /**/
 
 /* I_SYS_SECURITY:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <sys/security.h>.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/security.h>.
  */
 #$i_syssecrt   I_SYS_SECURITY	/**/
 
@@ -858,7 +858,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the number of bytes required to align a
  *	double, or a long double when applicable. Usual values are 2,
  *	4 and 8. The default is eight, for safety.  For cross-compiling
- *  	or multiarch support, Configure will set a minimum of 8.
+ *	or multiarch support, Configure will set a minimum of 8.
  */
 #define MEM_ALIGNBYTES $alignbytes
 
@@ -961,7 +961,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	the GNU C library is being used.  A better check is to use
  *	the __GLIBC__ and __GLIBC_MINOR__ symbols supplied with glibc.
  */
-#$d_gnulibc HAS_GNULIBC  	/**/
+#$d_gnulibc HAS_GNULIBC	/**/
 #if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
 #   define _GNU_SOURCE
 #endif
@@ -1113,12 +1113,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is defined if using the FILE_ptr macro as an lvalue
  *	to increase the pointer by n leaves File_cnt(fp) unchanged.
  */
-#$d_stdstdio USE_STDIO_PTR 	/**/
+#$d_stdstdio USE_STDIO_PTR	/**/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	$stdio_ptr
-#$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
+#$d_stdio_ptr_lval STDIO_PTR_LVALUE		/**/
 #define FILE_cnt(fp)	$stdio_cnt
-#$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
+#$d_stdio_cnt_lval STDIO_CNT_LVALUE		/**/
 #$d_stdio_ptr_lval_sets_cnt STDIO_PTR_LVAL_SETS_CNT	/**/
 #$d_stdio_ptr_lval_nochange_cnt STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
 #endif
@@ -1143,7 +1143,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	structure pointed to its argument. This macro will always be defined
  *	if USE_STDIO_BASE is defined.
  */
-#$d_stdiobase USE_STDIO_BASE 	/**/
+#$d_stdiobase USE_STDIO_BASE	/**/
 #ifdef USE_STDIO_BASE
 #define FILE_base(fp)	$stdio_base
 #define FILE_bufsiz(fp)	$stdio_bufsiz
@@ -1249,13 +1249,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	to get any typedef'ed information.
  *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
  */
-#define SSize_t $ssizetype	 /* signed count of bytes */
+#define SSize_t $ssizetype	/* signed count of bytes */
 
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
  */
-#$ebcdic	EBCDIC 		/**/
+#$ebcdic	EBCDIC		/**/
 
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
@@ -1287,7 +1287,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
-#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
+#define PERL_RELOCATABLE_INC "$userelocatableinc"		/**/
 
 /* PERL_INC_VERSION_LIST:
  *	This variable specifies the list of subdirectories in over
@@ -1300,7 +1300,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
- * 	also as /usr/bin/perl.
+ *	also as /usr/bin/perl.
  */
 #$installusrbinperl INSTALL_USR_BIN_PERL	/**/
 
@@ -1436,7 +1436,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
  *	the C preprocessor on the standard input and produce to standard
- *	output.	 Typical value of "cc -E" or "/lib/cpp", but it can also
+ *	output.  Typical value of "cc -E" or "/lib/cpp", but it can also
  *	call a wrapper. See CPPRUN.
  */
 /* CPPMINUS:
@@ -1991,7 +1991,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	st_blksize and st_blocks.
  */
 #ifndef USE_STAT_BLOCKS
-#$d_statblks USE_STAT_BLOCKS 	/**/
+#$d_statblks USE_STAT_BLOCKS	/**/
 #endif
 
 /* HAS_SYS_ERRLIST:
@@ -2210,7 +2210,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
- * void, but occasionally int.
+ *	void, but occasionally int.
  */
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
@@ -2315,10 +2315,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d__fwalk HAS__FWALK		/**/
 
 /* HAS_ACCEPT4:
- *	This symbol, if defined, indicates that the accept4
- *	system call is available to accept socket connections.
+ *	This symbol, if defined, indicates that the accept4 routine is
+ *	available to accept socket connections.
  */
-#$d_accept4 HAS_ACCEPT4		/**/
+#$d_accept4 HAS_ACCEPT4	/**/
 
 /* HAS_ACOSH:
  *	This symbol, if defined, indicates that the acosh routine is
@@ -2449,13 +2449,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	makes sense if you *have* dlsym, which we will presume is the
  *	case if you're using dl_dlopen.xs.
  */
-#$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
+#$d_dlsymun	DLSYM_NEEDS_UNDERSCORE	/**/
 
 /* HAS_DUP3:
- *	This symbol, if defined, indicates that the dup3
- *	system call is available to duplicate file descriptors.
+ *	This symbol, if defined, indicates that the dup3 routine is
+ *	available to duplicate file descriptors.
  */
-#$d_dup3 HAS_DUP3		/**/
+#$d_dup3 HAS_DUP3	/**/
 
 /* HAS_ERF:
  *	This symbol, if defined, indicates that the erf routine is
@@ -2607,22 +2607,22 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to classify doubles.  Available for example in HP-UX.
  *	The returned values are defined in <math.h> and are
  *
- *           FP_NORMAL     Normalized
- *           FP_ZERO       Zero
- *           FP_INFINITE   Infinity
- *           FP_SUBNORMAL  Denormalized
- *           FP_NAN        NaN
+ *	  FP_NORMAL     Normalized
+ *	  FP_ZERO       Zero
+ *	  FP_INFINITE   Infinity
+ *	  FP_SUBNORMAL  Denormalized
+ *	  FP_NAN        NaN
  *
  */
 /* HAS_FP_CLASSIFY:
  *	This symbol, if defined, indicates that the fp_classify routine is
  *	available to classify doubles. The values are defined in <math.h>
  *
- *           FP_NORMAL     Normalized
- *           FP_ZERO       Zero
- *           FP_INFINITE   Infinity
- *           FP_SUBNORMAL  Denormalized
- *           FP_NAN        NaN
+ *	  FP_NORMAL     Normalized
+ *	  FP_ZERO       Zero
+ *	  FP_INFINITE   Infinity
+ *	  FP_SUBNORMAL  Denormalized
+ *	  FP_NAN        NaN
  *
  */
 #$d_fpclassify	HAS_FPCLASSIFY		/**/
@@ -2655,7 +2655,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
  */
-#$d_fpos64_t	HAS_FPOS64_T    	/**/
+#$d_fpos64_t	HAS_FPOS64_T	/**/
 
 /* HAS_FREXPL:
  *	This symbol, if defined, indicates that the frexpl routine is
@@ -2826,8 +2826,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_inetpton HAS_INETPTON		/**/
 
 /* HAS_INT64_T:
- *     This symbol will defined if the C compiler supports int64_t.
- *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	This symbol will defined if the C compiler supports int64_t.
+ *	Usually the <inttypes.h> needs to be included, but sometimes
  *	<sys/types.h> is enough.
  */
 #$d_int64_t     HAS_INT64_T               /**/
@@ -2912,7 +2912,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	of significant digits in a long double precision number. Unlike
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
-#$d_ldbl_dig HAS_LDBL_DIG 	/* */
+#$d_ldbl_dig HAS_LDBL_DIG	/* */
 
 /* HAS_LGAMMA:
  *	This symbol, if defined, indicates that the lgamma routine is
@@ -3046,10 +3046,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_MKOSTEMP:
  *	This symbol, if defined, indicates that the mkostemp routine is
- *	available to exclusively create and open a uniquely named
- *	temporary file.
+ *	available to exclusively create and open a uniquely named (with a
+ *	suffix) temporary file.
  */
-#$d_mkostemp HAS_MKOSTEMP		/**/
+#$d_mkostemp HAS_MKOSTEMP	/**/
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
@@ -3153,11 +3153,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
  */
-#$d_off64_t	HAS_OFF64_T    		/**/
+#$d_off64_t	HAS_OFF64_T		/**/
 
 /* HAS_PIPE2:
- *	This symbol, if defined, indicates that the pipe2
- *	system call is available to create inter-process pipes.
+ *	This symbol, if defined, indicates that the pipe2 routine is
+ *	available to create an inter-process channel.
  */
 #$d_pipe2 HAS_PIPE2		/**/
 
@@ -3198,7 +3198,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HAS_PTRDIFF_T:
  *	This symbol will be defined if the C compiler supports ptrdiff_t.
  */
-#$d_ptrdiff_t	HAS_PTRDIFF_T    		/**/
+#$d_ptrdiff_t	HAS_PTRDIFF_T		/**/
 
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
@@ -3596,8 +3596,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	Note that if fflushNULL is defined, fflushall will not
  *	even be probed for and will be left undefined.
  */
-#$fflushNULL	FFLUSH_NULL 		/**/
-#$fflushall	FFLUSH_ALL 		/**/
+#$fflushNULL	FFLUSH_NULL		/**/
+#$fflushall	FFLUSH_ALL		/**/
 
 /* I_BFD:
  *	This symbol, if defined, indicates that <bfd.h> exists and
@@ -3636,10 +3636,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	For DB version 1 this is always 0.
  */
 #define DB_Hash_t	$db_hashtype		/**/
-#define DB_Prefix_t	$db_prefixtype  	/**/
-#define DB_VERSION_MAJOR_CFG	$db_version_major  	/**/
-#define DB_VERSION_MINOR_CFG	$db_version_minor  	/**/
-#define DB_VERSION_PATCH_CFG	$db_version_patch  	/**/
+#define DB_Prefix_t	$db_prefixtype		/**/
+#define DB_VERSION_MAJOR_CFG	$db_version_major	/**/
+#define DB_VERSION_MINOR_CFG	$db_version_minor	/**/
+#define DB_VERSION_PATCH_CFG	$db_version_patch	/**/
 
 /* I_FENV:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3666,8 +3666,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$i_ieeefp	I_IEEEFP		/**/
 
 /* I_INTTYPES:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <inttypes.h>.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <inttypes.h>.
  */
 #$i_inttypes   I_INTTYPES                /**/
 
@@ -3696,8 +3696,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$i_mntent	I_MNTENT		/**/
 
 /* I_NETINET_TCP:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <netinet/tcp.h>.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <netinet/tcp.h>.
  */
 #$i_netinettcp   I_NETINET_TCP                /**/
 
@@ -3797,8 +3797,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$i_ustat	I_USTAT		/**/
 
 /* I_WCHAR:
- *     This symbol, if defined, indicates to the C program that <wchar.h>
- *     is available for inclusion
+ *	This symbol, if defined, indicates to the C program that <wchar.h>
+ *	is available for inclusion
  */
 #$i_wchar   I_WCHAR	/**/
 
@@ -4134,7 +4134,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	is either n or 32*ceil(n/32), especially many little-endians do
  *	the latter.  This is only useful if you have select(), naturally.
  */
-#define SELECT_MIN_BITS 	$selectminbits	/**/
+#define SELECT_MIN_BITS	$selectminbits	/**/
 
 /* ST_INO_SIZE:
  *	This variable contains the size of struct stat's st_ino in bytes.
@@ -4236,7 +4236,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* USE_KERN_PROC_PATHNAME:
  *	This symbol, if defined, indicates that we can use sysctl with
  *	KERN_PROC_PATHNAME to get a full path for the executable, and hence
- * 	convert $^X to an absolute path.
+ *	convert $^X to an absolute path.
  */
 #$usekernprocpathname USE_KERN_PROC_PATHNAME	/**/
 
@@ -4379,7 +4379,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	is defined, and 'int *' otherwise.  This is only useful if you
  *	have select(), of course.
  */
-#define Select_fd_set_t 	$selecttype	/**/
+#define Select_fd_set_t	$selecttype	/**/
 
 /* Sock_size_t:
  *	This symbol holds the type used for the size argument of
@@ -4405,8 +4405,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_asctime_r
  *	is defined.
  */
-#$d_asctime_r HAS_ASCTIME_R	   /**/
-#define ASCTIME_R_PROTO $asctime_r_proto	   /**/
+#$d_asctime_r HAS_ASCTIME_R	/**/
+#define ASCTIME_R_PROTO $asctime_r_proto	/**/
 
 /* HAS_CRYPT_R:
  *	This symbol, if defined, indicates that the crypt_r routine
@@ -4418,8 +4418,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_crypt_r
  *	is defined.
  */
-#$d_crypt_r HAS_CRYPT_R	   /**/
-#define CRYPT_R_PROTO $crypt_r_proto	   /**/
+#$d_crypt_r HAS_CRYPT_R	/**/
+#define CRYPT_R_PROTO $crypt_r_proto	/**/
 
 /* HAS_CTERMID_R:
  *	This symbol, if defined, indicates that the ctermid_r routine
@@ -4431,8 +4431,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctermid_r
  *	is defined.
  */
-#$d_ctermid_r HAS_CTERMID_R	   /**/
-#define CTERMID_R_PROTO $ctermid_r_proto	   /**/
+#$d_ctermid_r HAS_CTERMID_R	/**/
+#define CTERMID_R_PROTO $ctermid_r_proto	/**/
 
 /* HAS_CTIME_R:
  *	This symbol, if defined, indicates that the ctime_r routine
@@ -4444,8 +4444,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctime_r
  *	is defined.
  */
-#$d_ctime_r HAS_CTIME_R	   /**/
-#define CTIME_R_PROTO $ctime_r_proto	   /**/
+#$d_ctime_r HAS_CTIME_R	/**/
+#define CTIME_R_PROTO $ctime_r_proto	/**/
 
 /* HAS_DRAND48_R:
  *	This symbol, if defined, indicates that the drand48_r routine
@@ -4457,8 +4457,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
  *	is defined.
  */
-#$d_drand48_r HAS_DRAND48_R	   /**/
-#define DRAND48_R_PROTO $drand48_r_proto	   /**/
+#$d_drand48_r HAS_DRAND48_R	/**/
+#define DRAND48_R_PROTO $drand48_r_proto	/**/
 
 /* HAS_ENDGRENT_R:
  *	This symbol, if defined, indicates that the endgrent_r routine
@@ -4470,8 +4470,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endgrent_r
  *	is defined.
  */
-#$d_endgrent_r HAS_ENDGRENT_R	   /**/
-#define ENDGRENT_R_PROTO $endgrent_r_proto	   /**/
+#$d_endgrent_r HAS_ENDGRENT_R	/**/
+#define ENDGRENT_R_PROTO $endgrent_r_proto	/**/
 
 /* HAS_ENDHOSTENT_R:
  *	This symbol, if defined, indicates that the endhostent_r routine
@@ -4483,8 +4483,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endhostent_r
  *	is defined.
  */
-#$d_endhostent_r HAS_ENDHOSTENT_R	   /**/
-#define ENDHOSTENT_R_PROTO $endhostent_r_proto	   /**/
+#$d_endhostent_r HAS_ENDHOSTENT_R	/**/
+#define ENDHOSTENT_R_PROTO $endhostent_r_proto	/**/
 
 /* HAS_ENDNETENT_R:
  *	This symbol, if defined, indicates that the endnetent_r routine
@@ -4496,8 +4496,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endnetent_r
  *	is defined.
  */
-#$d_endnetent_r HAS_ENDNETENT_R	   /**/
-#define ENDNETENT_R_PROTO $endnetent_r_proto	   /**/
+#$d_endnetent_r HAS_ENDNETENT_R	/**/
+#define ENDNETENT_R_PROTO $endnetent_r_proto	/**/
 
 /* HAS_ENDPROTOENT_R:
  *	This symbol, if defined, indicates that the endprotoent_r routine
@@ -4509,8 +4509,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endprotoent_r
  *	is defined.
  */
-#$d_endprotoent_r HAS_ENDPROTOENT_R	   /**/
-#define ENDPROTOENT_R_PROTO $endprotoent_r_proto	   /**/
+#$d_endprotoent_r HAS_ENDPROTOENT_R	/**/
+#define ENDPROTOENT_R_PROTO $endprotoent_r_proto	/**/
 
 /* HAS_ENDPWENT_R:
  *	This symbol, if defined, indicates that the endpwent_r routine
@@ -4522,8 +4522,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endpwent_r
  *	is defined.
  */
-#$d_endpwent_r HAS_ENDPWENT_R	   /**/
-#define ENDPWENT_R_PROTO $endpwent_r_proto	   /**/
+#$d_endpwent_r HAS_ENDPWENT_R	/**/
+#define ENDPWENT_R_PROTO $endpwent_r_proto	/**/
 
 /* HAS_ENDSERVENT_R:
  *	This symbol, if defined, indicates that the endservent_r routine
@@ -4535,8 +4535,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endservent_r
  *	is defined.
  */
-#$d_endservent_r HAS_ENDSERVENT_R	   /**/
-#define ENDSERVENT_R_PROTO $endservent_r_proto	   /**/
+#$d_endservent_r HAS_ENDSERVENT_R	/**/
+#define ENDSERVENT_R_PROTO $endservent_r_proto	/**/
 
 /* HAS_GETGRENT_R:
  *	This symbol, if defined, indicates that the getgrent_r routine
@@ -4548,8 +4548,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrent_r
  *	is defined.
  */
-#$d_getgrent_r HAS_GETGRENT_R	   /**/
-#define GETGRENT_R_PROTO $getgrent_r_proto	   /**/
+#$d_getgrent_r HAS_GETGRENT_R	/**/
+#define GETGRENT_R_PROTO $getgrent_r_proto	/**/
 
 /* HAS_GETGRGID_R:
  *	This symbol, if defined, indicates that the getgrgid_r routine
@@ -4561,8 +4561,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrgid_r
  *	is defined.
  */
-#$d_getgrgid_r HAS_GETGRGID_R	   /**/
-#define GETGRGID_R_PROTO $getgrgid_r_proto	   /**/
+#$d_getgrgid_r HAS_GETGRGID_R	/**/
+#define GETGRGID_R_PROTO $getgrgid_r_proto	/**/
 
 /* HAS_GETGRNAM_R:
  *	This symbol, if defined, indicates that the getgrnam_r routine
@@ -4574,8 +4574,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrnam_r
  *	is defined.
  */
-#$d_getgrnam_r HAS_GETGRNAM_R	   /**/
-#define GETGRNAM_R_PROTO $getgrnam_r_proto	   /**/
+#$d_getgrnam_r HAS_GETGRNAM_R	/**/
+#define GETGRNAM_R_PROTO $getgrnam_r_proto	/**/
 
 /* HAS_GETHOSTBYADDR_R:
  *	This symbol, if defined, indicates that the gethostbyaddr_r routine
@@ -4587,8 +4587,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyaddr_r
  *	is defined.
  */
-#$d_gethostbyaddr_r HAS_GETHOSTBYADDR_R	   /**/
-#define GETHOSTBYADDR_R_PROTO $gethostbyaddr_r_proto	   /**/
+#$d_gethostbyaddr_r HAS_GETHOSTBYADDR_R	/**/
+#define GETHOSTBYADDR_R_PROTO $gethostbyaddr_r_proto	/**/
 
 /* HAS_GETHOSTBYNAME_R:
  *	This symbol, if defined, indicates that the gethostbyname_r routine
@@ -4600,8 +4600,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyname_r
  *	is defined.
  */
-#$d_gethostbyname_r HAS_GETHOSTBYNAME_R	   /**/
-#define GETHOSTBYNAME_R_PROTO $gethostbyname_r_proto	   /**/
+#$d_gethostbyname_r HAS_GETHOSTBYNAME_R	/**/
+#define GETHOSTBYNAME_R_PROTO $gethostbyname_r_proto	/**/
 
 /* HAS_GETHOSTENT_R:
  *	This symbol, if defined, indicates that the gethostent_r routine
@@ -4613,8 +4613,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostent_r
  *	is defined.
  */
-#$d_gethostent_r HAS_GETHOSTENT_R	   /**/
-#define GETHOSTENT_R_PROTO $gethostent_r_proto	   /**/
+#$d_gethostent_r HAS_GETHOSTENT_R	/**/
+#define GETHOSTENT_R_PROTO $gethostent_r_proto	/**/
 
 /* HAS_GETLOGIN_R:
  *	This symbol, if defined, indicates that the getlogin_r routine
@@ -4626,8 +4626,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getlogin_r
  *	is defined.
  */
-#$d_getlogin_r HAS_GETLOGIN_R	   /**/
-#define GETLOGIN_R_PROTO $getlogin_r_proto	   /**/
+#$d_getlogin_r HAS_GETLOGIN_R	/**/
+#define GETLOGIN_R_PROTO $getlogin_r_proto	/**/
 
 /* HAS_GETNETBYADDR_R:
  *	This symbol, if defined, indicates that the getnetbyaddr_r routine
@@ -4639,8 +4639,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyaddr_r
  *	is defined.
  */
-#$d_getnetbyaddr_r HAS_GETNETBYADDR_R	   /**/
-#define GETNETBYADDR_R_PROTO $getnetbyaddr_r_proto	   /**/
+#$d_getnetbyaddr_r HAS_GETNETBYADDR_R	/**/
+#define GETNETBYADDR_R_PROTO $getnetbyaddr_r_proto	/**/
 
 /* HAS_GETNETBYNAME_R:
  *	This symbol, if defined, indicates that the getnetbyname_r routine
@@ -4652,8 +4652,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyname_r
  *	is defined.
  */
-#$d_getnetbyname_r HAS_GETNETBYNAME_R	   /**/
-#define GETNETBYNAME_R_PROTO $getnetbyname_r_proto	   /**/
+#$d_getnetbyname_r HAS_GETNETBYNAME_R	/**/
+#define GETNETBYNAME_R_PROTO $getnetbyname_r_proto	/**/
 
 /* HAS_GETNETENT_R:
  *	This symbol, if defined, indicates that the getnetent_r routine
@@ -4665,8 +4665,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetent_r
  *	is defined.
  */
-#$d_getnetent_r HAS_GETNETENT_R	   /**/
-#define GETNETENT_R_PROTO $getnetent_r_proto	   /**/
+#$d_getnetent_r HAS_GETNETENT_R	/**/
+#define GETNETENT_R_PROTO $getnetent_r_proto	/**/
 
 /* HAS_GETPROTOBYNAME_R:
  *	This symbol, if defined, indicates that the getprotobyname_r routine
@@ -4678,8 +4678,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobyname_r
  *	is defined.
  */
-#$d_getprotobyname_r HAS_GETPROTOBYNAME_R	   /**/
-#define GETPROTOBYNAME_R_PROTO $getprotobyname_r_proto	   /**/
+#$d_getprotobyname_r HAS_GETPROTOBYNAME_R	/**/
+#define GETPROTOBYNAME_R_PROTO $getprotobyname_r_proto	/**/
 
 /* HAS_GETPROTOBYNUMBER_R:
  *	This symbol, if defined, indicates that the getprotobynumber_r routine
@@ -4691,8 +4691,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobynumber_r
  *	is defined.
  */
-#$d_getprotobynumber_r HAS_GETPROTOBYNUMBER_R	   /**/
-#define GETPROTOBYNUMBER_R_PROTO $getprotobynumber_r_proto	   /**/
+#$d_getprotobynumber_r HAS_GETPROTOBYNUMBER_R	/**/
+#define GETPROTOBYNUMBER_R_PROTO $getprotobynumber_r_proto	/**/
 
 /* HAS_GETPROTOENT_R:
  *	This symbol, if defined, indicates that the getprotoent_r routine
@@ -4704,8 +4704,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotoent_r
  *	is defined.
  */
-#$d_getprotoent_r HAS_GETPROTOENT_R	   /**/
-#define GETPROTOENT_R_PROTO $getprotoent_r_proto	   /**/
+#$d_getprotoent_r HAS_GETPROTOENT_R	/**/
+#define GETPROTOENT_R_PROTO $getprotoent_r_proto	/**/
 
 /* HAS_GETPWENT_R:
  *	This symbol, if defined, indicates that the getpwent_r routine
@@ -4717,8 +4717,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwent_r
  *	is defined.
  */
-#$d_getpwent_r HAS_GETPWENT_R	   /**/
-#define GETPWENT_R_PROTO $getpwent_r_proto	   /**/
+#$d_getpwent_r HAS_GETPWENT_R	/**/
+#define GETPWENT_R_PROTO $getpwent_r_proto	/**/
 
 /* HAS_GETPWNAM_R:
  *	This symbol, if defined, indicates that the getpwnam_r routine
@@ -4730,8 +4730,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwnam_r
  *	is defined.
  */
-#$d_getpwnam_r HAS_GETPWNAM_R	   /**/
-#define GETPWNAM_R_PROTO $getpwnam_r_proto	   /**/
+#$d_getpwnam_r HAS_GETPWNAM_R	/**/
+#define GETPWNAM_R_PROTO $getpwnam_r_proto	/**/
 
 /* HAS_GETPWUID_R:
  *	This symbol, if defined, indicates that the getpwuid_r routine
@@ -4743,8 +4743,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwuid_r
  *	is defined.
  */
-#$d_getpwuid_r HAS_GETPWUID_R	   /**/
-#define GETPWUID_R_PROTO $getpwuid_r_proto	   /**/
+#$d_getpwuid_r HAS_GETPWUID_R	/**/
+#define GETPWUID_R_PROTO $getpwuid_r_proto	/**/
 
 /* HAS_GETSERVBYNAME_R:
  *	This symbol, if defined, indicates that the getservbyname_r routine
@@ -4756,8 +4756,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyname_r
  *	is defined.
  */
-#$d_getservbyname_r HAS_GETSERVBYNAME_R	   /**/
-#define GETSERVBYNAME_R_PROTO $getservbyname_r_proto	   /**/
+#$d_getservbyname_r HAS_GETSERVBYNAME_R	/**/
+#define GETSERVBYNAME_R_PROTO $getservbyname_r_proto	/**/
 
 /* HAS_GETSERVBYPORT_R:
  *	This symbol, if defined, indicates that the getservbyport_r routine
@@ -4769,8 +4769,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyport_r
  *	is defined.
  */
-#$d_getservbyport_r HAS_GETSERVBYPORT_R	   /**/
-#define GETSERVBYPORT_R_PROTO $getservbyport_r_proto	   /**/
+#$d_getservbyport_r HAS_GETSERVBYPORT_R	/**/
+#define GETSERVBYPORT_R_PROTO $getservbyport_r_proto	/**/
 
 /* HAS_GETSERVENT_R:
  *	This symbol, if defined, indicates that the getservent_r routine
@@ -4782,8 +4782,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservent_r
  *	is defined.
  */
-#$d_getservent_r HAS_GETSERVENT_R	   /**/
-#define GETSERVENT_R_PROTO $getservent_r_proto	   /**/
+#$d_getservent_r HAS_GETSERVENT_R	/**/
+#define GETSERVENT_R_PROTO $getservent_r_proto	/**/
 
 /* HAS_GETSPNAM_R:
  *	This symbol, if defined, indicates that the getspnam_r routine
@@ -4795,8 +4795,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getspnam_r
  *	is defined.
  */
-#$d_getspnam_r HAS_GETSPNAM_R	   /**/
-#define GETSPNAM_R_PROTO $getspnam_r_proto	   /**/
+#$d_getspnam_r HAS_GETSPNAM_R	/**/
+#define GETSPNAM_R_PROTO $getspnam_r_proto	/**/
 
 /* HAS_GMTIME_R:
  *	This symbol, if defined, indicates that the gmtime_r routine
@@ -4808,8 +4808,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gmtime_r
  *	is defined.
  */
-#$d_gmtime_r HAS_GMTIME_R	   /**/
-#define GMTIME_R_PROTO $gmtime_r_proto	   /**/
+#$d_gmtime_r HAS_GMTIME_R	/**/
+#define GMTIME_R_PROTO $gmtime_r_proto	/**/
 
 /* HAS_LOCALECONV_L:
  *	This symbol, if defined, indicates that the localeconv_l routine is
@@ -4840,8 +4840,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_localtime_r
  *	is defined.
  */
-#$d_localtime_r HAS_LOCALTIME_R	   /**/
-#define LOCALTIME_R_PROTO $localtime_r_proto	   /**/
+#$d_localtime_r HAS_LOCALTIME_R	/**/
+#define LOCALTIME_R_PROTO $localtime_r_proto	/**/
 
 /* HAS_MBRLEN:
  *	This symbol, if defined, indicates that the mbrlen routine is
@@ -4906,8 +4906,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
  *	is defined.
  */
-#$d_random_r HAS_RANDOM_R	   /**/
-#define RANDOM_R_PROTO $random_r_proto	   /**/
+#$d_random_r HAS_RANDOM_R	/**/
+#define RANDOM_R_PROTO $random_r_proto	/**/
 
 /* HAS_READDIR64_R:
  *	This symbol, if defined, indicates that the readdir64_r routine
@@ -4919,8 +4919,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir64_r
  *	is defined.
  */
-#$d_readdir64_r HAS_READDIR64_R	   /**/
-#define READDIR64_R_PROTO $readdir64_r_proto	   /**/
+#$d_readdir64_r HAS_READDIR64_R	/**/
+#define READDIR64_R_PROTO $readdir64_r_proto	/**/
 
 /* HAS_READDIR_R:
  *	This symbol, if defined, indicates that the readdir_r routine
@@ -4932,8 +4932,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir_r
  *	is defined.
  */
-#$d_readdir_r HAS_READDIR_R	   /**/
-#define READDIR_R_PROTO $readdir_r_proto	   /**/
+#$d_readdir_r HAS_READDIR_R	/**/
+#define READDIR_R_PROTO $readdir_r_proto	/**/
 
 /* HAS_SETGRENT_R:
  *	This symbol, if defined, indicates that the setgrent_r routine
@@ -4945,8 +4945,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setgrent_r
  *	is defined.
  */
-#$d_setgrent_r HAS_SETGRENT_R	   /**/
-#define SETGRENT_R_PROTO $setgrent_r_proto	   /**/
+#$d_setgrent_r HAS_SETGRENT_R	/**/
+#define SETGRENT_R_PROTO $setgrent_r_proto	/**/
 
 /* HAS_SETHOSTENT_R:
  *	This symbol, if defined, indicates that the sethostent_r routine
@@ -4958,8 +4958,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_sethostent_r
  *	is defined.
  */
-#$d_sethostent_r HAS_SETHOSTENT_R	   /**/
-#define SETHOSTENT_R_PROTO $sethostent_r_proto	   /**/
+#$d_sethostent_r HAS_SETHOSTENT_R	/**/
+#define SETHOSTENT_R_PROTO $sethostent_r_proto	/**/
 
 /* HAS_SETLOCALE_R:
  *	This symbol, if defined, indicates that the setlocale_r routine
@@ -4971,8 +4971,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setlocale_r
  *	is defined.
  */
-#$d_setlocale_r HAS_SETLOCALE_R	   /**/
-#define SETLOCALE_R_PROTO $setlocale_r_proto	   /**/
+#$d_setlocale_r HAS_SETLOCALE_R	/**/
+#define SETLOCALE_R_PROTO $setlocale_r_proto	/**/
 
 /* HAS_SETNETENT_R:
  *	This symbol, if defined, indicates that the setnetent_r routine
@@ -4984,8 +4984,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setnetent_r
  *	is defined.
  */
-#$d_setnetent_r HAS_SETNETENT_R	   /**/
-#define SETNETENT_R_PROTO $setnetent_r_proto	   /**/
+#$d_setnetent_r HAS_SETNETENT_R	/**/
+#define SETNETENT_R_PROTO $setnetent_r_proto	/**/
 
 /* HAS_SETPROTOENT_R:
  *	This symbol, if defined, indicates that the setprotoent_r routine
@@ -4997,8 +4997,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setprotoent_r
  *	is defined.
  */
-#$d_setprotoent_r HAS_SETPROTOENT_R	   /**/
-#define SETPROTOENT_R_PROTO $setprotoent_r_proto	   /**/
+#$d_setprotoent_r HAS_SETPROTOENT_R	/**/
+#define SETPROTOENT_R_PROTO $setprotoent_r_proto	/**/
 
 /* HAS_SETPWENT_R:
  *	This symbol, if defined, indicates that the setpwent_r routine
@@ -5010,8 +5010,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setpwent_r
  *	is defined.
  */
-#$d_setpwent_r HAS_SETPWENT_R	   /**/
-#define SETPWENT_R_PROTO $setpwent_r_proto	   /**/
+#$d_setpwent_r HAS_SETPWENT_R	/**/
+#define SETPWENT_R_PROTO $setpwent_r_proto	/**/
 
 /* HAS_SETSERVENT_R:
  *	This symbol, if defined, indicates that the setservent_r routine
@@ -5023,8 +5023,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
  *	is defined.
  */
-#$d_setservent_r HAS_SETSERVENT_R	   /**/
-#define SETSERVENT_R_PROTO $setservent_r_proto	   /**/
+#$d_setservent_r HAS_SETSERVENT_R	/**/
+#define SETSERVENT_R_PROTO $setservent_r_proto	/**/
 
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine
@@ -5036,8 +5036,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
  *	is defined.
  */
-#$d_srand48_r HAS_SRAND48_R	   /**/
-#define SRAND48_R_PROTO $srand48_r_proto	   /**/
+#$d_srand48_r HAS_SRAND48_R	/**/
+#define SRAND48_R_PROTO $srand48_r_proto	/**/
 
 /* HAS_SRANDOM_R:
  *	This symbol, if defined, indicates that the srandom_r routine
@@ -5049,8 +5049,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
  *	is defined.
  */
-#$d_srandom_r HAS_SRANDOM_R	   /**/
-#define SRANDOM_R_PROTO $srandom_r_proto	   /**/
+#$d_srandom_r HAS_SRANDOM_R	/**/
+#define SRANDOM_R_PROTO $srandom_r_proto	/**/
 
 /* HAS_STRERROR_R:
  *	This symbol, if defined, indicates that the strerror_r routine
@@ -5062,8 +5062,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_strerror_r
  *	is defined.
  */
-#$d_strerror_r HAS_STRERROR_R	   /**/
-#define STRERROR_R_PROTO $strerror_r_proto	   /**/
+#$d_strerror_r HAS_STRERROR_R	/**/
+#define STRERROR_R_PROTO $strerror_r_proto	/**/
 
 /* HAS_STRTOLD_L:
  *	This symbol, if defined, indicates that the strtold_l routine is
@@ -5081,8 +5081,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_tmpnam_r
  *	is defined.
  */
-#$d_tmpnam_r HAS_TMPNAM_R	   /**/
-#define TMPNAM_R_PROTO $tmpnam_r_proto	   /**/
+#$d_tmpnam_r HAS_TMPNAM_R	/**/
+#define TMPNAM_R_PROTO $tmpnam_r_proto	/**/
 
 /* HAS_TTYNAME_R:
  *	This symbol, if defined, indicates that the ttyname_r routine
@@ -5094,18 +5094,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ttyname_r
  *	is defined.
  */
-#$d_ttyname_r HAS_TTYNAME_R	   /**/
-#define TTYNAME_R_PROTO $ttyname_r_proto	   /**/
+#$d_ttyname_r HAS_TTYNAME_R	/**/
+#define TTYNAME_R_PROTO $ttyname_r_proto	/**/
 
 /* I_MACH_CTHREADS:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <mach/cthreads.h>.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <mach/cthreads.h>.
  */
 #$i_machcthr   I_MACH_CTHREADS	/**/
 
 /* I_PTHREAD:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <pthread.h>.
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <pthread.h>.
  */
 #$i_pthread   I_PTHREAD	/**/
 
@@ -5149,7 +5149,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HAS_TIMES:
  *	This symbol, if defined, indicates that the times() routine exists.
  *	Note that this became obsolete on some systems (SUNOS), which now
- * use getrusage(). It may be necessary to include <sys/times.h>.
+ *	use getrusage(). It may be necessary to include <sys/times.h>.
  */
 #$d_times HAS_TIMES		/**/
 

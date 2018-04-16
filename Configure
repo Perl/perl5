@@ -11000,8 +11000,15 @@ $cat >attrib.c <<EOCP
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+#ifndef INTPTR_MAX
+#define intptr_t int
+#endif
 int null_printf (char* pat,...) __attribute__((__format__(__printf__,1,2)));
-int null_printf (char* pat,...) { return (int)pat; }
+int null_printf (char* pat,...) { return (int)(intptr_t)pat; }
 int main () { exit(null_printf(NULL)); }
 EOCP
 	if $cc $ccflags -o attrib attrib.c >attrib.out 2>&1 ; then
@@ -17574,21 +17581,31 @@ END
 extern int errno;
 #endif
 int main() {
-    struct semid_ds arg;
+    union semun
+#ifndef HAS_UNION_SEMUN
+    {
+	int val;
+	struct semid_ds *buf;
+	unsigned short *array;
+    }
+#endif
+    arg;
+    struct semid_ds argbuf;
     int sem, st;
 
 #if defined(IPC_PRIVATE) && defined(S_IRWXU) && defined(S_IRWXG) &&  defined(S_IRWXO) && defined(IPC_CREAT)
     sem = semget(IPC_PRIVATE, 1, S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
     if (sem > -1) {
+	arg.buf = &argbuf;
 #	ifdef IPC_STAT
-	st = semctl(sem, 0, IPC_STAT, &arg);
+	st = semctl(sem, 0, IPC_STAT, arg);
 	if (st == 0)
 	    printf("semid_ds\n");
 	else
 #	endif /* IPC_STAT */
 	    printf("semctl IPC_STAT failed: errno = %d\n", errno);
 #	ifdef IPC_RMID
-	if (semctl(sem, 0, IPC_RMID, &arg) != 0)
+	if (semctl(sem, 0, IPC_RMID, arg) != 0)
 #	endif /* IPC_RMID */
 	    printf("semctl IPC_RMID failed: errno = %d\n", errno);
     } else
