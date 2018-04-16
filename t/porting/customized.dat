@@ -27,5 +27,5 @@ experimental cpan/experimental/t/basic.t a073ea03ccc98dec496569f3648ab01a5fe1c7a
 perlfaq cpan/perlfaq/lib/perlfaq5.pod bcc1b6af3b6dff3973643acf8d5e741463374123
 perlfaq cpan/perlfaq/lib/perlfaq8.pod bffbc0c8fa828aead24e0891a5e789369a8e0743
 podlators pod/perlpodstyle.pod c6500c9950b46e8228d4adbc09a3ee2ef23de2d0
-version cpan/version/lib/version.pm 2325ac992f0be9d765b558a2162ca13a46de256f
+version cpan/version/lib/version.pm a61f969d55dd73ae2d7a604f2c9bbef1ea82b820
 version vxs.inc f26c23f0279fb64c77ad814af906c04930cff81c

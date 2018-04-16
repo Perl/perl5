@@ -8,10 +8,9 @@ if ($] >= 5.015) {
     warnings::register_categories(qw/version/);
 }
 
-use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
-
-$VERSION = 0.9921;
-$CLASS = 'version';
+our $VERSION = 0.9923;
+our $CLASS = 'version';
+our (@ISA, $STRICT, $LAX);
 
 # avoid using Exporter
 require version::regex;

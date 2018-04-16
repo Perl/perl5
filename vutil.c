@@ -693,12 +693,12 @@ VER_NV:
 #endif
 
 	if (sv) {
-	    Perl_sv_catpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
+                Perl_sv_catpvf(aTHX_ sv, "%.9" NVff, SvNVX(ver));
 	    len = SvCUR(sv);
 	    buf = SvPVX(sv);
 	}
 	else {
-	    len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+                len = my_snprintf(tbuf, sizeof(tbuf), "%.9" NVff, SvNVX(ver));
 	    buf = tbuf;
 	}
 
@@ -989,11 +989,11 @@ Perl_vnormal(pTHX_ SV *vs)
 	SV * tsv = *av_fetch(av, 0, 0);
 	digit = SvIV(tsv);
     }
-    sv = Perl_newSVpvf(aTHX_ "v%"IVdf, (IV)digit);
+    sv = Perl_newSVpvf(aTHX_ "v%" IVdf, (IV)digit);
     for ( i = 1 ; i <= len ; i++ ) {
 	SV * tsv = *av_fetch(av, i, 0);
 	digit = SvIV(tsv);
-	Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
+	Perl_sv_catpvf(aTHX_ sv, ".%" IVdf, (IV)digit);
     }
 
     if ( len <= 2 ) { /* short version, must be at least three */
