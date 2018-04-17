@@ -13968,6 +13968,24 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 ender = 's';
                                 added_len = 2;
                             }
+                            else if (RExC_uni_semantics) {
+
+                                /* Here, we are supossed to be using Unicode
+                                 * rules, but this folding node is not.  This
+                                 * happens during pass 1 when the node started
+                                 * out not under Unicode rules, but a \N{} was
+                                 * encountered during the processing of it,
+                                 * causing Unicode rules to be switched into.
+                                 * Pass 1 continues uninteruppted, as by the
+                                 * time we get to pass 2, we will know enough
+                                 * to generate the correct folds.  Except in
+                                 * this one case, we need to restart the node,
+                                 * because the fold of the sharp s requires 2
+                                 * characters, and the sizing needs to account
+                                 * for that. */
+                                p = oldp;
+                                goto loopdone;
+                            }
                             else {
                                 RExC_seen_unfolded_sharp_s = 1;
                                 maybe_exactfu = FALSE;

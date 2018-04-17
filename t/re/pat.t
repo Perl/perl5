@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 846;  # Update this when adding/deleting tests.
+plan tests => 847;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -31,6 +31,8 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+
+    my $sharp_s = uni_to_native("\xdf");
 
     {
         my $x = "abc\ndef\n";
@@ -1409,9 +1411,6 @@ EOP
 
     {   # Various flags weren't being set when a [] is optimized into an
         # EXACTish node
-        ;
-        ;
-        my $sharp_s = uni_to_native("\xdf");
         ok("\x{017F}\x{017F}" =~ qr/^[$sharp_s]?$/i, "[] to EXACTish optimization");
     }
 
@@ -1940,6 +1939,9 @@ EOP
     }
     {
         fresh_perl_is('$_="0\x{1000000}";/^000?\0000/','',{},"dont throw assert errors trying to fbm past end of string");
+    }
+    {   # [perl $132227]
+        fresh_perl_is("('0ba' . ('ss' x 300)) =~ m/0B\\N{U+41}" . $sharp_s x 150 . '/i and print "1\n"',  1,{},"Use of sharp s under /di that changes to /ui");
     }
 
 } # End of sub run_tests
