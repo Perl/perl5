@@ -13976,7 +13976,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                  * out not under Unicode rules, but a \N{} was
                                  * encountered during the processing of it,
                                  * causing Unicode rules to be switched into.
-                                 * Pass 1 continues uninteruppted, as by the
+                                 * Pass 1 continues uninterrupted, as by the
                                  * time we get to pass 2, we will know enough
                                  * to generate the correct folds.  Except in
                                  * this one case, we need to restart the node,
