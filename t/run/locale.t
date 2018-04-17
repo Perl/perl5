@@ -94,6 +94,7 @@ if ($non_C_locale) {
         setlocale(LC_NUMERIC, "$_") or next;
         my $s = sprintf "%g %g", 3.1, 3.1;
         next if $s eq '3.1 3.1' || $s =~ /^(3.+1) \1$/;
+        no warnings "utf8";
         print "$_ $s\n";
     }
 EOF
@@ -108,6 +109,7 @@ EOF
             my $in = 4.2;
             my $s = sprintf "%g", $in; # avoid any constant folding bugs
             next if $s eq "4.2";
+            no warnings "utf8";
             print "$_ $s\n";
         }
 EOF
@@ -185,6 +187,7 @@ EOF
             {
                 fresh_perl_is(<<'EOF', ",,", { eval $switches },
     use POSIX;
+    no warnings "utf8";
     print localeconv()->{decimal_point};
     use locale;
     print localeconv()->{decimal_point};
@@ -279,6 +282,7 @@ EOF
                 \$a = sprintf("%.2f", \$i);
                 require version;
                 \$b = sprintf("%.2f", \$i);
+                no warnings "utf8";
                 print ".\$a \$b" unless \$a eq \$b
 EOF
                 "", { eval $switches }, "version does not clobber version");
@@ -291,6 +295,7 @@ EOF
                 \$a = sprintf("%.2f", \$i);
                 eval "use v5.0.0";
                 \$b = sprintf("%.2f", \$i);
+                no warnings "utf8";
                 print "\$a \$b" unless \$a eq \$b
 EOF
                 "", { eval $switches }, "version does not clobber version (via eval)");
@@ -336,6 +341,7 @@ EOF
                 if (! fresh_perl_is(<<"EOF", "$difference", { eval $switches  },
                     if (\$ENV{LC_ALL} ne "invalid") {
                         # Make the test pass if the sh didn't accept the ENV set
+                        no warnings "utf8";
                         print "$difference\n";
                         exit 0;
                     }
@@ -363,6 +369,7 @@ EOF
 
                     if (! fresh_perl_is(<<"EOF", 4.2, { eval $switches  },
                         if (\$ENV{LC_ALL} ne "invalid") {
+                            no warnings "utf8";
                             print "$difference\n";
                             exit 0;
                         }
