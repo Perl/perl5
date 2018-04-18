@@ -1423,19 +1423,20 @@ Perl_set_numeric_standard(pTHX)
      * to our records (which could be wrong if some XS code has changed the
      * locale behind our back) */
 
+#  ifdef DEBUGGING
+
+    if (DEBUG_L_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log,
+                          "Setting LC_NUMERIC locale to standard C\n");
+    }
+
+#  endif
+
     do_setlocale_c(LC_NUMERIC, "C");
     PL_numeric_standard = TRUE;
     PL_numeric_underlying = PL_numeric_underlying_is_standard;
     set_numeric_radix(0);
 
-#  ifdef DEBUGGING
-
-    if (DEBUG_L_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log,
-                          "LC_NUMERIC locale now is standard C\n");
-    }
-
-#  endif
 #endif /* USE_LOCALE_NUMERIC */
 
 }
@@ -1452,20 +1453,21 @@ Perl_set_numeric_underlying(pTHX)
      * if toggling isn't necessary according to our records (which could be
      * wrong if some XS code has changed the locale behind our back) */
 
+#  ifdef DEBUGGING
+
+    if (DEBUG_L_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log,
+                          "Setting LC_NUMERIC locale to %s\n",
+                          PL_numeric_name);
+    }
+
+#  endif
+
     do_setlocale_c(LC_NUMERIC, PL_numeric_name);
     PL_numeric_standard = PL_numeric_underlying_is_standard;
     PL_numeric_underlying = TRUE;
     set_numeric_radix(! PL_numeric_standard);
 
-#  ifdef DEBUGGING
-
-    if (DEBUG_L_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log,
-                          "LC_NUMERIC locale now is %s\n",
-                          PL_numeric_name);
-    }
-
-#  endif
 #endif /* USE_LOCALE_NUMERIC */
 
 }
