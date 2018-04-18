@@ -3899,7 +3899,7 @@ See L<perlfunc/pack>.
 
 (F) Transliteration (C<tr///> and C<y///>) transliterates individual
 characters.  But a named sequence by definition is more than an
-individual charater, and hence doing this operation on it doesn't make
+individual character, and hence doing this operation on it doesn't make
 sense.
 
 =item "my sub" not yet implemented
@@ -4273,7 +4273,7 @@ find out what kind of ref it really was.  See L<perlref>.
 =item '#' not allowed immediately following a sigil in a subroutine signature
 
 (F) In a subroutine signature definition, a comment following a sigil
-(C<$>, C<@> or C<%>), needs to be separated by whitespace or a commma etc., in
+(C<$>, C<@> or C<%>), needs to be separated by whitespace or a comma etc., in
 particular to avoid confusion with the C<$#> variable.  For example:
 
     # bad

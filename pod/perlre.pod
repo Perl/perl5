@@ -192,7 +192,7 @@ want in the set.  You do this by enclosing the list within C<[]> bracket
 characters.  These are called "bracketed character classes" when we are
 being precise, but often the word "bracketed" is dropped.  (Dropping it
 usually doesn't cause confusion.)  This means that the C<"["> character
-is another metacharacter.  It doesn't match anything just by itelf; it
+is another metacharacter.  It doesn't match anything just by itself; it
 is used only to tell Perl that what follows it is a bracketed character
 class.  If you want to match a literal left square bracket, you must
 escape it, like C<"\[">.  The matching C<"]"> is also a metacharacter;

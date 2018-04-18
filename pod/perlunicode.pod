@@ -394,7 +394,7 @@ other.
 
 You may be presented with strings in any of these equivalent forms.
 There is currently nothing in Perl 5 that ignores the differences.  So
-you'll have to specially hanlde it.  The usual advice is to convert your
+you'll have to specially handle it.  The usual advice is to convert your
 inputs to C<NFD> before processing further.
 
 For more detailed information, see L<http://unicode.org/reports/tr15/>.
@@ -1679,7 +1679,7 @@ See L<perlebcdic/Unicode and UTF>.
 
 Because UTF-EBCDIC is so similar to UTF-8, the differences are mostly
 hidden from you; S<C<use utf8>> (and NOT something like
-S<C<use utfebcdic>>) declares the the script is in the platform's
+S<C<use utfebcdic>>) declares the script is in the platform's
 "native" 8-bit encoding of Unicode.  (Similarly for the C<":utf8">
 layer.)
 

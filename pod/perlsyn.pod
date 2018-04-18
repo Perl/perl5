@@ -992,7 +992,7 @@ the form C<!/REGEX/>, C<$foo !~ /REGEX/>, or C<$foo !~ EXPR>.
 A smart match that uses an explicit C<~~> operator, such as C<EXPR ~~ EXPR>.
 
 B<NOTE:> You will often have to use C<$c ~~ $_> because the default case
-uses C<$_ ~~ $c> , which is frequentlythe opposite of what you want.
+uses C<$_ ~~ $c> , which is frequently the opposite of what you want.
 
 =item Z<>4.
 

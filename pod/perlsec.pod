@@ -380,7 +380,7 @@ see which interpreter to run and when the (now-set-id) interpreter turns
 around and reopens the file to interpret it, the file in question may have
 changed, especially if you have symbolic links on your system.
 
-Some Unices, especially more recent ones, are free of this
+Some Unixes, especially more recent ones, are free of this
 inherent security bug.  On such systems, when the kernel passes the name
 of the set-id script to open to the interpreter, rather than using a
 pathname subject to meddling, it instead passes I</dev/fd/3>.  This is a
@@ -430,7 +430,7 @@ in C:
 
 Compile this wrapper into a binary executable and then make I<it> rather
 than your script setuid or setgid.  Note that this wrapper isn't doing
-anything to santitise the execution environment other than ensuring
+anything to sanitise the execution environment other than ensuring
 that a safe path to the script is used.  It only avoids the shebang
 race condition.  It relies on Perl's own features, and on the script
 itself being careful, to make it safe enough to run the script set-id.

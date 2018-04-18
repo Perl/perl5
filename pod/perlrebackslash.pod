@@ -596,7 +596,7 @@ sentence boundary.  C<\b{sb}> works with text designed for
 word-processors which wrap lines
 automatically for display, but hard-coded line boundaries are considered
 to be essentially the ends of text blocks (paragraphs really), and hence
-the ends of sententces.  C<\b{sb}> doesn't do well with text containing
+the ends of sentences.  C<\b{sb}> doesn't do well with text containing
 embedded newlines, like the source text of the document you are reading.
 Such text needs to be preprocessed to get rid of the line separators
 before looking for sentence boundaries.  Some people view this as a bug

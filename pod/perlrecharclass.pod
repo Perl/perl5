@@ -641,7 +641,7 @@ Examples:
              #  even on an EBCDIC platform.
  [\N{U+27}-\N{U+3F}] # Same. (U+27 is "'", and U+3F is "?")
 
-As the final two examples above show, you can achieve portablity to
+As the final two examples above show, you can achieve portability to
 non-ASCII platforms by using the C<\N{...}> form for the range
 endpoints.  These indicate that the specified range is to be interpreted
 using Unicode values, so C<[\N{U+27}-\N{U+3F}]> means to match

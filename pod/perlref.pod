@@ -868,7 +868,7 @@ Combining that form with C<local> and putting parentheses immediately
 around a hash are forbidden (because it is not clear what they should do):
 
     \local(@array) = foo(); # WRONG
-    \(%hash)       = bar(); # wRONG
+    \(%hash)       = bar(); # WRONG
 
 Assignment to references and non-references may be combined in lists and
 conditional ternary expressions, as long as the values on the right-hand

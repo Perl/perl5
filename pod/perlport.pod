@@ -436,7 +436,7 @@ too).  The portable idiom to remove all the versions of a file is
 
     1 while unlink "file";
 
-This will terminate if the file is undeleteable for some reason
+This will terminate if the file is undeletable for some reason
 (protected, not there, and so on).
 
 Don't count on a specific environment variable existing in
@@ -1362,7 +1362,7 @@ where
     Directory and File =~ m|[^\0- "\.\$\%\&:\@\\^\|\177]+|
 
 The default filename translation is roughly C<tr|/.|./|>, swapping dots
-and slahes.
+and slashes.
 
 Note that C<"ADFS::HardDisk.$.File" ne 'ADFS::HardDisk.$.File'> and that
 the second stage of C<$> interpolation in regular expressions will fall
