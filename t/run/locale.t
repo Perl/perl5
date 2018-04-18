@@ -135,7 +135,7 @@ EOF
             # For utf8 locales with a non-ascii radix, it should be encoded as
             # UTF-8 with the internal flag so set.
             if (! defined $utf8_radix
-                && $radix =~ /[[:^ascii:]]/
+                && $radix =~ /[[:^ascii:]]/u  # /u because /l can raise warnings
                 && is_locale_utf8($_))
             {
                 $utf8_radix = $_;
