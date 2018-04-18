@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.24_50';
+$VERSION = '0.25';
 
 =head1 NAME
 
