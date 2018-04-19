@@ -49,6 +49,8 @@ OpSIBLING
 OpMORESIB_set
 OpLASTSIB_set
 OpMAYBESIB_set
+MUTABLE_PTR
+MUTABLE_SV
 
 =implementation
 
@@ -58,6 +60,7 @@ __UNDEFINED__ OpSIBLING(o)          (0 + (o)->op_sibling)
 __UNDEFINED__ OpMORESIB_set(o, sib) ((o)->op_sibling = (sib))
 __UNDEFINED__ OpLASTSIB_set(o, parent) ((o)->op_sibling = NULL)
 __UNDEFINED__ OpMAYBESIB_set(o, sib, parent) ((o)->op_sibling = (sib))
+__UNDEFINED__ HEf_SVKEY   -2
 
 #ifndef SvRX
 #if { NEED SvRX }
@@ -351,6 +354,16 @@ __UNDEFINED__ HeUTF8(he)        ((HeKLEN(he) == HEf_SVKEY) ?            \
 
 __UNDEFINED__ C_ARRAY_LENGTH(a)		(sizeof(a)/sizeof((a)[0]))
 __UNDEFINED__ C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
+
+#ifndef MUTABLE_PTR
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define MUTABLE_PTR(p) ({ void *_p = (p); _p; })
+#else
+#  define MUTABLE_PTR(p) ((void *) (p))
+#endif
+#endif
+
+__UNDEFINED__ MUTABLE_SV(p)   ((SV *)MUTABLE_PTR(p))
 
 =xsmisc
 
