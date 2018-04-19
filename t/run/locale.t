@@ -88,6 +88,13 @@ if ($non_C_locale) {
         @test_numeric_locales = grep { $_ !~ m/ps_AF/i } @test_numeric_locales;
     }
 
+    # Similarly the arabic locales on solaris don't work right on the
+    # multi-byte radix character, generating malformed UTF-8.
+    if ($^O eq 'solaris') {
+        @test_numeric_locales = grep { $_ !~ m/ ^ ( ar_ | pa_ ) /x }
+                                                        @test_numeric_locales;
+    }
+
     fresh_perl_is("for (qw(@test_numeric_locales)) {\n" . <<'EOF',
         use POSIX qw(locale_h);
         use locale;
