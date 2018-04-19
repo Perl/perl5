@@ -160,7 +160,8 @@ For the character code set being used (such as "ISO8859-1", "cp850",
 For an alternate representation of digits, for the
 radix character used between the integer and the fractional part
 of decimal numbers, the group separator string for large-ish floating point
-numbers (yes, the final two are redundant with POSIX::localeconv()):
+numbers (yes, the final two are redundant with
+L<POSIX::localeconv()|POSIX/localeconv>):
 
     ALT_DIGITS RADIXCHAR THOUSEP
 
