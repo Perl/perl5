@@ -39,7 +39,7 @@ my $out_fh = open_new('charclass_invlists.h', '>',
 		      {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 
-my $in_file_pound_if = 0;
+my $in_file_pound_if = "";
 
 my $max_hdr_len = 3;    # In headings, how wide a name is allowed?
 
@@ -91,7 +91,7 @@ sub a2n($) {
 sub end_file_pound_if {
     if ($in_file_pound_if) {
         print $out_fh "\n#endif\t/* $in_file_pound_if */\n";
-        $in_file_pound_if = 0;
+        $in_file_pound_if = "";
     }
 }
 
@@ -99,31 +99,31 @@ sub switch_pound_if ($$) {
     my $name = shift;
     my $new_pound_if = shift;
     my @new_pound_if = ref ($new_pound_if)
-                       ? @$new_pound_if
+                       ? sort @$new_pound_if
                        : $new_pound_if;
 
     # Switch to new #if given by the 2nd argument.  If there is an override
     # for this, it instead switches to that.  The 1st argument is the
-    # static's name, used to look up the overrides
+    # static's name, used only to check if there is an override for this
 
     if (exists $exceptions_to_where_to_define{$name}) {
         @new_pound_if = $exceptions_to_where_to_define{$name};
     }
-    $new_pound_if = join "", @new_pound_if;
 
-    # Exit current #if if the new one is different from the old
-    if (   $in_file_pound_if
-        && $in_file_pound_if !~ /$new_pound_if/)
-    {
-        end_file_pound_if;
+    foreach my $element (@new_pound_if) {
+        $element = "defined($element)";
     }
+    $new_pound_if = join " || ", @new_pound_if;
 
-    # Enter new #if, if not already in it.
-    if (! $in_file_pound_if) {
-        foreach my $element (@new_pound_if) {
-            $element = "defined($element)";
+    # Change to the new one if different from old
+    if ($in_file_pound_if ne $new_pound_if) {
+
+        # Exit any current #if
+        if ($in_file_pound_if) {
+            end_file_pound_if;
         }
-        $in_file_pound_if = join " || ", @new_pound_if;
+
+        $in_file_pound_if = $new_pound_if;
         print $out_fh "\n#if $in_file_pound_if\n";
     }
 }
