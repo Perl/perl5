@@ -3828,9 +3828,10 @@ L<C<continue>|/continue BLOCK> block, if any, is not executed:
         #...
     }
 
-L<C<last>|/last LABEL> cannot be used to exit a block that returns a
-value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
-to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
+L<C<last>|/last LABEL> cannot return a value from a block that typically
+returns a value, such as C<eval {}>, C<sub {}>, or C<do {}>. It will perform
+its flow control behavior, which precludes any return value. It should not be
+used to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
 Note that a block by itself is semantically identical to a loop
@@ -4358,9 +4359,10 @@ refers to the innermost enclosing loop.  The C<next EXPR> form, available
 as of Perl 5.18.0, allows a label name to be computed at run time, being
 otherwise identical to C<next LABEL>.
 
-L<C<next>|/next LABEL> cannot be used to exit a block which returns a
-value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
-to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
+L<C<next>|/next LABEL> cannot return a value from a block that typically
+returns a value, such as C<eval {}>, C<sub {}>, or C<do {}>. It will perform
+its flow control behavior, which precludes any return value. It should not be
+used to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
 Note that a block by itself is semantically identical to a loop
@@ -6322,9 +6324,10 @@ normally use this command:
         print;
     }
 
-L<C<redo>|/redo LABEL> cannot be used to retry a block that returns a
-value such as C<eval {}>, C<sub {}>, or C<do {}>, and should not be used
-to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
+L<C<redo>|/redo LABEL> cannot return a value from a block that typically
+returns a value, such as C<eval {}>, C<sub {}>, or C<do {}>. It will perform
+its flow control behavior, which precludes any return value. It should not be
+used to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
 
 Note that a block by itself is semantically identical to a loop
