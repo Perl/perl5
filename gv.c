@@ -804,7 +804,9 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
 
         assert(cstash);
 
-        gvp = (GV**)hv_fetch(cstash, name, is_utf8 ? -(I32)len : (I32)len, 0);
+        gvp = (GV**)hv_common(
+            cstash, meth, name, len, is_utf8 ? HVhek_UTF8 : 0, HV_FETCH_JUST_SV, NULL, 0
+        );
         if (!gvp) {
             if (len > 1 && HvNAMELEN_get(cstash) == 4) {
                 const char *hvname = HvNAME(cstash); assert(hvname);

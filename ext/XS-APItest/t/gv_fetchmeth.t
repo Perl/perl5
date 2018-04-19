@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 43;
+use Test::More tests => 44;
 
 use_ok('XS::APItest');
 
@@ -69,4 +69,11 @@ ok !XS::APItest::gv_fetchmeth_type(\%::, "method\0not quite!", 3, $level, 0), "g
                             "method", $type, $level, 0);
         }
     }
+}
+
+{
+    @Foo::ISA = qw/Bar/;
+    @Bar::ISA = qw//;
+
+    is(XS::APItest::gv_fetchmeth_type(\%Foo::, "nomethod", 1, -1, 0), undef, 'gv_fetchmeth_sv survives @ISA traversal');
 }
