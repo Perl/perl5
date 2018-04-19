@@ -5035,6 +5035,12 @@
 /*#define HAS_STRERROR_R	/ **/
 #define STRERROR_R_PROTO 0	/**/
 
+/* HAS_STRTOD_L:
+ *	This symbol, if defined, indicates that the strtod_l routine is
+ *	available to convert strings to long doubles.
+ */
+/*#define HAS_STRTOD_L		/ **/
+
 /* HAS_STRTOLD_L:
  *	This symbol, if defined, indicates that the strtold_l routine is
  *	available to convert strings to long doubles.
@@ -5224,6 +5230,6 @@
 #endif
 
 /* Generated from:
- * 56a02f6734fb9a0de8f95d1a08f8d4b46182e6b374a276010c43dad6fff17642 config_h.SH
- * bf0ec5566c5c2d58c68ec60e41ab6cb78ab48a521e25ff1f0f215ee01caadcfb uconfig.sh
+ * 86429d6dea8cb2d81b30da9d916693eb4c04ebeb21969c8df6f470ac77cd5c92 config_h.SH
+ * 0a854c66239d29490cd1bce8581db1733878f26386edfaddf1498ed61840c613 uconfig.sh
  * ex: set ro: */
