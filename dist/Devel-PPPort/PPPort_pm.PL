@@ -632,13 +632,9 @@ __DATA__
 
 %include memory
 
-%include magic
-
 %include magic_defs
 
 %include misc
-
-%include format
 
 %include mess
 
@@ -653,6 +649,8 @@ __DATA__
 %include newCONSTSUB
 
 %include MY_CXT
+
+%include format
 
 %include SvREFCNT
 
@@ -675,6 +673,8 @@ __DATA__
 %include warn
 
 %include pvs
+
+%include magic
 
 %include cop
 
