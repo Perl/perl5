@@ -284,6 +284,7 @@ sub print_algo {
     my $n= 0+@$second_level;
     my $data_size= 0+@$second_level * 8 + length $smart_blob;
 
+    print $ofh "#define ${prefix}_VALt I16\n\n";
     print $ofh "/*\n";
     printf $ofh "rows: %s\n", $n;
     printf $ofh "seed: %s\n", $seed1;
@@ -347,7 +348,6 @@ EOF_CODE
 sub print_main {
     my ($ofh,$h_file,$match_name,$prefix)=@_;
     print $ofh <<"EOF_CODE";
-#define ${prefix}_VALt I16
 #include "$h_file"
 
 int main(int argc, char *argv[]){
