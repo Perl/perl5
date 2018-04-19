@@ -306,6 +306,7 @@ sub parse_embed
         my @e = split /\s*\|\s*/, $line;
         if( @e >= 3 ) {
           my($flags, $ret, $name, @args) = @e;
+          next if $flags =~ /[DM]/; # Skip entries marked as deprecated or unstable
           if ($name =~ /^[^\W\d]\w*$/) {
             for (@args) {
               $_ = [trim_arg($_)];
