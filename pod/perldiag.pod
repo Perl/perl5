@@ -7220,6 +7220,12 @@ scope is deprecated and should be avoided.
 
 This was deprecated in Perl 5.12.
 
+=item Use of '%s' in \p{} or \P{} is deprecated because: %s
+
+(D deprecated) Certain properties are deprecated by Unicode, and may
+eventually be removed from the Standard, at which time Perl will follow
+along.  In the meantime, this message is raised to notify you.
+
 =item Use of inherited AUTOLOAD for non-method %s::%s() is no longer allowed
 
 (F) As an accidental feature, C<AUTOLOAD> subroutines were looked up as
