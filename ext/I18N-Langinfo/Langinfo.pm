@@ -119,7 +119,11 @@ but under a French locale
 
     dim? [oui/non]
 
-The usually available constants are
+The usually available constants are as follows.
+
+=over 4
+
+=item *
 
     ABDAY_1 ABDAY_2 ABDAY_3 ABDAY_4 ABDAY_5 ABDAY_6 ABDAY_7
     ABMON_1 ABMON_2 ABMON_3 ABMON_4 ABMON_5 ABMON_6
@@ -130,20 +134,28 @@ The usually available constants are
 
 for abbreviated and full length days of the week and months of the year,
 
+=item *
+
     D_T_FMT D_FMT T_FMT
 
 for the date-time, date, and time formats used by the strftime() function
 (see L<POSIX>)
+
+=item *
 
     AM_STR PM_STR T_FMT_AMPM
 
 for the locales for which it makes sense to have ante meridiem and post
 meridiem time formats,
 
+=item *
+
     CODESET CRNCYSTR
 
 for the character code set being used (such as "ISO8859-1", "cp850",
 "koi8-r", "sjis", "utf8", etc.), for the currency string
+
+=item *
 
     ALT_DIGITS RADIXCHAR THOUSEP
 
@@ -152,14 +164,20 @@ radix character used between the integer and the fractional part
 of decimal numbers, the group separator string for large-ish floating point
 numbers  (yes, the final two are redundant with POSIX::localeconv())
 
+=item *
+
     YESSTR YESEXPR NOSTR NOEXPR
 
 for the affirmative and negative responses and expressions, and
+
+=item *
 
     ERA ERA_D_FMT ERA_D_T_FMT ERA_T_FMT
 
 for the eras based on typically some ruler, such as the Japanese Emperor
 (naturally only defined in the appropriate locales).
+
+=back
 
 Starting in Perl 5.28, this module is available even on systems that lack a
 native C<nl_langinfo>.  On such systems, it uses various methods to construct
