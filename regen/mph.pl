@@ -204,7 +204,7 @@ sub blob_as_code {
     $blob_name ||= "mph_blob";
 
     # output the blob as C code.
-    my @code= (sprintf "const unsigned char %s[] =\n",$blob_name);
+    my @code= (sprintf "STATIC const unsigned char %s[] =\n",$blob_name);
     my $blob_len= length $blob;
     while (length($blob)) {
         push @code, sprintf qq(    "%s"), substr($blob,0,65,"");
@@ -251,13 +251,13 @@ sub build_array_of_struct {
             index($blob,$row->{prefix}//0),
             index($blob,$row->{suffix}//0),
         );
-        $_ > 0xFFFF and die "panic: value exceeds range of uint16_t"
+        $_ > 0xFFFF and die "panic: value exceeds range of U16"
             for @u16;
         my @u8= (
             length($row->{prefix}),
             length($row->{suffix}),
         );
-        $_ > 0xFF and die "panic: value exceeds range of uint8_t"
+        $_ > 0xFF and die "panic: value exceeds range of U8"
             for @u8;
         push @rows, sprintf("  { %5d, %5d, %5d, %3d, %3d, %s }",
             @u16, @u8, $row->{value} );
@@ -297,11 +297,11 @@ sub print_algo {
     print $ofh <<"EOF_CODE";
 
 struct $struct_name {
-    uint16_t seed2;
-    uint16_t pfx;
-    uint16_t sfx;
-    uint8_t  pfx_len;
-    uint8_t  sfx_len;
+    U16 seed2;
+    U16 pfx;
+    U16 sfx;
+    U8  pfx_len;
+    U8  sfx_len;
     ${prefix}_VALt value;
 };
 
@@ -309,18 +309,18 @@ EOF_CODE
 
     print $ofh "#define ${prefix}_RSHIFT $RSHIFT\n";
     print $ofh "#define ${prefix}_BUCKETS $n\n\n";
-    printf $ofh "const uint32_t ${prefix}_SEED1 = 0x%08x;\n", $seed1;
-    printf $ofh "const uint32_t ${prefix}_FNV_CONST = 0x%08x;\n\n", $FNV_CONST;
+    printf $ofh "STATIC const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
+    printf $ofh "STATIC const U32 ${prefix}_FNV_CONST = 0x%08x;\n\n", $FNV_CONST;
 
     print $ofh "\n";
-    print $ofh "const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n", join(",\n", @$rows)."\n};\n\n";
+    print $ofh "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n", join(",\n", @$rows)."\n};\n\n";
     print $ofh <<"EOF_CODE";
-${prefix}_VALt $match_name( const unsigned char * const key, const uint16_t key_len ) {
+${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len ) {
     const unsigned char * ptr= key;
     const unsigned char * ptr_end= key + key_len;
-    uint32_t h= ${prefix}_SEED1;
-    uint32_t s;
-    uint32_t n;
+    U32 h= ${prefix}_SEED1;
+    U32 s;
+    U32 n;
     do {
         h ^= *ptr;
         h *= ${prefix}_FNV_CONST;
@@ -347,7 +347,7 @@ EOF_CODE
 sub print_main {
     my ($ofh,$h_file,$match_name,$prefix)=@_;
     print $ofh <<"EOF_CODE";
-#define ${prefix}_VALt int16_t
+#define ${prefix}_VALt I16
 #include "$h_file"
 
 int main(int argc, char *argv[]){
