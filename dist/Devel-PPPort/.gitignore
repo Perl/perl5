@@ -1,5 +1,4 @@
 /PPPort.pm
-#ignored in /ext
+#ignored in the parent directory
 #/ppport.h
-/module*.c
 /RealPPPort.xs
