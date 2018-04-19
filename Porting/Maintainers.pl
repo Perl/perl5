@@ -396,6 +396,10 @@ use File::Glob qw(:case);
     'Encode' => {
         'DISTRIBUTION' => 'DANKOGAI/Encode-2.97.tar.gz',
         'FILES'        => q[cpan/Encode],
+        'CUSTOMIZED'   => [
+	    # TODO test passes on blead
+	    't/truncated_utf8.t',
+        ],
     },
 
     'encoding::warnings' => {

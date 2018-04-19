@@ -45,7 +45,7 @@ SKIP: {
     is($str2, ("x" x 1023) . ("\x{fffd}" x 3) . "x");
 
     TODO: {
-        local $TODO = "bug in perlio";
+        local $TODO = "bug in perlio" if $] < 5.027009;
         my $str = ("x" x 1023) . "\xfd\xfe\xff";
         open my $fh, '<:encoding(UTF-8)', \$str;
         my $str2 = <$fh>;
