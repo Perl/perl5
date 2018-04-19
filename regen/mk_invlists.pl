@@ -95,6 +95,10 @@ sub end_file_pound_if {
     }
 }
 
+sub end_charset_pound_if {
+    print $out_fh "\n" . get_conditional_compile_line_end();
+}
+
 sub switch_pound_if ($$) {
     my $name = shift;
     my $new_pound_if = shift;
@@ -126,6 +130,10 @@ sub switch_pound_if ($$) {
         $in_file_pound_if = $new_pound_if;
         print $out_fh "\n#if $in_file_pound_if\n";
     }
+}
+
+sub start_charset_pound_if ($;$) {
+    print $out_fh "\n" . get_conditional_compile_line_start(shift, shift);
 }
 
 sub output_invlist ($$;$) {
@@ -2055,7 +2063,7 @@ end_file_pound_if;
 # official inversion list.
 
 for my $charset (get_supported_code_pages()) {
-    print $out_fh "\n" . get_conditional_compile_line_start($charset);
+    start_charset_pound_if($charset);
 
     @a2n = @{get_a2n($charset)};
     # Below is the list of property names to generate.  '&' means to use the
@@ -2478,7 +2486,7 @@ for my $charset (get_supported_code_pages()) {
         output_invmap($prop_name, \@invmap, $lookup_prop, $map_format, $map_default, $extra_enums, $charset) if @invmap;
     }
     end_file_pound_if;
-    print $out_fh "\n" . get_conditional_compile_line_end();
+    end_charset_pound_if;
 }
 
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
