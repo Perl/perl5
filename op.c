@@ -1223,8 +1223,7 @@ S_cop_free(pTHX_ COP* cop)
 }
 
 STATIC void
-S_forget_pmop(pTHX_ PMOP *const o
-	      )
+S_forget_pmop(pTHX_ PMOP *const o)
 {
     HV * const pmstash = PmopSTASH(o);
 
