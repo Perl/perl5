@@ -622,6 +622,8 @@ __DATA__
 
 %include magic
 
+%include magic_defs
+
 %include misc
 
 %include format

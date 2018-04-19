@@ -3191,6 +3191,7 @@ dist/Devel-PPPort/parts/inc/gv		Devel::PPPort include
 dist/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/limits	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/magic	Devel::PPPort include
+dist/Devel-PPPort/parts/inc/magic_defs	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/memory	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/mess	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/misc	Devel::PPPort include
