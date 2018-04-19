@@ -26,7 +26,7 @@ unless ($ENV{'PERL_CORE'}) {
 
 @ARGV = map { /^--with-(apicheck)$/ && ++$opt{$1} ? () : $_ } @ARGV;
 
-WriteMakefile(
+my %mf = (
   NAME          => 'Devel::PPPort',
   VERSION_FROM  => 'PPPort_pm.PL',
   PM            => { 'PPPort.pm' => '$(INST_LIBDIR)/PPPort.pm' },
@@ -50,6 +50,10 @@ WriteMakefile(
     },
   },
 );
+my $eumm_version = $ExtUtils::MakeMaker::VERSION;
+$eumm_version = eval $eumm_version;
+delete $mf{META_MERGE} if $eumm_version < 6.46;
+WriteMakefile(%mf);
 
 sub configure
 {
