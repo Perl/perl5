@@ -229,7 +229,7 @@ extensions=''
 known_extensions=''
 nonxs_ext=''
 static_ext=''
-usei18n_lang=''
+uselanginfo=''
 useopcode=''
 useposix=''
 extras=''
@@ -1465,12 +1465,12 @@ ignore_versioned_solibs=''
 ccname=''
 ccversion=''
 perllibs=''
-: set usei18n_lang=false in your hint file to disable the I18N_Langinfo extension.
-usei18n_lang=true
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
 useopcode=true
+: set uselanginfo=false in your hint file to disable the I18N::Langinfo extension.
+uselanginfo=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
@@ -23278,11 +23278,6 @@ for xxx in $xs_extensions ; do
 		$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
-	I18N/Langinfo|i18n_lan)
-		case "$usei18n_lang" in
-		true|define|y) avail_ext="$avail_ext $xxx" ;;
-		esac
-		;;
 	IPC/SysV|ipc/sysv)
 		: XXX Do we need a useipcsysv variable here
 		case "${d_msg}${d_sem}${d_shm}" in
@@ -23334,6 +23329,11 @@ for xxx in $xs_extensions ; do
 	Socket|socket)
 		case "$d_socket" in
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	I18N/Langinfo|langinfo)
+		case "$uselanginfo" in
+		true|define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	Sys/Syslog|sys/syslog)
@@ -24826,9 +24826,9 @@ usedevel='$usedevel'
 usedl='$usedl'
 usedtrace='$usedtrace'
 usefaststdio='$usefaststdio'
-usei18n_lang='$i18n_lang'
 useithreads='$useithreads'
 usekernprocpathname='$usekernprocpathname'
+uselanginfo='$uselanginfo'
 uselargefiles='$uselargefiles'
 uselongdouble='$uselongdouble'
 usemallocwrap='$usemallocwrap'
