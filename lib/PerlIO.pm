@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 # Map layer name to package that defines it
 our %alias;
