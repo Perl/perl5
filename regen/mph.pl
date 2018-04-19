@@ -265,8 +265,8 @@ sub build_array_of_struct {
     return \@rows,\%defines,\%tests;
 }
 
-sub print_algo {
-    my ($ofh, $second_level, $seed1, $length_all_keys, $smart_blob, $rows,
+sub make_algo {
+    my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows,
         $blob_name, $struct_name, $table_name, $match_name, $prefix) = @_;
 
     $blob_name ||= "mph_blob";
@@ -274,28 +274,21 @@ sub print_algo {
     $table_name ||= "mph_table";
     $prefix ||= "MPH";
 
-    if (!ref $ofh) {
-        my $file= $ofh;
-        undef $ofh;
-        open $ofh, ">", $file
-            or die "Failed to open '$file': $!";
-    }
-
     my $n= 0+@$second_level;
     my $data_size= 0+@$second_level * 8 + length $smart_blob;
 
-    print $ofh "#define ${prefix}_VALt I16\n\n";
-    print $ofh "/*\n";
-    printf $ofh "rows: %s\n", $n;
-    printf $ofh "seed: %s\n", $seed1;
-    printf $ofh "full length of keys: %d\n", $length_all_keys;
-    printf $ofh "blob length: %d\n", length $smart_blob;
-    printf $ofh "ref length: %d\n", 0+@$second_level * 8;
-    printf $ofh "data size: %d (%%%.2f)\n", $data_size, ($data_size / $length_all_keys) * 100;
-    print $ofh "*/\n\n";
+    my @code = "#define ${prefix}_VALt I16\n\n";
+    push @code, "/*\n";
+    push @code, sprintf "rows: %s\n", $n;
+    push @code, sprintf "seed: %s\n", $seed1;
+    push @code, sprintf "full length of keys: %d\n", $length_all_keys;
+    push @code, sprintf "blob length: %d\n", length $smart_blob;
+    push @code, sprintf "ref length: %d\n", 0+@$second_level * 8;
+    push @code, sprintf "data size: %d (%%%.2f)\n", $data_size, ($data_size / $length_all_keys) * 100;
+    push @code, "*/\n\n";
 
-    print $ofh blob_as_code($smart_blob, $blob_name);
-    print $ofh <<"EOF_CODE";
+    push @code, blob_as_code($smart_blob, $blob_name);
+    push @code, <<"EOF_CODE";
 
 struct $struct_name {
     U16 seed2;
@@ -308,14 +301,14 @@ struct $struct_name {
 
 EOF_CODE
 
-    print $ofh "#define ${prefix}_RSHIFT $RSHIFT\n";
-    print $ofh "#define ${prefix}_BUCKETS $n\n\n";
-    printf $ofh "STATIC const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
-    printf $ofh "STATIC const U32 ${prefix}_FNV_CONST = 0x%08x;\n\n", $FNV_CONST;
+    push @code, "#define ${prefix}_RSHIFT $RSHIFT\n";
+    push @code, "#define ${prefix}_BUCKETS $n\n\n";
+    push @code, sprintf "STATIC const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
+    push @code, sprintf "STATIC const U32 ${prefix}_FNV_CONST = 0x%08x;\n\n", $FNV_CONST;
 
-    print $ofh "\n";
-    print $ofh "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n", join(",\n", @$rows)."\n};\n\n";
-    print $ofh <<"EOF_CODE";
+    push @code, "\n";
+    push @code, "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n", join(",\n", @$rows)."\n};\n\n";
+    push @code, <<"EOF_CODE";
 ${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len ) {
     const unsigned char * ptr= key;
     const unsigned char * ptr_end= key + key_len;
@@ -343,6 +336,25 @@ ${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len )
     return 0;
 }
 EOF_CODE
+
+    return join "", @code;
+}
+
+sub print_algo {
+    my ($ofh, $second_level, $seed1, $long_blob, $smart_blob, $rows,
+        $blob_name, $struct_name, $table_name, $match_name ) = @_;
+
+    if (!ref $ofh) {
+        my $file= $ofh;
+        undef $ofh;
+        open $ofh, ">", $file
+            or die "Failed to open '$file': $!";
+    }
+
+    my $code = make_algo(
+        $second_level, $seed1, $long_blob, $smart_blob, $rows,
+        $blob_name, $struct_name, $table_name, $match_name );
+    print $ofh $code;
 }
 
 sub print_main {
