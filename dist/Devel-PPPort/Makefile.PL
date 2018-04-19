@@ -50,9 +50,7 @@ my %mf = (
     },
   },
 );
-my $eumm_version = $ExtUtils::MakeMaker::VERSION;
-$eumm_version = eval $eumm_version;
-delete $mf{META_MERGE} if $eumm_version < 6.46;
+delete $mf{META_MERGE} unless eval { ExtUtils::MakeMaker->VERSION (6.46) };
 WriteMakefile(%mf);
 
 sub configure
