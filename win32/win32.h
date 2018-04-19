@@ -344,7 +344,7 @@ typedef struct
 #define PERLIO_FILE_base(f) (((__crt_stdio_stream_data*)(f))->_base)
 #define PERLIO_FILE_cnt(f)  (((__crt_stdio_stream_data*)(f))->_cnt)
 #define PERLIO_FILE_flag(f) ((int)(((__crt_stdio_stream_data*)(f))->_flags))
-#define PERLIO_FILE_file(f) ((int)(((__crt_stdio_stream_data*)(f))->_file))
+#define PERLIO_FILE_file(f) (*(int*)(&((__crt_stdio_stream_data*)(f))->_file))
 
 #endif
 
