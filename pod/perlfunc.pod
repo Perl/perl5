@@ -3680,7 +3680,8 @@ may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
 
 As a side effect, calling L<C<keys>|/keys HASH> resets the internal
-iterator of the HASH or ARRAY (see L<C<each>|/each HASH>).  In
+iterator of the HASH or ARRAY (see L<C<each>|/each HASH>) before
+yielding the keys.  In
 particular, calling L<C<keys>|/keys HASH> in void context resets the
 iterator with no other overhead.
 
@@ -9600,9 +9601,12 @@ may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
 
 As a side effect, calling L<C<values>|/values HASH> resets the HASH or
-ARRAY's internal iterator, see L<C<each>|/each HASH>.  (In particular,
+ARRAY's internal iterator (see L<C<each>|/each HASH>) before yielding the
+values.  In particular,
 calling L<C<values>|/values HASH> in void context resets the iterator
-with no other overhead.  Apart from resetting the iterator,
+with no other overhead.
+
+Apart from resetting the iterator,
 C<values @array> in list context is the same as plain C<@array>.
 (We recommend that you use void context C<keys @array> for this, but
 reasoned that taking C<values @array> out would require more
