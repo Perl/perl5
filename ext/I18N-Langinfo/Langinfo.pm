@@ -125,6 +125,8 @@ The usually available constants are as follows.
 
 =item *
 
+For abbreviated and full length days of the week and months of the year:
+
     ABDAY_1 ABDAY_2 ABDAY_3 ABDAY_4 ABDAY_5 ABDAY_6 ABDAY_7
     ABMON_1 ABMON_2 ABMON_3 ABMON_4 ABMON_5 ABMON_6
     ABMON_7 ABMON_8 ABMON_9 ABMON_10 ABMON_11 ABMON_12
@@ -132,50 +134,48 @@ The usually available constants are as follows.
     MON_1 MON_2 MON_3 MON_4 MON_5 MON_6
     MON_7 MON_8 MON_9 MON_10 MON_11 MON_12
 
-for abbreviated and full length days of the week and months of the year,
-
 =item *
+
+For the date-time, date, and time formats used by the strftime() function
+(see L<POSIX>):
 
     D_T_FMT D_FMT T_FMT
 
-for the date-time, date, and time formats used by the strftime() function
-(see L<POSIX>)
-
 =item *
+
+For the locales for which it makes sense to have ante meridiem and post
+meridiem time formats:
 
     AM_STR PM_STR T_FMT_AMPM
 
-for the locales for which it makes sense to have ante meridiem and post
-meridiem time formats,
-
 =item *
+
+For the character code set being used (such as "ISO8859-1", "cp850",
+"koi8-r", "sjis", "utf8", etc.), and for the currency string:
 
     CODESET CRNCYSTR
 
-for the character code set being used (such as "ISO8859-1", "cp850",
-"koi8-r", "sjis", "utf8", etc.), for the currency string
-
 =item *
+
+For an alternate representation of digits, for the
+radix character used between the integer and the fractional part
+of decimal numbers, the group separator string for large-ish floating point
+numbers (yes, the final two are redundant with POSIX::localeconv()):
 
     ALT_DIGITS RADIXCHAR THOUSEP
 
-for an alternate representation of digits, for the
-radix character used between the integer and the fractional part
-of decimal numbers, the group separator string for large-ish floating point
-numbers  (yes, the final two are redundant with POSIX::localeconv())
-
 =item *
+
+For the affirmative and negative responses and expressions:
 
     YESSTR YESEXPR NOSTR NOEXPR
 
-for the affirmative and negative responses and expressions, and
-
 =item *
 
-    ERA ERA_D_FMT ERA_D_T_FMT ERA_T_FMT
+For the eras based on typically some ruler, such as the Japanese Emperor
+(naturally only defined in the appropriate locales):
 
-for the eras based on typically some ruler, such as the Japanese Emperor
-(naturally only defined in the appropriate locales).
+    ERA ERA_D_FMT ERA_D_T_FMT ERA_T_FMT
 
 =back
 
