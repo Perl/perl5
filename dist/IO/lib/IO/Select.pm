@@ -8,12 +8,11 @@ package IO::Select;
 
 use     strict;
 use warnings::register;
-use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = "1.23";
+our $VERSION = "1.39";
 
-@ISA = qw(Exporter); # This is only so we can do version checking
+our @ISA = qw(Exporter); # This is only so we can do version checking
 
 sub VEC_BITS () {0}
 sub FD_COUNT () {1}

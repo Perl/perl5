@@ -260,21 +260,19 @@ Derived from FileHandle.pm by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 
 =cut
 
-use 5.006_001;
+use 5.008_001;
 use strict;
-our($VERSION, @EXPORT_OK, @ISA);
 use Carp;
 use Symbol;
 use SelectSaver;
 use IO ();	# Load the XS module
 
 require Exporter;
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
-$VERSION = "1.37";
-$VERSION = eval $VERSION;
+our $VERSION = "1.39";
 
-@EXPORT_OK = qw(
+our @EXPORT_OK = qw(
     autoflush
     output_field_separator
     output_record_separator
