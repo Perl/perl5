@@ -353,22 +353,6 @@ sub output_invmap ($$$$$$$) {
             }
         }
 
-        # Inversion map stuff is used only by regexec or utf-8 (if it is
-        # for code points) , unless it is in the enum exception list
-        my $where = (exists $where_to_define_enums{$name})
-                    ? $where_to_define_enums{$name}
-                    : ($input_format =~ /a/)
-                       ? 'PERL_IN_UTF8_C'
-                       : 'PERL_IN_REGEXEC_C';
-
-        my $is_public_enum = exists $public_enums{$name};
-        if ($is_public_enum) {
-            end_file_pound_if;
-        }
-        else {
-            switch_pound_if($name, $where);
-        }
-
         # The short names tend to be two lower case letters, but it looks
         # better for those if they are upper. XXX
         $short_name = uc($short_name) if length($short_name) < 3
@@ -433,8 +417,24 @@ sub output_invmap ($$$$$$$) {
 
         $enum_declaration_type = "${name_prefix}enum";
 
-        # Finished with the enum definition.  If it only contains one element,
-        # that is a dummy, default one
+        # Finished with the enum definition.  Inversion map stuff is used only
+        # by regexec or utf-8 (if it is for code points) , unless it is in the
+        # enum exception list
+        my $where = (exists $where_to_define_enums{$name})
+                    ? $where_to_define_enums{$name}
+                    : ($input_format =~ /a/)
+                       ? 'PERL_IN_UTF8_C'
+                       : 'PERL_IN_REGEXEC_C';
+
+        my $is_public_enum = exists $public_enums{$name};
+        if ($is_public_enum) {
+            end_file_pound_if;
+        }
+        else {
+            switch_pound_if($name, $where);
+        }
+
+        # If the enum only contains one element, that is a dummy, default one
         if (scalar @enum_definition > 1) {
 
             # Currently unneeded
