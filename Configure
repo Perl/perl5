@@ -12658,6 +12658,30 @@ eval $inlibc
 set dup3 d_dup3
 eval $inlibc
 
+: see if this is an xlocale.h system
+set xlocale.h i_xlocale
+eval $inhdr
+
+: see if newlocale exists
+set newlocale d_newlocale
+eval $inlibc
+
+: see if freelocale exists
+set freelocale d_freelocale
+eval $inlibc
+
+: see if uselocale exists
+set uselocale d_uselocale
+eval $inlibc
+
+: see if duplocale exists
+set duplocale d_duplocale
+eval $inlibc
+
+: see if querylocale exists
+set querylocale d_querylocale
+eval $inlibc
+
 : see if eaccess exists
 set eaccess d_eaccess
 eval $inlibc
@@ -14004,30 +14028,6 @@ fi
 $rm_try
 set d_fpos64_t
 eval $setvar
-
-: see if this is an xlocale.h system
-set xlocale.h i_xlocale
-eval $inhdr
-
-: see if newlocale exists
-set newlocale d_newlocale
-eval $inlibc
-
-: see if freelocale exists
-set freelocale d_freelocale
-eval $inlibc
-
-: see if uselocale exists
-set uselocale d_uselocale
-eval $inlibc
-
-: see if duplocale exists
-set duplocale d_duplocale
-eval $inlibc
-
-: see if querylocale exists
-set querylocale d_querylocale
-eval $inlibc
 
 : see if frexpl exists
 set frexpl d_frexpl

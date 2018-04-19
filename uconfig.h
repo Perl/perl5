@@ -3080,6 +3080,10 @@
  *	This symbol, if defined, indicates that the uselocale routine is
  *	available to set the current locale for the calling thread.
  */
+/* HAS_DUPLOCALE:
+ *	This symbol, if defined, indicates that the duplocale routine is
+ *	available to duplicate a locale object.
+ */
 /* HAS_QUERYLOCALE:
  *	This symbol, if defined, indicates that the querylocale routine is
  *	available to return the name of the locale for a category mask.
@@ -3091,6 +3095,7 @@
 /*#define	HAS_NEWLOCALE	/ **/
 /*#define	HAS_FREELOCALE	/ **/
 /*#define	HAS_USELOCALE	/ **/
+/*#define	HAS_DUPLOCALE	/ **/
 /*#define	HAS_QUERYLOCALE	/ **/
 /*#define	I_XLOCALE               / **/
 
@@ -5219,6 +5224,6 @@
 #endif
 
 /* Generated from:
- * 8047ef9e3b5e75f1f5c3dc1b32b5f65e47d91672c551d49889fe3f1d14345138 config_h.SH
- * 1e70064e443c06121c6da3420720d35624194e5ddf48b168a65ff46273c53478 uconfig.sh
+ * 56a02f6734fb9a0de8f95d1a08f8d4b46182e6b374a276010c43dad6fff17642 config_h.SH
+ * bf0ec5566c5c2d58c68ec60e41ab6cb78ab48a521e25ff1f0f215ee01caadcfb uconfig.sh
  * ex: set ro: */
