@@ -72,7 +72,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 XSLoader::load();
 
@@ -162,7 +162,7 @@ for the eras based on typically some ruler, such as the Japanese Emperor
 (naturally only defined in the appropriate locales).
 
 Starting in Perl 5.28, this module is available even on systems that lack a
-nativeC<nl_langinfo>.  On such systems, it uses various methods to construct
+native C<nl_langinfo>.  On such systems, it uses various methods to construct
 what that function, if present, would return.  But there are potential
 glitches.  These are the items that could be different:
 
