@@ -5325,6 +5325,7 @@ regen/mg_vtable.pl		generate mg_vtable.h
 regen/miniperlmain.pl		generate miniperlmain.c
 regen/mk_invlists.pl		Generates charclass_invlists.h
 regen/mk_PL_charclass.pl	Populate the PL_charclass table
+regen/mph.pl			Generate perfect hashes
 regen/op_private		Definitions of bits in an OP's op_private field
 regen/opcode.pl			Opcode header generator
 regen/opcodes			Opcode data
