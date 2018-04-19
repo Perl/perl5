@@ -2169,8 +2169,12 @@ for my $charset (get_supported_code_pages()) {
                     # in scalar context to differentiate
                     my $count = prop_invlist($lookup_prop,
                                              '_perl_core_internal_ok');
+                    if (defined $count) {
+                        # Short-circuit an empty inversion list.
+                        output_invlist($prop_name, \@invlist, $charset);
+                        next;
+                    }
                     die "Could not find inversion list for '$lookup_prop'"
-                                                          unless defined $count;
                 }
                 else {
                     @invlist = @$list_ref;
@@ -2181,13 +2185,6 @@ for my $charset (get_supported_code_pages()) {
                     $to_adjust = $map_format =~ /a/;
                 }
             }
-        }
-
-
-        # Short-circuit an empty inversion list.
-        if (! @invlist) {
-            output_invlist($prop_name, \@invlist, $charset);
-            next;
         }
 
         # Re-order the Unicode code points to native ones for this platform.
