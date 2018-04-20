@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.51';
+our $VERSION = '1.52';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -436,6 +436,9 @@ with the same effect.
 
 If the required version is older than Perl 5.10, the ":default" feature
 bundle is automatically loaded instead.
+
+Unlike C<use feature ":5.12">, saying C<use v5.12> (or any higher version)
+also does the equivalent of C<use strict>; see L<perlfunc/use> for details.
 
 =back
 
