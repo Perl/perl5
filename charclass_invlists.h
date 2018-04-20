@@ -70864,8 +70864,6 @@ static const UV _Perl_SCX_invlist[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_UTF8_C) */
 
-#if defined(PERL_IN_REGEXEC_C)
-
 #   if 'A' == 65 /* ASCII/Latin1 */
 
 /* Negative enum values indicate the need to use an auxiliary table
@@ -71065,6 +71063,12 @@ typedef enum {
 	SCX_use_AUX_TABLE_44 = -44,
 	SCX_use_AUX_TABLE_45 = -45
 } SCX_enum;
+
+#   endif	/* ASCII/Latin1 */
+
+#if defined(PERL_IN_REGEXEC_C)
+
+#   if 'A' == 65 /* ASCII/Latin1 */
 
 #define HAS_SCX_AUX_TABLES
 
@@ -74855,8 +74859,6 @@ static const UV _Perl_SCX_invlist[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_UTF8_C) */
 
-#if defined(PERL_IN_REGEXEC_C)
-
 #   if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
@@ -75059,6 +75061,15 @@ typedef enum {
 	SCX_use_AUX_TABLE_44 = -44,
 	SCX_use_AUX_TABLE_45 = -45
 } SCX_enum;
+
+#   endif	/* EBCDIC 1047 */
+
+#if defined(PERL_IN_REGEXEC_C)
+
+#   if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_SCX_AUX_TABLES
 
@@ -78871,8 +78882,6 @@ static const UV _Perl_SCX_invlist[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_UTF8_C) */
 
-#if defined(PERL_IN_REGEXEC_C)
-
 #   if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
@@ -79075,6 +79084,15 @@ typedef enum {
 	SCX_use_AUX_TABLE_44 = -44,
 	SCX_use_AUX_TABLE_45 = -45
 } SCX_enum;
+
+#   endif	/* EBCDIC 037 */
+
+#if defined(PERL_IN_REGEXEC_C)
+
+#   if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_SCX_AUX_TABLES
 
@@ -374267,5 +374285,5 @@ static const U8 WB_table[24][24] = {
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 38936fafefb0559582239124bc936259b283874f3bab9d92af6e266657a46a78 regen/mk_invlists.pl
+ * d3ca5c0fbf36f85475b811615af0c2ceafdb38cb74ce786b9c4e73d07730e733 regen/mk_invlists.pl
  * ex: set ro: */
