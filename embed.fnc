@@ -984,7 +984,6 @@ EMiR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
 EiRn	|I32	|regcurly	|NN const char *s
 #endif
-Epn	|int	|uniprop_lookup	|NN const char * tokstr|const Size_t len
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep

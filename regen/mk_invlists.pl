@@ -2758,49 +2758,26 @@ my @sources = qw(regen/mk_invlists.pl
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
 
-use Devel::Tokenizer::C;
+require './regen/mph.pl';
 
 sub token_name
 {
     my $name = sanitize_name(shift);
     warn "$name contains non-word" if $name =~ /\W/a;
 
-    return "return $table_name_prefix\U$name;\n"
+    return "$table_name_prefix\U$name"
 }
 
-my $t = Devel::Tokenizer::C->new(TokenFunc => \&token_name,
-                                 StringLength  => 'len',
-                                 Strategy      => 'narrow',
-                                 TokenEnd      =>  undef,
-                                 UnknownCode   => 'return 0;',
-        );
-
-$t->add_tokens(lc $_) for @keywords;
-
-my $keywords_fh = open_new('uni_keywords.c', '>',
+my $keywords_fh = open_new('uni_keywords.h', '>',
 		  {style => '*', by => 'regen/mk_invlists.pl',
-                  from => "Unicode::UCD"});
-
-print $keywords_fh <<EOF;
-
-#define PERL_IN_UNI_KEYWORDS_C
-
-#include "EXTERN.h"
-#include "perl.h"
-
-int
-Perl_uniprop_lookup(const char * tokstr, const Size_t len)
-{
-
-    PERL_ARGS_ASSERT_UNIPROP_LOOKUP;
-
-EOF
-
-print $keywords_fh $t->generate;
-
-print $keywords_fh <<EOF;
-
+                  from => "mph.pl"});
+my %keyword_hash;
+foreach my $keyword (@keywords) {
+    $keyword_hash{$keyword} = token_name($keyword);
 }
-EOF
 
+my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows) = MinimalPerfectHash::make_mph_from_hash(\%keyword_hash);
+print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1, $length_all_keys, $smart_blob, $rows, undef, undef, undef, 'match_uniprop' );
+
+push @sources, 'regen/mph.pl';
 read_only_bottom_close_and_rename($keywords_fh, \@sources);

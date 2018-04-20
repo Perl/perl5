@@ -32,6 +32,7 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 #include "invlist_inline.h"
+#include "uni_keywords.h"
 
 static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
@@ -6178,7 +6179,9 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
     /* Get the index into our pointer table of the inversion list corresponding
      * to the property */
-    table_index = uniprop_lookup(lookup_name, j);
+    table_index = match_uniprop((U8 *) lookup_name, j);
+
+    /* If it didn't find the property */
     if (table_index == 0) {
 
         /* If didn't find the property, we try again stripping off any initial
@@ -6189,9 +6192,9 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
         lookup_name += 2;
         j -= 2;
-        table_index = uniprop_lookup(lookup_name, j);
 
         /* If still didn't find it, give up */
+        table_index = match_uniprop((U8 *) lookup_name, j);
         if (table_index == 0) {
             return NULL;
         }
