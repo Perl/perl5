@@ -2061,59 +2061,59 @@ end_file_pound_if;
 # An initial & means to use the subroutine from this file instead of an
 # official inversion list.
 
-    # Below is the list of property names to generate.  '&' means to use the
-    # subroutine to generate the inversion list instead of the generic code
-    # below.  Some properties have a comma-separated list after the name,
-    # These are extra enums to add to those found in the Unicode tables.
-    no warnings 'qw';
-                         # Ignore non-alpha in sort
-    for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
-                             Assigned
-                             ASCII
-                             Cased
-                             VertSpace
-                             XPerlSpace
-                             XPosixAlnum
-                             XPosixAlpha
-                             XPosixBlank
-                             XPosixCntrl
-                             XPosixDigit
-                             XPosixGraph
-                             XPosixLower
-                             XPosixPrint
-                             XPosixPunct
-                             XPosixSpace
-                             XPosixUpper
-                             XPosixWord
-                             XPosixXDigit
-                             _Perl_Any_Folds
-                             &NonL1_Perl_Non_Final_Folds
-                             _Perl_Folds_To_Multi_Char
-                             &UpperLatin1
-                             _Perl_IDStart
-                             _Perl_IDCont
-                             _Perl_Charname_Begin
-                             _Perl_Charname_Continue
-                             _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
-                             _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
-                             _Perl_SB,SContinue,CR,Extend,LF,EDGE
-                             _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
-                             _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
-                             Lowercase_Mapping
-                             Titlecase_Mapping
-                             Uppercase_Mapping
-                             Simple_Case_Folding
-                             Case_Folding
-                            &_Perl_IVCF
-                           )
-                           # NOTE that the convention is that extra enum
-                           # values come after the property name, separated by
-                           # commas, with the enums that aren't ever defined
-                           # by Unicode coming last, at least 4 all-uppercase
-                           # characters.  The others are enum names that are
-                           # needed by perl, but aren't in all Unicode
-                           # releases.
-    ) {
+# Below is the list of property names to generate.  '&' means to use the
+# subroutine to generate the inversion list instead of the generic code
+# below.  Some properties have a comma-separated list after the name,
+# These are extra enums to add to those found in the Unicode tables.
+no warnings 'qw';
+                        # Ignore non-alpha in sort
+for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
+                            Assigned
+                            ASCII
+                            Cased
+                            VertSpace
+                            XPerlSpace
+                            XPosixAlnum
+                            XPosixAlpha
+                            XPosixBlank
+                            XPosixCntrl
+                            XPosixDigit
+                            XPosixGraph
+                            XPosixLower
+                            XPosixPrint
+                            XPosixPunct
+                            XPosixSpace
+                            XPosixUpper
+                            XPosixWord
+                            XPosixXDigit
+                            _Perl_Any_Folds
+                            &NonL1_Perl_Non_Final_Folds
+                            _Perl_Folds_To_Multi_Char
+                            &UpperLatin1
+                            _Perl_IDStart
+                            _Perl_IDCont
+                            _Perl_Charname_Begin
+                            _Perl_Charname_Continue
+                            _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
+                            _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
+                            _Perl_SB,SContinue,CR,Extend,LF,EDGE
+                            _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
+                            _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
+                            Lowercase_Mapping
+                            Titlecase_Mapping
+                            Uppercase_Mapping
+                            Simple_Case_Folding
+                            Case_Folding
+                        &_Perl_IVCF
+                        )
+                        # NOTE that the convention is that extra enum
+                        # values come after the property name, separated by
+                        # commas, with the enums that aren't ever defined
+                        # by Unicode coming last, at least 4 all-uppercase
+                        # characters.  The others are enum names that are
+                        # needed by perl, but aren't in all Unicode
+                        # releases.
+) {
 
     for my $charset (get_supported_code_pages()) {
         @a2n = @{get_a2n($charset)};
