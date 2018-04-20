@@ -6,7 +6,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl527.dll).  Also makes individual DLLs for the XS extensions.
+# (perl528.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -44,7 +44,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	*= \5.27.11
+#INST_VER	*= \5.28.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -220,7 +220,7 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl527s.lib will also be created.
+# variables below. A static library perl528s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	*= define
@@ -919,8 +919,8 @@ UTILS		=			\
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl527$(a)
-PERLSTATICLIB	= ..\libperl527s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl528$(a)
+PERLSTATICLIB	= ..\libperl528s$(a)
 INT64		= long long
 
 .ELSE
@@ -933,11 +933,11 @@ INT64		= __int64
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= $(COREDIR)\perl527$(a)
-PERLEXPLIB	*= $(COREDIR)\perl527.exp
-PERLSTATICLIB	*= ..\perl527s$(a)
-PERLDLL		= ..\perl527.dll
-PERLDLLBASE	= perl527.dll
+PERLIMPLIB	*= $(COREDIR)\perl528$(a)
+PERLEXPLIB	*= $(COREDIR)\perl528.exp
+PERLSTATICLIB	*= ..\perl528s$(a)
+PERLDLL		= ..\perl528.dll
+PERLDLLBASE	= perl528.dll
 
 #EUMM on Win32 isn't ready for parallel make, so only allow this file to be parallel
 #$(MAKE) will contain the -P that this makefile was called with, which is bad for
