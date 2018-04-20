@@ -2668,9 +2668,7 @@ print $out_fh "\nconst char * deprecated_property_msgs[] = {\n\t";
 print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
 print $out_fh "\n};\n";
 
-switch_pound_if ('binary_property_tables', [ 'PERL_IN_UTF8_C',
-                                             'PERL_IN_UNI_KEYWORDS_C',
-                                            ]);
+switch_pound_if ('binary_property_tables', 'PERL_IN_UTF8_C');
 
 my @enums = sort values %enums;
 
