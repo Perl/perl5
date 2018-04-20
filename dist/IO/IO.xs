@@ -11,6 +11,10 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
+#define NEED_eval_pv
+#define NEED_newCONSTSUB
+#define NEED_newSVpvn_flags
+#include "ppport.h"
 #include "poll.h"
 #ifdef I_UNISTD
 #  include <unistd.h>
