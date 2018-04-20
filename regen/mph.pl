@@ -259,8 +259,8 @@ sub build_array_of_struct {
         );
         $_ > 0xFF and die "panic: value exceeds range of U8"
             for @u8;
-        push @rows, sprintf("  { %5d, %5d, %5d, %3d, %3d, %s }",
-            @u16, @u8, $row->{value} );
+        push @rows, sprintf("  { %5d, %5d, %5d, %3d, %3d, %s }   /* %s%s */",
+            @u16, @u8, $row->{value}, $row->{prefix}, $row->{suffix});
     }
     return \@rows,\%defines,\%tests;
 }
