@@ -7250,7 +7250,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
         const char* name;
 
         name = get_regex_charset_name(RExC_rx->extflags, &len);
-        if strEQ(name, DEPENDS_PAT_MODS) {  /* /d under UTF-8 => /u */
+        if (strEQ(name, DEPENDS_PAT_MODS)) {  /* /d under UTF-8 => /u */
             assert(RExC_utf8);
             name = UNICODE_PAT_MODS;
             len = sizeof(UNICODE_PAT_MODS) - 1;
@@ -17730,7 +17730,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                            literal
                         );
                 }
-                else if isMNEMONIC_CNTRL(value) {
+                else if (isMNEMONIC_CNTRL(value)) {
                     vWARN4(RExC_parse,
                            "\"%.*s\" is more clearly written simply as \"%s\"",
                            (int) (RExC_parse - rangebegin),

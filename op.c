@@ -10478,7 +10478,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 	    return FALSE;
     } else {
 	if (*name == 'E') {
-	    if strEQ(name, "END") {
+	    if (strEQ(name, "END")) {
 		DEBUG_x( dump_sub(gv) );
 		Perl_av_create_and_unshift_one(aTHX_ &PL_endav, MUTABLE_SV(cv));
 	    } else
