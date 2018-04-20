@@ -56,6 +56,7 @@ POD = perl.pod	\
 	perl5270delta.pod	\
 	perl52710delta.pod	\
 	perl52711delta.pod	\
+	perl52712delta.pod	\
 	perl5271delta.pod	\
 	perl5272delta.pod	\
 	perl5273delta.pod	\
@@ -216,6 +217,7 @@ MAN = perl.man	\
 	perl5270delta.man	\
 	perl52710delta.man	\
 	perl52711delta.man	\
+	perl52712delta.man	\
 	perl5271delta.man	\
 	perl5272delta.man	\
 	perl5273delta.man	\
@@ -375,6 +377,7 @@ HTML = perl.html	\
 	perl5270delta.html	\
 	perl52710delta.html	\
 	perl52711delta.html	\
+	perl52712delta.html	\
 	perl5271delta.html	\
 	perl5272delta.html	\
 	perl5273delta.html	\
@@ -535,6 +538,7 @@ TEX = perl.tex	\
 	perl5270delta.tex	\
 	perl52710delta.tex	\
 	perl52711delta.tex	\
+	perl52712delta.tex	\
 	perl5271delta.tex	\
 	perl5272delta.tex	\
 	perl5273delta.tex	\
