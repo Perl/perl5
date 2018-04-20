@@ -60,6 +60,8 @@ my %exceptions_to_where_to_define =
 
 my %where_to_define_enums = ();
 
+my $applies_to_all_charsets_text = "all charsets";
+
 my %gcb_enums;
 my @gcb_short_enums;
 my %gcb_abbreviations;
@@ -2148,6 +2150,7 @@ for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
         my $map_default;
         my $maps_to_code_point;
         my $to_adjust;
+        my $same_in_all_code_pages;
         if ($is_local_sub) {
             my @return = eval $lookup_prop;
             die $@ if $@;
@@ -2178,7 +2181,7 @@ for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     if (defined $count) {
                         # Short-circuit an empty inversion list.
                         output_invlist($prop_name, \@invlist, $charset);
-                        next;
+                        last;
                     }
                     die "Could not find inversion list for '$lookup_prop'"
                 }
@@ -2220,6 +2223,7 @@ for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 && (    $invlist[0] != 0
                     || (scalar @invlist != 1 && $invlist[1] < 256)))))
         {
+            $same_in_all_code_pages = 0;
             if (! @invmap) {    # Straight inversion list
                 # Look at all the ranges that start before 257.
                 my @latin1_list;
@@ -2423,6 +2427,9 @@ for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 unshift @invlist, @new_invlist;
             }
         }
+        else {
+            $same_in_all_code_pages = 1;
+        }
 
         # prop_invmap() returns an extra final entry, which we can now
         # discard.
@@ -2481,14 +2488,18 @@ for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
         }
 
         switch_pound_if ($prop_name, 'PERL_IN_UTF8_C');
-        start_charset_pound_if($charset, 1);
+        start_charset_pound_if($charset, 1) unless $same_in_all_code_pages;
 
-        output_invlist($prop_name, \@invlist, $charset);
+        output_invlist($prop_name, \@invlist, ($same_in_all_code_pages)
+                                              ? $applies_to_all_charsets_text
+                                              : $charset);
 
         if (@invmap) {
             output_invmap($prop_name, \@invmap, $lookup_prop, $map_format,
                           $map_default, $extra_enums, $charset);
         }
+
+        last if $same_in_all_code_pages;
         end_charset_pound_if;
     }
 }
