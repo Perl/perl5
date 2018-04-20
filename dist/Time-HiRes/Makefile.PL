@@ -959,6 +959,18 @@ sub doMakefile {
 	push @makefileopts, (LICENSE => 'perl_5');
     }
 
+    if ($ExtUtils::MakeMaker::VERSION >= 6.46) {
+        push @makefileopts, (
+            META_MERGE => {
+                resources => {
+                    repository => 'git://perl5.git.perl.org/perl.git',
+                    bugtracker => 'https://rt.perl.org/rt3/',
+                    homepage   => "http://dev.perl.org/",
+                },
+            },
+        )
+    }
+
     WriteMakefile(@makefileopts);
 }
 
