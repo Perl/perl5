@@ -1644,7 +1644,8 @@ EOP
         like("X", qr/$x/, "UTF-8 of /[x]/i matches upper case");
     }
 
-    {   # make sure we get an error when \p{} cannot load Unicode tables
+SKIP: {   # make sure we get an error when \p{} cannot load Unicode tables
+        skip("Unicode tables always now loaded", 1);
         fresh_perl_like(<<'        prog that cannot load uni tables',
             BEGIN {
                 @INC = '../lib';

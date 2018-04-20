@@ -16721,6 +16721,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         * anyway, to save a little time */
                                       |_CORE_SWASH_INIT_ACCEPT_INVLIST;
 
+                SvREFCNT_dec(swash); /* Free any left-overs */
 		if (RExC_parse >= RExC_end)
 		    vFAIL2("Empty \\%c", (U8)value);
 		if (*RExC_parse == '{') {
@@ -16756,13 +16757,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    while (isSPACE(*(RExC_parse + n - 1)))
 		        n--;
 
-                    for (i = RExC_parse; i < RExC_parse + n; i++) {
-                        if (isCNTRL(*i) && *i != '\t') {
-                            char * name = Perl_form(aTHX_ "%.*s", (int)n, RExC_parse);
-                            RExC_parse = e + 1;
-                            vFAIL2("Can't find Unicode property definition \"%s\"", name);
-                        }
-                    }
 		}   /* The \p isn't immediately followed by a '{' */
 		else if (! isALPHA(*RExC_parse)) {
                     RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
@@ -16775,11 +16769,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    n = 1;
 		}
 		if (!SIZE_ONLY) {
-                    SV* invlist;
-                    char* name;
+                    char* name = RExC_parse;
                     char* base_name;    /* name after any packages are stripped */
                     char* lookup_name = NULL;
                     const char * const colon_colon = "::";
+                    bool invert;
+
+                    SV* invlist = parse_uniprop_string(name, n, FOLD, &invert);
+                    if (invlist) {
+                        if (invert) {
+                            value ^= 'P' ^ 'p';
+                        }
+                    }
+                    else {
 
                     /* Try to get the definition of the property into
                      * <invlist>.  If /i is in effect, the effective property
@@ -16788,6 +16790,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
                     name = savepv(Perl_form(aTHX_ "%.*s", (int)n, RExC_parse));
                     SAVEFREEPV(name);
+
+                    for (i = RExC_parse; i < RExC_parse + n; i++) {
+                        if (isCNTRL(*i) && *i != '\t') {
+                            RExC_parse = e + 1;
+                            vFAIL2("Can't find Unicode property definition \"%s\"", name);
+                        }
+                    }
+
                     if (FOLD) {
                         lookup_name = savepv(Perl_form(aTHX_ "__%s_i", name));
 
@@ -16798,7 +16808,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
-                    SvREFCNT_dec(swash); /* Free any left-overs */
                     swash = _core_swash_init("utf8",
                                              (lookup_name)
                                               ? lookup_name
@@ -16898,18 +16907,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         {
                             has_user_defined_property = TRUE;
                         }
-                        else if
+                    }
+                    }
+                    if (invlist) {
+                        if (! has_user_defined_property &&
                             /* We warn on matching an above-Unicode code point
                              * if the match would return true, except don't
                              * warn for \p{All}, which has exactly one element
                              * = 0 */
                             (_invlist_contains_cp(invlist, 0x110000)
                                 && (! (_invlist_len(invlist) == 1
-                                       && *invlist_array(invlist) == 0)))
+                                       && *invlist_array(invlist) == 0))))
                         {
                             warn_super = TRUE;
                         }
-
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
@@ -16920,14 +16931,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             /* The swash can't be used as-is, because we've
 			     * inverted things; delay removing it to here after
 			     * have copied its invlist above */
-                            SvREFCNT_dec_NN(swash);
+                            if (! swash) {
+                                SvREFCNT_dec_NN(invlist);
+                            }
+                            SvREFCNT_dec(swash);
                             swash = NULL;
                         }
                         else {
                             _invlist_union(properties, invlist, &properties);
+                            if (! swash) {
+                                SvREFCNT_dec_NN(invlist);
+                            }
 			}
-		    }
-		}
+                    }
+                }
 		RExC_parse = e + 1;
                 namedclass = ANYOF_UNIPROP;  /* no official name, but it's
                                                 named */
