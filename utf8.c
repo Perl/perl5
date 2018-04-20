@@ -5878,7 +5878,7 @@ Perl_init_uniprops(pTHX)
     PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(PL_XPOSIXLOWER_invlist);
     PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(PL_XPOSIXPRINT_invlist);
     PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PL_XPOSIXPUNCT_invlist);
-    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_XPERLSPACE_invlist);
+    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_XPOSIXSPACE_invlist);
     PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(PL_XPOSIXUPPER_invlist);
     PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_VERTSPACE_invlist);
     PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_XPOSIXWORD_invlist);
@@ -5912,15 +5912,338 @@ Perl_init_uniprops(pTHX)
 SV *
 Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const bool to_fold, bool * invert)
 {
+    /* Parse the interior meat of \p{} passed to this in 'name' with length 'len',
+     * and return an inversion list if a property with 'name' is found, or NULL
+     * if not.  'name' point to the input with leading and trailing space trimmed.
+     * 'to_fold' indicates if /i is in effect.
+     *
+     * When the return is an inversion list, '*invert' will be set to a boolean
+     * indicating if it should be inverted or not
+     *
+     * This currently doesn't handle all cases.  A NULL return indicates the
+     * caller should try a different approach
+     */
+
+    char* lookup_name;
+    bool stricter = FALSE;
+    unsigned int i;
+    unsigned int j = 0;
+    int equals_pos = -1;        /* Where the '=' is found, or negative if none */
+    int table_index = 0;
+    bool starts_with_In_or_Is = FALSE;
+    Size_t lookup_offset = 0;
 
     PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
-    PERL_UNUSED_ARG(name);
-    PERL_UNUSED_ARG(len);
-    PERL_UNUSED_ARG(to_fold);
-    PERL_UNUSED_ARG(invert);
+    /* The input will be modified into 'lookup_name' */
+    Newx(lookup_name, len, char);
+    SAVEFREEPV(lookup_name);
 
-    return NULL;
+    /* Parse the input. */
+    for (i = 0; i < len; i++) {
+        char cur = name[i];
+
+        /* These characters can be freely ignored in most situations.  Later it
+         * may turn out we shouldn't have ignored them, and we have to reparse,
+         * but we don't have enough information yet to make that decision */
+        if (cur == '-' || cur == '_' || isSPACE(cur)) {
+            continue;
+        }
+
+        /* Case differences are also ignored.  Our lookup routine assumes
+         * everything is lowercase */
+        if (isUPPER(cur)) {
+            lookup_name[j++] = toLOWER(cur);
+            continue;
+        }
+
+        /* A double colon is either an error, or a package qualifier to a
+         * subroutine user-defined property; neither of which do we currently
+         * handle
+         *
+         * But a single colon is a synonym for '=' */
+        if (cur == ':') {
+            if (i < len - 1 && name[i+1] == ':') {
+                return NULL;
+            }
+            cur = '=';
+        }
+
+        /* Otherwise, this character is part of the name. */
+        lookup_name[j++] = cur;
+
+        /* Only the equals sign needs further processing */
+        if (cur == '=') {
+            equals_pos = j; /* Note where it occurred in the input */
+            break;
+        }
+    }
+
+    /* Here, we are either done with the whole property name, if it was simple;
+     * or are positioned just after the '=' if it is compound. */
+
+    if (equals_pos >= 0) {
+        assert(! stricter); /* We shouldn't have set this yet */
+
+        /* Space immediately after the '=' is ignored */
+        i++;
+        for (; i < len; i++) {
+            if (! isSPACE(name[i])) {
+                break;
+            }
+        }
+
+        /* Certain properties need special handling.  They may optionally be
+         * prefixed by 'is'.  Ignore that prefix for the purposes of checking
+         * if this is one of those properties */
+        if (memBEGINPs(lookup_name, len, "is")) {
+            lookup_offset = 2;
+        }
+
+        /* Then check if it is one of these properties.  This is hard-coded
+         * because easier this way, and the list is unlikely to change */
+        if (   memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "canonicalcombiningclass")
+            || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "ccc")
+            || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "numericvalue")
+            || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "nv")
+            || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "age")
+            || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "in")
+            || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "presentin"))
+        {
+            unsigned int k;
+
+            /* What makes these properties special is that the stuff after the
+             * '=' is a number.  Therefore, we can't throw away '-'
+             * willy-nilly, as those could be a minus sign.  Other stricter
+             * rules also apply.  However, these properties all can have the
+             * rhs not be a number, in which case they contain at least one
+             * alphabetic.  In those cases, the stricter rules don't apply.  We
+             * first parse to look for alphas */
+            stricter = TRUE;
+            for (k = i; k < len; k++) {
+                if (isALPHA(name[k])) {
+                    stricter = FALSE;
+                    break;
+                }
+            }
+        }
+
+        if (stricter) {
+
+            /* A number may have a leading '+' or '-'.  The latter is retained
+             * */
+            if (name[i] == '+') {
+                i++;
+            }
+            else if (name[i] == '-') {
+                lookup_name[j++] = '-';
+                i++;
+            }
+
+            /* Skip leading zeros including single underscores separating the
+             * zeros, or between the final leading zero and the first other
+             * digit */
+            for (; i < len - 1; i++) {
+                if (   name[i] != '0'
+                    && (name[i] != '_' || ! isDIGIT(name[i+1])))
+                {
+                    break;
+                }
+            }
+        }
+    }
+    else {  /* No '=' */
+
+       /* We are now in a position to determine if this property should have
+        * been parsed using stricter rules.  Only a few are like that, and
+        * unlikely to change. */
+        if (   (   memBEGINPs(lookup_name, j, "perl")
+                && memNEs(lookup_name + 4, j - 4, "space")
+                && memNEs(lookup_name + 4, j - 4, "word"))
+            || memEQs(lookup_name, j, "canondcij")
+            || memEQs(lookup_name, j, "combabove"))
+        {
+            stricter = TRUE;
+
+            /* We set the inputs back to 0 and the code below will reparse,
+             * using strict */
+            i = j = 0;
+        }
+    }
+
+    /* Here, we have either finished the property, or are positioned to parse
+     * the remainder, and we know if stricter rules apply.  Finish out, if not
+     * already done */
+    for (; i < len; i++) {
+        char cur = name[i];
+
+        /* In all instances, case differences are ignored, and we normalize to
+         * lowercase */
+        if (isUPPER(cur)) {
+            lookup_name[j++] = toLOWER(cur);
+            continue;
+        }
+
+        /* An underscore is skipped, but not under strict rules unless it
+         * separates two digits */
+        if (cur == '_') {
+            if (    stricter
+                && (     i == 0 || (int) i == equals_pos || i == len- 1
+                    || ! isDIGIT(name[i-1]) || ! isDIGIT(name[i+1])))
+            {
+                lookup_name[j++] = '_';
+            }
+            continue;
+        }
+
+        /* Hyphens are skipped except under strict */
+        if (cur == '-' && ! stricter) {
+            continue;
+        }
+
+        /* XXX Bug in documentation.  It says white space skipped adjacent to
+         * non-word char.  Maybe we should, but shouldn't skip it next to a dot
+         * in a number */
+        if (isSPACE(cur) && ! stricter) {
+            continue;
+        }
+
+        lookup_name[j++] = cur;
+
+        /* Unless this is a slash, we are done with it */
+        if (cur != '/') {
+            continue;
+        }
+
+        /* A slash in the 'numeric value' property indicates that what follows
+         * is a denominator.  It can have a leading '+' and '0's that should be
+         * skipped.  But we have never allowed a negative denominator, so treat
+         * a minus like every other character.  (No need to rule out a second
+         * '/', as that won't match anything anyway */
+        if (   memEQs(lookup_name + lookup_offset, equals_pos - lookup_offset,
+                      "nv=")
+            || memEQs(lookup_name + lookup_offset, equals_pos - lookup_offset,
+                      "numericvalue="))
+        {
+            i++;
+            if (i < len && name[i] == '+') {
+                i++;
+            }
+
+            /* Skip leading zeros including underscores separating digits */
+            for (; i < len - 1; i++) {
+                if (   name[i] != '0'
+                    && (name[i] != '_' || ! isDIGIT(name[i+1])))
+                {
+                    break;
+                }
+            }
+
+            /* Store the first real character in the denominator */
+            lookup_name[j++] = name[i];
+        }
+    }
+
+    /* Here are completely done parsing the input 'name', and 'lookup_name'
+     * contains a copy, normalized.
+     *
+     * This special case is grandfathered in: 'L_' and 'GC=L_' are accepted and
+     * different from without the underscores.  */
+    if (  (   UNLIKELY(memEQs(lookup_name, j, "l"))
+           || UNLIKELY(memEQs(lookup_name, j, "gc=l")))
+        && UNLIKELY(name[len-1] == '_'))
+    {
+        lookup_name[j++] = '&';
+    }
+    else if (len > 2 && name[0] == 'I' && (   name[1] == 'n' || name[1] == 's'))
+    {
+
+        /* Also, if the original input began with 'In' or 'Is', it could be a
+         * subroutine call instead of a property names, which currently isn't
+         * handled by this function.  Subroutine calls can't happen if there is
+         * an '=' in the name */
+        if (equals_pos < 0 && get_cvn_flags(name, len, GV_NOTQUAL) != NULL) {
+            return NULL;
+        }
+
+        starts_with_In_or_Is = true;
+    }
+
+    /* Get the index into our pointer table of the inversion list corresponding
+     * to the property */
+    table_index = uniprop_lookup(lookup_name, j);
+    if (table_index == 0) {
+
+        /* If didn't find the property, we try again stripping off any initial
+         * 'In' or 'Is' */
+        if (! starts_with_In_or_Is) {
+            return NULL;
+        }
+
+        lookup_name += 2;
+        j -= 2;
+        table_index = uniprop_lookup(lookup_name, j);
+
+        /* If still didn't find it, give up */
+        if (table_index == 0) {
+            return NULL;
+        }
+    }
+
+    /* The return is an index into a table of ptrs.  A negative return
+     * signifies that the real index is the absolute value, but the result
+     * needs to be inverted */
+    if (table_index < 0) {
+        *invert = TRUE;
+        table_index = -table_index;
+    }
+    else {
+        *invert = FALSE;
+    }
+
+    /* Out-of band indices indicate a deprecated property.  The proper index is
+     * modulo it with the table size.  And dividing by the table size yields
+     * an offset into a table constructed to contain the corresponding warning
+     * message */
+    if (table_index > MAX_UNI_KEYWORD_INDEX) {
+        Size_t warning_offset = table_index / MAX_UNI_KEYWORD_INDEX;
+        table_index %= MAX_UNI_KEYWORD_INDEX;
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                "Use of '%.*s' in \\p{} or \\P{} is deprecated because: %s",
+                (int) len, name, deprecated_property_msgs[warning_offset]);
+    }
+
+    /* In a few properties, a different property is used under /i.  These are
+     * unlikely to change, so are hard-coded here. */
+    if (to_fold) {
+        if (   table_index == PL_UPPER
+            || table_index == PL_LOWER
+            || table_index == PL_TITLE)
+        {
+            table_index = PL_CASED;
+        }
+        else if (   table_index == PL_UPPERCASELETTER
+                 || table_index == PL_LOWERCASELETTER
+                 || table_index == PL_TITLECASELETTER)
+        {
+            table_index = PL_CASEDLETTER;
+        }
+        else if (   table_index == PL_POSIXUPPER
+                 || table_index == PL_POSIXLOWER)
+        {
+            table_index = PL_POSIXALPHA;
+        }
+    }
+
+    /* Create and return the inversion list */
+    return _new_invlist_C_array(PL_uni_prop_ptrs[table_index]);
 }
 
 /*

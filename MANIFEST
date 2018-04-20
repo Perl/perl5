@@ -6068,6 +6068,7 @@ toke.c				The tokener
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl
 uconfig64.sh			Configuration script for microperl for LP64
+uni_keywords.c			Generated file which parses \p{} property names
 unicode_constants.h		compile-time macros for Unicode code points
 universal.c			The default UNIVERSAL package methods
 unixish.h			Defines that are assumed on Unix

@@ -32,6 +32,7 @@ my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 # integer or float
 my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /ax;
 
+my @keywords;
 my $table_name_prefix = "PL_";
 
 # Matches valid C language enum names: begins with ASCII alphabetic, then any
@@ -76,6 +77,14 @@ my @wb_short_enums;
 my %wb_abbreviations;
 
 my @a2n;
+
+my %prop_name_aliases;
+# Invert this hash so that for each canonical name, we get a list of things
+# that map to it (excluding itself)
+foreach my $name (sort keys %utf8::loose_property_name_of) {
+    my $canonical = $utf8::loose_property_name_of{$name};
+    push @{$prop_name_aliases{$canonical}},  $name if $canonical ne $name;
+}
 
 # Output these tables in the same vicinity as each other, so that will get
 # paged in at about the same time
@@ -2178,9 +2187,8 @@ foreach my $property (sort
     $tag = $utf8::stricter_to_file_of{$property} unless defined $tag;
 
     # The tag may contain an '!' meaning it is identical to the one formed
-    # by removing the !, except that it is inverted, so we don't need a
-    # table for it
-    next if $tag =~ s/!//;
+    # by removing the !, except that it is inverted.
+    my $inverted = $tag =~ s/!//;
 
     # The list of 'prop=value' entries that this single entry expands to
     my @this_entries;
@@ -2189,18 +2197,84 @@ foreach my $property (sort
     # thing if there is no '='
     my ($lhs, $rhs) = $property =~ / ( [^=]* ) ( =? .*) /x;
 
-    if (! exists $enums{$tag}) {
+    # $lhs then becomes the property name.  See if there are any synonyms
+    # for this property.
+    if (exists $prop_name_aliases{$lhs}) {
+
+        # If so, do the combinatorics so that a new entry is added for
+        # each legal property combined with the property value (which is
+        # $rhs)
+        foreach my $alias (@{$prop_name_aliases{$lhs}}) {
+
+            # But, there are some ambiguities, like 'script' is a synonym
+            # for 'sc', and 'sc' can stand alone, meaning something
+            # entirely different than 'script'.  'script' cannot stand
+            # alone.  Don't add if the potential new lhs is in the hash of
+            # stand-alone properties.
+            no warnings 'once';
+            next if $rhs eq "" &&  grep { $alias eq $_ }
+                                    keys %utf8::loose_property_to_file_of;
+
+            my $new_entry = $alias . $rhs;
+            push @this_entries, $new_entry
+                            unless grep { $_ eq $new_entry } @this_entries;
+        }
+    }
+
+    # Above, we added the synonyms for the base entry we're now
+    # processing.  But we haven't dealt with it yet.  If we already have a
+    # property with the identical characteristics, this becomes just a
+    # synonym for it.
+    if (exists $enums{$tag}) {
+        push @this_entries, $property;
+    }
+    else { # Otherwise, create a new entry.
+
         # Add to the list of properties to generate inversion lists for.
         push @bin_props, uc $property;
 
+        # Create a rule for the parser
+        push @keywords, $property unless grep { $property eq $_ } @keywords;
+
         # And create an enum for it.
         $enums{$tag} = $table_name_prefix . uc sanitize_name($property);
+
+        # Some properties are deprecated.  This hash tells us so, and the
+        # warning message to raise if they are used.
+        if (exists $utf8::why_deprecated{$tag}) {
+            $deprecated_tags{$enums{$tag}} = scalar @deprecated_messages;
+            push @deprecated_messages, $utf8::why_deprecated{$tag};
+        }
+
+        # Our sort above should have made sure that we see the
+        # non-inverted version first, but this makes sure.
+        warn "$property is inverted!!!" if $inverted;
+    }
+
+    # Everything else is #defined to be the base enum, inversion is
+    # indicated by negating the value.
+    my $defined_to = "";
+    $defined_to .= "-" if $inverted;
+    $defined_to .= $enums{$tag};
+
+    # Go through the entries that evaluate to this.
+    foreach my $define (@this_entries) {
+
+        # There is a rule for the parser for each.
+        push @keywords, $define unless grep { $define eq $_ } @keywords;
+
+        # And a #define for each to this.
+        push @bin_prop_defines, "#define "
+                                . $table_name_prefix
+                                . uc(sanitize_name($define))
+                                . "   $defined_to";
     }
 }
 
 @bin_props = sort {  exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
                    or $a cmp $b
                   } @bin_props;
+@bin_prop_defines = sort @bin_prop_defines;
 push @props, @bin_props;
 
 foreach my $prop (@props) {
@@ -2594,6 +2668,63 @@ foreach my $prop (@props) {
     }
 }
 
+switch_pound_if ('binary_property_tables', 'PERL_IN_UTF8_C');
+
+print $out_fh "\nconst char * deprecated_property_msgs[] = {\n\t";
+print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
+print $out_fh "\n};\n";
+
+switch_pound_if ('binary_property_tables', [ 'PERL_IN_UTF8_C',
+                                             'PERL_IN_UNI_KEYWORDS_C',
+                                            ]);
+
+my @enums = sort values %enums;
+
+# Save a copy of these before modification
+my @invlist_names = map { "${_}_invlist" } @enums;
+
+# Post-process the enums for deprecated properties.
+if (scalar keys %deprecated_tags) {
+    my $seen_deprecated = 0;
+    foreach my $enum (@enums) {
+        if (grep { $_ eq $enum } keys %deprecated_tags) {
+
+            # Change the enum name for this deprecated property to a
+            # munged one to act as a placeholder in the typedef.  Then
+            # make the real name be a #define whose value is such that
+            # its modulus with the number of enums yields the index into
+            # the table occupied by the placeholder.  And so that dividing
+            # the #define value by the table length gives an index into
+            # the table of deprecation messages for the corresponding
+            # warning.
+            my $revised_enum = "${enum}_perl_aux";
+            if (! $seen_deprecated) {
+                $seen_deprecated = 1;
+                print $out_fh "\n";
+            }
+            print $out_fh "#define $enum ($revised_enum + (MAX_UNI_KEYWORD_INDEX * $deprecated_tags{$enum}))\n";
+            $enum = $revised_enum;
+        }
+    }
+}
+
+print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,\n\t";
+print $out_fh join ",\n\t", @enums;
+print $out_fh "\n";
+print $out_fh "} binary_invlist_enum;\n";
+print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
+print $out_fh "\n", join "\n", @bin_prop_defines, "\n";
+
+switch_pound_if ('binary_property_index_table', 'PERL_IN_UTF8_C' );
+
+print $out_fh "\nstatic const UV * const PL_uni_prop_ptrs\[] = {\n";
+print $out_fh "\tNULL,\t/* Placeholder */\n\t";
+print $out_fh join ",\n\t", @invlist_names;
+print $out_fh "\n";
+print $out_fh "};\n";
+
+end_file_pound_if;
+
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
 
 output_GCB_table();
@@ -2626,3 +2757,50 @@ my @sources = qw(regen/mk_invlists.pl
 }
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
+
+use Devel::Tokenizer::C;
+
+sub token_name
+{
+    my $name = sanitize_name(shift);
+    warn "$name contains non-word" if $name =~ /\W/a;
+
+    return "return $table_name_prefix\U$name;\n"
+}
+
+my $t = Devel::Tokenizer::C->new(TokenFunc => \&token_name,
+                                 StringLength  => 'len',
+                                 Strategy      => 'narrow',
+                                 TokenEnd      =>  undef,
+                                 UnknownCode   => 'return 0;',
+        );
+
+$t->add_tokens(lc $_) for @keywords;
+
+my $keywords_fh = open_new('uni_keywords.c', '>',
+		  {style => '*', by => 'regen/mk_invlists.pl',
+                  from => "Unicode::UCD"});
+
+print $keywords_fh <<EOF;
+
+#define PERL_IN_UNI_KEYWORDS_C
+
+#include "EXTERN.h"
+#include "perl.h"
+
+int
+Perl_uniprop_lookup(const char * tokstr, const Size_t len)
+{
+
+    PERL_ARGS_ASSERT_UNIPROP_LOOKUP;
+
+EOF
+
+print $keywords_fh $t->generate;
+
+print $keywords_fh <<EOF;
+
+}
+EOF
+
+read_only_bottom_close_and_rename($keywords_fh, \@sources);

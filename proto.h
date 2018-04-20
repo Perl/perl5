@@ -3755,6 +3755,9 @@ PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
 PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
 PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags);
+PERL_CALLCONV int	Perl_uniprop_lookup(const char * tokstr, const Size_t len);
+#define PERL_ARGS_ASSERT_UNIPROP_LOOKUP	\
+	assert(tokstr)
 #ifndef NO_MATHOMS
 PERL_CALLCONV SSize_t	Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags);
 #define PERL_ARGS_ASSERT_UNPACK_STR	\
