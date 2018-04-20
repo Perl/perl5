@@ -6226,17 +6226,17 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
     /* In a few properties, a different property is used under /i.  These are
      * unlikely to change, so are hard-coded here. */
     if (to_fold) {
-        if (   table_index == PL_UPPER
-            || table_index == PL_LOWER
-            || table_index == PL_TITLE)
+        if (   table_index == PL_XPOSIXUPPER
+            || table_index == PL_XPOSIXLOWER
+            || table_index == PL_LT)
         {
             table_index = PL_CASED;
         }
-        else if (   table_index == PL_UPPERCASELETTER
-                 || table_index == PL_LOWERCASELETTER
-                 || table_index == PL_TITLECASELETTER)
+        else if (   table_index == PL_LU
+                 || table_index == PL_LL
+                 || table_index == PL_LT)
         {
-            table_index = PL_CASEDLETTER;
+            table_index = PL_L_AMP_;
         }
         else if (   table_index == PL_POSIXUPPER
                  || table_index == PL_POSIXLOWER)

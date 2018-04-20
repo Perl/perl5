@@ -32,7 +32,7 @@ my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 # integer or float
 my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /ax;
 
-my @keywords;
+my %keywords;
 my $table_name_prefix = "PL_";
 
 # Matches valid C language enum names: begins with ASCII alphabetic, then any
@@ -2163,7 +2163,6 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 # are needed by perl, but aren't in all Unicode releases.
 
 my @bin_props;
-my @bin_prop_defines;
 my %enums;
 my @deprecated_messages = "";   # Element [0] is a placeholder
 my %deprecated_tags;
@@ -2234,7 +2233,9 @@ foreach my $property (sort
         push @bin_props, uc $property;
 
         # Create a rule for the parser
-        push @keywords, $property unless grep { $property eq $_ } @keywords;
+        if (! exists $keywords{$property}) {
+            $keywords{$property} = token_name($property);
+        }
 
         # And create an enum for it.
         $enums{$tag} = $table_name_prefix . uc sanitize_name($property);
@@ -2261,20 +2262,13 @@ foreach my $property (sort
     foreach my $define (@this_entries) {
 
         # There is a rule for the parser for each.
-        push @keywords, $define unless grep { $define eq $_ } @keywords;
-
-        # And a #define for each to this.
-        push @bin_prop_defines, "#define "
-                                . $table_name_prefix
-                                . uc(sanitize_name($define))
-                                . "   $defined_to";
+        $keywords{$define} = $defined_to;
     }
 }
 
 @bin_props = sort {  exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
                    or $a cmp $b
                   } @bin_props;
-@bin_prop_defines = sort @bin_prop_defines;
 push @props, @bin_props;
 
 foreach my $prop (@props) {
@@ -2713,7 +2707,6 @@ print $out_fh join ",\n\t", @enums;
 print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
-print $out_fh "\n", join "\n", @bin_prop_defines, "\n";
 
 switch_pound_if ('binary_property_index_table', 'PERL_IN_UTF8_C' );
 
@@ -2771,12 +2764,8 @@ sub token_name
 my $keywords_fh = open_new('uni_keywords.h', '>',
 		  {style => '*', by => 'regen/mk_invlists.pl',
                   from => "mph.pl"});
-my %keyword_hash;
-foreach my $keyword (@keywords) {
-    $keyword_hash{$keyword} = token_name($keyword);
-}
 
-my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows) = MinimalPerfectHash::make_mph_from_hash(\%keyword_hash);
+my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows) = MinimalPerfectHash::make_mph_from_hash(\%keywords);
 print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1, $length_all_keys, $smart_blob, $rows, undef, undef, undef, 'match_uniprop' );
 
 push @sources, 'regen/mph.pl';
