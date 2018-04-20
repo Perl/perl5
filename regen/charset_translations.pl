@@ -194,7 +194,7 @@ sub get_I8_2_utf($) {
             $indent = "";
         }
         else {
-            $indent = " " x (($indent_level * 4) - 1);
+            $indent = "  " x $indent_level;
         }
 
         die "Unknown character set '$charset'" unless exists $ebcdic_translations{$charset};
