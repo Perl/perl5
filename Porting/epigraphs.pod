@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.27.11 - Tana French, In the Woods
+
+Announced on 2018-04-20 by Sawyer X
+
+  And then, too, I had learned early to assume something dark and
+  lethal hidden at the heart of anything I loved. When I couldn't find
+  it, I responded, bewildered and wary, in the only way I knew how: by
+
 =head2 v5.27.10 - Robert A. Heinlein, Time Enough for Love, p. 248
 
 L<Announced on 2018-03-20 by Todd Rinaldo|https://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250042.html>
