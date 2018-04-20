@@ -89,7 +89,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+The start up overhead for creating regular expression patterns with
+Unicode properties (C<\p{...}>) has been greatly reduced in most cases.
 
 =back
 
