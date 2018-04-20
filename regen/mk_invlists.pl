@@ -11,6 +11,7 @@ use Unicode::UCD qw(prop_aliases
                    );
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
+require './lib/unicore/Heavy.pl';
 
 # This program outputs charclass_invlists.h, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
@@ -30,6 +31,8 @@ my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
 # integer or float
 my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /ax;
+
+my $table_name_prefix = "PL_";
 
 # Matches valid C language enum names: begins with ASCII alphabetic, then any
 # ASCII \w
@@ -2034,7 +2037,22 @@ sub output_WB_table() {
                         \@wb_table, \@wb_short_enums, \%wb_abbreviations);
 }
 
+sub sanitize_name ($) {
+    # Change the non-word characters in the input string to standardized word
+    # equivalents
+    #
+    my $sanitized = shift;
+    $sanitized =~ s/=/__/;
+    $sanitized =~ s/&/_AMP_/;
+    $sanitized =~ s/\./_DOT_/;
+    $sanitized =~ s/-/_MINUS_/;
+    $sanitized =~ s!/!_SLASH_!;
+
+    return $sanitized;
+}
+
 switch_pound_if ('ALL', 'PERL_IN_UTF8_C');
+
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
 
@@ -2069,80 +2087,105 @@ end_file_pound_if;
 # These are extra enums to add to those found in the Unicode tables.
 no warnings 'qw';
                         # Ignore non-alpha in sort
-for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
-                            Assigned
-                            ASCII
-                            Cased
-                            VertSpace
-                            XPerlSpace
-                            XPosixAlnum
-                            XPosixAlpha
-                            XPosixBlank
-                            XPosixCntrl
-                            XPosixDigit
-                            XPosixGraph
-                            XPosixLower
-                            XPosixPrint
-                            XPosixPunct
-                            XPosixSpace
-                            XPosixUpper
-                            XPosixWord
-                            XPosixXDigit
-                            _Perl_Any_Folds
-                            &NonL1_Perl_Non_Final_Folds
-                            _Perl_Folds_To_Multi_Char
-                            &UpperLatin1
-                            _Perl_IDStart
-                            _Perl_IDCont
-                            _Perl_Charname_Begin
-                            _Perl_Charname_Continue
-                            _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
-                            _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
-                            _Perl_SB,SContinue,CR,Extend,LF,EDGE
-                            _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
-                            _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
-                            Lowercase_Mapping
-                            Titlecase_Mapping
-                            Uppercase_Mapping
-                            Simple_Case_Folding
-                            Case_Folding
-                        &_Perl_IVCF
-                        )
-                        # NOTE that the convention is that extra enum
-                        # values come after the property name, separated by
-                        # commas, with the enums that aren't ever defined
-                        # by Unicode coming last, at least 4 all-uppercase
-                        # characters.  The others are enum names that are
-                        # needed by perl, but aren't in all Unicode
-                        # releases.
+my @props;
+push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
+                    &NonL1_Perl_Non_Final_Folds
+                    &UpperLatin1
+                    _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
+                    _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
+                    _Perl_SB,SContinue,CR,Extend,LF,EDGE
+                    _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
+                    _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
+                    Lowercase_Mapping
+                    Titlecase_Mapping
+                    Uppercase_Mapping
+                    Simple_Case_Folding
+                    Case_Folding
+                    &_Perl_IVCF
+                );
+                # NOTE that the convention is that extra enum values come
+                # after the property name, separated by commas, with the enums
+                # that aren't ever defined by Unicode coming last, at least 4
+                # all-uppercase characters.  The others are enum names that
+                # are needed by perl, but aren't in all Unicode releases.
+
+my @bin_props;
+my %enums;
+
+# Collect all the binary properties from data in lib/unicore
+# Sort so that complements come after the main table, and the shortest
+# names first, finally alphabetically.
+foreach my $property (sort
+        {
+            $a =~ /!/ <=> $b =~ /!/
+         or length $a <=> length $b
+         or $a cmp $b
+        }   keys %utf8::loose_to_file_of,
+            keys %utf8::stricter_to_file_of
 ) {
+
+    # These two hashes map properties to values that can be considered to
+    # be checksums.  If two properties have the same checksum, they have
+    # identical entries.  Otherwise they differ in some way.
+    my $tag = $utf8::loose_to_file_of{$property};
+    $tag = $utf8::stricter_to_file_of{$property} unless defined $tag;
+
+    # The tag may contain an '!' meaning it is identical to the one formed
+    # by removing the !, except that it is inverted, so we don't need a
+    # table for it
+    next if $tag =~ s/!//;
+
+    # The list of 'prop=value' entries that this single entry expands to
+    my @this_entries;
+
+    # Split 'property=value' on the equals sign, with $lhs being the whole
+    # thing if there is no '='
+    my ($lhs, $rhs) = $property =~ / ( [^=]* ) ( =? .*) /x;
+
+    if (! exists $enums{$tag}) {
+        # Add to the list of properties to generate inversion lists for.
+        push @bin_props, uc $property;
+
+        # And create an enum for it.
+        $enums{$tag} = $table_name_prefix . uc sanitize_name($property);
+    }
+}
+
+@bin_props = sort {
+                      $a cmp $b
+                  } @bin_props;
+push @props, @bin_props;
+
+foreach my $prop (@props) {
+
+    # For the Latin1 properties, we change to use the eXtended version of the
+    # base property, then go through the result and get rid of everything not
+    # in Latin1 (above 255).  Actually, we retain the element for the range
+    # that crosses the 255/256 boundary if it is one that matches the
+    # property.  For example, in the Word property, there is a range of code
+    # points that start at U+00F8 and goes through U+02C1.  Instead of
+    # artificially cutting that off at 256 because 256 is the first code point
+    # above Latin1, we let the range go to its natural ending.  That gives us
+    # extra information with no added space taken.  But if the range that
+    # crosses the boundary is one that doesn't match the property, we don't
+    # start a new range above 255, as that could be construed as going to
+    # infinity.  For example, the Upper property doesn't include the character
+    # at 255, but does include the one at 256.  We don't include the 256 one.
+    my $prop_name = $prop;
+    my $is_local_sub = $prop_name =~ s/^&//;
+    my $extra_enums = "";
+    $extra_enums = $1 if $prop_name =~ s/, ( .* ) //x;
+    my $lookup_prop = $prop_name;
+    $prop_name = sanitize_name($prop_name);
+    $prop_name = $table_name_prefix . $prop_name if grep { lc $lookup_prop eq lc $_ } @bin_props;
+    my $l1_only = ($lookup_prop =~ s/^L1Posix/XPosix/
+                    or $lookup_prop =~ s/^L1//);
+    my $nonl1_only = 0;
+    $nonl1_only = $lookup_prop =~ s/^NonL1// unless $l1_only;
+    ($lookup_prop, my $has_suffixes) = $lookup_prop =~ / (.*) ( , .* )? /x;
 
     for my $charset (get_supported_code_pages()) {
         @a2n = @{get_a2n($charset)};
-
-        # For the Latin1 properties, we change to use the eXtended version of the
-        # base property, then go through the result and get rid of everything not
-        # in Latin1 (above 255).  Actually, we retain the element for the range
-        # that crosses the 255/256 boundary if it is one that matches the
-        # property.  For example, in the Word property, there is a range of code
-        # points that start at U+00F8 and goes through U+02C1.  Instead of
-        # artificially cutting that off at 256 because 256 is the first code point
-        # above Latin1, we let the range go to its natural ending.  That gives us
-        # extra information with no added space taken.  But if the range that
-        # crosses the boundary is one that doesn't match the property, we don't
-        # start a new range above 255, as that could be construed as going to
-        # infinity.  For example, the Upper property doesn't include the character
-        # at 255, but does include the one at 256.  We don't include the 256 one.
-        my $prop_name = $prop;
-        my $is_local_sub = $prop_name =~ s/^&//;
-        my $extra_enums = "";
-        $extra_enums = $1 if $prop_name =~ s/, ( .* ) //x;
-        my $lookup_prop = $prop_name;
-        my $l1_only = ($lookup_prop =~ s/^L1Posix/XPosix/
-                       or $lookup_prop =~ s/^L1//);
-        my $nonl1_only = 0;
-        $nonl1_only = $lookup_prop =~ s/^NonL1// unless $l1_only;
-        ($lookup_prop, my $has_suffixes) = $lookup_prop =~ / (.*) ( , .* )? /x;
 
         my @invlist;
         my @invmap;
