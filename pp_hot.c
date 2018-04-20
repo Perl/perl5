@@ -3998,25 +3998,41 @@ PP(pp_iter)
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
     }
 
-    /* Bypass pushing &PL_sv_yes and calling pp_and(); instead
+    /* Try to bypass pushing &PL_sv_yes and calling pp_and(); instead
      * jump straight to the AND op's op_other */
     assert(PL_op->op_next->op_type == OP_AND);
-    assert(PL_op->op_next->op_ppaddr == Perl_pp_and);
-    return cLOGOPx(PL_op->op_next)->op_other;
+    if (PL_op->op_next->op_ppaddr == Perl_pp_and) {
+        return cLOGOPx(PL_op->op_next)->op_other;
+    }
+    else {
+        /* An XS module has replaced the op_ppaddr, so fall back to the slow,
+         * obvious way. */
+        /* pp_enteriter should have pre-extended the stack */
+        EXTEND_SKIP(PL_stack_sp, 1);
+        *++PL_stack_sp = &PL_sv_yes;
+        return PL_op->op_next;
+    }
 
   retno:
-    /* Bypass pushing &PL_sv_no and calling pp_and(); instead
+    /* Try to bypass pushing &PL_sv_no and calling pp_and(); instead
      * jump straight to the AND op's op_next */
     assert(PL_op->op_next->op_type == OP_AND);
-    assert(PL_op->op_next->op_ppaddr == Perl_pp_and);
     /* pp_enteriter should have pre-extended the stack */
     EXTEND_SKIP(PL_stack_sp, 1);
     /* we only need this for the rare case where the OP_AND isn't
      * in void context, e.g. $x = do { for (..) {...} };
-     * but its cheaper to just push it rather than testing first
+     * (or for when an XS module has replaced the op_ppaddr)
+     * but it's cheaper to just push it rather than testing first
      */
     *++PL_stack_sp = &PL_sv_no;
-    return PL_op->op_next->op_next;
+    if (PL_op->op_next->op_ppaddr == Perl_pp_and) {
+        return PL_op->op_next->op_next;
+    }
+    else {
+        /* An XS module has replaced the op_ppaddr, so fall back to the slow,
+         * obvious way. */
+        return PL_op->op_next;
+    }
 }
 
 
