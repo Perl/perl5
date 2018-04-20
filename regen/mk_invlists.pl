@@ -77,6 +77,50 @@ my %wb_abbreviations;
 
 my @a2n;
 
+# Output these tables in the same vicinity as each other, so that will get
+# paged in at about the same time
+my %keep_together = (
+                        assigned => 1,
+                        ascii => 1,
+                        cased => 1,
+                        vertspace => 1,
+                        xposixalnum => 1,
+                        xposixalpha => 1,
+                        xposixblank => 1,
+                        xposixcntrl => 1,
+                        xposixdigit => 1,
+                        xposixgraph => 1,
+                        xposixlower => 1,
+                        xposixprint => 1,
+                        xposixpunct => 1,
+                        xposixspace => 1,
+                        xposixupper => 1,
+                        xposixword => 1,
+                        xposixxdigit => 1,
+                        posixalnum => 1,
+                        posixalpha => 1,
+                        posixblank => 1,
+                        posixcntrl => 1,
+                        posixdigit => 1,
+                        posixgraph => 1,
+                        posixlower => 1,
+                        posixprint => 1,
+                        posixpunct => 1,
+                        posixspace => 1,
+                        posixupper => 1,
+                        posixword => 1,
+                        posixxdigit => 1,
+                        _perl_any_folds => 1,
+                        _perl_folds_to_multi_char => 1,
+                        _perl_idstart => 1,
+                        _perl_idcont => 1,
+                        _perl_charname_begin => 1,
+                        _perl_charname_continue => 1,
+                        _perl_problematic_locale_foldeds_start => 1,
+                        _perl_problematic_locale_folds => 1,
+                        _perl_quotemeta => 1,
+                    );
+
 sub uniques {
     # Returns non-duplicated input values.  From "Perl Best Practices:
     # Encapsulated Cleverness".  p. 455 in first edition.
@@ -2110,14 +2154,17 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 # are needed by perl, but aren't in all Unicode releases.
 
 my @bin_props;
+my @bin_prop_defines;
 my %enums;
+my @deprecated_messages = "";   # Element [0] is a placeholder
+my %deprecated_tags;
 
 # Collect all the binary properties from data in lib/unicore
 # Sort so that complements come after the main table, and the shortest
 # names first, finally alphabetically.
 foreach my $property (sort
-        {
-            $a =~ /!/ <=> $b =~ /!/
+        {   exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
+         or $a =~ /!/ <=> $b =~ /!/
          or length $a <=> length $b
          or $a cmp $b
         }   keys %utf8::loose_to_file_of,
@@ -2151,8 +2198,8 @@ foreach my $property (sort
     }
 }
 
-@bin_props = sort {
-                      $a cmp $b
+@bin_props = sort {  exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
+                   or $a cmp $b
                   } @bin_props;
 push @props, @bin_props;
 
