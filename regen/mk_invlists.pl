@@ -57,6 +57,7 @@ my %exceptions_to_where_to_define =
                         (
                             #_Perl_IVCF => 'PERL_IN_REGCOMP_C',
                         );
+
 my %where_to_define_enums = ();
 
 my %gcb_enums;
@@ -154,8 +155,6 @@ sub output_invlist ($$;$) {
         $zero_or_one = 1;
     }
     my $count = @$invlist;
-
-    switch_pound_if ($name, 'PERL_IN_UTF8_C');
 
     print $out_fh "\nstatic const UV ${name}_invlist[] = {";
     print $out_fh " /* for $charset */" if $charset;
@@ -434,13 +433,10 @@ sub output_invmap ($$$$$$$) {
                        ? 'PERL_IN_UTF8_C'
                        : 'PERL_IN_REGEXEC_C';
 
-        my $is_public_enum = exists $public_enums{$name};
-        if ($is_public_enum) {
-            end_file_pound_if;
-        }
-        else {
-            switch_pound_if($name, $where);
-        }
+        end_charset_pound_if;
+        end_file_pound_if;
+        switch_pound_if($name, $where) unless exists $public_enums{$name};
+        start_charset_pound_if($charset, 1);
 
         # If the enum only contains one element, that is a dummy, default one
         if (scalar @enum_definition > 1) {
@@ -466,7 +462,9 @@ sub output_invmap ($$$$$$$) {
             print $out_fh "} $enum_declaration_type;\n";
         }
 
-        switch_pound_if($name, $where) if $is_public_enum;
+        end_charset_pound_if;
+        switch_pound_if($name, $where);
+        start_charset_pound_if($charset, 1);
 
         $invmap_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
@@ -2034,6 +2032,7 @@ sub output_WB_table() {
                         \@wb_table, \@wb_short_enums, \%wb_abbreviations);
 }
 
+switch_pound_if ('ALL', 'PERL_IN_UTF8_C');
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
 
@@ -2062,10 +2061,6 @@ end_file_pound_if;
 # An initial & means to use the subroutine from this file instead of an
 # official inversion list.
 
-for my $charset (get_supported_code_pages()) {
-    start_charset_pound_if($charset);
-
-    @a2n = @{get_a2n($charset)};
     # Below is the list of property names to generate.  '&' means to use the
     # subroutine to generate the inversion list instead of the generic code
     # below.  Some properties have a comma-separated list after the name,
@@ -2119,6 +2114,9 @@ for my $charset (get_supported_code_pages()) {
                            # needed by perl, but aren't in all Unicode
                            # releases.
     ) {
+
+    for my $charset (get_supported_code_pages()) {
+        @a2n = @{get_a2n($charset)};
 
         # For the Latin1 properties, we change to use the eXtended version of the
         # base property, then go through the result and get rid of everything not
@@ -2482,11 +2480,17 @@ for my $charset (get_supported_code_pages()) {
             die "No non-Latin1 code points in $lookup_prop" unless $found_nonl1;
         }
 
+        switch_pound_if ($prop_name, 'PERL_IN_UTF8_C');
+        start_charset_pound_if($charset, 1);
+
         output_invlist($prop_name, \@invlist, $charset);
-        output_invmap($prop_name, \@invmap, $lookup_prop, $map_format, $map_default, $extra_enums, $charset) if @invmap;
+
+        if (@invmap) {
+            output_invmap($prop_name, \@invmap, $lookup_prop, $map_format,
+                          $map_default, $extra_enums, $charset);
+        }
+        end_charset_pound_if;
     }
-    end_file_pound_if;
-    end_charset_pound_if;
 }
 
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
