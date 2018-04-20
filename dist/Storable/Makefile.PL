@@ -6,6 +6,7 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
 use ExtUtils::MakeMaker;
 use Config;
 use File::Copy qw(move copy);
@@ -36,7 +37,7 @@ WriteMakefile(
                             provides    => {
                                 'Storable'  => {
                                     file        => 'Storable_pm.PL',
-                                    version     => $NEW_VERSION,
+                                    version     => MM->parse_version('__Storable__.pm'),
                                 },
                             },
 
