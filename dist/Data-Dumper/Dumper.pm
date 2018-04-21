@@ -18,6 +18,7 @@ BEGIN {
 use 5.006_001;
 require Exporter;
 
+use constant IS_PRE_516_PERL => $] < 5.016;
 use constant IS_PRE_520_PERL => $] < 5.020;
 
 use Carp ();
@@ -541,6 +542,7 @@ sub _dump {
         $sname = $name;
       }
       else {
+        local $s->{useqq} = IS_PRE_516_PERL && ($s->{useqq} || $name =~ /[^\x00-\x7f]/) ? 1 : $s->{useqq};
         $sname = $s->_dump(
           $name eq 'main::' || $] < 5.007 && $name eq "main::\0"
             ? ''
