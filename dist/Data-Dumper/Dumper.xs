@@ -555,7 +555,22 @@ deparsed_output(pTHX_ SV *val)
      * modifies it (so we also can't reuse it below) */
     SV *pkg = newSVpvs("B::Deparse");
 
+    /* Commit ebdc88085efa6fca8a1b0afaa388f0491bdccd5a (first released as part
+     * of 5.19.7) changed core S_process_special_blocks() to use a new stack
+     * for anything using a BEGIN block, on the grounds that doing so "avoids
+     * the stack moving underneath anything that directly or indirectly calls
+     * Perl_load_module()". If we're in an older Perl, we can't rely on that
+     * stack, and must create a fresh sacrificial stack of our own. */
+#if PERL_VERSION < 20
+    PUSHSTACKi(PERLSI_REQUIRE);
+#endif
+
     load_module(PERL_LOADMOD_NOIMPORT, pkg, 0);
+
+#if PERL_VERSION < 20
+    POPSTACK;
+    SPAGAIN;
+#endif
 
     SAVETMPS;
 

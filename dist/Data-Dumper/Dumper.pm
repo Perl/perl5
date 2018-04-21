@@ -19,7 +19,6 @@ use 5.006_001;
 require Exporter;
 
 use constant IS_PRE_516_PERL => $] < 5.016;
-use constant IS_PRE_520_PERL => $] < 5.020;
 
 use Carp ();
 
@@ -227,14 +226,6 @@ sub Names {
 sub DESTROY {}
 
 sub Dump {
-  # On old versions of perl, the xs-deparse support can fail
-  # mysteriously. Barring copious spare time, it's best to revert
-  # to the previously standard behavior of using the pure perl dumper
-  # for deparsing on old perls. --Steffen
-  if (IS_PRE_520_PERL and ($Data::Dumper::Deparse or (ref($_[0]) && $_[0]->{deparse}))) {
-    return &Dumpperl;
-  }
-
   return &Dumpxs
     unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl})
             # Use pure perl version on earlier releases on EBCDIC platforms
