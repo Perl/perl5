@@ -38,7 +38,7 @@ WriteMakefile(
                                { bugtracker => 'http://rt.perl.org/perlbug/' },
                             provides    => {
                                 'Storable'  => {
-                                    file        => 'Storable_pm.PL',
+                                    file        => '__Storable__.pm',
                                     version     => MM->parse_version('__Storable__.pm'),
                                 },
                             },
