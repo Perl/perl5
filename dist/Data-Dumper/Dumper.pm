@@ -541,6 +541,7 @@ sub _dump {
         $sname = $name;
       }
       else {
+        local $s->{useqq} = $] < 5.016 && ($s->{useqq} || $name =~ /[^\x00-\x7f]/) ? 1 : $s->{useqq};
         $sname = $s->_dump(
           $name eq 'main::' || $] < 5.007 && $name eq "main::\0"
             ? ''

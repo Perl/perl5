@@ -89,6 +89,7 @@ static STRLEN num_q (const char *s, STRLEN slen);
 static STRLEN esc_q (char *dest, const char *src, STRLEN slen);
 static STRLEN esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
 static bool globname_needs_quote(const char *s, STRLEN len);
+static bool globname_supra_ascii(const char *s, STRLEN len);
 static bool key_needs_quote(const char *s, STRLEN len);
 static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
@@ -181,6 +182,22 @@ TOP:
 
     return FALSE;
 }
+
+#ifndef GvNAMEUTF8
+/* does a glob name contain supra-ASCII characters? */
+static bool
+globname_supra_ascii(const char *ss, STRLEN len)
+{
+    const U8 *s = (const U8 *) ss;
+    const U8 *send = s+len;
+    while (s < send) {
+        if (!isASCII(*s))
+            return TRUE;
+        s++;
+    }
+    return FALSE;
+}
+#endif
 
 /* does a hash key need to be quoted (to the left of => ).
    Previously this used (globname_)needs_quote() which accepted strings
@@ -1322,11 +1339,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvCUR_set(retval, SvCUR(retval)+2);
                 i = 3 + esc_q_utf8(aTHX_ retval, c, i,
 #ifdef GvNAMEUTF8
-			!!GvNAMEUTF8(val)
+			!!GvNAMEUTF8(val), style->useqq
 #else
-			0
+			0, style->useqq || globname_supra_ascii(c, i)
 #endif
-			, style->useqq);
+			);
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
