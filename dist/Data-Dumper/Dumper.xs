@@ -154,9 +154,10 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 
 /* does a glob name need to be protected? */
 static bool
-globname_needs_quote(const char *s, STRLEN len)
+globname_needs_quote(const char *ss, STRLEN len)
 {
-    const char *send = s+len;
+    const U8 *s = (const U8 *) ss;
+    const U8 *send = s+len;
 TOP:
     if (s[0] == ':') {
 	if (++s<send) {
@@ -386,15 +387,16 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
         *r++ = '"';
 
         for (s = src; s < send; s += increment) {
+            U8 c0 = *(U8 *)s;
             UV k;
 
             if (do_utf8
-                && ! isASCII(*s)
+                && ! isASCII(c0)
                     /* Exclude non-ASCII low ordinal controls.  This should be
                      * optimized out by the compiler on ASCII platforms; if not
                      * could wrap it in a #ifdef EBCDIC, but better to avoid
                      * #if's if possible */
-                && *(U8*)s > ' '
+                && c0 > ' '
             ) {
 
                 /* When in UTF-8, we output all non-ascii chars as \x{}
