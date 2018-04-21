@@ -48,6 +48,16 @@ my $authors = authors();
 my $nauthors = $authors =~ tr/,/,/;
 $nauthors++;
 
+my ($day, $month, $year) = (gmtime)[3..5];
+$month++; $year += 1900;
+
+my $age = $year - 1987;
+$age-- unless $month >= 12 and $day >= 18;
+
+my $decade = qw(
+    first second third fourth fifth sixth seventh eighth ninth tenth
+)[$age/10] or die "Unknown decade, please extend list";
+
 my $text
     = "Perl $next_version represents approximately $development_time of development
 since Perl $previous_version and contains approximately $formatted_changes
@@ -57,7 +67,7 @@ Excluding auto-generated files, documentation and release tools, there
 were approximately $formatted_code_changes lines of changes to
 $formatted_code_files .pm, .t, .c and .h files.
 
-Perl continues to flourish into its fourth decade thanks to a vibrant
+Perl continues to flourish into its $decade decade thanks to a vibrant
 community of users and developers. The following people are known to
 have contributed the improvements that became Perl $next_version:
 
