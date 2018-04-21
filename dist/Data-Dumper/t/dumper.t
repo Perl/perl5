@@ -1800,6 +1800,6 @@ EOT
   TEST (q(Data::Dumper->Dumpxs([$v], ["v"])), 'glob purity: Dumpxs()') if $XS;
   $WANT =~ tr/'/"/;
   local $Data::Dumper::Useqq = 1;
-  TEST (q(Data::Dumper->Dump([$v], ["v"])), 'glob purity: Dump()');
-  TEST (q(Data::Dumper->Dumpxs([$v], ["v"])), 'glob purity: Dumpxs()') if $XS;
+  TEST (q(Data::Dumper->Dump([$v], ["v"])), 'glob purity, useqq: Dump()');
+  TEST (q(Data::Dumper->Dumpxs([$v], ["v"])), 'glob purity, useqq: Dumpxs()') if $XS;
 }
