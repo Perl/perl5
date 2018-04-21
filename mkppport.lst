@@ -12,3 +12,4 @@ cpan/Win32API-File
 dist/IO
 dist/PathTools
 dist/Time-HiRes
+dist/Storable

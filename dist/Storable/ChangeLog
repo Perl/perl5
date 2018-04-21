@@ -1,3 +1,12 @@
+2018-04-21 11:23:00 xsawyerx
+    Version 3.08
+        * (perl #132849) try to disable core files when deliberatly segfaulting.
+        * (perl #127743) don't probe Storable limits so much.
+        * (perl #132893) don't probe for Storable recursion limits on old Win32.
+        * (perl #132870) workaround VC2017 compiler bug.
+        * (perl #127743) re-work for debugging builds with MSVC.
+        * (perl #133039) dont build a Storable.so/.dll with a static perl build.
+
 2018-02-07 15:08:00 tonyc
     Version 3.06
 
