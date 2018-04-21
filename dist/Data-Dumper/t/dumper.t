@@ -98,7 +98,7 @@ sub TEST {
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
     if ($WANT =~ /deadbeef/);
   print( ($t eq $WANT and not $@) ? "ok $TNUM -   works a 2nd time after intervening eval\n"
-    : "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
+    : "not ok $TNUM -  re-evaled version \n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
 
 sub SKIP_TEST {
