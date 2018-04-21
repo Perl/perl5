@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.27.11 - Tana French, In the Woods
 
-Announced on 2018-04-20 by Sawyer X
+L<Announced on 2018-04-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2018/04/msg250571.html>
 
   And then, too, I had learned early to assume something dark and
   lethal hidden at the heart of anything I loved. When I couldn't find
