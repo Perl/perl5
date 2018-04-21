@@ -1,3 +1,26 @@
+3.42 - 2018-04-21
+
+    * Include 'Changes' (this file) in the distribution.
+
+3.41 - 2018-04-21
+
+    * Fix security problem: CWE-134: Use of Externally-Controlled Format String.
+    * Fix WIDEST_UTYPE.
+    * Add the following functions:
+      croak_sv, die_sv, mess_sv, warn_sv, mess, vmess, warn_nocontext,
+      croak_nocontext, croak_no_modify, croak_memory_wrap, croak_xs_usage.
+    * Delist functions listed as deprecated or unstable.
+    * (perl #132876) define API macros on if the NEED_ macro is defined.
+    * (perl #132876) only define croak_xs_usage()'s assert macro if cxu requested.
+    * (perl #132761) updates for older perls.
+    * Do not define PERL_MAGIC_qr more times.
+    * Do not mask Perl_warn_nocontext and Perl_croak_nocontext.
+      (Fixes compile errors on older threaded Perl versions.)
+    * Skip ASCII tests on non-ASCII platforms.
+    * Skip tests invalid on EBCDIC.
+    * Will now compile under C++11.
+    * Documentation improvements.
+
 3.36 - 2017-05-14
 
     * Support Perl 5.26.* which no longer has '.' in @INC
