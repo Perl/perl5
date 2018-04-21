@@ -98,6 +98,7 @@ find(
     sub {
         /(\.pm|_pm\.PL)$/ or return;
         /PPPort\.pm$/ and return;
+        /__Storable__\.pm$/ and return;
         my $module = $File::Find::name;
         $module =~ /\b(demo|t|private|corpus)\b/ and return;    # demo or test modules
         my $version = MM->parse_version($_);
