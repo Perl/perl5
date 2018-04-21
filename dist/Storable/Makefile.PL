@@ -24,6 +24,7 @@ unless ($ENV{PERL_CORE}) {
 WriteMakefile(
     NAME                => 'Storable',
     AUTHOR              => 'Perl 5 Porters',
+    LICENSE             => 'perl',
     DISTNAME            => "Storable",
 # We now ship this in t/
 #    PREREQ_PM           => { 'Test::More' => '0.41' },
