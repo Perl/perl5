@@ -24,6 +24,10 @@ foreach my $type (qw(regular perl)) {
 	skip "_perl_abs_path() not expected to work", 4
 	    if $type eq "perl" &&
 		!(($Config{prefix} =~ m/\//) && $^O ne "cygwin");
+
+	skip "getcwd() doesn't fail on non-existent directories on this platform", 4
+	    if $type eq 'regular' && $^O eq 'dragonfly';
+
 	no warnings "redefine";
 	local *Cwd::abs_path = \&Cwd::_perl_abs_path if $type eq "perl";
 	local *Cwd::getcwd = \&Cwd::_perl_getcwd if $type eq "perl";
