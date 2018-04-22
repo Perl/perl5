@@ -8,7 +8,7 @@
 
 use strict;
 use warnings;
-use ExtUtils::MakeMaker;
+use ExtUtils::MakeMaker 6.31;
 use Config;
 use File::Copy qw(move copy);
 use File::Spec;
