@@ -314,7 +314,7 @@ __PL_nan_u = { 0x7FF8000000000000UI64 };
 #if _MSC_VER >= 1900
 
 /* No longer declared in stdio.h */
-char *gets(char* buffer);
+EXTERN_C char *gets(char* buffer);
 
 #define tzname _tzname
 
