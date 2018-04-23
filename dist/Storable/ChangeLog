@@ -1,3 +1,7 @@
+2018-04-21 22:00:00 xsawyerx
+    Version 3.10
+        * Fix binary artifacts from distribution.
+
 2018-04-21 16:49:00 xsawyerx
     Version 3.09
         * Fix "provides" in metadata (META.yml/META.json) to use the Storable
