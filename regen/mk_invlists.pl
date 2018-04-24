@@ -2731,6 +2731,7 @@ my @sources = qw(regen/mk_invlists.pl
                  lib/unicore/mktables
                  lib/Unicode/UCD.pm
                  regen/charset_translations.pl
+                 regen/mk_PL_charclass.pl
                );
 {
     # Depend on mktables’ own sources.  It’s a shorter list of files than
