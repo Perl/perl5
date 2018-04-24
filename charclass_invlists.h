@@ -1413,14 +1413,6 @@ static const UV Case_Folding_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
-#   endif	/* ASCII/Latin1 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -1501,10 +1493,6 @@ typedef enum {
 	CF_use_AUX_TABLE_72 = -72,
 	CF_use_AUX_TABLE_73 = -73
 } CF_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 #define HAS_CF_AUX_TABLES
 
@@ -4825,17 +4813,6 @@ static const UV Case_Folding_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
-#   endif	/* EBCDIC 1047 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -4916,13 +4893,6 @@ typedef enum {
 	CF_use_AUX_TABLE_72 = -72,
 	CF_use_AUX_TABLE_73 = -73
 } CF_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_CF_AUX_TABLES
 
@@ -8258,17 +8228,6 @@ static const UV Case_Folding_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
-#   endif	/* EBCDIC 037 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -8349,13 +8308,6 @@ typedef enum {
 	CF_use_AUX_TABLE_72 = -72,
 	CF_use_AUX_TABLE_73 = -73
 } CF_enum;
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_CF_AUX_TABLES
 
@@ -11533,14 +11485,6 @@ static const UV Lowercase_Mapping_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
-#   endif	/* ASCII/Latin1 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -11549,10 +11493,6 @@ typedef enum {
 	LC_0 = 0,
 	LC_use_AUX_TABLE_1 = -1
 } LC_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 #define HAS_LC_AUX_TABLES
 
@@ -14082,17 +14022,6 @@ static const UV Lowercase_Mapping_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
-#   endif	/* EBCDIC 1047 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -14101,13 +14030,6 @@ typedef enum {
 	LC_0 = 0,
 	LC_use_AUX_TABLE_1 = -1
 } LC_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_LC_AUX_TABLES
 
@@ -16651,17 +16573,6 @@ static const UV Lowercase_Mapping_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
-#   endif	/* EBCDIC 037 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -16670,13 +16581,6 @@ typedef enum {
 	LC_0 = 0,
 	LC_use_AUX_TABLE_1 = -1
 } LC_enum;
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_LC_AUX_TABLES
 
@@ -19855,10 +19759,6 @@ typedef enum {
 	GCB_ZWJ = 17,
 	GCB_EDGE = 18
 } GCB_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for ASCII/Latin1 */
 	GCB_Control,
@@ -23294,13 +23194,6 @@ typedef enum {
 	GCB_EDGE = 18
 } GCB_enum;
 
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 1047 */
 	GCB_Control,
 	GCB_CR,
@@ -26735,13 +26628,6 @@ typedef enum {
 	GCB_EDGE = 18
 } GCB_enum;
 
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 037 */
 	GCB_Control,
 	GCB_CR,
@@ -29739,14 +29625,6 @@ static const UV _Perl_IVCF_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
-#   endif	/* ASCII/Latin1 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -29781,10 +29659,6 @@ typedef enum {
 	IVCF_use_AUX_TABLE_26 = -26,
 	IVCF_use_AUX_TABLE_27 = -27
 } IVCF_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 #define HAS_IVCF_AUX_TABLES
 
@@ -32599,17 +32473,6 @@ static const UV _Perl_IVCF_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
-#   endif	/* EBCDIC 1047 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -32644,13 +32507,6 @@ typedef enum {
 	IVCF_use_AUX_TABLE_26 = -26,
 	IVCF_use_AUX_TABLE_27 = -27
 } IVCF_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_IVCF_AUX_TABLES
 
@@ -35479,17 +35335,6 @@ static const UV _Perl_IVCF_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
-#   endif	/* EBCDIC 037 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -35524,13 +35369,6 @@ typedef enum {
 	IVCF_use_AUX_TABLE_26 = -26,
 	IVCF_use_AUX_TABLE_27 = -27
 } IVCF_enum;
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_IVCF_AUX_TABLES
 
@@ -39415,10 +39253,6 @@ typedef enum {
 	LB_ZWSpace = 37,
 	LB_EDGE = 38
 } LB_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 static const LB_enum _Perl_LB_invmap[] = { /* for ASCII/Latin1 */
 	LB_Combining_Mark,
@@ -44131,13 +43965,6 @@ typedef enum {
 	LB_ZWSpace = 37,
 	LB_EDGE = 38
 } LB_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 1047 */
 	LB_Combining_Mark,
@@ -48862,13 +48689,6 @@ typedef enum {
 	LB_ZWSpace = 37,
 	LB_EDGE = 38
 } LB_enum;
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 037 */
 	LB_Combining_Mark,
@@ -54241,10 +54061,6 @@ typedef enum {
 	SB_Upper = 14,
 	SB_EDGE = 15
 } SB_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 static const SB_enum _Perl_SB_invmap[] = { /* for ASCII/Latin1 */
 	SB_Other,
@@ -60324,13 +60140,6 @@ typedef enum {
 	SB_Upper = 14,
 	SB_EDGE = 15
 } SB_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 1047 */
 	SB_Other,
@@ -66431,13 +66240,6 @@ typedef enum {
 	SB_EDGE = 15
 } SB_enum;
 
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 037 */
 	SB_Other,
 	SB_Sp,
@@ -71264,10 +71066,6 @@ typedef enum {
 	SCX_use_AUX_TABLE_45 = -45
 } SCX_enum;
 
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 #define HAS_SCX_AUX_TABLES
 
 static const SCX_enum SCX_AUX_TABLE_1[] = {
@@ -75261,13 +75059,6 @@ typedef enum {
 	SCX_use_AUX_TABLE_44 = -44,
 	SCX_use_AUX_TABLE_45 = -45
 } SCX_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_SCX_AUX_TABLES
 
@@ -79285,13 +79076,6 @@ typedef enum {
 	SCX_use_AUX_TABLE_45 = -45
 } SCX_enum;
 
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 #define HAS_SCX_AUX_TABLES
 
 static const SCX_enum SCX_AUX_TABLE_1[] = {
@@ -83247,10 +83031,6 @@ typedef enum {
 	WB_UNKNOWN = 24
 } WB_enum;
 
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_Other,
 	WB_Perl_Tailored_HSpace,
@@ -86775,13 +86555,6 @@ typedef enum {
 	WB_EDGE = 23,
 	WB_UNKNOWN = 24
 } WB_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_Other,
@@ -90327,13 +90100,6 @@ typedef enum {
 	WB_UNKNOWN = 24
 } WB_enum;
 
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_Other,
 	WB_Perl_Tailored_HSpace,
@@ -93358,18 +93124,6 @@ static const UV Simple_Case_Folding_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
-#   endif	/* ASCII/Latin1 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 static const int Simple_Case_Folding_invmap[] = { /* for ASCII/Latin1 */
 	0,
 	0x61,
@@ -95936,24 +95690,6 @@ static const UV Simple_Case_Folding_invlist[] = { /* for EBCDIC 1047 */
 	0x1E900,
 	0x1E922
 };
-
-#   endif	/* EBCDIC 1047 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 static const int Simple_Case_Folding_invmap[] = { /* for EBCDIC 1047 */
 	0,
@@ -98535,24 +98271,6 @@ static const UV Simple_Case_Folding_invlist[] = { /* for EBCDIC 037 */
 	0x1E900,
 	0x1E922
 };
-
-#   endif	/* EBCDIC 037 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 static const int Simple_Case_Folding_invmap[] = { /* for EBCDIC 037 */
 	0,
@@ -101166,14 +100884,6 @@ static const UV Titlecase_Mapping_invlist[] = { /* for ASCII/Latin1 */
 	0x1E944
 };
 
-#   endif	/* ASCII/Latin1 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -101226,10 +100936,6 @@ typedef enum {
 	TC_use_AUX_TABLE_44 = -44,
 	TC_use_AUX_TABLE_45 = -45
 } TC_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 #define HAS_TC_AUX_TABLES
 
@@ -104241,17 +103947,6 @@ static const UV Titlecase_Mapping_invlist[] = { /* for EBCDIC 1047 */
 	0x1E944
 };
 
-#   endif	/* EBCDIC 1047 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -104304,13 +103999,6 @@ typedef enum {
 	TC_use_AUX_TABLE_44 = -44,
 	TC_use_AUX_TABLE_45 = -45
 } TC_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_TC_AUX_TABLES
 
@@ -107336,17 +107024,6 @@ static const UV Titlecase_Mapping_invlist[] = { /* for EBCDIC 037 */
 	0x1E944
 };
 
-#   endif	/* EBCDIC 037 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -107399,13 +107076,6 @@ typedef enum {
 	TC_use_AUX_TABLE_44 = -44,
 	TC_use_AUX_TABLE_45 = -45
 } TC_enum;
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_TC_AUX_TABLES
 
@@ -110459,14 +110129,6 @@ static const UV Uppercase_Mapping_invlist[] = { /* for ASCII/Latin1 */
 	0x1E944
 };
 
-#   endif	/* ASCII/Latin1 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 65 /* ASCII/Latin1 */
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -110546,10 +110208,6 @@ typedef enum {
 	UC_use_AUX_TABLE_71 = -71,
 	UC_use_AUX_TABLE_72 = -72
 } UC_enum;
-
-#   endif	/* ASCII/Latin1 */
-
-#   if 'A' == 65 /* ASCII/Latin1 */
 
 #define HAS_UC_AUX_TABLES
 
@@ -113844,17 +113502,6 @@ static const UV Uppercase_Mapping_invlist[] = { /* for EBCDIC 1047 */
 	0x1E944
 };
 
-#   endif	/* EBCDIC 1047 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -113934,13 +113581,6 @@ typedef enum {
 	UC_use_AUX_TABLE_71 = -71,
 	UC_use_AUX_TABLE_72 = -72
 } UC_enum;
-
-#   endif	/* EBCDIC 1047 */
-
-#   if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_UC_AUX_TABLES
 
@@ -117249,17 +116889,6 @@ static const UV Uppercase_Mapping_invlist[] = { /* for EBCDIC 037 */
 	0x1E944
 };
 
-#   endif	/* EBCDIC 037 */
-
-#endif	/* defined(PERL_IN_UTF8_C) */
-
-#if defined(PERL_IN_UTF8_C)
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -117339,13 +116968,6 @@ typedef enum {
 	UC_use_AUX_TABLE_71 = -71,
 	UC_use_AUX_TABLE_72 = -72
 } UC_enum;
-
-#   endif	/* EBCDIC 037 */
-
-#   if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
 
 #define HAS_UC_AUX_TABLES
 
@@ -374645,5 +374267,5 @@ static const U8 WB_table[24][24] = {
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 232d95d2479300926c29d5ed849bcec7d02f36f80f06578849584a064a0cc967 regen/mk_invlists.pl
+ * 38936fafefb0559582239124bc936259b283874f3bab9d92af6e266657a46a78 regen/mk_invlists.pl
  * ex: set ro: */

@@ -158,9 +158,11 @@ sub end_charset_pound_if {
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
-sub switch_pound_if ($$) {
+sub switch_pound_if ($$;$) {
     my $name = shift;
     my $new_pound_if = shift;
+    my $charset = shift;
+
     my @new_pound_if = ref ($new_pound_if)
                        ? sort @$new_pound_if
                        : $new_pound_if;
@@ -168,6 +170,10 @@ sub switch_pound_if ($$) {
     # Switch to new #if given by the 2nd argument.  If there is an override
     # for this, it instead switches to that.  The 1st argument is the
     # static's name, used only to check if there is an override for this
+    #
+    # The 'charset' parmameter, if present, is used to first end the charset
+    # #if if we actually do a switch, and then restart it afterwards.  This
+    # code, then assumes that the charset #if's are enclosed in the file ones.
 
     if (exists $exceptions_to_where_to_define{$name}) {
         @new_pound_if = $exceptions_to_where_to_define{$name};
@@ -181,6 +187,8 @@ sub switch_pound_if ($$) {
     # Change to the new one if different from old
     if ($in_file_pound_if ne $new_pound_if) {
 
+        end_charset_pound_if() if defined $charset;
+
         # Exit any current #if
         if ($in_file_pound_if) {
             end_file_pound_if;
@@ -188,6 +196,8 @@ sub switch_pound_if ($$) {
 
         $in_file_pound_if = $new_pound_if;
         print $out_fh "\n#if $in_file_pound_if\n";
+
+        start_charset_pound_if ($charset, 1) if defined $charset;
     }
 }
 
@@ -491,10 +501,14 @@ sub output_invmap ($$$$$$$) {
                        ? 'PERL_IN_UTF8_C'
                        : 'PERL_IN_REGEXEC_C';
 
-        end_charset_pound_if;
-        end_file_pound_if;
-        switch_pound_if($name, $where) unless exists $public_enums{$name};
-        start_charset_pound_if($charset, 1);
+        if (! exists $public_enums{$name}) {
+            switch_pound_if($name, $where, $charset);
+        }
+        else {
+            end_charset_pound_if;
+            end_file_pound_if;
+            start_charset_pound_if($charset, 1);
+        }
 
         # If the enum only contains one element, that is a dummy, default one
         if (scalar @enum_definition > 1) {
@@ -520,9 +534,7 @@ sub output_invmap ($$$$$$$) {
             print $out_fh "} $enum_declaration_type;\n";
         }
 
-        end_charset_pound_if;
-        switch_pound_if($name, $where);
-        start_charset_pound_if($charset, 1);
+        switch_pound_if($name, $where, $charset);
 
         $invmap_declaration_type = ($input_format =~ /s/)
                                  ? $enum_declaration_type
