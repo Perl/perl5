@@ -474,6 +474,7 @@ and check for NULL.
 #  define RX_MATCH_TAINTED(rx_sv)       0
 #  define RXp_MATCH_TAINTED_on(prog)    NOOP
 #  define RX_MATCH_TAINTED_on(rx_sv)    NOOP
+#  define RXp_MATCH_TAINTED_off(prog)   NOOP
 #  define RX_MATCH_TAINTED_off(rx_sv)   NOOP
 #else
 #  define RX_ISTAINTED(rx_sv)           (RX_EXTFLAGS(rx_sv) & RXf_TAINTED)
