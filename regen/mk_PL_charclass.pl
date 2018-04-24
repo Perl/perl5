@@ -91,121 +91,121 @@ my @non_latin1_simple_folds;
 my @folds;
 use Unicode::UCD;
 
-    # Use the Unicode data file if we are on an ASCII platform (which its data
-    # is for), and it is in the modern format (starting in Unicode 3.1.0) and
-    # it is available.  This avoids being affected by potential bugs
-    # introduced by other layers of Perl
-    my $file="lib/unicore/CaseFolding.txt";
+# Use the Unicode data file if we are on an ASCII platform (which its data
+# is for), and it is in the modern format (starting in Unicode 3.1.0) and
+# it is available.  This avoids being affected by potential bugs
+# introduced by other layers of Perl
+my $file="lib/unicore/CaseFolding.txt";
 
-    if (ord('A') == 65
-        && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
-        && open my $fh, "<", $file)
-    {
-        @folds = <$fh>;
-    }
-    else {
-        my ($invlist_ref, $invmap_ref, undef, $default)
-                                    = Unicode::UCD::prop_invmap('Case_Folding');
-        for my $i (0 .. @$invlist_ref - 1 - 1) {
-            next if $invmap_ref->[$i] == $default;
-            my $adjust = -1;
-            for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
-                $adjust++;
+if (ord('A') == 65
+    && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
+    && open my $fh, "<", $file)
+{
+    @folds = <$fh>;
+}
+else {
+    my ($invlist_ref, $invmap_ref, undef, $default)
+                                = Unicode::UCD::prop_invmap('Case_Folding');
+    for my $i (0 .. @$invlist_ref - 1 - 1) {
+        next if $invmap_ref->[$i] == $default;
+        my $adjust = -1;
+        for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
+            $adjust++;
 
-                # Single-code point maps go to a 'C' type
-                if (! ref $invmap_ref->[$i]) {
-                    push @folds, sprintf("%04X; C; %04X\n",
-                                        $j,
-                                        $invmap_ref->[$i] + $adjust);
-                }
-                else {  # Multi-code point maps go to 'F'.  prop_invmap()
-                        # guarantees that no adjustment is needed for these,
-                        # as the range will contain just one element
-                    push @folds, sprintf("%04X; F; %s\n",
-                                        $j,
-                                        join " ", map { sprintf "%04X", $_ }
-                                                        @{$invmap_ref->[$i]});
-                }
+            # Single-code point maps go to a 'C' type
+            if (! ref $invmap_ref->[$i]) {
+                push @folds, sprintf("%04X; C; %04X\n",
+                                    $j,
+                                    $invmap_ref->[$i] + $adjust);
+            }
+            else {  # Multi-code point maps go to 'F'.  prop_invmap()
+                    # guarantees that no adjustment is needed for these,
+                    # as the range will contain just one element
+                push @folds, sprintf("%04X; F; %s\n",
+                                    $j,
+                                    join " ", map { sprintf "%04X", $_ }
+                                                    @{$invmap_ref->[$i]});
             }
         }
     }
+}
 
-    for (@folds) {
-        chomp;
+for (@folds) {
+    chomp;
 
-        # Lines look like (without the initial '#'
-        #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
-        # Get rid of comments, ignore blank or comment-only lines
-        my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
-        next unless length $line;
-        my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
+    # Lines look like (without the initial '#'
+    #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
+    # Get rid of comments, ignore blank or comment-only lines
+    my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
+    next unless length $line;
+    my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
 
-        my $from = hex $hex_from;
+    my $from = hex $hex_from;
 
-        # Perl only deals with S, C, and F folds
-        next if $fold_type ne 'C' and $fold_type ne 'F' and $fold_type ne 'S';
+    # Perl only deals with S, C, and F folds
+    next if $fold_type ne 'C' and $fold_type ne 'F' and $fold_type ne 'S';
 
-        # Get each code point in the range that participates in this line's fold.
-        # The hash has keys of each code point in the range, and values of what it
-        # folds to and what folds to it
-        for my $i (0 .. @folded - 1) {
-            my $fold = hex $folded[$i];
-            if ($fold < 256) {
-                push @{$folded_closure{$fold}}, $from;
-                push @{$simple_folded_closure{$fold}}, $from if $fold_type ne 'F';
-            }
-            if ($from < 256) {
-                push @{$folded_closure{$from}}, $fold;
-                push @{$simple_folded_closure{$from}}, $fold if $fold_type ne 'F';
-            }
+    # Get each code point in the range that participates in this line's fold.
+    # The hash has keys of each code point in the range, and values of what it
+    # folds to and what folds to it
+    for my $i (0 .. @folded - 1) {
+        my $fold = hex $folded[$i];
+        if ($fold < 256) {
+            push @{$folded_closure{$fold}}, $from;
+            push @{$simple_folded_closure{$fold}}, $from if $fold_type ne 'F';
+        }
+        if ($from < 256) {
+            push @{$folded_closure{$from}}, $fold;
+            push @{$simple_folded_closure{$from}}, $fold if $fold_type ne 'F';
+        }
 
-            if (($fold_type eq 'C' || $fold_type eq 'S')
-                && ($fold < 256 != $from < 256))
-            {
-                # Fold is simple (hence can't be a non-final fold, so the 'if'
-                # above is mutualy exclusive from the 'if below) and crosses
-                # 255/256 boundary.  We keep track of the Latin1 code points
-                # in such folds.
-                push @non_latin1_simple_folds, ($fold < 256)
-                                                ? $fold
-                                                : $from;
-            }
-            elsif ($i < @folded-1
-                   && $fold < 256
-                   && ! grep { $_ == $fold } @non_final_folds)
-            {
-                push @non_final_folds, $fold;
+        if (($fold_type eq 'C' || $fold_type eq 'S')
+            && ($fold < 256 != $from < 256))
+        {
+            # Fold is simple (hence can't be a non-final fold, so the 'if'
+            # above is mutualy exclusive from the 'if below) and crosses
+            # 255/256 boundary.  We keep track of the Latin1 code points
+            # in such folds.
+            push @non_latin1_simple_folds, ($fold < 256)
+                                            ? $fold
+                                            : $from;
+        }
+        elsif ($i < @folded-1
+                && $fold < 256
+                && ! grep { $_ == $fold } @non_final_folds)
+        {
+            push @non_final_folds, $fold;
 
-                # Also add the upper case, which in the latin1 range folds to
-                # $fold
-                push @non_final_folds, ord uc chr $fold;
-            }
+            # Also add the upper case, which in the latin1 range folds to
+            # $fold
+            push @non_final_folds, ord uc chr $fold;
         }
     }
+}
 
-    # Now having read all the lines, combine them into the full closure of each
-    # code point in the range by adding lists together that share a common
-    # element
-    foreach my $folded (keys %folded_closure) {
-        foreach my $from (grep { $_ < 256 } @{$folded_closure{$folded}}) {
-            push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
-        }
+# Now having read all the lines, combine them into the full closure of each
+# code point in the range by adding lists together that share a common
+# element
+foreach my $folded (keys %folded_closure) {
+    foreach my $from (grep { $_ < 256 } @{$folded_closure{$folded}}) {
+        push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
     }
-    foreach my $folded (keys %simple_folded_closure) {
-        foreach my $from (grep { $_ < 256 } @{$simple_folded_closure{$folded}}) {
-            push @{$simple_folded_closure{$from}}, @{$simple_folded_closure{$folded}};
-        }
+}
+foreach my $folded (keys %simple_folded_closure) {
+    foreach my $from (grep { $_ < 256 } @{$simple_folded_closure{$folded}}) {
+        push @{$simple_folded_closure{$from}}, @{$simple_folded_closure{$folded}};
     }
+}
 
-    # We have the single-character folds that cross the 255/256, like KELVIN
-    # SIGN => 'k', but we need the closure, so add like 'K' to it
-    foreach my $folded (@non_latin1_simple_folds) {
-        foreach my $fold (@{$simple_folded_closure{$folded}}) {
-            if ($fold < 256 && ! grep { $fold == $_ } @non_latin1_simple_folds) {
-                push @non_latin1_simple_folds, $fold;
-            }
+# We have the single-character folds that cross the 255/256, like KELVIN
+# SIGN => 'k', but we need the closure, so add like 'K' to it
+foreach my $folded (@non_latin1_simple_folds) {
+    foreach my $fold (@{$simple_folded_closure{$folded}}) {
+        if ($fold < 256 && ! grep { $fold == $_ } @non_latin1_simple_folds) {
+            push @non_latin1_simple_folds, $fold;
         }
     }
+}
 
 sub Id_First {
     my @alpha_invlist = prop_invlist("XPosixAlpha");
