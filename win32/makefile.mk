@@ -1287,6 +1287,11 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define Off_t_size ^4)>> config.h
 .ENDIF
 .IF "$(WIN64)"=="define"
+.IF "$(CCTYPE)" == "GCC"
+	@(echo #define LONG_DOUBLESIZE ^16)>> config.h
+.ELSE
+	@(echo #define LONG_DOUBLESIZE ^8)>> config.h
+.ENDIF
 	@(echo #define PTRSIZE ^8&& \
 	echo #define SSize_t $(INT64)&& \
 	echo #define HAS_ATOLL&& \
@@ -1294,6 +1299,11 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define HAS_STRTOULL&& \
 	echo #define Size_t_size ^8)>> config.h
 .ELSE
+.IF "$(CCTYPE)" == "GCC"
+	@(echo #define LONG_DOUBLESIZE ^12)>> config.h
+.ELSE
+	@(echo #define LONG_DOUBLESIZE ^8)>> config.h
+.ENDIF
 	@(echo #define PTRSIZE ^4&& \
 	echo #define SSize_t int&& \
 	echo #undef HAS_ATOLL&& \
@@ -1345,15 +1355,9 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define PERL_PRIgldbl "Lg"&& \
 	echo #define PERL_PRIeldbl "Le"&& \
 	echo #define PERL_SCNfldbl "Lf"&& \
-	echo #define NVTYPE long double)>> config.h
-.IF "$(WIN64)"=="define"
-	@(echo #define NVSIZE ^16&& \
-	echo #define LONG_DOUBLESIZE ^16)>> config.h
-.ELSE
-	@(echo #define NVSIZE ^12&& \
-	echo #define LONG_DOUBLESIZE ^12)>> config.h
-.ENDIF
-	@(echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0&& \
+	echo #define NVTYPE long double&& \
+	echo #define NVSIZE LONG_DOUBLESIZE&& \
+	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0&& \
 	echo #define NVef "Le"&& \
 	echo #define NVff "Lf"&& \
 	echo #define NVgf "Lg"&& \
@@ -1372,7 +1376,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef PERL_SCNfldbl&& \
 	echo #define NVTYPE double&& \
 	echo #define NVSIZE ^8&& \
-	echo #define LONG_DOUBLESIZE ^8&& \
 	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0&& \
 	echo #define NVef "e"&& \
 	echo #define NVff "f"&& \
