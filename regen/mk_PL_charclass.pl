@@ -205,7 +205,7 @@ for my $ord (0..255) {
     utf8::upgrade($char);   # Important to use Unicode rules!
 
     # Look at all the properties we care about here.
-    for my $property (@properties) {
+    for my $property (sort @properties) {
         my $name = $property;
 
         # Remove the suffix to get the actual property name.
