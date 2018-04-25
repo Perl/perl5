@@ -937,9 +937,9 @@ my %why_obsolete;    # Documentation only
     my $why_no_expand  = "Deprecated by Unicode.  These are characters that expand to more than one character in the specified normalization form, but whether they actually take up more bytes or not depends on the encoding being used.  For example, a UTF-8 encoded character may expand to a different number of bytes than a UTF-32 encoded character.";
 
     %why_deprecated = (
-        'Grapheme_Link' => 'Deprecated by Unicode:  Duplicates ccc=vr (Canonical_Combining_Class=Virama)',
+        'Grapheme_Link' => 'Duplicates ccc=vr (Canonical_Combining_Class=Virama)',
         'Jamo_Short_Name' => $contributory,
-        'Line_Break=Surrogate' => 'Deprecated by Unicode because surrogates should never appear in well-formed text, and therefore shouldn\'t be the basis for line breaking',
+        'Line_Break=Surrogate' => 'Surrogates should never appear in well-formed text, and therefore shouldn\'t be the basis for line breaking',
         'Other_Alphabetic' => $contributory,
         'Other_Default_Ignorable_Code_Point' => $contributory,
         'Other_Grapheme_Extend' => $contributory,
