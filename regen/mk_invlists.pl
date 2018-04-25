@@ -751,9 +751,9 @@ for my $i (0 .. @$folds_ref - 1) {
     # Add to the non-finals list each code point that is in a non-final
     # position
     for my $j (0 .. @{$folds_ref->[$i]} - 2) {
-        push @is_non_final_fold, $folds_ref->[$i][$j]
-                unless grep { $folds_ref->[$i][$j] == $_ } @is_non_final_fold;
+        push @is_non_final_fold, $folds_ref->[$i][$j];
     }
+    @is_non_final_fold = uniques @is_non_final_fold;
 }
 
 sub _Perl_Non_Final_Folds {
@@ -2227,8 +2227,7 @@ foreach my $property (sort
                                     keys %utf8::loose_property_to_file_of;
 
             my $new_entry = $alias . $rhs;
-            push @this_entries, $new_entry
-                            unless grep { $_ eq $new_entry } @this_entries;
+            push @this_entries, $new_entry;
         }
     }
 
@@ -2271,6 +2270,7 @@ foreach my $property (sort
     $defined_to .= $enums{$tag};
 
     # Go through the entries that evaluate to this.
+    @this_entries = uniques @this_entries;
     foreach my $define (@this_entries) {
 
         # There is a rule for the parser for each.
