@@ -14983,33 +14983,6 @@ sub compile_perl() {
         Note => 'Union of all non-canonical decompositions',
         );
 
-    # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
-    # than SD appeared, construct it ourselves, based on the first release SD
-    # was in.  A pod entry is grandfathered in for it
-    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Re_Pod_Entry => 1,
-                                           Perl_Extension => 1,
-                                           Fate => $INTERNAL_ONLY,
-                                           Status => $DISCOURAGED);
-    my $soft_dotted = property_ref('Soft_Dotted');
-    if (defined $soft_dotted && ! $soft_dotted->is_empty) {
-        $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
-    }
-    else {
-
-        # This list came from 3.2 Soft_Dotted; all of these code points are in
-        # all releases
-        $CanonDCIJ->initialize([ ord('i'),
-                                 ord('j'),
-                                 0x012F,
-                                 0x0268,
-                                 0x0456,
-                                 0x0458,
-                                 0x1E2D,
-                                 0x1ECB,
-                               ]);
-        $CanonDCIJ = $CanonDCIJ & $Assigned;
-    }
-
     # For backward compatibility, Perl has its own definition for IDStart.
     # It is regular XID_Start plus the underscore, but all characters must be
     # Word characters as well

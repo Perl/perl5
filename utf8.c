@@ -6067,10 +6067,9 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
        /* We are now in a position to determine if this property should have
         * been parsed using stricter rules.  Only a few are like that, and
         * unlikely to change. */
-        if (   (   memBEGINPs(lookup_name, j, "perl")
-                && memNEs(lookup_name + 4, j - 4, "space")
-                && memNEs(lookup_name + 4, j - 4, "word"))
-            || memEQs(lookup_name, j, "canondcij"))
+        if (   memBEGINPs(lookup_name, j, "perl")
+            && memNEs(lookup_name + 4, j - 4, "space")
+            && memNEs(lookup_name + 4, j - 4, "word"))
         {
             stricter = TRUE;
 
