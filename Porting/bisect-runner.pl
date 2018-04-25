@@ -1514,10 +1514,36 @@ if ($target ne 'miniperl') {
     system "$options{make} $j $real_target </dev/null";
 }
 
-# Testing a cpan module? See if it will install
-my $just_testing;
-if (my $mod_opt = $options{module} || $options{'with-module'}
+my $expected_file_found = $expected_file =~ /perl$/
+    ? -x $expected_file : -r $expected_file;
+
+if ($expected_file_found && $expected_file eq 't/perl') {
+    # Check that it isn't actually pointing to ../miniperl, which will happen
+    # if the sanity check ./miniperl -Ilib -MExporter -e '<?>' fails, and
+    # Makefile tries to run minitest.
+
+    # Of course, helpfully sometimes it's called ../perl, other times .././perl
+    # and who knows if that list is exhaustive...
+    my ($dev0, $ino0) = stat 't/perl';
+    my ($dev1, $ino1) = stat 'perl';
+    unless (defined $dev0 && defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1) {
+        undef $expected_file_found;
+        my $link = readlink $expected_file;
+        warn "'t/perl' => '$link', not 'perl'";
+        die_255("Could not realink t/perl: $!") unless defined $link;
+    }
+}
+
+my $just_testing = 0;
+
+if ($options{'test-build'}) {
+    report_and_exit($expected_file_found, 'could build', 'could not build',
+                    $real_target);
+} elsif (!$expected_file_found) {
+    skip("could not build $real_target");
+} elsif (my $mod_opt = $options{module} || $options{'with-module'}
                || ($just_testing++, $options{'test-module'})) {
+  # Testing a cpan module? See if it will install
   # First we need to install this perl somewhere
   system_or_die('./installperl');
 
@@ -1578,33 +1604,6 @@ if (my $mod_opt = $options{module} || $options{'with-module'}
       report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
     }
   }
-}
-
-my $expected_file_found = $expected_file =~ /perl$/
-    ? -x $expected_file : -r $expected_file;
-
-if ($expected_file_found && $expected_file eq 't/perl') {
-    # Check that it isn't actually pointing to ../miniperl, which will happen
-    # if the sanity check ./miniperl -Ilib -MExporter -e '<?>' fails, and
-    # Makefile tries to run minitest.
-
-    # Of course, helpfully sometimes it's called ../perl, other times .././perl
-    # and who knows if that list is exhaustive...
-    my ($dev0, $ino0) = stat 't/perl';
-    my ($dev1, $ino1) = stat 'perl';
-    unless (defined $dev0 && defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1) {
-        undef $expected_file_found;
-        my $link = readlink $expected_file;
-        warn "'t/perl' => '$link', not 'perl'";
-        die_255("Could not realink t/perl: $!") unless defined $link;
-    }
-}
-
-if ($options{'test-build'}) {
-    report_and_exit($expected_file_found, 'could build', 'could not build',
-                    $real_target);
-} elsif (!$expected_file_found) {
-    skip("could not build $real_target");
 }
 
 match_and_exit($real_target, @ARGV) if $match;
