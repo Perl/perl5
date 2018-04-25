@@ -214,7 +214,7 @@ Most code should use C<L</uvchr_to_utf8_flags>()> rather than call this directly
 
 This function is for code that wants any warning and/or error messages to be
 returned to the caller rather than be displayed.  All messages that would have
-been displayed if all lexcial warnings are enabled will be returned.
+been displayed if all lexical warnings are enabled will be returned.
 
 It is just like C<L</uvchr_to_utf8_flags>> but it takes an extra parameter
 placed after all the others, C<msgs>.  If this parameter is 0, this function
