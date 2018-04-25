@@ -374285,5 +374285,5 @@ static const U8 WB_table[24][24] = {
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 8490f46d7ca2e6ef92751349c7885ed1dd3cc97a78daa7cbcef2cf007973e758 regen/mk_invlists.pl
+ * 47720a10807fc28ffdf7143ba5f2c199fb9acf5330e4cd6f5c2601ac2c64a634 regen/mk_invlists.pl
  * ex: set ro: */

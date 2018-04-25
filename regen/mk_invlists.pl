@@ -2654,7 +2654,11 @@ foreach my $prop (@props) {
                 $found_nonl1 = 1;
                 last;
             }
-            die "No non-Latin1 code points in $lookup_prop" unless $found_nonl1;
+            if (! $found_nonl1) {
+                warn "No non-Latin1 code points in $prop_name";
+                output_invlist($prop_name, []);
+                last;
+            }
         }
 
         switch_pound_if ($prop_name, 'PERL_IN_UTF8_C');
