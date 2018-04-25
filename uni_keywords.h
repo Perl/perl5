@@ -171,7 +171,7 @@ struct mph_struct {
 STATIC const U32 MPH_SEED1 = 0x5065726c;
 STATIC const U32 MPH_FNV_CONST = 0x01000193;
 
-
+/* The comments give the input key for the row it is in */
 STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
   {     0,  2108,  7209,   3,   7, PL_INHIRAGANA }   /* inhiragana */,
   {     4,  8376,  6576,   3,  10, PL_LB__BA }   /* lb=breakafter */,
@@ -6759,5 +6759,5 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
  * d3ca5c0fbf36f85475b811615af0c2ceafdb38cb74ce786b9c4e73d07730e733 regen/mk_invlists.pl
- * 784929499a354028e04efcff331847d420beeca7f3f4f22569b59ec160924b72 regen/mph.pl
+ * 5599d961e0e4ab42842b41d65db8a265c84e0b68e91a31d15585b7c9c8c6da53 regen/mph.pl
  * ex: set ro: */

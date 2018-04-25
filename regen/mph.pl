@@ -306,7 +306,7 @@ EOF_CODE
     push @code, sprintf "STATIC const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
     push @code, sprintf "STATIC const U32 ${prefix}_FNV_CONST = 0x%08x;\n\n", $FNV_CONST;
 
-    push @code, "\n";
+    push @code, "/* The comments give the input key for the row it is in */\n";
     push @code, "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n", join(",\n", @$rows)."\n};\n\n";
     push @code, <<"EOF_CODE";
 ${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len ) {
