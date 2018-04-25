@@ -6070,8 +6070,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         if (   (   memBEGINPs(lookup_name, j, "perl")
                 && memNEs(lookup_name + 4, j - 4, "space")
                 && memNEs(lookup_name + 4, j - 4, "word"))
-            || memEQs(lookup_name, j, "canondcij")
-            || memEQs(lookup_name, j, "combabove"))
+            || memEQs(lookup_name, j, "canondcij"))
         {
             stricter = TRUE;
 

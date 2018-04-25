@@ -14469,13 +14469,6 @@ sub compile_perl() {
 
     calculate_Assigned();
 
-    # Our internal-only property should be treated as more than just a
-    # synonym; grandfather it in to the pod.
-    $perl->add_match_table('_CombAbove', Re_Pod_Entry => 1,
-                            Fate => $INTERNAL_ONLY, Status => $DISCOURAGED)
-            ->set_equivalent_to(property_ref('ccc')->table('Above'),
-                                                                Related => 1);
-
     my $ASCII = $perl->add_match_table('ASCII');
     if (defined $block) {   # This is equivalent to the block if have it.
         my $Unicode_ASCII = $block->table('Basic_Latin');
