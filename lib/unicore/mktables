@@ -14617,56 +14617,6 @@ sub compile_perl() {
         $Lower->set_caseless_equivalent($cased);
     }
 
-    # Similarly, set up our own Case_Ignorable property if this Unicode
-    # version doesn't have it.  From Unicode 5.1: Definition D121: A character
-    # C is defined to be case-ignorable if C has the value MidLetter or the
-    # value MidNumLet for the Word_Break property or its General_Category is
-    # one of Nonspacing_Mark (Mn), Enclosing_Mark (Me), Format (Cf),
-    # Modifier_Letter (Lm), or Modifier_Symbol (Sk).
-
-    # Perl has long had an internal-only alias for this property; grandfather
-    # it in to the pod, but discourage its use.
-    my $perl_case_ignorable = $perl->add_match_table('_Case_Ignorable',
-                                                     Re_Pod_Entry => 1,
-                                                     Fate => $INTERNAL_ONLY,
-                                                     Status => $DISCOURAGED);
-    my $case_ignorable = property_ref('Case_Ignorable');
-    if (defined $case_ignorable && ! $case_ignorable->is_empty) {
-        $perl_case_ignorable->set_equivalent_to($case_ignorable->table('Y'),
-                                                                Related => 1);
-    }
-    else {
-
-        $perl_case_ignorable->initialize($gc->table('Mn') + $gc->table('Lm'));
-
-        # The following three properties are not in early releases
-        $perl_case_ignorable += $gc->table('Me') if defined $gc->table('Me');
-        $perl_case_ignorable += $gc->table('Cf') if defined $gc->table('Cf');
-        $perl_case_ignorable += $gc->table('Sk') if defined $gc->table('Sk');
-
-        # For versions 4.1 - 5.0, there is no MidNumLet property, and
-        # correspondingly the case-ignorable definition lacks that one.  For
-        # 4.0, it appears that it was meant to be the same definition, but was
-        # inadvertently omitted from the standard's text, so add it if the
-        # property actually is there
-        my $wb = property_ref('Word_Break');
-        if (defined $wb) {
-            my $midlet = $wb->table('MidLetter');
-            $perl_case_ignorable += $midlet if defined $midlet;
-            my $midnumlet = $wb->table('MidNumLet');
-            $perl_case_ignorable += $midnumlet if defined $midnumlet;
-        }
-        else {
-
-            # In earlier versions of the standard, instead of the above two
-            # properties , just the following characters were used:
-            $perl_case_ignorable +=
-                            ord("'")
-                        +   utf8::unicode_to_native(0xAD)  # SOFT HYPHEN (SHY)
-                        +   0x2019; # RIGHT SINGLE QUOTATION MARK
-        }
-    }
-
     # The remaining perl defined tables are mostly based on Unicode TR 18,
     # "Annex C: Compatibility Properties".  All of these have two versions,
     # one whose name generally begins with Posix that is posix-compliant, and
