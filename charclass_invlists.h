@@ -191042,16 +191042,6 @@ static const UV PL_CPRT_invlist[] = { /* for all charsets */
 	0x10840
 };
 
-static const UV PL_CS_invlist[] = { /* for all charsets */
-	3,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0xD800,
-	0xE000
-};
-
 static const UV PL_CUNEIFORMNUMBERS_invlist[] = { /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -303854,50 +303844,6 @@ static const UV PL_NBAT_invlist[] = { /* for all charsets */
 	0x108B0
 };
 
-static const UV PL_NCHAR_invlist[] = { /* for all charsets */
-	37,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0xFDD0,
-	0xFDF0,
-	0xFFFE,
-	0x10000,
-	0x1FFFE,
-	0x20000,
-	0x2FFFE,
-	0x30000,
-	0x3FFFE,
-	0x40000,
-	0x4FFFE,
-	0x50000,
-	0x5FFFE,
-	0x60000,
-	0x6FFFE,
-	0x70000,
-	0x7FFFE,
-	0x80000,
-	0x8FFFE,
-	0x90000,
-	0x9FFFE,
-	0xA0000,
-	0xAFFFE,
-	0xB0000,
-	0xBFFFE,
-	0xC0000,
-	0xCFFFE,
-	0xD0000,
-	0xDFFFE,
-	0xE0000,
-	0xEFFFE,
-	0xF0000,
-	0xFFFFE,
-	0x100000,
-	0x10FFFE,
-	0x110000
-};
-
 static const UV PL_NEWA_invlist[] = { /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -324372,86 +324318,6 @@ static const UV PL_PATSYN_invlist[] = { /* for EBCDIC 037 */
 	0xFD40,
 	0xFE45,
 	0xFE47
-};
-
-#  endif	/* EBCDIC 037 */
-
-#  if 'A' == 65 /* ASCII/Latin1 */
-
-static const UV PL_PATWS_invlist[] = { /* for ASCII/Latin1 */
-	11,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x9,
-	0xE,
-	0x20,
-	0x21,
-	0x85,
-	0x86,
-	0x200E,
-	0x2010,
-	0x2028,
-	0x202A
-};
-
-#  endif	/* ASCII/Latin1 */
-
-#  if 'A' == 193 /* EBCDIC 1047 */ \
-     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
-     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
-static const UV PL_PATWS_invlist[] = { /* for EBCDIC 1047 */
-	15,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x5,
-	0x6,
-	0xB,
-	0xE,
-	0x15,
-	0x16,
-	0x25,
-	0x26,
-	0x40,
-	0x41,
-	0x200E,
-	0x2010,
-	0x2028,
-	0x202A
-};
-
-#  endif	/* EBCDIC 1047 */
-
-#  if 'A' == 193 /* EBCDIC 037 */ \
-     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
-     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
-
-static const UV PL_PATWS_invlist[] = { /* for EBCDIC 037 */
-	15,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x5,
-	0x6,
-	0xB,
-	0xE,
-	0x15,
-	0x16,
-	0x25,
-	0x26,
-	0x40,
-	0x41,
-	0x200E,
-	0x2010,
-	0x2028,
-	0x202A
 };
 
 #  endif	/* EBCDIC 037 */
@@ -371861,6 +371727,140 @@ static const UV PL_ZZZZ_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
+static const UV PL__PERL_NCHAR_invlist[] = { /* for all charsets */
+	37,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xFDD0,
+	0xFDF0,
+	0xFFFE,
+	0x10000,
+	0x1FFFE,
+	0x20000,
+	0x2FFFE,
+	0x30000,
+	0x3FFFE,
+	0x40000,
+	0x4FFFE,
+	0x50000,
+	0x5FFFE,
+	0x60000,
+	0x6FFFE,
+	0x70000,
+	0x7FFFE,
+	0x80000,
+	0x8FFFE,
+	0x90000,
+	0x9FFFE,
+	0xA0000,
+	0xAFFFE,
+	0xB0000,
+	0xBFFFE,
+	0xC0000,
+	0xCFFFE,
+	0xD0000,
+	0xDFFFE,
+	0xE0000,
+	0xEFFFE,
+	0xF0000,
+	0xFFFFE,
+	0x100000,
+	0x10FFFE,
+	0x110000
+};
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
+static const UV PL__PERL_PATWS_invlist[] = { /* for ASCII/Latin1 */
+	11,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x9,
+	0xE,
+	0x20,
+	0x21,
+	0x85,
+	0x86,
+	0x200E,
+	0x2010,
+	0x2028,
+	0x202A
+};
+
+#  endif	/* ASCII/Latin1 */
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
+static const UV PL__PERL_PATWS_invlist[] = { /* for EBCDIC 1047 */
+	15,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x5,
+	0x6,
+	0xB,
+	0xE,
+	0x15,
+	0x16,
+	0x25,
+	0x26,
+	0x40,
+	0x41,
+	0x200E,
+	0x2010,
+	0x2028,
+	0x202A
+};
+
+#  endif	/* EBCDIC 1047 */
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
+static const UV PL__PERL_PATWS_invlist[] = { /* for EBCDIC 037 */
+	15,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x5,
+	0x6,
+	0xB,
+	0xE,
+	0x15,
+	0x16,
+	0x25,
+	0x26,
+	0x40,
+	0x41,
+	0x200E,
+	0x2010,
+	0x2028,
+	0x202A
+};
+
+#  endif	/* EBCDIC 037 */
+
+static const UV PL__PERL_SURROGATE_invlist[] = { /* for all charsets */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xD800,
+	0xE000
+};
+
 const char * deprecated_property_msgs[] = {
 	"",
 	"Surrogates should never appear in well-formed text, and therefore shouldn't be the basis for line breaking",
@@ -372048,7 +372048,6 @@ typedef enum {
 	PL_COPTICEPACTNUMBERS,
 	PL_COUNTINGROD,
 	PL_CPRT,
-	PL_CS,
 	PL_CUNEIFORMNUMBERS,
 	PL_CURRENCYSYMBOLS,
 	PL_CWCF,
@@ -372584,7 +372583,6 @@ typedef enum {
 	PL_NARB,
 	PL_NB,
 	PL_NBAT,
-	PL_NCHAR,
 	PL_NEWA,
 	PL_NFCQC__M,
 	PL_NFCQC__Y,
@@ -372746,7 +372744,6 @@ typedef enum {
 	PL_P,
 	PL_PALM,
 	PL_PATSYN,
-	PL_PATWS,
 	PL_PAUC,
 	PL_PC,
 	PL_PCM,
@@ -372981,12 +372978,15 @@ typedef enum {
 	PL__PERL_FOLDS_TO_MULTI_CHAR,
 	PL__PERL_IDCONT,
 	PL__PERL_IDSTART,
+	PL__PERL_NCHAR,
+	PL__PERL_PATWS,
 	PL__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START,
 	PL__PERL_PROBLEMATIC_LOCALE_FOLDS,
-	PL__PERL_QUOTEMETA
+	PL__PERL_QUOTEMETA,
+	PL__PERL_SURROGATE
 } binary_invlist_enum;
 
-#define MAX_UNI_KEYWORD_INDEX PL__PERL_QUOTEMETA
+#define MAX_UNI_KEYWORD_INDEX PL__PERL_SURROGATE
 
 static const UV * const PL_uni_prop_ptrs[] = {
 	NULL,	/* Placeholder */
@@ -373166,7 +373166,6 @@ static const UV * const PL_uni_prop_ptrs[] = {
 	PL_COPTICEPACTNUMBERS_invlist,
 	PL_COUNTINGROD_invlist,
 	PL_CPRT_invlist,
-	PL_CS_invlist,
 	PL_CUNEIFORMNUMBERS_invlist,
 	PL_CURRENCYSYMBOLS_invlist,
 	PL_CWCF_invlist,
@@ -373702,7 +373701,6 @@ static const UV * const PL_uni_prop_ptrs[] = {
 	PL_NARB_invlist,
 	PL_NB_invlist,
 	PL_NBAT_invlist,
-	PL_NCHAR_invlist,
 	PL_NEWA_invlist,
 	PL_NFCQC__M_invlist,
 	PL_NFCQC__Y_invlist,
@@ -373864,7 +373862,6 @@ static const UV * const PL_uni_prop_ptrs[] = {
 	PL_P_invlist,
 	PL_PALM_invlist,
 	PL_PATSYN_invlist,
-	PL_PATWS_invlist,
 	PL_PAUC_invlist,
 	PL_PC_invlist,
 	PL_PCM_invlist,
@@ -374099,9 +374096,12 @@ static const UV * const PL_uni_prop_ptrs[] = {
 	PL__PERL_FOLDS_TO_MULTI_CHAR_invlist,
 	PL__PERL_IDCONT_invlist,
 	PL__PERL_IDSTART_invlist,
+	PL__PERL_NCHAR_invlist,
+	PL__PERL_PATWS_invlist,
 	PL__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist,
 	PL__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist,
-	PL__PERL_QUOTEMETA_invlist
+	PL__PERL_QUOTEMETA_invlist,
+	PL__PERL_SURROGATE_invlist
 };
 
 #endif	/* defined(PERL_IN_UTF8_C) */
@@ -374285,5 +374285,5 @@ static const U8 WB_table[24][24] = {
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 7e0e8d51a337ffcdbe666ee61e72049920af277812e1ddd80fac42bcb7f616f5 regen/mk_invlists.pl
+ * 668d1d96686dbe72327f7afc0bf1fbae4c3188bb996e17bb9c6eaa620563d8a2 regen/mk_invlists.pl
  * ex: set ro: */

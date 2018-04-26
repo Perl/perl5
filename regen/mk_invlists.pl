@@ -2182,9 +2182,12 @@ my %deprecated_tags;
 # Collect all the binary properties from data in lib/unicore
 # Sort so that complements come after the main table, and the shortest
 # names first, finally alphabetically.  Also, sort together the tables we want
-# to be kept together.
+# to be kept together, and prefer those with 'posix' in their names, which is
+# what the C code is expecting their names to be.
 foreach my $property (sort
         {   exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
+         or $b =~ /posix/i <=> $a =~ /posix/i
+         or $b =~ /perl/i <=> $a =~ /perl/i
          or $a =~ /!/ <=> $b =~ /!/
          or length $a <=> length $b
          or $a cmp $b
