@@ -87,7 +87,8 @@ foreach my $name (sort keys %utf8::loose_property_name_of) {
 }
 
 # Output these tables in the same vicinity as each other, so that will get
-# paged in at about the same time
+# paged in at about the same time.  These are also assumed to be the exact
+# same list as those properties used internally by perl.
 my %keep_together = (
                         assigned => 1,
                         ascii => 1,
@@ -129,6 +130,7 @@ my %keep_together = (
                         _perl_problematic_locale_folds => 1,
                         _perl_quotemeta => 1,
                     );
+my %perl_tags;  # So can find synonyms of the above properties
 
 sub uniques {
     # Returns non-duplicated input values.  From "Perl Best Practices:
@@ -2175,6 +2177,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 # are needed by perl, but aren't in all Unicode releases.
 
 my @bin_props;
+my @perl_prop_synonyms;
 my %enums;
 my @deprecated_messages = "";   # Element [0] is a placeholder
 my %deprecated_tags;
@@ -2255,6 +2258,8 @@ foreach my $property (sort
         # And create an enum for it.
         $enums{$tag} = $table_name_prefix . uc sanitize_name($property);
 
+        $perl_tags{$tag} = 1 if exists $keep_together{lc $property};
+
         # Some properties are deprecated.  This hash tells us so, and the
         # warning message to raise if they are used.
         if (exists $utf8::why_deprecated{$tag}) {
@@ -2279,12 +2284,22 @@ foreach my $property (sort
 
         # There is a rule for the parser for each.
         $keywords{$define} = $defined_to;
+
+        # And a #define for all simple names equivalent to a perl property,
+        # except those that begin with 'is' or 'in';
+        if (exists $perl_tags{$tag} && $property !~ / ^ i[ns] | = /x) {
+            push @perl_prop_synonyms, "#define "
+                                    . $table_name_prefix
+                                    . uc(sanitize_name($define))
+                                    . "   $defined_to";
+        }
     }
 }
 
 @bin_props = sort {  exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
                    or $a cmp $b
                   } @bin_props;
+@perl_prop_synonyms = sort(uniques(@perl_prop_synonyms));
 push @props, @bin_props;
 
 foreach my $prop (@props) {
@@ -2724,6 +2739,8 @@ print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 
+print $out_fh "\n/* Synonyms for perl properties */\n";
+print $out_fh join "\n", @perl_prop_synonyms, "\n";
 
 print $out_fh "\nstatic const UV * const PL_uni_prop_ptrs\[] = {\n";
 print $out_fh "\tNULL,\t/* Placeholder */\n\t";
