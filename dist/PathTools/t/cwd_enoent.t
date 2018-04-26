@@ -47,4 +47,6 @@ foreach my $type (qw(regular perl)) {
 
 chdir $tmp or die "$tmp: $!";
 
+END { chdir $tmp; }
+
 1;
