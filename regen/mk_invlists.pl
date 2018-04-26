@@ -2181,7 +2181,8 @@ my %deprecated_tags;
 
 # Collect all the binary properties from data in lib/unicore
 # Sort so that complements come after the main table, and the shortest
-# names first, finally alphabetically.
+# names first, finally alphabetically.  Also, sort together the tables we want
+# to be kept together.
 foreach my $property (sort
         {   exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
          or $a =~ /!/ <=> $b =~ /!/
