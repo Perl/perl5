@@ -2189,6 +2189,27 @@ my %enums;
 my @deprecated_messages = "";   # Element [0] is a placeholder
 my %deprecated_tags;
 
+my $float_e_format = qr/ ^ -? \d \. \d+ e [-+] \d+ $ /x;
+
+# Create another hash that maps floating point x.yyEzz representation to what
+# %stricter_to_file_of does for the equivalent rational.  A typical entry in
+# the latter hash is
+#
+#    'nv=1/2' => 'Nv/1_2',
+#
+# From that, this loop creates an entry
+#
+#    'nv=5.00e-01' => 'Nv/1_2',
+#
+# %stricter_to_file_of contains far more than just the rationals.  Instead we
+# use %utf8::nv_floating_to_rational which should have an entry for each
+# nv in the former hash.
+my %floating_to_file_of;
+foreach my $key (keys %utf8::nv_floating_to_rational) {
+    my $value = $utf8::nv_floating_to_rational{$key};
+    $floating_to_file_of{$key} = $utf8::stricter_to_file_of{"nv=$value"};
+}
+
 # Collect all the binary properties from data in lib/unicore
 # Sort so that complements come after the main table, and the shortest
 # names first, finally alphabetically.  Also, sort together the tables we want
@@ -2198,11 +2219,13 @@ foreach my $property (sort
         {   exists $keep_together{lc $b} <=> exists $keep_together{lc $a}
          or $b =~ /posix/i <=> $a =~ /posix/i
          or $b =~ /perl/i <=> $a =~ /perl/i
+         or $a =~ $float_e_format <=> $b =~ $float_e_format
          or $a =~ /!/ <=> $b =~ /!/
          or length $a <=> length $b
          or $a cmp $b
         }   keys %utf8::loose_to_file_of,
-            keys %utf8::stricter_to_file_of
+            keys %utf8::stricter_to_file_of,
+            keys %floating_to_file_of
 ) {
 
     # These two hashes map properties to values that can be considered to
@@ -2210,10 +2233,14 @@ foreach my $property (sort
     # identical entries.  Otherwise they differ in some way.
     my $tag = $utf8::loose_to_file_of{$property};
     $tag = $utf8::stricter_to_file_of{$property} unless defined $tag;
+    $tag = $floating_to_file_of{$property} unless defined $tag;
 
     # The tag may contain an '!' meaning it is identical to the one formed
     # by removing the !, except that it is inverted.
     my $inverted = $tag =~ s/!//;
+
+    # This hash is lacking the property name
+    $property = "nv=$property" if $property =~ $float_e_format;
 
     # The list of 'prop=value' entries that this single entry expands to
     my @this_entries;
@@ -2802,6 +2829,13 @@ sub token_name
 my $keywords_fh = open_new('uni_keywords.h', '>',
 		  {style => '*', by => 'regen/mk_invlists.pl',
                   from => "mph.pl"});
+
+no warnings 'once';
+print $keywords_fh <<"EOF";
+/* The precisionn to use in "%.*e" formats */
+#define PL_E_FORMAT_PRECISION $utf8::e_precision
+
+EOF
 
 my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows) = MinimalPerfectHash::make_mph_from_hash(\%keywords);
 print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1, $length_all_keys, $smart_blob, $rows, undef, undef, undef, 'match_uniprop' );
