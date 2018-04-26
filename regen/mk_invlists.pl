@@ -2684,8 +2684,6 @@ print $out_fh "\nconst char * deprecated_property_msgs[] = {\n\t";
 print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
 print $out_fh "\n};\n";
 
-switch_pound_if ('binary_property_tables', 'PERL_IN_UTF8_C');
-
 my @enums = sort values %enums;
 
 # Save a copy of these before modification
@@ -2722,15 +2720,12 @@ print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 
-switch_pound_if ('binary_property_index_table', 'PERL_IN_UTF8_C' );
 
 print $out_fh "\nstatic const UV * const PL_uni_prop_ptrs\[] = {\n";
 print $out_fh "\tNULL,\t/* Placeholder */\n\t";
 print $out_fh join ",\n\t", @invlist_names;
 print $out_fh "\n";
 print $out_fh "};\n";
-
-end_file_pound_if;
 
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
 
