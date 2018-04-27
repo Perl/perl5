@@ -5618,14 +5618,7 @@ PP(pp_reverse)
 			SV * const tmp = *begin;
 			*begin++ = *end;
 			*end--   = tmp;
-
-                        if (tmp && SvWEAKREF(tmp))
-                            sv_rvunweaken(tmp);
 		    }
-
-                    /* make sure we catch the middle element */
-                    if (begin == end && *begin && SvWEAKREF(*begin))
-                        sv_rvunweaken(*begin);
 		}
 	    }
 	}
