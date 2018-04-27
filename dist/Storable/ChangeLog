@@ -1,3 +1,7 @@
+2018-04-27 20:40:00 xsawyerx
+    version 3.11
+        * Fix Strawberry Perl build failures.
+
 2018-04-21 22:00:00 xsawyerx
     Version 3.10
         * Fix binary artifacts from distribution.
