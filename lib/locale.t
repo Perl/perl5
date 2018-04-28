@@ -78,6 +78,11 @@ my %known_bad_locales = (
                           darwin => qr/ ^ lt_LT.ISO8859 /ix,
                           os390 => qr/ ^ italian /ix,
                           netbsd => qr/\bISO8859-2\b/i,
+
+                          # This may be the same bug as the cygwin below; it's
+                          # generating malformed UTF-8 on the radix being
+                          # mulit-byte
+                          solaris => qr/ ^ ( ar_ | pa_ ) /x,
                         );
 
 # cygwin isn't returning proper radix length in this locale, but supposedly to
