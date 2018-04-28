@@ -1040,8 +1040,15 @@ EXTERN_C int usleep(unsigned int);
 #  define PERL_STRLEN_EXPAND_SHIFT 2
 #endif
 
-#include <stddef.h>
-#define STRUCT_OFFSET(s,m)  offsetof(s,m)
+/* This use of offsetof() requires /Zc:offsetof- for VS2017 (and presumably
+ * onwards) when building Socket.xs, but we can just use a different definition
+ * for STRUCT_OFFSET instead. */
+#if defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1910
+#  define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
+#else
+#  include <stddef.h>
+#  define STRUCT_OFFSET(s,m)  offsetof(s,m)
+#endif
 
 /* ptrdiff_t is C11, so undef it under pedantic builds */
 #ifdef PERL_GCC_PEDANTIC
