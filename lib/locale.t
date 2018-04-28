@@ -2237,6 +2237,7 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok15);
     $test_names{$locales_test_number} = 'Verify that a number with a UTF-8 radix has a UTF-8 stringification';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok16);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number with a UTF-8 radix yields UTF-8';
