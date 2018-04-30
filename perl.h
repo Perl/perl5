@@ -2328,11 +2328,12 @@ int isnan(double d);
 
 #ifdef USE_PERL_ATOF
 #   define Perl_atof(s) Perl_my_atof(s)
-#   define Perl_atof2(s, n) Perl_my_atof2(aTHX_ (s), &(n))
+#   define Perl_atof2(s, n) Perl_my_atof3(aTHX_ (s), &(n), 0)
 #else
 #   define Perl_atof(s) (NV)atof(s)
 #   define Perl_atof2(s, n) ((n) = atof(s))
 #endif
+#define my_atof2(a,b) my_atof3(a,b,0)
 
 /*
  * CHAR_MIN and CHAR_MAX are not included here, as the (char) type may be

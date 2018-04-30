@@ -2220,6 +2220,9 @@ PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *orig, NV* value);
 #define PERL_ARGS_ASSERT_MY_ATOF2	\
 	assert(orig); assert(value)
+PERL_CALLCONV char*	Perl_my_atof3(pTHX_ const char *orig, NV* value, const STRLEN len);
+#define PERL_ARGS_ASSERT_MY_ATOF3	\
+	assert(orig); assert(value)
 PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
 #define PERL_ARGS_ASSERT_MY_ATTRS	\
 	assert(o)

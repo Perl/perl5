@@ -1228,7 +1228,7 @@ Perl_my_atof(pTHX_ const char* s)
 
 #ifdef USE_QUADMATH
 
-    Perl_my_atof2(aTHX_ s, &x);
+    my_atof2(s, &x);
 
 #elif ! defined(USE_LOCALE_NUMERIC)
 
@@ -1367,10 +1367,19 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
+    PERL_ARGS_ASSERT_MY_ATOF2;
+    return my_atof3(orig, value, 0);
+}
+
+char*
+Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
+{
     const char* s = orig;
     NV result[3] = {0.0, 0.0, 0.0};
 #if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
-    const char* send = s + strlen(orig); /* one past the last */
+    const char* send = s + ((len != 0)
+                           ? len
+                           : strlen(orig)); /* one past the last */
     bool negative = 0;
 #endif
 #if defined(USE_PERL_ATOF) && !defined(USE_QUADMATH)
@@ -1387,10 +1396,10 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 #endif
 
 #if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
-    PERL_ARGS_ASSERT_MY_ATOF2;
+    PERL_ARGS_ASSERT_MY_ATOF3;
 
     /* leading whitespace */
-    while (isSPACE(*s))
+    while (s < send && isSPACE(*s))
 	++s;
 
     /* sign */
@@ -1408,6 +1417,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
         char* endp;
         if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return endp;
+        endp = send;
         result[2] = strtoflt128(s, &endp);
         if (s != endp) {
             *value = negative ? -result[2] : result[2];
@@ -1457,7 +1467,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */
 
-    while (1) {
+    while (s < send) {
 	if (isDIGIT(*s)) {
 	    seen_digit = 1;
 	    old_digit = digit;
@@ -1485,7 +1495,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 		    exp_adjust[0]++;
 		}
 		/* skip remaining digits */
-		while (isDIGIT(*s)) {
+		while (s < send && isDIGIT(*s)) {
 		    ++s;
 		    if (! seen_dp) {
 			exp_adjust[0]++;
@@ -1509,7 +1519,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	else if (!seen_dp && GROK_NUMERIC_RADIX(&s, send)) {
 	    seen_dp = 1;
 	    if (sig_digits > MAX_SIG_DIGITS) {
-		while (isDIGIT(*s)) {
+		while (s < send && isDIGIT(*s)) {
 		    ++s;
 		}
 		break;
@@ -1525,7 +1535,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	result[1] = S_mulexp10(result[1], exp_acc[1]) + (NV)accumulator[1];
     }
 
-    if (seen_digit && (isALPHA_FOLD_EQ(*s, 'e'))) {
+    if (s < send && seen_digit && (isALPHA_FOLD_EQ(*s, 'e'))) {
 	bool expnegative = 0;
 
 	++s;
@@ -1536,13 +1546,11 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	    case '+':
 		++s;
 	}
-	while (isDIGIT(*s))
+	while (s < send && isDIGIT(*s))
 	    exponent = exponent * 10 + (*s++ - '0');
 	if (expnegative)
 	    exponent = -exponent;
     }
-
-
 
     /* now apply the exponent */
 
