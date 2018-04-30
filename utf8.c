@@ -5931,7 +5931,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
     bool stricter = FALSE;
     bool is_nv = FALSE;         /* nv= or numeric_value= */
     unsigned int i;
-    unsigned int j = 0;
+    unsigned int j = 0, lookup_len;
     int equals_pos = -1;        /* Where the '=' is found, or negative if none */
     int table_index = 0;
     bool starts_with_In_or_Is = FALSE;
@@ -6175,9 +6175,11 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         starts_with_In_or_Is = TRUE;
     }
 
+    lookup_len = j;     /* Use a more mnemonic name starting here */
+
     /* Get the index into our pointer table of the inversion list corresponding
      * to the property */
-    table_index = match_uniprop((U8 *) lookup_name, j);
+    table_index = match_uniprop((U8 *) lookup_name, lookup_len);
 
     /* If it didn't find the property */
     if (table_index == 0) {
@@ -6189,10 +6191,10 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         }
 
         lookup_name += 2;
-        j -= 2;
+        lookup_len -= 2;
 
         /* If still didn't find it, give up */
-        table_index = match_uniprop((U8 *) lookup_name, j);
+        table_index = match_uniprop((U8 *) lookup_name, lookup_len);
         if (table_index == 0) {
             return NULL;
         }
