@@ -6029,11 +6029,15 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
              * willy-nilly, as those could be a minus sign.  Other stricter
              * rules also apply.  However, these properties all can have the
              * rhs not be a number, in which case they contain at least one
-             * alphabetic.  In those cases, the stricter rules don't apply.  We
-             * first parse to look for alphas */
+             * alphabetic.  In those cases, the stricter rules don't apply.
+             * But the numeric value property can have the alphas [Ee] to
+             * signify an exponent, and it is still a number with stricter
+             * rules.  So look for an alpha that signifys not-strict */
             stricter = TRUE;
             for (k = i; k < len; k++) {
-                if (isALPHA(name[k])) {
+                if (   isALPHA(name[k])
+                    && (! is_nv || ! isALPHA_FOLD_EQ(name[k], 'E')))
+                {
                     stricter = FALSE;
                     break;
                 }
@@ -6186,17 +6190,58 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
         /* If didn't find the property, we try again stripping off any initial
          * 'In' or 'Is' */
-        if (! starts_with_In_or_Is) {
-            return NULL;
+        if (starts_with_In_or_Is) {
+            lookup_name += 2;
+            lookup_len -= 2;
+            equals_pos -= 2;
+
+            table_index = match_uniprop((U8 *) lookup_name, lookup_len);
         }
 
-        lookup_name += 2;
-        lookup_len -= 2;
-
-        /* If still didn't find it, give up */
-        table_index = match_uniprop((U8 *) lookup_name, lookup_len);
         if (table_index == 0) {
-            return NULL;
+            char * canonical;
+
+            /* If not found, and not the numeric value property, isn't a legal
+             * property */
+            if (! is_nv) {
+                return NULL;
+            }
+
+            /* But the numeric value property needs more work to decide.  What
+             * we do is make sure we have the number in canonical form and look
+             * that up. */
+
+            {
+
+                /* Take the input, convert it to a
+                 * NV, then create a canonical string representation of that
+                 * NV. */
+
+                NV value;
+
+                /* Get the value */
+                if (my_atof3(lookup_name + equals_pos, &value,
+                             lookup_len - equals_pos)
+                          != lookup_name + lookup_len)
+                {
+                    return NULL;
+                }
+
+                /* If the value is an integer, the canonical value is integral */
+                if (Perl_ceil(value) == value) {
+                    canonical = Perl_form(aTHX_ "nv=%.0" NVff, value);
+                }
+                else {  /* Otherwise, it is %e with a known precision */
+                    canonical = Perl_form(aTHX_ "nv=%.*" NVef,
+                                                PL_E_FORMAT_PRECISION, value);
+                }
+            }
+
+            /* Here, we have the number in canonical form.  Try that */
+            table_index = match_uniprop((U8 *) canonical, strlen(canonical));
+            if (table_index == 0) {
+                return NULL;
+            }
         }
     }
 
