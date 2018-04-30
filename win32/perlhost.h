@@ -1756,7 +1756,8 @@ restart:
 		SvREFCNT_dec(PL_curstash);
 		PL_curstash = (HV *)SvREFCNT_inc(PL_defstash);
 	    }
-	    if (PL_endav && !PL_minus_c) {
+            if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) &&
+	        PL_endav && !PL_minus_c) {
 		PERL_SET_PHASE(PERL_PHASE_END);
 		call_list(oldscope, PL_endav);
 	    }
