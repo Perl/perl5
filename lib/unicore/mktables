@@ -1436,10 +1436,10 @@ my @missing_early_files;   # Generated list of absent files that we need to
 my @files_actually_output; # List of files we generated.
 my @more_Names;            # Some code point names are compound; this is used
                            # to store the extra components of them.
-my $MIN_FRACTION_LENGTH = 3; # How many digits of a floating point number at
-                           # the minimum before we consider it equivalent to a
-                           # candidate rational
-my $MAX_FLOATING_SLOP = 10 ** - $MIN_FRACTION_LENGTH; # And in floating terms
+my $E_FLOAT_PRECISION = 2; # The minimum number of digits after the decimal
+                           # point of a normalized floating point number
+                           # needed to match before we consider it equivalent
+                           # to a candidate rational
 
 # These store references to certain commonly used property objects
 my $age;
@@ -12955,6 +12955,7 @@ sub register_fraction($) {
     my $rational = shift;
 
     my $float = eval $rational;
+    $float = sprintf "%.*e", $E_FLOAT_PRECISION, $float;
     $nv_floating_to_rational{$float} = $rational;
     return;
 }
@@ -17656,10 +17657,10 @@ $loose_to_file_of
 $nv_floating_to_rational
 );
 
-# If a floating point number doesn't have enough digits in it to get this
-# close to a fraction, it isn't considered to be that fraction even if all the
-# digits it does have match.
-\$utf8::max_floating_slop = $MAX_FLOATING_SLOP;
+# If a %e floating point number doesn't have this number of digits in it after
+# the decimal point to get this close to a fraction, it isn't considered to be
+# that fraction even if all the digits it does have match.
+\$utf8::e_precision = $E_FLOAT_PRECISION;
 
 # Deprecated tables to generate a warning for.  The key is the file containing
 # the table, so as to avoid duplication, as many property names can map to the
@@ -18982,21 +18983,12 @@ sub make_property_test_script() {
 
     $t_path = 'TestProp.pl' unless defined $t_path; # the traditional name
 
-    # Keep going down an order of magnitude
-    # until find that adding this quantity to
-    # 1 remains 1; but put an upper limit on
-    # this so in case this algorithm doesn't
-    # work properly on some platform, that we
-    # won't loop forever.
-    my $digits = 0;
-    my $min_floating_slop = 1;
-    while (1+ $min_floating_slop != 1
-            && $digits++ < 50)
-    {
-        my $next = $min_floating_slop / 10;
-        last if $next == 0; # If underflows,
-                            # use previous one
-        $min_floating_slop = $next;
+    # Create a list of what the %f representation is for each rational number.
+    # This will be used below.
+    my @valid_base_floats = '0.0';
+    foreach my $e_representation (keys %nv_floating_to_rational) {
+        push @valid_base_floats,
+                            eval $nv_floating_to_rational{$e_representation};
     }
 
     # It doesn't matter whether the elements of this array contain single lines
@@ -19144,70 +19136,82 @@ EOF_CODE
                     # floating point equivalent.
                     if ($table_name =~ qr{/}) {
 
-                        # Calculate the float, and find just the fraction.
+                        # Calculate the float, and the %e representation
                         my $float = eval $table_name;
-                        my ($whole, $fraction)
-                                            = $float =~ / (.*) \. (.*) /x;
+                        my $e_representation = sprintf("%.*e",
+                                                $E_FLOAT_PRECISION, $float);
+                        # Parse that
+                        my ($non_zeros, $zeros, $exponent_sign, $exponent)
+                           = $e_representation
+                               =~ / -? [1-9] \. (\d*?) (0*) e ([+-]) (\d+) /x;
+                        my $min_e_precision;
+                        my $min_f_precision;
 
-                        # Starting with one digit after the decimal point,
-                        # create a test for each possible precision (number of
-                        # digits past the decimal point) until well beyond the
-                        # native number found on this machine.  (If we started
-                        # with 0 digits, it would be an integer, which could
-                        # well match an unrelated table)
-                        PLACE:
-                        for my $i (1 .. $min_floating_slop + 3) {
-                            my $table_name = sprintf("%.*f", $i, $float);
-                            if ($i < $MIN_FRACTION_LENGTH) {
+                        if ($exponent_sign eq '+' && $exponent != 0) {
+                            Carp::my_carp_bug("Not yet equipped to handle"
+                                            . " positive exponents");
+                            return;
+                        }
+                        else {
+                            # We're trying to find the minimum precision that
+                            # is needed to indicate this particular rational
+                            # for the given $E_FLOAT_PRECISION.  For %e, any
+                            # trailing zeros, like 1.500e-02 aren't needed, so
+                            # the correct value is how many non-trailing zeros
+                            # there are after the decimal point.
+                            $min_e_precision = length $non_zeros;
 
-                                # If the test case has fewer digits than the
-                                # minimum acceptable precision, it shouldn't
-                                # succeed, so we expect an error for it.
-                                # E.g., 2/3 = .7 at one decimal point, and we
-                                # shouldn't say it matches .7.  We should make
-                                # it be .667 at least before agreeing that the
-                                # intent was to match 2/3.  But at the
-                                # less-than- acceptable level of precision, it
-                                # might actually match an unrelated number.
-                                # So don't generate a test case if this
-                                # conflating is possible.  In our example, we
-                                # don't want 2/3 matching 7/10, if there is
-                                # a 7/10 code point.
+                            # For %f, like .01500, we want at least
+                            # $E_FLOAT_PRECISION digits, but any trailing
+                            # zeros aren't needed, so we can subtract the
+                            # length of those.  But we also need to include
+                            # the zeros after the decimal point, but before
+                            # the first significant digit.
+                            $min_f_precision = $E_FLOAT_PRECISION
+                                             + $exponent
+                                             - length $zeros;
+                        }
 
-                                # First, integers are not in the rationals
-                                # table.  Don't generate an error if this
-                                # rounds to an integer using the given
-                                # precision.
-                                my $round = sprintf "%.0f", $table_name;
-                                next PLACE if abs($table_name - $round)
-                                                        < $MAX_FLOATING_SLOP;
+                        # Make tests for each possible precision from 1 to
+                        # just past the worst case.  
+                        my $upper_limit = ($min_e_precision > $min_f_precision)
+                                           ? $min_e_precision
+                                           : $min_f_precision;
 
-                                # Here, isn't close enough to an integer to be
-                                # confusable with one.  Now, see it it's
-                                # "close" to a known rational
-                                for my $existing
-                                        (keys %nv_floating_to_rational)
-                                {
-                                    next PLACE
-                                        if abs($table_name - $existing)
-                                                < $MAX_FLOATING_SLOP;
+                        for my $i (1 .. $upper_limit + 1) {
+                            for my $format ("e", "f") {
+                                my $this_table
+                                          = sprintf("%.*$format", $i, $float);
+
+                                # If we don't have enough precision digits,
+                                # make a fail test; otherwise a pass test.
+                                my $pass = ($format eq "e")
+                                            ? $i >= $min_e_precision
+                                            : $i >= $min_f_precision;
+                                if ($pass) {
+                                    push @output, generate_tests($property_name,
+                                                                $this_table,
+                                                                $valid,
+                                                                $invalid,
+                                                                $warning,
+                                                );
                                 }
-                                push @output, generate_error($property_name,
-                                                             $table_name,
-                                                             1   # 1 => already an error
-                                              );
-                            }
-                            else {
+                                elsif (   $format eq "e"
 
-                                # Here the number of digits exceeds the
-                                # minimum we think is needed.  So generate a
-                                # success test case for it.
-                                push @output, generate_tests($property_name,
-                                                             $table_name,
-                                                             $valid,
-                                                             $invalid,
-                                                             $warning,
-                                             );
+                                          # Here we would fail, but in the %f
+                                          # case, the representation at this
+                                          # precision could actually be a
+                                          # valid one for some other rational
+                                       || ! grep { $_ eq $this_table }
+                                                            @valid_base_floats)
+                                {
+                                    push @output,
+                                        generate_error($property_name,
+                                                       $this_table,
+                                                       1   # 1 => already an
+                                                           # error
+                                                );
+                                }
                             }
                         }
                     }
