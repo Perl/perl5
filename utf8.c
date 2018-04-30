@@ -5929,6 +5929,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
     char* lookup_name;
     bool stricter = FALSE;
+    bool is_nv = FALSE;         /* nv= or numeric_value= */
     unsigned int i;
     unsigned int j = 0;
     int equals_pos = -1;        /* Where the '=' is found, or negative if none */
@@ -6005,14 +6006,15 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
         /* Then check if it is one of these properties.  This is hard-coded
          * because easier this way, and the list is unlikely to change */
-        if (   memEQs(lookup_name + lookup_offset,
+        is_nv = memEQs(lookup_name + lookup_offset,
+                       j - 1 - lookup_offset, "numericvalue")
+             || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "nv");
+        if (   is_nv
+            || memEQs(lookup_name + lookup_offset,
                       j - 1 - lookup_offset, "canonicalcombiningclass")
             || memEQs(lookup_name + lookup_offset,
                       j - 1 - lookup_offset, "ccc")
-            || memEQs(lookup_name + lookup_offset,
-                      j - 1 - lookup_offset, "numericvalue")
-            || memEQs(lookup_name + lookup_offset,
-                      j - 1 - lookup_offset, "nv")
             || memEQs(lookup_name + lookup_offset,
                       j - 1 - lookup_offset, "age")
             || memEQs(lookup_name + lookup_offset,
@@ -6128,11 +6130,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
          * skipped.  But we have never allowed a negative denominator, so treat
          * a minus like every other character.  (No need to rule out a second
          * '/', as that won't match anything anyway */
-        if (   memEQs(lookup_name + lookup_offset, equals_pos - lookup_offset,
-                      "nv=")
-            || memEQs(lookup_name + lookup_offset, equals_pos - lookup_offset,
-                      "numericvalue="))
-        {
+        if (is_nv) {
             i++;
             if (i < len && name[i] == '+') {
                 i++;
