@@ -2217,9 +2217,9 @@ PERL_CALLCONV SV*	Perl_multideref_stringify(pTHX_ const OP* o, CV *cv);
 PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s);
 #define PERL_ARGS_ASSERT_MY_ATOF	\
 	assert(s)
-PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
+PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *orig, NV* value);
 #define PERL_ARGS_ASSERT_MY_ATOF2	\
-	assert(s); assert(value)
+	assert(orig); assert(value)
 PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
 #define PERL_ARGS_ASSERT_MY_ATTRS	\
 	assert(o)
