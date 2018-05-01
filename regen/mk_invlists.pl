@@ -2442,9 +2442,10 @@ foreach my $prop (@props) {
         # 255 because a re-ordering could cause 256 to need to be in the same
         # range as 255.)
         if (       (@invmap && $maps_to_code_point)
-            || (   ($invlist[0] < 256
+            || (    @invlist
+                &&  $invlist[0] < 256
                 && (    $invlist[0] != 0
-                    || (scalar @invlist != 1 && $invlist[1] < 256)))))
+                    || (scalar @invlist != 1 && $invlist[1] < 256))))
         {
             $same_in_all_code_pages = 0;
             if (! @invmap) {    # Straight inversion list
@@ -2649,6 +2650,10 @@ foreach my $prop (@props) {
                 # one that contains anything we didn't process.
                 unshift @invlist, @new_invlist;
             }
+        }
+        elsif (@invmap) {   # inversion maps can't cope with this variable
+                            # being true, even if it could be true
+            $same_in_all_code_pages = 0;
         }
         else {
             $same_in_all_code_pages = 1;
