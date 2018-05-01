@@ -1110,25 +1110,26 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
         return FALSE;
     }
 
-        /* Single-digit inputs are quite common. */
-        val = *s++ - '0';
-        if (s < *eptr && isDIGIT(*s)) {
-            /* Fail on extra leading zeros. */
-            if (val == 0)
+    /* Single-digit inputs are quite common. */
+    val = *s++ - '0';
+    if (s < *eptr && isDIGIT(*s)) {
+        /* Fail on extra leading zeros. */
+        if (val == 0)
+            return FALSE;
+        while (s < *eptr && isDIGIT(*s)) {
+            /* This could be unrolled like in grok_number(), but
+                * the expected uses of this are not speed-needy, and
+                * unlikely to need full 64-bitness. */
+            const U8 digit = *s++ - '0';
+            if (val < uv_max_div_10 ||
+                (val == uv_max_div_10 && digit <= uv_max_mod_10)) {
+                val = val * 10 + digit;
+            } else {
                 return FALSE;
-            while (s < *eptr && isDIGIT(*s)) {
-                /* This could be unrolled like in grok_number(), but
-                 * the expected uses of this are not speed-needy, and
-                 * unlikely to need full 64-bitness. */
-                const U8 digit = *s++ - '0';
-                if (val < uv_max_div_10 ||
-                    (val == uv_max_div_10 && digit <= uv_max_mod_10)) {
-                    val = val * 10 + digit;
-                } else {
-                    return FALSE;
-                }
             }
         }
+    }
+
     if (endptr == NULL) {
         if (*s) {
             return FALSE; /* If endptr is NULL, no trailing non-digits allowed. */
@@ -1137,6 +1138,7 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
     else {
         *endptr = s;
     }
+
     *valptr = val;
     return TRUE;
 }
