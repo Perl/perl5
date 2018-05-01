@@ -5099,62 +5099,182 @@ typedef struct {
     PerlIOBuf buf;
     STDCHAR leftovers[UTF8_MAX_BYTES];
     size_t leftover_length;
-    utf8_flags flags;
+    U32 flags;
 } PerlIOUnicode;
+
+#define UTF8_QUIET_ON_ERROR 0x0
+#define UTF8_FAIL_ON_ERROR 0x40000000
+#define UTF8_WARN_ON_ERROR 0x80000000
+#define UTF8_CROAK_ON_ERROR 0xC0000000
+#define UTF8_ONERROR_MASK 0xC0000000
 
 static struct {
     const char* name;
     size_t length;
-    utf8_flags value;
+    U32 value;
+    U32 mask;
 } map[] = {
-    { STR_WITH_LEN("allow_surrogates"), ALLOW_SURROGATES },
-    { STR_WITH_LEN("allow_noncharacters"), ALLOW_NONCHARACTERS },
-    { STR_WITH_LEN("allow_nonshortest"), ALLOW_NONSHORTEST },
-    { STR_WITH_LEN("strict"), STRICT_UTF8 },
-    { STR_WITH_LEN("loose"), ALLOW_SURROGATES | ALLOW_NONCHARACTERS | ALLOW_NONSHORTEST },
+    { STR_WITH_LEN("allow_surrogates"), 0, UTF8_DISALLOW_SURROGATE },
+    { STR_WITH_LEN("allow_noncharacters"), 0, UTF8_DISALLOW_NONCHAR },
+    { STR_WITH_LEN("allow_nonshortest"), UTF8_ALLOW_LONG, UTF8_ALLOW_LONG },
+    { STR_WITH_LEN("strict"), 0, ~(U32)0 },
+    { STR_WITH_LEN("loose"), UTF8_ALLOW_ANY, ~(U32)0 },
+    { STR_WITH_LEN("error=quiet"), UTF8_QUIET_ON_ERROR, UTF8_ONERROR_MASK },
+    { STR_WITH_LEN("error=warn"), UTF8_WARN_ON_ERROR, UTF8_ONERROR_MASK },
+    { STR_WITH_LEN("error=die"), UTF8_CROAK_ON_ERROR, UTF8_ONERROR_MASK },
+    { STR_WITH_LEN("error=fail"), UTF8_FAIL_ON_ERROR, UTF8_ONERROR_MASK },
 };
 
-static utf8_flags lookup_parameter(pTHX_ const char* ptr, size_t len) {
+static int lookup_parameter(pTHX_ const char* ptr, size_t len) {
     unsigned i;
     for (i = 0; i < sizeof map / sizeof *map; ++i) {
         if (map[i].length == len && memcmp(ptr, map[i].name, len) == 0)
-            return map[i].value;
+            return i;
     }
     Perl_croak(aTHX_ "Unknown argument to :utf8: %*s", (int)len, ptr);
 }
-static utf8_flags parse_parameters(pTHX_ SV* param) {
+
+static U32 parse_parameters(pTHX_ SV* param) {
     STRLEN len;
-    const char *begin, *delim;
+    U32 flags = UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SUPER;
+    const char *begin, *delim, *end;
     if (!param || !SvOK(param))
-        return 0;
+        return flags;
 
     begin = SvPV(param, len);
-    delim = strchr(begin, ',');
-    if(delim) {
-        utf8_flags ret = 0;
-        const char* end = begin + len;
-        do {
-            ret |= lookup_parameter(aTHX_ begin, delim - begin);
-            begin = delim + 1;
-            delim = strchr(begin, ',');
-        } while (delim);
-        if (begin < end)
-            ret |= lookup_parameter(aTHX_ begin, end - begin);
-        return ret;
+    if (!len)
+        return flags;
+    end = begin + len;
+    do {
+        int i;
+        delim = strchr(begin, ',');
+        i = lookup_parameter(aTHX_ begin, (delim ? delim : end) - begin);
+        flags = (flags & ~map[i].mask) | map[i].value;
+        begin = delim ? delim+1 : end;
+    } while (delim);
+
+    if ((flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR
+        || (flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR) {
+        flags |= (flags & (UTF8_DISALLOW_SUPER | UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NON_CHAR | UTF8_DISALLOW_PERL_EXTENDED)) << 1;
     }
-    else {
-            return lookup_parameter(aTHX_ begin, len);
-    }
+
+    return flags;
 }
 
 static IV PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlIO_funcs* tab) {
-    utf8_flags flags = parse_parameters(aTHX_ arg);
+    U32 flags = parse_parameters(aTHX_ arg);
     if (PerlIOBuf_pushed(aTHX_ f, mode, arg, tab) == 0) {
         PerlIOBase(f)->flags |= PERLIO_F_UTF8;
         PerlIOSelf(f, PerlIOUnicode)->flags = flags;
         return 0;
     }
     return -1;
+}
+
+SSize_t
+Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
+                      const U32 flags) {
+    U32 sub_flags;
+    SSize_t retval = 0;
+    /* UTF8_CHECK_ONLY modifies retlen for utf8n_to_uvchr_msgs() */
+    U32 utf8_flags = flags & ~(UTF8_ONERROR_MASK | UTF8_CHECK_ONLY);
+
+    /* Restrict flags to the ones we handle */
+    sub_flags = flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                         |UTF8_DISALLOW_ABOVE_31_BIT);
+
+    while (*start < send) {
+#if 0
+        U8 *opos = *out;
+        const U8 *spos = *start;
+        while (spos < send) {
+            const SSize_t cur_len = isUTF8_CHAR_flags(spos, send, flags);
+            if (oend-opos < cur_len) {
+                retval += spos - *start;
+                Copy(*start, *out, spos-*start, U8);
+                *start = spos;
+                *out = opos;
+                return retval;
+            }
+            opos += cur_len;
+            spos += cur_len;
+        }
+        Copy(*start, *out, spos-*start, U8);
+        *start = spos;
+        *out = opos;
+#else
+
+        /* I thought originally I couldn't use this function, but
+           since the length of a well-formed utf-8 string won't change
+           in the output, we can just use the remaining output size to
+           limit the input size
+        */
+        const U8 *spos = *start;
+        STRLEN s_temp_len =
+            (send - spos) > (oend - *out) ? (oend - *out) : (send - *start);
+        is_utf8_string_loc_flags(*start, s_temp_len, &spos, sub_flags);
+        Copy(*start, *out, spos-*start, U8);
+        retval += spos - *start;
+        *out += spos - *start;
+        *start = spos;
+#endif
+        if (*start < send) {
+            STRLEN retlen = 0;
+            U32 errors;
+            AV *msgs = NULL;
+
+            /* we encountered an error, emit a replacement character */
+            const SSize_t replacement_len = sizeof(REPLACEMENT_CHARACTER_UTF8)
+                                                                        - 1;
+            if ((flags & UTF8_ONERROR_MASK) == UTF8_FAIL_ON_ERROR) {
+                if (retval) {
+                    /* avoid failing until we need to, return the valid data */
+                    return retval;
+                }
+                else {
+                    errno = EINVAL;
+                    return -1;
+                }
+            }
+            
+            /* but only if we have space for it */
+            if (oend-*out < replacement_len)
+                return retval;
+
+            (void)utf8n_to_uvchr_msgs(*start, send - *start,
+                                      &retlen, utf8_flags, &errors,
+                                      (flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR ? NULL :&msgs);
+            if ((flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR &&
+                msgs && av_tindex(msgs) >= 0) {
+                SSize_t i;
+                SV *fullmsg = sv_2mortal(newSVpvs(""));
+                for (i = 0; i <= av_tindex(msgs); ++i) {
+                    SV **h = av_fetch(msgs, 0, FALSE);
+                    SV **msg;
+                    assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
+                    msg = hv_fetch((HV*)SvRV(*h), "text", 4, FALSE);
+                    if (msg && *msg) {
+                        sv_catpvf(fullmsg, "%s%" SVf, SvCUR(fullmsg) ? "\n" : "",
+                                  *msg);
+                    }
+                }
+                SvREFCNT_dec((SV*)msgs);
+                croak_sv(fullmsg);
+            }
+            SvREFCNT_dec(msgs);
+
+            /* partial character at the end of the buffer */
+            if ((errors & UTF8_GOT_SHORT) && (flags & UTF8_ALLOW_SHORT))
+                return retval;
+
+            Copy(REPLACEMENT_CHARACTER_UTF8, *out, replacement_len, U8);
+            *start += retlen;
+            *out += replacement_len;
+            retval += replacement_len;
+        }
+    }
+
+    return retval;
 }
 
 static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
