@@ -12956,6 +12956,14 @@ sub register_fraction($) {
 
     my $float = eval $rational;
     $float = sprintf "%.*e", $E_FLOAT_PRECISION, $float;
+    if (   defined $nv_floating_to_rational{$float}
+        && $nv_floating_to_rational{$float} ne $rational)
+    {
+        die Carp::my_carp_bug("Both '$rational' and"
+                            . " '$nv_floating_to_rational{$float}' evaluate to"
+                            . " the same floating point number."
+                            . "  \$E_FLOAT_PRECISION must be increased");
+    }
     $nv_floating_to_rational{$float} = $rational;
     return;
 }
