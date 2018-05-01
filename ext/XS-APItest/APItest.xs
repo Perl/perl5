@@ -6353,6 +6353,36 @@ test_utf8_hop_safe(SV *s_sv, STRLEN s_off, IV off)
     OUTPUT:
         RETVAL
 
+void
+test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize)
+    PREINIT:
+        STRLEN inlen;
+        const U8 *start;
+        const U8 *ostart;
+        SV *outsv;
+        SSize_t outlen;
+        U8 *out;
+        U8 *outstart;
+        U8 *outend;
+    PPCODE:
+        ostart = start = (U8*)SvPVbyte(in, inlen);
+        outsv = sv_2mortal(newSV(outsize+1));
+        outstart = out = (U8*)SvPVX(outsv);
+        outend = out + outsize;
+        *outend = 'A';
+        outlen = utf8_validate_and_fix(&start, start+inlen,
+                                       &out, outend, flags);
+        if (*outend != 'A')
+            croak("Buffer overflow in validate_and_fix_utf8()");
+        if (outlen < 0)
+            XSRETURN_EMPTY;
+        *out = '\0';
+        SvCUR_set(outsv, out - outstart);
+        SvPOK_on(outsv);
+        EXTEND(SP, 2);
+        PUSHs(outsv); /* already mortal */
+        PUSHs(sv_2mortal(newSViv(start - ostart)));
+
 UV
 test_toLOWER(UV ord)
     CODE:

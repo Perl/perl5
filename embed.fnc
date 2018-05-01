@@ -3268,4 +3268,6 @@ XEop	|void   |dtrace_probe_op   |NN const OP *op
 XEop	|void   |dtrace_probe_phase|enum perl_phase phase
 #endif
 
+EMpR	|SSize_t|utf8_validate_and_fix|NN const U8 **start|NN const U8 *send|NN U8 **out|NN U8 *oend|const U32 flags
+
 : ex: set ts=8 sts=4 sw=4 noet:
