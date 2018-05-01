@@ -4320,7 +4320,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 
   if (*p) {
        if (isDIGIT(*p)) {
-            const char* endptr;
+            const char* endptr = p + strlen(p);
             UV uv;
             if (grok_atoUV(p, &uv, &endptr) && uv <= U32_MAX) {
                 opt = (U32)uv;
@@ -4707,7 +4707,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	 * timeval. */
 	{
 	    STRLEN len;
-            const char* endptr;
+            const char* endptr = pmlenv + stren(pmlenv);
 	    int fd;
             UV uv;
             if (grok_atoUV(pmlenv, &uv, &endptr) /* Ignore endptr. */
@@ -5989,7 +5989,7 @@ static const char* atos_parse(const char* p,
      * The matched regular expression is roughly "\(.*:\d+\)\s*$" */
     const char* source_number_start;
     const char* source_name_end;
-    const char* source_line_end;
+    const char* source_line_end = start;
     const char* close_paren;
     UV uv;
 

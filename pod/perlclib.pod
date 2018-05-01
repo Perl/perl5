@@ -211,7 +211,8 @@ C<toUPPER_uni>, as described in L<perlapi/Character case changing>.)
 
 Typical use is to do range checks on C<uv> before casting:
 
-  int i; UV uv; char* end_ptr;
+  int i; UV uv;
+  char* end_ptr = input_end;
   if (grok_atoUV(input, &uv, &end_ptr)
       && uv <= INT_MAX)
     i = (int)uv;

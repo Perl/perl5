@@ -1049,31 +1049,39 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 }
 
 /*
-grok_atoUV
+=for apidoc grok_atoUV
 
-grok_atoUV parses a C-style zero-byte terminated string, looking for
-a decimal unsigned integer.
+parse a string, looking for a decimal unsigned integer.
 
-Returns the unsigned integer, if a valid value can be parsed
-from the beginning of the string.
+On entry, C<pv> points to the beginning of the string;
+C<valptr> points to a UV that will receive the converted value, if found;
+C<endptr> is either NULL or points to a variable that points to one byte
+beyond the point in C<pv> that this routine should examine.
+If C<endptr> is NULL, C<pv> is assumed to be NUL-terminated.
 
-Accepts only the decimal digits '0'..'9'.
+Returns FALSE if C<pv> doesn't represent a valid unsigned integer value (with
+no leading zeros).  Otherwise it returns TRUE, and sets C<*valptr> to that
+value.
 
-As opposed to atoi or strtol, grok_atoUV does NOT allow optional
-leading whitespace, or negative inputs.  If such features are
-required, the calling code needs to explicitly implement those.
+If you constrain the portion of C<pv> that is looked at by this function (by
+passing a non-NULL C<endptr>), and if the intial bytes of that portion form a
+valid value, it will return TRUE, setting C<*endptr> to the byte following the
+final digit of the value.  But if there is no constraint at what's looked at,
+all of C<pv> must be valid in order for TRUE to be returned.
 
-Returns true if a valid value could be parsed. In that case, valptr
-is set to the parsed value, and endptr (if provided) is set to point
-to the character after the last digit.
+The only characters this accepts are the decimal digits '0'..'9'.
 
-Returns false otherwise. This can happen if a) there is a leading zero
-followed by another digit; b) the digits would overflow a UV; or c)
-there are trailing non-digits AND endptr is not provided.
+As opposed to L<atoi(3)> or L<strtol(3)>, C<grok_atoUV> does NOT allow optional
+leading whitespace, nor negative inputs.  If such features are required, the
+calling code needs to explicitly implement those.
 
-Background: atoi has severe problems with illegal inputs, it cannot be
+Note that this function returns FALSE for inputs that would overflow a UV,
+or have leading zeros.  Thus a single C<0> is accepted, but not C<00> nor
+C<01>, C<002>, I<etc>.
+
+Background: C<atoi> has severe problems with illegal inputs, it cannot be
 used for incremental parsing, and therefore should be avoided
-atoi and strtol are also affected by locale settings, which can also be
+C<atoi> and C<strtol> are also affected by locale settings, which can also be
 seen as a bug (global state controlled by user environment).
 
 */
@@ -1088,15 +1096,27 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
 
     PERL_ARGS_ASSERT_GROK_ATOUV;
 
-    eptr = endptr ? endptr : &end2;
-    if (isDIGIT(*s)) {
+    if (endptr) {
+        eptr = endptr;
+    }
+    else {
+        end2 = s + strlen(s);
+        eptr = &end2;
+    }
+
+    if (   *eptr <= s
+        || ! isDIGIT(*s))
+    {
+        return FALSE;
+    }
+
         /* Single-digit inputs are quite common. */
         val = *s++ - '0';
-        if (isDIGIT(*s)) {
+        if (s < *eptr && isDIGIT(*s)) {
             /* Fail on extra leading zeros. */
             if (val == 0)
                 return FALSE;
-            while (isDIGIT(*s)) {
+            while (s < *eptr && isDIGIT(*s)) {
                 /* This could be unrolled like in grok_number(), but
                  * the expected uses of this are not speed-needy, and
                  * unlikely to need full 64-bitness. */
@@ -1109,12 +1129,14 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
                 }
             }
         }
+    if (endptr == NULL) {
+        if (*s) {
+            return FALSE; /* If endptr is NULL, no trailing non-digits allowed. */
+        }
     }
-    if (s == pv)
-        return FALSE;
-    if (endptr == NULL && *s)
-        return FALSE; /* If endptr is NULL, no trailing non-digits allowed. */
-    *eptr = s;
+    else {
+        *endptr = s;
+    }
     *valptr = val;
     return TRUE;
 }

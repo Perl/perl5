@@ -3351,7 +3351,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 	}
     }
     else if (isDIGIT(**s)) {
-        const char* e;
+        const char* e = *s + strlen(*s);
 	if (grok_atoUV(*s, &uv, &e))
             *s = e;
 	for (; isWORDCHAR(**s); (*s)++) ;
@@ -3946,6 +3946,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
         UV uv;
 	/* if find_script() returns, it returns a malloc()-ed value */
 	scriptname = PL_origfilename = find_script(scriptname, dosearch, NULL, 1);
+        s = scriptname + strlen(scriptname);
 
 	if (strBEGINs(scriptname, "/dev/fd/")
             && isDIGIT(scriptname[8])

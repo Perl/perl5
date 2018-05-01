@@ -5201,6 +5201,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
             /* Get the 0th element, which is needed to setup the inversion list
              * */
             while (isSPACE(*l)) l++;
+            after_atou = (char *) lend;
             if (!grok_atoUV((const char *)l, &element0, &after_atou)) {
                 Perl_croak(aTHX_ "panic: Expecting a valid 0th element for"
                                  " inversion list");
@@ -5217,6 +5218,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
                                      " elements than available", elements);
                 }
                 while (isSPACE(*l)) l++;
+                after_atou = (char *) lend;
                 if (!grok_atoUV((const char *)l, other_elements_ptr++,
                                  &after_atou))
                 {
