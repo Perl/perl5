@@ -5933,6 +5933,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
     unsigned int i;
     unsigned int j = 0, lookup_len;
     int equals_pos = -1;        /* Where the '=' is found, or negative if none */
+    int slash_pos = -1;        /* Where the '/' is found, or negative if none */
     int table_index = 0;
     bool starts_with_In_or_Is = FALSE;
     Size_t lookup_offset = 0;
@@ -6129,6 +6130,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
             continue;
         }
 
+        slash_pos = j;
+
         /* A slash in the 'numeric value' property indicates that what follows
          * is a denominator.  It can have a leading '+' and '0's that should be
          * skipped.  But we have never allowed a negative denominator, so treat
@@ -6194,6 +6197,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
             lookup_name += 2;
             lookup_len -= 2;
             equals_pos -= 2;
+            slash_pos -= 2;
 
             table_index = match_uniprop((U8 *) lookup_name, lookup_len);
         }
@@ -6211,9 +6215,9 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
              * we do is make sure we have the number in canonical form and look
              * that up. */
 
-            {
+            if (slash_pos < 0) {    /* No slash */
 
-                /* Take the input, convert it to a
+                /* When it isn't a rational, take the input, convert it to a
                  * NV, then create a canonical string representation of that
                  * NV. */
 
@@ -6235,6 +6239,83 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
                     canonical = Perl_form(aTHX_ "nv=%.*" NVef,
                                                 PL_E_FORMAT_PRECISION, value);
                 }
+            }
+            else {  /* Has a slash.  Create a rational in canonical form  */
+                UV numerator, denominator, gcd, trial;
+                const char * end_ptr;
+                const char * sign = "";
+
+                /* We can't just find the numerator, denominator, and do the
+                 * division, then use the method above, because that is
+                 * inexact.  And the input could be a rational that is within
+                 * epsilon (given our precision) of a valid rational, and would
+                 * then incorrectly compare valid.
+                 *
+                 * We're only interested in the part after the '=' */
+                lookup_name += equals_pos;
+                lookup_len -= equals_pos;
+                slash_pos -= equals_pos;
+
+                /* Handle any leading minus */
+                if (lookup_name[0] == '-') {
+                    sign = "-";
+                    lookup_name++;
+                    lookup_len--;
+                    slash_pos--;
+                }
+
+                /* Convert the numerator to numeric */
+                end_ptr = lookup_name + slash_pos;
+                if (! grok_atoUV(lookup_name, &numerator, &end_ptr)) {
+                    return NULL;
+                }
+
+                /* It better have included all characters before the slash */
+                if (*end_ptr != '/') {
+                    return NULL;
+                }
+
+                /* Set to look at just the denominator */
+                lookup_name += slash_pos;
+                lookup_len -= slash_pos;
+                end_ptr = lookup_name + lookup_len;
+
+                /* Convert the denominator to numeric */
+                if (! grok_atoUV(lookup_name, &denominator, &end_ptr)) {
+                    return NULL;
+                }
+
+                /* It better be the rest of the characters, and don't divide by
+                 * 0 */
+                if (   end_ptr != lookup_name + lookup_len
+                    || denominator == 0)
+                {
+                    return NULL;
+                }
+
+                /* Get the greatest common denominator using
+                   http://en.wikipedia.org/wiki/Euclidean_algorithm */
+                gcd = numerator;
+                trial = denominator;
+                while (trial != 0) {
+                    UV temp = trial;
+                    trial = gcd % trial;
+                    gcd = temp;
+                }
+
+                /* If already in lowest possible terms, we have already tried
+                 * looking this up */
+                if (gcd == 1) {
+                    return NULL;
+                }
+
+                /* Reduce the rational, which should put it in canonical form.
+                 * Then look it up */
+                numerator /= gcd;
+                denominator /= gcd;
+
+                canonical = Perl_form(aTHX_ "nv=%s%" UVuf "/%" UVuf,
+                                             sign, numerator, denominator);
             }
 
             /* Here, we have the number in canonical form.  Try that */

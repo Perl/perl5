@@ -19132,9 +19132,21 @@ EOF_CODE
                                                  $warning,
                                              );
 
-                    # If the name is a rational number, add tests for the
-                    # floating point equivalent.
+                    # If the name is a rational number, add tests for a
+                    # non-reduced form, and for a floating point equivalent.
                     if ($table_name =~ qr{/}) {
+
+                        # 60 is a number divisible by a bunch of things
+                        my ($numerator, $denominator) = $table_name
+                                                        =~ m! (.+) / (.+) !x;
+                        $numerator *= 60;
+                        $denominator *= 60;
+                        push @output, generate_tests($property_name,
+                                                    "$numerator/$denominator",
+                                                    $valid,
+                                                    $invalid,
+                                                    $warning,
+                                    );
 
                         # Calculate the float, and the %e representation
                         my $float = eval $table_name;
