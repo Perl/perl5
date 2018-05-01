@@ -5613,23 +5613,13 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     break;
 
                 case NASCII:
-                    invert = 1;
-                    /* FALLTHROUGH */
-		case ASCII:
-                    my_invlist = invlist_clone(PL_XPosix_ptrs[_CC_ASCII]);
-
-                    /* This can be handled as a Posix class */
-                    goto join_posix_and_ascii;
-
                 case NPOSIXA:   /* For these, we always know the exact set of
                                    what's matched */
                     invert = 1;
                     /* FALLTHROUGH */
+		case ASCII:
 		case POSIXA:
-                    assert(FLAGS(scan) != _CC_ASCII);
-                    _invlist_intersection(PL_XPosix_ptrs[FLAGS(scan)],
-                                          PL_XPosix_ptrs[_CC_ASCII],
-                                          &my_invlist);
+                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)]);
                     goto join_posix_and_ascii;
 
 		case NPOSIXD:
@@ -17216,21 +17206,24 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                 }
                 else if (  UNI_SEMANTICS
+                        || AT_LEAST_ASCII_RESTRICTED
                         || classnum == _CC_ASCII
                         || (DEPENDS_SEMANTICS && (   classnum == _CC_DIGIT
                                                   || classnum == _CC_XDIGIT)))
                 {
-                    /* We usually have to worry about /d and /a affecting what
-                     * POSIX classes match, with special code needed for /d
-                     * because we won't know until runtime what all matches.
-                     * But there is no extra work needed under /u, and
-                     * [:ascii:] is unaffected by /a and /d; and :digit: and
-                     * :xdigit: don't have runtime differences under /d.  So we
-                     * can special case these, and avoid some extra work below,
-                     * and at runtime. */
+                    /* We usually have to worry about /d a affecting what POSIX
+                     * classes match, with special code needed because we won't
+                     * know until runtime what all matches.  But there is no
+                     * extra work needed under /u and /a; and [:ascii:] is
+                     * unaffected by /d; and :digit: and :xdigit: don't have
+                     * runtime differences under /d.  So we can special case
+                     * these, and avoid some extra work below, and at runtime.
+                     * */
                     _invlist_union_maybe_complement_2nd(
                                                      simple_posixes,
-                                                     PL_XPosix_ptrs[classnum],
+                                                      ((AT_LEAST_ASCII_RESTRICTED)
+                                                       ? PL_Posix_ptrs[classnum]
+                                                       : PL_XPosix_ptrs[classnum]),
                                                      namedclass % 2 != 0,
                                                      &simple_posixes);
                 }
@@ -18054,26 +18047,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
     if (posixes || nposixes) {
-
-        /* We have to adjust /a and /aa */
-        if (AT_LEAST_ASCII_RESTRICTED) {
-
-            /* Under /a and /aa, nothing above ASCII matches these */
-            if (posixes) {
-                _invlist_intersection(posixes,
-                                    PL_XPosix_ptrs[_CC_ASCII],
-                                    &posixes);
-            }
-
-            /* Under /a and /aa, everything above ASCII matches these
-             * complements */
-            if (nposixes) {
-                _invlist_union_complement_2nd(nposixes,
-                                              PL_XPosix_ptrs[_CC_ASCII],
-                                              &nposixes);
-            }
-        }
-
         if (! DEPENDS_SEMANTICS) {
 
             /* For everything but /d, we can just add the current 'posixes' and

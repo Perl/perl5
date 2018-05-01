@@ -365,6 +365,8 @@
 #define PL_GLatin1		(my_vars->GLatin1)
 #define PL_NonL1NonFinalFold	(my_vars->GNonL1NonFinalFold)
 #define PL_GNonL1NonFinalFold	(my_vars->GNonL1NonFinalFold)
+#define PL_Posix_ptrs		(my_vars->GPosix_ptrs)
+#define PL_GPosix_ptrs		(my_vars->GPosix_ptrs)
 #define PL_SB_invlist		(my_vars->GSB_invlist)
 #define PL_GSB_invlist		(my_vars->GSB_invlist)
 #define PL_SCX_invlist		(my_vars->GSCX_invlist)

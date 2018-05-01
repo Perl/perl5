@@ -5886,6 +5886,24 @@ Perl_init_uniprops(pTHX)
     PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_VERTSPACE_invlist);
     PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_XPOSIXWORD_invlist);
     PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PL_XPOSIXXDIGIT_invlist);
+
+    PL_Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(PL_ASCII_invlist);
+    PL_Posix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(PL_POSIXALNUM_invlist);
+    PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PL_POSIXALPHA_invlist);
+    PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PL_POSIXBLANK_invlist);
+    PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PL_CASED_invlist);
+    PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PL_POSIXCNTRL_invlist);
+    PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PL_POSIXDIGIT_invlist);
+    PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PL_POSIXGRAPH_invlist);
+    PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PL_POSIXLOWER_invlist);
+    PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PL_POSIXPRINT_invlist);
+    PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PL_POSIXPUNCT_invlist);
+    PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_POSIXSPACE_invlist);
+    PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PL_POSIXUPPER_invlist);
+    PL_Posix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_VERTSPACE_invlist);
+    PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_POSIXWORD_invlist);
+    PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PL_POSIXXDIGIT_invlist);
+
     PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
     PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
     PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
