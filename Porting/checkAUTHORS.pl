@@ -627,6 +627,7 @@ fugazi\100zyx.net                       larrysh\100cpan.org
 gbacon\100itsc.uah.edu                  gbacon\100adtrn-srv4.adtran.com
 gerberb\100zenez.com                    root\100devsys0.zenez.com
 gfuji\100cpan.org                       g.psy.va\100gmail.com
+genesullivan50\100yahoo.com             gsullivan\100cpan.org
 gerard\100ggoossen.net                  gerard\100tty.nl
 gibreel\100pobox.com                    stephen.zander\100interlock.mckesson.com
 +                                       srz\100loopback
