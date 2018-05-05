@@ -10583,9 +10583,11 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             /* If there is only a single script in common, set to that.
              * Otherwise, use the intersection going forward */
             Safefree(intersection);
+            intersection = NULL;
             if (intersection_len == 1) {
                 script_of_run = script_of_char = new_overlap[0];
                 Safefree(new_overlap);
+                new_overlap = NULL;
             }
             else {
                 intersection = new_overlap;
