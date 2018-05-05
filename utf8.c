@@ -6386,8 +6386,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
     /* In a few properties, a different property is used under /i.  These are
      * unlikely to change, so are hard-coded here. */
     if (to_fold) {
-        if (   table_index == PL_UPPER
-            || table_index == PL_LOWER
+        if (   table_index == PL_XPOSIXUPPER
+            || table_index == PL_XPOSIXLOWER
             || table_index == PL_TITLE)
         {
             table_index = PL_CASED;
