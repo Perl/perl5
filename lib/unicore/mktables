@@ -19026,7 +19026,7 @@ EOF_CODE
                                } property_ref('*'))
     {
         # Non-binary properties should not match \p{};  Test all for that.
-        if ($property->type != $BINARY) {
+        if ($property->type != $BINARY && $property->type != $FORCED_BINARY) {
             my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS }
                                                             $property->aliases;
             foreach my $property_alias ($property->aliases) {
