@@ -5870,39 +5870,39 @@ Perl_init_uniprops(pTHX)
 {
     /* Set up the inversion list global variables */
 
-    PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(PL_ASCII_invlist);
-    PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(PL_XPOSIXALNUM_invlist);
-    PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PL_XPOSIXALPHA_invlist);
-    PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(PL_XPOSIXBLANK_invlist);
-    PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(PL_CASED_invlist);
-    PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PL_XPOSIXCNTRL_invlist);
-    PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PL_XPOSIXDIGIT_invlist);
-    PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PL_XPOSIXGRAPH_invlist);
-    PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(PL_XPOSIXLOWER_invlist);
-    PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(PL_XPOSIXPRINT_invlist);
-    PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PL_XPOSIXPUNCT_invlist);
-    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_XPOSIXSPACE_invlist);
-    PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(PL_XPOSIXUPPER_invlist);
-    PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_VERTSPACE_invlist);
-    PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_XPOSIXWORD_invlist);
-    PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PL_XPOSIXXDIGIT_invlist);
+    PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_ASCII]);
+    PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXALNUM]);
+    PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXALPHA]);
+    PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXBLANK]);
+    PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(PL_uni_prop_ptrs[PL_CASED]);
+    PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXCNTRL]);
+    PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXDIGIT]);
+    PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXGRAPH]);
+    PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXLOWER]);
+    PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXPRINT]);
+    PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXPUNCT]);
+    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXSPACE]);
+    PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXUPPER]);
+    PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_VERTSPACE]);
+    PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXWORD]);
+    PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_XPOSIXXDIGIT]);
 
-    PL_Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(PL_ASCII_invlist);
-    PL_Posix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(PL_POSIXALNUM_invlist);
-    PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PL_POSIXALPHA_invlist);
-    PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PL_POSIXBLANK_invlist);
-    PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PL_CASED_invlist);
-    PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PL_POSIXCNTRL_invlist);
-    PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PL_POSIXDIGIT_invlist);
-    PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PL_POSIXGRAPH_invlist);
-    PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PL_POSIXLOWER_invlist);
-    PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PL_POSIXPRINT_invlist);
-    PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PL_POSIXPUNCT_invlist);
-    PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_POSIXSPACE_invlist);
-    PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PL_POSIXUPPER_invlist);
-    PL_Posix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_VERTSPACE_invlist);
-    PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_POSIXWORD_invlist);
-    PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PL_POSIXXDIGIT_invlist);
+    PL_Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_ASCII]);
+    PL_Posix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXALNUM]);
+    PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXALPHA]);
+    PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXBLANK]);
+    PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PL_uni_prop_ptrs[PL_CASED]);
+    PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXCNTRL]);
+    PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXDIGIT]);
+    PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXGRAPH]);
+    PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXLOWER]);
+    PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXPRINT]);
+    PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXPUNCT]);
+    PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXSPACE]);
+    PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXUPPER]);
+    PL_Posix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_VERTSPACE]);
+    PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXWORD]);
+    PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PL_uni_prop_ptrs[PL_POSIXXDIGIT]);
 
     PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
     PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
@@ -5914,17 +5914,17 @@ Perl_init_uniprops(pTHX)
     PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
     PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
 
-    PL_Assigned_invlist = _new_invlist_C_array(PL_ASSIGNED_invlist);
+    PL_Assigned_invlist = _new_invlist_C_array(PL_uni_prop_ptrs[PL_ASSIGNED]);
 
-    PL_utf8_perl_idstart = _new_invlist_C_array(PL__PERL_IDSTART_invlist);
-    PL_utf8_perl_idcont = _new_invlist_C_array(PL__PERL_IDCONT_invlist);
+    PL_utf8_perl_idstart = _new_invlist_C_array(PL_uni_prop_ptrs[PL__PERL_IDSTART]);
+    PL_utf8_perl_idcont = _new_invlist_C_array(PL_uni_prop_ptrs[PL__PERL_IDCONT]);
 
-    PL_utf8_charname_begin = _new_invlist_C_array(PL__PERL_CHARNAME_BEGIN_invlist);
-    PL_utf8_charname_continue = _new_invlist_C_array(PL__PERL_CHARNAME_CONTINUE_invlist);
+    PL_utf8_charname_begin = _new_invlist_C_array(PL_uni_prop_ptrs[PL__PERL_CHARNAME_BEGIN]);
+    PL_utf8_charname_continue = _new_invlist_C_array(PL_uni_prop_ptrs[PL__PERL_CHARNAME_CONTINUE]);
 
-    PL_utf8_foldable = _new_invlist_C_array(PL__PERL_ANY_FOLDS_invlist);
-    PL_HasMultiCharFold = _new_invlist_C_array(
-                                         PL__PERL_FOLDS_TO_MULTI_CHAR_invlist);
+    PL_utf8_foldable = _new_invlist_C_array(PL_uni_prop_ptrs[PL__PERL_ANY_FOLDS]);
+    PL_HasMultiCharFold = _new_invlist_C_array(PL_uni_prop_ptrs[
+                                            PL__PERL_FOLDS_TO_MULTI_CHAR]);
     PL_NonL1NonFinalFold = _new_invlist_C_array(
                                             NonL1_Perl_Non_Final_Folds_invlist);
 
