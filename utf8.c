@@ -5947,7 +5947,10 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
     char* lookup_name;
     bool stricter = FALSE;
-    bool is_nv = FALSE;         /* nv= or numeric_value= */
+    bool is_nv_type = FALSE;         /* nv= or numeric_value=, or possibly one
+                                        of the cjk numeric properties (though
+                                        it requires extra effort to compile
+                                        them) */
     unsigned int i;
     unsigned int j = 0, lookup_len;
     int equals_pos = -1;        /* Where the '=' is found, or negative if none */
@@ -6024,12 +6027,23 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         }
 
         /* Then check if it is one of these properties.  This is hard-coded
-         * because easier this way, and the list is unlikely to change */
-        is_nv = memEQs(lookup_name + lookup_offset,
+         * because easier this way, and the list is unlikely to change.  There
+         * are several properties like this in the Unihan DB, which is unlikely
+         * to be compiled, and they all end with 'numeric'.  The interiors
+         * aren't checked for the precise property.  This would stop working if
+         * a cjk property were to be created that ended with 'numeric' and
+         * wasn't a numeric type */
+        is_nv_type = memEQs(lookup_name + lookup_offset,
                        j - 1 - lookup_offset, "numericvalue")
-             || memEQs(lookup_name + lookup_offset,
-                      j - 1 - lookup_offset, "nv");
-        if (   is_nv
+                  || memEQs(lookup_name + lookup_offset,
+                      j - 1 - lookup_offset, "nv")
+                  || (   memENDPs(lookup_name + lookup_offset,
+                            j - 1 - lookup_offset, "numeric")
+                      && (   memBEGINPs(lookup_name + lookup_offset,
+                                      j - 1 - lookup_offset, "cjk")
+                          || memBEGINPs(lookup_name + lookup_offset,
+                                      j - 1 - lookup_offset, "k")));
+        if (   is_nv_type
             || memEQs(lookup_name + lookup_offset,
                       j - 1 - lookup_offset, "canonicalcombiningclass")
             || memEQs(lookup_name + lookup_offset,
@@ -6049,13 +6063,13 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
              * rules also apply.  However, these properties all can have the
              * rhs not be a number, in which case they contain at least one
              * alphabetic.  In those cases, the stricter rules don't apply.
-             * But the numeric value property can have the alphas [Ee] to
+             * But the numeric type properties can have the alphas [Ee] to
              * signify an exponent, and it is still a number with stricter
              * rules.  So look for an alpha that signifys not-strict */
             stricter = TRUE;
             for (k = i; k < len; k++) {
                 if (   isALPHA(name[k])
-                    && (! is_nv || ! isALPHA_FOLD_EQ(name[k], 'E')))
+                    && (! is_nv_type || ! isALPHA_FOLD_EQ(name[k], 'E')))
                 {
                     stricter = FALSE;
                     break;
@@ -6155,7 +6169,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
          * skipped.  But we have never allowed a negative denominator, so treat
          * a minus like every other character.  (No need to rule out a second
          * '/', as that won't match anything anyway */
-        if (is_nv) {
+        if (is_nv_type) {
             i++;
             if (i < len && name[i] == '+') {
                 i++;
@@ -6223,13 +6237,13 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         if (table_index == 0) {
             char * canonical;
 
-            /* If not found, and not the numeric value property, isn't a legal
+            /* If not found, and not a numeric type property, isn't a legal
              * property */
-            if (! is_nv) {
+            if (! is_nv_type) {
                 return NULL;
             }
 
-            /* But the numeric value property needs more work to decide.  What
+            /* But the numeric type properties need more work to decide.  What
              * we do is make sure we have the number in canonical form and look
              * that up. */
 
@@ -6251,10 +6265,12 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
                 /* If the value is an integer, the canonical value is integral */
                 if (Perl_ceil(value) == value) {
-                    canonical = Perl_form(aTHX_ "nv=%.0" NVff, value);
+                    canonical = Perl_form(aTHX_ "%.*s%.0" NVff,
+                                                equals_pos, lookup_name, value);
                 }
                 else {  /* Otherwise, it is %e with a known precision */
-                    canonical = Perl_form(aTHX_ "nv=%.*" NVef,
+                    canonical = Perl_form(aTHX_ "%.*s%.*" NVef,
+                                                equals_pos, lookup_name,
                                                 PL_E_FORMAT_PRECISION, value);
                 }
             }
@@ -6270,21 +6286,21 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
                  * then incorrectly compare valid.
                  *
                  * We're only interested in the part after the '=' */
-                lookup_name += equals_pos;
+                const char * this_lookup_name = lookup_name + equals_pos;
                 lookup_len -= equals_pos;
                 slash_pos -= equals_pos;
 
                 /* Handle any leading minus */
-                if (lookup_name[0] == '-') {
+                if (this_lookup_name[0] == '-') {
                     sign = "-";
-                    lookup_name++;
+                    this_lookup_name++;
                     lookup_len--;
                     slash_pos--;
                 }
 
                 /* Convert the numerator to numeric */
-                end_ptr = lookup_name + slash_pos;
-                if (! grok_atoUV(lookup_name, &numerator, &end_ptr)) {
+                end_ptr = this_lookup_name + slash_pos;
+                if (! grok_atoUV(this_lookup_name, &numerator, &end_ptr)) {
                     return NULL;
                 }
 
@@ -6294,18 +6310,18 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
                 }
 
                 /* Set to look at just the denominator */
-                lookup_name += slash_pos;
+                this_lookup_name += slash_pos;
                 lookup_len -= slash_pos;
-                end_ptr = lookup_name + lookup_len;
+                end_ptr = this_lookup_name + lookup_len;
 
                 /* Convert the denominator to numeric */
-                if (! grok_atoUV(lookup_name, &denominator, &end_ptr)) {
+                if (! grok_atoUV(this_lookup_name, &denominator, &end_ptr)) {
                     return NULL;
                 }
 
                 /* It better be the rest of the characters, and don't divide by
                  * 0 */
-                if (   end_ptr != lookup_name + lookup_len
+                if (   end_ptr != this_lookup_name + lookup_len
                     || denominator == 0)
                 {
                     return NULL;
@@ -6332,8 +6348,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
                 numerator /= gcd;
                 denominator /= gcd;
 
-                canonical = Perl_form(aTHX_ "nv=%s%" UVuf "/%" UVuf,
-                                             sign, numerator, denominator);
+                canonical = Perl_form(aTHX_ "%.*s%s%" UVuf "/%" UVuf,
+                        equals_pos, lookup_name, sign, numerator, denominator);
             }
 
             /* Here, we have the number in canonical form.  Try that */
