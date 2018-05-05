@@ -5908,25 +5908,31 @@ Perl_init_uniprops(pTHX)
     PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
     PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
     PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
-    PL_Assigned_invlist = _new_invlist_C_array(PL_ASSIGNED_invlist);
     PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
-    PL_utf8_toupper = _new_invlist_C_array(Uppercase_Mapping_invlist);
-    PL_utf8_tolower = _new_invlist_C_array(Lowercase_Mapping_invlist);
-    PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
-    PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
-    PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
-    PL_utf8_perl_idstart = _new_invlist_C_array(PL__PERL_IDSTART_invlist);
-    PL_utf8_perl_idcont = _new_invlist_C_array(PL__PERL_IDCONT_invlist);
+
     PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
     PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
     PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
+
+    PL_Assigned_invlist = _new_invlist_C_array(PL_ASSIGNED_invlist);
+
+    PL_utf8_perl_idstart = _new_invlist_C_array(PL__PERL_IDSTART_invlist);
+    PL_utf8_perl_idcont = _new_invlist_C_array(PL__PERL_IDCONT_invlist);
+
+    PL_utf8_charname_begin = _new_invlist_C_array(PL__PERL_CHARNAME_BEGIN_invlist);
+    PL_utf8_charname_continue = _new_invlist_C_array(PL__PERL_CHARNAME_CONTINUE_invlist);
+
     PL_utf8_foldable = _new_invlist_C_array(PL__PERL_ANY_FOLDS_invlist);
     PL_HasMultiCharFold = _new_invlist_C_array(
                                          PL__PERL_FOLDS_TO_MULTI_CHAR_invlist);
     PL_NonL1NonFinalFold = _new_invlist_C_array(
                                             NonL1_Perl_Non_Final_Folds_invlist);
-    PL_utf8_charname_begin = _new_invlist_C_array(PL__PERL_CHARNAME_BEGIN_invlist);
-    PL_utf8_charname_continue = _new_invlist_C_array(PL__PERL_CHARNAME_CONTINUE_invlist);
+
+    PL_utf8_toupper = _new_invlist_C_array(Uppercase_Mapping_invlist);
+    PL_utf8_tolower = _new_invlist_C_array(Lowercase_Mapping_invlist);
+    PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
+    PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
+    PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
 }
 
