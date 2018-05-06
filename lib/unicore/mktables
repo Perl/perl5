@@ -19868,6 +19868,10 @@ my @input_file_objects = (
                     Skip => 'Maps certain Unicode code points to their '
                           . 'legacy Japanese cell-phone values',
                    ),
+    # This file is actually not usable as-is until 6.1.0, because the property
+    # is provisional, so its name is missing from PropertyAliases.txt until
+    # that release, so that further work would have to be done to get it to
+    # work properly
     Input_file->new('ScriptExtensions.txt', v6.0.0,
                     Property => 'Script_Extensions',
                     Early => [ sub {} ], # Doesn't do anything but ensures
@@ -19880,10 +19884,9 @@ my @input_file_objects = (
                                             : $IGNORED),
                    ),
     # These two Indic files are actually not usable as-is until 6.1.0,
-    # because their property values are missing from PropValueAliases.txt
-    # until that release, so that further work would have to be done to get
-    # them to work properly, which isn't worth it because of them being
-    # provisional.
+    # because they are provisional, so their property values are missing from
+    # PropValueAliases.txt until that release, so that further work would have
+    # to be done to get them to work properly.
     Input_file->new('IndicMatraCategory.txt', v6.0.0,
                     Withdrawn => v8.0.0,
                     Property => 'Indic_Matra_Category',
