@@ -8,6 +8,7 @@ use Unicode::UCD qw(prop_aliases
                     prop_invlist
                     prop_invmap search_invlist
                     charprop
+                    num
                    );
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
@@ -628,7 +629,7 @@ sub output_invmap ($$$$$$$) {
             # that.
             for (my $i = 0; $i < @decimals_invlist; $i += 2) {
                 my $code_point = $decimals_invlist[$i];
-                next if chr($code_point) !~ /\p{Nv=0}/;
+                next if num(chr($code_point)) ne '0';
 
                 # Turn the scripts this zero is in into a list.
                 my @scripts = split ",",
