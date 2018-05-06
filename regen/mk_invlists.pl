@@ -26,8 +26,8 @@ use re "/aa";
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
 
-# charclass_invlists.h now also has a partial implementation of inversion
-# maps; enough to generate tables for the line break properties, such as GCB
+# charclass_invlists.h now also contains inversion maps and enum definitions
+# for those maps that have a finite number of possible values
 
 my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
