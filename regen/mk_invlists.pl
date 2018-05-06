@@ -13,6 +13,7 @@ use Unicode::UCD qw(prop_aliases
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
 require './lib/unicore/Heavy.pl';
+use re "/aa";
 
 # This program outputs charclass_invlists.h, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
@@ -31,7 +32,7 @@ require './lib/unicore/Heavy.pl';
 my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
 # integer or float
-my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /ax;
+my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
 
 my %keywords;
 my $table_name_prefix = "PL_";
@@ -840,7 +841,7 @@ sub _Perl_IVCF {
     #    other.  This situation happens in Unicode 3.0.1, but probably no
     #    other version.
     foreach my $fold (keys %new) {
-        my $folds_to_string = $fold =~ /\D/a;
+        my $folds_to_string = $fold =~ /\D/;
 
         # If the bucket contains only one element, convert from an array to a
         # scalar
@@ -1038,7 +1039,7 @@ sub output_table_common {
 
     for my $i (0 .. $size - 1) {
         no warnings 'numeric';
-        $has_placeholder = 1 if $names_ref->[$i] =~ / ^ [[:lower:]] $ /ax;
+        $has_placeholder = 1 if $names_ref->[$i] =~ / ^ [[:lower:]] $ /x;
         $spacers[$i] = " " x (length($names_ref->[$i]) - $column_width);
     }
 
@@ -2827,7 +2828,7 @@ require './regen/mph.pl';
 sub token_name
 {
     my $name = sanitize_name(shift);
-    warn "$name contains non-word" if $name =~ /\W/a;
+    warn "$name contains non-word" if $name =~ /\W/;
 
     return "$table_name_prefix\U$name"
 }
