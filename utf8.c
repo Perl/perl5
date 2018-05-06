@@ -6118,8 +6118,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
         lookup_name[j++] = cur;
 
-        /* Unless this is a slash, we are done with it */
-        if (cur != '/') {
+        /* Unless this is a non-trailing slash, we are done with it */
+        if (i >= len - 1 || cur != '/') {
             continue;
         }
 
