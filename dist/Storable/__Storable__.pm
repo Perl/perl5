@@ -39,6 +39,8 @@ $recursion_limit = 512
 $recursion_limit_hash = 256
   unless defined $recursion_limit_hash;
 
+use Carp;
+
 BEGIN {
     if (eval {
         local $SIG{__DIE__};
@@ -54,16 +56,23 @@ BEGIN {
     # provide a fallback implementation.
     #
     unless ($Storable::{logcroak} && *{$Storable::{logcroak}}{CODE}) {
-        require Carp;
+        *logcroak = \&Carp::croak;
+    }
+    else {
+        # Log::Agent's logcroak always adds a newline to the error it is
+        # given.  This breaks refs getting thrown.  We can just discard what
+        # it throws (but keep whatever logging it does) and throw the original
+        # args.
+        no warnings 'redefine';
+        my $logcroak = \&logcroak;
         *logcroak = sub {
-            Carp::croak(@_);
+            my @args = @_;
+            eval { &$logcroak };
+            Carp::croak(@args);
         };
     }
     unless ($Storable::{logcarp} && *{$Storable::{logcarp}}{CODE}) {
-	require Carp;
-        *logcarp = sub {
-          Carp::carp(@_);
-        };
+        *logcarp = \&Carp::carp;
     }
 }
 
