@@ -24,7 +24,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 58;  #** update watchdog timeouts proportionally when adding tests
+plan tests => 59;  #** update watchdog timeouts proportionally when adding tests
 
 use strict;
 use warnings;
@@ -156,6 +156,9 @@ PROG
         ok( $elapsed <= 1, "should not COW on long string with substr and m//g");
     }
 
+    # [perl #133185] Infinite loop
+    like("!\xdf", eval 'qr/\pp(?aai)\xdf/',
+         'Compiling qr/\pp(?aai)\xdf/ doesn\'t loop');
 
 } # End of sub run_tests
 

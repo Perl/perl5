@@ -13507,6 +13507,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * need to figure this out until pass 2) */
             bool maybe_exactfu = PASS2;
 
+            /* To see if RExC_uni_semantics changes during parsing of the node.
+             * */
+            bool uni_semantics_at_node_start;
+
             /* The node_type may change below, but since the size of the node
              * doesn't change, it works */
 	    ret = reg_node(pRExC_state, node_type);
@@ -13532,6 +13536,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             assert( ! UTF     /* Is at the beginning of a character */
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
                    || UTF8_IS_START(UCHARAT(RExC_parse)));
+
+            uni_semantics_at_node_start = RExC_uni_semantics;
 
             /* Here, we have a literal character.  Find the maximal string of
              * them in the input that we can fit into a single EXACTish node.
@@ -13970,8 +13976,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 ender = 's';
                                 added_len = 2;
                             }
-                            else if (RExC_uni_semantics) {
-
+                            else if (   uni_semantics_at_node_start
+                                     != RExC_uni_semantics)
+                            {
                                 /* Here, we are supossed to be using Unicode
                                  * rules, but this folding node is not.  This
                                  * happens during pass 1 when the node started
