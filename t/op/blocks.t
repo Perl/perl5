@@ -188,48 +188,50 @@ SKIP: {
 }
 
 
-fresh_perl_is(
-    "$testblocks BEGIN { exit 1; }",
-    "begin\nunitcheck\ncheck\nend",
-    {},
-    "BEGIN{exit 1} should exit"
-);
+SKIP: {
+    fresh_perl_is(
+        "$testblocks BEGIN { exit 1; }",
+        "begin\nunitcheck\ncheck\nend",
+        {},
+        "BEGIN{exit 1} should exit"
+    );
 
-fresh_perl_like(
-    "$testblocks BEGIN { die; }",
-    qr/\Abegin\nDied[^\n]*\.\nBEGIN failed[^\n]*\.\nunitcheck\ncheck\nend\z/,
-    {},
-    "BEGIN{die} should exit"
-);
+    fresh_perl_like(
+        "$testblocks BEGIN { die; }",
+        qr/\Abegin\nDied[^\n]*\.\nBEGIN failed[^\n]*\.\nunitcheck\ncheck\nend\z/,
+        {},
+        "BEGIN{die} should exit"
+    );
 
-fresh_perl_is(
-    "$testblocks UNITCHECK { exit 1; }",
-    "begin\nunitcheck\ncheck\nend",
-    {},
-    "UNITCHECK{exit 1} should exit"
-);
+    fresh_perl_is(
+        "$testblocks UNITCHECK { exit 1; }",
+        "begin\nunitcheck\ncheck\nend",
+        {},
+        "UNITCHECK{exit 1} should exit"
+    );
 
-fresh_perl_like(
-    "$testblocks UNITCHECK { die; }",
-    qr/\Abegin\nDied[^\n]*\.\nUNITCHECK failed[^\n]*\.\nunitcheck\ncheck\nend\z/,
-    {},
-    "UNITCHECK{die} should exit"
-);
+    fresh_perl_like(
+        "$testblocks UNITCHECK { die; }",
+        qr/\Abegin\nDied[^\n]*\.\nUNITCHECK failed[^\n]*\.\nunitcheck\ncheck\nend\z/,
+        {},
+        "UNITCHECK{die} should exit"
+    );
 
 
-fresh_perl_is(
-    "$testblocks CHECK { exit 1; }",
-    "begin\nunitcheck\ncheck\nend",
-    {},
-    "CHECK{exit 1} should exit"
-);
+    fresh_perl_is(
+        "$testblocks CHECK { exit 1; }",
+        "begin\nunitcheck\ncheck\nend",
+        {},
+        "CHECK{exit 1} should exit"
+    );
 
-fresh_perl_like(
-    "$testblocks CHECK { die; }",
-    qr/\Abegin\nunitcheck\nDied[^\n]*\.\nCHECK failed[^\n]*\.\ncheck\nend\z/,
-    {},
-    "CHECK{die} should exit"
-);
+    fresh_perl_like(
+        "$testblocks CHECK { die; }",
+        qr/\Abegin\nunitcheck\nDied[^\n]*\.\nCHECK failed[^\n]*\.\ncheck\nend\z/,
+        {},
+        "CHECK{die} should exit"
+    );
+}
 
 fresh_perl_is(
     "$testblocks INIT { exit 0; }",
