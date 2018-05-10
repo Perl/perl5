@@ -105,7 +105,7 @@ encoding (declared or auto-detected) with C<\N{REPLACEMENT CHARACTER}>.
 =back
 
 If the C<PERL_POD_PEDANTIC> environment variable is set or the C<--pedantic>
-command line argument is provided then a few more checks are made.
+command line argument is provided, then a few more checks are made.
 The pedantic checks are:
 
 =over
@@ -467,7 +467,7 @@ my $C_path_re = qr{ ^
 
 # '.PL' files should be excluded, as they aren't final pods, but often contain
 # material used in generating pods, and so can look like a pod.  We can't use
-# the regexp above because case sensisitivity is important for these, as some
+# the regexp above because case sensitivity is important for these, as some
 # '.pl' files should be examined for pods.  Instead look through the MANIFEST
 # for .PL files and get their full path names, so we can exclude each such
 # file explicitly.  This works because other porting tests prohibit having two
@@ -671,7 +671,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
     my %linkable_item;      # Bool: if the latest =item is linkable.  It isn't
                             # for bullet and number lists
     my %linkable_nodes;     # Pod::Checker adds all =items to its node list,
-                            # but not all =items are linkable to
+                            # but not all =items are linkable-to
     my %running_CFL_text;   # The current text that is being accumulated until
                             # an end_FOO is found, and this includes any C<>,
                             # F<>, or L<> directives.
@@ -1655,7 +1655,8 @@ sub is_pod_file {
 
     if ($filename =~ / (?: ^(cpan|lib|ext|dist)\/ )
                         | $only_for_interior_links_re
-                    /x) {
+                    /x)
+    {
         $digest->add($contents);
         $digests{$filename} = $digest->digest;
 
@@ -1803,7 +1804,6 @@ foreach my $filename (@files) {
             next FILE;
         }
         $parsed = 1;
-
     }
 
     if ($checker->num_errors() < 0) {   # Returns negative if not a pod
@@ -2106,6 +2106,10 @@ foreach my $filename (@files) {
             my $problem_count = scalar @{$problems{$filename}{$message}};
             $total_known += $problem_count;
             next if $known_problems{$canonical}{$message} < 0;
+
+            # If we have new problems not previously known, we output all of
+            # such problems, as we can't know which are really new and which
+            # not
             if ($problem_count > $known_problems{$canonical}{$message}) {
 
                 # Here we are about to output all the messages for this type,
