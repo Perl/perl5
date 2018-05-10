@@ -3557,6 +3557,6 @@ XEop	|void   |dtrace_probe_phase|enum perl_phase phase
 
 XEop	|STRLEN*|dup_warnings	|NULLOK STRLEN* warnings
 
-XEpR	|SSize_t|utf8_validate_and_fix|NN const U8 **start|NN const U8 *send|NN U8 **out|NN U8 *oend|const U32 flags
+XEpR	|SSize_t|utf8_validate_and_fix|NN const U8 **start|NN const U8 *send|NN U8 **out|NN U8 *oend|const U32 flags|bool eof|NN U32 *unfixed_errors
 
 : ex: set ts=8 sts=4 sw=4 noet:

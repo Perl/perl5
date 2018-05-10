@@ -5097,9 +5097,10 @@ noncharacter:
 
 typedef struct {
     PerlIOBuf buf;
-    STDCHAR leftovers[UTF8_MAX_BYTES];
-    size_t leftover_length;
     U32 flags;
+    U8 *start, *end;
+    /* currently we always use this, but that might change */
+    U8 cbuf[PERLIOBUF_DEFAULT_BUFSIZ+UTF8_MAX_BYTES];
 } PerlIOUnicode;
 
 #define UTF8_QUIET_ON_ERROR 0x0
@@ -5107,6 +5108,8 @@ typedef struct {
 #define UTF8_WARN_ON_ERROR 0x80000000
 #define UTF8_CROAK_ON_ERROR 0xC0000000
 #define UTF8_ONERROR_MASK 0xC0000000
+/* test whether we want messages */
+#define UTF8_ONERROR_MESSAGES(f) ((f) & UTF8_WARN_ON_ERROR)
 
 static struct {
     const char* name;
@@ -5117,8 +5120,8 @@ static struct {
     { STR_WITH_LEN("allow_surrogates"), 0, UTF8_DISALLOW_SURROGATE },
     { STR_WITH_LEN("allow_noncharacters"), 0, UTF8_DISALLOW_NONCHAR },
     { STR_WITH_LEN("allow_nonshortest"), UTF8_ALLOW_LONG, UTF8_ALLOW_LONG },
-    { STR_WITH_LEN("strict"), 0, ~(U32)0 },
-    { STR_WITH_LEN("loose"), UTF8_ALLOW_ANY, ~(U32)0 },
+    { STR_WITH_LEN("strict"), 0, ~(U32)UTF8_ONERROR_MASK },
+    { STR_WITH_LEN("loose"), UTF8_ALLOW_ANY, ~(U32)UTF8_ONERROR_MASK },
     { STR_WITH_LEN("error=quiet"), UTF8_QUIET_ON_ERROR, UTF8_ONERROR_MASK },
     { STR_WITH_LEN("error=warn"), UTF8_WARN_ON_ERROR, UTF8_ONERROR_MASK },
     { STR_WITH_LEN("error=die"), UTF8_CROAK_ON_ERROR, UTF8_ONERROR_MASK },
@@ -5136,7 +5139,7 @@ static int lookup_parameter(pTHX_ const char* ptr, size_t len) {
 
 static U32 parse_parameters(pTHX_ SV* param) {
     STRLEN len;
-    U32 flags = UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SUPER;
+    U32 flags = UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SUPER | UTF8_CROAK_ON_ERROR;
     const char *begin, *delim, *end;
     if (!param || !SvOK(param))
         return flags;
@@ -5155,7 +5158,8 @@ static U32 parse_parameters(pTHX_ SV* param) {
 
     if ((flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR
         || (flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR) {
-        flags |= (flags & (UTF8_DISALLOW_SUPER | UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NON_CHAR | UTF8_DISALLOW_PERL_EXTENDED)) << 1;
+        /* each of these flags has a warning mask bit one to the left */
+        flags |= (flags & (UTF8_DISALLOW_SUPER | UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_PERL_EXTENDED)) << 1;
     }
 
     return flags;
@@ -5164,8 +5168,10 @@ static U32 parse_parameters(pTHX_ SV* param) {
 static IV PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlIO_funcs* tab) {
     U32 flags = parse_parameters(aTHX_ arg);
     if (PerlIOBuf_pushed(aTHX_ f, mode, arg, tab) == 0) {
+        PerlIOUnicode *u = PerlIOSelf(f, PerlIOUnicode);
         PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-        PerlIOSelf(f, PerlIOUnicode)->flags = flags;
+        u->flags = flags;
+        u->start = u->end = u->cbuf;
         return 0;
     }
     return -1;
@@ -5173,37 +5179,17 @@ static IV PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlI
 
 SSize_t
 Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
-                      const U32 flags) {
+                           const U32 flags, bool eof, U32 *unfixed_errors) {
     U32 sub_flags;
     SSize_t retval = 0;
     /* UTF8_CHECK_ONLY modifies retlen for utf8n_to_uvchr_msgs() */
-    U32 utf8_flags = flags & ~(UTF8_ONERROR_MASK | UTF8_CHECK_ONLY);
+    U32 utf8_flags = flags & ~(UTF8_ONERROR_MASK | UTF8_CHECK_ONLY | UTF8_ALLOW_SHORT);
 
-    /* Restrict flags to the ones we handle */
-    sub_flags = flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                         |UTF8_DISALLOW_ABOVE_31_BIT);
+    /* Restrict flags to the ones is_utf8_string_*() handles */
+    sub_flags = utf8_flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                              |UTF8_DISALLOW_ABOVE_31_BIT);
 
     while (*start < send) {
-#if 0
-        U8 *opos = *out;
-        const U8 *spos = *start;
-        while (spos < send) {
-            const SSize_t cur_len = isUTF8_CHAR_flags(spos, send, flags);
-            if (oend-opos < cur_len) {
-                retval += spos - *start;
-                Copy(*start, *out, spos-*start, U8);
-                *start = spos;
-                *out = opos;
-                return retval;
-            }
-            opos += cur_len;
-            spos += cur_len;
-        }
-        Copy(*start, *out, spos-*start, U8);
-        *start = spos;
-        *out = opos;
-#else
-
         /* I thought originally I couldn't use this function, but
            since the length of a well-formed utf-8 string won't change
            in the output, we can just use the remaining output size to
@@ -5217,7 +5203,7 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
         retval += spos - *start;
         *out += spos - *start;
         *start = spos;
-#endif
+
         if (*start < send) {
             STRLEN retlen = 0;
             U32 errors;
@@ -5226,24 +5212,39 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
             /* we encountered an error, emit a replacement character */
             const SSize_t replacement_len = sizeof(REPLACEMENT_CHARACTER_UTF8)
                                                                         - 1;
-            if ((flags & UTF8_ONERROR_MASK) == UTF8_FAIL_ON_ERROR) {
-                if (retval) {
-                    /* avoid failing until we need to, return the valid data */
-                    return retval;
-                }
-                else {
-                    errno = EINVAL;
-                    return -1;
-                }
-            }
-            
             /* but only if we have space for it */
             if (oend-*out < replacement_len)
                 return retval;
 
             (void)utf8n_to_uvchr_msgs(*start, send - *start,
-                                      &retlen, utf8_flags, &errors,
-                                      (flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR ? NULL :&msgs);
+                                      &retlen, flags | (eof ? 0 : UTF8_ALLOW_SHORT), &errors,
+                                      (flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR ? NULL : &msgs);
+
+            assert(*start + retlen <= send);
+            /* partial character at the end of the buffer */
+            if (!eof) {
+                if ((errors & UTF8_GOT_SHORT) && *start + retlen == send) {
+                    return retval;
+                }
+                else if (!(flags & UTF8_ALLOW_SHORT)
+                         && *start + retlen < send
+                         && UTF8_ONERROR_MESSAGES(flags)) {
+                    /* we suppress warnings (and the structure we emit croak from)
+                       above in case the short character is at the end of the buffer,
+                       but in this case it isn't, so populate msgs or warn
+                    */
+                    (void)utf8n_to_uvchr_msgs(*start, send - *start,
+                                              &retlen, flags, &errors,
+                                              (flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR ? NULL : &msgs);
+                    
+                }
+            }
+
+            if ((flags & UTF8_ONERROR_MASK) == UTF8_FAIL_ON_ERROR && errors) {
+                *unfixed_errors = errors;
+                return retval;
+            }
+            
             if ((flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR &&
                 msgs && av_tindex(msgs) >= 0) {
                 SSize_t i;
@@ -5263,10 +5264,6 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
             }
             SvREFCNT_dec(msgs);
 
-            /* partial character at the end of the buffer */
-            if ((errors & UTF8_GOT_SHORT) && (flags & UTF8_ALLOW_SHORT))
-                return retval;
-
             Copy(REPLACEMENT_CHARACTER_UTF8, *out, replacement_len, U8);
             *start += retlen;
             *out += replacement_len;
@@ -5283,8 +5280,9 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
     PerlIO *n = PerlIONext(f);
     SSize_t avail;
     Size_t read_bytes = 0;
-    STDCHAR *end;
+    U8 *outp;
     SSize_t fit;
+    U32 errors = 0;
 
     if (PerlIO_flush(f) != 0)
         return -1;
@@ -5296,22 +5294,23 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
 
     assert(b->buf);
 
-    if (u->leftover_length) {
-        Copy(u->leftovers, b->buf, u->leftover_length, STDCHAR);
-        b->end = b->buf + u->leftover_length;
-        read_bytes = u->leftover_length;
-        u->leftover_length = 0;
+    assert(u->end >= u->start);
+
+    if (u->end - u->start < 2 * UTF8_MAX_BYTES) {
+        Size_t sz = u->end - u->start;
+        Move(u->start, u->cbuf, sz, U8);
+        u->start = u->cbuf;
+        u->end = u->cbuf + sz;
     }
-    else {
-        b->ptr = b->end = b->buf;
-    }
-    fit = (SSize_t)b->bufsiz - (b->end - b->buf);
+
+    fit = u->cbuf + sizeof(u->cbuf) - u->end;
 
     if (!PerlIOValid(n)) {
         PerlIOBase(f)->flags |= PERLIO_F_EOF;
         return -1;
     }
 
+    /* Try to fill our work buffer */
     if (PerlIO_fast_gets(n)) {
         /*
          * Layer below is also buffered. We do _NOT_ want to call its
@@ -5334,30 +5333,34 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
             const SSize_t cnt = avail;
             if (avail > fit)
                 avail = fit;
-            Copy(ptr, b->end, avail, STDCHAR);
+            Copy(ptr, u->end, avail, U8);
             PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
-            read_bytes += avail;
+            u->end += avail;
         }
     }
     else {
-        avail = PerlIO_read(n, b->end, fit);
+        avail = PerlIO_read(n, u->end, fit);
         if (avail > 0)
-            read_bytes += avail;
+            u->end += avail;
     }
-    if (avail <= 0) {
+
+    read_bytes = u->end - u->start;
+    fit = (SSize_t)b->bufsiz - (b->end - b->buf);
+
+    if (u->start == u->end) {
         if (avail < 0 || (read_bytes == 0 && PerlIO_eof(n))) {
             PerlIOBase(f)->flags |= (avail == 0) ? PERLIO_F_EOF : PERLIO_F_ERROR;
             return -1;
         }
     }
-    end = b->buf + read_bytes;
-    b->end = b->buf + validate(aTHX_ (const U8 *)b->buf, (const U8 *)end, u->flags, n);
-    if (b->end < end) {
-        size_t len = b->buf + read_bytes - b->end;
-        Copy(b->end, u->leftovers, len, char);
-        u->leftover_length = len;
-    }
+
+    outp = (U8*)b->end;
+    b->end = b->end + utf8_validate_and_fix((const U8 **)&u->start, u->end, &outp, (U8*)b->buf+b->bufsiz, u->flags, PerlIO_eof(n), &errors);
     PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+
+    if (errors) {
+        PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+    }
     
     return 0;
 }
@@ -5373,7 +5376,7 @@ PerlIOUnicode_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR de
         PerlIO *n = PerlIONext(f);
         SSize_t avail = PerlIO_get_cnt(f);
         Size_t wanted = MIN(avail, count);
-        Size_t read = 0, also = 0;
+        Size_t read = 0;
         STDCHAR *validated = NULL, *end = NULL;
         int seen = FALSE;
 
@@ -5387,12 +5390,6 @@ PerlIOUnicode_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR de
                 PerlIO_get_base(f);
 
             assert(b->buf);
-
-            if (u->leftover_length) {
-                Copy(u->leftovers, vbuf, u->leftover_length, STDCHAR);
-                read += u->leftover_length;
-                u->leftover_length = 0;
-            }
 
             if (!PerlIOValid(n)) {
                 PerlIOBase(f)->flags |= PERLIO_F_EOF;
@@ -5416,17 +5413,30 @@ PerlIOUnicode_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR de
             }
         }
 
-        if (seen == FALSE && count - read)
-            also = PerlIO_readdelim(n, vbuf + read, count - read, delim);
-        read += also;
-        end = vbuf + read;
-        validated = vbuf + validate(aTHX_ (const U8 *)vbuf, (const U8 *) end, u->flags, n);
-        if (validated < end) {
-            size_t len = end - validated;
-            Copy(validated, u->leftovers, len, char);
-            u->leftover_length = len;
-            read -= len;
+        while (seen == FALSE && count - read && !(PerlIOBase(f)->flags & PERLIO_F_ERROR)) {
+            STDCHAR *ptr;
+            STDCHAR *found;
+            if (PerlIOUnicode_fill(aTHX_ f) < 0)
+                break;
+            avail = PerlIO_get_cnt(f);
+            wanted = MIN(avail, count);
+            ptr = PerlIO_get_ptr(f); /* can this change? */
+            found = (STDCHAR*)memchr(ptr, delim, wanted);
+            if (found) {
+                Size_t len = found + 1 - ptr;
+                Copy(ptr, vbuf, len, char);
+                read += len;
+                PerlIO_set_ptrcnt(f, found + 1, avail - len);
+                seen = TRUE;
+            }
+            else {
+                Copy(ptr, vbuf, wanted, char);
+                read += wanted;
+                PerlIO_set_ptrcnt(f, ptr + wanted, avail - wanted);
+            }
         }
+        if (read == 0 && PerlIOBase(f)->flags & PERLIO_F_ERROR)
+            return -1;
         PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
         return read;
     }
