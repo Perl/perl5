@@ -1431,11 +1431,11 @@ sub fail_with_diff ($$$$) {
     # For use below to output better messages
     my ($prop, $official, $constructed, $tested_function_name) = @_;
 
-    if (! $ENV{PERL_DIFF_TOOL}) {
+    if (! $ENV{PERL_TEST_DIFF}) {
 
         is($constructed, $official, "$tested_function_name('$prop')");
 
-        diag("Set environment variable PERL_DIFF_TOOL=diff_tool to see just "
+        diag("Set environment variable PERL_TEST_DIFF=diff_tool to see just "
            . "the differences.");
         return;
     }
@@ -1455,7 +1455,7 @@ sub fail_with_diff ($$$$) {
     close $gend || die "Can't close gend";
 
     my $diff = File::Temp->new();
-    system("$ENV{PERL_DIFF_TOOL} $off $gend > $diff");
+    system("$ENV{PERL_TEST_DIFF} $off $gend > $diff");
 
     open my $fh, "<", $diff || die "Can't open $diff";
     my @diffs = <$fh>;
