@@ -1,3 +1,4 @@
+#!perl
 use strict;
 use Test::More;
 use XS::APItest;
@@ -42,7 +43,18 @@ sub _fail_flags {
 {
     my @tests =
       (
-       # input, outsize, flags, expected string, consumed bytes, name, ascii only, message qr// with warnings/croak enabled
+       # name - name of the test (required)
+       # in - input text (required)
+       # outsize - output buffer size (required)
+       # flags - conversion/validation flags
+       # result - expected string
+       # consumed - consumed bytes
+       # eof - true if no more data is expected
+       # ascii - true for an ASCII (vs EBCIDIC) only test
+       # message - warning/croak message when run with CROAK or WARN flags
+       # failout - result with fail flags
+       # failconsumed - consumed with fail flags
+       # failerror - failure error flags
        {
         name => "simple ascii",
         in => "AAAAA",
@@ -75,8 +87,10 @@ sub _fail_flags {
         consumed => 2,
         name => "short encoding",
         message => qr/too short/,
+        eof => 1,
         failout => "A",
         failconsumed => 1,
+        failerror => $::UTF8_GOT_SHORT,
        },
        {
         in => _c("A\x{100}", 2),
@@ -85,6 +99,19 @@ sub _fail_flags {
         result => "A",
         consumed => 1,
         name => "short encoding, short allowed",
+       },
+       {
+        in => _c("A\x{100}", 2),
+        outsize => 10,
+        flags => 0,
+        eof => 1,
+        result => "A\x{FFFD}",
+        consumed => length(_c("A\x{100}", 2)),
+        name => "short encoding, short allowed",
+        message => qr/too short/,
+        failout => "A",
+        failconsumed => 1,
+        failerror => $::UTF8_GOT_SHORT
        },
        {
         in => "\xBFA\xBF",
@@ -97,6 +124,7 @@ sub _fail_flags {
         message => qr/unexpected continuation byte/,
         failout => "",
         failconsumed => 0,
+        failerror => $::UTF8_GOT_CONTINUATION,
        },
        {
         in => _c("A\x{D800}B"),
@@ -116,6 +144,7 @@ sub _fail_flags {
         message => qr/UTF-16 surrogate/,
         failout => "A",
         failconsumed => 1,
+        failerror => $::UTF8_GOT_SURROGATE,
        },
        {
         in =>_c("A\x{DFFF}B"),
@@ -135,6 +164,7 @@ sub _fail_flags {
         message => qr/surrogate/,
         failout => "A",
         failconsumed => 1,
+        failerror => $::UTF8_GOT_SURROGATE,
        },
        {
         in => "\xF0\x82\x82\xAC",
@@ -147,6 +177,7 @@ sub _fail_flags {
         message => qr/overlong/,
         failout => "",
         failconsumed => 0,
+        failerror => $::UTF8_GOT_LONG,
        },
        {
         in => _c("A\x{110000}B"),
@@ -166,6 +197,7 @@ sub _fail_flags {
         message => qr/is not Unicode/,
         failout => "A",
         failconsumed => 1,
+        failerror => $::UTF8_GOT_SUPER,
        },
       );
   SKIP:
@@ -182,7 +214,7 @@ sub _fail_flags {
         my ($out, $con);
         {
             local $SIG{__WARN__} = sub { push @warn, "@_"; local $| = 1; print @_; };
-            ($out, $con) = test_utf8_validate_and_fix($test->{in}, $flags, $test->{outsize});
+            ($out, $con) = test_utf8_validate_and_fix($test->{in}, $flags, $test->{outsize}, $test->{eof} || 0);
         }
 
         is($out, $eout, "$name: output")
@@ -193,7 +225,7 @@ sub _fail_flags {
         @warn = ();
         {
             local $SIG{__WARN__} = sub { push @warn, "@_"; };
-            ($out, $con) = test_utf8_validate_and_fix($test->{in}, _warn_flags($flags) , $test->{outsize});
+            ($out, $con) = test_utf8_validate_and_fix($test->{in}, _warn_flags($flags) , $test->{outsize}, $test->{eof} || 0);
         }
         is($out, $eout, "$name: output (with warn flags)");
         is($con, $test->{consumed}, "$name: consumed (with warn flags)");
@@ -204,7 +236,7 @@ sub _fail_flags {
             is(@warn, 0, "$name: no warnings with warn flags");
         }
         my $died = !eval {
-            ($out, $con) = test_utf8_validate_and_fix($test->{in}, _croak_flags($flags) , $test->{outsize});
+            ($out, $con) = test_utf8_validate_and_fix($test->{in}, _croak_flags($flags) , $test->{outsize}, $test->{eof} || 0);
             1;
         };
         if ($test->{message}) {
@@ -219,17 +251,21 @@ sub _fail_flags {
         if (exists $test->{failout}) {
             my $out = "";
             my $fconsumed = 0;
+            my $ferror = 0;
             my $in = $test->{in};
             my $loops = 0;
-            while (my ($tout, $consumed) = test_utf8_validate_and_fix(substr($in,  $fconsumed), _fail_flags($flags), $test->{outsize} - length($out))) {
+            while (my ($tout, $consumed, $error) = test_utf8_validate_and_fix(substr($in,  $fconsumed), _fail_flags($flags), $test->{outsize} - length($out), $test->{eof})) {
                 $out .= $tout;
                 $fconsumed += $consumed;
+                $ferror |= $error;
+                last if $ferror;
                 ++$loops > 5
                   and die "$name: had to abort loop";
             }
             utf8::encode($out);
             is($out, $test->{failout}, "$name: fail output");
             is($fconsumed, $test->{failconsumed}, "$name: fail consumed");
+            is($ferror, $test->{failerror}, "$name: fail error");
         }
         else {
             # otherwise it doesn't fail
@@ -238,11 +274,12 @@ sub _fail_flags {
             my $fconsumed = 0;
             my $in = $test->{in};
             my $loops = 0;
-            my ($tout, $consumed);
+            my ($tout, $consumed, $error);
             while ($fconsumed < length($in)
                    && $test->{outsize} > length($tout)
-                   && (($tout, $consumed) = test_utf8_validate_and_fix(substr($in,  $fconsumed), _fail_flags($flags), $test->{outsize} - length($tout)))
-                   && length($tout) > 0) {
+                   && (($tout, $consumed, $error) = test_utf8_validate_and_fix(substr($in,  $fconsumed), _fail_flags($flags), $test->{outsize} - length($tout), $test->{eof}))
+                   && length($tout) > 0
+                   && !$error) {
                 diag "$name: tout '$tout' con $consumed outsize ".($test->{outsize} - length($tout));
                 $out .= $tout;
                 $fconsumed += $consumed;

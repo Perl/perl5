@@ -6354,7 +6354,7 @@ test_utf8_hop_safe(SV *s_sv, STRLEN s_off, IV off)
         RETVAL
 
 void
-test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize)
+test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize, bool eof = FALSE)
     PREINIT:
         STRLEN inlen;
         const U8 *start;
@@ -6364,6 +6364,7 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize)
         U8 *out;
         U8 *outstart;
         U8 *outend;
+        U32 errors = 0;
     PPCODE:
         ostart = start = (U8*)SvPVbyte(in, inlen);
         outsv = sv_2mortal(newSV(outsize+1));
@@ -6371,7 +6372,7 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize)
         outend = out + outsize;
         *outend = 'A';
         outlen = utf8_validate_and_fix(&start, start+inlen,
-                                       &out, outend, flags);
+                                       &out, outend, flags, eof, &errors);
         if (*outend != 'A')
             croak("Buffer overflow in validate_and_fix_utf8()");
         if (outlen < 0)
@@ -6379,9 +6380,11 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize)
         *out = '\0';
         SvCUR_set(outsv, out - outstart);
         SvPOK_on(outsv);
+        PerlIO_printf(PerlIO_stderr(), "consumed %zi errors %x\n", start-ostart, errors);
         EXTEND(SP, 2);
         PUSHs(outsv); /* already mortal */
         PUSHs(sv_2mortal(newSViv(start - ostart)));
+        PUSHs(sv_2mortal(newSVuv(errors)));
 
 UV
 test_toLOWER(UV ord)
