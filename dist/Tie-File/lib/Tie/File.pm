@@ -7,7 +7,7 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -2517,7 +2517,7 @@ People sometimes point out that L<DB_File> will do something similar,
 and ask why C<Tie::File> module is necessary.
 
 There are a number of reasons that you might prefer C<Tie::File>.
-A list is available at C<http://perl.plover.com/TieFile/why-not-DB_File>.
+A list is available at C<L<http://perl.plover.com/TieFile/why-not-DB_File>>.
 
 =head1 AUTHOR
 
