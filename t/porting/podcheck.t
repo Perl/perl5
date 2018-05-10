@@ -1475,7 +1475,7 @@ if ($show_counts) {
     note("-----\n" . Text::Tabs::expand("$total\tknown potential issues"));
     if (%suppressed_files) {
         note("\nFiles that have all messages of at least one type suppressed:");
-        note(join ",", keys %suppressed_files);
+        note(join ",", sort keys %suppressed_files);
     }
     exit 0;
 }
@@ -2176,7 +2176,7 @@ if (! $regen
     && ! ok (keys %known_problems == 0, "The known problems database ($data_dir/known_pod_issues.dat) includes no references to non-existent files"))
 {
     note("The following files were not found: "
-         . join ", ", keys %known_problems);
+         . join ", ", sort keys %known_problems);
     note("They will automatically be removed from the db the next time");
     note("  cd t; ./perl -I../lib porting/podcheck.t --regen");
     note("is run");
