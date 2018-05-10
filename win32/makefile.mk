@@ -1391,7 +1391,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #endif)>> config.h
 .ENDIF
 #separate line since this is sentinal that this target is done
-	rem. > $(MINIDIR)\.exists
+	@rem. > $(MINIDIR)\.exists
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) ..\$(*B).c

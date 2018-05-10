@@ -758,6 +758,7 @@ MAKE_BARE	= nmake
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
+INT64		= __int64
 
 XCOPY		= xcopy /f /r /i /d /y
 RCOPY		= xcopy /f /r /i /e /d /y
@@ -938,7 +939,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
+all : ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
 	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions PostExt \
 	$(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
@@ -963,112 +964,6 @@ $(GLOBEXE) : perlglob$(o)
 	$(EMBED_EXE_MANI)
 
 perlglob$(o)  : perlglob.c
-
-#
-# Copy the template config.h and set configurables at the end of it
-# as per the options chosen and compiler used.
-# Note: This config.h is only used to build miniperl.exe anyway, but
-# it's as well to have its options correct to be sure that it builds
-# and so that it's "-V" options are correct for use by makedef.pl. The
-# real config.h used to build perl.exe is generated from the top-level
-# config_h.SH by config_h.PL (run by miniperl.exe).
-#
-.\config.h : $(CFGH_TMPL)
-	-del /f config.h
-	copy $(CFGH_TMPL) config.h
-	@echo.>>$@
-	@echo #ifndef _config_h_footer_>>$@
-	@echo #define _config_h_footer_>>$@
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
-	@echo #undef FILE_ptr>>$@
-	@echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)>>$@
-	@echo #undef FILE_cnt>>$@
-	@echo #define FILE_cnt(fp) PERLIO_FILE_cnt(fp)>>$@
-	@echo #undef FILE_base>>$@
-	@echo #define FILE_base(fp) PERLIO_FILE_base(fp)>>$@
-	@echo #undef FILE_bufsiz>>$@
-	@echo #define FILE_bufsiz(fp) (PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))>>$@
-	@echo #define I_STDBOOL>>$@
-!ENDIF
-	@echo #undef Off_t>>$@
-	@echo #undef LSEEKSIZE>>$@
-	@echo #undef Off_t_size>>$@
-	@echo #undef PTRSIZE>>$@
-	@echo #undef SSize_t>>$@
-	@echo #undef HAS_ATOLL>>$@
-	@echo #undef HAS_STRTOLL>>$@
-	@echo #undef HAS_STRTOULL>>$@
-	@echo #undef IVTYPE>>$@
-	@echo #undef UVTYPE>>$@
-	@echo #undef IVSIZE>>$@
-	@echo #undef UVSIZE>>$@
-	@echo #undef NV_PRESERVES_UV>>$@
-	@echo #undef NV_PRESERVES_UV_BITS>>$@
-	@echo #undef IVdf>>$@
-	@echo #undef UVuf>>$@
-	@echo #undef UVof>>$@
-	@echo #undef UVxf>>$@
-	@echo #undef UVXf>>$@
-	@echo #undef USE_64_BIT_INT>>$@
-	@echo #undef Size_t_size>>$@
-	@echo #undef USE_CPLUSPLUS>>$@
-!IF "$(USE_LARGE_FILES)"=="define"
-	@echo #define Off_t __int64>>$@
-	@echo #define LSEEKSIZE ^8>>$@
-	@echo #define Off_t_size ^8>>$@
-!ELSE
-	@echo #define Off_t long>>$@
-	@echo #define LSEEKSIZE ^4>>$@
-	@echo #define Off_t_size ^4>>$@
-!ENDIF
-!IF "$(WIN64)"=="define"
-	@echo #define PTRSIZE ^8>>$@
-	@echo #define SSize_t __int64>>$@
-	@echo #define HAS_ATOLL>>$@
-	@echo #define HAS_STRTOLL>>$@
-	@echo #define HAS_STRTOULL>>$@
-	@echo #define Size_t_size ^8>>$@
-!ELSE
-	@echo #define PTRSIZE ^4>>$@
-	@echo #define SSize_t int>>$@
-	@echo #undef HAS_ATOLL>>$@
-	@echo #undef HAS_STRTOLL>>$@
-	@echo #undef HAS_STRTOULL>>$@
-	@echo #define Size_t_size ^4>>$@
-!ENDIF
-!IF "$(USE_64_BIT_INT)"=="define"
-	@echo #define IVTYPE __int64>>$@
-	@echo #define UVTYPE unsigned __int64>>$@
-	@echo #define IVSIZE ^8>>$@
-	@echo #define UVSIZE ^8>>$@
-	@echo #undef NV_PRESERVES_UV>>$@
-	@echo #define NV_PRESERVES_UV_BITS 53>>$@
-	@echo #define IVdf "I64d">>$@
-	@echo #define UVuf "I64u">>$@
-	@echo #define UVof "I64o">>$@
-	@echo #define UVxf "I64x">>$@
-	@echo #define UVXf "I64X">>$@
-	@echo #define USE_64_BIT_INT>>$@
-!ELSE
-	@echo #define IVTYPE long>>$@
-	@echo #define UVTYPE unsigned long>>$@
-	@echo #define IVSIZE ^4>>$@
-	@echo #define UVSIZE ^4>>$@
-	@echo #define NV_PRESERVES_UV>>$@
-	@echo #define NV_PRESERVES_UV_BITS 32>>$@
-	@echo #define IVdf "ld">>$@
-	@echo #define UVuf "lu">>$@
-	@echo #define UVof "lo">>$@
-	@echo #define UVxf "lx">>$@
-	@echo #define UVXf "lX">>$@
-	@echo #undef USE_64_BIT_INT>>$@
-!ENDIF
-!IF "$(USE_CPLUSPLUS)"=="define"
-	@echo #define USE_CPLUSPLUS>>$@
-!ELSE
-	@echo #undef USE_CPLUSPLUS>>$@
-!ENDIF
-	@echo #endif>>$@
 
 ..\git_version.h : $(MINIPERL) ..\make_patchnum.pl
 	cd .. && miniperl -Ilib make_patchnum.pl && cd win32
@@ -1098,18 +993,127 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
 	-$(MINIPERL) -I..\lib config_h.PL
 	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
-# See the comment in Makefile.SH explaining this seemingly cranky ordering
-$(MINIPERL) : ..\lib\buildcustomize.pl 
+.\config.h : $(CONFIGPM)
 
-..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
+# See the comment in Makefile.SH explaining this seemingly cranky ordering
+$(MINIPERL) : ..\lib\buildcustomize.pl
+
+..\lib\buildcustomize.pl : $(MINI_OBJ) ..\write_buildcustomize.pl
 	$(LINK32) -out:$(MINIPERL) @<<
 	$(BLINK_FLAGS) $(DELAYLOAD) $(MINIDELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
 	$(EMBED_EXE_MANI:..\lib\buildcustomize.pl=..\miniperl.exe)
 	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..
 
-$(MINIDIR) :
+$(MINIDIR)\.exists : $(CFGH_TMPL)
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
+#
+# Copy the template config.h and set configurables at the end of it
+# as per the options chosen and compiler used.
+# Note: This config.h is only used to build miniperl.exe anyway, but
+# it's as well to have its options correct to be sure that it builds
+# and so that it's "-V" options are correct for use by makedef.pl. The
+# real config.h used to build perl.exe is generated from the top-level
+# config_h.SH by config_h.PL (run by miniperl.exe).
+#
+	copy $(CFGH_TMPL) config.h
+	@(echo.&& \
+	echo #ifndef _config_h_footer_&& \
+	echo #define _config_h_footer_&& \
+	echo #undef Off_t&& \
+	echo #undef LSEEKSIZE&& \
+	echo #undef Off_t_size&& \
+	echo #undef PTRSIZE&& \
+	echo #undef SSize_t&& \
+	echo #undef HAS_ATOLL&& \
+	echo #undef HAS_STRTOLL&& \
+	echo #undef HAS_STRTOULL&& \
+	echo #undef Size_t_size&& \
+	echo #undef IVTYPE&& \
+	echo #undef UVTYPE&& \
+	echo #undef IVSIZE&& \
+	echo #undef UVSIZE&& \
+	echo #undef NV_PRESERVES_UV&& \
+	echo #undef NV_PRESERVES_UV_BITS&& \
+	echo #undef IVdf&& \
+	echo #undef UVuf&& \
+	echo #undef UVof&& \
+	echo #undef UVxf&& \
+	echo #undef UVXf&& \
+	echo #undef USE_64_BIT_INT&& \
+	echo #undef USE_LONG_DOUBLE&& \
+	echo #undef USE_CPLUSPLUS)>> config.h
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+	@(echo #undef FILE_ptr&& \
+	echo #undef FILE_cnt&& \
+	echo #undef FILE_base&& \
+	echo #undef FILE_bufsiz&& \
+	echo #define FILE_ptr^(fp^) PERLIO_FILE_ptr^(fp^)&& \
+	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
+	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
+	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
+	echo #define I_STDBOOL)>> config.h
+!ENDIF
+!IF "$(USE_LARGE_FILES)"=="define"
+	@(echo #define Off_t $(INT64)&& \
+	echo #define LSEEKSIZE ^8&& \
+	echo #define Off_t_size ^8)>> config.h
+!ELSE
+	@(echo #define Off_t long&& \
+	echo #define LSEEKSIZE ^4&& \
+	echo #define Off_t_size ^4)>> config.h
+!ENDIF
+!IF "$(WIN64)"=="define"
+	@(echo #define PTRSIZE ^8&& \
+	echo #define SSize_t $(INT64)&& \
+	echo #define HAS_ATOLL&& \
+	echo #define HAS_STRTOLL&& \
+	echo #define HAS_STRTOULL&& \
+	echo #define Size_t_size ^8)>> config.h
+!ELSE
+	@(echo #define PTRSIZE ^4&& \
+	echo #define SSize_t int&& \
+	echo #undef HAS_ATOLL&& \
+	echo #undef HAS_STRTOLL&& \
+	echo #undef HAS_STRTOULL&& \
+	echo #define Size_t_size ^4)>> config.h
+!ENDIF
+!IF "$(USE_64_BIT_INT)"=="define"
+	@(echo #define IVTYPE $(INT64)&& \
+	echo #define UVTYPE unsigned $(INT64)&& \
+	echo #define IVSIZE ^8&& \
+	echo #define UVSIZE ^8&& \
+	echo #undef NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 53&& \
+	echo #define IVdf "I64d"&& \
+	echo #define UVuf "I64u"&& \
+	echo #define UVof "I64o"&& \
+	echo #define UVxf "I64x"&& \
+	echo #define UVXf "I64X"&& \
+	echo #define USE_64_BIT_INT)>> config.h
+!ELSE
+	@(echo #define IVTYPE long&& \
+	echo #define UVTYPE unsigned long&& \
+	echo #define IVSIZE ^4&& \
+	echo #define UVSIZE ^4&& \
+	echo #define NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 32&& \
+	echo #define IVdf "ld"&& \
+	echo #define UVuf "lu"&& \
+	echo #define UVof "lo"&& \
+	echo #define UVxf "lx"&& \
+	echo #define UVXf "lX"&& \
+	echo #undef USE_64_BIT_INT)>> config.h
+!ENDIF
+!IF "$(USE_CPLUSPLUS)"=="define"
+	@(echo #define USE_CPLUSPLUS&& \
+	echo #endif)>> config.h
+!ELSE
+	@(echo #undef USE_CPLUSPLUS&& \
+	echo #endif)>> config.h
+!ENDIF
+#separate line since this is sentinal that this target is done
+	@rem. > $(MINIDIR)\.exists
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*F).c
@@ -1127,7 +1131,7 @@ perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 # 1. we don't want to rebuild miniperl.exe when config.h changes
 # 2. we don't want to rebuild miniperl.exe with non-default config.h
 # 3. we can't have miniperl.exe depend on git_version.h, as miniperl creates it
-$(MINI_OBJ)	: $(CORE_NOCFG_H)
+$(MINI_OBJ)	: $(MINIDIR)\.exists $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
