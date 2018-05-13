@@ -12487,10 +12487,11 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
           do_concat:
 
             if (node_p) {
-            /* Convert to notation the rest of the code understands */
-            sv_catpv(substitute_parse, "\\x{");
-            sv_catpvn(substitute_parse, start_digit, RExC_parse - start_digit);
-            sv_catpv(substitute_parse, "}");
+                /* Convert to notation the rest of the code understands */
+                sv_catpv(substitute_parse, "\\x{");
+                sv_catpvn(substitute_parse, start_digit,
+                                            RExC_parse - start_digit);
+                sv_catpv(substitute_parse, "}");
             }
 
             /* Move to after the dot (or ending brace the final time through.)
