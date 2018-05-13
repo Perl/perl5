@@ -657,7 +657,13 @@ static const scan_data_t zero_scan_data = {
     UTF8fARG(UTF,                                                           \
              (xI(xC) > eC) /* Don't run off end */                          \
               ? eC - sC   /* Length before the <--HERE */                   \
-              : ( __ASSERT_(xI_offset(xC) >= 0) xI_offset(xC) ),            \
+              : ((xI_offset(xC) >= 0)                                       \
+                 ? xI_offset(xC)                                            \
+                 : (Perl_croak(aTHX_ "panic: %s: %d: negative offset: %"    \
+                                    IVdf " trying to output message for "   \
+                                    " pattern %.*s",                        \
+                                    __FILE__, __LINE__, xI_offset(xC),      \
+                                    ((int) (eC - sC)), sC), 0)),            \
              sC),         /* The input pattern printed up to the <--HERE */ \
     UTF8fARG(UTF,                                                           \
              (xI(xC) > eC) ? 0 : eC - xI(xC), /* Length after <--HERE */    \
