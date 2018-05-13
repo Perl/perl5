@@ -12242,8 +12242,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * *node_p, nor *code_point_p, nor *flagp.
   *
   * If <cp_count> is not NULL, the caller wants to know the length (in code
-  * points) that this \N sequence matches.  This is set even if the function
-  * returns FALSE, as detailed below.
+  * points) that this \N sequence matches.  This is set, and the input is
+  * parsed for errors, even if the function returns FALSE, as detailed below.
   *
   * There are 5 possibilities here, as detailed in the next 5 paragraphs.
   *
@@ -12466,31 +12466,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             }
 
             /* Here, looks like its really a multiple character sequence.  Fail
-             * if that's not what the caller wants. */
-            if (! node_p) {
-
-                /* But even if failing, we count the code points if requested, and
-                 * don't back up up the pointer as the caller is expected to
-                 * handle this situation */
-                if (cp_count) {
-                    char * dot = RExC_parse + 1;
-                    do {
-                        dot = (char *) memchr(dot, '.', endbrace - dot);
-                        if (! dot) {
-                            break;
-                        }
-                        count++;
-                        dot++;
-                    } while (dot < endbrace);
-                    count++;
-
-                    *cp_count = count;
-                    RExC_parse = endbrace;
-                    nextchar(pRExC_state);
-                }
-                else {  /* Back up the pointer. */
-                    RExC_parse = p;
-                }
+             * if that's not what the caller wants.  But continue with counting
+             * and error checking if they still want a count */
+            if (! node_p && ! cp_count) {
                 return FALSE;
             }
 
@@ -12498,24 +12476,36 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
              * form \x{char1}\x{char2}...  and then call reg recursively to
              * parse it (enclosing in "(?: ... )" ).  That way, it retains its
              * atomicness, while not having to worry about special handling
-             * that some code points may have. */
+             * that some code points may have.  We don't create a subpattern,
+             * but go through the motions of code point counting and error
+             * checking, if the caller doesn't want a node returned. */
 
-            if (count == 1) {
+            if (node_p && count == 1) {
                 substitute_parse = newSVpvs("?:");
             }
 
           do_concat:
 
+            if (node_p) {
             /* Convert to notation the rest of the code understands */
             sv_catpv(substitute_parse, "\\x{");
             sv_catpvn(substitute_parse, start_digit, RExC_parse - start_digit);
             sv_catpv(substitute_parse, "}");
+            }
 
             /* Move to after the dot (or ending brace the final time through.)
              * */
             RExC_parse++;
+            count++;
 
         } while (RExC_parse < endbrace);
+
+        if (! node_p) { /* Doesn't want the node */
+            assert (cp_count);
+
+            *cp_count = count;
+            return FALSE;
+        }
 
         sv_catpv(substitute_parse, ")");
 
