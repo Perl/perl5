@@ -15433,8 +15433,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.028000 => {
-        delta_from => 5.027010,
+        delta_from => 5.027011,
         changed => {
+            'B::Op_private'         => '5.028000',
+            'Config'                => '5.028',
+            'Module::CoreList'      => '5.20180520',
+            'Module::CoreList::Utils'=> '5.20180520',
+            'Storable'              => '3.08',
+            'feature'               => '1.52',
         },
         removed => {
         }
@@ -16323,6 +16329,13 @@ sub is_core
     },
     5.027011 => {
         delta_from => 5.02701,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.028000 => {
+        delta_from => 5.027011,
         changed => {
         },
         removed => {
