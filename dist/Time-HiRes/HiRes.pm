@@ -50,7 +50,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 stat lstat utime
 		);
 
-our $VERSION = '1.9760';
+our $VERSION = '1.9761';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -221,8 +221,8 @@ Sleeps for the number of microseconds (millionths of a second)
 specified.  Returns the number of microseconds actually slept.
 Can sleep for more than one second, unlike the C<usleep> system call.
 Can also sleep for zero seconds, which often works like a I<thread yield>.
-See also C<Time::HiRes::usleep()>, C<Time::HiRes::sleep()>, and
-C<Time::HiRes::clock_nanosleep()>.
+See also L<C<Time::HiRes::sleep()>|/sleep ( $floating_seconds )>, and
+L<C<clock_nanosleep()>|/clock_nanosleep ( $which, $nanoseconds, $flags = 0)>.
 
 Do not expect usleep() to be exact down to one microsecond.
 
@@ -232,8 +232,10 @@ Sleeps for the number of nanoseconds (1e9ths of a second) specified.
 Returns the number of nanoseconds actually slept (accurate only to
 microseconds, the nearest thousand of them).  Can sleep for more than
 one second.  Can also sleep for zero seconds, which often works like
-a I<thread yield>.  See also C<Time::HiRes::sleep()>,
-C<Time::HiRes::usleep()>, and C<Time::HiRes::clock_nanosleep()>.
+a I<thread yield>.  See also
+L<C<Time::HiRes::sleep()>|/sleep ( $floating_seconds )>,
+L<C<Time::HiRes::usleep()>|/usleep ( $useconds )>, and
+L<C<clock_nanosleep()>|/clock_nanosleep ( $which, $nanoseconds, $flags = 0)>.
 
 Do not expect nanosleep() to be exact down to one nanosecond.
 Getting even accuracy of one thousand nanoseconds is good.
@@ -356,7 +358,7 @@ delivered when the timer expires.  C<SIGPROF> can interrupt system calls.
 The semantics of interval timers for multithreaded programs are
 system-specific, and some systems may support additional interval
 timers.  For example, it is unspecified which thread gets the signals.
-See your C<setitimer()> documentation.
+See your L<C<setitimer(2)>> documentation.
 
 =item getitimer ( $which )
 
@@ -404,8 +406,10 @@ default to zero but C<TIMER_ABSTIME> can specified (must be exported
 explicitly) which means that C<$nanoseconds> is not a time interval
 (as is the default) but instead an absolute time.  Can sleep for more
 than one second.  Can also sleep for zero seconds, which often works
-like a I<thread yield>.  See also C<Time::HiRes::sleep()>,
-C<Time::HiRes::usleep()>, and C<Time::HiRes::nanosleep()>.
+like a I<thread yield>.  See also
+L<C<Time::HiRes::sleep()>|/sleep ( $floating_seconds )>,
+L<C<Time::HiRes::usleep()>|/usleep ( $useconds )>, and
+L<C<Time::HiRes::nanosleep()>|/nanosleep ( $nanoseconds )>.
 
 Do not expect clock_nanosleep() to be exact down to one nanosecond.
 Getting even accuracy of one thousand nanoseconds is good.
@@ -650,9 +654,10 @@ gnukfreebsd seems to have non-functional futimens() and utimensat()
 
 Perl modules L<BSD::Resource>, L<Time::TAI64>.
 
-Your system documentation for C<clock>, C<clock_gettime>,
-C<clock_getres>, C<clock_nanosleep>, C<clock_settime>, C<getitimer>,
-C<gettimeofday>, C<setitimer>, C<sleep>, C<stat>, C<ualarm>.
+Your system documentation for L<C<clock(3)>>, L<C<clock_gettime(2)>>,
+L<C<clock_getres(3)>>, L<C<clock_nanosleep(3)>>, L<C<clock_settime(2)>>,
+L<C<getitimer(2)>>, L<C<gettimeofday(2)>>, L<C<setitimer(2)>>, L<C<sleep(3)>>,
+L<C<stat(2)>>, L<C<ualarm(3)>>.
 
 =head1 AUTHORS
 

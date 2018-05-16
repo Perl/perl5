@@ -53,6 +53,10 @@ Class::Tiny::Antlers
 Classic::Perl
 clearerr(3)
 clock(3)
+clock_getres(3)
+clock_gettime(2)
+clock_nanosleep(3)
+clock_settime(2)
 Clone
 closedir(2)
 connect(2)
@@ -130,6 +134,7 @@ futimes(2)
 Future
 gcc(1)
 gdbm(3)
+getitimer(2)
 Getopt::Std
 getpgrp(2)
 getpriority(2)
@@ -277,6 +282,7 @@ sha1sum(1)
 shadow(3)
 Shell
 Shell::Command
+sleep(3)
 sock_init(3)
 Socket
 socketpair(3)
@@ -311,6 +317,7 @@ touch(1)
 tr(1)
 TryCatch
 tty(1)
+ualarm(3)
 umask(2)
 Unicode::CaseFold
 Unicode::Casing
