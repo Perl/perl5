@@ -1359,28 +1359,6 @@ package My::Pod::Checker {      # Extend Pod::Checker
     }
 }
 
-package Tie_Array_to_FH {  # So printing actually goes to an array
-
-    my %array;
-
-    sub TIEHANDLE {
-        my $class = shift;
-        my $array_ref = shift;
-
-        my $self = bless \do{ my $anonymous_scalar }, $class;
-        $array{Scalar::Util::refaddr $self} = $array_ref;
-
-        return $self;
-    }
-
-    sub PRINT {
-        my $self = shift;
-        push @{$array{Scalar::Util::refaddr $self}}, @_;
-        return 1;
-    }
-}
-
-
 my %filename_to_checker; # Map a filename to its pod checker object
 my %id_to_checker;       # Map a checksum to its pod checker object
 my %nodes;               # key is filename, values are nodes in that file.
@@ -1553,19 +1531,18 @@ sub my_safer_print {    # print, with error checking for outputting to db
 sub extract_pod {   # Extracts just the pod from a file; returns undef if file
                     # doesn't exist
     my $filename = shift;
-    use Pod::Parser;
 
-    my @pod;
-
-    # Arrange for the output of Pod::Parser to be collected in an array we can
-    # look at instead of being printed
-    tie *ALREADY_FH, 'Tie_Array_to_FH', \@pod;
     if (open my $in_fh, '<:bytes', $filename) {
-        my $parser = Pod::Parser->new();
-        $parser->parse_from_filehandle($in_fh, *ALREADY_FH);
+        use Pod::Simple::JustPod;
+        my $parser = Pod::Simple::JustPod->new();
+        $parser->no_errata_section(1);
+        $parser->source_filename($filename);
+        my $output;
+        $parser->output_string( \$output );
+        $parser->parse_lines( <$in_fh>, undef );
         close $in_fh;
 
-        return join "", @pod
+        return $output;
     }
 
     # The file should already have been opened once to get here, so if that
