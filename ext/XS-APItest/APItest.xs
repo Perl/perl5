@@ -4674,7 +4674,7 @@ test_isBLANK_utf8(U8 * p, int type)
             RETVAL = isBLANK_utf8_safe(p, e);
         }
         else {
-            RETVAL = isBLANK_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4689,7 +4689,7 @@ test_isBLANK_LC_utf8(U8 * p, int type)
             RETVAL = isBLANK_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isBLANK_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4718,7 +4718,7 @@ test_isVERTWS_utf8(U8 * p, int type)
             RETVAL = isVERTWS_utf8_safe(p, e);
         }
         else {
-            RETVAL = isVERTWS_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4782,7 +4782,7 @@ test_isUPPER_utf8(U8 * p, int type)
             RETVAL = isUPPER_utf8_safe(p, e);
         }
         else {
-            RETVAL = isUPPER_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4797,7 +4797,7 @@ test_isUPPER_LC_utf8(U8 * p, int type)
             RETVAL = isUPPER_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isUPPER_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4861,7 +4861,7 @@ test_isLOWER_utf8(U8 * p, int type)
             RETVAL = isLOWER_utf8_safe(p, e);
         }
         else {
-            RETVAL = isLOWER_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4876,7 +4876,7 @@ test_isLOWER_LC_utf8(U8 * p, int type)
             RETVAL = isLOWER_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isLOWER_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4940,7 +4940,7 @@ test_isALPHA_utf8(U8 * p, int type)
             RETVAL = isALPHA_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHA_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -4955,7 +4955,7 @@ test_isALPHA_LC_utf8(U8 * p, int type)
             RETVAL = isALPHA_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHA_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5019,7 +5019,7 @@ test_isWORDCHAR_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5034,7 +5034,7 @@ test_isWORDCHAR_LC_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5098,7 +5098,7 @@ test_isALPHANUMERIC_utf8(U8 * p, int type)
             RETVAL = isALPHANUMERIC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHANUMERIC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5113,7 +5113,7 @@ test_isALPHANUMERIC_LC_utf8(U8 * p, int type)
             RETVAL = isALPHANUMERIC_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isALPHANUMERIC_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5156,7 +5156,7 @@ test_isALNUM_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5171,7 +5171,7 @@ test_isALNUM_LC_utf8(U8 * p, int type)
             RETVAL = isWORDCHAR_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isWORDCHAR_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5207,7 +5207,7 @@ test_isDIGIT_utf8(U8 * p, int type)
             RETVAL = isDIGIT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isDIGIT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5222,7 +5222,7 @@ test_isDIGIT_LC_utf8(U8 * p, int type)
             RETVAL = isDIGIT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isDIGIT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5335,7 +5335,7 @@ test_isIDFIRST_utf8(U8 * p, int type)
             RETVAL = isIDFIRST_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDFIRST_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5350,7 +5350,7 @@ test_isIDFIRST_LC_utf8(U8 * p, int type)
             RETVAL = isIDFIRST_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDFIRST_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5414,7 +5414,7 @@ test_isIDCONT_utf8(U8 * p, int type)
             RETVAL = isIDCONT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDCONT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5429,7 +5429,7 @@ test_isIDCONT_LC_utf8(U8 * p, int type)
             RETVAL = isIDCONT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isIDCONT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5493,7 +5493,7 @@ test_isSPACE_utf8(U8 * p, int type)
             RETVAL = isSPACE_utf8_safe(p, e);
         }
         else {
-            RETVAL = isSPACE_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5508,7 +5508,7 @@ test_isSPACE_LC_utf8(U8 * p, int type)
             RETVAL = isSPACE_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isSPACE_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5575,7 +5575,7 @@ test_isASCII_utf8(U8 * p, int type)
             RETVAL = isASCII_utf8_safe(p, e);
         }
         else {
-            RETVAL = isASCII_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5593,7 +5593,7 @@ test_isASCII_LC_utf8(U8 * p, int type)
             RETVAL = isASCII_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isASCII_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5657,7 +5657,7 @@ test_isCNTRL_utf8(U8 * p, int type)
             RETVAL = isCNTRL_utf8_safe(p, e);
         }
         else {
-            RETVAL = isCNTRL_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5672,7 +5672,7 @@ test_isCNTRL_LC_utf8(U8 * p, int type)
             RETVAL = isCNTRL_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isCNTRL_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5736,7 +5736,7 @@ test_isPRINT_utf8(U8 * p, int type)
             RETVAL = isPRINT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPRINT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5751,7 +5751,7 @@ test_isPRINT_LC_utf8(U8 * p, int type)
             RETVAL = isPRINT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPRINT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5815,7 +5815,7 @@ test_isGRAPH_utf8(U8 * p, int type)
             RETVAL = isGRAPH_utf8_safe(p, e);
         }
         else {
-            RETVAL = isGRAPH_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5830,7 +5830,7 @@ test_isGRAPH_LC_utf8(U8 * p, int type)
             RETVAL = isGRAPH_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isGRAPH_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5894,7 +5894,7 @@ test_isPUNCT_utf8(U8 * p, int type)
             RETVAL = isPUNCT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPUNCT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5909,7 +5909,7 @@ test_isPUNCT_LC_utf8(U8 * p, int type)
             RETVAL = isPUNCT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPUNCT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5973,7 +5973,7 @@ test_isXDIGIT_utf8(U8 * p, int type)
             RETVAL = isXDIGIT_utf8_safe(p, e);
         }
         else {
-            RETVAL = isXDIGIT_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -5988,7 +5988,7 @@ test_isXDIGIT_LC_utf8(U8 * p, int type)
             RETVAL = isXDIGIT_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isXDIGIT_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -6052,7 +6052,7 @@ test_isPSXSPC_utf8(U8 * p, int type)
             RETVAL = isPSXSPC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPSXSPC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -6067,7 +6067,7 @@ test_isPSXSPC_LC_utf8(U8 * p, int type)
             RETVAL = isPSXSPC_LC_utf8_safe(p, e);
         }
         else {
-            RETVAL = isPSXSPC_LC_utf8(p);
+            RETVAL = 0;
         }
     OUTPUT:
         RETVAL
@@ -6507,23 +6507,18 @@ test_toLOWER_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toLOWER_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toLOWER_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_lower(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 
@@ -6597,23 +6592,18 @@ test_toFOLD_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toFOLD_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toFOLD_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_fold(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 
@@ -6687,23 +6677,18 @@ test_toUPPER_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toUPPER_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toUPPER_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_upper(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 
@@ -6770,23 +6755,18 @@ test_toTITLE_utf8(SV * p, int type)
         if (type >= 0) {
             e = input + UTF8SKIP(input) - type;
             resultant_cp = toTITLE_utf8_safe(input, e, s, &len);
+            av_push(av, newSVuv(resultant_cp));
+
+            utf8 = newSVpvn((char *) s, len);
+            SvUTF8_on(utf8);
+            av_push(av, utf8);
+
+            av_push(av, newSVuv(len));
+            RETVAL = av;
         }
-        else if (type == -1) {
-            resultant_cp = toTITLE_utf8(input, s, &len);
-        }
-#ifndef NO_MATHOMS
         else {
-            resultant_cp = Perl_to_utf8_title(aTHX_ input, s, &len);
+            RETVAL = 0;
         }
-#endif
-        av_push(av, newSVuv(resultant_cp));
-
-        utf8 = newSVpvn((char *) s, len);
-        SvUTF8_on(utf8);
-        av_push(av, utf8);
-
-        av_push(av, newSVuv(len));
-        RETVAL = av;
     OUTPUT:
         RETVAL
 

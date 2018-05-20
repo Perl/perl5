@@ -2082,8 +2082,9 @@ END_EXTERN_C
 #endif
 
 #define _generic_utf8_safe(classnum, p, e, above_latin1)                    \
-         (__ASSERT_(_utf8_safe_assert(p, e))                                \
-         (UTF8_IS_INVARIANT(*(p)))                                          \
+    ((! _utf8_safe_assert(p, e))                                            \
+      ? (_force_out_malformed_utf8_message((U8 *) (p), (U8 *) (e), 0, 1), 0)\
+      : (UTF8_IS_INVARIANT(*(p)))                                           \
           ? _generic_isCC(*(p), classnum)                                   \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
              ? ((LIKELY((e) - (p) > 1 && UTF8_IS_CONTINUATION(*((p)+1))))   \
