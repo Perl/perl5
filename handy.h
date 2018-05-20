@@ -1851,13 +1851,6 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
              ? 0 /* Note that doesn't check validity for latin1 */          \
              : above_latin1)
 
-/* NOTE that some of these macros have very similar ones in regcharclass.h.
- * For example, there is (at the time of this writing) an 'is_SPACE_utf8()'
- * there, differing in name only by an underscore from the one here
- * 'isSPACE_utf8().  The difference is that the ones here are probably more
- * efficient and smaller, using an O(1) array lookup for Latin1-range code
- * points; the regcharclass.h ones are implemented as a series of
- * "if-else-if-else ..." */
 
 #define isALPHA_utf8(p)         _generic_utf8(ALPHA, p)
 #define isALPHANUMERIC_utf8(p)  _generic_utf8(ALPHANUMERIC, p)
