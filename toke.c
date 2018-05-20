@@ -10613,14 +10613,11 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     const char * opening_delims = "([{<";
     const char * closing_delims = ")]}>";
 
+    /* The only non-UTF character that isn't a stand alone grapheme is
+     * white-space, hence can't be a delimiter. */
     const char * non_grapheme_msg = "Use of unassigned code point or"
                                     " non-standalone grapheme for a delimiter"
-                                    " will be a fatal error starting in Perl"
-                                    " 5.30";
-    /* The only non-UTF character that isn't a stand alone grapheme is
-     * white-space, hence can't be a delimiter.  So can skip for non-UTF-8 */
-    bool check_grapheme = UTF && ckWARN_d(WARN_DEPRECATED);
-
+                                    " is not allowed";
     PERL_ARGS_ASSERT_SCAN_STR;
 
     /* skip space before the delimiter */
@@ -10639,18 +10636,12 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     }
     else {
 	termcode = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
-        if (UTF) {
-                 if (UNLIKELY(! _is_grapheme((U8 *) start,
-                                             (U8 *) s,
-                                             (U8 *) PL_bufend,
-                                             termcode)))
-            {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "%s", non_grapheme_msg);
-
-                /* Don't have to check the other end, as have already warned at
-                 * this one */
-                check_grapheme = FALSE;
-            }
+        if (UTF && UNLIKELY(! _is_grapheme((U8 *) start,
+                                           (U8 *) s,
+                                           (U8 *) PL_bufend,
+                                                  termcode)))
+        {
+            yyerror(non_grapheme_msg);
         }
 
 	Copy(s, termstr, termlen, U8);
@@ -10716,14 +10707,13 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
                     if (   s + termlen <= PL_bufend
                         && memEQ(s + 1, (char*)termstr + 1, termlen - 1))
                     {
-                        if (   check_grapheme
+                        if (   UTF
                             && UNLIKELY(! _is_grapheme((U8 *) start,
-                                                              (U8 *) s,
-                                                              (U8 *) PL_bufend,
+                                                       (U8 *) s,
+                                                       (U8 *) PL_bufend,
                                                               termcode)))
                         {
-                            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                                        "%s", non_grapheme_msg);
+                            yyerror(non_grapheme_msg);
                         }
 			break;
                     }

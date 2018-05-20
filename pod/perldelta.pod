@@ -43,7 +43,11 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 Pattern delimiters now must be graphemes
+
+This usage has been deprecated and scheduled for removal in 5.30.  See
+L<perldeprecation/Use of unassigned code point or non-standalone
+grapheme for a delimiter.>
 
 =head1 Deprecations
 

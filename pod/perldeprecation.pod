@@ -247,8 +247,8 @@ L<code points that are above the legal Unicode maximum|
 perlunicode/Beyond Unicode code points>, those can be delimiters, and
 their use won't raise this warning.
 
-In Perl 5.30, delimiters which are unassigned code points, or which
-are non-standalone graphemes will be fatal.
+As of Perl 5.30, delimiters which are unassigned code points, or which
+are non-standalone graphemes are fatal.
 
 =head3 In XS code, use of various macros dealing with UTF-8.
 
