@@ -328,7 +328,7 @@ but has been broken for many years.
 
 Perl 5.22.0 introduced an optimization allowing subroutines to be stored in
 packages as simple sub refs, not requiring a full typeglob (thus
-potentially saving large amounts of memeory).  However, the optimization
+potentially saving large amounts of memory).  However, the optimization
 was flawed: it only applied to the main package.
 
 This optimization has now been extended to all packages.  This may break
@@ -598,11 +598,11 @@ L<arybase> has been upgraded from version 0.12 to 0.15.
 
 =item *
 
-L<Attribute::Handlers> has been upgraded from version 1.00 to 1.01.
+L<Attribute::Handlers> has been upgraded from version 0.99 to 1.01.
 
 =item *
 
-L<attributes> has been upgraded from version 0.3 to 0.33.
+L<attributes> has been upgraded from version 0.29 to 0.33.
 
 =item *
 
@@ -610,7 +610,7 @@ L<B> has been upgraded from version 1.68 to 1.74.
 
 =item *
 
-L<B::Concise> has been upgraded from version 1.000 to 1.003.
+L<B::Concise> has been upgraded from version 0.999 to 1.003.
 
 =item *
 
@@ -889,7 +889,7 @@ L<JSON::PP> has been upgraded from version 2.27400_02 to 2.97001.
 
 =item *
 
-The libnet distribution has been upgraded from version 3.10 to 3.11.
+libnet has been upgraded from version 3.10 to 3.11.
 
 =item *
 
@@ -976,7 +976,7 @@ L<Pod::Perldoc> has been upgraded from version 3.28 to 3.2801.
 
 =item *
 
-The podlators bundle has been upgraded from version 4.09 to 4.10.
+podlators has been upgraded from version 4.09 to 4.10.
 
 Man page references and function names now follow the Linux man page
 formatting standards, instead of the Solaris standard.
@@ -1318,11 +1318,6 @@ caveats regarding the fragility of while-each loops. [perl #132644]
 
 =item *
 
-Improve the documentation of while condition magic in various
-places. [perl #132644]
-
-=item *
-
 Clarification to require was added to show that
 
         require "Foo/Bar.pm";
@@ -1405,11 +1400,6 @@ been corrected and clarified.  [perl #127391]
 The documentation for the C<\> referencing operator now explains the
 unusual context that it supplies to its operand.  [perl #131061]
 
-=item *
-
-Improve the documentation of while condition magic in various
-places. [perl #132644]
-
 =back
 
 =head3 L<perlrequick>
@@ -1473,11 +1463,6 @@ The means to disambiguate between code blocks and hash constructors,
 already documented in L<perlref>, are now documented in L<perlsyn> too.
 [perl #130958]
 
-=item *
-
-Improve the documentation of while condition magic in various
-places. [perl #132644]
-
 =back
 
 =head3 L<perluniprops>
@@ -1508,6 +1493,17 @@ the first few ranges of code points matched above that.
 
 The entry for C<$+> in perlvar has been expanded upon to describe handling of
 multiply-named capturing groups.
+
+=back
+
+=head3 L<perlfunc>, L<perlop>, L<perlsyn>
+
+=over 4
+
+=item *
+
+Improve the documentation of while condition magic in various
+places. [perl #132644]
 
 =back
 
@@ -2349,25 +2345,9 @@ warnings.pm: sprintf is faster than concat
 
 =back
 
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
-
 =head1 Acknowledgements
 
-Perl 5.28.0 represents approximately 11 months of development since Perl
+Perl 5.28.0 represents approximately 12 months of development since Perl
 5.26.0 and contains approximately 730,000 lines of changes across 2,200
 files from 76 authors.
 
