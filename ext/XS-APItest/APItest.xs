@@ -6450,8 +6450,7 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize, bool eof = FALSE)
         *out = '\0';
         SvCUR_set(outsv, out - outstart);
         SvPOK_on(outsv);
-        PerlIO_printf(PerlIO_stderr(), "consumed %zi errors %x\n", start-ostart, errors);
-        EXTEND(SP, 2);
+        EXTEND(SP, 3);
         PUSHs(outsv); /* already mortal */
         PUSHs(sv_2mortal(newSViv(start - ostart)));
         PUSHs(sv_2mortal(newSVuv(errors)));

@@ -5185,6 +5185,8 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
     /* UTF8_CHECK_ONLY modifies retlen for utf8n_to_uvchr_msgs() */
     U32 utf8_flags = flags & ~(UTF8_ONERROR_MASK | UTF8_CHECK_ONLY | UTF8_ALLOW_SHORT);
 
+    PERL_ARGS_ASSERT_UTF8_VALIDATE_AND_FIX;
+
     /* Restrict flags to the ones is_utf8_string_*() handles */
     sub_flags = utf8_flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
                               |UTF8_DISALLOW_ABOVE_31_BIT);
@@ -5284,6 +5286,8 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
     SSize_t fit;
     U32 errors = 0;
 
+    DEBUG_i( PerlIO_debug("PerlIOUnicode_fill ->") );
+
     if (PerlIO_flush(f) != 0)
         return -1;
     if (PerlIOBase(f)->flags & PERLIO_F_TTY)
@@ -5349,6 +5353,7 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
 
     if (u->start == u->end) {
         if (avail < 0 || (read_bytes == 0 && PerlIO_eof(n))) {
+            DEBUG_i( PerlIO_debug(avail == 0 ? " => eof\n" : " => fail\n") );
             PerlIOBase(f)->flags |= (avail == 0) ? PERLIO_F_EOF : PERLIO_F_ERROR;
             return -1;
         }
@@ -5359,15 +5364,18 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
     PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
 
     if (errors) {
+        DEBUG_i( PerlIO_debug(" => error\n") );
         PerlIOBase(f)->flags |= PERLIO_F_ERROR;
     }
     
+    DEBUG_i( PerlIO_debug(" => %zu avail\n", b->end - b->ptr) );
     return 0;
 }
 
 SSize_t
 PerlIOUnicode_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR delim)
 {
+    DEBUG_i( PerlIO_debug("PerlIOUnicode_readdelim") );
     if (0 && PerlIO_fast_gets(PerlIONext(f)))
         return PerlIOBuf_readdelim(aTHX_ f, vbuf, count, delim);
     else {
@@ -5392,6 +5400,7 @@ PerlIOUnicode_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR de
             assert(b->buf);
 
             if (!PerlIOValid(n)) {
+                DEBUG_i( PerlIO_debug(" => fail\n") );
                 PerlIOBase(f)->flags |= PERLIO_F_EOF;
                 return -1;
             }
@@ -5424,20 +5433,23 @@ PerlIOUnicode_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR de
             found = (STDCHAR*)memchr(ptr, delim, wanted);
             if (found) {
                 Size_t len = found + 1 - ptr;
-                Copy(ptr, vbuf, len, char);
+                Copy(ptr, vbuf+read, len, char);
                 read += len;
                 PerlIO_set_ptrcnt(f, found + 1, avail - len);
                 seen = TRUE;
             }
             else {
-                Copy(ptr, vbuf, wanted, char);
+                Copy(ptr, vbuf+read, wanted, char);
                 read += wanted;
                 PerlIO_set_ptrcnt(f, ptr + wanted, avail - wanted);
             }
         }
-        if (read == 0 && PerlIOBase(f)->flags & PERLIO_F_ERROR)
+        if (read == 0 && PerlIOBase(f)->flags & PERLIO_F_ERROR) {
+            DEBUG_i( PerlIO_debug(" => fail error\n") );
             return -1;
+        }
         PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+        DEBUG_i( PerlIO_debug(" => %zd\n", read) );
         return read;
     }
 }

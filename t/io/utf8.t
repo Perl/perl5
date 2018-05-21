@@ -168,9 +168,10 @@ SKIP: {
     if ($::IS_EBCDIC) {
 	skip("EBCDIC The file isn't deformed in UTF-EBCDIC", 2);
     } else {
+        # testing readline's handling of bad UTF-8
 	open F, "<:utf8", $a_file or die $!;
 	eval { $x = <F>; chomp $x; };
-	like ($@, qr/^Can't decode ill-formed UTF-8 octet sequence <82>/);
+	like ($@, qr/^Malformed UTF-8 character: \\x82 \(unexpected continuation byte 0x82, with no preceding start byte\)/);
     }
 }
 
@@ -336,11 +337,11 @@ is($failed, undef);
     };
     my ($chrE4, $chrF6) = ("E4", "F6");
     if ($::IS_EBCDIC) { ($chrE4, $chrF6) = ("43", "EC"); } # EBCDIC
-    like( $@, qr/^Can't decode ill-formed UTF-8 octet sequence <E4>/,
+    like( $@, qr/^Malformed UTF-8 character: \\xe4\\x0a\\x66 \(unexpected non-continuation byte 0x0a, immediately after start byte 0xe4; need 3 bytes, got 1\)/,
       "<:utf8 readline must warn about bad utf8");
     undef $@;
     eval { $line .= <F> };
-    like( $@, qr/Can\'t decode ill-formed UTF-8 octet sequence <F6>/, 
+    like( $@, qr/^Malformed UTF-8 character: \\xe4\\x0a\\x66 \(unexpected non-continuation byte 0x0a, immediately after start byte 0xe4; need 3 bytes, got 1\)/, 
       "<:utf8 rcatline must warn about bad utf8");
     close F;
 }
@@ -379,7 +380,7 @@ is($failed, undef);
     local $SIG{__WARN__} = sub { $@ = shift };
 	$line = eval { <F> };
 
-    like( $@, qr/Can\'t decode ill-formed UTF-8 octet sequence <EF AC> at end of file/);
+    like( $@, qr/Malformed UTF-8 character: \\xef\\xac \(too short; 2 bytes available, need 3\)/);
     close F;
 }
 
