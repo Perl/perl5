@@ -25,39 +25,7 @@ L<C<delete>|perlfunc/delete EXPR> can now be used on key/value slices,
 returning the keys along with the deleted values.
 L<[perl #131328]|https://rt.perl.org/Ticket/Display.html?id=131328>
 
-=head2 Mixed Unicode scripts are now detectable
-
-A mixture of scripts, such as Cyrillic and Latin, in a string is often
-the sign of a spoofing attack.  A new regular expression construct
-now allows for easy detection of these.  For example, you can say
-
- qr/(*script_run: \d+ \b )/x
-
-Or:
-
- qr/(*sr:..)/
-
-And the digits matched will all be from the same set of 10.  You won't
-get a look-alike digit from a different script that has a different
-value than what it appears to be.
-
-You can also combine script runs with C<(?E<gt>...)> (or
-C<*atomic:...)>).
-
-Instead of writing:
-
-    (*sr:(?<...))
-
-you can now run:
-
-    (*asr:...)
-    # or
-    (*atomic_script_run:...)
-
-See L<perlre/Script Runs>.
-
-=head2 Experimentally, there are now alphabetic synonyms for some
-regular expression assertions
+=head2 Experimentally, there are now alphabetic synonyms for some regular expression assertions
 
 If you find it difficult to remember how to write certain of the pattern
 assertions, there are now alphabetic synonyms.
@@ -73,6 +41,42 @@ assertions, there are now alphabetic synonyms.
 These are considered experimental, so using any of these will raise
 (unless turned off) a warning in the C<experimental::alpha_assertions>
 category.
+
+=head2 Mixed Unicode scripts are now detectable
+
+A mixture of scripts, such as Cyrillic and Latin, in a string is often
+the sign of a spoofing attack.  A new regular expression construct
+now allows for easy detection of these.  For example, you can say
+
+ qr/(*script_run: \d+ \b )/x
+
+And the digits matched will all be from the same set of 10.  You won't
+get a look-alike digit from a different script that has a different
+value than what it appears to be.
+
+Or:
+
+ qr/(*sr: \b \w+ \b )/x
+
+makes sure that all the characters come from the same script.
+
+You can also combine script runs with C<(?E<gt>...)> (or
+C<*atomic:...)>).
+
+Instead of writing:
+
+    (*sr:(?<...))
+
+you can now run:
+
+    (*asr:...)
+    # or
+    (*atomic_script_run:...)
+
+This is considered experimental, so using it will raise (unless turned
+off) a warning in the C<experimental::script_run> category.
+
+See L<perlre/Script Runs>.
 
 =head2 In-place editing is now safer
 
@@ -126,8 +130,7 @@ work as well as they did before, which is to say they fall back to
 floating point, and ultimately operate on a fairly useless rounded inode
 number if the real inode number is too big for the floating point format.
 
-=head2 The C<sprintf> C<%j> format size modifier is now available with
-pre-C99 compilers
+=head2 The C<sprintf> C<%j> format size modifier is now available with pre-C99 compilers
 
 The actual size used depends on the platform, so remains unportable.
 
@@ -175,15 +178,6 @@ may need to be changed to this:
 
     SV *
     bitop_handler (lobj, robj, swap, ...)
-
-=head2 New read-only predefined variable C<${^SAFE_LOCALES}>
-
-This variable is 1 if the Perl interpreter is operating in an
-environment where it is safe to use and change locales (see
-L<perllocale>.)  This variable is true when the perl is
-unthreaded, or compiled in a platform that supports thread-safe locale
-operation (see next item).
-
 =head2 Locales are now thread-safe on systems that support them
 
 These systems include Windows starting with Visual Studio 2005, and in
@@ -192,6 +186,14 @@ POSIX 2008 systems.
 The implication is that you are now free to use locales and changes them
 in a threaded environment.  Your changes affect only your thread.
 See L<perllocale/Multi-threaded operation>
+
+=head2 New read-only predefined variable C<${^SAFE_LOCALES}>
+
+This variable is 1 if the Perl interpreter is operating in an
+environment where it is safe to use and change locales (see
+L<perllocale>.)  This variable is true when the perl is
+unthreaded, or compiled in a platform that supports thread-safe locale
+operation (see previous item).
 
 =head1 Security
 
@@ -301,8 +303,7 @@ Use C<B::Concise::b_terse> instead.
 
 This was deprecated in Perl 5.004.
 
-=head2 Use of strings with code points over 0xFF is not allowed for
-bitwise string operators
+=head2 Use of strings with code points over 0xFF is not allowed for bitwise string operators
 
 Code points over C<0xFF> do not make sense for bitwise operators.
 
@@ -386,12 +387,11 @@ accommodate datasets of more than two billion items.
 
 =head1 Deprecations
 
-=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code
-points above 0xFF is deprecated.
+=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code points above 0xFF is deprecated.
 
-Use of these is nonsensical, as C<vec> is a bit-oriented operation,
-which operates on the underlying UTF-8 representation these strings must
-be in, and will likely give unexpected results.
+Such strings are represented internally in UTF-8, and C<vec> is a
+bit-oriented operation that will likely give unexpected results on those
+strings.
 
 =head2 Some uses of unescaped C<"{"> are no longer fatal
 
@@ -407,8 +407,7 @@ where the C<"{"> will not be repurposed.
 
 Note that these uses continue to raise a deprecation message.
 
-=head2 Use of unescaped C<"{"> immediately after a C<"("> in regular
-expression patterns
+=head2 Use of unescaped C<"{"> immediately after a C<"("> in regular expression patterns
 
 Using unescaped left braces is officially deprecated everywhere, but it
 is not enforced in contexts where their use does not interfere with
@@ -850,7 +849,6 @@ L<Hash::Util::FieldHash> has been upgraded from version 1.19 to 1.20.
 L<I18N::Langinfo> has been upgraded from version 0.13 to 0.17.
 
 This module is now available on all platforms, emulating the system
-
 L<nl_langinfo(3)> on systems that lack it.  Some caveats apply, as
 L<detailed in its documentation|I18N::Langinfo>, the most severe being
 that, except for MS Windows, the C<CODESET> item is not implemented on
@@ -1878,7 +1876,7 @@ near the beginning of an C<XS> file, it will be compiled so that
 whatever reentrant functions perl knows about on that system will
 automatically and invisibly be used instead of the plain, non-reentrant
 versions.  For example, if you write C<getpwnam()> in your code, on a
-system that has C<pwnam_r()> all calls to the former will be translated
+system that has C<getpwnam_r()> all calls to the former will be translated
 invisibly into the latter.  This does not happen except on threaded
 perls, as they aren't needed otherwise.  Be aware that which functions
 have reentrant versions varies from system to system.
