@@ -2025,7 +2025,7 @@ L<[perl #131836]|https://rt.perl.org/Public/Bug/Display.html?id=131836>
 =item *
 
 The tokenizer now correctly adjusts a parse pointer when skipping
-whitespace in a C< ${identifier} > construct.
+whitespace in a C<< ${identifier} >> construct.
 L<[perl #131949]|https://rt.perl.org/Public/Bug/Display.html?id=131949>
 
 =item *
@@ -2049,7 +2049,7 @@ L<[perl #131892]|https://rt.perl.org/Public/Bug/Display.html?id=131892>
 
 Only the C<=> operator is permitted for defining defaults for
 parameters in subroutine signatures.  Previously other assignment
-operators, e.g. C<+=>, were also permitted.
+operators, e.g. C<+=>, were also accidentally permitted.
 L<[perl #131777]|https://rt.perl.org/Public/Bug/Display.html?id=131777>
 
 =item *
@@ -2260,11 +2260,6 @@ crashes because of the early freeing of the subroutine.
 The C<printf> format specifier C<%.0f> no longer rounds incorrectly
 [perl #47602], and now shows the correct sign for a negative zero.
 
-=item *
-
-Don't stringify numeric first arguments to
-C<< system() >> on Windows or VMS. [perl #132633]
-
 =item * 
 
 Fixed an issue where the error C<< Scalar value @arrayname[0] better
@@ -2276,11 +2271,6 @@ when arrayname starts with C<< Inf >>. [perl #132645]
 The Perl implementation of C<< getcwd() >> in C<< Cwd >> in the PathTools
 distribution now behaves the same as XS implementation on errors: it
 returns an error, and sets C<< $! >>. [perl #132648]
-
-=item *
-
-Fixed argument counting in multiconcat when concatenating adjacent constants.
-[perl #132646]
 
 =item *
 
@@ -2323,19 +2313,11 @@ doesn't come up on those with thread-safe locales.
 
 =item *
 
-Prevent duplicate Config.pm vars [perl #132834]
-
-=item *
-
 Regex assertion failure [perl #132163]
 
 =item *
 
 fix line numbers in multi-line s///
-
-=item *
-
-add an empty file (to be removed next commit)
 
 =item *
 
