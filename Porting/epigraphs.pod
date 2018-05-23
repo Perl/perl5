@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.28.0-RC1 - Anu Garg, A Word A Day
 
-Announced on 2018-05-21 by Sawyer X
+L<Announced on 2018-05-21 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2018/05/msg250999.html>
 
   One doesn't have to know the unit of pain (dol) to realize that the
   unit of joy is not the dollar, or any other currency for that matter.
