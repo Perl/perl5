@@ -78,10 +78,10 @@ off) a warning in the C<experimental::script_run> category.
 
 See L<perlre/Script Runs>.
 
-=head2 In-place editing is now safer
+=head2 In-place editing with C<perl -i> is now safer
 
-Previously in-place editing would delete or rename the input file
-as soon as you started working on a new file.
+Previously in-place editing (C<perl -i>) would delete or rename the
+input file as soon as you started working on a new file.
 
 Without backups this would result in loss of data if there was an
 error, such as a full disk, when writing to the output file.
