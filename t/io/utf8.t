@@ -10,8 +10,6 @@ skip_all_without_perlio();
 no utf8; # needed for use utf8 not griping about the raw octets
 
 
-plan(tests => 62);
-
 $| = 1;
 
 my $a_file = tempfile();
@@ -394,4 +392,173 @@ SKIP: {
 	is getc $$_[0], $$_[1],
 	  'getc returning non-utf8 after utf8';
     }
+}
+
+{
+    # similar to the tests done by utf8_buf.t for XS::APItest, but tests
+    # the perlio bits too
+    # name - base name of the test
+    # data - raw file data (bytes)
+    # expect - expected result when read from file with :utf8(options)
+    # options - the :utf8(options)
+    # messages - qr// or arrayref of qr//s to match each message emitted
+    my @tests =
+      (
+       {
+        name => "small ascii",
+        data => "abc",
+       },
+       {
+        name => "small unicode",
+        data => _c("abc\x{100}\n"),
+       },
+       {
+        name => "multiple buffer unicode",
+        data => _c("abc\x{101}\n" x 100),
+       },
+       # split a character across buffer boundaries
+       (
+        map
+        +{
+          name => "buffer split character $_",
+          data => _c("a" x $_ . "\x{10FFE0}" . "a" x (20000 - $_)),
+         }, 8180 .. 8230
+       ),
+       {
+        name => "strict, error=fail, surrogate",
+        data => _c("abc\x{D800}def"),
+        options => "error=fail,strict",
+        expect => "abc",
+       },
+       {
+        name => "strict, error=warn, surrogate",
+        data => _c("abc\x{D800}def"),
+        options => "error=warn,strict",
+        expect => "abc\x{FFFD}def",
+        messages => qr/surrogate/,
+       },
+       # split surrogate across buffer boundary
+       (
+        map
+        +{
+          name => "strict, error=warn, split surrogate $_",
+          data => _c("a" x $_ . "\x{D800}def"),
+          options => "error=warn,strict",
+          expect => "a" x $_ . "\x{FFFD}def",
+          messages => qr/surrogate/,
+         }, 8180 .. 8230
+       ),
+       {
+        name => "strict, allow_surrogates",
+        data => _c("abc\x{D800}def"),
+        options => "error=quiet,strict,allow_surrogates",
+       },
+      );
+
+    for my $test (@tests) {
+        my ($name, $data, $expect, $options, $messages) =
+          @$test{qw/name data expect options messages/};
+
+        $messages = [] unless defined $messages;
+        $messages = [ $messages ] if ref $messages ne "ARRAY";
+        utf8::decode($expect = $data) unless defined $expect;
+        $options = '' unless defined $options;
+        utf8::downgrade($data); # must be octets
+        open my $f, ">", $a_file
+          or die "Cannot create $a_file: $!";
+        binmode $f;
+        print $f $data;
+        close $f;
+
+        if (ok(open(my $fi, "<:utf8($options)", $a_file), "$name: open for read()")) {
+            my @warn;
+            local $SIG{__WARN__} = sub { push @warn, "@_" };
+            my $buf;
+            ok(read($fi, $buf, length $data), "$name: read with read()");
+            is($buf, $expect, "$name: match with read()");
+            like_array(\@warn, $messages, "$name: warnings with read()");
+
+            close $fi;
+        }
+        if (ok(open(my $fi, "<:utf8($options)", $a_file), "$name: open for readline")) {
+            my @warn;
+            local $SIG{__WARN__} = sub { push @warn, "@_" };
+            my $buf = '';
+            while (my $line = <$fi>) {
+                $buf .= $line;
+            }
+            is($buf, $expect, "$name: match with readline");
+            like_array(\@warn, $messages, "$name: warnings with readline");
+
+            close $fi;
+        }
+    }
+}
+
+# TODO: test croaking
+
+{
+    my $data = "a" x 8190 . "\x{7FFFFFFF}";
+    utf8::encode($data);
+    open my $fh, ">", $a_file
+      or die;
+    binmode $fh;
+    print $fh $data;
+    close $fh or die;
+    open $fh, "<:utf8(loose)", $a_file
+      or die;
+    my $buf;
+    read($fh, $buf, 8190);
+    is(tell($fh), 8190, "check tell is properly adjusted");
+}
+
+done_testing();
+
+END {
+    unlink($a_file);
+}
+
+sub like_array {
+    my ($result, $expect, $name) = @_;
+
+    my @notes;
+    for (my $i = 0; $i < @$result && $i < @$expect; ++$i) {
+        unless ($result->[$i] =~ $expect->[$i]) {
+            push @notes, "  $i: mismatch";
+            push @notes, "  expect: /$expect->[$i]/";
+            push @notes, '     got: "'._clean($result->[$i]) . '"';
+        }
+    }
+    if (@$result < @$expect) {
+        for my $i (@$result .. $#$expect) {
+            push @notes, "  $i: not enough messages";
+            push @notes, "  expect: /$expect->[$i]/";
+        }
+    }
+    elsif (@$expect < @$result) {
+        for my $i (@$expect .. $#$result) {
+            push @notes, "  $i: too many messages";
+            push @notes, '  got unexpected: "' . _clean($result->[$i]) . '"';
+        }
+    }
+    local $Level = $Level + 1;
+    ok(!@notes, $name);
+    diag $_ for @notes;
+    use Data::Dumper;
+    print STDERR Dumper($result) if @notes;
+
+    return !@notes;
+}
+
+sub _clean {
+    my $text = shift;
+
+    $text =~ s/([^[:print:]]|[\\"])/ $1 eq "\\" ? "\\\\" : sprintf("\\x{%x}", ord $1) /ger;
+}
+
+sub _c {
+    my ($s, $c) = @_;
+    utf8::encode($s);
+    substr($s, $c) = "" if $c;
+    $s
 }
