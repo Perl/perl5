@@ -41,7 +41,7 @@ following compilers on the Intel x86 architecture:
 
       Microsoft Visual C++    version 6.0 or later
       Intel C++ Compiler      (experimental)
-      Gcc by mingw.org        gcc version 3.4.5 or later
+      Gcc by mingw.org        gcc version 3.4.5 or later with runtime < 3.21
       Gcc by mingw-w64.org    gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
@@ -312,14 +312,21 @@ The nmake that comes with the Platform SDK will suffice for building
 Perl.  Make sure you are building within one of the "Build Environment"
 shells available after you install the Platform SDK from the Start Menu.
 
-=item MinGW release 3 with gcc
+=item GCC
 
-Perl can be compiled with gcc from MinGW release 3 and later (using gcc 3.4.5
-and later).  It can be downloaded here:
+Perl can be compiled with gcc from MinGW (version 3.4.5 or later) or from
+MinGW64 (version 4.4.3 or later).  It can be downloaded here:
 
 L<http://www.mingw.org/>
+L<http://www.mingw-w64.org/>
 
 You also need dmake.  See L</"Make"> above on how to get it.
+
+Note that the MinGW build currently requires a MinGW runtime version earlier
+than 3.21 (check __MINGW32_MAJOR_VERSION and __MINGW32_MINOR_VERSION).
+
+Note also that the C++ mode build currently fails with MinGW 3.4.5 and 4.7.2
+or later, and with MinGW64 64-bit 6.3.0 or later.
 
 =item Intel C++ Compiler
 
@@ -951,6 +958,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 16 June 2017
+Last updated: 23 May 2018
 
 =cut
