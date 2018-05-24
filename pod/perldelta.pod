@@ -773,7 +773,8 @@ L<fields> has been upgraded from version 2.23 to 2.24.
 
 L<File::Copy> has been upgraded from version 2.32 to 2.33.
 
-It will now use L<Time::HiRes> utime where available (perl #132401).
+It will now use L<Time::HiRes> utime where available
+L<[perl #132401|https://rt.perl.org/Ticket/Display.html?id=132401>.
 
 =item *
 
@@ -1936,15 +1937,15 @@ L<[perl #132729]|https://rt.perl.org/Ticket/Display.html?id=132729>
 =item *
 
 List assignment (C<aassign>) could in some rare cases allocate an
-entry on the mortal stack and leave the entry uninitialized. [perl
-#131570]
+entry on the mortal stack and leave the entry uninitialized.
+L<[perl #131570]|https://rt.perl.org/Ticket/Display.html?id=131570>
 
 =item *
 
 Attempting to apply an attribute to an C<our> variable where a
 function of that name already exists could result in a NULL pointer
-being supplied where an SV was expected, crashing perl.  [perl
-#131597]
+being supplied where an SV was expected, crashing perl.
+L<[perl #131597]|https://rt.perl.org/Ticket/Display.html?id=131597>
 
 =item *
 
@@ -2009,8 +2010,8 @@ C<$@>. For example:
 =item *
 
 Fixed a duplicate symbol failure with C<-flto -mieee-fp> builds.
-F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines. [perl
-#131786]
+F<pp.c> defined C<_LIB_VERSION> which C<-lieee> already defines.
+L<[perl #131786]|https://rt.perl.org/Ticket/Display.html?id=131786>
 
 =item *
 
@@ -2024,8 +2025,8 @@ On non-threaded builds, for C<m/$null/> where C<$null> is an empty
 string is no longer treated as if the C</o> flag was present when the
 previous matching match operator included the C</o> flag.  The
 rewriting used to implement this behavior could confuse the
-interpreter.  This matches the behaviour of threaded builds.  [perl
-#124368]
+interpreter.  This matches the behaviour of threaded builds.
+L<[perl #124368]|https://rt.perl.org/Ticket/Display.html?id=124368>
 
 =item *
 
