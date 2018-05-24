@@ -510,6 +510,10 @@ SKIP: {
     my $buf;
     read($fh, $buf, 8190);
     is(tell($fh), 8190, "check tell is properly adjusted");
+    ok(seek($fh, 8190, 0), "seek with buffered data");
+    $buf = '';
+    is(read($fh, $buf, 1), 1, "read a single character");
+    is($buf, "\x{7FFFFFFF}", "check we got the expected");
 }
 
 done_testing();
