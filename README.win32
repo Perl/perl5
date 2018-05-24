@@ -41,7 +41,8 @@ following compilers on the Intel x86 architecture:
 
       Microsoft Visual C++    version 6.0 or later
       Intel C++ Compiler      (experimental)
-      Gcc by mingw.org        gcc version 3.4.5 or later with runtime < 3.21
+      Gcc by mingw.org        gcc version 3.4.5 or later
+                              with runtime < 3.21
       Gcc by mingw-w64.org    gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
