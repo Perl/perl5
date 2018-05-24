@@ -75,7 +75,13 @@ is(length $root->[1], 0);
     is($x, undef, 'and undef result');
 }
 
+SKIP:
 {
+    # this can allocate a lot of memory, only do that if the testers tells us we can
+    # the test allocates 2GB, but other memory is allocated too, so we want
+    # at least 3
+    $ENV{PERL_TEST_MEMORY} && $ENV{PERL_TEST_MEMORY} >= 3
+      or skip "over 2GB memory needed for this test", 2;
     # len<I32, len>127: stack overflow
     my $retrieve_hook = "\x04\x0a\x08\x31\x32\x33\x34\x35\x36\x37\x38\x04\x08\x08\x08\x13\x04\x49\xfe\xf4\x7f\x72\x6e\x61\x6c\x73\x02\x00\x00\x00\x00";
     my $x = eval { Storable::mretrieve($retrieve_hook); };
