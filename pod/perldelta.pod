@@ -150,7 +150,8 @@ flag set, but some were being missed.
 =head2 String- and number-specific bitwise ops are no longer experimental
 
 The new string-specific (C<&. |. ^. ~.>) and number-specific (C<& | ^ ~>)
-bitwise operators introduced in Perl 5.22 are no longer experimental.
+bitwise operators introduced in Perl 5.22 that are available within the
+scope of C<use feature 'bitwise'> are no longer experimental.
 Because the number-specific ops are spelled the same way as the existing
 operators that choose their behaviour based on their operands, these
 operators must still be enabled via the "bitwise" feature, in either of
@@ -178,12 +179,13 @@ may need to be changed to this:
 
     SV *
     bitop_handler (lobj, robj, swap, ...)
+
 =head2 Locales are now thread-safe on systems that support them
 
 These systems include Windows starting with Visual Studio 2005, and in
 POSIX 2008 systems.
 
-The implication is that you are now free to use locales and changes them
+The implication is that you are now free to use locales and change them
 in a threaded environment.  Your changes affect only your thread.
 See L<perllocale/Multi-threaded operation>
 
@@ -295,7 +297,7 @@ since Perl 5.20.
 
 This was deprecated since Perl 5.24.
 
-=head2 C<B::OP::terse> no longer exists.
+=head2 The C<B::OP::terse> method has been removed.
 
 Use C<B::Concise::b_terse> instead.
 
@@ -305,9 +307,11 @@ This was deprecated in Perl 5.004.
 
 =head2 Use of strings with code points over 0xFF is not allowed for bitwise string operators
 
-Code points over C<0xFF> do not make sense for bitwise operators.
+Code points over C<0xFF> do not make sense for bitwise operators and such
+an operation will now croak, except for a few remaining cases. See
+L<perldeprecation>.
 
-See L<perldeprecation>.
+This was deprecated in Perl 5.24.
 
 =head2 Setting C<${^ENCODING}> to a defined value is now illegal
 
@@ -375,11 +379,11 @@ Such strings are represented internally in UTF-8, and C<vec> is a
 bit-oriented operation that will likely give unexpected results on those
 strings.
 
-=head2 Some uses of unescaped C<"{"> are no longer fatal
+=head2 Some uses of unescaped C<"{"> in regexes are no longer fatal
 
 Perl 5.26.0 fatalized some uses of an unescaped left brace, but an
 exception was made at the last minute, specifically crafted to be a
-minimal change to allow GNU Autoconf to work.  This code is heavily
+minimal change to allow GNU Autoconf to work.  That tool is heavily
 depended upon, and continues to use the deprecated usage.  Its use of an
 unescaped left brace is one where we have no intention of repurposing
 C<"{"> to be something other than itself.
@@ -490,7 +494,10 @@ C<keys()> in void and scalar contexts is now more efficient.
 
 =item *
 
-C<< if (index(...) != -1) { ... } >> is now more efficient.
+The common idiom of comparing the result of index() with -1 is now
+specifically optimised,  e.g.
+
+    if (index(...) != -1) { ... }
 
 =item *
 
@@ -504,7 +511,7 @@ for more details.
 
 =item *
 
-C<SvTRUE()> is now more efficient.
+The XS-level C<SvTRUE()> API function is now more efficient.
 
 =item *
 
@@ -545,19 +552,20 @@ Key highlights in this release across several modules:
 
 =head2 Removal of use vars
 
-The usage of C<use vars> has been discouraged since the introduction of C<our> in
-Perl 5.6.0. Where possible the usage of this pragma has now been removed from
-the Perl source code.
+The usage of C<use vars> has been discouraged since the introduction of
+C<our> in Perl 5.6.0. Where possible the usage of this pragma has now been
+removed from the Perl source code.
 
 This had a slight effect (for the better) on the output of WARNING_BITS in
 L<B::Deparse>.
 
 =head2 Use of DynaLoader changed to XSLoader in many modules
 
-XSLoader is more modern, and most modules already require perl 5.6 or greater, so
-no functionality is lost by switching. In some cases, we have also made changes to
-the local implementation that may not be reflected in the version on CPAN due
-to a desire to maintain more backwards compatibility.
+XSLoader is more modern, and most modules already require perl 5.6 or
+greater, so no functionality is lost by switching. In some cases, we have
+also made changes to the local implementation that may not be reflected in
+the version on CPAN due to a desire to maintain more backwards
+compatibility.
 
 =head2 Updated Modules and Pragmata
 
@@ -591,7 +599,8 @@ L<B::Concise> has been upgraded from version 0.999 to 1.003.
 
 L<B::Debug> has been upgraded from version 1.24 to 1.26.
 
-NOTE: L<B::Debug> is deprecated and may be removed from a future version of Perl.
+NOTE: L<B::Debug> is deprecated and may be removed from a future version
+of Perl.
 
 =item *
 
@@ -773,7 +782,8 @@ L<fields> has been upgraded from version 2.23 to 2.24.
 
 L<File::Copy> has been upgraded from version 2.32 to 2.33.
 
-It will now use L<Time::HiRes> utime where available
+It will now use the sub-second precision variant of utime() supplied by
+L<Time::HiRes> where available.
 L<[perl #132401|https://rt.perl.org/Ticket/Display.html?id=132401>.
 
 =item *
@@ -872,7 +882,7 @@ L<JSON::PP> has been upgraded from version 2.27400_02 to 2.97001.
 
 =item *
 
-libnet has been upgraded from version 3.10 to 3.11.
+The C<libnet> distribution has been upgraded from version 3.10 to 3.11.
 
 =item *
 
@@ -960,7 +970,7 @@ L<Pod::Perldoc> has been upgraded from version 3.28 to 3.2801.
 
 =item *
 
-podlators has been upgraded from version 4.09 to 4.10.
+The C<podlators> distribution has been upgraded from version 4.09 to 4.10.
 
 Man page references and function names now follow the Linux man page
 formatting standards, instead of the Solaris standard.
@@ -1304,20 +1314,17 @@ The documentation of C<die> and C<warn> has been revised for clarity.
 
 =item *
 
-Improve the documentation of C<each> with a slightly more
+The documentation of C<each> has been improved, with a slightly more
 explicit description of the sharing of iterator state, and with
 caveats regarding the fragility of while-each loops.
 L<[perl #132644]|https://rt.perl.org/Ticket/Display.html?id=132644>
 
 =item *
 
-Clarification to require was added to show that
+Clarification to C<require> was added to explain the differences between
 
-        require "Foo/Bar.pm";
-
-is equivalent to:
-
-        eval "require Foo::Bar";
+    require Foo::Bar;
+    require "Foo/Bar.pm";
 
 =back
 
@@ -1381,8 +1388,8 @@ L<[perl #132460]|https://rt.perl.org/Ticket/Display.html?id=132460>
 
 =item *
 
-L<perlop> has been updated to note that C<qw>'s whitespace rules differ from that of
-C<split>'s in that only ASCII whitespace is used.
+L<perlop> has been updated to note that C<qw>'s whitespace rules differ
+from that of C<split>'s in that only ASCII whitespace is used.
 
 =item *
 
@@ -1424,7 +1431,7 @@ Clarify metacharacters.
 
 =item *
 
-Clarify the documentation of B<< -m >>.
+Clarify the differences between B<< -M >> and B<< -m >>.
 L<[perl #131518]|https://rt.perl.org/Ticket/Display.html?id=131518>
 
 =back
@@ -1499,7 +1506,9 @@ multiply-named capturing groups.
 
 =item *
 
-Improve the documentation of while condition magic in various places.
+In various places, improve the documentation of the special cases
+in the condition expression of a while loop, such as implicit C<defined>
+and assignment to C<$_>.
 L<[perl #132644]|https://rt.perl.org/Ticket/Display.html?id=132644>
 
 =back
@@ -1633,7 +1642,7 @@ disallowing arithmetic on void and function pointers.
 
 =item *
 
-Where an HTML version of the doucmentation is installed, the HTML
+Where an HTML version of the documentation is installed, the HTML
 documents now use relative links to refer to each other.  Links from
 the index page of L<perlipc> to the individual section documents are
 now correct.
@@ -1702,7 +1711,7 @@ L<[perl #123981]|https://rt.perl.org/Ticket/Display.html?id=123981>
 
 =item *
 
-Allow override of watchdog timer count in F<re/pat_psycho.t>.
+The watchdog timer count in F<re/pat_psycho.t> can now be overridden.
 
 This test can take a long time to run, so there is a timer to keep
 this in check (currently, 5 minutes). This commit adds checking
@@ -1721,8 +1730,8 @@ L<[perl #132867]|https://rt.perl.org/Ticket/Display.html?id=132867>
 
 For the past few years we have released perl using three different archive
 formats: bzip (C<.bz2>), LZMA2 (C<.xz>) and gzip (C<.gz>). Since xz compresses
-better and decompresses faster, and gzip is more compatible and uses less memory,
-we have dropped the C<.bz2> archive format with this release.
+better and decompresses faster, and gzip is more compatible and uses less
+memory, we have dropped the C<.bz2> archive format with this release.
 (If this poses a problem, do let us know; see L</Reporting Bugs>, below.)
 
 =head1 Platform Support
@@ -1733,7 +1742,8 @@ we have dropped the C<.bz2> archive format with this release.
 
 =item PowerUX / Power MAX OS
 
-Compiler hints and other support for these apparently long-defunct platforms has been removed.
+Compiler hints and other support for these apparently long-defunct
+platforms has been removed.
 
 =back
 
@@ -1757,7 +1767,7 @@ versions of Darwin that have support for them.
 =item FreeBSD
 
 FreeBSD's F<< /usr/share/mk/sys.mk >> specifies C<< -O2 >> for
-architectures other than arm and mips. By default, compile perl
+architectures other than ARM and MIPS. By default, perl is now compiled
 with the same optimization levels.
 
 =item VMS
@@ -1765,9 +1775,10 @@ with the same optimization levels.
 Several fix-ups for F<configure.com>, marking function VMS has
 (or doesn't have).
 
-CRTL features can now be set by embedders before invoking Perl by using the
-C<decc$feature_set> and C<decc$feature_set_value> functions.  Previously any attempt
-to set features after image initialization were ignored.
+CRTL features can now be set by embedders before invoking Perl by using
+the C<decc$feature_set> and C<decc$feature_set_value> functions.
+Previously any attempt to set features after image initialization were
+ignored.
 
 =item Windows
 
@@ -1874,9 +1885,9 @@ stable by default.
 XS modules can now automatically get reentrant versions of system
 functions on threaded perls.
 
-By saying
+By adding
 
- #define PERL_REENTRANT
+    #define PERL_REENTRANT
 
 near the beginning of an C<XS> file, it will be compiled so that
 whatever reentrant functions perl knows about on that system will
@@ -1894,8 +1905,8 @@ that perl is now always built with C<PERL_OP_PARENT> enabled.
 
 =item *
 
-The format of the non-utf8 transliteration table attached to the C<op_pv>
-field of C<OP_TRANS>/C<OP_TRANSR> ops has changed. It's now a
+The format and content of the non-utf8 transliteration table attached to
+the C<op_pv> field of C<OP_TRANS>/C<OP_TRANSR> ops has changed. It's now a
 C<struct OPtrans_map>.
 
 =item *
@@ -1917,7 +1928,7 @@ whether the system was using the global locale or not.
 =item *
 
 A new kind of magic scalar, called a "nonelem" scalar, has been introduced.
-It is stored in an array to denote a nonexistent element, whenever such an
+It is stored in an array to denote a non-existent element, whenever such an
 element is accessed in a potential lvalue context.  It replaces the
 existing "defelem" (deferred element) magic wherever this is possible,
 being significantly more efficient.  This means that
@@ -1937,7 +1948,8 @@ L<[perl #132729]|https://rt.perl.org/Ticket/Display.html?id=132729>
 =item *
 
 List assignment (C<aassign>) could in some rare cases allocate an
-entry on the mortal stack and leave the entry uninitialized.
+entry on the mortals stack and leave the entry uninitialized, leading to
+possible crashes.
 L<[perl #131570]|https://rt.perl.org/Ticket/Display.html?id=131570>
 
 =item *
@@ -2048,7 +2060,7 @@ L<[perl #128263]|https://rt.perl.org/Public/Bug/Display.html?id=128263>
 
 =item *
 
-The C<Copy()>, C<Move()>, C<Zero()> macros and their variants now
+The XS-level C<Copy()>, C<Move()>, C<Zero()> macros and their variants now
 assert if the pointers supplied are C<NULL>.  ISO C considers
 supplying NULL pointers to the functions these macros are built upon
 as undefined behaviour even when their count parameters are zero.
@@ -2068,12 +2080,6 @@ L<[perl #131777]|https://rt.perl.org/Public/Bug/Display.html?id=131777>
 
 Package names are now always included in C<:prototype> warnings
 L<[perl #131833]|https://rt.perl.org/Public/Bug/Display.html?id=131833>
-
-=item *
-
-Creating a thread with no parameters no longer tries to C<Copy()> a
-null pointer. This fixes an assertion failure and allows threaded
-builds to work again.
 
 =item *
 
@@ -2144,20 +2150,14 @@ and yield the appropriate errors if the argument doesn't refer to a file.
 
 =item *
 
-The in-place reverse optimisation now correctly strengthens weak
-references using the L<C<sv_rvunweaken()>|perlapi/sv_rvunweaken>
-API function.
-
-=item *
-
-Fixed a read before buffer when parsing a range starting with C<\N{}>
-at the beginning of the character set for the transliteration
+Fixed a 'read before buffer' overrun when parsing a range starting with
+C<\N{}> at the beginning of the character set for the transliteration
 operator.
 L<[perl #132245]|https://rt.perl.org/Ticket/Display.html?id=132245>
 
 =item *
 
-Fixed a leaked SV when parsing an empty C<\N{}> at compile-time.
+Fixed a leaked scalar when parsing an empty C<\N{}> at compile-time.
 L<[perl #132245]|https://rt.perl.org/Ticket/Display.html?id=132245>
 
 =item *
@@ -2193,9 +2193,10 @@ significand doesn't fit into an integer type.
 
 =item *
 
-The canonical truth value no longer has a spurious special meaning as
-a callable.  It used to be a magic placeholder for a missing C<import>
-or C<unimport> method.  It is now treated like any other string C<1>.
+The canonical truth value no longer has a spurious special meaning as a
+callable subroutine.  It used to be a magic placeholder for a missing
+C<import> or C<unimport> method, but is now treated like any other string
+C<1>.
 L<[perl #126042]|https://rt.perl.org/Ticket/Display.html?id=126042>
 
 =item *
@@ -2324,8 +2325,8 @@ C<\x{100}-\x{7fffffff}> to the search character list.
 
 =item *
 
-Failures while compiling code within other constructs, such as with
-string interpolation and the right part of C<s///e> now cause
+Compilation failures within "perl-within-perl" constructs, such as with
+string interpolation and the right part of C<s///e>, now cause
 compilation to abort earlier.
 
 Previously compilation could continue in order to report other errors,
@@ -2338,22 +2339,15 @@ L<[perl #125351]|https://rt.perl.org/Ticket/Display.html?id=125351>
 
 On threaded perls where the decimal point (radix) character is not a
 dot, it has been possible for a race to occur between threads when one
-needs to use the real radix character.  This has now been fixed by use
-of a mutex on systems without thread-safe locales, and the problem just
-doesn't come up on those with thread-safe locales.
+needs to use the real radix character (such as with C<sprintf>).  This has
+now been fixed by use of a mutex on systems without thread-safe locales,
+and the problem just doesn't come up on those with thread-safe locales.
 
 =item *
 
-Regex assertion failure
+Errors while compiling a regex character class could sometime trigger an
+assertion failure.
 L<[perl #132163]|https://rt.perl.org/Ticket/Display.html?id=132163>
-
-=item *
-
-fix line numbers in multi-line s///
-
-=item *
-
-warnings.pm: sprintf is faster than concat
 
 =back
 
