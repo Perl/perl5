@@ -545,7 +545,7 @@ If necessary update the list and the indicated version number.
 
 =head3 check a readonly build
 
-Even before other prep work, follow the steps in L<build the tarball> and test
+Even before other prep work, follow the steps in L</build the tarball> and test
 it locally.  Because a perl source tarballs sets many files read-only, it could
 test differently than tests run from the repository.  After you're sure
 permissions aren't a problem, delete the generated directory and tarballs.
@@ -689,7 +689,7 @@ action from the last commit.)
 Add a perldelta entry for the new Module::CoreList version. You only
 need to do this if you want to add notes about the changes included
 with this version of Module::CoreList. Otherwise, its version bump
-will be automatically filled in below in L<finalize perldelta>.
+will be automatically filled in below in L</finalize perldelta>.
 
 =for checklist skip RC
 
