@@ -300,7 +300,7 @@ with
 	perl ../../blah/foo.cmd arg1 arg2 arg3
 
 (note that the argument C<-my_opts> is taken care of by the C<extproc> line
-in your script, see L<C<extproc> on the first line>).
+in your script, see L</C<extproc> on the first line>).
 
 To understand what the above I<magic> does, read perl docs about C<-S>
 switch - see L<perlrun>, and cmdref about C<extproc>:
@@ -436,7 +436,7 @@ managed to goof.  C<;-)>
 =item *
 
 Did you run your programs with C<-w> switch? See 
-L<Starting OSE<sol>2 (and DOS) programs under Perl>.
+L</Starting OSE<sol>2 (and DOS) programs under Perl>.
 
 =item *
 
@@ -2666,8 +2666,8 @@ I will include it into distribution. I have no need for such a module, so
 cannot test it.
 
 For the details of the current situation with calling external programs,
-see L<Starting OSE<sol>2 (and DOS) programs under Perl>.  Set us mention a couple
-of features:
+see L</Starting OSE<sol>2 (and DOS) programs under Perl>.  Set us
+mention a couple of features:
 
 =over 4
 
