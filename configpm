@@ -1023,15 +1023,11 @@ sub process {
       print CONFIG_POD <<EOF if $text;
 =back
 
-=cut
-
 EOF
       print CONFIG_POD <<EOF;
 =head2 $c
 
 =over 4
-
-=cut
 
 EOF
      $text = 1;
