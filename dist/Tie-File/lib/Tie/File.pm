@@ -2365,7 +2365,7 @@ will be rewritten in a single pass.
 (Actually, the preceding discussion is something of a fib.  You don't
 need to enable deferred writing to get good performance for this
 common case, because C<Tie::File> will do it for you automatically
-unless you specifically tell it not to.  See L<"Autodeferring">,
+unless you specifically tell it not to.  See L</Autodeferring>,
 below.)
 
 Calling C<-E<gt>flush> returns the array to immediate-write mode.  If
