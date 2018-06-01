@@ -313,7 +313,7 @@ perform a char-by-char comparison, and only returns I<0> (equal) if the
 operands are char-for-char identical.  If you really want to know whether
 two strings--which C<eq> and C<cmp> may consider different--are equal
 as far as collation in the locale is concerned, see the discussion in
-L<Category C<LC_COLLATE>: Collation>.
+L</Category C<LC_COLLATE>: Collation>.
 
 =item *
 
