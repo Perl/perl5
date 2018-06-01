@@ -1019,7 +1019,7 @@ Removes -g from optimize, and -DDEBUGGING from ccflags.
 =back
 
 If you are using a shared libperl, see the warnings about multiple
-versions of perl under L<Building a shared Perl library>.
+versions of perl under L</Building a shared Perl library>.
 
 Note that a perl built with -DDEBUGGING will be much bigger and will run
 much, much more slowly than a standard perl.
@@ -1854,11 +1854,11 @@ Packaging and transferring either the core Perl modules or CPAN
 modules to the target platform is also left up to the each
 cross-compilation environment.  Often the cross-compilation target
 platforms are somewhat limited in diskspace: see the section
-L<Minimizing the Perl installation> to learn more of the minimal set
+L</Minimizing the Perl installation> to learn more of the minimal set
 of files required for a functional Perl installation.
 
 For some cross-compilation environments the Configure option
-C<-Dinstallprefix=...> might be handy, see L<Changing the installation
+C<-Dinstallprefix=...> might be handy, see L</Changing the installation
 directory>.
 
 About the cross-compilation support of Configure: There's two forms.
