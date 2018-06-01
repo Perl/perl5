@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.44';
+$VERSION = '1.45';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -1027,7 +1027,7 @@ X<-w>
 
 This is  the existing flag.  If the lexical warnings pragma is B<not>
 used in any of you code, or any of the modules that you use, this flag
-will enable warnings everywhere.  See L<Backward Compatibility> for
+will enable warnings everywhere.  See L</Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
 =item B<-W>
