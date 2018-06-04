@@ -2080,7 +2080,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         /* most putenv()s leak, so we manipulate environ directly */
         I32 i;
         const I32 len = strlen(nam);
-        int nlen, vlen;
+        size_t nlen, vlen;
 
         /* where does it go? */
         for (i = 0; environ[i]; i++) {
@@ -2098,7 +2098,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
                 max++;
             tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
             for (j=0; j<max; j++) {         /* copy environment */
-                const int len = strlen(environ[j]);
+                const size_t len = strlen(environ[j]);
                 tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
                 Copy(environ[j], tmpenv[j], len+1, char);
             }
@@ -2150,8 +2150,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
             if (environ) /* old glibc can crash with null environ */
                 (void)unsetenv(nam);
         } else {
-	    const int nlen = strlen(nam);
-	    const int vlen = strlen(val);
+	    const size_t nlen = strlen(nam);
+	    const size_t vlen = strlen(val);
 	    char * const new_env =
                 (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
             my_setenv_format(new_env, nam, nlen, val, vlen);
@@ -2159,8 +2159,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         }
 #   else /* ! HAS_UNSETENV */
         char *new_env;
-	const int nlen = strlen(nam);
-	int vlen;
+	const size_t nlen = strlen(nam);
+	size_t vlen;
         if (!val) {
 	   val = "";
         }
@@ -2187,8 +2187,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
     dVAR;
     char *envstr;
-    const int nlen = strlen(nam);
-    int vlen;
+    const size_t nlen = strlen(nam);
+    size_t vlen;
 
     if (!val) {
        val = "";
@@ -2198,7 +2198,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     my_setenv_format(envstr, nam, nlen, val, vlen);
     (void)PerlEnv_putenv(envstr);
     Safefree(envstr);
-}
+} 
 
 #endif /* WIN32 || NETWARE */
 
