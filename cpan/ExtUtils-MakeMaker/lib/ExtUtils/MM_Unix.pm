@@ -1082,7 +1082,7 @@ sub xs_make_dynamic_lib {
     }
 
     push @m, sprintf <<'MAKE', $ld_run_path_shell, $ldrun, $dlsyms_arg, $ldfrom, $self->xs_obj_opt('$@'), $libs, $exportlist;
-	%s$(LD) %s $(LDDLFLAGS) %s %s $(OTHERLDFLAGS) %s $(MYEXTLIB) \
+	%s$(LD) %s $(LDDLFLAGS) %s %s $(LDFLAGS) $(OTHERLDFLAGS) %s $(MYEXTLIB) \
 	  $(PERL_ARCHIVE) %s $(PERL_ARCHIVE_AFTER) %s \
 	  $(INST_DYNAMIC_FIX)
 	$(CHMOD) $(PERM_RWX) $@
