@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.28.0-RC2 - Oliver Sacks, The Man Who Mistook His Wife For A Hat: And Other Clinical Tales
+
+L<Announced on 2018-06-06 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251122>
+
+  Had she not been of exceptional intelligence and literacy, with an
+  imagination filled and sustained, so to speak, by the images of
+  others, images conveyed by language, by the word, she might have
+  remained almost as helpless as a baby.
+
 =head2 v5.28.0-RC1 - Anu Garg, A Word A Day
 
 L<Announced on 2018-05-21 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2018/05/msg250999.html>
