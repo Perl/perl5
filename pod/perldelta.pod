@@ -912,7 +912,7 @@ L<Math::BigRat> has been upgraded from version 0.2611 to 0.2613.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20170530 to 5.20180521.
+L<Module::CoreList> has been upgraded from version 5.20170530 to 5.20180606.
 
 =item *
 
