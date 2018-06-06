@@ -2355,7 +2355,7 @@ L<[perl #132163]|https://rt.perl.org/Ticket/Display.html?id=132163>
 
 Perl 5.28.0 represents approximately 12 months of development since Perl
 5.26.0 and contains approximately 730,000 lines of changes across 2,200
-files from 76 authors.
+files from 77 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
 approximately 580,000 lines of changes to 1,300 .pm, .t, .c and .h files.
@@ -2377,9 +2377,10 @@ Williamson, Ken Brown, Ken Cotterill, Leon Timmermans, Lukas Mai, Marco
 Fontani, Marc-Philip Werner, Matthew Horsfall, Neil Bowers, Nicholas Clark,
 Nicolas R., Niko Tyni, Pali, Paul Marquess, Peter John Acklam, Reini Urban,
 Renee Baecker, Ricardo Signes, Robin Barker, Sawyer X, Scott Lanning, Sergey
-Aleynikov, Shoichi Kaji, Slaven Rezic, Smylers, Steffen Müller, Steve Hay,
-Sullivan Beck, Thomas Sibley, Todd Rinaldo, Tomasz Konojacki, Tom Hukins,
-Tom Wyant, Tony Cook, Vitali Peil, Yves Orton, Zefram.
+Aleynikov, Shirakata Kentaro, Shoichi Kaji, Slaven Rezic, Smylers, Steffen
+Müller, Steve Hay, Sullivan Beck, Thomas Sibley, Todd Rinaldo, Tomasz
+Konojacki, Tom Hukins, Tom Wyant, Tony Cook, Vitali Peil, Yves Orton,
+Zefram.
 
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
