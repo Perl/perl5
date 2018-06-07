@@ -394,7 +394,7 @@ where the C<"{"> will not be repurposed.
 
 Note that these uses continue to raise a deprecation message.
 
-=head2 Use of unescaped C<"{"> immediately after a C<"("> in regular expression patterns
+=head2 Use of unescaped C<"{"> immediately after a C<"("> in regular expression patterns is deprecated
 
 Using unescaped left braces is officially deprecated everywhere, but it
 is not enforced in contexts where their use does not interfere with
