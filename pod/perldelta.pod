@@ -276,7 +276,7 @@ allowed.  This has been deprecated since Perl 5.000.
 These have been no-ops and deprecated since Perl 5.12 and 5.10,
 respectively.
 
-=head2 C<\N{}> with nothing between the braces is now illegal.
+=head2 C<\N{}> with nothing between the braces is now illegal
 
 This has been deprecated since Perl 5.24.
 
@@ -294,15 +294,15 @@ Use of a bare terminator has been deprecated since Perl 5.000.
 This used to work like setting it to C<undef>, but has been deprecated
 since Perl 5.20.
 
-=head2 Unicode code points with values exceeding C<IV_MAX> are now fatal.
+=head2 Unicode code points with values exceeding C<IV_MAX> are now fatal
 
 This was deprecated since Perl 5.24.
 
-=head2 The C<B::OP::terse> method has been removed.
+=head2 The C<B::OP::terse> method has been removed
 
 Use C<B::Concise::b_terse> instead.
 
-=head2 Use of inherited AUTOLOAD for non-methods is no longer allowed.
+=head2 Use of inherited AUTOLOAD for non-methods is no longer allowed
 
 This was deprecated in Perl 5.004.
 
@@ -374,7 +374,7 @@ accommodate datasets of more than two billion items.
 
 =head1 Deprecations
 
-=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code points above 0xFF is deprecated.
+=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code points above 0xFF is deprecated
 
 Such strings are represented internally in UTF-8, and C<vec> is a
 bit-oriented operation that will likely give unexpected results on those
