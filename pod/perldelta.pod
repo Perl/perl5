@@ -1210,7 +1210,7 @@ L<[perl #131672]|https://rt.perl.org/Ticket/Display.html?id=131672>
 
 =over 4
 
-=item * L<perldiag/Variable length lookbehind not implemented in regex m/%s/>
+=item * L<perldiag/Variable length lookbehind not implemented in regex mE<sol>%sE<sol>>
 
 This now gives more ideas as to workarounds to the issue that was
 introduced in Perl 5.18 (but not documented explicitly in its perldelta)
