@@ -19,9 +19,10 @@ L<perl5260delta>, which describes differences between 5.24.0 and 5.26.0.
 A list of changes is at
 L<http://www.unicode.org/versions/Unicode10.0.0>.
 
-=head2 L<C<delete>|perlfunc/delete EXPR> on key/value slices
+=head2 L<C<delete>|perlfunc/delete EXPR> on key/value hash slices
 
-L<C<delete>|perlfunc/delete EXPR> can now be used on key/value slices,
+L<C<delete>|perlfunc/delete EXPR> can now be used on
+L<keyE<sol>value hash slices|perldata/KeyE<sol>Value Hash Slices>,
 returning the keys along with the deleted values.
 L<[perl #131328]|https://rt.perl.org/Ticket/Display.html?id=131328>
 
