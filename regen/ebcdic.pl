@@ -134,10 +134,10 @@ END
         }
 
         print $out_fh <<END;
-/* Index is $charset UTF-EBCDIC byte; value is UTF8SKIP for start bytes;
- * 1 for continuation.  Adapted from the shadow flags table in tr16.  The
- * entries marked 9 in tr16 are continuation bytes and are marked as length 1
- * here so that we can recover. */
+/* Index is $charset UTF-EBCDIC byte; value is UTF8SKIP for start bytes
+ * (including for overlongs); 1 for continuation.  Adapted from the shadow
+ * flags table in tr16.  The entries marked 9 in tr16 are continuation bytes
+ * and are marked as length 1 here so that we can recover. */
 END
         output_table(\@utf8skip, "PL_utf8skip", 0);  # The 0 means don't print
                                                      # in hex

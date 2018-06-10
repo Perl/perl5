@@ -106,10 +106,10 @@ EXTCONST U8 PL_e2utf[] = {
 /*_0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 };
 
-/* Index is EBCDIC 1047 UTF-EBCDIC byte; value is UTF8SKIP for start bytes;
- * 1 for continuation.  Adapted from the shadow flags table in tr16.  The
- * entries marked 9 in tr16 are continuation bytes and are marked as length 1
- * here so that we can recover. */
+/* Index is EBCDIC 1047 UTF-EBCDIC byte; value is UTF8SKIP for start bytes
+ * (including for overlongs); 1 for continuation.  Adapted from the shadow
+ * flags table in tr16.  The entries marked 9 in tr16 are continuation bytes
+ * and are marked as length 1 here so that we can recover. */
 EXTCONST U8 PL_utf8skip[] = {
    1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
    1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
@@ -319,10 +319,10 @@ EXTCONST U8 PL_e2utf[] = {
 /*_0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 };
 
-/* Index is EBCDIC 037 UTF-EBCDIC byte; value is UTF8SKIP for start bytes;
- * 1 for continuation.  Adapted from the shadow flags table in tr16.  The
- * entries marked 9 in tr16 are continuation bytes and are marked as length 1
- * here so that we can recover. */
+/* Index is EBCDIC 037 UTF-EBCDIC byte; value is UTF8SKIP for start bytes
+ * (including for overlongs); 1 for continuation.  Adapted from the shadow
+ * flags table in tr16.  The entries marked 9 in tr16 are continuation bytes
+ * and are marked as length 1 here so that we can recover. */
 EXTCONST U8 PL_utf8skip[] = {
    1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
    1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
