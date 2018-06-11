@@ -5632,7 +5632,7 @@ typedef struct am_table_short AMTS;
 #    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
 	STMT_START { /* Check if to warn before doing the conversion work */\
             if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
-                UV cp = utf8_to_uvchr_buf((U8 *) s, (U8 *) send, NULL);     \
+                UV cp = utf8_to_uvchr_buf((U8 *) (s), (U8 *) (send), NULL); \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
                     "Wide character (U+%" UVXf ") in %s",                   \
                     (cp == 0)                                               \
