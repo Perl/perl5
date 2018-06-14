@@ -1661,14 +1661,10 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
     while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
         UV type = dfa_tab_for_perl[*s];
 
-        if (state != 0) {
-            uv = (*s & 0x3fu) | (uv << UTF_ACCUMULATION_SHIFT);
-            state = dfa_tab_for_perl[256 + state + type];
-        }
-        else {
-            uv = (0xff >> type) & (*s);
-            state = dfa_tab_for_perl[256 + type];
-        }
+        uv = (state == 0)
+             ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
+             : UTF8_ACCUMULATE(uv, *s);
+        state = dfa_tab_for_perl[256 + state + type];
 
         if (state == 0) {
 
@@ -1683,7 +1679,7 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
                 goto got_uv;
             }
 
-            return uv;
+            return UNI_TO_NATIVE(uv);
         }
 
         s++;
