@@ -644,6 +644,7 @@ the strings?).
 
  Sawyer X  5.28.0-RC1   2018-May-21     The 5.28 maintenance track
  Sawyer X  5.28.0-RC2   2018-Jun-06     The 5.28 maintenance track
+ Sawyer X  5.28.0-RC3   2018-Jun-18     The 5.28 maintenance track
 
 =head2 SELECTED RELEASE SIZES
 
