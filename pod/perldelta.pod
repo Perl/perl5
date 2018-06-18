@@ -574,7 +574,7 @@ compatibility.
 
 =item *
 
-L<Archive::Tar> has been upgraded from version 2.24 to 2.26.
+L<Archive::Tar> has been upgraded from version 2.24 to 2.28.
 
 =item *
 
