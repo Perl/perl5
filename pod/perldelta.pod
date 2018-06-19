@@ -574,7 +574,11 @@ compatibility.
 
 =item *
 
-L<Archive::Tar> has been upgraded from version 2.24 to 2.28.
+L<Archive::Tar> has been upgraded from version 2.24 to 2.30.
+
+This update also handled CVE-2018-12015: directory traversal
+vulnerability.
+L<[cpan #125523]|https://rt.cpan.org/Ticket/Display.html?id=125523>
 
 =item *
 
