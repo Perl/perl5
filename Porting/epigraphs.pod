@@ -17,9 +17,20 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.28.0-RC4 - Neil Gaiman, The Graveyard Book
+
+Announced on 2018-06-19 by Sawyer X
+
+  You're alive, Bod. That means you have infinite potential. You can do
+  anything, make anything, dream anything. If you can change the world,
+  the world will change. Potential. Once you're dead, it's gone. Over.
+  You've made what you've made, dreamed your dream, written your name.
+  You may be buried here, you may even walk. But that potential is
+  finished.”
+
 =head2 v5.28.0-RC3 - Anthony Horowitz, Magpie Murders
 
-L<Announced on 20180=-06-18 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251204>
+L<Announced on 2018-06-18 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251204>
 
   These had been his plans. But if there was one thing that life had
   taught him, it was the futility of making plans. Life had its own
