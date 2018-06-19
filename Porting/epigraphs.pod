@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.28.0-RC3 - Anthony Horowitz, Magpie Murders
+
+L<Announced on 20180=-06-18 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251204>
+
+  These had been his plans. But if there was one thing that life had
+  taught him, it was the futility of making plans. Life had its own
+  agenda.
+
 =head2 v5.28.0-RC2 - Oliver Sacks, The Man Who Mistook His Wife For A Hat: And Other Clinical Tales
 
 L<Announced on 2018-06-06 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251122>
