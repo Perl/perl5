@@ -90,6 +90,15 @@ When prompted, pick a subject that summarizes your changes.
 The porters appreciate the time you spent helping to make Perl better.
 Thank you!
 
+=item * Acknowledgement
+
+All contributors are credited (by name and email address) in the
+AUTHORS file, which is part of the perl distribution. 
+
+If you don’t want to be included in the AUTHORS file, just let us
+know. Otherwise we will take your submission of a patch as permission
+to credit you in the AUTHORS file.
+
 =item * Next time
 
 The next time you wish to make a patch, you need to start from the
