@@ -789,7 +789,7 @@ L<File::Copy> has been upgraded from version 2.32 to 2.33.
 
 It will now use the sub-second precision variant of utime() supplied by
 L<Time::HiRes> where available.
-L<[perl #132401|https://rt.perl.org/Ticket/Display.html?id=132401>.
+L<[perl #132401]|https://rt.perl.org/Ticket/Display.html?id=132401>.
 
 =item *
 
