@@ -190,6 +190,9 @@ sub generate_known_author_map {
         # Randy W. Sims
         "ml-perl\100thepierianspring.org",
 
+        # Jason Hord
+        "pravus\100cpan.org",
+
         # perl internal addresses
         "perl5-porters\100africa.nicoh.com",
         "perlbug\100perl.org",,
