@@ -2358,7 +2358,7 @@ L<[perl #132163]|https://rt.perl.org/Ticket/Display.html?id=132163>
 
 =head1 Acknowledgements
 
-Perl 5.28.0 represents approximately 12 months of development since Perl
+Perl 5.28.0 represents approximately 13 months of development since Perl
 5.26.0 and contains approximately 730,000 lines of changes across 2,200
 files from 77 authors.
 
