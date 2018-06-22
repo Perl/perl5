@@ -93,7 +93,7 @@ Thank you!
 =item * Acknowledgement
 
 All contributors are credited (by name and email address) in the
-AUTHORS file, which is part of the perl distribution. 
+AUTHORS file, which is part of the perl distribution.
 
 If you don’t want to be included in the AUTHORS file, just let us
 know. Otherwise we will take your submission of a patch as permission
