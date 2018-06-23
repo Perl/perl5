@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.28.0 - Martin Luther King, Jr., 1967
+
+Announced on 2018-06-22 by Sawyer X
+
+  When we look at modern man we have to face the fact that modern man
+  suffers from a kind of poverty of the spirit which stands in glaring
+  contrast with his scientific and technological abundance. We've learned
+  to fly the air as birds, we've learned to swim the seas as fish, yet we
+  haven't learned to walk the earth as brothers and sisters.
+
 =head2 v5.28.0-RC4 - Neil Gaiman, The Graveyard Book
 
 Announced on 2018-06-19 by Sawyer X
