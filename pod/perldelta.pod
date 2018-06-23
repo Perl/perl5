@@ -5,11 +5,11 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.28.1
+perldelta - what is new for perl v5.29.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.28.0 release and the 5.28.1
+This document describes differences between the 5.28.0 release and the 5.29.0
 release.
 
 If you are upgrading from an earlier release such as 5.27.0, first read
