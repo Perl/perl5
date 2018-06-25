@@ -9,7 +9,33 @@
 #define PERL_EBCDIC_TABLES_H_   1
 
 /* This file contains definitions for various tables used in EBCDIC handling.
- * More info is in utfebcdic.h */
+ * More info is in utfebcdic.h
+ *
+ * Some of the tables are adapted from
+ *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ * which requires this copyright notice:
+
+Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
 
 #if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
@@ -257,6 +283,47 @@
 /*E_*/0xE0,0xE1,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9,0xEA,0xCB,0xCC,0xCD,0xCE,0xCF,
 /*F_*/0xF0,0xF1,0xF2,0xF3,0xF4,0xF5,0xF6,0xF7,0xF8,0xF9,0xFA,0xDB,0xDC,0xDD,0xDE,0xFF
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
+};
+#  endif
+
+
+/* The table below is adapted from
+ *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ * See copyright notice at the beginning of this file.
+ */
+
+#  ifndef DOINIT
+#    EXTCONST U8 perl_extended_utf8_dfa_tab[];
+#  else
+#    EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
+/*         _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
+/*0_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*1_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*2_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*3_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*4_    */  0,  7,  7,  8,  8,  9,  9,  9,  9, 10, 10,  0,  0,  0,  0,  0,
+/*5_    */  0, 10, 10, 10, 10, 10, 10, 11, 11, 11,  0,  0,  0,  0,  0,  0,
+/*6_    */  0,  0, 11, 11, 11, 11, 11, 11, 11, 11, 11,  0,  0,  0,  0,  0,
+/*7_    */ 11, 11, 11, 11,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,
+/*8_    */  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  2,  2,  2,  2,
+/*9_    */  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  2,  2,  2,  2,
+/*A_    */  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  2,  0,  2,  2,
+/*B_    */  2,  2,  2,  2,  2,  2,  2,  1,  3,  3,  3,  3,  3,  0,  3,  3,
+/*C_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,  3,  3,  3,  3,  3,
+/*D_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,  3, 12,  4,  4,  4,
+/*E_    */  0,  4,  0,  0,  0,  0,  0,  0,  0,  0,  4,  4,  4, 13,  5,  5,
+/*F_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  5, 14,  6, 15,  1,  0,
+/*N0=  0*/  0,  1, 16, 32, 48, 64, 80,  1,  1,  1,  1,  1, 96,112,128,144,
+/*N1= 16*/  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+/*N2= 32*/  1,  1,  1,  1,  1,  1,  1, 16, 16, 16, 16, 16,  1,  1,  1,  1,
+/*N3= 48*/  1,  1,  1,  1,  1,  1,  1, 32, 32, 32, 32, 32,  1,  1,  1,  1,
+/*N4= 64*/  1,  1,  1,  1,  1,  1,  1, 48, 48, 48, 48, 48,  1,  1,  1,  1,
+/*N5= 80*/  1,  1,  1,  1,  1,  1,  1, 64, 64, 64, 64, 64,  1,  1,  1,  1,
+/*N6= 96*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 32,  1,  1,  1,  1,
+/*N7=112*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 48, 48,  1,  1,  1,  1,
+/*N8=128*/  1,  1,  1,  1,  1,  1,  1,  1,  1, 64, 64, 64,  1,  1,  1,  1,
+/*N9=144*/  1,  1,  1,  1,  1,  1,  1,  1, 80, 80, 80, 80,  1,  1,  1,  1
+/*          0   1   2   3   4   5   6   7   8   9  10  11  12  13  14 15*/
 };
 #  endif
 
@@ -508,6 +575,47 @@
 /*E_*/0xE0,0xE1,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9,0xEA,0xCB,0xCC,0xCD,0xCE,0xCF,
 /*F_*/0xF0,0xF1,0xF2,0xF3,0xF4,0xF5,0xF6,0xF7,0xF8,0xF9,0xFA,0xDB,0xDC,0xDD,0xDE,0xFF
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
+};
+#  endif
+
+
+/* The table below is adapted from
+ *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ * See copyright notice at the beginning of this file.
+ */
+
+#  ifndef DOINIT
+#    EXTCONST U8 perl_extended_utf8_dfa_tab[];
+#  else
+#    EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
+/*         _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
+/*0_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*1_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*2_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*3_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*4_    */  0,  7,  7,  8,  8,  9,  9,  9,  9, 10, 10,  0,  0,  0,  0,  0,
+/*5_    */  0, 10, 10, 10, 10, 10, 10, 11, 11, 11,  0,  0,  0,  0,  0, 11,
+/*6_    */  0,  0, 11, 11, 11, 11, 11, 11, 11, 11, 11,  0,  0,  0,  0,  0,
+/*7_    */ 11, 11, 11,  1,  1,  1,  1,  1,  2,  0,  0,  0,  0,  0,  0,  0,
+/*8_    */  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  2,  2,  2,  2,
+/*9_    */  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  2,  2,  2,  2,
+/*A_    */  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  2,  2,  2,  2,
+/*B_    */  0,  2,  2,  2,  2,  2,  1,  3,  3,  3,  0,  0,  3,  3,  3,  3,
+/*C_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,  3,  3,  3,  3,  3,
+/*D_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,  3, 12,  4,  4,  4,
+/*E_    */  0,  4,  0,  0,  0,  0,  0,  0,  0,  0,  4,  4,  4, 13,  5,  5,
+/*F_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  5, 14,  6, 15,  1,  0,
+/*N0=  0*/  0,  1, 16, 32, 48, 64, 80,  1,  1,  1,  1,  1, 96,112,128,144,
+/*N1= 16*/  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+/*N2= 32*/  1,  1,  1,  1,  1,  1,  1, 16, 16, 16, 16, 16,  1,  1,  1,  1,
+/*N3= 48*/  1,  1,  1,  1,  1,  1,  1, 32, 32, 32, 32, 32,  1,  1,  1,  1,
+/*N4= 64*/  1,  1,  1,  1,  1,  1,  1, 48, 48, 48, 48, 48,  1,  1,  1,  1,
+/*N5= 80*/  1,  1,  1,  1,  1,  1,  1, 64, 64, 64, 64, 64,  1,  1,  1,  1,
+/*N6= 96*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 32,  1,  1,  1,  1,
+/*N7=112*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 48, 48,  1,  1,  1,  1,
+/*N8=128*/  1,  1,  1,  1,  1,  1,  1,  1,  1, 64, 64, 64,  1,  1,  1,  1,
+/*N9=144*/  1,  1,  1,  1,  1,  1,  1,  1, 80, 80, 80, 80,  1,  1,  1,  1
+/*          0   1   2   3   4   5   6   7   8   9  10  11  12  13  14 15*/
 };
 #  endif
 

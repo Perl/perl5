@@ -195,13 +195,39 @@ EOF
     print $out_fh "};\n#  endif\n\n";
 }
 
-print $out_fh <<END;
+print $out_fh <<'END';
 
 #ifndef PERL_EBCDIC_TABLES_H_   /* Guard against nested #includes */
 #define PERL_EBCDIC_TABLES_H_   1
 
 /* This file contains definitions for various tables used in EBCDIC handling.
- * More info is in utfebcdic.h */
+ * More info is in utfebcdic.h
+ *
+ * Some of the tables are adapted from
+ *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ * which requires this copyright notice:
+
+Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
 END
 
 my @charsets = get_supported_code_pages();
@@ -369,6 +395,117 @@ END
  * the code point itself */
 END
         output_table(\@latin1_fold, "PL_fold_latin1");
+    }
+
+    {
+      # This generates the dfa table for perl extended UTF-8, which accepts
+      # surrogates, non-characters, and accepts start bytes up through FE
+      # (start byte FF has to be handled outside this dfa).  The class numbers
+      # for start bytes are constrained so that they can be used as a shift
+      # count for masking off the leading one bits
+      #
+      # The classes are
+      #   00-9F           0
+      #   A0-A1           7   Not legal immediately after start bytes F0 F8 FC
+      #                       FE
+      #   A2-A3           8   Not legal immediately after start bytes F0 F8 FC
+      #   A4-A7           9   Not legal immediately after start bytes F0 F8
+      #   A8-AF          10   Not legal immediately after start bytes F0
+      #   B0-BF          11
+      #   C0-C4           1
+      #   C5-DF           2
+      #   E0              1
+      #   E1-EF           3
+      #   F0             12
+      #   F1-F7           4
+      #   F8             13
+      #   F9-FB           5
+      #   FC             14
+      #   FD              6
+      #   FE             15
+      #   FF              1
+      #
+      # Here's the I8 for the code points before which overlongs occur:
+      # U+4000:     \xF0\xB0\xA0\xA0
+      # U+40000:    \xF8\xA8\xA0\xA0\xA0
+      # U+400000:   \xFC\xA4\xA0\xA0\xA0\xA0
+      # U+4000000:  \xFE\xA2\xA0\xA0\xA0\xA0\xA0
+      #
+      # The first part of the table maps bytes to character classes to reduce
+      # the size of the transition table and create bitmasks.
+      #
+      # The second part is a transition table that maps a combination of a
+      # state of the automaton and a character class to a new state.  The
+      # numbering of the original nodes is retained, but some have been split
+      # so that there are new nodes.  They mean:
+      # N0     The initial state, and final accepting one.
+      # N1     One continuation byte (A0-BF) left.  This is transitioned to
+      #        immediately when the start byte indicates a two-byte sequence
+      # N2     Two continuation bytes left.
+      # N3     Three continuation bytes left.
+      # N4     Four continuation bytes left.
+      # N5     Five continuation bytes left.
+      # N6     Start byte is F0.  Continuation bytes A[0-F] are illegal
+      #        (overlong); the other continuations transition to N2
+      # N7     Start byte is F8.  Continuation bytes A[0-7] are illegal
+      #        (overlong); the other continuations transition to N3
+      # N8     Start byte is FC.  Continuation bytes A[0-3] are illegal
+      #        (overlong); the other continuations transition to N4
+      # N9     Start byte is FE.  Continuation bytes A[01] are illegal
+      #        (overlong); the other continuations transition to N5
+      # 1      Reject.  All transitions not mentioned above (except the single
+      #        byte ones (as they are always legal) are to this state.
+
+        my $NUM_CLASSES = 16;
+        my $N0 = 0;
+        my $N1 =  $N0 + $NUM_CLASSES;
+        my $N2 =  $N1 + $NUM_CLASSES;
+        my $N3 =  $N2 + $NUM_CLASSES;
+        my $N4 =  $N3 + $NUM_CLASSES;
+        my $N5 =  $N4 + $NUM_CLASSES;
+        my $N6 =  $N5 + $NUM_CLASSES;
+        my $N7 =  $N6 + $NUM_CLASSES;
+        my $N8 =  $N7 + $NUM_CLASSES;
+        my $N9 =  $N8 + $NUM_CLASSES;
+        my $N10 = $N9 + $NUM_CLASSES;
+
+        my @perl_extended_utf8_dfa;
+        my @i8 = (
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00-0F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10-1F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20-2F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30-3F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40-4F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50-5F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60-6F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70-7F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80-8F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90-9F
+                  7, 7, 8, 8, 9, 9, 9, 9,10,10,10,10,10,10,10,10, # A0-AF
+                 11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11, # B0-BF
+                  1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, # C0-CF
+                  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, # D0-DF
+                  1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, # E0-EF
+                 12, 4, 4, 4, 4, 4, 4, 4,13, 5, 5, 5,14, 6,15, 1, # F0-FF
+                );
+        $perl_extended_utf8_dfa[$i82utf[$_]] = $i8[$_] for (0 .. 255);
+        push @perl_extended_utf8_dfa, (
+          # Class:
+          # 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+            0,  1,$N1,$N2,$N3,$N4,$N5,  1,  1,  1,  1,  1,$N6,$N7,$N8,$N9, # N0
+            1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  1,  1,  1,  1, # N1
+            1,  1,  1,  1,  1,  1,  1,$N1,$N1,$N1,$N1,$N1,  1,  1,  1,  1, # N2
+            1,  1,  1,  1,  1,  1,  1,$N2,$N2,$N2,$N2,$N2,  1,  1,  1,  1, # N3
+            1,  1,  1,  1,  1,  1,  1,$N3,$N3,$N3,$N3,$N3,  1,  1,  1,  1, # N4
+            1,  1,  1,  1,  1,  1,  1,$N4,$N4,$N4,$N4,$N4,  1,  1,  1,  1, # N5
+
+            1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,$N2,  1,  1,  1,  1, # N6
+            1,  1,  1,  1,  1,  1,  1,  1,  1,  1,$N3,$N3,  1,  1,  1,  1, # N7
+            1,  1,  1,  1,  1,  1,  1,  1,  1,$N4,$N4,$N4,  1,  1,  1,  1, # N8
+            1,  1,  1,  1,  1,  1,  1,  1,$N5,$N5,$N5,$N5,  1,  1,  1,  1, # N9
+        );
+        output_table(\@perl_extended_utf8_dfa, "perl_extended_utf8_dfa_tab",
+                                                                   $NUM_CLASSES);
     }
 
     print $out_fh get_conditional_compile_line_end();

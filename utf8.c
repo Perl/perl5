@@ -1555,12 +1555,10 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
 	return *s0;
     }
 
-#ifndef EBCDIC
-
     /* Measurements show that this dfa is somewhat faster than the regular code
      * below, so use it first, dropping down for the non-normal cases. */
 
-#  define PERL_UTF8_DECODE_REJECT 1
+#define PERL_UTF8_DECODE_REJECT 1
 
     while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
         UV type = perl_extended_utf8_dfa_tab[*s];
@@ -1594,8 +1592,6 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
     /* Here, is some sort of failure.  Use the full mechanism */
 
     uv = *s0;
-
-#endif
 
     /* A continuation character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(uv))) {
