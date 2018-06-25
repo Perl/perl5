@@ -860,6 +860,7 @@ delete @warnings::{qw(NORMAL FATAL MESSAGE LEVEL)};
 
 1;
 __END__
+
 =head1 NAME
 
 warnings - Perl pragma to control optional warnings

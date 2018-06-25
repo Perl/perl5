@@ -17,6 +17,7 @@ foreach my $type (qw(static dynamic nonxs)) {
 
 1;
 __END__
+
 =head1 NAME
 
 Config::Extensions - hash lookup of which core extensions were built.

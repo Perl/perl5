@@ -24,7 +24,7 @@ my @files =
     grep !m#/perl.*\.pod#,
     grep m#(?:\.pm|\.pod|_pm\.PL)#,
     map {s/\s.*//s; $_}
-    grep { m#^(lib|ext|dist|cpan)/# && !m#/(?:t|demo)/# }
+    grep { m#^(lib|ext|dist|cpan)/# && !m#/(?:t|demo|corpus)/# }
     <MANIFEST>;
 close MANIFEST
     or die "$0: failed to close MANIFEST: $!";
@@ -60,8 +60,13 @@ for my $filename (@files) {
 	}
     }
     unless ($foundit) {
-	warn "$filename missing =head1 NAME (OK if respective .pod exists)\n"
-	    unless $Quiet;
+        next if pod_for_module_has_head1_NAME($filename);
+        die "p5p-controlled module $filename missing =head1 NAME\n"
+            if $filename !~ m{^(dist/|cpan/)}n # under our direct control
+            && $filename !~ m{/_[^/]+\z}       # not private
+            && $filename ne 'lib/meta_notation.pm'      # no pod
+            && $filename ne 'lib/overload/numbers.pm';  # no pod
+        warn "$filename missing =head1 NAME\n" unless $Quiet;
 	next;
     }
     my $title = <MOD>;
@@ -88,6 +93,19 @@ for my $filename (@files) {
     } else {
 	push @pragma, $title;
     }
+}
+
+sub pod_for_module_has_head1_NAME {
+    my ($filename) = @_;
+    (my $pod_file = $filename) =~ s/\.pm\z/.pod/ or return 0;
+    return 0 if !-e $pod_file;
+    open my $fh, '<', $pod_file
+        or die "Can't open $pod_file for reading: $!\n";
+    local $/ = '';
+    while (my $para = <$fh>) {
+        return 1 if $para =~ /\A=head1 NAME$/m;
+    }
+    return 0;
 }
 
 # Much easier to special case it like this than special case the depending on
