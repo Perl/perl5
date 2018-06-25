@@ -1285,10 +1285,11 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s,
     return utf8n_to_uvchr_error(s, curlen, retlen, flags, NULL);
 }
 
-/* The tables below come from http://bjoern.hoehrmann.de/utf-8/decoder/dfa/,
- * which requires this copyright notice */
+/* The tables below are adapted from
+ * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this copyright
+ * notice:
 
-/* Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -1310,7 +1311,8 @@ SOFTWARE.
 
 */
 
-#if 0
+#if 0           /* This is the original table given in
+                   http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ */
 static U8 utf8d_C9[] = {
   /* The first part of the table maps bytes to character classes that
    * to reduce the size of the transition table and create bitmasks. */
@@ -1336,47 +1338,117 @@ static U8 utf8d_C9[] = {
 
 #ifndef EBCDIC
 
+
 /* This is a version of the above table customized for Perl that doesn't
- * exclude surrogates and accepts start bytes up through F7 (representing
- * 2**21 - 1). */
-static U8 dfa_tab_for_perl[] = {
+ * exclude surrogates and accepts start bytes up through FD (FE on 64-bit
+ * machines).  The classes have been renumbered so that the patterns are more
+ * evident in the table.  The class numbers for start bytes are constrained so
+ * that they can be used as a shift count for masking off the leading one bits.
+ * It would make the code simpler if start byte FF could also be handled, but
+ * doing so would mean adding nodes for each of continuation bytes 6-12
+ * remaining, and two more nodes for overlong detection (a total of 9), and
+ * there is room only for 4 more nodes unless we make the array U16 instead of
+ * U8.
+ *
+ * The classes are
+ *      00-7F           0
+ *      80-81           7   Not legal immediately after start bytes E0 F0 F8 FC
+ *                          FE
+ *      82-83           8   Not legal immediately after start bytes E0 F0 F8 FC
+ *      84-87           9   Not legal immediately after start bytes E0 F0 F8
+ *      88-8F          10   Not legal immediately after start bytes E0 F0
+ *      90-9F          11   Not legal immediately after start byte E0
+ *      A0-BF          12
+ *      C0,C1           1
+ *      C2-DF           2
+ *      E0             13
+ *      E1-EF           3
+ *      F0             14
+ *      F1-F7           4
+ *      F8             15
+ *      F9-FB           5
+ *      FC             16
+ *      FD              6
+ *      FE             17  (or 1 on 32-bit machines, since it overflows)
+ *      FF              1
+ */
+
+static const U8 dfa_tab_for_perl[] = {
     /* The first part of the table maps bytes to character classes to reduce
      * the size of the transition table and create bitmasks. */
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /*-1F*/
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /*-3F*/
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /*-5F*/
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /*-7F*/
-   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,  9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, /*-9F*/
-   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7, /*-BF*/
-   8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, /*-DF*/
-  10,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3, 11,4,4,4,4,4,4,4,8,8,8,8,8,8,8,8, /*-FF*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*10-1F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*20-2F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*30-3F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*40-4F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*50-5F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*60-6F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*70-7F*/
+   7, 7, 8, 8, 9, 9, 9, 9,10,10,10,10,10,10,10,10, /*80-8F*/
+  11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11, /*90-9F*/
+  12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12, /*A0-AF*/
+  12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12, /*B0-BF*/
+   1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, /*C0-CF*/
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, /*D0-DF*/
+  13, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, /*E0-EF*/
+  14, 4, 4, 4, 4, 4, 4, 4,15, 5, 5, 5,16, 6,       /*F0-FD*/
+#  ifdef UV_IS_QUAD
+                                            17,    /*FE*/
+#  else
+                                             1,    /*FE*/
+#  endif
+                                                1, /*FF*/
 
-  /* The second part is a transition table that maps a combination
-   * of a state of the automaton and a character class to a state. */
-   0,12,24,36,96,12,12,12,12,12,48,72, 12,12,12,12,12,12,12,12,12,12,12,12,/*23*/
-  12, 0,12,12,12,12,12, 0,12, 0,12,12, 12,24,12,12,12,12,12,24,12,24,12,12,/*47*/
-  12,12,12,12,12,12,12,24,12,12,12,12, 12,24,12,12,12,12,12,12,12,24,12,12,/*71*/
-  12,12,12,12,12,12,12,36,12,36,12,12, 12,36,12,12,12,12,12,36,12,36,12,12,/*95*/
-  12,36,12,12,12,12,12,36,12,36,12,12 /* 96- 107 */
+/* The second part is a transition table that maps a combination
+ * of a state of the automaton and a character class to a new state, called a
+ * node.  The nodes are:
+ * N0     The initial state, and final accepting one.
+ * N1     Any one continuation byte (80-BF) left.  This is transitioned to
+ *        immediately when the start byte indicates a two-byte sequence
+ * N2     Any two continuation bytes left.
+ * N3     Any three continuation bytes left.
+ * N4     Any four continuation bytes left.
+ * N5     Any five continuation bytes left.
+ * N6     Start byte is E0.  Continuation bytes 80-9F are illegal (overlong);
+ *        the other continuations transition to N1
+ * N7     Start byte is F0.  Continuation bytes 80-8F are illegal (overlong);
+ *        the other continuations transition to N2
+ * N8     Start byte is F8.  Continuation bytes 80-87 are illegal (overlong);
+ *        the other continuations transition to N3
+ * N9     Start byte is FC.  Continuation bytes 80-83 are illegal (overlong);
+ *        the other continuations transition to N4
+ * N10    Start byte is FE.  Continuation bytes 80-81 are illegal (overlong);
+ *        the other continuations transition to N5
+ * 1      Reject.  All transitions not mentioned above (except the single
+ *        byte ones (as they are always legal) are to this state.
+ */
 
- /* The customization was to repurpose the surrogates type '4' to instead be
-  * for start bytes F1-F7.  Types 5 and 6 are now unused, and their entries in
-  * the transition part of the table are set to 12, so are illegal.
-  *
-  * To do higher code points would require expansion and some rearrangement of
-  * the table.  The type '1' entries for continuation bytes 80-8f would have to
-  * be split into several types, because they aren't treated uniformly for
-  * higher start bytes, since overlongs for F8 are 80-87; FC: 80-83; and FE:
-  * 80-81.  We start needing to worry about overflow if FE is included.
-  * Ignoring, FE and FF, we could use type 5 for F9-FB, and 6 for FD (remember
-  * from the web site that these are used to right shift).  FE would
-  * necessarily be type 7; and FF, type 8.  And new states would have to be
-  * created for F8 and FC (and FE and FF if used), so quite a bit of work would
-  * be involved.
-  *
-  * XXX Better would be to customize the table so that the noncharacters are
-  * excluded.  This again is non trivial, but doing so would simplify the code
-  * that uses this, and might make it small enough to make it inlinable */
+#    define NUM_CLASSES 18
+#    define N0 0
+#    define N1 ((N0)   + NUM_CLASSES)
+#    define N2 ((N1)   + NUM_CLASSES)
+#    define N3 ((N2)   + NUM_CLASSES)
+#    define N4 ((N3)   + NUM_CLASSES)
+#    define N5 ((N4)   + NUM_CLASSES)
+#    define N6 ((N5)   + NUM_CLASSES)
+#    define N7 ((N6)   + NUM_CLASSES)
+#    define N8 ((N7)   + NUM_CLASSES)
+#    define N9 ((N8)   + NUM_CLASSES)
+#    define N10 ((N9)  + NUM_CLASSES)
+
+/*Class: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17  */
+/*N0*/   0, 1,N1,N2,N3,N4,N5, 1, 1, 1, 1, 1, 1,N6,N7,N8,N9,N10,
+/*N1*/   1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+/*N2*/   1, 1, 1, 1, 1, 1, 1,N1,N1,N1,N1,N1,N1, 1, 1, 1, 1, 1,
+/*N3*/   1, 1, 1, 1, 1, 1, 1,N2,N2,N2,N2,N2,N2, 1, 1, 1, 1, 1,
+/*N4*/   1, 1, 1, 1, 1, 1, 1,N3,N3,N3,N3,N3,N3, 1, 1, 1, 1, 1,
+/*N5*/   1, 1, 1, 1, 1, 1, 1,N4,N4,N4,N4,N4,N4, 1, 1, 1, 1, 1,
+
+/*N6*/   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,N1, 1, 1, 1, 1, 1,
+/*N7*/   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,N2,N2, 1, 1, 1, 1, 1,
+/*N8*/   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,N3,N3,N3, 1, 1, 1, 1, 1,
+/*N9*/   1, 1, 1, 1, 1, 1, 1, 1, 1,N4,N4,N4,N4, 1, 1, 1, 1, 1,
+/*N10*/  1, 1, 1, 1, 1, 1, 1, 1,N5,N5,N5,N5,N5, 1, 1, 1, 1, 1,
 };
 
 #endif
@@ -1656,7 +1728,7 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
     /* Measurements show that this dfa is somewhat faster than the regular code
      * below, so use it first, dropping down for the non-normal cases. */
 
-#  define PERL_UTF8_DECODE_REJECT 12
+#  define PERL_UTF8_DECODE_REJECT 1
 
     while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
         UV type = dfa_tab_for_perl[*s];
@@ -1672,7 +1744,9 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
             * surrogate is the first such possible one), delve further, but we already
             * have calculated 'uv' */
             if (  (flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                           |UTF8_WARN_ILLEGAL_INTERCHANGE))
+                           |UTF8_DISALLOW_PERL_EXTENDED
+                           |UTF8_WARN_ILLEGAL_INTERCHANGE
+                           |UTF8_WARN_PERL_EXTENDED))
                 && uv >= UNICODE_SURROGATE_FIRST)
             {
                 curlen = s + 1 - s0;
