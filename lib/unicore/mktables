@@ -17190,7 +17190,7 @@ Perl can provide access to all non-provisional Unicode character properties,
 though not all are enabled by default.  The omitted ones are the Unihan
 properties (accessible via the CPAN module L<Unicode::Unihan>) and certain
 deprecated or Unicode-internal properties.  (An installation may choose to
-recompile Perl's tables to change this.  See L<Unicode character
+recompile Perl's tables to change this.  See L</Unicode character
 properties that are NOT accepted by Perl>.)
 
 For most purposes, access to Unicode properties from the Perl core is through
@@ -19202,7 +19202,7 @@ EOF_CODE
                         }
 
                         # Make tests for each possible precision from 1 to
-                        # just past the worst case.  
+                        # just past the worst case.
                         my $upper_limit = ($min_e_precision > $min_f_precision)
                                            ? $min_e_precision
                                            : $min_f_precision;
