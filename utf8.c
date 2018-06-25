@@ -1373,7 +1373,7 @@ static U8 utf8d_C9[] = {
  *      FF              1
  */
 
-static const U8 dfa_tab_for_perl[] = {
+static const U8 perl_extended_utf8_dfa_tab[] = {
     /* The first part of the table maps bytes to character classes to reduce
      * the size of the transition table and create bitmasks. */
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
@@ -1731,12 +1731,12 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
 #  define PERL_UTF8_DECODE_REJECT 1
 
     while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
-        UV type = dfa_tab_for_perl[*s];
+        UV type = perl_extended_utf8_dfa_tab[*s];
 
         uv = (state == 0)
              ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
              : UTF8_ACCUMULATE(uv, *s);
-        state = dfa_tab_for_perl[256 + state + type];
+        state = perl_extended_utf8_dfa_tab[256 + state + type];
 
         if (state == 0) {
 
