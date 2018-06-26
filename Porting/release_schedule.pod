@@ -15,11 +15,11 @@ deemed necessary by the Pumpking.
 
 Code freezes (which happen in the 5.29.X series)
 
-  2018-03-20  5.27.7          Contentious changes freeze
-  2018-04-20  5.27.8          User-visible changes to correctly
+  2019-02-20  5.29.8          Contentious changes freeze
+  2019-03-20  5.29.9          User-visible changes to correctly
                               functioning programs freeze
-  2018-05-20  5.27.9          Full code freeze
-  2018-06-20  5.28.0          Stable release!
+  2019-04-20  5.29.10         Full code freeze
+  2019-05-20  5.30.0          Stable release!
 
 =head2 Perl 5.28
 
@@ -60,6 +60,20 @@ B<must> consent to ship the release.
 When shipping a release, you should include the schedule for (at least)
 the next four releases. If a stable version of Perl is released,
 you should reset the version numbers to the next blead series.
+
+=head2 Perl 5.29
+
+  2018-06-??  5.29.0          Sawyer X
+  2018-07-20  5.29.1
+  2018-08-20  5.29.2
+  2018-09-20  5.29.3
+  2018-10-20  5.29.4
+  2018-11-20  5.29.5
+  2018-12-20  5.29.6
+  2019-01-20  5.29.7
+  2019-02-20  5.29.8
+  2019-03-20  5.29.9
+  2019-04-20  5.29.10
 
 =head2 Perl 5.27
 
