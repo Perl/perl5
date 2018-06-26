@@ -258,6 +258,7 @@
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define init_tm(a)		Perl_init_tm(aTHX_ a)
 #define intro_my()		Perl_intro_my(aTHX)
+#define isUTF8_CHAR		S_isUTF8_CHAR
 #define is_c9strict_utf8_string_loclen	S_is_c9strict_utf8_string_loclen
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)

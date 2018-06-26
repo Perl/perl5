@@ -5,6 +5,31 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ *    This file contains tables and code adapted from
+ *    http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which requires this
+ *    copyright notice:
+
+Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+ *
  * This file is a home for static inline functions that cannot go in other
  * header files, because they depend on proto.h (included after most other
  * headers) or struct definitions.
@@ -984,6 +1009,85 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
         return (x == send);
     }
+}
+
+/*
+
+=for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
+that represents some code point; otherwise it evaluates to 0.  If non-zero, the
+value gives how many bytes starting at C<s> comprise the code point's
+representation.  Any bytes remaining before C<e>, but beyond the ones needed to
+form the first code point in C<s>, are not examined.
+
+The code point can be any that will fit in a UV on this machine, using Perl's
+extension to official UTF-8 to represent those higher than the Unicode maximum
+of 0x10FFFF.  That means that this macro is used to efficiently decide if the
+next few bytes in C<s> is legal UTF-8 for a single character.
+
+Use C<L</isSTRICT_UTF8_CHAR>> to restrict the acceptable code points to those
+defined by Unicode to be fully interchangeable across applications;
+C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
+#9|http://www.unicode.org/versions/corrigendum9.html> definition of allowable
+code points; and C<L</isUTF8_CHAR_flags>> for a more customized definition.
+
+Use C<L</is_utf8_string>>, C<L</is_utf8_string_loc>>, and
+C<L</is_utf8_string_loclen>> to check entire strings.
+
+Note that it is deprecated to use code points higher than what will fit in an
+IV.  This macro does not raise any warnings for such code points, treating them
+as valid.
+
+Note also that a UTF-8 INVARIANT character (i.e. ASCII on non-EBCDIC machines)
+is a valid UTF-8 character.
+
+=cut
+
+This uses an adaptation of the table and algorithm given in
+http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+documentation of the original version.  A copyright notice for the original
+version is given at the beginning of this file.  The Perl adapation is
+documented at the definition of perl_extended_utf8_dfa_tab[].
+
+*/
+
+PERL_STATIC_INLINE Size_t
+S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
+{
+    const U8 * s = s0;
+    UV state = 0;
+
+    PERL_ARGS_ASSERT_ISUTF8_CHAR;
+
+    /* This dfa is fast.  If it accepts the input, it was for a well-formed,
+     * code point, which can be returned immediately.  Otherwise, it is either
+     * malformed, or for the start byte FF which the dfa doesn't handle (except
+     * on 32-bit ASCII platforms where it trivially is an error).  Call a
+     * helper function for the other platforms. */
+
+    while (s < e && LIKELY(state != 1)) {
+        state = perl_extended_utf8_dfa_tab[256
+                                         + state
+                                         + perl_extended_utf8_dfa_tab[*s]];
+        if (state != 0) {
+            s++;
+            continue;
+        }
+
+        return s - s0 + 1;
+    }
+
+#if defined(UV_IS_QUAD) || defined(EBCDIC)
+
+    if (NATIVE_UTF8_TO_I8(*s0) == 0xFF && e - s0 >= UTF8_MAXBYTES) {
+       return _is_utf8_char_helper(s0, e, 0);
+    }
+
+#endif
+
+    return 0;
 }
 
 /*

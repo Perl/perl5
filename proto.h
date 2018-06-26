@@ -1403,6 +1403,13 @@ PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool warn_on_fail);
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE Size_t	S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ISUTF8_CHAR	\
+	assert(s0); assert(e)
+#endif
+
 /* PERL_CALLCONV bool	Perl_is_ascii_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */

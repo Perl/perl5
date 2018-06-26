@@ -1652,16 +1652,7 @@ SURROGATE: Surrogate code points
 # that have that start byte.  In other words, it is the natural stopping place
 # that includes all Unicode code points.
 #
-#UTF8_CHAR: Matches legal UTF-8 variant code points up through the 0x1FFFFFF
-#=> UTF8 :no_length_checks only_ascii_platform
-#0x80 - 0x1FFFFF
-
-#UTF8_CHAR: Matches legal UTF-EBCDIC variant code points up through 0x1FFFFFF
-#=> UTF8 :no_length_checks only_ebcdic_platform
-#0xA0 - 0x1FFFFF
-
 #STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points, no surrrogates nor non-character code points
-#=> UTF8 :no_length_checks only_ascii_platform
 #0x0080 - 0xD7FF
 #0xE000 - 0xFDCF
 #0xFDF0 - 0xFFFD
