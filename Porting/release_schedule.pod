@@ -63,7 +63,7 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.29
 
-  2018-06-??  5.29.0          Sawyer X
+  2018-06-26  5.29.0 ✓        Sawyer X
   2018-07-20  5.29.1
   2018-08-20  5.29.2
   2018-09-20  5.29.3
