@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.0 - Erle Stanley Gardner, The Case of the Grinning Gorilla
+
+Announced on 2018-06-26
+
+  Courage is the only antidote for danger
+
 =head2 v5.28.0 - Martin Luther King, Jr., 1967
 
 Announced on 2018-06-22 by Sawyer X
