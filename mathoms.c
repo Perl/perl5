@@ -819,7 +819,7 @@ C<unpackstring> instead.
 
 =cut */
 
-SSize_t
+I32
 Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 		const char *strbeg, const char *strend, char **new_s, I32 ocnt,
 		U32 flags)
@@ -1081,7 +1081,6 @@ Perl_sv_eq(pTHX_ SV *sv1, SV *sv2)
 char *
 Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
 {
-    PERL_ARGS_ASSERT_SV_COLLXFRM;
     return sv_collxfrm_flags(sv, nxp, SV_GMAGIC);
 }
 
@@ -1101,7 +1100,6 @@ Perl_mem_collxfrm(pTHX_ const char *input_string, STRLEN len, STRLEN *xlen)
 bool
 Perl_sv_2bool(pTHX_ SV *const sv)
 {
-    PERL_ARGS_ASSERT_SV_2BOOL;
     return sv_2bool_flags(sv, SV_GMAGIC);
 }
 
@@ -1692,6 +1690,36 @@ Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
+}
+
+/*
+=for apidoc utf8_to_uvchr
+
+Returns the native code point of the first character in the string C<s>
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Some, but not all, UTF-8 malformations are detected, and in fact, some
+malformed input could cause reading beyond the end of the input buffer, which
+is why this function is deprecated.  Use L</utf8_to_uvchr_buf> instead.
+
+If C<s> points to one of the detected malformations, and UTF8 warnings are
+enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
+C<NULL>) to -1.  If those warnings are off, the computed value if well-defined (or
+the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
+is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
+
+=cut
+*/
+
+UV
+Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR;
+
+    return utf8_to_uvchr_buf(s, s + UTF8_MAXBYTES, retlen);
 }
 
 /*

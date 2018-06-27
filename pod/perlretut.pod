@@ -170,16 +170,10 @@ always match at the earliest possible point in the string:
 
 With respect to character matching, there are a few more points you
 need to know about.   First of all, not all characters can be used "as
-is" in a match.  Some characters, called I<metacharacters>, are
-generally reserved for use in regexp notation.  The metacharacters are
+is" in a match.  Some characters, called I<metacharacters>, are reserved
+for use in regexp notation.  The metacharacters are
 
-    {}[]()^$.|*+?-#\
-
-This list is not as definitive as it may appear (or be claimed to be in
-other documentation).  For example, C<"#"> is a metacharacter only when
-the C</x> pattern modifier (described below) is used, and both C<"}">
-and C<"]"> are metacharacters only when paired with opening C<"{"> or
-C<"["> respectively; other gotchas apply.
+    {}[]()^$.|*+?-\
 
 The significance of each of these will be explained
 in the rest of the tutorial, but for now, it is important only to know
@@ -880,7 +874,7 @@ matching operation combines the three patterns as alternatives:
     $fmt1 = '(?<y>\d\d\d\d)-(?<m>\d\d)-(?<d>\d\d)';
     $fmt2 = '(?<m>\d\d)/(?<d>\d\d)/(?<y>\d\d\d\d)';
     $fmt3 = '(?<d>\d\d)\.(?<m>\d\d)\.(?<y>\d\d\d\d)';
-    for my $d (qw(2006-10-21 15.01.2007 10/31/2005)) {
+    for my $d qw( 2006-10-21 15.01.2007 10/31/2005 ){
         if ( $d =~ m{$fmt1|$fmt2|$fmt3} ){
             print "day=$+{d} month=$+{m} year=$+{y}\n";
         }
@@ -2361,18 +2355,6 @@ by looking ahead and behind:
                   | (?<=-)  (?=\S)   # a '-' followed by any non-space
                   /x, $str;          # @toks = qw(one two - - - 6 - 8)
 
-Starting in Perl 5.28, experimentally, alphabetic equivalents to these
-assertions are added, so you can use whichever is most memorable for
-your tastes.
-
- (?=...)        (*pla:...) or (*positive_lookahead:...)
- (?!...)        (*nla:...) or (*negative_lookahead:...)
- (?<=...)       (*plb:...) or (*positive_lookbehind:...)
- (?<!...)       (*nlb:...) or (*negative_lookbehind:...)
- (?>...)        (*atomic:...)
-
-Using any of these will raise (unless turned off) a warning in the
-C<experimental::alpha_assertions> category.
 
 =head2 Using independent subexpressions to prevent backtracking
 

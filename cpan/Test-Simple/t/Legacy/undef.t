@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# HARNESS-NO-FORK
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -79,18 +78,13 @@ warnings_like(qr/Use of uninitialized value.* at \(eval in cmp_ok\) $Filename li
 
 my $tb = Test::More->builder;
 
-SKIP: {
-    skip("Test cannot be run with this formatter", 2)
-        unless $tb->{Stack}->top->format->isa('Test::Builder::Formatter');
+my $err = '';
+$tb->failure_output(\$err);
+diag(undef);
+$tb->reset_outputs;
 
-    my $err = '';
-    $tb->failure_output(\$err);
-    diag(undef);
-    $tb->reset_outputs;
-
-    is( $err, "# undef\n" );
-    no_warnings;
-}
+is( $err, "# undef\n" );
+no_warnings;
 
 
 $tb->maybe_regex(undef);

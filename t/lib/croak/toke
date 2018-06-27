@@ -92,11 +92,6 @@ Can't find string terminator "/" anywhere before EOF at - line 1.
 EXPECT
 Can't find string terminator "'" anywhere before EOF at - line 1.
 ########
-# NAME Unterminated ""
-"
-EXPECT
-Can't find string terminator '"' anywhere before EOF at - line 1.
-########
 # NAME Unterminated q// with non-ASCII delimiter, under utf8
 BEGIN { binmode STDERR, ":utf8" }
 use utf8;
@@ -137,12 +132,6 @@ use 5.01;
 state sub;
 EXPECT
 Missing name in "state sub" at - line 2.
-########
-# NAME our sub pack::foo
-our sub foo::bar;
-EXPECT
-No package name allowed for subroutine &foo::bar in "our" at - line 1, near "our sub foo::bar"
-Execution of - aborted due to compilation errors.
 ########
 # NAME my sub pack::foo
 use feature 'lexical_subs', 'state';
@@ -289,44 +278,6 @@ Too many arguments for undef operator at - line 11, near "2)"
 Constant(q) unknown at - line 12, near ""a""
 - has too many errors.
 ########
-# NAME Bad name after ' (with other helpful messages)
-sub has{}
-has erdef => (
-    isa => 'Int',
-    is => 'ro,
-    default => sub { 1 }
-);
-
-has cxxc => (
-    isa => 'Int',
-    is => 'ro',
-    default => sub { 1 }
-);
-EXPECT
-Bareword found where operator expected at - line 9, near "isa => 'Int"
-  (Might be a runaway multi-line '' string starting on line 4)
-	(Do you need to predeclare isa?)
-Bad name after Int' at - line 9.
-########
-# NAME Bad name after :: (with other helpful messages)
-sub has{}
-has erdef => (
-    isa => 'Int',
-    is => "ro,
-    default => sub { 1 }
-);
-
-has cxxc => (
-    isa => "Foo::$subpackage",
-    is => 'ro',
-    default => sub { 1 }
-);
-EXPECT
-Bareword found where operator expected at - line 9, near "isa => "Foo"
-  (Might be a runaway multi-line "" string starting on line 4)
-	(Do you need to predeclare isa?)
-Bad name after Foo:: at - line 9.
-########
 # NAME Unterminated delimiter for here document
 <<"foo
 EXPECT
@@ -419,64 +370,4 @@ Execution of - aborted due to compilation errors.
 tr/\o-0//;
 EXPECT
 Missing braces on \o{} at - line 2, within string
-Execution of - aborted due to compilation errors.
-########
-# NAME bare <<
-$a = <<;
-
-EXPECT
-Use of bare << to mean <<"" is forbidden at - line 1.
-########
-# NAME bare <<~
-$a = <<~;
-EXPECT
-Use of bare << to mean <<"" is forbidden at - line 1.
-########
-# NAME bare <<~
-$a = <<~ ;
-
-EXPECT
-Use of bare << to mean <<"" is forbidden at - line 1.
-########
-# NAME incomplete floating point decimal exponent (#131725)
-1e--5
-EXPECT
-Bareword found where operator expected at - line 1, near "1e"
-	(Missing operator before e?)
-Number found where operator expected at - line 1, near "--5"
-	(Missing operator before 5?)
-syntax error at - line 1, near "1e"
-Execution of - aborted due to compilation errors.
-########
-# NAME signature with non-"=" assignop #131777
-use feature 'signatures';
-no warnings 'experimental::signatures';
-sub foo ($a += 1)
-EXPECT
-Illegal operator following parameter in a subroutine signature at - line 3, near "($a += 1"
-syntax error at - line 3, near "($a += 1"
-Execution of - aborted due to compilation errors.
-########
-# NAME tr/// range with empty \N{} at the start
-tr//\N{}-0/;
-EXPECT
-Unknown charname '' at - line 1, within string
-Execution of - aborted due to compilation errors.
-########
-# NAME octal fp with non-octal digits after the decimal point
-01.1234567p0;
-07.8p0;
-EXPECT
-Bareword found where operator expected at - line 2, near "8p0"
-	(Missing operator before p0?)
-syntax error at - line 2, near "8p0"
-Execution of - aborted due to compilation errors.
-########
-# NAME binary fp with non-binary digits after the decimal point
-0b1.10p0;
-0b1.2p0;
-EXPECT
-Bareword found where operator expected at - line 2, near "2p0"
-	(Missing operator before p0?)
-syntax error at - line 2, near "2p0"
 Execution of - aborted due to compilation errors.

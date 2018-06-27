@@ -13,116 +13,10 @@ BEGIN {
 
 $|=1;
 
+no warnings 'deprecated'; # Some of the below are above IV_MAX on 32 bit
+                          # machines, and that is tested elsewhere
+
 use XS::APItest;
-use Config;
-my $word_length = defined $Config{quadkind} ? 8 : 4;
-
-# Below we test some byte-oriented functions that look for UTF-8 variant bytes
-# and we know can work on full words at a time.  Hence this is not black box
-# testing.  We know how long a word is.  Suppose it is 4.  We set things up so
-# that we have a string containing 3 bytes followed by 4, followed by 3, and
-# we tell our APItest functions to position the string so it starts at 1 byte
-# past a word boundary.  That way the first 3 bytes are the final ones of a
-# word, and the final 3 are the initial ones of a non-complete word.  This
-# assumes that the initial and final non-full word bytes are treated
-# individually, so we don't have to test the various combinations of partially
-# filled words.
-
-my $offset = 1;  # Start 1 byte past word boundary.
-
-# We choose an invariant and a variant that are at the boundaries between
-# those two types on ASCII platforms.  And, just in case the EBCDIC ever
-# changes to do per-word, we choose arbitrarily an invariant that has most of
-# its bits set natively, and a variant that has most unset.   First create
-# versions for display in the test names.
-my $display_invariant = isASCII ? "7F" : sprintf "%02X", utf8::unicode_to_native(0x9F);
-my $display_variant =   isASCII ? "80" : sprintf "%02X", utf8::unicode_to_native(0xA0);
-my $invariant = chr hex $display_invariant;
-my $variant = chr hex $display_variant;
-
-# We create a string with the correct number of bytes.  The -1 is to make the
-# final portion not quite fill a full word and $offset to do the same for the
-# initial portion.)
-my $string_length = 3 * $word_length - 1 - $offset;
-my $all_invariants = $invariant x $string_length;
-my $display_all_invariants = $display_invariant x $string_length;
-
-my $ret_ref = test_is_utf8_invariant_string_loc($all_invariants, $offset,
-                                                length $all_invariants);
-pass("The tests below are for is_utf8_invariant_string_loc() with string"
-   . " starting $offset bytes after a word boundary");
-is($ret_ref->[0], 1, "$display_all_invariants contains no variants");
-
-# Just create a string with a single variant, in all the possible positions.
-for my $pos (0.. length($all_invariants) - 1) {
-    my $test_string = $all_invariants;
-    my $test_display = $display_all_invariants;
-
-    substr($test_string, $pos, 1) = $variant;
-    substr($test_display, $pos * 2, 2) = $display_variant;
-    my $ret_ref = test_is_utf8_invariant_string_loc($test_string, $offset,
-                                                    length $test_string);
-    if (is($ret_ref->[0], 0, "$test_display has a variant")) {
-        is($ret_ref->[1], $pos, "   at position $pos");
-    }
-}
-
-# Now work on variant_under_utf8_count().
-pass("The tests below are for variant_under_utf8_count() with string"
-   . " starting $offset bytes after a word boundary");
-is(test_variant_under_utf8_count($all_invariants, $offset,
-                                length $all_invariants),
-                                0,
-                                "$display_all_invariants contains 0 variants");
-
-# First, put a variant in each possible position in the flanking partial words
-for my $pos (0 .. $word_length - $offset,
-             2 * $word_length .. length($all_invariants) - 1)
-{
-    my $test_string = $all_invariants;
-    my $test_display = $display_all_invariants;
-
-    substr($test_string, $pos, 1) = $variant;
-    substr($test_display, $pos * 2, 2) = $display_variant;
-    is(test_variant_under_utf8_count($test_string, $offset, length $test_string),
-                                     1,
-                                     "$test_display contains 1 variant");
-}
-
-# Then try all possible combinations of variant/invariant in the full word in
-# the middle  (We've already tested the case with 0 variants, so start at 1.)
-for my $bit_pattern (1 .. (1 << $word_length) - 1) {
-    my $bits = $bit_pattern;
-    my $display_word = "";
-    my $test_word = "";
-    my $count = 0;
-
-    # Every 1 bit gets the variant for this particular $bit_pattern.
-    for my $bit (0 .. 7) {
-        if ($bits & 1) {
-            $count++;
-            $test_word .= $variant;
-            $display_word .= $display_variant;
-        }
-        else {
-            $test_word .= $invariant;
-            $display_word .= $display_invariant;
-        }
-        $bits >>= 1;
-    }
-
-    my $test_string = $variant x ($word_length - 1)
-                    . $test_word
-                    . $variant x ($word_length - 1);
-    my $display_string = $display_variant x ($word_length - 1)
-                        . $display_word
-                        . $display_variant x ($word_length - 1);
-    my $expected_count = $count + 2 * $word_length - 2;
-    is(test_variant_under_utf8_count($test_string, $offset,
-                        length $test_string), $expected_count,
-                        "$display_string contains $expected_count variants");
-}
-
 
 my $pound_sign = chr utf8::unicode_to_native(163);
 
@@ -138,8 +32,8 @@ my $look_for_everything_utf8n_to
 			| $::UTF8_WARN_NONCHAR
 			| $::UTF8_DISALLOW_SUPER
 			| $::UTF8_WARN_SUPER
-			| $::UTF8_DISALLOW_PERL_EXTENDED
-			| $::UTF8_WARN_PERL_EXTENDED;
+			| $::UTF8_DISALLOW_ABOVE_31_BIT
+			| $::UTF8_WARN_ABOVE_31_BIT;
 my $look_for_everything_uvchr_to
                         = $::UNICODE_DISALLOW_SURROGATE
 			| $::UNICODE_WARN_SURROGATE
@@ -147,10 +41,8 @@ my $look_for_everything_uvchr_to
 			| $::UNICODE_WARN_NONCHAR
 			| $::UNICODE_DISALLOW_SUPER
 			| $::UNICODE_WARN_SUPER
-			| $::UNICODE_DISALLOW_PERL_EXTENDED
-			| $::UNICODE_WARN_PERL_EXTENDED;
-
-my $highest_non_extended_cp = 2 ** ((isASCII) ? 31 : 30) - 1;
+			| $::UNICODE_DISALLOW_ABOVE_31_BIT
+			| $::UNICODE_WARN_ABOVE_31_BIT;
 
 foreach ([0, '', '', 'empty'],
 	 [0, 'N', 'N', '1 char'],
@@ -167,10 +59,10 @@ foreach ([0, '', '', 'empty'],
     my ($expect, $left, $right, $desc) = @$_;
     my $copy = $right;
     utf8::encode($copy);
-    is(bytes_cmp_utf8($left, $copy), $expect, "bytes_cmp_utf8: $desc");
+    is(bytes_cmp_utf8($left, $copy), $expect, $desc);
     next if $right =~ tr/\0-\377//c;
     utf8::encode($left);
-    is(bytes_cmp_utf8($right, $left), -$expect, "... and $desc reversed");
+    is(bytes_cmp_utf8($right, $left), -$expect, "$desc reversed");
 }
 
 # The keys to this hash are Unicode code points, their values are the native
@@ -180,9 +72,9 @@ foreach ([0, '', '', 'empty'],
 # are adjacent to problematic code points, so we want to make sure they aren't
 # considered problematic.
 my %code_points = (
-    0x0100     => (isASCII) ? "\xc4\x80"     : I8_to_native("\xc8\xa0"),
-    0x0400 - 1 => (isASCII) ? "\xcf\xbf"     : I8_to_native("\xdf\xbf"),
-    0x0400     => (isASCII) ? "\xd0\x80"     : I8_to_native("\xe1\xa0\xa0"),
+    0x0100     => (isASCII) ? "\xc4\x80" : I8_to_native("\xc8\xa0"),
+    0x0400 - 1 => (isASCII) ? "\xcf\xbf" : I8_to_native("\xdf\xbf"),
+    0x0400     => (isASCII) ? "\xd0\x80" : I8_to_native("\xe1\xa0\xa0"),
     0x0800 - 1 => (isASCII) ? "\xdf\xbf"     : I8_to_native("\xe1\xbf\xbf"),
     0x0800     => (isASCII) ? "\xe0\xa0\x80" : I8_to_native("\xe2\xa0\xa0"),
     0x4000 - 1 => (isASCII) ? "\xe3\xbf\xbf" : I8_to_native("\xef\xbf\xbf"),
@@ -203,10 +95,11 @@ my %code_points = (
     0xD7FF     => (isASCII) ? "\xed\x9f\xbf" : I8_to_native("\xf1\xb5\xbf\xbf"),
     0xD800     => (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
     0xDC00     => (isASCII) ? "\xed\xb0\x80" : I8_to_native("\xf1\xb7\xa0\xa0"),
+    0xDFFF     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
     0xDFFF     => (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
     0xE000     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
 
-    # Include the 32 contiguous non characters, and adjacent code points
+    # Include the 32 contiguous non characters, and surrounding code points
     0xFDCF     => (isASCII) ? "\xef\xb7\x8f" : I8_to_native("\xf1\xbf\xae\xaf"),
     0xFDD0     => (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
     0xFDD1     => (isASCII) ? "\xef\xb7\x91" : I8_to_native("\xf1\xbf\xae\xb1"),
@@ -491,18 +384,16 @@ my %code_points = (
     0x80000000 - 1 =>
     (isASCII) ?    "\xfd\xbf\xbf\xbf\xbf\xbf"
     : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf"),
+    0x80000000     =>
+    (isASCII) ?    "\xfe\x82\x80\x80\x80\x80\x80"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+    0xFFFFFFFF     =>
+    (isASCII) ?    "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
 );
 
 if ($::is64bit) {
     no warnings qw(overflow portable);
-    $code_points{0x80000000}
-    = (isASCII)
-    ?              "\xfe\x82\x80\x80\x80\x80\x80"
-    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0");
-    $code_points{0xFFFFFFFF}
-    = (isASCII)
-    ?              "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
-    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf");
     $code_points{0x100000000}
      = (isASCII)
      ?              "\xfe\x84\x80\x80\x80\x80\x80"
@@ -515,17 +406,10 @@ if ($::is64bit) {
      = (isASCII)
      ?              "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
      : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0");
-    $code_points{0x7FFFFFFFFFFFFFFF}
+    $code_points{0xFFFFFFFFFFFFFFFF}
      = (isASCII)
-     ?              "\xff\x80\x87\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-     : I8_to_native("\xff\xa7\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
-
-    # This is used when UV_MAX is the upper limit of acceptable code points
-    # $code_points{0xFFFFFFFFFFFFFFFF}
-    # = (isASCII)
-    # ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-    # : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
-
+     ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+     : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
     if (isASCII) {  # These could falsely show as overlongs in a naive
                     # implementation
         $code_points{0x40000000000}
@@ -565,17 +449,17 @@ while ($cp < ((isASCII) ? 128 : 160)) {   # This is from the definition of
 # continuation bytes can be in, and what the lowest start byte can be.  So we
 # cycle through them.
 
-my $highest_continuation = 0xBF;
+my $final_continuation = 0xBF;
 my $start = (isASCII) ? 0xC2 : 0xC5;
 
-my $continuation = $::lowest_continuation - 1;
+my $continuation = $::first_continuation - 1;
 
 while ($cp < 255) {
-    if (++$continuation > $highest_continuation) {
+    if (++$continuation > $final_continuation) {
 
         # Wrap to the next start byte when we reach the final continuation
         # byte possible
-        $continuation = $::lowest_continuation;
+        $continuation = $::first_continuation;
         $start++;
     }
     $code_points{$cp} = I8_to_native(chr($start) . chr($continuation));
@@ -589,6 +473,11 @@ use warnings 'utf8';
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
 my %restriction_types;
+
+$restriction_types{""}{'valid_strings'} = "";
+$restriction_types{"c9strict"}{'valid_strings'} = "";
+$restriction_types{"strict"}{'valid_strings'} = "";
+$restriction_types{"fits_in_31_bits"}{'valid_strings'} = "";
 
 # This set of tests looks for basic sanity, and lastly tests various routines
 # for the given code point.  If the earlier tests for that code point fail,
@@ -731,15 +620,15 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     my $valid_under_strict = 1;
     my $valid_under_c9strict = 1;
-    my $valid_for_not_extended_utf8 = 1;
+    my $valid_for_fits_in_31_bits = 1;
     if ($n > 0x10FFFF) {
         $this_utf8_flags &= ~($::UTF8_DISALLOW_SUPER|$::UTF8_WARN_SUPER);
         $valid_under_strict = 0;
         $valid_under_c9strict = 0;
-        if ($n > $highest_non_extended_cp) {
+        if ($n > 2 ** 31 - 1) {
             $this_utf8_flags &=
-                ~($::UTF8_DISALLOW_PERL_EXTENDED|$::UTF8_WARN_PERL_EXTENDED);
-            $valid_for_not_extended_utf8 = 0;
+                        ~($::UTF8_DISALLOW_ABOVE_31_BIT|$::UTF8_WARN_ABOVE_31_BIT);
+            $valid_for_fits_in_31_bits = 0;
         }
     }
     elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
@@ -893,20 +782,19 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     # Similarly for uvchr_to_utf8
     my $this_uvchr_flags = $look_for_everything_uvchr_to;
-    if ($n > $highest_non_extended_cp) {
+    if ($n > 2 ** 31 - 1) {
         $this_uvchr_flags &=
-            ~($::UNICODE_DISALLOW_PERL_EXTENDED|$::UNICODE_WARN_PERL_EXTENDED);
+                ~($::UNICODE_DISALLOW_ABOVE_31_BIT|$::UNICODE_WARN_ABOVE_31_BIT);
     }
     if ($n > 0x10FFFF) {
         $this_uvchr_flags &= ~($::UNICODE_DISALLOW_SUPER|$::UNICODE_WARN_SUPER);
     }
     elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
-        $this_uvchr_flags
-                     &= ~($::UNICODE_DISALLOW_NONCHAR|$::UNICODE_WARN_NONCHAR);
+        $this_uvchr_flags &= ~($::UNICODE_DISALLOW_NONCHAR|$::UNICODE_WARN_NONCHAR);
     }
     elsif ($n >= 0xD800 && $n <= 0xDFFF) {
         $this_uvchr_flags
-                &= ~($::UNICODE_DISALLOW_SURROGATE|$::UNICODE_WARN_SURROGATE);
+                     &= ~($::UNICODE_DISALLOW_SURROGATE|$::UNICODE_WARN_SURROGATE);
     }
     $display_flags = sprintf "0x%x", $this_uvchr_flags;
 
@@ -956,17 +844,17 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
                                 = $restriction_types{"strict"}{'valid_counts'};
     }
 
-    if ($valid_for_not_extended_utf8) {
-        $restriction_types{"not_extended_utf8"}{'valid_strings'} .= $bytes;
-        $restriction_types{"not_extended_utf8"}{'valid_counts'}++;
+    if ($valid_for_fits_in_31_bits) {
+        $restriction_types{"fits_in_31_bits"}{'valid_strings'} .= $bytes;
+        $restriction_types{"fits_in_31_bits"}{'valid_counts'}++;
     }
     elsif (! exists
-                $restriction_types{"not_extended_utf8"}{'first_invalid_offset'})
+                $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'})
     {
-        $restriction_types{"not_extended_utf8"}{'first_invalid_offset'}
-                = length $restriction_types{"not_extended_utf8"}{'valid_strings'};
-        $restriction_types{"not_extended_utf8"}{'first_invalid_count'}
-                        = $restriction_types{"not_extended_utf8"}{'valid_counts'};
+        $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'}
+                = length $restriction_types{"fits_in_31_bits"}{'valid_strings'};
+        $restriction_types{"fits_in_31_bits"}{'first_invalid_count'}
+                        = $restriction_types{"fits_in_31_bits"}{'valid_counts'};
     }
 }
 
@@ -986,7 +874,7 @@ for my $restriction (sort keys %restriction_types) {
         # and the specially named foo function.  But not if there isn't such a
         # specially named function.  Currently, this is the only tested
         # restriction that doesn't have a specially named function
-        next if $use_flags eq "" && $restriction eq "not_extended_utf8";
+        next if $use_flags eq "" && $restriction eq "fits_in_31_bits";
 
         # Start building up the name of the function we will test.
         my $base_name = "is_";
@@ -998,7 +886,7 @@ for my $restriction (sort keys %restriction_types) {
         # We test both "is_utf8_string_foo" and "is_fixed_width_buf" functions
         foreach my $operand ('string', 'fixed_width_buf') {
 
-            # Currently, only fixed_width_buf functions have the '_flags'
+            # Currently, the only fixed_width_buf functions have the '_flags'
             # suffix.
             next if $operand eq 'fixed_width_buf' && $use_flags eq "";
 
@@ -1013,7 +901,7 @@ for my $restriction (sort keys %restriction_types) {
                 #      continuation character to the valid string
                 #   c) input created by appending a partial character.  This
                 #      is valid in the 'fixed_width' functions, but invalid in
-                #      the 'string' ones
+                #   the 'string' ones
                 #   d) invalid input created by calling a function that is
                 #      expecting a restricted form of the input using the string
                 #      that's valid when unrestricted
@@ -1057,29 +945,42 @@ for my $restriction (sort keys %restriction_types) {
                                         = 0 if $operand eq "fixed_width_buf";
                             }
                         }
-                        elsif (! exists $restriction_types
-                                    {$this_error_type}{'first_invalid_count'})
-                        {
-                            # If no errors were found, this is entirely valid.
-                            $this_error_type = 0;
-                        }
                         else {
+                            $test_name_suffix
+                                        = " if contains forbidden code points";
+                            if ($this_error_type eq "c9strict") {
+                                $bytes = $restriction_types{""}{'valid_strings'};
+                                $expected_offset
+                                 = $restriction_types{"c9strict"}
+                                                     {'first_invalid_offset'};
+                                $expected_count
+                                  = $restriction_types{"c9strict"}
+                                                      {'first_invalid_count'};
+                            }
+                            elsif ($this_error_type eq "strict") {
+                                $bytes = $restriction_types{""}{'valid_strings'};
+                                $expected_offset
+                                  = $restriction_types{"strict"}
+                                                      {'first_invalid_offset'};
+                                $expected_count
+                                  = $restriction_types{"strict"}
+                                                      {'first_invalid_count'};
 
-                            if (! exists $restriction_types{$this_error_type}) {
+                            }
+                            elsif ($this_error_type eq "fits_in_31_bits") {
+                                $bytes = $restriction_types{""}{'valid_strings'};
+                                $expected_offset
+                                  = $restriction_types{"fits_in_31_bits"}
+                                                      {'first_invalid_offset'};
+                                $expected_count
+                                    = $restriction_types{"fits_in_31_bits"}
+                                                        {'first_invalid_count'};
+                            }
+                            else {
                                 fail("Internal test error: Unknown error type "
                                 . "'$this_error_type'");
                                 next;
                             }
-                            $test_name_suffix
-                                        = " if contains forbidden code points";
-
-                            $bytes = $restriction_types{""}{'valid_strings'};
-                            $expected_offset
-                                 = $restriction_types{$this_error_type}
-                                                     {'first_invalid_offset'};
-                            $expected_count
-                                  = $restriction_types{$this_error_type }
-                                                      {'first_invalid_count'};
                         }
                     }
 
@@ -1106,8 +1007,8 @@ for my $restriction (sort keys %restriction_types) {
                             elsif ($restriction eq "strict") {
                                 $test .= ", $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE";
                             }
-                            elsif ($restriction eq "not_extended_utf8") {
-                                $test .= ", $::UTF8_DISALLOW_PERL_EXTENDED";
+                            elsif ($restriction eq "fits_in_31_bits") {
+                                $test .= ", $::UTF8_DISALLOW_ABOVE_31_BIT";
                             }
                             else {
                                 fail("Internal test error: Unknown restriction "

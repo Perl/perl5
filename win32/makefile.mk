@@ -2,12 +2,11 @@
 # Makefile to build perl on Windows using DMAKE.
 # Supported compilers:
 #	Microsoft Visual C++ 6.0 or later
-#	MinGW with gcc-3.4.5 or later with runtime < 3.21
-#	MinGW64 with gcc-4.4.3 or later
+#	MinGW with gcc-3.4.5 or later
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl529.dll).  Also makes individual DLLs for the XS extensions.
+# (perl526.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -45,7 +44,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	*= \5.29.0
+#INST_VER	*= \5.26.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -106,15 +105,7 @@ USE_LARGE_FILES	*= define
 # Uncomment this if you want to support the use of long doubles in GCC builds.
 # This option is not supported for MSVC builds.
 #
-#USE_LONG_DOUBLE *= define
-
-#
-# Uncomment this if you want to build perl with __USE_MINGW_ANSI_STDIO defined.
-# (If you're building perl with USE_LONG_DOUBLE defined then
-# __USE_MINGW_ANSI_STDIO will be defined whether or not this is uncommented.)
-# This option is not supported for MSVC builds.
-#
-#USE_MINGW_ANSI_STDIO *= define
+#USE_LONG_DOUBLE *=define
 
 #
 # Comment this out if you want the legacy default behavior of including '.' at
@@ -127,7 +118,7 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 # HKEY_CURRENT_USER\Software\Perl and HKEY_LOCAL_MACHINE\Software\Perl in
 # the Registry.
 #
-#USE_NO_REGISTRY *= define
+#USE_NO_REGISTRY *=define
 
 #
 # uncomment exactly one of the following
@@ -140,19 +131,31 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 #CCTYPE		*= MSVC70FREE
 # Windows Server 2003 SP1 Platform SDK (April 2005)
 #CCTYPE		= SDK2003SP1
-# Visual C++ 2005 (aka Visual C++ 8.0) (full version or Express Edition)
+# Visual C++ 2005 (aka Visual C++ 8.0) (full version)
 #CCTYPE		*= MSVC80
-# Visual C++ 2008 (aka Visual C++ 9.0) (full version or Express Edition)
+# Visual C++ 2005 Express Edition (aka Visual C++ 8.0) (free version)
+#CCTYPE		*= MSVC80FREE
+# Visual C++ 2008 (aka Visual C++ 9.0) (full version)
 #CCTYPE		*= MSVC90
-# Visual C++ 2010 (aka Visual C++ 10.0) (full version or Express Edition)
+# Visual C++ 2008 Express Edition (aka Visual C++ 9.0) (free version)
+#CCTYPE		*= MSVC90FREE
+# Visual C++ 2010 (aka Visual C++ 10.0) (full version)
 #CCTYPE		= MSVC100
-# Visual C++ 2012 (aka Visual C++ 11.0) (full version or Express Edition)
+# Visual C++ 2010 Express Edition (aka Visual C++ 10.0) (free version)
+#CCTYPE		= MSVC100FREE
+# Visual C++ 2012 (aka Visual C++ 11.0) (full version)
 #CCTYPE		= MSVC110
-# Visual C++ 2013 (aka Visual C++ 12.0) (full version or Express Edition)
+# Visual C++ 2012 Express Edition (aka Visual C++ 11.0) (free version)
+#CCTYPE		= MSVC110FREE
+# Visual C++ 2013 (aka Visual C++ 12.0) (full version)
 #CCTYPE		= MSVC120
-# Visual C++ 2015 (aka Visual C++ 14.0) (full version or Express Edition)
+# Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
+#CCTYPE		= MSVC120FREE
+# Visual C++ 2015 (aka Visual C++ 14.0) (full version)
 #CCTYPE		= MSVC140
-# Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
+# Visual C++ 2015 Express Edition (aka Visual C++ 14.0) (free version)
+#CCTYPE		= MSVC140FREE
+# Visual C++ 2017 (aka Visual C++ 14.1) (all versions)
 #CCTYPE		= MSVC141
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		= GCC
@@ -221,17 +224,17 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl529s.lib will also be created.
+# variables below. A static library perl526s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	*= define
 
 #
 # in addition to BUILD_STATIC the option ALL_STATIC makes *every*
-# extension get statically built.
+# extension get statically built
 # This will result in a very large perl executable, but the main purpose
 # is to have proper linking set so as to be able to create miscellaneous
-# executables with different built-in extensions. It implies BUILD_STATIC.
+# executables with different built-in extensions
 #
 #ALL_STATIC	*= define
 
@@ -519,7 +522,7 @@ LIB32		= $(ARCHPREFIX)ar rc
 IMPLIB		= $(ARCHPREFIX)dlltool
 RSC		= $(ARCHPREFIX)windres
 
-.IF "$(USE_LONG_DOUBLE)" == "define" || "$(USE_MINGW_ANSI_STDIO)" == "define"
+.IF "$(USE_LONG_DOUBLE)" == "define"
 BUILDOPT        += -D__USE_MINGW_ANSI_STDIO
 MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 .ENDIF
@@ -640,7 +643,8 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrt.lib
 .ELSE
 LIBC		= msvcrt.lib
@@ -653,7 +657,8 @@ LINK_DBG	= -debug
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
 .ELIF  "$(CFG)" == "DebugFull"
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrtd.lib
 .ELSE
 LIBC		= msvcrtd.lib
@@ -690,8 +695,9 @@ OPTIMIZE	+= -fp:precise
 DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
-# Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+# Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 .ENDIF
 
@@ -714,7 +720,8 @@ LIBBASEFILES	= oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 	netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib version.lib \
 	odbc32.lib odbccp32.lib comctl32.lib
 
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 .IF "$(CFG)" == "DebugFull"
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 .ELSE
@@ -775,7 +782,8 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
 # Console vs GUI makes no difference for DLLs, so use default for cleaner
 # building cmd lines
-.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
+.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC120FREE" \
+    || "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
 .IF "$(WIN64)" == "define"
 LINK_FLAGS	+= -subsystem:console,"5.02"
 .ELSE
@@ -920,8 +928,8 @@ UTILS		=			\
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl529$(a)
-PERLSTATICLIB	= ..\libperl529s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl526$(a)
+PERLSTATICLIB	= ..\libperl526s$(a)
 INT64		= long long
 
 .ELSE
@@ -934,11 +942,10 @@ INT64		= __int64
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= $(COREDIR)\perl529$(a)
-PERLEXPLIB	*= $(COREDIR)\perl529.exp
-PERLSTATICLIB	*= ..\perl529s$(a)
-PERLDLL		= ..\perl529.dll
-PERLDLLBASE	= perl529.dll
+PERLIMPLIB	*= $(COREDIR)\perl526$(a)
+PERLEXPLIB	*= $(COREDIR)\perl526.exp
+PERLSTATICLIB	*= ..\perl526s$(a)
+PERLDLL		= ..\perl526.dll
 
 #EUMM on Win32 isn't ready for parallel make, so only allow this file to be parallel
 #$(MAKE) will contain the -P that this makefile was called with, which is bad for
@@ -1085,13 +1092,11 @@ SETARGV_OBJ	= setargv$(o)
 # some exclusions, unfortunately, until fixed:
 #  - MakeMaker isn't capable enough for SDBM_File (small bug)
 STATIC_EXT	= * !SDBM_File
-NORMALIZE_STATIC = Normalize_static
 .ELSE
 # specify static extensions here, for example:
 # (be sure to include Win32CORE to load Win32 on demand)
 #STATIC_EXT	= Win32CORE Cwd Compress/Raw/Zlib
 STATIC_EXT	= Win32CORE
-NORMALIZE_DYN	= Normalize_dyn
 .ENDIF
 
 DYNALOADER	= ..\DynaLoader$(o)
@@ -1139,7 +1144,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
+all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC)
 
 ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
 
@@ -1267,7 +1272,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
-.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+.IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" || "$(CCTYPE)" == "MSVC141"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
@@ -1288,11 +1293,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define Off_t_size ^4)>> config.h
 .ENDIF
 .IF "$(WIN64)"=="define"
-.IF "$(CCTYPE)" == "GCC"
-	@(echo #define LONG_DOUBLESIZE ^16)>> config.h
-.ELSE
-	@(echo #define LONG_DOUBLESIZE ^8)>> config.h
-.ENDIF
 	@(echo #define PTRSIZE ^8&& \
 	echo #define SSize_t $(INT64)&& \
 	echo #define HAS_ATOLL&& \
@@ -1300,11 +1300,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define HAS_STRTOULL&& \
 	echo #define Size_t_size ^8)>> config.h
 .ELSE
-.IF "$(CCTYPE)" == "GCC"
-	@(echo #define LONG_DOUBLESIZE ^12)>> config.h
-.ELSE
-	@(echo #define LONG_DOUBLESIZE ^8)>> config.h
-.ENDIF
 	@(echo #define PTRSIZE ^4&& \
 	echo #define SSize_t int&& \
 	echo #undef HAS_ATOLL&& \
@@ -1356,9 +1351,15 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define PERL_PRIgldbl "Lg"&& \
 	echo #define PERL_PRIeldbl "Le"&& \
 	echo #define PERL_SCNfldbl "Lf"&& \
-	echo #define NVTYPE long double&& \
-	echo #define NVSIZE LONG_DOUBLESIZE&& \
-	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0&& \
+	echo #define NVTYPE long double)>> config.h
+.IF "$(WIN64)"=="define"
+	@(echo #define NVSIZE ^16&& \
+	echo #define LONG_DOUBLESIZE ^16)>> config.h
+.ELSE
+	@(echo #define NVSIZE ^12&& \
+	echo #define LONG_DOUBLESIZE ^12)>> config.h
+.ENDIF
+	@(echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0&& \
 	echo #define NVef "Le"&& \
 	echo #define NVff "Lf"&& \
 	echo #define NVgf "Lg"&& \
@@ -1377,6 +1378,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef PERL_SCNfldbl&& \
 	echo #define NVTYPE double&& \
 	echo #define NVSIZE ^8&& \
+	echo #define LONG_DOUBLESIZE ^8&& \
 	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0&& \
 	echo #define NVef "e"&& \
 	echo #define NVff "f"&& \
@@ -1432,7 +1434,7 @@ perldll.def : $(HAVEMINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl
 
 $(PERLEXPLIB) $(PERLIMPLIB) .UPDATEALL : perldll.def
 .IF "$(CCTYPE)" == "GCC"
-	$(IMPLIB) -k -d perldll.def -D $(PERLDLLBASE) -l $(PERLIMPLIB) -e $(PERLEXPLIB)
+	$(IMPLIB) -k -d perldll.def -l $(PERLIMPLIB) -e $(PERLEXPLIB)
 .ELSE #VC family
 	lib -def:perldll.def -machine:$(ARCHITECTURE) /OUT:$(PERLIMPLIB)
 .ENDIF
@@ -1519,33 +1521,25 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 # DynaLoader.pm, so this will have to do
 
 #most of deps of this target are in DYNALOADER and therefore omitted here
-Extensions : $(PERLDEP) $(DYNALOADER) Extension_lib $(GLOBEXE) MakePPPort
+Extensions : $(PERLDEP) $(DYNALOADER) $(GLOBEXE) MakePPPort
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic !Unicode/Normalize
 
-Normalize_static : $(CONFIGPM) $(GLOBEXE) $(HAVE_COREDIR) $(UNIDATAFILES)
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --static +Unicode/Normalize
-
-Normalize_dyn : $(PERLDEP) $(DYNALOADER) $(GLOBEXE) $(UNIDATAFILES)
+Extensions_normalize : $(PERLDEP) $(DYNALOADER) $(GLOBEXE) $(UNIDATAFILES)
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic +Unicode/Normalize
 
 Extensions_reonly : $(PERLDEP) $(DYNALOADER)
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic +re
 
-Exts_static_general : ..\make_ext.pl $(CONFIGPM) Extension_lib $(GLOBEXE) $(HAVE_COREDIR) MakePPPort
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --static !Unicode/Normalize
-
-Extensions_static : list_static_libs.pl Exts_static_general $(NORMALIZE_STATIC)
+Extensions_static : ..\make_ext.pl list_static_libs.pl $(CONFIGPM) $(GLOBEXE) $(HAVE_COREDIR) MakePPPort
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --static
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
 
 Extensions_nonxs : ..\make_ext.pl ..\pod\perlfunc.pod $(CONFIGPM) $(GLOBEXE)
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --nonxs !libs
 
-Extension_lib : ..\make_ext.pl $(CONFIGPM)
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) lib
-
 #lib must be built, it can't be buildcustomize.pl-ed, and is required for XS building
 $(DYNALOADER) : ..\make_ext.pl $(CONFIGPM) $(HAVE_COREDIR)
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(EXTDIR) --dir=$(DISTDIR) --dynaloader
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(EXTDIR) --dir=$(DISTDIR) --dynaloader lib
 
 Extensions_clean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=clean
@@ -1556,23 +1550,12 @@ Extensions_realclean :
 # all PE files need to be built by the time this target runs, PP files can still
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
-.IF "$(PERLSTATIC)"=="static"
-rebasePE : Extensions $(PERLDLL) $(PERLEXE) $(PERLEXESTATIC)
+.IF "$(BUILD_STATIC)"=="define"
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(PERLEXESTATIC)
 .ELSE
-rebasePE : Extensions $(PERLDLL) $(NORMALIZE_DYN) $(PERLEXE)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
 .ENDIF
 	$(NOOP)
-
-PostExt : ..\lib\Storable\Limit.pm
-	$(NOOP)
-
-# we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
-# rebasePE most of that, including adjustment for static builds, so we
-# just need non-xs extensions
-..\lib\Storable\Limit.pm : rebasePE Extensions_nonxs
-	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
-	if not exist ..\lib\Storable mkdir ..\lib\Storable
-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
 
 #-------------------------------------------------------------------------------
 
@@ -1622,12 +1605,12 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5290delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5262delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
 
-..\pod\perltoc.pod: $(PERLEXE) $(PERLDLL) Extensions Extensions_nonxs $(NORMALIZE_DYN) utils
+..\pod\perltoc.pod: $(PERLEXE) $(PERLDLL) Extensions Extensions_nonxs Extensions_normalize utils
 	$(PERLEXE) -f ..\pod\buildtoc -q
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
@@ -1644,11 +1627,11 @@ distclean: realclean
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
 	-del /f $(LIBDIR)\File\Glob.pm
+	-del /f $(LIBDIR)\Storable.pm
 	-del /f $(LIBDIR)\Sys\Hostname.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
-	-del /f $(LIBDIR)\Storable.pm $(LIBDIR)\Storable\Limit.pm
 	-del /f $(LIBDIR)\Win32.pm
 	-del /f $(LIBDIR)\Win32CORE.pm
 	-del /f $(LIBDIR)\Win32API\File.pm
@@ -1720,7 +1703,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5290delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5262delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \

@@ -2,10 +2,11 @@
 
 use strict;
 use Test qw($ntest plan ok $TESTOUT $TESTERR);
+use vars qw($mycnt);
 
 BEGIN { plan test => 6, onfail => \&myfail }
 
-our $mycnt = 0;
+$mycnt = 0;
 
 my $why = "zero != one";
 # sneak in a test that Test::Harness wont see

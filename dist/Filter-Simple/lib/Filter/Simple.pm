@@ -2,12 +2,14 @@ package Filter::Simple;
 
 use Text::Balanced ':ALL';
 
-our $VERSION = '0.95';
+use vars qw{ $VERSION @EXPORT };
+
+$VERSION = '0.93';
 
 use Filter::Util::Call;
 use Carp;
 
-our @EXPORT = qw( FILTER FILTER_ONLY );
+@EXPORT = qw( FILTER FILTER_ONLY );
 
 
 sub import {

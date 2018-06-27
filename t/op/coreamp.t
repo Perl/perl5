@@ -639,7 +639,7 @@ SKIP: {
 
   my %h = 1..2;
   &mykeys(\%h) = 1024;
-  like Hash::Util::bucket_ratio(%h), qr!/(?:1024|2048)\z!, '&mykeys = changed number of buckets allocated';
+  like Hash::Util::bucket_ratio(%h), qr|/1024\z|, '&mykeys = changed number of buckets allocated';
   eval { (&mykeys(\%h)) = 1025; };
   like $@, qr/^Can't modify keys in list assignment at /;
 }
@@ -881,7 +881,7 @@ is &myselect, select, '&select with no args';
   my $prev = select;
   is &myselect(my $fh), $prev, '&select($arg) retval';
   is lc ref $fh, 'glob', '&select autovivifies';
-  is select, $fh, '&select selects';
+  is select=~s/\*//rug, (*$fh."")=~s/\*//rug, '&select selects';
   select $prev;
 }
 eval { &myselect(1,2) };

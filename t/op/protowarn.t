@@ -11,7 +11,7 @@ use warnings;
 
 plan( tests => 12 );
 
-our (@warnings, $sub, $warn);
+use vars qw{ @warnings $sub $warn };
 
 BEGIN {
     $warn = 'Illegal character in prototype';

@@ -12,7 +12,7 @@ BEGIN {
     set_up_inc(qw(t . lib ../lib));
 }
 
-plan(tests => 44);
+plan(tests => 48);
 
 use Config;
 use Errno qw(ENOENT EBADF EINVAL);
@@ -55,7 +55,7 @@ SKIP: {
 $Cwd = abs_path;
 
 SKIP: {
-    skip("no fchdir", 19) unless $has_fchdir;
+    skip("no fchdir", 23) unless $has_fchdir;
     my $has_dirfd = ($Config{d_dirfd} || $Config{d_dir_dd_fd} || "") eq "define";
     ok(opendir(my $dh, "."), "opendir .");
     ok(open(my $fh, "<", "op"), "open op");
@@ -86,7 +86,26 @@ SKIP: {
     }
     ok(-d "op", "verify that we are back");
 
-    ok(open(H, "<", "base"), "open base") or diag $!;
+    # And now the ambiguous case
+    {
+	no warnings qw<io deprecated>;
+	ok(opendir(H, "op"), "opendir op") or diag $!;
+	ok(open(H, "<", "base"), "open base") or diag $!;
+    }
+    if ($has_dirfd) {
+	ok(chdir(H), "fchdir to op");
+	ok(-f "chdir.t", "verify that we are in 'op'");
+	chdir ".." or die $!;
+    }
+    else {
+	eval { chdir(H); };
+	like($@, qr/^The dirfd function is unimplemented at/,
+	     "dirfd is unimplemented");
+	SKIP: {
+	    skip("dirfd is unimplemented");
+	}
+    }
+    ok(closedir(H), "closedir");
     ok(chdir(H), "fchdir to base");
     ok(-f "cond.t", "verify that we are in 'base'");
     ok(close(H), "close");

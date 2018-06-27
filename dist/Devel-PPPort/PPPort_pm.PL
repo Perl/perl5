@@ -15,7 +15,7 @@
 
 use strict;
 $^W = 1;
-require "./parts/ppptools.pl";
+require "parts/ppptools.pl";
 
 my $INCLUDE = 'parts/inc';
 my $DPPP = 'DPPP_';
@@ -293,9 +293,9 @@ sub expand_pp_expr
          . "extern $proto;\n"
          . "#endif\n"
          . "\n"
-         . "#if defined(NEED_$func) || defined(NEED_${func}_GLOBAL)\n"
+         . "$embed\n"
          . "\n"
-         . "$embed\n";
+         . "#if defined(NEED_$func) || defined(NEED_${func}_GLOBAL)";
   }
 
   die "cannot expand preprocessor expression '$expr'\n";
@@ -492,8 +492,8 @@ __UNSUPPORTED_API__
 =head1 BUGS
 
 If you find any bugs, C<Devel::PPPort> doesn't seem to build on your
-system, or any of its tests fail, please send a bug report to
-L<perlbug@perl.org|mailto:perlbug@perl.org>.
+system, or any of its tests fail, please file an issue here:
+L<https://github.com/mhx/Devel-PPPort/issues/>
 
 =head1 AUTHORS
 
@@ -539,7 +539,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = '3.40';
+$VERSION = '3.35';
 
 sub _init_data
 {
@@ -620,13 +620,7 @@ __DATA__
 
 %include memory
 
-%include magic
-
 %include misc
-
-%include format
-
-%include mess
 
 %include variables
 
@@ -639,6 +633,8 @@ __DATA__
 %include newCONSTSUB
 
 %include MY_CXT
+
+%include format
 
 %include SvREFCNT
 
@@ -661,6 +657,8 @@ __DATA__
 %include warn
 
 %include pvs
+
+%include magic
 
 %include cop
 

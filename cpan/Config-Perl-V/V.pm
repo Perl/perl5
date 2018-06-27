@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.29";
+$VERSION     = "0.28";
 @ISA         = qw( Exporter );
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -310,11 +310,8 @@ sub plv2hash {
 
 sub summary {
     my $conf = shift || myconfig ();
-    ref $conf eq "HASH"
-    && exists $conf->{config}
-    && exists $conf->{build}
-    && ref $conf->{config} eq "HASH"
-    && ref $conf->{build}  eq "HASH" or return;
+    ref $conf eq "HASH" &&
+	exists $conf->{config} && exists $conf->{build} or return;
 
     my %info = map {
 	exists $conf->{config}{$_} ? ( $_ => $conf->{config}{$_} ) : () }
@@ -331,15 +328,10 @@ sub summary {
     } # summary
 
 sub signature {
-    my $no_md5 = "0" x 32;
-    my $conf = summary (shift) or return $no_md5;
-
     eval { require Digest::MD5 };
-    $@ and return $no_md5;
+    $@ and return "00000000000000000000000000000000";
 
-    $conf->{cc} =~ s{.*\bccache\s+}{};
-    $conf->{cc} =~ s{.*[/\\]}{};
-
+    my $conf = shift || summary ();
     delete $conf->{config_args};
     return Digest::MD5::md5_hex (join "\xFF" => map {
 	"$_=".(defined $conf->{$_} ? $conf->{$_} : "\xFE");
@@ -554,7 +546,7 @@ H.Merijn Brand <h.m.brand@xs4all.nl>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2017 H.Merijn Brand
+Copyright (C) 2009-2016 H.Merijn Brand
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

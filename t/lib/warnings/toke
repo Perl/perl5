@@ -2,11 +2,10 @@ toke.c	AOK
 
     we seem to have lost a few ambiguous warnings!!
 
-     Prototype after '@' for main::foo
-	sub foo (@$)
-
-     Illegal character in prototype for main::foo
-	sub foo (x)
+ 
+ 		$a = <<;
+ 		Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28
+		(called 3 times via depcom)
 
      \1 better written as $1 
  	use warnings 'syntax' ;
@@ -53,11 +52,6 @@ toke.c	AOK
 	print ("")
 	printf ("")
 	sort ("")
-
-     Old package separator used in string
-	"$foo'bar"
-	"@foo'bar"
-	"$#foo'bar"
 
      Ambiguous use of %c{%s%s} resolved to %c%s%s 
 	$a = ${time[2]}
@@ -131,74 +125,38 @@ toke.c	AOK
         *foo *foo
 
 __END__
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-eval "sub fòò (@\$\0) {}";
+# toke.c 
+format STDOUT =
+@<<<  @|||  @>>>  @>>>
+$a    $b    "abc" 'def'
+.
+no warnings 'deprecated' ;
+format STDOUT =
+@<<<  @|||  @>>>  @>>>
+$a    $b    "abc" 'def'
+.
 EXPECT
-Prototype after '@' for main::fòò : @$\0 at (eval 1) line 1.
-Illegal character in prototype for main::fòò : @$\0 at (eval 1) line 1.
+Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
+Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
+Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
 ########
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-eval "sub foo (@\0) {}";
-eval "sub foo2 :prototype(@\0) {}";
+# toke.c
+$a = <<;
+
+no warnings 'deprecated' ;
+$a = <<;
+
 EXPECT
-Prototype after '@' for main::foo : @\0 at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\0 at (eval 1) line 1.
-Prototype after '@' for main::foo2 : @\x{0} at (eval 2) line 1.
-Illegal character in prototype for main::foo2 : @\x{0} at (eval 2) line 1.
+Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 2.
 ########
-BEGIN {
-    if (ord('A') == 193) {
-        print "SKIPPED\n# Different results on EBCDIC";
-        exit 0;
-    }
-}
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-BEGIN { $::{"foo"} = "\@\$\0L\351on" }
-BEGIN { eval "sub foo (@\$\0L\x{c3}\x{a9}on) {}"; }
+# toke.c
+$a = <<~;
+
+$a = <<~ ;
+
 EXPECT
-Prototype after '@' for main::foo : @$\x{0}L... at (eval 1) line 1.
-Illegal character in prototype for main::foo : @$\x{0}L... at (eval 1) line 1.
-########
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-BEGIN { eval "sub foo (@\0) {}"; }
-EXPECT
-Prototype after '@' for main::foo : @\0 at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\0 at (eval 1) line 1.
-########
-use warnings;
-eval "sub foo (@\xAB) {}";
-EXPECT
-Prototype after '@' for main::foo : @\x{ab} at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\x{ab} at (eval 1) line 1.
-########
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-BEGIN { eval "sub foo (@\x{30cb}) {}"; }
-EXPECT
-Prototype after '@' for main::foo : @\x{30cb} at (eval 1) line 1.
-Illegal character in prototype for main::foo : @\x{30cb} at (eval 1) line 1.
-########
-use warnings;
-sub f ([);
-sub f :prototype([)
-EXPECT
-Missing ']' in prototype for main::f : [ at - line 2.
-Missing ']' in prototype for main::f : [ at - line 3.
-########
-use warnings;
-package bar { sub bar { eval q"sub foo ([)" } }
-bar::bar
-EXPECT
-Missing ']' in prototype for bar::foo : [ at (eval 1) line 1.
+Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 2.
+Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
 ########
 # toke.c
 $a =~ m/$foo/eq;
@@ -416,40 +374,6 @@ no warnings 'syntax' ;
 sort ("")
 EXPECT
 
-########
-use warnings 'syntax';
-@foo::bar = 1..3;
-() = "$foo'bar";
-() = "@foo'bar";
-() = "$#foo'bar";
-no warnings 'syntax' ;
-() = "$foo'bar";
-() = "@foo'bar";
-() = "$#foo'bar";
-EXPECT
-Old package separator used in string at - line 3.
-	(Did you mean "$foo\'bar" instead?)
-Old package separator used in string at - line 4.
-	(Did you mean "@foo\'bar" instead?)
-Old package separator used in string at - line 5.
-	(Did you mean "$#foo\'bar" instead?)
-########
-use warnings 'syntax'; use utf8;
-@fooл::barл = 1..3;
-() = "$fooл'barл";
-() = "@fooл'barл";
-() = "$#fooл'barл";
-no warnings 'syntax' ;
-() = "$fooл'barл";
-() = "@fooл'barл";
-() = "$#fooл'barл";
-EXPECT
-Old package separator used in string at - line 3.
-	(Did you mean "$fooл\'barл" instead?)
-Old package separator used in string at - line 4.
-	(Did you mean "@fooл\'barл" instead?)
-Old package separator used in string at - line 5.
-	(Did you mean "$#fooл\'barл" instead?)
 ########
 # toke.c
 use warnings 'ambiguous' ;
@@ -1343,6 +1267,26 @@ EXPECT
 !=~ should be !~ at - line 9.
 ########
 # toke.c
+our $foo :unique;
+sub pam :locked;
+sub glipp :locked {
+}
+sub whack_eth ($) : locked {
+}
+no warnings 'deprecated';
+our $bar :unique;
+sub zapeth :locked;
+sub ker_plop :locked {
+}
+sub swa_a_p ($) : locked {
+}
+EXPECT
+Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 2.
+Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 3.
+Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 4.
+Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 6.
+########
+# toke.c
 use warnings "syntax";
 sub proto_after_array(@$);
 sub proto_after_arref(\@$);
@@ -1353,7 +1297,7 @@ sub proto_after_hashref(\%$);
 sub proto_after_hashref2(\[%$]);
 sub underscore_last_pos($_);
 sub underscore2($_;$);
-sub underscore_fail($_$); sub underscore_fail2 : prototype($_$);
+sub underscore_fail($_$);
 sub underscore_after_at(@_);
 our sub hour (@$);
 my sub migh (@$);
@@ -1371,7 +1315,6 @@ EXPECT
 Prototype after '@' for main::proto_after_array : @$ at - line 3.
 Prototype after '%' for main::proto_after_hash : %$ at - line 7.
 Illegal character after '_' in prototype for main::underscore_fail : $_$ at - line 12.
-Illegal character after '_' in prototype for main::underscore_fail2 : $_$ at - line 12.
 Prototype after '@' for main::underscore_after_at : @_ at - line 13.
 Prototype after '@' for hour : @$ at - line 14.
 Prototype after '@' for migh : @$ at - line 15.
@@ -1676,9 +1619,7 @@ BEGIN{
 use utf8;
 my $a = qr ̂foobar̂;
 EXPECT
-Use of unassigned code point or non-standalone grapheme for a delimiter is not allowed at - line 8, near "= "
-Use of unassigned code point or non-standalone grapheme for a delimiter is not allowed at - line 8, near "= "
-Execution of - aborted due to compilation errors.
+Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30 at - line 8.
 ########
 # NAME  [perl #130567] Assertion failure
 BEGIN {

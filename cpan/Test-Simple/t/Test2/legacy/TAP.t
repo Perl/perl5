@@ -12,6 +12,7 @@ use Test2::Tools::Tiny;
 #########################
 
 use Test2::API qw/test2_stack context/;
+use Test::Builder::Formatter;
 
 # The tools in Test2::Tools::Tiny have some intentional differences from the
 # Test::More versions, these behave more like Test::More which is important for
@@ -52,9 +53,6 @@ sub tm_note {
 test2_stack->top;
 
 my $temp_hub = test2_stack->new_hub();
-require Test::Builder::Formatter;
-$temp_hub->format(Test::Builder::Formatter->new);
-
 my $diag = capture {
     tm_diag(undef);
     tm_diag("");

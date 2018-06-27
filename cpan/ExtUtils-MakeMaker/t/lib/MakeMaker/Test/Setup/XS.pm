@@ -19,8 +19,7 @@ use ExtUtils::MM;
 my $tempdir = tempdir(DIR => getcwd, CLEANUP => 1);
 chdir $tempdir;
 my $typemap = 'type map';
-my $MM = MM->new({NAME=>'name', NORECURS=>1});
-$typemap =~ s/ //g unless $MM->can_dep_space;
+$typemap =~ s/ //g unless MM->new({NAME=>'name', NORECURS=>1})->can_dep_space;
 chdir File::Spec->updir;
 
 my $PM_TEST = <<'END';
@@ -149,11 +148,6 @@ $label2files{static} = +{
     $MAKEFILEPL, 'Test', 'lib/XS/Test.pm', qq{'$typemap'},
     q{LINKTYPE => 'static'},
   ),
-  "blib/arch/auto/share/dist/x-y/libwhatevs$MM->{LIB_EXT}" => 'hi there', # mimic what File::ShareDir can do
-  "blib/arch/auto/Alien/ROOT/root/lib/root/root$MM->{LIB_EXT}" => 'hi there', # mimic Alien::ROOT that installs a .a without extralibs.ld
-  # next two mimic dist that installs a .a WITH extralibs.ld but that is still not XS
-  "blib/arch/auto/Dist/File$MM->{LIB_EXT}" => 'hi there',
-  "blib/arch/auto/Dist/extralibs.ld" => '',
 };
 
 $label2files{subdirs} = +{
@@ -216,71 +210,6 @@ $label2files{subdirsstatic} = +{
     q{DEFINE => '-DINVAR=input', LINKTYPE => 'static',},
   ),
 };
-
-# to mimic behaviour of CGI-Deurl-XS version 0.08
-my $OTHERMAKEFILE = File::Spec->catfile('Other', makefile_name());
-$label2files{subdirsskip} = +{
-  %{ $label2files{subdirscomplex} }, # make copy
-  'Makefile.PL' => sprintf(
-    $MAKEFILEPL,
-    'Test', 'Test.pm', qq{},
-    q[
-MYEXTLIB => '] . File::Spec->catfile('Other', 'libparser$(LIB_EXT)') . q[',
-     ]
-  )
-  . q[
-sub MY::postamble {
-    my ($self) = @_;
-    return '$(MYEXTLIB) : ] . $OTHERMAKEFILE . q['."\n\t".$self->cd('Other', '$(MAKE) $(PASSTHRU)')."\n";
-}
-     ],
-  'Other/Makefile.PL' => sprintf(
-    $MAKEFILEPL,
-    'Other', 'Other.pm', qq{},
-    <<'EOF',
-SKIP   => [qw(all static dynamic )],
-clean  => {'FILES' => 'libparser$(LIB_EXT)'},
-EOF
-  ) . <<'EOF',
-sub MY::top_targets {
-  my ($self) = @_;
-  my $static_lib_pure_cmd = $self->static_lib_pure_cmd('$(O_FILES)');
-  <<'SNIP' . $static_lib_pure_cmd;
-all :: static
-
-pure_all :: static
-
-static :: libparser$(LIB_EXT)
-
-libparser$(LIB_EXT): $(O_FILES)
-SNIP
-}
-EOF
-  't/plus1.t' => <<'END',
-#!/usr/bin/perl -w
-use Test::More tests => 2;
-use_ok "XS::Test";
-is XS::Test::plus1(3), 4;
-END
-  'Test.xs' => <<EOF,
-#ifdef __cplusplus
-extern "C" {
-#endif
-int plus1(int);
-#ifdef __cplusplus
-}
-#endif
-$XS_TEST
-int
-plus1(input)
-       int     input
-   CODE:
-       RETVAL = plus1(input);
-   OUTPUT:
-       RETVAL
-EOF
-};
-virtual_rename('subdirsskip', 'Other/lib/file.c', 'Other/file.c');
 
 my $XS_MULTI = $XS_OTHER;
 # check compiling from top dir still can include local
@@ -397,7 +326,7 @@ sub list_dynamic {
     $^O ne 'MSWin32' ? (
         [ 'bscode', '', '' ],
         [ 'bscodemulti', '', '' ],
-        $^O !~ m!^(VMS|aix)$! ? ([ 'subdirscomplex', '', '' ]) : (),
+        $^O ne 'VMS' ? ([ 'subdirscomplex', '', '' ]) : (),
     ) : (), # DynaLoader different
     [ 'subdirs', '', '' ],
     [ 'subdirsstatic', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
@@ -406,7 +335,6 @@ sub list_dynamic {
     [ 'staticmulti', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
     [ 'staticmulti', ' dynamic', '_dynamic' ],
     [ 'xsbuild', '', '' ],
-    [ 'subdirsskip', '', '' ],
   );
 }
 
@@ -463,11 +391,7 @@ sub run_tests {
   }
 
   chdir File::Spec->updir or die;
-  if ($ENV{EUMM_KEEP_TESTDIRS}) {
-    ok 1, "don't teardown $dir";
-  } else {
-    ok rmtree($dir), "teardown $dir";
-  }
+  ok rmtree($dir), "teardown $dir";
 }
 
 1;

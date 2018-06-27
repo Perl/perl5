@@ -1,4 +1,5 @@
 5.010001
+croak_xs_usage                 # U
 mro_get_from_name              # U
 mro_get_private_data           # U
 mro_register                   # U

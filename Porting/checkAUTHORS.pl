@@ -190,9 +190,6 @@ sub generate_known_author_map {
         # Randy W. Sims
         "ml-perl\100thepierianspring.org",
 
-        # Jason Hord
-        "pravus\100cpan.org",
-
         # perl internal addresses
         "perl5-porters\100africa.nicoh.com",
         "perlbug\100perl.org",,
@@ -630,7 +627,6 @@ fugazi\100zyx.net                       larrysh\100cpan.org
 gbacon\100itsc.uah.edu                  gbacon\100adtrn-srv4.adtran.com
 gerberb\100zenez.com                    root\100devsys0.zenez.com
 gfuji\100cpan.org                       g.psy.va\100gmail.com
-genesullivan50\100yahoo.com             gsullivan\100cpan.org
 gerard\100ggoossen.net                  gerard\100tty.nl
 gibreel\100pobox.com                    stephen.zander\100interlock.mckesson.com
 +                                       srz\100loopback
@@ -696,7 +692,6 @@ jpeacock\100messagesystems.com          john.peacock\100havurah-software.org
 +                                       jpeacock\100jpeacock-hp.doesntexist.org
 +                                       jpeacock\100cpan.org
 +                                       jpeacock\100rowman.com
-james.schneider\100db.com               jschneid\100netilla.com
 jpl.jpl\100gmail.com                    jpl\100research.att.com
 jql\100accessone.com                    jql\100jql.accessone.com
 jsm28\100hermes.cam.ac.uk               jsm28\100cam.ac.uk
@@ -884,7 +879,6 @@ schwern\100pobox.com                    schwern\100gmail.com
 +                                       schwern\100athens.arena-i.com
 +                                       schwern\100blackrider.aocn.com
 +                                       schwern\100ool-18b93024.dyn.optonline.net
-scop\100cs132170.pp.htv.fi              ville.skytta\100iki.fi
 scotth\100sgi.com                       author scotth\100sgi.com 842220273 +0000
 +                                       schotth\100sgi.com
 schwab\100suse.de                       schwab\100issan.informatik.uni-dortmund.de

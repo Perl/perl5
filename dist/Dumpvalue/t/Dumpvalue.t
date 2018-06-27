@@ -14,7 +14,7 @@ BEGIN {
 	$^W = 0;
 }
 
-our ( $foo, @bar, %baz );
+use vars qw( $foo @bar %baz );
 
 use Test::More tests => 88;
 

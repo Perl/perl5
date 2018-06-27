@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# HARNESS-NO-STREAM
 
 use strict;
 use warnings;

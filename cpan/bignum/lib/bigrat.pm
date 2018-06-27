@@ -1,10 +1,10 @@
 package bigrat;
 
-use 5.010;
+use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.49';
+our $VERSION = '0.47';
 
 use Exporter;
 our @ISA            = qw( bigint );

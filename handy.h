@@ -11,8 +11,15 @@
 /* IMPORTANT NOTE: Everything whose name begins with an underscore is for
  * internal core Perl use only. */
 
-#ifndef PERL_HANDY_H_ /* Guard against nested #inclusion */
-#define PERL_HANDY_H_
+#ifndef HANDY_H /* Guard against nested #inclusion */
+#define HANDY_H
+
+#if !defined(__STDC__)
+#ifdef NULL
+#undef NULL
+#endif
+#  define NULL 0
+#endif
 
 #ifndef PERL_CORE
 #  define Null(type) ((type)NULL)
@@ -109,11 +116,13 @@ Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
  * XXX Similarly, a Configure probe for __FILE__ and __LINE__ is needed. */
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
 #  define FUNCTION__ __func__
-#elif (defined(USING_MSVC6)) || /* MSVC6 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
-    (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
-#  define FUNCTION__ ""
 #else
-#  define FUNCTION__ __FUNCTION__ /* Common extension. */
+#  if (defined(USING_MSVC6)) || /* MSVC6 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
+      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
+#    define FUNCTION__ ""
+#  else
+#    define FUNCTION__ __FUNCTION__ /* Common extension. */
+#  endif
 #endif
 
 /* XXX A note on the perl source internal type system.  The
@@ -165,9 +174,52 @@ typedef U16TYPE U16;
 typedef I32TYPE I32;
 typedef U32TYPE U32;
 
-#ifdef QUADKIND
+#ifdef HAS_QUAD
 typedef I64TYPE I64;
 typedef U64TYPE U64;
+#endif
+
+/* INT64_C/UINT64_C are C99 from <stdint.h> (so they will not be
+ * available in strict C89 mode), but they are nice, so let's define
+ * them if necessary. */
+#if defined(HAS_QUAD)
+#  undef PeRl_INT64_C
+#  undef PeRl_UINT64_C
+/* Prefer the native integer types (int and long) over long long
+ * (which is not C89) and Win32-specific __int64. */
+#  if QUADKIND == QUAD_IS_INT && INTSIZE == 8
+#    define PeRl_INT64_C(c)	(c)
+#    define PeRl_UINT64_C(c)	CAT2(c,U)
+#  endif
+#  if QUADKIND == QUAD_IS_LONG && LONGSIZE == 8
+#    define PeRl_INT64_C(c)	CAT2(c,L)
+#    define PeRl_UINT64_C(c)	CAT2(c,UL)
+#  endif
+#  if QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LONG_LONG)
+#    define PeRl_INT64_C(c)	CAT2(c,LL)
+#    define PeRl_UINT64_C(c)	CAT2(c,ULL)
+#  endif
+#  if QUADKIND == QUAD_IS___INT64
+#    define PeRl_INT64_C(c)	CAT2(c,I64)
+#    define PeRl_UINT64_C(c)	CAT2(c,UI64)
+#  endif
+#  ifndef PeRl_INT64_C
+#    define PeRl_INT64_C(c)	((I64)(c)) /* last resort */
+#    define PeRl_UINT64_C(c)	((U64)(c))
+#  endif
+/* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
+ * not fly with C89-pedantic gcc, so let's undefine them first so that
+ * we can redefine them with our native integer preferring versions. */
+#  if defined(PERL_DARWIN) && defined(PERL_GCC_PEDANTIC)
+#    undef INT64_C
+#    undef UINT64_C
+#  endif
+#  ifndef INT64_C
+#    define INT64_C(c) PeRl_INT64_C(c)
+#  endif
+#  ifndef UINT64_C
+#    define UINT64_C(c) PeRl_UINT64_C(c)
+#  endif
 #endif
 
 #if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
@@ -217,29 +269,8 @@ typedef U64TYPE U64;
 
 #endif
 
-/* These C99 typedefs are useful sometimes for, say, loop variables whose
- * maximum values are small, but for which speed trumps size.  If we have a C99
- * compiler, use that.  Otherwise, a plain 'int' should be good enough.
- *
- * Restrict these to core for now until we are more certain this is a good
- * idea. */
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#  ifdef I_STDINT
-    typedef  int_fast8_t  PERL_INT_FAST8_T;
-    typedef uint_fast8_t  PERL_UINT_FAST8_T;
-    typedef  int_fast16_t PERL_INT_FAST16_T;
-    typedef uint_fast16_t PERL_UINT_FAST16_T;
-#  else
-    typedef int           PERL_INT_FAST8_T;
-    typedef unsigned int  PERL_UINT_FAST8_T;
-    typedef int           PERL_INT_FAST16_T;
-    typedef unsigned int  PERL_UINT_FAST16_T;
-#  endif
-#endif
-
-/* log(2) (i.e., log base 10 of 2) is pretty close to 0.30103, just in case
- * anyone is grepping for it */
-#define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log10(2) =~ 146/485 */
+/* log(2) is pretty close to  0.30103, just in case anyone is grepping for it */
+#define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log2(10) =~ 146/485 */
 #define TYPE_DIGITS(T)  BIT_DIGITS(sizeof(T) * 8)
 #define TYPE_CHARS(T)   (TYPE_DIGITS(T) + 2) /* sign, NUL */
 
@@ -273,78 +304,78 @@ typedef U64TYPE U64;
 /*
 =head1 SV-Body Allocation
 
-=for apidoc Ama|SV*|newSVpvs|"literal string" s
-Like C<newSVpvn>, but takes a literal string instead of a
+=for apidoc Ama|SV*|newSVpvs|const char* s
+Like C<newSVpvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Ama|SV*|newSVpvs_flags|"literal string" s|U32 flags
-Like C<newSVpvn_flags>, but takes a literal string instead of
+=for apidoc Ama|SV*|newSVpvs_flags|const char* s|U32 flags
+Like C<newSVpvn_flags>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair.
 
-=for apidoc Ama|SV*|newSVpvs_share|"literal string" s
-Like C<newSVpvn_share>, but takes a literal string instead of
+=for apidoc Ama|SV*|newSVpvs_share|const char* s
+Like C<newSVpvn_share>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair and omits the hash parameter.
 
-=for apidoc Am|void|sv_catpvs_flags|SV* sv|"literal string" s|I32 flags
-Like C<sv_catpvn_flags>, but takes a literal string instead
+=for apidoc Am|void|sv_catpvs_flags|SV* sv|const char* s|I32 flags
+Like C<sv_catpvn_flags>, but takes a C<NUL>-terminated literal string instead
 of a string/length pair.
 
-=for apidoc Am|void|sv_catpvs_nomg|SV* sv|"literal string" s
-Like C<sv_catpvn_nomg>, but takes a literal string instead of
+=for apidoc Am|void|sv_catpvs_nomg|SV* sv|const char* s
+Like C<sv_catpvn_nomg>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair.
 
-=for apidoc Am|void|sv_catpvs|SV* sv|"literal string" s
-Like C<sv_catpvn>, but takes a literal string instead of a
+=for apidoc Am|void|sv_catpvs|SV* sv|const char* s
+Like C<sv_catpvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Am|void|sv_catpvs_mg|SV* sv|"literal string" s
-Like C<sv_catpvn_mg>, but takes a literal string instead of a
+=for apidoc Am|void|sv_catpvs_mg|SV* sv|const char* s
+Like C<sv_catpvn_mg>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Am|void|sv_setpvs|SV* sv|"literal string" s
-Like C<sv_setpvn>, but takes a literal string instead of a
+=for apidoc Am|void|sv_setpvs|SV* sv|const char* s
+Like C<sv_setpvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Am|void|sv_setpvs_mg|SV* sv|"literal string" s
-Like C<sv_setpvn_mg>, but takes a literal string instead of a
+=for apidoc Am|void|sv_setpvs_mg|SV* sv|const char* s
+Like C<sv_setpvn_mg>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Am|SV *|sv_setref_pvs|"literal string" s
-Like C<sv_setref_pvn>, but takes a literal string instead of
+=for apidoc Am|SV *|sv_setref_pvs|const char* s
+Like C<sv_setref_pvn>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair.
 
 =head1 Memory Management
 
-=for apidoc Ama|char*|savepvs|"literal string" s
-Like C<savepvn>, but takes a literal string instead of a
+=for apidoc Ama|char*|savepvs|const char* s
+Like C<savepvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Ama|char*|savesharedpvs|"literal string" s
+=for apidoc Ama|char*|savesharedpvs|const char* s
 A version of C<savepvs()> which allocates the duplicate string in memory
 which is shared between threads.
 
 =head1 GV Functions
 
-=for apidoc Am|HV*|gv_stashpvs|"literal string" name|I32 create
-Like C<gv_stashpvn>, but takes a literal string instead of a
+=for apidoc Am|HV*|gv_stashpvs|const char* name|I32 create
+Like C<gv_stashpvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
 =head1 Hash Manipulation Functions
 
-=for apidoc Am|SV**|hv_fetchs|HV* tb|"literal string" key|I32 lval
-Like C<hv_fetch>, but takes a literal string instead of a
+=for apidoc Am|SV**|hv_fetchs|HV* tb|const char* key|I32 lval
+Like C<hv_fetch>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
-=for apidoc Am|SV**|hv_stores|HV* tb|"literal string" key|SV* val
-Like C<hv_store>, but takes a literal string instead of a
+=for apidoc Am|SV**|hv_stores|HV* tb|const char* key|NULLOK SV* val
+Like C<hv_store>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair
 and omits the hash parameter.
 
 =head1 Lexer interface
 
-=for apidoc Amx|void|lex_stuff_pvs|"literal string" pv|U32 flags
+=for apidoc Amx|void|lex_stuff_pvs|const char *pv|U32 flags
 
-Like L</lex_stuff_pvn>, but takes a literal string instead of
+Like L</lex_stuff_pvn>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair.
 
 =cut
@@ -441,90 +472,45 @@ are not equal.  The C<len> parameter indicates the number of bytes to compare.
 Returns zero if non-equal, or non-zero if equal.
 
 =cut
-
-New macros should use the following conventions for their names (which are
-based on the underlying C library functions):
-
-  (mem | str n? ) (EQ | NE | LT | GT | GE | (( BEGIN | END ) P? )) l? s?
-
-  Each has two main parameters, string-like operands that are compared
-  against each other, as specified by the macro name.  Some macros may
-  additionally have one or potentially even two length parameters.  If a length
-  parameter applies to both string parameters, it will be positioned third;
-  otherwise any length parameter immediately follows the string parameter it
-  applies to.
-
-  If the prefix to the name is 'str', the string parameter is a pointer to a C
-  language string.  Such a string does not contain embedded NUL bytes; its
-  length may be unknown, but can be calculated by C<strlen()>, since it is
-  terminated by a NUL, which isn't included in its length.
-
-  The optional 'n' following 'str' means that that there is a third parameter,
-  giving the maximum number of bytes to look at in each string.  Even if both
-  strings are longer than the length parameter, those extra bytes will be
-  unexamined.
-
-  The 's' suffix means that the 2nd byte string parameter is a literal C
-  double-quoted string.  Its length will automatically be calculated by the
-  macro, so no length parameter will ever be needed for it.
-
-  If the prefix is 'mem', the string parameters don't have to be C strings;
-  they may contain embedded NUL bytes, do not necessarily have a terminating
-  NUL, and their lengths can be known only through other means, which in
-  practice are additional parameter(s) passed to the function.  All 'mem'
-  functions have at least one length parameter.  Barring any 'l' or 's' suffix,
-  there is a single length parameter, in position 3, which applies to both
-  string parameters.  The 's' suffix means, as described above, that the 2nd
-  string is a literal double-quoted C string (hence its length is calculated by
-  the macro, and the length parameter to the function applies just to the first
-  string parameter, and hence is positioned just after it).  An 'l' suffix
-  means that the 2nd string parameter has its own length parameter, and the
-  signature will look like memFOOl(s1, l1, s2, l2).
-
-  BEGIN (and END) are for testing if the 2nd string is an initial (or final)
-  substring  of the 1st string.  'P' if present indicates that the substring
-  must be a "proper" one in tha mathematical sense that the first one must be
-  strictly larger than the 2nd.
-
 */
 
 
-#define strNE(s1,s2) (strcmp(s1,s2) != 0)
-#define strEQ(s1,s2) (strcmp(s1,s2) == 0)
+#define strNE(s1,s2) (strcmp(s1,s2))
+#define strEQ(s1,s2) (!strcmp(s1,s2))
 #define strLT(s1,s2) (strcmp(s1,s2) < 0)
 #define strLE(s1,s2) (strcmp(s1,s2) <= 0)
 #define strGT(s1,s2) (strcmp(s1,s2) > 0)
 #define strGE(s1,s2) (strcmp(s1,s2) >= 0)
 
-#define strnNE(s1,s2,l) (strncmp(s1,s2,l) != 0)
-#define strnEQ(s1,s2,l) (strncmp(s1,s2,l) == 0)
+#define strnNE(s1,s2,l) (strncmp(s1,s2,l))
+#define strnEQ(s1,s2,l) (!strncmp(s1,s2,l))
 
-#define memNE(s1,s2,l) (memcmp(s1,s2,l) != 0)
-#define memEQ(s1,s2,l) (memcmp(s1,s2,l) == 0)
+/* These names are controversial, so guarding against their being used in more
+ * places than they already are.  strBEGs and StrStartsWith are potential
+ * candidates */
+#if defined(PERL_IN_DOIO_C) || defined(PERL_IN_GV_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_LOCALE_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_TOKE_C) || defined(PERL_EXT)
+#define strNEs(s1,s2) (strncmp(s1,"" s2 "", sizeof(s2)-1))
+#define strEQs(s1,s2) (!strncmp(s1,"" s2 "", sizeof(s2)-1))
+#endif
+
+#ifdef HAS_MEMCMP
+#  define memNE(s1,s2,l) (memcmp(s1,s2,l))
+#  define memEQ(s1,s2,l) (!memcmp(s1,s2,l))
+#else
+#  define memNE(s1,s2,l) (bcmp(s1,s2,l))
+#  define memEQ(s1,s2,l) (!bcmp(s1,s2,l))
+#endif
 
 /* memEQ and memNE where second comparand is a string constant */
 #define memEQs(s1, l, s2) \
         (((sizeof(s2)-1) == (l)) && memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
-#define memNEs(s1, l, s2) (! memEQs(s1, l, s2))
+#define memNEs(s1, l, s2) !memEQs(s1, l, s2)
 
-/* Keep these private until we decide it was a good idea */
-#if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_EXT_POSIX)
-
-#define strBEGINs(s1,s2) (strncmp(s1,"" s2 "", sizeof(s2)-1) == 0)
-
-#define memBEGINs(s1, l, s2)                                                \
-            (   (l) >= sizeof(s2) - 1                                       \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
-#define memBEGINPs(s1, l, s2)                                               \
-            (   (l) > sizeof(s2) - 1                                        \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
-#define memENDs(s1, l, s2)                                                  \
-            (   (l) >= sizeof(s2) - 1                                       \
-             && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
-#define memENDPs(s1, l, s2)                                                 \
-            (   (l) > sizeof(s2)                                            \
-             && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
-#endif  /* End of making macros private */
+/* memEQ and memNE where second comparand is a string constant
+ * and we can assume the length of s1 is at least that of the string */
+#define _memEQs(s1, s2) \
+        (memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
+#define _memNEs(s1, s2) (memNE((s1),("" s2 ""),(sizeof(s2)-1)))
 
 #define memLT(s1,s2,l) (memcmp(s1,s2,l) < 0)
 #define memLE(s1,s2,l) (memcmp(s1,s2,l) <= 0)
@@ -1059,9 +1045,11 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 */
 
-/* Specify the widest unsigned type on the platform. */
-#ifdef QUADKIND
-#   define WIDEST_UTYPE U64
+/* Specify the widest unsigned type on the platform.  Use U64TYPE because U64
+ * is known only in the perl core, and this macro can be called from outside
+ * that */
+#ifdef HAS_QUAD
+#   define WIDEST_UTYPE U64TYPE
 #else
 #   define WIDEST_UTYPE U32
 #endif
@@ -1125,13 +1113,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  *
  * The first group of these is ordered in what I (khw) estimate to be the
  * frequency of their use.  This gives a slight edge to exiting a loop earlier
- * (in reginclass() in regexec.c).  Except \v should be last, as it isn't a
- * real Posix character class, and some (small) inefficiencies in regular
- * expression handling would be introduced by putting it in the middle of those
- * that are.  Also, cntrl and ascii come after the others as it may be useful
- * to group these which have no members that match above Latin1, (or above
- * ASCII in the latter case) */
-
+ * (in reginclass() in regexec.c) */
 #  define _CC_WORDCHAR           0      /* \w and [:word:] */
 #  define _CC_DIGIT              1      /* \d and [:digit:] */
 #  define _CC_ALPHA              2      /* [:alpha:] */
@@ -1142,6 +1124,17 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_ALPHANUMERIC       7      /* [:alnum:] */
 #  define _CC_GRAPH              8      /* [:graph:] */
 #  define _CC_CASED              9      /* [:lower:] or [:upper:] under /i */
+
+#define _FIRST_NON_SWASH_CC     10
+/* The character classes above are implemented with swashes.  The second group
+ * (just below) contains the ones implemented without.  These are also sorted
+ * in rough order of the frequency of their use, except that \v should be last,
+ * as it isn't a real Posix character class, and some (small) inefficiencies in
+ * regular expression handling would be introduced by putting it in the middle
+ * of those that are.  Also, cntrl and ascii come after the others as it may be
+ * useful to group these which have no members that match above Latin1, (or
+ * above ASCII in the latter case) */
+
 #  define _CC_SPACE             10      /* \s, [:space:] */
 #  define _CC_PSXSPC            _CC_SPACE   /* XXX Temporary, can be removed
                                                when the deprecated isFOO_utf8()
@@ -1208,7 +1201,35 @@ typedef enum {
 } _char_class_number;
 #endif
 
+#define POSIX_SWASH_COUNT _FIRST_NON_SWASH_CC
 #define POSIX_CC_COUNT    (_HIGHEST_REGCOMP_DOT_H_SYNC + 1)
+
+#if defined(PERL_IN_UTF8_C)                         \
+ || defined(PERL_IN_REGCOMP_C)                      \
+ || defined(PERL_IN_REGEXEC_C)
+#   if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
+       || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
+       || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9
+      #error Need to adjust order of swash_property_names[]
+#   endif
+
+/* This is declared static in each of the few files that this is #defined for
+ * to keep them from being publicly accessible.  Hence there is a small amount
+ * of wasted space */
+
+static const char* const swash_property_names[] = {
+    "XPosixWord",
+    "XPosixDigit",
+    "XPosixAlpha",
+    "XPosixLower",
+    "XPosixUpper",
+    "XPosixPunct",
+    "XPosixPrint",
+    "XPosixAlnum",
+    "XPosixGraph",
+    "Cased"
+};
+#endif
 
 START_EXTERN_C
 #  ifdef DOINIT
@@ -1381,7 +1402,7 @@ END_EXTERN_C
 #   define isGRAPH_L1(c)     (isPRINT_L1(c) && (! isBLANK_L1(c)))
 #   define isLOWER_L1(c)     (isLOWER_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && ((   NATIVE_TO_LATIN1((U8) c) >= 0xDF   \
+                                  && ((NATIVE_TO_LATIN1((U8) c) >= 0xDF      \
                                        && NATIVE_TO_LATIN1((U8) c) != 0xF7)  \
                                        || NATIVE_TO_LATIN1((U8) c) == 0xAA   \
                                        || NATIVE_TO_LATIN1((U8) c) == 0xBA   \
@@ -1391,7 +1412,7 @@ END_EXTERN_C
                                   && NATIVE_TO_LATIN1((U8) c) >= 0xA0))
 #   define isPUNCT_L1(c)     (isPUNCT_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (   NATIVE_TO_LATIN1((U8) c) == 0xA1    \
+                                  && (NATIVE_TO_LATIN1((U8) c) == 0xA1       \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xA7    \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xAB    \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xB6    \
@@ -1400,11 +1421,11 @@ END_EXTERN_C
                                       || NATIVE_TO_LATIN1((U8) c) == 0xBF)))
 #   define isSPACE_L1(c)     (isSPACE_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (   NATIVE_TO_LATIN1((U8) c) == 0x85    \
+                                  && (NATIVE_TO_LATIN1((U8) c) == 0x85       \
                                       || NATIVE_TO_LATIN1((U8) c) == 0xA0)))
 #   define isUPPER_L1(c)     (isUPPER_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
-                                  && (   NATIVE_TO_LATIN1((U8) c) >= 0xC0    \
+                                  && (NATIVE_TO_LATIN1((U8) c) >= 0xC0       \
                                       && NATIVE_TO_LATIN1((U8) c) <= 0xDE    \
                                       && NATIVE_TO_LATIN1((U8) c) != 0xD7)))
 #   define isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT_A(c))
@@ -1851,6 +1872,13 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
              ? 0 /* Note that doesn't check validity for latin1 */          \
              : above_latin1)
 
+/* NOTE that some of these macros have very similar ones in regcharclass.h.
+ * For example, there is (at the time of this writing) an 'is_SPACE_utf8()'
+ * there, differing in name only by an underscore from the one here
+ * 'isSPACE_utf8().  The difference is that the ones here are probably more
+ * efficient and smaller, using an O(1) array lookup for Latin1-range code
+ * points; the regcharclass.h ones are implemented as a series of
+ * "if-else-if-else ..." */
 
 #define isALPHA_utf8(p)         _generic_utf8(ALPHA, p)
 #define isALPHANUMERIC_utf8(p)  _generic_utf8(ALPHANUMERIC, p)
@@ -2230,9 +2258,8 @@ PoisonWith(0xEF) for catching access to freed memory.
 #define NEWSV(x,len)	newSV(len)
 #endif
 
-#define MEM_SIZE_MAX ((MEM_SIZE)-1)
+#define MEM_SIZE_MAX ((MEM_SIZE)~0)
 
-#define _PERL_STRLEN_ROUNDUP_UNCHECKED(n) (((n) - 1 + PERL_STRLEN_ROUNDUP_QUANTUM) & ~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM - 1))
 
 #ifdef PERL_MALLOC_WRAP
 
@@ -2247,8 +2274,7 @@ PoisonWith(0xEF) for catching access to freed memory.
  */
 
 #  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
-    (  sizeof(MEM_SIZE) < sizeof(n) \
-    || sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
+    (8 * sizeof(n) + sizeof(t) > sizeof(MEM_SIZE))
 
 /* This is written in a slightly odd way to avoid various spurious
  * compiler warnings. We *want* to write the expression as
@@ -2279,22 +2305,17 @@ PoisonWith(0xEF) for catching access to freed memory.
 	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
 	&& (Perl_croak_nocontext("%s",(a)),0))
 
-/* "a" arg must be a string literal */
-#  define MEM_WRAP_CHECK_s(n,t,a) \
-	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
-	&& (Perl_croak_nocontext("" a ""),0))
-
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
-#define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
+#define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0):0),((n-1+PERL_STRLEN_ROUNDUP_QUANTUM)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1)))
 #else
 
 #define MEM_WRAP_CHECK(n,t)
 #define MEM_WRAP_CHECK_1(n,t,a)
-#define MEM_WRAP_CHECK_s(n,t,a)
+#define MEM_WRAP_CHECK_2(n,t,a,b)
 #define MEM_WRAP_CHECK_(n,t)
 
-#define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
+#define PERL_STRLEN_ROUNDUP(n) (((n-1+PERL_STRLEN_ROUNDUP_QUANTUM)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1)))
 
 #endif
 
@@ -2388,20 +2409,18 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
-/* assert that a valid ptr has been supplied - use this instead of assert(ptr)  *
- * as it handles cases like constant string arguments without throwing warnings *
- * the cast is required, as is the inequality check, to avoid warnings          */
-#define perl_assert_ptr(p) assert( ((void*)(p)) != 0 )
+#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memzero((char*)(d), (n) * sizeof(t)))
 
-
-#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), (void)memzero((char*)(d), (n) * sizeof(t)))
-
-/* Like above, but returns a pointer to 'd' */
-#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)))
+#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#ifdef HAS_MEMSET
+#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) memzero((char*)(d), (n) * sizeof(t)))
+#else
+/* Using bzero(), which returns void.  */
+#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) memzero((char*)(d), (n) * sizeof(t)),d)
+#endif
 
 #define PoisonWith(d,n,t,b)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), (U8)(b), (n) * sizeof(t)))
 #define PoisonNew(d,n,t)	PoisonWith(d,n,t,0xAB)
@@ -2414,7 +2433,11 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  define PERL_POISON_EXPR(x)
 #endif
 
+#ifdef USE_STRUCT_COPY
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
+#else
+#define StructCopy(s,d,t) Copy(s,d,1,t)
+#endif
 
 /* C_ARRAY_LENGTH is the number of elements in the C array (so you
  * want your zero-based indices to be less than but not equal to).
@@ -2427,10 +2450,12 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #ifdef NEED_VA_COPY
 # ifdef va_copy
 #  define Perl_va_copy(s, d) va_copy(d, s)
-# elif defined(__va_copy)
-#  define Perl_va_copy(s, d) __va_copy(d, s)
 # else
-#  define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
+#  if defined(__va_copy)
+#   define Perl_va_copy(s, d) __va_copy(d, s)
+#  else
+#   define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
+#  endif
 # endif
 #endif
 
@@ -2471,28 +2496,32 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  if Uid_t_size > IVSIZE
 #    define sv_setuid(sv, uid)       sv_setnv((sv), (NV)(uid))
 #    define SvUID(sv)                SvNV(sv)
-#  elif Uid_t_sign <= 0
-#    define sv_setuid(sv, uid)       sv_setiv((sv), (IV)(uid))
-#    define SvUID(sv)                SvIV(sv)
 #  else
-#    define sv_setuid(sv, uid)       sv_setuv((sv), (UV)(uid))
-#    define SvUID(sv)                SvUV(sv)
+#    if Uid_t_sign <= 0
+#      define sv_setuid(sv, uid)       sv_setiv((sv), (IV)(uid))
+#      define SvUID(sv)                SvIV(sv)
+#    else
+#      define sv_setuid(sv, uid)       sv_setuv((sv), (UV)(uid))
+#      define SvUID(sv)                SvUV(sv)
+#    endif
 #  endif /* Uid_t_size */
 
 #  if Gid_t_size > IVSIZE
 #    define sv_setgid(sv, gid)       sv_setnv((sv), (NV)(gid))
 #    define SvGID(sv)                SvNV(sv)
-#  elif Gid_t_sign <= 0
-#    define sv_setgid(sv, gid)       sv_setiv((sv), (IV)(gid))
-#    define SvGID(sv)                SvIV(sv)
 #  else
-#    define sv_setgid(sv, gid)       sv_setuv((sv), (UV)(gid))
-#    define SvGID(sv)                SvUV(sv)
+#    if Gid_t_sign <= 0
+#      define sv_setgid(sv, gid)       sv_setiv((sv), (IV)(gid))
+#      define SvGID(sv)                SvIV(sv)
+#    else
+#      define sv_setgid(sv, gid)       sv_setuv((sv), (UV)(gid))
+#      define SvGID(sv)                SvUV(sv)
+#    endif
 #  endif /* Gid_t_size */
 
 #endif
 
-#endif  /* PERL_HANDY_H_ */
+#endif  /* HANDY_H */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

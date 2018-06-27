@@ -529,7 +529,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.53';
+$VERSION = '1.51';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1871,10 +1871,7 @@ sub _DB__trim_command_and_return_first_component {
     $cmd =~ s/\A\s+//s;    # trim annoying leading whitespace
     $cmd =~ s/\s+\z//s;    # trim annoying trailing whitespace
 
-    # A single-character debugger command can be immediately followed by its
-    # argument if they aren't both alphanumeric; otherwise require space
-    # between commands and arguments:
-    my ($verb, $args) = $cmd =~ m{\A(.\b|\S*)\s*(.*)}s;
+    my ($verb, $args) = $cmd =~ m{\A(\S*)\s*(.*)}s;
 
     $obj->cmd_verb($verb);
     $obj->cmd_args($args);
@@ -6631,15 +6628,19 @@ sub dump_trace {
         $i++
     )
     {
-        # if the sub has args ($h true), make an anonymous array of the
-        # dumped args.
-        my $args = $h ? _dump_trace_calc_save_args($nothard) : undef;
+
+        # Go through the arguments and save them for later.
+        my $save_args = _dump_trace_calc_save_args($nothard);
 
         # If context is true, this is array (@)context.
         # If context is false, this is scalar ($) context.
         # If neither, context isn't defined. (This is apparently a 'can't
         # happen' trap.)
         $context = $context ? '@' : ( defined $context ? "\$" : '.' );
+
+        # if the sub has args ($h true), make an anonymous array of the
+        # dumped args.
+        $args = $h ? $save_args : undef;
 
         # remove trailing newline-whitespace-semicolon-end of line sequence
         # from the eval text, if any.

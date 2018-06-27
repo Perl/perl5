@@ -3,19 +3,22 @@ require Exporter;
 use Config;
 require File::Spec;
 
-our ( @Extensions, $opt_o, $opt_s );
+use vars qw(@ISA @EXPORT $VERSION
+	    @Extensions $Verbose $lib_ext
+	    $opt_o $opt_s 
+	    );
 use strict;
 
 # This is not a dual-life module, so no need for development version numbers
-our $VERSION = '1.35';
+$VERSION = '1.34';
 
-our @ISA = qw(Exporter);
-our @EXPORT = qw(&xsinit &ldopts 
+@ISA = qw(Exporter);
+@EXPORT = qw(&xsinit &ldopts 
 	     &ccopts &ccflags &ccdlflags &perl_inc
 	     &xsi_header &xsi_protos &xsi_body);
 
-our $Verbose = 0;
-our $lib_ext = $Config{lib_ext} || '.a';
+$Verbose = 0;
+$lib_ext = $Config{lib_ext} || '.a';
 
 sub is_cmd { $0 eq '-e' }
 

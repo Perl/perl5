@@ -65,8 +65,6 @@ use File::Spec;		# keep perlbug Perl 5.005 compatible
 use Getopt::Std;
 use File::Basename 'basename';
 
-$Getopt::Std::STANDARD_HELP_VERSION = 1;
-
 sub paraprint;
 
 BEGIN {
@@ -83,7 +81,7 @@ BEGIN {
     $::HaveWrap = ($@ eq "");
 };
 
-our $VERSION = "1.41";
+my $Version = "1.40";
 
 #TODO:
 #       make sure failure (transmission-wise) of Mail::Send is accounted for.
@@ -187,9 +185,6 @@ EOF
     lc $alt;
 }
 
-sub HELP_MESSAGE { Help(); exit; }
-sub VERSION_MESSAGE { print "perlbug version $VERSION\n"; }
-
 sub Init {
     # -------- Setup --------
 
@@ -197,6 +192,13 @@ sub Init {
     $Is_VMS = $^O eq 'VMS';
     $Is_Linux = lc($^O) eq 'linux';
     $Is_OpenBSD = lc($^O) eq 'openbsd';
+
+    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T:p:", \%opt)) { Help(); exit; };
+
+    # This comment is needed to notify metaconfig that we are
+    # using the $perladmin, $cf_by, and $cf_time definitions.
+
+    # -------- Configuration ---------
 
     # perlbug address
     $bugaddress = 'perlbug@perl.org';
@@ -206,16 +208,6 @@ sub Init {
 
     # Thanks address
     $thanksaddress = 'perl-thanks@perl.org';
-
-    # Defaults if getopts fails.
-    $address = (basename ($0) =~ /^perlthanks/i) ? $thanksaddress : $bugaddress;
-    $cc = $::Config{'perladmin'} || $::Config{'cf_email'} || $::Config{'cf_by'} || '';
-
-    HELP_MESSAGE() unless getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T:p:", \%opt);
-
-    # This comment is needed to notify metaconfig that we are
-    # using the $perladmin, $cf_by, and $cf_time definitions.
-    # -------- Configuration ---------
 
     if (basename ($0) =~ /^perlthanks/i) {
 	# invoked as perlthanks
@@ -249,7 +241,7 @@ sub Init {
 
     # We have one or more attachments
     $have_attachment = ($opt{p} || 0);
-    $mime_boundary = ('-' x 12) . "$VERSION.perlbug" if $have_attachment;
+    $mime_boundary = ('-' x 12) . "$Version.perlbug" if $have_attachment;
 
     # Comma-separated list of attachments
     $attachments = $opt{p} || "";
@@ -620,7 +612,7 @@ EOF
 
     print REP <<EOF;
 This is a $reptype report for perl from $from,
-generated with the help of perlbug $VERSION running under perl $perl_version.
+generated with the help of perlbug $Version running under perl $perl_version.
 
 EOF
 
@@ -1122,10 +1114,6 @@ sub build_complete_message {
 sub save_message_to_disk {
     my $file = shift;
 
-        if (-e $file) {
-            my $response = _prompt( '', "Overwrite existing '$file'", 'n' );
-            return undef unless $response =~ / yes | y /xi;
-        }
         open OUTFILE, '>:raw', $file or do { warn  "Couldn't open '$file': $!\n"; return undef};
         binmode(OUTFILE, ':raw :crlf') if $Is_MSWin32;
 

@@ -34,7 +34,6 @@ bug*.pl
 /perlmain.c
 /perlmini.c
 /pod/Makefile
-/preload
 /runtests
 /writemain
 /x2p/Makefile
@@ -116,7 +115,6 @@ lib/Config.pod
 lib/Cross.pm
 lib/ExtUtils/MANIFEST.SKIP
 lib/ExtUtils/xsubpp
-lib/Storable/Limit.pm
 lib/auto/
 lib/perldoc.pod
 lib/buildcustomize.pl
@@ -142,7 +140,6 @@ t/perl
 t/test_state
 *.output
 *.tmp
-*.bak
 t/*.ph
 t/lib/*.ph
 

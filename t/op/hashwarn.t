@@ -11,7 +11,7 @@ plan( tests => 18 );
 use strict;
 use warnings;
 
-our @warnings;
+use vars qw{ @warnings };
 
 BEGIN {
     $SIG{'__WARN__'} = sub { push @warnings, @_ };

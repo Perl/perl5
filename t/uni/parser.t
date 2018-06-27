@@ -6,11 +6,10 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    require './charset_tools.pl';
     skip_all_without_unicode_tables();
 }
 
-plan (tests => 57);
+plan (tests => 55);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -232,27 +231,15 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
         {stderr => 1}, "RT# 124216");
 }
 
-SKIP: {
-
+SKIP: {   # [perl #128738]
     use Config;
     if ($Config{uvsize} < 8) {
-        skip("test is only valid on 64-bit ints", 4);
+        skip("test is only valid on 64-bit ints", 2);
     }
     else {
+        no warnings 'deprecated';
         my $a;
-        my $b;
-
-        # This caused a memory fault [perl #128738]
-        $b = byte_utf8a_to_utf8n("\xFE\x82\x80\x80\x80\x80\x80"); # 0x80000000
-        eval "\$a = q ${b}abc${b}";
-        is $@, "",
-               "No errors in eval'ing a string with large code point delimiter";
-        is $a, 'abc',
-               "Got expected result in eval'ing a string with a large code point"
-            . " delimiter";
-
-        $b = byte_utf8a_to_utf8n("\xFE\x83\xBF\xBF\xBF\xBF\xBF"); # 0xFFFFFFFF
-        eval "\$a = q ${b}Hello, \\\\whirled!${b}";
+        eval "\$a = q \x{ffffffff}Hello, \\\\whirled!\x{ffffffff}";
         is $@, "",
                "No errors in eval'ing a string with large code point delimiter";
         is $a, 'Hello, \whirled!',

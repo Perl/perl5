@@ -1,5 +1,4 @@
 #define PERL_EXT_POSIX
-#define PERL_EXT
 
 #ifdef NETWARE
 	#define _POSIX_
@@ -35,13 +34,17 @@ static int not_here(const char *s);
 #ifdef WIN32
 #include <sys/errno2.h>
 #endif
+#ifdef I_FLOAT
 #include <float.h>
+#endif
 #ifdef I_FENV
 #if !(defined(__vax__) && defined(__NetBSD__))
 #include <fenv.h>
 #endif
 #endif
+#ifdef I_LIMITS
 #include <limits.h>
+#endif
 #include <locale.h>
 #include <math.h>
 #ifdef I_PWD
@@ -50,18 +53,13 @@ static int not_here(const char *s);
 #include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
+
+#ifdef I_STDDEF
 #include <stddef.h>
+#endif
 
 #ifdef I_UNISTD
 #include <unistd.h>
-#endif
-
-#ifdef I_SYS_TIME
-# include <sys/time.h>
-#endif
-
-#ifdef I_SYS_RESOURCE
-# include <sys/resource.h>
 #endif
 
 #if defined(USE_QUADMATH) && defined(I_QUADMATH)
@@ -1330,7 +1328,9 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
 #if defined(I_TERMIOS)
 #include <termios.h>
 #endif
+#ifdef I_STDLIB
 #include <stdlib.h>
+#endif
 #ifndef __ultrix__
 #include <string.h>
 #endif
@@ -1598,8 +1598,8 @@ static const struct lconv_offset lconv_strings[] = {
 
 /* The Linux man pages say these are the field names for the structure
  * components that are LC_NUMERIC; the rest being LC_MONETARY */
-#   define isLC_NUMERIC_STRING(name) (   strEQ(name, "decimal_point")   \
-                                      || strEQ(name, "thousands_sep")   \
+#   define isLC_NUMERIC_STRING(name) (strEQ(name, "decimal_point")     \
+                                      || strEQ(name, "thousands_sep")  \
                                                                         \
                                       /* There should be no harm done   \
                                        * checking for this, even if     \
@@ -1792,7 +1792,7 @@ fix_win32_tzenv(void)
         perl_tz_env = "";
     if (crt_tz_env == NULL)
         crt_tz_env = "";
-    if (strNE(perl_tz_env, crt_tz_env)) {
+    if (strcmp(perl_tz_env, crt_tz_env) != 0) {
         newenv = (char*)malloc((strlen(perl_tz_env) + 4) * sizeof(char));
         if (newenv != NULL) {
             sprintf(newenv, "TZ=%s", perl_tz_env);
@@ -1897,9 +1897,8 @@ getattr(termios_ref, fd = 0)
     OUTPUT:
 	RETVAL
 
-    # If we define TCSANOW here then both a found and not found constant sub
-    # are created causing a Constant subroutine TCSANOW redefined warning
-
+# If we define TCSANOW here then both a found and not found constant sub
+# are created causing a Constant subroutine TCSANOW redefined warning
 #ifndef TCSANOW
 #  define DEF_SETATTR_ACTION 0
 #else
@@ -2125,67 +2124,15 @@ localeconv()
 	localeconv(); /* A stub to call not_here(). */
 #else
 	struct lconv *lcbuf;
-#  if defined(USE_ITHREADS)                                             \
-   && defined(HAS_POSIX_2008_LOCALE)                                    \
-   && defined(HAS_LOCALECONV_L) /* Prefer this thread-safe version */
-        bool do_free = FALSE;
-        locale_t cur = NULL;
-#  elif defined(TS_W32_BROKEN_LOCALECONV)
-        const char * save_global;
-        const char * save_thread;
-#  endif
-        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
         /* localeconv() deals with both LC_NUMERIC and LC_MONETARY, but
          * LC_MONETARY is already in the correct locale */
-#  ifdef USE_LOCALE_MONETARY
-
-        const bool is_monetary_utf8 = _is_cur_LC_category_utf8(LC_MONETARY);
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-
-        bool is_numeric_utf8;
-
+        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-
-        is_numeric_utf8 = _is_cur_LC_category_utf8(LC_NUMERIC);
-#  endif
 
 	RETVAL = newHV();
 	sv_2mortal((SV*)RETVAL);
-#  if defined(USE_ITHREADS)                         \
-   && defined(HAS_POSIX_2008_LOCALE)                \
-   && defined(HAS_LOCALECONV_L)                     \
-   && defined(HAS_DUPLOCALE)
-
-        cur = uselocale((locale_t) 0);
-        if (cur == LC_GLOBAL_LOCALE) {
-            cur = duplocale(LC_GLOBAL_LOCALE);
-            do_free = TRUE;
-        }
-
-        lcbuf = localeconv_l(cur);
-#  else
-        LOCALE_LOCK_V;  /* Prevent interference with other threads using
-                           localeconv() */
-#    ifdef TS_W32_BROKEN_LOCALECONV
-        /* This is a workaround for a Windows bug prior to VS 15, in which
-         * localeconv only looks at the global locale.  We toggle to the global
-         * locale; populate the return; then toggle back.  We have to use
-         * LC_ALL instead of the individual ones because of another bug in
-         * Windows */
-
-        save_thread  = savepv(Perl_setlocale(LC_NUMERIC, NULL));
-
-        _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-
-        save_global  = savepv(Perl_setlocale(LC_ALL, NULL));
-
-        Perl_setlocale(LC_ALL,  save_thread);
-#    endif
-        lcbuf = localeconv();
-#  endif
-	if (lcbuf) {
+	if ((lcbuf = localeconv())) {
 	    const struct lconv_offset *strings = lconv_strings;
 	    const struct lconv_offset *integers = lconv_integers;
 	    const char *ptr = (const char *) lcbuf;
@@ -2193,35 +2140,35 @@ localeconv()
 	    while (strings->name) {
                 /* This string may be controlled by either LC_NUMERIC, or
                  * LC_MONETARY */
-                const bool is_utf8_locale =
-#  if defined(USE_LOCALE_NUMERIC) && defined(USE_LOCALE_MONETARY)
-                                        (isLC_NUMERIC_STRING(strings->name))
-                                        ? is_numeric_utf8
-                                        : is_monetary_utf8;
-#  elif defined(USE_LOCALE_NUMERIC)
-                                        is_numeric_utf8;
-#  elif defined(USE_LOCALE_MONETARY)
-                                        is_monetary_utf8;
-#  else
-                                        FALSE;
-#  endif
+                bool is_utf8_locale
+#if defined(USE_LOCALE_NUMERIC) && defined(USE_LOCALE_MONETARY)
+                 = _is_cur_LC_category_utf8((isLC_NUMERIC_STRING(strings->name))
+                                             ? LC_NUMERIC
+                                             : LC_MONETARY);
+#elif defined(USE_LOCALE_NUMERIC)
+                 = _is_cur_LC_category_utf8(LC_NUMERIC);
+#elif defined(USE_LOCALE_MONETARY)
+                 = _is_cur_LC_category_utf8(LC_MONETARY);
+#else
+                 = FALSE;
+#endif
 
 		const char *value = *((const char **)(ptr + strings->offset));
 
 		if (value && *value) {
-                    const STRLEN value_len = strlen(value);
-
-                    /* We mark it as UTF-8 if a utf8 locale and is valid and
-                     * variant under UTF-8 */
-                    const bool is_utf8 = is_utf8_locale
-                                     &&  is_utf8_non_invariant_string(
-                                                                (U8*) value,
-                                                                value_len);
 		    (void) hv_store(RETVAL,
-                                    strings->name,
-                                    strlen(strings->name),
-                                    newSVpvn_utf8(value, value_len, is_utf8),
-                                    0);
+                        strings->name,
+                        strlen(strings->name),
+                        newSVpvn_utf8(
+                                value,
+                                strlen(value),
+
+                                /* We mark it as UTF-8 if a utf8 locale and is
+                                 * valid and variant under UTF-8 */
+                                     is_utf8_locale
+                                && ! is_utf8_invariant_string((U8 *) value, 0)
+                                &&   is_utf8_string((U8 *) value, 0)),
+                    0);
             }
                 strings++;
 	    }
@@ -2235,26 +2182,7 @@ localeconv()
                 integers++;
             }
 	}
-#  if defined(USE_ITHREADS)                         \
-   && defined(HAS_POSIX_2008_LOCALE)                \
-   && defined(HAS_LOCALECONV_L)
-        if (do_free) {
-            freelocale(cur);
-        }
-#  else
-#    ifdef TS_W32_BROKEN_LOCALECONV
-        Perl_setlocale(LC_ALL, save_global);
-
-        _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-
-        Perl_setlocale(LC_ALL, save_thread);
-
-        Safefree(save_global);
-        Safefree(save_thread);
-#    endif
-        LOCALE_UNLOCK_V;
-#  endif
-        RESTORE_LC_NUMERIC();
+        RESTORE_LC_NUMERIC_STANDARD();
 #endif  /* HAS_LOCALECONV */
     OUTPUT:
 	RETVAL
@@ -2266,12 +2194,116 @@ setlocale(category, locale = 0)
     PREINIT:
 	char *		retval;
     CODE:
-	retval = (char *) Perl_setlocale(category, locale);
-        if (! retval) {
+#ifdef USE_LOCALE_NUMERIC
+        /* A 0 (or NULL) locale means only query what the current one is.  We
+         * have the LC_NUMERIC name saved, because we are normally switched
+         * into the C locale for it.  Switch back so an LC_ALL query will yield
+         * the correct results; all other categories don't require special
+         * handling */
+        if (locale == 0) {
+            if (category == LC_NUMERIC) {
+                XSRETURN_PV(PL_numeric_name);
+            }
+#   ifdef LC_ALL
+            else if (category == LC_ALL) {
+                SET_NUMERIC_UNDERLYING();
+            }
+#   endif
+        }
+#endif
+#ifdef WIN32    /* Use wrapper on Windows */
+	retval = Perl_my_setlocale(aTHX_ category, locale);
+#else
+	retval = setlocale(category, locale);
+#endif
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+            "%s:%d: %s\n", __FILE__, __LINE__,
+                _setlocale_debug_string(category, locale, retval)));
+	if (! retval) {
+            /* Should never happen that a query would return an error, but be
+             * sure and reset to C locale */
+            if (locale == 0) {
+                SET_NUMERIC_STANDARD();
+            }
             XSRETURN_UNDEF;
         }
 
-        RETVAL = retval;
+        /* Save retval since subsequent setlocale() calls may overwrite it. */
+        retval = savepv(retval);
+        SAVEFREEPV(retval);
+
+        /* For locale == 0, we may have switched to NUMERIC_UNDERLYING.  Switch
+         * back */
+        if (locale == 0) {
+            SET_NUMERIC_STANDARD();
+            XSRETURN_PV(retval);
+        }
+        else {
+	    RETVAL = retval;
+#ifdef USE_LOCALE_CTYPE
+	    if (category == LC_CTYPE
+#ifdef LC_ALL
+		|| category == LC_ALL
+#endif
+		)
+	    {
+		char *newctype;
+#ifdef LC_ALL
+		if (category == LC_ALL) {
+		    newctype = setlocale(LC_CTYPE, NULL);
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s:%d: %s\n", __FILE__, __LINE__,
+                        _setlocale_debug_string(LC_CTYPE, NULL, newctype)));
+                }
+		else
+#endif
+		    newctype = RETVAL;
+		new_ctype(newctype);
+	    }
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+	    if (category == LC_COLLATE
+#ifdef LC_ALL
+		|| category == LC_ALL
+#endif
+		)
+	    {
+		char *newcoll;
+#ifdef LC_ALL
+		if (category == LC_ALL) {
+		    newcoll = setlocale(LC_COLLATE, NULL);
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s:%d: %s\n", __FILE__, __LINE__,
+                        _setlocale_debug_string(LC_COLLATE, NULL, newcoll)));
+                }
+		else
+#endif
+		    newcoll = RETVAL;
+		new_collate(newcoll);
+	    }
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+	    if (category == LC_NUMERIC
+#ifdef LC_ALL
+		|| category == LC_ALL
+#endif
+		)
+	    {
+		char *newnum;
+#ifdef LC_ALL
+		if (category == LC_ALL) {
+		    newnum = setlocale(LC_NUMERIC, NULL);
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s:%d: %s\n", __FILE__, __LINE__,
+                        _setlocale_debug_string(LC_NUMERIC, NULL, newnum)));
+                }
+		else
+#endif
+		    newnum = RETVAL;
+		new_numeric(newnum);
+	    }
+#endif /* USE_LOCALE_NUMERIC */
+	}
     OUTPUT:
 	RETVAL
 
@@ -2988,7 +3020,7 @@ sigaction(sig, optaction, oldaction = 0)
 	        const char *s = SvPVX_const(ST(0));
 		int i = whichsig(s);
 
-	        if (i < 0 && memBEGINs(s, SvCUR(ST(0)), "SIG"))
+	        if (i < 0 && _memEQs(s, "SIG"))
 		    i = whichsig(s + 3);
 	        if (i < 0) {
 	            if (ckWARN(WARN_SIGNAL))
@@ -3304,27 +3336,10 @@ write(fd, buffer, nbytes)
 void
 abort()
 
-#ifdef I_WCHAR
-#  include <wchar.h>
-#endif
-
 int
 mblen(s, n)
 	char *		s
 	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        mbstate_t ps;
-#endif
-    CODE:
-#if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        PERL_UNUSED_RESULT(mbrlen(NULL, 0, &ps));   /* Initialize state */
-        RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
-#else
-        RETVAL = mblen(s, n);
-#endif
-    OUTPUT:
-        RETVAL
 
 size_t
 mbstowcs(s, pwcs, n)
@@ -3337,21 +3352,6 @@ mbtowc(pwc, s, n)
 	wchar_t *	pwc
 	char *		s
 	size_t		n
-    PREINIT:
-#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
-        mbstate_t ps;
-#endif
-    CODE:
-#if defined(USE_ITHREADS) && defined(HAS_MBRTOWC)
-        memset(&ps, 0, sizeof(ps));;
-        PERL_UNUSED_RESULT(mbrtowc(pwc, NULL, 0, &ps));/* Reset any shift state */
-        errno = 0;
-        RETVAL = mbrtowc(pwc, s, n, &ps);   /* Prefer reentrant version */
-#else
-        RETVAL = mbtowc(pwc, s, n);
-#endif
-    OUTPUT:
-        RETVAL
 
 int
 wcstombs(s, pwcs, n)
@@ -3379,7 +3379,6 @@ strtod(str)
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
 	num = strtod(str, &unparsed);
-        RESTORE_LC_NUMERIC();
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
@@ -3388,6 +3387,7 @@ strtod(str)
 	    else
 		PUSHs(&PL_sv_undef);
 	}
+        RESTORE_LC_NUMERIC_STANDARD();
 
 #ifdef HAS_STRTOLD
 
@@ -3401,7 +3401,6 @@ strtold(str)
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
 	num = strtold(str, &unparsed);
-        RESTORE_LC_NUMERIC();
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
@@ -3410,6 +3409,7 @@ strtold(str)
 	    else
 		PUSHs(&PL_sv_undef);
 	}
+        RESTORE_LC_NUMERIC_STANDARD();
 
 #endif
 
@@ -3644,22 +3644,18 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             /* allowing user-supplied (rather than literal) formats
              * is normally frowned upon as a potential security risk;
              * but this is part of the API so we have to allow it */
-            GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
+            GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	    buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
-            GCC_DIAG_RESTORE_STMT;
+            GCC_DIAG_RESTORE;
             sv = sv_newmortal();
 	    if (buf) {
                 STRLEN len = strlen(buf);
 		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
-		if (       SvUTF8(fmt)
-                    || (   is_utf8_non_invariant_string((U8*) buf, len)
+		if (SvUTF8(fmt)
+                    || (! is_utf8_invariant_string((U8*) buf, len)
+                        && is_utf8_string((U8*) buf, len)
 #ifdef USE_LOCALE_TIME
                         && _is_cur_LC_category_utf8(LC_TIME)
-#else   /* If can't check directly, at least can see if script is consistent,
-           under UTF-8, which gives us an extra measure of confidence. */
-
-                        && isSCRIPT_RUN((const U8 *) buf, buf + len,
-                                        TRUE) /* Means assume UTF-8 */
 #endif
                 )) {
 		    SvUTF8_on(sv);

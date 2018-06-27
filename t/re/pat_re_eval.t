@@ -21,9 +21,8 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-our @global;
 
-plan tests => 502;  # Update this when adding/deleting tests.
+plan tests => 533;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -746,6 +745,19 @@ sub run_tests {
 			use re 'eval';
 			ok($ss =~ /^$cc/, fmt("code         $u->[2]", $ss, $cc));
 		    }
+
+                    SKIP:
+		    {
+                        skip("Encode not working on EBCDIC", 1) unless defined $enc;
+			# Poor man's "use encoding 'ascii'".
+			# This causes a different code path in S_const_str()
+			# to be used
+			no warnings 'deprecated';
+			local ${^ENCODING} = $enc;
+			use warnings 'deprecated';
+			use re 'eval';
+			ok($ss =~ /^$cc/, fmt("encode       $u->[2]", $ss, $cc));
+		    }
 		}
 	    }
 	}
@@ -1067,6 +1079,7 @@ sub run_tests {
     {
 	use Tie::Array;
 
+	use vars '@global';
 	local @global;
 	my @array;
 	my @refs = (0, \@array, 2);
@@ -1276,29 +1289,6 @@ sub run_tests {
             \z
         }x;
         is $max, 2, "RT #126697";
-    }
-
-    # RT #132772
-    #
-    # Ensure that optimisation of OP_CONST into OP_MULTICONCAT doesn't
-    # leave any freed ops in the execution path. This is is associated
-    # with rpeep() being called before optimize_optree(), which causes
-    # gv/rv2sv to be prematurely optimised into gvsv, confusing
-    # S_maybe_multiconcat when it tries to reorganise a concat subtree
-    # into a multiconcat list
-
-    {
-        my $a = "a";
-        local $b = "b"; # not lexical, so optimised to OP_GVSV
-        local $_ = "abc";
-        ok /^a(??{ $b."c" })$/,  "RT #132772 - compile time";
-        ok /^$a(??{ $b."c" })$/, "RT #132772 - run time";
-        my $qr = qr/^a(??{ $b."c" })$/;
-        ok /$qr/,  "RT #132772 - compile time time qr//";
-        $qr = qr/(??{ $b."c" })$/;
-        ok /^a$qr$/,  "RT #132772 -  compile time time qr// compound";
-        $qr = qr/$a(??{ $b."c" })$/;
-        ok /^$qr$/,  "RT #132772 -  run time time qr//";
     }
 
 

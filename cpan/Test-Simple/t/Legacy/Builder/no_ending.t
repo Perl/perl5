@@ -1,5 +1,4 @@
 use Test::Builder;
-# HARNESS-NO-STREAM
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {

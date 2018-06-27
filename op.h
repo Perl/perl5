@@ -188,8 +188,6 @@ typedef union  {
     SV        *sv;
     IV        iv;
     UV        uv;
-    char      *pv;
-    SSize_t   ssize;
 } UNOP_AUX_item;
 
 #ifdef USE_ITHREADS
@@ -522,7 +520,7 @@ typedef enum {
 #  define	cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
 #endif
 
-#define	cMETHOPx_meth(v)	cSVOPx_sv(v)
+#  define	cMETHOPx_meth(v)	cSVOPx_sv(v)
 
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)
@@ -626,15 +624,6 @@ typedef enum {
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #define ref(o, type) doref(o, type, TRUE)
 #endif
-
-
-/* translation table attached to OP_TRANS/OP_TRANSR ops */
-
-typedef struct {
-    Size_t size; /* number of entries in map[], not including final slot */
-    short map[1]; /* Unwarranted chumminess */
-} OPtrans_map;
-
 
 /*
 =head1 Optree Manipulation Functions
@@ -1109,13 +1098,10 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define MDEREF_SHIFT           7
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
-#   define FATAL_ABOVE_FF_MSG                                       \
-      "Use of strings with code points over 0xFF as arguments to "  \
-      "%s operator is not allowed"
-#  define DEPRECATED_ABOVE_FF_MSG                                   \
-      "Use of strings with code points over 0xFF as arguments to "  \
-      "%s operator is deprecated. This will be a fatal error in "   \
-      "Perl 5.32"
+static const char * const deprecated_above_ff_msg
+    = "Use of strings with code points over 0xFF as arguments to "
+      "%s operator is deprecated. This will be a fatal error in "
+      "Perl 5.28";
 #endif
 
 

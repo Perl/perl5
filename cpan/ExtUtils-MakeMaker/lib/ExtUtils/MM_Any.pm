@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '7.34';
+our $VERSION = '7.24';
 $VERSION = eval $VERSION;
 
 use Carp;
@@ -910,17 +910,6 @@ MAKE_FRAG
 }
 
 
-=head3 xs_dlsyms_arg
-
-Returns command-line arg(s) to linker for file listing dlsyms to export.
-Defaults to returning empty string, can be overridden by e.g. AIX.
-
-=cut
-
-sub xs_dlsyms_arg {
-    return '';
-}
-
 =head3 xs_dlsyms_ext
 
 Returns file-extension for C<xs_make_dlsyms> method's output file,
@@ -1329,10 +1318,8 @@ sub metafile_data {
     # needs to be based on the original version
     my $v1_add = _metaspec_version($meta_add) !~ /^2/;
 
-    my ($add_v, $merge_v) = map _metaspec_version($_), $meta_add, $meta_merge;
     for my $frag ($meta_add, $meta_merge) {
-        my $def_v = $frag == $meta_add ? $merge_v : $add_v;
-        $frag = CPAN::Meta::Converter->new($frag, default_version => $def_v)->upgrade_fragment;
+        $frag = CPAN::Meta::Converter->new($frag, default_version => "1.4")->upgrade_fragment;
     }
 
     # if we upgraded a 1.x _ADD fragment, we gave it a prereqs key that
@@ -2899,20 +2886,13 @@ Takes a path to a file or dir and returns an empty string if we don't
 want to include this file in the library.  Otherwise it returns the
 the $path unchanged.
 
-Mainly used to exclude version control administrative directories
-and base-level F<README.pod> from installation.
+Mainly used to exclude version control administrative directories from
+installation.
 
 =cut
 
 sub libscan {
     my($self,$path) = @_;
-
-    if ($path =~ m<^README\.pod$>i) {
-        warn "WARNING: Older versions of ExtUtils::MakeMaker may errantly install $path as part of this distribution. It is recommended to avoid using this path in CPAN modules.\n"
-          unless $ENV{PERL_CORE};
-        return '';
-    }
-
     my($dirs,$file) = ($self->splitpath($path))[1,2];
     return '' if grep /^(?:RCS|CVS|SCCS|\.svn|_darcs)$/,
                      $self->splitdir($dirs), $file;

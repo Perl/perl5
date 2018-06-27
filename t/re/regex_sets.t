@@ -158,13 +158,13 @@ for my $char ("٠", "٥", "٩") {
 	eval { $_ = '/(?[(\c]) /'; qr/$_/ };
 	like($@, qr/^Syntax error/, '/(?[(\c]) / should not panic');
 	eval { $_ = '(?[\c#]' . "\n])"; qr/$_/ };
-	like($@, qr/^Unexpected/, '/(?[(\c]) / should not panic');
+	like($@, qr/^Syntax error/, '/(?[(\c]) / should not panic');
 	eval { $_ = '(?[(\c])'; qr/$_/ };
 	like($@, qr/^Syntax error/, '/(?[(\c])/ should be a syntax error');
 	eval { $_ = '(?[(\c]) ]\b'; qr/$_/ };
-	like($@, qr/^Unexpected/, '/(?[(\c]) ]\b/ should be a syntax error');
+	like($@, qr/^Syntax error/, '/(?[(\c]) ]\b/ should be a syntax error');
 	eval { $_ = '(?[\c[]](])'; qr/$_/ };
-	like($@, qr/^Unexpected/, '/(?[\c[]](])/ should be a syntax error');
+	like($@, qr/^Syntax error/, '/(?[\c[]](])/ should be a syntax error');
 	like("\c#", qr/(?[\c#])/, '\c# should match itself');
 	like("\c[", qr/(?[\c[])/, '\c[ should match itself');
 	like("\c\ ", qr/(?[\c\])/, '\c\ should match itself');
@@ -202,17 +202,6 @@ for my $char ("٠", "٥", "٩") {
 {   # [perl #129322 ]  This crashed perl, so keep after the ones that don't
     my $pat = '(?[[!]&[0]^[!]&[0]+[a]])';
     like("a", qr/$pat/, "/$pat/ compiles and matches 'a'");
-}
-
-{   # [perl #132167]
-    fresh_perl_is('no warnings "experimental::regex_sets";
-        print "c" =~ qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ])/;',
-        1, {},
-        'qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ]) compiles and properly matches');
-    fresh_perl_is('no warnings "experimental::regex_sets";
-        print "b" =~ qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ])/;',
-        "", {},
-        'qr/(?[ ( \p{Uppercase} ) + (\p{Lowercase} - ([a] + [b]))  ]) compiles and properly matches');
 }
 
 done_testing();

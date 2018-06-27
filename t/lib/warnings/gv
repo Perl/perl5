@@ -3,11 +3,18 @@
      Can't locate package %s for @%s::ISA
 	@ISA = qw(Fred); joe()
 
+     Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated
+	sub Other::AUTOLOAD { 1 } sub Other::fred {}
+	@ISA = qw(Other) ;
+	fred() ;
+
      $# is no longer supported
      $* is no longer supported
 
 	$a = ${"#"} ;
  	$a = ${"*"} ;
+
+     ${^ENCODING} is no longer supported.
 
      Name "main::a" used only once: possible typo
 
@@ -30,6 +37,26 @@ no warnings 'syntax' ;
 @ISA = qw(Fred); joe()
 EXPECT
 Undefined subroutine &main::joe called at - line 3.
+########
+# gv.c
+sub Other::AUTOLOAD { 1 } sub Other::fred {}
+@ISA = qw(Other) ;
+use warnings 'deprecated' ;
+fred() ;
+my $x = \&barney;
+(bless[])->barney;
+EXPECT
+Use of inherited AUTOLOAD for non-method main::fred() is deprecated. This will be fatal in Perl 5.28 at - line 5.
+########
+# gv.c
+use utf8;
+use open qw( :utf8 :std );
+sub Oᕞʀ::AUTOLOAD { 1 } sub Oᕞʀ::fᕃƌ {}
+@ISA = qw(Oᕞʀ) ;
+use warnings 'deprecated' ;
+fᕃƌ() ;
+EXPECT
+Use of inherited AUTOLOAD for non-method main::fᕃƌ() is deprecated. This will be fatal in Perl 5.28 at - line 7.
 ########
 # gv.c
 $a = ${"#"};
@@ -94,8 +121,10 @@ $* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
 # gv.c
 $a = ${^ENCODING};
 $a = ${^E_NCODING};
+${^ENCODING} = 1;
 ${^E_NCODING} = 1; # We pretend this variable never existed.
 EXPECT
+${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28 at - line 4.
 ########
 # gv.c
 use warnings 'syntax' ;

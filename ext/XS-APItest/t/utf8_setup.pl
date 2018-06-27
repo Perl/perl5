@@ -8,28 +8,16 @@
 
 sub isASCII { ord "A" == 65 }
 
-sub display_bytes_no_quotes {
+sub display_bytes {
     use bytes;
     my $string = shift;
-    return join("", map {
-                          ($_ =~ /[[:print:]]/)
-                          ? $_
-                          : sprintf("\\x%02x", ord $_)
-                        } split "", $string)
-}
-
-sub display_bytes {
-    return   '"' . display_bytes_no_quotes(shift) . '"';
+    return   '"'
+           . join("", map { sprintf("\\x%02x", ord $_) } split "", $string)
+           . '"';
 }
 
 sub output_warnings(@) {
-    my @list = @_;
-    if (@list) {
-        diag "The warnings were:\n" . join "\n", map { chomp; $_ } @list;
-    }
-    else {
-        diag "No warnings were raised";
-    }
+    diag "The warnings were:\n" . join("", @_);
 }
 
 sub start_byte_to_cont($) {
@@ -55,7 +43,7 @@ sub start_byte_to_cont($) {
 
 $::is64bit = length sprintf("%x", ~0) > 8;
 
-$::lowest_continuation = (isASCII) ? 0x80 : 0xA0;
+$::first_continuation = (isASCII) ? 0x80 : 0xA0;
 
 $::I8c = (isASCII) ? "\x80" : "\xa0";    # A continuation byte
 
@@ -86,12 +74,10 @@ $::UTF8_WARN_NONCHAR           = 0x0800;
 $::UTF8_DISALLOW_SUPER         = 0x1000;
 $::UTF8_GOT_SUPER              = $UTF8_DISALLOW_SUPER;
 $::UTF8_WARN_SUPER             = 0x2000;
-$::UTF8_DISALLOW_PERL_EXTENDED  = 0x4000;
-$::UTF8_GOT_PERL_EXTENDED       = $UTF8_DISALLOW_PERL_EXTENDED;
-$::UTF8_WARN_PERL_EXTENDED      = 0x8000;
+$::UTF8_DISALLOW_ABOVE_31_BIT  = 0x4000;
+$::UTF8_GOT_ABOVE_31_BIT       = $UTF8_DISALLOW_ABOVE_31_BIT;
+$::UTF8_WARN_ABOVE_31_BIT      = 0x8000;
 $::UTF8_CHECK_ONLY             = 0x10000;
-$::UTF8_NO_CONFIDENCE_IN_CURLEN_ = 0x20000;
-
 $::UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
                              = $UTF8_DISALLOW_SUPER|$UTF8_DISALLOW_SURROGATE;
 $::UTF8_DISALLOW_ILLEGAL_INTERCHANGE
@@ -105,8 +91,8 @@ $::UTF8_WARN_ILLEGAL_INTERCHANGE
 $::UNICODE_WARN_SURROGATE        = 0x0001;
 $::UNICODE_WARN_NONCHAR          = 0x0002;
 $::UNICODE_WARN_SUPER            = 0x0004;
-$::UNICODE_WARN_PERL_EXTENDED     = 0x0008;
+$::UNICODE_WARN_ABOVE_31_BIT     = 0x0008;
 $::UNICODE_DISALLOW_SURROGATE    = 0x0010;
 $::UNICODE_DISALLOW_NONCHAR      = 0x0020;
 $::UNICODE_DISALLOW_SUPER        = 0x0040;
-$::UNICODE_DISALLOW_PERL_EXTENDED = 0x0080;
+$::UNICODE_DISALLOW_ABOVE_31_BIT = 0x0080;

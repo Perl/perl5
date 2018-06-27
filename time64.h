@@ -1,8 +1,8 @@
 #include <time.h>
 #include "time64_config.h"
 
-#ifndef PERL_TIME64_H_
-#    define PERL_TIME64_H_
+#ifndef TIME64_H
+#    define TIME64_H
 
 
 /* Set our custom types */

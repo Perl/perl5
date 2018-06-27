@@ -43,8 +43,7 @@ is_deeply( [ uniqstr qw( 1 1.0 1E0 ) ],
                'uniqstr on undef coerces to empty-string' );
 }
 
-SKIP: {
-    skip 'Perl 5.007003 with utf8::encode is required', 3 if $] lt "5.007003";
+{
     my $warnings = "";
     local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
 
@@ -54,15 +53,11 @@ SKIP: {
                [ $cafe ],
                'uniqstr is happy with Unicode strings' );
 
-    SKIP: {
-      skip "utf8::encode not available", 1
-        unless defined &utf8::encode;
-      utf8::encode( my $cafebytes = $cafe );
+    utf8::encode( my $cafebytes = $cafe );
 
-      is_deeply( [ uniqstr $cafe, $cafebytes ],
-                [ $cafe, $cafebytes ],
-                'uniqstr does not squash bytewise-equal but differently-encoded strings' );
-    }
+    is_deeply( [ uniqstr $cafe, $cafebytes ],
+               [ $cafe, $cafebytes ],
+               'uniqstr does not squash bytewise-equal but differently-encoded strings' );
 
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }
@@ -75,24 +70,25 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
            'uniqnum distinguishes floats' );
 
+SKIP: {
+my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
+skip("VAX does not have inf/nan", 1) if $vax_float;
+
 # Hard to know for sure what an Inf is going to be. Lets make one
-my $Inf = 0 + 1E1000;
+my $Inf = 0 + eval '1E1000';
 my $NaN;
 $Inf **= 1000 while ( $NaN = $Inf - $Inf ) == $NaN;
 
 is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
            [ 0, 1, 12345, $Inf, -$Inf, $NaN ],
            'uniqnum preserves the special values of +-Inf and Nan' );
+}
 
 {
-    my $maxuint = ~0;
-    my $maxint = ~0 >> 1;
-    my $minint = -(~0 >> 1) - 1;
+    my $maxint = ~0;
 
-    my @nums = ($maxuint, $maxuint-1, -1, $Inf, $NaN, $maxint, $minint, 1 );
-
-    is_deeply( [ uniqnum @nums, 1.0 ],
-               [ @nums ],
+    is_deeply( [ uniqnum $maxint, $maxint-1, -1 ],
+               [ $maxint, $maxint-1, -1 ],
                'uniqnum preserves uniqness of full integer range' );
 }
 
@@ -143,8 +139,8 @@ is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
 
     my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
 
-    is_deeply( [ map "$_", uniqstr @strs ],
-               [ map "$_", $strs[0], $strs[2] ],
+    is_deeply( [ uniqstr @strs ],
+               [ $strs[0], $strs[2] ],
                'uniqstr respects stringify overload' );
 }
 

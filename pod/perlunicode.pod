@@ -60,11 +60,10 @@ filenames.
 Use the C<:encoding(...)> layer  to read from and write to
 filehandles using the specified encoding.  (See L<open>.)
 
-=item You must convert your non-ASCII, non-UTF-8 Perl scripts to be
+=item You should convert your non-ASCII, non-UTF-8 Perl scripts to be
 UTF-8.
 
-The L<encoding> module has been deprecated since perl 5.18 and the
-perl internals it requires have been removed with perl 5.26.
+See L<encoding>.
 
 =item C<use utf8> still needed to enable L<UTF-8|/Unicode Encodings> in scripts
 
@@ -192,12 +191,11 @@ C<scalar reverse()> reverses by character rather than by byte.
 =item *
 
 The bit string operators, C<& | ^ ~> and (starting in v5.22)
-C<&. |. ^.  ~.> can operate on bit strings encoded in UTF-8, but this
-can give unexpected results if any of the strings contain code points
-above 0xFF.  Starting in v5.28, it is a fatal error to have such an
-operand.  Otherwise, the operation is performed on a non-UTF-8 copy of
-the operand.  If you're not sure about the encoding of a string,
-downgrade it before using any of these operators; you can use
+C<&. |. ^.  ~.> can operate on characters that don't fit into a byte.
+However, the current behavior is likely to change.  You should not use
+these operators on strings that are encoded in UTF-8.  If you're not
+sure about the encoding of a string, downgrade it before using any of
+these operators; you can use
 L<C<utf8::utf8_downgrade()>|utf8/Utility functions>.
 
 =back
@@ -234,7 +232,7 @@ Unicode:
 Within the scope of S<C<use utf8>>
 
 If the whole program is Unicode (signified by using 8-bit B<U>nicode
-B<T>ransformation B<F>ormat), then all literal strings within it must be
+B<T>ransformation B<F>ormat), then all strings within it must be
 Unicode.
 
 =item *
@@ -394,7 +392,7 @@ other.
 
 You may be presented with strings in any of these equivalent forms.
 There is currently nothing in Perl 5 that ignores the differences.  So
-you'll have to specially handle it.  The usual advice is to convert your
+you'll have to specially hanlde it.  The usual advice is to convert your
 inputs to C<NFD> before processing further.
 
 For more detailed information, see L<http://unicode.org/reports/tr15/>.
@@ -681,7 +679,7 @@ A complete list of scripts and their shortcuts is in L<perluniprops>.
 
 =head3 B<Use of the C<"Is"> Prefix>
 
-For backward compatibility (with ancient Perl 5.6), all properties writable
+For backward compatibility (with Perl 5.6), all properties writable
 without using the compound form mentioned
 so far may have C<Is> or C<Is_> prepended to their name, so C<\P{Is_Lu}>, for
 example, is equal to C<\P{Lu}>, and C<\p{IsScript:Arabic}> is equal to
@@ -1679,7 +1677,7 @@ See L<perlebcdic/Unicode and UTF>.
 
 Because UTF-EBCDIC is so similar to UTF-8, the differences are mostly
 hidden from you; S<C<use utf8>> (and NOT something like
-S<C<use utfebcdic>>) declares the script is in the platform's
+S<C<use utfebcdic>>) declares the the script is in the platform's
 "native" 8-bit encoding of Unicode.  (Similarly for the C<":utf8">
 layer.)
 
@@ -1836,17 +1834,6 @@ consistently within the scope of C<unicode_strings>. Prior to that, or
 outside its scope, it could produce strings whose length in characters
 exceeded that of the right-hand side, where the right-hand side took up more
 bytes than the correct range endpoint.
-
-=item *
-
-In L<< C<split>'s special-case whitespace splitting|perlfunc/split >>.
-
-Starting in Perl 5.28.0, the C<split> function with a pattern specified as
-a string containing a single space handles whitespace characters consistently
-within the scope of of C<unicode_strings>. Prior to that, or outside its scope,
-characters that are whitespace according to Unicode rules but not according to
-ASCII rules were treated as field contents rather than field separators when
-they appear in byte-encoded strings.
 
 =back
 

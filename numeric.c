@@ -518,44 +518,33 @@ Scan and skip for a numeric decimal separator (radix).
 bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 {
+#ifdef USE_LOCALE_NUMERIC
     PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
 
-#ifdef USE_LOCALE_NUMERIC
-
     if (IN_LC(LC_NUMERIC)) {
-        STRLEN len;
-        char * radix;
-        bool matches_radix = FALSE;
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-
-        STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-
-        radix = SvPV(PL_numeric_radix_sv, len);
-        radix = savepvn(radix, len);
-
+        STORE_LC_NUMERIC_SET_TO_NEEDED();
+        if (PL_numeric_radix_sv) {
+            STRLEN len;
+            const char * const radix = SvPV(PL_numeric_radix_sv, len);
+            if (*sp + len <= send && memEQ(*sp, radix, len)) {
+                *sp += len;
+                RESTORE_LC_NUMERIC();
+                return TRUE;
+            }
+        }
         RESTORE_LC_NUMERIC();
-
-        if (*sp + len <= send) {
-            matches_radix = memEQ(*sp, radix, len);
-        }
-
-        Safefree(radix);
-
-        if (matches_radix) {
-            *sp += len;
-            return TRUE;
-        }
     }
-
-#endif
-
     /* always try "." if numeric radix didn't match because
      * we may have data from different locales mixed */
+#endif
+
+    PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
+
     if (*sp < send && **sp == '.') {
         ++*sp;
         return TRUE;
     }
-
     return FALSE;
 }
 
@@ -1024,7 +1013,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     s++;
   if (s >= send)
     return numtype;
-  if (memEQs(pv, len, "0 but true")) {
+  if (len == 10 && _memEQs(pv, "0 but true")) {
     if (valuep)
       *valuep = 0;
     return IS_NUMBER_IN_UV;
@@ -1049,39 +1038,31 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 }
 
 /*
-=for apidoc grok_atoUV
+grok_atoUV
 
-parse a string, looking for a decimal unsigned integer.
+grok_atoUV parses a C-style zero-byte terminated string, looking for
+a decimal unsigned integer.
 
-On entry, C<pv> points to the beginning of the string;
-C<valptr> points to a UV that will receive the converted value, if found;
-C<endptr> is either NULL or points to a variable that points to one byte
-beyond the point in C<pv> that this routine should examine.
-If C<endptr> is NULL, C<pv> is assumed to be NUL-terminated.
+Returns the unsigned integer, if a valid value can be parsed
+from the beginning of the string.
 
-Returns FALSE if C<pv> doesn't represent a valid unsigned integer value (with
-no leading zeros).  Otherwise it returns TRUE, and sets C<*valptr> to that
-value.
+Accepts only the decimal digits '0'..'9'.
 
-If you constrain the portion of C<pv> that is looked at by this function (by
-passing a non-NULL C<endptr>), and if the intial bytes of that portion form a
-valid value, it will return TRUE, setting C<*endptr> to the byte following the
-final digit of the value.  But if there is no constraint at what's looked at,
-all of C<pv> must be valid in order for TRUE to be returned.
+As opposed to atoi or strtol, grok_atoUV does NOT allow optional
+leading whitespace, or negative inputs.  If such features are
+required, the calling code needs to explicitly implement those.
 
-The only characters this accepts are the decimal digits '0'..'9'.
+Returns true if a valid value could be parsed. In that case, valptr
+is set to the parsed value, and endptr (if provided) is set to point
+to the character after the last digit.
 
-As opposed to L<atoi(3)> or L<strtol(3)>, C<grok_atoUV> does NOT allow optional
-leading whitespace, nor negative inputs.  If such features are required, the
-calling code needs to explicitly implement those.
+Returns false otherwise. This can happen if a) there is a leading zero
+followed by another digit; b) the digits would overflow a UV; or c)
+there are trailing non-digits AND endptr is not provided.
 
-Note that this function returns FALSE for inputs that would overflow a UV,
-or have leading zeros.  Thus a single C<0> is accepted, but not C<00> nor
-C<01>, C<002>, I<etc>.
-
-Background: C<atoi> has severe problems with illegal inputs, it cannot be
+Background: atoi has severe problems with illegal inputs, it cannot be
 used for incremental parsing, and therefore should be avoided
-C<atoi> and C<strtol> are also affected by locale settings, which can also be
+atoi and strtol are also affected by locale settings, which can also be
 seen as a bug (global state controlled by user environment).
 
 */
@@ -1096,49 +1077,33 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
 
     PERL_ARGS_ASSERT_GROK_ATOUV;
 
-    if (endptr) {
-        eptr = endptr;
-    }
-    else {
-        end2 = s + strlen(s);
-        eptr = &end2;
-    }
-
-    if (   *eptr <= s
-        || ! isDIGIT(*s))
-    {
-        return FALSE;
-    }
-
-    /* Single-digit inputs are quite common. */
-    val = *s++ - '0';
-    if (s < *eptr && isDIGIT(*s)) {
-        /* Fail on extra leading zeros. */
-        if (val == 0)
-            return FALSE;
-        while (s < *eptr && isDIGIT(*s)) {
-            /* This could be unrolled like in grok_number(), but
-                * the expected uses of this are not speed-needy, and
-                * unlikely to need full 64-bitness. */
-            const U8 digit = *s++ - '0';
-            if (val < uv_max_div_10 ||
-                (val == uv_max_div_10 && digit <= uv_max_mod_10)) {
-                val = val * 10 + digit;
-            } else {
+    eptr = endptr ? endptr : &end2;
+    if (isDIGIT(*s)) {
+        /* Single-digit inputs are quite common. */
+        val = *s++ - '0';
+        if (isDIGIT(*s)) {
+            /* Fail on extra leading zeros. */
+            if (val == 0)
                 return FALSE;
+            while (isDIGIT(*s)) {
+                /* This could be unrolled like in grok_number(), but
+                 * the expected uses of this are not speed-needy, and
+                 * unlikely to need full 64-bitness. */
+                const U8 digit = *s++ - '0';
+                if (val < uv_max_div_10 ||
+                    (val == uv_max_div_10 && digit <= uv_max_mod_10)) {
+                    val = val * 10 + digit;
+                } else {
+                    return FALSE;
+                }
             }
         }
     }
-
-    if (endptr == NULL) {
-        if (*s) {
-            return FALSE; /* If endptr is NULL, no trailing non-digits allowed. */
-        }
-    }
-    else {
-        *endptr = s;
-    }
-
+    if (s == pv)
+        return FALSE;
+    if (endptr == NULL && *s)
+        return FALSE; /* If endptr is NULL, no trailing non-digits allowed. */
+    *eptr = s;
     *valptr = val;
     return TRUE;
 }
@@ -1244,21 +1209,13 @@ S_mulexp10(NV value, I32 exponent)
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
-    /* 's' must be NUL terminated */
-
     NV x = 0.0;
-
-    PERL_ARGS_ASSERT_MY_ATOF;
-
 #ifdef USE_QUADMATH
-
-    my_atof2(s, &x);
-
-#elif ! defined(USE_LOCALE_NUMERIC)
-
-    Perl_atof2(s, x);
-
+    Perl_my_atof2(aTHX_ s, &x);
+    return x;
 #else
+#  ifdef USE_LOCALE_NUMERIC
+    PERL_ARGS_ASSERT_MY_ATOF;
 
     {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
@@ -1271,31 +1228,26 @@ Perl_my_atof(pTHX_ const char* s)
              * that we have to determine this beforehand because on some
              * systems, Perl_atof2 is just a wrapper around the system's atof.
              * */
-            const char * const standard_pos = strchr(s, '.');
-            const char * const local_pos
-                                  = strstr(s, SvPV_nolen(PL_numeric_radix_sv));
-            const bool use_standard_radix
-                    = standard_pos && (!local_pos || standard_pos < local_pos);
+            const char * const standard = strchr(s, '.');
+            const char * const local = strstr(s, SvPV_nolen(PL_numeric_radix_sv));
+            const bool use_standard_radix = standard && (!local || standard < local);
 
-            if (use_standard_radix) {
+            if (use_standard_radix)
                 SET_NUMERIC_STANDARD();
-                LOCK_LC_NUMERIC_STANDARD();
-            }
 
             Perl_atof2(s, x);
 
-            if (use_standard_radix) {
-                UNLOCK_LC_NUMERIC_STANDARD();
+            if (use_standard_radix)
                 SET_NUMERIC_UNDERLYING();
-            }
         }
         else
             Perl_atof2(s, x);
         RESTORE_LC_NUMERIC();
     }
-
+#  else
+    Perl_atof2(s, x);
+#  endif
 #endif
-
     return x;
 }
 
@@ -1391,19 +1343,10 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
-    PERL_ARGS_ASSERT_MY_ATOF2;
-    return my_atof3(orig, value, 0);
-}
-
-char*
-Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
-{
     const char* s = orig;
     NV result[3] = {0.0, 0.0, 0.0};
 #if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
-    const char* send = s + ((len != 0)
-                           ? len
-                           : strlen(orig)); /* one past the last */
+    const char* send = s + strlen(orig); /* one past the last */
     bool negative = 0;
 #endif
 #if defined(USE_PERL_ATOF) && !defined(USE_QUADMATH)
@@ -1420,10 +1363,10 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 #endif
 
 #if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
-    PERL_ARGS_ASSERT_MY_ATOF3;
+    PERL_ARGS_ASSERT_MY_ATOF2;
 
     /* leading whitespace */
-    while (s < send && isSPACE(*s))
+    while (isSPACE(*s))
 	++s;
 
     /* sign */
@@ -1441,7 +1384,6 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
         char* endp;
         if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return endp;
-        endp = send;
         result[2] = strtoflt128(s, &endp);
         if (s != endp) {
             *value = negative ? -result[2] : result[2];
@@ -1491,7 +1433,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */
 
-    while (s < send) {
+    while (1) {
 	if (isDIGIT(*s)) {
 	    seen_digit = 1;
 	    old_digit = digit;
@@ -1519,7 +1461,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 		    exp_adjust[0]++;
 		}
 		/* skip remaining digits */
-		while (s < send && isDIGIT(*s)) {
+		while (isDIGIT(*s)) {
 		    ++s;
 		    if (! seen_dp) {
 			exp_adjust[0]++;
@@ -1543,7 +1485,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 	else if (!seen_dp && GROK_NUMERIC_RADIX(&s, send)) {
 	    seen_dp = 1;
 	    if (sig_digits > MAX_SIG_DIGITS) {
-		while (s < send && isDIGIT(*s)) {
+		while (isDIGIT(*s)) {
 		    ++s;
 		}
 		break;
@@ -1559,7 +1501,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 	result[1] = S_mulexp10(result[1], exp_acc[1]) + (NV)accumulator[1];
     }
 
-    if (s < send && seen_digit && (isALPHA_FOLD_EQ(*s, 'e'))) {
+    if (seen_digit && (isALPHA_FOLD_EQ(*s, 'e'))) {
 	bool expnegative = 0;
 
 	++s;
@@ -1570,11 +1512,13 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 	    case '+':
 		++s;
 	}
-	while (s < send && isDIGIT(*s))
+	while (isDIGIT(*s))
 	    exponent = exponent * 10 + (*s++ - '0');
 	if (expnegative)
 	    exponent = -exponent;
     }
+
+
 
     /* now apply the exponent */
 

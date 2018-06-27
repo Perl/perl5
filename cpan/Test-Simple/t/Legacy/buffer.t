@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-# HARNESS-NO-STREAM
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {

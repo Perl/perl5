@@ -50,8 +50,8 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
   --nochanges                 don't suggest changes
   --nofilter                  don't filter input files
 
-  --strip                     strip all script and doc functionality
-                              from ppport.h
+  --strip                     strip all script and doc functionality from
+                              ppport.h
 
   --list-provided             list provided API
   --list-unsupported          list unsupported API
@@ -297,7 +297,7 @@ before sending a bug report.
 
 If F<ppport.h> was generated using the latest version of
 C<Devel::PPPort> and is causing failure of this module, please
-send a bug report to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+file a bug report here: L<https://github.com/mhx/Devel-PPPort/issues/>
 
 Please include the following information:
 

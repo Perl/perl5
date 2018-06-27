@@ -1,5 +1,4 @@
 #!perl -w
-# HARNESS-NO-PRELOAD
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -42,6 +41,7 @@ SKIP: {
     is( $file || '', '',      '  or file' );
     is( $line || '', '',      '  or line' );
 }
+
 
 SKIP: {
     skip $Why, 2 if 1;

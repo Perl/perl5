@@ -18,7 +18,7 @@ BEGIN {
 }
 use strict;
 use warnings;
-my $VALID;
+use vars '$VALID';
 
 plan(tests => 11);
 

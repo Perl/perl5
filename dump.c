@@ -369,9 +369,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv_catpv(t, "WILD");
 	goto finish;
     }
-    else if (  sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes
-            || sv == &PL_sv_zero || sv == &PL_sv_placeholder)
-    {
+    else if (sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes || sv == &PL_sv_placeholder) {
 	if (sv == &PL_sv_undef) {
 	    sv_catpv(t, "SV_UNDEF");
 	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
@@ -398,17 +396,6 @@ Perl_sv_peek(pTHX_ SV *sv)
 		SvCUR(sv) == 1 &&
 		SvPVX_const(sv) && *SvPVX_const(sv) == '1' &&
 		SvNVX(sv) == 1.0)
-		goto finish;
-	}
-	else if (sv == &PL_sv_zero) {
-	    sv_catpv(t, "SV_ZERO");
-	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
-				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
-		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
-				  SVp_POK|SVp_NOK)) &&
-		SvCUR(sv) == 1 &&
-		SvPVX_const(sv) && *SvPVX_const(sv) == '0' &&
-		SvNVX(sv) == 0.0)
 		goto finish;
 	}
 	else {
@@ -493,10 +480,9 @@ Perl_sv_peek(pTHX_ SV *sv)
 	}
     }
     else if (SvNOKp(sv)) {
-        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-        STORE_LC_NUMERIC_SET_STANDARD();
+	STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD();
 	Perl_sv_catpvf(aTHX_ t, "(%" NVgf ")",SvNVX(sv));
-        RESTORE_LC_NUMERIC();
+	RESTORE_LC_NUMERIC_UNDERLYING();
     }
     else if (SvIOKp(sv)) {
 	if (SvIsUV(sv))
@@ -579,10 +565,7 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
         /* output preceding blank line */
         PerlIO_puts(file, "     ");
         for (i = level-1; i >= 0; i--)
-            PerlIO_puts(file,  (   i == 0
-                                || (i < UVSIZE*8 && (bar & ((UV)1 << i)))
-                               )
-                                    ?  "|   " : "    ");
+            PerlIO_puts(file,  i == 0 || (bar & (1 << i)) ?  "|   " : "    ");
         PerlIO_puts(file, "\n");
 
         /* output sequence number */
@@ -610,12 +593,10 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
  */
 
 static void
-S_opdump_link(pTHX_ const OP *base, const OP *o, PerlIO *file)
+S_opdump_link(pTHX_ const OP *o, PerlIO *file)
 {
     PerlIO_puts(file, " ===> ");
-    if (o == base)
-        PerlIO_puts(file, "[SELF]\n");
-    else if (o)
+    if (o)
         PerlIO_printf(file, "%" UVuf " [%s 0x%" UVxf "]\n",
             sequence_num(o), OP_NAME(o), PTR2UV(o));
     else
@@ -996,14 +977,9 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 
     PerlIO_printf(file, " %s(0x%" UVxf ")",
                     op_class_names[op_class(o)], PTR2UV(o));
-    S_opdump_link(aTHX_ o, o->op_next, file);
+    S_opdump_link(aTHX_ o->op_next, file);
 
     /* print op common fields */
-
-    if (level == 0) {
-        S_opdump_indent(aTHX_ o, level, bar, file, "PARENT");
-        S_opdump_link(aTHX_ o, op_parent((OP*)o), file);
-    }
 
     if (o->op_targ && optype != OP_NULL)
 	    S_opdump_indent(aTHX_ o, level, bar, file, "TARG = %ld\n",
@@ -1149,15 +1125,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 	break;
     }
 
-    case OP_MULTICONCAT:
-	S_opdump_indent(aTHX_ o, level, bar, file, "NARGS = %" IVdf "\n",
-            (IV)cUNOP_AUXo->op_aux[PERL_MULTICONCAT_IX_NARGS].ssize);
-        /* XXX really ought to dump each field individually,
-         * but that's too much like hard work */
-	S_opdump_indent(aTHX_ o, level, bar, file, "CONSTS = (%" SVf ")\n",
-            SVfARG(multiconcat_stringify(o)));
-	break;
-
     case OP_CONST:
     case OP_HINTSEVAL:
     case OP_METHOD_NAMED:
@@ -1209,11 +1176,11 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_ENTERITER:
     case OP_ENTERLOOP:
 	S_opdump_indent(aTHX_ o, level, bar, file, "REDO");
-        S_opdump_link(aTHX_ o, cLOOPo->op_redoop, file);
+        S_opdump_link(aTHX_ cLOOPo->op_redoop, file);
 	S_opdump_indent(aTHX_ o, level, bar, file, "NEXT");
-        S_opdump_link(aTHX_ o, cLOOPo->op_nextop, file);
+        S_opdump_link(aTHX_ cLOOPo->op_nextop, file);
 	S_opdump_indent(aTHX_ o, level, bar, file, "LAST");
-        S_opdump_link(aTHX_ o, cLOOPo->op_lastop, file);
+        S_opdump_link(aTHX_ cLOOPo->op_lastop, file);
 	break;
 
     case OP_REGCOMP:
@@ -1234,7 +1201,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_ENTERTRY:
     case OP_ONCE:
 	S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");
-        S_opdump_link(aTHX_ o, cLOGOPo->op_other, file);
+        S_opdump_link(aTHX_ cLOGOPo->op_other, file);
 	break;
     case OP_SPLIT:
     case OP_MATCH:
@@ -1271,42 +1238,10 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 
     case OP_TRANS:
     case OP_TRANSR:
-        if (o->op_private & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF)) {
-            /* utf8: table stored as a swash */
-#ifndef USE_ITHREADS
-	/* with ITHREADS, swash is stored in the pad, and the right pad
-	 * may not be active here, so skip */
             S_opdump_indent(aTHX_ o, level, bar, file,
-                            "SWASH = 0x%" UVxf "\n",
-                            PTR2UV(MUTABLE_SV(cSVOPo->op_sv)));
-#endif
-        }
-        else {
-            const OPtrans_map * const tbl = (OPtrans_map*)cPVOPo->op_pv;
-            SSize_t i, size = tbl->size;
-
-            S_opdump_indent(aTHX_ o, level, bar, file,
-                            "TABLE = 0x%" UVxf "\n",
-                            PTR2UV(tbl));
-            S_opdump_indent(aTHX_ o, level, bar, file,
-                "  SIZE: 0x%" UVxf "\n", (UV)size);
-
-            /* dump size+1 values, to include the extra slot at the end */
-            for (i = 0; i <= size; i++) {
-                short val = tbl->map[i];
-                if ((i & 0xf) == 0)
-                    S_opdump_indent(aTHX_ o, level, bar, file,
-                        " %4" UVxf ":", (UV)i);
-                if (val < 0)
-                    PerlIO_printf(file, " %2"  IVdf, (IV)val);
-                else
-                    PerlIO_printf(file, " %02" UVxf, (UV)val);
-
-                if ( i == size || (i & 0xf) == 0xf)
-                    PerlIO_printf(file, "\n");
-            }
-        }
-        break;
+                            "PV = 0x%" UVxf "\n",
+                            PTR2UV(cPVOPo->op_pv));
+            break;
 
 
     default:
@@ -1834,10 +1769,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		&& type != SVt_PVCV && type != SVt_PVFM  && type != SVt_REGEXP
 		&& type != SVt_PVIO && !isGV_with_GP(sv) && !SvVALID(sv))
 	       || type == SVt_NV) {
-        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-        STORE_LC_NUMERIC_SET_STANDARD();
+	STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD();
 	Perl_dump_indent(aTHX_ level, file, "  NV = %.*" NVgf "\n", NV_DIG, SvNVX(sv));
-        RESTORE_LC_NUMERIC();
+	RESTORE_LC_NUMERIC_UNDERLYING();
     }
 
     if (SvROK(sv)) {
@@ -1889,12 +1823,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 PerlIO_printf(file, "\n");
             }
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %" IVdf "\n", (IV)SvCUR(sv));
-	    if (re && type == SVt_PVLV)
-                /* LV-as-REGEXP usurps len field to store pointer to
-                 * regexp struct */
-		Perl_dump_indent(aTHX_ level, file, "  REGEXP = 0x%" UVxf "\n",
-                   PTR2UV(((XPV*)SvANY(sv))->xpv_len_u.xpvlenu_rx));
-            else
+	    if (!re)
 		Perl_dump_indent(aTHX_ level, file, "  LEN = %" IVdf "\n",
 				       (IV)SvLEN(sv));
 #ifdef PERL_COPY_ON_WRITE
@@ -2484,29 +2413,15 @@ Perl_sv_dump(pTHX_ SV *sv)
 int
 Perl_runops_debug(pTHX)
 {
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-    SSize_t orig_stack_hwm = PL_curstackinfo->si_stack_hwm;
-
-    PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
-#endif
-
     if (!PL_op) {
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
 	return 0;
     }
+
     DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
     do {
 #ifdef PERL_TRACE_OPS
         ++PL_op_exec_cnt[PL_op->op_type];
-#endif
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-        if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
-            Perl_croak_nocontext(
-                "panic: previous op failed to extend arg stack: "
-                "base=%p, sp=%p, hwm=%p\n",
-                    PL_stack_base, PL_stack_sp,
-                    PL_stack_base + PL_curstackinfo->si_stack_hwm);
-        PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
 #endif
 	if (PL_debug) {
             ENTER;
@@ -2537,10 +2452,6 @@ Perl_runops_debug(pTHX)
     DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
     PERL_ASYNC_CHECK();
 
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-    if (PL_curstackinfo->si_stack_hwm < orig_stack_hwm)
-        PL_curstackinfo->si_stack_hwm = orig_stack_hwm;
-#endif
     TAINT_NOT;
     return 0;
 }
@@ -2778,47 +2689,6 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
 }
 
 
-/* Return a temporary SV containing a stringified representation of
- * the op_aux field of a MULTICONCAT op. Note that if the aux contains
- * both plain and utf8 versions of the const string and indices, only
- * the first is displayed.
- */
-
-SV*
-Perl_multiconcat_stringify(pTHX_ const OP *o)
-{
-    UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
-    UNOP_AUX_item *lens;
-    STRLEN len;
-    SSize_t nargs;
-    char *s;
-    SV *out = newSVpvn_flags("", 0, SVs_TEMP);
-
-    PERL_ARGS_ASSERT_MULTICONCAT_STRINGIFY;
-
-    nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
-    s   = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
-    len = aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize;
-    if (!s) {
-        s   = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
-        len = aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize;
-        sv_catpvs(out, "UTF8 ");
-    }
-    pv_pretty(out, s, len, 50,
-                NULL, NULL,
-                (PERL_PV_PRETTY_NOCLEAR
-                |PERL_PV_PRETTY_QUOTE
-                |PERL_PV_PRETTY_ELLIPSES));
-
-    lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
-    while (nargs-- >= 0) {
-        Perl_sv_catpvf(aTHX_ out, ",%" IVdf, (IV)lens->ssize);
-        lens++;
-    }
-    return out;
-}
-
-
 I32
 Perl_debop(pTHX_ const OP *o)
 {
@@ -2861,11 +2731,6 @@ Perl_debop(pTHX_ const OP *o)
     case OP_MULTIDEREF:
         PerlIO_printf(Perl_debug_log, "(%" SVf ")",
             SVfARG(multideref_stringify(o, deb_curcv(cxstack_ix))));
-        break;
-
-    case OP_MULTICONCAT:
-        PerlIO_printf(Perl_debug_log, "(%" SVf ")",
-            SVfARG(multiconcat_stringify(o)));
         break;
 
     default:

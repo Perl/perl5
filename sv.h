@@ -208,6 +208,7 @@ typedef struct hek HEK;
 	UV      svu_uv;			\
 	_NV_BODYLESS_UNION		\
 	SV*     svu_rv;		/* pointer to another SV */		\
+	struct regexp* svu_rx;		\
 	SV**    svu_array;		\
 	HE**	svu_hash;		\
 	GP*	svu_gp;			\
@@ -401,12 +402,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 					  refers to an eval or once only
 					  [CvEVAL(cv), CvSPECIAL(cv)]
                                        3: HV: informally reserved by DAPM
-                                          for vtables
-                                       4: Together with other flags (or
-                                           lack thereof) indicates a regex,
-                                           including PVLV-as-regex. See
-                                           isREGEXP().
-                                       */
+                                          for vtables */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
 				       after the main array */
@@ -477,7 +473,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
 	STRLEN	xpvlenu_len; 	/* allocated size */			\
-        struct regexp* xpvlenu_rx; /* regex when SV body is XPVLV */    \
+	char *	xpvlenu_pv;	/* regexp string */			\
     } xpv_len_u	
 
 #define xpv_len	xpv_len_u.xpvlenu_len
@@ -851,7 +847,7 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 #define assert_not_ROK(sv)	assert_(!SvROK(sv) || !SvRV(sv))
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
-#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
+#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK || isREGEXP(sv))
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\
@@ -1185,7 +1181,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 	 }))
 #    define SvCUR(sv)							\
 	(*({ const SV *const _svcur = (const SV *)(sv);			\
-	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
+	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]	\
+		|| SvTYPE(_svcur) == SVt_REGEXP);			\
 	    assert(!isGV_with_GP(_svcur));				\
 	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
 		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
@@ -1315,7 +1312,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { \
-		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]	\
+			|| SvTYPE(sv) == SVt_REGEXP);	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
@@ -1403,10 +1401,6 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #define LvSTARGOFF(sv)	((XPVLV*)  SvANY(sv))->xlv_targoff_u.xlvu_stargoff
 #define LvTARGLEN(sv)	((XPVLV*)  SvANY(sv))->xlv_targlen
 #define LvFLAGS(sv)	((XPVLV*)  SvANY(sv))->xlv_flags
-
-#define LVf_NEG_OFF      0x1
-#define LVf_NEG_LEN      0x2
-#define LVf_OUT_OF_RANGE 0x4
 
 #define IoIFP(sv)	(sv)->sv_u.svu_fp
 #define IoOFP(sv)	((XPVIO*)  SvANY(sv))->xio_ofp
@@ -1649,7 +1643,7 @@ Like C<sv_setsv> but doesn't process magic.
 =for apidoc Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Like C<sv_catsv> but doesn't process magic.
 
-=for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|SV *sv
+=for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|NN SV *sv
 
 Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 
@@ -1762,23 +1756,18 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#define SvTRUE(sv)         (LIKELY(sv) && SvTRUE_NN(sv))
-#define SvTRUE_nomg(sv)    (LIKELY(sv) && SvTRUE_nomg_NN(sv))
-#define SvTRUE_NN(sv)      (SvGETMAGIC(sv), SvTRUE_nomg_NN(sv))
-#define SvTRUE_nomg_NN(sv) (SvTRUE_common(sv, sv_2bool_nomg(sv)))
-
+#define SvTRUE(sv)        (LIKELY(sv) && (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_nomg(sv)   (LIKELY(sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_NN(sv)              (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
+#define SvTRUE_nomg_NN(sv) (                                        SvTRUE_common(sv, sv_2bool_nomg(sv)))
 #define SvTRUE_common(sv,fallback) (			\
-      SvIMMORTAL_INTERP(sv)                             \
-        ? SvIMMORTAL_TRUE(sv)                           \
-    : !SvOK(sv)						\
+      !SvOK(sv)						\
 	? 0						\
     : SvPOK(sv)						\
 	? SvPVXtrue(sv)					\
-    : SvIOK(sv)                			        \
-        ? (SvIVX(sv) != 0 /* cast to bool */)           \
-    : (SvROK(sv) && !(   SvOBJECT(SvRV(sv))             \
-                      && HvAMAGIC(SvSTASH(SvRV(sv)))))  \
-        ? TRUE                                          \
+    : (SvFLAGS(sv) & (SVf_IOK|SVf_NOK))			\
+	? (   (SvIOK(sv) && SvIVX(sv) != 0)		\
+	   || (SvNOK(sv) && SvNVX(sv) != 0.0))		\
     : (fallback))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -2094,20 +2083,7 @@ properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 #define SvPEEK(sv) ""
 #endif
 
-/* Is this a per-interpreter immortal SV (rather than global)?
- * These should either occupy adjacent entries in the interpreter struct
- * (MULTIPLICITY) or adjacent elements of PL_sv_immortals[] otherwise.
- * The unsigned (Size_t) cast avoids the need for a second < 0 condition.
- */
-#define SvIMMORTAL_INTERP(sv) ((Size_t)((sv) - &PL_sv_yes) < 4)
-
-/* Does this immortal have a true value? Currently only PL_sv_yes does. */
-#define SvIMMORTAL_TRUE(sv)   ((sv) == &PL_sv_yes)
-
-/* the SvREADONLY() test is to quickly reject most SVs */
-#define SvIMMORTAL(sv) \
-                (  SvREADONLY(sv) \
-                && (SvIMMORTAL_INTERP(sv) || (sv) == &PL_sv_placeholder))
+#define SvIMMORTAL(sv) (SvREADONLY(sv) && ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder))
 
 #ifdef DEBUGGING
    /* exercise the immortal resurrection code in sv_free2() */
@@ -2146,13 +2122,9 @@ See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
 	assert (!SvIOKp(sv));					       \
 	(SvFLAGS(sv) &= ~SVpgv_GP);				       \
     } STMT_END
-#ifdef PERL_CORE
-# define isGV_or_RVCV(kadawp) \
-    (isGV(kadawp) || (SvROK(kadawp) && SvTYPE(SvRV(kadawp)) == SVt_PVCV))
-#endif
 #define isREGEXP(sv) \
     (SvTYPE(sv) == SVt_REGEXP				      \
-     || (SvFLAGS(sv) & (SVTYPEMASK|SVpgv_GP|SVf_FAKE))        \
+     || (SvFLAGS(sv) & (SVTYPEMASK|SVp_POK|SVpgv_GP|SVf_FAKE)) \
 	 == (SVt_PVLV|SVf_FAKE))
 
 
@@ -2180,7 +2152,7 @@ struct clone_params {
 };
 
 /*
-=for apidoc Am|SV*|newSVpvn_utf8|const char* s|STRLEN len|U32 utf8
+=for apidoc Am|SV*|newSVpvn_utf8|NULLOK const char* s|STRLEN len|U32 utf8
 
 Creates a new SV and copies a string (which may contain C<NUL> (C<\0>)
 characters) into it.  If C<utf8> is true, calls
@@ -2202,7 +2174,7 @@ Creates a new SV containing the pad name.
 #define newSVpadname(pn) newSVpvn_utf8(PadnamePV(pn), PadnameLEN(pn), TRUE)
 
 /*
-=for apidoc Am|void|SvOOK_offset|SV*sv|STRLEN len
+=for apidoc Am|void|SvOOK_offset|NN SV*sv|STRLEN len
 
 Reads into C<len> the offset from C<SvPVX> back to the true start of the
 allocated buffer, which will be non-zero if C<sv_chop> has been used to

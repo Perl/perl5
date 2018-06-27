@@ -419,15 +419,6 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
 #    define PerlMemShared PerlMem
 #endif
 
-/* make freed ops die if they're inadvertently executed */
-#ifdef DEBUGGING
-static OP *
-S_pp_freed(pTHX)
-{
-    DIE(aTHX_ "panic: freed op 0x%p called\n", PL_op);
-}
-#endif
-
 void
 Perl_Slab_Free(pTHX_ void *op)
 {
@@ -435,10 +426,6 @@ Perl_Slab_Free(pTHX_ void *op)
     OPSLAB *slab;
 
     PERL_ARGS_ASSERT_SLAB_FREE;
-
-#ifdef DEBUGGING
-    o->op_ppaddr = S_pp_freed;
-#endif
 
     if (!o->op_slabbed) {
         if (!o->op_static)
@@ -675,7 +662,6 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
 	 && isASCII(name[1])
 	 && (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1]))) {
-	    /* diag_listed_as: Can't use global %s in "%s" */
 	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in \"%s\"",
 			      name[0], toCTRL(name[1]), (int)(len - 2), name + 2,
 			      PL_parser->in_my == KEY_state ? "state" : "my"));
@@ -970,7 +956,6 @@ Perl_op_clear(pTHX_ OP *o)
 	SvREFCNT_dec(cMETHOPx(o)->op_rclass_sv);
 	cMETHOPx(o)->op_rclass_sv = NULL;
 #endif
-        /* FALLTHROUGH */
     case OP_METHOD_NAMED:
     case OP_METHOD_SUPER:
         SvREFCNT_dec(cMETHOPx(o)->op_u.op_meth_sv);
@@ -1078,22 +1063,6 @@ Perl_op_clear(pTHX_ OP *o)
         PerlMemShared_free(cUNOP_AUXo->op_aux);
         break;
 
-    case OP_MULTICONCAT:
-        {
-            UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
-            /* aux[PERL_MULTICONCAT_IX_PLAIN_PV] and/or
-             * aux[PERL_MULTICONCAT_IX_UTF8_PV] point to plain and/or
-             * utf8 shared strings */
-            char *p1 = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
-            char *p2 = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
-            if (p1)
-                PerlMemShared_free(p1);
-            if (p2 && p1 != p2)
-                PerlMemShared_free(p2);
-            PerlMemShared_free(aux);
-        }
-        break;
-
     case OP_MULTIDEREF:
         {
             UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
@@ -1110,14 +1079,12 @@ Perl_op_clear(pTHX_ OP *o)
 
                 case MDEREF_HV_padhv_helem:
                     is_hash = TRUE;
-                    /* FALLTHROUGH */
                 case MDEREF_AV_padav_aelem:
                     pad_free((++items)->pad_offset);
                     goto do_elem;
 
                 case MDEREF_HV_gvhv_helem:
                     is_hash = TRUE;
-                    /* FALLTHROUGH */
                 case MDEREF_AV_gvav_aelem:
 #ifdef USE_ITHREADS
                     S_op_clear_gv(aTHX_ o, &((++items)->pad_offset));
@@ -1128,7 +1095,6 @@ Perl_op_clear(pTHX_ OP *o)
 
                 case MDEREF_HV_gvsv_vivify_rv2hv_helem:
                     is_hash = TRUE;
-                    /* FALLTHROUGH */
                 case MDEREF_AV_gvsv_vivify_rv2av_aelem:
 #ifdef USE_ITHREADS
                     S_op_clear_gv(aTHX_ o, &((++items)->pad_offset));
@@ -1139,7 +1105,6 @@ Perl_op_clear(pTHX_ OP *o)
 
                 case MDEREF_HV_padsv_vivify_rv2hv_helem:
                     is_hash = TRUE;
-                    /* FALLTHROUGH */
                 case MDEREF_AV_padsv_vivify_rv2av_aelem:
                     pad_free((++items)->pad_offset);
                     goto do_vivify_rv2xv_elem;
@@ -1147,7 +1112,6 @@ Perl_op_clear(pTHX_ OP *o)
                 case MDEREF_HV_pop_rv2hv_helem:
                 case MDEREF_HV_vivify_rv2hv_helem:
                     is_hash = TRUE;
-                    /* FALLTHROUGH */
                 do_vivify_rv2xv_elem:
                 case MDEREF_AV_pop_rv2av_aelem:
                 case MDEREF_AV_vivify_rv2av_aelem:
@@ -1223,7 +1187,8 @@ S_cop_free(pTHX_ COP* cop)
 }
 
 STATIC void
-S_forget_pmop(pTHX_ PMOP *const o)
+S_forget_pmop(pTHX_ PMOP *const o
+	      )
 {
     HV * const pmstash = PmopSTASH(o);
 
@@ -1544,8 +1509,7 @@ Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
     OpTYPE_set(logop, type);
     logop->op_first = first;
     logop->op_other = other;
-    if (first)
-        logop->op_flags = OPf_KIDS;
+    logop->op_flags = OPf_KIDS;
     while (kid && OpHAS_SIBLING(kid))
         kid = OpSIBLING(kid);
     if (kid)
@@ -1949,11 +1913,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
             if (o->op_type == OP_REPEAT)
                 scalar(cBINOPo->op_first);
             goto func_ops;
-	case OP_CONCAT:
-            if ((o->op_flags & OPf_STACKED) &&
-		    !(o->op_private & OPpCONCAT_NESTED))
-                break;
-	    goto func_ops;
         case OP_SUBSTR:
             if (o->op_private == 4)
                 break;
@@ -2491,916 +2450,6 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
     }
 }
 
-/* info returned by S_sprintf_is_multiconcatable() */
-
-struct sprintf_ismc_info {
-    SSize_t nargs;    /* num of args to sprintf (not including the format) */
-    char  *start;     /* start of raw format string */
-    char  *end;       /* bytes after end of raw format string */
-    STRLEN total_len; /* total length (in bytes) of format string, not
-                         including '%s' and  half of '%%' */
-    STRLEN variant;   /* number of bytes by which total_len_p would grow
-                         if upgraded to utf8 */
-    bool   utf8;      /* whether the format is utf8 */
-};
-
-
-/* is the OP_SPRINTF o suitable for converting into a multiconcat op?
- * i.e. its format argument is a const string with only '%s' and '%%'
- * formats, and the number of args is known, e.g.
- *    sprintf "a=%s f=%s", $a[0], scalar(f());
- * but not
- *    sprintf "i=%d a=%s f=%s", $i, @a, f();
- *
- * If successful, the sprintf_ismc_info struct pointed to by info will be
- * populated.
- */
-
-STATIC bool
-S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
-{
-    OP    *pm, *constop, *kid;
-    SV    *sv;
-    char  *s, *e, *p;
-    SSize_t nargs, nformats;
-    STRLEN cur, total_len, variant;
-    bool   utf8;
-
-    /* if sprintf's behaviour changes, die here so that someone
-     * can decide whether to enhance this function or skip optimising
-     * under those new circumstances */
-    assert(!(o->op_flags & OPf_STACKED));
-    assert(!(PL_opargs[OP_SPRINTF] & OA_TARGLEX));
-    assert(!(o->op_private & ~OPpARG4_MASK));
-
-    pm = cUNOPo->op_first;
-    if (pm->op_type != OP_PUSHMARK) /* weird coreargs stuff */
-        return FALSE;
-    constop = OpSIBLING(pm);
-    if (!constop || constop->op_type != OP_CONST)
-        return FALSE;
-    sv = cSVOPx_sv(constop);
-    if (SvMAGICAL(sv) || !SvPOK(sv))
-        return FALSE;
-
-    s = SvPV(sv, cur);
-    e = s + cur;
-
-    /* Scan format for %% and %s and work out how many %s there are.
-     * Abandon if other format types are found.
-     */
-
-    nformats  = 0;
-    total_len = 0;
-    variant   = 0;
-
-    for (p = s; p < e; p++) {
-        if (*p != '%') {
-            total_len++;
-            if (!UTF8_IS_INVARIANT(*p))
-                variant++;
-            continue;
-        }
-        p++;
-        if (p >= e)
-            return FALSE; /* lone % at end gives "Invalid conversion" */
-        if (*p == '%')
-            total_len++;
-        else if (*p == 's')
-            nformats++;
-        else
-            return FALSE;
-    }
-
-    if (!nformats || nformats > PERL_MULTICONCAT_MAXARG)
-        return FALSE;
-
-    utf8 = cBOOL(SvUTF8(sv));
-    if (utf8)
-        variant = 0;
-
-    /* scan args; they must all be in scalar cxt */
-
-    nargs = 0;
-    kid = OpSIBLING(constop);
-
-    while (kid) {
-        if ((kid->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
-            return FALSE;
-        nargs++;
-        kid = OpSIBLING(kid);
-    }
-
-    if (nargs != nformats)
-        return FALSE; /* e.g. sprintf("%s%s", $a); */
-
-
-    info->nargs      = nargs;
-    info->start      = s;
-    info->end        = e;
-    info->total_len  = total_len;
-    info->variant    = variant;
-    info->utf8       = utf8;
-
-    return TRUE;
-}
-
-
-
-/* S_maybe_multiconcat():
- *
- * given an OP_STRINGIFY, OP_SASSIGN, OP_CONCAT or OP_SPRINTF op, possibly
- * convert it (and its children) into an OP_MULTICONCAT. See the code
- * comments just before pp_multiconcat() for the full details of what
- * OP_MULTICONCAT supports.
- *
- * Basically we're looking for an optree with a chain of OP_CONCATS down
- * the LHS (or an OP_SPRINTF), with possibly an OP_SASSIGN, and/or
- * OP_STRINGIFY, and/or OP_CONCAT acting as '.=' at its head, e.g.
- *
- *      $x = "$a$b-$c"
- *
- *  looks like
- *
- *      SASSIGN
- *         |
- *      STRINGIFY   -- PADSV[$x]
- *         |
- *         |
- *      ex-PUSHMARK -- CONCAT/S
- *                        |
- *                     CONCAT/S  -- PADSV[$d]
- *                        |
- *                     CONCAT    -- CONST["-"]
- *                        |
- *                     PADSV[$a] -- PADSV[$b]
- *
- * Note that at this stage the OP_SASSIGN may have already been optimised
- * away with OPpTARGET_MY set on the OP_STRINGIFY or OP_CONCAT.
- */
-
-STATIC void
-S_maybe_multiconcat(pTHX_ OP *o)
-{
-    OP *lastkidop;   /* the right-most of any kids unshifted onto o */
-    OP *topop;       /* the top-most op in the concat tree (often equals o,
-                        unless there are assign/stringify ops above it */
-    OP *parentop;    /* the parent op of topop (or itself if no parent) */
-    OP *targmyop;    /* the op (if any) with the OPpTARGET_MY flag */
-    OP *targetop;    /* the op corresponding to target=... or target.=... */
-    OP *stringop;    /* the OP_STRINGIFY op, if any */
-    OP *nextop;      /* used for recreating the op_next chain without consts */
-    OP *kid;         /* general-purpose op pointer */
-    UNOP_AUX_item *aux;
-    UNOP_AUX_item *lenp;
-    char *const_str, *p;
-    struct sprintf_ismc_info sprintf_info;
-
-                     /* store info about each arg in args[];
-                      * toparg is the highest used slot; argp is a general
-                      * pointer to args[] slots */
-    struct {
-        void *p;      /* initially points to const sv (or null for op);
-                         later, set to SvPV(constsv), with ... */
-        STRLEN len;   /* ... len set to SvPV(..., len) */
-    } *argp, *toparg, args[PERL_MULTICONCAT_MAXARG*2 + 1];
-
-    SSize_t nargs  = 0;
-    SSize_t nconst = 0;
-    SSize_t nadjconst  = 0; /* adjacent consts - may be demoted to args */
-    STRLEN variant;
-    bool utf8 = FALSE;
-    bool kid_is_last = FALSE; /* most args will be the RHS kid of a concat op;
-                                 the last-processed arg will the LHS of one,
-                                 as args are processed in reverse order */
-    U8   stacked_last = 0;   /* whether the last seen concat op was STACKED */
-    STRLEN total_len  = 0;   /* sum of the lengths of the const segments */
-    U8 flags          = 0;   /* what will become the op_flags and ... */
-    U8 private_flags  = 0;   /* ... op_private of the multiconcat op */
-    bool is_sprintf = FALSE; /* we're optimising an sprintf */
-    bool is_targable  = FALSE; /* targetop is an OPpTARGET_MY candidate */
-    bool prev_was_const = FALSE; /* previous arg was a const */
-
-    /* -----------------------------------------------------------------
-     * Phase 1:
-     *
-     * Examine the optree non-destructively to determine whether it's
-     * suitable to be converted into an OP_MULTICONCAT. Accumulate
-     * information about the optree in args[].
-     */
-
-    argp     = args;
-    targmyop = NULL;
-    targetop = NULL;
-    stringop = NULL;
-    topop    = o;
-    parentop = o;
-
-    assert(   o->op_type == OP_SASSIGN
-           || o->op_type == OP_CONCAT
-           || o->op_type == OP_SPRINTF
-           || o->op_type == OP_STRINGIFY);
-
-    Zero(&sprintf_info, 1, struct sprintf_ismc_info);
-
-    /* first see if, at the top of the tree, there is an assign,
-     * append and/or stringify */
-
-    if (topop->op_type == OP_SASSIGN) {
-        /* expr = ..... */
-        if (o->op_ppaddr != PL_ppaddr[OP_SASSIGN])
-            return;
-        if (o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
-            return;
-        assert(!(o->op_private & ~OPpARG2_MASK)); /* barf on unknown flags */
-
-        parentop = topop;
-        topop = cBINOPo->op_first;
-        targetop = OpSIBLING(topop);
-        if (!targetop) /* probably some sort of syntax error */
-            return;
-    }
-    else if (   topop->op_type == OP_CONCAT
-             && (topop->op_flags & OPf_STACKED)
-             && (cUNOPo->op_first->op_flags & OPf_MOD)
-             && (!(topop->op_private & OPpCONCAT_NESTED))
-            )
-    {
-        /* expr .= ..... */
-
-        /* OPpTARGET_MY shouldn't be able to be set here. If it is,
-         * decide what to do about it */
-        assert(!(o->op_private & OPpTARGET_MY));
-
-        /* barf on unknown flags */
-        assert(!(o->op_private & ~(OPpARG2_MASK|OPpTARGET_MY)));
-        private_flags |= OPpMULTICONCAT_APPEND;
-        targetop = cBINOPo->op_first;
-        parentop = topop;
-        topop    = OpSIBLING(targetop);
-
-        /* $x .= <FOO> gets optimised to rcatline instead */
-        if (topop->op_type == OP_READLINE)
-            return;
-    }
-
-    if (targetop) {
-        /* Can targetop (the LHS) if it's a padsv, be be optimised
-         * away and use OPpTARGET_MY instead?
-         */
-        if (    (targetop->op_type == OP_PADSV)
-            && !(targetop->op_private & OPpDEREF)
-            && !(targetop->op_private & OPpPAD_STATE)
-               /* we don't support 'my $x .= ...' */
-            && (   o->op_type == OP_SASSIGN
-                || !(targetop->op_private & OPpLVAL_INTRO))
-        )
-            is_targable = TRUE;
-    }
-
-    if (topop->op_type == OP_STRINGIFY) {
-        if (topop->op_ppaddr != PL_ppaddr[OP_STRINGIFY])
-            return;
-        stringop = topop;
-
-        /* barf on unknown flags */
-        assert(!(o->op_private & ~(OPpARG4_MASK|OPpTARGET_MY)));
-
-        if ((topop->op_private & OPpTARGET_MY)) {
-            if (o->op_type == OP_SASSIGN)
-                return; /* can't have two assigns */
-            targmyop = topop;
-        }
-
-        private_flags |= OPpMULTICONCAT_STRINGIFY;
-        parentop = topop;
-        topop = cBINOPx(topop)->op_first;
-        assert(OP_TYPE_IS_OR_WAS_NN(topop, OP_PUSHMARK));
-        topop = OpSIBLING(topop);
-    }
-
-    if (topop->op_type == OP_SPRINTF) {
-        if (topop->op_ppaddr != PL_ppaddr[OP_SPRINTF])
-            return;
-        if (S_sprintf_is_multiconcatable(aTHX_ topop, &sprintf_info)) {
-            nargs     = sprintf_info.nargs;
-            total_len = sprintf_info.total_len;
-            variant   = sprintf_info.variant;
-            utf8      = sprintf_info.utf8;
-            is_sprintf = TRUE;
-            private_flags |= OPpMULTICONCAT_FAKE;
-            toparg = argp;
-            /* we have an sprintf op rather than a concat optree.
-             * Skip most of the code below which is associated with
-             * processing that optree. We also skip phase 2, determining
-             * whether its cost effective to optimise, since for sprintf,
-             * multiconcat is *always* faster */
-            goto create_aux;
-        }
-        /* note that even if the sprintf itself isn't multiconcatable,
-         * the expression as a whole may be, e.g. in
-         *    $x .= sprintf("%d",...)
-         * the sprintf op will be left as-is, but the concat/S op may
-         * be upgraded to multiconcat
-         */
-    }
-    else if (topop->op_type == OP_CONCAT) {
-        if (topop->op_ppaddr != PL_ppaddr[OP_CONCAT])
-            return;
-
-        if ((topop->op_private & OPpTARGET_MY)) {
-            if (o->op_type == OP_SASSIGN || targmyop)
-                return; /* can't have two assigns */
-            targmyop = topop;
-        }
-    }
-
-    /* Is it safe to convert a sassign/stringify/concat op into
-     * a multiconcat? */
-    assert((PL_opargs[OP_SASSIGN]   & OA_CLASS_MASK) == OA_BINOP);
-    assert((PL_opargs[OP_CONCAT]    & OA_CLASS_MASK) == OA_BINOP);
-    assert((PL_opargs[OP_STRINGIFY] & OA_CLASS_MASK) == OA_LISTOP);
-    assert((PL_opargs[OP_SPRINTF]   & OA_CLASS_MASK) == OA_LISTOP);
-    STATIC_ASSERT_STMT(   STRUCT_OFFSET(BINOP,    op_last)
-                       == STRUCT_OFFSET(UNOP_AUX, op_aux));
-    STATIC_ASSERT_STMT(   STRUCT_OFFSET(LISTOP,   op_last)
-                       == STRUCT_OFFSET(UNOP_AUX, op_aux));
-
-    /* Now scan the down the tree looking for a series of
-     * CONCAT/OPf_STACKED ops on the LHS (with the last one not
-     * stacked). For example this tree:
-     *
-     *     |
-     *   CONCAT/STACKED
-     *     |
-     *   CONCAT/STACKED -- EXPR5
-     *     |
-     *   CONCAT/STACKED -- EXPR4
-     *     |
-     *   CONCAT -- EXPR3
-     *     |
-     *   EXPR1  -- EXPR2
-     *
-     * corresponds to an expression like
-     *
-     *   (EXPR1 . EXPR2 . EXPR3 . EXPR4 . EXPR5)
-     *
-     * Record info about each EXPR in args[]: in particular, whether it is
-     * a stringifiable OP_CONST and if so what the const sv is.
-     *
-     * The reason why the last concat can't be STACKED is the difference
-     * between
-     *
-     *    ((($a .= $a) .= $a) .= $a) .= $a
-     *
-     * and
-     *    $a . $a . $a . $a . $a
-     *
-     * The main difference between the optrees for those two constructs
-     * is the presence of the last STACKED. As well as modifying $a,
-     * the former sees the changed $a between each concat, so if $s is
-     * initially 'a', the first returns 'a' x 16, while the latter returns
-     * 'a' x 5. And pp_multiconcat can't handle that kind of thing.
-     */
-
-    kid = topop;
-
-    for (;;) {
-        OP *argop;
-        SV *sv;
-        bool last = FALSE;
-
-        if (    kid->op_type == OP_CONCAT
-            && !kid_is_last
-        ) {
-            OP *k1, *k2;
-            k1 = cUNOPx(kid)->op_first;
-            k2 = OpSIBLING(k1);
-            /* shouldn't happen except maybe after compile err? */
-            if (!k2)
-                return;
-
-            /* avoid turning (A . B . ($lex = C) ...)  into  (A . B . C ...) */
-            if (kid->op_private & OPpTARGET_MY)
-                kid_is_last = TRUE;
-
-            stacked_last = (kid->op_flags & OPf_STACKED);
-            if (!stacked_last)
-                kid_is_last = TRUE;
-
-            kid   = k1;
-            argop = k2;
-        }
-        else {
-            argop = kid;
-            last = TRUE;
-        }
-
-        if (   nargs + nadjconst  >  PERL_MULTICONCAT_MAXARG        - 2
-            || (argp - args + 1)  > (PERL_MULTICONCAT_MAXARG*2 + 1) - 2)
-        {
-            /* At least two spare slots are needed to decompose both
-             * concat args. If there are no slots left, continue to
-             * examine the rest of the optree, but don't push new values
-             * on args[]. If the optree as a whole is legal for conversion
-             * (in particular that the last concat isn't STACKED), then
-             * the first PERL_MULTICONCAT_MAXARG elements of the optree
-             * can be converted into an OP_MULTICONCAT now, with the first
-             * child of that op being the remainder of the optree -
-             * which may itself later be converted to a multiconcat op
-             * too.
-             */
-            if (last) {
-                /* the last arg is the rest of the optree */
-                argp++->p = NULL;
-                nargs++;
-            }
-        }
-        else if (   argop->op_type == OP_CONST
-            && ((sv = cSVOPx_sv(argop)))
-            /* defer stringification until runtime of 'constant'
-             * things that might stringify variantly, e.g. the radix
-             * point of NVs, or overloaded RVs */
-            && (SvPOK(sv) || SvIOK(sv))
-            && (!SvGMAGICAL(sv))
-        ) {
-            argp++->p = sv;
-            utf8   |= cBOOL(SvUTF8(sv));
-            nconst++;
-            if (prev_was_const)
-                /* this const may be demoted back to a plain arg later;
-                 * make sure we have enough arg slots left */
-                nadjconst++;
-            prev_was_const = !prev_was_const;
-        }
-        else {
-            argp++->p = NULL;
-            nargs++;
-            prev_was_const = FALSE;
-        }
-
-        if (last)
-            break;
-    }
-
-    toparg = argp - 1;
-
-    if (stacked_last)
-        return; /* we don't support ((A.=B).=C)...) */
-
-    /* look for two adjacent consts and don't fold them together:
-     *     $o . "a" . "b"
-     * should do
-     *     $o->concat("a")->concat("b")
-     * rather than
-     *     $o->concat("ab")
-     * (but $o .=  "a" . "b" should still fold)
-     */
-    {
-        bool seen_nonconst = FALSE;
-        for (argp = toparg; argp >= args; argp--) {
-            if (argp->p == NULL) {
-                seen_nonconst = TRUE;
-                continue;
-            }
-            if (!seen_nonconst)
-                continue;
-            if (argp[1].p) {
-                /* both previous and current arg were constants;
-                 * leave the current OP_CONST as-is */
-                argp->p = NULL;
-                nconst--;
-                nargs++;
-            }
-        }
-    }
-
-    /* -----------------------------------------------------------------
-     * Phase 2:
-     *
-     * At this point we have determined that the optree *can* be converted
-     * into a multiconcat. Having gathered all the evidence, we now decide
-     * whether it *should*.
-     */
-
-
-    /* we need at least one concat action, e.g.:
-     *
-     *  Y . Z
-     *  X = Y . Z
-     *  X .= Y
-     *
-     * otherwise we could be doing something like $x = "foo", which
-     * if treated as as a concat, would fail to COW.
-     */
-    if (nargs + nconst + cBOOL(private_flags & OPpMULTICONCAT_APPEND) < 2)
-        return;
-
-    /* Benchmarking seems to indicate that we gain if:
-     * * we optimise at least two actions into a single multiconcat
-     *    (e.g concat+concat, sassign+concat);
-     * * or if we can eliminate at least 1 OP_CONST;
-     * * or if we can eliminate a padsv via OPpTARGET_MY
-     */
-
-    if (
-           /* eliminated at least one OP_CONST */
-           nconst >= 1
-           /* eliminated an OP_SASSIGN */
-        || o->op_type == OP_SASSIGN
-           /* eliminated an OP_PADSV */
-        || (!targmyop && is_targable)
-    )
-        /* definitely a net gain to optimise */
-        goto optimise;
-
-    /* ... if not, what else? */
-
-    /* special-case '$lex1 = expr . $lex1' (where expr isn't lex1):
-     * multiconcat is faster (due to not creating a temporary copy of
-     * $lex1), whereas for a general $lex1 = $lex2 . $lex3, concat is
-     * faster.
-     */
-    if (   nconst == 0
-         && nargs == 2
-         && targmyop
-         && topop->op_type == OP_CONCAT
-    ) {
-        PADOFFSET t = targmyop->op_targ;
-        OP *k1 = cBINOPx(topop)->op_first;
-        OP *k2 = cBINOPx(topop)->op_last;
-        if (   k2->op_type == OP_PADSV
-            && k2->op_targ == t
-            && (   k1->op_type != OP_PADSV
-                || k1->op_targ != t)
-        )
-            goto optimise;
-    }
-
-    /* need at least two concats */
-    if (nargs + nconst + cBOOL(private_flags & OPpMULTICONCAT_APPEND) < 3)
-        return;
-
-
-
-    /* -----------------------------------------------------------------
-     * Phase 3:
-     *
-     * At this point the optree has been verified as ok to be optimised
-     * into an OP_MULTICONCAT. Now start changing things.
-     */
-
-   optimise:
-
-    /* stringify all const args and determine utf8ness */
-
-    variant = 0;
-    for (argp = args; argp <= toparg; argp++) {
-        SV *sv = (SV*)argp->p;
-        if (!sv)
-            continue; /* not a const op */
-        if (utf8 && !SvUTF8(sv))
-            sv_utf8_upgrade_nomg(sv);
-        argp->p = SvPV_nomg(sv, argp->len);
-        total_len += argp->len;
-        
-        /* see if any strings would grow if converted to utf8 */
-        if (!utf8) {
-            char *p    = (char*)argp->p;
-            STRLEN len = argp->len;
-            while (len--) {
-                U8 c = *p++;
-                if (!UTF8_IS_INVARIANT(c))
-                    variant++;
-            }
-        }
-    }
-
-    /* create and populate aux struct */
-
-  create_aux:
-
-    aux = (UNOP_AUX_item*)PerlMemShared_malloc(
-                    sizeof(UNOP_AUX_item)
-                    *  (
-                           PERL_MULTICONCAT_HEADER_SIZE
-                         + ((nargs + 1) * (variant ? 2 : 1))
-                        )
-                    );
-    const_str = (char *)PerlMemShared_malloc(total_len ? total_len : 1);
-
-    /* Extract all the non-const expressions from the concat tree then
-     * dispose of the old tree, e.g. convert the tree from this:
-     *
-     *  o => SASSIGN
-     *         |
-     *       STRINGIFY   -- TARGET
-     *         |
-     *       ex-PUSHMARK -- CONCAT
-     *                        |
-     *                      CONCAT -- EXPR5
-     *                        |
-     *                      CONCAT -- EXPR4
-     *                        |
-     *                      CONCAT -- EXPR3
-     *                        |
-     *                      EXPR1  -- EXPR2
-     *
-     *
-     * to:
-     *
-     *  o => MULTICONCAT
-     *         |
-     *       ex-PUSHMARK -- EXPR1 -- EXPR2 -- EXPR3 -- EXPR4 -- EXPR5 -- TARGET
-     *
-     * except that if EXPRi is an OP_CONST, it's discarded.
-     *
-     * During the conversion process, EXPR ops are stripped from the tree
-     * and unshifted onto o. Finally, any of o's remaining original
-     * childen are discarded and o is converted into an OP_MULTICONCAT.
-     *
-     * In this middle of this, o may contain both: unshifted args on the
-     * left, and some remaining original args on the right. lastkidop
-     * is set to point to the right-most unshifted arg to delineate
-     * between the two sets.
-     */
-
-
-    if (is_sprintf) {
-        /* create a copy of the format with the %'s removed, and record
-         * the sizes of the const string segments in the aux struct */
-        char *q, *oldq;
-        lenp = aux + PERL_MULTICONCAT_IX_LENGTHS;
-
-        p    = sprintf_info.start;
-        q    = const_str;
-        oldq = q;
-        for (; p < sprintf_info.end; p++) {
-            if (*p == '%') {
-                p++;
-                if (*p != '%') {
-                    (lenp++)->ssize = q - oldq;
-                    oldq = q;
-                    continue;
-                }
-            }
-            *q++ = *p;
-        }
-        lenp->ssize = q - oldq;
-        assert((STRLEN)(q - const_str) == total_len);
-
-        /* Attach all the args (i.e. the kids of the sprintf) to o (which
-         * may or may not be topop) The pushmark and const ops need to be
-         * kept in case they're an op_next entry point.
-         */
-        lastkidop = cLISTOPx(topop)->op_last;
-        kid = cUNOPx(topop)->op_first; /* pushmark */
-        op_null(kid);
-        op_null(OpSIBLING(kid));       /* const */
-        if (o != topop) {
-            kid = op_sibling_splice(topop, NULL, -1, NULL); /* cut all args */
-            op_sibling_splice(o, NULL, 0, kid); /* and attach to o */
-            lastkidop->op_next = o;
-        }
-    }
-    else {
-        p = const_str;
-        lenp = aux + PERL_MULTICONCAT_IX_LENGTHS;
-
-        lenp->ssize = -1;
-
-        /* Concatenate all const strings into const_str.
-         * Note that args[] contains the RHS args in reverse order, so
-         * we scan args[] from top to bottom to get constant strings
-         * in L-R order
-         */
-        for (argp = toparg; argp >= args; argp--) {
-            if (!argp->p)
-                /* not a const op */
-                (++lenp)->ssize = -1;
-            else {
-                STRLEN l = argp->len;
-                Copy(argp->p, p, l, char);
-                p += l;
-                if (lenp->ssize == -1)
-                    lenp->ssize = l;
-                else
-                    lenp->ssize += l;
-            }
-        }
-
-        kid = topop;
-        nextop = o;
-        lastkidop = NULL;
-
-        for (argp = args; argp <= toparg; argp++) {
-            /* only keep non-const args, except keep the first-in-next-chain
-             * arg no matter what it is (but nulled if OP_CONST), because it
-             * may be the entry point to this subtree from the previous
-             * op_next.
-             */
-            bool last = (argp == toparg);
-            OP *prev;
-
-            /* set prev to the sibling *before* the arg to be cut out,
-             * e.g. when cutting EXPR:
-             *
-             *         |
-             * kid=  CONCAT
-             *         |
-             * prev= CONCAT -- EXPR
-             *         |
-             */
-            if (argp == args && kid->op_type != OP_CONCAT) {
-                /* in e.g. '$x .= f(1)' there's no RHS concat tree
-                 * so the expression to be cut isn't kid->op_last but
-                 * kid itself */
-                OP *o1, *o2;
-                /* find the op before kid */
-                o1 = NULL;
-                o2 = cUNOPx(parentop)->op_first;
-                while (o2 && o2 != kid) {
-                    o1 = o2;
-                    o2 = OpSIBLING(o2);
-                }
-                assert(o2 == kid);
-                prev = o1;
-                kid  = parentop;
-            }
-            else if (kid == o && lastkidop)
-                prev = last ? lastkidop : OpSIBLING(lastkidop);
-            else
-                prev = last ? NULL : cUNOPx(kid)->op_first;
-
-            if (!argp->p || last) {
-                /* cut RH op */
-                OP *aop = op_sibling_splice(kid, prev, 1, NULL);
-                /* and unshift to front of o */
-                op_sibling_splice(o, NULL, 0, aop);
-                /* record the right-most op added to o: later we will
-                 * free anything to the right of it */
-                if (!lastkidop)
-                    lastkidop = aop;
-                aop->op_next = nextop;
-                if (last) {
-                    if (argp->p)
-                        /* null the const at start of op_next chain */
-                        op_null(aop);
-                }
-                else if (prev)
-                    nextop = prev->op_next;
-            }
-
-            /* the last two arguments are both attached to the same concat op */
-            if (argp < toparg - 1)
-                kid = prev;
-        }
-    }
-
-    /* Populate the aux struct */
-
-    aux[PERL_MULTICONCAT_IX_NARGS].ssize     = nargs;
-    aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv    = utf8 ? NULL : const_str;
-    aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize = utf8 ?    0 : total_len;
-    aux[PERL_MULTICONCAT_IX_UTF8_PV].pv     = const_str;
-    aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize  = total_len;
-
-    /* if variant > 0, calculate a variant const string and lengths where
-     * the utf8 version of the string will take 'variant' more bytes than
-     * the plain one. */
-
-    if (variant) {
-        char              *p = const_str;
-        STRLEN          ulen = total_len + variant;
-        UNOP_AUX_item  *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
-        UNOP_AUX_item *ulens = lens + (nargs + 1);
-        char             *up = (char*)PerlMemShared_malloc(ulen);
-        SSize_t            n;
-
-        aux[PERL_MULTICONCAT_IX_UTF8_PV].pv    = up;
-        aux[PERL_MULTICONCAT_IX_UTF8_LEN].ssize = ulen;
-
-        for (n = 0; n < (nargs + 1); n++) {
-            SSize_t i;
-            char * orig_up = up;
-            for (i = (lens++)->ssize; i > 0; i--) {
-                U8 c = *p++;
-                append_utf8_from_native_byte(c, (U8**)&up);
-            }
-            (ulens++)->ssize = (i < 0) ? i : up - orig_up;
-        }
-    }
-
-    if (stringop) {
-        /* if there was a top(ish)-level OP_STRINGIFY, we need to keep
-         * that op's first child - an ex-PUSHMARK - because the op_next of
-         * the previous op may point to it (i.e. it's the entry point for
-         * the o optree)
-         */
-        OP *pmop =
-            (stringop == o)
-                ? op_sibling_splice(o, lastkidop, 1, NULL)
-                : op_sibling_splice(stringop, NULL, 1, NULL);
-        assert(OP_TYPE_IS_OR_WAS_NN(pmop, OP_PUSHMARK));
-        op_sibling_splice(o, NULL, 0, pmop);
-        if (!lastkidop)
-            lastkidop = pmop;
-    }
-
-    /* Optimise 
-     *    target  = A.B.C...
-     *    target .= A.B.C...
-     */
-
-    if (targetop) {
-        assert(!targmyop);
-
-        if (o->op_type == OP_SASSIGN) {
-            /* Move the target subtree from being the last of o's children
-             * to being the last of o's preserved children.
-             * Note the difference between 'target = ...' and 'target .= ...':
-             * for the former, target is executed last; for the latter,
-             * first.
-             */
-            kid = OpSIBLING(lastkidop);
-            op_sibling_splice(o, kid, 1, NULL); /* cut target op */
-            op_sibling_splice(o, lastkidop, 0, targetop); /* and paste */
-            lastkidop->op_next = kid->op_next;
-            lastkidop = targetop;
-        }
-        else {
-            /* Move the target subtree from being the first of o's
-             * original children to being the first of *all* o's children.
-             */
-            if (lastkidop) {
-                op_sibling_splice(o, lastkidop, 1, NULL); /* cut target op */
-                op_sibling_splice(o, NULL, 0, targetop);  /* and paste*/
-            }
-            else {
-                /* if the RHS of .= doesn't contain a concat (e.g.
-                 * $x .= "foo"), it gets missed by the "strip ops from the
-                 * tree and add to o" loop earlier */
-                assert(topop->op_type != OP_CONCAT);
-                if (stringop) {
-                    /* in e.g. $x .= "$y", move the $y expression
-                     * from being a child of OP_STRINGIFY to being the
-                     * second child of the OP_CONCAT
-                     */
-                    assert(cUNOPx(stringop)->op_first == topop);
-                    op_sibling_splice(stringop, NULL, 1, NULL);
-                    op_sibling_splice(o, cUNOPo->op_first, 0, topop);
-                }
-                assert(topop == OpSIBLING(cBINOPo->op_first));
-                if (toparg->p)
-                    op_null(topop);
-                lastkidop = topop;
-            }
-        }
-
-        if (is_targable) {
-            /* optimise
-             *  my $lex  = A.B.C...
-             *     $lex  = A.B.C...
-             *     $lex .= A.B.C...
-             * The original padsv op is kept but nulled in case it's the
-             * entry point for the optree (which it will be for
-             * '$lex .=  ... '
-             */
-            private_flags |= OPpTARGET_MY;
-            private_flags |= (targetop->op_private & OPpLVAL_INTRO);
-            o->op_targ = targetop->op_targ;
-            targetop->op_targ = 0;
-            op_null(targetop);
-        }
-        else
-            flags |= OPf_STACKED;
-    }
-    else if (targmyop) {
-        private_flags |= OPpTARGET_MY;
-        if (o != targmyop) {
-            o->op_targ = targmyop->op_targ;
-            targmyop->op_targ = 0;
-        }
-    }
-
-    /* detach the emaciated husk of the sprintf/concat optree and free it */
-    for (;;) {
-        kid = op_sibling_splice(o, lastkidop, 1, NULL);
-        if (!kid)
-            break;
-        op_free(kid);
-    }
-
-    /* and convert o into a multiconcat */
-
-    o->op_flags        = (flags|OPf_KIDS|stacked_last
-                         |(o->op_flags & (OPf_WANT|OPf_PARENS)));
-    o->op_private      = private_flags;
-    o->op_type         = OP_MULTICONCAT;
-    o->op_ppaddr       = PL_ppaddr[OP_MULTICONCAT];
-    cUNOP_AUXo->op_aux = aux;
-}
-
 
 /* do all the final processing on an optree (e.g. running the peephole
  * optimiser on it), then attach it to cv (if cv is non-null)
@@ -3423,7 +2472,6 @@ S_process_optree(pTHX_ CV *cv, OP *optree, OP* start)
     *startp = start;
     optree->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(optree, 1);
-    optimize_optree(optree);
     CALL_PEEP(*startp);
     finalize_optree(optree);
     S_prune_chain_head(startp);
@@ -3433,74 +2481,6 @@ S_process_optree(pTHX_ CV *cv, OP *optree, OP* start)
         pad_tidy(optree->op_type == OP_LEAVEWRITE ? padtidy_FORMAT
                  : CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
     }
-}
-
-
-/*
-=for apidoc optimize_optree
-
-This function applies some optimisations to the optree in top-down order.
-It is called before the peephole optimizer, which processes ops in
-execution order. Note that finalize_optree() also does a top-down scan,
-but is called *after* the peephole optimizer.
-
-=cut
-*/
-
-void
-Perl_optimize_optree(pTHX_ OP* o)
-{
-    PERL_ARGS_ASSERT_OPTIMIZE_OPTREE;
-
-    ENTER;
-    SAVEVPTR(PL_curcop);
-
-    optimize_op(o);
-
-    LEAVE;
-}
-
-
-/* helper for optimize_optree() which optimises on op then recurses
- * to optimise any children.
- */
-
-STATIC void
-S_optimize_op(pTHX_ OP* o)
-{
-    OP *kid;
-
-    PERL_ARGS_ASSERT_OPTIMIZE_OP;
-    assert(o->op_type != OP_FREED);
-
-    switch (o->op_type) {
-    case OP_NEXTSTATE:
-    case OP_DBSTATE:
-	PL_curcop = ((COP*)o);		/* for warnings */
-	break;
-
-
-    case OP_CONCAT:
-    case OP_SASSIGN:
-    case OP_STRINGIFY:
-    case OP_SPRINTF:
-        S_maybe_multiconcat(aTHX_ o);
-        break;
-
-    case OP_SUBST:
-	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
-	    optimize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
-	break;
-
-    default:
-	break;
-    }
-
-    if (!(o->op_flags & OPf_KIDS))
-        return;
-
-    for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
-        optimize_op(kid);
 }
 
 
@@ -3598,8 +2578,8 @@ S_finalize_op(pTHX_ OP* o)
     case OP_CONST:
 	if (cSVOPo->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(o);
+	/* FALLTHROUGH */
 #ifdef USE_ITHREADS
-        /* FALLTHROUGH */
     case OP_HINTSEVAL:
         op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
 #endif
@@ -4080,10 +3060,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_RV2HV:
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
            PL_modcount = RETURN_UNLIMITED_NUMBER;
-           /* Treat \(@foo) like ordinary list, but still mark it as modi-
-              fiable since some contexts need to know.  */
-           o->op_flags |= OPf_MOD;
-           return o;
+	    return o;		/* Treat \(@foo) like ordinary list. */
 	}
 	/* FALLTHROUGH */
     case OP_RV2GV:
@@ -4115,7 +3092,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         goto nomod;
     case OP_AVHVSWITCH:
 	if (type == OP_LEAVESUBLV
-	 && (o->op_private & OPpAVHVSWITCH_MASK) + OP_EACH == OP_KEYS)
+	 && (o->op_private & 3) + OP_EACH == OP_KEYS)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
     case OP_AV2ARYLEN:
@@ -4148,12 +3125,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_PADHV:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS)
-	{
-           /* Treat \(@foo) like ordinary list, but still mark it as modi-
-              fiable since some contexts need to know.  */
-	    o->op_flags |= OPf_MOD;
-	    return o;
-	}
+	    return o;		/* Treat \(@foo) like ordinary list. */
 	if (scalar_mod_type(o, type))
 	    goto nomod;
 	if ((o->op_flags & OPf_WANT) != OPf_WANT_SCALAR
@@ -4714,8 +3686,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
 }
 
 STATIC void
-S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
-                        bool curstash)
+S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
 {
     OP *new_proto = NULL;
     STRLEN pvlen;
@@ -4730,7 +3701,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
     o = *attrs;
     if (o->op_type == OP_CONST) {
         pv = SvPV(cSVOPo_sv, pvlen);
-        if (memBEGINs(pv, pvlen, "prototype(")) {
+        if (pvlen >= 10 && memEQ(pv, "prototype(", 10)) {
             SV * const tmpsv = newSVpvn_flags(pv + 10, pvlen - 11, SvUTF8(cSVOPo_sv));
             SV ** const tmpo = cSVOPx_svp(o);
             SvREFCNT_dec(cSVOPo_sv);
@@ -4746,7 +3717,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
         for (o = OpSIBLING(lasto); o; o = OpSIBLING(o)) {
             if (o->op_type == OP_CONST) {
                 pv = SvPV(cSVOPo_sv, pvlen);
-                if (memBEGINs(pv, pvlen, "prototype(")) {
+                if (pvlen >= 10 && memEQ(pv, "prototype(", 10)) {
                     SV * const tmpsv = newSVpvn_flags(pv + 10, pvlen - 11, SvUTF8(cSVOPo_sv));
                     SV ** const tmpo = cSVOPx_svp(o);
                     SvREFCNT_dec(cSVOPo_sv);
@@ -4789,19 +3760,11 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
         else
             svname = (SV *)name;
         if (ckWARN(WARN_ILLEGALPROTO))
-            (void)validate_proto(svname, cSVOPx_sv(new_proto), TRUE,
-                                 curstash);
+            (void)validate_proto(svname, cSVOPx_sv(new_proto), TRUE);
         if (*proto && ckWARN(WARN_PROTOTYPE)) {
             STRLEN old_len, new_len;
             const char * oldp = SvPV(cSVOPx_sv(*proto), old_len);
             const char * newp = SvPV(cSVOPx_sv(new_proto), new_len);
-
-            if (curstash && svname == (SV *)name
-             && !memchr(SvPVX(svname), ':', SvCUR(svname))) {
-                svname = sv_2mortal(newSVsv(PL_curstname));
-                sv_catpvs(svname, "::");
-                sv_catsv(svname, (SV *)name);
-            }
 
             Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
                 "Prototype '%" UTF8f "' overridden by attribute 'prototype(%" UTF8f ")'"
@@ -5469,11 +4432,11 @@ static OP *
 S_fold_constants(pTHX_ OP *const o)
 {
     dVAR;
-    OP * volatile curop;
+    OP * VOL curop;
     OP *newop;
-    volatile I32 type = o->op_type;
+    VOL I32 type = o->op_type;
     bool is_stringify;
-    SV * volatile sv = NULL;
+    SV * VOL sv = NULL;
     int ret = 0;
     OP *old_next;
     SV * const oldwarnhook = PL_warnhook;
@@ -5706,9 +4669,6 @@ S_gen_constant_list(pTHX_ OP *o)
 
     switch (ret) {
     case 0:
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-        PL_curstackinfo->si_stack_hwm = 0; /* stop valgrind complaining */
-#endif
 	Perl_pp_pushmark(aTHX);
 	CALLRUNOPS(aTHX);
 	PL_op = curop;
@@ -6301,10 +5261,6 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
 
-/* Helper function for S_pmtrans(): comparison function to sort an array
- * of codepoint range pairs. Sorts by start point, or if equal, by end
- * point */
-
 static int uvcompare(const void *a, const void *b)
     __attribute__nonnull__(1)
     __attribute__nonnull__(2)
@@ -6322,39 +5278,24 @@ static int uvcompare(const void *a, const void *b)
     return 0;
 }
 
-/* Given an OP_TRANS / OP_TRANSR op o, plus OP_CONST ops expr and repl
- * containing the search and replacement strings, assemble into
- * a translation table attached as o->op_pv.
- * Free expr and repl.
- * It expects the toker to have already set the
- *   OPpTRANS_COMPLEMENT
- *   OPpTRANS_SQUASH
- *   OPpTRANS_DELETE
- * flags as appropriate; this function may add
- *   OPpTRANS_FROM_UTF
- *   OPpTRANS_TO_UTF
- *   OPpTRANS_IDENTICAL
- *   OPpTRANS_GROWS
- * flags
- */
-
 static OP *
 S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 {
     SV * const tstr = ((SVOP*)expr)->op_sv;
-    SV * const rstr = ((SVOP*)repl)->op_sv;
+    SV * const rstr =
+			      ((SVOP*)repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
     const U8 *t = (U8*)SvPV_const(tstr, tlen);
     const U8 *r = (U8*)SvPV_const(rstr, rlen);
-    Size_t i, j;
-    bool grows = FALSE;
-    OPtrans_map *tbl;
-    SSize_t struct_size; /* malloced size of table struct */
+    I32 i;
+    I32 j;
+    I32 grows = 0;
+    short *tbl;
 
-    const bool complement = cBOOL(o->op_private & OPpTRANS_COMPLEMENT);
-    const bool squash     = cBOOL(o->op_private & OPpTRANS_SQUASH);
-    const bool del        = cBOOL(o->op_private & OPpTRANS_DELETE);
+    const I32 complement = o->op_private & OPpTRANS_COMPLEMENT;
+    const I32 squash     = o->op_private & OPpTRANS_SQUASH;
+    I32 del              = o->op_private & OPpTRANS_DELETE;
     SV* swash;
 
     PERL_ARGS_ASSERT_PMTRANS;
@@ -6368,14 +5309,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         o->op_private |= OPpTRANS_TO_UTF;
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
-
-        /* for utf8 translations, op_sv will be set to point to a swash
-         * containing codepoint ranges. This is done by first assembling
-         * a textual representation of the ranges in listsv then compiling
-         * it using swash_init(). For more details of the textual format,
-         * see L<perlunicode.pod/"User-Defined Character Properties"> .
-         */
-
 	SV* const listsv = newSVpvs("# comment\n");
 	SV* transv = NULL;
 	const U8* tend = t + tlen;
@@ -6417,24 +5350,15 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
  * odd.  */
 
 	if (complement) {
-            /* utf8 and /c:
-             * replace t/tlen/tend with a version that has the ranges
-             * complemented
-             */
 	    U8 tmpbuf[UTF8_MAXBYTES+1];
 	    UV *cp;
 	    UV nextmin = 0;
 	    Newx(cp, 2*tlen, UV);
 	    i = 0;
 	    transv = newSVpvs("");
-
-            /* convert search string into array of (start,end) range
-             * codepoint pairs stored in cp[]. Most "ranges" will start
-             * and end at the same char */
 	    while (t < tend) {
 		cp[2*i] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
 		t += ulen;
-                /* the toker converts X-Y into (X, ILLEGAL_UTF8_BYTE, Y) */
 		if (t < tend && *t == ILLEGAL_UTF8_BYTE) {
 		    t++;
 		    cp[2*i+1] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
@@ -6445,19 +5369,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 		i++;
 	    }
-
-            /* sort the ranges */
 	    qsort(cp, i, 2*sizeof(UV), uvcompare);
-
-            /* Create a utf8 string containing the complement of the
-             * codepoint ranges. For example if cp[] contains [A,B], [C,D],
-             * then transv will contain the equivalent of:
-             * join '', map chr, 0,     ILLEGAL_UTF8_BYTE, A - 1,
-             *                   B + 1, ILLEGAL_UTF8_BYTE, C - 1,
-             *                   D + 1, ILLEGAL_UTF8_BYTE, 0x7fffffff;
-             * A range of a single char skips the ILLEGAL_UTF8_BYTE and
-             * end cp.
-             */
 	    for (j = 0; j < i; j++) {
 		UV  val = cp[2*j];
 		diff = val - nextmin;
@@ -6475,7 +5387,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
-
 	    t = uvchr_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    {
@@ -6492,7 +5403,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	else if (!rlen && !del) {
 	    r = t; rlen = tlen; rend = tend;
 	}
-
 	if (!squash) {
 		if ((!rlen && !del) || t == r ||
 		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
@@ -6500,8 +5410,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    o->op_private |= OPpTRANS_IDENTICAL;
 		}
 	}
-
-        /* extract char ranges from t and r and append them to listsv */
 
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
@@ -6575,11 +5483,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    tfirst += diff + 1;
 	}
 
-        /* compile listsv into a swash and attach to o */
-
 	none = ++max;
 	if (del)
-	    ++max;
+	    del = ++max;
 
 	if (max > 0xffff)
 	    bits = 32;
@@ -6618,88 +5524,50 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	goto warnins;
     }
 
-    /* Non-utf8 case: set o->op_pv to point to a simple 256+ entry lookup
-     * table. Entries with the value -1 indicate chars not to be
-     * translated, while -2 indicates a search char without a
-     * corresponding replacement char under /d.
-     *
-     * Normally, the table has 256 slots. However, in the presence of
-     * /c, the search charlist has an implicit \x{100}-\x{7fffffff}
-     * added, and if there are enough replacement chars to start pairing
-     * with the \x{100},... search chars, then a larger (> 256) table
-     * is allocated.
-     *
-     * In addition, regardless of whether under /c, an extra slot at the
-     * end is used to store the final repeating char, or -3 under an empty
-     * replacement list, or -2 under /d; which makes the runtime code
-     * easier.
-     *
-     * The toker will have already expanded char ranges in t and r.
-     */
-
-    /* Initially allocate 257-slot table: 256 for basic (non /c) usage,
-     * plus final slot for repeat/-2/-3. Later we realloc if excess > * 0.
-     * The OPtrans_map struct already contains one slot; hence the -1.
-     */
-    struct_size = sizeof(OPtrans_map) + (256 - 1 + 1)*sizeof(short);
-    tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
-    tbl->size = 256;
+    tbl = (short*)PerlMemShared_calloc(
+	(o->op_private & OPpTRANS_COMPLEMENT) &&
+	    !(o->op_private & OPpTRANS_DELETE) ? 258 : 256,
+	sizeof(short));
     cPVOPo->op_pv = (char*)tbl;
-
     if (complement) {
-        Size_t excess;
-
-        /* in this branch, j is a count of 'consumed' (i.e. paired off
-         * with a search char) replacement chars (so j <= rlen always)
-         */
-	for (i = 0; i < tlen; i++)
-	    tbl->map[t[i]] = -1;
-
+	for (i = 0; i < (I32)tlen; i++)
+	    tbl[t[i]] = -1;
 	for (i = 0, j = 0; i < 256; i++) {
-	    if (!tbl->map[i]) {
-		if (j == rlen) {
+	    if (!tbl[i]) {
+		if (j >= (I32)rlen) {
 		    if (del)
-			tbl->map[i] = -2;
+			tbl[i] = -2;
 		    else if (rlen)
-			tbl->map[i] = r[j-1];
+			tbl[i] = r[j-1];
 		    else
-			tbl->map[i] = (short)i;
+			tbl[i] = (short)i;
 		}
 		else {
-		    tbl->map[i] = r[j++];
+		    if (UVCHR_IS_INVARIANT(i) && ! UVCHR_IS_INVARIANT(r[j]))
+			grows = 1;
+		    tbl[i] = r[j++];
 		}
-                if (   tbl->map[i] >= 0
-                    &&  UVCHR_IS_INVARIANT((UV)i)
-                    && !UVCHR_IS_INVARIANT((UV)(tbl->map[i]))
-                )
-                    grows = TRUE;
 	    }
 	}
-
-        ASSUME(j <= rlen);
-        excess = rlen - j;
-
-        if (excess) {
-            /* More replacement chars than search chars:
-             * store excess replacement chars at end of main table.
-             */
-
-            struct_size += excess;
-            tbl = (OPtrans_map*)PerlMemShared_realloc(tbl,
-                        struct_size + excess * sizeof(short));
-            tbl->size += excess;
-            cPVOPo->op_pv = (char*)tbl;
-
-            for (i = 0; i < excess; i++)
-                tbl->map[i + 256] = r[j+i];
-        }
-        else {
-            /* no more replacement chars than search chars */
-            if (!rlen && !del && !squash)
-                o->op_private |= OPpTRANS_IDENTICAL;
-        }
-
-        tbl->map[tbl->size] = del ? -2 : rlen ? r[rlen - 1] : -3;
+	if (!del) {
+	    if (!rlen) {
+		j = rlen;
+		if (!squash)
+		    o->op_private |= OPpTRANS_IDENTICAL;
+	    }
+	    else if (j >= (I32)rlen)
+		j = rlen - 1;
+	    else {
+		tbl = 
+		    (short *)
+		    PerlMemShared_realloc(tbl,
+					  (0x101+rlen-j) * sizeof(short));
+		cPVOPo->op_pv = (char*)tbl;
+	    }
+	    tbl[0x100] = (short)(rlen - j);
+	    for (i=0; i < (I32)rlen - j; i++)
+		tbl[0x101+i] = r[j+i];
+	}
     }
     else {
 	if (!rlen && !del) {
@@ -6710,29 +5578,25 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	else if (!squash && rlen == tlen && memEQ((char*)t, (char*)r, tlen)) {
 	    o->op_private |= OPpTRANS_IDENTICAL;
 	}
-
 	for (i = 0; i < 256; i++)
-	    tbl->map[i] = -1;
-	for (i = 0, j = 0; i < tlen; i++,j++) {
-	    if (j >= rlen) {
+	    tbl[i] = -1;
+	for (i = 0, j = 0; i < (I32)tlen; i++,j++) {
+	    if (j >= (I32)rlen) {
 		if (del) {
-		    if (tbl->map[t[i]] == -1)
-			tbl->map[t[i]] = -2;
+		    if (tbl[t[i]] == -1)
+			tbl[t[i]] = -2;
 		    continue;
 		}
 		--j;
 	    }
-	    if (tbl->map[t[i]] == -1) {
+	    if (tbl[t[i]] == -1) {
                 if (     UVCHR_IS_INVARIANT(t[i])
                     && ! UVCHR_IS_INVARIANT(r[j]))
-		    grows = TRUE;
-		tbl->map[t[i]] = r[j];
+		    grows = 1;
+		tbl[t[i]] = r[j];
 	    }
 	}
-        tbl->map[tbl->size] = del ? -1 : rlen ? -1 : -3;
     }
-
-    /* both non-utf8 and utf8 code paths end up here */
 
   warnins:
     if(del && rlen == tlen) {
@@ -6748,7 +5612,6 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     return o;
 }
-
 
 /*
 =for apidoc Am|OP *|newPMOP|I32 type|I32 flags
@@ -6950,17 +5813,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
 		scope->op_next = NULL; /* stop on last op */
 		op_null(scope);
 	    }
-
-            /* XXX optimize_optree() must be called on o before
-             * CALL_PEEP(), as currently S_maybe_multiconcat() can't
-             * currently cope with a peephole-optimised optree.
-             * Calling optimize_optree() here ensures that condition
-             * is met, but may mean optimize_optree() is applied
-             * to the same optree later (where hopefully it won't do any
-             * harm as it can't convert an op to multiconcat if it's
-             * already been converted */
-            optimize_optree(o);
-
 	    /* have to peep the DOs individually as we've removed it from
 	     * the op_next chain */
 	    CALL_PEEP(o);
@@ -7348,10 +6200,9 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 
 Constructs, checks, and returns an op of any type that involves an
 embedded C-level pointer (PV).  C<type> is the opcode.  C<flags> gives
-the eight bits of C<op_flags>.  C<pv> supplies the C-level pointer.
-Depending on the op type, the memory referenced by C<pv> may be freed
-when the op is destroyed.  If the op is of a freeing type, C<pv> must
-have been allocated using C<PerlMemShared_malloc>.
+the eight bits of C<op_flags>.  C<pv> supplies the C-level pointer, which
+must have been allocated using C<PerlMemShared_malloc>; the memory will
+be freed when the op is destroyed.
 
 =cut
 */
@@ -7705,24 +6556,11 @@ S_assignment_type(pTHX_ const OP *o)
     if (!o)
 	return TRUE;
 
-    if (o->op_type == OP_SREFGEN)
-    {
-	OP * const kid = cUNOPx(cUNOPo->op_first)->op_first;
-	type = kid->op_type;
-	flags = o->op_flags | kid->op_flags;
-	if (!(flags & OPf_PARENS)
-	  && (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV ||
-	      kid->op_type == OP_RV2HV || kid->op_type == OP_PADHV ))
-	    return ASSIGN_REF;
-	ret = ASSIGN_REF;
-    } else {
-	if ((o->op_type == OP_NULL) && (o->op_flags & OPf_KIDS))
-	    o = cUNOPo->op_first;
-	flags = o->op_flags;
-	type = o->op_type;
-	ret = 0;
-    }
+    if ((o->op_type == OP_NULL) && (o->op_flags & OPf_KIDS))
+	o = cUNOPo->op_first;
 
+    flags = o->op_flags;
+    type = o->op_type;
     if (type == OP_COND_EXPR) {
         OP * const sib = OpSIBLING(cLOGOPo->op_first);
         const I32 t = assignment_type(sib);
@@ -7734,6 +6572,19 @@ S_assignment_type(pTHX_ const OP *o)
 	    yyerror("Assignment to both a list and a scalar");
 	return FALSE;
     }
+
+    if (type == OP_SREFGEN)
+    {
+	OP * const kid = cUNOPx(cUNOPo->op_first)->op_first;
+	type = kid->op_type;
+	flags |= kid->op_flags;
+	if (!(flags & OPf_PARENS)
+	  && (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV ||
+	      kid->op_type == OP_RV2HV || kid->op_type == OP_PADHV ))
+	    return ASSIGN_REF;
+	ret = ASSIGN_REF;
+    }
+    else ret = 0;
 
     if (type == OP_LIST &&
 	(flags & OPf_WANT) == OPf_WANT_SCALAR &&
@@ -7755,33 +6606,6 @@ S_assignment_type(pTHX_ const OP *o)
     return ret;
 }
 
-static OP *
-S_newONCEOP(pTHX_ OP *initop, OP *padop)
-{
-    const PADOFFSET target = padop->op_targ;
-    OP *const other = newOP(OP_PADSV,
-			    padop->op_flags
-			    | ((padop->op_private & ~OPpLVAL_INTRO) << 8));
-    OP *const first = newOP(OP_NULL, 0);
-    OP *const nullop = newCONDOP(0, first, initop, other);
-    /* XXX targlex disabled for now; see ticket #124160
-	newCONDOP(0, first, S_maybe_targlex(aTHX_ initop), other);
-     */
-    OP *const condop = first->op_next;
-
-    OpTYPE_set(condop, OP_ONCE);
-    other->op_targ = target;
-    nullop->op_flags |= OPf_WANT_SCALAR;
-
-    /* Store the initializedness of state vars in a separate
-       pad entry.  */
-    condop->op_targ =
-      pad_add_name_pvn("$",1,padadd_NO_DUP_CHECK|padadd_STATE,0,0);
-    /* hijacking PADSTALE for uninitialized state variables */
-    SvPADSTALE_on(PAD_SVl(condop->op_targ));
-
-    return nullop;
-}
 
 /*
 =for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
@@ -7826,9 +6650,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     }
 
     if ((assign_type = assignment_type(left)) == ASSIGN_LIST) {
-	OP *state_var_op = NULL;
 	static const char no_list_state[] = "Initialization of state variables"
-	    " in list currently forbidden";
+	    " in list context currently forbidden";
 	OP *curop;
 
 	if (left->op_type == OP_ASLICE || left->op_type == OP_HSLICE)
@@ -7842,29 +6665,16 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
 	if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
 	{
-	    OP *lop = ((LISTOP*)left)->op_first, *vop, *eop;
-	    if (!(left->op_flags & OPf_PARENS) &&
-		    lop->op_type == OP_PUSHMARK &&
-		    (vop = OpSIBLING(lop)) &&
-		    (vop->op_type == OP_PADAV || vop->op_type == OP_PADHV) &&
-		    !(vop->op_flags & OPf_PARENS) &&
-		    (vop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) ==
-			(OPpLVAL_INTRO|OPpPAD_STATE) &&
-		    (eop = OpSIBLING(vop)) &&
-		    eop->op_type == OP_ENTERSUB &&
-		    !OpHAS_SIBLING(eop)) {
-		state_var_op = vop;
-	    } else {
-		while (lop) {
-		    if ((lop->op_type == OP_PADSV ||
-			 lop->op_type == OP_PADAV ||
-			 lop->op_type == OP_PADHV ||
-			 lop->op_type == OP_PADANY)
-		      && (lop->op_private & OPpPAD_STATE)
-		    )
-			yyerror(no_list_state);
-		    lop = OpSIBLING(lop);
-		}
+	    OP* lop = ((LISTOP*)left)->op_first;
+	    while (lop) {
+		if ((lop->op_type == OP_PADSV ||
+		     lop->op_type == OP_PADAV ||
+		     lop->op_type == OP_PADHV ||
+		     lop->op_type == OP_PADANY)
+		  && (lop->op_private & OPpPAD_STATE)
+                )
+                    yyerror(no_list_state);
+		lop = OpSIBLING(lop);
 	    }
 	}
 	else if (  (left->op_private & OPpLVAL_INTRO)
@@ -7884,10 +6694,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		   state (%a) = ...
 		   (state %a) = ...
 		*/
-                if (left->op_flags & OPf_PARENS)
-		    yyerror(no_list_state);
-		else
-		    state_var_op = left;
+		yyerror(no_list_state);
 	}
 
         /* optimise @a = split(...) into:
@@ -7979,9 +6786,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                 }
             }
 	}
-
-	if (state_var_op)
-	    o = S_newONCEOP(aTHX_ o, state_var_op);
 	return o;
     }
     if (assign_type == ASSIGN_REF)
@@ -9092,8 +7896,8 @@ S_looks_like_bool(pTHX_ const OP *o)
 =for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
 
 Constructs, checks, and returns an op tree expressing a C<given> block.
-C<cond> supplies the expression to whose value C<$_> will be locally
-aliased, and C<block> supplies the body of the C<given> construct; they
+C<cond> supplies the expression that will be locally assigned to a lexical
+variable, and C<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
 C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
 
@@ -9398,8 +8202,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     PERL_ARGS_ASSERT_NEWMYSUB;
 
-    PL_hints |= HINT_BLOCK_SCOPE;
-
     /* Find the pad slot for storing the new sub.
        We cannot use PL_comppad, as it is the pad owned by the new sub.  We
        need to look in CvOUTSIDE and find the pad belonging to the enclos-
@@ -9421,7 +8223,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     spot = (CV **)svspot;
 
     if (!(PL_parser && PL_parser->error_count))
-        move_proto_attr(&proto, &attrs, (GV *)PadnameSV(name), 0);
+        move_proto_attr(&proto, &attrs, (GV *)PadnameSV(name));
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -9728,85 +8530,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     return cv;
 }
 
-/*
-=for apidoc m|CV *|newATTRSUB_x|I32 floor|OP *o|OP *proto|OP *attrs|OP *block|bool o_is_gv
-
-Construct a Perl subroutine, also performing some surrounding jobs.
-
-This function is expected to be called in a Perl compilation context,
-and some aspects of the subroutine are taken from global variables
-associated with compilation.  In particular, C<PL_compcv> represents
-the subroutine that is currently being compiled.  It must be non-null
-when this function is called, and some aspects of the subroutine being
-constructed are taken from it.  The constructed subroutine may actually
-be a reuse of the C<PL_compcv> object, but will not necessarily be so.
-
-If C<block> is null then the subroutine will have no body, and for the
-time being it will be an error to call it.  This represents a forward
-subroutine declaration such as S<C<sub foo ($$);>>.  If C<block> is
-non-null then it provides the Perl code of the subroutine body, which
-will be executed when the subroutine is called.  This body includes
-any argument unwrapping code resulting from a subroutine signature or
-similar.  The pad use of the code must correspond to the pad attached
-to C<PL_compcv>.  The code is not expected to include a C<leavesub> or
-C<leavesublv> op; this function will add such an op.  C<block> is consumed
-by this function and will become part of the constructed subroutine.
-
-C<proto> specifies the subroutine's prototype, unless one is supplied
-as an attribute (see below).  If C<proto> is null, then the subroutine
-will not have a prototype.  If C<proto> is non-null, it must point to a
-C<const> op whose value is a string, and the subroutine will have that
-string as its prototype.  If a prototype is supplied as an attribute, the
-attribute takes precedence over C<proto>, but in that case C<proto> should
-preferably be null.  In any case, C<proto> is consumed by this function.
-
-C<attrs> supplies attributes to be applied the subroutine.  A handful of
-attributes take effect by built-in means, being applied to C<PL_compcv>
-immediately when seen.  Other attributes are collected up and attached
-to the subroutine by this route.  C<attrs> may be null to supply no
-attributes, or point to a C<const> op for a single attribute, or point
-to a C<list> op whose children apart from the C<pushmark> are C<const>
-ops for one or more attributes.  Each C<const> op must be a string,
-giving the attribute name optionally followed by parenthesised arguments,
-in the manner in which attributes appear in Perl source.  The attributes
-will be applied to the sub by this function.  C<attrs> is consumed by
-this function.
-
-If C<o_is_gv> is false and C<o> is null, then the subroutine will
-be anonymous.  If C<o_is_gv> is false and C<o> is non-null, then C<o>
-must point to a C<const> op, which will be consumed by this function,
-and its string value supplies a name for the subroutine.  The name may
-be qualified or unqualified, and if it is unqualified then a default
-stash will be selected in some manner.  If C<o_is_gv> is true, then C<o>
-doesn't point to an C<OP> at all, but is instead a cast pointer to a C<GV>
-by which the subroutine will be named.
-
-If there is already a subroutine of the specified name, then the new
-sub will either replace the existing one in the glob or be merged with
-the existing one.  A warning may be generated about redefinition.
-
-If the subroutine has one of a few special names, such as C<BEGIN> or
-C<END>, then it will be claimed by the appropriate queue for automatic
-running of phase-related subroutines.  In this case the relevant glob will
-be left not containing any subroutine, even if it did contain one before.
-In the case of C<BEGIN>, the subroutine will be executed and the reference
-to it disposed of before this function returns.
-
-The function returns a pointer to the constructed subroutine.  If the sub
-is anonymous then ownership of one counted reference to the subroutine
-is transferred to the caller.  If the sub is named then the caller does
-not get ownership of a reference.  In most such cases, where the sub
-has a non-phase name, the sub will be alive at the point it is returned
-by virtue of being contained in the glob that names it.  A phase-named
-subroutine will usually be alive by virtue of the reference owned by the
-phase's automatic run queue.  But a C<BEGIN> subroutine, having already
-been executed, will quite likely have been destroyed already by the
-time this function returns, making it erroneous for the caller to make
-any use of the returned pointer.  It is the caller's responsibility to
-ensure that it knows which of these situations applies.
-
-=cut
-*/
 
 /* _x = extended */
 CV *
@@ -9852,12 +8575,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	   Also, we may be called from load_module at run time, so
 	   PL_curstash (which sets CvSTASH) may not point to the stash the
 	   sub is stored in.  */
-	/* XXX This optimization is currently disabled for packages other
-	       than main, since there was too much CPAN breakage.  */
 	const I32 flags =
 	   ec ? GV_NOADD_NOINIT
-	      :   (IN_PERL_RUNTIME && PL_curstash != CopSTASH(PL_curcop))
-	       || PL_curstash != PL_defstash
+	      :   PL_curstash != CopSTASH(PL_curcop)
 	       || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
 		    ? gv_fetch_flags
 		    : GV_ADDMULTI | GV_NOINIT | GV_NOTQUAL;
@@ -9880,10 +8600,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (!ec) {
         if (isGV(gv)) {
-            move_proto_attr(&proto, &attrs, gv, 0);
+            move_proto_attr(&proto, &attrs, gv);
         } else {
             assert(cSVOPo);
-            move_proto_attr(&proto, &attrs, (GV *)cSVOPo->op_sv, 1);
+            move_proto_attr(&proto, &attrs, (GV *)cSVOPo->op_sv);
         }
     }
 
@@ -9912,7 +8632,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
 	PL_compcv = 0;
 	if (name && block) {
-	    const char *s = (char *) my_memrchr(name, ':', namlen);
+	    const char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
 		if (PL_in_eval & EVAL_KEEPERR)
@@ -10076,8 +8796,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		    NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		    const_sv
 		);
-		assert(cv);
-		assert(SvREFCNT((SV*)cv) != 0);
 		CvFLAGS(cv) |= CvMETHOD(PL_compcv);
 	    }
 	    else {
@@ -10176,12 +8894,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		SvROK_on(gv);
 	    }
 	    SvRV_set(gv, (SV *)cv);
-	    if (HvENAME_HEK(PL_curstash))
-		mro_method_changed_in(PL_curstash);
 	}
     }
-    assert(cv);
-    assert(SvREFCNT((SV*)cv) != 0);
 
     if (!CvHASGV(cv)) {
 	if (isGV(gv))
@@ -10270,15 +8984,12 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                     process_special_blocks(floor, name, gv, cv);
         }
     }
-    assert(cv);
 
   done:
-    assert(!cv || evanescent || SvREFCNT((SV*)cv) != 0);
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);
 
-    assert(!cv || evanescent || SvREFCNT((SV*)cv) != 0);
     if (!evanescent) {
 #ifdef PERL_DEBUG_READONLY_OPS
     if (slab)
@@ -10393,11 +9104,9 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 }
 
 /*
-=for apidoc Am|CV *|newCONSTSUB|HV *stash|const char *name|SV *sv
+=for apidoc newCONSTSUB
 
-Behaves like L</newCONSTSUB_flags>, except that C<name> is nul-terminated
-rather than of counted length, and no flags are set.  (This means that
-C<name> is always interpreted as Latin-1.)
+See L</newCONSTSUB_flags>.
 
 =cut
 */
@@ -10409,71 +9118,20 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 }
 
 /*
-=for apidoc Am|CV *|newCONSTSUB_flags|HV *stash|const char *name|STRLEN len|U32 flags|SV *sv
+=for apidoc newCONSTSUB_flags
 
-Construct a constant subroutine, also performing some surrounding
-jobs.  A scalar constant-valued subroutine is eligible for inlining
-at compile-time, and in Perl code can be created by S<C<sub FOO () {
-123 }>>.  Other kinds of constant subroutine have other treatment.
+Creates a constant sub equivalent to Perl S<C<sub FOO () { 123 }>> which is
+eligible for inlining at compile-time.
 
-The subroutine will have an empty prototype and will ignore any arguments
-when called.  Its constant behaviour is determined by C<sv>.  If C<sv>
-is null, the subroutine will yield an empty list.  If C<sv> points to a
-scalar, the subroutine will always yield that scalar.  If C<sv> points
-to an array, the subroutine will always yield a list of the elements of
-that array in list context, or the number of elements in the array in
-scalar context.  This function takes ownership of one counted reference
-to the scalar or array, and will arrange for the object to live as long
-as the subroutine does.  If C<sv> points to a scalar then the inlining
-assumes that the value of the scalar will never change, so the caller
-must ensure that the scalar is not subsequently written to.  If C<sv>
-points to an array then no such assumption is made, so it is ostensibly
-safe to mutate the array or its elements, but whether this is really
-supported has not been determined.
+Currently, the only useful value for C<flags> is C<SVf_UTF8>.
 
-The subroutine will have C<CvFILE> set according to C<PL_curcop>.
-Other aspects of the subroutine will be left in their default state.
-The caller is free to mutate the subroutine beyond its initial state
-after this function has returned.
+The newly created subroutine takes ownership of a reference to the passed in
+SV.
 
-If C<name> is null then the subroutine will be anonymous, with its
-C<CvGV> referring to an C<__ANON__> glob.  If C<name> is non-null then the
-subroutine will be named accordingly, referenced by the appropriate glob.
-C<name> is a string of length C<len> bytes giving a sigilless symbol
-name, in UTF-8 if C<flags> has the C<SVf_UTF8> bit set and in Latin-1
-otherwise.  The name may be either qualified or unqualified.  If the
-name is unqualified then it defaults to being in the stash specified by
-C<stash> if that is non-null, or to C<PL_curstash> if C<stash> is null.
-The symbol is always added to the stash if necessary, with C<GV_ADDMULTI>
-semantics.
-
-C<flags> should not have bits set other than C<SVf_UTF8>.
-
-If there is already a subroutine of the specified name, then the new sub
-will replace the existing one in the glob.  A warning may be generated
-about the redefinition.
-
-If the subroutine has one of a few special names, such as C<BEGIN> or
-C<END>, then it will be claimed by the appropriate queue for automatic
-running of phase-related subroutines.  In this case the relevant glob will
-be left not containing any subroutine, even if it did contain one before.
-Execution of the subroutine will likely be a no-op, unless C<sv> was
-a tied array or the caller modified the subroutine in some interesting
-way before it was executed.  In the case of C<BEGIN>, the treatment is
-buggy: the sub will be executed when only half built, and may be deleted
-prematurely, possibly causing a crash.
-
-The function returns a pointer to the constructed subroutine.  If the sub
-is anonymous then ownership of one counted reference to the subroutine
-is transferred to the caller.  If the sub is named then the caller does
-not get ownership of a reference.  In most such cases, where the sub
-has a non-phase name, the sub will be alive at the point it is returned
-by virtue of being contained in the glob that names it.  A phase-named
-subroutine will usually be alive by virtue of the reference owned by
-the phase's automatic run queue.  A C<BEGIN> subroutine may have been
-destroyed already by the time this function returns, but currently bugs
-occur in that case before the caller gets control.  It is the caller's
-responsibility to ensure that it knows which of these situations applies.
+Passing C<NULL> for SV creates a constant sub equivalent to S<C<sub BAR () {}>>,
+which won't be called if used as a destructor, but will suppress the overhead
+of a call to C<AUTOLOAD>.  (This form, however, isn't eligible for inlining at
+compile time.)
 
 =cut
 */
@@ -10520,8 +9178,6 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 			     : const_sv_xsub,
 			 file ? file : "", "",
 			 &sv, XS_DYNAMIC_FILENAME | flags);
-    assert(cv);
-    assert(SvREFCNT((SV*)cv) != 0);
     CvXSUBANY(cv).any_ptr = SvREFCNT_inc_simple(sv);
     CvCONST_on(cv);
 
@@ -10568,78 +9224,6 @@ Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
     );
 }
 
-/*
-=for apidoc m|CV *|newXS_len_flags|const char *name|STRLEN len|XSUBADDR_t subaddr|const char *const filename|const char *const proto|SV **const_svp|U32 flags
-
-Construct an XS subroutine, also performing some surrounding jobs.
-
-The subroutine will have the entry point C<subaddr>.  It will have
-the prototype specified by the nul-terminated string C<proto>, or
-no prototype if C<proto> is null.  The prototype string is copied;
-the caller can mutate the supplied string afterwards.  If C<filename>
-is non-null, it must be a nul-terminated filename, and the subroutine
-will have its C<CvFILE> set accordingly.  By default C<CvFILE> is set to
-point directly to the supplied string, which must be static.  If C<flags>
-has the C<XS_DYNAMIC_FILENAME> bit set, then a copy of the string will
-be taken instead.
-
-Other aspects of the subroutine will be left in their default state.
-If anything else needs to be done to the subroutine for it to function
-correctly, it is the caller's responsibility to do that after this
-function has constructed it.  However, beware of the subroutine
-potentially being destroyed before this function returns, as described
-below.
-
-If C<name> is null then the subroutine will be anonymous, with its
-C<CvGV> referring to an C<__ANON__> glob.  If C<name> is non-null then the
-subroutine will be named accordingly, referenced by the appropriate glob.
-C<name> is a string of length C<len> bytes giving a sigilless symbol name,
-in UTF-8 if C<flags> has the C<SVf_UTF8> bit set and in Latin-1 otherwise.
-The name may be either qualified or unqualified, with the stash defaulting
-in the same manner as for C<gv_fetchpvn_flags>.  C<flags> may contain
-flag bits understood by C<gv_fetchpvn_flags> with the same meaning as
-they have there, such as C<GV_ADDWARN>.  The symbol is always added to
-the stash if necessary, with C<GV_ADDMULTI> semantics.
-
-If there is already a subroutine of the specified name, then the new sub
-will replace the existing one in the glob.  A warning may be generated
-about the redefinition.  If the old subroutine was C<CvCONST> then the
-decision about whether to warn is influenced by an expectation about
-whether the new subroutine will become a constant of similar value.
-That expectation is determined by C<const_svp>.  (Note that the call to
-this function doesn't make the new subroutine C<CvCONST> in any case;
-that is left to the caller.)  If C<const_svp> is null then it indicates
-that the new subroutine will not become a constant.  If C<const_svp>
-is non-null then it indicates that the new subroutine will become a
-constant, and it points to an C<SV*> that provides the constant value
-that the subroutine will have.
-
-If the subroutine has one of a few special names, such as C<BEGIN> or
-C<END>, then it will be claimed by the appropriate queue for automatic
-running of phase-related subroutines.  In this case the relevant glob will
-be left not containing any subroutine, even if it did contain one before.
-In the case of C<BEGIN>, the subroutine will be executed and the reference
-to it disposed of before this function returns, and also before its
-prototype is set.  If a C<BEGIN> subroutine would not be sufficiently
-constructed by this function to be ready for execution then the caller
-must prevent this happening by giving the subroutine a different name.
-
-The function returns a pointer to the constructed subroutine.  If the sub
-is anonymous then ownership of one counted reference to the subroutine
-is transferred to the caller.  If the sub is named then the caller does
-not get ownership of a reference.  In most such cases, where the sub
-has a non-phase name, the sub will be alive at the point it is returned
-by virtue of being contained in the glob that names it.  A phase-named
-subroutine will usually be alive by virtue of the reference owned by the
-phase's automatic run queue.  But a C<BEGIN> subroutine, having already
-been executed, will quite likely have been destroyed already by the
-time this function returns, making it erroneous for the caller to make
-any use of the returned pointer.  It is the caller's responsibility to
-ensure that it knows which of these situations applies.
-
-=cut
-*/
-
 CV *
 Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 			   XSUBADDR_t subaddr, const char *const filename,
@@ -10648,7 +9232,6 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 {
     CV *cv;
     bool interleave = FALSE;
-    bool evanescent = FALSE;
 
     PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS;
 
@@ -10693,8 +9276,6 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                     gv_method_changed(gv); /* newXS */
             }
         }
-	assert(cv);
-	assert(SvREFCNT((SV*)cv) != 0);
 
         CvGV_set(cv, gv);
         if(filename) {
@@ -10722,17 +9303,14 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 #endif
 
         if (name)
-            evanescent = process_special_blocks(0, name, gv, cv);
+            process_special_blocks(0, name, gv, cv);
         else
             CvANON_on(cv);
     } /* <- not a conditional branch */
 
-    assert(cv);
-    assert(evanescent || SvREFCNT((SV*)cv) != 0);
 
-    if (!evanescent) sv_setpv(MUTABLE_SV(cv), proto);
+    sv_setpv(MUTABLE_SV(cv), proto);
     if (interleave) LEAVE;
-    assert(evanescent || SvREFCNT((SV*)cv) != 0);
     return cv;
 }
 
@@ -10890,8 +9468,6 @@ Perl_oopsHV(pTHX_ OP *o)
     case OP_RV2SV:
     case OP_RV2AV:
         OpTYPE_set(o, OP_RV2HV);
-        /* rv2hv steals the bottom bit for its own uses */
-        o->op_private &= ~OPpARG1_MASK;
 	ref(o, OP_RV2HV);
 	break;
 
@@ -11060,6 +9636,12 @@ Perl_ck_bitop(pTHX_ OP *o)
 
     o->op_private = (U8)(PL_hints & HINT_INTEGER);
 
+    if (o->op_type == OP_NBIT_OR     || o->op_type == OP_SBIT_OR
+     || o->op_type == OP_NBIT_XOR    || o->op_type == OP_SBIT_XOR
+     || o->op_type == OP_NBIT_AND    || o->op_type == OP_SBIT_AND
+     || o->op_type == OP_NCOMPLEMENT || o->op_type == OP_SCOMPLEMENT)
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__BITWISE),
+			      "The bitwise feature is experimental");
     if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
 	    && OP_IS_INFIX_BIT(o->op_type))
     {
@@ -11095,27 +9677,11 @@ is_dollar_bracket(pTHX_ const OP * const o)
 	&& strEQ(GvNAME(cGVOPx_gv(kid)), "[");
 }
 
-/* for lt, gt, le, ge, eq, ne and their i_ variants */
-
 OP *
 Perl_ck_cmp(pTHX_ OP *o)
 {
-    bool is_eq;
-    bool neg;
-    bool reverse;
-    bool iv0;
-    OP *indexop, *constop, *start;
-    SV *sv;
-    IV iv;
-
     PERL_ARGS_ASSERT_CK_CMP;
-
-    is_eq = (   o->op_type == OP_EQ
-             || o->op_type == OP_NE
-             || o->op_type == OP_I_EQ
-             || o->op_type == OP_I_NE);
-
-    if (!is_eq && ckWARN(WARN_SYNTAX)) {
+    if (ckWARN(WARN_SYNTAX)) {
 	const OP *kid = cUNOPo->op_first;
 	if (kid &&
             (
@@ -11130,86 +9696,8 @@ Perl_ck_cmp(pTHX_ OP *o)
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"$[ used in %s (did you mean $] ?)", OP_DESC(o));
     }
-
-    /* convert (index(...) == -1) and variations into
-     *   (r)index/BOOL(,NEG)
-     */
-
-    reverse = FALSE;
-
-    indexop = cUNOPo->op_first;
-    constop = OpSIBLING(indexop);
-    start = NULL;
-    if (indexop->op_type == OP_CONST) {
-        constop = indexop;
-        indexop = OpSIBLING(constop);
-        start = constop;
-        reverse = TRUE;
-    }
-
-    if (indexop->op_type != OP_INDEX && indexop->op_type != OP_RINDEX)
-        return o;
-
-    /* ($lex = index(....)) == -1 */
-    if (indexop->op_private & OPpTARGET_MY)
-        return o;
-
-    if (constop->op_type != OP_CONST)
-        return o;
-
-    sv = cSVOPx_sv(constop);
-    if (!(sv && SvIOK_notUV(sv)))
-        return o;
-
-    iv = SvIVX(sv);
-    if (iv != -1 && iv != 0)
-        return o;
-    iv0 = (iv == 0);
-
-    if (o->op_type == OP_LT || o->op_type == OP_I_LT) {
-        if (!(iv0 ^ reverse))
-            return o;
-        neg = iv0;
-    }
-    else if (o->op_type == OP_LE || o->op_type == OP_I_LE) {
-        if (iv0 ^ reverse)
-            return o;
-        neg = !iv0;
-    }
-    else if (o->op_type == OP_GE || o->op_type == OP_I_GE) {
-        if (!(iv0 ^ reverse))
-            return o;
-        neg = !iv0;
-    }
-    else if (o->op_type == OP_GT || o->op_type == OP_I_GT) {
-        if (iv0 ^ reverse)
-            return o;
-        neg = iv0;
-    }
-    else if (o->op_type == OP_EQ || o->op_type == OP_I_EQ) {
-        if (iv0)
-            return o;
-        neg = TRUE;
-    }
-    else {
-        assert(o->op_type == OP_NE || o->op_type == OP_I_NE);
-        if (iv0)
-            return o;
-        neg = FALSE;
-    }
-
-    indexop->op_flags &= ~OPf_PARENS;
-    indexop->op_flags |= (o->op_flags & OPf_PARENS);
-    indexop->op_private |= OPpTRUEBOOL;
-    if (neg)
-        indexop->op_private |= OPpINDEX_BOOLNEG;
-    /* cut out the index op and free the eq,const ops */
-    (void)op_sibling_splice(o, start, 1, NULL);
-    op_free(o);
-
-    return indexop;
+    return o;
 }
-
 
 OP *
 Perl_ck_concat(pTHX_ OP *o)
@@ -11219,13 +9707,9 @@ Perl_ck_concat(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_CONCAT;
     PERL_UNUSED_CONTEXT;
 
-    /* reuse the padtmp returned by the concat child */
     if (kid->op_type == OP_CONCAT && !(kid->op_private & OPpTARGET_MY) &&
 	    !(kUNOP->op_first->op_flags & OPf_MOD))
-    {
         o->op_flags |= OPf_STACKED;
-        o->op_private |= OPpCONCAT_NESTED;
-    }
     return o;
 }
 
@@ -11290,11 +9774,11 @@ Perl_ck_delete(pTHX_ OP *o)
 	case OP_HELEM:
 	    break;
 	case OP_KVASLICE:
-            o->op_flags |= OPf_SPECIAL;
-            /* FALLTHROUGH */
+	    Perl_croak(aTHX_ "delete argument is index/value array slice,"
+			     " use array slice");
 	case OP_KVHSLICE:
-            o->op_private |= OPpKVSLICE;
-            break;
+	    Perl_croak(aTHX_ "delete argument is key/value hash slice, use"
+			     " hash slice");
 	default:
 	    Perl_croak(aTHX_ "delete argument is not a HASH or ARRAY "
 			     "element or slice");
@@ -11326,7 +9810,6 @@ Perl_ck_eof(pTHX_ OP *o)
     }
     return o;
 }
-
 
 OP *
 Perl_ck_eval(pTHX_ OP *o)
@@ -11439,10 +9922,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_RVCONST;
-
-    if (o->op_type == OP_RV2HV)
-        /* rv2hv steals the bottom bit for its own uses */
-        o->op_private &= ~OPpARG1_MASK;
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
 
@@ -11947,9 +10426,7 @@ Perl_ck_index(pTHX_ OP *o)
 	if (kid && kid->op_type == OP_CONST) {
 	    const bool save_taint = TAINT_get;
 	    SV *sv = kSVOP->op_sv;
-	    if (   (!SvPOK(sv) || SvNIOKp(sv) || isREGEXP(sv))
-                && SvOK(sv) && !SvROK(sv))
-            {
+	    if ((!SvPOK(sv) || SvNIOKp(sv)) && SvOK(sv) && !SvROK(sv)) {
 		sv = newSV(0);
 		sv_copypv(sv, kSVOP->op_sv);
 		SvREFCNT_dec_NN(kSVOP->op_sv);
@@ -12149,12 +10626,34 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    )
 		&& (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
 		    == (OPpLVAL_INTRO|OPpPAD_STATE)) {
-	    return S_newONCEOP(aTHX_ o, kkid);
+	    const PADOFFSET target = kkid->op_targ;
+	    OP *const other = newOP(OP_PADSV,
+				    kkid->op_flags
+				    | ((kkid->op_private & ~OPpLVAL_INTRO) << 8));
+	    OP *const first = newOP(OP_NULL, 0);
+	    OP *const nullop =
+		newCONDOP(0, first, o, other);
+	    /* XXX targlex disabled for now; see ticket #124160
+		newCONDOP(0, first, S_maybe_targlex(aTHX_ o), other);
+	     */
+	    OP *const condop = first->op_next;
+
+            OpTYPE_set(condop, OP_ONCE);
+	    other->op_targ = target;
+	    nullop->op_flags |= OPf_WANT_SCALAR;
+
+	    /* Store the initializedness of state vars in a separate
+	       pad entry.  */
+	    condop->op_targ =
+	      pad_add_name_pvn("$",1,padadd_NO_DUP_CHECK|padadd_STATE,0,0);
+	    /* hijacking PADSTALE for uninitialized state variables */
+	    SvPADSTALE_on(PAD_SVl(condop->op_targ));
+
+	    return nullop;
 	}
     }
     return S_maybe_targlex(aTHX_ o);
 }
-
 
 OP *
 Perl_ck_match(pTHX_ OP *o)
@@ -12182,9 +10681,7 @@ Perl_ck_method(pTHX_ OP *o)
     sv = kSVOP->op_sv;
 
     /* replace ' with :: */
-    while ((compatptr = (char *) memchr(SvPVX(sv), '\'',
-                                        SvEND(sv) - SvPVX(sv) )))
-    {
+    while ((compatptr = strchr(SvPVX(sv), '\''))) {
         *compatptr = ':';
         sv_insert(sv, compatptr - SvPVX_const(sv), 0, ":", 1);
     }
@@ -12205,13 +10702,13 @@ Perl_ck_method(pTHX_ OP *o)
         return newMETHOP_named(OP_METHOD_NAMED, 0, methsv);
     }
 
-    if (memEQs(method, nsplit, "SUPER::")) { /* $proto->SUPER::method() */
+    if (nsplit == 7 && memEQ(method, "SUPER::", nsplit)) { /* $proto->SUPER::method() */
         op_free(o);
         return newMETHOP_named(OP_METHOD_SUPER, 0, methsv);
     }
 
     /* $proto->MyClass::method() and $proto->MyClass::SUPER::method() */
-    if (nsplit >= 9 && strBEGINs(method+nsplit-9, "::SUPER::")) {
+    if (nsplit >= 9 && strnEQ(method+nsplit-9, "::SUPER::", 9)) {
         rclass = newSVpvn_share(method, utf8*(nsplit-9), 0);
         new_op = newMETHOP_named(OP_METHOD_REDIR_SUPER, 0, methsv);
     } else {
@@ -12560,10 +11057,10 @@ Perl_ck_sort(pTHX_ OP *o)
 	    SV ** const svp = hv_fetchs(hinthv, "sort", FALSE);
 	    if (svp) {
 		const I32 sorthints = (I32)SvIV(*svp);
+		if ((sorthints & HINT_SORT_QUICKSORT) != 0)
+		    o->op_private |= OPpSORT_QSORT;
 		if ((sorthints & HINT_SORT_STABLE) != 0)
 		    o->op_private |= OPpSORT_STABLE;
-		if ((sorthints & HINT_SORT_UNSTABLE) != 0)
-		    o->op_private |= OPpSORT_UNSTABLE;
 	    }
     }
 
@@ -12631,7 +11128,7 @@ Perl_ck_sort(pTHX_ OP *o)
 }
 
 /* for sort { X } ..., where X is one of
- *   $a <=> $b, $b <=> $a, $a cmp $b, $b cmp $a
+ *   $a <=> $b, $b <= $a, $a cmp $b, $b cmp $a
  * elide the second child of the sort (the one containing X),
  * and set these flags as appropriate
 	OPpSORT_NUMERIC;
@@ -12991,18 +11488,11 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     }
     if (SvTYPE((SV*)cv) != SVt_PVCV)
 	return NULL;
-    if (flags & RV2CVOPCV_RETURN_NAME_GV) {
-	if ((!CvANON(cv) && !CvLEXICAL(cv)) || !gv)
+    if (flags & (RV2CVOPCV_RETURN_NAME_GV|RV2CVOPCV_MAYBE_NAME_GV)) {
+	if ((!CvANON(cv) || !gv) && !CvLEXICAL(cv)
+	 && ((flags & RV2CVOPCV_RETURN_NAME_GV) || !CvNAMED(cv)))
 	    gv = CvGV(cv);
 	return (CV*)gv;
-    }
-    else if (flags & RV2CVOPCV_MAYBE_NAME_GV) {
-	if (CvLEXICAL(cv) || CvNAMED(cv))
-	    return NULL;
-	if (!CvANON(cv) || !gv)
-	    gv = CvGV(cv);
-	return (CV*)gv;
-
     } else {
 	return cv;
     }
@@ -13176,7 +11666,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		switch (*proto++) {
 		    case '[':
 			if (contextclass++ == 0) {
-			    e = (char *) memchr(proto, ']', proto_end - proto);
+			    e = strchr(proto, ']');
 			    if (!e || e == proto)
 				goto oops;
 			}
@@ -13334,8 +11824,7 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop,
 OP *
 Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
-    IV cvflags = SvIVX(protosv);
-    int opnum = cvflags & 0xffff;
+    int opnum = SvTYPE(protosv) == SVt_PVCV ? 0 : (int)SvUV(protosv);
     OP *aop = cUNOPx(entersubop)->op_first;
 
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
@@ -13346,14 +11835,11 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    aop = cUNOPx(aop)->op_first;
 	aop = OpSIBLING(aop);
 	for (cvop = aop; OpSIBLING(cvop); cvop = OpSIBLING(cvop)) ;
-	if (aop != cvop) {
-	    SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
-	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
-		SVfARG(namesv)), SvUTF8(namesv));
-	}
+	if (aop != cvop)
+	    (void)too_many_arguments_pv(entersubop, GvNAME(namegv), 0);
 	
 	op_free(entersubop);
-	switch(cvflags >> 16) {
+	switch(GvNAME(namegv)[2]) {
 	case 'F': return newSVOP(OP_CONST, 0,
 					newSVpv(CopFILE(PL_curcop),0));
 	case 'L': return newSVOP(
@@ -13406,7 +11892,8 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
             op_sibling_splice(parent, first, -1, NULL);
 	op_free(entersubop);
 
-	if (cvflags == (OP_ENTEREVAL | (1<<16)))
+	if (opnum == OP_ENTEREVAL
+	 && GvNAMELEN(namegv)==9 && strnEQ(GvNAME(namegv), "evalbytes", 9))
 	    flags |= OPpEVAL_BYTES <<8;
 	
 	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
@@ -13416,9 +11903,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    return aop ? newUNOP(opnum,flags,aop) : newOP(opnum,flags);
 	case OA_BASEOP:
 	    if (aop) {
-		SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
-		yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
-		    SVfARG(namesv)), SvUTF8(namesv));
+		    (void)too_many_arguments_pv(aop, GvNAME(namegv), 0);
 		op_free(aop);
 	    }
 	    return opnum == OP_RUNCV
@@ -13433,101 +11918,70 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 }
 
 /*
-=for apidoc Am|void|cv_get_call_checker_flags|CV *cv|U32 gflags|Perl_call_checker *ckfun_p|SV **ckobj_p|U32 *ckflags_p
+=for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
 
 Retrieves the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
 subroutine call, not marked with C<&>, where the callee can be identified
 at compile time as C<cv>.
 
-The C-level function pointer is returned in C<*ckfun_p>, an SV argument
-for it is returned in C<*ckobj_p>, and control flags are returned in
-C<*ckflags_p>.  The function is intended to be called in this manner:
+The C-level function pointer is returned in C<*ckfun_p>, and an SV
+argument for it is returned in C<*ckobj_p>.  The function is intended
+to be called in this manner:
 
  entersubop = (*ckfun_p)(aTHX_ entersubop, namegv, (*ckobj_p));
 
 In this call, C<entersubop> is a pointer to the C<entersub> op,
-which may be replaced by the check function, and C<namegv> supplies
-the name that should be used by the check function to refer
+which may be replaced by the check function, and C<namegv> is a GV
+supplying the name that should be used by the check function to refer
 to the callee of the C<entersub> op if it needs to emit any diagnostics.
 It is permitted to apply the check function in non-standard situations,
 such as to a call to a different subroutine or to a method call.
 
-C<namegv> may not actually be a GV.  If the C<CALL_CHECKER_REQUIRE_GV>
-bit is clear in C<*ckflags_p>, it is permitted to pass a CV or other SV
-instead, anything that can be used as the first argument to L</cv_name>.
-If the C<CALL_CHECKER_REQUIRE_GV> bit is set in C<*ckflags_p> then the
-check function requires C<namegv> to be a genuine GV.
-
-By default, the check function is
+By default, the function is
 L<Perl_ck_entersub_args_proto_or_list|/ck_entersub_args_proto_or_list>,
-the SV parameter is C<cv> itself, and the C<CALL_CHECKER_REQUIRE_GV>
-flag is clear.  This implements standard prototype processing.  It can
-be changed, for a particular subroutine, by L</cv_set_call_checker_flags>.
-
-If the C<CALL_CHECKER_REQUIRE_GV> bit is set in C<gflags> then it
-indicates that the caller only knows about the genuine GV version of
-C<namegv>, and accordingly the corresponding bit will always be set in
-C<*ckflags_p>, regardless of the check function's recorded requirements.
-If the C<CALL_CHECKER_REQUIRE_GV> bit is clear in C<gflags> then it
-indicates the caller knows about the possibility of passing something
-other than a GV as C<namegv>, and accordingly the corresponding bit may
-be either set or clear in C<*ckflags_p>, indicating the check function's
-recorded requirements.
-
-C<gflags> is a bitset passed into C<cv_get_call_checker_flags>, in which
-only the C<CALL_CHECKER_REQUIRE_GV> bit currently has a defined meaning
-(for which see above).  All other bits should be clear.
-
-=for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
-
-The original form of L</cv_get_call_checker_flags>, which does not return
-checker flags.  When using a checker function returned by this function,
-it is only safe to call it with a genuine GV as its C<namegv> argument.
+and the SV parameter is C<cv> itself.  This implements standard
+prototype processing.  It can be changed, for a particular subroutine,
+by L</cv_set_call_checker>.
 
 =cut
 */
 
-void
-Perl_cv_get_call_checker_flags(pTHX_ CV *cv, U32 gflags,
-	Perl_call_checker *ckfun_p, SV **ckobj_p, U32 *ckflags_p)
+static void
+S_cv_get_call_checker(CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p,
+		      U8 *flagsp)
 {
     MAGIC *callmg;
-    PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER_FLAGS;
-    PERL_UNUSED_CONTEXT;
     callmg = SvMAGICAL((SV*)cv) ? mg_find((SV*)cv, PERL_MAGIC_checkcall) : NULL;
     if (callmg) {
 	*ckfun_p = DPTR2FPTR(Perl_call_checker, callmg->mg_ptr);
 	*ckobj_p = callmg->mg_obj;
-	*ckflags_p = (callmg->mg_flags | gflags) & MGf_REQUIRE_GV;
+	if (flagsp) *flagsp = callmg->mg_flags;
     } else {
 	*ckfun_p = Perl_ck_entersub_args_proto_or_list;
 	*ckobj_p = (SV*)cv;
-	*ckflags_p = gflags & MGf_REQUIRE_GV;
+	if (flagsp) *flagsp = 0;
     }
 }
 
 void
 Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 {
-    U32 ckflags;
     PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
     PERL_UNUSED_CONTEXT;
-    cv_get_call_checker_flags(cv, CALL_CHECKER_REQUIRE_GV, ckfun_p, ckobj_p,
-	&ckflags);
+    S_cv_get_call_checker(cv, ckfun_p, ckobj_p, NULL);
 }
 
 /*
-=for apidoc Am|void|cv_set_call_checker_flags|CV *cv|Perl_call_checker ckfun|SV *ckobj|U32 ckflags
+=for apidoc Am|void|cv_set_call_checker_flags|CV *cv|Perl_call_checker ckfun|SV *ckobj|U32 flags
 
 Sets the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
 subroutine call, not marked with C<&>, where the callee can be identified
 at compile time as C<cv>.
 
-The C-level function pointer is supplied in C<ckfun>, an SV argument for
-it is supplied in C<ckobj>, and control flags are supplied in C<ckflags>.
-The function should be defined like this:
+The C-level function pointer is supplied in C<ckfun>, and an SV argument
+for it is supplied in C<ckobj>.  The function should be defined like this:
 
     STATIC OP * ckfun(pTHX_ OP *op, GV *namegv, SV *ckobj)
 
@@ -13545,21 +11999,15 @@ such as to a call to a different subroutine or to a method call.
 C<namegv> may not actually be a GV.  For efficiency, perl may pass a
 CV or other SV instead.  Whatever is passed can be used as the first
 argument to L</cv_name>.  You can force perl to pass a GV by including
-C<CALL_CHECKER_REQUIRE_GV> in the C<ckflags>.
-
-C<ckflags> is a bitset, in which only the C<CALL_CHECKER_REQUIRE_GV>
-bit currently has a defined meaning (for which see above).  All other
-bits should be clear.
+C<CALL_CHECKER_REQUIRE_GV> in the C<flags>.
 
 The current setting for a particular CV can be retrieved by
-L</cv_get_call_checker_flags>.
+L</cv_get_call_checker>.
 
 =for apidoc Am|void|cv_set_call_checker|CV *cv|Perl_call_checker ckfun|SV *ckobj
 
 The original form of L</cv_set_call_checker_flags>, which passes it the
-C<CALL_CHECKER_REQUIRE_GV> flag for backward-compatibility.  The effect
-of that flag setting is that the check function is guaranteed to get a
-genuine GV as its C<namegv> argument.
+C<CALL_CHECKER_REQUIRE_GV> flag for backward-compatibility.
 
 =cut
 */
@@ -13573,7 +12021,7 @@ Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 
 void
 Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
-				     SV *ckobj, U32 ckflags)
+				     SV *ckobj, U32 flags)
 {
     PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER_FLAGS;
     if (ckfun == Perl_ck_entersub_args_proto_or_list && ckobj == (SV*)cv) {
@@ -13595,7 +12043,7 @@ Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
 	    callmg->mg_flags |= MGf_REFCOUNTED;
 	}
 	callmg->mg_flags = (callmg->mg_flags &~ MGf_REQUIRE_GV)
-			 | (U8)(ckflags & MGf_REQUIRE_GV) | MGf_COPY;
+			 | (U8)(flags & MGf_REQUIRE_GV) | MGf_COPY;
     }
 }
 
@@ -13676,8 +12124,8 @@ Perl_ck_subr(pTHX_ OP *o)
     } else {
 	Perl_call_checker ckfun;
 	SV *ckobj;
-	U32 ckflags;
-	cv_get_call_checker_flags(cv, 0, &ckfun, &ckobj, &ckflags);
+	U8 flags;
+	S_cv_get_call_checker(cv, &ckfun, &ckobj, &flags);
 	if (CvISXSUB(cv) || !CvROOT(cv))
 	    S_entersub_alloc_targ(aTHX_ o);
 	if (!namegv) {
@@ -13687,7 +12135,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	       the CV’s GV, unless this is an anonymous sub.  This is not
 	       ideal for lexical subs, as its stringification will include
 	       the package.  But it is the best we can do.  */
-	    if (ckflags & CALL_CHECKER_REQUIRE_GV) {
+	    if (flags & MGf_REQUIRE_GV) {
 		if (!CvANON(cv) && (!CvNAMED(cv) || CvNAME_HEK(cv)))
 		    namegv = CvGV(cv);
 	    }
@@ -13758,10 +12206,7 @@ Perl_ck_substr(pTHX_ OP *o)
 	if (kid->op_type == OP_NULL)
 	    kid = OpSIBLING(kid);
 	if (kid)
-	    /* Historically, substr(delete $foo{bar},...) has been allowed
-	       with 4-arg substr.  Keep it working by applying entersub
-	       lvalue context.  */
-	    op_lvalue(kid, OP_ENTERSUB);
+	    kid->op_flags |= OPf_MOD;
 
     }
     return o;
@@ -15041,67 +13486,18 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
 /* See if the ops following o are such that o will always be executed in
  * boolean context: that is, the SV which o pushes onto the stack will
- * only ever be consumed by later ops via SvTRUE(sv) or similar.
+ * only ever be used by later ops with SvTRUE(sv) or similar.
  * If so, set a suitable private flag on o. Normally this will be
- * bool_flag; but see below why maybe_flag is needed too.
- *
- * Typically the two flags you pass will be the generic OPpTRUEBOOL and
- * OPpMAYBE_TRUEBOOL, buts it's possible that for some ops those bits may
- * already be taken, so you'll have to give that op two different flags.
- *
- * More explanation of 'maybe_flag' and 'safe_and' parameters.
- * The binary logical ops &&, ||, // (plus 'if' and 'unless' which use
- * those underlying ops) short-circuit, which means that rather than
- * necessarily returning a truth value, they may return the LH argument,
- * which may not be boolean. For example in $x = (keys %h || -1), keys
- * should return a key count rather than a boolean, even though its
- * sort-of being used in boolean context.
- *
- * So we only consider such logical ops to provide boolean context to
- * their LH argument if they themselves are in void or boolean context.
- * However, sometimes the context isn't known until run-time. In this
- * case the op is marked with the maybe_flag flag it.
- *
- * Consider the following.
- *
- *     sub f { ....;  if (%h) { .... } }
- *
- * This is actually compiled as
- *
- *     sub f { ....;  %h && do { .... } }
- *
- * Here we won't know until runtime whether the final statement (and hence
- * the &&) is in void context and so is safe to return a boolean value.
- * So mark o with maybe_flag rather than the bool_flag.
- * Note that there is cost associated with determining context at runtime
- * (e.g. a call to block_gimme()), so it may not be worth setting (at
- * compile time) and testing (at runtime) maybe_flag if the scalar verses
- * boolean costs savings are marginal.
- *
- * However, we can do slightly better with && (compared to || and //):
- * this op only returns its LH argument when that argument is false. In
- * this case, as long as the op promises to return a false value which is
- * valid in both boolean and scalar contexts, we can mark an op consumed
- * by && with bool_flag rather than maybe_flag.
- * For example as long as pp_padhv and pp_rv2hv return &PL_sv_zero rather
- * than &PL_sv_no for a false result in boolean context, then it's safe. An
- * op which promises to handle this case is indicated by setting safe_and
- * to true.
+ * bool_flag; but if it's only possible to determine booleaness at run
+ * time (e.g. sub f { ....; (%h || $y) }), then set maybe_flag instead.
  */
 
 static void
-S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
+S_check_for_bool_cxt(pTHX_ OP*o, U8 bool_flag, U8 maybe_flag)
 {
     OP *lop;
-    U8 flag = 0;
 
     assert((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR);
-
-    /* OPpTARGET_MY and boolean context probably don't mix well.
-     * If someone finds a valid use case, maybe add an extra flag to this
-     * function which indicates its safe to do so for this op? */
-    assert(!(   (PL_opargs[o->op_type] & OA_TARGLEX)
-             && (o->op_private & OPpTARGET_MY)));
 
     lop = o->op_next;
 
@@ -15127,7 +13523,7 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
         case OP_XOR:
         case OP_COND_EXPR:
         case OP_GREPWHILE:
-            flag = bool_flag;
+            o->op_private |= bool_flag;
             lop = NULL;
             break;
 
@@ -15137,22 +13533,16 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
          * that whatever follows consumes the arg only in boolean context
          * too.
          */
-        case OP_AND:
-            if (safe_and) {
-                flag = bool_flag;
-                lop = NULL;
-                break;
-            }
-            /* FALLTHROUGH */
         case OP_OR:
         case OP_DOR:
+        case OP_AND:
             if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
-                flag = bool_flag;
+                o->op_private |= bool_flag;
                 lop = NULL;
             }
             else if (!(lop->op_flags & OPf_WANT)) {
                 /* unknown context - decide at runtime */
-                flag = maybe_flag;
+                o->op_private |= maybe_flag;
                 lop = NULL;
             }
             break;
@@ -15165,8 +13555,6 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
         if (lop)
             lop = lop->op_next;
     }
-
-    o->op_private |= flag;
 }
 
 
@@ -15898,54 +14286,15 @@ Perl_rpeep(pTHX_ OP *o)
             break;
         }
 
-	case OP_RV2AV:
-            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            break;
-
 	case OP_RV2HV:
 	case OP_PADHV:
-            /*'keys %h' in void or scalar context: skip the OP_KEYS
-             * and perform the functionality directly in the RV2HV/PADHV
-             * op
-             */
-            if (o->op_flags & OPf_REF) {
-                OP *k = o->op_next;
-                U8 want = (k->op_flags & OPf_WANT);
-                if (   k
-                    && k->op_type == OP_KEYS
-                    && (   want == OPf_WANT_VOID
-                        || want == OPf_WANT_SCALAR)
-                    && !(k->op_private & OPpMAYBE_LVSUB)
-                    && !(k->op_flags & OPf_MOD)
-                ) {
-                    o->op_next     = k->op_next;
-                    o->op_flags   &= ~(OPf_REF|OPf_WANT);
-                    o->op_flags   |= want;
-                    o->op_private |= (o->op_type == OP_PADHV ?
-                                      OPpPADHV_ISKEYS : OPpRV2HV_ISKEYS);
-                    /* for keys(%lex), hold onto the OP_KEYS's targ
-                     * since padhv doesn't have its own targ to return
-                     * an int with */
-                    if (!(o->op_type ==OP_PADHV && want == OPf_WANT_SCALAR))
-                        op_null(k);
-                }
-            }
-
             /* see if %h is used in boolean context */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
-
-
+                S_check_for_bool_cxt(aTHX_ o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             if (o->op_type != OP_PADHV)
                 break;
             /* FALLTHROUGH */
 	case OP_PADAV:
-            if (   o->op_type == OP_PADAV
-                && (o->op_flags & OPf_WANT) == OPf_WANT_SCALAR
-            )
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            /* FALLTHROUGH */
 	case OP_PADSV:
             /* Skip over state($x) in void context.  */
             if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)
@@ -16066,12 +14415,9 @@ Perl_rpeep(pTHX_ OP *o)
 	    o->op_opt = 1;
 	    break;
 	
-	case OP_GREPWHILE:
-            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            /* FALLTHROUGH */
 	case OP_COND_EXPR:
 	case OP_MAPWHILE:
+	case OP_GREPWHILE:
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
 	case OP_DORASSIGN:
@@ -16103,8 +14449,6 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_SUBST:
-            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
 	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
 	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
@@ -16438,31 +14782,8 @@ Perl_rpeep(pTHX_ OP *o)
                 o->op_private &=
                         ~(OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1);
 
-            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpASSIGN_TRUEBOOL, 0);
 	    break;
         }
-
-        case OP_REF:
-            /* see if ref() is used in boolean context */
-            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
-            break;
-
-        case OP_LENGTH:
-            /* see if the op is used in known boolean context,
-             * but not if OA_TARGLEX optimisation is enabled */
-            if (   (o->op_flags & OPf_WANT) == OPf_WANT_SCALAR
-                && !(o->op_private & OPpTARGET_MY)
-            )
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            break;
-
-        case OP_POS:
-            /* see if the op is used in known boolean context */
-            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
-                S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            break;
 
 	case OP_CUSTOM: {
 	    Perl_cpeep_t cpeep = 
@@ -16870,8 +15191,20 @@ C<opcode> specifies which type of op is to be affected.  C<new_checker>
 is a pointer to the C function that is to be added to that opcode's
 check chain, and C<old_checker_p> points to the storage location where a
 pointer to the next function in the chain will be stored.  The value of
-C<new_checker> is written into the L</PL_check> array, while the value
+C<new_pointer> is written into the L</PL_check> array, while the value
 previously stored there is written to C<*old_checker_p>.
+
+The function should be defined like this:
+
+    static OP *new_checker(pTHX_ OP *op) { ... }
+
+It is intended to be called in this manner:
+
+    new_checker(aTHX_ op)
+
+C<old_checker_p> should be defined like this:
+
+    static Perl_check_t old_checker_p;
 
 L</PL_check> is global to an entire process, and a module wishing to
 hook op checking may find itself invoked more than once per process,
@@ -16894,22 +15227,9 @@ decides not to do anything special with an op that it is given (which
 is the usual case for most uses of op check hooking), it must chain the
 check function referenced by C<*old_checker_p>.
 
-Taken all together, XS code to hook an op checker should typically look
-something like this:
-
-    static Perl_check_t nxck_frob;
-    static OP *myck_frob(pTHX_ OP *op) {
-	...
-	op = nxck_frob(aTHX_ op);
-	...
-	return op;
-    }
-    BOOT:
-	wrap_op_checker(OP_FROB, myck_frob, &nxck_frob);
-
 If you want to influence compilation of calls to a specific subroutine,
-then use L</cv_set_call_checker_flags> rather than hooking checking of
-all C<entersub> ops.
+then use L</cv_set_call_checker> rather than hooking checking of all
+C<entersub> ops.
 
 =cut
 */

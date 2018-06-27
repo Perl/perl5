@@ -20,13 +20,6 @@ our $z;
     is $a, 123;
 }
 
-eval "#line 8 foo\nsub t004 :method (\$a) { }";
-like $@, qr{syntax error at foo line 8}, "error when not enabled 1";
-
-eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
-like $@, qr{syntax error at foo line 8}, "error when not enabled 2";
-
-
 no warnings "experimental::signatures";
 use feature "signatures";
 
@@ -1102,21 +1095,17 @@ syntax error at foo line 8, near ", 123"
 EOF
 
 eval "#line 8 foo\nno warnings; sub t096 (\$a 123) { }";
-is $@, <<'EOF';
-Illegal operator following parameter in a subroutine signature at foo line 8, near "($a 123"
-syntax error at foo line 8, near "($a 123"
-EOF
+is $@, qq{syntax error at foo line 8, near "\$a 123"\n};
 
 eval "#line 8 foo\nsub t097 (\$a { }) { }";
-is $@, <<'EOF';
-Illegal operator following parameter in a subroutine signature at foo line 8, near "($a { }"
-syntax error at foo line 8, near "($a { }"
+is $@, <<EOF;
+syntax error at foo line 8, near "\$a { "
 EOF
 
 eval "#line 8 foo\nsub t098 (\$a; \$b) { }";
-is $@, <<'EOF';
-Illegal operator following parameter in a subroutine signature at foo line 8, near "($a; "
-syntax error at foo line 8, near "($a; "
+is $@, <<EOF;
+syntax error at foo line 8, at EOF
+syntax error at foo line 8, near "\$b) "
 EOF
 
 eval "#line 8 foo\nsub t099 (\$\$) { }";
@@ -1143,7 +1132,7 @@ is eval("\$t103->(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine 'main::__ANON__' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-my $t118 = sub :prototype($) ($a) { $a || "z" };
+my $t118 = sub ($a) :prototype($) { $a || "z" };
 is prototype($t118), "\$";
 is eval("\$t118->()"), undef;
 like $@, qr/\AToo few arguments for subroutine 'main::__ANON__' at \(eval \d+\) line 1\.\n\z/;
@@ -1209,7 +1198,7 @@ is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
 like $@, qr/\AToo many arguments for subroutine 'main::t132' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-sub t104 :method ($a) { $a || "z" }
+sub t104($a) :method { $a || "z" }
 is prototype(\&t104), undef;
 is eval("t104()"), undef;
 like $@, qr/\AToo few arguments for subroutine 'main::t104' at \(eval \d+\) line 1\.\n\z/;
@@ -1221,7 +1210,7 @@ is eval("t104(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine 'main::t104' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-sub t105 :prototype($) ($a) { $a || "z" }
+sub t105($a) :prototype($) { $a || "z" }
 is prototype(\&t105), "\$";
 is eval("t105()"), undef;
 like $@, qr/\ANot enough arguments for main::t105 /;
@@ -1233,7 +1222,7 @@ is eval("t105(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is $a, 123;
 
-sub t106 :prototype(@) ($a) { $a || "z" }
+sub t106($a) :prototype(@) { $a || "z" }
 is prototype(\&t106), "\@";
 is eval("t106()"), undef;
 like $@, qr/\AToo few arguments for subroutine 'main::t106' at \(eval \d+\) line 1\.\n\z/;
@@ -1245,10 +1234,10 @@ is eval("t106(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine 'main::t106' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-eval "#line 8 foo\nsub t107(\$a) :method { }";
+eval "#line 8 foo\nsub t107 :method (\$a) { }";
 isnt $@, "";
 
-eval "#line 8 foo\nsub t108 (\$a) :prototype(\$) { }";
+eval "#line 8 foo\nsub t108 :prototype(\$) (\$a) { }";
 isnt $@, "";
 
 sub t109 { }
@@ -1519,38 +1508,6 @@ while(<$kh>) {
         eval 'no warnings; sub ($x = ' . $word . ', $y) {}';
         isnt $@, "", "$word does not swallow trailing comma";
     }
-}
-
-# RT #132141
-# Attributes such as lvalue have to come *before* the signature to
-# ensure that they're applied to any code block within the signature
-
-{
-    my $x;
-    sub f :lvalue ($a = do { $x = "abc"; return substr($x,0,1)}) {
-        die; # notreached
-    }
-
-    f() = "X";
-    is $x, "Xbc", "RT #132141";
-}
-
-# RT #132760
-# attributes have been moved back before signatures for 5.28. Ensure that
-# code doing it the old wrong way get a meaningful error message.
-
-{
-    my @errs;
-    local $SIG{__WARN__} = sub { push @errs, @_};
-    eval q{
-        sub rt132760 ($a, $b) :prototype($$) { $a + $b }
-    };
-
-    @errs = split /\n/, $@;
-    is +@errs, 1, "RT 132760 expect 1 error";
-    like $errs[0],
-        qr/^Subroutine attributes must come before the signature at/,
-        "RT 132760 err 0";
 }
 
 done_testing;

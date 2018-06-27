@@ -62,10 +62,6 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq)],
     "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq)],
-    "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise)],
-    "5.29"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise)],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -371,7 +367,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.53';
+our $VERSION = '1.47';
 
 FEATURES
 
@@ -489,9 +485,8 @@ C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
 This feature is available starting with Perl 5.12; was almost fully
 implemented in Perl 5.14; and extended in Perl 5.16 to cover C<quotemeta>;
-was extended further in Perl 5.26 to cover L<the range
-operator|perlop/Range Operators>; and was extended again in Perl 5.28 to
-cover L<special-cased whitespace splitting|perlfunc/split>.
+and extended further in Perl 5.26 to cover L<the range
+operator|perlop/Range Operators>.
 
 =head2 The 'unicode_eval' and 'evalbytes' features
 
@@ -628,6 +623,13 @@ This feature is available from Perl 5.22 onwards.
 
 =head2 The 'bitwise' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::bitwise";
+
 This makes the four standard bitwise operators (C<& | ^ ~>) treat their
 operands consistently as numbers, and introduces four new dotted operators
 (C<&. |. ^. ~.>) that treat their operands consistently as strings.  The
@@ -635,10 +637,7 @@ same applies to the assignment variants (C<&= |= ^= &.= |.= ^.=>).
 
 See L<perlop/Bitwise String Operators> for details.
 
-This feature is available from Perl 5.22 onwards.  Starting in Perl 5.28,
-C<use v5.28> will enable the feature.  Before 5.28, it was still
-experimental and would emit a warning in the "experimental::bitwise"
-category.
+This feature is available from Perl 5.22 onwards.
 
 =head2 The 'declared_refs' feature
 
@@ -717,9 +716,6 @@ with the same effect.
 
 If the required version is older than Perl 5.10, the ":default" feature
 bundle is automatically loaded instead.
-
-Unlike C<use feature ":5.12">, saying C<use v5.12> (or any higher version)
-also does the equivalent of C<use strict>; see L<perlfunc/use> for details.
 
 =back
 

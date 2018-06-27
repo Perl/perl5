@@ -8,7 +8,7 @@ use CPAN::InfoObj;
 use File::Path ();
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.19";
+$VERSION = "2.18";
 
 # no prepare, because prepare is not a command on the shell command line
 # TODO: clear instance cache on reload
@@ -660,11 +660,8 @@ sub satisfy_requires {
     my ($self) = @_;
     $self->debug("Entering satisfy_requires") if $CPAN::DEBUG;
     if (my @prereq = $self->unsat_prereq("later")) {
-        if ($CPAN::DEBUG){
-            require Data::Dumper;
-            my $prereq = Data::Dumper->new(\@prereq)->Terse(1)->Indent(0)->Dump;
-            $self->debug("unsatisfied[$prereq]");
-        }
+        $self->debug("unsatisfied[@prereq]") if $CPAN::DEBUG;
+        $self->debug(@prereq) if $CPAN::DEBUG && @prereq;
         if ($prereq[0][0] eq "perl") {
             my $need = "requires perl '$prereq[0][1]'";
             my $id = $self->pretty_id;
@@ -1720,10 +1717,13 @@ sub isa_perl {
   my($self) = @_;
   my $file = File::Basename::basename($self->id);
   if ($file =~ m{ ^ perl
+                  -?
+                  (5)
+                  ([._-])
                   (
-                   -5\.\d+\.\d+
+                   \d{3}(_[0-4][0-9])?
                    |
-                   5[._-]00[0-5](_[0-4][0-9])?
+                   \d+\.\d+
                   )
                   \.tar[._-](?:gz|bz2)
                   (?!\n)\Z
@@ -1982,12 +1982,7 @@ sub prepare {
                 }
             }
             elsif ( $self->_should_report('pl') ) {
-                ($output, $ret) = eval { CPAN::Reporter::record_command($system) };
-                if (! defined $output or $@) {
-                    my $err = $@ || "Unknown error";
-                    $CPAN::Frontend->mywarn("Error while running PL phase: $err");
-                    return $self->goodbye("$system -- NOT OK");
-                }
+                ($output, $ret) = CPAN::Reporter::record_command($system);
                 CPAN::Reporter::grade_PL( $self, $system, $output, $ret );
             }
             else {
@@ -2089,7 +2084,7 @@ is part of the perl-%s distribution. To install that, you need to run
                              $self->called_for,
                              $self->isa_perl,
                              $self->called_for,
-                             $self->pretty_id,
+                             $self->id,
                             ));
             $self->{make} = CPAN::Distrostatus->new("NO isa perl");
             $CPAN::Frontend->mysleep(1);
@@ -2615,19 +2610,9 @@ sub _make_install_make_command {
 sub is_locally_optional {
     my($self, $prereq_pm, $prereq) = @_;
     $prereq_pm ||= $self->{prereq_pm};
-    my($nmo,$opt);
-    for my $rt (qw(requires build_requires)) {
-        if (exists $prereq_pm->{$rt}{$prereq}) {
-            # rt 121914
-            $nmo ||= $CPAN::META->instance("CPAN::Module",$prereq);
-            my $av = $nmo->available_version;
-            return 0 if !$av || CPAN::Version->vlt($av,$prereq_pm->{$rt}{$prereq});
-        }
-        if (exists $prereq_pm->{"opt_$rt"}{$prereq}) {
-            $opt = 1;
-        }
-    }
-    return $opt||0;
+    exists $prereq_pm->{opt_requires}{$prereq}
+        ||
+            exists $prereq_pm->{opt_build_requires}{$prereq};
 }
 
 #-> sub CPAN::Distribution::follow_prereqs ;
@@ -2776,29 +2761,8 @@ sub _feature_depends {
 sub prereqs_for_slot {
     my($self,$slot) = @_;
     my($prereq_pm);
-    unless ($CPAN::META->has_usable("CPAN::Meta::Requirements")) {
-        my $whynot = "not available";
-        if (defined $CPAN::Meta::Requirements::VERSION) {
-            $whynot = "version $CPAN::Meta::Requirements::VERSION not sufficient";
-        }
-        $CPAN::Frontend->mywarn("CPAN::Meta::Requirements $whynot\n");
-        my $before = "";
-        if ($self->{CALLED_FOR}){
-            if ($self->{CALLED_FOR} =~
-                /^(
-                     CPAN::Meta::Requirements
-                 |version
-                 |parent
-                 |ExtUtils::MakeMaker
-                 |Test::Harness
-                 )$/x) {
-                $CPAN::Frontend->mywarn("Setting requirements to nil as a workaround\n");
-                return;
-            }
-            $before = " before $self->{CALLED_FOR}";
-        }
-        $CPAN::Frontend->mydie("Please install CPAN::Meta::Requirements manually$before");
-    }
+    $CPAN::META->has_usable("CPAN::Meta::Requirements")
+        or die "CPAN::Meta::Requirements not available";
     my $merged = CPAN::Meta::Requirements->new;
     my $prefs_depends = $self->prefs->{depends}||{};
     my $feature_depends = $self->_feature_depends();
@@ -2861,10 +2825,8 @@ sub unsat_prereq {
     my($self,$slot) = @_;
     my($merged_hash,$prereq_pm) = $self->prereqs_for_slot($slot);
     my(@need);
-    unless ($CPAN::META->has_usable("CPAN::Meta::Requirements")) {
-        $CPAN::Frontend->mywarn("CPAN::Meta::Requirements not available, please install as soon as possible, trying to continue with severly limited capabilities\n");
-        return;
-    }
+    $CPAN::META->has_usable("CPAN::Meta::Requirements")
+        or die "CPAN::Meta::Requirements not available";
     my $merged = CPAN::Meta::Requirements->from_string_hash($merged_hash);
     my @merged = sort $merged->required_modules;
     CPAN->debug("all merged_prereqs[@merged]") if $CPAN::DEBUG;
@@ -3085,10 +3047,6 @@ sub unsat_prereq {
         }
         # here need to flag as optional for recommends/suggests
         # -- xdg, 2012-04-01
-        $self->debug(sprintf "%s manadory?[%s]",
-                     $self->pretty_id,
-                     $self->{mandatory})
-            if $CPAN::DEBUG;
         my $optional = !$self->{mandatory}
             || $self->is_locally_optional($prereq_pm, $need_module);
         push @need, [$need_module,$needed_as,$optional];
@@ -4007,15 +3965,7 @@ sub install {
     local $ENV{PERL_MM_USE_DEFAULT} = 1 if $CPAN::Config->{use_prompt_default};
     local $ENV{NONINTERACTIVE_TESTING} = 1 if $CPAN::Config->{use_prompt_default};
 
-    my($pipe) = FileHandle->new("$system $stderr |");
-    unless ($pipe) {
-        $CPAN::Frontend->mywarn("Can't execute $system: $!");
-        $self->introduce_myself;
-        $self->{install} = CPAN::Distrostatus->new("NO");
-        $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
-        delete $self->{force_update};
-        return;
-    }
+    my($pipe) = FileHandle->new("$system $stderr |") || Carp::croak("Can't execute $system: $!");
     my($makeout) = "";
     while (<$pipe>) {
         print $_; # intentionally NOT use Frontend->myprint because it
@@ -4030,8 +3980,7 @@ sub install {
         $CPAN::Frontend->myprint("  $system -- OK\n");
         $CPAN::META->is_installed($self->{build_dir});
         $self->{install} = CPAN::Distrostatus->new("YES");
-        if ($CPAN::Config->{'cleanup_after_install'}
-            && ! $self->is_dot_dist) {
+        if ($CPAN::Config->{'cleanup_after_install'}) {
             my $parent = File::Spec->catdir( $self->{build_dir}, File::Spec->updir );
             chdir $parent or $CPAN::Frontend->mydie("Couldn't chdir to $parent: $!\n");
             File::Path::rmtree($self->{build_dir});

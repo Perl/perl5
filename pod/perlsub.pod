@@ -15,25 +15,20 @@ X<subroutine, declaration> X<sub>
 
     sub NAME BLOCK		  # A declaration and a definition.
     sub NAME(PROTO) BLOCK	  #  ditto, but with prototypes
+    sub NAME(SIG) BLOCK           #  with a signature instead
     sub NAME : ATTRS BLOCK	  #  with attributes
     sub NAME(PROTO) : ATTRS BLOCK #  with prototypes and attributes
-
-    use feature 'signatures';
-    sub NAME(SIG) BLOCK                    # with signature
-    sub NAME :ATTRS (SIG) BLOCK            # with signature, attributes
-    sub NAME :prototype(PROTO) (SIG) BLOCK # with signature, prototype
+    sub NAME(SIG) : ATTRS BLOCK   #  with a signature and attributes
 
 To define an anonymous subroutine at runtime:
 X<subroutine, anonymous>
 
     $subref = sub BLOCK;		 # no proto
     $subref = sub (PROTO) BLOCK;	 # with proto
+    $subref = sub (SIG) BLOCK;           # with signature
     $subref = sub : ATTRS BLOCK;	 # with attributes
     $subref = sub (PROTO) : ATTRS BLOCK; # with proto and attributes
-
-    use feature 'signatures';
-    $subref = sub (SIG) BLOCK;           # with signature
-    $subref = sub : ATTRS(SIG) BLOCK;    # with signature, attributes
+    $subref = sub (SIG) : ATTRS BLOCK;   # with signature and attributes
 
 To import subroutines:
 X<import>
@@ -322,15 +317,10 @@ a warning unless the "experimental::signatures" warnings category is
 disabled.
 
 The signature is part of a subroutine's body.  Normally the body of a
-subroutine is simply a braced block of code, but when using a signature,
-the signature is a parenthesised list that goes immediately before the
-block, after any name or attributes.
-
-For example,
-
-    sub foo :lvalue ($a, $b = 1, @c) { .... }
-
-The signature declares lexical variables that are
+subroutine is simply a braced block of code.  When using a signature,
+the signature is a parenthesised list that goes immediately after
+the subroutine name (or, for anonymous subroutines, immediately after
+the C<sub> keyword).  The signature declares lexical variables that are
 in scope for the block.  When the subroutine is called, the signature
 takes control first.  It populates the signature variables from the
 list of arguments that were passed.  If the argument list doesn't meet
@@ -500,13 +490,12 @@ a signature.  They do different jobs: the prototype affects compilation
 of calls to the subroutine, and the signature puts argument values into
 lexical variables at runtime.  You can therefore write
 
-    sub foo :prototype($$) ($left, $right) {
+    sub foo ($left, $right) : prototype($$) {
 	return $left + $right;
     }
 
-The prototype attribute, and any other attributes, must come before
-the signature.  The signature always immediately precedes the block of
-the subroutine's body.
+The prototype attribute, and any other attributes, come after 
+the signature.
 
 =head2 Private Variables via my()
 X<my> X<variable, lexical> X<lexical> X<lexical variable> X<scope, lexical>
@@ -747,11 +736,10 @@ And this example uses anonymous subroutines to create separate counters:
 Also, since C<$x> is lexical, it can't be reached or modified by any Perl
 code outside.
 
-When combined with variable declaration, simple assignment to C<state>
+When combined with variable declaration, simple scalar assignment to C<state>
 variables (as in C<state $x = 42>) is executed only the first time.  When such
 statements are evaluated subsequent times, the assignment is ignored.  The
-behavior of assignment to C<state> declarations where the left hand side
-of the assignment involves any parentheses is currently undefined.
+behavior of this sort of assignment to non-scalar variables is undefined.
 
 =head3 Persistent variables with closures
 
@@ -1085,45 +1073,24 @@ declared, and only after that declaration:
     no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
-    foo();              # calls the package/global subroutine
+    foo();		# calls the package/global subroutine
     state sub foo {
-        foo();          # also calls the package subroutine
+	foo();		# also calls the package subroutine
     }
-    foo();              # calls "state" sub
-    my $ref = \&foo;    # take a reference to "state" sub
+    foo();		# calls "state" sub
+    my $ref = \&foo;	# take a reference to "state" sub
 
     my sub bar { ... }
-    bar();              # calls "my" sub
+    bar();		# calls "my" sub
 
-You can't (directly) write a recursive lexical subroutine:
+To use a lexical subroutine from inside the subroutine itself, you must
+predeclare it.  The C<sub foo {...}> subroutine definition syntax respects
+any previous C<my sub;> or C<state sub;> declaration.
 
-    # WRONG
-    my sub baz {
-        baz();
+    my sub baz;		# predeclaration
+    sub baz {		# define the "my" sub
+	baz();		# recursive call
     }
-
-This example fails because C<baz()> refers to the package/global subroutine
-C<baz>, not the lexical subroutine currently being defined.
-
-The solution is to use L<C<__SUB__>|perlfunc/__SUB__>:
-
-    my sub baz {
-        __SUB__->();    # calls itself
-    }
-
-It is possible to predeclare a lexical subroutine.  The C<sub foo {...}>
-subroutine definition syntax respects any previous C<my sub;> or C<state sub;>
-declaration.  Using this to define recursive subroutines is a bad idea,
-however:
-
-    my sub baz;         # predeclaration
-    sub baz {           # define the "my" sub
-        baz();          # WRONG: calls itself, but leaks memory
-    }
-
-Just like C<< my $f; $f = sub { $f->() } >>, this example leaks memory.  The
-name C<baz> is a reference to the subroutine, and the subroutine uses the name
-C<baz>; they keep each other alive (see L<perlref/Circular References>).
 
 =head3 C<state sub> vs C<my sub>
 

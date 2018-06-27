@@ -21,7 +21,6 @@
          "dist/Carp",
          "dist/constant",
          "dist/Data-Dumper",
-         "dist/Devel-PPPort",
          "dist/Devel-SelfStubber",
          "dist/Dumpvalue",
          "dist/encoding-warnings",
@@ -114,7 +113,7 @@
          "vxs.inc"
       ]
    },
-   "release_status" : "unstable",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://rt.perl.org/"
@@ -127,6 +126,6 @@
          "url" : "http://perl5.git.perl.org/"
       }
    },
-   "version" : "5.029000",
-   "x_serialization_backend" : "JSON::PP version 2.97001"
+   "version" : "5.026002",
+   "x_serialization_backend" : "JSON::PP version 2.27400_02"
 }

@@ -158,26 +158,12 @@ C<&PL_sv_no>.
 This is the C<true> SV.  See C<L</PL_sv_no>>.  Always refer to this as
 C<&PL_sv_yes>.
 
-=for apidoc Amn|SV|PL_sv_zero
-This readonly SV has a zero numeric value and a C<"0"> string value. It's
-similar to C<L</PL_sv_no>> except for its string value. Can be used as a
-cheap alternative to C<mXPUSHi(0)> for example.  Always refer to this as
-C<&PL_sv_zero>. Introduced in 5.28.
-
 =cut
 */
 
-#ifdef MULTIPLICITY
-PERLVAR(I, sv_yes,	SV)
 PERLVAR(I, sv_undef,	SV)
 PERLVAR(I, sv_no,	SV)
-PERLVAR(I, sv_zero,	SV)
-#else
-/* store the immortals as an array to ensure they are contiguous in
- * memory: makes SvIMMORTAL_INTERP(sv) possible */
-PERLVARA(I, sv_immortals, 4, SV)
-#endif
-
+PERLVAR(I, sv_yes,	SV)
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
 PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */
@@ -202,6 +188,7 @@ PERLVAR(I, na,		STRLEN)		/* for use in SvPV when length is
 					   Not Applicable */
 
 /* stat stuff */
+PERLVAR(I, statbuf,	Stat_t)
 PERLVAR(I, statcache,	Stat_t)		/* _ */
 PERLVAR(I, statgv,	GV *)
 PERLVARI(I, statname,	SV *,	NULL)
@@ -262,11 +249,6 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
-#if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
-PERLVARI(I, lc_numeric_mutex_depth, int, 0)   /* Emulate general semaphore */
-#endif
-PERLVARA(I, locale_utf8ness, 256, char)
-
 #ifdef USE_LOCALE_CTYPE
     PERLVAR(I, warn_locale, SV *)
 #endif
@@ -461,6 +443,8 @@ PERLVARI(I, curcopdb,	COP *,	NULL)
 PERLVAR(I, filemode,	int)		/* so nextargv() can preserve mode */
 PERLVAR(I, lastfd,	int)		/* what to preserve mode on */
 PERLVAR(I, oldname,	char *)		/* what to preserve mode on */
+PERLVAR(I, Argv,	const char **)	/* stuff to free from do_aexec, vfork safe */
+PERLVAR(I, Cmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 /* Elements in this array have ';' appended and are injected as a single line
    into the tokeniser. You can't put any (literal) newlines into any program
    you stuff in into this array, as the point where it's injected is expecting
@@ -560,7 +544,7 @@ PERLVAR(I, sighandlerp,	Sighandler_t)
 
 PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
-PERLVAR(I, debug,	volatile U32)	/* flags given to -D switch */
+PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
 
 PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
@@ -578,15 +562,7 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
-#if defined(USE_POSIX_2008_LOCALE)          \
- && defined(USE_THREAD_SAFE_LOCALE)         \
- && ! defined(HAS_QUERYLOCALE)
-
-PERLVARA(I, curlocales, 12, char *)
-
-#endif
 #ifdef USE_LOCALE_COLLATE
-
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
 PERLVARI(I, collxfrm_mult,Size_t, 2)	/* Expansion factor in *xfrm() */
@@ -598,11 +574,6 @@ PERLVARI(I, strxfrm_max_cp, U8, 0)      /* Highest collating cp in locale */
 PERLVARI(I, collation_standard, bool, TRUE)
 					/* Assume simple collation */
 #endif /* USE_LOCALE_COLLATE */
-
-PERLVARI(I, langinfo_buf, char *, NULL)
-PERLVARI(I, langinfo_bufsize, Size_t, 0)
-PERLVARI(I, setlocale_buf, char *, NULL)
-PERLVARI(I, setlocale_bufsize, Size_t, 0)
 
 #ifdef PERL_SAWAMPERSAND
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */
@@ -626,25 +597,40 @@ PERLVARI(I, perl_destruct_level, signed char,	0)
 #ifdef USE_LOCALE_NUMERIC
 
 PERLVARI(I, numeric_standard, int, TRUE)
-					/* Assume C locale numerics */
-PERLVARI(I, numeric_underlying, bool, TRUE)
-					/* Assume underlying locale numerics */
-PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
+					/* Assume simple numerics */
+PERLVARI(I, numeric_local, bool, TRUE)
+					/* Assume local numerics */
 PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
-#  ifdef HAS_POSIX_2008_LOCALE
-
-PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
-
-#  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
 /* Unicode inversion lists */
+PERLVAR(I, Latin1,	SV *)
+PERLVAR(I, UpperLatin1,	SV *)   /* Code points 128 - 255 */
+PERLVAR(I, AboveLatin1,	SV *)
 PERLVAR(I, InBitmap,	SV *)
+
+PERLVAR(I, NonL1NonFinalFold,   SV *)
+PERLVAR(I, HasMultiCharFold,   SV *)
 
 /* utf8 character class swashes */
 PERLVAR(I, utf8_mark,	SV *)
+PERLVAR(I, utf8_toupper, SV *)
+PERLVAR(I, utf8_totitle, SV *)
+PERLVAR(I, utf8_tolower, SV *)
+PERLVAR(I, utf8_tofold,	SV *)
+PERLVAR(I, utf8_charname_begin, SV *)
+PERLVAR(I, utf8_charname_continue, SV *)
+
+PERLVARA(I, utf8_swash_ptrs, POSIX_SWASH_COUNT, SV *)
+PERLVARA(I, Posix_ptrs, POSIX_CC_COUNT, SV *)
+PERLVARA(I, XPosix_ptrs, POSIX_CC_COUNT, SV *)
+PERLVAR(I, GCB_invlist, SV *)
+PERLVAR(I, LB_invlist, SV *)
+PERLVAR(I, SB_invlist, SV *)
+PERLVAR(I, WB_invlist, SV *)
+PERLVAR(I, Assigned_invlist, SV *)
 PERLVAR(I, seen_deprecated_macro, HV *)
 
 PERLVAR(I, last_swash_hv, HV *)
@@ -714,6 +700,13 @@ PERLVARI(I, known_layers, PerlIO_list_t *, NULL)
 PERLVARI(I, def_layerlist, PerlIO_list_t *, NULL)
 #endif
 
+PERLVAR(I, utf8_idstart, SV *)
+PERLVAR(I, utf8_idcont,	SV *)
+PERLVAR(I, utf8_xidstart, SV *)
+PERLVAR(I, utf8_perl_idstart, SV *)
+PERLVAR(I, utf8_perl_idcont, SV *)
+PERLVAR(I, utf8_xidcont, SV *)
+
 PERLVAR(I, sort_RealCmp, SVCOMPARE_t)
 
 PERLVARI(I, checkav_save, AV *, NULL)	/* save CHECK{}s when compiling */
@@ -752,6 +745,14 @@ PERLVAR(I, registered_mros, HV *)
 
 /* Compile-time block start/end hooks */
 PERLVAR(I, blockhooks,	AV *)
+
+/* Everything that folds to a given character, for case insensitivity regex
+ * matching */
+PERLVARI(I, utf8_foldclosures, HV *, NULL)
+
+/* List of characters that participate in folds (except marks, etc in
+ * multi-char folds) */
+PERLVARI(I, utf8_foldable, SV *, NULL)
 
 PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 
@@ -811,15 +812,7 @@ PERLVARA(I, op_exec_cnt, OP_max+2, UV)	/* Counts of executed OPs of the given ty
 
 PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
 
-PERLVARI(I, dump_re_max_len, STRLEN, 60)
-
-/* For internal uses of randomness, this ensures the sequence of
- * random numbers returned by rand() isn't modified by perl's internal
- * use of randomness.
- * This is important if the user has called srand() with a seed.
- */
-
-PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
+PERLVARI(I, dump_re_max_len, STRLEN, 0)
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */

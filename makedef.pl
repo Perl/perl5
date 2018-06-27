@@ -108,6 +108,7 @@ my $config_h = 'config.h';
 open(CFG, '<', $config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
+                                           |SPRINTF_RETURNS_STRLEN
                                            |KILL_BY_SIGPRC
                                            |(?:PERL|USE|HAS)_\w+)\b/x;
 }
@@ -125,34 +126,8 @@ $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
     $define{MULTIPLICITY} ;
 
-if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'netware') {
+if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $^O ne 'darwin') {
     $define{USE_REENTRANT_API} = 1;
-}
-
-if (     $define{USE_ITHREADS}
-    &&   $define{HAS_SETLOCALE}
-    && ! $define{NO_LOCALE}
-    && ! $define{NO_POSIX_2008_LOCALE})
-{
-    $define{HAS_POSIX_2008_LOCALE} = 1 if $define{HAS_NEWLOCALE}
-                                       && $define{HAS_FREELOCALE}
-                                       && $define{HAS_USELOCALE};
-    my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
-    if (    ! $define{NO_THREAD_SAFE_LOCALE}
-        && (  $define{HAS_POSIX_2008_LOCALE}
-            || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
-                                               && $cctype >= 80))))
-    {
-        $define{USE_THREAD_SAFE_LOCALE} = 1;
-        $define{USE_POSIX_2008_LOCALE} = 1 if $define{HAS_POSIX_2008_LOCALE};
-    }
-
-    if (   $ARGS{PLATFORM} eq 'win32'
-        && $define{USE_THREAD_SAFE_LOCALE}
-        && $cctype < 140)
-    {
-        $define{TS_W32_BROKEN_LOCALECONV} = 1;
-    }
 }
 
 # perl.h logic duplication ends
@@ -384,17 +359,13 @@ unless ($define{'USE_ITHREADS'}) {
 
 unless ($define{'USE_ITHREADS'}) {
     ++$skip{$_} foreach qw(
-                    PL_keyword_plugin_mutex
 		    PL_check_mutex
-                    PL_curlocales
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
 		    PL_dollarzero_mutex
 		    PL_hints_mutex
 		    PL_locale_mutex
-		    PL_lc_numeric_mutex
-		    PL_lc_numeric_mutex_depth
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_stashpad
@@ -425,18 +396,14 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_stashpv_hvname_match
 		    Perl_regdupe_internal
 		    Perl_newPADOP
-                    PL_C_locale_obj
 			 );
 }
 
-unless ( $define{'HAS_NEWLOCALE'}
-    &&   $define{'HAS_FREELOCALE'}
-    &&   $define{'HAS_USELOCALE'}
-    && ! $define{'NO_POSIX_2008_LOCALE'})
+unless (   $define{'USE_ITHREADS'}
+        && $define{'HAS_NEWLOCALE'})
 {
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
-        PL_underlying_numeric_obj
     );
 }
 
@@ -462,14 +429,6 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_my_cxt_init
 		    Perl_my_cxt_index
 			 );
-}
-
-if ($define{USE_THREAD_SAFE_LOCALE}) {
-    ++$skip{PL_lc_numeric_mutex};
-    ++$skip{PL_lc_numeric_mutex_depth};
-    if (! $define{TS_W32_BROKEN_LOCALECONV}) {
-        ++$skip{PL_locale_mutex};
-    }
 }
 
 unless ($define{'PERL_OP_PARENT'}) {
@@ -507,6 +466,10 @@ unless ($define{'PERL_DONT_CREATE_GVSV'}) {
     ++$skip{Perl_gv_SVadd};
 }
 
+if ($define{'SPRINTF_RETURNS_STRLEN'}) {
+    ++$skip{Perl_my_sprintf};
+}
+
 unless ($define{'PERL_USES_PL_PIDSTATUS'}) {
     ++$skip{PL_pidstatus};
 }
@@ -519,10 +482,6 @@ unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_interp_size
 		    PL_interp_size_5_18_0
-                    PL_sv_yes
-                    PL_sv_undef
-                    PL_sv_no
-                    PL_sv_zero
 			 );
 }
 
@@ -558,11 +517,6 @@ if ($ARGS{PLATFORM} eq 'vms' && !$define{KILL_BY_SIGPRC}) {
     ++$skip{Perl_sig_to_vmscondition};
     ++$skip{PL_sig_defaulting};
     ++$skip{PL_sig_handlers_initted} unless !$define{HAS_SIGACTION};
-}
-
-if ($define{'HAS_STRNLEN'})
-{
-    ++$skip{Perl_my_strnlen};
 }
 
 unless ($define{USE_LOCALE_COLLATE}) {
@@ -618,9 +572,6 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 ++$skip{PL_op_exec_cnt}
     unless $define{PERL_TRACE_OPS};
-
-++$skip{PL_hash_chars}
-    unless $define{PERL_USE_SINGLE_CHAR_HASH_CACHE};
 
 # functions from *.sym files
 
@@ -731,13 +682,12 @@ unless ($define{'USE_QUADMATH'}) {
 {
     my %seen;
     my ($embed) = setup_embed($ARGS{TARG_DIR});
-    my $excludedre = $define{'NO_MATHOMS'} ? qr/[xmib]/ : qr/[xmi]/;
 
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;
 	next unless $func;
-	if (($flags =~ /[AX]/ && $flags !~ $excludedre)
-            || (!$define{'NO_MATHOMS'} && $flags =~ /b/))
+	if (   ($flags =~ /[AX]/ && $flags !~ /[xmi]/)
+            || ($flags =~ /b/ && ! $define{'NO_MATHOMS'}))
         {
 	    # public API, so export
 

@@ -19,7 +19,6 @@
 # In this file, we use the latter "Baby Perl" approach, and increment
 # will be worked over by t/op/inc.t
 
-$| = 1;
 $Level = 1;
 my $test = 1;
 my $planned;
@@ -212,9 +211,6 @@ sub find_git_or_skip {
 	}
     } else {
 	$reason = 'not being run from a git checkout';
-    }
-    if ($ENV{'PERL_BUILD_PACKAGING'}) {
-	$reason = 'PERL_BUILD_PACKAGING is set';
     }
     skip_all($reason) if $_[0] && $_[0] eq 'all';
     skip($reason, @_);
@@ -864,7 +860,7 @@ sub unlink_all {
 	if( -f $file ){
 	    _print_stderr "# Couldn't unlink '$file': $!\n";
 	}else{
-	    $count = $count + 1; # don't use ++
+	    ++$count;
 	}
     }
     $count;
@@ -918,7 +914,7 @@ $::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
 my $tempfile_count = 0;
 sub tempfile {
     while(1){
-	my $try = (-d "t" ? "t/" : "")."tmp$$";
+	my $try = "tmp$$";
         my $alpha = _num_to_alpha($tempfile_count,2);
         last unless defined $alpha;
         $try = $try . $alpha;
@@ -1145,7 +1141,7 @@ sub setup_multiple_progs {
         my $found;
         while (<$fh>) {
             if (/^__END__/) {
-                $found = $found + 1; # don't use ++
+                ++$found;
                 last;
             }
         }
@@ -1520,7 +1516,6 @@ sub capture_warnings {
 
     local @::__capture;
     local $SIG {__WARN__} = \&__capture;
-    local $Level = 1;
     &$code;
     return @::__capture;
 }

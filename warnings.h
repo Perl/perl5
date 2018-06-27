@@ -115,15 +115,9 @@
 
 #define WARN_EXPERIMENTAL__DECLARED_REFS 66
 
-/* Warnings Categories added in Perl 5.027 */
-
-#define WARN_EXPERIMENTAL__ALPHA_ASSERTIONS 67
-#define WARN_EXPERIMENTAL__SCRIPT_RUN	 68
-#define WARN_SHADOW			 69
-
-#define WARNsize			 18
-#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+#define WARNsize			 17
+#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on \
 	cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
@@ -227,15 +221,13 @@ is by default enabled even if not within the scope of S<C<use warnings>>.
 #define unpackWARN4(x)		(((x) >>24) & 0xFF)
 
 #define ckDEAD(x)							\
-   (PL_curcop &&                                                        \
-    !specialWARN(PL_curcop->cop_warnings) &&			        \
-    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	        \
-      (unpackWARN2(x) &&                                                \
-	(isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	        \
-	  (unpackWARN3(x) &&                                            \
-	    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
-	      (unpackWARN4(x) &&                                        \
-		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
+	   (PL_curcop &&                                                \
+            !specialWARN(PL_curcop->cop_warnings) &&			\
+	    ( isWARNf_on(PL_curcop->cop_warnings, WARN_ALL) || 		\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x))))
 
 /* end of file warnings.h */
 

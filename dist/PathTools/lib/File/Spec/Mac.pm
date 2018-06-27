@@ -1,13 +1,18 @@
 package File::Spec::Mac;
 
 use strict;
-use Cwd ();
+use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-our $VERSION = '3.74';
+$VERSION = '3.67';
 $VERSION =~ tr/_//d;
 
-our @ISA = qw(File::Spec::Unix);
+@ISA = qw(File::Spec::Unix);
+
+my $macfiles;
+if ($^O eq 'MacOS') {
+	$macfiles = eval { require Mac::Files };
+}
 
 sub case_tolerant { 1 }
 
@@ -338,11 +343,27 @@ sub devnull {
 
 =item rootdir
 
-Returns the empty string.  Mac OS has no real root directory.
+Returns a string representing the root directory.  Under MacPerl,
+returns the name of the startup volume, since that's the closest in
+concept, although other volumes aren't rooted there. The name has a
+trailing ":", because that's the correct specification for a volume
+name on Mac OS.
+
+If Mac::Files could not be loaded, the empty string is returned.
 
 =cut
 
-sub rootdir { '' }
+sub rootdir {
+#
+#  There's no real root directory on Mac OS. The name of the startup
+#  volume is returned, since that's the closest in concept.
+#
+    return '' unless $macfiles;
+    my $system = Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
+	&Mac::Files::kSystemFolderType);
+    $system =~ s/:.*\Z(?!\n)/:/s;
+    return $system;
+}
 
 =item tmpdir
 
@@ -648,7 +669,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-	$base = Cwd::getcwd();
+	$base = $self->_cwd();
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -716,7 +737,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute($path) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-	    $base = Cwd::getcwd();
+	    $base = $self->_cwd();
         }
         elsif ( ! $self->file_name_is_absolute($base) ) {
             $base = $self->rel2abs($base) ;

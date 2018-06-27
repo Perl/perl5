@@ -2,11 +2,12 @@ package VMS::DCLsym;
 
 use Carp;
 use DynaLoader;
+use vars qw( @ISA $VERSION );
 use strict;
 
 # Package globals
-our @ISA = ( 'DynaLoader' );
-our $VERSION = '1.09';              # remember to update version in POD!
+@ISA = ( 'DynaLoader' );
+$VERSION = '1.08';
 my(%Locsyms) = ( ':ID' => 'LOCAL' );
 my(%Gblsyms) = ( ':ID' => 'GLOBAL');
 my $DoCache = 1;
@@ -264,7 +265,7 @@ Charles Bailey  bailey@newman.upenn.edu
 
 =head1 VERSION
 
-1.09
+1.05  12-Feb-2011
 
 =head1 BUGS
 

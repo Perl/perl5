@@ -24,11 +24,6 @@ BEGIN { *CORE::GLOBAL::rename = sub { CORE::rename($_[0], $_[1]) }; }
 use File::Copy qw(copy move cp);
 use Config;
 
-# If we have Time::HiRes, File::Copy loaded it for us.
-BEGIN {
-  eval { Time::HiRes->import(qw( stat utime )) };
-  note "Testing Time::HiRes::utime support" unless $@;
-}
 
 foreach my $code ("copy()", "copy('arg')", "copy('arg', 'arg', 'arg', 'arg')",
                   "move()", "move('arg')", "move('arg', 'arg', 'arg')"
@@ -71,14 +66,12 @@ for my $cross_partition_test (0..1) {
   unlink "copy-$$" or die "unlink: $!";
 
   open(F, "<", "file-$$");
-  binmode F;
   copy(*F, "copy-$$");
-  open(R, "<:raw", "copy-$$") or die "open copy-$$: $!"; $foo = <R>; close(R);
+  open(R, "<", "copy-$$") or die "open copy-$$: $!"; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(*F, fn): same contents';
   unlink "copy-$$" or die "unlink: $!";
 
   open(F, "<", "file-$$");
-  binmode F;
   copy(\*F, "copy-$$");
   close(F) or die "close: $!";
   open(R, "<", "copy-$$") or die; $foo = <R>; close(R) or die "close: $!";
@@ -107,7 +100,7 @@ for my $cross_partition_test (0..1) {
   ok -e "copy-$$",                '  target still there';
 
   # Doesn't really matter what time it is as long as its not now.
-  my $time = 1000000000.12345;
+  my $time = 1000000000;
   utime( $time, $time, "copy-$$" );
 
   # Recheck the mtime rather than rely on utime in case we're on a
@@ -352,7 +345,6 @@ SKIP: {
             chmod $c_perm3 => $copy6 or die $!;
 
             open my $fh => "<", $src or die $!;
-            binmode $fh;
 
             copy ($src, $copy1);
             copy ($fh,  $copy2);
@@ -473,8 +465,6 @@ SKIP: {
 
     open(my $IN, "-|") || exec $^X, '-e', 'print "Hello, world!\n"';
     open(my $OUT, "|-") || exec $^X, '-ne', 'exit(/Hello/ ? 55 : 0)';
-    binmode $IN;
-    binmode $OUT;
 
     ok(copy($IN, $OUT), "copy pipe to another");
     close($OUT);

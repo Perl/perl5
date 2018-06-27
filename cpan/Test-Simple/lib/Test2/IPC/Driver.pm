@@ -2,11 +2,11 @@ package Test2::IPC::Driver;
 use strict;
 use warnings;
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302073';
 
 
-use Carp qw/confess/;
-use Test2::Util::HashBase qw{no_fatal no_bail};
+use Carp qw/confess longmess/;
+use Test2::Util::HashBase qw{no_fatal};
 
 use Test2::API qw/test2_ipc_add_driver/;
 
@@ -36,11 +36,8 @@ for my $meth (qw/send cull add_hub drop_hub waiting is_viable/) {
 sub abort {
     my $self = shift;
     chomp(my ($msg) = @_);
-
-    $self->driver_abort($msg) if $self->can('driver_abort');
-
     print STDERR "IPC Fatal Error: $msg\n";
-    print STDOUT "Bail out! IPC Fatal Error: $msg\n" unless $self->no_bail;
+    print STDOUT "not ok - IPC Fatal Error\n";
 
     CORE::exit(255) unless $self->no_fatal;
 }
@@ -48,8 +45,7 @@ sub abort {
 sub abort_trace {
     my $self = shift;
     my ($msg) = @_;
-    # Older versions of Carp do not export longmess() function, so it needs to be called with package name
-    $self->abort(Carp::longmess($msg));
+    $self->abort(longmess($msg));
 }
 
 1;
@@ -252,12 +248,6 @@ child processes and threads to complete.
 
 =over 4
 
-=item $ipc->driver_abort($msg)
-
-This is a hook called by C<< Test2::IPC::Driver->abort() >>. This is your
-chance to cleanup when an abort happens. You cannot prevent the abort, but you
-can gracefully except it.
-
 =item $bool = $ipc->use_shm()
 
 True if you want to make use of the L<Test2::API>/L<Test2::API::Instance> SHM.
@@ -292,7 +282,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

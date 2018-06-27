@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.43";
+$VERSION = "1.39";
 
 use Carp;
 use Exporter ();
@@ -353,7 +353,7 @@ These memory related ops are not included in :base_core because they
 can easily be used to implement a resource attack (e.g., consume all
 available memory).
 
-    concat multiconcat repeat join range
+    concat repeat join range
 
     anonlist anonhash
 

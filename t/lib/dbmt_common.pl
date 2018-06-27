@@ -156,11 +156,12 @@ unlink <Op_dbmx*>, $Dfile;
 
    use strict;
    use warnings;
+   use vars qw(@ISA @EXPORT);
 
    require Exporter;
    use %s;
-   our @ISA=qw(%s);
-   our @EXPORT = @%s::EXPORT;
+   @ISA=qw(%s);
+   @EXPORT = @%s::EXPORT;
 
    sub STORE {
 	my $self = shift;

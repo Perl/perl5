@@ -1,13 +1,9 @@
 package Module::CoreList;
 use strict;
-
-our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
-
+use vars qw/$VERSION %released %version %families %upstream
+	    %bug_tracker %deprecated %delta/;
 use version;
-our $VERSION = '5.20180624';
-
-sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
-sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
+$VERSION = '5.20180414_26';
 
 sub _undelta {
     my ($delta) = @_;
@@ -48,8 +44,9 @@ END {
 
 
 sub first_release_raw {
-    shift if defined $_[1] and $_[1] =~ PKG_PATTERN and _looks_like_invocant $_[0];
     my $module = shift;
+    $module = shift if eval { $module->isa(__PACKAGE__) }
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
     my $version = shift;
 
     my @perls = $version
@@ -73,9 +70,10 @@ sub first_release {
 }
 
 sub find_modules {
-    shift if _looks_like_invocant $_[0];
     my $regex = shift;
-    my @perls = @_ ? @_ : keys %version;
+    $regex = shift if eval { $regex->isa(__PACKAGE__) };
+    my @perls = @_;
+    @perls = keys %version unless @perls;
 
     my %mods;
     foreach (@perls) {
@@ -87,23 +85,30 @@ sub find_modules {
 }
 
 sub find_version {
-    shift if _looks_like_invocant $_[0];
     my $v = shift;
-    return $version{$v} if defined $v and defined $version{$v};
+    if ($v->isa(__PACKAGE__)) {
+        $v = shift;
+        return if not defined $v;
+    }
+    return $version{$v} if defined $version{$v};
     return;
 }
 
 sub is_deprecated {
-    shift if defined $_[1] and $_[1] =~ PKG_PATTERN and _looks_like_invocant $_[0];
     my $module = shift;
-    my $perl_version = shift || $];
+    $module = shift if eval { $module->isa(__PACKAGE__) }
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
+    my $perl_version = shift;
+    $perl_version ||= $];
     return unless $module && exists $deprecated{$perl_version}{$module};
     return $deprecated{$perl_version}{$module};
 }
 
 sub deprecated_in {
-    shift if defined $_[1] and $_[1] =~ PKG_PATTERN and _looks_like_invocant $_[0];
-    my $module = shift or return;
+    my $module = shift;
+    $module = shift if eval { $module->isa(__PACKAGE__) }
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
+    return unless $module;
     my @perls = grep { exists $deprecated{$_}{$module} } keys %deprecated;
     return unless @perls;
     require List::Util;
@@ -121,8 +126,9 @@ sub removed_from_by_date {
 }
 
 sub removed_raw {
-  shift if defined $_[1] and $_[1] =~ PKG_PATTERN and _looks_like_invocant $_[0];
   my $mod = shift;
+  $mod = shift if eval { $mod->isa(__PACKAGE__) }
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
   return unless my @perls = sort { $a cmp $b } first_release_raw($mod);
   my $last = pop @perls;
   my @removed = grep { $_ > $last } sort { $a cmp $b } keys %version;
@@ -130,8 +136,8 @@ sub removed_raw {
 }
 
 sub changes_between {
-  shift if _looks_like_invocant $_[0];
   my $left_ver = shift;
+  $left_ver = shift if eval { $left_ver->isa(__PACKAGE__) };
   my $right_ver = shift;
 
   my $left  = $version{ $left_ver };
@@ -330,11 +336,7 @@ sub changes_between {
     5.027008 => '2018-01-20',
     5.027009 => '2018-02-20',
     5.027010 => '2018-03-20',
-    5.024004 => '2018-04-14',
     5.026002 => '2018-04-14',
-    5.027011 => '2018-04-20',
-    5.028000 => '2018-06-22',
-    5.029000 => '2018-06-24',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -14693,6 +14695,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'SelfLoader'            => '1.25',
             'Socket'                => '2.020_04',
             'Storable'              => '2.65',
+            'Storable::__Storable__'=> '2.65',
             'Test'                  => '1.31',
             'Test2'                 => '1.302111',
             'Test2::API'            => '1.302111',
@@ -15091,6 +15094,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'PerlIO::encoding'      => '0.26',
             'Storable'              => '3.06',
             'Storable::Limit'       => undef,
+            'Storable::__Storable__'=> '3.06',
             'Test2'                 => '1.302122',
             'Test2::API'            => '1.302122',
             'Test2::API::Breakage'  => '1.302122',
@@ -15369,18 +15373,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.024004 => {
-        delta_from => 5.024003,
-        changed => {
-            'B::Op_private'         => '5.024004',
-            'Config'                => '5.024004',
-            'Module::CoreList'      => '5.20180414_24',
-            'Module::CoreList::TieHashDelta'=> '5.20180414_24',
-            'Module::CoreList::Utils'=> '5.20180414_24',
-        },
-        removed => {
-        }
-    },
     5.026002 => {
         delta_from => 5.026001,
         changed => {
@@ -15396,82 +15388,16 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.027011 => {
-        delta_from => 5.027010,
-        changed => {
-            'B::Op_private'         => '5.027011',
-            'Carp'                  => '1.50',
-            'Carp::Heavy'           => '1.50',
-            'Config'                => '5.027011',
-            'Devel::PPPort'         => '3.40',
-            'Exporter'              => '5.73',
-            'Exporter::Heavy'       => '5.73',
-            'ExtUtils::Constant'    => '0.25',
-            'I18N::Langinfo'        => '0.17',
-            'IO'                    => '1.39',
-            'IO::Dir'               => '1.39',
-            'IO::File'              => '1.39',
-            'IO::Handle'            => '1.39',
-            'IO::Pipe'              => '1.39',
-            'IO::Poll'              => '1.39',
-            'IO::Seekable'          => '1.39',
-            'IO::Select'            => '1.39',
-            'IO::Socket'            => '1.39',
-            'IO::Socket::INET'      => '1.39',
-            'IO::Socket::UNIX'      => '1.39',
-            'Module::CoreList'      => '5.20180420',
-            'Module::CoreList::Utils'=> '5.20180420',
-            'POSIX'                 => '1.84',
-            'Time::HiRes'           => '1.9759',
-            'XS::APItest'           => '0.97',
-            'bytes'                 => '1.06',
-            'subs'                  => '1.03',
-            'vars'                  => '1.04',
-            'version'               => '0.9923',
-            'version::regex'        => '0.9923',
-        },
-        removed => {
-        }
-    },
-    5.028000 => {
-        delta_from => 5.027011,
-        changed => {
-            'Archive::Tar'          => '2.28',
-            'Archive::Tar::Constant'=> '2.28',
-            'Archive::Tar::File'    => '2.28',
-            'B::Op_private'         => '5.028000',
-            'Config'                => '5.028',
-            'Module::CoreList'      => '5.20180622',
-            'Module::CoreList::Utils'=> '5.20180622',
-            'Storable'              => '3.08',
-            'XS::APItest'           => '0.98',
-            'feature'               => '1.52',
-        },
-        removed => {
-        }
-    },
-    5.029000 => {
-        delta_from => 5.028000,
-        changed => {
-            'Archive::Tar'          => '2.30',
-            'Archive::Tar::Constant'=> '2.30',
-            'Archive::Tar::File'    => '2.30',
-            'Config'                => '5.029',
-            'Module::CoreList'      => '5.20180624',
-            'Module::CoreList::Utils'=> '5.20180624',
-            'feature'               => '1.53',
-        },
-        removed => {
-        }
-    },
 );
 
 sub is_core
 {
-    shift if defined $_[1] and $_[1] =~ /^\w/ and _looks_like_invocant $_[0];
     my $module = shift;
-    my $module_version = @_ > 0 ? shift : undef;
-    my $perl_version   = @_ > 0 ? shift : $];
+    $module = shift if eval { $module->isa(__PACKAGE__) } && @_ > 0 && defined($_[0]) && $_[0] =~ /^\w/;
+    my ($module_version, $perl_version);
+
+    $module_version = shift if @_ > 0;
+    $perl_version   = @_ > 0 ? shift : $];
 
     my $first_release = first_release($module);
 
@@ -15488,11 +15414,6 @@ sub is_core
     # On the way if we pass the required module version, we can
     # short-circuit and return true
     if (defined($module_version)) {
-        my $module_version_object = eval { version->parse($module_version) };
-        if (!defined($module_version_object)) {
-            (my $err = $@) =~ s/^Invalid version format\b/Invalid version '$module_version' specified/;
-            die $err;
-        }
         # The Perl releases aren't a linear sequence, but a tree. We need to build the path
         # of releases from 5 to the specified release, and follow the module's version(s)
         # along that path.
@@ -15510,7 +15431,7 @@ sub is_core
             last RELEASE if $prn > $perl_version;
             next unless defined(my $next_module_version
                                    = $delta{$prn}->{changed}->{$module});
-            return 1 if eval { version->parse($next_module_version) >= $module_version_object };
+            return 1 if version->parse($next_module_version) >= version->parse($module_version);
         }
         return 0;
     }
@@ -16332,36 +16253,8 @@ sub is_core
         removed => {
         }
     },
-    5.024004 => {
-        delta_from => 5.024003,
-        changed => {
-        },
-        removed => {
-        }
-    },
     5.026002 => {
         delta_from => 5.026001,
-        changed => {
-        },
-        removed => {
-        }
-    },
-    5.027011 => {
-        delta_from => 5.02701,
-        changed => {
-        },
-        removed => {
-        }
-    },
-    5.028000 => {
-        delta_from => 5.027011,
-        changed => {
-        },
-        removed => {
-        }
-    },
-    5.029000 => {
-        delta_from => 5.028,
         changed => {
         },
         removed => {
@@ -16433,6 +16326,7 @@ sub is_core
     'Compress::Zlib'        => 'cpan',
     'Config::Perl::V'       => 'cpan',
     'DB_File'               => 'cpan',
+    'Devel::PPPort'         => 'cpan',
     'Digest'                => 'cpan',
     'Digest::MD5'           => 'cpan',
     'Digest::SHA'           => 'cpan',
@@ -16734,30 +16628,15 @@ sub is_core
     'Test2::Event::Diag'    => 'cpan',
     'Test2::Event::Encoding'=> 'cpan',
     'Test2::Event::Exception'=> 'cpan',
-    'Test2::Event::Fail'    => 'cpan',
     'Test2::Event::Generic' => 'cpan',
+    'Test2::Event::Info'    => 'cpan',
     'Test2::Event::Note'    => 'cpan',
     'Test2::Event::Ok'      => 'cpan',
-    'Test2::Event::Pass'    => 'cpan',
     'Test2::Event::Plan'    => 'cpan',
     'Test2::Event::Skip'    => 'cpan',
     'Test2::Event::Subtest' => 'cpan',
     'Test2::Event::TAP::Version'=> 'cpan',
-    'Test2::Event::V2'      => 'cpan',
     'Test2::Event::Waiting' => 'cpan',
-    'Test2::EventFacet'     => 'cpan',
-    'Test2::EventFacet::About'=> 'cpan',
-    'Test2::EventFacet::Amnesty'=> 'cpan',
-    'Test2::EventFacet::Assert'=> 'cpan',
-    'Test2::EventFacet::Control'=> 'cpan',
-    'Test2::EventFacet::Error'=> 'cpan',
-    'Test2::EventFacet::Hub'=> 'cpan',
-    'Test2::EventFacet::Info'=> 'cpan',
-    'Test2::EventFacet::Meta'=> 'cpan',
-    'Test2::EventFacet::Parent'=> 'cpan',
-    'Test2::EventFacet::Plan'=> 'cpan',
-    'Test2::EventFacet::Render'=> 'cpan',
-    'Test2::EventFacet::Trace'=> 'cpan',
     'Test2::Formatter'      => 'cpan',
     'Test2::Formatter::TAP' => 'cpan',
     'Test2::Hub'            => 'cpan',
@@ -16770,7 +16649,6 @@ sub is_core
     'Test2::Tools::Tiny'    => 'cpan',
     'Test2::Util'           => 'cpan',
     'Test2::Util::ExternalMeta'=> 'cpan',
-    'Test2::Util::Facets2Legacy'=> 'cpan',
     'Test2::Util::HashBase' => 'cpan',
     'Test2::Util::Trace'    => 'cpan',
     'Test::Builder'         => 'cpan',
@@ -16888,6 +16766,7 @@ sub is_core
     'Compress::Zlib'        => undef,
     'Config::Perl::V'       => undef,
     'DB_File'               => undef,
+    'Devel::PPPort'         => 'https://github.com/mhx/Devel-PPPort/issues/',
     'Digest'                => undef,
     'Digest::MD5'           => undef,
     'Digest::SHA'           => undef,
@@ -17189,30 +17068,15 @@ sub is_core
     'Test2::Event::Diag'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Encoding'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Exception'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::Event::Fail'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Generic' => 'http://github.com/Test-More/test-more/issues',
+    'Test2::Event::Info'    => undef,
     'Test2::Event::Note'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Ok'      => 'http://github.com/Test-More/test-more/issues',
-    'Test2::Event::Pass'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Plan'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Skip'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Subtest' => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::TAP::Version'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::Event::V2'      => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Waiting' => 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet'     => 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::About'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Amnesty'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Assert'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Control'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Error'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Hub'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Info'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Meta'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Parent'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Plan'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Render'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::EventFacet::Trace'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Formatter'      => 'http://github.com/Test-More/test-more/issues',
     'Test2::Formatter::TAP' => 'http://github.com/Test-More/test-more/issues',
     'Test2::Hub'            => 'http://github.com/Test-More/test-more/issues',
@@ -17225,7 +17089,6 @@ sub is_core
     'Test2::Tools::Tiny'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Util'           => 'http://github.com/Test-More/test-more/issues',
     'Test2::Util::ExternalMeta'=> 'http://github.com/Test-More/test-more/issues',
-    'Test2::Util::Facets2Legacy'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Util::HashBase' => 'http://github.com/Test-More/test-more/issues',
     'Test2::Util::Trace'    => 'http://github.com/Test-More/test-more/issues',
     'Test::Builder'         => 'http://github.com/Test-More/test-more/issues',

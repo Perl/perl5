@@ -6,11 +6,6 @@ use List::Util qw/shuffle/;
 use strict;
 use warnings;
 
-if ($] lt "5.008") {
-    print "1..0 # SKIP Test cannot run on perls below 5.8.0\n";
-    exit 0;
-}
-
 sub simple_capture(&) {
     my $code = shift;
 
@@ -130,12 +125,10 @@ ok(!-d $tmpdir, "cleaned up temp dir");
 }
 
 {
-    no warnings qw/once redefine/;
-    local *Test2::IPC::Driver::Files::driver_abort = sub {};
+    no warnings 'once';
     local *Test2::IPC::Driver::Files::abort = sub {
         my $self = shift;
         local $self->{no_fatal} = 1;
-        local $self->{no_bail} = 1;
         $self->Test2::IPC::Driver::abort(@_);
         die 255;
     };
@@ -177,6 +170,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     };
     $cleanup->();
 
+    is($out->{STDOUT}, "not ok - IPC Fatal Error\nnot ok - IPC Fatal Error\n", "printed ");
+
     like($out->{STDERR}, qr/IPC Temp Dir: \Q$tmpdir\E/m, "Got temp dir path");
     like($out->{STDERR}, qr/^# Not removing temp dir: \Q$tmpdir\E$/m, "Notice about not closing tempdir");
 
@@ -186,7 +181,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
         $ipc->add_hub($hid);
-        my $trace = Test2::EventFacet::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
+        my $trace = Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
         my $e = eval { $ipc->send($hid, bless({glob => \*ok, trace => $trace}, 'Foo')); 1 };
         print STDERR $@ unless $e || $@ =~ m/^255/;
         $ipc->drop_hub($hid);
@@ -365,7 +360,6 @@ ok(!-d $tmpdir, "cleaned up temp dir");
             pid      => "123",
             tid      => "456",
             eid      => "789",
-            file     => join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo',
         },
         "Parsed global complete"
     );
@@ -381,7 +375,6 @@ ok(!-d $tmpdir, "cleaned up temp dir");
             pid      => "123",
             tid      => "456",
             eid      => "789",
-            file     => join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo',
         },
         "Parsed global ready"
     );
@@ -397,7 +390,6 @@ ok(!-d $tmpdir, "cleaned up temp dir");
             pid      => "123",
             tid      => "456",
             eid      => "789",
-            file     => join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo',
         },
         "Parsed global not ready"
     );
@@ -413,7 +405,6 @@ ok(!-d $tmpdir, "cleaned up temp dir");
             pid      => "123",
             tid      => "456",
             eid      => "789",
-            file     => join ipc_separator, qw'1 1 1 123 456 789 Event Type Foo',
         },
         "Parsed event complete"
     );
@@ -429,7 +420,6 @@ ok(!-d $tmpdir, "cleaned up temp dir");
             pid      => "123",
             tid      => "456",
             eid      => "789",
-            file     => join ipc_separator, qw'1 2 3 123 456 789 Event Type Foo',
         },
         "Parsed event ready"
     );
@@ -445,7 +435,6 @@ ok(!-d $tmpdir, "cleaned up temp dir");
             pid      => "123",
             tid      => "456",
             eid      => "789",
-            file     => join ipc_separator, qw'3 2 11 123 456 789 Event',
         },
         "Parsed event not ready"
     );

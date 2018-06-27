@@ -1,6 +1,4 @@
 #!/usr/bin/perl -w
-# HARNESS-NO-STREAM
-# HARNESS-NO-PRELOAD
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -12,20 +10,14 @@ BEGIN {
     }
 }
 
-my $goto = 0;
 my $Exit_Code;
 BEGIN {
-    *CORE::GLOBAL::exit = sub { $Exit_Code = shift; goto XXX if $goto; CORE::exit($Exit_Code)};
+    *CORE::GLOBAL::exit = sub { $Exit_Code = shift; goto XXX};
 }
 
 use Test::Builder;
 use Test::More;
 
-my $skip = ref(Test::Builder->new->{Stack}->top->format) ne 'Test::Builder::Formatter';
-plan skip_all => "This test cannot be run with the current formatter"
-    if $skip;
-
-$goto = 1;
 my $output;
 my $TB = Test::More->builder;
 $TB->output(\$output);

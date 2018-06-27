@@ -57,9 +57,9 @@ no_THX_arg(sv)
 
 void
 with_THX_arg(error)
-        SV *error
+        char *error
         PPCODE:
-                croak_sv(error);
+                Perl_croak(aTHX_ "%s", error);
 
 =tests plan => 2
 

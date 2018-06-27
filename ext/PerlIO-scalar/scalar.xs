@@ -43,7 +43,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	     && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))
 		    Perl_warner(aTHX_ packWARN(WARN_LAYER), "%s", PL_no_modify);
-		SETERRNO(EACCES, RMS_PRV);
+		SETERRNO(EINVAL, SS_IVCHAN);
 		return -1;
 	    }
 	    s->var = SvREFCNT_inc(SvRV(arg));
@@ -186,8 +186,8 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
          * seems safe) and that the size of the buffer in our SV is
          * always less than half the size of the address space
          */
-        STATIC_ASSERT_STMT(sizeof(Off_t) >= sizeof(len));
-        assert(len < ((~(STRLEN)0) >> 1));
+        assert(sizeof(Off_t) >= sizeof(len));
+        assert((Off_t)len >= 0);
         if ((Off_t)len <= s->posn)
 	    return 0;
 	got = len - (STRLEN)(s->posn);

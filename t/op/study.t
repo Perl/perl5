@@ -9,11 +9,12 @@ BEGIN {
 watchdog(10);
 plan(tests => 43);
 use strict;
+use vars '$x';
 
 use Config;
 my $have_alarm = $Config{d_alarm};
 
-our $x = "abc\ndef\n";
+$x = "abc\ndef\n";
 study($x);
 
 ok($x =~ /^abc/);

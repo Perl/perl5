@@ -55,10 +55,6 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
         Perl_croak(aTHX_ "Out of memory during stack extend");
 
     av_extend(PL_curstack, current + n + extra);
-#ifdef DEBUGGING
-        PL_curstackinfo->si_stack_hwm = current + n + extra;
-#endif
-
     return PL_stack_sp;
 }
 
@@ -330,17 +326,6 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
     PERL_ARGS_ASSERT_SAVE_GP;
 
-    /* XXX For now, we just upgrade any coderef in the stash to a full GV
-           during localisation.  Maybe at some point we could make localis-
-           ation work without needing the upgrade.  (In which case our
-           callers should probably call a different function, not save_gp.)
-     */
-    if (!isGV(gv)) {
-        assert(isGV_or_RVCV(gv));
-        (void)CvGV(SvRV((SV *)gv)); /* CvGV does the upgrade */
-        assert(isGV(gv));
-    }
-
     save_pushptrptr(SvREFCNT_inc(gv), GvGP(gv), SAVEt_GP);
 
     if (empty) {
@@ -349,7 +334,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	bool isa_changed = 0;
 
 	if (stash && HvENAME(stash)) {
-	    if (memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
+	    if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
 		isa_changed = TRUE;
 	    else if (GvCVu(gv))
 		/* taking a method out of circulation ("local")*/
@@ -1091,7 +1076,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gp_free(a0.any_gv);
 	    GvGP_set(a0.any_gv, (GP*)a1.any_ptr);
 	    if ((hv=GvSTASH(a0.any_gv)) && HvENAME_get(hv)) {
-	        if (memEQs(GvNAME(a0.any_gv), GvNAMELEN(a0.any_gv), "ISA"))
+	        if (   GvNAMELEN(a0.any_gv) == 3
+                    && strnEQ(GvNAME(a0.any_gv), "ISA", 3)
+                )
 	            mro_isa_changed_in(hv);
                 else if (had_method || GvCVu(a0.any_gv))
                     /* putting a method back into circulation ("local")*/	
@@ -1203,7 +1190,10 @@ Perl_leave_scope(pTHX_ I32 base)
                         break;
                     case SVt_PVCV:
                     {
-                        HEK *hek = CvGvNAME_HEK(sv);
+                        HEK *hek =
+			      CvNAMED(sv)
+				? CvNAME_HEK((CV *)sv)
+				: GvNAME_HEK(CvGV(sv));
                         assert(hek);
                         (void)share_hek_hek(hek);
                         cv_undef((CV *)sv);
@@ -1229,7 +1219,9 @@ Perl_leave_scope(pTHX_ I32 base)
                     case SVt_PVHV:	*svp = MUTABLE_SV(newHV());	break;
                     case SVt_PVCV:
                     {
-                        HEK * const hek = CvGvNAME_HEK(sv);
+                        HEK * const hek = CvNAMED(sv)
+                                             ? CvNAME_HEK((CV *)sv)
+                                             : GvNAME_HEK(CvGV(sv));
 
                         /* Create a stub */
                         *svp = newSV_type(SVt_PVCV);
@@ -1543,8 +1535,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
                     PTR2UV(CxITERVAR(cx)));
             PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%" UVxf "\n",
                     PTR2UV(cx->blk_loop.itersave));
-	}
-	if (CxTYPE(cx) == CXt_LOOP_ARY) {
+            /* XXX: not accurate for LAZYSV/IV/LIST */
             PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%" UVxf "\n",
                     PTR2UV(cx->blk_loop.state_u.ary.ary));
             PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",

@@ -2,11 +2,18 @@ package Test2::Event::Bail;
 use strict;
 use warnings;
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302073';
 
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
-use Test2::Util::HashBase qw{reason buffered};
+use Test2::Util::HashBase qw{reason};
+
+sub callback {
+    my $self = shift;
+    my ($hub) = @_;
+
+    $hub->set_bailed_out($self);
+}
 
 # Make sure the tests terminate
 sub terminate { 255 };
@@ -24,20 +31,6 @@ sub summary {
 }
 
 sub diagnostics { 1 }
-
-sub facet_data {
-    my $self = shift;
-    my $out = $self->common_facet_data;
-
-    $out->{control} = {
-        global    => 1,
-        halt      => 1,
-        details   => $self->{+REASON},
-        terminate => 255,
-    };
-
-    return $out;
-}
 
 1;
 
@@ -99,7 +92,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

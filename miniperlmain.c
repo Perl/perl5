@@ -124,7 +124,8 @@ main(int argc, char **argv, char **env)
 	PL_perl_destruct_level = 0;
     }
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-    if (!perl_parse(my_perl, xs_init, argc, argv, (char **)NULL))
+    exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
+    if (!exitstatus)
         perl_run(my_perl);
 
 #ifndef PERL_MICRO

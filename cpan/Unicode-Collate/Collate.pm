@@ -17,16 +17,17 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.25';
+our $VERSION = '1.19';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
-use XSLoader ();
-XSLoader::load('Unicode::Collate', $VERSION);
+require DynaLoader;
+our @ISA = qw(DynaLoader);
+bootstrap Unicode::Collate $VERSION;
 ### end XS only ###
 
 my @Path = qw(Unicode Collate);
-my $KeyFile = 'allkeys.txt';
+my $KeyFile = "allkeys.txt";
 
 # Perl's boolean
 use constant TRUE  => 1;
@@ -88,9 +89,9 @@ my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 my $HighestVCE = pack(VCE_TEMPLATE, 0, 0xFFFE, 0x20, 0x5, 0xFFFF);
 my $minimalVCE = pack(VCE_TEMPLATE, 0,      1, 0x20, 0x5, 0xFFFE);
 
-sub UCA_Version { '34' }
+sub UCA_Version { "32" }
 
-sub Base_Unicode_Version { '9.0.0' }
+sub Base_Unicode_Version { "8.0.0" }
 
 ######
 
@@ -189,13 +190,11 @@ my %DerivCode = (
    28 => \&_derivCE_24, # 28 == 24
    30 => \&_derivCE_24, # 30 == 24
    32 => \&_derivCE_32,
-   34 => \&_derivCE_34,
-   36 => \&_derivCE_36,
 );
 
 sub checkCollator {
     my $self = shift;
-    _checkLevel($self->{level}, 'level');
+    _checkLevel($self->{level}, "level");
 
     $self->{derivCode} = $DerivCode{ $self->{UCA_Version} }
 	or croak "Illegal UCA version (passed $self->{UCA_Version}).";
@@ -209,13 +208,13 @@ sub checkCollator {
     if (! defined $self->{backwards}) {
 	$self->{backwardsFlag} = 0;
     } elsif (! ref $self->{backwards}) {
-	_checkLevel($self->{backwards}, 'backwards');
+	_checkLevel($self->{backwards}, "backwards");
 	$self->{backwardsFlag} = 1 << $self->{backwards};
     } else {
 	my %level;
 	$self->{backwardsFlag} = 0;
 	for my $b (@{ $self->{backwards} }) {
-	    _checkLevel($b, 'backwards');
+	    _checkLevel($b, "backwards");
 	    $level{$b} = 1;
 	}
 	for my $v (sort keys %level) {
@@ -440,17 +439,13 @@ sub parseEntry
 	# if and only if "all" CEs are [.0000.0000.0000].
     }
 
-    # mapping: be an array ref or not exists (any false value is disallowed)
     $self->{mapping}{$entry} = $is_L3_ignorable ? [] : \@key;
 
-    # maxlength: be more than 1 or not exists (any false value is disallowed)
     if (@uv > 1) {
 	if (!$self->{maxlength}{$uv[0]} || $self->{maxlength}{$uv[0]} < @uv) {
 	    $self->{maxlength}{$uv[0]} = @uv;
 	}
     }
-
-    # contraction: be 1 or not exists (any false value is disallowed)
     while (@uv > 2) {
 	pop @uv;
 	my $fake_entry = join(CODE_SEP, @uv); # in JCPS
@@ -519,7 +514,7 @@ sub splitEnt
 	if ($vers <= 20 && _isIllegal($src[$i])) {
 	    $src[$i] = undef;
 	} elsif ($ver9) {
-	    $src[$i] = undef if exists $map->{ $src[$i] }
+	    $src[$i] = undef if $map->{ $src[$i] }
 			   ? @{ $map->{ $src[$i] } } == 0
 			   : $uXS && _ignorable_simple($src[$i]); ### XS only
 	}
@@ -539,7 +534,7 @@ sub splitEnt
 	my $i_orig = $i;
 
 	# find contraction
-	if (exists $max->{$jcps}) {
+	if ($max->{$jcps}) {
 	    my $temp_jcps = $jcps;
 	    my $jcpsLen = 1;
 	    my $maxLen = $max->{$jcps};
@@ -548,7 +543,7 @@ sub splitEnt
 		next if ! defined $src[$p];
 		$temp_jcps .= CODE_SEP . $src[$p];
 		$jcpsLen++;
-		if (exists $map->{$temp_jcps}) {
+		if ($map->{$temp_jcps}) {
 		    $jcps = $temp_jcps;
 		    $i = $p;
 		}
@@ -575,7 +570,7 @@ sub splitEnt
 		    last unless $curCC;
 		    my $tail = CODE_SEP . $src[$p];
 
-		    if ($preCC != $curCC && exists $map->{$jcps.$tail}) {
+		    if ($preCC != $curCC && $map->{$jcps.$tail}) {
 			$jcps .= $tail;
 			push @out, $p;
 		    } else {
@@ -584,9 +579,8 @@ sub splitEnt
 
 		    next if !$long;
 
-		    if ($preCC_uc != $curCC &&
-			    (exists $map->{$jcps_uc.$tail} ||
-			    exists $cont->{$jcps_uc.$tail})) {
+		    if ($preCC_uc != $curCC && ($map->{$jcps_uc.$tail} ||
+					       $cont->{$jcps_uc.$tail})) {
 			$jcps_uc .= $tail;
 			push @out_uc, $p;
 		    } else {
@@ -594,7 +588,7 @@ sub splitEnt
 		    }
 		}
 
-		if (@out_uc && exists $map->{$jcps_uc}) {
+		if (@out_uc && $map->{$jcps_uc}) {
 		    $jcps = $jcps_uc;
 		    $src[$_] = undef for @out_uc;
 		} else {
@@ -604,7 +598,7 @@ sub splitEnt
 	}
 
 	# skip completely ignorable
-	if (exists $map->{$jcps} ? @{ $map->{$jcps} } == 0 :
+	if ($map->{$jcps} ? @{ $map->{$jcps} } == 0 :
 	    $uXS && $jcps !~ /;/ && _ignorable_simple($jcps)) { ### XS only
 	    if ($wLen && @buf) {
 		$buf[-1][2] = $i + 1;
@@ -653,7 +647,7 @@ sub getWt
     $u = 0xFFFD if $u !~ /;/ && 0x10FFFF < $u && !$out;
 
     my @ce;
-    if (exists $map->{$u}) {
+    if ($map->{$u}) {
 	@ce = @{ $map->{$u} }; # $u may be a contraction
 ### begin XS only ###
     } elsif ($uXS && _exists_simple($u)) {
@@ -671,27 +665,27 @@ sub getWt
 
 	    if (@decH == 2) {
 		my $contract = join(CODE_SEP, @decH);
-		@decH = ($contract) if exists $map->{$contract};
+		@decH = ($contract) if $map->{$contract};
 	    } else { # must be <@decH == 3>
-		if (exists $max->{$decH[0]}) {
+		if ($max->{$decH[0]}) {
 		    my $contract = join(CODE_SEP, @decH);
-		    if (exists $map->{$contract}) {
+		    if ($map->{$contract}) {
 			@decH = ($contract);
 		    } else {
 			$contract = join(CODE_SEP, @decH[0,1]);
-			exists $map->{$contract} and @decH = ($contract, $decH[2]);
+			$map->{$contract} and @decH = ($contract, $decH[2]);
 		    }
 		    # even if V's ignorable, LT contraction is not supported.
 		    # If such a situation were required, NFD should be used.
 		}
-		if (@decH == 3 && exists $max->{$decH[1]}) {
+		if (@decH == 3 && $max->{$decH[1]}) {
 		    my $contract = join(CODE_SEP, @decH[1,2]);
-		    exists $map->{$contract} and @decH = ($decH[0], $contract);
+		    $map->{$contract} and @decH = ($decH[0], $contract);
 		}
 	    }
 
 	    @ce = map({
-		    exists $map->{$_} ? @{ $map->{$_} } :
+		    $map->{$_} ? @{ $map->{$_} } :
 		$uXS && _exists_simple($_) ? _fetch_simple($_) : ### XS only
 		    $der->($_);
 		} @decH);
@@ -1104,7 +1098,7 @@ If the revision (previously "tracking version") number of UCA is given,
 behavior of that revision is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 
-The following revisions are supported.  The default is 34.
+The following revisions are supported.  The default is 32.
 
      UCA       Unicode Standard         DUCET (@version)
    -------------------------------------------------------
@@ -1121,8 +1115,6 @@ The following revisions are supported.  The default is 34.
      28             6.3.0               6.3.0 (6.3.0)
      30             7.0.0               7.0.0 (7.0.0)
      32             8.0.0               8.0.0 (8.0.0)
-     34             9.0.0               9.0.0 (9.0.0)
-     36            10.0.0              10.0.0(10.0.0)
 
 * See below for C<long_contraction> with C<UCA_Version> 22 and 24.
 
@@ -1462,15 +1454,13 @@ those in the CJK Unified Ideographs Extension A etc.
     U+4E00..U+9FC3 if UCA_Version is 18.
     U+4E00..U+9FCB if UCA_Version is 20 or 22.
     U+4E00..U+9FCC if UCA_Version is 24 to 30.
-    U+4E00..U+9FD5 if UCA_Version is 32 or 34.
-    U+4E00..U+9FEA if UCA_Version is 36.
+    U+4E00..U+9FD5 if UCA_Version is 32.
 
     In the CJK Unified Ideographs Extension blocks:
     Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version.
     Ext.C (U+2A700..U+2B734) if UCA_Version is 20 or later.
     Ext.D (U+2B740..U+2B81D) if UCA_Version is 22 or later.
-    Ext.E (U+2B820..U+2CEA1) if UCA_Version is 32 or later.
-    Ext.F (U+2CEB0..U+2EBE0) if UCA_Version is 36.
+    Ext.E (U+2B820..U+2CEA1) if UCA_Version is 32.
 
 Through C<overrideCJK>, ordering of CJK unified ideographs (including
 extensions) can be overridden.
@@ -2047,8 +2037,7 @@ The most preferable one is "The Default Unicode Collation Element Table"
 
    http://www.unicode.org/Public/UCA/
 
-   http://www.unicode.org/Public/UCA/latest/allkeys.txt
-   (latest version)
+   http://www.unicode.org/Public/UCA/latest/allkeys.txt (latest version)
 
 If DUCET is not installed, it is recommended to copy the file
 from http://www.unicode.org/Public/UCA/latest/allkeys.txt
@@ -2092,15 +2081,15 @@ B<Unicode::Normalize is required to try The Conformance Test.>
 =head1 AUTHOR, COPYRIGHT AND LICENSE
 
 The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
-<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2017,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2016,
 SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied verbatim
-from L<http://www.unicode.org/Public/UCA/9.0.0/allkeys.txt>.
-For this file, Copyright (c) 2016 Unicode, Inc.; distributed
+from L<http://www.unicode.org/Public/UCA/8.0.0/allkeys.txt>.
+For this file, Copyright (c) 2001-2015 Unicode, Inc.; distributed
 under the Terms of Use in L<http://www.unicode.org/terms_of_use.html>
 
 =head1 SEE ALSO

@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '2.22';      # remember to update version in POD!
+our $VERSION = '2.15';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 2.21
+This document describes threads version 2.15
 
 =head1 WARNING
 
@@ -937,33 +937,6 @@ C<chdir()>) will affect all the threads in the application.
 On MSWin32, each thread maintains its own the current working directory
 setting.
 
-=item Locales
-
-Prior to Perl 5.28, locales could not be used with threads, due to various
-race conditions.  Starting in that release, on systems that implement
-thread-safe locale functions, threads can be used, with some caveats.
-This includes Windows starting with Visual Studio 2005, and systems compatible
-with POSIX 2008.  See L<perllocale/Multi-threaded operation>.
-
-Each thread (except the main thread) is started using the C locale.  The main
-thread is started like all other Perl programs; see L<perllocale/ENVIRONMENT>.
-You can switch locales in any thread as often as you like.
-
-If you want to inherit the parent thread's locale, you can, in the parent, set
-a variable like so:
-
-    $foo = POSIX::setlocale(LC_ALL, NULL);
-
-and then pass to threads->create() a sub that closes over C<$foo>.  Then, in
-the child, you say
-
-    POSIX::setlocale(LC_ALL, $foo);
-
-Or you can use the facilities in L<threads::shared> to pass C<$foo>;
-or if the environment hasn't changed, in the child, do
-
-    POSIX::setlocale(LC_ALL, "");
-
 =item Environment variables
 
 Currently, on all platforms except MSWin32, all I<system> calls (e.g., using
@@ -1014,6 +987,13 @@ L</"THREAD SIGNALLING"> to relay the signal to the thread:
 On some platforms, it might not be possible to destroy I<parent> threads while
 there are still existing I<child> threads.
 
+=item Creating threads inside special blocks
+
+Creating threads inside C<BEGIN>, C<CHECK> or C<INIT> blocks should not be
+relied upon.  Depending on the Perl version and the application code, results
+may range from success, to (apparently harmless) warnings of leaked scalar, or
+all the way up to crashing of the Perl interpreter.
+
 =item Unsafe signals
 
 Since Perl 5.8.0, signals have been made safer in Perl by postponing their
@@ -1038,27 +1018,16 @@ signalling behavior is only in effect in the following situations:
 If unsafe signals is in effect, then signal handling is not thread-safe, and
 the C<-E<gt>kill()> signalling method cannot be used.
 
-=item Identity of objects returned from threads
+=item Returning closures from threads
 
-When a value is returned from a thread through a C<join> operation,
-the value and everything that it references is copied across to the
-joining thread, in much the same way that values are copied upon thread
-creation.  This works fine for most kinds of value, including arrays,
-hashes, and subroutines.  The copying recurses through array elements,
-reference scalars, variables closed over by subroutines, and other kinds
-of reference.
+Returning closures from threads should not be relied upon.  Depending on the
+Perl version and the application code, results may range from success, to
+(apparently harmless) warnings of leaked scalar, or all the way up to crashing
+of the Perl interpreter.
 
-However, everything referenced by the returned value is a fresh copy in
-the joining thread, even if a returned object had in the child thread
-been a copy of something that previously existed in the parent thread.
-After joining, the parent will therefore have a duplicate of each such
-object.  This sometimes matters, especially if the object gets mutated;
-this can especially matter for private data to which a returned subroutine
-provides access.
+=item Returning objects from threads
 
-=item Returning blessed objects from threads
-
-Returning blessed objects from threads does not work.  Depending on the classes
+Returning objects from threads does not work.  Depending on the classes
 involved, you may be able to work around this by returning a serialized
 version of the object (e.g., using L<Data::Dumper> or L<Storable>), and then
 reconstituting it in the joining thread.  If you're using Perl 5.10.0 or

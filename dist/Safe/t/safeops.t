@@ -234,7 +234,6 @@ exists		exists $h{Key}
 rv2hv		%h
 helem		$h{kEy}
 hslice		@h{kEy}
-multiconcat	SKIP (set by optimizer)
 multideref	SKIP (set by optimizer)
 unpack		unpack
 pack		pack

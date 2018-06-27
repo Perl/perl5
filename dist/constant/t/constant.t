@@ -1,7 +1,7 @@
 #!./perl -T
 
 use warnings;
-our ( @warnings, $fagwoosh, $putt, $kloong );
+use vars qw{ @warnings $fagwoosh $putt $kloong};
 BEGIN {				# ...and save 'em for later
     $SIG{'__WARN__'} = sub { push @warnings, @_ }
 }

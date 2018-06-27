@@ -2,12 +2,6 @@ package Test2::Tools::Tiny;
 use strict;
 use warnings;
 
-BEGIN {
-    if ($] lt "5.008") {
-        require Test::Builder::IO::Scalar;
-    }
-}
-
 use Scalar::Util qw/blessed/;
 
 use Test2::Util qw/try/;
@@ -16,7 +10,7 @@ use Test2::API qw/context run_subtest test2_stack/;
 use Test2::Hub::Interceptor();
 use Test2::Hub::Interceptor::Terminator();
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302073';
 
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 our @EXPORT = qw{
@@ -27,9 +21,9 @@ our @EXPORT = qw{
 sub ok($;$@) {
     my ($bool, $name, @diag) = @_;
     my $ctx = context();
-
-    return $ctx->pass_and_release($name) if $bool;
-    return $ctx->fail_and_release($name, @diag);
+    $ctx->ok($bool, $name, \@diag);
+    $ctx->release;
+    return $bool ? 1 : 0;
 }
 
 sub is($$;$@) {
@@ -47,16 +41,18 @@ sub is($$;$@) {
         $bool = 1;
     }
 
-    return $ctx->pass_and_release($name) if $bool;
+    unless ($bool) {
+        $got  = '*NOT DEFINED*' unless defined $got;
+        $want = '*NOT DEFINED*' unless defined $want;
+        unshift @diag => (
+            "GOT:      $got",
+            "EXPECTED: $want",
+        );
+    }
 
-    $got  = '*NOT DEFINED*' unless defined $got;
-    $want = '*NOT DEFINED*' unless defined $want;
-    unshift @diag => (
-        "GOT:      $got",
-        "EXPECTED: $want",
-    );
-
-    return $ctx->fail_and_release($name, @diag);
+    $ctx->ok($bool, $name, \@diag);
+    $ctx->release;
+    return $bool;
 }
 
 sub isnt($$;$@) {
@@ -74,12 +70,12 @@ sub isnt($$;$@) {
         $bool = 0;
     }
 
-    return $ctx->pass_and_release($name) if $bool;
-
     unshift @diag => "Strings are the same (they should not be)"
         unless $bool;
 
-    return $ctx->fail_and_release($name, @diag);
+    $ctx->ok($bool, $name, \@diag);
+    $ctx->release;
+    return $bool;
 }
 
 sub like($$;$@) {
@@ -99,8 +95,9 @@ sub like($$;$@) {
         unshift @diag => "Got an undefined value.";
     }
 
-    return $ctx->pass_and_release($name) if $bool;
-    return $ctx->fail_and_release($name, @diag);
+    $ctx->ok($bool, $name, \@diag);
+    $ctx->release;
+    return $bool;
 }
 
 sub unlike($$;$@) {
@@ -121,8 +118,9 @@ sub unlike($$;$@) {
         unshift @diag => "Got an undefined value.";
     }
 
-    return $ctx->pass_and_release($name) if $bool;
-    return $ctx->fail_and_release($name, @diag);
+    $ctx->ok($bool, $name, \@diag);
+    $ctx->release;
+    return $bool;
 }
 
 sub is_deeply($$;$@) {
@@ -131,10 +129,6 @@ sub is_deeply($$;$@) {
 
     no warnings 'once';
     require Data::Dumper;
-
-    # Otherwise numbers might be unquoted
-    local $Data::Dumper::Useperl  = 1;
-
     local $Data::Dumper::Sortkeys = 1;
     local $Data::Dumper::Deparse  = 1;
     local $Data::Dumper::Freezer  = 'XXX';
@@ -153,8 +147,11 @@ sub is_deeply($$;$@) {
 
     my $bool = $g eq $w;
 
-    return $ctx->pass_and_release($name) if $bool;
-    return $ctx->fail_and_release($name, $g, $w, @diag);
+    my $diff;
+
+    $ctx->ok($bool, $name, [$diff ? $diff : ($g, $w), @diag]);
+    $ctx->release;
+    return $bool;
 }
 
 sub diag {
@@ -186,13 +183,16 @@ sub todo {
     my $filter = $hub->pre_filter(
         sub {
             my ($active_hub, $event) = @_;
-            if ($active_hub == $hub) {
-                $event->set_todo($reason) if $event->can('set_todo');
-                $event->add_amnesty({tag => 'TODO', details => $reason});
+
+            # Turn a diag into a note
+            return Test2::Event::Note->new(%$event) if ref($event) eq 'Test2::Event::Diag';
+
+            # Set todo on ok's
+            if ($hub == $active_hub && $event->isa('Test2::Event::Ok')) {
+                $event->set_todo($reason);
+                $event->set_effective_pass(1);
             }
-            else {
-                $event->add_amnesty({tag => 'TODO', details => $reason, inherited => 1});
-            }
+
             return $event;
         },
         inherit => 1,
@@ -237,9 +237,7 @@ sub tests {
     my ($name, $code) = @_;
     my $ctx = context();
 
-    my $be = caller->can('before_each');
-
-    $be->($name) if $be;
+    before_each() if __PACKAGE__->can('before_each');
 
     my $bool = run_subtest($name, $code, 1);
 
@@ -259,16 +257,8 @@ sub capture(&) {
         my ($out_fh, $err_fh);
 
         ($ok, $e) = try {
-          # Scalar refs as filehandles were added in 5.8.
-          if ($] ge "5.008") {
             open($out_fh, '>', \$out) or die "Failed to open a temporary STDOUT: $!";
             open($err_fh, '>', \$err) or die "Failed to open a temporary STDERR: $!";
-          }
-          # Emulate scalar ref filehandles with a tie.
-          else {
-            $out_fh = Test::Builder::IO::Scalar->new(\$out) or die "Failed to open a temporary STDOUT";
-            $err_fh = Test::Builder::IO::Scalar->new(\$err) or die "Failed to open a temporary STDERR";
-          }
 
             test2_stack->top->format->set_handles([$out_fh, $err_fh, $out_fh]);
 
@@ -425,7 +415,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

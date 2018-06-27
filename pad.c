@@ -66,7 +66,7 @@ or resolved at compile time.  These don't have names by which they
 can be looked up from Perl code at run time through eval"" the way
 C<my>/C<our> variables can be.  Since they can't be looked up by "name"
 but only by their index allocated at compile time (which is usually
-in C<< PL_op->op_targ >>), wasting a name SV for them doesn't make sense.
+in C<PL_op->op_targ>), wasting a name SV for them doesn't make sense.
 
 The pad names in the PADNAMELIST have their PV holding the name of
 the variable.  The C<COP_SEQ_RANGE_LOW> and C<_HIGH> fields form a range
@@ -137,7 +137,7 @@ values for the pad for the currently-executing code.
 =for apidoc AmxU|SV **|PL_curpad
 
 Points directly to the body of the L</PL_comppad> array.
-(I.e., this is C<PadARRAY(PL_comppad)>.)
+(I.e., this is C<PAD_ARRAY(PL_comppad)>.)
 
 =cut
 */
@@ -395,11 +395,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 		if (name && PadnamePV(name) && *PadnamePV(name) == '&')
 		    {
 			CV * const innercv = MUTABLE_CV(curpad[ix]);
-			U32 inner_rc;
-			assert(innercv);
-			assert(SvTYPE(innercv) != SVt_PVFM);
-			inner_rc = SvREFCNT(innercv);
+			U32 inner_rc = SvREFCNT(innercv);
 			assert(inner_rc);
+			assert(SvTYPE(innercv) != SVt_PVFM);
 
 			if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
 			    curpad[ix] = NULL;
@@ -859,7 +857,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
     assert((flags & ~padadd_OUR) == 0);
 
-    if (PadnamelistMAX(PL_comppad_name) < 0 || !ckWARN(WARN_SHADOW))
+    if (PadnamelistMAX(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
 	return; /* nothing to check */
 
     svp = PadnamelistARRAY(PL_comppad_name);
@@ -877,7 +875,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
 	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
-	    Perl_warner(aTHX_ packWARN(WARN_SHADOW),
+	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" %s %" PNf " masks earlier declaration in same %s",
 		(   is_our                         ? "our"   :
                     PL_parser->in_my == KEY_my     ? "my"    :
@@ -903,10 +901,10 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 		&& SvOURSTASH(sv) == ourstash
 		&& memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
 	    {
-		Perl_warner(aTHX_ packWARN(WARN_SHADOW),
+		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %" PNf " redeclared", PNfARG(sv));
 		if (off <= PL_comppad_name_floor)
-		    Perl_warner(aTHX_ packWARN(WARN_SHADOW),
+		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		break;
 	    }
@@ -1021,7 +1019,7 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 
 Until the lexical C<$_> feature was removed, this function would
 find the position of the lexical C<$_> in the pad of the
-currently-executing function and return the offset in the current pad,
+currently-executing function and returns the offset in the current pad,
 or C<NOT_IN_PAD>.
 
 Now it always returns C<NOT_IN_PAD>.
@@ -2003,7 +2001,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
 		    {
 			/* my sub */
 			/* Just provide a stub, but name it.  It will be
-			   upgraded to the real thing on scope entry. */
+			   upgrade to the real thing on scope entry. */
                         dVAR;
 			U32 hash;
 			PERL_HASH(hash, PadnamePV(namesv)+1,
@@ -2297,10 +2295,7 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv, U32 flags)
 		if (CvLEXICAL(cv) || flags & CV_NAME_NOTQUAL)
 		    sv_sethek(retsv, CvNAME_HEK(cv));
 		else {
-		    if (CvSTASH(cv) && HvNAME_HEK(CvSTASH(cv)))
-			sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
-		    else
-			sv_setpvs(retsv, "__ANON__");
+		    sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
 		    sv_catpvs(retsv, "::");
 		    sv_cathek(retsv, CvNAME_HEK(cv));
 		}

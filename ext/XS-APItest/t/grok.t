@@ -4,6 +4,7 @@ use strict;
 use Test::More;
 use Config;
 use XS::APItest;
+use feature 'switch';
 no warnings 'experimental::smartmatch';
 use constant TRUTH => '0 but true';
 
@@ -30,15 +31,21 @@ foreach my $leader ('', ' ', '  ') {
 
 	{
 	    my (@UV, @NV);
-	    if ($Config{ivsize} == 4) {
-		@UV = qw(429496729  4294967290 4294967294 4294967295);
-		@NV = qw(4294967296 4294967297 4294967300 4294967304);
-	    } elsif ($Config{ivsize} == 8) {
-		@UV = qw(1844674407370955161  18446744073709551610
-			 18446744073709551614 18446744073709551615);
-		@NV = qw(18446744073709551616 18446744073709551617
-			 18446744073709551620 18446744073709551624);
-	    } else { die "Unknown IV size $Config{ivsize}" }
+	    given ($Config{ivsize}) {
+		when (4) {
+		    @UV = qw(429496729  4294967290 4294967294 4294967295);
+		    @NV = qw(4294967296 4294967297 4294967300 4294967304);
+		}
+		when (8) {
+		    @UV = qw(1844674407370955161  18446744073709551610
+			     18446744073709551614 18446744073709551615);
+		    @NV = qw(18446744073709551616 18446744073709551617
+			     18446744073709551620 18446744073709551624);
+		}
+		default {
+		    die "Unknown IV size $_";
+		}
+	    }
 	    foreach (@UV) {
 		my $string = $leader . $_ . $trailer;
 		my ($flags, $value) = grok_number($string);

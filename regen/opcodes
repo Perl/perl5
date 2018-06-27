@@ -131,7 +131,6 @@ i_add		integer addition (+)	ck_null		ifsT2	S S
 subtract	subtraction (-)		ck_null		IfsT2	S S
 i_subtract	integer subtraction (-)	ck_null		ifsT2	S S
 concat		concatenation (.) or string	ck_concat	fsT2	S S
-multiconcat	concatenation (.) or string	ck_null	sT+
 stringify	string			ck_stringify	fsT@	S
 
 left_shift	left bitshift (<<)	ck_bitop	fsT2	S S
@@ -145,10 +144,10 @@ le		numeric le (<=)		ck_cmp		Iifs2	S S<
 i_le		integer le (<=)		ck_cmp		ifs2	S S<
 ge		numeric ge (>=)		ck_cmp		Iifs2	S S<
 i_ge		integer ge (>=)		ck_cmp		ifs2	S S<
-eq		numeric eq (==)		ck_cmp		Iifs2	S S<
-i_eq		integer eq (==)		ck_cmp		ifs2	S S<
-ne		numeric ne (!=)		ck_cmp		Iifs2	S S<
-i_ne		integer ne (!=)		ck_cmp		ifs2	S S<
+eq		numeric eq (==)		ck_null		Iifs2	S S<
+i_eq		integer eq (==)		ck_null		ifs2	S S<
+ne		numeric ne (!=)		ck_null		Iifs2	S S<
+i_ne		integer ne (!=)		ck_null		ifs2	S S<
 ncmp		numeric comparison (<=>)	ck_null		Iifst2	S S<
 i_ncmp		integer comparison (<=>)	ck_null		ifst2	S S<
 
@@ -175,7 +174,9 @@ i_negate	integer negation (-)	ck_null		ifst1	S
 not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fst1	S
 ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
-scomplement	string 1's complement (~)	ck_null	fsT1	S
+# scomplement uses ck_bitop only for the experimental warning.  Once the
+# warning is gone, this can change to ck_null.
+scomplement	string 1's complement (~)	ck_bitop	fsT1	S
 
 smartmatch	smart match		ck_smartmatch	s2
 
@@ -237,7 +238,7 @@ values		values			ck_each		dt%	H
 keys		keys			ck_each		t%	H
 delete		delete			ck_delete	%	S
 exists		exists			ck_exists	is%	S
-rv2hv		hash dereference	ck_rvconst	dt1	
+rv2hv		hash dereference	ck_rvconst	d1	
 helem		hash element		ck_null		s2	H S
 hslice		hash slice		ck_null		m@	H L
 kvhslice	key/value hash slice	ck_null		m@	H L
@@ -291,6 +292,7 @@ andassign	logical and assignment (&&=)	ck_null		s|
 orassign	logical or assignment (||=)	ck_null		s|	
 dorassign	defined or assignment (//=)	ck_null		s|
 
+method		method lookup		ck_method	d.
 entersub	subroutine entry	ck_subr		dm1	L
 leavesub	subroutine exit		ck_null		1	
 leavesublv	lvalue subroutine return	ck_null		1	
@@ -320,7 +322,6 @@ redo		redo			ck_null		s}
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		s}	
 exit		exit			ck_fun		s%	S?
-method		method lookup		ck_method	d.
 method_named	method with known name	ck_null		d.
 method_super	super with known name	ck_null		d.
 method_redir	redirect method with known name	ck_null	d.

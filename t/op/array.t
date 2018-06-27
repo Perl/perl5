@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (194);
+plan (173);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -574,118 +574,5 @@ $#a = -1; $#a++;
 () =  -splice @a, 0, 1, 1, 1;
 $#a = -1; $#a++;
 () = 0+splice @a, 0, 1, 1, 1;
-
-# [perl #8910] lazy creation of array elements used to leak out
-{
-    sub t8910 { $_[1] = 5; $_[2] = 7; }
-    my @p;
-    $p[0] = 1;
-    $p[2] = 2;
-    t8910(@p);
-    is "@p", "1 5 7", "lazy element creation with sub call";
-    my @q;
-    @q[0] = 1;
-    @q[2] = 2;
-    my @qr = \(@q);
-    is $qr[$_], \$q[$_], "lazy element creation with refgen" foreach 0..2;
-    isnt $qr[1], \undef, "lazy element creation with refgen";
-    my @r;
-    $r[1] = 1;
-    foreach my $re ((), @r) { $re = 5; }
-    is join("", @r), "55", "lazy element creation with foreach";
-}
-
-{ # Some things broken by the initial fix for #8910
-    (\my @a)->$#*++;
-    my @b = @a;
-    ok !exists $a[0], 'copying an array via = does not vivify elements';
-    delete $a[0];
-    @a[1..5] = 1..5;
-    $#a++;
-    my $count;
-    my @existing_elements = map { exists $a[$count++] ? $_ : () } @a;
-    is join(",", @existing_elements), "1,2,3,4,5",
-       'map {} @a does not vivify elements';
-    $#a = -1;
-    {local $a[3] = 12; my @foo=@a};
-    is @a, 0,'unwinding localization of elem past end of array shrinks it';
-
-    # Again, but with a package array
-    package tmp; (\our @a)->$#*++; package main;
-    my @b = @a;
-    ok !exists $a[0], 'copying an array via = does not vivify elements';
-    delete $a[0];
-    @a[1..5] = 1..5;
-    $#a++;
-    my $count;
-    my @existing_elements = map { exists $a[$count++] ? $_ : () } @a;
-    is join(",", @existing_elements), "1,2,3,4,5",
-       'map {} @a does not vivify elements';
-    $#a = -1;
-    {local $a[3] = 12; my @foo=@a};
-    is @a, 0,'unwinding localization of elem past end of array shrinks it';
-}
-{
-    # Again, but with a non-magical array ($#a makes it magical)
-    my @a = 1;
-    delete $a[0];
-    my @b = @a;
-    ok !exists $a[0], 'copying an array via = does not vivify elements';
-    delete $a[0];
-    @a[1..5] = 1..5;
-    my $count;
-    my @existing_elements = map { exists $a[$count++] ? $_ : () } @a;
-    is join(",", @existing_elements), "1,2,3,4,5",
-       'map {} @a does not vivify elements';
-    @a = ();
-    {local $a[3] = 12; my @foo=@a};
-    is @a, 0, 'unwinding localization of elem past end of array shrinks it'
-}
-
-# perl #132729, as it applies to flattening an array in lvalue context
-{
-    my @a;
-    $a[1] = 1;
-    map { unshift @a, 7; $_ = 3; goto aftermap; } @a;
-   aftermap:
-    is "[@a]", "[7 3 1]",
-       'non-elems read from @a do not lose their position';
-    @a = ();
-    $#a++; # make it magical
-    $a[1] = 1;
-    map { unshift @a, 7; $_ = 3; goto aftermath; } @a;
-   aftermath:
-    is "[@a]", "[7 3 1]",
-       'non-elems read from magical @a do not lose their position';
-}
-# perl #132729, as it applies to ‘holes’ in an array passed to a sub
-# individually
-{
-    my @a;
-    $a[1] = 1;
-    sub { unshift @a, 7; $_[0] = 3; }->($a[0]);
-    is "[@a]", "[7 3 1]",
-       'holes passed to sub do not lose their position (multideref)';
-    @a = ();
-    $#a++; # make it magical
-    $a[1] = 1;
-    sub { unshift @a, 7; $_[0] = 3; }->($a[0]);
-    is "[@a]", "[7 3 1]",
-       'holes passed to sub do not lose their position (multideref, mg)';
-}
-{
-    # Again, with aelem, not multideref
-    my @a;
-    $a[1] = 1;
-    sub { unshift @a, 7; $_[0] = 3; }->($a[${\0}]);
-    is "[@a]", "[7 3 1]",
-       'holes passed to sub do not lose their position (aelem)';
-    @a = ();
-    $#a++; # make it magical
-    $a[1] = 1;
-    sub { unshift @a, 7; $_[0] = 3; }->($a[${\0}]);
-    is "[@a]", "[7 3 1]",
-       'holes passed to sub do not lose their position (aelem, mg)';
-}
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";

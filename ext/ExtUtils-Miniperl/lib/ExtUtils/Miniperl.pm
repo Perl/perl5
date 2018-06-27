@@ -4,9 +4,11 @@ use strict;
 require Exporter;
 use ExtUtils::Embed 1.31, qw(xsi_header xsi_protos xsi_body);
 
-our @ISA = qw(Exporter);
-our @EXPORT = qw(writemain);
-our $VERSION = '1.08';
+use vars qw($VERSION @ISA @EXPORT);
+
+@ISA = qw(Exporter);
+@EXPORT = qw(writemain);
+$VERSION = '1.06';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -151,7 +153,8 @@ main(int argc, char **argv, char **env)
 	PL_perl_destruct_level = 0;
     }
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-    if (!perl_parse(my_perl, xs_init, argc, argv, (char **)NULL))
+    exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
+    if (!exitstatus)
         perl_run(my_perl);
 
 #ifndef PERL_MICRO

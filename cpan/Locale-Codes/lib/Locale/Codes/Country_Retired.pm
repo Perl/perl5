@@ -3,7 +3,7 @@ Locale::Codes::Country_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Fri Feb 23 12:58:17 EST 2018
+#    Generated on: Fri Nov 18 09:22:54 EST 2016
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.56';
+$VERSION='3.42';
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'code'} = {
    q(an) => q(Netherlands Antilles),
@@ -340,7 +340,6 @@ $Locale::Codes::Retired{'country'}{'un-alpha-3'}{'code'} = {
 };
 
 $Locale::Codes::Retired{'country'}{'un-numeric'}{'code'} = {
-   q(830) => q(Channel Islands),
 };
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'name'} = {
@@ -616,13 +615,10 @@ $Locale::Codes::Retired{'country'}{'numeric'}{'name'} = {
 
 $Locale::Codes::Retired{'country'}{'un-alpha-3'}{'name'} = {
    q(czech republic) => [ q(CZE), q(Czech Republic) ],
-   q(korea, the democratic people's republic of) => [ q(PRK), q(Korea, The Democratic People's Republic of) ],
 };
 
 $Locale::Codes::Retired{'country'}{'un-numeric'}{'name'} = {
-   q(channel islands) => [ q(830), q(Channel Islands) ],
    q(czech republic) => [ q(203), q(Czech Republic) ],
-   q(korea, the democratic people's republic of) => [ q(408), q(Korea, The Democratic People's Republic of) ],
 };
 
 

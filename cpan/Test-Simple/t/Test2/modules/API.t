@@ -37,8 +37,6 @@ ok(Test2::API->can($_), "$_ method is present") for qw{
     test2_list_post_load_callbacks
 
     test2_ipc
-    test2_ipc_disable
-    test2_ipc_disabled
     test2_ipc_drivers
     test2_ipc_add_driver
     test2_ipc_polling
@@ -104,18 +102,11 @@ is_deeply([$CLASS->can('test2_ipc_drivers')->()], [qw/Test2::IPC::Driver::Files/
 my $file = __FILE__;
 my $line = __LINE__ + 1;
 my $warnings = warnings { $CLASS->can('test2_ipc_add_driver')->('fake') };
-my $sub1 = sub {
 like(
     $warnings->[0],
     qr{^IPC driver fake loaded too late to be used as the global ipc driver at \Q$file\E line $line},
     "got warning about adding driver too late"
 );
-};
-if ($] le "5.006002") {
-    todo("TODO known to fail on $]", $sub1);
-} else {
-    $sub1->();
-}
 
 is_deeply([$CLASS->can('test2_ipc_drivers')->()], [qw/fake Test2::IPC::Driver::Files/], "Got updated list");
 
@@ -149,12 +140,6 @@ $CLASS->can('test2_no_wait')->(1);
 ok($CLASS->can('test2_no_wait')->(), "no_wait is set");
 $CLASS->can('test2_no_wait')->(undef);
 ok(!$CLASS->can('test2_no_wait')->(), "no_wait is not set");
-
-ok($CLASS->can('test2_ipc_wait_enabled')->(), "IPC waiting enabled");
-$CLASS->can('test2_ipc_wait_disable')->();
-ok(!$CLASS->can('test2_ipc_wait_enabled')->(), "IPC waiting disabled");
-$CLASS->can('test2_ipc_wait_enable')->();
-ok($CLASS->can('test2_ipc_wait_enabled')->(), "IPC waiting enabled");
 
 my $pctx;
 sub tool_a($;$) {

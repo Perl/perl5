@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use overload ();
 
-our $VERSION = '0.67_01';
+our $VERSION = '0.67';
 
 sub NEXT::ELSEWHERE::ancestors
 {
@@ -64,19 +64,17 @@ sub NEXT::ELSEWHERE::buildAUTOLOAD
                 last if shift @forebears eq $caller_class
             }
             no strict 'refs';
-            # Use *{"..."} when first accessing the CODE slot, to make sure
-            # any typeglob stub is upgraded to a full typeglob.
             @{$NEXT::NEXT{$key,$wanted_method}} =
                 map {
                     my $stash = \%{"${_}::"};
-                    ($stash->{$caller_method} && (*{"${_}::$caller_method"}{CODE}))
+                    ($stash->{$caller_method} && (*{$stash->{$caller_method}}{CODE}))
                         ? *{$stash->{$caller_method}}{CODE}
                         : () } @forebears
                     unless $wanted_method eq 'AUTOLOAD';
             @{$NEXT::NEXT{$key,$wanted_method}} =
                 map {
                     my $stash = \%{"${_}::"};
-                    ($stash->{AUTOLOAD} && (*{"${_}::AUTOLOAD"}{CODE}))
+                    ($stash->{AUTOLOAD} && (*{$stash->{AUTOLOAD}}{CODE}))
                         ? "${_}::AUTOLOAD"
                         : () } @forebears
                     unless @{$NEXT::NEXT{$key,$wanted_method}||[]};

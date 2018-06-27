@@ -41,7 +41,7 @@ use Safe;
 
 #$Storable::DEBUGME = 1;
 
-our ($freezed, $thawed, @obj, @res, $blessed_code);
+use vars qw($freezed $thawed @obj @res $blessed_code);
 
 $blessed_code = bless sub { "blessed" }, "Some::Package";
 { package Another::Package; sub foo { __PACKAGE__ } }
@@ -125,9 +125,8 @@ is($new_sub->(), $obj[2]->());
 ######################################################################
 # Test retrieve & store
 
-store $obj[0], "store$$";
-# $Storable::DEBUGME = 1;
-$thawed = retrieve "store$$";
+store $obj[0], 'store';
+$thawed = retrieve 'store';
 
 is($thawed->[0]->(), "JAPH");
 is($thawed->[1]->(), 42);
@@ -137,9 +136,9 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
 ######################################################################
 
-nstore $obj[0], "store$$";
-$thawed = retrieve "store$$";
-unlink "store$$";
+nstore $obj[0], 'store';
+$thawed = retrieve 'store';
+unlink 'store';
 
 is($thawed->[0]->(), "JAPH");
 is($thawed->[1]->(), 42);

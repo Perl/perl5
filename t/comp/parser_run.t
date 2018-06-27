@@ -5,12 +5,12 @@
 # Note that this should still be runnable under miniperl.
 
 BEGIN {
+    @INC = qw(. ../lib );
     chdir 't' if -d 't';
-    require './test.pl';
-    set_up_inc( qw(. ../lib ) );
 }
 
-plan(5);
+require './test.pl';
+plan(4);
 
 # [perl #130814] can reallocate lineptr while looking ahead for
 # "Missing $ on loop variable" diagnostic.
@@ -48,12 +48,6 @@ SKIP:
     my $out = runperl(prog => "\@{ 0\n\n}", stderr => 1, non_portable => 1);
     is($out, "", "check for ASAN use after free");
 }
-
-fresh_perl_is('-C-', <<'EXPECTED', {}, "ambiguous unary operator check doesn't crash (#132433)");
-Warning: Use of "-C-" without parentheses is ambiguous at - line 1.
-syntax error at - line 1, at EOF
-Execution of - aborted due to compilation errors.
-EXPECTED
 
 __END__
 # ex: set ts=8 sts=4 sw=4 et:

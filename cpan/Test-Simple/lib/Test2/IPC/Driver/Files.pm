@@ -2,12 +2,12 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302073';
 
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
-use Test2::Util::HashBase qw{tempdir event_ids read_ids timeouts tid pid globals};
+use Test2::Util::HashBase qw{tempdir event_id tid pid globals};
 
 use Scalar::Util qw/blessed/;
 use File::Temp();
@@ -15,8 +15,53 @@ use Storable();
 use File::Spec();
 use POSIX();
 
-use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator do_rename do_unlink try_sig_mask/;
+use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator/;
 use Test2::API qw/test2_ipc_set_pending/;
+
+BEGIN {
+    if (IS_WIN32) {
+        my $max_tries = 5;
+
+        *do_rename = sub {
+            my ($from, $to) = @_;
+
+            my $err;
+            for (1 .. $max_tries) {
+                return (1) if rename($from, $to);
+                $err = "$!";
+                last if $_ == $max_tries;
+                sleep 1;
+            }
+
+            return (0, $err);
+        };
+        *do_unlink = sub {
+            my ($file) = @_;
+
+            my $err;
+            for (1 .. $max_tries) {
+                return (1) if unlink($file);
+                $err = "$!";
+                last if $_ == $max_tries;
+                sleep 1;
+            }
+
+            return (0, "$!");
+        };
+    }
+    else {
+        *do_rename = sub {
+            my ($from, $to) = @_;
+            return (1) if rename($from, $to);
+            return (0, "$!");
+        };
+        *do_unlink = sub {
+            my ($file) = @_;
+            return (1) if unlink($file);
+            return (0, "$!");
+        };
+    }
+}
 
 sub use_shm { 1 }
 sub shm_size() { 64 }
@@ -39,9 +84,7 @@ sub init {
     print STDERR "\nIPC Temp Dir: $tmpdir\n\n"
         if $ENV{T2_KEEP_TEMPDIR};
 
-    $self->{+EVENT_IDS} = {};
-    $self->{+READ_IDS} = {};
-    $self->{+TIMEOUTS} = {};
+    $self->{+EVENT_ID} = 1;
 
     $self->{+TID} = get_tid();
     $self->{+PID} = $$;
@@ -68,11 +111,8 @@ sub event_file {
     $self->abort("'$e' is not an event object!")
         unless $type->isa('Test2::Event');
 
-    my $tid = get_tid();
-    my $eid = $self->{+EVENT_IDS}->{$hid}->{$$}->{$tid} += 1;
-
     my @type = split '::', $type;
-    my $name = join(ipc_separator, $hid, $$, $tid, $eid, @type);
+    my $name = join(ipc_separator, $hid, $$, get_tid(), $self->{+EVENT_ID}++, @type);
 
     return File::Spec->catfile($tempdir, $name);
 }
@@ -159,18 +199,36 @@ do so if Test::Builder is loaded for legacy reasons.
         $self->{+GLOBALS}->{$hid}->{$name}++;
     }
 
+    my ($old, $blocked);
+    unless(IS_WIN32) {
+        my $to_block = POSIX::SigSet->new(
+            POSIX::SIGINT(),
+            POSIX::SIGALRM(),
+            POSIX::SIGHUP(),
+            POSIX::SIGTERM(),
+            POSIX::SIGUSR1(),
+            POSIX::SIGUSR2(),
+        );
+        $old = POSIX::SigSet->new;
+        $blocked = POSIX::sigprocmask(POSIX::SIG_BLOCK(), $to_block, $old);
+        # Silently go on if we failed to log signals, not much we can do.
+    }
+
     # Write and rename the file.
-    my ($ren_ok, $ren_err);
-    my ($ok, $err) = try_sig_mask {
+    my ($ok, $err) = try {
         Storable::store($e, $file);
-        ($ren_ok, $ren_err) = do_rename("$file", $ready);
+        my ($ok, $err) = do_rename("$file", $ready);
+        unless ($ok) {
+            POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
+            $self->abort("Could not rename file '$file' -> '$ready': $err");
+        };
+        test2_ipc_set_pending(substr($file, -(shm_size)));
     };
 
-    if ($ok) {
-        $self->abort("Could not rename file '$file' -> '$ready': $ren_err") unless $ren_ok;
-        test2_ipc_set_pending(substr($file, -(shm_size)));
-    }
-    else {
+    # If our block was successful we want to restore the old mask.
+    POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
+
+    if (!$ok) {
         my $src_file = __FILE__;
         $err =~ s{ at \Q$src_file\E.*$}{};
         chomp($err);
@@ -198,20 +256,6 @@ Error: $err
     return 1;
 }
 
-sub driver_abort {
-    my $self = shift;
-    my ($msg) = @_;
-
-    local ($@, $!, $?, $^E);
-    eval {
-        my $abort = File::Spec->catfile($self->{+TEMPDIR}, "ABORT");
-        open(my $fh, '>>', $abort) or die "Could not open abort file: $!";
-        print $fh $msg, "\n";
-        close($fh) or die "Could not close abort file: $!";
-        1;
-    } or warn $@;
-}
-
 sub cull {
     my $self = shift;
     my ($hid) = @_;
@@ -220,25 +264,8 @@ sub cull {
 
     opendir(my $dh, $tempdir) or $self->abort("could not open IPC temp dir ($tempdir)!");
 
-    my $read = $self->{+READ_IDS};
-    my $timeouts = $self->{+TIMEOUTS};
-
     my @out;
     for my $info (sort cmp_events map { $self->should_read_event($hid, $_) } readdir($dh)) {
-        unless ($info->{global}) {
-            my $next = $self->{+READ_IDS}->{$info->{hid}}->{$info->{pid}}->{$info->{tid}} ||= 1;
-
-            $timeouts->{$info->{file}} ||= time;
-
-            if ($next != $info->{eid}) {
-                # Wait up to N seconds for missing events
-                next unless 5 < time - $timeouts->{$info->{file}};
-                $self->abort("Missing event HID: $info->{hid}, PID: $info->{pid}, TID: $info->{tid}, EID: $info->{eid}.");
-            }
-
-            $self->{+READ_IDS}->{$info->{hid}}->{$info->{pid}}->{$info->{tid}} = $info->{eid} + 1;
-        }
-
         my $full = $info->{full_path};
         my $obj = $self->read_event_file($full);
         push @out => $obj;
@@ -275,7 +302,6 @@ sub parse_event_filename {
     my $type = join '::' => @parts;
 
     return {
-        file     => $file,
         ready    => $ready,
         complete => $complete,
         global   => $global,
@@ -292,8 +318,6 @@ sub should_read_event {
     my ($hid, $file) = @_;
 
     return if substr($file, 0, 1) eq '.';
-    return if substr($file, 0, 3) eq 'HUB';
-    CORE::exit(255) if $file eq 'ABORT';
 
     my $parsed = $self->parse_event_filename($file);
 
@@ -350,7 +374,7 @@ sub waiting {
     require Test2::Event::Waiting;
     $self->send(
         GLOBAL => Test2::Event::Waiting->new(
-            trace => Test2::EventFacet::Trace->new(frame => [caller()]),
+            trace => Test2::Util::Trace->new(frame => [caller()]),
         ),
         'GLOBAL'
     );
@@ -368,14 +392,6 @@ sub DESTROY {
 
     my $tempdir = $self->{+TEMPDIR};
 
-    my $aborted = 0;
-    my $abort_file = File::Spec->catfile($self->{+TEMPDIR}, "ABORT");
-    if (-e $abort_file) {
-        $aborted = 1;
-        my ($ok, $err) = do_unlink($abort_file);
-        warn $err unless $ok;
-    }
-
     opendir(my $dh, $tempdir) or $self->abort("Could not open temp dir! ($tempdir)");
     while(my $file = readdir($dh)) {
         next if $file =~ m/^\.+$/;
@@ -383,7 +399,7 @@ sub DESTROY {
         my $full = File::Spec->catfile($tempdir, $file);
 
         my $sep = ipc_separator;
-        if ($aborted || $file =~ m/^(GLOBAL|HUB$sep)/) {
+        if ($file =~ m/^(GLOBAL|HUB$sep)/) {
             $full =~ m/^(.*)$/;
             $full = $1; # Untaint it
             next if $ENV{T2_KEEP_TEMPDIR};
@@ -401,8 +417,6 @@ sub DESTROY {
         return;
     }
 
-    my $abort = File::Spec->catfile($self->{+TEMPDIR}, "ABORT");
-    unlink($abort) if -e $abort;
     rmdir($tempdir) or warn "Could not remove IPC temp dir ($tempdir)";
 }
 
@@ -473,7 +487,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

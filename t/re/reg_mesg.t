@@ -57,14 +57,6 @@ sub fixup_expect ($$) {
     return wantarray ? @new_expect : join "", @new_expect;
 }
 
-sub add_markers {
-    my ($element)= @_;
-    $element =~ s/ at .* line \d+\.?\n$//;
-    $element =~ s/in regex; marked by <-- HERE in/{#}/;
-    $element =~ s/ <-- HERE /{#}/;
-    return $element;
-}
-
 ## Because we don't "use utf8" in this file, we need to do some extra legwork
 ## for the utf8 tests: Prepend 'use utf8' to the pattern, and mark the strings
 ## to check against as UTF-8, but for this all to work properly, the character
@@ -114,14 +106,9 @@ my $high_mixed_digit = ('A' lt '0') ? '0' : 'A';
 my $colon_hex = sprintf "%02X", ord(":");
 my $tab_hex = sprintf "%02X", ord("\t");
 
-# Key-value pairs of strings eval'd as patterns => warn/error messages that
-# they should generate.  In some cases, the value is an array of multiple
-# messages.  Some groups have the message(s) be default on; others, default
-# off.  This can be overridden on an individual key basis by preceding the
-# pattern string with either 'default_on' or 'default_off'
-#
-# The first set are those that should be fatal errors.
-
+##
+## Key-value pairs of code/error of code that should have fatal errors.
+##
 my @death =
 (
  '/[[=foo=]]/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/[[=foo=]{#}]/',
@@ -226,8 +213,11 @@ my @death =
  '/\b{gc}/' => "'gc' is an unknown bound type {#} m/\\b{gc{#}}/",
  '/\B{gc}/' => "'gc' is an unknown bound type {#} m/\\B{gc{#}}/",
 
- '/(?[[[::]]])/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[[[::]]{#}])/",
- '/(?[[[:w:]]])/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[[[:w:]]{#}])/",
+ '/(?[[[::]]])/' => "Syntax error in (?[...]) in regex m/(?[[[::]]])/",
+ '/(?[[[:w:]]])/' => "Syntax error in (?[...]) in regex m/(?[[[:w:]]])/",
+ '/(?[[:w:]])/' => "",
+ '/([.].*)[.]/'   => "",    # [perl #127582]
+ '/[.].*[.]/'     => "",    # [perl #127604]
  '/(?[a])/' =>  'Unexpected character {#} m/(?[a{#}])/',
  '/(?[ + \t ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ +{#} \t ])/',
  '/(?[ \cK - ( + \t ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ \cK - ( +{#} \t ) ])/',
@@ -247,12 +237,11 @@ my @death =
  '/(?[ \p{foo} ])/' => 'Can\'t find Unicode property definition "foo" {#} m/(?[ \p{foo}{#} ])/',
  '/(?[ \p{ foo = bar } ])/' => 'Can\'t find Unicode property definition "foo = bar" {#} m/(?[ \p{ foo = bar }{#} ])/',
  '/(?[ \8 ])/' => 'Unrecognized escape \8 in character class {#} m/(?[ \8{#} ])/',
- '/(?[ \t ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[ \\t ]{#}/",
- '/(?[ [ \t ]/' => "Syntax error in (?[...]) {#} m/(?[ [ \\t ]{#}/",
- '/(?[ \t ] ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/(?[ \\t ]{#} ]/",
- '/(?[ [ ] ]/' => "Syntax error in (?[...]) {#} m/(?[ [ ] ]{#}/",
- '/(?[ \t + \e # This was supposed to be a comment ])/' =>
-    "Syntax error in (?[...]) {#} m/(?[ \\t + \\e # This was supposed to be a comment ]){#}/",
+ '/(?[ \t ]/' => 'Syntax error in (?[...]) in regex m/(?[ \t ]/',
+ '/(?[ [ \t ]/' => 'Syntax error in (?[...]) in regex m/(?[ [ \t ]/',
+ '/(?[ \t ] ]/' => 'Syntax error in (?[...]) in regex m/(?[ \t ] ]/',
+ '/(?[ [ ] ]/' => 'Syntax error in (?[...]) in regex m/(?[ [ ] ]/',
+ '/(?[ \t + \e # This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # This was supposed to be a comment ])/',
  '/(?[ ])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ {#}])/',
  'm/(?[[a-\d]])/' => 'False [] range "a-\d" {#} m/(?[[a-\d{#}]])/',
  'm/(?[[\w-x]])/' => 'False [] range "\w-" {#} m/(?[[\w-{#}x]])/',
@@ -284,17 +273,6 @@ my @death =
  'm/\cß/' => "Character following \"\\c\" must be printable ASCII",
  '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', the \'(\' and \'?\' must be adjacent {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
  '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
- '/((?# This is a comment in the middle of a token)*script_run:foo)/' => 'In \'(*...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}script_run:foo)/',
-
- '/(*script_runfoo)/' => 'Unknown \'(*...)\' construct \'script_runfoo\' {#} m/(*script_runfoo){#}/',
- '/(*srfoo)/' => 'Unknown \'(*...)\' construct \'srfoo\' {#} m/(*srfoo){#}/',
- '/(*script_run)/' => '\'(*script_run\' requires a terminating \':\' {#} m/(*script_run{#})/',
- '/(*sr)/' => '\'(*sr\' requires a terminating \':\' {#} m/(*sr{#})/',
- '/(*pla)/' => '\'(*pla\' requires a terminating \':\' {#} m/(*pla{#})/',
- '/(*script_run/' => 'Unterminated \'(*...\' construct {#} m/(*script_run{#}/',
- '/(*sr/' => 'Unterminated \'(*...\' construct {#} m/(*sr{#}/',
- '/(*script_run:foo/' => 'Unterminated \'(*...\' argument {#} m/(*script_run:foo{#}/',
- '/(*sr:foo/' => 'Unterminated \'(*...\' argument {#} m/(*sr:foo{#}/',
  '/(?[\ &!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ &!{#}])/',    # [perl #126180]
  '/(?[\ +!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ +!{#}])/',    # [perl #126180]
  '/(?[\ -!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ -!{#}])/',    # [perl #126180]
@@ -305,16 +283,20 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
+ '/:{4,a}/' => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
+ '/xa{3\,4}y/' => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
+ '/abc/xix' => "",
+ '/(?xmsixp:abc)/' => "",
+ '/(?xmsixp)abc/' => "",
+ '/(?xxxx:abc)/' => "",
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
- '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
 
 );
 
-# These are messages that are death under 'use re "strict"', and may or may
-# not warn otherwise.  See comment before @warning as to why some have a
-# \x{100} in them.  This array has 3 elements per construct.  [0] is the regex
-# to use; [1] is the message under no strict (empty to not warn), and [2] is
-# under strict.
+# These are messages that are warnings when not strict; death under 'use re
+# "strict".  See comment before @warnings as to why some have a \x{100} in
+# them.  This array has 3 elements per construct.  [0] is the regex to use;
+# [1] is the message under no strict, and [2] is under strict.
 my @death_only_under_strict = (
     'm/\xABC/' => "",
                => 'Use \x{...} for more than two hex characters {#} m/\xABC{#}/',
@@ -389,14 +371,6 @@ my @death_only_under_strict = (
                                      => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
     '/[a\zb]\x{100}/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]\x{100}/',
                       => 'Unrecognized escape \z in character class {#} m/[a\z{#}b]\x{100}/',
-    'default_on/:{4,a}/'     => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/:{{#}4,a}/',
-                             => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
-    'default_on/xa{3\,4}y/'  => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/xa{{#}3\,4}y/',
-                             => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
-  'default_on/\\${[^\\}]*}/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\\${{#}[^\\}]*}/',
-                             => 'Unescaped left brace in regex is illegal here {#} m/\\${{#}[^\\}]*}/',
-    '/[ab]/'          => "",
-                        => 'Literal vertical space in [] is illegal except under /x {#} m/[a{#}b]/',
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -447,15 +421,17 @@ my @death_utf8 = mark_as_utf8(
  '/ネ[\x{ネ]/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]/',
 
  '/ネ\o{ネ/' => 'Missing right brace on \o{ {#} m/ネ\o{{#}ネ/',
+ '/ネ[[:ネ:]]ネ/' => "",
 
  '/[ネ-a]ネ/' => 'Invalid [] range "ネ-a" {#} m/[ネ-a{#}]ネ/',
 
  '/ネ\p{}ネ/' => 'Empty \p{} {#} m/ネ\p{{#}}ネ/',
 
- '/ネ(?[[[:ネ]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[:ネ]]{#}])ネ/",
- '/ネ(?[[[:ネ: ])ネ/' => "Syntax error in (?[...]) {#} m/ネ(?[[[:ネ: ])ネ{#}/",
- '/ネ(?[[[::]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[::]]{#}])ネ/",
- '/ネ(?[[[:ネ:]]])ネ/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[[[:ネ:]]{#}])ネ/",
+ '/ネ(?[[[:ネ]]])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[:ネ]]])ネ/",
+ '/ネ(?[[[:ネ: ])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[:ネ: ])ネ/",
+ '/ネ(?[[[::]]])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[::]]])ネ/",
+ '/ネ(?[[[:ネ:]]])ネ/' => "Syntax error in (?[...]) in regex m/ネ(?[[[:ネ:]]])ネ/",
+ '/ネ(?[[:ネ:]])ネ/' => "",
  '/ネ(?[ネ])ネ/' =>  'Unexpected character {#} m/ネ(?[ネ{#}])ネ/',
  '/ネ(?[ + [ネ] ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ +{#} [ネ] ])/',
  '/ネ(?[ \cK - ( + [ネ] ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ \cK - ( +{#} [ネ] ) ])/',
@@ -467,10 +443,9 @@ my @death_utf8 = mark_as_utf8(
  '/(?[ \x{ネ} ])ネ/' => 'Non-hex character {#} m/(?[ \x{ネ{#}} ])ネ/',
  '/(?[ \p{ネ} ])/' => 'Can\'t find Unicode property definition "ネ" {#} m/(?[ \p{ネ}{#} ])/',
  '/(?[ \p{ ネ = bar } ])/' => 'Can\'t find Unicode property definition "ネ = bar" {#} m/(?[ \p{ ネ = bar }{#} ])/',
- '/ネ(?[ \t ]/' => "Unexpected ']' with no following ')' in (?[... {#} m/ネ(?[ \\t ]{#}/",
- '/(?[ \t + \e # ネ This was supposed to be a comment ])/' =>
-    "Syntax error in (?[...]) {#} m/(?[ \\t + \\e # ネ This was supposed to be a comment ]){#}/",
- 'm/(*ネ)ネ/' => q<Unknown '(*...)' construct 'ネ' {#} m/(*ネ){#}ネ/>,
+ '/ネ(?[ \t ]/' => 'Syntax error in (?[...]) in regex m/ネ(?[ \t ]/',
+ '/(?[ \t + \e # ネ This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # ネ This was supposed to be a comment ])/',
+ 'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>,
  '/\cネ/' => "Character following \"\\c\" must be printable ASCII",
  '/\b{ネ}/' => "'ネ' is an unknown bound type {#} m/\\b{ネ{#}}/",
  '/\B{ネ}/' => "'ネ' is an unknown bound type {#} m/\\B{ネ{#}}/",
@@ -604,14 +579,6 @@ my @warning = (
                                 ],
    '/[][[:alpha:]]/' => "",        # [perl #127581]
    '/[][[:alpha:]\\@\\\\^_?]/' => "", # [perl #131522]
-    '/(?[[:w:]])/' => "",
-    '/([.].*)[.]/'   => "",    # [perl #127582]
-    '/[.].*[.]/'     => "",    # [perl #127604]
-    '/abc/xix' => "",
-    '/(?xmsixp:abc)/' => "",
-    '/(?xmsixp)abc/' => "",
-    '/(?xxxx:abc)/' => "",
-
 ); # See comments before this for why '\x{100}' is generally needed
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -625,8 +592,6 @@ my @warnings_utf8 = mark_as_utf8(
         'Useless (?g) - use /g modifier {#} m/utf8 ネ (?og{#}c) ネ/',
         'Useless (?c) - use /gc modifier {#} m/utf8 ネ (?ogc{#}) ネ/',
     ],
-   '/ネ[[:ネ:]]ネ/' => "",
-   '/ネ(?[[:ネ:]])ネ/' => "",
 
 );
 
@@ -676,23 +641,18 @@ my @experimental_regex_sets = (
     '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
-my @experimental_script_run = (
-    '/(*script_run:paypal.com)/' => 'The script_run feature is experimental {#} m/(*script_run:{#}paypal.com)/',
-    'use utf8; /utf8 ネ (*script_run:ネ)/' => do { use utf8; 'The script_run feature is experimental {#} m/utf8 ネ (*script_run:{#}ネ)/' },
-    '/noutf8 ネ (*script_run:ネ)/' => 'The script_run feature is experimental {#} m/noutf8 ネ (*script_run:{#}ネ)/',
-);
-
 my @deprecated = (
  '/^{/'          => "",
  '/foo|{/'       => "",
  '/foo|^{/'      => "",
- '/foo({bar)/'   => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.32), passed through {#} m/foo({{#}bar)/',
+ '/foo({bar)/'   => "",
  '/foo(:?{bar)/' => "",
  '/\s*{/'        => "",
  '/a{3,4}{/'     => "",
  '/.{/'         => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/.{{#}/',
  '/[x]{/'       => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/[x]{{#}/',
  '/\p{Latin}{/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\p{Latin}{{#}/',
+ '/\\${[^\\}]*}/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\\${{#}[^\\}]*}/',
 );
 
 for my $strict ("", "use re 'strict';") {
@@ -713,32 +673,17 @@ for my $strict ("", "use re 'strict';") {
         }
     }
     for (my $i = 0; $i < @death; $i += 2) {
-        my $regex = $death[$i] =~ s/ default_ (on | off) //rx;
+        my $regex = $death[$i];
         my $expect = fixup_expect($death[$i+1], $strict);
-        if ($expect eq "") {
-            fail("$0: Internal error: '$death[$i]' should have an error message");
-        }
-        else {
-            no warnings 'experimental::regex_sets';
-            no warnings 'experimental::script_run';
-            no warnings 'experimental::re_strict';
+        no warnings 'experimental::regex_sets';
+        no warnings 'experimental::re_strict';
 
-            warning_is(sub {
-                    my $meaning_of_life;
+        warning_is(sub {
                     my $eval_string = "$strict $regex";
                     $_ = "x";
-                    eval "$eval_string; \$meaning_of_life = 42";
-                    ok (! defined $meaning_of_life, "$eval_string died");
-                    my $error= $@;
-                    if ($error =~ qr/\Q$expect/) {
-                        ok(1, "... and gave expected message");
-                    } else {
-                        ok(0,$eval_string);
-                        diag("Have: " . _q(add_markers($error)));
-                        diag("Want: " . _q($death[$i+1]));
-                    }
-                }, undef, "... and no other warnings");
-        }
+                    eval $eval_string;
+                    like($@, qr/\Q$expect/, $eval_string);
+                }, undef, "... and died without any other warnings");
     }
 }
 
@@ -773,42 +718,25 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
     }
 
-    foreach my $ref (\@warning_tests,
-                     \@experimental_regex_sets,
-                     \@experimental_script_run,
-                     \@deprecated)
-    {
+    foreach my $ref (\@warning_tests, \@experimental_regex_sets, \@deprecated) {
         my $warning_type;
         my $turn_off_warnings = "";
         my $default_on;
         if ($ref == \@warning_tests) {
             $warning_type = 'regexp, digit';
-            $turn_off_warnings = "no warnings 'experimental::regex_sets';"
-                               . "no warnings 'experimental::script_run';";
+            $turn_off_warnings = "no warnings 'experimental::regex_sets';";
             $default_on = $strict;
         }
         elsif ($ref == \@deprecated) {
             $warning_type = 'regexp, deprecated';
             $default_on = 1;
         }
-        elsif ($ref == \@experimental_regex_sets) {
+        else {
             $warning_type = 'experimental::regex_sets';
             $default_on = 1;
         }
-        elsif ($ref == \@experimental_script_run) {
-            $warning_type = 'experimental::script_run';
-            $default_on = 1;
-        }
-        else {
-            fail("$0: Internal error: Unexpected loop variable");
-        }
-
         for (my $i = 0; $i < @$ref; $i += 2) {
-            my $this_default_on = $default_on;
             my $regex = $ref->[$i];
-            if ($regex =~ s/ default_ (on | off) //x) {
-                $this_default_on = $1 eq 'on';
-            }
             my @expect = fixup_expect($ref->[$i+1], $strict);
 
             # A length-1 array with an empty warning means no warning gets
@@ -862,7 +790,7 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
                                                         eval "$strict $regex" });
                         # Warning should be on as well if is testing
                         # '(?[...])' which turns on strict
-                        if ($this_default_on || grep { $_ =~ /\Q(?[/ } @expect ) {
+                        if ($default_on || grep { $_ =~ /\Q(?[/ } @expect ) {
                            ok @warns > 0, "... and the warning is on by default";
                         }
                         else {

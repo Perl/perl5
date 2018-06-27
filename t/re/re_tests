@@ -1443,6 +1443,7 @@ foo(\h)bar	foo\tbar	y	$1	\t
 /\N{U+41}\x{c1}/i	a\x{e1}	y	$&	a\x{e1}
 /[\N{U+41}\x{c1}]/i	\x{e1}	y	$&	\x{e1}
 '\N{U+41}'	A	y	$&	A		# Even for single quoted patterns
+/\N{}\xe4/i	\xc4	y	$&	\xc4		# Empty \N{} should change /d to /u
 
 [\s][\S]	\x{a0}\x{a0}	n	-	-	# Unicode complements should not match same character
 
@@ -1984,15 +1985,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?x)[a b]/xx	\N{SPACE}	yS	$&	 	# Note a space char here
 /(?xx)[a b]/x	\N{SPACE}	n	-	-
 /(?-x:[a b])/xx	\N{SPACE}	yS	$&	 	# Note a space char here
-^a?bcd\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff	ABCDEFGHIJKLMNOPQRSTUVWXYZ	n	-	-	# [perl #132187] for valgrind's benefit
-^Xaaa?Xaa	aaa\x{400000}	n	-	-	# [perl #132552] for valgrind's benefit
-([[:ascii:]]+)\x81	a\x80b\x81	y	$&	b\x81
-[[:^ascii:]]+b	\x80a\x81b	y	$&	\x81b
-[[:^ascii:]]+b	\x80a\x81\x{100}b	y	$&	\x81\x{100}b
-/\A\x80+\z/	\x80\x80\x80\x80\x80\x80\x80\x80\x80	y	$&	\x80\x80\x80\x80\x80\x80\x80\x80\x80		# [perl #132900]
-^(\d+)*?4X$	1234X	y	$1	123	# perl #131648
-(?il)\x{100}|\x{100}|\x{FE}	\xFE	y	$&	\xFE
-
+(?il)\x{100}|\x{100}|\x{FF}	\xFF	y	$&	\xFF
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

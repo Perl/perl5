@@ -5,13 +5,6 @@ use Test2::IPC;
 use Test2::Tools::Tiny;
 use Test2::Util qw/CAN_THREAD CAN_REALLY_FORK USE_THREADS get_tid/;
 
-ok(1, "Just to get things initialized.");
-
-# We need to control this env var for this test
-$ENV{T2_NO_IPC} = 0;
-# This test relies on TAP being the default formatter for non-canon instances
-$ENV{T2_FORMATTER} = 'TAP';
-
 my $CLASS = 'Test2::API::Instance';
 
 my $one = $CLASS->new;
@@ -24,12 +17,8 @@ is_deeply(
         ipc       => undef,
         formatter => undef,
 
-        add_uuid_via => undef,
-
-        ipc_polling    => undef,
-        ipc_drivers    => [],
-        ipc_timeout    => 30,
-        ipc_disabled   => 0,
+        ipc_polling => undef,
+        ipc_drivers => [],
 
         formatters => [],
 
@@ -41,7 +30,6 @@ is_deeply(
         context_acquire_callbacks => [],
         context_init_callbacks    => [],
         context_release_callbacks => [],
-        pre_subtest_callbacks     => [],
 
         stack => [],
     },
@@ -57,12 +45,8 @@ is_deeply(
     {
         contexts => {},
 
-        ipc_polling  => undef,
-        ipc_drivers  => [],
-        ipc_timeout  => 30,
-        ipc_disabled => 0,
-
-        add_uuid_via => undef,
+        ipc_polling => undef,
+        ipc_drivers => [],
 
         formatters => [],
 
@@ -78,7 +62,6 @@ is_deeply(
         context_acquire_callbacks => [],
         context_init_callbacks    => [],
         context_release_callbacks => [],
-        pre_subtest_callbacks     => [],
 
         stack => [],
     },
@@ -142,11 +125,11 @@ ok($one->finalized, "calling format finalized the object");
     is($one->formatter, 'Test2::Formatter::TAP', "got specified formatter");
     ok($one->finalized, "calling format finalized the object");
 
-    local $ENV{T2_FORMATTER} = '+A::Fake::Module::That::Should::Not::Exist';
+    local $ENV{T2_FORMATTER} = '+Fake';
     $one->reset;
     like(
         exception { $one->formatter },
-        qr/COULD NOT LOAD FORMATTER 'A::Fake::Module::That::Should::Not::Exist' \(set by the 'T2_FORMATTER' environment variable\)/,
+        qr/COULD NOT LOAD FORMATTER 'Fake' \(set by the 'T2_FORMATTER' environment variable\)/,
         "Bad formatter"
     );
 }
@@ -164,25 +147,13 @@ like(
     "Exit callbacks must be coderefs"
 );
 
-$one->reset;
-$one->add_pre_subtest_callback($callback);
-is(@{$one->pre_subtest_callbacks}, 1, "added a pre-subtest callback");
-$one->add_pre_subtest_callback($callback);
-is(@{$one->pre_subtest_callbacks}, 2, "added another pre-subtest callback");
-
-like(
-    exception { $one->add_pre_subtest_callback({}) },
-    qr/Pre-subtest callbacks must be coderefs/,
-    "Pre-subtest callbacks must be coderefs"
-);
-
 if (CAN_REALLY_FORK) {
     $one->reset;
     my $pid = fork;
     die "Failed to fork!" unless defined $pid;
     unless($pid) { exit 0 }
 
-    is(Test2::API::Instance::_ipc_wait, 0, "No errors");
+    is($one->_ipc_wait, 0, "No errors");
 
     $pid = fork;
     die "Failed to fork!" unless defined $pid;
@@ -190,20 +161,9 @@ if (CAN_REALLY_FORK) {
     my @warnings;
     {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
-        is(Test2::API::Instance::_ipc_wait, 255, "Process exited badly");
+        is($one->_ipc_wait, 255, "Process exited badly");
     }
-    like($warnings[0], qr/Process .* did not exit cleanly \(wstat: \S+, exit: 255, sig: 0\)/, "Warn about exit");
-
-    $pid = fork;
-    die "Failed to fork!" unless defined $pid;
-    unless($pid) { sleep 20; exit 0 }
-    kill('TERM', $pid) or die "Failed to send signal";
-    @warnings = ();
-    {
-        local $SIG{__WARN__} = sub { push @warnings => @_ };
-        is(Test2::API::Instance::_ipc_wait, 255, "Process exited badly");
-    }
-    like($warnings[0], qr/Process .* did not exit cleanly \(wstat: \S+, exit: 0, sig: 15\)/, "Warn about exit");
+    like($warnings[0], qr/Process .* did not exit cleanly \(status: 255\)/, "Warn about exit");
 }
 
 if (CAN_THREAD && $] ge '5.010') {
@@ -211,7 +171,7 @@ if (CAN_THREAD && $] ge '5.010') {
     $one->reset;
 
     threads->new(sub { 1 });
-    is(Test2::API::Instance::_ipc_wait, 0, "No errors");
+    is($one->_ipc_wait, 0, "No errors");
 
     if (threads->can('error')) {
         threads->new(sub {
@@ -222,7 +182,7 @@ if (CAN_THREAD && $] ge '5.010') {
         my @warnings;
         {
             local $SIG{__WARN__} = sub { push @warnings => @_ };
-            is(Test2::API::Instance::_ipc_wait, 255, "Thread exited badly");
+            is($one->_ipc_wait, 255, "Thread exited badly");
         }
         like($warnings[0], qr/Thread .* did not end cleanly: xxx/, "Warn about exit");
     }
@@ -291,8 +251,7 @@ if (CAN_THREAD && $] ge '5.010') {
     like($events[0]->message, qr/Test ended with extra hubs on the stack!/, "got diag");
 }
 
-SKIP: {
-    last SKIP if $] lt "5.008";
+{
     $one->reset;
     my $stderr = "";
     {
@@ -320,8 +279,7 @@ This is not a supported configuration, you will have problems.
     EOT
 }
 
-SKIP: {
-    last SKIP if $] lt "5.008";
+{
     require Test2::API::Breakage;
     no warnings qw/redefine once/;
     my $ran = 0;
@@ -393,7 +351,7 @@ if (CAN_REALLY_FORK) {
 
 {
     my $ctx = bless {
-        trace => Test2::EventFacet::Trace->new(frame => ['Foo::Bar', 'Foo/Bar.pm', 42, 'xxx']),
+        trace => Test2::Util::Trace->new(frame => ['Foo::Bar', 'Foo/Bar.pm', 42, 'xxx']),
         hub => Test2::Hub->new(),
     }, 'Test2::API::Context';
     $one->contexts->{1234} = $ctx;
@@ -507,31 +465,6 @@ if (CAN_REALLY_FORK) {
     $one->set_ipc_shm_last('abc3');
     $one->context_init_callbacks->[0]->({'hub' => 'Fake::Hub'});
     is($cull, 1, "called cull once");
-}
-
-{
-    require Test2::IPC::Driver::Files;
-
-    local $ENV{T2_NO_IPC} = 1;
-    $one->reset;
-    $one->add_ipc_driver('Test2::IPC::Driver::Files');
-    ok($one->ipc_disabled, "IPC is disabled by env var");
-    ok(!$one->ipc, 'IPC not loaded');
-
-    local $ENV{T2_NO_IPC} = 0;
-    $one->reset;
-    ok(!$one->ipc_disabled, "IPC is not disabled by env var");
-    ok($one->ipc, 'IPC loaded');
-    like(
-        exception { $one->ipc_disable },
-        qr/Attempt to disable IPC after it has been initialized/,
-        "Cannot diable IPC once it is initialized"
-    );
-
-    $one->reset;
-    ok(!$one->ipc_disabled, "IPC is not disabled by env var");
-    $one->ipc_disable;
-    ok($one->ipc_disabled, "IPC is disabled directly");
 }
 
 done_testing;

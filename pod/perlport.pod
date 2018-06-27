@@ -436,7 +436,7 @@ too).  The portable idiom to remove all the versions of a file is
 
     1 while unlink "file";
 
-This will terminate if the file is undeletable for some reason
+This will terminate if the file is undeleteable for some reason
 (protected, not there, and so on).
 
 Don't count on a specific environment variable existing in
@@ -1362,7 +1362,7 @@ where
     Directory and File =~ m|[^\0- "\.\$\%\&:\@\\^\|\177]+|
 
 The default filename translation is roughly C<tr|/.|./|>, swapping dots
-and slashes.
+and slahes.
 
 Note that C<"ADFS::HardDisk.$.File" ne 'ADFS::HardDisk.$.File'> and that
 the second stage of C<$> interpolation in regular expressions will fall
@@ -1590,10 +1590,6 @@ in the SYSTEM environment settings.
 (Android)
 Setting the exec bit on some locations (generally F</sdcard>) will return true
 but not actually set the bit.
-
-(VMS)
-A mode argument of zero sets permissions to the user's default permission mask
-rather than disabling all permissions.
 
 =item chown
 
@@ -2144,12 +2140,8 @@ may fall back to trying the shell if the first C<spawn()> fails.
 Does not automatically flush output handles on some platforms.
 
 (VMS)
-As with Win32, C<system(1, @args)> spawns an external process and
-immediately returns its process designator without waiting for the
-process to terminate.  In this case the return value may be used subsequently
-in L<C<wait>|perlfunc/wait> or L<C<waitpid>|perlfunc/waitpid PID,FLAGS>.
-Otherwise the return value is POSIX-like (shifted up by 8 bits), which only
-allows room for a made-up value derived from the severity bits of the native
+The return value is POSIX-like (shifted up by 8 bits), which only allows
+room for a made-up value derived from the severity bits of the native
 32-bit condition code (unless overridden by
 L<C<use vmsish 'status'>|vmsish/C<vmsish status>>).  If the native
 condition code is one that has a POSIX value encoded, the POSIX value will
@@ -2416,6 +2408,7 @@ available at L<http://www.cpan.org/src/>
         Open UNIX       (Unixware) (since Perl 5.8.1/5.9.0)
         OS/2
         OS/400          (using the PASE) (since Perl 5.8.1/5.9.0)
+        PowerUX
         POSIX-BC        (formerly BS2000)
         QNX
         Solaris

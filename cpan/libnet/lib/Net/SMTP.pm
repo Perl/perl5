@@ -1,7 +1,9 @@
 # Net::SMTP.pm
 #
-# Copyright (C) 1995-2004 Graham Barr.  All rights reserved.
-# Copyright (C) 2013-2016 Steve Hay.  All rights reserved.
+# Versions up to 2.31_1 Copyright (c) 1995-2004 Graham Barr <gbarr@pobox.com>.
+# All rights reserved.
+# Changes in Version 2.31_2 onwards Copyright (C) 2013-2015 Steve Hay.  All
+# rights reserved.
 # This module is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself, i.e. under the terms of either the GNU General
 # Public License or the Artistic License, as specified in the F<LICENCE> file.
@@ -19,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket;
 
-our $VERSION = "3.11";
+our $VERSION = "3.10";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -1026,18 +1028,16 @@ L<IO::Socket::SSL>
 
 =head1 AUTHOR
 
-Graham Barr E<lt>F<gbarr@pobox.com>E<gt>.
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 
 Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
-1.22_02.
+1.22_02
 
 =head1 COPYRIGHT
 
-Copyright (C) 1995-2004 Graham Barr.  All rights reserved.
-
-Copyright (C) 2013-2016 Steve Hay.  All rights reserved.
-
-=head1 LICENCE
+Versions up to 2.31_1 Copyright (c) 1995-2004 Graham Barr. All rights reserved.
+Changes in Version 2.31_2 onwards Copyright (C) 2013-2015 Steve Hay.  All rights
+reserved.
 
 This module is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself, i.e. under the terms of either the GNU General Public

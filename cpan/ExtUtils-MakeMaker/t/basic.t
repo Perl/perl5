@@ -24,7 +24,7 @@ use ExtUtils::MM;
 use Test::More
     !MM->can_run(make()) && $ENV{PERL_CORE} && $Config{'usecrosscompile'}
     ? (skip_all => "cross-compiling and make not available")
-    : (tests => 188);
+    : (tests => 186);
 use File::Find;
 use File::Spec;
 use File::Path;
@@ -367,7 +367,7 @@ note "META file validity"; SKIP: {
       "MANIFEST has META.yml"
     );
     is( $manifest->{'meta.json'}, 'Module JSON meta-data (added by MakeMaker)',
-      "MANIFEST has META.json"
+      "MANFIEST has META.json"
     );
 
     # Test NO_META META.yml suppression
@@ -438,12 +438,8 @@ note "META file validity"; SKIP: {
 }
 
 
+
 # Make sure init_dirscan doesn't go into the distdir
-# also with a "messup.PL" that will make a build fail
-open $fh, '>', 'messup.PL' or die "messup.PL: $!";
-print $fh 'print "Extracting messup (with variable substitutions)\n";' . "\n";
-print $fh 'die';
-close $fh;
 @mpl_out = run(qq{$perl Makefile.PL "PREFIX=$DUMMYINST"});
 
 cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) || diag(@mpl_out);
@@ -452,14 +448,6 @@ ok( grep(/^Writing $makefile for Big::Dummy/, @mpl_out) == 1,
                                 'init_dirscan skipped distdir') ||
   diag(@mpl_out);
 
-# "make test" straight after "perl Makefile.PL" is expected to work same as
-#   "make all test" so check that with "messup.PL" that will make the
-#   build step fail
-$test_out = run("$make test");
-unlike( $test_out, qr/All tests successful/, 'make test caused build' );
-isnt( $?, 0,                                 '  build should fail' ) ||
-    diag $test_out;
-
 # I know we'll get ignored errors from make here, that's ok.
 # Send STDERR off to oblivion.
 open(SAVERR, ">&STDERR") or die $!;
@@ -467,7 +455,6 @@ open(STDERR, ">",File::Spec->devnull) or die $!;
 
 my $realclean_out = run("$make realclean");
 is( $?, 0, 'realclean' ) || diag($realclean_out);
-1 while unlink 'messup.PL'; # also zap deliberate build-breaker
 
 open(STDERR, ">&SAVERR") or die $!;
 close SAVERR;

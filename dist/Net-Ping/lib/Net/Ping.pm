@@ -4,42 +4,44 @@ require 5.002;
 require Exporter;
 
 use strict;
-our $hires;
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION
+            $def_timeout $def_proto $def_factor $def_family
+            $max_datasize $pingstring $hires $source_verify $syn_forking);
 use Fcntl qw( F_GETFL F_SETFL O_NONBLOCK );
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW AF_INET PF_INET IPPROTO_TCP
 	       SOL_SOCKET SO_ERROR SO_BROADCAST
                IPPROTO_IP IP_TOS IP_TTL
-               inet_ntoa inet_aton getnameinfo sockaddr_in );
+               inet_ntoa inet_aton getnameinfo NI_NUMERICHOST sockaddr_in );
 use POSIX qw( ENOTCONN ECONNREFUSED ECONNRESET EINPROGRESS EWOULDBLOCK EAGAIN
 	      WNOHANG );
 use FileHandle;
 use Carp;
 use Time::HiRes;
 
-our @ISA = qw(Exporter);
-our @EXPORT = qw(pingecho);
-our @EXPORT_OK = qw(wakeonlan);
-our $VERSION = "2.62";
+@ISA = qw(Exporter);
+@EXPORT = qw(pingecho);
+@EXPORT_OK = qw(wakeonlan);
+$VERSION = "2.55";
 
 # Globals
 
-our $def_timeout = 5;           # Default timeout to wait for a reply
-our $def_proto = "tcp";         # Default protocol to use for pinging
-our $def_factor = 1.2;          # Default exponential backoff rate.
-our $def_family = AF_INET;      # Default family.
-our $max_datasize = 1024;       # Maximum data bytes in a packet
+$def_timeout = 5;           # Default timeout to wait for a reply
+$def_proto = "tcp";         # Default protocol to use for pinging
+$def_factor = 1.2;          # Default exponential backoff rate.
+$def_family = AF_INET;      # Default family.
+$max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
-our $pingstring = "pingschwingping!\n";
-our $source_verify = 1;         # Default is to verify source endpoint
-our $syn_forking = 0;
+$pingstring = "pingschwingping!\n";
+$source_verify = 1;         # Default is to verify source endpoint
+$syn_forking = 0;
 
 # Constants
 
-my $AF_INET6  = eval { Socket::AF_INET6() } || 30;
+my $AF_INET6  = eval { Socket::AF_INET6() };
 my $AF_UNSPEC = eval { Socket::AF_UNSPEC() };
-my $AI_NUMERICHOST = eval { Socket::AI_NUMERICHOST() } || 4;
-my $NI_NUMERICHOST = eval { Socket::NI_NUMERICHOST() } || 2;
-my $IPPROTO_IPV6   = eval { Socket::IPPROTO_IPV6() }   || 41;
+my $AI_NUMERICHOST = eval { Socket::AI_NUMERICHOST() };
+my $NI_NUMERICHOST = eval { Socket::NI_NUMERICHOST() };
+my $IPPROTO_IPV6   = eval { Socket::IPPROTO_IPV6() };
 #my $IPV6_HOPLIMIT  = eval { Socket::IPV6_HOPLIMIT() };  # ping6 -h 0-255
 my $qr_family = qr/^(?:(?:(:?ip)?v?(?:4|6))|${\AF_INET}|$AF_INET6)$/;
 my $qr_family4 = qr/^(?:(?:(:?ip)?v?4)|${\AF_INET})$/;
@@ -616,11 +618,8 @@ sub ping_external {
     ? ('ip' => $ip->{addr_in})
     : ('host' => $ip->{host});
 
-  eval {
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
-    require Net::Ping::External;
-  } or croak('Protocol "external" not supported on your system: Net::Ping::External not found');
+  eval { require Net::Ping::External; }
+    or croak('Protocol "external" not supported on your system: Net::Ping::External not found');
   return Net::Ping::External::ping(@addr, timeout => $timeout,
                                    family => $family);
 }
@@ -1296,9 +1295,8 @@ sub ping_udp
         $done = 1;
       } else {
         ($from_port, $from_ip) = _unpack_sockaddr_in($from_saddr, $ip->{family});
-        my $addr_in = ref($ip) eq "HASH" ? $ip->{addr_in} : $ip;
         if (!$source_verify ||
-            (($from_ip eq $addr_in) &&        # Does the packet check out?
+            (($from_ip eq $ip) &&        # Does the packet check out?
              ($from_port == $self->{port_num}) &&
              ($from_msg eq $msg)))
         {
@@ -1381,7 +1379,7 @@ sub ping_syn
     }
   }
 
-  my $entry = [ $host, $ip, $fh, $start_time, $stop_time, $self->{port_num} ];
+  my $entry = [ $host, $ip, $fh, $start_time, $stop_time ];
   $self->{syn}->{$fh->fileno} = $entry;
   if ($self->{stop_time} < $stop_time) {
     $self->{stop_time} = $stop_time;
@@ -1560,7 +1558,7 @@ sub ack
           }
           # Everything passed okay, return the answer
           return wantarray ?
-            ($entry->[0], &time() - $entry->[3], $self->ntop($entry->[1]), $entry->[5])
+            ($entry->[0], &time() - $entry->[3], $self->ntop($entry->[1]))
             : $entry->[0];
         } else {
           warn "Corrupted SYN entry: unknown fd [$fd] ready!";
@@ -1714,8 +1712,10 @@ sub ntop {
     # Socket warns when undef is passed in, but it still works.
     my $port = getservbyname('echo', 'udp');
     my $sockaddr = _pack_sockaddr_in($port, $ip);
-    my ($error, $address) = getnameinfo($sockaddr, $NI_NUMERICHOST);
-    croak $error if $error;
+    my ($error, $address) = getnameinfo($sockaddr, NI_NUMERICHOST);
+    if($error) {
+      croak $error;
+    }
     return $address;
 }
 
@@ -1854,8 +1854,9 @@ sub _resolv {
         croak("getnameinfo($getaddr[0]->{addr}) failed - $err");
       }
     } else {
-      croak(sprintf("getaddrinfo($h{host},,%s) failed - $err",
-                    $family == AF_INET ? "AF_INET" : "AF_INET6"));
+      my $error = sprintf "getaddrinfo($h{host},,%s) failed - $err",
+                  ($family == AF_INET) ? "AF_INET" : "AF_INET6";
+      croak("$error");
     }
   # old way
   } else {
@@ -2241,8 +2242,8 @@ SYN queued using the ping() method.  If the timeout is
 reached before the TCP ACK is received, or if the remote
 host is not listening on the port attempted, then the TCP
 connection will not be established and ack() will return
-undef.  In list context, the host, the ack time, the dotted ip 
-string, and the port number will be returned instead of just the host.
+undef.  In list context, the host, the ack time, and the
+dotted ip string will be returned instead of just the host.
 If the optional $host argument is specified, the return
 value will be pertaining to that host only.
 This call simply does nothing if you are using any protocol

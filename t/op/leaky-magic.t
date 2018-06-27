@@ -33,8 +33,9 @@ fresh_perl_is
 use tests 1; # %SIG
 ok !scalar keys %foo::SIG, "%foo::SIG";
 
-use tests 3; # rw ${^LETTERS} variables
-for(qw< CHILD_ERROR_NATIVE UTF8CACHE WARNING_BITS >) {
+use tests 4; # rw ${^LETTERS} variables
+for(qw< CHILD_ERROR_NATIVE ENCODING UTF8CACHE WARNING_BITS >) {
+ no warnings 'deprecated';  # ENCODING is deprecated;
  my $name = s/./"qq|\\c$&|"/ere;
  local $$name = 'swit';
 

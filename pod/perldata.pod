@@ -320,17 +320,12 @@ are considered pretty much the same thing for nearly all purposes,
 references are strongly-typed, uncastable pointers with builtin
 reference-counting and destructor invocation.
 
-X<truth> X<falsehood> X<true> X<false> X<!> X<not> X<negation> X<0>
-X<boolean> X<bool>
 A scalar value is interpreted as FALSE in the Boolean sense
 if it is undefined, the null string or the number 0 (or its
 string equivalent, "0"), and TRUE if it is anything else.  The
 Boolean context is just a special kind of scalar context where no 
 conversion to a string or a number is ever performed.
-Negation of a true value by C<!> or C<not> returns a special false value.
-When evaluated as a string it is treated as C<"">, but as a number, it
-is treated as 0.  Most Perl operators
-that return true or false behave this way.
+X<boolean> X<bool> X<true> X<false> X<truth>
 
 There are actually two varieties of null strings (sometimes referred
 to as "empty" strings), a defined one and an undefined one.  The
@@ -404,9 +399,9 @@ leave nothing to doubt:
 
     $element_count = scalar(@whatever);
 
-If you evaluate a hash in scalar context, it returns a false value if
-the hash is empty.  If there are any key/value pairs, it returns a
-true value.  A more precise definition is version dependent.
+If you evaluate a hash in scalar context, it returns false if the
+hash is empty.  If there are any key/value pairs, it returns true.
+A more precise definition is version dependent.
 
 Prior to Perl 5.25 the value returned was a string consisting of the
 number of used buckets and the number of allocated buckets, separated
@@ -619,17 +614,6 @@ introduced, __END__ behaves like __DATA__ in the top level script (but
 not in files loaded with C<require> or C<do>) and leaves the remaining
 contents of the file accessible via C<main::DATA>.
 
-The C<DATA> file handle by default has whatever PerlIO layers were
-in place when Perl read the file to parse the source.  Normally that
-means that the file is being read bytewise, as if it were encoded in
-Latin-1, but there are two major ways for it to be otherwise.  Firstly,
-if the C<__END__>/C<__DATA__> token is in the scope of a C<use utf8>
-pragma then the C<DATA> handle will be in UTF-8 mode.  And secondly,
-if the source is being read from perl's standard input then the C<DATA>
-file handle is actually aliased to the C<STDIN> file handle, and may
-be in UTF-8 mode because of the C<PERL_UNICODE> environment variable or
-perl's command-line switches.
-
 See L<SelfLoader> for more description of __DATA__, and
 an example of its use.  Note that you cannot read from the DATA
 filehandle in a BEGIN block: the BEGIN block is executed as soon
@@ -788,53 +772,6 @@ function:
 As of Perl 5.22, you can also use C<(undef)x2> instead of C<undef, undef>.
 (You can also do C<($x) x 2>, which is less useful, because it assigns to
 the same variable twice, clobbering the first value assigned.)
-
-When you assign a list of scalars to an array, all previous values in that
-array are wiped out and the number of elements in the array will now be equal to
-the number of elements in the right-hand list -- the list from which
-assignment was made.  The array will automatically resize itself to precisely
-accommodate each element in the right-hand list.
-
-    use warnings;
-    my (@xyz, $x, $y, $z);
-
-    @xyz = (1, 2, 3);
-    print "@xyz\n";                             # 1 2 3
-
-    @xyz = ('al', 'be', 'ga', 'de');
-    print "@xyz\n";                             # al be ga de
-
-    @xyz = (101, 102);
-    print "@xyz\n";                             # 101 102
-
-When, however, you assign a list of scalars to another list of scalars, the
-results differ according to whether the left-hand list -- the list being
-assigned to -- has the same, more or fewer elements than the right-hand list.
-
-    ($x, $y, $z) = (1, 2, 3);
-    print "$x $y $z\n";                         # 1 2 3
-
-    ($x, $y, $z) = ('al', 'be', 'ga', 'de');
-    print "$x $y $z\n";                         # al be ga
-
-    ($x, $y, $z) = (101, 102);
-    print "$x $y $z\n";                         # 101 102
-    # Use of uninitialized value $z in concatenation (.)
-    # or string at [program] line [line number].
-
-If the number of scalars in the left-hand list is less than that in the
-right-hand list, the "extra" scalars in the right-hand list will simply not be
-assigned.
-
-If the number of scalars in the left-hand list is greater than that in the
-left-hand list, the "missing" scalars will become undefined.
-
-    ($x, $y, $z) = (101, 102);
-    for my $el ($x, $y, $z) {
-        (defined $el) ? print "$el " : print "<undef>";
-    }
-    print "\n";
-                                                # 101 102 <undef>
 
 List assignment in scalar context returns the number of elements
 produced by the expression on the right side of the assignment:
@@ -1077,11 +1014,8 @@ returning a list of key/value pairs rather than just values:
     %h = (blonk => 2, foo => 3, squink => 5, bar => 8);
     %subset = %h{'foo', 'bar'}; # key/value hash slice
     # %subset is now (foo => 3, bar => 8)
-    %removed = delete %h{'foo', 'bar'};
-    # %removed is now (foo => 3, bar => 8)
-    # %h is now (blonk => 2, squink => 5)
 
-However, the result of such a slice cannot be localized or used
+However, the result of such a slice cannot be localized, deleted or used
 in assignment.  These are otherwise very much consistent with hash slices
 using the @ symbol.
 
@@ -1094,12 +1028,6 @@ of index/value pairs:
     @a = "a".."z";
     @list = %a[3,4,6];
     # @list is now (3, "d", 4, "e", 6, "g")
-    @removed = delete %a[3,4,6]
-    # @removed is now (3, "d", 4, "e", 6, "g")
-    # @list[3,4,6] are now undef
-
-Note that calling L<C<delete>|perlfunc/delete EXPR> on array values is
-strongly discouraged.
 
 =head2 Typeglobs and Filehandles
 X<typeglob> X<filehandle> X<*>

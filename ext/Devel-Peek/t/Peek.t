@@ -359,10 +359,11 @@ do_test('reference to regexp',
   RV = $ADDR
   SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)
+    FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)		# $] < 5.017006
+    FLAGS = \\(OBJECT,FAKE\\)			# $] >= 5.017006
     PV = $ADDR "\\(\\?\\^:tic\\)"
     CUR = 8
-    LEN = 0
+    LEN = 0					# $] < 5.017006
     STASH = $ADDR\\t"Regexp"'
 . ($] < 5.013 ? '' :
 '
@@ -386,10 +387,9 @@ do_test('reference to regexp',
 . ($] < 5.019003 ? '' : '
     SV = REGEXP\($ADDR\) at $ADDR
       REFCNT = 2
-      FLAGS = \(POK,pPOK\)
+      FLAGS = \(\)
       PV = $ADDR "\(\?\^:tic\)"
       CUR = 8
-      LEN = \d+
       COMPFLAGS = 0x0 \(\)
       EXTFLAGS = 0x680000 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
 (?:      ENGINE = $ADDR \(STANDARD\)
@@ -1162,10 +1162,9 @@ do_test('UTF-8 in a regular expression',
   RV = $ADDR
   SV = REGEXP\($ADDR\) at $ADDR
     REFCNT = 1
-    FLAGS = \(OBJECT,POK,FAKE,pPOK,UTF8\)
+    FLAGS = \(OBJECT,FAKE,UTF8\)
     PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
     CUR = 13
-    LEN = 0
     STASH = $ADDR	"Regexp"
     COMPFLAGS = 0x0 \(\)
     EXTFLAGS = $ADDR \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
@@ -1187,10 +1186,9 @@ do_test('UTF-8 in a regular expression',
 . ($] < 5.019003 ? '' : '
     SV = REGEXP\($ADDR\) at $ADDR
       REFCNT = 2
-      FLAGS = \(POK,pPOK,UTF8\)
+      FLAGS = \(UTF8\)
       PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
       CUR = 13
-      LEN = \d+
       COMPFLAGS = 0x0 \(\)
       EXTFLAGS = $ADDR \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
 (?:      ENGINE = $ADDR \(STANDARD\)
@@ -1459,7 +1457,6 @@ for my $test (
 dumpindent is 4 at -e line 1.
      
 1    leave LISTOP(0xNNN) ===> [0x0]
-     PARENT ===> [0x0]
      TARG = 1
      FLAGS = (VOID,KIDS,PARENS,SLABBED)
      PRIVATE = (REFC)

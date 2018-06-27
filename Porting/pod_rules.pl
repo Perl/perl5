@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-our (%Build, %Targets, $Verbose, $Test);
+use vars qw(%Build %Targets $Verbose $Test);
 use Text::Tabs;
 use Text::Wrap;
 use Getopt::Long;

@@ -35,7 +35,6 @@ sub usage { die "usage: $0 [ -b bison_executable ] [ file.y ]\n" }
 use warnings;
 use strict;
 
-our $Verbose;
 BEGIN { require './regen/regen_lib.pl'; }
 
 my $bison = 'bison';

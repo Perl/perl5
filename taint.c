@@ -62,14 +62,14 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
         /* XXX because taint_proper adds extra format args, we can't
          * get the caller to check properly; o we just silence the warning
          * and hope the callers aren't naughty */
-        GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
+        GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	if (PL_unsafe || TAINT_WARN_get) {
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_TAINT), f, s, ug);
         }
         else {
             Perl_croak(aTHX_ f, s, ug);
         }
-        GCC_DIAG_RESTORE_STMT;
+        GCC_DIAG_RESTORE;
 
     }
 }
@@ -122,7 +122,7 @@ Perl_taint_env(pTHX)
     while (1) {
         MAGIC* mg;
 	if (i)
-	    len = my_snprintf(name, sizeof name, "DCL$PATH;%d", i);
+	    len = my_sprintf(name,"DCL$PATH;%d", i);
 	svp = hv_fetch(GvHVn(PL_envgv), name, len, FALSE);
 	if (!svp || *svp == &PL_sv_undef)
 	    break;

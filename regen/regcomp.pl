@@ -649,8 +649,7 @@ END_OF_DESCR
     while (<$oldguts>) {
         last if /=for regcomp.pl end/;
     }
-    do { print } while <$oldguts>; #win32 can't unlink an open FH
-    close $oldguts or die "Error closing pod/perldebguts.pod: $!";
+    do { print } while <$oldguts>;
     select $old_fh;
     close_and_rename($guts);
 }

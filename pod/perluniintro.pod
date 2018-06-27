@@ -151,12 +151,11 @@ serious Unicode work.  The maintenance release 5.6.1 fixed many of the
 problems of the initial Unicode implementation, but for example
 regular expressions still do not work with Unicode in 5.6.1.
 Perl v5.14.0 is the first release where Unicode support is
-(almost) seamlessly integrable without some gotchas. (There are a few
+(almost) seamlessly integrable without some gotchas. (There are two
 exceptions. Firstly, some differences in L<quotemeta|perlfunc/quotemeta>
 were fixed starting in Perl 5.16.0. Secondly, some differences in
 L<the range operator|perlop/Range Operators> were fixed starting in
-Perl 5.26.0. Thirdly, some differences in L<split|perlfunc/split> were fixed
-started in Perl 5.28.0.)
+Perl 5.26.0.)
 
 To enable this
 seamless support, you should C<use feature 'unicode_strings'> (which is
@@ -473,11 +472,8 @@ standardisation organisations are recognised; for a more detailed
 list see L<Encode::Supported>.
 
 C<read()> reads characters and returns the number of characters.
-C<seek()> and C<tell()> operate on byte counts, as does C<sysseek()>.
-
-C<sysread()> and C<syswrite()> should not be used on file handles with
-character encoding layers, they behave badly, and that behaviour has
-been deprecated since perl 5.24.
+C<seek()> and C<tell()> operate on byte counts, as do C<sysread()>
+and C<sysseek()>.
 
 Notice that because of the default behaviour of not doing any
 conversion upon input if there is no default layer,
@@ -538,17 +534,15 @@ you want to see what the native values are.)
 
 =item *
 
-Starting in Perl 5.28, it is illegal for bit operators, like C<~>, to
-operate on strings containing code points above 255.
+Bit Complement Operator ~ And vec()
 
-=item *
-
-The vec() function may produce surprising results if
+The bit complement operator C<~> may produce surprising results if
 used on strings containing characters with ordinal values above
 255. In such a case, the results are consistent with the internal
 encoding of the characters, but not with much else. So don't do
-that, and starting in Perl 5.28, a deprecation message is issued if you
-do so, becoming illegal in Perl 5.32.
+that. Similarly for C<vec()>: you will be operating on the
+internally-encoded bit patterns of the Unicode characters, not on
+the code point values, which is very probably not what you want.
 
 =item *
 

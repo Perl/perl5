@@ -45,7 +45,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v10.0.0;
+my $version_of_mk_invlist_bounds = v9.0.0;
 
 ##########################################################################
 #
@@ -135,7 +135,7 @@ my $map_directory = 'To';        # Where map files go.
 # each one of the tens of thousands individually.
 #
 # In a match table, the value of a range is irrelevant (and hence the type as
-# well, which will always be 0), and arbitrarily set to the empty string.
+# well, which will always be 0), and arbitrarily set to the null string.
 # Using the example above, there would be two match tables for those two
 # entries, one named Upper would contain the 0x41..0x5A range, and the other
 # named Lower would contain 0x61..0x7A.
@@ -660,7 +660,7 @@ sub stack_trace() {
 # common to both releases, and you can see the changes caused just by the
 # underlying release semantic changes.  For versions earlier than 3.2, you
 # must copy a version of DAge.txt into the directory.
-my $string_compare_versions = DEBUG && ""; #  e.g., "2.1";
+my $string_compare_versions = DEBUG && 0; #  e.g., "2.1";
 my $compare_versions = DEBUG
                        && $string_compare_versions
                        && pack "C*", split /\./, $string_compare_versions;
@@ -937,9 +937,9 @@ my %why_obsolete;    # Documentation only
     my $why_no_expand  = "Deprecated by Unicode.  These are characters that expand to more than one character in the specified normalization form, but whether they actually take up more bytes or not depends on the encoding being used.  For example, a UTF-8 encoded character may expand to a different number of bytes than a UTF-32 encoded character.";
 
     %why_deprecated = (
-        'Grapheme_Link' => 'Duplicates ccc=vr (Canonical_Combining_Class=Virama)',
+        'Grapheme_Link' => 'Deprecated by Unicode:  Duplicates ccc=vr (Canonical_Combining_Class=Virama)',
         'Jamo_Short_Name' => $contributory,
-        'Line_Break=Surrogate' => 'Surrogates should never appear in well-formed text, and therefore shouldn\'t be the basis for line breaking',
+        'Line_Break=Surrogate' => 'Deprecated by Unicode because surrogates should never appear in well-formed text, and therefore shouldn\'t be the basis for line breaking',
         'Other_Alphabetic' => $contributory,
         'Other_Default_Ignorable_Code_Point' => $contributory,
         'Other_Grapheme_Extend' => $contributory,
@@ -1140,17 +1140,17 @@ my $MAX_UNICODE_CODEPOINT_STRING = ($v_version ge v2.0.0)
 my $MAX_UNICODE_CODEPOINT = hex $MAX_UNICODE_CODEPOINT_STRING;
 my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 
-# We work with above-Unicode code points, up to IV_MAX, but we may want to use
-# sentinels above that number.  Therefore for internal use, we use a much
-# smaller number, translating it to IV_MAX only for output.  The exact number
-# is immaterial (all above-Unicode code points are treated exactly the same),
-# but the algorithm requires it to be at least
-# 2 * $MAX_UNICODE_CODEPOINTS + 1
+# We work with above-Unicode code points, up to UV_MAX.   But when you get
+# that high, above IV_MAX, some operations don't work, and you can easily get
+# overflow.  Therefore for internal use, we use a much smaller number,
+# translating it to UV_MAX only for output.  The exact number is immaterial
+# (all Unicode code points are treated exactly the same), but the algorithm
+# requires it to be at least 2 * $MAX_UNICODE_CODEPOINTS + 1;
 my $MAX_WORKING_CODEPOINTS= $MAX_UNICODE_CODEPOINT * 8;
 my $MAX_WORKING_CODEPOINT = $MAX_WORKING_CODEPOINTS - 1;
 my $MAX_WORKING_CODEPOINT_STRING = sprintf("%X", $MAX_WORKING_CODEPOINT);
 
-my $MAX_PLATFORM_CODEPOINT = ~0 >> 1;
+my $MAX_PLATFORM_CODEPOINT = ~0;
 
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
@@ -1436,10 +1436,10 @@ my @missing_early_files;   # Generated list of absent files that we need to
 my @files_actually_output; # List of files we generated.
 my @more_Names;            # Some code point names are compound; this is used
                            # to store the extra components of them.
-my $E_FLOAT_PRECISION = 2; # The minimum number of digits after the decimal
-                           # point of a normalized floating point number
-                           # needed to match before we consider it equivalent
-                           # to a candidate rational
+my $MIN_FRACTION_LENGTH = 3; # How many digits of a floating point number at
+                           # the minimum before we consider it equivalent to a
+                           # candidate rational
+my $MAX_FLOATING_SLOP = 10 ** - $MIN_FRACTION_LENGTH; # And in floating terms
 
 # These store references to certain commonly used property objects
 my $age;
@@ -1454,7 +1454,6 @@ my $Assigned;   # All assigned characters in this Unicode release
 my $DI;         # Default_Ignorable_Code_Point property
 my $NChar;      # Noncharacter_Code_Point property
 my $script;
-my $scx;        # Script_Extensions property
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
 my $has_In_conflicts = 0;
@@ -1530,7 +1529,7 @@ sub populate_char_info ($) {
 
     $viacode[$i] = $perl_charname->value_of($i) || "";
     $age[$i] = (defined $age)
-               ? (($age->value_of($i) =~ / ^ \d+ \. \d+ $ /x)
+               ? (($age->value_of($i) =~ / ^ \d \. \d $ /x)
                   ? $age->value_of($i)
                   : "")
                : "";
@@ -3554,7 +3553,7 @@ sub trace { return main::trace(@_); }
     main::set_access('end', \%end, 'r', 's');
 
     my %value;
-    main::set_access('value', \%value, 'r', 's');
+    main::set_access('value', \%value, 'r');
 
     my %type;
     main::set_access('type', \%type, 'r');
@@ -5323,14 +5322,6 @@ use parent '-norequire', '_Range_List_Base';
         # Rest of parameters passed on
 
         return $self->_add_delete('+', @_);
-    }
-
-    sub replace_map {
-        # Replace a range
-
-        my $self = shift;
-
-        return $self->_add_delete('+', @_, Replace => $UNCONDITIONALLY);
     }
 
     sub add_duplicate {
@@ -7742,7 +7733,6 @@ END
     # Accessors for the underlying list that should fail if locked.
     for my $sub (qw(
                     add_duplicate
-                    replace_map
                 ))
     {
         no strict "refs";
@@ -7810,12 +7800,6 @@ use parent '-norequire', '_Base_Table';
 #    version.  But manual intervention to decide what the actual behavior
 #    should be may be required should this happen.  The introductory comments
 #    have more to say about this.
-#
-# 4) Definition.  This is a string for human consumption that specifies the
-#    code points that this table matches.  This is used only for the generated
-#    pod file.  It may be specified explicitly, or automatically computed.
-#    Only the first portion of complicated definitions is computed and
-#    displayed.
 
 sub standardize { return main::standardize($_[0]); }
 sub trace { return main::trace(@_); }
@@ -7860,11 +7844,6 @@ sub trace { return main::trace(@_); }
     # none.
     main::set_access('complement', \%complement, 'r');
 
-    my %definition;
-    # Human readable string of the first few ranges of code points matched by
-    # this table
-    main::set_access('definition', \%definition, 'r', 's');
-
     sub new {
         my $class = shift;
 
@@ -7881,7 +7860,6 @@ sub trace { return main::trace(@_); }
         my $initialize = delete $args{'Initialize'};
         my $matches_all = delete $args{'Matches_All'} || 0;
         my $format = delete $args{'Format'};
-        my $definition = delete $args{'Definition'} // "";
         # Rest of parameters passed on.
 
         my $range_list = Range_List->new(Initialize => $initialize,
@@ -7916,7 +7894,6 @@ sub trace { return main::trace(@_); }
         $leader{$addr} = $self;
         $parent{$addr} = $self;
         $complement{$addr} = 0;
-        $definition{$addr} = $definition;
 
         if (defined $format && $format ne $EMPTY_FORMAT) {
             Carp::my_carp_bug("'Format' must be '$EMPTY_FORMAT' in a match table instead of '$format'.  Using '$EMPTY_FORMAT'");
@@ -8027,23 +8004,13 @@ sub trace { return main::trace(@_); }
         # complement's if it has one.
 
         my $self = shift;
-        my $complement = $self->complement;
-
-        # In order to avoid re-complementing on each access, only do the
-        # complement the first time, and store the result in this table's
-        # range list to use henceforth.  However, this wouldn't work if the
-        # controlling (complement) table changed after we do this, so lock it.
-        # Currently, the value of the complement isn't needed until after it
-        # is fully constructed, so this works.  If this were to change, the
-        # each_range iteration functionality would no longer work on this
-        # complement.
-        if ($complement != 0 && $self->SUPER::_range_list->count == 0) {
-            $self->_set_range_list($self->SUPER::_range_list
-                                + ~ $complement->_range_list);
-            $complement->lock;
+        my $complement;
+        if (($complement = $self->complement) != 0) {
+            return ~ $complement->_range_list;
         }
-
-        return $self->SUPER::_range_list;
+        else {
+            return $self->SUPER::_range_list;
+        }
     }
 
     sub add_alias {
@@ -8081,7 +8048,7 @@ sub trace { return main::trace(@_); }
         # disambiguate with).
         if (defined $conflicting_object) {
             foreach my $alias ($self->aliases) {
-                if (standardize($alias->name) eq standardize($conflicting_name)) {
+                if ($alias->name eq $conflicting_name) {
 
                     # Here, there is an exact match.  This results in
                     # ambiguous comments, so disambiguate by changing the
@@ -8174,19 +8141,7 @@ sub trace { return main::trace(@_); }
                                                             # add_alias()
                                                             # instead for same
                                                             # property
-                     && ! $other->perl_extension
-
-                         # We allow the sc and scx properties to be marked as
-                         # related.  They are in fact related, and this allows
-                         # the pod to show that better.  This test isn't valid
-                         # if this is an early Unicode release without the scx
-                         # property (having that also implies the sc property
-                         # exists, so don't have to test for no 'sc')
-                     && (   ! defined $scx
-                         && ! (   (   $self->property == $script
-                                   || $self->property == $scx)
-                               && (   $self->property == $script
-                                   || $self->property == $scx))))
+                     && ! $other->perl_extension)
             {
                 Carp::my_carp_bug("set_equivalent_to should have 'Related => 0 for equivalencing two Unicode properties.  Assuming $self is not related to $other");
                 $related = 0;
@@ -8307,235 +8262,6 @@ sub trace { return main::trace(@_); }
             $child->set_fate($fate, $reason);
         }
         return;
-    }
-
-    sub calculate_table_definition
-    {
-        # Returns a human-readable string showing some or all of the code
-        # points matched by this table.  The string will include a
-        # bracketed-character class for all characters matched in the 00-FF
-        # range, and the first few ranges matched beyond that.
-        my $max_ranges = 6;
-
-        my $self = shift;
-        my $definition = $self->definition || "";
-
-        # Skip this if already have a definition.
-        return $definition if $definition;
-
-        my $lows_string = "";   # The string representation of the 0-FF
-                                # characters
-        my $string_range = "";  # The string rep. of the above FF ranges
-        my $range_count = 0;    # How many ranges in $string_rage
-
-        my @lows_invlist;       # The inversion list of the 0-FF code points
-        my $first_non_control = ord(" ");   # Everything below this is a
-                                            # control, on ASCII or EBCDIC
-        my $max_table_code_point = $self->max;
-
-        # On ASCII platforms, the range 80-FF contains no printables.
-        my $highest_printable = ((main::NON_ASCII_PLATFORM) ? 255 : 126);
-
-
-        # Look through the first few ranges matched by this table.
-        $self->reset_each_range;    # Defensive programming
-        while (defined (my $range = $self->each_range())) {
-            my $start = $range->start;
-            my $end = $range->end;
-
-            # Accumulate an inversion list of the 00-FF code points
-            if ($start < 256 && ($start > 0 || $end < 256)) {
-                push @lows_invlist, $start;
-                push @lows_invlist, 1 + (($end < 256) ? $end : 255);
-
-                # Get next range if there are more ranges below 256
-                next if $end < 256 && $end < $max_table_code_point;
-
-                # If the range straddles the 255/256 boundary, we split it
-                # there.  We already added above the low portion to the
-                # inversion list
-                $start = 256 if $end > 256;
-            }
-
-            # Here, @lows_invlist contains the code points below 256, and
-            # there is no other range, or the current one starts at or above
-            # 256.  Generate the [char class] for the 0-255 ones.
-            while (@lows_invlist) {
-
-                # If this range (necessarily the first one, by the way) starts
-                # at 0 ...
-                if ($lows_invlist[0] == 0) {
-
-                    # If it ends within the block of controls, that means that
-                    # some controls are in it and some aren't.  Since Unicode
-                    # properties pretty much only know about a few of the
-                    # controls, like \n, \t, this means that its one of them
-                    # that isn't in the range.  Complement the inversion list
-                    # which will likely cause these to be output using their
-                    # mnemonics, hence being clearer.
-                    if ($lows_invlist[1] < $first_non_control) {
-                        $lows_string .= '^';
-                        shift @lows_invlist;
-                        push @lows_invlist, 256;
-                    }
-                    elsif ($lows_invlist[1] <= $highest_printable) {
-
-                        # Here, it extends into the printables block.  Split
-                        # into two ranges so that the controls are separate.
-                        $lows_string .= sprintf "\\x00-\\x%02x",
-                                                    $first_non_control - 1;
-                        $lows_invlist[0] = $first_non_control;
-                    }
-                }
-
-                # If the range completely contains the printables, don't
-                # individually spell out the printables.
-                if (    $lows_invlist[0] <= $first_non_control
-                    && $lows_invlist[1] > $highest_printable)
-                {
-                    $lows_string .= sprintf "\\x%02x-\\x%02x",
-                                        $lows_invlist[0], $lows_invlist[1] - 1;
-                    shift @lows_invlist;
-                    shift @lows_invlist;
-                    next;
-                }
-
-                # Here, the range may include some but not all printables.
-                # Look at each one individually
-                foreach my $ord (shift @lows_invlist .. shift(@lows_invlist) - 1) {
-                    my $char = chr $ord;
-
-                    # If there is already something in the list, an
-                    # alphanumeric char could be the next in sequence.  If so,
-                    # we start or extend a range.  That is, we could have so
-                    # far something like 'a-c', and the next char is a 'd', so
-                    # we change it to 'a-d'.  We use native_to_unicode()
-                    # because a-z on EBCDIC means 26 chars, and excludes the
-                    # gap ones.
-                    if ($lows_string ne "" && $char =~ /[[:alnum:]]/) {
-                        my $prev = substr($lows_string, -1);
-                        if (   $prev !~ /[[:alnum:]]/
-                            ||   utf8::native_to_unicode(ord $prev) + 1
-                              != utf8::native_to_unicode(ord $char))
-                        {
-                            # Not extending the range
-                            $lows_string .= $char;
-                        }
-                        elsif (   length $lows_string > 1
-                               && substr($lows_string, -2, 1) eq '-')
-                        {
-                            # We had a sequence like '-c' and the current
-                            # character is 'd'.  Extend the range.
-                            substr($lows_string, -1, 1) = $char;
-                        }
-                        else {
-                            # We had something like 'd' and this is 'e'.
-                            # Start a range.
-                            $lows_string .= "-$char";
-                        }
-                    }
-                    elsif ($char =~ /[[:graph:]]/) {
-
-                        # We output a graphic char as-is, preceded by a
-                        # backslash if it is a metacharacter
-                        $lows_string .= '\\'
-                                if $char =~ /[\\\^\$\@\%\|()\[\]\{\}\-\/"']/;
-                        $lows_string .= $char;
-                    } # Otherwise use mnemonic for any that have them
-                    elsif ($char =~ /[\a]/) {
-                        $lows_string .= '\a';
-                    }
-                    elsif ($char =~ /[\b]/) {
-                        $lows_string .= '\b';
-                    }
-                    elsif ($char eq "\e") {
-                        $lows_string .= '\e';
-                    }
-                    elsif ($char eq "\f") {
-                        $lows_string .= '\f';
-                    }
-                    elsif ($char eq "\cK") {
-                        $lows_string .= '\cK';
-                    }
-                    elsif ($char eq "\n") {
-                        $lows_string .= '\n';
-                    }
-                    elsif ($char eq "\r") {
-                        $lows_string .= '\r';
-                    }
-                    elsif ($char eq "\t") {
-                        $lows_string .= '\t';
-                    }
-                    else {
-
-                        # Here is a non-graphic without a mnemonic.  We use \x
-                        # notation.  But if the ordinal of this is one above
-                        # the previous, create or extend the range
-                        my $hex_representation = sprintf("%02x", ord $char);
-                        if (   length $lows_string >= 4
-                            && substr($lows_string, -4, 2) eq '\\x'
-                            && hex(substr($lows_string, -2)) + 1 == ord $char)
-                        {
-                            if (       length $lows_string >= 5
-                                &&     substr($lows_string, -5, 1) eq '-'
-                                && (   length $lows_string == 5
-                                    || substr($lows_string, -6, 1) ne '\\'))
-                            {
-                                substr($lows_string, -2) = $hex_representation;
-                            }
-                            else {
-                                $lows_string .= '-\\x' . $hex_representation;
-                            }
-                        }
-                        else {
-                            $lows_string .= '\\x' . $hex_representation;
-                        }
-                    }
-                }
-            }
-
-            # Done with assembling the string of all lows.  If there are only
-            # lows in the property, are completely done.
-            if ($max_table_code_point < 256) {
-                $self->reset_each_range;
-                last;
-            }
-
-            # Otherwise, quit if reached max number of non-lows ranges.  If
-            # there are lows, count them as one unit towards the maximum.
-            $range_count++;
-            if ($range_count > (($lows_string eq "") ? $max_ranges : $max_ranges - 1)) {
-                $string_range .= " ...";
-                $self->reset_each_range;
-                last;
-            }
-
-            # Otherwise add this range.
-            $string_range .= ", " if $string_range ne "";
-            if ($start == $end) {
-                $string_range .= sprintf("U+%04X", $start);
-            }
-            elsif ($end >= $MAX_WORKING_CODEPOINT)  {
-                $string_range .= sprintf("U+%04X..infinity", $start);
-            }
-            else  {
-                $string_range .= sprintf("U+%04X..%04X",
-                                        $start, $end);
-            }
-        }
-
-        # Done with all the ranges we're going to look at.  Assemble the
-        # definition from the lows + non-lows.
-
-        if ($lows_string ne "" || $string_range ne "") {
-            if ($lows_string ne "") {
-                $definition .= "[$lows_string]";
-                $definition .= ", " if $string_range;
-            }
-            $definition .= $string_range;
-        }
-
-        return $definition;
     }
 
     sub write {
@@ -9623,7 +9349,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     containing_range
                     count
                     default_map
-                    definition
                     delete_range
                     description
                     each_range
@@ -9642,7 +9367,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     range_count
                     ranges
                     range_size_1
-                    replace_map
                     reset_each_range
                     set_comment
                     set_default_map
@@ -12955,15 +12679,6 @@ sub register_fraction($) {
     my $rational = shift;
 
     my $float = eval $rational;
-    $float = sprintf "%.*e", $E_FLOAT_PRECISION, $float;
-    if (   defined $nv_floating_to_rational{$float}
-        && $nv_floating_to_rational{$float} ne $rational)
-    {
-        die Carp::my_carp_bug("Both '$rational' and"
-                            . " '$nv_floating_to_rational{$float}' evaluate to"
-                            . " the same floating point number."
-                            . "  \$E_FLOAT_PRECISION must be increased");
-    }
     $nv_floating_to_rational{$float} = $rational;
     return;
 }
@@ -13426,9 +13141,9 @@ sub setup_script_extensions {
     # The Script_Extensions property starts out with a clone of the Script
     # property.
 
-    $scx = property_ref("Script_Extensions");
-    return unless defined $scx;
-
+    my $scx = property_ref("Script_Extensions");
+    $scx = Property->new("scx", Full_Name => "Script_Extensions")
+                                                            if ! defined $scx;
     $scx->_set_format($STRING_WHITE_SPACE_LIST);
     $scx->initialize($script);
     $scx->set_default_map($script->default_map);
@@ -13664,7 +13379,7 @@ sub filter_all_caps_script_names {
 
     my ($range, $script, @remainder)
         = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
-    my @words = split /[_-]/, $script;
+    my @words = split "_", $script;
     for my $word (@words) {
         $word =
             ucfirst(lc($word)) if $word ne 'CJK';
@@ -14021,6 +13736,7 @@ END
     # data is retained in the map table for reference, but the spurious match
     # tables are deleted.
 
+    my $scx = property_ref("Script_Extensions");
     if (defined $scx) {
         foreach my $table ($scx->tables) {
             next unless $table->name =~ /\s/;   # All the new and only the new
@@ -14032,21 +13748,6 @@ END
                 $script_table += $table;
             }
             $scx->delete_match_table($table);
-        }
-
-        # Mark the scx table as the parent of the corresponding sc table for
-        # those which are identical.  This causes the pod for the script table
-        # to refer to the corresponding scx one.
-        #
-        # This has to be in a separate loop from above, so as to wait until
-        # the tables are stabilized before checking for equivalency.
-        if (defined $pod_directory) {
-            foreach my $table ($scx->tables) {
-                my $plain_sc_equiv = $script->table($table->name);
-                if ($table->matches_identically_to($plain_sc_equiv)) {
-                    $plain_sc_equiv->set_equivalent_to($table, Related => 1);
-                }
-            }
         }
     }
 
@@ -14197,10 +13898,8 @@ sub handle_compare_versions () {
     # since the first compare version.
     my $delta = Range_List->new();
     foreach my $table ($age->tables) {
-        use version;
         next if $table == $age->table('Unassigned');
-        next if version->parse($table->name)
-             le version->parse($string_compare_versions);
+        next if $table->name le $string_compare_versions;
         $delta += $table;
     }
     if ($delta->is_empty) {
@@ -14223,9 +13922,6 @@ sub handle_compare_versions () {
         next if     $this_block == $no_block
                 ||  ! ($this_block & $Assigned)->is_empty;
         $this_block->set_fate($SUPPRESSED, $after_first_version);
-        foreach my $range ($this_block->ranges) {
-            $block->replace_map($range->start, $range->end, 'No_Block')
-        }
         $no_block += $this_block;
     }
 
@@ -14472,13 +14168,21 @@ sub compile_perl() {
     }
 
     my $Any = $perl->add_match_table('Any',
-                                    Description  => "All Unicode code points");
+                                     Description  => "All Unicode code points: [\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
+                                     );
     $Any->add_range(0, $MAX_UNICODE_CODEPOINT);
     $Any->add_alias('Unicode');
 
     calculate_Assigned();
 
-    my $ASCII = $perl->add_match_table('ASCII');
+    # Our internal-only property should be treated as more than just a
+    # synonym; grandfather it in to the pod.
+    $perl->add_match_table('_CombAbove', Re_Pod_Entry => 1,
+                            Fate => $INTERNAL_ONLY, Status => $DISCOURAGED)
+            ->set_equivalent_to(property_ref('ccc')->table('Above'),
+                                                                Related => 1);
+
+    my $ASCII = $perl->add_match_table('ASCII', Description => '[[:ASCII:]]');
     if (defined $block) {   # This is equivalent to the block if have it.
         my $Unicode_ASCII = $block->table('Basic_Latin');
         if (defined $Unicode_ASCII && ! $Unicode_ASCII->is_empty) {
@@ -14538,6 +14242,7 @@ sub compile_perl() {
         $Lower += $temp & $Assigned;
     }
     my $Posix_Lower = $perl->add_match_table("PosixLower",
+                            Description => "[a-z]",
                             Initialize => $Lower & $ASCII,
                             );
 
@@ -14555,6 +14260,7 @@ sub compile_perl() {
         $Upper->add_range(0x24B6, 0x24CF);  # Circled Latin upper case letters
     }
     my $Posix_Upper = $perl->add_match_table("PosixUpper",
+                            Description => "[A-Z]",
                             Initialize => $Upper & $ASCII,
                             );
 
@@ -14617,6 +14323,56 @@ sub compile_perl() {
             $Unicode_Lower->table('N')->set_caseless_equivalent($notcased);
         }
         $Lower->set_caseless_equivalent($cased);
+    }
+
+    # Similarly, set up our own Case_Ignorable property if this Unicode
+    # version doesn't have it.  From Unicode 5.1: Definition D121: A character
+    # C is defined to be case-ignorable if C has the value MidLetter or the
+    # value MidNumLet for the Word_Break property or its General_Category is
+    # one of Nonspacing_Mark (Mn), Enclosing_Mark (Me), Format (Cf),
+    # Modifier_Letter (Lm), or Modifier_Symbol (Sk).
+
+    # Perl has long had an internal-only alias for this property; grandfather
+    # it in to the pod, but discourage its use.
+    my $perl_case_ignorable = $perl->add_match_table('_Case_Ignorable',
+                                                     Re_Pod_Entry => 1,
+                                                     Fate => $INTERNAL_ONLY,
+                                                     Status => $DISCOURAGED);
+    my $case_ignorable = property_ref('Case_Ignorable');
+    if (defined $case_ignorable && ! $case_ignorable->is_empty) {
+        $perl_case_ignorable->set_equivalent_to($case_ignorable->table('Y'),
+                                                                Related => 1);
+    }
+    else {
+
+        $perl_case_ignorable->initialize($gc->table('Mn') + $gc->table('Lm'));
+
+        # The following three properties are not in early releases
+        $perl_case_ignorable += $gc->table('Me') if defined $gc->table('Me');
+        $perl_case_ignorable += $gc->table('Cf') if defined $gc->table('Cf');
+        $perl_case_ignorable += $gc->table('Sk') if defined $gc->table('Sk');
+
+        # For versions 4.1 - 5.0, there is no MidNumLet property, and
+        # correspondingly the case-ignorable definition lacks that one.  For
+        # 4.0, it appears that it was meant to be the same definition, but was
+        # inadvertently omitted from the standard's text, so add it if the
+        # property actually is there
+        my $wb = property_ref('Word_Break');
+        if (defined $wb) {
+            my $midlet = $wb->table('MidLetter');
+            $perl_case_ignorable += $midlet if defined $midlet;
+            my $midnumlet = $wb->table('MidNumLet');
+            $perl_case_ignorable += $midnumlet if defined $midnumlet;
+        }
+        else {
+
+            # In earlier versions of the standard, instead of the above two
+            # properties , just the following characters were used:
+            $perl_case_ignorable +=
+                            ord("'")
+                        +   utf8::unicode_to_native(0xAD)  # SOFT HYPHEN (SHY)
+                        +   0x2019; # RIGHT SINGLE QUOTATION MARK
+        }
     }
 
     # The remaining perl defined tables are mostly based on Unicode TR 18,
@@ -14712,6 +14468,7 @@ sub compile_perl() {
         $Alpha->add_alias('Alphabetic');
     }
     my $Posix_Alpha = $perl->add_match_table("PosixAlpha",
+                            Description => "[A-Za-z]",
                             Initialize => $Alpha & $ASCII,
                             );
     $Posix_Upper->set_caseless_equivalent($Posix_Alpha);
@@ -14722,6 +14479,7 @@ sub compile_perl() {
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
     $perl->add_match_table("PosixAlnum",
+                            Description => "[A-Za-z0-9]",
                             Initialize => $Alnum & $ASCII,
                             );
 
@@ -14748,7 +14506,7 @@ sub compile_perl() {
 
     # This is a Perl extension, so the name doesn't begin with Posix.
     my $PerlWord = $perl->add_match_table('PosixWord',
-                    Description => '\w, restricted to ASCII',
+                    Description => '\w, restricted to ASCII = [A-Za-z0-9_]',
                     Initialize => $Word & $ASCII,
                     );
     $PerlWord->add_alias('PerlWord');
@@ -14765,6 +14523,7 @@ sub compile_perl() {
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
     $perl->add_match_table("PosixBlank",
+                            Description => "\\t and ' '",
                             Initialize => $Blank & $ASCII,
                             );
 
@@ -14790,6 +14549,7 @@ sub compile_perl() {
     $Space->add_alias('Space') if $v_version lt v4.1.0;
 
     my $Posix_space = $perl->add_match_table("PosixSpace",
+                            Description => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
                             Initialize => $Space & $ASCII,
                             );
     $Posix_space->add_alias('PerlSpace'); # A pre-existing synonym
@@ -14798,12 +14558,7 @@ sub compile_perl() {
                                         Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
     $perl->add_match_table("PosixCntrl",
-                            Description => "ASCII control characters",
-                            Definition =>  "ACK, BEL, BS, CAN, CR, DC1, DC2,"
-                                         . " DC3, DC4, DEL, DLE, ENQ, EOM,"
-                                         . " EOT, ESC, ETB, ETX, FF, FS, GS,"
-                                         . " HT, LF, NAK, NUL, RS, SI, SO,"
-                                         . " SOH, STX, SUB, SYN, US, VT",
+                            Description => "ASCII control characters: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EOM, SUB, ESC, FS, GS, RS, US, and DEL",
                             Initialize => $Cntrl & $ASCII,
                             );
 
@@ -14827,6 +14582,8 @@ sub compile_perl() {
                         Initialize => ~ ($Space + $controls),
                         );
     $perl->add_match_table("PosixGraph",
+                            Description =>
+                                '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~0-9A-Za-z]',
                             Initialize => $Graph & $ASCII,
                             );
 
@@ -14835,6 +14592,8 @@ sub compile_perl() {
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
     $perl->add_match_table("PosixPrint",
+                            Description =>
+                              '[- 0-9A-Za-z!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
                             Initialize => $print & $ASCII,
                             );
 
@@ -14849,6 +14608,7 @@ sub compile_perl() {
                                 Perl_Extension => 1
         );
     $perl->add_match_table('PosixPunct', Perl_Extension => 1,
+        Description => '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
         Initialize => $ASCII & $XPosixPunct,
         );
 
@@ -14856,6 +14616,7 @@ sub compile_perl() {
                             Description => '[0-9] + all other decimal digits');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
     my $PosixDigit = $perl->add_match_table("PosixDigit",
+                                            Description => '[0-9]',
                                             Initialize => $Digit & $ASCII,
                                             );
 
@@ -14870,6 +14631,7 @@ sub compile_perl() {
                               ord('A') .. ord('F'),
                               ord('a') .. ord('f'),
                               0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
+        $Xdigit->add_description('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
 
     # AHex was not present in early releases
@@ -14883,6 +14645,7 @@ sub compile_perl() {
         $PosixXDigit->add_alias('AHex');
         $PosixXDigit->add_alias('Ascii_Hex_Digit');
     }
+    $PosixXDigit->add_description('[0-9A-Fa-f]');
 
     my $any_folds = $perl->add_match_table("_Perl_Any_Folds",
                     Description => "Code points that particpate in some fold",
@@ -14991,6 +14754,33 @@ sub compile_perl() {
         Perl_Extension => 1,
         Note => 'Union of all non-canonical decompositions',
         );
+
+    # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
+    # than SD appeared, construct it ourselves, based on the first release SD
+    # was in.  A pod entry is grandfathered in for it
+    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Re_Pod_Entry => 1,
+                                           Perl_Extension => 1,
+                                           Fate => $INTERNAL_ONLY,
+                                           Status => $DISCOURAGED);
+    my $soft_dotted = property_ref('Soft_Dotted');
+    if (defined $soft_dotted && ! $soft_dotted->is_empty) {
+        $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
+    }
+    else {
+
+        # This list came from 3.2 Soft_Dotted; all of these code points are in
+        # all releases
+        $CanonDCIJ->initialize([ ord('i'),
+                                 ord('j'),
+                                 0x012F,
+                                 0x0268,
+                                 0x0456,
+                                 0x0458,
+                                 0x1E2D,
+                                 0x1ECB,
+                               ]);
+        $CanonDCIJ = $CanonDCIJ & $Assigned;
+    }
 
     # For backward compatibility, Perl has its own definition for IDStart.
     # It is regular XID_Start plus the underscore, but all characters must be
@@ -15311,9 +15101,6 @@ END
                                                     . $current_age->name
                                                     . ' or earlier',
                                     );
-            foreach my $alias ($current_age->aliases) {
-                $current_in->add_alias($alias->name);
-            }
             $previous_in = $current_in;
 
             # Add clarifying material for the corresponding age file.  This is
@@ -15535,71 +15322,6 @@ END
         }
     }
 
-    # This property is a modification of the scx property
-    my $perl_scx = Property->new('_Perl_SCX',
-                                 Fate => $INTERNAL_ONLY,
-                                 Perl_Extension => 1,
-                                 Directory => $map_directory,
-                                 Type => $ENUM);
-    my $source;
-
-    # Use scx if available; otherwise sc;  if neither is there (a very old
-    # Unicode version, just say that everything is 'Common'
-    if (defined $scx) {
-        $source = $scx;
-        $perl_scx->set_default_map('Unknown');
-    }
-    elsif (defined $script) {
-        $source = $script;
-
-        # Early versions of 'sc', had everything be 'Common'
-        if (defined $script->table('Unknown')) {
-            $perl_scx->set_default_map('Unknown');
-        }
-        else {
-            $perl_scx->set_default_map('Common');
-        }
-    } else {
-        $perl_scx->add_match_table('Common');
-        $perl_scx->add_map(0, $MAX_UNICODE_CODEPOINT, 'Common');
-
-        $perl_scx->add_match_table('Unknown');
-        $perl_scx->set_default_map('Unknown');
-    }
-
-    $perl_scx->_set_format($STRING_WHITE_SPACE_LIST);
-    $perl_scx->set_pre_declared_maps(0); # PropValueAliases doesn't list these
-
-    if (defined $source) {
-        $perl_scx->initialize($source);
-
-        # UTS 39 says that the scx property should be modified for these
-        # countries where certain mixed scripts are commonly used.
-        for my $range ($perl_scx->ranges) {
-            my $value = $range->value;
-            my $changed = $value =~ s/ ( \b Han i? \b ) /$1 Hanb Jpan Kore/xi;
-             $changed |=  $value =~ s/ ( \b Hira (gana)? \b ) /$1 Jpan/xi;
-             $changed |=  $value =~ s/ ( \b Kata (kana)? \b ) /$1 Jpan/xi;
-             $changed |=  $value =~ s{ ( \b Katakana_or_Hiragana \b ) }
-                                     {$1 Katakana Hiragana Jpan}xi;
-             $changed |=  $value =~ s/ ( \b Hang (ul)? \b ) /$1 Kore/xi;
-             $changed |=  $value =~ s/ ( \b Bopo (mofo)? \b ) /$1 Hanb/xi;
-
-            if ($changed) {
-                $value = join " ", uniques split " ", $value;
-                $range->set_value($value)
-            }
-        }
-
-        foreach my $table ($source->tables) {
-            my $scx_table = $perl_scx->add_match_table($table->name,
-                                    Full_Name => $table->full_name);
-            foreach my $alias ($table->aliases) {
-                $scx_table->add_alias($alias->name);
-            }
-        }
-    }
-
     # Here done with all the basic stuff.  Ready to populate the information
     # about each character if annotating them.
     if ($annotate) {
@@ -15643,6 +15365,7 @@ sub add_perl_synonyms() {
 
     # If the version of Unicode includes the Script Extensions (preferably),
     # or Script property, add its tables
+    my $scx = property_ref("Script_Extensions");
     if (defined $scx) {
         push @tables, $scx->tables;
     }
@@ -16307,18 +16030,7 @@ sub make_re_pod_entries($) {
         $unicode_count = $count;
         $non_unicode_string = "";
     }
-
     my $string_count = clarify_number($unicode_count) . $non_unicode_string;
-
-    my $definition = $input_table->calculate_table_definition;
-    if ($definition) {
-
-        # Save the definition for later use.
-        $input_table->set_definition($definition);
-
-        $definition = ": $definition";
-    }
-
     my $status = $input_table->status;
     my $status_info = $input_table->status_info;
     my $caseless_equivalent = $input_table->caseless_equivalent;
@@ -16613,10 +16325,7 @@ sub make_re_pod_entries($) {
             if ($table_property != $perl && $table->perl_extension) {
                 push @info, '(Perl extension)';
             }
-            my $definition = $table->definition // "";
-            $definition = "" if $entry_for_first_alias;
-            $definition = ": $definition" if $definition;
-            push @info, "($string_count$definition)";
+            push @info, "($string_count)";
 
             # Now, we have both the entry and info so add them to the
             # list of all the properties.
@@ -16659,49 +16368,38 @@ sub make_ucd_table_pod_entries {
                    : $table->parent->property;
 
     my $perl_extension = $table->perl_extension;
-    my $is_perl_extension_match_table_but_not_dollar_perl
-                                                        = $property != $perl
-                                                       && $perl_extension
-                                                       && $property != $table;
 
     # Get the more official name for for perl extensions that aren't
     # stand-alone properties
-    if ($is_perl_extension_match_table_but_not_dollar_perl) {
-        if ($property->type == $BINARY) {
-            $meaning = $property->full_name;
+    if ($perl_extension && $property != $table) {
+        if ($property == $perl ||$property->type == $BINARY) {
+            $meaning = $table->complete_name;
         }
         else {
-            $meaning = $table->parent->complete_name;
+            $meaning = $property->full_name . "=$full_name";
         }
     }
 
     # There are three types of info column.  One for the short name, one for
     # the full name, and one for everything else.  They mostly are the same,
     # so initialize in the same loop.
-
     foreach my $info_ref (\$full_info, \$short_info, \$other_info) {
-        if ($info_ref != \$full_info) {
-
-            # The non-full name columns include the full name
-            $$info_ref .= $full_name;
-        }
-
-
-        if ($is_perl_extension_match_table_but_not_dollar_perl) {
+        if ($perl_extension && $property != $table) {
 
             # Add the synonymous name for the non-full name entries; and to
             # the full-name entry if it adds extra information
-            if (   standardize($meaning) ne $standard_full_name
-                || $info_ref == \$other_info
-                || $info_ref == \$short_info)
-            {
-                my $parenthesized =  $info_ref != \$full_info;
-                $$info_ref .= " " if $$info_ref && $parenthesized;
-                $$info_ref .= "(=" if $parenthesized;
-                $$info_ref .= "$meaning";
-                $$info_ref .= ")" if $parenthesized;
-                $$info_ref .= ".";
+            if ($info_ref == \$other_info
+                || ($info_ref == \$short_info
+                    && $standard_short_name ne $standard_full_name)
+                || standardize($meaning) ne $standard_full_name
+            ) {
+                $$info_ref .= "$meaning.";
             }
+        }
+        elsif ($info_ref != \$full_info) {
+
+            # Otherwise, the non-full name columns include the full name
+            $$info_ref .= $full_name;
         }
 
         # And the full-name entry includes the short name, if shorter
@@ -16720,23 +16418,8 @@ sub make_ucd_table_pod_entries {
         }
     }
 
-    my $definition;
-    my $definition_table;
-    my $type = $table->property->type;
-    if ($type == $BINARY || $type == $FORCED_BINARY) {
-        $definition_table = $table->property->table('Y');
-    }
-    elsif ($table->isa('Match_Table')) {
-        $definition_table = $table;
-    }
-
-    $definition = $definition_table->calculate_table_definition
-                                            if defined $definition_table
-                                                    && $definition_table != 0;
-
     # Add any extra annotations to the full name entry
     foreach my $more_info ($table->description,
-                            $definition,
                             $table->note,
                             $table->status_info)
     {
@@ -16874,69 +16557,27 @@ sub pod_alphanumeric_sort {
         return -1
     }
 
-    # Determine if the two operands are compound or not, and if so if are
-    # "numeric" property values or not, like \p{Age: 3.0}.  But there are also
-    # things like \p{Canonical_Combining_Class: CCC133} and \p{Age: V10_0},
-    # all of which this considers numeric, and for sorting, looks just at the
-    # numeric parts.  It can also be a rational like \p{Numeric Value=-1/2}.
-    my $split_re = qr/
-        ^ ( [^:=]+ ) # $1 is undef if not a compound form, otherwise is the
-                     # property name
-        [:=] \s*     # The syntax for the compound form
-        (?:          # followed by ...
-            (        # $2 gets defined if what follows is a "numeric"
-                     # expression, which is ...
-              ( -? \d+ (?: [.\/] \d+)?  # An integer, float, or rational
-                                        # number, optionally signed
-               | [[:alpha:]]{2,} \d+ $ ) # or something like CCC131.  Either
-                                         # of these go into $3
-             | ( V \d+ _ \d+ )           # or a Unicode's Age property version
-                                         # number, into $4
-            )
-            | .* $    # If not "numeric", accept anything so that $1 gets
-                      # defined if it is any compound form
-        ) /ix;
-    my ($a_initial, $a_numeric, $a_number, $a_version) = ($a =~ $split_re);
-    my ($b_initial, $b_numeric, $b_number, $b_version) = ($b =~ $split_re);
+    # Determine if the two operands are numeric property values or not.
+    # A numeric property will look like xyz: 3.  But the number
+    # can begin with an optional minus sign, and may have a
+    # fraction or rational component, like xyz: 3/2.  If either
+    # isn't numeric, use alphabetic sort.
+    my ($a_initial, $a_number) =
+        ($a =~ /^ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
+    return $a cmp $b unless defined $a_number;
+    my ($b_initial, $b_number) =
+        ($b =~ /^ ( [^:=]+ [:=] \s* ) (-? \d+ (?: [.\/] \d+)? )/ix);
+    return $a cmp $b unless defined $b_number;
 
-    # Sort alphabeticlly on the whole property name if either operand isn't
-    # compound, or they differ.
-    return $a cmp $b if   ! defined $a_initial
-                       || ! defined $b_initial
-                       || $a_initial ne $b_initial;
-
-    if (! defined $a_numeric) {
-
-        # If neither is numeric, use alpha sort
-        return $a cmp $b if ! defined $b_numeric;
-        return 1;  # Sort numeric ahead of alpha
-    }
-
-    # Here $a is numeric
-    return -1 if ! defined $b_numeric;  # Numeric sorts before alpha
-
-    # Here they are both numeric in the same property.
-    # Convert version numbers into regular numbers
-    if (defined $a_version) {
-        ($a_number = $a_version) =~ s/^V//i;
-        $a_number =~ s/_/./;
-    }
-    else {  # Otherwise get rid of the, e.g., CCC in CCC9 */
-        $a_number =~ s/ ^ [[:alpha:]]+ //x;
-    }
-    if (defined $b_version) {
-        ($b_number = $b_version) =~ s/^V//i;
-        $b_number =~ s/_/./;
-    }
-    else {
-        $b_number =~ s/ ^ [[:alpha:]]+ //x;
-    }
+    # Here they are both numeric, but use alphabetic sort if the
+    # initial parts don't match
+    return $a cmp $b if $a_initial ne $b_initial;
 
     # Convert rationals to floating for the comparison.
     $a_number = eval $a_number if $a_number =~ qr{/};
     $b_number = eval $b_number if $b_number =~ qr{/};
 
-    return $a_number <=> $b_number || $a cmp $b;
+    return $a_number <=> $b_number;
 }
 
 sub make_pod () {
@@ -17162,7 +16803,6 @@ END
     $ucd_pod =  format_pod_line($indent_info_column, 'NAME', '  INFO')
                 . "\n"
                 . $ucd_pod;
-    my $space_hex = sprintf("%02x", ord " ");
     local $" = "";
 
     # Everything is ready to assemble.
@@ -17190,7 +16830,7 @@ Perl can provide access to all non-provisional Unicode character properties,
 though not all are enabled by default.  The omitted ones are the Unihan
 properties (accessible via the CPAN module L<Unicode::Unihan>) and certain
 deprecated or Unicode-internal properties.  (An installation may choose to
-recompile Perl's tables to change this.  See L</Unicode character
+recompile Perl's tables to change this.  See L<Unicode character
 properties that are NOT accepted by Perl>.)
 
 For most purposes, access to Unicode properties from the Perl core is through
@@ -17223,16 +16863,14 @@ constructs, both single and compound forms.
 B<Compound forms> consist of two components, separated by an equals sign or a
 colon.  The first component is the property name, and the second component is
 the particular value of the property to match against, for example,
-C<\\p{Script_Extensions: Greek}> and C<\\p{Script_Extensions=Greek}> both mean
-to match characters whose Script_Extensions property value is Greek.
-(C<Script_Extensions> is an improved version of the C<Script> property.)
+C<\\p{Script: Greek}> and C<\\p{Script=Greek}> both mean to match characters
+whose Script property value is Greek.
 
 B<Single forms>, like C<\\p{Greek}>, are mostly Perl-defined shortcuts for
 their equivalent compound forms.  The table shows these equivalences.  (In our
-example, C<\\p{Greek}> is a just a shortcut for
-C<\\p{Script_Extensions=Greek}>).  There are also a few Perl-defined single
-forms that are not shortcuts for a compound form.  One such is C<\\p{Word}>.
-These are also listed in the table.
+example, C<\\p{Greek}> is a just a shortcut for C<\\p{Script=Greek}>.)
+There are also a few Perl-defined single forms that are not shortcuts for a
+compound form.  One such is C<\\p{Word}>.  These are also listed in the table.
 
 In parsing these constructs, Perl always ignores Upper/lower case differences
 everywhere within the {braces}.  Thus C<\\p{Greek}> means the same thing as
@@ -17356,16 +16994,8 @@ All single forms are Perl extensions; a few compound forms are as well, and
 are noted as such.
 
 Numbers in (parentheses) indicate the total number of Unicode code points
-matched by the property.  For the entries that give the longest, most
-descriptive version of the property, the count is followed by a list of some
-of the code points matched by it.  The list includes all the matched
-characters in the 0-255 range, enclosed in the familiar [brackets] the same as
-a regular expression bracketed character class.  Following that, the next few
-higher matching ranges are also given.  To avoid visual ambiguity, the SPACE
-character is represented as C<\\x$space_hex>.
-
-For emphasis, those properties that match no code points at all are listed as
-well in a separate section following the table.
+matched by the property.  For emphasis, those properties that match no code
+points at all are listed as well in a separate section following the table.
 
 Most properties match the same code points regardless of whether C<"/i">
 case-insensitive matching is specified or not.  But a few properties are
@@ -17470,11 +17100,7 @@ an alternative name, if any, plus possibly some annotations.  The alternative
 name is the property's full name, unless that would simply repeat the first
 column, in which case the second column indicates the property's short name
 (if different).  The annotations are given only in the entry for the full
-name.  The annotations for binary properties include a list of the first few
-ranges that the property matches.  To avoid any ambiguity, the SPACE character
-is represented as C<\\x$space_hex>.
-
-If a property is obsolete, etc, the entry will be flagged with the same
+name.  If a property is obsolete, etc, the entry will be flagged with the same
 characters used in the table in the L<section above|/Properties accessible
 through \\p{} and \\P{}>, like B<$DEPRECATED> or B<$STABILIZED>.
 
@@ -17665,10 +17291,10 @@ $loose_to_file_of
 $nv_floating_to_rational
 );
 
-# If a %e floating point number doesn't have this number of digits in it after
-# the decimal point to get this close to a fraction, it isn't considered to be
-# that fraction even if all the digits it does have match.
-\$utf8::e_precision = $E_FLOAT_PRECISION;
+# If a floating point number doesn't have enough digits in it to get this
+# close to a fraction, it isn't considered to be that fraction even if all the
+# digits it does have match.
+\$utf8::max_floating_slop = $MAX_FLOATING_SLOP;
 
 # Deprecated tables to generate a warning for.  The key is the file containing
 # the table, so as to avoid duplication, as many property names can map to the
@@ -18428,19 +18054,18 @@ sub write_all_tables() {
                     make_re_pod_entries($table) if defined $pod_directory;
 
                     # See if the table matches identical code points with
-                    # something that has already been processed and is ready
-                    # for output.  In that case, no need to have two files
-                    # with the same code points in them.  We use the table's
-                    # hash() method to store these in buckets, so that it is
-                    # quite likely that if two tables are in the same bucket
-                    # they will be identical, so don't have to compare tables
-                    # frequently.  The tables have to have the same status to
-                    # share a file, so add this to the bucket hash.  (The
-                    # reason for this latter is that Heavy.pl associates a
-                    # status with a file.) We don't check tables that are
-                    # inverses of others, as it would lead to some coding
-                    # complications, and checking all the regular ones should
-                    # find everything.
+                    # something that has already been output.  In that case,
+                    # no need to have two files with the same code points in
+                    # them.  We use the table's hash() method to store these
+                    # in buckets, so that it is quite likely that if two
+                    # tables are in the same bucket they will be identical, so
+                    # don't have to compare tables frequently.  The tables
+                    # have to have the same status to share a file, so add
+                    # this to the bucket hash.  (The reason for this latter is
+                    # that Heavy.pl associates a status with a file.)
+                    # We don't check tables that are inverses of others, as it
+                    # would lead to some coding complications, and checking
+                    # all the regular ones should find everything.
                     if ($table->complement == 0) {
                         my $hash = $table->hash . ';' . $table->status;
 
@@ -18449,11 +18074,7 @@ sub write_all_tables() {
                         foreach my $comparison
                                             (@{$match_tables_to_write{$hash}})
                         {
-                            # If the table doesn't point back to this one, we
-                            # see if it matches identically
-                            if (   $comparison->leader != $table
-                                && $table->matches_identically_to($comparison))
-                            {
+                            if ($table->matches_identically_to($comparison)) {
                                 $table->set_equivalent_to($comparison,
                                                                 Related => 0);
                                 next TABLE;
@@ -18991,12 +18612,21 @@ sub make_property_test_script() {
 
     $t_path = 'TestProp.pl' unless defined $t_path; # the traditional name
 
-    # Create a list of what the %f representation is for each rational number.
-    # This will be used below.
-    my @valid_base_floats = '0.0';
-    foreach my $e_representation (keys %nv_floating_to_rational) {
-        push @valid_base_floats,
-                            eval $nv_floating_to_rational{$e_representation};
+    # Keep going down an order of magnitude
+    # until find that adding this quantity to
+    # 1 remains 1; but put an upper limit on
+    # this so in case this algorithm doesn't
+    # work properly on some platform, that we
+    # won't loop forever.
+    my $digits = 0;
+    my $min_floating_slop = 1;
+    while (1+ $min_floating_slop != 1
+            && $digits++ < 50)
+    {
+        my $next = $min_floating_slop / 10;
+        last if $next == 0; # If underflows,
+                            # use previous one
+        $min_floating_slop = $next;
     }
 
     # It doesn't matter whether the elements of this array contain single lines
@@ -19025,24 +18655,6 @@ EOF_CODE
                                  lc $a->name cmp lc $b->name
                                } property_ref('*'))
     {
-        # Non-binary properties should not match \p{};  Test all for that.
-        if ($property->type != $BINARY && $property->type != $FORCED_BINARY) {
-            my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS }
-                                                            $property->aliases;
-            foreach my $property_alias ($property->aliases) {
-                my $name = standardize($property_alias->name);
-
-                # But some names are ambiguous, meaning a binary property with
-                # the same name when used in \p{}, and a different
-                # (non-binary) property in other contexts.
-                next if grep { $name eq $_ } keys %ambiguous_names;
-
-                push @output, <<"EOF_CODE";
-Error('\\p{$name}');
-Error('\\P{$name}');
-EOF_CODE
-            }
-        }
         foreach my $table (sort { $a->has_dependency <=> $b->has_dependency
                                     or
                                   lc $a->name cmp lc $b->name
@@ -19140,110 +18752,76 @@ EOF_CODE
                                                  $warning,
                                              );
 
-                    if ($property->name eq 'nv') {
-                        if ($table_name !~ qr{/}) {
-                            push @output, generate_tests($property_name,
-                                                sprintf("%.15e", $table_name),
-                                                $valid,
-                                                $invalid,
-                                                $warning,
-                                            );
-                    }
-                    else {
-                    # If the name is a rational number, add tests for a
-                    # non-reduced form, and for a floating point equivalent.
+                    # If the name is a rational number, add tests for the
+                    # floating point equivalent.
+                    if ($table_name =~ qr{/}) {
 
-                        # 60 is a number divisible by a bunch of things
-                        my ($numerator, $denominator) = $table_name
-                                                        =~ m! (.+) / (.+) !x;
-                        $numerator *= 60;
-                        $denominator *= 60;
-                        push @output, generate_tests($property_name,
-                                                    "$numerator/$denominator",
-                                                    $valid,
-                                                    $invalid,
-                                                    $warning,
-                                    );
-
-                        # Calculate the float, and the %e representation
+                        # Calculate the float, and find just the fraction.
                         my $float = eval $table_name;
-                        my $e_representation = sprintf("%.*e",
-                                                $E_FLOAT_PRECISION, $float);
-                        # Parse that
-                        my ($non_zeros, $zeros, $exponent_sign, $exponent)
-                           = $e_representation
-                               =~ / -? [1-9] \. (\d*?) (0*) e ([+-]) (\d+) /x;
-                        my $min_e_precision;
-                        my $min_f_precision;
+                        my ($whole, $fraction)
+                                            = $float =~ / (.*) \. (.*) /x;
 
-                        if ($exponent_sign eq '+' && $exponent != 0) {
-                            Carp::my_carp_bug("Not yet equipped to handle"
-                                            . " positive exponents");
-                            return;
-                        }
-                        else {
-                            # We're trying to find the minimum precision that
-                            # is needed to indicate this particular rational
-                            # for the given $E_FLOAT_PRECISION.  For %e, any
-                            # trailing zeros, like 1.500e-02 aren't needed, so
-                            # the correct value is how many non-trailing zeros
-                            # there are after the decimal point.
-                            $min_e_precision = length $non_zeros;
+                        # Starting with one digit after the decimal point,
+                        # create a test for each possible precision (number of
+                        # digits past the decimal point) until well beyond the
+                        # native number found on this machine.  (If we started
+                        # with 0 digits, it would be an integer, which could
+                        # well match an unrelated table)
+                        PLACE:
+                        for my $i (1 .. $min_floating_slop + 3) {
+                            my $table_name = sprintf("%.*f", $i, $float);
+                            if ($i < $MIN_FRACTION_LENGTH) {
 
-                            # For %f, like .01500, we want at least
-                            # $E_FLOAT_PRECISION digits, but any trailing
-                            # zeros aren't needed, so we can subtract the
-                            # length of those.  But we also need to include
-                            # the zeros after the decimal point, but before
-                            # the first significant digit.
-                            $min_f_precision = $E_FLOAT_PRECISION
-                                             + $exponent
-                                             - length $zeros;
-                        }
+                                # If the test case has fewer digits than the
+                                # minimum acceptable precision, it shouldn't
+                                # succeed, so we expect an error for it.
+                                # E.g., 2/3 = .7 at one decimal point, and we
+                                # shouldn't say it matches .7.  We should make
+                                # it be .667 at least before agreeing that the
+                                # intent was to match 2/3.  But at the
+                                # less-than- acceptable level of precision, it
+                                # might actually match an unrelated number.
+                                # So don't generate a test case if this
+                                # conflating is possible.  In our example, we
+                                # don't want 2/3 matching 7/10, if there is
+                                # a 7/10 code point.
 
-                        # Make tests for each possible precision from 1 to
-                        # just past the worst case.
-                        my $upper_limit = ($min_e_precision > $min_f_precision)
-                                           ? $min_e_precision
-                                           : $min_f_precision;
+                                # First, integers are not in the rationals
+                                # table.  Don't generate an error if this
+                                # rounds to an integer using the given
+                                # precision.
+                                my $round = sprintf "%.0f", $table_name;
+                                next PLACE if abs($table_name - $round)
+                                                        < $MAX_FLOATING_SLOP;
 
-                        for my $i (1 .. $upper_limit + 1) {
-                            for my $format ("e", "f") {
-                                my $this_table
-                                          = sprintf("%.*$format", $i, $float);
-
-                                # If we don't have enough precision digits,
-                                # make a fail test; otherwise a pass test.
-                                my $pass = ($format eq "e")
-                                            ? $i >= $min_e_precision
-                                            : $i >= $min_f_precision;
-                                if ($pass) {
-                                    push @output, generate_tests($property_name,
-                                                                $this_table,
-                                                                $valid,
-                                                                $invalid,
-                                                                $warning,
-                                                );
-                                }
-                                elsif (   $format eq "e"
-
-                                          # Here we would fail, but in the %f
-                                          # case, the representation at this
-                                          # precision could actually be a
-                                          # valid one for some other rational
-                                       || ! grep { $_ eq $this_table }
-                                                            @valid_base_floats)
+                                # Here, isn't close enough to an integer to be
+                                # confusable with one.  Now, see it it's
+                                # "close" to a known rational
+                                for my $existing
+                                        (keys %nv_floating_to_rational)
                                 {
-                                    push @output,
-                                        generate_error($property_name,
-                                                       $this_table,
-                                                       1   # 1 => already an
-                                                           # error
-                                                );
+                                    next PLACE
+                                        if abs($table_name - $existing)
+                                                < $MAX_FLOATING_SLOP;
                                 }
+                                push @output, generate_error($property_name,
+                                                             $table_name,
+                                                             1   # 1 => already an error
+                                              );
+                            }
+                            else {
+
+                                # Here the number of digits exceeds the
+                                # minimum we think is needed.  So generate a
+                                # success test case for it.
+                                push @output, generate_tests($property_name,
+                                                             $table_name,
+                                                             $valid,
+                                                             $invalid,
+                                                             $warning,
+                                             );
                             }
                         }
-                    }
                     }
                 }
             }
@@ -19474,14 +19052,6 @@ my @input_file_objects = (
     Input_file->new("${EXTRACTED}DJoinType.txt", v3.1.0,
                     Property => 'Joining_Type',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                   ),
-    Input_file->new("${EXTRACTED}DName.txt", v10.0.0,
-                    Skip => 'This file adds no new information not already'
-                          . ' present in other files',
-                    # And it's unnecessary programmer work to handle this new
-                    # format.  Previous Derived files actually had bug fixes
-                    # in them that were useful, but that should not be the
-                    # case here.
                    ),
     Input_file->new('Jamo.txt', v2.0.0,
                     Property => 'Jamo_Short_Name',
@@ -19868,15 +19438,8 @@ my @input_file_objects = (
                     Skip => 'Maps certain Unicode code points to their '
                           . 'legacy Japanese cell-phone values',
                    ),
-    # This file is actually not usable as-is until 6.1.0, because the property
-    # is provisional, so its name is missing from PropertyAliases.txt until
-    # that release, so that further work would have to be done to get it to
-    # work properly
     Input_file->new('ScriptExtensions.txt', v6.0.0,
                     Property => 'Script_Extensions',
-                    Early => [ sub {} ], # Doesn't do anything but ensures
-                                         # that this isn't skipped for early
-                                         # versions
                     Pre_Handler => \&setup_script_extensions,
                     Each_Line_Handler => \&filter_script_extensions_line,
                     Has_Missings_Defaults => (($v_version le v6.0.0)
@@ -19884,9 +19447,10 @@ my @input_file_objects = (
                                             : $IGNORED),
                    ),
     # These two Indic files are actually not usable as-is until 6.1.0,
-    # because they are provisional, so their property values are missing from
-    # PropValueAliases.txt until that release, so that further work would have
-    # to be done to get them to work properly.
+    # because their property values are missing from PropValueAliases.txt
+    # until that release, so that further work would have to be done to get
+    # them to work properly, which isn't worth it because of them being
+    # provisional.
     Input_file->new('IndicMatraCategory.txt', v6.0.0,
                     Withdrawn => v8.0.0,
                     Property => 'Indic_Matra_Category',
@@ -19926,13 +19490,6 @@ my @input_file_objects = (
                           . ' and components. This data file also includes'
                           . ' informative radical-stroke values that are used'
                           . ' internally by Unicode',
-                   ),
-    Input_file->new('VerticalOrientation.txt', v10.0.0,
-                    Property => 'Vertical_Orientation',
-                    Has_Missings_Defaults => $NOT_IGNORED,
-                   ),
-    Input_file->new('NushuSources.txt', v10.0.0,
-                    Skip => 'Specifies source material for Nushu characters',
                    ),
 );
 
@@ -20204,9 +19761,9 @@ if ( $file_list and $make_list ) {
 
     print "Updating '$file_list'\n" if $verbosity >= $PROGRESS;
     foreach my $file (@input_files, @files_actually_output) {
-        my (undef, $directories, $basefile) = File::Spec->splitpath($file);
-        my @directories = grep length, File::Spec->splitdir($directories);
-        $file = join '/', @directories, $basefile;
+        my (undef, $directories, $file) = File::Spec->splitpath($file);
+        my @directories = File::Spec->splitdir($directories);
+        $file = join '/', @directories, $file;
     }
 
     my $ofh;

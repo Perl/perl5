@@ -137,7 +137,7 @@ use Archive::Tar;
 use File::Basename qw( basename );
 use File::Path qw( remove_tree );
 use File::Find;
-use File::Spec::Functions qw( tmpdir rel2abs );
+use File::Spec::Functions qw( tmpdir );
 use Config qw( %Config );
 
 $| = 1;
@@ -282,8 +282,6 @@ if (!-d $files [0] || grep { $_ eq $module } @problematic) {
     say "--force is in effect, so we'll soldier on. Wish me luck!";
 }
 
-use Cwd 'cwd';
-my $orig_pwd = cwd();
 
 chdir "cpan";
 
@@ -297,29 +295,12 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
     $cpan_mod =~ s/-/::/g;
 }
 
-sub wget {
-    my ($url, $saveas) = @_;
-    eval {
-        require HTTP::Tiny;
-        my $http= HTTP::Tiny->new();
-        $http->mirror( $url => $saveas );
-        1
-    } or
-       # Some system do not have wget.  Fall back to curl if we do not
-       # have it.  On Windows, `which wget` is not going to work, so
-       # just use wget, as this script has always done.
-       WIN32 || -x substr(`which wget`, 0, -1)
-         ? system wget => $url, '-qO', $saveas
-         : system curl => $url, '-sSo', $saveas;
-}
-
 #
 # Find the information from CPAN.
 #
 my $new_file;
 my $new_version;
 if (defined $tarball) {
-    $tarball = rel2abs( $tarball, $orig_pwd ) ;
     die "Tarball $tarball does not exist\n" if !-e $tarball;
     die "Tarball $tarball is not a plain file\n" if !-f _;
     $new_file     = $tarball;
@@ -332,7 +313,12 @@ else {
     # Poor man's cache
     #
     unless (-f $package_file && -M $package_file < 1) {
-        wget $package_url, $package_file;
+        eval {
+            require HTTP::Tiny;
+            my $http= HTTP::Tiny->new();
+            $http->mirror( $package_url => $package_file );
+            1
+        } or system wget => $package_url, '-qO', $package_file;
     }
 
     open my $fh, '<', $package_file;
@@ -348,12 +334,17 @@ else {
     die "The latest version of $module is $new_version, but blead already has it\n"
         if $new_version eq $old_version;
 
-    my $url = "https://cpan.metacpan.org/authors/id/$new_path";
+    my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
     say "Fetching $url";
     #
     # Fetch the new distro
     #
-    wget $url, $new_file;
+    eval {
+        require HTTP::Tiny;
+        my $http= HTTP::Tiny->new();
+        $http->mirror( $url => $new_file );
+        1
+    } or system wget => $url, '-qO', $new_file;
 }
 
 my  $old_dir      = "$pkg_dir-$old_version";
@@ -495,7 +486,7 @@ if (@de_exec && @delete) {
 # Mustn't change the +x bit on files that are whitelisted
 #
 if (@de_exec) {
-    my %permitted = map { (my $x = $_) =~ tr/\n//d; $x => 1 } grep !/^#/,
+    my %permitted = map +(tr/\n//dr => 1), grep !/^#/,
         do { local @ARGV = '../Porting/exec-bit.txt'; <> };
     @de_exec = grep !$permitted{"cpan/$pkg_dir/$_"}, @de_exec;
 }

@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.53';
+our $VERSION = '1.47';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -29,7 +29,6 @@ our %feature_bundle = (
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.27"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
     "all"     => [qw(array_base bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
@@ -47,9 +46,6 @@ $feature_bundle{"5.22"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.24"} = $feature_bundle{"5.23"};
 $feature_bundle{"5.25"} = $feature_bundle{"5.23"};
 $feature_bundle{"5.26"} = $feature_bundle{"5.23"};
-$feature_bundle{"5.28"} = $feature_bundle{"5.27"};
-$feature_bundle{"5.29"} = $feature_bundle{"5.27"};
-$feature_bundle{"5.30"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -58,7 +54,7 @@ my %noops = (
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x1c000000;
-our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 );
+our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 );
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
@@ -179,9 +175,8 @@ C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
 This feature is available starting with Perl 5.12; was almost fully
 implemented in Perl 5.14; and extended in Perl 5.16 to cover C<quotemeta>;
-was extended further in Perl 5.26 to cover L<the range
-operator|perlop/Range Operators>; and was extended again in Perl 5.28 to
-cover L<special-cased whitespace splitting|perlfunc/split>.
+and extended further in Perl 5.26 to cover L<the range
+operator|perlop/Range Operators>.
 
 =head2 The 'unicode_eval' and 'evalbytes' features
 
@@ -318,6 +313,13 @@ This feature is available from Perl 5.22 onwards.
 
 =head2 The 'bitwise' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::bitwise";
+
 This makes the four standard bitwise operators (C<& | ^ ~>) treat their
 operands consistently as numbers, and introduces four new dotted operators
 (C<&. |. ^. ~.>) that treat their operands consistently as strings.  The
@@ -325,10 +327,7 @@ same applies to the assignment variants (C<&= |= ^= &.= |.= ^.=>).
 
 See L<perlop/Bitwise String Operators> for details.
 
-This feature is available from Perl 5.22 onwards.  Starting in Perl 5.28,
-C<use v5.28> will enable the feature.  Before 5.28, it was still
-experimental and would emit a warning in the "experimental::bitwise"
-category.
+This feature is available from Perl 5.22 onwards.
 
 =head2 The 'declared_refs' feature
 
@@ -386,14 +385,6 @@ The following feature bundles are available:
             unicode_eval evalbytes current_sub fc
             postderef_qq
 
-  :5.28     say state switch unicode_strings
-            unicode_eval evalbytes current_sub fc
-            postderef_qq bitwise
-
-  :5.30     say state switch unicode_strings
-            unicode_eval evalbytes current_sub fc
-            postderef_qq bitwise
-
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
 
@@ -442,9 +433,6 @@ with the same effect.
 
 If the required version is older than Perl 5.10, the ":default" feature
 bundle is automatically loaded instead.
-
-Unlike C<use feature ":5.12">, saying C<use v5.12> (or any higher version)
-also does the equivalent of C<use strict>; see L<perlfunc/use> for details.
 
 =back
 

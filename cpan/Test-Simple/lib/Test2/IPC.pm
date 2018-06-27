@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302073';
 
 
 use Test2::API::Instance;
@@ -10,7 +10,6 @@ use Test2::Util qw/get_tid/;
 use Test2::API qw{
     test2_init_done
     test2_ipc
-    test2_has_ipc
     test2_ipc_enable_polling
     test2_pid
     test2_stack
@@ -23,12 +22,9 @@ use Carp qw/confess/;
 our @EXPORT_OK = qw/cull/;
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
-sub unimport { Test2::API::test2_ipc_disable() }
-
 sub import {
-    goto &Exporter::import if test2_has_ipc || !test2_init_done();
+    goto &Exporter::import unless test2_init_done();
 
-    confess "IPC is disabled" if Test2::API::test2_ipc_disabled();
     confess "Cannot add IPC in a child process (" . test2_pid() . " vs $$)" if test2_pid() != $$;
     confess "Cannot add IPC in a child thread (" . test2_tid() . " vs " . get_tid() . ")"  if test2_tid() != get_tid();
 
@@ -99,11 +95,6 @@ You should C<use Test2::IPC;> as early as possible in your test file. If you
 import this module after API initialization it will attempt to retrofit IPC
 onto the existing hubs.
 
-=head2 DISABLING IT
-
-You can use C<no Test2::IPC;> to disable IPC for good. You can also use the
-T2_NO_IPC env var.
-
 =head1 EXPORTS
 
 All exports are optional.
@@ -139,7 +130,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

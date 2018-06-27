@@ -1,6 +1,4 @@
 .dir-locals.el			Emacs control file
-.metaconf-exclusions.txt	Symbols that should ignored when generating Configure
-.travis.yml		continuous integration on github (where enabled)
 amigaos4/amigaio.c	AmigaOS4 port
 amigaos4/amigaio.h	AmigaOS4 port
 amigaos4/amigaos.c	AmigaOS4 port
@@ -244,8 +242,6 @@ cpan/Config-Perl-V/t/28_plv52201w.t		Config::Perl::V
 cpan/Config-Perl-V/t/29_plv5235w.t		Config::Perl::V
 cpan/Config-Perl-V/t/30_plv5240.t		Config::Perl::V
 cpan/Config-Perl-V/t/31_plv52511.t		Config::Perl::V
-cpan/Config-Perl-V/t/32_plv5261rc1.t		Config::Perl::V
-cpan/Config-Perl-V/t/33_plv52711r.t		Config::Perl::V
 cpan/Config-Perl-V/V.pm				Config::Perl::V
 cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
@@ -464,6 +460,374 @@ cpan/DB_File/t/db-hash.t	See if DB_File works
 cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
+cpan/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
+cpan/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
+cpan/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
+cpan/Devel-PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
+cpan/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
+cpan/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
+cpan/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
+cpan/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
+cpan/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
+cpan/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
+cpan/Devel-PPPort/mktests.PL		Devel::PPPort test file writer
+cpan/Devel-PPPort/module2.c		Devel::PPPort test file
+cpan/Devel-PPPort/module3.c		Devel::PPPort test file
+cpan/Devel-PPPort/parts/apicheck.pl	Devel::PPPort apicheck generator
+cpan/Devel-PPPort/parts/apidoc.fnc	Devel::PPPort Perl API listing
+cpan/Devel-PPPort/parts/base/5003070	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5004000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5004010	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5004020	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5004030	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5004040	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5004050	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5005000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5005010	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5005020	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5005030	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5005040	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5006000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5006001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5006002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5007000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5007001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5007002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5007003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5008009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5009000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5009001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5009002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5009003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5009004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5009005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5010000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5010001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5011000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5011001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5011002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5011003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5011004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5011005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5012000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5012001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5012002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5012003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5012004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5012005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013010	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5013011	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5014000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5014001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5014002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5014003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5014004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5015009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5016000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5016001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5016002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5016003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017010	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5017011	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5018000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5018001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5018002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5018003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5018004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019010	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5019011	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5020000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5020001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5020002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5020003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021010	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5021011	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5022000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5022001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023001	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023002	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023003	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023004	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023005	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023006	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023007	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023008	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5023009	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/base/5024000	Devel::PPPort baseline todo file
+cpan/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
+cpan/Devel-PPPort/parts/inc/call	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/cop		Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/exception	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/format	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/grok	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/gv		Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/limits	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/magic	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/memory	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/misc	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/newRV	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/newSVpv	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/podtest	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/ppphbin	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/ppphdoc	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/ppphtest	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/pv_tools	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/pvs		Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/shared_pv	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/snprintf	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/sprintf	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/strlfuncs	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/Sv_set	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/sv_xpvf	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/SvPV	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/SvREFCNT	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/threads	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/uv		Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/variables	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/version	Devel::PPPort include
+cpan/Devel-PPPort/parts/inc/warn	Devel::PPPort include
+cpan/Devel-PPPort/parts/ppport.fnc	Devel::PPPort API listing
+cpan/Devel-PPPort/parts/ppptools.pl	Devel::PPPort various utilities
+cpan/Devel-PPPort/parts/todo/5003070	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5004000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5004010	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5004020	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5004030	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5004040	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5004050	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5005000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5005010	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5005020	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5005030	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5005040	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5006000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5006001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5006002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5007000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5007001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5007002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5007003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5008009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5009000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5009001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5009002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5009003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5009004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5009005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5010000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5010001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5011000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5011001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5011002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5011003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5011004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5011005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5012000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5012001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5012002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5012003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5012004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5012005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013010	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5013011	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5014000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5014001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5014002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5014003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5014004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5015009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5016000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5016001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5016002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5016003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017010	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5017011	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5018000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5018001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5018002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5018003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5018004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019010	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5019011	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5020000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5020001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5020002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5020003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021010	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5021011	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5022000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5022001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023000	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023001	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023002	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023003	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023004	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023005	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023006	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023007	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023008	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5023009	Devel::PPPort todo file
+cpan/Devel-PPPort/parts/todo/5024000	Devel::PPPort todo file
+cpan/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
+cpan/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
+cpan/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
+cpan/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
+cpan/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
+cpan/Devel-PPPort/t/call.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/cop.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/exception.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/format.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/grok.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/gv.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/limits.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/magic.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/memory.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/misc.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
+cpan/Devel-PPPort/t/newRV.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
+cpan/Devel-PPPort/t/newSVpv.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/podtest.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/ppphtest.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/pv_tools.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/pvs.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/shared_pv.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/snprintf.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/sprintf.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/strlfuncs.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/Sv_set.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/sv_xpvf.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/SvPV.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/SvREFCNT.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/testutil.pl		Devel::PPPort test utilities
+cpan/Devel-PPPort/t/threads.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/uv.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/variables.t		Devel::PPPort test file
+cpan/Devel-PPPort/t/warn.t		Devel::PPPort test file
+cpan/Devel-PPPort/typemap		Devel::PPPort Typemap
 cpan/Digest/Digest.pm		Digest extensions
 cpan/Digest/Digest/base.pm	Digest extensions
 cpan/Digest/Digest/file.pm	Digest extensions
@@ -619,17 +983,11 @@ cpan/Encode/t/rt76824.t			test script
 cpan/Encode/t/rt85489.t			test script
 cpan/Encode/t/rt86327.t			test script
 cpan/Encode/t/taint.t
-cpan/Encode/t/truncated_utf8.t
-cpan/Encode/t/undef.t
 cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script
-cpan/Encode/t/use-Encode-Alias.t
-cpan/Encode/t/utf8messages.t
 cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
 cpan/Encode/t/utf8warnings.t
-cpan/Encode/t/whatwg-aliases.json
-cpan/Encode/t/whatwg-aliases.t
 cpan/Encode/TW/Makefile.PL		Encode extension
 cpan/Encode/TW/TW.pm			Encode extension
 cpan/Encode/ucm/8859-1.ucm		Unicode Character Map
@@ -842,7 +1200,6 @@ cpan/ExtUtils-MakeMaker/t/MM_Unix.t				See if ExtUtils::MM_UNIX works
 cpan/ExtUtils-MakeMaker/t/MM_VMS.t				See if ExtUtils::MM_VMS works
 cpan/ExtUtils-MakeMaker/t/MM_Win32.t				See if ExtUtils::MM_Win32 works
 cpan/ExtUtils-MakeMaker/t/oneliner.t				See if MM can generate perl one-liners
-cpan/ExtUtils-MakeMaker/t/os_unsupported.t
 cpan/ExtUtils-MakeMaker/t/parse_abstract.t			See if parse_abstract works
 cpan/ExtUtils-MakeMaker/t/parse_version.t			See if parse_version works
 cpan/ExtUtils-MakeMaker/t/PL_FILES.t				Test PL_FILES in MakeMaker
@@ -1225,12 +1582,7 @@ cpan/JSON-PP/t/113_overloaded_eq.t
 cpan/JSON-PP/t/114_decode_prefix.t
 cpan/JSON-PP/t/115_tie_ixhash.t
 cpan/JSON-PP/t/116_incr_parse_fixed.t
-cpan/JSON-PP/t/117_numbers.t
 cpan/JSON-PP/t/_unicode_handling.pm
-cpan/JSON-PP/t/gh_28_json_test_suite.t
-cpan/JSON-PP/t/gh_29_trailing_false_value.t
-cpan/JSON-PP/t/rt_116998_wrong_character_offset.t
-cpan/JSON-PP/t/rt_90071_incr_parse.t
 cpan/JSON-PP/t/zero-mojibake.t
 cpan/libnet/lib/Net/Cmd.pm
 cpan/libnet/lib/Net/Config.pm
@@ -1266,6 +1618,7 @@ cpan/libnet/t/smtp_ssl.t
 cpan/libnet/t/time.t		libnet
 cpan/Locale-Codes/lib/Locale/Codes.pm		Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes.pod		Locale::Codes documentation
+cpan/Locale-Codes/lib/Locale/Codes/API.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Changes.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Constants.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/Country.pm	Locale::Codes
@@ -1296,7 +1649,6 @@ cpan/Locale-Codes/lib/Locale/Codes/Script.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/Script.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Script_Codes.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/Script_Retired.pm	Locale::Codes
-cpan/Locale-Codes/lib/Locale/Codes/Types.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Country.pm		Locale::Codes
 cpan/Locale-Codes/lib/Locale/Country.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Currency.pm	Locale::Codes
@@ -1305,36 +1657,26 @@ cpan/Locale-Codes/lib/Locale/Language.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Language.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
 cpan/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
-cpan/Locale-Codes/t/country_func.t	Locale::Codes tests
+cpan/Locale-Codes/t/country.t			Locale::Codes tests
 cpan/Locale-Codes/t/country_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/country_oo.t	Locale::Codes tests
-cpan/Locale-Codes/t/currency_func.t	Locale::Codes tests
-cpan/Locale-Codes/t/currency_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/currency_oo.t	Locale::Codes tests
-cpan/Locale-Codes/t/do_tests.pl	Locale::Codes tests
-cpan/Locale-Codes/t/errors.1.t	Locale::Codes tests
-cpan/Locale-Codes/t/errors.2.t	Locale::Codes tests
-cpan/Locale-Codes/t/langext_func.t	Locale::Codes tests
-cpan/Locale-Codes/t/langext_oo.t	Locale::Codes tests
-cpan/Locale-Codes/t/langfam_func.t	Locale::Codes tests
-cpan/Locale-Codes/t/langfam_oo.t	Locale::Codes tests
-cpan/Locale-Codes/t/language_func.t	Locale::Codes tests
+cpan/Locale-Codes/t/currency.t
+cpan/Locale-Codes/t/currency_old.t
+cpan/Locale-Codes/t/langext.t
+cpan/Locale-Codes/t/langfam.t
+cpan/Locale-Codes/t/language.t			Locale::Codes tests
 cpan/Locale-Codes/t/language_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/language_oo.t	Locale::Codes tests
-cpan/Locale-Codes/t/langvar_func.t	Locale::Codes tests
-cpan/Locale-Codes/t/langvar_oo.t	Locale::Codes tests
-cpan/Locale-Codes/t/script_func.t	Locale::Codes tests
-cpan/Locale-Codes/t/script_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/script_oo.t	Locale::Codes tests
+cpan/Locale-Codes/t/langvar.t
+cpan/Locale-Codes/t/script.t
+cpan/Locale-Codes/t/script_old.t
 cpan/Locale-Codes/t/testfunc.pl			Locale::Codes tests
-cpan/Locale-Codes/t/vals_country.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_currency.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_error.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_langext.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_langfam.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_language.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_langvar.pl	Locale::Codes tests
-cpan/Locale-Codes/t/vals_script.pl	Locale::Codes tests
+cpan/Locale-Codes/t/vals.pl
+cpan/Locale-Codes/t/vals_country.pl
+cpan/Locale-Codes/t/vals_currency.pl
+cpan/Locale-Codes/t/vals_langext.pl
+cpan/Locale-Codes/t/vals_langfam.pl
+cpan/Locale-Codes/t/vals_language.pl
+cpan/Locale-Codes/t/vals_langvar.pl
+cpan/Locale-Codes/t/vals_script.pl
 cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
 cpan/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests
@@ -1359,7 +1701,6 @@ cpan/Math-BigInt/t/bdstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bdstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/bestr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bestr-mbi.t		Test Math::BigInt
-cpan/Math-BigInt/t/bfib-mbi.t
 cpan/Math-BigInt/t/big_pi_e.t		test bpi() and bexp()
 cpan/Math-BigInt/t/bigfltpm.inc		Shared tests for bigfltpm.t and sub_mbf.t
 cpan/Math-BigInt/t/bigfltpm.t		See if BigFloat.pm works
@@ -1369,7 +1710,6 @@ cpan/Math-BigInt/t/bigintpm.t		See if BigInt.pm works
 cpan/Math-BigInt/t/bigints.t		See if BigInt.pm works
 cpan/Math-BigInt/t/biglog.t		Test the log function
 cpan/Math-BigInt/t/bigroot.t		Test the broot function
-cpan/Math-BigInt/t/blucas-mbi.t
 cpan/Math-BigInt/t/bnstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bnstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/bsstr-mbf.t		Test Math::BigInt
@@ -1461,7 +1801,6 @@ cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
 cpan/Math-BigRat/t/requirer.t		see if require works properly
-cpan/Math-BigRat/t/rt121139.t
 cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
 cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
 cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
@@ -1989,10 +2328,8 @@ cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
-cpan/Scalar-List-Utils/t/exotic_names.t
 cpan/Scalar-List-Utils/t/first.t		List::Util
 cpan/Scalar-List-Utils/t/getmagic-once.t
-cpan/Scalar-List-Utils/t/head-tail.t
 cpan/Scalar-List-Utils/t/isvstring.t		Scalar::Util
 cpan/Scalar-List-Utils/t/lln.t			Scalar::Util
 cpan/Scalar-List-Utils/t/max.t			List::Util
@@ -2123,7 +2460,6 @@ cpan/Test-Harness/t/console.t				Test::Harness test
 cpan/Test-Harness/t/data/catme.1			Test data for Test::Harness
 cpan/Test-Harness/t/data/proverc			Test data for Test::Harness
 cpan/Test-Harness/t/data/sample.yml			Test data for Test::Harness
-cpan/Test-Harness/t/env_opts.t
 cpan/Test-Harness/t/errors.t				Test::Harness test
 cpan/Test-Harness/t/file.t				Test::Harness test
 cpan/Test-Harness/t/glob-to-regexp.t			Test::Harness test
@@ -2168,7 +2504,6 @@ cpan/Test-Harness/t/proverun.t				Test::Harness test
 cpan/Test-Harness/t/proveversion.t				Test::Harness test
 cpan/Test-Harness/t/regression.t			Test::Harness test
 cpan/Test-Harness/t/results.t				Test::Harness test
-cpan/Test-Harness/t/rulesfile.t
 cpan/Test-Harness/t/sample-tests/bailout		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/bignum			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/bignum_many		Test data for Test::Harness
@@ -2210,7 +2545,6 @@ cpan/Test-Harness/t/sample-tests/skipall		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_nomsg		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_v13		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/space_after_plan	Test data for Test::Harness
-cpan/Test-Harness/t/sample-tests/space_after_plan_v13
 cpan/Test-Harness/t/sample-tests/stdout_stderr		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/strict			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/switches		Test data for Test::Harness
@@ -2244,7 +2578,6 @@ cpan/Test-Harness/t/source_tests/source.sh				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.t				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.tap				Test::Harness test
 cpan/Test-Harness/t/source_tests/source_args.sh				Test::Harness test
-cpan/Test-Harness/t/source_tests/test.tap
 cpan/Test-Harness/t/spool.t				Test::Harness test
 cpan/Test-Harness/t/state.t				Test::Harness test
 cpan/Test-Harness/t/state_results.t			Test::Harness test
@@ -2284,30 +2617,15 @@ cpan/Test-Simple/lib/Test2/Event/Bail.pm
 cpan/Test-Simple/lib/Test2/Event/Diag.pm
 cpan/Test-Simple/lib/Test2/Event/Encoding.pm
 cpan/Test-Simple/lib/Test2/Event/Exception.pm
-cpan/Test-Simple/lib/Test2/Event/Fail.pm
 cpan/Test-Simple/lib/Test2/Event/Generic.pm
+cpan/Test-Simple/lib/Test2/Event/Info.pm
 cpan/Test-Simple/lib/Test2/Event/Note.pm
 cpan/Test-Simple/lib/Test2/Event/Ok.pm
-cpan/Test-Simple/lib/Test2/Event/Pass.pm
 cpan/Test-Simple/lib/Test2/Event/Plan.pm
 cpan/Test-Simple/lib/Test2/Event/Skip.pm
 cpan/Test-Simple/lib/Test2/Event/Subtest.pm
 cpan/Test-Simple/lib/Test2/Event/TAP/Version.pm
-cpan/Test-Simple/lib/Test2/Event/V2.pm
 cpan/Test-Simple/lib/Test2/Event/Waiting.pm
-cpan/Test-Simple/lib/Test2/EventFacet.pm
-cpan/Test-Simple/lib/Test2/EventFacet/About.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Amnesty.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Assert.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Control.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Error.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Hub.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Info.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Meta.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Parent.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Plan.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Render.pm
-cpan/Test-Simple/lib/Test2/EventFacet/Trace.pm
 cpan/Test-Simple/lib/Test2/Formatter.pm
 cpan/Test-Simple/lib/Test2/Formatter/TAP.pm
 cpan/Test-Simple/lib/Test2/Hub.pm
@@ -2321,10 +2639,8 @@ cpan/Test-Simple/lib/Test2/Tools/Tiny.pm
 cpan/Test-Simple/lib/Test2/Transition.pod
 cpan/Test-Simple/lib/Test2/Util.pm
 cpan/Test-Simple/lib/Test2/Util/ExternalMeta.pm
-cpan/Test-Simple/lib/Test2/Util/Facets2Legacy.pm
 cpan/Test-Simple/lib/Test2/Util/HashBase.pm
 cpan/Test-Simple/lib/Test2/Util/Trace.pm
-cpan/Test-Simple/t/HashBase.t
 cpan/Test-Simple/t/Legacy/00test_harness_check.t
 cpan/Test-Simple/t/Legacy/01-basic.t
 cpan/Test-Simple/t/Legacy/478-cmp_ok_hash.t
@@ -2392,7 +2708,6 @@ cpan/Test-Simple/t/Legacy/is_deeply_with_threads.t
 cpan/Test-Simple/t/Legacy/missing.t
 cpan/Test-Simple/t/Legacy/More.t
 cpan/Test-Simple/t/Legacy/new_ok.t
-cpan/Test-Simple/t/Legacy/no_log_results.t
 cpan/Test-Simple/t/Legacy/no_plan.t
 cpan/Test-Simple/t/Legacy/no_tests.t
 cpan/Test-Simple/t/Legacy/note.t
@@ -2408,7 +2723,6 @@ cpan/Test-Simple/t/Legacy/Regression/637.t
 cpan/Test-Simple/t/Legacy/Regression/683_thread_todo.t
 cpan/Test-Simple/t/Legacy/Regression/6_cmp_ok.t
 cpan/Test-Simple/t/Legacy/Regression/736_use_ok.t
-cpan/Test-Simple/t/Legacy/Regression/789-read-only.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t
@@ -2419,7 +2733,6 @@ cpan/Test-Simple/t/Legacy/strays.t
 cpan/Test-Simple/t/Legacy/subtest/args.t
 cpan/Test-Simple/t/Legacy/subtest/bail_out.t
 cpan/Test-Simple/t/Legacy/subtest/basic.t
-cpan/Test-Simple/t/Legacy/subtest/callback.t
 cpan/Test-Simple/t/Legacy/subtest/die.t
 cpan/Test-Simple/t/Legacy/subtest/do.t
 cpan/Test-Simple/t/Legacy/subtest/events.t
@@ -2454,9 +2767,7 @@ cpan/Test-Simple/t/Legacy/useing.t
 cpan/Test-Simple/t/Legacy/utf8.t
 cpan/Test-Simple/t/Legacy/versions.t
 cpan/Test-Simple/t/Legacy_And_Test2/builder_loaded_late.t
-cpan/Test-Simple/t/Legacy_And_Test2/diag_event_on_ok.t
 cpan/Test-Simple/t/Legacy_And_Test2/hidden_warnings.t
-cpan/Test-Simple/t/Legacy_And_Test2/preload_diag_note.t
 cpan/Test-Simple/t/lib/Dev/Null.pm
 cpan/Test-Simple/t/lib/Dummy.pm
 cpan/Test-Simple/t/lib/MyOverload.pm
@@ -2490,13 +2801,7 @@ cpan/Test-Simple/t/regression/684-nested_todo_diag.t
 cpan/Test-Simple/t/regression/694_note_diag_return_values.t
 cpan/Test-Simple/t/regression/696-intercept_skip_all.t
 cpan/Test-Simple/t/regression/721-nested-streamed-subtest.t
-cpan/Test-Simple/t/regression/757-reset_in_subtest.t
-cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t
-cpan/Test-Simple/t/regression/builder_does_not_init.t
-cpan/Test-Simple/t/regression/errors_facet.t
-cpan/Test-Simple/t/regression/inherit_trace.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
-cpan/Test-Simple/t/regression/todo_and_facets.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_no_plan.t
@@ -2504,28 +2809,18 @@ cpan/Test-Simple/t/Test2/acceptance/try_it_plan.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_skip.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_threads.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_todo.t
-cpan/Test-Simple/t/Test2/behavior/disable_ipc_a.t
-cpan/Test-Simple/t/Test2/behavior/disable_ipc_b.t
-cpan/Test-Simple/t/Test2/behavior/disable_ipc_c.t
-cpan/Test-Simple/t/Test2/behavior/disable_ipc_d.t
 cpan/Test-Simple/t/Test2/behavior/err_var.t
 cpan/Test-Simple/t/Test2/behavior/Formatter.t
 cpan/Test-Simple/t/Test2/behavior/init_croak.t
-cpan/Test-Simple/t/Test2/behavior/intercept.t
-cpan/Test-Simple/t/Test2/behavior/ipc_wait_timeout.t
 cpan/Test-Simple/t/Test2/behavior/nested_context_exception.t
 cpan/Test-Simple/t/Test2/behavior/no_load_api.t
 cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
 cpan/Test-Simple/t/Test2/behavior/special_names.t
-cpan/Test-Simple/t/Test2/behavior/subtest_bailout.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t
-cpan/Test-Simple/t/Test2/behavior/Subtest_callback.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_todo.t
 cpan/Test-Simple/t/Test2/behavior/Taint.t
-cpan/Test-Simple/t/Test2/behavior/trace_signature.t
-cpan/Test-Simple/t/Test2/behavior/uuid.t
 cpan/Test-Simple/t/Test2/legacy/TAP.t
 cpan/Test-Simple/t/Test2/modules/API.t
 cpan/Test-Simple/t/Test2/modules/API/Breakage.t
@@ -2535,30 +2830,15 @@ cpan/Test-Simple/t/Test2/modules/API/Stack.t
 cpan/Test-Simple/t/Test2/modules/Event.t
 cpan/Test-Simple/t/Test2/modules/Event/Bail.t
 cpan/Test-Simple/t/Test2/modules/Event/Diag.t
-cpan/Test-Simple/t/Test2/modules/Event/Encoding.t
 cpan/Test-Simple/t/Test2/modules/Event/Exception.t
-cpan/Test-Simple/t/Test2/modules/Event/Fail.t
 cpan/Test-Simple/t/Test2/modules/Event/Generic.t
+cpan/Test-Simple/t/Test2/modules/Event/Info.t
 cpan/Test-Simple/t/Test2/modules/Event/Note.t
 cpan/Test-Simple/t/Test2/modules/Event/Ok.t
-cpan/Test-Simple/t/Test2/modules/Event/Pass.t
 cpan/Test-Simple/t/Test2/modules/Event/Plan.t
 cpan/Test-Simple/t/Test2/modules/Event/Skip.t
 cpan/Test-Simple/t/Test2/modules/Event/Subtest.t
-cpan/Test-Simple/t/Test2/modules/Event/TAP/Version.t
-cpan/Test-Simple/t/Test2/modules/Event/V2.t
 cpan/Test-Simple/t/Test2/modules/Event/Waiting.t
-cpan/Test-Simple/t/Test2/modules/EventFacet.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/About.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Amnesty.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Assert.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Control.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Error.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Info.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Meta.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Parent.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Plan.t
-cpan/Test-Simple/t/Test2/modules/EventFacet/Trace.t
 cpan/Test-Simple/t/Test2/modules/Formatter/TAP.t
 cpan/Test-Simple/t/Test2/modules/Hub.t
 cpan/Test-Simple/t/Test2/modules/Hub/Interceptor.t
@@ -2570,10 +2850,9 @@ cpan/Test-Simple/t/Test2/modules/IPC/Driver/Files.t
 cpan/Test-Simple/t/Test2/modules/Tools/Tiny.t
 cpan/Test-Simple/t/Test2/modules/Util.t
 cpan/Test-Simple/t/Test2/modules/Util/ExternalMeta.t
-cpan/Test-Simple/t/Test2/modules/Util/Facets2Legacy.t
+cpan/Test-Simple/t/Test2/modules/Util/HashBase.t
 cpan/Test-Simple/t/Test2/modules/Util/Trace.t
 cpan/Test-Simple/t/Test2/regression/693_ipc_ordering.t
-cpan/Test-Simple/t/Test2/regression/746-forking-subtest.t
 cpan/Test-Simple/t/Test2/regression/gh_16.t
 cpan/Test-Simple/t/Test2/regression/ipc_files_abort_exit.t
 cpan/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
@@ -2650,7 +2929,6 @@ cpan/Unicode-Collate/Collate/Locale/cy.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/da.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/de_at_ph.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/de_phone.pl			Unicode::Collate
-cpan/Unicode-Collate/Collate/Locale/dsb.pl
 cpan/Unicode-Collate/Collate/Locale/ee.pl
 cpan/Unicode-Collate/Collate/Locale/eo.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/es.pl			Unicode::Collate
@@ -2678,7 +2956,6 @@ cpan/Unicode-Collate/Collate/Locale/kl.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kn.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ko.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kok.pl	Unicode::Collate
-cpan/Unicode-Collate/Collate/Locale/lkt.pl
 cpan/Unicode-Collate/Collate/Locale/ln.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lt.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lv.pl			Unicode::Collate
@@ -2766,7 +3043,6 @@ cpan/Unicode-Collate/t/loc_da.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_de.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_deat.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_deph.t			Unicode::Collate
-cpan/Unicode-Collate/t/loc_dsb.t
 cpan/Unicode-Collate/t/loc_ee.t
 cpan/Unicode-Collate/t/loc_eo.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_es.t			Unicode::Collate
@@ -2797,7 +3073,6 @@ cpan/Unicode-Collate/t/loc_kl.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kn.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ko.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kok.t	Unicode::Collate
-cpan/Unicode-Collate/t/loc_lkt.t
 cpan/Unicode-Collate/t/loc_ln.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_lt.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_lv.t			Unicode::Collate
@@ -2851,13 +3126,11 @@ cpan/Unicode-Collate/t/loc_zhzy.t
 cpan/Unicode-Collate/t/nonchar.t			Unicode::Collate
 cpan/Unicode-Collate/t/normal.t			Unicode::Collate
 cpan/Unicode-Collate/t/notable.t
-cpan/Unicode-Collate/t/nushu.t
 cpan/Unicode-Collate/t/overcjk0.t		Unicode::Collate
 cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate
 cpan/Unicode-Collate/t/override.t		Unicode::Collate
 cpan/Unicode-Collate/t/rearrang.t		Unicode::Collate
 cpan/Unicode-Collate/t/rewrite.t			Unicode::Collate
-cpan/Unicode-Collate/t/tangut.t
 cpan/Unicode-Collate/t/test.t			Unicode::Collate
 cpan/Unicode-Collate/t/trailwt.t		Unicode::Collate
 cpan/Unicode-Collate/t/variable.t		Unicode::Collate
@@ -2877,7 +3150,6 @@ cpan/version/t/07locale.t		Tests for version objects
 cpan/version/t/08_corelist.t		Tests for version objects
 cpan/version/t/09_list_util.t		Tests for version objects
 cpan/version/t/10_lyon.t		Tests for version objects
-cpan/version/t/11_taint.t		Tests for version objects
 cpan/version/t/coretests.pm		Tests for version objects
 cpan/Win32/longpath.inc			Win32 extension long path support
 cpan/Win32/Makefile.PL			Win32 extension makefile writer
@@ -2981,15 +3253,11 @@ dist/Carp/t/arg_regexp.t		See if Carp formats regexp args OK in stack traces
 dist/Carp/t/arg_string.t		See if Carp formats string args OK in stack traces
 dist/Carp/t/baduni.t		See if Carp handles non-char Unicode
 dist/Carp/t/baduni_warnings.t		See if Carp handles non-char Unicode when loaded via warnings.pm
-dist/Carp/t/broken_can.t	Test Carp with bad can implementations
-dist/Carp/t/broken_univ_can.t	Test Carp with bad UNIVERSAL::can
 dist/Carp/t/Carp.t		See if Carp works
 dist/Carp/t/Carp_overload.t		See if Carp handles overloads
-dist/Carp/t/Carp_overloadless.t		See if Carp handles overloads that dont use overload.pm
 dist/Carp/t/errno.t		See if Carp preserves $! and $^E
 dist/Carp/t/heavy.t		See if Carp::Heavy works
 dist/Carp/t/heavy_mismatch.t		See if Carp::Heavy catches version mismatch
-dist/Carp/t/stack_after_err.t	Test stack traces after syntax errors
 dist/Carp/t/stash_deletion.t		See if Carp handles stash deletion
 dist/Carp/t/swash.t		See if Carp avoids breaking swash loading
 dist/Carp/t/vivify_gv.t		See if Carp leaves utf8:: stuff alone
@@ -3029,376 +3297,6 @@ dist/Data-Dumper/t/toaster.t	See if Data::Dumper::Toaster works
 dist/Data-Dumper/t/trailing_comma.t	See if Data::Dumper::Trailingcomma works
 dist/Data-Dumper/t/values.t	See if Data::Dumper::Values works
 dist/Data-Dumper/Todo		Data pretty printer, futures
-dist/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
-dist/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
-dist/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
-dist/Devel-PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
-dist/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
-dist/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
-dist/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
-dist/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
-dist/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
-dist/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
-dist/Devel-PPPort/mktests.PL		Devel::PPPort test file writer
-dist/Devel-PPPort/module2.c		Devel::PPPort test file
-dist/Devel-PPPort/module3.c		Devel::PPPort test file
-dist/Devel-PPPort/parts/apicheck.pl	Devel::PPPort apicheck generator
-dist/Devel-PPPort/parts/apidoc.fnc	Devel::PPPort Perl API listing
-dist/Devel-PPPort/parts/base/5003070	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5004000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5004010	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5004020	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5004030	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5004040	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5004050	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5005000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5005010	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5005020	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5005030	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5005040	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5006000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5006001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5006002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5007000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5007001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5007002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5007003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5008009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5009000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5009001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5009002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5009003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5009004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5009005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5010000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5010001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5011000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5011001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5011002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5011003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5011004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5011005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5012000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5012001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5012002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5012003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5012004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5012005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013010	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5013011	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5014000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5014001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5014002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5014003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5014004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5015009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5016000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5016001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5016002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5016003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017010	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5017011	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5018000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5018001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5018002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5018003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5018004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019010	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5019011	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5020000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5020001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5020002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5020003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021010	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5021011	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5022000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5022001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023001	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023002	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023003	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023004	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023005	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023006	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023007	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023008	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5023009	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5024000	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
-dist/Devel-PPPort/parts/inc/call	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/cop		Devel::PPPort include
-dist/Devel-PPPort/parts/inc/exception	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/format	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/grok	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/gv		Devel::PPPort include
-dist/Devel-PPPort/parts/inc/HvNAME	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/limits	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/magic	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/memory	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/mess	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/misc	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/mPUSH	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/MY_CXT	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/newRV	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/newSV_type	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/newSVpv	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/podtest	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/ppphbin	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/ppphdoc	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/ppphtest	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/pv_tools	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/pvs		Devel::PPPort include
-dist/Devel-PPPort/parts/inc/shared_pv	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/snprintf	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/sprintf	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/strlfuncs	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/Sv_set	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/sv_xpvf	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/SvPV	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/SvREFCNT	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/threads	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/uv		Devel::PPPort include
-dist/Devel-PPPort/parts/inc/variables	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/version	Devel::PPPort include
-dist/Devel-PPPort/parts/inc/warn	Devel::PPPort include
-dist/Devel-PPPort/parts/ppport.fnc	Devel::PPPort API listing
-dist/Devel-PPPort/parts/ppptools.pl	Devel::PPPort various utilities
-dist/Devel-PPPort/parts/todo/5003070	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5004000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5004010	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5004020	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5004030	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5004040	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5004050	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5005000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5005010	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5005020	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5005030	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5005040	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5006000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5006001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5006002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5007000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5007001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5007002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5007003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5008009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5009000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5009001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5009002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5009003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5009004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5009005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5010000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5010001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5011000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5011001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5011002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5011003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5011004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5011005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5012000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5012001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5012002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5012003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5012004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5012005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013010	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5013011	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5014000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5014001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5014002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5014003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5014004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5015009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5016000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5016001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5016002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5016003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017010	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5017011	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5018000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5018001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5018002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5018003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5018004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019010	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5019011	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5020000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5020001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5020002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5020003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021010	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5021011	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5022000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5022001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023000	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023001	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023002	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023003	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023004	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023005	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023006	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023007	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023008	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5023009	Devel::PPPort todo file
-dist/Devel-PPPort/parts/todo/5024000	Devel::PPPort todo file
-dist/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
-dist/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
-dist/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
-dist/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
-dist/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
-dist/Devel-PPPort/t/call.t		Devel::PPPort test file
-dist/Devel-PPPort/t/cop.t		Devel::PPPort test file
-dist/Devel-PPPort/t/exception.t		Devel::PPPort test file
-dist/Devel-PPPort/t/format.t		Devel::PPPort test file
-dist/Devel-PPPort/t/grok.t		Devel::PPPort test file
-dist/Devel-PPPort/t/gv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
-dist/Devel-PPPort/t/limits.t		Devel::PPPort test file
-dist/Devel-PPPort/t/magic.t		Devel::PPPort test file
-dist/Devel-PPPort/t/memory.t		Devel::PPPort test file
-dist/Devel-PPPort/t/mess.t		Devel::PPPort test file
-dist/Devel-PPPort/t/misc.t		Devel::PPPort test file
-dist/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
-dist/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file
-dist/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
-dist/Devel-PPPort/t/newRV.t		Devel::PPPort test file
-dist/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
-dist/Devel-PPPort/t/newSVpv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/podtest.t		Devel::PPPort test file
-dist/Devel-PPPort/t/ppphtest.t		Devel::PPPort test file
-dist/Devel-PPPort/t/pv_tools.t		Devel::PPPort test file
-dist/Devel-PPPort/t/pvs.t		Devel::PPPort test file
-dist/Devel-PPPort/t/shared_pv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/snprintf.t		Devel::PPPort test file
-dist/Devel-PPPort/t/sprintf.t		Devel::PPPort test file
-dist/Devel-PPPort/t/strlfuncs.t		Devel::PPPort test file
-dist/Devel-PPPort/t/Sv_set.t		Devel::PPPort test file
-dist/Devel-PPPort/t/sv_xpvf.t		Devel::PPPort test file
-dist/Devel-PPPort/t/SvPV.t		Devel::PPPort test file
-dist/Devel-PPPort/t/SvREFCNT.t		Devel::PPPort test file
-dist/Devel-PPPort/t/testutil.pl		Devel::PPPort test utilities
-dist/Devel-PPPort/t/threads.t		Devel::PPPort test file
-dist/Devel-PPPort/t/uv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/variables.t		Devel::PPPort test file
-dist/Devel-PPPort/t/warn.t		Devel::PPPort test file
-dist/Devel-PPPort/typemap		Devel::PPPort Typemap
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
 dist/Dumpvalue/lib/Dumpvalue.pm	Screen dump of perl values
@@ -3533,9 +3431,6 @@ dist/I18N-LangTags/t/55_supers_strict.t		See whether I18N::LangTags works
 dist/I18N-LangTags/t/80_all_env.t		See whether I18N::LangTags works
 dist/if/Changes			if perl module change log
 dist/if/if.pm			For "use if"
-dist/if/MANIFEST		MANIFEST for if.pm
-dist/if/META.json		META.json for if.pm
-dist/if/META.yml		META.json for if.pm
 dist/if/t/if.t			Tests for "use if"
 dist/IO/ChangeLog		IO perl module change log
 dist/IO/hints/sco.pl		Hint for IO for named architecture
@@ -3608,6 +3503,7 @@ dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
 dist/Module-CoreList/lib/Module/CoreList.pm	Module::CoreList
 dist/Module-CoreList/lib/Module/CoreList.pod	Module::CoreList
+dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm	Module::CoreList guts
 dist/Module-CoreList/lib/Module/CoreList/Utils.pm	Module::CoreList guts
 dist/Module-CoreList/Makefile.PL		Module::CoreList
 dist/Module-CoreList/MANIFEST			Module::CoreList
@@ -3616,7 +3512,6 @@ dist/Module-CoreList/t/corelist.t		Module::CoreList tests
 dist/Module-CoreList/t/deprecated.t		Module::CoreList tests
 dist/Module-CoreList/t/find_modules.t		Module::CoreList tests
 dist/Module-CoreList/t/is_core.t		Module::CoreList tests
-dist/Module-CoreList/t/maintainer.t			Module::CoreList tests
 dist/Module-CoreList/t/pod.t			Module::CoreList tests
 dist/Module-CoreList/t/utils.t			Module::CoreList tests
 dist/Net-Ping/Changes			Net::Ping
@@ -3653,13 +3548,9 @@ dist/PathTools/lib/File/Spec/Unix.pm		portable operations on Unix file names
 dist/PathTools/lib/File/Spec/VMS.pm		portable operations on VMS file names
 dist/PathTools/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
 dist/PathTools/Makefile.PL			makefile writer for Cwd
-dist/PathTools/MANIFEST		MANIFEST for PathTools
-dist/PathTools/META.json		META.json for PathTools
-dist/PathTools/META.yml		META.yml for PathTools
 dist/PathTools/t/abs2rel.t		See if File::Spec->abs2rel works
 dist/PathTools/t/crossplatform.t		See if File::Spec works crossplatform
 dist/PathTools/t/cwd.t			See if Cwd works
-dist/PathTools/t/cwd_enoent.t			See if getcwd errors correctly
 dist/PathTools/t/Functions.t			See if File::Spec::Functions works
 dist/PathTools/t/rel2abs2rel.t		See if File::Spec->rel2abs/abs2rel works
 dist/PathTools/t/Spec.t			See if File::Spec works
@@ -3695,7 +3586,6 @@ dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 dist/SelfLoader/t/03taint.t		See if SelfLoader works under taint
-dist/Storable/__Storable__.pm	Template to generate Storable.pm
 dist/Storable/ChangeLog			Storable extension
 dist/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
@@ -3703,9 +3593,8 @@ dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
 dist/Storable/hints/linux.pl		Hint for Storable for named architecture
 dist/Storable/Makefile.PL		Storable extension
 dist/Storable/README			Storable extension
-dist/Storable/stacksize			compute stack sizes
+dist/Storable/Storable.pm		Storable extension
 dist/Storable/Storable.xs		Storable extension
-dist/Storable/Storable.pm.PL	perl script to generate Storable.pm from template
 dist/Storable/t/attach.t		Check STORABLE_attach doesn't create objects unnecessarily
 dist/Storable/t/attach_errors.t		Trigger and test STORABLE_attach errors
 dist/Storable/t/attach_singleton.t	Test STORABLE_attach for the Singleton pattern
@@ -3716,20 +3605,15 @@ dist/Storable/t/code.t			See if Storable works
 dist/Storable/t/compat01.t		See if Storable works
 dist/Storable/t/compat06.t		See if Storable works
 dist/Storable/t/croak.t			See if Storable works
-dist/Storable/t/CVE-2015-1592.inc	See if Storable works
-dist/Storable/t/CVE-2015-1592.t		See if Storable works
 dist/Storable/t/dclone.t		See if Storable works
 dist/Storable/t/destroy.t		Test Storable in global destructon
 dist/Storable/t/downgrade.t		See if Storable works
 dist/Storable/t/file_magic.t		See if file_magic function works
-dist/Storable/t/flags.t			See if Storable works
 dist/Storable/t/forgive.t		See if Storable works
 dist/Storable/t/freeze.t		See if Storable works
 dist/Storable/t/HAS_ATTACH.pm		For auto-requiring of modules for STORABLE_attach
 dist/Storable/t/HAS_HOOK.pm		For auto-requiring of modules for STORABLE_thaw
 dist/Storable/t/HAS_OVERLOAD.pm		For auto-requiring of mdoules for overload
-dist/Storable/t/huge.t			See how Storable handles huge data
-dist/Storable/t/hugeids.t		See how Storable handles huge object ids
 dist/Storable/t/integer.t		See if Storable works
 dist/Storable/t/interwork56.t		Test compatibility kludge for 64bit data under 5.6.x
 dist/Storable/t/just_plain_nasty.t	See if Storable works
@@ -3741,7 +3625,6 @@ dist/Storable/t/make_overload.pl	Make test data for overload.t
 dist/Storable/t/malice.t		See if Storable copes with corrupt files
 dist/Storable/t/overload.t		See if Storable works
 dist/Storable/t/recurse.t		See if Storable works
-dist/Storable/t/regexp.t		See if Storable works with regexps
 dist/Storable/t/restrict.t		See if Storable works
 dist/Storable/t/retrieve.t		See if Storable works
 dist/Storable/t/robust.t		See if it survives mangled %INC
@@ -3753,7 +3636,6 @@ dist/Storable/t/threads.t		Does Storable work with threads?
 dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/tied_hook.t		See if Storable works
 dist/Storable/t/tied_items.t		See if Storable works
-dist/Storable/t/tied_reify.t		See if Storable works
 dist/Storable/t/tied_store.t		See if Storable works
 dist/Storable/t/utf8.t			See if Storable works
 dist/Storable/t/utf8hash.t		See if Storable works
@@ -3823,7 +3705,6 @@ dist/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 dist/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 dist/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 dist/threads/t/thread.t		General ithread tests from thr5005
-dist/threads/t/unique.t			Test unique attribute with threads
 dist/threads/threads.xs		ithreads
 dist/threads-shared/hints/linux.pl	thread shared variables
 dist/threads-shared/lib/threads/shared.pm	thread shared variables
@@ -3915,7 +3796,6 @@ dist/Time-HiRes/t/usleep.t		Test for Time::HiRes
 dist/Time-HiRes/t/utime.t		Test for Time::HiRes
 dist/Time-HiRes/t/Watchdog.pm		Test for Time::HiRes
 dist/Time-HiRes/typemap			Time::HiRes extension
-dist/Unicode-Normalize/Changes		Unicode::Normalize
 dist/Unicode-Normalize/Makefile.PL	Unicode::Normalize
 dist/Unicode-Normalize/mkheader		Unicode::Normalize
 dist/Unicode-Normalize/Normalize.pm	Unicode::Normalize
@@ -4012,7 +3892,6 @@ ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/pragma.t	See if user pragmas work.
 ext/B/t/showlex.t	See if B::ShowLex works
-ext/B/t/strict.t	See if B works with strict and warnings.
 ext/B/t/sv_stash.t	See if SvSTASH() works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
@@ -4073,7 +3952,6 @@ ext/File-Glob/t/basic.t		See if File::Glob works
 ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/t/rt114984.t	See if File::Glob works
-ext/File-Glob/t/rt131211.t	See if File::Glob works
 ext/File-Glob/t/taint.t		See if File::Glob works
 ext/File-Glob/t/threads.t	See if File::Glob + threads works
 ext/File-Glob/TODO		File::Glob extension todo list
@@ -4263,6 +4141,7 @@ ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/strict.t		see if re 'strict' subpragma works
 ext/SDBM_File/biblio	SDBM kit
 ext/SDBM_File/CHANGES	SDBM kit
+ext/SDBM_File/COMPARE	SDBM kit
 ext/SDBM_File/dba.c	SDBM kit
 ext/SDBM_File/dbd.c	SDBM kit
 ext/SDBM_File/dbe.1	SDBM kit
@@ -4270,7 +4149,9 @@ ext/SDBM_File/dbe.c	SDBM kit
 ext/SDBM_File/dbu.c	SDBM kit
 ext/SDBM_File/grind	SDBM kit
 ext/SDBM_File/hash.c	SDBM kit
+ext/SDBM_File/linux.patches	SDBM kit
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
+ext/SDBM_File/makefile.sdbm	SDBM kit
 ext/SDBM_File/pair.c	SDBM kit
 ext/SDBM_File/pair.h	SDBM kit
 ext/SDBM_File/README	SDBM kit
@@ -4346,7 +4227,6 @@ ext/XS-APItest/t/eval-filter.t	Simple source filter/eval test
 ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/extend.t	test EXTEND() macro
 ext/XS-APItest/t/fetch_pad_names.t	Tests for UTF8 names in pad
-ext/XS-APItest/t/get.t		test get_sv et al.
 ext/XS-APItest/t/gotosub.t	XS::APItest: tests goto &xsub and hints
 ext/XS-APItest/t/grok.t		XS::APItest: tests for grok* functions
 ext/XS-APItest/t/gv_autoload4.t	XS::APItest: tests for gv_autoload4() and variants
@@ -4355,22 +4235,21 @@ ext/XS-APItest/t/gv_fetchmeth.t		XS::APItest: tests for gv_fetchmeth() and varia
 ext/XS-APItest/t/gv_fetchmeth_autoload.t	XS::APItest: tests for gv_fetchmeth_autoload() and variants
 ext/XS-APItest/t/gv_fetchmethod_flags.t	XS::APItest: tests for gv_fetchmethod_flags() and variants
 ext/XS-APItest/t/gv_init.t	XS::APItest: tests for gv_init and variants
-ext/XS-APItest/t/handy00.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy01.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy02.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy03.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy04.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy05.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy06.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy07.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy08.t	XS::APItest: tests for handy.h
-ext/XS-APItest/t/handy09.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy0.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy1.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy2.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy3.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy4.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy5.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy6.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy7.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy8.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy9.t	XS::APItest: tests for handy.h
 ext/XS-APItest/t/handy_base.pl	XS::APItest: tests for handy.h
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
 ext/XS-APItest/t/join_with_space.t	test op_convert_list
 ext/XS-APItest/t/keyword_multiline.t	test keyword plugin parsing across lines
 ext/XS-APItest/t/keyword_plugin.t	test keyword plugin mechanism
-ext/XS-APItest/t/keyword_plugin_threads.t	test keyword plugin loading from multiple threads
 ext/XS-APItest/t/labelconst.aux	auxiliary file for label test
 ext/XS-APItest/t/labelconst.t	test recursive descent label parsing
 ext/XS-APItest/t/labelconst_utf8.aux	auxiliary file for label test in UTF-8
@@ -4427,18 +4306,18 @@ ext/XS-APItest/t/temp_lv_sub.t	XS::APItest: tests for lvalue subs returning temp
 ext/XS-APItest/t/underscore_length.t	Test find_rundefsv()
 ext/XS-APItest/t/utf16_to_utf8.t	Test behaviour of utf16_to_utf8{,reversed}
 ext/XS-APItest/t/utf8.t		Tests for code in utf8.c
+ext/XS-APItest/t/utf8_malformed.t	Tests for code in utf8.c
 ext/XS-APItest/t/utf8_setup.pl	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_to_bytes.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn00.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn01.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn02.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn03.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn04.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn05.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn06.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn07.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn08.t	Tests for code in utf8.c
-ext/XS-APItest/t/utf8_warn09.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn0.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn1.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn2.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn3.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn4.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn5.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn6.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn7.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn8.t	Tests for code in utf8.c
+ext/XS-APItest/t/utf8_warn9.t	Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn_base.pl	Tests for code in utf8.c
 ext/XS-APItest/t/weaken.t	XS::APItest: tests for sv_rvweaken() and sv_get_backrefs()
 ext/XS-APItest/t/whichsig.t	XS::APItest: tests for whichsig() and variants
@@ -4507,6 +4386,7 @@ hints/esix4.sh			Hints for named architecture
 hints/fps.sh			Hints for named architecture
 hints/freebsd.sh		Hints for named architecture
 hints/freemint.sh		Hints for named architecture
+hints/genix.sh			Hints for named architecture
 hints/gnu.sh			Hints for named architecture
 hints/gnukfreebsd.sh		Hints for named architecture
 hints/gnuknetbsd.sh		Hints for named architecture
@@ -4539,6 +4419,7 @@ hints/os2.sh			Hints for named architecture
 hints/os390.sh			Hints for named architecture
 hints/os400.sh			Hints for named architecture
 hints/posix-bc.sh		Hints for named architecture
+hints/powerux.sh		Hints for named architecture
 hints/qnx.sh			Hints for named architecture
 hints/README.hints		Notes about hints
 hints/riscos.sh			Hints for named architecture
@@ -4568,7 +4449,6 @@ hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
 hv_func.h			Hash value static inline function header
-hv_macro.h			Macros used by hv_func.h
 inline.h			Static inline functions
 INSTALL				Detailed installation instructions
 install_lib.pl			functions shared between install* scripts
@@ -4700,7 +4580,6 @@ lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
 lib/perl5db/t/MyModule.pm	Tests for the Perl debugger
 lib/perl5db/t/proxy-constants	Tests for the Perl debugger
 lib/perl5db/t/rt-104168		Tests for the Perl debugger
-lib/perl5db/t/rt-120174		Tests for the Perl debugger
 lib/perl5db/t/rt-121509-restart-after-chdir		Tests for the Perl debugger
 lib/perl5db/t/rt-61222		Tests for the Perl debugger
 lib/perl5db/t/rt-66110		Tests for the Perl debugger
@@ -4820,7 +4699,6 @@ lib/unicore/SpecialCasing.txt			Unicode character database
 lib/unicore/StandardizedVariants.txt		Unicode character database
 lib/unicore/UnicodeData.txt			Unicode character database
 lib/unicore/version				The version of the Unicode
-lib/unicore/VerticalOrientation.txt		Unicode character database
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
 lib/User/grent.t		See if User::grwent works
@@ -4986,7 +4864,6 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.h			generated overload enum (public)
 overload.inc			generated overload name table (implementation)
-PACKAGING			notes and best practice for packaging perl 5
 packsizetables.inc		The generated packprops array used in pp_pack.c
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
@@ -4994,8 +4871,6 @@ parser.h			parser object header
 patchlevel.h			The current patch level of perl
 perl.c				main()
 perl.h				Global declarations
-perl_inc_macro.h		macro used to set \@INC using S_incpush_use_sep
-perl_langinfo.h			Perl's version of <langinfo.h>
 perlapi.c			Perl API functions
 perlapi.h			Perl API function declarations
 perldtrace.d			D script for Perl probes
@@ -5064,11 +4939,8 @@ pod/perl5240delta.pod		Perl changes in version 5.24.0
 pod/perl5241delta.pod		Perl changes in version 5.24.1
 pod/perl5242delta.pod		Perl changes in version 5.24.2
 pod/perl5243delta.pod		Perl changes in version 5.24.3
-pod/perl5244delta.pod		Perl changes in version 5.24.4
 pod/perl5260delta.pod		Perl changes in version 5.26.0
 pod/perl5261delta.pod		Perl changes in version 5.26.1
-pod/perl5262delta.pod		Perl changes in version 5.26.2
-pod/perl5280delta.pod		Perl changes in version 5.28.0
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5227,7 +5099,6 @@ Porting/makerel			Release making utility
 Porting/manicheck		Check against MANIFEST
 Porting/manifest_lib.pl		Library for checking and sorting the MANIFEST
 Porting/manisort		Sort the MANIFEST
-Porting/mksample		Generate Porting/config_H and Porting/config.sh
 Porting/new-perldelta.pl	Generate a new perldelta
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests
 Porting/perldelta_template.pod	Template for creating new perldelta.pod files
@@ -5315,7 +5186,6 @@ regen/mg_vtable.pl		generate mg_vtable.h
 regen/miniperlmain.pl		generate miniperlmain.c
 regen/mk_invlists.pl		Generates charclass_invlists.h
 regen/mk_PL_charclass.pl	Populate the PL_charclass table
-regen/mph.pl			Generate perfect hashes
 regen/op_private		Definitions of bits in an OP's op_private field
 regen/opcode.pl			Opcode header generator
 regen/opcodes			Opcode data
@@ -5334,10 +5204,8 @@ regexp.h			Public declarations for the above
 regnodes.h			Description of nodes of RE engine
 run.c				The interpreter loop
 runtests.SH			A script that generates runtests
-sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
-stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
 symbian/bld.inf			Symbian sample app build config
@@ -5400,7 +5268,6 @@ t/base/term.t			See if various terms work
 t/base/translate.t		See if character set translation works
 t/base/while.t			See if while work
 t/benchmark/rt26188-speed-up-keys-on-empty-hash.t	Benchmark if keys on empty hashes is fast enough
-t/bigmem/hash.t			Check hashing too large strings throws an exception
 t/bigmem/index.t		Check that index() handles large offsets
 t/bigmem/pos.t			Check that pos() handles large offsets
 t/bigmem/read.t			Check read() handles large offsets
@@ -5417,7 +5284,6 @@ t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
 t/comp/decl.t			See if declarations work
-t/comp/filter_exception.t	See if $@ survives source filters
 t/comp/final_line_num.t		See if line numbers are correct at EOF
 t/comp/fold.t			See if constant folding works
 t/comp/form_scope.t		See if format scoping works
@@ -5476,7 +5342,6 @@ t/io/sem.t			See if SysV semaphores work
 t/io/semctl.t			See if SysV semaphore semctl works
 t/io/shm.t			See if SysV shared memory works
 t/io/socket.t			See if socket functions work
-t/io/socketpair.t		See if socketpair function works
 t/io/tell.t			See if file seeking works
 t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
@@ -5493,7 +5358,6 @@ t/lib/croak/pp			Test croak calls from pp.c
 t/lib/croak/pp_ctl		Test croak calls from pp_ctl.c
 t/lib/croak/pp_hot		Test croak calls from pp_hot.c
 t/lib/croak/pp_sys		Test croak calls from pp_sys.c
-t/lib/croak/regcomp		Test croak calls from regcomp.c
 t/lib/croak/toke		Test croak calls from toke.c
 t/lib/croak/toke_l1		Test croak calls from toke.c; file is not UTF-8 encoded
 t/lib/cygwin.t			Builtin cygwin function tests
@@ -5805,9 +5669,7 @@ t/op/sprintf2.t			See if sprintf works
 t/op/srand.t			See if srand works
 t/op/sselect.t			See if 4 argument select works
 t/op/stash.t			See if %:: stashes work
-t/op/stash_parse_gv.t		See if parse_gv_stash_name works
 t/op/stat.t			See if stat works
-t/op/stat_errors.t		See if stat and file tests handle threshold errors
 t/op/state.t			See if state variables work
 t/op/study.t			See if study works
 t/op/studytied.t		See if study works with tied scalars
@@ -5863,16 +5725,7 @@ t/perf/taint.t			See if optimisations are keeping things fast (taint issues)
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
-t/porting/bench.t		Check Porting/bench.pl runs ok
-t/porting/bench/badhash		a test file for t/porting/bench.t
-t/porting/bench/badname		a test file for t/porting/bench.t
-t/porting/bench/badversion.json	a test file for t/porting/bench.t
-t/porting/bench/callsub.json	a test file for t/porting/bench.t
-t/porting/bench/callsub2.json	a test file for t/porting/bench.t
-t/porting/bench/oddentry	a test file for t/porting/bench.t
-t/porting/bench/ret0		a test file for t/porting/bench.t
-t/porting/bench/synerr		a test file for t/porting/bench.t
-t/porting/bench_selftest.t	run Porting/bench.pl's selftest facility
+t/porting/bench.t		Check that Porting/bench.pl is okay
 t/porting/bincompat.t		Check that {non_,}bincompat_options are ordered
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/checkcfgvar.t		Check that all config.sh-like files are good
@@ -5902,7 +5755,6 @@ t/porting/regen.t		Check that regen.pl doesn't need running
 t/porting/ss_dup.t		Check that sv.c:ss_dup handles everything
 t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping aren't accidentally overlooked.
 t/porting/utils.t		Check that utility scripts still compile
-t/re/alpha_assertions.t		See if things like '(*postive_lookahed:...) work properly
 t/re/anyof.t			See if bracketed char classes [...] compile properly
 t/re/charset.t			See if regex modifiers like /d, /u work properly
 t/re/fold_grind.t		See if case folding works properly
@@ -5954,7 +5806,6 @@ t/re/regexp_unicode_prop.t	See if unicode properties work in regular expressions
 t/re/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/re/rt122747.t			Test rt122747 assert faile (requires DEBUGGING)
 t/re/rxcode.t			See if /(?{ code })/ works
-t/re/script_run.t		See if script runs works
 t/re/speed.t			See if optimisations are keeping things fast
 t/re/speed_thr.t		ditto under threads
 t/re/subst.t			See if substitution works
@@ -6022,6 +5873,7 @@ t/uni/fold.t			See if Unicode folding works
 t/uni/goto.t			See if Unicode goto &sub works
 t/uni/greek.t			See if Unicode in greek works
 t/uni/gv.t			See if Unicode GVs work.
+t/uni/heavy.t			See if utf8_heavy.pl uses perl that depends on it
 t/uni/labels.t			See if Unicode labels work
 t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lex_utf8.t		See if Unicode in lexer works
@@ -6059,7 +5911,6 @@ toke.c				The tokener
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl
 uconfig64.sh			Configuration script for microperl for LP64
-uni_keywords.h			Map unicode property names to numbers
 unicode_constants.h		compile-time macros for Unicode code points
 universal.c			The default UNIVERSAL package methods
 unixish.h			Defines that are assumed on Unix
@@ -6174,4 +6025,3 @@ win32/wince.h			WinCE port
 win32/wincesck.c		WinCE port
 write_buildcustomize.pl		Generate lib/buildcustomize.pl
 XSUB.h				Include file for extension subroutines
-zaphod32_hash.h			Zaphod32 hash code (32 bit fast hash function)

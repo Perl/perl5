@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More;
 
 {
   use List::Util qw( first );
@@ -31,3 +31,5 @@ use Test::More tests => 2;
   is( $var, 'HellO WorlD',
     'any (lc$_) leaves value undisturbed' );
 }
+
+done_testing;

@@ -16,6 +16,15 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
+=item C<our> can now have an experimental optional attribute C<unique>
+
+Introduced in Perl 5.8.0
+
+Deprecated in Perl 5.10.0
+
+The ticket for this feature is
+L<[perl #119313]|https://rt.perl.org/rt3/Ticket/Display.html?id=119313>.
+
 =item Smart match (C<~~>)
 
 Introduced in Perl 5.10.0
@@ -92,6 +101,18 @@ C<experimental::re_strict>.
 
 See L<re/'strict' mode>
 
+=item String- and number-specific bitwise operators
+
+Introduced in Perl 5.22.0
+
+See also: L<perlop/Bitwise String Operators>
+
+Using this feature triggers warnings in the category
+C<experimental::bitwise>.
+
+The ticket for this feature is
+L<[perl #123707]|https://rt.perl.org/rt3/Ticket/Display.html?id=123707>.
+
 =item The <:win32> IO pseudolayer
 
 The ticket for this feature is
@@ -117,24 +138,6 @@ The ticket for this feature is
 L<[perl #116487]|https://rt.perl.org/rt3/Ticket/Display.html?id=116487>.
 
 =item Unicode in Perl on EBCDIC
-
-=item Script runs
-
-Introduced in Perl 5.28.0
-
-Using this feature triggers warnings in the category
-C<experimental::script_run>.
-
-See also: L<perlre/Script Runs>
-
-=item Alpabetic assertions
-
-Introduced in Perl 5.28.0
-
-Using this feature triggers warnings in the category
-C<experimental::alpha_assertions>.
-
-See also: L<perlre/Extended Patterns>.
 
 =back
 
@@ -252,12 +255,6 @@ Introduced in Perl 5.18.0
 
 Accepted in Perl 5.26.0
 
-=item String- and number-specific bitwise operators
-
-Introduced in Perl 5.22.0
-
-Accepted in Perl 5.28.0
-
 =back
 
 =head2 Removed features
@@ -331,14 +328,6 @@ Superseded by L</Postfix dereference syntax>.
 Introduced in Perl 5.14.0
 
 Removed in Perl 5.24.0
-
-=item C<our> can have an experimental optional attribute C<unique>
-
-Introduced in Perl 5.8.0
-
-Deprecated in Perl 5.10.0
-
-Removed in Perl 5.28.0
 
 =back
 

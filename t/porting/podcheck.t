@@ -29,10 +29,6 @@ BEGIN {
         print "1..0 # $^O cannot handle this test\n";
         exit(0);
     }
-    if ( $ENV{'PERL_BUILD_PACKAGING'} ) {
-        print "1..0 # This distro may have modified some files in cpan/. Skipping validation. \n";
-        exit 0;
-    }
     require '../regen/regen_lib.pl';
 }
 
@@ -97,13 +93,6 @@ missing from the C<LE<lt>E<gt>> pod command.
 A pod can't be linked to unless it has a unique name.
 And a NAME should have a dash and short description after it.
 
-=item Occurrences of the Unicode replacement character
-
-L<Pod::Simple> replaces bytes that aren't valid according to the document's
-encoding (declared or auto-detected) with C<\N{REPLACEMENT CHARACTER}>.
-
-=back
-
 If the C<PERL_POD_PEDANTIC> environment variable is set or the C<--pedantic>
 command line argument is provided then a few more checks are made.
 The pedantic checks are:
@@ -165,6 +154,8 @@ actually are.
 Another problem is that there is currently no check that modules listed as
 valid in the database
 actually are.  Thus any errors introduced there will remain there.
+
+=back
 
 =head2 Specially handled pods
 
@@ -370,7 +361,6 @@ my $multiple_targets = "There is more than one target";
 my $duplicate_name = "Pod NAME already used";
 my $no_name = "There is no NAME";
 my $missing_name_description = "The NAME should have a dash and short description after it";
-my $replacement_character = "Unicode replacement character found";
 # the pedantic warnings messages
 my $line_length = "Verbatim line length including indents exceeds $MAX_LINE_LENGTH by";
 my $C_not_linked = "? Should you be using L<...> instead of";
@@ -432,14 +422,13 @@ my $non_pods = qr/ (?: \.
                            | $dl_ext  # dynamic libraries
                            | gif      # GIF images (example files from CGI.pm)
                            | eg       # examples from libnet
-                           | core .*
+                           | core
                        )
                        $
                     ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
                            | ^cxx\$demangler_db\.$ # VMS name mangler database
                            | ^typemap\.?$          # typemap files
                            | ^(?i:Makefile\.PL)$
-                           | ^core (?: $ | \. .* )
                 /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
@@ -864,16 +853,6 @@ package My::Pod::Checker {      # Extend Pod::Checker
             $running_CFL_text{$addr} .= $text;
         }
 
-        # do this line-by-line so we can get the right line number
-        my @lines = split /^/, $running_simple_text{$addr};
-        for my $i (0..$#lines) {
-            if ($lines[$i] =~ m/\N{REPLACEMENT CHARACTER}/) {
-                $self->poderror({ -line => $start_line{$addr} + $i,
-                    -msg => $replacement_character,
-                    parameter => "possibly invalid ". $self->encoding . " input at character " . pos $lines[$i],
-                });
-            }
-        }
         return $return;
     }
 

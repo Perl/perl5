@@ -12,8 +12,8 @@ my $out_fh = open_new('unicode_constants.h', '>',
 
 print $out_fh <<END;
 
-#ifndef PERL_UNICODE_CONSTANTS_H_   /* Guard against nested #includes */
-#define PERL_UNICODE_CONSTANTS_H_   1
+#ifndef H_UNICODE_CONSTANTS   /* Guard against nested #includes */
+#define H_UNICODE_CONSTANTS   1
 
 /* This file contains #defines for the version of Unicode being used and
  * various Unicode code points.  The values the code point macros expand to
@@ -198,7 +198,7 @@ if (@cwcm) {
     }
 }
 
-print $out_fh "\n#endif /* PERL_UNICODE_CONSTANTS_H_ */\n";
+print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
 
 read_only_bottom_close_and_rename($out_fh);
 
@@ -258,8 +258,6 @@ BOM tail
 BOM string
 
 U+FFFD string
-
-U+10FFFF string MAX_UNICODE
 
 NBSP native
 NBSP string

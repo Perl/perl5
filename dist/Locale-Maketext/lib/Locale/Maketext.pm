@@ -1,6 +1,7 @@
 package Locale::Maketext;
 use strict;
-our $USE_LITERALS;
+use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
+$USE_LITERALS $MATCH_SUPERS_TIGHTLY);
 use Carp ();
 use I18N::LangTags ();
 use I18N::LangTags::Detect ();
@@ -25,12 +26,12 @@ BEGIN {
 }
 
 
-our $VERSION = '1.29';
-our @ISA = ();
+$VERSION = '1.28';
+@ISA = ();
 
-our $MATCH_SUPERS = 1;
-our $MATCH_SUPERS_TIGHTLY = 1;
-our $USING_LANGUAGE_TAGS  = 1;
+$MATCH_SUPERS = 1;
+$MATCH_SUPERS_TIGHTLY = 1;
+$USING_LANGUAGE_TAGS  = 1;
 # Turning this off is somewhat of a security risk in that little or no
 # checking will be done on the legality of tokens passed to the
 # eval("use $module_name") in _try_use.  If you turn this off, you have

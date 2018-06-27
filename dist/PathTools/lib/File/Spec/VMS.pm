@@ -1,13 +1,13 @@
 package File::Spec::VMS;
 
 use strict;
-use Cwd ();
+use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-our $VERSION = '3.74';
+$VERSION = '3.67';
 $VERSION =~ tr/_//d;
 
-our @ISA = qw(File::Spec::Unix);
+@ISA = qw(File::Spec::Unix);
 
 use File::Basename;
 use VMS::Filespec;
@@ -442,7 +442,7 @@ sub abs2rel {
     my $self = shift;
     my($path,$base) = @_;
 
-    $base = Cwd::getcwd() unless defined $base and length $base;
+    $base = $self->_cwd() unless defined $base and length $base;
 
     # If there is no device or directory syntax on $base, make sure it
     # is treated as a directory.
@@ -514,7 +514,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-            $base = Cwd::getcwd();
+            $base = $self->_cwd;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;

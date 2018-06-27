@@ -140,13 +140,17 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
                             ? SSize_t_MAX : key + newmax;
 	      resize:
 		{
+#ifdef PERL_MALLOC_WRAP /* Duplicated in pp_hot.c */
+		    static const char oom_array_extend[] =
+			"Out of memory during array extend";
+#endif
                     /* it should really be newmax+1 here, but if newmax
                      * happens to equal SSize_t_MAX, then newmax+1 is
                      * undefined. This means technically we croak one
                      * index lower than we should in theory; in practice
                      * its unlikely the system has SSize_t_MAX/sizeof(SV*)
                      * bytes to spare! */
-		    MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
+		    MEM_WRAP_CHECK_1(newmax, SV*, oom_array_extend);
 		}
 #ifdef STRESS_REALLOC
 		{
@@ -172,8 +176,12 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 	    else {
 		newmax = key < 3 ? 3 : key;
 		{
+#ifdef PERL_MALLOC_WRAP /* Duplicated in pp_hot.c */
+		    static const char oom_array_extend[] =
+			"Out of memory during array extend";
+#endif
                     /* see comment above about newmax+1*/
-		    MEM_WRAP_CHECK_s(newmax, SV*, "Out of memory during array extend");
+		    MEM_WRAP_CHECK_1(newmax, SV*, oom_array_extend);
 		}
 		Newx(*allocp, newmax+1, SV*);
 		ary = *allocp + 1;
@@ -534,7 +542,7 @@ void
 Perl_av_undef(pTHX_ AV *av)
 {
     bool real;
-    SSize_t orig_ix = PL_tmps_ix; /* silence bogus warning about possible unitialized use */
+    SSize_t orig_ix;
 
     PERL_ARGS_ASSERT_AV_UNDEF;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -543,8 +551,7 @@ Perl_av_undef(pTHX_ AV *av)
     if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied)) 
 	av_fill(av, -1);
 
-    real = cBOOL(AvREAL(av));
-    if (real) {
+    if ((real = cBOOL(AvREAL(av)))) {
 	SSize_t key = AvFILLp(av) + 1;
 
         /* avoid av being freed when calling destructors below */
@@ -1007,9 +1014,6 @@ Perl_av_exists(pTHX_ AV *av, SSize_t key)
 
     if (key <= AvFILLp(av) && AvARRAY(av)[key])
     {
-	if (SvSMAGICAL(AvARRAY(av)[key])
-	 && mg_find(AvARRAY(av)[key], PERL_MAGIC_nonelem))
-	    return FALSE;
 	return TRUE;
     }
     else
@@ -1052,27 +1056,17 @@ Perl_av_iter_p(pTHX_ AV *av) {
     PERL_ARGS_ASSERT_AV_ITER_P;
     assert(SvTYPE(av) == SVt_PVAV);
 
-    if (sizeof(IV) == sizeof(SSize_t)) {
-	return (IV *)&(mg->mg_len);
-    } else {
-	if (!mg->mg_ptr) {
-	    IV *temp;
-	    mg->mg_len = IVSIZE;
-	    Newxz(temp, 1, IV);
-	    mg->mg_ptr = (char *) temp;
-	}
-	return (IV *)mg->mg_ptr;
+#if IVSIZE == I32SIZE
+    return (IV *)&(mg->mg_len);
+#else
+    if (!mg->mg_ptr) {
+	IV *temp;
+	mg->mg_len = IVSIZE;
+	Newxz(temp, 1, IV);
+	mg->mg_ptr = (char *) temp;
     }
-}
-
-SV *
-Perl_av_nonelem(pTHX_ AV *av, SSize_t ix) {
-    SV * const sv = newSV(0);
-    PERL_ARGS_ASSERT_AV_NONELEM;
-    if (!av_store(av,ix,sv))
-	return sv_2mortal(sv); /* has tie magic */
-    sv_magic(sv, NULL, PERL_MAGIC_nonelem, NULL, 0);
-    return sv;
+    return (IV *)mg->mg_ptr;
+#endif
 }
 
 /*

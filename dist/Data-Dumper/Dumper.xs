@@ -12,14 +12,6 @@
 #  define DD_USE_OLD_ID_FORMAT
 #endif
 
-#ifndef strlcpy
-#  ifdef my_strlcpy
-#    define strlcpy(d,s,l) my_strlcpy(d,s,l)
-#  else
-#    define strlcpy(d,s,l) strcpy(d,s)
-#  endif
-#endif
-
 /* These definitions are ASCII only.  But the pure-perl .pm avoids
  * calling this .xs file for releases where they aren't defined */
 
@@ -47,17 +39,6 @@
 #ifndef isWORDCHAR
 #   define isWORDCHAR(c) (isIDFIRST(c)                                      \
                           || (((UV) (c)) >= '0' && ((UV) (c)) <= '9'))
-#endif
-
-/* SvPVCLEAR only from perl 5.25.6 */
-#ifndef SvPVCLEAR
-#  define SvPVCLEAR(sv) sv_setpvs((sv), "")
-#endif
-
-#ifndef memBEGINs
-#  define memBEGINs(s1, l, s2)                                              \
-            (   (l) >= sizeof(s2) - 1                                       \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
 #endif
 
 /* This struct contains almost all the user's desired configuration, and it
@@ -870,7 +851,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV * const ixsv = newSViv(0);
 	    /* allowing for a 24 char wide array index */
 	    New(0, iname, namelen+28, char);
-	    (void) strlcpy(iname, name, namelen+28);
+	    (void)strcpy(iname, name);
 	    inamelen = namelen;
 	    if (name[0] == '@') {
 		sv_catpvs(retval, "(");
@@ -1304,7 +1285,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else if (realtype == SVt_PVGV) {/* GLOBs can end up with scribbly names */
 	    c = SvPV(val, i);
 	    if(i) ++c, --i;			/* just get the name */
-	    if (memBEGINs(c, i, "main::")) {
+	    if (i >= 6 && strncmp(c, "main::", 6) == 0) {
 		c += 4;
 #if PERL_VERSION < 7
 		if (i == 6 || (i == 7 && c[6] == '\0'))
@@ -1314,30 +1295,37 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    i = 0; else i -= 4;
 	    }
             if (globname_needs_quote(c,i)) {
-		sv_grow(retval, SvCUR(retval)+3);
-		r = SvPVX(retval)+SvCUR(retval);
-		r[0] = '*'; r[1] = '{'; r[2] = 0;
-		SvCUR_set(retval, SvCUR(retval)+2);
-                i = 3 + esc_q_utf8(aTHX_ retval, c, i,
 #ifdef GvNAMEUTF8
-			!!GvNAMEUTF8(val)
-#else
-			0
-#endif
-			, style->useqq);
+	      if (GvNAMEUTF8(val)) {
+		sv_grow(retval, SvCUR(retval)+2);
+		r = SvPVX(retval)+SvCUR(retval);
+		r[0] = '*'; r[1] = '{';
+		SvCUR_set(retval, SvCUR(retval)+2);
+                esc_q_utf8(aTHX_ retval, c, i, 1, style->useqq);
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
-		SvCUR_set(retval, SvCUR(retval)+1);
-		r = r+1 - i;
+		i = 1;
+	      }
+	      else
+#endif
+	      {
+		sv_grow(retval, SvCUR(retval)+6+2*i);
+		r = SvPVX(retval)+SvCUR(retval);
+		r[0] = '*'; r[1] = '{';	r[2] = '\'';
+		i += esc_q(r+3, c, i);
+		i += 3;
+		r[i++] = '\''; r[i++] = '}';
+		r[i] = '\0';
+	      }
 	    }
 	    else {
 		sv_grow(retval, SvCUR(retval)+i+2);
 		r = SvPVX(retval)+SvCUR(retval);
-		r[0] = '*'; strlcpy(r+1, c, SvLEN(retval));
+		r[0] = '*'; strcpy(r+1, c);
 		i++;
-		SvCUR_set(retval, SvCUR(retval)+i);
 	    }
+	    SvCUR_set(retval, SvCUR(retval)+i);
 
             if (style->purity) {
 		static const char* const entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };

@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '7.34';
+our $VERSION = '7.24';
 $VERSION = eval $VERSION;
 
 1;
@@ -390,9 +390,7 @@ We recommend InfoZIP: L<http://www.info-zip.org/Zip.html>
 
 =head2 XS
 
-=over 4
-
-=item How do I prevent "object version X.XX does not match bootstrap parameter Y.YY" errors?
+=head3 How do I prevent "object version X.XX does not match bootstrap parameter Y.YY" errors?
 
 XS code is very sensitive to the module version number and will
 complain if the version number in your Perl module doesn't match.  If
@@ -407,15 +405,13 @@ WriteMakefile() arguments.
     depend => { '$(FIRST_MAKEFILE)' => '$(VERSION_FROM)' }
 
 
-=item How do I make two or more XS files coexist in the same directory?
+=head3 How do I make two or more XS files coexist in the same directory?
 
 Sometimes you need to have two and more XS files in the same package.
 There are three ways: C<XSMULTI>, separate directories, and bootstrapping
 one XS from another.
 
-=over 8
-
-=item XSMULTI
+=head4 XSMULTI
 
 Structure your modules so they are all located under F<lib>, such that
 C<Foo::Bar> is in F<lib/Foo/Bar.pm> and F<lib/Foo/Bar.xs>, etc. Have your
@@ -423,14 +419,14 @@ top-level C<WriteMakefile> set the variable C<XSMULTI> to a true value.
 
 Er, that's it.
 
-=item Separate directories
+=head4 Separate directories
 
 Put each XS files into separate directories, each with their own
 F<Makefile.PL>. Make sure each of those F<Makefile.PL>s has the correct
 C<CFLAGS>, C<INC>, C<LIBS> etc. You will need to make sure the top-level
 F<Makefile.PL> refers to each of these using C<DIR>.
 
-=item Bootstrapping
+=head4 Bootstrapping
 
 Let's assume that we have a package C<Cool::Foo>, which includes
 C<Cool::Foo> and C<Cool::Bar> modules each having a separate XS
@@ -550,8 +546,6 @@ and L<Glib::CodeGen>.
 
 =back
 
-=back
-
 =head1 DESIGN
 
 =head2 MakeMaker object hierarchy (simplified)
@@ -613,7 +607,7 @@ ExtUtils::Makemaker, ExtUtils::Liblist and ExtUtils::MM_{Current OS}
 NOTE: The methods in MY are simply copied into PACK### rather than
 MY being a superclass of PACK###.  I don't remember the rationale.
 
-NOTE: ExtUtils::Liblist should be removed from the inheritance hiearchy
+NOTE: ExtUtils::Liblist should be removed from the inheritence hiearchy
 and simply be called as functions.
 
 NOTE: Modules like File::Spec and Exporter have been omitted for clarity.

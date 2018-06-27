@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 195;
+plan tests => 193;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -1348,15 +1348,6 @@ unreified_check(undef,"");
     is($i, 111, 'when in for @a');
 }
 
-given("xyz") {
-    no warnings "void";
-    my @a = (qw(a b c), do { when(/abc/) { qw(x y) } }, qw(d e f));
-    is join(",", map { $_ // "u" } @a), "a,b,c,d,e,f",
-	"list value of false when";
-    @a = (qw(a b c), scalar do { when(/abc/) { qw(x y) } }, qw(d e f));
-    is join(",", map { $_ // "u" } @a), "a,b,c,u,d,e,f",
-	"scalar value of false when";
-}
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t. Taintedness of

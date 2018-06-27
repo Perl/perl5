@@ -24,7 +24,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.34';
+our $VERSION = '7.24';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -34,7 +34,7 @@ $Revision = int $Revision * 10000;
 our $Filename = __FILE__;   # referenced outside MakeMaker
 
 our @ISA = qw(Exporter);
-our @EXPORT    = qw(&WriteMakefile $Verbose &prompt &os_unsupported);
+our @EXPORT    = qw(&WriteMakefile $Verbose &prompt);
 our @EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
                     &WriteEmptyMakefile &open_for_writing &write_file_via_tmp
                     &_sprintf562);
@@ -225,10 +225,6 @@ sub prompt ($;$) {  ## no critic
     }
 
     return (!defined $ans || $ans eq '') ? $def : $ans;
-}
-
-sub os_unsupported {
-    die "OS unsupported\n";
 }
 
 sub eval_in_subdirs {
@@ -654,6 +650,11 @@ END
         } else {
             croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
         }
+    }
+
+    # This is for old Makefiles written pre 5.00, will go away
+    if ( Carp::longmess("") =~ /runsubdirpl/s ){
+        carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
     }
 
     my $newclass = ++$PACKNAME;
@@ -1817,7 +1818,7 @@ located in the C<x86> directory relative to the PPD itself.
 
 =item BUILD_REQUIRES
 
-Available in version 6.55_03 and above.
+Available in version 6.5503 and above.
 
 A hash of modules that are needed to build your module but not run it.
 
@@ -2069,8 +2070,6 @@ Defaults to $Config{installprivlib}.
 
 =item INSTALLSCRIPT
 
-Available in version 6.30_02 and above.
-
 Used by 'make install' which copies files from INST_SCRIPT to this
 directory if INSTALLDIRS=perl.
 
@@ -2107,9 +2106,7 @@ directory if INSTALLDIRS is set to site (default).
 =item INSTALLVENDORARCH
 
 Used by 'make install', which copies files from INST_ARCHLIB to this
-directory if INSTALLDIRS is set to vendor. Note that if you do not set
-this, the value of INSTALLVENDORLIB will be used, which is probably not
-what you want.
+directory if INSTALLDIRS is set to vendor.
 
 =item INSTALLVENDORBIN
 
@@ -2131,8 +2128,6 @@ INSTALLDIRS=vendor.  Defaults to $(VENDORPREFIX)/man/man$(MAN*EXT).
 If set to 'none', no man pages will be installed.
 
 =item INSTALLVENDORSCRIPT
-
-Available in version 6.30_02 and above.
 
 Used by 'make install' which copies files from INST_SCRIPT to this
 directory if INSTALLDIRS is set to vendor.
@@ -2239,14 +2234,10 @@ linkext below).
 
 =item MAGICXS
 
-Available in version 6.8305 and above.
-
 When this is set to C<1>, C<OBJECT> will be automagically derived from
 C<O_FILES>.
 
 =item MAKE
-
-Available in version 6.30_01 and above.
 
 Variant of make you intend to run the generated Makefile with.  This
 parameter lets Makefile.PL know what make quirks to account for when
@@ -2419,8 +2410,6 @@ Defaults to false.
 
 =item NO_MYMETA
 
-Available in version 6.57_02 and above.
-
 When true, suppresses the generation of MYMETA.yml and MYMETA.json module
 meta-data files during 'perl Makefile.PL'.
 
@@ -2428,15 +2417,11 @@ Defaults to false.
 
 =item NO_PACKLIST
 
-Available in version 6.7501 and above.
-
 When true, suppresses the writing of C<packlist> files for installs.
 
 Defaults to false.
 
 =item NO_PERLLOCAL
-
-Available in version 6.7501 and above.
 
 When true, suppresses the appending of installations to C<perllocal>.
 
@@ -2554,8 +2539,6 @@ Directory containing the Perl source code (use of this should be
 avoided, it may be undefined)
 
 =item PERM_DIR
-
-Available in version 6.51_01 and above.
 
 Desired permission for directories. Defaults to C<755>.
 
@@ -2678,13 +2661,9 @@ the installation of a package.
 
 =item PPM_UNINSTALL_EXEC
 
-Available in version 6.8502 and above.
-
 Name of the executable used to run C<PPM_UNINSTALL_SCRIPT> below. (e.g. perl)
 
 =item PPM_UNINSTALL_SCRIPT
-
-Available in version 6.8502 and above.
 
 Name of the script that gets executed by the Perl Package Manager before
 the removal of a package.
@@ -2782,8 +2761,6 @@ $Config{installprefix} will be used.
 Overridable by PREFIX
 
 =item SIGN
-
-Available in version 6.18 and above.
 
 When true, perform the generation and addition to the MANIFEST of the
 SIGNATURE file in the distdir during 'make distdir', via 'cpansign
@@ -2905,8 +2882,6 @@ deleted by a make clean.
 
 =item XSBUILD
 
-Available in version 7.12 and above.
-
 Hashref with options controlling the operation of C<XSMULTI>:
 
   {
@@ -2938,8 +2913,6 @@ make the final SO/SL, almost certainly including the XS basename with
 C<$(OBJ_EXT)> appended.
 
 =item XSMULTI
-
-Available in version 7.12 and above.
 
 When this is set to C<1>, multiple XS files may be placed under F<lib/>
 next to their corresponding C<*.pm> files (this is essential for compiling
@@ -3040,8 +3013,6 @@ recursively under C<t> that contain C<.t> files. It will be ignored if
 you provide your own C<TESTS> attribute, defaults to false.
 
   {RECURSIVE_TEST_FILES=>1}
-
-This is supported since 6.76
 
 =item tool_autosplit
 
@@ -3318,17 +3289,6 @@ is set to true, the $default will be used without prompting.  This
 prevents automated processes from blocking on user input.
 
 If no $default is provided an empty string will be used instead.
-
-=item os_unsupported
-
-  os_unsupported();
-  os_unsupported if $^O eq 'MSWin32';
-
-The C<os_unsupported()> function provides a way to correctly exit your
-C<Makefile.PL> before calling C<WriteMakefile>. It is essentially a
-C<die> with the message "OS unsupported".
-
-This is supported since 7.26
 
 =back
 

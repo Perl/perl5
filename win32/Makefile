@@ -5,7 +5,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl529.dll).  Also makes individual DLLs for the XS extensions.
+# (perl526.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -38,7 +38,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	= \5.29.0
+#INST_VER	= \5.26.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -119,19 +119,31 @@ CCTYPE		= MSVC60
 #CCTYPE		= MSVC70FREE
 # Windows Server 2003 SP1 Platform SDK (April 2005)
 #CCTYPE		= SDK2003SP1
-# Visual C++ 2005 (aka Visual C++ 8.0) (full version or Express Edition)
+# Visual C++ 2005 (aka Visual C++ 8.0) (full version)
 #CCTYPE		= MSVC80
-# Visual C++ 2008 (aka Visual C++ 9.0) (full version or Express Edition)
+# Visual C++ 2005 Express Edition (aka Visual C++ 8.0) (free version)
+#CCTYPE		= MSVC80FREE
+# Visual C++ 2008 (aka Visual C++ 9.0) (full version)
 #CCTYPE		= MSVC90
-# Visual C++ 2010 (aka Visual C++ 10.0) (full version or Express Edition)
+# Visual C++ 2008 Express Edition (aka Visual C++ 9.0) (free version)
+#CCTYPE		= MSVC90FREE
+# Visual C++ 2010 (aka Visual C++ 10.0) (full version)
 #CCTYPE		= MSVC100
-# Visual C++ 2012 (aka Visual C++ 11.0) (full version or Express Edition)
+# Visual C++ 2010 Express Edition (aka Visual C++ 10.0) (free version)
+#CCTYPE		= MSVC100FREE
+# Visual C++ 2012 (aka Visual C++ 11.0) (full version)
 #CCTYPE		= MSVC110
-# Visual C++ 2013 (aka Visual C++ 12.0) (full version or Express Edition)
+# Visual C++ 2012 Express Edition (aka Visual C++ 11.0) (free version)
+#CCTYPE		= MSVC110FREE
+# Visual C++ 2013 (aka Visual C++ 12.0) (full version)
 #CCTYPE		= MSVC120
-# Visual C++ 2015 (aka Visual C++ 14.0) (full version or Express Edition)
+# Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
+#CCTYPE		= MSVC120FREE
+# Visual C++ 2015 (aka Visual C++ 14.0) (full version)
 #CCTYPE		= MSVC140
-# Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
+# Visual C++ 2015 Express Edition (aka Visual C++ 14.0) (free version)
+#CCTYPE		= MSVC140FREE
+# Visual C++ 2017 (aka Visual C++ 14.1) (all versions)
 #CCTYPE		= MSVC141
 
 #
@@ -192,17 +204,17 @@ CCTYPE		= MSVC60
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl529s.lib will also be created.
+# variables below. A static library perl526s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	= define
 
 #
 # in addition to BUILD_STATIC the option ALL_STATIC makes *every*
-# extension get statically built.
+# extension get statically built
 # This will result in a very large perl executable, but the main purpose
 # is to have proper linking set so as to be able to create miscellaneous
-# executables with different built-in extensions.
+# executables with different built-in extensions
 #
 #ALL_STATIC	= define
 
@@ -494,7 +506,8 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrt.lib
 !ELSE
 LIBC		= msvcrt.lib
@@ -509,7 +522,8 @@ OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
 !ELSE
 !IF  "$(CFG)" == "DebugFull"
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 LIBC		= ucrtd.lib
 !ELSE
 LIBC		= msvcrtd.lib
@@ -548,8 +562,9 @@ OPTIMIZE	= $(OPTIMIZE) -fp:precise
 DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 !ENDIF
 
-# Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+# Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 !ENDIF
 
@@ -573,7 +588,8 @@ LIBBASEFILES	= \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib comctl32.lib
 
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" \
+    || "$(CCTYPE)" == "MSVC141"
 !  IF  "$(CFG)" == "DebugFull"
 LIBBASEFILES	= $(LIBBASEFILES) msvcrtd.lib vcruntimed.lib
 !  ELSE
@@ -630,7 +646,8 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 # LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
 # Console vs GUI makes no difference for DLLs, so use default for cleaner
 # building cmd lines
-!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
+!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC120FREE" \
+    || "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
 !  IF "$(WIN64)" == "define"
 LINK_FLAGS	= $(LINK_FLAGS) -subsystem:console,"5.02"
 !  ELSE
@@ -679,9 +696,9 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	= ..\perl529.lib
-PERLSTATICLIB	= ..\perl529s.lib
-PERLDLL		= ..\perl529.dll
+PERLIMPLIB	= ..\perl526.lib
+PERLSTATICLIB	= ..\perl526s.lib
+PERLDLL		= ..\perl526.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
@@ -939,8 +956,7 @@ CFG_VARS	=					\
 #
 
 all : .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
-	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions PostExt \
-	$(PERLSTATIC)
+	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions $(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 regnodes : ..\regnodes.h
@@ -979,7 +995,7 @@ perlglob$(o)  : perlglob.c
 	@echo.>>$@
 	@echo #ifndef _config_h_footer_>>$@
 	@echo #define _config_h_footer_>>$@
-!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC141"
+!IF "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE" || "$(CCTYPE)" == "MSVC141"
 	@echo #undef FILE_ptr>>$@
 	@echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)>>$@
 	@echo #undef FILE_cnt>>$@
@@ -1225,13 +1241,6 @@ Extensions_clean:
 Extensions_realclean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
 
-PostExt: ..\lib\Storable\Limit.pm
-
-..\lib\Storable\Limit.pm: $(PERLEXE) Extensions
-	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
-	if not exist ..\lib\Storable mkdir ..\lib\Storable
-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
-
 #-------------------------------------------------------------------------------
 
 doc: $(PERLEXE) ..\pod\perltoc.pod
@@ -1282,7 +1291,7 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5290delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5262delta.pod
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
@@ -1310,7 +1319,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
-	-del /f $(LIBDIR)\Storable.pm $(LIBDIR)\Storable\Limit.pm
 	-del /f $(LIBDIR)\Win32.pm
 	-del /f $(LIBDIR)\Win32CORE.pm
 	-del /f $(LIBDIR)\Win32API\File.pm
@@ -1382,7 +1390,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5290delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5262delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \

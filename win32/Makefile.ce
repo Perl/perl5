@@ -5,7 +5,7 @@
 #
 
 SRCDIR     = ..
-PV         = 529
+PV         = 526
 
 # INSTALL_ROOT specifies a path where this perl will be installed on CE device
 INSTALL_ROOT=/netzwerk/sprache/perl
@@ -780,7 +780,7 @@ XSUBPP		= $(HPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
 # Top targets
 #
 
-all: hostminiperl force_config_h ..\lib\buildcustomize.pl .\config.h ..\git_version.h $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) MakePPPort Extensions PostExt
+all: hostminiperl force_config_h ..\lib\buildcustomize.pl .\config.h ..\git_version.h $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) MakePPPort Extensions
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c config.h $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -856,14 +856,6 @@ Extensions_nonxs: ..\make_ext.pl ..\lib\buildcustomize.pl $(CONFIGPM) ..\pod\per
 
 Extensions_clean:
 	-if exist $(HPERL) $(HPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR)  --all --target=clean 
-
-PostExt: rebuild_storable
-
-rebuild_storable: $(PERLEXE)
-	$(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize --core
-	cd ..\dist\Storable
-	$(MAKE) PERL_CORE=1
-	cd ..\..\win32
 
 #----------------------------------------------------------------------------------
 

@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 848;  # Update this when adding/deleting tests.
+plan tests => 840;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -31,8 +31,6 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
-
-    my $sharp_s = uni_to_native("\xdf");
 
     {
         my $x = "abc\ndef\n";
@@ -140,21 +138,6 @@ sub run_tests {
         $null = "";
         $xyz =~ /$null/;
         is($&, $xyz, $message);
-
-        # each entry: regexp, match string, $&, //o match success
-        my @tests =
-          (
-           [ "", "xy", "x", 1 ],
-           [ "y", "yz", "y", !1 ],
-          );
-        for my $test (@tests) {
-            my ($re, $str, $matched, $omatch) = @$test;
-            $xyz =~ /x/o;
-            ok($str =~ /$re/, "$str matches /$re/");
-            is($&, $matched, "on $matched");
-            $xyz =~ /x/o;
-            is($str =~ /$re/o, $omatch, "$str matches /$re/o (or not)");
-        }
     }
 
     {
@@ -389,7 +372,7 @@ sub run_tests {
         $_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
         my $expect = "(bla()) ((l)u((e))) (l(e)e)";
 
-        our $c;
+        use vars '$c';
         sub matchit {
           m/
              (
@@ -1411,6 +1394,9 @@ EOP
 
     {   # Various flags weren't being set when a [] is optimized into an
         # EXACTish node
+        ;
+        ;
+        my $sharp_s = uni_to_native("\xdf");
         ok("\x{017F}\x{017F}" =~ qr/^[$sharp_s]?$/i, "[] to EXACTish optimization");
     }
 
@@ -1644,8 +1630,7 @@ EOP
         like("X", qr/$x/, "UTF-8 of /[x]/i matches upper case");
     }
 
-SKIP: {   # make sure we get an error when \p{} cannot load Unicode tables
-        skip("Unicode tables always now loaded", 1);
+    {   # make sure we get an error when \p{} cannot load Unicode tables
         fresh_perl_like(<<'        prog that cannot load uni tables',
             BEGIN {
                 @INC = '../lib';
@@ -1829,6 +1814,11 @@ SKIP: {   # make sure we get an error when \p{} cannot load Unicode tables
             ok($AE =~ $re, '/[\xE6\s]/i matches \xC6 when in UTF-8');
         }
 
+        {   # [perl #126606 crashed the interpreter
+            no warnings 'deprecated';
+            like("sS", qr/\N{}Ss|/i, "\N{} with empty branch alternation works");
+        }
+
         {
             is(0+("\n" =~ m'\n'), 1, q|m'\n' should interpolate escapes|);
         }
@@ -1937,15 +1927,6 @@ EOP
     }
     {
         fresh_perl_is('"AA" =~ m/AA{1,0}/','',{},"handle OPFAIL insert properly");
-    }
-    {
-        fresh_perl_is('$_="0\x{1000000}";/^000?\0000/','',{},"dont throw assert errors trying to fbm past end of string");
-    }
-    {   # [perl $132227]
-        fresh_perl_is("('0ba' . ('ss' x 300)) =~ m/0B\\N{U+41}" . $sharp_s x 150 . '/i and print "1\n"',  1,{},"Use of sharp s under /di that changes to /ui");
-    }
-    {   # [perl $132164]
-        fresh_perl_is('m m0*0+\Rm', "",{},"Undefined behavior in address sanitizer");
     }
 
 } # End of sub run_tests

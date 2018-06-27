@@ -23,6 +23,7 @@ while (<DATA>) {
     if (/^\$/) {
         $setup = $_;
         $setup =~ s/\$/\$${CLASS}::/g;  # round_mode, div_scale
+        #print "\$setup== $setup\n";
         next;
     }
 
@@ -37,7 +38,7 @@ while (<DATA>) {
     $try = qq|\$x = $CLASS->new("$args[0]");|;
     if ($f eq "bnorm") {
         $try .= qq| \$x;|;
-    } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan|int)$/) {
+    } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan|int)$/) {
         $try .= qq| \$x->$f();|;
     } elsif ($f eq "is_inf") {
         $try .= qq| \$x->is_inf("$args[1]");|;
@@ -49,12 +50,8 @@ while (<DATA>) {
         $try .= qq| \$x->accuracy($args[1]); \$x->precision($args[2]);|;
         $try .= ' $x->bstr();';
     # some unary ops
-    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|sgn|inc|dec|not|sqrt|exp|fac)$/) {
+    } elsif ($f =~ /^b(nan|sstr|neg|floor|ceil|int|abs)$/) {
         $try .= qq| \$x->$f();|;
-    } elsif ($f =~ /^(numify|length|as_number)$/) {
-        $try .= qq| \$x->$f();|;
-    } elsif ($f =~ /^(to|as)_(hex|oct|bin)$/) {
-        $try .= " \$x->$f();";
     # overloaded functions
     } elsif ($f =~ /^(log|exp|sin|cos|atan2|int|neg|abs|sqrt)$/) {
         $try .= qq| \$x = $f(\$x);|;
@@ -68,8 +65,14 @@ while (<DATA>) {
     } elsif ($f eq "mantissa") {
         # ->bstr() to see if an object is returned
         $try .= ' $x->mantissa()->bstr();';
+    } elsif ($f =~ /^(numify|length|as_number|as_hex|as_bin)$/) {
+        $try .= qq| \$x->$f();|;
     } elsif ($f eq "bpi") {
         $try .= qq| $CLASS->bpi(\$x);|;
+    } elsif ($f eq "binc") {
+        $try .= ' $x->binc();';
+    } elsif ($f eq "bdec") {
+        $try .= ' $x->bdec();';
     } elsif ($f eq "bround") {
         $try .= qq| $setup; \$x->bround($args[1]);|;
     } elsif ($f eq "bfround") {
@@ -78,8 +81,6 @@ while (<DATA>) {
         $try .= qq| $setup; \$x->bsqrt();|;
     } elsif ($f eq "bfac") {
         $try .= qq| $setup; \$x->bfac();|;
-    } elsif ($f eq "bdfac") {
-        $try .= qq| $setup; \$x->bdfac();|;
     } elsif ($f eq "blog") {
         if (defined $args[1] && $args[1] ne '') {
             $try .= qq| \$y = $CLASS->new($args[1]);|;
@@ -663,7 +664,7 @@ $div_scale = 40
 1::0
 
 &brsft
-invalid:2:NaN
+NaNbrsft:2:NaN
 0:2:0
 1:1:0.5
 2:1:1
@@ -672,7 +673,7 @@ invalid:2:NaN
 32:3:4
 
 &blsft
-invalid:0:NaN
+NaNblsft:0:NaN
 2:1:4
 4:3:32
 5:3:40
@@ -682,7 +683,7 @@ invalid:0:NaN
 &bnorm
 1:1
 -0:0
-invalid:NaN
+bnormNaN:NaN
 +inf:inf
 -inf:-inf
 123:123
@@ -768,74 +769,20 @@ NaN:NaN
 3:abc:inf
 
 &as_hex
-128:0x80
--128:-0x80
-0:0x0
--0:0x0
-1:0x1
-0x123456789123456789:0x123456789123456789
 +inf:inf
 -inf:-inf
-invalid:NaN
+hexNaN:NaN
+0:0x0
+5:0x5
+-5:-0x5
 
 &as_bin
-128:0b10000000
--128:-0b10000000
++inf:inf
+-inf:-inf
+hexNaN:NaN
 0:0b0
--0:0b0
-1:0b1
-0b1010111101010101010110110110110110101:0b1010111101010101010110110110110110101
-0x123456789123456789:0b100100011010001010110011110001001000100100011010001010110011110001001
-+inf:inf
--inf:-inf
-invalid:NaN
-
-&as_oct
-128:0200
--128:-0200
-0:00
--0:00
-1:01
-0b1010111101010101010110110110110110101:01275252666665
-0x123456789123456789:044321263611044321263611
-+inf:inf
--inf:-inf
-invalid:NaN
-
-&to_hex
-128:80
--128:-80
-0:0
--0:0
-1:1
-0x123456789123456789:123456789123456789
-+inf:inf
--inf:-inf
-invalid:NaN
-
-&to_bin
-128:10000000
--128:-10000000
-0:0
--0:0
-1:1
-0b1010111101010101010110110110110110101:1010111101010101010110110110110110101
-0x123456789123456789:100100011010001010110011110001001000100100011010001010110011110001001
-+inf:inf
--inf:-inf
-invalid:NaN
-
-&to_oct
-128:200
--128:-200
-0:0
--0:0
-1:1
-0b1010111101010101010110110110110110101:1275252666665
-0x123456789123456789:44321263611044321263611
-+inf:inf
--inf:-inf
-invalid:NaN
+5:0b101
+-5:-0b101
 
 &numify
 # uses bsstr() so 5 => 5e+0 to be compatible w/ Perls output
@@ -987,7 +934,7 @@ $div_scale = 20
 $div_scale = 40
 
 &bneg
-invalid:NaN
+bnegNaN:NaN
 +inf:-inf
 -inf:inf
 +0:0
@@ -999,7 +946,7 @@ invalid:NaN
 -123456.789:123456.789
 
 &babs
-invalid:NaN
+babsNaN:NaN
 +inf:inf
 -inf:inf
 +0:0
@@ -1015,7 +962,7 @@ $round_mode = "trunc"
 +inf:5:inf
 -inf:5:-inf
 0:5:0
-invalid:5:NaN
+NaNfround:5:NaN
 +10123456789:5:10123000000
 -10123456789:5:-10123000000
 +10123456789.123:5:10123000000
@@ -1091,7 +1038,7 @@ $round_mode = "trunc"
 +inf:5:inf
 -inf:5:-inf
 0:5:0
-invalid:5:NaN
+NaNffround:5:NaN
 +1.23:-1:1.2
 +1.234:-1:1.2
 +1.2345:-1:1.2
@@ -1223,9 +1170,9 @@ $round_mode = "even"
 0.01234567:-12:0.012345670000
 
 &bcmp
-invalid:invalid:
-invalid:+0:
-+0:invalid:
+bcmpNaN:bcmpNaN:
+bcmpNaN:+0:
++0:bcmpNaN:
 +0:+0:0
 -1:+0:-1
 +0:-1:1
@@ -1296,9 +1243,9 @@ NaN:inf:
 NaN:-inf:
 
 &bacmp
-invalid:invalid:
-invalid:+0:
-+0:invalid:
+bcmpNaN:bcmpNaN:
+bcmpNaN:+0:
++0:bcmpNaN:
 +0:+0:0
 -1:+0:1
 +0:-1:-1
@@ -1365,13 +1312,13 @@ invalid:+0:
 5:-inf:-1
 -1:-inf:-1
 # return undef
-+inf:invalid:
-invalid:inf:
--inf:invalid:
-invalid:-inf:
++inf:bacmpNaN:
+bacmpNaN:inf:
+-inf:bacmpNaN:
+bacmpNaN:-inf:
 
 &bdec
-invalid:NaN
+bdecNaN:NaN
 +inf:inf
 -inf:-inf
 +0:-1
@@ -1387,7 +1334,7 @@ invalid:NaN
 99:98
 
 &binc
-invalid:NaN
+bincNaN:NaN
 +inf:inf
 -inf:-inf
 +0:1
@@ -1409,10 +1356,10 @@ abc:+0:NaN
 -inf:+inf:NaN
 +inf:+inf:inf
 -inf:-inf:-inf
-invalid:+inf:NaN
-invalid:+inf:NaN
-+inf:invalid:NaN
--inf:invalid:NaN
+baddNaN:+inf:NaN
+baddNaN:+inf:NaN
++inf:baddNaN:NaN
+-inf:baddNaN:NaN
 +0:+0:0
 +1:+0:1
 +0:+1:1
@@ -1457,10 +1404,10 @@ abc:+0:NaN
 -inf:+inf:-inf
 +inf:+inf:NaN
 -inf:-inf:NaN
-invalid:+inf:NaN
-invalid:+inf:NaN
-+inf:invalid:NaN
--inf:invalid:NaN
+baddNaN:+inf:NaN
+baddNaN:+inf:NaN
++inf:baddNaN:NaN
+-inf:baddNaN:NaN
 +0:+0:0
 +1:+0:1
 +0:+1:-1
@@ -1501,10 +1448,10 @@ abc:abc:0:NaN
 abc:+0:0:NaN
 +0:abc:0:NaN
 +0:0:abc:NaN
-invalid:+inf:0:NaN
-invalid:-inf:0:NaN
--inf:invalid:0:NaN
-+inf:invalid:0:NaN
+NaNmul:+inf:0:NaN
+NaNmul:-inf:0:NaN
+-inf:NaNmul:0:NaN
++inf:NaNmul:0:NaN
 +inf:+inf:0:inf
 +inf:-inf:0:-inf
 -inf:+inf:0:-inf
@@ -1569,10 +1516,10 @@ invalid:-inf:0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-+inf:invalid:NaN
-+inf:invalid:NaN
-invalid:+inf:NaN
-invalid:-inf:NaN
++inf:NaNmul:NaN
++inf:NaNmul:NaN
+NaNmul:+inf:NaN
+NaNmul:-inf:NaN
 +inf:+inf:inf
 +inf:-inf:-inf
 +inf:-inf:-inf
@@ -1813,25 +1760,6 @@ Nanfac:NaN
 11:39916800
 12:479001600
 
-&bdfac
-NaN:NaN
--1:NaN
-+inf:inf
--inf:NaN
-0:1
-1:1
-2:2
-3:3
-4:8
-5:15
-6:48
-7:105
-8:384
-9:945
-10:3840
-11:10395
-12:46080
-
 &broot
 # sqrt()
 +0:2:0
@@ -1950,7 +1878,7 @@ abc:0
 2:0
 
 &is_int
-invalid:0
+NaNis_int:0
 0:1
 1:1
 2:1
@@ -2006,7 +1934,7 @@ NaN:0
 123:123 0
 -123:-123 0
 -1200:-12 2
-invalid:NaN NaN
+NaNparts:NaN NaN
 +inf:inf inf
 -inf:-inf inf
 
@@ -2018,7 +1946,7 @@ invalid:NaN NaN
 -1200:2
 +inf:inf
 -inf:inf
-invalid:NaN
+NaNexponent:NaN
 
 &mantissa
 0:0
@@ -2028,7 +1956,7 @@ invalid:NaN
 -1200:-12
 +inf:inf
 -inf:-inf
-invalid:NaN
+NaNmantissa:NaN
 
 &length
 123:3
@@ -2038,7 +1966,7 @@ invalid:NaN
 12345678901234567890:20
 
 &is_zero
-invalid:0
+NaNzero:0
 +inf:0
 -inf:0
 0:1
@@ -2046,7 +1974,7 @@ invalid:0
 1:0
 
 &is_one
-invalid:0
+NaNone:0
 +inf:0
 -inf:0
 0:0

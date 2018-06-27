@@ -41,7 +41,7 @@ BEGIN {
   "172.29.249.249" => 0,
 
   # Hopefully all these web ports are open
-  "www.google.com." => 1,
+  "www.geocities.com." => 1,
   "www.freeservers.com." => 1,
   "yahoo.com." => 1,
   "www.yahoo.com." => 1,

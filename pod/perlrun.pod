@@ -406,6 +406,7 @@ B<-D14> is equivalent to B<-Dtls>):
       2048  u  Tainting checks
       4096  U  Unofficial, User hacking (reserved for private,
                unreleased use)
+      8192  H  Hash dump -- usurps values()
      16384  X  Scratchpad allocation
      32768  D  Cleaning up
      65536  S  Op slab allocation
@@ -663,19 +664,14 @@ X<-m> X<-M>
 =item B<-[mM]>[B<->]I<module=arg[,arg]...>
 
 B<-m>I<module> executes C<use> I<module> C<();> before executing your
-program.  This loads the module, but does not call its C<import> method,
-so does not import subroutines and does not give effect to a pragma.
+program.
 
 B<-M>I<module> executes C<use> I<module> C<;> before executing your
-program.  This loads the module and calls its C<import> method, causing
-the module to have its default effect, typically importing subroutines
-or giving effect to a pragma.
-You can use quotes to add extra code after the module name,
+program.  You can use quotes to add extra code after the module name,
 e.g., C<'-MI<MODULE> qw(foo bar)'>.
 
 If the first character after the B<-M> or B<-m> is a dash (B<->)
 then the 'use' is replaced with 'no'.
-This makes no difference for B<-m>.
 
 A little builtin syntactic sugar means you can also say
 B<-mI<MODULE>=foo,bar> or B<-MI<MODULE>=foo,bar> as a shortcut for
@@ -685,8 +681,7 @@ C<use module split(/,/,q{foo,bar})>.  Note that the C<=> form
 removes the distinction between B<-m> and B<-M>; that is,
 B<-mI<MODULE>=foo,bar> is the same as B<-MI<MODULE>=foo,bar>.
 
-A consequence of the C<split> formulation
-is that B<-MI<MODULE>=number> never does a version check,
+A consequence of this is that B<-MI<MODULE>=number> never does a version check,
 unless C<I<MODULE>::import()> itself is set up to do a version check, which
 could happen for example if I<MODULE> inherits from L<Exporter>.
 
@@ -1397,18 +1392,6 @@ C<@INC> and should not be set in the environment for day-to-day use.
 X<SYS$LOGIN>
 
 Used if chdir has no argument and HOME and LOGDIR are not set.
-
-=item PERL_INTERNAL_RAND_SEED
-X<PERL_INTERNAL_RAND_SEED>
-
-Set to a non-negative integer to seed the random number generator used
-internally by perl for a variety of purposes.
-
-Ignored if perl is run setuid or setgid.  Used only for some limited
-startup randomization (hash keys) if C<-T> or C<-t> perl is started
-with tainting enabled.
-
-Perl may be built to ignore this variable.
 
 =back
 

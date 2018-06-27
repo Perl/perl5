@@ -2,7 +2,7 @@ package ExtUtils::MM_DOS;
 
 use strict;
 
-our $VERSION = '7.34';
+our $VERSION = '7.24';
 $VERSION = eval $VERSION;
 
 require ExtUtils::MM_Any;
@@ -49,14 +49,6 @@ sub replace_manpage_separator {
 
     $man =~ s,/+,__,g;
     return $man;
-}
-
-=item xs_static_lib_is_xs
-
-=cut
-
-sub xs_static_lib_is_xs {
-    return 1;
 }
 
 =back

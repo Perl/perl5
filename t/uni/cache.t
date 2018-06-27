@@ -2,7 +2,6 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    skip_all("utf8_heavy no longer used much");
     skip_all_without_unicode_tables();
 }
 

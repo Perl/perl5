@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef PERL_XSUB_H_
-#define PERL_XSUB_H_ 1
+#ifndef _INC_PERL_XSUB_H
+#define _INC_PERL_XSUB_H 1
 
 /* first, some documentation for xsubpp-generated items */
 
@@ -119,7 +119,7 @@ is a lexical C<$_> in scope.
  * "STATIC", ie. it exports XSUB symbols. You probably don't want that.
  */
 
-#define XSPROTO(name) void name(pTHX_ CV* cv __attribute__unused__)
+#define XSPROTO(name) void name(pTHX_ CV* cv)
 
 #undef XS
 #undef XS_EXTERNAL
@@ -127,18 +127,24 @@ is a lexical C<$_> in scope.
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
 #  define XS_INTERNAL(name) STATIC XSPROTO(name)
-#elif defined(__SYMBIAN32__)
+#endif
+#if defined(__SYMBIAN32__)
 #  define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
 #  define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
-#elif defined(__cplusplus)
-#  define XS_EXTERNAL(name) extern "C" XSPROTO(name)
-#  define XS_INTERNAL(name) static XSPROTO(name)
-#elif defined(HASATTRIBUTE_UNUSED)
-#  define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
-#  define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
-#else
-#  define XS_EXTERNAL(name) XSPROTO(name)
-#  define XS_INTERNAL(name) STATIC XSPROTO(name)
+#endif
+#ifndef XS_EXTERNAL
+#  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
+#    define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
+#    define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
+#  else
+#    ifdef __cplusplus
+#      define XS_EXTERNAL(name) extern "C" XSPROTO(name)
+#      define XS_INTERNAL(name) static XSPROTO(name)
+#    else
+#      define XS_EXTERNAL(name) XSPROTO(name)
+#      define XS_INTERNAL(name) STATIC XSPROTO(name)
+#    endif
+#  endif
 #endif
 
 /* We do export xsub symbols by default for the public XS macro.
@@ -697,7 +703,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_IMPLICIT_SYS && !PERL_CORE */
 
-#endif /* PERL_XSUB_H_ */		/* include guard */
+#endif /* _INC_PERL_XSUB_H */		/* include guard */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

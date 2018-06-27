@@ -55,7 +55,7 @@ while (<OPS>) {
     $args = '' unless defined $args;
 
     warn qq[Description "$desc" duplicates $seen{$desc}\n]
-     if $seen{$desc} and $key !~ "concat|transr|(?:intro|clone)cv|lvref";
+     if $seen{$desc} and $key !~ "transr|(?:intro|clone)cv|lvref";
     die qq[Opcode "$key" duplicates $seen{$key}\n] if $seen{$key};
     die qq[Opcode "freed" is reserved for the slab allocator\n]
 	if $key eq 'freed';
@@ -247,7 +247,7 @@ sub ::addbits {
             my $flag_name   = shift @args;
             my $flag_label  = shift @args;
             add_label($flag_name, $flag_label);
-            croak "addbits(): bit $bits of $op already specified ($FLAGS{$op}{$bits})"
+            croak "addbits(): bit $bits of $op already specified"
                 if defined $FLAGS{$op}{$bits};
             $FLAGS{$op}{$bits} = $flag_name;
             add_define($flag_name, (1 << $bits));
@@ -344,7 +344,7 @@ sub ::addbits {
             }
 
             for my $bit ($bitmin..$bitmax) {
-                croak "addbits(): bit $bit of $op already specified ($FLAGS{$op}{$bit})"
+                croak "addbits(): bit $bit of $op already specified"
                     if defined $FLAGS{$op}{$bit};
                 $FLAGS{$op}{$bit} = $BITFIELDS{$id};
             }
@@ -1034,9 +1034,11 @@ START_EXTERN_C
 #ifdef PERL_GLOBAL_STRUCT_INIT
 #  define PERL_PPADDR_INITED
 static const Perl_ppaddr_t Gppaddr[]
-#elif !defined(PERL_GLOBAL_STRUCT)
-#  define PERL_PPADDR_INITED
+#else
+#  ifndef PERL_GLOBAL_STRUCT
+#    define PERL_PPADDR_INITED
 EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
+#  endif
 #endif /* PERL_GLOBAL_STRUCT */
 #if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
 #  define PERL_PPADDR_INITED
@@ -1064,9 +1066,11 @@ print $oc <<'END';
 #ifdef PERL_GLOBAL_STRUCT_INIT
 #  define PERL_CHECK_INITED
 static const Perl_check_t Gcheck[]
-#elif !defined(PERL_GLOBAL_STRUCT)
-#  define PERL_CHECK_INITED
+#else
+#  ifndef PERL_GLOBAL_STRUCT
+#    define PERL_CHECK_INITED
 EXT Perl_check_t PL_check[] /* or perlvars.h */
+#  endif
 #endif
 #if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
 #  define PERL_CHECK_INITED

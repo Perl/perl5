@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-4 Secure Hash Standard
  *
- * Copyright (C) 2003-2017 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2016 Mark Shelor, All Rights Reserved
  *
- * Version: 6.01
- * Mon Dec 25 00:08:08 MST 2017
+ * Version: 5.96
+ * Wed Jul 27 20:04:34 MST 2016
  *
  * The following macros supply placeholder values that enable the
  * sha.c module to successfully compile when 64-bit integer types
