@@ -15469,7 +15469,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.029001 => {
-        delta_from => 5.029000,
+        delta_from => 5.029,
+        changed => {
+            'B::Op_private'         => '5.029001',
+            'Config'                => '5.029001',
+        },
+        removed => {
+        }
     },
 );
 
@@ -16369,6 +16375,13 @@ sub is_core
     },
     5.029000 => {
         delta_from => 5.028,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.029001 => {
+        delta_from => 5.029,
         changed => {
         },
         removed => {
