@@ -19957,6 +19957,7 @@ define)
 #ifndef DB_VERSION_MAJOR
 u_int32_t hash_cb (const void* ptr, size_t size)
 {
+	return 0;
 }
 HASHINFO info;
 int main()
@@ -20000,6 +20001,7 @@ define)
 #ifndef DB_VERSION_MAJOR
 size_t prefix_cb (const DBT *key1, const DBT *key2)
 {
+	return 0;
 }
 BTREEINFO info;
 int main()
