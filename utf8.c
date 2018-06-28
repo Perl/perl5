@@ -1275,10 +1275,10 @@ Also implemented as a macro in utf8.h
 */
 
 UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s,
-                          STRLEN curlen,
-                          STRLEN *retlen,
-                          const U32 flags)
+Perl_utf8n_to_uvchr(const U8 *s,
+                    STRLEN curlen,
+                    STRLEN *retlen,
+                    const U32 flags)
 {
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
 
@@ -1404,7 +1404,7 @@ Also implemented as a macro in utf8.h
 */
 
 UV
-Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
+Perl_utf8n_to_uvchr_error(const U8 *s,
                           STRLEN curlen,
                           STRLEN *retlen,
                           const U32 flags,
@@ -1468,7 +1468,7 @@ The caller, of course, is responsible for freeing any returned AV.
 */
 
 UV
-Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
+Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                                STRLEN curlen,
                                STRLEN *retlen,
                                const U32 flags,
@@ -1492,39 +1492,9 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
     U8 temp_char_buf[UTF8_MAXBYTES + 1]; /* Used to avoid a Newx in this
                                             routine; see [perl #130921] */
     UV uv_so_far;
-    UV state = 0;
+    dTHX;
 
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
-
-    /* Measurements show that this dfa is somewhat faster than the regular code
-     * below, so use it first, dropping down for the non-normal cases. */
-
-#define PERL_UTF8_DECODE_REJECT 1
-
-    while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
-        UV type = strict_utf8_dfa_tab[*s];
-
-        uv = (state == 0)
-             ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
-             : UTF8_ACCUMULATE(uv, *s);
-        state = strict_utf8_dfa_tab[256 + state + type];
-
-        if (state == 0) {
-            if (retlen) {
-                *retlen = s - s0 + 1;
-            }
-            if (errors) {
-                *errors = 0;
-            }
-            if (msgs) {
-                *msgs = NULL;
-            }
-
-            return uv;
-        }
-
-        s++;
-    }
+    PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER;
 
     /* Here, is one of: a) malformed; b) a problematic code point (surrogate,
      * non-unicode, or nonchar); or c) on ASCII platforms, one of the Hangul

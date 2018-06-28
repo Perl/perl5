@@ -46,6 +46,7 @@
 #define _to_utf8_lower_flags(a,b,c,d,e,f,g)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e,f,g)
 #define _to_utf8_title_flags(a,b,c,d,e,f,g)	Perl__to_utf8_title_flags(aTHX_ a,b,c,d,e,f,g)
 #define _to_utf8_upper_flags(a,b,c,d,e,f,g)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e,f,g)
+#define _utf8n_to_uvchr_msgs_helper	Perl__utf8n_to_uvchr_msgs_helper
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
@@ -824,7 +825,7 @@
 #define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
 #endif
 #define utf8_to_uvuni_buf(a,b,c)	Perl_utf8_to_uvuni_buf(aTHX_ a,b,c)
-#define utf8n_to_uvchr_msgs(a,b,c,d,e,f)	Perl_utf8n_to_uvchr_msgs(aTHX_ a,b,c,d,e,f)
+#define utf8n_to_uvchr_msgs	S_utf8n_to_uvchr_msgs
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
 #define uvoffuni_to_utf8_flags_msgs(a,b,c,d)	Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)

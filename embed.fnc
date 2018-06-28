@@ -1842,16 +1842,23 @@ Aopd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *ret
 ApdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 pM	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
 
-Adop	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
+Adnop	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags
-Adop	|UV	|utf8n_to_uvchr_error|NN const U8 *s			    \
+Adnop	|UV	|utf8n_to_uvchr_error|NN const U8 *s			    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags			    \
 				|NULLOK U32 * errors
-AMdp	|UV	|utf8n_to_uvchr_msgs|NN const U8 *s			    \
+AMndi	|UV	|utf8n_to_uvchr_msgs|NN const U8 *s			    \
+				|STRLEN curlen				    \
+				|NULLOK STRLEN *retlen			    \
+				|const U32 flags			    \
+				|NULLOK U32 * errors			    \
+				|NULLOK AV ** msgs
+AMnpd	|UV	|_utf8n_to_uvchr_msgs_helper				    \
+				|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags			    \

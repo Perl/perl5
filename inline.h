@@ -1654,6 +1654,69 @@ S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
            || is_utf8_valid_partial_char_flags(*ep, s + len, flags);
 }
 
+PERL_STATIC_INLINE UV
+S_utf8n_to_uvchr_msgs(const U8 *s,
+                      STRLEN curlen,
+                      STRLEN *retlen,
+                      const U32 flags,
+                      U32 * errors,
+                      AV ** msgs)
+{
+    /* This is the inlined portion of utf8n_to_uvchr_msgs.  It handles the
+     * simple cases, and, if necessary calls a helper function to deal with the
+     * more complex ones.  Almost all well-formed non-problematic code points
+     * are considered simple, so that it's unlikely that the helper function
+     * will need to be called.
+     *
+     * This is an adaptation of the tables and algorithm given in
+     * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
+     * comprehensive documentation of the original version.  A copyright notice
+     * for the original version is given at the beginning of this file.  The
+     * Perl adapation is documented at the definition of strict_utf8_dfa_tab[].
+     */
+
+    const U8 * const s0 = s;
+    const U8 * send = s0 + curlen;
+    UV uv;
+    UV state = 0;
+
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
+
+    /* This dfa is fast.  If it accepts the input, it was for a well-formed,
+     * non-problematic code point, which can be returned immediately.
+     * Otherwise we call a helper function to figure out the more complicated
+     * cases. */
+
+    while (s < send && LIKELY(state != 1)) {
+        UV type = strict_utf8_dfa_tab[*s];
+
+        uv = (state == 0)
+             ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
+             : UTF8_ACCUMULATE(uv, *s);
+        state = strict_utf8_dfa_tab[256 + state + type];
+
+        if (state != 0) {
+            s++;
+            continue;
+        }
+
+        if (retlen) {
+            *retlen = s - s0 + 1;
+        }
+        if (errors) {
+            *errors = 0;
+        }
+        if (msgs) {
+            *msgs = NULL;
+        }
+
+        return uv;
+    }
+
+    /* Here is potentially problematic.  Use the full mechanism */
+    return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags, errors, msgs);
+}
+
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
