@@ -1088,6 +1088,74 @@ S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 
 /*
 
+=for apidoc isSTRICT_UTF8_CHAR
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
+Unicode code point completely acceptable for open interchange between all
+applications; otherwise it evaluates to 0.  If non-zero, the value gives how
+many bytes starting at C<s> comprise the code point's representation.  Any
+bytes remaining before C<e>, but beyond the ones needed to form the first code
+point in C<s>, are not examined.
+
+The largest acceptable code point is the Unicode maximum 0x10FFFF, and must not
+be a surrogate nor a non-character code point.  Thus this excludes any code
+point from Perl's extended UTF-8.
+
+This is used to efficiently decide if the next few bytes in C<s> is
+legal Unicode-acceptable UTF-8 for a single character.
+
+Use C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
+#9|http://www.unicode.org/versions/corrigendum9.html> definition of allowable
+code points; C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8;
+and C<L</isUTF8_CHAR_flags>> for a more customized definition.
+
+Use C<L</is_strict_utf8_string>>, C<L</is_strict_utf8_string_loc>>, and
+C<L</is_strict_utf8_string_loclen>> to check entire strings.
+
+=cut
+
+This uses an adaptation of the tables and algorithm given in
+http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+documentation of the original version.  A copyright notice for the original
+version is given at the beginning of this file.  The Perl adapation is
+documented at the definition of strict_extended_utf8_dfa_tab[].
+
+*/
+
+PERL_STATIC_INLINE Size_t
+S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+{
+    const U8 * s = s0;
+    UV state = 0;
+
+    PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR;
+
+    while (s < e && LIKELY(state != 1)) {
+        state = strict_utf8_dfa_tab[256 + state + strict_utf8_dfa_tab[*s]];
+
+        if (state != 0) {
+            s++;
+            continue;
+        }
+
+        return s - s0 + 1;
+    }
+
+#ifndef EBCDIC
+
+    /* The dfa above drops out for certain Hanguls; handle them specially */
+    if (is_HANGUL_ED_utf8_safe(s0, e)) {
+        return 3;
+    }
+
+#endif
+
+    return 0;
+}
+
+/*
+
 =for apidoc is_strict_utf8_string_loc
 
 Like C<L</is_strict_utf8_string>> but stores the location of the failure (in the

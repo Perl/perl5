@@ -827,6 +827,8 @@ AbnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 AnidR	|Size_t	|isUTF8_CHAR|NN const U8 * const s0			    \
 			    |NN const U8 * const e
+AnidR	|Size_t	|isSTRICT_UTF8_CHAR |NN const U8 * const s0		    \
+				    |NN const U8 * const e
 AnmdpR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 AnidR	|bool	|is_utf8_string_flags					    \
 		|NN const U8 *s|STRLEN len|const U32 flags

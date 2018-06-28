@@ -1407,6 +1407,13 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool w
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE Size_t	S_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR	\
+	assert(s0); assert(e)
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE Size_t	S_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISUTF8_CHAR	\
