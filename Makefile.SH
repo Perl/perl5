@@ -1396,6 +1396,14 @@ _cleaner1:
 # run once if nothhing is passed in. It is such a great help.
 
 # Some systems do not support "?", so keep these files separate.
+
+# The Time::HiRes Makefile *should* remove dist/Time-HiRes/xdefine for 'clean',
+# but it's possible to get a rebuilt checkout into a state where it can't run
+# distclean, and can't recover until the file is gone.
+# There's no harm in adding it to the top level 'distclean' target - it should
+# anyway by then, and miniperl is long gone.
+# Add new rules before that line - the next line (rm -f so_locations ...) is
+# used as a placeholder by a regen script.
 _cleaner2:
 	-rm -f core.*perl.*.? t/core.perl.*.? .?*.c
 	rm -f core *perl.core t/core t/*perl.core core.* t/core.*
@@ -1413,6 +1421,7 @@ _cleaner2:
 	rm -f pod2htmd.tmp
 	rm -rf pod/perlfunc pod/perlipc
 	-rmdir ext/B/lib
+	-rm -f dist/Time-HiRes/xdefine
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	-rmdir lib/version lib/threads lib/inc/ExtUtils lib/inc lib/encoding
 	-rmdir lib/autodie/exception lib/autodie/Scope lib/autodie lib/XS
