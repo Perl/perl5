@@ -508,6 +508,164 @@ END
                                                                    $NUM_CLASSES);
     }
 
+    {
+      # This generates the dfa table for strict UTF-8, which rejects
+      # surrogates, non-characters, and above Unicode.
+      #
+      # The classes are
+      #   00-9F           0   Always legal at start
+      #   A0             10   Not legal immediately after start bytes F0 F8
+      #   A1             11   Not legal immediately after start bytes F0 F8,
+      #   A2-A7          12   Not legal immediately after start bytes F0 F8 F9
+      #   A8,AA,AC       13   Not legal immediately after start bytes F0 F9
+      #   A9,AB,AD       14   Not legal immediately after start byte F0
+      #   AE             15   Not legal immediately after start byte F0
+      #   AF             16   Not legal immediately after start bytes F0
+      #   B[0248AC]      17   Not legal immediately after start byte F9
+      #   B[1359D]       18   Not legal immediately after start byte F9
+      #   B6             19   Not legal immediately after start byte F9
+      #   B7             20   Not legal immediately after start byte F9
+      #   BE             21   Not legal immediately after start byte F9
+      #   BF             22   Not legal immediately after start byte F9
+      #   C0-C4           1   (reject, all are overlong)
+      #   C5-DF           2   Accepts any legal continuation
+      #   E0              1   (reject, all are overlong)
+      #   E1-EF           3   Accepts any legal continuation
+      #   F0              8   (has overlongs)
+      #   F1              6   (has surrogates, non-chars)
+      #   F2,F4,F6        4   Accepts any legal continuation
+      #   F3,F5,F7        5   (has non-chars)
+      #   F8              9   (has overlongs, non-chars)
+      #   F9              7   (has non-chars, non-Unicode)
+      #   FA-FF           1   (reject, all are non-Unicode)
+      #
+      # Here's the I8 for enough code points so that you can figure out what's
+      # going on:
+      #
+      # U+D800: \xF1\xB6\xA0\xA0
+      # U+DFFF: \xF1\xB7\xBF\xBF
+      # U+FDD0: \xF1\xBF\xAE\xB0
+      # U+FDEF: \xF1\xBF\xAF\xAF
+      # U+FFFE: \xF1\xBF\xBF\xBE
+      # U+1FFFE: \xF3\xBF\xBF\xBE
+      # U+2FFFE: \xF5\xBF\xBF\xBE
+      # U+3FFFE: \xF7\xBF\xBF\xBE
+      # U+4FFFE: \xF8\xA9\xBF\xBF\xBE
+      # U+5FFFE: \xF8\xAB\xBF\xBF\xBE
+      # U+6FFFE: \xF8\xAD\xBF\xBF\xBE
+      # U+7FFFE: \xF8\xAF\xBF\xBF\xBE
+      # U+8FFFE: \xF8\xB1\xBF\xBF\xBE
+      # U+9FFFE: \xF8\xB3\xBF\xBF\xBE
+      # U+AFFFE: \xF8\xB5\xBF\xBF\xBE
+      # U+BFFFE: \xF8\xB7\xBF\xBF\xBE
+      # U+CFFFE: \xF8\xB9\xBF\xBF\xBE
+      # U+DFFFE: \xF8\xBB\xBF\xBF\xBE
+      # U+EFFFE: \xF8\xBD\xBF\xBF\xBE
+      # U+FFFFE: \xF8\xBF\xBF\xBF\xBE
+      # U+10FFFE: \xF9\xA1\xBF\xBF\xBE
+      #
+      # The first part of the table maps bytes to character classes to reduce
+      # the size of the transition table and create bitmasks.
+      #
+      # The second part is a transition table that maps a combination of a
+      # state of the automaton and a character class to a new state.  The
+      # numbering of the original nodes is retained, but some have been split
+      # so that there are new nodes.  They mean:
+      # N0     The initial state, and final accepting one.
+      # N1     One continuation byte (A0-BF) left.  This is transitioned to
+      #        immediately when the start byte indicates a two-byte sequence
+      # N2     Two continuation bytes left.
+      # N3     Three continuation bytes left.
+      # N4     Start byte is F0.  Continuation bytes A[0-F] are illegal
+      #        (overlong); the other continuations transition to N2
+      # N5     Start byte is F1.  Continuation bytes B6 and B7 are illegal
+      #        (surrogates); BF transitions to N9; the other continuations to
+      #        N2
+      # N6     Start byte is F[357].  Continuation byte BF transitions to N12;
+      #        other continuations to N2
+      # N5     Start byte is F8.  Continuation bytes A[0-7] are illegal
+      #        (overlong); continuations A[9BDF] and B[13579BDF] transition to
+      #        N14; the other continuations to N3
+      # N8     Start byte is F9.  Continuation byte A0 transitions to N3; A1
+      #        to N14; the other continuation bytes are illegal.
+      # N9     Initial sequence is F1 BF.  Continuation byte AE transitions to
+      #        state N10; AF to N11; BF to N13; the other continuations to N1.
+      # N10    Initial sequence is F1 BF AE.  Continuation bytes B0-BF are
+      #        illegal (non-chars); the other continuations are legal
+      # N11    Initial sequence is F1 BF AF.  Continuation bytes A0-AF are
+      #        illegal (non-chars); the other continuations are legal
+      # N12    Initial sequence is F[357] BF.  Continuation bytes BF
+      #        transitions to N13; the other continuations to N1
+      # N13    Initial sequence is F[1357] BF BF or F8 x BF (where x is
+      #        something that can lead to a non-char.  Continuation bytes BE
+      #        and BF are illegal (non-chars); the other continuations are
+      #        legal
+      # N14    Initial sequence is F8 A[9BDF]; or F8 B[13579BDF]; or F9 A1.
+      #        Continuation byte BF transitions to N13; the other
+      #        continuations to N2
+      # 1      Reject.  All transitions not mentioned above (except the single
+      #        byte ones (as they are always legal) are to this state.
+
+        my $NUM_CLASSES = 23;
+        my $N0 = 0;
+        my $N1 =  $N0 + $NUM_CLASSES;
+        my $N2 =  $N1 + $NUM_CLASSES;
+        my $N3 =  $N2 + $NUM_CLASSES;
+        my $N4 =  $N3 + $NUM_CLASSES;
+        my $N5 =  $N4 + $NUM_CLASSES;
+        my $N6 =  $N5 + $NUM_CLASSES;
+        my $N7 =  $N6 + $NUM_CLASSES;
+        my $N8 =  $N7 + $NUM_CLASSES;
+        my $N9 =  $N8 + $NUM_CLASSES;
+        my $N10 = $N9 + $NUM_CLASSES;
+        my $N11 = $N10 + $NUM_CLASSES;
+        my $N12 = $N11 + $NUM_CLASSES;
+        my $N13 = $N12 + $NUM_CLASSES;
+        my $N14 = $N13 + $NUM_CLASSES;
+
+        my @strict_utf8_dfa;
+        my @i8 = (
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00-0F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10-1F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20-2F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30-3F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40-4F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50-5F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60-6F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70-7F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80-8F
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90-9F
+                 10,11,12,12,12,12,12,12,13,14,13,14,13,14,15,16, # A0-AF
+                 17,18,17,18,17,18,19,20,17,18,17,18,17,18,21,22, # B0-BF
+                  1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, # C0-CF
+                  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, # D0-DF
+                  1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, # E0-EF
+                  8, 6, 4, 5, 4, 5, 4, 5, 9, 7, 1, 1, 1, 1, 1, 1, # F0-FF
+                );
+        $strict_utf8_dfa[$i82utf[$_]] = $i8[$_] for (0 .. 255);
+        push @strict_utf8_dfa, (
+          # Class:
+          # 0 1   2   3   4   5   6   7   8   9   10   11   12   13   14   15   16   17   18   19   20   21   22
+            0,1,$N1,$N2,$N3,$N6,$N5,$N8,$N4,$N7,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, # N0
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, # N1
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, # N2
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, # N3
+
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1,   1,   1,   1,   1,   1,   1,   1, $N2, $N2, $N2, $N2, $N2, $N2, # N4
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2,   1,   1, $N2, $N9, # N5
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2,$N12, # N6
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1,   1,   1,   1, $N3,$N14, $N3,$N14, $N3,$N14, $N3,$N14, $N3,$N14, # N7
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N3,$N14,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, # N8
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N1, $N1, $N1, $N1, $N1,$N10,$N11, $N1, $N1, $N1, $N1, $N1,$N13, # N9
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1, # N10
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1,   1,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0, # N11
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1, $N1,$N13, # N12
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1, # N13
+            1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2,$N13, # N14
+        );
+        output_table(\@strict_utf8_dfa, "strict_utf8_dfa_tab", $NUM_CLASSES);
+    }
+
     print $out_fh get_conditional_compile_line_end();
 }
 

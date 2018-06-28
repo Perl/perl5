@@ -5596,9 +5596,163 @@ EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
 /*N10*/  1, 1, 1, 1, 1, 1, 1, 1,N5,N5,N5,N5,N5, 1, 1, 1, 1, 1,
 };
 
+/* And below is a version of the above table that accepts only strict UTF-8.
+ * Hence no surrogates nor non-characters, nor non-Unicode.  Thus, if the input
+ * passes this dfa, it will be for a well-formed, non-problematic code point
+ * that can be returned immediately.
+ *
+ * The "Implementation details" portion of
+ * http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ shows how
+ * the first portion of the table maps each possible byte into a character
+ * class.  And that the classes for those bytes which are start bytes have been
+ * carefully chosen so they serve as well to be used as a shift value to mask
+ * off the leading 1 bits of the start byte.  Unfortunately the addition of
+ * being able to distinguish non-characters makes this not fully work.  This is
+ * because, now, the start bytes E1-EF have to be broken into 3 classes instead
+ * of 2:
+ *  1) ED because it could be a surrogate
+ *  2) EF because it could be a non-character
+ *  3) the rest, which can never evaluate to a problematic code point.
+ *
+ * Each of E1-EF has three leading 1 bits, then a 0.  That means we could use a
+ * shift (and hence class number) of either 3 or 4 to get a mask that works.
+ * But that only allows two categories, and we need three.  khw made the
+ * decision to therefore treat the ED start byte as an error, so that the dfa
+ * drops out immediately for that.  In the dfa, classes 3 and 4 are used to
+ * distinguish EF vs the rest.  Then special code is used to deal with ED,
+ * that's executed only when the dfa drops out.  The code points started by ED
+ * are half surrogates, and half hangul syllables.  This means that 2048 of the
+ * the hangul syllables (about 18%) take longer than all other non-problematic
+ * code points to handle.
+ *
+ * The changes to handle non-characters requires the addition of states and
+ * classes to the dfa.  (See the section on "Mapping bytes to character
+ * classes" in the linked-to document for further explanation of the original
+ * dfa.)
+ *
+ * The classes are
+ *      00-7F           0
+ *      80-8E           9
+ *      8F             10
+ *      90-9E          11
+ *      9F             12
+ *      A0-AE          13
+ *      AF             14
+ *      B0-B6          15
+ *      B7             16
+ *      B8-BD          15
+ *      BE             17
+ *      BF             18
+ *      C0,C1           1
+ *      C2-DF           2
+ *      E0              7
+ *      E1-EC           3
+ *      ED              1
+ *      EE              3
+ *      EF              4
+ *      F0              8
+ *      F1-F3           6  (6 bits can be stripped)
+ *      F4              5  (only 5 can be stripped)
+ *      F5-FF           1
+ */
+
+EXTCONST U8 strict_utf8_dfa_tab[] = {
+    /* The first part of the table maps bytes to character classes to reduce
+     * the size of the transition table and create bitmasks. */
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*10-1F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*20-2F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*30-3F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*40-4F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*50-5F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*60-6F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*70-7F*/
+   9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,10, /*80-8F*/
+  11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12, /*90-9F*/
+  13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,14, /*A0-AF*/
+  15,15,15,15,15,15,15,16,15,15,15,15,15,15,17,18, /*B0-BF*/
+   1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, /*C0-CF*/
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, /*D0-DF*/
+   7, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 4, /*E0-EF*/
+   8, 6, 6, 6, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /*F0-FF*/
+
+/* The second part is a transition table that maps a combination
+ * of a state of the automaton and a character class to a new state, called a
+ * node.  The nodes are:
+ * N0     The initial state, and final accepting one.
+ * N1     Any one continuation byte (80-BF) left.  This is transitioned to
+ *        immediately when the start byte indicates a two-byte sequence
+ * N2     Any two continuation bytes left.
+ * N3     Start byte is E0.  Continuation bytes 80-9F are illegal (overlong);
+ *        the other continuations transition to state N1
+ * N4     Start byte is EF.  Continuation byte B7 transitions to N8; BF to N9;
+ *        the other continuations transitions to N1
+ * N5     Start byte is F0.  Continuation bytes 80-8F are illegal (overlong);
+ *        [9AB]F transition to N10; the other continuations to N2.
+ *        the other continuations transition to N2
+ * N6     Start byte is F[123].  Continuation bytes [89AB]F transition
+ *        to N10; the other continuations to N2.
+ * N7     Start byte is F4.  Continuation bytes 90-BF are illegal
+ *        (non-unicode); 8F transitions to N10; the other continuations to N2
+ * N8     Initial sequence is EF B7.  Continuation bytes 90-AF are illegal
+ *        (non-characters); the other continuations transition to N0.
+ * N9     Initial sequence is EF BF.  Continuation bytes BE and BF are illegal
+ *        (non-characters); the other continuations transition to N0.
+ * N10    Initial sequence is one of: F0 [9-B]F; F[123] [8-B]F; or F4 8F.
+ *        Continuation byte BF transitions to N11; the other continuations to
+ *        N1
+ * N11    Initial sequence is the two bytes given in N10 followed by BF.
+ *        Continuation bytes BE and BF are illegal (non-characters); the other
+ *        continuations transition to N0.
+ * 1      Reject.  All transitions not mentioned above (except the single
+ *        byte ones (as they are always legal) are to this state.
+ */
+
+#    undef N0
+#    undef N1
+#    undef N2
+#    undef N3
+#    undef N4
+#    undef N5
+#    undef N6
+#    undef N7
+#    undef N8
+#    undef N9
+#    undef NUM_CLASSES
+#    define NUM_CLASSES 19
+#    define N0 0
+#    define N1  ((N0)  + NUM_CLASSES)
+#    define N2  ((N1)  + NUM_CLASSES)
+#    define N3  ((N2)  + NUM_CLASSES)
+#    define N4  ((N3)  + NUM_CLASSES)
+#    define N5  ((N4)  + NUM_CLASSES)
+#    define N6  ((N5)  + NUM_CLASSES)
+#    define N7  ((N6)  + NUM_CLASSES)
+#    define N8  ((N7)  + NUM_CLASSES)
+#    define N9  ((N8)  + NUM_CLASSES)
+#    define N10 ((N9)  + NUM_CLASSES)
+#    define N11 ((N10) + NUM_CLASSES)
+
+/*Class: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18 */
+/*N0*/   0,  1, N1, N2, N4, N7, N6, N3, N5,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+/*N1*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*N2*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N1, N1, N1, N1, N1, N1, N1, N1, N1, N1,
+
+/*N3*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, N1, N1, N1, N1, N1, N1,
+/*N4*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N1, N1, N1, N1, N1, N1, N1, N8, N1, N9,
+/*N5*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, N2,N10, N2,N10, N2, N2, N2,N10,
+/*N6*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N2,N10, N2,N10, N2,N10, N2, N2, N2,N10,
+/*N7*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N2,N10,  1,  1,  1,  1,  1,  1,  1,  1,
+/*N8*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  1,  1,  1,  1,  0,  0,  0,  0,
+/*N9*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,
+/*N10*/  1,  1,  1,  1,  1,  1,  1,  1,  1, N1, N1, N1, N1, N1, N1, N1, N1, N1,N11,
+/*N11*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,
+};
+
 #  else     /* End of is DOINIT */
 
 EXTCONST U8 perl_extended_utf8_dfa_tab[];
+EXTCONST U8 strict_utf8_dfa_tab[];
 
 #  endif
 #endif    /* end of isn't EBCDIC */
