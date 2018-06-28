@@ -1477,27 +1477,100 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
 {
     const U8 * const s0 = s;
     const U8 * send = s0 + curlen;
-    U32 possible_problems = 0;  /* A bit is set here for each potential problem
-                                   found as we go along */
-    UV uv = (UV) -1;
-    STRLEN expectlen   = 0;     /* How long should this sequence be?
-                                   (initialized to silence compilers' wrong
-                                   warning) */
-    STRLEN avail_len   = 0;     /* When input is too short, gives what that is */
-    U32 discard_errors = 0;     /* Used to save branches when 'errors' is NULL;
-                                   this gets set and discarded */
+    U32 possible_problems;  /* A bit is set here for each potential problem
+                               found as we go along */
+    UV uv;
+    STRLEN expectlen;     /* How long should this sequence be? */
+    STRLEN avail_len;     /* When input is too short, gives what that is */
+    U32 discard_errors;   /* Used to save branches when 'errors' is NULL; this
+                             gets set and discarded */
 
     /* The below are used only if there is both an overlong malformation and a
      * too short one.  Otherwise the first two are set to 's0' and 'send', and
      * the third not used at all */
-    U8 * adjusted_s0 = (U8 *) s0;
+    U8 * adjusted_s0;
     U8 temp_char_buf[UTF8_MAXBYTES + 1]; /* Used to avoid a Newx in this
                                             routine; see [perl #130921] */
-    UV uv_so_far = 0;   /* (Initialized to silence compilers' wrong warning) */
-
+    UV uv_so_far;
     UV state = 0;
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
+
+    /* Measurements show that this dfa is somewhat faster than the regular code
+     * below, so use it first, dropping down for the non-normal cases. */
+
+#define PERL_UTF8_DECODE_REJECT 1
+
+    while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
+        UV type = strict_utf8_dfa_tab[*s];
+
+        uv = (state == 0)
+             ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
+             : UTF8_ACCUMULATE(uv, *s);
+        state = strict_utf8_dfa_tab[256 + state + type];
+
+        if (state == 0) {
+            if (retlen) {
+                *retlen = s - s0 + 1;
+            }
+            if (errors) {
+                *errors = 0;
+            }
+            if (msgs) {
+                *msgs = NULL;
+            }
+
+            return uv;
+        }
+
+        s++;
+    }
+
+    /* Here, is one of: a) malformed; b) a problematic code point (surrogate,
+     * non-unicode, or nonchar); or c) on ASCII platforms, one of the Hangul
+     * syllables that the dfa doesn't properly handle.  Quickly dispose of the
+     * final case. */
+
+#ifndef EBCDIC
+
+    /* Each of the affected Hanguls starts with \xED */
+
+    if (is_HANGUL_ED_utf8_safe(s0, send)) {
+        if (retlen) {
+            *retlen = 3;
+        }
+        if (errors) {
+            *errors = 0;
+        }
+        if (msgs) {
+            *msgs = NULL;
+        }
+
+        return ((0xED & UTF_START_MASK(3)) << (2 * UTF_ACCUMULATION_SHIFT))
+             | ((s0[1] & UTF_CONTINUATION_MASK) << UTF_ACCUMULATION_SHIFT)
+             |  (s0[2] & UTF_CONTINUATION_MASK);
+    }
+
+#endif
+
+    /* In conjunction with the exhaustive tests that can be enabled in
+     * APItest/t/utf8_warn_base.pl, this can make sure the dfa does precisely
+     * what it is intended to do, and that no flaws in it are masked by
+     * dropping down and executing the code below
+    assert(! isUTF8_CHAR(s0, send)
+          || UTF8_IS_SURROGATE(s0, send)
+          || UTF8_IS_SUPER(s0, send)
+          || UTF8_IS_NONCHAR(s0,send));
+    */
+
+    s = s0;
+    uv = *s0;
+    possible_problems = 0;
+    expectlen = 0;
+    avail_len = 0;
+    discard_errors = 0;
+    adjusted_s0 = (U8 *) s0;
+    uv_so_far = 0;
 
     if (errors) {
         *errors = 0;
@@ -1549,62 +1622,6 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
     if (retlen) {
 	*retlen = expectlen;
     }
-
-    /* An invariant is trivially well-formed */
-    if (UTF8_IS_INVARIANT(*s0)) {
-	return *s0;
-    }
-
-    /* Measurements show that this dfa is somewhat faster than the regular code
-     * below, so use it first, dropping down for the non-normal cases. */
-
-#define PERL_UTF8_DECODE_REJECT 1
-
-    while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
-        UV type = strict_utf8_dfa_tab[*s];
-
-        uv = (state == 0)
-             ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
-             : UTF8_ACCUMULATE(uv, *s);
-        state = strict_utf8_dfa_tab[256 + state + type];
-
-        if (state == 0) {
-            return uv;
-        }
-
-        s++;
-    }
-
-    /* Here, is one of: a) malformed; b) a problematic code point (surrogate,
-     * non-unicode, or nonchar); or c) on ASCII platforms, one of the Hangul
-     * syllables that the dfa doesn't properly handle.  Quickly dispose of the
-     * final case.
-     *
-     * Each of the affected Hanguls starts with \xED */
-
-#ifndef EBCDIC
-
-    if (is_HANGUL_ED_utf8_safe(s0, send)) {
-        return ((0xED & UTF_START_MASK(3)) << (2 * UTF_ACCUMULATION_SHIFT))
-             | ((s0[1] & UTF_CONTINUATION_MASK) << UTF_ACCUMULATION_SHIFT)
-             |  (s0[2] & UTF_CONTINUATION_MASK);
-    }
-
-#endif
-
-    /* Here is potentially problematic.  Use the full mechanism */
-    uv = *s0;
-
-    /* In conjunction with the exhaustive tests that can be enabled in
-     * APItest/t/utf8_warn_base.pl, this can make sure the dfa does precisely
-     * what it is intended to do, and that no flaws in it are masked by
-     * dropping down and executing the code below
-
-    assert(! isUTF8_CHAR(s0, send)
-          || UTF8_IS_SURROGATE(s0, send)
-          || UTF8_IS_SUPER(s0, send)
-          || UTF8_IS_NONCHAR(s0,send));
-    */
 
     /* A continuation character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(uv))) {
