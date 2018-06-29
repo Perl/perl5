@@ -230,25 +230,21 @@ A grapheme is what appears to a native-speaker of a language to be a
 character.  In Unicode (and hence Perl) a grapheme may actually be
 several adjacent characters that together form a complete grapheme.  For
 example, there can be a base character, like "R" and an accent, like a
-circumflex "^", that appear when displayed to be a single character with
-the circumflex hovering over the "R".  Perl currently allows things like
-that circumflex to be delimiters of strings, patterns, I<etc>.  When
-displayed, the circumflex would look like it belongs to the character
-just to the left of it.  In order to move the language to be able to
-accept graphemes as delimiters, we have to deprecate the use of
-delimiters which aren't graphemes by themselves.  Also, a delimiter must
-already be assigned (or known to be never going to be assigned) to try
-to future-proof code, for otherwise code that works today would fail to
-compile if the currently unassigned delimiter ends up being something
-that isn't a stand-alone grapheme.  Because Unicode is never going to
-assign
-L<non-character code points|perlunicode/Noncharacter code points>, nor
-L<code points that are above the legal Unicode maximum|
-perlunicode/Beyond Unicode code points>, those can be delimiters, and
-their use won't raise this warning.
+circumflex "^", that appear to be a single character when displayed,
+with the circumflex hovering over the "R".
 
-As of Perl 5.30, delimiters which are unassigned code points, or which
-are non-standalone graphemes are fatal.
+As of Perl 5.30, use of delimiters which are non-standalone graphemes is
+fatal, in order to move the language to be able to accept
+multi-character graphemes as delimiters.
+
+Also, as of Perl 5.30, delimiters which which are unassigned code points
+but that may someday become assigned are prohibited.  Otherwise, code
+that works today would fail to compile if the currently unassigned
+delimiter ends up being something that isn't a stand-alone grapheme.
+Because Unicode is never going to assign L<non-character code
+points|perlunicode/Noncharacter code points>, nor L<code points that are
+above the legal Unicode maximum| perlunicode/Beyond Unicode code
+points>, those can be delimiters.
 
 =head3 In XS code, use of various macros dealing with UTF-8.
 
