@@ -2061,6 +2061,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
    *(s+(nlen+1+vlen)) = '\0'
 
 #ifdef USE_ENVIRON_ARRAY
+/* NB: VMS' my_setenv() is in vms.c */
 
 /* small wrapper for use by Perl_my_setenv that mallocs, or reallocs if
  * 'current' is non-null, with up to three sizes that are added together.
@@ -2092,7 +2093,6 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 }
 
 
-/* VMS' my_setenv() is in vms.c */
 #if !defined(WIN32) && !defined(NETWARE)
 
 void
