@@ -163,7 +163,6 @@ my %utf8_param_code = (
                         "_safe"                 =>  0,
                         "_safe, malformed"      =>  1,
                         "deprecated unsafe"     => -1,
-                        "deprecated mathoms"    => -2,
                       );
 
 # This test is split into this number of files.
@@ -556,13 +555,8 @@ foreach my $name (sort keys %to_properties) {
         foreach my $utf8_param("_safe",
                                 "_safe, malformed",
                                 "deprecated unsafe",
-                                "deprecated mathoms",
                                 )
         {
-            use Config;
-            next if    $utf8_param eq 'deprecated mathoms'
-                    && $Config{'ccflags'} =~ /-DNO_MATHOMS/;
-
             my $utf8_param_code = $utf8_param_code{$utf8_param};
             my $expect_error = $utf8_param_code > 0;
 
