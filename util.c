@@ -4761,7 +4761,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	 * timeval. */
 	{
 	    STRLEN len;
-            const char* endptr = pmlenv + stren(pmlenv);
+            const char* endptr = pmlenv + strlen(pmlenv);
 	    int fd;
             UV uv;
             if (grok_atoUV(pmlenv, &uv, &endptr) /* Ignore endptr. */
