@@ -5613,12 +5613,19 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     break;
 
                 case NASCII:
-                case NPOSIXA:   /* For these, we always know the exact set of
-                                   what's matched */
                     invert = 1;
                     /* FALLTHROUGH */
 		case ASCII:
+                    my_invlist = invlist_clone(PL_Posix_ptrs[_CC_ASCII]);
+
+                    /* This can be handled as a Posix class */
+                    goto join_posix_and_ascii;
+
+                case NPOSIXA:   /* For these, we always know the exact set of
+                                   what's matched */
+                    /* FALLTHROUGH */
 		case POSIXA:
+                    assert(FLAGS(scan) != _CC_ASCII);
                     my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)]);
                     goto join_posix_and_ascii;
 
