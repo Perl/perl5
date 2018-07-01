@@ -4649,11 +4649,12 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                             && wc == (wchar_t) UNICODE_REPLACEMENT);
         }
 
+#    endif
+
         restore_switched_locale(LC_CTYPE, original_ctype_locale);
         goto finish_and_return;
     }
 
-#    endif
 #  else
 
         /* Here, we must have a C89 compiler that doesn't have mbtowc().  Next
@@ -4885,9 +4886,9 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             is_utf8 = TRUE;
             goto finish_and_return;
         }
-    }
 
 #      endif
+    }
 #    endif
 
     /* Other common encodings are the ISO 8859 series, which aren't UTF-8.  But
