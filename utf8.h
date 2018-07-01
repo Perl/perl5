@@ -316,31 +316,6 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 #define isUTF8_POSSIBLY_PROBLEMATIC(c) (__ASSERT_(FITS_IN_8_BITS(c))        \
                                         (U8) c >= 0xED)
 
-/* A helper macro for isC9_STRICT_UTF8_CHAR, so use that one instead of this.
- * Like is_UTF8_CHAR_utf8_no_length_checks(), this was moved here and LIKELYs
- * added manually.
- *
-        C9_STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points,
-                             no surrogates
-	0x0080 - 0xD7FF
-	0xE000 - 0x10FFFF
-*/
-/*** GENERATED CODE ***/
-#define is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks(s)                     \
-( ( 0xC2 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xDF ) ?                          \
-    ( LIKELY( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                    \
-: ( 0xE0 == ((const U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( ( 0xE1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xEC ) || ( ((const U8*)s)[0] & 0xFE ) == 0xEE ) ?\
-    ( LIKELY( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xED == ((const U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xF0 == ((const U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( 0x90 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xBF ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-: ( 0xF1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xF3 ) ?                          \
-    ( LIKELY( ( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-: LIKELY( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( ( ((const U8*)s)[1] & 0xF0 ) == 0x80 ) ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
-
 #define UNICODE_IS_PERL_EXTENDED(uv)    UNLIKELY((UV) (uv) > 0x7FFFFFFF)
 
 #endif /* EBCDIC vs ASCII */
@@ -952,43 +927,6 @@ point's representation.
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 #define bytes_from_utf8(s, lenp, is_utf8p)                                  \
                             bytes_from_utf8_loc(s, lenp, is_utf8p, 0)
-
-/*
-
-=for apidoc Am|STRLEN|isC9_STRICT_UTF8_CHAR|const U8 *s|const U8 *e
-
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
-Unicode non-surrogate code point; otherwise it evaluates to 0.  If non-zero,
-the value gives how many bytes starting at C<s> comprise the code point's
-representation.  Any bytes remaining before C<e>, but beyond the ones needed to
-form the first code point in C<s>, are not examined.
-
-The largest acceptable code point is the Unicode maximum 0x10FFFF.  This
-differs from C<L</isSTRICT_UTF8_CHAR>> only in that it accepts non-character
-code points.  This corresponds to
-L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
-which said that non-character code points are merely discouraged rather than
-completely forbidden in open interchange.  See
-L<perlunicode/Noncharacter code points>.
-
-Use C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8; and
-C<L</isUTF8_CHAR_flags>> for a more customized definition.
-
-Use C<L</is_c9strict_utf8_string>>, C<L</is_c9strict_utf8_string_loc>>, and
-C<L</is_c9strict_utf8_string_loclen>> to check entire strings.
-
-=cut
-*/
-
-#define isC9_STRICT_UTF8_CHAR(s, e)                                         \
-    (UNLIKELY((e) <= (s))                                                   \
-    ? 0                                                                     \
-    : (UTF8_IS_INVARIANT(*s))                                               \
-      ? 1                                                                   \
-      : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
-        ? 0                                                                 \
-        : is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks(s))
 
 /*
 

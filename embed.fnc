@@ -829,6 +829,8 @@ AnidR	|Size_t	|isUTF8_CHAR|NN const U8 * const s0			    \
 			    |NN const U8 * const e
 AnidR	|Size_t	|isSTRICT_UTF8_CHAR |NN const U8 * const s0		    \
 				    |NN const U8 * const e
+AnidR	|Size_t	|isC9_STRICT_UTF8_CHAR |NN const U8 * const s0		    \
+				       |NN const U8 * const e
 AnmdpR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 AnidR	|bool	|is_utf8_string_flags					    \
 		|NN const U8 *s|STRLEN len|const U32 flags

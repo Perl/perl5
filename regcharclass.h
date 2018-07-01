@@ -1910,6 +1910,6 @@
  * 6aaacc29ce24746bcb2bf82a920fcf90e07cf92d75325199c50f40754d39bb72 lib/unicore/mktables
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
- * 10e68a929fd4a2cb367c0caf2f82104de6b1c769a4fc4db8a5d87408c6b3c07b regen/regcharclass.pl
+ * f4fe24c2a005b636f6e7418df060c6c9a57ddcae4219b54d0cb18baf312dbc3a regen/regcharclass.pl
  * 393f8d882713a3ba227351ad0f00ea4839fda74fcf77dcd1cdf31519925adba5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

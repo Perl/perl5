@@ -5749,10 +5749,104 @@ EXTCONST U8 strict_utf8_dfa_tab[] = {
 /*N11*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,
 };
 
+/* And below is yet another version of the above tables that accepts only UTF-8
+ * as defined by Corregidum #9.  Hence no surrogates nor non-Unicode, but
+ * it allows non-characters.  This is isomorphic to the original table
+ * in http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ *
+ * The classes are
+ *      00-7F           0
+ *      80-8F           9
+ *      90-9F          10
+ *      A0-BF          11
+ *      C0,C1           1
+ *      C2-DF           2
+ *      E0              7
+ *      E1-EC           3
+ *      ED              4
+ *      EE-EF           3
+ *      F0              8
+ *      F1-F3           6  (6 bits can be stripped)
+ *      F4              5  (only 5 can be stripped)
+ *      F5-FF           1
+ */
+
+EXTCONST U8 C9_utf8_dfa_tab[] = {
+    /* The first part of the table maps bytes to character classes to reduce
+     * the size of the transition table and create bitmasks. */
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*10-1F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*20-2F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*30-3F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*40-4F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*50-5F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*60-6F*/
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*70-7F*/
+   9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, /*80-8F*/
+  10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10, /*90-9F*/
+  11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11, /*A0-AF*/
+  11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11, /*B0-BF*/
+   1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, /*C0-CF*/
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, /*D0-DF*/
+   7, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 3, 3, /*E0-EF*/
+   8, 6, 6, 6, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /*F0-FF*/
+
+/* The second part is a transition table that maps a combination
+ * of a state of the automaton and a character class to a new state, called a
+ * node.  The nodes are:
+ * N0     The initial state, and final accepting one.
+ * N1     Any one continuation byte (80-BF) left.  This is transitioned to
+ *        immediately when the start byte indicates a two-byte sequence
+ * N2     Any two continuation bytes left.
+ * N3     Any three continuation bytes left.
+ * N4     Start byte is E0.  Continuation bytes 80-9F are illegal (overlong);
+ *        the other continuations transition to state N1
+ * N5     Start byte is ED.  Continuation bytes A0-BF all lead to surrogates,
+ *        so are illegal.  The other continuations transition to state N1.
+ * N6     Start byte is F0.  Continuation bytes 80-8F are illegal (overlong);
+ *        the other continuations transition to N2
+ * N7     Start byte is F4.  Continuation bytes 90-BF are illegal
+ *        (non-unicode); the other continuations transition to N2
+ * 1      Reject.  All transitions not mentioned above (except the single
+ *        byte ones (as they are always legal) are to this state.
+ */
+
+#    undef N0
+#    undef N1
+#    undef N2
+#    undef N3
+#    undef N4
+#    undef N5
+#    undef N6
+#    undef N7
+#    undef NUM_CLASSES
+#    define NUM_CLASSES 12
+#    define N0 0
+#    define N1  ((N0)  + NUM_CLASSES)
+#    define N2  ((N1)  + NUM_CLASSES)
+#    define N3  ((N2)  + NUM_CLASSES)
+#    define N4  ((N3)  + NUM_CLASSES)
+#    define N5  ((N4)  + NUM_CLASSES)
+#    define N6  ((N5)  + NUM_CLASSES)
+#    define N7  ((N6)  + NUM_CLASSES)
+
+/*Class: 0   1   2   3   4   5   6   7   8   9  10  11 */
+/*N0*/   0,  1, N1, N2, N5, N7, N3, N4, N6,  1,  1,  1,
+/*N1*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  0,
+/*N2*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N1, N1, N1,
+/*N3*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N2, N2, N2,
+
+/*N4*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, N1,
+/*N5*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N1, N1,  1,
+/*N6*/   1,  1,  1,  1,  1,  1,  1,  1,  1,  1, N2, N2,
+/*N7*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N2,  1,  1,
+};
+
 #  else     /* End of is DOINIT */
 
 EXTCONST U8 perl_extended_utf8_dfa_tab[];
 EXTCONST U8 strict_utf8_dfa_tab[];
+EXTCONST U8 C9_utf8_dfa_tab[];
 
 #  endif
 #endif    /* end of isn't EBCDIC */

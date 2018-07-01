@@ -1637,53 +1637,6 @@ SURROGATE: Surrogate code points
 => UTF8 :safe
 \p{_Perl_Surrogate}
 
-# This program was run with this enabled, and the results copied to utf8.h and
-# utfebcdic.h; then this was commented out because it takes so long to figure
-# out these 2 million code points.  The results would not change unless utf8.h
-# decides it wants a different maximum, or this program creates better
-# optimizations.  Trying with 5 bytes used too much memory to calculate.
-#
-# We don't generate code for invariants here because the EBCDIC form is too
-# complicated and would slow things down; instead the user should test for
-# invariants first.
-#
-# 0x1FFFFF was chosen because for both UTF-8 and UTF-EBCDIC, its start byte
-# is the same as 0x10FFFF, and it includes all the above-Unicode code points
-# that have that start byte.  In other words, it is the natural stopping place
-# that includes all Unicode code points.
-#
-#STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points, no surrrogates nor non-character code points
-#=> UTF8 :no_length_checks only_ebcdic_platform
-#0x00A0 - 0xD7FF
-#0xE000 - 0xFDCF
-#0xFDF0 - 0xFFFD
-#0x10000 - 0x1FFFD
-#0x20000 - 0x2FFFD
-#0x30000 - 0x3FFFD
-#0x40000 - 0x4FFFD
-#0x50000 - 0x5FFFD
-#0x60000 - 0x6FFFD
-#0x70000 - 0x7FFFD
-#0x80000 - 0x8FFFD
-#0x90000 - 0x9FFFD
-#0xA0000 - 0xAFFFD
-#0xB0000 - 0xBFFFD
-#0xC0000 - 0xCFFFD
-#0xD0000 - 0xDFFFD
-#0xE0000 - 0xEFFFD
-#0xF0000 - 0xFFFFD
-#0x100000 - 0x10FFFD
-
-#C9_STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points, no surrogates
-#=> UTF8 :no_length_checks only_ascii_platform
-#0x0080 - 0xD7FF
-#0xE000 - 0x10FFFF
-#
-#C9_STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points including non-character code points, no surrogates
-#=> UTF8 :no_length_checks only_ebcdic_platform
-#0x00A0 - 0xD7FF
-#0xE000 - 0x10FFFF
-
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
 \p{_Perl_Quotemeta}
