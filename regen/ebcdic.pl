@@ -1,6 +1,7 @@
 use v5.16.0;
 use strict;
 use warnings;
+use integer;
 
 BEGIN { unshift @INC, '.' }
 
@@ -13,16 +14,117 @@ require './regen/charset_translations.pl';
 my $out_fh = open_new('ebcdic_tables.h', '>',
         {style => '*', by => $0, });
 
+sub get_column_headers ($$;$) {
+    my ($row_hdr_len, $field_width, $dfa_columns) = @_;
+    my $format;
+    my $final_column_format;
+    my $num_columns;
+
+    if (defined $dfa_columns) {
+        $num_columns = $dfa_columns;
+
+        # Trailing blank to correspond with commas in the rows below
+        $format = "%${field_width}d ";
+    }
+    else {  # Is a regular table
+        $num_columns = 16;
+
+        # Use blanks to separate the fields
+        $format = " " x ( $field_width
+                        - 2);               # For the '_X'
+        $format .= "_%X ";  # Again, trailing blank over the commas below
+    }
+
+    my $header = "/*" . " " x ($row_hdr_len - length "/*");
+
+    # All but the final column
+    $header .= sprintf($format, $_) for 0 .. $num_columns - 2;
+
+     # Get rid of trailing blank, so that the final column takes up one less
+     # space so that the "*/" doesn't extend past the commas in the rows below
+    chop $header;
+    $header .= sprintf $format, $num_columns - 1;
+
+    # Again, remove trailing blank
+    chop $header;
+
+    return $header . "*/\n";
+}
+
 sub output_table ($$;$) {
     my $table_ref = shift;
     my $name = shift;
 
-    # Tables in hex easier to debug, but don't fit into 80 columns
-    my $print_in_hex = shift // 1;
+    # 0 => print in decimal
+    # 1 => print in hex (translates code point to code point)
+    # >= 2 => is a dfa table, like http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+    #      The number is how many columns in the part after the code point
+    #      portion.
+    #
+    # code point tables in hex areasier to debug, but don't fit into 80
+    # columns
+    my $type = shift // 1;
 
-    die "Requres 256 entries in table $name, got @$table_ref" if @$table_ref != 256;
+    my $print_in_hex = $type == 1;
+    my $is_dfa = ($type >= 2) ? $type : 0;
+    my $columns_after_256 = 16;
 
-    my $declaration = "EXTCONST U8 $name\[\]";
+    die "Requres 256 entries in table $name, got @$table_ref"
+                                if ! $is_dfa && @$table_ref != 256;
+    if (! $is_dfa) {
+        die "Requres 256 entries in table $name, got @$table_ref"
+                                                        if @$table_ref != 256;
+    }
+    else {
+        $columns_after_256 = $is_dfa;
+
+        print $out_fh <<'EOF';
+
+/* The table below is adapted from
+ *      http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+ * See copyright notice at the beginning of this file.
+ */
+
+EOF
+    }
+
+    # Highest number in the table
+    my $max_entry = 0;
+    $max_entry = map { $_ > $max_entry ? $_ : $max_entry } @$table_ref;
+
+    # We assume that every table has at least one two digit entry, and none
+    # are more than three digit.
+    my $field_width = ($print_in_hex)
+                      ? 4
+                      : (($max_entry) > 99 ? 3 : 2);
+
+    my $row_hdr_length;
+    my $node_number_field_width;
+    my $node_value_field_width;
+
+    # dfa tables have a special header for the rows in the transitions part of
+    # the table.  It is longer than the regular one.
+    if ($is_dfa) {
+        my $max_node_number = ($max_entry - 256) / $columns_after_256 - 1;
+        $node_number_field_width = ($max_node_number > 9) ? 2 : 1;
+        $node_value_field_width = ($max_node_number * $columns_after_256 > 99)
+                                  ? 3 : 2;
+        # The header starts with this template, and adds in the number of
+        # digits needed to represent the maximum node number and its value
+        $row_hdr_length = length("/*N=*/")
+                        + $node_number_field_width
+                        + $node_value_field_width;
+    }
+    else {
+        $row_hdr_length = length "/*_X*/";  # Template for what the header
+                                            # looks like
+    }
+
+    # The table may not be representable in 8 bits.
+    my $TYPE = 'U8';
+    $TYPE = 'U16' if grep { $_ > 255 } @$table_ref;
+
+    my $declaration = "EXTCONST $TYPE $name\[\]";
     print $out_fh <<EOF;
 #  ifndef DOINIT
 #    $declaration;
@@ -30,22 +132,66 @@ sub output_table ($$;$) {
 #    $declaration = {
 EOF
 
-    my $column_numbers= "/*_0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/\n";
-    print $out_fh $column_numbers if $print_in_hex;
-    for my $i (0 .. 255) {
+    # First the headers for the columns
+    print $out_fh get_column_headers($row_hdr_length, $field_width);
+
+    # Now the table body
+    my $count = @$table_ref;
+    my $last_was_nl = 1;
+
+    # Print each element individually, arranged in rows of columns
+    for my $i (0 .. $count - 1) {
+
+        # Node number for here is -1 until get into the dfa state transitions
+        my $node = ($i < 256) ? -1 : ($i - 256) / $columns_after_256;
+
+        # Print row header at beginning of each row
+        if ($last_was_nl) {
+            if ($node >= 0) {
+                printf $out_fh "/*N%-*d=%*d*/", $node_number_field_width, $node,
+                                               $node_value_field_width, $i - 256;
+            }
+            else {  # Otherwise is regular row; print its number
+                printf $out_fh "/*%X_", $i / 16;
+
+                # These rows in a dfa table require extra space so columns
+                # will align vertically (because the Ndd=ddd requires extra
+                # space)
+                if ($is_dfa) {
+                    print  $out_fh " " x (  $node_number_field_width
+                                          + $node_value_field_width);
+                }
+                print  $out_fh "*/";
+            }
+        }
+
         if ($print_in_hex) {
-            printf $out_fh "/*%X_*/ ", $i / 16 if $i % 16 == 0;
             printf $out_fh "0x%02X", $table_ref->[$i];
         }
         else {
-            printf $out_fh "%4d", $table_ref->[$i];
+            printf $out_fh "%${field_width}d", $table_ref->[$i];
         }
-        print $out_fh ",", if $i < 255;
-        #print $out_fh ($i < 255) ? "," : " ";
-        #printf $out_fh " /* %X_ */", $i / 16 if $print_in_hex && $i % 16 == 15;
-        print $out_fh "\n" if $i % 16 == 15;
+
+        print $out_fh ",", if $i < $count -1;   # No comma on final entry
+
+        # Add \n if at end of row, which is 16 columns until we get to the
+        # transitions part
+        if (   ($node < 0 && $i % 16 == 15)
+            || ($node >= 0 && ($i -256) % $columns_after_256
+                                                    == $columns_after_256 - 1))
+        {
+            print $out_fh "\n";
+            $last_was_nl = 1;
+        }
+        else {
+            $last_was_nl = 0;
+        }
     }
-    print $out_fh $column_numbers if $print_in_hex;
+
+    # Print column footer
+    print $out_fh get_column_headers($row_hdr_length, $field_width,
+                                     ($is_dfa) ? $columns_after_256 : undef);
+
     print $out_fh "};\n#  endif\n\n";
 }
 
@@ -155,7 +301,8 @@ END
         for my $i (0 .. 255) {
             $lc[$a2e[$i]] = $a2e[ord lc chr $i];
         }
-        print $out_fh "/* Index is $charset code point; value is its lowercase equivalent */\n";
+        print $out_fh
+        "/* Index is $charset code point; value is its lowercase equivalent */\n";
         output_table(\@lc, "PL_latin1_lc");
     }
 
