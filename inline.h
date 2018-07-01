@@ -1022,7 +1022,7 @@ value gives how many bytes starting at C<s> comprise the code point's
 representation.  Any bytes remaining before C<e>, but beyond the ones needed to
 form the first code point in C<s>, are not examined.
 
-The code point can be any that will fit in a UV on this machine, using Perl's
+The code point can be any that will fit in an IV on this machine, using Perl's
 extension to official UTF-8 to represent those higher than the Unicode maximum
 of 0x10FFFF.  That means that this macro is used to efficiently decide if the
 next few bytes in C<s> is legal UTF-8 for a single character.
@@ -1036,12 +1036,8 @@ code points; and C<L</isUTF8_CHAR_flags>> for a more customized definition.
 Use C<L</is_utf8_string>>, C<L</is_utf8_string_loc>>, and
 C<L</is_utf8_string_loclen>> to check entire strings.
 
-Note that it is deprecated to use code points higher than what will fit in an
-IV.  This macro does not raise any warnings for such code points, treating them
-as valid.
-
-Note also that a UTF-8 INVARIANT character (i.e. ASCII on non-EBCDIC machines)
-is a valid UTF-8 character.
+Note also that a UTF-8 "invariant" character (i.e. ASCII on non-EBCDIC
+machines) is a valid UTF-8 character.
 
 =cut
 
