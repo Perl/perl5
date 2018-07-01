@@ -22,7 +22,13 @@ sub output_table ($$;$) {
 
     die "Requres 256 entries in table $name, got @$table_ref" if @$table_ref != 256;
 
-    print $out_fh "EXTCONST U8 $name\[\] = {\n";
+    my $declaration = "EXTCONST U8 $name\[\]";
+    print $out_fh <<EOF;
+#  ifndef DOINIT
+#    $declaration;
+#  else
+#    $declaration = {
+EOF
 
     my $column_numbers= "/*_0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/\n";
     print $out_fh $column_numbers if $print_in_hex;
@@ -40,7 +46,7 @@ sub output_table ($$;$) {
         print $out_fh "\n" if $i % 16 == 15;
     }
     print $out_fh $column_numbers if $print_in_hex;
-    print $out_fh "};\n\n";
+    print $out_fh "};\n#  endif\n\n";
 }
 
 print $out_fh <<END;
