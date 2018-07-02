@@ -403,6 +403,7 @@ doop_cflags=''
 op_cflags=''
 opmini_cflags=''
 perlmain_cflags=''
+pp_pack_cflags=''
     fi
 
 case "$ccisgcc" in
@@ -458,13 +459,16 @@ case "$ccisgcc" in
 		    B.11.11.*)
 			# opmini.c and op.c with +O2 makes the compiler die
 			# of internal error, for perlmain.c only +O0 (no opt)
-                        # works.
+                        # works. Disable +Ox for pp_pack, as the optimizer
+                        # causes this unit to fail (not a limit issue)
 			case "$optimize" in
-			*O2*)	opt=`echo "$optimize" | sed -e 's/O2/O1/'`
-				opmini_cflags="optimize=\"$opt\""
-				op_cflags="optimize=\"$opt\""
-				perlmain_cflags="optimize=\"\""
-				;;
+			*O[12]*)
+			    opt=`echo "$optimize" | sed -e 's/O2/O1/' -e 's/ *+Onolimit//'`
+			    opmini_cflags="optimize=\"$opt\""
+			    op_cflags="optimize=\"$opt\""
+			    perlmain_cflags="optimize=\"\""
+			    pp_pack_cflags="optimize=\"\""
+			    ;;
 			esac
 		    esac
 		;;
