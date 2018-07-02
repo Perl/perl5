@@ -1163,44 +1163,50 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
 
     /* mg_obj can be NULL if a thread is created with the handle open, in which
      case we leave any clean up to the parent thread */
-    if (mg->mg_obj && IoIFP(io)) {
-        SV **pid_psv;
+    if (mg->mg_obj) {
 #ifdef ARGV_USE_ATFUNCTIONS
         SV **dir_psv;
         DIR *dir;
+
+        dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
+        assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
+        dir = INT2PTR(DIR *, SvIV(*dir_psv));
 #endif
-        PerlIO *iop = IoIFP(io);
+        if (IoIFP(io)) {
+            SV **pid_psv;
+            PerlIO *iop = IoIFP(io);
 
-        assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
+            assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
 
-        pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
+            pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
 
-        assert(pid_psv && *pid_psv);
+            assert(pid_psv && *pid_psv);
 
-        if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
-            /* if we get here the file hasn't been closed explicitly by the
-               user and hadn't been closed implicitly by nextargv(), so
-               abandon the edit */
-            SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
-            const char *temp_pv = SvPVX(*temp_psv);
+            if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
+                /* if we get here the file hasn't been closed explicitly by the
+                   user and hadn't been closed implicitly by nextargv(), so
+                   abandon the edit */
+                SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+                const char *temp_pv = SvPVX(*temp_psv);
 
-            assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
-            (void)PerlIO_close(iop);
-            IoIFP(io) = IoOFP(io) = NULL;
+                assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
+                (void)PerlIO_close(iop);
+                IoIFP(io) = IoOFP(io) = NULL;
 #ifdef ARGV_USE_ATFUNCTIONS
-            dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
-            assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
-            dir = INT2PTR(DIR *, SvIV(*dir_psv));
-            if (dir) {
-                if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
-                    NotSupported(errno))
-                    (void)UNLINK(temp_pv);
-                closedir(dir);
-            }
+                if (dir) {
+                    if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
+                        NotSupported(errno))
+                        (void)UNLINK(temp_pv);
+                }
 #else
-            (void)UNLINK(temp_pv);
+                (void)UNLINK(temp_pv);
 #endif
+            }
         }
+#ifdef ARGV_USE_ATFUNCTIONS
+        if (dir)
+            closedir(dir);
+#endif
     }
 
     return 0;
