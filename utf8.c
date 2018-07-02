@@ -1561,37 +1561,50 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
 #define PERL_UTF8_DECODE_REJECT 1
 
     while (s < send && LIKELY(state != PERL_UTF8_DECODE_REJECT)) {
-        UV type = perl_extended_utf8_dfa_tab[*s];
+        UV type = strict_utf8_dfa_tab[*s];
 
         uv = (state == 0)
              ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
              : UTF8_ACCUMULATE(uv, *s);
-        state = perl_extended_utf8_dfa_tab[256 + state + type];
+        state = strict_utf8_dfa_tab[256 + state + type];
 
         if (state == 0) {
-
-            /* If this could be a code point that the flags don't allow (the first
-            * surrogate is the first such possible one), delve further, but we already
-            * have calculated 'uv' */
-            if (  (flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                           |UTF8_DISALLOW_PERL_EXTENDED
-                           |UTF8_WARN_ILLEGAL_INTERCHANGE
-                           |UTF8_WARN_PERL_EXTENDED))
-                && uv >= UNICODE_SURROGATE_FIRST)
-            {
-                curlen = s + 1 - s0;
-                goto got_uv;
-            }
-
-            return UNI_TO_NATIVE(uv);
+            return uv;
         }
 
         s++;
     }
 
-    /* Here, is some sort of failure.  Use the full mechanism */
+    /* Here, is one of: a) malformed; b) a problematic code point (surrogate,
+     * non-unicode, or nonchar); or c) on ASCII platforms, one of the Hangul
+     * syllables that the dfa doesn't properly handle.  Quickly dispose of the
+     * final case.
+     *
+     * Each of the affected Hanguls starts with \xED */
 
+#ifndef EBCDIC
+
+    if (is_HANGUL_ED_utf8_safe(s0, send)) {
+        return ((0xED & UTF_START_MASK(3)) << (2 * UTF_ACCUMULATION_SHIFT))
+             | ((s0[1] & UTF_CONTINUATION_MASK) << UTF_ACCUMULATION_SHIFT)
+             |  (s0[2] & UTF_CONTINUATION_MASK);
+    }
+
+#endif
+
+    /* Here is potentially problematic.  Use the full mechanism */
     uv = *s0;
+
+    /* In conjunction with the exhaustive tests that can be enabled in
+     * APItest/t/utf8_warn_base.pl, this can make sure the dfa does precisely
+     * what it is intended to do, and that no flaws in it are masked by
+     * dropping down and executing the code below
+
+    assert(! isUTF8_CHAR(s0, send)
+          || UTF8_IS_SURROGATE(s0, send)
+          || UTF8_IS_SUPER(s0, send)
+          || UTF8_IS_NONCHAR(s0,send));
+    */
 
     /* A continuation character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(uv))) {
@@ -1711,8 +1724,6 @@ Perl_utf8n_to_uvchr_msgs(pTHX_ const U8 *s,
             (void) uvoffuni_to_utf8_flags(adjusted_s0, min_uv, 0);
         }
     }
-
-  got_uv:
 
     /* Here, we have found all the possible problems, except for when the input
      * is for a problematic code point not allowed by the input parameters. */

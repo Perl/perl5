@@ -615,6 +615,15 @@
 ( 0x200F == cp || ( 0x200F < cp &&                                          \
 ( 0x2028 == cp || 0x2029 == cp ) ) ) ) ) ) ) ) ) ) )
 
+/*
+	HANGUL_ED: Hangul syllables whose first character is \xED
+
+	0xD000 - 0xD7FF
+*/
+/*** GENERATED CODE ***/
+#define is_HANGUL_ED_utf8_safe(s,e)                                         \
+( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( ( ((const U8*)s)[1] & 0xE0 ) == 0x80 ) ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )
+
 #endif	/* ASCII/Latin1 */
 
 #if 'A' == 193 /* EBCDIC 1047 */ \
@@ -1901,6 +1910,6 @@
  * 6aaacc29ce24746bcb2bf82a920fcf90e07cf92d75325199c50f40754d39bb72 lib/unicore/mktables
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
- * 069232ed937edb5a8f6a2e0e6e2d56e76ecc8d4580804f4f1ee98c828905434c regen/regcharclass.pl
+ * 0a1a1fad4b43cd9338269aa8cd46d246a33546c5409aa7e75a147e5350cd39ee regen/regcharclass.pl
  * 393f8d882713a3ba227351ad0f00ea4839fda74fcf77dcd1cdf31519925adba5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
