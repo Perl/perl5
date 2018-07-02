@@ -63,6 +63,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<pack()> no longer can return malformed UTF-8
+
+It croaks if it would otherwise return a UTF-8 string that contains
+malformed UTF-8.  This protects agains potential security threats.  This
+is considered a bug fix as well ([perl #131642]).
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -398,7 +404,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<pack()> no longer can return malformed UTF-8.  It croaks if it would
+otherwise return a UTF-8 string that contains malformed UTF-8.  This
+protects agains potential security threats.  [perl #131642]
 
 =back
 
