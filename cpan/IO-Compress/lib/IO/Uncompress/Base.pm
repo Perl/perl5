@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(IO::File Exporter);
 
 
-$VERSION = '2.074';
+$VERSION = '2.081';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.074 ;
+use IO::Compress::Base::Common 2.081 ;
 
 use IO::File ;
 use Symbol;
@@ -143,11 +143,12 @@ sub smartSeek
     my $position = shift || SEEK_SET;
 
     # TODO -- need to take prime into account
+    *$self->{Prime} = '';
     if (defined *$self->{FH})
       { *$self->{FH}->seek($offset, $position) }
     else {
         if ($position == SEEK_END) {
-            *$self->{BufferOffset} = length ${ *$self->{Buffer} } + $offset ;
+            *$self->{BufferOffset} = length(${ *$self->{Buffer} }) + $offset ;
         }
         elsif ($position == SEEK_CUR) {
             *$self->{BufferOffset} += $offset ;
@@ -493,6 +494,9 @@ sub _create
 
     *$obj->{InNew} = 0;
     *$obj->{Closed} = 0;
+    
+    return $obj 
+        if *$obj->{Pause} ;
 
     if ($status) {
         # Need to try uncompressing to catch the case
@@ -1120,6 +1124,7 @@ sub read
 
     if (! *$self->{AppendOutput}) {
         if (! $offset) {    
+
             $$buffer = '' ;
         }
         else {
@@ -1518,7 +1523,7 @@ __END__
 
 =head1 NAME
 
-IO::Uncompress::Base - Base Class for IO::Uncompress modules 
+IO::Uncompress::Base - Base Class for IO::Uncompress modules
 
 =head1 SYNOPSIS
 
@@ -1541,7 +1546,7 @@ L<IO::Zlib|IO::Zlib>
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>. 
+This module was written by Paul Marquess, C<pmqs@cpan.org>.
 
 =head1 MODIFICATION HISTORY
 
@@ -1549,7 +1554,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2017 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2018 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
