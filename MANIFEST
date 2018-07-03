@@ -1451,12 +1451,10 @@ cpan/Math-BigRat/lib/Math/BigRat.pm	Math::BigRat
 cpan/Math-BigRat/t/big_ap.t		Math::BigRat test
 cpan/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
 cpan/Math-BigRat/t/bigfltrt.t		Math::BigRat test
-cpan/Math-BigRat/t/biglog.t		Math::BigRat test
 cpan/Math-BigRat/t/bigrat.t		Math::BigRat test
 cpan/Math-BigRat/t/bigratpm.inc		Math::BigRat test
 cpan/Math-BigRat/t/bigratpm.t		Math::BigRat test
 cpan/Math-BigRat/t/bigratup.t		test under $Math::BigInt::upgrade
-cpan/Math-BigRat/t/bigroot.t		Math::BigRat test
 cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
