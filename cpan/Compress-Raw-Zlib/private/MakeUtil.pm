@@ -92,6 +92,8 @@ sub getPerlFiles
             s/^\s+//;
             s/\s+$//;
 
+            #next if m#t/Test/More\.pm$# or m#t/Test/Builder\.pm$#;
+
             /^(\S+)\s*(.*)$/;
 
             my ($file, $rest) = ($1, $2);
