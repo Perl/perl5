@@ -1,4 +1,5 @@
-#!/usr/bin/perl -w
+use strict;
+use warnings;
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -11,8 +12,6 @@ BEGIN {
     $ENV{PERL_MM_MANIFEST_VERBOSE}=1;
 }
 chdir 't';
-
-use strict;
 
 use Test::More tests => 98;
 use Cwd;

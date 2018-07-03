@@ -491,7 +491,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::Manifest' => {
-        'DISTRIBUTION' => 'ETHER/ExtUtils-Manifest-1.70.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-Manifest-1.71.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Manifest],
         'EXCLUDED'     => [
             qr(^t/00-report-prereqs),
