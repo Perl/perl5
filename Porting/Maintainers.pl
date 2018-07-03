@@ -694,7 +694,7 @@ use File::Glob qw(:case);
     },
 
     'Locale-Codes' => {
-        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.56.tar.gz',
+        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.57.tar.gz',
         'FILES'        => q[cpan/Locale-Codes],
         'EXCLUDED'     => [
             qw( README.first
@@ -702,7 +702,6 @@ use File::Glob qw(:case);
                 t/pod_coverage.t
                 t/pod.t),
             qr{^t/runtests},
-            qr{^t/runtests\.bat},
             qr{^internal/},
             qr{^examples/},
         ],

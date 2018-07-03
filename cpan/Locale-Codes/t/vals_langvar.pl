@@ -11,18 +11,18 @@ $::tests = '';
 $::tests = "
 
 2code
-Eastern Armenian
-   arevela
+Auvergnat
+   auvern
 
 2name
-arevela
-   Eastern Armenian
+auvern
+   Auvergnat
 
 code2code
-arevela
+auvern
 alpha
 alpha
-   arevela
+   auvern
 
 all_codes
 2

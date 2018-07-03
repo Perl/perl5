@@ -22,19 +22,33 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.59  (planned 2018-12-01; sbeck)
+=head1 VERSION 3.59  (planned 2018-12-01  sbeck)
 
-=head1 VERSION 3.58  (planned 2018-09-01; sbeck)
+=head1 VERSION 3.58  (planned 2018-09-01  sbeck)
 
-=head1 VERSION 3.57  (planned 2018-06-01; sbeck)
+=head1 VERSION 3.57  (2018-06-01  sbeck)
 
-=head1 VERSION 3.56  (planned 2018-03-01; sbeck)
+=over 4
 
-NEW CODE(s)
+=item NEW CODE(s)
 
-=head1 VERSION 3.55  (2017-11-17; sbeck)
+=back
 
-NEW CODE(s)
+=head1 VERSION 3.56  (2018-03-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
+
+=head1 VERSION 3.55  (2017-11-17  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -43,7 +57,9 @@ NEW CODE(s)
 Because correct usage of any of the Locale::Codes modules requires that
 they be kept up-to-date, I have long felt that it should not be distributed
 as a core module.  After discussion on the perl5-porters list, it is agreed,
-and the deprecation process has been started.
+and the deprecation process has been started.  Starting with perl 5.28.0,
+Locale-Codes will be flagged as deprecated, and it will be removed in
+version 5.30.0 .
 
 Thanks to p5p-porters (especially Dagfinn Ilmari Mannsaker) for discussion
 and guidance.
@@ -65,13 +81,21 @@ now reflects that.  RT 123571
 
 =back
 
-=head1 VERSION 3.54  (2017-09-01; sbeck)
+=head1 VERSION 3.54  (2017-09-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.53  (2017-07-25; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.53  (2017-07-25  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -90,13 +114,21 @@ Reported by dmaestro on GitHub.
 
 =back
 
-=head1 VERSION 3.52  (2017-06-01; sbeck)
+=head1 VERSION 3.52  (2017-06-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.51  (2017-04-10; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.51  (2017-04-10  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -107,9 +139,13 @@ tests accordingly.
 
 =back
 
-=head1 VERSION 3.50  (2017-03-01; sbeck)
+=head1 VERSION 3.50  (2017-03-01  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -161,7 +197,7 @@ This was fixed when I started generating the non-OO modules, but was reported
 
 =back
 
-=head1 VERSION 3.42  (2016-11-30; sbeck)
+=head1 VERSION 3.42  (2016-11-30  sbeck)
 
 =over 4
 
@@ -172,18 +208,26 @@ them back in.  Rob Emery
 
 =back
 
-=head1 VERSION 3.41  (2016-11-18; sbeck)
+=head1 VERSION 3.41  (2016-11-18  sbeck)
 
-NEW CODE(s) (Jiri Bohac noted that they were needed so this was release a
-couple weeks earlier than planned)
+=over 4
 
-=head1 VERSION 3.40  (2016-09-01; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+Jiri Bohac noted that they were needed so this was release a couple
+weeks earlier than planned.
 
-=head1 VERSION 3.39  (2016-05-31; sbeck)
+=back
 
-No new codes (for the existing codesets).
+=head1 VERSION 3.40  (2016-09-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
+
+=head1 VERSION 3.39  (2016-05-31  sbeck)
 
 =over 4
 
@@ -200,9 +244,13 @@ the ISO 3166 codes.
 
 =back
 
-=head1 VERSION 3.38  (2016-03-02; sbeck)
+=head1 VERSION 3.38  (2016-03-02  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -213,13 +261,21 @@ Test suite now has 100% coverage.
 
 =back
 
-=head1 VERSION 3.37  (2015-12-01; sbeck)
+=head1 VERSION 3.37  (2015-12-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.36  (2015-09-01; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.36  (2015-09-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -230,9 +286,13 @@ has been deprecated since 3.20.  It has been removed.
 
 =back
 
-=head1 VERSION 3.35  (2015-06-01; sbeck)
+=head1 VERSION 3.35  (2015-06-01  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -243,13 +303,21 @@ by Pete Houston.
 
 =back
 
-=head1 VERSION 3.34  (2015-03-01; sbeck)
+=head1 VERSION 3.34  (2015-03-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.33  (2014-12-01; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.33  (2014-12-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -266,13 +334,21 @@ Suggested by Gabor Szabo.
 
 =back
 
-=head1 VERSION 3.32  (2014-09-01; sbeck)
+=head1 VERSION 3.32  (2014-09-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.31  (2014-06-01; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.31  (2014-06-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -283,9 +359,13 @@ that prevented the SHP currency code from being found.  RT 94229
 
 =back
 
-=head1 VERSION 3.30  (2014-03-04; sbeck)
+=head1 VERSION 3.30  (2014-03-04  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -302,9 +382,13 @@ RT 92680.
 
 =back
 
-=head1 VERSION 3.29  (2014-01-27; sbeck)
+=head1 VERSION 3.29  (2014-01-27  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -322,13 +406,21 @@ time.  In response to RT 91167.
 
 =back
 
-=head1 VERSION 3.28  (2013-12-02; sbeck)
+=head1 VERSION 3.28  (2013-12-02  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.27  (2013-09-03; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.27  (2013-09-03  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -342,7 +434,7 @@ code set is no longer supported.
 
 =back
 
-=head1 VERSION 3.26  (2013-06-03; sbeck)
+=head1 VERSION 3.26  (2013-06-03  sbeck)
 
 =over 4
 
@@ -354,13 +446,21 @@ Some typos corrected.  RT 85692
 
 =back
 
-=head1 VERSION 3.25  (2013-03-01; sbeck)
+=head1 VERSION 3.25  (2013-03-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.24  (2012-12-03; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.24  (2012-12-03  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -394,13 +494,21 @@ The domain codes are now lowercase to correspond to the ISO 3166 codes.
 
 =back
 
-=head1 VERSION 3.23  (2012-09-01; sbeck)
+=head1 VERSION 3.23  (2012-09-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.22  (2012-06-01; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.22  (2012-06-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -417,13 +525,21 @@ diffs bigger than they should be.  Nicholas Clark
 
 =back
 
-=head1 VERSION 3.21  (2012-03-01; sbeck)
+=head1 VERSION 3.21  (2012-03-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.20  (2011-12-01; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.20  (2011-12-01  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -462,9 +578,13 @@ Added Language Family codes (langfam) as defined in ISO 639-5.
 
 =back
 
-=head1 VERSION 3.18  (2011-08-31; sbeck)
+=head1 VERSION 3.18  (2011-08-31  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -475,9 +595,13 @@ a source of data.  Based on a report by Michiel Beijen.
 
 =back
 
-=head1 VERSION 3.17  (2011-06-28; sbeck)
+=head1 VERSION 3.17  (2011-06-28  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -507,13 +631,21 @@ all new sets of codes will be added in the Locale::Codes namespace.
 
 =back
 
-=head1 VERSION 3.16  (2011-03-01; sbeck)
+=head1 VERSION 3.16  (2011-03-01  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.15  (2010-12-02; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.15  (2010-12-02  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -526,9 +658,13 @@ Changed 'use vars' to 'our'
 
 =back
 
-=head1 VERSION 3.14  (2010-09-28; sbeck)
+=head1 VERSION 3.14  (2010-09-28  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -538,13 +674,21 @@ Stripped out some HTML that got included with some codes.
 
 =back
 
-=head1 VERSION 3.13  (2010-06-04; sbeck)
+=head1 VERSION 3.13  (2010-06-04  sbeck)
 
-NEW CODE(s)
+=over 4
 
-=head1 VERSION 3.12  (2010-04-06; sbeck)
+=item NEW CODE(s)
 
-NEW CODE(s)
+=back
+
+=head1 VERSION 3.12  (2010-04-06  sbeck)
+
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -555,9 +699,13 @@ when built as part of perl.
 
 =back
 
-=head1 VERSION 3.11  (2010-03-01; sbeck)
+=head1 VERSION 3.11  (2010-03-01  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -572,9 +720,13 @@ Jerry D. Hedden
 
 =back
 
-=head1 VERSION 3.10  (2010-02-18; sbeck)
+=head1 VERSION 3.10  (2010-02-18  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -662,7 +814,7 @@ Added "UK" alias. Steve Hay
 
 =back
 
-=head1 VERSION 3.01  (2010-02-15; sbeck)
+=head1 VERSION 3.01  (2010-02-15  sbeck)
 
 =over 4
 
@@ -673,9 +825,13 @@ RT 54526
 
 =back
 
-=head1 VERSION 3.00  (2010-02-10; sbeck)
+=head1 VERSION 3.00  (2010-02-10  sbeck)
 
-NEW CODE(s)
+=over 4
+
+=item NEW CODE(s)
+
+=back
 
 =over 4
 
@@ -762,7 +918,9 @@ LOCALE_CODE_ALPHA_2).
 
 =back
 
-=head1 VERSION 2.07  (2004-06-10; neilb)
+=head1 VERSION 2.07  (2004-06-10  neilb)
+
+=over 4
 
 Made $_ local in the initialization code for each module
 change back-propagated from Perl distribution
@@ -796,13 +954,21 @@ ZAIRE is now CONGO, THE DEMOCRATIC REPUBLIC OF THE
     180 => 180 (unchanged)
     (ZAIRE retained as alias)
 
-=head1 VERSION 2.06  (2002-07-15; neilb)
+=back
+
+=head1 VERSION 2.06  (2002-07-15  neilb)
+
+=over 4
 
 The four modules which have data after __DATA__ weren't closing the
 DATA filehandle after reading from it, which they should. Bug and
 patch from Steve Hay.
 
-=head1 VERSION 2.05  (2002-07-08; neilb)
+=back
+
+=head1 VERSION 2.05  (2002-07-08  neilb)
+
+=over 4
 
 Added three letter codes for the countries that were missing
 them. Patch from TJ Mather.
@@ -815,7 +981,11 @@ Pointed out by TJ Mather and MYT.
 Updated the URL for the appendix in the CIA world factbook.
 Patch from TJ Mather.
 
-=head1 VERSION 2.04  (2002-05-23; neilb)
+=back
+
+=head1 VERSION 2.04  (2002-05-23  neilb)
+
+=over 4
 
 Updated according to changes in ISO 3166-1 described
 in ISO 3166-1 newsletters V-4 and V-5, dated 2002-05-20:
@@ -829,7 +999,11 @@ The alpha-2 and alpha-3 codes for East Timor have changed:
 the numeric code stays 626. If you want to support the old
 codes, you can use the semi-private function alias_code().
 
-=head1 VERSION 2.03  (2002-03-24; neilb)
+=back
+
+=head1 VERSION 2.03  (2002-03-24  neilb)
+
+=over 4
 
 Fixed a typo in the alias for the Vatican, reported (with patch)
 by Philip Newton.
@@ -838,7 +1012,11 @@ Added "Moldova" as an alias for "Moldova, Republic of"
 
 Updated Makefile.PL to include AUTHOR and ABSTRACT
 
-=head1 VERSION 2.02  (2002-03-09; neilb)
+=back
+
+=head1 VERSION 2.02  (2002-03-09  neilb)
+
+=over 4
 
 Added semi-private routine rename_country() to Locale::Country,
 based on a patch from Iain Chalmers.
@@ -849,7 +1027,11 @@ Renamed _alias_code to be alias_code. Have retained the old
 name for backwards compatibility. Will remove it when the
 major version number next changes.
 
-=head1 VERSION 2.01  (2002-02-18; neilb)
+=back
+
+=head1 VERSION 2.01  (2002-02-18  neilb)
+
+=over 4
 
 Split the documentation for all modules into separate pod files.
 
@@ -857,7 +1039,11 @@ Made sure all =over were =over 4; some were other values.
 
 The code2code() methods had one more shift than was needed.
 
-=head1 VERSION 2.00  (2002-02-17; neilb)
+=back
+
+=head1 VERSION 2.00  (2002-02-17  neilb)
+
+=over 4
 
 Created Locale::Script which provides an interface to the ISO codes
 for identification of scripts (writing scripts, rather than perl style
@@ -880,7 +1066,11 @@ pointing that it was missing.
 Should really have bumped major version with previous release,
 since there was a change to the API.
 
-=head1 VERSION 1.06  (2001-03-04; neilb)
+=back
+
+=head1 VERSION 1.06  (2001-03-04  neilb)
+
+=over 4
 
 Added Locale::Constants, which defines three symbols for identifying
 which codeset is being used:
@@ -894,18 +1084,30 @@ Updated Locale::Country to support all three code sets defined by ISO
 codeset support to the other modules yet - I'll wait until someone
 asks for them.
 
-=head1 VERSION 1.05  (2001-02-13; neilb)
+=back
+
+=head1 VERSION 1.05  (2001-02-13  neilb)
+
+=over 4
 
 Added Locale::Currency, contribution from Michael Hennecke.
 
 Added test suite for it (t/currency.t) and added test cases
 to t/all.t for the all_* functions.
 
-=head1 VERSION 1.04  (2000-12-21; neilb)
+=back
+
+=head1 VERSION 1.04  (2000-12-21  neilb)
+
+=over 4
 
 Fixed very minor typos from 1.03!
 
-=head1 VERSION 1.03  (2000-12-??; neilb)
+=back
+
+=head1 VERSION 1.03  (2000-12-??  neilb)
+
+=over 4
 
 Updated Locale::Country:
    - fixed spelling of a few countries
@@ -914,7 +1116,11 @@ Updated Locale::Country:
 Updated Locale::Language:
    - fixed typo in the documentation (ISO 939 should be 639)
 
-=head1 VERSION 1.02  (2000-05-04; neilb)
+=back
+
+=head1 VERSION 1.02  (2000-05-04  neilb)
+
+=over 4
 
 Updated Locale::Country and Locale::Language to reflect changes in the
 relevant ISO standards. These mainly reflect languages which are new
@@ -927,7 +1133,11 @@ doc for each module.
 Thanks to Jarkko Hietaniemi for pointing me at the pages with latest
 versions of ISO 3166 and 639.
 
-=head1 VERSION 1.00  (1998-03-09; neilb)
+=back
+
+=head1 VERSION 1.00  (1998-03-09  neilb)
+
+=over 4
 
 Added Locale::Country::_alias_code() so that 'uk' can be added as the
 code for "United Kingdom", if you want it.  This was prompted by Ed
@@ -937,9 +1147,15 @@ Added a new test suite for handling this case, and extended the
 existing test-suite to include testing of the case where 'uk' hasn't
 been defined as a valid code.
 
-=head1 VERSION 0.003  (1997-05-09; neilb)
+=back
+
+=head1 VERSION 0.003  (1997-05-09  neilb)
+
+=over 4
 
 First public release to CPAN
+
+=back
 
 =head1 SEE ALSO
 

@@ -3,7 +3,7 @@ Locale::Codes::LangExt_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Fri Feb 23 12:55:11 EST 2018
+#    Generated on: Wed May 30 10:18:43 EDT 2018
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.56';
+$VERSION='3.57';
 
 $Locale::Codes::Data{'langext'}{'id'} = '0233';
 
@@ -92,6 +92,7 @@ $Locale::Codes::Data{'langext'}{'id2names'} = {
       q(American Sign Language),
       ],
    q(0026) => [
+      q(Auslan),
       q(Australian Sign Language),
       ],
    q(0027) => [
@@ -393,29 +394,29 @@ $Locale::Codes::Data{'langext'}{'id2names'} = {
       q(Lithuanian Sign Language),
       ],
    q(0124) => [
-      q(Lyons Sign Language),
-      ],
-   q(0125) => [
       q(Latvian Sign Language),
       ],
-   q(0126) => [
+   q(0125) => [
       q(Laos Sign Language),
       ],
-   q(0127) => [
+   q(0126) => [
       q(Panamanian Sign Language),
       q(Lengua de Senas Panamenas),
       ],
-   q(0128) => [
+   q(0127) => [
       q(Trinidad and Tobago Sign Language),
       ],
-   q(0129) => [
+   q(0128) => [
       q(Mauritian Sign Language),
       ],
-   q(0130) => [
+   q(0129) => [
       q(Latgalian),
       ],
-   q(0131) => [
+   q(0130) => [
       q(Standard Latvian),
+      ],
+   q(0131) => [
+      q(Malawian Sign Language),
       ],
    q(0132) => [
       q(Literary Chinese),
@@ -771,13 +772,17 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0014),
       q(0),
       ],
+   q(auslan) => [
+      q(0026),
+      q(0),
+      ],
    q(australian aborigines sign language) => [
       q(0029),
       q(0),
       ],
    q(australian sign language) => [
       q(0026),
-      q(0),
+      q(1),
       ],
    q(austrian sign language) => [
       q(0028),
@@ -1188,15 +1193,15 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(laos sign language) => [
-      q(0126),
+      q(0125),
       q(0),
       ],
    q(latgalian) => [
-      q(0130),
+      q(0129),
       q(0),
       ],
    q(latvian sign language) => [
-      q(0125),
+      q(0124),
       q(0),
       ],
    q(lengua de senas catalana) => [
@@ -1208,7 +1213,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(1),
       ],
    q(lengua de senas panamenas) => [
-      q(0127),
+      q(0126),
       q(1),
       ],
    q(libyan arabic) => [
@@ -1243,12 +1248,12 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0121),
       q(0),
       ],
-   q(lyons sign language) => [
-      q(0124),
-      q(0),
-      ],
    q(madagascar sign language) => [
       q(0147),
+      q(0),
+      ],
+   q(malawian sign language) => [
+      q(0131),
       q(0),
       ],
    q(malay (individual language)) => [
@@ -1280,7 +1285,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(mauritian sign language) => [
-      q(0129),
+      q(0128),
       q(0),
       ],
    q(mesopotamian arabic) => [
@@ -1412,7 +1417,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(panamanian sign language) => [
-      q(0127),
+      q(0126),
       q(0),
       ],
    q(papua new guinean sign language) => [
@@ -1556,7 +1561,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(standard latvian) => [
-      q(0131),
+      q(0130),
       q(0),
       ],
    q(standard malay) => [
@@ -1628,7 +1633,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(trinidad and tobago sign language) => [
-      q(0128),
+      q(0127),
       q(0),
       ],
    q(tunisian arabic) => [
@@ -2219,35 +2224,35 @@ $Locale::Codes::Data{'langext'}{'code2id'} = {
          q(0123),
          q(0),
          ],
-      q(lsg) => [
+      q(lsl) => [
          q(0124),
          q(0),
          ],
-      q(lsl) => [
+      q(lso) => [
          q(0125),
          q(0),
          ],
-      q(lso) => [
+      q(lsp) => [
          q(0126),
          q(0),
          ],
-      q(lsp) => [
+      q(lst) => [
          q(0127),
          q(0),
          ],
-      q(lst) => [
+      q(lsy) => [
          q(0128),
          q(0),
          ],
-      q(lsy) => [
+      q(ltg) => [
          q(0129),
          q(0),
          ],
-      q(ltg) => [
+      q(lvs) => [
          q(0130),
          q(0),
          ],
-      q(lvs) => [
+      q(lws) => [
          q(0131),
          q(0),
          ],
@@ -2783,14 +2788,14 @@ $Locale::Codes::Data{'langext'}{'id2code'} = {
       q(0121) => q(lcf),
       q(0122) => q(liw),
       q(0123) => q(lls),
-      q(0124) => q(lsg),
-      q(0125) => q(lsl),
-      q(0126) => q(lso),
-      q(0127) => q(lsp),
-      q(0128) => q(lst),
-      q(0129) => q(lsy),
-      q(0130) => q(ltg),
-      q(0131) => q(lvs),
+      q(0124) => q(lsl),
+      q(0125) => q(lso),
+      q(0126) => q(lsp),
+      q(0127) => q(lst),
+      q(0128) => q(lsy),
+      q(0129) => q(ltg),
+      q(0130) => q(lvs),
+      q(0131) => q(lws),
       q(0132) => q(lzh),
       q(0133) => q(max),
       q(0134) => q(mdl),
