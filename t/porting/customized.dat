@@ -27,6 +27,5 @@ autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
 experimental cpan/experimental/t/basic.t a073ea03ccc98dec496569f3648ab01a5fe1c7a0
 perlfaq cpan/perlfaq/lib/perlfaq5.pod dab8fdf5cc1bb9bf3ccbd10773a78c43f7ed3fab
 perlfaq cpan/perlfaq/lib/perlfaq8.pod 586893218bc2faa8f087da862ccc55adfdf6908c
-podlators pod/perlpodstyle.pod c6500c9950b46e8228d4adbc09a3ee2ef23de2d0
 version cpan/version/lib/version.pm a61f969d55dd73ae2d7a604f2c9bbef1ea82b820
 version vxs.inc f26c23f0279fb64c77ad814af906c04930cff81c

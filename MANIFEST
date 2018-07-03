@@ -1896,6 +1896,11 @@ cpan/podlators/t/data/basic.ovr			podlators test
 cpan/podlators/t/data/basic.pod			podlators test
 cpan/podlators/t/data/basic.txt			podlators test
 cpan/podlators/t/data/perl.conf			podlators test
+cpan/podlators/t/data/snippets/color/escape-wrapping
+cpan/podlators/t/data/snippets/color/tag-width
+cpan/podlators/t/data/snippets/color/tag-wrapping
+cpan/podlators/t/data/snippets/color/width
+cpan/podlators/t/data/snippets/color/wrapping
 cpan/podlators/t/data/snippets/man/agrave
 cpan/podlators/t/data/snippets/man/backslash-man-ref
 cpan/podlators/t/data/snippets/man/bullet-after-nonbullet
@@ -1945,11 +1950,18 @@ cpan/podlators/t/data/snippets/man/utf8-verbatim
 cpan/podlators/t/data/snippets/man/x-whitespace
 cpan/podlators/t/data/snippets/man/x-whitespace-entry
 cpan/podlators/t/data/snippets/README			podlators test
+cpan/podlators/t/data/snippets/termcap/escape-wrapping
+cpan/podlators/t/data/snippets/termcap/tag-width
+cpan/podlators/t/data/snippets/termcap/tag-wrapping
+cpan/podlators/t/data/snippets/termcap/width
+cpan/podlators/t/data/snippets/termcap/wrapping
 cpan/podlators/t/data/snippets/text/cpp			podlators test
 cpan/podlators/t/data/termcap			podlators test
 cpan/podlators/t/docs/pod.t			podlators test
 cpan/podlators/t/docs/pod-spelling.t			podlators test
+cpan/podlators/t/docs/spdx-license.t			podlators test
 cpan/podlators/t/docs/synopsis.t			podlators test
+cpan/podlators/t/docs/urls.t			podlators test
 cpan/podlators/t/general/basic.t			podlators test
 cpan/podlators/t/general/filehandle.t			podlators test
 cpan/podlators/t/general/pod-parser.t			podlators test
