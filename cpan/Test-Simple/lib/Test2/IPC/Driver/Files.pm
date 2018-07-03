@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302136';
 
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
@@ -270,7 +270,7 @@ sub parse_event_filename {
     my $ready    = substr($file, -6, 6) eq '.ready'    || 0 and substr($file, -6, 6, "");
 
     my @parts = split ipc_separator, $file;
-    my ($global, $hid) = $parts[0] eq 'GLOBAL' ? (1, shift @parts) : (0, join ipc_separator, splice(@parts, 0, 3));
+    my ($global, $hid) = $parts[0] eq 'GLOBAL' ? (1, shift @parts) : (0, join ipc_separator, splice(@parts, 0, 4));
     my ($pid, $tid, $eid) = splice(@parts, 0, 3);
     my $type = join '::' => @parts;
 

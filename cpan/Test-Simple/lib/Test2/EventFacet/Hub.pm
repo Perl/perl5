@@ -2,7 +2,7 @@ package Test2::EventFacet::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302133';
+our $VERSION = '1.302136';
 
 sub is_list { 1 }
 sub facet_key { 'hubs' }
@@ -20,7 +20,7 @@ __END__
 
 =head1 NAME
 
-Test2::EventFacet::Hub
+Test2::EventFacet::Hub - Facet for the hubs an event passes through.
 
 =head1 DESCRIPTION
 
