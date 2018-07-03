@@ -4,7 +4,7 @@ perlfaq8 - System Interaction
 
 =head1 VERSION
 
-version 5.021011
+version 5.20180605
 
 =head1 DESCRIPTION
 
@@ -1106,7 +1106,7 @@ available drivers on CPAN: L<http://www.cpan.org/modules/by-module/DBD/> .
 You can read more about DBI on L<http://dbi.perl.org/> .
 
 Other modules provide more specific access: L<Win32::ODBC>, L<Alzabo>,
-C<iodbc>, and others found on CPAN Search: L<http://search.cpan.org/> .
+C<iodbc>, and others found on CPAN Search: L<https://metacpan.org/> .
 
 =head2 How do I make a system() exit on control-C?
 

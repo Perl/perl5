@@ -4,7 +4,7 @@ perlfaq9 - Web, Email and Networking
 
 =head1 VERSION
 
-version 5.021011
+version 5.20180605
 
 =head1 DESCRIPTION
 
@@ -227,7 +227,6 @@ If you've already got some other kind of email object, consider passing
 it to L<Email::Abstract> and then using its cast method to get an
 L<Email::MIME> object:
 
-  my $mail_message_object = read_message();
   my $abstract = Email::Abstract->new($mail_message_object);
   my $email_mime_object = $abstract->cast('Email::MIME');
 
@@ -323,13 +322,7 @@ be able to use this.
 =item L<Email::Sender::Transport::SMTP>
 
 This transport contacts a remote SMTP server over TCP. It optionally
-uses SSL and can authenticate to the server via SASL.
-
-=item L<Email::Sender::Transport::SMTP::TLS>
-
-This is like the SMTP transport, but uses TLS security. You can
-authenticate with this module as well, using any mechanisms your server
-supports after STARTTLS.
+uses TLS or SSL and can authenticate to the server via SASL.
 
 =back
 
