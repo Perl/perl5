@@ -2,7 +2,13 @@
 
 <data>
 
-<div><h2>Proposed Cherry-Picks</h2>
+<div><h2>Tickets Listed in #133320: 5.28.1 blockers</h2>
+
+<commit votes="" id="" ticket="133314" desc="in-place editing in 5.28 quickly exhausts open file descriptor limit" />
+
+</div>
+
+<div><h2>Other Proposed Cherry-Picks</h2>
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
