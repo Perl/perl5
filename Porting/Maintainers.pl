@@ -546,7 +546,8 @@ use File::Glob qw(:case);
             qr{^Exec/},
             qr{^lib/Filter/},
             qr{^tee/},
-            qw( Call/Makefile.PL
+            qw( .appveyor.yml
+                Call/Makefile.PL
                 Call/ppport.h
                 Call/typemap
                 mytest
