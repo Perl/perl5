@@ -725,15 +725,14 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999811.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999813.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^examples/},
             qr{^t/author-},
+            qr{^t/release-},
             qw( t/00sig.t
                 t/01load.t
-                t/02pod.t
-                t/03podcov.t
                 ),
         ],
     },
