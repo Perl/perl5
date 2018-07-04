@@ -11,10 +11,9 @@ use bignum;
 
 my @WARNINGS;
 {
-    # catch warnings:
-    require Carp;
-    no warnings 'redefine';
-    *Carp::carp = sub { push @WARNINGS, $_[0]; };
+    # This hack is to catch warnings. Math::BigInt imports 'carp' from 'Carp',
+    # so we redefine it to catch the warnings.
+    *Math::BigInt::carp = sub { push @WARNINGS, $_[0]; };
 }
 
 my $rc;
