@@ -417,12 +417,8 @@ use File::Glob qw(:case);
     },
 
     'experimental' => {
-        'DISTRIBUTION' => 'LEONT/experimental-0.019.tar.gz',
+        'DISTRIBUTION' => 'LEONT/experimental-0.020.tar.gz',
         'FILES'        => q[cpan/experimental],
-        'EXCLUDED'     => [
-            qr{^xt/},
-            qr{nytprof.*}
-        ],
         'EXCLUDED'     => [qr{^xt/}],
         'CUSTOMIZED'   => [
 	    # smartmatch changes
