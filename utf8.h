@@ -752,7 +752,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_CONTINUATION		0x0002
 #define UTF8_GOT_CONTINUATION		UTF8_ALLOW_CONTINUATION
 
-/* Unexpected continuation byte */
+/* Unexpected non-continuation byte */
 #define UTF8_ALLOW_NON_CONTINUATION	0x0004
 #define UTF8_GOT_NON_CONTINUATION	UTF8_ALLOW_NON_CONTINUATION
 
@@ -836,8 +836,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
                         |UTF8_ALLOW_OVERFLOW)
 
 /* Accept any Perl-extended UTF-8 that evaluates to any UV on the platform, but
- * not any malformed.  This is the default.  (Note that UVs above IV_MAX are
- * deprecated. */
+ * not any malformed.  This is the default. */
 #define UTF8_ALLOW_ANYUV   0
 #define UTF8_ALLOW_DEFAULT UTF8_ALLOW_ANYUV
 
