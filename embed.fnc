@@ -825,6 +825,12 @@ EXnidR	|bool	|is_utf8_non_invariant_string|NN const U8* const s	    \
 #endif
 AbnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
+AnidR	|Size_t	|isUTF8_CHAR|NN const U8 * const s0			    \
+			    |NN const U8 * const e
+AnidR	|Size_t	|isSTRICT_UTF8_CHAR |NN const U8 * const s0		    \
+				    |NN const U8 * const e
+AnidR	|Size_t	|isC9_STRICT_UTF8_CHAR |NN const U8 * const s0		    \
+				       |NN const U8 * const e
 AnmdpR	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 AnidR	|bool	|is_utf8_string_flags					    \
 		|NN const U8 *s|STRLEN len|const U32 flags
@@ -1840,16 +1846,23 @@ Aopd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *ret
 ApdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 pM	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
 
-Adop	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
+Adnop	|UV	|utf8n_to_uvchr	|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags
-Adop	|UV	|utf8n_to_uvchr_error|NN const U8 *s			    \
+Adnop	|UV	|utf8n_to_uvchr_error|NN const U8 *s			    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags			    \
 				|NULLOK U32 * errors
-AMdp	|UV	|utf8n_to_uvchr_msgs|NN const U8 *s			    \
+AMndi	|UV	|utf8n_to_uvchr_msgs|NN const U8 *s			    \
+				|STRLEN curlen				    \
+				|NULLOK STRLEN *retlen			    \
+				|const U32 flags			    \
+				|NULLOK U32 * errors			    \
+				|NULLOK AV ** msgs
+AMnpd	|UV	|_utf8n_to_uvchr_msgs_helper				    \
+				|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
 				|const U32 flags			    \
