@@ -28,8 +28,7 @@ sub output_table ($$;$) {
     print $out_fh $column_numbers if $print_in_hex;
     for my $i (0 .. 255) {
         if ($print_in_hex) {
-            # No row headings, so will fit in 80 cols.
-            #printf $out_fh "/* %X_ */ ", $i / 16 if $i % 16 == 0;
+            printf $out_fh "/*%X_*/ ", $i / 16 if $i % 16 == 0;
             printf $out_fh "0x%02X", $table_ref->[$i];
         }
         else {
