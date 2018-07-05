@@ -89,7 +89,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Translating from UTF-8 into the code point it represents now is done via
+a deterministic finite automaton, speeding it up.  As a typical example,
+C<ord("\x7fff")> now requires 12% fewer instructions than before.
+The performance of checking that a sequence of bytes is valid UTF-8 is
+similarly improved, again by using a dfa.
 
 =back
 
