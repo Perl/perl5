@@ -2032,7 +2032,7 @@ will run all tests.
 If individual tests fail, you can often run them by hand (from the main
 perl directory), e.g.,
 
-	./perl -MTestInit t/op/groups.t
+	./perl -I. -MTestInit t/op/groups.t
 
 You should also read the individual tests to see if there are any helpful
 comments that apply to your system.  You may also need to setup your
@@ -2099,7 +2099,7 @@ test 85 will fail if run under either t/TEST or t/harness.
 
 Try stopping other jobs on the system and then running the test by itself:
 
-	./perl -MTestInit t/op/pat.t
+	./perl -I. -MTestInit t/op/pat.t
 
 to see if you have any better luck.  If your perl still fails this
 test, it does not necessarily mean you have a broken perl.  This test
