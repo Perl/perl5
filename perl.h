@@ -6090,7 +6090,7 @@ typedef struct am_table_short AMTS;
  && (! defined(USE_THREAD_SAFE_LOCALE) || defined(TS_W32_BROKEN_LOCALECONV))
 
 /* We have a locale object holding the 'C' locale for Posix 2008 */
-#ifndef USE_POSIX_2008_LOCALE
+#  ifndef USE_POSIX_2008_LOCALE
 #    define _LOCALE_TERM_POSIX_2008  NOOP
 #  else
 #    define _LOCALE_TERM_POSIX_2008                                         \
