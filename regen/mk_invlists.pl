@@ -2839,7 +2839,7 @@ my $keywords_fh = open_new('uni_keywords.h', '>',
 
 no warnings 'once';
 print $keywords_fh <<"EOF";
-/* The precisionn to use in "%.*e" formats */
+/* The precision to use in "%.*e" formats */
 #define PL_E_FORMAT_PRECISION $utf8::e_precision
 
 EOF
