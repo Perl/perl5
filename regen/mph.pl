@@ -4,6 +4,7 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Text::Wrap;
+use bignum;     # Otherwise fails on 32-bit systems
 
 my $DEBUG= 0;
 my $RSHIFT= 8;
@@ -11,7 +12,6 @@ my $FNV_CONST= 16777619;
 
 sub _fnv {
     my ($key, $seed)= @_;
-    use integer;
     my $hash = 0+$seed;
     foreach my $char (split //, $key) {
         $hash = $hash ^ ord($char);
