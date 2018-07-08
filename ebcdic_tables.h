@@ -293,9 +293,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 perl_extended_utf8_dfa_tab[];
+#    EXTCONST U8 PL_extended_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
+#    EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
 /*         _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -334,9 +334,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U16 strict_utf8_dfa_tab[];
+#    EXTCONST U16 PL_strict_utf8_dfa_tab[];
 #  else
-#    EXTCONST U16 strict_utf8_dfa_tab[] = {
+#    EXTCONST U16 PL_strict_utf8_dfa_tab[] = {
 /*          _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -380,9 +380,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 C9_utf8_dfa_tab[];
+#    EXTCONST U8 PL_c9_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 C9_utf8_dfa_tab[] = {
+#    EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
 /*        _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -670,9 +670,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 perl_extended_utf8_dfa_tab[];
+#    EXTCONST U8 PL_extended_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
+#    EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
 /*         _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -711,9 +711,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U16 strict_utf8_dfa_tab[];
+#    EXTCONST U16 PL_strict_utf8_dfa_tab[];
 #  else
-#    EXTCONST U16 strict_utf8_dfa_tab[] = {
+#    EXTCONST U16 PL_strict_utf8_dfa_tab[] = {
 /*          _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -757,9 +757,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 C9_utf8_dfa_tab[];
+#    EXTCONST U8 PL_c9_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 C9_utf8_dfa_tab[] = {
+#    EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
 /*        _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,

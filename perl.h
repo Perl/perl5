@@ -5518,7 +5518,7 @@ static U8 utf8d_C9[] = {
  *      FF              1
  */
 
-EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
+EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
     /* The first part of the table maps bytes to character classes to reduce
      * the size of the transition table and create bitmasks. */
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
@@ -5656,7 +5656,7 @@ EXTCONST U8 perl_extended_utf8_dfa_tab[] = {
  *      F5-FF           1
  */
 
-EXTCONST U8 strict_utf8_dfa_tab[] = {
+EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
     /* The first part of the table maps bytes to character classes to reduce
      * the size of the transition table and create bitmasks. */
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
@@ -5771,7 +5771,7 @@ EXTCONST U8 strict_utf8_dfa_tab[] = {
  *      F5-FF           1
  */
 
-EXTCONST U8 C9_utf8_dfa_tab[] = {
+EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
     /* The first part of the table maps bytes to character classes to reduce
      * the size of the transition table and create bitmasks. */
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*00-0F*/
@@ -5844,9 +5844,9 @@ EXTCONST U8 C9_utf8_dfa_tab[] = {
 
 #  else     /* End of is DOINIT */
 
-EXTCONST U8 perl_extended_utf8_dfa_tab[];
-EXTCONST U8 strict_utf8_dfa_tab[];
-EXTCONST U8 C9_utf8_dfa_tab[];
+EXTCONST U8 PL_extended_utf8_dfa_tab[];
+EXTCONST U8 PL_strict_utf8_dfa_tab[];
+EXTCONST U8 PL_c9_utf8_dfa_tab[];
 
 #  endif
 #endif    /* end of isn't EBCDIC */

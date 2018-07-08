@@ -504,7 +504,7 @@ END
             1,  1,  1,  1,  1,  1,  1,  1,  1,$N4,$N4,$N4,  1,  1,  1,  1, # N8
             1,  1,  1,  1,  1,  1,  1,  1,$N5,$N5,$N5,$N5,  1,  1,  1,  1, # N9
         );
-        output_table(\@perl_extended_utf8_dfa, "perl_extended_utf8_dfa_tab",
+        output_table(\@perl_extended_utf8_dfa, "PL_extended_utf8_dfa_tab",
                                                                    $NUM_CLASSES);
     }
 
@@ -663,7 +663,7 @@ END
             1,1,  1,  1,  1,  1,  1,  1,  1,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1, # N13
             1,1,  1,  1,  1,  1,  1,  1,  1,  1, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2, $N2,$N13, # N14
         );
-        output_table(\@strict_utf8_dfa, "strict_utf8_dfa_tab", $NUM_CLASSES);
+        output_table(\@strict_utf8_dfa, "PL_strict_utf8_dfa_tab", $NUM_CLASSES);
     }
 
     {
@@ -754,7 +754,7 @@ END
             1,1,  1,  1,  1,  1,  1,  1,  1,  1,   1, $N3, $N3, $N3, # N6
             1,1,  1,  1,  1,  1,  1,  1,  1,$N3,   1,   1,   1,   1, # N7
         );
-        output_table(\@C9_utf8_dfa, "C9_utf8_dfa_tab", $NUM_CLASSES);
+        output_table(\@C9_utf8_dfa, "PL_c9_utf8_dfa_tab", $NUM_CLASSES);
     }
 
     print $out_fh get_conditional_compile_line_end();
