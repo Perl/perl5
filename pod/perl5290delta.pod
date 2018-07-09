@@ -28,10 +28,6 @@ grapheme for a delimiter.>
 
 =item *
 
-L<Archive::Tar> has been upgraded from version 2.28 to 2.30.
-
-=item *
-
 L<feature> has been upgraded from version 1.52 to 1.53.
 
 =item *
