@@ -1313,7 +1313,8 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVef&& \
 	echo #undef NVff&& \
 	echo #undef NVgf&& \
-	echo #undef USE_LONG_DOUBLE)>> config.h
+	echo #undef USE_LONG_DOUBLE&& \
+	echo #undef USE_CPLUSPLUS)>> config.h
 ifeq ($(CCTYPE),MSVC140)
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
