@@ -2926,8 +2926,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 	return _to_upper_title_latin1((U8) c, p, lenp, 'S');
     }
 
-    uvchr_to_utf8(p, c);
-    return CALL_UPPER_CASE(c, p, p, lenp);
+    return CALL_UPPER_CASE(c, NULL, p, lenp);
 }
 
 UV
@@ -2939,8 +2938,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 	return _to_upper_title_latin1((U8) c, p, lenp, 's');
     }
 
-    uvchr_to_utf8(p, c);
-    return CALL_TITLE_CASE(c, p, p, lenp);
+    return CALL_TITLE_CASE(c, NULL, p, lenp);
 }
 
 STATIC U8
@@ -2979,8 +2977,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 	return to_lower_latin1((U8) c, p, lenp, 0 /* 0 is a dummy arg */ );
     }
 
-    uvchr_to_utf8(p, c);
-    return CALL_LOWER_CASE(c, p, p, lenp);
+    return CALL_LOWER_CASE(c, NULL, p, lenp);
 }
 
 UV
@@ -3076,8 +3073,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 
     /* Here, above 255.  If no special needs, just use the macro */
     if ( ! (flags & (FOLD_FLAGS_LOCALE|FOLD_FLAGS_NOMIX_ASCII))) {
-	uvchr_to_utf8(p, c);
-	return CALL_FOLD_CASE(c, p, p, lenp, flags & FOLD_FLAGS_FULL);
+	return CALL_FOLD_CASE(c, NULL, p, lenp, flags & FOLD_FLAGS_FULL);
     }
     else {  /* Otherwise, _toFOLD_utf8_flags has the intelligence to deal with
 	       the special flags. */
@@ -3532,12 +3528,16 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
     /* Here, there was no mapping defined, which means that the code point maps
      * to itself.  Return the inputs */
   cases_to_self:
-    len = UTF8SKIP(p);
-    if (p != ustrp) {   /* Don't copy onto itself */
-        Copy(p, ustrp, len, U8);
+    if (p) {
+        len = UTF8SKIP(p);
+        if (p != ustrp) {   /* Don't copy onto itself */
+            Copy(p, ustrp, len, U8);
+        }
+        *lenp = len;
     }
-
-    *lenp = len;
+    else {
+	*lenp = uvchr_to_utf8(ustrp, uv1) - ustrp;
+    }
 
     return uv1;
 

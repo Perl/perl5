@@ -1779,7 +1779,7 @@ s	|U32	|check_and_deprecate					    \
 				|NN const char * const file		    \
 				|const unsigned line
 s	|UV	|_to_utf8_case  |const UV uv1					\
-				|NN const U8 *p					\
+				|NULLOK const U8 *p				\
 				|NN U8* ustrp					\
 				|NN STRLEN *lenp				\
 				|NN SV *invlist					\
