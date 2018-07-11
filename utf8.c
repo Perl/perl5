@@ -3537,8 +3537,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
         Copy(p, ustrp, len, U8);
     }
 
-    if (lenp)
-	 *lenp = len;
+    *lenp = len;
 
     return uv1;
 

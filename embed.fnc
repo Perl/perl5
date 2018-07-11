@@ -1781,7 +1781,7 @@ s	|U32	|check_and_deprecate					    \
 s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN const U8 *p					\
 				|NN U8* ustrp					\
-				|NULLOK STRLEN *lenp				\
+				|NN STRLEN *lenp				\
 				|NN SV *invlist					\
 				|NN const int * const invmap			\
 				|NULLOK const unsigned int * const * const aux_tables	\
