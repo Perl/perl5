@@ -305,6 +305,9 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
+ '/.{, 4 }/' => 'Unescaped left brace in regex is illegal here {#} m/.{{#}, 4 }/',
+ '/[x]{, 4}/'       => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}, 4}/',
+ '/\p{Latin}{,4 }/' => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#},4 }/',
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
 
@@ -389,14 +392,20 @@ my @death_only_under_strict = (
                                      => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
     '/[a\zb]\x{100}/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]\x{100}/',
                       => 'Unrecognized escape \z in character class {#} m/[a\z{#}b]\x{100}/',
-    'default_on/:{4,a}/'     => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/:{{#}4,a}/',
-                             => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
-    'default_on/xa{3\,4}y/'  => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/xa{{#}3\,4}y/',
-                             => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
-  'default_on/\\${[^\\}]*}/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\\${{#}[^\\}]*}/',
-                             => 'Unescaped left brace in regex is illegal here {#} m/\\${{#}[^\\}]*}/',
     '/[ab]/'          => "",
                         => 'Literal vertical space in [] is illegal except under /x {#} m/[a{#}b]/',
+    '/:{4,a}/'     => 'Unescaped left brace in regex is passed through {#} m/:{{#}4,a}/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
+    '/xa{3\,4}y/'  => 'Unescaped left brace in regex is passed through {#} m/xa{{#}3\,4}y/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
+    '/\\${[^\\}]*}/' => 'Unescaped left brace in regex is passed through {#} m/\\${{#}[^\\}]*}/',
+                     => 'Unescaped left brace in regex is illegal here {#} m/\\${{#}[^\\}]*}/',
+    '/.{/'         => 'Unescaped left brace in regex is passed through {#} m/.{{#}/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/.{{#}/',
+    '/[x]{/'       => 'Unescaped left brace in regex is passed through {#} m/[x]{{#}/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}/',
+    '/\p{Latin}{/' => 'Unescaped left brace in regex is passed through {#} m/\p{Latin}{{#}/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#}/',
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -690,9 +699,6 @@ my @deprecated = (
  '/foo(:?{bar)/' => "",
  '/\s*{/'        => "",
  '/a{3,4}{/'     => "",
- '/.{/'         => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/.{{#}/',
- '/[x]{/'       => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/[x]{{#}/',
- '/\p{Latin}{/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\p{Latin}{{#}/',
 );
 
 for my $strict ("", "use re 'strict';") {

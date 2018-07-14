@@ -106,7 +106,7 @@ Literal uses of C<{> were deprecated in Perl 5.20, and some uses of it
 started to give deprecation warnings since. These cases were made fatal
 in Perl 5.26. Due to an oversight, not all cases of a use of a literal
 C<{> got a deprecation warning.  Some cases started warning in Perl 5.26,
-and they will be fatal by Perl 5.30.  Other case started in Perl 5.28,
+and were made fatal in Perl 5.30.  Other case started in Perl 5.28,
 and will be made fatal in 5.32.
 
 =head2 Perl 5.30

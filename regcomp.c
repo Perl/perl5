@@ -13787,20 +13787,22 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    } /* End of switch on '\' */
 		    break;
 		case '{':
-                    /* Currently we allow an lbrace at the start of a construct
-                     * without raising a warning.  This is because we think we
-                     * will never want such a brace to be meant to be other
-                     * than taken literally. */
+                    /* Trying to gain new uses for '{' without breaking too
+                     * much existing code is hard.  The solution currently
+                     * adopted is:
+                     *  1)  If there is no ambiguity that a '{' should always
+                     *      be taken literally, at the start of a construct, we
+                     *      just do so.
+                     *  2)  If the literal '{' conflicts with our desired use
+                     *      of it as a metacharacter, we die.  The deprecation
+                     *      cycles for this have come and gone.
+                     *  3)  If there is ambiguity, we raise a simple warning.
+                     *      This could happen, for example, if the user
+                     *      intended it to introduce a quantifier, but slightly
+                     *      misspelled the quantifier.  Without this warning,
+                     *      the quantifier would silently be taken as a literal
+                     *      string of characters instead of a meta construct */
 		    if (len || (p > RExC_start && isALPHA_A(*(p - 1)))) {
-
-                        /* But, we raise a fatal warning otherwise, as the
-                         * deprecation cycle has come and gone.  Except that it
-                         * turns out that some heavily-relied on upstream
-                         * software, notably GNU Autoconf, have failed to fix
-                         * their uses.  For these, don't make it fatal unless
-                         * we anticipate using the '{' for something else.
-                         * This happens after any alpha, and for a looser {m,n}
-                         * quantifier specification */
                         if (      RExC_strict
                             || (  p > parse_start + 1
                                 && isALPHA_A(*(p - 1))
@@ -13812,10 +13814,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                   "illegal here");
                         }
                         if (PASS2) {
-                            ckWARNregdep(p + 1,
-                                        "Unescaped left brace in regex is "
-                                        "deprecated here (and will be fatal "
-                                        "in Perl 5.30), passed through");
+                            ckWARNreg(p + 1, "Unescaped left brace in regex is"
+                                             " passed through");
                         }
 		    }
 		    goto normal_default;
@@ -14324,8 +14324,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Position parse to next real character */
     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                             FALSE /* Don't force to /x */ );
-    if (PASS2 && *RExC_parse == '{' && OP(ret) != SBOL && ! regcurly(RExC_parse)) {
-        ckWARNregdep(RExC_parse + 1, "Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through");
+    if (   PASS2 && *RExC_parse == '{'
+        && OP(ret) != SBOL && ! regcurly(RExC_parse))
+    {
+        if (RExC_strict || new_regcurly(RExC_parse, RExC_end)) {
+            RExC_parse++;
+            vFAIL("Unescaped left brace in regex is illegal here");
+        }
+        ckWARNreg(RExC_parse + 1, "Unescaped left brace in regex is"
+                                  " passed through");
     }
 
     return(ret);
