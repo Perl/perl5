@@ -303,6 +303,8 @@ PERLVAR(G, utf8_tofold,	SV *)
 PERLVAR(G, utf8_tosimplefold,	SV *)
 PERLVAR(G, utf8_charname_begin, SV *)
 PERLVAR(G, utf8_charname_continue, SV *)
+PERLVAR(G, utf8_mark,	SV *)
+PERLVAR(G, InBitmap,	SV *)
 
 /* Everything that folds to a given character, for case insensitivity regex
  * matching */

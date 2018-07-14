@@ -109,6 +109,8 @@ END_EXTERN_C
 #define PL_GCB_invlist		(*Perl_GGCB_invlist_ptr(NULL))
 #undef  PL_HasMultiCharFold
 #define PL_HasMultiCharFold	(*Perl_GHasMultiCharFold_ptr(NULL))
+#undef  PL_InBitmap
+#define PL_InBitmap		(*Perl_GInBitmap_ptr(NULL))
 #undef  PL_LB_invlist
 #define PL_LB_invlist		(*Perl_GLB_invlist_ptr(NULL))
 #undef  PL_Latin1
@@ -219,6 +221,8 @@ END_EXTERN_C
 #define PL_utf8_idcont		(*Perl_Gutf8_idcont_ptr(NULL))
 #undef  PL_utf8_idstart
 #define PL_utf8_idstart		(*Perl_Gutf8_idstart_ptr(NULL))
+#undef  PL_utf8_mark
+#define PL_utf8_mark		(*Perl_Gutf8_mark_ptr(NULL))
 #undef  PL_utf8_perl_idcont
 #define PL_utf8_perl_idcont	(*Perl_Gutf8_perl_idcont_ptr(NULL))
 #undef  PL_utf8_perl_idstart

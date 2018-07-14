@@ -3367,7 +3367,7 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT__IS_UTF8_MARK;
 
-    return is_utf8_common(p, &PL_utf8_mark, "IsM", NULL);
+    return is_utf8_common(p, NULL, "IsM", PL_utf8_mark);
 }
 
 STATIC UV
@@ -5829,6 +5829,7 @@ Perl_init_uniprops(pTHX)
     PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
+    PL_utf8_mark = _new_invlist_C_array(PL_uni_prop_ptrs[PL_M]);
 }
 
 SV *

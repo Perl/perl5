@@ -640,11 +640,7 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
 
-/* Unicode inversion lists */
-PERLVAR(I, InBitmap,	SV *)
-
 /* utf8 character class swashes */
-PERLVAR(I, utf8_mark,	SV *)
 PERLVAR(I, seen_deprecated_macro, HV *)
 
 PERLVAR(I, last_swash_hv, HV *)

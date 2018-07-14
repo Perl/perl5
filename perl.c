@@ -1166,14 +1166,8 @@ perl_destruct(pTHXx)
     }
 
     /* clear character classes  */
-    SvREFCNT_dec(PL_utf8_mark);
-    SvREFCNT_dec(PL_InBitmap);
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
-#endif
-    PL_utf8_mark	= NULL;
-    PL_InBitmap          = NULL;
-#ifdef USE_LOCALE_CTYPE
     PL_warn_locale       = NULL;
 #endif
 
