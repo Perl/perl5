@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 195;
+plan tests => 197;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -1357,6 +1357,27 @@ given("xyz") {
     is join(",", map { $_ // "u" } @a), "a,b,c,u,d,e,f",
 	"scalar value of false when";
 }
+
+# RT #133368
+# index() and rindex() comparisons such as '> -1' are optimised away. Make
+# sure that they're still treated as a direct boolean expression rather
+# than when(X) being implicitly converted to when($_ ~~ X)
+
+{
+    my $s = "abc";
+    my $ok = 0;
+    given("xyz") {
+        when (index($s, 'a') > -1) { $ok = 1; }
+    }
+    ok($ok, "RT #133368 index");
+
+    $ok = 0;
+    given("xyz") {
+        when (rindex($s, 'a') > -1) { $ok = 1; }
+    }
+    ok($ok, "RT #133368 rindex");
+}
+
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t. Taintedness of
