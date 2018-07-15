@@ -1334,7 +1334,7 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
          * is to try faking the input.  We will try inf/-inf/nan
          * as the most promising/portable input. */
         {
-            const char* fake = NULL;
+            const char* fake = "silence compiler warning";
             char* endp;
             NV nv;
 #ifdef NV_INF
@@ -1347,7 +1347,7 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
                 fake = "nan";
             }
 #endif
-            assert(fake);
+            assert(strNE(fake, "silence compiler warning"));
             nv = Perl_strtod(fake, &endp);
             if (fake != endp) {
 #ifdef NV_INF
