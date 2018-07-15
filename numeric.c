@@ -1439,10 +1439,30 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 #ifdef USE_QUADMATH
     {
         char* endp;
+        char* copy = NULL;
+
         if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return endp;
-        endp = send;
+
+        /* If the length is passed in, the input string isn't NUL-terminated,
+         * and in it turns out the function below assumes it is; therefore we
+         * create a copy and NUL-terminate that */
+        if (len) {
+            Newx(copy, len + 1, char);
+            Copy(orig, copy, len, char);
+            copy[len] = '\0';
+            s = copy + (s - orig);
+        }
+
         result[2] = strtoflt128(s, &endp);
+
+        /* If we created a copy, 'endp' is in terms of that.  Convert back to
+         * the original */
+        if (copy) {
+            endp = (endp - copy) + (char *) orig;
+            Safefree(copy);
+        }
+
         if (s != endp) {
             *value = negative ? -result[2] : result[2];
             return endp;
