@@ -898,6 +898,7 @@ if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
 			    win32_realloc
 			    win32_free
 			    win32_sleep
+			    win32_pause
 			    win32_times
 			    win32_access
 			    win32_alarm

@@ -2455,6 +2455,14 @@ win32_sleep(unsigned int t)
     return win32_msgwait(aTHX_ 0, NULL, t * 1000, NULL) / 1000;
 }
 
+DllExport int
+win32_pause(void)
+{
+    dTHX;
+    win32_msgwait(aTHX_ 0, NULL, INFINITE, NULL);
+    return -1;
+}
+
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
