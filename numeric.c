@@ -1084,6 +1084,8 @@ used for incremental parsing, and therefore should be avoided
 C<atoi> and C<strtol> are also affected by locale settings, which can also be
 seen as a bug (global state controlled by user environment).
 
+=cut
+
 */
 
 bool
