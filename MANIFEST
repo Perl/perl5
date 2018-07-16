@@ -463,6 +463,7 @@ cpan/DB_File/Makefile.PL	Berkeley DB extension makefile writer
 cpan/DB_File/t/db-btree.t	See if DB_File works
 cpan/DB_File/t/db-hash.t	See if DB_File works
 cpan/DB_File/t/db-recno.t	See if DB_File works
+cpan/DB_File/t/db-threads.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
 cpan/Digest/Digest.pm		Digest extensions
