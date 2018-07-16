@@ -5,7 +5,7 @@ use warnings;
 use Carp qw/croak/;
 use Scalar::Util qw/reftype/;
 
-our $VERSION = '1.302136';
+our $VERSION = '1.302138';
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
 use Test2::Util::HashBase;

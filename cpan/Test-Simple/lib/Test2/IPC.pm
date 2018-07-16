@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302136';
+our $VERSION = '1.302138';
 
 
 use Test2::API::Instance;
@@ -17,6 +17,9 @@ use Test2::API qw{
     test2_tid
     context
 };
+
+# Make sure stuff is finalized before anyone tried to fork or start a new thread.
+INIT { context()->release() }
 
 use Carp qw/confess/;
 
