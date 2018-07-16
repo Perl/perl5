@@ -68,17 +68,11 @@ for example the character used as the decimal point.
 
 =item Category C<LC_MONETARY>: Formatting of monetary amounts
 
-=for comment
-The nbsp below makes this look better (though not great)
-
-E<160>
+Z<>
 
 =item Category C<LC_TIME>: Date/Time formatting
 
-=for comment
-The nbsp below makes this look better (though not great)
-
-E<160>
+Z<>
 
 =item Category C<LC_MESSAGES>: Error and other messages
 
@@ -247,10 +241,7 @@ module or writing XS code, it is important to keep in mind that the
 underlying locale may be something other than "C", even if the program
 hasn't explicitly changed it.
 
-=for comment
-The nbsp below makes this look better (though not great)
-
-E<160>
+Z<>
 
 =item B<Lingering effects of C<S<use locale>>>
 
@@ -278,11 +269,7 @@ behavior, not if the matches are done within such a scope or not.
 
 =back
 
-=for comment
-The nbsp below makes this look better (though not great)
-
-
-E<160>
+Z<>
 
 =item B<Under C<"use locale";>>
 
