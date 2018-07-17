@@ -82,15 +82,8 @@ my %temp_no_core =
 # Ideally this # list will eventually be empty
 
 my %temp_needs_dot  = map { $_ => 1 } qw(
-    ../cpan/ExtUtils-Install
     ../cpan/Filter-Util-Call
     ../cpan/libnet
-    ../cpan/Locale-Codes
-    ../cpan/Math-BigInt
-    ../cpan/Math-BigRat
-    ../cpan/Test-Harness
-    ../cpan/Test-Simple
-    ../cpan/version
 );
 
 
