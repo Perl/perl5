@@ -2085,7 +2085,7 @@ STMT_START {                                                                    
 #ifdef DEBUGGING
 static IV
 S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
-  IV cp_out = Perl__invlist_search(invlist, cp_in);
+  IV cp_out = _invlist_search(invlist, cp_in);
   assert(cp_out >= 0);
   return cp_out;
 }
