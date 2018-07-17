@@ -474,11 +474,12 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 # Programs to compile, build .lib files and link
 #
 
-#poison the recipe if no CCTYPE is set, and delete mini config.h if it was
-#written with no sane CC version set so the world is rebuilt
+# Poison the recipe if no CCTYPE is set, and delete mini\.exists so everything
+# is rebuilt next time to avoid reusing a mini config.h written with no sane CC
+# version set
 !IF "$(CCTYPE)" == ""
 CC		= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
-LINK32	= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
+LINK32		= @echo CCTYPE makefile variable not set && del mini\.exists && exit 1 &&
 !ELSE IF "$(__ICC)" != "define"
 CC		= cl
 LINK32		= link
