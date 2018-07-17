@@ -1443,7 +1443,7 @@ is a word character (meaning it matches C</\w/>):
     qXfooX  # WRONG!
 
 The following escape sequences are available in constructs that interpolate,
-and in transliterations:
+and in transliterations whose delimiters aren't single quotes (C<"'">).
 X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N> X<\N{}>
 X<\o{}>
 
@@ -2418,22 +2418,28 @@ Unless the C</r> option is used, the string specified with C<=~> must be a
 scalar variable, an array element, a hash element, or an assignment to one
 of those; in other words, an lvalue.
 
-A character range may be specified with a hyphen, so C<tr/A-J/0-9/>
-does the same replacement as C<tr/ACEGIBDFHJ/0246813579/>.
+If the characters delimiting I<SEARCHLIST> and I<REPLACEMENTLIST>
+are single quotes (C<tr'I<SEARCHLIST>'I<REPLACEMENTLIST>'>), the only
+interpolation is removal of C<\> from pairs of C<\\>.
+
+Otherwise, a character range may be specified with a hyphen, so
+C<tr/A-J/0-9/> does the same replacement as
+C<tr/ACEGIBDFHJ/0246813579/>.
 
 For B<sed> devotees, C<y> is provided as a synonym for C<tr>.
 
-If the
-I<SEARCHLIST> is delimited by bracketing quotes, the I<REPLACEMENTLIST>
-must have its own pair of quotes, which may or may not be bracketing
-quotes; for example, C<tr[aeiouy][yuoiea]> or C<tr(+\-*/)/ABCD/>.
+If the I<SEARCHLIST> is delimited by bracketing quotes, the
+I<REPLACEMENTLIST> must have its own pair of quotes, which may or may
+not be bracketing quotes; for example, C<tr[aeiouy][yuoiea]> or
+C<tr(+\-*/)/ABCD/>.
 
-Characters may be literals or any of the escape sequences accepted in
-double-quoted strings.  But there is no variable interpolation, so C<"$">
-and C<"@"> are treated as literals.  A hyphen at the beginning or end, or
-preceded by a backslash is considered a literal.  Escape sequence
-details are in L<the table near the beginning of this section|/Quote and
-Quote-like Operators>.
+Characters may be literals or (if the delimiters aren't single quotes)
+any of the escape sequences accepted in double-quoted strings.  But
+there is never any variable interpolation, so C<"$"> and C<"@"> are
+treated as literals.  A hyphen at the beginning or end, or preceded by a
+backslash is considered a literal.  Escape sequence details are in L<the
+table near the beginning of this section|/Quote and Quote-like
+Operators>.
 
 Note that C<tr> does B<not> do regular expression character classes such as
 C<\d> or C<\pL>.  The C<tr> operator is not equivalent to the C<L<tr(1)>>
