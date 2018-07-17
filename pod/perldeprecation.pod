@@ -100,7 +100,9 @@ Forcing literal C<{> characters to be escaped will enable the Perl
 language to be extended in various ways in future releases.  To avoid
 needlessly breaking existing code, the restriction is is not enforced in
 contexts where there are unlikely to ever be extensions that could
-conflict with the use there of C<{> as a literal.
+conflict with the use there of C<{> as a literal.  A non-deprecation
+warning that the left brace is being taken literally is raised in
+contexts where there could be confusion about it.
 
 Literal uses of C<{> were deprecated in Perl 5.20, and some uses of it
 started to give deprecation warnings since. These cases were made fatal
