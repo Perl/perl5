@@ -26,10 +26,10 @@ use re "/aa";
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
 
+my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
+
 # charclass_invlists.h now also contains inversion maps and enum definitions
 # for those maps that have a finite number of possible values
-
-my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
 # integer or float
 my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
