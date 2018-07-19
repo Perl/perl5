@@ -5,6 +5,7 @@
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
+#               Copyright (C) 2018, The perl5 porters
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -367,6 +368,7 @@ __DATA__
 ################################################################################
 #
 #  Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
+#               Copyright (C) 2018, The perl5 porters
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -381,12 +383,20 @@ Devel::PPPort - Perl/Pollution/Portability
 
 =head1 SYNOPSIS
 
-    Devel::PPPort::WriteFile();   # defaults to ./ppport.h
-    Devel::PPPort::WriteFile('someheader.h');
+  Devel::PPPort::WriteFile();   # defaults to ./ppport.h
+  Devel::PPPort::WriteFile('someheader.h');
 
-    # Same as above but retrieve contents rather than write file
-    my $contents = Devel::PPPort::GetFileContents();
-    my $contents = Devel::PPPort::GetFileContents('someheader.h');
+  # Same as above but retrieve contents rather than write file
+  my $contents = Devel::PPPort::GetFileContents();
+  my $contents = Devel::PPPort::GetFileContents('someheader.h');
+
+=head1 Start using Devel::PPPort for XS projects
+
+  $ cpan Devel::PPPort
+  $ perl -MDevel::PPPort -e'Devel::PPPort::WriteFile'
+  $ perl ppport.h --compat-version=5.6.1 --patch=diff.patch *.xs
+  $ patch -p0 < diff.patch
+  $ echo ppport.h >>MANIFEST
 
 =head1 DESCRIPTION
 
@@ -521,6 +531,8 @@ Versions >= 3.22 are maintained with support from Matthew Horsfall (alh).
 
 Version 3.x, Copyright (C) 2004-2013, Marcus Holland-Moritz.
 
+             Copyright (C) 2018, The perl5 porters
+
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 
 Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
@@ -539,7 +551,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = '3.40';
+$VERSION = '3.42';
 
 sub _init_data
 {
@@ -620,11 +632,9 @@ __DATA__
 
 %include memory
 
-%include magic
+%include magic_defs
 
 %include misc
-
-%include format
 
 %include mess
 
@@ -639,6 +649,8 @@ __DATA__
 %include newCONSTSUB
 
 %include MY_CXT
+
+%include format
 
 %include SvREFCNT
 
@@ -661,6 +673,8 @@ __DATA__
 %include warn
 
 %include pvs
+
+%include magic
 
 %include cop
 
