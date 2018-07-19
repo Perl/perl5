@@ -182,13 +182,26 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+C<AvFILL()> was wrongly listed as deprecated.  This has been corrected.
+L<[perl #133278]|https://rt.perl.org/Ticket/Display.html?id=133278>
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The behaviour of C<tr> when the delimiter is an apostrophe has been clarified.
+In particular, hyphens aren't special, and C<\x{}> isn't interpolated.
+L<[perl #130679]|https://rt.perl.org/Ticket/Display.html?id=130679>
 
 =back
 
@@ -346,9 +359,34 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item HP-UX 11.11
 
-XXX
+An obscure problem in C<pack()> when compiling with HP C-ANSI-C has been fixed
+by disabling optimizations in F<pp_pack.c>.
+
+=item Windows
+
+=over 4
+
+=item *
+
+The C<USE_CPLUSPLUS> build option which has long been available in
+F<win32/Makefile> (for B<nmake>) and F<win32/makefile.mk> (for B<dmake>) is now
+also available in F<win32/GNUmakefile> (for B<gmake>).
+
+=item *
+
+The B<nmake> makefile no longer defaults to Visual C++ 6.0 (a very old version
+which is unlikely to be widely used today).  As a result, it is now a
+requirement to specify the C<CCTYPE> since there is no obvious choice of which
+modern version to default to instead.  Failure to specify C<CCTYPE> will result
+in an error being output and the build will stop.
+
+(The B<dmake> and B<gmake> makefiles will automatically detect which compiler
+is being used, so do not require C<CCTYPE> to be set.  This feature has not yet
+been added to the B<nmake> makefile.)
+
+=back
 
 =back
 
@@ -379,7 +417,15 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Compilation under C<-DPERL_MEM_LOG> and C<-DNO_LOCALE> have been fixed.
+
+=item *
+
+Perl 5.28 introduced an C<index()> optimization when comparing to -1 (or
+indirectly, e.g. >= 0).  When this optimization was triggered inside a C<when>
+clause it caused a warning ("Argument %s isn't numeric in smart match").  This
+has now been fixed.
+L<[perl #133368]|https://rt.perl.org/Ticket/Display.html?id=133368>
 
 =back
 
