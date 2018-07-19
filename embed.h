@@ -259,7 +259,13 @@
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define init_tm(a)		Perl_init_tm(aTHX_ a)
 #define intro_my()		Perl_intro_my(aTHX)
+#ifndef NO_MATHOMS
+#define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
+#endif
 #define isC9_STRICT_UTF8_CHAR	S_isC9_STRICT_UTF8_CHAR
+#ifndef NO_MATHOMS
+#define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
+#endif
 #define isSTRICT_UTF8_CHAR	S_isSTRICT_UTF8_CHAR
 #define isUTF8_CHAR		S_isUTF8_CHAR
 #define is_c9strict_utf8_string_loclen	S_is_c9strict_utf8_string_loclen
@@ -357,14 +363,80 @@
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
 #endif
 #ifndef NO_MATHOMS
+#define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_alpha(a)	Perl_is_utf8_alpha(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_ascii(a)	Perl_is_utf8_ascii(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_blank(a)	Perl_is_utf8_blank(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif
+#ifndef NO_MATHOMS
+#define is_utf8_cntrl(a)	Perl_is_utf8_cntrl(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_digit(a)	Perl_is_utf8_digit(aTHX_ a)
+#endif
 #define is_utf8_fixed_width_buf_loclen_flags	S_is_utf8_fixed_width_buf_loclen_flags
+#ifndef NO_MATHOMS
+#define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_idcont(a)	Perl_is_utf8_idcont(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
+#endif
 #define is_utf8_invariant_string_loc	S_is_utf8_invariant_string_loc
+#ifndef NO_MATHOMS
+#define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_perl_space(a)	Perl_is_utf8_perl_space(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_perl_word(a)	Perl_is_utf8_perl_word(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_posix_digit(a)	Perl_is_utf8_posix_digit(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_print(a)	Perl_is_utf8_print(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_punct(a)	Perl_is_utf8_punct(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
+#endif
 #define is_utf8_string_flags	S_is_utf8_string_flags
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_string_loclen_flags	S_is_utf8_string_loclen_flags
+#ifndef NO_MATHOMS
+#define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
+#endif
 #define is_utf8_valid_partial_char_flags	S_is_utf8_valid_partial_char_flags
+#ifndef NO_MATHOMS
+#define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_xidcont(a)	Perl_is_utf8_xidcont(aTHX_ a)
+#endif
+#ifndef NO_MATHOMS
+#define is_utf8_xidfirst(a)	Perl_is_utf8_xidfirst(aTHX_ a)
+#endif
 #define isinfnan		Perl_isinfnan
 #define leave_adjust_stacks(a,b,c,d)	Perl_leave_adjust_stacks(aTHX_ a,b,c,d)
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)

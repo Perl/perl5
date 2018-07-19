@@ -1406,11 +1406,27 @@ PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool warn_on_fail);
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_isALNUM_lazy(pTHX_ const char* p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ISALNUM_LAZY	\
+	assert(p)
+#endif
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE Size_t	S_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISC9_STRICT_UTF8_CHAR	\
 	assert(s0); assert(e)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ISIDFIRST_LAZY	\
+	assert(p)
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -1654,6 +1670,46 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c)
 #endif
 
 #ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_ALNUM	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_alnumc(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_ALNUMC	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_alpha(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_ALPHA	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_ascii(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_ASCII	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_blank(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_BLANK	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
 PERL_CALLCONV STRLEN	Perl_is_utf8_char(const U8 *s)
 			__attribute__deprecated__;
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR	\
@@ -1665,6 +1721,22 @@ PERL_CALLCONV STRLEN	Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF	\
 	assert(buf); assert(buf_end)
 #endif
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_cntrl(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_CNTRL	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_digit(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_DIGIT	\
+	assert(p)
+#endif
+
 /* PERL_CALLCONV bool	is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags); */
 /* PERL_CALLCONV bool	is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -1672,6 +1744,30 @@ PERL_STATIC_INLINE bool	S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const 
 #define PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOCLEN_FLAGS	\
 	assert(s)
 #endif
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_graph(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_GRAPH	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_idcont(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_IDCONT	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_IDFIRST	\
+	assert(p)
+#endif
+
 /* PERL_CALLCONV bool	is_utf8_invariant_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__; */
 
@@ -1680,6 +1776,70 @@ PERL_STATIC_INLINE bool	S_is_utf8_invariant_string_loc(const U8* const s, STRLEN
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING_LOC	\
 	assert(s)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_lower(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_LOWER	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_MARK	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_perl_space(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_perl_word(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_print(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_PRINT	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_punct(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_PUNCT	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_SPACE	\
+	assert(p)
 #endif
 
 /* PERL_CALLCONV bool	Perl_is_utf8_string(const U8 *s, STRLEN len)
@@ -1708,6 +1868,14 @@ PERL_STATIC_INLINE bool	S_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, c
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS	\
 	assert(s)
 #endif
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_UPPER	\
+	assert(p)
+#endif
+
 /* PERL_CALLCONV bool	is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */
@@ -1717,6 +1885,30 @@ PERL_STATIC_INLINE bool	S_is_utf8_valid_partial_char_flags(const U8 * const s, c
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS	\
 	assert(s); assert(e)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_xdigit(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_XDIGIT	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_xidcont(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_XIDCONT	\
+	assert(p)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV bool	Perl_is_utf8_xidfirst(pTHX_ const U8 *p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_XIDFIRST	\
+	assert(p)
 #endif
 
 PERL_CALLCONV bool	Perl_isinfnan(NV nv)
@@ -3558,6 +3750,34 @@ PERL_CALLCONV UV	Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp);
 PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c)
 			__attribute__deprecated__
 			__attribute__warn_unused_result__;
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV UV	Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+			__attribute__deprecated__;
+#define PERL_ARGS_ASSERT_TO_UTF8_FOLD	\
+	assert(p); assert(ustrp)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+			__attribute__deprecated__;
+#define PERL_ARGS_ASSERT_TO_UTF8_LOWER	\
+	assert(p); assert(ustrp)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+			__attribute__deprecated__;
+#define PERL_ARGS_ASSERT_TO_UTF8_TITLE	\
+	assert(p); assert(ustrp)
+#endif
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+			__attribute__deprecated__;
+#define PERL_ARGS_ASSERT_TO_UTF8_UPPER	\
+	assert(p); assert(ustrp)
 #endif
 
 PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
