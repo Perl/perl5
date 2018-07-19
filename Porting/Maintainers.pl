@@ -344,12 +344,11 @@ use File::Glob qw(:case);
     },
 
     'Devel::PPPort' => {
-        'DISTRIBUTION' => 'WOLFSAGE/Devel-PPPort-3.36.tar.gz',
+        'DISTRIBUTION' => 'XSAWYERX/Devel-PPPort-3.42.tar.gz',
         'FILES'        => q[dist/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
         ],
-        'CUSTOMIZED'   => [ qw[ parts/embed.fnc ] ],
     },
 
     'Devel::SelfStubber' => {
@@ -1000,7 +999,7 @@ use File::Glob qw(:case);
     },
 
     'Storable' => {
-        'DISTRIBUTION' => 'AMS/Storable-2.51.tar.gz',
+        'DISTRIBUTION' => 'XSAWYERX/Storable-3.11.tar.gz',
         'FILES'        => q[dist/Storable],
         'EXCLUDED'     => [
             qr{^t/compat/},

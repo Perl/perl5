@@ -6,6 +6,7 @@ hints/hpux.pl
 hints/linux.pl
 Makefile.PL
 MANIFEST			This list of files
+META.json			Module JSON meta-data (added by MakeMaker)
 META.yml			Module meta-data (added by MakeMaker)
 ppport.h
 README
