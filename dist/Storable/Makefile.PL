@@ -7,21 +7,26 @@
 #
 
 use strict;
-use ExtUtils::MakeMaker;
+use warnings;
+use ExtUtils::MakeMaker 6.31;
 use Config;
 use File::Copy qw(move copy);
 use File::Spec;
 
 unlink "lib/Storable/Limit.pm";
 
+my $limit_pm = File::Spec->catfile('lib', 'Storable', 'Limit.pm');
+
 my $pm = { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' };
 unless ($ENV{PERL_CORE}) {
     # the core Makefile takes care of this for core builds
-    $pm->{"lib/Storable/Limit.pm"} = '$(INST_ARCHLIB)/Storable/Limit.pm';
+    $pm->{$limit_pm} = '$(INST_ARCHLIB)/Storable/Limit.pm';
 }
 
 WriteMakefile(
     NAME                => 'Storable',
+    AUTHOR              => 'Perl 5 Porters',
+    LICENSE             => 'perl',
     DISTNAME            => "Storable",
 # We now ship this in t/
 #    PREREQ_PM           => { 'Test::More' => '0.41' },
@@ -36,7 +41,7 @@ WriteMakefile(
                                { bugtracker => 'http://rt.perl.org/perlbug/' },
                             provides    => {
                                 'Storable'  => {
-                                    file        => 'Storable_pm.PL',
+                                    file        => '__Storable__.pm',
                                     version     => MM->parse_version('__Storable__.pm'),
                                 },
                             },
@@ -91,7 +96,6 @@ sub depend {
         $extra_deps = ' Storable.pm';
     }
     my $linktype = uc($_[0]->{LINKTYPE});
-    my $limit_pm = File::Spec->catfile('lib', 'Storable', 'Limit.pm');
     "
 $limit_pm : stacksize \$(INST_$linktype)$extra_deps
 	\$(MKPATH) \$(INST_LIB)
@@ -111,7 +115,7 @@ sub test {
     my $out = $self->SUPER::test(%attr);
 
     if ($ENV{PERL_CORE}) {
-        $out =~ s!^(test(?:db)?_(?:static|dynamic)\b.*)!$1 lib/Storable/Limit.pm!gm;
+        $out =~ s!^(test(?:db)?_(?:static|dynamic)\b.*)!$1 $limit_pm!gm;
     }
 
     $out;
