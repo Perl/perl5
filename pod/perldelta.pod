@@ -68,6 +68,10 @@ L<DB_File> has been upgraded from version 1.840 to 1.842.
 
 =item *
 
+L<Devel::PPPort> has been upgraded from version 3.40 to 3.42.
+
+=item *
+
 L<Digest::SHA> has been upgraded from version 6.01 to 6.02.
 
 =item *
@@ -108,6 +112,10 @@ L<Math::BigRat> has been upgraded from version 0.2613 to 0.2614.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20180626 to 5.20180720.
+
+=item *
+
 L<parent> has been upgraded from version 0.236 to 0.237.
 
 =item *
@@ -117,6 +125,10 @@ L<perlfaq> has been upgraded from version 5.021011 to 5.20180605.
 =item *
 
 podlators has been upgraded from version 4.10 to 4.11.
+
+=item *
+
+L<Storable> has been upgraded from version 3.08 to 3.11.
 
 =item *
 
@@ -133,8 +145,6 @@ L<Time::Local> has been upgraded from version 1.25 to 1.28.
 =item *
 
 L<version> has been upgraded from version 0.9923 to 0.9924.
-
-If there was something important to note about this change, include that here.
 
 =back
 
