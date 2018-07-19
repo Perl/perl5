@@ -108,7 +108,7 @@ Literal uses of C<{> were deprecated in Perl 5.20, and some uses of it
 started to give deprecation warnings since. These cases were made fatal
 in Perl 5.26. Due to an oversight, not all cases of a use of a literal
 C<{> got a deprecation warning.  Some cases started warning in Perl 5.26,
-and were made fatal in Perl 5.30.  Other case started in Perl 5.28,
+and were made fatal in Perl 5.30.  Other cases started in Perl 5.28,
 and will be made fatal in 5.32.
 
 =head2 Perl 5.30
@@ -239,13 +239,13 @@ As of Perl 5.30, use of delimiters which are non-standalone graphemes is
 fatal, in order to move the language to be able to accept
 multi-character graphemes as delimiters.
 
-Also, as of Perl 5.30, delimiters which which are unassigned code points
+Also, as of Perl 5.30, delimiters which are unassigned code points
 but that may someday become assigned are prohibited.  Otherwise, code
 that works today would fail to compile if the currently unassigned
 delimiter ends up being something that isn't a stand-alone grapheme.
 Because Unicode is never going to assign L<non-character code
 points|perlunicode/Noncharacter code points>, nor L<code points that are
-above the legal Unicode maximum| perlunicode/Beyond Unicode code
+above the legal Unicode maximum|perlunicode/Beyond Unicode code
 points>, those can be delimiters.
 
 =head3 In XS code, use of various macros dealing with UTF-8.
