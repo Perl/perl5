@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (5) {
+  if (6) {
     load();
-    plan(tests => 5);
+    plan(tests => 6);
   }
 }
 
@@ -60,6 +60,12 @@ ok($bar->x(), 'foobar');
 
 Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 ok($bar->x(), 'hacker');
+
+if ( "$]" lt '5.007003' ) {
+    skip 'skip: no SV_NOSTEAL support', 0;
+} else {
+    ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+}
 
 package foo;
 

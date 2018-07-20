@@ -13,7 +13,25 @@
 
 __UNDEFINED__
 
+SV_NOSTEAL
+sv_setsv_flags
+
 =implementation
+
+#if ( { VERSION >= 5.7.3 } && { VERSION < 5.8.7 } ) || ( { VERSION >= 5.9.0 } && { VERSION < 5.9.2 } )
+#undef sv_setsv_flags
+#define SV_NOSTEAL 16
+#define sv_setsv_flags(dstr, sstr, flags)                                \
+  STMT_START {                                                           \
+    if (((flags) & SV_NOSTEAL) && (SvFLAGS((sstr)) & SVs_TEMP)) {        \
+      SvTEMP_off((sstr));                                                \
+      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);  \
+      SvTEMP_on((sstr));                                                 \
+    } else {                                                             \
+      Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);  \
+    }                                                                    \
+  } STMT_END
+#endif
 
 __UNDEFINED__ SvMAGIC_set(sv, val) \
                 STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
@@ -94,7 +112,23 @@ TestSvSTASH_set(sv, name)
                 SvREFCNT_dec(SvSTASH(sv));
                 SvSTASH_set(sv, (HV*) SvREFCNT_inc(gv_stashpv(name, 0)));
 
-=tests plan => 5
+#ifdef SV_NOSTEAL
+
+IV
+Test_sv_setsv_SV_NOSTEAL()
+        PREINIT:
+                SV *sv1, *sv2;
+        CODE:
+                sv1 = sv_2mortal(newSVpv("test1", 0));
+                sv2 = sv_2mortal(newSVpv("test2", 0));
+                sv_setsv_flags(sv2, sv1, SV_NOSTEAL);
+                RETVAL = (strEQ(SvPV_nolen(sv1), "test1") && strEQ(SvPV_nolen(sv2), "test1"));
+        OUTPUT:
+                RETVAL
+
+#endif
+
+=tests plan => 6
 
 my $foo = 5;
 ok(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
@@ -108,6 +142,12 @@ ok($bar->x(), 'foobar');
 
 Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 ok($bar->x(), 'hacker');
+
+if ( "$]" lt '5.007003' ) {
+    skip 'skip: no SV_NOSTEAL support', 0;
+} else {
+    ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+}
 
 package foo;
 
