@@ -20270,7 +20270,7 @@ if ($verbosity >= $NORMAL_VERBOSITY && ! $debug_skip) {
 if ($version_of_mk_invlist_bounds lt $v_version) {
     Carp::my_carp("WARNING: \\b{} algorithms (regen/mk_invlist.pl) need"
                 . " to be checked and possibly updated to Unicode"
-                . " $string_version");
+                . " $string_version.  Failing tests will be marked TODO");
 }
 
 exit(0);
