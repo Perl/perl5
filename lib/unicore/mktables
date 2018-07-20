@@ -895,6 +895,19 @@ if ($v_version gt v3.2.0) {
                                 'Canonical_Combining_Class=Attached_Below_Left'
 }
 
+# Obsoleted
+if ($v_version ge v11.0.0) {
+    push @tables_that_may_be_empty, qw(
+                                       Grapheme_Cluster_Break=E_Base
+                                       Grapheme_Cluster_Break=E_Base_GAZ
+                                       Grapheme_Cluster_Break=E_Modifier
+                                       Grapheme_Cluster_Break=Glue_After_Zwj
+                                       Word_Break=E_Base
+                                       Word_Break=E_Base_GAZ
+                                       Word_Break=E_Modifier
+                                       Word_Break=Glue_After_Zwj);
+}
+
 # Enum values for to_output_map() method in the Map_Table package. (0 is don't
 # output)
 my $EXTERNAL_MAP = 1;
@@ -13474,6 +13487,24 @@ sub  filter_script_extensions_line {
     return;
 }
 
+sub setup_emojidata {
+    my $prop_ref = Property->new('XPG',
+                                 Full_Name => 'Extended_Pictographic',
+    );
+    $prop_ref->set_fate($PLACEHOLDER,
+                        "Not part of the Unicode Character Database");
+}
+
+sub filter_emojidata_line {
+    # We only are interested in this single property from this non-UCD data
+    # file, and we turn it into a Perl property, so that it isn't accessible
+    # to the users
+
+    $_ = "" unless /\bExtended_Pictographic\b/;
+
+    return;
+}
+
 sub generate_hst {
 
     # Populates the Hangul Syllable Type property from first principles
@@ -15446,19 +15477,49 @@ END
     }
 
     # Perl tailors the WordBreak property so that \b{wb} doesn't split
-    # adjacent spaces into separate words.  First create a copy of the regular
-    # WB property as '_Perl_WB'.  (On Unicode releases earlier than when WB
-    # was defined for, this will already have been done by the substitute file
-    # portion for 'Input_file' code for WB.)
+    # adjacent spaces into separate words.  Unicode 11.0 moved in that
+    # direction, but left TAB,  FIGURE SPACE (U+2007), and (ironically) NO
+    # BREAK SPACE as breaking, so we retained the original Perl customization.
+    # To do this, in the Perl copy of WB, simply replace the mappings of
+    # horizontal space characters that otherwise would map to the default or
+    # the 11.0 'WSegSpace' to instead map to our tailoring.
     my $perl_wb = property_ref('_Perl_WB');
-    # And simply replace the mappings of horizontal space characters that
-    # otherwise would map to the default to instead map to our tailoring.
     my $default = $perl_wb->default_map;
     for my $range ($Blank->ranges) {
         for my $i ($range->start .. $range->end) {
-            next unless $perl_wb->value_of($i) eq $default;
+            my $value = $perl_wb->value_of($i);
+
+            next unless $value eq $default || $value eq 'WSegSpace';
             $perl_wb->add_map($i, $i, 'Perl_Tailored_HSpace',
                               Replace => $UNCONDITIONALLY);
+        }
+    }
+
+    # Also starting in Unicode 11.0, rules for some of the boundary types are
+    # based on a non-UCD property (which we have read in if it exists).
+    # Recall that these boundary properties partition the code points into
+    # equivalence classes (represented as enums).
+    #
+    # The loop below goes through each code point that matches the non-UCD
+    # property, and for each current equivalence class containing such a code
+    # point, splits it so that those that are in both are now in a newly
+    # created equivalence class whose name is a combination of the property
+    # and the old class name, leaving unchanged everything that doesn't match
+    # the non-UCD property.
+    my $pictographic_emoji = property_ref('XPG');
+    if (defined $pictographic_emoji) {
+        foreach my $base_property (property_ref('GCB'),
+                                   property_ref('WB'))
+        {
+            my $property = property_ref('_Perl_' . $base_property->name);
+            foreach my $range ($pictographic_emoji->table('Y')->ranges) {
+                foreach my $i ($range->start .. $range->end) {
+                    my $current = $property->value_of($i);
+                    $current = $property->table($current)->short_name;
+                    $property->add_map($i, $i, 'XPG_' . $current,
+                                       Replace => $UNCONDITIONALLY);
+                }
+            }
         }
     }
 
@@ -19916,6 +19977,19 @@ my @input_file_objects = (
                    ),
     Input_file->new('NushuSources.txt', v10.0.0,
                     Skip => 'Specifies source material for Nushu characters',
+                   ),
+    Input_file->new('EquivalentUnifiedIdeograph.txt', v11.0.0,
+                    Property => 'Equivalent_Unified_Ideograph',
+                    Has_Missings_Defaults => $NOT_IGNORED,
+                   ),
+    Input_file->new('EmojiData.txt', v11.0.0,
+                    # Is in UAX #51 and not the UCD, so must be updated
+                    # separately, and the first line edited to indicate the
+                    # UCD release we're pretending it to be in.  The UTC says
+                    # this is a transitional state.
+                    Pre_Handler => \&setup_emojidata,
+                    Has_Missings_Defaults => $NOT_IGNORED,
+                    Each_Line_Handler => \&filter_emojidata_line,
                    ),
 );
 

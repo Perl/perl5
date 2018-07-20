@@ -4699,6 +4699,24 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 return prev != GCB_E_Base && prev != GCB_E_Base_GAZ;
             }
 
+        case GCB_Maybe_Emoji_NonBreak:
+
+            {
+
+            /* Do not break within emoji modifier sequences or emoji zwj sequences.
+              GB11 \p{Extended_Pictographic} Extend* ZWJ × \p{Extended_Pictographic}
+              */
+                U8 * temp_pos = (U8 *) curpos;
+                GCB_enum prev;
+
+                do {
+                    prev = backup_one_GCB(strbeg, &temp_pos, utf8_target);
+                }
+                while (prev == GCB_Extend);
+
+                return prev != GCB_XPG_XX;
+            }
+
         default:
             break;
     }

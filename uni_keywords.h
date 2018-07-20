@@ -6834,10 +6834,10 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * be0f129691d479aa38646e4ca0ec1ee576ae7f75b0300a5624a7fa862fa8abba lib/unicore/extracted/DLineBreak.txt
  * 92449d354d9f6b6f2f97a292ebb59f6344ffdeb83d120d7d23e569c43ba67cd5 lib/unicore/extracted/DNumType.txt
  * e3a319527153b0c6c0c549b40fc6f3a01a7a0dcd6620784391db25901df3b154 lib/unicore/extracted/DNumValues.txt
- * 5c4387f0eb0a4d3ec12ce24309495ba2fe2ff8d6c20e11eb19258ee347a83e5d lib/unicore/mktables
+ * 22c0974193811f3f52d01b33c394c22b87541385fb68d5a3502749ec6bf077aa lib/unicore/mktables
  * 21653d2744fdd071f9ef138c805393901bb9547cf3e777ebf50215a191f986ea lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * b015b9e6db7b31e919c494042c9c4b81f2b77352ff2a03a0b123f09a5818f8dd regen/mk_invlists.pl
+ * 507fb07e9b2257fe365525cc485c02ca756f13ca2186412c8792f1d03496313f regen/mk_invlists.pl
  * 1adf61210fe457d9fe2e953f9646cac257b1c00226a84435d9c2642051b81024 regen/mph.pl
  * ex: set ro: */
