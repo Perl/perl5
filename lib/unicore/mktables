@@ -15452,17 +15452,6 @@ END
     # was defined for, this will already have been done by the substitute file
     # portion for 'Input_file' code for WB.)
     my $perl_wb = property_ref('_Perl_WB');
-    if (! defined $perl_wb) {
-        $perl_wb = Property->new('_Perl_WB',
-                                 Fate => $INTERNAL_ONLY,
-                                 Perl_Extension => 1,
-                                 Directory => $map_directory,
-                                 Type => $STRING);
-        my $wb = property_ref('Word_Break');
-        $perl_wb->initialize($wb);
-        $perl_wb->set_default_map($wb->default_map);
-    }
-
     # And simply replace the mappings of horizontal space characters that
     # otherwise would map to the default to instead map to our tailoring.
     my $default = $perl_wb->default_map;
@@ -19720,12 +19709,7 @@ my @input_file_objects = (
                     Skip => $Documentation,
                    ),
     Input_file->new("$AUXILIARY/WordBreakProperty.txt", v4.1.0,
-                    Early => [ "WBsubst.txt", '_Perl_WB', 'ALetter',
-
-                               # Don't use _Perl_WB as a synonym for
-                               # Word_Break in later perls, as it is tailored
-                               # and isn't the same as Word_Break
-                               'ONLY_EARLY' ],
+                    Early => [ "WBsubst.txt", '_Perl_WB', 'ALetter' ],
                     Property => 'Word_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
