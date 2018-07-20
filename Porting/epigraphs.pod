@@ -17,6 +17,36 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.1 - Richard Curtis & Ben Elton, "Blackadder, Series 3, Episode 2: Ink and Incapability"
+
+L<Announced on 2018-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2018/07/msg251605.html>
+
+  Dr. Samuel Johnson: Here it is, sir: the very cornerstone of English
+  scholarship.  This book, sir, contains every word in our beloved
+  language.
+
+  Prince Regent George: Hmm.
+
+  Edmund Blackadder: Every single one, sir?
+
+  Johnson: (confidently) Every single word, sir!
+
+  Blackadder: (to Prince) Oh, well, in that case, sir, I hope you will
+  not object if I also offer the Doctor my most enthusiastic
+  contrafribularities.
+
+  Johnson: What?
+
+  Blackadder: 'Contrafribularities,' sir? It is a common word down our
+  way.
+
+  Johnson: Damn! (writes in the book)
+
+  Blackadder: Oh, I'm sorry, sir.  I'm anaspeptic, phrasmotic, even
+  compunctious to have caused you such pericombobulation.
+
+  Johnson: What? What? WHAT?
+
 =head2 v5.29.0 - Erle Stanley Gardner, The Case of the Grinning Gorilla
 
 L<Announced on 2018-06-26 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/251297>
