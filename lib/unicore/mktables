@@ -652,7 +652,7 @@ sub stack_trace() {
 # to use the -annotate option when using this.  Run this program on a unicore
 # containing the starting release you want to compare.  Save that output
 # structure.  Then, switching to a unicore with the ending release, change the
-# 0 in the $string_compare_versions definition just below to a string
+# "" in the $string_compare_versions definition just below to a string
 # containing a SINGLE dotted Unicode release number (e.g. "2.1") corresponding
 # to the starting release.  This program will then compile, but throw away all
 # code points introduced after the starting release.  Finally use a diff tool
@@ -10716,7 +10716,6 @@ _Perl_GCB; XX                               ; Other
 END
         );
     }
-
 
     # Add any explicit cjk values
     $file->insert_lines(@cjk_property_values);
