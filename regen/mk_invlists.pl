@@ -1930,7 +1930,7 @@ sub output_WB_table() {
                                                 = $wb_actions{'WB_NOBREAK'};
 
     # WB13a  (ALetter | Hebrew_Letter | Numeric | Katakana | ExtendNumLet)
-    #        × # ExtendNumLet
+    #        × ExtendNumLet
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'ExtendNumLet'}]
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ExtendNumLet'}]
@@ -2069,7 +2069,7 @@ sub output_WB_table() {
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'E_Base_GAZ'}]
                                                 = $wb_actions{'WB_NOBREAK'};
 
-    # Break before and after white space
+    # Break before and after newlines
     # WB3b     ÷  (Newline | CR | LF)
     # WB3a  (Newline | CR | LF)  ÷
     # et. al.
@@ -2168,7 +2168,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &NonL1_Perl_Non_Final_Folds
                     &UpperLatin1
                     _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,EDGE
-                    _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE,
+                    _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE
                     _Perl_SB,SContinue,CR,Extend,LF,EDGE
                     _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,EDGE,UNKNOWN
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
