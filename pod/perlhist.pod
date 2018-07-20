@@ -649,6 +649,7 @@ the strings?).
  Sawyer X  5.28.0       2018-Jun-22
 
  Sawyer X  5.29.0       2018-Jun-26     The 5.29 development track
+ Steve     5.29.1       2018-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
