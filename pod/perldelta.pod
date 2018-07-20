@@ -27,6 +27,32 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 11.0 is supported
+
+For details, see L<https://www.unicode.org/versions/Unicode11.0.0/>.
+
+The Word_Break property, as in past Perl releases, remains tailored to
+behave more in line with expectations of Perl users.  This means that
+sequential runs of horizontal white space characters are not broken
+apart, but kept as a single run.  Unicode 11 changed from past versions
+to be more in line with Perl, but it left several white space characters
+as causing breaks: TAB, NO BREAK SPACE, and FIGURE SPACE (U+2007).  We
+have decided to continue to use the previous Perl tailoring with regards
+to these.
+
+As of July 2018, another aspect of Unicode 11.0 is causing problems, and
+that is the changing the Georgian script to have both lower and
+uppercase letters.  It turns out that many devices do not have fonts
+installed that can display the new uppercase letters, and people using
+Georgian are finding their text more or less illegible.  It is being
+suggested that implementations delay their adoption of this portion of
+11.0.
+
+But since the next stable release of Perl is almost a year away, this
+aspect of 11.0 is being left in, with the option to back it out if
+things haven't improved by that time, or if we get too many complaints
+about the development release being unusable for Georgian users.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

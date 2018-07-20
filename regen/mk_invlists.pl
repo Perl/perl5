@@ -1778,16 +1778,11 @@ sub output_LB_table() {
         }
     }
 
-    # LB8a Do not break between a zero width joiner and an ideograph, emoji
-    # base or emoji modifier. This rule prevents breaks within emoji joiner
-    # sequences.
-    # ZWJ × (ID | EB | EM)
-    $lb_table[$lb_enums{'ZWJ'}][$lb_enums{'Ideographic'}]
-                                                    = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'ZWJ'}][$lb_enums{'E_Base'}]
-                                                    = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'ZWJ'}][$lb_enums{'E_Modifier'}]
-                                                    = $lb_actions{'LB_NOBREAK'};
+    # LB8a Do not break after a zero width joiner
+    # ZWJ ×
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_actions{'LB_NOBREAK'};
+    }
 
     # LB8 Break before any character following a zero-width space, even if one
     # or more spaces intervene.

@@ -4800,7 +4800,9 @@ lib/unicore/DAge.txt				Unicode character database
 lib/unicore/DCoreProperties.txt			Unicode character database
 lib/unicore/DNormalizationProps.txt		Unicode character database
 lib/unicore/EastAsianWidth.txt			Unicode character database
+lib/unicore/EmojiData.txt			Unicode character database
 lib/unicore/EmojiSources.txt			Unicode character database
+lib/unicore/EquivalentUnifiedIdeograph.txt	Unicode character database
 lib/unicore/extracted/DBidiClass.txt		Unicode character database
 lib/unicore/extracted/DBinaryProperties.txt	Unicode character database
 lib/unicore/extracted/DCombiningClass.txt	Unicode character database

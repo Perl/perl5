@@ -1,5 +1,5 @@
-# EmojiSources-10.0.0.txt
-# Date: 2017-02-04, 00:00:00 GMT [MS, KW]
+# EmojiSources-11.0.0.txt
+# Date: 2017-12-06, 00:00:00 GMT [MS, KW]
 # © 2017 Unicode®, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
