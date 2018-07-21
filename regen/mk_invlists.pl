@@ -141,6 +141,8 @@ my %keep_together = (
                     );
 my %perl_tags;  # So can find synonyms of the above properties
 
+my $unused_table_hdr = 'u';     # Heading for row or column for unused values
+
 sub uniques {
     # Returns non-duplicated input values.  From "Perl Best Practices:
     # Encapsulated Cleverness".  p. 455 in first edition.
@@ -306,17 +308,47 @@ sub output_invmap ($$$$$$$) {
         }
 
         # The internal enums come last, and in the order specified.
+        #
+        # The internal one named EDGE is also used a marker.  Any ones that
+        # come after it are used in the algorithms below, and so must be
+        # defined, even if the release of Unicode this is being compiled for
+        # doesn't use them.   But since no code points are assigned to them in
+        # such a release, those values will never be accessed.  We collapse
+        # all of them into a single placholder row and a column.  The
+        # algorithms below will fill in those cells with essentially garbage,
+        # but they are never read, so it doesn't matter.  This allows the
+        # algorithm to remain the same from release to release.
+        #
+        # In one case, regexec.c also uses a placeholder which must be defined
+        # here, and we put it in the unused row and column as its value is
+        # never read.
+        #
         my @enums = @input_enums;
         my @extras;
+        my @unused_enums;
+        my $unused_enum_value = @enums;
         if ($extra_enums ne "") {
             @extras = split /,/, $extra_enums;
+            my $seen_EDGE = 0;
 
             # Don't add if already there.
             foreach my $this_extra (@extras) {
                 next if grep { $_ eq $this_extra } @enums;
-
-                push @enums, $this_extra;
+                if ($this_extra eq 'EDGE') {
+                    push @enums, $this_extra;
+                    $seen_EDGE = 1;
+                }
+                elsif ($seen_EDGE) {
+                    push @unused_enums, $this_extra;
+                }
+                else {
+                    push @enums, $this_extra;
+                }
             }
+
+            @unused_enums = sort @unused_enums;
+            $unused_enum_value = @enums;    # All unused have the same value,
+                                            # one beyond the final used one
         }
 
         # Assign a value to each element of the enum type we are creating.
@@ -340,8 +372,6 @@ sub output_invmap ($$$$$$$) {
             # We use string evals to allow the same code to work on
             # all the tables
             my $type = lc $prop_name;
-
-            my $placeholder = "a";
 
             # Skip if we've already done this code, which populated
             # this hash
@@ -373,21 +403,16 @@ sub output_invmap ($$$$$$$) {
                             #
                             # First are those enums that are not part of the
                             # property, but are defined by this code.  By
-                            # convention these have all-caps names of at least
-                            # 4 characters.  We use the lowercased name for
-                            # thse.
+                            # convention these have all-caps names.  We use
+                            # the lowercased name for these.
                             #
-                            # Second are enums that are needed to get
-                            # regexec.c to compile, but don't exist in all
-                            # Unicode releases.  To get here, we must be
-                            # compiling an earlier Unicode release that
-                            # doesn't have that enum, so just use a unique
-                            # anonymous name for it.
+                            # Second are enums that are needed to get the
+                            # algorithms below to work and/or to get regexec.c
+                            # to compile, but don't exist in all Unicode
+                            # releases.  These are handled outside this loop
+                            # as 'unused_enums'
                             if (grep { $_ eq $enum } @input_enums) {
                                 $short = $enum
-                            }
-                            elsif ($enum !~ / ^ [A-Z]{4,} $ /x) {
-                                $short = $placeholder++;
                             }
                             else {
                                 $short = lc $enum;
@@ -436,6 +461,18 @@ sub output_invmap ($$$$$$$) {
                     eval "\$${type}_short_enums[$value] = '$short'";
                     die $@ if $@;
                 }
+
+                # Each unused enum has the same value.  They all are collapsed
+                # into one row and one column, named $unused_table_hdr.
+                if (@unused_enums) {
+                    eval "\$${type}_short_enums['$unused_enum_value'] = '$unused_table_hdr'";
+                    die $@ if $@;
+
+                    foreach my $enum (@unused_enums) {
+                        eval "\$${type}_enums{$enum} = $unused_enum_value";
+                        die $@ if $@;
+                    }
+                }
             }
         }
 
@@ -456,6 +493,12 @@ sub output_invmap ($$$$$$$) {
 
             my $name = $enum_list[$i];
             push @enum_definition, "\t${name_prefix}$name = $i";
+        }
+        if (@unused_enums) {
+            foreach my $unused (@unused_enums) {
+                push @enum_definition,
+                            ",\n\t${name_prefix}$unused = $unused_enum_value";
+            }
         }
 
         # For an 'l' property, we need extra enums, because some of the
@@ -1029,17 +1072,11 @@ sub output_table_common {
     # nor run into an adjacent column
     my @spacers;
 
-    # If we are being compiled on a Unicode version earlier than that which
-    # this file was designed for, it may be that some of the property values
-    # aren't in the current release, and so would be undefined if we didn't
-    # define them ourselves.  Earlier code has done this, making them
-    # lowercase characters of length one.  We look to see if any exist, so
-    # that we can add an annotation to the output table
-    my $has_placeholder = 0;
+    # Is there a row and column for unused values in this release?
+    my $has_unused = $names_ref->[$size-1] eq $unused_table_hdr;
 
     for my $i (0 .. $size - 1) {
         no warnings 'numeric';
-        $has_placeholder = 1 if $names_ref->[$i] =~ / ^ [[:lower:]] $ /x;
         $spacers[$i] = " " x (length($names_ref->[$i]) - $column_width);
     }
 
@@ -1061,18 +1098,15 @@ sub output_table_common {
     $header_line .= " */\n";
 
     # If we have annotations, output it now.
-    if ($has_placeholder || scalar %$abbreviations_ref) {
+    if ($has_unused || scalar %$abbreviations_ref) {
         my $text = "";
         foreach my $abbr (sort keys %$abbreviations_ref) {
             $text .= "; " if $text;
             $text .= "'$abbr' stands for '$abbreviations_ref->{$abbr}'";
         }
-        if ($has_placeholder) {
-            $text .= "; other " if $text;
-            $text .= "lowercase names are placeholders for"
-                  .  " property values not defined until a later Unicode"
-                  .  " release, so are irrelevant in this one, as they are"
-                  .  " not assigned to any code points";
+        if ($has_unused) {
+            $text .= "; $unused_table_hdr stands for 'unused in this Unicode"
+                   . " release (and the data in the row or column are garbage)"
         }
 
         my $indent = " " x 3;
@@ -1896,8 +1930,7 @@ sub output_WB_table() {
     # algorithm stops at the earliest matching rule
 
     my @wb_table;
-    my $table_size = @wb_short_enums - 1;   # -1 because we don't use UNKNOWN
-    die "UNKNOWN must be final WB enum" unless $wb_short_enums[-1] =~ /unk/i;
+    my $table_size = @wb_short_enums;
 
     # Otherwise, break everywhere (including around ideographs).
     # WB99  Any  ÷  Any
@@ -2209,10 +2242,10 @@ my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &NonL1_Perl_Non_Final_Folds
                     &UpperLatin1
-                    _Perl_GCB,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,XPG_XX,EDGE
-                    _Perl_LB,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,EDGE
-                    _Perl_SB,SContinue,CR,Extend,LF,EDGE
-                    _Perl_WB,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,XPG_XX,XPG_LE,Perl_Tailored_HSpace,EDGE,UNKNOWN
+                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,XPG_XX
+                    _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner
+                    _Perl_SB,EDGE,SContinue,CR,Extend,LF
+                    _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,XPG_XX,XPG_LE
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
                     Lowercase_Mapping
                     Titlecase_Mapping
