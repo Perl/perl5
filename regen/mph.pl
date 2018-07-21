@@ -10,6 +10,28 @@ my $DEBUG= 0;
 my $RSHIFT= 8;
 my $FNV_CONST= 16777619;
 
+# The basic idea is that you have a two level structure, and effectively
+# hash the key twice.
+#
+# The first hash finds a bucket in the array which contains a seed which
+# is used for the second hash, which then leads to a bucket with key
+# data which is compared against to determine if the key is a match.
+#
+# If the first hash finds no seed, then the key cannot match.
+#
+# In our case we cheat a bit, and hash the key only once, but use the
+# low bits for the first lookup and the high-bits for the second.
+#
+# So for instance:
+#
+#           h= (h >> RSHIFT) ^ s;
+#
+# is how the second hash is computed. We right shift the original hash
+# value  and then xor in the seed2, which will be non-zero.
+#
+# That then gives us the bucket which contains the key data we need to
+# match for a valid key.
+
 sub _fnv {
     my ($key, $seed)= @_;
     my $hash = 0+$seed;
