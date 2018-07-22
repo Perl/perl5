@@ -1889,7 +1889,7 @@ AMndi	|UV	|utf8n_to_uvchr_msgs|NN const U8 *s			    \
 				|const U32 flags			    \
 				|NULLOK U32 * errors			    \
 				|NULLOK AV ** msgs
-AMnpd	|UV	|_utf8n_to_uvchr_msgs_helper				    \
+AMnp	|UV	|_utf8n_to_uvchr_msgs_helper				    \
 				|NN const U8 *s				    \
 				|STRLEN curlen				    \
 				|NULLOK STRLEN *retlen			    \
