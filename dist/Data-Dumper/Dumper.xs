@@ -89,6 +89,7 @@ static STRLEN num_q (const char *s, STRLEN slen);
 static STRLEN esc_q (char *dest, const char *src, STRLEN slen);
 static STRLEN esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
 static bool globname_needs_quote(const char *s, STRLEN len);
+static bool globname_supra_ascii(const char *s, STRLEN len);
 static bool key_needs_quote(const char *s, STRLEN len);
 static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
@@ -154,9 +155,10 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 
 /* does a glob name need to be protected? */
 static bool
-globname_needs_quote(const char *s, STRLEN len)
+globname_needs_quote(const char *ss, STRLEN len)
 {
-    const char *send = s+len;
+    const U8 *s = (const U8 *) ss;
+    const U8 *send = s+len;
 TOP:
     if (s[0] == ':') {
 	if (++s<send) {
@@ -180,6 +182,22 @@ TOP:
 
     return FALSE;
 }
+
+#ifndef GvNAMEUTF8
+/* does a glob name contain supra-ASCII characters? */
+static bool
+globname_supra_ascii(const char *ss, STRLEN len)
+{
+    const U8 *s = (const U8 *) ss;
+    const U8 *send = s+len;
+    while (s < send) {
+        if (!isASCII(*s))
+            return TRUE;
+        s++;
+    }
+    return FALSE;
+}
+#endif
 
 /* does a hash key need to be quoted (to the left of => ).
    Previously this used (globname_)needs_quote() which accepted strings
@@ -386,15 +404,16 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
         *r++ = '"';
 
         for (s = src; s < send; s += increment) {
+            U8 c0 = *(U8 *)s;
             UV k;
 
             if (do_utf8
-                && ! isASCII(*s)
+                && ! isASCII(c0)
                     /* Exclude non-ASCII low ordinal controls.  This should be
                      * optimized out by the compiler on ASCII platforms; if not
                      * could wrap it in a #ifdef EBCDIC, but better to avoid
                      * #if's if possible */
-                && *(U8*)s > ' '
+                && c0 > ' '
             ) {
 
                 /* When in UTF-8, we output all non-ascii chars as \x{}
@@ -536,7 +555,22 @@ deparsed_output(pTHX_ SV *val)
      * modifies it (so we also can't reuse it below) */
     SV *pkg = newSVpvs("B::Deparse");
 
+    /* Commit ebdc88085efa6fca8a1b0afaa388f0491bdccd5a (first released as part
+     * of 5.19.7) changed core S_process_special_blocks() to use a new stack
+     * for anything using a BEGIN block, on the grounds that doing so "avoids
+     * the stack moving underneath anything that directly or indirectly calls
+     * Perl_load_module()". If we're in an older Perl, we can't rely on that
+     * stack, and must create a fresh sacrificial stack of our own. */
+#if PERL_VERSION < 20
+    PUSHSTACKi(PERLSI_REQUIRE);
+#endif
+
     load_module(PERL_LOADMOD_NOIMPORT, pkg, 0);
+
+#if PERL_VERSION < 20
+    POPSTACK;
+    SPAGAIN;
+#endif
 
     SAVETMPS;
 
@@ -1320,11 +1354,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvCUR_set(retval, SvCUR(retval)+2);
                 i = 3 + esc_q_utf8(aTHX_ retval, c, i,
 #ifdef GvNAMEUTF8
-			!!GvNAMEUTF8(val)
+			!!GvNAMEUTF8(val), style->useqq
 #else
-			0
+			0, style->useqq || globname_supra_ascii(c, i)
 #endif
-			, style->useqq);
+			);
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
