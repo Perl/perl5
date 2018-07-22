@@ -4,7 +4,7 @@ our (%Extensions, $VERSION, @ISA, @EXPORT_OK);
 use Config;
 require Exporter;
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 @ISA = 'Exporter';
 @EXPORT_OK = '%Extensions';
 
