@@ -522,7 +522,7 @@ L<Announced on 2016-10-10 by Aaron Crane|http://www.nntp.perl.org/group/perl.per
 
   I'm up on all the pop trivia, says the guy with the stud in his tongue.
       Are you?
-      Yes. Do you know who he lead singer of Echo and the Bunnymen is?
+      Yes. Do you know who the lead singer of Echo and the Bunnymen is?
       Let me guess, is he called Echo?
       Good guess but no, anyway when they played Glastonbury it was so
   muddy he had two roadies to hold up a binliner on each of his legs so
