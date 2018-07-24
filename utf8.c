@@ -3117,24 +3117,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
         NOT_REACHED; /* NOTREACHED */
     }
 
-    if (invlist) {
-        return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
-    }
-
-    assert(swash);
-
-    if (!*swash) {
-        U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-        *swash = _core_swash_init("utf8",
-
-                                  /* Only use the name if there is no inversion
-                                   * list; otherwise will go out to disk */
-                                  (invlist) ? "" : swashname,
-
-                                  &PL_sv_undef, 1, 0, invlist, &flags);
-    }
-
-    return swash_fetch(*swash, p, TRUE) != 0;
+    return is_utf8_common_with_len(p, p + len, swash, swashname, invlist);
 }
 
 PERL_STATIC_INLINE bool
