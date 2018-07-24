@@ -3100,7 +3100,9 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * Note that it is assumed that the buffer length of <p> is enough to
      * contain all the bytes that comprise the character.  Thus, <*p> should
      * have been checked before this call for mal-formedness enough to assure
-     * that. */
+     * that.  This function, does make sure to not look past any NUL, so it is
+     * safe to use on C, NUL-terminated, strings */
+    STRLEN len = my_strnlen((char *) p, UTF8SKIP(p));
 
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
@@ -3109,9 +3111,8 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * as far as there being enough bytes available in it to accommodate the
      * character without reading beyond the end, and pass that number on to the
      * validating routine */
-    if (! isUTF8_CHAR(p, p + UTF8SKIP(p))) {
-        _force_out_malformed_utf8_message(p, p + UTF8SKIP(p),
-                                          _UTF8_NO_CONFIDENCE_IN_CURLEN,
+    if (! isUTF8_CHAR(p, p + len)) {
+        _force_out_malformed_utf8_message(p, p + len, _UTF8_NO_CONFIDENCE_IN_CURLEN,
                                           1 /* Die */ );
         NOT_REACHED; /* NOTREACHED */
     }
