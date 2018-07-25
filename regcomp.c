@@ -16792,15 +16792,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SV* invlist;
 
                     /* Temporary workaround for [perl #133136].  For this
-                     * precise input that is in the .t that is failing, use the
-                     * old method so that that .t passes */
-                    if (memEQs(RExC_start, e + 1 - RExC_start, "foo\\p{Alnum}"))
+                    * precise input that is in the .t that is failing, load
+                    * utf8.pm, which is what the test wants, so that that
+                    * .t passes */
+                    if (     memEQs(RExC_start, e + 1 - RExC_start,
+                                    "foo\\p{Alnum}")
+                        && ! hv_common(GvHVn(PL_incgv),
+                                       NULL,
+                                       "utf8.pm", sizeof("utf8.pm") - 1,
+                                       0, HV_FETCH_ISEXISTS, NULL, 0))
                     {
-                        invlist = NULL;
+                        require_pv("utf8.pm");
                     }
-                    else {
-                        invlist = parse_uniprop_string(name, n, FOLD, &invert);
-                    }
+                    invlist = parse_uniprop_string(name, n, FOLD, &invert);
                     if (invlist) {
                         if (invert) {
                             value ^= 'P' ^ 'p';
