@@ -21546,6 +21546,11 @@ Perl_init_uniprops(pTHX)
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
     PL_utf8_mark = _new_invlist_C_array(uni_prop_ptrs[UNI_M]);
+
+    /* The below are used only by deprecated functions.  They could be removed */
+    PL_utf8_xidcont  = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDC]);
+    PL_utf8_idcont   = _new_invlist_C_array(uni_prop_ptrs[UNI_IDC]);
+    PL_utf8_xidstart = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDS]);
 }
 
 SV *
