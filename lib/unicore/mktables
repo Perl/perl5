@@ -19141,6 +19141,11 @@ EOF_CODE
                 # already guaranteed to be in error
                 my $already_error = ! $table->file_path;
 
+                # A table that begins with these could actually be a
+                # user-defined property, so won't be compile time errors, as
+                # the definitions of those can be deferred until runtime
+                next if $already_error && $table_name =~ / ^ I[ns] /x;
+
                 # Generate error cases for this alias.
                 push @output, generate_error($property_name,
                                              $table_name,
