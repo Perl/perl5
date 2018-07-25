@@ -3373,7 +3373,9 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT__IS_UTF8_MARK;
 
-    return is_utf8_common(p, NULL, "IsM", PL_utf8_mark);
+    return is_utf8_common(p, NULL,
+                          "This is buggy if this gets used",
+                          PL_utf8_mark);
 }
 
 STATIC UV
