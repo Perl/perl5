@@ -3649,7 +3649,10 @@ S_check_and_deprecate(pTHX_ const U8 *p,
 
     if (*e == NULL) {
         utf8n_flags = _UTF8_NO_CONFIDENCE_IN_CURLEN;
-        *e = p + UTF8SKIP(p);
+
+        /* strnlen() makes this function safe for the common case of
+         * NUL-terminated strings */
+        *e = p + my_strnlen((char *) p, UTF8SKIP(p));
 
         /* For mathoms.c calls, we use the function name we know is stored
          * there.  It could be part of a larger path */
