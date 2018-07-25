@@ -3053,6 +3053,7 @@ dist/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
 dist/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
 dist/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
 dist/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
+dist/Devel-PPPort/MANIFEST.SKIP		Devel::PPPort manifest skip file
 dist/Devel-PPPort/mktests.PL		Devel::PPPort test file writer
 dist/Devel-PPPort/module2.c		Devel::PPPort test file
 dist/Devel-PPPort/module3.c		Devel::PPPort test file
