@@ -87,8 +87,7 @@ SKIP: {
     find_git_or_skip(6);
     my %seen; # De-dup ls-files output (can appear more than once)
     chomp(my @repo= grep {
-        !m{\.gitignore$}                      &&
-        !m{(?<!lib/ExtUtils/)MANIFEST\.SKIP$} &&
+        !m{\.gitignore$} &&
         !$seen{$_}++
         } `git ls-files`);
     skip("git ls-files didnt work",3)
