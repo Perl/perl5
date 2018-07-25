@@ -3120,15 +3120,17 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
      * starts at <p>, and extending no further than <e - 1> is in the inversion
      * list <invlist>. */
 
+    UV cp = utf8n_to_uvchr(p, e - p, NULL, 0);
+
     PERL_ARGS_ASSERT_IS_UTF8_COMMON_WITH_LEN;
 
-    if (! isUTF8_CHAR(p, e)) {
+    if (cp == 0 && (p >= e || *p != '\0')) {
         _force_out_malformed_utf8_message(p, e, 0, 1);
         NOT_REACHED; /* NOTREACHED */
     }
 
     assert(invlist);
-    return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
+    return _invlist_contains_cp(invlist, cp);
 }
 
 STATIC void
