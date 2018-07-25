@@ -2766,9 +2766,7 @@ Perl__is_utf8_idstart(pTHX_ const U8 *p)
 
     if (*p == '_')
 	return TRUE;
-    return is_utf8_common(p, NULL,
-                          "This is buggy if this gets used",
-                          PL_utf8_idstart);
+    return is_utf8_common(p, PL_utf8_idstart);
 }
 
 bool
@@ -3086,16 +3084,10 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 }
 
 PERL_STATIC_INLINE bool
-S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
-		 const char *const swashname, SV* const invlist)
+S_is_utf8_common(pTHX_ const U8 *const p, SV* const invlist)
 {
     /* returns a boolean giving whether or not the UTF8-encoded character that
-     * starts at <p> is in the swash indicated by <swashname>.  <swash>
-     * contains a pointer to where the swash indicated by <swashname>
-     * is to be stored; which this routine will do, so that future calls will
-     * look at <*swash> and only generate a swash if it is not null.  <invlist>
-     * is NULL or an inversion list that defines the swash.  If not null, it
-     * saves time during initialization of the swash.
+     * starts at <p> is in the inversion list indicated by <invlist>.
      *
      * Note that it is assumed that the buffer length of <p> is enough to
      * contain all the bytes that comprise the character.  Thus, <*p> should
@@ -3117,22 +3109,16 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
         NOT_REACHED; /* NOTREACHED */
     }
 
-    return is_utf8_common_with_len(p, p + len, swash, swashname, invlist);
+    return is_utf8_common_with_len(p, p + len, invlist);
 }
 
 PERL_STATIC_INLINE bool
 S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
-                          SV **swash, const char *const swashname,
                           SV* const invlist)
 {
     /* returns a boolean giving whether or not the UTF8-encoded character that
-     * starts at <p>, and extending no further than <e - 1> is in the swash
-     * indicated by <swashname>.  <swash> contains a pointer to where the swash
-     * indicated by <swashname> is to be stored; which this routine will do, so
-     * that future calls will look at <*swash> and only generate a swash if it
-     * is not null.  <invlist> is NULL or an inversion list that defines the
-     * swash.  If not null, it saves time during initialization of the swash.
-     */
+     * starts at <p>, and extending no further than <e - 1> is in the inversion
+     * list <invlist>. */
 
     PERL_ARGS_ASSERT_IS_UTF8_COMMON_WITH_LEN;
 
@@ -3141,24 +3127,8 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e,
         NOT_REACHED; /* NOTREACHED */
     }
 
-    if (invlist) {
-        return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
-    }
-
-    assert(swash);
-
-    if (!*swash) {
-        U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-        *swash = _core_swash_init("utf8",
-
-                                  /* Only use the name if there is no inversion
-                                   * list; otherwise will go out to disk */
-                                  (invlist) ? "" : swashname,
-
-                                  &PL_sv_undef, 1, 0, invlist, &flags);
-    }
-
-    return swash_fetch(*swash, p, TRUE) != 0;
+    assert(invlist);
+    return _invlist_contains_cp(invlist, valid_utf8_to_uvchr(p, NULL));
 }
 
 STATIC void
@@ -3231,10 +3201,7 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
             case _CC_GRAPH:
             case _CC_CASED:
 
-                return is_utf8_common(p,
-                                      NULL,
-                                      "This is buggy if this gets used",
-                                      PL_XPosix_ptrs[classnum]);
+                return is_utf8_common(p, PL_XPosix_ptrs[classnum]);
 
             case _CC_SPACE:
                 return is_XPERLSPACE_high(p);
@@ -3249,13 +3216,9 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
             case _CC_VERTSPACE:
                 return is_VERTWS_high(p);
             case _CC_IDFIRST:
-                return is_utf8_common(p, NULL,
-                                      "This is buggy if this gets used",
-                                      PL_utf8_perl_idstart);
+                return is_utf8_common(p, PL_utf8_perl_idstart);
             case _CC_IDCONT:
-                return is_utf8_common(p, NULL,
-                                      "This is buggy if this gets used",
-                                      PL_utf8_perl_idcont);
+                return is_utf8_common(p, PL_utf8_perl_idcont);
         }
     }
 
@@ -3294,9 +3257,7 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
 {
     PERL_ARGS_ASSERT__IS_UTF8_FOO_WITH_LEN;
 
-    return is_utf8_common_with_len(p, e, NULL,
-                                   "This is buggy if this gets used",
-                                   PL_XPosix_ptrs[classnum]);
+    return is_utf8_common_with_len(p, e, PL_XPosix_ptrs[classnum]);
 }
 
 bool
@@ -3304,9 +3265,7 @@ Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN;
 
-    return is_utf8_common_with_len(p, e, NULL,
-                                   "This is buggy if this gets used",
-                                   PL_utf8_perl_idstart);
+    return is_utf8_common_with_len(p, e, PL_utf8_perl_idstart);
 }
 
 bool
@@ -3316,10 +3275,7 @@ Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 
     if (*p == '_')
 	return TRUE;
-
-    return is_utf8_common(p, NULL,
-                          "This is buggy if this gets used",
-                          PL_utf8_xidstart);
+    return is_utf8_common(p, PL_utf8_xidstart);
 }
 
 bool
@@ -3327,9 +3283,7 @@ Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN;
 
-    return is_utf8_common_with_len(p, e, NULL,
-                                   "This is buggy if this gets used",
-                                   PL_utf8_perl_idcont);
+    return is_utf8_common_with_len(p, e, PL_utf8_perl_idcont);
 }
 
 bool
@@ -3337,9 +3291,7 @@ Perl__is_utf8_idcont(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT__IS_UTF8_IDCONT;
 
-    return is_utf8_common(p, NULL,
-                          "This is buggy if this gets used",
-                          PL_utf8_idcont);
+    return is_utf8_common(p, PL_utf8_idcont);
 }
 
 bool
@@ -3347,9 +3299,7 @@ Perl__is_utf8_xidcont(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT__IS_UTF8_XIDCONT;
 
-    return is_utf8_common(p, NULL,
-                          "This is buggy if this gets used",
-                          PL_utf8_xidcont);
+    return is_utf8_common(p, PL_utf8_xidcont);
 }
 
 bool
@@ -3357,9 +3307,7 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
 {
     PERL_ARGS_ASSERT__IS_UTF8_MARK;
 
-    return is_utf8_common(p, NULL,
-                          "This is buggy if this gets used",
-                          PL_utf8_mark);
+    return is_utf8_common(p, PL_utf8_mark);
 }
 
 STATIC UV
