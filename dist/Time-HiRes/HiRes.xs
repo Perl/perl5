@@ -18,7 +18,9 @@ extern "C" {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#  include "ppport.h"
+#endif
 #if defined(__CYGWIN__) && defined(HAS_W32API_WINDOWS_H)
 # include <w32api/windows.h>
 # define CYGWIN_WITH_W32API
