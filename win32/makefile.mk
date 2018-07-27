@@ -349,15 +349,34 @@ BUILDOPT	+= -DWIN32_NO_REGISTRY
 
 #no explicit CCTYPE given, do auto detection
 .IF "$(CCTYPE)" == ""
-GCCTARGET	*= $(shell gcc -dumpmachine 2>NUL & exit /b 0)
+GCCTARGET	:= $(shell gcc -dumpmachine 2>NUL & exit /b 0)
 #do we have a GCC?
 .IF "$(GCCTARGET)" != ""
 CCTYPE		= GCC
 .ELSE
+WIN64		:= $(shell for /f "tokens=3 delims=.^ " \
+	%i in ('cl ^2^>^&1') do @if "%i" == "32-bit" echo undef)
+#major version of CL has diff position based on 32 vs 64
+#Microsoft (R) C/C++ Optimizing Compiler Version 15.00.30729.01 for x64
+#Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.30729.01 for 80x86
 #use var to capture 1st line only, not 8th token of lines 2 & 3 in cl.exe output
-MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8 delims=.^ " \
-	%i in ('cl ^2^>^&1') do @if not defined MSVCVER set /A "MSVCVER=%i-6"))
-CCTYPE		:= MSVC$(MSVCVER)0
+.IF "$(WIN64)" == "undef"
+MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8,9 delims=.^ " \
+	%i in ('cl ^2^>^&1') do @if not defined MSVCVER if %i% geq 19 \
+	(set /A "MSVCVER=((%i-5)*10)+(%j/10)") \
+	else (set /A "MSVCVER=(%i-6)*10")))
+.ELSE
+MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=7,8 delims=.^ " \
+	%i in ('cl ^2^>^&1') do @if not defined MSVCVER if %i% geq 19 \
+	(set /A "MSVCVER=((%i-5)*10)+(%j/10)") \
+	else (set /A "MSVCVER=(%i-6)*10")))
+.ENDIF
+#autodetect failed, reset to empty string
+.IF "$(MSVCVER)" == "-50"
+CCTYPE		:= 
+.ELSE
+CCTYPE		:= MSVC$(MSVCVER)
+.ENDIF
 .ENDIF
 .ENDIF
 
@@ -524,7 +543,14 @@ BUILDOPT        += -D__USE_MINGW_ANSI_STDIO
 MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 .ENDIF
 
-GCCWRAPV *= $(shell for /f "delims=. tokens=1,2,3" %i in ('$(CC) -dumpversion') do @if "%i"=="4" (if "%j" geq "3" echo define) else if "%i" geq "5" (echo define))
+GCCVER1:= $(shell for /f "delims=. tokens=1,2,3" %i in ('gcc -dumpversion') do @echo %i)
+GCCVER2:= $(shell for /f "delims=. tokens=1,2,3" %i in ('gcc -dumpversion') do @echo %j)
+GCCVER3:= $(shell for /f "delims=. tokens=1,2,3" %i in ('gcc -dumpversion') do @echo %k)
+
+# If you are using GCC, 4.3 or later by default we add the -fwrapv option.
+# See https://rt.perl.org/Ticket/Display.html?id=121505
+#
+GCCWRAPV *= $(shell if "$(GCCVER1)"=="4" (if "$(GCCVER2)" geq "3" echo define) else if "$(GCCVER1)" geq "5" (echo define))
 
 .IF "$(GCCWRAPV)" == "define"
 BUILDOPT        += -fwrapv
@@ -1140,6 +1166,30 @@ CFG_VARS	=					\
 #
 
 all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
+
+info :
+.IF "$(CCTYPE)" == "GCC"
+	@echo # CCTYPE=$(CCTYPE)&& \
+	echo # CC=$(CC)&& \
+	echo # GCCVER=$(GCCVER1).$(GCCVER2).$(GCCVER3)&& \
+	echo # GCCTARGET=$(GCCTARGET)&& \
+	echo # GCCCROSS=$(GCCCROSS)&& \
+	echo # WIN64=$(WIN64)&& \
+	echo # ARCHITECTURE=$(ARCHITECTURE)&& \
+	echo # ARCHNAME=$(ARCHNAME)&& \
+	echo # MAKE=$(PLMAKE)
+.ELSE
+	@echo # CCTYPE=$(CCTYPE)&& \
+	echo # WIN64=$(WIN64)&& \
+	echo # ARCHITECTURE=$(ARCHITECTURE)&& \
+	echo # ARCHNAME=$(ARCHNAME)&& \
+	echo # MAKE=$(PLMAKE)
+.ENDIF
+.IF "$(CCTYPE)" == ""
+	@echo Unable to detect gcc and/or architecture!
+	@exit 1
+.ENDIF
+
 
 ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
 

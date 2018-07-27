@@ -354,12 +354,32 @@ GCCTARGET	:= $(shell $(GCCBIN) -dumpmachine 2>NUL)
 ifneq ($(GCCTARGET),)
 CCTYPE		:= GCC
 else
+WIN64		:= $(shell for /f "tokens=3 delims=.^ " \
+	%%i in ('cl ^2^>^&1') do @if "%%i" == "32-bit" echo undef)
+#major version of CL has diff position based on 32 vs 64
+#Microsoft (R) C/C++ Optimizing Compiler Version 15.00.30729.01 for x64
+#Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.30729.01 for 80x86
 #use var to capture 1st line only, not 8th token of lines 2 & 3 in cl.exe output
-#rmving the cmd /c causes the var2b undef4echo but!4"set MSVCVER", cmd.exe bug?
-MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8 delims=.^ " \
-	%%i in ('cl ^2^>^&1') do if not defined MSVCVER set /A "MSVCVER=%%i-6") \
-	& cmd /c echo %%MSVCVER%%)
-CCTYPE		:= MSVC$(MSVCVER)0
+#removing the cmd /c (extra scope) on the echo causes the env var to be undef
+#when echo executes but it isn't undef for the "set MSVCVER", gmake or
+#cmd.exe bug?
+ifeq ($(WIN64),undef)
+MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8,9 delims=.^ " \
+	%%i in ('cl ^2^>^&1') do if not defined MSVCVER if %%i%% geq 19 \
+	(set /A "MSVCVER=((%%i-5)*10)+(%%j/10)") \
+	else (set /A "MSVCVER=(%%i-6)*10")) & cmd /c echo %%MSVCVER%%)
+else
+MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=7,8 delims=.^ " \
+	%%i in ('cl ^2^>^&1') do if not defined MSVCVER if %%i%% geq 19 \
+	(set /A "MSVCVER=((%%i-5)*10)+(%%j/10)") \
+	else (set /A "MSVCVER=(%%i-6)*10")) & cmd /c echo %%MSVCVER%%)
+endif
+#autodetect failed, reset to empty string
+ifeq ($(MSVCVER),-50)
+CCTYPE		:= 
+else
+CCTYPE		:= MSVC$(MSVCVER)
+endif
 endif
 endif
 
@@ -1179,17 +1199,23 @@ CFG_VARS	=					\
 all : info rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
 
 info :
-	@echo # CCTYPE=$(CCTYPE)
 ifeq ($(CCTYPE),GCC)
-	@echo # GCCBIN=$(GCCBIN)
-	@echo # GCCVER=$(GCCVER1).$(GCCVER2).$(GCCVER3)
-	@echo # GCCTARGET=$(GCCTARGET)
-	@echo # GCCCROSS=$(GCCCROSS)
+	@echo # CCTYPE=$(CCTYPE)&& \
+	echo # GCCBIN=$(GCCBIN)&& \
+	echo # GCCVER=$(GCCVER1).$(GCCVER2).$(GCCVER3)&& \
+	echo # GCCTARGET=$(GCCTARGET)&& \
+	echo # GCCCROSS=$(GCCCROSS)&& \
+	echo # WIN64=$(WIN64)&& \
+	echo # ARCHITECTURE=$(ARCHITECTURE)&& \
+	echo # ARCHNAME=$(ARCHNAME)&& \
+	echo # MAKE=$(PLMAKE)
+else
+	@echo # CCTYPE=$(CCTYPE)&& \
+	echo # WIN64=$(WIN64)&& \
+	echo # ARCHITECTURE=$(ARCHITECTURE)&& \
+	echo # ARCHNAME=$(ARCHNAME)&& \
+	echo # MAKE=$(PLMAKE)
 endif
-	@echo # WIN64=$(WIN64)
-	@echo # ARCHITECTURE=$(ARCHITECTURE)
-	@echo # ARCHNAME=$(ARCHNAME)
-	@echo # MAKE=$(PLMAKE)
 ifeq ($(CCTYPE),)
 	@echo Unable to detect gcc and/or architecture!
 	@exit 1
