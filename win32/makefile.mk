@@ -347,6 +347,10 @@ BUILDOPT	+= -DPERL_IMPLICIT_SYS
 BUILDOPT	+= -DWIN32_NO_REGISTRY
 .ENDIF
 
+.IF "$(CCTYPE)" == "GCC"
+GCCTARGET	:= $(shell gcc -dumpmachine & exit /b 0)
+.ENDIF
+
 #no explicit CCTYPE given, do auto detection
 .IF "$(CCTYPE)" == ""
 GCCTARGET	:= $(shell gcc -dumpmachine 2>NUL & exit /b 0)
