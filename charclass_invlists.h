@@ -7,7 +7,7 @@
 /* See the generating file for comments */
 
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 static const UV Latin1_invlist[] = {
 	2,	/* Number of elements */
@@ -27,13 +27,13 @@ static const UV AboveLatin1_invlist[] = {
 	0x100
 };
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV Case_Folding_invlist[] = { /* for ASCII/Latin1 */
+static const UV Case_Folding_invlist[] = {  /* for ASCII/Latin1 */
 	1381,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -1421,6 +1421,14 @@ static const UV Case_Folding_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
+#  endif	/* ASCII/Latin1 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -1962,6 +1970,7 @@ static const unsigned int * const CF_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 CF_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* CF_AUX_TABLE_1 */,
@@ -2039,7 +2048,7 @@ static const U8 CF_AUX_TABLE_lengths[] = {
 	2	/* CF_AUX_TABLE_73 */
 };
 
-static const int Case_Folding_invmap[] = { /* for ASCII/Latin1 */
+static const int Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x61,
 	0,
@@ -3425,12 +3434,16 @@ static const int Case_Folding_invmap[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Case_Folding_invlist[] = { /* for EBCDIC 1047 */
+static const UV Case_Folding_invlist[] = {  /* for EBCDIC 1047 */
 	1400,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -4837,6 +4850,17 @@ static const UV Case_Folding_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
+#  endif	/* EBCDIC 1047 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -5378,6 +5402,7 @@ static const unsigned int * const CF_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 CF_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* CF_AUX_TABLE_1 */,
@@ -5455,7 +5480,7 @@ static const U8 CF_AUX_TABLE_lengths[] = {
 	2	/* CF_AUX_TABLE_73 */
 };
 
-static const int Case_Folding_invmap[] = { /* for EBCDIC 1047 */
+static const int Case_Folding_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	CF_use_AUX_TABLE_1,
 	0,
@@ -6860,12 +6885,16 @@ static const int Case_Folding_invmap[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Case_Folding_invlist[] = { /* for EBCDIC 037 */
+static const UV Case_Folding_invlist[] = {  /* for EBCDIC 037 */
 	1396,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -8268,6 +8297,17 @@ static const UV Case_Folding_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
+#  endif	/* EBCDIC 037 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -8809,6 +8849,7 @@ static const unsigned int * const CF_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 CF_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* CF_AUX_TABLE_1 */,
@@ -8886,7 +8927,7 @@ static const U8 CF_AUX_TABLE_lengths[] = {
 	2	/* CF_AUX_TABLE_73 */
 };
 
-static const int Case_Folding_invmap[] = { /* for EBCDIC 037 */
+static const int Case_Folding_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	CF_use_AUX_TABLE_1,
 	0,
@@ -10287,9 +10328,13 @@ static const int Case_Folding_invmap[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV Lowercase_Mapping_invlist[] = { /* for ASCII/Latin1 */
+static const UV Lowercase_Mapping_invlist[] = {  /* for ASCII/Latin1 */
 	1245,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -11541,6 +11586,14 @@ static const UV Lowercase_Mapping_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
+#  endif	/* ASCII/Latin1 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -11564,12 +11617,13 @@ static const unsigned int * const LC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 LC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* LC_AUX_TABLE_1 */
 };
 
-static const int Lowercase_Mapping_invmap[] = { /* for ASCII/Latin1 */
+static const int Lowercase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x61,
 	0,
@@ -12819,12 +12873,16 @@ static const int Lowercase_Mapping_invmap[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Lowercase_Mapping_invlist[] = { /* for EBCDIC 1047 */
+static const UV Lowercase_Mapping_invlist[] = {  /* for EBCDIC 1047 */
 	1263,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -14094,6 +14152,17 @@ static const UV Lowercase_Mapping_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
+#  endif	/* EBCDIC 1047 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -14117,12 +14186,13 @@ static const unsigned int * const LC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 LC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* LC_AUX_TABLE_1 */
 };
 
-static const int Lowercase_Mapping_invmap[] = { /* for EBCDIC 1047 */
+static const int Lowercase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x42,
 	0,
@@ -15390,12 +15460,16 @@ static const int Lowercase_Mapping_invmap[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Lowercase_Mapping_invlist[] = { /* for EBCDIC 037 */
+static const UV Lowercase_Mapping_invlist[] = {  /* for EBCDIC 037 */
 	1259,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -16661,6 +16735,17 @@ static const UV Lowercase_Mapping_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
+#  endif	/* EBCDIC 037 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -16684,12 +16769,13 @@ static const unsigned int * const LC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 LC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* LC_AUX_TABLE_1 */
 };
 
-static const int Lowercase_Mapping_invmap[] = { /* for EBCDIC 037 */
+static const int Lowercase_Mapping_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x42,
 	0,
@@ -17953,9 +18039,13 @@ static const int Lowercase_Mapping_invmap[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for ASCII/Latin1 */
+static const UV NonL1_Perl_Non_Final_Folds_invlist[] = {  /* for ASCII/Latin1 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -18014,7 +18104,7 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 1047 */
+static const UV NonL1_Perl_Non_Final_Folds_invlist[] = {  /* for EBCDIC 1047 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -18073,7 +18163,7 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 037 */
+static const UV NonL1_Perl_Non_Final_Folds_invlist[] = {  /* for EBCDIC 037 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -18129,7 +18219,7 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV _Perl_GCB_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	1767,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -19905,7 +19995,7 @@ static const UV _Perl_GCB_invlist[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -19934,7 +20024,7 @@ typedef enum {
 	GCB_Glue_After_Zwj = 16
 } GCB_enum;
 
-static const GCB_enum _Perl_GCB_invmap[] = { /* for ASCII/Latin1 */
+static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Control,
 	GCB_LF,
 	GCB_Control,
@@ -21708,14 +21798,14 @@ static const GCB_enum _Perl_GCB_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_GCB_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 1047 */
 	1768,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -23492,7 +23582,7 @@ static const UV _Perl_GCB_invlist[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -23524,7 +23614,7 @@ typedef enum {
 	GCB_Glue_After_Zwj = 16
 } GCB_enum;
 
-static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 1047 */
+static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 1047 */
 	GCB_Control,
 	GCB_CR,
 	GCB_Control,
@@ -25299,14 +25389,14 @@ static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_GCB_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_GCB_invlist[] = {  /* for EBCDIC 037 */
 	1768,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -27083,7 +27173,7 @@ static const UV _Perl_GCB_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -27115,7 +27205,7 @@ typedef enum {
 	GCB_Glue_After_Zwj = 16
 } GCB_enum;
 
-static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 037 */
+static const GCB_enum _Perl_GCB_invmap[] = {  /* for EBCDIC 037 */
 	GCB_Control,
 	GCB_CR,
 	GCB_Control,
@@ -28890,11 +28980,11 @@ static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV _Perl_IVCF_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_IVCF_invlist[] = {  /* for ASCII/Latin1 */
 	1297,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -30198,6 +30288,14 @@ static const UV _Perl_IVCF_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
+#  endif	/* ASCII/Latin1 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -30406,6 +30504,7 @@ static const unsigned int * const IVCF_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 IVCF_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* IVCF_AUX_TABLE_1 */,
@@ -30437,7 +30536,7 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 	2	/* IVCF_AUX_TABLE_27 */
 };
 
-static const int _Perl_IVCF_invmap[] = { /* for ASCII/Latin1 */
+static const int _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x41,
 	IVCF_use_AUX_TABLE_1,
@@ -31739,12 +31838,16 @@ static const int _Perl_IVCF_invmap[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_IVCF_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 1047 */
 	1311,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -33062,6 +33165,17 @@ static const UV _Perl_IVCF_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
+#  endif	/* EBCDIC 1047 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -33270,6 +33384,7 @@ static const unsigned int * const IVCF_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 IVCF_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* IVCF_AUX_TABLE_1 */,
@@ -33301,7 +33416,7 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 	2	/* IVCF_AUX_TABLE_27 */
 };
 
-static const int _Perl_IVCF_invmap[] = { /* for EBCDIC 1047 */
+static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0xC0,
 	IVCF_use_AUX_TABLE_1,
@@ -34617,12 +34732,16 @@ static const int _Perl_IVCF_invmap[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_IVCF_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_IVCF_invlist[] = {  /* for EBCDIC 037 */
 	1311,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -35940,6 +36059,17 @@ static const UV _Perl_IVCF_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
+#  endif	/* EBCDIC 037 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -36148,6 +36278,7 @@ static const unsigned int * const IVCF_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 IVCF_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* IVCF_AUX_TABLE_1 */,
@@ -36179,7 +36310,7 @@ static const U8 IVCF_AUX_TABLE_lengths[] = {
 	2	/* IVCF_AUX_TABLE_27 */
 };
 
-static const int _Perl_IVCF_invmap[] = { /* for EBCDIC 037 */
+static const int _Perl_IVCF_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0xC0,
 	IVCF_use_AUX_TABLE_1,
@@ -37495,9 +37626,13 @@ static const int _Perl_IVCF_invmap[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV _Perl_LB_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	2353,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -39859,7 +39994,7 @@ static const UV _Perl_LB_invlist[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -39907,7 +40042,7 @@ typedef enum {
 	LB_EDGE = 38
 } LB_enum;
 
-static const LB_enum _Perl_LB_invmap[] = { /* for ASCII/Latin1 */
+static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Combining_Mark,
 	LB_Break_After,
 	LB_Line_Feed,
@@ -42267,14 +42402,14 @@ static const LB_enum _Perl_LB_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_LB_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_LB_invlist[] = {  /* for EBCDIC 1047 */
 	2365,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -44648,7 +44783,7 @@ static const UV _Perl_LB_invlist[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -44699,7 +44834,7 @@ typedef enum {
 	LB_EDGE = 38
 } LB_enum;
 
-static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 1047 */
+static const LB_enum _Perl_LB_invmap[] = {  /* for EBCDIC 1047 */
 	LB_Combining_Mark,
 	LB_Break_After,
 	LB_Combining_Mark,
@@ -47071,14 +47206,14 @@ static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_LB_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_LB_invlist[] = {  /* for EBCDIC 037 */
 	2365,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -49452,7 +49587,7 @@ static const UV _Perl_LB_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -49503,7 +49638,7 @@ typedef enum {
 	LB_EDGE = 38
 } LB_enum;
 
-static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 037 */
+static const LB_enum _Perl_LB_invmap[] = {  /* for EBCDIC 037 */
 	LB_Combining_Mark,
 	LB_Break_After,
 	LB_Combining_Mark,
@@ -51875,11 +52010,11 @@ static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV _Perl_SB_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
 	3065,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -54953,7 +55088,7 @@ static const UV _Perl_SB_invlist[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -54978,7 +55113,7 @@ typedef enum {
 	SB_EDGE = 15
 } SB_enum;
 
-static const SB_enum _Perl_SB_invmap[] = { /* for ASCII/Latin1 */
+static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_Other,
 	SB_Sp,
 	SB_LF,
@@ -58050,14 +58185,14 @@ static const SB_enum _Perl_SB_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_SB_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 1047 */
 	3089,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -61155,7 +61290,7 @@ static const UV _Perl_SB_invlist[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -61183,7 +61318,7 @@ typedef enum {
 	SB_EDGE = 15
 } SB_enum;
 
-static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 1047 */
+static const SB_enum _Perl_SB_invmap[] = {  /* for EBCDIC 1047 */
 	SB_Other,
 	SB_Sp,
 	SB_Other,
@@ -64279,14 +64414,14 @@ static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_SB_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_SB_invlist[] = {  /* for EBCDIC 037 */
 	3085,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -67380,7 +67515,7 @@ static const UV _Perl_SB_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -67408,7 +67543,7 @@ typedef enum {
 	SB_EDGE = 15
 } SB_enum;
 
-static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 037 */
+static const SB_enum _Perl_SB_invmap[] = {  /* for EBCDIC 037 */
 	SB_Other,
 	SB_Sp,
 	SB_Other,
@@ -70500,11 +70635,11 @@ static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV _Perl_SCX_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_SCX_invlist[] = {  /* for ASCII/Latin1 */
 	1612,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -72125,7 +72260,7 @@ static const UV _Perl_SCX_invlist[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
@@ -72778,6 +72913,7 @@ static const SCX_enum * const SCX_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 SCX_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* SCX_AUX_TABLE_1 */,
@@ -72834,6 +72970,7 @@ static const U8 SCX_AUX_TABLE_lengths[] = {
 /* This table, indexed by the script enum, gives the zero code point for that
  * script; 0 if the script has multiple digit sequences.  Scripts without a
  * digit sequence use ASCII [0-9], hence are marked '0' */
+
 static const UV script_zeros[] = {
 	'0',	/* Unknown */
 	0x1e950,	/* Adlam */
@@ -72987,7 +73124,7 @@ static const UV script_zeros[] = {
 	0x118e0	/* Warang_Citi */
 };
 
-static const SCX_enum _Perl_SCX_invmap[] = { /* for ASCII/Latin1 */
+static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Common,
 	SCX_Latin,
 	SCX_Common,
@@ -74606,14 +74743,14 @@ static const SCX_enum _Perl_SCX_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_SCX_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_SCX_invlist[] = {  /* for EBCDIC 1047 */
 	1638,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -76260,7 +76397,7 @@ static const UV _Perl_SCX_invlist[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
@@ -76919,6 +77056,7 @@ static const SCX_enum * const SCX_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 SCX_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* SCX_AUX_TABLE_1 */,
@@ -76975,6 +77113,7 @@ static const U8 SCX_AUX_TABLE_lengths[] = {
 /* This table, indexed by the script enum, gives the zero code point for that
  * script; 0 if the script has multiple digit sequences.  Scripts without a
  * digit sequence use ASCII [0-9], hence are marked '0' */
+
 static const UV script_zeros[] = {
 	'0',	/* Unknown */
 	0x1e950,	/* Adlam */
@@ -77128,7 +77267,7 @@ static const UV script_zeros[] = {
 	0x118e0	/* Warang_Citi */
 };
 
-static const SCX_enum _Perl_SCX_invmap[] = { /* for EBCDIC 1047 */
+static const SCX_enum _Perl_SCX_invmap[] = {  /* for EBCDIC 1047 */
 	SCX_Common,
 	SCX_Latin,
 	SCX_Common,
@@ -78773,14 +78912,14 @@ static const SCX_enum _Perl_SCX_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_SCX_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_SCX_invlist[] = {  /* for EBCDIC 037 */
 	1634,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -80423,7 +80562,7 @@ static const UV _Perl_SCX_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
@@ -81082,6 +81221,7 @@ static const SCX_enum * const SCX_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 SCX_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* SCX_AUX_TABLE_1 */,
@@ -81138,6 +81278,7 @@ static const U8 SCX_AUX_TABLE_lengths[] = {
 /* This table, indexed by the script enum, gives the zero code point for that
  * script; 0 if the script has multiple digit sequences.  Scripts without a
  * digit sequence use ASCII [0-9], hence are marked '0' */
+
 static const UV script_zeros[] = {
 	'0',	/* Unknown */
 	0x1e950,	/* Adlam */
@@ -81291,7 +81432,7 @@ static const UV script_zeros[] = {
 	0x118e0	/* Warang_Citi */
 };
 
-static const SCX_enum _Perl_SCX_invmap[] = { /* for EBCDIC 037 */
+static const SCX_enum _Perl_SCX_invmap[] = {  /* for EBCDIC 037 */
 	SCX_Common,
 	SCX_Latin,
 	SCX_Common,
@@ -82932,11 +83073,11 @@ static const SCX_enum _Perl_SCX_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_WB_invlist[] = {  /* for ASCII/Latin1 */
 	1812,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -84757,7 +84898,7 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -84793,7 +84934,7 @@ typedef enum {
 	WB_UNKNOWN = 22
 } WB_enum;
 
-static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
+static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_Other,
 	WB_Perl_Tailored_HSpace,
 	WB_LF,
@@ -86612,14 +86753,14 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 1047 */
 	1835,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -88463,7 +88604,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -88502,7 +88643,7 @@ typedef enum {
 	WB_UNKNOWN = 22
 } WB_enum;
 
-static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
+static const WB_enum _Perl_WB_invmap[] = {  /* for EBCDIC 1047 */
 	WB_Other,
 	WB_Perl_Tailored_HSpace,
 	WB_Other,
@@ -90344,14 +90485,14 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_WB_invlist[] = {  /* for EBCDIC 037 */
 	1831,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -92191,7 +92332,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -92230,7 +92371,7 @@ typedef enum {
 	WB_UNKNOWN = 22
 } WB_enum;
 
-static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
+static const WB_enum _Perl_WB_invmap[] = {  /* for EBCDIC 037 */
 	WB_Other,
 	WB_Perl_Tailored_HSpace,
 	WB_Other,
@@ -94068,11 +94209,11 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_UTF8_C)
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV Simple_Case_Folding_invlist[] = { /* for ASCII/Latin1 */
+static const UV Simple_Case_Folding_invlist[] = {  /* for ASCII/Latin1 */
 	1274,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -95353,7 +95494,15 @@ static const UV Simple_Case_Folding_invlist[] = { /* for ASCII/Latin1 */
 	0x1E922
 };
 
-static const int Simple_Case_Folding_invmap[] = { /* for ASCII/Latin1 */
+#  endif	/* ASCII/Latin1 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
+static const int Simple_Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x61,
 	0,
@@ -96632,12 +96781,16 @@ static const int Simple_Case_Folding_invmap[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Simple_Case_Folding_invlist[] = { /* for EBCDIC 1047 */
+static const UV Simple_Case_Folding_invlist[] = {  /* for EBCDIC 1047 */
 	1292,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -97936,7 +98089,18 @@ static const UV Simple_Case_Folding_invlist[] = { /* for EBCDIC 1047 */
 	0x1E922
 };
 
-static const int Simple_Case_Folding_invmap[] = { /* for EBCDIC 1047 */
+#  endif	/* EBCDIC 1047 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
+static const int Simple_Case_Folding_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x42,
 	0,
@@ -99233,12 +99397,16 @@ static const int Simple_Case_Folding_invmap[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Simple_Case_Folding_invlist[] = { /* for EBCDIC 037 */
+static const UV Simple_Case_Folding_invlist[] = {  /* for EBCDIC 037 */
 	1288,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -100533,7 +100701,18 @@ static const UV Simple_Case_Folding_invlist[] = { /* for EBCDIC 037 */
 	0x1E922
 };
 
-static const int Simple_Case_Folding_invmap[] = { /* for EBCDIC 037 */
+#  endif	/* EBCDIC 037 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
+static const int Simple_Case_Folding_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x42,
 	0,
@@ -101826,9 +102005,13 @@ static const int Simple_Case_Folding_invmap[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV Titlecase_Mapping_invlist[] = { /* for ASCII/Latin1 */
+static const UV Titlecase_Mapping_invlist[] = {  /* for ASCII/Latin1 */
 	1322,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -103157,6 +103340,14 @@ static const UV Titlecase_Mapping_invlist[] = { /* for ASCII/Latin1 */
 	0x1E944
 };
 
+#  endif	/* ASCII/Latin1 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -103502,6 +103693,7 @@ static const unsigned int * const TC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 TC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* TC_AUX_TABLE_1 */,
@@ -103551,7 +103743,7 @@ static const U8 TC_AUX_TABLE_lengths[] = {
 	2	/* TC_AUX_TABLE_45 */
 };
 
-static const int Titlecase_Mapping_invmap[] = { /* for ASCII/Latin1 */
+static const int Titlecase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x41,
 	0,
@@ -104878,12 +105070,16 @@ static const int Titlecase_Mapping_invmap[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Titlecase_Mapping_invlist[] = { /* for EBCDIC 1047 */
+static const UV Titlecase_Mapping_invlist[] = {  /* for EBCDIC 1047 */
 	1338,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -106228,6 +106424,17 @@ static const UV Titlecase_Mapping_invlist[] = { /* for EBCDIC 1047 */
 	0x1E944
 };
 
+#  endif	/* EBCDIC 1047 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -106573,6 +106780,7 @@ static const unsigned int * const TC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 TC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* TC_AUX_TABLE_1 */,
@@ -106622,7 +106830,7 @@ static const U8 TC_AUX_TABLE_lengths[] = {
 	2	/* TC_AUX_TABLE_45 */
 };
 
-static const int Titlecase_Mapping_invmap[] = { /* for EBCDIC 1047 */
+static const int Titlecase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x62,
 	0,
@@ -107965,12 +108173,16 @@ static const int Titlecase_Mapping_invmap[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Titlecase_Mapping_invlist[] = { /* for EBCDIC 037 */
+static const UV Titlecase_Mapping_invlist[] = {  /* for EBCDIC 037 */
 	1336,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -109313,6 +109525,17 @@ static const UV Titlecase_Mapping_invlist[] = { /* for EBCDIC 037 */
 	0x1E944
 };
 
+#  endif	/* EBCDIC 037 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -109658,6 +109881,7 @@ static const unsigned int * const TC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 TC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* TC_AUX_TABLE_1 */,
@@ -109707,7 +109931,7 @@ static const U8 TC_AUX_TABLE_lengths[] = {
 	2	/* TC_AUX_TABLE_45 */
 };
 
-static const int Titlecase_Mapping_invmap[] = { /* for EBCDIC 037 */
+static const int Titlecase_Mapping_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x62,
 	0,
@@ -111048,9 +111272,13 @@ static const int Titlecase_Mapping_invmap[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV Uppercase_Mapping_invlist[] = { /* for ASCII/Latin1 */
+static const UV Uppercase_Mapping_invlist[] = {  /* for ASCII/Latin1 */
 	1373,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -112430,6 +112658,14 @@ static const UV Uppercase_Mapping_invlist[] = { /* for ASCII/Latin1 */
 	0x1E944
 };
 
+#  endif	/* ASCII/Latin1 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -112964,6 +113200,7 @@ static const unsigned int * const UC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 UC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* UC_AUX_TABLE_1 */,
@@ -113040,7 +113277,7 @@ static const U8 UC_AUX_TABLE_lengths[] = {
 	2	/* UC_AUX_TABLE_72 */
 };
 
-static const int Uppercase_Mapping_invmap[] = { /* for ASCII/Latin1 */
+static const int Uppercase_Mapping_invmap[] = {  /* for ASCII/Latin1 */
 	0,
 	0x41,
 	0,
@@ -114418,12 +114655,16 @@ static const int Uppercase_Mapping_invmap[] = { /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Uppercase_Mapping_invlist[] = { /* for EBCDIC 1047 */
+static const UV Uppercase_Mapping_invlist[] = {  /* for EBCDIC 1047 */
 	1389,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -115819,6 +116060,17 @@ static const UV Uppercase_Mapping_invlist[] = { /* for EBCDIC 1047 */
 	0x1E944
 };
 
+#  endif	/* EBCDIC 1047 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 1047 */ \
+     && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
+     && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -116353,6 +116605,7 @@ static const unsigned int * const UC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 UC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* UC_AUX_TABLE_1 */,
@@ -116429,7 +116682,7 @@ static const U8 UC_AUX_TABLE_lengths[] = {
 	2	/* UC_AUX_TABLE_72 */
 };
 
-static const int Uppercase_Mapping_invmap[] = { /* for EBCDIC 1047 */
+static const int Uppercase_Mapping_invmap[] = {  /* for EBCDIC 1047 */
 	0,
 	0x62,
 	0,
@@ -117823,12 +118076,16 @@ static const int Uppercase_Mapping_invmap[] = { /* for EBCDIC 1047 */
 
 #  endif	/* EBCDIC 1047 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV Uppercase_Mapping_invlist[] = { /* for EBCDIC 037 */
+static const UV Uppercase_Mapping_invlist[] = {  /* for EBCDIC 037 */
 	1387,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -119222,6 +119479,17 @@ static const UV Uppercase_Mapping_invlist[] = { /* for EBCDIC 037 */
 	0x1E944
 };
 
+#  endif	/* EBCDIC 037 */
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
+
+#if defined(PERL_IN_UTF8_C)
+
+#  if 'A' == 193 /* EBCDIC 037 */ \
+     && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
+     && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
+     && '$' == 91 && '@' == 124 && '`' == 121
+
 /* Negative enum values indicate the need to use an auxiliary table
  * consisting of the list of enums this one expands to.  The absolute
  * values of the negative enums are indices into a table of the auxiliary
@@ -119756,6 +120024,7 @@ static const unsigned int * const UC_AUX_TABLE_ptrs[] = {
 
 /* Parallel table to the above, giving the number of elements in each table
  * pointed to */
+
 static const U8 UC_AUX_TABLE_lengths[] = {
 	0,	/* Placeholder */
 	2	/* UC_AUX_TABLE_1 */,
@@ -119832,7 +120101,7 @@ static const U8 UC_AUX_TABLE_lengths[] = {
 	2	/* UC_AUX_TABLE_72 */
 };
 
-static const int Uppercase_Mapping_invmap[] = { /* for EBCDIC 037 */
+static const int Uppercase_Mapping_invmap[] = {  /* for EBCDIC 037 */
 	0,
 	0x62,
 	0,
@@ -121224,9 +121493,13 @@ static const int Uppercase_Mapping_invmap[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE))
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
+static const UV UpperLatin1_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -121243,7 +121516,7 @@ static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
+static const UV UpperLatin1_invlist[] = {  /* for EBCDIC 1047 */
 	55,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -121312,7 +121585,7 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
+static const UV UpperLatin1_invlist[] = {  /* for EBCDIC 037 */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -121380,7 +121653,7 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_ASCII_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_ASCII_invlist[] = {  /* for ASCII/Latin1 */
 	2,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -121396,7 +121669,7 @@ static const UV PL_ASCII_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_ASCII_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_ASCII_invlist[] = {  /* for EBCDIC 1047 */
 	54,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -121464,7 +121737,7 @@ static const UV PL_ASCII_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_ASCII_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_ASCII_invlist[] = {  /* for EBCDIC 037 */
 	56,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -121529,7 +121802,7 @@ static const UV PL_ASCII_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_ASSIGNED_invlist[] = { /* for all charsets */
+static const UV UNI_ASSIGNED_invlist[] = {  /* for all charsets */
 	1316,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -122854,7 +123127,7 @@ static const UV PL_ASSIGNED_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CASED_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CASED_invlist[] = {  /* for ASCII/Latin1 */
 	279,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -123147,7 +123420,7 @@ static const UV PL_CASED_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CASED_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CASED_invlist[] = {  /* for EBCDIC 1047 */
 	305,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -123466,7 +123739,7 @@ static const UV PL_CASED_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CASED_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CASED_invlist[] = {  /* for EBCDIC 037 */
 	301,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -123778,7 +124051,7 @@ static const UV PL_CASED_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CASEDLETTER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CASEDLETTER_invlist[] = {  /* for ASCII/Latin1 */
 	261,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -124053,7 +124326,7 @@ static const UV PL_CASEDLETTER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CASEDLETTER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CASEDLETTER_invlist[] = {  /* for EBCDIC 1047 */
 	293,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -124360,7 +124633,7 @@ static const UV PL_CASEDLETTER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CASEDLETTER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CASEDLETTER_invlist[] = {  /* for EBCDIC 037 */
 	289,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -124660,7 +124933,7 @@ static const UV PL_CASEDLETTER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LOWERCASELETTER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LOWERCASELETTER_invlist[] = {  /* for ASCII/Latin1 */
 	1277,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -125951,7 +126224,7 @@ static const UV PL_LOWERCASELETTER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LOWERCASELETTER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LOWERCASELETTER_invlist[] = {  /* for EBCDIC 1047 */
 	1291,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -127256,7 +127529,7 @@ static const UV PL_LOWERCASELETTER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LOWERCASELETTER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LOWERCASELETTER_invlist[] = {  /* for EBCDIC 037 */
 	1291,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128558,7 +128831,7 @@ static const UV PL_LOWERCASELETTER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXALNUM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXALNUM_invlist[] = {  /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128579,7 +128852,7 @@ static const UV PL_POSIXALNUM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXALNUM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXALNUM_invlist[] = {  /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128608,7 +128881,7 @@ static const UV PL_POSIXALNUM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXALNUM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXALNUM_invlist[] = {  /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128634,7 +128907,7 @@ static const UV PL_POSIXALNUM_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXALPHA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXALPHA_invlist[] = {  /* for ASCII/Latin1 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128653,7 +128926,7 @@ static const UV PL_POSIXALPHA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXALPHA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXALPHA_invlist[] = {  /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128680,7 +128953,7 @@ static const UV PL_POSIXALPHA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXALPHA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXALPHA_invlist[] = {  /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128704,7 +128977,7 @@ static const UV PL_POSIXALPHA_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXBLANK_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXBLANK_invlist[] = {  /* for ASCII/Latin1 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128723,7 +128996,7 @@ static const UV PL_POSIXBLANK_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXBLANK_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXBLANK_invlist[] = {  /* for EBCDIC 1047 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128742,7 +129015,7 @@ static const UV PL_POSIXBLANK_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXBLANK_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXBLANK_invlist[] = {  /* for EBCDIC 037 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128758,7 +129031,7 @@ static const UV PL_POSIXBLANK_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXCNTRL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXCNTRL_invlist[] = {  /* for ASCII/Latin1 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -128776,7 +129049,7 @@ static const UV PL_POSIXCNTRL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXCNTRL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXCNTRL_invlist[] = {  /* for EBCDIC 1047 */
 	26,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -128816,7 +129089,7 @@ static const UV PL_POSIXCNTRL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXCNTRL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXCNTRL_invlist[] = {  /* for EBCDIC 037 */
 	26,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -128853,7 +129126,7 @@ static const UV PL_POSIXCNTRL_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXDIGIT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXDIGIT_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128870,7 +129143,7 @@ static const UV PL_POSIXDIGIT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXDIGIT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXDIGIT_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128887,7 +129160,7 @@ static const UV PL_POSIXDIGIT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXDIGIT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXDIGIT_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128901,7 +129174,7 @@ static const UV PL_POSIXDIGIT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXGRAPH_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXGRAPH_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128918,7 +129191,7 @@ static const UV PL_POSIXGRAPH_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXGRAPH_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXGRAPH_invlist[] = {  /* for EBCDIC 1047 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -128961,7 +129234,7 @@ static const UV PL_POSIXGRAPH_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXGRAPH_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXGRAPH_invlist[] = {  /* for EBCDIC 037 */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129003,7 +129276,7 @@ static const UV PL_POSIXGRAPH_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXLOWER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXLOWER_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129020,7 +129293,7 @@ static const UV PL_POSIXLOWER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXLOWER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXLOWER_invlist[] = {  /* for EBCDIC 1047 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129041,7 +129314,7 @@ static const UV PL_POSIXLOWER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXLOWER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXLOWER_invlist[] = {  /* for EBCDIC 037 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129059,7 +129332,7 @@ static const UV PL_POSIXLOWER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXPRINT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXPRINT_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129076,7 +129349,7 @@ static const UV PL_POSIXPRINT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXPRINT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXPRINT_invlist[] = {  /* for EBCDIC 1047 */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129121,7 +129394,7 @@ static const UV PL_POSIXPRINT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXPRINT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXPRINT_invlist[] = {  /* for EBCDIC 037 */
 	33,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129165,7 +129438,7 @@ static const UV PL_POSIXPRINT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXPUNCT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXPUNCT_invlist[] = {  /* for ASCII/Latin1 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129188,7 +129461,7 @@ static const UV PL_POSIXPUNCT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXPUNCT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXPUNCT_invlist[] = {  /* for EBCDIC 1047 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129223,7 +129496,7 @@ static const UV PL_POSIXPUNCT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXPUNCT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXPUNCT_invlist[] = {  /* for EBCDIC 037 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129257,7 +129530,7 @@ static const UV PL_POSIXPUNCT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXSPACE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXSPACE_invlist[] = {  /* for ASCII/Latin1 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129276,7 +129549,7 @@ static const UV PL_POSIXSPACE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXSPACE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXSPACE_invlist[] = {  /* for EBCDIC 1047 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129299,7 +129572,7 @@ static const UV PL_POSIXSPACE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXSPACE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXSPACE_invlist[] = {  /* for EBCDIC 037 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129319,7 +129592,7 @@ static const UV PL_POSIXSPACE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXUPPER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXUPPER_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129336,7 +129609,7 @@ static const UV PL_POSIXUPPER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXUPPER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXUPPER_invlist[] = {  /* for EBCDIC 1047 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129357,7 +129630,7 @@ static const UV PL_POSIXUPPER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXUPPER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXUPPER_invlist[] = {  /* for EBCDIC 037 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129375,7 +129648,7 @@ static const UV PL_POSIXUPPER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXWORD_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXWORD_invlist[] = {  /* for ASCII/Latin1 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129398,7 +129671,7 @@ static const UV PL_POSIXWORD_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXWORD_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXWORD_invlist[] = {  /* for EBCDIC 1047 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129429,7 +129702,7 @@ static const UV PL_POSIXWORD_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXWORD_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXWORD_invlist[] = {  /* for EBCDIC 037 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129457,7 +129730,7 @@ static const UV PL_POSIXWORD_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_POSIXXDIGIT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_POSIXXDIGIT_invlist[] = {  /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129478,7 +129751,7 @@ static const UV PL_POSIXXDIGIT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXXDIGIT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_POSIXXDIGIT_invlist[] = {  /* for EBCDIC 1047 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129499,7 +129772,7 @@ static const UV PL_POSIXXDIGIT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_POSIXXDIGIT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_POSIXXDIGIT_invlist[] = {  /* for EBCDIC 037 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129515,7 +129788,7 @@ static const UV PL_POSIXXDIGIT_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_TITLE_invlist[] = { /* for all charsets */
+static const UV UNI_TITLE_invlist[] = {  /* for all charsets */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -129545,7 +129818,7 @@ static const UV PL_TITLE_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_UPPERCASELETTER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_UPPERCASELETTER_invlist[] = {  /* for ASCII/Latin1 */
 	1263,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -130822,7 +131095,7 @@ static const UV PL_UPPERCASELETTER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_UPPERCASELETTER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_UPPERCASELETTER_invlist[] = {  /* for EBCDIC 1047 */
 	1281,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -132117,7 +132390,7 @@ static const UV PL_UPPERCASELETTER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_UPPERCASELETTER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_UPPERCASELETTER_invlist[] = {  /* for EBCDIC 037 */
 	1277,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -133405,7 +133678,7 @@ static const UV PL_UPPERCASELETTER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_VERTSPACE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_VERTSPACE_invlist[] = {  /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -133426,7 +133699,7 @@ static const UV PL_VERTSPACE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_VERTSPACE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_VERTSPACE_invlist[] = {  /* for EBCDIC 1047 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -133449,7 +133722,7 @@ static const UV PL_VERTSPACE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_VERTSPACE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_VERTSPACE_invlist[] = {  /* for EBCDIC 037 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -133469,7 +133742,7 @@ static const UV PL_VERTSPACE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXALNUM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXALNUM_invlist[] = {  /* for ASCII/Latin1 */
 	1427,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -134910,7 +135183,7 @@ static const UV PL_XPOSIXALNUM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXALNUM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXALNUM_invlist[] = {  /* for EBCDIC 1047 */
 	1451,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -136375,7 +136648,7 @@ static const UV PL_XPOSIXALNUM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXALNUM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXALNUM_invlist[] = {  /* for EBCDIC 037 */
 	1447,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -137833,7 +138106,7 @@ static const UV PL_XPOSIXALNUM_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXALPHA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXALPHA_invlist[] = {  /* for ASCII/Latin1 */
 	1353,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -139200,7 +139473,7 @@ static const UV PL_XPOSIXALPHA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXALPHA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXALPHA_invlist[] = {  /* for EBCDIC 1047 */
 	1379,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -140593,7 +140866,7 @@ static const UV PL_XPOSIXALPHA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXALPHA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXALPHA_invlist[] = {  /* for EBCDIC 037 */
 	1375,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -141979,7 +142252,7 @@ static const UV PL_XPOSIXALPHA_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXBLANK_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXBLANK_invlist[] = {  /* for ASCII/Latin1 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -142010,7 +142283,7 @@ static const UV PL_XPOSIXBLANK_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXBLANK_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXBLANK_invlist[] = {  /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -142039,7 +142312,7 @@ static const UV PL_XPOSIXBLANK_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXBLANK_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXBLANK_invlist[] = {  /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -142065,7 +142338,7 @@ static const UV PL_XPOSIXBLANK_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXCNTRL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXCNTRL_invlist[] = {  /* for ASCII/Latin1 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -142083,7 +142356,7 @@ static const UV PL_XPOSIXCNTRL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXCNTRL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXCNTRL_invlist[] = {  /* for EBCDIC 1047 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -142101,7 +142374,7 @@ static const UV PL_XPOSIXCNTRL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXCNTRL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXCNTRL_invlist[] = {  /* for EBCDIC 037 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -142116,7 +142389,7 @@ static const UV PL_XPOSIXCNTRL_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXDIGIT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXDIGIT_invlist[] = {  /* for ASCII/Latin1 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -142245,7 +142518,7 @@ static const UV PL_XPOSIXDIGIT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXDIGIT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXDIGIT_invlist[] = {  /* for EBCDIC 1047 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -142374,7 +142647,7 @@ static const UV PL_XPOSIXDIGIT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXDIGIT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXDIGIT_invlist[] = {  /* for EBCDIC 037 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -142500,7 +142773,7 @@ static const UV PL_XPOSIXDIGIT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXGRAPH_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for ASCII/Latin1 */
 	1327,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -143841,7 +144114,7 @@ static const UV PL_XPOSIXGRAPH_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXGRAPH_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for EBCDIC 1047 */
 	1327,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -145182,7 +145455,7 @@ static const UV PL_XPOSIXGRAPH_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXGRAPH_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for EBCDIC 037 */
 	1327,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -146520,7 +146793,7 @@ static const UV PL_XPOSIXGRAPH_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXLOWER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXLOWER_invlist[] = {  /* for ASCII/Latin1 */
 	1291,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -147825,7 +148098,7 @@ static const UV PL_XPOSIXLOWER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXLOWER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXLOWER_invlist[] = {  /* for EBCDIC 1047 */
 	1299,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -149138,7 +149411,7 @@ static const UV PL_XPOSIXLOWER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXLOWER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXLOWER_invlist[] = {  /* for EBCDIC 037 */
 	1299,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -150448,7 +150721,7 @@ static const UV PL_XPOSIXLOWER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXPRINT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXPRINT_invlist[] = {  /* for ASCII/Latin1 */
 	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -151783,7 +152056,7 @@ static const UV PL_XPOSIXPRINT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXPRINT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXPRINT_invlist[] = {  /* for EBCDIC 1047 */
 	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -153118,7 +153391,7 @@ static const UV PL_XPOSIXPRINT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXPRINT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXPRINT_invlist[] = {  /* for EBCDIC 037 */
 	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -154450,7 +154723,7 @@ static const UV PL_XPOSIXPRINT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXPUNCT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXPUNCT_invlist[] = {  /* for ASCII/Latin1 */
 	347,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -154811,7 +155084,7 @@ static const UV PL_XPOSIXPUNCT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXPUNCT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXPUNCT_invlist[] = {  /* for EBCDIC 1047 */
 	355,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -155180,7 +155453,7 @@ static const UV PL_XPOSIXPUNCT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXPUNCT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXPUNCT_invlist[] = {  /* for EBCDIC 037 */
 	357,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -155548,7 +155821,7 @@ static const UV PL_XPOSIXPUNCT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXSPACE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXSPACE_invlist[] = {  /* for ASCII/Latin1 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -155583,7 +155856,7 @@ static const UV PL_XPOSIXSPACE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXSPACE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXSPACE_invlist[] = {  /* for EBCDIC 1047 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -155620,7 +155893,7 @@ static const UV PL_XPOSIXSPACE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXSPACE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXSPACE_invlist[] = {  /* for EBCDIC 037 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -155654,7 +155927,7 @@ static const UV PL_XPOSIXSPACE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXUPPER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXUPPER_invlist[] = {  /* for ASCII/Latin1 */
 	1273,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -156941,7 +157214,7 @@ static const UV PL_XPOSIXUPPER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXUPPER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXUPPER_invlist[] = {  /* for EBCDIC 1047 */
 	1291,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -158246,7 +158519,7 @@ static const UV PL_XPOSIXUPPER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXUPPER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXUPPER_invlist[] = {  /* for EBCDIC 037 */
 	1287,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -159544,7 +159817,7 @@ static const UV PL_XPOSIXUPPER_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXWORD_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXWORD_invlist[] = {  /* for ASCII/Latin1 */
 	1423,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -160981,7 +161254,7 @@ static const UV PL_XPOSIXWORD_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXWORD_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXWORD_invlist[] = {  /* for EBCDIC 1047 */
 	1447,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -162442,7 +162715,7 @@ static const UV PL_XPOSIXWORD_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXWORD_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXWORD_invlist[] = {  /* for EBCDIC 037 */
 	1443,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -163896,7 +164169,7 @@ static const UV PL_XPOSIXWORD_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XPOSIXXDIGIT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XPOSIXXDIGIT_invlist[] = {  /* for ASCII/Latin1 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -163923,7 +164196,7 @@ static const UV PL_XPOSIXXDIGIT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXXDIGIT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XPOSIXXDIGIT_invlist[] = {  /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -163950,7 +164223,7 @@ static const UV PL_XPOSIXXDIGIT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XPOSIXXDIGIT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XPOSIXXDIGIT_invlist[] = {  /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -163974,7 +164247,7 @@ static const UV PL_XPOSIXXDIGIT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_ANY_FOLDS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_ANY_FOLDS_invlist[] = {  /* for ASCII/Latin1 */
 	263,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -164251,7 +164524,7 @@ static const UV PL__PERL_ANY_FOLDS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_ANY_FOLDS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_ANY_FOLDS_invlist[] = {  /* for EBCDIC 1047 */
 	295,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -164560,7 +164833,7 @@ static const UV PL__PERL_ANY_FOLDS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_ANY_FOLDS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_ANY_FOLDS_invlist[] = {  /* for EBCDIC 037 */
 	291,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -164862,7 +165135,7 @@ static const UV PL__PERL_ANY_FOLDS_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_CHARNAME_BEGIN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_CHARNAME_BEGIN_invlist[] = {  /* for ASCII/Latin1 */
 	1211,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -166087,7 +166360,7 @@ static const UV PL__PERL_CHARNAME_BEGIN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_CHARNAME_BEGIN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_CHARNAME_BEGIN_invlist[] = {  /* for EBCDIC 1047 */
 	1237,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -167338,7 +167611,7 @@ static const UV PL__PERL_CHARNAME_BEGIN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_CHARNAME_BEGIN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_CHARNAME_BEGIN_invlist[] = {  /* for EBCDIC 037 */
 	1233,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -168582,7 +168855,7 @@ static const UV PL__PERL_CHARNAME_BEGIN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_CHARNAME_CONTINUE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_CHARNAME_CONTINUE_invlist[] = {  /* for ASCII/Latin1 */
 	1435,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -170031,7 +170304,7 @@ static const UV PL__PERL_CHARNAME_CONTINUE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_CHARNAME_CONTINUE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_CHARNAME_CONTINUE_invlist[] = {  /* for EBCDIC 1047 */
 	1461,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -171506,7 +171779,7 @@ static const UV PL__PERL_CHARNAME_CONTINUE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_CHARNAME_CONTINUE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_CHARNAME_CONTINUE_invlist[] = {  /* for EBCDIC 037 */
 	1457,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -172974,7 +173247,7 @@ static const UV PL__PERL_CHARNAME_CONTINUE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = {  /* for ASCII/Latin1 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -173047,7 +173320,7 @@ static const UV PL__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = { /* for ASCII/Latin1 *
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = {  /* for EBCDIC 1047 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -173120,7 +173393,7 @@ static const UV PL__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = {  /* for EBCDIC 037 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -173190,7 +173463,7 @@ static const UV PL__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_IDCONT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_IDCONT_invlist[] = {  /* for ASCII/Latin1 */
 	1429,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -174633,7 +174906,7 @@ static const UV PL__PERL_IDCONT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_IDCONT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_IDCONT_invlist[] = {  /* for EBCDIC 1047 */
 	1453,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -176100,7 +176373,7 @@ static const UV PL__PERL_IDCONT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_IDCONT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_IDCONT_invlist[] = {  /* for EBCDIC 037 */
 	1449,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -177560,7 +177833,7 @@ static const UV PL__PERL_IDCONT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_IDSTART_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_IDSTART_invlist[] = {  /* for ASCII/Latin1 */
 	1217,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -178791,7 +179064,7 @@ static const UV PL__PERL_IDSTART_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_IDSTART_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_IDSTART_invlist[] = {  /* for EBCDIC 1047 */
 	1243,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -180048,7 +180321,7 @@ static const UV PL__PERL_IDSTART_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_IDSTART_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_IDSTART_invlist[] = {  /* for EBCDIC 037 */
 	1239,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181296,7 +181569,7 @@ static const UV PL__PERL_IDSTART_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist[] = { /* for all charsets */
+static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist[] = {  /* for all charsets */
 	26,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -181329,7 +181602,7 @@ static const UV PL__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist[] = { /* for a
 	0xFB07
 };
 
-static const UV PL__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist[] = { /* for all charsets */
+static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist[] = {  /* for all charsets */
 	24,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -181362,7 +181635,7 @@ static const UV PL__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist[] = { /* for all chars
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_QUOTEMETA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_QUOTEMETA_invlist[] = {  /* for ASCII/Latin1 */
 	78,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -181454,7 +181727,7 @@ static const UV PL__PERL_QUOTEMETA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_QUOTEMETA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_QUOTEMETA_invlist[] = {  /* for EBCDIC 1047 */
 	92,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -181560,7 +181833,7 @@ static const UV PL__PERL_QUOTEMETA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_QUOTEMETA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_QUOTEMETA_invlist[] = {  /* for EBCDIC 037 */
 	90,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -181659,7 +181932,7 @@ static const UV PL__PERL_QUOTEMETA_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_ADLM_invlist[] = { /* for all charsets */
+static const UV UNI_ADLM_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181675,7 +181948,7 @@ static const UV PL_ADLM_invlist[] = { /* for all charsets */
 	0x1E960
 };
 
-static const UV PL_AEGEANNUMBERS_invlist[] = { /* for all charsets */
+static const UV UNI_AEGEANNUMBERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181685,7 +181958,7 @@ static const UV PL_AEGEANNUMBERS_invlist[] = { /* for all charsets */
 	0x10140
 };
 
-static const UV PL_AGE__10_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__10_invlist[] = {  /* for all charsets */
 	81,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181773,7 +182046,7 @@ static const UV PL_AGE__10_invlist[] = { /* for all charsets */
 	0x2EBE1
 };
 
-static const UV PL_AGE__11_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__11_invlist[] = {  /* for all charsets */
 	119,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181899,7 +182172,7 @@ static const UV PL_AGE__11_invlist[] = { /* for all charsets */
 	0x1FA6E
 };
 
-static const UV PL_AGE__2_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__2_invlist[] = {  /* for all charsets */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181965,7 +182238,7 @@ static const UV PL_AGE__2_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_AGE__2_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__2_DOT_1_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -181977,7 +182250,7 @@ static const UV PL_AGE__2_DOT_1_invlist[] = { /* for all charsets */
 	0xFFFD
 };
 
-static const UV PL_AGE__3_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__3_invlist[] = {  /* for all charsets */
 	243,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -182227,7 +182500,7 @@ static const UV PL_AGE__3_invlist[] = { /* for all charsets */
 	0xFFFC
 };
 
-static const UV PL_AGE__3_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__3_DOT_1_invlist[] = {  /* for all charsets */
 	73,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -182307,7 +182580,7 @@ static const UV PL_AGE__3_DOT_1_invlist[] = { /* for all charsets */
 	0xE0080
 };
 
-static const UV PL_AGE__3_DOT_2_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__3_DOT_2_invlist[] = {  /* for all charsets */
 	119,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -182433,7 +182706,7 @@ static const UV PL_AGE__3_DOT_2_invlist[] = { /* for all charsets */
 	0xFF61
 };
 
-static const UV PL_AGE__4_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__4_invlist[] = {  /* for all charsets */
 	155,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -182595,7 +182868,7 @@ static const UV PL_AGE__4_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_AGE__4_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__4_DOT_1_invlist[] = {  /* for all charsets */
 	173,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -182775,7 +183048,7 @@ static const UV PL_AGE__4_DOT_1_invlist[] = { /* for all charsets */
 	0x1D6A6
 };
 
-static const UV PL_AGE__5_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__5_invlist[] = {  /* for all charsets */
 	71,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -182853,7 +183126,7 @@ static const UV PL_AGE__5_invlist[] = { /* for all charsets */
 	0x1D7CC
 };
 
-static const UV PL_AGE__5_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__5_DOT_1_invlist[] = {  /* for all charsets */
 	179,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183039,7 +183312,7 @@ static const UV PL_AGE__5_DOT_1_invlist[] = { /* for all charsets */
 	0x1F094
 };
 
-static const UV PL_AGE__5_DOT_2_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__5_DOT_2_invlist[] = {  /* for all charsets */
 	181,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183227,7 +183500,7 @@ static const UV PL_AGE__5_DOT_2_invlist[] = { /* for all charsets */
 	0x2B735
 };
 
-static const UV PL_AGE__6_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__6_invlist[] = {  /* for all charsets */
 	213,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183447,7 +183720,7 @@ static const UV PL_AGE__6_invlist[] = { /* for all charsets */
 	0x2B81E
 };
 
-static const UV PL_AGE__6_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__6_DOT_1_invlist[] = {  /* for all charsets */
 	179,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183633,7 +183906,7 @@ static const UV PL_AGE__6_DOT_1_invlist[] = { /* for all charsets */
 	0x1F635
 };
 
-static const UV PL_AGE__6_DOT_2_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__6_DOT_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183643,7 +183916,7 @@ static const UV PL_AGE__6_DOT_2_invlist[] = { /* for all charsets */
 	0x20BB
 };
 
-static const UV PL_AGE__6_DOT_3_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__6_DOT_3_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183655,7 +183928,7 @@ static const UV PL_AGE__6_DOT_3_invlist[] = { /* for all charsets */
 	0x206A
 };
 
-static const UV PL_AGE__7_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__7_invlist[] = {  /* for all charsets */
 	283,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -183945,7 +184218,7 @@ static const UV PL_AGE__7_invlist[] = { /* for all charsets */
 	0x1F8AE
 };
 
-static const UV PL_AGE__8_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__8_invlist[] = {  /* for all charsets */
 	119,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -184071,7 +184344,7 @@ static const UV PL_AGE__8_invlist[] = { /* for all charsets */
 	0x2CEA2
 };
 
-static const UV PL_AGE__9_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__9_invlist[] = {  /* for all charsets */
 	105,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -184183,7 +184456,7 @@ static const UV PL_AGE__9_invlist[] = { /* for all charsets */
 	0x1F992
 };
 
-static const UV PL_AGE__NA_invlist[] = { /* for all charsets */
+static const UV UNI_AGE__NA_invlist[] = {  /* for all charsets */
 	1336,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185526,7 +185799,7 @@ static const UV PL_AGE__NA_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_AGHB_invlist[] = { /* for all charsets */
+static const UV UNI_AGHB_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185538,7 +185811,7 @@ static const UV PL_AGHB_invlist[] = { /* for all charsets */
 	0x10570
 };
 
-static const UV PL_AHOM_invlist[] = { /* for all charsets */
+static const UV UNI_AHOM_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185552,7 +185825,7 @@ static const UV PL_AHOM_invlist[] = { /* for all charsets */
 	0x11740
 };
 
-static const UV PL_ALCHEMICAL_invlist[] = { /* for all charsets */
+static const UV UNI_ALCHEMICAL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185562,7 +185835,7 @@ static const UV PL_ALCHEMICAL_invlist[] = { /* for all charsets */
 	0x1F780
 };
 
-static const UV PL_ALL_invlist[] = { /* for all charsets */
+static const UV UNI_ALL_invlist[] = {  /* for all charsets */
 	1,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -185570,7 +185843,7 @@ static const UV PL_ALL_invlist[] = { /* for all charsets */
 	0x0
 };
 
-static const UV PL_ALPHABETICPF_invlist[] = { /* for all charsets */
+static const UV UNI_ALPHABETICPF_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185580,7 +185853,7 @@ static const UV PL_ALPHABETICPF_invlist[] = { /* for all charsets */
 	0xFB50
 };
 
-static const UV PL_ANCIENTGREEKMUSIC_invlist[] = { /* for all charsets */
+static const UV UNI_ANCIENTGREEKMUSIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185590,7 +185863,7 @@ static const UV PL_ANCIENTGREEKMUSIC_invlist[] = { /* for all charsets */
 	0x1D250
 };
 
-static const UV PL_ANCIENTGREEKNUMBERS_invlist[] = { /* for all charsets */
+static const UV UNI_ANCIENTGREEKNUMBERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185600,7 +185873,7 @@ static const UV PL_ANCIENTGREEKNUMBERS_invlist[] = { /* for all charsets */
 	0x10190
 };
 
-static const UV PL_ANCIENTSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_ANCIENTSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185610,7 +185883,7 @@ static const UV PL_ANCIENTSYMBOLS_invlist[] = { /* for all charsets */
 	0x101D0
 };
 
-static const UV PL_ANY_invlist[] = { /* for all charsets */
+static const UV UNI_ANY_invlist[] = {  /* for all charsets */
 	2,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -185619,7 +185892,7 @@ static const UV PL_ANY_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_ARAB_invlist[] = { /* for all charsets */
+static const UV UNI_ARAB_invlist[] = {  /* for all charsets */
 	105,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185731,7 +186004,7 @@ static const UV PL_ARAB_invlist[] = { /* for all charsets */
 	0x1EEF2
 };
 
-static const UV PL_ARABICEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_ARABICEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185741,7 +186014,7 @@ static const UV PL_ARABICEXTA_invlist[] = { /* for all charsets */
 	0x900
 };
 
-static const UV PL_ARABICMATH_invlist[] = { /* for all charsets */
+static const UV UNI_ARABICMATH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185751,7 +186024,7 @@ static const UV PL_ARABICMATH_invlist[] = { /* for all charsets */
 	0x1EF00
 };
 
-static const UV PL_ARABICPFA_invlist[] = { /* for all charsets */
+static const UV UNI_ARABICPFA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185761,7 +186034,7 @@ static const UV PL_ARABICPFA_invlist[] = { /* for all charsets */
 	0xFE00
 };
 
-static const UV PL_ARABICPFB_invlist[] = { /* for all charsets */
+static const UV UNI_ARABICPFB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185771,7 +186044,7 @@ static const UV PL_ARABICPFB_invlist[] = { /* for all charsets */
 	0xFF00
 };
 
-static const UV PL_ARABICSUP_invlist[] = { /* for all charsets */
+static const UV UNI_ARABICSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185781,7 +186054,7 @@ static const UV PL_ARABICSUP_invlist[] = { /* for all charsets */
 	0x780
 };
 
-static const UV PL_ARMI_invlist[] = { /* for all charsets */
+static const UV UNI_ARMI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185793,7 +186066,7 @@ static const UV PL_ARMI_invlist[] = { /* for all charsets */
 	0x10860
 };
 
-static const UV PL_ARMN_invlist[] = { /* for all charsets */
+static const UV UNI_ARMN_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185809,7 +186082,7 @@ static const UV PL_ARMN_invlist[] = { /* for all charsets */
 	0xFB18
 };
 
-static const UV PL_ARROWS_invlist[] = { /* for all charsets */
+static const UV UNI_ARROWS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185819,7 +186092,7 @@ static const UV PL_ARROWS_invlist[] = { /* for all charsets */
 	0x2200
 };
 
-static const UV PL_AVST_invlist[] = { /* for all charsets */
+static const UV UNI_AVST_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185831,7 +186104,7 @@ static const UV PL_AVST_invlist[] = { /* for all charsets */
 	0x10B40
 };
 
-static const UV PL_BALI_invlist[] = { /* for all charsets */
+static const UV UNI_BALI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185843,7 +186116,7 @@ static const UV PL_BALI_invlist[] = { /* for all charsets */
 	0x1B7D
 };
 
-static const UV PL_BAMU_invlist[] = { /* for all charsets */
+static const UV UNI_BAMU_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185855,7 +186128,7 @@ static const UV PL_BAMU_invlist[] = { /* for all charsets */
 	0x16A39
 };
 
-static const UV PL_BAMUMSUP_invlist[] = { /* for all charsets */
+static const UV UNI_BAMUMSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185865,7 +186138,7 @@ static const UV PL_BAMUMSUP_invlist[] = { /* for all charsets */
 	0x16A40
 };
 
-static const UV PL_BASS_invlist[] = { /* for all charsets */
+static const UV UNI_BASS_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185877,7 +186150,7 @@ static const UV PL_BASS_invlist[] = { /* for all charsets */
 	0x16AF6
 };
 
-static const UV PL_BATK_invlist[] = { /* for all charsets */
+static const UV UNI_BATK_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185889,7 +186162,7 @@ static const UV PL_BATK_invlist[] = { /* for all charsets */
 	0x1C00
 };
 
-static const UV PL_BC__AL_invlist[] = { /* for all charsets */
+static const UV UNI_BC__AL_invlist[] = {  /* for all charsets */
 	55,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185951,7 +186224,7 @@ static const UV PL_BC__AL_invlist[] = { /* for all charsets */
 	0x1EF00
 };
 
-static const UV PL_BC__AN_invlist[] = { /* for all charsets */
+static const UV UNI_BC__AN_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -185975,7 +186248,7 @@ static const UV PL_BC__AN_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__B_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__B_invlist[] = {  /* for ASCII/Latin1 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186000,7 +186273,7 @@ static const UV PL_BC__B_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__B_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__B_invlist[] = {  /* for EBCDIC 1047 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186025,7 +186298,7 @@ static const UV PL_BC__B_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__B_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__B_invlist[] = {  /* for EBCDIC 037 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186047,7 +186320,7 @@ static const UV PL_BC__B_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__BN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__BN_invlist[] = {  /* for ASCII/Latin1 */
 	64,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -186125,7 +186398,7 @@ static const UV PL_BC__BN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__BN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__BN_invlist[] = {  /* for EBCDIC 1047 */
 	70,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -186209,7 +186482,7 @@ static const UV PL_BC__BN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__BN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__BN_invlist[] = {  /* for EBCDIC 037 */
 	70,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -186290,7 +186563,7 @@ static const UV PL_BC__BN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__CS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__CS_invlist[] = {  /* for ASCII/Latin1 */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186331,7 +186604,7 @@ static const UV PL_BC__CS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__CS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__CS_invlist[] = {  /* for EBCDIC 1047 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186374,7 +186647,7 @@ static const UV PL_BC__CS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__CS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__CS_invlist[] = {  /* for EBCDIC 037 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186414,7 +186687,7 @@ static const UV PL_BC__CS_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__EN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__EN_invlist[] = {  /* for ASCII/Latin1 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186453,7 +186726,7 @@ static const UV PL_BC__EN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__EN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__EN_invlist[] = {  /* for EBCDIC 1047 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186492,7 +186765,7 @@ static const UV PL_BC__EN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__EN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__EN_invlist[] = {  /* for EBCDIC 037 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186528,7 +186801,7 @@ static const UV PL_BC__EN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__ES_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__ES_invlist[] = {  /* for ASCII/Latin1 */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186561,7 +186834,7 @@ static const UV PL_BC__ES_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__ES_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__ES_invlist[] = {  /* for EBCDIC 1047 */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186594,7 +186867,7 @@ static const UV PL_BC__ES_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__ES_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__ES_invlist[] = {  /* for EBCDIC 037 */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186624,7 +186897,7 @@ static const UV PL_BC__ES_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__ET_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__ET_invlist[] = {  /* for ASCII/Latin1 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186683,7 +186956,7 @@ static const UV PL_BC__ET_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__ET_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__ET_invlist[] = {  /* for EBCDIC 1047 */
 	53,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186750,7 +187023,7 @@ static const UV PL_BC__ET_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__ET_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__ET_invlist[] = {  /* for EBCDIC 037 */
 	53,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186812,7 +187085,7 @@ static const UV PL_BC__ET_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_BC__FSI_invlist[] = { /* for all charsets */
+static const UV UNI_BC__FSI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -186824,7 +187097,7 @@ static const UV PL_BC__FSI_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__L_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__L_invlist[] = {  /* for ASCII/Latin1 */
 	884,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -187722,7 +187995,7 @@ static const UV PL_BC__L_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__L_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__L_invlist[] = {  /* for EBCDIC 1047 */
 	910,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -188646,7 +188919,7 @@ static const UV PL_BC__L_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__L_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__L_invlist[] = {  /* for EBCDIC 037 */
 	906,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -189561,7 +189834,7 @@ static const UV PL_BC__L_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_BC__LRE_invlist[] = { /* for all charsets */
+static const UV UNI_BC__LRE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -189571,7 +189844,7 @@ static const UV PL_BC__LRE_invlist[] = { /* for all charsets */
 	0x202B
 };
 
-static const UV PL_BC__LRI_invlist[] = { /* for all charsets */
+static const UV UNI_BC__LRI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -189581,7 +189854,7 @@ static const UV PL_BC__LRI_invlist[] = { /* for all charsets */
 	0x2067
 };
 
-static const UV PL_BC__LRO_invlist[] = { /* for all charsets */
+static const UV UNI_BC__LRO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -189591,7 +189864,7 @@ static const UV PL_BC__LRO_invlist[] = { /* for all charsets */
 	0x202E
 };
 
-static const UV PL_BC__NSM_invlist[] = { /* for all charsets */
+static const UV UNI_BC__NSM_invlist[] = {  /* for all charsets */
 	619,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -190219,7 +190492,7 @@ static const UV PL_BC__NSM_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__ON_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__ON_invlist[] = {  /* for ASCII/Latin1 */
 	359,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -190592,7 +190865,7 @@ static const UV PL_BC__ON_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__ON_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__ON_invlist[] = {  /* for EBCDIC 1047 */
 	367,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -190973,7 +191246,7 @@ static const UV PL_BC__ON_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__ON_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__ON_invlist[] = {  /* for EBCDIC 037 */
 	363,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191345,7 +191618,7 @@ static const UV PL_BC__ON_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_BC__PDF_invlist[] = { /* for all charsets */
+static const UV UNI_BC__PDF_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191355,7 +191628,7 @@ static const UV PL_BC__PDF_invlist[] = { /* for all charsets */
 	0x202D
 };
 
-static const UV PL_BC__PDI_invlist[] = { /* for all charsets */
+static const UV UNI_BC__PDI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191365,7 +191638,7 @@ static const UV PL_BC__PDI_invlist[] = { /* for all charsets */
 	0x206A
 };
 
-static const UV PL_BC__R_invlist[] = { /* for all charsets */
+static const UV UNI_BC__R_invlist[] = {  /* for all charsets */
 	75,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191447,7 +191720,7 @@ static const UV PL_BC__R_invlist[] = { /* for all charsets */
 	0x1F000
 };
 
-static const UV PL_BC__RLE_invlist[] = { /* for all charsets */
+static const UV UNI_BC__RLE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191457,7 +191730,7 @@ static const UV PL_BC__RLE_invlist[] = { /* for all charsets */
 	0x202C
 };
 
-static const UV PL_BC__RLI_invlist[] = { /* for all charsets */
+static const UV UNI_BC__RLI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191467,7 +191740,7 @@ static const UV PL_BC__RLI_invlist[] = { /* for all charsets */
 	0x2068
 };
 
-static const UV PL_BC__RLO_invlist[] = { /* for all charsets */
+static const UV UNI_BC__RLO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191479,7 +191752,7 @@ static const UV PL_BC__RLO_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__S_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__S_invlist[] = {  /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191500,7 +191773,7 @@ static const UV PL_BC__S_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__S_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__S_invlist[] = {  /* for EBCDIC 1047 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191521,7 +191794,7 @@ static const UV PL_BC__S_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__S_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__S_invlist[] = {  /* for EBCDIC 037 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191539,7 +191812,7 @@ static const UV PL_BC__S_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BC__WS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BC__WS_invlist[] = {  /* for ASCII/Latin1 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191568,7 +191841,7 @@ static const UV PL_BC__WS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__WS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BC__WS_invlist[] = {  /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191597,7 +191870,7 @@ static const UV PL_BC__WS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BC__WS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BC__WS_invlist[] = {  /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191621,7 +191894,7 @@ static const UV PL_BC__WS_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_BENG_invlist[] = { /* for all charsets */
+static const UV UNI_BENG_invlist[] = {  /* for all charsets */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191679,7 +191952,7 @@ static const UV PL_BENG_invlist[] = { /* for all charsets */
 	0xA8F2
 };
 
-static const UV PL_BHKS_invlist[] = { /* for all charsets */
+static const UV UNI_BHKS_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191695,7 +191968,7 @@ static const UV PL_BHKS_invlist[] = { /* for all charsets */
 	0x11C6D
 };
 
-static const UV PL_BIDIC_invlist[] = { /* for all charsets */
+static const UV UNI_BIDIC_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191713,7 +191986,7 @@ static const UV PL_BIDIC_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BIDIM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BIDIM_invlist[] = {  /* for ASCII/Latin1 */
 	227,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -191954,7 +192227,7 @@ static const UV PL_BIDIM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BIDIM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BIDIM_invlist[] = {  /* for EBCDIC 1047 */
 	225,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192193,7 +192466,7 @@ static const UV PL_BIDIM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BIDIM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BIDIM_invlist[] = {  /* for EBCDIC 037 */
 	223,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192425,7 +192698,7 @@ static const UV PL_BIDIM_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_BLOCKELEMENTS_invlist[] = { /* for all charsets */
+static const UV UNI_BLOCKELEMENTS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192435,7 +192708,7 @@ static const UV PL_BLOCKELEMENTS_invlist[] = { /* for all charsets */
 	0x25A0
 };
 
-static const UV PL_BOPO_invlist[] = { /* for all charsets */
+static const UV UNI_BOPO_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192467,7 +192740,7 @@ static const UV PL_BOPO_invlist[] = { /* for all charsets */
 	0xFF66
 };
 
-static const UV PL_BOPOMOFOEXT_invlist[] = { /* for all charsets */
+static const UV UNI_BOPOMOFOEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192477,7 +192750,7 @@ static const UV PL_BOPOMOFOEXT_invlist[] = { /* for all charsets */
 	0x31C0
 };
 
-static const UV PL_BOXDRAWING_invlist[] = { /* for all charsets */
+static const UV UNI_BOXDRAWING_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192489,7 +192762,7 @@ static const UV PL_BOXDRAWING_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BPT__C_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BPT__C_invlist[] = {  /* for ASCII/Latin1 */
 	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192624,7 +192897,7 @@ static const UV PL_BPT__C_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BPT__C_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BPT__C_invlist[] = {  /* for EBCDIC 1047 */
 	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192759,7 +193032,7 @@ static const UV PL_BPT__C_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BPT__C_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BPT__C_invlist[] = {  /* for EBCDIC 037 */
 	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -192891,7 +193164,7 @@ static const UV PL_BPT__C_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BPT__N_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BPT__N_invlist[] = {  /* for ASCII/Latin1 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -192964,7 +193237,7 @@ static const UV PL_BPT__N_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BPT__N_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BPT__N_invlist[] = {  /* for EBCDIC 1047 */
 	61,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -193039,7 +193312,7 @@ static const UV PL_BPT__N_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BPT__N_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BPT__N_invlist[] = {  /* for EBCDIC 037 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -193109,7 +193382,7 @@ static const UV PL_BPT__N_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_BPT__O_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_BPT__O_invlist[] = {  /* for ASCII/Latin1 */
 	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193244,7 +193517,7 @@ static const UV PL_BPT__O_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BPT__O_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_BPT__O_invlist[] = {  /* for EBCDIC 1047 */
 	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193379,7 +193652,7 @@ static const UV PL_BPT__O_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_BPT__O_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_BPT__O_invlist[] = {  /* for EBCDIC 037 */
 	121,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193509,7 +193782,7 @@ static const UV PL_BPT__O_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_BRAH_invlist[] = { /* for all charsets */
+static const UV UNI_BRAH_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193523,7 +193796,7 @@ static const UV PL_BRAH_invlist[] = { /* for all charsets */
 	0x11080
 };
 
-static const UV PL_BRAI_invlist[] = { /* for all charsets */
+static const UV UNI_BRAI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193533,7 +193806,7 @@ static const UV PL_BRAI_invlist[] = { /* for all charsets */
 	0x2900
 };
 
-static const UV PL_BUGI_invlist[] = { /* for all charsets */
+static const UV UNI_BUGI_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193547,7 +193820,7 @@ static const UV PL_BUGI_invlist[] = { /* for all charsets */
 	0xA9D0
 };
 
-static const UV PL_BUHD_invlist[] = { /* for all charsets */
+static const UV UNI_BUHD_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193559,7 +193832,7 @@ static const UV PL_BUHD_invlist[] = { /* for all charsets */
 	0x1754
 };
 
-static const UV PL_BYZANTINEMUSIC_invlist[] = { /* for all charsets */
+static const UV UNI_BYZANTINEMUSIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -193571,7 +193844,7 @@ static const UV PL_BYZANTINEMUSIC_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_C_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_C_invlist[] = {  /* for ASCII/Latin1 */
 	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -194906,7 +195179,7 @@ static const UV PL_C_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_C_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_C_invlist[] = {  /* for EBCDIC 1047 */
 	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -196241,7 +196514,7 @@ static const UV PL_C_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_C_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_C_invlist[] = {  /* for EBCDIC 037 */
 	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -197571,7 +197844,7 @@ static const UV PL_C_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_CAKM_invlist[] = { /* for all charsets */
+static const UV UNI_CAKM_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -197587,7 +197860,7 @@ static const UV PL_CAKM_invlist[] = { /* for all charsets */
 	0x11147
 };
 
-static const UV PL_CANS_invlist[] = { /* for all charsets */
+static const UV UNI_CANS_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -197599,7 +197872,7 @@ static const UV PL_CANS_invlist[] = { /* for all charsets */
 	0x18F6
 };
 
-static const UV PL_CARI_invlist[] = { /* for all charsets */
+static const UV UNI_CARI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -197609,7 +197882,7 @@ static const UV PL_CARI_invlist[] = { /* for all charsets */
 	0x102D1
 };
 
-static const UV PL_CCC__0_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__0_invlist[] = {  /* for all charsets */
 	351,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -197967,7 +198240,7 @@ static const UV PL_CCC__0_invlist[] = { /* for all charsets */
 	0x1E94B
 };
 
-static const UV PL_CCC__1_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__1_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -197997,7 +198270,7 @@ static const UV PL_CCC__1_invlist[] = { /* for all charsets */
 	0x1D16A
 };
 
-static const UV PL_CCC__10_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__10_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198007,7 +198280,7 @@ static const UV PL_CCC__10_invlist[] = { /* for all charsets */
 	0x5B1
 };
 
-static const UV PL_CCC__103_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__103_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198017,7 +198290,7 @@ static const UV PL_CCC__103_invlist[] = { /* for all charsets */
 	0xE3A
 };
 
-static const UV PL_CCC__107_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__107_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198027,7 +198300,7 @@ static const UV PL_CCC__107_invlist[] = { /* for all charsets */
 	0xE4C
 };
 
-static const UV PL_CCC__11_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__11_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198037,7 +198310,7 @@ static const UV PL_CCC__11_invlist[] = { /* for all charsets */
 	0x5B2
 };
 
-static const UV PL_CCC__118_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__118_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198047,7 +198320,7 @@ static const UV PL_CCC__118_invlist[] = { /* for all charsets */
 	0xEBA
 };
 
-static const UV PL_CCC__12_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__12_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198057,7 +198330,7 @@ static const UV PL_CCC__12_invlist[] = { /* for all charsets */
 	0x5B3
 };
 
-static const UV PL_CCC__122_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__122_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198067,7 +198340,7 @@ static const UV PL_CCC__122_invlist[] = { /* for all charsets */
 	0xECC
 };
 
-static const UV PL_CCC__129_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__129_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198077,7 +198350,7 @@ static const UV PL_CCC__129_invlist[] = { /* for all charsets */
 	0xF72
 };
 
-static const UV PL_CCC__13_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__13_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198087,7 +198360,7 @@ static const UV PL_CCC__13_invlist[] = { /* for all charsets */
 	0x5B4
 };
 
-static const UV PL_CCC__130_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__130_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198101,7 +198374,7 @@ static const UV PL_CCC__130_invlist[] = { /* for all charsets */
 	0xF81
 };
 
-static const UV PL_CCC__132_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__132_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198111,7 +198384,7 @@ static const UV PL_CCC__132_invlist[] = { /* for all charsets */
 	0xF75
 };
 
-static const UV PL_CCC__14_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__14_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198121,7 +198394,7 @@ static const UV PL_CCC__14_invlist[] = { /* for all charsets */
 	0x5B5
 };
 
-static const UV PL_CCC__15_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__15_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198131,7 +198404,7 @@ static const UV PL_CCC__15_invlist[] = { /* for all charsets */
 	0x5B6
 };
 
-static const UV PL_CCC__16_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__16_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198141,7 +198414,7 @@ static const UV PL_CCC__16_invlist[] = { /* for all charsets */
 	0x5B7
 };
 
-static const UV PL_CCC__17_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__17_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198151,7 +198424,7 @@ static const UV PL_CCC__17_invlist[] = { /* for all charsets */
 	0x5B8
 };
 
-static const UV PL_CCC__18_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__18_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198163,7 +198436,7 @@ static const UV PL_CCC__18_invlist[] = { /* for all charsets */
 	0x5C8
 };
 
-static const UV PL_CCC__19_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__19_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198173,7 +198446,7 @@ static const UV PL_CCC__19_invlist[] = { /* for all charsets */
 	0x5BB
 };
 
-static const UV PL_CCC__20_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__20_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198183,7 +198456,7 @@ static const UV PL_CCC__20_invlist[] = { /* for all charsets */
 	0x5BC
 };
 
-static const UV PL_CCC__202_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__202_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198197,7 +198470,7 @@ static const UV PL_CCC__202_invlist[] = { /* for all charsets */
 	0x1DD1
 };
 
-static const UV PL_CCC__21_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__21_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198207,7 +198480,7 @@ static const UV PL_CCC__21_invlist[] = { /* for all charsets */
 	0x5BD
 };
 
-static const UV PL_CCC__214_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__214_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198217,7 +198490,7 @@ static const UV PL_CCC__214_invlist[] = { /* for all charsets */
 	0x1DCF
 };
 
-static const UV PL_CCC__216_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__216_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198233,7 +198506,7 @@ static const UV PL_CCC__216_invlist[] = { /* for all charsets */
 	0x1D173
 };
 
-static const UV PL_CCC__22_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__22_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198243,7 +198516,7 @@ static const UV PL_CCC__22_invlist[] = { /* for all charsets */
 	0x5BE
 };
 
-static const UV PL_CCC__23_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__23_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198253,7 +198526,7 @@ static const UV PL_CCC__23_invlist[] = { /* for all charsets */
 	0x5C0
 };
 
-static const UV PL_CCC__24_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__24_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198263,7 +198536,7 @@ static const UV PL_CCC__24_invlist[] = { /* for all charsets */
 	0x5C2
 };
 
-static const UV PL_CCC__25_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__25_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198273,7 +198546,7 @@ static const UV PL_CCC__25_invlist[] = { /* for all charsets */
 	0x5C3
 };
 
-static const UV PL_CCC__26_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__26_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198283,7 +198556,7 @@ static const UV PL_CCC__26_invlist[] = { /* for all charsets */
 	0xFB1F
 };
 
-static const UV PL_CCC__27_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__27_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198295,7 +198568,7 @@ static const UV PL_CCC__27_invlist[] = { /* for all charsets */
 	0x8F1
 };
 
-static const UV PL_CCC__28_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__28_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198307,7 +198580,7 @@ static const UV PL_CCC__28_invlist[] = { /* for all charsets */
 	0x8F2
 };
 
-static const UV PL_CCC__29_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__29_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198319,7 +198592,7 @@ static const UV PL_CCC__29_invlist[] = { /* for all charsets */
 	0x8F3
 };
 
-static const UV PL_CCC__30_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__30_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198331,7 +198604,7 @@ static const UV PL_CCC__30_invlist[] = { /* for all charsets */
 	0x64F
 };
 
-static const UV PL_CCC__31_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__31_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198343,7 +198616,7 @@ static const UV PL_CCC__31_invlist[] = { /* for all charsets */
 	0x650
 };
 
-static const UV PL_CCC__32_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__32_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198355,7 +198628,7 @@ static const UV PL_CCC__32_invlist[] = { /* for all charsets */
 	0x651
 };
 
-static const UV PL_CCC__33_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__33_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198365,7 +198638,7 @@ static const UV PL_CCC__33_invlist[] = { /* for all charsets */
 	0x652
 };
 
-static const UV PL_CCC__34_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__34_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198375,7 +198648,7 @@ static const UV PL_CCC__34_invlist[] = { /* for all charsets */
 	0x653
 };
 
-static const UV PL_CCC__35_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__35_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198385,7 +198658,7 @@ static const UV PL_CCC__35_invlist[] = { /* for all charsets */
 	0x671
 };
 
-static const UV PL_CCC__36_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__36_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198395,7 +198668,7 @@ static const UV PL_CCC__36_invlist[] = { /* for all charsets */
 	0x712
 };
 
-static const UV PL_CCC__7_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__7_invlist[] = {  /* for all charsets */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198451,7 +198724,7 @@ static const UV PL_CCC__7_invlist[] = { /* for all charsets */
 	0x1E94B
 };
 
-static const UV PL_CCC__8_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__8_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198461,7 +198734,7 @@ static const UV PL_CCC__8_invlist[] = { /* for all charsets */
 	0x309B
 };
 
-static const UV PL_CCC__84_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__84_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198471,7 +198744,7 @@ static const UV PL_CCC__84_invlist[] = { /* for all charsets */
 	0xC56
 };
 
-static const UV PL_CCC__9_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__9_invlist[] = {  /* for all charsets */
 	101,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198579,7 +198852,7 @@ static const UV PL_CCC__9_invlist[] = { /* for all charsets */
 	0x11D98
 };
 
-static const UV PL_CCC__91_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__91_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198589,7 +198862,7 @@ static const UV PL_CCC__91_invlist[] = { /* for all charsets */
 	0xC57
 };
 
-static const UV PL_CCC__A_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__A_invlist[] = {  /* for all charsets */
 	231,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198827,7 +199100,7 @@ static const UV PL_CCC__A_invlist[] = { /* for all charsets */
 	0x1E94A
 };
 
-static const UV PL_CCC__AL_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__AL_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198843,7 +199116,7 @@ static const UV PL_CCC__AL_invlist[] = { /* for all charsets */
 	0x302C
 };
 
-static const UV PL_CCC__AR_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__AR_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -198861,7 +199134,7 @@ static const UV PL_CCC__AR_invlist[] = { /* for all charsets */
 	0x302D
 };
 
-static const UV PL_CCC__B_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__B_invlist[] = {  /* for all charsets */
 	155,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199023,7 +199296,7 @@ static const UV PL_CCC__B_invlist[] = { /* for all charsets */
 	0x1E8D7
 };
 
-static const UV PL_CCC__BL_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__BL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199033,7 +199306,7 @@ static const UV PL_CCC__BL_invlist[] = { /* for all charsets */
 	0x302B
 };
 
-static const UV PL_CCC__BR_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__BR_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199049,7 +199322,7 @@ static const UV PL_CCC__BR_invlist[] = { /* for all charsets */
 	0x302E
 };
 
-static const UV PL_CCC__DA_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__DA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199063,7 +199336,7 @@ static const UV PL_CCC__DA_invlist[] = { /* for all charsets */
 	0x1DCE
 };
 
-static const UV PL_CCC__DB_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__DB_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199079,7 +199352,7 @@ static const UV PL_CCC__DB_invlist[] = { /* for all charsets */
 	0x1DFD
 };
 
-static const UV PL_CCC__IS_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__IS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199089,7 +199362,7 @@ static const UV PL_CCC__IS_invlist[] = { /* for all charsets */
 	0x346
 };
 
-static const UV PL_CCC__L_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__L_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199099,7 +199372,7 @@ static const UV PL_CCC__L_invlist[] = { /* for all charsets */
 	0x3030
 };
 
-static const UV PL_CCC__R_invlist[] = { /* for all charsets */
+static const UV UNI_CCC__R_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199109,7 +199382,7 @@ static const UV PL_CCC__R_invlist[] = { /* for all charsets */
 	0x1D16E
 };
 
-static const UV PL_CE_invlist[] = { /* for all charsets */
+static const UV UNI_CE_invlist[] = {  /* for all charsets */
 	67,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199185,7 +199458,7 @@ static const UV PL_CE_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CF_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CF_invlist[] = {  /* for ASCII/Latin1 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199238,7 +199511,7 @@ static const UV PL_CF_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CF_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CF_invlist[] = {  /* for EBCDIC 1047 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199291,7 +199564,7 @@ static const UV PL_CF_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CF_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CF_invlist[] = {  /* for EBCDIC 037 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199339,7 +199612,7 @@ static const UV PL_CF_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_CHAM_invlist[] = { /* for all charsets */
+static const UV UNI_CHAM_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199355,7 +199628,7 @@ static const UV PL_CHAM_invlist[] = { /* for all charsets */
 	0xAA60
 };
 
-static const UV PL_CHER_invlist[] = { /* for all charsets */
+static const UV UNI_CHER_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199369,7 +199642,7 @@ static const UV PL_CHER_invlist[] = { /* for all charsets */
 	0xABC0
 };
 
-static const UV PL_CHEROKEESUP_invlist[] = { /* for all charsets */
+static const UV UNI_CHEROKEESUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199379,7 +199652,7 @@ static const UV PL_CHEROKEESUP_invlist[] = { /* for all charsets */
 	0xABC0
 };
 
-static const UV PL_CHESSSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_CHESSSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -199391,7 +199664,7 @@ static const UV PL_CHESSSYMBOLS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CI_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CI_invlist[] = {  /* for ASCII/Latin1 */
 	789,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -200194,7 +200467,7 @@ static const UV PL_CI_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CI_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CI_invlist[] = {  /* for EBCDIC 1047 */
 	787,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -200995,7 +201268,7 @@ static const UV PL_CI_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CI_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CI_invlist[] = {  /* for EBCDIC 037 */
 	785,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201789,7 +202062,7 @@ static const UV PL_CI_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_CJK_invlist[] = { /* for all charsets */
+static const UV UNI_CJK_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201799,7 +202072,7 @@ static const UV PL_CJK_invlist[] = { /* for all charsets */
 	0xA000
 };
 
-static const UV PL_CJKCOMPAT_invlist[] = { /* for all charsets */
+static const UV UNI_CJKCOMPAT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201809,7 +202082,7 @@ static const UV PL_CJKCOMPAT_invlist[] = { /* for all charsets */
 	0x3400
 };
 
-static const UV PL_CJKCOMPATFORMS_invlist[] = { /* for all charsets */
+static const UV UNI_CJKCOMPATFORMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201819,7 +202092,7 @@ static const UV PL_CJKCOMPATFORMS_invlist[] = { /* for all charsets */
 	0xFE50
 };
 
-static const UV PL_CJKCOMPATIDEOGRAPHS_invlist[] = { /* for all charsets */
+static const UV UNI_CJKCOMPATIDEOGRAPHS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201829,7 +202102,7 @@ static const UV PL_CJKCOMPATIDEOGRAPHS_invlist[] = { /* for all charsets */
 	0xFB00
 };
 
-static const UV PL_CJKCOMPATIDEOGRAPHSSUP_invlist[] = { /* for all charsets */
+static const UV UNI_CJKCOMPATIDEOGRAPHSSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201839,7 +202112,7 @@ static const UV PL_CJKCOMPATIDEOGRAPHSSUP_invlist[] = { /* for all charsets */
 	0x2FA20
 };
 
-static const UV PL_CJKEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_CJKEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201849,7 +202122,7 @@ static const UV PL_CJKEXTA_invlist[] = { /* for all charsets */
 	0x4DC0
 };
 
-static const UV PL_CJKEXTB_invlist[] = { /* for all charsets */
+static const UV UNI_CJKEXTB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201859,7 +202132,7 @@ static const UV PL_CJKEXTB_invlist[] = { /* for all charsets */
 	0x2A6E0
 };
 
-static const UV PL_CJKEXTC_invlist[] = { /* for all charsets */
+static const UV UNI_CJKEXTC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201869,7 +202142,7 @@ static const UV PL_CJKEXTC_invlist[] = { /* for all charsets */
 	0x2B740
 };
 
-static const UV PL_CJKEXTD_invlist[] = { /* for all charsets */
+static const UV UNI_CJKEXTD_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201879,7 +202152,7 @@ static const UV PL_CJKEXTD_invlist[] = { /* for all charsets */
 	0x2B820
 };
 
-static const UV PL_CJKEXTE_invlist[] = { /* for all charsets */
+static const UV UNI_CJKEXTE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201889,7 +202162,7 @@ static const UV PL_CJKEXTE_invlist[] = { /* for all charsets */
 	0x2CEB0
 };
 
-static const UV PL_CJKEXTF_invlist[] = { /* for all charsets */
+static const UV UNI_CJKEXTF_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201899,7 +202172,7 @@ static const UV PL_CJKEXTF_invlist[] = { /* for all charsets */
 	0x2EBF0
 };
 
-static const UV PL_CJKRADICALSSUP_invlist[] = { /* for all charsets */
+static const UV UNI_CJKRADICALSSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201909,7 +202182,7 @@ static const UV PL_CJKRADICALSSUP_invlist[] = { /* for all charsets */
 	0x2F00
 };
 
-static const UV PL_CJKSTROKES_invlist[] = { /* for all charsets */
+static const UV UNI_CJKSTROKES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201919,7 +202192,7 @@ static const UV PL_CJKSTROKES_invlist[] = { /* for all charsets */
 	0x31F0
 };
 
-static const UV PL_CJKSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_CJKSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -201929,7 +202202,7 @@ static const UV PL_CJKSYMBOLS_invlist[] = { /* for all charsets */
 	0x3040
 };
 
-static const UV PL_CN_invlist[] = { /* for all charsets */
+static const UV UNI_CN_invlist[] = {  /* for all charsets */
 	1316,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203252,7 +203525,7 @@ static const UV PL_CN_invlist[] = { /* for all charsets */
 	0x10FFFE
 };
 
-static const UV PL_CO_invlist[] = { /* for all charsets */
+static const UV UNI_CO_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203266,7 +203539,7 @@ static const UV PL_CO_invlist[] = { /* for all charsets */
 	0x10FFFE
 };
 
-static const UV PL_COMPATJAMO_invlist[] = { /* for all charsets */
+static const UV UNI_COMPATJAMO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203276,7 +203549,7 @@ static const UV PL_COMPATJAMO_invlist[] = { /* for all charsets */
 	0x3190
 };
 
-static const UV PL_COMPEX_invlist[] = { /* for all charsets */
+static const UV UNI_COMPEX_invlist[] = {  /* for all charsets */
 	147,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203430,7 +203703,7 @@ static const UV PL_COMPEX_invlist[] = { /* for all charsets */
 	0x2FA1E
 };
 
-static const UV PL_CONTROLPICTURES_invlist[] = { /* for all charsets */
+static const UV UNI_CONTROLPICTURES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203440,7 +203713,7 @@ static const UV PL_CONTROLPICTURES_invlist[] = { /* for all charsets */
 	0x2440
 };
 
-static const UV PL_COPT_invlist[] = { /* for all charsets */
+static const UV UNI_COPT_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203456,7 +203729,7 @@ static const UV PL_COPT_invlist[] = { /* for all charsets */
 	0x102FC
 };
 
-static const UV PL_COPTICEPACTNUMBERS_invlist[] = { /* for all charsets */
+static const UV UNI_COPTICEPACTNUMBERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203466,7 +203739,7 @@ static const UV PL_COPTICEPACTNUMBERS_invlist[] = { /* for all charsets */
 	0x10300
 };
 
-static const UV PL_COUNTINGROD_invlist[] = { /* for all charsets */
+static const UV UNI_COUNTINGROD_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203476,7 +203749,7 @@ static const UV PL_COUNTINGROD_invlist[] = { /* for all charsets */
 	0x1D380
 };
 
-static const UV PL_CPRT_invlist[] = { /* for all charsets */
+static const UV UNI_CPRT_invlist[] = {  /* for all charsets */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203502,7 +203775,7 @@ static const UV PL_CPRT_invlist[] = { /* for all charsets */
 	0x10840
 };
 
-static const UV PL_CUNEIFORMNUMBERS_invlist[] = { /* for all charsets */
+static const UV UNI_CUNEIFORMNUMBERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203512,7 +203785,7 @@ static const UV PL_CUNEIFORMNUMBERS_invlist[] = { /* for all charsets */
 	0x12480
 };
 
-static const UV PL_CURRENCYSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_CURRENCYSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -203524,7 +203797,7 @@ static const UV PL_CURRENCYSYMBOLS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CWCF_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CWCF_invlist[] = {  /* for ASCII/Latin1 */
 	1215,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -204753,7 +205026,7 @@ static const UV PL_CWCF_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWCF_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CWCF_invlist[] = {  /* for EBCDIC 1047 */
 	1235,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -206002,7 +206275,7 @@ static const UV PL_CWCF_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWCF_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CWCF_invlist[] = {  /* for EBCDIC 037 */
 	1231,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -207244,7 +207517,7 @@ static const UV PL_CWCF_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CWCM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CWCM_invlist[] = {  /* for ASCII/Latin1 */
 	243,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -207501,7 +207774,7 @@ static const UV PL_CWCM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWCM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CWCM_invlist[] = {  /* for EBCDIC 1047 */
 	275,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -207790,7 +208063,7 @@ static const UV PL_CWCM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWCM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CWCM_invlist[] = {  /* for EBCDIC 037 */
 	271,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -208072,7 +208345,7 @@ static const UV PL_CWCM_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CWKCF_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CWKCF_invlist[] = {  /* for ASCII/Latin1 */
 	1639,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -209725,7 +209998,7 @@ static const UV PL_CWKCF_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWKCF_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CWKCF_invlist[] = {  /* for EBCDIC 1047 */
 	1649,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -211388,7 +211661,7 @@ static const UV PL_CWKCF_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWKCF_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CWKCF_invlist[] = {  /* for EBCDIC 037 */
 	1647,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -213046,7 +213319,7 @@ static const UV PL_CWKCF_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CWL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CWL_invlist[] = {  /* for ASCII/Latin1 */
 	1189,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -214249,7 +214522,7 @@ static const UV PL_CWL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CWL_invlist[] = {  /* for EBCDIC 1047 */
 	1207,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -215470,7 +215743,7 @@ static const UV PL_CWL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CWL_invlist[] = {  /* for EBCDIC 037 */
 	1203,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -216684,7 +216957,7 @@ static const UV PL_CWL_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CWT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CWT_invlist[] = {  /* for ASCII/Latin1 */
 	1221,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -217919,7 +218192,7 @@ static const UV PL_CWT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CWT_invlist[] = {  /* for EBCDIC 1047 */
 	1235,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -219168,7 +219441,7 @@ static const UV PL_CWT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CWT_invlist[] = {  /* for EBCDIC 037 */
 	1235,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -220414,7 +220687,7 @@ static const UV PL_CWT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_CWU_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_CWU_invlist[] = {  /* for ASCII/Latin1 */
 	1223,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -221651,7 +221924,7 @@ static const UV PL_CWU_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWU_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_CWU_invlist[] = {  /* for EBCDIC 1047 */
 	1237,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -222902,7 +223175,7 @@ static const UV PL_CWU_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_CWU_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_CWU_invlist[] = {  /* for EBCDIC 037 */
 	1237,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224148,7 +224421,7 @@ static const UV PL_CWU_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_CYPRIOTSYLLABARY_invlist[] = { /* for all charsets */
+static const UV UNI_CYPRIOTSYLLABARY_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224158,7 +224431,7 @@ static const UV PL_CYPRIOTSYLLABARY_invlist[] = { /* for all charsets */
 	0x10840
 };
 
-static const UV PL_CYRILLICEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_CYRILLICEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224168,7 +224441,7 @@ static const UV PL_CYRILLICEXTA_invlist[] = { /* for all charsets */
 	0x2E00
 };
 
-static const UV PL_CYRILLICEXTB_invlist[] = { /* for all charsets */
+static const UV UNI_CYRILLICEXTB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224178,7 +224451,7 @@ static const UV PL_CYRILLICEXTB_invlist[] = { /* for all charsets */
 	0xA6A0
 };
 
-static const UV PL_CYRILLICEXTC_invlist[] = { /* for all charsets */
+static const UV UNI_CYRILLICEXTC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224188,7 +224461,7 @@ static const UV PL_CYRILLICEXTC_invlist[] = { /* for all charsets */
 	0x1C90
 };
 
-static const UV PL_CYRILLICSUP_invlist[] = { /* for all charsets */
+static const UV UNI_CYRILLICSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224198,7 +224471,7 @@ static const UV PL_CYRILLICSUP_invlist[] = { /* for all charsets */
 	0x530
 };
 
-static const UV PL_CYRL_invlist[] = { /* for all charsets */
+static const UV UNI_CYRL_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224224,7 +224497,7 @@ static const UV PL_CYRL_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DASH_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DASH_invlist[] = {  /* for ASCII/Latin1 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224281,7 +224554,7 @@ static const UV PL_DASH_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DASH_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DASH_invlist[] = {  /* for EBCDIC 1047 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224338,7 +224611,7 @@ static const UV PL_DASH_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DASH_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DASH_invlist[] = {  /* for EBCDIC 037 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224390,7 +224663,7 @@ static const UV PL_DASH_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_DEP_invlist[] = { /* for all charsets */
+static const UV UNI_DEP_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224414,7 +224687,7 @@ static const UV PL_DEP_invlist[] = { /* for all charsets */
 	0xE0002
 };
 
-static const UV PL_DEVA_invlist[] = { /* for all charsets */
+static const UV UNI_DEVA_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224434,7 +224707,7 @@ static const UV PL_DEVA_invlist[] = { /* for all charsets */
 	0xA900
 };
 
-static const UV PL_DEVANAGARIEXT_invlist[] = { /* for all charsets */
+static const UV UNI_DEVANAGARIEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224446,7 +224719,7 @@ static const UV PL_DEVANAGARIEXT_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DI_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DI_invlist[] = {  /* for ASCII/Latin1 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224495,7 +224768,7 @@ static const UV PL_DI_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DI_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DI_invlist[] = {  /* for EBCDIC 1047 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224544,7 +224817,7 @@ static const UV PL_DI_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DI_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DI_invlist[] = {  /* for EBCDIC 037 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224590,7 +224863,7 @@ static const UV PL_DI_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DIA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DIA_invlist[] = {  /* for ASCII/Latin1 */
 	327,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -224931,7 +225204,7 @@ static const UV PL_DIA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DIA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DIA_invlist[] = {  /* for EBCDIC 1047 */
 	327,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225272,7 +225545,7 @@ static const UV PL_DIA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DIA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DIA_invlist[] = {  /* for EBCDIC 037 */
 	325,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225606,7 +225879,7 @@ static const UV PL_DIA_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_DIACRITICALS_invlist[] = { /* for all charsets */
+static const UV UNI_DIACRITICALS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225616,7 +225889,7 @@ static const UV PL_DIACRITICALS_invlist[] = { /* for all charsets */
 	0x370
 };
 
-static const UV PL_DIACRITICALSEXT_invlist[] = { /* for all charsets */
+static const UV UNI_DIACRITICALSEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225626,7 +225899,7 @@ static const UV PL_DIACRITICALSEXT_invlist[] = { /* for all charsets */
 	0x1B00
 };
 
-static const UV PL_DIACRITICALSFORSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_DIACRITICALSFORSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225636,7 +225909,7 @@ static const UV PL_DIACRITICALSFORSYMBOLS_invlist[] = { /* for all charsets */
 	0x2100
 };
 
-static const UV PL_DIACRITICALSSUP_invlist[] = { /* for all charsets */
+static const UV UNI_DIACRITICALSSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225646,7 +225919,7 @@ static const UV PL_DIACRITICALSSUP_invlist[] = { /* for all charsets */
 	0x1E00
 };
 
-static const UV PL_DINGBATS_invlist[] = { /* for all charsets */
+static const UV UNI_DINGBATS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225656,7 +225929,7 @@ static const UV PL_DINGBATS_invlist[] = { /* for all charsets */
 	0x27C0
 };
 
-static const UV PL_DOGR_invlist[] = { /* for all charsets */
+static const UV UNI_DOGR_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225670,7 +225943,7 @@ static const UV PL_DOGR_invlist[] = { /* for all charsets */
 	0x1183C
 };
 
-static const UV PL_DOMINO_invlist[] = { /* for all charsets */
+static const UV UNI_DOMINO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225680,7 +225953,7 @@ static const UV PL_DOMINO_invlist[] = { /* for all charsets */
 	0x1F0A0
 };
 
-static const UV PL_DSRT_invlist[] = { /* for all charsets */
+static const UV UNI_DSRT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -225692,7 +225965,7 @@ static const UV PL_DSRT_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__CAN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__CAN_invlist[] = {  /* for ASCII/Latin1 */
 	463,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -226169,7 +226442,7 @@ static const UV PL_DT__CAN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__CAN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__CAN_invlist[] = {  /* for EBCDIC 1047 */
 	467,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -226650,7 +226923,7 @@ static const UV PL_DT__CAN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__CAN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__CAN_invlist[] = {  /* for EBCDIC 037 */
 	467,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -227128,7 +227401,7 @@ static const UV PL_DT__CAN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__COM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__COM_invlist[] = {  /* for ASCII/Latin1 */
 	149,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -227291,7 +227564,7 @@ static const UV PL_DT__COM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__COM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__COM_invlist[] = {  /* for EBCDIC 1047 */
 	149,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -227454,7 +227727,7 @@ static const UV PL_DT__COM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__COM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__COM_invlist[] = {  /* for EBCDIC 037 */
 	147,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -227610,7 +227883,7 @@ static const UV PL_DT__COM_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_DT__ENC_invlist[] = { /* for all charsets */
+static const UV UNI_DT__ENC_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -227634,7 +227907,7 @@ static const UV PL_DT__ENC_invlist[] = { /* for all charsets */
 	0x1F252
 };
 
-static const UV PL_DT__FIN_invlist[] = { /* for all charsets */
+static const UV UNI_DT__FIN_invlist[] = {  /* for all charsets */
 	227,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -227868,7 +228141,7 @@ static const UV PL_DT__FIN_invlist[] = { /* for all charsets */
 	0xFEFD
 };
 
-static const UV PL_DT__FONT_invlist[] = { /* for all charsets */
+static const UV UNI_DT__FONT_invlist[] = {  /* for all charsets */
 	135,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228012,7 +228285,7 @@ static const UV PL_DT__FONT_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__FRA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__FRA_invlist[] = {  /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228033,7 +228306,7 @@ static const UV PL_DT__FRA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__FRA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__FRA_invlist[] = {  /* for EBCDIC 1047 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228054,7 +228327,7 @@ static const UV PL_DT__FRA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__FRA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__FRA_invlist[] = {  /* for EBCDIC 037 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228070,7 +228343,7 @@ static const UV PL_DT__FRA_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_DT__INIT_invlist[] = { /* for all charsets */
+static const UV UNI_DT__INIT_invlist[] = {  /* for all charsets */
 	151,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228228,7 +228501,7 @@ static const UV PL_DT__INIT_invlist[] = { /* for all charsets */
 	0xFEF4
 };
 
-static const UV PL_DT__ISO_invlist[] = { /* for all charsets */
+static const UV UNI_DT__ISO_invlist[] = {  /* for all charsets */
 	197,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228432,7 +228705,7 @@ static const UV PL_DT__ISO_invlist[] = { /* for all charsets */
 	0xFEFC
 };
 
-static const UV PL_DT__MED_invlist[] = { /* for all charsets */
+static const UV UNI_DT__MED_invlist[] = {  /* for all charsets */
 	109,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228548,7 +228821,7 @@ static const UV PL_DT__MED_invlist[] = { /* for all charsets */
 	0xFEF5
 };
 
-static const UV PL_DT__NAR_invlist[] = { /* for all charsets */
+static const UV UNI_DT__NAR_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228570,7 +228843,7 @@ static const UV PL_DT__NAR_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__NB_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__NB_invlist[] = {  /* for ASCII/Latin1 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228595,7 +228868,7 @@ static const UV PL_DT__NB_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__NB_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__NB_invlist[] = {  /* for EBCDIC 1047 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228620,7 +228893,7 @@ static const UV PL_DT__NB_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__NB_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__NB_invlist[] = {  /* for EBCDIC 037 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -228642,7 +228915,7 @@ static const UV PL_DT__NB_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__NONCANON_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__NONCANON_invlist[] = {  /* for ASCII/Latin1 */
 	373,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -229029,7 +229302,7 @@ static const UV PL_DT__NONCANON_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__NONCANON_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__NONCANON_invlist[] = {  /* for EBCDIC 1047 */
 	379,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -229422,7 +229695,7 @@ static const UV PL_DT__NONCANON_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__NONCANON_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__NONCANON_invlist[] = {  /* for EBCDIC 037 */
 	377,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -229810,7 +230083,7 @@ static const UV PL_DT__NONCANON_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__NONE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__NONE_invlist[] = {  /* for ASCII/Latin1 */
 	781,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -230605,7 +230878,7 @@ static const UV PL_DT__NONE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__NONE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__NONE_invlist[] = {  /* for EBCDIC 1047 */
 	779,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -231398,7 +231671,7 @@ static const UV PL_DT__NONE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__NONE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__NONE_invlist[] = {  /* for EBCDIC 037 */
 	781,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -232188,7 +232461,7 @@ static const UV PL_DT__NONE_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_DT__SML_invlist[] = { /* for all charsets */
+static const UV UNI_DT__SML_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232202,7 +232475,7 @@ static const UV PL_DT__SML_invlist[] = { /* for all charsets */
 	0xFE6C
 };
 
-static const UV PL_DT__SQR_invlist[] = { /* for all charsets */
+static const UV UNI_DT__SQR_invlist[] = {  /* for all charsets */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232228,7 +232501,7 @@ static const UV PL_DT__SQR_invlist[] = { /* for all charsets */
 	0x1F23C
 };
 
-static const UV PL_DT__SUB_invlist[] = { /* for all charsets */
+static const UV UNI_DT__SUB_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232246,7 +232519,7 @@ static const UV PL_DT__SUB_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_DT__SUP_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_DT__SUP_invlist[] = {  /* for ASCII/Latin1 */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232309,7 +232582,7 @@ static const UV PL_DT__SUP_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__SUP_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_DT__SUP_invlist[] = {  /* for EBCDIC 1047 */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232374,7 +232647,7 @@ static const UV PL_DT__SUP_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_DT__SUP_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_DT__SUP_invlist[] = {  /* for EBCDIC 037 */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232434,7 +232707,7 @@ static const UV PL_DT__SUP_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_DT__VERT_invlist[] = { /* for all charsets */
+static const UV UNI_DT__VERT_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232452,7 +232725,7 @@ static const UV PL_DT__VERT_invlist[] = { /* for all charsets */
 	0xFE49
 };
 
-static const UV PL_DUPL_invlist[] = { /* for all charsets */
+static const UV UNI_DUPL_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232472,7 +232745,7 @@ static const UV PL_DUPL_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_EA__A_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_EA__A_invlist[] = {  /* for ASCII/Latin1 */
 	359,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -232845,7 +233118,7 @@ static const UV PL_EA__A_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EA__A_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_EA__A_invlist[] = {  /* for EBCDIC 1047 */
 	363,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -233222,7 +233495,7 @@ static const UV PL_EA__A_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EA__A_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_EA__A_invlist[] = {  /* for EBCDIC 037 */
 	361,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -233592,7 +233865,7 @@ static const UV PL_EA__A_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_EA__F_invlist[] = { /* for all charsets */
+static const UV UNI_EA__F_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -233606,7 +233879,7 @@ static const UV PL_EA__F_invlist[] = { /* for all charsets */
 	0xFFE7
 };
 
-static const UV PL_EA__H_invlist[] = { /* for all charsets */
+static const UV UNI_EA__H_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -233630,7 +233903,7 @@ static const UV PL_EA__H_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_EA__N_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_EA__N_invlist[] = {  /* for ASCII/Latin1 */
 	537,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -234181,7 +234454,7 @@ static const UV PL_EA__N_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EA__N_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_EA__N_invlist[] = {  /* for EBCDIC 1047 */
 	535,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -234730,7 +235003,7 @@ static const UV PL_EA__N_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EA__N_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_EA__N_invlist[] = {  /* for EBCDIC 037 */
 	535,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -235276,7 +235549,7 @@ static const UV PL_EA__N_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_EA__NA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_EA__NA_invlist[] = {  /* for ASCII/Latin1 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235305,7 +235578,7 @@ static const UV PL_EA__NA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EA__NA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_EA__NA_invlist[] = {  /* for EBCDIC 1047 */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235356,7 +235629,7 @@ static const UV PL_EA__NA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EA__NA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_EA__NA_invlist[] = {  /* for EBCDIC 037 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235400,7 +235673,7 @@ static const UV PL_EA__NA_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_EA__W_invlist[] = { /* for all charsets */
+static const UV UNI_EA__W_invlist[] = {  /* for all charsets */
 	213,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235620,7 +235893,7 @@ static const UV PL_EA__W_invlist[] = { /* for all charsets */
 	0x3FFFE
 };
 
-static const UV PL_EARLYDYNASTICCUNEIFORM_invlist[] = { /* for all charsets */
+static const UV UNI_EARLYDYNASTICCUNEIFORM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235630,7 +235903,7 @@ static const UV PL_EARLYDYNASTICCUNEIFORM_invlist[] = { /* for all charsets */
 	0x12550
 };
 
-static const UV PL_EGYP_invlist[] = { /* for all charsets */
+static const UV UNI_EGYP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235640,7 +235913,7 @@ static const UV PL_EGYP_invlist[] = { /* for all charsets */
 	0x1342F
 };
 
-static const UV PL_ELBA_invlist[] = { /* for all charsets */
+static const UV UNI_ELBA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235650,7 +235923,7 @@ static const UV PL_ELBA_invlist[] = { /* for all charsets */
 	0x10528
 };
 
-static const UV PL_EMOTICONS_invlist[] = { /* for all charsets */
+static const UV UNI_EMOTICONS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235660,7 +235933,7 @@ static const UV PL_EMOTICONS_invlist[] = { /* for all charsets */
 	0x1F650
 };
 
-static const UV PL_ENCLOSEDALPHANUM_invlist[] = { /* for all charsets */
+static const UV UNI_ENCLOSEDALPHANUM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235670,7 +235943,7 @@ static const UV PL_ENCLOSEDALPHANUM_invlist[] = { /* for all charsets */
 	0x2500
 };
 
-static const UV PL_ENCLOSEDALPHANUMSUP_invlist[] = { /* for all charsets */
+static const UV UNI_ENCLOSEDALPHANUMSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235680,7 +235953,7 @@ static const UV PL_ENCLOSEDALPHANUMSUP_invlist[] = { /* for all charsets */
 	0x1F200
 };
 
-static const UV PL_ENCLOSEDCJK_invlist[] = { /* for all charsets */
+static const UV UNI_ENCLOSEDCJK_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235690,7 +235963,7 @@ static const UV PL_ENCLOSEDCJK_invlist[] = { /* for all charsets */
 	0x3300
 };
 
-static const UV PL_ENCLOSEDIDEOGRAPHICSUP_invlist[] = { /* for all charsets */
+static const UV UNI_ENCLOSEDIDEOGRAPHICSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235700,7 +235973,7 @@ static const UV PL_ENCLOSEDIDEOGRAPHICSUP_invlist[] = { /* for all charsets */
 	0x1F300
 };
 
-static const UV PL_ETHI_invlist[] = { /* for all charsets */
+static const UV UNI_ETHI_invlist[] = {  /* for all charsets */
 	65,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235772,7 +236045,7 @@ static const UV PL_ETHI_invlist[] = { /* for all charsets */
 	0xAB2F
 };
 
-static const UV PL_ETHIOPICEXT_invlist[] = { /* for all charsets */
+static const UV UNI_ETHIOPICEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235782,7 +236055,7 @@ static const UV PL_ETHIOPICEXT_invlist[] = { /* for all charsets */
 	0x2DE0
 };
 
-static const UV PL_ETHIOPICEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_ETHIOPICEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235792,7 +236065,7 @@ static const UV PL_ETHIOPICEXTA_invlist[] = { /* for all charsets */
 	0xAB30
 };
 
-static const UV PL_ETHIOPICSUP_invlist[] = { /* for all charsets */
+static const UV UNI_ETHIOPICSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235804,7 +236077,7 @@ static const UV PL_ETHIOPICSUP_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_EXT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_EXT_invlist[] = {  /* for ASCII/Latin1 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235877,7 +236150,7 @@ static const UV PL_EXT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EXT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_EXT_invlist[] = {  /* for EBCDIC 1047 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -235950,7 +236223,7 @@ static const UV PL_EXT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_EXT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_EXT_invlist[] = {  /* for EBCDIC 037 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -236020,7 +236293,7 @@ static const UV PL_EXT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_GCB__CN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_GCB__CN_invlist[] = {  /* for ASCII/Latin1 */
 	38,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -236072,7 +236345,7 @@ static const UV PL_GCB__CN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_GCB__CN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 1047 */
 	38,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -236124,7 +236397,7 @@ static const UV PL_GCB__CN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_GCB__CN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_GCB__CN_invlist[] = {  /* for EBCDIC 037 */
 	38,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -236171,7 +236444,7 @@ static const UV PL_GCB__CN_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_GCB__EX_invlist[] = { /* for all charsets */
+static const UV UNI_GCB__EX_invlist[] = {  /* for all charsets */
 	665,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -236843,7 +237116,7 @@ static const UV PL_GCB__EX_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_GCB__L_invlist[] = { /* for all charsets */
+static const UV UNI_GCB__L_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -236855,7 +237128,7 @@ static const UV PL_GCB__L_invlist[] = { /* for all charsets */
 	0xA97D
 };
 
-static const UV PL_GCB__PP_invlist[] = { /* for all charsets */
+static const UV UNI_GCB__PP_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -236885,7 +237158,7 @@ static const UV PL_GCB__PP_invlist[] = { /* for all charsets */
 	0x11D47
 };
 
-static const UV PL_GCB__SM_invlist[] = { /* for all charsets */
+static const UV UNI_GCB__SM_invlist[] = {  /* for all charsets */
 	303,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -237195,7 +237468,7 @@ static const UV PL_GCB__SM_invlist[] = { /* for all charsets */
 	0x1D16E
 };
 
-static const UV PL_GCB__T_invlist[] = { /* for all charsets */
+static const UV UNI_GCB__T_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -237207,7 +237480,7 @@ static const UV PL_GCB__T_invlist[] = { /* for all charsets */
 	0xD7FC
 };
 
-static const UV PL_GCB__V_invlist[] = { /* for all charsets */
+static const UV UNI_GCB__V_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -237221,7 +237494,7 @@ static const UV PL_GCB__V_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_GCB__XX_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_GCB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	594,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -237829,7 +238102,7 @@ static const UV PL_GCB__XX_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_GCB__XX_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	594,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -238437,7 +238710,7 @@ static const UV PL_GCB__XX_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_GCB__XX_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_GCB__XX_invlist[] = {  /* for EBCDIC 037 */
 	594,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239040,7 +239313,7 @@ static const UV PL_GCB__XX_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_GEOMETRICSHAPES_invlist[] = { /* for all charsets */
+static const UV UNI_GEOMETRICSHAPES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239050,7 +239323,7 @@ static const UV PL_GEOMETRICSHAPES_invlist[] = { /* for all charsets */
 	0x2600
 };
 
-static const UV PL_GEOMETRICSHAPESEXT_invlist[] = { /* for all charsets */
+static const UV UNI_GEOMETRICSHAPESEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239060,7 +239333,7 @@ static const UV PL_GEOMETRICSHAPESEXT_invlist[] = { /* for all charsets */
 	0x1F800
 };
 
-static const UV PL_GEOR_invlist[] = { /* for all charsets */
+static const UV UNI_GEOR_invlist[] = {  /* for all charsets */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239088,7 +239361,7 @@ static const UV PL_GEOR_invlist[] = { /* for all charsets */
 	0x2D2E
 };
 
-static const UV PL_GEORGIANEXT_invlist[] = { /* for all charsets */
+static const UV UNI_GEORGIANEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239098,7 +239371,7 @@ static const UV PL_GEORGIANEXT_invlist[] = { /* for all charsets */
 	0x1CC0
 };
 
-static const UV PL_GEORGIANSUP_invlist[] = { /* for all charsets */
+static const UV UNI_GEORGIANSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239108,7 +239381,7 @@ static const UV PL_GEORGIANSUP_invlist[] = { /* for all charsets */
 	0x2D30
 };
 
-static const UV PL_GLAG_invlist[] = { /* for all charsets */
+static const UV UNI_GLAG_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239138,7 +239411,7 @@ static const UV PL_GLAG_invlist[] = { /* for all charsets */
 	0x1E02B
 };
 
-static const UV PL_GLAGOLITICSUP_invlist[] = { /* for all charsets */
+static const UV UNI_GLAGOLITICSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239148,7 +239421,7 @@ static const UV PL_GLAGOLITICSUP_invlist[] = { /* for all charsets */
 	0x1E030
 };
 
-static const UV PL_GONG_invlist[] = { /* for all charsets */
+static const UV UNI_GONG_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239170,7 +239443,7 @@ static const UV PL_GONG_invlist[] = { /* for all charsets */
 	0x11DAA
 };
 
-static const UV PL_GONM_invlist[] = { /* for all charsets */
+static const UV UNI_GONM_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239192,7 +239465,7 @@ static const UV PL_GONM_invlist[] = { /* for all charsets */
 	0x11D5A
 };
 
-static const UV PL_GOTH_invlist[] = { /* for all charsets */
+static const UV UNI_GOTH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239202,7 +239475,7 @@ static const UV PL_GOTH_invlist[] = { /* for all charsets */
 	0x1034B
 };
 
-static const UV PL_GRAN_invlist[] = { /* for all charsets */
+static const UV UNI_GRAN_invlist[] = {  /* for all charsets */
 	47,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -239258,7 +239531,7 @@ static const UV PL_GRAN_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_GRBASE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_GRBASE_invlist[] = {  /* for ASCII/Latin1 */
 	1613,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -240885,7 +241158,7 @@ static const UV PL_GRBASE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_GRBASE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_GRBASE_invlist[] = {  /* for EBCDIC 1047 */
 	1613,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -242512,7 +242785,7 @@ static const UV PL_GRBASE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_GRBASE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_GRBASE_invlist[] = {  /* for EBCDIC 037 */
 	1613,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244134,7 +244407,7 @@ static const UV PL_GRBASE_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_GREEKEXT_invlist[] = { /* for all charsets */
+static const UV UNI_GREEKEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244144,7 +244417,7 @@ static const UV PL_GREEKEXT_invlist[] = { /* for all charsets */
 	0x2000
 };
 
-static const UV PL_GREK_invlist[] = { /* for all charsets */
+static const UV UNI_GREK_invlist[] = {  /* for all charsets */
 	77,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244228,7 +244501,7 @@ static const UV PL_GREK_invlist[] = { /* for all charsets */
 	0x1D246
 };
 
-static const UV PL_GREXT_invlist[] = { /* for all charsets */
+static const UV UNI_GREXT_invlist[] = {  /* for all charsets */
 	663,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244898,7 +245171,7 @@ static const UV PL_GREXT_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_GUJR_invlist[] = { /* for all charsets */
+static const UV UNI_GUJR_invlist[] = {  /* for all charsets */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244940,7 +245213,7 @@ static const UV PL_GUJR_invlist[] = { /* for all charsets */
 	0xA83A
 };
 
-static const UV PL_GURU_invlist[] = { /* for all charsets */
+static const UV UNI_GURU_invlist[] = {  /* for all charsets */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244986,7 +245259,7 @@ static const UV PL_GURU_invlist[] = { /* for all charsets */
 	0xA83A
 };
 
-static const UV PL_HALFANDFULLFORMS_invlist[] = { /* for all charsets */
+static const UV UNI_HALFANDFULLFORMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -244996,7 +245269,7 @@ static const UV PL_HALFANDFULLFORMS_invlist[] = { /* for all charsets */
 	0xFFF0
 };
 
-static const UV PL_HALFMARKS_invlist[] = { /* for all charsets */
+static const UV UNI_HALFMARKS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245006,7 +245279,7 @@ static const UV PL_HALFMARKS_invlist[] = { /* for all charsets */
 	0xFE30
 };
 
-static const UV PL_HAN_invlist[] = { /* for all charsets */
+static const UV UNI_HAN_invlist[] = {  /* for all charsets */
 	65,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245078,7 +245351,7 @@ static const UV PL_HAN_invlist[] = { /* for all charsets */
 	0x2FA1E
 };
 
-static const UV PL_HANG_invlist[] = { /* for all charsets */
+static const UV UNI_HANG_invlist[] = {  /* for all charsets */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245128,7 +245401,7 @@ static const UV PL_HANG_invlist[] = { /* for all charsets */
 	0xFFDD
 };
 
-static const UV PL_HANO_invlist[] = { /* for all charsets */
+static const UV UNI_HANO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245138,7 +245411,7 @@ static const UV PL_HANO_invlist[] = { /* for all charsets */
 	0x1737
 };
 
-static const UV PL_HATR_invlist[] = { /* for all charsets */
+static const UV UNI_HATR_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245152,7 +245425,7 @@ static const UV PL_HATR_invlist[] = { /* for all charsets */
 	0x10900
 };
 
-static const UV PL_HEBR_invlist[] = { /* for all charsets */
+static const UV UNI_HEBR_invlist[] = {  /* for all charsets */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245178,7 +245451,7 @@ static const UV PL_HEBR_invlist[] = { /* for all charsets */
 	0xFB50
 };
 
-static const UV PL_HIGHPUSURROGATES_invlist[] = { /* for all charsets */
+static const UV UNI_HIGHPUSURROGATES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245188,7 +245461,7 @@ static const UV PL_HIGHPUSURROGATES_invlist[] = { /* for all charsets */
 	0xDC00
 };
 
-static const UV PL_HIGHSURROGATES_invlist[] = { /* for all charsets */
+static const UV UNI_HIGHSURROGATES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245198,7 +245471,7 @@ static const UV PL_HIGHSURROGATES_invlist[] = { /* for all charsets */
 	0xDB80
 };
 
-static const UV PL_HIRA_invlist[] = { /* for all charsets */
+static const UV UNI_HIRA_invlist[] = {  /* for all charsets */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245236,7 +245509,7 @@ static const UV PL_HIRA_invlist[] = { /* for all charsets */
 	0x1F201
 };
 
-static const UV PL_HLUW_invlist[] = { /* for all charsets */
+static const UV UNI_HLUW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245246,7 +245519,7 @@ static const UV PL_HLUW_invlist[] = { /* for all charsets */
 	0x14647
 };
 
-static const UV PL_HMNG_invlist[] = { /* for all charsets */
+static const UV UNI_HMNG_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245264,7 +245537,7 @@ static const UV PL_HMNG_invlist[] = { /* for all charsets */
 	0x16B90
 };
 
-static const UV PL_HST__NA_invlist[] = { /* for all charsets */
+static const UV UNI_HST__NA_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -245282,7 +245555,7 @@ static const UV PL_HST__NA_invlist[] = { /* for all charsets */
 	0xD7FC
 };
 
-static const UV PL_HUNG_invlist[] = { /* for all charsets */
+static const UV UNI_HUNG_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245298,7 +245571,7 @@ static const UV PL_HUNG_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_HYPHEN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_HYPHEN_invlist[] = {  /* for ASCII/Latin1 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245333,7 +245606,7 @@ static const UV PL_HYPHEN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_HYPHEN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_HYPHEN_invlist[] = {  /* for EBCDIC 1047 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245368,7 +245641,7 @@ static const UV PL_HYPHEN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_HYPHEN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_HYPHEN_invlist[] = {  /* for EBCDIC 037 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -245400,7 +245673,7 @@ static const UV PL_HYPHEN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_IDC_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
 	1415,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -246829,7 +247102,7 @@ static const UV PL_IDC_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_IDC_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_IDC_invlist[] = {  /* for EBCDIC 1047 */
 	1439,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -248282,7 +248555,7 @@ static const UV PL_IDC_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_IDC_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_IDC_invlist[] = {  /* for EBCDIC 037 */
 	1435,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -249726,7 +249999,7 @@ static const UV PL_IDC_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_IDEO_invlist[] = { /* for all charsets */
+static const UV UNI_IDEO_invlist[] = {  /* for all charsets */
 	33,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -249766,7 +250039,7 @@ static const UV PL_IDEO_invlist[] = { /* for all charsets */
 	0x2FA1E
 };
 
-static const UV PL_IDEOGRAPHICSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_IDEOGRAPHICSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -249778,7 +250051,7 @@ static const UV PL_IDEOGRAPHICSYMBOLS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_IDS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_IDS_invlist[] = {  /* for ASCII/Latin1 */
 	1199,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -250991,7 +251264,7 @@ static const UV PL_IDS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_IDS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_IDS_invlist[] = {  /* for EBCDIC 1047 */
 	1225,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -252230,7 +252503,7 @@ static const UV PL_IDS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_IDS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_IDS_invlist[] = {  /* for EBCDIC 037 */
 	1221,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -253460,7 +253733,7 @@ static const UV PL_IDS_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_IDSB_invlist[] = { /* for all charsets */
+static const UV UNI_IDSB_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -253472,7 +253745,7 @@ static const UV PL_IDSB_invlist[] = { /* for all charsets */
 	0x2FFC
 };
 
-static const UV PL_IDST_invlist[] = { /* for all charsets */
+static const UV UNI_IDST_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -253482,7 +253755,7 @@ static const UV PL_IDST_invlist[] = { /* for all charsets */
 	0x2FF4
 };
 
-static const UV PL_IN__1_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_IN__1_DOT_1_invlist[] = {  /* for all charsets */
 	576,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -254065,7 +254338,7 @@ static const UV PL_IN__1_DOT_1_invlist[] = { /* for all charsets */
 	0x10000
 };
 
-static const UV PL_IN__10_invlist[] = { /* for all charsets */
+static const UV UNI_IN__10_invlist[] = {  /* for all charsets */
 	1318,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -255390,7 +255663,7 @@ static const UV PL_IN__10_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__11_invlist[] = { /* for all charsets */
+static const UV UNI_IN__11_invlist[] = {  /* for all charsets */
 	1336,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -256733,7 +257006,7 @@ static const UV PL_IN__11_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__2_invlist[] = { /* for all charsets */
+static const UV UNI_IN__2_invlist[] = {  /* for all charsets */
 	624,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -257364,7 +257637,7 @@ static const UV PL_IN__2_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__2_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_IN__2_DOT_1_invlist[] = {  /* for all charsets */
 	624,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -257995,7 +258268,7 @@ static const UV PL_IN__2_DOT_1_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__3_invlist[] = { /* for all charsets */
+static const UV UNI_IN__3_invlist[] = {  /* for all charsets */
 	738,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -258740,7 +259013,7 @@ static const UV PL_IN__3_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__3_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_IN__3_DOT_1_invlist[] = {  /* for all charsets */
 	804,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -259551,7 +259824,7 @@ static const UV PL_IN__3_DOT_1_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__3_DOT_2_invlist[] = { /* for all charsets */
+static const UV UNI_IN__3_DOT_2_invlist[] = {  /* for all charsets */
 	794,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -260352,7 +260625,7 @@ static const UV PL_IN__3_DOT_2_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__4_invlist[] = { /* for all charsets */
+static const UV UNI_IN__4_invlist[] = {  /* for all charsets */
 	824,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -261183,7 +261456,7 @@ static const UV PL_IN__4_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__4_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_IN__4_DOT_1_invlist[] = {  /* for all charsets */
 	860,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -262050,7 +262323,7 @@ static const UV PL_IN__4_DOT_1_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__5_invlist[] = { /* for all charsets */
+static const UV UNI_IN__5_invlist[] = {  /* for all charsets */
 	880,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -262937,7 +263210,7 @@ static const UV PL_IN__5_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__5_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_IN__5_DOT_1_invlist[] = {  /* for all charsets */
 	910,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -263854,7 +264127,7 @@ static const UV PL_IN__5_DOT_1_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__5_DOT_2_invlist[] = { /* for all charsets */
+static const UV UNI_IN__5_DOT_2_invlist[] = {  /* for all charsets */
 	990,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -264851,7 +265124,7 @@ static const UV PL_IN__5_DOT_2_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__6_invlist[] = { /* for all charsets */
+static const UV UNI_IN__6_invlist[] = {  /* for all charsets */
 	1022,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -265880,7 +266153,7 @@ static const UV PL_IN__6_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__6_DOT_1_invlist[] = { /* for all charsets */
+static const UV UNI_IN__6_DOT_1_invlist[] = {  /* for all charsets */
 	1098,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -266985,7 +267258,7 @@ static const UV PL_IN__6_DOT_1_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__6_DOT_2_invlist[] = { /* for all charsets */
+static const UV UNI_IN__6_DOT_2_invlist[] = {  /* for all charsets */
 	1098,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -268090,7 +268363,7 @@ static const UV PL_IN__6_DOT_2_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__6_DOT_3_invlist[] = { /* for all charsets */
+static const UV UNI_IN__6_DOT_3_invlist[] = {  /* for all charsets */
 	1098,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -269195,7 +269468,7 @@ static const UV PL_IN__6_DOT_3_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__7_invlist[] = { /* for all charsets */
+static const UV UNI_IN__7_invlist[] = {  /* for all charsets */
 	1220,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -270422,7 +270695,7 @@ static const UV PL_IN__7_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__8_invlist[] = { /* for all charsets */
+static const UV UNI_IN__8_invlist[] = {  /* for all charsets */
 	1246,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -271675,7 +271948,7 @@ static const UV PL_IN__8_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_IN__9_invlist[] = { /* for all charsets */
+static const UV UNI_IN__9_invlist[] = {  /* for all charsets */
 	1296,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -272978,7 +273251,7 @@ static const UV PL_IN__9_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_INADLAM_invlist[] = { /* for all charsets */
+static const UV UNI_INADLAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -272988,7 +273261,7 @@ static const UV PL_INADLAM_invlist[] = { /* for all charsets */
 	0x1E960
 };
 
-static const UV PL_INAHOM_invlist[] = { /* for all charsets */
+static const UV UNI_INAHOM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -272998,7 +273271,7 @@ static const UV PL_INAHOM_invlist[] = { /* for all charsets */
 	0x11740
 };
 
-static const UV PL_INANATOLIANHIEROGLYPHS_invlist[] = { /* for all charsets */
+static const UV UNI_INANATOLIANHIEROGLYPHS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273008,7 +273281,7 @@ static const UV PL_INANATOLIANHIEROGLYPHS_invlist[] = { /* for all charsets */
 	0x14680
 };
 
-static const UV PL_INARABIC_invlist[] = { /* for all charsets */
+static const UV UNI_INARABIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273018,7 +273291,7 @@ static const UV PL_INARABIC_invlist[] = { /* for all charsets */
 	0x700
 };
 
-static const UV PL_INARMENIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INARMENIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273028,7 +273301,7 @@ static const UV PL_INARMENIAN_invlist[] = { /* for all charsets */
 	0x590
 };
 
-static const UV PL_INAVESTAN_invlist[] = { /* for all charsets */
+static const UV UNI_INAVESTAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273038,7 +273311,7 @@ static const UV PL_INAVESTAN_invlist[] = { /* for all charsets */
 	0x10B40
 };
 
-static const UV PL_INBALINESE_invlist[] = { /* for all charsets */
+static const UV UNI_INBALINESE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273048,7 +273321,7 @@ static const UV PL_INBALINESE_invlist[] = { /* for all charsets */
 	0x1B80
 };
 
-static const UV PL_INBAMUM_invlist[] = { /* for all charsets */
+static const UV UNI_INBAMUM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273058,7 +273331,7 @@ static const UV PL_INBAMUM_invlist[] = { /* for all charsets */
 	0xA700
 };
 
-static const UV PL_INBASSAVAH_invlist[] = { /* for all charsets */
+static const UV UNI_INBASSAVAH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273068,7 +273341,7 @@ static const UV PL_INBASSAVAH_invlist[] = { /* for all charsets */
 	0x16B00
 };
 
-static const UV PL_INBATAK_invlist[] = { /* for all charsets */
+static const UV UNI_INBATAK_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273078,7 +273351,7 @@ static const UV PL_INBATAK_invlist[] = { /* for all charsets */
 	0x1C00
 };
 
-static const UV PL_INBENGALI_invlist[] = { /* for all charsets */
+static const UV UNI_INBENGALI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273088,7 +273361,7 @@ static const UV PL_INBENGALI_invlist[] = { /* for all charsets */
 	0xA00
 };
 
-static const UV PL_INBHAIKSUKI_invlist[] = { /* for all charsets */
+static const UV UNI_INBHAIKSUKI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273098,7 +273371,7 @@ static const UV PL_INBHAIKSUKI_invlist[] = { /* for all charsets */
 	0x11C70
 };
 
-static const UV PL_INBOPOMOFO_invlist[] = { /* for all charsets */
+static const UV UNI_INBOPOMOFO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273108,7 +273381,7 @@ static const UV PL_INBOPOMOFO_invlist[] = { /* for all charsets */
 	0x3130
 };
 
-static const UV PL_INBRAHMI_invlist[] = { /* for all charsets */
+static const UV UNI_INBRAHMI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273118,7 +273391,7 @@ static const UV PL_INBRAHMI_invlist[] = { /* for all charsets */
 	0x11080
 };
 
-static const UV PL_INBUGINESE_invlist[] = { /* for all charsets */
+static const UV UNI_INBUGINESE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273128,7 +273401,7 @@ static const UV PL_INBUGINESE_invlist[] = { /* for all charsets */
 	0x1A20
 };
 
-static const UV PL_INBUHID_invlist[] = { /* for all charsets */
+static const UV UNI_INBUHID_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273138,7 +273411,7 @@ static const UV PL_INBUHID_invlist[] = { /* for all charsets */
 	0x1760
 };
 
-static const UV PL_INCARIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INCARIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273148,7 +273421,7 @@ static const UV PL_INCARIAN_invlist[] = { /* for all charsets */
 	0x102E0
 };
 
-static const UV PL_INCAUCASIANALBANIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INCAUCASIANALBANIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273158,7 +273431,7 @@ static const UV PL_INCAUCASIANALBANIAN_invlist[] = { /* for all charsets */
 	0x10570
 };
 
-static const UV PL_INCHAKMA_invlist[] = { /* for all charsets */
+static const UV UNI_INCHAKMA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273168,7 +273441,7 @@ static const UV PL_INCHAKMA_invlist[] = { /* for all charsets */
 	0x11150
 };
 
-static const UV PL_INCHAM_invlist[] = { /* for all charsets */
+static const UV UNI_INCHAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273178,7 +273451,7 @@ static const UV PL_INCHAM_invlist[] = { /* for all charsets */
 	0xAA60
 };
 
-static const UV PL_INCHEROKEE_invlist[] = { /* for all charsets */
+static const UV UNI_INCHEROKEE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273188,7 +273461,7 @@ static const UV PL_INCHEROKEE_invlist[] = { /* for all charsets */
 	0x1400
 };
 
-static const UV PL_INCOPTIC_invlist[] = { /* for all charsets */
+static const UV UNI_INCOPTIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273198,7 +273471,7 @@ static const UV PL_INCOPTIC_invlist[] = { /* for all charsets */
 	0x2D00
 };
 
-static const UV PL_INCUNEIFORM_invlist[] = { /* for all charsets */
+static const UV UNI_INCUNEIFORM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273208,7 +273481,7 @@ static const UV PL_INCUNEIFORM_invlist[] = { /* for all charsets */
 	0x12400
 };
 
-static const UV PL_INCYRILLIC_invlist[] = { /* for all charsets */
+static const UV UNI_INCYRILLIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273218,7 +273491,7 @@ static const UV PL_INCYRILLIC_invlist[] = { /* for all charsets */
 	0x500
 };
 
-static const UV PL_INDEVANAGARI_invlist[] = { /* for all charsets */
+static const UV UNI_INDEVANAGARI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273228,7 +273501,7 @@ static const UV PL_INDEVANAGARI_invlist[] = { /* for all charsets */
 	0x980
 };
 
-static const UV PL_INDICNUMBERFORMS_invlist[] = { /* for all charsets */
+static const UV UNI_INDICNUMBERFORMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273238,7 +273511,7 @@ static const UV PL_INDICNUMBERFORMS_invlist[] = { /* for all charsets */
 	0xA840
 };
 
-static const UV PL_INDICSIYAQNUMBERS_invlist[] = { /* for all charsets */
+static const UV UNI_INDICSIYAQNUMBERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273248,7 +273521,7 @@ static const UV PL_INDICSIYAQNUMBERS_invlist[] = { /* for all charsets */
 	0x1ECC0
 };
 
-static const UV PL_INDOGRA_invlist[] = { /* for all charsets */
+static const UV UNI_INDOGRA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273258,7 +273531,7 @@ static const UV PL_INDOGRA_invlist[] = { /* for all charsets */
 	0x11850
 };
 
-static const UV PL_INDUPLOYAN_invlist[] = { /* for all charsets */
+static const UV UNI_INDUPLOYAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273268,7 +273541,7 @@ static const UV PL_INDUPLOYAN_invlist[] = { /* for all charsets */
 	0x1BCA0
 };
 
-static const UV PL_INEGYPTIANHIEROGLYPHS_invlist[] = { /* for all charsets */
+static const UV UNI_INEGYPTIANHIEROGLYPHS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273278,7 +273551,7 @@ static const UV PL_INEGYPTIANHIEROGLYPHS_invlist[] = { /* for all charsets */
 	0x13430
 };
 
-static const UV PL_INELBASAN_invlist[] = { /* for all charsets */
+static const UV UNI_INELBASAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273288,7 +273561,7 @@ static const UV PL_INELBASAN_invlist[] = { /* for all charsets */
 	0x10530
 };
 
-static const UV PL_INETHIOPIC_invlist[] = { /* for all charsets */
+static const UV UNI_INETHIOPIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273298,7 +273571,7 @@ static const UV PL_INETHIOPIC_invlist[] = { /* for all charsets */
 	0x1380
 };
 
-static const UV PL_INGEORGIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INGEORGIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273308,7 +273581,7 @@ static const UV PL_INGEORGIAN_invlist[] = { /* for all charsets */
 	0x1100
 };
 
-static const UV PL_INGLAGOLITIC_invlist[] = { /* for all charsets */
+static const UV UNI_INGLAGOLITIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273318,7 +273591,7 @@ static const UV PL_INGLAGOLITIC_invlist[] = { /* for all charsets */
 	0x2C60
 };
 
-static const UV PL_INGOTHIC_invlist[] = { /* for all charsets */
+static const UV UNI_INGOTHIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273328,7 +273601,7 @@ static const UV PL_INGOTHIC_invlist[] = { /* for all charsets */
 	0x10350
 };
 
-static const UV PL_INGRANTHA_invlist[] = { /* for all charsets */
+static const UV UNI_INGRANTHA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273338,7 +273611,7 @@ static const UV PL_INGRANTHA_invlist[] = { /* for all charsets */
 	0x11380
 };
 
-static const UV PL_INGREEK_invlist[] = { /* for all charsets */
+static const UV UNI_INGREEK_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273348,7 +273621,7 @@ static const UV PL_INGREEK_invlist[] = { /* for all charsets */
 	0x400
 };
 
-static const UV PL_INGUJARATI_invlist[] = { /* for all charsets */
+static const UV UNI_INGUJARATI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273358,7 +273631,7 @@ static const UV PL_INGUJARATI_invlist[] = { /* for all charsets */
 	0xB00
 };
 
-static const UV PL_INGUNJALAGONDI_invlist[] = { /* for all charsets */
+static const UV UNI_INGUNJALAGONDI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273368,7 +273641,7 @@ static const UV PL_INGUNJALAGONDI_invlist[] = { /* for all charsets */
 	0x11DB0
 };
 
-static const UV PL_INGURMUKHI_invlist[] = { /* for all charsets */
+static const UV UNI_INGURMUKHI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273378,7 +273651,7 @@ static const UV PL_INGURMUKHI_invlist[] = { /* for all charsets */
 	0xA80
 };
 
-static const UV PL_INHANGUL_invlist[] = { /* for all charsets */
+static const UV UNI_INHANGUL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273388,7 +273661,7 @@ static const UV PL_INHANGUL_invlist[] = { /* for all charsets */
 	0xD7B0
 };
 
-static const UV PL_INHANIFIROHINGYA_invlist[] = { /* for all charsets */
+static const UV UNI_INHANIFIROHINGYA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273398,7 +273671,7 @@ static const UV PL_INHANIFIROHINGYA_invlist[] = { /* for all charsets */
 	0x10D40
 };
 
-static const UV PL_INHANUNOO_invlist[] = { /* for all charsets */
+static const UV UNI_INHANUNOO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273408,7 +273681,7 @@ static const UV PL_INHANUNOO_invlist[] = { /* for all charsets */
 	0x1740
 };
 
-static const UV PL_INHATRAN_invlist[] = { /* for all charsets */
+static const UV UNI_INHATRAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273418,7 +273691,7 @@ static const UV PL_INHATRAN_invlist[] = { /* for all charsets */
 	0x10900
 };
 
-static const UV PL_INHEBREW_invlist[] = { /* for all charsets */
+static const UV UNI_INHEBREW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273428,7 +273701,7 @@ static const UV PL_INHEBREW_invlist[] = { /* for all charsets */
 	0x600
 };
 
-static const UV PL_INHIRAGANA_invlist[] = { /* for all charsets */
+static const UV UNI_INHIRAGANA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273438,7 +273711,7 @@ static const UV PL_INHIRAGANA_invlist[] = { /* for all charsets */
 	0x30A0
 };
 
-static const UV PL_INIDC_invlist[] = { /* for all charsets */
+static const UV UNI_INIDC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273448,7 +273721,7 @@ static const UV PL_INIDC_invlist[] = { /* for all charsets */
 	0x3000
 };
 
-static const UV PL_INIMPERIALARAMAIC_invlist[] = { /* for all charsets */
+static const UV UNI_INIMPERIALARAMAIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273458,7 +273731,7 @@ static const UV PL_INIMPERIALARAMAIC_invlist[] = { /* for all charsets */
 	0x10860
 };
 
-static const UV PL_ININSCRIPTIONALPAHLAVI_invlist[] = { /* for all charsets */
+static const UV UNI_ININSCRIPTIONALPAHLAVI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273468,7 +273741,7 @@ static const UV PL_ININSCRIPTIONALPAHLAVI_invlist[] = { /* for all charsets */
 	0x10B80
 };
 
-static const UV PL_ININSCRIPTIONALPARTHIAN_invlist[] = { /* for all charsets */
+static const UV UNI_ININSCRIPTIONALPARTHIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273478,7 +273751,7 @@ static const UV PL_ININSCRIPTIONALPARTHIAN_invlist[] = { /* for all charsets */
 	0x10B60
 };
 
-static const UV PL_INJAVANESE_invlist[] = { /* for all charsets */
+static const UV UNI_INJAVANESE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273488,7 +273761,7 @@ static const UV PL_INJAVANESE_invlist[] = { /* for all charsets */
 	0xA9E0
 };
 
-static const UV PL_INKAITHI_invlist[] = { /* for all charsets */
+static const UV UNI_INKAITHI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273498,7 +273771,7 @@ static const UV PL_INKAITHI_invlist[] = { /* for all charsets */
 	0x110D0
 };
 
-static const UV PL_INKANNADA_invlist[] = { /* for all charsets */
+static const UV UNI_INKANNADA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273508,7 +273781,7 @@ static const UV PL_INKANNADA_invlist[] = { /* for all charsets */
 	0xD00
 };
 
-static const UV PL_INKATAKANA_invlist[] = { /* for all charsets */
+static const UV UNI_INKATAKANA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273518,7 +273791,7 @@ static const UV PL_INKATAKANA_invlist[] = { /* for all charsets */
 	0x3100
 };
 
-static const UV PL_INKHAROSHTHI_invlist[] = { /* for all charsets */
+static const UV UNI_INKHAROSHTHI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273528,7 +273801,7 @@ static const UV PL_INKHAROSHTHI_invlist[] = { /* for all charsets */
 	0x10A60
 };
 
-static const UV PL_INKHMER_invlist[] = { /* for all charsets */
+static const UV UNI_INKHMER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273538,7 +273811,7 @@ static const UV PL_INKHMER_invlist[] = { /* for all charsets */
 	0x1800
 };
 
-static const UV PL_INKHOJKI_invlist[] = { /* for all charsets */
+static const UV UNI_INKHOJKI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273548,7 +273821,7 @@ static const UV PL_INKHOJKI_invlist[] = { /* for all charsets */
 	0x11250
 };
 
-static const UV PL_INKHUDAWADI_invlist[] = { /* for all charsets */
+static const UV UNI_INKHUDAWADI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273558,7 +273831,7 @@ static const UV PL_INKHUDAWADI_invlist[] = { /* for all charsets */
 	0x11300
 };
 
-static const UV PL_INLAO_invlist[] = { /* for all charsets */
+static const UV UNI_INLAO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273568,7 +273841,7 @@ static const UV PL_INLAO_invlist[] = { /* for all charsets */
 	0xF00
 };
 
-static const UV PL_INLEPCHA_invlist[] = { /* for all charsets */
+static const UV UNI_INLEPCHA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273578,7 +273851,7 @@ static const UV PL_INLEPCHA_invlist[] = { /* for all charsets */
 	0x1C50
 };
 
-static const UV PL_INLIMBU_invlist[] = { /* for all charsets */
+static const UV UNI_INLIMBU_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273588,7 +273861,7 @@ static const UV PL_INLIMBU_invlist[] = { /* for all charsets */
 	0x1950
 };
 
-static const UV PL_INLINEARA_invlist[] = { /* for all charsets */
+static const UV UNI_INLINEARA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273598,7 +273871,7 @@ static const UV PL_INLINEARA_invlist[] = { /* for all charsets */
 	0x10780
 };
 
-static const UV PL_INLYCIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INLYCIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273608,7 +273881,7 @@ static const UV PL_INLYCIAN_invlist[] = { /* for all charsets */
 	0x102A0
 };
 
-static const UV PL_INLYDIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INLYDIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273618,7 +273891,7 @@ static const UV PL_INLYDIAN_invlist[] = { /* for all charsets */
 	0x10940
 };
 
-static const UV PL_INMAHAJANI_invlist[] = { /* for all charsets */
+static const UV UNI_INMAHAJANI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273628,7 +273901,7 @@ static const UV PL_INMAHAJANI_invlist[] = { /* for all charsets */
 	0x11180
 };
 
-static const UV PL_INMAKASAR_invlist[] = { /* for all charsets */
+static const UV UNI_INMAKASAR_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273638,7 +273911,7 @@ static const UV PL_INMAKASAR_invlist[] = { /* for all charsets */
 	0x11F00
 };
 
-static const UV PL_INMALAYALAM_invlist[] = { /* for all charsets */
+static const UV UNI_INMALAYALAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273648,7 +273921,7 @@ static const UV PL_INMALAYALAM_invlist[] = { /* for all charsets */
 	0xD80
 };
 
-static const UV PL_INMANDAIC_invlist[] = { /* for all charsets */
+static const UV UNI_INMANDAIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273658,7 +273931,7 @@ static const UV PL_INMANDAIC_invlist[] = { /* for all charsets */
 	0x860
 };
 
-static const UV PL_INMANICHAEAN_invlist[] = { /* for all charsets */
+static const UV UNI_INMANICHAEAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273668,7 +273941,7 @@ static const UV PL_INMANICHAEAN_invlist[] = { /* for all charsets */
 	0x10B00
 };
 
-static const UV PL_INMARCHEN_invlist[] = { /* for all charsets */
+static const UV UNI_INMARCHEN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273678,7 +273951,7 @@ static const UV PL_INMARCHEN_invlist[] = { /* for all charsets */
 	0x11CC0
 };
 
-static const UV PL_INMASARAMGONDI_invlist[] = { /* for all charsets */
+static const UV UNI_INMASARAMGONDI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273688,7 +273961,7 @@ static const UV PL_INMASARAMGONDI_invlist[] = { /* for all charsets */
 	0x11D60
 };
 
-static const UV PL_INMEDEFAIDRIN_invlist[] = { /* for all charsets */
+static const UV UNI_INMEDEFAIDRIN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273698,7 +273971,7 @@ static const UV PL_INMEDEFAIDRIN_invlist[] = { /* for all charsets */
 	0x16EA0
 };
 
-static const UV PL_INMEETEIMAYEK_invlist[] = { /* for all charsets */
+static const UV UNI_INMEETEIMAYEK_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273708,7 +273981,7 @@ static const UV PL_INMEETEIMAYEK_invlist[] = { /* for all charsets */
 	0xAC00
 };
 
-static const UV PL_INMENDEKIKAKUI_invlist[] = { /* for all charsets */
+static const UV UNI_INMENDEKIKAKUI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273718,7 +273991,7 @@ static const UV PL_INMENDEKIKAKUI_invlist[] = { /* for all charsets */
 	0x1E8E0
 };
 
-static const UV PL_INMEROITICCURSIVE_invlist[] = { /* for all charsets */
+static const UV UNI_INMEROITICCURSIVE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273728,7 +274001,7 @@ static const UV PL_INMEROITICCURSIVE_invlist[] = { /* for all charsets */
 	0x10A00
 };
 
-static const UV PL_INMIAO_invlist[] = { /* for all charsets */
+static const UV UNI_INMIAO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273738,7 +274011,7 @@ static const UV PL_INMIAO_invlist[] = { /* for all charsets */
 	0x16FA0
 };
 
-static const UV PL_INMODI_invlist[] = { /* for all charsets */
+static const UV UNI_INMODI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273748,7 +274021,7 @@ static const UV PL_INMODI_invlist[] = { /* for all charsets */
 	0x11660
 };
 
-static const UV PL_INMONGOLIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INMONGOLIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273758,7 +274031,7 @@ static const UV PL_INMONGOLIAN_invlist[] = { /* for all charsets */
 	0x18B0
 };
 
-static const UV PL_INMRO_invlist[] = { /* for all charsets */
+static const UV UNI_INMRO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273768,7 +274041,7 @@ static const UV PL_INMRO_invlist[] = { /* for all charsets */
 	0x16A70
 };
 
-static const UV PL_INMULTANI_invlist[] = { /* for all charsets */
+static const UV UNI_INMULTANI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273778,7 +274051,7 @@ static const UV PL_INMULTANI_invlist[] = { /* for all charsets */
 	0x112B0
 };
 
-static const UV PL_INMYANMAR_invlist[] = { /* for all charsets */
+static const UV UNI_INMYANMAR_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273788,7 +274061,7 @@ static const UV PL_INMYANMAR_invlist[] = { /* for all charsets */
 	0x10A0
 };
 
-static const UV PL_INNABATAEAN_invlist[] = { /* for all charsets */
+static const UV UNI_INNABATAEAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273798,7 +274071,7 @@ static const UV PL_INNABATAEAN_invlist[] = { /* for all charsets */
 	0x108B0
 };
 
-static const UV PL_INNEWA_invlist[] = { /* for all charsets */
+static const UV UNI_INNEWA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273808,7 +274081,7 @@ static const UV PL_INNEWA_invlist[] = { /* for all charsets */
 	0x11480
 };
 
-static const UV PL_INNEWTAILUE_invlist[] = { /* for all charsets */
+static const UV UNI_INNEWTAILUE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273818,7 +274091,7 @@ static const UV PL_INNEWTAILUE_invlist[] = { /* for all charsets */
 	0x19E0
 };
 
-static const UV PL_INNKO_invlist[] = { /* for all charsets */
+static const UV UNI_INNKO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273828,7 +274101,7 @@ static const UV PL_INNKO_invlist[] = { /* for all charsets */
 	0x800
 };
 
-static const UV PL_INNUSHU_invlist[] = { /* for all charsets */
+static const UV UNI_INNUSHU_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273838,7 +274111,7 @@ static const UV PL_INNUSHU_invlist[] = { /* for all charsets */
 	0x1B300
 };
 
-static const UV PL_INOGHAM_invlist[] = { /* for all charsets */
+static const UV UNI_INOGHAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273848,7 +274121,7 @@ static const UV PL_INOGHAM_invlist[] = { /* for all charsets */
 	0x16A0
 };
 
-static const UV PL_INOLDHUNGARIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INOLDHUNGARIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273858,7 +274131,7 @@ static const UV PL_INOLDHUNGARIAN_invlist[] = { /* for all charsets */
 	0x10D00
 };
 
-static const UV PL_INOLDITALIC_invlist[] = { /* for all charsets */
+static const UV UNI_INOLDITALIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273868,7 +274141,7 @@ static const UV PL_INOLDITALIC_invlist[] = { /* for all charsets */
 	0x10330
 };
 
-static const UV PL_INOLDPERMIC_invlist[] = { /* for all charsets */
+static const UV UNI_INOLDPERMIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273878,7 +274151,7 @@ static const UV PL_INOLDPERMIC_invlist[] = { /* for all charsets */
 	0x10380
 };
 
-static const UV PL_INOLDPERSIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INOLDPERSIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273888,7 +274161,7 @@ static const UV PL_INOLDPERSIAN_invlist[] = { /* for all charsets */
 	0x103E0
 };
 
-static const UV PL_INOLDSOGDIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INOLDSOGDIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273898,7 +274171,7 @@ static const UV PL_INOLDSOGDIAN_invlist[] = { /* for all charsets */
 	0x10F30
 };
 
-static const UV PL_INOLDTURKIC_invlist[] = { /* for all charsets */
+static const UV UNI_INOLDTURKIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273908,7 +274181,7 @@ static const UV PL_INOLDTURKIC_invlist[] = { /* for all charsets */
 	0x10C50
 };
 
-static const UV PL_INORIYA_invlist[] = { /* for all charsets */
+static const UV UNI_INORIYA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273918,7 +274191,7 @@ static const UV PL_INORIYA_invlist[] = { /* for all charsets */
 	0xB80
 };
 
-static const UV PL_INOSAGE_invlist[] = { /* for all charsets */
+static const UV UNI_INOSAGE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273928,7 +274201,7 @@ static const UV PL_INOSAGE_invlist[] = { /* for all charsets */
 	0x10500
 };
 
-static const UV PL_INOSMANYA_invlist[] = { /* for all charsets */
+static const UV UNI_INOSMANYA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273938,7 +274211,7 @@ static const UV PL_INOSMANYA_invlist[] = { /* for all charsets */
 	0x104B0
 };
 
-static const UV PL_INPAHAWHHMONG_invlist[] = { /* for all charsets */
+static const UV UNI_INPAHAWHHMONG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273948,7 +274221,7 @@ static const UV PL_INPAHAWHHMONG_invlist[] = { /* for all charsets */
 	0x16B90
 };
 
-static const UV PL_INPAUCINHAU_invlist[] = { /* for all charsets */
+static const UV UNI_INPAUCINHAU_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -273958,7 +274231,7 @@ static const UV PL_INPAUCINHAU_invlist[] = { /* for all charsets */
 	0x11B00
 };
 
-static const UV PL_INPC__BOTTOM_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__BOTTOM_invlist[] = {  /* for all charsets */
 	275,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -274240,7 +274513,7 @@ static const UV PL_INPC__BOTTOM_invlist[] = { /* for all charsets */
 	0x11EF5
 };
 
-static const UV PL_INPC__BOTTOMANDLEFT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__BOTTOMANDLEFT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -274250,7 +274523,7 @@ static const UV PL_INPC__BOTTOMANDLEFT_invlist[] = { /* for all charsets */
 	0xA9C0
 };
 
-static const UV PL_INPC__BOTTOMANDRIGHT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__BOTTOMANDRIGHT_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -274262,7 +274535,7 @@ static const UV PL_INPC__BOTTOMANDRIGHT_invlist[] = { /* for all charsets */
 	0xA9C1
 };
 
-static const UV PL_INPC__LEFT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__LEFT_invlist[] = {  /* for all charsets */
 	85,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -274354,7 +274627,7 @@ static const UV PL_INPC__LEFT_invlist[] = { /* for all charsets */
 	0x11EF6
 };
 
-static const UV PL_INPC__LEFTANDRIGHT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__LEFTANDRIGHT_invlist[] = {  /* for all charsets */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -274388,7 +274661,7 @@ static const UV PL_INPC__LEFTANDRIGHT_invlist[] = { /* for all charsets */
 	0x115BB
 };
 
-static const UV PL_INPC__NA_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__NA_invlist[] = {  /* for all charsets */
 	405,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -274800,7 +275073,7 @@ static const UV PL_INPC__NA_invlist[] = { /* for all charsets */
 	0x11EF7
 };
 
-static const UV PL_INPC__OVERSTRUCK_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__OVERSTRUCK_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -274816,7 +275089,7 @@ static const UV PL_INPC__OVERSTRUCK_invlist[] = { /* for all charsets */
 	0x10A07
 };
 
-static const UV PL_INPC__RIGHT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__RIGHT_invlist[] = {  /* for all charsets */
 	317,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275140,7 +275413,7 @@ static const UV PL_INPC__RIGHT_invlist[] = { /* for all charsets */
 	0x11EF7
 };
 
-static const UV PL_INPC__TOP_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__TOP_invlist[] = {  /* for all charsets */
 	365,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275512,7 +275785,7 @@ static const UV PL_INPC__TOP_invlist[] = { /* for all charsets */
 	0x11EF4
 };
 
-static const UV PL_INPC__TOPANDBOTTOM_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__TOPANDBOTTOM_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275532,7 +275805,7 @@ static const UV PL_INPC__TOPANDBOTTOM_invlist[] = { /* for all charsets */
 	0x11130
 };
 
-static const UV PL_INPC__TOPANDBOTTOMANDRIGHT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__TOPANDBOTTOMANDRIGHT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275542,7 +275815,7 @@ static const UV PL_INPC__TOPANDBOTTOMANDRIGHT_invlist[] = { /* for all charsets 
 	0x1B3E
 };
 
-static const UV PL_INPC__TOPANDLEFT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__TOPANDLEFT_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275562,7 +275835,7 @@ static const UV PL_INPC__TOPANDLEFT_invlist[] = { /* for all charsets */
 	0x115BA
 };
 
-static const UV PL_INPC__TOPANDLEFTANDRIGHT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__TOPANDLEFTANDRIGHT_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275578,7 +275851,7 @@ static const UV PL_INPC__TOPANDLEFTANDRIGHT_invlist[] = { /* for all charsets */
 	0x115BC
 };
 
-static const UV PL_INPC__TOPANDRIGHT_invlist[] = { /* for all charsets */
+static const UV UNI_INPC__TOPANDRIGHT_invlist[] = {  /* for all charsets */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275604,7 +275877,7 @@ static const UV PL_INPC__TOPANDRIGHT_invlist[] = { /* for all charsets */
 	0x11234
 };
 
-static const UV PL_INPHAGSPA_invlist[] = { /* for all charsets */
+static const UV UNI_INPHAGSPA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275614,7 +275887,7 @@ static const UV PL_INPHAGSPA_invlist[] = { /* for all charsets */
 	0xA880
 };
 
-static const UV PL_INPHOENICIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INPHOENICIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275624,7 +275897,7 @@ static const UV PL_INPHOENICIAN_invlist[] = { /* for all charsets */
 	0x10920
 };
 
-static const UV PL_INPSALTERPAHLAVI_invlist[] = { /* for all charsets */
+static const UV UNI_INPSALTERPAHLAVI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275634,7 +275907,7 @@ static const UV PL_INPSALTERPAHLAVI_invlist[] = { /* for all charsets */
 	0x10BB0
 };
 
-static const UV PL_INPUNCTUATION_invlist[] = { /* for all charsets */
+static const UV UNI_INPUNCTUATION_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275644,7 +275917,7 @@ static const UV PL_INPUNCTUATION_invlist[] = { /* for all charsets */
 	0x2070
 };
 
-static const UV PL_INREJANG_invlist[] = { /* for all charsets */
+static const UV UNI_INREJANG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275654,7 +275927,7 @@ static const UV PL_INREJANG_invlist[] = { /* for all charsets */
 	0xA960
 };
 
-static const UV PL_INRUNIC_invlist[] = { /* for all charsets */
+static const UV UNI_INRUNIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275664,7 +275937,7 @@ static const UV PL_INRUNIC_invlist[] = { /* for all charsets */
 	0x1700
 };
 
-static const UV PL_INSAMARITAN_invlist[] = { /* for all charsets */
+static const UV UNI_INSAMARITAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275674,7 +275947,7 @@ static const UV PL_INSAMARITAN_invlist[] = { /* for all charsets */
 	0x840
 };
 
-static const UV PL_INSAURASHTRA_invlist[] = { /* for all charsets */
+static const UV UNI_INSAURASHTRA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275684,7 +275957,7 @@ static const UV PL_INSAURASHTRA_invlist[] = { /* for all charsets */
 	0xA8E0
 };
 
-static const UV PL_INSC__AVAGRAHA_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__AVAGRAHA_invlist[] = {  /* for all charsets */
 	33,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275724,7 +275997,7 @@ static const UV PL_INSC__AVAGRAHA_invlist[] = { /* for all charsets */
 	0x11C41
 };
 
-static const UV PL_INSC__BINDU_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__BINDU_invlist[] = {  /* for all charsets */
 	103,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275834,7 +276107,7 @@ static const UV PL_INSC__BINDU_invlist[] = { /* for all charsets */
 	0x11D96
 };
 
-static const UV PL_INSC__BRAHMIJOININGNUMBER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__BRAHMIJOININGNUMBER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275844,7 +276117,7 @@ static const UV PL_INSC__BRAHMIJOININGNUMBER_invlist[] = { /* for all charsets *
 	0x11066
 };
 
-static const UV PL_INSC__CANTILLATIONMARK_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CANTILLATIONMARK_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -275874,7 +276147,7 @@ static const UV PL_INSC__CANTILLATIONMARK_invlist[] = { /* for all charsets */
 	0x11375
 };
 
-static const UV PL_INSC__CONSONANT_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANT_invlist[] = {  /* for all charsets */
 	307,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276188,7 +276461,7 @@ static const UV PL_INSC__CONSONANT_invlist[] = { /* for all charsets */
 	0x11EF2
 };
 
-static const UV PL_INSC__CONSONANTDEAD_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTDEAD_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276202,7 +276475,7 @@ static const UV PL_INSC__CONSONANTDEAD_invlist[] = { /* for all charsets */
 	0xD80
 };
 
-static const UV PL_INSC__CONSONANTFINAL_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTFINAL_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276232,7 +276505,7 @@ static const UV PL_INSC__CONSONANTFINAL_invlist[] = { /* for all charsets */
 	0x11A96
 };
 
-static const UV PL_INSC__CONSONANTHEADLETTER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTHEADLETTER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276242,7 +276515,7 @@ static const UV PL_INSC__CONSONANTHEADLETTER_invlist[] = { /* for all charsets *
 	0xF8D
 };
 
-static const UV PL_INSC__CONSONANTINITIALPOSTFIXED_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTINITIALPOSTFIXED_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276252,7 +276525,7 @@ static const UV PL_INSC__CONSONANTINITIALPOSTFIXED_invlist[] = { /* for all char
 	0x1A5B
 };
 
-static const UV PL_INSC__CONSONANTKILLER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTKILLER_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276264,7 +276537,7 @@ static const UV PL_INSC__CONSONANTKILLER_invlist[] = { /* for all charsets */
 	0x17CE
 };
 
-static const UV PL_INSC__CONSONANTMEDIAL_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTMEDIAL_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276298,7 +276571,7 @@ static const UV PL_INSC__CONSONANTMEDIAL_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_INSC__CONSONANTPLACEHOLDER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_INSC__CONSONANTPLACEHOLDER_invlist[] = {  /* for ASCII/Latin1 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276341,7 +276614,7 @@ static const UV PL_INSC__CONSONANTPLACEHOLDER_invlist[] = { /* for ASCII/Latin1 
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__CONSONANTPLACEHOLDER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_INSC__CONSONANTPLACEHOLDER_invlist[] = {  /* for EBCDIC 1047 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276384,7 +276657,7 @@ static const UV PL_INSC__CONSONANTPLACEHOLDER_invlist[] = { /* for EBCDIC 1047 *
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__CONSONANTPLACEHOLDER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_INSC__CONSONANTPLACEHOLDER_invlist[] = {  /* for EBCDIC 037 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276422,7 +276695,7 @@ static const UV PL_INSC__CONSONANTPLACEHOLDER_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_INSC__CONSONANTPRECEDINGREPHA_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTPRECEDINGREPHA_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276434,7 +276707,7 @@ static const UV PL_INSC__CONSONANTPRECEDINGREPHA_invlist[] = { /* for all charse
 	0x11D47
 };
 
-static const UV PL_INSC__CONSONANTPREFIXED_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTPREFIXED_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276448,7 +276721,7 @@ static const UV PL_INSC__CONSONANTPREFIXED_invlist[] = { /* for all charsets */
 	0x11A8A
 };
 
-static const UV PL_INSC__CONSONANTSUBJOINED_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTSUBJOINED_invlist[] = {  /* for all charsets */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276482,7 +276755,7 @@ static const UV PL_INSC__CONSONANTSUBJOINED_invlist[] = { /* for all charsets */
 	0x11CB0
 };
 
-static const UV PL_INSC__CONSONANTSUCCEEDINGREPHA_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTSUCCEEDINGREPHA_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276498,7 +276771,7 @@ static const UV PL_INSC__CONSONANTSUCCEEDINGREPHA_invlist[] = { /* for all chars
 	0xA983
 };
 
-static const UV PL_INSC__CONSONANTWITHSTACKER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__CONSONANTWITHSTACKER_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276512,7 +276785,7 @@ static const UV PL_INSC__CONSONANTWITHSTACKER_invlist[] = { /* for all charsets 
 	0x11005
 };
 
-static const UV PL_INSC__GEMINATIONMARK_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__GEMINATIONMARK_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276526,7 +276799,7 @@ static const UV PL_INSC__GEMINATIONMARK_invlist[] = { /* for all charsets */
 	0x11A99
 };
 
-static const UV PL_INSC__INVISIBLESTACKER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__INVISIBLESTACKER_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276556,7 +276829,7 @@ static const UV PL_INSC__INVISIBLESTACKER_invlist[] = { /* for all charsets */
 	0x11D98
 };
 
-static const UV PL_INSC__MODIFYINGLETTER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__MODIFYINGLETTER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276566,7 +276839,7 @@ static const UV PL_INSC__MODIFYINGLETTER_invlist[] = { /* for all charsets */
 	0xB84
 };
 
-static const UV PL_INSC__NONJOINER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__NONJOINER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276576,7 +276849,7 @@ static const UV PL_INSC__NONJOINER_invlist[] = { /* for all charsets */
 	0x200D
 };
 
-static const UV PL_INSC__NUKTA_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__NUKTA_invlist[] = {  /* for all charsets */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276636,7 +276909,7 @@ static const UV PL_INSC__NUKTA_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_INSC__NUMBER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_INSC__NUMBER_invlist[] = {  /* for ASCII/Latin1 */
 	89,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276739,7 +277012,7 @@ static const UV PL_INSC__NUMBER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__NUMBER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_INSC__NUMBER_invlist[] = {  /* for EBCDIC 1047 */
 	89,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276842,7 +277115,7 @@ static const UV PL_INSC__NUMBER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__NUMBER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_INSC__NUMBER_invlist[] = {  /* for EBCDIC 037 */
 	89,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276940,7 +277213,7 @@ static const UV PL_INSC__NUMBER_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_INSC__NUMBERJOINER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__NUMBERJOINER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -276952,7 +277225,7 @@ static const UV PL_INSC__NUMBERJOINER_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_INSC__OTHER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_INSC__OTHER_invlist[] = {  /* for ASCII/Latin1 */
 	635,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -277601,7 +277874,7 @@ static const UV PL_INSC__OTHER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__OTHER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_INSC__OTHER_invlist[] = {  /* for EBCDIC 1047 */
 	635,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -278250,7 +278523,7 @@ static const UV PL_INSC__OTHER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__OTHER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_INSC__OTHER_invlist[] = {  /* for EBCDIC 037 */
 	635,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -278894,7 +279167,7 @@ static const UV PL_INSC__OTHER_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_INSC__PUREKILLER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__PUREKILLER_invlist[] = {  /* for all charsets */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -278940,7 +279213,7 @@ static const UV PL_INSC__PUREKILLER_invlist[] = { /* for all charsets */
 	0x11D45
 };
 
-static const UV PL_INSC__REGISTERSHIFTER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__REGISTERSHIFTER_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -278952,7 +279225,7 @@ static const UV PL_INSC__REGISTERSHIFTER_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_INSC__SYLLABLEMODIFIER_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_INSC__SYLLABLEMODIFIER_invlist[] = {  /* for ASCII/Latin1 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279005,7 +279278,7 @@ static const UV PL_INSC__SYLLABLEMODIFIER_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__SYLLABLEMODIFIER_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_INSC__SYLLABLEMODIFIER_invlist[] = {  /* for EBCDIC 1047 */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279060,7 +279333,7 @@ static const UV PL_INSC__SYLLABLEMODIFIER_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_INSC__SYLLABLEMODIFIER_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_INSC__SYLLABLEMODIFIER_invlist[] = {  /* for EBCDIC 037 */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279110,7 +279383,7 @@ static const UV PL_INSC__SYLLABLEMODIFIER_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_INSC__TONELETTER_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__TONELETTER_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279124,7 +279397,7 @@ static const UV PL_INSC__TONELETTER_invlist[] = { /* for all charsets */
 	0xAAC3
 };
 
-static const UV PL_INSC__TONEMARK_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__TONEMARK_invlist[] = {  /* for all charsets */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279162,7 +279435,7 @@ static const UV PL_INSC__TONEMARK_invlist[] = { /* for all charsets */
 	0xABED
 };
 
-static const UV PL_INSC__VIRAMA_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__VIRAMA_invlist[] = {  /* for all charsets */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279220,7 +279493,7 @@ static const UV PL_INSC__VIRAMA_invlist[] = { /* for all charsets */
 	0x11C40
 };
 
-static const UV PL_INSC__VISARGA_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__VISARGA_invlist[] = {  /* for all charsets */
 	71,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279298,7 +279571,7 @@ static const UV PL_INSC__VISARGA_invlist[] = { /* for all charsets */
 	0x11D97
 };
 
-static const UV PL_INSC__VOWEL_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__VOWEL_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279316,7 +279589,7 @@ static const UV PL_INSC__VOWEL_invlist[] = { /* for all charsets */
 	0x11155
 };
 
-static const UV PL_INSC__VOWELDEPENDENT_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__VOWELDEPENDENT_invlist[] = {  /* for all charsets */
 	251,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279574,7 +279847,7 @@ static const UV PL_INSC__VOWELDEPENDENT_invlist[] = { /* for all charsets */
 	0x11EF7
 };
 
-static const UV PL_INSC__VOWELINDEPENDENT_invlist[] = { /* for all charsets */
+static const UV UNI_INSC__VOWELINDEPENDENT_invlist[] = {  /* for all charsets */
 	167,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279748,7 +280021,7 @@ static const UV PL_INSC__VOWELINDEPENDENT_invlist[] = { /* for all charsets */
 	0x11D6C
 };
 
-static const UV PL_INSHARADA_invlist[] = { /* for all charsets */
+static const UV UNI_INSHARADA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279758,7 +280031,7 @@ static const UV PL_INSHARADA_invlist[] = { /* for all charsets */
 	0x111E0
 };
 
-static const UV PL_INSIDDHAM_invlist[] = { /* for all charsets */
+static const UV UNI_INSIDDHAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279768,7 +280041,7 @@ static const UV PL_INSIDDHAM_invlist[] = { /* for all charsets */
 	0x11600
 };
 
-static const UV PL_INSINHALA_invlist[] = { /* for all charsets */
+static const UV UNI_INSINHALA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279778,7 +280051,7 @@ static const UV PL_INSINHALA_invlist[] = { /* for all charsets */
 	0xE00
 };
 
-static const UV PL_INSOGDIAN_invlist[] = { /* for all charsets */
+static const UV UNI_INSOGDIAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279788,7 +280061,7 @@ static const UV PL_INSOGDIAN_invlist[] = { /* for all charsets */
 	0x10F70
 };
 
-static const UV PL_INSORASOMPENG_invlist[] = { /* for all charsets */
+static const UV UNI_INSORASOMPENG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279798,7 +280071,7 @@ static const UV PL_INSORASOMPENG_invlist[] = { /* for all charsets */
 	0x11100
 };
 
-static const UV PL_INSOYOMBO_invlist[] = { /* for all charsets */
+static const UV UNI_INSOYOMBO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279808,7 +280081,7 @@ static const UV PL_INSOYOMBO_invlist[] = { /* for all charsets */
 	0x11AB0
 };
 
-static const UV PL_INSUNDANESE_invlist[] = { /* for all charsets */
+static const UV UNI_INSUNDANESE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279818,7 +280091,7 @@ static const UV PL_INSUNDANESE_invlist[] = { /* for all charsets */
 	0x1BC0
 };
 
-static const UV PL_INSYLOTINAGRI_invlist[] = { /* for all charsets */
+static const UV UNI_INSYLOTINAGRI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279828,7 +280101,7 @@ static const UV PL_INSYLOTINAGRI_invlist[] = { /* for all charsets */
 	0xA830
 };
 
-static const UV PL_INSYRIAC_invlist[] = { /* for all charsets */
+static const UV UNI_INSYRIAC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279838,7 +280111,7 @@ static const UV PL_INSYRIAC_invlist[] = { /* for all charsets */
 	0x750
 };
 
-static const UV PL_INTAGALOG_invlist[] = { /* for all charsets */
+static const UV UNI_INTAGALOG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279848,7 +280121,7 @@ static const UV PL_INTAGALOG_invlist[] = { /* for all charsets */
 	0x1720
 };
 
-static const UV PL_INTAGBANWA_invlist[] = { /* for all charsets */
+static const UV UNI_INTAGBANWA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279858,7 +280131,7 @@ static const UV PL_INTAGBANWA_invlist[] = { /* for all charsets */
 	0x1780
 };
 
-static const UV PL_INTAILE_invlist[] = { /* for all charsets */
+static const UV UNI_INTAILE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279868,7 +280141,7 @@ static const UV PL_INTAILE_invlist[] = { /* for all charsets */
 	0x1980
 };
 
-static const UV PL_INTAITHAM_invlist[] = { /* for all charsets */
+static const UV UNI_INTAITHAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279878,7 +280151,7 @@ static const UV PL_INTAITHAM_invlist[] = { /* for all charsets */
 	0x1AB0
 };
 
-static const UV PL_INTAIVIET_invlist[] = { /* for all charsets */
+static const UV UNI_INTAIVIET_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279888,7 +280161,7 @@ static const UV PL_INTAIVIET_invlist[] = { /* for all charsets */
 	0xAAE0
 };
 
-static const UV PL_INTAKRI_invlist[] = { /* for all charsets */
+static const UV UNI_INTAKRI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279898,7 +280171,7 @@ static const UV PL_INTAKRI_invlist[] = { /* for all charsets */
 	0x116D0
 };
 
-static const UV PL_INTAMIL_invlist[] = { /* for all charsets */
+static const UV UNI_INTAMIL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279908,7 +280181,7 @@ static const UV PL_INTAMIL_invlist[] = { /* for all charsets */
 	0xC00
 };
 
-static const UV PL_INTANGUT_invlist[] = { /* for all charsets */
+static const UV UNI_INTANGUT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279918,7 +280191,7 @@ static const UV PL_INTANGUT_invlist[] = { /* for all charsets */
 	0x18800
 };
 
-static const UV PL_INTELUGU_invlist[] = { /* for all charsets */
+static const UV UNI_INTELUGU_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279928,7 +280201,7 @@ static const UV PL_INTELUGU_invlist[] = { /* for all charsets */
 	0xC80
 };
 
-static const UV PL_INTHAANA_invlist[] = { /* for all charsets */
+static const UV UNI_INTHAANA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279938,7 +280211,7 @@ static const UV PL_INTHAANA_invlist[] = { /* for all charsets */
 	0x7C0
 };
 
-static const UV PL_INTHAI_invlist[] = { /* for all charsets */
+static const UV UNI_INTHAI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279948,7 +280221,7 @@ static const UV PL_INTHAI_invlist[] = { /* for all charsets */
 	0xE80
 };
 
-static const UV PL_INTIBETAN_invlist[] = { /* for all charsets */
+static const UV UNI_INTIBETAN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279958,7 +280231,7 @@ static const UV PL_INTIBETAN_invlist[] = { /* for all charsets */
 	0x1000
 };
 
-static const UV PL_INTIFINAGH_invlist[] = { /* for all charsets */
+static const UV UNI_INTIFINAGH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279968,7 +280241,7 @@ static const UV PL_INTIFINAGH_invlist[] = { /* for all charsets */
 	0x2D80
 };
 
-static const UV PL_INTIRHUTA_invlist[] = { /* for all charsets */
+static const UV UNI_INTIRHUTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279978,7 +280251,7 @@ static const UV PL_INTIRHUTA_invlist[] = { /* for all charsets */
 	0x114E0
 };
 
-static const UV PL_INUGARITIC_invlist[] = { /* for all charsets */
+static const UV UNI_INUGARITIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279988,7 +280261,7 @@ static const UV PL_INUGARITIC_invlist[] = { /* for all charsets */
 	0x103A0
 };
 
-static const UV PL_INVAI_invlist[] = { /* for all charsets */
+static const UV UNI_INVAI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -279998,7 +280271,7 @@ static const UV PL_INVAI_invlist[] = { /* for all charsets */
 	0xA640
 };
 
-static const UV PL_INVS_invlist[] = { /* for all charsets */
+static const UV UNI_INVS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280008,7 +280281,7 @@ static const UV PL_INVS_invlist[] = { /* for all charsets */
 	0xFE10
 };
 
-static const UV PL_INWARANGCITI_invlist[] = { /* for all charsets */
+static const UV UNI_INWARANGCITI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280018,7 +280291,7 @@ static const UV PL_INWARANGCITI_invlist[] = { /* for all charsets */
 	0x11900
 };
 
-static const UV PL_INZANABAZARSQUARE_invlist[] = { /* for all charsets */
+static const UV UNI_INZANABAZARSQUARE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280028,7 +280301,7 @@ static const UV PL_INZANABAZARSQUARE_invlist[] = { /* for all charsets */
 	0x11A50
 };
 
-static const UV PL_IPAEXT_invlist[] = { /* for all charsets */
+static const UV UNI_IPAEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280038,7 +280311,7 @@ static const UV PL_IPAEXT_invlist[] = { /* for all charsets */
 	0x2B0
 };
 
-static const UV PL_ITAL_invlist[] = { /* for all charsets */
+static const UV UNI_ITAL_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280050,7 +280323,7 @@ static const UV PL_ITAL_invlist[] = { /* for all charsets */
 	0x10330
 };
 
-static const UV PL_JAMO_invlist[] = { /* for all charsets */
+static const UV UNI_JAMO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280060,7 +280333,7 @@ static const UV PL_JAMO_invlist[] = { /* for all charsets */
 	0x1200
 };
 
-static const UV PL_JAMOEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_JAMOEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280070,7 +280343,7 @@ static const UV PL_JAMOEXTA_invlist[] = { /* for all charsets */
 	0xA980
 };
 
-static const UV PL_JAMOEXTB_invlist[] = { /* for all charsets */
+static const UV UNI_JAMOEXTB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280080,7 +280353,7 @@ static const UV PL_JAMOEXTB_invlist[] = { /* for all charsets */
 	0xD800
 };
 
-static const UV PL_JAVA_invlist[] = { /* for all charsets */
+static const UV UNI_JAVA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280094,7 +280367,7 @@ static const UV PL_JAVA_invlist[] = { /* for all charsets */
 	0xA9E0
 };
 
-static const UV PL_JG__AFRICANFEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__AFRICANFEH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280104,7 +280377,7 @@ static const UV PL_JG__AFRICANFEH_invlist[] = { /* for all charsets */
 	0x8BC
 };
 
-static const UV PL_JG__AFRICANNOON_invlist[] = { /* for all charsets */
+static const UV UNI_JG__AFRICANNOON_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280114,7 +280387,7 @@ static const UV PL_JG__AFRICANNOON_invlist[] = { /* for all charsets */
 	0x8BE
 };
 
-static const UV PL_JG__AFRICANQAF_invlist[] = { /* for all charsets */
+static const UV UNI_JG__AFRICANQAF_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280124,7 +280397,7 @@ static const UV PL_JG__AFRICANQAF_invlist[] = { /* for all charsets */
 	0x8BD
 };
 
-static const UV PL_JG__AIN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__AIN_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280142,7 +280415,7 @@ static const UV PL_JG__AIN_invlist[] = { /* for all charsets */
 	0x8B4
 };
 
-static const UV PL_JG__ALAPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__ALAPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280152,7 +280425,7 @@ static const UV PL_JG__ALAPH_invlist[] = { /* for all charsets */
 	0x711
 };
 
-static const UV PL_JG__ALEF_invlist[] = { /* for all charsets */
+static const UV UNI_JG__ALEF_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280172,7 +280445,7 @@ static const UV PL_JG__ALEF_invlist[] = { /* for all charsets */
 	0x775
 };
 
-static const UV PL_JG__BEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__BEH_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280194,7 +280467,7 @@ static const UV PL_JG__BEH_invlist[] = { /* for all charsets */
 	0x8B9
 };
 
-static const UV PL_JG__BETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__BETH_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280206,7 +280479,7 @@ static const UV PL_JG__BETH_invlist[] = { /* for all charsets */
 	0x72E
 };
 
-static const UV PL_JG__BURUSHASKIYEHBARREE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__BURUSHASKIYEHBARREE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280216,7 +280489,7 @@ static const UV PL_JG__BURUSHASKIYEHBARREE_invlist[] = { /* for all charsets */
 	0x77C
 };
 
-static const UV PL_JG__DAL_invlist[] = { /* for all charsets */
+static const UV UNI_JG__DAL_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280234,7 +280507,7 @@ static const UV PL_JG__DAL_invlist[] = { /* for all charsets */
 	0x8AF
 };
 
-static const UV PL_JG__DALATHRISH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__DALATHRISH_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280248,7 +280521,7 @@ static const UV PL_JG__DALATHRISH_invlist[] = { /* for all charsets */
 	0x730
 };
 
-static const UV PL_JG__E_invlist[] = { /* for all charsets */
+static const UV UNI_JG__E_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280258,7 +280531,7 @@ static const UV PL_JG__E_invlist[] = { /* for all charsets */
 	0x726
 };
 
-static const UV PL_JG__FARSIYEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__FARSIYEH_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280274,7 +280547,7 @@ static const UV PL_JG__FARSIYEH_invlist[] = { /* for all charsets */
 	0x777
 };
 
-static const UV PL_JG__FE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__FE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280284,7 +280557,7 @@ static const UV PL_JG__FE_invlist[] = { /* for all charsets */
 	0x750
 };
 
-static const UV PL_JG__FEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__FEH_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280300,7 +280573,7 @@ static const UV PL_JG__FEH_invlist[] = { /* for all charsets */
 	0x8A5
 };
 
-static const UV PL_JG__FINALSEMKATH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__FINALSEMKATH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280310,7 +280583,7 @@ static const UV PL_JG__FINALSEMKATH_invlist[] = { /* for all charsets */
 	0x725
 };
 
-static const UV PL_JG__GAF_invlist[] = { /* for all charsets */
+static const UV UNI_JG__GAF_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280330,7 +280603,7 @@ static const UV PL_JG__GAF_invlist[] = { /* for all charsets */
 	0x8B1
 };
 
-static const UV PL_JG__GAMAL_invlist[] = { /* for all charsets */
+static const UV UNI_JG__GAMAL_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280342,7 +280615,7 @@ static const UV PL_JG__GAMAL_invlist[] = { /* for all charsets */
 	0x72F
 };
 
-static const UV PL_JG__HAH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HAH_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280366,7 +280639,7 @@ static const UV PL_JG__HAH_invlist[] = { /* for all charsets */
 	0x8A3
 };
 
-static const UV PL_JG__HAMZAONHEHGOAL_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HAMZAONHEHGOAL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280376,7 +280649,7 @@ static const UV PL_JG__HAMZAONHEHGOAL_invlist[] = { /* for all charsets */
 	0x6C4
 };
 
-static const UV PL_JG__HANIFIROHINGYAKINNAYA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HANIFIROHINGYAKINNAYA_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280392,7 +280665,7 @@ static const UV PL_JG__HANIFIROHINGYAKINNAYA_invlist[] = { /* for all charsets *
 	0x10D24
 };
 
-static const UV PL_JG__HANIFIROHINGYAPA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HANIFIROHINGYAPA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280406,7 +280679,7 @@ static const UV PL_JG__HANIFIROHINGYAPA_invlist[] = { /* for all charsets */
 	0x10D1D
 };
 
-static const UV PL_JG__HE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280416,7 +280689,7 @@ static const UV PL_JG__HE_invlist[] = { /* for all charsets */
 	0x718
 };
 
-static const UV PL_JG__HEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HEH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280426,7 +280699,7 @@ static const UV PL_JG__HEH_invlist[] = { /* for all charsets */
 	0x648
 };
 
-static const UV PL_JG__HEHGOAL_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HEHGOAL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280436,7 +280709,7 @@ static const UV PL_JG__HEHGOAL_invlist[] = { /* for all charsets */
 	0x6C3
 };
 
-static const UV PL_JG__HETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__HETH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280446,7 +280719,7 @@ static const UV PL_JG__HETH_invlist[] = { /* for all charsets */
 	0x71B
 };
 
-static const UV PL_JG__KAF_invlist[] = { /* for all charsets */
+static const UV UNI_JG__KAF_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280462,7 +280735,7 @@ static const UV PL_JG__KAF_invlist[] = { /* for all charsets */
 	0x8B5
 };
 
-static const UV PL_JG__KAPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__KAPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280472,7 +280745,7 @@ static const UV PL_JG__KAPH_invlist[] = { /* for all charsets */
 	0x720
 };
 
-static const UV PL_JG__KHAPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__KHAPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280482,7 +280755,7 @@ static const UV PL_JG__KHAPH_invlist[] = { /* for all charsets */
 	0x74F
 };
 
-static const UV PL_JG__KNOTTEDHEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__KNOTTEDHEH_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280494,7 +280767,7 @@ static const UV PL_JG__KNOTTEDHEH_invlist[] = { /* for all charsets */
 	0x700
 };
 
-static const UV PL_JG__LAM_invlist[] = { /* for all charsets */
+static const UV UNI_JG__LAM_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280510,7 +280783,7 @@ static const UV PL_JG__LAM_invlist[] = { /* for all charsets */
 	0x8A7
 };
 
-static const UV PL_JG__LAMADH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__LAMADH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280520,7 +280793,7 @@ static const UV PL_JG__LAMADH_invlist[] = { /* for all charsets */
 	0x721
 };
 
-static const UV PL_JG__MALAYALAMBHA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMBHA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280530,7 +280803,7 @@ static const UV PL_JG__MALAYALAMBHA_invlist[] = { /* for all charsets */
 	0x867
 };
 
-static const UV PL_JG__MALAYALAMJA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMJA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280540,7 +280813,7 @@ static const UV PL_JG__MALAYALAMJA_invlist[] = { /* for all charsets */
 	0x862
 };
 
-static const UV PL_JG__MALAYALAMLLA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMLLA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280550,7 +280823,7 @@ static const UV PL_JG__MALAYALAMLLA_invlist[] = { /* for all charsets */
 	0x869
 };
 
-static const UV PL_JG__MALAYALAMLLLA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMLLLA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280560,7 +280833,7 @@ static const UV PL_JG__MALAYALAMLLLA_invlist[] = { /* for all charsets */
 	0x86A
 };
 
-static const UV PL_JG__MALAYALAMNGA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMNGA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280570,7 +280843,7 @@ static const UV PL_JG__MALAYALAMNGA_invlist[] = { /* for all charsets */
 	0x861
 };
 
-static const UV PL_JG__MALAYALAMNNA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMNNA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280580,7 +280853,7 @@ static const UV PL_JG__MALAYALAMNNA_invlist[] = { /* for all charsets */
 	0x865
 };
 
-static const UV PL_JG__MALAYALAMNNNA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMNNNA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280590,7 +280863,7 @@ static const UV PL_JG__MALAYALAMNNNA_invlist[] = { /* for all charsets */
 	0x866
 };
 
-static const UV PL_JG__MALAYALAMNYA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMNYA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280600,7 +280873,7 @@ static const UV PL_JG__MALAYALAMNYA_invlist[] = { /* for all charsets */
 	0x863
 };
 
-static const UV PL_JG__MALAYALAMRA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMRA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280610,7 +280883,7 @@ static const UV PL_JG__MALAYALAMRA_invlist[] = { /* for all charsets */
 	0x868
 };
 
-static const UV PL_JG__MALAYALAMSSA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMSSA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280620,7 +280893,7 @@ static const UV PL_JG__MALAYALAMSSA_invlist[] = { /* for all charsets */
 	0x86B
 };
 
-static const UV PL_JG__MALAYALAMTTA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MALAYALAMTTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280630,7 +280903,7 @@ static const UV PL_JG__MALAYALAMTTA_invlist[] = { /* for all charsets */
 	0x864
 };
 
-static const UV PL_JG__MANICHAEANALEPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANALEPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280640,7 +280913,7 @@ static const UV PL_JG__MANICHAEANALEPH_invlist[] = { /* for all charsets */
 	0x10AC1
 };
 
-static const UV PL_JG__MANICHAEANAYIN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANAYIN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280650,7 +280923,7 @@ static const UV PL_JG__MANICHAEANAYIN_invlist[] = { /* for all charsets */
 	0x10ADB
 };
 
-static const UV PL_JG__MANICHAEANBETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANBETH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280660,7 +280933,7 @@ static const UV PL_JG__MANICHAEANBETH_invlist[] = { /* for all charsets */
 	0x10AC3
 };
 
-static const UV PL_JG__MANICHAEANDALETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANDALETH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280670,7 +280943,7 @@ static const UV PL_JG__MANICHAEANDALETH_invlist[] = { /* for all charsets */
 	0x10AC6
 };
 
-static const UV PL_JG__MANICHAEANDHAMEDH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANDHAMEDH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280680,7 +280953,7 @@ static const UV PL_JG__MANICHAEANDHAMEDH_invlist[] = { /* for all charsets */
 	0x10AD5
 };
 
-static const UV PL_JG__MANICHAEANFIVE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANFIVE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280690,7 +280963,7 @@ static const UV PL_JG__MANICHAEANFIVE_invlist[] = { /* for all charsets */
 	0x10AED
 };
 
-static const UV PL_JG__MANICHAEANGIMEL_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANGIMEL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280700,7 +280973,7 @@ static const UV PL_JG__MANICHAEANGIMEL_invlist[] = { /* for all charsets */
 	0x10AC5
 };
 
-static const UV PL_JG__MANICHAEANHETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANHETH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280710,7 +280983,7 @@ static const UV PL_JG__MANICHAEANHETH_invlist[] = { /* for all charsets */
 	0x10ACE
 };
 
-static const UV PL_JG__MANICHAEANHUNDRED_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANHUNDRED_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280720,7 +280993,7 @@ static const UV PL_JG__MANICHAEANHUNDRED_invlist[] = { /* for all charsets */
 	0x10AF0
 };
 
-static const UV PL_JG__MANICHAEANKAPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANKAPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280730,7 +281003,7 @@ static const UV PL_JG__MANICHAEANKAPH_invlist[] = { /* for all charsets */
 	0x10AD3
 };
 
-static const UV PL_JG__MANICHAEANLAMEDH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANLAMEDH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280740,7 +281013,7 @@ static const UV PL_JG__MANICHAEANLAMEDH_invlist[] = { /* for all charsets */
 	0x10AD4
 };
 
-static const UV PL_JG__MANICHAEANMEM_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANMEM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280750,7 +281023,7 @@ static const UV PL_JG__MANICHAEANMEM_invlist[] = { /* for all charsets */
 	0x10AD7
 };
 
-static const UV PL_JG__MANICHAEANNUN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANNUN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280760,7 +281033,7 @@ static const UV PL_JG__MANICHAEANNUN_invlist[] = { /* for all charsets */
 	0x10AD8
 };
 
-static const UV PL_JG__MANICHAEANONE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANONE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280770,7 +281043,7 @@ static const UV PL_JG__MANICHAEANONE_invlist[] = { /* for all charsets */
 	0x10AEC
 };
 
-static const UV PL_JG__MANICHAEANPE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANPE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280780,7 +281053,7 @@ static const UV PL_JG__MANICHAEANPE_invlist[] = { /* for all charsets */
 	0x10ADD
 };
 
-static const UV PL_JG__MANICHAEANQOPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANQOPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280790,7 +281063,7 @@ static const UV PL_JG__MANICHAEANQOPH_invlist[] = { /* for all charsets */
 	0x10AE1
 };
 
-static const UV PL_JG__MANICHAEANRESH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANRESH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280800,7 +281073,7 @@ static const UV PL_JG__MANICHAEANRESH_invlist[] = { /* for all charsets */
 	0x10AE2
 };
 
-static const UV PL_JG__MANICHAEANSADHE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANSADHE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280810,7 +281083,7 @@ static const UV PL_JG__MANICHAEANSADHE_invlist[] = { /* for all charsets */
 	0x10ADE
 };
 
-static const UV PL_JG__MANICHAEANSAMEKH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANSAMEKH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280820,7 +281093,7 @@ static const UV PL_JG__MANICHAEANSAMEKH_invlist[] = { /* for all charsets */
 	0x10AD9
 };
 
-static const UV PL_JG__MANICHAEANTAW_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANTAW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280830,7 +281103,7 @@ static const UV PL_JG__MANICHAEANTAW_invlist[] = { /* for all charsets */
 	0x10AE5
 };
 
-static const UV PL_JG__MANICHAEANTEN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANTEN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280840,7 +281113,7 @@ static const UV PL_JG__MANICHAEANTEN_invlist[] = { /* for all charsets */
 	0x10AEE
 };
 
-static const UV PL_JG__MANICHAEANTETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANTETH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280850,7 +281123,7 @@ static const UV PL_JG__MANICHAEANTETH_invlist[] = { /* for all charsets */
 	0x10ACF
 };
 
-static const UV PL_JG__MANICHAEANTHAMEDH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANTHAMEDH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280860,7 +281133,7 @@ static const UV PL_JG__MANICHAEANTHAMEDH_invlist[] = { /* for all charsets */
 	0x10AD6
 };
 
-static const UV PL_JG__MANICHAEANTWENTY_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANTWENTY_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280870,7 +281143,7 @@ static const UV PL_JG__MANICHAEANTWENTY_invlist[] = { /* for all charsets */
 	0x10AEF
 };
 
-static const UV PL_JG__MANICHAEANWAW_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANWAW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280880,7 +281153,7 @@ static const UV PL_JG__MANICHAEANWAW_invlist[] = { /* for all charsets */
 	0x10AC8
 };
 
-static const UV PL_JG__MANICHAEANYODH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANYODH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280890,7 +281163,7 @@ static const UV PL_JG__MANICHAEANYODH_invlist[] = { /* for all charsets */
 	0x10AD0
 };
 
-static const UV PL_JG__MANICHAEANZAYIN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MANICHAEANZAYIN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280900,7 +281173,7 @@ static const UV PL_JG__MANICHAEANZAYIN_invlist[] = { /* for all charsets */
 	0x10ACB
 };
 
-static const UV PL_JG__MEEM_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MEEM_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280914,7 +281187,7 @@ static const UV PL_JG__MEEM_invlist[] = { /* for all charsets */
 	0x8A8
 };
 
-static const UV PL_JG__MIM_invlist[] = { /* for all charsets */
+static const UV UNI_JG__MIM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -280924,7 +281197,7 @@ static const UV PL_JG__MIM_invlist[] = { /* for all charsets */
 	0x722
 };
 
-static const UV PL_JG__NOJOININGGROUP_invlist[] = { /* for all charsets */
+static const UV UNI_JG__NOJOININGGROUP_invlist[] = {  /* for all charsets */
 	61,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -280992,7 +281265,7 @@ static const UV PL_JG__NOJOININGGROUP_invlist[] = { /* for all charsets */
 	0x10D24
 };
 
-static const UV PL_JG__NOON_invlist[] = { /* for all charsets */
+static const UV UNI_JG__NOON_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281006,7 +281279,7 @@ static const UV PL_JG__NOON_invlist[] = { /* for all charsets */
 	0x76A
 };
 
-static const UV PL_JG__NUN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__NUN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281016,7 +281289,7 @@ static const UV PL_JG__NUN_invlist[] = { /* for all charsets */
 	0x723
 };
 
-static const UV PL_JG__NYA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__NYA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281026,7 +281299,7 @@ static const UV PL_JG__NYA_invlist[] = { /* for all charsets */
 	0x6BE
 };
 
-static const UV PL_JG__PE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__PE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281036,7 +281309,7 @@ static const UV PL_JG__PE_invlist[] = { /* for all charsets */
 	0x727
 };
 
-static const UV PL_JG__QAF_invlist[] = { /* for all charsets */
+static const UV UNI_JG__QAF_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281052,7 +281325,7 @@ static const UV PL_JG__QAF_invlist[] = { /* for all charsets */
 	0x8A6
 };
 
-static const UV PL_JG__QAPH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__QAPH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281062,7 +281335,7 @@ static const UV PL_JG__QAPH_invlist[] = { /* for all charsets */
 	0x72A
 };
 
-static const UV PL_JG__REH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__REH_invlist[] = {  /* for all charsets */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281088,7 +281361,7 @@ static const UV PL_JG__REH_invlist[] = { /* for all charsets */
 	0x8BA
 };
 
-static const UV PL_JG__REVERSEDPE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__REVERSEDPE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281098,7 +281371,7 @@ static const UV PL_JG__REVERSEDPE_invlist[] = { /* for all charsets */
 	0x728
 };
 
-static const UV PL_JG__ROHINGYAYEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__ROHINGYAYEH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281108,7 +281381,7 @@ static const UV PL_JG__ROHINGYAYEH_invlist[] = { /* for all charsets */
 	0x8AD
 };
 
-static const UV PL_JG__SAD_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SAD_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281124,7 +281397,7 @@ static const UV PL_JG__SAD_invlist[] = { /* for all charsets */
 	0x8B0
 };
 
-static const UV PL_JG__SADHE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SADHE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281134,7 +281407,7 @@ static const UV PL_JG__SADHE_invlist[] = { /* for all charsets */
 	0x729
 };
 
-static const UV PL_JG__SEEN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SEEN_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281156,7 +281429,7 @@ static const UV PL_JG__SEEN_invlist[] = { /* for all charsets */
 	0x77F
 };
 
-static const UV PL_JG__SEMKATH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SEMKATH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281166,7 +281439,7 @@ static const UV PL_JG__SEMKATH_invlist[] = { /* for all charsets */
 	0x724
 };
 
-static const UV PL_JG__SHIN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SHIN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281176,7 +281449,7 @@ static const UV PL_JG__SHIN_invlist[] = { /* for all charsets */
 	0x72C
 };
 
-static const UV PL_JG__STRAIGHTWAW_invlist[] = { /* for all charsets */
+static const UV UNI_JG__STRAIGHTWAW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281186,7 +281459,7 @@ static const UV PL_JG__STRAIGHTWAW_invlist[] = { /* for all charsets */
 	0x8B2
 };
 
-static const UV PL_JG__SWASHKAF_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SWASHKAF_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281196,7 +281469,7 @@ static const UV PL_JG__SWASHKAF_invlist[] = { /* for all charsets */
 	0x6AB
 };
 
-static const UV PL_JG__SYRIACWAW_invlist[] = { /* for all charsets */
+static const UV UNI_JG__SYRIACWAW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281206,7 +281479,7 @@ static const UV PL_JG__SYRIACWAW_invlist[] = { /* for all charsets */
 	0x719
 };
 
-static const UV PL_JG__TAH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__TAH_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281220,7 +281493,7 @@ static const UV PL_JG__TAH_invlist[] = { /* for all charsets */
 	0x8A4
 };
 
-static const UV PL_JG__TAW_invlist[] = { /* for all charsets */
+static const UV UNI_JG__TAW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281230,7 +281503,7 @@ static const UV PL_JG__TAW_invlist[] = { /* for all charsets */
 	0x72D
 };
 
-static const UV PL_JG__TEHMARBUTA_invlist[] = { /* for all charsets */
+static const UV UNI_JG__TEHMARBUTA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281244,7 +281517,7 @@ static const UV PL_JG__TEHMARBUTA_invlist[] = { /* for all charsets */
 	0x6D6
 };
 
-static const UV PL_JG__TETH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__TETH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281254,7 +281527,7 @@ static const UV PL_JG__TETH_invlist[] = { /* for all charsets */
 	0x71D
 };
 
-static const UV PL_JG__WAW_invlist[] = { /* for all charsets */
+static const UV UNI_JG__WAW_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281276,7 +281549,7 @@ static const UV PL_JG__WAW_invlist[] = { /* for all charsets */
 	0x8AC
 };
 
-static const UV PL_JG__YEH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__YEH_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281300,7 +281573,7 @@ static const UV PL_JG__YEH_invlist[] = { /* for all charsets */
 	0x8BB
 };
 
-static const UV PL_JG__YEHBARREE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__YEHBARREE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281310,7 +281583,7 @@ static const UV PL_JG__YEHBARREE_invlist[] = { /* for all charsets */
 	0x6D4
 };
 
-static const UV PL_JG__YEHWITHTAIL_invlist[] = { /* for all charsets */
+static const UV UNI_JG__YEHWITHTAIL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281320,7 +281593,7 @@ static const UV PL_JG__YEHWITHTAIL_invlist[] = { /* for all charsets */
 	0x6CE
 };
 
-static const UV PL_JG__YUDH_invlist[] = { /* for all charsets */
+static const UV UNI_JG__YUDH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281330,7 +281603,7 @@ static const UV PL_JG__YUDH_invlist[] = { /* for all charsets */
 	0x71E
 };
 
-static const UV PL_JG__YUDHHE_invlist[] = { /* for all charsets */
+static const UV UNI_JG__YUDHHE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281340,7 +281613,7 @@ static const UV PL_JG__YUDHHE_invlist[] = { /* for all charsets */
 	0x71F
 };
 
-static const UV PL_JG__ZAIN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__ZAIN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281350,7 +281623,7 @@ static const UV PL_JG__ZAIN_invlist[] = { /* for all charsets */
 	0x71A
 };
 
-static const UV PL_JG__ZHAIN_invlist[] = { /* for all charsets */
+static const UV UNI_JG__ZHAIN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281360,7 +281633,7 @@ static const UV PL_JG__ZHAIN_invlist[] = { /* for all charsets */
 	0x74E
 };
 
-static const UV PL_JOINC_invlist[] = { /* for all charsets */
+static const UV UNI_JOINC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281370,7 +281643,7 @@ static const UV PL_JOINC_invlist[] = { /* for all charsets */
 	0x200E
 };
 
-static const UV PL_JT__C_invlist[] = { /* for all charsets */
+static const UV UNI_JT__C_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281386,7 +281659,7 @@ static const UV PL_JT__C_invlist[] = { /* for all charsets */
 	0x200E
 };
 
-static const UV PL_JT__D_invlist[] = { /* for all charsets */
+static const UV UNI_JT__D_invlist[] = {  /* for all charsets */
 	129,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281522,7 +281795,7 @@ static const UV PL_JT__D_invlist[] = { /* for all charsets */
 	0x1E944
 };
 
-static const UV PL_JT__L_invlist[] = { /* for all charsets */
+static const UV UNI_JT__L_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281538,7 +281811,7 @@ static const UV PL_JT__L_invlist[] = { /* for all charsets */
 	0x10D01
 };
 
-static const UV PL_JT__R_invlist[] = { /* for all charsets */
+static const UV UNI_JT__R_invlist[] = {  /* for all charsets */
 	113,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -281660,7 +281933,7 @@ static const UV PL_JT__R_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_JT__T_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_JT__T_invlist[] = {  /* for ASCII/Latin1 */
 	649,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -282323,7 +282596,7 @@ static const UV PL_JT__T_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_JT__T_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 1047 */
 	649,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -282986,7 +283259,7 @@ static const UV PL_JT__T_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_JT__T_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_JT__T_invlist[] = {  /* for EBCDIC 037 */
 	649,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -283646,7 +283919,7 @@ static const UV PL_JT__T_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_JT__U_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_JT__U_invlist[] = {  /* for ASCII/Latin1 */
 	691,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -284351,7 +284624,7 @@ static const UV PL_JT__U_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_JT__U_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 1047 */
 	691,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -285056,7 +285329,7 @@ static const UV PL_JT__U_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_JT__U_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_JT__U_invlist[] = {  /* for EBCDIC 037 */
 	691,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -285756,7 +286029,7 @@ static const UV PL_JT__U_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_KALI_invlist[] = { /* for all charsets */
+static const UV UNI_KALI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285766,7 +286039,7 @@ static const UV PL_KALI_invlist[] = { /* for all charsets */
 	0xA930
 };
 
-static const UV PL_KANA_invlist[] = { /* for all charsets */
+static const UV UNI_KANA_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285802,7 +286075,7 @@ static const UV PL_KANA_invlist[] = { /* for all charsets */
 	0x1B001
 };
 
-static const UV PL_KANAEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_KANAEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285812,7 +286085,7 @@ static const UV PL_KANAEXTA_invlist[] = { /* for all charsets */
 	0x1B130
 };
 
-static const UV PL_KANASUP_invlist[] = { /* for all charsets */
+static const UV UNI_KANASUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285822,7 +286095,7 @@ static const UV PL_KANASUP_invlist[] = { /* for all charsets */
 	0x1B100
 };
 
-static const UV PL_KANBUN_invlist[] = { /* for all charsets */
+static const UV UNI_KANBUN_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285832,7 +286105,7 @@ static const UV PL_KANBUN_invlist[] = { /* for all charsets */
 	0x31A0
 };
 
-static const UV PL_KANGXI_invlist[] = { /* for all charsets */
+static const UV UNI_KANGXI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285842,7 +286115,7 @@ static const UV PL_KANGXI_invlist[] = { /* for all charsets */
 	0x2FE0
 };
 
-static const UV PL_KATAKANAEXT_invlist[] = { /* for all charsets */
+static const UV UNI_KATAKANAEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285852,7 +286125,7 @@ static const UV PL_KATAKANAEXT_invlist[] = { /* for all charsets */
 	0x3200
 };
 
-static const UV PL_KHAR_invlist[] = { /* for all charsets */
+static const UV UNI_KHAR_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285876,7 +286149,7 @@ static const UV PL_KHAR_invlist[] = { /* for all charsets */
 	0x10A59
 };
 
-static const UV PL_KHMERSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_KHMERSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285886,7 +286159,7 @@ static const UV PL_KHMERSYMBOLS_invlist[] = { /* for all charsets */
 	0x1A00
 };
 
-static const UV PL_KHMR_invlist[] = { /* for all charsets */
+static const UV UNI_KHMR_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285902,7 +286175,7 @@ static const UV PL_KHMR_invlist[] = { /* for all charsets */
 	0x1A00
 };
 
-static const UV PL_KHOJ_invlist[] = { /* for all charsets */
+static const UV UNI_KHOJ_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285918,7 +286191,7 @@ static const UV PL_KHOJ_invlist[] = { /* for all charsets */
 	0x1123F
 };
 
-static const UV PL_KNDA_invlist[] = { /* for all charsets */
+static const UV UNI_KNDA_invlist[] = {  /* for all charsets */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285966,7 +286239,7 @@ static const UV PL_KNDA_invlist[] = { /* for all charsets */
 	0xA836
 };
 
-static const UV PL_KTHI_invlist[] = { /* for all charsets */
+static const UV UNI_KTHI_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -285984,7 +286257,7 @@ static const UV PL_KTHI_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_L_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_L_invlist[] = {  /* for ASCII/Latin1 */
 	1199,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -287197,7 +287470,7 @@ static const UV PL_L_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_L_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_L_invlist[] = {  /* for EBCDIC 1047 */
 	1225,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -288436,7 +288709,7 @@ static const UV PL_L_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_L_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_L_invlist[] = {  /* for EBCDIC 037 */
 	1221,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289666,7 +289939,7 @@ static const UV PL_L_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LANA_invlist[] = { /* for all charsets */
+static const UV UNI_LANA_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289684,7 +289957,7 @@ static const UV PL_LANA_invlist[] = { /* for all charsets */
 	0x1AAE
 };
 
-static const UV PL_LAO_invlist[] = { /* for all charsets */
+static const UV UNI_LAO_invlist[] = {  /* for all charsets */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289730,7 +290003,7 @@ static const UV PL_LAO_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LATIN1_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LATIN1_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289747,7 +290020,7 @@ static const UV PL_LATIN1_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LATIN1_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LATIN1_invlist[] = {  /* for EBCDIC 1047 */
 	55,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289816,7 +290089,7 @@ static const UV PL_LATIN1_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LATIN1_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LATIN1_invlist[] = {  /* for EBCDIC 037 */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289882,7 +290155,7 @@ static const UV PL_LATIN1_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LATINEXTA_invlist[] = { /* for all charsets */
+static const UV UNI_LATINEXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289892,7 +290165,7 @@ static const UV PL_LATINEXTA_invlist[] = { /* for all charsets */
 	0x180
 };
 
-static const UV PL_LATINEXTADDITIONAL_invlist[] = { /* for all charsets */
+static const UV UNI_LATINEXTADDITIONAL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289902,7 +290175,7 @@ static const UV PL_LATINEXTADDITIONAL_invlist[] = { /* for all charsets */
 	0x1F00
 };
 
-static const UV PL_LATINEXTB_invlist[] = { /* for all charsets */
+static const UV UNI_LATINEXTB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289912,7 +290185,7 @@ static const UV PL_LATINEXTB_invlist[] = { /* for all charsets */
 	0x250
 };
 
-static const UV PL_LATINEXTC_invlist[] = { /* for all charsets */
+static const UV UNI_LATINEXTC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289922,7 +290195,7 @@ static const UV PL_LATINEXTC_invlist[] = { /* for all charsets */
 	0x2C80
 };
 
-static const UV PL_LATINEXTD_invlist[] = { /* for all charsets */
+static const UV UNI_LATINEXTD_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289932,7 +290205,7 @@ static const UV PL_LATINEXTD_invlist[] = { /* for all charsets */
 	0xA800
 };
 
-static const UV PL_LATINEXTE_invlist[] = { /* for all charsets */
+static const UV UNI_LATINEXTE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -289944,7 +290217,7 @@ static const UV PL_LATINEXTE_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LATN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LATN_invlist[] = {  /* for ASCII/Latin1 */
 	73,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -290031,7 +290304,7 @@ static const UV PL_LATN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LATN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LATN_invlist[] = {  /* for EBCDIC 1047 */
 	99,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -290144,7 +290417,7 @@ static const UV PL_LATN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LATN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LATN_invlist[] = {  /* for EBCDIC 037 */
 	95,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -290250,7 +290523,7 @@ static const UV PL_LATN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__AI_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__AI_invlist[] = {  /* for ASCII/Latin1 */
 	219,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -290483,7 +290756,7 @@ static const UV PL_LB__AI_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__AI_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__AI_invlist[] = {  /* for EBCDIC 1047 */
 	225,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -290722,7 +290995,7 @@ static const UV PL_LB__AI_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__AI_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__AI_invlist[] = {  /* for EBCDIC 037 */
 	225,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -290958,7 +291231,7 @@ static const UV PL_LB__AI_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__AL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	1481,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -292453,7 +292726,7 @@ static const UV PL_LB__AL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__AL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__AL_invlist[] = {  /* for EBCDIC 1047 */
 	1509,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -293976,7 +294249,7 @@ static const UV PL_LB__AL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__AL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__AL_invlist[] = {  /* for EBCDIC 037 */
 	1505,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -295490,7 +295763,7 @@ static const UV PL_LB__AL_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__B2_invlist[] = { /* for all charsets */
+static const UV UNI_LB__B2_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -295504,7 +295777,7 @@ static const UV PL_LB__B2_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__BA_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__BA_invlist[] = {  /* for ASCII/Latin1 */
 	191,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -295709,7 +295982,7 @@ static const UV PL_LB__BA_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__BA_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__BA_invlist[] = {  /* for EBCDIC 1047 */
 	191,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -295914,7 +296187,7 @@ static const UV PL_LB__BA_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__BA_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__BA_invlist[] = {  /* for EBCDIC 037 */
 	191,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296116,7 +296389,7 @@ static const UV PL_LB__BA_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__BB_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__BB_invlist[] = {  /* for ASCII/Latin1 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296175,7 +296448,7 @@ static const UV PL_LB__BB_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__BB_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__BB_invlist[] = {  /* for EBCDIC 1047 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296234,7 +296507,7 @@ static const UV PL_LB__BB_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__BB_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__BB_invlist[] = {  /* for EBCDIC 037 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296290,7 +296563,7 @@ static const UV PL_LB__BB_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__BK_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__BK_invlist[] = {  /* for ASCII/Latin1 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296309,7 +296582,7 @@ static const UV PL_LB__BK_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__BK_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__BK_invlist[] = {  /* for EBCDIC 1047 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296328,7 +296601,7 @@ static const UV PL_LB__BK_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__BK_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__BK_invlist[] = {  /* for EBCDIC 037 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296342,7 +296615,7 @@ static const UV PL_LB__BK_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__CB_invlist[] = { /* for all charsets */
+static const UV UNI_LB__CB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296352,7 +296625,7 @@ static const UV PL_LB__CB_invlist[] = { /* for all charsets */
 	0xFFFD
 };
 
-static const UV PL_LB__CJ_invlist[] = { /* for all charsets */
+static const UV UNI_LB__CJ_invlist[] = {  /* for all charsets */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296412,7 +296685,7 @@ static const UV PL_LB__CJ_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__CL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__CL_invlist[] = {  /* for ASCII/Latin1 */
 	165,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296591,7 +296864,7 @@ static const UV PL_LB__CL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__CL_invlist[] = {  /* for EBCDIC 1047 */
 	165,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296770,7 +297043,7 @@ static const UV PL_LB__CL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__CL_invlist[] = {  /* for EBCDIC 037 */
 	165,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -296946,7 +297219,7 @@ static const UV PL_LB__CL_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__CM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	526,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -297486,7 +297759,7 @@ static const UV PL_LB__CM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__CM_invlist[] = {  /* for EBCDIC 1047 */
 	530,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -298030,7 +298303,7 @@ static const UV PL_LB__CM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__CM_invlist[] = {  /* for EBCDIC 037 */
 	530,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -298571,7 +298844,7 @@ static const UV PL_LB__CM_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__CP_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__CP_invlist[] = {  /* for ASCII/Latin1 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298590,7 +298863,7 @@ static const UV PL_LB__CP_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CP_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__CP_invlist[] = {  /* for EBCDIC 1047 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298609,7 +298882,7 @@ static const UV PL_LB__CP_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CP_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__CP_invlist[] = {  /* for EBCDIC 037 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298625,7 +298898,7 @@ static const UV PL_LB__CP_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__CR_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__CR_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298642,7 +298915,7 @@ static const UV PL_LB__CR_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CR_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__CR_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298659,7 +298932,7 @@ static const UV PL_LB__CR_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__CR_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__CR_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298671,7 +298944,7 @@ static const UV PL_LB__CR_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__EB_invlist[] = { /* for all charsets */
+static const UV UNI_LB__EB_invlist[] = {  /* for all charsets */
 	69,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298747,7 +299020,7 @@ static const UV PL_LB__EB_invlist[] = { /* for all charsets */
 	0x1F9DE
 };
 
-static const UV PL_LB__EM_invlist[] = { /* for all charsets */
+static const UV UNI_LB__EM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298759,7 +299032,7 @@ static const UV PL_LB__EM_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__EX_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__EX_invlist[] = {  /* for ASCII/Latin1 */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298822,7 +299095,7 @@ static const UV PL_LB__EX_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__EX_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__EX_invlist[] = {  /* for EBCDIC 1047 */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298885,7 +299158,7 @@ static const UV PL_LB__EX_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__EX_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__EX_invlist[] = {  /* for EBCDIC 037 */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298945,7 +299218,7 @@ static const UV PL_LB__EX_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__GL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__GL_invlist[] = {  /* for ASCII/Latin1 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -298982,7 +299255,7 @@ static const UV PL_LB__GL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__GL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__GL_invlist[] = {  /* for EBCDIC 1047 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -299019,7 +299292,7 @@ static const UV PL_LB__GL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__GL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__GL_invlist[] = {  /* for EBCDIC 037 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -299051,7 +299324,7 @@ static const UV PL_LB__GL_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__H2_invlist[] = { /* for all charsets */
+static const UV UNI_LB__H2_invlist[] = {  /* for all charsets */
 	799,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -299857,7 +300130,7 @@ static const UV PL_LB__H2_invlist[] = { /* for all charsets */
 	0xD789
 };
 
-static const UV PL_LB__H3_invlist[] = { /* for all charsets */
+static const UV UNI_LB__H3_invlist[] = {  /* for all charsets */
 	799,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -300663,7 +300936,7 @@ static const UV PL_LB__H3_invlist[] = { /* for all charsets */
 	0xD7A4
 };
 
-static const UV PL_LB__HL_invlist[] = { /* for all charsets */
+static const UV UNI_LB__HL_invlist[] = {  /* for all charsets */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -300693,7 +300966,7 @@ static const UV PL_LB__HL_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__HY_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__HY_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -300710,7 +300983,7 @@ static const UV PL_LB__HY_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__HY_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__HY_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -300727,7 +301000,7 @@ static const UV PL_LB__HY_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__HY_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__HY_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -300739,7 +301012,7 @@ static const UV PL_LB__HY_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__ID_invlist[] = { /* for all charsets */
+static const UV UNI_LB__ID_invlist[] = {  /* for all charsets */
 	323,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301069,7 +301342,7 @@ static const UV PL_LB__ID_invlist[] = { /* for all charsets */
 	0x3FFFE
 };
 
-static const UV PL_LB__IN_invlist[] = { /* for all charsets */
+static const UV UNI_LB__IN_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301087,7 +301360,7 @@ static const UV PL_LB__IN_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__IS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__IS_invlist[] = {  /* for ASCII/Latin1 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301122,7 +301395,7 @@ static const UV PL_LB__IS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__IS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__IS_invlist[] = {  /* for EBCDIC 1047 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301159,7 +301432,7 @@ static const UV PL_LB__IS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__IS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__IS_invlist[] = {  /* for EBCDIC 037 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301193,7 +301466,7 @@ static const UV PL_LB__IS_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__LF_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__LF_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301210,7 +301483,7 @@ static const UV PL_LB__LF_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__LF_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__LF_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301227,7 +301500,7 @@ static const UV PL_LB__LF_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__LF_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__LF_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301241,7 +301514,7 @@ static const UV PL_LB__LF_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__NL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__NL_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301258,7 +301531,7 @@ static const UV PL_LB__NL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__NL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__NL_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301275,7 +301548,7 @@ static const UV PL_LB__NL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__NL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__NL_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301287,7 +301560,7 @@ static const UV PL_LB__NL_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__NS_invlist[] = { /* for all charsets */
+static const UV UNI_LB__NS_invlist[] = {  /* for all charsets */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301331,7 +301604,7 @@ static const UV PL_LB__NS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__NU_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301460,7 +301733,7 @@ static const UV PL_LB__NU_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__NU_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__NU_invlist[] = {  /* for EBCDIC 1047 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301589,7 +301862,7 @@ static const UV PL_LB__NU_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__NU_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__NU_invlist[] = {  /* for EBCDIC 037 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301715,7 +301988,7 @@ static const UV PL_LB__NU_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__OP_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__OP_invlist[] = {  /* for ASCII/Latin1 */
 	169,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -301898,7 +302171,7 @@ static const UV PL_LB__OP_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__OP_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__OP_invlist[] = {  /* for EBCDIC 1047 */
 	167,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302079,7 +302352,7 @@ static const UV PL_LB__OP_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__OP_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__OP_invlist[] = {  /* for EBCDIC 037 */
 	167,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302257,7 +302530,7 @@ static const UV PL_LB__OP_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__PO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__PO_invlist[] = {  /* for ASCII/Latin1 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302316,7 +302589,7 @@ static const UV PL_LB__PO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__PO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__PO_invlist[] = {  /* for EBCDIC 1047 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302375,7 +302648,7 @@ static const UV PL_LB__PO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__PO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__PO_invlist[] = {  /* for EBCDIC 037 */
 	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302431,7 +302704,7 @@ static const UV PL_LB__PO_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__PR_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__PR_invlist[] = {  /* for ASCII/Latin1 */
 	47,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302492,7 +302765,7 @@ static const UV PL_LB__PR_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__PR_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__PR_invlist[] = {  /* for EBCDIC 1047 */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302555,7 +302828,7 @@ static const UV PL_LB__PR_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__PR_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__PR_invlist[] = {  /* for EBCDIC 037 */
 	49,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302615,7 +302888,7 @@ static const UV PL_LB__PR_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__QU_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__QU_invlist[] = {  /* for ASCII/Latin1 */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302656,7 +302929,7 @@ static const UV PL_LB__QU_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__QU_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__QU_invlist[] = {  /* for EBCDIC 1047 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302695,7 +302968,7 @@ static const UV PL_LB__QU_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__QU_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__QU_invlist[] = {  /* for EBCDIC 037 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302729,7 +303002,7 @@ static const UV PL_LB__QU_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__SA_invlist[] = { /* for all charsets */
+static const UV UNI_LB__SA_invlist[] = {  /* for all charsets */
 	85,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302821,7 +303094,7 @@ static const UV PL_LB__SA_invlist[] = { /* for all charsets */
 	0x11740
 };
 
-static const UV PL_LB__SG_invlist[] = { /* for all charsets */
+static const UV UNI_LB__SG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302833,7 +303106,7 @@ static const UV PL_LB__SG_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__SP_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__SP_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302850,7 +303123,7 @@ static const UV PL_LB__SP_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__SP_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__SP_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302867,7 +303140,7 @@ static const UV PL_LB__SP_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__SP_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__SP_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302881,7 +303154,7 @@ static const UV PL_LB__SP_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LB__SY_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LB__SY_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302898,7 +303171,7 @@ static const UV PL_LB__SY_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__SY_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LB__SY_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302915,7 +303188,7 @@ static const UV PL_LB__SY_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LB__SY_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LB__SY_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302927,7 +303200,7 @@ static const UV PL_LB__SY_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LB__WJ_invlist[] = { /* for all charsets */
+static const UV UNI_LB__WJ_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -302939,7 +303212,7 @@ static const UV PL_LB__WJ_invlist[] = { /* for all charsets */
 	0xFF00
 };
 
-static const UV PL_LB__XX_invlist[] = { /* for all charsets */
+static const UV UNI_LB__XX_invlist[] = {  /* for all charsets */
 	1230,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304176,7 +304449,7 @@ static const UV PL_LB__XX_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_LB__ZW_invlist[] = { /* for all charsets */
+static const UV UNI_LB__ZW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304186,7 +304459,7 @@ static const UV PL_LB__ZW_invlist[] = { /* for all charsets */
 	0x200C
 };
 
-static const UV PL_LB__ZWJ_invlist[] = { /* for all charsets */
+static const UV UNI_LB__ZWJ_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304196,7 +304469,7 @@ static const UV PL_LB__ZWJ_invlist[] = { /* for all charsets */
 	0x200E
 };
 
-static const UV PL_LEPC_invlist[] = { /* for all charsets */
+static const UV UNI_LEPC_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304210,7 +304483,7 @@ static const UV PL_LEPC_invlist[] = { /* for all charsets */
 	0x1C50
 };
 
-static const UV PL_LETTERLIKESYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_LETTERLIKESYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304220,7 +304493,7 @@ static const UV PL_LETTERLIKESYMBOLS_invlist[] = { /* for all charsets */
 	0x2150
 };
 
-static const UV PL_LIMB_invlist[] = { /* for all charsets */
+static const UV UNI_LIMB_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304240,7 +304513,7 @@ static const UV PL_LIMB_invlist[] = { /* for all charsets */
 	0x1950
 };
 
-static const UV PL_LINA_invlist[] = { /* for all charsets */
+static const UV UNI_LINA_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304256,7 +304529,7 @@ static const UV PL_LINA_invlist[] = { /* for all charsets */
 	0x10768
 };
 
-static const UV PL_LINB_invlist[] = { /* for all charsets */
+static const UV UNI_LINB_invlist[] = {  /* for all charsets */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304284,7 +304557,7 @@ static const UV PL_LINB_invlist[] = { /* for all charsets */
 	0x10140
 };
 
-static const UV PL_LINEARBIDEOGRAMS_invlist[] = { /* for all charsets */
+static const UV UNI_LINEARBIDEOGRAMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304294,7 +304567,7 @@ static const UV PL_LINEARBIDEOGRAMS_invlist[] = { /* for all charsets */
 	0x10100
 };
 
-static const UV PL_LINEARBSYLLABARY_invlist[] = { /* for all charsets */
+static const UV UNI_LINEARBSYLLABARY_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304304,7 +304577,7 @@ static const UV PL_LINEARBSYLLABARY_invlist[] = { /* for all charsets */
 	0x10080
 };
 
-static const UV PL_LISU_invlist[] = { /* for all charsets */
+static const UV UNI_LISU_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304314,7 +304587,7 @@ static const UV PL_LISU_invlist[] = { /* for all charsets */
 	0xA500
 };
 
-static const UV PL_LM_invlist[] = { /* for all charsets */
+static const UV UNI_LM_invlist[] = {  /* for all charsets */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -304438,7 +304711,7 @@ static const UV PL_LM_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_LO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_LO_invlist[] = {  /* for ASCII/Latin1 */
 	941,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -305393,7 +305666,7 @@ static const UV PL_LO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_LO_invlist[] = {  /* for EBCDIC 1047 */
 	939,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -306346,7 +306619,7 @@ static const UV PL_LO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_LO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_LO_invlist[] = {  /* for EBCDIC 037 */
 	939,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307294,7 +307567,7 @@ static const UV PL_LO_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_LOE_invlist[] = { /* for all charsets */
+static const UV UNI_LOE_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307316,7 +307589,7 @@ static const UV PL_LOE_invlist[] = { /* for all charsets */
 	0xAABD
 };
 
-static const UV PL_LOWSURROGATES_invlist[] = { /* for all charsets */
+static const UV UNI_LOWSURROGATES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307326,7 +307599,7 @@ static const UV PL_LOWSURROGATES_invlist[] = { /* for all charsets */
 	0xE000
 };
 
-static const UV PL_LYCI_invlist[] = { /* for all charsets */
+static const UV UNI_LYCI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307336,7 +307609,7 @@ static const UV PL_LYCI_invlist[] = { /* for all charsets */
 	0x1029D
 };
 
-static const UV PL_LYDI_invlist[] = { /* for all charsets */
+static const UV UNI_LYDI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307348,7 +307621,7 @@ static const UV PL_LYDI_invlist[] = { /* for all charsets */
 	0x10940
 };
 
-static const UV PL_M_invlist[] = { /* for all charsets */
+static const UV UNI_M_invlist[] = {  /* for all charsets */
 	551,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307906,7 +308179,7 @@ static const UV PL_M_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_MAHJ_invlist[] = { /* for all charsets */
+static const UV UNI_MAHJ_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307920,7 +308193,7 @@ static const UV PL_MAHJ_invlist[] = { /* for all charsets */
 	0x11177
 };
 
-static const UV PL_MAHJONG_invlist[] = { /* for all charsets */
+static const UV UNI_MAHJONG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307930,7 +308203,7 @@ static const UV PL_MAHJONG_invlist[] = { /* for all charsets */
 	0x1F030
 };
 
-static const UV PL_MAKA_invlist[] = { /* for all charsets */
+static const UV UNI_MAKA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307940,7 +308213,7 @@ static const UV PL_MAKA_invlist[] = { /* for all charsets */
 	0x11EF9
 };
 
-static const UV PL_MAND_invlist[] = { /* for all charsets */
+static const UV UNI_MAND_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307954,7 +308227,7 @@ static const UV PL_MAND_invlist[] = { /* for all charsets */
 	0x85F
 };
 
-static const UV PL_MANI_invlist[] = { /* for all charsets */
+static const UV UNI_MANI_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307968,7 +308241,7 @@ static const UV PL_MANI_invlist[] = { /* for all charsets */
 	0x10AF7
 };
 
-static const UV PL_MARC_invlist[] = { /* for all charsets */
+static const UV UNI_MARC_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -307984,7 +308257,7 @@ static const UV PL_MARC_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_MATH_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_MATH_invlist[] = {  /* for ASCII/Latin1 */
 	277,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -308275,7 +308548,7 @@ static const UV PL_MATH_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_MATH_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_MATH_invlist[] = {  /* for EBCDIC 1047 */
 	279,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -308568,7 +308841,7 @@ static const UV PL_MATH_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_MATH_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_MATH_invlist[] = {  /* for EBCDIC 037 */
 	279,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -308856,7 +309129,7 @@ static const UV PL_MATH_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_MATHALPHANUM_invlist[] = { /* for all charsets */
+static const UV UNI_MATHALPHANUM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -308866,7 +309139,7 @@ static const UV PL_MATHALPHANUM_invlist[] = { /* for all charsets */
 	0x1D800
 };
 
-static const UV PL_MATHOPERATORS_invlist[] = { /* for all charsets */
+static const UV UNI_MATHOPERATORS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -308876,7 +309149,7 @@ static const UV PL_MATHOPERATORS_invlist[] = { /* for all charsets */
 	0x2300
 };
 
-static const UV PL_MAYANNUMERALS_invlist[] = { /* for all charsets */
+static const UV UNI_MAYANNUMERALS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -308886,7 +309159,7 @@ static const UV PL_MAYANNUMERALS_invlist[] = { /* for all charsets */
 	0x1D300
 };
 
-static const UV PL_MC_invlist[] = { /* for all charsets */
+static const UV UNI_MC_invlist[] = {  /* for all charsets */
 	333,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309226,7 +309499,7 @@ static const UV PL_MC_invlist[] = { /* for all charsets */
 	0x1D173
 };
 
-static const UV PL_ME_invlist[] = { /* for all charsets */
+static const UV UNI_ME_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309244,7 +309517,7 @@ static const UV PL_ME_invlist[] = { /* for all charsets */
 	0xA673
 };
 
-static const UV PL_MEDF_invlist[] = { /* for all charsets */
+static const UV UNI_MEDF_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309254,7 +309527,7 @@ static const UV PL_MEDF_invlist[] = { /* for all charsets */
 	0x16E9B
 };
 
-static const UV PL_MEETEIMAYEKEXT_invlist[] = { /* for all charsets */
+static const UV UNI_MEETEIMAYEKEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309264,7 +309537,7 @@ static const UV PL_MEETEIMAYEKEXT_invlist[] = { /* for all charsets */
 	0xAB00
 };
 
-static const UV PL_MEND_invlist[] = { /* for all charsets */
+static const UV UNI_MEND_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309276,7 +309549,7 @@ static const UV PL_MEND_invlist[] = { /* for all charsets */
 	0x1E8D7
 };
 
-static const UV PL_MERC_invlist[] = { /* for all charsets */
+static const UV UNI_MERC_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309290,7 +309563,7 @@ static const UV PL_MERC_invlist[] = { /* for all charsets */
 	0x10A00
 };
 
-static const UV PL_MERO_invlist[] = { /* for all charsets */
+static const UV UNI_MERO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309300,7 +309573,7 @@ static const UV PL_MERO_invlist[] = { /* for all charsets */
 	0x109A0
 };
 
-static const UV PL_MIAO_invlist[] = { /* for all charsets */
+static const UV UNI_MIAO_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309314,7 +309587,7 @@ static const UV PL_MIAO_invlist[] = { /* for all charsets */
 	0x16FA0
 };
 
-static const UV PL_MISCARROWS_invlist[] = { /* for all charsets */
+static const UV UNI_MISCARROWS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309324,7 +309597,7 @@ static const UV PL_MISCARROWS_invlist[] = { /* for all charsets */
 	0x2C00
 };
 
-static const UV PL_MISCMATHSYMBOLSA_invlist[] = { /* for all charsets */
+static const UV UNI_MISCMATHSYMBOLSA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309334,7 +309607,7 @@ static const UV PL_MISCMATHSYMBOLSA_invlist[] = { /* for all charsets */
 	0x27F0
 };
 
-static const UV PL_MISCMATHSYMBOLSB_invlist[] = { /* for all charsets */
+static const UV UNI_MISCMATHSYMBOLSB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309344,7 +309617,7 @@ static const UV PL_MISCMATHSYMBOLSB_invlist[] = { /* for all charsets */
 	0x2A00
 };
 
-static const UV PL_MISCPICTOGRAPHS_invlist[] = { /* for all charsets */
+static const UV UNI_MISCPICTOGRAPHS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309354,7 +309627,7 @@ static const UV PL_MISCPICTOGRAPHS_invlist[] = { /* for all charsets */
 	0x1F600
 };
 
-static const UV PL_MISCSYMBOLS_invlist[] = { /* for all charsets */
+static const UV UNI_MISCSYMBOLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309364,7 +309637,7 @@ static const UV PL_MISCSYMBOLS_invlist[] = { /* for all charsets */
 	0x2700
 };
 
-static const UV PL_MISCTECHNICAL_invlist[] = { /* for all charsets */
+static const UV UNI_MISCTECHNICAL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309374,7 +309647,7 @@ static const UV PL_MISCTECHNICAL_invlist[] = { /* for all charsets */
 	0x2400
 };
 
-static const UV PL_MLYM_invlist[] = { /* for all charsets */
+static const UV UNI_MLYM_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -309406,7 +309679,7 @@ static const UV PL_MLYM_invlist[] = { /* for all charsets */
 	0xA833
 };
 
-static const UV PL_MN_invlist[] = { /* for all charsets */
+static const UV UNI_MN_invlist[] = {  /* for all charsets */
 	627,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310040,7 +310313,7 @@ static const UV PL_MN_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_MODI_invlist[] = { /* for all charsets */
+static const UV UNI_MODI_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310054,7 +310327,7 @@ static const UV PL_MODI_invlist[] = { /* for all charsets */
 	0x1165A
 };
 
-static const UV PL_MODIFIERLETTERS_invlist[] = { /* for all charsets */
+static const UV UNI_MODIFIERLETTERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310064,7 +310337,7 @@ static const UV PL_MODIFIERLETTERS_invlist[] = { /* for all charsets */
 	0x300
 };
 
-static const UV PL_MODIFIERTONELETTERS_invlist[] = { /* for all charsets */
+static const UV UNI_MODIFIERTONELETTERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310074,7 +310347,7 @@ static const UV PL_MODIFIERTONELETTERS_invlist[] = { /* for all charsets */
 	0xA720
 };
 
-static const UV PL_MONG_invlist[] = { /* for all charsets */
+static const UV UNI_MONG_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310092,7 +310365,7 @@ static const UV PL_MONG_invlist[] = { /* for all charsets */
 	0x1166D
 };
 
-static const UV PL_MONGOLIANSUP_invlist[] = { /* for all charsets */
+static const UV UNI_MONGOLIANSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310102,7 +310375,7 @@ static const UV PL_MONGOLIANSUP_invlist[] = { /* for all charsets */
 	0x11680
 };
 
-static const UV PL_MRO_invlist[] = { /* for all charsets */
+static const UV UNI_MRO_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310116,7 +310389,7 @@ static const UV PL_MRO_invlist[] = { /* for all charsets */
 	0x16A70
 };
 
-static const UV PL_MTEI_invlist[] = { /* for all charsets */
+static const UV UNI_MTEI_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310130,7 +310403,7 @@ static const UV PL_MTEI_invlist[] = { /* for all charsets */
 	0xABFA
 };
 
-static const UV PL_MULT_invlist[] = { /* for all charsets */
+static const UV UNI_MULT_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310150,7 +310423,7 @@ static const UV PL_MULT_invlist[] = { /* for all charsets */
 	0x112AA
 };
 
-static const UV PL_MUSIC_invlist[] = { /* for all charsets */
+static const UV UNI_MUSIC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310160,7 +310433,7 @@ static const UV PL_MUSIC_invlist[] = { /* for all charsets */
 	0x1D200
 };
 
-static const UV PL_MYANMAREXTA_invlist[] = { /* for all charsets */
+static const UV UNI_MYANMAREXTA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310170,7 +310443,7 @@ static const UV PL_MYANMAREXTA_invlist[] = { /* for all charsets */
 	0xAA80
 };
 
-static const UV PL_MYANMAREXTB_invlist[] = { /* for all charsets */
+static const UV UNI_MYANMAREXTB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310180,7 +310453,7 @@ static const UV PL_MYANMAREXTB_invlist[] = { /* for all charsets */
 	0xAA00
 };
 
-static const UV PL_MYMR_invlist[] = { /* for all charsets */
+static const UV UNI_MYMR_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310198,7 +310471,7 @@ static const UV PL_MYMR_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_N_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_N_invlist[] = {  /* for ASCII/Latin1 */
 	251,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310463,7 +310736,7 @@ static const UV PL_N_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_N_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_N_invlist[] = {  /* for EBCDIC 1047 */
 	251,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310728,7 +311001,7 @@ static const UV PL_N_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_N_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_N_invlist[] = {  /* for EBCDIC 037 */
 	251,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310988,7 +311261,7 @@ static const UV PL_N_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NARB_invlist[] = { /* for all charsets */
+static const UV UNI_NARB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -310998,7 +311271,7 @@ static const UV PL_NARB_invlist[] = { /* for all charsets */
 	0x10AA0
 };
 
-static const UV PL_NB_invlist[] = { /* for all charsets */
+static const UV UNI_NB_invlist[] = {  /* for all charsets */
 	104,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -311109,7 +311382,7 @@ static const UV PL_NB_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_NBAT_invlist[] = { /* for all charsets */
+static const UV UNI_NBAT_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -311121,7 +311394,7 @@ static const UV PL_NBAT_invlist[] = { /* for all charsets */
 	0x108B0
 };
 
-static const UV PL_NEWA_invlist[] = { /* for all charsets */
+static const UV UNI_NEWA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -311135,7 +311408,7 @@ static const UV PL_NEWA_invlist[] = { /* for all charsets */
 	0x1145F
 };
 
-static const UV PL_NFCQC__M_invlist[] = { /* for all charsets */
+static const UV UNI_NFCQC__M_invlist[] = {  /* for all charsets */
 	83,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -311225,7 +311498,7 @@ static const UV PL_NFCQC__M_invlist[] = { /* for all charsets */
 	0x115B0
 };
 
-static const UV PL_NFCQC__Y_invlist[] = { /* for all charsets */
+static const UV UNI_NFCQC__Y_invlist[] = {  /* for all charsets */
 	223,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -311457,7 +311730,7 @@ static const UV PL_NFCQC__Y_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NFDQC__Y_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NFDQC__Y_invlist[] = {  /* for ASCII/Latin1 */
 	463,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -311934,7 +312207,7 @@ static const UV PL_NFDQC__Y_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFDQC__Y_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NFDQC__Y_invlist[] = {  /* for EBCDIC 1047 */
 	467,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -312415,7 +312688,7 @@ static const UV PL_NFDQC__Y_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFDQC__Y_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NFDQC__Y_invlist[] = {  /* for EBCDIC 037 */
 	467,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -312893,7 +313166,7 @@ static const UV PL_NFDQC__Y_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NFKCQC__N_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NFKCQC__N_invlist[] = {  /* for ASCII/Latin1 */
 	499,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -313406,7 +313679,7 @@ static const UV PL_NFKCQC__N_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFKCQC__N_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NFKCQC__N_invlist[] = {  /* for EBCDIC 1047 */
 	505,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -313925,7 +314198,7 @@ static const UV PL_NFKCQC__N_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFKCQC__N_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NFKCQC__N_invlist[] = {  /* for EBCDIC 037 */
 	503,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -314439,7 +314712,7 @@ static const UV PL_NFKCQC__N_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NFKCQC__Y_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NFKCQC__Y_invlist[] = {  /* for ASCII/Latin1 */
 	573,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -315026,7 +315299,7 @@ static const UV PL_NFKCQC__Y_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFKCQC__Y_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NFKCQC__Y_invlist[] = {  /* for EBCDIC 1047 */
 	579,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -315619,7 +315892,7 @@ static const UV PL_NFKCQC__Y_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFKCQC__Y_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NFKCQC__Y_invlist[] = {  /* for EBCDIC 037 */
 	577,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -316207,7 +316480,7 @@ static const UV PL_NFKCQC__Y_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NFKDQC__N_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NFKDQC__N_invlist[] = {  /* for ASCII/Latin1 */
 	781,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -317002,7 +317275,7 @@ static const UV PL_NFKDQC__N_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFKDQC__N_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NFKDQC__N_invlist[] = {  /* for EBCDIC 1047 */
 	779,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -317795,7 +318068,7 @@ static const UV PL_NFKDQC__N_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NFKDQC__N_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NFKDQC__N_invlist[] = {  /* for EBCDIC 037 */
 	781,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -318585,7 +318858,7 @@ static const UV PL_NFKDQC__N_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NKO_invlist[] = { /* for all charsets */
+static const UV UNI_NKO_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -318597,7 +318870,7 @@ static const UV PL_NKO_invlist[] = { /* for all charsets */
 	0x800
 };
 
-static const UV PL_NL_invlist[] = { /* for all charsets */
+static const UV UNI_NL_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -318631,7 +318904,7 @@ static const UV PL_NL_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NO_invlist[] = {  /* for ASCII/Latin1 */
 	135,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -318780,7 +319053,7 @@ static const UV PL_NO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NO_invlist[] = {  /* for EBCDIC 1047 */
 	137,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -318931,7 +319204,7 @@ static const UV PL_NO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NO_invlist[] = {  /* for EBCDIC 037 */
 	137,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319077,7 +319350,7 @@ static const UV PL_NO_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NSHU_invlist[] = { /* for all charsets */
+static const UV UNI_NSHU_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319091,7 +319364,7 @@ static const UV PL_NSHU_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NT__DI_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NT__DI_invlist[] = {  /* for ASCII/Latin1 */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319146,7 +319419,7 @@ static const UV PL_NT__DI_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NT__DI_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NT__DI_invlist[] = {  /* for EBCDIC 1047 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319203,7 +319476,7 @@ static const UV PL_NT__DI_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NT__DI_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NT__DI_invlist[] = {  /* for EBCDIC 037 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319257,7 +319530,7 @@ static const UV PL_NT__DI_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NT__NU_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
 	295,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319566,7 +319839,7 @@ static const UV PL_NT__NU_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NT__NU_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NT__NU_invlist[] = {  /* for EBCDIC 1047 */
 	295,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -319875,7 +320148,7 @@ static const UV PL_NT__NU_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NT__NU_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NT__NU_invlist[] = {  /* for EBCDIC 037 */
 	295,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320179,7 +320452,7 @@ static const UV PL_NT__NU_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NUMBERFORMS_invlist[] = { /* for all charsets */
+static const UV UNI_NUMBERFORMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320189,7 +320462,7 @@ static const UV PL_NUMBERFORMS_invlist[] = { /* for all charsets */
 	0x2190
 };
 
-static const UV PL_NV___MINUS_1_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV___MINUS_1_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320201,7 +320474,7 @@ static const UV PL_NV___MINUS_1_SLASH_2_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__0_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__0_invlist[] = {  /* for ASCII/Latin1 */
 	155,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320370,7 +320643,7 @@ static const UV PL_NV__0_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__0_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__0_invlist[] = {  /* for EBCDIC 1047 */
 	155,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320539,7 +320812,7 @@ static const UV PL_NV__0_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__0_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__0_invlist[] = {  /* for EBCDIC 037 */
 	155,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320705,7 +320978,7 @@ static const UV PL_NV__0_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__1_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__1_invlist[] = {  /* for ASCII/Latin1 */
 	263,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -320982,7 +321255,7 @@ static const UV PL_NV__1_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__1_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__1_invlist[] = {  /* for EBCDIC 1047 */
 	263,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321259,7 +321532,7 @@ static const UV PL_NV__1_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__1_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__1_invlist[] = {  /* for EBCDIC 037 */
 	263,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321531,7 +321804,7 @@ static const UV PL_NV__1_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__1_SLASH_10_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_10_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321543,7 +321816,7 @@ static const UV PL_NV__1_SLASH_10_invlist[] = { /* for all charsets */
 	0x2153
 };
 
-static const UV PL_NV__1_SLASH_12_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_12_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321553,7 +321826,7 @@ static const UV PL_NV__1_SLASH_12_invlist[] = { /* for all charsets */
 	0x109F7
 };
 
-static const UV PL_NV__1_SLASH_16_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_16_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321569,7 +321842,7 @@ static const UV PL_NV__1_SLASH_16_invlist[] = { /* for all charsets */
 	0xA834
 };
 
-static const UV PL_NV__1_SLASH_160_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_160_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321581,7 +321854,7 @@ static const UV PL_NV__1_SLASH_160_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__1_SLASH_2_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__1_SLASH_2_invlist[] = {  /* for ASCII/Latin1 */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321626,7 +321899,7 @@ static const UV PL_NV__1_SLASH_2_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__1_SLASH_2_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__1_SLASH_2_invlist[] = {  /* for EBCDIC 1047 */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321671,7 +321944,7 @@ static const UV PL_NV__1_SLASH_2_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__1_SLASH_2_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__1_SLASH_2_invlist[] = {  /* for EBCDIC 037 */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321711,7 +321984,7 @@ static const UV PL_NV__1_SLASH_2_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__1_SLASH_20_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_20_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321721,7 +321994,7 @@ static const UV PL_NV__1_SLASH_20_invlist[] = { /* for all charsets */
 	0xD5C
 };
 
-static const UV PL_NV__1_SLASH_3_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_3_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321743,7 +322016,7 @@ static const UV PL_NV__1_SLASH_3_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__1_SLASH_4_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__1_SLASH_4_invlist[] = {  /* for ASCII/Latin1 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321782,7 +322055,7 @@ static const UV PL_NV__1_SLASH_4_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__1_SLASH_4_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__1_SLASH_4_invlist[] = {  /* for EBCDIC 1047 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321821,7 +322094,7 @@ static const UV PL_NV__1_SLASH_4_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__1_SLASH_4_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__1_SLASH_4_invlist[] = {  /* for EBCDIC 037 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321855,7 +322128,7 @@ static const UV PL_NV__1_SLASH_4_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__1_SLASH_40_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_40_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321865,7 +322138,7 @@ static const UV PL_NV__1_SLASH_40_invlist[] = { /* for all charsets */
 	0xD5A
 };
 
-static const UV PL_NV__1_SLASH_5_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_5_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321877,7 +322150,7 @@ static const UV PL_NV__1_SLASH_5_invlist[] = { /* for all charsets */
 	0x2156
 };
 
-static const UV PL_NV__1_SLASH_6_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_6_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321891,7 +322164,7 @@ static const UV PL_NV__1_SLASH_6_invlist[] = { /* for all charsets */
 	0x12462
 };
 
-static const UV PL_NV__1_SLASH_7_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_7_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321901,7 +322174,7 @@ static const UV PL_NV__1_SLASH_7_invlist[] = { /* for all charsets */
 	0x2151
 };
 
-static const UV PL_NV__1_SLASH_8_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_8_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321921,7 +322194,7 @@ static const UV PL_NV__1_SLASH_8_invlist[] = { /* for all charsets */
 	0x12460
 };
 
-static const UV PL_NV__1_SLASH_9_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1_SLASH_9_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -321931,7 +322204,7 @@ static const UV PL_NV__1_SLASH_9_invlist[] = { /* for all charsets */
 	0x2152
 };
 
-static const UV PL_NV__10_invlist[] = { /* for all charsets */
+static const UV UNI_NV__10_invlist[] = {  /* for all charsets */
 	111,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322049,7 +322322,7 @@ static const UV PL_NV__10_invlist[] = { /* for all charsets */
 	0x1EC7B
 };
 
-static const UV PL_NV__100_invlist[] = { /* for all charsets */
+static const UV UNI_NV__100_invlist[] = {  /* for all charsets */
 	67,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322123,7 +322396,7 @@ static const UV PL_NV__100_invlist[] = { /* for all charsets */
 	0x1EC84
 };
 
-static const UV PL_NV__1000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1000_invlist[] = {  /* for all charsets */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322171,7 +322444,7 @@ static const UV PL_NV__1000_invlist[] = { /* for all charsets */
 	0x1EC8D
 };
 
-static const UV PL_NV__10000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__10000_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322201,7 +322474,7 @@ static const UV PL_NV__10000_invlist[] = { /* for all charsets */
 	0x1ECB4
 };
 
-static const UV PL_NV__100000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__100000_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322219,7 +322492,7 @@ static const UV PL_NV__100000_invlist[] = { /* for all charsets */
 	0x1ECB5
 };
 
-static const UV PL_NV__1000000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1000000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322229,7 +322502,7 @@ static const UV PL_NV__1000000_invlist[] = { /* for all charsets */
 	0x16B5F
 };
 
-static const UV PL_NV__10000000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__10000000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322239,7 +322512,7 @@ static const UV PL_NV__10000000_invlist[] = { /* for all charsets */
 	0x1ECA2
 };
 
-static const UV PL_NV__100000000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__100000000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322253,7 +322526,7 @@ static const UV PL_NV__100000000_invlist[] = { /* for all charsets */
 	0x16B60
 };
 
-static const UV PL_NV__10000000000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__10000000000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322263,7 +322536,7 @@ static const UV PL_NV__10000000000_invlist[] = { /* for all charsets */
 	0x16B61
 };
 
-static const UV PL_NV__1000000000000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__1000000000000_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322275,7 +322548,7 @@ static const UV PL_NV__1000000000000_invlist[] = { /* for all charsets */
 	0x16B62
 };
 
-static const UV PL_NV__11_invlist[] = { /* for all charsets */
+static const UV UNI_NV__11_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322299,7 +322572,7 @@ static const UV PL_NV__11_invlist[] = { /* for all charsets */
 	0x1D2EC
 };
 
-static const UV PL_NV__11_SLASH_12_invlist[] = { /* for all charsets */
+static const UV UNI_NV__11_SLASH_12_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322309,7 +322582,7 @@ static const UV PL_NV__11_SLASH_12_invlist[] = { /* for all charsets */
 	0x109BD
 };
 
-static const UV PL_NV__11_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__11_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322319,7 +322592,7 @@ static const UV PL_NV__11_SLASH_2_invlist[] = { /* for all charsets */
 	0xF30
 };
 
-static const UV PL_NV__12_invlist[] = { /* for all charsets */
+static const UV UNI_NV__12_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322343,7 +322616,7 @@ static const UV PL_NV__12_invlist[] = { /* for all charsets */
 	0x1D2ED
 };
 
-static const UV PL_NV__13_invlist[] = { /* for all charsets */
+static const UV UNI_NV__13_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322363,7 +322636,7 @@ static const UV PL_NV__13_invlist[] = { /* for all charsets */
 	0x1D2EE
 };
 
-static const UV PL_NV__13_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__13_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322373,7 +322646,7 @@ static const UV PL_NV__13_SLASH_2_invlist[] = { /* for all charsets */
 	0xF31
 };
 
-static const UV PL_NV__14_invlist[] = { /* for all charsets */
+static const UV UNI_NV__14_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322393,7 +322666,7 @@ static const UV PL_NV__14_invlist[] = { /* for all charsets */
 	0x1D2EF
 };
 
-static const UV PL_NV__15_invlist[] = { /* for all charsets */
+static const UV UNI_NV__15_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322413,7 +322686,7 @@ static const UV PL_NV__15_invlist[] = { /* for all charsets */
 	0x1D2F0
 };
 
-static const UV PL_NV__15_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__15_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322423,7 +322696,7 @@ static const UV PL_NV__15_SLASH_2_invlist[] = { /* for all charsets */
 	0xF32
 };
 
-static const UV PL_NV__16_invlist[] = { /* for all charsets */
+static const UV UNI_NV__16_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322445,7 +322718,7 @@ static const UV PL_NV__16_invlist[] = { /* for all charsets */
 	0x1D2F1
 };
 
-static const UV PL_NV__17_invlist[] = { /* for all charsets */
+static const UV UNI_NV__17_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322467,7 +322740,7 @@ static const UV PL_NV__17_invlist[] = { /* for all charsets */
 	0x1D2F2
 };
 
-static const UV PL_NV__17_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__17_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322477,7 +322750,7 @@ static const UV PL_NV__17_SLASH_2_invlist[] = { /* for all charsets */
 	0xF33
 };
 
-static const UV PL_NV__18_invlist[] = { /* for all charsets */
+static const UV UNI_NV__18_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322499,7 +322772,7 @@ static const UV PL_NV__18_invlist[] = { /* for all charsets */
 	0x1D2F3
 };
 
-static const UV PL_NV__19_invlist[] = { /* for all charsets */
+static const UV UNI_NV__19_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322523,7 +322796,7 @@ static const UV PL_NV__19_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__2_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__2_invlist[] = {  /* for ASCII/Latin1 */
 	259,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -322796,7 +323069,7 @@ static const UV PL_NV__2_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__2_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__2_invlist[] = {  /* for EBCDIC 1047 */
 	259,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323069,7 +323342,7 @@ static const UV PL_NV__2_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__2_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__2_invlist[] = {  /* for EBCDIC 037 */
 	259,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323337,7 +323610,7 @@ static const UV PL_NV__2_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__2_SLASH_3_invlist[] = { /* for all charsets */
+static const UV UNI_NV__2_SLASH_3_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323359,7 +323632,7 @@ static const UV PL_NV__2_SLASH_3_invlist[] = { /* for all charsets */
 	0x12467
 };
 
-static const UV PL_NV__2_SLASH_5_invlist[] = { /* for all charsets */
+static const UV UNI_NV__2_SLASH_5_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323369,7 +323642,7 @@ static const UV PL_NV__2_SLASH_5_invlist[] = { /* for all charsets */
 	0x2157
 };
 
-static const UV PL_NV__20_invlist[] = { /* for all charsets */
+static const UV UNI_NV__20_invlist[] = {  /* for all charsets */
 	69,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323445,7 +323718,7 @@ static const UV PL_NV__20_invlist[] = { /* for all charsets */
 	0x1EC7C
 };
 
-static const UV PL_NV__200_invlist[] = { /* for all charsets */
+static const UV UNI_NV__200_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323463,7 +323736,7 @@ static const UV PL_NV__200_invlist[] = { /* for all charsets */
 	0x1EC85
 };
 
-static const UV PL_NV__2000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__2000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323477,7 +323750,7 @@ static const UV PL_NV__2000_invlist[] = { /* for all charsets */
 	0x1EC8E
 };
 
-static const UV PL_NV__20000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__20000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323491,7 +323764,7 @@ static const UV PL_NV__20000_invlist[] = { /* for all charsets */
 	0x1EC97
 };
 
-static const UV PL_NV__200000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__200000_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323503,7 +323776,7 @@ static const UV PL_NV__200000_invlist[] = { /* for all charsets */
 	0x1ECA0
 };
 
-static const UV PL_NV__20000000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__20000000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323513,7 +323786,7 @@ static const UV PL_NV__20000000_invlist[] = { /* for all charsets */
 	0x1ECA3
 };
 
-static const UV PL_NV__21_invlist[] = { /* for all charsets */
+static const UV UNI_NV__21_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323523,7 +323796,7 @@ static const UV PL_NV__21_invlist[] = { /* for all charsets */
 	0x3252
 };
 
-static const UV PL_NV__216000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__216000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323533,7 +323806,7 @@ static const UV PL_NV__216000_invlist[] = { /* for all charsets */
 	0x12433
 };
 
-static const UV PL_NV__22_invlist[] = { /* for all charsets */
+static const UV UNI_NV__22_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323543,7 +323816,7 @@ static const UV PL_NV__22_invlist[] = { /* for all charsets */
 	0x3253
 };
 
-static const UV PL_NV__23_invlist[] = { /* for all charsets */
+static const UV UNI_NV__23_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323553,7 +323826,7 @@ static const UV PL_NV__23_invlist[] = { /* for all charsets */
 	0x3254
 };
 
-static const UV PL_NV__24_invlist[] = { /* for all charsets */
+static const UV UNI_NV__24_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323563,7 +323836,7 @@ static const UV PL_NV__24_invlist[] = { /* for all charsets */
 	0x3255
 };
 
-static const UV PL_NV__25_invlist[] = { /* for all charsets */
+static const UV UNI_NV__25_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323573,7 +323846,7 @@ static const UV PL_NV__25_invlist[] = { /* for all charsets */
 	0x3256
 };
 
-static const UV PL_NV__26_invlist[] = { /* for all charsets */
+static const UV UNI_NV__26_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323583,7 +323856,7 @@ static const UV PL_NV__26_invlist[] = { /* for all charsets */
 	0x3257
 };
 
-static const UV PL_NV__27_invlist[] = { /* for all charsets */
+static const UV UNI_NV__27_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323593,7 +323866,7 @@ static const UV PL_NV__27_invlist[] = { /* for all charsets */
 	0x3258
 };
 
-static const UV PL_NV__28_invlist[] = { /* for all charsets */
+static const UV UNI_NV__28_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323603,7 +323876,7 @@ static const UV PL_NV__28_invlist[] = { /* for all charsets */
 	0x3259
 };
 
-static const UV PL_NV__29_invlist[] = { /* for all charsets */
+static const UV UNI_NV__29_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323615,7 +323888,7 @@ static const UV PL_NV__29_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__3_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__3_invlist[] = {  /* for ASCII/Latin1 */
 	253,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -323882,7 +324155,7 @@ static const UV PL_NV__3_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__3_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__3_invlist[] = {  /* for EBCDIC 1047 */
 	253,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324149,7 +324422,7 @@ static const UV PL_NV__3_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__3_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__3_invlist[] = {  /* for EBCDIC 037 */
 	253,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324411,7 +324684,7 @@ static const UV PL_NV__3_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__3_SLASH_16_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3_SLASH_16_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324427,7 +324700,7 @@ static const UV PL_NV__3_SLASH_16_invlist[] = { /* for all charsets */
 	0xA836
 };
 
-static const UV PL_NV__3_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324437,7 +324710,7 @@ static const UV PL_NV__3_SLASH_2_invlist[] = { /* for all charsets */
 	0xF2C
 };
 
-static const UV PL_NV__3_SLASH_20_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3_SLASH_20_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324449,7 +324722,7 @@ static const UV PL_NV__3_SLASH_20_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__3_SLASH_4_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__3_SLASH_4_invlist[] = {  /* for ASCII/Latin1 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324480,7 +324753,7 @@ static const UV PL_NV__3_SLASH_4_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__3_SLASH_4_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__3_SLASH_4_invlist[] = {  /* for EBCDIC 1047 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324511,7 +324784,7 @@ static const UV PL_NV__3_SLASH_4_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__3_SLASH_4_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__3_SLASH_4_invlist[] = {  /* for EBCDIC 037 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324537,7 +324810,7 @@ static const UV PL_NV__3_SLASH_4_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__3_SLASH_5_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3_SLASH_5_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324547,7 +324820,7 @@ static const UV PL_NV__3_SLASH_5_invlist[] = { /* for all charsets */
 	0x2158
 };
 
-static const UV PL_NV__3_SLASH_8_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3_SLASH_8_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324557,7 +324830,7 @@ static const UV PL_NV__3_SLASH_8_invlist[] = { /* for all charsets */
 	0x215D
 };
 
-static const UV PL_NV__3_SLASH_80_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3_SLASH_80_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324567,7 +324840,7 @@ static const UV PL_NV__3_SLASH_80_invlist[] = { /* for all charsets */
 	0xD5B
 };
 
-static const UV PL_NV__30_invlist[] = { /* for all charsets */
+static const UV UNI_NV__30_invlist[] = {  /* for all charsets */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324611,7 +324884,7 @@ static const UV PL_NV__30_invlist[] = { /* for all charsets */
 	0x20984
 };
 
-static const UV PL_NV__300_invlist[] = { /* for all charsets */
+static const UV UNI_NV__300_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324631,7 +324904,7 @@ static const UV PL_NV__300_invlist[] = { /* for all charsets */
 	0x1EC86
 };
 
-static const UV PL_NV__3000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__3000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324645,7 +324918,7 @@ static const UV PL_NV__3000_invlist[] = { /* for all charsets */
 	0x1EC8F
 };
 
-static const UV PL_NV__30000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__30000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324659,7 +324932,7 @@ static const UV PL_NV__30000_invlist[] = { /* for all charsets */
 	0x1EC98
 };
 
-static const UV PL_NV__300000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__300000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324669,7 +324942,7 @@ static const UV PL_NV__300000_invlist[] = { /* for all charsets */
 	0x109F0
 };
 
-static const UV PL_NV__31_invlist[] = { /* for all charsets */
+static const UV UNI_NV__31_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324679,7 +324952,7 @@ static const UV PL_NV__31_invlist[] = { /* for all charsets */
 	0x325C
 };
 
-static const UV PL_NV__32_invlist[] = { /* for all charsets */
+static const UV UNI_NV__32_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324689,7 +324962,7 @@ static const UV PL_NV__32_invlist[] = { /* for all charsets */
 	0x325D
 };
 
-static const UV PL_NV__33_invlist[] = { /* for all charsets */
+static const UV UNI_NV__33_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324699,7 +324972,7 @@ static const UV PL_NV__33_invlist[] = { /* for all charsets */
 	0x325E
 };
 
-static const UV PL_NV__34_invlist[] = { /* for all charsets */
+static const UV UNI_NV__34_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324709,7 +324982,7 @@ static const UV PL_NV__34_invlist[] = { /* for all charsets */
 	0x325F
 };
 
-static const UV PL_NV__35_invlist[] = { /* for all charsets */
+static const UV UNI_NV__35_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324719,7 +324992,7 @@ static const UV PL_NV__35_invlist[] = { /* for all charsets */
 	0x3260
 };
 
-static const UV PL_NV__36_invlist[] = { /* for all charsets */
+static const UV UNI_NV__36_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324729,7 +325002,7 @@ static const UV PL_NV__36_invlist[] = { /* for all charsets */
 	0x32B2
 };
 
-static const UV PL_NV__37_invlist[] = { /* for all charsets */
+static const UV UNI_NV__37_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324739,7 +325012,7 @@ static const UV PL_NV__37_invlist[] = { /* for all charsets */
 	0x32B3
 };
 
-static const UV PL_NV__38_invlist[] = { /* for all charsets */
+static const UV UNI_NV__38_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324749,7 +325022,7 @@ static const UV PL_NV__38_invlist[] = { /* for all charsets */
 	0x32B4
 };
 
-static const UV PL_NV__39_invlist[] = { /* for all charsets */
+static const UV UNI_NV__39_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -324761,7 +325034,7 @@ static const UV PL_NV__39_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__4_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__4_invlist[] = {  /* for ASCII/Latin1 */
 	239,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325014,7 +325287,7 @@ static const UV PL_NV__4_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__4_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__4_invlist[] = {  /* for EBCDIC 1047 */
 	239,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325267,7 +325540,7 @@ static const UV PL_NV__4_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__4_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__4_invlist[] = {  /* for EBCDIC 037 */
 	239,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325515,7 +325788,7 @@ static const UV PL_NV__4_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__4_SLASH_5_invlist[] = { /* for all charsets */
+static const UV UNI_NV__4_SLASH_5_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325525,7 +325798,7 @@ static const UV PL_NV__4_SLASH_5_invlist[] = { /* for all charsets */
 	0x2159
 };
 
-static const UV PL_NV__40_invlist[] = { /* for all charsets */
+static const UV UNI_NV__40_invlist[] = {  /* for all charsets */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325567,7 +325840,7 @@ static const UV PL_NV__40_invlist[] = { /* for all charsets */
 	0x2099D
 };
 
-static const UV PL_NV__400_invlist[] = { /* for all charsets */
+static const UV UNI_NV__400_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325585,7 +325858,7 @@ static const UV PL_NV__400_invlist[] = { /* for all charsets */
 	0x1EC87
 };
 
-static const UV PL_NV__4000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__4000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325599,7 +325872,7 @@ static const UV PL_NV__4000_invlist[] = { /* for all charsets */
 	0x1EC90
 };
 
-static const UV PL_NV__40000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__40000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325613,7 +325886,7 @@ static const UV PL_NV__40000_invlist[] = { /* for all charsets */
 	0x1EC99
 };
 
-static const UV PL_NV__400000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__400000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325623,7 +325896,7 @@ static const UV PL_NV__400000_invlist[] = { /* for all charsets */
 	0x109F1
 };
 
-static const UV PL_NV__41_invlist[] = { /* for all charsets */
+static const UV UNI_NV__41_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325633,7 +325906,7 @@ static const UV PL_NV__41_invlist[] = { /* for all charsets */
 	0x32B7
 };
 
-static const UV PL_NV__42_invlist[] = { /* for all charsets */
+static const UV UNI_NV__42_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325643,7 +325916,7 @@ static const UV PL_NV__42_invlist[] = { /* for all charsets */
 	0x32B8
 };
 
-static const UV PL_NV__43_invlist[] = { /* for all charsets */
+static const UV UNI_NV__43_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325653,7 +325926,7 @@ static const UV PL_NV__43_invlist[] = { /* for all charsets */
 	0x32B9
 };
 
-static const UV PL_NV__432000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__432000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325663,7 +325936,7 @@ static const UV PL_NV__432000_invlist[] = { /* for all charsets */
 	0x12434
 };
 
-static const UV PL_NV__44_invlist[] = { /* for all charsets */
+static const UV UNI_NV__44_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325673,7 +325946,7 @@ static const UV PL_NV__44_invlist[] = { /* for all charsets */
 	0x32BA
 };
 
-static const UV PL_NV__45_invlist[] = { /* for all charsets */
+static const UV UNI_NV__45_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325683,7 +325956,7 @@ static const UV PL_NV__45_invlist[] = { /* for all charsets */
 	0x32BB
 };
 
-static const UV PL_NV__46_invlist[] = { /* for all charsets */
+static const UV UNI_NV__46_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325693,7 +325966,7 @@ static const UV PL_NV__46_invlist[] = { /* for all charsets */
 	0x32BC
 };
 
-static const UV PL_NV__47_invlist[] = { /* for all charsets */
+static const UV UNI_NV__47_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325703,7 +325976,7 @@ static const UV PL_NV__47_invlist[] = { /* for all charsets */
 	0x32BD
 };
 
-static const UV PL_NV__48_invlist[] = { /* for all charsets */
+static const UV UNI_NV__48_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325713,7 +325986,7 @@ static const UV PL_NV__48_invlist[] = { /* for all charsets */
 	0x32BE
 };
 
-static const UV PL_NV__49_invlist[] = { /* for all charsets */
+static const UV UNI_NV__49_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325725,7 +325998,7 @@ static const UV PL_NV__49_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__5_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__5_invlist[] = {  /* for ASCII/Latin1 */
 	245,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -325984,7 +326257,7 @@ static const UV PL_NV__5_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__5_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__5_invlist[] = {  /* for EBCDIC 1047 */
 	245,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326243,7 +326516,7 @@ static const UV PL_NV__5_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__5_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__5_invlist[] = {  /* for EBCDIC 037 */
 	245,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326497,7 +326770,7 @@ static const UV PL_NV__5_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__5_SLASH_12_invlist[] = { /* for all charsets */
+static const UV UNI_NV__5_SLASH_12_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326507,7 +326780,7 @@ static const UV PL_NV__5_SLASH_12_invlist[] = { /* for all charsets */
 	0x109FB
 };
 
-static const UV PL_NV__5_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__5_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326517,7 +326790,7 @@ static const UV PL_NV__5_SLASH_2_invlist[] = { /* for all charsets */
 	0xF2D
 };
 
-static const UV PL_NV__5_SLASH_6_invlist[] = { /* for all charsets */
+static const UV UNI_NV__5_SLASH_6_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326531,7 +326804,7 @@ static const UV PL_NV__5_SLASH_6_invlist[] = { /* for all charsets */
 	0x1245D
 };
 
-static const UV PL_NV__5_SLASH_8_invlist[] = { /* for all charsets */
+static const UV UNI_NV__5_SLASH_8_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326541,7 +326814,7 @@ static const UV PL_NV__5_SLASH_8_invlist[] = { /* for all charsets */
 	0x215E
 };
 
-static const UV PL_NV__50_invlist[] = { /* for all charsets */
+static const UV UNI_NV__50_invlist[] = {  /* for all charsets */
 	51,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326599,7 +326872,7 @@ static const UV PL_NV__50_invlist[] = { /* for all charsets */
 	0x1EC7F
 };
 
-static const UV PL_NV__500_invlist[] = { /* for all charsets */
+static const UV UNI_NV__500_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326629,7 +326902,7 @@ static const UV PL_NV__500_invlist[] = { /* for all charsets */
 	0x1EC88
 };
 
-static const UV PL_NV__5000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__5000_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326651,7 +326924,7 @@ static const UV PL_NV__5000_invlist[] = { /* for all charsets */
 	0x1EC91
 };
 
-static const UV PL_NV__50000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__50000_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326671,7 +326944,7 @@ static const UV PL_NV__50000_invlist[] = { /* for all charsets */
 	0x1EC9A
 };
 
-static const UV PL_NV__500000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__500000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326683,7 +326956,7 @@ static const UV PL_NV__500000_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__6_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__6_invlist[] = {  /* for ASCII/Latin1 */
 	215,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -326912,7 +327185,7 @@ static const UV PL_NV__6_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__6_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__6_invlist[] = {  /* for EBCDIC 1047 */
 	215,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327141,7 +327414,7 @@ static const UV PL_NV__6_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__6_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__6_invlist[] = {  /* for EBCDIC 037 */
 	215,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327365,7 +327638,7 @@ static const UV PL_NV__6_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__60_invlist[] = { /* for all charsets */
+static const UV UNI_NV__60_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327397,7 +327670,7 @@ static const UV PL_NV__60_invlist[] = { /* for all charsets */
 	0x1EC80
 };
 
-static const UV PL_NV__600_invlist[] = { /* for all charsets */
+static const UV UNI_NV__600_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327415,7 +327688,7 @@ static const UV PL_NV__600_invlist[] = { /* for all charsets */
 	0x1EC89
 };
 
-static const UV PL_NV__6000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__6000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327429,7 +327702,7 @@ static const UV PL_NV__6000_invlist[] = { /* for all charsets */
 	0x1EC92
 };
 
-static const UV PL_NV__60000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__60000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327443,7 +327716,7 @@ static const UV PL_NV__60000_invlist[] = { /* for all charsets */
 	0x1EC9B
 };
 
-static const UV PL_NV__600000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__600000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327455,7 +327728,7 @@ static const UV PL_NV__600000_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__7_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__7_invlist[] = {  /* for ASCII/Latin1 */
 	209,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327678,7 +327951,7 @@ static const UV PL_NV__7_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__7_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__7_invlist[] = {  /* for EBCDIC 1047 */
 	209,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -327901,7 +328174,7 @@ static const UV PL_NV__7_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__7_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__7_invlist[] = {  /* for EBCDIC 037 */
 	209,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328119,7 +328392,7 @@ static const UV PL_NV__7_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__7_SLASH_12_invlist[] = { /* for all charsets */
+static const UV UNI_NV__7_SLASH_12_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328129,7 +328402,7 @@ static const UV PL_NV__7_SLASH_12_invlist[] = { /* for all charsets */
 	0x109FD
 };
 
-static const UV PL_NV__7_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__7_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328139,7 +328412,7 @@ static const UV PL_NV__7_SLASH_2_invlist[] = { /* for all charsets */
 	0xF2E
 };
 
-static const UV PL_NV__7_SLASH_8_invlist[] = { /* for all charsets */
+static const UV UNI_NV__7_SLASH_8_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328149,7 +328422,7 @@ static const UV PL_NV__7_SLASH_8_invlist[] = { /* for all charsets */
 	0x215F
 };
 
-static const UV PL_NV__70_invlist[] = { /* for all charsets */
+static const UV UNI_NV__70_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328181,7 +328454,7 @@ static const UV PL_NV__70_invlist[] = { /* for all charsets */
 	0x1EC81
 };
 
-static const UV PL_NV__700_invlist[] = { /* for all charsets */
+static const UV UNI_NV__700_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328199,7 +328472,7 @@ static const UV PL_NV__700_invlist[] = { /* for all charsets */
 	0x1EC8A
 };
 
-static const UV PL_NV__7000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__7000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328213,7 +328486,7 @@ static const UV PL_NV__7000_invlist[] = { /* for all charsets */
 	0x1EC93
 };
 
-static const UV PL_NV__70000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__70000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328227,7 +328500,7 @@ static const UV PL_NV__70000_invlist[] = { /* for all charsets */
 	0x1EC9C
 };
 
-static const UV PL_NV__700000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__700000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328239,7 +328512,7 @@ static const UV PL_NV__700000_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__8_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__8_invlist[] = {  /* for ASCII/Latin1 */
 	203,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328456,7 +328729,7 @@ static const UV PL_NV__8_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__8_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__8_invlist[] = {  /* for EBCDIC 1047 */
 	203,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328673,7 +328946,7 @@ static const UV PL_NV__8_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__8_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__8_invlist[] = {  /* for EBCDIC 037 */
 	203,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328885,7 +329158,7 @@ static const UV PL_NV__8_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__80_invlist[] = { /* for all charsets */
+static const UV UNI_NV__80_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328915,7 +329188,7 @@ static const UV PL_NV__80_invlist[] = { /* for all charsets */
 	0x1EC82
 };
 
-static const UV PL_NV__800_invlist[] = { /* for all charsets */
+static const UV UNI_NV__800_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328933,7 +329206,7 @@ static const UV PL_NV__800_invlist[] = { /* for all charsets */
 	0x1EC8B
 };
 
-static const UV PL_NV__8000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__8000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328947,7 +329220,7 @@ static const UV PL_NV__8000_invlist[] = { /* for all charsets */
 	0x1EC94
 };
 
-static const UV PL_NV__80000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__80000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328961,7 +329234,7 @@ static const UV PL_NV__80000_invlist[] = { /* for all charsets */
 	0x1EC9D
 };
 
-static const UV PL_NV__800000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__800000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -328973,7 +329246,7 @@ static const UV PL_NV__800000_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__9_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__9_invlist[] = {  /* for ASCII/Latin1 */
 	207,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329194,7 +329467,7 @@ static const UV PL_NV__9_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__9_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__9_invlist[] = {  /* for EBCDIC 1047 */
 	207,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329415,7 +329688,7 @@ static const UV PL_NV__9_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__9_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__9_invlist[] = {  /* for EBCDIC 037 */
 	207,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329631,7 +329904,7 @@ static const UV PL_NV__9_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_NV__9_SLASH_2_invlist[] = { /* for all charsets */
+static const UV UNI_NV__9_SLASH_2_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329641,7 +329914,7 @@ static const UV PL_NV__9_SLASH_2_invlist[] = { /* for all charsets */
 	0xF2F
 };
 
-static const UV PL_NV__90_invlist[] = { /* for all charsets */
+static const UV UNI_NV__90_invlist[] = {  /* for all charsets */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329671,7 +329944,7 @@ static const UV PL_NV__90_invlist[] = { /* for all charsets */
 	0x1EC83
 };
 
-static const UV PL_NV__900_invlist[] = { /* for all charsets */
+static const UV UNI_NV__900_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329691,7 +329964,7 @@ static const UV PL_NV__900_invlist[] = { /* for all charsets */
 	0x1EC8C
 };
 
-static const UV PL_NV__9000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__9000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329705,7 +329978,7 @@ static const UV PL_NV__9000_invlist[] = { /* for all charsets */
 	0x1EC95
 };
 
-static const UV PL_NV__90000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__90000_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329719,7 +329992,7 @@ static const UV PL_NV__90000_invlist[] = { /* for all charsets */
 	0x1EC9E
 };
 
-static const UV PL_NV__900000_invlist[] = { /* for all charsets */
+static const UV UNI_NV__900000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -329731,7 +330004,7 @@ static const UV PL_NV__900000_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_NV__NAN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
 	395,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -330140,7 +330413,7 @@ static const UV PL_NV__NAN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__NAN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_NV__NAN_invlist[] = {  /* for EBCDIC 1047 */
 	395,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -330549,7 +330822,7 @@ static const UV PL_NV__NAN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_NV__NAN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_NV__NAN_invlist[] = {  /* for EBCDIC 037 */
 	395,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -330953,7 +331226,7 @@ static const UV PL_NV__NAN_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_OCR_invlist[] = { /* for all charsets */
+static const UV UNI_OCR_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -330963,7 +331236,7 @@ static const UV PL_OCR_invlist[] = { /* for all charsets */
 	0x2460
 };
 
-static const UV PL_OGAM_invlist[] = { /* for all charsets */
+static const UV UNI_OGAM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -330973,7 +331246,7 @@ static const UV PL_OGAM_invlist[] = { /* for all charsets */
 	0x169D
 };
 
-static const UV PL_OLCK_invlist[] = { /* for all charsets */
+static const UV UNI_OLCK_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -330983,7 +331256,7 @@ static const UV PL_OLCK_invlist[] = { /* for all charsets */
 	0x1C80
 };
 
-static const UV PL_ORKH_invlist[] = { /* for all charsets */
+static const UV UNI_ORKH_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -330993,7 +331266,7 @@ static const UV PL_ORKH_invlist[] = { /* for all charsets */
 	0x10C49
 };
 
-static const UV PL_ORNAMENTALDINGBATS_invlist[] = { /* for all charsets */
+static const UV UNI_ORNAMENTALDINGBATS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -331003,7 +331276,7 @@ static const UV PL_ORNAMENTALDINGBATS_invlist[] = { /* for all charsets */
 	0x1F680
 };
 
-static const UV PL_ORYA_invlist[] = { /* for all charsets */
+static const UV UNI_ORYA_invlist[] = {  /* for all charsets */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -331045,7 +331318,7 @@ static const UV PL_ORYA_invlist[] = { /* for all charsets */
 	0x1CDB
 };
 
-static const UV PL_OSGE_invlist[] = { /* for all charsets */
+static const UV UNI_OSGE_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -331057,7 +331330,7 @@ static const UV PL_OSGE_invlist[] = { /* for all charsets */
 	0x104FC
 };
 
-static const UV PL_OSMA_invlist[] = { /* for all charsets */
+static const UV UNI_OSMA_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -331071,7 +331344,7 @@ static const UV PL_OSMA_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_P_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_P_invlist[] = {  /* for ASCII/Latin1 */
 	357,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -331442,7 +331715,7 @@ static const UV PL_P_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_P_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_P_invlist[] = {  /* for EBCDIC 1047 */
 	365,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -331821,7 +332094,7 @@ static const UV PL_P_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_P_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_P_invlist[] = {  /* for EBCDIC 037 */
 	363,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332193,7 +332466,7 @@ static const UV PL_P_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PALM_invlist[] = { /* for all charsets */
+static const UV UNI_PALM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332205,7 +332478,7 @@ static const UV PL_PALM_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PATSYN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PATSYN_invlist[] = {  /* for ASCII/Latin1 */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332276,7 +332549,7 @@ static const UV PL_PATSYN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PATSYN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PATSYN_invlist[] = {  /* for EBCDIC 1047 */
 	61,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332351,7 +332624,7 @@ static const UV PL_PATSYN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PATSYN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PATSYN_invlist[] = {  /* for EBCDIC 037 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332419,7 +332692,7 @@ static const UV PL_PATSYN_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PAUC_invlist[] = { /* for all charsets */
+static const UV UNI_PAUC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332431,7 +332704,7 @@ static const UV PL_PAUC_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PC_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PC_invlist[] = {  /* for ASCII/Latin1 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332458,7 +332731,7 @@ static const UV PL_PC_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PC_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PC_invlist[] = {  /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332485,7 +332758,7 @@ static const UV PL_PC_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PC_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PC_invlist[] = {  /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332507,7 +332780,7 @@ static const UV PL_PC_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PCM_invlist[] = { /* for all charsets */
+static const UV UNI_PCM_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332529,7 +332802,7 @@ static const UV PL_PCM_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PD_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PD_invlist[] = {  /* for ASCII/Latin1 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332578,7 +332851,7 @@ static const UV PL_PD_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PD_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PD_invlist[] = {  /* for EBCDIC 1047 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332627,7 +332900,7 @@ static const UV PL_PD_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PD_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PD_invlist[] = {  /* for EBCDIC 037 */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332673,7 +332946,7 @@ static const UV PL_PD_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PE_invlist[] = {  /* for ASCII/Latin1 */
 	145,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332832,7 +333105,7 @@ static const UV PL_PE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PE_invlist[] = {  /* for EBCDIC 1047 */
 	145,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -332991,7 +333264,7 @@ static const UV PL_PE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PE_invlist[] = {  /* for EBCDIC 037 */
 	145,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333145,7 +333418,7 @@ static const UV PL_PE_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PERM_invlist[] = { /* for all charsets */
+static const UV UNI_PERM_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333159,7 +333432,7 @@ static const UV PL_PERM_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PF_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PF_invlist[] = {  /* for ASCII/Latin1 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333194,7 +333467,7 @@ static const UV PL_PF_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PF_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PF_invlist[] = {  /* for EBCDIC 1047 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333229,7 +333502,7 @@ static const UV PL_PF_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PF_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PF_invlist[] = {  /* for EBCDIC 037 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333259,7 +333532,7 @@ static const UV PL_PF_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PHAG_invlist[] = { /* for all charsets */
+static const UV UNI_PHAG_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333273,7 +333546,7 @@ static const UV PL_PHAG_invlist[] = { /* for all charsets */
 	0xA878
 };
 
-static const UV PL_PHAISTOS_invlist[] = { /* for all charsets */
+static const UV UNI_PHAISTOS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333283,7 +333556,7 @@ static const UV PL_PHAISTOS_invlist[] = { /* for all charsets */
 	0x10200
 };
 
-static const UV PL_PHLI_invlist[] = { /* for all charsets */
+static const UV UNI_PHLI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333295,7 +333568,7 @@ static const UV PL_PHLI_invlist[] = { /* for all charsets */
 	0x10B80
 };
 
-static const UV PL_PHLP_invlist[] = { /* for all charsets */
+static const UV UNI_PHLP_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333311,7 +333584,7 @@ static const UV PL_PHLP_invlist[] = { /* for all charsets */
 	0x10BB0
 };
 
-static const UV PL_PHNX_invlist[] = { /* for all charsets */
+static const UV UNI_PHNX_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333323,7 +333596,7 @@ static const UV PL_PHNX_invlist[] = { /* for all charsets */
 	0x10920
 };
 
-static const UV PL_PHONETICEXT_invlist[] = { /* for all charsets */
+static const UV UNI_PHONETICEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333333,7 +333606,7 @@ static const UV PL_PHONETICEXT_invlist[] = { /* for all charsets */
 	0x1D80
 };
 
-static const UV PL_PHONETICEXTSUP_invlist[] = { /* for all charsets */
+static const UV UNI_PHONETICEXTSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333345,7 +333618,7 @@ static const UV PL_PHONETICEXTSUP_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PI_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PI_invlist[] = {  /* for ASCII/Latin1 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333382,7 +333655,7 @@ static const UV PL_PI_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PI_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PI_invlist[] = {  /* for EBCDIC 1047 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333419,7 +333692,7 @@ static const UV PL_PI_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PI_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PI_invlist[] = {  /* for EBCDIC 037 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333451,7 +333724,7 @@ static const UV PL_PI_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PLAYINGCARDS_invlist[] = { /* for all charsets */
+static const UV UNI_PLAYINGCARDS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333463,7 +333736,7 @@ static const UV PL_PLAYINGCARDS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PO_invlist[] = {  /* for ASCII/Latin1 */
 	351,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -333828,7 +334101,7 @@ static const UV PL_PO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PO_invlist[] = {  /* for EBCDIC 1047 */
 	355,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -334197,7 +334470,7 @@ static const UV PL_PO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PO_invlist[] = {  /* for EBCDIC 037 */
 	355,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -334561,7 +334834,7 @@ static const UV PL_PO_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PRTI_invlist[] = { /* for all charsets */
+static const UV UNI_PRTI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -334575,7 +334848,7 @@ static const UV PL_PRTI_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_PS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_PS_invlist[] = {  /* for ASCII/Latin1 */
 	151,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -334740,7 +335013,7 @@ static const UV PL_PS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_PS_invlist[] = {  /* for EBCDIC 1047 */
 	151,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -334905,7 +335178,7 @@ static const UV PL_PS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_PS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_PS_invlist[] = {  /* for EBCDIC 037 */
 	151,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335065,7 +335338,7 @@ static const UV PL_PS_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_PUA_invlist[] = { /* for all charsets */
+static const UV UNI_PUA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335075,7 +335348,7 @@ static const UV PL_PUA_invlist[] = { /* for all charsets */
 	0xF900
 };
 
-static const UV PL_QAAI_invlist[] = { /* for all charsets */
+static const UV UNI_QAAI_invlist[] = {  /* for all charsets */
 	33,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335117,7 +335390,7 @@ static const UV PL_QAAI_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_QMARK_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_QMARK_invlist[] = {  /* for ASCII/Latin1 */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335158,7 +335431,7 @@ static const UV PL_QMARK_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_QMARK_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_QMARK_invlist[] = {  /* for EBCDIC 1047 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335197,7 +335470,7 @@ static const UV PL_QMARK_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_QMARK_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_QMARK_invlist[] = {  /* for EBCDIC 037 */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335231,7 +335504,7 @@ static const UV PL_QMARK_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_RADICAL_invlist[] = { /* for all charsets */
+static const UV UNI_RADICAL_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335245,7 +335518,7 @@ static const UV PL_RADICAL_invlist[] = { /* for all charsets */
 	0x2FD6
 };
 
-static const UV PL_RI_invlist[] = { /* for all charsets */
+static const UV UNI_RI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335255,7 +335528,7 @@ static const UV PL_RI_invlist[] = { /* for all charsets */
 	0x1F200
 };
 
-static const UV PL_RJNG_invlist[] = { /* for all charsets */
+static const UV UNI_RJNG_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335267,7 +335540,7 @@ static const UV PL_RJNG_invlist[] = { /* for all charsets */
 	0xA960
 };
 
-static const UV PL_ROHG_invlist[] = { /* for all charsets */
+static const UV UNI_ROHG_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335289,7 +335562,7 @@ static const UV PL_ROHG_invlist[] = { /* for all charsets */
 	0x10D3A
 };
 
-static const UV PL_RUMI_invlist[] = { /* for all charsets */
+static const UV UNI_RUMI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335299,7 +335572,7 @@ static const UV PL_RUMI_invlist[] = { /* for all charsets */
 	0x10E80
 };
 
-static const UV PL_RUNR_invlist[] = { /* for all charsets */
+static const UV UNI_RUNR_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335313,7 +335586,7 @@ static const UV PL_RUNR_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_S_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_S_invlist[] = {  /* for ASCII/Latin1 */
 	441,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -335768,7 +336041,7 @@ static const UV PL_S_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_S_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_S_invlist[] = {  /* for EBCDIC 1047 */
 	447,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336229,7 +336502,7 @@ static const UV PL_S_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_S_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_S_invlist[] = {  /* for EBCDIC 037 */
 	445,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336683,7 +336956,7 @@ static const UV PL_S_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SAMR_invlist[] = { /* for all charsets */
+static const UV UNI_SAMR_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336695,7 +336968,7 @@ static const UV PL_SAMR_invlist[] = { /* for all charsets */
 	0x83F
 };
 
-static const UV PL_SARB_invlist[] = { /* for all charsets */
+static const UV UNI_SARB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336705,7 +336978,7 @@ static const UV PL_SARB_invlist[] = { /* for all charsets */
 	0x10A80
 };
 
-static const UV PL_SAUR_invlist[] = { /* for all charsets */
+static const UV UNI_SAUR_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336719,7 +336992,7 @@ static const UV PL_SAUR_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__AT_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__AT_invlist[] = {  /* for ASCII/Latin1 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336742,7 +337015,7 @@ static const UV PL_SB__AT_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__AT_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__AT_invlist[] = {  /* for EBCDIC 1047 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336765,7 +337038,7 @@ static const UV PL_SB__AT_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__AT_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__AT_invlist[] = {  /* for EBCDIC 037 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336785,7 +337058,7 @@ static const UV PL_SB__AT_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__CL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__CL_invlist[] = {  /* for ASCII/Latin1 */
 	89,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336888,7 +337161,7 @@ static const UV PL_SB__CL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__CL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__CL_invlist[] = {  /* for EBCDIC 1047 */
 	91,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -336993,7 +337266,7 @@ static const UV PL_SB__CL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__CL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__CL_invlist[] = {  /* for EBCDIC 037 */
 	89,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -337091,7 +337364,7 @@ static const UV PL_SB__CL_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SB__EX_invlist[] = { /* for all charsets */
+static const UV UNI_SB__EX_invlist[] = {  /* for all charsets */
 	557,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -337657,7 +337930,7 @@ static const UV PL_SB__EX_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__FO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__FO_invlist[] = {  /* for ASCII/Latin1 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -337710,7 +337983,7 @@ static const UV PL_SB__FO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__FO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__FO_invlist[] = {  /* for EBCDIC 1047 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -337763,7 +338036,7 @@ static const UV PL_SB__FO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__FO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__FO_invlist[] = {  /* for EBCDIC 037 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -337811,7 +338084,7 @@ static const UV PL_SB__FO_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SB__LE_invlist[] = { /* for all charsets */
+static const UV UNI_SB__LE_invlist[] = {  /* for all charsets */
 	989,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -338809,7 +339082,7 @@ static const UV PL_SB__LE_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__LO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__LO_invlist[] = {  /* for ASCII/Latin1 */
 	1289,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -340112,7 +340385,7 @@ static const UV PL_SB__LO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__LO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__LO_invlist[] = {  /* for EBCDIC 1047 */
 	1297,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -341423,7 +341696,7 @@ static const UV PL_SB__LO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__LO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__LO_invlist[] = {  /* for EBCDIC 037 */
 	1297,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342731,7 +343004,7 @@ static const UV PL_SB__LO_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__SC_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__SC_invlist[] = {  /* for ASCII/Latin1 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342784,7 +343057,7 @@ static const UV PL_SB__SC_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__SC_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__SC_invlist[] = {  /* for EBCDIC 1047 */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342839,7 +343112,7 @@ static const UV PL_SB__SC_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__SC_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__SC_invlist[] = {  /* for EBCDIC 037 */
 	41,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342891,7 +343164,7 @@ static const UV PL_SB__SC_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__SE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__SE_invlist[] = {  /* for ASCII/Latin1 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342910,7 +343183,7 @@ static const UV PL_SB__SE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__SE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__SE_invlist[] = {  /* for EBCDIC 1047 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342929,7 +343202,7 @@ static const UV PL_SB__SE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__SE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__SE_invlist[] = {  /* for EBCDIC 037 */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342945,7 +343218,7 @@ static const UV PL_SB__SE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__SP_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__SP_invlist[] = {  /* for ASCII/Latin1 */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -342978,7 +343251,7 @@ static const UV PL_SB__SP_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__SP_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__SP_invlist[] = {  /* for EBCDIC 1047 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -343009,7 +343282,7 @@ static const UV PL_SB__SP_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__SP_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__SP_invlist[] = {  /* for EBCDIC 037 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -343037,7 +343310,7 @@ static const UV PL_SB__SP_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__ST_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__ST_invlist[] = {  /* for ASCII/Latin1 */
 	143,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -343194,7 +343467,7 @@ static const UV PL_SB__ST_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__ST_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__ST_invlist[] = {  /* for EBCDIC 1047 */
 	143,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -343351,7 +343624,7 @@ static const UV PL_SB__ST_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__ST_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__ST_invlist[] = {  /* for EBCDIC 037 */
 	143,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -343505,7 +343778,7 @@ static const UV PL_SB__ST_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__UP_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__UP_invlist[] = {  /* for ASCII/Latin1 */
 	1279,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -344798,7 +345071,7 @@ static const UV PL_SB__UP_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__UP_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__UP_invlist[] = {  /* for EBCDIC 1047 */
 	1297,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -346109,7 +346382,7 @@ static const UV PL_SB__UP_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__UP_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__UP_invlist[] = {  /* for EBCDIC 037 */
 	1293,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -347413,7 +347686,7 @@ static const UV PL_SB__UP_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SB__XX_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	1565,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -348992,7 +349265,7 @@ static const UV PL_SB__XX_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__XX_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	1585,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -350591,7 +350864,7 @@ static const UV PL_SB__XX_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SB__XX_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SB__XX_invlist[] = {  /* for EBCDIC 037 */
 	1583,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -352185,7 +352458,7 @@ static const UV PL_SB__XX_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SC_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SC_invlist[] = {  /* for ASCII/Latin1 */
 	39,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352238,7 +352511,7 @@ static const UV PL_SC_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SC_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SC_invlist[] = {  /* for EBCDIC 1047 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352295,7 +352568,7 @@ static const UV PL_SC_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SC_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SC_invlist[] = {  /* for EBCDIC 037 */
 	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352347,7 +352620,7 @@ static const UV PL_SC_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SC__ADLM_invlist[] = { /* for all charsets */
+static const UV UNI_SC__ADLM_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352361,7 +352634,7 @@ static const UV PL_SC__ADLM_invlist[] = { /* for all charsets */
 	0x1E960
 };
 
-static const UV PL_SC__ARAB_invlist[] = { /* for all charsets */
+static const UV UNI_SC__ARAB_invlist[] = {  /* for all charsets */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352483,7 +352756,7 @@ static const UV PL_SC__ARAB_invlist[] = { /* for all charsets */
 	0x1EEF2
 };
 
-static const UV PL_SC__ARMN_invlist[] = { /* for all charsets */
+static const UV UNI_SC__ARMN_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352501,7 +352774,7 @@ static const UV PL_SC__ARMN_invlist[] = { /* for all charsets */
 	0xFB18
 };
 
-static const UV PL_SC__BENG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__BENG_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352537,7 +352810,7 @@ static const UV PL_SC__BENG_invlist[] = { /* for all charsets */
 	0x9FF
 };
 
-static const UV PL_SC__BOPO_invlist[] = { /* for all charsets */
+static const UV UNI_SC__BOPO_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352551,7 +352824,7 @@ static const UV PL_SC__BOPO_invlist[] = { /* for all charsets */
 	0x31BB
 };
 
-static const UV PL_SC__BUGI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__BUGI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352563,7 +352836,7 @@ static const UV PL_SC__BUGI_invlist[] = { /* for all charsets */
 	0x1A20
 };
 
-static const UV PL_SC__BUHD_invlist[] = { /* for all charsets */
+static const UV UNI_SC__BUHD_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352573,7 +352846,7 @@ static const UV PL_SC__BUHD_invlist[] = { /* for all charsets */
 	0x1754
 };
 
-static const UV PL_SC__CAKM_invlist[] = { /* for all charsets */
+static const UV UNI_SC__CAKM_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352585,7 +352858,7 @@ static const UV PL_SC__CAKM_invlist[] = { /* for all charsets */
 	0x11147
 };
 
-static const UV PL_SC__COPT_invlist[] = { /* for all charsets */
+static const UV UNI_SC__COPT_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352599,7 +352872,7 @@ static const UV PL_SC__COPT_invlist[] = { /* for all charsets */
 	0x2D00
 };
 
-static const UV PL_SC__CPRT_invlist[] = { /* for all charsets */
+static const UV UNI_SC__CPRT_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352619,7 +352892,7 @@ static const UV PL_SC__CPRT_invlist[] = { /* for all charsets */
 	0x10840
 };
 
-static const UV PL_SC__CYRL_invlist[] = { /* for all charsets */
+static const UV UNI_SC__CYRL_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352643,7 +352916,7 @@ static const UV PL_SC__CYRL_invlist[] = { /* for all charsets */
 	0xFE30
 };
 
-static const UV PL_SC__DEVA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__DEVA_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352659,7 +352932,7 @@ static const UV PL_SC__DEVA_invlist[] = { /* for all charsets */
 	0xA900
 };
 
-static const UV PL_SC__DOGR_invlist[] = { /* for all charsets */
+static const UV UNI_SC__DOGR_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352669,7 +352942,7 @@ static const UV PL_SC__DOGR_invlist[] = { /* for all charsets */
 	0x1183C
 };
 
-static const UV PL_SC__DUPL_invlist[] = { /* for all charsets */
+static const UV UNI_SC__DUPL_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352687,7 +352960,7 @@ static const UV PL_SC__DUPL_invlist[] = { /* for all charsets */
 	0x1BCA0
 };
 
-static const UV PL_SC__GEOR_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GEOR_invlist[] = {  /* for all charsets */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352715,7 +352988,7 @@ static const UV PL_SC__GEOR_invlist[] = { /* for all charsets */
 	0x2D2E
 };
 
-static const UV PL_SC__GLAG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GLAG_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352737,7 +353010,7 @@ static const UV PL_SC__GLAG_invlist[] = { /* for all charsets */
 	0x1E02B
 };
 
-static const UV PL_SC__GONG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GONG_invlist[] = {  /* for all charsets */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352757,7 +353030,7 @@ static const UV PL_SC__GONG_invlist[] = { /* for all charsets */
 	0x11DAA
 };
 
-static const UV PL_SC__GRAN_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GRAN_invlist[] = {  /* for all charsets */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352795,7 +353068,7 @@ static const UV PL_SC__GRAN_invlist[] = { /* for all charsets */
 	0x11375
 };
 
-static const UV PL_SC__GREK_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GREK_invlist[] = {  /* for all charsets */
 	73,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352875,7 +353148,7 @@ static const UV PL_SC__GREK_invlist[] = { /* for all charsets */
 	0x1D246
 };
 
-static const UV PL_SC__GUJR_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GUJR_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352911,7 +353184,7 @@ static const UV PL_SC__GUJR_invlist[] = { /* for all charsets */
 	0xB00
 };
 
-static const UV PL_SC__GURU_invlist[] = { /* for all charsets */
+static const UV UNI_SC__GURU_invlist[] = {  /* for all charsets */
 	33,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352951,7 +353224,7 @@ static const UV PL_SC__GURU_invlist[] = { /* for all charsets */
 	0xA77
 };
 
-static const UV PL_SC__HAN_invlist[] = { /* for all charsets */
+static const UV UNI_SC__HAN_invlist[] = {  /* for all charsets */
 	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -352993,7 +353266,7 @@ static const UV PL_SC__HAN_invlist[] = { /* for all charsets */
 	0x2FA1E
 };
 
-static const UV PL_SC__HANG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__HANG_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353029,7 +353302,7 @@ static const UV PL_SC__HANG_invlist[] = { /* for all charsets */
 	0xFFDD
 };
 
-static const UV PL_SC__HANO_invlist[] = { /* for all charsets */
+static const UV UNI_SC__HANO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353039,7 +353312,7 @@ static const UV PL_SC__HANO_invlist[] = { /* for all charsets */
 	0x1735
 };
 
-static const UV PL_SC__HIRA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__HIRA_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353055,7 +353328,7 @@ static const UV PL_SC__HIRA_invlist[] = { /* for all charsets */
 	0x1F201
 };
 
-static const UV PL_SC__JAVA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__JAVA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353069,7 +353342,7 @@ static const UV PL_SC__JAVA_invlist[] = { /* for all charsets */
 	0xA9E0
 };
 
-static const UV PL_SC__KALI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__KALI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353081,7 +353354,7 @@ static const UV PL_SC__KALI_invlist[] = { /* for all charsets */
 	0xA930
 };
 
-static const UV PL_SC__KANA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__KANA_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353105,7 +353378,7 @@ static const UV PL_SC__KANA_invlist[] = { /* for all charsets */
 	0x1B001
 };
 
-static const UV PL_SC__KHOJ_invlist[] = { /* for all charsets */
+static const UV UNI_SC__KHOJ_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353117,7 +353390,7 @@ static const UV PL_SC__KHOJ_invlist[] = { /* for all charsets */
 	0x1123F
 };
 
-static const UV PL_SC__KNDA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__KNDA_invlist[] = {  /* for all charsets */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353151,7 +353424,7 @@ static const UV PL_SC__KNDA_invlist[] = { /* for all charsets */
 	0xCF3
 };
 
-static const UV PL_SC__KTHI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__KTHI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353165,7 +353438,7 @@ static const UV PL_SC__KTHI_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SC__LATN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SC__LATN_invlist[] = {  /* for ASCII/Latin1 */
 	61,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353240,7 +353513,7 @@ static const UV PL_SC__LATN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SC__LATN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SC__LATN_invlist[] = {  /* for EBCDIC 1047 */
 	87,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353341,7 +353614,7 @@ static const UV PL_SC__LATN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SC__LATN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SC__LATN_invlist[] = {  /* for EBCDIC 037 */
 	83,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353433,7 +353706,7 @@ static const UV PL_SC__LATN_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SC__LIMB_invlist[] = { /* for all charsets */
+static const UV UNI_SC__LIMB_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353451,7 +353724,7 @@ static const UV PL_SC__LIMB_invlist[] = { /* for all charsets */
 	0x1950
 };
 
-static const UV PL_SC__LINA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__LINA_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353465,7 +353738,7 @@ static const UV PL_SC__LINA_invlist[] = { /* for all charsets */
 	0x10768
 };
 
-static const UV PL_SC__LINB_invlist[] = { /* for all charsets */
+static const UV UNI_SC__LINB_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353487,7 +353760,7 @@ static const UV PL_SC__LINB_invlist[] = { /* for all charsets */
 	0x100FB
 };
 
-static const UV PL_SC__MAHJ_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MAHJ_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353497,7 +353770,7 @@ static const UV PL_SC__MAHJ_invlist[] = { /* for all charsets */
 	0x11177
 };
 
-static const UV PL_SC__MAND_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MAND_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353509,7 +353782,7 @@ static const UV PL_SC__MAND_invlist[] = { /* for all charsets */
 	0x85F
 };
 
-static const UV PL_SC__MANI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MANI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353521,7 +353794,7 @@ static const UV PL_SC__MANI_invlist[] = { /* for all charsets */
 	0x10AF7
 };
 
-static const UV PL_SC__MLYM_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MLYM_invlist[] = {  /* for all charsets */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353545,7 +353818,7 @@ static const UV PL_SC__MLYM_invlist[] = { /* for all charsets */
 	0xD80
 };
 
-static const UV PL_SC__MODI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MODI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353557,7 +353830,7 @@ static const UV PL_SC__MODI_invlist[] = { /* for all charsets */
 	0x1165A
 };
 
-static const UV PL_SC__MONG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MONG_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353579,7 +353852,7 @@ static const UV PL_SC__MONG_invlist[] = { /* for all charsets */
 	0x1166D
 };
 
-static const UV PL_SC__MULT_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MULT_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353597,7 +353870,7 @@ static const UV PL_SC__MULT_invlist[] = { /* for all charsets */
 	0x112AA
 };
 
-static const UV PL_SC__MYMR_invlist[] = { /* for all charsets */
+static const UV UNI_SC__MYMR_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353611,7 +353884,7 @@ static const UV PL_SC__MYMR_invlist[] = { /* for all charsets */
 	0xAA80
 };
 
-static const UV PL_SC__ORYA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__ORYA_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353647,7 +353920,7 @@ static const UV PL_SC__ORYA_invlist[] = { /* for all charsets */
 	0xB78
 };
 
-static const UV PL_SC__PERM_invlist[] = { /* for all charsets */
+static const UV UNI_SC__PERM_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353657,7 +353930,7 @@ static const UV PL_SC__PERM_invlist[] = { /* for all charsets */
 	0x1037B
 };
 
-static const UV PL_SC__PHAG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__PHAG_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353667,7 +353940,7 @@ static const UV PL_SC__PHAG_invlist[] = { /* for all charsets */
 	0xA878
 };
 
-static const UV PL_SC__PHLP_invlist[] = { /* for all charsets */
+static const UV UNI_SC__PHLP_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353681,7 +353954,7 @@ static const UV PL_SC__PHLP_invlist[] = { /* for all charsets */
 	0x10BB0
 };
 
-static const UV PL_SC__QAAI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__QAAI_invlist[] = {  /* for all charsets */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353745,7 +354018,7 @@ static const UV PL_SC__QAAI_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_SC__ROHG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__ROHG_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353757,7 +354030,7 @@ static const UV PL_SC__ROHG_invlist[] = { /* for all charsets */
 	0x10D3A
 };
 
-static const UV PL_SC__SHRD_invlist[] = { /* for all charsets */
+static const UV UNI_SC__SHRD_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353769,7 +354042,7 @@ static const UV PL_SC__SHRD_invlist[] = { /* for all charsets */
 	0x111E0
 };
 
-static const UV PL_SC__SIND_invlist[] = { /* for all charsets */
+static const UV UNI_SC__SIND_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353781,7 +354054,7 @@ static const UV PL_SC__SIND_invlist[] = { /* for all charsets */
 	0x112FA
 };
 
-static const UV PL_SC__SINH_invlist[] = { /* for all charsets */
+static const UV UNI_SC__SINH_invlist[] = {  /* for all charsets */
 	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353815,7 +354088,7 @@ static const UV PL_SC__SINH_invlist[] = { /* for all charsets */
 	0x111F5
 };
 
-static const UV PL_SC__SOGD_invlist[] = { /* for all charsets */
+static const UV UNI_SC__SOGD_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353825,7 +354098,7 @@ static const UV PL_SC__SOGD_invlist[] = { /* for all charsets */
 	0x10F5A
 };
 
-static const UV PL_SC__SYLO_invlist[] = { /* for all charsets */
+static const UV UNI_SC__SYLO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353835,7 +354108,7 @@ static const UV PL_SC__SYLO_invlist[] = { /* for all charsets */
 	0xA82C
 };
 
-static const UV PL_SC__SYRC_invlist[] = { /* for all charsets */
+static const UV UNI_SC__SYRC_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353851,7 +354124,7 @@ static const UV PL_SC__SYRC_invlist[] = { /* for all charsets */
 	0x86B
 };
 
-static const UV PL_SC__TAGB_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TAGB_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353865,7 +354138,7 @@ static const UV PL_SC__TAGB_invlist[] = { /* for all charsets */
 	0x1774
 };
 
-static const UV PL_SC__TAKR_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TAKR_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353877,7 +354150,7 @@ static const UV PL_SC__TAKR_invlist[] = { /* for all charsets */
 	0x116CA
 };
 
-static const UV PL_SC__TALE_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TALE_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353889,7 +354162,7 @@ static const UV PL_SC__TALE_invlist[] = { /* for all charsets */
 	0x1975
 };
 
-static const UV PL_SC__TAML_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TAML_invlist[] = {  /* for all charsets */
 	33,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353929,7 +354202,7 @@ static const UV PL_SC__TAML_invlist[] = { /* for all charsets */
 	0xBFB
 };
 
-static const UV PL_SC__TELU_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TELU_invlist[] = {  /* for all charsets */
 	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353961,7 +354234,7 @@ static const UV PL_SC__TELU_invlist[] = { /* for all charsets */
 	0xC80
 };
 
-static const UV PL_SC__TGLG_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TGLG_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353973,7 +354246,7 @@ static const UV PL_SC__TGLG_invlist[] = { /* for all charsets */
 	0x1715
 };
 
-static const UV PL_SC__THAA_invlist[] = { /* for all charsets */
+static const UV UNI_SC__THAA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353983,7 +354256,7 @@ static const UV PL_SC__THAA_invlist[] = { /* for all charsets */
 	0x7B2
 };
 
-static const UV PL_SC__TIRH_invlist[] = { /* for all charsets */
+static const UV UNI_SC__TIRH_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -353995,7 +354268,7 @@ static const UV PL_SC__TIRH_invlist[] = { /* for all charsets */
 	0x114DA
 };
 
-static const UV PL_SC__YI_invlist[] = { /* for all charsets */
+static const UV UNI_SC__YI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -354009,7 +354282,7 @@ static const UV PL_SC__YI_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SC__ZYYY_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SC__ZYYY_invlist[] = {  /* for ASCII/Latin1 */
 	332,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -354355,7 +354628,7 @@ static const UV PL_SC__ZYYY_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SC__ZYYY_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SC__ZYYY_invlist[] = {  /* for EBCDIC 1047 */
 	358,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -354727,7 +355000,7 @@ static const UV PL_SC__ZYYY_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SC__ZYYY_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SC__ZYYY_invlist[] = {  /* for EBCDIC 037 */
 	354,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -355092,7 +355365,7 @@ static const UV PL_SC__ZYYY_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SD_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SD_invlist[] = {  /* for ASCII/Latin1 */
 	63,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355169,7 +355442,7 @@ static const UV PL_SD_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SD_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SD_invlist[] = {  /* for EBCDIC 1047 */
 	65,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355248,7 +355521,7 @@ static const UV PL_SD_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SD_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SD_invlist[] = {  /* for EBCDIC 037 */
 	65,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355322,7 +355595,7 @@ static const UV PL_SD_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SGNW_invlist[] = { /* for all charsets */
+static const UV UNI_SGNW_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355336,7 +355609,7 @@ static const UV PL_SGNW_invlist[] = { /* for all charsets */
 	0x1DAB0
 };
 
-static const UV PL_SHAW_invlist[] = { /* for all charsets */
+static const UV UNI_SHAW_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355346,7 +355619,7 @@ static const UV PL_SHAW_invlist[] = { /* for all charsets */
 	0x10480
 };
 
-static const UV PL_SHORTHANDFORMATCONTROLS_invlist[] = { /* for all charsets */
+static const UV UNI_SHORTHANDFORMATCONTROLS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355356,7 +355629,7 @@ static const UV PL_SHORTHANDFORMATCONTROLS_invlist[] = { /* for all charsets */
 	0x1BCB0
 };
 
-static const UV PL_SHRD_invlist[] = { /* for all charsets */
+static const UV UNI_SHRD_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355378,7 +355651,7 @@ static const UV PL_SHRD_invlist[] = { /* for all charsets */
 	0x111E0
 };
 
-static const UV PL_SIDD_invlist[] = { /* for all charsets */
+static const UV UNI_SIDD_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355390,7 +355663,7 @@ static const UV PL_SIDD_invlist[] = { /* for all charsets */
 	0x115DE
 };
 
-static const UV PL_SIND_invlist[] = { /* for all charsets */
+static const UV UNI_SIND_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355406,7 +355679,7 @@ static const UV PL_SIND_invlist[] = { /* for all charsets */
 	0x112FA
 };
 
-static const UV PL_SINH_invlist[] = { /* for all charsets */
+static const UV UNI_SINH_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355442,7 +355715,7 @@ static const UV PL_SINH_invlist[] = { /* for all charsets */
 	0x111F5
 };
 
-static const UV PL_SINHALAARCHAICNUMBERS_invlist[] = { /* for all charsets */
+static const UV UNI_SINHALAARCHAICNUMBERS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355454,7 +355727,7 @@ static const UV PL_SINHALAARCHAICNUMBERS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SK_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SK_invlist[] = {  /* for ASCII/Latin1 */
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355527,7 +355800,7 @@ static const UV PL_SK_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SK_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SK_invlist[] = {  /* for EBCDIC 1047 */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355598,7 +355871,7 @@ static const UV PL_SK_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SK_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SK_invlist[] = {  /* for EBCDIC 037 */
 	55,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355664,7 +355937,7 @@ static const UV PL_SK_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SM_invlist[] = {  /* for ASCII/Latin1 */
 	129,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355807,7 +356080,7 @@ static const UV PL_SM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SM_invlist[] = {  /* for EBCDIC 1047 */
 	131,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -355952,7 +356225,7 @@ static const UV PL_SM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SM_invlist[] = {  /* for EBCDIC 037 */
 	131,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -356092,7 +356365,7 @@ static const UV PL_SM_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SMALLFORMS_invlist[] = { /* for all charsets */
+static const UV UNI_SMALLFORMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -356104,7 +356377,7 @@ static const UV PL_SMALLFORMS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_SO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_SO_invlist[] = {  /* for ASCII/Latin1 */
 	349,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -356467,7 +356740,7 @@ static const UV PL_SO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_SO_invlist[] = {  /* for EBCDIC 1047 */
 	349,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -356830,7 +357103,7 @@ static const UV PL_SO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_SO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_SO_invlist[] = {  /* for EBCDIC 037 */
 	349,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357188,7 +357461,7 @@ static const UV PL_SO_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SOGD_invlist[] = { /* for all charsets */
+static const UV UNI_SOGD_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357200,7 +357473,7 @@ static const UV PL_SOGD_invlist[] = { /* for all charsets */
 	0x10F5A
 };
 
-static const UV PL_SOGO_invlist[] = { /* for all charsets */
+static const UV UNI_SOGO_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357210,7 +357483,7 @@ static const UV PL_SOGO_invlist[] = { /* for all charsets */
 	0x10F28
 };
 
-static const UV PL_SORA_invlist[] = { /* for all charsets */
+static const UV UNI_SORA_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357222,7 +357495,7 @@ static const UV PL_SORA_invlist[] = { /* for all charsets */
 	0x110FA
 };
 
-static const UV PL_SOYO_invlist[] = { /* for all charsets */
+static const UV UNI_SOYO_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357234,7 +357507,7 @@ static const UV PL_SOYO_invlist[] = { /* for all charsets */
 	0x11AA3
 };
 
-static const UV PL_SPECIALS_invlist[] = { /* for all charsets */
+static const UV UNI_SPECIALS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357246,7 +357519,7 @@ static const UV PL_SPECIALS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_STERM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_STERM_invlist[] = {  /* for ASCII/Latin1 */
 	149,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357409,7 +357682,7 @@ static const UV PL_STERM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_STERM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_STERM_invlist[] = {  /* for EBCDIC 1047 */
 	149,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357572,7 +357845,7 @@ static const UV PL_STERM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_STERM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_STERM_invlist[] = {  /* for EBCDIC 037 */
 	149,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357730,7 +358003,7 @@ static const UV PL_STERM_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_SUND_invlist[] = { /* for all charsets */
+static const UV UNI_SUND_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357742,7 +358015,7 @@ static const UV PL_SUND_invlist[] = { /* for all charsets */
 	0x1CC8
 };
 
-static const UV PL_SUNDANESESUP_invlist[] = { /* for all charsets */
+static const UV UNI_SUNDANESESUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357752,7 +358025,7 @@ static const UV PL_SUNDANESESUP_invlist[] = { /* for all charsets */
 	0x1CD0
 };
 
-static const UV PL_SUPARROWSA_invlist[] = { /* for all charsets */
+static const UV UNI_SUPARROWSA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357762,7 +358035,7 @@ static const UV PL_SUPARROWSA_invlist[] = { /* for all charsets */
 	0x2800
 };
 
-static const UV PL_SUPARROWSB_invlist[] = { /* for all charsets */
+static const UV UNI_SUPARROWSB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357772,7 +358045,7 @@ static const UV PL_SUPARROWSB_invlist[] = { /* for all charsets */
 	0x2980
 };
 
-static const UV PL_SUPARROWSC_invlist[] = { /* for all charsets */
+static const UV UNI_SUPARROWSC_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357782,7 +358055,7 @@ static const UV PL_SUPARROWSC_invlist[] = { /* for all charsets */
 	0x1F900
 };
 
-static const UV PL_SUPERANDSUB_invlist[] = { /* for all charsets */
+static const UV UNI_SUPERANDSUB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357792,7 +358065,7 @@ static const UV PL_SUPERANDSUB_invlist[] = { /* for all charsets */
 	0x20A0
 };
 
-static const UV PL_SUPMATHOPERATORS_invlist[] = { /* for all charsets */
+static const UV UNI_SUPMATHOPERATORS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357802,7 +358075,7 @@ static const UV PL_SUPMATHOPERATORS_invlist[] = { /* for all charsets */
 	0x2B00
 };
 
-static const UV PL_SUPPUAA_invlist[] = { /* for all charsets */
+static const UV UNI_SUPPUAA_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357812,7 +358085,7 @@ static const UV PL_SUPPUAA_invlist[] = { /* for all charsets */
 	0x100000
 };
 
-static const UV PL_SUPPUAB_invlist[] = { /* for all charsets */
+static const UV UNI_SUPPUAB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357822,7 +358095,7 @@ static const UV PL_SUPPUAB_invlist[] = { /* for all charsets */
 	0x110000
 };
 
-static const UV PL_SUPPUNCTUATION_invlist[] = { /* for all charsets */
+static const UV UNI_SUPPUNCTUATION_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357832,7 +358105,7 @@ static const UV PL_SUPPUNCTUATION_invlist[] = { /* for all charsets */
 	0x2E80
 };
 
-static const UV PL_SUPSYMBOLSANDPICTOGRAPHS_invlist[] = { /* for all charsets */
+static const UV UNI_SUPSYMBOLSANDPICTOGRAPHS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357842,7 +358115,7 @@ static const UV PL_SUPSYMBOLSANDPICTOGRAPHS_invlist[] = { /* for all charsets */
 	0x1FA00
 };
 
-static const UV PL_SUTTONSIGNWRITING_invlist[] = { /* for all charsets */
+static const UV UNI_SUTTONSIGNWRITING_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357852,7 +358125,7 @@ static const UV PL_SUTTONSIGNWRITING_invlist[] = { /* for all charsets */
 	0x1DAB0
 };
 
-static const UV PL_SYLO_invlist[] = { /* for all charsets */
+static const UV UNI_SYLO_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357866,7 +358139,7 @@ static const UV PL_SYLO_invlist[] = { /* for all charsets */
 	0xA82C
 };
 
-static const UV PL_SYRC_invlist[] = { /* for all charsets */
+static const UV UNI_SYRC_invlist[] = {  /* for all charsets */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357894,7 +358167,7 @@ static const UV PL_SYRC_invlist[] = { /* for all charsets */
 	0x86B
 };
 
-static const UV PL_SYRIACSUP_invlist[] = { /* for all charsets */
+static const UV UNI_SYRIACSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357904,7 +358177,7 @@ static const UV PL_SYRIACSUP_invlist[] = { /* for all charsets */
 	0x870
 };
 
-static const UV PL_TAGB_invlist[] = { /* for all charsets */
+static const UV UNI_TAGB_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357920,7 +358193,7 @@ static const UV PL_TAGB_invlist[] = { /* for all charsets */
 	0x1774
 };
 
-static const UV PL_TAGS_invlist[] = { /* for all charsets */
+static const UV UNI_TAGS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357930,7 +358203,7 @@ static const UV PL_TAGS_invlist[] = { /* for all charsets */
 	0xE0080
 };
 
-static const UV PL_TAIXUANJING_invlist[] = { /* for all charsets */
+static const UV UNI_TAIXUANJING_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357940,7 +358213,7 @@ static const UV PL_TAIXUANJING_invlist[] = { /* for all charsets */
 	0x1D360
 };
 
-static const UV PL_TAKR_invlist[] = { /* for all charsets */
+static const UV UNI_TAKR_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357956,7 +358229,7 @@ static const UV PL_TAKR_invlist[] = { /* for all charsets */
 	0x116CA
 };
 
-static const UV PL_TALE_invlist[] = { /* for all charsets */
+static const UV UNI_TALE_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357970,7 +358243,7 @@ static const UV PL_TALE_invlist[] = { /* for all charsets */
 	0x1975
 };
 
-static const UV PL_TALU_invlist[] = { /* for all charsets */
+static const UV UNI_TALU_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -357986,7 +358259,7 @@ static const UV PL_TALU_invlist[] = { /* for all charsets */
 	0x19E0
 };
 
-static const UV PL_TAML_invlist[] = { /* for all charsets */
+static const UV UNI_TAML_invlist[] = {  /* for all charsets */
 	47,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358040,7 +358313,7 @@ static const UV PL_TAML_invlist[] = { /* for all charsets */
 	0x1133D
 };
 
-static const UV PL_TANG_invlist[] = { /* for all charsets */
+static const UV UNI_TANG_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358054,7 +358327,7 @@ static const UV PL_TANG_invlist[] = { /* for all charsets */
 	0x18AF3
 };
 
-static const UV PL_TANGUTCOMPONENTS_invlist[] = { /* for all charsets */
+static const UV UNI_TANGUTCOMPONENTS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358064,7 +358337,7 @@ static const UV PL_TANGUTCOMPONENTS_invlist[] = { /* for all charsets */
 	0x18B00
 };
 
-static const UV PL_TAVT_invlist[] = { /* for all charsets */
+static const UV UNI_TAVT_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358076,7 +358349,7 @@ static const UV PL_TAVT_invlist[] = { /* for all charsets */
 	0xAAE0
 };
 
-static const UV PL_TELU_invlist[] = { /* for all charsets */
+static const UV UNI_TELU_invlist[] = {  /* for all charsets */
 	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358116,7 +358389,7 @@ static const UV PL_TELU_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_TERM_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_TERM_invlist[] = {  /* for ASCII/Latin1 */
 	205,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358335,7 +358608,7 @@ static const UV PL_TERM_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_TERM_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_TERM_invlist[] = {  /* for EBCDIC 1047 */
 	207,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358556,7 +358829,7 @@ static const UV PL_TERM_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_TERM_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_TERM_invlist[] = {  /* for EBCDIC 037 */
 	207,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358772,7 +359045,7 @@ static const UV PL_TERM_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_TFNG_invlist[] = { /* for all charsets */
+static const UV UNI_TFNG_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358786,7 +359059,7 @@ static const UV PL_TFNG_invlist[] = { /* for all charsets */
 	0x2D80
 };
 
-static const UV PL_TGLG_invlist[] = { /* for all charsets */
+static const UV UNI_TGLG_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358800,7 +359073,7 @@ static const UV PL_TGLG_invlist[] = { /* for all charsets */
 	0x1737
 };
 
-static const UV PL_THAA_invlist[] = { /* for all charsets */
+static const UV UNI_THAA_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358822,7 +359095,7 @@ static const UV PL_THAA_invlist[] = { /* for all charsets */
 	0xFDFE
 };
 
-static const UV PL_THAI_invlist[] = { /* for all charsets */
+static const UV UNI_THAI_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358834,7 +359107,7 @@ static const UV PL_THAI_invlist[] = { /* for all charsets */
 	0xE5C
 };
 
-static const UV PL_TIBT_invlist[] = { /* for all charsets */
+static const UV UNI_TIBT_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358856,7 +359129,7 @@ static const UV PL_TIBT_invlist[] = { /* for all charsets */
 	0xFDB
 };
 
-static const UV PL_TIRH_invlist[] = { /* for all charsets */
+static const UV UNI_TIRH_invlist[] = {  /* for all charsets */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358874,7 +359147,7 @@ static const UV PL_TIRH_invlist[] = { /* for all charsets */
 	0x114DA
 };
 
-static const UV PL_TRANSPORTANDMAP_invlist[] = { /* for all charsets */
+static const UV UNI_TRANSPORTANDMAP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358884,7 +359157,7 @@ static const UV PL_TRANSPORTANDMAP_invlist[] = { /* for all charsets */
 	0x1F700
 };
 
-static const UV PL_UCAS_invlist[] = { /* for all charsets */
+static const UV UNI_UCAS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358894,7 +359167,7 @@ static const UV PL_UCAS_invlist[] = { /* for all charsets */
 	0x1680
 };
 
-static const UV PL_UCASEXT_invlist[] = { /* for all charsets */
+static const UV UNI_UCASEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358904,7 +359177,7 @@ static const UV PL_UCASEXT_invlist[] = { /* for all charsets */
 	0x1900
 };
 
-static const UV PL_UGAR_invlist[] = { /* for all charsets */
+static const UV UNI_UGAR_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358916,7 +359189,7 @@ static const UV PL_UGAR_invlist[] = { /* for all charsets */
 	0x103A0
 };
 
-static const UV PL_UIDEO_invlist[] = { /* for all charsets */
+static const UV UNI_UIDEO_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358952,7 +359225,7 @@ static const UV PL_UIDEO_invlist[] = { /* for all charsets */
 	0x2EBE1
 };
 
-static const UV PL_VAI_invlist[] = { /* for all charsets */
+static const UV UNI_VAI_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358962,7 +359235,7 @@ static const UV PL_VAI_invlist[] = { /* for all charsets */
 	0xA62C
 };
 
-static const UV PL_VEDICEXT_invlist[] = { /* for all charsets */
+static const UV UNI_VEDICEXT_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358972,7 +359245,7 @@ static const UV PL_VEDICEXT_invlist[] = { /* for all charsets */
 	0x1D00
 };
 
-static const UV PL_VERTICALFORMS_invlist[] = { /* for all charsets */
+static const UV UNI_VERTICALFORMS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -358984,7 +359257,7 @@ static const UV PL_VERTICALFORMS_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_VO__R_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_VO__R_invlist[] = {  /* for ASCII/Latin1 */
 	175,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -359173,7 +359446,7 @@ static const UV PL_VO__R_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_VO__R_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_VO__R_invlist[] = {  /* for EBCDIC 1047 */
 	173,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -359360,7 +359633,7 @@ static const UV PL_VO__R_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_VO__R_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_VO__R_invlist[] = {  /* for EBCDIC 037 */
 	173,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -359542,7 +359815,7 @@ static const UV PL_VO__R_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_VO__TR_invlist[] = { /* for all charsets */
+static const UV UNI_VO__TR_invlist[] = {  /* for all charsets */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -359578,7 +359851,7 @@ static const UV PL_VO__TR_invlist[] = { /* for all charsets */
 	0xFFE4
 };
 
-static const UV PL_VO__TU_invlist[] = { /* for all charsets */
+static const UV UNI_VO__TU_invlist[] = {  /* for all charsets */
 	69,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -359656,7 +359929,7 @@ static const UV PL_VO__TU_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_VO__U_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_VO__U_invlist[] = {  /* for ASCII/Latin1 */
 	253,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -359923,7 +360196,7 @@ static const UV PL_VO__U_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_VO__U_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_VO__U_invlist[] = {  /* for EBCDIC 1047 */
 	251,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360188,7 +360461,7 @@ static const UV PL_VO__U_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_VO__U_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_VO__U_invlist[] = {  /* for EBCDIC 037 */
 	251,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360448,7 +360721,7 @@ static const UV PL_VO__U_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_VS_invlist[] = { /* for all charsets */
+static const UV UNI_VS_invlist[] = {  /* for all charsets */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360462,7 +360735,7 @@ static const UV PL_VS_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_VSSUP_invlist[] = { /* for all charsets */
+static const UV UNI_VSSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360472,7 +360745,7 @@ static const UV PL_VSSUP_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL_WARA_invlist[] = { /* for all charsets */
+static const UV UNI_WARA_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360486,7 +360759,7 @@ static const UV PL_WARA_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__DQ_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__DQ_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360503,7 +360776,7 @@ static const UV PL_WB__DQ_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__DQ_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__DQ_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360520,7 +360793,7 @@ static const UV PL_WB__DQ_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__DQ_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__DQ_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360532,7 +360805,7 @@ static const UV PL_WB__DQ_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_WB__EB_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__EB_invlist[] = {  /* for ASCII/Latin1 */
 	0,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -360541,7 +360814,7 @@ static const UV PL_WB__EB_invlist[] = { /* for ASCII/Latin1 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__EX_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__EX_invlist[] = {  /* for ASCII/Latin1 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360570,7 +360843,7 @@ static const UV PL_WB__EX_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__EX_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__EX_invlist[] = {  /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360599,7 +360872,7 @@ static const UV PL_WB__EX_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__EX_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__EX_invlist[] = {  /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -360623,7 +360896,7 @@ static const UV PL_WB__EX_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_WB__EXTEND_invlist[] = { /* for all charsets */
+static const UV UNI_WB__EXTEND_invlist[] = {  /* for all charsets */
 	559,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -361191,7 +361464,7 @@ static const UV PL_WB__EXTEND_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__FO_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__FO_invlist[] = {  /* for ASCII/Latin1 */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -361242,7 +361515,7 @@ static const UV PL_WB__FO_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__FO_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__FO_invlist[] = {  /* for EBCDIC 1047 */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -361293,7 +361566,7 @@ static const UV PL_WB__FO_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__FO_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__FO_invlist[] = {  /* for EBCDIC 037 */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -361339,7 +361612,7 @@ static const UV PL_WB__FO_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_WB__KA_invlist[] = { /* for all charsets */
+static const UV UNI_WB__KA_invlist[] = {  /* for all charsets */
 	19,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -361367,7 +361640,7 @@ static const UV PL_WB__KA_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__LE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__LE_invlist[] = {  /* for ASCII/Latin1 */
 	1047,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -362428,7 +362701,7 @@ static const UV PL_WB__LE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__LE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__LE_invlist[] = {  /* for EBCDIC 1047 */
 	1073,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -363515,7 +363788,7 @@ static const UV PL_WB__LE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__LE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__LE_invlist[] = {  /* for EBCDIC 037 */
 	1069,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364595,7 +364868,7 @@ static const UV PL_WB__LE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__MB_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__MB_invlist[] = {  /* for ASCII/Latin1 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364622,7 +364895,7 @@ static const UV PL_WB__MB_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__MB_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__MB_invlist[] = {  /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364649,7 +364922,7 @@ static const UV PL_WB__MB_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__MB_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__MB_invlist[] = {  /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364673,7 +364946,7 @@ static const UV PL_WB__MB_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__ML_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__ML_invlist[] = {  /* for ASCII/Latin1 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364704,7 +364977,7 @@ static const UV PL_WB__ML_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__ML_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__ML_invlist[] = {  /* for EBCDIC 1047 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364735,7 +365008,7 @@ static const UV PL_WB__ML_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__ML_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__ML_invlist[] = {  /* for EBCDIC 037 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364763,7 +365036,7 @@ static const UV PL_WB__ML_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__MN_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__MN_invlist[] = {  /* for ASCII/Latin1 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364806,7 +365079,7 @@ static const UV PL_WB__MN_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__MN_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__MN_invlist[] = {  /* for EBCDIC 1047 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364849,7 +365122,7 @@ static const UV PL_WB__MN_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__MN_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__MN_invlist[] = {  /* for EBCDIC 037 */
 	29,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364889,7 +365162,7 @@ static const UV PL_WB__MN_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__NL_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__NL_invlist[] = {  /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364910,7 +365183,7 @@ static const UV PL_WB__NL_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__NL_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__NL_invlist[] = {  /* for EBCDIC 1047 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364931,7 +365204,7 @@ static const UV PL_WB__NL_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__NL_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__NL_invlist[] = {  /* for EBCDIC 037 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -364949,7 +365222,7 @@ static const UV PL_WB__NL_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__NU_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365078,7 +365351,7 @@ static const UV PL_WB__NU_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__NU_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 1047 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365207,7 +365480,7 @@ static const UV PL_WB__NU_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__NU_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__NU_invlist[] = {  /* for EBCDIC 037 */
 	115,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365333,7 +365606,7 @@ static const UV PL_WB__NU_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__SQ_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__SQ_invlist[] = {  /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365350,7 +365623,7 @@ static const UV PL_WB__SQ_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__SQ_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__SQ_invlist[] = {  /* for EBCDIC 1047 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365367,7 +365640,7 @@ static const UV PL_WB__SQ_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__SQ_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__SQ_invlist[] = {  /* for EBCDIC 037 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365381,7 +365654,7 @@ static const UV PL_WB__SQ_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__WSEGSPACE_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__WSEGSPACE_invlist[] = {  /* for ASCII/Latin1 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365408,7 +365681,7 @@ static const UV PL_WB__WSEGSPACE_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__WSEGSPACE_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__WSEGSPACE_invlist[] = {  /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365435,7 +365708,7 @@ static const UV PL_WB__WSEGSPACE_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__WSEGSPACE_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__WSEGSPACE_invlist[] = {  /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -365459,7 +365732,7 @@ static const UV PL_WB__WSEGSPACE_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_WB__XX_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_WB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	1441,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -366914,7 +367187,7 @@ static const UV PL_WB__XX_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__XX_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_WB__XX_invlist[] = {  /* for EBCDIC 1047 */
 	1465,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -368393,7 +368666,7 @@ static const UV PL_WB__XX_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_WB__XX_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_WB__XX_invlist[] = {  /* for EBCDIC 037 */
 	1461,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -369865,7 +370138,7 @@ static const UV PL_WB__XX_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XIDC_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
 	1429,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -371308,7 +371581,7 @@ static const UV PL_XIDC_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XIDC_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XIDC_invlist[] = {  /* for EBCDIC 1047 */
 	1453,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -372775,7 +373048,7 @@ static const UV PL_XIDC_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XIDC_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XIDC_invlist[] = {  /* for EBCDIC 037 */
 	1449,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -374235,7 +374508,7 @@ static const UV PL_XIDC_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_XIDS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_XIDS_invlist[] = {  /* for ASCII/Latin1 */
 	1213,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -375462,7 +375735,7 @@ static const UV PL_XIDS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XIDS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_XIDS_invlist[] = {  /* for EBCDIC 1047 */
 	1239,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -376715,7 +376988,7 @@ static const UV PL_XIDS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_XIDS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_XIDS_invlist[] = {  /* for EBCDIC 037 */
 	1235,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -377959,7 +378232,7 @@ static const UV PL_XIDS_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_XPEO_invlist[] = { /* for all charsets */
+static const UV UNI_XPEO_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -377971,7 +378244,7 @@ static const UV PL_XPEO_invlist[] = { /* for all charsets */
 	0x103D6
 };
 
-static const UV PL_XSUX_invlist[] = { /* for all charsets */
+static const UV UNI_XSUX_invlist[] = {  /* for all charsets */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -377987,7 +378260,7 @@ static const UV PL_XSUX_invlist[] = { /* for all charsets */
 	0x12544
 };
 
-static const UV PL_YI_invlist[] = { /* for all charsets */
+static const UV UNI_YI_invlist[] = {  /* for all charsets */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378009,7 +378282,7 @@ static const UV PL_YI_invlist[] = { /* for all charsets */
 	0xFF66
 };
 
-static const UV PL_YIJING_invlist[] = { /* for all charsets */
+static const UV UNI_YIJING_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378019,7 +378292,7 @@ static const UV PL_YIJING_invlist[] = { /* for all charsets */
 	0x4E00
 };
 
-static const UV PL_YIRADICALS_invlist[] = { /* for all charsets */
+static const UV UNI_YIRADICALS_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378029,7 +378302,7 @@ static const UV PL_YIRADICALS_invlist[] = { /* for all charsets */
 	0xA4D0
 };
 
-static const UV PL_YISYLLABLES_invlist[] = { /* for all charsets */
+static const UV UNI_YISYLLABLES_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378041,7 +378314,7 @@ static const UV PL_YISYLLABLES_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_Z_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_Z_invlist[] = {  /* for ASCII/Latin1 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378072,7 +378345,7 @@ static const UV PL_Z_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_Z_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_Z_invlist[] = {  /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378101,7 +378374,7 @@ static const UV PL_Z_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_Z_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_Z_invlist[] = {  /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378125,7 +378398,7 @@ static const UV PL_Z_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_ZANB_invlist[] = { /* for all charsets */
+static const UV UNI_ZANB_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378135,7 +378408,7 @@ static const UV PL_ZANB_invlist[] = { /* for all charsets */
 	0x11A48
 };
 
-static const UV PL_ZL_invlist[] = { /* for all charsets */
+static const UV UNI_ZL_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378145,7 +378418,7 @@ static const UV PL_ZL_invlist[] = { /* for all charsets */
 	0x2029
 };
 
-static const UV PL_ZP_invlist[] = { /* for all charsets */
+static const UV UNI_ZP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378157,7 +378430,7 @@ static const UV PL_ZP_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_ZS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_ZS_invlist[] = {  /* for ASCII/Latin1 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378186,7 +378459,7 @@ static const UV PL_ZS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_ZS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_ZS_invlist[] = {  /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378213,7 +378486,7 @@ static const UV PL_ZS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_ZS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_ZS_invlist[] = {  /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -378237,7 +378510,7 @@ static const UV PL_ZS_invlist[] = { /* for EBCDIC 037 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL_ZYYY_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI_ZYYY_invlist[] = {  /* for ASCII/Latin1 */
 	282,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -378533,7 +378806,7 @@ static const UV PL_ZYYY_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_ZYYY_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI_ZYYY_invlist[] = {  /* for EBCDIC 1047 */
 	308,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -378855,7 +379128,7 @@ static const UV PL_ZYYY_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL_ZYYY_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI_ZYYY_invlist[] = {  /* for EBCDIC 037 */
 	304,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -379168,7 +379441,7 @@ static const UV PL_ZYYY_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL_ZZZZ_invlist[] = { /* for all charsets */
+static const UV UNI_ZZZZ_invlist[] = {  /* for all charsets */
 	1312,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -380487,7 +380760,7 @@ static const UV PL_ZZZZ_invlist[] = { /* for all charsets */
 	0xE01F0
 };
 
-static const UV PL__PERL_NCHAR_invlist[] = { /* for all charsets */
+static const UV UNI__PERL_NCHAR_invlist[] = {  /* for all charsets */
 	37,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -380533,7 +380806,7 @@ static const UV PL__PERL_NCHAR_invlist[] = { /* for all charsets */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
-static const UV PL__PERL_PATWS_invlist[] = { /* for ASCII/Latin1 */
+static const UV UNI__PERL_PATWS_invlist[] = {  /* for ASCII/Latin1 */
 	11,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -380558,7 +380831,7 @@ static const UV PL__PERL_PATWS_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_PATWS_invlist[] = { /* for EBCDIC 1047 */
+static const UV UNI__PERL_PATWS_invlist[] = {  /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -380587,7 +380860,7 @@ static const UV PL__PERL_PATWS_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-static const UV PL__PERL_PATWS_invlist[] = { /* for EBCDIC 037 */
+static const UV UNI__PERL_PATWS_invlist[] = {  /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -380611,7 +380884,7 @@ static const UV PL__PERL_PATWS_invlist[] = { /* for EBCDIC 037 */
 
 #  endif	/* EBCDIC 037 */
 
-static const UV PL__PERL_SURROGATE_invlist[] = { /* for all charsets */
+static const UV UNI__PERL_SURROGATE_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
@@ -380627,2342 +380900,2343 @@ const char * deprecated_property_msgs[] = {
 	"Supplanted by Line_Break property values; see www.unicode.org/reports/tr14"
 };
 
-#define PL_HYPHEN (PL_HYPHEN_perl_aux + (MAX_UNI_KEYWORD_INDEX * 2))
-#define PL_LB__SG (PL_LB__SG_perl_aux + (MAX_UNI_KEYWORD_INDEX * 1))
+#define UNI_HYPHEN (UNI_HYPHEN_perl_aux + (MAX_UNI_KEYWORD_INDEX * 2))
+#define UNI_LB__SG (UNI_LB__SG_perl_aux + (MAX_UNI_KEYWORD_INDEX * 1))
 
 typedef enum {
 	PERL_BIN_PLACEHOLDER = 0,
-	PL_ADLM,
-	PL_AEGEANNUMBERS,
-	PL_AGE__10,
-	PL_AGE__11,
-	PL_AGE__2,
-	PL_AGE__2_DOT_1,
-	PL_AGE__3,
-	PL_AGE__3_DOT_1,
-	PL_AGE__3_DOT_2,
-	PL_AGE__4,
-	PL_AGE__4_DOT_1,
-	PL_AGE__5,
-	PL_AGE__5_DOT_1,
-	PL_AGE__5_DOT_2,
-	PL_AGE__6,
-	PL_AGE__6_DOT_1,
-	PL_AGE__6_DOT_2,
-	PL_AGE__6_DOT_3,
-	PL_AGE__7,
-	PL_AGE__8,
-	PL_AGE__9,
-	PL_AGE__NA,
-	PL_AGHB,
-	PL_AHOM,
-	PL_ALCHEMICAL,
-	PL_ALL,
-	PL_ALPHABETICPF,
-	PL_ANCIENTGREEKMUSIC,
-	PL_ANCIENTGREEKNUMBERS,
-	PL_ANCIENTSYMBOLS,
-	PL_ANY,
-	PL_ARAB,
-	PL_ARABICEXTA,
-	PL_ARABICMATH,
-	PL_ARABICPFA,
-	PL_ARABICPFB,
-	PL_ARABICSUP,
-	PL_ARMI,
-	PL_ARMN,
-	PL_ARROWS,
-	PL_ASCII,
-	PL_ASSIGNED,
-	PL_AVST,
-	PL_BALI,
-	PL_BAMU,
-	PL_BAMUMSUP,
-	PL_BASS,
-	PL_BATK,
-	PL_BC__AL,
-	PL_BC__AN,
-	PL_BC__B,
-	PL_BC__BN,
-	PL_BC__CS,
-	PL_BC__EN,
-	PL_BC__ES,
-	PL_BC__ET,
-	PL_BC__FSI,
-	PL_BC__L,
-	PL_BC__LRE,
-	PL_BC__LRI,
-	PL_BC__LRO,
-	PL_BC__NSM,
-	PL_BC__ON,
-	PL_BC__PDF,
-	PL_BC__PDI,
-	PL_BC__R,
-	PL_BC__RLE,
-	PL_BC__RLI,
-	PL_BC__RLO,
-	PL_BC__S,
-	PL_BC__WS,
-	PL_BENG,
-	PL_BHKS,
-	PL_BIDIC,
-	PL_BIDIM,
-	PL_BLOCKELEMENTS,
-	PL_BOPO,
-	PL_BOPOMOFOEXT,
-	PL_BOXDRAWING,
-	PL_BPT__C,
-	PL_BPT__N,
-	PL_BPT__O,
-	PL_BRAH,
-	PL_BRAI,
-	PL_BUGI,
-	PL_BUHD,
-	PL_BYZANTINEMUSIC,
-	PL_C,
-	PL_CAKM,
-	PL_CANS,
-	PL_CARI,
-	PL_CASED,
-	PL_CASEDLETTER,
-	PL_CCC__0,
-	PL_CCC__1,
-	PL_CCC__10,
-	PL_CCC__103,
-	PL_CCC__107,
-	PL_CCC__11,
-	PL_CCC__118,
-	PL_CCC__12,
-	PL_CCC__122,
-	PL_CCC__129,
-	PL_CCC__13,
-	PL_CCC__130,
-	PL_CCC__132,
-	PL_CCC__14,
-	PL_CCC__15,
-	PL_CCC__16,
-	PL_CCC__17,
-	PL_CCC__18,
-	PL_CCC__19,
-	PL_CCC__20,
-	PL_CCC__202,
-	PL_CCC__21,
-	PL_CCC__214,
-	PL_CCC__216,
-	PL_CCC__22,
-	PL_CCC__23,
-	PL_CCC__24,
-	PL_CCC__25,
-	PL_CCC__26,
-	PL_CCC__27,
-	PL_CCC__28,
-	PL_CCC__29,
-	PL_CCC__30,
-	PL_CCC__31,
-	PL_CCC__32,
-	PL_CCC__33,
-	PL_CCC__34,
-	PL_CCC__35,
-	PL_CCC__36,
-	PL_CCC__7,
-	PL_CCC__8,
-	PL_CCC__84,
-	PL_CCC__9,
-	PL_CCC__91,
-	PL_CCC__A,
-	PL_CCC__AL,
-	PL_CCC__AR,
-	PL_CCC__B,
-	PL_CCC__BL,
-	PL_CCC__BR,
-	PL_CCC__DA,
-	PL_CCC__DB,
-	PL_CCC__IS,
-	PL_CCC__L,
-	PL_CCC__R,
-	PL_CE,
-	PL_CF,
-	PL_CHAM,
-	PL_CHER,
-	PL_CHEROKEESUP,
-	PL_CHESSSYMBOLS,
-	PL_CI,
-	PL_CJK,
-	PL_CJKCOMPAT,
-	PL_CJKCOMPATFORMS,
-	PL_CJKCOMPATIDEOGRAPHS,
-	PL_CJKCOMPATIDEOGRAPHSSUP,
-	PL_CJKEXTA,
-	PL_CJKEXTB,
-	PL_CJKEXTC,
-	PL_CJKEXTD,
-	PL_CJKEXTE,
-	PL_CJKEXTF,
-	PL_CJKRADICALSSUP,
-	PL_CJKSTROKES,
-	PL_CJKSYMBOLS,
-	PL_CN,
-	PL_CO,
-	PL_COMPATJAMO,
-	PL_COMPEX,
-	PL_CONTROLPICTURES,
-	PL_COPT,
-	PL_COPTICEPACTNUMBERS,
-	PL_COUNTINGROD,
-	PL_CPRT,
-	PL_CUNEIFORMNUMBERS,
-	PL_CURRENCYSYMBOLS,
-	PL_CWCF,
-	PL_CWCM,
-	PL_CWKCF,
-	PL_CWL,
-	PL_CWT,
-	PL_CWU,
-	PL_CYPRIOTSYLLABARY,
-	PL_CYRILLICEXTA,
-	PL_CYRILLICEXTB,
-	PL_CYRILLICEXTC,
-	PL_CYRILLICSUP,
-	PL_CYRL,
-	PL_DASH,
-	PL_DEP,
-	PL_DEVA,
-	PL_DEVANAGARIEXT,
-	PL_DI,
-	PL_DIA,
-	PL_DIACRITICALS,
-	PL_DIACRITICALSEXT,
-	PL_DIACRITICALSFORSYMBOLS,
-	PL_DIACRITICALSSUP,
-	PL_DINGBATS,
-	PL_DOGR,
-	PL_DOMINO,
-	PL_DSRT,
-	PL_DT__CAN,
-	PL_DT__COM,
-	PL_DT__ENC,
-	PL_DT__FIN,
-	PL_DT__FONT,
-	PL_DT__FRA,
-	PL_DT__INIT,
-	PL_DT__ISO,
-	PL_DT__MED,
-	PL_DT__NAR,
-	PL_DT__NB,
-	PL_DT__NONCANON,
-	PL_DT__NONE,
-	PL_DT__SML,
-	PL_DT__SQR,
-	PL_DT__SUB,
-	PL_DT__SUP,
-	PL_DT__VERT,
-	PL_DUPL,
-	PL_EARLYDYNASTICCUNEIFORM,
-	PL_EA__A,
-	PL_EA__F,
-	PL_EA__H,
-	PL_EA__N,
-	PL_EA__NA,
-	PL_EA__W,
-	PL_EGYP,
-	PL_ELBA,
-	PL_EMOTICONS,
-	PL_ENCLOSEDALPHANUM,
-	PL_ENCLOSEDALPHANUMSUP,
-	PL_ENCLOSEDCJK,
-	PL_ENCLOSEDIDEOGRAPHICSUP,
-	PL_ETHI,
-	PL_ETHIOPICEXT,
-	PL_ETHIOPICEXTA,
-	PL_ETHIOPICSUP,
-	PL_EXT,
-	PL_GCB__CN,
-	PL_GCB__EX,
-	PL_GCB__L,
-	PL_GCB__PP,
-	PL_GCB__SM,
-	PL_GCB__T,
-	PL_GCB__V,
-	PL_GCB__XX,
-	PL_GEOMETRICSHAPES,
-	PL_GEOMETRICSHAPESEXT,
-	PL_GEOR,
-	PL_GEORGIANEXT,
-	PL_GEORGIANSUP,
-	PL_GLAG,
-	PL_GLAGOLITICSUP,
-	PL_GONG,
-	PL_GONM,
-	PL_GOTH,
-	PL_GRAN,
-	PL_GRBASE,
-	PL_GREEKEXT,
-	PL_GREK,
-	PL_GREXT,
-	PL_GUJR,
-	PL_GURU,
-	PL_HALFANDFULLFORMS,
-	PL_HALFMARKS,
-	PL_HAN,
-	PL_HANG,
-	PL_HANO,
-	PL_HATR,
-	PL_HEBR,
-	PL_HIGHPUSURROGATES,
-	PL_HIGHSURROGATES,
-	PL_HIRA,
-	PL_HLUW,
-	PL_HMNG,
-	PL_HST__NA,
-	PL_HUNG,
-	PL_HYPHEN_perl_aux,
-	PL_IDC,
-	PL_IDEO,
-	PL_IDEOGRAPHICSYMBOLS,
-	PL_IDS,
-	PL_IDSB,
-	PL_IDST,
-	PL_INADLAM,
-	PL_INAHOM,
-	PL_INANATOLIANHIEROGLYPHS,
-	PL_INARABIC,
-	PL_INARMENIAN,
-	PL_INAVESTAN,
-	PL_INBALINESE,
-	PL_INBAMUM,
-	PL_INBASSAVAH,
-	PL_INBATAK,
-	PL_INBENGALI,
-	PL_INBHAIKSUKI,
-	PL_INBOPOMOFO,
-	PL_INBRAHMI,
-	PL_INBUGINESE,
-	PL_INBUHID,
-	PL_INCARIAN,
-	PL_INCAUCASIANALBANIAN,
-	PL_INCHAKMA,
-	PL_INCHAM,
-	PL_INCHEROKEE,
-	PL_INCOPTIC,
-	PL_INCUNEIFORM,
-	PL_INCYRILLIC,
-	PL_INDEVANAGARI,
-	PL_INDICNUMBERFORMS,
-	PL_INDICSIYAQNUMBERS,
-	PL_INDOGRA,
-	PL_INDUPLOYAN,
-	PL_INEGYPTIANHIEROGLYPHS,
-	PL_INELBASAN,
-	PL_INETHIOPIC,
-	PL_INGEORGIAN,
-	PL_INGLAGOLITIC,
-	PL_INGOTHIC,
-	PL_INGRANTHA,
-	PL_INGREEK,
-	PL_INGUJARATI,
-	PL_INGUNJALAGONDI,
-	PL_INGURMUKHI,
-	PL_INHANGUL,
-	PL_INHANIFIROHINGYA,
-	PL_INHANUNOO,
-	PL_INHATRAN,
-	PL_INHEBREW,
-	PL_INHIRAGANA,
-	PL_INIDC,
-	PL_INIMPERIALARAMAIC,
-	PL_ININSCRIPTIONALPAHLAVI,
-	PL_ININSCRIPTIONALPARTHIAN,
-	PL_INJAVANESE,
-	PL_INKAITHI,
-	PL_INKANNADA,
-	PL_INKATAKANA,
-	PL_INKHAROSHTHI,
-	PL_INKHMER,
-	PL_INKHOJKI,
-	PL_INKHUDAWADI,
-	PL_INLAO,
-	PL_INLEPCHA,
-	PL_INLIMBU,
-	PL_INLINEARA,
-	PL_INLYCIAN,
-	PL_INLYDIAN,
-	PL_INMAHAJANI,
-	PL_INMAKASAR,
-	PL_INMALAYALAM,
-	PL_INMANDAIC,
-	PL_INMANICHAEAN,
-	PL_INMARCHEN,
-	PL_INMASARAMGONDI,
-	PL_INMEDEFAIDRIN,
-	PL_INMEETEIMAYEK,
-	PL_INMENDEKIKAKUI,
-	PL_INMEROITICCURSIVE,
-	PL_INMIAO,
-	PL_INMODI,
-	PL_INMONGOLIAN,
-	PL_INMRO,
-	PL_INMULTANI,
-	PL_INMYANMAR,
-	PL_INNABATAEAN,
-	PL_INNEWA,
-	PL_INNEWTAILUE,
-	PL_INNKO,
-	PL_INNUSHU,
-	PL_INOGHAM,
-	PL_INOLDHUNGARIAN,
-	PL_INOLDITALIC,
-	PL_INOLDPERMIC,
-	PL_INOLDPERSIAN,
-	PL_INOLDSOGDIAN,
-	PL_INOLDTURKIC,
-	PL_INORIYA,
-	PL_INOSAGE,
-	PL_INOSMANYA,
-	PL_INPAHAWHHMONG,
-	PL_INPAUCINHAU,
-	PL_INPC__BOTTOM,
-	PL_INPC__BOTTOMANDLEFT,
-	PL_INPC__BOTTOMANDRIGHT,
-	PL_INPC__LEFT,
-	PL_INPC__LEFTANDRIGHT,
-	PL_INPC__NA,
-	PL_INPC__OVERSTRUCK,
-	PL_INPC__RIGHT,
-	PL_INPC__TOP,
-	PL_INPC__TOPANDBOTTOM,
-	PL_INPC__TOPANDBOTTOMANDRIGHT,
-	PL_INPC__TOPANDLEFT,
-	PL_INPC__TOPANDLEFTANDRIGHT,
-	PL_INPC__TOPANDRIGHT,
-	PL_INPHAGSPA,
-	PL_INPHOENICIAN,
-	PL_INPSALTERPAHLAVI,
-	PL_INPUNCTUATION,
-	PL_INREJANG,
-	PL_INRUNIC,
-	PL_INSAMARITAN,
-	PL_INSAURASHTRA,
-	PL_INSC__AVAGRAHA,
-	PL_INSC__BINDU,
-	PL_INSC__BRAHMIJOININGNUMBER,
-	PL_INSC__CANTILLATIONMARK,
-	PL_INSC__CONSONANT,
-	PL_INSC__CONSONANTDEAD,
-	PL_INSC__CONSONANTFINAL,
-	PL_INSC__CONSONANTHEADLETTER,
-	PL_INSC__CONSONANTINITIALPOSTFIXED,
-	PL_INSC__CONSONANTKILLER,
-	PL_INSC__CONSONANTMEDIAL,
-	PL_INSC__CONSONANTPLACEHOLDER,
-	PL_INSC__CONSONANTPRECEDINGREPHA,
-	PL_INSC__CONSONANTPREFIXED,
-	PL_INSC__CONSONANTSUBJOINED,
-	PL_INSC__CONSONANTSUCCEEDINGREPHA,
-	PL_INSC__CONSONANTWITHSTACKER,
-	PL_INSC__GEMINATIONMARK,
-	PL_INSC__INVISIBLESTACKER,
-	PL_INSC__MODIFYINGLETTER,
-	PL_INSC__NONJOINER,
-	PL_INSC__NUKTA,
-	PL_INSC__NUMBER,
-	PL_INSC__NUMBERJOINER,
-	PL_INSC__OTHER,
-	PL_INSC__PUREKILLER,
-	PL_INSC__REGISTERSHIFTER,
-	PL_INSC__SYLLABLEMODIFIER,
-	PL_INSC__TONELETTER,
-	PL_INSC__TONEMARK,
-	PL_INSC__VIRAMA,
-	PL_INSC__VISARGA,
-	PL_INSC__VOWEL,
-	PL_INSC__VOWELDEPENDENT,
-	PL_INSC__VOWELINDEPENDENT,
-	PL_INSHARADA,
-	PL_INSIDDHAM,
-	PL_INSINHALA,
-	PL_INSOGDIAN,
-	PL_INSORASOMPENG,
-	PL_INSOYOMBO,
-	PL_INSUNDANESE,
-	PL_INSYLOTINAGRI,
-	PL_INSYRIAC,
-	PL_INTAGALOG,
-	PL_INTAGBANWA,
-	PL_INTAILE,
-	PL_INTAITHAM,
-	PL_INTAIVIET,
-	PL_INTAKRI,
-	PL_INTAMIL,
-	PL_INTANGUT,
-	PL_INTELUGU,
-	PL_INTHAANA,
-	PL_INTHAI,
-	PL_INTIBETAN,
-	PL_INTIFINAGH,
-	PL_INTIRHUTA,
-	PL_INUGARITIC,
-	PL_INVAI,
-	PL_INVS,
-	PL_INWARANGCITI,
-	PL_INZANABAZARSQUARE,
-	PL_IN__10,
-	PL_IN__11,
-	PL_IN__1_DOT_1,
-	PL_IN__2,
-	PL_IN__2_DOT_1,
-	PL_IN__3,
-	PL_IN__3_DOT_1,
-	PL_IN__3_DOT_2,
-	PL_IN__4,
-	PL_IN__4_DOT_1,
-	PL_IN__5,
-	PL_IN__5_DOT_1,
-	PL_IN__5_DOT_2,
-	PL_IN__6,
-	PL_IN__6_DOT_1,
-	PL_IN__6_DOT_2,
-	PL_IN__6_DOT_3,
-	PL_IN__7,
-	PL_IN__8,
-	PL_IN__9,
-	PL_IPAEXT,
-	PL_ITAL,
-	PL_JAMO,
-	PL_JAMOEXTA,
-	PL_JAMOEXTB,
-	PL_JAVA,
-	PL_JG__AFRICANFEH,
-	PL_JG__AFRICANNOON,
-	PL_JG__AFRICANQAF,
-	PL_JG__AIN,
-	PL_JG__ALAPH,
-	PL_JG__ALEF,
-	PL_JG__BEH,
-	PL_JG__BETH,
-	PL_JG__BURUSHASKIYEHBARREE,
-	PL_JG__DAL,
-	PL_JG__DALATHRISH,
-	PL_JG__E,
-	PL_JG__FARSIYEH,
-	PL_JG__FE,
-	PL_JG__FEH,
-	PL_JG__FINALSEMKATH,
-	PL_JG__GAF,
-	PL_JG__GAMAL,
-	PL_JG__HAH,
-	PL_JG__HAMZAONHEHGOAL,
-	PL_JG__HANIFIROHINGYAKINNAYA,
-	PL_JG__HANIFIROHINGYAPA,
-	PL_JG__HE,
-	PL_JG__HEH,
-	PL_JG__HEHGOAL,
-	PL_JG__HETH,
-	PL_JG__KAF,
-	PL_JG__KAPH,
-	PL_JG__KHAPH,
-	PL_JG__KNOTTEDHEH,
-	PL_JG__LAM,
-	PL_JG__LAMADH,
-	PL_JG__MALAYALAMBHA,
-	PL_JG__MALAYALAMJA,
-	PL_JG__MALAYALAMLLA,
-	PL_JG__MALAYALAMLLLA,
-	PL_JG__MALAYALAMNGA,
-	PL_JG__MALAYALAMNNA,
-	PL_JG__MALAYALAMNNNA,
-	PL_JG__MALAYALAMNYA,
-	PL_JG__MALAYALAMRA,
-	PL_JG__MALAYALAMSSA,
-	PL_JG__MALAYALAMTTA,
-	PL_JG__MANICHAEANALEPH,
-	PL_JG__MANICHAEANAYIN,
-	PL_JG__MANICHAEANBETH,
-	PL_JG__MANICHAEANDALETH,
-	PL_JG__MANICHAEANDHAMEDH,
-	PL_JG__MANICHAEANFIVE,
-	PL_JG__MANICHAEANGIMEL,
-	PL_JG__MANICHAEANHETH,
-	PL_JG__MANICHAEANHUNDRED,
-	PL_JG__MANICHAEANKAPH,
-	PL_JG__MANICHAEANLAMEDH,
-	PL_JG__MANICHAEANMEM,
-	PL_JG__MANICHAEANNUN,
-	PL_JG__MANICHAEANONE,
-	PL_JG__MANICHAEANPE,
-	PL_JG__MANICHAEANQOPH,
-	PL_JG__MANICHAEANRESH,
-	PL_JG__MANICHAEANSADHE,
-	PL_JG__MANICHAEANSAMEKH,
-	PL_JG__MANICHAEANTAW,
-	PL_JG__MANICHAEANTEN,
-	PL_JG__MANICHAEANTETH,
-	PL_JG__MANICHAEANTHAMEDH,
-	PL_JG__MANICHAEANTWENTY,
-	PL_JG__MANICHAEANWAW,
-	PL_JG__MANICHAEANYODH,
-	PL_JG__MANICHAEANZAYIN,
-	PL_JG__MEEM,
-	PL_JG__MIM,
-	PL_JG__NOJOININGGROUP,
-	PL_JG__NOON,
-	PL_JG__NUN,
-	PL_JG__NYA,
-	PL_JG__PE,
-	PL_JG__QAF,
-	PL_JG__QAPH,
-	PL_JG__REH,
-	PL_JG__REVERSEDPE,
-	PL_JG__ROHINGYAYEH,
-	PL_JG__SAD,
-	PL_JG__SADHE,
-	PL_JG__SEEN,
-	PL_JG__SEMKATH,
-	PL_JG__SHIN,
-	PL_JG__STRAIGHTWAW,
-	PL_JG__SWASHKAF,
-	PL_JG__SYRIACWAW,
-	PL_JG__TAH,
-	PL_JG__TAW,
-	PL_JG__TEHMARBUTA,
-	PL_JG__TETH,
-	PL_JG__WAW,
-	PL_JG__YEH,
-	PL_JG__YEHBARREE,
-	PL_JG__YEHWITHTAIL,
-	PL_JG__YUDH,
-	PL_JG__YUDHHE,
-	PL_JG__ZAIN,
-	PL_JG__ZHAIN,
-	PL_JOINC,
-	PL_JT__C,
-	PL_JT__D,
-	PL_JT__L,
-	PL_JT__R,
-	PL_JT__T,
-	PL_JT__U,
-	PL_KALI,
-	PL_KANA,
-	PL_KANAEXTA,
-	PL_KANASUP,
-	PL_KANBUN,
-	PL_KANGXI,
-	PL_KATAKANAEXT,
-	PL_KHAR,
-	PL_KHMERSYMBOLS,
-	PL_KHMR,
-	PL_KHOJ,
-	PL_KNDA,
-	PL_KTHI,
-	PL_L,
-	PL_LANA,
-	PL_LAO,
-	PL_LATIN1,
-	PL_LATINEXTA,
-	PL_LATINEXTADDITIONAL,
-	PL_LATINEXTB,
-	PL_LATINEXTC,
-	PL_LATINEXTD,
-	PL_LATINEXTE,
-	PL_LATN,
-	PL_LB__AI,
-	PL_LB__AL,
-	PL_LB__B2,
-	PL_LB__BA,
-	PL_LB__BB,
-	PL_LB__BK,
-	PL_LB__CB,
-	PL_LB__CJ,
-	PL_LB__CL,
-	PL_LB__CM,
-	PL_LB__CP,
-	PL_LB__CR,
-	PL_LB__EB,
-	PL_LB__EM,
-	PL_LB__EX,
-	PL_LB__GL,
-	PL_LB__H2,
-	PL_LB__H3,
-	PL_LB__HL,
-	PL_LB__HY,
-	PL_LB__ID,
-	PL_LB__IN,
-	PL_LB__IS,
-	PL_LB__LF,
-	PL_LB__NL,
-	PL_LB__NS,
-	PL_LB__NU,
-	PL_LB__OP,
-	PL_LB__PO,
-	PL_LB__PR,
-	PL_LB__QU,
-	PL_LB__SA,
-	PL_LB__SG_perl_aux,
-	PL_LB__SP,
-	PL_LB__SY,
-	PL_LB__WJ,
-	PL_LB__XX,
-	PL_LB__ZW,
-	PL_LB__ZWJ,
-	PL_LEPC,
-	PL_LETTERLIKESYMBOLS,
-	PL_LIMB,
-	PL_LINA,
-	PL_LINB,
-	PL_LINEARBIDEOGRAMS,
-	PL_LINEARBSYLLABARY,
-	PL_LISU,
-	PL_LM,
-	PL_LO,
-	PL_LOE,
-	PL_LOWERCASELETTER,
-	PL_LOWSURROGATES,
-	PL_LYCI,
-	PL_LYDI,
-	PL_M,
-	PL_MAHJ,
-	PL_MAHJONG,
-	PL_MAKA,
-	PL_MAND,
-	PL_MANI,
-	PL_MARC,
-	PL_MATH,
-	PL_MATHALPHANUM,
-	PL_MATHOPERATORS,
-	PL_MAYANNUMERALS,
-	PL_MC,
-	PL_ME,
-	PL_MEDF,
-	PL_MEETEIMAYEKEXT,
-	PL_MEND,
-	PL_MERC,
-	PL_MERO,
-	PL_MIAO,
-	PL_MISCARROWS,
-	PL_MISCMATHSYMBOLSA,
-	PL_MISCMATHSYMBOLSB,
-	PL_MISCPICTOGRAPHS,
-	PL_MISCSYMBOLS,
-	PL_MISCTECHNICAL,
-	PL_MLYM,
-	PL_MN,
-	PL_MODI,
-	PL_MODIFIERLETTERS,
-	PL_MODIFIERTONELETTERS,
-	PL_MONG,
-	PL_MONGOLIANSUP,
-	PL_MRO,
-	PL_MTEI,
-	PL_MULT,
-	PL_MUSIC,
-	PL_MYANMAREXTA,
-	PL_MYANMAREXTB,
-	PL_MYMR,
-	PL_N,
-	PL_NARB,
-	PL_NB,
-	PL_NBAT,
-	PL_NEWA,
-	PL_NFCQC__M,
-	PL_NFCQC__Y,
-	PL_NFDQC__Y,
-	PL_NFKCQC__N,
-	PL_NFKCQC__Y,
-	PL_NFKDQC__N,
-	PL_NKO,
-	PL_NL,
-	PL_NO,
-	PL_NSHU,
-	PL_NT__DI,
-	PL_NT__NU,
-	PL_NUMBERFORMS,
-	PL_NV__0,
-	PL_NV__1,
-	PL_NV__10,
-	PL_NV__100,
-	PL_NV__1000,
-	PL_NV__10000,
-	PL_NV__100000,
-	PL_NV__1000000,
-	PL_NV__10000000,
-	PL_NV__100000000,
-	PL_NV__10000000000,
-	PL_NV__1000000000000,
-	PL_NV__11,
-	PL_NV__11_SLASH_12,
-	PL_NV__11_SLASH_2,
-	PL_NV__12,
-	PL_NV__13,
-	PL_NV__13_SLASH_2,
-	PL_NV__14,
-	PL_NV__15,
-	PL_NV__15_SLASH_2,
-	PL_NV__16,
-	PL_NV__17,
-	PL_NV__17_SLASH_2,
-	PL_NV__18,
-	PL_NV__19,
-	PL_NV__1_SLASH_10,
-	PL_NV__1_SLASH_12,
-	PL_NV__1_SLASH_16,
-	PL_NV__1_SLASH_160,
-	PL_NV__1_SLASH_2,
-	PL_NV__1_SLASH_20,
-	PL_NV__1_SLASH_3,
-	PL_NV__1_SLASH_4,
-	PL_NV__1_SLASH_40,
-	PL_NV__1_SLASH_5,
-	PL_NV__1_SLASH_6,
-	PL_NV__1_SLASH_7,
-	PL_NV__1_SLASH_8,
-	PL_NV__1_SLASH_9,
-	PL_NV__2,
-	PL_NV__20,
-	PL_NV__200,
-	PL_NV__2000,
-	PL_NV__20000,
-	PL_NV__200000,
-	PL_NV__20000000,
-	PL_NV__21,
-	PL_NV__216000,
-	PL_NV__22,
-	PL_NV__23,
-	PL_NV__24,
-	PL_NV__25,
-	PL_NV__26,
-	PL_NV__27,
-	PL_NV__28,
-	PL_NV__29,
-	PL_NV__2_SLASH_3,
-	PL_NV__2_SLASH_5,
-	PL_NV__3,
-	PL_NV__30,
-	PL_NV__300,
-	PL_NV__3000,
-	PL_NV__30000,
-	PL_NV__300000,
-	PL_NV__31,
-	PL_NV__32,
-	PL_NV__33,
-	PL_NV__34,
-	PL_NV__35,
-	PL_NV__36,
-	PL_NV__37,
-	PL_NV__38,
-	PL_NV__39,
-	PL_NV__3_SLASH_16,
-	PL_NV__3_SLASH_2,
-	PL_NV__3_SLASH_20,
-	PL_NV__3_SLASH_4,
-	PL_NV__3_SLASH_5,
-	PL_NV__3_SLASH_8,
-	PL_NV__3_SLASH_80,
-	PL_NV__4,
-	PL_NV__40,
-	PL_NV__400,
-	PL_NV__4000,
-	PL_NV__40000,
-	PL_NV__400000,
-	PL_NV__41,
-	PL_NV__42,
-	PL_NV__43,
-	PL_NV__432000,
-	PL_NV__44,
-	PL_NV__45,
-	PL_NV__46,
-	PL_NV__47,
-	PL_NV__48,
-	PL_NV__49,
-	PL_NV__4_SLASH_5,
-	PL_NV__5,
-	PL_NV__50,
-	PL_NV__500,
-	PL_NV__5000,
-	PL_NV__50000,
-	PL_NV__500000,
-	PL_NV__5_SLASH_12,
-	PL_NV__5_SLASH_2,
-	PL_NV__5_SLASH_6,
-	PL_NV__5_SLASH_8,
-	PL_NV__6,
-	PL_NV__60,
-	PL_NV__600,
-	PL_NV__6000,
-	PL_NV__60000,
-	PL_NV__600000,
-	PL_NV__7,
-	PL_NV__70,
-	PL_NV__700,
-	PL_NV__7000,
-	PL_NV__70000,
-	PL_NV__700000,
-	PL_NV__7_SLASH_12,
-	PL_NV__7_SLASH_2,
-	PL_NV__7_SLASH_8,
-	PL_NV__8,
-	PL_NV__80,
-	PL_NV__800,
-	PL_NV__8000,
-	PL_NV__80000,
-	PL_NV__800000,
-	PL_NV__9,
-	PL_NV__90,
-	PL_NV__900,
-	PL_NV__9000,
-	PL_NV__90000,
-	PL_NV__900000,
-	PL_NV__9_SLASH_2,
-	PL_NV__NAN,
-	PL_NV___MINUS_1_SLASH_2,
-	PL_OCR,
-	PL_OGAM,
-	PL_OLCK,
-	PL_ORKH,
-	PL_ORNAMENTALDINGBATS,
-	PL_ORYA,
-	PL_OSGE,
-	PL_OSMA,
-	PL_P,
-	PL_PALM,
-	PL_PATSYN,
-	PL_PAUC,
-	PL_PC,
-	PL_PCM,
-	PL_PD,
-	PL_PE,
-	PL_PERM,
-	PL_PF,
-	PL_PHAG,
-	PL_PHAISTOS,
-	PL_PHLI,
-	PL_PHLP,
-	PL_PHNX,
-	PL_PHONETICEXT,
-	PL_PHONETICEXTSUP,
-	PL_PI,
-	PL_PLAYINGCARDS,
-	PL_PO,
-	PL_POSIXALNUM,
-	PL_POSIXALPHA,
-	PL_POSIXBLANK,
-	PL_POSIXCNTRL,
-	PL_POSIXDIGIT,
-	PL_POSIXGRAPH,
-	PL_POSIXLOWER,
-	PL_POSIXPRINT,
-	PL_POSIXPUNCT,
-	PL_POSIXSPACE,
-	PL_POSIXUPPER,
-	PL_POSIXWORD,
-	PL_POSIXXDIGIT,
-	PL_PRTI,
-	PL_PS,
-	PL_PUA,
-	PL_QAAI,
-	PL_QMARK,
-	PL_RADICAL,
-	PL_RI,
-	PL_RJNG,
-	PL_ROHG,
-	PL_RUMI,
-	PL_RUNR,
-	PL_S,
-	PL_SAMR,
-	PL_SARB,
-	PL_SAUR,
-	PL_SB__AT,
-	PL_SB__CL,
-	PL_SB__EX,
-	PL_SB__FO,
-	PL_SB__LE,
-	PL_SB__LO,
-	PL_SB__SC,
-	PL_SB__SE,
-	PL_SB__SP,
-	PL_SB__ST,
-	PL_SB__UP,
-	PL_SB__XX,
-	PL_SC,
-	PL_SC__ADLM,
-	PL_SC__ARAB,
-	PL_SC__ARMN,
-	PL_SC__BENG,
-	PL_SC__BOPO,
-	PL_SC__BUGI,
-	PL_SC__BUHD,
-	PL_SC__CAKM,
-	PL_SC__COPT,
-	PL_SC__CPRT,
-	PL_SC__CYRL,
-	PL_SC__DEVA,
-	PL_SC__DOGR,
-	PL_SC__DUPL,
-	PL_SC__GEOR,
-	PL_SC__GLAG,
-	PL_SC__GONG,
-	PL_SC__GRAN,
-	PL_SC__GREK,
-	PL_SC__GUJR,
-	PL_SC__GURU,
-	PL_SC__HAN,
-	PL_SC__HANG,
-	PL_SC__HANO,
-	PL_SC__HIRA,
-	PL_SC__JAVA,
-	PL_SC__KALI,
-	PL_SC__KANA,
-	PL_SC__KHOJ,
-	PL_SC__KNDA,
-	PL_SC__KTHI,
-	PL_SC__LATN,
-	PL_SC__LIMB,
-	PL_SC__LINA,
-	PL_SC__LINB,
-	PL_SC__MAHJ,
-	PL_SC__MAND,
-	PL_SC__MANI,
-	PL_SC__MLYM,
-	PL_SC__MODI,
-	PL_SC__MONG,
-	PL_SC__MULT,
-	PL_SC__MYMR,
-	PL_SC__ORYA,
-	PL_SC__PERM,
-	PL_SC__PHAG,
-	PL_SC__PHLP,
-	PL_SC__QAAI,
-	PL_SC__ROHG,
-	PL_SC__SHRD,
-	PL_SC__SIND,
-	PL_SC__SINH,
-	PL_SC__SOGD,
-	PL_SC__SYLO,
-	PL_SC__SYRC,
-	PL_SC__TAGB,
-	PL_SC__TAKR,
-	PL_SC__TALE,
-	PL_SC__TAML,
-	PL_SC__TELU,
-	PL_SC__TGLG,
-	PL_SC__THAA,
-	PL_SC__TIRH,
-	PL_SC__YI,
-	PL_SC__ZYYY,
-	PL_SD,
-	PL_SGNW,
-	PL_SHAW,
-	PL_SHORTHANDFORMATCONTROLS,
-	PL_SHRD,
-	PL_SIDD,
-	PL_SIND,
-	PL_SINH,
-	PL_SINHALAARCHAICNUMBERS,
-	PL_SK,
-	PL_SM,
-	PL_SMALLFORMS,
-	PL_SO,
-	PL_SOGD,
-	PL_SOGO,
-	PL_SORA,
-	PL_SOYO,
-	PL_SPECIALS,
-	PL_STERM,
-	PL_SUND,
-	PL_SUNDANESESUP,
-	PL_SUPARROWSA,
-	PL_SUPARROWSB,
-	PL_SUPARROWSC,
-	PL_SUPERANDSUB,
-	PL_SUPMATHOPERATORS,
-	PL_SUPPUAA,
-	PL_SUPPUAB,
-	PL_SUPPUNCTUATION,
-	PL_SUPSYMBOLSANDPICTOGRAPHS,
-	PL_SUTTONSIGNWRITING,
-	PL_SYLO,
-	PL_SYRC,
-	PL_SYRIACSUP,
-	PL_TAGB,
-	PL_TAGS,
-	PL_TAIXUANJING,
-	PL_TAKR,
-	PL_TALE,
-	PL_TALU,
-	PL_TAML,
-	PL_TANG,
-	PL_TANGUTCOMPONENTS,
-	PL_TAVT,
-	PL_TELU,
-	PL_TERM,
-	PL_TFNG,
-	PL_TGLG,
-	PL_THAA,
-	PL_THAI,
-	PL_TIBT,
-	PL_TIRH,
-	PL_TITLE,
-	PL_TRANSPORTANDMAP,
-	PL_UCAS,
-	PL_UCASEXT,
-	PL_UGAR,
-	PL_UIDEO,
-	PL_UPPERCASELETTER,
-	PL_VAI,
-	PL_VEDICEXT,
-	PL_VERTICALFORMS,
-	PL_VERTSPACE,
-	PL_VO__R,
-	PL_VO__TR,
-	PL_VO__TU,
-	PL_VO__U,
-	PL_VS,
-	PL_VSSUP,
-	PL_WARA,
-	PL_WB__DQ,
-	PL_WB__EB,
-	PL_WB__EX,
-	PL_WB__EXTEND,
-	PL_WB__FO,
-	PL_WB__KA,
-	PL_WB__LE,
-	PL_WB__MB,
-	PL_WB__ML,
-	PL_WB__MN,
-	PL_WB__NL,
-	PL_WB__NU,
-	PL_WB__SQ,
-	PL_WB__WSEGSPACE,
-	PL_WB__XX,
-	PL_XIDC,
-	PL_XIDS,
-	PL_XPEO,
-	PL_XPOSIXALNUM,
-	PL_XPOSIXALPHA,
-	PL_XPOSIXBLANK,
-	PL_XPOSIXCNTRL,
-	PL_XPOSIXDIGIT,
-	PL_XPOSIXGRAPH,
-	PL_XPOSIXLOWER,
-	PL_XPOSIXPRINT,
-	PL_XPOSIXPUNCT,
-	PL_XPOSIXSPACE,
-	PL_XPOSIXUPPER,
-	PL_XPOSIXWORD,
-	PL_XPOSIXXDIGIT,
-	PL_XSUX,
-	PL_YI,
-	PL_YIJING,
-	PL_YIRADICALS,
-	PL_YISYLLABLES,
-	PL_Z,
-	PL_ZANB,
-	PL_ZL,
-	PL_ZP,
-	PL_ZS,
-	PL_ZYYY,
-	PL_ZZZZ,
-	PL__PERL_ANY_FOLDS,
-	PL__PERL_CHARNAME_BEGIN,
-	PL__PERL_CHARNAME_CONTINUE,
-	PL__PERL_FOLDS_TO_MULTI_CHAR,
-	PL__PERL_IDCONT,
-	PL__PERL_IDSTART,
-	PL__PERL_NCHAR,
-	PL__PERL_PATWS,
-	PL__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START,
-	PL__PERL_PROBLEMATIC_LOCALE_FOLDS,
-	PL__PERL_QUOTEMETA,
-	PL__PERL_SURROGATE
+	UNI_ADLM,
+	UNI_AEGEANNUMBERS,
+	UNI_AGE__10,
+	UNI_AGE__11,
+	UNI_AGE__2,
+	UNI_AGE__2_DOT_1,
+	UNI_AGE__3,
+	UNI_AGE__3_DOT_1,
+	UNI_AGE__3_DOT_2,
+	UNI_AGE__4,
+	UNI_AGE__4_DOT_1,
+	UNI_AGE__5,
+	UNI_AGE__5_DOT_1,
+	UNI_AGE__5_DOT_2,
+	UNI_AGE__6,
+	UNI_AGE__6_DOT_1,
+	UNI_AGE__6_DOT_2,
+	UNI_AGE__6_DOT_3,
+	UNI_AGE__7,
+	UNI_AGE__8,
+	UNI_AGE__9,
+	UNI_AGE__NA,
+	UNI_AGHB,
+	UNI_AHOM,
+	UNI_ALCHEMICAL,
+	UNI_ALL,
+	UNI_ALPHABETICPF,
+	UNI_ANCIENTGREEKMUSIC,
+	UNI_ANCIENTGREEKNUMBERS,
+	UNI_ANCIENTSYMBOLS,
+	UNI_ANY,
+	UNI_ARAB,
+	UNI_ARABICEXTA,
+	UNI_ARABICMATH,
+	UNI_ARABICPFA,
+	UNI_ARABICPFB,
+	UNI_ARABICSUP,
+	UNI_ARMI,
+	UNI_ARMN,
+	UNI_ARROWS,
+	UNI_ASCII,
+	UNI_ASSIGNED,
+	UNI_AVST,
+	UNI_BALI,
+	UNI_BAMU,
+	UNI_BAMUMSUP,
+	UNI_BASS,
+	UNI_BATK,
+	UNI_BC__AL,
+	UNI_BC__AN,
+	UNI_BC__B,
+	UNI_BC__BN,
+	UNI_BC__CS,
+	UNI_BC__EN,
+	UNI_BC__ES,
+	UNI_BC__ET,
+	UNI_BC__FSI,
+	UNI_BC__L,
+	UNI_BC__LRE,
+	UNI_BC__LRI,
+	UNI_BC__LRO,
+	UNI_BC__NSM,
+	UNI_BC__ON,
+	UNI_BC__PDF,
+	UNI_BC__PDI,
+	UNI_BC__R,
+	UNI_BC__RLE,
+	UNI_BC__RLI,
+	UNI_BC__RLO,
+	UNI_BC__S,
+	UNI_BC__WS,
+	UNI_BENG,
+	UNI_BHKS,
+	UNI_BIDIC,
+	UNI_BIDIM,
+	UNI_BLOCKELEMENTS,
+	UNI_BOPO,
+	UNI_BOPOMOFOEXT,
+	UNI_BOXDRAWING,
+	UNI_BPT__C,
+	UNI_BPT__N,
+	UNI_BPT__O,
+	UNI_BRAH,
+	UNI_BRAI,
+	UNI_BUGI,
+	UNI_BUHD,
+	UNI_BYZANTINEMUSIC,
+	UNI_C,
+	UNI_CAKM,
+	UNI_CANS,
+	UNI_CARI,
+	UNI_CASED,
+	UNI_CASEDLETTER,
+	UNI_CCC__0,
+	UNI_CCC__1,
+	UNI_CCC__10,
+	UNI_CCC__103,
+	UNI_CCC__107,
+	UNI_CCC__11,
+	UNI_CCC__118,
+	UNI_CCC__12,
+	UNI_CCC__122,
+	UNI_CCC__129,
+	UNI_CCC__13,
+	UNI_CCC__130,
+	UNI_CCC__132,
+	UNI_CCC__14,
+	UNI_CCC__15,
+	UNI_CCC__16,
+	UNI_CCC__17,
+	UNI_CCC__18,
+	UNI_CCC__19,
+	UNI_CCC__20,
+	UNI_CCC__202,
+	UNI_CCC__21,
+	UNI_CCC__214,
+	UNI_CCC__216,
+	UNI_CCC__22,
+	UNI_CCC__23,
+	UNI_CCC__24,
+	UNI_CCC__25,
+	UNI_CCC__26,
+	UNI_CCC__27,
+	UNI_CCC__28,
+	UNI_CCC__29,
+	UNI_CCC__30,
+	UNI_CCC__31,
+	UNI_CCC__32,
+	UNI_CCC__33,
+	UNI_CCC__34,
+	UNI_CCC__35,
+	UNI_CCC__36,
+	UNI_CCC__7,
+	UNI_CCC__8,
+	UNI_CCC__84,
+	UNI_CCC__9,
+	UNI_CCC__91,
+	UNI_CCC__A,
+	UNI_CCC__AL,
+	UNI_CCC__AR,
+	UNI_CCC__B,
+	UNI_CCC__BL,
+	UNI_CCC__BR,
+	UNI_CCC__DA,
+	UNI_CCC__DB,
+	UNI_CCC__IS,
+	UNI_CCC__L,
+	UNI_CCC__R,
+	UNI_CE,
+	UNI_CF,
+	UNI_CHAM,
+	UNI_CHER,
+	UNI_CHEROKEESUP,
+	UNI_CHESSSYMBOLS,
+	UNI_CI,
+	UNI_CJK,
+	UNI_CJKCOMPAT,
+	UNI_CJKCOMPATFORMS,
+	UNI_CJKCOMPATIDEOGRAPHS,
+	UNI_CJKCOMPATIDEOGRAPHSSUP,
+	UNI_CJKEXTA,
+	UNI_CJKEXTB,
+	UNI_CJKEXTC,
+	UNI_CJKEXTD,
+	UNI_CJKEXTE,
+	UNI_CJKEXTF,
+	UNI_CJKRADICALSSUP,
+	UNI_CJKSTROKES,
+	UNI_CJKSYMBOLS,
+	UNI_CN,
+	UNI_CO,
+	UNI_COMPATJAMO,
+	UNI_COMPEX,
+	UNI_CONTROLPICTURES,
+	UNI_COPT,
+	UNI_COPTICEPACTNUMBERS,
+	UNI_COUNTINGROD,
+	UNI_CPRT,
+	UNI_CUNEIFORMNUMBERS,
+	UNI_CURRENCYSYMBOLS,
+	UNI_CWCF,
+	UNI_CWCM,
+	UNI_CWKCF,
+	UNI_CWL,
+	UNI_CWT,
+	UNI_CWU,
+	UNI_CYPRIOTSYLLABARY,
+	UNI_CYRILLICEXTA,
+	UNI_CYRILLICEXTB,
+	UNI_CYRILLICEXTC,
+	UNI_CYRILLICSUP,
+	UNI_CYRL,
+	UNI_DASH,
+	UNI_DEP,
+	UNI_DEVA,
+	UNI_DEVANAGARIEXT,
+	UNI_DI,
+	UNI_DIA,
+	UNI_DIACRITICALS,
+	UNI_DIACRITICALSEXT,
+	UNI_DIACRITICALSFORSYMBOLS,
+	UNI_DIACRITICALSSUP,
+	UNI_DINGBATS,
+	UNI_DOGR,
+	UNI_DOMINO,
+	UNI_DSRT,
+	UNI_DT__CAN,
+	UNI_DT__COM,
+	UNI_DT__ENC,
+	UNI_DT__FIN,
+	UNI_DT__FONT,
+	UNI_DT__FRA,
+	UNI_DT__INIT,
+	UNI_DT__ISO,
+	UNI_DT__MED,
+	UNI_DT__NAR,
+	UNI_DT__NB,
+	UNI_DT__NONCANON,
+	UNI_DT__NONE,
+	UNI_DT__SML,
+	UNI_DT__SQR,
+	UNI_DT__SUB,
+	UNI_DT__SUP,
+	UNI_DT__VERT,
+	UNI_DUPL,
+	UNI_EARLYDYNASTICCUNEIFORM,
+	UNI_EA__A,
+	UNI_EA__F,
+	UNI_EA__H,
+	UNI_EA__N,
+	UNI_EA__NA,
+	UNI_EA__W,
+	UNI_EGYP,
+	UNI_ELBA,
+	UNI_EMOTICONS,
+	UNI_ENCLOSEDALPHANUM,
+	UNI_ENCLOSEDALPHANUMSUP,
+	UNI_ENCLOSEDCJK,
+	UNI_ENCLOSEDIDEOGRAPHICSUP,
+	UNI_ETHI,
+	UNI_ETHIOPICEXT,
+	UNI_ETHIOPICEXTA,
+	UNI_ETHIOPICSUP,
+	UNI_EXT,
+	UNI_GCB__CN,
+	UNI_GCB__EX,
+	UNI_GCB__L,
+	UNI_GCB__PP,
+	UNI_GCB__SM,
+	UNI_GCB__T,
+	UNI_GCB__V,
+	UNI_GCB__XX,
+	UNI_GEOMETRICSHAPES,
+	UNI_GEOMETRICSHAPESEXT,
+	UNI_GEOR,
+	UNI_GEORGIANEXT,
+	UNI_GEORGIANSUP,
+	UNI_GLAG,
+	UNI_GLAGOLITICSUP,
+	UNI_GONG,
+	UNI_GONM,
+	UNI_GOTH,
+	UNI_GRAN,
+	UNI_GRBASE,
+	UNI_GREEKEXT,
+	UNI_GREK,
+	UNI_GREXT,
+	UNI_GUJR,
+	UNI_GURU,
+	UNI_HALFANDFULLFORMS,
+	UNI_HALFMARKS,
+	UNI_HAN,
+	UNI_HANG,
+	UNI_HANO,
+	UNI_HATR,
+	UNI_HEBR,
+	UNI_HIGHPUSURROGATES,
+	UNI_HIGHSURROGATES,
+	UNI_HIRA,
+	UNI_HLUW,
+	UNI_HMNG,
+	UNI_HST__NA,
+	UNI_HUNG,
+	UNI_HYPHEN_perl_aux,
+	UNI_IDC,
+	UNI_IDEO,
+	UNI_IDEOGRAPHICSYMBOLS,
+	UNI_IDS,
+	UNI_IDSB,
+	UNI_IDST,
+	UNI_INADLAM,
+	UNI_INAHOM,
+	UNI_INANATOLIANHIEROGLYPHS,
+	UNI_INARABIC,
+	UNI_INARMENIAN,
+	UNI_INAVESTAN,
+	UNI_INBALINESE,
+	UNI_INBAMUM,
+	UNI_INBASSAVAH,
+	UNI_INBATAK,
+	UNI_INBENGALI,
+	UNI_INBHAIKSUKI,
+	UNI_INBOPOMOFO,
+	UNI_INBRAHMI,
+	UNI_INBUGINESE,
+	UNI_INBUHID,
+	UNI_INCARIAN,
+	UNI_INCAUCASIANALBANIAN,
+	UNI_INCHAKMA,
+	UNI_INCHAM,
+	UNI_INCHEROKEE,
+	UNI_INCOPTIC,
+	UNI_INCUNEIFORM,
+	UNI_INCYRILLIC,
+	UNI_INDEVANAGARI,
+	UNI_INDICNUMBERFORMS,
+	UNI_INDICSIYAQNUMBERS,
+	UNI_INDOGRA,
+	UNI_INDUPLOYAN,
+	UNI_INEGYPTIANHIEROGLYPHS,
+	UNI_INELBASAN,
+	UNI_INETHIOPIC,
+	UNI_INGEORGIAN,
+	UNI_INGLAGOLITIC,
+	UNI_INGOTHIC,
+	UNI_INGRANTHA,
+	UNI_INGREEK,
+	UNI_INGUJARATI,
+	UNI_INGUNJALAGONDI,
+	UNI_INGURMUKHI,
+	UNI_INHANGUL,
+	UNI_INHANIFIROHINGYA,
+	UNI_INHANUNOO,
+	UNI_INHATRAN,
+	UNI_INHEBREW,
+	UNI_INHIRAGANA,
+	UNI_INIDC,
+	UNI_INIMPERIALARAMAIC,
+	UNI_ININSCRIPTIONALPAHLAVI,
+	UNI_ININSCRIPTIONALPARTHIAN,
+	UNI_INJAVANESE,
+	UNI_INKAITHI,
+	UNI_INKANNADA,
+	UNI_INKATAKANA,
+	UNI_INKHAROSHTHI,
+	UNI_INKHMER,
+	UNI_INKHOJKI,
+	UNI_INKHUDAWADI,
+	UNI_INLAO,
+	UNI_INLEPCHA,
+	UNI_INLIMBU,
+	UNI_INLINEARA,
+	UNI_INLYCIAN,
+	UNI_INLYDIAN,
+	UNI_INMAHAJANI,
+	UNI_INMAKASAR,
+	UNI_INMALAYALAM,
+	UNI_INMANDAIC,
+	UNI_INMANICHAEAN,
+	UNI_INMARCHEN,
+	UNI_INMASARAMGONDI,
+	UNI_INMEDEFAIDRIN,
+	UNI_INMEETEIMAYEK,
+	UNI_INMENDEKIKAKUI,
+	UNI_INMEROITICCURSIVE,
+	UNI_INMIAO,
+	UNI_INMODI,
+	UNI_INMONGOLIAN,
+	UNI_INMRO,
+	UNI_INMULTANI,
+	UNI_INMYANMAR,
+	UNI_INNABATAEAN,
+	UNI_INNEWA,
+	UNI_INNEWTAILUE,
+	UNI_INNKO,
+	UNI_INNUSHU,
+	UNI_INOGHAM,
+	UNI_INOLDHUNGARIAN,
+	UNI_INOLDITALIC,
+	UNI_INOLDPERMIC,
+	UNI_INOLDPERSIAN,
+	UNI_INOLDSOGDIAN,
+	UNI_INOLDTURKIC,
+	UNI_INORIYA,
+	UNI_INOSAGE,
+	UNI_INOSMANYA,
+	UNI_INPAHAWHHMONG,
+	UNI_INPAUCINHAU,
+	UNI_INPC__BOTTOM,
+	UNI_INPC__BOTTOMANDLEFT,
+	UNI_INPC__BOTTOMANDRIGHT,
+	UNI_INPC__LEFT,
+	UNI_INPC__LEFTANDRIGHT,
+	UNI_INPC__NA,
+	UNI_INPC__OVERSTRUCK,
+	UNI_INPC__RIGHT,
+	UNI_INPC__TOP,
+	UNI_INPC__TOPANDBOTTOM,
+	UNI_INPC__TOPANDBOTTOMANDRIGHT,
+	UNI_INPC__TOPANDLEFT,
+	UNI_INPC__TOPANDLEFTANDRIGHT,
+	UNI_INPC__TOPANDRIGHT,
+	UNI_INPHAGSPA,
+	UNI_INPHOENICIAN,
+	UNI_INPSALTERPAHLAVI,
+	UNI_INPUNCTUATION,
+	UNI_INREJANG,
+	UNI_INRUNIC,
+	UNI_INSAMARITAN,
+	UNI_INSAURASHTRA,
+	UNI_INSC__AVAGRAHA,
+	UNI_INSC__BINDU,
+	UNI_INSC__BRAHMIJOININGNUMBER,
+	UNI_INSC__CANTILLATIONMARK,
+	UNI_INSC__CONSONANT,
+	UNI_INSC__CONSONANTDEAD,
+	UNI_INSC__CONSONANTFINAL,
+	UNI_INSC__CONSONANTHEADLETTER,
+	UNI_INSC__CONSONANTINITIALPOSTFIXED,
+	UNI_INSC__CONSONANTKILLER,
+	UNI_INSC__CONSONANTMEDIAL,
+	UNI_INSC__CONSONANTPLACEHOLDER,
+	UNI_INSC__CONSONANTPRECEDINGREPHA,
+	UNI_INSC__CONSONANTPREFIXED,
+	UNI_INSC__CONSONANTSUBJOINED,
+	UNI_INSC__CONSONANTSUCCEEDINGREPHA,
+	UNI_INSC__CONSONANTWITHSTACKER,
+	UNI_INSC__GEMINATIONMARK,
+	UNI_INSC__INVISIBLESTACKER,
+	UNI_INSC__MODIFYINGLETTER,
+	UNI_INSC__NONJOINER,
+	UNI_INSC__NUKTA,
+	UNI_INSC__NUMBER,
+	UNI_INSC__NUMBERJOINER,
+	UNI_INSC__OTHER,
+	UNI_INSC__PUREKILLER,
+	UNI_INSC__REGISTERSHIFTER,
+	UNI_INSC__SYLLABLEMODIFIER,
+	UNI_INSC__TONELETTER,
+	UNI_INSC__TONEMARK,
+	UNI_INSC__VIRAMA,
+	UNI_INSC__VISARGA,
+	UNI_INSC__VOWEL,
+	UNI_INSC__VOWELDEPENDENT,
+	UNI_INSC__VOWELINDEPENDENT,
+	UNI_INSHARADA,
+	UNI_INSIDDHAM,
+	UNI_INSINHALA,
+	UNI_INSOGDIAN,
+	UNI_INSORASOMPENG,
+	UNI_INSOYOMBO,
+	UNI_INSUNDANESE,
+	UNI_INSYLOTINAGRI,
+	UNI_INSYRIAC,
+	UNI_INTAGALOG,
+	UNI_INTAGBANWA,
+	UNI_INTAILE,
+	UNI_INTAITHAM,
+	UNI_INTAIVIET,
+	UNI_INTAKRI,
+	UNI_INTAMIL,
+	UNI_INTANGUT,
+	UNI_INTELUGU,
+	UNI_INTHAANA,
+	UNI_INTHAI,
+	UNI_INTIBETAN,
+	UNI_INTIFINAGH,
+	UNI_INTIRHUTA,
+	UNI_INUGARITIC,
+	UNI_INVAI,
+	UNI_INVS,
+	UNI_INWARANGCITI,
+	UNI_INZANABAZARSQUARE,
+	UNI_IN__10,
+	UNI_IN__11,
+	UNI_IN__1_DOT_1,
+	UNI_IN__2,
+	UNI_IN__2_DOT_1,
+	UNI_IN__3,
+	UNI_IN__3_DOT_1,
+	UNI_IN__3_DOT_2,
+	UNI_IN__4,
+	UNI_IN__4_DOT_1,
+	UNI_IN__5,
+	UNI_IN__5_DOT_1,
+	UNI_IN__5_DOT_2,
+	UNI_IN__6,
+	UNI_IN__6_DOT_1,
+	UNI_IN__6_DOT_2,
+	UNI_IN__6_DOT_3,
+	UNI_IN__7,
+	UNI_IN__8,
+	UNI_IN__9,
+	UNI_IPAEXT,
+	UNI_ITAL,
+	UNI_JAMO,
+	UNI_JAMOEXTA,
+	UNI_JAMOEXTB,
+	UNI_JAVA,
+	UNI_JG__AFRICANFEH,
+	UNI_JG__AFRICANNOON,
+	UNI_JG__AFRICANQAF,
+	UNI_JG__AIN,
+	UNI_JG__ALAPH,
+	UNI_JG__ALEF,
+	UNI_JG__BEH,
+	UNI_JG__BETH,
+	UNI_JG__BURUSHASKIYEHBARREE,
+	UNI_JG__DAL,
+	UNI_JG__DALATHRISH,
+	UNI_JG__E,
+	UNI_JG__FARSIYEH,
+	UNI_JG__FE,
+	UNI_JG__FEH,
+	UNI_JG__FINALSEMKATH,
+	UNI_JG__GAF,
+	UNI_JG__GAMAL,
+	UNI_JG__HAH,
+	UNI_JG__HAMZAONHEHGOAL,
+	UNI_JG__HANIFIROHINGYAKINNAYA,
+	UNI_JG__HANIFIROHINGYAPA,
+	UNI_JG__HE,
+	UNI_JG__HEH,
+	UNI_JG__HEHGOAL,
+	UNI_JG__HETH,
+	UNI_JG__KAF,
+	UNI_JG__KAPH,
+	UNI_JG__KHAPH,
+	UNI_JG__KNOTTEDHEH,
+	UNI_JG__LAM,
+	UNI_JG__LAMADH,
+	UNI_JG__MALAYALAMBHA,
+	UNI_JG__MALAYALAMJA,
+	UNI_JG__MALAYALAMLLA,
+	UNI_JG__MALAYALAMLLLA,
+	UNI_JG__MALAYALAMNGA,
+	UNI_JG__MALAYALAMNNA,
+	UNI_JG__MALAYALAMNNNA,
+	UNI_JG__MALAYALAMNYA,
+	UNI_JG__MALAYALAMRA,
+	UNI_JG__MALAYALAMSSA,
+	UNI_JG__MALAYALAMTTA,
+	UNI_JG__MANICHAEANALEPH,
+	UNI_JG__MANICHAEANAYIN,
+	UNI_JG__MANICHAEANBETH,
+	UNI_JG__MANICHAEANDALETH,
+	UNI_JG__MANICHAEANDHAMEDH,
+	UNI_JG__MANICHAEANFIVE,
+	UNI_JG__MANICHAEANGIMEL,
+	UNI_JG__MANICHAEANHETH,
+	UNI_JG__MANICHAEANHUNDRED,
+	UNI_JG__MANICHAEANKAPH,
+	UNI_JG__MANICHAEANLAMEDH,
+	UNI_JG__MANICHAEANMEM,
+	UNI_JG__MANICHAEANNUN,
+	UNI_JG__MANICHAEANONE,
+	UNI_JG__MANICHAEANPE,
+	UNI_JG__MANICHAEANQOPH,
+	UNI_JG__MANICHAEANRESH,
+	UNI_JG__MANICHAEANSADHE,
+	UNI_JG__MANICHAEANSAMEKH,
+	UNI_JG__MANICHAEANTAW,
+	UNI_JG__MANICHAEANTEN,
+	UNI_JG__MANICHAEANTETH,
+	UNI_JG__MANICHAEANTHAMEDH,
+	UNI_JG__MANICHAEANTWENTY,
+	UNI_JG__MANICHAEANWAW,
+	UNI_JG__MANICHAEANYODH,
+	UNI_JG__MANICHAEANZAYIN,
+	UNI_JG__MEEM,
+	UNI_JG__MIM,
+	UNI_JG__NOJOININGGROUP,
+	UNI_JG__NOON,
+	UNI_JG__NUN,
+	UNI_JG__NYA,
+	UNI_JG__PE,
+	UNI_JG__QAF,
+	UNI_JG__QAPH,
+	UNI_JG__REH,
+	UNI_JG__REVERSEDPE,
+	UNI_JG__ROHINGYAYEH,
+	UNI_JG__SAD,
+	UNI_JG__SADHE,
+	UNI_JG__SEEN,
+	UNI_JG__SEMKATH,
+	UNI_JG__SHIN,
+	UNI_JG__STRAIGHTWAW,
+	UNI_JG__SWASHKAF,
+	UNI_JG__SYRIACWAW,
+	UNI_JG__TAH,
+	UNI_JG__TAW,
+	UNI_JG__TEHMARBUTA,
+	UNI_JG__TETH,
+	UNI_JG__WAW,
+	UNI_JG__YEH,
+	UNI_JG__YEHBARREE,
+	UNI_JG__YEHWITHTAIL,
+	UNI_JG__YUDH,
+	UNI_JG__YUDHHE,
+	UNI_JG__ZAIN,
+	UNI_JG__ZHAIN,
+	UNI_JOINC,
+	UNI_JT__C,
+	UNI_JT__D,
+	UNI_JT__L,
+	UNI_JT__R,
+	UNI_JT__T,
+	UNI_JT__U,
+	UNI_KALI,
+	UNI_KANA,
+	UNI_KANAEXTA,
+	UNI_KANASUP,
+	UNI_KANBUN,
+	UNI_KANGXI,
+	UNI_KATAKANAEXT,
+	UNI_KHAR,
+	UNI_KHMERSYMBOLS,
+	UNI_KHMR,
+	UNI_KHOJ,
+	UNI_KNDA,
+	UNI_KTHI,
+	UNI_L,
+	UNI_LANA,
+	UNI_LAO,
+	UNI_LATIN1,
+	UNI_LATINEXTA,
+	UNI_LATINEXTADDITIONAL,
+	UNI_LATINEXTB,
+	UNI_LATINEXTC,
+	UNI_LATINEXTD,
+	UNI_LATINEXTE,
+	UNI_LATN,
+	UNI_LB__AI,
+	UNI_LB__AL,
+	UNI_LB__B2,
+	UNI_LB__BA,
+	UNI_LB__BB,
+	UNI_LB__BK,
+	UNI_LB__CB,
+	UNI_LB__CJ,
+	UNI_LB__CL,
+	UNI_LB__CM,
+	UNI_LB__CP,
+	UNI_LB__CR,
+	UNI_LB__EB,
+	UNI_LB__EM,
+	UNI_LB__EX,
+	UNI_LB__GL,
+	UNI_LB__H2,
+	UNI_LB__H3,
+	UNI_LB__HL,
+	UNI_LB__HY,
+	UNI_LB__ID,
+	UNI_LB__IN,
+	UNI_LB__IS,
+	UNI_LB__LF,
+	UNI_LB__NL,
+	UNI_LB__NS,
+	UNI_LB__NU,
+	UNI_LB__OP,
+	UNI_LB__PO,
+	UNI_LB__PR,
+	UNI_LB__QU,
+	UNI_LB__SA,
+	UNI_LB__SG_perl_aux,
+	UNI_LB__SP,
+	UNI_LB__SY,
+	UNI_LB__WJ,
+	UNI_LB__XX,
+	UNI_LB__ZW,
+	UNI_LB__ZWJ,
+	UNI_LEPC,
+	UNI_LETTERLIKESYMBOLS,
+	UNI_LIMB,
+	UNI_LINA,
+	UNI_LINB,
+	UNI_LINEARBIDEOGRAMS,
+	UNI_LINEARBSYLLABARY,
+	UNI_LISU,
+	UNI_LM,
+	UNI_LO,
+	UNI_LOE,
+	UNI_LOWERCASELETTER,
+	UNI_LOWSURROGATES,
+	UNI_LYCI,
+	UNI_LYDI,
+	UNI_M,
+	UNI_MAHJ,
+	UNI_MAHJONG,
+	UNI_MAKA,
+	UNI_MAND,
+	UNI_MANI,
+	UNI_MARC,
+	UNI_MATH,
+	UNI_MATHALPHANUM,
+	UNI_MATHOPERATORS,
+	UNI_MAYANNUMERALS,
+	UNI_MC,
+	UNI_ME,
+	UNI_MEDF,
+	UNI_MEETEIMAYEKEXT,
+	UNI_MEND,
+	UNI_MERC,
+	UNI_MERO,
+	UNI_MIAO,
+	UNI_MISCARROWS,
+	UNI_MISCMATHSYMBOLSA,
+	UNI_MISCMATHSYMBOLSB,
+	UNI_MISCPICTOGRAPHS,
+	UNI_MISCSYMBOLS,
+	UNI_MISCTECHNICAL,
+	UNI_MLYM,
+	UNI_MN,
+	UNI_MODI,
+	UNI_MODIFIERLETTERS,
+	UNI_MODIFIERTONELETTERS,
+	UNI_MONG,
+	UNI_MONGOLIANSUP,
+	UNI_MRO,
+	UNI_MTEI,
+	UNI_MULT,
+	UNI_MUSIC,
+	UNI_MYANMAREXTA,
+	UNI_MYANMAREXTB,
+	UNI_MYMR,
+	UNI_N,
+	UNI_NARB,
+	UNI_NB,
+	UNI_NBAT,
+	UNI_NEWA,
+	UNI_NFCQC__M,
+	UNI_NFCQC__Y,
+	UNI_NFDQC__Y,
+	UNI_NFKCQC__N,
+	UNI_NFKCQC__Y,
+	UNI_NFKDQC__N,
+	UNI_NKO,
+	UNI_NL,
+	UNI_NO,
+	UNI_NSHU,
+	UNI_NT__DI,
+	UNI_NT__NU,
+	UNI_NUMBERFORMS,
+	UNI_NV__0,
+	UNI_NV__1,
+	UNI_NV__10,
+	UNI_NV__100,
+	UNI_NV__1000,
+	UNI_NV__10000,
+	UNI_NV__100000,
+	UNI_NV__1000000,
+	UNI_NV__10000000,
+	UNI_NV__100000000,
+	UNI_NV__10000000000,
+	UNI_NV__1000000000000,
+	UNI_NV__11,
+	UNI_NV__11_SLASH_12,
+	UNI_NV__11_SLASH_2,
+	UNI_NV__12,
+	UNI_NV__13,
+	UNI_NV__13_SLASH_2,
+	UNI_NV__14,
+	UNI_NV__15,
+	UNI_NV__15_SLASH_2,
+	UNI_NV__16,
+	UNI_NV__17,
+	UNI_NV__17_SLASH_2,
+	UNI_NV__18,
+	UNI_NV__19,
+	UNI_NV__1_SLASH_10,
+	UNI_NV__1_SLASH_12,
+	UNI_NV__1_SLASH_16,
+	UNI_NV__1_SLASH_160,
+	UNI_NV__1_SLASH_2,
+	UNI_NV__1_SLASH_20,
+	UNI_NV__1_SLASH_3,
+	UNI_NV__1_SLASH_4,
+	UNI_NV__1_SLASH_40,
+	UNI_NV__1_SLASH_5,
+	UNI_NV__1_SLASH_6,
+	UNI_NV__1_SLASH_7,
+	UNI_NV__1_SLASH_8,
+	UNI_NV__1_SLASH_9,
+	UNI_NV__2,
+	UNI_NV__20,
+	UNI_NV__200,
+	UNI_NV__2000,
+	UNI_NV__20000,
+	UNI_NV__200000,
+	UNI_NV__20000000,
+	UNI_NV__21,
+	UNI_NV__216000,
+	UNI_NV__22,
+	UNI_NV__23,
+	UNI_NV__24,
+	UNI_NV__25,
+	UNI_NV__26,
+	UNI_NV__27,
+	UNI_NV__28,
+	UNI_NV__29,
+	UNI_NV__2_SLASH_3,
+	UNI_NV__2_SLASH_5,
+	UNI_NV__3,
+	UNI_NV__30,
+	UNI_NV__300,
+	UNI_NV__3000,
+	UNI_NV__30000,
+	UNI_NV__300000,
+	UNI_NV__31,
+	UNI_NV__32,
+	UNI_NV__33,
+	UNI_NV__34,
+	UNI_NV__35,
+	UNI_NV__36,
+	UNI_NV__37,
+	UNI_NV__38,
+	UNI_NV__39,
+	UNI_NV__3_SLASH_16,
+	UNI_NV__3_SLASH_2,
+	UNI_NV__3_SLASH_20,
+	UNI_NV__3_SLASH_4,
+	UNI_NV__3_SLASH_5,
+	UNI_NV__3_SLASH_8,
+	UNI_NV__3_SLASH_80,
+	UNI_NV__4,
+	UNI_NV__40,
+	UNI_NV__400,
+	UNI_NV__4000,
+	UNI_NV__40000,
+	UNI_NV__400000,
+	UNI_NV__41,
+	UNI_NV__42,
+	UNI_NV__43,
+	UNI_NV__432000,
+	UNI_NV__44,
+	UNI_NV__45,
+	UNI_NV__46,
+	UNI_NV__47,
+	UNI_NV__48,
+	UNI_NV__49,
+	UNI_NV__4_SLASH_5,
+	UNI_NV__5,
+	UNI_NV__50,
+	UNI_NV__500,
+	UNI_NV__5000,
+	UNI_NV__50000,
+	UNI_NV__500000,
+	UNI_NV__5_SLASH_12,
+	UNI_NV__5_SLASH_2,
+	UNI_NV__5_SLASH_6,
+	UNI_NV__5_SLASH_8,
+	UNI_NV__6,
+	UNI_NV__60,
+	UNI_NV__600,
+	UNI_NV__6000,
+	UNI_NV__60000,
+	UNI_NV__600000,
+	UNI_NV__7,
+	UNI_NV__70,
+	UNI_NV__700,
+	UNI_NV__7000,
+	UNI_NV__70000,
+	UNI_NV__700000,
+	UNI_NV__7_SLASH_12,
+	UNI_NV__7_SLASH_2,
+	UNI_NV__7_SLASH_8,
+	UNI_NV__8,
+	UNI_NV__80,
+	UNI_NV__800,
+	UNI_NV__8000,
+	UNI_NV__80000,
+	UNI_NV__800000,
+	UNI_NV__9,
+	UNI_NV__90,
+	UNI_NV__900,
+	UNI_NV__9000,
+	UNI_NV__90000,
+	UNI_NV__900000,
+	UNI_NV__9_SLASH_2,
+	UNI_NV__NAN,
+	UNI_NV___MINUS_1_SLASH_2,
+	UNI_OCR,
+	UNI_OGAM,
+	UNI_OLCK,
+	UNI_ORKH,
+	UNI_ORNAMENTALDINGBATS,
+	UNI_ORYA,
+	UNI_OSGE,
+	UNI_OSMA,
+	UNI_P,
+	UNI_PALM,
+	UNI_PATSYN,
+	UNI_PAUC,
+	UNI_PC,
+	UNI_PCM,
+	UNI_PD,
+	UNI_PE,
+	UNI_PERM,
+	UNI_PF,
+	UNI_PHAG,
+	UNI_PHAISTOS,
+	UNI_PHLI,
+	UNI_PHLP,
+	UNI_PHNX,
+	UNI_PHONETICEXT,
+	UNI_PHONETICEXTSUP,
+	UNI_PI,
+	UNI_PLAYINGCARDS,
+	UNI_PO,
+	UNI_POSIXALNUM,
+	UNI_POSIXALPHA,
+	UNI_POSIXBLANK,
+	UNI_POSIXCNTRL,
+	UNI_POSIXDIGIT,
+	UNI_POSIXGRAPH,
+	UNI_POSIXLOWER,
+	UNI_POSIXPRINT,
+	UNI_POSIXPUNCT,
+	UNI_POSIXSPACE,
+	UNI_POSIXUPPER,
+	UNI_POSIXWORD,
+	UNI_POSIXXDIGIT,
+	UNI_PRTI,
+	UNI_PS,
+	UNI_PUA,
+	UNI_QAAI,
+	UNI_QMARK,
+	UNI_RADICAL,
+	UNI_RI,
+	UNI_RJNG,
+	UNI_ROHG,
+	UNI_RUMI,
+	UNI_RUNR,
+	UNI_S,
+	UNI_SAMR,
+	UNI_SARB,
+	UNI_SAUR,
+	UNI_SB__AT,
+	UNI_SB__CL,
+	UNI_SB__EX,
+	UNI_SB__FO,
+	UNI_SB__LE,
+	UNI_SB__LO,
+	UNI_SB__SC,
+	UNI_SB__SE,
+	UNI_SB__SP,
+	UNI_SB__ST,
+	UNI_SB__UP,
+	UNI_SB__XX,
+	UNI_SC,
+	UNI_SC__ADLM,
+	UNI_SC__ARAB,
+	UNI_SC__ARMN,
+	UNI_SC__BENG,
+	UNI_SC__BOPO,
+	UNI_SC__BUGI,
+	UNI_SC__BUHD,
+	UNI_SC__CAKM,
+	UNI_SC__COPT,
+	UNI_SC__CPRT,
+	UNI_SC__CYRL,
+	UNI_SC__DEVA,
+	UNI_SC__DOGR,
+	UNI_SC__DUPL,
+	UNI_SC__GEOR,
+	UNI_SC__GLAG,
+	UNI_SC__GONG,
+	UNI_SC__GRAN,
+	UNI_SC__GREK,
+	UNI_SC__GUJR,
+	UNI_SC__GURU,
+	UNI_SC__HAN,
+	UNI_SC__HANG,
+	UNI_SC__HANO,
+	UNI_SC__HIRA,
+	UNI_SC__JAVA,
+	UNI_SC__KALI,
+	UNI_SC__KANA,
+	UNI_SC__KHOJ,
+	UNI_SC__KNDA,
+	UNI_SC__KTHI,
+	UNI_SC__LATN,
+	UNI_SC__LIMB,
+	UNI_SC__LINA,
+	UNI_SC__LINB,
+	UNI_SC__MAHJ,
+	UNI_SC__MAND,
+	UNI_SC__MANI,
+	UNI_SC__MLYM,
+	UNI_SC__MODI,
+	UNI_SC__MONG,
+	UNI_SC__MULT,
+	UNI_SC__MYMR,
+	UNI_SC__ORYA,
+	UNI_SC__PERM,
+	UNI_SC__PHAG,
+	UNI_SC__PHLP,
+	UNI_SC__QAAI,
+	UNI_SC__ROHG,
+	UNI_SC__SHRD,
+	UNI_SC__SIND,
+	UNI_SC__SINH,
+	UNI_SC__SOGD,
+	UNI_SC__SYLO,
+	UNI_SC__SYRC,
+	UNI_SC__TAGB,
+	UNI_SC__TAKR,
+	UNI_SC__TALE,
+	UNI_SC__TAML,
+	UNI_SC__TELU,
+	UNI_SC__TGLG,
+	UNI_SC__THAA,
+	UNI_SC__TIRH,
+	UNI_SC__YI,
+	UNI_SC__ZYYY,
+	UNI_SD,
+	UNI_SGNW,
+	UNI_SHAW,
+	UNI_SHORTHANDFORMATCONTROLS,
+	UNI_SHRD,
+	UNI_SIDD,
+	UNI_SIND,
+	UNI_SINH,
+	UNI_SINHALAARCHAICNUMBERS,
+	UNI_SK,
+	UNI_SM,
+	UNI_SMALLFORMS,
+	UNI_SO,
+	UNI_SOGD,
+	UNI_SOGO,
+	UNI_SORA,
+	UNI_SOYO,
+	UNI_SPECIALS,
+	UNI_STERM,
+	UNI_SUND,
+	UNI_SUNDANESESUP,
+	UNI_SUPARROWSA,
+	UNI_SUPARROWSB,
+	UNI_SUPARROWSC,
+	UNI_SUPERANDSUB,
+	UNI_SUPMATHOPERATORS,
+	UNI_SUPPUAA,
+	UNI_SUPPUAB,
+	UNI_SUPPUNCTUATION,
+	UNI_SUPSYMBOLSANDPICTOGRAPHS,
+	UNI_SUTTONSIGNWRITING,
+	UNI_SYLO,
+	UNI_SYRC,
+	UNI_SYRIACSUP,
+	UNI_TAGB,
+	UNI_TAGS,
+	UNI_TAIXUANJING,
+	UNI_TAKR,
+	UNI_TALE,
+	UNI_TALU,
+	UNI_TAML,
+	UNI_TANG,
+	UNI_TANGUTCOMPONENTS,
+	UNI_TAVT,
+	UNI_TELU,
+	UNI_TERM,
+	UNI_TFNG,
+	UNI_TGLG,
+	UNI_THAA,
+	UNI_THAI,
+	UNI_TIBT,
+	UNI_TIRH,
+	UNI_TITLE,
+	UNI_TRANSPORTANDMAP,
+	UNI_UCAS,
+	UNI_UCASEXT,
+	UNI_UGAR,
+	UNI_UIDEO,
+	UNI_UPPERCASELETTER,
+	UNI_VAI,
+	UNI_VEDICEXT,
+	UNI_VERTICALFORMS,
+	UNI_VERTSPACE,
+	UNI_VO__R,
+	UNI_VO__TR,
+	UNI_VO__TU,
+	UNI_VO__U,
+	UNI_VS,
+	UNI_VSSUP,
+	UNI_WARA,
+	UNI_WB__DQ,
+	UNI_WB__EB,
+	UNI_WB__EX,
+	UNI_WB__EXTEND,
+	UNI_WB__FO,
+	UNI_WB__KA,
+	UNI_WB__LE,
+	UNI_WB__MB,
+	UNI_WB__ML,
+	UNI_WB__MN,
+	UNI_WB__NL,
+	UNI_WB__NU,
+	UNI_WB__SQ,
+	UNI_WB__WSEGSPACE,
+	UNI_WB__XX,
+	UNI_XIDC,
+	UNI_XIDS,
+	UNI_XPEO,
+	UNI_XPOSIXALNUM,
+	UNI_XPOSIXALPHA,
+	UNI_XPOSIXBLANK,
+	UNI_XPOSIXCNTRL,
+	UNI_XPOSIXDIGIT,
+	UNI_XPOSIXGRAPH,
+	UNI_XPOSIXLOWER,
+	UNI_XPOSIXPRINT,
+	UNI_XPOSIXPUNCT,
+	UNI_XPOSIXSPACE,
+	UNI_XPOSIXUPPER,
+	UNI_XPOSIXWORD,
+	UNI_XPOSIXXDIGIT,
+	UNI_XSUX,
+	UNI_YI,
+	UNI_YIJING,
+	UNI_YIRADICALS,
+	UNI_YISYLLABLES,
+	UNI_Z,
+	UNI_ZANB,
+	UNI_ZL,
+	UNI_ZP,
+	UNI_ZS,
+	UNI_ZYYY,
+	UNI_ZZZZ,
+	UNI__PERL_ANY_FOLDS,
+	UNI__PERL_CHARNAME_BEGIN,
+	UNI__PERL_CHARNAME_CONTINUE,
+	UNI__PERL_FOLDS_TO_MULTI_CHAR,
+	UNI__PERL_IDCONT,
+	UNI__PERL_IDSTART,
+	UNI__PERL_NCHAR,
+	UNI__PERL_PATWS,
+	UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START,
+	UNI__PERL_PROBLEMATIC_LOCALE_FOLDS,
+	UNI__PERL_QUOTEMETA,
+	UNI__PERL_SURROGATE
 } binary_invlist_enum;
 
-#define MAX_UNI_KEYWORD_INDEX PL__PERL_SURROGATE
+#define MAX_UNI_KEYWORD_INDEX UNI__PERL_SURROGATE
 
-/* Synonyms for perl properties */
-#define PL_AHEX   PL_POSIXXDIGIT
-#define PL_ALNUM   PL_XPOSIXALNUM
-#define PL_ALPHA   PL_XPOSIXALPHA
-#define PL_ALPHABETIC   PL_XPOSIXALPHA
-#define PL_ASCIIHEXDIGIT   PL_POSIXXDIGIT
-#define PL_BASICLATIN   PL_ASCII
-#define PL_BLANK   PL_XPOSIXBLANK
-#define PL_CC   PL_XPOSIXCNTRL
-#define PL_CNTRL   PL_XPOSIXCNTRL
-#define PL_CONTROL   PL_XPOSIXCNTRL
-#define PL_DECIMALNUMBER   PL_XPOSIXDIGIT
-#define PL_DIGIT   PL_XPOSIXDIGIT
-#define PL_GRAPH   PL_XPOSIXGRAPH
-#define PL_HEX   PL_XPOSIXXDIGIT
-#define PL_HEXDIGIT   PL_XPOSIXXDIGIT
-#define PL_HORIZSPACE   PL_XPOSIXBLANK
-#define PL_LC   PL_CASEDLETTER
-#define PL_LL   PL_LOWERCASELETTER
-#define PL_LOWER   PL_XPOSIXLOWER
-#define PL_LOWERCASE   PL_XPOSIXLOWER
-#define PL_LT   PL_TITLE
-#define PL_LU   PL_UPPERCASELETTER
-#define PL_L_   PL_CASEDLETTER
-#define PL_L_AMP_   PL_CASEDLETTER
-#define PL_ND   PL_XPOSIXDIGIT
-#define PL_PERLSPACE   PL_POSIXSPACE
-#define PL_PERLWORD   PL_POSIXWORD
-#define PL_PRINT   PL_XPOSIXPRINT
-#define PL_SPACE   PL_XPOSIXSPACE
-#define PL_SPACEPERL   PL_XPOSIXSPACE
-#define PL_TITLECASE   PL_TITLE
-#define PL_TITLECASELETTER   PL_TITLE
-#define PL_UPPER   PL_XPOSIXUPPER
-#define PL_UPPERCASE   PL_XPOSIXUPPER
-#define PL_WHITESPACE   PL_XPOSIXSPACE
-#define PL_WORD   PL_XPOSIXWORD
-#define PL_WSPACE   PL_XPOSIXSPACE
-#define PL_XDIGIT   PL_XPOSIXXDIGIT
-#define PL_XPERLSPACE   PL_XPOSIXSPACE
-
-
-static const UV * const PL_uni_prop_ptrs[] = {
+static const UV * const uni_prop_ptrs[] = {
 	NULL,	/* Placeholder */
-	PL_ADLM_invlist,
-	PL_AEGEANNUMBERS_invlist,
-	PL_AGE__10_invlist,
-	PL_AGE__11_invlist,
-	PL_AGE__2_invlist,
-	PL_AGE__2_DOT_1_invlist,
-	PL_AGE__3_invlist,
-	PL_AGE__3_DOT_1_invlist,
-	PL_AGE__3_DOT_2_invlist,
-	PL_AGE__4_invlist,
-	PL_AGE__4_DOT_1_invlist,
-	PL_AGE__5_invlist,
-	PL_AGE__5_DOT_1_invlist,
-	PL_AGE__5_DOT_2_invlist,
-	PL_AGE__6_invlist,
-	PL_AGE__6_DOT_1_invlist,
-	PL_AGE__6_DOT_2_invlist,
-	PL_AGE__6_DOT_3_invlist,
-	PL_AGE__7_invlist,
-	PL_AGE__8_invlist,
-	PL_AGE__9_invlist,
-	PL_AGE__NA_invlist,
-	PL_AGHB_invlist,
-	PL_AHOM_invlist,
-	PL_ALCHEMICAL_invlist,
-	PL_ALL_invlist,
-	PL_ALPHABETICPF_invlist,
-	PL_ANCIENTGREEKMUSIC_invlist,
-	PL_ANCIENTGREEKNUMBERS_invlist,
-	PL_ANCIENTSYMBOLS_invlist,
-	PL_ANY_invlist,
-	PL_ARAB_invlist,
-	PL_ARABICEXTA_invlist,
-	PL_ARABICMATH_invlist,
-	PL_ARABICPFA_invlist,
-	PL_ARABICPFB_invlist,
-	PL_ARABICSUP_invlist,
-	PL_ARMI_invlist,
-	PL_ARMN_invlist,
-	PL_ARROWS_invlist,
-	PL_ASCII_invlist,
-	PL_ASSIGNED_invlist,
-	PL_AVST_invlist,
-	PL_BALI_invlist,
-	PL_BAMU_invlist,
-	PL_BAMUMSUP_invlist,
-	PL_BASS_invlist,
-	PL_BATK_invlist,
-	PL_BC__AL_invlist,
-	PL_BC__AN_invlist,
-	PL_BC__B_invlist,
-	PL_BC__BN_invlist,
-	PL_BC__CS_invlist,
-	PL_BC__EN_invlist,
-	PL_BC__ES_invlist,
-	PL_BC__ET_invlist,
-	PL_BC__FSI_invlist,
-	PL_BC__L_invlist,
-	PL_BC__LRE_invlist,
-	PL_BC__LRI_invlist,
-	PL_BC__LRO_invlist,
-	PL_BC__NSM_invlist,
-	PL_BC__ON_invlist,
-	PL_BC__PDF_invlist,
-	PL_BC__PDI_invlist,
-	PL_BC__R_invlist,
-	PL_BC__RLE_invlist,
-	PL_BC__RLI_invlist,
-	PL_BC__RLO_invlist,
-	PL_BC__S_invlist,
-	PL_BC__WS_invlist,
-	PL_BENG_invlist,
-	PL_BHKS_invlist,
-	PL_BIDIC_invlist,
-	PL_BIDIM_invlist,
-	PL_BLOCKELEMENTS_invlist,
-	PL_BOPO_invlist,
-	PL_BOPOMOFOEXT_invlist,
-	PL_BOXDRAWING_invlist,
-	PL_BPT__C_invlist,
-	PL_BPT__N_invlist,
-	PL_BPT__O_invlist,
-	PL_BRAH_invlist,
-	PL_BRAI_invlist,
-	PL_BUGI_invlist,
-	PL_BUHD_invlist,
-	PL_BYZANTINEMUSIC_invlist,
-	PL_C_invlist,
-	PL_CAKM_invlist,
-	PL_CANS_invlist,
-	PL_CARI_invlist,
-	PL_CASED_invlist,
-	PL_CASEDLETTER_invlist,
-	PL_CCC__0_invlist,
-	PL_CCC__1_invlist,
-	PL_CCC__10_invlist,
-	PL_CCC__103_invlist,
-	PL_CCC__107_invlist,
-	PL_CCC__11_invlist,
-	PL_CCC__118_invlist,
-	PL_CCC__12_invlist,
-	PL_CCC__122_invlist,
-	PL_CCC__129_invlist,
-	PL_CCC__13_invlist,
-	PL_CCC__130_invlist,
-	PL_CCC__132_invlist,
-	PL_CCC__14_invlist,
-	PL_CCC__15_invlist,
-	PL_CCC__16_invlist,
-	PL_CCC__17_invlist,
-	PL_CCC__18_invlist,
-	PL_CCC__19_invlist,
-	PL_CCC__20_invlist,
-	PL_CCC__202_invlist,
-	PL_CCC__21_invlist,
-	PL_CCC__214_invlist,
-	PL_CCC__216_invlist,
-	PL_CCC__22_invlist,
-	PL_CCC__23_invlist,
-	PL_CCC__24_invlist,
-	PL_CCC__25_invlist,
-	PL_CCC__26_invlist,
-	PL_CCC__27_invlist,
-	PL_CCC__28_invlist,
-	PL_CCC__29_invlist,
-	PL_CCC__30_invlist,
-	PL_CCC__31_invlist,
-	PL_CCC__32_invlist,
-	PL_CCC__33_invlist,
-	PL_CCC__34_invlist,
-	PL_CCC__35_invlist,
-	PL_CCC__36_invlist,
-	PL_CCC__7_invlist,
-	PL_CCC__8_invlist,
-	PL_CCC__84_invlist,
-	PL_CCC__9_invlist,
-	PL_CCC__91_invlist,
-	PL_CCC__A_invlist,
-	PL_CCC__AL_invlist,
-	PL_CCC__AR_invlist,
-	PL_CCC__B_invlist,
-	PL_CCC__BL_invlist,
-	PL_CCC__BR_invlist,
-	PL_CCC__DA_invlist,
-	PL_CCC__DB_invlist,
-	PL_CCC__IS_invlist,
-	PL_CCC__L_invlist,
-	PL_CCC__R_invlist,
-	PL_CE_invlist,
-	PL_CF_invlist,
-	PL_CHAM_invlist,
-	PL_CHER_invlist,
-	PL_CHEROKEESUP_invlist,
-	PL_CHESSSYMBOLS_invlist,
-	PL_CI_invlist,
-	PL_CJK_invlist,
-	PL_CJKCOMPAT_invlist,
-	PL_CJKCOMPATFORMS_invlist,
-	PL_CJKCOMPATIDEOGRAPHS_invlist,
-	PL_CJKCOMPATIDEOGRAPHSSUP_invlist,
-	PL_CJKEXTA_invlist,
-	PL_CJKEXTB_invlist,
-	PL_CJKEXTC_invlist,
-	PL_CJKEXTD_invlist,
-	PL_CJKEXTE_invlist,
-	PL_CJKEXTF_invlist,
-	PL_CJKRADICALSSUP_invlist,
-	PL_CJKSTROKES_invlist,
-	PL_CJKSYMBOLS_invlist,
-	PL_CN_invlist,
-	PL_CO_invlist,
-	PL_COMPATJAMO_invlist,
-	PL_COMPEX_invlist,
-	PL_CONTROLPICTURES_invlist,
-	PL_COPT_invlist,
-	PL_COPTICEPACTNUMBERS_invlist,
-	PL_COUNTINGROD_invlist,
-	PL_CPRT_invlist,
-	PL_CUNEIFORMNUMBERS_invlist,
-	PL_CURRENCYSYMBOLS_invlist,
-	PL_CWCF_invlist,
-	PL_CWCM_invlist,
-	PL_CWKCF_invlist,
-	PL_CWL_invlist,
-	PL_CWT_invlist,
-	PL_CWU_invlist,
-	PL_CYPRIOTSYLLABARY_invlist,
-	PL_CYRILLICEXTA_invlist,
-	PL_CYRILLICEXTB_invlist,
-	PL_CYRILLICEXTC_invlist,
-	PL_CYRILLICSUP_invlist,
-	PL_CYRL_invlist,
-	PL_DASH_invlist,
-	PL_DEP_invlist,
-	PL_DEVA_invlist,
-	PL_DEVANAGARIEXT_invlist,
-	PL_DI_invlist,
-	PL_DIA_invlist,
-	PL_DIACRITICALS_invlist,
-	PL_DIACRITICALSEXT_invlist,
-	PL_DIACRITICALSFORSYMBOLS_invlist,
-	PL_DIACRITICALSSUP_invlist,
-	PL_DINGBATS_invlist,
-	PL_DOGR_invlist,
-	PL_DOMINO_invlist,
-	PL_DSRT_invlist,
-	PL_DT__CAN_invlist,
-	PL_DT__COM_invlist,
-	PL_DT__ENC_invlist,
-	PL_DT__FIN_invlist,
-	PL_DT__FONT_invlist,
-	PL_DT__FRA_invlist,
-	PL_DT__INIT_invlist,
-	PL_DT__ISO_invlist,
-	PL_DT__MED_invlist,
-	PL_DT__NAR_invlist,
-	PL_DT__NB_invlist,
-	PL_DT__NONCANON_invlist,
-	PL_DT__NONE_invlist,
-	PL_DT__SML_invlist,
-	PL_DT__SQR_invlist,
-	PL_DT__SUB_invlist,
-	PL_DT__SUP_invlist,
-	PL_DT__VERT_invlist,
-	PL_DUPL_invlist,
-	PL_EARLYDYNASTICCUNEIFORM_invlist,
-	PL_EA__A_invlist,
-	PL_EA__F_invlist,
-	PL_EA__H_invlist,
-	PL_EA__N_invlist,
-	PL_EA__NA_invlist,
-	PL_EA__W_invlist,
-	PL_EGYP_invlist,
-	PL_ELBA_invlist,
-	PL_EMOTICONS_invlist,
-	PL_ENCLOSEDALPHANUM_invlist,
-	PL_ENCLOSEDALPHANUMSUP_invlist,
-	PL_ENCLOSEDCJK_invlist,
-	PL_ENCLOSEDIDEOGRAPHICSUP_invlist,
-	PL_ETHI_invlist,
-	PL_ETHIOPICEXT_invlist,
-	PL_ETHIOPICEXTA_invlist,
-	PL_ETHIOPICSUP_invlist,
-	PL_EXT_invlist,
-	PL_GCB__CN_invlist,
-	PL_GCB__EX_invlist,
-	PL_GCB__L_invlist,
-	PL_GCB__PP_invlist,
-	PL_GCB__SM_invlist,
-	PL_GCB__T_invlist,
-	PL_GCB__V_invlist,
-	PL_GCB__XX_invlist,
-	PL_GEOMETRICSHAPES_invlist,
-	PL_GEOMETRICSHAPESEXT_invlist,
-	PL_GEOR_invlist,
-	PL_GEORGIANEXT_invlist,
-	PL_GEORGIANSUP_invlist,
-	PL_GLAG_invlist,
-	PL_GLAGOLITICSUP_invlist,
-	PL_GONG_invlist,
-	PL_GONM_invlist,
-	PL_GOTH_invlist,
-	PL_GRAN_invlist,
-	PL_GRBASE_invlist,
-	PL_GREEKEXT_invlist,
-	PL_GREK_invlist,
-	PL_GREXT_invlist,
-	PL_GUJR_invlist,
-	PL_GURU_invlist,
-	PL_HALFANDFULLFORMS_invlist,
-	PL_HALFMARKS_invlist,
-	PL_HAN_invlist,
-	PL_HANG_invlist,
-	PL_HANO_invlist,
-	PL_HATR_invlist,
-	PL_HEBR_invlist,
-	PL_HIGHPUSURROGATES_invlist,
-	PL_HIGHSURROGATES_invlist,
-	PL_HIRA_invlist,
-	PL_HLUW_invlist,
-	PL_HMNG_invlist,
-	PL_HST__NA_invlist,
-	PL_HUNG_invlist,
-	PL_HYPHEN_invlist,
-	PL_IDC_invlist,
-	PL_IDEO_invlist,
-	PL_IDEOGRAPHICSYMBOLS_invlist,
-	PL_IDS_invlist,
-	PL_IDSB_invlist,
-	PL_IDST_invlist,
-	PL_INADLAM_invlist,
-	PL_INAHOM_invlist,
-	PL_INANATOLIANHIEROGLYPHS_invlist,
-	PL_INARABIC_invlist,
-	PL_INARMENIAN_invlist,
-	PL_INAVESTAN_invlist,
-	PL_INBALINESE_invlist,
-	PL_INBAMUM_invlist,
-	PL_INBASSAVAH_invlist,
-	PL_INBATAK_invlist,
-	PL_INBENGALI_invlist,
-	PL_INBHAIKSUKI_invlist,
-	PL_INBOPOMOFO_invlist,
-	PL_INBRAHMI_invlist,
-	PL_INBUGINESE_invlist,
-	PL_INBUHID_invlist,
-	PL_INCARIAN_invlist,
-	PL_INCAUCASIANALBANIAN_invlist,
-	PL_INCHAKMA_invlist,
-	PL_INCHAM_invlist,
-	PL_INCHEROKEE_invlist,
-	PL_INCOPTIC_invlist,
-	PL_INCUNEIFORM_invlist,
-	PL_INCYRILLIC_invlist,
-	PL_INDEVANAGARI_invlist,
-	PL_INDICNUMBERFORMS_invlist,
-	PL_INDICSIYAQNUMBERS_invlist,
-	PL_INDOGRA_invlist,
-	PL_INDUPLOYAN_invlist,
-	PL_INEGYPTIANHIEROGLYPHS_invlist,
-	PL_INELBASAN_invlist,
-	PL_INETHIOPIC_invlist,
-	PL_INGEORGIAN_invlist,
-	PL_INGLAGOLITIC_invlist,
-	PL_INGOTHIC_invlist,
-	PL_INGRANTHA_invlist,
-	PL_INGREEK_invlist,
-	PL_INGUJARATI_invlist,
-	PL_INGUNJALAGONDI_invlist,
-	PL_INGURMUKHI_invlist,
-	PL_INHANGUL_invlist,
-	PL_INHANIFIROHINGYA_invlist,
-	PL_INHANUNOO_invlist,
-	PL_INHATRAN_invlist,
-	PL_INHEBREW_invlist,
-	PL_INHIRAGANA_invlist,
-	PL_INIDC_invlist,
-	PL_INIMPERIALARAMAIC_invlist,
-	PL_ININSCRIPTIONALPAHLAVI_invlist,
-	PL_ININSCRIPTIONALPARTHIAN_invlist,
-	PL_INJAVANESE_invlist,
-	PL_INKAITHI_invlist,
-	PL_INKANNADA_invlist,
-	PL_INKATAKANA_invlist,
-	PL_INKHAROSHTHI_invlist,
-	PL_INKHMER_invlist,
-	PL_INKHOJKI_invlist,
-	PL_INKHUDAWADI_invlist,
-	PL_INLAO_invlist,
-	PL_INLEPCHA_invlist,
-	PL_INLIMBU_invlist,
-	PL_INLINEARA_invlist,
-	PL_INLYCIAN_invlist,
-	PL_INLYDIAN_invlist,
-	PL_INMAHAJANI_invlist,
-	PL_INMAKASAR_invlist,
-	PL_INMALAYALAM_invlist,
-	PL_INMANDAIC_invlist,
-	PL_INMANICHAEAN_invlist,
-	PL_INMARCHEN_invlist,
-	PL_INMASARAMGONDI_invlist,
-	PL_INMEDEFAIDRIN_invlist,
-	PL_INMEETEIMAYEK_invlist,
-	PL_INMENDEKIKAKUI_invlist,
-	PL_INMEROITICCURSIVE_invlist,
-	PL_INMIAO_invlist,
-	PL_INMODI_invlist,
-	PL_INMONGOLIAN_invlist,
-	PL_INMRO_invlist,
-	PL_INMULTANI_invlist,
-	PL_INMYANMAR_invlist,
-	PL_INNABATAEAN_invlist,
-	PL_INNEWA_invlist,
-	PL_INNEWTAILUE_invlist,
-	PL_INNKO_invlist,
-	PL_INNUSHU_invlist,
-	PL_INOGHAM_invlist,
-	PL_INOLDHUNGARIAN_invlist,
-	PL_INOLDITALIC_invlist,
-	PL_INOLDPERMIC_invlist,
-	PL_INOLDPERSIAN_invlist,
-	PL_INOLDSOGDIAN_invlist,
-	PL_INOLDTURKIC_invlist,
-	PL_INORIYA_invlist,
-	PL_INOSAGE_invlist,
-	PL_INOSMANYA_invlist,
-	PL_INPAHAWHHMONG_invlist,
-	PL_INPAUCINHAU_invlist,
-	PL_INPC__BOTTOM_invlist,
-	PL_INPC__BOTTOMANDLEFT_invlist,
-	PL_INPC__BOTTOMANDRIGHT_invlist,
-	PL_INPC__LEFT_invlist,
-	PL_INPC__LEFTANDRIGHT_invlist,
-	PL_INPC__NA_invlist,
-	PL_INPC__OVERSTRUCK_invlist,
-	PL_INPC__RIGHT_invlist,
-	PL_INPC__TOP_invlist,
-	PL_INPC__TOPANDBOTTOM_invlist,
-	PL_INPC__TOPANDBOTTOMANDRIGHT_invlist,
-	PL_INPC__TOPANDLEFT_invlist,
-	PL_INPC__TOPANDLEFTANDRIGHT_invlist,
-	PL_INPC__TOPANDRIGHT_invlist,
-	PL_INPHAGSPA_invlist,
-	PL_INPHOENICIAN_invlist,
-	PL_INPSALTERPAHLAVI_invlist,
-	PL_INPUNCTUATION_invlist,
-	PL_INREJANG_invlist,
-	PL_INRUNIC_invlist,
-	PL_INSAMARITAN_invlist,
-	PL_INSAURASHTRA_invlist,
-	PL_INSC__AVAGRAHA_invlist,
-	PL_INSC__BINDU_invlist,
-	PL_INSC__BRAHMIJOININGNUMBER_invlist,
-	PL_INSC__CANTILLATIONMARK_invlist,
-	PL_INSC__CONSONANT_invlist,
-	PL_INSC__CONSONANTDEAD_invlist,
-	PL_INSC__CONSONANTFINAL_invlist,
-	PL_INSC__CONSONANTHEADLETTER_invlist,
-	PL_INSC__CONSONANTINITIALPOSTFIXED_invlist,
-	PL_INSC__CONSONANTKILLER_invlist,
-	PL_INSC__CONSONANTMEDIAL_invlist,
-	PL_INSC__CONSONANTPLACEHOLDER_invlist,
-	PL_INSC__CONSONANTPRECEDINGREPHA_invlist,
-	PL_INSC__CONSONANTPREFIXED_invlist,
-	PL_INSC__CONSONANTSUBJOINED_invlist,
-	PL_INSC__CONSONANTSUCCEEDINGREPHA_invlist,
-	PL_INSC__CONSONANTWITHSTACKER_invlist,
-	PL_INSC__GEMINATIONMARK_invlist,
-	PL_INSC__INVISIBLESTACKER_invlist,
-	PL_INSC__MODIFYINGLETTER_invlist,
-	PL_INSC__NONJOINER_invlist,
-	PL_INSC__NUKTA_invlist,
-	PL_INSC__NUMBER_invlist,
-	PL_INSC__NUMBERJOINER_invlist,
-	PL_INSC__OTHER_invlist,
-	PL_INSC__PUREKILLER_invlist,
-	PL_INSC__REGISTERSHIFTER_invlist,
-	PL_INSC__SYLLABLEMODIFIER_invlist,
-	PL_INSC__TONELETTER_invlist,
-	PL_INSC__TONEMARK_invlist,
-	PL_INSC__VIRAMA_invlist,
-	PL_INSC__VISARGA_invlist,
-	PL_INSC__VOWEL_invlist,
-	PL_INSC__VOWELDEPENDENT_invlist,
-	PL_INSC__VOWELINDEPENDENT_invlist,
-	PL_INSHARADA_invlist,
-	PL_INSIDDHAM_invlist,
-	PL_INSINHALA_invlist,
-	PL_INSOGDIAN_invlist,
-	PL_INSORASOMPENG_invlist,
-	PL_INSOYOMBO_invlist,
-	PL_INSUNDANESE_invlist,
-	PL_INSYLOTINAGRI_invlist,
-	PL_INSYRIAC_invlist,
-	PL_INTAGALOG_invlist,
-	PL_INTAGBANWA_invlist,
-	PL_INTAILE_invlist,
-	PL_INTAITHAM_invlist,
-	PL_INTAIVIET_invlist,
-	PL_INTAKRI_invlist,
-	PL_INTAMIL_invlist,
-	PL_INTANGUT_invlist,
-	PL_INTELUGU_invlist,
-	PL_INTHAANA_invlist,
-	PL_INTHAI_invlist,
-	PL_INTIBETAN_invlist,
-	PL_INTIFINAGH_invlist,
-	PL_INTIRHUTA_invlist,
-	PL_INUGARITIC_invlist,
-	PL_INVAI_invlist,
-	PL_INVS_invlist,
-	PL_INWARANGCITI_invlist,
-	PL_INZANABAZARSQUARE_invlist,
-	PL_IN__10_invlist,
-	PL_IN__11_invlist,
-	PL_IN__1_DOT_1_invlist,
-	PL_IN__2_invlist,
-	PL_IN__2_DOT_1_invlist,
-	PL_IN__3_invlist,
-	PL_IN__3_DOT_1_invlist,
-	PL_IN__3_DOT_2_invlist,
-	PL_IN__4_invlist,
-	PL_IN__4_DOT_1_invlist,
-	PL_IN__5_invlist,
-	PL_IN__5_DOT_1_invlist,
-	PL_IN__5_DOT_2_invlist,
-	PL_IN__6_invlist,
-	PL_IN__6_DOT_1_invlist,
-	PL_IN__6_DOT_2_invlist,
-	PL_IN__6_DOT_3_invlist,
-	PL_IN__7_invlist,
-	PL_IN__8_invlist,
-	PL_IN__9_invlist,
-	PL_IPAEXT_invlist,
-	PL_ITAL_invlist,
-	PL_JAMO_invlist,
-	PL_JAMOEXTA_invlist,
-	PL_JAMOEXTB_invlist,
-	PL_JAVA_invlist,
-	PL_JG__AFRICANFEH_invlist,
-	PL_JG__AFRICANNOON_invlist,
-	PL_JG__AFRICANQAF_invlist,
-	PL_JG__AIN_invlist,
-	PL_JG__ALAPH_invlist,
-	PL_JG__ALEF_invlist,
-	PL_JG__BEH_invlist,
-	PL_JG__BETH_invlist,
-	PL_JG__BURUSHASKIYEHBARREE_invlist,
-	PL_JG__DAL_invlist,
-	PL_JG__DALATHRISH_invlist,
-	PL_JG__E_invlist,
-	PL_JG__FARSIYEH_invlist,
-	PL_JG__FE_invlist,
-	PL_JG__FEH_invlist,
-	PL_JG__FINALSEMKATH_invlist,
-	PL_JG__GAF_invlist,
-	PL_JG__GAMAL_invlist,
-	PL_JG__HAH_invlist,
-	PL_JG__HAMZAONHEHGOAL_invlist,
-	PL_JG__HANIFIROHINGYAKINNAYA_invlist,
-	PL_JG__HANIFIROHINGYAPA_invlist,
-	PL_JG__HE_invlist,
-	PL_JG__HEH_invlist,
-	PL_JG__HEHGOAL_invlist,
-	PL_JG__HETH_invlist,
-	PL_JG__KAF_invlist,
-	PL_JG__KAPH_invlist,
-	PL_JG__KHAPH_invlist,
-	PL_JG__KNOTTEDHEH_invlist,
-	PL_JG__LAM_invlist,
-	PL_JG__LAMADH_invlist,
-	PL_JG__MALAYALAMBHA_invlist,
-	PL_JG__MALAYALAMJA_invlist,
-	PL_JG__MALAYALAMLLA_invlist,
-	PL_JG__MALAYALAMLLLA_invlist,
-	PL_JG__MALAYALAMNGA_invlist,
-	PL_JG__MALAYALAMNNA_invlist,
-	PL_JG__MALAYALAMNNNA_invlist,
-	PL_JG__MALAYALAMNYA_invlist,
-	PL_JG__MALAYALAMRA_invlist,
-	PL_JG__MALAYALAMSSA_invlist,
-	PL_JG__MALAYALAMTTA_invlist,
-	PL_JG__MANICHAEANALEPH_invlist,
-	PL_JG__MANICHAEANAYIN_invlist,
-	PL_JG__MANICHAEANBETH_invlist,
-	PL_JG__MANICHAEANDALETH_invlist,
-	PL_JG__MANICHAEANDHAMEDH_invlist,
-	PL_JG__MANICHAEANFIVE_invlist,
-	PL_JG__MANICHAEANGIMEL_invlist,
-	PL_JG__MANICHAEANHETH_invlist,
-	PL_JG__MANICHAEANHUNDRED_invlist,
-	PL_JG__MANICHAEANKAPH_invlist,
-	PL_JG__MANICHAEANLAMEDH_invlist,
-	PL_JG__MANICHAEANMEM_invlist,
-	PL_JG__MANICHAEANNUN_invlist,
-	PL_JG__MANICHAEANONE_invlist,
-	PL_JG__MANICHAEANPE_invlist,
-	PL_JG__MANICHAEANQOPH_invlist,
-	PL_JG__MANICHAEANRESH_invlist,
-	PL_JG__MANICHAEANSADHE_invlist,
-	PL_JG__MANICHAEANSAMEKH_invlist,
-	PL_JG__MANICHAEANTAW_invlist,
-	PL_JG__MANICHAEANTEN_invlist,
-	PL_JG__MANICHAEANTETH_invlist,
-	PL_JG__MANICHAEANTHAMEDH_invlist,
-	PL_JG__MANICHAEANTWENTY_invlist,
-	PL_JG__MANICHAEANWAW_invlist,
-	PL_JG__MANICHAEANYODH_invlist,
-	PL_JG__MANICHAEANZAYIN_invlist,
-	PL_JG__MEEM_invlist,
-	PL_JG__MIM_invlist,
-	PL_JG__NOJOININGGROUP_invlist,
-	PL_JG__NOON_invlist,
-	PL_JG__NUN_invlist,
-	PL_JG__NYA_invlist,
-	PL_JG__PE_invlist,
-	PL_JG__QAF_invlist,
-	PL_JG__QAPH_invlist,
-	PL_JG__REH_invlist,
-	PL_JG__REVERSEDPE_invlist,
-	PL_JG__ROHINGYAYEH_invlist,
-	PL_JG__SAD_invlist,
-	PL_JG__SADHE_invlist,
-	PL_JG__SEEN_invlist,
-	PL_JG__SEMKATH_invlist,
-	PL_JG__SHIN_invlist,
-	PL_JG__STRAIGHTWAW_invlist,
-	PL_JG__SWASHKAF_invlist,
-	PL_JG__SYRIACWAW_invlist,
-	PL_JG__TAH_invlist,
-	PL_JG__TAW_invlist,
-	PL_JG__TEHMARBUTA_invlist,
-	PL_JG__TETH_invlist,
-	PL_JG__WAW_invlist,
-	PL_JG__YEH_invlist,
-	PL_JG__YEHBARREE_invlist,
-	PL_JG__YEHWITHTAIL_invlist,
-	PL_JG__YUDH_invlist,
-	PL_JG__YUDHHE_invlist,
-	PL_JG__ZAIN_invlist,
-	PL_JG__ZHAIN_invlist,
-	PL_JOINC_invlist,
-	PL_JT__C_invlist,
-	PL_JT__D_invlist,
-	PL_JT__L_invlist,
-	PL_JT__R_invlist,
-	PL_JT__T_invlist,
-	PL_JT__U_invlist,
-	PL_KALI_invlist,
-	PL_KANA_invlist,
-	PL_KANAEXTA_invlist,
-	PL_KANASUP_invlist,
-	PL_KANBUN_invlist,
-	PL_KANGXI_invlist,
-	PL_KATAKANAEXT_invlist,
-	PL_KHAR_invlist,
-	PL_KHMERSYMBOLS_invlist,
-	PL_KHMR_invlist,
-	PL_KHOJ_invlist,
-	PL_KNDA_invlist,
-	PL_KTHI_invlist,
-	PL_L_invlist,
-	PL_LANA_invlist,
-	PL_LAO_invlist,
-	PL_LATIN1_invlist,
-	PL_LATINEXTA_invlist,
-	PL_LATINEXTADDITIONAL_invlist,
-	PL_LATINEXTB_invlist,
-	PL_LATINEXTC_invlist,
-	PL_LATINEXTD_invlist,
-	PL_LATINEXTE_invlist,
-	PL_LATN_invlist,
-	PL_LB__AI_invlist,
-	PL_LB__AL_invlist,
-	PL_LB__B2_invlist,
-	PL_LB__BA_invlist,
-	PL_LB__BB_invlist,
-	PL_LB__BK_invlist,
-	PL_LB__CB_invlist,
-	PL_LB__CJ_invlist,
-	PL_LB__CL_invlist,
-	PL_LB__CM_invlist,
-	PL_LB__CP_invlist,
-	PL_LB__CR_invlist,
-	PL_LB__EB_invlist,
-	PL_LB__EM_invlist,
-	PL_LB__EX_invlist,
-	PL_LB__GL_invlist,
-	PL_LB__H2_invlist,
-	PL_LB__H3_invlist,
-	PL_LB__HL_invlist,
-	PL_LB__HY_invlist,
-	PL_LB__ID_invlist,
-	PL_LB__IN_invlist,
-	PL_LB__IS_invlist,
-	PL_LB__LF_invlist,
-	PL_LB__NL_invlist,
-	PL_LB__NS_invlist,
-	PL_LB__NU_invlist,
-	PL_LB__OP_invlist,
-	PL_LB__PO_invlist,
-	PL_LB__PR_invlist,
-	PL_LB__QU_invlist,
-	PL_LB__SA_invlist,
-	PL_LB__SG_invlist,
-	PL_LB__SP_invlist,
-	PL_LB__SY_invlist,
-	PL_LB__WJ_invlist,
-	PL_LB__XX_invlist,
-	PL_LB__ZW_invlist,
-	PL_LB__ZWJ_invlist,
-	PL_LEPC_invlist,
-	PL_LETTERLIKESYMBOLS_invlist,
-	PL_LIMB_invlist,
-	PL_LINA_invlist,
-	PL_LINB_invlist,
-	PL_LINEARBIDEOGRAMS_invlist,
-	PL_LINEARBSYLLABARY_invlist,
-	PL_LISU_invlist,
-	PL_LM_invlist,
-	PL_LO_invlist,
-	PL_LOE_invlist,
-	PL_LOWERCASELETTER_invlist,
-	PL_LOWSURROGATES_invlist,
-	PL_LYCI_invlist,
-	PL_LYDI_invlist,
-	PL_M_invlist,
-	PL_MAHJ_invlist,
-	PL_MAHJONG_invlist,
-	PL_MAKA_invlist,
-	PL_MAND_invlist,
-	PL_MANI_invlist,
-	PL_MARC_invlist,
-	PL_MATH_invlist,
-	PL_MATHALPHANUM_invlist,
-	PL_MATHOPERATORS_invlist,
-	PL_MAYANNUMERALS_invlist,
-	PL_MC_invlist,
-	PL_ME_invlist,
-	PL_MEDF_invlist,
-	PL_MEETEIMAYEKEXT_invlist,
-	PL_MEND_invlist,
-	PL_MERC_invlist,
-	PL_MERO_invlist,
-	PL_MIAO_invlist,
-	PL_MISCARROWS_invlist,
-	PL_MISCMATHSYMBOLSA_invlist,
-	PL_MISCMATHSYMBOLSB_invlist,
-	PL_MISCPICTOGRAPHS_invlist,
-	PL_MISCSYMBOLS_invlist,
-	PL_MISCTECHNICAL_invlist,
-	PL_MLYM_invlist,
-	PL_MN_invlist,
-	PL_MODI_invlist,
-	PL_MODIFIERLETTERS_invlist,
-	PL_MODIFIERTONELETTERS_invlist,
-	PL_MONG_invlist,
-	PL_MONGOLIANSUP_invlist,
-	PL_MRO_invlist,
-	PL_MTEI_invlist,
-	PL_MULT_invlist,
-	PL_MUSIC_invlist,
-	PL_MYANMAREXTA_invlist,
-	PL_MYANMAREXTB_invlist,
-	PL_MYMR_invlist,
-	PL_N_invlist,
-	PL_NARB_invlist,
-	PL_NB_invlist,
-	PL_NBAT_invlist,
-	PL_NEWA_invlist,
-	PL_NFCQC__M_invlist,
-	PL_NFCQC__Y_invlist,
-	PL_NFDQC__Y_invlist,
-	PL_NFKCQC__N_invlist,
-	PL_NFKCQC__Y_invlist,
-	PL_NFKDQC__N_invlist,
-	PL_NKO_invlist,
-	PL_NL_invlist,
-	PL_NO_invlist,
-	PL_NSHU_invlist,
-	PL_NT__DI_invlist,
-	PL_NT__NU_invlist,
-	PL_NUMBERFORMS_invlist,
-	PL_NV__0_invlist,
-	PL_NV__1_invlist,
-	PL_NV__10_invlist,
-	PL_NV__100_invlist,
-	PL_NV__1000_invlist,
-	PL_NV__10000_invlist,
-	PL_NV__100000_invlist,
-	PL_NV__1000000_invlist,
-	PL_NV__10000000_invlist,
-	PL_NV__100000000_invlist,
-	PL_NV__10000000000_invlist,
-	PL_NV__1000000000000_invlist,
-	PL_NV__11_invlist,
-	PL_NV__11_SLASH_12_invlist,
-	PL_NV__11_SLASH_2_invlist,
-	PL_NV__12_invlist,
-	PL_NV__13_invlist,
-	PL_NV__13_SLASH_2_invlist,
-	PL_NV__14_invlist,
-	PL_NV__15_invlist,
-	PL_NV__15_SLASH_2_invlist,
-	PL_NV__16_invlist,
-	PL_NV__17_invlist,
-	PL_NV__17_SLASH_2_invlist,
-	PL_NV__18_invlist,
-	PL_NV__19_invlist,
-	PL_NV__1_SLASH_10_invlist,
-	PL_NV__1_SLASH_12_invlist,
-	PL_NV__1_SLASH_16_invlist,
-	PL_NV__1_SLASH_160_invlist,
-	PL_NV__1_SLASH_2_invlist,
-	PL_NV__1_SLASH_20_invlist,
-	PL_NV__1_SLASH_3_invlist,
-	PL_NV__1_SLASH_4_invlist,
-	PL_NV__1_SLASH_40_invlist,
-	PL_NV__1_SLASH_5_invlist,
-	PL_NV__1_SLASH_6_invlist,
-	PL_NV__1_SLASH_7_invlist,
-	PL_NV__1_SLASH_8_invlist,
-	PL_NV__1_SLASH_9_invlist,
-	PL_NV__2_invlist,
-	PL_NV__20_invlist,
-	PL_NV__200_invlist,
-	PL_NV__2000_invlist,
-	PL_NV__20000_invlist,
-	PL_NV__200000_invlist,
-	PL_NV__20000000_invlist,
-	PL_NV__21_invlist,
-	PL_NV__216000_invlist,
-	PL_NV__22_invlist,
-	PL_NV__23_invlist,
-	PL_NV__24_invlist,
-	PL_NV__25_invlist,
-	PL_NV__26_invlist,
-	PL_NV__27_invlist,
-	PL_NV__28_invlist,
-	PL_NV__29_invlist,
-	PL_NV__2_SLASH_3_invlist,
-	PL_NV__2_SLASH_5_invlist,
-	PL_NV__3_invlist,
-	PL_NV__30_invlist,
-	PL_NV__300_invlist,
-	PL_NV__3000_invlist,
-	PL_NV__30000_invlist,
-	PL_NV__300000_invlist,
-	PL_NV__31_invlist,
-	PL_NV__32_invlist,
-	PL_NV__33_invlist,
-	PL_NV__34_invlist,
-	PL_NV__35_invlist,
-	PL_NV__36_invlist,
-	PL_NV__37_invlist,
-	PL_NV__38_invlist,
-	PL_NV__39_invlist,
-	PL_NV__3_SLASH_16_invlist,
-	PL_NV__3_SLASH_2_invlist,
-	PL_NV__3_SLASH_20_invlist,
-	PL_NV__3_SLASH_4_invlist,
-	PL_NV__3_SLASH_5_invlist,
-	PL_NV__3_SLASH_8_invlist,
-	PL_NV__3_SLASH_80_invlist,
-	PL_NV__4_invlist,
-	PL_NV__40_invlist,
-	PL_NV__400_invlist,
-	PL_NV__4000_invlist,
-	PL_NV__40000_invlist,
-	PL_NV__400000_invlist,
-	PL_NV__41_invlist,
-	PL_NV__42_invlist,
-	PL_NV__43_invlist,
-	PL_NV__432000_invlist,
-	PL_NV__44_invlist,
-	PL_NV__45_invlist,
-	PL_NV__46_invlist,
-	PL_NV__47_invlist,
-	PL_NV__48_invlist,
-	PL_NV__49_invlist,
-	PL_NV__4_SLASH_5_invlist,
-	PL_NV__5_invlist,
-	PL_NV__50_invlist,
-	PL_NV__500_invlist,
-	PL_NV__5000_invlist,
-	PL_NV__50000_invlist,
-	PL_NV__500000_invlist,
-	PL_NV__5_SLASH_12_invlist,
-	PL_NV__5_SLASH_2_invlist,
-	PL_NV__5_SLASH_6_invlist,
-	PL_NV__5_SLASH_8_invlist,
-	PL_NV__6_invlist,
-	PL_NV__60_invlist,
-	PL_NV__600_invlist,
-	PL_NV__6000_invlist,
-	PL_NV__60000_invlist,
-	PL_NV__600000_invlist,
-	PL_NV__7_invlist,
-	PL_NV__70_invlist,
-	PL_NV__700_invlist,
-	PL_NV__7000_invlist,
-	PL_NV__70000_invlist,
-	PL_NV__700000_invlist,
-	PL_NV__7_SLASH_12_invlist,
-	PL_NV__7_SLASH_2_invlist,
-	PL_NV__7_SLASH_8_invlist,
-	PL_NV__8_invlist,
-	PL_NV__80_invlist,
-	PL_NV__800_invlist,
-	PL_NV__8000_invlist,
-	PL_NV__80000_invlist,
-	PL_NV__800000_invlist,
-	PL_NV__9_invlist,
-	PL_NV__90_invlist,
-	PL_NV__900_invlist,
-	PL_NV__9000_invlist,
-	PL_NV__90000_invlist,
-	PL_NV__900000_invlist,
-	PL_NV__9_SLASH_2_invlist,
-	PL_NV__NAN_invlist,
-	PL_NV___MINUS_1_SLASH_2_invlist,
-	PL_OCR_invlist,
-	PL_OGAM_invlist,
-	PL_OLCK_invlist,
-	PL_ORKH_invlist,
-	PL_ORNAMENTALDINGBATS_invlist,
-	PL_ORYA_invlist,
-	PL_OSGE_invlist,
-	PL_OSMA_invlist,
-	PL_P_invlist,
-	PL_PALM_invlist,
-	PL_PATSYN_invlist,
-	PL_PAUC_invlist,
-	PL_PC_invlist,
-	PL_PCM_invlist,
-	PL_PD_invlist,
-	PL_PE_invlist,
-	PL_PERM_invlist,
-	PL_PF_invlist,
-	PL_PHAG_invlist,
-	PL_PHAISTOS_invlist,
-	PL_PHLI_invlist,
-	PL_PHLP_invlist,
-	PL_PHNX_invlist,
-	PL_PHONETICEXT_invlist,
-	PL_PHONETICEXTSUP_invlist,
-	PL_PI_invlist,
-	PL_PLAYINGCARDS_invlist,
-	PL_PO_invlist,
-	PL_POSIXALNUM_invlist,
-	PL_POSIXALPHA_invlist,
-	PL_POSIXBLANK_invlist,
-	PL_POSIXCNTRL_invlist,
-	PL_POSIXDIGIT_invlist,
-	PL_POSIXGRAPH_invlist,
-	PL_POSIXLOWER_invlist,
-	PL_POSIXPRINT_invlist,
-	PL_POSIXPUNCT_invlist,
-	PL_POSIXSPACE_invlist,
-	PL_POSIXUPPER_invlist,
-	PL_POSIXWORD_invlist,
-	PL_POSIXXDIGIT_invlist,
-	PL_PRTI_invlist,
-	PL_PS_invlist,
-	PL_PUA_invlist,
-	PL_QAAI_invlist,
-	PL_QMARK_invlist,
-	PL_RADICAL_invlist,
-	PL_RI_invlist,
-	PL_RJNG_invlist,
-	PL_ROHG_invlist,
-	PL_RUMI_invlist,
-	PL_RUNR_invlist,
-	PL_S_invlist,
-	PL_SAMR_invlist,
-	PL_SARB_invlist,
-	PL_SAUR_invlist,
-	PL_SB__AT_invlist,
-	PL_SB__CL_invlist,
-	PL_SB__EX_invlist,
-	PL_SB__FO_invlist,
-	PL_SB__LE_invlist,
-	PL_SB__LO_invlist,
-	PL_SB__SC_invlist,
-	PL_SB__SE_invlist,
-	PL_SB__SP_invlist,
-	PL_SB__ST_invlist,
-	PL_SB__UP_invlist,
-	PL_SB__XX_invlist,
-	PL_SC_invlist,
-	PL_SC__ADLM_invlist,
-	PL_SC__ARAB_invlist,
-	PL_SC__ARMN_invlist,
-	PL_SC__BENG_invlist,
-	PL_SC__BOPO_invlist,
-	PL_SC__BUGI_invlist,
-	PL_SC__BUHD_invlist,
-	PL_SC__CAKM_invlist,
-	PL_SC__COPT_invlist,
-	PL_SC__CPRT_invlist,
-	PL_SC__CYRL_invlist,
-	PL_SC__DEVA_invlist,
-	PL_SC__DOGR_invlist,
-	PL_SC__DUPL_invlist,
-	PL_SC__GEOR_invlist,
-	PL_SC__GLAG_invlist,
-	PL_SC__GONG_invlist,
-	PL_SC__GRAN_invlist,
-	PL_SC__GREK_invlist,
-	PL_SC__GUJR_invlist,
-	PL_SC__GURU_invlist,
-	PL_SC__HAN_invlist,
-	PL_SC__HANG_invlist,
-	PL_SC__HANO_invlist,
-	PL_SC__HIRA_invlist,
-	PL_SC__JAVA_invlist,
-	PL_SC__KALI_invlist,
-	PL_SC__KANA_invlist,
-	PL_SC__KHOJ_invlist,
-	PL_SC__KNDA_invlist,
-	PL_SC__KTHI_invlist,
-	PL_SC__LATN_invlist,
-	PL_SC__LIMB_invlist,
-	PL_SC__LINA_invlist,
-	PL_SC__LINB_invlist,
-	PL_SC__MAHJ_invlist,
-	PL_SC__MAND_invlist,
-	PL_SC__MANI_invlist,
-	PL_SC__MLYM_invlist,
-	PL_SC__MODI_invlist,
-	PL_SC__MONG_invlist,
-	PL_SC__MULT_invlist,
-	PL_SC__MYMR_invlist,
-	PL_SC__ORYA_invlist,
-	PL_SC__PERM_invlist,
-	PL_SC__PHAG_invlist,
-	PL_SC__PHLP_invlist,
-	PL_SC__QAAI_invlist,
-	PL_SC__ROHG_invlist,
-	PL_SC__SHRD_invlist,
-	PL_SC__SIND_invlist,
-	PL_SC__SINH_invlist,
-	PL_SC__SOGD_invlist,
-	PL_SC__SYLO_invlist,
-	PL_SC__SYRC_invlist,
-	PL_SC__TAGB_invlist,
-	PL_SC__TAKR_invlist,
-	PL_SC__TALE_invlist,
-	PL_SC__TAML_invlist,
-	PL_SC__TELU_invlist,
-	PL_SC__TGLG_invlist,
-	PL_SC__THAA_invlist,
-	PL_SC__TIRH_invlist,
-	PL_SC__YI_invlist,
-	PL_SC__ZYYY_invlist,
-	PL_SD_invlist,
-	PL_SGNW_invlist,
-	PL_SHAW_invlist,
-	PL_SHORTHANDFORMATCONTROLS_invlist,
-	PL_SHRD_invlist,
-	PL_SIDD_invlist,
-	PL_SIND_invlist,
-	PL_SINH_invlist,
-	PL_SINHALAARCHAICNUMBERS_invlist,
-	PL_SK_invlist,
-	PL_SM_invlist,
-	PL_SMALLFORMS_invlist,
-	PL_SO_invlist,
-	PL_SOGD_invlist,
-	PL_SOGO_invlist,
-	PL_SORA_invlist,
-	PL_SOYO_invlist,
-	PL_SPECIALS_invlist,
-	PL_STERM_invlist,
-	PL_SUND_invlist,
-	PL_SUNDANESESUP_invlist,
-	PL_SUPARROWSA_invlist,
-	PL_SUPARROWSB_invlist,
-	PL_SUPARROWSC_invlist,
-	PL_SUPERANDSUB_invlist,
-	PL_SUPMATHOPERATORS_invlist,
-	PL_SUPPUAA_invlist,
-	PL_SUPPUAB_invlist,
-	PL_SUPPUNCTUATION_invlist,
-	PL_SUPSYMBOLSANDPICTOGRAPHS_invlist,
-	PL_SUTTONSIGNWRITING_invlist,
-	PL_SYLO_invlist,
-	PL_SYRC_invlist,
-	PL_SYRIACSUP_invlist,
-	PL_TAGB_invlist,
-	PL_TAGS_invlist,
-	PL_TAIXUANJING_invlist,
-	PL_TAKR_invlist,
-	PL_TALE_invlist,
-	PL_TALU_invlist,
-	PL_TAML_invlist,
-	PL_TANG_invlist,
-	PL_TANGUTCOMPONENTS_invlist,
-	PL_TAVT_invlist,
-	PL_TELU_invlist,
-	PL_TERM_invlist,
-	PL_TFNG_invlist,
-	PL_TGLG_invlist,
-	PL_THAA_invlist,
-	PL_THAI_invlist,
-	PL_TIBT_invlist,
-	PL_TIRH_invlist,
-	PL_TITLE_invlist,
-	PL_TRANSPORTANDMAP_invlist,
-	PL_UCAS_invlist,
-	PL_UCASEXT_invlist,
-	PL_UGAR_invlist,
-	PL_UIDEO_invlist,
-	PL_UPPERCASELETTER_invlist,
-	PL_VAI_invlist,
-	PL_VEDICEXT_invlist,
-	PL_VERTICALFORMS_invlist,
-	PL_VERTSPACE_invlist,
-	PL_VO__R_invlist,
-	PL_VO__TR_invlist,
-	PL_VO__TU_invlist,
-	PL_VO__U_invlist,
-	PL_VS_invlist,
-	PL_VSSUP_invlist,
-	PL_WARA_invlist,
-	PL_WB__DQ_invlist,
-	PL_WB__EB_invlist,
-	PL_WB__EX_invlist,
-	PL_WB__EXTEND_invlist,
-	PL_WB__FO_invlist,
-	PL_WB__KA_invlist,
-	PL_WB__LE_invlist,
-	PL_WB__MB_invlist,
-	PL_WB__ML_invlist,
-	PL_WB__MN_invlist,
-	PL_WB__NL_invlist,
-	PL_WB__NU_invlist,
-	PL_WB__SQ_invlist,
-	PL_WB__WSEGSPACE_invlist,
-	PL_WB__XX_invlist,
-	PL_XIDC_invlist,
-	PL_XIDS_invlist,
-	PL_XPEO_invlist,
-	PL_XPOSIXALNUM_invlist,
-	PL_XPOSIXALPHA_invlist,
-	PL_XPOSIXBLANK_invlist,
-	PL_XPOSIXCNTRL_invlist,
-	PL_XPOSIXDIGIT_invlist,
-	PL_XPOSIXGRAPH_invlist,
-	PL_XPOSIXLOWER_invlist,
-	PL_XPOSIXPRINT_invlist,
-	PL_XPOSIXPUNCT_invlist,
-	PL_XPOSIXSPACE_invlist,
-	PL_XPOSIXUPPER_invlist,
-	PL_XPOSIXWORD_invlist,
-	PL_XPOSIXXDIGIT_invlist,
-	PL_XSUX_invlist,
-	PL_YI_invlist,
-	PL_YIJING_invlist,
-	PL_YIRADICALS_invlist,
-	PL_YISYLLABLES_invlist,
-	PL_Z_invlist,
-	PL_ZANB_invlist,
-	PL_ZL_invlist,
-	PL_ZP_invlist,
-	PL_ZS_invlist,
-	PL_ZYYY_invlist,
-	PL_ZZZZ_invlist,
-	PL__PERL_ANY_FOLDS_invlist,
-	PL__PERL_CHARNAME_BEGIN_invlist,
-	PL__PERL_CHARNAME_CONTINUE_invlist,
-	PL__PERL_FOLDS_TO_MULTI_CHAR_invlist,
-	PL__PERL_IDCONT_invlist,
-	PL__PERL_IDSTART_invlist,
-	PL__PERL_NCHAR_invlist,
-	PL__PERL_PATWS_invlist,
-	PL__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist,
-	PL__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist,
-	PL__PERL_QUOTEMETA_invlist,
-	PL__PERL_SURROGATE_invlist
+		UNI_ADLM_invlist,
+	UNI_AEGEANNUMBERS_invlist,
+	UNI_AGE__10_invlist,
+	UNI_AGE__11_invlist,
+	UNI_AGE__2_invlist,
+	UNI_AGE__2_DOT_1_invlist,
+	UNI_AGE__3_invlist,
+	UNI_AGE__3_DOT_1_invlist,
+	UNI_AGE__3_DOT_2_invlist,
+	UNI_AGE__4_invlist,
+	UNI_AGE__4_DOT_1_invlist,
+	UNI_AGE__5_invlist,
+	UNI_AGE__5_DOT_1_invlist,
+	UNI_AGE__5_DOT_2_invlist,
+	UNI_AGE__6_invlist,
+	UNI_AGE__6_DOT_1_invlist,
+	UNI_AGE__6_DOT_2_invlist,
+	UNI_AGE__6_DOT_3_invlist,
+	UNI_AGE__7_invlist,
+	UNI_AGE__8_invlist,
+	UNI_AGE__9_invlist,
+	UNI_AGE__NA_invlist,
+	UNI_AGHB_invlist,
+	UNI_AHOM_invlist,
+	UNI_ALCHEMICAL_invlist,
+	UNI_ALL_invlist,
+	UNI_ALPHABETICPF_invlist,
+	UNI_ANCIENTGREEKMUSIC_invlist,
+	UNI_ANCIENTGREEKNUMBERS_invlist,
+	UNI_ANCIENTSYMBOLS_invlist,
+	UNI_ANY_invlist,
+	UNI_ARAB_invlist,
+	UNI_ARABICEXTA_invlist,
+	UNI_ARABICMATH_invlist,
+	UNI_ARABICPFA_invlist,
+	UNI_ARABICPFB_invlist,
+	UNI_ARABICSUP_invlist,
+	UNI_ARMI_invlist,
+	UNI_ARMN_invlist,
+	UNI_ARROWS_invlist,
+	UNI_ASCII_invlist,
+	UNI_ASSIGNED_invlist,
+	UNI_AVST_invlist,
+	UNI_BALI_invlist,
+	UNI_BAMU_invlist,
+	UNI_BAMUMSUP_invlist,
+	UNI_BASS_invlist,
+	UNI_BATK_invlist,
+	UNI_BC__AL_invlist,
+	UNI_BC__AN_invlist,
+	UNI_BC__B_invlist,
+	UNI_BC__BN_invlist,
+	UNI_BC__CS_invlist,
+	UNI_BC__EN_invlist,
+	UNI_BC__ES_invlist,
+	UNI_BC__ET_invlist,
+	UNI_BC__FSI_invlist,
+	UNI_BC__L_invlist,
+	UNI_BC__LRE_invlist,
+	UNI_BC__LRI_invlist,
+	UNI_BC__LRO_invlist,
+	UNI_BC__NSM_invlist,
+	UNI_BC__ON_invlist,
+	UNI_BC__PDF_invlist,
+	UNI_BC__PDI_invlist,
+	UNI_BC__R_invlist,
+	UNI_BC__RLE_invlist,
+	UNI_BC__RLI_invlist,
+	UNI_BC__RLO_invlist,
+	UNI_BC__S_invlist,
+	UNI_BC__WS_invlist,
+	UNI_BENG_invlist,
+	UNI_BHKS_invlist,
+	UNI_BIDIC_invlist,
+	UNI_BIDIM_invlist,
+	UNI_BLOCKELEMENTS_invlist,
+	UNI_BOPO_invlist,
+	UNI_BOPOMOFOEXT_invlist,
+	UNI_BOXDRAWING_invlist,
+	UNI_BPT__C_invlist,
+	UNI_BPT__N_invlist,
+	UNI_BPT__O_invlist,
+	UNI_BRAH_invlist,
+	UNI_BRAI_invlist,
+	UNI_BUGI_invlist,
+	UNI_BUHD_invlist,
+	UNI_BYZANTINEMUSIC_invlist,
+	UNI_C_invlist,
+	UNI_CAKM_invlist,
+	UNI_CANS_invlist,
+	UNI_CARI_invlist,
+	UNI_CASED_invlist,
+	UNI_CASEDLETTER_invlist,
+	UNI_CCC__0_invlist,
+	UNI_CCC__1_invlist,
+	UNI_CCC__10_invlist,
+	UNI_CCC__103_invlist,
+	UNI_CCC__107_invlist,
+	UNI_CCC__11_invlist,
+	UNI_CCC__118_invlist,
+	UNI_CCC__12_invlist,
+	UNI_CCC__122_invlist,
+	UNI_CCC__129_invlist,
+	UNI_CCC__13_invlist,
+	UNI_CCC__130_invlist,
+	UNI_CCC__132_invlist,
+	UNI_CCC__14_invlist,
+	UNI_CCC__15_invlist,
+	UNI_CCC__16_invlist,
+	UNI_CCC__17_invlist,
+	UNI_CCC__18_invlist,
+	UNI_CCC__19_invlist,
+	UNI_CCC__20_invlist,
+	UNI_CCC__202_invlist,
+	UNI_CCC__21_invlist,
+	UNI_CCC__214_invlist,
+	UNI_CCC__216_invlist,
+	UNI_CCC__22_invlist,
+	UNI_CCC__23_invlist,
+	UNI_CCC__24_invlist,
+	UNI_CCC__25_invlist,
+	UNI_CCC__26_invlist,
+	UNI_CCC__27_invlist,
+	UNI_CCC__28_invlist,
+	UNI_CCC__29_invlist,
+	UNI_CCC__30_invlist,
+	UNI_CCC__31_invlist,
+	UNI_CCC__32_invlist,
+	UNI_CCC__33_invlist,
+	UNI_CCC__34_invlist,
+	UNI_CCC__35_invlist,
+	UNI_CCC__36_invlist,
+	UNI_CCC__7_invlist,
+	UNI_CCC__8_invlist,
+	UNI_CCC__84_invlist,
+	UNI_CCC__9_invlist,
+	UNI_CCC__91_invlist,
+	UNI_CCC__A_invlist,
+	UNI_CCC__AL_invlist,
+	UNI_CCC__AR_invlist,
+	UNI_CCC__B_invlist,
+	UNI_CCC__BL_invlist,
+	UNI_CCC__BR_invlist,
+	UNI_CCC__DA_invlist,
+	UNI_CCC__DB_invlist,
+	UNI_CCC__IS_invlist,
+	UNI_CCC__L_invlist,
+	UNI_CCC__R_invlist,
+	UNI_CE_invlist,
+	UNI_CF_invlist,
+	UNI_CHAM_invlist,
+	UNI_CHER_invlist,
+	UNI_CHEROKEESUP_invlist,
+	UNI_CHESSSYMBOLS_invlist,
+	UNI_CI_invlist,
+	UNI_CJK_invlist,
+	UNI_CJKCOMPAT_invlist,
+	UNI_CJKCOMPATFORMS_invlist,
+	UNI_CJKCOMPATIDEOGRAPHS_invlist,
+	UNI_CJKCOMPATIDEOGRAPHSSUP_invlist,
+	UNI_CJKEXTA_invlist,
+	UNI_CJKEXTB_invlist,
+	UNI_CJKEXTC_invlist,
+	UNI_CJKEXTD_invlist,
+	UNI_CJKEXTE_invlist,
+	UNI_CJKEXTF_invlist,
+	UNI_CJKRADICALSSUP_invlist,
+	UNI_CJKSTROKES_invlist,
+	UNI_CJKSYMBOLS_invlist,
+	UNI_CN_invlist,
+	UNI_CO_invlist,
+	UNI_COMPATJAMO_invlist,
+	UNI_COMPEX_invlist,
+	UNI_CONTROLPICTURES_invlist,
+	UNI_COPT_invlist,
+	UNI_COPTICEPACTNUMBERS_invlist,
+	UNI_COUNTINGROD_invlist,
+	UNI_CPRT_invlist,
+	UNI_CUNEIFORMNUMBERS_invlist,
+	UNI_CURRENCYSYMBOLS_invlist,
+	UNI_CWCF_invlist,
+	UNI_CWCM_invlist,
+	UNI_CWKCF_invlist,
+	UNI_CWL_invlist,
+	UNI_CWT_invlist,
+	UNI_CWU_invlist,
+	UNI_CYPRIOTSYLLABARY_invlist,
+	UNI_CYRILLICEXTA_invlist,
+	UNI_CYRILLICEXTB_invlist,
+	UNI_CYRILLICEXTC_invlist,
+	UNI_CYRILLICSUP_invlist,
+	UNI_CYRL_invlist,
+	UNI_DASH_invlist,
+	UNI_DEP_invlist,
+	UNI_DEVA_invlist,
+	UNI_DEVANAGARIEXT_invlist,
+	UNI_DI_invlist,
+	UNI_DIA_invlist,
+	UNI_DIACRITICALS_invlist,
+	UNI_DIACRITICALSEXT_invlist,
+	UNI_DIACRITICALSFORSYMBOLS_invlist,
+	UNI_DIACRITICALSSUP_invlist,
+	UNI_DINGBATS_invlist,
+	UNI_DOGR_invlist,
+	UNI_DOMINO_invlist,
+	UNI_DSRT_invlist,
+	UNI_DT__CAN_invlist,
+	UNI_DT__COM_invlist,
+	UNI_DT__ENC_invlist,
+	UNI_DT__FIN_invlist,
+	UNI_DT__FONT_invlist,
+	UNI_DT__FRA_invlist,
+	UNI_DT__INIT_invlist,
+	UNI_DT__ISO_invlist,
+	UNI_DT__MED_invlist,
+	UNI_DT__NAR_invlist,
+	UNI_DT__NB_invlist,
+	UNI_DT__NONCANON_invlist,
+	UNI_DT__NONE_invlist,
+	UNI_DT__SML_invlist,
+	UNI_DT__SQR_invlist,
+	UNI_DT__SUB_invlist,
+	UNI_DT__SUP_invlist,
+	UNI_DT__VERT_invlist,
+	UNI_DUPL_invlist,
+	UNI_EARLYDYNASTICCUNEIFORM_invlist,
+	UNI_EA__A_invlist,
+	UNI_EA__F_invlist,
+	UNI_EA__H_invlist,
+	UNI_EA__N_invlist,
+	UNI_EA__NA_invlist,
+	UNI_EA__W_invlist,
+	UNI_EGYP_invlist,
+	UNI_ELBA_invlist,
+	UNI_EMOTICONS_invlist,
+	UNI_ENCLOSEDALPHANUM_invlist,
+	UNI_ENCLOSEDALPHANUMSUP_invlist,
+	UNI_ENCLOSEDCJK_invlist,
+	UNI_ENCLOSEDIDEOGRAPHICSUP_invlist,
+	UNI_ETHI_invlist,
+	UNI_ETHIOPICEXT_invlist,
+	UNI_ETHIOPICEXTA_invlist,
+	UNI_ETHIOPICSUP_invlist,
+	UNI_EXT_invlist,
+	UNI_GCB__CN_invlist,
+	UNI_GCB__EX_invlist,
+	UNI_GCB__L_invlist,
+	UNI_GCB__PP_invlist,
+	UNI_GCB__SM_invlist,
+	UNI_GCB__T_invlist,
+	UNI_GCB__V_invlist,
+	UNI_GCB__XX_invlist,
+	UNI_GEOMETRICSHAPES_invlist,
+	UNI_GEOMETRICSHAPESEXT_invlist,
+	UNI_GEOR_invlist,
+	UNI_GEORGIANEXT_invlist,
+	UNI_GEORGIANSUP_invlist,
+	UNI_GLAG_invlist,
+	UNI_GLAGOLITICSUP_invlist,
+	UNI_GONG_invlist,
+	UNI_GONM_invlist,
+	UNI_GOTH_invlist,
+	UNI_GRAN_invlist,
+	UNI_GRBASE_invlist,
+	UNI_GREEKEXT_invlist,
+	UNI_GREK_invlist,
+	UNI_GREXT_invlist,
+	UNI_GUJR_invlist,
+	UNI_GURU_invlist,
+	UNI_HALFANDFULLFORMS_invlist,
+	UNI_HALFMARKS_invlist,
+	UNI_HAN_invlist,
+	UNI_HANG_invlist,
+	UNI_HANO_invlist,
+	UNI_HATR_invlist,
+	UNI_HEBR_invlist,
+	UNI_HIGHPUSURROGATES_invlist,
+	UNI_HIGHSURROGATES_invlist,
+	UNI_HIRA_invlist,
+	UNI_HLUW_invlist,
+	UNI_HMNG_invlist,
+	UNI_HST__NA_invlist,
+	UNI_HUNG_invlist,
+	UNI_HYPHEN_invlist,
+	UNI_IDC_invlist,
+	UNI_IDEO_invlist,
+	UNI_IDEOGRAPHICSYMBOLS_invlist,
+	UNI_IDS_invlist,
+	UNI_IDSB_invlist,
+	UNI_IDST_invlist,
+	UNI_INADLAM_invlist,
+	UNI_INAHOM_invlist,
+	UNI_INANATOLIANHIEROGLYPHS_invlist,
+	UNI_INARABIC_invlist,
+	UNI_INARMENIAN_invlist,
+	UNI_INAVESTAN_invlist,
+	UNI_INBALINESE_invlist,
+	UNI_INBAMUM_invlist,
+	UNI_INBASSAVAH_invlist,
+	UNI_INBATAK_invlist,
+	UNI_INBENGALI_invlist,
+	UNI_INBHAIKSUKI_invlist,
+	UNI_INBOPOMOFO_invlist,
+	UNI_INBRAHMI_invlist,
+	UNI_INBUGINESE_invlist,
+	UNI_INBUHID_invlist,
+	UNI_INCARIAN_invlist,
+	UNI_INCAUCASIANALBANIAN_invlist,
+	UNI_INCHAKMA_invlist,
+	UNI_INCHAM_invlist,
+	UNI_INCHEROKEE_invlist,
+	UNI_INCOPTIC_invlist,
+	UNI_INCUNEIFORM_invlist,
+	UNI_INCYRILLIC_invlist,
+	UNI_INDEVANAGARI_invlist,
+	UNI_INDICNUMBERFORMS_invlist,
+	UNI_INDICSIYAQNUMBERS_invlist,
+	UNI_INDOGRA_invlist,
+	UNI_INDUPLOYAN_invlist,
+	UNI_INEGYPTIANHIEROGLYPHS_invlist,
+	UNI_INELBASAN_invlist,
+	UNI_INETHIOPIC_invlist,
+	UNI_INGEORGIAN_invlist,
+	UNI_INGLAGOLITIC_invlist,
+	UNI_INGOTHIC_invlist,
+	UNI_INGRANTHA_invlist,
+	UNI_INGREEK_invlist,
+	UNI_INGUJARATI_invlist,
+	UNI_INGUNJALAGONDI_invlist,
+	UNI_INGURMUKHI_invlist,
+	UNI_INHANGUL_invlist,
+	UNI_INHANIFIROHINGYA_invlist,
+	UNI_INHANUNOO_invlist,
+	UNI_INHATRAN_invlist,
+	UNI_INHEBREW_invlist,
+	UNI_INHIRAGANA_invlist,
+	UNI_INIDC_invlist,
+	UNI_INIMPERIALARAMAIC_invlist,
+	UNI_ININSCRIPTIONALPAHLAVI_invlist,
+	UNI_ININSCRIPTIONALPARTHIAN_invlist,
+	UNI_INJAVANESE_invlist,
+	UNI_INKAITHI_invlist,
+	UNI_INKANNADA_invlist,
+	UNI_INKATAKANA_invlist,
+	UNI_INKHAROSHTHI_invlist,
+	UNI_INKHMER_invlist,
+	UNI_INKHOJKI_invlist,
+	UNI_INKHUDAWADI_invlist,
+	UNI_INLAO_invlist,
+	UNI_INLEPCHA_invlist,
+	UNI_INLIMBU_invlist,
+	UNI_INLINEARA_invlist,
+	UNI_INLYCIAN_invlist,
+	UNI_INLYDIAN_invlist,
+	UNI_INMAHAJANI_invlist,
+	UNI_INMAKASAR_invlist,
+	UNI_INMALAYALAM_invlist,
+	UNI_INMANDAIC_invlist,
+	UNI_INMANICHAEAN_invlist,
+	UNI_INMARCHEN_invlist,
+	UNI_INMASARAMGONDI_invlist,
+	UNI_INMEDEFAIDRIN_invlist,
+	UNI_INMEETEIMAYEK_invlist,
+	UNI_INMENDEKIKAKUI_invlist,
+	UNI_INMEROITICCURSIVE_invlist,
+	UNI_INMIAO_invlist,
+	UNI_INMODI_invlist,
+	UNI_INMONGOLIAN_invlist,
+	UNI_INMRO_invlist,
+	UNI_INMULTANI_invlist,
+	UNI_INMYANMAR_invlist,
+	UNI_INNABATAEAN_invlist,
+	UNI_INNEWA_invlist,
+	UNI_INNEWTAILUE_invlist,
+	UNI_INNKO_invlist,
+	UNI_INNUSHU_invlist,
+	UNI_INOGHAM_invlist,
+	UNI_INOLDHUNGARIAN_invlist,
+	UNI_INOLDITALIC_invlist,
+	UNI_INOLDPERMIC_invlist,
+	UNI_INOLDPERSIAN_invlist,
+	UNI_INOLDSOGDIAN_invlist,
+	UNI_INOLDTURKIC_invlist,
+	UNI_INORIYA_invlist,
+	UNI_INOSAGE_invlist,
+	UNI_INOSMANYA_invlist,
+	UNI_INPAHAWHHMONG_invlist,
+	UNI_INPAUCINHAU_invlist,
+	UNI_INPC__BOTTOM_invlist,
+	UNI_INPC__BOTTOMANDLEFT_invlist,
+	UNI_INPC__BOTTOMANDRIGHT_invlist,
+	UNI_INPC__LEFT_invlist,
+	UNI_INPC__LEFTANDRIGHT_invlist,
+	UNI_INPC__NA_invlist,
+	UNI_INPC__OVERSTRUCK_invlist,
+	UNI_INPC__RIGHT_invlist,
+	UNI_INPC__TOP_invlist,
+	UNI_INPC__TOPANDBOTTOM_invlist,
+	UNI_INPC__TOPANDBOTTOMANDRIGHT_invlist,
+	UNI_INPC__TOPANDLEFT_invlist,
+	UNI_INPC__TOPANDLEFTANDRIGHT_invlist,
+	UNI_INPC__TOPANDRIGHT_invlist,
+	UNI_INPHAGSPA_invlist,
+	UNI_INPHOENICIAN_invlist,
+	UNI_INPSALTERPAHLAVI_invlist,
+	UNI_INPUNCTUATION_invlist,
+	UNI_INREJANG_invlist,
+	UNI_INRUNIC_invlist,
+	UNI_INSAMARITAN_invlist,
+	UNI_INSAURASHTRA_invlist,
+	UNI_INSC__AVAGRAHA_invlist,
+	UNI_INSC__BINDU_invlist,
+	UNI_INSC__BRAHMIJOININGNUMBER_invlist,
+	UNI_INSC__CANTILLATIONMARK_invlist,
+	UNI_INSC__CONSONANT_invlist,
+	UNI_INSC__CONSONANTDEAD_invlist,
+	UNI_INSC__CONSONANTFINAL_invlist,
+	UNI_INSC__CONSONANTHEADLETTER_invlist,
+	UNI_INSC__CONSONANTINITIALPOSTFIXED_invlist,
+	UNI_INSC__CONSONANTKILLER_invlist,
+	UNI_INSC__CONSONANTMEDIAL_invlist,
+	UNI_INSC__CONSONANTPLACEHOLDER_invlist,
+	UNI_INSC__CONSONANTPRECEDINGREPHA_invlist,
+	UNI_INSC__CONSONANTPREFIXED_invlist,
+	UNI_INSC__CONSONANTSUBJOINED_invlist,
+	UNI_INSC__CONSONANTSUCCEEDINGREPHA_invlist,
+	UNI_INSC__CONSONANTWITHSTACKER_invlist,
+	UNI_INSC__GEMINATIONMARK_invlist,
+	UNI_INSC__INVISIBLESTACKER_invlist,
+	UNI_INSC__MODIFYINGLETTER_invlist,
+	UNI_INSC__NONJOINER_invlist,
+	UNI_INSC__NUKTA_invlist,
+	UNI_INSC__NUMBER_invlist,
+	UNI_INSC__NUMBERJOINER_invlist,
+	UNI_INSC__OTHER_invlist,
+	UNI_INSC__PUREKILLER_invlist,
+	UNI_INSC__REGISTERSHIFTER_invlist,
+	UNI_INSC__SYLLABLEMODIFIER_invlist,
+	UNI_INSC__TONELETTER_invlist,
+	UNI_INSC__TONEMARK_invlist,
+	UNI_INSC__VIRAMA_invlist,
+	UNI_INSC__VISARGA_invlist,
+	UNI_INSC__VOWEL_invlist,
+	UNI_INSC__VOWELDEPENDENT_invlist,
+	UNI_INSC__VOWELINDEPENDENT_invlist,
+	UNI_INSHARADA_invlist,
+	UNI_INSIDDHAM_invlist,
+	UNI_INSINHALA_invlist,
+	UNI_INSOGDIAN_invlist,
+	UNI_INSORASOMPENG_invlist,
+	UNI_INSOYOMBO_invlist,
+	UNI_INSUNDANESE_invlist,
+	UNI_INSYLOTINAGRI_invlist,
+	UNI_INSYRIAC_invlist,
+	UNI_INTAGALOG_invlist,
+	UNI_INTAGBANWA_invlist,
+	UNI_INTAILE_invlist,
+	UNI_INTAITHAM_invlist,
+	UNI_INTAIVIET_invlist,
+	UNI_INTAKRI_invlist,
+	UNI_INTAMIL_invlist,
+	UNI_INTANGUT_invlist,
+	UNI_INTELUGU_invlist,
+	UNI_INTHAANA_invlist,
+	UNI_INTHAI_invlist,
+	UNI_INTIBETAN_invlist,
+	UNI_INTIFINAGH_invlist,
+	UNI_INTIRHUTA_invlist,
+	UNI_INUGARITIC_invlist,
+	UNI_INVAI_invlist,
+	UNI_INVS_invlist,
+	UNI_INWARANGCITI_invlist,
+	UNI_INZANABAZARSQUARE_invlist,
+	UNI_IN__10_invlist,
+	UNI_IN__11_invlist,
+	UNI_IN__1_DOT_1_invlist,
+	UNI_IN__2_invlist,
+	UNI_IN__2_DOT_1_invlist,
+	UNI_IN__3_invlist,
+	UNI_IN__3_DOT_1_invlist,
+	UNI_IN__3_DOT_2_invlist,
+	UNI_IN__4_invlist,
+	UNI_IN__4_DOT_1_invlist,
+	UNI_IN__5_invlist,
+	UNI_IN__5_DOT_1_invlist,
+	UNI_IN__5_DOT_2_invlist,
+	UNI_IN__6_invlist,
+	UNI_IN__6_DOT_1_invlist,
+	UNI_IN__6_DOT_2_invlist,
+	UNI_IN__6_DOT_3_invlist,
+	UNI_IN__7_invlist,
+	UNI_IN__8_invlist,
+	UNI_IN__9_invlist,
+	UNI_IPAEXT_invlist,
+	UNI_ITAL_invlist,
+	UNI_JAMO_invlist,
+	UNI_JAMOEXTA_invlist,
+	UNI_JAMOEXTB_invlist,
+	UNI_JAVA_invlist,
+	UNI_JG__AFRICANFEH_invlist,
+	UNI_JG__AFRICANNOON_invlist,
+	UNI_JG__AFRICANQAF_invlist,
+	UNI_JG__AIN_invlist,
+	UNI_JG__ALAPH_invlist,
+	UNI_JG__ALEF_invlist,
+	UNI_JG__BEH_invlist,
+	UNI_JG__BETH_invlist,
+	UNI_JG__BURUSHASKIYEHBARREE_invlist,
+	UNI_JG__DAL_invlist,
+	UNI_JG__DALATHRISH_invlist,
+	UNI_JG__E_invlist,
+	UNI_JG__FARSIYEH_invlist,
+	UNI_JG__FE_invlist,
+	UNI_JG__FEH_invlist,
+	UNI_JG__FINALSEMKATH_invlist,
+	UNI_JG__GAF_invlist,
+	UNI_JG__GAMAL_invlist,
+	UNI_JG__HAH_invlist,
+	UNI_JG__HAMZAONHEHGOAL_invlist,
+	UNI_JG__HANIFIROHINGYAKINNAYA_invlist,
+	UNI_JG__HANIFIROHINGYAPA_invlist,
+	UNI_JG__HE_invlist,
+	UNI_JG__HEH_invlist,
+	UNI_JG__HEHGOAL_invlist,
+	UNI_JG__HETH_invlist,
+	UNI_JG__KAF_invlist,
+	UNI_JG__KAPH_invlist,
+	UNI_JG__KHAPH_invlist,
+	UNI_JG__KNOTTEDHEH_invlist,
+	UNI_JG__LAM_invlist,
+	UNI_JG__LAMADH_invlist,
+	UNI_JG__MALAYALAMBHA_invlist,
+	UNI_JG__MALAYALAMJA_invlist,
+	UNI_JG__MALAYALAMLLA_invlist,
+	UNI_JG__MALAYALAMLLLA_invlist,
+	UNI_JG__MALAYALAMNGA_invlist,
+	UNI_JG__MALAYALAMNNA_invlist,
+	UNI_JG__MALAYALAMNNNA_invlist,
+	UNI_JG__MALAYALAMNYA_invlist,
+	UNI_JG__MALAYALAMRA_invlist,
+	UNI_JG__MALAYALAMSSA_invlist,
+	UNI_JG__MALAYALAMTTA_invlist,
+	UNI_JG__MANICHAEANALEPH_invlist,
+	UNI_JG__MANICHAEANAYIN_invlist,
+	UNI_JG__MANICHAEANBETH_invlist,
+	UNI_JG__MANICHAEANDALETH_invlist,
+	UNI_JG__MANICHAEANDHAMEDH_invlist,
+	UNI_JG__MANICHAEANFIVE_invlist,
+	UNI_JG__MANICHAEANGIMEL_invlist,
+	UNI_JG__MANICHAEANHETH_invlist,
+	UNI_JG__MANICHAEANHUNDRED_invlist,
+	UNI_JG__MANICHAEANKAPH_invlist,
+	UNI_JG__MANICHAEANLAMEDH_invlist,
+	UNI_JG__MANICHAEANMEM_invlist,
+	UNI_JG__MANICHAEANNUN_invlist,
+	UNI_JG__MANICHAEANONE_invlist,
+	UNI_JG__MANICHAEANPE_invlist,
+	UNI_JG__MANICHAEANQOPH_invlist,
+	UNI_JG__MANICHAEANRESH_invlist,
+	UNI_JG__MANICHAEANSADHE_invlist,
+	UNI_JG__MANICHAEANSAMEKH_invlist,
+	UNI_JG__MANICHAEANTAW_invlist,
+	UNI_JG__MANICHAEANTEN_invlist,
+	UNI_JG__MANICHAEANTETH_invlist,
+	UNI_JG__MANICHAEANTHAMEDH_invlist,
+	UNI_JG__MANICHAEANTWENTY_invlist,
+	UNI_JG__MANICHAEANWAW_invlist,
+	UNI_JG__MANICHAEANYODH_invlist,
+	UNI_JG__MANICHAEANZAYIN_invlist,
+	UNI_JG__MEEM_invlist,
+	UNI_JG__MIM_invlist,
+	UNI_JG__NOJOININGGROUP_invlist,
+	UNI_JG__NOON_invlist,
+	UNI_JG__NUN_invlist,
+	UNI_JG__NYA_invlist,
+	UNI_JG__PE_invlist,
+	UNI_JG__QAF_invlist,
+	UNI_JG__QAPH_invlist,
+	UNI_JG__REH_invlist,
+	UNI_JG__REVERSEDPE_invlist,
+	UNI_JG__ROHINGYAYEH_invlist,
+	UNI_JG__SAD_invlist,
+	UNI_JG__SADHE_invlist,
+	UNI_JG__SEEN_invlist,
+	UNI_JG__SEMKATH_invlist,
+	UNI_JG__SHIN_invlist,
+	UNI_JG__STRAIGHTWAW_invlist,
+	UNI_JG__SWASHKAF_invlist,
+	UNI_JG__SYRIACWAW_invlist,
+	UNI_JG__TAH_invlist,
+	UNI_JG__TAW_invlist,
+	UNI_JG__TEHMARBUTA_invlist,
+	UNI_JG__TETH_invlist,
+	UNI_JG__WAW_invlist,
+	UNI_JG__YEH_invlist,
+	UNI_JG__YEHBARREE_invlist,
+	UNI_JG__YEHWITHTAIL_invlist,
+	UNI_JG__YUDH_invlist,
+	UNI_JG__YUDHHE_invlist,
+	UNI_JG__ZAIN_invlist,
+	UNI_JG__ZHAIN_invlist,
+	UNI_JOINC_invlist,
+	UNI_JT__C_invlist,
+	UNI_JT__D_invlist,
+	UNI_JT__L_invlist,
+	UNI_JT__R_invlist,
+	UNI_JT__T_invlist,
+	UNI_JT__U_invlist,
+	UNI_KALI_invlist,
+	UNI_KANA_invlist,
+	UNI_KANAEXTA_invlist,
+	UNI_KANASUP_invlist,
+	UNI_KANBUN_invlist,
+	UNI_KANGXI_invlist,
+	UNI_KATAKANAEXT_invlist,
+	UNI_KHAR_invlist,
+	UNI_KHMERSYMBOLS_invlist,
+	UNI_KHMR_invlist,
+	UNI_KHOJ_invlist,
+	UNI_KNDA_invlist,
+	UNI_KTHI_invlist,
+	UNI_L_invlist,
+	UNI_LANA_invlist,
+	UNI_LAO_invlist,
+	UNI_LATIN1_invlist,
+	UNI_LATINEXTA_invlist,
+	UNI_LATINEXTADDITIONAL_invlist,
+	UNI_LATINEXTB_invlist,
+	UNI_LATINEXTC_invlist,
+	UNI_LATINEXTD_invlist,
+	UNI_LATINEXTE_invlist,
+	UNI_LATN_invlist,
+	UNI_LB__AI_invlist,
+	UNI_LB__AL_invlist,
+	UNI_LB__B2_invlist,
+	UNI_LB__BA_invlist,
+	UNI_LB__BB_invlist,
+	UNI_LB__BK_invlist,
+	UNI_LB__CB_invlist,
+	UNI_LB__CJ_invlist,
+	UNI_LB__CL_invlist,
+	UNI_LB__CM_invlist,
+	UNI_LB__CP_invlist,
+	UNI_LB__CR_invlist,
+	UNI_LB__EB_invlist,
+	UNI_LB__EM_invlist,
+	UNI_LB__EX_invlist,
+	UNI_LB__GL_invlist,
+	UNI_LB__H2_invlist,
+	UNI_LB__H3_invlist,
+	UNI_LB__HL_invlist,
+	UNI_LB__HY_invlist,
+	UNI_LB__ID_invlist,
+	UNI_LB__IN_invlist,
+	UNI_LB__IS_invlist,
+	UNI_LB__LF_invlist,
+	UNI_LB__NL_invlist,
+	UNI_LB__NS_invlist,
+	UNI_LB__NU_invlist,
+	UNI_LB__OP_invlist,
+	UNI_LB__PO_invlist,
+	UNI_LB__PR_invlist,
+	UNI_LB__QU_invlist,
+	UNI_LB__SA_invlist,
+	UNI_LB__SG_invlist,
+	UNI_LB__SP_invlist,
+	UNI_LB__SY_invlist,
+	UNI_LB__WJ_invlist,
+	UNI_LB__XX_invlist,
+	UNI_LB__ZW_invlist,
+	UNI_LB__ZWJ_invlist,
+	UNI_LEPC_invlist,
+	UNI_LETTERLIKESYMBOLS_invlist,
+	UNI_LIMB_invlist,
+	UNI_LINA_invlist,
+	UNI_LINB_invlist,
+	UNI_LINEARBIDEOGRAMS_invlist,
+	UNI_LINEARBSYLLABARY_invlist,
+	UNI_LISU_invlist,
+	UNI_LM_invlist,
+	UNI_LO_invlist,
+	UNI_LOE_invlist,
+	UNI_LOWERCASELETTER_invlist,
+	UNI_LOWSURROGATES_invlist,
+	UNI_LYCI_invlist,
+	UNI_LYDI_invlist,
+	UNI_M_invlist,
+	UNI_MAHJ_invlist,
+	UNI_MAHJONG_invlist,
+	UNI_MAKA_invlist,
+	UNI_MAND_invlist,
+	UNI_MANI_invlist,
+	UNI_MARC_invlist,
+	UNI_MATH_invlist,
+	UNI_MATHALPHANUM_invlist,
+	UNI_MATHOPERATORS_invlist,
+	UNI_MAYANNUMERALS_invlist,
+	UNI_MC_invlist,
+	UNI_ME_invlist,
+	UNI_MEDF_invlist,
+	UNI_MEETEIMAYEKEXT_invlist,
+	UNI_MEND_invlist,
+	UNI_MERC_invlist,
+	UNI_MERO_invlist,
+	UNI_MIAO_invlist,
+	UNI_MISCARROWS_invlist,
+	UNI_MISCMATHSYMBOLSA_invlist,
+	UNI_MISCMATHSYMBOLSB_invlist,
+	UNI_MISCPICTOGRAPHS_invlist,
+	UNI_MISCSYMBOLS_invlist,
+	UNI_MISCTECHNICAL_invlist,
+	UNI_MLYM_invlist,
+	UNI_MN_invlist,
+	UNI_MODI_invlist,
+	UNI_MODIFIERLETTERS_invlist,
+	UNI_MODIFIERTONELETTERS_invlist,
+	UNI_MONG_invlist,
+	UNI_MONGOLIANSUP_invlist,
+	UNI_MRO_invlist,
+	UNI_MTEI_invlist,
+	UNI_MULT_invlist,
+	UNI_MUSIC_invlist,
+	UNI_MYANMAREXTA_invlist,
+	UNI_MYANMAREXTB_invlist,
+	UNI_MYMR_invlist,
+	UNI_N_invlist,
+	UNI_NARB_invlist,
+	UNI_NB_invlist,
+	UNI_NBAT_invlist,
+	UNI_NEWA_invlist,
+	UNI_NFCQC__M_invlist,
+	UNI_NFCQC__Y_invlist,
+	UNI_NFDQC__Y_invlist,
+	UNI_NFKCQC__N_invlist,
+	UNI_NFKCQC__Y_invlist,
+	UNI_NFKDQC__N_invlist,
+	UNI_NKO_invlist,
+	UNI_NL_invlist,
+	UNI_NO_invlist,
+	UNI_NSHU_invlist,
+	UNI_NT__DI_invlist,
+	UNI_NT__NU_invlist,
+	UNI_NUMBERFORMS_invlist,
+	UNI_NV__0_invlist,
+	UNI_NV__1_invlist,
+	UNI_NV__10_invlist,
+	UNI_NV__100_invlist,
+	UNI_NV__1000_invlist,
+	UNI_NV__10000_invlist,
+	UNI_NV__100000_invlist,
+	UNI_NV__1000000_invlist,
+	UNI_NV__10000000_invlist,
+	UNI_NV__100000000_invlist,
+	UNI_NV__10000000000_invlist,
+	UNI_NV__1000000000000_invlist,
+	UNI_NV__11_invlist,
+	UNI_NV__11_SLASH_12_invlist,
+	UNI_NV__11_SLASH_2_invlist,
+	UNI_NV__12_invlist,
+	UNI_NV__13_invlist,
+	UNI_NV__13_SLASH_2_invlist,
+	UNI_NV__14_invlist,
+	UNI_NV__15_invlist,
+	UNI_NV__15_SLASH_2_invlist,
+	UNI_NV__16_invlist,
+	UNI_NV__17_invlist,
+	UNI_NV__17_SLASH_2_invlist,
+	UNI_NV__18_invlist,
+	UNI_NV__19_invlist,
+	UNI_NV__1_SLASH_10_invlist,
+	UNI_NV__1_SLASH_12_invlist,
+	UNI_NV__1_SLASH_16_invlist,
+	UNI_NV__1_SLASH_160_invlist,
+	UNI_NV__1_SLASH_2_invlist,
+	UNI_NV__1_SLASH_20_invlist,
+	UNI_NV__1_SLASH_3_invlist,
+	UNI_NV__1_SLASH_4_invlist,
+	UNI_NV__1_SLASH_40_invlist,
+	UNI_NV__1_SLASH_5_invlist,
+	UNI_NV__1_SLASH_6_invlist,
+	UNI_NV__1_SLASH_7_invlist,
+	UNI_NV__1_SLASH_8_invlist,
+	UNI_NV__1_SLASH_9_invlist,
+	UNI_NV__2_invlist,
+	UNI_NV__20_invlist,
+	UNI_NV__200_invlist,
+	UNI_NV__2000_invlist,
+	UNI_NV__20000_invlist,
+	UNI_NV__200000_invlist,
+	UNI_NV__20000000_invlist,
+	UNI_NV__21_invlist,
+	UNI_NV__216000_invlist,
+	UNI_NV__22_invlist,
+	UNI_NV__23_invlist,
+	UNI_NV__24_invlist,
+	UNI_NV__25_invlist,
+	UNI_NV__26_invlist,
+	UNI_NV__27_invlist,
+	UNI_NV__28_invlist,
+	UNI_NV__29_invlist,
+	UNI_NV__2_SLASH_3_invlist,
+	UNI_NV__2_SLASH_5_invlist,
+	UNI_NV__3_invlist,
+	UNI_NV__30_invlist,
+	UNI_NV__300_invlist,
+	UNI_NV__3000_invlist,
+	UNI_NV__30000_invlist,
+	UNI_NV__300000_invlist,
+	UNI_NV__31_invlist,
+	UNI_NV__32_invlist,
+	UNI_NV__33_invlist,
+	UNI_NV__34_invlist,
+	UNI_NV__35_invlist,
+	UNI_NV__36_invlist,
+	UNI_NV__37_invlist,
+	UNI_NV__38_invlist,
+	UNI_NV__39_invlist,
+	UNI_NV__3_SLASH_16_invlist,
+	UNI_NV__3_SLASH_2_invlist,
+	UNI_NV__3_SLASH_20_invlist,
+	UNI_NV__3_SLASH_4_invlist,
+	UNI_NV__3_SLASH_5_invlist,
+	UNI_NV__3_SLASH_8_invlist,
+	UNI_NV__3_SLASH_80_invlist,
+	UNI_NV__4_invlist,
+	UNI_NV__40_invlist,
+	UNI_NV__400_invlist,
+	UNI_NV__4000_invlist,
+	UNI_NV__40000_invlist,
+	UNI_NV__400000_invlist,
+	UNI_NV__41_invlist,
+	UNI_NV__42_invlist,
+	UNI_NV__43_invlist,
+	UNI_NV__432000_invlist,
+	UNI_NV__44_invlist,
+	UNI_NV__45_invlist,
+	UNI_NV__46_invlist,
+	UNI_NV__47_invlist,
+	UNI_NV__48_invlist,
+	UNI_NV__49_invlist,
+	UNI_NV__4_SLASH_5_invlist,
+	UNI_NV__5_invlist,
+	UNI_NV__50_invlist,
+	UNI_NV__500_invlist,
+	UNI_NV__5000_invlist,
+	UNI_NV__50000_invlist,
+	UNI_NV__500000_invlist,
+	UNI_NV__5_SLASH_12_invlist,
+	UNI_NV__5_SLASH_2_invlist,
+	UNI_NV__5_SLASH_6_invlist,
+	UNI_NV__5_SLASH_8_invlist,
+	UNI_NV__6_invlist,
+	UNI_NV__60_invlist,
+	UNI_NV__600_invlist,
+	UNI_NV__6000_invlist,
+	UNI_NV__60000_invlist,
+	UNI_NV__600000_invlist,
+	UNI_NV__7_invlist,
+	UNI_NV__70_invlist,
+	UNI_NV__700_invlist,
+	UNI_NV__7000_invlist,
+	UNI_NV__70000_invlist,
+	UNI_NV__700000_invlist,
+	UNI_NV__7_SLASH_12_invlist,
+	UNI_NV__7_SLASH_2_invlist,
+	UNI_NV__7_SLASH_8_invlist,
+	UNI_NV__8_invlist,
+	UNI_NV__80_invlist,
+	UNI_NV__800_invlist,
+	UNI_NV__8000_invlist,
+	UNI_NV__80000_invlist,
+	UNI_NV__800000_invlist,
+	UNI_NV__9_invlist,
+	UNI_NV__90_invlist,
+	UNI_NV__900_invlist,
+	UNI_NV__9000_invlist,
+	UNI_NV__90000_invlist,
+	UNI_NV__900000_invlist,
+	UNI_NV__9_SLASH_2_invlist,
+	UNI_NV__NAN_invlist,
+	UNI_NV___MINUS_1_SLASH_2_invlist,
+	UNI_OCR_invlist,
+	UNI_OGAM_invlist,
+	UNI_OLCK_invlist,
+	UNI_ORKH_invlist,
+	UNI_ORNAMENTALDINGBATS_invlist,
+	UNI_ORYA_invlist,
+	UNI_OSGE_invlist,
+	UNI_OSMA_invlist,
+	UNI_P_invlist,
+	UNI_PALM_invlist,
+	UNI_PATSYN_invlist,
+	UNI_PAUC_invlist,
+	UNI_PC_invlist,
+	UNI_PCM_invlist,
+	UNI_PD_invlist,
+	UNI_PE_invlist,
+	UNI_PERM_invlist,
+	UNI_PF_invlist,
+	UNI_PHAG_invlist,
+	UNI_PHAISTOS_invlist,
+	UNI_PHLI_invlist,
+	UNI_PHLP_invlist,
+	UNI_PHNX_invlist,
+	UNI_PHONETICEXT_invlist,
+	UNI_PHONETICEXTSUP_invlist,
+	UNI_PI_invlist,
+	UNI_PLAYINGCARDS_invlist,
+	UNI_PO_invlist,
+	UNI_POSIXALNUM_invlist,
+	UNI_POSIXALPHA_invlist,
+	UNI_POSIXBLANK_invlist,
+	UNI_POSIXCNTRL_invlist,
+	UNI_POSIXDIGIT_invlist,
+	UNI_POSIXGRAPH_invlist,
+	UNI_POSIXLOWER_invlist,
+	UNI_POSIXPRINT_invlist,
+	UNI_POSIXPUNCT_invlist,
+	UNI_POSIXSPACE_invlist,
+	UNI_POSIXUPPER_invlist,
+	UNI_POSIXWORD_invlist,
+	UNI_POSIXXDIGIT_invlist,
+	UNI_PRTI_invlist,
+	UNI_PS_invlist,
+	UNI_PUA_invlist,
+	UNI_QAAI_invlist,
+	UNI_QMARK_invlist,
+	UNI_RADICAL_invlist,
+	UNI_RI_invlist,
+	UNI_RJNG_invlist,
+	UNI_ROHG_invlist,
+	UNI_RUMI_invlist,
+	UNI_RUNR_invlist,
+	UNI_S_invlist,
+	UNI_SAMR_invlist,
+	UNI_SARB_invlist,
+	UNI_SAUR_invlist,
+	UNI_SB__AT_invlist,
+	UNI_SB__CL_invlist,
+	UNI_SB__EX_invlist,
+	UNI_SB__FO_invlist,
+	UNI_SB__LE_invlist,
+	UNI_SB__LO_invlist,
+	UNI_SB__SC_invlist,
+	UNI_SB__SE_invlist,
+	UNI_SB__SP_invlist,
+	UNI_SB__ST_invlist,
+	UNI_SB__UP_invlist,
+	UNI_SB__XX_invlist,
+	UNI_SC_invlist,
+	UNI_SC__ADLM_invlist,
+	UNI_SC__ARAB_invlist,
+	UNI_SC__ARMN_invlist,
+	UNI_SC__BENG_invlist,
+	UNI_SC__BOPO_invlist,
+	UNI_SC__BUGI_invlist,
+	UNI_SC__BUHD_invlist,
+	UNI_SC__CAKM_invlist,
+	UNI_SC__COPT_invlist,
+	UNI_SC__CPRT_invlist,
+	UNI_SC__CYRL_invlist,
+	UNI_SC__DEVA_invlist,
+	UNI_SC__DOGR_invlist,
+	UNI_SC__DUPL_invlist,
+	UNI_SC__GEOR_invlist,
+	UNI_SC__GLAG_invlist,
+	UNI_SC__GONG_invlist,
+	UNI_SC__GRAN_invlist,
+	UNI_SC__GREK_invlist,
+	UNI_SC__GUJR_invlist,
+	UNI_SC__GURU_invlist,
+	UNI_SC__HAN_invlist,
+	UNI_SC__HANG_invlist,
+	UNI_SC__HANO_invlist,
+	UNI_SC__HIRA_invlist,
+	UNI_SC__JAVA_invlist,
+	UNI_SC__KALI_invlist,
+	UNI_SC__KANA_invlist,
+	UNI_SC__KHOJ_invlist,
+	UNI_SC__KNDA_invlist,
+	UNI_SC__KTHI_invlist,
+	UNI_SC__LATN_invlist,
+	UNI_SC__LIMB_invlist,
+	UNI_SC__LINA_invlist,
+	UNI_SC__LINB_invlist,
+	UNI_SC__MAHJ_invlist,
+	UNI_SC__MAND_invlist,
+	UNI_SC__MANI_invlist,
+	UNI_SC__MLYM_invlist,
+	UNI_SC__MODI_invlist,
+	UNI_SC__MONG_invlist,
+	UNI_SC__MULT_invlist,
+	UNI_SC__MYMR_invlist,
+	UNI_SC__ORYA_invlist,
+	UNI_SC__PERM_invlist,
+	UNI_SC__PHAG_invlist,
+	UNI_SC__PHLP_invlist,
+	UNI_SC__QAAI_invlist,
+	UNI_SC__ROHG_invlist,
+	UNI_SC__SHRD_invlist,
+	UNI_SC__SIND_invlist,
+	UNI_SC__SINH_invlist,
+	UNI_SC__SOGD_invlist,
+	UNI_SC__SYLO_invlist,
+	UNI_SC__SYRC_invlist,
+	UNI_SC__TAGB_invlist,
+	UNI_SC__TAKR_invlist,
+	UNI_SC__TALE_invlist,
+	UNI_SC__TAML_invlist,
+	UNI_SC__TELU_invlist,
+	UNI_SC__TGLG_invlist,
+	UNI_SC__THAA_invlist,
+	UNI_SC__TIRH_invlist,
+	UNI_SC__YI_invlist,
+	UNI_SC__ZYYY_invlist,
+	UNI_SD_invlist,
+	UNI_SGNW_invlist,
+	UNI_SHAW_invlist,
+	UNI_SHORTHANDFORMATCONTROLS_invlist,
+	UNI_SHRD_invlist,
+	UNI_SIDD_invlist,
+	UNI_SIND_invlist,
+	UNI_SINH_invlist,
+	UNI_SINHALAARCHAICNUMBERS_invlist,
+	UNI_SK_invlist,
+	UNI_SM_invlist,
+	UNI_SMALLFORMS_invlist,
+	UNI_SO_invlist,
+	UNI_SOGD_invlist,
+	UNI_SOGO_invlist,
+	UNI_SORA_invlist,
+	UNI_SOYO_invlist,
+	UNI_SPECIALS_invlist,
+	UNI_STERM_invlist,
+	UNI_SUND_invlist,
+	UNI_SUNDANESESUP_invlist,
+	UNI_SUPARROWSA_invlist,
+	UNI_SUPARROWSB_invlist,
+	UNI_SUPARROWSC_invlist,
+	UNI_SUPERANDSUB_invlist,
+	UNI_SUPMATHOPERATORS_invlist,
+	UNI_SUPPUAA_invlist,
+	UNI_SUPPUAB_invlist,
+	UNI_SUPPUNCTUATION_invlist,
+	UNI_SUPSYMBOLSANDPICTOGRAPHS_invlist,
+	UNI_SUTTONSIGNWRITING_invlist,
+	UNI_SYLO_invlist,
+	UNI_SYRC_invlist,
+	UNI_SYRIACSUP_invlist,
+	UNI_TAGB_invlist,
+	UNI_TAGS_invlist,
+	UNI_TAIXUANJING_invlist,
+	UNI_TAKR_invlist,
+	UNI_TALE_invlist,
+	UNI_TALU_invlist,
+	UNI_TAML_invlist,
+	UNI_TANG_invlist,
+	UNI_TANGUTCOMPONENTS_invlist,
+	UNI_TAVT_invlist,
+	UNI_TELU_invlist,
+	UNI_TERM_invlist,
+	UNI_TFNG_invlist,
+	UNI_TGLG_invlist,
+	UNI_THAA_invlist,
+	UNI_THAI_invlist,
+	UNI_TIBT_invlist,
+	UNI_TIRH_invlist,
+	UNI_TITLE_invlist,
+	UNI_TRANSPORTANDMAP_invlist,
+	UNI_UCAS_invlist,
+	UNI_UCASEXT_invlist,
+	UNI_UGAR_invlist,
+	UNI_UIDEO_invlist,
+	UNI_UPPERCASELETTER_invlist,
+	UNI_VAI_invlist,
+	UNI_VEDICEXT_invlist,
+	UNI_VERTICALFORMS_invlist,
+	UNI_VERTSPACE_invlist,
+	UNI_VO__R_invlist,
+	UNI_VO__TR_invlist,
+	UNI_VO__TU_invlist,
+	UNI_VO__U_invlist,
+	UNI_VS_invlist,
+	UNI_VSSUP_invlist,
+	UNI_WARA_invlist,
+	UNI_WB__DQ_invlist,
+	UNI_WB__EB_invlist,
+	UNI_WB__EX_invlist,
+	UNI_WB__EXTEND_invlist,
+	UNI_WB__FO_invlist,
+	UNI_WB__KA_invlist,
+	UNI_WB__LE_invlist,
+	UNI_WB__MB_invlist,
+	UNI_WB__ML_invlist,
+	UNI_WB__MN_invlist,
+	UNI_WB__NL_invlist,
+	UNI_WB__NU_invlist,
+	UNI_WB__SQ_invlist,
+	UNI_WB__WSEGSPACE_invlist,
+	UNI_WB__XX_invlist,
+	UNI_XIDC_invlist,
+	UNI_XIDS_invlist,
+	UNI_XPEO_invlist,
+	UNI_XPOSIXALNUM_invlist,
+	UNI_XPOSIXALPHA_invlist,
+	UNI_XPOSIXBLANK_invlist,
+	UNI_XPOSIXCNTRL_invlist,
+	UNI_XPOSIXDIGIT_invlist,
+	UNI_XPOSIXGRAPH_invlist,
+	UNI_XPOSIXLOWER_invlist,
+	UNI_XPOSIXPRINT_invlist,
+	UNI_XPOSIXPUNCT_invlist,
+	UNI_XPOSIXSPACE_invlist,
+	UNI_XPOSIXUPPER_invlist,
+	UNI_XPOSIXWORD_invlist,
+	UNI_XPOSIXXDIGIT_invlist,
+	UNI_XSUX_invlist,
+	UNI_YI_invlist,
+	UNI_YIJING_invlist,
+	UNI_YIRADICALS_invlist,
+	UNI_YISYLLABLES_invlist,
+	UNI_Z_invlist,
+	UNI_ZANB_invlist,
+	UNI_ZL_invlist,
+	UNI_ZP_invlist,
+	UNI_ZS_invlist,
+	UNI_ZYYY_invlist,
+	UNI_ZZZZ_invlist,
+	UNI__PERL_ANY_FOLDS_invlist,
+	UNI__PERL_CHARNAME_BEGIN_invlist,
+	UNI__PERL_CHARNAME_CONTINUE_invlist,
+	UNI__PERL_FOLDS_TO_MULTI_CHAR_invlist,
+	UNI__PERL_IDCONT_invlist,
+	UNI__PERL_IDSTART_invlist,
+	UNI__PERL_NCHAR_invlist,
+	UNI__PERL_PATWS_invlist,
+	UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist,
+	UNI__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist,
+	UNI__PERL_QUOTEMETA_invlist,
+	UNI__PERL_SURROGATE_invlist
 };
 
-#endif	/* defined(PERL_IN_UTF8_C) */
+
+/* Synonyms for perl properties */
+#define UNI_AHEX   UNI_POSIXXDIGIT
+#define UNI_ALNUM   UNI_XPOSIXALNUM
+#define UNI_ALPHA   UNI_XPOSIXALPHA
+#define UNI_ALPHABETIC   UNI_XPOSIXALPHA
+#define UNI_ASCIIHEXDIGIT   UNI_POSIXXDIGIT
+#define UNI_BASICLATIN   UNI_ASCII
+#define UNI_BLANK   UNI_XPOSIXBLANK
+#define UNI_CC   UNI_XPOSIXCNTRL
+#define UNI_CNTRL   UNI_XPOSIXCNTRL
+#define UNI_CONTROL   UNI_XPOSIXCNTRL
+#define UNI_DECIMALNUMBER   UNI_XPOSIXDIGIT
+#define UNI_DIGIT   UNI_XPOSIXDIGIT
+#define UNI_GRAPH   UNI_XPOSIXGRAPH
+#define UNI_HEX   UNI_XPOSIXXDIGIT
+#define UNI_HEXDIGIT   UNI_XPOSIXXDIGIT
+#define UNI_HORIZSPACE   UNI_XPOSIXBLANK
+#define UNI_LC   UNI_CASEDLETTER
+#define UNI_LL   UNI_LOWERCASELETTER
+#define UNI_LOWER   UNI_XPOSIXLOWER
+#define UNI_LOWERCASE   UNI_XPOSIXLOWER
+#define UNI_LT   UNI_TITLE
+#define UNI_LU   UNI_UPPERCASELETTER
+#define UNI_L_   UNI_CASEDLETTER
+#define UNI_L_AMP_   UNI_CASEDLETTER
+#define UNI_ND   UNI_XPOSIXDIGIT
+#define UNI_PERLSPACE   UNI_POSIXSPACE
+#define UNI_PERLWORD   UNI_POSIXWORD
+#define UNI_PRINT   UNI_XPOSIXPRINT
+#define UNI_SPACE   UNI_XPOSIXSPACE
+#define UNI_SPACEPERL   UNI_XPOSIXSPACE
+#define UNI_TITLECASE   UNI_TITLE
+#define UNI_TITLECASELETTER   UNI_TITLE
+#define UNI_UPPER   UNI_XPOSIXUPPER
+#define UNI_UPPERCASE   UNI_XPOSIXUPPER
+#define UNI_WHITESPACE   UNI_XPOSIXSPACE
+#define UNI_WORD   UNI_XPOSIXWORD
+#define UNI_WSPACE   UNI_XPOSIXSPACE
+#define UNI_XDIGIT   UNI_XPOSIXXDIGIT
+#define UNI_XPERLSPACE   UNI_XPOSIXSPACE
+
+
+#endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
 
 #if defined(PERL_IN_REGEXEC_C)
 
@@ -383147,5 +383421,5 @@ static const U8 WB_table[23][23] = {
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 97779934175e3b7dc8c302762e8e9f342bb828583dd7f862ed85be5906aa939c regen/mk_invlists.pl
+ * 75b68d1ed0aa09110eacc421055c41bb1cc2d7cfbf23455f0a7bc9e2eb662b13 regen/mk_invlists.pl
  * ex: set ro: */

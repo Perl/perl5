@@ -35,7 +35,7 @@ my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
 
 my %keywords;
-my $table_name_prefix = "PL_";
+my $table_name_prefix = "UNI_";
 
 # Matches valid C language enum names: begins with ASCII alphabetic, then any
 # ASCII \w
@@ -193,7 +193,12 @@ sub switch_pound_if ($$;$) {
     }
 
     foreach my $element (@new_pound_if) {
+
+        # regcomp.c is arranged so that the tables are not compiled in
+        # re_comp.c */
+        my $no_xsub = 1 if $element =~ / PERL_IN_ (?: REGCOMP ) _C /x;
         $element = "defined($element)";
+        $element = "($element && ! defined(PERL_IN_XSUB_RE))" if $no_xsub;
     }
     $new_pound_if = join " || ", @new_pound_if;
 
@@ -218,6 +223,78 @@ sub start_charset_pound_if ($;$) {
     print $out_fh "\n" . get_conditional_compile_line_start(shift, shift);
 }
 
+{   # Closure
+    my $fh;
+    my $in_doinit = 0;
+
+    sub output_table_header($$$;$@) {
+
+        # Output to $fh the heading for a table given by the other inputs
+
+        $fh = shift;
+        my ($type,      # typedef of table, like UV, UV*
+            $name,      # name of table
+            $comment,   # Optional comment to put on header line
+            @sizes      # Optional sizes of each array index.  If omitted,
+                        # there is a single index whose size is computed by
+                        # the C compiler.
+            ) = @_;
+
+        $type =~ s/ \s+ $ //x;
+
+        # If a the typedef is a ptr, add in an extra const
+        $type .= " const" if $type =~ / \* $ /x;
+
+        $comment = "" unless defined $comment;
+        $comment = "  /* $comment */" if $comment;
+
+        my $array_declaration;
+        if (@sizes) {
+            $array_declaration = "";
+            $array_declaration .= "[$_]" for @sizes;
+        }
+        else {
+            $array_declaration = '[]';
+        }
+
+        my $declaration = "$type ${name}$array_declaration";
+
+        # Things not matching this are static.  Otherwise, it is an external
+        # constant, initialized only under DOINIT.
+        #
+        # (Currently everything is static)
+        if ($in_file_pound_if !~ / PERL_IN_ (?: ) _C /x) {
+            $in_doinit = 0;
+            print $fh "\nstatic const $declaration = {$comment\n";
+        }
+        else {
+            $in_doinit = 1;
+            print $fh <<EOF;
+
+#    ifndef DOINIT
+
+EXTCONST $declaration;
+
+#    else
+
+EXTCONST $declaration = {$comment
+EOF
+        }
+    }
+
+    sub output_table_trailer() {
+
+        # Close out a table started by output_table_header()
+
+        print $fh "};\n";
+        if ($in_doinit) {
+            print $fh "\n#    endif  /* DOINIT */\n\n";
+            $in_doinit = 0;
+        }
+    }
+} # End closure
+
+
 sub output_invlist ($$;$) {
     my $name = shift;
     my $invlist = shift;     # Reference to inversion list array
@@ -235,17 +312,17 @@ sub output_invlist ($$;$) {
         unshift @$invlist, 0;
         $zero_or_one = 1;
     }
+
+    $charset = "for $charset" if $charset;
+    output_table_header($out_fh, "UV", "${name}_invlist", $charset);
+
     my $count = @$invlist;
-
-    print $out_fh "\nstatic const UV ${name}_invlist[] = {";
-    print $out_fh " /* for $charset */" if $charset;
-    print $out_fh "\n";
-
-    print $out_fh "\t$count,\t/* Number of elements */\n";
-    print $out_fh "\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */\n";
-    print $out_fh "\t", $zero_or_one,
-                  ",\t/* 0 if the list starts at 0;",
-                  "\n\t\t   1 if it starts at the element beyond 0 */\n";
+    print $out_fh <<EOF;
+\t$count,\t/* Number of elements */
+\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */
+\t$zero_or_one,\t/* 0 if the list starts at 0;
+\t\t   1 if it starts at the element beyond 0 */
+EOF
 
     # The main body are the UVs passed in to this routine.  Do the final
     # element separately
@@ -255,7 +332,7 @@ sub output_invlist ($$;$) {
         print $out_fh "\n";
     }
 
-    print $out_fh "};\n";
+    output_table_trailer();
 }
 
 sub output_invmap ($$$$$$$) {
@@ -619,7 +696,9 @@ sub output_invmap ($$$$$$$) {
             # Output each aux table.
             foreach my $table_number (@sorted_table_list) {
                 my $table = $inverted_mults{$table_number};
-                print $out_fh "\nstatic const $aux_declaration_type $name_prefix$aux_table_prefix$table_number\[] = {\n";
+                output_table_header($out_fh,
+                                       $aux_declaration_type,
+                                       "$name_prefix$aux_table_prefix$table_number");
 
                 # Earlier, we joined the elements of this table together with a comma
                 my @elements = split ",", $table;
@@ -634,30 +713,36 @@ sub output_invmap ($$$$$$$) {
                         print $out_fh "\t${name_prefix}$elements[$i]";
                     }
                 }
-                print $out_fh "\n};\n";
+
+                print $out_fh "\n";
+                output_table_trailer();
             }
 
             # Output the table that is indexed by the absolute value of the
             # aux table enum and contains pointers to the tables output just
             # above
-            print $out_fh "\nstatic const $aux_declaration_type * const ${name_prefix}${aux_table_prefix}ptrs\[] = {\n";
+            output_table_header($out_fh, "$aux_declaration_type *",
+                                   "${name_prefix}${aux_table_prefix}ptrs");
             print $out_fh "\tNULL,\t/* Placeholder */\n";
             for my $i (1 .. @sorted_table_list) {
                 print $out_fh  ",\n" if $i > 1;
                 print $out_fh  "\t$name_prefix$aux_table_prefix$i";
             }
-            print $out_fh "\n};\n";
+            print $out_fh "\n";
+            output_table_trailer();
 
             print $out_fh
               "\n/* Parallel table to the above, giving the number of elements"
             . " in each table\n * pointed to */\n";
-            print $out_fh "static const U8 ${name_prefix}${aux_table_prefix}lengths\[] = {\n";
+            output_table_header($out_fh, "U8",
+                                   "${name_prefix}${aux_table_prefix}lengths");
             print $out_fh "\t0,\t/* Placeholder */\n";
             for my $i (1 .. @sorted_table_list) {
                 print $out_fh  ",\n" if $i > 1;
                 print $out_fh  "\t$aux_counts[$i]\t/* $name_prefix$aux_table_prefix$i */";
             }
-            print $out_fh "\n};\n";
+            print $out_fh "\n";
+            output_table_trailer();
         } # End of outputting the auxiliary and associated tables
 
         # The scx property used in regexec.c needs a specialized table which
@@ -709,7 +794,7 @@ sub output_invmap ($$$$$$$) {
           . " code point for that\n * script; 0 if the script has multiple"
           . " digit sequences.  Scripts without a\n * digit sequence use"
           . " ASCII [0-9], hence are marked '0' */\n";
-            print $out_fh "static const UV script_zeros[] = {\n";
+            output_table_header($out_fh, "UV", "script_zeros");
             for my $i (0 .. @script_zeros - 1) {
                 my $code_point = $script_zeros[$i];
                 if (defined $code_point) {
@@ -727,7 +812,7 @@ sub output_invmap ($$$$$$$) {
                 print $out_fh "\t/* $enum_list[$i] */";
                 print $out_fh "\n";
             }
-            print $out_fh "};\n";
+            output_table_trailer();
         } # End of special handling of scx
     }
     else {
@@ -739,9 +824,10 @@ sub output_invmap ($$$$$$$) {
                                              && $count;
 
     # Now output the inversion map proper
-    print $out_fh "\nstatic const $invmap_declaration_type ${name}_invmap[] = {";
-    print $out_fh " /* for $charset */" if $charset;
-    print $out_fh "\n";
+    $charset = "for $charset" if $charset;
+    output_table_header($out_fh, $invmap_declaration_type,
+                                    "${name}_invmap",
+                                    $charset);
 
     # The main body are the scalars passed in to this routine.
     for my $i (0 .. $count - 1) {
@@ -760,7 +846,7 @@ sub output_invmap ($$$$$$$) {
         print $out_fh "," if $i < $count - 1;
         print $out_fh  "\n";
     }
-    print $out_fh "};\n";
+    output_table_trailer();
 }
 
 sub mk_invlist_from_sorted_cp_list {
@@ -1080,7 +1166,7 @@ sub output_table_common {
         $spacers[$i] = " " x (length($names_ref->[$i]) - $column_width);
     }
 
-    print $out_fh "\nstatic const $table_type ${property}_table[$size][$size] = {\n";
+    output_table_header($out_fh, $table_type, "${property}_table", undef, $size, $size);
 
     # Calculate the column heading line
     my $header_line = "/* "
@@ -1157,7 +1243,7 @@ sub output_table_common {
         print $out_fh "\n";
     }
 
-    print $out_fh "};\n";
+    output_table_trailer();
 }
 
 sub output_GCB_table() {
@@ -2202,7 +2288,7 @@ sub sanitize_name ($) {
     return $sanitized;
 }
 
-switch_pound_if ('ALL', 'PERL_IN_UTF8_C');
+switch_pound_if ('ALL', 'PERL_IN_REGCOMP_C');
 
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
@@ -2796,7 +2882,7 @@ foreach my $prop (@props) {
             }
         }
 
-        switch_pound_if ($prop_name, 'PERL_IN_UTF8_C');
+        switch_pound_if ($prop_name, 'PERL_IN_REGCOMP_C');
         start_charset_pound_if($charset, 1) unless $same_in_all_code_pages;
 
         output_invlist($prop_name, \@invlist, ($same_in_all_code_pages)
@@ -2813,7 +2899,7 @@ foreach my $prop (@props) {
     }
 }
 
-switch_pound_if ('binary_property_tables', 'PERL_IN_UTF8_C');
+switch_pound_if ('binary_property_tables', 'PERL_IN_REGCOMP_C');
 
 print $out_fh "\nconst char * deprecated_property_msgs[] = {\n\t";
 print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
@@ -2855,14 +2941,22 @@ print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 
-print $out_fh "\n/* Synonyms for perl properties */\n";
-print $out_fh join "\n", @perl_prop_synonyms, "\n";
-
-print $out_fh "\nstatic const UV * const PL_uni_prop_ptrs\[] = {\n";
+output_table_header($out_fh, "UV *", "uni_prop_ptrs");
 print $out_fh "\tNULL,\t/* Placeholder */\n\t";
+print $out_fh "\t";
 print $out_fh join ",\n\t", @invlist_names;
 print $out_fh "\n";
-print $out_fh "};\n";
+
+output_table_trailer();
+
+print $out_fh join "\n", "\n",
+                         #'#    ifdef DOINIT',
+                         #"\n",
+                         "/* Synonyms for perl properties */",
+                         @perl_prop_synonyms,
+                         #"\n",
+                         #"#    endif  /* DOINIT */",
+                         "\n";
 
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
 
