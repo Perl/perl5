@@ -27,7 +27,7 @@ our @EXPORT_OK = qw(
 
 our ($canonical, $forgive_me);
 
-our $VERSION = '3.11';
+our $VERSION = '3.12';
 
 our $recursion_limit;
 our $recursion_limit_hash;

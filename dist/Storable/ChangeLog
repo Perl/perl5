@@ -1,3 +1,7 @@
+unreleased
+    version 3.12
+        * (perl #133411) don't probe for stack limits with -Dusecrosscompile
+
 2018-04-27 20:40:00 xsawyerx
     version 3.11
         * Fix Strawberry Perl build failures.
