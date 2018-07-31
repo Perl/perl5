@@ -21562,12 +21562,13 @@ Perl_init_uniprops(pTHX)
 }
 
 SV *
-Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const bool to_fold, bool * invert)
+Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
+                                const bool to_fold, bool * invert)
 {
-    /* Parse the interior meat of \p{} passed to this in 'name' with length 'len',
-     * and return an inversion list if a property with 'name' is found, or NULL
-     * if not.  'name' point to the input with leading and trailing space trimmed.
-     * 'to_fold' indicates if /i is in effect.
+    /* Parse the interior meat of \p{} passed to this in 'name' with length
+     * 'name_len', and return an inversion list if a property with 'name' is
+     * found, or NULL if not.  'name' point to the input with leading and
+     * trailing space trimmed.  'to_fold' indicates if /i is in effect.
      *
      * When the return is an inversion list, '*invert' will be set to a boolean
      * indicating if it should be inverted or not
@@ -21593,11 +21594,11 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
     PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
     /* The input will be modified into 'lookup_name' */
-    Newx(lookup_name, len, char);
+    Newx(lookup_name, name_len, char);
     SAVEFREEPV(lookup_name);
 
     /* Parse the input. */
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < name_len; i++) {
         char cur = name[i];
 
         /* These characters can be freely ignored in most situations.  Later it
@@ -21620,7 +21621,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
          *
          * But a single colon is a synonym for '=' */
         if (cur == ':') {
-            if (i < len - 1 && name[i+1] == ':') {
+            if (i < name_len - 1 && name[i+1] == ':') {
                 return NULL;
             }
             cur = '=';
@@ -21644,7 +21645,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
 
         /* Space immediately after the '=' is ignored */
         i++;
-        for (; i < len; i++) {
+        for (; i < name_len; i++) {
             if (! isSPACE(name[i])) {
                 break;
             }
@@ -21653,7 +21654,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         /* Certain properties need special handling.  They may optionally be
          * prefixed by 'is'.  Ignore that prefix for the purposes of checking
          * if this is one of those properties */
-        if (memBEGINPs(lookup_name, len, "is")) {
+        if (memBEGINPs(lookup_name, name_len, "is")) {
             lookup_offset = 2;
         }
 
@@ -21698,7 +21699,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
              * signify an exponent, and it is still a number with stricter
              * rules.  So look for an alpha that signifys not-strict */
             stricter = TRUE;
-            for (k = i; k < len; k++) {
+            for (k = i; k < name_len; k++) {
                 if (   isALPHA(name[k])
                     && (! is_nv_type || ! isALPHA_FOLD_EQ(name[k], 'E')))
                 {
@@ -21723,7 +21724,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
             /* Skip leading zeros including single underscores separating the
              * zeros, or between the final leading zero and the first other
              * digit */
-            for (; i < len - 1; i++) {
+            for (; i < name_len - 1; i++) {
                 if (   name[i] != '0'
                     && (name[i] != '_' || ! isDIGIT(name[i+1])))
                 {
@@ -21752,7 +21753,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
     /* Here, we have either finished the property, or are positioned to parse
      * the remainder, and we know if stricter rules apply.  Finish out, if not
      * already done */
-    for (; i < len; i++) {
+    for (; i < name_len; i++) {
         char cur = name[i];
 
         /* In all instances, case differences are ignored, and we normalize to
@@ -21766,7 +21767,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
          * separates two digits */
         if (cur == '_') {
             if (    stricter
-                && (     i == 0 || (int) i == equals_pos || i == len- 1
+                && (     i == 0 || (int) i == equals_pos || i == name_len- 1
                     || ! isDIGIT(name[i-1]) || ! isDIGIT(name[i+1])))
             {
                 lookup_name[j++] = '_';
@@ -21789,7 +21790,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         lookup_name[j++] = cur;
 
         /* Unless this is a non-trailing slash, we are done with it */
-        if (i >= len - 1 || cur != '/') {
+        if (i >= name_len - 1 || cur != '/') {
             continue;
         }
 
@@ -21802,12 +21803,12 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
          * '/', as that won't match anything anyway */
         if (is_nv_type) {
             i++;
-            if (i < len && name[i] == '+') {
+            if (i < name_len && name[i] == '+') {
                 i++;
             }
 
             /* Skip leading zeros including underscores separating digits */
-            for (; i < len - 1; i++) {
+            for (; i < name_len - 1; i++) {
                 if (   name[i] != '0'
                     && (name[i] != '_' || ! isDIGIT(name[i+1])))
                 {
@@ -21827,18 +21828,20 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
      * different from without the underscores.  */
     if (  (   UNLIKELY(memEQs(lookup_name, j, "l"))
            || UNLIKELY(memEQs(lookup_name, j, "gc=l")))
-        && UNLIKELY(name[len-1] == '_'))
+        && UNLIKELY(name[name_len-1] == '_'))
     {
         lookup_name[j++] = '&';
     }
-    else if (len > 2 && name[0] == 'I' && (   name[1] == 'n' || name[1] == 's'))
+    else if (name_len > 2 && name[0] == 'I' && (   name[1] == 'n'
+                                                || name[1] == 's'))
     {
 
         /* Also, if the original input began with 'In' or 'Is', it could be a
          * subroutine call instead of a property names, which currently isn't
          * handled by this function.  Subroutine calls can't happen if there is
          * an '=' in the name */
-        if (equals_pos < 0 && get_cvn_flags(name, len, GV_NOTQUAL) != NULL) {
+        if (equals_pos < 0 && get_cvn_flags(name, name_len, GV_NOTQUAL) != NULL)
+        {
             return NULL;
         }
 
@@ -22038,7 +22041,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
         table_index %= MAX_UNI_KEYWORD_INDEX;
         Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
                 "Use of '%.*s' in \\p{} or \\P{} is deprecated because: %s",
-                (int) len, name, deprecated_property_msgs[warning_offset]);
+                (int) name_len, name, deprecated_property_msgs[warning_offset]);
     }
 
     /* In a few properties, a different property is used under /i.  These are

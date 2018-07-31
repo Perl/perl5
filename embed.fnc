@@ -2508,7 +2508,7 @@ EnsR	|int	|edit_distance	|NN const UV *src		    \
 				|const STRLEN y			    \
 				|const SSize_t maxDistance
 EXp	|SV *	|parse_uniprop_string|NN const char * const name	   \
-				     |const Size_t len			   \
+				     |const Size_t name_len		   \
 				     |const bool to_fold		   \
 				     |NN bool * invert
 #  ifdef DEBUGGING
