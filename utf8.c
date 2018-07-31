@@ -5755,8 +5755,8 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
     }
 
     return utf8_to_uvchr_buf(s,
-                             s + my_strnlen((char *) s, UTF8_MAXBYTES),
-                            retlen);
+                             s + my_strnlen((char *) s, UTF8SKIP(s)),
+                             retlen);
 }
 
 /*
