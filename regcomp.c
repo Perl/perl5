@@ -21604,13 +21604,13 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         /* These characters can be freely ignored in most situations.  Later it
          * may turn out we shouldn't have ignored them, and we have to reparse,
          * but we don't have enough information yet to make that decision */
-        if (cur == '-' || cur == '_' || isSPACE(cur)) {
+        if (cur == '-' || cur == '_' || isSPACE_A(cur)) {
             continue;
         }
 
         /* Case differences are also ignored.  Our lookup routine assumes
          * everything is lowercase */
-        if (isUPPER(cur)) {
+        if (isUPPER_A(cur)) {
             lookup_name[j++] = toLOWER(cur);
             continue;
         }
@@ -21646,7 +21646,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         /* Space immediately after the '=' is ignored */
         i++;
         for (; i < name_len; i++) {
-            if (! isSPACE(name[i])) {
+            if (! isSPACE_A(name[i])) {
                 break;
             }
         }
@@ -21700,7 +21700,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
              * rules.  So look for an alpha that signifys not-strict */
             stricter = TRUE;
             for (k = i; k < name_len; k++) {
-                if (   isALPHA(name[k])
+                if (   isALPHA_A(name[k])
                     && (! is_nv_type || ! isALPHA_FOLD_EQ(name[k], 'E')))
                 {
                     stricter = FALSE;
@@ -21726,7 +21726,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
              * digit */
             for (; i < name_len - 1; i++) {
                 if (   name[i] != '0'
-                    && (name[i] != '_' || ! isDIGIT(name[i+1])))
+                    && (name[i] != '_' || ! isDIGIT_A(name[i+1])))
                 {
                     break;
                 }
@@ -21758,7 +21758,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
 
         /* In all instances, case differences are ignored, and we normalize to
          * lowercase */
-        if (isUPPER(cur)) {
+        if (isUPPER_A(cur)) {
             lookup_name[j++] = toLOWER(cur);
             continue;
         }
@@ -21768,7 +21768,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         if (cur == '_') {
             if (    stricter
                 && (     i == 0 || (int) i == equals_pos || i == name_len- 1
-                    || ! isDIGIT(name[i-1]) || ! isDIGIT(name[i+1])))
+                    || ! isDIGIT_A(name[i-1]) || ! isDIGIT_A(name[i+1])))
             {
                 lookup_name[j++] = '_';
             }
@@ -21783,7 +21783,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         /* XXX Bug in documentation.  It says white space skipped adjacent to
          * non-word char.  Maybe we should, but shouldn't skip it next to a dot
          * in a number */
-        if (isSPACE(cur) && ! stricter) {
+        if (isSPACE_A(cur) && ! stricter) {
             continue;
         }
 
@@ -21810,7 +21810,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
             /* Skip leading zeros including underscores separating digits */
             for (; i < name_len - 1; i++) {
                 if (   name[i] != '0'
-                    && (name[i] != '_' || ! isDIGIT(name[i+1])))
+                    && (name[i] != '_' || ! isDIGIT_A(name[i+1])))
                 {
                     break;
                 }
