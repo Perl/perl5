@@ -3950,7 +3950,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
 
             /* Special case these two characters, as what normally gets
              * returned under locale doesn't work */
-            if (memEQs((char *) p, UTF8SKIP(p), CAP_SHARP_S))
+            if (memBEGINs((char *) p, e - p, CAP_SHARP_S))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
@@ -3960,7 +3960,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
             }
             else
 #endif
-                 if (memEQs((char *) p, UTF8SKIP(p), LONG_S_T))
+                 if (memBEGINs((char *) p, e - p, LONG_S_T))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
@@ -3979,7 +3979,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
              * 255/256 boundary which is forbidden under /l, and so the code
              * wouldn't catch that they are equivalent (which they are only in
              * this release) */
-            else if (memEQs((char *) p, UTF8SKIP(p), DOTTED_I)) {
+            else if (memBEGINs((char *) p, e - p, DOTTED_I)) {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
                               "Can't do fc(\"\\x{0130}\") on non-UTF-8 locale; "
