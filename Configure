@@ -5783,7 +5783,7 @@ $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs > /dev/null 
 compile_ok='
 mc_file=$1;
 shift;
-$cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs;'
+$cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs > /dev/null 2>&1;'
 
 : stub, used only to satisfy other units
 i_stdlib='define'
