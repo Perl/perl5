@@ -6477,7 +6477,17 @@ expression, but with an empty argument list, like this:
 #ifdef USE_QUADMATH
 #  define Perl_strtod(s, e) strtoflt128(s, e)
 #elif defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
-#  if defined(HAS_STRTOLD)
+#  if defined(__MINGW64_VERSION_MAJOR) && defined(HAS_STRTOLD)
+      /***********************************************
+       We are unable to use strtold because of
+        https://sourceforge.net/p/mingw-w64/bugs/711/
+        &
+        https://sourceforge.net/p/mingw-w64/bugs/725/
+
+       but __mingw_strtold is fine.
+      ***********************************************/
+#    define Perl_strtod(s, e) __mingw_strtold(s, e)
+#  elif defined(HAS_STRTOLD)
 #    define Perl_strtod(s, e) strtold(s, e)
 #  elif defined(HAS_STRTOD)
 #    define Perl_strtod(s, e) (NV)strtod(s, e) /* Unavoidable loss. */
