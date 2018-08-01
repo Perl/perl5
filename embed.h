@@ -1653,11 +1653,6 @@
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #    endif
 #  endif
-#  if !defined(USE_QUADMATH)
-#    if defined(PERL_IN_NUMERIC_C)
-#define mulexp10		S_mulexp10
-#    endif
-#  endif
 #  if !defined(UV_IS_QUAD)
 #    if defined(PERL_IN_UTF8_C)
 #define is_utf8_cp_above_31_bits	S_is_utf8_cp_above_31_bits

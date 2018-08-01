@@ -2879,12 +2879,6 @@ pn	|Malloc_t	|mem_log_realloc	|const UV n|const UV typesize|NN const char *type_
 pn	|Malloc_t	|mem_log_free	|Malloc_t oldalloc|NN const char *filename|const int linenumber|NN const char *funcname
 #endif
 
-#if defined(PERL_IN_NUMERIC_C)
-#ifndef USE_QUADMATH
-sn	|NV|mulexp10	|NV value|I32 exponent
-#endif
-#endif
-
 #if defined(PERL_IN_UTF8_C)
 sR	|HV *	|new_msg_hv |NN const char * const message		    \
 			    |U32 categories				    \

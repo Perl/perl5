@@ -1145,7 +1145,7 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
     return TRUE;
 }
 
-#ifndef USE_QUADMATH
+#ifndef Perl_strtod
 STATIC NV
 S_mulexp10(NV value, I32 exponent)
 {
@@ -1241,9 +1241,9 @@ S_mulexp10(NV value, I32 exponent)
     }
     return negative ? value / result : value * result;
 }
-#endif /* #ifndef USE_QUADMATH */
+#endif /* #ifndef Perl_strtod */
 
-#ifdef USE_QUADMATH
+#ifdef Perl_strtod
 #  define ATOF(s, x) my_atof2(s, &x)
 #  else
 #  define ATOF(s, x) Perl_atof2(s, x)
@@ -1406,13 +1406,13 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
 {
     const char* s = orig;
     NV result[3] = {0.0, 0.0, 0.0};
-#if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
+#if defined(USE_PERL_ATOF) || defined(Perl_strtod)
     const char* send = s + ((len != 0)
                            ? len
                            : strlen(orig)); /* one past the last */
     bool negative = 0;
 #endif
-#if defined(USE_PERL_ATOF) && !defined(USE_QUADMATH)
+#if defined(USE_PERL_ATOF) && !defined(Perl_strtod)
     UV accumulator[2] = {0,0};	/* before/after dp */
     bool seen_digit = 0;
     I32 exp_adjust[2] = {0,0};
@@ -1425,7 +1425,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
     I32 sig_digits = 0; /* noof significant digits seen so far */
 #endif
 
-#if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
+#if defined(USE_PERL_ATOF) || defined(Perl_strtod)
     PERL_ARGS_ASSERT_MY_ATOF3;
 
     /* leading whitespace */
@@ -1442,7 +1442,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
     }
 #endif
 
-#ifdef USE_QUADMATH
+#ifdef Perl_strtod
     {
         char* endp;
         char* copy = NULL;
@@ -1460,7 +1460,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
             s = copy + (s - orig);
         }
 
-        result[2] = strtoflt128(s, &endp);
+        result[2] = Perl_strtod(s, &endp);
 
         /* If we created a copy, 'endp' is in terms of that.  Convert back to
          * the original */
