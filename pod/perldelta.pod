@@ -356,9 +356,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+=over
+
+=item *
+
+C<sleep()> with warnings enabled for a C<USE_IMP_SYS> build no longer
+warns about the sleep timeout being too large.  [perl #133376]
+
+=back
 
 =back
 
@@ -389,7 +396,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The new in-place editing code no longer leaks directory handles.  [perl
+#133314]
 
 =back
 
