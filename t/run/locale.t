@@ -438,6 +438,7 @@ EOF
 EOF
                 "1,5\n2,5", { stderr => 'devnull' }, "Can do math when radix is a comma"); # [perl 115800]
 
+          SKIP: {
             unless ($have_strtod) {
                 skip("no strtod()", 1);
             }
@@ -451,6 +452,7 @@ EOF
 EOF
                 "1.5", { stderr => 'devnull' }, "POSIX::strtod() uses underlying locale");
             }
+          }
         }
     }
 
