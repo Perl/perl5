@@ -181,7 +181,7 @@ SKIP: {
     }
 
     # we're just checking that strtold works, not how accurate it is
-    ($n, $x) = &POSIX::strtod('2.718_ISH');
+    ($n, $x) = &POSIX::strtold('2.718_ISH');
     cmp_ok(abs("2.718" - $n), '<', 1e-6, 'strtold works');
     is($x, 4, 'strtold works');
 
