@@ -1079,7 +1079,7 @@ EXTERN_C int usleep(unsigned int);
 #  define saferealloc Perl_realloc
 #  define safefree    Perl_mfree
 #  define CHECK_MALLOC_TOO_LATE_FOR_(code)	STMT_START {		\
-	if (!PL_tainting && MallocCfg_ptr[MallocCfg_cfg_env_read])	\
+	if (!TAINTING_get && MallocCfg_ptr[MallocCfg_cfg_env_read])	\
 		code;							\
     } STMT_END
 #  define CHECK_MALLOC_TOO_LATE_FOR(ch)				\
