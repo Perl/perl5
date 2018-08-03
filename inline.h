@@ -1802,7 +1802,7 @@ S_utf8n_to_uvchr_msgs(const U8 *s,
 
     const U8 * const s0 = s;
     const U8 * send = s0 + curlen;
-    UV uv;
+    UV uv = 0;      /* The 0 silences some stupid compilers */
     UV state = 0;
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
