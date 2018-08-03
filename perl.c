@@ -2279,7 +2279,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
        This could possibly be wasteful if PERL_INTERNAL_RAND_SEED is invalid,
        but avoids duplicating the logic from perl_construct().
     */
-    if (PL_tainting &&
+    if (TAINT_get &&
         PerlProc_getuid() == PerlProc_geteuid() &&
         PerlProc_getgid() == PerlProc_getegid()) {
         Perl_drand48_init_r(&PL_internal_random_state, seed());
