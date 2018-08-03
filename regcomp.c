@@ -17006,7 +17006,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     const char * const colon_colon = "::";
                     bool invert;
 
-                    SV* invlist;
+                    SV* prop_definition;
 
                     /* Temporary workaround for [perl #133136].  For this
                     * precise input that is in the .t that is failing, load
@@ -17021,8 +17021,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     {
                         require_pv("utf8.pm");
                     }
-                    invlist = parse_uniprop_string(name, n, FOLD, &invert);
-                    if (invlist) {
+                    prop_definition = parse_uniprop_string(name, n, FOLD, &invert);
+                    if (prop_definition) {
                         if (invert) {
                             value ^= 'P' ^ 'p';
                         }
@@ -17030,7 +17030,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     else {
 
                     /* Try to get the definition of the property into
-                     * <invlist>.  If /i is in effect, the effective property
+                     * <prop_definition>.  If /i is in effect, the effective property
                      * will have its name be <__NAME_i>.  The design is
                      * discussed in commit
                      * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
@@ -17064,7 +17064,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                              NULL, /* No inversion list */
                                              &swash_init_flags
                                             );
-                    if (! swash || ! (invlist = _get_swash_invlist(swash))) {
+                    if (! swash || ! (prop_definition = _get_swash_invlist(swash))) {
                         HV* curpkg = (IN_PERL_COMPILETIME)
                                       ? PL_curstash
                                       : CopSTASH(PL_curcop);
@@ -17153,16 +17153,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         }
                     }
                     }
-                    if (invlist) {
+                    if (prop_definition) {
                         if (! (has_runtime_dependency
                                                 & HAS_USER_DEFINED_PROPERTY) &&
                             /* We warn on matching an above-Unicode code point
                              * if the match would return true, except don't
                              * warn for \p{All}, which has exactly one element
                              * = 0 */
-                            (_invlist_contains_cp(invlist, 0x110000)
-                                && (! (_invlist_len(invlist) == 1
-                                       && *invlist_array(invlist) == 0))))
+                            (_invlist_contains_cp(prop_definition, 0x110000)
+                                && (! (_invlist_len(prop_definition) == 1
+                                       && *invlist_array(prop_definition) == 0))))
                         {
                             warn_super = TRUE;
                         }
@@ -17170,22 +17170,22 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         /* Invert if asking for the complement */
                         if (value == 'P') {
 			    _invlist_union_complement_2nd(properties,
-                                                          invlist,
+                                                          prop_definition,
                                                           &properties);
 
                             /* The swash can't be used as-is, because we've
 			     * inverted things; delay removing it to here after
 			     * have copied its invlist above */
                             if (! swash) {
-                                SvREFCNT_dec_NN(invlist);
+                                SvREFCNT_dec_NN(prop_definition);
                             }
                             SvREFCNT_dec(swash);
                             swash = NULL;
                         }
                         else {
-                            _invlist_union(properties, invlist, &properties);
+                            _invlist_union(properties, prop_definition, &properties);
                             if (! swash) {
-                                SvREFCNT_dec_NN(invlist);
+                                SvREFCNT_dec_NN(prop_definition);
                             }
 			}
                     }
