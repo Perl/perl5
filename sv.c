@@ -791,9 +791,6 @@ Perl_sv_free_arenas(pTHX)
   are decremented to point at the unused 'ghost' memory, knowing that
   the pointers are used with offsets to the real memory.
 
-
-=head1 SV-Body Allocation
-
 =cut
 
 Allocation of SV-bodies is similar to SV-heads, differing as follows;
