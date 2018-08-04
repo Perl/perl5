@@ -1063,7 +1063,7 @@ C<&utf8::Any> must be the last line in the definition.
 Intersection is used generally for getting the common characters matched
 by two (or more) classes.  It's important to remember not to use C<"&"> for
 the first set; that would be intersecting with nothing, resulting in an
-empty set.
+empty set.  (Similarly using C<"-"> for the first set does nothing).
 
 Unlike non-user-defined C<\p{}> property matches, no warning is ever
 generated if these properties are matched against a non-Unicode code
