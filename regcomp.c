@@ -16747,6 +16747,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
 
                     RExC_parse++;
+
+                    /* White space is allowed adjacent to the braces and after
+                     * any '^', even when not under /x */
                     while (isSPACE(*RExC_parse)) {
                          RExC_parse++;
 		    }
@@ -16973,7 +16976,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             }
 			}
                     }
-                }
+                } /* End of actually getting the values in pass 2 */
+
 		RExC_parse = e + 1;
                 namedclass = ANYOF_UNIPROP;  /* no official name, but it's
                                                 named */
