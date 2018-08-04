@@ -1662,7 +1662,7 @@ Perl_is_utf8_char(const U8 *s)
 
     /* Assumes we have enough space, which is why this is deprecated.  But the
      * strnlen() makes it safe for the common case of NUL-terminated strings */
-    return isUTF8_CHAR(s, s + strnlen((char *) s, UTF8SKIP(s)));
+    return isUTF8_CHAR(s, s + my_strnlen((char *) s, UTF8SKIP(s)));
 }
 
 /*
