@@ -6272,8 +6272,10 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 /*
 =for apidoc sv_insert
 
-Inserts a string at the specified offset/length within the SV.  Similar to
-the Perl C<substr()> function.  Handles get magic.
+Inserts and/or replaces a string at the specified offset/length within the SV.
+Similar to the Perl C<substr()> function, with C<littlelen> bytes starting at
+C<little> replacing C<len> bytes of the string in C<bigstr> starting at
+C<offset>.  Handles get magic.
 
 =for apidoc sv_insert_flags
 
