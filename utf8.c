@@ -1365,7 +1365,8 @@ C<UTF8_DISALLOW_NONCHAR> or the C<UTF8_WARN_NONCHAR> flags.
 =item C<UTF8_GOT_NON_CONTINUATION>
 
 The input sequence was malformed in that a non-continuation type byte was found
-in a position where only a continuation type one should be.
+in a position where only a continuation type one should be.  See also
+L</C<UTF8_GOT_SHORT>>.
 
 =item C<UTF8_GOT_OVERFLOW>
 
@@ -1377,6 +1378,34 @@ representable in the number of bits available in an IV on the current platform.
 The input sequence was malformed in that C<curlen> is smaller than required for
 a complete sequence.  In other words, the input is for a partial character
 sequence.
+
+
+C<UTF8_GOT_SHORT> and C<UTF8_GOT_NON_CONTINUATION> both indicate a too short
+sequence.  The difference is that C<UTF8_GOT_NON_CONTINUATION> indicates always
+that there is an error, while C<UTF8_GOT_SHORT> means that an incomplete
+sequence was looked at.   If no other flags are present, it means that the
+sequence was valid as far as it went.  Depending on the application, this could
+mean one of three things:
+
+=over
+
+=item *
+
+The C<curlen> length parameter passed in was too small, and the function was
+prevented from examining all the necessary bytes.
+
+=item *
+
+The buffer being looked at is based on reading data, and the data received so
+far stopped in the middle of a character, so that the next read will
+read the remainder of this character.  (It is up to the caller to deal with the
+split bytes somehow.)
+
+=item *
+
+This is a real error, and the partial sequence is all we're going to get.
+
+=back
 
 =item C<UTF8_GOT_SUPER>
 
