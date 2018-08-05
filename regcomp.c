@@ -12491,10 +12491,10 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
             if (node_p) {
                 /* Convert to notation the rest of the code understands */
-                sv_catpv(substitute_parse, "\\x{");
+                sv_catpvs(substitute_parse, "\\x{");
                 sv_catpvn(substitute_parse, start_digit,
                                             RExC_parse - start_digit);
-                sv_catpv(substitute_parse, "}");
+                sv_catpvs(substitute_parse, "}");
             }
 
             /* Move to after the dot (or ending brace the final time through.)
@@ -12511,7 +12511,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             return FALSE;
         }
 
-        sv_catpv(substitute_parse, ")");
+        sv_catpvs(substitute_parse, ")");
 
 #ifdef EBCDIC
         /* The values are Unicode, and therefore have to be converted to native
@@ -17625,7 +17625,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 #if 0   /* Have decided not to deal with multi-char folds in inverted classes,
            because too confusing */
         if (invert) {
-            sv_catpv(substitute_parse, "(?:");
+            sv_catpvs(substitute_parse, "(?:");
         }
 #endif
 
@@ -17645,7 +17645,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                                 &PL_sv_undef)
                 {
                     if (! first_time) {
-                        sv_catpv(substitute_parse, "|");
+                        sv_catpvs(substitute_parse, "|");
                     }
                     first_time = FALSE;
 
@@ -17657,24 +17657,24 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         /* If the character class contains anything else besides these
          * multi-character folds, have to include it in recursive parsing */
         if (element_count) {
-            sv_catpv(substitute_parse, "|[");
+            sv_catpvs(substitute_parse, "|[");
             prefix_end = SvCUR(substitute_parse);
             sv_catpvn(substitute_parse, orig_parse, RExC_parse - orig_parse);
 
             /* Put in a closing ']' only if not going off the end, as otherwise
              * we are adding something that really isn't there */
             if (RExC_parse < RExC_end) {
-                sv_catpv(substitute_parse, "]");
+                sv_catpvs(substitute_parse, "]");
             }
         }
 
-        sv_catpv(substitute_parse, ")");
+        sv_catpvs(substitute_parse, ")");
 #if 0
         if (invert) {
             /* This is a way to get the parse to skip forward a whole named
              * sequence instead of matching the 2nd character when it fails the
              * first */
-            sv_catpv(substitute_parse, "(*THEN)(*SKIP)(*FAIL)|.)");
+            sv_catpvs(substitute_parse, "(*THEN)(*SKIP)(*FAIL)|.)");
         }
 #endif
 
@@ -20022,11 +20022,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         U8 index = FLAGS(o) * 2;
         if (index < C_ARRAY_LENGTH(anyofs)) {
             if (*anyofs[index] != '[')  {
-                sv_catpv(sv, "[");
+                sv_catpvs(sv, "[");
             }
             sv_catpv(sv, anyofs[index]);
             if (*anyofs[index] != '[')  {
-                sv_catpv(sv, "]");
+                sv_catpvs(sv, "]");
             }
         }
         else {

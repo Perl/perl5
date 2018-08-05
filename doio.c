@@ -3244,24 +3244,24 @@ Perl_vms_start_glob
 #  if defined(OS2)
     sv_setpv(tmpcmd, "for a in ");
     sv_catsv(tmpcmd, tmpglob);
-    sv_catpv(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
+    sv_catpvs(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
 #  elif defined(DJGPP)
     sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
     sv_catsv(tmpcmd, tmpglob);
 #  else
     sv_setpv(tmpcmd, "perlglob ");
     sv_catsv(tmpcmd, tmpglob);
-    sv_catpv(tmpcmd, " |");
+    sv_catpvs(tmpcmd, " |");
 #  endif
 # elif defined(CSH)
     sv_setpvn(tmpcmd, PL_cshname, PL_cshlen);
-    sv_catpv(tmpcmd, " -cf 'set nonomatch; glob ");
+    sv_catpvs(tmpcmd, " -cf 'set nonomatch; glob ");
     sv_catsv(tmpcmd, tmpglob);
-    sv_catpv(tmpcmd, "' 2>/dev/null |");
+    sv_catpvs(tmpcmd, "' 2>/dev/null |");
 # else
     sv_setpv(tmpcmd, "echo ");
     sv_catsv(tmpcmd, tmpglob);
-    sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\n\\n\\n\\n'|");
+    sv_catpvs(tmpcmd, "|tr -s ' \t\f\r' '\\n\\n\\n\\n'|");
 # endif /* !DOSISH && !CSH */
     {
         SV ** const svp = hv_fetchs(GvHVn(PL_envgv), "LS_COLORS", 0);

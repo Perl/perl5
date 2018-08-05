@@ -10331,7 +10331,7 @@ S_scan_heredoc(pTHX_ char *s)
 	while (ss < se) {
 	    /* newline only? Copy and move on */
 	    if (*ss == '\n') {
-		sv_catpv(newstr,"\n");
+		sv_catpvs(newstr,"\n");
 		ss++;
 		linecount++;
 

@@ -438,7 +438,7 @@ win32_get_xlib(const char *pl, WIN32_NO_REGISTRY_M_(const char *xlib)
 	sv1 = sv2;
     } else if (sv2) {
         dTHX;
-	sv_catpv(sv1, ";");
+	sv_catpvs(sv1, ";");
 	sv_catsv(sv1, sv2);
     }
 
