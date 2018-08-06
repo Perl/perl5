@@ -296,15 +296,17 @@ sub run_tests {
         my $in_pat  = eval qq ['\\p{$class}'];
         my $out_pat = eval qq ['\\P{$class}'];
 
-        # Verify works as regularly for not /i
-        match $_, $in_pat,  $out_pat for @in;
-        match $_, $out_pat, $in_pat  for @out;
+        # Verify that adding /i does change the out set to match.
+        match $_, $in_pat,  $out_pat, 'i' for @out;
 
         # Verify that adding /i doesn't change the in set.
         match $_, $in_pat,  $out_pat, 'i' for @in;
 
-        # Verify that adding /i does change the out set to match.
-        match $_, $in_pat,  $out_pat, 'i' for @out;
+        # Verify works as regularly for not /i
+        match $_, $in_pat,  $out_pat for @in;
+        match $_, $out_pat, $in_pat  for @out;
+
+
     }
 }
 
