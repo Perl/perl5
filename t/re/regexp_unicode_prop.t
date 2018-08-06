@@ -8,6 +8,9 @@ use strict;
 use warnings;
 use 5.010;
 
+my @warnings;
+local $SIG {__WARN__} = sub {push @warnings, "@_"};
+
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
@@ -199,6 +202,7 @@ $count += 4 * @ILLEGAL_PROPERTIES;
 $count += 4 * grep {length $_ == 1} @ILLEGAL_PROPERTIES;
 $count += 8 * @USER_CASELESS_PROPERTIES;
 $count += 1;    # Test for pkg:IsMyLower
+$count += 1;    # No warnings generated
 
 plan(tests => $count);
 
@@ -404,6 +408,10 @@ sub ISfoo   { die }
 sub INfoo   { die }
 sub Is::foo { die }
 sub In::foo { die }
+
+if (! is(@warnings, 0, "No warnings were generated")) {
+    diag join "\n", @warnings, "\n";
+}
 
 1;
 __END__
