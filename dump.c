@@ -1390,9 +1390,9 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
     PERL_ARGS_ASSERT_DO_MAGIC_DUMP;
 
     for (; mg; mg = mg->mg_moremagic) {
- 	Perl_dump_indent(aTHX_ level, file,
+        Perl_dump_indent(aTHX_ level, file,
 			 "  MAGIC = 0x%" UVxf "\n", PTR2UV(mg));
- 	if (mg->mg_virtual) {
+        if (mg->mg_virtual) {
             const MGVTBL * const v = mg->mg_virtual;
 	    if (v >= PL_magic_vtables
 		&& v < PL_magic_vtables + magic_vtable_max) {
@@ -1728,7 +1728,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    sv_catpvs(d, "PADTMP,");
     append_flags(d, flags, first_sv_flags_names);
     if (flags & SVf_ROK)  {	
-    				sv_catpvs(d, "ROK,");
+                                sv_catpvs(d, "ROK,");
 	if (SvWEAKREF(sv))	sv_catpvs(d, "WEAKREF,");
     }
     if (flags & SVf_IsCOW && type != SVt_PVHV) sv_catpvs(d, "IsCOW,");
