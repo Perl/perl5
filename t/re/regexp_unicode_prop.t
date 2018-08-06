@@ -469,12 +469,25 @@ sub InLatin1 {
 }
 
 sub IsMyUpper {
+    use feature 'state';
+
+    state $cased_count = 0;
+    state $caseless_count = 0;
+    my $ret= "+utf8::";
+
     my $caseless = shift;
-    return "+utf8::"
-           . (($caseless)
-               ? 'Alphabetic'
-               : 'Uppercase')
-           . "\n&utf8::ASCII";
+    if($caseless) {
+        die "Called twice" if $caseless_count;
+        $caseless_count++;
+        $ret .= 'Alphabetic'
+    }
+    else {
+        die "Called twice" if $cased_count;
+        $cased_count++;
+        $ret .= 'Uppercase';
+    }
+
+    return $ret . "\n&utf8::ASCII";
 }
 
 sub pkg1::pkg2::IsMyLower {
