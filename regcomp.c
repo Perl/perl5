@@ -9130,9 +9130,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
 	initial_size = 10;
     }
 
-    /* Allocate the initial space */
     new_list = newSV_type(SVt_INVLIST);
-
     initialize_invlist_guts(new_list, initial_size);
 
     return new_list;
@@ -10317,18 +10315,15 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
 SV*
 Perl_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 {
-
     /* Return a new inversion list that is a copy of the input one, which is
      * unchanged.  The new list will not be mortal even if the old one was. */
 
-    const STRLEN nominal_length = _invlist_len(invlist);    /* Why not +1 XXX */
+    const STRLEN nominal_length = _invlist_len(invlist);
     const STRLEN physical_length = SvCUR(invlist);
     const bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    /* Need to allocate extra space to accommodate Perl's addition of a
-     * trailing NUL to SvPV's, since it thinks they are always strings */
     if (new_invlist == NULL) {
         new_invlist = _new_invlist(nominal_length);
     }
@@ -16578,7 +16573,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     STRLEN numlen;
     int namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
-    SV *listsv = NULL;
+    SV *listsv = NULL;      /* List of \p{user-defined} whose definitions
+                               aren't available at the time this was called */
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
     SV* properties = NULL;    /* Code points that match \p{} \P{} */
@@ -19088,7 +19084,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
      * the node passed-in.  If there is nothing outside the node's bitmap, the
      * arg is set to ANYOF_ONLY_HAS_BITMAP.  Otherwise, it sets the argument to
      * the count returned by add_data(), having allocated and stored an array,
-     * av, that that count references, as follows:
+     * av, as follows:
      *  av[0] stores the character class description in its textual form.
      *        This is used later (regexec.c:Perl_regclass_swash()) to
      *        initialize the appropriate swash, and is also useful for dumping
@@ -22043,7 +22039,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
 
     PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
-    /* The input will be modified into 'lookup_name' */
+    /* The input will be normalized into 'lookup_name' */
     Newx(lookup_name, name_len, char);
     SAVEFREEPV(lookup_name);
 
@@ -22058,8 +22054,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
             continue;
         }
 
-        /* Case differences are also ignored.  Our lookup routine assumes
-         * everything is lowercase */
+        /* Case differences are ignored.  Our lookup routine assumes
+         * everything is lowercase, so normalize to that */
         if (isUPPER_A(cur)) {
             lookup_name[j++] = toLOWER(cur);
             continue;
@@ -22101,17 +22097,22 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
             }
         }
 
-        /* Certain properties need special handling.  They may optionally be
-         * prefixed by 'is'.  Ignore that prefix for the purposes of checking
-         * if this is one of those properties */
+        /* Certain properties whose values are numeric need special handling.
+         * They may optionally be prefixed by 'is'.  Ignore that prefix for the
+         * purposes of checking if this is one of those properties */
         if (memBEGINPs(lookup_name, name_len, "is")) {
             lookup_offset = 2;
         }
 
-        /* Then check if it is one of these properties.  This is hard-coded
-         * because easier this way, and the list is unlikely to change.  There
-         * are several properties like this in the Unihan DB, which is unlikely
-         * to be compiled, and they all end with 'numeric'.  The interiors
+        /* Then check if it is one of these specially-handled properties.  The
+         * possibilities are hard-coded because easier this way, and the list
+         * is unlikely to change.
+         *
+         * All numeric value type properties are of this ilk, and are also
+         * special in a different way later on.  So find those first.  There
+         * are several numeric value type properties in the Unihan DB (which is
+         * unlikely to be compiled with perl, but we handle it here in case it
+         * does get compiled).  They all end with 'numeric'.  The interiors
          * aren't checked for the precise property.  This would stop working if
          * a cjk property were to be created that ended with 'numeric' and
          * wasn't a numeric type */
@@ -22139,15 +22140,14 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         {
             unsigned int k;
 
-            /* What makes these properties special is that the stuff after the
-             * '=' is a number.  Therefore, we can't throw away '-'
-             * willy-nilly, as those could be a minus sign.  Other stricter
+            /* Since the stuff after the '=' is a number, we can't throw away
+             * '-' willy-nilly, as those could be a minus sign.  Other stricter
              * rules also apply.  However, these properties all can have the
              * rhs not be a number, in which case they contain at least one
              * alphabetic.  In those cases, the stricter rules don't apply.
              * But the numeric type properties can have the alphas [Ee] to
              * signify an exponent, and it is still a number with stricter
-             * rules.  So look for an alpha that signifys not-strict */
+             * rules.  So look for an alpha that signifies not-strict */
             stricter = TRUE;
             for (k = i; k < name_len; k++) {
                 if (   isALPHA_A(name[k])
@@ -22175,7 +22175,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
              * zeros, or between the final leading zero and the first other
              * digit */
             for (; i < name_len - 1; i++) {
-                if (   name[i] != '0'
+                if (    name[i] != '0'
                     && (name[i] != '_' || ! isDIGIT_A(name[i+1])))
                 {
                     break;
@@ -22185,9 +22185,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
     }
     else {  /* No '=' */
 
-       /* We are now in a position to determine if this property should have
-        * been parsed using stricter rules.  Only a few are like that, and
-        * unlikely to change. */
+       /* Only a few properties without an '=' should be parsed with stricter
+        * rules.  The list is unlikely to change. */
         if (   memBEGINPs(lookup_name, j, "perl")
             && memNEs(lookup_name + 4, j - 4, "space")
             && memNEs(lookup_name + 4, j - 4, "word"))
@@ -22298,17 +22297,16 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         starts_with_In_or_Is = TRUE;
     }
 
-    lookup_len = j;     /* Use a more mnemonic name starting here */
+    lookup_len = j;     /* This is a more mnemonic name than 'j' */
 
     /* Get the index into our pointer table of the inversion list corresponding
      * to the property */
     table_index = match_uniprop((U8 *) lookup_name, lookup_len);
 
-    /* If it didn't find the property */
+    /* If it didn't find the property ... */
     if (table_index == 0) {
 
-        /* If didn't find the property, we try again stripping off any initial
-         * 'In' or 'Is' */
+        /* Try again stripping off any initial 'In' or 'Is' */
         if (starts_with_In_or_Is) {
             lookup_name += 2;
             lookup_len -= 2;
@@ -22327,8 +22325,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
                 return NULL;
             }
 
-            /* But the numeric type properties need more work to decide.  What
-             * we do is make sure we have the number in canonical form and look
+            /* The numeric type properties need more work to decide.  What we
+             * do is make sure we have the number in canonical form and look
              * that up. */
 
             if (slash_pos < 0) {    /* No slash */
@@ -22454,8 +22452,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
                     return NULL;
                 }
 
-                /* Reduce the rational, which should put it in canonical form.
-                 * Then look it up */
+                /* Reduce the rational, which should put it in canonical form
+                 * */
                 numerator /= gcd;
                 denominator /= gcd;
 
@@ -22468,12 +22466,12 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
             if (table_index == 0) {
                 return NULL;
             }
-        }
-    }
+        }   /* End of still didn't find the property in our table */
+    }       /* End of       didn't find the property in our table */
 
-    /* The return is an index into a table of ptrs.  A negative return
-     * signifies that the real index is the absolute value, but the result
-     * needs to be inverted */
+    /* Here, we have a non-zero return, which is an index into a table of ptrs.
+     * A negative return signifies that the real index is the absolute value,
+     * but the result needs to be inverted */
     if (table_index < 0) {
         *invert = TRUE;
         table_index = -table_index;
@@ -22484,8 +22482,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
 
     /* Out-of band indices indicate a deprecated property.  The proper index is
      * modulo it with the table size.  And dividing by the table size yields
-     * an offset into a table constructed to contain the corresponding warning
-     * message */
+     * an offset into a table constructed by regen/mk_invlists.pl to contain
+     * the corresponding warning message */
     if (table_index > MAX_UNI_KEYWORD_INDEX) {
         Size_t warning_offset = table_index / MAX_UNI_KEYWORD_INDEX;
         table_index %= MAX_UNI_KEYWORD_INDEX;
