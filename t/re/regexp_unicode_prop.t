@@ -218,14 +218,16 @@ sub match {
     undef $@;
     my $pat = "qr/$match/$caseless";
     my $match_pat = eval $pat;
-    is($@, '', "$pat compiled correctly to a regexp: $@");
-    like($str, $match_pat, "$name correctly matched");
+    if (is($@, '', "$pat compiled correctly to a regexp: $@")) {
+        like($str, $match_pat, "$name correctly matched");
+    }
 
     undef $@;
     $pat = "qr/$nomatch/$caseless";
     my $nomatch_pat = eval $pat;
-    is($@, '', "$pat compiled correctly to a regexp: $@");
-    unlike($str, $nomatch_pat, "$name correctly did not match");
+    if (is($@, '', "$pat compiled correctly to a regexp: $@")) {
+        unlike($str, $nomatch_pat, "$name correctly did not match");
+    }
 }
 
 sub run_tests {
