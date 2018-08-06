@@ -16,6 +16,27 @@ BEGIN {
 
 sub run_tests;
 
+sub get_str_name($) {
+    my $char = shift;
+
+    my ($str, $name);
+
+    if ($char =~ /^\\/) {
+        $str  = eval qq ["$char"];
+        $name =      qq ["$char"];
+    }
+    elsif ($char =~ /^0x([0-9A-Fa-f]+)$/) {
+        $str  =  chr hex $1;
+        $name = "chr ($char)";
+    }
+    else {
+        $str  =      $char;
+        $name = qq ["$char"];
+    }
+
+    return ($str, $name);
+}
+
 #
 # This is the data to test.
 #
@@ -188,20 +209,7 @@ sub match {
     $caseless = "" unless defined $caseless;
     $caseless = 'i' if $caseless;
 
-    my ($str, $name);
-
-    if ($char =~ /^\\/) {
-        $str  = eval qq ["$char"];
-        $name =      qq ["$char"];
-    }
-    elsif ($char =~ /^0x([0-9A-Fa-f]+)$/) {
-        $str  =  chr hex $1;
-        $name = "chr ($char)";
-    }
-    else {
-        $str  =      $char;
-        $name = qq ["$char"];
-    }
+    my ($str, $name) = get_str_name($char);
 
     undef $@;
     my $pat = "qr/$match/$caseless";
