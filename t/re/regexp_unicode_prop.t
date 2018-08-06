@@ -81,37 +81,37 @@ my @CLASSES = (
 
 );
 
-my @USER_DEFINED_PROPERTIES = (
-   #
-   # User defined properties
-   #
-   InKana1                   => ['\x{3040}', '!\x{303F}'],
-   InKana2                   => ['\x{3040}', '!\x{303F}'],
-   InKana3                   => ['\x{3041}', '!\x{3040}'],
-   InNotKana                 => ['\x{3040}', '!\x{3041}'],
-   InConsonant               => ['d',        '!e'],
-   IsSyriac1                 => ['\x{0712}', '!\x{072F}'],
-   IsSyriac1KanaMark         => ['\x{309A}', '!\x{3090}'],
-   IsSyriac1KanaMark         => ['\x{0730}', '!\x{0712}'],
-   '# User-defined character properties may lack \n at the end',
-   InGreekSmall              => ['\N{GREEK SMALL LETTER PI}',
-                                 '\N{GREEK SMALL LETTER FINAL SIGMA}'],
-   InGreekCapital            => ['\N{GREEK CAPITAL LETTER PI}', '!\x{03A2}'],
-   Dash                      => ['-'],
-   ASCII_Hex_Digit           => ['!-', 'A'],
-   IsAsciiHexAndDash         => ['-', 'A'],
+    my @USER_DEFINED_PROPERTIES = (
+        #
+        # User defined properties
+        #
+        InKana1                   => ['\x{3040}', '!\x{303F}'],
+        InKana2                   => ['\x{3040}', '!\x{303F}'],
+        InKana3                   => ['\x{3041}', '!\x{3040}'],
+        InNotKana                 => ['\x{3040}', '!\x{3041}'],
+        InConsonant               => ['d',        '!e'],
+        IsSyriac1                 => ['\x{0712}', '!\x{072F}'],
+        IsSyriac1KanaMark         => ['\x{309A}', '!\x{3090}'],
+        IsSyriac1KanaMark         => ['\x{0730}', '!\x{0712}'],
+        '# User-defined character properties may lack \n at the end',
+        InGreekSmall              => ['\N{GREEK SMALL LETTER PI}',
+                                        '\N{GREEK SMALL LETTER FINAL SIGMA}'],
+        InGreekCapital            => ['\N{GREEK CAPITAL LETTER PI}', '!\x{03A2}'],
+        Dash                      => ['-'],
+        ASCII_Hex_Digit           => ['!-', 'A'],
+        IsAsciiHexAndDash         => ['-', 'A'],
 
-   # This overrides the official one
-   InLatin1                  => ['\x{0100}', '!\x{00FF}'],
-);
+        # This overrides the official one
+        InLatin1                  => ['\x{0100}', '!\x{00FF}'],
+    );
 
-my @USER_CASELESS_PROPERTIES = (
-   #
-   # User defined properties which differ depending on /i.  Second entry is
-   # false normally, true under /i
-   #
-   'IsMyUpper'                => ["M", "!m" ],
-);
+    my @USER_CASELESS_PROPERTIES = (
+        #
+        # User defined properties which differ depending on /i.  Second entry
+        # is false normally, true under /i
+        #
+        'IsMyUpper'                => ["M", "!m" ],
+    );
 
 
 #
@@ -365,14 +365,14 @@ sub IsMyUpper {
 
     my $mylower = qr/\p{pkg::IsMyLower}/i;
 
-    sub pkg::IsMyLower {
-        my $caseless = shift;
-        return "+utf8::"
-            . (($caseless)
-                ? 'Alphabetic'
-                : 'Lowercase')
-            . "\n&utf8::ASCII";
-    }
+sub pkg::IsMyLower {
+    my $caseless = shift;
+    return "+utf8::"
+        . (($caseless)
+            ? 'Alphabetic'
+            : 'Lowercase')
+        . "\n&utf8::ASCII";
+}
 
     like("A", $mylower, "Not available until runtime user-defined property with pkg:: and /i works");
 
