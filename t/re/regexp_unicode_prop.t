@@ -105,7 +105,16 @@ my @CLASSES = (
 
 );
 
-    my @USER_DEFINED_PROPERTIES = (
+my @USER_DEFINED_PROPERTIES;
+my @USER_CASELESS_PROPERTIES;
+my @DEFERRED;
+BEGIN {
+
+    # We defined these at compile time, so that the subroutines that they
+    # refer to aren't known, so that we can test properties not known until
+    # runtime
+
+    @USER_DEFINED_PROPERTIES = (
         #
         # User defined properties
         #
@@ -124,19 +133,44 @@ my @CLASSES = (
         Dash                      => ['-'],
         ASCII_Hex_Digit           => ['!-', 'A'],
         IsAsciiHexAndDash         => ['-', 'A'],
-
-        # This overrides the official one
-        InLatin1                  => ['\x{0100}', '!\x{00FF}'],
     );
 
-    my @USER_CASELESS_PROPERTIES = (
+    @USER_CASELESS_PROPERTIES = (
         #
         # User defined properties which differ depending on /i.  Second entry
         # is false normally, true under /i
         #
         'IsMyUpper'                => ["M", "!m" ],
+        'pkg::IsMyLower'           => ["a", "!A" ],
     );
 
+
+    # Now create a list of properties whose definitions won't be known at
+    # runtime.  The qr// below thus will have forward references to them, and
+    # when matched at runtime will not know what's in the property definition
+    my @DEFERRABLE_USER_DEFINED_PROPERTIES;
+    push @DEFERRABLE_USER_DEFINED_PROPERTIES, @USER_DEFINED_PROPERTIES;
+    push @DEFERRABLE_USER_DEFINED_PROPERTIES, @USER_CASELESS_PROPERTIES;
+    for (my $i = 0; $i < @DEFERRABLE_USER_DEFINED_PROPERTIES; $i+=2) {
+        my $property = $DEFERRABLE_USER_DEFINED_PROPERTIES[$i];
+        if ($property =~ / ^ \# /x) {
+            $i++;
+            redo;
+        }
+
+        # Only do this for the properties in the list that are user-defined
+        next if ($property !~ / ( ^ | :: ) I[ns] /x);
+
+        push @DEFERRED, qr/\p{$property}/,
+                        $DEFERRABLE_USER_DEFINED_PROPERTIES[$i+1];
+    }
+}
+
+# These override the official ones, so if found before defined, the official
+# ones prevail, so can't test deferred definition
+my @OVERRIDING_USER_DEFINED_PROPERTIES = (
+   InLatin1                  => ['\x{0100}', '!\x{00FF}'],
+);
 
 #
 # From the short properties we populate POSIX-like classes.
@@ -187,7 +221,8 @@ while (my ($class, $chars) = each %SHORT_PROPERTIES) {
 
 push @CLASSES => "# Short properties"        => %SHORT_PROPERTIES,
                  "# POSIX like properties"   => %d,
-                 "# User defined properties" => @USER_DEFINED_PROPERTIES;
+                 "# User defined properties" => @USER_DEFINED_PROPERTIES,
+                 "# Overriding user defined properties" => @OVERRIDING_USER_DEFINED_PROPERTIES;
 
 
 #
@@ -201,7 +236,7 @@ for (my $i = 0; $i < @CLASSES; $i += 2) {
 $count += 4 * @ILLEGAL_PROPERTIES;
 $count += 4 * grep {length $_ == 1} @ILLEGAL_PROPERTIES;
 $count += 8 * @USER_CASELESS_PROPERTIES;
-$count += 1;    # Test for pkg:IsMyLower
+$count += 1 * @DEFERRED / 2;
 $count += 1;    # No warnings generated
 
 plan(tests => $count);
@@ -231,6 +266,12 @@ sub match {
 }
 
 sub run_tests {
+
+    for (my $i = 0; $i < @DEFERRED; $i+=2) {
+            my ($str, $name) = get_str_name($DEFERRED[$i+1][0]);
+            like($str, $DEFERRED[$i],
+                "$name correctly matched $DEFERRED[$i] (defn. not known until runtime)");
+    }
 
     while (@CLASSES) {
         my $class = shift @CLASSES;
@@ -374,13 +415,6 @@ sub IsMyUpper {
            . "\n&utf8::ASCII";
 }
 
-{   # This has to be done here and not like the others, because we have to
-    # make sure that the property is not known until after the regex is
-    # compiled.  It was previously getting confused about the pkg and /i
-    # combination
-
-    my $mylower = qr/\p{pkg::IsMyLower}/i;
-
 sub pkg::IsMyLower {
     my $caseless = shift;
     return "+utf8::"
@@ -388,10 +422,6 @@ sub pkg::IsMyLower {
             ? 'Alphabetic'
             : 'Lowercase')
         . "\n&utf8::ASCII";
-}
-
-    like("A", $mylower, "Not available until runtime user-defined property with pkg:: and /i works");
-
 }
 
 # Verify that can use user-defined properties inside another one
