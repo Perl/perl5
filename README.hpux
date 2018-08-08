@@ -100,17 +100,21 @@ details.
 
 =head2 PA-RISC
 
+The last and final version of PA-RISC is 2.0, HP no longer sells any
+system with these CPU's.
+
 HP's HP9000 Unix systems run on HP's own Precision Architecture
 (PA-RISC) chip.  HP-UX used to run on the Motorola MC68000 family of
 chips, but any machine with this chip in it is quite obsolete and this
 document will not attempt to address issues for compiling Perl on the
-Motorola chipset.
+Motorola chipset. Even though PA-RISC hardware is not sold anymore, a
+lot of machines still running on these CPU's can be found in the wild.
 
-The version of PA-RISC at the time of this document's last update is 2.0,
-which is also the last there will be. HP PA-RISC systems are usually
-referred to with model description "HP 9000". The last CPU in this series
-is the PA-8900.  Support for PA-RISC architectured machines officially
-ends as shown in the following table:
+The last order date for HP 9000 systems was December 31, 2008.
+
+HP PA-RISC systems are usually referred to with model description "HP 9000".
+The last CPU in this series is the PA-8900.  Support for PA-RISC
+architectured machines officially ended as shown in the following table:
 
    PA-RISC End-of-Life Roadmap
  +--------+----------------+----------------+-----------------+
@@ -133,10 +137,6 @@ ends as shown in the following table:
  | cores  |                | PA-8900/rp34x0 | 2014            |
  +--------+----------------+----------------+-----------------+
 
-From L<http://www.hp.com/products1/evolution/9000/faqs.html>
-
- The last order date for HP 9000 systems was December 31, 2008.
-
 A complete list of models at the time the OS was built is in the file
 /usr/sam/lib/mo/sched.models. The first column corresponds to the last
 part of the output of the "model" command.  The second column is the
@@ -147,19 +147,6 @@ PA-RISC version and the third column is the exact chip type used.
   9000/800/L1000-44
   # grep L1000-44 /usr/sam/lib/mo/sched.models
   L1000-44        2.0     PA8500
-
-=head2 Portability Between PA-RISC Versions
-
-An executable compiled on a PA-RISC 2.0 platform will not execute on a
-PA-RISC 1.1 platform, even if they are running the same version of
-HP-UX.  If you are building Perl on a PA-RISC 2.0 platform and want that
-Perl to also run on a PA-RISC 1.1, the compiler flags +DAportable and
-+DS32 should be used.
-
-It is no longer possible to compile PA-RISC 1.0 executables on either
-the PA-RISC 1.1 or 2.0 platforms.  The command-line flags are accepted,
-but the resulting executable will not run when transferred to a PA-RISC
-1.0 system.
 
 =head2 PA-RISC 1.0
 
@@ -235,9 +222,22 @@ The current naming convention is:
           b = blade
           sa = appliance
 
+=head2 Portability Between PA-RISC Versions
+
+An executable compiled on a PA-RISC 2.0 platform will not execute on a
+PA-RISC 1.1 platform, even if they are running the same version of
+HP-UX.  If you are building Perl on a PA-RISC 2.0 platform and want that
+Perl to also run on a PA-RISC 1.1, the compiler flags +DAportable and
++DS32 should be used.
+
+It is no longer possible to compile PA-RISC 1.0 executables on either
+the PA-RISC 1.1 or 2.0 platforms.  The command-line flags are accepted,
+but the resulting executable will not run when transferred to a PA-RISC
+1.0 system.
+
 =head2 Itanium Processor Family (IPF) and HP-UX
 
-HP-UX also runs on the new Itanium processor.  This requires the use
+HP-UX also runs on the newer Itanium processor.  This requires the use
 of HP-UX version 11.23 (11i v2) or 11.31 (11i v3), and with the exception
 of a few differences detailed below and in later sections, Perl should
 compile with no problems.
