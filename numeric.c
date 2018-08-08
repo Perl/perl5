@@ -1243,6 +1243,12 @@ S_mulexp10(NV value, I32 exponent)
 }
 #endif /* #ifndef USE_QUADMATH */
 
+#ifdef USE_QUADMATH
+#  define ATOF(s, x) my_atof2(s, &x)
+#  else
+#  define ATOF(s, x) Perl_atof2(s, x)
+#  endif
+
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
@@ -1252,13 +1258,9 @@ Perl_my_atof(pTHX_ const char* s)
 
     PERL_ARGS_ASSERT_MY_ATOF;
 
-#ifdef USE_QUADMATH
+#if ! defined(USE_LOCALE_NUMERIC)
 
-    my_atof2(s, &x);
-
-#elif ! defined(USE_LOCALE_NUMERIC)
-
-    Perl_atof2(s, x);
+    ATOF(s, x);
 
 #else
 
@@ -1284,15 +1286,16 @@ Perl_my_atof(pTHX_ const char* s)
                 LOCK_LC_NUMERIC_STANDARD();
             }
 
-            Perl_atof2(s, x);
+            ATOF(s,x);
 
             if (use_standard_radix) {
                 UNLOCK_LC_NUMERIC_STANDARD();
                 SET_NUMERIC_UNDERLYING();
             }
         }
-        else
-            Perl_atof2(s, x);
+        else {
+            ATOF(s,x);
+        }
         RESTORE_LC_NUMERIC();
     }
 
