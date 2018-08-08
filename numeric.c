@@ -1267,7 +1267,10 @@ Perl_my_atof(pTHX_ const char* s)
     {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_TO_NEEDED();
-        if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+        if (! (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))) {
+            ATOF(s,x);
+        }
+        else {
 
             /* Look through the string for the first thing that looks like a
              * decimal point: either the value in the current locale or the
@@ -1293,9 +1296,6 @@ Perl_my_atof(pTHX_ const char* s)
                 UNLOCK_LC_NUMERIC_STANDARD();
                 SET_NUMERIC_UNDERLYING();
             }
-        }
-        else {
-            ATOF(s,x);
         }
         RESTORE_LC_NUMERIC();
     }
