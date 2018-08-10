@@ -1245,9 +1245,9 @@ S_mulexp10(NV value, I32 exponent)
 
 #ifdef Perl_strtod
 #  define ATOF(s, x) my_atof2(s, &x)
-#  else
+#else
 #  define ATOF(s, x) Perl_atof2(s, x)
-#  endif
+#endif
 
 NV
 Perl_my_atof(pTHX_ const char* s)
