@@ -864,12 +864,6 @@ a file in /dev, a FIFO or an uneditable directory.  The file was ignored.
 (S inplace) The creation of the new file failed for the indicated
 reason.
 
-=item Can't do inplace edit without backup
-
-(F) You're on a system such as MS-DOS that gets confused if you try
-reading from a deleted (but still opened) file.  You have to say
-C<-i.bak>, or some such.
-
 =item Can't do inplace edit: %s would not be unique
 
 (S inplace) Your filesystem does not support filenames longer than 14
