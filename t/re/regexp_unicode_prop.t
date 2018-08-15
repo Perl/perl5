@@ -141,7 +141,7 @@ BEGIN {
         # is false normally, true under /i
         #
         'IsMyUpper'                => ["M", "!m" ],
-        'pkg::IsMyLower'           => ["a", "!A" ],
+        'pkg1::pkg2::IsMyLower'    => ["a", "!A" ],
     );
 
 
@@ -418,7 +418,7 @@ sub IsMyUpper {
            . "\n&utf8::ASCII";
 }
 
-sub pkg::IsMyLower {
+sub pkg1::pkg2::IsMyLower {
     my $caseless = shift;
     return "+utf8::"
         . (($caseless)
