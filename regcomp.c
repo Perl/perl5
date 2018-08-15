@@ -13555,7 +13555,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
                    || UTF8_IS_START(UCHARAT(RExC_parse)));
 
-            uni_semantics_at_node_start = RExC_uni_semantics;
+            uni_semantics_at_node_start = cBOOL(RExC_uni_semantics);
 
             /* Here, we have a literal character.  Find the maximal string of
              * them in the input that we can fit into a single EXACTish node.
