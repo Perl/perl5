@@ -9962,10 +9962,8 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
     *get_invlist_offset_addr(invlist) = ! *get_invlist_offset_addr(invlist);
 }
 
-#endif
-
-PERL_STATIC_INLINE SV*
-S_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
+SV*
+Perl_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 {
 
     /* Return a new inversion list that is a copy of the input one, which is
@@ -9987,6 +9985,8 @@ S_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 
     return new_invlist;
 }
+
+#endif
 
 PERL_STATIC_INLINE STRLEN*
 S_get_invlist_iter_addr(SV* invlist)
