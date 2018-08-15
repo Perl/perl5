@@ -21900,9 +21900,36 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t len, const
                                                 equals_pos, lookup_name, value);
                 }
                 else {  /* Otherwise, it is %e with a known precision */
+                    char * exp_ptr;
+
                     canonical = Perl_form(aTHX_ "%.*s%.*" NVef,
                                                 equals_pos, lookup_name,
                                                 PL_E_FORMAT_PRECISION, value);
+
+                    /* The exponent generated is expecting two digits, whereas
+                     * %e on some systems will generate three.  Remove leading
+                     * zeros in excess of 2 from the exponent.  We start
+                     * looking for them after the '=' */
+                    exp_ptr = strchr(canonical + equals_pos, 'e');
+                    if (exp_ptr) {
+                        char * cur_ptr = exp_ptr + 2; /* past the 'e[+-]' */
+                        SSize_t excess_exponent_len = strlen(cur_ptr) - 2;
+
+                        assert(*(cur_ptr - 1) == '-' || *(cur_ptr - 1) == '+');
+
+                        if (excess_exponent_len > 0) {
+                            SSize_t leading_zeros = strspn(cur_ptr, "0");
+                            SSize_t excess_leading_zeros
+                                    = MIN(leading_zeros, excess_exponent_len);
+                            if (excess_leading_zeros > 0) {
+                                Move(cur_ptr + excess_leading_zeros,
+                                     cur_ptr,
+                                     strlen(cur_ptr) - excess_leading_zeros
+                                       + 1,  /* Copy the NUL as well */
+                                     char);
+                            }
+                        }
+                    }
                 }
             }
             else {  /* Has a slash.  Create a rational in canonical form  */
