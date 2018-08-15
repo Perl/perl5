@@ -477,6 +477,13 @@ SKIP: {
           messages => qr/^Malformed UTF-8 character: (?:\\x\w\w){3} \(unexpected non-continuation byte 0x\w\w, 2 bytes after start byte 0x\w\w; need \d bytes, got 2\)/,
          }, 8190 .. 8196
        ),
+       {
+        name => "strict, warn, short and non-cont",
+        data => _c("abc\x{FFF0}", 4) . "x",
+        expect => "abc\x{FFFD}x",
+        options => "strict,error=warn",
+        messages => [ qr/xx/ ],
+       },
       );
 
     for my $test (@tests) {
@@ -516,10 +523,22 @@ SKIP: {
 
             close $fi;
         }
+        if (@$messages && $options =~ /error=warn/) {
+            (my $coptions = $options) =~ s/warn/die/;
+            if (ok(open(my $fi, "<:utf8($coptions)", $a_file),
+                   "$name, croak: open for read()")) {
+                ok(!eval {
+                    my $buf;
+                    read($fi, $buf, length $data);
+                    1;
+                }, "$name, croak: should croak");
+                my @got = split /\n/, $@;
+                like_array(\@got, $messages, "$name: croak message");
+                close $fi;
+            }
+        }
     }
 }
-
-# TODO: test croaking
 
 {
     my $data = "a" x 8190 . "\x{7FFFFFFF}";
