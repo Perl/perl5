@@ -255,7 +255,7 @@ WHILEM          A_pre,A_min,A_max,B_min,B_max:FAIL
 BRANCH          next:FAIL
 CURLYM          A,B:FAIL
 IFMATCH         A:FAIL
-CURLY           B_min_known,B_min,B_max:FAIL
+CURLY           B_min,B_max:FAIL
 COMMIT          next:FAIL
 MARKPOINT       next:FAIL
 SKIP            next:FAIL

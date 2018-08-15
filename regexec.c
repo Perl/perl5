@@ -8462,24 +8462,41 @@ NULL
 	    }
 	    NOT_REACHED; /* NOTREACHED */
 
-	case CURLY_B_min_known_fail:
-	    /* failed to find B in a non-greedy match where c1,c2 valid */
+	case CURLY_B_min_fail:
+	    /* failed to find B in a non-greedy match.
+             * Handles both cases where c1,c2 valid or not */
 
 	    REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             }
-	    /* Couldn't or didn't -- move forward. */
-	    ST.oldloc = locinput;
-	    if (utf8_target)
-		locinput += UTF8SKIP(locinput);
-	    else
-		locinput++;
-	    ST.count++;
-	  curly_try_B_min_known:
-	     /* find the next place where 'B' could work, then call B */
-	    {
+
+            if (ST.c1 == CHRTEST_VOID) {
+                /* failed -- move forward one */
+                char *li = locinput;
+                if (!regrepeat(rex, &li, ST.A, reginfo, 1)) {
+                    sayNO;
+                }
+                locinput = li;
+                ST.count++;
+		if (!(   ST.count <= ST.max
+                        /* count overflow ? */
+                     || (ST.max == REG_INFTY && ST.count > 0))
+                )
+                    sayNO;
+            }
+            else {
 		int n;
+                /* Couldn't or didn't -- move forward. */
+                ST.oldloc = locinput;
+                if (utf8_target)
+                    locinput += UTF8SKIP(locinput);
+                else
+                    locinput++;
+                ST.count++;
+
+              curly_try_B_min_known:
+                /* find the next place where 'B' could work, then call B */
 		if (utf8_target) {
 		    n = (ST.oldloc == locinput) ? 0 : 1;
 		    if (ST.c1 == ST.c2) {
@@ -8558,42 +8575,15 @@ NULL
 			sayNO;
                     assert(n == REG_INFTY || locinput == li);
 		}
-		CURLY_SETPAREN(ST.paren, ST.count);
-                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-		    goto fake_end;
-		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B, locinput);
 	    }
+
+          curly_try_B_min:
+            CURLY_SETPAREN(ST.paren, ST.count);
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
+                goto fake_end;
+            PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
 	    NOT_REACHED; /* NOTREACHED */
 
-	case CURLY_B_min_fail:
-	    /* failed to find B in a non-greedy match where c1,c2 invalid */
-
-	    REGCP_UNWIND(ST.cp);
-            if (ST.paren) {
-                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
-            }
-	    /* failed -- move forward one */
-            {
-                char *li = locinput;
-                if (!regrepeat(rex, &li, ST.A, reginfo, 1)) {
-                    sayNO;
-                }
-                locinput = li;
-            }
-            {
-		ST.count++;
-		if (ST.count <= ST.max || (ST.max == REG_INFTY &&
-			ST.count > 0)) /* count overflow ? */
-		{
-		  curly_try_B_min:
-		    CURLY_SETPAREN(ST.paren, ST.count);
-                    if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-                        goto fake_end;
-		    PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
-		}
-	    }
-            sayNO;
-	    NOT_REACHED; /* NOTREACHED */
 
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
