@@ -8770,7 +8770,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     invlist_set_len(new_list, 0, 0);
 
     /* Force iterinit() to be used to get iteration to work */
-    *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
+    invlist_iterfinish(new_list);
 
     *get_invlist_previous_index_addr(new_list) = 0;
 
