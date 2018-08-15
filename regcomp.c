@@ -1500,7 +1500,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         assert(RExC_rxi->data->what[n] == 's');
 
         if (ary[1] && ary[1] != &PL_sv_undef) { /* Has compile-time swash */
-            invlist = sv_2mortal(invlist_clone(_get_swash_invlist(ary[1])));
+            invlist = sv_2mortal(invlist_clone(_get_swash_invlist(ary[1]), NULL));
         }
         else if (ary[0] && ary[0] != &PL_sv_undef) {
 
@@ -1513,7 +1513,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
             /* Here no compile-time swash, and no run-time only data.  Use the
              * node's inversion list */
-            invlist = sv_2mortal(invlist_clone(ary[3]));
+            invlist = sv_2mortal(invlist_clone(ary[3], NULL));
         }
 
         /* Get the code points valid only under UTF-8 locales */
@@ -2002,7 +2002,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * ANYOF node, with the first NUM_ANYOF_CODE_POINTS code points in a bit
      * map */
 
-    SV* invlist = invlist_clone(ssc->invlist);
+    SV* invlist = invlist_clone(ssc->invlist, NULL);
 
     PERL_ARGS_ASSERT_SSC_FINALIZE;
 
@@ -5616,7 +5616,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     invert = 1;
                     /* FALLTHROUGH */
 		case ASCII:
-                    my_invlist = invlist_clone(PL_Posix_ptrs[_CC_ASCII]);
+                    my_invlist = invlist_clone(PL_Posix_ptrs[_CC_ASCII], NULL);
 
                     /* This can be handled as a Posix class */
                     goto join_posix_and_ascii;
@@ -5627,7 +5627,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     /* FALLTHROUGH */
 		case POSIXA:
                     assert(FLAGS(scan) != _CC_ASCII);
-                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)]);
+                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)], NULL);
                     goto join_posix_and_ascii;
 
 		case NPOSIXD:
@@ -5636,7 +5636,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     /* FALLTHROUGH */
 		case POSIXD:
 		case POSIXU:
-                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)]);
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)], NULL);
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is
@@ -9215,7 +9215,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
          * union.  We can just return a copy of 'a' if '*output' doesn't point
          * to an existing list */
         if (*output == NULL) {
-            *output = invlist_clone(a);
+            *output = invlist_clone(a, NULL);
             return;
         }
 
@@ -9226,7 +9226,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
         }
 
         /* Here, '*output' is to be overwritten by 'a' */
-        u = invlist_clone(a);
+        u = invlist_clone(a, NULL);
         invlist_replace_list_destroys_src(*output, u);
         SvREFCNT_dec_NN(u);
 
@@ -9243,7 +9243,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
          * the clone */
 
         SV ** dest = (*output == NULL) ? output : &u;
-        *dest = invlist_clone(b);
+        *dest = invlist_clone(b, NULL);
         if (complement_b) {
             _invlist_invert(*dest);
         }
@@ -9468,11 +9468,11 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
             }
 
             if (*i == NULL) {
-                *i = invlist_clone(a);
+                *i = invlist_clone(a, NULL);
                 return;
             }
 
-            r = invlist_clone(a);
+            r = invlist_clone(a, NULL);
             invlist_replace_list_destroys_src(*i, r);
             SvREFCNT_dec_NN(r);
             return;
@@ -9965,7 +9965,7 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
 #endif
 
 PERL_STATIC_INLINE SV*
-S_invlist_clone(pTHX_ SV* const invlist)
+S_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 {
 
     /* Return a new inversion list that is a copy of the input one, which is
@@ -9973,12 +9973,14 @@ S_invlist_clone(pTHX_ SV* const invlist)
 
     /* Need to allocate extra space to accommodate Perl's addition of a
      * trailing NUL to SvPV's, since it thinks they are always strings */
-    SV* new_invlist = _new_invlist(_invlist_len(invlist) + 1);
     STRLEN physical_length = SvCUR(invlist);
     bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
+    assert(new_invlist == NULL);
+
+    new_invlist = _new_invlist(_invlist_len(invlist) + 1);
     *(get_invlist_offset_addr(new_invlist)) = offset;
     invlist_set_len(new_invlist, _invlist_len(invlist), offset);
     Copy(SvPVX(invlist), SvPVX(new_invlist), physical_length, char);
@@ -18110,7 +18112,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              *
              * Handle the case where there something like \W separately */
             if (nposixes) {
-                SV* only_non_utf8_list = invlist_clone(PL_UpperLatin1);
+                SV* only_non_utf8_list = invlist_clone(PL_UpperLatin1, NULL);
 
                 /* A complemented posix class matches all upper Latin1
                  * characters if not in UTF-8.  And it matches just certain
@@ -18974,7 +18976,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                                                   ));
             }
             else if (! *output_invlist) {
-                *output_invlist = invlist_clone(invlist);
+                *output_invlist = invlist_clone(invlist, NULL);
             }
             else {
                 _invlist_union(*output_invlist, invlist, output_invlist);
@@ -21129,7 +21131,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      * don't change the caller's list) */
     if (nonbitmap_invlist) {
         assert(invlist_highest(nonbitmap_invlist) < NUM_ANYOF_CODE_POINTS);
-        invlist = invlist_clone(nonbitmap_invlist);
+        invlist = invlist_clone(nonbitmap_invlist, NULL);
     }
     else {  /* Worst case size is every other code point is matched */
         invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
@@ -21150,7 +21152,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             /* And this flag for matching all non-ASCII 0xFF and below */
             if (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
             {
-                not_utf8 = invlist_clone(PL_UpperLatin1);
+                not_utf8 = invlist_clone(PL_UpperLatin1, NULL);
             }
         }
         else if (OP(node) == ANYOFL) {
@@ -21206,7 +21208,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
         /* Since this list is passed in, we have to make a copy before
          * modifying it */
-        only_utf8_locale = invlist_clone(only_utf8_locale_invlist);
+        only_utf8_locale = invlist_clone(only_utf8_locale_invlist, NULL);
 
         _invlist_subtract(only_utf8_locale, invlist, &only_utf8_locale);
 
