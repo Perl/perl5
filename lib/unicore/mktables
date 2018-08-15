@@ -12968,6 +12968,11 @@ sub register_fraction($) {
 
     my $float = eval $rational;
     $float = sprintf "%.*e", $E_FLOAT_PRECISION, $float;
+
+    # Strip off any leading zeros beyond 2 digits to make it C99 compliant.
+    # (Windows has 3 digit exponents, contrary to C99)
+    $float =~ s/ ( .* e [-+] ) 0* ( \d{2,}? ) /$1$2/x;
+
     if (   defined $nv_floating_to_rational{$float}
         && $nv_floating_to_rational{$float} ne $rational)
     {
