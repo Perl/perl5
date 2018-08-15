@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use 5.010;
+use v5.16;
 
 my @warnings;
 local $SIG {__WARN__} = sub {push @warnings, "@_"};
@@ -357,8 +357,8 @@ sub run_tests {
 #
 
 sub InKana1 {<<'--'}
-3040    309F
-30A0    30FF
+3040    309F            # A comment; next line has trailing spaces
+30A0    30FF    
 --
 
 sub InKana2 {<<'--'}
@@ -367,15 +367,18 @@ sub InKana2 {<<'--'}
 --
 
 sub InKana3 {<<'--'}
+# First line comment
 +utf8::InHiragana
+# Full line comment
 +utf8::InKatakana
 -utf8::IsCn
 --
 
 sub InNotKana {<<'--'}
-!utf8::InHiragana
--utf8::InKatakana
+!utf8::InHiragana       # A comment; next line has trailing spaces
+-utf8::InKatakana   
 +utf8::IsCn
+# Final line comment
 --
 
 sub InConsonant {
