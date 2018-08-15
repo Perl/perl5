@@ -21928,6 +21928,15 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 void
 Perl_init_uniprops(pTHX)
 {
+    PL_user_def_props = newHV();
+
+#ifdef USE_ITHREADS
+
+    HvSHAREKEYS_off(PL_user_def_props);
+    PL_user_def_props_aTHX = aTHX;
+
+#endif
+
     /* Set up the inversion list global variables */
 
     PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
@@ -22006,6 +22015,22 @@ Perl_init_uniprops(pTHX)
     PL_utf8_xidstart = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDS]);
 #endif
 }
+
+#ifdef USE_ITHREADS
+#  define DECLARATION_FOR_GLOBAL_CONTEXT                                    \
+                                        PerlInterpreter * save_aTHX = aTHX;
+#  define SWITCH_TO_GLOBAL_CONTEXT                                          \
+                           PERL_SET_CONTEXT((aTHX = PL_user_def_props_aTHX))
+#  define RESTORE_CONTEXT  PERL_SET_CONTEXT((aTHX = save_aTHX));
+#  define CUR_CONTEXT      aTHX
+#  define ORIGINAL_CONTEXT save_aTHX
+#else
+#  define DECLARATION_FOR_GLOBAL_CONTEXT
+#  define SWITCH_TO_GLOBAL_CONTEXT          NOOP
+#  define RESTORE_CONTEXT                   NOOP
+#  define CUR_CONTEXT                       NULL
+#  define ORIGINAL_CONTEXT                  NULL
+#endif
 
 SV *
 Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,

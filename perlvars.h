@@ -307,8 +307,15 @@ PERLVAR(G, utf8_mark,	SV *)
 PERLVAR(G, InBitmap,	SV *)
 PERLVAR(G, CCC_non0_non230,	SV *)
 
+/* Definitions of user-defined \p{} properties, as the subs that define them
+ * are only called once */
+PERLVARI(G, user_def_props,	HV *, NULL)
+
 #if defined(USE_ITHREADS)
-PERLVAR(G, user_prop_mutex, perl_mutex)
+PERLVAR(G, user_def_props_aTHX, PerlInterpreter *)  /* aTHX that user_def_props
+                                                       was defined in */
+PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
+                                              PL_user_defined_properties */
 #endif
 
 /* Everything that folds to a given character, for case insensitivity regex
