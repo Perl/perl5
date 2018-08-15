@@ -1643,6 +1643,11 @@
 #define doopen_pm(a)		S_doopen_pm(aTHX_ a)
 #    endif
 #  endif
+#  if !defined(PERL_EXT_RE_BUILD)
+#    if defined(PERL_IN_REGCOMP_C)
+#define initialize_invlist_guts(a,b)	S_initialize_invlist_guts(aTHX_ a,b)
+#    endif
+#  endif
 #  if !defined(PERL_IS_MINIPERL)
 #    if defined(PERL_IN_PERL_C)
 #define incpush_if_exists(a,b,c)	S_incpush_if_exists(aTHX_ a,b,c)

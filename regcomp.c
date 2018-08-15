@@ -8747,6 +8747,23 @@ S_invlist_max(SV* const invlist)
            ? FROM_INTERNAL_SIZE(SvCUR(invlist)) - 1
            : FROM_INTERNAL_SIZE(SvLEN(invlist)) - 1;
 }
+
+STATIC void
+S_initialize_invlist_guts(pTHX_ SV* invlist, const Size_t initial_size)
+{
+    PERL_ARGS_ASSERT_INITIALIZE_INVLIST_GUTS;
+
+    /* First 1 is in case the zero element isn't in the list; second 1 is for
+     * trailing NUL */
+    SvGROW(invlist, TO_INTERNAL_SIZE(initial_size + 1) + 1);
+    invlist_set_len(invlist, 0, 0);
+
+    /* Force iterinit() to be used to get iteration to work */
+    invlist_iterfinish(invlist);
+
+    *get_invlist_previous_index_addr(invlist) = 0;
+}
+
 SV*
 Perl__new_invlist(pTHX_ IV initial_size)
 {
@@ -8764,15 +8781,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     /* Allocate the initial space */
     new_list = newSV_type(SVt_INVLIST);
 
-    /* First 1 is in case the zero element isn't in the list; second 1 is for
-     * trailing NUL */
-    SvGROW(new_list, TO_INTERNAL_SIZE(initial_size + 1) + 1);
-    invlist_set_len(new_list, 0, 0);
-
-    /* Force iterinit() to be used to get iteration to work */
-    invlist_iterfinish(new_list);
-
-    *get_invlist_previous_index_addr(new_list) = 0;
+    initialize_invlist_guts(new_list, initial_size);
 
     return new_list;
 }

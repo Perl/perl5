@@ -4165,6 +4165,9 @@ PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(SV* invlist)
 	assert(invlist)
 #endif
 
+STATIC void	S_initialize_invlist_guts(pTHX_ SV* invlist, const Size_t initial_size);
+#define PERL_ARGS_ASSERT_INITIALIZE_INVLIST_GUTS	\
+	assert(invlist)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_invlist_clear(pTHX_ SV* invlist);
 #define PERL_ARGS_ASSERT_INVLIST_CLEAR	\
