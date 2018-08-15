@@ -396,4 +396,6 @@ sub ISfoo   { die }
 sub INfoo   { die }
 sub Is::foo { die }
 sub In::foo { die }
+
+1;
 __END__
