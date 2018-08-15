@@ -9969,18 +9969,24 @@ Perl_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
     /* Return a new inversion list that is a copy of the input one, which is
      * unchanged.  The new list will not be mortal even if the old one was. */
 
-    /* Need to allocate extra space to accommodate Perl's addition of a
-     * trailing NUL to SvPV's, since it thinks they are always strings */
-    STRLEN physical_length = SvCUR(invlist);
-    bool offset = *(get_invlist_offset_addr(invlist));
+    const STRLEN nominal_length = _invlist_len(invlist);    /* Why not +1 XXX */
+    const STRLEN physical_length = SvCUR(invlist);
+    const bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    assert(new_invlist == NULL);
+    /* Need to allocate extra space to accommodate Perl's addition of a
+     * trailing NUL to SvPV's, since it thinks they are always strings */
+    if (new_invlist == NULL) {
+        new_invlist = _new_invlist(nominal_length);
+    }
+    else {
+        sv_upgrade(new_invlist, SVt_INVLIST);
+        initialize_invlist_guts(new_invlist, nominal_length);
+    }
 
-    new_invlist = _new_invlist(_invlist_len(invlist) + 1);
     *(get_invlist_offset_addr(new_invlist)) = offset;
-    invlist_set_len(new_invlist, _invlist_len(invlist), offset);
+    invlist_set_len(new_invlist, nominal_length, offset);
     Copy(SvPVX(invlist), SvPVX(new_invlist), physical_length, char);
 
     return new_invlist;
