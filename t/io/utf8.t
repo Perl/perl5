@@ -453,6 +453,30 @@ SKIP: {
         data => _c("abc\x{D800}def"),
         options => "error=quiet,strict,allow_surrogates",
        },
+       {
+        name => "strict, warn, truncated character",
+        data => _c("abc\x{FFF0}", 4),
+        expect => "abc\x{FFFD}",
+        options => "error=warn,strict",
+        messages => qr/^Malformed UTF-8 character: \\x\w{2} \(too short; 1 byte available, need \d\)/,
+       },
+       {
+        name => "strict, warn, incomplete character",
+        data => _c("abc\x{FFF0}", 4)."def",
+        expect => "abc\x{FFFD}def",
+        options => "error=warn,strict",
+        messages => qr/^Malformed UTF-8 character: (?:\\x\w\w){3} \(unexpected non-continuation byte 0x\w\w, immediately after start byte 0x\w\w; need \d bytes, got 1\)/,
+       },
+       (
+        map
+        +{
+          name => "strict, warn, incomplete character split across buffer $_",
+          data => "x" x $_ . _c("\x{FFF0}", 2)."def",
+          expect => "x" x $_ . "\x{FFFD}def",
+          options => "error=warn,strict",
+          messages => qr/^Malformed UTF-8 character: (?:\\x\w\w){3} \(unexpected non-continuation byte 0x\w\w, 2 bytes after start byte 0x\w\w; need \d bytes, got 2\)/,
+         }, 8190 .. 8196
+       ),
       );
 
     for my $test (@tests) {
