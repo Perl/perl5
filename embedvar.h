@@ -468,6 +468,8 @@
 #define PL_Gtimesbase		(my_vars->Gtimesbase)
 #define PL_use_safe_putenv	(my_vars->Guse_safe_putenv)
 #define PL_Guse_safe_putenv	(my_vars->Guse_safe_putenv)
+#define PL_user_prop_mutex	(my_vars->Guser_prop_mutex)
+#define PL_Guser_prop_mutex	(my_vars->Guser_prop_mutex)
 #define PL_utf8_charname_begin	(my_vars->Gutf8_charname_begin)
 #define PL_Gutf8_charname_begin	(my_vars->Gutf8_charname_begin)
 #define PL_utf8_charname_continue	(my_vars->Gutf8_charname_continue)

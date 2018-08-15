@@ -352,6 +352,7 @@ if ($define{'PERL_USE_SAFE_PUTENV'}) {
 
 unless ($define{'USE_ITHREADS'}) {
     ++$skip{PL_thr_key};
+    ++$skip{PL_user_prop_mutex};
 }
 
 # USE_5005THREADS symbols. Kept as reference for easier removal
