@@ -2517,8 +2517,9 @@ backtracking occurs until something all in the same script is found that
 matches, or all possibilities are exhausted.  This can cause a lot of
 backtracking, but generally, only malicious input will result in this,
 though the slow down could cause a denial of service attack.  If your
-needs permit, it is best to make the pattern atomic.  This is so likely
-to be what you want, that instead of writing this:
+needs permit, it is best to make the pattern atomic to cut down on the
+amount of backtracking.  This is so likely to be what you want, that
+instead of writing this:
 
  (*script_run:(?>pattern))
 
@@ -2532,7 +2533,10 @@ you can write either of these:
 In Taiwan, Japan, and Korea, it is common for text to have a mixture of
 characters from their native scripts and base Chinese.  Perl follows
 Unicode's UTS 39 (L<http://unicode.org/reports/tr39/>) Unicode Security
-Mechanisms in allowing such mixtures.
+Mechanisms in allowing such mixtures.  For example, the Japanese scripts
+Katakana and Hiragana are commonly mixed together in practice, along
+with some Chinese characters, and hence are treated as being in a single
+script run by Perl.
 
 The rules used for matching decimal digits are somewhat different.  Many
 scripts have their own sets of digits equivalent to the Western C<0>
@@ -2578,7 +2582,53 @@ This feature is experimental, and the exact syntax and details of
 operation are subject to change; using it yields a warning in the
 C<experimental::script_run> category.
 
-The C<Script_Extensions> property is used as the basis for this feature.
+The C<Script_Extensions> property as modified by UTS 39
+(L<http://unicode.org/reports/tr39/>) is used as the basis for this
+feature.
+
+To summarize,
+
+=over 4
+
+=item *
+
+All length 0 or length 1 sequences are script runs.
+
+=item *
+
+A longer sequence is a script run if and only if B<all> of the following
+conditions are met:
+
+Z<>
+
+=over
+
+=item 1
+
+No code point in the sequence has the C<Script_Extension> property of
+C<Unknown>.
+
+This currently means that all code points the sequence have been
+assigned by Unicode to be characters that aren't private use nor
+surrogate code points.
+
+=item 2
+
+All characters in the sequence come from the Common script and/or the
+Inherited script and/or a single other script.
+
+The script of a character is determined by the C<Script_Extensions>
+property as modified by UTS 39 (L<http://unicode.org/reports/tr39/>), as
+described above.
+
+=item 3
+
+All decimal digits in the sequence come from the same block of 10
+consecutive digits.
+
+=back
+
+=back
 
 =head2 Special Backtracking Control Verbs
 
