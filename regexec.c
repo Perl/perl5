@@ -8341,12 +8341,18 @@ NULL
 		maxopenparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
+            scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
+
+            /* handle the single-char capture called as a GOSUB etc */
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
             {
-	        ST.min=1;
-	        ST.max=1;
+                char *li = locinput;
+                if (!regrepeat(rex, &li, scan, reginfo, 1))
+		    sayNO;
+                SET_locinput(li);
+                goto fake_end;
 	    }
-            scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
+
 	    goto repeat;
 
 	case CURLY:		/*  /A{m,n}B/ where A is width 1 char */
@@ -8579,16 +8585,12 @@ NULL
 
           curly_try_B_min:
             CURLY_SETPAREN(ST.paren, ST.count);
-            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-                goto fake_end;
             PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
 	    NOT_REACHED; /* NOTREACHED */
 
 
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
-            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-                goto fake_end;
 	    {
 		bool could_match = locinput < reginfo->strend;
 
