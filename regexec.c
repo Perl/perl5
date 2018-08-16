@@ -10465,7 +10465,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          * one to use, and the character is in that sequence.  Now that we know
          * the script, we can use script_zeros[] to directly find which
          * sequence the script uses, except in a few cases it returns 0 */
-        if (UNLIKELY(zero_of_run == 0) && script_of_char >= 0) {
+        if (UNLIKELY(zero_of_run == 0 && script_of_char >= 0)) {
             zero_of_run = script_zeros[script_of_char];
         }
 
