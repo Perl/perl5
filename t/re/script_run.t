@@ -84,6 +84,11 @@ foreach my $type ('script_run', 'sr', 'atomic_script_run', 'asr') {
 
     # From UTS 39
     like("写真だけの結婚式", $script_run, "Mixed Hiragana and Han");
+
+    unlike "\N{THAI DIGIT FIVE}1", $script_run, "Thai digit followed by '1'";
+    unlike "1\N{THAI DIGIT FIVE}", $script_run, "'1' followed by Thai digit ";
+    unlike "\N{BENGALI DIGIT ZERO}\N{CHAKMA DIGIT SEVEN}", $script_run,
+           "Two digits in same extended script but from different sets of 10";
 }
 
     # Until fixed, this was skipping the '['

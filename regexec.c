@@ -10626,23 +10626,39 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
   scripts_match:
 
         /* Here, the script of the character is compatible with that of the
-         * run.  Either they match exactly, or one or both can be any of
-         * several scripts, and the intersection is not empty.  If the
-         * character is not a decimal digit, we are done with it.  Otherwise,
-         * it could still fail if it is from a different set of 10 than seen
-         * already (or we may not have seen any, and we need to set the
-         * sequence).  If we have determined a single script and that script
-         * only has one set of digits (almost all scripts are like that), then
-         * this isn't a problem, as any digit must come from the same sequence.
-         * The only scripts that have multiple sequences have been constructed
-         * to be 0 in 'script_zeros[]'.
+         * run.  That means that in most cases, it continues the script run.
+         * Either it and the run match exactly, or one or both can be in any of
+         * several scripts, and the intersection is not empty.  But if the
+         * character is a decimal digit, we need further handling.  If we
+         * haven't seen a digit before, it would establish what set of 10 all
+         * must come from; and if we have established a set, we need to check
+         * that this is in it.
          *
-         * Here we check if it is a digit. */
+         * But there are cases we can rule out without having to look up if
+         * this is a digit:
+         *   a.  All instances of [0-9] have been dealt with earlier.
+         *   b.  The next digit encoded by Unicode is 1600 code points further
+         *       on, so if the code point in this loop iteration is less than
+         *       that, it isn't a digit.
+         *   c.  Most scripts that have digits have a single set of 10.  If
+         *       we've encountered a digit in such a script, 'zero_of_run' is
+         *       set to the code point (call it z) whose numeric value is 0.
+         *       If the code point in this loop iteration is in the range
+         *       z..z+9, it is in the script's set of 10, and we've actually
+         *       handled it earlier in this function and won't reach this
+         *       point.  But, code points in that script that aren't in that
+         *       range can't be digits, so we don't have to look any such up.
+         *       We can tell if this script is such a one by looking at
+         *       'script_zeros[]' for it.  It is non-zero iff it has a single
+         *       set of digits.  This rule doesn't apply if we haven't narrowed
+         *       down the possible scripts to a single one yet.  Nor if the
+         *       zero of the run is '0', as that also hasn't narrowed things
+         *       down completely */
         if (    cp >= FIRST_NON_ASCII_DECIMAL_DIGIT
-            && (   (          ! SEEN_A_DIGIT
-                    || (  (   script_of_char >= 0
-                           && script_zeros[script_of_char] == 0)
-                        ||    intersection))))
+            && (   intersection
+                || script_of_char < 0   /* Also implies an intersection */
+                || zero_of_run == '0'
+                || script_zeros[script_of_char] == 0))
         {
             SSize_t range_zero_index;
             range_zero_index = _invlist_search(decimals_invlist, cp);
