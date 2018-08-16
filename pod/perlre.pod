@@ -649,11 +649,16 @@ possible matches.  And some of those digits look like some of the 10
 ASCII digits, but mean a different number, so a human could easily think
 a number is a different quantity than it really is.  For example,
 C<BENGALI DIGIT FOUR> (U+09EA) looks very much like an
-C<ASCII DIGIT EIGHT> (U+0038).  And, C<\d+>, may match strings of digits
-that are a mixture from different writing systems, creating a security
-issue.  L<Unicode::UCD/num()> can be used to sort
-this out.  Or the C</a> modifier can be used to force C<\d> to match
-just the ASCII 0 through 9.
+C<ASCII DIGIT EIGHT> (U+0038), and C<LEPCHA DIGIT SIX> (U+1C46) looks
+very much like an C<ASCII DIGIT FIVE> (U+0035).  And, C<\d+>, may match
+strings of digits that are a mixture from different writing systems,
+creating a security issue.  A fraudulent website, for example, could
+display the price of something using U+1C46, and it would appear to the
+user that something cost 500 units, but it really costs 600.  A browser
+that enforced script runs (L</Script Runs>) would prevent that
+fraudulent display.  L<Unicode::UCD/num()> can also be used to sort this
+out.  Or the C</a> modifier can be used to force C<\d> to match just the
+ASCII 0 through 9.
 
 Also, under this modifier, case-insensitive matching works on the full
 set of Unicode

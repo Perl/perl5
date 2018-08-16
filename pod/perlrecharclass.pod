@@ -109,14 +109,17 @@ security issues.
 
 Some digits that C<\d> matches look like some of the [0-9] ones, but
 have different values.  For example, BENGALI DIGIT FOUR (U+09EA) looks
-very much like an ASCII DIGIT EIGHT (U+0038).  An application that
+very much like an ASCII DIGIT EIGHT (U+0038), and LEPCHA DIGIT SIX
+(U+1C46) looks very much like an ASCII DIGIT FIVE (U+0035).  An
+application that
 is expecting only the ASCII digits might be misled, or if the match is
 C<\d+>, the matched string might contain a mixture of digits from
 different writing systems that look like they signify a number different
 than they actually do.  L<Unicode::UCD/num()> can
 be used to safely
 calculate the value, returning C<undef> if the input string contains
-such a mixture.
+such a mixture.  Otherwise, for example, a displayed price might be
+deliberately different than it appears.
 
 What C<\p{Digit}> means (and hence C<\d> except under the C</a>
 modifier) is C<\p{General_Category=Decimal_Number}>, or synonymously,
