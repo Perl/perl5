@@ -33,11 +33,13 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh" id="6b877bbd2c071b3e0659fab552a74dc2ff7e08fb" ticket="133368" desc="treat when(index() > -1) as a boolean expression"/>
+<commit votes="steveh khw" id="6b877bbd2c071b3e0659fab552a74dc2ff7e08fb" ticket="133368" desc="treat when(index() > -1) as a boolean expression"/>
 
 </div>
 
 <div><h3>New Feature Fixes</h3>
+
+<commit votes="khw" id="7da8e27b9d7d2be4e770d074405ddb9941e6c8b7" ticket="none" desc="Fix script run \"1\N{THAI DIGIT}\""/>
 
 </div>
 
