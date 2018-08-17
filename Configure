@@ -3864,8 +3864,13 @@ esac
 
 . ./posthint.sh
 
+# Allow overrides for reproducible builds
+case "$cf_time" in
+"")
+	cf_time=`LC_ALL=C; LANGUAGE=C; export LC_ALL; export LANGUAGE; $date 2>&1`
+	;;
+esac
 : who configured the system
-cf_time=`LC_ALL=C; LANGUAGE=C; export LC_ALL; export LANGUAGE; $date 2>&1`
 case "$cf_by" in
 "")
 	cf_by=`(logname) 2>/dev/null`
