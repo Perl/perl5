@@ -8267,9 +8267,9 @@ NULL
 		/* emulate CLOSE: mark current A as captured */
 		I32 paren = ST.me->flags;
 		if (ST.count) {
-		    rex->offs[paren].start
-			= HOPc(locinput, -ST.alen) - reginfo->strbeg;
-		    rex->offs[paren].end = locinput - reginfo->strbeg;
+                    CLOSE_CAPTURE(paren,
+			HOPc(locinput, -ST.alen) - reginfo->strbeg,
+		        locinput - reginfo->strbeg);
 		    if ((U32)paren > rex->lastparen)
 			rex->lastparen = paren;
 		    rex->lastcloseparen = paren;
@@ -8311,8 +8311,8 @@ NULL
 #define CURLY_SETPAREN(paren, success) \
     if (paren) { \
 	if (success) { \
-	    rex->offs[paren].start = HOPc(locinput, -1) - reginfo->strbeg; \
-	    rex->offs[paren].end = locinput - reginfo->strbeg; \
+            CLOSE_CAPTURE(paren, HOPc(locinput, -1) - reginfo->strbeg, \
+	                         locinput - reginfo->strbeg); \
 	    if (paren > rex->lastparen) \
 		rex->lastparen = paren; \
 	    rex->lastcloseparen = paren; \
