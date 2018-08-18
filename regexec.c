@@ -336,7 +336,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
         rex->lastparen = ix;                                               \
     rex->lastcloseparen = ix;                                              \
     DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
-        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "max: %" UVuf "\n", \
+        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf " max: %" UVuf "\n", \
         depth,                                                             \
         PTR2UV(rex),                                                       \
         PTR2UV(rex->offs),                                                 \
@@ -347,6 +347,15 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     ))
 
 #define UNWIND_PAREN(lp, lcp)               \
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_  \
+        "UNWIND_PAREN: rex=0x%" UVxf " offs=0x%" UVxf ": invalidate (%" UVuf "..%" UVuf "] set lcp: %" UVuf "\n", \
+        depth,                              \
+        PTR2UV(rex),                        \
+        PTR2UV(rex->offs),                  \
+        (UV)(lp),                           \
+        (UV)(rex->lastparen),               \
+        (UV)(lcp)                           \
+    ));                                     \
     for (n = rex->lastparen; n > lp; n--)   \
         rex->offs[n].end = -1;              \
     rex->lastparen = n;                     \
