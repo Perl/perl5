@@ -328,6 +328,20 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     );                                                          \
     regcpblow(cp)
 
+/* XXX really need to log other places start/end are set too */
+#define CLOSE_CAPTURE                                                      \
+    rex->offs[n].start = rex->offs[n].start_tmp;                           \
+    rex->offs[n].end = locinput - reginfo->strbeg;                         \
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
+        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "\n", \
+        depth,                                                             \
+        PTR2UV(rex),                                                       \
+        PTR2UV(rex->offs),                                                 \
+        (UV)n,                                                             \
+        (IV)rex->offs[n].start,                                            \
+        (IV)rex->offs[n].end                                               \
+    ))
+
 #define UNWIND_PAREN(lp, lcp)               \
     for (n = rex->lastparen; n > lp; n--)   \
         rex->offs[n].end = -1;              \
@@ -7584,19 +7598,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             script_run_begin = (U8 *) locinput;
             break;
 
-/* XXX really need to log other places start/end are set too */
-#define CLOSE_CAPTURE                                                      \
-    rex->offs[n].start = rex->offs[n].start_tmp;                           \
-    rex->offs[n].end = locinput - reginfo->strbeg;                         \
-    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
-        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "\n", \
-        depth,                                                             \
-        PTR2UV(rex),                                                       \
-        PTR2UV(rex->offs),                                                 \
-        (UV)n,                                                             \
-        (IV)rex->offs[n].start,                                            \
-        (IV)rex->offs[n].end                                               \
-    ))
 
 	case CLOSE:  /*  )  */
 	    n = ARG(scan);  /* which paren pair */
