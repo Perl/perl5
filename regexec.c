@@ -329,17 +329,19 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     regcpblow(cp)
 
 /* XXX really need to log other places start/end are set too */
-#define CLOSE_CAPTURE                                                      \
-    rex->offs[n].start = rex->offs[n].start_tmp;                           \
-    rex->offs[n].end = locinput - reginfo->strbeg;                         \
+
+/* set the start and end positions of capture ix */
+#define CLOSE_CAPTURE(ix, s, e)                                            \
+    rex->offs[ix].start = s;                                               \
+    rex->offs[ix].end = e;                                                 \
     DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
         "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "\n", \
         depth,                                                             \
         PTR2UV(rex),                                                       \
         PTR2UV(rex->offs),                                                 \
-        (UV)n,                                                             \
-        (IV)rex->offs[n].start,                                            \
-        (IV)rex->offs[n].end                                               \
+        (UV)ix,                                                            \
+        (IV)rex->offs[ix].start,                                           \
+        (IV)rex->offs[ix].end                                              \
     ))
 
 #define UNWIND_PAREN(lp, lcp)               \
@@ -7601,7 +7603,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case CLOSE:  /*  )  */
 	    n = ARG(scan);  /* which paren pair */
-	    CLOSE_CAPTURE;
+	    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                             locinput - reginfo->strbeg);
 	    if (n > rex->lastparen)
 		rex->lastparen = n;
 	    rex->lastcloseparen = n;
@@ -7632,7 +7635,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     if ( OP(cursor)==CLOSE ){
                         n = ARG(cursor);
                         if ( n <= lastopen ) {
-			    CLOSE_CAPTURE;
+			    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                                             locinput - reginfo->strbeg);
                             if (n > rex->lastparen)
                                 rex->lastparen = n;
                             rex->lastcloseparen = n;
