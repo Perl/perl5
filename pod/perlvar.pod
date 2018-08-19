@@ -1046,7 +1046,10 @@ This variable is read-only and dynamically-scoped.
 =item $+
 X<$+> X<$LAST_PAREN_MATCH>
 
-The text matched by the last bracket of the last successful search pattern.
+The text matched by the highest used capture group of the last
+successful search pattern.  It is logically equivalent to the highest
+numbered capture variable (C<$1>, C<$2>, ...) which has a defined value.
+
 This is useful if you don't know which one of a set of alternative patterns
 matched.  For example:
 
@@ -1063,7 +1066,15 @@ X<$^N> X<$LAST_SUBMATCH_RESULT>
 
 The text matched by the used group most-recently closed (i.e. the group
 with the rightmost closing parenthesis) of the last successful search
-pattern.
+pattern. This is subtly different from C<$+>. For example in
+
+    "ab" =~ /^((.)(.))$/
+
+we have
+
+    $1,$^N   have the value "ab"
+    $2       has  the value "a"
+    $3,$+    have the value "b"
 
 This is primarily used inside C<(?{...})> blocks for examining text
 recently matched.  For example, to effectively capture text to a variable
