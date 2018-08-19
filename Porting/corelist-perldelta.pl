@@ -174,13 +174,6 @@ sub corelist_delta {
         'data'         => $changes{'Net::Cmd'}
       }
     ],
-    'Locale-Codes' => [
-      {
-        'name'         => 'Locale::Codes',
-        'modification' => $getModifyType->( $changes{'Locale::Codes'} ),
-        'data'         => $changes{'Locale::Codes'}
-      }
-    ],
     'PathTools' => [
       {
         'name'         => 'File::Spec',

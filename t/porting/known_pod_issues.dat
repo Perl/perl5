@@ -161,6 +161,8 @@ Lingua::ZH::Romanize::Pinyin
 List::Gather
 listen(2)
 local::lib
+Locale::Country
+Locale::Language
 localeconv(3)
 lockf(3)
 Log::Message
