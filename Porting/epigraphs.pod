@@ -17,6 +17,29 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.2 - Rick Riordan, "The Lightning Thief"
+
+L<Announced on 2018-08-20 by Chris 'BinGOs' Williams|https://www.nntp.perl.org/group/perl.perl5.porters/2018/08/msg251918.html>
+
+  Look, I didn't want to be a half-blood.
+
+  If you're reading this because you think you might be one,
+  my advice is: close this book right now. Believe whatever
+  lie your mom or dad told you about your birth, and try
+  to lead a normal life.
+
+  Being a half-blood is dangerous. It's scary. Most of the time,
+  it gets you killed in painful, nasty ways.
+
+  If you're a normal kid, reading this because you think it's
+  fiction, great. Read on. I envy you for being able to believe
+  that none of this ever happened.
+
+  But if you recognize yourself in these pages - if you feel
+  something stirring inside - stop reading immediately.
+  You might be one of us. And once you know that, it's only a
+  matter of time before they sense it too, and they'll come for you.
+
 =head2 v5.29.1 - Richard Curtis & Ben Elton, "Blackadder, Series 3, Episode 2: Ink and Incapability"
 
 L<Announced on 2018-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2018/07/msg251605.html>
