@@ -776,7 +776,7 @@ represent a code point that cannot fit in a UV on the current platform.  Hence
 this macro can give different results when run on a 64-bit word machine than on
 one with a 32-bit word size.
 
-Note that it is deprecated to have code points that are larger than what can
+Note that it is illegal to have code points that are larger than what can
 fit in an IV on the current machine.
 
 =cut
