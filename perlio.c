@@ -4961,6 +4961,7 @@ static struct {
 } map[] = {
     { STR_WITH_LEN("allow_surrogates"), 0, UTF8_DISALLOW_SURROGATE },
     { STR_WITH_LEN("allow_noncharacters"), 0, UTF8_DISALLOW_NONCHAR },
+    { STR_WITH_LEN("allow_supers"), 0, UTF8_DISALLOW_SUPER },
     { STR_WITH_LEN("allow_nonshortest"), UTF8_ALLOW_LONG, UTF8_ALLOW_LONG },
     { STR_WITH_LEN("strict"), UTF8_DISALLOW_ILLEGAL_INTERCHANGE, ~(U32)UTF8_ONERROR_MASK },
     { STR_WITH_LEN("loose"), UTF8_ALLOW_ANY, ~(U32)UTF8_ONERROR_MASK },
@@ -4982,21 +4983,21 @@ static int lookup_parameter(pTHX_ const char* ptr, size_t len) {
 static U32 parse_parameters(pTHX_ SV* param) {
     STRLEN len;
     U32 flags = UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SUPER | UTF8_CROAK_ON_ERROR;
-    const char *begin, *delim, *end;
-    if (!param || !SvOK(param))
-        return flags;
 
-    begin = SvPV(param, len);
-    if (!len)
-        return flags;
-    end = begin + len;
-    do {
-        int i;
-        delim = strchr(begin, ',');
-        i = lookup_parameter(aTHX_ begin, (delim ? delim : end) - begin);
-        flags = (flags & ~map[i].mask) | map[i].value;
-        begin = delim ? delim+1 : end;
-    } while (delim);
+    if (param && SvOK(param)) {
+        const char *begin, *delim, *end;
+        begin = SvPV(param, len);
+        if (len) {
+            end = begin + len;
+            do {
+                int i;
+                delim = strchr(begin, ',');
+                i = lookup_parameter(aTHX_ begin, (delim ? delim : end) - begin);
+                flags = (flags & ~map[i].mask) | map[i].value;
+                begin = delim ? delim+1 : end;
+            } while (delim);
+        }
+    }
 
     if ((flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR
         || (flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR) {
@@ -5072,9 +5073,11 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
                                       (flags & UTF8_ONERROR_MASK) == UTF8_WARN_ON_ERROR ? NULL : &msgs);
 
             assert(*start + retlen <= send);
-            if (!eof && (errors & UTF8_GOT_SHORT)) {
+            /* we can get UTF8_GOT_SHORT even with *start + retlen < send */
+            if (!eof
+                && (errors & UTF8_GOT_SHORT)
+                && *start + retlen == send) {
                 /* partial character at the end of the buffer */
-                assert(*start + retlen == send);
                 return retval;
             }
 

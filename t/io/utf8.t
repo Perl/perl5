@@ -414,7 +414,7 @@ SKIP: {
        },
        {
         name => "multiple buffer unicode",
-        data => _c("abc\x{101}\n" x 100),
+        data => _c("abc\x{101}\n" x 10000),
        },
        # split a character across buffer boundaries
        (
@@ -482,8 +482,63 @@ SKIP: {
         data => _c("abc\x{FFF0}", 4) . "x",
         expect => "abc\x{FFFD}x",
         options => "strict,error=warn",
-        messages => [ qr/xx/ ],
+        messages => [ qr/^Malformed UTF-8 character: (?:\\x\w\w){2} \(unexpected non-continuation byte 0x\w\w, immediately after start byte 0x\w\w; need \d bytes, got 1\)/ ],
        },
+       # option coverage
+       {
+        # this was broken for a while
+        name => "default, no parens, test surrogates",
+        data => _c("abc\x{D800}\x{DFFF}def"),
+        messages => [ qr/^UTF-16 surrogate U\+D800/ ],
+        options => undef, # "<:utf8" instead of "<:utf8()" which is covered next
+        croak => 1,
+       },
+       {
+        # this too
+        name => "default, test surrogates",
+        data => _c("abc\x{D800}\x{DFFF}def"),
+        messages => [ qr/^UTF-16 surrogate U\+D800/ ],
+        options => "", # becomes "<:utf8()"
+        croak => 1,
+       },
+       (
+        map
+        {
+            my ($name, $code, $result) = @$_;
+            utf8::decode($result = $code) unless $result;
+            (
+             {
+              name => "strict, allow_$name",
+              data => "abc${code}def",
+              options => "strict,allow_$name",
+              expect => "abc${result}def",
+             },
+             {
+              name => "strict, quiet, $name",
+              data => "abc${code}def",
+              options => "strict,error=quiet",
+              expect => "abc\x{fffd}def",
+             },
+             {
+              name => "strict, fail, $name",
+              data => "abc${code}def",
+              options => "strict,error=fail",
+              expect => "abc",
+             },
+             {
+              name => "loose, $name",
+              data => "abc${code}def",
+              options => "loose",
+              expect => "abc${result}def",
+             },
+            )
+        } (
+           [ "surrogates", _c("\x{d800}") ],
+           [ "noncharacters", _c("\x{fdd0}") ],
+           [ "supers", _c("\x{110000}") ],
+           [ "nonshortest", "\xE0\x81\x80", "\x{fffd}" ],
+          )
+       ),
       );
 
     for my $test (@tests) {
@@ -493,48 +548,50 @@ SKIP: {
         $messages = [] unless defined $messages;
         $messages = [ $messages ] if ref $messages ne "ARRAY";
         utf8::decode($expect = $data) unless defined $expect;
-        $options = '' unless defined $options;
         utf8::downgrade($data); # must be octets
         open my $f, ">", $a_file
           or die "Cannot create $a_file: $!";
         binmode $f;
         print $f $data;
         close $f;
+        unless ($test->{croak}) {
+            my $poptions = defined $options ? "($options)" : "";
 
-        if (ok(open(my $fi, "<:utf8($options)", $a_file), "$name: open for read()")) {
-            my @warn;
-            local $SIG{__WARN__} = sub { push @warn, "@_" };
-            my $buf;
-            ok(read($fi, $buf, length $data), "$name: read with read()");
-            is($buf, $expect, "$name: match with read()");
-            like_array(\@warn, $messages, "$name: warnings with read()");
+            if (ok(open(my $fi, "<:utf8$poptions", $a_file), "$name: open for read()")) {
+                my @warn;
+                local $SIG{__WARN__} = sub { push @warn, "@_" };
+                my $buf;
+                ok(read($fi, $buf, length $data), "$name: read with read()");
+                is($buf, $expect, "$name: match with read() ($options)");
+                like_array(\@warn, $messages, "$name: warnings with read()");
 
-            close $fi;
-        }
-        if (ok(open(my $fi, "<:utf8($options)", $a_file), "$name: open for readline")) {
-            my @warn;
-            local $SIG{__WARN__} = sub { push @warn, "@_" };
-            my $buf = '';
-            while (my $line = <$fi>) {
-                $buf .= $line;
-            }
-            is($buf, $expect, "$name: match with readline");
-            like_array(\@warn, $messages, "$name: warnings with readline");
-
-            close $fi;
-        }
-        if (@$messages && $options =~ /error=warn/) {
-            (my $coptions = $options) =~ s/warn/die/;
-            if (ok(open(my $fi, "<:utf8($coptions)", $a_file),
-                   "$name, croak: open for read()")) {
-                ok(!eval {
-                    my $buf;
-                    read($fi, $buf, length $data);
-                    1;
-                }, "$name, croak: should croak");
-                my @got = split /\n/, $@;
-                like_array(\@got, $messages, "$name: croak message");
                 close $fi;
+            }
+            if (ok(open(my $fi, "<:utf8$poptions", $a_file), "$name: open for readline")) {
+                my @warn;
+                local $SIG{__WARN__} = sub { push @warn, "@_" };
+                my $buf = '';
+                while (my $line = <$fi>) {
+                    $buf .= $line;
+                }
+                is($buf, $expect, "$name: match with readline");
+                like_array(\@warn, $messages, "$name: warnings with readline");
+
+                close $fi;
+            }
+            if (@$messages && ($options =~ /error=warn/ || $test->{croak})) {
+                (my $coptions = $poptions) =~ s/warn/die/;
+                if (ok(open(my $fi, "<:utf8$coptions", $a_file),
+                       "$name, croak: open for read()")) {
+                    ok(!eval {
+                        my $buf;
+                        read($fi, $buf, length $data);
+                        1;
+                    }, "$name, croak: should croak");
+                    my @got = split /\n/, $@;
+                    like_array(\@got, $messages, "$name: croak message");
+                    close $fi;
+                }
             }
         }
     }
