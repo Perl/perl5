@@ -8601,7 +8601,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     SvCUR_set(invlist,
               (len == 0)
@@ -8629,8 +8629,8 @@ S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
 
     PERL_ARGS_ASSERT_INVLIST_REPLACE_LIST_DESTROYS_SRC;
 
-    assert(SvTYPE(src) == SVt_INVLIST);
-    assert(SvTYPE(dest) == SVt_INVLIST);
+    assert(is_invlist(src));
+    assert(is_invlist(dest));
     assert(! invlist_is_iterating(src));
     assert(SvCUR(src) == 0 || SvCUR(src) < SvLEN(src));
 
@@ -8665,7 +8665,7 @@ S_get_invlist_previous_index_addr(SV* invlist)
      * */
     PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     return &(((XINVLIST*) SvANY(invlist))->prev_index);
 }
@@ -8703,7 +8703,7 @@ S_invlist_trim(SV* invlist)
 
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     SvPV_renew(invlist, MAX(min_size, SvCUR(invlist) + 1));
 }
@@ -8713,7 +8713,7 @@ S_invlist_clear(pTHX_ SV* invlist)    /* Empty the inversion list */
 {
     PERL_ARGS_ASSERT_INVLIST_CLEAR;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     invlist_set_len(invlist, 0, 0);
     invlist_trim(invlist);
@@ -8739,7 +8739,7 @@ S_invlist_max(SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     /* Assumes worst case, in which the 0 element is not counted in the
      * inversion list, so subtracts 1 for that */
@@ -8840,7 +8840,7 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 
     PERL_ARGS_ASSERT_INVLIST_EXTEND;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     /* Add one to account for the zero element at the beginning which may not
      * be counted by the calling parameters */
@@ -9164,7 +9164,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
-    assert(*output == NULL || SvTYPE(*output) == SVt_INVLIST);
+    assert(*output == NULL || is_invlist(*output));
 
     len_b = _invlist_len(b);
     if (len_b == 0) {
@@ -9442,7 +9442,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
-    assert(*i == NULL || SvTYPE(*i) == SVt_INVLIST);
+    assert(*i == NULL || is_invlist(*i));
 
     /* Special case if either one is empty */
     len_a = (a == NULL) ? 0 : _invlist_len(a);
@@ -9985,7 +9985,7 @@ S_get_invlist_iter_addr(SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
 
-    assert(SvTYPE(invlist) == SVt_INVLIST);
+    assert(is_invlist(invlist));
 
     return &(((XINVLIST*) SvANY(invlist))->iterator);
 }
@@ -15957,7 +15957,7 @@ redo_curchar:
     if (av_tindex_skip_len_mg(stack) < 0   /* Was empty */
         || ((final = av_pop(stack)) == NULL)
         || ! IS_OPERAND(final)
-        || SvTYPE(final) != SVt_INVLIST
+        || ! is_invlist(final)
         || av_tindex_skip_len_mg(stack) >= 0)  /* More left on stack */
     {
       bad_syntax:
