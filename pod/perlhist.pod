@@ -650,6 +650,7 @@ the strings?).
 
  Sawyer X  5.29.0       2018-Jun-26     The 5.29 development track
  Steve     5.29.1       2018-Jul-20
+ BinGOs    5.29.2       2018-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
