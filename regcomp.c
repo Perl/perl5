@@ -12410,8 +12410,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             /* Loop through the hex digits of the current code point */
             do {
                 /* Adding this digit will shift the result 4 bits.  If that
-                 * result would be above IV_MAX, it's overflow */
-                if (cp > IV_MAX >> 4) {
+                 * result would be above the legal max, it's overflow */
+                if (cp > MAX_LEGAL_CP >> 4) {
 
                     /* Find the end of the code point */
                     do {
@@ -12422,7 +12422,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                      * in utf8.c */
                     vFAIL4("Use of code point 0x%.*s is not allowed; the"
                         " permissible max is 0x%" UVxf,
-                        (int) (RExC_parse - start_digit), start_digit, IV_MAX);
+                        (int) (RExC_parse - start_digit), start_digit,
+                        MAX_LEGAL_CP);
                 }
 
                 /* Accumulate this (valid) digit into the running total */

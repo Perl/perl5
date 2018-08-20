@@ -758,6 +758,8 @@ point's representation.
 
 #define UTF8_IS_REPLACEMENT(s, send) is_REPLACEMENT_utf8_safe(s,send)
 
+#define MAX_LEGAL_CP  IV_MAX
+
 /*
 =for apidoc Am|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
 

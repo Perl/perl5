@@ -42,8 +42,6 @@ static const char cp_above_legal_max[] =
                         "Use of code point 0x%" UVXf " is not allowed; the"
                         " permissible max is 0x%" UVXf;
 
-#define MAX_EXTERNALLY_LEGAL_CP ((UV) (IV_MAX))
-
 /*
 =head1 Unicode Support
 These are various utility functions for manipulating UTF8-encoded
@@ -309,8 +307,8 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
      * performance hit on these high EBCDIC code points. */
 
     if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-        if (UNLIKELY(uv > MAX_EXTERNALLY_LEGAL_CP)) {
-            Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_EXTERNALLY_LEGAL_CP);
+        if (UNLIKELY(uv > MAX_LEGAL_CP)) {
+            Perl_croak(aTHX_ cp_above_legal_max, uv, MAX_LEGAL_CP);
         }
         if (       (flags & UNICODE_WARN_SUPER)
             || (   (flags & UNICODE_WARN_PERL_EXTENDED)
@@ -3428,9 +3426,9 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
                 }
 
                 if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
-                    if (UNLIKELY(uv1 > MAX_EXTERNALLY_LEGAL_CP)) {
+                    if (UNLIKELY(uv1 > MAX_LEGAL_CP)) {
                         Perl_croak(aTHX_ cp_above_legal_max, uv1,
-                                         MAX_EXTERNALLY_LEGAL_CP);
+                                         MAX_LEGAL_CP);
                     }
                     if (ckWARN_d(WARN_NON_UNICODE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
