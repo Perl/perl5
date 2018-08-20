@@ -3447,7 +3447,7 @@ is likely to be imminently called which will do a C<FREETMPS>, so there's
 no need to do that either.
 
 The next step is to pop savestack entries: C<CX_LEAVE_SCOPE(cx)> is just
-defined as C<<LEAVE_SCOPE(cx->blk_oldsaveix)>>. Note that during the
+defined as C<< LEAVE_SCOPE(cx->blk_oldsaveix) >>. Note that during the
 popping, it's possible for perl to call destructors, call C<STORE> to undo
 localisations of tied vars, and so on. Any of these can die or call
 C<exit()>. In this case, C<dounwind()> will be called, and the current
