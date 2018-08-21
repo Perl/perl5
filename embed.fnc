@@ -2513,10 +2513,23 @@ EnsR	|int	|edit_distance	|NN const UV *src		    \
 				|const STRLEN x			    \
 				|const STRLEN y			    \
 				|const SSize_t maxDistance
-EXp	|SV *	|parse_uniprop_string|NN const char * const name	   \
-				     |const Size_t name_len		   \
-				     |const bool to_fold		   \
-				     |NN bool * invert
+EpX	|SV *	|parse_uniprop_string|NN const char * const name	    \
+				     |const Size_t name_len		    \
+				     |const bool is_utf8		    \
+				     |const bool to_fold		    \
+				     |const bool runtime		    \
+				     |NN bool * user_defined_ptr	    \
+				     |NN SV * msg			    \
+				     |const STRLEN level
+EXp	|SV *	|handle_user_defined_property|NN const char * name	    \
+					     |const STRLEN name_len	    \
+					     |const bool is_utf8	    \
+					     |const bool to_fold	    \
+					     |const bool runtime	    \
+					     |NN SV* contents		    \
+					     |NN bool *user_defined_ptr	    \
+					     |NN SV * msg		    \
+					     |const STRLEN level
 #  ifdef DEBUGGING
 Ep	|int	|re_indentf	|NN const char *fmt|U32 depth|...
 Es	|void        |regdump_intflags|NULLOK const char *lead| const U32 flags
