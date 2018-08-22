@@ -2862,9 +2862,6 @@ PERL_CALLCONV SV*	Perl_reg_qr_package(pTHX_ REGEXP * const rx);
 PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* dsv, REGEXP* ssv);
 #define PERL_ARGS_ASSERT_REG_TEMP_COPY	\
 	assert(ssv)
-PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **altsvp);
-#define PERL_ARGS_ASSERT_REGCLASS_SWASH	\
-	assert(node)
 PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r);
 #define PERL_ARGS_ASSERT_REGDUMP	\
 	assert(r)
@@ -5564,7 +5561,7 @@ STATIC void	S_regtail(pTHX_ RExC_state_t * pRExC_state, const regnode_offset p, 
 STATIC void	S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, struct scan_data_t *data, SSize_t *minlenp, int is_inf);
 #define PERL_ARGS_ASSERT_SCAN_COMMIT	\
 	assert(pRExC_state); assert(data); assert(minlenp)
-STATIC void	S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state, regnode* const node, SV* const cp_list, SV* const runtime_defns, SV* const only_utf8_locale_list, SV* const swash, const bool has_user_defined_property);
+STATIC void	S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state, regnode* const node, SV* const cp_list, SV* const runtime_defns, SV* const only_utf8_locale_list);
 #define PERL_ARGS_ASSERT_SET_ANYOF_ARG	\
 	assert(pRExC_state); assert(node)
 STATIC void	S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx);
@@ -5654,11 +5651,6 @@ PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode*
 	assert(sv); assert(o)
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
-PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__GET_SWASH_INVLIST	\
-	assert(swash)
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE bool	S__invlist_contains_cp(SV* const invlist, const UV cp)
 			__attribute__warn_unused_result__;
@@ -5699,11 +5691,6 @@ PERL_STATIC_INLINE bool	S_is_invlist(SV* const invlist)
 	assert(invlist)
 #endif
 
-#endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
-PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV* listsv, I32 minbits, I32 none, SV* invlist, U8* const flags_p);
-#define PERL_ARGS_ASSERT__CORE_SWASH_INIT	\
-	assert(pkg); assert(name); assert(listsv)
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV SV*	Perl_invlist_clone(pTHX_ SV* const invlist, SV* newlist);
@@ -5750,9 +5737,6 @@ PERL_CALLCONV void	Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* con
 PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist);
 #define PERL_ARGS_ASSERT__INVLIST_INVERT	\
 	assert(invlist)
-PERL_CALLCONV void	Perl__invlist_populate_swatch(SV* const invlist, const UV start, const UV end, U8* swatch);
-#define PERL_ARGS_ASSERT__INVLIST_POPULATE_SWATCH	\
-	assert(invlist); assert(swatch)
 /* PERL_CALLCONV void	_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result); */
 /* PERL_CALLCONV void	_invlist_union(pTHX_ SV* const a, SV* const b, SV** output); */
 PERL_CALLCONV void	Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** output);
@@ -5765,11 +5749,6 @@ PERL_CALLCONV SV*	Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV e
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST	\
 	assert(other_elements_ptr)
-
-PERL_CALLCONV SV*	Perl__swash_to_invlist(pTHX_ SV* const swash)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__SWASH_TO_INVLIST	\
-	assert(swash)
 
 #endif
 #if defined(PERL_IN_REGEXEC_C)

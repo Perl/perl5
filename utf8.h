@@ -34,11 +34,6 @@
 #define FOLD_FLAGS_FULL         0x2
 #define FOLD_FLAGS_NOMIX_ASCII  0x4
 
-/* For _core_swash_init(), internal core use only */
-#define _CORE_SWASH_INIT_USER_DEFINED_PROPERTY 0x1
-#define _CORE_SWASH_INIT_RETURN_IF_UNDEF       0x2
-#define _CORE_SWASH_INIT_ACCEPT_INVLIST        0x4
-
 /*
 =head1 Unicode Support
 L<perlguts/Unicode Support> has an introduction to this API.

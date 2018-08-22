@@ -631,7 +631,6 @@
 #define reg_named_buff_firstkey(a,b)	Perl_reg_named_buff_firstkey(aTHX_ a,b)
 #define reg_named_buff_nextkey(a,b)	Perl_reg_named_buff_nextkey(aTHX_ a,b)
 #define reg_named_buff_scalar(a,b)	Perl_reg_named_buff_scalar(aTHX_ a,b)
-#define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define regdump(a)		Perl_regdump(aTHX_ a)
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
@@ -1219,7 +1218,7 @@
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
-#define set_ANYOF_arg(a,b,c,d,e,f,g)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f,g)
+#define set_ANYOF_arg(a,b,c,d,e)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e)
 #define set_regex_pv(a,b)	S_set_regex_pv(aTHX_ a,b)
 #define skip_to_be_ignored_text(a,b,c)	S_skip_to_be_ignored_text(aTHX_ a,b,c)
 #define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
@@ -1251,16 +1250,12 @@
 #define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
-#define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
 #define get_invlist_offset_addr	S_get_invlist_offset_addr
 #define invlist_array		S_invlist_array
 #define is_invlist		S_is_invlist
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
-#define _core_swash_init(a,b,c,d,e,f,g)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
 #define invlist_clone(a,b)	Perl_invlist_clone(aTHX_ a,b)
@@ -1276,11 +1271,9 @@
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
 #define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
-#define _invlist_populate_swatch	Perl__invlist_populate_swatch
 #define _invlist_union_maybe_complement_2nd(a,b,c,d)	Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
 #define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
 #define _setup_canned_invlist(a,b,c)	Perl__setup_canned_invlist(aTHX_ a,b,c)
-#define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define advance_one_LB(a,b,c)	S_advance_one_LB(aTHX_ a,b,c)

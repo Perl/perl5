@@ -4220,81 +4220,43 @@ SV*
 Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv,
                       I32 minbits, I32 none)
 {
-    PERL_ARGS_ASSERT_SWASH_INIT;
-
     /* Returns a copy of a swash initiated by the called function.  This is the
      * public interface, and returning a copy prevents others from doing
-     * mischief on the original */
-
-    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none,
-                                    NULL, NULL));
-}
-
-SV*
-Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv,
-                            I32 minbits, I32 none, SV* invlist,
-                            U8* const flags_p)
-{
+     * mischief on the original.  The only remaining use of this is in tr/// */
 
     /*NOTE NOTE NOTE - If you want to use "return" in this routine you MUST
      * use the following define */
 
-#define CORE_SWASH_INIT_RETURN(x)   \
+#define SWASH_INIT_RETURN(x)   \
     PL_curpm= old_PL_curpm;         \
-    return x
+    return newSVsv(x)
 
     /* Initialize and return a swash, creating it if necessary.  It does this
-     * by calling utf8_heavy.pl in the general case.  The returned value may be
-     * the swash's inversion list instead if the input parameters allow it.
-     * Which is returned should be immaterial to callers, as the only
-     * operations permitted on a swash, swash_fetch(), _get_swash_invlist(),
-     * and swash_to_invlist() handle both these transparently.
-     *
-     * This interface should only be used by functions that won't destroy or
-     * adversely change the swash, as doing so affects all other uses of the
-     * swash in the program; the general public should use 'Perl_swash_init'
-     * instead.
+     * by calling utf8_heavy.pl in the general case.
      *
      * pkg  is the name of the package that <name> should be in.
-     * name is the name of the swash to find.  Typically it is a Unicode
-     *	    property name, including user-defined ones
+     * name is the name of the swash to find.
      * listsv is a string to initialize the swash with.  It must be of the form
      *	    documented as the subroutine return value in
      *	    L<perlunicode/User-Defined Character Properties>
      * minbits is the number of bits required to represent each data element.
-     *	    It is '1' for binary properties.
      * none I (khw) do not understand this one, but it is used only in tr///.
-     * invlist is an inversion list to initialize the swash with (or NULL)
-     * flags_p if non-NULL is the address of various input and output flag bits
-     *      to the routine, as follows:  ('I' means is input to the routine;
-     *      'O' means output from the routine.  Only flags marked O are
-     *      meaningful on return.)
-     *  _CORE_SWASH_INIT_USER_DEFINED_PROPERTY indicates if the swash
-     *      came from a user-defined property.  (I O)
-     *  _CORE_SWASH_INIT_RETURN_IF_UNDEF indicates that instead of croaking
-     *      when the swash cannot be located, to simply return NULL. (I)
-     *  _CORE_SWASH_INIT_ACCEPT_INVLIST indicates that the caller will accept a
-     *      return of an inversion list instead of a swash hash if this routine
-     *      thinks that would result in faster execution of swash_fetch() later
-     *      on. (I)
      *
-     * Thus there are three possible inputs to find the swash: <name>,
-     * <listsv>, and <invlist>.  At least one must be specified.  The result
+     * Thus there are two possible inputs to find the swash: <name> and
+     * <listsv>.  At least one must be specified.  The result
      * will be the union of the specified ones, although <listsv>'s various
      * actions can intersect, etc. what <name> gives.  To avoid going out to
      * disk at all, <invlist> should specify completely what the swash should
      * have, and <listsv> should be &PL_sv_undef and <name> should be "".
-     *
-     * <invlist> is only valid for binary properties */
+     */
 
     PMOP *old_PL_curpm= PL_curpm; /* save away the old PL_curpm */
 
     SV* retval = &PL_sv_undef;
-    HV* swash_hv = NULL;
-    const bool use_invlist= (flags_p && *flags_p & _CORE_SWASH_INIT_ACCEPT_INVLIST);
 
-    assert(listsv != &PL_sv_undef || strNE(name, "") || invlist);
-    assert(! invlist || minbits == 1);
+    PERL_ARGS_ASSERT_SWASH_INIT;
+
+    assert(listsv != &PL_sv_undef || strNE(name, ""));
 
     PL_curpm= NULL; /* reset PL_curpm so that we dont get confused between the
                        regex that triggered the swash init and the swash init
@@ -4310,7 +4272,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv,
 	SV* errsv_save;
 	GV *method;
 
-	PERL_ARGS_ASSERT__CORE_SWASH_INIT;
 
 	PUSHSTACKi(PERLSI_MAGIC);
 	ENTER;
@@ -4383,115 +4344,10 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv,
 	if (IN_PERL_COMPILETIME) {
 	    CopHINTS_set(PL_curcop, PL_hints);
 	}
-	if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
-	    if (SvPOK(retval)) {
-
-		/* If caller wants to handle missing properties, let them */
-		if (flags_p && *flags_p & _CORE_SWASH_INIT_RETURN_IF_UNDEF) {
-                    CORE_SWASH_INIT_RETURN(NULL);
-		}
-		Perl_croak(aTHX_
-			   "Can't find Unicode property definition \"%" SVf "\"",
-			   SVfARG(retval));
-                NOT_REACHED; /* NOTREACHED */
-            }
-	}
     } /* End of calling the module to find the swash */
 
-    /* If this operation fetched a swash, and we will need it later, get it */
-    if (retval != &PL_sv_undef
-        && (minbits == 1 || (flags_p
-                            && ! (*flags_p
-                                  & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY))))
-    {
-        swash_hv = MUTABLE_HV(SvRV(retval));
-
-        /* If we don't already know that there is a user-defined component to
-         * this swash, and the user has indicated they wish to know if there is
-         * one (by passing <flags_p>), find out */
-        if (flags_p && ! (*flags_p & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY)) {
-            SV** user_defined = hv_fetchs(swash_hv, "USER_DEFINED", FALSE);
-            if (user_defined && SvUV(*user_defined)) {
-                *flags_p |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
-            }
-        }
-    }
-
-    /* Make sure there is an inversion list for binary properties */
-    if (minbits == 1) {
-	SV** swash_invlistsvp = NULL;
-	SV* swash_invlist = NULL;
-	bool invlist_in_swash_is_valid = FALSE;
-	bool swash_invlist_unclaimed = FALSE; /* whether swash_invlist has
-					    an unclaimed reference count */
-
-        /* If this operation fetched a swash, get its already existing
-         * inversion list, or create one for it */
-
-        if (swash_hv) {
-	    swash_invlistsvp = hv_fetchs(swash_hv, "V", FALSE);
-	    if (swash_invlistsvp) {
-		swash_invlist = *swash_invlistsvp;
-		invlist_in_swash_is_valid = TRUE;
-	    }
-	    else {
-		swash_invlist = _swash_to_invlist(retval);
-		swash_invlist_unclaimed = TRUE;
-	    }
-	}
-
-	/* If an inversion list was passed in, have to include it */
-	if (invlist) {
-
-            /* Any fetched swash will by now have an inversion list in it;
-             * otherwise <swash_invlist>  will be NULL, indicating that we
-             * didn't fetch a swash */
-	    if (swash_invlist) {
-
-		/* Add the passed-in inversion list, which invalidates the one
-		 * already stored in the swash */
-		invlist_in_swash_is_valid = FALSE;
-                SvREADONLY_off(swash_invlist);  /* Turned on again below */
-		_invlist_union(invlist, swash_invlist, &swash_invlist);
-	    }
-	    else {
-
-                /* Here, there is no swash already.  Set up a minimal one, if
-                 * we are going to return a swash */
-                if (! use_invlist) {
-                    swash_hv = newHV();
-                    retval = newRV_noinc(MUTABLE_SV(swash_hv));
-                }
-		swash_invlist = invlist;
-	    }
-	}
-
-        /* Here, we have computed the union of all the passed-in data.  It may
-         * be that there was an inversion list in the swash which didn't get
-         * touched; otherwise save the computed one */
-	if (! invlist_in_swash_is_valid && ! use_invlist) {
-	    if (! hv_stores(MUTABLE_HV(SvRV(retval)), "V", swash_invlist))
-            {
-		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
-	    }
-	    /* We just stole a reference count. */
-	    if (swash_invlist_unclaimed) swash_invlist_unclaimed = FALSE;
-	    else SvREFCNT_inc_simple_void_NN(swash_invlist);
-	}
-
-        /* The result is immutable.  Forbid attempts to change it. */
-        SvREADONLY_on(swash_invlist);
-
-        if (use_invlist) {
-	    SvREFCNT_dec(retval);
-	    if (!swash_invlist_unclaimed)
-		SvREFCNT_inc_simple_void_NN(swash_invlist);
-            retval = newRV_noinc(swash_invlist);
-        }
-    }
-
-    CORE_SWASH_INIT_RETURN(retval);
-#undef CORE_SWASH_INIT_RETURN
+    SWASH_INIT_RETURN(retval);
+#undef SWASH_INIT_RETURN
 }
 
 
@@ -4814,41 +4670,32 @@ STATIC SV*
 S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 {
     SV *swatch;
-    U8 *l, *lend, *x, *xend, *s, *send;
+    U8 *l, *lend, *x, *xend, *s;
     STRLEN lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
-    SV** const invlistsvp = hv_fetchs(hv, "V", FALSE);
 
     SV** listsvp = NULL; /* The string containing the main body of the table */
     SV** extssvp = NULL;
-    SV** invert_it_svp = NULL;
     U8* typestr = NULL;
-    STRLEN bits;
+    STRLEN bits = 0;
     STRLEN octets; /* if bits == 1, then octets == 0 */
     UV  none;
     UV  end = start + span;
 
-    if (invlistsvp == NULL) {
         SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
         SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
         SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
         extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
         listsvp = hv_fetchs(hv, "LIST", FALSE);
-        invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
 
 	bits  = SvUV(*bitssvp);
 	none  = SvUV(*nonesvp);
 	typestr = (U8*)SvPV_nolen(*typesvp);
-    }
-    else {
-	bits = 1;
-	none = 0;
-    }
     octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
     PERL_ARGS_ASSERT_SWATCH_GET;
 
-    if (bits != 1 && bits != 8 && bits != 16 && bits != 32) {
+    if (bits != 8 && bits != 16 && bits != 32) {
 	Perl_croak(aTHX_ "panic: swatch_get doesn't expect bits %" UVuf,
 						 (UV)bits);
     }
@@ -4888,16 +4735,11 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     SvCUR_set(swatch, scur);
     s = (U8*)SvPVX(swatch);
 
-    if (invlistsvp) {	/* If has an inversion list set up use that */
-	_invlist_populate_swatch(*invlistsvp, start, end, s);
-        return swatch;
-    }
-
     /* read $swash->{LIST} */
     l = (U8*)SvPV(*listsvp, lcur);
     lend = l + lcur;
     while (l < lend) {
-	UV min, max, val, upper;
+	UV min = 0, max = 0, val = 0, upper;
 	l = swash_scan_list_line(l, lend, &min, &max, &val,
                                                         cBOOL(octets), typestr);
 	if (l > lend) {
@@ -4946,43 +4788,9 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 		    ++val;
 	    }
 	}
-	else { /* bits == 1, then val should be ignored */
-	    UV key;
-	    if (min < start)
-		min = start;
-
-	    for (key = min; key <= upper; key++) {
-		const STRLEN offset = (STRLEN)(key - start);
-		s[offset >> 3] |= 1 << (offset & 7);
-	    }
-	}
     } /* while */
 
-    /* Invert if the data says it should be.  Assumes that bits == 1 */
-    if (invert_it_svp && SvUV(*invert_it_svp)) {
-
-	/* Unicode properties should come with all bits above PERL_UNICODE_MAX
-	 * be 0, and their inversion should also be 0, as we don't succeed any
-	 * Unicode property matches for non-Unicode code points */
-	if (start <= PERL_UNICODE_MAX) {
-
-	    /* The code below assumes that we never cross the
-	     * Unicode/above-Unicode boundary in a range, as otherwise we would
-	     * have to figure out where to stop flipping the bits.  Since this
-	     * boundary is divisible by a large power of 2, and swatches comes
-	     * in small powers of 2, this should be a valid assumption */
-	    assert(start + span - 1 <= PERL_UNICODE_MAX);
-
-	    send = s + scur;
-	    while (s < send) {
-		*s = ~(*s);
-		s++;
-	    }
-	}
-    }
-
-    /* read $swash->{EXTRAS}
-     * This code also copied to swash_to_invlist() below */
+    /* read $swash->{EXTRAS} */
     x = (U8*)SvPV(*extssvp, xcur);
     xend = x + xcur;
     while (x < xend) {
@@ -5038,34 +4846,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 	    Perl_croak(aTHX_ "panic: swatch_get got improper swatch");
 
 	s = (U8*)SvPV(swatch, slen);
-	if (bits == 1 && otherbits == 1) {
-	    if (slen != olen)
-		Perl_croak(aTHX_ "panic: swatch_get found swatch length "
-			   "mismatch, slen=%" UVuf ", olen=%" UVuf,
-			   (UV)slen, (UV)olen);
-
-	    switch (opc) {
-	    case '+':
-		while (slen--)
-		    *s++ |= *o++;
-		break;
-	    case '!':
-		while (slen--)
-		    *s++ |= ~*o++;
-		break;
-	    case '-':
-		while (slen--)
-		    *s++ &= ~*o++;
-		break;
-	    case '&':
-		while (slen--)
-		    *s++ &= *o++;
-		break;
-	    default:
-		break;
-	    }
-	}
-	else {
+        {
 	    STRLEN otheroctets = otherbits >> 3;
 	    STRLEN offset = 0;
 	    U8* const send = s + slen;
@@ -5111,263 +4892,11 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 		    *s++ = (U8)((otherval >>  8) & 0xff);
 		    *s++ = (U8)( otherval        & 0xff);
 		}
-	    }
+            }
 	}
 	sv_free(other); /* through with it! */
     } /* while */
     return swatch;
-}
-
-SV*
-Perl__swash_to_invlist(pTHX_ SV* const swash)
-{
-
-   /* Subject to change or removal.  For use only in one place in regcomp.c.
-    * Ownership is given to one reference count in the returned SV* */
-
-    U8 *l, *lend;
-    char *loc;
-    STRLEN lcur;
-    HV *const hv = MUTABLE_HV(SvRV(swash));
-    UV elements = 0;    /* Number of elements in the inversion list */
-    U8 empty[] = "";
-    SV** listsvp;
-    SV** typesvp;
-    SV** bitssvp;
-    SV** extssvp;
-    SV** invert_it_svp;
-
-    U8* typestr;
-    STRLEN bits;
-    STRLEN octets; /* if bits == 1, then octets == 0 */
-    U8 *x, *xend;
-    STRLEN xcur;
-
-    SV* invlist;
-
-    PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
-
-    /* If not a hash, it must be the swash's inversion list instead */
-    if (SvTYPE(hv) != SVt_PVHV) {
-        return SvREFCNT_inc_simple_NN((SV*) hv);
-    }
-
-    /* The string containing the main body of the table */
-    listsvp = hv_fetchs(hv, "LIST", FALSE);
-    typesvp = hv_fetchs(hv, "TYPE", FALSE);
-    bitssvp = hv_fetchs(hv, "BITS", FALSE);
-    extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
-    invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
-
-    typestr = (U8*)SvPV_nolen(*typesvp);
-    bits  = SvUV(*bitssvp);
-    octets = bits >> 3; /* if bits == 1, then octets == 0 */
-
-    /* read $swash->{LIST} */
-    if (SvPOK(*listsvp)) {
-	l = (U8*)SvPV(*listsvp, lcur);
-    }
-    else {
-	/* LIST legitimately doesn't contain a string during compilation phases
-	 * of Perl itself, before the Unicode tables are generated.  In this
-	 * case, just fake things up by creating an empty list */
-	l = empty;
-	lcur = 0;
-    }
-    loc = (char *) l;
-    lend = l + lcur;
-
-    if (*l == 'V') {    /*  Inversion list format */
-        const char *after_atou = (char *) lend;
-        UV element0;
-        UV* other_elements_ptr;
-
-        /* The first number is a count of the rest */
-        l++;
-        if (!grok_atoUV((const char *)l, &elements, &after_atou)) {
-            Perl_croak(aTHX_ "panic: Expecting a valid count of elements"
-                             " at start of inversion list");
-        }
-        if (elements == 0) {
-            invlist = _new_invlist(0);
-        }
-        else {
-            l = (U8 *) after_atou;
-
-            /* Get the 0th element, which is needed to setup the inversion list
-             * */
-            while (isSPACE(*l)) l++;
-            after_atou = (char *) lend;
-            if (!grok_atoUV((const char *)l, &element0, &after_atou)) {
-                Perl_croak(aTHX_ "panic: Expecting a valid 0th element for"
-                                 " inversion list");
-            }
-            l = (U8 *) after_atou;
-            invlist = _setup_canned_invlist(elements, element0,
-                                            &other_elements_ptr);
-            elements--;
-
-            /* Then just populate the rest of the input */
-            while (elements-- > 0) {
-                if (l > lend) {
-                    Perl_croak(aTHX_ "panic: Expecting %" UVuf " more"
-                                     " elements than available", elements);
-                }
-                while (isSPACE(*l)) l++;
-                after_atou = (char *) lend;
-                if (!grok_atoUV((const char *)l, other_elements_ptr++,
-                                 &after_atou))
-                {
-                    Perl_croak(aTHX_ "panic: Expecting a valid element"
-                                     " in inversion list");
-                }
-                l = (U8 *) after_atou;
-            }
-        }
-    }
-    else {
-
-        /* Scan the input to count the number of lines to preallocate array
-         * size based on worst possible case, which is each line in the input
-         * creates 2 elements in the inversion list: 1) the beginning of a
-         * range in the list; 2) the beginning of a range not in the list.  */
-        while ((loc = (char *) memchr(loc, '\n', lend - (U8 *) loc)) != NULL) {
-            elements += 2;
-            loc++;
-        }
-
-        /* If the ending is somehow corrupt and isn't a new line, add another
-         * element for the final range that isn't in the inversion list */
-        if (! (*lend == '\n'
-            || (*lend == '\0' && (lcur == 0 || *(lend - 1) == '\n'))))
-        {
-            elements++;
-        }
-
-        invlist = _new_invlist(elements);
-
-        /* Now go through the input again, adding each range to the list */
-        while (l < lend) {
-            UV start, end;
-            UV val;		/* Not used by this function */
-
-            l = swash_scan_list_line(l, lend, &start, &end, &val,
-                                                        cBOOL(octets), typestr);
-
-            if (l > lend) {
-                break;
-            }
-
-            invlist = _add_range_to_invlist(invlist, start, end);
-        }
-    }
-
-    /* Invert if the data says it should be */
-    if (invert_it_svp && SvUV(*invert_it_svp)) {
-	_invlist_invert(invlist);
-    }
-
-    /* This code is copied from swatch_get()
-     * read $swash->{EXTRAS} */
-    x = (U8*)SvPV(*extssvp, xcur);
-    xend = x + xcur;
-    while (x < xend) {
-	STRLEN namelen;
-	U8 *namestr;
-	SV** othersvp;
-	HV* otherhv;
-	STRLEN otherbits;
-	SV **otherbitssvp, *other;
-	U8 *nl;
-
-	const U8 opc = *x++;
-	if (opc == '\n')
-	    continue;
-
-	nl = (U8*)memchr(x, '\n', xend - x);
-
-	if (opc != '-' && opc != '+' && opc != '!' && opc != '&') {
-	    if (nl) {
-		x = nl + 1; /* 1 is length of "\n" */
-		continue;
-	    }
-	    else {
-		x = xend; /* to EXTRAS' end at which \n is not found */
-		break;
-	    }
-	}
-
-	namestr = x;
-	if (nl) {
-	    namelen = nl - namestr;
-	    x = nl + 1;
-	}
-	else {
-	    namelen = xend - namestr;
-	    x = xend;
-	}
-
-	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
-	otherhv = MUTABLE_HV(SvRV(*othersvp));
-	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
-	otherbits = (STRLEN)SvUV(*otherbitssvp);
-
-	if (bits != otherbits || bits != 1) {
-	    Perl_croak(aTHX_ "panic: _swash_to_invlist only operates on boolean "
-		       "properties, bits=%" UVuf ", otherbits=%" UVuf,
-		       (UV)bits, (UV)otherbits);
-	}
-
-	/* The "other" swatch must be destroyed after. */
-	other = _swash_to_invlist((SV *)*othersvp);
-
-	/* End of code copied from swatch_get() */
-	switch (opc) {
-	case '+':
-	    _invlist_union(invlist, other, &invlist);
-	    break;
-	case '!':
-            _invlist_union_maybe_complement_2nd(invlist, other, TRUE, &invlist);
-	    break;
-	case '-':
-	    _invlist_subtract(invlist, other, &invlist);
-	    break;
-	case '&':
-	    _invlist_intersection(invlist, other, &invlist);
-	    break;
-	default:
-	    break;
-	}
-	sv_free(other); /* through with it! */
-    }
-
-    SvREADONLY_on(invlist);
-    return invlist;
-}
-
-SV*
-Perl__get_swash_invlist(pTHX_ SV* const swash)
-{
-    SV** ptr;
-
-    PERL_ARGS_ASSERT__GET_SWASH_INVLIST;
-
-    if (! SvROK(swash)) {
-        return NULL;
-    }
-
-    /* If it really isn't a hash, it isn't really swash; must be an inversion
-     * list */
-    if (SvTYPE(SvRV(swash)) != SVt_PVHV) {
-        return SvRV(swash);
-    }
-
-    ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "V", FALSE);
-    if (! ptr) {
-        return NULL;
-    }
-
-    return *ptr;
 }
 
 bool
