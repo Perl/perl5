@@ -9808,17 +9808,21 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     && isALPHA_FOLD_EQ(*p, 'i'))
                 {
                     if (*p == 'i') {
-                        if (swash_fetch(sw, (const U8 *) LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8, TRUE)) {
+                        if (_invlist_contains_cp(sw,
+                                       LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
+                        {
                             match = TRUE;
                         }
                     }
                     else if (*p == 'I') {
-                        if (swash_fetch(sw, (const U8 *) LATIN_SMALL_LETTER_DOTLESS_I_UTF8, TRUE)) {
+                        if (_invlist_contains_cp(sw,
+                                                LATIN_SMALL_LETTER_DOTLESS_I))
+                        {
                             match = TRUE;
                         }
                     }
                 }
-                else if (swash_fetch(sw, utf8_p, TRUE)) {
+                else if (_invlist_contains_cp(sw, c)) {
 		    match = TRUE;
                 }
 	    }

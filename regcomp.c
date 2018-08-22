@@ -1571,28 +1571,25 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         SV **const ary = AvARRAY(av);
         assert(RExC_rxi->data->what[n] == 's');
 
-        if (ary[1] && ary[1] != &PL_sv_undef) { /* Has compile-time swash */
-            invlist = sv_2mortal(invlist_clone(_get_swash_invlist(ary[1]), NULL));
-        }
-        else if (ary[0] && ary[0] != &PL_sv_undef) {
+        if (av_tindex_skip_len_mg(av) > 1) {
 
-            /* Here, no compile-time swash, and there are things that won't be
-             * known until runtime -- we have to assume it could be anything */
+            /* Here there are things that won't be known until runtime -- we
+             * have to assume it could be anything */
             invlist = sv_2mortal(_new_invlist(1));
             return _add_range_to_invlist(invlist, 0, UV_MAX);
         }
-        else if (ary[3] && ary[3] != &PL_sv_undef) {
+        else if (ary[0] && ary[0] != &PL_sv_undef) {
 
-            /* Here no compile-time swash, and no run-time only data.  Use the
-             * node's inversion list */
-            invlist = sv_2mortal(invlist_clone(ary[3], NULL));
+            /* Use the node's inversion list */
+            invlist = sv_2mortal(invlist_clone(ary[0], NULL));
         }
 
         /* Get the code points valid only under UTF-8 locales */
-        if ((ANYOF_FLAGS(node) & ANYOFL_FOLD)
-            && ary[2] && ary[2] != &PL_sv_undef)
+        if (   (ANYOF_FLAGS(node) & ANYOFL_FOLD)
+            &&  av_tindex_skip_len_mg(av) > 0
+            &&  ary[1] != &PL_sv_undef)
         {
-            only_utf8_locale_invlist = ary[2];
+            only_utf8_locale_invlist = ary[1];
         }
     }
 
@@ -18986,22 +18983,14 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
      * arg is set to ANYOF_ONLY_HAS_BITMAP.  Otherwise, it sets the argument to
      * the count returned by add_data(), having allocated and stored an array,
      * av, as follows:
-     *  av[0] stores the character class description in its textual form.
-     *        This is used later (regexec.c:Perl_regclass_swash()) to
-     *        initialize the appropriate swash, and is also useful for dumping
-     *        the regnode.  This is set to &PL_sv_undef if the textual
-     *        description is not needed at run-time (as happens if the other
-     *        elements completely define the class)
-     *  av[1] if &PL_sv_undef, is a placeholder to later contain the swash
-     *        computed from av[0].  But if no further computation need be done,
-     *        the swash is stored here now (and av[0] is &PL_sv_undef).
-     *  av[2] stores the inversion list of code points that match only if the
-     *        current locale is UTF-8
-     *  av[3] stores the cp_list inversion list for use in addition or instead
-     *        of av[0]; used only if cp_list exists and av[1] is &PL_sv_undef.
-     *        (Otherwise everything needed is already in av[0] and av[1])
-     *  av[4] is set if any component of the class is from a user-defined
-     *        property; used only if av[3] exists */
+     *
+     *  av[0] stores the inversion list defining this class as far as known at
+     *        this time, or PL_sv_undef if nothing definite is now known.
+     *  av[1] stores the inversion list of code points that match only if the
+     *        current locale is UTF-8, or if none, PL_sv_undef if there is an
+     *        av[2], or no entry otherwise.
+     *  av[2] stores the list of user-defined properties whose subroutine
+     *        definitions aren't known at this time, or no entry if none. */
 
     UV n;
 
@@ -19016,26 +19005,16 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	AV * const av = newAV();
 	SV *rv;
 
-	av_store(av, 0, (runtime_defns)
-			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
-	if (swash) {
-	    assert(cp_list);
-	    av_store(av, 1, swash);
-	    SvREFCNT_dec_NN(cp_list);
-	}
-	else {
-	    av_store(av, 1, &PL_sv_undef);
-	    if (cp_list) {
-		av_store(av, 3, cp_list);
-		av_store(av, 4, newSVuv(has_user_defined_property));
-	    }
-	}
+	av_store(av, 0, (cp_list) ? cp_list : &PL_sv_undef);
 
-        if (only_utf8_locale_list) {
-	    av_store(av, 2, only_utf8_locale_list);
-        }
-        else {
-	    av_store(av, 2, &PL_sv_undef);
+        if (only_utf8_locale_list || runtime_defns) {
+            av_store(av, 1, (only_utf8_locale_list)
+                             ? only_utf8_locale_list
+                             : &PL_sv_undef);
+
+            if (runtime_defns) {
+                av_store(av, 2, SvREFCNT_inc(runtime_defns));
+            }
         }
 
 	rv = newRV_noinc(MUTABLE_SV(av));
@@ -19081,7 +19060,6 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
      * that, in spite of this function's name, the swash it returns may include
      * the bitmap data as well */
 
-    SV *sw  = NULL;
     SV *si  = NULL;         /* Input swash initialization string */
     SV* invlist = NULL;
 
@@ -19098,46 +19076,25 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	    SV * const rv = MUTABLE_SV(data->data[n]);
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
-	    U8 swash_init_flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
 
-	    si = *ary;	/* ary[0] = the string to initialize the swash with */
+            invlist = *ary;	/* ary[0] = the inversion list */
 
-            if (av_tindex_skip_len_mg(av) >= 2) {
-                if (only_utf8_locale_ptr
-                    && ary[2]
-                    && ary[2] != &PL_sv_undef)
-                {
-                    *only_utf8_locale_ptr = ary[2];
+            if (av_tindex_skip_len_mg(av) > 0) {
+                if (only_utf8_locale_ptr && ary[1] != &PL_sv_undef) {
+                    *only_utf8_locale_ptr = ary[1];
                 }
                 else {
                     assert(only_utf8_locale_ptr);
                     *only_utf8_locale_ptr = NULL;
                 }
 
-                /* Elements 3 and 4 are either both present or both absent. [3]
-                 * is any inversion list generated at compile time; [4]
-                 * indicates if that inversion list has any user-defined
-                 * properties in it. */
-                if (av_tindex_skip_len_mg(av) >= 3) {
-                    invlist = ary[3];
-                    if (SvUV(ary[4])) {
-                        swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
-                    }
-                }
-                else {
-                    invlist = NULL;
+                if (av_tindex_skip_len_mg(av) > 1) {
+                    si = ary[2];
                 }
 	    }
 
-	    /* Element [1] is reserved for the set-up swash.  If already there,
-	     * return it; if not, create it and store it there */
-	    if (ary[1] && SvROK(ary[1])) {
-		sw = ary[1];
-	    }
-	    else if (doinit && ((si && si != &PL_sv_undef)
-                                 || (invlist && invlist != &PL_sv_undef))) {
-
-                if (si && si != &PL_sv_undef) {
+	    if (doinit && (si || (invlist && invlist != &PL_sv_undef))) {
+                if (si) {
                     bool user_defined;
                     SV * msg = newSVpvs_flags("", SVs_TEMP);
 
@@ -19167,16 +19124,10 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     else {
                         invlist = prop_definition;
                     }
+                    av_store(av, 0, invlist);
+                    av_fill(av, (ary[1] == &PL_sv_undef) ? 0 : 1);
                     si = &PL_sv_undef;
                 }
-		sw = _core_swash_init("utf8", /* the utf8 package */
-				      "", /* nameless */
-				      si,
-				      1, /* binary */
-				      0, /* not from tr/// */
-				      invlist,
-				      &swash_init_flags);
-		(void)av_store(av, 1, sw);
 	    }
 	}
     }
@@ -19190,9 +19141,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
          * compile-time, before everything gets resolved, in which case we
          * return the currently best available information, which is the string
          * that will eventually be used to do that resolving, 'si' */
-	if ((! sw || (invlist = _get_swash_invlist(sw)) == NULL)
-            && (si && si != &PL_sv_undef))
-        {
+	if (si && si != &PL_sv_undef) {
             /* Here, we only have 'si' (and possibly some passed-in data in
              * 'invlist', which is handled below)  If the caller only wants
              * 'si', use that.  */
@@ -19291,7 +19240,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
         /* If we have a swash in place, its equivalent inversion list was above
          * placed into 'invlist'.  If not, this variable may contain a stored
          * inversion list which is information beyond what is in 'si' */
-        if (invlist) {
+        if (invlist && invlist != &PL_sv_undef) {
 
             /* Again, if the caller doesn't want the output inversion list, put
              * everything in 'matches-string' */
@@ -19314,7 +19263,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	*listsvp = matches_string;
     }
 
-    return sw;
+    return (invlist != &PL_sv_undef) ? invlist : NULL;
 }
 #endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
