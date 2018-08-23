@@ -21949,6 +21949,38 @@ Perl_init_uniprops(pTHX)
 #endif
 }
 
+#if 0
+
+This code was mainly added for backcompat to give a warning for non-portable
+code points in user-defined properties.  But experiments showed that the
+warning in earlier perls were only omitted on overflow, which should be an
+error, so there really isnt a backcompat issue, and actually adding the
+warning when none was present before might cause breakage, for little gain.  So
+khw left this code in, but not enabled.  Tests were never added.
+
+embed.fnc entry:
+Ei	|const char *|get_extended_utf8_msg|const UV cp
+
+PERL_STATIC_INLINE const char *
+S_get_extended_utf8_msg(pTHX_ const UV cp)
+{
+    U8 dummy[UTF8_MAXBYTES + 1];
+    HV *msgs;
+    SV **msg;
+
+    uvchr_to_utf8_flags_msgs(dummy, cp, UNICODE_WARN_PERL_EXTENDED,
+                             &msgs);
+
+    msg = hv_fetchs(msgs, "text", 0);
+    assert(msg);
+
+    (void) sv_2mortal((SV *) msgs);
+
+    return SvPVX(*msg);
+}
+
+#endif
+
 SV *
 Perl_handle_user_defined_property(pTHX_
 
@@ -22117,6 +22149,26 @@ Perl_handle_user_defined_property(pTHX_
             sv_catpvs(msg, "\"");
             goto return_msg;
         }
+
+#if 0   /* See explanation at definition above of get_extended_utf8_msg() */
+
+        if (   UNICODE_IS_PERL_EXTENDED(min)
+            || UNICODE_IS_PERL_EXTENDED(max))
+        {
+            if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+
+            /* If both code points are non-portable, warn only on the lower
+             * one. */
+            sv_catpv(msg, get_extended_utf8_msg(
+                                            (UNICODE_IS_PERL_EXTENDED(min))
+                                            ? min : max));
+            sv_catpvs(msg, " in \"");
+            Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                                 UTF8fARG(is_contents_utf8, s - s0, s0));
+            sv_catpvs(msg, "\"");
+        }
+
+#endif
 
         /* Here, this line contains a legal range */
         this_definition = sv_2mortal(_new_invlist(2));
