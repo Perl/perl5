@@ -137,7 +137,8 @@ If there was something important to note about this change, include that here.
 
 =item *
 
-XXX
+C<Locale::Codes> has been removed at the request of its author.  It
+continues to be available on CPAN C<L<Locale::Codes>>.  [perl #133458].
 
 =back
 
