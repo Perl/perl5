@@ -1578,7 +1578,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
             invlist = sv_2mortal(_new_invlist(1));
             return _add_range_to_invlist(invlist, 0, UV_MAX);
         }
-        else if (ary[0] && ary[0] != &PL_sv_undef) {
+        else if (ary[0]) {
 
             /* Use the node's inversion list */
             invlist = sv_2mortal(invlist_clone(ary[0], NULL));
@@ -1586,8 +1586,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
         /* Get the code points valid only under UTF-8 locales */
         if (   (ANYOF_FLAGS(node) & ANYOFL_FOLD)
-            &&  av_tindex_skip_len_mg(av) > 0
-            &&  ary[1] != &PL_sv_undef)
+            &&  av_tindex_skip_len_mg(av) > 0)
         {
             only_utf8_locale_invlist = ary[1];
         }
@@ -19005,16 +19004,16 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	AV * const av = newAV();
 	SV *rv;
 
-	av_store(av, 0, (cp_list) ? cp_list : &PL_sv_undef);
+        if (cp_list) {
+            av_store(av, 0, cp_list);
+        }
 
-        if (only_utf8_locale_list || runtime_defns) {
-            av_store(av, 1, (only_utf8_locale_list)
-                             ? only_utf8_locale_list
-                             : &PL_sv_undef);
+        if (only_utf8_locale_list) {
+            av_store(av, 1, only_utf8_locale_list);
+        }
 
-            if (runtime_defns) {
-                av_store(av, 2, SvREFCNT_inc(runtime_defns));
-            }
+        if (runtime_defns) {
+            av_store(av, 2, SvREFCNT_inc(runtime_defns));
         }
 
 	rv = newRV_noinc(MUTABLE_SV(av));
@@ -19080,20 +19079,14 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
             invlist = *ary;	/* ary[0] = the inversion list */
 
             if (av_tindex_skip_len_mg(av) > 0) {
-                if (only_utf8_locale_ptr && ary[1] != &PL_sv_undef) {
-                    *only_utf8_locale_ptr = ary[1];
-                }
-                else {
-                    assert(only_utf8_locale_ptr);
-                    *only_utf8_locale_ptr = NULL;
-                }
+                *only_utf8_locale_ptr = ary[1];
+            }
 
-                if (av_tindex_skip_len_mg(av) > 1) {
-                    si = ary[2];
-                }
-	    }
+            if (av_tindex_skip_len_mg(av) > 1) {
+                si = ary[2];
+            }
 
-	    if (doinit && (si || (invlist && invlist != &PL_sv_undef))) {
+	    if (doinit && (si || invlist)) {
                 if (si) {
                     bool user_defined;
                     SV * msg = newSVpvs_flags("", SVs_TEMP);
@@ -19117,7 +19110,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                                 UTF8fARG(SvUTF8(msg), SvCUR(msg), SvPVX(msg)));
                     }
 
-                    if (invlist && invlist != &PL_sv_undef) {
+                    if (invlist) {
                         _invlist_union(invlist, prop_definition, &invlist);
                         SvREFCNT_dec_NN(prop_definition);
                     }
@@ -19125,8 +19118,8 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                         invlist = prop_definition;
                     }
                     av_store(av, 0, invlist);
-                    av_fill(av, (ary[1] == &PL_sv_undef) ? 0 : 1);
-                    si = &PL_sv_undef;
+                    av_fill(av, (ary[1]) ? 1 : 0);
+                    si = NULL;
                 }
 	    }
 	}
@@ -19141,7 +19134,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
          * compile-time, before everything gets resolved, in which case we
          * return the currently best available information, which is the string
          * that will eventually be used to do that resolving, 'si' */
-	if (si && si != &PL_sv_undef) {
+	if (si) {
             /* Here, we only have 'si' (and possibly some passed-in data in
              * 'invlist', which is handled below)  If the caller only wants
              * 'si', use that.  */
@@ -19240,7 +19233,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
         /* If we have a swash in place, its equivalent inversion list was above
          * placed into 'invlist'.  If not, this variable may contain a stored
          * inversion list which is information beyond what is in 'si' */
-        if (invlist && invlist != &PL_sv_undef) {
+        if (invlist) {
 
             /* Again, if the caller doesn't want the output inversion list, put
              * everything in 'matches-string' */
@@ -19263,7 +19256,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	*listsvp = matches_string;
     }
 
-    return (invlist != &PL_sv_undef) ? invlist : NULL;
+    return invlist;
 }
 #endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
