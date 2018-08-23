@@ -8591,8 +8591,6 @@ S__invlist_array_init(SV* const invlist, const bool will_have_0)
     return zero_addr + *offset;
 }
 
-#endif
-
 PERL_STATIC_INLINE void
 S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 {
@@ -8609,8 +8607,6 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
                : TO_INTERNAL_SIZE(len + offset));
     assert(SvLEN(invlist) == 0 || SvCUR(invlist) <= SvLEN(invlist));
 }
-
-#ifndef PERL_IN_XSUB_RE
 
 STATIC void
 S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
