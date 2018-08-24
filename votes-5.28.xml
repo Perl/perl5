@@ -45,6 +45,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="steveh" id="b79cd7dfefcc16674b83ffdeb11687ea693b7845" ticket="" desc="Fix Windows build with CCTYPE=SDK2003SP1"/>
+
 </div>
 
 <div><h3>Portability Fixes</h3>
