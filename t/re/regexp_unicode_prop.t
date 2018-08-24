@@ -7,6 +7,10 @@
 use strict;
 use warnings;
 use v5.16;
+use utf8;
+
+# To verify that messages containing the expansions work on UTF-8
+my $utf8_comment;
 
 my @warnings;
 local $SIG {__WARN__} = sub {push @warnings, "@_"};
@@ -107,8 +111,14 @@ my @CLASSES = (
 
 my @USER_DEFINED_PROPERTIES;
 my @USER_CASELESS_PROPERTIES;
+my @USER_ERROR_PROPERTIES;
 my @DEFERRED;
+my $overflow;
 BEGIN {
+    $utf8_comment = "#\N{U+30CD}";
+
+    use Config;
+    $overflow = $Config{uvsize} < 8 ? "80000000" : "80000000000000000";
 
     # We defined these at compile time, so that the subroutines that they
     # refer to aren't known, so that we can test properties not known until
@@ -144,6 +154,23 @@ BEGIN {
         'pkg1::pkg2::IsMyLower'    => ["a", "!A" ],
     );
 
+    @USER_ERROR_PROPERTIES = (
+        'IsOverflow'    => qr/Code point too large in (?#
+                             )"0\t$overflow$utf8_comment" in expansion of (?#
+                             )main::IsOverflow/,
+        'InRecursedA'   => qr/Infinite recursion in user-defined property (?#
+                             )"main::InRecursedA" in expansion of (?#
+                             )main::InRecursedC in expansion of (?#
+                             )main::InRecursedB in expansion of (?#
+                             )main::InRecursedA/,
+        'IsRangeReversed' => qr/Illegal range in "200 100$utf8_comment" in (?#
+                               )expansion of main::IsRangeReversed/,
+        'IsNonHex'        => qr/Can't find Unicode property definition (?#
+                               )"BEEF CAGED" in expansion of main::IsNonHex/,
+
+        # Could have \n, hence /s
+        'IsDeath'        => qr/Died.* in expansion of main::IsDeath/s,
+    );
 
     # Now create a list of properties whose definitions won't be known at
     # runtime.  The qr// below thus will have forward references to them, and
@@ -151,6 +178,7 @@ BEGIN {
     my @DEFERRABLE_USER_DEFINED_PROPERTIES;
     push @DEFERRABLE_USER_DEFINED_PROPERTIES, @USER_DEFINED_PROPERTIES;
     push @DEFERRABLE_USER_DEFINED_PROPERTIES, @USER_CASELESS_PROPERTIES;
+    unshift @DEFERRABLE_USER_DEFINED_PROPERTIES, @USER_ERROR_PROPERTIES;
     for (my $i = 0; $i < @DEFERRABLE_USER_DEFINED_PROPERTIES; $i+=2) {
         my $property = $DEFERRABLE_USER_DEFINED_PROPERTIES[$i];
         if ($property =~ / ^ \# /x) {
@@ -236,7 +264,8 @@ for (my $i = 0; $i < @CLASSES; $i += 2) {
 $count += 4 * @ILLEGAL_PROPERTIES;
 $count += 4 * grep {length $_ == 1} @ILLEGAL_PROPERTIES;
 $count += 8 * @USER_CASELESS_PROPERTIES;
-$count += 1 * @DEFERRED / 2;
+$count += 1 * (@DEFERRED - @USER_ERROR_PROPERTIES) / 2;
+$count += 1 * @USER_ERROR_PROPERTIES;
 $count += 1;    # No warnings generated
 
 plan(tests => $count);
@@ -268,9 +297,20 @@ sub match {
 sub run_tests {
 
     for (my $i = 0; $i < @DEFERRED; $i+=2) {
+        if (ref $DEFERRED[$i+1] eq 'ARRAY') {
             my ($str, $name) = get_str_name($DEFERRED[$i+1][0]);
             like($str, $DEFERRED[$i],
                 "$name correctly matched $DEFERRED[$i] (defn. not known until runtime)");
+        }
+        else {  # Single entry rhs indicates a property that is an error
+            undef $@;
+
+            # Using block eval causes the pattern to not be recompiled, so it
+            # retains its deferred status until this is executed.
+            eval { 'A' =~ $DEFERRED[$i] };
+            like($@, $DEFERRED[$i+1],
+                                "$DEFERRED[$i] gave correct failure message (defn. not known until runtime)");
+        }
     }
 
     while (@CLASSES) {
@@ -346,8 +386,15 @@ sub run_tests {
         # Verify works as regularly for not /i
         match $_, $in_pat,  $out_pat for @in;
         match $_, $out_pat, $in_pat  for @out;
+    }
 
+    print "# User-defined properties with errors in their definition\n";
+    while (my $error_property = shift @USER_ERROR_PROPERTIES) {
+        my $error_re = shift @USER_ERROR_PROPERTIES;
 
+        undef $@;
+        eval { 'A' =~ /\p{$error_property}/; };
+        like($@, $error_re, "$error_property gave correct failure message");
     }
 }
 
@@ -397,6 +444,18 @@ sub IsSyriac1 {<<'--'}
 0730    074A
 --
 
+sub InRecursedA {
+    return "+main::InRecursedB\n";
+}
+
+sub InRecursedB {
+    return "+main::InRecursedC\n";
+}
+
+sub InRecursedC {
+    return "+main::InRecursedA\n";
+}
+
 sub InGreekSmall   {return "03B1\t03C9"}
 sub InGreekCapital {return "0391\t03A9\n-03A2"}
 
@@ -427,6 +486,18 @@ sub pkg1::pkg2::IsMyLower {
         . "\n&utf8::ASCII";
 }
 
+sub IsRangeReversed {
+    return "200 100$utf8_comment";
+}
+
+sub IsNonHex {
+    return "BEEF CAGED$utf8_comment";
+}
+
+sub IsDeath {
+    die;
+}
+
 # Verify that can use user-defined properties inside another one
 sub IsSyriac1KanaMark {<<'--'}
 +main::IsSyriac1
@@ -445,6 +516,10 @@ sub ISfoo   { die }
 sub INfoo   { die }
 sub Is::foo { die }
 sub In::foo { die }
+
+sub IsOverflow {
+    return "0\t$overflow$utf8_comment";
+}
 
 if (! is(@warnings, 0, "No warnings were generated")) {
     diag join "\n", @warnings, "\n";
