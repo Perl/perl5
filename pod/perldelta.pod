@@ -331,9 +331,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+The Windows Server 2003 SP1 Platform SDK build, with its early x64 compiler and
+tools, was accidentally broken in Perl 5.27.9.  This has now been fixed.
 
 =back
 
