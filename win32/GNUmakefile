@@ -166,7 +166,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #CCTYPE		:= MSVC70
 # Visual C++ Toolkit 2003 (aka Visual C++ 7.1) (free command-line tools)
 #CCTYPE		:= MSVC70FREE
-# Windows Server 2003 SP1 Platform SDK (April 2005)
+# Windows Server 2003 SP1 Platform SDK (April 2005) (64-bit compiler and tools)
 #CCTYPE		:= SDK2003SP1
 # Visual C++ 2005 (aka Visual C++ 8.0) (full version or Express Edition)
 #CCTYPE		:= MSVC80
@@ -800,11 +800,11 @@ ifeq ($(__ICC),define)
 LIBBASEFILES	+= libircmt.lib libmmd.lib
 endif
 
-# The 64 bit Windows Server 2003 SP1 SDK compilers link against MSVCRT.dll, which
+# The Windows Server 2003 SP1 SDK compiler links against MSVCRT.dll, which
 # doesn't include the buffer overrun verification code used by the /GS switch.
 # Since the code links against libraries that are compiled with /GS, this
 # "security cookie verification" code must be included via bufferoverflow.lib.
-ifeq ("$(WIN64) $(CCTYPE)","define SDK2003SP1")
+ifeq ($(CCTYPE),SDK2003SP1)
 LIBBASEFILES    += bufferoverflowU.lib
 endif
 
