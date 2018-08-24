@@ -39,7 +39,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="khw" id="7da8e27b9d7d2be4e770d074405ddb9941e6c8b7" ticket="none" desc="Fix script run \"1\N{THAI DIGIT}\""/>
+<commit votes="khw steveh" id="7da8e27b9d7d2be4e770d074405ddb9941e6c8b7" ticket="none" desc="Fix script run &quot;1\N{THAI DIGIT}&quot;"/>
 
 </div>
 
@@ -59,7 +59,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="xsawyerx" id="9dd556afad370558b5d26c9222d4fa79fb2dc2ac" ticket="" desc="Add 5.28.0 release data to perlhist.pod"/>
+<commit votes="xsawyerx steveh" id="9dd556afad370558b5d26c9222d4fa79fb2dc2ac" ticket="" desc="Add 5.28.0 release data to perlhist.pod"/>
 
 </div>
 
