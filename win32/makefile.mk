@@ -725,6 +725,15 @@ DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
 .ENDIF
 
+# The Windows Server 2003 SP1 SDK compiler only defines _configthreadlocale() if
+# _MT is defined, i.e. when using /MT (the LIBCMT.lib version of the CRT), which
+# the perl build doesn't use. We therefore specify NO_THREAD_SAFE_LOCALE so that
+# perl.h doesn't set USE_THREAD_SAFE_LOCALE, which it otherwise would do since
+# _MSC_VER is 1400 for this compiler (as per MSVC80).
+.IF "$(CCTYPE)" == "SDK2003SP1"
+DEFINES		+= -DNO_THREAD_SAFE_LOCALE
+.ENDIF
+
 # In VS 2005 (VC++ 8.0) Microsoft changes time_t from 32-bit to
 # 64-bit, even in 32-bit mode.  It also provides the _USE_32BIT_TIME_T
 # preprocessor option to revert back to the old functionality for
