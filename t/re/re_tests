@@ -1143,6 +1143,11 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 /(a)+((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
 /(a){1,100}((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
 /(a){0,100}((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
+/(a)??((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
+/(a)*?((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
+/(a)+?((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
+/(a){1,100}?((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
+/(a){0,100}?((?1))(fox)/	aafox	y	$1-$2-$3	a-a-fox
 /(ab)?((?1))(fox)/	ababfox	y	$1-$2-$3	ab-ab-fox
 /(ab)*((?1))(fox)/	ababfox	y	$1-$2-$3	ab-ab-fox
 /(ab)+((?1))(fox)/	ababfox	y	$1-$2-$3	ab-ab-fox

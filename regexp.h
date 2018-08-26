@@ -134,8 +134,8 @@ typedef struct regexp {
      * Data about the last/current match. These are modified during matching
      */
 
-    U32 lastparen;           /* last open paren matched */
-    U32 lastcloseparen;      /* last close paren matched */
+    U32 lastparen;           /* highest close paren matched ($+) */
+    U32 lastcloseparen;      /* last close paren matched ($^N) */
     regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
     char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
 

@@ -328,7 +328,34 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     );                                                          \
     regcpblow(cp)
 
+/* set the start and end positions of capture ix */
+#define CLOSE_CAPTURE(ix, s, e)                                            \
+    rex->offs[ix].start = s;                                               \
+    rex->offs[ix].end = e;                                                 \
+    if (ix > rex->lastparen)                                               \
+        rex->lastparen = ix;                                               \
+    rex->lastcloseparen = ix;                                              \
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
+        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf " max: %" UVuf "\n", \
+        depth,                                                             \
+        PTR2UV(rex),                                                       \
+        PTR2UV(rex->offs),                                                 \
+        (UV)ix,                                                            \
+        (IV)rex->offs[ix].start,                                           \
+        (IV)rex->offs[ix].end,                                             \
+        (UV)rex->lastparen                                                 \
+    ))
+
 #define UNWIND_PAREN(lp, lcp)               \
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_  \
+        "UNWIND_PAREN: rex=0x%" UVxf " offs=0x%" UVxf ": invalidate (%" UVuf "..%" UVuf "] set lcp: %" UVuf "\n", \
+        depth,                              \
+        PTR2UV(rex),                        \
+        PTR2UV(rex->offs),                  \
+        (UV)(lp),                           \
+        (UV)(rex->lastparen),               \
+        (UV)(lcp)                           \
+    ));                                     \
     for (n = rex->lastparen; n > lp; n--)   \
         rex->offs[n].end = -1;              \
     rex->lastparen = n;                     \
@@ -7584,26 +7611,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             script_run_begin = (U8 *) locinput;
             break;
 
-/* XXX really need to log other places start/end are set too */
-#define CLOSE_CAPTURE                                                      \
-    rex->offs[n].start = rex->offs[n].start_tmp;                           \
-    rex->offs[n].end = locinput - reginfo->strbeg;                         \
-    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
-        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf "\n", \
-        depth,                                                             \
-        PTR2UV(rex),                                                       \
-        PTR2UV(rex->offs),                                                 \
-        (UV)n,                                                             \
-        (IV)rex->offs[n].start,                                            \
-        (IV)rex->offs[n].end                                               \
-    ))
 
 	case CLOSE:  /*  )  */
 	    n = ARG(scan);  /* which paren pair */
-	    CLOSE_CAPTURE;
-	    if (n > rex->lastparen)
-		rex->lastparen = n;
-	    rex->lastcloseparen = n;
+	    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                             locinput - reginfo->strbeg);
             if ( EVAL_CLOSE_PAREN_IS( cur_eval, n ) )
 	        goto fake_end;
 
@@ -7631,10 +7643,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     if ( OP(cursor)==CLOSE ){
                         n = ARG(cursor);
                         if ( n <= lastopen ) {
-			    CLOSE_CAPTURE;
-                            if (n > rex->lastparen)
-                                rex->lastparen = n;
-                            rex->lastcloseparen = n;
+			    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                                             locinput - reginfo->strbeg);
                             if ( n == ARG(scan) || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
                                 break;
                         }
@@ -8260,14 +8270,11 @@ NULL
 
 	    if (ST.me->flags) {
 		/* emulate CLOSE: mark current A as captured */
-		I32 paren = ST.me->flags;
+		U32 paren = (U32)ST.me->flags;
 		if (ST.count) {
-		    rex->offs[paren].start
-			= HOPc(locinput, -ST.alen) - reginfo->strbeg;
-		    rex->offs[paren].end = locinput - reginfo->strbeg;
-		    if ((U32)paren > rex->lastparen)
-			rex->lastparen = paren;
-		    rex->lastcloseparen = paren;
+                    CLOSE_CAPTURE(paren,
+			HOPc(locinput, -ST.alen) - reginfo->strbeg,
+		        locinput - reginfo->strbeg);
 		}
 		else
 		    rex->offs[paren].end = -1;
@@ -8306,11 +8313,8 @@ NULL
 #define CURLY_SETPAREN(paren, success) \
     if (paren) { \
 	if (success) { \
-	    rex->offs[paren].start = HOPc(locinput, -1) - reginfo->strbeg; \
-	    rex->offs[paren].end = locinput - reginfo->strbeg; \
-	    if (paren > rex->lastparen) \
-		rex->lastparen = paren; \
-	    rex->lastcloseparen = paren; \
+            CLOSE_CAPTURE(paren, HOPc(locinput, -1) - reginfo->strbeg, \
+	                         locinput - reginfo->strbeg); \
 	} \
 	else { \
 	    rex->offs[paren].end = -1; \
@@ -8341,12 +8345,18 @@ NULL
 		maxopenparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
+            scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
+
+            /* handle the single-char capture called as a GOSUB etc */
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
             {
-	        ST.min=1;
-	        ST.max=1;
+                char *li = locinput;
+                if (!regrepeat(rex, &li, scan, reginfo, 1))
+		    sayNO;
+                SET_locinput(li);
+                goto fake_end;
 	    }
-            scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
+
 	    goto repeat;
 
 	case CURLY:		/*  /A{m,n}B/ where A is width 1 char */
@@ -8462,24 +8472,41 @@ NULL
 	    }
 	    NOT_REACHED; /* NOTREACHED */
 
-	case CURLY_B_min_known_fail:
-	    /* failed to find B in a non-greedy match where c1,c2 valid */
+	case CURLY_B_min_fail:
+	    /* failed to find B in a non-greedy match.
+             * Handles both cases where c1,c2 valid or not */
 
 	    REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             }
-	    /* Couldn't or didn't -- move forward. */
-	    ST.oldloc = locinput;
-	    if (utf8_target)
-		locinput += UTF8SKIP(locinput);
-	    else
-		locinput++;
-	    ST.count++;
-	  curly_try_B_min_known:
-	     /* find the next place where 'B' could work, then call B */
-	    {
+
+            if (ST.c1 == CHRTEST_VOID) {
+                /* failed -- move forward one */
+                char *li = locinput;
+                if (!regrepeat(rex, &li, ST.A, reginfo, 1)) {
+                    sayNO;
+                }
+                locinput = li;
+                ST.count++;
+		if (!(   ST.count <= ST.max
+                        /* count overflow ? */
+                     || (ST.max == REG_INFTY && ST.count > 0))
+                )
+                    sayNO;
+            }
+            else {
 		int n;
+                /* Couldn't or didn't -- move forward. */
+                ST.oldloc = locinput;
+                if (utf8_target)
+                    locinput += UTF8SKIP(locinput);
+                else
+                    locinput++;
+                ST.count++;
+
+              curly_try_B_min_known:
+                /* find the next place where 'B' could work, then call B */
 		if (utf8_target) {
 		    n = (ST.oldloc == locinput) ? 0 : 1;
 		    if (ST.c1 == ST.c2) {
@@ -8558,47 +8585,16 @@ NULL
 			sayNO;
                     assert(n == REG_INFTY || locinput == li);
 		}
-		CURLY_SETPAREN(ST.paren, ST.count);
-                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-		    goto fake_end;
-		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B, locinput);
 	    }
+
+          curly_try_B_min:
+            CURLY_SETPAREN(ST.paren, ST.count);
+            PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
 	    NOT_REACHED; /* NOTREACHED */
 
-	case CURLY_B_min_fail:
-	    /* failed to find B in a non-greedy match where c1,c2 invalid */
-
-	    REGCP_UNWIND(ST.cp);
-            if (ST.paren) {
-                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
-            }
-	    /* failed -- move forward one */
-            {
-                char *li = locinput;
-                if (!regrepeat(rex, &li, ST.A, reginfo, 1)) {
-                    sayNO;
-                }
-                locinput = li;
-            }
-            {
-		ST.count++;
-		if (ST.count <= ST.max || (ST.max == REG_INFTY &&
-			ST.count > 0)) /* count overflow ? */
-		{
-		  curly_try_B_min:
-		    CURLY_SETPAREN(ST.paren, ST.count);
-                    if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-                        goto fake_end;
-		    PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
-		}
-	    }
-            sayNO;
-	    NOT_REACHED; /* NOTREACHED */
 
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
-            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
-                goto fake_end;
 	    {
 		bool could_match = locinput < reginfo->strend;
 
