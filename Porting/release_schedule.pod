@@ -65,7 +65,7 @@ you should reset the version numbers to the next blead series.
 
   2018-06-26  5.29.0 ✓        Sawyer X
   2018-07-20  5.29.1 ✓        Steve Hay
-  2018-08-20  5.29.2          Chris BinGOs Williams
+  2018-08-20  5.29.2 ✓        Chris BinGOs Williams
   2018-09-20  5.29.3          John Anderson
   2018-10-20  5.29.4          Aaron Crane
   2018-11-20  5.29.5
