@@ -4939,6 +4939,7 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
 typedef struct {
     PerlIOBuf buf;
     U32 flags;
+    bool no_replacements;
     U8 *start, *end;
     /* currently we always use this when reading, but that might change */
     U8 *cbuf;
@@ -4950,8 +4951,24 @@ typedef struct {
 #define UTF8_WARN_ON_ERROR 0x80000000
 #define UTF8_CROAK_ON_ERROR 0xC0000000
 #define UTF8_ONERROR_MASK 0xC0000000
+
+/* The following two macros depend on the values of the masks above */
 /* test whether we want messages */
 #define UTF8_ONERROR_MESSAGES(f) ((f) & UTF8_WARN_ON_ERROR)
+/* test whether an error does replacement */
+#define UTF8_ONERROR_REPLACEMENT(f) (((f) & UTF8_FAIL_ON_ERROR) == 0)
+
+/* test whether we do no replacement:
+   Which is the case if we fail or die for all errors,
+   and only allow extended UTF-8.
+
+   So for example allowing overlongs would fail this test, since they
+   need to be replaced, but surrogates are fine, since they're passed
+   through.
+*/
+
+#define UTF8_NO_REPLACEMENTS(flags) \
+    (!UTF8_ONERROR_REPLACEMENT(flags) && ((flags) & UTF8_ALLOW_ANY) == 0)
 
 static struct {
     const char* name;
@@ -5016,6 +5033,7 @@ static IV PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlI
         u->flags = flags;
         u->cbuf_size = 0;
         u->start = u->end = u->cbuf = NULL;
+        u->no_replacements = UTF8_NO_REPLACEMENTS(flags);
         return 0;
     }
     return -1;
@@ -5046,11 +5064,13 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
         */
         const U8 *spos = *start;
         STRLEN s_temp_len =
-            (send - spos) > (oend - *out) ? (oend - *out) : (send - *start);
-        is_utf8_string_loc_flags(*start, s_temp_len, &spos, sub_flags);
-        Copy(*start, *out, spos-*start, U8);
+            out != NULL && (send - spos) > (oend - *out) ? (oend - *out) : (send - *start);
+        (void)is_utf8_string_loc_flags(*start, s_temp_len, &spos, sub_flags);
+        if (out) {
+            Copy(*start, *out, spos-*start, U8);
+            *out += spos - *start;
+        }
         retval += spos - *start;
-        *out += spos - *start;
         *start = spos;
 
         if (*start < send) {
@@ -5065,7 +5085,7 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
                and that warning could be produced twice if we do the
                check later.
             */
-            if (oend-*out < (SSize_t)REPLACEMENT_CHARACTER_UTF8_LEN)
+            if (out && oend-*out < (SSize_t)REPLACEMENT_CHARACTER_UTF8_LEN)
                 return retval;
 
             (void)utf8n_to_uvchr_msgs(*start, send - *start,
@@ -5106,10 +5126,12 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
             }
             SvREFCNT_dec(msgs);
 
-            Copy(REPLACEMENT_CHARACTER_UTF8, *out,
-                 REPLACEMENT_CHARACTER_UTF8_LEN, U8);
+            if (out) {
+                Copy(REPLACEMENT_CHARACTER_UTF8, *out,
+                     REPLACEMENT_CHARACTER_UTF8_LEN, U8);
+                *out += REPLACEMENT_CHARACTER_UTF8_LEN;
+            }
             *start += retlen;
-            *out += REPLACEMENT_CHARACTER_UTF8_LEN;
             retval += REPLACEMENT_CHARACTER_UTF8_LEN;
         }
     }
@@ -5136,77 +5158,150 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
         PerlIO_get_base(f);
 
     assert(b->buf);
+    b->ptr = b->buf;
 
     if (!PerlIOValid(n)) {
         PerlIOBase(f)->flags |= PERLIO_F_EOF;
         return -1;
     }
 
-    if (!u->cbuf) {
-        if (!u->cbuf_size)
-            u->cbuf_size = PERLIOBUF_DEFAULT_BUFSIZ + UTF8_MAXBYTES * 2;
-        Newx(u->cbuf, u->cbuf_size, U8);
-        u->start = u->end = u->cbuf;
-    }
-    assert(u->end >= u->start);
+    if (u->no_replacements) {
+        const U8 *p;
+        Size_t valid_bytes;
+        if (u->start != u->end) {
+            /* we have a (small) amount of data in the cbuf) */
+            assert(u->cbuf);
+            read_bytes = u->end - u->start;
+            Copy(u->start, b->buf, read_bytes, STDCHAR);
+            u->start = u->end = u->cbuf;
+            b->end = b->buf + read_bytes;
+        }
+        else {
+            b->end = b->buf;
+        }
 
-    if (u->end - u->start < 2 * UTF8_MAXBYTES) {
-        Size_t sz = u->end - u->start;
-        if (sz)
-            Move(u->start, u->cbuf, sz, U8);
-        u->start = u->cbuf;
-        u->end = u->cbuf + sz;
-    }
+        fit = (SSize_t)b->bufsiz - (b->end - b->buf);
 
-    fit = u->cbuf + u->cbuf_size - u->end;
-
-    /* Try to fill our work buffer */
-    if (PerlIO_fast_gets(n)) {
-        /*
-         * Layer below is also buffered. We do _NOT_ want to call its
-         * ->Read() because that will loop till it gets what we asked for
-         * which may hang on a pipe etc. Instead take anything it has to
-         * hand, or ask it to fill _once_.
-         */
-        avail = PerlIO_get_cnt(n);
-        if (avail <= 0) {
-            avail = PerlIO_fill(n);
-            if (avail == 0)
-                avail = PerlIO_get_cnt(n);
-            else {
-                if (!PerlIO_error(n) && PerlIO_eof(n))
-                    avail = 0;
+        if (PerlIO_fast_gets(n)) {
+            avail = PerlIO_get_cnt(n);
+            if (avail <= 0) {
+                avail = PerlIO_fill(n);
+                if (avail == 0)
+                    avail = PerlIO_get_cnt(n);
+                else {
+                    if (!PerlIO_error(n) && PerlIO_eof(n))
+                        avail = 0;
+                }
+            }
+            if (avail > 0) {
+                STDCHAR *ptr = PerlIO_get_ptr(n);
+                const SSize_t cnt = avail;
+                if (avail > fit)
+                    avail = fit;
+                Copy(ptr, b->end, avail, STDCHAR);
+                PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
+                read_bytes += avail;
             }
         }
-        if (avail > 0) {
-            STDCHAR *ptr = PerlIO_get_ptr(n);
-            const SSize_t cnt = avail;
-            if (avail > fit)
-                avail = fit;
-            Copy(ptr, u->end, avail, U8);
-            PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
-            u->end += avail;
+        else {
+            avail = PerlIO_read(n, b->end, fit);
+            if (avail > 0)
+                read_bytes += avail;
         }
+        if (avail <= 0) {
+            if (avail < 0 || (read_bytes == 0 && PerlIO_eof(n))) {
+                PerlIOBase(f)->flags |= (avail == 0) ? PERLIO_F_EOF : PERLIO_F_ERROR;
+                return -1;
+            }
+        }
+        p = (const U8 *)b->buf;
+        valid_bytes = utf8_validate_and_fix(&p, p + read_bytes, NULL, NULL, u->flags, PerlIO_eof(n), &errors);
+        b->end = b->buf + valid_bytes;
+        if (valid_bytes != read_bytes) {
+            SSize_t sz = read_bytes - valid_bytes;
+            assert(sz <= UTF8_MAXBYTES);
+            if (!u->cbuf) {
+                u->cbuf_size = UTF8_MAXBYTES;
+                Newx(u->cbuf, u->cbuf_size, U8);
+                u->start = u->end = u->cbuf;
+            }
+            Copy(b->end, u->cbuf, sz, STDCHAR);
+            u->end = u->cbuf + sz;
+        }
+        PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
     }
     else {
-        avail = PerlIO_read(n, u->end, fit);
-        if (avail > 0)
-            u->end += avail;
-    }
-
-    read_bytes = u->end - u->start;
-    fit = (SSize_t)b->bufsiz - (b->end - b->buf);
-
-    if (u->start == u->end) {
-        if (avail < 0 || (read_bytes == 0 && PerlIO_eof(n))) {
-            PerlIOBase(f)->flags |= (avail == 0) ? PERLIO_F_EOF : PERLIO_F_ERROR;
-            return -1;
+        /* because of limitations with the PerlIO API (fill() don't
+           top-up, it always fills from empty) and since we might be
+           replacing bad single bytes with a longer replacement character,
+           we need an intermediate buffer.
+         */
+        if (!u->cbuf) {
+            if (!u->cbuf_size)
+                u->cbuf_size = PERLIOBUF_DEFAULT_BUFSIZ + UTF8_MAXBYTES * 2;
+            Newx(u->cbuf, u->cbuf_size, U8);
+            u->start = u->end = u->cbuf;
         }
-    }
+        assert(u->end >= u->start);
 
-    outp = (U8*)b->end;
-    b->end = b->end + utf8_validate_and_fix((const U8 **)&u->start, u->end, &outp, (U8*)b->buf+b->bufsiz, u->flags, PerlIO_eof(n), &errors);
-    PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+        if (u->end - u->start < 2 * UTF8_MAXBYTES) {
+            Size_t sz = u->end - u->start;
+            if (sz)
+                Move(u->start, u->cbuf, sz, U8);
+            u->start = u->cbuf;
+            u->end = u->cbuf + sz;
+        }
+
+        fit = u->cbuf + u->cbuf_size - u->end;
+
+        /* Try to fill our work buffer */
+        if (PerlIO_fast_gets(n)) {
+            /*
+             * Layer below is also buffered. We do _NOT_ want to call its
+             * ->Read() because that will loop till it gets what we asked for
+             * which may hang on a pipe etc. Instead take anything it has to
+             * hand, or ask it to fill _once_.
+             */
+            avail = PerlIO_get_cnt(n);
+            if (avail <= 0) {
+                avail = PerlIO_fill(n);
+                if (avail == 0)
+                    avail = PerlIO_get_cnt(n);
+                else {
+                    if (!PerlIO_error(n) && PerlIO_eof(n))
+                        avail = 0;
+                }
+            }
+            if (avail > 0) {
+                STDCHAR *ptr = PerlIO_get_ptr(n);
+                const SSize_t cnt = avail;
+                if (avail > fit)
+                    avail = fit;
+                Copy(ptr, u->end, avail, U8);
+                PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
+                u->end += avail;
+            }
+        }
+        else {
+            avail = PerlIO_read(n, u->end, fit);
+            if (avail > 0)
+                u->end += avail;
+        }
+
+        read_bytes = u->end - u->start;
+        fit = (SSize_t)b->bufsiz - (b->end - b->buf);
+
+        if (u->start == u->end) {
+            if (avail < 0 || (read_bytes == 0 && PerlIO_eof(n))) {
+                PerlIOBase(f)->flags |= (avail == 0) ? PERLIO_F_EOF : PERLIO_F_ERROR;
+                return -1;
+            }
+        }
+
+        outp = (U8*)b->end;
+        b->end = b->end + utf8_validate_and_fix((const U8 **)&u->start, u->end, &outp, (U8*)b->buf+b->bufsiz, u->flags, PerlIO_eof(n), &errors);
+        PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+    }
 
     if (errors) {
         PerlIOBase(f)->flags |= PERLIO_F_ERROR;
