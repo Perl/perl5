@@ -493,3 +493,12 @@ sub t1 {}
 sub t2 (}
 EXPECT
 Prototype not terminated at - line 2.
+########
+# NAME [perl #132158] format with syntax errors
+format=
+@
+=h
+=cut
+EXPECT
+syntax error at - line 4, next token ???
+Execution of - aborted due to compilation errors.
