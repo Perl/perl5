@@ -2575,16 +2575,8 @@ S_sublex_done(pTHX)
 	const line_t l = CopLINE(PL_curcop);
 	LEAVE;
         if (PL_parser->sub_error_count != PL_error_count) {
-            const char * const name = OutCopFILE(PL_curcop);
             if (PL_parser->sub_no_recover) {
-                const char * msg = "";
-                if (PL_in_eval) {
-                    SV *errsv = ERRSV;
-                    if (SvCUR(ERRSV)) {
-                        msg = Perl_form(aTHX_ "%" SVf, SVfARG(errsv));
-                    }
-                }
-                abort_execution(msg, name);
+                yyquit();
                 NOT_REACHED;
             }
         }
