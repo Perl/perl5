@@ -479,6 +479,42 @@ a(?:b|c|d){2}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}?(.)	acdbcdbe	y	$1	d
 ((foo)|(bar))*	foobar	y	$1-$2-$3	bar-foo-bar
+# RT 133352: failed branches should restore captures to the value they had
+# before the branch was tried (in the cases below to whatever was
+# captured by the previous iterations of an enclosing repeat) rather than
+# to undef.
+^((.)foo|bar)*$	afoobar	y	$2	a
+(?:(ab)|(cd)){2,}	abcdef	y	$1-$2	ab-cd
+(?:(de)|(bc)){2,}	abcdef	y	$1-$2	de-bc
+(?:(ab)|(cd)|(ef)){3,}	abcdef	y	$1-$2-$3	ab-cd-ef
+(?:(ef)|(cd)|(ab)){3,}	abcdef	y	$1-$2-$3	ef-cd-ab
+(?:(\d+)(?:(ab)|(cd)|(ef))([XYZ])){3,}	1abX22cdY333efZ	y	$1-$2-$3-$4-$5	333-ab-cd-ef-Z
+(?:([XY])(?:(ab)|(cd))*){2,}	XabYcd	y	$1-$2-$3	Y-ab-cd
+((ab)|(cd)){2,}	abcdef	y	$1-$2-$3	cd-ab-cd
+((de)|(bc)){2,}	abcdef	y	$1-$2-$3	de-de-bc
+((ab)|(cd)|(ef)){3,}	abcdef	y	$1-$2-$3-$4	ef-ab-cd-ef
+((ef)|(cd)|(ab)){3,}	abcdef	y	$1-$2-$3-$4	ef-ef-cd-ab
+((\d+)(?:(ab)|(cd)|(ef))([XYZ])){3,}	1abX22cdY333efZ	y	$1-$2-$3-$4-$5-$6	333efZ-333-ab-cd-ef-Z
+(?:(a)b|(c)d){2,}	abcdef	y	$1-$2	a-c
+(?:(d)e|(b)c){2,}	abcdef	y	$1-$2	d-b
+(?:(a)b|(c)d|(e)f){3,}	abcdef	y	$1-$2-$3	a-c-e
+(?:(e)f|(c)d|(a)b){3,}	abcdef	y	$1-$2-$3	e-c-a
+(?:(\d+)(?:(a)b|(c)d|(e)f)([XYZ])){3,}	1abX22cdY333efZ	y	$1-$2-$3-$4-$5	333-a-c-e-Z
+(?:([XY])(?:(a)b|(c)d)*){2,}	XabYcd	y	$1-$2-$3	Y-a-c
+(?:(.)b|(c)d){2,}	abcdef	y	$1-$2	a-c
+(?:(.)e|(b)c){2,}	abcdef	y	$1-$2	d-b
+(?:(.)b|(c)d|(e)f){3,}	abcdef	y	$1-$2-$3	a-c-e
+(?:(.)f|(c)d|(a)b){3,}	abcdef	y	$1-$2-$3	e-c-a
+(?:(\d+)(?:(.)b|(c)d|(e)f)([XYZ])){3,}	1abX22cdY333efZ	y	$1-$2-$3-$4-$5	333-a-c-e-Z
+(?:([XY])(?:(.)b|(c)d)*){2,}	XabYcd	y	$1-$2-$3	Y-a-c
+# trie variants of the above
+(?:=(.)b|=(c)d){2,}	=ab=cd=ef	y	$1-$2	a-c
+(?:=(.)e|BOB(b)c){2,}	aBOBbc=def	y	$1-$2	d-b
+(?:=(.)b|=(c)d|=(e)f){3,}	=ab=cd=ef	y	$1-$2-$3	a-c-e
+(?:=(.)f|=(c)d|=(a)b){3,}	=ab=cd=ef	y	$1-$2-$3	e-c-a
+(?:(\d+)(?:=(.)b|=(c)d|=(e)f)([XYZ])){3,}	1=abX22=cdY333=efZ	y	$1-$2-$3-$4-$5	333-a-c-e-Z
+(?:([XY])(?:=(.)b|=(c)d)*){2,}	X=abY=cd	y	$1-$2-$3	Y-a-c
+#
 :(?:	-	c	-	Sequence (? incomplete
 a(?:b|c|d){6,7}(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){6,7}?(.)	acdbcdbe	y	$1	e

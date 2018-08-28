@@ -788,6 +788,7 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            bool parens_saved; /* need to restore paren indices on failure */
 
         } branchlike;
 
@@ -797,6 +798,7 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            bool parens_saved; /* need to restore paren indices on failure */
 
             regnode *next_branch; /* next branch node */
         } branch;
@@ -807,6 +809,7 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            bool parens_saved; /* need to restore paren indices on failure */
 
             U32		accepted; /* how many accepting states left */
             bool	longfold;/* saw a fold with a 1->n char mapping */

@@ -337,6 +337,48 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     rex->lastparen = n;                     \
     rex->lastcloseparen = lcp;
 
+/* Save the current capture state at the start of a branch or trie.
+ * Normally if a branch fails we just invalidate any new captures about
+ * the saved ST.lastparen. However this isn't sufficient if the
+ * alternation is within a repeat (which implies CURLYX).  At the start of
+ * second and subsequent repeats, the captures within the repeat aren't
+ * invalid, but rather, hold the results of the previous iteration. During
+ * the course of the iteration, the captures are progressively 'upgraded'
+ * with the results of the current iteration.  This means that failed
+ * branches should *restore* captures rather than just invalidating them.
+ * But saving and restoring is expensive, and also we don't know the
+ * current paren index.  So use cur_curlyx to detemine whether we're
+ * within a repeat (and thus need to save), and use it as a lower bound
+ * estimate of the floor.
+ * XXX ideally we'd have the current paren index stored as part of the
+ * BRANCH op; for now, the value stored as part of the CURLYX op is a
+ * conservative under-estimate (i.e. we save too much, which is safe but
+ * inefficient). In theory with that index available, we could use it to
+ * just restore a suitable subset of the captures already saved by the
+ * last WHILEM, ratheer than saving them at the start of the BRANCH.
+ */
+#define BRANCH_SAVE_PAREN \
+    ST.parens_saved = (                                           \
+           cur_curlyx                                             \
+        && (int)maxopenparen > cur_curlyx->u.curlyx.parenfloor);  \
+    if (ST.parens_saved)                                          \
+         regcppush(rex, cur_curlyx->u.curlyx.parenfloor,          \
+                        maxopenparen);                            \
+    else {                                                        \
+        ST.lastparen = rex->lastparen;                            \
+        ST.lastcloseparen = rex->lastcloseparen;                  \
+    }
+
+#define BRANCH_RESTORE_PAREN \
+    if (ST.parens_saved)                                          \
+        regcppop(rex, &maxopenparen);                             \
+    else {                                                        \
+        UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);            \
+    }
+
+
+
+
 
 STATIC void
 S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
@@ -6718,7 +6760,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * where the trie just matches X then calls out to do the
                  * rest of the branch */
                 REGCP_UNWIND(ST.cp);
-                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+                BRANCH_RESTORE_PAREN;
             }
             if (!--ST.accepted) {
                 DEBUG_EXECUTE_r({
@@ -6753,6 +6795,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if ( ST.jump ) {
                 ST.lastparen = rex->lastparen;
                 ST.lastcloseparen = rex->lastcloseparen;
+                BRANCH_SAVE_PAREN;
                 REGCP_SET(ST.cp);
             }
 
@@ -8832,9 +8875,8 @@ NULL
 
         case BRANCH:	    /*  /(...|A|...)/ */
             scan = NEXTOPER(scan); /* scan now points to inner node */
-            ST.lastparen = rex->lastparen;
-            ST.lastcloseparen = rex->lastcloseparen;
             ST.next_branch = next;
+            BRANCH_SAVE_PAREN;
             REGCP_SET(ST.cp);
 
             /* Now go into the branch */
@@ -8873,7 +8915,8 @@ NULL
                 no_final = 0;
             }
             REGCP_UNWIND(ST.cp);
-            UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+            BRANCH_RESTORE_PAREN;
+
             scan = ST.next_branch;
             /* no more branches? */
             if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {

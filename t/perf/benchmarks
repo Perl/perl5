@@ -2175,6 +2175,28 @@
         code    => '/[acgt]+/',
     },
 
+    'regex::branch::basic' => {
+        setup   => '$_ = "verily the mammal was brown and jumpy"',
+        code    => '/^(?:the|quick|brown|fox|jumps|over)/',
+    },
+    'regex::branch::basic_capture' => {
+        setup   => '$_ = "verily the mammal was brown and jumpy"',
+        code    => '/^(?:(t)he|(q)uick|(b)rown|(f)ox|(j)umps|(o)ver)/',
+    },
+    'regex::branch::basic_capture_repeat' => {
+        setup   => '$_ = "thequickbrownfoxjumpsoverthelazydog"',
+        code    => '/^(?:(t)he|(q)uick|(b)rown|(f)ox|(j)umps|(o)ver)*/',
+    },
+
+    'regex::trie::basic_capture' => {
+        setup   => '$_ = "verily the mammal was brown and jumpy"',
+        code    => '/^(?:t(h)e|qu(i)ck|br(o)wn|f(o)x|ju(m)ps|o(v)er)/',
+    },
+    'regex::trie::basic_capture_repeat' => {
+        setup   => '$_ = "thequickbrownfoxjumpsoverthelazydog"',
+        code    => '/^(?:t(h)e|qu(i)ck|br(o)wn|f(o)x|ju(m)ps|o(v)er)*/',
+    },
+
     'regex::whilem::min_captures_fail' => {
         desc    => '/WHILEM with anon-greedy match and captures that fails',
         setup   => '$_ = ("a" x 20)',
