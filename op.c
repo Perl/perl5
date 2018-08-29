@@ -2722,7 +2722,6 @@ S_maybe_multiconcat(pTHX_ OP *o)
     }
     else if (   topop->op_type == OP_CONCAT
              && (topop->op_flags & OPf_STACKED)
-             && (cUNOPo->op_first->op_flags & OPf_MOD)
              && (!(topop->op_private & OPpCONCAT_NESTED))
             )
     {
