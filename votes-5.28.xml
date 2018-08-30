@@ -4,7 +4,7 @@
 
 <div><h2>Tickets Listed in #133320: 5.28.1 blockers</h2>
 
-<commit votes="" id="" ticket="133314" desc="in-place editing in 5.28 quickly exhausts open file descriptor limit" />
+<commit votes="tonyc" id="3d5e9c119db6b727684fe75dfcfe5831c4351bec" ticket="133314" desc="in-place editing in 5.28 quickly exhausts open file descriptor limit" />
 
 </div>
 
@@ -35,6 +35,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh khw" id="6b877bbd2c071b3e0659fab552a74dc2ff7e08fb" ticket="133368" desc="treat when(index() > -1) as a boolean expression"/>
 
+<commit votes="tonyc" id="b9965e1496efe3cb6116e74d50aa83152c70e877" ticket="133422" desc="(perl #133422) handle Off_t smaller than size_t" />
+
+<commit votes="tonyc" id="120060c86e233cb9f588314214137f3ed1b48e2a" ticket="133326" desc="(perl #133326) fix and clarify handling of recurs_sv." />
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -46,6 +50,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Build and Installation Fixes</h3>
 
 <commit votes="steveh" id="b79cd7dfefcc16674b83ffdeb11687ea693b7845" ticket="" desc="Fix Windows build with CCTYPE=SDK2003SP1"/>
+
+<commit votes="tonyc" id="edf639fce3e8c8852ee4179ab902b357b1deba98: ticket="133411" desc="(perl #133411) don't try to load Storable with -Dusecrosscompile" />
 
 </div>
 
