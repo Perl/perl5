@@ -5168,19 +5168,16 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
     if (u->no_replacements) {
         const U8 *p;
         Size_t valid_bytes;
+        Size_t consumed;
+        b->end = b->buf;
         if (u->start != u->end) {
             /* we have a (small) amount of data in the cbuf) */
             assert(u->cbuf);
             read_bytes = u->end - u->start;
             Copy(u->start, b->buf, read_bytes, STDCHAR);
-            u->start = u->end = u->cbuf;
-            b->end = b->buf + read_bytes;
-        }
-        else {
-            b->end = b->buf;
         }
 
-        fit = (SSize_t)b->bufsiz - (b->end - b->buf);
+        fit = (SSize_t)b->bufsiz - read_bytes;
 
         if (PerlIO_fast_gets(n)) {
             avail = PerlIO_get_cnt(n);
@@ -5195,11 +5192,9 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
             }
             if (avail > 0) {
                 STDCHAR *ptr = PerlIO_get_ptr(n);
-                const SSize_t cnt = avail;
                 if (avail > fit)
                     avail = fit;
-                Copy(ptr, b->end, avail, STDCHAR);
-                PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
+                Copy(ptr, b->end+read_bytes, avail, STDCHAR);
                 read_bytes += avail;
             }
         }
@@ -5215,8 +5210,20 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
             }
         }
         p = (const U8 *)b->buf;
-        valid_bytes = utf8_validate_and_fix(&p, p + read_bytes, NULL, NULL, u->flags, PerlIO_eof(n), &errors);
+        consumed = valid_bytes = utf8_validate_and_fix(&p, p + read_bytes, NULL, NULL, u->flags, PerlIO_eof(n), &errors);
         b->end = b->buf + valid_bytes;
+        /* account for data in the parent buffer now rather than before validating to
+           ensure it doesn't advance past an error.
+        */
+        if (u->start != u->end) {
+            u->end = u->start = u->cbuf;
+        }
+        if (PerlIO_fast_gets(n)) {
+            /* there's not much we can do without a parent buffer */
+            STDCHAR *ptr = PerlIO_get_ptr(n);
+            Size_t cnt = PerlIO_get_cnt(n);
+            PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
+        }
         if (valid_bytes != read_bytes) {
             SSize_t sz = read_bytes - valid_bytes;
             assert(sz <= UTF8_MAXBYTES);
@@ -5226,6 +5233,7 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
                 u->start = u->end = u->cbuf;
             }
             Copy(b->end, u->cbuf, sz, STDCHAR);
+            u->start = u->cbuf;
             u->end = u->cbuf + sz;
         }
         PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
