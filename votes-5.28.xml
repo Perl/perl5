@@ -33,8 +33,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh khw" id="6b877bbd2c071b3e0659fab552a74dc2ff7e08fb" ticket="133368" desc="treat when(index() > -1) as a boolean expression"/>
-
 <commit votes="tonyc" id="b9965e1496efe3cb6116e74d50aa83152c70e877" ticket="133422" desc="(perl #133422) handle Off_t smaller than size_t" />
 
 <commit votes="tonyc" id="120060c86e233cb9f588314214137f3ed1b48e2a" ticket="133326" desc="(perl #133326) fix and clarify handling of recurs_sv." />
