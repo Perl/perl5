@@ -8721,7 +8721,7 @@ bytes before the result of the read is appended.
 There is no syseof() function, which is ok, since
 L<C<eof>|/eof FILEHANDLE> doesn't work well on device files (like ttys)
 anyway.  Use L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET> and
-check for a return value for 0 to decide whether you're done.
+check for a return value of 0 to decide whether you're done.
 
 Note that if the filehandle has been marked as C<:utf8>, Unicode
 characters are read instead of bytes (the LENGTH, OFFSET, and the
