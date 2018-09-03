@@ -61,7 +61,7 @@ User::grent - by-name interface to Perl's built-in getgr*() functions
 
 =head1 DESCRIPTION
 
-This module's default exports override the core getgrent(), getgruid(),
+This module's default exports override the core getgrent(), getgrgid(),
 and getgrnam() functions, replacing them with versions that return
 "User::grent" objects.  This object has methods that return the similarly
 named structure field name from the C's passwd structure from F<grp.h>; 
