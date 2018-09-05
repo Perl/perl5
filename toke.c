@@ -11221,7 +11221,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #ifdef HEXFP_UQUAD
                         hexfp_exp -= hexfp_frac_bits;
 #endif
-                        hexfp_mult = Perl_pow(2.0, hexfp_exp);
+                        hexfp_mult = Perl_pow(2.0, (NV)hexfp_exp);
                         hexfp = TRUE;
                         goto decimal;
                     }
