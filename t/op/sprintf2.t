@@ -808,17 +808,7 @@ SKIP: {
     for my $t (@subnormals) {
 	# Note that "0x1p+2" is not considered numeric,
 	# since neither is "0x12", hence the eval.
-        my $f = eval $t->[0];
-        # XXX under g++ -ansi, pow(2.0, -1074) returns 0 rather
-        # than the smallest denorm number. Which means that very small
-        # string literals on a perl compiled under g++ may be seen as 0.
-        # This is either a bug in the g++ math library or scan_num() in
-        # toke.c; but in either case, its not a bug in sprintf(), so
-        # skip the test.
-        local $::TODO = "denorm literals treated as zero"
-            if $f == 0.0 && $t->[2] ne '0x0p+0';
-
-        my $s = sprintf($t->[1], $f);
+        my $s = sprintf($t->[1], eval $t->[0]);
         is($s, $t->[2], "subnormal @$t got $s");
     }
 
