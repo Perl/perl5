@@ -1943,6 +1943,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_fmod fmodq
 #   define Perl_log logq
 #   define Perl_log10 log10q
+#   define Perl_signbit signbitq
 #   define Perl_pow powq
 #   define Perl_sin sinq
 #   define Perl_sinh sinhq
@@ -3838,7 +3839,9 @@ my_swap16(const U16 x) {
 #define U_L(what) U_32(what)
 
 #ifdef HAS_SIGNBIT
-#  define Perl_signbit signbit
+#  ifndef Perl_signbit
+#    define Perl_signbit signbit
+#  endif
 #endif
 
 /* These do not care about the fractional part, only about the range. */
