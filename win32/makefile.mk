@@ -240,6 +240,9 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 # Running VCVARS32.BAT, VCVARSALL.BAT or similar is *required* when using
 # Visual C++.
 #
+# For GCC builds this should be the directory containing the bin, include,
+# lib directories for your compiler.
+#
 
 #CCHOME		*= C:\MinGW
 

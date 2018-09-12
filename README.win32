@@ -372,7 +372,9 @@ may end up building against the installed perl's lib/CORE directory rather
 than the one being tested.
 
 You will have to make sure that CCTYPE is set correctly and that
-CCHOME points to wherever you installed your compiler.
+CCHOME points to wherever you installed your compiler.  For GCC this
+should be the directory that contains the F<bin>, F<include> and
+F<lib> directories.
 
 If building with the cross-compiler provided by
 mingw-w64.org you'll need to uncomment the line that sets
