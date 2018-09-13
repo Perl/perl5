@@ -371,7 +371,19 @@ PerlIO_debug(const char *fmt, ...)
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
 	char buffer[1024];
 	const STRLEN len1 = my_snprintf(buffer, sizeof(buffer), "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
+#  ifdef USE_QUADMATH
+#    ifdef HAS_VSNPRINTF
+        /* my_vsnprintf() isn't available with quadmath, but the native vsnprintf()
+           should be, otherwise the system isn't likely to support quadmath.
+           Nothing should be calling PerlIO_debug() with floating point anyway.
+        */
+        const STRLEN len2 = vsnprintf(buffer + len1, sizeof(buffer) - len1, fmt, ap);
+#    else
+        STATIC_ASSERT_STMT(0);
+#    endif
+#  else
 	const STRLEN len2 = my_vsnprintf(buffer + len1, sizeof(buffer) - len1, fmt, ap);
+#  endif
 	PERL_UNUSED_RESULT(PerlLIO_write(PL_perlio_debug_fd, buffer, len1 + len2));
 #else
 	const char *s = CopFILE(PL_curcop);
