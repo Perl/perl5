@@ -1947,12 +1947,13 @@ let's pretend that a function that wasn't defined should just invoke
 C<system> with those arguments.  All you'd do is:
 
     sub AUTOLOAD {
-	my $program = $AUTOLOAD;
-	$program =~ s/.*:://;
-	system($program, @_);
+        our $AUTOLOAD;              # keep 'use strict' happy
+        my $program = $AUTOLOAD;
+        $program =~ s/.*:://;
+        system($program, @_);
     }
     date();
-    who('am', 'i');
+    who();
     ls('-l');
 
 In fact, if you predeclare functions you want to call that way, you don't
@@ -1960,7 +1961,7 @@ even need parentheses:
 
     use subs qw(date who ls);
     date;
-    who "am", "i";
+    who;
     ls '-l';
 
 A more complete example of this is the Shell module on CPAN, which
