@@ -873,16 +873,9 @@ use File::Glob qw(:case);
     },
 
     'perlfaq' => {
-        'DISTRIBUTION' => 'ETHER/perlfaq-5.20180605.tar.gz',
+        'DISTRIBUTION' => 'ETHER/perlfaq-5.20180915.tar.gz',
         'FILES'        => q[cpan/perlfaq],
-        'EXCLUDED'     => [
-            qw( inc/CreateQuestionList.pm
-                inc/perlfaq.tt
-                t/00-compile.t),
-            qr{^xt/},
-        ],
-
-        'CUSTOMIZED'   => [ qw[ lib/perlfaq5.pod lib/perlfaq8.pod ] ],
+        'EXCLUDED'     => [ qr/^inc/, qr/^xt/, qr{^t/00-} ],
     },
 
     'PerlIO::via::QuotedPrint' => {

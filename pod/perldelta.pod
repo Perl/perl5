@@ -129,6 +129,10 @@ L<File::Path> has been upgraded from version 2.15 to 2.16.
 
 =item *
 
+L<perlfaq> has been upgraded from version 5.20180605 to 5.0180915.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
