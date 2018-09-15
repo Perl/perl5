@@ -3467,7 +3467,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                    ) {
                    regnode *fix = convert;
                    U32 word = trie->wordcount;
+#ifdef RE_TRACK_PATTERN_OFFSETS
                    mjd_nodelen++;
+#endif
                    Set_Node_Offset_Length(convert, mjd_offset, state - 1);
                    while( ++fix < n ) {
                        Set_Node_Offset_Length(fix, 0, 0);
@@ -3541,7 +3543,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 optimisation.
              */
             while( optimize < jumper ) {
+#ifdef RE_TRACK_PATTERN_OFFSETS
                 mjd_nodelen += Node_Length((optimize));
+#endif
                 OP( optimize ) = OPTIMIZED;
                 Set_Node_Offset_Length(optimize,0,0);
                 optimize++;
