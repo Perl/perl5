@@ -125,6 +125,10 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<Devel::PPPort> has been upgraded from version 3.42 to 3.43.
+
+=item *
+
 L<File::Path> has been upgraded from version 2.15 to 2.16.
 
 =item *
