@@ -373,7 +373,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Warnings produced when constant folding operations on overloaded
+Warnings produced from constant folding operations on overloaded
 values no longer produce spurious "Use of uninitialized value"
 warnings.  [perl #132683]
 
