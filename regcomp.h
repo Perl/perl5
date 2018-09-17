@@ -353,35 +353,35 @@ struct regnode_ssc {
 #define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
 #define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
 
-#define FILL_NODE(ptr, op)                                           \
-    STMT_START {                                                     \
-                    OP(ptr) = op;                                    \
-                    NEXT_OFF(ptr) = 0;                               \
+#define FILL_NODE(offset, op)                                           \
+    STMT_START {                                                        \
+                    OP(REGNODE_p(offset)) = op;                         \
+                    NEXT_OFF(REGNODE_p(offset)) = 0;                    \
     } STMT_END
-#define FILL_ADVANCE_NODE(ptr, op)                                   \
-    STMT_START {                                                     \
-                    FILL_NODE(ptr, op);                              \
-                    (ptr)++;                                         \
+#define FILL_ADVANCE_NODE(offset, op)                                   \
+    STMT_START {                                                        \
+                    FILL_NODE(offset, op);                              \
+                    (offset)++;                                         \
     } STMT_END
-#define FILL_ADVANCE_NODE_ARG(ptr, op, arg)                         \
-    STMT_START {                                                    \
-                    ARG_SET(ptr, arg);                              \
-                    FILL_ADVANCE_NODE(ptr, op);                     \
-                    /* This is used generically for other operations\
-                     * that have a longer argument */               \
-                    (ptr) += regarglen[op];                         \
+#define FILL_ADVANCE_NODE_ARG(offset, op, arg)                          \
+    STMT_START {                                                        \
+                    ARG_SET(REGNODE_p(offset), arg);                    \
+                    FILL_ADVANCE_NODE(offset, op);                      \
+                    /* This is used generically for other operations    \
+                     * that have a longer argument */                   \
+                    (offset) += regarglen[op];                          \
     } STMT_END
-#define FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2)               \
-    STMT_START {                                                    \
-                    ARG_SET(ptr, arg1);                             \
-                    ARG2L_SET(ptr, arg2);                           \
-                    FILL_ADVANCE_NODE(ptr, op);                     \
-                    (ptr) += 2;                                     \
+#define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
+    STMT_START {                                                        \
+                    ARG_SET(REGNODE_p(offset), arg1);                   \
+                    ARG2L_SET(REGNODE_p(offset), arg2);                 \
+                    FILL_ADVANCE_NODE(offset, op);                      \
+                    (offset) += 2;                                      \
     } STMT_END
 
 #define REG_MAGIC 0234
 
-#define SIZE_ONLY cBOOL(RExC_emit == (regnode *) & RExC_emit_dummy)
+#define SIZE_ONLY RExC_pass1
 #define PASS1 SIZE_ONLY
 #define PASS2 (! SIZE_ONLY)
 

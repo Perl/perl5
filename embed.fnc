@@ -2362,21 +2362,21 @@ Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o|NULLO
 Ep	|int	|re_printf	|NN const char *fmt|...
 #endif
 #if defined(PERL_IN_REGCOMP_C)
-Es	|regnode*|reg		|NN RExC_state_t *pRExC_state \
+Es	|regnode_offset|reg	|NN RExC_state_t *pRExC_state \
 				|I32 paren|NN I32 *flagp|U32 depth
-Es	|regnode*|regnode_guts	|NN RExC_state_t *pRExC_state              \
+Es	|regnode_offset|regnode_guts|NN RExC_state_t *pRExC_state          \
 				|const U8 op				   \
 				|const STRLEN extra_len			   \
 				|NN const char* const name
-Es	|regnode*|reganode	|NN RExC_state_t *pRExC_state|U8 op \
+Es	|regnode_offset|reganode|NN RExC_state_t *pRExC_state|U8 op \
 				|U32 arg
-Es	|regnode*|reg2Lanode	|NN RExC_state_t *pRExC_state		   \
+Es	|regnode_offset|reg2Lanode|NN RExC_state_t *pRExC_state		   \
 				|const U8 op				   \
 				|const U32 arg1				   \
 				|const I32 arg2
-Es	|regnode*|regatom	|NN RExC_state_t *pRExC_state \
+Es	|regnode_offset|regatom	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
-Es	|regnode*|regbranch	|NN RExC_state_t *pRExC_state \
+Es	|regnode_offset|regbranch	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|I32 first|U32 depth
 Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 				|NN regnode* const node                    \
@@ -2392,7 +2392,7 @@ Es	|void	|output_or_return_posix_warnings			    \
 Es	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
 				|NN SV* multi_string			    \
 				|const STRLEN cp_count
-Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
+Es	|regnode_offset|regclass|NN RExC_state_t *pRExC_state                 \
 				|NN I32 *flagp|U32 depth|const bool stop_at_1 \
 				|bool allow_multi_fold                        \
 				|const bool silence_non_portable              \
@@ -2402,12 +2402,12 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|NULLOK AV** return_posix_warnings
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
-Ei	|regnode*|handle_named_backref|NN RExC_state_t *pRExC_state	    \
+Ei	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
 				|NN I32 *flagp				    \
 				|NN char * parse_start			    \
 				|char ch
 EsnR	|unsigned int|regex_set_precedence|const U8 my_operator
-Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
+Es	|regnode_offset|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
 				|NN char * const oregcomp_parse
@@ -2418,21 +2418,21 @@ Es	|void	|dump_regex_sets_structures				    \
 				|const IV fence|NN AV * fence_stack
 #endif
 Es	|void|parse_lparen_question_flags|NN RExC_state_t *pRExC_state
-Es	|regnode*|reg_node	|NN RExC_state_t *pRExC_state|U8 op
-Es	|regnode*|regpiece	|NN RExC_state_t *pRExC_state \
+Es	|regnode_offset|reg_node|NN RExC_state_t *pRExC_state|U8 op
+Es	|regnode_offset|regpiece|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
 Es	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \
-				|NULLOK regnode** nodep			    \
+				|NULLOK regnode_offset* nodep		    \
 				|NULLOK UV *code_point_p		    \
 				|NULLOK int* cp_count			    \
 				|NN I32 *flagp				    \
 				|const bool strict			    \
 				|const U32 depth
 Es	|void	|reginsert	|NN RExC_state_t *pRExC_state \
-				|U8 op|NN regnode *operand|U32 depth
+				|U8 op|regnode_offset operand|U32 depth
 Es	|void	|regtail	|NN RExC_state_t * pRExC_state		    \
-				|NN const regnode * const p		    \
-				|NN const regnode * const val		    \
+				|NN const regnode_offset p		    \
+				|NN const regnode_offset val		    \
 				|const U32 depth
 Es	|SV *	|reg_scan_name	|NN RExC_state_t *pRExC_state \
 				|U32 flags
@@ -2441,7 +2441,7 @@ Es	|U32	|join_exact	|NN RExC_state_t *pRExC_state \
 				|NN bool *unfolded_multi_char          \
 				|U32 flags|NULLOK regnode *val|U32 depth
 Ei	|void   |alloc_maybe_populate_EXACT|NN RExC_state_t *pRExC_state \
-				|NN regnode *node|NN I32 *flagp|STRLEN len \
+				|NN regnode_offset node|NN I32 *flagp|STRLEN len \
 				|UV code_point|bool downgradable
 Ein	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
 Es	|void	|nextchar	|NN RExC_state_t *pRExC_state
@@ -2553,7 +2553,7 @@ Es	|void	|dump_trie_interim_table|NN const struct _reg_trie_data *trie\
 				|NULLOK HV* widecharmap|NN AV *revcharmap\
 				|U32 next_alloc|U32 depth
 Es	|U8	|regtail_study	|NN RExC_state_t *pRExC_state \
-				|NN regnode *p|NN const regnode *val|U32 depth
+				|NN regnode_offset p|NN const regnode_offset val|U32 depth
 #  endif
 #endif
 
