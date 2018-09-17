@@ -883,6 +883,11 @@ static const scan_data_t zero_scan_data = {
                                        REPORT_LOCATION_ARGS(loc));      \
 } STMT_END
 
+/* Convert between a pointer to a node and its offset from the beginning of the
+ * program */
+#define REGNODE_p(offset)    (RExC_emit_start + (offset))
+#define REGNODE_OFFSET(node) ((node) - RExC_emit_start)
+
 /* Macros for recording node offsets.   20001227 mjd@plover.com
  * Nodes are numbered 1, 2, 3, 4.  Node #n's position is recorded in
  * element 2*n-1 of the array.  Element #2n holds the byte length node #n.
@@ -918,7 +923,7 @@ static const scan_data_t zero_scan_data = {
 } STMT_END
 
 #define Set_Node_Offset(node,byte) \
-    Set_Node_Offset_To_R((node)-RExC_emit_start, (byte)-RExC_start)
+    Set_Node_Offset_To_R(REGNODE_OFFSET(node), (byte)-RExC_start)
 #define Set_Cur_Node_Offset Set_Node_Offset(RExC_emit, RExC_parse)
 
 #define Set_Node_Length_To_R(node,len) STMT_START {			\
@@ -935,17 +940,17 @@ static const scan_data_t zero_scan_data = {
 } STMT_END
 
 #define Set_Node_Length(node,len) \
-    Set_Node_Length_To_R((node)-RExC_emit_start, len)
+    Set_Node_Length_To_R(REGNODE_OFFSET(node), len)
 #define Set_Node_Cur_Length(node, start)                \
     Set_Node_Length(node, RExC_parse - start)
 
 /* Get offsets and lengths */
-#define Node_Offset(n) (RExC_offsets[2*((n)-RExC_emit_start)-1])
-#define Node_Length(n) (RExC_offsets[2*((n)-RExC_emit_start)])
+#define Node_Offset(n) (RExC_offsets[2*(REGNODE_OFFSET(n))-1])
+#define Node_Length(n) (RExC_offsets[2*(REGNODE_OFFSET(n))])
 
 #define Set_Node_Offset_Length(node,offset,len) STMT_START {	\
-    Set_Node_Offset_To_R((node)-RExC_emit_start, (offset));	\
-    Set_Node_Length_To_R((node)-RExC_emit_start, (len));	\
+    Set_Node_Offset_To_R(REGNODE_OFFSET(node), (offset));	\
+    Set_Node_Length_To_R(REGNODE_OFFSET(node), (len));	\
 } STMT_END
 #endif
 
@@ -4555,7 +4560,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             Perl_re_indentf( aTHX_  "%s %" UVuf ":%s\n",
                               depth+1,
                               "Looking for TRIE'able sequences. Tail node is ",
-                              (UV)(tail - RExC_emit_start),
+                              (UV) REGNODE_OFFSET(tail),
                               SvPV_nolen_const( RExC_mysv )
                             );
                         });
@@ -19302,13 +19307,13 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *operand, U32 depth)
                   "reginsert",
 		  __LINE__,
 		  PL_reg_name[op],
-                  (UV)(dst - RExC_emit_start) > RExC_offsets[0]
+                  (UV)(REGNODE_OFFSET(dst)) > RExC_offsets[0]
 		    ? "Overwriting end of array!\n" : "OK",
-                  (UV)(src - RExC_emit_start),
-                  (UV)(dst - RExC_emit_start),
+                  (UV)REGNODE_OFFSET(src),
+                  (UV)REGNODE_OFFSET(dst),
                   (UV)RExC_offsets[0]));
-	    Set_Node_Offset_To_R(dst-RExC_emit_start, Node_Offset(src));
-	    Set_Node_Length_To_R(dst-RExC_emit_start, Node_Length(src));
+	    Set_Node_Offset_To_R(REGNODE_OFFSET(dst), Node_Offset(src));
+	    Set_Node_Length_To_R(REGNODE_OFFSET(dst), Node_Length(src));
         }
 #endif
     }
@@ -19321,9 +19326,9 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *operand, U32 depth)
               "reginsert",
 	      __LINE__,
 	      PL_reg_name[op],
-              (UV)(place - RExC_emit_start) > RExC_offsets[0]
+              (UV)REGNODE_OFFSET(place) > RExC_offsets[0]
               ? "Overwriting end of array!\n" : "OK",
-              (UV)(place - RExC_emit_start),
+              (UV)REGNODE_OFFSET(place),
               (UV)(RExC_parse - RExC_start),
               (UV)RExC_offsets[0]));
 	Set_Node_Offset(place, RExC_parse);
