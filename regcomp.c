@@ -890,7 +890,7 @@ static const scan_data_t zero_scan_data = {
  * Position is 1 indexed.
  */
 #ifndef RE_TRACK_PATTERN_OFFSETS
-#define Set_Node_Offset_To_R(node,byte)
+#define Set_Node_Offset_To_R(offset,byte)
 #define Set_Node_Offset(node,byte)
 #define Set_Cur_Node_Offset
 #define Set_Node_Length_To_R(node,len)
@@ -904,15 +904,15 @@ static const scan_data_t zero_scan_data = {
 #else
 #define ProgLen(ri) ri->u.offsets[0]
 #define SetProgLen(ri,x) ri->u.offsets[0] = x
-#define Set_Node_Offset_To_R(node,byte) STMT_START {			\
+#define Set_Node_Offset_To_R(offset,byte) STMT_START {			\
     if (! SIZE_ONLY) {							\
 	MJD_OFFSET_DEBUG(("** (%d) offset of node %d is %d.\n",		\
-		    __LINE__, (int)(node), (int)(byte)));		\
-	if((node) < 0) {						\
+		    __LINE__, (int)(offset), (int)(byte)));		\
+	if((offset) < 0) {						\
 	    Perl_croak(aTHX_ "value of node is %d in Offset macro",     \
-                                         (int)(node));                  \
+                                         (int)(offset));                \
 	} else {							\
-	    RExC_offsets[2*(node)-1] = (byte);				\
+            RExC_offsets[2*(offset)-1] = (byte);	                \
 	}								\
     }									\
 } STMT_END
