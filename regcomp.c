@@ -372,22 +372,22 @@ struct RExC_state_t {
             }                                                               \
     } STMT_END
 
-#define RETURN_NULL_ON_RESTART_OR_FLAGS(flags,flagp,extra)                  \
+#define RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,extra)                  \
                     RETURN_X_ON_RESTART_OR_FLAGS(NULL,flags,flagp,extra)
 
 #define RETURN_X_ON_RESTART(X, flags,flagp)                                 \
                         RETURN_X_ON_RESTART_OR_FLAGS( X, flags, flagp, 0)
 
 
-#define RETURN_NULL_ON_RESTART_FLAGP_OR_FLAGS(flagp,extra)                  \
+#define RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp,extra)                  \
             if (*(flagp) & (RESTART_PASS1|(extra))) return NULL
 
 #define MUST_RESTART(flags) ((flags) & (RESTART_PASS1))
 
-#define RETURN_NULL_ON_RESTART(flags,flagp)                                 \
+#define RETURN_FAIL_ON_RESTART(flags,flagp)                                 \
                                     RETURN_X_ON_RESTART(NULL, flags,flagp)
-#define RETURN_NULL_ON_RESTART_FLAGP(flagp)                                 \
-                            RETURN_NULL_ON_RESTART_FLAGP_OR_FLAGS(flagp,0)
+#define RETURN_FAIL_ON_RESTART_FLAGP(flagp)                                 \
+                            RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp,0)
 
 /* This converts the named class defined in regcomp.h to its equivalent class
  * number defined in handy.h. */
@@ -7257,7 +7257,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
             goto redo_first_pass;
         }
-        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#" UVxf, (UV) flags);
+        Perl_croak(aTHX_ "panic: reg returned failure to re_op_compile for sizing pass, flags=%#" UVxf, (UV) flags);
     }
 
     DEBUG_PARSE_r({
@@ -7446,7 +7446,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_npar = 1;
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	ReREFCNT_dec(Rx);
-        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#" UVxf, (UV) flags);
+        Perl_croak(aTHX_ "panic: reg returned failure to re_op_compile for generation pass, flags=%#" UVxf, (UV) flags);
     }
     DEBUG_OPTIMISE_r(
         Perl_re_printf( aTHX_  "Starting post parse optimization\n");
@@ -11462,7 +11462,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         ret->flags = 1;
 
                     tail = reg(pRExC_state, 1, &flag, depth+1);
-                    RETURN_NULL_ON_RESTART(flag,flagp);
+                    RETURN_FAIL_ON_RESTART(flag,flagp);
                     REGTAIL(pRExC_state, ret, tail);
                     goto insert_if;
                 }
@@ -11570,8 +11570,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
 		    if (br == NULL) {
-                        RETURN_NULL_ON_RESTART(flags,flagp);
-                        FAIL2("panic: regbranch returned NULL, flags=%#" UVxf,
+                        RETURN_FAIL_ON_RESTART(flags,flagp);
+                        FAIL2("panic: regbranch returned failure, flags=%#" UVxf,
                               (UV) flags);
                     } else
                         REGTAIL(pRExC_state, br, reganode(pRExC_state,
@@ -11588,8 +11588,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         lastbr = reganode(pRExC_state, IFTHEN, 0);
 
                         if (!regbranch(pRExC_state, &flags, 1,depth+1)) {
-                            RETURN_NULL_ON_RESTART(flags,flagp);
-                            FAIL2("panic: regbranch returned NULL, flags=%#" UVxf,
+                            RETURN_FAIL_ON_RESTART(flags,flagp);
+                            FAIL2("panic: regbranch returned failure, flags=%#" UVxf,
                                   (UV) flags);
                         }
                         REGTAIL(pRExC_state, ret, lastbr);
@@ -11693,8 +11693,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /*     branch_len = (paren != 0); */
 
     if (br == NULL) {
-        RETURN_NULL_ON_RESTART(flags,flagp);
-        FAIL2("panic: regbranch returned NULL, flags=%#" UVxf, (UV) flags);
+        RETURN_FAIL_ON_RESTART(flags,flagp);
+        FAIL2("panic: regbranch returned failure, flags=%#" UVxf, (UV) flags);
     }
     if (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
@@ -11737,8 +11737,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
 	if (br == NULL) {
-            RETURN_NULL_ON_RESTART(flags,flagp);
-            FAIL2("panic: regbranch returned NULL, flags=%#" UVxf, (UV) flags);
+            RETURN_FAIL_ON_RESTART(flags,flagp);
+            FAIL2("panic: regbranch returned failure, flags=%#" UVxf, (UV) flags);
         }
         REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
 	lastbr = br;
@@ -11961,8 +11961,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	if (latest == NULL) {
 	    if (flags & TRYAGAIN)
 		continue;
-            RETURN_NULL_ON_RESTART(flags,flagp);
-            FAIL2("panic: regpiece returned NULL, flags=%#" UVxf, (UV) flags);
+            RETURN_FAIL_ON_RESTART(flags,flagp);
+            FAIL2("panic: regpiece returned failure, flags=%#" UVxf, (UV) flags);
 	}
 	else if (ret == NULL)
             ret = latest;
@@ -12031,8 +12031,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     ret = regatom(pRExC_state, &flags,depth+1);
     if (ret == NULL) {
-        RETURN_NULL_ON_RESTART_OR_FLAGS(flags,flagp,TRYAGAIN);
-        FAIL2("panic: regatom returned NULL, flags=%#" UVxf, (UV) flags);
+        RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,TRYAGAIN);
+        FAIL2("panic: regatom returned failure, flags=%#" UVxf, (UV) flags);
     }
 
     op = *RExC_parse;
@@ -12576,7 +12576,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
     if (! *node_p) {
         RETURN_X_ON_RESTART(FALSE, flags,flagp);
-        FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#" UVxf,
+        FAIL2("panic: reg returned failure to grok_bslash_N, flags=%#" UVxf,
             (UV) flags);
     }
     *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
@@ -12974,8 +12974,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        NULL,
                        NULL);
         if (ret == NULL) {
-            RETURN_NULL_ON_RESTART_FLAGP_OR_FLAGS(flagp,NEED_UTF8);
-            FAIL2("panic: regclass returned NULL to regatom, flags=%#" UVxf,
+            RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp,NEED_UTF8);
+            FAIL2("panic: regclass returned failure to regatom, flags=%#" UVxf,
                   (UV) *flagp);
         }
 	if (*RExC_parse != ']') {
@@ -12998,8 +12998,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    }
 		    goto tryagain;
 		}
-                RETURN_NULL_ON_RESTART(flags,flagp);
-                FAIL2("panic: reg returned NULL to regatom, flags=%#" UVxf,
+                RETURN_FAIL_ON_RESTART(flags,flagp);
+                FAIL2("panic: reg returned failure to regatom, flags=%#" UVxf,
                                                                  (UV) flags);
 	}
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
@@ -13283,11 +13283,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                            TRUE, /* Allow an optimized regnode result */
                            NULL,
                            NULL);
-            RETURN_NULL_ON_RESTART_FLAGP(flagp);
+            RETURN_FAIL_ON_RESTART_FLAGP(flagp);
             /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
              * multi-char folds are allowed.  */
             if (!ret)
-                FAIL2("panic: regclass returned NULL to regatom, flags=%#" UVxf,
+                FAIL2("panic: regclass returned failure to regatom, flags=%#" UVxf,
                       (UV) *flagp);
 
             RExC_parse--;
@@ -13322,7 +13322,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 break;
             }
 
-            RETURN_NULL_ON_RESTART_FLAGP(flagp);
+            RETURN_FAIL_ON_RESTART_FLAGP(flagp);
 
             /* Here, evaluates to a single code point.  Go get that */
             RExC_parse = parse_start;
@@ -13653,7 +13653,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         ) {
                             if (*flagp & NEED_UTF8)
                                 FAIL("panic: grok_bslash_N set NEED_UTF8");
-                            RETURN_NULL_ON_RESTART_FLAGP(flagp);
+                            RETURN_FAIL_ON_RESTART_FLAGP(flagp);
 
                             /* Here, it wasn't a single code point.  Go close
                              * up this EXACTish node.  The switch() prior to
@@ -15397,7 +15397,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                   &current,
                                   &posix_warnings
                                  ))
-                        FAIL2("panic: regclass returned NULL to handle_sets, "
+                        FAIL2("panic: regclass returned failure to handle_sets, "
                               "flags=%#" UVxf, (UV) *flagp);
 
                     /* function call leaves parse pointing to the ']', except
@@ -15673,7 +15673,7 @@ redo_curchar:
                               &current,
                               NULL))
                 {
-                    FAIL2("panic: regclass returned NULL to handle_sets, "
+                    FAIL2("panic: regclass returned failure to handle_sets, "
                           "flags=%#" UVxf, (UV) *flagp);
                 }
 
@@ -15712,7 +15712,7 @@ redo_curchar:
                                 NULL
                                 ))
                 {
-                    FAIL2("panic: regclass returned NULL to handle_sets, "
+                    FAIL2("panic: regclass returned failure to handle_sets, "
                           "flags=%#" UVxf, (UV) *flagp);
                 }
 
@@ -16042,7 +16042,7 @@ redo_curchar:
                     NULL
                 );
     if (!node)
-        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#" UVxf,
+        FAIL2("panic: regclass returned failure to handle_sets, flags=%#" UVxf,
                     PTR2UV(flagp));
 
     /* Fix up the node type if we are in locale.  (We have pretended we are
@@ -16703,7 +16703,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         if (*flagp & NEED_UTF8)
                             FAIL("panic: grok_bslash_N set NEED_UTF8");
 
-                        RETURN_NULL_ON_RESTART_FLAGP(flagp);
+                        RETURN_FAIL_ON_RESTART_FLAGP(flagp);
 
                         if (cp_count < 0) {
                             vFAIL("\\N in a character class must be a named character: \\N{...}");
