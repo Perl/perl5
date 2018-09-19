@@ -1050,9 +1050,18 @@ EXTERN_C int usleep(unsigned int);
 #  define STRUCT_OFFSET(s,m)  offsetof(s,m)
 #endif
 
-/* ptrdiff_t is C11, so undef it under pedantic builds */
+/* ptrdiff_t is C11, so undef it under pedantic builds.  (Actually it is
+ * in C89, but apparently there are platforms where it doesn't exist.  See
+ * thread beginning at http://nntp.perl.org/group/perl.perl5.porters/251541.)
+ * */
 #ifdef PERL_GCC_PEDANTIC
 #   undef HAS_PTRDIFF_T
+#endif
+
+#ifdef HAS_PTRDIFF_T
+#  define Ptrdiff_t ptrdiff_t
+#else
+#  define Ptrdiff_t SSize_t
 #endif
 
 #ifndef __SYMBIAN32__
