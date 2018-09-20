@@ -117,16 +117,3 @@ SKIP: {
 }
 isnt ($first, $$, "And that new parent isn't this process");
 
-# Orphaned Docker or Linux containers do not necessarily attach to PID 1. They might attach to 0 instead.
-sub is_linux_container {
-
-    if ($^O eq 'linux' && open my $fh, '<', '/proc/1/cgroup') {
-        while(<$fh>) {
-            if (m{^\d+:pids:(.*)} && $1 ne '/init.scope') {
-                return 1;
-            }
-        }
-    }
-
-    return 0;
-}
