@@ -353,8 +353,16 @@ struct regnode_ssc {
 #define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
 #define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
 
-#define FILL_ADVANCE_NODE(ptr, op) STMT_START { \
-    (ptr)->type = op;    (ptr)->next_off = 0;   (ptr)++; } STMT_END
+#define FILL_NODE(ptr, op)                                           \
+    STMT_START {                                                     \
+                    OP(ptr) = op;                                    \
+                    NEXT_OFF(ptr) = 0;                               \
+    } STMT_END
+#define FILL_ADVANCE_NODE(ptr, op)                                   \
+    STMT_START {                                                     \
+                    FILL_NODE(ptr, op);                              \
+                    (ptr)++;                                         \
+    } STMT_END
 #define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
     ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 1; } STMT_END
 #define FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2)               \
