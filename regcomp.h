@@ -363,15 +363,19 @@ struct regnode_ssc {
                     FILL_NODE(ptr, op);                              \
                     (ptr)++;                                         \
     } STMT_END
-#define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
-    ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 1; } STMT_END
+#define FILL_ADVANCE_NODE_ARG(ptr, op, arg)                         \
+    STMT_START {                                                    \
+                    ARG_SET(ptr, arg);                              \
+                    FILL_ADVANCE_NODE(ptr, op);                     \
+                    (ptr) += 1;                                     \
+    } STMT_END
 #define FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2)               \
-                STMT_START {                                        \
+    STMT_START {                                                    \
                     ARG_SET(ptr, arg1);                             \
                     ARG2L_SET(ptr, arg2);                           \
                     FILL_ADVANCE_NODE(ptr, op);                     \
                     (ptr) += 2;                                     \
-                } STMT_END
+    } STMT_END
 
 #define REG_MAGIC 0234
 
@@ -388,7 +392,7 @@ struct regnode_ssc {
  * never reach this high). */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* When the bimap isn't completely sufficient for handling the ANYOF node,
+/* When the bitmap isn't completely sufficient for handling the ANYOF node,
  * flags (in node->flags of the ANYOF node) get set to indicate this.  These
  * are perennially in short supply.  Beyond several cases where warnings need
  * to be raised under certain circumstances, currently, there are six cases
@@ -449,9 +453,9 @@ struct regnode_ssc {
  *      shared with another, so it doesn't occupy extra space.
  *
  * At the moment, there is one spare bit, but this could be increased by
- * various tricks.
+ * various tricks:
  *
- * If just one more bit is needed, at this writing it seems to khw that the
+ * If just one more bit is needed, as of this writing it seems to khw that the
  * best choice would be to make ANYOF_MATCHES_ALL_ABOVE_BITMAP not a flag, but
  * something like
  *
