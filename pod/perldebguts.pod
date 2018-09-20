@@ -601,12 +601,15 @@ will be lost.
  # [Special] alternatives:
  REG_ANY          no         Match any one character (except newline).
  SANY             no         Match any one character.
- ANYOF            sv 1       Match character in (or not in) this class,
-                             single char match only
- ANYOFD           sv 1       Like ANYOF, but /d is in effect
- ANYOFL           sv 1       Like ANYOF, but /l is in effect
- ANYOFPOSIXL      sv 1       Like ANYOFL, but matches [[:posix:]]
-                             classes
+ ANYOF            sv         Match character in (or not in) this class,
+                  charclass  single char match only
+ ANYOFD           sv         Like ANYOF, but /d is in effect
+                  charclass
+ ANYOFL           sv         Like ANYOF, but /l is in effect
+                  charclass
+ ANYOFPOSIXL      sv         Like ANYOFL, but matches [[:posix:]]
+                  charclass_ classes
+                  posixl
  ANYOFM           byte 1     Like ANYOF, but matches an invariant byte
                              as determined by the mask and arg
 

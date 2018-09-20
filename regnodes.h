@@ -324,10 +324,10 @@ static const U8 regarglen[] = {
 	0,                                   	/* NBOUNDA      */
 	0,                                   	/* REG_ANY      */
 	0,                                   	/* SANY         */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOF        */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFD       */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFL       */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFPOSIXL  */
+	EXTRA_SIZE(struct regnode_charclass),	/* ANYOF        */
+	EXTRA_SIZE(struct regnode_charclass),	/* ANYOFD       */
+	EXTRA_SIZE(struct regnode_charclass),	/* ANYOFL       */
+	EXTRA_SIZE(struct regnode_charclass_posixl),	/* ANYOFPOSIXL  */
 	EXTRA_SIZE(struct regnode_1),        	/* ANYOFM       */
 	0,                                   	/* POSIXD       */
 	0,                                   	/* POSIXL       */

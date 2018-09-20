@@ -56,10 +56,10 @@ NBOUNDA     NBOUND,     no        ; Match "" betweeen any \w\w or \W\W, where \w
 #* [Special] alternatives:
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
-ANYOF       ANYOF,      sv 1 S    ; Match character in (or not in) this class, single char match only
-ANYOFD      ANYOF,      sv 1 S    ; Like ANYOF, but /d is in effect
-ANYOFL      ANYOF,      sv 1 S    ; Like ANYOF, but /l is in effect
-ANYOFPOSIXL ANYOF,      sv 1 S    ; Like ANYOFL, but matches [[:posix:]] classes
+ANYOF       ANYOF,      sv charclass S    ; Match character in (or not in) this class, single char match only
+ANYOFD      ANYOF,      sv charclass S    ; Like ANYOF, but /d is in effect
+ANYOFL      ANYOF,      sv charclass S    ; Like ANYOF, but /l is in effect
+ANYOFPOSIXL ANYOF,      sv charclass_posixl S    ; Like ANYOFL, but matches [[:posix:]] classes
 ANYOFM      ANYOFM      byte 1 S  ; Like ANYOF, but matches an invariant byte as determined by the mask and arg
 
 #* POSIX Character Classes:

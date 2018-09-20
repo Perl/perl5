@@ -367,7 +367,9 @@ struct regnode_ssc {
     STMT_START {                                                    \
                     ARG_SET(ptr, arg);                              \
                     FILL_ADVANCE_NODE(ptr, op);                     \
-                    (ptr) += 1;                                     \
+                    /* This is used generically for other operations\
+                     * that have a longer argument */               \
+                    (ptr) += regarglen[op];                         \
     } STMT_END
 #define FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2)               \
     STMT_START {                                                    \
@@ -466,22 +468,18 @@ struct regnode_ssc {
  * handler function, as the macro REGINCLASS in regexec.c does now for other
  * cases.
  *
- * Another possibility is to instead (or additionally) rename the ANYOF_POSIXL
- * flag to be ANYOFL_LARGE, to mean that the ANYOF node has an extra 32 bits
- * beyond what a regular one does.  That's what it effectively means now, with
- * the extra space all for the POSIX class flags.  But those classes actually
- * only occupy 30 bits, so the ANYOFL_FOLD and
- * ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD flags could be moved
- * to that extra space.  The 30 bits in the extra word would indicate if a
- * posix class should be looked up or not.  The downside of this is that ANYOFL
- * nodes with folding would always have to have the extra space allocated, even
- * if they didn't use the 30 posix bits.  There isn't an SSC problem as all
- * SSCs are this large anyway.
+ * Another possibility is based on the fact that ANYOF_MATCHES_POSIXL is
+ * redundant with the node type ANYOFPOSIXL.  That flag could be removed, but
+ * at the expense of extra code in regexec.c.  The flag has been retained
+ * because it allows us to see if we need to call reginsert, or just use the
+ * bitmap in one test.
  *
- * One could completely remove ANYOFL_LARGE and make all ANYOFL nodes large.
- * REGINCLASS would have to be modified so that if the node type were this, it
- * would call reginclass(), as the flag bit that indicates to do this now would
- * be gone.
+ * If this is done, an extension would be to make all ANYOFL nodes contain the
+ * extra 32 bits that ANYOFPOSIXL ones do.  The posix flags only occupy 30
+ * bits, so the ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD flags
+ * and ANYOFL_FOLD could be moved to that extra space, but it would mean extra
+ * instructions, as there are currently places in the code that assume those
+ * two bits are zero.
  *
  * All told, 5 bits could be available for other uses if all of the above were
  * done.
@@ -706,11 +704,6 @@ struct regnode_ssc {
 	memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
-
-#define ANYOF_SKIP		(EXTRA_SIZE(regnode_charclass)          \
-                               - EXTRA_SIZE(struct regnode_1))
-#define ANYOF_POSIXL_SKIP	(EXTRA_SIZE(regnode_charclass_posixl)   \
-                               - EXTRA_SIZE(struct regnode_1))
 
 /*
  * Utility definitions.
