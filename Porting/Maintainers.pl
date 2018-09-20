@@ -126,6 +126,7 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qw(t/07_ptardiff.t),
         ],
+        'CUSTOMIZED' => [ qw(lib/Archive/Tar.pm) ], # CVE-2018-12015
     },
 
     'Attribute::Handlers' => {

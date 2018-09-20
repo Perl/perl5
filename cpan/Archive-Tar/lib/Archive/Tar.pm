@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "2.24";
+$VERSION                = "2.24_01";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -843,6 +843,21 @@ sub _extract_file {
     if( $entry->is_unknown ) {
         $self->_error( qq[Unknown file type for file '$full'] );
         return;
+    }
+
+    ### If a file system already contains a block device with the same name as
+    ### the being extracted regular file, we would write the file's content
+    ### to the block device. So remove the existing file (block device) now.
+    ### If an archive contains multiple same-named entries, the last one
+    ### should replace the previous ones. So remove the old file now.
+    ### If the old entry is a symlink to a file outside of the CWD, the new
+    ### entry would create a file there. This is CVE-2018-12015
+    ### <https://rt.cpan.org/Ticket/Display.html?id=125523>.
+    if (-l $full || -e _) {
+	if (!unlink $full) {
+	    $self->_error( qq[Could not remove old file '$full': $!] );
+	    return;
+	}
     }
 
     if( length $entry->type && $entry->is_file ) {
