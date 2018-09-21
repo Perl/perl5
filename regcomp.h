@@ -217,7 +217,7 @@ struct regnode_charclass {
 };
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
-struct regnode_charclass_class {
+struct regnode_charclass_posixl {
     U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
