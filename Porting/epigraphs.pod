@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.3 - Mac Miller, "Senior Skip Day"
+
+L<Announced on 2018-09-20 by John 'genehack' Anderson|https://www.nntp.perl.org/group/perl.perl5.porters/2018/09/msg252255.html>
+
+  Enjoy the best things in your life
+  ’Cause you ain’t gonna get to live it twice
+  They say you waste time asleep
+  But I’m just tryin’ to dream
+
 =head2 v5.29.2 - Rick Riordan, "The Lightning Thief"
 
 L<Announced on 2018-08-20 by Chris 'BinGOs' Williams|https://www.nntp.perl.org/group/perl.perl5.porters/2018/08/msg251918.html>
