@@ -363,7 +363,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<pack "u", "invalid uuencoding"> now properly NUL terminates the
+zero-length SV produced.  [perl #132655]
 
 =back
 
