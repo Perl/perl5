@@ -651,13 +651,22 @@ struct regnode_ssc {
 
 #define ANYOF_BIT(c)		(1U << ((c) & 7))
 
-#define ANYOF_POSIXL_SET(p, c)	(((regnode_charclass_posixl*) (p))->classflags |= (1U << (c)))
+#define POSIXL_SET(field, c)	((field) |= (1U << (c)))
+#define ANYOF_POSIXL_SET(p, c)	POSIXL_SET(((regnode_charclass_posixl*) (p))->classflags, (c))
 
-#define ANYOF_POSIXL_CLEAR(p, c) (((regnode_charclass_posixl*) (p))->classflags &= ~ (1U <<(c)))
+#define POSIXL_CLEAR(field, c) ((field) &= ~ (1U <<(c)))
+#define ANYOF_POSIXL_CLEAR(p, c) POSIXL_CLEAR(((regnode_charclass_posixl*) (p))->classflags, (c))
 
-#define ANYOF_POSIXL_TEST(p, c)	(((regnode_charclass_posixl*) (p))->classflags & (1U << (c)))
+#define POSIXL_TEST(field, c)	((field) & (1U << (c)))
+#define ANYOF_POSIXL_TEST(p, c)	POSIXL_TEST(((regnode_charclass_posixl*) (p))->classflags, (c))
 
-#define ANYOF_POSIXL_ZERO(ret)	STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = 0; } STMT_END
+#define POSIXL_ZERO(field)	STMT_START { (field) = 0; } STMT_END
+#define ANYOF_POSIXL_ZERO(ret)	POSIXL_ZERO(((regnode_charclass_posixl*) (ret))->classflags)
+
+#define ANYOF_POSIXL_SET_TO_BITMAP(p, bits)                                 \
+     STMT_START {                                                           \
+                    ((regnode_charclass_posixl*) (p))->classflags = (bits); \
+     } STMT_END
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
 #define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
