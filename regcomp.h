@@ -652,16 +652,12 @@ struct regnode_ssc {
 #define ANYOF_BIT(c)		(1U << ((c) & 7))
 
 #define ANYOF_POSIXL_SET(p, c)	(((regnode_charclass_posixl*) (p))->classflags |= (1U << (c)))
-#define ANYOF_CLASS_SET(p, c)	ANYOF_POSIXL_SET((p), (c))
 
 #define ANYOF_POSIXL_CLEAR(p, c) (((regnode_charclass_posixl*) (p))->classflags &= ~ (1U <<(c)))
-#define ANYOF_CLASS_CLEAR(p, c)	ANYOF_POSIXL_CLEAR((p), (c))
 
 #define ANYOF_POSIXL_TEST(p, c)	(((regnode_charclass_posixl*) (p))->classflags & (1U << (c)))
-#define ANYOF_CLASS_TEST(p, c)	ANYOF_POSIXL_TEST((p), (c))
 
 #define ANYOF_POSIXL_ZERO(ret)	STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = 0; } STMT_END
-#define ANYOF_CLASS_ZERO(ret)	ANYOF_POSIXL_ZERO(ret)
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
 #define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
