@@ -2045,9 +2045,9 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
         ANYOF_FLAGS(ssc) |= ANYOF_MATCHES_POSIXL;
+        OP(ssc) = ANYOFPOSIXL;
     }
-
-    if (RExC_contains_locale) {
+    else if (RExC_contains_locale) {
         OP(ssc) = ANYOFL;
     }
 
@@ -5566,6 +5566,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 
                 case ANYOFD:
                 case ANYOFL:
+                case ANYOFPOSIXL:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -16493,6 +16494,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     AV* posix_warnings = NULL;
     const bool do_posix_warnings =     return_posix_warnings
                                    || (PASS2 && ckWARN(WARN_REGEXP));
+    U8 op = END;    /* The returned node-type, initialized to an impossible
+                       one.  */
+    U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
+    U32 posixl = 0;       /* bit field of posix classes matched under /l */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -16509,21 +16514,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     allow_multi_folds = FALSE;
 #endif
 
-    /* Assume we are going to generate an ANYOF node. */
-    ret = reganode(pRExC_state,
-                   (LOC)
-                    ? ANYOFL
-                    : ANYOF,
-                   0);
-
     if (SIZE_ONLY) {
-	RExC_size += ANYOF_SKIP;
 	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
     }
     else {
-        ANYOF_FLAGS(ret) = 0;
-
- 	RExC_emit += ANYOF_SKIP;
 	listsv = newSVpvs_flags("# comment\n", SVs_TEMP);
 	initial_listsv_len = SvCUR(listsv);
         SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
@@ -16974,7 +16968,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                         /* We don't know yet what this matches, so have to flag
                          * it */
-                        ANYOF_FLAGS(ret) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
+                        anyof_flags |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
                     }
                     else {
 
@@ -17179,14 +17173,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * by locale, and hence are dealt with separately */
                 if (! need_class) {
                     need_class = 1;
-                    if (SIZE_ONLY) {
-                        RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-                    }
-                    else {
-                        RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-                    }
-                    ANYOF_FLAGS(ret) |= ANYOF_MATCHES_POSIXL;
-                    ANYOF_POSIXL_ZERO(ret);
+                    anyof_flags |= ANYOF_MATCHES_POSIXL;
 
                     /* We can't change this into some other type of node
                      * (unless this is the only element, in which case there
@@ -17197,15 +17184,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 /* Coverity thinks it is possible for this to be negative; both
                  * jhi and khw think it's not, but be safer */
-                assert(! (ANYOF_FLAGS(ret) & ANYOF_MATCHES_POSIXL)
+                assert(! (anyof_flags & ANYOF_MATCHES_POSIXL)
                        || (namedclass + ((namedclass % 2) ? -1 : 1)) >= 0);
 
                 /* See if it already matches the complement of this POSIX
                  * class */
-                if ((ANYOF_FLAGS(ret) & ANYOF_MATCHES_POSIXL)
-                    && ANYOF_POSIXL_TEST(ret, namedclass + ((namedclass % 2)
-                                                            ? -1
-                                                            : 1)))
+                if (  (anyof_flags & ANYOF_MATCHES_POSIXL)
+                    && POSIXL_TEST(posixl, namedclass + ((namedclass % 2)
+                                                         ? -1
+                                                         : 1)))
                 {
                     posixl_matches_all = TRUE;
                     break;  /* No need to continue.  Since it matches both
@@ -17214,7 +17201,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 }
 
                 /* Add this class to those that should be checked at runtime */
-                ANYOF_POSIXL_SET(ret, namedclass);
+                POSIXL_SET(posixl, namedclass);
 
                 /* The above-Latin1 characters are not subject to locale rules.
                  * Just add them, in the second pass, to the
@@ -17734,7 +17721,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_copy_start_in_constructed = RExC_start + constructed_prefix_len;
 	RExC_end = RExC_parse + len;
         RExC_in_multi_char_class = 1;
-        RExC_emit = (regnode *)orig_emit;
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
@@ -17910,23 +17896,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * an optimization */
         if (op != END) {
 
-            /* Throw away this ANYOF regnode, and emit the calculated one,
+            /* Emit the calculated regnode,
              * which should correspond to the beginning, not current, state of
              * the parse */
             const char * cur_parse = RExC_parse;
             RExC_parse = (char *)orig_parse;
-            if ( SIZE_ONLY) {
-                if (! LOC) {
-
-                    /* To get locale nodes to not use the full ANYOF size would
-                     * require moving the code above that writes the portions
-                     * of it that aren't in other nodes to after this point.
-                     * e.g.  ANYOF_POSIXL_SET */
-                    RExC_size = orig_size;
-                }
-            }
-            else {
-                RExC_emit = (regnode *)orig_emit;
                 if (PL_regkind[op] == POSIXD) {
                     if (op == POSIXL) {
                         RExC_contains_locale = 1;
@@ -17935,7 +17909,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         op += NPOSIXD - POSIXD;
                     }
                 }
-            }
 
             ret = reg_node(pRExC_state, op);
 
@@ -17965,9 +17938,26 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
 
-    if (SIZE_ONLY)
+    /* Assume we are going to generate an ANYOF-type node. */
+    op = (posixl)
+          ? ANYOFPOSIXL
+          : (LOC)
+             ? ANYOFL
+             : ANYOF;
+    ret = reganode(pRExC_state, op, 0);
+
+    if (SIZE_ONLY) {
+        RExC_size += (op == ANYOFPOSIXL) ? ANYOF_POSIXL_SKIP : ANYOF_SKIP + 1;
         return ret;
+    }
+
     /****** !SIZE_ONLY (Pass 2) AFTER HERE *********/
+    RExC_emit += (op == ANYOFPOSIXL) ? ANYOF_POSIXL_SKIP : ANYOF_SKIP;
+
+    ANYOF_FLAGS(ret) = anyof_flags;
+    if (posixl) {
+        ANYOF_POSIXL_SET_TO_BITMAP(ret, posixl);
+    }
 
     /* If folding, we calculate all characters that could fold to or from the
      * ones already on the list */
@@ -19925,7 +19915,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         const bool inverted = flags & ANYOF_INVERT;
 
-	if (OP(o) == ANYOFL) {
+	if (OP(o) == ANYOFL || OP(o) == ANYOFPOSIXL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
                 sv_catpvs(sv, "{utf8-locale-reqd}");
             }
@@ -21195,7 +21185,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                 not_utf8 = invlist_clone(PL_UpperLatin1, NULL);
             }
         }
-        else if (OP(node) == ANYOFL) {
+        else if (OP(node) == ANYOFL || OP(node) == ANYOFPOSIXL) {
 
             /* If either of these flags are set, what matches isn't
              * determinable except during execution, so don't know enough here

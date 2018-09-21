@@ -50,8 +50,8 @@ my @tests = (
     'ebcdic_ok_below_this_marker',
 
     '(?l:[\x{212A}])' => 'ANYOFL[212A]',
-    '(?l:[\s\x{212A}])' => 'ANYOFL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
-    '(?l:[^\S\x{202F}])' => 'ANYOFL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
+    '(?l:[\s\x{212A}])' => 'ANYOFPOSIXL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
+    '(?l:[^\S\x{202F}])' => 'ANYOFPOSIXL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
     '(?i:[^:])' => 'ANYOF[^:][0100-INFINITY]',
     '[\p{Any}]' => 'ANYOF[\x00-\xFF][0100-10FFFF]',
     '[\p{IsMyRuntimeProperty}]' => 'ANYOF[+utf8::IsMyRuntimeProperty]',
