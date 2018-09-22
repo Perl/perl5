@@ -1767,7 +1767,7 @@
  *	This symbol, if defined, indicates that the long double is
  *	the 128-bit VAX format H.
  */
-/*#define  HAS_LDEXPL		/ **/
+#define HAS_LDEXPL		/**/
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
 #define LONG_DOUBLESIZE 12		/**/
