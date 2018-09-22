@@ -896,7 +896,9 @@ SKIP: {
 
 # quadmath tests for rt.perl.org #128843
 SKIP: {
-    skip "need quadmath", 7, unless $Config{usequadmath};
+    skip "need IEEE 754 NV", 7,
+          unless ($Config{usequadmath} ||
+          ($Config{uselongdouble} && $Config{longdblkind} > 0 && $Config{longdblkind} < 3));
 
     is(sprintf("%a", eval '0x1p-16382'), '0x1p-16382');  # last normal
 
