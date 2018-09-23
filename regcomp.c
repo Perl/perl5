@@ -19282,7 +19282,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *operand, U32 depth)
         if (RExC_offsets) {     /* MJD 20010112 */
 	    MJD_OFFSET_DEBUG(
                  ("%s(%d): (op %s) %s copy %" UVuf " -> %" UVuf " (max %" UVuf ").\n",
-                  "reg_insert",
+                  "reginsert",
 		  __LINE__,
 		  PL_reg_name[op],
                   (UV)(dst - RExC_emit_start) > RExC_offsets[0]
