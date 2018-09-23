@@ -179,13 +179,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
     },
 
-    'B::Debug' => {
-        'DISTRIBUTION' => 'RURBAN/B-Debug-1.26.tar.gz',
-        'FILES'        => q[cpan/B-Debug],
-        'EXCLUDED'     => ['t/pod.t'],
-        'DEPRECATED'   => '5.027003',
-    },
-
     'base' => {
         'DISTRIBUTION' => 'RJBS/base-2.23.tar.gz',
         'FILES'        => q[dist/base],

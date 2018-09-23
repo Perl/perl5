@@ -16,7 +16,6 @@
 /AutoSplit.pm
 /B.pm
 /B/Concise.pm
-/B/Debug.pm
 /B/Showlex.pm
 /B/Terse.pm
 /B/Xref.pm
