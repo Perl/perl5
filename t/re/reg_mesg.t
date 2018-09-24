@@ -106,6 +106,8 @@ my $high_mixed_digit = ('A' lt '0') ? '0' : 'A';
 my $colon_hex = sprintf "%02X", ord(":");
 my $tab_hex = sprintf "%02X", ord("\t");
 
+my $bug133423 = "(?[(?^:(?[\\\x00]))\\]\x00|2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670";
+
 ##
 ## Key-value pairs of code/error of code that should have fatal errors.
 ##
@@ -290,6 +292,8 @@ my @death =
  '/(?xmsixp)abc/' => "",
  '/(?xxxx:abc)/' => "",
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
+ "/$bug133423/" => "Operand with no preceding operator {#} m/(?[(?^:(?[\\ ]))\\{#}] |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
+
 
 );
 

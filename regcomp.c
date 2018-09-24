@@ -15109,7 +15109,6 @@ redo_curchar:
                     RExC_parse++;
                     assert(UCHARAT(RExC_parse) == ')');
 
-                    RExC_parse++;
                     RExC_flags = save_flags;
                     goto handle_operand;
                 }
