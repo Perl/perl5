@@ -901,6 +901,8 @@ simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100othersideofthe.earth.li
 +                                       simon\100cozens.net
 +                                       simon\100netthink.co.uk
+sisyphus\100cpan.org                    sisyphus1\100optusnet.com.au
++                                       sisyphus359\100gmail.com
 lannings\100who.int                     lannings\100gmail.com
 +                                       slanning\100cpan.org
 slaven\100rezic.de                      slaven.rezic\100berlin.de
@@ -931,7 +933,6 @@ stef\100mongueurs.net                   stef\100payrard.net
 stevan\100cpan.org                      stevan.little\100gmail.com
 +                                       stevan.little\100iinteractive.com
 sthoenna\100efn.org                     ysth\100raven.shiftboard.com
-sisyphus1\100optusnet.com.au            sisyphus\100cpan.org
 
 tassilo.parseval\100post.rwth-aachen.de tassilo.von.parseval\100rwth-aachen.de
 tchrist\100perl.com                     tchrist\100mox.perl.com
