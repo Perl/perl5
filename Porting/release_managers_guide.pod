@@ -173,12 +173,6 @@ which has a F<public_html> directory to share files with.
 If you use Dropbox, you can append "raw=1" as a parameter to their usual
 sharing link to allow direct download (albeit with redirects).
 
-=head3 git clone of L<https://github.com/perlorg/perlweb>
-
-For updating the L<http://dev.perl.org> web pages, either a Github account or
-sweet-talking somebody with a Github account into obedience is needed. This
-is only needed on the day of the release or shortly afterwards.
-
 =head3 Quotation for release announcement epigraph
 
 You will need a quotation to use as an epigraph to your release announcement.
@@ -1529,22 +1523,6 @@ Check L<http://search.cpan.org> to see if it has indexed the distribution.
 It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 =back
-
-=for checklist skip RC
-
-=head3 update dev.perl.org
-
-I<You MUST SKIP this step for a RC release>
-
-In your C<perlweb> repository, link to the new release.  For a new
-latest-maint release, edit F<docs/shared/tpl/stats.html>.  Otherwise,
-edit F<docs/dev/perl5/index.html>.
-
-Then make a pull request to Leo Lapworth.  If this fails for some reason
-and you cannot cajole anybody else into submitting that change, you can
-mail Leo as last resort.
-
-This repository can be found on L<github|https://github.com/perlorg/perlweb>.
 
 =head3 update release manager's guide
 
