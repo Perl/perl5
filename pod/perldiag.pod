@@ -3206,26 +3206,23 @@ neither as a system call nor an ioctl call (SIOCATMARK).
 Perl.  The current valid ones are given in
 L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
-=item %s() is deprecated on :utf8 handles. This will be a fatal error in Perl 5.30
+=item %s() isn't allowed on :utf8 handles
 
-(D deprecated) The sysread(), recv(), syswrite() and send() operators are
-deprecated on handles that have the C<:utf8> layer, either explicitly, or
+(F) The sysread(), recv(), syswrite() and send() operators are
+not allowed on handles that have the C<:utf8> layer, either explicitly, or
 implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
 
-Both sysread() and recv() currently use only the C<:utf8> flag for the stream,
-ignoring the actual layers.  Since sysread() and recv() do no UTF-8
+Previously sysread() and recv() currently use only the C<:utf8> flag for the stream,
+ignoring the actual layers.  Since sysread() and recv() did no UTF-8
 validation they can end up creating invalidly encoded scalars.
 
-Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise ignoring
-any layers.  If the flag is set, both write the value UTF-8 encoded, even if
+Similarly, syswrite() and send() used only the C<:utf8> flag, otherwise ignoring
+any layers.  If the flag is set, both wrote the value UTF-8 encoded, even if
 the layer is some different encoding, such as the example above.
 
 Ideally, all of these operators would completely ignore the C<:utf8> state,
 working only with bytes, but this would result in silently breaking existing
 code.
-
-In Perl 5.30, it will no longer be possible to use sysread(), recv(),
-syswrite() or send() to read or send bytes from/to :utf8 handles.
 
 =item "%s" is more clearly written simply as "%s" in regex; marked by S<<-- HERE> in m/%s/
 

@@ -6284,14 +6284,9 @@ string otherwise.  If there's an error, returns the undefined value.
 This call is actually implemented in terms of the L<recvfrom(2)> system call.
 See L<perlipc/"UDP: Message Passing"> for examples.
 
-Note the I<characters>: depending on the status of the socket, either
-(8-bit) bytes or characters are received.  By default all sockets
-operate on bytes, but for example if the socket has been changed using
-L<C<binmode>|/binmode FILEHANDLE, LAYER> to operate with the
-C<:encoding(UTF-8)> I/O layer (see the L<open> pragma), the I/O will
-operate on UTF8-encoded Unicode
-characters, not bytes.  Similarly for the C<:encoding> layer: in that
-case pretty much any characters can be read.
+Note that if the socket has been marked as C<:utf8>, C<recv> will
+throw an exception.  The C<:encoding(...)> layer implicitly introduces
+the C<:utf8> layer.  See L<C<binmode>|/binmode FILEHANDLE, LAYER>.
 
 =item redo LABEL
 X<redo>
@@ -7083,14 +7078,9 @@ case it does a L<sendto(2)> syscall.  Returns the number of characters sent,
 or the undefined value on error.  The L<sendmsg(2)> syscall is currently
 unimplemented.  See L<perlipc/"UDP: Message Passing"> for examples.
 
-Note the I<characters>: depending on the status of the socket, either
-(8-bit) bytes or characters are sent.  By default all sockets operate
-on bytes, but for example if the socket has been changed using
-L<C<binmode>|/binmode FILEHANDLE, LAYER> to operate with the
-C<:encoding(UTF-8)> I/O layer (see L<C<open>|/open FILEHANDLE,EXPR>, or
-the L<open> pragma), the I/O will operate on UTF-8
-encoded Unicode characters, not bytes.  Similarly for the C<:encoding>
-layer: in that case pretty much any characters can be sent.
+Note that if the socket has been marked as C<:utf8>, C<send> will
+throw an exception.  The C<:encoding(...)> layer implicitly introduces
+the C<:utf8> layer.  See L<C<binmode>|/binmode FILEHANDLE, LAYER>.
 
 =item setpgrp PID,PGRP
 X<setpgrp> X<group>
@@ -8723,10 +8713,8 @@ L<C<eof>|/eof FILEHANDLE> doesn't work well on device files (like ttys)
 anyway.  Use L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET> and
 check for a return value of 0 to decide whether you're done.
 
-Note that if the filehandle has been marked as C<:utf8>, Unicode
-characters are read instead of bytes (the LENGTH, OFFSET, and the
-return value of L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET>
-are in Unicode characters).  The C<:encoding(...)> layer implicitly
+Note that if the filehandle has been marked as C<:utf8>, C<sysread> will
+throw an exception.  The C<:encoding(...)> layer implicitly
 introduces the C<:utf8> layer.  See
 L<C<binmode>|/binmode FILEHANDLE, LAYER>,
 L<C<open>|/open FILEHANDLE,EXPR>, and the L<open> pragma.
@@ -8887,10 +8875,7 @@ string other than the beginning.  A negative OFFSET specifies writing
 that many characters counting backwards from the end of the string.
 If SCALAR is of length zero, you can only use an OFFSET of 0.
 
-B<WARNING>: If the filehandle is marked C<:utf8>, Unicode characters
-encoded in UTF-8 are written instead of bytes, and the LENGTH, OFFSET, and
-return value of L<C<syswrite>|/syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET>
-are in (UTF8-encoded Unicode) characters.
+B<WARNING>: If the filehandle is marked C<:utf8>, C<syswrite> will raise an exception.
 The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 Alternately, if the handle is not marked with an encoding but you
 attempt to write characters with code points over 255, raises an exception.
