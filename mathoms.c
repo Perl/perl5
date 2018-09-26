@@ -518,7 +518,7 @@ int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 {
     int ret = 0;
-    va_list(arglist);
+    va_list arglist;
 
     /* Easier to special case this here than in embed.pl. (Look at what it
        generates for proto.h) */
@@ -536,7 +536,7 @@ int
 Perl_printf_nocontext(const char *format, ...)
 {
     dTHX;
-    va_list(arglist);
+    va_list arglist;
     int ret = 0;
 
 #ifdef PERL_IMPLICIT_CONTEXT
