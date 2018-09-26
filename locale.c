@@ -4425,6 +4425,9 @@ S_restore_switched_locale(pTHX_ const int category, const char * const original_
     Safefree(original_locale);
 }
 
+/* is_cur_LC_category_utf8 uses a small char buffer to avoid malloc/free */
+#define CUR_LC_BUFFER_SIZE  64
+
 bool
 Perl__is_cur_LC_category_utf8(pTHX_ int category)
 {
@@ -4462,6 +4465,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                                the name in the cache */
     char * delimited;           /* The name plus the delimiters used to store
                                    it in the cache */
+    char buffer[CUR_LC_BUFFER_SIZE];        /* small buffer */
     char * name_pos;            /* position of 'delimited' in the cache, or 0
                                    if not there */
 
@@ -4490,9 +4494,15 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * utf8ness digit */
     input_name_len_with_overhead = input_name_len + 3;
 
-    /* Allocate and populate space for a copy of the name surrounded by the
-     * delimiters */
-    Newx(delimited, input_name_len_with_overhead, char);
+    if ( input_name_len_with_overhead <= CUR_LC_BUFFER_SIZE ) {
+        /* we can use the buffer, avoid a malloc */
+        delimited = buffer;
+    } else { /* need a malloc */
+        /* Allocate and populate space for a copy of the name surrounded by the
+         * delimiters */
+        Newx(delimited, input_name_len_with_overhead, char);
+    }
+
     delimited[0] = UTF8NESS_SEP[0];
     Copy(save_input_locale, delimited + 1, input_name_len, char);
     delimited[input_name_len+1] = UTF8NESS_PREFIX[0];
@@ -4526,7 +4536,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             utf8ness_cache[input_name_len_with_overhead - 1] = is_utf8 + '0';
         }
 
-        Safefree(delimited);
+        /* free only when not using the buffer */
+        if ( delimited != buffer ) Safefree(delimited);
         Safefree(save_input_locale);
         return is_utf8;
     }
@@ -5021,7 +5032,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #  endif
 
-    Safefree(delimited);
+    /* free only when not using the buffer */
+    if ( delimited != buffer ) Safefree(delimited);
     Safefree(save_input_locale);
     return is_utf8;
 }
