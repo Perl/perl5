@@ -125,9 +125,10 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<vars> has been upgraded from version 1.04 to 1.05.
 
-If there was something important to note about this change, include that here.
+C<vars.pm> no longer disables non-vars strict when checking if strict
+vars is enabled.  [perl #130674]
 
 =back
 
