@@ -144,6 +144,11 @@ vars is enabled.  [perl #130674]
 
 =item *
 
+B::Debug is no longer distributed with the core distribution.  It remains
+available on CPAN.
+
+=item *
+
 XXX
 
 =back
