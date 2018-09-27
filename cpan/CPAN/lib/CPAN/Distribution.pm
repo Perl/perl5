@@ -8,7 +8,7 @@ use CPAN::InfoObj;
 use File::Path ();
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.19";
+$VERSION = "2.21";
 
 # no prepare, because prepare is not a command on the shell command line
 # TODO: clear instance cache on reload
@@ -559,7 +559,8 @@ See also http://rt.cpan.org/Ticket/Display.html?id=38932\n");
         $CPAN::Frontend->mydie("Cannot create directory $builddir: $@");
     }
     my $packagedir;
-    my $eexist = $CPAN::META->has_usable("Errno") ? &Errno::EEXIST : undef;
+    my $eexist = ($CPAN::META->has_usable("Errno") && defined &Errno::EEXIST)
+        ? &Errno::EEXIST : undef;
     for(my $suffix = 0; ; $suffix++) {
         $packagedir = File::Spec->catdir($builddir, "$tdir_base-$suffix");
         my $parent = $builddir;
@@ -1658,7 +1659,7 @@ sub force {
   my $methodmatch = 0;
   my $ldebug = 0;
  PHASE: for my $phase (qw(unknown get make test install)) { # order matters
-      $methodmatch = 1 if $fforce || $phase eq $method;
+      $methodmatch = 1 if $fforce || ($method && $phase eq $method);
       next unless $methodmatch;
     ATTRIBUTE: for my $att (@{$phase_map{$phase}}) {
           if ($phase eq "get") {
@@ -1721,14 +1722,20 @@ sub isa_perl {
   my $file = File::Basename::basename($self->id);
   if ($file =~ m{ ^ perl
                   (
-                   -5\.\d+\.\d+
+                   -(5\.\d+\.\d+)
                    |
-                   5[._-]00[0-5](_[0-4][0-9])?
+                   (5)[._-](00[0-5](?:_[0-4][0-9])?)
                   )
                   \.tar[._-](?:gz|bz2)
                   (?!\n)\Z
                 }xs) {
-    return "$1.$3";
+    my $perl_version;
+    if ($2) {
+        $perl_version = $2;
+    } else {
+        $perl_version = "$3.$4";
+    }
+    return $perl_version;
   } elsif ($self->cpan_comment
            &&
            $self->cpan_comment =~ /isa_perl\(.+?\)/) {
@@ -2898,8 +2905,10 @@ sub unsat_prereq {
                 next NEED;
             }
 
+            my $sufficient_file = exists $prereq_pm->{requires}{$need_module}
+                ? $inst_file : $available_file;
             # if they have not specified a version, we accept any installed one
-            if ( $available_file
+            if ( $sufficient_file
                 and ( # a few quick short circuits
                      not defined $need_version
                      or $need_version eq '0'    # "==" would trigger warning when not numeric
@@ -3491,8 +3500,21 @@ sub _exe_files {
     if (-f $buildparams) {
         CPAN->debug("Found '$buildparams'") if $CPAN::DEBUG;
         my $x = do $buildparams;
-        for my $sf (@{$x->[2]{script_files} || []}) {
-            push @exe_files, $sf;
+        for my $sf ($x->[2]{script_files}) {
+            if (my $reftype = ref $sf) {
+                if ($reftype eq "ARRAY") {
+                    push @exe_files, @$sf;
+                }
+                elsif ($reftype eq "HASH") {
+                    push @exe_files, keys %$sf;
+                }
+                else {
+                    $CPAN::Frontend->mywarn("Invalid reftype $reftype for Build.PL 'script_files'\n");
+                }
+            }
+            elsif (defined $sf) {
+                push @exe_files, $sf;
+            }
         }
     }
     return \@exe_files;
@@ -3773,7 +3795,7 @@ sub clean {
             push @e, "make clean already called once";
         $CPAN::Frontend->myprint(join "", map {"  $_\n"} @e) and return if @e;
     }
-    chdir $self->{build_dir} or
+    chdir "$self->{build_dir}" or
         Carp::confess("Couldn't chdir to $self->{build_dir}: $!");
     $self->debug("Changed directory to $self->{build_dir}") if $CPAN::DEBUG;
 
@@ -4401,6 +4423,17 @@ sub reports {
         $CPAN::Frontend->mydie("File::Temp not installed; cannot continue");
     }
 
+    my $format;
+    if ($CPAN::META->has_inst("YAML::XS") || $CPAN::META->has_inst("YAML::Syck")){
+        $format = 'yaml';
+    }
+    elsif (!$format && $CPAN::META->has_inst("JSON::PP") ) {
+        $format = 'json';
+    }
+    else {
+        $CPAN::Frontend->mydie("JSON::PP not installed, cannot continue");
+    }
+
     my $d = CPAN::DistnameInfo->new($pathname);
 
     my $dist      = $d->dist;      # "CPAN-DistnameInfo"
@@ -4410,7 +4443,7 @@ sub reports {
     my $cpanid    = $d->cpanid;    # "GBARR"
     my $distvname = $d->distvname; # "CPAN-DistnameInfo-0.02"
 
-    my $url = sprintf "http://www.cpantesters.org/show/%s.yaml", $dist;
+    my $url = sprintf "http://www.cpantesters.org/show/%s.%s", $dist, $format;
 
     CPAN::LWP::UserAgent->config;
     my $Ua;
@@ -4424,19 +4457,25 @@ sub reports {
         $CPAN::Frontend->mydie(sprintf "Could not download '%s': %s\n", $url, $resp->code);
     }
     $CPAN::Frontend->myprint("DONE\n\n");
-    my $yaml = $resp->content;
-    # what a long way round!
-    my $fh = File::Temp->new(
-                             dir      => File::Spec->tmpdir,
-                             template => 'cpan_reports_XXXX',
-                             suffix => '.yaml',
-                             unlink => 0,
-                            );
-    my $tfilename = $fh->filename;
-    print $fh $yaml;
-    close $fh or $CPAN::Frontend->mydie("Could not close '$tfilename': $!");
-    my $unserialized = CPAN->_yaml_loadfile($tfilename)->[0];
-    unlink $tfilename or $CPAN::Frontend->mydie("Could not unlink '$tfilename': $!");
+    my $unserialized;
+    if ( $format eq 'yaml' ) {
+        my $yaml = $resp->content;
+        # what a long way round!
+        my $fh = File::Temp->new(
+                                 dir      => File::Spec->tmpdir,
+                                 template => 'cpan_reports_XXXX',
+                                 suffix => '.yaml',
+                                 unlink => 0,
+                                );
+        my $tfilename = $fh->filename;
+        print $fh $yaml;
+        close $fh or $CPAN::Frontend->mydie("Could not close '$tfilename': $!");
+        $unserialized = CPAN->_yaml_loadfile($tfilename)->[0];
+        unlink $tfilename or $CPAN::Frontend->mydie("Could not unlink '$tfilename': $!");
+    } else {
+        require JSON::PP;
+        $unserialized = JSON::PP->new->utf8->decode($resp->content);
+    }
     my %other_versions;
     my $this_version_seen;
     for my $rep (@$unserialized) {
@@ -4469,7 +4508,7 @@ Reports for other versions:\n");
             $CPAN::Frontend->myprint(" $v\: $other_versions{$v}\n");
         }
     }
-    $url =~ s/\.yaml/.html/;
+    $url = substr($url,0,-4) . 'html';
     $CPAN::Frontend->myprint("See $url for details\n");
 }
 

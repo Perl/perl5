@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.20';
+$CPAN::VERSION = '2.21';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -284,7 +284,7 @@ sub shell {
         }
         if (my $histfile = $CPAN::Config->{'histfile'}) {{
             unless ($term->can("AddHistory")) {
-                $CPAN::Frontend->mywarn("Terminal does not support AddHistory.\n");
+                $CPAN::Frontend->mywarn("Terminal does not support AddHistory.\n\nTo fix enter>  install Term::ReadLine::Perl\n\n");
                 last;
             }
             $META->readhist($term,$histfile);
@@ -488,7 +488,7 @@ Trying '$root' as temporary haven.
         push @$cwd, $root;
     }
     while () {
-        if (chdir $cwd->[0]) {
+        if (chdir "$cwd->[0]") {
             return;
         } else {
             if (@$cwd>1) {
