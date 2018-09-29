@@ -10280,17 +10280,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
      * These are all defined in charclass_invlists.h */
 
     /* XXX Here are the additional things UTS 39 says could be done:
-     * Mark Chinese strings as “mixed script” if they contain both simplified
-     * (S) and traditional (T) Chinese characters, using the Unihan data in the
-     * Unicode Character Database [UCD].  The criterion can only be applied if
-     * the language of the string is known to be Chinese. So, for example, the
-     * string “写真だけの結婚式 ” is Japanese, and should not be marked as
-     * mixed script because of a mixture of S and T characters.  Testing for
-     * whether a character is S or T needs to be based not on whether the
-     * character has a S or T variant , but whether the character is an S or T
-     * variant. khw notes that the sample contains a Hiragana character, and it
-     * is unclear if absence of any foreign script marks the script as
-     * "Chinese"
      *
      * Forbid sequences of the same nonspacing mark
      *
@@ -10315,8 +10304,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
     PERL_UINT_FAST8_T intersection_len = 0;
 
     bool retval = TRUE;
-
-    /* This is supposed to be a return parameter, but currently unused */
     SCX_enum * ret_script = NULL;
 
     assert(send >= s);
