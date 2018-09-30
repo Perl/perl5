@@ -265,22 +265,22 @@ struct regnode_ssc {
    Impose a limit of REG_INFTY on various pattern matching operations
    to limit stack growth and to avoid "infinite" recursions.
 */
-/* The default size for REG_INFTY is I16_MAX, which is the same as
-   SHORT_MAX (see perl.h).  Unfortunately I16 isn't necessarily 16 bits
-   (see handy.h).  On the Cray C90, sizeof(short)==4 and hence I16_MAX is
-   ((1<<31)-1), while on the Cray T90, sizeof(short)==8 and I16_MAX is
-   ((1<<63)-1).  To limit stack growth to reasonable sizes, supply a
+/* The default size for REG_INFTY is U16_MAX, which is the same as
+   USHORT_MAX (see perl.h).  Unfortunately U16 isn't necessarily 16 bits
+   (see handy.h).  On the Cray C90, sizeof(short)==4 and hence U16_MAX is
+   ((1<<32)-1), while on the Cray T90, sizeof(short)==8 and U16_MAX is
+   ((1<<64)-1).  To limit stack growth to reasonable sizes, supply a
    smaller default.
 	--Andy Dougherty  11 June 1998
 */
 #if SHORTSIZE > 2
 #  ifndef REG_INFTY
-#    define REG_INFTY ((1<<15)-1)
+#    define REG_INFTY ((1<<16)-1)
 #  endif
 #endif
 
 #ifndef REG_INFTY
-#  define REG_INFTY I16_MAX
+#  define REG_INFTY U16_MAX
 #endif
 
 #define ARG_VALUE(arg) (arg)
