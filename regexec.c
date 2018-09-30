@@ -10346,6 +10346,10 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
     /* Look at each character in the sequence */
     while (s < send) {
+        /* If the current character being examined is a digit, this is the code
+         * point of the zero for its sequence of 10 */
+        UV zero_of_char;
+
         UV cp;
 
         /* The code allows all scripts to use the ASCII digits.  This is
@@ -10455,16 +10459,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             }
 
             script_of_run = script_of_char;
-        }
-
-        /* All decimal digits must be from the same sequence of 10.  Above, we
-         * handled any ASCII digits without descending to here.  We also
-         * handled the case where we already knew what digit sequence is the
-         * one to use, and the character is in that sequence.  Now that we know
-         * the script, we can use script_zeros[] to directly find which
-         * sequence the script uses, except in a few cases it returns 0 */
-        if (UNLIKELY(zero_of_run == 0 && script_of_char >= 0)) {
-            zero_of_run = script_zeros[script_of_char];
         }
 
         /* Now we can see if the script of the character is the same as that of
@@ -10624,54 +10618,61 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         /* Here, the script of the character is compatible with that of the
          * run.  That means that in most cases, it continues the script run.
          * Either it and the run match exactly, or one or both can be in any of
-         * several scripts, and the intersection is not empty.  But if the
-         * character is a decimal digit, we need further handling.  If we
-         * haven't seen a digit before, it would establish what set of 10 all
-         * must come from; and if we have established a set, we need to check
-         * that this is in it.
-         *
-         * But there are cases we can rule out without having to look up if
-         * this is a digit:
-         *   a.  All instances of [0-9] have been dealt with earlier.
-         *   b.  The next digit encoded by Unicode is 1600 code points further
-         *       on, so if the code point in this loop iteration is less than
-         *       that, it isn't a digit.
-         *   c.  Most scripts that have digits have a single set of 10.  If
-         *       we've encountered a digit in such a script, 'zero_of_run' is
-         *       set to the code point (call it z) whose numeric value is 0.
-         *       If the code point in this loop iteration is in the range
-         *       z..z+9, it is in the script's set of 10, and we've actually
-         *       handled it earlier in this function and won't reach this
-         *       point.  But, code points in that script that aren't in that
-         *       range can't be digits, so we don't have to look any such up.
-         *       We can tell if this script is such a one by looking at
-         *       'script_zeros[]' for it.  It is non-zero iff it has a single
-         *       set of digits.  This rule doesn't apply if we haven't narrowed
-         *       down the possible scripts to a single one yet.  Nor if the
-         *       zero of the run is '0', as that also hasn't narrowed things
-         *       down completely */
-        if (    cp >= FIRST_NON_ASCII_DECIMAL_DIGIT
-            && (   intersection
-                || script_of_char < 0   /* Also implies an intersection */
-                || zero_of_run == '0'
-                || script_zeros[script_of_char] == 0))
+         * several scripts, and the intersection is not empty.  However, if the
+         * character is a decimal digit, it could still mean failure if it is
+         * from the wrong sequence of 10.  So, we need to look at if it's a
+         * digit.  We've already handled the 10 decimal digits, and the next
+         * lowest one is this one: */
+        if (cp < FIRST_NON_ASCII_DECIMAL_DIGIT) {
+            continue;   /* Not a digit; this character is part of the run */
+        }
+
+        /* If we have a definitive '0' for the script of this character, we
+         * know that for this to be a digit, it must be in the range of +0..+9
+         * of that zero. */
+        if (   script_of_char >= 0
+            && (zero_of_char = script_zeros[script_of_char]))
         {
-            SSize_t zero_of_char_index;
-            zero_of_char_index = _invlist_search(decimals_invlist, cp);
-            if (   LIKELY(zero_of_char_index >= 0)
-                && ELEMENT_RANGE_MATCHES_INVLIST(zero_of_char_index))
+            if (   cp < zero_of_char
+                || cp > zero_of_char + 9)
             {
-                UV zero_of_char = decimals_array[zero_of_char_index];
-                if (SEEN_A_DIGIT) {
-                    if (zero_of_run != zero_of_char) {
-                        retval = FALSE;
-                        break;
-                    }
-                }
-                else {
-                    zero_of_run = zero_of_char;
-                }
+                continue;   /* Not a digit; this character is part of the run
+                             */
             }
+
+        }
+        else {  /* Need to look up if this character is a digit or not */
+            SSize_t index_of_zero_of_char;
+            index_of_zero_of_char = _invlist_search(decimals_invlist, cp);
+            if (     UNLIKELY(index_of_zero_of_char < 0)
+                || ! ELEMENT_RANGE_MATCHES_INVLIST(index_of_zero_of_char))
+            {
+                continue;   /* Not a digit; this character is part of the run.
+                             */
+            }
+
+            zero_of_char = decimals_array[index_of_zero_of_char];
+        }
+
+        /* Here, the character is a decimal digit, and the zero of its sequence
+         * of 10 is in 'zero_of_char'.  If we already have a zero for this run,
+         * they better be the same. */
+        if (zero_of_run) {
+            if (zero_of_run != zero_of_char) {
+                retval = FALSE;
+                break;
+            }
+        }
+        else if (script_of_char == SCX_Common && script_of_run != SCX_Common) {
+
+            /* Here, the script run isn't Common, but the current digit is in
+             * Common, and isn't '0'-'9' (those were handled earlier).   Only
+             * '0'-'9' are acceptable in non-Common scripts. */
+            retval = FALSE;
+            break;
+        }
+        else {  /* Otherwise we now have a zero for this run */
+            zero_of_run = zero_of_char;
         }
     } /* end of looping through CLOSESR text */
 

@@ -97,4 +97,9 @@ foreach my $type ('script_run', 'sr', 'atomic_script_run', 'asr') {
       like("abc", qr/(*asr:a[bc]*c)/, "Outer asr works on a run");
     unlike("abc", qr/(*asr:a(*asr:[bc]*)c)/, "Nested asr works to exclude some things");
 
+    like("\x{0980}12\x{0993}", qr/^(*sr:.{4})/,
+         "Script with own zero works with ASCII digits"); # perl #133547
+    like("\x{3041}12\x{3041}", qr/^(*sr:.{4})/,
+         "Script without own zero works with ASCII digits");
+
 done_testing();
