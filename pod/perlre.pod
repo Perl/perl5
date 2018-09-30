@@ -2608,7 +2608,7 @@ Z<>
 No code point in the sequence has the C<Script_Extension> property of
 C<Unknown>.
 
-This currently means that all code points the sequence have been
+This currently means that all code points in the sequence have been
 assigned by Unicode to be characters that aren't private use nor
 surrogate code points.
 
