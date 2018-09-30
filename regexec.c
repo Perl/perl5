@@ -10656,20 +10656,20 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
                 || zero_of_run == '0'
                 || script_zeros[script_of_char] == 0))
         {
-            SSize_t range_zero_index;
-            range_zero_index = _invlist_search(decimals_invlist, cp);
-            if (   LIKELY(range_zero_index >= 0)
-                && ELEMENT_RANGE_MATCHES_INVLIST(range_zero_index))
+            SSize_t zero_of_char_index;
+            zero_of_char_index = _invlist_search(decimals_invlist, cp);
+            if (   LIKELY(zero_of_char_index >= 0)
+                && ELEMENT_RANGE_MATCHES_INVLIST(zero_of_char_index))
             {
-                UV range_zero = decimals_array[range_zero_index];
+                UV zero_of_char = decimals_array[zero_of_char_index];
                 if (SEEN_A_DIGIT) {
-                    if (zero_of_run != range_zero) {
+                    if (zero_of_run != zero_of_char) {
                         retval = FALSE;
                         break;
                     }
                 }
                 else {
-                    zero_of_run = range_zero;
+                    zero_of_run = zero_of_char;
                 }
             }
         }
