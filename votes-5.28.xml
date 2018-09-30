@@ -42,7 +42,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>New Feature Fixes</h3>
 
 <commit votes="khw steveh" id="7da8e27b9d7d2be4e770d074405ddb9941e6c8b7" ticket="none" desc="Fix script run &quot;1\N{THAI DIGIT}&quot;"/>
-
+<commit votes="khw" id="393e5a4585b92e635cfc4eee34da8f86f3bfd2af" ticket="none" desc="script run broken"/>
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
