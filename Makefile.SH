@@ -67,8 +67,16 @@ true)
                             -compatibility_version \
 				${api_revision}.${api_version}.${api_subversion} \
 			     -current_version \
-				${revision}.${patchlevel}.${subversion} \
-			     -install_name \$(shrpdir)/\$@"
+				${revision}.${patchlevel}.${subversion}"
+		case "$osvers" in
+	        1[5-9]*|[2-9]*)
+			shrpldflags="$shrpldflags -install_name `pwd`/\$@ -Xlinker -headerpad_max_install_names"
+			exeldflags="-Xlinker -headerpad_max_install_names"
+			;;
+		*)
+			shrpldflags="$shrpldflags -install_name \$(shrpdir)/\$@"
+			;;
+		esac
 		;;
 	cygwin*)
 		shrpldflags="$shrpldflags -Wl,--out-implib=libperl.dll.a -Wl,--image-base,0x52000000"
@@ -338,6 +346,14 @@ MINIPERL = \$(LDLIBPTH) ./miniperl\$(EXE_EXT) -Ilib
 MANIFEST_SRT = MANIFEST.srt
 
 !GROK!THIS!
+
+case "$useshrplib$osname" in
+truedarwin)
+	$spitshell >>$Makefile <<!GROK!THIS!
+PERL_EXE_LDFLAGS=$exeldflags
+!GROK!THIS!
+	;;
+esac
 
 case "$usecrosscompile$perl" in
 define?*)
@@ -1050,6 +1066,20 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
 	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(LLIBPERL) $(static_ext) `cat ext.libs` $(libs)
 !NO!SUBS!
         ;;
+
+	darwin)
+	    case "$useshrplib$osvers" in
+	    true1[5-9]*|true[2-9]*) $spitshell >>$Makefile <<'!NO!SUBS!'
+	$(SHRPENV) $(CC) -o perl $(PERL_EXE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+!NO!SUBS!
+	       ;;
+	    *) $spitshell >>$Makefile <<'!NO!SUBS!'
+	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+!NO!SUBS!
+	       ;;
+	    esac
+        ;;
+
         *) $spitshell >>$Makefile <<'!NO!SUBS!'
 	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 !NO!SUBS!
