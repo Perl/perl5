@@ -384,6 +384,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 C<pack "u", "invalid uuencoding"> now properly NUL terminates the
 zero-length SV produced.  [perl #132655]
 
+=item *
+
+Improve the debugging output for calloc() calls with C<-Dm>.  [perl #133439]
+
 =back
 
 =head1 Known Problems
