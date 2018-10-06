@@ -307,11 +307,14 @@ Generates the path name for the controlling terminal.
 This is identical to the C function C<ctime()> and equivalent
 to C<asctime(localtime(...))>, see L</asctime> and L</localtime>.
 
-=item C<cuserid>
+=item C<cuserid> [POSIX.1-1988]
 
 Get the login name of the owner of the current process.
 
 	$name = POSIX::cuserid();
+
+Note: this function has not been specified by POSIX since 1990 and is included
+only for backwards compatibility. New code should use L<C<getlogin()>|perlfunc/getlogin> instead.
 
 =item C<difftime>
 
