@@ -21524,7 +21524,7 @@ Perl_init_uniprops(pTHX)
     PL_Posix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALNUM]);
     PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALPHA]);
     PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXBLANK]);
-    PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(uni_prop_ptrs[UNI_CASED]);
+    PL_Posix_ptrs[_CC_CASED] = PL_Posix_ptrs[_CC_ALPHA];
     PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXCNTRL]);
     PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXDIGIT]);
     PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXGRAPH]);
@@ -21533,7 +21533,7 @@ Perl_init_uniprops(pTHX)
     PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPUNCT]);
     PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXSPACE]);
     PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXUPPER]);
-    PL_Posix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(uni_prop_ptrs[UNI_VERTSPACE]);
+    PL_Posix_ptrs[_CC_VERTSPACE] = NULL;
     PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXWORD]);
     PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXXDIGIT]);
 
