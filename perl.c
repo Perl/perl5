@@ -1330,8 +1330,8 @@ perl_destruct(pTHXx)
 	    for (sv = sva + 1; sv < svend; ++sv) {
 		if (SvTYPE(sv) != (svtype)SVTYPEMASK) {
 		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
-			" flags=0x%"UVxf
-			" refcnt=%"UVuf pTHX__FORMAT "\n"
+			" flags=0x%" UVxf
+			" refcnt=%" UVuf pTHX__FORMAT "\n"
 			"\tallocated at %s:%d %s %s (parent 0x%" UVxf ");"
 			"serial %" UVuf "\n",
 			(void*)sv, (UV)sv->sv_flags, (UV)sv->sv_refcnt
