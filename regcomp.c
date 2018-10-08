@@ -791,14 +791,17 @@ static const scan_data_t zero_scan_data = {
             REPORT_LOCATION_ARGS(RExC_parse));          \
 } STMT_END
 
-/* This has an assert in it because of [perl #122671] Many warnings in
- * regcomp.c can occur twice.  If they get output in pass1 and later in that
- * pass, the pattern has to be converted to UTF-8 and the pass restarted, they
- * would get output again.  So they should be output in pass2, and this
- * assert makes sure new warnings follow that paradigm. */
+/* Outputting warnings is generally deferred until the 2nd pass.  This is
+ * because the first pass can be restarted, for example if the pattern has to
+ * be converted to UTF-8.  If a warning had already been output earlier in the
+ * pass, it would be re-output after the restart.  Pass 2 is never restarted,
+ * so the problem simply goes away if we defer the output to that pass.  See
+ * [perl #122671]. */
 #define _WARN_HELPER(loc, warns, code)                                  \
     STMT_START {                                                        \
-        __ASSERT_(PASS2) code;                                          \
+        if (PASS2) {                                                    \
+            code;                                                       \
+        }                                                               \
     } STMT_END
 
 /* m is not necessarily a "literal string", in this macro */
@@ -10611,8 +10614,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 break;
             case KEEPCOPY_PAT_MOD: /* 'p' */
                 if (flagsp == &negflags) {
-                    if (PASS2)
-                        ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
+                    ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
                 } else {
                     *flagsp |= RXf_PMf_KEEPCOPY;
                 }
@@ -10976,11 +10978,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
                     /* By doing this here, we avoid extra warnings for nested
                      * script runs */
-                    if (PASS2) {
                     ckWARNexperimental(RExC_parse,
                         WARN_EXPERIMENTAL__SCRIPT_RUN,
                         "The script_run feature is experimental");
-                    }
 
                     if (paren == 's') {
                         /* Here, we're starting a new regular script run */
@@ -11021,12 +11021,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 /*FALLTHROUGH*/
 
             alpha_assertions:
-
-                if (PASS2) {
                 ckWARNexperimental(RExC_parse,
                         WARN_EXPERIMENTAL__ALPHA_ASSERTIONS,
                         "The alpha_assertions feature is experimental");
-                }
 
                 RExC_seen_zerolen++;
 
@@ -11687,7 +11684,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             } /* end switch */
 	}
 	else {
-            if (*RExC_parse == '{' && PASS2) {
+            if (*RExC_parse == '{') {
                 ckWARNregdep(RExC_parse + 1,
                             "Unescaped left brace in regex is "
                             "deprecated here (and will be fatal "
@@ -12159,11 +12156,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             else if (min == max && *RExC_parse == '?')
             {
-                if (PASS2) {
-                    ckWARN2reg(RExC_parse + 1,
-                               "Useless use of greediness modifier '%c'",
-                               *RExC_parse);
-                }
+                ckWARN2reg(RExC_parse + 1,
+                           "Useless use of greediness modifier '%c'",
+                           *RExC_parse);
             }
 
 	  do_curly:
@@ -13860,8 +13855,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 				REQUIRE_UTF8(flagp);
 			    }
 			    p += numlen;
-                            if (PASS2   /* like \08, \178 */
-                                && numlen < 3
+                            if (   numlen < 3 /* like \08, \178 */
                                 && isDIGIT(*p) && ckWARN(WARN_REGEXP))
                             {
 				reg_warn_non_literal_string(
@@ -13875,7 +13869,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			    FAIL("Trailing \\");
 			/* FALLTHROUGH */
 		    default:
-			if (!SIZE_ONLY&& isALPHANUMERIC(*p)) {
+			if (isALPHANUMERIC(*p)) {
 			    /* Include any left brace following the alpha to emphasize
 			     * that it could be part of an escape at some point
 			     * in the future */
@@ -13912,15 +13906,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             vFAIL("Unescaped left brace in regex is "
                                   "illegal here");
                         }
-                        if (PASS2) {
-                            ckWARNreg(p + 1, "Unescaped left brace in regex is"
-                                             " passed through");
-                        }
+                        ckWARNreg(p + 1, "Unescaped left brace in regex is"
+                                         " passed through");
 		    }
 		    goto normal_default;
                 case '}':
                 case ']':
-                    if (PASS2 && p > RExC_parse && RExC_strict) {
+                    if (p > RExC_parse && RExC_strict) {
                         ckWARN2reg(p + 1, "Unescaped literal '%c'", *p);
                     }
 		    /*FALLTHROUGH*/
@@ -16277,11 +16269,9 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
 
                 /* Use deprecated warning to increase the chances of this being
                  * output */
-                if (PASS2) {
-                    ckWARN2reg_d(RExC_parse,
+                ckWARN2reg_d(RExC_parse,
                         "Perl folding rules are not up-to-date for 0x%02X;"
                         " please use the perlbug utility to report;", cp);
-                }
             }
             else {
                 unsigned int i;
@@ -16774,10 +16764,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             vFAIL("\\N in a character class must be a named character: \\N{...}");
                         }
                         else if (cp_count == 0) {
-                            if (PASS2) {
-                                ckWARNreg(RExC_parse,
-                                        "Ignoring zero length \\N{} in character class");
-                            }
+                            ckWARNreg(RExC_parse,
+                              "Ignoring zero length \\N{} in character class");
                         }
                         else { /* cp_count > 1 */
                             if (! RExC_in_multi_char_class) {
@@ -16786,7 +16774,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         RExC_parse--;
                                         vFAIL("\\N{} in inverted character class or as a range end-point is restricted to one character");
                                     }
-                                    else if (PASS2) {
+                                    else {
                                         ckWARNreg(RExC_parse, "Using just the first character returned by \\N{} in character class");
                                     }
                                     break; /* <value> contains the first code
@@ -17412,7 +17400,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 vFAIL4("False [] range \"%*.*s\"",
                                     w, w, rangebegin);
                             }
-                            else if (PASS2) {
+                            else {
                                 vWARN4(RExC_parse,
                                     "False [] range \"%*.*s\"",
                                     w, w, rangebegin);
