@@ -885,6 +885,12 @@ static const scan_data_t zero_scan_data = {
 	                               a1, a2, a3, a4,                  \
                                        REPORT_LOCATION_ARGS(loc)))
 
+#define	ckWARNexperimental(loc, class, m)                               \
+    _WARN_HELPER(loc, packWARN(class),                                  \
+                      Perl_ck_warner_d(aTHX_ packWARN(class),           \
+                                            m REPORT_LOCATION,          \
+                                            REPORT_LOCATION_ARGS(loc)))
+
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
 #define REGNODE_p(offset)    (RExC_emit_start + (offset))
@@ -10971,11 +10977,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     /* By doing this here, we avoid extra warnings for nested
                      * script runs */
                     if (PASS2) {
-                        Perl_ck_warner_d(aTHX_
-                            packWARN(WARN_EXPERIMENTAL__SCRIPT_RUN),
-                            "The script_run feature is experimental"
-                            REPORT_LOCATION, REPORT_LOCATION_ARGS(RExC_parse));
-
+                    ckWARNexperimental(RExC_parse,
+                        WARN_EXPERIMENTAL__SCRIPT_RUN,
+                        "The script_run feature is experimental");
                     }
 
                     if (paren == 's') {
@@ -11019,10 +11023,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             alpha_assertions:
 
                 if (PASS2) {
-                    Perl_ck_warner_d(aTHX_
-                        packWARN(WARN_EXPERIMENTAL__ALPHA_ASSERTIONS),
-                        "The alpha_assertions feature is experimental"
-                        REPORT_LOCATION, REPORT_LOCATION_ARGS(RExC_parse));
+                ckWARNexperimental(RExC_parse,
+                        WARN_EXPERIMENTAL__ALPHA_ASSERTIONS,
+                        "The alpha_assertions feature is experimental");
                 }
 
                 RExC_seen_zerolen++;
@@ -15514,10 +15517,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     }
 
     /* Pass 2 only after this. */
-    Perl_ck_warner_d(aTHX_
-        packWARN(WARN_EXPERIMENTAL__REGEX_SETS),
-        "The regex_sets feature is experimental" REPORT_LOCATION,
-        REPORT_LOCATION_ARGS(RExC_parse));
+    ckWARNexperimental(RExC_parse,
+                       WARN_EXPERIMENTAL__REGEX_SETS,
+                       "The regex_sets feature is experimental");
 
     /* Everything in this construct is a metacharacter.  Operands begin with
      * either a '\' (for an escape sequence), or a '[' for a bracketed
