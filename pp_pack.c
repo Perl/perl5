@@ -1378,8 +1378,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if SHORTSIZE != SIZE16
 	    while (len-- > 0) {
 		unsigned short aushort;
-                SHIFT_VAR(utf8, s, strend, aushort, datumtype, needs_swap,
-                          needs_swap);
+		SHIFT_VAR(utf8, s, strend, aushort, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHu(aushort);
 		else if (checksum > bits_in_uv)
