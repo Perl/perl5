@@ -791,95 +791,99 @@ static const scan_data_t zero_scan_data = {
             REPORT_LOCATION_ARGS(RExC_parse));          \
 } STMT_END
 
-/* These have asserts in them because of [perl #122671] Many warnings in
+/* This has an assert in it because of [perl #122671] Many warnings in
  * regcomp.c can occur twice.  If they get output in pass1 and later in that
  * pass, the pattern has to be converted to UTF-8 and the pass restarted, they
- * would get output again.  So they should be output in pass2, and these
- * asserts make sure new warnings follow that paradigm. */
+ * would get output again.  So they should be output in pass2, and this
+ * assert makes sure new warnings follow that paradigm. */
+#define _WARN_HELPER(loc, warns, code)                                  \
+    STMT_START {                                                        \
+        __ASSERT_(PASS2) code;                                          \
+    } STMT_END
 
 /* m is not necessarily a "literal string", in this macro */
-#define reg_warn_non_literal_string(loc, m) STMT_START {                \
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+#define reg_warn_non_literal_string(loc, m)                             \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        "%s" REPORT_LOCATION,            \
-                                  m, REPORT_LOCATION_ARGS(loc));        \
-} STMT_END
+                                  m, REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARNreg(loc,m) STMT_START {					\
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),        \
+#define	ckWARNreg(loc,m) 					        \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
                                           m REPORT_LOCATION,	        \
-	                                  REPORT_LOCATION_ARGS(loc));   \
-} STMT_END
+	                                  REPORT_LOCATION_ARGS(loc)))
 
-#define	vWARN(loc, m) STMT_START {				        \
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+#define	vWARN(loc, m)           				        \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        m REPORT_LOCATION,               \
-                                       REPORT_LOCATION_ARGS(loc));      \
-} STMT_END
+                                       REPORT_LOCATION_ARGS(loc)))      \
 
-#define	vWARN_dep(loc, m) STMT_START {				        \
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),       \
+#define	vWARN_dep(loc, m)           				        \
+    _WARN_HELPER(loc, packWARN(WARN_DEPRECATED),                        \
+                      Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),      \
                                        m REPORT_LOCATION,               \
-	                               REPORT_LOCATION_ARGS(loc));      \
-} STMT_END
+	                               REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARNdep(loc,m) STMT_START {				        \
-    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),  \
+#define	ckWARNdep(loc,m)            				        \
+    _WARN_HELPER(loc, packWARN(WARN_DEPRECATED),                        \
+                      Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED), \
 	                                    m REPORT_LOCATION,          \
-	                                    REPORT_LOCATION_ARGS(loc)); \
-} STMT_END
+	                                    REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARNregdep(loc,m) STMT_START {				    \
-    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,      \
+#define	ckWARNregdep(loc,m)             				    \
+    _WARN_HELPER(loc, packWARN2(WARN_DEPRECATED, WARN_REGEXP),              \
+                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,     \
                                                       WARN_REGEXP),         \
 	                                     m REPORT_LOCATION,             \
-	                                     REPORT_LOCATION_ARGS(loc));    \
-} STMT_END
+	                                     REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARN2reg_d(loc,m, a1) STMT_START {				    \
-    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),          \
+#define	ckWARN2reg_d(loc,m, a1)             				    \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+                      Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),         \
 	                                    m REPORT_LOCATION,              \
-	                                    a1, REPORT_LOCATION_ARGS(loc)); \
-} STMT_END
+	                                    a1, REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARN2reg(loc, m, a1) STMT_START {                                 \
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),            \
+#define	ckWARN2reg(loc, m, a1)                                              \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),           \
                                           m REPORT_LOCATION,	            \
-                                          a1, REPORT_LOCATION_ARGS(loc));   \
-} STMT_END
+                                          a1, REPORT_LOCATION_ARGS(loc)))
 
-#define	vWARN3(loc, m, a1, a2) STMT_START {				    \
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),               \
+#define	vWARN3(loc, m, a1, a2)          				    \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),              \
                                        m REPORT_LOCATION,                   \
-	                               a1, a2, REPORT_LOCATION_ARGS(loc));  \
-} STMT_END
+	                               a1, a2, REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARN3reg(loc, m, a1, a2) STMT_START {				    \
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),            \
+#define	ckWARN3reg(loc, m, a1, a2)          				    \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),           \
                                           m REPORT_LOCATION,                \
 	                                  a1, a2,                           \
-                                          REPORT_LOCATION_ARGS(loc));       \
-} STMT_END
+                                          REPORT_LOCATION_ARGS(loc)))
 
-#define	vWARN4(loc, m, a1, a2, a3) STMT_START {				\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+#define	vWARN4(loc, m, a1, a2, a3)          				\
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        m REPORT_LOCATION,               \
 	                               a1, a2, a3,                      \
-                                       REPORT_LOCATION_ARGS(loc));      \
-} STMT_END
+                                       REPORT_LOCATION_ARGS(loc)))
 
-#define	ckWARN4reg(loc, m, a1, a2, a3) STMT_START {			\
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),        \
+#define	ckWARN4reg(loc, m, a1, a2, a3)          			\
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
                                           m REPORT_LOCATION,            \
 	                                  a1, a2, a3,                   \
-                                          REPORT_LOCATION_ARGS(loc));   \
-} STMT_END
+                                          REPORT_LOCATION_ARGS(loc)))
 
-#define	vWARN5(loc, m, a1, a2, a3, a4) STMT_START {			\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+#define	vWARN5(loc, m, a1, a2, a3, a4)          			\
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        m REPORT_LOCATION,		\
 	                               a1, a2, a3, a4,                  \
-                                       REPORT_LOCATION_ARGS(loc));      \
-} STMT_END
+                                       REPORT_LOCATION_ARGS(loc)))
 
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
