@@ -43,7 +43,7 @@ the C<__DATA__> line):
 =item C<is_WHATEVER_safe(s,e,is_utf8)>
 
 Do a lookup as appropriate based on the C<is_utf8> flag. When possible
-comparisons involving octect<128 are done before checking the C<is_utf8>
+comparisons involving octet<128 are done before checking the C<is_utf8>
 flag, hopefully saving time.
 
 The version without the C<_safe> suffix should be used only when the input is

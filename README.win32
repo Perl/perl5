@@ -334,7 +334,7 @@ or later, and with MinGW64 64-bit 6.3.0 or later.
 Experimental support for using Intel C++ Compiler has been added. Edit
 win32/Makefile and pick the correct CCTYPE for the Visual C that Intel C was
 installed into. Also uncomment __ICC to enable Intel C on Visual C support.
-To set up the build enviroment, from the Start Menu run
+To set up the build environment, from the Start Menu run
 IA-32 Visual Studio 20__ mode or Intel 64 Visual Studio 20__ mode as
 appropriate. Then run nmake as usually in that prompt box.
 
@@ -418,7 +418,7 @@ Similarly you can build in parallel with GNU make, type "gmake -j2" to
 build with two parallel jobs, or higher for more.
 
 If you are advanced enough with building C code, here is a suggestion to speed
-up building perl, and the later C<make test>. Try to keep your PATH enviromental
+up building perl, and the later C<make test>. Try to keep your PATH environmental
 variable with the least number of folders possible (remember to keep your C
 compiler's folders there). C<C:\WINDOWS\system32> or C<C:\WINNT\system32>
 depending on your OS version should be first folder in PATH, since "cmd.exe"

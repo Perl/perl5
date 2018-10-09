@@ -389,7 +389,7 @@ terms of performance and more importantly in terms of memory. SBOX32
 requires 1k of storage per character it can hash, and it must populate that
 storage with 256 32-bit random values as well. In practice the RNG we use
 for seeding the SBOX32 storage is very efficient and populating the table
-required for hashing even fairly long keys is negligble as we only do it
+required for hashing even fairly long keys is negligible as we only do it
 during startup. By default we build with SBOX32 enabled, but you change that
 by setting
 
@@ -2693,7 +2693,7 @@ completely removed.
 X<PERL_INTERNAL_RAND_SEED>
 
 If you configure perl with C<-Accflags=-DNO_PERL_INTERNAL_RAND_SEED>,
-perl will ignore the C<PERL_INTERNAL_RAND_SEED> enviroment variable.
+perl will ignore the C<PERL_INTERNAL_RAND_SEED> environment variable.
 
 =head1 DOCUMENTATION
 

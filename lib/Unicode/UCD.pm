@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.71';
+our $VERSION = '0.72';
 
 require Exporter;
 
@@ -2091,7 +2091,7 @@ sub prop_aliases ($) {
         # as a key into another hash.  The whole concept is for memory
         # savings, as the second hash doesn't have to have all the
         # combinations.  Actually, there are two hashes that do the
-        # converstion.  One is used in utf8_heavy.pl (stored in Heavy.pl) for
+        # conversion.  One is used in utf8_heavy.pl (stored in Heavy.pl) for
         # looking up properties matchable in regexes.  This function needs to
         # access string properties, which aren't available in regexes, so a
         # second conversion hash is made for them (stored in UCD.pl).  Look in

@@ -695,7 +695,7 @@ currently start with C<f:/>).
 =head2 B<Warning>
 
 The automatic and manual perl installation leave precompiled paths
-inside perl executables. While these paths are overwriteable (see
+inside perl executables. While these paths are overwritable (see
 L</"C<PERLLIB_PREFIX>">, L</"C<PERL_SH_DIR>">), some people may prefer
 binary editing of paths inside the executables/DLLs.
 
