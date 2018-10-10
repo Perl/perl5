@@ -57,6 +57,35 @@ Setting L<< C<$[>|perlvar/$[ >> to a non-zero value has been deprecated since
 Perl 5.12 and now throws a fatal error.
 See L<<< perldeprecation/Assigning non-zero to C<< $[ >> is fatal >>>.
 
+=head2 Previously deprecated sysread()/syswrite() on :utf8 handles now fatal
+
+Calling sysread(), syswrite(), send() or recv() on a C<:utf8> handle,
+whether applied explicitly or implicitly, is now fatal.  This was
+deprecated in perl 5.24.
+
+There were two problems with calling these functions on C<:utf8>
+handles:
+
+=over
+
+=item *
+
+all four functions only paid attention to the C<:utf8> flag, other
+layers were completely ignored, so a handle with
+C<:encoding(UTF-16LE)> layer would be treated as UTF-8.  Other layers,
+such as compression are completely ignored with or without the
+C<:utf8> flag.
+
+=item *
+
+sysread() and recv() would read from the handle, skipping any
+validation by the layers, and do no validation of their own.  This
+could lead to invalidly encoded perl scalars.
+
+=back
+
+[perl #125760]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
