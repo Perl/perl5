@@ -131,6 +131,7 @@ static const char S_destroy[] = "DESTROY";
 /* ============================================================================
 
 =head1 Allocation and deallocation of SVs.
+
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
@@ -790,8 +791,6 @@ Perl_sv_free_arenas(pTHX)
   because the leading fields arent accessed.  Pointers to such bodies
   are decremented to point at the unused 'ghost' memory, knowing that
   the pointers are used with offsets to the real memory.
-
-=cut
 
 Allocation of SV-bodies is similar to SV-heads, differing as follows;
 the allocation mechanism is used for many body types, so is somewhat
