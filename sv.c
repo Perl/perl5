@@ -770,7 +770,7 @@ Perl_sv_free_arenas(pTHX)
 
 /*
   Here are mid-level routines that manage the allocation of bodies out
-  of the various arenas.  There are 5 kinds of arenas:
+  of the various arenas.  There are 4 kinds of arenas:
 
   1. SV-head arenas, which are discussed and handled above
   2. regular body arenas
@@ -783,7 +783,7 @@ Perl_sv_free_arenas(pTHX)
   unused block of them is wasteful.  Also, several svtypes dont have
   bodies; the data fits into the sv-head itself.  The arena-root
   pointer thus has a few unused root-pointers (which may be hijacked
-  later for arena types 4,5)
+  later for arena type 4)
 
   3 differs from 2 as an optimization; some body types have several
   unused fields in the front of the structure (which are kept in-place
