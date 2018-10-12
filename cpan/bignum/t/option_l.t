@@ -9,12 +9,12 @@ use Test::More tests => 19;
 
 use bignum;
 
+# Catch warnings.
+
 my @WARNINGS;
-{
-    # This hack is to catch warnings. Math::BigInt imports 'carp' from 'Carp',
-    # so we redefine it to catch the warnings.
-    *Math::BigInt::carp = sub { push @WARNINGS, $_[0]; };
-}
+local $SIG{__WARN__} = sub {
+    push @WARNINGS, $_[0];
+};
 
 my $rc;
 
