@@ -62,6 +62,7 @@ chomp $c;
 expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
 
 {
+    no warnings 'once'; # main::foo
     my $outfile = tempfile();
     open my $h, ">$outfile" or die  "$0 cannot close $outfile: $!";
     binmode $h;
