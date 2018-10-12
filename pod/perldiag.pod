@@ -3231,10 +3231,10 @@ code.
 You specified a character that has the given plainer way of writing it, and
 which is also portable to platforms running with different character sets.
 
-=item $* is no longer supported. Its use will be fatal in Perl 5.30
+=item $* is no longer supported as of Perl 5.30
 
-(D deprecated, syntax) The special variable C<$*>, deprecated in older
-perls, has been removed as of 5.10.0 and is no longer supported.  In
+(F) The special variable C<$*>, deprecated in older perls, was removed in
+5.10.0, is no longer supported and is a fatal error as of Perl 5.30.  In
 previous versions of perl the use of C<$*> enabled or disabled multi-line
 matching within a string.
 
@@ -3245,13 +3245,11 @@ then all regular expressions behaved as if they were written using C</m>.)
 
 Use of this variable will be a fatal error in Perl 5.30.
 
-=item $# is no longer supported. Its use will be fatal in Perl 5.30
+=item $# is no longer supported as of Perl 5.30
 
-(D deprecated, syntax) The special variable C<$#>, deprecated in older
-perls, has been removed as of 5.10.0 and is no longer supported.  You
+(F) The special variable C<$#>, deprecated in older perls, was removed as of
+5.10.0, is no longer supported and is a fatal error as of Perl 5.30.  You
 should use the printf/sprintf functions instead.
-
-Use of this variable will be a fatal error in Perl 5.30.
 
 =item '%s' is not a code reference
 

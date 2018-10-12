@@ -1030,6 +1030,7 @@ Operator or semicolon missing before *foo at - line 8.
 Ambiguous use of * resolved as operator * at - line 8.
 Operator or semicolon missing before *foo at - line 10.
 Ambiguous use of * resolved as operator * at - line 10.
+$* is no longer supported as of Perl 5.30 at - line 14.
 ########
 # toke.c
 $^W = 0 ;
