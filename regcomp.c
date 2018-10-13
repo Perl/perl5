@@ -16108,6 +16108,10 @@ redo_curchar:
     SvREFCNT_dec_NN(final);
     SvREFCNT_dec_NN(result_string);
 
+    if (save_fold) {
+        RExC_flags |= RXf_PMf_FOLD;
+    }
+
     if (!node)
         FAIL2("panic: regclass returned failure to handle_sets, flags=%#" UVxf,
                     PTR2UV(flagp));
@@ -16136,10 +16140,6 @@ redo_curchar:
         OP(REGNODE_p(node)) = ANYOFL;
         ANYOF_FLAGS(REGNODE_p(node))
                 |= ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
-    }
-
-    if (save_fold) {
-        RExC_flags |= RXf_PMf_FOLD;
     }
 
     nextchar(pRExC_state);
