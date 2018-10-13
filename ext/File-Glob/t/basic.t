@@ -44,17 +44,20 @@ if (opendir(D, ".")) {
    @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
-my @a = do {no warnings 'deprecated'; File::Glob::glob("*", 0);};
-@a = sort @a;
-if (GLOB_ERROR) {
-    fail(GLOB_ERROR);
-} else {
-    is_deeply(\@a, \@correct);
+{
+    local $@;
+    my $expect =
+        qr/File::Glob::glob\(\) was removed in perl 5\.30\. Use File::Glob::bsd_glob\(\) instead/;
+    eval { File::Glob::glob("*", 0); };
+    like $@, $expect,
+        "Got expected error message for removal of File::Glob::glob()";
 }
 chdir '..' or die "chdir .. $!";
 
 # look up the user's home directory
 # should return a list with one item, and not set ERROR
+my @a;
+
 SKIP: {
     my ($name, $home);
     skip $^O, 1 if $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS'
