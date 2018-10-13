@@ -852,8 +852,8 @@ into an executable file by using the I<undump> program (not supplied).
 This speeds startup at the expense of some disk space (which you
 can minimize by stripping the executable).  (Still, a "hello world"
 executable comes out to about 200K on my machine.)  If you want to
-execute a portion of your program before dumping, use the dump()
-operator instead.  Note: availability of I<undump> is platform
+execute a portion of your program before dumping, use the C<CORE::dump()>
+function instead.  Note: availability of I<undump> is platform
 specific and may not be available for a specific port of Perl.
 
 =item B<-U>

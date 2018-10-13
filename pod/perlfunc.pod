@@ -1921,9 +1921,8 @@ be open any more when the program is reincarnated, with possible
 resulting confusion by Perl.
 
 This function is now largely obsolete, mostly because it's very hard to
-convert a core file into an executable.  That's why you should now invoke
-it as C<CORE::dump()> if you don't want to be warned against a possible
-typo.
+convert a core file into an executable.  As of Perl 5.30, it must be invoked
+as C<CORE::dump()>.
 
 Unlike most named operators, this has the same precedence as assignment.
 It is also exempt from the looks-like-a-function rule, so
