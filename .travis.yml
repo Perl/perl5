@@ -21,6 +21,8 @@ env:
     matrix:
         - CONFIGURE_ARGS='-Uusethreads'
         - CONFIGURE_ARGS='-Dusethreads'
+        - CONFIGURE_ARGS='-Uusethreads' OUT_OF_SOURCE='true'
+        - CONFIGURE_ARGS='-Dusethreads' OUT_OF_SOURCE='true'
 
 # only use gcc on linux, and only use clang on osx for now
 matrix:
@@ -31,7 +33,8 @@ matrix:
     os: osx
 
 script:
-  - ./Configure -des -Dusedevel -Uversiononly -Dcc="ccache $CC" $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING
+  - if [ "x$OUT_OF_SOURCE" = "xtrue" ]; then mkdir /tmp/perl-out-of-source && cd /tmp/perl-out-of-source; fi
+  - $TRAVIS_BUILD_DIR/Configure -des -Dusedevel -Uversiononly -Dcc="ccache $CC" $CONFIGURE_ARGS -Dprefix=$HOME/perl-blead -DDEBUGGING
 # all script commands are always run
 # rather than using one very long oneliner using '&&', just always check the build status
   - if [ "x$TRAVIS_TEST_RESULT" = "x0" ]; then TEST_JOBS=$JOBS make -j$JOBS test_harness_notty; fi
