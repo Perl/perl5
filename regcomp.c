@@ -150,6 +150,9 @@ struct RExC_state_t {
     I32         npar;                   /* Capture buffer count, (OPEN) plus
                                            one. ("par" 0 is the whole
                                            pattern)*/
+    I32         total_par;              /* Capture buffer count after parse
+                                           completed, (OPEN) plus one. ("par" 0
+                                           is the whole pattern)*/
     I32		nestroot;		/* root parens we are in - used by
                                            accept */
     I32		extralen;
@@ -252,6 +255,7 @@ struct RExC_state_t {
 #define RExC_size	(pRExC_state->size)
 #define RExC_maxlen        (pRExC_state->maxlen)
 #define RExC_npar	(pRExC_state->npar)
+#define RExC_total_parens	(pRExC_state->total_par)
 #define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_extralen	(pRExC_state->extralen)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
@@ -4283,7 +4287,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             U32 i;
             U32 j;
             for ( j = 0 ; j < recursed_depth ; j++ ) {
-                for ( i = 0 ; i < (U32)RExC_npar ; i++ ) {
+                for ( i = 0 ; i < (U32)RExC_total_parens ; i++ ) {
                     if (
                         PAREN_TEST(RExC_study_chunk_recursed +
                                    ( j * RExC_study_chunk_recursed_bytes), i )
@@ -7152,6 +7156,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_frame_head= NULL;
     RExC_frame_last= NULL;
     RExC_frame_count= 0;
+    RExC_total_parens = 0;
 
     DEBUG_r({
         RExC_mysv1= sv_newmortal();
@@ -7438,7 +7443,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     r->intflags = 0;
-    r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
+    RExC_total_parens = RExC_npar;
+    r->nparens = RExC_total_parens - 1;	/* set early to validate backrefs */
 
     /* Useful during FAIL. */
 #ifdef RE_TRACK_PATTERN_OFFSETS
@@ -7520,7 +7526,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     Zero(r->substrs, 1, struct reg_substr_data);
     if (RExC_study_chunk_recursed) {
         Zero(RExC_study_chunk_recursed,
-             RExC_study_chunk_recursed_bytes * RExC_npar, U8);
+             RExC_study_chunk_recursed_bytes * RExC_total_parens, U8);
     }
 
 
@@ -7722,7 +7728,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
 
 
-	if ( RExC_npar == 1 && !data.cur_is_floating
+	if ( RExC_total_parens == 1 && !data.cur_is_floating
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
              && !(RExC_seen & REG_VERBARG_SEEN)
@@ -7992,7 +7998,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         ARG2L_SET( scan, RExC_open_parens[ARG(scan)] - REGNODE_OFFSET(scan));
     }
 
-    Newxz(r->offs, RExC_npar, regexp_paren_pair);
+    Newxz(r->offs, RExC_total_parens, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
         Perl_re_printf( aTHX_ "study_chunk_recursed_count: %lu\n",
