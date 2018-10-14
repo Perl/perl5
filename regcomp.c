@@ -16574,6 +16574,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                        one.  */
     U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
     U32 posixl = 0;       /* bit field of posix classes matched under /l */
+    bool use_anyofd = FALSE; /* ? Is this to be an ANYOFD node */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -18378,7 +18379,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              && (    has_upper_latin1_only_utf8_matches
                  || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
-        OP(REGNODE_p(ret)) = ANYOFD;
+        use_anyofd = TRUE;
         optimizable = FALSE;
     }
 
@@ -18389,7 +18390,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * */
     if (     cp_list
         &&   invert
-        &&   OP(REGNODE_p(ret)) != ANYOFD
+        && ! use_anyofd
         && ! (anyof_flags & (ANYOF_LOCALE_FLAGS))
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
@@ -18710,6 +18711,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
 
+    /* It's going to be an ANYOF node. */
+    OP(REGNODE_p(ret)) = (use_anyofd)
+         ? ANYOFD
+         : ((posixl)
+            ? ANYOFPOSIXL
+            : ((LOC)
+               ? ANYOFL
+               : ANYOF));
     ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
 
     /* Here, <cp_list> contains all the code points we can determine at
