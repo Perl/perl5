@@ -18025,10 +18025,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /****** !SIZE_ONLY (Pass 2) AFTER HERE *********/
 
-    if (posixl) {
-        ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
-    }
-
     /* If folding, we calculate all characters that could fold to or from the
      * ones already on the list */
     if (cp_foldable_list) {
@@ -18723,6 +18719,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * list, and if so, set a flag to speed up execution */
 
     populate_ANYOF_from_invlist(REGNODE_p(ret), &cp_list);
+
+    if (posixl) {
+        ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
+    }
 
     if (invert) {
         ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_INVERT;
