@@ -19322,8 +19322,8 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 * ALSO NOTE - FLAGS(newly-inserted-operator) will be set to 0 as well.
 */
 STATIC void
-S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op,
-                  regnode_offset operand, U32 depth)
+S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
+                  const regnode_offset operand, const U32 depth)
 {
     regnode *src;
     regnode *dst;

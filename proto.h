@@ -5539,7 +5539,7 @@ STATIC regnode_offset	S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U3
 STATIC unsigned int	S_regex_set_precedence(const U8 my_operator)
 			__attribute__warn_unused_result__;
 
-STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode_offset operand, U32 depth);
+STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op, const regnode_offset operand, const U32 depth);
 #define PERL_ARGS_ASSERT_REGINSERT	\
 	assert(pRExC_state)
 STATIC regnode_offset	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len, const char* const name);

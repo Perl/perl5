@@ -2429,7 +2429,9 @@ Es	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \
 				|const bool strict			    \
 				|const U32 depth
 Es	|void	|reginsert	|NN RExC_state_t *pRExC_state \
-				|U8 op|regnode_offset operand|U32 depth
+				|const U8 op				    \
+				|const regnode_offset operand		    \
+				|const U32 depth
 Es	|void	|regtail	|NN RExC_state_t * pRExC_state		    \
 				|NN const regnode_offset p		    \
 				|NN const regnode_offset val		    \
