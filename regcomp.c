@@ -16804,9 +16804,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         RExC_parse--;
                                         vFAIL("\\N{} in inverted character class or as a range end-point is restricted to one character");
                                     }
-                                    else {
-                                        ckWARNreg(RExC_parse, "Using just the first character returned by \\N{} in character class");
-                                    }
+                                    ckWARNreg(RExC_parse, "Using just the first character returned by \\N{} in character class");
                                     break; /* <value> contains the first code
                                               point. Drop out of the switch to
                                               process it */
