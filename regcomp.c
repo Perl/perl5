@@ -8485,6 +8485,7 @@ STATIC SV*
 S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 {
     char *name_start = RExC_parse;
+    SV* sv_name;
 
     PERL_ARGS_ASSERT_REG_SCAN_NAME;
 
@@ -8508,8 +8509,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
         vFAIL("Group name must start with a non-digit word character");
     }
     if ( flags ) {
-        SV* sv_name
-	    = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),
+    sv_name = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),
 			     SVs_TEMP | (UTF ? SVf_UTF8 : 0));
         if ( flags == REG_RSN_RETURN_NAME)
             return sv_name;
@@ -11417,6 +11417,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	    {
 		U32 n = 0;
 		struct reg_code_block *cb;
+                OP * o;
 
 		RExC_seen_zerolen++;
 
@@ -11435,7 +11436,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 		cb = &pRExC_state->code_blocks->cb[pRExC_state->code_index];
 		RExC_parse = RExC_start + cb->end;
 		if (!SIZE_ONLY) {
-		    OP *o = cb->block;
+		o = cb->block;
 		    if (cb->src_regex) {
 			n = add_data(pRExC_state, STR_WITH_LEN("rl"));
 			RExC_rxi->data->data[n] =
@@ -17235,6 +17236,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 && classnum != _CC_ASCII
 #endif
             ) {
+                SV* scratch_list = NULL;
+
                 /* What the Posix classes (like \w, [:space:]) match in locale
                  * isn't knowable under locale until actual match time.  Room
                  * must be reserved (one time per outer bracketed class) to
@@ -17278,7 +17281,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * Just add them, in the second pass, to the
                  * unconditionally-matched list */
                 if (! SIZE_ONLY) {
-                    SV* scratch_list = NULL;
 
                     /* Get the list of the above-Latin1 code points this
                      * matches */
