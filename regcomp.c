@@ -13879,8 +13879,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 				REQUIRE_UTF8(flagp);
 			    }
 			    p += numlen;
-                            if (   numlen < 3 /* like \08, \178 */
-                                && isDIGIT(*p) && ckWARN(WARN_REGEXP))
+                            if (   isDIGIT(*p)  /* like \08, \178 */
+                                && ckWARN(WARN_REGEXP)
+                                && numlen < 3)
                             {
 				reg_warn_non_literal_string(
                                          p + 1,
