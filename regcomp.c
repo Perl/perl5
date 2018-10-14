@@ -10719,10 +10719,10 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
         vFAIL2("Sequence %.3s... not terminated", parse_start);
     }
 
-    if (!SIZE_ONLY) {
+    if (sv_dat) {
         num = add_data( pRExC_state, STR_WITH_LEN("S"));
         RExC_rxi->data->data[num]=(void*)sv_dat;
-        SvREFCNT_inc_simple_void(sv_dat);
+        SvREFCNT_inc_simple_void_NN(sv_dat);
     }
     RExC_sawback = 1;
     ret = reganode(pRExC_state,
