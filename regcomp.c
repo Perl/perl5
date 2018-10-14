@@ -810,6 +810,8 @@ static const scan_data_t zero_scan_data = {
 #define TO_OUTPUT_WARNINGS(loc)                                         \
   (PASS2 && RExC_copy_start_in_constructed)
 
+#define UPDATE_WARNINGS_LOC(loc)  NOOP
+
 #define _WARN_HELPER(loc, warns, code)                                  \
     STMT_START {                                                        \
         if (! RExC_copy_start_in_constructed) {                         \
@@ -819,6 +821,7 @@ static const scan_data_t zero_scan_data = {
         }                                                               \
         if (TO_OUTPUT_WARNINGS(loc)) {                                  \
             code;                                                       \
+            UPDATE_WARNINGS_LOC(loc);                                   \
         }                                                               \
     } STMT_END
 
@@ -13794,6 +13797,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 						   to exact spot of failure */
 				vFAIL(error_msg);
 			    }
+                            UPDATE_WARNINGS_LOC(p - 1);
                             ender = result;
 			    if (ender > 0xff) {
 				REQUIRE_UTF8(flagp);
@@ -13821,6 +13825,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 						   to exact spot of failure */
 				vFAIL(error_msg);
 			    }
+                            UPDATE_WARNINGS_LOC(p - 1);
                             ender = result;
 
                             if (ender < 0x100) {
@@ -13838,6 +13843,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    case 'c':
 			p++;
 			ender = grok_bslash_c(*p, TO_OUTPUT_WARNINGS(p));
+                        UPDATE_WARNINGS_LOC(p);
                         p++;
 			break;
                     case '8': case '9': /* must be a backreference */
@@ -16358,6 +16364,10 @@ S_output_or_return_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_war
             SvREFCNT_dec_NN(msg);
         }
     }
+
+    if (! return_posix_warnings) {
+        UPDATE_WARNINGS_LOC(RExC_parse);
+    }
 }
 
 STATIC AV *
@@ -17122,6 +17132,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    if (! valid) {
 			vFAIL(error_msg);
 		    }
+                    UPDATE_WARNINGS_LOC(RExC_parse - 1);
 		}
                 non_portable_endpoint++;
 		break;
@@ -17140,11 +17151,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     if (! valid) {
 			vFAIL(error_msg);
 		    }
+                    UPDATE_WARNINGS_LOC(RExC_parse - 1);
 		}
                 non_portable_endpoint++;
 		break;
 	    case 'c':
 		value = grok_bslash_c(*RExC_parse, TO_OUTPUT_WARNINGS(RExC_parse));
+                UPDATE_WARNINGS_LOC(RExC_parse);
 		RExC_parse++;
                 non_portable_endpoint++;
 		break;
