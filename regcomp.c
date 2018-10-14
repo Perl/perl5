@@ -18025,7 +18025,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /****** !SIZE_ONLY (Pass 2) AFTER HERE *********/
 
-    ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
     if (posixl) {
         ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
     }
@@ -18243,7 +18242,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 _invlist_subtract(only_non_utf8_list, cp_list,
                                   &only_non_utf8_list);
                 if (_invlist_len(only_non_utf8_list) != 0) {
-                    ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+                    anyof_flags |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
                 }
                 SvREFCNT_dec_NN(only_non_utf8_list);
             }
@@ -18328,7 +18327,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         if (warn_super) {
-            ANYOF_FLAGS(REGNODE_p(ret))
+            anyof_flags
              |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
 
             /* Because an ANYOF node is the only one that warns, this node
@@ -18366,22 +18365,22 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
         }
         if (only_utf8_locale_list) {
-            ANYOF_FLAGS(REGNODE_p(ret))
-                 |=  ANYOFL_FOLD
-                    |ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+            anyof_flags
+                 |= ANYOFL_FOLD
+                 |  ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
         }
         else if (cp_list) { /* Look to see if a 0-255 code point is in list */
             UV start, end;
             invlist_iterinit(cp_list);
             if (invlist_iternext(cp_list, &start, &end) && start < 256) {
-                ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOFL_FOLD;
+                anyof_flags |= ANYOFL_FOLD;
             }
             invlist_iterfinish(cp_list);
         }
     }
     else if (   DEPENDS_SEMANTICS
              && (    has_upper_latin1_only_utf8_matches
-                 || (ANYOF_FLAGS(REGNODE_p(ret)) & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
+                 || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
         OP(REGNODE_p(ret)) = ANYOFD;
         optimizable = FALSE;
@@ -18395,7 +18394,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (     cp_list
         &&   invert
         &&   OP(REGNODE_p(ret)) != ANYOFD
-        && ! (ANYOF_FLAGS(REGNODE_p(ret)) & (ANYOF_LOCALE_FLAGS))
+        && ! (anyof_flags & (ANYOF_LOCALE_FLAGS))
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
         _invlist_invert(cp_list);
@@ -18714,6 +18713,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             return ret;
         }
     }
+
+    ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
 
     /* Here, <cp_list> contains all the code points we can determine at
      * compile time that match under all conditions.  Go through it, and
