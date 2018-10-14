@@ -11538,10 +11538,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             (ch == '>' ? '<' : ch));
                     }
                     RExC_parse++;
-	            if (!SIZE_ONLY) {
+                    if (sv_dat) {
                         num = add_data( pRExC_state, STR_WITH_LEN("S"));
                         RExC_rxi->data->data[num]=(void*)sv_dat;
-                        SvREFCNT_inc_simple_void(sv_dat);
+                        SvREFCNT_inc_simple_void_NN(sv_dat);
                     }
                     ret = reganode(pRExC_state, NGROUPP, num);
                     goto insert_if_check_paren;
