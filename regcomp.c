@@ -11234,7 +11234,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         /* Yes this does cause a memory leak in debugging Perls
                          * */
                         if (!av_store(RExC_paren_name_list,
-                                      RExC_npar, SvREFCNT_inc(svname)))
+                                      RExC_npar, SvREFCNT_inc_NN(svname)))
                             SvREFCNT_dec_NN(svname);
 #endif
 
