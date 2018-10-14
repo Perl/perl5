@@ -13886,11 +13886,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			/* FALLTHROUGH */
 		    default:
 			if (isALPHANUMERIC(*p)) {
-			    /* Include any left brace following the alpha to emphasize
-			     * that it could be part of an escape at some point
-			     * in the future */
-			    int len = (isALPHA(*p) && *(p + 1) == '{') ? 2 : 1;
-			    ckWARN3reg(p + len, "Unrecognized escape \\%.*s passed through", len, p);
+                            /* An alpha followed by '{' is going to fail next
+                             * iteration, so don't output this warning in that
+                             * case */
+                            if (! isALPHA(*p) || *(p + 1) != '{') {
+                                ckWARN2reg(p + 1, "Unrecognized escape \\%.1s"
+                                                  " passed through", p);
+                            }
 			}
 			goto normal_default;
 		    } /* End of switch on '\' */
