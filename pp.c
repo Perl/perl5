@@ -1503,8 +1503,11 @@ PP(pp_divide)
 #endif
                 ) {
                 /* Integer division can't overflow, but it can be imprecise.  */
+
+                /* Modern compilers optimize division followed by
+                 * modulo into a single div instruction */
 		const UV result = left / right;
-                if (result * right == left) {
+                if (left % right == 0) {
                     SP--; /* result is valid */
                     if (left_non_neg == right_non_neg) {
                         /* signs identical, result is positive.  */
