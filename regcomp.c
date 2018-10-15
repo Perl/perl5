@@ -812,6 +812,7 @@ static const scan_data_t zero_scan_data = {
 
 #define UPDATE_WARNINGS_LOC(loc)  NOOP
 
+/* 'warns' is the output of the packWARNx macro used in 'code' */
 #define _WARN_HELPER(loc, warns, code)                                  \
     STMT_START {                                                        \
         if (! RExC_copy_start_in_constructed) {                         \
@@ -820,6 +821,8 @@ static const scan_data_t zero_scan_data = {
                               __FILE__, __LINE__, loc);                 \
         }                                                               \
         if (TO_OUTPUT_WARNINGS(loc)) {                                  \
+            if (ckDEAD(warns))                                          \
+                PREPARE_TO_DIE;                                         \
             code;                                                       \
             UPDATE_WARNINGS_LOC(loc);                                   \
         }                                                               \
@@ -5224,15 +5227,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     && maxcount <= REG_INFTY/3) /* Complement check for big
                                                    count */
 		{
-		    /* Fatal warnings may leak the regexp without this: */
-		    SAVEFREESV(RExC_rx_sv);
-		    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
-			"Quantifier unexpected on zero-length expression "
-			"in regex m/%" UTF8f "/",
-			 UTF8fARG(UTF, RExC_precomp_end - RExC_precomp,
-				  RExC_precomp));
-		    (void)ReREFCNT_inc(RExC_rx_sv);
-		}
+		    _WARN_HELPER(RExC_precomp_end, packWARN(WARN_REGEXP),
+                        Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
+                            "Quantifier unexpected on zero-length expression "
+                            "in regex m/%" UTF8f "/",
+			     UTF8fARG(UTF, RExC_precomp_end - RExC_precomp,
+				  RExC_precomp)));
+                }
 
 		min += minnext * mincount;
 		is_inf_internal |= deltanext == SSize_t_MAX
@@ -12288,14 +12289,12 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
   nest_check:
     if (!SIZE_ONLY && !(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3) {
-	SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
 	ckWARN2reg(RExC_parse,
 		   "%" UTF8f " matches null string many times",
 		   UTF8fARG(UTF, (RExC_parse >= origparse
                                  ? RExC_parse - origparse
                                  : 0),
 		   origparse));
-	(void)ReREFCNT_inc(RExC_rx_sv);
     }
 
     if (*RExC_parse == '?') {
@@ -16355,8 +16354,8 @@ S_output_or_return_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_war
                                                array is mortal, but is a
                                                fail-safe */
                 (void) sv_2mortal(msg);
-                if (PASS2) {
-                    SAVEFREESV(RExC_rx_sv);
+                if (ckDEAD(packWARN(WARN_REGEXP))) {
+                    PREPARE_TO_DIE;
                 }
             }
             Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s",
@@ -16630,7 +16629,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                 NULL,
                                                 TRUE /* checking only */);
         if (PASS2 && maybe_class >= OOB_NAMEDCLASS && do_posix_warnings) {
-            SAVEFREESV(RExC_rx_sv);
             ckWARN4reg(not_posix_region_end,
                     "POSIX syntax [%c %c] belongs inside character classes%s",
                     *RExC_parse, *RExC_parse,
@@ -16640,7 +16638,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         : " (but this one isn't fully valid)")
                     : ""
                     );
-            (void)ReREFCNT_inc(RExC_rx_sv);
         }
     }
 
@@ -17180,11 +17177,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                  && isDIGIT(*RExC_parse)
                                  && ckWARN(WARN_REGEXP))
                         {
-                            SAVEFREESV(RExC_rx_sv);
                             reg_warn_non_literal_string(
                                  RExC_parse + 1,
                                  form_short_octal_warning(RExC_parse, numlen));
-                            (void)ReREFCNT_inc(RExC_rx_sv);
                         }
                     }
                     non_portable_endpoint++;
@@ -17198,11 +17193,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                (int)value);
                     }
                     else {
-                        SAVEFREESV(RExC_rx_sv);
                         ckWARN2reg(RExC_parse,
                             "Unrecognized escape \\%c in character class passed through",
                             (int)value);
-                        (void)ReREFCNT_inc(RExC_rx_sv);
                     }
 		}
 		break;
@@ -17228,11 +17221,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             UTF8fARG(UTF, w, rangebegin));
                     }
                     else {
-                        SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
                         ckWARN2reg(RExC_parse,
                             "False [] range \"%" UTF8f "\"",
                             UTF8fARG(UTF, w, rangebegin));
-                        (void)ReREFCNT_inc(RExC_rx_sv);
                         cp_list = add_cp_to_invlist(cp_list, '-');
                         cp_foldable_list = add_cp_to_invlist(cp_foldable_list,
                                                              prevvalue);
