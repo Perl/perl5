@@ -683,6 +683,13 @@ static const scan_data_t zero_scan_data = {
  * past a nul byte. */
 #define SKIP_IF_CHAR(s) (!*(s) ? 0 : UTF ? UTF8SKIP(s) : 1)
 
+/* Set up to clean up after our imminent demise */
+#define PREPARE_TO_DIE                                                      \
+    STMT_START {					                    \
+        if (RExC_rx_sv)                                                     \
+            SAVEFREESV(RExC_rx_sv);                                         \
+    } STMT_END
+
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
@@ -692,8 +699,7 @@ static const scan_data_t zero_scan_data = {
     const char *ellipses = "";						\
     IV len = RExC_precomp_end - RExC_precomp;				\
 									\
-    if (!SIZE_ONLY)							\
-	SAVEFREESV(RExC_rx_sv);						\
+    PREPARE_TO_DIE;						        \
     if (len > RegexLengthToShowInErrorMessages) {			\
 	/* chop 10 shorter than the max, to ensure meaning of "..." */	\
 	len = RegexLengthToShowInErrorMessages - 10;			\
@@ -722,8 +728,7 @@ static const scan_data_t zero_scan_data = {
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL()
  */
 #define	vFAIL(m) STMT_START {				\
-    if (!SIZE_ONLY)					\
-	SAVEFREESV(RExC_rx_sv);				\
+    PREPARE_TO_DIE;                                     \
     Simple_vFAIL(m);					\
 } STMT_END
 
@@ -739,8 +744,7 @@ static const scan_data_t zero_scan_data = {
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL2().
  */
 #define	vFAIL2(m,a1) STMT_START {			\
-    if (!SIZE_ONLY)					\
-	SAVEFREESV(RExC_rx_sv);				\
+    PREPARE_TO_DIE;                                     \
     Simple_vFAIL2(m, a1);				\
 } STMT_END
 
@@ -757,8 +761,7 @@ static const scan_data_t zero_scan_data = {
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL3().
  */
 #define	vFAIL3(m,a1,a2) STMT_START {			\
-    if (!SIZE_ONLY)					\
-	SAVEFREESV(RExC_rx_sv);				\
+    PREPARE_TO_DIE;                                     \
     Simple_vFAIL3(m, a1, a2);				\
 } STMT_END
 
@@ -771,22 +774,19 @@ static const scan_data_t zero_scan_data = {
 } STMT_END
 
 #define	vFAIL4(m,a1,a2,a3) STMT_START {			\
-    if (!SIZE_ONLY)					\
-	SAVEFREESV(RExC_rx_sv);				\
+    PREPARE_TO_DIE;                                     \
     Simple_vFAIL4(m, a1, a2, a3);			\
 } STMT_END
 
 /* A specialized version of vFAIL2 that works with UTF8f */
 #define vFAIL2utf8f(m, a1) STMT_START {             \
-    if (!SIZE_ONLY)                                 \
-        SAVEFREESV(RExC_rx_sv);                     \
+    PREPARE_TO_DIE;                                 \
     S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1,  \
             REPORT_LOCATION_ARGS(RExC_parse));      \
 } STMT_END
 
 #define vFAIL3utf8f(m, a1, a2) STMT_START {             \
-    if (!SIZE_ONLY)                                     \
-        SAVEFREESV(RExC_rx_sv);                         \
+    PREPARE_TO_DIE;                                     \
     S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2,  \
             REPORT_LOCATION_ARGS(RExC_parse));          \
 } STMT_END
@@ -7141,6 +7141,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* ignore the utf8ness if the pattern is 0 length */
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
 
+    RExC_rx_sv = NULL;                                                     \
     RExC_uni_semantics = 0;
     RExC_seen_unfolded_sharp_s = 0;
     RExC_contains_locale = 0;
