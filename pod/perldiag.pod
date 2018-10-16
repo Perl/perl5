@@ -3218,9 +3218,16 @@ Similarly, syswrite() and send() used only the C<:utf8> flag, otherwise ignoring
 any layers.  If the flag is set, both wrote the value UTF-8 encoded, even if
 the layer is some different encoding, such as the example above.
 
-Ideally, all of these operators would completely ignore the C<:utf8> state,
-working only with bytes, but this would result in silently breaking existing
-code.
+You can prevent this error by calling the operator within the scope
+of:
+
+  use feature 'sysio_bytes';
+
+B<but> this changes the behaviour from older perls so that these
+operators always work in bytes, rather than the older behaviour.
+
+Ideally, this would be the default, but this may result in silently
+breaking existing code.
 
 =item "%s" is more clearly written simply as "%s" in regex; marked by S<<-- HERE> in m/%s/
 

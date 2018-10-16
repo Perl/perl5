@@ -35,6 +35,7 @@ my %feature = (
     unicode_strings => 'unicode',
     fc              => 'fc',
     signatures      => 'signatures',
+    sysio_bytes     => 'sysio_bytes',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -375,7 +376,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.54';
+our $VERSION = '1.55';
 
 FEATURES
 
@@ -659,6 +660,13 @@ conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
 Reference to a Variable> for examples.
 
 This feature is available from Perl 5.26 onwards.
+
+=head2 The 'sysio_bytes' feature
+
+This allows the C<sysread>, C<syswrite>, C<recv> and C<send> operators
+to work on file handles that have the C<:utf8> flag, B<but> makes them
+operator in bytes, just as they do for handles without the C<:utf8>
+flag.
 
 =head1 FEATURE BUNDLES
 

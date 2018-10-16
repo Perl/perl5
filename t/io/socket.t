@@ -169,10 +169,17 @@ SKIP: {
             binmode $accept, ':raw:utf8';
             ok(!eval { send($accept, "ABC", 0); 1 },
                "should die on send to :utf8 socket");
-            binmode $accept;
             # check bytes will be sent
             utf8::upgrade($send_data);
 	    my $sent_total = 0;
+            {
+                use feature 'sysio_bytes';
+                my $sent;
+                ok(eval { $sent = send($accept, $send_data, 0); 1 },
+                   "can send to :utf8 under sysio_bytes");
+                $sent_total += $sent;
+            }
+            binmode $accept;
 	    while ($sent_total < length $send_data) {
 		my $sent = send($accept, substr($send_data, $sent_total), 0);
 		defined $sent or last;
@@ -184,13 +191,13 @@ SKIP: {
 	    # transit on a certain broken implementation
 	    <$accept>;
 	    # child tests are printed once we hit eof
-	    curr_test(curr_test()+6);
+	    curr_test(curr_test()+7);
 	    waitpid($pid, 0);
 
 	    ok($shutdown, "shutdown() works");
 	}
 	elsif (defined $pid) {
-	    curr_test(curr_test()+3);
+	    curr_test(curr_test()+4);
 	    #sleep 1;
 	    # child
 	    ok_child(close($serv), "close server socket in child");
@@ -205,8 +212,12 @@ SKIP: {
             ok_child(!eval { recv($child, $buf, 1000, 0); 1 },
                      "recv on :utf8 should die");
             is_child($buf, "", "buf shouldn't contain anything");
+            {
+                use feature "sysio_bytes";
+                ok_child(eval { recv($child, $buf, 1000, 0); 1 },
+                         "recv under sysio_bytes on :utf8 doesn't die");
+            }
             binmode $child;
-	    my $recv_peer = recv($child, $buf, 1000, 0);
 	    while(defined recv($child, my $tmp, 1000, 0)) {
 		last if length $tmp == 0;
 		$buf .= $tmp;
@@ -277,11 +288,17 @@ sub ok_child {
     push @child_tests, ( $ok ? "ok " : "not ok ") . curr_test() . " - $note "
 	. ( $TODO ? "# TODO $TODO" : "" ) . "\n";
     curr_test(curr_test()+1);
+    $ok;
 }
 
 sub is_child {
     my ($got, $want, $note) = @_;
-    ok_child($got eq $want, $note);
+    unless (ok_child($got eq $want, $note)) {
+        $got =~ s/([^[:print:]])/ sprintf("\\x%02x", ord $1) /ge;
+        $want =~ s/([^[:print:]])/ sprintf("\\x%02x", ord $1) /ge;
+        push @child_tests, "#  got: $got (length ".length($got). ")\n",
+          "# want: $want (length ".length($want). ")\n";
+    }
 }
 
 sub end_child {

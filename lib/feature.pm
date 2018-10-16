@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.54';
+our $VERSION = '1.55';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -17,6 +17,7 @@ our %feature = (
     signatures      => 'feature_signatures',
     current_sub     => 'feature___SUB__',
     refaliasing     => 'feature_refaliasing',
+    sysio_bytes     => 'feature_sysio_bytes',
     postderef_qq    => 'feature_postderef_qq',
     unicode_eval    => 'feature_unieval',
     declared_refs   => 'feature_myref',
@@ -29,7 +30,7 @@ our %feature_bundle = (
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch sysio_bytes unicode_eval unicode_strings)],
     "default" => [qw()],
 );
 
@@ -347,6 +348,13 @@ conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
 Reference to a Variable> for examples.
 
 This feature is available from Perl 5.26 onwards.
+
+=head2 The 'sysio_bytes' feature
+
+This allows the C<sysread>, C<syswrite>, C<recv> and C<send> operators
+to work on file handles that have the C<:utf8> flag, B<but> makes them
+operator in bytes, just as they do for handles without the C<:utf8>
+flag.
 
 =head1 FEATURE BUNDLES
 

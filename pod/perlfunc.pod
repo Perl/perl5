@@ -6284,7 +6284,8 @@ This call is actually implemented in terms of the L<recvfrom(2)> system call.
 See L<perlipc/"UDP: Message Passing"> for examples.
 
 Note that if the socket has been marked as C<:utf8>, C<recv> will
-throw an exception.  The C<:encoding(...)> layer implicitly introduces
+throw an exception unless called within the scope of
+C< use feature "sysio_bytes"; >.  The C<:encoding(...)> layer implicitly introduces
 the C<:utf8> layer.  See L<C<binmode>|/binmode FILEHANDLE, LAYER>.
 
 =item redo LABEL
@@ -7078,7 +7079,8 @@ or the undefined value on error.  The L<sendmsg(2)> syscall is currently
 unimplemented.  See L<perlipc/"UDP: Message Passing"> for examples.
 
 Note that if the socket has been marked as C<:utf8>, C<send> will
-throw an exception.  The C<:encoding(...)> layer implicitly introduces
+throw an exception unless called within the scope of
+C< use feature "sysio_bytes"; >.  The C<:encoding(...)> layer implicitly introduces
 the C<:utf8> layer.  See L<C<binmode>|/binmode FILEHANDLE, LAYER>.
 
 =item setpgrp PID,PGRP
@@ -8712,8 +8714,9 @@ L<C<eof>|/eof FILEHANDLE> doesn't work well on device files (like ttys)
 anyway.  Use L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET> and
 check for a return value of 0 to decide whether you're done.
 
-Note that if the filehandle has been marked as C<:utf8>, C<sysread> will
-throw an exception.  The C<:encoding(...)> layer implicitly
+If the filehandle has been marked as C<:utf8>, C<sysread> will
+throw an exception unless it's called within the scope of
+C< use feature "sysio_bytes"; >.  The C<:encoding(...)> layer implicitly
 introduces the C<:utf8> layer.  See
 L<C<binmode>|/binmode FILEHANDLE, LAYER>,
 L<C<open>|/open FILEHANDLE,EXPR>, and the L<open> pragma.
@@ -8874,7 +8877,8 @@ string other than the beginning.  A negative OFFSET specifies writing
 that many characters counting backwards from the end of the string.
 If SCALAR is of length zero, you can only use an OFFSET of 0.
 
-B<WARNING>: If the filehandle is marked C<:utf8>, C<syswrite> will raise an exception.
+If the filehandle is marked C<:utf8>, C<syswrite> will raise an exception,
+unless it is called within the scope of C< use feature "sysio_bytes"; >.
 The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 Alternately, if the handle is not marked with an encoding but you
 attempt to write characters with code points over 255, raises an exception.

@@ -30,6 +30,7 @@
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
 #include "time64.h"
+#include "feature.h"
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
@@ -1725,16 +1726,26 @@ PP(pp_sysread)
 
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
         if (PL_op->op_type == OP_SYSREAD || PL_op->op_type == OP_RECV) {
-            Perl_croak(aTHX_
-                       "%s() isn't allowed on :utf8 handles",
-                       OP_DESC(PL_op));
+            if (FEATURE_SYSIO_BYTES_IS_ENABLED) {
+                /* treat the handle as non-UTF8 for sysread() */
+                fp_utf8 = 0;
+                goto bytes;
+            }
+            else {
+                Perl_croak(aTHX_
+                           "%s() isn't allowed on :utf8 handles",
+                           OP_DESC(PL_op));
+            }
         }
-	buffer = SvPVutf8_force(bufsv, blen);
-	/* UTF-8 may not have been set if they are all low bytes */
-	SvUTF8_on(bufsv);
-	buffer_utf8 = 0;
+        else {
+            buffer = SvPVutf8_force(bufsv, blen);
+            /* UTF-8 may not have been set if they are all low bytes */
+            SvUTF8_on(bufsv);
+            buffer_utf8 = 0;
+        }
     }
     else {
+    bytes:
 	buffer = SvPV_force(bufsv, blen);
 	buffer_utf8 = !IN_BYTES && SvUTF8(bufsv);
     }
@@ -1776,8 +1787,6 @@ PP(pp_sysread)
 	SvCUR_set(bufsv, count);
 	*SvEND(bufsv) = '\0';
 	(void)SvPOK_only(bufsv);
-	if (fp_utf8)
-	    SvUTF8_on(bufsv);
 	SvSETMAGIC(bufsv);
 	/* This should not be marked tainted if the fp is marked clean */
 	if (!(IoFLAGS(io) & IOf_UNTAINT))
@@ -1985,7 +1994,7 @@ PP(pp_syswrite)
     buffer = SvPV_const(bufsv, blen);
     doing_utf8 = DO_UTF8(bufsv);
 
-    if (PerlIO_isutf8(IoIFP(io))) {
+    if (PerlIO_isutf8(IoIFP(io)) && !FEATURE_SYSIO_BYTES_IS_ENABLED) {
         Perl_croak(aTHX_
                    "%s() isn't allowed on :utf8 handles",
                    OP_DESC(PL_op));

@@ -79,17 +79,23 @@ open my $fh, "<:raw", "../harness" or die "# $!";
 my $buf;
 sysread $fh, $buf, 10;
 binmode $fh, ':utf8';
+use feature "sysio_bytes";
+sysread $fh, $buf, 10;
+no feature "sysio_bytes";
 sysread $fh, $buf, 10;
 EXPECT
-sysread() isn't allowed on :utf8 handles at - line 5.
+sysread() isn't allowed on :utf8 handles at - line 8.
 ########
 # NAME syswrite() disallowed on :utf8
 my $file = "syswwarn.tmp";
 open my $fh, ">:raw", $file or die "# $!";
 syswrite $fh, 'ABC';
 binmode $fh, ':utf8';
+use feature "sysio_bytes";
+syswrite $fh, 'ABC';
+no feature "sysio_bytes";
 syswrite $fh, 'ABC';
 close $fh;
 END { unlink $file; }
 EXPECT
-syswrite() isn't allowed on :utf8 handles at - line 5.
+syswrite() isn't allowed on :utf8 handles at - line 8.

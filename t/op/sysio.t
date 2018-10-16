@@ -6,7 +6,7 @@ BEGIN {
   set_up_inc('../lib');
 }
 
-plan tests => 45;
+plan tests => 52;
 
 open(I, 'op/sysio.t') || die "sysio.t: cannot find myself: $!";
 binmode I;
@@ -218,6 +218,25 @@ ok(sysseek(I, 0, 0) eq '0 but true');
 ok(not defined sysseek(I, -1, 1));
 
 close(I);
+
+{
+    use feature "sysio_bytes";
+    open my $f, ">:raw:utf8", $outfile
+      or die "Cannot open $outfile: $!";
+    my $abc = "\x80\xC1\xFF";
+    is(syswrite($f, $abc), length $abc, "syswrite to :utf8 with sysio_bytes");
+    utf8::upgrade($abc);
+    is(syswrite($f, $abc), length $abc, "syswrite to :utf8 with sysio_bytes");
+    close $f;
+    open $f, "<:raw:utf8", $outfile
+      or die "Cannot open $outfile; $!";
+    my $x;
+    is(sysread($f, $x, 6), 6, "sysread from :utf8 with sysio_bytes");
+    is($x, "$abc$abc", "check we read as bytes");
+    is(sysseek($f, 0, 0)+0, 0, "seek back");
+    is(sysread($f, $x, 6, 6), 6, "sysread with offset from :utf8 with sysio_bytes");
+    is($x, $abc x 4, "check we wrote buffer correctly");
+}
 
 unlink_all $outfile;
 
