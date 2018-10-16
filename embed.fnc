@@ -1368,7 +1368,7 @@ p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|NN const regexp_engine* eng \
 				|NULLOK REGEXP *old_re \
 				|NULLOK bool *is_bare_re \
-				|U32 rx_flags|U32 pm_flags
+				|const U32 rx_flags|const U32 pm_flags
 Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 orig_rx_flags
 Ap	|char*	|re_intuit_start|NN REGEXP * const rx \
 				|NULLOK SV* sv \

@@ -6935,7 +6935,7 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
 REGEXP *
 Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
-		     bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
+		     bool *is_bare_re, const U32 orig_rx_flags, const U32 pm_flags)
 {
     REGEXP *Rx;         /* Capital 'R' means points to a REGEXP */
     struct regexp *r;
