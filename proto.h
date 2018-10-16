@@ -5394,6 +5394,9 @@ PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_s
 #define PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT	\
 	assert(pRExC_state); assert(node); assert(flagp)
 #endif
+STATIC void	S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
+#define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE	\
+	assert(pRExC_state)
 STATIC const char *	S_cntrl_to_mnemonic(const U8 c)
 			__attribute__warn_unused_result__;
 

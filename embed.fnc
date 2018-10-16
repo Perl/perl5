@@ -2368,6 +2368,7 @@ Es	|regnode_offset|regnode_guts|NN RExC_state_t *pRExC_state          \
 				|const U8 op				   \
 				|const STRLEN extra_len			   \
 				|NN const char* const name
+Es	|void	|change_engine_size|NN RExC_state_t *pRExC_state|const Ptrdiff_t size
 Es	|regnode_offset|reganode|NN RExC_state_t *pRExC_state|U8 op \
 				|U32 arg
 Es	|regnode_offset|reg2Lanode|NN RExC_state_t *pRExC_state		   \

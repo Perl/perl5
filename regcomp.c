@@ -19216,6 +19216,14 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
+STATIC void
+S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size)
+{
+    PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE;
+
+    RExC_size += size;
+}
+
 STATIC regnode_offset
 S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size, const char* const name)
 {
@@ -19235,7 +19243,7 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_
 
     if (SIZE_ONLY) {
 	SIZE_ALIGN(RExC_size);
-	RExC_size += 1 + extra_size;
+    change_engine_size(pRExC_state, (Ptrdiff_t) 1 + extra_size);
 	return(ret);
     }
     if (REGNODE_p(RExC_emit) >= RExC_emit_bound)
