@@ -7175,7 +7175,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                           PL_colors[4], PL_colors[5], s);
         });
 
-  redo_parse:
     /* we jump here if we have to recompile, e.g., from upgrading the pattern
      * to utf8 */
 
@@ -7186,6 +7185,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     )
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, exp, plen);
 
+  redo_parse:
     /* return old regex if pattern hasn't changed */
     /* XXX: note in the below we have to check the flags as well as the
      * pattern.
@@ -7346,7 +7346,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Allocate space and zero-initialize. Note, the two step process
        of zeroing when in debug mode, thus anything assigned has to
        happen after that */
-    Rx = (REGEXP*) newSV_type(SVt_REGEXP);
+    RExC_rx_sv = Rx = (REGEXP*) newSV_type(SVt_REGEXP);
     r = ReANY(Rx);
     Newxc(RExC_rxi, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp_internal);
