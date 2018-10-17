@@ -6937,7 +6937,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
 		     bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
 {
-    REGEXP *rx;
+    REGEXP *Rx;         /* Capital 'R' means points to a REGEXP */
     struct regexp *r;
     regexp_internal *ri;
     STRLEN plen;
@@ -7288,8 +7288,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Allocate space and zero-initialize. Note, the two step process
        of zeroing when in debug mode, thus anything assigned has to
        happen after that */
-    rx = (REGEXP*) newSV_type(SVt_REGEXP);
-    r = ReANY(rx);
+    Rx = (REGEXP*) newSV_type(SVt_REGEXP);
+    r = ReANY(Rx);
     Newxc(ri, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp_internal);
     if ( r == NULL || ri == NULL )
@@ -7346,10 +7346,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* make sure PL_bitcount bounds not exceeded */
         assert(sizeof(STD_PAT_MODS) <= 8);
 
-        p = sv_grow(MUTABLE_SV(rx), wraplen + 1); /* +1 for the ending NUL */
-        SvPOK_on(rx);
+        p = sv_grow(MUTABLE_SV(Rx), wraplen + 1); /* +1 for the ending NUL */
+        SvPOK_on(Rx);
 	if (RExC_utf8)
-	    SvFLAGS(rx) |= SVf_UTF8;
+	    SvFLAGS(Rx) |= SVf_UTF8;
         *p++='('; *p++='?';
 
         /* If a default, cover it using the caret */
@@ -7375,14 +7375,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         *p++ = ':';
         Copy(RExC_precomp, p, plen, char);
-	assert ((RX_WRAPPED(rx) - p) < 16);
-	r->pre_prefix = p - RX_WRAPPED(rx);
+	assert ((RX_WRAPPED(Rx) - p) < 16);
+	r->pre_prefix = p - RX_WRAPPED(Rx);
         p += plen;
         if (has_runon)
             *p++ = '\n';
         *p++ = ')';
         *p = 0;
-	SvCUR_set(rx, p - RX_WRAPPED(rx));
+	SvCUR_set(Rx, p - RX_WRAPPED(Rx));
     }
 
     r->intflags = 0;
@@ -7397,7 +7397,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                           (UV)((2*RExC_size+1) * sizeof(U32))));
 #endif
     SetProgLen(ri,RExC_size);
-    RExC_rx_sv = rx;
+    RExC_rx_sv = Rx;
     RExC_rx = r;
     RExC_rxi = ri;
 
@@ -7445,7 +7445,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     RExC_npar = 1;
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
-	ReREFCNT_dec(rx);
+	ReREFCNT_dec(Rx);
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#" UVxf, (UV) flags);
     }
     DEBUG_OPTIMISE_r(
@@ -7496,7 +7496,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /*dmq: removed as part of de-PMOP: pm->op_pmflags = RExC_flags; */
 
     if (UTF)
-	SvUTF8_on(rx);	/* Unicode in it? */
+	SvUTF8_on(Rx);	/* Unicode in it? */
     ri->regstclass = NULL;
     if (RExC_naughty >= TOO_NAUGHTY)	/* Probably an expensive pattern. */
 	r->intflags |= PREGf_NAUGHTY;
@@ -7972,9 +7972,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * by setting the regexp SV to readonly-only instead. If the
      * pattern's been recompiled, the USEDness should remain. */
     if (old_re && SvREADONLY(old_re))
-        SvREADONLY_on(rx);
+        SvREADONLY_on(Rx);
 #endif
-    return rx;
+    return Rx;
 }
 
 
