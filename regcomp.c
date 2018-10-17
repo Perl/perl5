@@ -7347,10 +7347,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        of zeroing when in debug mode, thus anything assigned has to
        happen after that */
     RExC_rx_sv = Rx = (REGEXP*) newSV_type(SVt_REGEXP);
-    r = ReANY(Rx);
+    RExC_rx = ReANY(Rx);
     Newxc(RExC_rxi, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp_internal);
-    if ( r == NULL || RExC_rxi == NULL )
+    if ( RExC_rx == NULL || RExC_rxi == NULL )
 	FAIL("Regexp out of space");
 #ifdef DEBUGGING
     /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
@@ -7362,10 +7362,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #endif
 
     /* non-zero initialization begins here */
-    RXi_SET( r, RExC_rxi );
-    r->engine= eng;
-    r->extflags = rx_flags;
-    RXp_COMPFLAGS(r) = orig_rx_flags & RXf_PMf_FLAGCOPYMASK;
+    RXi_SET( RExC_rx, RExC_rxi );
+    RExC_rx->engine= eng;
+    RExC_rx->extflags = rx_flags;
+    RXp_COMPFLAGS(RExC_rx) = orig_rx_flags & RXf_PMf_FLAGCOPYMASK;
 
     if (pm_flags & PMf_IS_QR) {
 	RExC_rxi->code_blocks = pRExC_state->code_blocks;
@@ -7374,18 +7374,18 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     {
-        bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
-        bool has_charset = (get_regex_charset(r->extflags)
+        bool has_p     = ((RExC_rx->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
+        bool has_charset = (get_regex_charset(RExC_rx->extflags)
                                                     != REGEX_DEPENDS_CHARSET);
 
         /* The caret is output if there are any defaults: if not all the STD
          * flags are set, or if no character set specifier is needed */
         bool has_default =
-                    (((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD)
+                    (((RExC_rx->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD)
                     || ! has_charset);
         bool has_runon = ((RExC_seen & REG_RUN_ON_COMMENT_SEEN)
                                                    == REG_RUN_ON_COMMENT_SEEN);
-	U8 reganch = (U8)((r->extflags & RXf_PMf_STD_PMMOD)
+	U8 reganch = (U8)((RExC_rx->extflags & RXf_PMf_STD_PMMOD)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msixxn"*/
 	char *p;
@@ -7416,7 +7416,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
         if (has_charset) {
 	    STRLEN len;
-	    const char* const name = get_regex_charset_name(r->extflags, &len);
+	    const char* const name = get_regex_charset_name(RExC_rx->extflags, &len);
 	    Copy(name, p, len, char);
 	    p += len;
         }
@@ -7434,7 +7434,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         *p++ = ':';
         Copy(RExC_precomp, p, plen, char);
 	assert ((RX_WRAPPED(Rx) - p) < 16);
-	r->pre_prefix = p - RX_WRAPPED(Rx);
+	RExC_rx->pre_prefix = p - RX_WRAPPED(Rx);
         p += plen;
 
         /* Adding a trailing \n causes this to compile properly:
@@ -7447,9 +7447,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvCUR_set(Rx, p - RX_WRAPPED(Rx));
     }
 
-    r->intflags = 0;
+    RExC_rx->intflags = 0;
     RExC_total_parens = RExC_npar;
-    r->nparens = RExC_total_parens - 1;	/* set early to validate backrefs */
+    RExC_rx->nparens = RExC_total_parens - 1;	/* set early to validate backrefs */
 
     /* Useful during FAIL. */
 #ifdef RE_TRACK_PATTERN_OFFSETS
@@ -7461,7 +7461,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #endif
     SetProgLen(RExC_rxi, RExC_size);
     RExC_rx_sv = Rx;
-    RExC_rx = r;
 
     /* Second pass: emit code. */
     RExC_pass1 = FALSE;
@@ -7517,18 +7516,18 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
-    Newx(r->substrs, 1, struct reg_substr_data);
+    Newx(RExC_rx->substrs, 1, struct reg_substr_data);
     if (RExC_recurse_count) {
         Newx(RExC_recurse, RExC_recurse_count, regnode *);
         SAVEFREEPV(RExC_recurse);
     }
 
   reStudy:
-    r->minlen = minlen = sawlookahead = sawplus = sawopen = sawminmod = 0;
+    RExC_rx->minlen = minlen = sawlookahead = sawplus = sawopen = sawminmod = 0;
     DEBUG_r(
         RExC_study_chunk_recursed_count= 0;
     );
-    Zero(r->substrs, 1, struct reg_substr_data);
+    Zero(RExC_rx->substrs, 1, struct reg_substr_data);
     if (RExC_study_chunk_recursed) {
         Zero(RExC_study_chunk_recursed,
              RExC_study_chunk_recursed_bytes * RExC_total_parens, U8);
@@ -7555,14 +7554,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #endif
 
     /* Dig out information for optimizations. */
-    r->extflags = RExC_flags; /* was pm_op */
+    RExC_rx->extflags = RExC_flags; /* was pm_op */
     /*dmq: removed as part of de-PMOP: pm->op_pmflags = RExC_flags; */
 
     if (UTF)
 	SvUTF8_on(Rx);	/* Unicode in it? */
     RExC_rxi->regstclass = NULL;
     if (RExC_naughty >= TOO_NAUGHTY)	/* Probably an expensive pattern. */
-	r->intflags |= PREGf_NAUGHTY;
+	RExC_rx->intflags |= PREGf_NAUGHTY;
     scan = RExC_rxi->program + 1;		/* First BRANCH. */
 
     /* testing for BRANCH here tells us whether there is "must appear"
@@ -7641,14 +7640,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		 PL_regkind[OP(first)] == NBOUND)
 	    RExC_rxi->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOL) {
-            r->intflags |= (OP(first) == MBOL
+            RExC_rx->intflags |= (OP(first) == MBOL
                            ? PREGf_ANCH_MBOL
                            : PREGf_ANCH_SBOL);
 	    first = NEXTOPER(first);
 	    goto again;
 	}
 	else if (OP(first) == GPOS) {
-            r->intflags |= PREGf_ANCH_GPOS;
+            RExC_rx->intflags |= PREGf_ANCH_GPOS;
 	    first = NEXTOPER(first);
 	    goto again;
 	}
@@ -7656,14 +7655,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             !sawlookahead &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
-            !(r->intflags & PREGf_ANCH) && !pRExC_state->code_blocks)
+            !(RExC_rx->intflags & PREGf_ANCH) && !pRExC_state->code_blocks)
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
 	    const int type =
 		(OP(NEXTOPER(first)) == REG_ANY)
                     ? PREGf_ANCH_MBOL
                     : PREGf_ANCH_SBOL;
-            r->intflags |= (type | PREGf_IMPLICIT);
+            RExC_rx->intflags |= (type | PREGf_IMPLICIT);
 	    first = NEXTOPER(first);
 	    goto again;
 	}
@@ -7671,7 +7670,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             && (!sawopen || !RExC_sawback)
 	    && !pRExC_state->code_blocks) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
-	    r->intflags |= PREGf_SKIP;
+	    RExC_rx->intflags |= PREGf_SKIP;
 
 	/* Scan is after the zeroth branch, first is atomic matcher. */
 #ifdef TRIE_STUDY_OPT
@@ -7739,7 +7738,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
              && !(RExC_seen & REG_VERBARG_SEEN)
              && !(RExC_seen & REG_GPOS_SEEN)
         ){
-	    r->extflags |= RXf_CHECK_ALL;
+	    RExC_rx->extflags |= RXf_CHECK_ALL;
         }
 	scan_commit(pRExC_state, &data,&minlen, 0);
 
@@ -7758,22 +7757,22 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                         == SvCUR(data.substrs[1].str)
                     )
                 && S_setup_longest (aTHX_ pRExC_state,
-                                        &(r->substrs->data[i]),
+                                        &(RExC_rx->substrs->data[i]),
                                         &(data.substrs[i]),
                                         longest_length[i]))
             {
-                r->substrs->data[i].min_offset =
+                RExC_rx->substrs->data[i].min_offset =
                         data.substrs[i].min_offset - data.substrs[i].lookbehind;
 
-                r->substrs->data[i].max_offset = data.substrs[i].max_offset;
+                RExC_rx->substrs->data[i].max_offset = data.substrs[i].max_offset;
                 /* Don't offset infinity */
                 if (data.substrs[i].max_offset < SSize_t_MAX)
-                    r->substrs->data[i].max_offset -= data.substrs[i].lookbehind;
+                    RExC_rx->substrs->data[i].max_offset -= data.substrs[i].lookbehind;
                 SvREFCNT_inc_simple_void_NN(data.substrs[i].str);
             }
             else {
-                r->substrs->data[i].substr      = NULL;
-                r->substrs->data[i].utf8_substr = NULL;
+                RExC_rx->substrs->data[i].substr      = NULL;
+                RExC_rx->substrs->data[i].utf8_substr = NULL;
                 longest_length[i] = 0;
             }
         }
@@ -7784,8 +7783,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    && (OP(RExC_rxi->regstclass) == REG_ANY || OP(RExC_rxi->regstclass) == SANY))
 	    RExC_rxi->regstclass = NULL;
 
-	if ((!(r->substrs->data[0].substr || r->substrs->data[0].utf8_substr)
-              || r->substrs->data[0].min_offset)
+	if ((!(RExC_rx->substrs->data[0].substr || RExC_rx->substrs->data[0].utf8_substr)
+              || RExC_rx->substrs->data[0].min_offset)
 	    && stclass_flag
             && ! (ANYOF_FLAGS(data.start_class) & SSC_MATCHES_EMPTY_STRING)
 	    && is_ssc_worth_it(pRExC_state, data.start_class))
@@ -7799,9 +7798,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		       (regnode_ssc*)RExC_rxi->data->data[n],
 		       regnode_ssc);
 	    RExC_rxi->regstclass = (regnode*)RExC_rxi->data->data[n];
-	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
+	    RExC_rx->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
-                      regprop(r, sv, (regnode*)data.start_class, NULL, pRExC_state);
+                      regprop(RExC_rx, sv, (regnode*)data.start_class, NULL, pRExC_state);
                       Perl_re_printf( aTHX_
 				    "synthetic stclass \"%s\".\n",
 				    SvPVX_const(sv));});
@@ -7811,19 +7810,19 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* A temporary algorithm prefers floated substr to fixed one of
          * same length to dig more info. */
 	i = (longest_length[0] <= longest_length[1]);
-        r->substrs->check_ix = i;
-        r->check_end_shift  = r->substrs->data[i].end_shift;
-        r->check_substr     = r->substrs->data[i].substr;
-        r->check_utf8       = r->substrs->data[i].utf8_substr;
-        r->check_offset_min = r->substrs->data[i].min_offset;
-        r->check_offset_max = r->substrs->data[i].max_offset;
-        if (!i && (r->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS)))
-            r->intflags |= PREGf_NOSCAN;
+        RExC_rx->substrs->check_ix = i;
+        RExC_rx->check_end_shift  = RExC_rx->substrs->data[i].end_shift;
+        RExC_rx->check_substr     = RExC_rx->substrs->data[i].substr;
+        RExC_rx->check_utf8       = RExC_rx->substrs->data[i].utf8_substr;
+        RExC_rx->check_offset_min = RExC_rx->substrs->data[i].min_offset;
+        RExC_rx->check_offset_max = RExC_rx->substrs->data[i].max_offset;
+        if (!i && (RExC_rx->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS)))
+            RExC_rx->intflags |= PREGf_NOSCAN;
 
-	if ((r->check_substr || r->check_utf8) ) {
-	    r->extflags |= RXf_USE_INTUIT;
-	    if (SvTAIL(r->check_substr ? r->check_substr : r->check_utf8))
-		r->extflags |= RXf_INTUIT_TAIL;
+	if ((RExC_rx->check_substr || RExC_rx->check_utf8) ) {
+	    RExC_rx->extflags |= RXf_USE_INTUIT;
+	    if (SvTAIL(RExC_rx->check_substr ? RExC_rx->check_substr : RExC_rx->check_utf8))
+		RExC_rx->extflags |= RXf_INTUIT_TAIL;
 	}
 
 	/* XXX Unneeded? dmq (shouldn't as this is handled elsewhere)
@@ -7860,12 +7859,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         CHECK_RESTUDY_GOTO_butfirst(NOOP);
 
-	r->check_substr = NULL;
-        r->check_utf8 = NULL;
-        r->substrs->data[0].substr      = NULL;
-        r->substrs->data[0].utf8_substr = NULL;
-        r->substrs->data[1].substr      = NULL;
-        r->substrs->data[1].utf8_substr = NULL;
+	RExC_rx->check_substr = NULL;
+        RExC_rx->check_utf8 = NULL;
+        RExC_rx->substrs->data[0].substr      = NULL;
+        RExC_rx->substrs->data[0].utf8_substr = NULL;
+        RExC_rx->substrs->data[1].substr      = NULL;
+        RExC_rx->substrs->data[1].utf8_substr = NULL;
 
         if (! (ANYOF_FLAGS(data.start_class) & SSC_MATCHES_EMPTY_STRING)
 	    && is_ssc_worth_it(pRExC_state, data.start_class))
@@ -7879,9 +7878,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		       (regnode_ssc*)RExC_rxi->data->data[n],
 		       regnode_ssc);
 	    RExC_rxi->regstclass = (regnode*)RExC_rxi->data->data[n];
-	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
+	    RExC_rx->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
-                      regprop(r, sv, (regnode*)data.start_class, NULL, pRExC_state);
+                      regprop(RExC_rx, sv, (regnode*)data.start_class, NULL, pRExC_state);
                       Perl_re_printf( aTHX_
 				    "synthetic stclass \"%s\".\n",
 				    SvPVX_const(sv));});
@@ -7890,52 +7889,52 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN) {
-        r->extflags |= RXf_UNBOUNDED_QUANTIFIER_SEEN;
-        r->maxlen = REG_INFTY;
+        RExC_rx->extflags |= RXf_UNBOUNDED_QUANTIFIER_SEEN;
+        RExC_rx->maxlen = REG_INFTY;
     }
     else {
-        r->maxlen = RExC_maxlen;
+        RExC_rx->maxlen = RExC_maxlen;
     }
 
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
-        Perl_re_printf( aTHX_ "minlen: %" IVdf " r->minlen:%" IVdf " maxlen:%" IVdf "\n",
-                      (IV)minlen, (IV)r->minlen, (IV)RExC_maxlen);
+        Perl_re_printf( aTHX_ "minlen: %" IVdf " RExC_rx->minlen:%" IVdf " maxlen:%" IVdf "\n",
+                      (IV)minlen, (IV)RExC_rx->minlen, (IV)RExC_maxlen);
     });
-    r->minlenret = minlen;
-    if (r->minlen < minlen)
-        r->minlen = minlen;
+    RExC_rx->minlenret = minlen;
+    if (RExC_rx->minlen < minlen)
+        RExC_rx->minlen = minlen;
 
     if (RExC_seen & REG_RECURSE_SEEN ) {
-        r->intflags |= PREGf_RECURSE_SEEN;
-        Newx(r->recurse_locinput, r->nparens + 1, char *);
+        RExC_rx->intflags |= PREGf_RECURSE_SEEN;
+        Newx(RExC_rx->recurse_locinput, RExC_rx->nparens + 1, char *);
     }
     if (RExC_seen & REG_GPOS_SEEN)
-        r->intflags |= PREGf_GPOS_SEEN;
+        RExC_rx->intflags |= PREGf_GPOS_SEEN;
     if (RExC_seen & REG_LOOKBEHIND_SEEN)
-        r->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
+        RExC_rx->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
                                                 lookbehind */
     if (pRExC_state->code_blocks)
-	r->extflags |= RXf_EVAL_SEEN;
+	RExC_rx->extflags |= RXf_EVAL_SEEN;
     if (RExC_seen & REG_VERBARG_SEEN)
     {
-	r->intflags |= PREGf_VERBARG_SEEN;
-        r->extflags |= RXf_NO_INPLACE_SUBST; /* don't understand this! Yves */
+	RExC_rx->intflags |= PREGf_VERBARG_SEEN;
+        RExC_rx->extflags |= RXf_NO_INPLACE_SUBST; /* don't understand this! Yves */
     }
     if (RExC_seen & REG_CUTGROUP_SEEN)
-	r->intflags |= PREGf_CUTGROUP_SEEN;
+	RExC_rx->intflags |= PREGf_CUTGROUP_SEEN;
     if (pm_flags & PMf_USE_RE_EVAL)
-	r->intflags |= PREGf_USE_RE_EVAL;
+	RExC_rx->intflags |= PREGf_USE_RE_EVAL;
     if (RExC_paren_names)
-        RXp_PAREN_NAMES(r) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
+        RXp_PAREN_NAMES(RExC_rx) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
-        RXp_PAREN_NAMES(r) = NULL;
+        RXp_PAREN_NAMES(RExC_rx) = NULL;
 
     /* If we have seen an anchor in our pattern then we set the extflag RXf_IS_ANCHORED
      * so it can be used in pp.c */
-    if (r->intflags & PREGf_ANCH)
-        r->extflags |= RXf_IS_ANCHORED;
+    if (RExC_rx->intflags & PREGf_ANCH)
+        RExC_rx->extflags |= RXf_IS_ANCHORED;
 
 
     {
@@ -7952,29 +7951,29 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         U8 nop = OP(next);
 
         if (PL_regkind[fop] == NOTHING && nop == END)
-            r->extflags |= RXf_NULL;
+            RExC_rx->extflags |= RXf_NULL;
         else if ((fop == MBOL || (fop == SBOL && !first->flags)) && nop == END)
             /* when fop is SBOL first->flags will be true only when it was
              * produced by parsing /\A/, and not when parsing /^/. This is
              * very important for the split code as there we want to
              * treat /^/ as /^/m, but we do not want to treat /\A/ as /^/m.
              * See rt #122761 for more details. -- Yves */
-            r->extflags |= RXf_START_ONLY;
+            RExC_rx->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
                  && PL_regkind[nop] == POSIXD && FLAGS(next) == _CC_SPACE
                  && nop == END)
-            r->extflags |= RXf_WHITE;
-        else if ( r->extflags & RXf_SPLIT
+            RExC_rx->extflags |= RXf_WHITE;
+        else if ( RExC_rx->extflags & RXf_SPLIT
                   && (fop == EXACT || fop == EXACTL)
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
                   && nop == END )
-            r->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
+            RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
 
     }
 
     if (RExC_contains_locale) {
-        RXp_EXTFLAGS(r) |= RXf_TAINTED;
+        RXp_EXTFLAGS(RExC_rx) |= RXf_TAINTED;
     }
 
 #ifdef DEBUGGING
@@ -8003,7 +8002,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         ARG2L_SET( scan, RExC_open_parens[ARG(scan)] - REGNODE_OFFSET(scan));
     }
 
-    Newxz(r->offs, RExC_total_parens, regexp_paren_pair);
+    Newxz(RExC_rx->offs, RExC_total_parens, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
         Perl_re_printf( aTHX_ "study_chunk_recursed_count: %lu\n",
@@ -8012,7 +8011,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     DEBUG_DUMP_r({
         DEBUG_RExC_seen();
         Perl_re_printf( aTHX_ "Final program:\n");
-        regdump(r);
+        regdump(RExC_rx);
     });
 #ifdef RE_TRACK_PATTERN_OFFSETS
     DEBUG_OFFSETS_r(if (RExC_offsets) {
