@@ -135,6 +135,96 @@ SKIP: {
     }
 }
 
+SKIP: {
+    # test recv/send handling with :utf8
+    # this doesn't appear to have been tested previously, this is
+    # separate to avoid interfering with the data expected above
+    $local or skip("No localhost", 1);
+    $fork or skip("No fork", 1);
+
+    note "recv/send :utf8 tests";
+    ok(socket(my $serv, PF_INET, SOCK_STREAM, $tcp), "make a tcp socket (recv/send :utf8 handling)");
+    my $bind_at = pack_sockaddr_in(0, $local);
+    ok(bind($serv, $bind_at), "bind works")
+	or skip("Couldn't bind to localhost", 1);
+    my $bind_name = getsockname($serv);
+    ok($bind_name, "getsockname() on bound socket");
+    my ($bind_port) = unpack_sockaddr_in($bind_name);
+
+    print "# port $bind_port\n";
+
+  SKIP:
+    {
+	ok(listen($serv, 5), "listen() works")
+	  or diag "listen error: $!";
+
+	my $pid = fork;
+	my $send_data = "test\x80\xFF" x 50_000;
+	if ($pid) {
+	    # parent
+	    ok(socket(my $accept, PF_INET, SOCK_STREAM, $tcp),
+	       "make accept tcp socket");
+	    ok(my $addr = accept($accept, $serv), "accept() works")
+		or diag "accept error: $!";
+            binmode $accept, ':raw:utf8';
+            ok(!eval { send($accept, "ABC", 0); 1 },
+               "should die on send to :utf8 socket");
+            binmode $accept;
+            # check bytes will be sent
+            utf8::upgrade($send_data);
+	    my $sent_total = 0;
+	    while ($sent_total < length $send_data) {
+		my $sent = send($accept, substr($send_data, $sent_total), 0);
+		defined $sent or last;
+		$sent_total += $sent;
+	    }
+	    my $shutdown = shutdown($accept, 1);
+
+	    # wait for the remote to close so data isn't lost in
+	    # transit on a certain broken implementation
+	    <$accept>;
+	    # child tests are printed once we hit eof
+	    curr_test(curr_test()+6);
+	    waitpid($pid, 0);
+
+	    ok($shutdown, "shutdown() works");
+	}
+	elsif (defined $pid) {
+	    curr_test(curr_test()+3);
+	    #sleep 1;
+	    # child
+	    ok_child(close($serv), "close server socket in child");
+	    ok_child(socket(my $child, PF_INET, SOCK_STREAM, $tcp),
+	       "make child tcp socket");
+
+	    ok_child(connect($child, $bind_name), "connect() works")
+		or diag "connect error: $!";
+            binmode $child, ':raw:utf8';
+	    my $buf;
+
+            ok_child(!eval { recv($child, $buf, 1000, 0); 1 },
+                     "recv on :utf8 should die");
+            is_child($buf, "", "buf shouldn't contain anything");
+            binmode $child;
+	    my $recv_peer = recv($child, $buf, 1000, 0);
+	    while(defined recv($child, my $tmp, 1000, 0)) {
+		last if length $tmp == 0;
+		$buf .= $tmp;
+	    }
+	    is_child($buf, $send_data, "check we received the data");
+	    close($child);
+	    end_child();
+
+	    exit(0);
+	}
+	else {
+	    # failed to fork
+	    diag "fork() failed $!";
+	    skip("fork() failed", 2);
+	}
+    }
+}
+
 SKIP:
 {
     eval { require Errno; defined &Errno::EMFILE }
