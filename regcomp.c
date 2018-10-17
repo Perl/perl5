@@ -7415,10 +7415,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* Useful during FAIL. */
 #ifdef RE_TRACK_PATTERN_OFFSETS
-    Newxz(RExC_rxi->u.offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
+    Newxz(RExC_offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
     DEBUG_OFFSETS_r(Perl_re_printf( aTHX_
                           "%s %" UVuf " bytes for offset annotations.\n",
-                          RExC_rxi->u.offsets ? "Got" : "Couldn't get",
+                          RExC_offsets ? "Got" : "Couldn't get",
                           (UV)((2*RExC_size+1) * sizeof(U32))));
 #endif
     SetProgLen(RExC_rxi, RExC_size);
@@ -7977,16 +7977,16 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         regdump(r);
     });
 #ifdef RE_TRACK_PATTERN_OFFSETS
-    DEBUG_OFFSETS_r(if (RExC_rxi->u.offsets) {
-        const STRLEN len = RExC_rxi->u.offsets[0];
+    DEBUG_OFFSETS_r(if (RExC_offsets) {
+        const STRLEN len = RExC_offsets[0];
         STRLEN i;
         GET_RE_DEBUG_FLAGS_DECL;
         Perl_re_printf( aTHX_
-                      "Offsets: [%" UVuf "]\n\t", (UV)RExC_rxi->u.offsets[0]);
+                      "Offsets: [%" UVuf "]\n\t", (UV)RExC_offsets[0]);
         for (i = 1; i <= len; i++) {
-            if (RExC_rxi->u.offsets[i*2-1] || RExC_rxi->u.offsets[i*2])
+            if (RExC_offsets[i*2-1] || RExC_offsets[i*2])
                 Perl_re_printf( aTHX_  "%" UVuf ":%" UVuf "[%" UVuf "] ",
-                (UV)i, (UV)RExC_rxi->u.offsets[i*2-1], (UV)RExC_rxi->u.offsets[i*2]);
+                (UV)i, (UV)RExC_offsets[i*2-1], (UV)RExC_offsets[i*2]);
             }
         Perl_re_printf( aTHX_  "\n");
     });
