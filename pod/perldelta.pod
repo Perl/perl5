@@ -86,6 +86,32 @@ could lead to invalidly encoded perl scalars.
 
 [perl #125760]
 
+=head2 my() in false conditional prohibited
+
+Declarations such as C<my $x if 0> are no longer permitted.
+
+[perl #133543]
+
+=head2 Fatalize $* and $#
+
+These special variables, long deprecated, now throw exceptions when used.
+
+[perl #133583]
+
+=head2 Fatalize unqualified use of dump()
+
+The C<dump()> function, long discouraged, may no longer be used unless it is
+fully qualified, I<i.e.>, C<CORE::dump()>.
+
+[perl #133584]
+
+=head2 Remove File::Glob::glob()
+
+The C<File::Glob::glob()> function, long deprecated, has been removed and now
+throws an exception which advises use of C<File::Glob::bsd_glob()> instead.
+
+[perl #133586]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
