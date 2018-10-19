@@ -381,9 +381,6 @@ struct regnode_ssc {
 
 #define REG_MAGIC 0234
 
-#define SIZE_ONLY FALSE
-#define PASS1 SIZE_ONLY
-#define PASS2 (! SIZE_ONLY)
 /* An ANYOF node is basically a bitmap with the index being a code point.  If
  * the bit for that code point is 1, the code point matches;  if 0, it doesn't
  * match (complemented if inverted).  There is an additional mechanism to deal
