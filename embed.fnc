@@ -2412,6 +2412,7 @@ Es	|regnode_offset|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
 				|NN char * const oregcomp_parse
+Es	|void	|set_regex_pv	|NN RExC_state_t *pRExC_state|NN REGEXP *Rx
 #if defined(DEBUGGING) && defined(ENABLE_REGEX_SETS_DEBUGGING)
 Es	|void	|dump_regex_sets_structures				    \
 				|NN RExC_state_t *pRExC_state		    \

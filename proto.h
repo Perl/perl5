@@ -5560,6 +5560,9 @@ STATIC void	S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, struct scan_dat
 STATIC void	S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state, regnode* const node, SV* const cp_list, SV* const runtime_defns, SV* const only_utf8_locale_list, SV* const swash, const bool has_user_defined_property);
 #define PERL_ARGS_ASSERT_SET_ANYOF_ARG	\
 	assert(pRExC_state); assert(node)
+STATIC void	S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx);
+#define PERL_ARGS_ASSERT_SET_REGEX_PV	\
+	assert(pRExC_state); assert(Rx)
 STATIC void	S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state, char ** p, const bool force_to_xmod);
 #define PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT	\
 	assert(pRExC_state); assert(p)

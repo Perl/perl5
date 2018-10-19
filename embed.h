@@ -1222,6 +1222,7 @@
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define set_ANYOF_arg(a,b,c,d,e,f,g)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f,g)
+#define set_regex_pv(a,b)	S_set_regex_pv(aTHX_ a,b)
 #define skip_to_be_ignored_text(a,b,c)	S_skip_to_be_ignored_text(aTHX_ a,b,c)
 #define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
 #define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
