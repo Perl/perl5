@@ -16856,6 +16856,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                       |_CORE_SWASH_INIT_ACCEPT_INVLIST;
 
                 SvREFCNT_dec(swash); /* Free any left-overs */
+
+		/* \p means they want Unicode semantics */
+		REQUIRE_UNI_RULES(flagp, 0);
+
 		if (RExC_parse >= RExC_end)
 		    vFAIL2("Empty \\%c", (U8)value);
 		if (*RExC_parse == '{') {
@@ -17101,9 +17105,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		RExC_parse = e + 1;
                 namedclass = ANYOF_UNIPROP;  /* no official name, but it's
                                                 named */
-
-		/* \p means they want Unicode semantics */
-		REQUIRE_UNI_RULES(flagp, 0);
 		}
 		break;
 	    case 'n':	value = '\n';			break;
