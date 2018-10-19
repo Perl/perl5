@@ -20277,6 +20277,9 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 
     PERL_ARGS_ASSERT_PREGFREE2;
 
+    if (! r)
+        return;
+
     if (r->mother_re) {
         ReREFCNT_dec(r->mother_re);
     } else {
@@ -20421,6 +20424,10 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGFREE_INTERNAL;
+
+    if (! ri) {
+        return;
+    }
 
     DEBUG_COMPILE_r({
 	if (!PL_colorset)
