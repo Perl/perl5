@@ -6328,8 +6328,10 @@ S_free_codeblocks(pTHX_ struct reg_code_blocks *cbs)
         return;
     for (n = 0; n < cbs->count; n++) {
         REGEXP *rx = cbs->cb[n].src_regex;
-        cbs->cb[n].src_regex = NULL;
-        SvREFCNT_dec(rx);
+        if (rx) {
+            cbs->cb[n].src_regex = NULL;
+            SvREFCNT_dec_NN(rx);
+        }
     }
     Safefree(cbs->cb);
     Safefree(cbs);
