@@ -7262,7 +7262,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* ignore the utf8ness if the pattern is 0 length */
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
 
-    RExC_uni_semantics = 0;
+    RExC_uni_semantics = RExC_utf8; /* UTF-8 implies unicode semantics;
+                                       otherwise we may find later this should
+                                       be 1 */
     RExC_seen_unfolded_sharp_s = 0;
     RExC_contains_locale = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
@@ -7334,7 +7336,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     rx_flags = orig_rx_flags;
 
     if (   initial_charset == REGEX_DEPENDS_CHARSET
-        && (RExC_utf8 ||RExC_uni_semantics))
+        && (RExC_uni_semantics))
     {
 
 	/* Set to use unicode semantics if the pattern is in utf8 and has the
@@ -10580,14 +10582,14 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         RExC_parse++;
         has_use_defaults = TRUE;
         STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
-        set_regex_charset(&RExC_flags, (RExC_utf8 || RExC_uni_semantics)
+        set_regex_charset(&RExC_flags, (RExC_uni_semantics)
                                         ? REGEX_UNICODE_CHARSET
                                         : REGEX_DEPENDS_CHARSET);
     }
 
     cs = get_regex_charset(RExC_flags);
     if (cs == REGEX_DEPENDS_CHARSET
-        && (RExC_utf8 || RExC_uni_semantics))
+        && (RExC_uni_semantics))
     {
         cs = REGEX_UNICODE_CHARSET;
     }
@@ -10652,7 +10654,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                  * pattern (or target, not known until runtime) are
                  * utf8, or something in the pattern indicates unicode
                  * semantics */
-                cs = (RExC_utf8 || RExC_uni_semantics)
+                cs = (RExC_uni_semantics)
                      ? REGEX_UNICODE_CHARSET
                      : REGEX_DEPENDS_CHARSET;
                 has_charset_modifier = DEPENDS_PAT_MOD;
