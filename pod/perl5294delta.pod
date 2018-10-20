@@ -1,0 +1,270 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5294delta - what is new for perl v5.29.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.29.3 release and the 5.29.4
+release.
+
+If you are upgrading from an earlier release such as 5.29.2, first read
+L<perl5293delta>, which describes differences between 5.29.2 and 5.29.3.
+
+=head1 Core Enhancements
+
+=head2 The maximum number of times a pattern can match has been doubled
+to 65535
+
+This means if you specify C<qr/a+/> that there can be anywhere from 1
+through 65535 C<"a">'s in a row, instead of 32267 as previously.
+
+=head1 Incompatible Changes
+
+=head2 Assigning non-zero to C<$[> is fatal
+
+Setting L<< C<$[>|perlvar/$[ >> to a non-zero value has been deprecated since
+Perl 5.12 and now throws a fatal error.
+See L<<< perldeprecation/Assigning non-zero to C<< $[ >> is fatal >>>.
+
+=head2 Previously deprecated sysread()/syswrite() on :utf8 handles now fatal
+
+Calling sysread(), syswrite(), send() or recv() on a C<:utf8> handle,
+whether applied explicitly or implicitly, is now fatal.  This was
+deprecated in perl 5.24.
+
+There were two problems with calling these functions on C<:utf8>
+handles:
+
+=over
+
+=item *
+
+All four functions only paid attention to the C<:utf8> flag.  Other
+layers were completely ignored, so a handle with
+C<:encoding(UTF-16LE)> layer would be treated as UTF-8.  Other layers,
+such as compression are completely ignored with or without the
+C<:utf8> flag.
+
+=item *
+
+sysread() and recv() would read from the handle, skipping any
+validation by the layers, and do no validation of their own.  This
+could lead to invalidly encoded perl scalars.
+
+=back
+
+[perl #125760]
+
+=head2 my() in false conditional prohibited
+
+Declarations such as C<my $x if 0> are no longer permitted.
+
+[perl #133543]
+
+=head2 Fatalize $* and $#
+
+These special variables, long deprecated, now throw exceptions when used.
+
+[perl #133583]
+
+=head2 Fatalize unqualified use of dump()
+
+The C<dump()> function, long discouraged, may no longer be used unless it is
+fully qualified, I<i.e.>, C<CORE::dump()>.
+
+[perl #133584]
+
+=head2 Remove File::Glob::glob()
+
+The C<File::Glob::glob()> function, long deprecated, has been removed and now
+throws an exception which advises use of C<File::Glob::bsd_glob()> instead.
+
+[perl #133586]
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.74 to 1.75.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.003 to 1.004.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<bignum> has been upgraded from version 0.50 to 0.51.
+
+=item *
+
+L<bytes> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.20-TRIAL to 2.21-TRIAL.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+L<feature> has been upgraded from version 1.53 to 1.54.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.33 to 2.34.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20180920 to 5.20181020.
+
+=item *
+
+L<sigtrap> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.71 to 0.72.
+
+=item *
+
+L<vars> has been upgraded from version 1.04 to 1.05.
+
+C<vars.pm> no longer disables non-vars strict when checking if strict
+vars is enabled.  [perl #130674]
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
+
+=item *
+
+B::Debug is no longer distributed with the core distribution.  It remains
+available on CPAN.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The sizing pass has been eliminated from the regular expression
+compiler.  An extra pass may instead be needed in some cases to count
+the number of parenthetical capture groups.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<pack "u", "invalid uuencoding"> now properly NUL terminates the
+zero-length SV produced.  [perl #132655]
+
+=item *
+
+Improve the debugging output for calloc() calls with C<-Dm>.  [perl #133439]
+
+=item *
+
+Regexp script runs were failing to permit ASCII digits in some cases.
+[perl #133547]
+
+=item *
+
+On Unix-like systems supporting a platform-specific technique for
+determining L<< C<$^X>|perlvar/$^X >>, Perl failed to fall back to the
+generic technique when the platform-specific one fails (for example, a Linux
+system with /proc not mounted).  This was a regression in Perl 5.28.0.
+[perl #133573]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.29.4 represents approximately 4 weeks of development since Perl
+5.29.3 and contains approximately 8,400 lines of changes across 180 files
+from 17 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,300 lines of changes to 110 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.29.4:
+
+Aaron Crane, Alexandr Savca, Andreas König, Chris 'BinGOs' Williams, Craig
+A. Berry, Dagfinn Ilmari Mannsåker, David Mitchell, Eugen Konkov, James E
+Keenan, John SJ Anderson, Karl Williamson, Matthias Bethke, Nicolas R.,
+Sisyphus, Slaven Rezic, Tomasz Konojacki, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
