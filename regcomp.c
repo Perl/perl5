@@ -965,6 +965,7 @@ static const scan_data_t zero_scan_data = {
 #define Set_Node_Offset_Length(node,offset,len)
 #define ProgLen(ri) ri->u.proglen
 #define SetProgLen(ri,x) ri->u.proglen = x
+#define Track_Code(code)
 #else
 #define ProgLen(ri) ri->u.offsets[0]
 #define SetProgLen(ri,x) ri->u.offsets[0] = x
@@ -1007,6 +1008,8 @@ static const scan_data_t zero_scan_data = {
     Set_Node_Offset_To_R(REGNODE_OFFSET(node), (offset));	\
     Set_Node_Length_To_R(REGNODE_OFFSET(node), (len));	\
 } STMT_END
+
+#define Track_Code(code) STMT_START { code } STMT_END
 #endif
 
 #if PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS
@@ -3603,9 +3606,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 optimisation.
              */
             while( optimize < jumper ) {
-#ifdef RE_TRACK_PATTERN_OFFSETS
-                mjd_nodelen += Node_Length((optimize));
-#endif
+                Track_Code( mjd_nodelen += Node_Length((optimize)); );
                 OP( optimize ) = OPTIMIZED;
                 Set_Node_Offset_Length(optimize, 0, 0);
                 optimize++;
