@@ -20,6 +20,8 @@
 
 #include "utf8.h"
 
+typedef SSize_t regnode_offset;
+
 struct regnode {
     U8	flags;
     U8  type;

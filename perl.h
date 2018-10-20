@@ -246,7 +246,7 @@
     Perl_pregfree(aTHX_ (prog))
 
 #define CALLREGFREE_PVT(prog) \
-    if(prog) RX_ENGINE(prog)->rxfree(aTHX_ (prog))
+    if(prog && RX_ENGINE(prog)) RX_ENGINE(prog)->rxfree(aTHX_ (prog))
 
 #define CALLREG_NUMBUF_FETCH(rx,paren,usesv)                                \
     RX_ENGINE(rx)->numbered_buff_FETCH(aTHX_ (rx),(paren),(usesv))
@@ -3682,11 +3682,10 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 struct scan_data_t;
 typedef struct regnode_charclass regnode_charclass;
 
-struct regnode_charclass_class;
-
 /* A hopefully less confusing name.  The sub-classes are all Posix classes only
  * used under /l matching */
-typedef struct regnode_charclass_class regnode_charclass_posixl;
+typedef struct regnode_charclass_posixl regnode_charclass_class;
+typedef struct regnode_charclass_posixl regnode_charclass_posixl;
 
 typedef struct regnode_ssc regnode_ssc;
 typedef struct RExC_state_t RExC_state_t;

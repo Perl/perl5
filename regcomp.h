@@ -217,7 +217,7 @@ struct regnode_charclass {
 };
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
-struct regnode_charclass_class {
+struct regnode_charclass_posixl {
     U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
@@ -353,23 +353,33 @@ struct regnode_ssc {
 #define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
 #define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
 
-#define FILL_ADVANCE_NODE(ptr, op) STMT_START { \
-    (ptr)->type = op;    (ptr)->next_off = 0;   (ptr)++; } STMT_END
-#define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
-    ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 1; } STMT_END
-#define FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2)               \
-                STMT_START {                                        \
-                    ARG_SET(ptr, arg1);                             \
-                    ARG2L_SET(ptr, arg2);                           \
-                    FILL_ADVANCE_NODE(ptr, op);                     \
-                    (ptr) += 2;                                     \
-                } STMT_END
+#define FILL_NODE(offset, op)                                           \
+    STMT_START {                                                        \
+                    OP(REGNODE_p(offset)) = op;                         \
+                    NEXT_OFF(REGNODE_p(offset)) = 0;                    \
+    } STMT_END
+#define FILL_ADVANCE_NODE(offset, op)                                   \
+    STMT_START {                                                        \
+                    FILL_NODE(offset, op);                              \
+                    (offset)++;                                         \
+    } STMT_END
+#define FILL_ADVANCE_NODE_ARG(offset, op, arg)                          \
+    STMT_START {                                                        \
+                    ARG_SET(REGNODE_p(offset), arg);                    \
+                    FILL_ADVANCE_NODE(offset, op);                      \
+                    /* This is used generically for other operations    \
+                     * that have a longer argument */                   \
+                    (offset) += regarglen[op];                          \
+    } STMT_END
+#define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
+    STMT_START {                                                        \
+                    ARG_SET(REGNODE_p(offset), arg1);                   \
+                    ARG2L_SET(REGNODE_p(offset), arg2);                 \
+                    FILL_ADVANCE_NODE(offset, op);                      \
+                    (offset) += 2;                                      \
+    } STMT_END
 
 #define REG_MAGIC 0234
-
-#define SIZE_ONLY cBOOL(RExC_emit == (regnode *) & RExC_emit_dummy)
-#define PASS1 SIZE_ONLY
-#define PASS2 (! SIZE_ONLY)
 
 /* An ANYOF node is basically a bitmap with the index being a code point.  If
  * the bit for that code point is 1, the code point matches;  if 0, it doesn't
@@ -380,7 +390,7 @@ struct regnode_ssc {
  * never reach this high). */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* When the bimap isn't completely sufficient for handling the ANYOF node,
+/* When the bitmap isn't completely sufficient for handling the ANYOF node,
  * flags (in node->flags of the ANYOF node) get set to indicate this.  These
  * are perennially in short supply.  Beyond several cases where warnings need
  * to be raised under certain circumstances, currently, there are six cases
@@ -441,9 +451,9 @@ struct regnode_ssc {
  *      shared with another, so it doesn't occupy extra space.
  *
  * At the moment, there is one spare bit, but this could be increased by
- * various tricks.
+ * various tricks:
  *
- * If just one more bit is needed, at this writing it seems to khw that the
+ * If just one more bit is needed, as of this writing it seems to khw that the
  * best choice would be to make ANYOF_MATCHES_ALL_ABOVE_BITMAP not a flag, but
  * something like
  *
@@ -454,22 +464,18 @@ struct regnode_ssc {
  * handler function, as the macro REGINCLASS in regexec.c does now for other
  * cases.
  *
- * Another possibility is to instead (or additionally) rename the ANYOF_POSIXL
- * flag to be ANYOFL_LARGE, to mean that the ANYOF node has an extra 32 bits
- * beyond what a regular one does.  That's what it effectively means now, with
- * the extra space all for the POSIX class flags.  But those classes actually
- * only occupy 30 bits, so the ANYOFL_FOLD and
- * ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD flags could be moved
- * to that extra space.  The 30 bits in the extra word would indicate if a
- * posix class should be looked up or not.  The downside of this is that ANYOFL
- * nodes with folding would always have to have the extra space allocated, even
- * if they didn't use the 30 posix bits.  There isn't an SSC problem as all
- * SSCs are this large anyway.
+ * Another possibility is based on the fact that ANYOF_MATCHES_POSIXL is
+ * redundant with the node type ANYOFPOSIXL.  That flag could be removed, but
+ * at the expense of extra code in regexec.c.  The flag has been retained
+ * because it allows us to see if we need to call reginsert, or just use the
+ * bitmap in one test.
  *
- * One could completely remove ANYOFL_LARGE and make all ANYOFL nodes large.
- * REGINCLASS would have to be modified so that if the node type were this, it
- * would call reginclass(), as the flag bit that indicates to do this now would
- * be gone.
+ * If this is done, an extension would be to make all ANYOFL nodes contain the
+ * extra 32 bits that ANYOFPOSIXL ones do.  The posix flags only occupy 30
+ * bits, so the ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD flags
+ * and ANYOFL_FOLD could be moved to that extra space, but it would mean extra
+ * instructions, as there are currently places in the code that assume those
+ * two bits are zero.
  *
  * All told, 5 bits could be available for other uses if all of the above were
  * done.
@@ -639,17 +645,22 @@ struct regnode_ssc {
 
 #define ANYOF_BIT(c)		(1U << ((c) & 7))
 
-#define ANYOF_POSIXL_SET(p, c)	(((regnode_charclass_posixl*) (p))->classflags |= (1U << (c)))
-#define ANYOF_CLASS_SET(p, c)	ANYOF_POSIXL_SET((p), (c))
+#define POSIXL_SET(field, c)	((field) |= (1U << (c)))
+#define ANYOF_POSIXL_SET(p, c)	POSIXL_SET(((regnode_charclass_posixl*) (p))->classflags, (c))
 
-#define ANYOF_POSIXL_CLEAR(p, c) (((regnode_charclass_posixl*) (p))->classflags &= ~ (1U <<(c)))
-#define ANYOF_CLASS_CLEAR(p, c)	ANYOF_POSIXL_CLEAR((p), (c))
+#define POSIXL_CLEAR(field, c) ((field) &= ~ (1U <<(c)))
+#define ANYOF_POSIXL_CLEAR(p, c) POSIXL_CLEAR(((regnode_charclass_posixl*) (p))->classflags, (c))
 
-#define ANYOF_POSIXL_TEST(p, c)	(((regnode_charclass_posixl*) (p))->classflags & (1U << (c)))
-#define ANYOF_CLASS_TEST(p, c)	ANYOF_POSIXL_TEST((p), (c))
+#define POSIXL_TEST(field, c)	((field) & (1U << (c)))
+#define ANYOF_POSIXL_TEST(p, c)	POSIXL_TEST(((regnode_charclass_posixl*) (p))->classflags, (c))
 
-#define ANYOF_POSIXL_ZERO(ret)	STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = 0; } STMT_END
-#define ANYOF_CLASS_ZERO(ret)	ANYOF_POSIXL_ZERO(ret)
+#define POSIXL_ZERO(field)	STMT_START { (field) = 0; } STMT_END
+#define ANYOF_POSIXL_ZERO(ret)	POSIXL_ZERO(((regnode_charclass_posixl*) (ret))->classflags)
+
+#define ANYOF_POSIXL_SET_TO_BITMAP(p, bits)                                 \
+     STMT_START {                                                           \
+                    ((regnode_charclass_posixl*) (p))->classflags = (bits); \
+     } STMT_END
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
 #define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
@@ -689,11 +700,6 @@ struct regnode_ssc {
 	memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
-
-#define ANYOF_SKIP		(EXTRA_SIZE(regnode_charclass)          \
-                               - EXTRA_SIZE(struct regnode_1))
-#define ANYOF_POSIXL_SKIP	(EXTRA_SIZE(regnode_charclass_posixl)   \
-                               - EXTRA_SIZE(struct regnode_1))
 
 /*
  * Utility definitions.

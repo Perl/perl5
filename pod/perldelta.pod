@@ -421,7 +421,9 @@ well.
 
 =item *
 
-XXX
+The sizing pass has been eliminated from the regular expression
+compiler.  An extra pass may instead be needed in some cases to count
+the number of parenthetical capture groups.
 
 =back
 

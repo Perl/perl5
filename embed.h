@@ -1179,6 +1179,7 @@
 #define add_data		S_add_data
 #define add_multi_match(a,b,c)	S_add_multi_match(aTHX_ a,b,c)
 #define alloc_maybe_populate_EXACT(a,b,c,d,e,f)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e,f)
+#define change_engine_size(a,b)	S_change_engine_size(aTHX_ a,b)
 #define cntrl_to_mnemonic	S_cntrl_to_mnemonic
 #define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
@@ -1221,6 +1222,7 @@
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define set_ANYOF_arg(a,b,c,d,e,f,g)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f,g)
+#define set_regex_pv(a,b)	S_set_regex_pv(aTHX_ a,b)
 #define skip_to_be_ignored_text(a,b,c)	S_skip_to_be_ignored_text(aTHX_ a,b,c)
 #define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
 #define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
