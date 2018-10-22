@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C< use feature 'sysio_bytes'; >
+
+This feature allows using C<sysread>, C<syswrite>, C<recv> and C<send>
+on C<:utf8> handles, B<but> makes them work in bytes rather than in
+the sort-of-UTF-8 way they did in older perls.
+
+We use a feature here rather than changing the default behaviour to
+avoid silently breaking existing code.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
