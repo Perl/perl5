@@ -4825,7 +4825,7 @@ PerlIOCrlf_binmode(pTHX_ PerlIO *f)
 	PerlIO_pop(aTHX_ f);
 #endif
     }
-    return 0;
+    return PerlIOBase_binmode(aTHX_ f);
 }
 
 PERLIO_FUNCS_DECL(PerlIO_crlf) = {

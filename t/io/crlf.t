@@ -98,7 +98,6 @@ my $ungetc_count = 8200;    # Somewhat over the likely buffer size
         ok((() = grep($_ eq "utf8", PerlIO::get_layers($fh))),
            "check :utf8 set");
         ok(binmode($fh), "remove :utf8");
-        local $TODO = "this fails without the fix";
         ok(!(() = grep($_ eq "utf8", PerlIO::get_layers($fh))),
            "check :utf8 removed");
         close $fh;

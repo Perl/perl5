@@ -141,8 +141,6 @@ SKIP: {
     # separate to avoid interfering with the data expected above
     $local or skip("No localhost", 1);
     $fork or skip("No fork", 1);
-    $^O eq "MSWin32"
-      and skip("binmode acting strangely here on Win32", 1);
 
     note "recv/send :utf8 tests";
     ok(socket(my $serv, PF_INET, SOCK_STREAM, $tcp), "make a tcp socket (recv/send :utf8 handling)");
