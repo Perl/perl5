@@ -572,7 +572,7 @@ static int not_here(const char *s);
 #  undef c99_trunc
 #endif
 
-#ifdef WIN32
+#ifdef _MSC_VER
 
 /* Some APIs exist under Win32 with "underbar" names. */
 #  undef c99_hypot
