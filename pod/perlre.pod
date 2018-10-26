@@ -931,7 +931,7 @@ instance the above example could also be written as follows:
 
    /"(?>(?:(?>[^"\\]+)|\\.)*)"/
 
-Note that the possessive quantifier modifier can not be be combined
+Note that the possessive quantifier modifier can not be combined
 with the non-greedy modifier. This is because it would make no sense.
 Consider the follow equivalency table:
 
