@@ -270,65 +270,6 @@ SKIP: {
     isnt($!+0, 0, "and errno was set");
 }
 
-
-sub check_utime_result {
-    ($ut, $accurate_timestamps, $delta) = @_;
-    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-     $blksize,$blocks) = stat('b');
-
-    SKIP: {
-        skip "bogus inode num", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
-        ok($ino,    'non-zero inode num');
-    }
-
-    SKIP: {
-        skip "filesystem atime/mtime granularity too low", 2
-            unless $accurate_timestamps;
-
-        if ($^O eq 'vos') {
-            skip ("# TODO - hit VOS bug posix-2055 - access time does not follow POSIX rules for an open file.", 2);
-        }
-
-        note("# atime - $atime  mtime - $mtime  delta - $delta");
-        if($atime == $ut && $mtime == $ut + $delta) {
-            pass('atime: granularity test');
-            pass('mtime: granularity test');
-        }
-        else {
-            if ($^O =~ /\blinux\b/i) {
-                note("# Maybe stat() cannot get the correct atime, ".
-                    "as happens via NFS on linux?");
-                $foo = (utime 400000000,$ut + 2*$delta,'b');
-                my ($new_atime, $new_mtime) = (stat('b'))[8,9];
-                note("# newatime - $new_atime  nemtime - $new_mtime");
-                if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
-                    pass("atime - accounted for possible NFS/glibc2.2 bug on linux");
-                    pass("mtime - accounted for possible NFS/glibc2.2 bug on linux");
-                }
-                else {
-                    fail("atime - $atime/$new_atime $mtime/$new_mtime");
-                    fail("mtime - $atime/$new_atime $mtime/$new_mtime");
-                }
-            }
-            elsif ($^O eq 'VMS') {
-                # why is this 1 second off?
-                is( $atime, $ut + 1,      'atime: VMS' );
-                is( $mtime, $ut + $delta, 'mtime: VMS' );
-            }
-            elsif ($^O eq 'haiku') {
-                SKIP: {
-                    skip "atime not updated", 1;
-                }
-                is($mtime, 500000001, 'mtime');
-            }
-            else {
-                fail("atime: default case");
-                fail("mtime: default case");
-            }
-        } # END failed atime mtime 'else' block
-    } # END granularity SKIP block
-}
-
 SKIP: {
     skip "has futimes", 1 if ($Config{d_futimes} || "") eq "define";
     open(my $fh, "<", "b") || die;
@@ -532,3 +473,61 @@ SKIP: {
 
 # need to remove $tmpdir if rename() in test 28 failed!
 END { rmdir $tmpdir1; rmdir $tmpdir; }
+
+sub check_utime_result {
+    ($ut, $accurate_timestamps, $delta) = @_;
+    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+     $blksize,$blocks) = stat('b');
+
+    SKIP: {
+        skip "bogus inode num", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+        ok($ino,    'non-zero inode num');
+    }
+
+    SKIP: {
+        skip "filesystem atime/mtime granularity too low", 2
+            unless $accurate_timestamps;
+
+        if ($^O eq 'vos') {
+            skip ("# TODO - hit VOS bug posix-2055 - access time does not follow POSIX rules for an open file.", 2);
+        }
+
+        note("# atime - $atime  mtime - $mtime  delta - $delta");
+        if($atime == $ut && $mtime == $ut + $delta) {
+            pass('atime: granularity test');
+            pass('mtime: granularity test');
+        }
+        else {
+            if ($^O =~ /\blinux\b/i) {
+                note("# Maybe stat() cannot get the correct atime, ".
+                    "as happens via NFS on linux?");
+                $foo = (utime 400000000,$ut + 2*$delta,'b');
+                my ($new_atime, $new_mtime) = (stat('b'))[8,9];
+                note("# newatime - $new_atime  nemtime - $new_mtime");
+                if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
+                    pass("atime - accounted for possible NFS/glibc2.2 bug on linux");
+                    pass("mtime - accounted for possible NFS/glibc2.2 bug on linux");
+                }
+                else {
+                    fail("atime - $atime/$new_atime $mtime/$new_mtime");
+                    fail("mtime - $atime/$new_atime $mtime/$new_mtime");
+                }
+            }
+            elsif ($^O eq 'VMS') {
+                # why is this 1 second off?
+                is( $atime, $ut + 1,      'atime: VMS' );
+                is( $mtime, $ut + $delta, 'mtime: VMS' );
+            }
+            elsif ($^O eq 'haiku') {
+                SKIP: {
+                    skip "atime not updated", 1;
+                }
+                is($mtime, 500000001, 'mtime');
+            }
+            else {
+                fail("atime: default case");
+                fail("mtime: default case");
+            }
+        } # END failed atime mtime 'else' block
+    } # END granularity SKIP block
+}
