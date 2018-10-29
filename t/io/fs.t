@@ -247,27 +247,29 @@ is($ino, undef, "ino of renamed file a should be undef");
 $delta = $accurate_timestamps ? 1 : 2;	# Granularity of time on the filesystem
 chmod 0777, 'b';
 
+$ut = 500000000;
+
 note("basic check of atime and mtime");
-$foo = (utime 500000000,500000000 + $delta,'b');
+$foo = (utime $ut,$ut + $delta,'b');
 is($foo, 1, "utime");
 check_utime_result();
 
 utime undef, undef, 'b';
 ($atime,$mtime) = (stat 'b')[8,9];
 note("# utime undef, undef --> $atime, $mtime");
-isnt($atime, 500000000,          'atime: utime called with two undefs');
-isnt($mtime, 500000000 + $delta, 'mtime: utime called with two undefs');
+isnt($atime, $ut,          'atime: utime called with two undefs');
+isnt($mtime, $ut + $delta, 'mtime: utime called with two undefs');
 
 SKIP: {
     skip "no futimes", 6 unless ($Config{d_futimes} || "") eq "define";
     note("check futimes");
     open(my $fh, "<", 'b');
-    $foo = (utime 500000000,500000000 + $delta, $fh);
+    $foo = (utime $ut,$ut + $delta, $fh);
     is($foo, 1, "futime");
     check_utime_result();
     # [perl #122703]
     close $fh;
-    ok(!utime(500000000,500000000 + $delta, $fh),
+    ok(!utime($ut,$ut + $delta, $fh),
        "utime fails on a closed file handle");
     isnt($!+0, 0, "and errno was set");
 }
@@ -292,7 +294,7 @@ sub check_utime_result {
      }
 
 	note("# atime - $atime  mtime - $mtime  delta - $delta");
-	if($atime == 500000000 && $mtime == 500000000 + $delta) {
+	if($atime == $ut && $mtime == $ut + $delta) {
 	    pass('atime: granularity test');
 	    pass('mtime: granularity test');
 	}
@@ -300,7 +302,7 @@ sub check_utime_result {
 	    if ($^O =~ /\blinux\b/i) {
 		note("# Maybe stat() cannot get the correct atime, ".
 		    "as happens via NFS on linux?");
-		$foo = (utime 400000000,500000000 + 2*$delta,'b');
+		$foo = (utime 400000000,$ut + 2*$delta,'b');
 		my ($new_atime, $new_mtime) = (stat('b'))[8,9];
 		note("# newatime - $new_atime  nemtime - $new_mtime");
 		if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
@@ -314,8 +316,8 @@ sub check_utime_result {
 	    }
 	    elsif ($^O eq 'VMS') {
 		# why is this 1 second off?
-		is( $atime, 500000001,          'atime: VMS' );
-		is( $mtime, 500000000 + $delta, 'mtime: VMS' );
+		is( $atime, $ut + 1,      'atime: VMS' );
+		is( $mtime, $ut + $delta, 'mtime: VMS' );
 	    }
 	    elsif ($^O eq 'haiku') {
             SKIP: {
