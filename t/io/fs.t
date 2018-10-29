@@ -255,8 +255,8 @@ check_utime_result();
 utime undef, undef, 'b';
 ($atime,$mtime) = (stat 'b')[8,9];
 note("# utime undef, undef --> $atime, $mtime");
-isnt($atime, 500000000, 'atime');
-isnt($mtime, 500000000 + $delta, 'mtime');
+isnt($atime, 500000000,          'atime: utime called with two undefs');
+isnt($mtime, 500000000 + $delta, 'mtime: utime called with two undefs');
 
 SKIP: {
     skip "no futimes", 6 unless ($Config{d_futimes} || "") eq "define";
@@ -314,8 +314,8 @@ sub check_utime_result {
 	    }
 	    elsif ($^O eq 'VMS') {
 		# why is this 1 second off?
-		is( $atime, 500000001,          'atime' );
-		is( $mtime, 500000000 + $delta, 'mtime' );
+		is( $atime, 500000001,          'atime: VMS' );
+		is( $mtime, 500000000 + $delta, 'mtime: VMS' );
 	    }
 	    elsif ($^O eq 'haiku') {
             SKIP: {
@@ -324,8 +324,8 @@ sub check_utime_result {
 		is($mtime, 500000001, 'mtime');
 	    }
 	    else {
-		fail("atime");
-		fail("mtime");
+		fail("atime: default case");
+		fail("mtime: default case");
 	    }
 	}
     }
