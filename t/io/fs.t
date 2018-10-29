@@ -248,7 +248,7 @@ $ut = 500000000;
 note("basic check of atime and mtime");
 $foo = (utime $ut,$ut + $delta,'b');
 is($foo, 1, "utime");
-check_utime_result();
+check_utime_result($ut, $accurate_timestamps, $delta);
 
 utime undef, undef, 'b';
 ($atime,$mtime) = (stat 'b')[8,9];
@@ -262,7 +262,7 @@ SKIP: {
     open(my $fh, "<", 'b');
     $foo = (utime $ut,$ut + $delta, $fh);
     is($foo, 1, "futime");
-    check_utime_result();
+    check_utime_result($ut, $accurate_timestamps, $delta);
     # [perl #122703]
     close $fh;
     ok(!utime($ut,$ut + $delta, $fh),
@@ -272,6 +272,7 @@ SKIP: {
 
 
 sub check_utime_result {
+    ($ut, $accurate_timestamps, $delta) = @_;
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('b');
 
