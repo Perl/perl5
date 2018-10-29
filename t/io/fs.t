@@ -247,6 +247,7 @@ is($ino, undef, "ino of renamed file a should be undef");
 $delta = $accurate_timestamps ? 1 : 2;	# Granularity of time on the filesystem
 chmod 0777, 'b';
 
+note("basic check of atime and mtime");
 $foo = (utime 500000000,500000000 + $delta,'b');
 is($foo, 1, "utime");
 check_utime_result();
@@ -259,6 +260,7 @@ isnt($mtime, 500000000 + $delta, 'mtime');
 
 SKIP: {
     skip "no futimes", 6 unless ($Config{d_futimes} || "") eq "define";
+    note("check futimes");
     open(my $fh, "<", 'b');
     $foo = (utime 500000000,500000000 + $delta, $fh);
     is($foo, 1, "futime");
@@ -291,8 +293,8 @@ sub check_utime_result {
 
 	note("# atime - $atime  mtime - $mtime  delta - $delta");
 	if($atime == 500000000 && $mtime == 500000000 + $delta) {
-	    pass('atime');
-	    pass('mtime');
+	    pass('atime: granularity test');
+	    pass('mtime: granularity test');
 	}
 	else {
 	    if ($^O =~ /\blinux\b/i) {
