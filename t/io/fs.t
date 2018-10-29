@@ -120,15 +120,11 @@ SKIP: {
 
     SKIP: {
         skip "hard links not that hard in $^O", 1 if $^O eq 'amigaos';
-	skip "no mode checks", 1 if $skip_mode_checks;
+        skip "no mode checks", 1 if $skip_mode_checks;
 
-#      if ($^O eq 'cygwin') { # new files on cygwin get rwx instead of rw-
-#          is($mode & 0777, 0777, "mode of triply-linked file");
-#      } else {
-            is(sprintf("0%o", $mode & 0777), 
-               sprintf("0%o", $a_mode & 0777), 
-               "mode of triply-linked file");
-#      }
+        is(sprintf("0%o", $mode & 0777), 
+            sprintf("0%o", $a_mode & 0777), 
+            "mode of triply-linked file");
     }
 }
 
