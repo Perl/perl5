@@ -23,6 +23,7 @@ use Config;
 my $have_strtod = $Config{d_strtod} eq 'define';
 my @locales = find_locales( [ 'LC_ALL', 'LC_CTYPE', 'LC_NUMERIC' ]);
 skip_all("no locales available") unless @locales;
+note("locales available: @locales");
 
 my $debug = 0;
 my $switches = "";
@@ -73,6 +74,7 @@ foreach my $locale (@locales) {
 }
 
 if ($non_C_locale) {
+    note("using non-C locale '$non_C_locale'");
     setlocale(LC_NUMERIC, $non_C_locale);
     isnt(setlocale(LC_NUMERIC), "C", "retrieving current non-C LC_NUMERIC doesn't give 'C'");
     setlocale(LC_ALL, $non_C_locale);
@@ -80,7 +82,7 @@ if ($non_C_locale) {
 
     my @test_numeric_locales = @locales;
 
-    # Skip this locale on these cywgwin versions as the returned radix character
+    # Skip this locale on these cygwin versions as the returned radix character
     # length is wrong
     if (   $^O eq 'cygwin'
         && version->new(($Config{'osvers'} =~ /^(\d+(?:\.\d+)+)/)[0]) le v2.4.1)
