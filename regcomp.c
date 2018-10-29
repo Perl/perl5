@@ -6967,7 +6967,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
      * properly wrapped with the right modifiers */
 
     bool has_p     = ((RExC_rx->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
-    bool has_charset = (get_regex_charset(RExC_rx->extflags)
+    bool has_charset = RExC_utf8 || (get_regex_charset(RExC_rx->extflags)
                                                 != REGEX_DEPENDS_CHARSET);
 
     /* The caret is output if there are any defaults: if not all the STD
@@ -7011,7 +7011,14 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
     }
     if (has_charset) {
         STRLEN len;
-        const char* const name = get_regex_charset_name(RExC_rx->extflags, &len);
+        const char* name;
+
+        name = get_regex_charset_name(RExC_rx->extflags, &len);
+        if strEQ(name, DEPENDS_PAT_MODS) {  /* /d under UTF-8 => /u */
+            assert(RExC_utf8);
+            name = UNICODE_PAT_MODS;
+            len = sizeof(UNICODE_PAT_MODS) - 1;
+        }
         Copy(name, p, len, char);
         p += len;
     }
