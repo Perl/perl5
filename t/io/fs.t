@@ -253,7 +253,7 @@ check_utime_result();
 
 utime undef, undef, 'b';
 ($atime,$mtime) = (stat 'b')[8,9];
-print "# utime undef, undef --> $atime, $mtime\n";
+note("# utime undef, undef --> $atime, $mtime");
 isnt($atime, 500000000, 'atime');
 isnt($mtime, 500000000 + $delta, 'mtime');
 
@@ -289,18 +289,18 @@ sub check_utime_result {
 	    skip ("# TODO - hit VOS bug posix-2055 - access time does not follow POSIX rules for an open file.", 2);
      }
 
-	print "# atime - $atime  mtime - $mtime  delta - $delta\n";
+	note("# atime - $atime  mtime - $mtime  delta - $delta");
 	if($atime == 500000000 && $mtime == 500000000 + $delta) {
 	    pass('atime');
 	    pass('mtime');
 	}
 	else {
 	    if ($^O =~ /\blinux\b/i) {
-		print "# Maybe stat() cannot get the correct atime, ".
-		    "as happens via NFS on linux?\n";
+		note("# Maybe stat() cannot get the correct atime, ".
+		    "as happens via NFS on linux?");
 		$foo = (utime 400000000,500000000 + 2*$delta,'b');
 		my ($new_atime, $new_mtime) = (stat('b'))[8,9];
-		print "# newatime - $new_atime  nemtime - $new_mtime\n";
+		note("# newatime - $new_atime  nemtime - $new_mtime");
 		if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
 		    pass("atime - accounted for possible NFS/glibc2.2 bug on linux");
 		    pass("mtime - accounted for possible NFS/glibc2.2 bug on linux");
