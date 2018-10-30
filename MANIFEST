@@ -4455,6 +4455,7 @@ hints/linux.sh			Hints for named architecture
 hints/linux-android.sh		Hints for named architecture
 hints/lynxos.sh			Hints for named architecture
 hints/midnightbsd.sh		Hints for named architecture
+hints/minix.sh			Hints for named architecture
 hints/mips.sh			Hints for named architecture
 hints/mirbsd.sh			Hints for named architecture
 hints/mpc.sh			Hints for named architecture
