@@ -3499,6 +3499,9 @@ EOM
 			;;
 		MiNT)	osname=mint
 			;;
+		minix)	osname=minix
+			osvers=`$uname -r`
+			;;
 		netbsd*) osname=netbsd
 			osvers="$3"
 			;;
@@ -8803,7 +8806,7 @@ if "$useshrplib"; then
 	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd|mirbsd|netbsd|openbsd|interix|dragonfly|bitrig)
+	freebsd|minix|mirbsd|netbsd|openbsd|interix|dragonfly|bitrig)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	bsdos|linux|irix*|dec_osf|gnu*|haiku)
