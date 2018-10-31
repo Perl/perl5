@@ -498,6 +498,9 @@ sub check_utime_result {
             pass('mtime: granularity test');
         }
         else {
+            # Operating systems whose filesystems may be mounted with the noatime option
+            # RT 132663
+            my %noatime_oses = map { $_ => 1 } ( qw| haiku netbsd | );
             if ($^O =~ /\blinux\b/i) {
                 note("# Maybe stat() cannot get the correct atime, ".
                     "as happens via NFS on linux?");
@@ -518,10 +521,8 @@ sub check_utime_result {
                 is( $atime, $ut + 1,      'atime: VMS' );
                 is( $mtime, $ut + $delta, 'mtime: VMS' );
             }
-            elsif ($^O eq 'haiku') {
-                SKIP: {
-                    skip "atime not updated", 1;
-                }
+            elsif ($noatime_oses{$^O}) {
+                pass("atime not updated");
                 is($mtime, 500000001, 'mtime');
             }
             else {
