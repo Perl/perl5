@@ -1999,6 +1999,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 (?il)\x{100}|\x{100}|\x{FE}	\xFE	y	$&	\xFE
 \A([\x00-\x7F]+)(.*)\z	\007\011\012	y	$&	\007\011\012	# [perl #133311]
 (?:(?^:(?{1}))[^0-9])	:	y	$&	:	# [perl #133348]
+/[\xdf-/i	-	c	-	Invalid [] range	# [perl #133620] likely only fails under valgrind
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

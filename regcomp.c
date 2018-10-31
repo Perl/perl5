@@ -686,7 +686,7 @@ static const scan_data_t zero_scan_data = {
 #define REPORT_LOCATION_ARGS(xC)                                            \
     UTF8fARG(UTF,                                                           \
              (xI(xC) > eI) /* Don't run off end */                          \
-              ? eC - sC   /* Length before the <--HERE */                   \
+              ? eI - sI   /* Length before the <--HERE */                   \
               : ((xI_offset(xC) >= 0)                                       \
                  ? xI_offset(xC)                                            \
                  : (Perl_croak(aTHX_ "panic: %s: %d: negative offset: %"    \
