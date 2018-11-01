@@ -18387,10 +18387,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * up less room and generally fewer operations to execute than ANYOF nodes.
      * Above, we checked for and optimized into some such equivalents for
      * certain common classes that are easy to test.  Getting to this point in
-     * the code means that the class didn't get optimized there.  Since this
-     * code is only executed in Pass 2, it is too late to save space--it has
-     * been allocated in Pass 1, and currently isn't given back.  XXX Why not?
-     * But turning things into an EXACTish node can allow the optimizer to join
+     * the code means that the class didn't get optimized there.
+     * Turning things into an EXACTish node can allow the optimizer to join
      * it to any adjacent such nodes.  And if the class is equivalent to things
      * like /./, expensive run-time swashes can be avoided.  Now that we have
      * more complete information, we can find things necessarily missed by the
@@ -18497,22 +18495,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 op = NASCII;
                 *flagp |= HASWIDTH|SIMPLE;
             }
-            else if (invlist_highest(cp_list) >= 0x2029) {
+            else {
 
                 /* Then try the other POSIX classes.  The POSIXA ones are about
-                 * the same speed as ANYOF ops, but the ones that have
-                 * above-Latin1 code point matches are somewhat faster than
-                 * ANYOF.  So optimize those, but don't bother with the POSIXA
-                 * ones nor [:cntrl:] which has no above-Latin1 matches.  If
-                 * this ANYOF node has a lower highest possible matching code
-                 * point than any of the XPosix ones, we know that it can't
-                 * possibly be the same as any of them, so we can avoid
-                 * executing this code.  The 0x2029 above for the lowest max
-                 * was determined by manual inspection of the classes, and
-                 * comes from \v.  Suppose Unicode in a later version adds a
-                 * higher code point to \v.  All that means is that this code
-                 * can be executed unnecessarily.  It will still give the
-                 * correct answer. */
+                 * the same speed as ANYOF ops, but take less room; the ones
+                 * that have above-Latin1 code point matches are somewhat
+                 * faster than ANYOF. */
 
                 for (posix_class = 0;
                      posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
@@ -18520,13 +18508,23 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 {
                     int try_inverted;
 
-                    if (posix_class == _CC_CNTRL) {
-                        continue;
-                    }
-
                     for (try_inverted = 0; try_inverted < 2; try_inverted++) {
 
-                        /* Check if matches normal or inverted */
+                        /* Check if matches POSIXA, normal or inverted */
+                        if (PL_Posix_ptrs[posix_class]) {
+                            if (_invlistEQ(cp_list,
+                                           PL_Posix_ptrs[posix_class],
+                                           try_inverted))
+                            {
+                                op = (try_inverted)
+                                    ? NPOSIXA
+                                    : POSIXA;
+                                *flagp |= HASWIDTH|SIMPLE;
+                                goto found_posix;
+                            }
+                        }
+
+                        /* Check if matches POSIXU, normal or inverted */
                         if (_invlistEQ(cp_list,
                                        PL_XPosix_ptrs[posix_class],
                                        try_inverted))
