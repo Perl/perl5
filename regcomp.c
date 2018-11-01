@@ -17795,207 +17795,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         return ret;
     }
 
-    /* Here, we've gone through the entire class and dealt with multi-char
-     * folds.  We are now in a position that we can do some checks to see if we
-     * can optimize this ANYOF node into a simpler one, even in Pass 1.
-     * Currently we only do two checks:
-     * 1) is in the unlikely event that the user has specified both, eg. \w and
-     *    \W under /l, then the class matches everything.  (This optimization
-     *    is done only to make the optimizer code run later work.)
-     * 2) if the character class contains only a single element (including a
-     *    single range), we see if there is an equivalent node for it.
-     * Other checks are possible */
-    if (   optimizable
-        && ! ret_invlist   /* Can't optimize if returning the constructed
-                              inversion list */
-        && (UNLIKELY(posixl_matches_all) || element_count == 1))
-    {
-        U8 op = END;
-        U8 arg = 0;
-
-        if (UNLIKELY(posixl_matches_all)) {
-            op = SANY;
-        }
-        else if (namedclass > OOB_NAMEDCLASS) { /* this is a single named
-                                                   class, like \w or [:digit:]
-                                                   or \p{foo} */
-
-            /* All named classes are mapped into POSIXish nodes, with its FLAG
-             * argument giving which class it is */
-            switch ((I32)namedclass) {
-                case ANYOF_UNIPROP:
-                    break;
-
-                /* These don't depend on the charset modifiers.  They always
-                 * match under /u rules */
-                case ANYOF_NHORIZWS:
-                case ANYOF_HORIZWS:
-                    namedclass = ANYOF_BLANK + namedclass - ANYOF_HORIZWS;
-                    /* FALLTHROUGH */
-
-                case ANYOF_NVERTWS:
-                case ANYOF_VERTWS:
-                    op = POSIXU;
-                    goto join_posix;
-
-                /* The actual POSIXish node for all the rest depends on the
-                 * charset modifier.  The ones in the first set depend only on
-                 * ASCII or, if available on this platform, also locale */
-
-                case ANYOF_ASCII:
-                case ANYOF_NASCII:
-
-#ifdef HAS_ISASCII
-                    if (LOC) {
-                        op = POSIXL;
-                        goto join_posix;
-                    }
-#endif
-                    /* (named_class - ANYOF_ASCII) is 0 or 1. xor'ing with
-                     * invert converts that to 1 or 0 */
-                    op = ASCII + ((namedclass - ANYOF_ASCII) ^ invert);
-                    break;
-
-                /* The following don't have any matches in the upper Latin1
-                 * range, hence /d is equivalent to /u for them.  Making it /u
-                 * saves some branches at runtime */
-                case ANYOF_DIGIT:
-                case ANYOF_NDIGIT:
-                case ANYOF_XDIGIT:
-                case ANYOF_NXDIGIT:
-                    if (! DEPENDS_SEMANTICS) {
-                        goto treat_as_default;
-                    }
-
-                    op = POSIXU;
-                    goto join_posix;
-
-                /* The following change to CASED under /i */
-                case ANYOF_LOWER:
-                case ANYOF_NLOWER:
-                case ANYOF_UPPER:
-                case ANYOF_NUPPER:
-                    if (FOLD) {
-                        namedclass = ANYOF_CASED + (namedclass % 2);
-                    }
-                    /* FALLTHROUGH */
-
-                /* The rest have more possibilities depending on the charset.
-                 * We take advantage of the enum ordering of the charset
-                 * modifiers to get the exact node type, */
-                default:
-                  treat_as_default:
-                    op = POSIXD + get_regex_charset(RExC_flags);
-                    if (op > POSIXA) { /* /aa is same as /a */
-                        op = POSIXA;
-                    }
-
-                  join_posix:
-                    /* The odd numbered ones are the complements of the
-                     * next-lower even number one */
-                    if (namedclass % 2 == 1) {
-                        invert = ! invert;
-                        namedclass--;
-                    }
-                    arg = namedclass_to_classnum(namedclass);
-                    break;
-            }
-        }
-        else if (value == prevvalue) {
-
-            /* Here, the class consists of just a single code point */
-
-            if (invert) {
-                if (! LOC && value == '\n') {
-                    op = REG_ANY; /* Optimize [^\n] */
-                    *flagp |= HASWIDTH|SIMPLE;
-                    MARK_NAUGHTY(1);
-                }
-            }
-            else if (value < 256 || UTF) {
-
-                /* Optimize a single value into an EXACTish node, but not if it
-                 * would require converting the pattern to UTF-8. */
-                op = compute_EXACTish(pRExC_state);
-            }
-        } /* Otherwise is a range */
-        else if (! LOC) {   /* locale could vary these */
-            if (prevvalue == '0') {
-                if (value == '9') {
-                    arg = _CC_DIGIT;
-                    op = POSIXA;
-                }
-            }
-            else if (! FOLD || ASCII_FOLD_RESTRICTED) {
-                /* We can optimize A-Z or a-z, but not if they could match
-                 * something like the KELVIN SIGN under /i. */
-                if (prevvalue == 'A') {
-                    if (value == 'Z'
-#ifdef EBCDIC
-                        && ! non_portable_endpoint
-#endif
-                    ) {
-                        arg = (FOLD) ? _CC_ALPHA : _CC_UPPER;
-                        op = POSIXA;
-                    }
-                }
-                else if (prevvalue == 'a') {
-                    if (value == 'z'
-#ifdef EBCDIC
-                        && ! non_portable_endpoint
-#endif
-                    ) {
-                        arg = (FOLD) ? _CC_ALPHA : _CC_LOWER;
-                        op = POSIXA;
-                    }
-                }
-            }
-        }
-
-        /* Here, we have changed <op> away from its initial value iff we found
-         * an optimization */
-        if (op != END) {
-
-            /* Emit the calculated regnode,
-             * which should correspond to the beginning, not current, state of
-             * the parse */
-            const char * cur_parse = RExC_parse;
-            RExC_parse = (char *)orig_parse;
-            if (PL_regkind[op] == POSIXD) {
-                if (op == POSIXL) {
-                    RExC_contains_locale = 1;
-                }
-                if (invert) {
-                    op += NPOSIXD - POSIXD;
-                }
-            }
-
-            ret = reg_node(pRExC_state, op);
-
-            if (PL_regkind[op] == POSIXD || PL_regkind[op] == NPOSIXD) {
-                FLAGS(REGNODE_p(ret)) = arg;
-                *flagp |= HASWIDTH|SIMPLE;
-            }
-            else if (PL_regkind[op] == EXACT) {
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
-                                           TRUE /* downgradable to EXACT */
-                                           );
-            }
-            else {
-                *flagp |= HASWIDTH|SIMPLE;
-            }
-
-            RExC_parse = (char *) cur_parse;
-
-            SvREFCNT_dec(posixes);
-            SvREFCNT_dec(nposixes);
-            SvREFCNT_dec(simple_posixes);
-            SvREFCNT_dec(cp_list);
-            SvREFCNT_dec(cp_foldable_list);
-            return ret;
-        }
-    }
-
     /* If folding, we calculate all characters that could fold to or from the
      * ones already on the list */
     if (cp_foldable_list) {
@@ -18385,22 +18184,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /* Some character classes are equivalent to other nodes.  Such nodes take
      * up less room and generally fewer operations to execute than ANYOF nodes.
-     * Above, we checked for and optimized into some such equivalents for
-     * certain common classes that are easy to test.  Getting to this point in
-     * the code means that the class didn't get optimized there.
-     * Turning things into an EXACTish node can allow the optimizer to join
-     * it to any adjacent such nodes.  And if the class is equivalent to things
-     * like /./, expensive run-time swashes can be avoided.  Now that we have
-     * more complete information, we can find things necessarily missed by the
-     * earlier code. */
+     * */
 
-    if (optimizable && cp_list && ! invert) {
-        UV start, end;
-        U8 op = END;  /* The optimzation node-type */
+    if (optimizable) {
         int posix_class = -1;   /* Illegal value */
         const char * cur_parse= RExC_parse;
         U8 ANYOFM_mask = 0xFF;
         U32 anode_arg = 0;
+        UV start, end;
+
+        if (UNLIKELY(posixl_matches_all)) {
+            op = SANY;
+        }
+        else if (cp_list && ! invert) {
 
         invlist_iterinit(cp_list);
         if (! invlist_iternext(cp_list, &start, &end)) {
@@ -18639,6 +18435,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     *flagp |= HASWIDTH|SIMPLE;
                 }
             }
+        }
         }
 
         if (op != END) {
