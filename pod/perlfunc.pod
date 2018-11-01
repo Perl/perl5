@@ -522,6 +522,10 @@ argument is omitted, tests L<C<$_>|perlvar/$_>, except for C<-t>, which
 tests STDIN.  Unless otherwise documented, it returns C<1> for true and
 C<''> for false.  If the file doesn't exist or can't be examined, it
 returns L<C<undef>|/undef EXPR> and sets L<C<$!>|perlvar/$!> (errno).
+With the exception of the C<-l> test they all follow symbolic links
+because they use C<stat()> and not C<lstat()> (so dangling symlinks can't
+be examined and will therefore report failure).
+
 Despite the funny names, precedence is the same as any other named unary
 operator.  The operator may be any of:
 
