@@ -307,7 +307,7 @@ SKIP: {
     skip("locales not available", 26) unless locales_enabled(qw(NUMERIC MONETARY));
     skip("localeconv() not available", 26) unless $Config{d_locconv};
     my $conv = localeconv;
-    is(ref $conv, 'HASH', 'localconv returns a hash reference');
+    is(ref $conv, 'HASH', 'localeconv returns a hash reference');
 
     foreach (qw(decimal_point thousands_sep grouping int_curr_symbol
 		currency_symbol mon_decimal_point mon_thousands_sep
