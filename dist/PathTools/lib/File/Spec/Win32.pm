@@ -407,16 +407,6 @@ sub _canon_cat				# @path -> path
 	       )+			# performance boost -- I do not know why
 	     }{\\}gx;
 
-    # XXX I do not know whether more dots are supported by the OS supporting
-    #     this ... annotation (NetWare or symbian but not MSWin32).
-    #     Then .... could easily become ../../.. etc:
-    # Replace \.\.\. by (\.\.\.+)  and substitute with
-    # { $1 . ".." . "\\.." x (length($2)-2) }gex
-	     				# ... --> ../..
-    $path =~ s{ (\A|\\)			# at begin or after a slash
-    		\.\.\.
-		(?=\\|\z) 		# at end or followed by slash
-	     }{$1..\\..}gx;
     					# xx\yy\..\zz --> xx\zz
     while ( $path =~ s{(?:
 		(?:\A|\\)		# at begin or after a slash
