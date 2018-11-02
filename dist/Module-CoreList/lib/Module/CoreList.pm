@@ -15443,8 +15443,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.028000',
             'Config'                => '5.028',
-            'Module::CoreList'      => '5.20180520',
-            'Module::CoreList::Utils'=> '5.20180520',
+            'Module::CoreList'      => '5.20180521',
+            'Module::CoreList::Utils'=> '5.20180521',
             'Storable'              => '3.08',
             'feature'               => '1.52',
         },
