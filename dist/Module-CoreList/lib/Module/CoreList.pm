@@ -340,7 +340,7 @@ sub changes_between {
     5.026002 => '2018-04-14',
     5.027011 => '2018-04-20',
     5.028000 => '2018-06-22',
-    5.029000 => '2018-06-24',
+    5.029000 => '2018-06-26',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -15457,14 +15457,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.029000 => {
-        delta_from => 5.028000,
+        delta_from => 5.028,
         changed => {
             'Archive::Tar'          => '2.30',
             'Archive::Tar::Constant'=> '2.30',
             'Archive::Tar::File'    => '2.30',
+            'B::Op_private'         => '5.029000',
             'Config'                => '5.029',
-            'Module::CoreList'      => '5.20180624',
-            'Module::CoreList::Utils'=> '5.20180624',
+            'Module::CoreList'      => '5.20180626',
+            'Module::CoreList::Utils'=> '5.20180626',
+            'Unicode::UCD'          => '0.71',
+            'XS::APItest'           => '0.99',
             'feature'               => '1.53',
         },
         removed => {
