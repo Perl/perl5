@@ -339,6 +339,7 @@ sub changes_between {
     5.024004 => '2018-04-14',
     5.026002 => '2018-04-14',
     5.027011 => '2018-04-20',
+    5.028000 => '2018-05-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -15435,6 +15436,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'vars'                  => '1.04',
             'version'               => '0.9923',
             'version::regex'        => '0.9923',
+        },
+        removed => {
+        }
+    },
+    5.028000 => {
+        delta_from => 5.027010,
+        changed => {
         },
         removed => {
         }
