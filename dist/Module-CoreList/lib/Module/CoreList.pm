@@ -338,6 +338,7 @@ sub changes_between {
     5.027010 => '2018-03-20',
     5.024004 => '2018-04-14',
     5.026002 => '2018-04-14',
+    5.027011 => '2018-04-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -15401,6 +15402,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.027011 => {
+        delta_from => 5.027010,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -16275,6 +16283,13 @@ sub is_core
     },
     5.026002 => {
         delta_from => 5.026001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027011 => {
+        delta_from => 5.027010,
         changed => {
         },
         removed => {
