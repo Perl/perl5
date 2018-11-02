@@ -15470,6 +15470,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.029001',
             'Config'                => '5.029001',
+            'Module::CoreList'      => '5.20180720',
+            'Module::CoreList::Utils'=> '5.20180720',
         },
         removed => {
         }
