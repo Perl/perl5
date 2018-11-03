@@ -219,7 +219,6 @@ struct RExC_state_t {
 #define RExC_mysv2	(pRExC_state->mysv2)
 
 #endif
-    bool        seen_unfolded_sharp_s;
     bool        strict;
     bool        study_started;
     bool        in_script_run;
@@ -241,15 +240,6 @@ struct RExC_state_t {
 #define RExC_latest_warn_offset (pRExC_state->latest_warn_offset )
 #define RExC_whilem_seen	(pRExC_state->whilem_seen)
 
-/* Set during the sizing pass when there is a LATIN SMALL LETTER SHARP S in any
- * EXACTF node, hence was parsed under /di rules.  If later in the parse,
- * something forces the pattern into using /ui rules, the sharp s should be
- * folded into the sequence 'ss', which takes up more space than previously
- * calculated.  This means that the sizing pass needs to be restarted.  (The
- * node also becomes an EXACTFU_SS.)  For all other characters, an EXACTF node
- * that gets converted to /ui (and EXACTFU) occupies the same amount of space,
- * so there is no need to resize [perl #125990]. */
-#define RExC_seen_unfolded_sharp_s (pRExC_state->seen_unfolded_sharp_s)
 
 #ifdef RE_TRACK_PATTERN_OFFSETS
 #  define RExC_offsets	(RExC_rxi->u.offsets) /* I am not like the
@@ -7274,7 +7264,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_uni_semantics = RExC_utf8; /* UTF-8 implies unicode semantics;
                                        otherwise we may find later this should
                                        be 1 */
-    RExC_seen_unfolded_sharp_s = 0;
     RExC_contains_locale = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
     RExC_in_script_run = 0;
@@ -13732,10 +13721,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * as the latter's folds aren't known until runtime. */
             bool maybe_exactfu = TRUE;
 
-            /* To see if RExC_uni_semantics changes during parsing of the node.
-             * */
-            bool uni_semantics_at_node_start;
-
             /* Allocate an EXACT node.  The node_type may change below to
              * another EXACTish node, but since the size of the node doesn't
              * change, it works */
@@ -13763,7 +13748,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
                    || UTF8_IS_START(UCHARAT(RExC_parse)));
 
-            uni_semantics_at_node_start = cBOOL(RExC_uni_semantics);
 
             /* Here, we have a literal character.  Find the maximal string of
              * them in the input that we can fit into a single EXACTish node.
@@ -14188,27 +14172,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 ender = 's';
                                 added_len = 2;
                             }
-                            else if (   uni_semantics_at_node_start
-                                     != RExC_uni_semantics)
-                            {
-                                /* Here, we are supossed to be using Unicode
-                                 * rules, but this folding node is not.  This
-                                 * happens during pass 1 when the node started
-                                 * out not under Unicode rules, but a \N{} was
-                                 * encountered during the processing of it,
-                                 * causing Unicode rules to be switched into.
-                                 * Pass 1 continues uninterrupted, as by the
-                                 * time we get to pass 2, we will know enough
-                                 * to generate the correct folds.  Except in
-                                 * this one case, we need to restart the node,
-                                 * because the fold of the sharp s requires 2
-                                 * characters, and the sizing needs to account
-                                 * for that. */
-                                p = oldp;
-                                goto loopdone;
-                            }
-                            else {
-                                RExC_seen_unfolded_sharp_s = 1;
+                            else if (! RExC_uni_semantics) {
                                 maybe_exactfu = FALSE;
                             }
                         }
