@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use version;
-$VERSION = '5.20180414_26';
+$VERSION = '5.20181122_26';
 
 sub _undelta {
     my ($delta) = @_;
@@ -345,6 +345,7 @@ sub changes_between {
     5.029002 => '2018-08-20',
     5.029003 => '2018-09-20',
     5.029004 => '2018-10-20',
+    5.026003 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -15819,6 +15820,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'arybase'               => 1,
         }
     },
+    5.026003 => {
+        delta_from => 5.026002,
+        changed => {
+            'Archive::Tar'          => '2.24_01',
+            'B::Op_private'         => '5.026003',
+            'Config'                => '5.026003',
+            'Module::CoreList'      => '5.20181122_26',
+            'Module::CoreList::Utils'=> '5.20181122_26',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -16748,6 +16761,13 @@ sub is_core
             arybase => '1',
         }
     },
+    5.026003 => {
+        delta_from => 5.026002,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -17254,7 +17274,7 @@ sub is_core
     'Compress::Zlib'        => undef,
     'Config::Perl::V'       => undef,
     'DB_File'               => undef,
-    'Devel::PPPort'         => 'https://github.com/mhx/Devel-PPPort/issues/',
+    'Devel::PPPort'         => 'https://rt.perl.org/rt3/',
     'Digest'                => undef,
     'Digest::MD5'           => undef,
     'Digest::SHA'           => undef,
@@ -17327,7 +17347,7 @@ sub is_core
     'File::Fetch'           => undef,
     'File::GlobMapper'      => undef,
     'File::Path'            => undef,
-    'File::Temp'            => 'http://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp',
+    'File::Temp'            => 'https://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp',
     'Filter::Util::Call'    => undef,
     'Getopt::Long'          => undef,
     'HTTP::Tiny'            => 'https://github.com/chansen/p5-http-tiny/issues',
