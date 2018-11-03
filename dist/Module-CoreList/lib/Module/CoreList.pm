@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20180622';
+our $VERSION = '5.20181122_28';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -339,6 +339,7 @@ sub changes_between {
     5.029002 => '2018-08-20',
     5.029003 => '2018-09-20',
     5.029004 => '2018-10-20',
+    5.028001 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -15813,6 +15814,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'arybase'               => 1,
         }
     },
+    5.028001 => {
+        delta_from => 5.028000,
+        changed => {
+            'B::Op_private'         => '5.028001',
+            'Config'                => '5.028001',
+            'Module::CoreList'      => '5.20181122_28',
+            'Module::CoreList::Utils'=> '5.20181122_28',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -16745,6 +16757,13 @@ sub is_core
             arybase => '1',
         }
     },
+    5.028001 => {
+        delta_from => 5.028,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -17338,7 +17357,7 @@ sub is_core
     'File::Fetch'           => undef,
     'File::GlobMapper'      => undef,
     'File::Path'            => undef,
-    'File::Temp'            => 'http://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp',
+    'File::Temp'            => 'https://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp',
     'Filter::Util::Call'    => undef,
     'Getopt::Long'          => undef,
     'HTTP::Tiny'            => 'https://github.com/chansen/p5-http-tiny/issues',
