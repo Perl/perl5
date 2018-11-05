@@ -6599,10 +6599,12 @@ PP(pp_lvrefslice)
 
     while (++MARK <= SP) {
 	SV * const elemsv = *MARK;
-	if (SvTYPE(av) == SVt_PVAV)
-	    S_localise_aelem_lval(aTHX_ av, elemsv, can_preserve);
-	else
-	    S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
+        if (UNLIKELY(localizing)) {
+            if (SvTYPE(av) == SVt_PVAV)
+                S_localise_aelem_lval(aTHX_ av, elemsv, can_preserve);
+            else
+                S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
+        }
 	*MARK = sv_2mortal(newSV_type(SVt_PVMG));
 	sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
     }
