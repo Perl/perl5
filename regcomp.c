@@ -13846,6 +13846,24 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (ender > 0xff) {
                             REQUIRE_UTF8(flagp);
                         }
+
+                        /* The \N{} means the pattern, if previously /d,
+                         * becomes /u.  That means it can't be an EXACTF node,
+                         * but an EXACTFU */
+                        if (node_type == EXACTF) {
+                            node_type = EXACTFU;
+
+                            /* If the node already contains something that
+                             * differs between EXACTF and EXACTFU, reparse it
+                             * as EXACTFU */
+                            if (! maybe_exactfu) {
+                                len = 0;
+                                s = s0;
+                                maybe_exactfu = TRUE;   /* Prob. unnecessary */
+                                goto reparse;
+                            }
+                        }
+
                         break;
 		    case 'r':
 			ender = '\r';
