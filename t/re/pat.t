@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 848;  # Update this when adding/deleting tests.
+plan tests => 849;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1943,6 +1943,9 @@ EOP
     }
     {   # [perl $132227]
         fresh_perl_is("('0ba' . ('ss' x 300)) =~ m/0B\\N{U+41}" . $sharp_s x 150 . '/i and print "1\n"',  1,{},"Use of sharp s under /di that changes to /ui");
+
+        # A variation, but as far as khw knows not part of 132227
+        fresh_perl_is("'0bssa' =~ m/0B" . $sharp_s . "\\N{U+41}" . '/i and print "1\n"',  1,{},"Use of sharp s under /di that changes to /ui");
     }
     {   # [perl $132164]
         fresh_perl_is('m m0*0+\Rm', "",{},"Undefined behavior in address sanitizer");
