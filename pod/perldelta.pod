@@ -95,41 +95,17 @@ XXX
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Archive::Tar> has been upgraded from version 2.24 to 2.24_01.
 
 =item *
 
-XXX
+L<Module::CoreList> has been upgraded from version 5.20180414_26 to 5.20181122_26.
 
 =back
 
