@@ -1,0 +1,8 @@
+extraction:
+  cpp:
+    configure:
+      command:
+        - "./Configure -des -Dusedevel"
+    index:
+      build_command:
+        - "make"
