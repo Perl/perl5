@@ -15827,6 +15827,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'B::Op_private'         => '5.026003',
             'Config'                => '5.026003',
             'Module::CoreList'      => '5.20181122_26',
+            'Module::CoreList::TieHashDelta'=> '5.20181122_26',
             'Module::CoreList::Utils'=> '5.20181122_26',
         },
         removed => {
