@@ -135,9 +135,32 @@ This fatal error message has been slightly expanded (from "Syntax error in
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.26.3 represents approximately 7 months of development since Perl 5.26.2
+and contains approximately 4,500 lines of changes across 51 files from 15
+authors.
 
-  perl Porting/acknowledgements.pl v5.26.2..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 770 lines of changes to 10 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.26.3:
+
+Aaron Crane, Abigail, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, David
+Mitchell, H.Merijn Brand, James E Keenan, John SJ Anderson, Karen Etheridge,
+Karl Williamson, Sawyer X, Steve Hay, Todd Rinaldo, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
