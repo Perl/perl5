@@ -14,9 +14,44 @@ L<perl5262delta>, which describes differences between 5.26.1 and 5.26.2.
 
 =head1 Security
 
-=head2 XXX
+=head2 [CVE-2018-12015] Directory traversal in module Archive::Tar
 
-XXX
+By default, L<Archive::Tar> doesn't allow extracting files outside the current
+working directory.  However, this secure extraction mode could be bypassed by
+putting a symlink and a regular file with the same name into the tar file.
+
+L<[perl #133250]|https://rt.perl.org/Ticket/Display.html?id=133250>
+L<[cpan #125523]|https://rt.cpan.org/Ticket/Display.html?id=125523>
+
+=head2 [CVE-2018-18311] Integer overflow leading to buffer overflow and segmentation fault
+
+Integer arithmetic in C<Perl_my_setenv()> could wrap when the combined length
+of the environment variable name and value exceeded around 0x7fffffff.  This
+could lead to writing beyond the end of an allocated buffer with attacker
+supplied data.
+
+L<[perl #133204]|https://rt.perl.org/Ticket/Display.html?id=133204>
+
+=head2 [CVE-2018-18312] Heap-buffer-overflow write in S_regatom (regcomp.c)
+
+A crafted regular expression could cause heap-buffer-overflow write during
+compilation, potentially allowing arbitrary code execution.
+
+L<[perl #133423]|https://rt.perl.org/Ticket/Display.html?id=133423>
+
+=head2 [CVE-2018-18313] Heap-buffer-overflow read in S_grok_bslash_N (regcomp.c)
+
+A crafted regular expression could cause heap-buffer-overflow read during
+compilation, potentially leading to sensitive information being leaked.
+
+L<[perl #133192]|https://rt.perl.org/Ticket/Display.html?id=133192>
+
+=head2 [CVE-2018-18314] Heap-buffer-overflow write in S_regatom (regcomp.c)
+
+A crafted regular expression could cause heap-buffer-overflow write during
+compilation, potentially allowing arbitrary code execution.
+
+L<[perl #131649]|https://rt.perl.org/Ticket/Display.html?id=131649>
 
 =head1 Incompatible Changes
 
@@ -54,7 +89,34 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Unexpected ']' with no following ')' in (?[... in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Unexpected ']' with no following ')' in (?[... in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>">
+
+(F) While parsing an extended character class a ']' character was encountered
+at a point in the definition where the only legal use of ']' is to close the
+character class definition as part of a '])', you may have forgotten the close
+paren, or otherwise confused the parser.
+
+=item *
+
+L<Expecting close paren for nested extended charclass in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Expecting close paren for nested extended charclass in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>">
+
+(F) While parsing a nested extended character class like:
+
+    (?[ ... (?flags:(?[ ... ])) ... ])
+                             ^
+
+we expected to see a close paren ')' (marked by ^) but did not.
+
+=item *
+
+L<Expecting close paren for wrapper for nested extended charclass in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Expecting close paren for wrapper for nested extended charclass in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>">
+
+(F) While parsing a nested extended character class like:
+
+    (?[ ... (?flags:(?[ ... ])) ... ])
+                              ^
+
+we expected to see a close paren ')' (marked by ^) but did not.
 
 =back
 
@@ -64,17 +126,10 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX Describe change here
+L<Syntax error in (?[...]) in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Syntax error in (?[...]) in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>">
 
-=back
-
-=head1 Selected Bug Fixes
-
-=over 4
-
-=item *
-
-XXX
+This fatal error message has been slightly expanded (from "Syntax error in
+(?[...]) in regex mE<sol>%sE<sol>") for greater clarity.
 
 =back
 
