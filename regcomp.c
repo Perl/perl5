@@ -14138,155 +14138,103 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * character, and wait until runtime to fold it */
                     goto not_fold_common;
                 }
-                else                /* A regular FOLD code point */
-                     if (! UTF)
+                else /* regular fold; see if actually is in a fold */
+                     if (   (ender < 256 && ! IS_IN_SOME_FOLD_L1(ender))
+                         || (ender > 255
+                            && ! _invlist_contains_cp(PL_utf8_foldable, ender)))
                 {
-                    /* Here, are folding and are not UTF-8 encoded; therefore
-                     * the character must be in the range 0-255, and is not /l.
-                     * (Not /l because we already handled these under /l in
-                     * is_PROBLEMATIC_LOCALE_FOLD_cp) */
-                    if (! IS_IN_SOME_FOLD_L1(ender)) {
+                    /* Here, folding, but the character isn't in a fold.
+                     *
+                     * Start a new node if previous characters in the node were
+                     * folded */
+                    if (len && node_type != EXACT) {
+                        p = oldp;
+                        goto loopdone;
+                    }
 
-                        /* Start a new node for this non-folding character if
-                         * previous ones in the node were folded */
-                        if (len && node_type != EXACT) {
-                            p = oldp;
-                            goto loopdone;
-                        }
+                    /* Here, continuing a node with non-folded characters.  Add
+                     * this one */
 
+                    if (UVCHR_IS_INVARIANT(ender) || ! UTF) {
                         *(s++) = (char) ender;
                     }
-                    else {  /* Here, does participate in some fold */
+                    else {
+                        s = (char *) uvchr_to_utf8((U8 *) s, ender);
+                        added_len = UVCHR_SKIP(ender);
+                    }
+                }
+                else {  /* Here, does participate in some fold */
 
-                        /* if this is the first character in the node, change
-                         * its type to folding.  Otherwise, if this is the
-                         * first folding character in the node, close up the
-                         * existing node, so can start a new node with this
-                         * one.  */
-                        if (! len) {
-                            node_type = compute_EXACTish(pRExC_state);
-                        }
-                        else if (node_type == EXACT) {
-                            p = oldp;
-                            goto loopdone;
-                        }
+                    /* If this is the first character in the node, change its
+                     * type to folding.  Otherwise, if this is the first
+                     * folding character in the node, close up the existing
+                     * node, so can start a new node with this one.  */
+                    if (! len) {
+                        node_type = compute_EXACTish(pRExC_state);
+                    }
+                    else if (node_type == EXACT) {
+                        p = oldp;
+                        goto loopdone;
+                    }
 
-                        /* See if the character's fold differs between /d and
-                         * /u.  On non-ancient Unicode versions, this includes
-                         * the multi-char fold SHARP S to 'ss' */
+                    if (UTF) {  /* For UTF-8, we add the folded value */
+                        if (UVCHR_IS_INVARIANT(ender)) {
+                            *(s)++ = (U8) toFOLD(ender);
+                        }
+                        else {
+                            ender = _to_uni_fold_flags(
+                                    ender,
+                                    (U8 *) s,
+                                    &added_len,
+                                    FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
+                                                    ? FOLD_FLAGS_NOMIX_ASCII
+                                                    : 0));
+                            s += added_len;
+                        }
+                    }
+                    else {
+
+                        /* Here is non-UTF8; we don't normally store the folded
+                         * value.  First, see if the character's fold differs
+                         * between /d and /u. */
+                        if (PL_fold[ender] != PL_fold_latin1[ender]) {
+                            maybe_exactfu = FALSE;
+                        }
 
 #if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
    || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
                                       || UNICODE_DOT_DOT_VERSION > 0)
 
-                        if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
+                        /* On non-ancient Unicode versions, this includes the
+                         * multi-char fold SHARP S to 'ss' */
 
-                            /* See comments for join_exact() as to why we fold
-                             * this non-UTF at compile time */
+                        else if (UNLIKELY(   ender == LATIN_SMALL_LETTER_SHARP_S
+                                          || (   len
+                                              && isALPHA_FOLD_EQ(ender, 's')
+                                              && isALPHA_FOLD_EQ(*(s-1), 's'))))
+                        {
+
                             if (node_type == EXACTFU) {
-                                *(s++) = 's';
+                                /* See comments for join_exact() as to why we
+                                 * fold this non-UTF at compile time */
+                                if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
+                                    *(s++) = 's';
 
-                                /* Let the code below add in the extra 's' */
-                                ender = 's';
-                                added_len = 2;
+                                    /* Let the code below add in the extra 's' */
+                                    ender = 's';
+                                    added_len = 2;
+                                }
                             }
-                            else if (! RExC_uni_semantics) {
+                            else {
                                 maybe_exactfu = FALSE;
                             }
                         }
-                        else if (   len
-                                 && isALPHA_FOLD_EQ(ender, 's')
-                                 && isALPHA_FOLD_EQ(*(s-1), 's'))
-                        {
-                            maybe_exactfu = FALSE;
-                        }
-                        else
 #endif
-
-                        if (PL_fold[ender] != PL_fold_latin1[ender]) {
-                            maybe_exactfu = FALSE;
-                        }
 
                         /* Even when folding, we store just the input
                          * character, as we have an array that finds its fold
                          * quickly */
                         *(s++) = (char) ender;
-                    }
-                }
-                else {  /* FOLD, and UTF */
-                    /* Unlike the non-fold case, we do actually have to
-                     * calculate the fold in pass 1.  This is for two reasons,
-                     * the folded length may be longer than the unfolded, and
-                     * we have to calculate how many EXACTish nodes it will
-                     * take; and we may run out of room in a node in the middle
-                     * of a potential multi-char fold, and have to back off
-                     * accordingly.  */
-
-                    if (isASCII_uni(ender)) {
-
-                        /* As above, we close up and start a new node if the
-                         * previous characters don't match the fold/non-fold
-                         * state of this one.  And if this is the first
-                         * character in the node, and it folds, we change the
-                         * node away from being EXACT */
-                        if (! IS_IN_SOME_FOLD_L1(ender)) {
-                            if (len && node_type != EXACT) {
-                                p = oldp;
-                                goto loopdone;
-                            }
-
-                            *(s)++ = (U8) ender;
-                        }
-                        else {  /* Is in a fold */
-
-                            if (! len) {
-                                node_type = compute_EXACTish(pRExC_state);
-                            }
-                            else if (node_type == EXACT) {
-                                p = oldp;
-                                goto loopdone;
-                            }
-
-                            *(s)++ = (U8) toFOLD(ender);
-                        }
-                    }
-                    else {  /* Not ASCII */
-                        STRLEN foldlen;
-
-                        /* As above, we close up and start a new node if the
-                         * previous characters don't match the fold/non-fold
-                         * state of this one.  And if this is the first
-                         * character in the node, and it folds, we change the
-                         * node away from being EXACT */
-                        if (! _invlist_contains_cp(PL_utf8_foldable, ender)) {
-                            if (len && node_type != EXACT) {
-                                p = oldp;
-                                goto loopdone;
-                            }
-
-                            s = (char *) uvchr_to_utf8((U8 *) s, ender);
-                            added_len = UVCHR_SKIP(ender);
-                        }
-                        else {
-
-                            if (! len) {
-                                node_type = compute_EXACTish(pRExC_state);
-                            }
-                            else if (node_type == EXACT) {
-                                p = oldp;
-                                goto loopdone;
-                            }
-
-                            ender = _to_uni_fold_flags(
-                                     ender,
-                                     (U8 *) s,
-                                     &foldlen,
-                                     FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
-                                                        ? FOLD_FLAGS_NOMIX_ASCII
-                                                        : 0));
-                            s += foldlen;
-                            added_len = foldlen;
-                        }
                     }
 		} /* End of adding current character to the node */
 
