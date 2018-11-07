@@ -1214,7 +1214,7 @@
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b,c)		S_regatom(aTHX_ a,b,c)
 #define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
-#define regclass(a,b,c,d,e,f,g,h,i,j)	S_regclass(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#define regclass(a,b,c,d,e,f,g,h,i)	S_regclass(aTHX_ a,b,c,d,e,f,g,h,i)
 #define regex_set_precedence	S_regex_set_precedence
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regnode_guts(a,b,c,d)	S_regnode_guts(aTHX_ a,b,c,d)

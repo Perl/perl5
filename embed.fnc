@@ -2399,8 +2399,7 @@ Es	|regnode_offset|regclass|NN RExC_state_t *pRExC_state                 \
 				|const bool silence_non_portable              \
 				|const bool strict                            \
 				|bool optimizable			      \
-				|NULLOK SV** ret_invlist		      \
-				|NULLOK AV** return_posix_warnings
+				|NULLOK SV** ret_invlist
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 Ei	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \

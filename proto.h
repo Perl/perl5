@@ -5536,7 +5536,7 @@ STATIC regnode_offset	S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32
 STATIC regnode_offset	S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth);
 #define PERL_ARGS_ASSERT_REGBRANCH	\
 	assert(pRExC_state); assert(flagp)
-STATIC regnode_offset	S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1, bool allow_multi_fold, const bool silence_non_portable, const bool strict, bool optimizable, SV** ret_invlist, AV** return_posix_warnings);
+STATIC regnode_offset	S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1, bool allow_multi_fold, const bool silence_non_portable, const bool strict, bool optimizable, SV** ret_invlist);
 #define PERL_ARGS_ASSERT_REGCLASS	\
 	assert(pRExC_state); assert(flagp)
 STATIC unsigned int	S_regex_set_precedence(const U8 my_operator)

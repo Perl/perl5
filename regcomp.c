@@ -13160,7 +13160,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        FALSE, /* don't silence non-portable warnings. */
                        (bool) RExC_strict,
                        TRUE, /* Allow an optimized regnode result */
-                       NULL,
                        NULL);
         if (ret == 0) {
             RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp, NEED_UTF8);
@@ -13472,7 +13471,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                      non-portables */
                            (bool) RExC_strict,
                            TRUE, /* Allow an optimized regnode result */
-                           NULL,
                            NULL);
             RETURN_FAIL_ON_RESTART_FLAGP(flagp);
             /* regclass() can only return RESTART_PARSE and NEED_UTF8 if
@@ -15689,8 +15687,7 @@ redo_curchar:
                               FALSE, /* don't silence non-portable warnings.  */
                               TRUE,  /* strict */
                               FALSE, /* Require return to be an ANYOF */
-                              &current,
-                              NULL))
+                              &current))
                 {
                     FAIL2("panic: regclass returned failure to handle_sets, "
                           "flags=%#" UVxf, (UV) *flagp);
@@ -15727,9 +15724,7 @@ redo_curchar:
                                 TRUE, /* silence non-portable warnings. */
                                 TRUE, /* strict */
                                 FALSE, /* Require return to be an ANYOF */
-                                &current,
-                                NULL
-                                ))
+                                &current))
                 {
                     FAIL2("panic: regclass returned failure to handle_sets, "
                           "flags=%#" UVxf, (UV) *flagp);
@@ -16079,7 +16074,6 @@ redo_curchar:
                              they're valid on this machine */
                     FALSE, /* similarly, no need for strict */
                     FALSE, /* Require return to be an ANYOF */
-                    NULL,
                     NULL
                 );
 
@@ -16397,8 +16391,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool strict,
                  bool optimizable,                  /* ? Allow a non-ANYOF return
                                                        node */
-                 SV** ret_invlist, /* Return an inversion list, not a node */
-                 AV** return_posix_warnings
+                 SV** ret_invlist  /* Return an inversion list, not a node */
           )
 {
     /* parse a bracketed class specification.  Most of these will produce an
@@ -16524,7 +16517,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     char *not_posix_region_end = RExC_parse - 1;
 
     AV* posix_warnings = NULL;
-    const bool do_posix_warnings = return_posix_warnings || ckWARN(WARN_REGEXP);
+    const bool do_posix_warnings = ckWARN(WARN_REGEXP);
     U8 op = END;    /* The returned node-type, initialized to an impossible
                        one.  */
     U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
@@ -16605,7 +16598,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * caller.  This is done each time through the loop so that a later
              * class won't zap them before they have been dealt with. */
             output_or_return_posix_warnings(pRExC_state, posix_warnings,
-                                            return_posix_warnings);
+                                            NULL);
         }
 
         if  (RExC_parse >= stop_ptr) {
@@ -17637,8 +17630,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 
     if (   posix_warnings && av_tindex_skip_len_mg(posix_warnings) >= 0) {
-        output_or_return_posix_warnings(pRExC_state, posix_warnings,
-                                        return_posix_warnings);
+        output_or_return_posix_warnings(pRExC_state, posix_warnings, NULL);
     }
 
     /* If anything in the class expands to more than one character, we have to
