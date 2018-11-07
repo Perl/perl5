@@ -36,7 +36,7 @@ L<Archive::Tar> has been upgraded from version 2.24 to 2.24_01.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20180414_26 to 5.20181122_26.
+L<Module::CoreList> has been upgraded from version 5.20180414_26 to 5.20181129_26.
 
 =back
 
