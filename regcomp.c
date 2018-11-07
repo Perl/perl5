@@ -358,8 +358,12 @@ struct RExC_state_t {
 #define REQUIRE_BRANCHJ(flagp, restart_retval)                              \
     STMT_START {                                                            \
                 RExC_use_BRANCHJ = 1;                                       \
-                *flagp |= RESTART_PARSE;                                    \
-                return restart_retval;                                      \
+                if (LIKELY(RExC_total_parens >= 0)) {                       \
+                    /* No need to restart the parse immediately if we're    \
+                     * going to reparse anyway to count parens */           \
+                    *flagp |= RESTART_PARSE;                                \
+                    return restart_retval;                                  \
+                }                                                           \
     } STMT_END
 
 #define REQUIRE_PARENS_PASS                                                 \
