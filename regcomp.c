@@ -16268,47 +16268,33 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
 }
 
 STATIC void
-S_output_or_return_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings, AV** return_posix_warnings)
+S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
 {
-    /* If the final parameter is NULL, output the elements of the array given
-     * by '*posix_warnings' as REGEXP warnings.  Otherwise, the elements are
-     * pushed onto it, (creating if necessary) */
+    /* Output the elements of the array given by '*posix_warnings' as REGEXP
+     * warnings. */
 
     SV * msg;
-    const bool first_is_fatal =  ! return_posix_warnings
-                                && ckDEAD(packWARN(WARN_REGEXP));
+    const bool first_is_fatal = ckDEAD(packWARN(WARN_REGEXP));
 
-    PERL_ARGS_ASSERT_OUTPUT_OR_RETURN_POSIX_WARNINGS;
+    PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS;
+
+    if (! TO_OUTPUT_WARNINGS(RExC_parse)) {
+        return;
+    }
 
     while ((msg = av_shift(posix_warnings)) != &PL_sv_undef) {
-        if (return_posix_warnings) {
-            if (! *return_posix_warnings) { /* mortalize to not leak if
-                                               warnings are fatal */
-                *return_posix_warnings = (AV *) sv_2mortal((SV *) newAV());
-            }
-            av_push(*return_posix_warnings, msg);
+        if (first_is_fatal) {           /* Avoid leaking this */
+            av_undef(posix_warnings);   /* This isn't necessary if the
+                                            array is mortal, but is a
+                                            fail-safe */
+            (void) sv_2mortal(msg);
+            PREPARE_TO_DIE;
         }
-        else {
-            if (first_is_fatal) {           /* Avoid leaking this */
-                av_undef(posix_warnings);   /* This isn't necessary if the
-                                               array is mortal, but is a
-                                               fail-safe */
-                (void) sv_2mortal(msg);
-                if (ckDEAD(packWARN(WARN_REGEXP))) {
-                    PREPARE_TO_DIE;
-                }
-            }
-            if (TO_OUTPUT_WARNINGS(RExC_parse)) {
-                Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s",
-                                           SvPVX(msg));
-            }
-            SvREFCNT_dec_NN(msg);
-        }
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s", SvPVX(msg));
+        SvREFCNT_dec_NN(msg);
     }
 
-    if (! return_posix_warnings) {
-        UPDATE_WARNINGS_LOC(RExC_parse);
-    }
+    UPDATE_WARNINGS_LOC(RExC_parse);
 }
 
 STATIC AV *
@@ -16531,6 +16517,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     PERL_UNUSED_ARG(depth);
 #endif
 
+
+    /* If wants an inversion list returned, we can't optimize to something
+     * else. */
+    if (ret_invlist) {
+        optimizable = FALSE;
+    }
+
     DEBUG_PARSE("clas");
 
 #if UNICODE_MAJOR_VERSION < 3 /* no multifolds in early Unicode */      \
@@ -16593,12 +16586,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         {
             /* Warnings about posix class issues are considered tentative until
              * we are far enough along in the parse that we can no longer
-             * change our mind, at which point we either output them or add
-             * them, if it has so specified, to what gets returned to the
-             * caller.  This is done each time through the loop so that a later
-             * class won't zap them before they have been dealt with. */
-            output_or_return_posix_warnings(pRExC_state, posix_warnings,
-                                            NULL);
+             * change our mind, at which point we output them.  This is done
+             * each time through the loop so that a later class won't zap them
+             * before they have been dealt with. */
+            output_posix_warnings(pRExC_state, posix_warnings);
         }
 
         if  (RExC_parse >= stop_ptr) {
@@ -17628,9 +17619,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	range = 0; /* this range (if it was one) is done now */
     } /* End of loop through all the text within the brackets */
 
-
     if (   posix_warnings && av_tindex_skip_len_mg(posix_warnings) >= 0) {
-        output_or_return_posix_warnings(pRExC_state, posix_warnings, NULL);
+        output_posix_warnings(pRExC_state, posix_warnings);
     }
 
     /* If anything in the class expands to more than one character, we have to

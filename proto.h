@@ -5493,8 +5493,8 @@ STATIC bool	S_new_regcurly(const char *s, const char *e)
 STATIC void	S_nextchar(pTHX_ RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_NEXTCHAR	\
 	assert(pRExC_state)
-STATIC void	S_output_or_return_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings, AV** return_posix_warnings);
-#define PERL_ARGS_ASSERT_OUTPUT_OR_RETURN_POSIX_WARNINGS	\
+STATIC void	S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings);
+#define PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS	\
 	assert(pRExC_state); assert(posix_warnings)
 STATIC void	S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS	\
