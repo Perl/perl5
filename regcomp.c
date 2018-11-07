@@ -219,6 +219,7 @@ struct RExC_state_t {
 #define RExC_mysv2	(pRExC_state->mysv2)
 
 #endif
+    bool        seen_d_op;
     bool        strict;
     bool        study_started;
     bool        in_script_run;
@@ -239,6 +240,8 @@ struct RExC_state_t {
 #define RExC_parse	(pRExC_state->parse)
 #define RExC_latest_warn_offset (pRExC_state->latest_warn_offset )
 #define RExC_whilem_seen	(pRExC_state->whilem_seen)
+#define RExC_seen_d_op (pRExC_state->seen_d_op) /* Seen something that differs
+                                                   under /d from /u ? */
 
 
 #ifdef RE_TRACK_PATTERN_OFFSETS
@@ -349,9 +352,11 @@ struct RExC_state_t {
             if (DEPENDS_SEMANTICS) {                                        \
                 set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
                 RExC_uni_semantics = 1;                                     \
-                if (LIKELY(RExC_total_parens >= 0)) {                       \
-                    /* No need to restart the parse immediately if we're    \
-                     * going to reparse anyway to count parens */           \
+                if (RExC_seen_d_op && LIKELY(RExC_total_parens >= 0)) {     \
+                    /* No need to restart the parse if we haven't seen      \
+                     * anything that differs between /u and /d, and no need \
+                     * to restart immediately if we're going to reparse     \
+                     * anyway to count parens */                            \
                     *flagp |= RESTART_PARSE;                                \
                     return restart_retval;                                  \
                 }                                                           \
@@ -7287,6 +7292,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_close_parens = NULL;
     RExC_paren_names = NULL;
     RExC_size = 0;
+    RExC_seen_d_op = FALSE;
 #ifdef DEBUGGING
     RExC_paren_name_list = NULL;
 #endif
@@ -13276,7 +13282,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             RExC_seen |= REG_LOOKBEHIND_SEEN;
 	    op = BOUND + charset;
 
-            if (op == BOUNDL) {
+            if (op == BOUND) {
+                RExC_seen_d_op = TRUE;
+            }
+            else if (op == BOUNDL) {
                 RExC_contains_locale = 1;
             }
 
@@ -13424,6 +13433,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             else if (op == POSIXL) {
                 RExC_contains_locale = 1;
+            }
+            else if (op == POSIXD) {
+                RExC_seen_d_op = TRUE;
             }
 
           join_posix_op_known:
@@ -13643,6 +13655,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                        ? REFFL
                                        : REFF),
                                 num);
+                if (OP(REGNODE_p(ret)) == REFF) {
+                    RExC_seen_d_op = TRUE;
+                }
                 *flagp |= HASWIDTH;
 
                 /* override incorrect value set in reganode MJD */
@@ -14449,6 +14464,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         else if (node_type == EXACTFL) {
                             OP(REGNODE_p(ret)) = EXACTFLU8;
                         }
+                    }
+                    else if (node_type == EXACTF) {
+                        RExC_seen_d_op = TRUE;
                     }
                 }
 
@@ -18076,9 +18094,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
         use_anyofd = TRUE;
+        RExC_seen_d_op = TRUE;
         optimizable = FALSE;
     }
-
 
     /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
      * at compile time.  Besides not inverting folded locale now, we can't
