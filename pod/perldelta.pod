@@ -14,9 +14,21 @@ L<perl5280delta>, which describes differences between 5.26.0 and 5.28.0.
 
 =head1 Security
 
-=head2 XXX
+=head2 [CVE-2018-18311] Integer overflow leading to buffer overflow and segmentation fault
 
-XXX
+Integer arithmetic in C<Perl_my_setenv()> could wrap when the combined length
+of the environment variable name and value exceeded around 0x7fffffff.  This
+could lead to writing beyond the end of an allocated buffer with attacker
+supplied data.
+
+L<[perl #133204]|https://rt.perl.org/Ticket/Display.html?id=133204>
+
+=head2 [CVE-2018-18312] Heap-buffer-overflow write in S_regatom (regcomp.c)
+
+A crafted regular expression could cause heap-buffer-overflow write during
+compilation, potentially allowing arbitrary code execution.
+
+L<[perl #133423]|https://rt.perl.org/Ticket/Display.html?id=133423>
 
 =head1 Incompatible Changes
 
@@ -42,7 +54,22 @@ L<Module::CoreList> has been upgraded from version 5.20180622 to 5.20181129_28.
 
 =item *
 
-XXX
+Perl 5.28 introduced an C<index()> optimization when comparing to -1 (or
+indirectly, e.g. >= 0).  When this optimization was triggered inside a C<when>
+clause it caused a warning ("Argument %s isn't numeric in smart match").  This
+has now been fixed.
+L<[perl #133368]|https://rt.perl.org/Ticket/Display.html?id=133368>
+
+=item *
+
+Matching of decimal digits in script runs, introduced in Perl 5.28, had a bug
+that led to C<"1\N{THAI DIGIT FIVE}"> matching C</^(*sr:\d+)$/> when it should
+not.  This has now been fixed.
+
+=item *
+
+The new in-place editing code no longer leaks directory handles.
+L<[perl #133314]|https://rt.perl.org/Ticket/Display.html?id=133314>
 
 =back
 
