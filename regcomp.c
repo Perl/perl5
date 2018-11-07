@@ -349,8 +349,12 @@ struct RExC_state_t {
             if (DEPENDS_SEMANTICS) {                                        \
                 set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
                 RExC_uni_semantics = 1;                                     \
+                if (LIKELY(RExC_total_parens >= 0)) {                       \
+                    /* No need to restart the parse immediately if we're    \
+                     * going to reparse anyway to count parens */           \
                     *flagp |= RESTART_PARSE;                                \
                     return restart_retval;                                  \
+                }                                                           \
             }                                                               \
     } STMT_END
 
