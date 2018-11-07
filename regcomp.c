@@ -14101,13 +14101,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 if (! FOLD) {  /* The simple case, just append the literal */
 
                       not_fold_common:
-                        if (UTF && ! UVCHR_IS_INVARIANT(ender)) {
+                        if (UVCHR_IS_INVARIANT(ender) || ! UTF) {
+                            *(s++) = (char) ender;
+                        }
+                        else {
                             U8 * new_s = uvchr_to_utf8((U8*)s, ender);
                             added_len = (char *) new_s - s;
                             s = (char *) new_s;
-                        }
-                        else {
-                            *(s++) = (char) ender;
                         }
                 }
                 else if (LOC && is_PROBLEMATIC_LOCALE_FOLD_cp(ender)) {
