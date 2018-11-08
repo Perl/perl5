@@ -8603,11 +8603,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
         }
         return sv_dat;
     }
-    else {
-        Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
-                   (unsigned long) flags);
-    }
-    NOT_REACHED; /* NOTREACHED */
+
+    Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
+                     (unsigned long) flags);
 }
 
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
