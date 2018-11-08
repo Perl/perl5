@@ -6396,7 +6396,8 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     DEBUG_PARSE_r(Perl_re_printf( aTHX_
         "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
 
-    Newx(dst, *plen_p * 2 + 1, U8);
+    /* 1 for each byte + 1 for each byte that expands to two, + trailing NUL */
+    Newx(dst, *plen_p + variant_under_utf8_count(src, src + *plen_p) + 1, U8);
     d = dst;
 
     while (s < *plen_p) {
