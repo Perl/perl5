@@ -529,6 +529,7 @@ my @warning = (
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
+    '/\q\p{Any}/' => 'Unrecognized escape \q passed through {#} m/\q{#}\p{Any}/',
 
     # These two tests do not include the marker, because regcomp.c no
     # longer knows where it goes by the time this warning is emitted.
