@@ -7533,15 +7533,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     SetProgLen(RExC_rxi,RExC_size);
 
-    /* The values for the two variables below are now immutable, we can add
-     * them to the list to free without overwhelming it */
-    if (RExC_open_parens) {
-        SAVEFREEPV(RExC_open_parens);
-    }
-    if (RExC_close_parens) {
-        SAVEFREEPV(RExC_close_parens);
-    }
-
     /* Update the string to compile, with correct modifiers, etc */
     set_regex_pv(pRExC_state, Rx);
 
@@ -8093,6 +8084,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         Perl_re_printf( aTHX_  "\n");
     });
 #endif
+
+    if (RExC_open_parens) {
+        Safefree(RExC_open_parens);
+        RExC_open_parens = NULL;
+    }
+    if (RExC_close_parens) {
+        Safefree(RExC_close_parens);
+        RExC_close_parens = NULL;
+    }
 
 #ifdef USE_ITHREADS
     /* under ithreads the ?pat? PMf_USED flag on the pmop is simulated

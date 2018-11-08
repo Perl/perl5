@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 849;  # Update this when adding/deleting tests.
+plan tests => 850;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1949,6 +1949,9 @@ EOP
     }
     {   # [perl $132164]
         fresh_perl_is('m m0*0+\Rm', "",{},"Undefined behavior in address sanitizer");
+    }
+    {   # [perl #133642]
+        fresh_perl_is('m/((?<=(0?)))/', "Variable length lookbehind not implemented in regex m/((?<=(0?)))/ at - line 1.",{},"Was getting 'Double free'");
     }
 
 } # End of sub run_tests
