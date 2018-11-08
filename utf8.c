@@ -2647,7 +2647,8 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
     PERL_ARGS_ASSERT_BYTES_TO_UTF8;
     PERL_UNUSED_CONTEXT;
 
-    Newx(d, (*lenp) * 2 + 1, U8);
+    /* 1 for each byte + 1 for each byte that expands to two, + trailing NUL */
+    Newx(d, (*lenp) + variant_under_utf8_count(s, send) + 1, U8);
     dst = d;
 
     while (s < send) {
@@ -2657,9 +2658,6 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
 
     *d = '\0';
     *lenp = d-dst;
-
-    /* Trim unused space */
-    Renew(dst, *lenp + 1, U8);
 
     return dst;
 }
