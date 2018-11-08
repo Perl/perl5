@@ -1463,13 +1463,18 @@ END_EXTERN_C
     #define toLOWER(c) (isASCII(c) ? toLOWER_LATIN1(c) : (c))
     #define toUPPER(c) (isASCII(c) ? toUPPER_LATIN1_MOD(c) : (c))
    which uses table lookup and mask instead of subtraction.  (This would
-   work because the _MOD does not apply in the ASCII range) */
+   work because the _MOD does not apply in the ASCII range).
+
+   These actually are UTF-8 invariant casing, not just ASCII, as any non-ASCII
+   UTF-8 invariants are neither upper nor lower.  (Only on EBCDIC platforms are
+   there non-ASCII invariants, and all of them are controls.) */
 #define toLOWER(c)  (isUPPER(c) ? (U8)((c) + ('a' - 'A')) : (c))
 #define toUPPER(c)  (isLOWER(c) ? (U8)((c) - ('a' - 'A')) : (c))
 
 /* In the ASCII range, these are equivalent to what they're here defined to be.
  * But by creating these definitions, other code doesn't have to be aware of
- * this detail */
+ * this detail.  Actually this works for all UTF-8 invariants, not just the
+ * ASCII range. (EBCDIC platforms can have non-ASCII invariants.) */
 #define toFOLD(c)    toLOWER(c)
 #define toTITLE(c)   toUPPER(c)
 

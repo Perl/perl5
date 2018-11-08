@@ -12830,10 +12830,7 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                 if (LOC || ! FOLD) {    /* /l defers folding until runtime */
                     *character = (U8) code_point;
                 }
-                else { /* Here is /i and not /l. (toFOLD() is defined on just
-                          ASCII, which isn't the same thing as INVARIANT on
-                          EBCDIC, but it works there, as the extra invariants
-                          fold to themselves) */
+                else { /* Here is /i and not /l. */
                     *character = toFOLD((U8) code_point);
 
                     /* We can downgrade to an EXACT node if this character
