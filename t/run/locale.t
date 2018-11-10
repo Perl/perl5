@@ -166,7 +166,8 @@ EOF
                                         . " radix is marked UTF-8");
     }
 
-    if ($different) {
+    SKIP: {
+        skip("no locale available where LC_NUMERIC radix isn't '.'", 30) unless $different;
         note("using the '$different' locale for LC_NUMERIC tests");
         {
             local $ENV{LC_NUMERIC} = $different;
