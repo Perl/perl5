@@ -4020,11 +4020,11 @@ Gid_t getegid (void);
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
 
-#ifndef PERL_EXT_RE_BUILD
-#  define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
-#else
-#  define DEBUG_r(a) STMT_START {a;} STMT_END
-#endif /* PERL_EXT_RE_BUILD */
+#  ifndef PERL_EXT_RE_BUILD
+#    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
+#  else
+#    define DEBUG_r(a) STMT_START {a;} STMT_END
+#  endif /* PERL_EXT_RE_BUILD */
 
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
@@ -4048,7 +4048,7 @@ Gid_t getegid (void);
 #  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 #  define DEBUG_i(a) DEBUG__(DEBUG_i_TEST, a)
 
-#else /* DEBUGGING */
+#else /* ! DEBUGGING below */
 
 #  define DEBUG_p_TEST (0)
 #  define DEBUG_s_TEST (0)
