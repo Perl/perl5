@@ -421,9 +421,10 @@ is printed with proper indentation.
 There are two ways to enable debugging output for regular expressions.
 
 If your perl is compiled with C<-DDEBUGGING>, you may use the
-B<-Dr> flag on the command line.
+B<-Dr> flag on the command line, and C<-Drv> for more verbose
+information.
 
-Otherwise, one can C<use re 'debug'>, which has effects at
+Otherwise, one can C<use re 'debug'>, which has effects at both
 compile time and run time.  Since Perl 5.9.5, this pragma is lexically
 scoped.
 
