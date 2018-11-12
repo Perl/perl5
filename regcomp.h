@@ -1008,8 +1008,6 @@ re.pm, especially to the documentation.
     if (re_debug_flags & RE_DEBUG_COMPILE_PARSE) x  )
 #define DEBUG_OPTIMISE_r(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_COMPILE_OPTIMISE) x  )
-#define DEBUG_PARSE_r(x) DEBUG_r( \
-    if (re_debug_flags & RE_DEBUG_COMPILE_PARSE) x  )
 #define DEBUG_DUMP_r(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_COMPILE_DUMP) x  )
 #define DEBUG_TRIE_COMPILE_r(x) DEBUG_r( \
