@@ -479,8 +479,8 @@ static const char reg_off_by_arg[] = {
 	0,	/* NREFFA       */
 	1,	/* LONGJMP      */
 	1,	/* BRANCHJ      */
-	2,	/* IFMATCH      */
-	2,	/* UNLESSM      */
+	1,	/* IFMATCH      */
+	1,	/* UNLESSM      */
 	1,	/* SUSPEND      */
 	1,	/* IFTHEN       */
 	0,	/* GROUPP       */
