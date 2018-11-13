@@ -380,33 +380,26 @@ struct RExC_state_t {
                     if (RExC_total_parens == 0) RExC_total_parens = -1;     \
     } STMT_END
 
-/* Executes a return statement with the value 'X', if 'flags' contains any of
- * 'RESTART_PARSE', 'NEED_UTF8', or 'extra'.  If so, *flagp is set to those
- * flags */
-#define RETURN_X_ON_RESTART_OR_FLAGS(X, flags, flagp, extra)                \
+/* This is used to return failure (zero) early from the calling function if
+ * various flags in 'flags' are set.  Two flags always cause a return:
+ * 'RESTART_PARSE' and 'NEED_UTF8'.   'extra' can be used to specify any
+ * additional flags that should cause a return; 0 if none.  If the return will
+ * be done, '*flagp' is first set to be all of the flags that caused the
+ * return. */
+#define RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,extra)                  \
     STMT_START {                                                            \
             if ((flags) & (RESTART_PARSE|NEED_UTF8|(extra))) {              \
                 *(flagp) = (flags) & (RESTART_PARSE|NEED_UTF8|(extra));     \
-                return X;                                                   \
+                return 0;                                                   \
             }                                                               \
     } STMT_END
-
-#define RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,extra)                  \
-                    RETURN_X_ON_RESTART_OR_FLAGS(0,flags,flagp,extra)
-
-#define RETURN_X_ON_RESTART(X, flags,flagp)                                 \
-                        RETURN_X_ON_RESTART_OR_FLAGS( X, flags, flagp, 0)
-
-
-#define RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp,extra)                  \
-            if (*(flagp) & (RESTART_PARSE|(extra))) return 0
 
 #define MUST_RESTART(flags) ((flags) & (RESTART_PARSE))
 
 #define RETURN_FAIL_ON_RESTART(flags,flagp)                                 \
-                                    RETURN_X_ON_RESTART(0, flags,flagp)
+                        RETURN_FAIL_ON_RESTART_OR_FLAGS( flags, flagp, 0)
 #define RETURN_FAIL_ON_RESTART_FLAGP(flagp)                                 \
-                            RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp, 0)
+                                    if (MUST_RESTART(*(flagp))) return 0
 
 /* This converts the named class defined in regcomp.h to its equivalent class
  * number defined in handy.h. */
@@ -12775,7 +12768,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     SvREFCNT_dec_NN(substitute_parse);
 
     if (! *node_p) {
-        RETURN_X_ON_RESTART(FALSE, flags, flagp);
+        RETURN_FAIL_ON_RESTART(flags, flagp);
         FAIL2("panic: reg returned failure to grok_bslash_N, flags=%#" UVxf,
             (UV) flags);
     }
@@ -13162,7 +13155,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        TRUE, /* Allow an optimized regnode result */
                        NULL);
         if (ret == 0) {
-            RETURN_FAIL_ON_RESTART_FLAGP_OR_FLAGS(flagp, NEED_UTF8);
+            RETURN_FAIL_ON_RESTART_FLAGP(flagp);
             FAIL2("panic: regclass returned failure to regatom, flags=%#" UVxf,
                   (UV) *flagp);
         }
