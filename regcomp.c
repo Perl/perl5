@@ -7540,8 +7540,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * for the regex engine.  We are ready to finish things up and look for
      * optimizations. */
 
-    SetProgLen(RExC_rxi,RExC_size);
-
     /* Update the string to compile, with correct modifiers, etc */
     set_regex_pv(pRExC_state, Rx);
 
@@ -7562,7 +7560,23 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     DEBUG_OFFSETS_r(Perl_re_printf( aTHX_
                           "%s %" UVuf " bytes for offset annotations.\n",
                           RExC_offsets ? "Got" : "Couldn't get",
-                          (UV)((2*RExC_size+1) * sizeof(U32))));
+                          (UV)((RExC_offsets[0] * 2 + 1))));
+    DEBUG_OFFSETS_r(if (RExC_offsets) {
+        const STRLEN len = RExC_offsets[0];
+        STRLEN i;
+        GET_RE_DEBUG_FLAGS_DECL;
+        Perl_re_printf( aTHX_
+                      "Offsets: [%" UVuf "]\n\t", (UV)RExC_offsets[0]);
+        for (i = 1; i <= len; i++) {
+            if (RExC_offsets[i*2-1] || RExC_offsets[i*2])
+                Perl_re_printf( aTHX_  "%" UVuf ":%" UVuf "[%" UVuf "] ",
+                (UV)i, (UV)RExC_offsets[i*2-1], (UV)RExC_offsets[i*2]);
+        }
+        Perl_re_printf( aTHX_  "\n");
+    });
+
+#else
+    SetProgLen(RExC_rxi,RExC_size);
 #endif
 
     DEBUG_OPTIMISE_r(
@@ -8078,21 +8092,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         Perl_re_printf( aTHX_ "Final program:\n");
         regdump(RExC_rx);
     });
-#ifdef RE_TRACK_PATTERN_OFFSETS
-    DEBUG_OFFSETS_r(if (RExC_offsets) {
-        const STRLEN len = RExC_offsets[0];
-        STRLEN i;
-        GET_RE_DEBUG_FLAGS_DECL;
-        Perl_re_printf( aTHX_
-                      "Offsets: [%" UVuf "]\n\t", (UV)RExC_offsets[0]);
-        for (i = 1; i <= len; i++) {
-            if (RExC_offsets[i*2-1] || RExC_offsets[i*2])
-                Perl_re_printf( aTHX_  "%" UVuf ":%" UVuf "[%" UVuf "] ",
-                (UV)i, (UV)RExC_offsets[i*2-1], (UV)RExC_offsets[i*2]);
-            }
-        Perl_re_printf( aTHX_  "\n");
-    });
-#endif
 
     if (RExC_open_parens) {
         Safefree(RExC_open_parens);
@@ -19200,7 +19199,7 @@ S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size)
     if (size > 0) {
         Zero(RExC_offsets + 2*(RExC_size - size) + 1, 2 * size, U32);
     }
-    RExC_offsets[0] = 2*RExC_size+1;
+    RExC_offsets[0] = RExC_size;
 #endif
 }
 
