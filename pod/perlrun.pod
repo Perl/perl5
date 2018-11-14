@@ -414,7 +414,9 @@ B<-D14> is equivalent to B<-Dtls>):
                (eg when using -Ds)
     524288  J  show s,t,P-debug (don't Jump over) on opcodes within
                package DB
-   1048576  v  Verbose: use in conjunction with other flags
+   1048576  v  Verbose: use in conjunction with other flags to
+               increase the verbosity of the output.  Is a no-op on
+               many of the other flags
    2097152  C  Copy On Write
    4194304  A  Consistency checks on internal structures
    8388608  q  quiet - currently only suppresses the "EXECUTING"
