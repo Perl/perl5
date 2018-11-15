@@ -6,3 +6,6 @@ extraction:
     index:
       build_command:
         - "make"
+path_classifiers:
+  generated:
+    - charclass_invlists.h
