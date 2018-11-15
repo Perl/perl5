@@ -2265,6 +2265,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                    (U8) ARG(c), FLAGS(c)));
         break;
 
+    case NANYOFM:
+        REXEC_FBC_FIND_NEXT_SCAN(0,
+         (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
+                                   (U8) ARG(c), FLAGS(c)));
+        break;
+
     case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
 	/* FALLTHROUGH */
@@ -6743,6 +6749,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             locinput++;
             break;
 
+        case NANYOFM:
+            if (NEXTCHR_IS_EOS || (UCHARAT(locinput) & FLAGS(scan)) == ARG(scan)) {
+                sayNO;
+            }
+            goto increment_locinput;
+            break;
+
         case ASCII:
             if (NEXTCHR_IS_EOS || ! isASCII(UCHARAT(locinput))) {
                 sayNO;
@@ -9395,6 +9408,21 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         }
 
         scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) loceol, (U8) ARG(p), FLAGS(p));
+        break;
+
+    case NANYOFM:
+	if (utf8_target) {
+	    while (     hardcount < max
+                   &&   scan < loceol
+		   &&  (*scan & FLAGS(p)) != ARG(p))
+	    {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	}
+        else {
+            scan = (char *) find_next_masked((U8 *) scan, (U8 *) loceol, (U8) ARG(p), FLAGS(p));
+	}
         break;
 
     case ASCII:

@@ -5630,21 +5630,16 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                                                           (regnode_charclass *) scan);
 		    break;
 
+                case NANYOFM:
                 case ANYOFM:
                   {
                     SV* cp_list = get_ANYOFM_contents(scan);
 
                     if (flags & SCF_DO_STCLASS_OR) {
-                        ssc_union(data->start_class,
-                                  cp_list,
-                                  FALSE /* don't invert */
-                                  );
+                        ssc_union(data->start_class, cp_list, invert);
                     }
                     else if (flags & SCF_DO_STCLASS_AND) {
-                        ssc_intersection(data->start_class,
-                                         cp_list,
-                                         FALSE /* don't invert */
-                                         );
+                        ssc_intersection(data->start_class, cp_list, invert);
                     }
 
                     SvREFCNT_dec_NN(cp_list);
@@ -18280,26 +18275,30 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * usage, is optimizable into ANYOFM, and can benefit from the
                  * speed up.  We can only do this on UTF-8 invariant bytes,
                  * because the variance would throw this off.  */
-                if (   op == END
-                    && invlist_highest(cp_list) <=
+                if (op == END) {
+                    PERL_UINT_FAST8_T inverted = 0;
 #ifdef EBCDIC
-                                                   0xFF
+                    const PERL_UINT_FAST8_T max_permissible = 0xFF;
 #else
-                                                   0x7F
+                    const PERL_UINT_FAST8_T max_permissible = 0x7F;
 #endif
-                ) {
+                    if (invlist_highest(cp_list) > max_permissible) {
+                        _invlist_invert(cp_list);
+                        inverted = 1;
+                    }
+
+                    if (invlist_highest(cp_list) <= max_permissible) {
                     Size_t cp_count = 0;
                     bool first_time = TRUE;
                     unsigned int lowest_cp = 0xFF;
                     U8 bits_differing = 0;
 
-                    /* Only needed on EBCDIC, as there, variants and non- are
-                     * mixed together.  Could #ifdef it out on ASCII, but
-                     * probably the compiler will optimize it out */
+                    /* Only needed on EBCDIC, as there, variants and non- are mixed
+                     * together.  Could #ifdef it out on ASCII, but probably the
+                     * compiler will optimize it out */
                     bool has_variant = FALSE;
 
-                    /* Go through the bytes and find the bit positions that
-                     * differ */
+                    /* Go through the bytes and find the bit positions that differ */
                     invlist_iterinit(cp_list);
                     while (invlist_iternext(cp_list, &start, &end)) {
                         unsigned int i = start;
@@ -18350,8 +18349,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     if ( ! has_variant
                         && cp_count == 1U << PL_bitcount[bits_differing])
                     {
-                        assert(cp_count > 1);
-                        op = ANYOFM;
+                        assert(inverted || cp_count > 1);
+                        op = ANYOFM + inverted;;
 
                         /* We need to make the bits that differ be 0's */
                         ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS
@@ -18362,6 +18361,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         *flagp |= HASWIDTH|SIMPLE;
                     }
                 }
+                if (inverted) {
+                    _invlist_invert(cp_list);
+                }
+            }
             }
         }
 
@@ -19275,8 +19278,8 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 STATIC SV*
 S_get_ANYOFM_contents(pTHX_ const regnode * n) {
 
-    /* Returns an inversion list of all the code points matched by the ANYOFM
-     * node 'n' */
+    /* Returns an inversion list of all the code points matched by the
+     * ANYOFM/NANYOFM node 'n' */
 
     SV * cp_list = _new_invlist(-1);
     const U8 lowest = (U8) ARG(n);
@@ -19299,6 +19302,9 @@ S_get_ANYOFM_contents(pTHX_ const regnode * n) {
         }
     }
 
+    if (OP(n) == NANYOFM) {
+        _invlist_invert(cp_list);
+    }
     return cp_list;
 }
 
@@ -19832,6 +19838,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SV * cp_list = get_ANYOFM_contents(o);
 
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+        if (OP(o) == NANYOFM) {
+            _invlist_invert(cp_list);
+        }
+
         put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, TRUE);
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 

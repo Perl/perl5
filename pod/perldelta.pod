@@ -94,7 +94,12 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Regular expression pattern matching of things like C<qr/[^I<a>]/> is
+significantly sped up, where I<a> is any ASCII character.  Which classes
+will get this speed up is complicated and depends on the underlying bit
+patterns of those characters, so differs between ASCII and EBCDIC
+platforms, but all case pairs, like C<qr/[Gg]/> are included, as is
+C<[^01]>.
 
 =back
 
