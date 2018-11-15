@@ -749,7 +749,7 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
                           - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
     {
-        PERL_UINTMAX_T word_complemented, mask_word;
+        PERL_UINTMAX_T word, mask_word;
 
         while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
             if (((*s) & mask) == byte) {
@@ -758,15 +758,17 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
             s++;
         }
 
-        word_complemented = ~ (PERL_COUNT_MULTIPLIER * byte);
-        mask_word =            PERL_COUNT_MULTIPLIER * mask;
+        word      = PERL_COUNT_MULTIPLIER * byte;
+        mask_word = PERL_COUNT_MULTIPLIER * mask;
 
         do {
             PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
 
-            /* If 'masked' contains 'byte' within it, anding with the
-             * complement will leave those 8 bits 0 */
-            masked &= word_complemented;
+            /* If 'masked' contains bytes with the bit pattern of 'byte' within
+             * it, xoring with 'word' will leave each of the 8 bits in such
+             * bytes be 0, and no byte containing any other bit pattern will be
+             * 0. */
+            masked ^= word;
 
             /* This causes the most significant bit to be set to 1 for any
              * bytes in the word that aren't completely 0 */
