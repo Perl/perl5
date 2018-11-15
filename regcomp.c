@@ -13849,9 +13849,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                         p = RExC_parse;
                         RExC_parse = parse_start;
-                        if (ender > 0xff) {
-                            REQUIRE_UTF8(flagp);
-                        }
 
                         /* The \N{} means the pattern, if previously /d,
                          * becomes /u.  That means it can't be an EXACTF node,
@@ -13913,9 +13910,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			    }
                             UPDATE_WARNINGS_LOC(p - 1);
                             ender = result;
-			    if (ender > 0xff) {
-				REQUIRE_UTF8(flagp);
-			    }
 			    break;
 			}
 		    case 'x':
@@ -13948,9 +13942,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                     ender = LATIN1_TO_NATIVE(ender);
                                 }
 #endif
-			    }
-                            else {
-				REQUIRE_UTF8(flagp);
 			    }
 			    break;
 			}
@@ -13996,9 +13987,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
-			    if (ender > 0xff) {
-				REQUIRE_UTF8(flagp);
-			    }
 			    p += numlen;
                             if (   isDIGIT(*p)  /* like \08, \178 */
                                 && ckWARN(WARN_REGEXP)
@@ -14079,7 +14067,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 		/* Here, have looked at the literal character, and <ender>
                  * contains its ordinal; <p> points to the character after it.
-                 * We need to check if the next non-ignored thing is a
+                 * */
+
+                if (ender > 255) {
+                    REQUIRE_UTF8(flagp);
+                }
+
+                /* We need to check if the next non-ignored thing is a
                  * quantifier.  Move <p> to after anything that should be
                  * ignored, which, as a side effect, positions <p> for the next
                  * loop iteration */
