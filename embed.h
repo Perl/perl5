@@ -1202,7 +1202,7 @@
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define new_regcurly		S_new_regcurly
 #define nextchar(a)		S_nextchar(aTHX_ a)
-#define output_or_return_posix_warnings(a,b,c)	S_output_or_return_posix_warnings(aTHX_ a,b,c)
+#define output_posix_warnings(a,b)	S_output_posix_warnings(aTHX_ a,b)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
 #define parse_uniprop_string(a,b,c,d)	Perl_parse_uniprop_string(aTHX_ a,b,c,d)
 #define populate_ANYOF_from_invlist(a,b)	S_populate_ANYOF_from_invlist(aTHX_ a,b)
@@ -1214,7 +1214,7 @@
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b,c)		S_regatom(aTHX_ a,b,c)
 #define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
-#define regclass(a,b,c,d,e,f,g,h,i,j)	S_regclass(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#define regclass(a,b,c,d,e,f,g,h,i)	S_regclass(aTHX_ a,b,c,d,e,f,g,h,i)
 #define regex_set_precedence	S_regex_set_precedence
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regnode_guts(a,b,c,d)	S_regnode_guts(aTHX_ a,b,c,d)

@@ -2386,10 +2386,9 @@ Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 				|NULLOK SV* const only_utf8_locale_list	   \
 				|NULLOK SV* const swash                    \
 				|const bool has_user_defined_property
-Es	|void	|output_or_return_posix_warnings			    \
+Es	|void	|output_posix_warnings					    \
 				|NN RExC_state_t *pRExC_state		    \
-				|NN AV* posix_warnings			    \
-				|NULLOK AV** return_posix_warnings
+				|NN AV* posix_warnings
 Es	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
 				|NN SV* multi_string			    \
 				|const STRLEN cp_count
@@ -2399,8 +2398,7 @@ Es	|regnode_offset|regclass|NN RExC_state_t *pRExC_state                 \
 				|const bool silence_non_portable              \
 				|const bool strict                            \
 				|bool optimizable			      \
-				|NULLOK SV** ret_invlist		      \
-				|NULLOK AV** return_posix_warnings
+				|NULLOK SV** ret_invlist
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 Ei	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
