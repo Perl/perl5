@@ -14169,14 +14169,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                     /* Here, continuing a node with non-folded characters.  Add
                      * this one */
-
-                    if (UVCHR_IS_INVARIANT(ender) || ! UTF) {
-                        *(s++) = (char) ender;
-                    }
-                    else {
-                        s = (char *) uvchr_to_utf8((U8 *) s, ender);
-                        added_len = UVCHR_SKIP(ender);
-                    }
+                    goto not_fold_common;
                 }
                 else {  /* Here, does participate in some fold */
 
