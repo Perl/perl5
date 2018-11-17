@@ -531,130 +531,6 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
     return FALSE; /* Things like CNTRL are always below 256 */
 }
 
-STATIC char *
-S_find_next_ascii(char * s, const char * send, const bool utf8_target)
-{
-    /* Returns the position of the first ASCII byte in the sequence between 's'
-     * and 'send-1' inclusive; returns 'send' if none found */
-
-    PERL_ARGS_ASSERT_FIND_NEXT_ASCII;
-
-#ifndef EBCDIC
-
-    if ((STRLEN) (send - s) >= PERL_WORDSIZE
-
-                            /* This term is wordsize if subword; 0 if not */
-                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
-
-                            /* 'offset' */
-                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
-    {
-
-        /* Process per-byte until reach word boundary.  XXX This loop could be
-         * eliminated if we knew that this platform had fast unaligned reads */
-        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
-            if (isASCII(*s)) {
-                return s;
-            }
-            s++;    /* khw didn't bother creating a separate loop for
-                       utf8_target */
-        }
-
-        /* Here, we know we have at least one full word to process.  Process
-         * per-word as long as we have at least a full word left */
-        do {
-            PERL_UINTMAX_T complemented = ~ * (PERL_UINTMAX_T *) s;
-            if (complemented & PERL_VARIANTS_WORD_MASK)  {
-
-#  if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
-     || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
-
-                s += _variant_byte_number(complemented);
-                return s;
-
-#  else   /* If weird byte order, drop into next loop to do byte-at-a-time
-           checks. */
-
-                break;
-#  endif
-            }
-
-            s += PERL_WORDSIZE;
-
-        } while (s + PERL_WORDSIZE <= send);
-    }
-
-#endif
-
-    /* Process per-character */
-    if (utf8_target) {
-        while (s < send) {
-            if (isASCII(*s)) {
-                return s;
-            }
-            s += UTF8SKIP(s);
-        }
-    }
-    else {
-        while (s < send) {
-            if (isASCII(*s)) {
-                return s;
-            }
-            s++;
-        }
-    }
-
-    return s;
-}
-
-STATIC char *
-S_find_next_non_ascii(char * s, const char * send, const bool utf8_target)
-{
-    /* Returns the position of the first non-ASCII byte in the sequence between
-     * 's' and 'send-1' inclusive; returns 'send' if none found */
-
-#ifdef EBCDIC
-
-    PERL_ARGS_ASSERT_FIND_NEXT_NON_ASCII;
-
-    if (utf8_target) {
-        while (s < send) {
-            if ( ! isASCII(*s)) {
-                return s;
-            }
-            s += UTF8SKIP(s);
-        }
-    }
-    else {
-        while (s < send) {
-            if ( ! isASCII(*s)) {
-                return s;
-            }
-            s++;
-        }
-    }
-
-    return s;
-
-#else
-
-    const U8 * next_non_ascii = NULL;
-
-    PERL_ARGS_ASSERT_FIND_NEXT_NON_ASCII;
-    PERL_UNUSED_ARG(utf8_target);
-
-    /* On ASCII platforms invariants and ASCII are identical, so if the string
-     * is entirely invariants, there is no non-ASCII character */
-    return (is_utf8_invariant_string_loc((U8 *) s,
-                                         (STRLEN) (send - s),
-                                         &next_non_ascii))
-            ? (char *) send
-            : (char *) next_non_ascii;
-
-#endif
-
-}
-
 STATIC U8 *
 S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 {
@@ -2805,22 +2681,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         REXEC_FBC_CSCAN(is_LNBREAK_utf8_safe(s, strend),
                         is_LNBREAK_latin1_safe(s, strend)
         );
-        break;
-
-    case ASCII:
-        REXEC_FBC_FIND_NEXT_SCAN(0, find_next_ascii(s, strend, utf8_target));
-        break;
-
-    case NASCII:
-        if (utf8_target) {
-            REXEC_FBC_FIND_NEXT_SCAN(1, find_next_non_ascii(s, strend,
-                                                            utf8_target));
-        }
-        else {
-            REXEC_FBC_FIND_NEXT_SCAN(0, find_next_non_ascii(s, strend,
-                                                            utf8_target));
-        }
-
         break;
 
     /* The argument to all the POSIX node types is the class number to pass to
@@ -6819,22 +6679,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto increment_locinput;
             break;
 
-        case ASCII:
-            if (NEXTCHR_IS_EOS || ! isASCII(UCHARAT(locinput))) {
-                sayNO;
-            }
-
-            locinput++;     /* ASCII is always single byte */
-            break;
-
-        case NASCII:
-            if (NEXTCHR_IS_EOS || isASCII(UCHARAT(locinput))) {
-                sayNO;
-            }
-
-            goto increment_locinput;
-            break;
-
         /* The argument (FLAGS) to all the POSIX node types is the class number
          * */
 
@@ -9494,29 +9338,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             scan = (char *) find_next_masked((U8 *) scan, (U8 *) loceol, (U8) ARG(p), FLAGS(p));
 	}
         break;
-
-    case ASCII:
-        if (utf8_target && loceol - scan > max) {
-            loceol = scan + max;
-        }
-
-        scan = find_next_non_ascii(scan, loceol, utf8_target);
-	break;
-
-    case NASCII:
-	if (utf8_target) {
-	    while (     hardcount < max
-                   &&   scan < loceol
-		   && ! isASCII_utf8_safe(scan, loceol))
-	    {
-		scan += UTF8SKIP(scan);
-		hardcount++;
-	    }
-	}
-        else {
-            scan = find_next_ascii(scan, loceol, utf8_target);
-	}
-	break;
 
     /* The argument (FLAGS) to all the POSIX node types is the class number */
 

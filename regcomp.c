@@ -5828,21 +5828,11 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     }
                     break;
 
-                case NASCII:
-                    invert = 1;
-                    /* FALLTHROUGH */
-		case ASCII:
-                    my_invlist = invlist_clone(PL_Posix_ptrs[_CC_ASCII], NULL);
-
-                    /* This can be handled as a Posix class */
-                    goto join_posix_and_ascii;
-
                 case NPOSIXA:   /* For these, we always know the exact set of
                                    what's matched */
                     invert = 1;
                     /* FALLTHROUGH */
 		case POSIXA:
-                    assert(FLAGS(scan) != _CC_ASCII);
                     my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)], NULL);
                     goto join_posix_and_ascii;
 
@@ -18569,24 +18559,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
 
             /* Here, didn't find an optimization.  See if this matches any
-             * of the POSIX classes.  First try ASCII */
-
-            if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 0)) {
-                ret = reg_node(pRExC_state, ASCII);
-                *flagp |= HASWIDTH|SIMPLE;
-                goto not_anyof;
-            }
-
-            if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 1)) {
-                ret = reg_node(pRExC_state, NASCII);
-                *flagp |= HASWIDTH|SIMPLE;
-                goto not_anyof;
-            }
-
-            /* Then try the other POSIX classes.  The POSIXA ones are
-             * about the same speed as ANYOF ops, but take less room;
-             * the ones that have above-Latin1 code point matches are
-             * somewhat faster than ANYOF. */
+             * of the POSIX classes.  The POSIXA ones are about the same speed
+             * as ANYOF ops, but take less room; the ones that have
+             * above-Latin1 code point matches are somewhat faster than ANYOF.
+             * */
 
             for (posix_class = 0;
                  posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;

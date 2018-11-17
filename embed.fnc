@@ -2570,8 +2570,6 @@ ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *stren
 
 #if defined(PERL_IN_REGEXEC_C)
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character|NN const U8* e
-ERns	|char *	|find_next_ascii|NN char* s|NN const char * send|const bool is_utf8
-ERns	|char *	|find_next_non_ascii|NN char* s|NN const char * send|const bool is_utf8
 ERns	|U8 *	|find_next_masked|NN U8 * s				\
 				 |NN const U8 * send			\
 				 |const U8 byte|const U8 mask

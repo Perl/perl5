@@ -5809,19 +5809,9 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 #define PERL_ARGS_ASSERT_FIND_BYCLASS	\
 	assert(prog); assert(c); assert(s); assert(strend)
 
-STATIC char *	S_find_next_ascii(char* s, const char * send, const bool is_utf8)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_FIND_NEXT_ASCII	\
-	assert(s); assert(send)
-
 STATIC U8 *	S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_FIND_NEXT_MASKED	\
-	assert(s); assert(send)
-
-STATIC char *	S_find_next_non_ascii(char* s, const char * send, const bool is_utf8)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_FIND_NEXT_NON_ASCII	\
 	assert(s); assert(send)
 
 STATIC U8 *	S_find_span_end(U8* s, const U8 * send, const U8 span_byte)

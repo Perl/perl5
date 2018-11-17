@@ -629,9 +629,6 @@ will be lost.
  NPOSIXU          none       complement of POSIXU, [[:^class:]]
  NPOSIXA          none       complement of POSIXA, [[:^class:]]
 
- ASCII            none       [[:ascii:]]
- NASCII           none       [[:^ascii:]]
-
  CLUMP            no         Match any extended grapheme cluster
                              sequence
 

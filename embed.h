@@ -1293,9 +1293,7 @@
 #define backup_one_SB(a,b,c)	S_backup_one_SB(aTHX_ a,b,c)
 #define backup_one_WB(a,b,c,d)	S_backup_one_WB(aTHX_ a,b,c,d)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
-#define find_next_ascii		S_find_next_ascii
 #define find_next_masked	S_find_next_masked
-#define find_next_non_ascii	S_find_next_non_ascii
 #define find_span_end		S_find_span_end
 #define find_span_end_mask	S_find_span_end_mask
 #define foldEQ_latin1_s2_folded	S_foldEQ_latin1_s2_folded
