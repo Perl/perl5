@@ -674,6 +674,9 @@ will be lost.
                              not guaranteed to be folded) using /iaa
                              rules (w/len).
 
+ EXACT_ONLY8      str        Like EXACT, but no strings that aren't in
+                             UTF-8 can match
+
  # Do nothing types
 
  NOTHING          no         Match empty string.

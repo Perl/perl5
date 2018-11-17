@@ -111,6 +111,8 @@ EXACTFU_SS  EXACT,      str	  ; Match this string (folded iff in UTF-8, length i
 EXACTFLU8   EXACT,      str	  ; Rare circumstances: like EXACTFU, but is under /l, UTF-8, folded, and everything in it is above 255.
 EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string (which is not trie-able; not guaranteed to be folded) using /iaa rules (w/len).
 
+EXACT_ONLY8 EXACT,      str       ; Like EXACT, but no strings that aren't in UTF-8 can match
+
 #*Do nothing types
 
 NOTHING     NOTHING,    no        ; Match empty string.

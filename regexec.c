@@ -4449,7 +4449,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     U8 *pat = (U8*)STRING(text_node);
     U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
 
-    if (OP(text_node) == EXACT || OP(text_node) == EXACTL) {
+    if (   OP(text_node) == EXACT
+        || OP(text_node) == EXACT_ONLY8
+        || OP(text_node) == EXACTL)
+    {
 
         /* In an exact node, only one thing can be matched, that first
          * character.  If both the pat and the target are UTF-8, we can just
@@ -6246,9 +6249,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (utf8_target && UTF8_IS_ABOVE_LATIN1(*locinput)) {
                 _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
             }
+            goto do_exact;
+	case EXACT_ONLY8:
+            if (! utf8_target) {
+                sayNO;
+            }
             /* FALLTHROUGH */
 	case EXACT: {            /*  /abc/        */
-	    char *s = STRING(scan);
+	    char *s;
+          do_exact:
+	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 	    if (utf8_target != is_utf8_pat) {
 		/* The target and the pattern have differing utf8ness. */
@@ -9184,8 +9194,15 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         if (utf8_target && UTF8_IS_ABOVE_LATIN1(*scan)) {
             _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(scan, loceol);
         }
+        goto do_exact;
+
+    case EXACT_ONLY8:
+        if (! utf8_target) {
+            break;
+        }
         /* FALLTHROUGH */
     case EXACT:
+      do_exact:
         assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
 	c = (U8)*STRING(p);
