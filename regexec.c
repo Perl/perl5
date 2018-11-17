@@ -6724,7 +6724,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (NEXTCHR_IS_EOS || (UCHARAT(locinput) & FLAGS(scan)) != ARG(scan)) {
                 sayNO;
             }
-            locinput++;
+            locinput++; /* ANYOFM is always single byte */
             break;
 
         case NANYOFM:
