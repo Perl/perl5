@@ -196,22 +196,6 @@ static const char* const non_utf8_target_but_utf8_required
 
 #define HAS_TEXT(rn) ( IS_EXACT(rn) || PL_regkind[OP(rn)] == REF )
 
-#if 0 
-/* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
-   we don't need this definition.  XXX These are now out-of-sync*/
-#define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFAA || OP(rn)==EXACTFAA_NO_TRIE || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
-#define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
-
-#else
-/* ... so we use this as its faster. */
-#define IS_TEXT(rn)   ( OP(rn)==EXACT || OP(rn)==EXACTL )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFLU8 || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFAA || OP(rn) == EXACTFAA_NO_TRIE)
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
-#define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
-
-#endif
-
 /*
   Search for mandatory following text node; for lookahead, the text must
   follow but for lookbehind (rn->flags != 0) we skip to the next step.
