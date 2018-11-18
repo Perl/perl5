@@ -13725,7 +13725,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * contain only above-Latin1 characters (hence must be in UTF8),
              * which don't participate in folds with Latin1-range characters,
              * as the latter's folds aren't known until runtime. */
-            bool maybe_exactfu = TRUE;
+            bool maybe_exactfu = FOLD;
 
             /* Allocate an EXACT node.  The node_type may change below to
              * another EXACTish node, but since the size of the node doesn't
@@ -13862,7 +13862,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             if (! maybe_exactfu) {
                                 len = 0;
                                 s = s0;
-                                maybe_exactfu = TRUE;   /* Prob. unnecessary */
+                                maybe_exactfu = FOLD;   /* Prob. unnecessary */
                                 goto reparse;
                             }
                         }
