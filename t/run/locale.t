@@ -459,7 +459,18 @@ EOF
         }
     }
 
-    {
+SKIP: {
+        # Note: a Configure probe could be written to give us the syntax to
+        # use, but khw doesn't think it's worth it.  If the POSIX 2008 locale
+        # functions are being used, the syntax becomes mostly irrelevant, so
+        # do the test anyway if they are
+        # it's a lot of trouble to figure out in a perl script
+        if ($^O eq 'openbsd' && (     $Config{useithreads} ne 'define'
+                                 || ! ${^SAFE_LOCALES}))
+        {
+            skip("The setlocale() syntax used is invalid on this platform", 2);
+        }
+
         my @valid_categories = valid_locale_categories();
 
         my $valid_string = "";
