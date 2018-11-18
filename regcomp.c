@@ -14447,7 +14447,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
                 }
 
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender,
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len,
+                                           UV_MAX,  /* unused here */
                                            FALSE /* Don't look to see if could
                                                     be turned into an EXACT
                                                     node, as we have already
