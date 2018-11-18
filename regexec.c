@@ -107,13 +107,6 @@ static const char* const non_utf8_target_but_utf8_required
 #define	STATIC	static
 #endif
 
-/* Valid only if 'c', the character being looke-up, is an invariant under
- * UTF-8: it avoids the reginclass call if there are no complications: i.e., if
- * everything matchable is straight forward in the bitmap */
-#define REGINCLASS(prog,p,c,u)  (ANYOF_FLAGS(p)                             \
-                                ? reginclass(prog,p,c,c+1,u)                \
-                                : ANYOF_BITMAP_TEST(p,*(c)))
-
 /*
  * Forwards.
  */
@@ -6714,7 +6707,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		locinput += UTF8SKIP(locinput);
 	    }
 	    else {
-		if (!REGINCLASS(rex, scan, (U8*)locinput, utf8_target))
+		if (ANYOF_FLAGS(scan)
+                    ? ! reginclass(rex, scan, (U8*) locinput, (U8*) locinput+1, utf8_target)
+                    : ! ANYOF_BITMAP_TEST(scan, *(U8*) locinput))
 		    sayNO;
 		locinput++;
 	    }
