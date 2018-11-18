@@ -6700,19 +6700,22 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case ANYOF:  /*   /[abc]/       */
             if (NEXTCHR_IS_EOS)
                 sayNO;
-	    if (utf8_target && ! UTF8_IS_INVARIANT(*locinput)) {
+	    if (  (! utf8_target || UTF8_IS_INVARIANT(*locinput))
+	        && ! ANYOF_FLAGS(scan))
+            {
+                if (! ANYOF_BITMAP_TEST(scan, * (U8 *) (locinput))) {
+		    sayNO;
+                }
+		locinput++;
+            }
+            else {
 	        if (!reginclass(rex, scan, (U8*)locinput, (U8*)reginfo->strend,
                                                                    utf8_target))
+                {
 		    sayNO;
-		locinput += UTF8SKIP(locinput);
-	    }
-	    else {
-		if (ANYOF_FLAGS(scan)
-                    ? ! reginclass(rex, scan, (U8*) locinput, (U8*) locinput+1, utf8_target)
-                    : ! ANYOF_BITMAP_TEST(scan, *(U8*) locinput))
-		    sayNO;
-		locinput++;
-	    }
+                }
+                goto increment_locinput;
+            }
 	    break;
 
         case ANYOFM:
