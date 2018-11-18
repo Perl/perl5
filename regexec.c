@@ -2221,7 +2221,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             REXEC_FBC_CLASS_SCAN(1, /* 1=>is-utf8 */
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
         }
-        else if (ANYOF_FLAGS(c)) {
+        else if (ANYOF_FLAGS(c) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
+            /* We know that s is in the bitmap range since the target isn't
+             * UTF-8, so what happens for out-of-range values is not relevant,
+             * so exclude that from the flags */
             REXEC_FBC_CLASS_SCAN(0, reginclass(prog,c, (U8*)s, (U8*)s+1, 0));
         }
         else {
@@ -6701,7 +6704,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (NEXTCHR_IS_EOS)
                 sayNO;
 	    if (  (! utf8_target || UTF8_IS_INVARIANT(*locinput))
-	        && ! ANYOF_FLAGS(scan))
+	        && ! (ANYOF_FLAGS(scan) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP))
             {
                 if (! ANYOF_BITMAP_TEST(scan, * (U8 *) (locinput))) {
 		    sayNO;
@@ -9363,7 +9366,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 		hardcount++;
 	    }
 	}
-        else if (ANYOF_FLAGS(p)) {
+        else if (ANYOF_FLAGS(p) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
 	    while (scan < loceol
                     && reginclass(prog, p, (U8*)scan, (U8*)scan+1, 0))
 		scan++;
