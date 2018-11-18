@@ -505,9 +505,9 @@ struct regnode_ssc {
 #define ANYOFL_FOLD                             0x04
 
 /* Shared bit set only with ANYOFL and SSC nodes:
- *    If ANYOFL_FOLD is set, this means there are potential matches valid
- *       only if the locale is a UTF-8 one.
- *    If ANYOFL_FOLD is NOT set, this means to warn if the runtime locale
+ *    If ANYOFL_FOLD is set, this flag indicates there are potential matches
+ *      valid only if the locale is a UTF-8 one.
+ *    If ANYOFL_FOLD is NOT set, this flag means to warn if the runtime locale
  *       isn't a UTF-8 one (and the generated node assumes a UTF-8 locale).
  *       None of INVERT, POSIXL,
  *       ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
