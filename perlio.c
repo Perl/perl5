@@ -5043,6 +5043,127 @@ static IV PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlI
 #define REPLACEMENT_CHARACTER_UTF8_LEN (sizeof("" REPLACEMENT_CHARACTER_UTF8 "")-1)
 
 SSize_t
+Perl_utf8_validate_and_fix_too(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
+                               const U32 flags, bool eof, U32 *unfixed_errors, SV **msgs) {
+    U32 sub_flags;
+    SSize_t retval = 0;
+    /* UTF8_CHECK_ONLY modifies retlen for utf8n_to_uvchr_msgs() */
+    U32 utf8_flags = flags & ~(UTF8_ONERROR_MASK | UTF8_CHECK_ONLY | UTF8_ALLOW_SHORT);
+
+    PERL_ARGS_ASSERT_UTF8_VALIDATE_AND_FIX;
+
+    /* Restrict flags to the ones is_utf8_string_*() handles */
+    sub_flags = utf8_flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                              |UTF8_DISALLOW_ABOVE_31_BIT);
+
+    *msgs = NULL;
+
+    while (*start < send) {
+        /* I thought originally I couldn't use this function, but
+           since the length of a well-formed utf-8 string won't change
+           in the output, we can just use the remaining output size to
+           limit the input size
+        */
+        const U8 *spos = *start;
+        STRLEN s_temp_len =
+            out != NULL && (send - spos) > (oend - *out) ? (oend - *out) : (send - *start);
+        (void)is_utf8_string_loc_flags(*start, s_temp_len, &spos, sub_flags);
+        if (out) {
+            Copy(*start, *out, spos-*start, U8);
+            *out += spos - *start;
+        }
+        retval += spos - *start;
+        *start = spos;
+
+        if (*start < send) {
+            STRLEN retlen = 0;
+            U32 errors;
+            AV *msgs = NULL;
+
+            /* we encountered an error we don't otherwise handle, emit a replacement character */
+            /* but only if we have space for it */
+
+            /* Check here since the next step may produce a warning,
+               and that warning could be produced twice if we do the
+               check later.
+            */
+            if (out && oend-*out < (SSize_t)REPLACEMENT_CHARACTER_UTF8_LEN)
+                return retval;
+
+            (void)utf8n_to_uvchr_msgs(*start, send - *start,
+                                      &retlen, flags | (eof ? 0 : UTF8_ALLOW_SHORT), &errors,
+                                      &msgs);
+
+            assert(*start + retlen <= send);
+            /* we can get UTF8_GOT_SHORT even with *start + retlen < send */
+            if (!eof
+                && (errors & UTF8_GOT_SHORT)
+                && *start + retlen == send) {
+                /* partial character at the end of the buffer */
+                return retval;
+            }
+
+            if ((flags & UTF8_ONERROR_MASK) == UTF8_FAIL_ON_ERROR && errors) {
+                *unfixed_errors = errors;
+                return retval;
+            }
+
+            if ((flags & UTF8_ONERROR_MASK) == UTF8_CROAK_ON_ERROR
+                && msgs && av_tindex(msgs) >= 0) {
+                return retval;
+            }
+            SvREFCNT_dec(msgs);
+
+            if (out) {
+                Copy(REPLACEMENT_CHARACTER_UTF8, *out,
+                     REPLACEMENT_CHARACTER_UTF8_LEN, U8);
+                *out += REPLACEMENT_CHARACTER_UTF8_LEN;
+            }
+            *start += retlen;
+            retval += REPLACEMENT_CHARACTER_UTF8_LEN;
+        }
+    }
+
+    return retval;
+}
+
+STATIC void
+S_throw_utf8_msgs(pTHX_ const U32 flags, SV *msgs) {
+    if (msgs && av_tindex(msgs) >= 0) {
+        switch (flags & UTF8_ONERROR_MASK) {
+        case UTF8_CROAK_ON_ERROR:
+            {
+                SSize_t i;
+                SSize_t const top = av_tindex(msgs);
+                SV *fullmsg = sv_2mortal(newSVpvs(""));
+                for (i = 0; i <= top; ++i) {
+                    SV **h = av_fetch(msgs, 0, FALSE);
+                    SV **msg;
+                    assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
+                    msg = hv_fetch((HV*)SvRV(*h), "text", 4, FALSE);
+                    if (msg && *msg) {
+                        sv_catpvf(fullmsg, "%s%" SVf, SvCUR(fullmsg) ? "\n" : "",
+                                  *msg);
+                    }
+                }
+                SvREFCNT_dec((SV*)msgs);
+                croak_sv(fullmsg);
+            }
+        case UTF8_WARN_ON_ERROR:
+            /* Some __WARN__ handler might throw an error, so make sure msgs
+               is released */
+            sv_2mortal(msgs);
+            /* FIXME - emit warnings*/
+            break;
+
+        default:
+            SvREFCNT_dec(msgs);
+            break;
+        }
+    }
+}
+
+SSize_t
 Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
                            const U32 flags, bool eof, U32 *unfixed_errors) {
     U32 sub_flags;
