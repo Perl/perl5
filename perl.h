@@ -775,11 +775,16 @@
 
 #    define HAS_POSIX_2008_LOCALE
 #  endif
-#  if     defined(USE_ITHREADS)                                             \
+                                   /* If compiled with
+                                    * -DUSE_THREAD_SAFE_LOCALE, will do so even
+                                    * on unthreaded builds */
+#  if    (defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE))         \
       && (    defined(HAS_POSIX_2008_LOCALE)                                \
           || (defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400))     \
       && ! defined(NO_THREAD_SAFE_LOCALE)
-#    define USE_THREAD_SAFE_LOCALE
+#    ifndef USE_THREAD_SAFE_LOCALE
+#      define USE_THREAD_SAFE_LOCALE
+#    endif
 #    ifdef HAS_POSIX_2008_LOCALE
 #      define USE_POSIX_2008_LOCALE
 #    endif

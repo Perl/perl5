@@ -517,6 +517,11 @@ from using thread-safe locales.
 C<${^SAFE_LOCALES}> will be 0 on systems that turn off the thread-safe
 operations.
 
+Normally on unthreaded builds, the traditional C<setlocale()> is used
+and not the thread-safe locale functions.  You can force the use of these
+on systems that have them by adding the
+C<-Accflags='-DUSE_THREAD_SAFE_LOCALE'> to F<Configure>.
+
 The initial program is started up using the locale specified from the
 environment, as currently, described in L</ENVIRONMENT>.   All newly
 created threads start with C<LC_ALL> set to C<"C">>.  Each thread may

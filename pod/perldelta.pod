@@ -264,7 +264,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Normally the thread-safe functions used only on threaded builds.
+It is now possible to force their use on unthreaded builds on systems
+that have them available, by including the
+C<-Accflags='-DUSE_THREAD_SAFE_LOCALE'> option to F<Configure>.
 
 =back
 

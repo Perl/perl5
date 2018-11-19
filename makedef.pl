@@ -129,7 +129,7 @@ if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'n
     $define{USE_REENTRANT_API} = 1;
 }
 
-if (     $define{USE_ITHREADS}
+if (    ($define{USE_ITHREADS} || $define{USE_THREAD_SAFE_LOCALE})
     &&   $define{HAS_SETLOCALE}
     && ! $define{NO_LOCALE}
     && ! $define{NO_POSIX_2008_LOCALE})
@@ -386,7 +386,6 @@ unless ($define{'USE_ITHREADS'}) {
     ++$skip{$_} foreach qw(
                     PL_keyword_plugin_mutex
 		    PL_check_mutex
-                    PL_curlocales
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
@@ -425,8 +424,15 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_stashpv_hvname_match
 		    Perl_regdupe_internal
 		    Perl_newPADOP
-                    PL_C_locale_obj
 			 );
+}
+
+unless ($define{USE_ITHREADS} || $define{USE_THREAD_SAFE_LOCALE})
+{
+    ++$skip{$_} foreach qw(
+        PL_C_locale_obj
+        PL_curlocales
+    );
 }
 
 unless ( $define{'HAS_NEWLOCALE'}
