@@ -16,7 +16,7 @@ BEGIN {
     use_ok('GDBM_File');
 }
 
-unlink <Op_dbmx*>;
+unlink <fatal_dbmx*>;
 
 open my $fh, '<', $^X or die "Can't open $^X: $!";
 my $fileno = fileno $fh;
@@ -28,7 +28,7 @@ is((open $fh, "<&=$fileno"), undef,
 
 umask(0);
 my %h;
-isa_ok(tie(%h, 'GDBM_File', 'Op_dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
+isa_ok(tie(%h, 'GDBM_File', 'fatal_dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
 
 isnt((open $fh, "<&=$fileno"), undef, "dup fileno $fileno")
     or diag("\$! = $!");
@@ -46,4 +46,4 @@ is(eval {
 like($@, qr/ at .*\bfatal\.t line \d+\.\n\z/,
      'expected error message from GDBM_File');
 
-unlink <Op_dbmx*>;
+unlink <fatal_dbmx*>;
