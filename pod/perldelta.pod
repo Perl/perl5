@@ -388,7 +388,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+L<SDBM_File> is now more robust with corrupt database files.  The
+improvements do not make SDBM files suitable as an interchange format.
+[perl #132147]
 
 =back
 
