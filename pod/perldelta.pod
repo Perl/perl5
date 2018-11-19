@@ -398,6 +398,20 @@ C<binmode($fh);> or C<binmode($fh, ':raw');> now properly removes the
 C<:utf8> flag from the default C<:crlf> I/O layer on Win32.  [perl
 #133604]
 
+=item *
+
+The experimental reference aliasing feature was misinterpreting array and
+hash slice assignment as being localised, e.g.
+
+    \(@a[3,5,7]) = \(....);
+
+was being interpreted as:
+
+    local \(@a[3,5,7]) = \(....);
+
+[perl #133538]
+
+
 =back
 
 =head1 Known Problems
