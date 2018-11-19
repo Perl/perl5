@@ -320,7 +320,7 @@ use File::Glob qw(:case);
     },
 
     'Data::Dumper' => {
-        'DISTRIBUTION' => 'SMUELLER/Data-Dumper-2.161.tar.gz',
+        'DISTRIBUTION' => 'XSAWYERX/Data-Dumper-2.173.tar.gz',
         'FILES'        => q[dist/Data-Dumper],
     },
 
@@ -337,7 +337,7 @@ use File::Glob qw(:case);
     },
 
     'Devel::PPPort' => {
-        'DISTRIBUTION' => 'XSAWYERX/Devel-PPPort-3.42.tar.gz',
+        'DISTRIBUTION' => 'XSAWYERX/Devel-PPPort-3.43.tar.gz',
         'FILES'        => q[dist/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
@@ -418,7 +418,7 @@ use File::Glob qw(:case);
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.72.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.73.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
