@@ -6,6 +6,12 @@ use File::Temp 'tempfile';
 use SDBM_File;
 use Fcntl qw(O_RDWR);
 use Errno qw(EINVAL);
+use Config;
+
+$Config{byteorder} =~ /^1234(?:5678)?$/
+  or plan skip_all => "test SDBM databases are little-endian";
+$Config{shortsize} == 2
+  or plan skip_all => "test SDBM databases have short size 2";
 
 my ($dirfh, $dirname) = tempfile(UNLINK => 1);
 my ($pagfh, $pagname) = tempfile(UNLINK => 1);
