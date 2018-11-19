@@ -4212,6 +4212,7 @@ ext/SDBM_File/sdbm.h	SDBM kit
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
 ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
 ext/SDBM_File/t/constants.t	See if SDBM_File constants work
+ext/SDBM_File/t/corrupt.t	See if SDBM_File handles corrupt files
 ext/SDBM_File/t/prep.t		See if SDBM_File with extra argument works
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/tune.h	SDBM kit

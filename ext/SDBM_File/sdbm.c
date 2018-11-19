@@ -398,6 +398,12 @@ sdbm_firstkey(DBM *db)
 	if (lseek(db->pagf, OFF_PAG(0), SEEK_SET) < 0
 	    || read(db->pagf, db->pagbuf, PBLKSIZ) < 0)
 		return ioerr(db), nullitem;
+        if (!chkpage(db->pagbuf)) {
+            errno = EINVAL;
+            ioerr(db);
+            db->pagbno = -1;
+            return nullitem;
+        }
 	db->pagbno = 0;
 	db->blkptr = 0;
 	db->keyptr = 0;
@@ -446,8 +452,12 @@ getpage(DBM *db, long int hash)
 		if (lseek(db->pagf, OFF_PAG(pagb), SEEK_SET) < 0
 		    || read(db->pagf, db->pagbuf, PBLKSIZ) < 0)
 			return 0;
-		if (!chkpage(db->pagbuf))
-			return 0;
+		if (!chkpage(db->pagbuf)) {
+                    errno = EINVAL;
+                    db->pagbno = -1;
+                    ioerr(db);
+                    return 0;
+                }
 		db->pagbno = pagb;
 
 		debug(("pag read: %d\n", pagb));
@@ -543,8 +553,12 @@ getnext(DBM *db)
 		db->pagbno = db->blkptr;
 		if (read(db->pagf, db->pagbuf, PBLKSIZ) <= 0)
 			break;
-		if (!chkpage(db->pagbuf))
-			break;
+		if (!chkpage(db->pagbuf)) {
+                    errno = EINVAL;
+                    db->pagbno = -1;
+                    ioerr(db);
+                    break;
+                }
 	}
 
 	return ioerr(db), nullitem;
