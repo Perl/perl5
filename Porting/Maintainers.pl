@@ -164,6 +164,8 @@ use File::Glob qw(:case);
 	    'lib/autodie/hints.pm',
 	    't/exceptions.t',
 	    't/lib/Hints_pod_examples.pm',
+            # CPAN RT#127762
+            't/recv.t',
         ],
     },
 
