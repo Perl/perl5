@@ -7534,9 +7534,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         goto redo_parse;
     }
 
-    /* In a stable state, as here, this must be true */
-    assert(RExC_size = RExC_emit + 1);
-
     /* Here, we have successfully parsed and generated the pattern's program
      * for the regex engine.  We are ready to finish things up and look for
      * optimizations. */
