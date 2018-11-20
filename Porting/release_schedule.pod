@@ -31,22 +31,6 @@ Code freezes (which happen in the 5.29.X series)
   2017-09-22  5.26.1 ✓        Steve Hay
   2018-04-14  5.26.2 ✓        Steve Hay
 
-=head2 Perl 5.24
-
-  2016-05-09  5.24.0 ✓        Ricardo Signes
-  2017-01-14  5.24.1 ✓        Steve Hay
-  2017-07-15  5.24.2 ✓        Steve Hay
-  2017-09-22  5.24.3 ✓        Steve Hay
-  2018-04-14  5.24.4 ✓        Steve Hay
-
-=head2 Perl 5.22
-
-  2015-06-01  5.22.0 ✓        Ricardo Signes
-  2015-12-13  5.22.1 ✓        Steve Hay
-  2016-04-29  5.22.2 ✓        Steve Hay
-  2017-01-14  5.22.3 ✓        Steve Hay
-  2017-07-15  5.22.4 ✓        Steve Hay
-
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
 This schedule lists the release engineers for at least the next
