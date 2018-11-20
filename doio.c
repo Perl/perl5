@@ -1173,34 +1173,39 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
         dir = INT2PTR(DIR *, SvIV(*dir_psv));
 #endif
         if (IoIFP(io)) {
-            SV **pid_psv;
-            PerlIO *iop = IoIFP(io);
+            if (PL_phase == PERL_PHASE_DESTRUCT && PL_statusvalue == 0) {
+                (void)argvout_final(mg, (IO*)io, FALSE);
+            }
+            else {
+                SV **pid_psv;
+                PerlIO *iop = IoIFP(io);
 
-            assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
+                assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
 
-            pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
+                pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
 
-            assert(pid_psv && *pid_psv);
+                assert(pid_psv && *pid_psv);
 
-            if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
-                /* if we get here the file hasn't been closed explicitly by the
-                   user and hadn't been closed implicitly by nextargv(), so
-                   abandon the edit */
-                SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
-                const char *temp_pv = SvPVX(*temp_psv);
+                if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
+                    /* if we get here the file hasn't been closed explicitly by the
+                       user and hadn't been closed implicitly by nextargv(), so
+                       abandon the edit */
+                    SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+                    const char *temp_pv = SvPVX(*temp_psv);
 
-                assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
-                (void)PerlIO_close(iop);
-                IoIFP(io) = IoOFP(io) = NULL;
+                    assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
+                    (void)PerlIO_close(iop);
+                    IoIFP(io) = IoOFP(io) = NULL;
 #ifdef ARGV_USE_ATFUNCTIONS
-                if (dir) {
-                    if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
-                        NotSupported(errno))
-                        (void)UNLINK(temp_pv);
-                }
+                    if (dir) {
+                        if (unlinkat(my_dirfd(dir), temp_pv, 0) < 0 &&
+                            NotSupported(errno))
+                            (void)UNLINK(temp_pv);
+                    }
 #else
-                (void)UNLINK(temp_pv);
+                    (void)UNLINK(temp_pv);
 #endif
+                }
             }
         }
 #ifdef ARGV_USE_ATFUNCTIONS

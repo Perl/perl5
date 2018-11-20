@@ -96,7 +96,7 @@ SKIP:
     my @tests =
       ( # opts, code, result, name, $TODO
        [ "-n", "die", "bar\n", "die shouldn't touch file" ],
-       [ "-n", "last", "", "last should update file", "not implemented yet" ],
+       [ "-n", "last", "", "last should update file" ],
       );
     our $file = tempfile() ;
 
