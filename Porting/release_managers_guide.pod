@@ -206,7 +206,7 @@ You can also run an actual diff of the contents of the modules, comparing core
 to CPAN, to ensure that there were no erroneous/extraneous changes that need to
 be dealt with. You do this by not passing the C<-x> option:
 
-    $ ./perl -Ilib Porting/core-cpan-diff -a -o /tmp/corediffs
+    $ ./perl -Ilib Porting/core-cpan-diff -a -o ~/corediffs
 
 Passing C<-u cpan> will probably be helpful, since it limits the search to
 distributions with 'cpan' upstream source.  (It's OK for blead upstream to
@@ -237,6 +237,16 @@ maint, then diff the two outputs. Compare this with what you expect, and if
 necessary, fix things up. For example, you might think that both blead
 and maint are synchronised with a particular CPAN module, but one might
 have some extra changes.
+
+In any case, any cpan-first distribution that is listed as having files
+"Customized for blead" in the output of cpan-core-diff should have requests
+submitted to the maintainer(s) to make a cpan release to catch up with blead.
+
+Additionally, all files listed as "modified" but not "customized for blead"
+should have entries added under the C<CUSTOMIZED> key in
+F<Porting/Maintainers.pl>, as well as checksums updated via:
+
+    cd t; ./perl -I../lib porting/customized.t --regen
 
 =head4 Sync CPAN modules with the corresponding cpanE<sol> distro
 
@@ -393,7 +403,7 @@ L<"update Module::CoreList">).
 =head3 Bump the version number
 
 Do not do this yet for a BLEAD-POINT release! You will do this at the end of
-the release process.
+the release process (after building the final tarball, tagging etc).
 
 Increase the version number (e.g. from 5.12.0 to 5.12.1).
 
@@ -732,7 +742,7 @@ Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
     $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
-        /tmp/perldelta.html
+        ~/perldelta.html
 
 If you make changes, be sure to commit them.
 
