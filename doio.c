@@ -1526,31 +1526,14 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
 #define dir_unchanged(orig_psv, mg) \
     S_dir_unchanged(aTHX_ (orig_psv), (mg))
 
-/* explicit renamed to avoid C++ conflict    -- kja */
-bool
-Perl_do_close(pTHX_ GV *gv, bool not_implicit)
-{
+STATIC bool
+S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool not_implicit) {
     bool retval;
-    IO *io;
-    MAGIC *mg;
 
-    if (!gv)
-	gv = PL_argvgv;
-    if (!gv || !isGV_with_GP(gv)) {
-	if (not_implicit)
-	    SETERRNO(EBADF,SS_IVCHAN);
-	return FALSE;
-    }
-    io = GvIO(gv);
-    if (!io) {		/* never opened */
-	if (not_implicit) {
-	    report_evil_fh(gv);
-	    SETERRNO(EBADF,SS_IVCHAN);
-	}
-	return FALSE;
-    }
-    if ((mg = mg_findext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl))
-        && mg->mg_obj) {
+    /* ensure args are checked before we start using them */
+    PERL_ARGS_ASSERT_ARGVOUT_FINAL;
+
+    {
         /* handle to an in-place edit work file */
         SV **back_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_BACKUP_NAME, FALSE);
         SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
@@ -1717,7 +1700,38 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
                            SvPVX(*temp_psv), Strerror(errno));
             }
         }
-    freext:
+ freext:
+        ;
+    }
+    return retval;
+}
+
+/* explicit renamed to avoid C++ conflict    -- kja */
+bool
+Perl_do_close(pTHX_ GV *gv, bool not_implicit)
+{
+    bool retval;
+    IO *io;
+    MAGIC *mg;
+
+    if (!gv)
+	gv = PL_argvgv;
+    if (!gv || !isGV_with_GP(gv)) {
+	if (not_implicit)
+	    SETERRNO(EBADF,SS_IVCHAN);
+	return FALSE;
+    }
+    io = GvIO(gv);
+    if (!io) {		/* never opened */
+	if (not_implicit) {
+	    report_evil_fh(gv);
+	    SETERRNO(EBADF,SS_IVCHAN);
+	}
+	return FALSE;
+    }
+    if ((mg = mg_findext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl))
+        && mg->mg_obj) {
+        retval = argvout_final(mg, io, not_implicit);
         mg_freeext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl);
     }
     else {
