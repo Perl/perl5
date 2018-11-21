@@ -2868,7 +2868,7 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
 	uv = iv;
 	sign = 0;
     } else {
-        uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
+        uv = -(UV)iv;
 	sign = 1;
     }
     do {
@@ -12596,7 +12596,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                             esignbuf[esignlen++] = plus;
                     }
                     else {
-                        uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
+                        uv = -(UV)iv;
                         esignbuf[esignlen++] = '-';
                     }
                 }
