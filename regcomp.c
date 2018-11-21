@@ -307,7 +307,8 @@ struct RExC_state_t {
  * Flags to be passed up and down.
  */
 #define	WORST		0	/* Worst case. */
-#define	HASWIDTH	0x01	/* Known to match non-null strings. */
+#define	HASWIDTH	0x01	/* Known to not match null strings, could match
+                                   non-null ones. */
 
 /* Simple enough to be STAR/PLUS operand; in an EXACTish node must be a single
  * character.  (There needs to be a case: in the switch statement in regexec.c
