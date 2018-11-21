@@ -1295,7 +1295,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                             SV **svp, **end;
                         strip_magic:
                             svp = AvARRAY(isa);
-                            end = svp + AvFILLp(isa)+1;
+                            end = svp + (AvFILLp(isa)+1);
                             while (svp < end) {
                                 if (*svp)
                                     mg_free_type(*svp, PERL_MAGIC_isaelem);
