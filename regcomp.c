@@ -16475,8 +16475,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     bool warn_super = ALWAYS_WARN_SUPER;
 
-    const regnode_offset orig_emit = RExC_emit; /* Save the original RExC_emit in
-        case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
     bool posixl_matches_all = FALSE; /* Does /l class have both e.g. \W,\w ? */
 
@@ -18367,7 +18365,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
         if (op != END) {
             RExC_parse = (char *)orig_parse;
-            RExC_emit = orig_emit;
 
             if (regarglen[op]) {
                 ret = reganode(pRExC_state, op, anode_arg);
