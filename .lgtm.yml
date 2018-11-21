@@ -12,4 +12,4 @@ path_classifiers:
     # These files are incorrectly classified as generated. Work around
     # this pending a fix on LGTM.com.
     - exclude: perl.c
-    - exclude: io.c
+    - exclude: op.c
