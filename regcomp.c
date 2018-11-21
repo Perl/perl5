@@ -18346,14 +18346,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (optimizable) {
         int posix_class = -1;   /* Illegal value */
         U8 ANYOFM_mask = 0xFF;
-        U32 anode_arg = 0;
         UV start, end;
 
         if (UNLIKELY(posixl_matches_all)) {
-            op = SANY;
+            ret = reg_node(pRExC_state, SANY);
+            goto not_anyof;
         }
-        else if (cp_list && ! invert) {
 
+        if (cp_list && ! invert) {
             invlist_iterinit(cp_list);
             if (! invlist_iternext(cp_list, &start, &end)) {
 
@@ -18361,10 +18361,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * Unicode property that doesn't match anything is the only
                  * element in the character class (perluniprops.pod notes such
                  * properties).  */
-                op = OPFAIL;
+                ret = reganode(pRExC_state, OPFAIL, 0);
                 *flagp |= HASWIDTH|SIMPLE;
+                goto not_anyof;
             }
-            else if (start == end) {    /* The range is a single code point */
+
+            if (start == end) {    /* The range is a single code point */
                 if (! invlist_iternext(cp_list, &start, &end)
 
                         /* Don't do this optimization if it would require
@@ -18435,20 +18437,30 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             invlist_iterfinish(cp_list);
 
-            if (op == END) {
+            if (op != END) {
+                ret = reg_node(pRExC_state, op);
+                if (PL_regkind[op] == EXACT) {
+                    alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
+                                            TRUE /* downgradable to EXACT */
+                                            );
+                }
+                goto not_anyof;
+            }
 
                 /* Here, didn't find an optimization.  See if this matches any
                  * of the POSIX classes.  First try ASCII */
 
                 if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 0)) {
-                    op = ASCII;
+                    ret = reg_node(pRExC_state, ASCII);
                     *flagp |= HASWIDTH|SIMPLE;
+                    goto not_anyof;
                 }
-                else if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 1)) {
-                    op = NASCII;
+
+                if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 1)) {
+                    ret = reg_node(pRExC_state, NASCII);
                     *flagp |= HASWIDTH|SIMPLE;
+                    goto not_anyof;
                 }
-                else {
 
                     /* Then try the other POSIX classes.  The POSIXA ones are
                      * about the same speed as ANYOF ops, but take less room;
@@ -18470,11 +18482,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                PL_Posix_ptrs[posix_class],
                                                try_inverted))
                                 {
-                                    op = (try_inverted)
-                                        ? NPOSIXA
-                                        : POSIXA;
+                                    ret = reg_node(pRExC_state, (try_inverted)
+                                                                ? NPOSIXA
+                                                                : POSIXA);
+                                FLAGS(REGNODE_p(ret)) = posix_class;
                                     *flagp |= HASWIDTH|SIMPLE;
-                                    goto found_posix;
+                                    goto not_anyof;
                                 }
                             }
 
@@ -18483,16 +18496,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                            PL_XPosix_ptrs[posix_class],
                                            try_inverted))
                             {
-                                op = (try_inverted)
-                                     ? NPOSIXU
-                                     : POSIXU;
+                                ret = reg_node(pRExC_state, (try_inverted)
+                                                            ? NPOSIXU
+                                                            : POSIXU);
+
+                                FLAGS(REGNODE_p(ret)) = posix_class;
                                 *flagp |= HASWIDTH|SIMPLE;
-                                goto found_posix;
+                                goto not_anyof;
                             }
                         }
                     }
-                  found_posix: ;
-                }
 
                 /* If it didn't match a POSIX class, it might be able to be
                  * turned into an ANYOFM node.  Compare two different bytes,
@@ -18516,7 +18529,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * usage, is optimizable into ANYOFM, and can benefit from the
                  * speed up.  We can only do this on UTF-8 invariant bytes,
                  * because the variance would throw this off.  */
-                if (op == END) {
+                {
                     PERL_UINT_FAST8_T inverted = 0;
 #ifdef EBCDIC
                     const PERL_UINT_FAST8_T max_permissible = 0xFF;
@@ -18598,40 +18611,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                          */
 
                         /* The argument is the lowest code point */
-                        anode_arg = lowest_cp;
+                        ret = reganode(pRExC_state, op, lowest_cp);
+                        FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
+
                         *flagp |= HASWIDTH|SIMPLE;
                     }
                 }
                 if (inverted) {
                     _invlist_invert(cp_list);
                 }
+                if (op != END) {
+                    goto not_anyof;
+                }
             }
-            }
-        }
-
-        if (op != END) {
-            if (regarglen[op]) {
-                ret = reganode(pRExC_state, op, anode_arg);
-            } else {
-                ret = reg_node(pRExC_state, op);
-            }
-            Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
-                                                   RExC_parse - orig_parse);;
-
-            if (PL_regkind[op] == EXACT) {
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
-                                           TRUE /* downgradable to EXACT */
-                                          );
-            }
-            else if (PL_regkind[op] == POSIXD || PL_regkind[op] == NPOSIXD) {
-                FLAGS(REGNODE_p(ret)) = posix_class;
-            }
-            else if (PL_regkind[op] == ANYOFM) {
-                FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
-            }
-
-            SvREFCNT_dec_NN(cp_list);
-            return ret;
         }
     }   /* End of seeing if can optimize it into a different node */
 
@@ -18704,6 +18696,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_contains_locale = 1;
     }
 
+    return ret;
+
+  not_anyof:
+
+    /* Here, the node is getting optimized into something that's not an ANYOF
+     * one.  Finish up. */
+
+    Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
+                                           RExC_parse - orig_parse);;
+    SvREFCNT_dec_NN(cp_list);;
     return ret;
 }
 
