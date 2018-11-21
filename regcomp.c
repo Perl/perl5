@@ -18098,7 +18098,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     if (optimizable) {
         int posix_class = -1;   /* Illegal value */
-        const char * cur_parse= RExC_parse;
         U8 ANYOFM_mask = 0xFF;
         U32 anode_arg = 0;
         UV start, end;
@@ -18364,15 +18363,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         if (op != END) {
-            RExC_parse = (char *)orig_parse;
-
             if (regarglen[op]) {
                 ret = reganode(pRExC_state, op, anode_arg);
             } else {
                 ret = reg_node(pRExC_state, op);
             }
-
-            RExC_parse = (char *)cur_parse;
+            Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
+                                                   RExC_parse - orig_parse);;
 
             if (PL_regkind[op] == EXACT) {
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
