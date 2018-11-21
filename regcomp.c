@@ -18447,181 +18447,184 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 goto not_anyof;
             }
 
-                /* Here, didn't find an optimization.  See if this matches any
-                 * of the POSIX classes.  First try ASCII */
+            {
 
-                if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 0)) {
-                    ret = reg_node(pRExC_state, ASCII);
-                    *flagp |= HASWIDTH|SIMPLE;
-                    goto not_anyof;
-                }
-
-                if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 1)) {
-                    ret = reg_node(pRExC_state, NASCII);
-                    *flagp |= HASWIDTH|SIMPLE;
-                    goto not_anyof;
-                }
-
-                    /* Then try the other POSIX classes.  The POSIXA ones are
-                     * about the same speed as ANYOF ops, but take less room;
-                     * the ones that have above-Latin1 code point matches are
-                     * somewhat faster than ANYOF. */
-
-                    for (posix_class = 0;
-                         posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
-                         posix_class++)
-                    {
-                        int try_inverted;
-
-                        for (try_inverted = 0; try_inverted < 2; try_inverted++)
-                        {
-
-                            /* Check if matches POSIXA, normal or inverted */
-                            if (PL_Posix_ptrs[posix_class]) {
-                                if (_invlistEQ(cp_list,
-                                               PL_Posix_ptrs[posix_class],
-                                               try_inverted))
-                                {
-                                    ret = reg_node(pRExC_state, (try_inverted)
-                                                                ? NPOSIXA
-                                                                : POSIXA);
-                                FLAGS(REGNODE_p(ret)) = posix_class;
-                                    *flagp |= HASWIDTH|SIMPLE;
-                                    goto not_anyof;
-                                }
-                            }
-
-                            /* Check if matches POSIXU, normal or inverted */
-                            if (_invlistEQ(cp_list,
-                                           PL_XPosix_ptrs[posix_class],
-                                           try_inverted))
-                            {
-                                ret = reg_node(pRExC_state, (try_inverted)
-                                                            ? NPOSIXU
-                                                            : POSIXU);
-
-                                FLAGS(REGNODE_p(ret)) = posix_class;
-                                *flagp |= HASWIDTH|SIMPLE;
-                                goto not_anyof;
-                            }
-                        }
-                    }
-
-                /* If it didn't match a POSIX class, it might be able to be
-                 * turned into an ANYOFM node.  Compare two different bytes,
-                 * bit-by-bit.  In some positions, the bits in each will be 1;
-                 * and in other positions both will be 0; and in some positions
-                 * the bit will be 1 in one byte, and 0 in the other.  Let 'n'
-                 * be the number of positions where the bits differ.  We create
-                 * a mask which has exactly 'n' 0 bits, each in a position
-                 * where the two bytes differ.  Now take the set of all bytes
-                 * that when ANDed with the mask yield the same result.  That
-                 * set has 2**n elements, and is representable by just two 8
-                 * bit numbers: the result and the mask.  Importantly, matching
-                 * the set can be vectorized by creating a word full of the
-                 * result bytes, and a word full of the mask bytes, yielding a
-                 * significant speed up.  Here, see if this node matches such a
-                 * set.  As a concrete example consider [01], and the byte
-                 * representing '0' which is 0x30 on ASCII machines.  It has
-                 * the bits 0011 0000.  Take the mask 1111 1110.  If we AND
-                 * 0x31 and 0x30 with that mask we get 0x30.  Any other bytes
-                 * ANDed yield something else.  So [01], which is a common
-                 * usage, is optimizable into ANYOFM, and can benefit from the
-                 * speed up.  We can only do this on UTF-8 invariant bytes,
-                 * because the variance would throw this off.  */
-                {
-                    PERL_UINT_FAST8_T inverted = 0;
+            /* See if this can be turned into an ANYOFM node.  Think about the
+             * bit patterns in two different bytes.  In some positions, the
+             * bits in each will be 1; and in other positions both will be 0;
+             * and in some positions the bit will be 1 in one byte, and 0 in
+             * the other.  Let 'n' be the number of positions where the bits
+             * differ.  We create a mask which has exactly 'n' 0 bits, each in
+             * a position where the two bytes differ.  Now take the set of all
+             * bytes that when ANDed with the mask yield the same result.  That
+             * set has 2**n elements, and is representable by just two 8 bit
+             * numbers: the result and the mask.  Importantly, matching the set
+             * can be vectorized by creating a word full of the result bytes,
+             * and a word full of the mask bytes, yielding a significant speed
+             * up.  Here, see if this node matches such a set.  As a concrete
+             * example consider [01], and the byte representing '0' which is
+             * 0x30 on ASCII machines.  It has the bits 0011 0000.  Take the
+             * mask 1111 1110.  If we AND 0x31 and 0x30 with that mask we get
+             * 0x30.  Any other bytes ANDed yield something else.  So [01],
+             * which is a common usage, is optimizable into ANYOFM, and can
+             * benefit from the speed up.  We can only do this on UTF-8
+             * invariant bytes, because they don't have the same patterns under
+             * UTF-8 as not. */
+            PERL_UINT_FAST8_T inverted = 0;
 #ifdef EBCDIC
-                    const PERL_UINT_FAST8_T max_permissible = 0xFF;
+            const PERL_UINT_FAST8_T max_permissible = 0xFF;
 #else
-                    const PERL_UINT_FAST8_T max_permissible = 0x7F;
+            const PERL_UINT_FAST8_T max_permissible = 0x7F;
 #endif
-                    if (invlist_highest(cp_list) > max_permissible) {
-                        _invlist_invert(cp_list);
-                        inverted = 1;
-                    }
+            /* If doesn't fit the criteria for ANYOFM, invert and try again.
+             * If that works we will instead later generate an NANYOFM, and
+             * invert back when through */
 
-                    if (invlist_highest(cp_list) <= max_permissible) {
-                    Size_t cp_count = 0;
-                    bool first_time = TRUE;
-                    unsigned int lowest_cp = 0xFF;
-                    U8 bits_differing = 0;
+            if (invlist_highest(cp_list) > max_permissible) {
+                _invlist_invert(cp_list);
+                inverted = 1;
+            }
 
-                    /* Only needed on EBCDIC, as there, variants and non- are mixed
-                     * together.  Could #ifdef it out on ASCII, but probably the
-                     * compiler will optimize it out */
-                    bool has_variant = FALSE;
+            if (invlist_highest(cp_list) <= max_permissible) {
+                Size_t cp_count = 0;
+                bool first_time = TRUE;
+                unsigned int lowest_cp = 0xFF;
+                U8 bits_differing = 0;
 
-                    /* Go through the bytes and find the bit positions that differ */
-                    invlist_iterinit(cp_list);
-                    while (invlist_iternext(cp_list, &start, &end)) {
-                        unsigned int i = start;
+                /* Only needed on EBCDIC, as there, variants and non- are mixed
+                 * together.  Could #ifdef it out on ASCII, but probably the
+                 * compiler will optimize it out */
+                bool has_variant = FALSE;
 
-                        cp_count += end - start + 1;
+                /* Go through the bytes and find the bit positions that differ
+                 * */
+                invlist_iterinit(cp_list);
+                while (invlist_iternext(cp_list, &start, &end)) {
+                    unsigned int i = start;
 
-                        if (first_time) {
-                            if (! UVCHR_IS_INVARIANT(i)) {
-                                has_variant = TRUE;
-                                continue;
-                            }
+                    cp_count += end - start + 1;
 
-                            first_time = FALSE;
-                            lowest_cp = start;
-
-                            i++;
+                    if (first_time) {
+                        if (! UVCHR_IS_INVARIANT(i)) {
+                            has_variant = TRUE;
+                            continue;
                         }
 
-                        /* Find the bit positions that differ from the lowest
-                         * code point in the node.  Keep track of all such
-                         * positions by OR'ing */
-                        for (; i <= end; i++) {
-                            if (! UVCHR_IS_INVARIANT(i)) {
-                                has_variant = TRUE;
-                                continue;
-                            }
+                        first_time = FALSE;
+                        lowest_cp = start;
 
-                            bits_differing  |= i ^ lowest_cp;
+                        i++;
+                    }
+
+                    /* Find the bit positions that differ from the lowest code
+                     * point in the node.  Keep track of all such positions by
+                     * OR'ing */
+                    for (; i <= end; i++) {
+                        if (! UVCHR_IS_INVARIANT(i)) {
+                            has_variant = TRUE;
+                            continue;
+                        }
+
+                        bits_differing  |= i ^ lowest_cp;
+                    }
+                }
+                invlist_iterfinish(cp_list);
+
+                /* At the end of the loop, we count how many bits differ from
+                 * the bits in lowest code point, call the count 'd'.  If the
+                 * set we found contains 2**d elements, it is the closure of
+                 * all code points that differ only in those bit positions.  To
+                 * convince yourself of that, first note that the number in the
+                 * closure must be a power of 2, which we test for.  The only
+                 * way we could have that count and it be some differing set,
+                 * is if we got some code points that don't differ from the
+                 * lowest code point in any position, but do differ from each
+                 * other in some other position.  That means one code point has
+                 * a 1 in that position, and another has a 0.  But that would
+                 * mean that one of them differs from the lowest code point in
+                 * that position, which possibility we've already excluded.  */
+                if (  ! has_variant
+                    && (inverted || cp_count > 1)
+                    &&  cp_count == 1U << PL_bitcount[bits_differing])
+                {
+                    op = ANYOFM + inverted;;
+
+                    /* We need to make the bits that differ be 0's */
+                    ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
+
+                    /* The argument is the lowest code point */
+                    ret = reganode(pRExC_state, op, lowest_cp);
+                    FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
+
+                    *flagp |= HASWIDTH|SIMPLE;
+                }
+            }
+            if (inverted) {
+                _invlist_invert(cp_list);
+            }
+
+            if (op != END) {
+                goto not_anyof;
+            }
+            }
+
+            /* Here, didn't find an optimization.  See if this matches any
+             * of the POSIX classes.  First try ASCII */
+
+            if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 0)) {
+                ret = reg_node(pRExC_state, ASCII);
+                *flagp |= HASWIDTH|SIMPLE;
+                goto not_anyof;
+            }
+
+            if (_invlistEQ(cp_list, PL_XPosix_ptrs[_CC_ASCII], 1)) {
+                ret = reg_node(pRExC_state, NASCII);
+                *flagp |= HASWIDTH|SIMPLE;
+                goto not_anyof;
+            }
+
+            /* Then try the other POSIX classes.  The POSIXA ones are
+             * about the same speed as ANYOF ops, but take less room;
+             * the ones that have above-Latin1 code point matches are
+             * somewhat faster than ANYOF. */
+
+            for (posix_class = 0;
+                 posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
+                 posix_class++)
+            {
+                int try_inverted;
+
+                for (try_inverted = 0; try_inverted < 2; try_inverted++)
+                {
+
+                    /* Check if matches POSIXA, normal or inverted */
+                    if (PL_Posix_ptrs[posix_class]) {
+                        if (_invlistEQ(cp_list,
+                                       PL_Posix_ptrs[posix_class],
+                                       try_inverted))
+                        {
+                            ret = reg_node(pRExC_state, (try_inverted)
+                                                        ? NPOSIXA
+                                                        : POSIXA);
+                        FLAGS(REGNODE_p(ret)) = posix_class;
+                            *flagp |= HASWIDTH|SIMPLE;
+                            goto not_anyof;
                         }
                     }
-                    invlist_iterfinish(cp_list);
 
-                    /* At the end of the loop, we count how many bits differ
-                     * from the bits in lowest code point, call the count 'd'.
-                     * If the set we found contains 2**d elements, it is the
-                     * closure of all code points that differ only in those bit
-                     * positions.  To convince yourself of that, first note
-                     * that the number in the closure must be a power of 2,
-                     * which we test for.  The only way we could have that
-                     * count and it be some differing set, is if we got some
-                     * code points that don't differ from the lowest code point
-                     * in any position, but do differ from each other in some
-                     * other position.  That means one code point has a 1 in
-                     * that position, and another has a 0.  But that would mean
-                     * that one of them differs from the lowest code point in
-                     * that position, which possibility we've already excluded.
-                     * */
-                    if ( ! has_variant
-                        && cp_count == 1U << PL_bitcount[bits_differing])
+                    /* Check if matches POSIXU, normal or inverted */
+                    if (_invlistEQ(cp_list,
+                                   PL_XPosix_ptrs[posix_class],
+                                   try_inverted))
                     {
-                        assert(inverted || cp_count > 1);
-                        op = ANYOFM + inverted;;
+                        ret = reg_node(pRExC_state, (try_inverted)
+                                                    ? NPOSIXU
+                                                    : POSIXU);
 
-                        /* We need to make the bits that differ be 0's */
-                        ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS
-                                                         */
-
-                        /* The argument is the lowest code point */
-                        ret = reganode(pRExC_state, op, lowest_cp);
-                        FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
-
+                        FLAGS(REGNODE_p(ret)) = posix_class;
                         *flagp |= HASWIDTH|SIMPLE;
+                        goto not_anyof;
                     }
-                }
-                if (inverted) {
-                    _invlist_invert(cp_list);
-                }
-                if (op != END) {
-                    goto not_anyof;
                 }
             }
         }
