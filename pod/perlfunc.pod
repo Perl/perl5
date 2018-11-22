@@ -6652,7 +6652,8 @@ Generally used in a L<C<continue>|/continue BLOCK> block at the end of a
 loop to clear variables and reset C<m?pattern?> searches so that they
 work again.  The
 expression is interpreted as a list of single characters (hyphens
-allowed for ranges).  All variables and arrays beginning with one of
+allowed for ranges).  All variables (scalars, arrays, and hashes)
+in the current package beginning with one of
 those letters are reset to their pristine state.  If the expression is
 omitted, one-match searches (C<m?pattern?>) are reset to match again.
 Only resets variables or searches in the current package.  Always returns
@@ -6665,6 +6666,7 @@ Only resets variables or searches in the current package.  Always returns
 Resetting C<"A-Z"> is not recommended because you'll wipe out your
 L<C<@ARGV>|perlvar/@ARGV> and L<C<@INC>|perlvar/@INC> arrays and your
 L<C<%ENV>|perlvar/%ENV> hash.
+
 Resets only package variables; lexical variables are unaffected, but
 they clean themselves up on scope exit anyway, so you'll probably want
 to use them instead.  See L<C<my>|/my VARLIST>.
