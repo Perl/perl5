@@ -5150,10 +5150,25 @@ S_throw_utf8_msgs(pTHX_ const U32 flags, SV *msgs) {
                 croak_sv(fullmsg);
             }
         case UTF8_WARN_ON_ERROR:
-            /* Some __WARN__ handler might throw an error, so make sure msgs
-               is released */
-            sv_2mortal(msgs);
-            /* FIXME - emit warnings*/
+            {
+                SSize_t i;
+                SSize_t top = av_tindex(msgs);
+                /* Some __WARN__ handler might throw an error, so make sure msgs
+                   is released */
+                sv_2mortal(msgs);
+                for (i = 0; i < top; ++i) {
+                    SV **h = av_fetch(msgs, 0, FALSE);
+                    SV **text;
+                    SV **category;
+                    SV **flags;
+                    HV *hv;
+                    assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
+                    hv = (HV*)SvRV(*h);
+                    text = hv_fetchs(hv, "text", FALSE);
+                    category = hv_fetchs(hv, "warn_categories", FALSE);
+                    Perl_ck_warner(aTHX_ SvUV(*category), "%" SVf, *text);
+                }
+            }
             break;
 
         default:
