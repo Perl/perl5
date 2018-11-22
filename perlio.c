@@ -5172,6 +5172,7 @@ S_throw_utf8_msgs(pTHX_ const U32 flags, SV *msgs) {
             break;
 
         default:
+            /* just discard them */
             SvREFCNT_dec(msgs);
             break;
         }
