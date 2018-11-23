@@ -74,7 +74,7 @@ for my $filename (@files) {
     close MOD
         or die "Error closing $filename: $!";
 
-    ($name, $thing) = split / --? /, $title, 2;
+    ($name, $thing) = split /\s+--?\s+/, $title, 2;
 
     unless ($name and $thing) {
 	warn "$filename missing name\n"  unless $name;

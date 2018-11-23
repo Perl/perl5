@@ -14,7 +14,7 @@
 
 =head1 NAME
 
-B::Op_private -  OP op_private flag definitions
+B::Op_private - OP op_private flag definitions
 
 =head1 SYNOPSIS
 
