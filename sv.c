@@ -5164,9 +5164,8 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
                 SvCUR_set(sv, cur);
                 *SvEND(sv) = '\0';
             }
-	    if (len) {
-	    } else {
-		unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
+	    if (! len) {
+			unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	    }
 #ifdef DEBUGGING
             if (DEBUG_C_TEST)
