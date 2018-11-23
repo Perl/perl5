@@ -44,7 +44,7 @@ Perl_cast_ulong(NV f)
     return (U32) f;
 #endif
   }
-  return f > 0 ? U32_MAX : 0 /* NaN */;
+  return U32_MAX /* NaN */;
 }
 
 I32
@@ -62,7 +62,7 @@ Perl_cast_i32(NV f)
     return (I32)(U32) f;
 #endif
   }
-  return f > 0 ? (I32)U32_MAX : 0 /* NaN */;
+  return (I32)U32_MAX /* NaN */;
 }
 
 IV
