@@ -230,7 +230,7 @@ completely) due to their sizes, volatility, or simply lack of time
 for adequate testing and configuration across the multitude of
 platforms on which Perl was beta-tested.  You are encouraged to
 look for them on CPAN (described below), or using web search engines
-like Alta Vista or Google.
+like Google or DuckDuckGo.
 
 =head1 CPAN
 
