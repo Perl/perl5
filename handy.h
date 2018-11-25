@@ -255,6 +255,14 @@ typedef U64TYPE U64;
 #  endif
 #endif
 
+/* Returns a boolean as to whether the input unsigned number is a power of 2
+ * (2**0, 2**1, etc).  In other words if it has just a single bit set.
+ * If not, subtracting 1 would leave the uppermost bit set, so the & would
+ * yield non-zero */
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#  define isPOWER_OF_2(n) ((n & (n-1)) == 0)
+#endif
+
 /* This is a helper macro to avoid preprocessor issues, replaced by nothing
  * unless under DEBUGGING, where it expands to an assert of its argument,
  * followed by a comma (hence the comma operator).  If we just used a straight

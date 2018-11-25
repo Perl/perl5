@@ -96,12 +96,6 @@ static const char* const non_utf8_target_but_utf8_required
                 = "Can't match, because target string needs to be in UTF-8\n";
 #endif
 
-/* Returns a boolean as to whether the input unsigned number is a power of 2
- * (2**0, 2**1, etc).  In other words if it has just a single bit set.
- * If not, subtracting 1 would leave the uppermost bit set, so the & would
- * yield non-zero */
-#define isPOWER_OF_2(n) ((n & (n-1)) == 0)
-
 #define NON_UTF8_TARGET_BUT_UTF8_REQUIRED(target) STMT_START {           \
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%s", non_utf8_target_but_utf8_required));\
     goto target;                                                         \
