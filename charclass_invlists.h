@@ -383370,6 +383370,13 @@ static const U8 WB_table[23][23] = {
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
+/* More than one code point may have the same code point as their fold.  This
+ * gives the maximum number in the current Unicode release.  (The folded-to
+ * code point is not included in this count.)  For example, both 'S' and
+ * \x{17F} fold to 's', so the number for that fold is 2.  Another way to
+ * look at it is the maximum length of all the IVCF_AUX_TABLE's */
+#define MAX_FOLD_FROMS 3
+
 /* Generated from:
  * d34c77b7e7a94986cc82056919f4ffc1503b73091561e16bd8ef145ac0fd04c5 lib/Unicode/UCD.pm
  * 0bc5023a4606962114c4eb3775fae072cad8fecef5894d0de06603b1c70cbb47 lib/unicore/ArabicShaping.txt
@@ -383421,5 +383428,5 @@ static const U8 WB_table[23][23] = {
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 75b68d1ed0aa09110eacc421055c41bb1cc2d7cfbf23455f0a7bc9e2eb662b13 regen/mk_invlists.pl
+ * 743fbd71a854b7898795d351668ad5059d4f07dcfa870904618c97e6b4809e93 regen/mk_invlists.pl
  * ex: set ro: */

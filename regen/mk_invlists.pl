@@ -34,6 +34,12 @@ my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 # integer or float
 my $numeric_re = qr/ ^ -? \d+ (:? \. \d+ )? $ /x;
 
+# More than one code point may have the same code point as their fold.  This
+# gives the maximum number in the current Unicode release.  (The folded-to
+# code point is not included in this count.)  Most folds are pairs of code
+# points, like 'B' and 'b', so this number is at least one.
+my $max_fold_froms = 1;
+
 my %keywords;
 my $table_name_prefix = "UNI_";
 
@@ -1028,8 +1034,15 @@ sub _Perl_IVCF {
 
 
     # Now we have a hash that is the inversion of the case fold property.
-    # Convert it to an inversion map.
+    # First find the maximum number of code points that fold to the same one.
+    foreach my $fold_to (keys %new) {
+        if (ref $new{$fold_to}) {
+            my $folders_count = scalar @{$new{$fold_to}};
+            $max_fold_froms = $folders_count if $folders_count > $max_fold_froms;
+        }
+    }
 
+    # Then convert the hash to an inversion map.
     my @sorted_folds = sort { $a <=> $b } keys %new;
     my (@invlist, @invmap);
 
@@ -2965,6 +2978,16 @@ output_LB_table();
 output_WB_table();
 
 end_file_pound_if;
+
+print $out_fh <<"EOF";
+
+/* More than one code point may have the same code point as their fold.  This
+ * gives the maximum number in the current Unicode release.  (The folded-to
+ * code point is not included in this count.)  For example, both 'S' and
+ * \\x{17F} fold to 's', so the number for that fold is 2.  Another way to
+ * look at it is the maximum length of all the IVCF_AUX_TABLE's */
+#define MAX_FOLD_FROMS $max_fold_froms
+EOF
 
 my $sources_list = "lib/unicore/mktables.lst";
 my @sources = qw(regen/mk_invlists.pl
