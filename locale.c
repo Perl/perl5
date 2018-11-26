@@ -5050,15 +5050,15 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 
     const COP * const cop = (compiling) ? &PL_compiling : PL_curcop;
 
-    SV *categories = cop_hints_fetch_pvs(cop, "locale", 0);
-    if (! categories || categories == &PL_sv_placeholder) {
+    SV *these_categories = cop_hints_fetch_pvs(cop, "locale", 0);
+    if (! these_categories || these_categories == &PL_sv_placeholder) {
         return FALSE;
     }
 
     /* The pseudo-category 'not_characters' is -1, so just add 1 to each to get
      * a valid unsigned */
     assert(category >= -1);
-    return cBOOL(SvUV(categories) & (1U << (category + 1)));
+    return cBOOL(SvUV(these_categories) & (1U << (category + 1)));
 }
 
 char *
