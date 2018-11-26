@@ -363,7 +363,20 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+If an in-place edit is still in progress during global destruction and
+the process exit code (as stored in C<$?>) is zero, perl will now
+treat the in-place edit as successful, replacing the input file with
+any output produced.
+
+This allows code like:
+
+  perl -i -ne 'print "Foo"; last'
+
+to replace the input file, while code like:
+
+  perl -i -ne 'print "Foo"; die'
+
+will not.  Partly resolves [perl #133659].
 
 =back
 
