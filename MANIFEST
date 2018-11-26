@@ -4321,6 +4321,7 @@ ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
 ext/XS-APItest/t/newCONSTSUB.t	XS::APItest: test newCONSTSUB(_flags)
 ext/XS-APItest/t/newDEFSVOP.t	XS::APItest: test newDEFSVOP
 ext/XS-APItest/t/Null.pm	Helper for ./blockhooks.t
+ext/XS-APItest/t/numeric.c	XS::APItest: test numeric.c utility functions
 ext/XS-APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS-APItest/t/op_contextualize.t	test op_contextualize() API
 ext/XS-APItest/t/op_list.t	test OP list construction API

@@ -59,3 +59,15 @@ grok_atoUV(number, endsv)
 	    PUSHs(sv_2mortal(newSViv(0)));
 	  }
 	}
+
+UV
+U_32(NV number)
+
+UV
+U_V(NV number)
+
+IV
+I_32(NV number)
+
+IV
+I_V(NV number)
