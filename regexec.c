@@ -2292,6 +2292,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                              | FOLDEQ_S2_FOLDS_SANE;
             goto do_exactf_utf8;
 
+    case EXACTFU_ONLY8:
+        if (! utf8_target) {
+            break;
+        }
+        assert(is_utf8_pat);
+        utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
+        goto do_exactf_utf8;
+
     case EXACTFU:
         if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
@@ -6361,6 +6369,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_array = PL_fold_latin1;
 	    goto do_exactf;
 
+        case EXACTFU_ONLY8:      /* /abc/iu with something in /abc/ > 255 */
+            if (! utf8_target) {
+                sayNO;
+            }
+	    assert(is_utf8_pat);
+	    fold_utf8_flags = FOLDEQ_S1_ALREADY_FOLDED;
+	    goto do_exactf;
+
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
 	case EXACTFU:            /*  /abc/iu      */
 	    folder = foldEQ_latin1;
@@ -9286,6 +9302,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         }
         utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S2_ALREADY_FOLDED
                                     | FOLDEQ_S2_FOLDS_SANE;
+        goto do_exactf;
+
+    case EXACTFU_ONLY8:
+        if (! utf8_target) {
+            break;
+        }
+	assert(reginfo->is_utf8_pat);
+	utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
         goto do_exactf;
 
     case EXACTFU_SS:

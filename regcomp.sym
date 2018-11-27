@@ -112,6 +112,9 @@ EXACTFLU8   EXACT,      str	  ; Rare circumstances: like EXACTFU, but is under /
 EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string (which is not trie-able; not guaranteed to be folded) using /iaa rules (w/len).
 
 EXACT_ONLY8 EXACT,      str       ; Like EXACT, but no strings that aren't in UTF-8 can match
+EXACTFU_ONLY8 EXACT,    str       ; Like EXACTFU, but no strings that aren't in UTF-8 can match
+# One could add EXACTFAA8 and and something that has the same effect for /l,
+# but these would be extremely uncommon
 
 #*Do nothing types
 

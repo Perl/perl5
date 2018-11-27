@@ -676,6 +676,8 @@ will be lost.
 
  EXACT_ONLY8      str        Like EXACT, but no strings that aren't in
                              UTF-8 can match
+ EXACTFU_ONLY8    str        Like EXACTFU, but no strings that aren't in
+                             UTF-8 can match
 
  # Do nothing types
 
