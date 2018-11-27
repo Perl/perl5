@@ -18329,6 +18329,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         return RExC_emit;
     }
 
+    /* All possible optimizations below still have these characteristics.
+     * (Multi-char folds aren't SIMPLE, but they don't get this far in this
+     * routine) */
+    *flagp |= HASWIDTH|SIMPLE;
+
     /* Some character classes are equivalent to other nodes.  Such nodes take
      * up less room and generally fewer operations to execute than ANYOF nodes.
      * */
@@ -18351,7 +18356,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * element in the character class (perluniprops.pod notes such
                  * properties).  */
                 ret = reganode(pRExC_state, OPFAIL, 0);
-                *flagp |= HASWIDTH|SIMPLE;
                 goto not_anyof;
             }
 
@@ -18412,7 +18416,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             else if (start == 0) {
                 if (end == UV_MAX) {
                     op = SANY;
-                    *flagp |= HASWIDTH|SIMPLE;
                     MARK_NAUGHTY(1);
                 }
                 else if (end == '\n' - 1
@@ -18420,7 +18423,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         && start == '\n' + 1 && end == UV_MAX)
                 {
                     op = REG_ANY;
-                    *flagp |= HASWIDTH|SIMPLE;
                     MARK_NAUGHTY(1);
                 }
             }
@@ -18540,7 +18542,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     ret = reganode(pRExC_state, op, lowest_cp);
                     FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
 
-                    *flagp |= HASWIDTH|SIMPLE;
                 }
             }
           done_anyofm:
@@ -18579,7 +18580,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                         ? NPOSIXA
                                                         : POSIXA);
                         FLAGS(REGNODE_p(ret)) = posix_class;
-                            *flagp |= HASWIDTH|SIMPLE;
                             goto not_anyof;
                         }
                     }
@@ -18594,7 +18594,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                     : POSIXU);
 
                         FLAGS(REGNODE_p(ret)) = posix_class;
-                        *flagp |= HASWIDTH|SIMPLE;
                         goto not_anyof;
                     }
                 }
@@ -18664,8 +18663,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                    ? listsv : NULL,
                   only_utf8_locale_list,
                   swash, has_user_defined_property);
-
-    *flagp |= HASWIDTH|SIMPLE;
 
     if (ANYOF_FLAGS(REGNODE_p(ret)) & ANYOF_LOCALE_FLAGS) {
         RExC_contains_locale = 1;
