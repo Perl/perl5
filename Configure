@@ -19480,7 +19480,7 @@ case "$d_u32align" in
 $signal_t bletch(int s) { exit(4); }
 #endif
 int main() {
-#if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x4321 || BYTEORDER == 0x12345678 || BYTEORDER == 0x87654321
     volatile U8 buf[8];
     volatile U32 *up;
     int i;
