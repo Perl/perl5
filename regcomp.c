@@ -16566,7 +16566,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                        one.  */
     U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
     U32 posixl = 0;       /* bit field of posix classes matched under /l */
-    bool use_anyofd = FALSE; /* ? Is this to be an ANYOFD node */
+    bool has_d_runtime_dependencies = FALSE; /* ? Is this to be an ANYOFD node */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -18132,7 +18132,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              && (    upper_latin1_only_utf8_matches
                  || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
-        use_anyofd = TRUE;
+        has_d_runtime_dependencies = TRUE;
         RExC_seen_d_op = TRUE;
         optimizable = FALSE;
     }
@@ -18143,7 +18143,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * */
     if (     cp_list
         &&   invert
-        && ! use_anyofd
+        && ! has_d_runtime_dependencies
         && ! (anyof_flags & (ANYOF_LOCALE_FLAGS))
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
@@ -18450,7 +18450,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }   /* End of seeing if can optimize it into a different node */
 
     /* It's going to be an ANYOF node. */
-    op = (use_anyofd)
+    op = (has_d_runtime_dependencies)
          ? ANYOFD
          : ((posixl)
             ? ANYOFPOSIXL
