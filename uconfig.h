@@ -1479,17 +1479,6 @@
  */
 /*#define HAS_BACKTRACE	/ **/
 
-/* HASCONST:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the const type. There is no need to actually test for that symbol
- *	within your programs. The mere use of the "const" keyword will
- *	trigger the necessary tests.
- */
-/*#define HASCONST	/ **/
-#ifndef HASCONST
-#define const
-#endif
-
 /* HAS_CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
  */
@@ -5230,6 +5219,6 @@
 #endif
 
 /* Generated from:
- * 86429d6dea8cb2d81b30da9d916693eb4c04ebeb21969c8df6f470ac77cd5c92 config_h.SH
- * fd30f4a36ebf71b0b366649cee58bb37d9d61863201e087e8f40e4ceae0abf1d uconfig.sh
+ * 875df2221ab768da0a87740ad45e12bbc9e3b483bfa1a913727e982350ad74cf config_h.SH
+ * 24ca29f990de08f8119ad2c15f060361b86fc407caab088289d7d5ac3e0f117a uconfig.sh
  * ex: set ro: */

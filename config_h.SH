@@ -1514,17 +1514,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_backtrace HAS_BACKTRACE	/**/
 
-/* HASCONST:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the const type. There is no need to actually test for that symbol
- *	within your programs. The mere use of the "const" keyword will
- *	trigger the necessary tests.
- */
-#$d_const HASCONST	/**/
-#ifndef HASCONST
-#define const
-#endif
-
 /* HAS_CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
  */

@@ -584,11 +584,6 @@ d_cmsghdr_s (d_cmsghdr_s.U):
 	This variable conditionally defines the HAS_STRUCT_CMSGHDR symbol,
 	which indicates that the struct cmsghdr is supported.
 
-d_const (d_const.U):
-	This variable conditionally defines the HASCONST symbol, which
-	indicates to the C program that this C compiler knows about the
-	const type.
-
 d_copysign (d_copysign.U):
 	This variable conditionally defines the HAS_COPYSIGN symbol, which
 	indicates to the C program that the copysign() routine is available.

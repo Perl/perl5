@@ -410,7 +410,6 @@ d_clearenv=''
 d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
-d_const=''
 d_copysign=''
 d_copysignl=''
 d_cplusplus=''
@@ -12054,27 +12053,6 @@ case "$d_cmsghdr_s" in
 *)              echo "No, it doesn't." ;;
 esac
 
-: check for const keyword
-echo " "
-echo 'Checking to see if your C compiler knows about "const"...' >&4
-$cat >const.c <<'EOCP'
-typedef struct spug { int drokk; } spug;
-int main()
-{
-	const char *foo;
-	const spug y = { 0 };
-}
-EOCP
-if $cc -c $ccflags const.c >/dev/null 2>&1 ; then
-	val="$define"
-	echo "Yup, it does."
-else
-	val="$undef"
-	echo "Nope, it doesn't."
-fi
-set d_const
-eval $setvar
-
 : see if copysign exists
 set copysign d_copysign
 eval $inlibc
@@ -19856,10 +19834,6 @@ $define)
 	echo " "
 	echo "Checking Berkeley DB version ..." >&4
 	$cat >try.c <<EOCP
-#$d_const HASCONST
-#ifndef HASCONST
-#define const
-#endif
 #include <sys/types.h>
 #include <stdio.h>
 #$i_stdlib I_STDLIB
@@ -19950,10 +19924,6 @@ define)
 	echo " "
 	echo "Checking return type needed for hash for Berkeley DB ..." >&4
 	$cat >try.c <<EOCP
-#$d_const HASCONST
-#ifndef HASCONST
-#define const
-#endif
 #include <sys/types.h>
 #include <db.h>
 
@@ -19994,10 +19964,6 @@ define)
 	echo " "
 	echo "Checking return type needed for prefix for Berkeley DB ..." >&4
 	cat >try.c <<EOCP
-#$d_const HASCONST
-#ifndef HASCONST
-#define const
-#endif
 #include <sys/types.h>
 #include <db.h>
 
@@ -23843,7 +23809,6 @@ d_class='$d_class'
 d_clearenv='$d_clearenv'
 d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
-d_const='$d_const'
 d_copysign='$d_copysign'
 d_copysignl='$d_copysignl'
 d_cplusplus='$d_cplusplus'
