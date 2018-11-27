@@ -4690,12 +4690,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                               || EXACTFU_ONLY8 == (X)                       \
                               || EXACTFU_SS == (X) )                        \
                            ? EXACTFU                                        \
-                           : ( EXACTFAA == (X) )                             \
-                             ? EXACTFAA                                      \
+                           : ( EXACTFAA == (X) )                            \
+                             ? EXACTFAA                                     \
                              : ( EXACTL == (X) )                            \
                                ? EXACTL                                     \
-                               : ( EXACTFLU8 == (X) )                        \
-                                 ? EXACTFLU8                                 \
+                               : ( EXACTFLU8 == (X) )                       \
+                                 ? EXACTFLU8                                \
                                  : 0 )
 
                         /* dont use tail as the end marker for this traverse */
