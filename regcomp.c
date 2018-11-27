@@ -18476,6 +18476,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
 
             if (invlist_highest(cp_list) <= max_permissible) {
+                UV this_start, this_end;
                 Size_t cp_count = 0;
                 bool first_time = TRUE;
                 unsigned int lowest_cp = 0xFF;
@@ -18489,10 +18490,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* Go through the bytes and find the bit positions that differ
                  * */
                 invlist_iterinit(cp_list);
-                while (invlist_iternext(cp_list, &start, &end)) {
-                    unsigned int i = start;
+                while (invlist_iternext(cp_list, &this_start, &this_end)) {
+                    unsigned int i = this_start;
 
-                    cp_count += end - start + 1;
+                    cp_count += this_end - this_start + 1;
 
                     if (first_time) {
                         if (! UVCHR_IS_INVARIANT(i)) {
@@ -18501,7 +18502,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         }
 
                         first_time = FALSE;
-                        lowest_cp = start;
+                        lowest_cp = this_start;
 
                         i++;
                     }
@@ -18509,7 +18510,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     /* Find the bit positions that differ from the lowest code
                      * point in the node.  Keep track of all such positions by
                      * OR'ing */
-                    for (; i <= end; i++) {
+                    for (; i <= this_end; i++) {
                         if (! UVCHR_IS_INVARIANT(i)) {
                             has_variant = TRUE;
                             continue;
