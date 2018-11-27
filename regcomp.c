@@ -18414,39 +18414,39 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             for (type = POSIXU; type <= POSIXA; type++) {
 
-            for (posix_class = 0;
-                 posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
-                 posix_class++)
-            {
-                SV** our_code_points = &cp_list;
-                SV** official_code_points;
-                int try_inverted;
+                for (posix_class = 0;
+                     posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
+                     posix_class++)
+                {
+                    SV** our_code_points = &cp_list;
+                    SV** official_code_points;
+                    int try_inverted;
 
-                if (type == POSIXA) {
-                    official_code_points = &PL_Posix_ptrs[posix_class];
-                }
-                else {
-                    official_code_points = &PL_XPosix_ptrs[posix_class];
-                }
+                    if (type == POSIXA) {
+                        official_code_points = &PL_Posix_ptrs[posix_class];
+                    }
+                    else {
+                        official_code_points = &PL_XPosix_ptrs[posix_class];
+                    }
 
-                for (try_inverted = 0; try_inverted < 2; try_inverted++) {
-                    /* Check if matches, normal or inverted */
-                    if (*official_code_points) {
-                        if (_invlistEQ(*our_code_points,
-                                    *official_code_points,
-                                    try_inverted))
-                        {
-                            ret = reg_node(pRExC_state, (try_inverted)
-                                                        ? type + NPOSIXA
-                                                               - POSIXA
-                                                        : type);
-                        FLAGS(REGNODE_p(ret)) = posix_class;
-                        goto not_anyof;
+                    for (try_inverted = 0; try_inverted < 2; try_inverted++) {
+                        /* Check if matches, normal or inverted */
+                        if (*official_code_points) {
+                            if (_invlistEQ(*our_code_points,
+                                        *official_code_points,
+                                        try_inverted))
+                            {
+                                ret = reg_node(pRExC_state, (try_inverted)
+                                                            ? type + NPOSIXA
+                                                                   - POSIXA
+                                                            : type);
+                                FLAGS(REGNODE_p(ret)) = posix_class;
+                                goto not_anyof;
+                            }
                         }
                     }
                 }
             }
-        }
         }
         }
     }   /* End of seeing if can optimize it into a different node */
