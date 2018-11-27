@@ -18403,49 +18403,51 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             }
 
+        {
+            PERL_UINT_FAST8_T type;
+
             /* Here, didn't find an optimization.  See if this matches any
              * of the POSIX classes.  The POSIXA ones are about the same speed
              * as ANYOF ops, but take less room; the ones that have
              * above-Latin1 code point matches are somewhat faster than ANYOF.
              * */
 
+            for (type = POSIXU; type <= POSIXA; type++) {
+
             for (posix_class = 0;
                  posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
                  posix_class++)
             {
+                SV** our_code_points = &cp_list;
+                SV** official_code_points;
                 int try_inverted;
 
-                for (try_inverted = 0; try_inverted < 2; try_inverted++)
-                {
+                if (type == POSIXA) {
+                    official_code_points = &PL_Posix_ptrs[posix_class];
+                }
+                else {
+                    official_code_points = &PL_XPosix_ptrs[posix_class];
+                }
 
-                    /* Check if matches POSIXA, normal or inverted */
-                    if (PL_Posix_ptrs[posix_class]) {
-                        if (_invlistEQ(cp_list,
-                                       PL_Posix_ptrs[posix_class],
-                                       try_inverted))
+                for (try_inverted = 0; try_inverted < 2; try_inverted++) {
+                    /* Check if matches, normal or inverted */
+                    if (*official_code_points) {
+                        if (_invlistEQ(*our_code_points,
+                                    *official_code_points,
+                                    try_inverted))
                         {
                             ret = reg_node(pRExC_state, (try_inverted)
-                                                        ? NPOSIXA
-                                                        : POSIXA);
-                        FLAGS(REGNODE_p(ret)) = posix_class;
-                            goto not_anyof;
-                        }
-                    }
-
-                    /* Check if matches POSIXU, normal or inverted */
-                    if (_invlistEQ(cp_list,
-                                   PL_XPosix_ptrs[posix_class],
-                                   try_inverted))
-                    {
-                        ret = reg_node(pRExC_state, (try_inverted)
-                                                    ? NPOSIXU
-                                                    : POSIXU);
-
+                                                        ? type + NPOSIXA
+                                                               - POSIXA
+                                                        : type);
                         FLAGS(REGNODE_p(ret)) = posix_class;
                         goto not_anyof;
+                        }
                     }
                 }
             }
+        }
+        }
         }
     }   /* End of seeing if can optimize it into a different node */
 
