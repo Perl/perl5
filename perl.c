@@ -1971,6 +1971,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_SITECUSTOMIZE
 			     " USE_SITECUSTOMIZE"
 #  endif	       
+#  ifdef USE_THREAD_SAFE_LOCALE
+			     " USE_THREAD_SAFE_LOCALE"
+#  endif
 	;
     PERL_UNUSED_ARG(cv);
     PERL_UNUSED_VAR(items);
