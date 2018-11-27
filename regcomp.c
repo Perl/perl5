@@ -18335,7 +18335,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     if (optimizable) {
         int posix_class = -1;   /* Illegal value */
-        U8 ANYOFM_mask = 0xFF;
         UV start, end;
 
         if (UNLIKELY(posixl_matches_all)) {
@@ -18469,23 +18468,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             /* If doesn't fit the criteria for ANYOFM, invert and try again.
              * If that works we will instead later generate an NANYOFM, and
              * invert back when through */
-
             if (invlist_highest(cp_list) > max_permissible) {
                 _invlist_invert(cp_list);
                 inverted = 1;
             }
 
             if (invlist_highest(cp_list) <= max_permissible) {
-                UV this_start, this_end;
+                UV this_start, this_end, lowest_cp;
+                U8 bits_differing = 0;
                 Size_t cp_count = 0;
                 bool first_time = TRUE;
-                unsigned int lowest_cp = 0xFF;
-                U8 bits_differing = 0;
-
-                /* Only needed on EBCDIC, as there, variants and non- are mixed
-                 * together.  Could #ifdef it out on ASCII, but probably the
-                 * compiler will optimize it out */
-                bool has_variant = FALSE;
 
                 /* Go through the bytes and find the bit positions that differ
                  * */
@@ -18493,17 +18485,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 while (invlist_iternext(cp_list, &this_start, &this_end)) {
                     unsigned int i = this_start;
 
-                    cp_count += this_end - this_start + 1;
-
                     if (first_time) {
                         if (! UVCHR_IS_INVARIANT(i)) {
-                            has_variant = TRUE;
-                            continue;
+                            goto done_anyofm;
                         }
 
                         first_time = FALSE;
                         lowest_cp = this_start;
 
+                        /* We have set up the code point to compare with.
+                         * Don't compare it with itself */
                         i++;
                     }
 
@@ -18512,12 +18503,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * OR'ing */
                     for (; i <= this_end; i++) {
                         if (! UVCHR_IS_INVARIANT(i)) {
-                            has_variant = TRUE;
-                            continue;
+                            goto done_anyofm;
                         }
 
                         bits_differing  |= i ^ lowest_cp;
                     }
+
+                    cp_count += this_end - this_start + 1;
                 }
                 invlist_iterfinish(cp_list);
 
@@ -18534,10 +18526,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * a 1 in that position, and another has a 0.  But that would
                  * mean that one of them differs from the lowest code point in
                  * that position, which possibility we've already excluded.  */
-                if (  ! has_variant
-                    && (inverted || cp_count > 1)
-                    &&  cp_count == 1U << PL_bitcount[bits_differing])
+                if (  (inverted || cp_count > 1)
+                    && cp_count == 1U << PL_bitcount[bits_differing])
                 {
+                    U8 ANYOFM_mask;
+
                     op = ANYOFM + inverted;;
 
                     /* We need to make the bits that differ be 0's */
@@ -18550,6 +18543,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     *flagp |= HASWIDTH|SIMPLE;
                 }
             }
+          done_anyofm:
+
             if (inverted) {
                 _invlist_invert(cp_list);
             }
