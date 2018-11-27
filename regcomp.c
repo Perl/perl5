@@ -6756,13 +6756,27 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	        && n < pRExC_state->code_blocks->count
 		&& s == pRExC_state->code_blocks->cb[n].start)
 	    {
-		/* blank out literal code block */
-		assert(pat[s] == '(');
-		while (s <= pRExC_state->code_blocks->cb[n].end) {
-		    *p++ = '_';
+		/* blank out literal code block so that they aren't
+                 * recompiled: eg change from/to:
+                 *     /(?{xyz})/
+                 *     /(?=====)/
+                 * and
+                 *     /(??{xyz})/
+                 *     /(?======)/
+                 * and
+                 *     /(?(?{xyz}))/
+                 *     /(?(?=====))/
+                */
+		assert(pat[s]   == '(');
+		assert(pat[s+1] == '?');
+                *p++ = '(';
+                *p++ = '?';
+                s += 2;
+		while (s < pRExC_state->code_blocks->cb[n].end) {
+		    *p++ = '=';
 		    s++;
 		}
-		s--;
+                *p++ = ')';
 		n++;
 		continue;
 	    }
