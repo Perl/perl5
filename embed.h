@@ -1123,7 +1123,7 @@
 #define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
-#define utf8_validate_and_fix(a,b,c,d,e,f,g)	Perl_utf8_validate_and_fix(aTHX_ a,b,c,d,e,f,g)
+#define utf8_validate_and_fix(a,b,c,d,e,f,g,h)	Perl_utf8_validate_and_fix(aTHX_ a,b,c,d,e,f,g,h)
 #define validate_proto(a,b,c,d)	Perl_validate_proto(aTHX_ a,b,c,d)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define yylex()			Perl_yylex(aTHX)

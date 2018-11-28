@@ -5043,7 +5043,7 @@ static IV PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlI
 #define REPLACEMENT_CHARACTER_UTF8_LEN (sizeof("" REPLACEMENT_CHARACTER_UTF8 "")-1)
 
 SSize_t
-Perl_utf8_validate_and_fix_too(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
+Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
                                const U32 flags, bool eof, U32 *unfixed_errors, SV **msgs) {
     U32 sub_flags;
     SSize_t retval = 0;
@@ -5128,7 +5128,7 @@ Perl_utf8_validate_and_fix_too(pTHX_ const U8 **start, const U8 *send, U8 **out,
 }
 
 STATIC void
-S_throw_utf8_msgs(pTHX_ const U32 flags, SV *msgs) {
+S_throw_utf8_msgs(pTHX_ const U32 flags, AV *msgs) {
     if (msgs && av_tindex(msgs) >= 0) {
         switch (flags & UTF8_ONERROR_MASK) {
         case UTF8_CROAK_ON_ERROR:
@@ -5155,12 +5155,11 @@ S_throw_utf8_msgs(pTHX_ const U32 flags, SV *msgs) {
                 SSize_t top = av_tindex(msgs);
                 /* Some __WARN__ handler might throw an error, so make sure msgs
                    is released */
-                sv_2mortal(msgs);
+                sv_2mortal((SV*)msgs);
                 for (i = 0; i < top; ++i) {
                     SV **h = av_fetch(msgs, 0, FALSE);
                     SV **text;
                     SV **category;
-                    SV **flags;
                     HV *hv;
                     assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
                     hv = (HV*)SvRV(*h);
@@ -5173,21 +5172,19 @@ S_throw_utf8_msgs(pTHX_ const U32 flags, SV *msgs) {
 
         default:
             /* just discard them */
-            SvREFCNT_dec(msgs);
+            SvREFCNT_dec((SV*)msgs);
             break;
         }
     }
 }
 
 SSize_t
-Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
+Perl_utf8_validate_and_fix_old(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend,
                            const U32 flags, bool eof, U32 *unfixed_errors) {
     U32 sub_flags;
     SSize_t retval = 0;
     /* UTF8_CHECK_ONLY modifies retlen for utf8n_to_uvchr_msgs() */
     U32 utf8_flags = flags & ~(UTF8_ONERROR_MASK | UTF8_CHECK_ONLY | UTF8_ALLOW_SHORT);
-
-    PERL_ARGS_ASSERT_UTF8_VALIDATE_AND_FIX;
 
     /* Restrict flags to the ones is_utf8_string_*() handles */
     sub_flags = utf8_flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
@@ -5276,7 +5273,8 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
     return retval;
 }
 
-static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
+static IV
+PerlIOUnicode_fill(pTHX_ PerlIO* f) {
     PerlIOUnicode * const u = PerlIOSelf(f, PerlIOUnicode);
     PerlIOBuf * const b = &u->buf;
     PerlIO *n = PerlIONext(f);
@@ -5305,7 +5303,7 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
     if (u->no_replacements) {
         const U8 *p;
         Size_t valid_bytes;
-        Size_t consumed;
+        SV *msgs = NULL;
         b->end = b->buf;
         if (u->start != u->end) {
             /* we have a (small) amount of data in the cbuf) */
@@ -5347,7 +5345,7 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
             }
         }
         p = (const U8 *)b->buf;
-        consumed = valid_bytes = utf8_validate_and_fix(&p, p + read_bytes, NULL, NULL, u->flags, PerlIO_eof(n), &errors);
+        valid_bytes = utf8_validate_and_fix(&p, p + read_bytes, NULL, NULL, u->flags, PerlIO_eof(n), &errors, &msgs);
         b->end = b->buf + valid_bytes;
         /* account for data in the parent buffer now rather than before validating to
            ensure it doesn't advance past an error.
@@ -5376,6 +5374,7 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
         PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
     }
     else {
+        SV *msgs = NULL;
         /* because of limitations with the PerlIO API (fill() don't
            top-up, it always fills from empty) and since we might be
            replacing bad single bytes with a longer replacement character,
@@ -5444,15 +5443,17 @@ static IV PerlIOUnicode_fill(pTHX_ PerlIO* f) {
         }
 
         outp = (U8*)b->end;
-        b->end = b->end + utf8_validate_and_fix((const U8 **)&u->start, u->end, &outp, (U8*)b->buf+b->bufsiz, u->flags, PerlIO_eof(n), &errors);
+        b->end = b->end + utf8_validate_and_fix((const U8 **)&u->start, u->end, &outp, (U8*)b->buf+b->bufsiz, u->flags, PerlIO_eof(n), &errors, &msgs);
         PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+        if (errors) {
+            PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+            if (b->end == b->buf) /* FIXME: is this correct? */
+                return -1;
+        }
+        if (msgs)
+            S_throw_utf8_msgs(aTHX_, u->flags, (AV*)msgs);
     }
 
-    if (errors) {
-        PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-        if (b->end == b->buf) /* FIXME: is this correct? */
-            return -1;
-    }
     
     return 0;
 }
