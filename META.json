@@ -113,7 +113,7 @@
          "vxs.inc"
       ]
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://rt.perl.org/"
