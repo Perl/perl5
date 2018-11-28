@@ -629,6 +629,7 @@ the strings?).
  Steve     5.26.2-RC1   2018-Mar-24
  Steve     5.26.2       2018-Apr-14
  Steve     5.26.3-RC1   2018-Nov-08
+ Steve     5.26.3       2018-Nov-29
 
  Sawyer X  5.27.0       2017-May-31     The 5.27 development track
  Eric      5.27.1       2017-Jun-20
@@ -649,6 +650,7 @@ the strings?).
  Sawyer X  5.28.0-RC4   2018-Jun-19
  Sawyer X  5.28.0       2018-Jun-22
  Steve     5.28.1-RC1   2018-Nov-08
+ Steve     5.28.1       2018-Nov-29
 
  Sawyer X  5.29.0       2018-Jun-26     The 5.29 development track
  Steve     5.29.1       2018-Jul-20
