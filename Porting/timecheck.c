@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
-#include <values.h>
 #include <string.h>
 
 int opt_v = 0;
