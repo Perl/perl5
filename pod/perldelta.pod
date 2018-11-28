@@ -135,7 +135,7 @@ This fatal error message has been slightly expanded (from "Syntax error in
 
 =head1 Acknowledgements
 
-Perl 5.26.3 represents approximately 7 months of development since Perl 5.26.2
+Perl 5.26.3 represents approximately 8 months of development since Perl 5.26.2
 and contains approximately 4,500 lines of changes across 51 files from 15
 authors.
 
