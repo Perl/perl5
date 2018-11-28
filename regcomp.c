@@ -3906,7 +3906,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      that a character in the pattern corresponds to at most a single
  *      character in the target string.  (And I do mean character, and not byte
  *      here, unlike other parts of the documentation that have never been
- *      updated to account for multibyte Unicode.)  sharp s in EXACTF and
+ *      updated to account for multibyte Unicode.)  Sharp s in EXACTF and
  *      EXACTFL nodes can match the two character string 'ss'; in EXACTFAA
  *      nodes it can match "\x{17F}\x{17F}".  These, along with other ones in
  *      EXACTFL nodes, violate the assumption, and they are the only instances
@@ -13727,7 +13727,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* We can convert EXACTF nodes to EXACTFU if they contain only
              * characters that match identically regardless of the target
              * string's UTF8ness.  The reason to do this is that EXACTF is not
-             * trie-able, EXACTFU is.
+             * trie-able, EXACTFU is, and EXACTFU requires fewer operations at
+             * runtime.
              *
              * Similarly, we can convert EXACTFL nodes to EXACTFLU8 if they
              * contain only above-Latin1 characters (hence must be in UTF8),
@@ -14151,7 +14152,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         goto loopdone;
                     }
 
-                    /* This code point means we can't simplify things */
+                    /* This problematic code point means we can't simplify
+                     * things */
                     maybe_exactfu = FALSE;
 
                     /* Here, we are adding a problematic fold character.
@@ -17232,12 +17234,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 SV* scratch_list = NULL;
 
                 /* What the Posix classes (like \w, [:space:]) match in locale
-                 * isn't knowable under locale until actual match time.  Room
-                 * must be reserved (one time per outer bracketed class) to
-                 * store such classes.  The space will contain a bit for each
-                 * named class that is to be matched against.  This isn't
-                 * needed for \p{} and pseudo-classes, as they are not affected
-                 * by locale, and hence are dealt with separately */
+                 * isn't knowable under locale until actual match time.  A
+                 * special node is used for these which has extra space for a
+                 * bitmap, with a bit reserved for each named class that is to
+                 * be matched against.  This isn't needed for \p{} and
+                 * pseudo-classes, as they are not affected by locale, and
+                 * hence are dealt with separately */
                 if (! need_class) {
                     need_class = 1;
                     anyof_flags |= ANYOF_MATCHES_POSIXL;
@@ -17457,7 +17459,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          *
          * See [perl #89750] */
         if (FOLD && allow_multi_folds && value == prevvalue) {
-            if (value == LATIN_SMALL_LETTER_SHARP_S
+            if (    value == LATIN_SMALL_LETTER_SHARP_S
                 || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
                                                         value)))
             {
@@ -17964,7 +17966,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * the target string is in UTF-8.  But things like \W match all the
              * upper Latin1 characters if the target string is not in UTF-8.
              *
-             * Handle the case where there something like \W separately */
+             * Handle the case with something like \W separately */
             if (nposixes) {
                 SV* only_non_utf8_list = invlist_clone(PL_UpperLatin1, NULL);
 
@@ -18038,9 +18040,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 SvREFCNT_dec(nonascii_but_latin1_properties);
 
-                /* Get rid of any characters that we now know are matched
-                 * unconditionally from the conditional list, which may make
-                 * that list empty */
+                /* Get rid of any characters from the conditional list that we
+                 * now know are matched unconditionally, which may make that
+                 * list empty */
                 _invlist_subtract(upper_latin1_only_utf8_matches,
                                   cp_list,
                                   &upper_latin1_only_utf8_matches);
@@ -18148,10 +18150,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         has_runtime_dependency |= HAS_D_RUNTIME_DEPENDENCY;
     }
 
-    /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
-     * at compile time.  Besides not inverting folded locale now, we can't
-     * invert if there are things such as \w, which aren't known until runtime
-     * */
+    /* Optimize inverted patterns (e.g. [^a-z]) when everything is known at
+     * compile time. */
     if (     cp_list
         &&   invert
         && ! has_runtime_dependency)
@@ -18164,8 +18164,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             swash = NULL;
         }
 
-	/* Clear the invert flag since have just done it here */
-	invert = FALSE;
+        invert = FALSE;
     }
 
     if (ret_invlist) {
@@ -18181,8 +18180,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     *flagp |= HASWIDTH|SIMPLE;
 
     /* Some character classes are equivalent to other nodes.  Such nodes take
-     * up less room and generally fewer operations to execute than ANYOF nodes.
-     * */
+     * up less room, and some nodes require fewer operations to execute, than
+     * ANYOF nodes.  EXACTish nodes may be joinable with adjacent nodes to
+     * improve efficiency. */
 
     if (optimizable) {
         int posix_class = -1;   /* Illegal value */
@@ -18197,10 +18197,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             invlist_iterinit(cp_list);
             if (! invlist_iternext(cp_list, &start, &end)) {
 
-                /* Here, the list is empty.  This happens, for example, when a
-                 * Unicode property that doesn't match anything is the only
-                 * element in the character class (perluniprops.pod notes such
-                 * properties).  */
+            /* If the list is empty, nothing matches.  This happens, for
+             * example, when a Unicode property that doesn't match anything is
+             * the only element in the character class (perluniprops.pod notes
+             * such properties). */
                 ret = reganode(pRExC_state, OPFAIL, 0);
                 goto not_anyof;
             }
@@ -18316,7 +18316,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * 0x30.  Any other bytes ANDed yield something else.  So [01],
              * which is a common usage, is optimizable into ANYOFM, and can
              * benefit from the speed up.  We can only do this on UTF-8
-             * invariant bytes, because they don't have the same patterns under
+             * invariant bytes, because they have the same bit patterns under
              * UTF-8 as not. */
             PERL_UINT_FAST8_T inverted = 0;
 #ifdef EBCDIC
@@ -18398,7 +18398,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     /* The argument is the lowest code point */
                     ret = reganode(pRExC_state, op, lowest_cp);
                     FLAGS(REGNODE_p(ret)) = ANYOFM_mask;
-
                 }
             }
           done_anyofm:
@@ -18438,6 +18437,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         official_code_points = &PL_XPosix_ptrs[posix_class];
                     }
 
+                    /* Try both the regular class, and its inversion */
                     for (try_inverted = 0; try_inverted < 2; try_inverted++) {
                         /* Check if matches, normal or inverted */
                         if (*official_code_points) {
@@ -18976,6 +18976,9 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 STATIC void
 S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size)
 {
+    /* 'size' is the delta to add or subtract from the current memory allocated
+     * to the regex engine being constructed */
+
     PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE;
 
     RExC_size += size;
