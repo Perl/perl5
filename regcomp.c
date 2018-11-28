@@ -16514,10 +16514,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * time */
     SV* swash = NULL;		/* Code points that match \p{} \P{} */
 
-    /* Set if a component of this character class is user-defined; just passed
-     * on to the engine */
-    bool has_user_defined_property = FALSE;
-
     /* inversion list of code points this node matches only when the target
      * string is in UTF-8.  These are all non-ASCII, < 256.  (Because is under
      * /d) */
@@ -16566,7 +16562,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                        one.  */
     U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
     U32 posixl = 0;       /* bit field of posix classes matched under /l */
-    bool has_d_runtime_dependencies = FALSE; /* ? Is this to be an ANYOFD node */
+
+
+/* Flags as to what things aren't knowable until runtime.  (Note that these are
+ * mutually exclusive.) */
+#define HAS_USER_DEFINED_PROPERTY 0x01   /* /u any user-defined properties that
+                                            haven't been defined as of yet */
+#define HAS_D_RUNTIME_DEPENDENCY  0x02   /* /d if the target being matched is
+                                            UTF-8 or not */
+#define HAS_L_RUNTIME_DEPENDENCY   0x04 /* /l what the posix classes match and
+                                            what gets folded */
+    U32 has_runtime_dependency = 0;     /* OR of the above flags */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -17029,9 +17035,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         (FOLD) ? "__" : "",
                                         UTF8fARG(UTF, n, name),
                                         (FOLD) ? "_i" : "");
-                        has_user_defined_property = TRUE;
                         optimizable = FALSE;    /* Will have to leave this an
                                                    ANYOF node */
+                        has_runtime_dependency |= HAS_USER_DEFINED_PROPERTY;
 
                         /* We don't know yet what this matches, so have to flag
                          * it */
@@ -17045,12 +17051,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         if (swash_init_flags
                             & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY)
                         {
-                            has_user_defined_property = TRUE;
+                            has_runtime_dependency |= HAS_USER_DEFINED_PROPERTY;
                         }
                     }
                     }
                     if (invlist) {
-                        if (! has_user_defined_property &&
+                        if (! (has_runtime_dependency
+                                                & HAS_USER_DEFINED_PROPERTY) &&
                             /* We warn on matching an above-Unicode code point
                              * if the match would return true, except don't
                              * warn for \p{All}, which has exactly one element
@@ -17234,6 +17241,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 if (! need_class) {
                     need_class = 1;
                     anyof_flags |= ANYOF_MATCHES_POSIXL;
+                    has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
 
                     /* We can't change this into some other type of node
                      * (unless this is the only element, in which case there
@@ -17262,6 +17270,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 /* Add this class to those that should be checked at runtime */
                 POSIXL_SET(posixl, namedclass);
+                has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
 
                 /* The above-Latin1 characters are not subject to locale rules.
                  * Just add them to the unconditionally-matched list */
@@ -18115,6 +18124,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
         }
         if (only_utf8_locale_list) {
+            has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
             anyof_flags
                  |= ANYOFL_FOLD
                  |  ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
@@ -18124,6 +18134,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             invlist_iterinit(cp_list);
             if (invlist_iternext(cp_list, &start, &end) && start < 256) {
                 anyof_flags |= ANYOFL_FOLD;
+                has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
             }
             invlist_iterfinish(cp_list);
         }
@@ -18132,9 +18143,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              && (    upper_latin1_only_utf8_matches
                  || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
-        has_d_runtime_dependencies = TRUE;
         RExC_seen_d_op = TRUE;
         optimizable = FALSE;
+        has_runtime_dependency |= HAS_D_RUNTIME_DEPENDENCY;
     }
 
     /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
@@ -18143,9 +18154,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * */
     if (     cp_list
         &&   invert
-        && ! has_d_runtime_dependencies
-        && ! (anyof_flags & (ANYOF_LOCALE_FLAGS))
-	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+        && ! has_runtime_dependency)
     {
         _invlist_invert(cp_list);
 
@@ -18452,7 +18461,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }   /* End of seeing if can optimize it into a different node */
 
     /* It's going to be an ANYOF node. */
-    op = (has_d_runtime_dependencies)
+    op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
          ? ANYOFD
          : ((posixl)
             ? ANYOFPOSIXL
@@ -18512,7 +18521,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                   (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
                    ? listsv : NULL,
                   only_utf8_locale_list,
-                  swash, has_user_defined_property);
+                  swash, cBOOL(has_runtime_dependency
+                                                & HAS_USER_DEFINED_PROPERTY));
 
     if (ANYOF_FLAGS(REGNODE_p(ret)) & ANYOF_LOCALE_FLAGS) {
         RExC_contains_locale = 1;
