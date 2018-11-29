@@ -24,12 +24,14 @@ Code freezes (which happen in the 5.29.X series)
 =head2 Perl 5.28
 
   2018-05-20  5.28.0 ✓        Sawyer X
+  2018-11-29  5.28.1 ✓        Steve Hay
 
 =head2 Perl 5.26
 
   2017-05-30  5.26.0 ✓        Sawyer X
   2017-09-22  5.26.1 ✓        Steve Hay
   2018-04-14  5.26.2 ✓        Steve Hay
+  2018-11-29  5.26.3 ✓        Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
