@@ -331,7 +331,7 @@ S_category_name(const int category)
 #    define LC_COLLATE_INDEX            _DUMMY_CTYPE + 1
 #    define _DUMMY_COLLATE              LC_COLLATE_INDEX
 #  else
-#    define _DUMMY_COLLATE              _DUMMY_COLLATE
+#    define _DUMMY_COLLATE              _DUMMY_CTYPE
 #  endif
 #  ifdef USE_LOCALE_TIME
 #    define LC_TIME_INDEX               _DUMMY_COLLATE + 1
