@@ -242,6 +242,9 @@ read_only_bottom_close_and_rename($pm);
 
 print $h <<EOH;
 
+#ifndef PERL_FEATURE_H_
+#define PERL_FEATURE_H_
+
 #if defined(PERL_CORE) || defined (PERL_EXT)
 
 #define HINT_FEATURE_SHIFT	$HintShift
@@ -364,6 +367,8 @@ print $h <<EOJ;
     else			    PL_hints &= ~HINT_UNI_8_BIT;
 }
 #endif /* PERL_IN_OP_C */
+
+#endif /* PERL_FEATURE_H_ */
 EOJ
 
 read_only_bottom_close_and_rename($h);

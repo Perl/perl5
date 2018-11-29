@@ -7,6 +7,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  */
+
+#ifndef PERL_REGCOMP_H_
+#define PERL_REGCOMP_H_
+
 #include "regcharclass.h"
 
 /* Convert branch sequences to more efficient trie ops? */
@@ -1117,6 +1121,8 @@ typedef enum {
 	SB_BOUND,
 	WB_BOUND
 } bound_type;
+
+#endif /* PERL_REGCOMP_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

@@ -5,6 +5,9 @@
  */
 
 
+#ifndef PERL_FEATURE_H_
+#define PERL_FEATURE_H_
+
 #if defined(PERL_CORE) || defined (PERL_EXT)
 
 #define HINT_FEATURE_SHIFT	26
@@ -161,5 +164,7 @@ S_enable_feature_bundle(pTHX_ SV *ver)
     else			    PL_hints &= ~HINT_UNI_8_BIT;
 }
 #endif /* PERL_IN_OP_C */
+
+#endif /* PERL_FEATURE_H_ */
 
 /* ex: set ro: */
