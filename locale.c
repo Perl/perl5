@@ -3322,7 +3322,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  endif
 
+#  ifdef USE_LOCALE_NUMERIC
+
     PL_numeric_radix_sv = newSVpvs(".");
+
+#  endif
 
 #  if defined(USE_POSIX_2008_LOCALE) && ! defined(HAS_QUERYLOCALE)
 
