@@ -983,11 +983,11 @@ Multidimensional arrays may be emulated by subscripting a hash with a
 list.  The elements of the list are joined with the subscript separator
 (see L<perlvar/$;>).
 
-    $foo{$a,$b,$c}
+    $foo{$x,$y,$z}
 
 is equivalent to
 
-    $foo{join($;, $a, $b, $c)}
+    $foo{join($;, $x, $y, $z)}
 
 The default subscript separator is "\034", the same as SUBSEP in B<awk>.
 
