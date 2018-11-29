@@ -2846,6 +2846,34 @@ Perl_sv_2num(pTHX_ SV *const sv)
     return sv_2mortal(newSVuv(PTR2UV(SvRV(sv))));
 }
 
+/* int2str_table: lookup table containing string representations of all
+ * two digit numbers. For example, int2str_table.arr[0] is "00" and
+ * int2str_table.arr[12*2] is "12".
+ *
+ * We are going to read two bytes at a time, so we have to ensure that
+ * the array is aligned to a 2 byte boundary. That's why it was made a
+ * union with a dummy U16 member. */
+static const union {
+    char arr[200];
+    U16 dummy;
+} int2str_table = {{
+    '0', '0', '0', '1', '0', '2', '0', '3', '0', '4', '0', '5', '0', '6',
+    '0', '7', '0', '8', '0', '9', '1', '0', '1', '1', '1', '2', '1', '3',
+    '1', '4', '1', '5', '1', '6', '1', '7', '1', '8', '1', '9', '2', '0',
+    '2', '1', '2', '2', '2', '3', '2', '4', '2', '5', '2', '6', '2', '7',
+    '2', '8', '2', '9', '3', '0', '3', '1', '3', '2', '3', '3', '3', '4',
+    '3', '5', '3', '6', '3', '7', '3', '8', '3', '9', '4', '0', '4', '1',
+    '4', '2', '4', '3', '4', '4', '4', '5', '4', '6', '4', '7', '4', '8',
+    '4', '9', '5', '0', '5', '1', '5', '2', '5', '3', '5', '4', '5', '5',
+    '5', '6', '5', '7', '5', '8', '5', '9', '6', '0', '6', '1', '6', '2',
+    '6', '3', '6', '4', '6', '5', '6', '6', '6', '7', '6', '8', '6', '9',
+    '7', '0', '7', '1', '7', '2', '7', '3', '7', '4', '7', '5', '7', '6',
+    '7', '7', '7', '8', '7', '9', '8', '0', '8', '1', '8', '2', '8', '3',
+    '8', '4', '8', '5', '8', '6', '8', '7', '8', '8', '8', '9', '9', '0',
+    '9', '1', '9', '2', '9', '3', '9', '4', '9', '5', '9', '6', '9', '7',
+    '9', '8', '9', '9'
+}};
+
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
  * UV as a string towards the end of buf, and return pointers to start and
  * end of it.
@@ -2853,16 +2881,23 @@ Perl_sv_2num(pTHX_ SV *const sv)
  * We assume that buf is at least TYPE_CHARS(UV) long.
  */
 
-static char *
+PERL_STATIC_INLINE char *
 S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const peob)
 {
     char *ptr = buf + TYPE_CHARS(UV);
     char * const ebuf = ptr;
     int sign;
+    U16 *word_ptr, *word_table;
 
     PERL_ARGS_ASSERT_UIV_2BUF;
 
-    if (is_uv)
+    /* ptr has to be properly aligned, because we will cast it to U16* */
+    assert(PTR2nat(ptr) % 2 == 0);
+    /* we are going to read/write two bytes at a time */
+    word_ptr = (U16*)ptr;
+    word_table = (U16*)int2str_table.arr;
+
+    if (UNLIKELY(is_uv))
 	sign = 0;
     else if (iv >= 0) {
 	uv = iv;
@@ -2871,11 +2906,23 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
         uv = -(UV)iv;
 	sign = 1;
     }
-    do {
-	*--ptr = '0' + (char)(uv % 10);
-    } while (uv /= 10);
+
+    while (uv > 99) {
+        *--word_ptr = word_table[uv % 100];
+        uv /= 100;
+    }
+    ptr = (char*)word_ptr;
+
+    if (uv < 10)
+        *--ptr = (char)uv + '0';
+    else {
+        *--word_ptr = word_table[uv];
+        ptr = (char*)word_ptr;
+    }
+
     if (sign)
-	*--ptr = '-';
+        *--ptr = '-';
+
     *peob = ebuf;
     return ptr;
 }
@@ -3083,13 +3130,18 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	/* I'm assuming that if both IV and NV are equally valid then
 	   converting the IV is going to be more efficient */
 	const U32 isUIOK = SvIsUV(sv);
-	char buf[TYPE_CHARS(UV)];
+        /* The purpose of this union is to ensure that arr is aligned on
+           a 2 byte boundary, because that is what uiv_2buf() requires */
+        union {
+            char arr[TYPE_CHARS(UV)];
+            U16 dummy;
+        } buf;
 	char *ebuf, *ptr;
 	STRLEN len;
 
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
- 	ptr = uiv_2buf(buf, SvIVX(sv), SvUVX(sv), isUIOK, &ebuf);
+        ptr = uiv_2buf(buf.arr, SvIVX(sv), SvUVX(sv), isUIOK, &ebuf);
 	len = ebuf - ptr;
 	/* inlined from sv_setpvn */
 	s = SvGROW_mutable(sv, len + 1);
@@ -10621,9 +10673,14 @@ Does not handle 'set' magic.  See C<L</sv_setpviv_mg>>.
 void
 Perl_sv_setpviv(pTHX_ SV *const sv, const IV iv)
 {
-    char buf[TYPE_CHARS(UV)];
+    /* The purpose of this union is to ensure that arr is aligned on
+       a 2 byte boundary, because that is what uiv_2buf() requires */
+    union {
+        char arr[TYPE_CHARS(UV)];
+        U16 dummy;
+    } buf;
     char *ebuf;
-    char * const ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+    char * const ptr = uiv_2buf(buf.arr, iv, 0, 0, &ebuf);
 
     PERL_ARGS_ASSERT_SV_SETPVIV;
 
