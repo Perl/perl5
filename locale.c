@@ -4303,6 +4303,10 @@ S_print_collxfrm_input_and_return(pTHX_
     PerlIO_printf(Perl_debug_log, "'\n");
 }
 
+#  endif    /* DEBUGGING */
+#endif /* USE_LOCALE_COLLATE */
+#ifdef DEBUGGING
+
 STATIC void
 S_print_bytes_for_locale(pTHX_
                     const char * const s,
@@ -4338,8 +4342,7 @@ S_print_bytes_for_locale(pTHX_
     }
 }
 
-#  endif   /* #ifdef DEBUGGING */
-#endif /* USE_LOCALE_COLLATE */
+#endif   /* #ifdef DEBUGGING */
 
 #ifdef USE_LOCALE
 
