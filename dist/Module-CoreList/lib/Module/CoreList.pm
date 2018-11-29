@@ -339,6 +339,7 @@ sub changes_between {
     5.029002 => '2018-08-20',
     5.029003 => '2018-09-20',
     5.029004 => '2018-10-20',
+    5.029005 => '2018-11-20',
     5.028001 => '2018-11-29',
   );
 
@@ -15814,6 +15815,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'arybase'               => 1,
         }
     },
+    5.029005 => {
+        delta_from => 5.029004,
+        changed => {
+            'B::Op_private'         => '5.029005',
+            'Config'                => '5.029005',
+            'Module::CoreList'      => '5.20181120',
+            'Module::CoreList::Utils'=> '5.20181120',
+        },
+        removed => {
+        }
+    },
     5.028001 => {
         delta_from => 5.028,
         changed => {
@@ -16755,6 +16767,13 @@ sub is_core
         },
         removed => {
             arybase => '1',
+        }
+    },
+    5.029005 => {
+        delta_from => 5.027002,
+        changed => {
+        },
+        removed => {
         }
     },
     5.028001 => {
