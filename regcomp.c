@@ -14426,14 +14426,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 if (len == 0) {
                     len = full_len;
 
-                    /* If the node ends in an 's' we make sure it stays EXACTF,
-                     * as if it turns into an EXACTFU, it could later get
-                     * joined with another 's' that would then wrongly match
-                     * the sharp s */
-                    if (maybe_exactfu && isALPHA_FOLD_EQ(ender, 's'))
-                    {
-                        maybe_exactfu = FALSE;
-                    }
                 } else {
 
                     /* Here, the node does contain some characters that aren't
@@ -14509,6 +14501,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
 
                 if (FOLD) {
+                    /* If the node ends in an 's' we make sure it stays EXACTF,
+                     * as if it turns into an EXACTFU, it could later get
+                     * joined with another 's' that would then wrongly match
+                     * the sharp s */
+                    if (maybe_exactfu && isALPHA_FOLD_EQ(ender, 's'))
+                    {
+                        maybe_exactfu = FALSE;
+                    }
+
                     /* If 'maybe_exactfu' is set, then there are no code points
                      * that match differently depending on UTF8ness of the
                      * target string (for /u), or depending on locale for /l */
