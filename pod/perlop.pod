@@ -1081,9 +1081,60 @@ And now some examples as a list operator:
     @foo = @foo[0 .. $#foo];        # an expensive no-op
     @foo = @foo[$#foo-4 .. $#foo];  # slice last 5 items
 
-The range operator (in list context) makes use of the magical
-auto-increment algorithm if the operands are strings.  You
-can say
+Because each operand is evaluated in integer form, S<C<2.18 .. 3.14>> will
+return two elements in list context.
+
+    @list = (2.18 .. 3.14); # same as @list = (2 .. 3);
+
+The range operator in list context can make use of the magical
+auto-increment algorithm if both operands are strings, subject to the
+following rules:
+
+=over
+
+=item *
+
+With one exception (below), if both strings look like numbers to Perl,
+the magic increment will not be applied, and the strings will be treated
+as numbers (more specifically, integers) instead.
+
+For example, C<"-2".."2"> is the same as C<-2..2>, and
+C<"2.18".."3.14"> produces C<2, 3>.
+
+=item *
+
+The exception to the above rule is when the left-hand string begins with
+C<0> and is longer than one character, in this case the magic increment
+I<will> be applied, even though strings like C<"01"> would normally look
+like a number to Perl.
+
+For example, C<"01".."04"> produces C<"01", "02", "03", "04">, and
+C<"00".."-1"> produces C<"00"> through C<"99"> - this may seem
+surprising, but see the following rules for why it works this way.
+To get dates with leading zeros, you can say:
+
+    @z2 = ("01" .. "31");
+    print $z2[$mday];
+
+If you want to force strings to be interpreted as numbers, you could say
+
+    @numbers = ( 0+$first .. 0+$last );
+
+=item *
+
+If the initial value specified isn't part of a magical increment
+sequence (that is, a non-empty string matching C</^[a-zA-Z]*[0-9]*\z/>),
+only the initial value will be returned.
+
+For example, C<"ax".."az"> produces C<"ax", "ay", "az">, but
+C<"*x".."az"> produces only C<"*x">.
+
+=item *
+
+For other initial values that are strings that do follow the rules of the
+magical increment, the corresponding sequence will be returned.
+
+For example, you can say
 
     @alphabet = ("A" .. "Z");
 
@@ -1091,16 +1142,20 @@ to get all normal letters of the English alphabet, or
 
     $hexdigit = (0 .. 9, "a" .. "f")[$num & 15];
 
-to get a hexadecimal digit, or
+to get a hexadecimal digit.
 
-    @z2 = ("01" .. "31");
-    print $z2[$mday];
-
-to get dates with leading zeros.
+=item *
 
 If the final value specified is not in the sequence that the magical
 increment would produce, the sequence goes until the next value would
-be longer than the final value specified.
+be longer than the final value specified. If the length of the final
+string is shorter than the first, the empty list is returned.
+
+For example, C<"a".."--"> is the same as C<"a".."zz">, C<"0".."xx">
+produces C<"0"> through C<"99">, and C<"aaa".."--"> returns the empty
+list.
+
+=back
 
 As of Perl 5.26, the list-context range operator on strings works as expected
 in the scope of L<< S<C<"use feature 'unicode_strings">>|feature/The
@@ -1108,10 +1163,8 @@ in the scope of L<< S<C<"use feature 'unicode_strings">>|feature/The
 that feature, it exhibits L<perlunicode/The "Unicode Bug">: its behavior
 depends on the internal encoding of the range endpoint.
 
-If the initial value specified isn't part of a magical increment
-sequence (that is, a non-empty string matching C</^[a-zA-Z]*[0-9]*\z/>),
-only the initial value will be returned.  So the following will only
-return an alpha:
+Because the magical increment only works on non-empty strings matching
+C</^[a-zA-Z]*[0-9]*\z/>, the following will only return an alpha:
 
     use charnames "greek";
     my @greek_small =  ("\N{alpha}" .. "\N{omega}");
@@ -1130,11 +1183,6 @@ just those, to match lowercase Greek characters in a regular expression,
 you could use the pattern C</(?:(?=\p{Greek})\p{Lower})+/> (or the
 L<experimental feature|perlrecharclass/Extended Bracketed Character
 Classes> C<S</(?[ \p{Greek} & \p{Lower} ])+/>>).
-
-Because each operand is evaluated in integer form, S<C<2.18 .. 3.14>> will
-return two elements in list context.
-
-    @list = (2.18 .. 3.14); # same as @list = (2 .. 3);
 
 =head2 Conditional Operator
 X<operator, conditional> X<operator, ternary> X<ternary> X<?:>

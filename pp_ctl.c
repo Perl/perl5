@@ -1178,14 +1178,18 @@ PP(pp_flip)
 }
 
 /* This code tries to decide if "$left .. $right" should use the
-   magical string increment, or if the range is numeric (we make
-   an exception for .."0" [#18165]). AMS 20021031. */
+   magical string increment, or if the range is numeric. Initially,
+   an exception was made for *any* string beginning with "0" (see
+   [#18165], AMS 20021031), but now that is only applied when the
+   string's length is also >1 - see the rules now documented in
+   perlop [#133695] */
 
 #define RANGE_IS_NUMERIC(left,right) ( \
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
 	(((!SvOK(left) && SvOK(right)) || ((!SvOK(left) || \
-          looks_like_number(left)) && SvPOKp(left) && *SvPVX_const(left) != '0')) \
+          looks_like_number(left)) && SvPOKp(left) \
+          && !(*SvPVX_const(left) == '0' && SvCUR(left)>1 ) )) \
          && (!SvOK(right) || looks_like_number(right))))
 
 PP(pp_flop)
