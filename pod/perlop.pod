@@ -2584,10 +2584,9 @@ want to use L</Indented Here-docs> (see below).
 The terminating string may be either an identifier (a word), or some
 quoted text.  An unquoted identifier works like double quotes.
 There may not be a space between the C<< << >> and the identifier,
-unless the identifier is explicitly quoted.  (If you put a space it
-will be treated as a null identifier, which is valid, and matches the
-first empty line.)  The terminating string must appear by itself
-(unquoted and with no surrounding whitespace) on the terminating line.
+unless the identifier is explicitly quoted.  The terminating string
+must appear by itself (unquoted and with no surrounding whitespace)
+on the terminating line.
 
 If the terminating string is quoted, the type of quotes used determine
 the treatment of the text.
