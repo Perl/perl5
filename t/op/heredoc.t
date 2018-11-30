@@ -221,7 +221,7 @@ HEREDOC
     push @tests, [
         "print <<~' EOF ';\n $string\n EOF\nEOF \n  EOF  \n EOF \n",
         " $string\n EOF\nEOF \n  EOF  \n",
-        "intented here-doc matches final delimiter correctly"
+        "indented here-doc matches final delimiter correctly"
     ];
 
     for my $test (@tests) {
