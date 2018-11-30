@@ -8535,18 +8535,19 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
      * null assign is a placeholder. */
     rslast = rslen ? rsptr[rslen - 1] : '\0';
 
-    if (rspara) {		/* have to do this both before and after */
-	do {			/* to make sure file boundaries work right */
-	    if (PerlIO_eof(fp))
-		return 0;
-	    i = PerlIO_getc(fp);
-	    if (i != '\n') {
-		if (i == -1)
-		    return 0;
-		PerlIO_ungetc(fp,i);
-		break;
-	    }
-	} while (i != EOF);
+    if (rspara) {        /* have to do this both before and after */
+                         /* to make sure file boundaries work right */
+        while (1) {
+            if (PerlIO_eof(fp))
+                return 0;
+            i = PerlIO_getc(fp);
+            if (i != '\n') {
+                if (i == -1)
+                    return 0;
+                PerlIO_ungetc(fp,i);
+                break;
+            }
+        }
     }
 
     /* See if we know enough about I/O mechanism to cheat it ! */
