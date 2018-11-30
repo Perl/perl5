@@ -14282,11 +14282,42 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         /* On non-ancient Unicode versions, this includes the
                          * multi-char fold SHARP S to 'ss' */
 
-                        else if (UNLIKELY(   ender == LATIN_SMALL_LETTER_SHARP_S
-                                          || (   len
-                                              && isALPHA_FOLD_EQ(ender, 's')
-                                              && isALPHA_FOLD_EQ(*(s-1), 's'))))
+                        else if (   UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)
+                                 || (    isALPHA_FOLD_EQ(ender, 's')
+                                     && (len == 0 || isALPHA_FOLD_EQ(*(s-1), 's'))))
                         {
+                            /* Here, we have one of the following:
+                             *  a)  a SHARP S.  This folds to 'ss' only under
+                             *      /u rules.  If we are in that situation,
+                             *      fold the SHARP S to 'ss'.  See the comments
+                             *      for join_exact() as to why we fold this
+                             *      non-UTF at compile time, and no others.
+                             *  b)  'ss'.  When under /u, there's nothing
+                             *      special needed to be done here.  The
+                             *      previous iteration handled the first 's',
+                             *      and this iteration will handle the second.
+                             *      If, on the otherhand it's not /u, we have
+                             *      to exclude the possibility of moving to /u,
+                             *      so that we won't generate an unwanted
+                             *      match, unless, at runtime, the target
+                             *      string is in UTF-8.
+                             *  c)  an initial s in the node.  By itself, this
+                             *      isn't a problem, but if we later join this
+                             *      and the node preceding it together, where
+                             *      that one ends with an 's', the juncture
+                             *      would contain 'ss', and again we could have
+                             *      an inappropriate match, so keep this node
+                             *      EXACTF.  After we've accumulated the node
+                             *      we also make sure that a final s keeps it
+                             *      from becoming EXACTFU.
+                             *
+                             * XXX An enhancement would be to create a new
+                             * node-type, say EXACTFS, which would be EXACTFU
+                             * except for beginning or ending with 's'.  This
+                             * could trivially be turned into EXACTFU after
+                             * joining, if appropriate, and would then be
+                             * trieable */
+
                             maybe_exactfu = FALSE;
                             if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
                                 maybe_SIMPLE = 0;
