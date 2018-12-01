@@ -2,7 +2,7 @@ package Test2::Event::Subtest;
 use strict;
 use warnings;
 
-our $VERSION = '1.302140';
+our $VERSION = '1.302141';
 
 BEGIN { require Test2::Event::Ok; our @ISA = qw(Test2::Event::Ok) }
 use Test2::Util::HashBase qw{subevents buffered subtest_id subtest_uuid};

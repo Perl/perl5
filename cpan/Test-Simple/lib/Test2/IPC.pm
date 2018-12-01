@@ -2,12 +2,13 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302140';
+our $VERSION = '1.302141';
 
 
 use Test2::API::Instance;
 use Test2::Util qw/get_tid/;
 use Test2::API qw{
+    test2_in_preload
     test2_init_done
     test2_ipc
     test2_has_ipc
@@ -24,7 +25,7 @@ use Test2::API qw{
     no warnings 'void';
     INIT {
         use warnings 'void';
-        context()->release();
+        context()->release() unless test2_in_preload();
     }
 }
 
