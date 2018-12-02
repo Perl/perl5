@@ -10304,7 +10304,7 @@ S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
 	if (end == UV_MAX) {
-	    Perl_sv_catpvf(aTHX_ output, "%04" UVXf "%cINFINITY%c",
+	    Perl_sv_catpvf(aTHX_ output, "%04" UVXf "%cINFTY%c",
                                           start, intra_range_delimiter,
                                                  inter_range_delimiter);
 	}
@@ -10338,7 +10338,7 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level,
          [0] 0x000A .. 0x000D
          [2] 0x0085
          [4] 0x2028 .. 0x2029
-         [6] 0x3104 .. INFINITY
+         [6] 0x3104 .. INFTY
      * This means that the first range of code points matched by the list are
      * 0xA through 0xD; the second range contains only the single code point
      * 0x85, etc.  An inversion list is an array of UVs.  Two array elements
@@ -10362,7 +10362,7 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level,
     while (invlist_iternext(invlist, &start, &end)) {
 	if (end == UV_MAX) {
 	    Perl_dump_indent(aTHX_ level, file,
-                                       "%s[%" UVuf "] 0x%04" UVXf " .. INFINITY\n",
+                                       "%s[%" UVuf "] 0x%04" UVXf " .. INFTY\n",
                                    indent, (UV)count, start);
 	}
 	else if (end != start) {
