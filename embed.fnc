@@ -2443,9 +2443,6 @@ Es	|U32	|join_exact	|NN RExC_state_t *pRExC_state \
 				|NN regnode *scan|NN UV *min_subtract  \
 				|NN bool *unfolded_multi_char          \
 				|U32 flags|NULLOK regnode *val|U32 depth
-Ei	|void   |alloc_maybe_populate_EXACT|NN RExC_state_t *pRExC_state \
-				|NN regnode_offset node|NN I32 *flagp|STRLEN len \
-				|UV code_point|bool downgradable
 Ein	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
 Es	|void	|nextchar	|NN RExC_state_t *pRExC_state
 Es	|void	|skip_to_be_ignored_text|NN RExC_state_t *pRExC_state  \

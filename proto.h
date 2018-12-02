@@ -5392,11 +5392,6 @@ STATIC U32	S_add_data(RExC_state_t* const pRExC_state, const char* const s, cons
 STATIC AV*	S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN cp_count);
 #define PERL_ARGS_ASSERT_ADD_MULTI_MATCH	\
 	assert(multi_string)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode_offset node, I32 *flagp, STRLEN len, UV code_point, bool downgradable);
-#define PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT	\
-	assert(pRExC_state); assert(node); assert(flagp)
-#endif
 STATIC void	S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
 #define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE	\
 	assert(pRExC_state)
