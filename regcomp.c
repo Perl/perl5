@@ -575,7 +575,9 @@ static const scan_data_t zero_scan_data = {
 #define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
 #define DEPENDS_SEMANTICS (get_regex_charset(RExC_flags)                    \
                                                      == REGEX_DEPENDS_CHARSET)
+/* Use RExC_uni_semantics instead of this:
 #define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
+*/
 #define AT_LEAST_UNI_SEMANTICS (get_regex_charset(RExC_flags)                \
                                                      >= REGEX_UNICODE_CHARSET)
 #define ASCII_RESTRICTED (get_regex_charset(RExC_flags)                      \
@@ -2039,8 +2041,8 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
                            list */
     const U32 max_code_points = (LOC)
                                 ?  256
-                                : ((   ! UNI_SEMANTICS
-                                     || invlist_highest(ssc->invlist) < 256)
+                                : ((  ! RExC_uni_semantics
+                                    ||  invlist_highest(ssc->invlist) < 256)
                                   ? 128
                                   : NON_OTHER_COUNT);
     const U32 max_match = max_code_points / 2;
@@ -17296,7 +17298,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 &cp_list);
                     }
                 }
-                else if (  UNI_SEMANTICS
+                else if (  RExC_uni_semantics
                         || AT_LEAST_ASCII_RESTRICTED
                         || classnum == _CC_ASCII
                         || (DEPENDS_SEMANTICS && (   classnum == _CC_DIGIT
