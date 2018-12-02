@@ -13763,6 +13763,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * as the latter's folds aren't known until runtime. */
             bool maybe_exactfu = FOLD;
 
+            /* Single-character EXACTish nodes are almost always SIMPLE.  This
+             * allows us to override this as encountered */
+            U8 maybe_SIMPLE = SIMPLE;
+
             /* Does this node contain something that can't match unless the
              * target string is (also) in UTF-8 */
             bool requires_utf8_target = FALSE;
@@ -14165,6 +14169,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * existing node, so can start a new node with this one */
                     if (! len) {
                         node_type = EXACTFL;
+                        RExC_contains_locale = 1;
                     }
                     else if (node_type == EXACT) {
                         p = oldp;
@@ -14259,20 +14264,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                               && isALPHA_FOLD_EQ(ender, 's')
                                               && isALPHA_FOLD_EQ(*(s-1), 's'))))
                         {
-
-                            if (node_type == EXACTFU) {
-                                /* See comments for join_exact() as to why we
-                                 * fold this non-UTF at compile time */
-                                if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
+                            maybe_exactfu = FALSE;
+                            if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
+                                maybe_SIMPLE = 0;
+                                if (node_type == EXACTFU) {
                                     *(s++) = 's';
 
                                     /* Let the code below add in the extra 's' */
                                     ender = 's';
                                     added_len = 2;
                                 }
-                            }
-                            else {
-                                maybe_exactfu = FALSE;
                             }
                         }
 #endif
@@ -14508,17 +14509,18 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     {
                         node_type = EXACTFU_ONLY8;
                     }
-
                 }
 
                 OP(REGNODE_p(ret)) = node_type;
+                STR_LEN(REGNODE_p(ret)) = len;
+                RExC_emit += STR_SZ(len);
 
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender,
-                                           FALSE /* Don't look to see if could
-                                                    be turned into an EXACT
-                                                    node, as we have already
-                                                    computed that */
-                                          );
+                /* If the node isn't a single character, it can't be SIMPLE */
+                if (len > ((UTF) ? UVCHR_SKIP(ender) : 1)) {
+                    maybe_SIMPLE = 0;
+                }
+
+                *flagp |= HASWIDTH | maybe_SIMPLE;
             }
 
 	    RExC_parse = p - 1;
