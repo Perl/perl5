@@ -14472,16 +14472,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 OP(REGNODE_p(ret)) = NOTHING;
             }
             else {
-                OP(REGNODE_p(ret)) = node_type;
 
                 /* If the node type is EXACT here, check to see if it
                  * should be EXACTL, or EXACT_ONLY8. */
                 if (node_type == EXACT) {
                     if (LOC) {
-                        OP(REGNODE_p(ret)) = EXACTL;
+                        node_type = EXACTL;
                     }
                     else if (requires_utf8_target) {
-                        OP(REGNODE_p(ret)) = EXACT_ONLY8;
+                        node_type = EXACT_ONLY8;
                     }
                 }
 
@@ -14491,10 +14490,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * target string (for /u), or depending on locale for /l */
                     if (maybe_exactfu) {
                         if (node_type == EXACTF) {
-                            OP(REGNODE_p(ret)) = EXACTFU;
+                            node_type = EXACTFU;
                         }
                         else if (node_type == EXACTFL) {
-                            OP(REGNODE_p(ret)) = EXACTFLU8;
+                            node_type = EXACTFLU8;
                         }
                     }
                     else if (node_type == EXACTF) {
@@ -14503,14 +14502,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                     /* The micro sign is the only below 256 character that
                      * folds to above 255 */
-                    if (   OP(REGNODE_p(ret)) == EXACTFU
+                    if (   node_type == EXACTFU
                         && requires_utf8_target
                         && LIKELY(! has_micro_sign))
                     {
-                        OP(REGNODE_p(ret)) = EXACTFU_ONLY8;
+                        node_type = EXACTFU_ONLY8;
                     }
 
                 }
+
+                OP(REGNODE_p(ret)) = node_type;
 
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender,
                                            FALSE /* Don't look to see if could
