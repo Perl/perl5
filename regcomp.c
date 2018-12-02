@@ -3933,6 +3933,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                    U32 flags, regnode *val, U32 depth)
 {
     /* Merge several consecutive EXACTish nodes into one. */
+
     regnode *n = regnext(scan);
     U32 stringok = 1;
     regnode *next = scan + NODE_SZ_STR(scan);
@@ -3951,6 +3952,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     PERL_UNUSED_ARG(val);
 #endif
     DEBUG_PEEP("join", scan, depth, 0);
+
+    assert(PL_regkind[OP(scan)] == EXACT);
 
     /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
      * EXACT ones that are mergeable to the current one. */
