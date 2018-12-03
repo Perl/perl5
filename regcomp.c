@@ -14546,9 +14546,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 *flagp |= HASWIDTH | maybe_SIMPLE;
             }
 
-	    RExC_parse = p - 1;
-            Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
-	    RExC_parse = p;
+            Set_Node_Length(REGNODE_p(ret), p - parse_start - 1);
+            RExC_parse = p;
+
 	    {
 		/* len is STRLEN which is unsigned, need to copy to signed */
 		IV iv = len;
