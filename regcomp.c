@@ -3957,9 +3957,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 
     /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
      * EXACT ones that are mergeable to the current one. */
-    while (n
-           && (PL_regkind[OP(n)] == NOTHING
-               || (stringok && OP(n) == OP(scan)))
+    while (    n
+           && (    PL_regkind[OP(n)] == NOTHING
+               || (stringok && PL_regkind[OP(n)] == EXACT))
            && NEXT_OFF(n)
            && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX)
     {
@@ -3986,6 +3986,10 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             /* Don't join if the sum can't fit into a single node */
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
+
+            if (OP(scan) != OP(n)) {
+                break;
+            }
 
             DEBUG_PEEP("merg", n, depth, 0);
             merged++;
