@@ -3987,7 +3987,23 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
 
-            if (OP(scan) != OP(n)) {
+            /* Joining something that requires UTF-8 with something that
+             * doesn't, means the result requires UTF-8. */
+            if (OP(scan) == EXACT && (OP(n) == EXACT_ONLY8)) {
+                OP(scan) = EXACT_ONLY8;
+            }
+            else if (OP(scan) == EXACT_ONLY8 && (OP(n) == EXACT)) {
+                ;   /* join is compatible, no need to change OP */
+            }
+            else if ((OP(scan) == EXACTFU) && (OP(n) == EXACTFU_ONLY8)) {
+                OP(scan) = EXACTFU_ONLY8;
+            }
+            else if ((OP(scan) == EXACTFU_ONLY8) && (OP(n) == EXACTFU)) {
+                ;   /* join is compatible, no need to change OP */
+            }
+            else if (OP(scan) != OP(n)) {
+
+                /* The only other compatible joinings are the same node type */
                 break;
             }
 
