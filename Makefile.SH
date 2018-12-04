@@ -184,15 +184,11 @@ esac
 
 : is Cwd static or dynamic
 static_cwd='define'
-storable_limit_dep=''
-storable_type=''
 list_util_dep='$(PERL_EXE)'
 for f in $dynamic_ext; do
    case $f in
        Cwd) static_cwd='undef' ;;
        List/Util) list_util_dep=lib/auto/List/Util/Util.$dlext ;;
-       Storable) storable_limit_dep=lib/auto/Storable/Storable.$dlext
-                 storable_type='dynamic' ;;
    esac
 done
 
@@ -229,7 +225,6 @@ for f in $static_ext; do
 $this_target: lib/auto/List/Util/Util\$(LIB_EXT)" ;;
 	Unicode/Normalize) extra_dep="$extra_dep
 $this_target: uni.data" ;;
-        Storable) storable_type='static' ;;
     esac
 done
 
@@ -1187,26 +1182,6 @@ no_install no-install: install-notify
 
 install: install-all
 !NO!SUBS!
-
-if test "$storable_type" != "" ; then
-
-case "$static_cwd" in
-undef) storable_limit_dep="$storable_limit_dep lib/auto/Cwd/Cwd.$dlext" ;;
-esac
-
-$spitshell >>$Makefile <<EOT
-
-dist/Storable/lib/Storable/Limit.pm : \$(PERL_EXE) dist/Storable/stacksize $storable_limit_dep
-	cd dist/Storable ; \$(LDLIBPTH) \$(MAKE) lib/Storable/Limit.pm
-
-lib/Storable/Limit.pm : dist/Storable/lib/Storable/Limit.pm
-	test -d lib/Storable || mkdir lib/Storable
-	cp dist/Storable/lib/Storable/Limit.pm lib/Storable/Limit.pm
-EOT
-
-common_build_deps="$common_build_deps lib/Storable/Limit.pm"
-
-fi
 
 for name in all notify silent strip verbose; do
     flags="--$name";

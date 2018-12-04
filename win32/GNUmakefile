@@ -1208,7 +1208,7 @@ CFG_VARS	=					\
 
 .PHONY: all info
 
-all : info rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
+all : info rebasePE Extensions_nonxs $(PERLSTATIC)
 
 info :
 ifeq ($(CCTYPE),GCC)
@@ -1658,16 +1658,6 @@ Extensions_clean :
 
 Extensions_realclean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
-
-PostExt : ..\lib\Storable\Limit.pm
-
-# we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
-# rebasePE most of that, including adjustment for static builds, so we
-# just need non-xs extensions
-..\lib\Storable\Limit.pm : rebasePE Extensions_nonxs
-	$(PLMAKE) -C ..\dist\Storable lib\Storable\Limit.pm
-	if not exist ..\lib\Storable mkdir ..\lib\Storable
-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
 
 # all PE files need to be built by the time this target runs, PP files can still
 # be running in parallel like UNIDATAFILES, this target a placeholder for the

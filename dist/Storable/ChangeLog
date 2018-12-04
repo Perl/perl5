@@ -1,4 +1,8 @@
 unreleased
+    version 3.14
+	* (perl #133708) don't build-time probe for stack limits at all
+
+unreleased
     version 3.12
         * (perl #133411) don't probe for stack limits with -Dusecrosscompile
 
