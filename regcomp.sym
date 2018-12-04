@@ -117,6 +117,12 @@ EXACTFU_ONLY8 EXACT,    str       ; Like EXACTFU, but only UTF-8 encoded targets
 # One could add EXACTFAA8 and and something that has the same effect for /l,
 # but these would be extremely uncommon
 
+# If we ran out of node types, these could be replaced by some other method,
+# such as instead examining the first and final characters of nodes.
+EXACTFS_B_U EXACT,      str       ; EXACTFU but begins with [Ss]; (string not UTF-8; compile-time only).
+EXACTFS_E_U EXACT,      str       ; EXACTFU but ends with [Ss]; (string not UTF-8; compile-time only).
+EXACTFS_BE_U EXACT,     str       ; EXACTFU but begins and ends with [Ss]; (string not UTF-8; compile-time only).
+
 #*Do nothing types
 
 NOTHING     NOTHING,    no        ; Match empty string.

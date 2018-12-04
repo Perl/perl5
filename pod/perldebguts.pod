@@ -680,6 +680,13 @@ will be lost.
  EXACTFU_ONLY8    str        Like EXACTFU, but only UTF-8 encoded
                              targets can match
 
+ EXACTFS_B_U      str        EXACTFU but begins with [Ss]; (string not
+                             UTF-8; compile-time only).
+ EXACTFS_E_U      str        EXACTFU but ends with [Ss]; (string not UTF-
+                             8; compile-time only).
+ EXACTFS_BE_U     str        EXACTFU but begins and ends with [Ss];
+                             (string not UTF-8; compile-time only).
+
  # Do nothing types
 
  NOTHING          no         Match empty string.

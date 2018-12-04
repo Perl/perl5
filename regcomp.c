@@ -4001,6 +4001,108 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             else if ((OP(scan) == EXACTFU_ONLY8) && (OP(n) == EXACTFU)) {
                 ;   /* join is compatible, no need to change OP */
             }
+            else if (OP(scan) == EXACTFU) {
+                if (OP(n) != EXACTFU) {
+
+                    /* Here the first node is EXACTFU and the second isn't.
+                     * Normally EXACTFU nodes are compatible for joining only
+                     * with EXACTFU_ONLY8 nodes (already handled), and other
+                     * EXACTFU nodes.  But under /di, certain temporary
+                     * EXACTFS_foo_U nodes are generated, which are compatible.
+                     * We check for this case here.  These need to be resolved
+                     * to either EXACTFU or EXACTF at joining time.  They have
+                     * nothing in them that would forbid them from being the
+                     * more desirable EXACTFU nodes except that they begin
+                     * and/or end with a single [Ss].  The reason this is
+                     * problematic is because they could be joined in this loop
+                     * with an adjacent node that ends and/or begins with [Ss]
+                     * which would then form the sequence 'ss', which matches
+                     * differently under /di than /ui, in which case EXACTFU
+                     * can't be used.  If the 'ss' sequence doesn't get formed,
+                     * the nodes get absorbed into any adjacent EXACTFU node.
+                     * And if the only adjacent node is EXACTF, they get
+                     * absorbed into that, under the theory that a longer node
+                     * is better than two shorter ones, even if one is EXACTFU.
+                     * Note that EXACTFU_ONLY8 is generated only for UTF-8
+                     * patterns, and the EXACTFS_foo_U ones only for non-UTF-8.
+                     * */
+
+                    if (OP(n) == EXACTFS_E_U || OP(n) == EXACTFS_BE_U) {
+
+                        /* Here the joined node would end with 's'.  If the
+                         * node following the combination is an EXACTF one,
+                         * it's better to join this EXACTFS_fooE_U with that
+                         * one, leaving the current one in 'scan' be the more
+                         * desirable EXACTFU */
+                        if (OP(nnext) == EXACTF) {
+                            break;
+                        }
+                        OP(scan) = EXACTFS_E_U;
+                    }
+                    else if (OP(n) != EXACTFS_B_U) {
+                        break;  /* This would be an incompatible join; stop */
+                    }
+                }
+            }
+            else if (OP(scan) == EXACTF) {
+                if (OP(n) != EXACTF) {
+
+                    /* Here the first node is EXACTF and the second isn't.
+                     * EXACTF nodes are compatible for joining only with other
+                     * EXACTF nodes, and the EXACTFS_foo_U nodes.  But the
+                     * latter nodes can be also joined with EXACTFU ones, and
+                     * that is a better outcome, so if the node following 'n'
+                     * is EXACTFU, quit now so that those two can be joined
+                     * later */
+                    if (   OP(n) != EXACTFS_B_U
+                        && OP(n) != EXACTFS_E_U
+                        && OP(n) != EXACTFS_BE_U)
+                    {
+                        break;
+                    }
+                    else if (OP(nnext) == EXACTFU) {
+                        break;
+                    }
+                    else {
+                        /* Here the next node can be joined with the EXACTF
+                         * node, and become part of it.  That they begin or end
+                         * with 's' now doesn't matter. */
+                    }
+                }
+            }
+            else if (OP(scan) == EXACTFS_B_U) {
+
+                /* Here, the first node begins, but does not end with 's'.
+                 * That means it doesn't form 'ss' with the following node, so
+                 * can become EXACTFU, and either stand on its own or be joined
+                 * with a following EXACTFU.  If the following is instead an
+                 * EXACTF, the two can also be joined together as EXACTF */
+                if (OP(n) == EXACTF) {
+                    OP(scan) = EXACTF;
+                }
+                else {
+                    OP(scan) = EXACTFU;
+                    if (OP(n) != EXACTFU) {
+                        break;
+                    }
+                }
+            }
+            else if (OP(scan) == EXACTFS_E_U || OP(scan) == EXACTFS_BE_U) {
+
+                /* Here, the first node ends with 's', and could become an
+                 * EXACTFU (or be joined with a following EXACTFU) if that next
+                 * node doesn't begin with 's'; otherwise it must become an
+                 * EXACTF node. */
+                if (OP(n) == EXACTFS_B_U || OP(n) == EXACTFS_BE_U) {
+                    OP(scan) = EXACTF;
+                }
+                else {
+                    OP(scan) = EXACTFU;
+                    if (OP(n) != EXACTFU) {
+                        break;
+                    }
+                }
+            }
             else if (OP(scan) != OP(n)) {
 
                 /* The only other compatible joinings are the same node type */
@@ -4034,6 +4136,15 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 	    stopnow = 1;
 	}
 #endif
+    }
+
+    /* These temporary nodes can now be turned into EXACTFU, and must, as
+     * regexec.c doesn't handle them */
+    if (   OP(scan) == EXACTFS_B_U
+        || OP(scan) == EXACTFS_E_U
+        || OP(scan) == EXACTFS_BE_U)
+    {
+        OP(scan) = EXACTFU;
     }
 
     *min_subtract = 0;
@@ -5174,6 +5285,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		min++;
 		/* FALLTHROUGH */
 	    case STAR:
+                next = NEXTOPER(scan);
+
+                /* These temporary nodes can now be turned into EXACTFU, and
+                 * must, as regexec.c doesn't handle them */
+                if (   OP(next) == EXACTFS_B_U
+                    || OP(next) == EXACTFS_E_U
+                    || OP(next) == EXACTFS_BE_U)
+                {
+                    OP(next) = EXACTFU;
+                }
+
 		if (flags & SCF_DO_STCLASS) {
 		    mincount = 0;
 		    maxcount = REG_INFTY;
@@ -13786,6 +13908,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * as the latter's folds aren't known until runtime. */
             bool maybe_exactfu = FOLD;
 
+            /* An EXACTF node that otherwise could be turned into EXACTFU,
+             * can't be if it starts and/or ends with [Ss].  Because, during
+             * optimization it could be joined with another node that ends
+             * and/or starts with [Ss], creating the sequence 'ss', which needs
+             * to remain in an EXACTF node.  This flag is used to signal this
+             * situation */
+            bool maybe_exactfs = FALSE;
+
             /* Single-character EXACTish nodes are almost always SIMPLE.  This
              * allows us to override this as encountered */
             U8 maybe_SIMPLE = SIMPLE;
@@ -14282,9 +14412,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         /* On non-ancient Unicode versions, this includes the
                          * multi-char fold SHARP S to 'ss' */
 
+                        if (len == 0 && isALPHA_FOLD_EQ(ender, 's')) {
+                            maybe_exactfs = TRUE;   /* Node begins with 's' */
+                        }
                         else if (   UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)
-                                 || (    isALPHA_FOLD_EQ(ender, 's')
-                                     && (len == 0 || isALPHA_FOLD_EQ(*(s-1), 's'))))
+                                 || (   isALPHA_FOLD_EQ(ender, 's')
+                                     && isALPHA_FOLD_EQ(*(s-1), 's')))
                         {
                             /* Here, we have one of the following:
                              *  a)  a SHARP S.  This folds to 'ss' only under
@@ -14301,24 +14434,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                              *      so that we won't generate an unwanted
                              *      match, unless, at runtime, the target
                              *      string is in UTF-8.
-                             *  c)  an initial s in the node.  By itself, this
-                             *      isn't a problem, but if we later join this
-                             *      and the node preceding it together, where
-                             *      that one ends with an 's', the juncture
-                             *      would contain 'ss', and again we could have
-                             *      an inappropriate match, so keep this node
-                             *      EXACTF.  After we've accumulated the node
-                             *      we also make sure that a final s keeps it
-                             *      from becoming EXACTFU.
-                             *
-                             * XXX An enhancement would be to create a new
-                             * node-type, say EXACTFS, which would be EXACTFU
-                             * except for beginning or ending with 's'.  This
-                             * could trivially be turned into EXACTFU after
-                             * joining, if appropriate, and would then be
-                             * trieable */
+                             * */
 
-                            maybe_exactfu = FALSE;
+                            maybe_exactfs = FALSE;  /* Can't generate an
+                                                       EXACTFS node */
+                            maybe_exactfu = FALSE;  /* Nor EXACTFU (unless we
+                                                       already are in one) */
                             if (UNLIKELY(ender == LATIN_SMALL_LETTER_SHARP_S)) {
                                 maybe_SIMPLE = 0;
                                 if (node_type == EXACTFU) {
@@ -14532,12 +14653,20 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
 
                 if (FOLD) {
-                    /* If the node ends in an 's' we make sure it stays EXACTF,
-                     * as if it turns into an EXACTFU, it could later get
-                     * joined with another 's' that would then wrongly match
-                     * the sharp s */
-                    if (maybe_exactfu && isALPHA_FOLD_EQ(ender, 's'))
-                    {
+                    /* If the node ends in an 's' it can't now be changed into
+                     * an EXACTFU, as the node could later get joined with another
+                     * one that begins with 's' and that combination that would
+                     * then wrongly match the sharp s under /di.  (Note that if
+                     * it's already EXACTFU, this is irrelevant)  If this is
+                     * the only reason keeping it from being an EXACTFU, we
+                     * create a special node type so that at joining time, we
+                     * can turn it into an EXACTFU if no 'ss' is formed */
+                    if (isALPHA_FOLD_EQ(ender, 's')) {
+                        if (maybe_exactfu && node_type == EXACTF) {
+                            node_type = (maybe_exactfs)
+                                        ? EXACTFS_BE_U
+                                        : EXACTFS_E_U;
+                        }
                         maybe_exactfu = FALSE;
                     }
 
@@ -14554,6 +14683,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
                     else if (node_type == EXACTF) {
                         RExC_seen_d_op = TRUE;
+
+                        /* If the only thing keeping this from being EXACTFU is
+                         * that it begins with 's', change it to a special node
+                         * type so that during the later join, we can easily
+                         * check for, and do the change there if appropriate */
+                        if (maybe_exactfs) {
+                            node_type = EXACTFS_B_U;
+                        }
                     }
 
                     /* The micro sign is the only below 256 character that
@@ -19334,6 +19471,9 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
                 case EXACT_ONLY8:
                 case EXACTL:
                 case EXACTF:
+                case EXACTFS_B_U:
+                case EXACTFS_E_U:
+                case EXACTFS_BE_U:
                 case EXACTFAA_NO_TRIE:
                 case EXACTFAA:
                 case EXACTFU:
