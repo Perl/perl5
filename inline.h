@@ -2347,10 +2347,10 @@ Perl_foldEQ(const char *s1, const char *s2, I32 len)
 PERL_STATIC_INLINE I32
 Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
 {
-    /* Compare non-utf8 using Unicode (Latin1) semantics.  Does not work on
-     * MICRO_SIGN, LATIN_SMALL_LETTER_SHARP_S, nor
-     * LATIN_SMALL_LETTER_Y_WITH_DIAERESIS, and does not check for these.  Nor
-     * does it check that the strings each have at least 'len' characters */
+    /* Compare non-UTF-8 using Unicode (Latin1) semantics.  Works on all folds
+     * representable without UTF-8, except for LATIN_SMALL_LETTER_SHARP_S, and
+     * does not check for this.  Nor does it check that the strings each have
+     * at least 'len' characters. */
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
