@@ -14280,8 +14280,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
 
                         /* Even when folding, we store just the input
-                         * character, as we have an array that finds its fold
-                         * quickly */
+                         * character.  The bottom line reason to do this is
+                         * because the fold for MICRO SIGN requires UTF-8.  But
+                         * there's no real performance penalty for not folding,
+                         * as we have an array that finds any fold quickly. */
                         *(s++) = (char) ender;
                     }
 		} /* End of adding current character to the node */
