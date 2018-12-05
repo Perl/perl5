@@ -100,19 +100,20 @@ BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 
 EXACT       EXACT,      str       ; Match this string (preceded by length).
 EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect (used so locale-related warnings can be checked for).
-EXACTF      EXACT,      str       ; Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len).
-EXACTFL     EXACT,      str       ; Match this string (not guaranteed to be folded) using /il rules (w/len).
-EXACTFU     EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len).
-EXACTFAA    EXACT,      str	  ; Match this string (not guaranteed to be folded) using /iaa rules (w/len).
+EXACTF      EXACT,      str       ; Match this string using /id rules (w/len); (string not UTF-8, not guaranteed to be folded).
+EXACTFL     EXACT,      str       ; Match this string using /il rules (w/len); (string not guaranteed to be folded).
+EXACTFU     EXACT,      str	  ; Match this string using /iu rules (w/len); (string folded iff in UTF-8; non-UTF8 folded length <= unfolded).
+EXACTFAA    EXACT,      str	  ; Match this string using /iaa rules (w/len) (string folded iff in UTF-8; non-UTF8 folded length <= unfolded).
 
 # End of important relative ordering.
 
-EXACTFU_SS  EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len).
-EXACTFLU8   EXACT,      str	  ; Rare circumstances: like EXACTFU, but is under /l, UTF-8, folded, and everything in it is above 255.
-EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string (which is not trie-able; not guaranteed to be folded) using /iaa rules (w/len).
+EXACTFU_SS  EXACT,      str	  ; Match this string using /iu rules (w/len); (string folded iff in UTF-8; non-UTF8 folded length > unfolded).
+EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, folded, and everything in it is above 255.
+EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string using /iaa rules (w/len) (string not UTF-8, not guaranteed to be folded, not currently trie-able).
 
-EXACT_ONLY8 EXACT,      str       ; Like EXACT, but no strings that aren't in UTF-8 can match
-EXACTFU_ONLY8 EXACT,    str       ; Like EXACTFU, but no strings that aren't in UTF-8 can match
+
+EXACT_ONLY8 EXACT,      str       ; Like EXACT, but only UTF-8 encoded targets can match
+EXACTFU_ONLY8 EXACT,    str       ; Like EXACTFU, but only UTF-8 encoded targets can match
 # One could add EXACTFAA8 and and something that has the same effect for /l,
 # but these would be extremely uncommon
 
