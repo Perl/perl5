@@ -887,17 +887,28 @@ die "Could not find inversion map for Case_Folding" unless defined $format;
 die "Incorrect format '$format' for Case_Folding inversion map"
                                                     unless $format eq 'al'
                                                            || $format eq 'a';
+my @is_in_multi_char_fold;
 my @is_non_final_fold;
 
 for my $i (0 .. @$folds_ref - 1) {
     next unless ref $folds_ref->[$i];   # Skip single-char folds
 
-    # Add to the non-finals list each code point that is in a non-final
-    # position
-    for my $j (0 .. @{$folds_ref->[$i]} - 2) {
+    # Add to the is_in_multis ls list each code point that is in a
+    # multi-character fold, and to the non-finals list each code point that is
+    # in a non-final position
+    for my $j (0 .. @{$folds_ref->[$i]} - 1) {
+        push @is_in_multi_char_fold, $folds_ref->[$i][$j];
+        last if $j == @{$folds_ref->[$i]} - 1;
         push @is_non_final_fold, $folds_ref->[$i][$j];
     }
     @is_non_final_fold = uniques @is_non_final_fold;
+    @is_in_multi_char_fold = uniques @is_in_multi_char_fold;
+}
+
+sub _Perl_Is_In_Multi_Char_Fold {
+    @is_in_multi_char_fold = sort { $a <=> $b } @is_in_multi_char_fold;
+    my @return = mk_invlist_from_sorted_cp_list(\@is_in_multi_char_fold);
+    return \@return;
 }
 
 sub _Perl_Non_Final_Folds {
@@ -2338,6 +2349,7 @@ no warnings 'qw';
 my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &NonL1_Perl_Non_Final_Folds
+                    &_Perl_Is_In_Multi_Char_Fold
                     &UpperLatin1
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,XPG_XX
                     _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner

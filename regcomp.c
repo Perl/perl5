@@ -21427,6 +21427,7 @@ Perl_init_uniprops(pTHX)
     PL_utf8_foldable = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_ANY_FOLDS]);
     PL_HasMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
                                             UNI__PERL_FOLDS_TO_MULTI_CHAR]);
+    PL_InMultiCharFold = _new_invlist_C_array(_Perl_Is_In_Multi_Char_Fold_invlist);
     PL_NonL1NonFinalFold = _new_invlist_C_array(
                                             NonL1_Perl_Non_Final_Folds_invlist);
 

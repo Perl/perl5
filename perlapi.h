@@ -111,6 +111,8 @@ END_EXTERN_C
 #define PL_HasMultiCharFold	(*Perl_GHasMultiCharFold_ptr(NULL))
 #undef  PL_InBitmap
 #define PL_InBitmap		(*Perl_GInBitmap_ptr(NULL))
+#undef  PL_InMultiCharFold
+#define PL_InMultiCharFold	(*Perl_GInMultiCharFold_ptr(NULL))
 #undef  PL_LB_invlist
 #define PL_LB_invlist		(*Perl_GLB_invlist_ptr(NULL))
 #undef  PL_Latin1

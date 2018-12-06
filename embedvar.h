@@ -359,6 +359,8 @@
 #define PL_GHasMultiCharFold	(my_vars->GHasMultiCharFold)
 #define PL_InBitmap		(my_vars->GInBitmap)
 #define PL_GInBitmap		(my_vars->GInBitmap)
+#define PL_InMultiCharFold	(my_vars->GInMultiCharFold)
+#define PL_GInMultiCharFold	(my_vars->GInMultiCharFold)
 #define PL_LB_invlist		(my_vars->GLB_invlist)
 #define PL_GLB_invlist		(my_vars->GLB_invlist)
 #define PL_Latin1		(my_vars->GLatin1)
