@@ -9772,14 +9772,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	    match = TRUE;
 	}
 	else if (flags & ANYOF_LOCALE_FLAGS) {
-	    if ((flags & ANYOFL_FOLD)
-                && c < 256
+	    if (  (flags & ANYOFL_FOLD)
+                && c < sizeof(PL_fold_locale)
 		&& ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
             {
                 match = TRUE;
             }
-            else if (ANYOF_POSIXL_TEST_ANY_SET(n)
-                     && c < 256
+            else if (   ANYOF_POSIXL_TEST_ANY_SET(n)
+                     && c <= U8_MAX  /* param to isFOO_lc() */
             ) {
 
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
