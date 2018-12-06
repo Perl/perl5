@@ -887,12 +887,10 @@ die "Could not find inversion map for Case_Folding" unless defined $format;
 die "Incorrect format '$format' for Case_Folding inversion map"
                                                     unless $format eq 'al'
                                                            || $format eq 'a';
-my @has_multi_char_fold;
 my @is_non_final_fold;
 
 for my $i (0 .. @$folds_ref - 1) {
     next unless ref $folds_ref->[$i];   # Skip single-char folds
-    push @has_multi_char_fold, $cp_ref->[$i];
 
     # Add to the non-finals list each code point that is in a non-final
     # position
