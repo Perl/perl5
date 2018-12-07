@@ -193,6 +193,12 @@ if (@ARGV) {
             $serials{$_} = 1;
         }
 
+        my @nonexistent_serials = grep { not exists $all_dirs{$_} } keys %serials;
+        if (@nonexistent_serials) {
+            die "These directories to be run serially are incorrectly"
+              . " specified:\n" . join "\n", @nonexistent_serials;
+        }
+
         # Remove the serial testing directories from the list of all
         # directories.  The remaining ones are testable in parallel.  Make the
         # parallel list a scalar with names separated by '|' so that below
