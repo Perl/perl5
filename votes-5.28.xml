@@ -37,9 +37,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="tonyc" id="120060c86e233cb9f588314214137f3ed1b48e2a" ticket="133326" desc="(perl #133326) fix and clarify handling of recurs_sv." />
 
-<commit votes="tonyc" id="404395d24bc87890c7d978622296b9925a347aa0" ticket="133659" desc="(perl #133659) move argvout cleanup to a new function" />
-<commit votes="tonyc" id="640e129d0fc499d24a759cacae9240a32c66fa51 " ticket="133659" desc="(perl #133659) tests for global destruction handling of inplace editing" />
-<commit votes="tonyc" id="85d2f7cacba4b0088ae0c67cc6d4c9b7495355c0" ticket="133659" desc="(perl #133659) make an in-place edit successful if the exit status is zero" />
+<commit votes="tonyc dom" id="404395d24bc87890c7d978622296b9925a347aa0" ticket="133659" desc="(perl #133659) move argvout cleanup to a new function" />
+<commit votes="tonyc dom" id="640e129d0fc499d24a759cacae9240a32c66fa51 " ticket="133659" desc="(perl #133659) tests for global destruction handling of inplace editing" />
+<commit votes="tonyc dom" id="85d2f7cacba4b0088ae0c67cc6d4c9b7495355c0" ticket="133659" desc="(perl #133659) make an in-place edit successful if the exit status is zero" />
 
 </div>
 
