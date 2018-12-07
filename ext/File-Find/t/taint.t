@@ -108,7 +108,7 @@ sub cleanup {
         chdir($updir);
     }
     if (-d dir_path('for_find_taint')) {
-	rmdir dir_path('for_find_taint') or print "# Can't rmdir for_find: $!\n";
+	rmdir dir_path('for_find_taint') or print "# Can't rmdir for_find_taint: $!\n";
     }
 }
 
