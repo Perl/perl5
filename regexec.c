@@ -2149,6 +2149,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                    (U8) ARG(c), FLAGS(c)));
         break;
 
+    case ANYOFH:
+        if (utf8_target) REXEC_FBC_CLASS_SCAN(TRUE,
+                      reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
+        break;
+
     case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
 	/* FALLTHROUGH */
@@ -6679,6 +6684,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto increment_locinput;
             break;
 
+        case ANYOFH:
+            if (   ! utf8_target
+                ||   NEXTCHR_IS_EOS
+	        || ! reginclass(rex, scan, (U8*)locinput, (U8*)reginfo->strend,
+                                                                   utf8_target))
+            {
+                sayNO;
+            }
+            goto increment_locinput;
+            break;
+
         /* The argument (FLAGS) to all the POSIX node types is the class number
          * */
 
@@ -9339,6 +9355,17 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
         break;
 
+    case ANYOFH:
+        if (utf8_target) while (   hardcount < max
+                                && scan < loceol
+                                && reginclass(prog, p, (U8*)scan, (U8*) loceol,
+                                                                  TRUE))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
+        break;
+
     /* The argument (FLAGS) to all the POSIX node types is the class number */
 
     case NPOSIXL:
@@ -9631,7 +9658,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     }
 
     /* If this character is potentially in the bitmap, check it */
-    if (c < NUM_ANYOF_CODE_POINTS) {
+    if (c < NUM_ANYOF_CODE_POINTS && OP(n) != ANYOFH) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
 	else if ((flags

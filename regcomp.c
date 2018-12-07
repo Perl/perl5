@@ -5763,6 +5763,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 case ANYOFD:
                 case ANYOFL:
                 case ANYOFPOSIXL:
+                case ANYOFH:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -14584,6 +14585,11 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
     PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST;
     assert(PL_regkind[OP(node)] == ANYOF);
 
+    /* There is no bitmap for this node type */
+    if (OP(node) == ANYOFH) {
+        return;
+    }
+
     ANYOF_BITMAP_ZERO(node);
     if (*invlist_ptr) {
 
@@ -18869,16 +18875,28 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             SvREFCNT_dec(d_invlist);
             SvREFCNT_dec(intersection);
         }
+
+        /* If didn't find an optimization and there is no need for a
+        * bitmap, optimize to indicate that */
+        if (     start[0] >= NUM_ANYOF_CODE_POINTS
+            && ! LOC
+            && ! upper_latin1_only_utf8_matches)
+        {
+            op = ANYOFH;
+        }
     }   /* End of seeing if can optimize it into a different node */
 
   is_anyof: /* It's going to be an ANYOF node. */
-    op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
-         ? ANYOFD
-         : ((posixl)
-            ? ANYOFPOSIXL
-            : ((LOC)
-               ? ANYOFL
-               : ANYOF));
+    if (op != ANYOFH) {
+        op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
+             ? ANYOFD
+             : ((posixl)
+                ? ANYOFPOSIXL
+                : ((LOC)
+                   ? ANYOFL
+                   : ANYOF));
+    }
+
     ret = regnode_guts(pRExC_state, op, regarglen[op], "anyof");
     FILL_NODE(ret, op);        /* We set the argument later */
     RExC_emit += 1 + regarglen[op];
@@ -20222,6 +20240,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Ready to start outputting.  First, the initial left bracket */
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
+        if (OP(o) != ANYOFH) {
         /* Then all the things that could fit in the bitmap */
         do_sep = put_charclass_bitmap_innards(sv,
                                               ANYOF_BITMAP(o),
@@ -20258,6 +20277,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 sv_catpvs(sv, "}");
             }
             do_sep = ! inverted;
+        }
         }
 
         /* And, finally, add the above-the-bitmap stuff */
