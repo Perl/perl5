@@ -136,7 +136,7 @@ int main (int argc, char *argv[])
 
     opt_v++;
     printf ("======================\n");
-    printf ("Sizeof time_t = %ld\n", (long)(i = sizeof (time_t)));
+    printf ("Sizeof time_t = %d\n", (i = sizeof (time_t)));
     printf ("gmtime () boundaries:\n");
     gm_check (gm_max,    69, 0x7fffffff);
     gm_check (gm_min, -1900,         70);
