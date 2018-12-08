@@ -194,7 +194,7 @@ struct regnode_2 {
  * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
  * Japanese, nor Korean.  (The regarglen structure in regnodes.h is a U8, and
  * the trie types TRIEC and AHOCORASICKC are larger than U8 for shift values
- * below above 12.)  Be sure to benchmark before changing, as larger sizes do
+ * above 12.)  Be sure to benchmark before changing, as larger sizes do
  * significantly slow down the test suite */
 #define NUM_ANYOF_CODE_POINTS   (1 << 8)
 
