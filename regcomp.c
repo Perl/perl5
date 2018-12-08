@@ -20241,43 +20241,45 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
         if (OP(o) != ANYOFH) {
-        /* Then all the things that could fit in the bitmap */
-        do_sep = put_charclass_bitmap_innards(sv,
-                                              ANYOF_BITMAP(o),
-                                              bitmap_range_not_in_bitmap,
-                                              only_utf8_locale_invlist,
-                                              o,
+            /* Then all the things that could fit in the bitmap */
+            do_sep = put_charclass_bitmap_innards(sv,
+                                                  ANYOF_BITMAP(o),
+                                                  bitmap_range_not_in_bitmap,
+                                                  only_utf8_locale_invlist,
+                                                  o,
 
-                                              /* Can't try inverting for a
-                                               * better display if there are
-                                               * things that haven't been
-                                               * resolved */
-                                              unresolved != NULL);
-        SvREFCNT_dec(bitmap_range_not_in_bitmap);
+                                                  /* Can't try inverting for a
+                                                   * better display if there
+                                                   * are things that haven't
+                                                   * been resolved */
+                                                  unresolved != NULL);
+            SvREFCNT_dec(bitmap_range_not_in_bitmap);
 
-        /* If there are user-defined properties which haven't been defined yet,
-         * output them.  If the result is not to be inverted, it is clearest to
-         * output them in a separate [] from the bitmap range stuff.  If the
-         * result is to be complemented, we have to show everything in one [],
-         * as the inversion applies to the whole thing.  Use {braces} to
-         * separate them from anything in the bitmap and anything above the
-         * bitmap. */
-        if (unresolved) {
-            if (inverted) {
-                if (! do_sep) { /* If didn't output anything in the bitmap */
-                    sv_catpvs(sv, "^");
+            /* If there are user-defined properties which haven't been defined
+             * yet, output them.  If the result is not to be inverted, it is
+             * clearest to output them in a separate [] from the bitmap range
+             * stuff.  If the result is to be complemented, we have to show
+             * everything in one [], as the inversion applies to the whole
+             * thing.  Use {braces} to separate them from anything in the
+             * bitmap and anything above the bitmap. */
+            if (unresolved) {
+                if (inverted) {
+                    if (! do_sep) { /* If didn't output anything in the bitmap
+                                     */
+                        sv_catpvs(sv, "^");
+                    }
+                    sv_catpvs(sv, "{");
                 }
-                sv_catpvs(sv, "{");
+                else if (do_sep) {
+                    Perl_sv_catpvf(aTHX_ sv,"%s][%s", PL_colors[1],
+                                                      PL_colors[0]);
+                }
+                sv_catsv(sv, unresolved);
+                if (inverted) {
+                    sv_catpvs(sv, "}");
+                }
+                do_sep = ! inverted;
             }
-            else if (do_sep) {
-                Perl_sv_catpvf(aTHX_ sv,"%s][%s", PL_colors[1], PL_colors[0]);
-            }
-            sv_catsv(sv, unresolved);
-            if (inverted) {
-                sv_catpvs(sv, "}");
-            }
-            do_sep = ! inverted;
-        }
         }
 
         /* And, finally, add the above-the-bitmap stuff */
