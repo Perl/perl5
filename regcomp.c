@@ -4335,6 +4335,23 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 	    }
 #endif
 	}
+
+        if (     STR_LEN(scan) == 1
+            &&   isALPHA_A(* STRING(scan))
+            &&  (         OP(scan) == EXACTFAA
+                 || (     OP(scan) == EXACTFU
+                     && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(* STRING(scan)))))
+        {
+            U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
+
+            /* Replace a length 1 ASCII fold pair node with an ANYOFM node,
+             * with the mask set to the complement of the bit that differs
+             * between upper and lower case, and the lowest code point of the
+             * pair (which the '&' forces) */
+            OP(scan) = ANYOFM;
+            ARG_SET(scan, *STRING(scan) & mask);
+            FLAGS(scan) = mask;
+        }
     }
 
 #ifdef DEBUGGING
@@ -5273,6 +5290,27 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                  * must, as regexec.c doesn't handle it */
                 if (OP(next) == EXACTFU_S_EDGE) {
                     OP(next) = EXACTFU;
+                }
+
+                if (     STR_LEN(next) == 1
+                    &&   isALPHA_A(* STRING(next))
+                    && (         OP(next) == EXACTFAA
+                        || (     OP(next) == EXACTFU
+                            && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(* STRING(next)))))
+                {
+                    /* These differ in just one bit */
+                    U8 mask = ~ ('A' ^ 'a');
+
+                    assert(isALPHA_A(* STRING(next)));
+
+                    /* Then replace it by an ANYOFM node, with
+                    * the mask set to the complement of the
+                    * bit that differs between upper and lower
+                    * case, and the lowest code point of the
+                    * pair (which the '&' forces) */
+                    OP(next) = ANYOFM;
+                    ARG_SET(next, *STRING(next) & mask);
+                    FLAGS(next) = mask;
                 }
 
 		if (flags & SCF_DO_STCLASS) {

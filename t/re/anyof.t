@@ -141,13 +141,13 @@ my @tests = (
     '(?il)[\x{212A}]' => 'ANYOFL{i}[{utf8 locale}Kk][212A]',
     '(?il)(?[\x{212A}])' => 'ANYOFL{utf8-locale-reqd}[Kk][212A]',
 
-    '(?i)b[s]\xe0' => 'EXACTFU <b>',    # The s goes into a 2nd node
+    '(?i)b[s]\xe0' => 'ANYOFM[Bb]',    # The s goes into a 2nd node
+
+    '[aA]' => 'ANYOFM[Aa]',
+    '[bB]' => 'ANYOFM[Bb]',
+    '[kK]' => 'ANYOFM[Kk]',
 
     'ebcdic_ok_below_this_marker',
-
-    '[aA]' => 'EXACTFAA <a>',
-    '[bB]' => 'EXACTFU <b>',
-    '[kK]' => 'EXACTFAA <k>',
 
     '(?i:[^:])' => 'NANYOFM[:]',
 
