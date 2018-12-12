@@ -2205,7 +2205,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #endif
 
 /* Win32: _fpclass(), _isnan(), _finite(). */
-#ifdef WIN32
+#ifdef _MSC_VER
 #  ifndef Perl_isnan
 #    define Perl_isnan(x) _isnan(x)
 #  endif
