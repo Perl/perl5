@@ -2121,7 +2121,7 @@ PP(pp_eof)
     }
 
     if (!gv)
-	RETPUSHNO;
+	RETPUSHYES;
 
     if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
 	return tied_method1(SV_CONST(EOF), SP, MUTABLE_SV(io), mg, newSVuv(which));

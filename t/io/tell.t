@@ -189,7 +189,6 @@ seek *$fh,0,0;
 is(tell, 0, "argless tell after seek *\$coercible...");
 
 {
-    local $TODO = "not fixed yet";
     # [perl #133721]
     fresh_perl_is(<<'EOI', 'ok', {}, 'eof with no ${^LAST_FH}');
 print "ok" if eof;
