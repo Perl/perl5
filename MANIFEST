@@ -5405,6 +5405,7 @@ t/io/layers.t			See if PerlIO layers work
 t/io/nargv.t			See if nested ARGV stuff works
 t/io/open.t			See if open works
 t/io/openpid.t			See if open works for subprocesses
+t/io/paragraph_mode.t			See if paragraph mode works
 t/io/perlio.t			See if PerlIO works
 t/io/perlio_fail.t		See if bad layers fail
 t/io/perlio_leaks.t		See if PerlIO layers are leaking
