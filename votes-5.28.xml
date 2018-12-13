@@ -58,6 +58,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="tonyc" id="d6139ec4a9065ae249ab512398326a70dfb2fea2" ticket="133558" desc="fix 'for reverse @array' bug on AIX"/>
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
