@@ -1487,6 +1487,44 @@ the next paragraph, even if it's a newline.
 Remember: the value of C<$/> is a string, not a regex.  B<awk> has to
 be better for something. :-)
 
+Setting C<$/> to an empty string -- the so-called I<paragraph mode> -- merits
+special attention.  When C<$/> is set to C<""> and the entire file is read in
+with that setting, any sequence of consecutive newlines C<"\n\n"> at the
+beginning of the file is discarded.  With the exception of the final record in
+the file, each sequence of characters ending in two or more newlines is
+treated as one record and is read in to end in exactly two newlines.  If the
+last record in the file ends in zero or one consecutive newlines, that record
+is read in with that number of newlines.  If the last record ends in two or
+more consecutive newlines, it is read in with two newlines like all preceding
+records.
+
+Suppose we wrote the following string to a file:
+
+    my $string = "\n\n\n";
+    $string .= "alpha beta\ngamma delta\n\n\n";
+    $string .= "epsilon zeta eta\n\n";
+    $string .= "theta\n";
+
+    my $file = 'simple_file.txt'; 
+    open my $OUT, '>', $file or die;
+    print $OUT $string;
+    close $OUT or die;
+
+Now we read that file in paragraph mode:
+
+    local $/ = ""; # paragraph mode
+    open my $IN, '<', $file or die;
+    my @records = <$IN>;
+    close $IN or die;
+
+C<@records> will consist of these 3 strings:
+
+    (
+      "alpha beta\ngamma delta\n\n",
+      "epsilon zeta eta\n\n",
+      "theta\n",
+    )
+
 Setting C<$/> to a reference to an integer, scalar containing an
 integer, or scalar that's convertible to an integer will attempt to
 read records instead of lines, with the maximum record size being the
