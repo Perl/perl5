@@ -1,4 +1,12 @@
 #!./perl -w
+#
+# Exercise the error handling callback mechanism in gdbm.
+#
+# Try to trigger an error by surreptitiously closing the file handle which
+# gdbm has opened.  Note that this won't trigger an error in newer
+# releases of the gdbm library, which uses mmap() rather than write() etc:
+# so skip in that case.
+
 use strict;
 
 use Test::More;
@@ -34,16 +42,25 @@ isnt((open $fh, "<&=$fileno"), undef, "dup fileno $fileno")
     or diag("\$! = $!");
 isnt(close $fh, undef,
      "close fileno $fileno, out from underneath the GDBM_File");
-is(eval {
+
+# store some data to a closed file handle
+
+my $res = eval {
     $h{Perl} = 'Rules';
     untie %h;
-    1;
-}, undef, 'Trapped error when attempting to write to knobbled GDBM_File');
+    99;
+};
 
-# Observed "File write error" and "lseek error" from two different systems.
-# So there might be more variants. Important part was that we trapped the error
-# via croak.
-like($@, qr/ at .*\bfatal\.t line \d+\.\n\z/,
-     'expected error message from GDBM_File');
+SKIP: {
+    skip "Can't tigger failure", 2 if $res == 99;
+
+    is $res, undef, "eval should return undef";
+
+    # Observed "File write error" and "lseek error" from two different
+    # systems.  So there might be more variants. Important part was that
+    # we trapped the error # via croak.
+    like($@, qr/ at .*\bfatal\.t line \d+\.\n\z/,
+         'expected error message from GDBM_File');
+}
 
 unlink <fatal_dbmx*>;
