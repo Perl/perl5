@@ -29,9 +29,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 [CVE-2018-18312] Heap-buffer-overflow write in S_regatom (regcomp.c)
+
+A crafted regular expression could cause heap-buffer-overflow write during
+compilation, potentially allowing arbitrary code execution.
+
+L<[perl #133423]|https://rt.perl.org/Ticket/Display.html?id=133423>
+
 
 [ List each security issue as a =head2 entry ]
 
@@ -89,7 +93,25 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Optimization of C<IV> to C<UV> conversions.
+L<[perl #133677]|https://rt.perl.org/Ticket/Display.html?id=133677>.
+
+=item *
+
+Speed up of the integer stringification algorithm by processing
+two digits at a time instead of one.
+L<[perl #133691]|https://rt.perl.org/Ticket/Display.html?id=133691>.
+
+=item *
+
+Improvements based on LGTM analysis and recommendation.
+(L<https://lgtm.com/projects/g/Perl/perl5/alerts/?mode=tree>). 
+L<[perl #133686]|https://rt.perl.org/Ticket/Display.html?id=133686>.
+L<[perl #133699]|https://rt.perl.org/Ticket/Display.html?id=133699>.
+
+=item *
+
+Code optimizations in F<regcomp.c>, F<regcomp.h>, F<regexec.c>.
 
 =back
 
@@ -180,13 +202,28 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlfunc>
+
+=over 4
+
+Clearification of behaviour of C<reset EXPR>.
+
+=head3 L<perlreref>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Clearification of the syntax of /(?(cond)yes)/.
+
+=back
+
+=head3 L<perlop>
+
+=item *
+
+We no longer have null (empty line) here doc terminators, so 
+L<perlop> should not refer to them.
 
 =back
 
@@ -232,7 +269,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Under C<< -Dr >> (or C<< use re 'Debug' >>) the compiled regex engine
+program is displayed. It used two different spellings for I<< infinity >>,
+C<< INFINITY >>, and C<< INFTY >>. It now uses the latter exclusively,
+as that spelling has been around the longest.
 
 =back
 
@@ -245,13 +285,17 @@ Most of these are built within the directory F<utils>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head2 L<XXX>
+=head2 L<xsubpp>
 
 =over 4
 
 =item *
 
-XXX
+The generated prototype (with C<< PROTOTYPES: ENABLE >>) would include
+C<< OUTLIST >> parameters, but these aren't arguments to the perl function.
+This has been rectified.
+L<[perl #133654]|https://rt.perl.org/Ticket/Display.html?id=133654>.
+
 
 =back
 
@@ -297,7 +341,8 @@ made:
 
 =item *
 
-XXX
+Some tests in C<< t/io/eintr.t >> caused the process to hang on
+pre-16 Darwin. These tests are skipped for those version of Darwin.
 
 =back
 
@@ -344,9 +389,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Cygwin
 
-XXX
+Cygwin doesn't make C<< cuserid >> visible.
+
+=item Win32 Mingw
+
+C99 math functions are now available.
 
 =back
 
@@ -362,7 +411,18 @@ well.
 
 =item *
 
-XXX
+Two new regnodes have been introduced C<< EXACT_ONLY8 >>, and
+C<< EXACTFU_ONLY8 >>. They're equivalent to C<< EXACT >> and C<< EXACTFU >>,
+except that they contain a code point which requires UTF-8 to
+represent/match. Hence, if the target string isn't UTF-8, we know
+it can't possibly match, without needing to try.
+
+
+=item *
+
+C<< print_bytes_for_locale() >> is now defined if C<< DEBUGGING >>,
+Prior, it didn't get defined unless C<< LC_COLLATE >> was defined
+on the platform.
 
 =back
 
@@ -390,9 +450,36 @@ to replace the input file, while code like:
 
   perl -i -ne 'print "Foo"; die'
 
-will not.  Partly resolves [perl #133659].
+will not.  Partly resolves
+L<[perl #133659]|https://rt.perl.org/Ticket/Display.html?id=133659>.
+
+=item *
+
+Fixed an issue where compiling a regexp containing both compile-time
+and run-time code blocks could lead to trying to compile something
+which is invalid syntax.
+
+=item *
+
+Fixed build failures with C<< -DNO_LOCALE_NUMERIC >> and
+C<< -DNO_LOCALE_COLLATE >>.
+L<[perl #133696]|https://rt.perl.org/Ticket/Display.html?id=133696>.
+
+=item *
+
+Prevent the tests L<< ext/B/t/strict.t >> from being skipped.
+L<[perl #133713]|https://rt.perl.org/Ticket/Display.html?id=133713>.
+
+=item *
+
+C<< /di >> nodes ending or beginning in I<s> are now C<< EXACTF >>. We do not
+want two C<< EXACTFU >> to be joined together during optimization,
+and to form a C<< ss >>, C<< sS >>, C<< Ss >> or C<< SS >> sequence;
+they are the only multi-character sequences which may match differently
+under C<< /ui >> and C<< /di >>. 
 
 =back
+
 
 =head1 Known Problems
 
