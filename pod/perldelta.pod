@@ -125,6 +125,12 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<Config::Perl::V>. has been upgraded from version 0.30 to 0.31. This was due
+to a new configuration variable that has influence on binary compatibility:
+C<USE_THREAD_SAFE_LOCALE>.
+
+=item *
+
 L<threads::shared> has been upgraded from version 1.58 to 1.59.
 
 =item *
