@@ -52,7 +52,7 @@ my $res = eval {
 };
 
 SKIP: {
-    skip "Can't tigger failure", 2 if $res == 99;
+    skip "Can't trigger failure", 2 if $res == 99;
 
     is $res, undef, "eval should return undef";
 
