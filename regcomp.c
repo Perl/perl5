@@ -15822,10 +15822,11 @@ redo_curchar:
 
             case '(':
 
-                if (   RExC_parse < RExC_end - 1
-                    && (UCHARAT(RExC_parse + 1) == '?'))
+                if (   RExC_parse < RExC_end - 2
+                    && UCHARAT(RExC_parse + 1) == '?'
+                    && UCHARAT(RExC_parse + 2) == '^')
                 {
-                    /* If is a '(?', could be an embedded '(?flags:(?[...])'.
+                    /* If is a '(?', could be an embedded '(?^flags:(?[...])'.
                      * This happens when we have some thing like
                      *
                      *   my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
@@ -15843,14 +15844,11 @@ redo_curchar:
                     RExC_parse += 2;        /* Skip past the '(?' */
                     save_parse = RExC_parse;
 
-                    /* Parse any flags for the '(?' */
+                    /* Parse the flags for the '(?'.  We already know the first
+                     * flag to parse is a '^' */
                     parse_lparen_question_flags(pRExC_state);
 
-                    if (RExC_parse == save_parse  /* Makes sure there was at
-                                                     least one flag (or else
-                                                     this embedding wasn't
-                                                     compiled) */
-                        || RExC_parse >= RExC_end - 4
+                    if (   RExC_parse >= RExC_end - 4
                         || UCHARAT(RExC_parse) != ':'
                         || UCHARAT(++RExC_parse) != '('
                         || UCHARAT(++RExC_parse) != '?'
@@ -15859,8 +15857,7 @@ redo_curchar:
 
                         /* In combination with the above, this moves the
                          * pointer to the point just after the first erroneous
-                         * character (or if there are no flags, to where they
-                         * should have been) */
+                         * character. */
                         if (RExC_parse >= RExC_end - 4) {
                             RExC_parse = RExC_end;
                         }
