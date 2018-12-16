@@ -1171,8 +1171,15 @@ closing C<])> characters.
 
 Just as in all regular expressions, the pattern can be built up by
 including variables that are interpolated at regex compilation time.
-Care must be taken to ensure that you are getting what you expect.  For
-example:
+But its best to compile each sub-component.
+
+ my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
+ my $lower = qr/(?[ \p{Lower} + \p{Digit} ])/;
+
+When these are embedded in another pattern, what they match does not
+change, regardless of parenthesization or what modifiers are in effect
+in that outer pattern.  If you fail to compile the subcomponents, you
+can get some nasty surprises.  For example:
 
  my $thai_or_lao = '\p{Thai} + \p{Lao}';
  ...
@@ -1182,10 +1189,10 @@ compiles to
 
  qr/(?[ \p{Digit} & \p{Thai} + \p{Lao} ])/;
 
-But this does not have the effect that someone reading the code would
-likely expect, as the intersection applies just to C<\p{Thai}>,
-excluding the Laotian.  Pitfalls like this can be avoided by
-parenthesizing the component pieces:
+But this does not have the effect that someone reading the source code
+would likely expect, as the intersection applies just to C<\p{Thai}>,
+excluding the Laotian.  Its best to compile the subcomponents, but you
+could also parenthesize the component pieces:
 
  my $thai_or_lao = '( \p{Thai} + \p{Lao} )';
 
@@ -1194,15 +1201,8 @@ But any modifiers will still apply to all the components:
  my $lower = '\p{Lower} + \p{Digit}';
  qr/(?[ \p{Greek} & $lower ])/i;
 
-matches upper case things.  You can avoid surprises by making the
-components into instances of this construct by compiling them:
-
- my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
- my $lower = qr/(?[ \p{Lower} + \p{Digit} ])/;
-
-When these are embedded in another pattern, what they match does not
-change, regardless of parenthesization or what modifiers are in effect
-in that outer pattern.
+matches upper case things.  So just, compile the subcomponents, as
+illustrated above.
 
 Due to the way that Perl parses things, your parentheses and brackets
 may need to be balanced, even including comments.  If you run into any
