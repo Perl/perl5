@@ -107,7 +107,7 @@ EXACTFAA    EXACT,      str	  ; Match this string using /iaa rules (w/len) (stri
 
 # End of important relative ordering.
 
-EXACTFU_SS  EXACT,      str	  ; Match this string using /iu rules (w/len); (string folded iff in UTF-8; non-UTF8 folded length > unfolded).
+EXACTFU_SS  EXACT,      str	  ; Match this string using /iu rules (w/len); (string not UTF-8, only portions guaranteed to be folded; folded length > unfolded).
 EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, folded, and everything in it is above 255.
 EXACTFAA_NO_TRIE  EXACT, str	  ; Match this string using /iaa rules (w/len) (string not UTF-8, not guaranteed to be folded, not currently trie-able).
 

@@ -53,7 +53,7 @@
 #define	EXACTFL               	39	/* 0x27 Match this string using /il rules (w/len); (string not guaranteed to be folded). */
 #define	EXACTFU               	40	/* 0x28 Match this string using /iu rules (w/len); (string folded iff in UTF-8; non-UTF8 folded length <= unfolded). */
 #define	EXACTFAA              	41	/* 0x29 Match this string using /iaa rules (w/len) (string folded iff in UTF-8; non-UTF8 folded length <= unfolded). */
-#define	EXACTFU_SS            	42	/* 0x2a Match this string using /iu rules (w/len); (string folded iff in UTF-8; non-UTF8 folded length > unfolded). */
+#define	EXACTFU_SS            	42	/* 0x2a Match this string using /iu rules (w/len); (string not UTF-8, only portions guaranteed to be folded; folded length > unfolded). */
 #define	EXACTFLU8             	43	/* 0x2b Like EXACTFU, but use /il, UTF-8, folded, and everything in it is above 255. */
 #define	EXACTFAA_NO_TRIE      	44	/* 0x2c Match this string using /iaa rules (w/len) (string not UTF-8, not guaranteed to be folded, not currently trie-able). */
 #define	EXACT_ONLY8           	45	/* 0x2d Like EXACT, but only UTF-8 encoded targets can match */

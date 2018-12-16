@@ -2278,9 +2278,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
     case EXACTFU_SS:
-        if (is_utf8_pat) {
-            utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
-        }
+        assert(! is_utf8_pat);
         goto do_exactf_utf8;
 
     case EXACTFLU8:
@@ -6378,6 +6376,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
+            assert(! is_utf8_pat);
+            /* FALLTHROUGH */
 	case EXACTFU:            /*  /abc/iu      */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -9131,7 +9131,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     I32 hardcount = 0;  /* How many matches so far */
     bool utf8_target = reginfo->is_utf8_target;
     unsigned int to_complement = 0;  /* Invert the result? */
-    UV utf8_flags;
+    UV utf8_flags = 0;
     _char_class_number classnum;
 
     PERL_ARGS_ASSERT_REGREPEAT;
@@ -9277,7 +9277,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     case EXACTF:   /* This node only generated for non-utf8 patterns */
         assert(! reginfo->is_utf8_pat);
-        utf8_flags = 0;
         goto do_exactf;
 
     case EXACTFLU8:
@@ -9296,9 +9295,13 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
         goto do_exactf;
 
-    case EXACTFU_SS:
     case EXACTFU:
-	utf8_flags = reginfo->is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
+	if (reginfo->is_utf8_pat) {
+            utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
+        }
+        /* FALLTHROUGH */
+
+    case EXACTFU_SS:
 
       do_exactf: {
         int c1, c2;

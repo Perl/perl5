@@ -3856,16 +3856,18 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      so that the optimizer doesn't reject these possibilities based on size
  *      constraints.
  * 2)   For the sequence involving the Sharp s (\xDF), the node type EXACTFU_SS
- *      is used for an EXACTFU node that contains at least one "ss" sequence in
- *      it.  For non-UTF-8 patterns and strings, this is the only case where
- *      there is a possible fold length change.  That means that a regular
- *      EXACTFU node without UTF-8 involvement doesn't have to concern itself
- *      with length changes, and so can be processed faster.  regexec.c takes
- *      advantage of this.  Generally, an EXACTFish node that is in UTF-8 is
- *      pre-folded by regcomp.c (except EXACTFL, some of whose folds aren't
- *      known until runtime).  This saves effort in regex matching.  However,
- *      the pre-folding isn't done for non-UTF8 patterns because the fold of
- *      the MICRO SIGN requires UTF-8, and we don't want to slow things down by
+ *      is used in non-UTF-8 patterns for an EXACTFU node that contains at
+ *      least one "ss" sequence in it.  For UTF-8 patterns, the procedures in
+ *      step 1) above are sufficient to handle these, but for non-UTF-8
+ *      patterns and strings, this is the only case where there is a possible
+ *      fold length change.  That means that a regular EXACTFU node without
+ *      UTF-8 involvement doesn't have to concern itself with length changes,
+ *      and so can be processed faster.  regexec.c takes advantage of this.
+ *      Generally, an EXACTFish node that is in UTF-8 is pre-folded by
+ *      regcomp.c (except EXACTFL, some of whose folds aren't known until
+ *      runtime).  This saves effort in regex matching.  However, the
+ *      pre-folding isn't done for non-UTF8 patterns because the fold of the
+ *      MICRO SIGN requires UTF-8, and we don't want to slow things down by
  *      forcing the pattern into UTF8 unless necessary.  Also what EXACTF (and,
  *      again, EXACTFL) nodes fold to isn't known until runtime.  The fold
  *      possibilities for the non-UTF8 patterns are quite simple, except for
@@ -4232,19 +4234,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     continue;
                 }
 
-                /* Nodes with 'ss' require special handling, except for
-                 * EXACTFAA-ish for which there is no multi-char fold to this */
-                if (len == 2 && *s == 's' && *(s+1) == 's'
-                    && OP(scan) != EXACTFAA
-                    && OP(scan) != EXACTFAA_NO_TRIE)
-                {
-                    count = 2;
-                    if (OP(scan) != EXACTFL) {
-                        OP(scan) = EXACTFU_SS;
-                    }
-                    s += 2;
-                }
-                else { /* Here is a generic multi-char fold. */
+                { /* Here is a generic multi-char fold. */
                     U8* multi_end  = s + len;
 
                     /* Count how many characters are in it.  In the case of

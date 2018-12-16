@@ -667,8 +667,8 @@ will be lost.
                              folded length <= unfolded).
 
  EXACTFU_SS       str        Match this string using /iu rules (w/len);
-                             (string folded iff in UTF-8; non-UTF8
-                             folded length > unfolded).
+                             (string not UTF-8, only portions guaranteed
+                             to be folded; folded length > unfolded).
  EXACTFLU8        str        Like EXACTFU, but use /il, UTF-8, folded,
                              and everything in it is above 255.
  EXACTFAA_NO_TRIE str        Match this string using /iaa rules (w/len)
