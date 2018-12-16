@@ -261,6 +261,14 @@ L<[perl #133659]|https://rt.perl.org/Ticket/Display.html?id=133659>.
 
 =item *
 
+A regression in 5.28 caused the following code to fail
+
+ close(STDIN); open(CHILD, "|wc -l")'
+
+because the child's stdin would be closed on exec. This has now been fixed.
+
+=item *
+
 Fixed an issue where compiling a regexp containing both compile-time
 and run-time code blocks could lead to trying to compile something
 which is invalid syntax.
