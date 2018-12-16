@@ -30,7 +30,8 @@ That statement was wrong.  Try to forget you ever saw it.
 =head2 [CVE-2018-18312] Heap-buffer-overflow write in S_regatom (regcomp.c)
 
 A crafted regular expression could cause heap-buffer-overflow write during
-compilation, potentially allowing arbitrary code execution.
+compilation, potentially allowing arbitrary code execution. (This was 
+actually fixed in 5.29.4, but not announced as a security fix at the time).
 
 L<[perl #133423]|https://rt.perl.org/Ticket/Display.html?id=133423>
 
