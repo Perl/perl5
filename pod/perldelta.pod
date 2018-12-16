@@ -109,6 +109,11 @@ L<Test::Simple> has been upgraded from version 1.302140 to 1.302141.
 
 =item *
 
+L<File::Find> has been upgraded from 1.34 to 1.35.
+C<$File::Find::dont_use_nlink> now defaults to 1 on all platforms.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
