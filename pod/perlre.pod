@@ -2051,7 +2051,7 @@ Full syntax: C<< (?(<name>)then|else) >>
 
 Checks whether the pattern matches (or does not match, for the C<"!">
 variants).
-Full syntax: C<< (?(?=lookahead)then|else) >>
+Full syntax: C<< (?(?=I<lookahead>)I<then>|I<else>) >>
 
 =item C<(?{ I<CODE> })>
 
