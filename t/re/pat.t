@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 850;  # Update this when adding/deleting tests.
+plan tests => 851;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -339,6 +339,11 @@ sub run_tests {
         like($@, qr/^\QQuantifier in {,} bigger than/, $message);
         eval "'aaa' =~ /a{1,$::reg_infty_p}/";
         like($@, qr/^\QQuantifier in {,} bigger than/, $message);
+
+        # It should be 'a' x 2147483647, but that exhausts memory on
+        # reasonably sized modern machines
+        like('a' x $::reg_infty_p, qr/a{1,}/,
+             "{1,} matches more times than REG_INFTY");
     }
 
     {

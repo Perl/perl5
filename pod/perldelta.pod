@@ -12,6 +12,19 @@ release.
 If you are upgrading from an earlier release such as 5.29.4, first read
 L<perl5295delta>, which describes differences between 5.29.4 and 5.29.5.
 
+=head1 Core Enhancements
+
+=head2 The upper limit C<"n"> specifiable in a regular expression
+quantifier of the form C<"{m,n}"> has been doubled to 65534
+
+The meaning of an unbounded upper quantifier C<"{m,}"> remains unchanged.
+It matches 2**31 - 1 times on most platforms, and more on ones where a C
+language short variable is more than 4 bytes long.
+
+The text above is what perl5294delta should have said.  Instead it said
+"The maximum number of times a pattern can match has been doubled to 65535"
+That statement was wrong.  Try to forget you ever saw it.
+
 =head1 Security
 
 =head2 [CVE-2018-18312] Heap-buffer-overflow write in S_regatom (regcomp.c)

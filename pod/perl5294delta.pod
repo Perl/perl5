@@ -14,11 +14,12 @@ L<perl5293delta>, which describes differences between 5.29.2 and 5.29.3.
 
 =head1 Core Enhancements
 
-=head2 The maximum number of times a pattern can match has been doubled
-to 65535
+=head2 The upper limit C<"n"> specifiable in a regular expression
+quantifier of the form C<"{m,n}"> has been doubled to 65534
 
-This means if you specify C<qr/a+/> that there can be anywhere from 1
-through 65535 C<"a">'s in a row, instead of 32267 as previously.
+The meaning of an unbounded upper quantifier C<"{m,}"> remains unchanged.
+It matches 2**31 - 1 times on most platforms, and more on ones where a C
+language short variable is more than 4 bytes long.
 
 =head1 Incompatible Changes
 
