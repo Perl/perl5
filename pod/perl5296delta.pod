@@ -1,0 +1,378 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5296delta - what is new for perl v5.29.6
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.29.5 release and the 5.29.6
+release.
+
+If you are upgrading from an earlier release such as 5.29.4, first read
+L<perl5295delta>, which describes differences between 5.29.4 and 5.29.5.
+
+=head1 Security
+
+=head2 [CVE-2018-18312] Heap-buffer-overflow write in S_regatom (regcomp.c)
+
+A crafted regular expression could cause heap-buffer-overflow write during
+compilation, potentially allowing arbitrary code execution. (This was 
+actually fixed in 5.29.4, but not announced as a security fix at the time).
+L<[perl #133423]|https://rt.perl.org/Ticket/Display.html?id=133423>
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Optimization of C<IV> to C<UV> conversions.
+L<[perl #133677]|https://rt.perl.org/Ticket/Display.html?id=133677>.
+
+=item *
+
+Speed up of the integer stringification algorithm by processing
+two digits at a time instead of one.
+L<[perl #133691]|https://rt.perl.org/Ticket/Display.html?id=133691>.
+
+=item *
+
+Improvements based on LGTM analysis and recommendation.
+(L<https://lgtm.com/projects/g/Perl/perl5/alerts/?mode=tree>). 
+L<[perl #133686]|https://rt.perl.org/Ticket/Display.html?id=133686>.
+L<[perl #133699]|https://rt.perl.org/Ticket/Display.html?id=133699>.
+
+=item *
+
+Code optimizations in F<regcomp.c>, F<regcomp.h>, F<regexec.c>.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Config::Perl::V>. has been upgraded from version 0.30 to 0.32. This was due
+to a new configuration variable that has influence on binary compatibility:
+C<USE_THREAD_SAFE_LOCALE>.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.39 to 3.40.
+C<OUTLIST> parameters are no longer incorrectly included in the
+automatically generated function prototype.
+L<[perl #133654]|https://rt.perl.org/Ticket/Display.html?id=133654>.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.34 to 1.35.
+C<$File::Find::dont_use_nlink> now defaults to 1 on all
+platforms.
+L<[perl #133673]|https://rt.perl.org/Ticket/Display.html?id=133673>.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20181120 to 5.20181218.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.85 to 1.86.
+
+=item *
+
+L<Storable> has been upgraded from version 3.13 to 3.14.
+
+Storable no longer probes for recursion limits at build time.
+L<[perl #133708]|https://rt.perl.org/Ticket/Display.html?id=133708>
+and others.
+
+Metasploit exploit code was included to test for CVE-2015-1992
+detection, this caused anti-virus detections on at least one AV suite.
+The exploit code has been removed and replaced with a simple
+functional test.
+L<[perl #133706]|https://rt.perl.org/Ticket/Display.html?id=133706>
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302140 to 1.302141.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.58 to 1.59.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Clarification of behaviour of C<reset EXPR>.
+
+=back
+
+=head3 L<perlreref>
+
+=over 4
+
+=item *
+
+Clarification of the syntax of /(?(cond)yes)/.
+
+=back
+
+=head3 L<perlop>
+
+=over
+
+=item *
+
+We no longer have null (empty line) here doc terminators, so 
+L<perlop> should not refer to them.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+Under C<< -Dr >> (or C<< use re 'Debug' >>) the compiled regex engine
+program is displayed. It used two different spellings for I<< infinity >>,
+C<< INFINITY >>, and C<< INFTY >>. It now uses the latter exclusively,
+as that spelling has been around the longest.
+
+=back
+
+=head1 Utility Changes
+
+=head2 L<xsubpp>
+
+=over 4
+
+=item *
+
+The generated prototype (with C<< PROTOTYPES: ENABLE >>) would include
+C<< OUTLIST >> parameters, but these aren't arguments to the perl function.
+This has been rectified.
+L<[perl #133654]|https://rt.perl.org/Ticket/Display.html?id=133654>.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+Some tests in F<< t/io/eintr.t >> caused the process to hang on
+pre-16 Darwin. These tests are skipped for those version of Darwin.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Cygwin
+
+Cygwin doesn't make C<< cuserid >> visible.
+
+=item Win32 Mingw
+
+C99 math functions are now available.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Two new regnodes have been introduced C<< EXACT_ONLY8 >>, and
+C<< EXACTFU_ONLY8 >>. They're equivalent to C<< EXACT >> and C<< EXACTFU >>,
+except that they contain a code point which requires UTF-8 to
+represent/match. Hence, if the target string isn't UTF-8, we know
+it can't possibly match, without needing to try.
+
+=item *
+
+C<< print_bytes_for_locale() >> is now defined if C<< DEBUGGING >>,
+Prior, it didn't get defined unless C<< LC_COLLATE >> was defined
+on the platform.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+If an in-place edit is still in progress during global destruction and
+the process exit code (as stored in C<$?>) is zero, perl will now
+treat the in-place edit as successful, replacing the input file with
+any output produced.
+
+This allows code like:
+
+  perl -i -ne 'print "Foo"; last'
+
+to replace the input file, while code like:
+
+  perl -i -ne 'print "Foo"; die'
+
+will not.  Partly resolves
+L<[perl #133659]|https://rt.perl.org/Ticket/Display.html?id=133659>.
+
+=item *
+
+A regression in 5.28 caused the following code to fail
+
+ close(STDIN); open(CHILD, "|wc -l")'
+
+because the child's stdin would be closed on exec. This has now been fixed.
+
+=item *
+
+Fixed an issue where compiling a regexp containing both compile-time
+and run-time code blocks could lead to trying to compile something
+which is invalid syntax.
+
+=item *
+
+Fixed build failures with C<< -DNO_LOCALE_NUMERIC >> and
+C<< -DNO_LOCALE_COLLATE >>.
+L<[perl #133696]|https://rt.perl.org/Ticket/Display.html?id=133696>.
+
+=item *
+
+Prevent the tests in F<< ext/B/t/strict.t >> from being skipped.
+L<[perl #133713]|https://rt.perl.org/Ticket/Display.html?id=133713>.
+
+=item *
+
+C<< /di >> nodes ending or beginning in I<s> are now C<< EXACTF >>. We do not
+want two C<< EXACTFU >> to be joined together during optimization,
+and to form a C<< ss >>, C<< sS >>, C<< Ss >> or C<< SS >> sequence;
+they are the only multi-character sequences which may match differently
+under C<< /ui >> and C<< /di >>. 
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+The upper limit C<"n"> specifiable in a regular expression
+quantifier of the form C<"{m,n}"> has been doubled to 65534.
+
+The meaning of an unbounded upper quantifier C<"{m,}"> remains unchanged.
+It matches 2**31 - 1 times on most platforms, and more on ones where a C
+language short variable is more than 4 bytes long.
+
+The text above is what perl5294delta should have said.  Instead it said
+"The maximum number of times a pattern can match has been doubled to 65535"
+That statement was wrong.  Try to forget you ever saw it.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.29.6 represents approximately 4 weeks of development since Perl
+5.29.5 and contains approximately 5,000 lines of changes across 230 files
+from 19 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 2,600 lines of changes to 150 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.29.6:
+
+Aaron Crane, Abigail, Dagfinn Ilmari Mannsåker, David Mitchell, Dominic
+Hargreaves, E. Choroba, Eugen Konkov, H.Merijn Brand, James E Keenan, Jerry
+D. Hedden, Karen Etheridge, Karl Williamson, Leon Timmermans, Niko Tyni,
+Petr Písař, Sisyphus, Steve Hay, Tomasz Konojacki, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
