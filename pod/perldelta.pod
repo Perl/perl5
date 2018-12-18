@@ -66,13 +66,15 @@ C<USE_THREAD_SAFE_LOCALE>.
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.39 to 3.40.
 C<OUTLIST> parameters are no longer incorrectly included in the
-automatically generated function prototype.  [perl #133654]
+automatically generated function prototype.
+L<[perl #133654]|https://rt.perl.org/Ticket/Display.html?id=133654>.
 
 =item *
 
 L<File::Find> has been upgraded from version 1.34 to 1.35.
 C<$File::Find::dont_use_nlink> now defaults to 1 on all
-platforms. [perl #133673]
+platforms.
+L<[perl #133673]|https://rt.perl.org/Ticket/Display.html?id=133673>.
 
 =item *
 
@@ -86,13 +88,15 @@ L<POSIX> has been upgraded from version 1.85 to 1.86.
 
 L<Storable> has been upgraded from version 3.13 to 3.14.
 
-Storable no longer probes for recursion limits at build time.  [perl
-#133708] and others.
+Storable no longer probes for recursion limits at build time.
+L<[perl #133708]|https://rt.perl.org/Ticket/Display.html?id=133708>
+and others.
 
 Metasploit exploit code was included to test for CVE-2015-1992
 detection, this caused anti-virus detections on at least one AV suite.
 The exploit code has been removed and replaced with a simple
-functional test.  [perl #133706]
+functional test.
+L<[perl #133706]|https://rt.perl.org/Ticket/Display.html?id=133706>
 
 =item *
 
