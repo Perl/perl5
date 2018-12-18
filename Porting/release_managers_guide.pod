@@ -1011,7 +1011,7 @@ which is why you should test from the tarball.
 
 =head4 Run the Installation Verification Procedure utility
 
-    $ ./perl utils/perlivp
+    $ ./perl ./perlivp
     ...
     All tests successful.
     $
