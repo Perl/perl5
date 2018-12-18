@@ -655,9 +655,9 @@ the strings?).
  Sawyer X  5.29.0       2018-Jun-26     The 5.29 development track
  Steve     5.29.1       2018-Jul-20
  BinGOs    5.29.2       2018-Aug-20
- John      5.29.3       2019-Sep-20
- Aaron     5.29.4       2019-Oct-20
- Ether     5.29.5       2019-Nov-20
+ John      5.29.3       2018-Sep-20
+ Aaron     5.29.4       2018-Oct-20
+ Ether     5.29.5       2018-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
