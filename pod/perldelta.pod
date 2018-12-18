@@ -19,7 +19,6 @@ L<perl5295delta>, which describes differences between 5.29.4 and 5.29.5.
 A crafted regular expression could cause heap-buffer-overflow write during
 compilation, potentially allowing arbitrary code execution. (This was 
 actually fixed in 5.29.4, but not announced as a security fix at the time).
-
 L<[perl #133423]|https://rt.perl.org/Ticket/Display.html?id=133423>
 
 =head1 Performance Enhancements
