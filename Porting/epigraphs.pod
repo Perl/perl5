@@ -17,6 +17,50 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.6 - Rudyard Kipling: "How the Camel Got His Hump"
+
+L<Announced on 2018-12-18 by Abigail|https://www.nntp.perl.org/group/perl.perl5.porters/2018/12/msg253187.html>
+
+  The Camel's hump is an ugly lump
+    Which well you may see at the Zoo;
+  But uglier yet is the hump we get
+    From having little to do.
+
+  Kiddies and grown-ups too-oo-oo
+  If we haven't enough to do-oo-oo,
+        We get the hump -
+        Cameelious hump -
+  The hump that is black and blue!
+
+  We climb out of bed with a frouzly head
+    And a snarly-yarly voice.
+  We shiver and scowl and we grunt and we growl
+    At our bath and our boots and our toys;
+
+  And there ought to be a corner for me
+  (And I know there is one for you)
+        When we get the hump -
+        Cameelious hump -
+  The hump that is black and blue!
+
+  The cure for this ill is to not sit still,
+    Or frowst with a book by the fire;
+  But to take a large hoe and a shovel also,
+    And dig till you gentle perspire;
+
+  And then you will find that the sun and the wind,
+  And the Djinn of the Garden too,
+        Have lifted the hump -
+        The horrible hump -
+  The hump that is black and blue!
+
+  I get it as well as you-oo-oo -
+  If I haven't enough to do-oo-oo!
+        We all get hump -
+        Cameelious hump -
+  Kiddies and grown-ups too!
+
+
 =head2 v5.29.5 - T. S. Eliot, "The Naming Of Cats"
 
 L<Announced on 2018-11-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2018/11/msg252839.html>
