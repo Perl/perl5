@@ -2653,7 +2653,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     switch (flags) {
         case EXACT: case EXACT_ONLY8: case EXACTL: break;
 	case EXACTFAA:
-        case EXACTFU_SS:
+        case EXACTFUP:
 	case EXACTFU:
 	case EXACTFLU8: folder = PL_fold_latin1; break;
 	case EXACTF:  folder = PL_fold; break;
@@ -2744,7 +2744,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             && (    OP(noper) == flags
                 || (flags == EXACT && OP(noper) == EXACT_ONLY8)
                 || (flags == EXACTFU && (   OP(noper) == EXACTFU_ONLY8
-                                         || OP(noper) == EXACTFU_SS))) )
+                                         || OP(noper) == EXACTFUP))))
         {
             uc= (U8*)STRING(noper);
             e= uc + STR_LEN(noper);
@@ -2757,7 +2757,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         if ( set_bit ) { /* bitmap only alloced when !(UTF&&Folding) */
             TRIE_BITMAP_SET(trie,*uc); /* store the raw first byte
                                           regardless of encoding */
-            if (OP( noper ) == EXACTFU_SS) {
+            if (OP( noper ) == EXACTFUP) {
                 /* false positives are ok, so just set this */
                 TRIE_BITMAP_SET(trie, LATIN_SMALL_LETTER_SHARP_S);
             }
@@ -2962,7 +2962,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 && (    OP(noper) == flags
                     || (flags == EXACT && OP(noper) == EXACT_ONLY8)
                     || (flags == EXACTFU && (   OP(noper) == EXACTFU_ONLY8
-                                             || OP(noper) == EXACTFU_SS))) )
+                                             || OP(noper) == EXACTFUP))))
             {
                 const U8 *uc= (U8*)STRING(noper);
                 const U8 *e= uc + STR_LEN(noper);
@@ -3187,7 +3187,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 && (    OP(noper) == flags
                     || (flags == EXACT && OP(noper) == EXACT_ONLY8)
                     || (flags == EXACTFU && (   OP(noper) == EXACTFU_ONLY8
-                                             || OP(noper) == EXACTFU_SS))) )
+                                             || OP(noper) == EXACTFUP))))
             {
                 const U8 *uc= (U8*)STRING(noper);
                 const U8 *e= uc + STR_LEN(noper);
@@ -3839,7 +3839,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  * Both sides fold to "sss", but if the pattern is parsed to create a node that
  * would match just the \xDF, it won't be able to handle the case where a
  * successful match would have to cross the node's boundary.  The new approach
- * that hopefully generally solves the problem generates an EXACTFU_SS node
+ * that hopefully generally solves the problem generates an EXACTFUP node
  * that is "sss" in this case.
  *
  * It turns out that there are problems with all multi-character folds, and not
@@ -3855,28 +3855,46 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      adjust the min length of the match, and the delta between min and max,
  *      so that the optimizer doesn't reject these possibilities based on size
  *      constraints.
- * 2)   For the sequence involving the Sharp s (\xDF), the node type EXACTFU_SS
- *      is used in non-UTF-8 patterns for an EXACTFU node that contains at
- *      least one "ss" sequence in it.  For UTF-8 patterns, the procedures in
- *      step 1) above are sufficient to handle these, but for non-UTF-8
- *      patterns and strings, this is the only case where there is a possible
- *      fold length change.  That means that a regular EXACTFU node without
- *      UTF-8 involvement doesn't have to concern itself with length changes,
- *      and so can be processed faster.  regexec.c takes advantage of this.
- *      Generally, an EXACTFish node that is in UTF-8 is pre-folded by
- *      regcomp.c (except EXACTFL, some of whose folds aren't known until
- *      runtime).  This saves effort in regex matching.  However, the
- *      pre-folding isn't done for non-UTF8 patterns because the fold of the
- *      MICRO SIGN requires UTF-8, and we don't want to slow things down by
- *      forcing the pattern into UTF8 unless necessary.  Also what EXACTF (and,
- *      again, EXACTFL) nodes fold to isn't known until runtime.  The fold
- *      possibilities for the non-UTF8 patterns are quite simple, except for
- *      the sharp s.  All the ones that don't involve a UTF-8 target string are
- *      members of a fold-pair, and arrays are set up for all of them so that
- *      the other member of the pair can be found quickly.  Code elsewhere in
- *      this file makes sure that in EXACTFU nodes, the sharp s gets folded to
- *      'ss', even if the pattern isn't UTF-8.  This avoids the issues
- *      described in the next item.
+ *
+ * 2)   For the sequence involving the LATIN SMALL LETTER SHARP S (U+00DF)
+ *      under /u, we fold it to 'ss' in regatom(), and in this routine, after
+ *      joining, we scan for occurrences of the sequence 'ss' in non-UTF-8
+ *      EXACTFU nodes.  The node type of such nodes is then changed to
+ *      EXACTFUP, indicating it is problematic, and needs careful handling.
+ *      (The procedures in step 1) above are sufficient to handle this case in
+ *      UTF-8 encoded nodes.)  The reason this is problematic is that this is
+ *      the only case where there is a possible fold length change in non-UTF-8
+ *      patterns.  By reserving a special node type for problematic cases, the
+ *      far more common regular EXACTFU nodes can be processed faster.
+ *      regexec.c takes advantage of this.
+ *
+ *      EXACTFUP has been created as a grab-bag for (hopefully uncommon)
+ *      problematic cases.   These all only occur when the pattern is not
+ *      UTF-8.  In addition to the 'ss' sequence where there is a possible fold
+ *      length change, it handles the situation where the string cannot be
+ *      entirely folded.  The strings in an EXACTFish node are folded as much
+ *      as possible during compilation in regcomp.c.  This saves effort in
+ *      regex matching.  By using an EXACTFUP node when it is not possible to
+ *      fully fold at compile time, regexec.c can know that everything in an
+ *      EXACTFU node is folded, so folding can be skipped at runtime.  The only
+ *      case where folding in EXACTFU nodes can't be done at compile time is
+ *      the presumably uncommon MICRO SIGN, when the pattern isn't UTF-8.  This
+ *      is because its fold requires UTF-8 to represent.  Thus EXACTFUP nodes
+ *      handle two very different cases.  Alternatively, there could have been
+ *      a node type where there are length changes, one for unfolded, and one
+ *      for both.  If yet another special case needed to be created, the number
+ *      of required node types would have to go to 7.  khw figures that even
+ *      though there are plenty of node types to spare, that the maintenance
+ *      cost wasn't worth the small speedup of doing it that way, especially
+ *      since he thinks the MICRO SIGN is rarely encountered in practice.
+ *
+ *      There are other cases where folding isn't done at compile time, but
+ *      none of them are under /u, and hence not for EXACTFU nodes.  The folds
+ *      in EXACTFL nodes aren't known until runtime, and vary as the locale
+ *      changes.  Some folds in EXACTF depend on if the runtime target string
+ *      is UTF-8 or not.  (regatom() will create an EXACTFU node even under /di
+ *      when no fold in it depends on the UTF-8ness of the target string.)
+ *
  * 3)   A problem remains for unfolded multi-char folds. (These occur when the
  *      validity of the fold won't be known until runtime, and so must remain
  *      unfolded for now.  This happens for the sharp s in EXACTF and EXACTFAA
@@ -4334,7 +4352,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                      * which we don't know until runtime.  EXACTFL nodes can't
                      * transform into EXACTFU nodes */
                     if (OP(scan) != EXACTF && OP(scan) != EXACTFL) {
-                        OP(scan) = EXACTFU_SS;
+                        OP(scan) = EXACTFUP;
                     }
 		}
 
@@ -4801,7 +4819,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 EXACT_ONLY8     | EXACT
                                 EXACTFU         | EXACTFU
                                 EXACTFU_ONLY8   | EXACTFU
-                                EXACTFU_SS      | EXACTFU
+                                EXACTFUP        | EXACTFU
                                 EXACTFAA        | EXACTFAA
                                 EXACTL          | EXACTL
                                 EXACTFLU8       | EXACTFLU8
@@ -4814,7 +4832,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                          ? EXACT                                            \
                          : (     EXACTFU == (X)                             \
                               || EXACTFU_ONLY8 == (X)                       \
-                              || EXACTFU_SS == (X) )                        \
+                              || EXACTFUP == (X) )                          \
                            ? EXACTFU                                        \
                            : ( EXACTFAA == (X) )                            \
                              ? EXACTFAA                                     \
@@ -14710,6 +14728,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
 
                     if (node_type == EXACTFU) {
+
+                        /* Because the MICRO SIGN folds to something
+                         * representable only in UTF-8, we use a special node
+                         * when we aren't in UTF-8, so can't represent that
+                         * fold */
                         if (UNLIKELY(has_micro_sign)) {
 
                             /* The micro sign is the only below 256 character
@@ -19497,7 +19520,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
                 case EXACTFU:
                 case EXACTFU_ONLY8:
                 case EXACTFLU8:
-                case EXACTFU_SS:
+                case EXACTFUP:
                 case EXACTFL:
                         if( exact == PSEUDO )
                             exact= OP(REGNODE_p(scan));

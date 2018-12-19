@@ -666,9 +666,6 @@ will be lost.
                              (string folded iff in UTF-8; non-UTF8
                              folded length <= unfolded).
 
- EXACTFU_SS       str        Match this string using /iu rules (w/len);
-                             (string not UTF-8, only portions guaranteed
-                             to be folded; folded length > unfolded).
  EXACTFUP         str        Match this string using /iu rules (w/len);
                              (string not UTF-8, not guaranteed to be
                              folded; and its Problematic).
