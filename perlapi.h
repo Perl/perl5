@@ -117,8 +117,8 @@ END_EXTERN_C
 #define PL_LB_invlist		(*Perl_GLB_invlist_ptr(NULL))
 #undef  PL_Latin1
 #define PL_Latin1		(*Perl_GLatin1_ptr(NULL))
-#undef  PL_NonL1NonFinalFold
-#define PL_NonL1NonFinalFold	(*Perl_GNonL1NonFinalFold_ptr(NULL))
+#undef  PL_NonFinalFold
+#define PL_NonFinalFold		(*Perl_GNonFinalFold_ptr(NULL))
 #undef  PL_Posix_ptrs
 #define PL_Posix_ptrs		(*Perl_GPosix_ptrs_ptr(NULL))
 #undef  PL_SB_invlist

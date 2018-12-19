@@ -279,7 +279,7 @@ PERLVAR(G, HasMultiCharFold,   SV *)
 PERLVAR(G, InMultiCharFold,   SV *)
 PERLVAR(G, Latin1,	SV *)
 PERLVAR(G, LB_invlist, SV *)
-PERLVAR(G, NonL1NonFinalFold,   SV *)
+PERLVAR(G, NonFinalFold,   SV *)
 PERLVAR(G, SB_invlist, SV *)
 PERLVAR(G, SCX_invlist, SV *)
 PERLVAR(G, UpperLatin1,	SV *)   /* Code points 128 - 255 */

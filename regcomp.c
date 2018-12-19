@@ -14563,7 +14563,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             }
                         }
                         else if (! _invlist_contains_cp(
-                                        PL_NonL1NonFinalFold,
+                                        PL_NonFinalFold,
                                         valid_utf8_to_uvchr((U8 *) s, NULL)))
                         {
                             break;
@@ -21639,8 +21639,7 @@ Perl_init_uniprops(pTHX)
     PL_HasMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
                                             UNI__PERL_FOLDS_TO_MULTI_CHAR]);
     PL_InMultiCharFold = _new_invlist_C_array(UNI__PERL_IS_IN_MULTI_CHAR_FOLD_invlist);
-    PL_NonL1NonFinalFold = _new_invlist_C_array(
-                                            UNI__PERL_NON_FINAL_FOLDS_invlist);
+    PL_NonFinalFold = _new_invlist_C_array(UNI__PERL_NON_FINAL_FOLDS_invlist);
 
     PL_utf8_toupper = _new_invlist_C_array(Uppercase_Mapping_invlist);
     PL_utf8_tolower = _new_invlist_C_array(Lowercase_Mapping_invlist);
