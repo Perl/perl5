@@ -5471,7 +5471,13 @@ L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *                          that effect.  However, if the caller knows what
  *                          it's doing, it can pass this flag to indicate that,
  *                          and the assertion is skipped.
- *  FOLDEQ_S2_ALREADY_FOLDED  Similarly.
+ *  FOLDEQ_S2_ALREADY_FOLDED  Similar to FOLDEQ_S1_ALREADY_FOLDED, but applies
+ *                          to s2, and s2 doesn't have to be UTF-8 encoded.
+ *                          This introduces an asymmetry to save a few branches
+ *                          in a loop.  Currently, this is not a problem, as
+ *                          never are both inputs pre-folded.  Simply call this
+ *                          function with the pre-folded one as the second
+ *                          string.
  *  FOLDEQ_S2_FOLDS_SANE
  */
 I32
@@ -5605,9 +5611,23 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
 
         if (n2 == 0) {    /* Same for s2 */
 	    if (flags & FOLDEQ_S2_ALREADY_FOLDED) {
-		f2 = (U8 *) p2;
-                assert(u2);
-		n2 = UTF8SKIP(f2);
+
+                /* Point to the already-folded character.  But for non-UTF-8
+                 * variants, convert to UTF-8 for the algorithm below */
+		if (UTF8_IS_INVARIANT(*p2)) {
+                    f2 = (U8 *) p2;
+                    n2 = 1;
+                }
+                else if (u2) {
+                    f2 = (U8 *) p2;
+                    n2 = UTF8SKIP(f2);
+                }
+                else {
+                    foldbuf2[0] = UTF8_EIGHT_BIT_HI(*p2);
+                    foldbuf2[1] = UTF8_EIGHT_BIT_LO(*p2);
+                    f2 = foldbuf2;
+                    n2 = 2;
+                }
 	    }
 	    else {
                 if (isASCII(*p2) && ! (flags & FOLDEQ_LOCALE)) {
