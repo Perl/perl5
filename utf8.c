@@ -4059,7 +4059,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
      * works. */
 
     *lenp = 2 * sizeof(LATIN_SMALL_LETTER_LONG_S_UTF8) - 2;
-    Copy(LATIN_SMALL_LETTER_LONG_S_UTF8 LATIN_SMALL_LETTER_LONG_S_UTF8,
+    Copy(LATIN_SMALL_LETTER_LONG_S_UTF8   LATIN_SMALL_LETTER_LONG_S_UTF8,
         ustrp, *lenp, U8);
     return LATIN_SMALL_LETTER_LONG_S;
 
@@ -5494,11 +5494,11 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
 
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
-    assert( ! ((flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_LOCALE))
-               && (((flags & FOLDEQ_S1_ALREADY_FOLDED)
-                     && !(flags & FOLDEQ_S1_FOLDS_SANE))
-                   || ((flags & FOLDEQ_S2_ALREADY_FOLDED)
-                       && !(flags & FOLDEQ_S2_FOLDS_SANE)))));
+    assert( ! (             (flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_LOCALE))
+               && ((        (flags &  FOLDEQ_S1_ALREADY_FOLDED)
+                        && !(flags &  FOLDEQ_S1_FOLDS_SANE))
+                    || (    (flags &  FOLDEQ_S2_ALREADY_FOLDED)
+                        && !(flags &  FOLDEQ_S2_FOLDS_SANE)))));
     /* The algorithm is to trial the folds without regard to the flags on
      * the first line of the above assert(), and then see if the result
      * violates them.  This means that the inputs can't be pre-folded to a
