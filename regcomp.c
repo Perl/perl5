@@ -14403,7 +14403,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         goto loopdone;
                     }
 
-                    if (UTF) {  /* For UTF-8, we add the folded value */
+                    if (UTF) {  /* Use the folded value */
                         if (UVCHR_IS_INVARIANT(ender)) {
                             *(s)++ = (U8) toFOLD(ender);
                         }
