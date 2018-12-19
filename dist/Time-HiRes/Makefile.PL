@@ -919,7 +919,8 @@ EOM
     }
 
     # we need both of these to fully replicate perl's utime
-    my $has_hires_utime = ($has_futimens && ($has_utimensat || $has_utimes));
+    # d_futimes is available since perl itself supported handles passed to utime()
+    my $has_hires_utime = (($has_futimens || $Config{d_futimes}) && ($has_utimensat || $has_utimes));
     if ($has_hires_utime) {
 	$DEFINE .= ' -DTIME_HIRES_UTIME';
         print "You seem to have subsecond timestamp setting.\n";
@@ -1088,9 +1089,7 @@ sub doConstants {
                     next;
                 }
 	    } elsif ($macro =~ /^(d_hires_utime)$/) {
-		my $d_hires_utime =
-		    ($DEFINE =~ /-DHAS_FUTIMENS/ ||
-		     $DEFINE =~ /-DHAS_UTIMENSAT/);
+		my $d_hires_utime = $DEFINE =~ /-DTIME_HIRES_UTIME\b/ ? 1 : 0;
 		push @names, {name => $_, macro => "TIME_HIRES_UTIME", value => $d_hires_utime,
 			      default => ["IV", "0"]};
 		next;

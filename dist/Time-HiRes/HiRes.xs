@@ -1464,7 +1464,7 @@ PROTOTYPE: $$@
 			if (fd < 0) {
 				SETERRNO(EBADF,RMS_IFI);
 	                } else {
-#ifdef HAS_FUTIMENS
+#if defined(HAS_FUTIMENS)
                           if (FUTIMENS_AVAILABLE) {
                             if (futimens(fd, utbufp) == 0) {
                               tot++;
@@ -1472,6 +1472,15 @@ PROTOTYPE: $$@
                           } else {
                             croak("futimens unimplemented in this platform");
                           }
+#elif defined(HAS_FUTIMES) /* perl itself probes for this */
+			  struct timeval tv[2];
+			  tv[0].tv_sec  = utbuf[0].tv_sec;
+			  tv[0].tv_usec = utbuf[0].tv_nsec / 1000;
+			  tv[1].tv_sec  = utbuf[1].tv_sec;
+			  tv[1].tv_usec = utbuf[1].tv_nsec / 1000;
+			  if (futimes(fd, tv) == 0) {
+			    tot++;
+			  }
 #else  /* HAS_FUTIMENS */
 			  croak("futimens unimplemented in this platform");
 #endif /* HAS_FUTIMENS */
