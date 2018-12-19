@@ -3802,7 +3802,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  * require special handling.  The joining is only done if:
  * 1) there is room in the current conglomerated node to entirely contain the
  *    next one.
- * 2) they are the exact same node type
+ * 2) they are compatible node types
  *
  * The adjacent nodes actually may be separated by NOTHING-kind nodes, and
  * these get optimized out
