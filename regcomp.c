@@ -13049,7 +13049,7 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                                                cases, avoiding the
                                                _invlist_contains_cp() overhead
                                                for those.  */
-                    && ! _invlist_contains_cp(PL_utf8_foldable, code_point))
+                    && ! _invlist_contains_cp(PL_in_some_fold, code_point))
                 {
                     OP(REGNODE_p(node)) = (LOC)
                                ? EXACTL
@@ -14345,7 +14345,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 else /* regular fold; see if actually is in a fold */
                      if (   (ender < 256 && ! IS_IN_SOME_FOLD_L1(ender))
                          || (ender > 255
-                            && ! _invlist_contains_cp(PL_utf8_foldable, ender)))
+                            && ! _invlist_contains_cp(PL_in_some_fold, ender)))
                 {
                     /* Here, folding, but the character isn't in a fold.
                      *
@@ -17979,7 +17979,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * be checked.  Get the intersection of this class and all the
              * possible characters that are foldable.  This can quickly narrow
              * down a large class */
-            _invlist_intersection(PL_utf8_foldable, cp_foldable_list,
+            _invlist_intersection(PL_in_some_fold, cp_foldable_list,
                                   &fold_intersection);
 
             /* Now look at the foldable characters in this class individually */
@@ -18408,7 +18408,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             }
                         }
                         else {
-                            if (_invlist_contains_cp(PL_utf8_foldable, value)) {
+                            if (_invlist_contains_cp(PL_in_some_fold, value)) {
                                 op = EXACT;
                             }
                         }
@@ -21618,7 +21618,7 @@ Perl_init_uniprops(pTHX)
     PL_utf8_charname_begin = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_CHARNAME_BEGIN]);
     PL_utf8_charname_continue = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_CHARNAME_CONTINUE]);
 
-    PL_utf8_foldable = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_ANY_FOLDS]);
+    PL_in_some_fold = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_ANY_FOLDS]);
     PL_HasMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
                                             UNI__PERL_FOLDS_TO_MULTI_CHAR]);
     PL_InMultiCharFold = _new_invlist_C_array(_Perl_Is_In_Multi_Char_Fold_invlist);
