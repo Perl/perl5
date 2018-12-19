@@ -465,6 +465,34 @@ Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 
 #endif
 
+PERL_STATIC_INLINE I32
+S_foldEQ_latin1_s2_folded(const char *s1, const char *s2, I32 len)
+{
+    /* Compare non-UTF-8 using Unicode (Latin1) semantics.  s2 must already be
+     * folded.  Works on all folds representable without UTF-8, except for
+     * LATIN_SMALL_LETTER_SHARP_S, and does not check for this.  Nor does it
+     * check that the strings each have at least 'len' characters.
+     *
+     * There is almost an identical API function where s2 need not be folded:
+     * Perl_foldEQ_latin1() */
+
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
+
+    PERL_ARGS_ASSERT_FOLDEQ_LATIN1_S2_FOLDED;
+
+    assert(len >= 0);
+
+    while (len--) {
+        assert(! isUPPER_L1(*b));
+        if (toLOWER_L1(*a) != *b) {
+            return 0;
+        }
+        a++, b++;
+    }
+    return 1;
+}
+
 STATIC bool
 S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
 {
