@@ -6363,8 +6363,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (! utf8_target) {
                 sayNO;
             }
-            fold_utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S1_ALREADY_FOLDED
-                                             | FOLDEQ_S1_FOLDS_SANE;
+            fold_utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S2_ALREADY_FOLDED
+                                             | FOLDEQ_S2_FOLDS_SANE;
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    goto do_exactf;
@@ -6374,14 +6374,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sayNO;
             }
 	    assert(is_utf8_pat);
-	    fold_utf8_flags = FOLDEQ_S1_ALREADY_FOLDED;
+	    fold_utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
 	case EXACTFU:            /*  /abc/iu      */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
-	    fold_utf8_flags = is_utf8_pat ? FOLDEQ_S1_ALREADY_FOLDED : 0;
+	    fold_utf8_flags = is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 	    goto do_exactf;
 
         case EXACTFAA_NO_TRIE:   /* This node only generated for non-utf8
@@ -6415,8 +6415,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		const char * const l = locinput;
 		char *e = reginfo->strend;
 
-		if (! foldEQ_utf8_flags(s, 0,  ln, is_utf8_pat,
-			                l, &e, 0,  utf8_target, fold_utf8_flags))
+		if (! foldEQ_utf8_flags(l, &e, 0,  utf8_target,
+                                        s, 0,  ln, is_utf8_pat,fold_utf8_flags))
 		{
 		    sayNO;
 		}
@@ -6433,7 +6433,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 	    if (reginfo->strend - locinput < ln)
 		sayNO;
-	    if (ln > 1 && ! folder(s, locinput, ln))
+	    if (ln > 1 && ! folder(locinput, s, ln))
 		sayNO;
 	    locinput += ln;
 	    break;
@@ -7129,7 +7129,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		sayNO;
 	    if (ln > 1 && (type == REF
 			   ? memNE(s, locinput, ln)
-			   : ! folder(s, locinput, ln)))
+			   : ! folder(locinput, s, ln)))
 		sayNO;
 	    locinput += ln;
 	    break;
