@@ -10535,12 +10535,29 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
      * identical.  The final argument, if TRUE, says to take the complement of
      * the second inversion list before doing the comparison */
 
-    const UV* array_a = invlist_array(a);
-    const UV* array_b = invlist_array(b);
-    UV len_a = _invlist_len(a);
+    const UV len_a = _invlist_len(a);
     UV len_b = _invlist_len(b);
 
+    const UV* array_a = NULL;
+    const UV* array_b = NULL;
+
     PERL_ARGS_ASSERT__INVLISTEQ;
+
+    /* This code avoids accessing the arrays unless it knows the length is
+     * non-zero */
+
+    if (len_a == 0) {
+        if (len_b == 0) {
+            return ! complement_b;
+        }
+    }
+    else {
+        array_a = invlist_array(a);
+    }
+
+    if (len_b != 0) {
+        array_b = invlist_array(b);
+    }
 
     /* If are to compare 'a' with the complement of b, set it
      * up so are looking at b's complement. */
@@ -10551,7 +10568,7 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
         if (len_b == 0) {
             return (len_a == 1 && array_a[0] == 0);
         }
-        else if (array_b[0] == 0) {
+        if (array_b[0] == 0) {
 
             /* Otherwise, to complement, we invert.  Here, the first element is
              * 0, just remove it.  To do this, we just pretend the array starts
