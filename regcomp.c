@@ -18008,7 +18008,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 *use_list = add_cp_to_invlist(*use_list,
                                                             PL_fold_latin1[j]);
                             }
-                            else {
+                            else if (j != PL_fold_latin1[j]) {
                                 has_upper_latin1_only_utf8_matches
                                     = add_cp_to_invlist(
                                             has_upper_latin1_only_utf8_matches,
