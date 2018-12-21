@@ -16713,7 +16713,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     /* inversion list of code points this node matches only when the target
      * string is in UTF-8.  These are all non-ASCII, < 256.  (Because is under
      * /d) */
-    SV* has_upper_latin1_only_utf8_matches = NULL;
+    SV* upper_latin1_only_utf8_matches = NULL;
 
     /* Inversion list of code points this node matches regardless of things
      * like locale, folding, utf8ness of the target string */
@@ -18026,10 +18026,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                             PL_fold_latin1[j]);
                             }
                             else if (j != PL_fold_latin1[j]) {
-                                has_upper_latin1_only_utf8_matches
-                                    = add_cp_to_invlist(
-                                            has_upper_latin1_only_utf8_matches,
-                                            PL_fold_latin1[j]);
+                                upper_latin1_only_utf8_matches
+                                        = add_cp_to_invlist(
+                                                upper_latin1_only_utf8_matches,
+                                                PL_fold_latin1[j]);
                             }
                         }
 
@@ -18088,10 +18088,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         else {
                             /* Similarly folds involving non-ascii Latin1
                              * characters under /d are added to their list */
-                            has_upper_latin1_only_utf8_matches
-                                = add_cp_to_invlist(
-                                            has_upper_latin1_only_utf8_matches,
-                                            c);
+                            upper_latin1_only_utf8_matches
+                                    = add_cp_to_invlist(
+                                                upper_latin1_only_utf8_matches,
+                                                c);
                         }
                     }
                 }
@@ -18171,12 +18171,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 /* Likewise for anything else in the range that matched only
                  * under UTF-8 */
-                if (has_upper_latin1_only_utf8_matches) {
+                if (upper_latin1_only_utf8_matches) {
                     _invlist_union(cp_list,
-                                   has_upper_latin1_only_utf8_matches,
+                                   upper_latin1_only_utf8_matches,
                                    &cp_list);
-                    SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
-                    has_upper_latin1_only_utf8_matches = NULL;
+                    SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
+                    upper_latin1_only_utf8_matches = NULL;
                 }
 
                 /* If we don't match all the upper Latin1 characters regardless
@@ -18202,9 +18202,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                       &nonascii_but_latin1_properties);
 
                 /* And add them to the final list of such characters. */
-                _invlist_union(has_upper_latin1_only_utf8_matches,
+                _invlist_union(upper_latin1_only_utf8_matches,
                                nonascii_but_latin1_properties,
-                               &has_upper_latin1_only_utf8_matches);
+                               &upper_latin1_only_utf8_matches);
 
                 /* Remove them from what now becomes the unconditional list */
                 _invlist_subtract(posixes, nonascii_but_latin1_properties,
@@ -18225,12 +18225,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* Get rid of any characters that we now know are matched
                  * unconditionally from the conditional list, which may make
                  * that list empty */
-                _invlist_subtract(has_upper_latin1_only_utf8_matches,
+                _invlist_subtract(upper_latin1_only_utf8_matches,
                                   cp_list,
-                                  &has_upper_latin1_only_utf8_matches);
-                if (_invlist_len(has_upper_latin1_only_utf8_matches) == 0) {
-                    SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
-                    has_upper_latin1_only_utf8_matches = NULL;
+                                  &upper_latin1_only_utf8_matches);
+                if (_invlist_len(upper_latin1_only_utf8_matches) == 0) {
+                    SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
+                    upper_latin1_only_utf8_matches = NULL;
                 }
             }
         }
@@ -18245,7 +18245,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * class that isn't a Unicode property, and which matches above Unicode, \W
      * or [\x{110000}] for example.
      * (Note that in this case, unlike the Posix one above, there is no
-     * <has_upper_latin1_only_utf8_matches>, because having a Unicode property
+     * <upper_latin1_only_utf8_matches>, because having a Unicode property
      * forces Unicode semantics */
     if (properties) {
         if (cp_list) {
@@ -18322,7 +18322,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
     else if (   DEPENDS_SEMANTICS
-             && (    has_upper_latin1_only_utf8_matches
+             && (    upper_latin1_only_utf8_matches
                  || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
         use_anyofd = TRUE;
@@ -18686,17 +18686,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /* Here, the bitmap has been populated with all the Latin1 code points that
      * always match.  Can now add to the overall list those that match only
-     * when the target string is UTF-8 (<has_upper_latin1_only_utf8_matches>).
+     * when the target string is UTF-8 (<upper_latin1_only_utf8_matches>).
      * */
-    if (has_upper_latin1_only_utf8_matches) {
+    if (upper_latin1_only_utf8_matches) {
 	if (cp_list) {
 	    _invlist_union(cp_list,
-                           has_upper_latin1_only_utf8_matches,
+                           upper_latin1_only_utf8_matches,
                            &cp_list);
-	    SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
+	    SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
 	}
 	else {
-	    cp_list = has_upper_latin1_only_utf8_matches;
+	    cp_list = upper_latin1_only_utf8_matches;
 	}
         ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
     }
