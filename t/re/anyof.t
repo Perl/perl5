@@ -31,6 +31,9 @@ BEGIN {
 # differences are skipped on EBCDIC.  They are all at the beginning of the
 # array, and a special marker entry is used to delmit the boundary between
 # skipped and not skipped.
+#
+# NOTE:  If the pattern contains (?8) it will be upgraded to UTF-8 after
+#        stripping that
 
 my @tests = (
     '[[{]' => 'ANYOFM[\[\{]',
@@ -338,8 +341,11 @@ while (defined (my $test = shift @tests)) {
         # platform
         $test =~ s/\{INFTY\}/$highest_cp/g;
         $test =~ s/\{INFTY_minus_1\}/$next_highest_cp/g;
+        my $use_utf8 = ($test =~ s/\Q(?8)//);
 
-        $test = "qr/$test/";
+        $test = "my \$a = '$test';";
+        $test .= "utf8::upgrade(\$a);" if $use_utf8;
+        $test .= "qr/\$a/";
         my $actual_test = "use re qw(Debug COMPILE); $test";
 
         my $result = fresh_perl($actual_test);
