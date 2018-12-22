@@ -35,6 +35,55 @@ BEGIN {
 # NOTE:  If the pattern contains (?8) it will be upgraded to UTF-8 after
 #        stripping that
 
+# 2**32-1 or 2**64-1
+my $highest_cp_string = "F" x (($Config{uvsize} < 8) ? 8 : 16);
+
+my $next_highest_cp_string = $highest_cp_string =~ s/ F $ /E/xr;
+
+my $highest_cp = "\\x{$highest_cp_string}";
+my $next_highest_cp = "\\x{$next_highest_cp_string}";
+
+sub  get_compiled ($) {
+    # Convert platform-independent values to what is suitable for the
+    # platform
+
+    my $pattern = shift;
+
+    $pattern =~ s/\{INFTY\}/$highest_cp/g;
+    $pattern =~ s/\{INFTY_minus_1\}/$next_highest_cp/g;
+    my $use_utf8 = ($pattern =~ s/\Q(?8)//);
+
+    $pattern = "my \$a = '$pattern';";
+    $pattern .= "utf8::upgrade(\$a);" if $use_utf8;
+    $pattern .= "qr/\$a/";
+    my $actual_pattern = "use re qw(Debug COMPILE); $pattern";
+
+    my $result = fresh_perl($actual_pattern);
+    if ($? != 0) {  # Re-run so as to display STDERR.
+        fail($pattern);
+        fresh_perl($actual_pattern, { stderr => 0, verbose => 1 });
+        return;
+    }
+
+    # The Debug output will come back as a bunch of lines.  We are
+    # interested only in the line after /Final program/
+    my @lines = split /\n/, $result;
+    while (defined ($_ = shift @lines)) {
+        last if /Final program/;
+    }
+
+    $_ = shift @lines;
+
+    s/ \s* \( \d+ \) \s* //x;   # Get rid of the node branch
+    s/ ^ \s* \d+ : \s* //x;     # ... And the node number
+
+    # Use platform-independent values
+    s/$highest_cp_string/INFTY/g;
+    s/$next_highest_cp_string/INFTY_minus_1/g;
+
+    return $_;
+}
+
 my @tests = (
     '[[{]' => 'ANYOFM[\[\{]',
     '[^\S ]' => 'ANYOFD[\t\n\x0B\f\r{utf8}\x85\xA0][1680 2000-200A 2028-2029 202F 205F 3000]',
@@ -311,14 +360,6 @@ my @tests = (
     '[\x{10C}-{INFTY}\x{102}-\x{104}\x{106}]' => 'ANYOF[0102-0104 0106 010C-INFTY]',
 );
 
-# 2**32-1 or 2**64-1
-my $highest_cp_string = "F" x (($Config{uvsize} < 8) ? 8 : 16);
-
-my $next_highest_cp_string = $highest_cp_string =~ s/ F $ /E/xr;
-
-my $highest_cp = "\\x{$highest_cp_string}";
-my $next_highest_cp = "\\x{$next_highest_cp_string}";
-
 plan(scalar (@tests - 1) / 2);  # -1 because of the marker.
 
 my $skip_ebcdic = $::IS_EBCDIC;
@@ -337,41 +378,8 @@ while (defined (my $test = shift @tests)) {
         my $display_expected = $expected
                                   =~ s/ INFTY_minus_1 /$next_highest_cp/xgr;
 
-        # Convert platform-independent values to what is suitable for the
-        # platform
-        $test =~ s/\{INFTY\}/$highest_cp/g;
-        $test =~ s/\{INFTY_minus_1\}/$next_highest_cp/g;
-        my $use_utf8 = ($test =~ s/\Q(?8)//);
-
-        $test = "my \$a = '$test';";
-        $test .= "utf8::upgrade(\$a);" if $use_utf8;
-        $test .= "qr/\$a/";
-        my $actual_test = "use re qw(Debug COMPILE); $test";
-
-        my $result = fresh_perl($actual_test);
-        if ($? != 0) {  # Re-run so as to display STDERR.
-            fail($test);
-            fresh_perl($actual_test, { stderr => 0, verbose => 1 });
-            next;
-        }
-
-        # The Debug output will come back as a bunch of lines.  We are
-        # interested only in the line after /Final program/
-        my @lines = split /\n/, $result;
-        while (defined ($_ = shift @lines)) {
-            next unless /Final program/;
-            $_ = shift @lines;
-
-            s/ \s* \( \d+ \) \s* //x;   # Get rid of the node branch
-            s/ ^ \s* \d+ : \s* //x;     # ... And the node number
-
-            # Use platform-independent values
-            s/$highest_cp_string/INFTY/g;
-            s/$next_highest_cp_string/INFTY_minus_1/g;
-
-            is($_, $expected,
+        my $result = get_compiled($test);
+        is($result, $expected,
                "Verify compilation of $test displays as $display_expected");
-            last;   # Discard the rest of this test's output
-        }
     }
 }
