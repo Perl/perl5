@@ -4540,25 +4540,24 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         else { /* an EXACTFish node which doesn't begin with a multi-char fold */
             c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
             if (c1 > 255) {
-                const unsigned int * remaining_folds_to_list;
-                unsigned int first_folds_to;
+                const unsigned int * remaining_folds;
+                unsigned int first_fold;
 
                 /* Look up what code points (besides c1) fold to c1;  e.g.,
                  * [ 'K', KELVIN_SIGN ] both fold to 'k'. */
-                Size_t folds_to_count = _inverse_folds(c1,
-                                                     &first_folds_to,
-                                                     &remaining_folds_to_list);
-                if (folds_to_count == 0) {
+                Size_t folds_count = _inverse_folds(c1, &first_fold,
+                                                       &remaining_folds);
+                if (folds_count == 0) {
                     c2 = c1;    /* there is only a single character that could
                                    match */
                 }
-                else if (folds_to_count != 1) {
+                else if (folds_count != 1) {
                     /* If there aren't exactly two folds to this (itself and
                      * another), it is outside the scope of this function */
                     use_chrtest_void = TRUE;
                 }
                 else {  /* There are two.  We already have one, get the other */
-                    c2 = first_folds_to;
+                    c2 = first_fold;
 
                     /* Folds that cross the 255/256 boundary are forbidden if
                      * EXACTFL (and isnt a UTF8 locale), or EXACTFAA and one is

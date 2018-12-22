@@ -10709,19 +10709,19 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         }
         else {  /* Single char fold */
             unsigned int k;
-            unsigned int first_folds_to;
-            const unsigned int * remaining_folds_to_list;
-            Size_t folds_to_count;
+            unsigned int first_fold;
+            const unsigned int * remaining_folds;
+            Size_t folds_count;
 
             /* It matches itself */
             invlist = add_cp_to_invlist(invlist, fc);
 
             /* ... plus all the things that fold to it, which are found in
              * PL_utf8_foldclosures */
-            folds_to_count = _inverse_folds(fc, &first_folds_to,
-                                                &remaining_folds_to_list);
-            for (k = 0; k < folds_to_count; k++) {
-                UV c = (k == 0) ? first_folds_to : remaining_folds_to_list[k-1];
+            folds_count = _inverse_folds(fc, &first_fold,
+                                                &remaining_folds);
+            for (k = 0; k < folds_count; k++) {
+                UV c = (k == 0) ? first_fold : remaining_folds[k-1];
 
                 /* /aa doesn't allow folds between ASCII and non- */
                 if (   (OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
@@ -16473,9 +16473,9 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
         default:    /* Other code points are checked against the data for the
                        current Unicode version */
           {
-            Size_t folds_to_count;
-            unsigned int first_folds_to;
-            const unsigned int * remaining_folds_to_list;
+            Size_t folds_count;
+            unsigned int first_fold;
+            const unsigned int * remaining_folds;
             UV folded_cp;
 
             if (isASCII(cp)) {
@@ -16491,9 +16491,9 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
                 *invlist = add_cp_to_invlist(*invlist, folded_cp);
             }
 
-            folds_to_count = _inverse_folds(folded_cp, &first_folds_to,
-                                                    &remaining_folds_to_list);
-            if (folds_to_count == 0) {
+            folds_count = _inverse_folds(folded_cp, &first_fold,
+                                                    &remaining_folds);
+            if (folds_count == 0) {
 
                 /* Use deprecated warning to increase the chances of this being
                  * output */
@@ -16504,13 +16504,13 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
             else {
                 unsigned int i;
 
-                if (first_folds_to > 255) {
-                    *invlist = add_cp_to_invlist(*invlist, first_folds_to);
+                if (first_fold > 255) {
+                    *invlist = add_cp_to_invlist(*invlist, first_fold);
                 }
-                for (i = 0; i < folds_to_count - 1; i++) {
-                    if (remaining_folds_to_list[i] > 255) {
+                for (i = 0; i < folds_count - 1; i++) {
+                    if (remaining_folds[i] > 255) {
                         *invlist = add_cp_to_invlist(*invlist,
-                                                    remaining_folds_to_list[i]);
+                                                    remaining_folds[i]);
                     }
                 }
             }
@@ -18010,9 +18010,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
                     STRLEN foldlen;
                     unsigned int k;
-                    Size_t folds_to_count;
-                    unsigned int first_folds_to;
-                    const unsigned int * remaining_folds_to_list;
+                    Size_t folds_count;
+                    unsigned int first_fold;
+                    const unsigned int * remaining_folds;
 
                     if (j < 256) {
 
@@ -18055,16 +18055,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     /* Single character fold of above Latin1.  Add everything
                      * in its fold closure to the list that this node should
                      * match. */
-                    folds_to_count = _inverse_folds(folded, &first_folds_to,
-                                                    &remaining_folds_to_list);
-                    for (k = 0; k <= folds_to_count; k++) {
+                    folds_count = _inverse_folds(folded, &first_fold,
+                                                    &remaining_folds);
+                    for (k = 0; k <= folds_count; k++) {
                         UV c = (k == 0)     /* First time through use itself */
                                 ? folded
                                 : (k == 1)  /* 2nd time use, the first fold */
-                                   ? first_folds_to
+                                   ? first_fold
 
                                      /* Then the remaining ones */
-                                   : remaining_folds_to_list[k-2];
+                                   : remaining_folds[k-2];
 
                         /* /aa doesn't allow folds between ASCII and non- */
                         if ((   ASCII_FOLD_RESTRICTED
