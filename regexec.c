@@ -2182,7 +2182,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     STRLEN lnc;
     U8 c1;
     U8 c2;
-    char *e;
+    char *e = NULL;
 
     /* In some cases we accept only the first occurence of 'x' in a sequence of
      * them.  This variable points to just beyond the end of the previous
