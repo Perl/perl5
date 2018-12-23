@@ -14980,8 +14980,19 @@ sub compile_perl() {
          Description =>
               "Code points whose fold is a string of more than one character",
     );
+    my $in_multi_fold = $perl->add_match_table(
+               "_Perl_Is_In_Multi_Char_Fold",
+               Description =>
+                   "Code points that are in some multiple character fold",
+    );
+    my $non_final_fold = $perl->add_match_table(
+               "_Perl_Non_Final_Folds",
+               Description => "Code points that are in some multiple character fold, but not in the final position",
+    );
     if ($v_version lt v3.0.1) {
-        push @tables_that_may_be_empty, '_Perl_Folds_To_Multi_Char';
+        push @tables_that_may_be_empty, '_Perl_Folds_To_Multi_Char',
+                                        '_Perl_Is_In_Multi_Char_Fold',
+                                        '_Perl_Non_Final_Folds';
     }
 
     # Look through all the known folds to populate these tables.
@@ -15008,6 +15019,12 @@ sub compile_perl() {
             if ($loc_problem_folds->contains($cp)) {
                 $loc_problem_folds->add_range($start, $end);
                 $found_locale_problematic = 1;
+            }
+
+            if (@hex_folds > 1) {
+                $in_multi_fold->add_range($cp, $cp);
+                next if $i < @hex_folds - 1;
+                $non_final_fold->add_range($cp, $cp);
             }
         }
 
