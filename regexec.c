@@ -2321,6 +2321,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
     case EXACTFU_SS:
+    case EXACTFUP:      /* Problematic even though pattern isn't UTF-8.  Use
+                           full functionality normally not done except for
+                           UTF-8 */
         assert(! is_utf8_pat);
         goto do_exactf_utf8;
 
@@ -4661,6 +4664,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         /* FALLTHROUGH */
                     case EXACTFAA:
                     case EXACTFU_SS:
+                    case EXACTFUP:
                     case EXACTFU:
                         c2 = PL_fold_latin1[c1];
                         break;
@@ -6419,6 +6423,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
+        case EXACTFUP:          /*  /foo/iu, and something is problematic in
+                                    'foo' so can't take shortcuts. */
             assert(! is_utf8_pat);
             /* FALLTHROUGH */
 	case EXACTFU:            /*  /abc/iu      */
@@ -6460,6 +6466,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (   utf8_target
                 || is_utf8_pat
                 || state_num == EXACTFU_SS
+                || state_num == EXACTFUP
                 || (state_num == EXACTFL && IN_UTF8_CTYPE_LOCALE))
             {
 	      /* Either target or the pattern are utf8, or has the issue where
@@ -9361,6 +9368,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
     case EXACTFU_SS:
+    case EXACTFUP:
 
       do_exactf: {
         int c1, c2;

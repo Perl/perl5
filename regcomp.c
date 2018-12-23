@@ -14709,13 +14709,19 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                     }
 
-                    /* The micro sign is the only below 256 character that
-                     * folds to above 255 */
-                    if (   node_type == EXACTFU
-                        && requires_utf8_target
-                        && LIKELY(! has_micro_sign))
-                    {
-                        node_type = EXACTFU_ONLY8;
+                    if (node_type == EXACTFU) {
+                        if (UNLIKELY(has_micro_sign)) {
+
+                            /* The micro sign is the only below 256 character
+                             * that folds to above 255 */
+                            if (! UTF) {
+                                node_type = EXACTFUP;
+                            }
+                        }
+                        else if (requires_utf8_target) {
+
+                            node_type = EXACTFU_ONLY8;
+                        }
                     }
                 }
 

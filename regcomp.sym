@@ -108,7 +108,7 @@ EXACTFAA    EXACT,      str	  ; Match this string using /iaa rules (w/len) (stri
 # End of important relative ordering.
 
 EXACTFU_SS  EXACT,      str	  ; Match this string using /iu rules (w/len); (string not UTF-8, only portions guaranteed to be folded; folded length > unfolded).
-
+EXACTFUP    EXACT,      str	  ; Match this string using /iu rules (w/len); (string not UTF-8, not guaranteed to be folded; and its Problematic).
 # In order for a non-UTF-8 EXACTFAA to think the pattern is pre-folded when
 # matching a UTF-8 target string, there would have to be something like an
 # EXACTFAA_MICRO which would not be considered pre-folded for UTF-8 targets,
