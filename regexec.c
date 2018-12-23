@@ -2277,13 +2277,28 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         assert(! is_utf8_pat);
 	/* FALLTHROUGH */
     case EXACTFAA:
-        if (is_utf8_pat || utf8_target) {
+        if (is_utf8_pat) {
+            utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII
+                             |FOLDEQ_S2_ALREADY_FOLDED|FOLDEQ_S2_FOLDS_SANE;
+            goto do_exactf_utf8;
+        }
+        else if (utf8_target) {
+
+            /* Here, and elsewhere in this file, the reason we can't consider a
+             * non-UTF-8 pattern already folded in the presence of a UTF-8
+             * target is because any MICRO SIGN in the pattern won't be folded.
+             * Since the fold of the MICRO SIGN requires UTF-8 to represent, we
+             * can consider a non-UTF-8 pattern folded when matching a
+             * non-UTF-8 target */
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
             goto do_exactf_utf8;
         }
-        fold_array = PL_fold_latin1;    /* Latin1 folds are not affected by */
-        folder = foldEQ_latin1;	        /* /a, except the sharp s one which */
-        goto do_exactf_non_utf8;	/* isn't dealt with by these */
+
+        /* Latin1 folds are not affected by /a, except it excludes the sharp s,
+         * which these functions don't handle anyway */
+        fold_array = PL_fold_latin1;
+        folder = foldEQ_latin1_s2_folded;
+        goto do_exactf_non_utf8;
 
     case EXACTF:   /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
@@ -6417,10 +6432,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             assert(! is_utf8_pat);
             /* FALLTHROUGH */
 	case EXACTFAA:            /*  /abc/iaa     */
-	    folder = foldEQ_latin1;
+            folder = foldEQ_latin1_s2_folded;
 	    fold_array = PL_fold_latin1;
 	    fold_utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
+            if (is_utf8_pat || ! utf8_target) {
+
+                /* The possible presence of a MICRO SIGN in the pattern forbids
+                 * us to view a non-UTF-8 pattern as folded when there is a
+                 * UTF-8 target */
+                fold_utf8_flags |= FOLDEQ_S2_ALREADY_FOLDED
+                                  |FOLDEQ_S2_FOLDS_SANE;
+            }
 	    goto do_exactf;
+
 
         case EXACTF:             /*  /abc/i    This node only generated for
                                                non-utf8 patterns */
@@ -9296,7 +9320,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
     case EXACTFAA:
         utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
-	goto do_exactf;
+        if (reginfo->is_utf8_pat || ! utf8_target) {
+
+            /* The possible presence of a MICRO SIGN in the pattern forbids us
+             * to view a non-UTF-8 pattern as folded when there is a UTF-8
+             * target.  */
+            utf8_flags |= FOLDEQ_S2_ALREADY_FOLDED|FOLDEQ_S2_FOLDS_SANE;
+        }
+        goto do_exactf;
 
     case EXACTFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
