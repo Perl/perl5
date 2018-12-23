@@ -2508,10 +2508,12 @@ foreach my $property (sort
         # And a #define for all simple names equivalent to a perl property,
         # except those that begin with 'is' or 'in';
         if (exists $perl_tags{$tag} && $property !~ / ^ i[ns] | = /x) {
-            push @perl_prop_synonyms, "#define "
-                                    . $table_name_prefix
-                                    . uc(sanitize_name($define))
+            my $name = $table_name_prefix . uc(sanitize_name($define));
+            push @perl_prop_synonyms, "#define $name"
                                     . "   $defined_to";
+            push @perl_prop_synonyms, "#define "
+                                    . "${name}_invlist"
+                                    . "   ${defined_to}_invlist";
         }
     }
 }
@@ -2975,7 +2977,7 @@ output_table_trailer();
 print $out_fh join "\n", "\n",
                          #'#    ifdef DOINIT',
                          #"\n",
-                         "/* Synonyms for perl properties */",
+                         "/* Synonyms for perl properties, and their tables */",
                          @perl_prop_synonyms,
                          #"\n",
                          #"#    endif  /* DOINIT */",

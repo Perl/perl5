@@ -383474,46 +383474,85 @@ static const UV * const uni_prop_ptrs[] = {
 };
 
 
-/* Synonyms for perl properties */
+/* Synonyms for perl properties, and their tables */
 #define UNI_AHEX   UNI_POSIXXDIGIT
+#define UNI_AHEX_invlist   UNI_POSIXXDIGIT_invlist
 #define UNI_ALNUM   UNI_XPOSIXALNUM
+#define UNI_ALNUM_invlist   UNI_XPOSIXALNUM_invlist
 #define UNI_ALPHA   UNI_XPOSIXALPHA
 #define UNI_ALPHABETIC   UNI_XPOSIXALPHA
+#define UNI_ALPHABETIC_invlist   UNI_XPOSIXALPHA_invlist
+#define UNI_ALPHA_invlist   UNI_XPOSIXALPHA_invlist
 #define UNI_ASCIIHEXDIGIT   UNI_POSIXXDIGIT
+#define UNI_ASCIIHEXDIGIT_invlist   UNI_POSIXXDIGIT_invlist
 #define UNI_BASICLATIN   UNI_ASCII
+#define UNI_BASICLATIN_invlist   UNI_ASCII_invlist
 #define UNI_BLANK   UNI_XPOSIXBLANK
+#define UNI_BLANK_invlist   UNI_XPOSIXBLANK_invlist
 #define UNI_CC   UNI_XPOSIXCNTRL
+#define UNI_CC_invlist   UNI_XPOSIXCNTRL_invlist
 #define UNI_CNTRL   UNI_XPOSIXCNTRL
+#define UNI_CNTRL_invlist   UNI_XPOSIXCNTRL_invlist
 #define UNI_CONTROL   UNI_XPOSIXCNTRL
+#define UNI_CONTROL_invlist   UNI_XPOSIXCNTRL_invlist
 #define UNI_DECIMALNUMBER   UNI_XPOSIXDIGIT
+#define UNI_DECIMALNUMBER_invlist   UNI_XPOSIXDIGIT_invlist
 #define UNI_DIGIT   UNI_XPOSIXDIGIT
+#define UNI_DIGIT_invlist   UNI_XPOSIXDIGIT_invlist
 #define UNI_GRAPH   UNI_XPOSIXGRAPH
+#define UNI_GRAPH_invlist   UNI_XPOSIXGRAPH_invlist
 #define UNI_HEX   UNI_XPOSIXXDIGIT
 #define UNI_HEXDIGIT   UNI_XPOSIXXDIGIT
+#define UNI_HEXDIGIT_invlist   UNI_XPOSIXXDIGIT_invlist
+#define UNI_HEX_invlist   UNI_XPOSIXXDIGIT_invlist
 #define UNI_HORIZSPACE   UNI_XPOSIXBLANK
+#define UNI_HORIZSPACE_invlist   UNI_XPOSIXBLANK_invlist
 #define UNI_LC   UNI_CASEDLETTER
+#define UNI_LC_invlist   UNI_CASEDLETTER_invlist
 #define UNI_LL   UNI_LOWERCASELETTER
+#define UNI_LL_invlist   UNI_LOWERCASELETTER_invlist
 #define UNI_LOWER   UNI_XPOSIXLOWER
 #define UNI_LOWERCASE   UNI_XPOSIXLOWER
+#define UNI_LOWERCASE_invlist   UNI_XPOSIXLOWER_invlist
+#define UNI_LOWER_invlist   UNI_XPOSIXLOWER_invlist
 #define UNI_LT   UNI_TITLE
+#define UNI_LT_invlist   UNI_TITLE_invlist
 #define UNI_LU   UNI_UPPERCASELETTER
+#define UNI_LU_invlist   UNI_UPPERCASELETTER_invlist
 #define UNI_L_   UNI_CASEDLETTER
 #define UNI_L_AMP_   UNI_CASEDLETTER
+#define UNI_L_AMP__invlist   UNI_CASEDLETTER_invlist
+#define UNI_L__invlist   UNI_CASEDLETTER_invlist
 #define UNI_ND   UNI_XPOSIXDIGIT
+#define UNI_ND_invlist   UNI_XPOSIXDIGIT_invlist
 #define UNI_PERLSPACE   UNI_POSIXSPACE
+#define UNI_PERLSPACE_invlist   UNI_POSIXSPACE_invlist
 #define UNI_PERLWORD   UNI_POSIXWORD
+#define UNI_PERLWORD_invlist   UNI_POSIXWORD_invlist
 #define UNI_PRINT   UNI_XPOSIXPRINT
+#define UNI_PRINT_invlist   UNI_XPOSIXPRINT_invlist
 #define UNI_SPACE   UNI_XPOSIXSPACE
 #define UNI_SPACEPERL   UNI_XPOSIXSPACE
+#define UNI_SPACEPERL_invlist   UNI_XPOSIXSPACE_invlist
+#define UNI_SPACE_invlist   UNI_XPOSIXSPACE_invlist
 #define UNI_TITLECASE   UNI_TITLE
 #define UNI_TITLECASELETTER   UNI_TITLE
+#define UNI_TITLECASELETTER_invlist   UNI_TITLE_invlist
+#define UNI_TITLECASE_invlist   UNI_TITLE_invlist
 #define UNI_UPPER   UNI_XPOSIXUPPER
 #define UNI_UPPERCASE   UNI_XPOSIXUPPER
+#define UNI_UPPERCASE_invlist   UNI_XPOSIXUPPER_invlist
+#define UNI_UPPER_invlist   UNI_XPOSIXUPPER_invlist
 #define UNI_WHITESPACE   UNI_XPOSIXSPACE
+#define UNI_WHITESPACE_invlist   UNI_XPOSIXSPACE_invlist
 #define UNI_WORD   UNI_XPOSIXWORD
+#define UNI_WORD_invlist   UNI_XPOSIXWORD_invlist
 #define UNI_WSPACE   UNI_XPOSIXSPACE
+#define UNI_WSPACE_invlist   UNI_XPOSIXSPACE_invlist
 #define UNI_XDIGIT   UNI_XPOSIXXDIGIT
+#define UNI_XDIGIT_invlist   UNI_XPOSIXXDIGIT_invlist
 #define UNI_XPERLSPACE   UNI_XPOSIXSPACE
+#define UNI_XPERLSPACE_invlist   UNI_XPOSIXSPACE_invlist
 
 
 #endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
@@ -383708,5 +383747,5 @@ static const U8 WB_table[23][23] = {
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 35eecb67dfc9b89a150036e4dcd76de5d46f20d6ddd6976188e1df94a4055b7b regen/mk_invlists.pl
+ * 16f4ae204ee7dd84f67663b2e33fb0639d0a1cf8838c9d9c085907a268fc94e4 regen/mk_invlists.pl
  * ex: set ro: */
