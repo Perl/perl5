@@ -436,8 +436,6 @@ sub make_mph_from_hash {
     my $hash= shift;
 
     # we do this twice because often we can find longer prefixes on the second pass.
-    my @keys= sort {length($b) <=> length($a) || $a cmp $b } keys %$hash;
-
     my ($smart_blob, $res_to_split)= build_split_words($hash,0);
     {
         my ($smart_blob2, $res_to_split2)= build_split_words($hash,1);
