@@ -13088,9 +13088,11 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
 #else
         else if (1) {
 #endif
-            /* We don't fold any non-UTF8 except possibly the Sharp s  (see
-             * comments at join_exact()); */
-            *character = (U8) code_point;
+            *character = (U8) (DEPENDS_SEMANTICS)
+                              ? toFOLD(code_point)
+                              : (LOC)
+                                ? code_point
+                                : toLOWER_L1(code_point);
             len = 1;
 
             /* Can turn into an EXACT node if we know the fold at compile time,
@@ -14407,9 +14409,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
                     else {
 
-                        /* Here is non-UTF8; we don't normally store the folded
-                         * value.  First, see if the character's fold differs
-                         * between /d and /u. */
+                        /* Here is non-UTF8.  First, see if the character's
+                         * fold differs between /d and /u. */
                         if (PL_fold[ender] != PL_fold_latin1[ender]) {
                             maybe_exactfu = FALSE;
                         }
@@ -14466,12 +14467,18 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             has_micro_sign = TRUE;
                         }
 
-                        /* Even when folding, we store just the input
-                         * character.  The bottom line reason to do this is
-                         * because the fold for MICRO SIGN requires UTF-8.  But
-                         * there's no real performance penalty for not folding,
-                         * as we have an array that finds any fold quickly. */
-                        *(s++) = (char) ender;
+                        *(s++) = (char) (DEPENDS_SEMANTICS)
+                                        ? toFOLD(ender)
+
+                                          /* Under /u, the fold of any
+                                           * character in the 0-255 range
+                                           * happens to be its lowercase
+                                           * equivalent, except for LATIN SMALL
+                                           * LETTER SHARP S, which was handled
+                                           * above, and the MICRO SIGN, whose
+                                           * fold requires UTF-8 to represent.
+                                           * */
+                                        : toLOWER_L1(ender);
                     }
 		} /* End of adding current character to the node */
 
