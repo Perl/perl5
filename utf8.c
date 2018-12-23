@@ -5518,6 +5518,9 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
             flags_for_folder |= FOLD_FLAGS_LOCALE;
         }
     }
+    if (flags & FOLDEQ_UTF8_NOMIX_ASCII) {
+        flags_for_folder |= FOLD_FLAGS_NOMIX_ASCII;
+    }
 
     if (pe1) {
         e1 = *(U8**)pe1;
