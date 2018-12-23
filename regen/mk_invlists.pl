@@ -1131,21 +1131,8 @@ sub output_table_common {
 
     my $column_width = 2;   # We currently allow 2 digits for the number
 
-    # If the maximum value in the table is 1, it can be a bool.  (Being above
-    # a U8 is not currently handled
-    my $max_element = 0;
-    for my $i (0 .. $size - 1) {
-        for my $j (0 .. $size - 1) {
-            next if $max_element >= $table_ref->[$i][$j];
-            $max_element = $table_ref->[$i][$j];
-        }
-    }
-    die "Need wider table column width given '$max_element"
-                                    if length $max_element > $column_width;
-
-    my $table_type = ($max_element == 1)
-                     ? 'bool'
-                     : 'U8';
+    # Being above a U8 is not currently handled
+    my $table_type = 'U8';
 
     # If a name is longer than the width set aside for a column, its column
     # needs to have increased spacing so that the name doesn't get truncated
