@@ -347,7 +347,9 @@ struct RExC_state_t {
                              } STMT_END
 
 /* Change from /d into /u rules, and restart the parse.  RExC_uni_semantics is
- * a flag that indicates we've changed to /u during the parse.  */
+ * a flag that indicates we need to override /d with /u as a result of
+ * something in the pattern.  It should only be used in regards to calling
+ * set_regex_charset() or get_regex_charse() */
 #define REQUIRE_UNI_RULES(flagp, restart_retval)                            \
     STMT_START {                                                            \
             if (DEPENDS_SEMANTICS) {                                        \
@@ -575,9 +577,7 @@ static const scan_data_t zero_scan_data = {
 #define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
 #define DEPENDS_SEMANTICS (get_regex_charset(RExC_flags)                    \
                                                      == REGEX_DEPENDS_CHARSET)
-/* Use RExC_uni_semantics instead of this:
 #define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
-*/
 #define AT_LEAST_UNI_SEMANTICS (get_regex_charset(RExC_flags)                \
                                                      >= REGEX_UNICODE_CHARSET)
 #define ASCII_RESTRICTED (get_regex_charset(RExC_flags)                      \
@@ -2041,7 +2041,7 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
                            list */
     const U32 max_code_points = (LOC)
                                 ?  256
-                                : ((  ! RExC_uni_semantics
+                                : ((  ! UNI_SEMANTICS
                                     ||  invlist_highest(ssc->invlist) < 256)
                                   ? 128
                                   : NON_OTHER_COUNT);
@@ -7438,10 +7438,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* ignore the utf8ness if the pattern is 0 length */
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
-
-    RExC_uni_semantics = RExC_utf8; /* UTF-8 implies unicode semantics;
-                                       otherwise we may find later this should
-                                       be 1 */
+    RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
     RExC_in_script_run = 0;
@@ -7512,11 +7509,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     rx_flags = orig_rx_flags;
 
-    if (initial_charset == REGEX_DEPENDS_CHARSET && RExC_uni_semantics) {
+    if (   (UTF || RExC_uni_semantics)
+        && initial_charset == REGEX_DEPENDS_CHARSET)
+    {
 
 	/* Set to use unicode semantics if the pattern is in utf8 and has the
 	 * 'depends' charset specified, as it means unicode when utf8  */
 	set_regex_charset(&rx_flags, REGEX_UNICODE_CHARSET);
+        RExC_uni_semantics = 1;
     }
 
     RExC_pm_flags = pm_flags;
@@ -12262,8 +12262,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
     /* Check for proper termination. */
     if (paren) {
-        /* restore original flags, but keep (?p) and, if we've changed from /d
-         * rules to /u, keep the /u */
+        /* restore original flags, but keep (?p) and, if we've encountered
+         * something in the parse that changes /d rules into /u, keep the /u */
 	RExC_flags = oregflags | (RExC_flags & RXf_PMf_KEEPCOPY);
         if (DEPENDS_SEMANTICS && RExC_uni_semantics) {
             set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
@@ -17507,11 +17507,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 &cp_list);
                     }
                 }
-                else if (  RExC_uni_semantics
-                        || AT_LEAST_ASCII_RESTRICTED
-                        || classnum == _CC_ASCII
-                        || (DEPENDS_SEMANTICS && (   classnum == _CC_DIGIT
-                                                  || classnum == _CC_XDIGIT)))
+                else if (   AT_LEAST_UNI_SEMANTICS
+                         || classnum == _CC_ASCII
+                         || (DEPENDS_SEMANTICS && (   classnum == _CC_DIGIT
+                                                   || classnum == _CC_XDIGIT)))
                 {
                     /* We usually have to worry about /d affecting what POSIX
                      * classes match, with special code needed because we won't
