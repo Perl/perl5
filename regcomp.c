@@ -10777,16 +10777,18 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         RExC_parse++;
         has_use_defaults = TRUE;
         STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
-        set_regex_charset(&RExC_flags, (RExC_uni_semantics)
-                                        ? REGEX_UNICODE_CHARSET
-                                        : REGEX_DEPENDS_CHARSET);
+        cs = (RExC_uni_semantics)
+             ? REGEX_UNICODE_CHARSET
+             : REGEX_DEPENDS_CHARSET;
+        set_regex_charset(&RExC_flags, cs);
     }
-
-    cs = get_regex_charset(RExC_flags);
-    if (cs == REGEX_DEPENDS_CHARSET
-        && (RExC_uni_semantics))
-    {
-        cs = REGEX_UNICODE_CHARSET;
+    else {
+        cs = get_regex_charset(RExC_flags);
+        if (   cs == REGEX_DEPENDS_CHARSET
+            && RExC_uni_semantics)
+        {
+            cs = REGEX_UNICODE_CHARSET;
+        }
     }
 
     while (RExC_parse < RExC_end) {
