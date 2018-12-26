@@ -3162,6 +3162,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * values for our db, instead of trying to change them.
      * */
 
+    dVAR;
+
     int ok = 1;
 
 #ifndef USE_LOCALE

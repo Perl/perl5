@@ -2650,6 +2650,7 @@ S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
 STATIC void
 S_maybe_multiconcat(pTHX_ OP *o)
 {
+    dVAR;
     OP *lastkidop;   /* the right-most of any kids unshifted onto o */
     OP *topop;       /* the top-most op in the concat tree (often equals o,
                         unless there are assign/stringify ops above it */
@@ -7822,6 +7823,7 @@ S_assignment_type(pTHX_ const OP *o)
 static OP *
 S_newONCEOP(pTHX_ OP *initop, OP *padop)
 {
+    dVAR;
     const PADOFFSET target = padop->op_targ;
     OP *const other = newOP(OP_PADSV,
 			    padop->op_flags
