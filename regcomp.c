@@ -74,10 +74,6 @@
 #define PERL_IN_REGCOMP_C
 #include "perl.h"
 
-#ifndef PERL_IN_XSUB_RE
-#  include "INTERN.h"
-#endif
-
 #define REG_COMP_C
 #ifdef PERL_IN_XSUB_RE
 #  include "re_comp.h"
