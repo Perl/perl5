@@ -18335,7 +18335,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             if (invlist_highest(cp_list) <= max_permissible) {
                 UV this_start, this_end, lowest_cp;
                 U8 bits_differing = 0;
-                Size_t cp_count = 0;
+                Size_t full_cp_count = 0;
                 bool first_time = TRUE;
 
                 /* Go through the bytes and find the bit positions that differ
@@ -18368,7 +18368,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         bits_differing  |= i ^ lowest_cp;
                     }
 
-                    cp_count += this_end - this_start + 1;
+                    full_cp_count += this_end - this_start + 1;
                 }
                 invlist_iterfinish(cp_list);
 
@@ -18385,8 +18385,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * a 1 in that position, and another has a 0.  But that would
                  * mean that one of them differs from the lowest code point in
                  * that position, which possibility we've already excluded.  */
-                if (  (inverted || cp_count > 1)
-                    && cp_count == 1U << PL_bitcount[bits_differing])
+                if (  (inverted || full_cp_count > 1)
+                    && full_cp_count == 1U << PL_bitcount[bits_differing])
                 {
                     U8 ANYOFM_mask;
 
