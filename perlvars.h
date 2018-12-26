@@ -321,3 +321,19 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
 /* Everything that folds to a given character, for case insensitivity regex
  * matching */
 PERLVAR(G, utf8_foldclosures, SV *)
+
+/* these record the best way to to perform certain IO operations while
+ * atomically setting FD_CLOEXEC. On the first call, a probe is done
+ * and the result recorded for use by subsequent calls.
+ * In theory these variables aren't thread-safe, but the worst that can
+ * happen is that two treads will both do an initial probe
+ */
+PERLVARI(G, strategy_dup,        int, 0)	/* doio.c */
+PERLVARI(G, strategy_dup2,       int, 0)	/* doio.c */
+PERLVARI(G, strategy_open,       int, 0)	/* doio.c */
+PERLVARI(G, strategy_open3,      int, 0)	/* doio.c */
+PERLVARI(G, strategy_mkstemp,    int, 0)	/* doio.c */
+PERLVARI(G, strategy_socket,     int, 0)	/* doio.c */
+PERLVARI(G, strategy_accept,     int, 0)	/* doio.c */
+PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
+PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
