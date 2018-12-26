@@ -16478,7 +16478,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     STRLEN numlen;
     int namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
-    bool need_class = 0;
     SV *listsv = NULL;
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
@@ -16549,7 +16548,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     bool warn_super = ALWAYS_WARN_SUPER;
 
     const char * orig_parse = RExC_parse;
-    bool posixl_matches_all = FALSE; /* Does /l class have both e.g. \W,\w ? */
 
     /* This variable is used to mark where the end in the input is of something
      * that looks like a POSIX construct but isn't.  During the parse, when
@@ -17037,8 +17035,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         (FOLD) ? "__" : "",
                                         UTF8fARG(UTF, n, name),
                                         (FOLD) ? "_i" : "");
-                        optimizable = FALSE;    /* Will have to leave this an
-                                                   ANYOF node */
                         has_runtime_dependency |= HAS_USER_DEFINED_PROPERTY;
 
                         /* We don't know yet what this matches, so have to flag
@@ -17240,39 +17236,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * be matched against.  This isn't needed for \p{} and
                  * pseudo-classes, as they are not affected by locale, and
                  * hence are dealt with separately */
-                if (! need_class) {
-                    need_class = 1;
-                    anyof_flags |= ANYOF_MATCHES_POSIXL;
-                    has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
-
-                    /* We can't change this into some other type of node
-                     * (unless this is the only element, in which case there
-                     * are nodes that mean exactly this) as has runtime
-                     * dependencies */
-                    optimizable = FALSE;
-                }
-
-                /* Coverity thinks it is possible for this to be negative; both
-                 * jhi and khw think it's not, but be safer */
-                assert(! (anyof_flags & ANYOF_MATCHES_POSIXL)
-                       || (namedclass + ((namedclass % 2) ? -1 : 1)) >= 0);
-
-                /* See if it already matches the complement of this POSIX
-                 * class */
-                if (  (anyof_flags & ANYOF_MATCHES_POSIXL)
-                    && POSIXL_TEST(posixl, namedclass + ((namedclass % 2)
-                                                         ? -1
-                                                         : 1)))
-                {
-                    posixl_matches_all = TRUE;
-                    break;  /* No need to continue.  Since it matches both
-                               e.g., \w and \W, it matches everything, and the
-                               bracketed class can be optimized into qr/./s */
-                }
-
-                /* Add this class to those that should be checked at runtime */
                 POSIXL_SET(posixl, namedclass);
                 has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
+                anyof_flags |= ANYOF_MATCHES_POSIXL;
 
                 /* The above-Latin1 characters are not subject to locale rules.
                  * Just add them to the unconditionally-matched list */
@@ -18146,7 +18112,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
     {
         RExC_seen_d_op = TRUE;
-        optimizable = FALSE;
         has_runtime_dependency |= HAS_D_RUNTIME_DEPENDENCY;
     }
 
@@ -18179,106 +18144,484 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * routine) */
     *flagp |= HASWIDTH|SIMPLE;
 
+    if (anyof_flags & ANYOF_LOCALE_FLAGS) {
+        RExC_contains_locale = 1;
+    }
+
     /* Some character classes are equivalent to other nodes.  Such nodes take
      * up less room, and some nodes require fewer operations to execute, than
      * ANYOF nodes.  EXACTish nodes may be joinable with adjacent nodes to
      * improve efficiency. */
 
     if (optimizable) {
-        int posix_class = -1;   /* Illegal value */
-        UV start, end;
+        PERL_UINT_FAST8_T i;
+        Size_t partial_cp_count = 0;
+        UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
+        UV   end[MAX_FOLD_FROMS+1] = { 0 };
 
-        if (UNLIKELY(posixl_matches_all)) {
-            ret = reg_node(pRExC_state, SANY);
+        if (cp_list) { /* Count the code points in enough ranges that we would
+                          see all the ones possible in any fold in this version
+                          of Unicode */
+
+            invlist_iterinit(cp_list);
+            for (i = 0; i <= MAX_FOLD_FROMS; i++) {
+                if (invlist_iternext(cp_list, &start[i], &end[i])) {
+                    partial_cp_count += end[i] - start[i] + 1;
+                }
+            }
+
+            invlist_iterfinish(cp_list);
+        }
+
+        /* If we know at compile time that this matches every possible code
+         * point, any run-time dependencies don't matter */
+        if (start[0] == 0 && end[0] == UV_MAX) {
+            if (invert) {
+                ret = reganode(pRExC_state, OPFAIL, 0);
+            }
+            else {
+                ret = reg_node(pRExC_state, SANY);
+                MARK_NAUGHTY(1);
+            }
             goto not_anyof;
         }
 
-        if (cp_list && ! invert) {
-            invlist_iterinit(cp_list);
-            if (! invlist_iternext(cp_list, &start, &end)) {
+        /* Similarly, for /l posix classes, if both a class and its
+         * complement match, any run-time dependencies don't matter */
+        if (posixl) {
+            for (namedclass = 0; namedclass < ANYOF_POSIXL_MAX;
+                                                        namedclass += 2)
+            {
+                if (   POSIXL_TEST(posixl, namedclass)      /* class */
+                    && POSIXL_TEST(posixl, namedclass + 1)) /* its complement */
+                {
+                    if (invert) {
+                        ret = reganode(pRExC_state, OPFAIL, 0);
+                    }
+                    else {
+                        ret = reg_node(pRExC_state, SANY);
+                        MARK_NAUGHTY(1);
+                    }
+                    goto not_anyof;
+                }
+            }
+            /* For well-behaved locales, some classes are subsets of others,
+             * so complementing the subset and including the non-complemented
+             * superset should match everything, like [\D[:alnum:]], and
+             * [[:^alpha:][:alnum:]], but some implementations of locales are
+             * buggy, and khw thinks its a bad idea to have optimization change
+             * behavior, even if it avoids an OS bug in a given case */
+
+#define isSINGLE_BIT_SET(n) isPOWER_OF_2(n)
+
+            /* If is a single posix /l class, can optimize to just that op.
+             * Such a node will not match anything in the Latin1 range, as that
+             * is not determinable until runtime, but will match whatever the
+             * class does outside that range.  (Note that some classes won't
+             * match anything outside the range, like [:ascii:]) */
+            if (    isSINGLE_BIT_SET(posixl)
+                && (partial_cp_count == 0 || start[0] > 255))
+            {
+                U8 classnum;
+                SV * class_above_latin1 = NULL;
+                bool already_inverted;
+                bool are_equivalent;
+
+                /* Compute which bit is set, which is the same thing as, e.g.,
+                 * ANYOF_CNTRL.  From
+                 * https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
+                 * */
+                static const int MultiplyDeBruijnBitPosition2[32] =
+                    {
+                    0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
+                    31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+                    };
+
+                namedclass = MultiplyDeBruijnBitPosition2[(posixl
+                                                          * 0x077CB531U) >> 27];
+                classnum = namedclass_to_classnum(namedclass);
+
+                /* The named classes are such that the inverted number is one
+                 * larger than the non-inverted one */
+                already_inverted = namedclass
+                                 - classnum_to_namedclass(classnum);
+
+                /* Create an inversion list of the official property, inverted
+                 * if the constructed node list is inverted, and restricted to
+                 * only the above latin1 code points, which are the only ones
+                 * known at compile time */
+                _invlist_intersection_maybe_complement_2nd(
+                                                    PL_AboveLatin1,
+                                                    PL_XPosix_ptrs[classnum],
+                                                    already_inverted,
+                                                    &class_above_latin1);
+                are_equivalent = _invlistEQ(class_above_latin1, cp_list,
+                                                                        FALSE);
+                SvREFCNT_dec_NN(class_above_latin1);
+
+                if (are_equivalent) {
+
+                    /* Resolve the run-time inversion flag with this possibly
+                     * inverted class */
+                    invert = invert ^ already_inverted;
+
+                    ret = reg_node(pRExC_state,
+                                   POSIXL + invert * (NPOSIXL - POSIXL));
+                    FLAGS(REGNODE_p(ret)) = classnum;
+                    goto not_anyof;
+                }
+            }
+        }
+
+        /* khw can't think of any other possible transformation involving
+         * these. */
+        if (has_runtime_dependency & HAS_USER_DEFINED_PROPERTY) {
+            goto is_anyof;
+        }
+
+        if (! has_runtime_dependency) {
 
             /* If the list is empty, nothing matches.  This happens, for
              * example, when a Unicode property that doesn't match anything is
              * the only element in the character class (perluniprops.pod notes
              * such properties). */
+            if (partial_cp_count == 0) {
+                assert (! invert);
                 ret = reganode(pRExC_state, OPFAIL, 0);
                 goto not_anyof;
             }
 
-            if (start == end) {    /* The range is a single code point */
-                if (! invlist_iternext(cp_list, &start, &end)
+            /* If matches everything but \n */
+            if (   start[0] == 0 && end[0] == '\n' - 1
+                && start[1] == '\n' + 1 && end[1] == UV_MAX)
+            {
+                assert (! invert);
+                ret = reg_node(pRExC_state, REG_ANY);
+                MARK_NAUGHTY(1);
+                goto not_anyof;
+            }
+        }
 
-                        /* Don't do this optimization if it would require
-                         * changing the pattern to UTF-8 */
-                    && (start < 256 || UTF))
-                {
-                    /* Here, the list contains a single code point.  Can
-                     * optimize into an EXACTish node */
+        /* Next see if can optimize classes that contain just a few code points
+         * into an EXACTish node.  The reason to do this is to let the
+         * optimizer join this node with adjacent EXACTish ones.
+         *
+         * An EXACTFish node can be generated even if not under /i, and vice
+         * versa.  But care must be taken.  An EXACTFish node has to be such
+         * that it only matches precisely the code points in the class, but we
+         * want to generate the least restrictive one that does that, to
+         * increase the odds of being able to join with an adjacent node.  For
+         * example, if the class contains [kK], we have to make it an EXACTFAA
+         * node to prevent the KELVIN SIGN from matching.  Whether we are under
+         * /i or not is irrelevant in this case.  Less obvious is the pattern
+         * qr/[\x{02BC}]n/i.  U+02BC is MODIFIER LETTER APOSTROPHE. That is
+         * supposed to match the single character U+0149 LATIN SMALL LETTER N
+         * PRECEDED BY APOSTROPHE.  And so even though there is no simple fold
+         * that includes \X{02BC}, there is a multi-char fold that does, and so
+         * the node generated for it must be an EXACTFish one.  On the other
+         * hand qr/:/i should generate a plain EXACT node since the colon
+         * participates in no fold whatsoever, and having it EXACT tells the
+         * optimizer the target string cannot match unless it has a colon in
+         * it.
+         *
+         * We don't typically generate an EXACTish node if doing so would
+         * require changing the pattern to UTF-8, as that affects /d and
+         * otherwise is slower.  However, under /i, not changing to UTF-8 can
+         * miss some potential multi-character folds.  We calculate the
+         * EXACTish node, and then decide if something would be missed if we
+         * don't upgrade */
+        if (   ! posixl
+            && ! invert
 
-                    value = start;
+                /* Only try if there are no more code points in the class than
+                 * in the max possible fold */
+            &&   partial_cp_count > 0 && partial_cp_count <= MAX_FOLD_FROMS + 1
 
-                    if (! FOLD) {
-                        op = (LOC)
-                             ? EXACTL
-                             : EXACT;
-                    }
-                    else if (LOC) {
+            && (start[0] < 256 || UTF || FOLD))
+        {
+            if (partial_cp_count == 1 && ! upper_latin1_only_utf8_matches)
+            {
+                /* We can always make a single code point class into an
+                 * EXACTish node. */
 
-                        /* A locale node under folding with one code point can
-                         * be an EXACTFL, as its fold won't be calculated until
-                         * runtime */
-                        op = EXACTFL;
-                    }
-                    else {
+                if (LOC) {
 
-                        /* Here, we are generally folding, but there is only
-                         * one code point to match.  If we have to, we use an
-                         * EXACT node, but it would be better for joining with
-                         * adjacent nodes in the optimization phase if we used
-                         * the same EXACTFish node that any such are likely to
-                         * be.  We can do this iff the code point doesn't
-                         * participate in any folds.  For example, an EXACTF of
-                         * a colon is the same as an EXACT one, since nothing
-                         * folds to or from a colon. */
-                        if (value < 256) {
-                            if (IS_IN_SOME_FOLD_L1(value)) {
-                                op = EXACT;
-                            }
+                    /* Here is /l:  Use EXACTL, except /li indicates EXACTFL,
+                     * as that means there is a fold not known until runtime so
+                     * shows as only a single code point here. */
+                    op = (FOLD) ? EXACTFL : EXACTL;
+                }
+                else if (! FOLD) { /* Not /l and not /i */
+                    op = (start[0] < 256) ? EXACT : EXACT_ONLY8;
+                }
+                else if (start[0] < 256) { /* /i, not /l, and the code point is
+                                              small */
+
+                    /* Under /i, it gets a little tricky.  A code point that
+                     * doesn't participate in a fold should be an EXACT node.
+                     * We know this one isn't the result of a simple fold, or
+                     * there'd be more than one code point in the list, but it
+                     * could be part of a multi- character fold.  In that case
+                     * we better not create an EXACT node, as we would wrongly
+                     * be telling the optimizer that this code point must be in
+                     * the target string, and that is wrong.  This is because
+                     * if the sequence around this code point forms a
+                     * multi-char fold, what needs to be in the string could be
+                     * the code point that folds to the sequence.
+                     *
+                     * This handles the case of below-255 code points, as we
+                     * have an easy look up for those.  The next clause handles
+                     * the above-256 one */
+                    op = IS_IN_SOME_FOLD_L1(start[0])
+                         ? EXACTFU
+                         : EXACT;
+                }
+                else {  /* /i, larger code point.  Since we are under /i, and
+                           have just this code point, we know that it can't
+                           fold to something else, so PL_InMultiCharFold
+                           applies to it */
+                    op = _invlist_contains_cp(PL_InMultiCharFold,
+                                              start[0])
+                         ? EXACTFU_ONLY8
+                         : EXACT_ONLY8;
+                }
+
+                value = start[0];
+            }
+            else if (  ! (has_runtime_dependency & ~HAS_D_RUNTIME_DEPENDENCY)
+                     && _invlist_contains_cp(PL_in_some_fold, start[0]))
+            {
+                /* Here, the only runtime dependency, if any, is from /d, and
+                 * the class matches more than one code point, and the lowest
+                 * code point participates in some fold.  It might be that the
+                 * other code points are /i equivalent to this one, and hence
+                 * they would representable by an EXACTFish node.  Above, we
+                 * eliminated classes that contain too many code points to be
+                 * EXACTFish, with the test for MAX_FOLD_FROMS
+                 *
+                 * First, special case the ASCII fold pairs, like 'B' and 'b'.
+                 * We do this because we have EXACTFAA at our disposal for the
+                 * ASCII range */
+                if (partial_cp_count == 2 && isASCII(start[0])) {
+
+                    /* The only ASCII characters that participate in folds are
+                     * alphabetics */
+                    assert(isALPHA(start[0]));
+                    if (   end[0] == start[0]   /* First range is a single
+                                                   character, so 2nd exists */
+                        && isALPHA_FOLD_EQ(start[0], start[1]))
+                    {
+
+                        /* Here, is part of an ASCII fold pair */
+
+                        if (   ASCII_FOLD_RESTRICTED
+                            || HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(start[0]))
+                        {
+                            /* If the second clause just above was true, it
+                             * means we can't be under /i, or else the list
+                             * would have included more than this fold pair.
+                             * Therefore we have to exclude the possibility of
+                             * whatever else it is that folds to these, by
+                             * using EXACTFAA */
+                            op = EXACTFAA;
+                        }
+                        else if (HAS_NONLATIN1_FOLD_CLOSURE(start[0])) {
+
+                            /* Here, there's no simple fold that start[0] is part
+                             * of, but there is a multi-character one.  If we
+                             * are not under /i, we want to exclude that
+                             * possibility; if under /i, we want to include it
+                             * */
+                            op = (FOLD) ? EXACTFU : EXACTFAA;
                         }
                         else {
-                            if (_invlist_contains_cp(PL_in_some_fold, value)) {
-                                op = EXACT;
-                            }
+
+                            /* Here, the only possible fold start[0] particpates in
+                             * is with start[1].  /i or not isn't relevant */
+                            op = EXACTFU;
                         }
 
-                        /* If we haven't found the node type, above, it means
-                         * we can use the prevailing one */
-                        if (op == END) {
-                            op = compute_EXACTish(pRExC_state);
-                        }
+                        value = toFOLD(start[0]);
                     }
                 }
-            }   /* End of first range contains just a single code point */
-            else if (start == 0) {
-                if (end == UV_MAX) {
-                    op = SANY;
-                    MARK_NAUGHTY(1);
-                }
-                else if (end == '\n' - 1
-                        && invlist_iternext(cp_list, &start, &end)
-                        && start == '\n' + 1 && end == UV_MAX)
+                else if (  ! upper_latin1_only_utf8_matches
+                         || (   _invlist_len(upper_latin1_only_utf8_matches)
+                                                                          == 2
+                             && PL_fold_latin1[
+                               invlist_highest(upper_latin1_only_utf8_matches)]
+                             == start[0]))
                 {
-                    op = REG_ANY;
-                    MARK_NAUGHTY(1);
+                    /* Here, the smallest character is non-ascii or there are
+                     * more than 2 code points matched by this node.  Also, we
+                     * either don't have /d UTF-8 dependent matches, or if we
+                     * do, they look like they could be a single character that
+                     * is the fold of the lowest one in the always-match list.
+                     * This test quickly excludes most of the false positives
+                     * when there are /d UTF-8 depdendent matches.  These are
+                     * like LATIN CAPITAL LETTER A WITH GRAVE matching LATIN
+                     * SMALL LETTER A WITH GRAVE iff the target string is
+                     * UTF-8.  (We don't have to worry above about exceeding
+                     * the array bounds of PL_fold_latin1[] because any code
+                     * point in 'upper_latin1_only_utf8_matches' is below 256.)
+                     *
+                     * EXACTFAA would apply only to pairs (hence exactly 2 code
+                     * points) in the ASCII range, so we can't use it here to
+                     * artificially restrict the fold domain, so we check if
+                     * the class does or does not match some EXACTFish node.
+                     * Further, if we aren't under /i, and and the folded-to
+                     * character is part of a multi-character fold, we can't do
+                     * this optimization, as the sequence around it could be
+                     * that multi-character fold, and we don't here know the
+                     * context, so we have to assume it is that multi-char
+                     * fold, to prevent potential bugs.
+                     *
+                     * To do the general case, we first find the fold of the
+                     * lowest code point (which may be higher than the lowest
+                     * one), then find everything that folds to it.  (The data
+                     * structure we have only maps from the folded code points,
+                     * so we have to do the earlier step.) */
+
+                    Size_t foldlen;
+                    U8 foldbuf[UTF8_MAXBYTES_CASE];
+                    UV folded = _to_uni_fold_flags(start[0],
+                                                        foldbuf, &foldlen, 0);
+                    unsigned int first_fold;
+                    const unsigned int * remaining_folds;
+                    Size_t folds_to_this_cp_count = _inverse_folds(
+                                                            folded,
+                                                            &first_fold,
+                                                            &remaining_folds);
+                    Size_t folds_count = folds_to_this_cp_count + 1;
+                    SV * fold_list = _new_invlist(folds_count);
+                    unsigned int i;
+
+                    /* If there are UTF-8 dependent matches, create a temporary
+                     * list of what this node matches, including them. */
+                    SV * all_cp_list = NULL;
+                    SV ** use_this_list = &cp_list;
+
+                    if (upper_latin1_only_utf8_matches) {
+                        all_cp_list = _new_invlist(0);
+                        use_this_list = &all_cp_list;
+                        _invlist_union(cp_list,
+                                       upper_latin1_only_utf8_matches,
+                                       use_this_list);
+                    }
+
+                    /* Having gotten everything that participates in the fold
+                     * containing the lowest code point, we turn that into an
+                     * inversion list, making sure everything is included. */
+                    fold_list = add_cp_to_invlist(fold_list, start[0]);
+                    fold_list = add_cp_to_invlist(fold_list, folded);
+                    fold_list = add_cp_to_invlist(fold_list, first_fold);
+                    for (i = 0; i < folds_to_this_cp_count - 1; i++) {
+                        fold_list = add_cp_to_invlist(fold_list,
+                                                        remaining_folds[i]);
+                    }
+
+                    /* If the fold list is identical to what's in this ANYOF
+                     * node, the node can be represented by an EXACTFish one
+                     * instead */
+                    if (_invlistEQ(*use_this_list, fold_list,
+                                   0 /* Don't complement */ )
+                    ) {
+
+                        /* But, we have to be careful, as mentioned above.
+                         * Just the right sequence of characters could match
+                         * this if it is part of a multi-character fold.  That
+                         * IS what we want if we are under /i.  But it ISN'T
+                         * what we want if not under /i, as it could match when
+                         * it shouldn't.  So, when we aren't under /i and this
+                         * character participates in a multi-char fold, we
+                         * don't optimize into an EXACTFish node.  So, for each
+                         * case below we have to check if we are folding
+                         * and if not, if it is not part of a multi-char fold.
+                         * */
+                        if (start[0] > 255) {    /* Highish code point */
+                            if (FOLD || ! _invlist_contains_cp(
+                                            PL_InMultiCharFold, folded))
+                            {
+                                op = (LOC)
+                                     ? EXACTFLU8
+                                     : (ASCII_FOLD_RESTRICTED)
+                                       ? EXACTFAA
+                                       : EXACTFU_ONLY8;
+                                value = folded;
+                            }
+                        }   /* Below, the lowest code point < 256 */
+                        else if (    FOLD
+                                 &&  folded == 's'
+                                 &&  DEPENDS_SEMANTICS)
+                        {   /* An EXACTF node containing a single character
+                                's', can be an EXACTFU if it doesn't get
+                                joined with an adjacent 's' */
+                            op = EXACTFU_S_EDGE;
+                            value = folded;
+                        }
+                        else if (    FOLD
+                                || ! HAS_NONLATIN1_FOLD_CLOSURE(start[0]))
+                        {
+                            if (upper_latin1_only_utf8_matches) {
+                                op = EXACTF;
+
+                                /* We can't use the fold, as that only matches
+                                 * under UTF-8 */
+                                value = start[0];
+                            }
+                            else if (     UNLIKELY(start[0] == MICRO_SIGN)
+                                     && ! UTF)
+                            {   /* EXACTFUP is a special node for this
+                                   character */
+                                op = (ASCII_FOLD_RESTRICTED)
+                                     ? EXACTFAA
+                                     : EXACTFUP;
+                                value = MICRO_SIGN;
+                            }
+                            else if (     ASCII_FOLD_RESTRICTED
+                                     && ! isASCII(start[0]))
+                            {   /* For ASCII under /iaa, we can use EXACTFU
+                                   below */
+                                op = EXACTFAA;
+                                value = folded;
+                            }
+                            else {
+                                op = EXACTFU;
+                                value = folded;
+                            }
+                        }
+                    }
+
+                    SvREFCNT_dec_NN(fold_list);
+                    SvREFCNT_dec(all_cp_list);
                 }
             }
-            invlist_iterfinish(cp_list);
 
             if (op != END) {
-                if (PL_regkind[op] != EXACT) {
-                    ret = reg_node(pRExC_state, op);
+
+                /* Here, we have calculated what EXACTish node we would use.
+                 * But we don't use it if it would require converting the
+                 * pattern to UTF-8, unless not using it could cause us to miss
+                 * some folds (hence be buggy) */
+
+                if (! UTF && value > 255) {
+                    SV * in_multis = NULL;
+
+                    assert(FOLD);
+
+                    /* If there is no code point that is part of a multi-char
+                     * fold, then there aren't any matches, so we don't do this
+                     * optimization.  Otherwise, it could match depending on
+                     * the context around us, so we do upgrade */
+                    _invlist_intersection(PL_InMultiCharFold, cp_list, &in_multis);
+                    if (UNLIKELY(_invlist_len(in_multis) != 0)) {
+                        REQUIRE_UTF8(flagp);
+                    }
+                    else {
+                        op = END;
+                    }
                 }
-                else {
+
+                if (op != END) {
                     U8 len = (UTF) ? UVCHR_SKIP(value) : 1;
 
                     ret = regnode_guts(pRExC_state, op, len, "exact");
@@ -18291,11 +18634,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     else {
                         uvchr_to_utf8((U8 *) STRING(REGNODE_p(ret)), value);
                     }
+                    goto not_anyof;
                 }
-                goto not_anyof;
             }
+        }
 
-            {
+        if (! has_runtime_dependency) {
 
             /* See if this can be turned into an ANYOFM node.  Think about the
              * bit patterns in two different bytes.  In some positions, the
@@ -18333,7 +18677,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
 
             if (invlist_highest(cp_list) <= max_permissible) {
-                UV this_start, this_end, lowest_cp;
+                UV this_start, this_end;
+                UV lowest_cp = UV_MAX;  /* inited to suppress compiler warn */
                 U8 bits_differing = 0;
                 Size_t full_cp_count = 0;
                 bool first_time = TRUE;
@@ -18409,18 +18754,24 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             if (op != END) {
                 goto not_anyof;
             }
-            }
+        }
 
-        {
+        if (! posixl) {
             PERL_UINT_FAST8_T type;
+            SV * intersection = NULL;
+            SV* d_invlist = NULL;
 
-            /* Here, didn't find an optimization.  See if this matches any
-             * of the POSIX classes.  The POSIXA ones are about the same speed
-             * as ANYOF ops, but take less room; the ones that have
-             * above-Latin1 code point matches are somewhat faster than ANYOF.
-             * */
+            /* See if this matches any of the POSIX classes.  The POSIXA and
+             * POSIXD ones are about the same speed as ANYOF ops, but take less
+             * room; the ones that have above-Latin1 code point matches are
+             * somewhat faster than ANYOF.  */
 
-            for (type = POSIXU; type <= POSIXA; type++) {
+            for (type = POSIXA; type >= POSIXD; type--) {
+                int posix_class;
+
+                if (type == POSIXL) {   /* But not /l posix classes */
+                    continue;
+                }
 
                 for (posix_class = 0;
                      posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
@@ -18437,30 +18788,90 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         official_code_points = &PL_XPosix_ptrs[posix_class];
                     }
 
+                    /* Skip non-existent classes of this type.  e.g. \v only
+                     * has an entry in PL_XPosix_ptrs */
+                    if (! *official_code_points) {
+                        continue;
+                    }
+
                     /* Try both the regular class, and its inversion */
                     for (try_inverted = 0; try_inverted < 2; try_inverted++) {
-                        /* Check if matches, normal or inverted */
-                        if (*official_code_points) {
-                            if (_invlistEQ(*our_code_points,
-                                        *official_code_points,
-                                        try_inverted))
+                        bool this_inverted = invert ^ try_inverted;
+
+                        if (type != POSIXD) {
+
+                            /* This class that isn't /d can't match if we have
+                             * /d dependencies */
+                            if (has_runtime_dependency
+                                                    & HAS_D_RUNTIME_DEPENDENCY)
                             {
-                                ret = reg_node(pRExC_state, (try_inverted)
-                                                            ? type + NPOSIXA
-                                                                   - POSIXA
-                                                            : type);
-                                FLAGS(REGNODE_p(ret)) = posix_class;
-                                goto not_anyof;
+                                continue;
                             }
+                        }
+                        else /* is /d */ if (! this_inverted) {
+
+                            /* /d classes don't match anything non-ASCII below
+                             * 256 unconditionally (which cp_list contains) */
+                            _invlist_intersection(cp_list, PL_UpperLatin1,
+                                                           &intersection);
+                            if (_invlist_len(intersection) != 0) {
+                                continue;
+                            }
+
+                            SvREFCNT_dec(d_invlist);
+                            d_invlist = invlist_clone(cp_list, NULL);
+
+                            /* But under UTF-8 it turns into using /u rules.
+                             * Add the things it matches under these conditions
+                             * so that we check below that these are identical
+                             * to what the tested class should match */
+                            if (upper_latin1_only_utf8_matches) {
+                                _invlist_union(
+                                            d_invlist,
+                                            upper_latin1_only_utf8_matches,
+                                            &d_invlist);
+                            }
+                            our_code_points = &d_invlist;
+                        }
+                        else {  /* POSIXD, inverted.  If this doesn't have this
+                                   flag set, it isn't /d. */
+                            if (! (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+                            {
+                                continue;
+                            }
+                            our_code_points = &cp_list;
+                        }
+
+                        /* Here, have weeded out some things.  We want to see
+                         * if the list of characters this node contains
+                         * ('*our_code_points') precisely matches those of the
+                         * class we are currently checking against
+                         * ('*official_code_points'). */
+                        if (_invlistEQ(*our_code_points,
+                                       *official_code_points,
+                                       try_inverted))
+                        {
+                            /* Here, they precisely match.  Optimize this ANYOF
+                             * node into its equivalent POSIX one of the
+                             * correct type, possibly inverted */
+                            ret = reg_node(pRExC_state, (try_inverted)
+                                                        ? type + NPOSIXA
+                                                                - POSIXA
+                                                        : type);
+                            FLAGS(REGNODE_p(ret)) = posix_class;
+                            SvREFCNT_dec(d_invlist);
+                            SvREFCNT_dec(intersection);
+                            goto not_anyof;
                         }
                     }
                 }
             }
-        }
+            SvREFCNT_dec(d_invlist);
+            SvREFCNT_dec(intersection);
         }
     }   /* End of seeing if can optimize it into a different node */
 
-    /* It's going to be an ANYOF node. */
+  is_anyof: /* It's going to be an ANYOF node. */
     op = (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY)
          ? ANYOFD
          : ((posixl)
@@ -18523,11 +18934,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                   only_utf8_locale_list,
                   swash, cBOOL(has_runtime_dependency
                                                 & HAS_USER_DEFINED_PROPERTY));
-
-    if (ANYOF_FLAGS(REGNODE_p(ret)) & ANYOF_LOCALE_FLAGS) {
-        RExC_contains_locale = 1;
-    }
-
     return ret;
 
   not_anyof:
@@ -18537,7 +18943,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
                                            RExC_parse - orig_parse);;
-    SvREFCNT_dec_NN(cp_list);;
+    SvREFCNT_dec(cp_list);;
     return ret;
 }
 

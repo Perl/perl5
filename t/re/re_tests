@@ -1675,8 +1675,6 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 
 /st/i	\x{DF}\x{FB05}	y	$&	\x{FB05}
 /ssst/i	\x{DF}\x{FB05}	y	$&	\x{DF}\x{FB05}
-/[s]s/i	\x{DF}	n	-	-
-/s[s]/i	\x{DF}	n	-	-
 
 # [perl #101970]
 /[[:lower:]]/i	\x{100}	y	$&	\x{100}
