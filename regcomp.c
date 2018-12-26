@@ -18429,11 +18429,22 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             invlist_iterfinish(cp_list);
 
             if (op != END) {
-                ret = reg_node(pRExC_state, op);
-                if (PL_regkind[op] == EXACT) {
-                    alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
-                                            TRUE /* downgradable to EXACT */
-                                            );
+                if (PL_regkind[op] != EXACT) {
+                    ret = reg_node(pRExC_state, op);
+                }
+                else {
+                    U8 len = (UTF) ? UVCHR_SKIP(value) : 1;
+
+                    ret = regnode_guts(pRExC_state, op, len, "exact");
+                    FILL_NODE(ret, op);
+                    RExC_emit += 1 + STR_SZ(len);
+                    STR_LEN(REGNODE_p(ret)) = len;
+                    if (len == 1) {
+                        *STRING(REGNODE_p(ret)) = value;
+                    }
+                    else {
+                        uvchr_to_utf8((U8 *) STRING(REGNODE_p(ret)), value);
+                    }
                 }
                 goto not_anyof;
             }
