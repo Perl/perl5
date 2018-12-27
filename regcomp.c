@@ -13311,25 +13311,17 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* FALLTHROUGH */
 	case 'b':
           {
+            U8 flags = 0;
 	    regex_charset charset = get_regex_charset(RExC_flags);
 
 	    RExC_seen_zerolen++;
             RExC_seen |= REG_LOOKBEHIND_SEEN;
 	    op = BOUND + charset;
 
-            if (op == BOUND) {
-                RExC_seen_d_op = TRUE;
-            }
-            else if (op == BOUNDL) {
-                RExC_contains_locale = 1;
-            }
-
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= SIMPLE;
 	    if (RExC_parse >= RExC_end || *(RExC_parse + 1) != '{') {
-                FLAGS(REGNODE_p(ret)) = TRADITIONAL_BOUND;
+                flags = TRADITIONAL_BOUND;
                 if (op > BOUNDA) {  /* /aa is same as /a */
-                    OP(REGNODE_p(ret)) = BOUNDA;
+                    op = BOUNDA;
                 }
             }
             else {
@@ -13365,25 +13357,25 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         {
                             goto bad_bound_type;
                         }
-                        FLAGS(REGNODE_p(ret)) = GCB_BOUND;
+                        flags = GCB_BOUND;
                         break;
                     case 'l':
                         if (length != 2 || *(RExC_parse + 1) != 'b') {
                             goto bad_bound_type;
                         }
-                        FLAGS(REGNODE_p(ret)) = LB_BOUND;
+                        flags = LB_BOUND;
                         break;
                     case 's':
                         if (length != 2 || *(RExC_parse + 1) != 'b') {
                             goto bad_bound_type;
                         }
-                        FLAGS(REGNODE_p(ret)) = SB_BOUND;
+                        flags = SB_BOUND;
                         break;
                     case 'w':
                         if (length != 2 || *(RExC_parse + 1) != 'b') {
                             goto bad_bound_type;
                         }
-                        FLAGS(REGNODE_p(ret)) = WB_BOUND;
+                        flags = WB_BOUND;
                         break;
                     default:
                       bad_bound_type:
@@ -13396,8 +13388,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_parse = endbrace;
                 REQUIRE_UNI_RULES(flagp, 0);
 
-                if (op >= BOUNDA) {  /* /aa is same as /a */
-                    OP(REGNODE_p(ret)) = BOUNDU;
+                if (op == BOUND) {
+                    op = BOUNDU;
+                }
+                else if (op >= BOUNDA) {  /* /aa is same as /a */
+                    op = BOUNDU;
                     length += 4;
 
                     /* Don't have to worry about UTF-8, in this message because
@@ -13412,9 +13407,22 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
 	    }
 
-            if (invert) {
-                OP(REGNODE_p(ret)) += NBOUND - BOUND;
+            if (op == BOUND) {
+                RExC_seen_d_op = TRUE;
             }
+            else if (op == BOUNDL) {
+                RExC_contains_locale = 1;
+            }
+
+            if (invert) {
+                op += NBOUND - BOUND;
+            }
+
+	    ret = reg_node(pRExC_state, op);
+            FLAGS(REGNODE_p(ret)) = flags;
+
+	    *flagp |= SIMPLE;
+
 	    goto finish_meta_pat;
           }
 
