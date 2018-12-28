@@ -207,7 +207,7 @@ const int categories[] = {
 
 /* The top-most real element is LC_ALL */
 
-const char * category_names[] = {
+const char * const category_names[] = {
 
 #    ifdef USE_LOCALE_NUMERIC
                                  "LC_NUMERIC",
