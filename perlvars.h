@@ -304,7 +304,7 @@ PERLVAR(G, utf8_tosimplefold,	SV *)
 PERLVAR(G, utf8_charname_begin, SV *)
 PERLVAR(G, utf8_charname_continue, SV *)
 PERLVAR(G, utf8_mark,	SV *)
-PERLVAR(G, InBitmap,	SV *)
+PERLVARI(G, InBitmap,	SV *, NULL)
 PERLVAR(G, CCC_non0_non230,	SV *)
 
 /* Definitions of user-defined \p{} properties, as the subs that define them
