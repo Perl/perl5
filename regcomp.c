@@ -1618,17 +1618,19 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Add in the points from the bit map */
     if (OP(node) != ANYOFH) {
-    for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
-        if (ANYOF_BITMAP_TEST(node, i)) {
-            unsigned int start = i++;
+        for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
+            if (ANYOF_BITMAP_TEST(node, i)) {
+                unsigned int start = i++;
 
-            for (; i < NUM_ANYOF_CODE_POINTS && ANYOF_BITMAP_TEST(node, i); ++i) {
-                /* empty */
+                for (;    i < NUM_ANYOF_CODE_POINTS
+                       && ANYOF_BITMAP_TEST(node, i); ++i)
+                {
+                    /* empty */
+                }
+                invlist = _add_range_to_invlist(invlist, start, i-1);
+                new_node_has_latin1 = TRUE;
             }
-            invlist = _add_range_to_invlist(invlist, start, i-1);
-            new_node_has_latin1 = TRUE;
         }
-    }
     }
 
     /* If this can match all upper Latin1 code points, have to add them
