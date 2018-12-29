@@ -234,7 +234,7 @@ require Symbol; # doesn't matter whether it exists or not
 EOP
 		    qr/\ARecursive call to Perl_load_module in PerlIO_find_layer at/s,
 		    {stderr => 1},
-		    'Mutal recursion between Perl_load_module and PerlIO_find_layer croaks');
+		    'Mutual recursion between Perl_load_module and PerlIO_find_layer croaks');
 }
 
 {
