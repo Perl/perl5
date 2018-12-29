@@ -47,6 +47,8 @@ Also, don’t backport the version change; just add _01 to the maint version.
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="tonyc" id="191f8909fa4eca1db16a91ada42dd4a065c04890" ticket="127606" desc="(perl #127606) adjust dependency paths on installation on darwin" />
+
 </div>
 
 <div><h3>Portability Fixes</h3>

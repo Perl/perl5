@@ -53,7 +53,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh tonyc" id="b79cd7dfefcc16674b83ffdeb11687ea693b7845" ticket="" desc="Fix Windows build with CCTYPE=SDK2003SP1"/>
 
-<commit votes="tonyc" id="edf639fce3e8c8852ee4179ab902b357b1deba98: ticket="133411" desc="(perl #133411) don't try to load Storable with -Dusecrosscompile" />
+<commit votes="tonyc" id="edf639fce3e8c8852ee4179ab902b357b1deba98" ticket="133411" desc="(perl #133411) don't try to load Storable with -Dusecrosscompile" />
+
+Fixes -Duseshrplib builds on darwin.
+<commit votes="tonyc" id="191f8909fa4eca1db16a91ada42dd4a065c04890" ticket="127606" desc="(perl #127606) adjust dependency paths on installation on darwin" />
 
 </div>
 
