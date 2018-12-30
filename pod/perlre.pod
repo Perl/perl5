@@ -1627,7 +1627,11 @@ X<look-behind, positive> X<lookbehind, positive> X<\K>
 
 A zero-width positive lookbehind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
-Works only for fixed-width lookbehind of up to 255 characters.
+Works only for fixed-width lookbehind of up to 255 characters.  Note
+that a compilation error will be generated if the assertion contains a
+multi-character match under C</i>, as that could match a single
+character, or it could match two or three, and that makes it variable
+length, which is forbidden.
 
 There is a special form of this construct, called C<\K> (available since
 Perl 5.10.0), which causes the
@@ -1662,7 +1666,11 @@ X<look-behind, negative> X<lookbehind, negative>
 
 A zero-width negative lookbehind assertion.  For example C</(?<!bar)foo/>
 matches any occurrence of "foo" that does not follow "bar".  Works
-only for fixed-width lookbehind of up to 255 characters.
+only for fixed-width lookbehind of up to 255 characters.  Note that a
+compilation error will be generated if the assertion contains a
+multi-character match under C</i>, as that could match a single
+character, or it could match two or three, and that makes it variable
+length, which is forbidden.
 
 The alphabetic forms are experimental; using them yields a warning in the
 C<experimental::alpha_assertions> category.
