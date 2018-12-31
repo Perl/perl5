@@ -18,8 +18,8 @@
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
 #define pWARN_STD		NULL
-#define pWARN_ALL		(((STRLEN*)0)+1)    /* use warnings 'all' */
-#define pWARN_NONE		(((STRLEN*)0)+2)    /* no  warnings 'all' */
+#define pWARN_ALL		(STRLEN *) &PL_WARN_ALL    /* use warnings 'all' */
+#define pWARN_NONE		(STRLEN *) &PL_WARN_NONE   /* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)

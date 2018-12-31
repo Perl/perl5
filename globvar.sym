@@ -83,4 +83,6 @@ PL_warn_nl
 PL_warn_nosemi
 PL_warn_reserved
 PL_warn_uninit
+PL_WARN_ALL
+PL_WARN_NONE
 PL_watch_pvx
