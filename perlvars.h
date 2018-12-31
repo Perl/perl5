@@ -285,7 +285,7 @@ PERLVAR(G, SCX_invlist, SV *)
 PERLVAR(G, UpperLatin1,	SV *)   /* Code points 128 - 255 */
 
 /* List of characters that participate in any fold defined by Unicode */
-PERLVARI(G, in_some_fold, SV *, NULL)
+PERLVAR(G, in_some_fold, SV *)
 
 PERLVAR(G, utf8_idcont,	SV *)
 PERLVAR(G, utf8_idstart, SV *)
