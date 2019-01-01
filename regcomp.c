@@ -21931,8 +21931,10 @@ Perl_init_uniprops(pTHX)
     PL_in_some_fold = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_ANY_FOLDS]);
     PL_HasMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
                                             UNI__PERL_FOLDS_TO_MULTI_CHAR]);
-    PL_InMultiCharFold = _new_invlist_C_array(UNI__PERL_IS_IN_MULTI_CHAR_FOLD_invlist);
-    PL_NonFinalFold = _new_invlist_C_array(UNI__PERL_NON_FINAL_FOLDS_invlist);
+    PL_InMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
+                                            UNI__PERL_IS_IN_MULTI_CHAR_FOLD]);
+    PL_NonFinalFold = _new_invlist_C_array(uni_prop_ptrs[
+                                            UNI__PERL_NON_FINAL_FOLDS]);
 
     PL_utf8_toupper = _new_invlist_C_array(Uppercase_Mapping_invlist);
     PL_utf8_tolower = _new_invlist_C_array(Lowercase_Mapping_invlist);
