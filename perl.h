@@ -5705,7 +5705,6 @@ EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
  *        the other continuations transitions to N1
  * N5     Start byte is F0.  Continuation bytes 80-8F are illegal (overlong);
  *        [9AB]F transition to N10; the other continuations to N2.
- *        the other continuations transition to N2
  * N6     Start byte is F[123].  Continuation bytes [89AB]F transition
  *        to N10; the other continuations to N2.
  * N7     Start byte is F4.  Continuation bytes 90-BF are illegal
