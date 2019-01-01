@@ -47,7 +47,7 @@ my $cwd = cwd();
     {
         local $^W; # avoid warnings on invalid dirhandle
         ok(!$dot->rewind, "rewind on closed");
-        ok(!defined($dot->read), "Directory handle closed; hence 'read' returns undef");
+        ok(!defined($dot->read), "Directory handle closed; 'read' returns undef");
     }
 
     open(FH,'>','X') || die "Can't create x";
@@ -68,7 +68,7 @@ my $cwd = cwd();
 
     delete $dir{'X'};
 
-    ok(-f 'X', "Confirm that file still exists after entry in tied hash has been deleted");
+    ok(-f 'X', "File still exists after tied hash entry deleted");
 
     my %dirx;
     tie %dirx, $CLASS, $DIR, DIR_UNLINK;
@@ -80,9 +80,7 @@ my $cwd = cwd();
 
     delete $dirx{'X'};
 
-    my $description = "Tied hash interface with DIR_UNLINK:";
-    $description .= "  deleting an element from hash deletes corresponding directory entry";
-    ok(!(-f 'X'), $description);
+    ok(!(-f 'X'), "Using DIR_UNLINK deletes tied hash element and directory entry");
 
     chdir $cwd or die "Unable to chdir back to $cwd";
 }
