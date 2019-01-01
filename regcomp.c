@@ -8808,7 +8808,6 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 }
 
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
-    int num;                                                    \
     if (RExC_lastparse!=RExC_parse) {                           \
         Perl_re_printf( aTHX_  "%s",                            \
             Perl_pv_pretty(aTHX_ RExC_mysv1, RExC_parse,        \
@@ -8824,16 +8823,15 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
     } else                                                      \
         Perl_re_printf( aTHX_ "%16s","");                       \
                                                                 \
-    num=REG_NODE_NUM(REGNODE_p(RExC_emit));                     \
-    if (RExC_lastnum!=num)                                      \
-       Perl_re_printf( aTHX_ "|%4d", num);                      \
+    if (RExC_lastnum!=RExC_emit)                                \
+       Perl_re_printf( aTHX_ "|%4d", RExC_emit);                \
     else                                                        \
        Perl_re_printf( aTHX_ "|%4s","");                        \
     Perl_re_printf( aTHX_ "|%*s%-4s",                           \
         (int)((depth*2)), "",                                   \
         (funcname)                                              \
     );                                                          \
-    RExC_lastnum=num;                                           \
+    RExC_lastnum=RExC_emit;                                     \
     RExC_lastparse=RExC_parse;                                  \
 })
 
@@ -12049,7 +12047,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                     "%*s%*s Setting open paren #%" IVdf " to %d\n",
                     22, "|    |", (int)(depth * 2 + 1), "",
-                    (IV)parno, REG_NODE_NUM(REGNODE_p(ret))));
+                    (IV)parno, ret));
                 RExC_open_parens[parno]= ret;
             }
 
@@ -12138,7 +12136,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                         "%*s%*s Setting close paren #%" IVdf " to %d\n",
                         22, "|    |", (int)(depth * 2 + 1), "",
-                        (IV)parno, REG_NODE_NUM(REGNODE_p(ender))));
+                        (IV)parno, ender));
                 RExC_close_parens[parno]= ender;
 	        if (RExC_nestroot == parno)
 	            RExC_nestroot = 0;
@@ -12172,7 +12170,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                     "%*s%*s Setting close paren #0 (END) to %d\n",
                     22, "|    |", (int)(depth * 2 + 1), "",
-                    REG_NODE_NUM(REGNODE_p(ender))));
+                    ender));
 
                 RExC_close_parens[0]= ender;
             }
@@ -12184,9 +12182,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender), NULL, pRExC_state);
             Perl_re_printf( aTHX_  "~ tying lastbr %s (%" IVdf ") to ender %s (%" IVdf ") offset %" IVdf "\n",
                           SvPV_nolen_const(RExC_mysv1),
-                          (IV)REG_NODE_NUM(REGNODE_p(lastbr)),
+                          (IV)lastbr,
                           SvPV_nolen_const(RExC_mysv2),
-                          (IV)REG_NODE_NUM(REGNODE_p(ender)),
+                          (IV)ender,
                           (IV)(ender - lastbr)
             );
         );
@@ -12234,7 +12232,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                   SvPV_nolen_const(RExC_mysv1),
                                   (IV)REG_NODE_NUM(ret_as_regnode),
                                   SvPV_nolen_const(RExC_mysv2),
-                                  (IV)REG_NODE_NUM(REGNODE_p(ender)),
+                                  (IV)ender,
                                   (IV)(ender - ret)
                     );
                 );
@@ -19708,7 +19706,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
             DEBUG_PARSE_MSG((scan==p ? "tail" : ""));
             regprop(RExC_rx, RExC_mysv, REGNODE_p(scan), NULL, pRExC_state);
             Perl_re_printf( aTHX_  "~ %s (%d) %s %s\n",
-                SvPV_nolen_const(RExC_mysv), REG_NODE_NUM(REGNODE_p(scan)),
+                SvPV_nolen_const(RExC_mysv), scan,
                     (temp == NULL ? "->" : ""),
                     (temp == NULL ? PL_reg_name[OP(REGNODE_p(val))] : "")
             );
@@ -19799,7 +19797,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
             regprop(RExC_rx, RExC_mysv, REGNODE_p(scan), NULL, pRExC_state);
             Perl_re_printf( aTHX_  "~ %s (%d) -> %s\n",
                 SvPV_nolen_const(RExC_mysv),
-                REG_NODE_NUM(REGNODE_p(scan)),
+                scan,
                 PL_reg_name[exact]);
         });
 	if (temp == NULL)
@@ -19812,7 +19810,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         Perl_re_printf( aTHX_
                       "~ attach to %s (%" IVdf ") offset to %" IVdf "\n",
 		      SvPV_nolen_const(RExC_mysv),
-		      (IV)REG_NODE_NUM(REGNODE_p(val)),
+		      (IV)val,
 		      (IV)(val - scan)
         );
     });
