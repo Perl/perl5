@@ -218,7 +218,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Prototype not terminated|perldiag/"Prototype not terminated">
+
+The file and line number is now reported for this error.  [perl
+#133524]
 
 =back
 
