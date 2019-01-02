@@ -366,7 +366,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A bare C<eof> call with no previous file handle now returns true.
+[perl #133721]
 
 =back
 
