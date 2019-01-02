@@ -487,3 +487,9 @@ dump;
 CORE::dump;
 EXPECT
 dump() must be written as CORE::dump() as of Perl 5.30 at - line 2.
+########
+# NAME check Prototype not terminated includes line number (133524)
+sub t1 {}
+sub t2 (}
+EXPECT
+Prototype not terminated at - line 2.
