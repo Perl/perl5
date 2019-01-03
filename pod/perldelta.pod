@@ -391,6 +391,12 @@ because the child's stdin would be closed on exec. This has now been fixed.
 C<pack "u", "invalid uuencoding"> now properly NUL terminates the
 zero-length SV produced.  [perl #132655]
 
+=item *
+
+Failing to compile a format now aborts compilation.  Like other errors
+in sub-parses this could leave the parser in a strange state, possibly
+crashing perl if compilation continued.  [perl #132158]
+
 =back
 
 =head1 Known Problems
