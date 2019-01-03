@@ -369,6 +369,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 A bare C<eof> call with no previous file handle now returns true.
 [perl #133721]
 
+=item *
+
+Failing to compile a format now aborts compilation.  Like other errors
+in sub-parses this could leave the parser in a strange state, possibly
+crashing perl if compilation continued.  [perl #132158]
+
 =back
 
 =head1 Known Problems
