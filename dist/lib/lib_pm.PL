@@ -86,7 +86,7 @@ my \@inc_version_list = $Config_inc_version_list;
 print OUT <<'!NO!SUBS!';
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
-our $VERSION = '0.64';
+our $VERSION = '0.65';
 
 sub import {
     shift;
