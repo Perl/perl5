@@ -2922,7 +2922,7 @@ print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 
 output_table_header($out_fh, "UV *", "uni_prop_ptrs");
-print $out_fh "\tNULL,\t/* Placeholder */\n\t";
+print $out_fh "\tNULL,\t/* Placeholder */\n";
 print $out_fh "\t";
 print $out_fh join ",\n\t", @invlist_names;
 print $out_fh "\n";

@@ -382315,7 +382315,7 @@ typedef enum {
 
 static const UV * const uni_prop_ptrs[] = {
 	NULL,	/* Placeholder */
-		UNI_ADLM_invlist,
+	UNI_ADLM_invlist,
 	UNI_AEGEANNUMBERS_invlist,
 	UNI_AGE__10_invlist,
 	UNI_AGE__11_invlist,
@@ -383694,5 +383694,5 @@ static const U8 WB_table[23][23] = {
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * 0ae79b62810eccee76ca20625f3261d326a741403e9f53eee7509443646ea522 regen/mk_invlists.pl
+ * 1fdcc4c0ed94008c13daeb934b40cbd9f5b2871201dce7a9f0530be4145ea026 regen/mk_invlists.pl
  * ex: set ro: */
