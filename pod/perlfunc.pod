@@ -8731,7 +8731,7 @@ X<sysseek> X<lseek>
 
 Sets FILEHANDLE's system position I<in bytes> using L<lseek(2)>.  FILEHANDLE may
 be an expression whose value gives the name of the filehandle.  The values
-for WHENCE are C<0> to set the new position to POSITION; C<1> to set the it
+for WHENCE are C<0> to set the new position to POSITION; C<1> to set it
 to the current position plus POSITION; and C<2> to set it to EOF plus
 POSITION, typically negative.
 
