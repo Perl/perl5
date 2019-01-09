@@ -47,7 +47,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 In XS code, use of various macros dealing with UTF-8.
+
+This deprecation was scheduled to become fatal in 5.30, but has been
+delayed to 5.32 due to problems that showed up with some CPAN modules.
+For details of what's affected, see L<perldeprecation|
+perldeprecation/In XS code, use of various macros dealing with UTF-8.>
 
 =head2 Module removals
 

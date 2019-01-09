@@ -3184,14 +3184,14 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 
             if (instr(file, "mathoms.c")) {
                 Perl_warner(aTHX_ WARN_DEPRECATED,
-                            "In %s, line %d, starting in Perl v5.30, %s()"
+                            "In %s, line %d, starting in Perl v5.32, %s()"
                             " will be removed.  Avoid this message by"
                             " converting to use %s().\n",
                             file, line, name, alternative);
             }
             else {
                 Perl_warner(aTHX_ WARN_DEPRECATED,
-                            "In %s, line %d, starting in Perl v5.30, %s() will"
+                            "In %s, line %d, starting in Perl v5.32, %s() will"
                             " require an additional parameter.  Avoid this"
                             " message by converting to use %s().\n",
                             file, line, name, alternative);
