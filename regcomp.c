@@ -14377,6 +14377,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * identifies, so when it is set to less than the full node, we can
              * skip the rest of this */
             if (FOLD && p < RExC_end && upper_parse == MAX_NODE_STRING_SIZE) {
+                PERL_UINT_FAST8_T backup_count = 0;
 
                 const STRLEN full_len = len;
 
@@ -14393,7 +14394,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         goto loopdone;
                     }
 
-                    while (--s >= s0 && IS_NON_FINAL_FOLD(*s)) { }
+                    while (--s >= s0 && IS_NON_FINAL_FOLD(*s)) {
+                        backup_count++;
+                    }
                     len = s - s0 + 1;
 		}
                 else {
@@ -14435,6 +14438,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * special case the very first byte in the string, so
                          * we don't read outside the string */
                         s = (s == s0) ? s -1 : (char *) utf8_hop((U8 *) s, -1);
+                        backup_count++;
                     } /* End of loop backwards through the string */
 
                     /* If there were only problematic characters in the string,
@@ -14458,12 +14462,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 } else {
 
                     /* Here, the node does contain some characters that aren't
-                     * problematic.  If one such is the final character in the
-                     * node, we are done */
-                    if (len == full_len) {
+                     * problematic.  If we didn't have to backup any, then the
+                     * final character in the node is non-problematic, and we
+                     * can take the node as-is */
+                    if (backup_count == 0) {
                         goto loopdone;
                     }
-                    else if (len + ((UTF) ? UTF8SKIP(s) : 1) == full_len) {
+                    else if (backup_count == 1) {
 
                         /* If the final character is problematic, but the
                          * penultimate is not, back-off that last character to

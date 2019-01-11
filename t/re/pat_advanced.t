@@ -2176,6 +2176,33 @@ EOP
             }
         }
         ok(! $failed, "Matched multi-char fold 'ss' across EXACTF node boundaries; if failed, was at count $failed");
+
+        for my $non_finals ("t", "ft", "ift", "sift") {
+            my $base_pat = $non_finals . "enKalt";   # (The tail is taken from
+                                                     # the trouble ticket, is
+                                                     # arbitrary)
+            for my $utf8 ("non-UTF-8", "UTF-8") {
+
+                # Try at different lengths to be sure to get a node boundary
+                for my $repeat (120 .. 270) {   # [perl #133756]
+                    my $head = ("b" x $repeat) . "\xDC";
+                    my $pat = $base_pat;
+                    utf8::upgrade($pat) if $utf8 eq "UTF-8";
+                    $pat     = $head . $pat;
+                    my $text = $head . $base_pat;
+
+                    if ($text !~ /$pat/i) {
+                        $failed = $repeat;
+                        last;
+                    }
+                }
+
+                ok(! $failed, "A non-final fold character "
+                            . (length($non_finals) - 1)
+                            . " characters from the end of an EXACTFish"
+                            . " $utf8 pattern works; if failed, was at count $failed");
+            }
+        }
     }
 
     {
