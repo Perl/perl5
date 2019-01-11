@@ -14382,9 +14382,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 		assert(len >= MAX_NODE_STRING_SIZE);
 
-                /* Here, <s> points to the final byte of the final character.
-                 * Look backwards through the string until find a non-
-                 * problematic character */
+                /* Here, <s> points to just beyond where we have output the
+                 * final character of the node.  Look backwards through the
+                 * string until find a non- problematic character */
 
 		if (! UTF) {
 
