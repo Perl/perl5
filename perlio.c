@@ -5111,6 +5111,10 @@ Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 
                 && *msgs && av_tindex(*msgs) >= 0) {
                 return retval;
             }
+            else if ((flags & UTF8_ONERROR_MASK) != UTF8_WARN_ON_ERROR) {
+                SvREFCNT_dec(*msgs);
+                *msgs = NULL;
+            }
 
             if (out) {
                 Copy(REPLACEMENT_CHARACTER_UTF8, *out,

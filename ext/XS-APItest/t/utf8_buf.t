@@ -204,17 +204,17 @@ sub _fail_flags {
     for my $test (@tests) {
         my @warn;
         use Data::Dumper;
-        diag Dumper($test);
+        note Dumper($test);
         my $name = $test->{name};
         my $flags = $test->{flags};
         my $eout = $test->{result};
         utf8::encode($eout);
         skip("$name: ascii only", 3)
           if $test->{ascii} && ord("A") != 65;
-        my ($out, $con, $msgs);
+        my ($out, $con, $errors, $msgs);
         {
             local $SIG{__WARN__} = sub { push @warn, "@_"; local $| = 1; print @_; };
-            ($out, $con, $msgs) = test_utf8_validate_and_fix($test->{in}, $flags, $test->{outsize}, $test->{eof} || 0);
+            ($out, $con, $errors, $msgs) = test_utf8_validate_and_fix($test->{in}, $flags, $test->{outsize}, $test->{eof} || 0);
         }
 
         is($out, $eout, "$name: output")
@@ -226,13 +226,21 @@ sub _fail_flags {
         @warn = ();
         {
             local $SIG{__WARN__} = sub { push @warn, "@_"; };
-            ($out, $con, $msgs) = test_utf8_validate_and_fix($test->{in}, _warn_flags($flags) , $test->{outsize}, $test->{eof} || 0);
+            ($out, $con, $errors, $msgs) = test_utf8_validate_and_fix($test->{in}, _warn_flags($flags) , $test->{outsize}, $test->{eof} || 0);
         }
         is($out, $eout, "$name: output (with warn flags)");
         is($con, $test->{consumed}, "$name: consumed (with warn flags)");
         is(@warn, 0, "$name: should not warn");
         if ($test->{message}) {
-            like("@$msgs", $test->{message}, "$name: messages matched");
+            if (ref $msgs) {
+                my $text = join "\n", map $_->{text}, @$msgs;
+                #use Data::Dumper;
+                #note Dumper($msgs);
+                like($text, $test->{message}, "$name: messages matched");
+            }
+            else {
+                fail("$name: messages matched (but none produced)");
+            }
         }
         else {
             ok(!$msgs || !@$msgs, "$name: no messages with warn flags");
@@ -244,7 +252,7 @@ sub _fail_flags {
             my $ferror = 0;
             my $in = $test->{in};
             my $loops = 0;
-            while (my ($tout, $consumed, $error) = test_utf8_validate_and_fix(substr($in,  $fconsumed), _fail_flags($flags), $test->{outsize} - length($out), $test->{eof})) {
+            while (my ($tout, $consumed, $error, $msgs) = test_utf8_validate_and_fix(substr($in,  $fconsumed), _fail_flags($flags), $test->{outsize} - length($out), $test->{eof})) {
                 $out .= $tout;
                 $fconsumed += $consumed;
                 $ferror |= $error;
