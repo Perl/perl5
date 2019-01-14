@@ -2366,6 +2366,8 @@ output of the command, for example:
   use open IN => ":encoding(UTF-8)";
   my $x = `cmd-producing-utf-8`;
 
+C<qx//> can also be called like a function with L<perlfunc/readpipe>.
+
 See L</"I/O Operators"> for more discussion.
 
 =item C<qw/I<STRING>/>
@@ -3096,7 +3098,8 @@ Unlike in B<csh>, no translation is done on the return data--newlines
 remain newlines.  Unlike in any of the shells, single quotes do not
 hide variable names in the command from interpretation.  To pass a
 literal dollar-sign through to the shell you need to hide it with a
-backslash.  The generalized form of backticks is C<qx//>.  (Because
+backslash.  The generalized form of backticks is C<qx//>, or you can
+call the L<perlfunc/readpipe> function.  (Because
 backticks always undergo shell expansion as well, see L<perlsec> for
 security concerns.)
 X<qx> X<`> X<``> X<backtick> X<glob>
