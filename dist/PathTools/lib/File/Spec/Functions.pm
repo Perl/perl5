@@ -3,7 +3,7 @@ package File::Spec::Functions;
 use File::Spec;
 use strict;
 
-our $VERSION = '3.76';
+our $VERSION = '3.77';
 $VERSION =~ tr/_//d;
 
 require Exporter;

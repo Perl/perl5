@@ -3,7 +3,7 @@ package File::Spec::Cygwin;
 use strict;
 require File::Spec::Unix;
 
-our $VERSION = '3.76';
+our $VERSION = '3.77';
 $VERSION =~ tr/_//d;
 
 our @ISA = qw(File::Spec::Unix);
