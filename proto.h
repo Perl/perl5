@@ -4404,7 +4404,7 @@ PERL_CALLCONV UV	Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLE
 #define PERL_ARGS_ASSERT_UTF8_TO_UVUNI_BUF	\
 	assert(s); assert(send)
 
-PERL_CALLCONV SSize_t	Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend, const U32 flags, bool eof, U32 *unfixed_errors, SV **msgs)
+PERL_CALLCONV SSize_t	Perl_utf8_validate_and_fix(pTHX_ const U8 **start, const U8 *send, U8 **out, U8 *oend, const U32 flags, bool eof, U32 *unfixed_errors, AV **msgs)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_UTF8_VALIDATE_AND_FIX	\
 	assert(start); assert(send); assert(unfixed_errors); assert(msgs)

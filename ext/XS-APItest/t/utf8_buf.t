@@ -211,41 +211,31 @@ sub _fail_flags {
         utf8::encode($eout);
         skip("$name: ascii only", 3)
           if $test->{ascii} && ord("A") != 65;
-        my ($out, $con);
+        my ($out, $con, $msgs);
         {
             local $SIG{__WARN__} = sub { push @warn, "@_"; local $| = 1; print @_; };
-            ($out, $con) = test_utf8_validate_and_fix($test->{in}, $flags, $test->{outsize}, $test->{eof} || 0);
+            ($out, $con, $msgs) = test_utf8_validate_and_fix($test->{in}, $flags, $test->{outsize}, $test->{eof} || 0);
         }
 
         is($out, $eout, "$name: output")
           or _clean(got => $out, expected => $eout);
         is($con, $test->{consumed}, "$name: consumed");
+        ok(!$msgs || !@$msgs, "should be no messages");
         is(@warn, 0, "$name: no warnings")
           or do { diag $_ for @warn };
         @warn = ();
         {
             local $SIG{__WARN__} = sub { push @warn, "@_"; };
-            ($out, $con) = test_utf8_validate_and_fix($test->{in}, _warn_flags($flags) , $test->{outsize}, $test->{eof} || 0);
+            ($out, $con, $msgs) = test_utf8_validate_and_fix($test->{in}, _warn_flags($flags) , $test->{outsize}, $test->{eof} || 0);
         }
         is($out, $eout, "$name: output (with warn flags)");
         is($con, $test->{consumed}, "$name: consumed (with warn flags)");
+        is(@warn, 0, "$name: should not warn");
         if ($test->{message}) {
-            like("@warn", $test->{message}, "$name: warning matched");
+            like("@$msgs", $test->{message}, "$name: messages matched");
         }
         else {
-            is(@warn, 0, "$name: no warnings with warn flags");
-        }
-        my $died = !eval {
-            ($out, $con) = test_utf8_validate_and_fix($test->{in}, _croak_flags($flags) , $test->{outsize}, $test->{eof} || 0);
-            1;
-        };
-        if ($test->{message}) {
-            my $msg = $@;
-            ok($died, "$name: should have died with croak flags");
-            like($msg, $test->{message}, "$name: check die message");
-        }
-        else {
-            ok(!$died, "$name: should not die");
+            ok(!$msgs || !@$msgs, "$name: no messages with warn flags");
         }
 
         if (exists $test->{failout}) {

@@ -6435,6 +6435,7 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize, bool eof = FALSE)
         U8 *outstart;
         U8 *outend;
         U32 errors = 0;
+	AV *msgs = NULL;
     PPCODE:
         ostart = start = (U8*)SvPVbyte(in, inlen);
         outsv = sv_2mortal(newSV(outsize+1));
@@ -6442,7 +6443,7 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize, bool eof = FALSE)
         outend = out + outsize;
         *outend = 'A';
         outlen = utf8_validate_and_fix(&start, start+inlen,
-                                       &out, outend, flags, eof, &errors);
+                                       &out, outend, flags, eof, &errors, &msgs);
         if (*outend != 'A')
             croak("Buffer overflow in validate_and_fix_utf8()");
         if (outlen < 0)
@@ -6450,10 +6451,13 @@ test_utf8_validate_and_fix(SV *in, U32 flags, STRLEN outsize, bool eof = FALSE)
         *out = '\0';
         SvCUR_set(outsv, out - outstart);
         SvPOK_on(outsv);
-        EXTEND(SP, 3);
+        EXTEND(SP, 4);
         PUSHs(outsv); /* already mortal */
         PUSHs(sv_2mortal(newSViv(start - ostart)));
         PUSHs(sv_2mortal(newSVuv(errors)));
+	if (msgs) {
+	    PUSHs(newRV_noinc((SV*)msgs));
+	}
 
 UV
 test_toLOWER(UV ord)

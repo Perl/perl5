@@ -557,9 +557,10 @@ SKIP: {
         unless ($test->{croak}) {
             my $poptions = defined $options ? "($options)" : "";
 
+            note "Options :utf8$poptions";
             if (ok(open(my $fi, "<:utf8$poptions", $a_file), "$name: open for read()")) {
                 my @warn;
-                local $SIG{__WARN__} = sub { push @warn, "@_" };
+                local $SIG{__WARN__} = sub { note "@_"; push @warn, "@_" };
                 my $buf;
                 ok(read($fi, $buf, length $data), "$name: read with read()");
                 is($buf, $expect, "$name: match with read() ($options)");
