@@ -35,6 +35,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="tonyc" id="120060c86e233cb9f588314214137f3ed1b48e2a" ticket="133326" desc="(perl #133326) fix and clarify handling of recurs_sv." />
 
+<commit votes="tonyc" id="03b94aa47e981af3c7b0118bfb11facda2b95251" ticket="133573" desc="RT#133573: $^X fallback when platform-specific technique fails" />
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
