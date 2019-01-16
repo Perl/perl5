@@ -67,8 +67,6 @@ Fixes -Duseshrplib builds on darwin.
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="xsawyerx steveh" id="9dd556afad370558b5d26c9222d4fa79fb2dc2ac" ticket="" desc="Add 5.28.0 release data to perlhist.pod"/>
-
 </div>
 
 </data>
