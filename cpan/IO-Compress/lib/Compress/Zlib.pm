@@ -7,17 +7,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.081 ;
-use Compress::Raw::Zlib 2.081 ;
-use IO::Compress::Gzip 2.081 ;
-use IO::Uncompress::Gunzip 2.081 ;
+use IO::Compress::Base::Common 2.084 ;
+use Compress::Raw::Zlib 2.084 ;
+use IO::Compress::Gzip 2.084 ;
+use IO::Uncompress::Gunzip 2.084 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.081';
+$VERSION = '2.084';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -461,7 +461,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.081 ;
+use IO::Compress::Gzip::Constants 2.084 ;
 
 sub memGzip($)
 {
@@ -1161,7 +1161,7 @@ The default is Z_DEFAULT_STRATEGY.
 When a dictionary is specified I<Compress::Zlib> will automatically
 call C<deflateSetDictionary> directly after calling C<deflateInit>. The
 Adler32 value for the dictionary can be obtained by calling the method
-C<$d->dict_adler()>.
+C<< $d->dict_adler() >>.
 
 The default is no dictionary.
 
@@ -1469,7 +1469,7 @@ of I<Compress::Zlib>.
 
 =head1 SEE ALSO
 
-L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzip>, L<IO::Uncompress::UnLzip>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Compress::Zstd>, L<IO::Uncompress::UnZstd>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<IO::Compress::FAQ|IO::Compress::FAQ>
 
@@ -1500,7 +1500,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 1995-2018 Paul Marquess. All rights reserved.
+Copyright (c) 1995-2019 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

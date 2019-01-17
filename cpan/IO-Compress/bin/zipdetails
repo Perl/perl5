@@ -173,13 +173,14 @@ my %Extras = (
       0x7855,  ['Unix Extra type 2', \&decode_Ux],
       0x7875,  ['Unix Extra Type 3', \&decode_ux],
       0x9901,  ['AES Encryption', \&decode_AES],
+      0xa11e,  ['Data Stream Alignment', undef],
       0xA220,  ['Open Packaging Growth Hint', undef ],
       0xCAFE,  ['Java Executable', \&decode_Java_exe],
       0xfb4a,  ['SMS/QDOS', undef],
 
        );
 
-my $VERSION = "1.08" ;
+my $VERSION = "1.09" ;
 
 my $FH;
 
