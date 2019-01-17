@@ -1,9 +1,9 @@
-package File::Temp; # git description: v0.2307-2-g43003ec
+package File::Temp; # git description: v0.2308-7-g3bb4d88
 # ABSTRACT: return name and handle of a temporary file safely
 
-our $VERSION = '0.2308';
+our $VERSION = '0.2309';
 
-#pod =begin __INTERNALS
+#pod =begin :__INTERNALS
 #pod
 #pod =head1 PORTABILITY
 #pod
@@ -41,7 +41,7 @@ our $VERSION = '0.2308';
 #pod
 #pod =back
 #pod
-#pod =end __INTERNALS
+#pod =end :__INTERNALS
 #pod
 #pod =head1 SYNOPSIS
 #pod
@@ -2581,7 +2581,7 @@ sub unlink1 {
 package ## hide from PAUSE
   File::Temp::Dir;
 
-our $VERSION = '0.2308';
+our $VERSION = '0.2309';
 
 use File::Path qw/ rmtree /;
 use strict;
@@ -2648,7 +2648,7 @@ File::Temp - return name and handle of a temporary file safely
 
 =head1 VERSION
 
-version 0.2308
+version 0.2309
 
 =head1 SYNOPSIS
 
@@ -2743,7 +2743,7 @@ that the file will not exist by the time the caller opens the filename.
 
 Filehandles returned by these functions support the seekable methods.
 
-=begin __INTERNALS
+=begin :__INTERNALS
 
 =head1 PORTABILITY
 
@@ -2756,6 +2756,7 @@ This module is designed to be portable across operating systems and it
 currently supports Unix, VMS, DOS, OS/2, Windows and Mac OS
 (Classic). When porting to a new OS there are generally three main
 issues that have to be solved:
+
 =over 4
 
 =item *
@@ -2780,7 +2781,7 @@ The C<_can_do_level> method should be modified accordingly.
 
 =back
 
-=end __INTERNALS
+=end :__INTERNALS
 
 =head1 OBJECT-ORIENTED INTERFACE
 
@@ -3677,7 +3678,7 @@ Ben Tilly <btilly@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2018 by Tim Jenness and the UK Particle Physics and Astronomy Research Council.
+This software is copyright (c) 2019 by Tim Jenness and the UK Particle Physics and Astronomy Research Council.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

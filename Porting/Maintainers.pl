@@ -508,7 +508,7 @@ use File::Glob qw(:case);
     },
 
     'File::Temp' => {
-        'DISTRIBUTION' => 'ETHER/File-Temp-0.2308.tar.gz',
+        'DISTRIBUTION' => 'ETHER/File-Temp-0.2309.tar.gz',
         'FILES'        => q[cpan/File-Temp],
         'EXCLUDED'     => [
             qw( README.mkdn
