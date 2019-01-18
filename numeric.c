@@ -1465,6 +1465,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, STRLEN len)
         /* If we created a copy, 'endp' is in terms of that.  Convert back to
          * the original */
         if (copy) {
+            s = (s - copy) + (char *) orig;
             endp = (endp - copy) + (char *) orig;
             Safefree(copy);
         }
