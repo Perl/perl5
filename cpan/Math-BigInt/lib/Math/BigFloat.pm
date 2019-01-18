@@ -19,7 +19,7 @@ use warnings;
 use Carp qw< carp croak >;
 use Math::BigInt ();
 
-our $VERSION = '1.999813';
+our $VERSION = '1.999816';
 
 our @ISA        = qw/Math::BigInt/;
 our @EXPORT_OK  = qw/bpi/;
@@ -2569,16 +2569,20 @@ sub bnok {
     return $x if $x->modify('bnok');
 
     return $x->bnan() if $x->is_nan() || $y->is_nan();
-    return $x->binf() if $x->is_inf();
+    return $x->bnan() if (($x->is_finite() && !$x->is_int()) ||
+                          ($y->is_finite() && !$y->is_int()));
 
-    my $u = $x->as_int();
-    $u->bnok($y->as_int());
+    my $xint = Math::BigInt -> new($x -> bsstr());
+    my $yint = Math::BigInt -> new($y -> bsstr());
+    $xint -> bnok($yint);
+    my $xflt = Math::BigFloat -> new($xint);
 
-    $x->{_m} = $u->{value};
-    $x->{_e} = $LIB->_zero();
-    $x->{_es} = '+';
-    $x->{sign} = '+';
-    $x->bnorm(@r);
+    $x->{_m}   = $xflt->{_m};
+    $x->{_e}   = $xflt->{_e};
+    $x->{_es}  = $xflt->{_es};
+    $x->{sign} = $xflt->{sign};
+
+    return $x;
 }
 
 sub bsin {
@@ -5133,7 +5137,7 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 In scalar context, divides $x by $y and returns the result to the given or
 default accuracy/precision. In list context, does floored division
 (F-division), returning an integer $q and a remainder $r so that $x = $q * $y +
-$r. The remainer (modulo) is equal to what is returned by C<$x->bmod($y)>.
+$r. The remainer (modulo) is equal to what is returned by C<< $x->bmod($y) >>.
 
 =item bmod()
 
