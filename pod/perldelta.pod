@@ -89,7 +89,7 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-More specific documentation of paragraph mode. [perl #133722].
+More specific documentation of paragraph mode. L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
 
 =back
 
@@ -108,7 +108,7 @@ diagnostic messages, see L<perldiag>.
 L<Prototype not terminated|perldiag/"Prototype not terminated">
 
 The file and line number is now reported for this error.
-[perl #133524]
+L<[perl #133524]|https://rt.perl.org/Ticket/Display.html?id=133524>
 
 =back
 
@@ -123,12 +123,12 @@ made:
 =item *
 
 Fix intermittent tests which failed due to race conditions which
-surface during parallel testing. [perl #133740].
+surface during parallel testing. L<[perl #133740]|https://rt.perl.org/Ticket/Display.html?id=133740>.
 
 =item *
 
 Thoroughly test paragraph mode, using a new test file,
-F<t/io/paragraph_mode.t>. [perl #133722].
+F<t/io/paragraph_mode.t>. L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
 
 =back
 
@@ -148,18 +148,18 @@ multi-character folds in Unicode correctly. If we want to break a
 string at a place which could potentially be in the middle of a
 multi-character fold, we back off one (or more) characters, leaving
 a shorter EXACTFish regnode. This backing off mechanism contained
-an off-by-one error. [perl #133756].
+an off-by-one error. L<[perl #133756]|https://rt.perl.org/Ticket/Display.html?id=133756>.
 
 =item *
 
 A bare C<eof> call with no previous file handle now returns true.
-[perl #133721]
+L<[perl #133721]|https://rt.perl.org/Ticket/Display.html?id=133721>
 
 =item *
 
 Failing to compile a format now aborts compilation.  Like other errors
 in sub-parses this could leave the parser in a strange state, possibly
-crashing perl if compilation continued.  [perl #132158]
+crashing perl if compilation continued.  L<[perl #132158]|https://rt.perl.org/Ticket/Display.html?id=132158>
 
 =back
 
