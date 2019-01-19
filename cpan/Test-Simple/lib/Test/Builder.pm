@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302141';
+our $VERSION = '1.302160';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -64,18 +64,13 @@ sub _add_ts_hooks {
         $todo = ${"$cpkg\::TODO"} if $cpkg;
         $todo = ${"$epkg\::TODO"} if $epkg && !$todo;
 
-        return $e unless $todo;
+        return $e unless defined $todo;
 
         # Turn a diag into a todo diag
         return Test::Builder::TodoDiag->new(%$e) if ref($e) eq 'Test2::Event::Diag';
 
-        if ($active_hub == $hub) {
-            $e->set_todo($todo) if $e->can('set_todo');
-            $e->add_amnesty({tag => 'TODO', details => $todo});
-        }
-        else {
-            $e->add_amnesty({tag => 'TODO', details => $todo, inherited => 1});
-        }
+        $e->set_todo($todo) if $e->can('set_todo');
+        $e->add_amnesty({tag => 'TODO', details => $todo});
 
         # Set todo on ok's
         if ($e->isa('Test2::Event::Ok')) {
@@ -2578,7 +2573,17 @@ L<Test::Exception> and L<Test::Differences> all use Test::Builder.
 
 =head1 SEE ALSO
 
-L<Test::Simple>, L<Test::More>, L<Test::Harness>
+=head2 INTERNALS
+
+L<Test2>, L<Test2::API>
+
+=head2 LEGACY
+
+L<Test::Simple>, L<Test::More>
+
+=head2 EXTERNAL
+
+L<Test::Harness>
 
 =head1 AUTHORS
 

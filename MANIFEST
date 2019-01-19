@@ -2252,6 +2252,7 @@ cpan/Test-Simple/lib/Test2/EventFacet/Control.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Error.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Hub.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Info.pm
+cpan/Test-Simple/lib/Test2/EventFacet/Info/Table.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Meta.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Parent.pm
 cpan/Test-Simple/lib/Test2/EventFacet/Plan.pm
@@ -2441,6 +2442,8 @@ cpan/Test-Simple/t/regression/694_note_diag_return_values.t
 cpan/Test-Simple/t/regression/696-intercept_skip_all.t
 cpan/Test-Simple/t/regression/721-nested-streamed-subtest.t
 cpan/Test-Simple/t/regression/757-reset_in_subtest.t
+cpan/Test-Simple/t/regression/812-todo.t
+cpan/Test-Simple/t/regression/817-subtest-todo.t
 cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t
 cpan/Test-Simple/t/regression/builder_does_not_init.t
 cpan/Test-Simple/t/regression/errors_facet.t

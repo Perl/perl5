@@ -9,7 +9,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302141';
+our $VERSION = '1.302160';
 
 
 my $INST;
@@ -1590,7 +1590,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2019 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

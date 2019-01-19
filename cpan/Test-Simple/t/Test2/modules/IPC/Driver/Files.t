@@ -94,6 +94,11 @@ $ipc->send($hid, bless({global => 1}, 'Foo'), 'GLOBAL');
 my @got = $ipc->cull($hid);
 ok(@got == 0, "did not get our own global event");
 
+ok(!-e $ipc->shm_stop_file, "No stop file");
+$ipc->stop_shm;
+ok(-e $ipc->shm_stop_file, "stop file added");
+ok($ipc->shm_stopped, "stopped shm");
+
 my $tmpdir = $ipc->tempdir;
 ok(-d $tmpdir, "still have temp dir");
 $ipc = undef;

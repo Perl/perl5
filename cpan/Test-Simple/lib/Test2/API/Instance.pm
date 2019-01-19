@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302141';
+our $VERSION = '1.302160';
 
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
@@ -33,6 +33,7 @@ use Test2::Util::HashBase qw{
     ipc_drivers
     ipc_timeout
     formatters
+    _shm_warned
 
     exit_callbacks
     post_load_callbacks
@@ -368,16 +369,22 @@ sub enable_ipc_polling {
             return unless $self->{+IPC_POLLING};
             return $_[0]->{hub}->cull unless $self->{+IPC_SHM_ID};
 
+            # You may notice that we are not handling the error case of shmread
+            # returning false. In the case where SHM returns false it falls
+            # through to the call to 'cull'. shmread is used as an optimization
+            # to avoid needing to call cull() too often. In the case of failure
+            # the optimization fails and we call 'cull' more often than needed,
+            # this is slower, but completely safe.
             my $val;
             if(shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE})) {
                 return if $val eq $self->{+IPC_SHM_LAST};
                 $self->{+IPC_SHM_LAST} = $val;
-            }
-            else {
-                warn "SHM Read error: $!\n";
+                return $_[0]->{hub}->cull;
             }
 
-            $_[0]->{hub}->cull;
+            # Do not come back if shm is gone.
+            delete $self->{+IPC_SHM_ID};
+            return;
         }
     ) unless defined $self->ipc_polling;
 
@@ -427,6 +434,7 @@ sub ipc_free_shm {
     my $id = delete $self->{+IPC_SHM_ID};
     return unless defined $id;
 
+    $self->{+IPC}->stop_shm() if $self->{+IPC} && $self->{+IPC}->can('stop_shm');
     shmctl($id, IPC::SysV::IPC_RMID(), 0);
 }
 
@@ -434,10 +442,22 @@ sub get_ipc_pending {
     my $self = shift;
     return -1 unless defined $self->{+IPC_SHM_ID};
     my $val;
-    shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE}) or return -1;
-    return 0 if $val eq $self->{+IPC_SHM_LAST};
-    $self->{+IPC_SHM_LAST} = $val;
-    return 1;
+
+    if (shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE})) {
+        return 0 if $val eq $self->{+IPC_SHM_LAST};
+        $self->{+IPC_SHM_LAST} = $val;
+        return 1;
+    }
+
+    $self->{+IPC}->stop_shm() if $self->{+IPC} && $self->{+IPC}->can('stop_shm');
+    delete $self->{+IPC_SHM_ID};
+    return -1;
+}
+
+sub _check_pid {
+    my $self = shift;
+    my ($pid) = @_;
+    return kill(0, $pid);
 }
 
 sub set_ipc_pending {
@@ -450,7 +470,53 @@ sub set_ipc_pending {
     confess "value is required for set_ipc_pending"
         unless $val;
 
-    shmwrite($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE});
+    return if shmwrite($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE});
+    my $errno = 0 + $!;
+    my $err = "$!";
+
+    # Do not come back if shm is gone.
+    my $id = delete $self->{+IPC_SHM_ID};
+
+    my $ppid = defined $self->{+_PID} ? $self->{+_PID} : '?';
+    my $ptid = defined $self->{+_TID} ? $self->{+_TID} : '?';
+    my $cpid = $$;
+    my $ctid = get_tid();
+
+    my $shm_stopped = $self->{+IPC} && $self->{+IPC}->can('shm_stopped') && $self->{+IPC}->shm_stopped || 0;
+
+    if (defined($self->{+_PID}) && ($ppid == $$ || $self->_check_pid($ppid)) && !$shm_stopped) {
+        return if $self->{+_SHM_WARNED}++;
+
+        my $warn = "($$) It looks like SHM has gone away unexpectedly ($errno: $err). The parent process is still active. This is not fatal, but may slow things down slightly.";
+        $warn = Carp::longmess($warn) if Carp->can('longmess');
+        warn $warn;
+        return;
+    }
+
+    chomp(my $msg = <<"    EOT");
+IPC shmwrite($id, '$val', 0, $self->{+IPC_SHM_SIZE}) failed, the parent process appears to have exited. This is a fatal error.
+  Error: ($errno) $err
+  Parent  PID: $ppid
+  Current PID: $cpid
+  Parent  TID: $ptid
+  Current TID: $ctid
+  SHM State:   $shm_stopped
+  IPC errors like this usually indicate a race condition in a test where the
+  parent thread/process is allowed to exit before all child processes/threads
+  are complete.
+  Trace:
+    EOT
+    $self->_fatal_error($msg);
+}
+
+sub _fatal_error {
+    my $self = shift;
+    my ($msg) = @_;
+
+    $msg = Carp::longmess($msg) if Carp->can('longmess');
+
+    print STDERR $msg;
+    CORE::exit(255);
 }
 
 sub disable_ipc_polling {
@@ -525,8 +591,9 @@ sub DESTROY {
     return unless defined($self->{+_PID}) && $self->{+_PID} == $$;
     return unless defined($self->{+_TID}) && $self->{+_TID} == get_tid();
 
+    $self->{+IPC}->stop_shm() if $self->{+IPC} && $self->{+IPC}->can('stop_shm');
     shmctl($self->{+IPC_SHM_ID}, IPC::SysV::IPC_RMID(), 0)
-        if defined $self->{+IPC_SHM_ID};
+        if defined $self->{+IPC_SHM_ID} && IPC::SysV->can('IPC_RMID');
 }
 
 sub set_exit {
@@ -906,7 +973,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2019 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

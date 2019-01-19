@@ -2,7 +2,7 @@ package Test2::IPC::Driver;
 use strict;
 use warnings;
 
-our $VERSION = '1.302141';
+our $VERSION = '1.302160';
 
 
 use Carp qw/confess/;
@@ -267,6 +267,14 @@ True if you want to make use of the L<Test2::API>/L<Test2::API::Instance> SHM.
 Use this to customize the size of the SHM space. There are no guarantees about
 what the size will be if you do not implement this.
 
+=item $ipc->stop_shm()
+
+The Test2 API will call this when it is about to free the SHM memory.
+
+=item $bool = $ipc->shm_stopped()
+
+Returns true if C<< $ipc->stop_shm >> has been called.
+
 =back
 
 =head1 SOURCE
@@ -292,7 +300,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2019 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

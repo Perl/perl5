@@ -133,7 +133,7 @@ ok($one->finalized, "calling format finalized the object");
 
 {
     local $ENV{T2_FORMATTER} = 'TAP';
-    $one->reset;
+    my $one = $CLASS->new;
     is($one->formatter, 'Test2::Formatter::TAP', "got specified formatter");
     ok($one->finalized, "calling format finalized the object");
 
@@ -177,7 +177,7 @@ like(
 );
 
 if (CAN_REALLY_FORK) {
-    $one->reset;
+    my $one = $CLASS->new;
     my $pid = fork;
     die "Failed to fork!" unless defined $pid;
     unless($pid) { exit 0 }
@@ -208,7 +208,7 @@ if (CAN_REALLY_FORK) {
 
 if (CAN_THREAD && $] ge '5.010') {
     require threads;
-    $one->reset;
+    my $one = $CLASS->new;
 
     threads->new(sub { 1 });
     is(Test2::API::Instance::_ipc_wait, 0, "No errors");
@@ -229,14 +229,14 @@ if (CAN_THREAD && $] ge '5.010') {
 }
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     local $? = 0;
     $one->set_exit;
     is($?, 0, "no errors on exit");
 }
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     $one->set__tid(1);
     local $? = 0;
     $one->set_exit;
@@ -244,7 +244,7 @@ if (CAN_THREAD && $] ge '5.010') {
 }
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     $one->stack->top;
     $one->no_wait(1);
     local $? = 0;
@@ -253,7 +253,7 @@ if (CAN_THREAD && $] ge '5.010') {
 }
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     $one->stack->top->set_no_ending(1);
     local $? = 0;
     $one->set_exit;
@@ -261,7 +261,7 @@ if (CAN_THREAD && $] ge '5.010') {
 }
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     $one->load();
     $one->stack->top->set_failed(2);
     local $? = 0;
@@ -270,7 +270,7 @@ if (CAN_THREAD && $] ge '5.010') {
 }
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     $one->load();
     local $? = 500;
     $one->set_exit;
@@ -280,7 +280,7 @@ if (CAN_THREAD && $] ge '5.010') {
 {
     local %INC = %INC;
     delete $INC{'Test2/IPC.pm'};
-    $one->reset();
+    my $one = $CLASS->new;
     $one->load();
     my @events;
     $one->stack->top->filter(sub { push @events => $_[1]; undef});
@@ -293,7 +293,7 @@ if (CAN_THREAD && $] ge '5.010') {
 
 SKIP: {
     last SKIP if $] lt "5.008";
-    $one->reset;
+    my $one = $CLASS->new;
     my $stderr = "";
     {
         local $INC{'Test/Builder.pm'} = __FILE__;
@@ -327,7 +327,7 @@ SKIP: {
     my $ran = 0;
     local *Test2::API::Breakage::report = sub { $ran++; return "foo" };
     use warnings qw/redefine once/;
-    $one->reset();
+    my $one = $CLASS->new;
     $one->load();
 
     my $stderr = "";
@@ -349,7 +349,7 @@ foo
 
 
 {
-    $one->reset();
+    my $one = $CLASS->new;
     $one->load();
     my @events;
     $one->stack->top->filter(sub { push @events => $_[1]; undef});
@@ -368,7 +368,7 @@ foo
 
 if (CAN_REALLY_FORK) {
     local $SIG{__WARN__} = sub { };
-    $one->reset();
+    my $one = $CLASS->new;
     my $pid = fork;
     die "Failed to fork!" unless defined $pid;
     unless ($pid) { exit 255 }
@@ -392,6 +392,7 @@ if (CAN_REALLY_FORK) {
 }
 
 {
+    my $one = $CLASS->new;
     my $ctx = bless {
         trace => Test2::EventFacet::Trace->new(frame => ['Foo::Bar', 'Foo/Bar.pm', 42, 'xxx']),
         hub => Test2::Hub->new(),
@@ -409,6 +410,7 @@ if (CAN_REALLY_FORK) {
         ],
         "Warned about unfreed context"
     );
+    $one->set_no_wait(0);
 }
 
 {
@@ -417,7 +419,7 @@ if (CAN_REALLY_FORK) {
     delete $INC{'threads.pm'};
     ok(!USE_THREADS, "Sanity Check");
 
-    $one->reset;
+    my $one = $CLASS->new;
     ok(!$one->ipc, 'IPC not loaded, no IPC object');
     ok($one->finalized, "calling ipc finalized the object");
     is($one->ipc_polling, undef, "no polling defined");
@@ -469,7 +471,7 @@ if (CAN_REALLY_FORK) {
 }
 
 {
-    $one->reset;
+    my $one = $CLASS->new;
 
     ok(!@{$one->context_init_callbacks}, "no callbacks");
     is($one->ipc_polling, undef, "no polling, undef");
@@ -513,7 +515,7 @@ if (CAN_REALLY_FORK) {
     require Test2::IPC::Driver::Files;
 
     local $ENV{T2_NO_IPC} = 1;
-    $one->reset;
+    my $one = $CLASS->new;
     $one->add_ipc_driver('Test2::IPC::Driver::Files');
     ok($one->ipc_disabled, "IPC is disabled by env var");
     ok(!$one->ipc, 'IPC not loaded');
@@ -533,5 +535,129 @@ if (CAN_REALLY_FORK) {
     $one->ipc_disable;
     ok($one->ipc_disabled, "IPC is disabled directly");
 }
+
+SKIP: {
+    last SKIP if $] lt "5.008";
+    no warnings 'redefine';
+    my $error;
+    local *Test2::API::Instance::_fatal_error = sub { die "$_[1]\n" };
+
+    my $two = $CLASS->new;
+    $two->{ipc_shm_id} = undef;
+    is($two->set_ipc_pending, undef, "No shm");
+
+    $two->{ipc_shm_id} = -1;
+    $two->{ipc_shm_size} = 32;
+
+    my $ok = eval { $two->set_ipc_pending(); 1 };
+    ok(!$ok, "Exception");
+    like($@, qr/value is required for set_ipc_pending/, "Got expected exception");
+
+    my $ctid = get_tid();
+
+    my $ec;
+    {
+        local $! = 22;
+        $ec = "$!";
+    }
+
+    $ok = eval { $two->set_ipc_pending('message'); 1 };
+    my $err = $@;
+    ok(!$ok, "Exception");
+
+    is($err, <<"    EOT", "Got exception when shm write fails (no tid/pid)") unless $err =~ m/not implemented/;
+IPC shmwrite(-1, 'message', 0, 32) failed, the parent process appears to have exited. This is a fatal error.
+  Error: (22) $ec
+  Parent  PID: ?
+  Current PID: $$
+  Parent  TID: ?
+  Current TID: $ctid
+  SHM State:   0
+  IPC errors like this usually indicate a race condition in a test where the
+  parent thread/process is allowed to exit before all child processes/threads
+  are complete.
+  Trace:
+    EOT
+
+    # Need a fake PID that cannot actually be signaled, but is a real number....
+    $two->{_pid} = 10000000000000000;
+    $two->{_tid} = $ctid;
+
+    $two->{ipc_shm_id} = -1; # Reset this
+    $ok = eval {
+        # override check_pid, some platforms will return true with our absurd PID above.
+        no warnings 'redefine';
+        local *Test2::API::Instance::_check_pid = sub { () };
+        $two->set_ipc_pending('message');
+        1;
+    };
+    $err = $@;
+    ok(!$ok, "Exception");
+
+    is($err, <<"    EOT", "Got exception when shm write fails (with tid/pid)") unless $err =~ m/not implemented/;
+IPC shmwrite(-1, 'message', 0, 32) failed, the parent process appears to have exited. This is a fatal error.
+  Error: (22) $ec
+  Parent  PID: $two->{_pid}
+  Current PID: $$
+  Parent  TID: $ctid
+  Current TID: $ctid
+  SHM State:   0
+  IPC errors like this usually indicate a race condition in a test where the
+  parent thread/process is allowed to exit before all child processes/threads
+  are complete.
+  Trace:
+    EOT
+
+    $two->{_pid} = $$; # Parent that has not exited
+    $two->{_tid} = $ctid;
+
+    my $warn = undef;
+    $two->{ipc_shm_id} = -1; # Reset this
+    $ok = eval {
+        local $SIG{__WARN__} = sub { $warn = $_[0] };
+        $two->set_ipc_pending('message');
+        1;
+    };
+    $err = $@;
+    unless ($err =~ m/not implemented/) {
+        ok($ok, "No Exception");
+
+        like(
+            $warn,
+            qr/^\($$\) It looks like SHM has gone away unexpectedly \(22: $ec\)\. The parent process is still active\. This is not fatal, but may slow things down slightly/,
+            "Got warning when shm write fails but parent is open"
+        );
+    }
+}
+
+
+if (CAN_REALLY_FORK && $] ge "5.008") {
+    my ($rh, $wh);
+    pipe($rh, $wh) or die "no pipe: $!";
+
+    my $pid = fork;
+    die "Could not fork" unless defined $pid;
+    if ($pid) {
+        close($wh);
+        my $check = waitpid($pid, 0);
+        my $exit = $?;
+        is($check, $pid, "Waited on process");
+        my $err = ($exit >> 8);
+        my $sig = ($exit & 127);
+        ok(!$sig, "did not exit via a signal");
+        is($err, 255, "exit code 255");
+
+        my $msg = join "" => <$rh>;
+        like($msg, qr/^blah, I died\nfoo bar at \Q${ \__FILE__ }\E line \d+/, "Saw error message");
+    }
+    else {
+        close($rh);
+        open(STDERR, '>&', $wh) or print "Could not open: $!";
+        $CLASS->_fatal_error("blah, I died\nfoo bar");
+        exit 1;
+    }
+}
+
+Test2::API::test2_ipc_wait_enable();
 
 done_testing;

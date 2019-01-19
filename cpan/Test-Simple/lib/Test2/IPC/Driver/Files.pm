@@ -2,12 +2,11 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302141';
-
+our $VERSION = '1.302160';
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
-use Test2::Util::HashBase qw{tempdir event_ids read_ids timeouts tid pid globals};
+use Test2::Util::HashBase qw{tempdir event_ids read_ids timeouts tid pid globals shm_stop_file};
 
 use Scalar::Util qw/blessed/;
 use File::Temp();
@@ -23,6 +22,19 @@ sub shm_size() { 64 }
 
 sub is_viable { 1 }
 
+sub stop_shm {
+    my $self = shift;
+    open(my $fh, '>>', $self->{+SHM_STOP_FILE}) or die "Could not open shm top file: $!";
+    print $fh $$, "\n";
+    return;
+}
+
+sub shm_stopped {
+    my $self = shift;
+    return 1 if -e $self->{+SHM_STOP_FILE};
+    return 0;
+}
+
 sub init {
     my $self = shift;
 
@@ -35,6 +47,8 @@ sub init {
     $self->abort_trace("Could not get a temp dir") unless $tmpdir;
 
     $self->{+TEMPDIR} = File::Spec->canonpath($tmpdir);
+
+    $self->{+SHM_STOP_FILE} = File::Spec->catfile($tmpdir, 'stop_shm');
 
     print STDERR "\nIPC Temp Dir: $tmpdir\n\n"
         if $ENV{T2_KEEP_TEMPDIR};
@@ -383,7 +397,7 @@ sub DESTROY {
         my $full = File::Spec->catfile($tempdir, $file);
 
         my $sep = ipc_separator;
-        if ($aborted || $file =~ m/^(GLOBAL|HUB$sep)/) {
+        if ($aborted || $file =~ m/^(GLOBAL|HUB$sep|stop_shm)/) {
             $full =~ m/^(.*)$/;
             $full = $1; # Untaint it
             next if $ENV{T2_KEEP_TEMPDIR};
@@ -473,7 +487,7 @@ F<http://github.com/Test-More/test-more/>.
 
 =head1 COPYRIGHT
 
-Copyright 2018 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+Copyright 2019 Chad Granum E<lt>exodist@cpan.orgE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
