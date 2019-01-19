@@ -141,7 +141,7 @@ F<t/io/paragraph_mode.t>. [perl #133722].
 Fixed a failure to match properly.
 
 An EXACTFish regnode has a finite length it can hold for the string
-being matched.  If that length is exceeded, a 2nd node is used for
+being matched.  If that length is exceeded, a second node is used for
 the next segment of the string, for as many regnodes as are needed.
 Care has to be taken where to break the string, in order to deal
 multi-character folds in Unicode correctly. If we want to break a
