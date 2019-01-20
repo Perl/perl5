@@ -56,7 +56,7 @@ you should reset the version numbers to the next blead series.
   2018-10-20  5.29.4 ✓        Aaron Crane
   2018-11-20  5.29.5 ✓        Karen Etheridge (ether)
   2018-12-18  5.29.6 ✓        Abigail
-  2019-01-20  5.29.7          Abigail
+  2019-01-20  5.29.7 ✓        Abigail
   2019-02-20  5.29.8
   2019-03-20  5.29.9          Zak B. Elep
   2019-04-20  5.29.10
