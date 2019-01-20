@@ -659,6 +659,7 @@ the strings?).
  Aaron     5.29.4       2018-Oct-20
  Ether     5.29.5       2018-Nov-20
  Abigail   5.29.6       2018-Dec-18
+ Abigail   5.29.7       2019-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
