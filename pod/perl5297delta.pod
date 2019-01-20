@@ -1,0 +1,264 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5297delta - what is new for perl v5.29.7
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.29.6 release and the 5.29.7
+release.
+
+If you are upgrading from an earlier release such as 5.29.5, first read
+L<perl5296delta>, which describes differences between 5.29.5 and 5.29.6.
+
+=head1 Deprecations
+
+=head2 In XS code, use of various macros dealing with UTF-8.
+
+This deprecation was scheduled to become fatal in 5.30, but has been
+delayed to 5.32 due to problems that showed up with some CPAN modules.
+For details of what's affected, see L<perldeprecation|
+perldeprecation/In XS code, use of various macros dealing with UTF-8.>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+A handful of small optimizations related to character folding
+and character classes in regular expressions.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.081 to 2.084.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.081 to 2.084.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.21 to 2.22.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.842 to 1.843.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.35 to 1.36.
+
+Variables C<< $Is_Win32 >> and C<< $Is_VMS >> are being initialized.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.76 to 3.77.
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.2308 to 0.2309.
+
+=item *
+
+IO-Compress has been upgraded from version 2.081 to 2.084.
+
+Adds support for C<< IO::Uncompress::Zstd >> and
+C<< IO::Uncompress::UnLzip >>. 
+
+The C<< BinModeIn >> and C<< BinModeOut >> options are now no-ops.
+ALL files will be read/written in binmode.
+
+=item *
+
+L<lib> has been upgraded from version 0.64 to 0.65.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999813 to 1.999816.
+
+C<< bnok() >> now supports the full Kronenburg extension.
+L<[cpan #95628]|https://rt.cpan.org/Ticket/Display.html?id=95628>.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5007 to 0.5008.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20181218 to 5.20190120.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302141 to 1.302160.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.25 to 1.27.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+More specific documentation of paragraph mode. L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Prototype not terminated|perldiag/"Prototype not terminated">
+
+The file and line number is now reported for this error.
+L<[perl #133524]|https://rt.perl.org/Ticket/Display.html?id=133524>
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+Fix intermittent tests which failed due to race conditions which
+surface during parallel testing. L<[perl #133740]|https://rt.perl.org/Ticket/Display.html?id=133740>.
+
+=item *
+
+Thoroughly test paragraph mode, using a new test file,
+F<t/io/paragraph_mode.t>. L<[perl #133722]|https://rt.perl.org/Ticket/Display.html?id=133722>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Fixed a failure to match properly.
+
+An EXACTFish regnode has a finite length it can hold for the string
+being matched.  If that length is exceeded, a second node is used for
+the next segment of the string, for as many regnodes as are needed.
+Care has to be taken where to break the string, in order to deal
+multi-character folds in Unicode correctly. If we want to break a
+string at a place which could potentially be in the middle of a
+multi-character fold, we back off one (or more) characters, leaving
+a shorter EXACTFish regnode. This backing off mechanism contained
+an off-by-one error. L<[perl #133756]|https://rt.perl.org/Ticket/Display.html?id=133756>.
+
+=item *
+
+A bare C<eof> call with no previous file handle now returns true.
+L<[perl #133721]|https://rt.perl.org/Ticket/Display.html?id=133721>
+
+=item *
+
+Failing to compile a format now aborts compilation.  Like other errors
+in sub-parses this could leave the parser in a strange state, possibly
+crashing perl if compilation continued.  L<[perl #132158]|https://rt.perl.org/Ticket/Display.html?id=132158>
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.29.7 represents approximately 5 weeks of development since Perl
+5.29.6 and contains approximately 97,000 lines of changes across 350 files
+from 8 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 27,000 lines of changes to 190 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.29.7:
+
+Abigail, Chris 'BinGOs' Williams, Eugen Konkov, Hauke D, James E Keenan,
+Karl Williamson, Tomasz Konojacki, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
