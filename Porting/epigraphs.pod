@@ -17,6 +17,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.29.7 - Edsger W. Dijkstra: "Programming Considered as a Human Activity", IFIP Congress, New York, 1965.
+
+L<Announced on 2019-01-20 by Abigail|https://www.nntp.perl.org/group/perl.perl5.porters/2019/01/msg253444.html>
+
+When I became acquainted with the notion of algorithmic languages I
+never challenged the then prevailing notion that the problems of
+language design and implementation were mostly a question of
+compromises: every new convenience for the user had to be paid for
+by the implementation, either in the form of increased trouble
+during translation, or during execution or during both. Well, we
+are most certainly not living in Heaven and I am not going to deny
+the possibility of a conflict between convenience and efficiency,
+but now I do protest when this conflict is presented as a complete
+summing up of the situation. I am of the opinion that is worth-while
+to investigate what extent the needs of Man and Machine go hand in
+hand and to see what techniques we can devise of the benefit of all
+of us. I trust that this investigation will bear fruits and if this
+talk made some of you share this fervent hope, it has achieved its aim.
+
 =head2 v5.29.6 - Rudyard Kipling: "How the Camel Got His Hump"
 
 L<Announced on 2018-12-18 by Abigail|https://www.nntp.perl.org/group/perl.perl5.porters/2018/12/msg253187.html>
