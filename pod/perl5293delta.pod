@@ -44,7 +44,7 @@ PathTools has been upgraded from version 3.74 to 3.75
 
 =item *
 
-L<perlfaq> has been upgraded from version 5.20180605 to 5.0180915.
+L<perlfaq> has been upgraded from version 5.20180605 to 5.20180915.
 
 =back
 
