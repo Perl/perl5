@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 851;  # Update this when adding/deleting tests.
+plan tests => 852;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1957,6 +1957,14 @@ EOP
     }
     {   # [perl #133642]
         fresh_perl_is('m/((?<=(0?)))/', "Variable length lookbehind not implemented in regex m/((?<=(0?)))/ at - line 1.",{},"Was getting 'Double free'");
+    }
+    {   # [perl #133782]
+        # this would panic on DEBUGGING builds
+        fresh_perl_is(<<'CODE', "ok\nok\n",{}, 'Bad length magic was left on $^R');
+while( "\N{U+100}bc" =~ /(..?)(?{$^N})/g ) {
+  print "ok\n" if length($^R)==length("$^R");
+}
+CODE
     }
 
 } # End of sub run_tests
