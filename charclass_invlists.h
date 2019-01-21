@@ -181839,7 +181839,7 @@ static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist[] = {  /* for
 	0x0,
 	0x100,
 	0x130,
-	0x131,
+	0x132,
 	0x149,
 	0x14A,
 	0x178,
@@ -181865,14 +181865,14 @@ static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist[] = {  /* for
 };
 
 static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist[] = {  /* for all charsets */
-	24,	/* Number of elements */
+	26,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
 	0x100,
 	0x130,
-	0x131,
+	0x132,
 	0x149,
 	0x14A,
 	0x178,
@@ -181881,6 +181881,8 @@ static const UV UNI__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist[] = {  /* for all cha
 	0x180,
 	0x1F0,
 	0x1F1,
+	0x307,
+	0x308,
 	0x39C,
 	0x39D,
 	0x3BC,
@@ -383690,7 +383692,7 @@ static const U8 WB_table[23][23] = {
  * 018e20fa2f469667cc7ccd8a3d4a4a8cce8ad9bdf5fce5b2f61137660ea1065f lib/unicore/extracted/DLineBreak.txt
  * 88c30a794011f5e6dc62154342e8bab1bd4ce2d0c0ab06fb69ba47134dc75b23 lib/unicore/extracted/DNumType.txt
  * dab1e84f48990e30635a4f489d33212b25d0e35d80839c08e33a8afe5736346c lib/unicore/extracted/DNumValues.txt
- * b4d304a8173a57d5baca855ba3465c0fbec45a723983445c03bb80cf2dff9f46 lib/unicore/mktables
+ * 457213d2957fa73d19eba1479093ab28419712c03c49f156c732ddb36d011112 lib/unicore/mktables
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
