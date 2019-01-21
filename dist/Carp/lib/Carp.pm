@@ -585,7 +585,10 @@ BEGIN {
 sub ret_backtrace {
     my ( $i, @error ) = @_;
     my $mess;
-    my $err = join '', @error;
+    if (warnings::enabled("uninitialized") && scalar grep {!defined} @error) {
+        carp "Use of uninitialized value in error message";
+    }
+    my $err = join '', grep defined, @error;
     $i++;
 
     my $tid_msg = '';
@@ -627,7 +630,10 @@ sub ret_backtrace {
 
 sub ret_summary {
     my ( $i, @error ) = @_;
-    my $err = join '', @error;
+    if (warnings::enabled("uninitialized") && scalar grep {!defined} @error) {
+        carp "Use of uninitialized value in error message";
+    }
+    my $err = join '', grep defined, @error;
     $i++;
 
     my $tid_msg = '';
