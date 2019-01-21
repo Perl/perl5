@@ -7304,8 +7304,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		PL_op = NULL;
 
                 re_sv = NULL;
-		if (logical == 0)        /*   (?{})/   */
-		    sv_setsv(save_scalar(PL_replgv), ret); /* $^R */
+		if (logical == 0) {       /*   (?{})/   */
+                    SV *replsv = save_scalar(PL_replgv);
+                    sv_setsv(replsv, ret); /* $^R */
+                    SvSETMAGIC(replsv);
+                }
 		else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
 		    sw = cBOOL(SvTRUE_NN(ret));
 		    logical = 0;
@@ -7480,9 +7483,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             {
                 /* preserve $^R across LEAVE's. See Bug 121070. */
                 SV *save_sv= GvSV(PL_replgv);
+                SV *replsv;
                 SvREFCNT_inc(save_sv);
                 regcpblow(ST.cp); /* LEAVE in disguise */
-                sv_setsv(GvSV(PL_replgv), save_sv);
+                /* don't move this initialization up */
+                replsv = GvSV(PL_replgv);
+                sv_setsv(replsv, save_sv);
+                SvSETMAGIC(replsv);
                 SvREFCNT_dec(save_sv);
             }
 	    cur_eval = ST.prev_eval;
@@ -8950,8 +8957,10 @@ NULL
          * see code related to PL_replgv elsewhere in this file.
          * Yves
          */
-	if (oreplsv != GvSV(PL_replgv))
+	if (oreplsv != GvSV(PL_replgv)) {
 	    sv_setsv(oreplsv, GvSV(PL_replgv));
+            SvSETMAGIC(oreplsv);
+        }
     }
     result = 1;
     goto final_exit;
