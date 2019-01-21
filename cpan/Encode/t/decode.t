@@ -51,9 +51,12 @@ $orig = "\xC3\x80";
 $orig =~ /(..)/;
 is(Encode::decode_utf8($1), "\N{U+C0}", 'passing magic regex to Encode::decode_utf8');
 
-$orig = "\xC3\x80";
-*a = $orig;
-is(Encode::decode_utf8(*a), "*main::\N{U+C0}", 'passing typeglob to Encode::decode_utf8');
+SKIP: {
+    skip "Perl Version ($]) is older than v5.27.1", 1 if $] < 5.027001;
+    $orig = "\xC3\x80";
+    *a = $orig;
+    is(Encode::decode_utf8(*a), "*main::\N{U+C0}", 'passing typeglob to Encode::decode_utf8');
+}
 
 $orig = "\N{U+C0}";
 $orig =~ /(.)/;

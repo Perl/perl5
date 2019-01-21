@@ -25,6 +25,10 @@ BEGIN {
     }
 }
 
+use Encode qw();
+$PerlIO::encoding::fallback |= Encode::ONLY_PRAGMA_WARNINGS;
+use warnings "utf8";
+
 no warnings "deprecated";
 use encoding 'euc-jp';
 
