@@ -166,13 +166,14 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Try to clarify that C<< ref(qr/xx/) >> returns C<Regexp> rather than
+C<REGEXP> and why.  [perl #133751]
 
 =back
 
