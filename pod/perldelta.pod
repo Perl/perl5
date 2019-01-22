@@ -218,7 +218,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Type of arg %d to %s must be %s (not %s)|perldiag/"Type of arg %d to %s must be %s (not %s)">
+
+Attempts to push, pop, etc on a hash or glob now produce this message
+rather than complaining that they no longer work on scalars. [perl
+#130367]
 
 =back
 
