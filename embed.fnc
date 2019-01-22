@@ -2052,9 +2052,9 @@ ApmdbR	|char*	|sv_pvutf8	|NN SV *sv
 ApmdbR	|char*	|sv_pvbyte	|NN SV *sv
 Apmdb	|STRLEN	|sv_utf8_upgrade|NN SV *sv
 Amd	|STRLEN	|sv_utf8_upgrade_nomg|NN SV *sv
-ApdM	|bool	|sv_utf8_downgrade|NN SV *const sv|const bool fail_ok
+Apd	|bool	|sv_utf8_downgrade|NN SV *const sv|const bool fail_ok
 Apd	|void	|sv_utf8_encode |NN SV *const sv
-ApdM	|bool	|sv_utf8_decode |NN SV *const sv
+Apd	|bool	|sv_utf8_decode |NN SV *const sv
 Apdmb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *const sv|const U32 flags
 pX	|SSize_t|tmps_grow_p	|SSize_t ix
