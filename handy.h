@@ -507,8 +507,8 @@ based on the underlying C library functions):
 #define strnNE(s1,s2,l) (strncmp(s1,s2,l) != 0)
 #define strnEQ(s1,s2,l) (strncmp(s1,s2,l) == 0)
 
-#define memNE(s1,s2,l) (memcmp(s1,s2,l) != 0)
-#define memEQ(s1,s2,l) (memcmp(s1,s2,l) == 0)
+#define memEQ(s1,s2,l) (memcmp(((const void *) (s1)), ((const void *) (s2)), l) == 0)
+#define memNE(s1,s2,l) (! memEQ(s1,s2,l))
 
 /* memEQ and memNE where second comparand is a string constant */
 #define memEQs(s1, l, s2) \
