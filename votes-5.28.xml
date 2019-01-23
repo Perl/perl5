@@ -27,6 +27,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="tonyc" id="817480137a8b1165315f21d14b8968862101c3a2" ticket="132158" desc="(perl #132158) abort compilation if we see an error compiling a form" />
+
 </div>
 
 <div><h3>Regression Fixes</h3>
