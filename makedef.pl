@@ -478,12 +478,6 @@ if ($define{USE_THREAD_SAFE_LOCALE}) {
     }
 }
 
-unless ($define{'PERL_OP_PARENT'}) {
-    ++$skip{$_} foreach qw(
-		    Perl_op_parent
-                );
-}
-
 unless ($define{'USE_DTRACE'}) {
     ++$skip{$_} foreach qw(
                     Perl_dtrace_probe_call

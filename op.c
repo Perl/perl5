@@ -359,11 +359,9 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     DEBUG_S_warn((aTHX_ "allocating op at %p, slab %p", (void*)o, (void*)slab));
 
   gotit:
-#ifdef PERL_OP_PARENT
     /* moresib == 0, op_sibling == 0 implies a solitary unattached op */
     assert(!o->op_moresib);
     assert(!o->op_sibparent);
-#endif
 
     return (void *)o;
 }
@@ -1473,14 +1471,10 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
     Perl_croak_nocontext("panic: op_sibling_splice(): NULL parent");
 }
 
-
-#ifdef PERL_OP_PARENT
-
 /*
 =for apidoc op_parent
 
 Returns the parent OP of C<o>, if it has a parent. Returns C<NULL> otherwise.
-This function is only available on perls built with C<-DPERL_OP_PARENT>.
 
 =cut
 */
@@ -1493,9 +1487,6 @@ Perl_op_parent(OP *o)
         o = OpSIBLING(o);
     return o->op_sibparent;
 }
-
-#endif
-
 
 /* replace the sibling following start with a new UNOP, which becomes
  * the parent of the original sibling; e.g.
@@ -3708,16 +3699,11 @@ S_finalize_op(pTHX_ OP* o)
               );
 
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
-#  ifdef PERL_OP_PARENT
             if (!OpHAS_SIBLING(kid)) {
                 if (has_last)
                     assert(kid == cLISTOPo->op_last);
                 assert(kid->op_sibparent == o);
             }
-#  else
-            if (has_last && !OpHAS_SIBLING(kid))
-                assert(kid == cLISTOPo->op_last);
-#  endif
         }
 #endif
 
@@ -8860,19 +8846,15 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LISTOP);
-#ifdef PERL_OP_PARENT
         assert(loop->op_last->op_sibparent == (OP*)loop);
         OpLASTSIB_set(loop->op_last, (OP*)tmp); /*point back to new parent */
-#endif
 	S_op_destroy(aTHX_ (OP*)loop);
 	loop = tmp;
     }
     else if (!loop->op_slabbed)
     {
 	loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
-#ifdef PERL_OP_PARENT
         OpLASTSIB_set(loop->op_last, (OP*)loop);
-#endif
     }
     loop->op_targ = padoff;
     wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
