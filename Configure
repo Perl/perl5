@@ -16175,47 +16175,25 @@ set mbtowc d_mbtowc
 eval $inlibc
 
 : see if memmem exists
+: We need both a prototype in string.h and the symbol in libc.
 echo " "
-echo "Checking if you have a working memmem()" >&4
-$cat >try.c <<EOCP
-#$d_gnulibc HAS_GNULIBC         /**/
-#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
-#   define _GNU_SOURCE
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-int main(int argc, char **argv)
-{
-    char *big = "abcdefghiabcdefghi";
-    char *little = "def";
-    char *rtn;
-    ptrdiff_t diff;
-    rtn = (char *) memmem(big, strlen(big), little, strlen(little));
-    diff = rtn - big;
-    exit(diff == 3 ?  EXIT_SUCCESS : EXIT_FAILURE);
-}
-EOCP
-set try
-if eval $compile; then
-    `$run ./try`
-    rc=$?
-    case "$rc" in
-        0)  echo "Yes, you do." >&4
-            val="$define"
-            ;;
-        *)  echo "Well, you have memmem, but it isn't working." >&4
-            val="$undef"
-            ;;
-    esac
-else
-    echo "No, you do not." >&4
-    val="$undef"
-fi
-set d_memmem
-eval $setvar
-$rm_try
+d_memmem_proto=''
+xx1="#$d_gnulibc HAS_GNULIBC"
+xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
+xx3='#   define _GNU_SOURCE'
+xx4='#endif'
+set d_memmem_proto memmem literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
+eval $hasproto
+case "$d_memmem_proto" in
+    define) # see if memmem exists
+	set memmem d_memmem
+	eval $inlibc
+	;;
+    *)  val=$undef
+	set d_memmem
+	eval $setvar
+	;;
+esac
 
 : see if memrchr exists
 set memrchr d_memrchr
