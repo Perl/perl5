@@ -10739,6 +10739,7 @@ hasproto='varname=$1; func=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
 	$define) echo "#include <$2>";;
+	literal) echo "$2" ;;
 	esac ;
     shift 2;
 done > try.c;
