@@ -1545,7 +1545,7 @@ END_EXTERN_C
                                                 ? (c)                          \
                                                 : (IN_UTF8_CTYPE_LOCALE)       \
                                                   ? PL_latin1_lc[ (U8) (c) ]   \
-                                                : (cast)function((cast)(c)))
+                                                  : (cast)function((cast)(c)))
 
 /* Note that the result can be larger than a byte in a UTF-8 locale.  It
  * returns a single value, so can't adequately return the upper case of LATIN
