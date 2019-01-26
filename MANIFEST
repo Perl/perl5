@@ -3525,6 +3525,7 @@ dist/Carp/lib/Carp.pm			Error message extension
 dist/Carp/lib/Carp/Heavy.pm		Error message retired workhorse
 dist/Carp/Makefile.PL			makefile writer for Carp
 dist/Carp/README			README for Carp's CPAN releases
+dist/Carp/t/133800-stash_deletion_new.t	Deeper look into stash deletion
 dist/Carp/t/arg_regexp.t		See if Carp formats regexp args OK in stack traces
 dist/Carp/t/arg_string.t		See if Carp formats string args OK in stack traces
 dist/Carp/t/baduni.t			See if Carp handles non-char Unicode
