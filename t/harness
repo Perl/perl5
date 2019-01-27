@@ -30,6 +30,12 @@ if ($ARGV[0] && $ARGV[0] eq '-torture') {
     $torture = 1;
 }
 
+my $leak_check;
+if ($ARGV[0] && $ARGV[0] eq '-leak-check') {
+    shift;
+    $leak_check = 1;
+}
+
 # Let tests know they're running in the perl core.  Useful for modules
 # which live dual lives on CPAN.
 $ENV{PERL_CORE} = 1;
@@ -88,6 +94,10 @@ if ($ENV{HARNESS_OPTIONS}) {
             die "Unknown HARNESS_OPTIONS item: $opt\n";
         }
     }
+}
+
+if ($leak_check && $jobs > 1) {
+    die "-leak-check not compatible with parallel testing\n";
 }
 
 if (@ARGV) {
@@ -271,6 +281,12 @@ my %options;
 
 my $type = 'perl';
 
+my %ipcs;
+my %leaks;
+if ($leak_check) {
+    %ipcs = gather_ipcs();
+}
+
 # Load TAP::Parser now as otherwise it could be required in the short time span
 # in which the harness process chdirs into ext/Dist
 require TAP::Parser;
@@ -317,6 +333,29 @@ if ($ENV{PERL_VALGRIND}) {
 		 );
 }
 
+if ($leak_check) {
+    $h->callback(
+                 after_test => sub {
+                     my ($job) = @_;
+                     my $test = $job->[0];
+                     my %new_ipcs = gather_ipcs();
+                     for my $type (keys %new_ipcs) {
+                         if ($new_ipcs{$type} ne $ipcs{$type}) {
+                             my %new = map { $_ => 1 } split ' ', $new_ipcs{$type};
+                             delete @new{split ' ', $ipcs{$type}};
+                             print "\n$test:\n";
+                             for my $id (sort keys %new) {
+                                 my $rep = "leaked $type id $id";
+                                 push @{$leaks{$test}}, $rep;
+                                 print "    $rep\n";
+                             }
+                         }
+                     }
+                     %ipcs = %new_ipcs;
+                 }
+                );
+}
+
 if ($state) {
     $h->callback(
 		 after_test => sub {
@@ -350,4 +389,72 @@ $h->callback(
 
 my $agg = $h->runtests(@tests);
 _cleanup_valgrind(\$htoolnm, \$hgrind_ct);
+
+if ($leak_check) {
+    if (%leaks) {
+        print "\nLeaks found:\n";
+        for my $test (sort keys %leaks) {
+            print "    $test:\n";
+            for my $leak (@{$leaks{$test}}) {
+                print "         $leak\n";
+            }
+        }
+        exit 1;
+    }
+    else {
+        print "No leaks found.\n"
+    }
+}
+
 exit $agg->has_errors ? 1 : 0;
+
+sub gather_ipcs {
+    my $hprefix;
+    my $hsuffix;
+    if ($^O eq 'linux') {
+        $hprefix = "------ ";
+        $hsuffix = " --------";
+    }
+    elsif ($^O eq 'darwin') { # BSD too?
+        $hprefix = "";
+        $hsuffix = ":";
+    }
+    else {
+        return;
+    }
+    my @lines = `ipcs`;
+    my $type = '';
+    my %result =
+      (
+       map { $_ => [] } qw/msg shm sem/
+      );
+    for (@lines) {
+        chomp;
+        if (/^${hprefix}Message Queues${hsuffix}$/) {
+            $type = "msg";
+        }
+        elsif (/^${hprefix}Shared Memory(?: Segments)?${hsuffix}$/) {
+            $type = "shm";
+        }
+        elsif (/^${hprefix}Semaphore(?: Array)?s${hsuffix}$/) {
+            $type = "sem";
+        }
+        elsif (/^IPC status/ || /^\s*$/
+               || /^T\s+ID\s+KEY/ # header on darwin
+               || /^key\s+(?:shm|msq|sem)id\s+owner/ # header on linux
+              ) {
+            # discard
+        }
+        else {
+            # id is secon on both linux and darwin
+            push @{$result{$type}}, (split ' ')[1];
+        }
+    }
+
+    my @types = keys %result;
+    for my $key (@types) {
+        $result{$key} = join " ", sort @{$result{$key}};
+    }
+
+    %result;
+}
