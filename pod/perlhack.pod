@@ -968,6 +968,15 @@ Filter the file list so that all the test files run match
 by '|' and you cannot supply a list of files, instead the test files
 are obtained from the MANIFEST.
 
+=item * -leak-check
+
+=item * -leak-check=files
+
+=item * -leak-check=ipc
+
+Check for leaks of SysV IPC objects and temporary files.
+See L<Leak checks>.
+
 =back
 
 You can run an individual test by a command similar to
@@ -1102,6 +1111,25 @@ question, then to patch the source code at that point to facilitate a build.
 Once the source was patched, C<./Configure> and C<make test_prep> were called
 and completed successfully, enabling confirmation of the findings in RT
 #72414.
+
+=head2 Leak checks
+
+F<harness> accepts C<-leak-check=files> to check for file leaks,
+C<-leak-check=ipc> to check for leaks of SysV IPC objects, or
+C<-leak-check> to check for both types of leaks.
+
+The file check complains if extra files are found in the F<t>
+directory, or in a new directory which is assigned to C<TMPDIR> so
+that L<File::Temp> will create temporary filenames there.
+
+The SysV IPC check snapshots the results of C<ipcs>, compares the
+results as it runs each test, and complains if new objects are
+created but not released by a test.
+
+Either of these tests can be broken by other system activity - if you
+have another process creating and destroying IPC objects then the IPC
+checks will report errors when there are none.  If you're editing
+files in F<t/> editor temp files might also cause problems.
 
 =head1 MORE READING FOR GUTS HACKERS
 
