@@ -31,9 +31,28 @@ if ($ARGV[0] && $ARGV[0] eq '-torture') {
 }
 
 my $leak_check;
-if ($ARGV[0] && $ARGV[0] eq '-leak-check') {
+my $leak_check_ipc;
+my $leak_check_files;
+if ($ARGV[0] && $ARGV[0] =~ /^--?leak-check$/) {
     shift;
-    $leak_check = 1;
+    $leak_check = $leak_check_files = $leak_check_ipc = 1;
+}
+# match anything here so typos die
+elsif ($ARGV[0] && $ARGV[0] =~ /^--?leak-check=([a-z,]+)$/) {
+    shift;
+    ++$leak_check;
+    for my $type (split /,/, $1) {
+        if ($type eq 'files') {
+            $leak_check_files = 1;
+        }
+        elsif ($type eq 'ipc') {
+            $leak_check_ipc = 1;
+        }
+        # can anything else leak?
+        else {
+            die "Unknown leak-check type $type\n";
+        }
+    }
 }
 
 # Let tests know they're running in the perl core.  Useful for modules
@@ -283,8 +302,15 @@ my $type = 'perl';
 
 my %ipcs;
 my %leaks;
-if ($leak_check) {
+if ($leak_check_ipc) {
     %ipcs = gather_ipcs();
+}
+my @t_files;
+if ($leak_check_files) {
+    opendir my $dh, "."
+      or die "Cannot open directory .: $!\n";
+    @t_files = sort readdir $dh;
+    closedir $dh;
 }
 
 # Load TAP::Parser now as otherwise it could be required in the short time span
@@ -333,7 +359,7 @@ if ($ENV{PERL_VALGRIND}) {
 		 );
 }
 
-if ($leak_check) {
+if ($leak_check_ipc) {
     $h->callback(
                  after_test => sub {
                      my ($job) = @_;
@@ -343,7 +369,6 @@ if ($leak_check) {
                          if ($new_ipcs{$type} ne $ipcs{$type}) {
                              my %new = map { $_ => 1 } split ' ', $new_ipcs{$type};
                              delete @new{split ' ', $ipcs{$type}};
-                             print "\n$test:\n";
                              for my $id (sort keys %new) {
                                  my $rep = "leaked $type id $id";
                                  push @{$leaks{$test}}, $rep;
@@ -352,6 +377,29 @@ if ($leak_check) {
                          }
                      }
                      %ipcs = %new_ipcs;
+                 }
+                );
+}
+
+if ($leak_check_files) {
+    $h->callback(
+                 after_test => sub {
+                     my ($job) = @_;
+                     my $test = $job->[0];
+                     opendir my $dh, "."
+                       or die "Cannot opendir .: $!";
+                     my @files = sort readdir $dh;
+                     close $dh;
+                     if (@files ne @t_files) {
+                         my %new = map { $_ => 1 } @files;
+                         delete @new{@t_files};
+                         for my $file (sort keys %new) {
+                             my $rep = "leaked temp files t/$file";
+                             push @{$leaks{$test}}, $rep;
+                             print "    $rep\n";
+                         }
+                         @t_files = @files;
+                     }
                  }
                 );
 }
