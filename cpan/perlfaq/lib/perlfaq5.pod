@@ -4,7 +4,7 @@ perlfaq5 - Files and Formats
 
 =head1 VERSION
 
-version 5.20180915
+version 5.20190126
 
 =head1 DESCRIPTION
 
@@ -801,7 +801,7 @@ To open file for writing, create new file, file must not exist:
 
 To open file for appending, create if necessary:
 
-    open my $fh, '>>' $path                               or die $!;
+    open my $fh, '>>', $path                              or die $!;
     sysopen my $fh, $path, O_WRONLY|O_APPEND|O_CREAT      or die $!;
     sysopen my $fh, $path, O_WRONLY|O_APPEND|O_CREAT, 0666 or die $!;
 
@@ -1543,7 +1543,7 @@ a similar interface, but does the traversal for you too:
 (contributed by brian d foy)
 
 If you have an empty directory, you can use Perl's built-in C<rmdir>.
-If the directory is not empty (so, no files or subdirectories), you
+If the directory is not empty (so, with files or subdirectories), you
 either have to empty it yourself (a lot of work) or use a module to
 help you.
 

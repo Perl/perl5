@@ -4,7 +4,7 @@ perlfaq3 - Programming Tools
 
 =head1 VERSION
 
-version 5.20180915
+version 5.20190126
 
 =head1 DESCRIPTION
 
