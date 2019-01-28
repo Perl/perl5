@@ -1,4 +1,8 @@
 # Grind out a lot of combinatoric tests for folding.
+# It uses various charset modifiers, passed in via $::TEST_CHUNK.  The caller
+# will also have set the locale to use if /l is the modifier.
+#   L is a pseudo-modifier that indicates to use the modifier /l instead, and
+#     the locale set by the caller is known to be UTF-8,
 
 binmode STDOUT, ":utf8";
 
@@ -27,6 +31,8 @@ use warnings;
 no warnings 'locale';   # Plenty of these would otherwise get generated
 use Encode;
 use POSIX;
+
+my $charset = $::TEST_CHUNK;
 
 # Special-cased characters in the .c's that we want to make sure get tested.
 my %be_sure_to_test = (
@@ -426,33 +432,6 @@ sub pairs (@) {
     map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_
 }
 
-my $utf8_locale;
-
-my @charsets = qw(d u a aa);
-if (locales_enabled('LC_CTYPE')) {
-    my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, "C") // "";
-    if ($current_locale eq 'C') {
-        use locale;
-
-        # Some implementations don't have the 128-255 range characters all
-        # mean nothing under the C locale (an example being VMS).  This is
-        # legal, but since we don't know what the right answers should be,
-        # skip the locale tests in that situation.
-        for my $i (128 .. 255) {
-            my $char = chr(utf8::unicode_to_native($i));
-            goto skip_C_locale_tests if uc($char) ne $char || lc($char) ne $char;
-        }
-        push @charsets, 'l';
-
-      skip_C_locale_tests:
-
-        # Look for utf8 locale.  We use the pseudo-modifier 'L' to indicate
-        # that we really want /l, but change to a UTF-8 locale.
-        $utf8_locale = find_utf8_ctype_locale();
-        push @charsets, 'L' if defined $utf8_locale;
-    }
-}
-
 # Finally ready to do the tests
 foreach my $test (sort { numerically } keys %tests) {
 
@@ -515,16 +494,10 @@ foreach my $test (sort { numerically } keys %tests) {
     #note $progress;
 
     # Now grind out tests, using various combinations.
-    foreach my $charset (@charsets) {
+    {
       my $charset_mod = lc $charset;
-      my $current_locale = "";
-      if ($charset_mod eq 'l') {
-        $current_locale = POSIX::setlocale(&POSIX::LC_CTYPE,
-                          ($charset eq 'L')
-                           ? $utf8_locale
-                           : 'C');
-        $current_locale = 'C locale' if $current_locale eq 'C';
-      }
+      my $current_locale = setlocale(&POSIX::LC_CTYPE);
+      $current_locale = 'C locale' if $current_locale eq 'C';
       $okays = 0;
       $this_iteration = 0;
 

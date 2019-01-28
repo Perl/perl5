@@ -5863,7 +5863,13 @@ t/porting/utils.t		Check that utility scripts still compile
 t/re/alpha_assertions.t		See if things like '(*postive_lookahed:...) work properly
 t/re/anyof.t			See if bracketed char classes [...] compile properly
 t/re/charset.t			See if regex modifiers like /d, /u work properly
-t/re/fold_grind.t		See if case folding works properly
+t/re/fold_grind.pl		Core file to see if regex case folding works properly
+t/re/fold_grind_8.t		Wrapper for fold_grind.pl for /l testing with a UTF-8 locale
+t/re/fold_grind_a.t		Wrapper for fold_grind.pl for /a testing
+t/re/fold_grind_aa.t		Wrapper for fold_grind.pl for /aa testing
+t/re/fold_grind_d.t		Wrapper for fold_grind.pl for /d testing
+t/re/fold_grind_l.t		Wrapper for fold_grind.pl for /l testing with a C locale
+t/re/fold_grind_u.t		Wrapper for fold_grind.pl for /u testing
 t/re/keep_tabs.t		Tests where \t can't be expanded.
 t/re/no_utf8_pm.t		Verify utf8.pm doesn't get loaded unless required
 t/re/overload.t		Test against string corruption in pattern matches on overloaded objects
