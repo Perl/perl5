@@ -175,6 +175,11 @@ static const char array_passed_to_stat[] = "Array passed to stat will be coerced
    op_free()
 */
 
+#define dDEFER_OP  \
+    SSize_t defer_stack_alloc = 0; \
+    SSize_t defer_ix = -1; \
+    OP **defer_stack = NULL;
+#define DEFER_OP_CLEANUP Safefree(defer_stack)
 #define DEFERRED_OP_STEP 100
 #define DEFER_OP(o) \
   STMT_START { \
@@ -770,9 +775,7 @@ Perl_op_free(pTHX_ OP *o)
 {
     dVAR;
     OPCODE type;
-    SSize_t defer_ix = -1;
-    SSize_t defer_stack_alloc = 0;
-    OP **defer_stack = NULL;
+    dDEFER_OP;
 
     do {
 
@@ -870,7 +873,7 @@ Perl_op_free(pTHX_ OP *o)
             PL_op = NULL;
     } while ( (o = POP_DEFERRED_OP()) );
 
-    Safefree(defer_stack);
+    DEFER_OP_CLEANUP;
 }
 
 /* S_op_clear_gv(): free a GV attached to an OP */
@@ -1892,10 +1895,8 @@ Perl_scalarvoid(pTHX_ OP *arg)
     dVAR;
     OP *kid;
     SV* sv;
-    SSize_t defer_stack_alloc = 0;
-    SSize_t defer_ix = -1;
-    OP **defer_stack = NULL;
     OP *o = arg;
+    dDEFER_OP;
 
     PERL_ARGS_ASSERT_SCALARVOID;
 
@@ -2256,7 +2257,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         }
     } while ( (o = POP_DEFERRED_OP()) );
 
-    Safefree(defer_stack);
+    DEFER_OP_CLEANUP;
 
     return arg;
 }
