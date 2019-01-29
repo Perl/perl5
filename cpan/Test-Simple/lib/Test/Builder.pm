@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302160';
+our $VERSION = '1.302161'; # TRIAL
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -27,7 +27,6 @@ BEGIN {
         Test2::IPC::Driver::Files->import;
         Test2::API::test2_ipc_enable_polling();
         Test2::API::test2_no_wait(1);
-        Test2::API::test2_ipc_enable_shm();
     }
 }
 
@@ -1760,7 +1759,6 @@ sub coordinate_forks {
     my $ipc = Test2::IPC::apply_ipc($self->{Stack});
     $ipc->set_no_fatal(1);
     Test2::API::test2_no_wait(1);
-    Test2::API::test2_ipc_enable_shm();
 }
 
 sub no_log_results { $_[0]->{no_log_results} = 1 }

@@ -2,8 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302160';
-
+our $VERSION = '1.302161'; # TRIAL
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
 use Carp qw/confess carp/;
@@ -26,14 +25,10 @@ use Test2::Util::HashBase qw{
     -preload
 
     ipc_disabled
-    ipc_shm_size
-    ipc_shm_last
-    ipc_shm_id
     ipc_polling
     ipc_drivers
     ipc_timeout
     formatters
-    _shm_warned
 
     exit_callbacks
     post_load_callbacks
@@ -217,7 +212,6 @@ sub _finalize {
     for my $driver (@{$self->{+IPC_DRIVERS}}) {
         next unless $driver->can('is_viable') && $driver->is_viable;
         $self->{+IPC} = $driver->new or next;
-        $self->ipc_enable_shm if $self->{+IPC}->use_shm;
         return;
     }
 
@@ -367,91 +361,19 @@ sub enable_ipc_polling {
         # $_[0] is a context object
         sub {
             return unless $self->{+IPC_POLLING};
-            return $_[0]->{hub}->cull unless $self->{+IPC_SHM_ID};
-
-            # You may notice that we are not handling the error case of shmread
-            # returning false. In the case where SHM returns false it falls
-            # through to the call to 'cull'. shmread is used as an optimization
-            # to avoid needing to call cull() too often. In the case of failure
-            # the optimization fails and we call 'cull' more often than needed,
-            # this is slower, but completely safe.
-            my $val;
-            if(shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE})) {
-                return if $val eq $self->{+IPC_SHM_LAST};
-                $self->{+IPC_SHM_LAST} = $val;
-                return $_[0]->{hub}->cull;
-            }
-
-            # Do not come back if shm is gone.
-            delete $self->{+IPC_SHM_ID};
-            return;
+            return unless $self->{+IPC};
+            return unless $self->{+IPC}->pending();
+            return $_[0]->{hub}->cull;
         }
     ) unless defined $self->ipc_polling;
 
     $self->set_ipc_polling(1);
 }
 
-sub ipc_enable_shm {
-    my $self = shift;
-
-    return 1 if defined $self->{+IPC_SHM_ID};
-
-    $self->{+_PID} = $$        unless defined $self->{+_PID};
-    $self->{+_TID} = get_tid() unless defined $self->{+_TID};
-
-    my ($ok, $err) = try {
-        # SysV IPC can be available but not enabled.
-        #
-        # In some systems (*BSD) accessing the SysV IPC APIs without
-        # them being enabled can cause a SIGSYS.  We suppress the SIGSYS
-        # and then get ENOSYS from the calls.
-        local $SIG{SYS} = 'IGNORE' if CAN_SIGSYS;
-
-        require IPC::SysV;
-
-        my $ipc_key = IPC::SysV::IPC_PRIVATE();
-        my $shm_size = $self->{+IPC}->can('shm_size') ? $self->{+IPC}->shm_size : 64;
-        my $shm_id = shmget($ipc_key, $shm_size, 0666) or die "Could not get shm: $!";
-
-        my $initial = 'a' x $shm_size;
-        shmwrite($shm_id, $initial, 0, $shm_size) or die "Could not write to shm: $!";
-        my $val;
-        shmread($shm_id, $val, 0, $shm_size) or die "Could not read from shm: $!";
-        die "Read SHM value does not match the initial value ('$val' vs '$initial')"
-            unless $val eq $initial;
-
-        $self->{+IPC_SHM_SIZE} = $shm_size;
-        $self->{+IPC_SHM_ID}   = $shm_id;
-        $self->{+IPC_SHM_LAST} = $initial;
-    };
-
-    return $ok;
-}
-
-sub ipc_free_shm {
-    my $self = shift;
-
-    my $id = delete $self->{+IPC_SHM_ID};
-    return unless defined $id;
-
-    $self->{+IPC}->stop_shm() if $self->{+IPC} && $self->{+IPC}->can('stop_shm');
-    shmctl($id, IPC::SysV::IPC_RMID(), 0);
-}
-
 sub get_ipc_pending {
     my $self = shift;
-    return -1 unless defined $self->{+IPC_SHM_ID};
-    my $val;
-
-    if (shmread($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE})) {
-        return 0 if $val eq $self->{+IPC_SHM_LAST};
-        $self->{+IPC_SHM_LAST} = $val;
-        return 1;
-    }
-
-    $self->{+IPC}->stop_shm() if $self->{+IPC} && $self->{+IPC}->can('stop_shm');
-    delete $self->{+IPC_SHM_ID};
-    return -1;
+    return -1 unless $self->{+IPC};
+    $self->{+IPC}->pending();
 }
 
 sub _check_pid {
@@ -462,61 +384,13 @@ sub _check_pid {
 
 sub set_ipc_pending {
     my $self = shift;
-
-    return undef unless defined $self->{+IPC_SHM_ID};
-
+    return unless $self->{+IPC};
     my ($val) = @_;
 
     confess "value is required for set_ipc_pending"
         unless $val;
 
-    return if shmwrite($self->{+IPC_SHM_ID}, $val, 0, $self->{+IPC_SHM_SIZE});
-    my $errno = 0 + $!;
-    my $err = "$!";
-
-    # Do not come back if shm is gone.
-    my $id = delete $self->{+IPC_SHM_ID};
-
-    my $ppid = defined $self->{+_PID} ? $self->{+_PID} : '?';
-    my $ptid = defined $self->{+_TID} ? $self->{+_TID} : '?';
-    my $cpid = $$;
-    my $ctid = get_tid();
-
-    my $shm_stopped = $self->{+IPC} && $self->{+IPC}->can('shm_stopped') && $self->{+IPC}->shm_stopped || 0;
-
-    if (defined($self->{+_PID}) && ($ppid == $$ || $self->_check_pid($ppid)) && !$shm_stopped) {
-        return if $self->{+_SHM_WARNED}++;
-
-        my $warn = "($$) It looks like SHM has gone away unexpectedly ($errno: $err). The parent process is still active. This is not fatal, but may slow things down slightly.";
-        $warn = Carp::longmess($warn) if Carp->can('longmess');
-        warn $warn;
-        return;
-    }
-
-    chomp(my $msg = <<"    EOT");
-IPC shmwrite($id, '$val', 0, $self->{+IPC_SHM_SIZE}) failed, the parent process appears to have exited. This is a fatal error.
-  Error: ($errno) $err
-  Parent  PID: $ppid
-  Current PID: $cpid
-  Parent  TID: $ptid
-  Current TID: $ctid
-  SHM State:   $shm_stopped
-  IPC errors like this usually indicate a race condition in a test where the
-  parent thread/process is allowed to exit before all child processes/threads
-  are complete.
-  Trace:
-    EOT
-    $self->_fatal_error($msg);
-}
-
-sub _fatal_error {
-    my $self = shift;
-    my ($msg) = @_;
-
-    $msg = Carp::longmess($msg) if Carp->can('longmess');
-
-    print STDERR $msg;
-    CORE::exit(255);
+    $self->{+IPC}->set_pending($val);
 }
 
 sub disable_ipc_polling {
@@ -581,19 +455,6 @@ sub _ipc_wait {
     return 0 if $ok && !$fail;
     warn $error unless $ok;
     return 255;
-}
-
-sub DESTROY {
-    my $self = shift;
-
-    return if $self->{+PRELOAD};
-
-    return unless defined($self->{+_PID}) && $self->{+_PID} == $$;
-    return unless defined($self->{+_TID}) && $self->{+_TID} == get_tid();
-
-    $self->{+IPC}->stop_shm() if $self->{+IPC} && $self->{+IPC}->can('stop_shm');
-    shmctl($self->{+IPC_SHM_ID}, IPC::SysV::IPC_RMID(), 0)
-        if defined $self->{+IPC_SHM_ID} && IPC::SysV->can('IPC_RMID');
 }
 
 sub set_exit {
@@ -807,42 +668,20 @@ This is intended to be called in an C<END { ... }> block. This will look at
 test state and set $?. This will also call any end callbacks, and wait on child
 processes/threads.
 
-=item $obj->ipc_enable_shm()
-
-Turn on SHM for IPC (if possible)
-
-=item $shm_id = $obj->ipc_shm_id()
-
-If SHM is enabled for IPC this will be the shm_id for it.
-
-=item $shm_size = $obj->ipc_shm_size()
-
-If SHM is enabled for IPC this will be the size of it.
-
-=item $shm_last_val = $obj->ipc_shm_last()
-
-If SHM is enabled for IPC this will return the last SHM value seen.
-
 =item $obj->set_ipc_pending($val)
 
-use the IPC SHM to tell other processes and threads there is a pending event.
-C<$val> should be a unique value no other thread/process will generate.
+Tell other processes and threads there is a pending event. C<$val> should be a
+unique value no other thread/process will generate.
 
-B<Note:> This will also make the current process see a pending event. It does
-not set C<ipc_shm_last()>, this is important because doing so could hide a
-previous change.
+B<Note:> This will also make the current process see a pending event.
 
 =item $pending = $obj->get_ipc_pending()
 
-This returns -1 if SHM is not enabled for IPC.
+This returns -1 if it is not possible to know.
 
-This returns 0 if the SHM value matches the last known value, which means there
-are no pending events.
+This returns 0 if there are no pending events.
 
-This returns 1 if the SHM value has changed, which means there are probably
-pending events.
-
-When 1 is returned this will set C<< $obj->ipc_shm_last() >>.
+This returns 1 if there are pending events.
 
 =item $timeout = $obj->ipc_timeout;
 

@@ -2,11 +2,11 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302160';
+our $VERSION = '1.302161'; # TRIAL
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
-use Test2::Util::HashBase qw{tempdir event_ids read_ids timeouts tid pid globals shm_stop_file};
+use Test2::Util::HashBase qw{tempdir event_ids read_ids timeouts tid pid globals};
 
 use Scalar::Util qw/blessed/;
 use File::Temp();
@@ -17,23 +17,7 @@ use POSIX();
 use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator do_rename do_unlink try_sig_mask/;
 use Test2::API qw/test2_ipc_set_pending/;
 
-sub use_shm { 1 }
-sub shm_size() { 64 }
-
 sub is_viable { 1 }
-
-sub stop_shm {
-    my $self = shift;
-    open(my $fh, '>>', $self->{+SHM_STOP_FILE}) or die "Could not open shm top file: $!";
-    print $fh $$, "\n";
-    return;
-}
-
-sub shm_stopped {
-    my $self = shift;
-    return 1 if -e $self->{+SHM_STOP_FILE};
-    return 0;
-}
 
 sub init {
     my $self = shift;
@@ -47,8 +31,6 @@ sub init {
     $self->abort_trace("Could not get a temp dir") unless $tmpdir;
 
     $self->{+TEMPDIR} = File::Spec->canonpath($tmpdir);
-
-    $self->{+SHM_STOP_FILE} = File::Spec->catfile($tmpdir, 'stop_shm');
 
     print STDERR "\nIPC Temp Dir: $tmpdir\n\n"
         if $ENV{T2_KEEP_TEMPDIR};
@@ -182,7 +164,7 @@ do so if Test::Builder is loaded for legacy reasons.
 
     if ($ok) {
         $self->abort("Could not rename file '$file' -> '$ready': $ren_err") unless $ren_ok;
-        test2_ipc_set_pending(substr($file, -(shm_size)));
+        test2_ipc_set_pending($file);
     }
     else {
         my $src_file = __FILE__;
@@ -397,7 +379,7 @@ sub DESTROY {
         my $full = File::Spec->catfile($tempdir, $file);
 
         my $sep = ipc_separator;
-        if ($aborted || $file =~ m/^(GLOBAL|HUB$sep|stop_shm)/) {
+        if ($aborted || $file =~ m/^(GLOBAL|HUB$sep)/) {
             $full =~ m/^(.*)$/;
             $full = $1; # Untaint it
             next if $ENV{T2_KEEP_TEMPDIR};

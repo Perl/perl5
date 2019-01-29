@@ -472,6 +472,7 @@ if (CAN_REALLY_FORK) {
 
 {
     my $one = $CLASS->new;
+    $one->{ipc} = Test2::IPC::Driver::Files->new;
 
     ok(!@{$one->context_init_callbacks}, "no callbacks");
     is($one->ipc_polling, undef, "no polling, undef");
@@ -490,7 +491,6 @@ if (CAN_REALLY_FORK) {
     ok(defined($one->{_tid}), "tid is defined");
     is(@{$one->context_init_callbacks}, 1, "added the callback");
     is($one->ipc_polling, 1, "polling on");
-    $one->set_ipc_shm_last('abc1');
     $one->context_init_callbacks->[0]->({'hub' => 'Fake::Hub'});
     is($cull, 1, "called cull once");
     $cull = 0;
@@ -498,7 +498,6 @@ if (CAN_REALLY_FORK) {
     $one->disable_ipc_polling;
     is(@{$one->context_init_callbacks}, 1, "kept the callback");
     is($one->ipc_polling, 0, "no polling, set to 0");
-    $one->set_ipc_shm_last('abc3');
     $one->context_init_callbacks->[0]->({'hub' => 'Fake::Hub'});
     is($cull, 0, "did not call cull");
     $cull = 0;
@@ -506,7 +505,6 @@ if (CAN_REALLY_FORK) {
     $one->enable_ipc_polling;
     is(@{$one->context_init_callbacks}, 1, "did not add the callback");
     is($one->ipc_polling, 1, "polling on");
-    $one->set_ipc_shm_last('abc3');
     $one->context_init_callbacks->[0]->({'hub' => 'Fake::Hub'});
     is($cull, 1, "called cull once");
 }
@@ -534,128 +532,6 @@ if (CAN_REALLY_FORK) {
     ok(!$one->ipc_disabled, "IPC is not disabled by env var");
     $one->ipc_disable;
     ok($one->ipc_disabled, "IPC is disabled directly");
-}
-
-SKIP: {
-    last SKIP if $] lt "5.008";
-    no warnings 'redefine';
-    my $error;
-    local *Test2::API::Instance::_fatal_error = sub { die "$_[1]\n" };
-
-    my $two = $CLASS->new;
-    $two->{ipc_shm_id} = undef;
-    is($two->set_ipc_pending, undef, "No shm");
-
-    $two->{ipc_shm_id} = -1;
-    $two->{ipc_shm_size} = 32;
-
-    my $ok = eval { $two->set_ipc_pending(); 1 };
-    ok(!$ok, "Exception");
-    like($@, qr/value is required for set_ipc_pending/, "Got expected exception");
-
-    my $ctid = get_tid();
-
-    my $ec;
-    {
-        local $! = 22;
-        $ec = "$!";
-    }
-
-    $ok = eval { $two->set_ipc_pending('message'); 1 };
-    my $err = $@;
-    ok(!$ok, "Exception");
-
-    is($err, <<"    EOT", "Got exception when shm write fails (no tid/pid)") unless $err =~ m/not implemented/;
-IPC shmwrite(-1, 'message', 0, 32) failed, the parent process appears to have exited. This is a fatal error.
-  Error: (22) $ec
-  Parent  PID: ?
-  Current PID: $$
-  Parent  TID: ?
-  Current TID: $ctid
-  SHM State:   0
-  IPC errors like this usually indicate a race condition in a test where the
-  parent thread/process is allowed to exit before all child processes/threads
-  are complete.
-  Trace:
-    EOT
-
-    # Need a fake PID that cannot actually be signaled, but is a real number....
-    $two->{_pid} = 10000000000000000;
-    $two->{_tid} = $ctid;
-
-    $two->{ipc_shm_id} = -1; # Reset this
-    $ok = eval {
-        # override check_pid, some platforms will return true with our absurd PID above.
-        no warnings 'redefine';
-        local *Test2::API::Instance::_check_pid = sub { () };
-        $two->set_ipc_pending('message');
-        1;
-    };
-    $err = $@;
-    ok(!$ok, "Exception");
-
-    is($err, <<"    EOT", "Got exception when shm write fails (with tid/pid)") unless $err =~ m/not implemented/;
-IPC shmwrite(-1, 'message', 0, 32) failed, the parent process appears to have exited. This is a fatal error.
-  Error: (22) $ec
-  Parent  PID: $two->{_pid}
-  Current PID: $$
-  Parent  TID: $ctid
-  Current TID: $ctid
-  SHM State:   0
-  IPC errors like this usually indicate a race condition in a test where the
-  parent thread/process is allowed to exit before all child processes/threads
-  are complete.
-  Trace:
-    EOT
-
-    $two->{_pid} = $$; # Parent that has not exited
-    $two->{_tid} = $ctid;
-
-    my $warn = undef;
-    $two->{ipc_shm_id} = -1; # Reset this
-    $ok = eval {
-        local $SIG{__WARN__} = sub { $warn = $_[0] };
-        $two->set_ipc_pending('message');
-        1;
-    };
-    $err = $@;
-    unless ($err =~ m/not implemented/) {
-        ok($ok, "No Exception");
-
-        like(
-            $warn,
-            qr/^\($$\) It looks like SHM has gone away unexpectedly \(22: $ec\)\. The parent process is still active\. This is not fatal, but may slow things down slightly/,
-            "Got warning when shm write fails but parent is open"
-        );
-    }
-}
-
-
-if (CAN_REALLY_FORK && $] ge "5.008") {
-    my ($rh, $wh);
-    pipe($rh, $wh) or die "no pipe: $!";
-
-    my $pid = fork;
-    die "Could not fork" unless defined $pid;
-    if ($pid) {
-        close($wh);
-        my $check = waitpid($pid, 0);
-        my $exit = $?;
-        is($check, $pid, "Waited on process");
-        my $err = ($exit >> 8);
-        my $sig = ($exit & 127);
-        ok(!$sig, "did not exit via a signal");
-        is($err, 255, "exit code 255");
-
-        my $msg = join "" => <$rh>;
-        like($msg, qr/^blah, I died\nfoo bar at \Q${ \__FILE__ }\E line \d+/, "Saw error message");
-    }
-    else {
-        close($rh);
-        open(STDERR, '>&', $wh) or print "Could not open: $!";
-        $CLASS->_fatal_error("blah, I died\nfoo bar");
-        exit 1;
-    }
 }
 
 Test2::API::test2_ipc_wait_enable();
