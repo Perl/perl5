@@ -368,7 +368,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Regular expression matching no longer leaves stale UTF-8 length magic
+when updating C<$^R>.  This could result in C<length($^R)> returning
+an incorrect value.
 
 =back
 
