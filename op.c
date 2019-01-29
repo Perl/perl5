@@ -3583,20 +3583,20 @@ S_finalize_op(pTHX_ OP* o)
     PERL_ARGS_ASSERT_FINALIZE_OP;
 
     do {
-    assert(o->op_type != OP_FREED);
+        assert(o->op_type != OP_FREED);
 
-    switch (o->op_type) {
-    case OP_NEXTSTATE:
-    case OP_DBSTATE:
-	PL_curcop = ((COP*)o);		/* for warnings */
-	break;
-    case OP_EXEC:
-        if (OpHAS_SIBLING(o)) {
-            OP *sib = OpSIBLING(o);
-            if ((  sib->op_type == OP_NEXTSTATE || sib->op_type == OP_DBSTATE)
-                && ckWARN(WARN_EXEC)
-                && OpHAS_SIBLING(sib))
-            {
+        switch (o->op_type) {
+        case OP_NEXTSTATE:
+        case OP_DBSTATE:
+            PL_curcop = ((COP*)o);		/* for warnings */
+            break;
+        case OP_EXEC:
+            if (OpHAS_SIBLING(o)) {
+                OP *sib = OpSIBLING(o);
+                if ((  sib->op_type == OP_NEXTSTATE || sib->op_type == OP_DBSTATE)
+                    && ckWARN(WARN_EXEC)
+                    && OpHAS_SIBLING(sib))
+                {
 		    const OPCODE type = OpSIBLING(sib)->op_type;
 		    if (type != OP_EXIT && type != OP_WARN && type != OP_DIE) {
 			const line_t oldline = CopLINE(PL_curcop);
@@ -3607,145 +3607,145 @@ S_finalize_op(pTHX_ OP* o)
 			    "\t(Maybe you meant system() when you said exec()?)\n");
 			CopLINE_set(PL_curcop, oldline);
 		    }
-	    }
-        }
-	break;
+                }
+            }
+            break;
 
-    case OP_GV:
-	if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_PROTOTYPE)) {
-	    GV * const gv = cGVOPo_gv;
-	    if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
-		/* XXX could check prototype here instead of just carping */
-		SV * const sv = sv_newmortal();
-		gv_efullname3(sv, gv, NULL);
-		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-		    "%" SVf "() called too early to check prototype",
-		    SVfARG(sv));
-	    }
-	}
-	break;
+        case OP_GV:
+            if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_PROTOTYPE)) {
+                GV * const gv = cGVOPo_gv;
+                if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
+                    /* XXX could check prototype here instead of just carping */
+                    SV * const sv = sv_newmortal();
+                    gv_efullname3(sv, gv, NULL);
+                    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
+                                "%" SVf "() called too early to check prototype",
+                                SVfARG(sv));
+                }
+            }
+            break;
 
-    case OP_CONST:
-	if (cSVOPo->op_private & OPpCONST_STRICT)
-	    no_bareword_allowed(o);
+        case OP_CONST:
+            if (cSVOPo->op_private & OPpCONST_STRICT)
+                no_bareword_allowed(o);
 #ifdef USE_ITHREADS
-        /* FALLTHROUGH */
-    case OP_HINTSEVAL:
-        op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
+            /* FALLTHROUGH */
+        case OP_HINTSEVAL:
+            op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
 #endif
-        break;
+            break;
 
 #ifdef USE_ITHREADS
-    /* Relocate all the METHOP's SVs to the pad for thread safety. */
-    case OP_METHOD_NAMED:
-    case OP_METHOD_SUPER:
-    case OP_METHOD_REDIR:
-    case OP_METHOD_REDIR_SUPER:
-        op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
-        break;
+            /* Relocate all the METHOP's SVs to the pad for thread safety. */
+        case OP_METHOD_NAMED:
+        case OP_METHOD_SUPER:
+        case OP_METHOD_REDIR:
+        case OP_METHOD_REDIR_SUPER:
+            op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
+            break;
 #endif
 
-    case OP_HELEM: {
-	UNOP *rop;
-	SVOP *key_op;
-	OP *kid;
+        case OP_HELEM: {
+            UNOP *rop;
+            SVOP *key_op;
+            OP *kid;
 
-	if ((key_op = cSVOPx(((BINOP*)o)->op_last))->op_type != OP_CONST)
-	    break;
+            if ((key_op = cSVOPx(((BINOP*)o)->op_last))->op_type != OP_CONST)
+                break;
 
-	rop = (UNOP*)((BINOP*)o)->op_first;
+            rop = (UNOP*)((BINOP*)o)->op_first;
 
-	goto check_keys;
+            goto check_keys;
 
-    case OP_HSLICE:
-	S_scalar_slice_warning(aTHX_ o);
-        /* FALLTHROUGH */
+            case OP_HSLICE:
+                S_scalar_slice_warning(aTHX_ o);
+                /* FALLTHROUGH */
 
-    case OP_KVHSLICE:
-        kid = OpSIBLING(cLISTOPo->op_first);
-	if (/* I bet there's always a pushmark... */
-	    OP_TYPE_ISNT_AND_WASNT_NN(kid, OP_LIST)
-	    && OP_TYPE_ISNT_NN(kid, OP_CONST))
-        {
-	    break;
+            case OP_KVHSLICE:
+                kid = OpSIBLING(cLISTOPo->op_first);
+	    if (/* I bet there's always a pushmark... */
+	        OP_TYPE_ISNT_AND_WASNT_NN(kid, OP_LIST)
+	        && OP_TYPE_ISNT_NN(kid, OP_CONST))
+            {
+	        break;
+            }
+
+            key_op = (SVOP*)(kid->op_type == OP_CONST
+                             ? kid
+                             : OpSIBLING(kLISTOP->op_first));
+
+            rop = (UNOP*)((LISTOP*)o)->op_last;
+
+        check_keys:
+            if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
+                rop = NULL;
+            S_check_hash_fields_and_hekify(aTHX_ rop, key_op);
+            break;
         }
+        case OP_NULL:
+            if (o->op_targ != OP_HSLICE && o->op_targ != OP_ASLICE)
+                break;
+            /* FALLTHROUGH */
+        case OP_ASLICE:
+            S_scalar_slice_warning(aTHX_ o);
+            break;
 
-	key_op = (SVOP*)(kid->op_type == OP_CONST
-				? kid
-				: OpSIBLING(kLISTOP->op_first));
-
-	rop = (UNOP*)((LISTOP*)o)->op_last;
-
-      check_keys:	
-        if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
-            rop = NULL;
-        S_check_hash_fields_and_hekify(aTHX_ rop, key_op);
-	break;
-    }
-    case OP_NULL:
-	if (o->op_targ != OP_HSLICE && o->op_targ != OP_ASLICE)
-	    break;
-	/* FALLTHROUGH */
-    case OP_ASLICE:
-	S_scalar_slice_warning(aTHX_ o);
-	break;
-
-    case OP_SUBST: {
-	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
-	    finalize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
-	break;
-    }
-    default:
-	break;
-    }
+        case OP_SUBST: {
+            if (cPMOPo->op_pmreplrootu.op_pmreplroot)
+                finalize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
+            break;
+        }
+        default:
+            break;
+        }
 
 #ifdef DEBUGGING
-    if (o->op_flags & OPf_KIDS) {
-	OP *kid;
+        if (o->op_flags & OPf_KIDS) {
+            OP *kid;
 
-        /* check that op_last points to the last sibling, and that
-         * the last op_sibling/op_sibparent field points back to the
-         * parent, and that the only ops with KIDS are those which are
-         * entitled to them */
-        U32 type = o->op_type;
-        U32 family;
-        bool has_last;
+            /* check that op_last points to the last sibling, and that
+             * the last op_sibling/op_sibparent field points back to the
+             * parent, and that the only ops with KIDS are those which are
+             * entitled to them */
+            U32 type = o->op_type;
+            U32 family;
+            bool has_last;
 
-        if (type == OP_NULL) {
-            type = o->op_targ;
-            /* ck_glob creates a null UNOP with ex-type GLOB
-             * (which is a list op. So pretend it wasn't a listop */
-            if (type == OP_GLOB)
-                type = OP_NULL;
-        }
-        family = PL_opargs[type] & OA_CLASS_MASK;
+            if (type == OP_NULL) {
+                type = o->op_targ;
+                /* ck_glob creates a null UNOP with ex-type GLOB
+                 * (which is a list op. So pretend it wasn't a listop */
+                if (type == OP_GLOB)
+                    type = OP_NULL;
+            }
+            family = PL_opargs[type] & OA_CLASS_MASK;
 
-        has_last = (   family == OA_BINOP
-                    || family == OA_LISTOP
-                    || family == OA_PMOP
-                    || family == OA_LOOP
-                   );
-        assert(  has_last /* has op_first and op_last, or ...
-              ... has (or may have) op_first: */
-              || family == OA_UNOP
-              || family == OA_UNOP_AUX
-              || family == OA_LOGOP
-              || family == OA_BASEOP_OR_UNOP
-              || family == OA_FILESTATOP
-              || family == OA_LOOPEXOP
-              || family == OA_METHOP
-              || type == OP_CUSTOM
-              || type == OP_NULL /* new_logop does this */
-              );
+            has_last = (   family == OA_BINOP
+                        || family == OA_LISTOP
+                        || family == OA_PMOP
+                        || family == OA_LOOP
+                       );
+            assert(  has_last /* has op_first and op_last, or ...
+                  ... has (or may have) op_first: */
+                  || family == OA_UNOP
+                  || family == OA_UNOP_AUX
+                  || family == OA_LOGOP
+                  || family == OA_BASEOP_OR_UNOP
+                  || family == OA_FILESTATOP
+                  || family == OA_LOOPEXOP
+                  || family == OA_METHOP
+                  || type == OP_CUSTOM
+                  || type == OP_NULL /* new_logop does this */
+                  );
 
-        for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
-            if (!OpHAS_SIBLING(kid)) {
-                if (has_last)
-                    assert(kid == cLISTOPo->op_last);
-                assert(kid->op_sibparent == o);
+            for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
+                if (!OpHAS_SIBLING(kid)) {
+                    if (has_last)
+                        assert(kid == cLISTOPo->op_last);
+                    assert(kid->op_sibparent == o);
+                }
             }
         }
-    }
 #endif
     } while (( o = traverse_op_tree(top, o)) != NULL);
 }
