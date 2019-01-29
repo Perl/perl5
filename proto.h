@@ -5115,6 +5115,9 @@ STATIC OP*	S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 STATIC OP*	S_too_many_arguments_pv(pTHX_ OP *o, const char* name, U32 flags);
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_PV	\
 	assert(o); assert(name)
+STATIC OP*	S_traverse_op_tree(pTHX_ OP* top, OP* o);
+#define PERL_ARGS_ASSERT_TRAVERSE_OP_TREE	\
+	assert(top); assert(o)
 #  if defined(USE_ITHREADS)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp);

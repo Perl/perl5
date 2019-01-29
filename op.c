@@ -3537,12 +3537,52 @@ S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
 }
 #endif
 
+/*
+=for apidoc s|OP*|traverse_op_tree|OP* top|OP* o
+
+Return the next op in a depth-first traversal of the op tree,
+returning NULL when the traversal is complete.
+
+The initial call must supply the root of the tree as both top and o.
+
+For now it's static, but it may be exposed to the API in the future.
+
+=cut
+*/
+
+STATIC OP*
+S_traverse_op_tree(OP *top, OP *o) {
+    OP *sib;
+
+    PERL_ARGS_ASSERT_TRAVERSE_OP_TREE;
+
+    if ((o->op_flags & OPf_KIDS) && cUNOPo->op_first) {
+        return cUNOPo->op_first;
+    }
+    else if ((sib = OpSIBLING(o))) {
+        return sib;
+    }
+    else {
+        OP *parent = o->op_sibparent;
+        assert(!(o->op_moresib));
+        while (parent && parent != top) {
+            OP *sib = OpSIBLING(parent);
+            if (sib)
+                return sib;
+            parent = parent->op_sibparent;
+        }
+
+        return NULL;
+    }
+}
 
 STATIC void
 S_finalize_op(pTHX_ OP* o)
 {
+    OP * const top = o;
     PERL_ARGS_ASSERT_FINALIZE_OP;
 
+    do {
     assert(o->op_type != OP_FREED);
 
     switch (o->op_type) {
@@ -3659,10 +3699,10 @@ S_finalize_op(pTHX_ OP* o)
 	break;
     }
 
+#ifdef DEBUGGING
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
 
-#ifdef DEBUGGING
         /* check that op_last points to the last sibling, and that
          * the last op_sibling/op_sibparent field points back to the
          * parent, and that the only ops with KIDS are those which are
@@ -3705,11 +3745,9 @@ S_finalize_op(pTHX_ OP* o)
                 assert(kid->op_sibparent == o);
             }
         }
-#endif
-
-	for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
-	    finalize_op(kid);
     }
+#endif
+    } while (( o = traverse_op_tree(top, o)) != NULL);
 }
 
 /*
