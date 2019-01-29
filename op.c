@@ -190,6 +190,22 @@ static const char array_passed_to_stat[] = "Array passed to stat will be coerced
     } \
     defer_stack[++defer_ix] = o; \
   } STMT_END
+#define DEFER_REVERSE(count)                            \
+    STMT_START {                                        \
+        UV cnt = (count);                               \
+        if (cnt > 1) {                                  \
+            OP **top = defer_stack + defer_ix;          \
+            /* top - (cnt) + 1 isn't safe here */       \
+            OP **bottom = top - (cnt - 1);              \
+            OP *tmp;                                    \
+            assert(bottom >= defer_stack);              \
+            while (top > bottom) {                      \
+                tmp = *top;                             \
+                *top-- = *bottom;                       \
+                *bottom++ = tmp;                        \
+            }                                           \
+        }                                               \
+    } STMT_END;
 
 #define POP_DEFERRED_OP() (defer_ix >= 0 ? defer_stack[defer_ix--] : (OP *)NULL)
 
@@ -3490,8 +3506,12 @@ S_optimize_op(pTHX_ OP* o)
 
         if (o->op_flags & OPf_KIDS) {
             OP *kid;
-            for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
+            IV child_count = 0;
+            for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
                 DEFER_OP(kid);
+                ++child_count;
+            }
+            DEFER_REVERSE(child_count);
         }
     } while ( ( o = POP_DEFERRED_OP() ) );
 
