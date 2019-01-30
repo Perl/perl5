@@ -3824,13 +3824,16 @@ PP(pp_ucfirst)
 		    inplace = FALSE;
 
                     /* If the result won't fit in a byte, the entire result
-                     * will have to be in UTF-8.  Assume worst case sizing in
-                     * conversion. (all latin1 characters occupy at most two
-                     * bytes in utf8) */
+                     * will have to be in UTF-8.  Allocate enough space for the
+                     * expanded first byte, and if UTF-8, the rest of the input
+                     * string, some or all of which may also expand to two
+                     * bytes, plus the terminating NUL. */
 		    if (title_ord > 255) {
 			doing_utf8 = TRUE;
 			convert_source_to_utf8 = TRUE;
-			need = slen * 2 + 1;
+			need = slen
+                            + variant_under_utf8_count(s, s + slen)
+                            + 1;
 
                         /* The (converted) UTF-8 and UTF-EBCDIC lengths of all
                          * (both) characters whose title case is above 255 is
@@ -4113,6 +4116,8 @@ PP(pp_uc)
           do_uni_rules:
 #endif
 		for (; s < send; d++, s++) {
+                    Size_t extra;
+
 		    *d = toUPPER_LATIN1_MOD(*s);
 		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
                         continue;
@@ -4163,22 +4168,29 @@ PP(pp_uc)
                      * come separately to UTF-8, then jump into the loop that
                      * handles UTF-8.  But the most efficient time-wise of the
                      * ones I could think of is what follows, and turned out to
-                     * not require much extra code. */
+                     * not require much extra code.
+                     *
+                     * First, calculate the extra space needed for the
+                     * remainder of the source needing to be in UTF-8.  The
+                     * uppercase of a character below 256 occupies the same
+                     * number of bytes as the original.  Therefore, the space
+                     * needed is the that number plus the number of characters
+                     * that become two bytes when converted to UTF-8. */
+
+                    extra = send - s + variant_under_utf8_count(s, send);
 
                     /* Convert what we have so far into UTF-8, telling the
 		     * function that we know it should be converted, and to
 		     * allow extra space for what we haven't processed yet.
-		     * Assume the worst case space requirements for converting
-		     * what we haven't processed so far: that it will require
-		     * two bytes for each remaining source character, plus the
-		     * NUL at the end.  This may cause the string pointer to
-		     * move, so re-find it. */
+                     *
+                     * This may cause the string pointer to move, so need to
+                     * save and re-find it. */
 
 		    len = d - (U8*)SvPVX_const(dest);
 		    SvCUR_set(dest, len);
 		    len = sv_utf8_upgrade_flags_grow(dest,
 						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						(send -s) * 2 + 1);
+						extra);
 		    d = (U8*)SvPVX(dest) + len;
 
                     /* Now process the remainder of the source, simultaneously
@@ -4531,19 +4543,32 @@ PP(pp_fc)
              * For the rest, the casefold is their lowercase.  */
             for (; s < send; d++, s++) {
                 if (*s == MICRO_SIGN) {
+                    Size_t extra = send - s
+                                 + variant_under_utf8_count(s, send);
+
                     /* \N{MICRO SIGN}'s casefold is \N{GREEK SMALL LETTER MU},
                      * which is outside of the latin-1 range. There's a couple
                      * of ways to deal with this -- khw discusses them in
                      * pp_lc/uc, so go there :) What we do here is upgrade what
                      * we had already casefolded, then enter an inner loop that
-                     * appends the rest of the characters as UTF-8. */
+                     * appends the rest of the characters as UTF-8.
+                     *
+                     * First we calculate the needed size of the upgraded dest
+                     * beyond what's been processed already (the upgrade
+                     * function figures that out).  In UTF-8 strings, the fold case of a
+                     * character below 256 occupies the same number of bytes as
+                     * the original (even the Sharp S).  Therefore, the space
+                     * needed is the number of bytes remaining plus the number
+                     * of characters that become two bytes when converted to
+                     * UTF-8. */
+
+                    /* Growing may move things, so have to save and recalculate
+                     * 'd' */
                     len = d - (U8*)SvPVX_const(dest);
                     SvCUR_set(dest, len);
                     len = sv_utf8_upgrade_flags_grow(dest,
                                                 SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						/* The max expansion for latin1
-						 * chars is 1 byte becomes 2 */
-                                                (send -s) * 2 + 1);
+                                                extra);
                     d = (U8*)SvPVX(dest) + len;
 
                     *d++ = UTF8_TWO_BYTE_HI(GREEK_SMALL_LETTER_MU);
