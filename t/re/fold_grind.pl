@@ -667,7 +667,11 @@ foreach my $test (sort { numerically } keys %tests) {
           next if $pattern_above_latin1 && ! $utf8_pattern;
 
           # Our testing of 'l' uses the POSIX locale, which is ASCII-only
-          my $uni_semantics = $charset ne 'l' && ($utf8_target || $charset eq 'u' || $charset eq 'L' || ($charset eq 'd' && $utf8_pattern) || $charset =~ /a/);
+          my $uni_semantics = $charset ne 'l' && (    $utf8_target
+                                                  ||  $charset eq 'u'
+                                                  ||  $charset eq 'L'
+                                                  || ($charset eq 'd' && $utf8_pattern)
+                                                  ||  $charset =~ /a/);
           my $upgrade_pattern = "";
           $upgrade_pattern = ' utf8::upgrade($p);' if ! $pattern_above_latin1 && $utf8_pattern;
 
