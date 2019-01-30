@@ -4568,7 +4568,9 @@ PP(pp_fc)
                     }
                     break;
                 }
-                else if (full_folding && *s == LATIN_SMALL_LETTER_SHARP_S) {
+                else if (   UNLIKELY(*s == LATIN_SMALL_LETTER_SHARP_S)
+                         && full_folding)
+                {
                     /* Under full casefolding, LATIN SMALL LETTER SHARP S
                      * becomes "ss", which may require growing the SV. */
                     if (SvLEN(dest) < ++min) {
