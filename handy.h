@@ -1540,7 +1540,9 @@ END_EXTERN_C
                                           || (char)(c) == '_'))
 
 /* These next three are also for internal core Perl use only: case-change
- * helper macros */
+ * helper macros.  The reason for using the PL_latin arrays is in case the
+ * system function is defective; it ensures uniform results that conform to the
+ * Unicod standard. */
 #define _generic_toLOWER_LC(c, function, cast)  (! FITS_IN_8_BITS(c)           \
                                                 ? (c)                          \
                                                 : (IN_UTF8_CTYPE_LOCALE)       \
