@@ -1705,13 +1705,13 @@ S_new_ctype(pTHX_ const char *newctype)
                                           "isxdigit('%s') unexpectedly is %d\n",
                                           name, cBOOL(isxdigit(i))));
                 }
-                if (UNLIKELY(tolower(i) != (int) toLOWER_A(i)))  {
+                if (UNLIKELY(tolower(i) != (int) toLOWER_A(i))) {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "tolower('%s')=0x%x instead of the expected 0x%x\n",
                             name, tolower(i), (int) toLOWER_A(i)));
                 }
-                if (UNLIKELY(toupper(i) != (int) toUPPER_A(i)))  {
+                if (UNLIKELY(toupper(i) != (int) toUPPER_A(i))) {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "toupper('%s')=0x%x instead of the expected 0x%x\n",
