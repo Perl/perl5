@@ -3895,9 +3895,11 @@ PP(pp_ucfirst)
 		*d++ = *(tmpbuf + 1);
 		s++;	/* We have just processed the 1st char */
 
-		for (; s < send; s++) {
-		    d = uvchr_to_utf8(d, *s);
-		}
+                while (s < send) {
+                    append_utf8_from_native_byte(*s, &d);
+                    s++;
+                }
+
 		*d = '\0';
 		SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	    }
