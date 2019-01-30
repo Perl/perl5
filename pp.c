@@ -31,7 +31,6 @@
 #include "reentr.h"
 #include "regcharclass.h"
 
-static const STRLEN capital_iota_len = sizeof(GREEK_CAPITAL_LETTER_IOTA_UTF8) - 1;
 /* variations on pp_null */
 
 PP(pp_stub)
@@ -4019,6 +4018,8 @@ PP(pp_uc)
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
+#define GREEK_CAPITAL_LETTER_IOTA 0x0399
+#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
 	/* All occurrences of these are to be moved to follow any other marks.
 	 * This is context-dependent.  We may not be passed enough context to
 	 * move the iota subscript beyond all of them, but we do the best we can
@@ -4038,8 +4039,8 @@ PP(pp_uc)
 	    if (in_iota_subscript && ! _is_utf8_mark(s)) {
 
 		/* A non-mark.  Time to output the iota subscript */
-		Copy(GREEK_CAPITAL_LETTER_IOTA_UTF8, d, capital_iota_len, U8);
-                d += capital_iota_len;
+		*d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
+		*d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
 		in_iota_subscript = FALSE;
             }
 
@@ -4052,8 +4053,6 @@ PP(pp_uc)
 #else
             uv = _toUPPER_utf8_flags(s, send, tmpbuf, &ulen, 0);
 #endif
-#define GREEK_CAPITAL_LETTER_IOTA 0x0399
-#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
                 && utf8_to_uvchr_buf(s, send, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
             {
@@ -4079,8 +4078,8 @@ PP(pp_uc)
             s += u;
 	}
 	if (in_iota_subscript) {
-            Copy(GREEK_CAPITAL_LETTER_IOTA_UTF8, d, capital_iota_len, U8);
-            d += capital_iota_len;
+            *d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
+            *d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
 	}
 	SvUTF8_on(dest);
 	*d = '\0';

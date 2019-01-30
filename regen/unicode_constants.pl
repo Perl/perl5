@@ -241,7 +241,6 @@ U+017F string
 
 U+0300 string
 
-U+0399 string
 
 U+1E9E string_skip_if_undef
 
