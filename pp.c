@@ -31,9 +31,7 @@
 #include "reentr.h"
 #include "regcharclass.h"
 
-static const STRLEN small_mu_len = sizeof(GREEK_SMALL_LETTER_MU_UTF8) - 1;
 static const STRLEN capital_iota_len = sizeof(GREEK_CAPITAL_LETTER_IOTA_UTF8) - 1;
-
 /* variations on pp_null */
 
 PP(pp_stub)
@@ -4549,8 +4547,8 @@ PP(pp_fc)
                                                 (send -s) * 2 + 1);
                     d = (U8*)SvPVX(dest) + len;
 
-                    Copy(GREEK_SMALL_LETTER_MU_UTF8, d, small_mu_len, U8);
-                    d += small_mu_len;
+                    *d++ = UTF8_TWO_BYTE_HI(GREEK_SMALL_LETTER_MU);
+                    *d++ = UTF8_TWO_BYTE_LO(GREEK_SMALL_LETTER_MU);
                     s++;
 
                     for (; s < send; s++) {
