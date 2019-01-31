@@ -257,6 +257,37 @@ PERLVAR(I, efloatsize,	STRLEN)
 PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
 
+/*
+=for apidoc Amn|U8|PL_exit_flags
+
+Contains flags controlling perl's behaviour on exit():
+
+=over
+
+=item * C<PERL_EXIT_DESTRUCT_END>
+
+If set, END blocks are executed when the interpreter is destroyed.
+This is normally set by perl itself after the interpreter is
+constructed.
+
+=item * C<PERL_EXIT_ABORT>
+
+Call C<abort()> on exit.  This is used internally by perl itself to
+abort if exit is called while processing exit.
+
+=item * C<PERL_EXIT_WARN>
+
+Warn on exit.
+
+=item * C<PERL_EXIT_EXPECTED>
+
+Set by the L<perlfunc/exit> operator.
+
+=back
+
+=cut
+*/
+
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
