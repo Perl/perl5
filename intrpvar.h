@@ -117,6 +117,13 @@ PERLVAR(I, dowarn,	U8)
 PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 #undef PERL___I
 
+/*
+=for apidoc Amn|HV*|PL_curstash
+
+The stash for the package code will be compiled into.
+
+=cut
+*/
 
 /* Stashes */
 PERLVAR(I, defstash,	HV *)		/* main symbol table */
