@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.45 2019/01/21 03:13:35 dankogai Exp $
+ $Id: Encode.xs,v 2.46 2019/01/31 04:26:40 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -148,6 +148,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
 	      IV check, STRLEN * offset, SV * term, int * retcode, 
 	      SV *fallback_cb)
 {
+    U8 *sorig    = s;
     STRLEN tlen  = slen;
     STRLEN ddone = 0;
     STRLEN sdone = 0;
@@ -309,7 +310,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
         /* settle variables when fallback */
         d    = (U8 *)SvEND(dst);
         dlen = SvLEN(dst) - ddone - 1;
-        s    = (U8*)SvPVX(src) + sdone;
+        s    = sorig + sdone;
         slen = tlen - sdone;
         break;
 
@@ -322,12 +323,9 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
     }   /* End of looping through the string */
  ENCODE_SET_SRC:
     if (check && !(check & ENCODE_LEAVE_SRC)){
-    sdone = SvCUR(src) - (slen+sdone);
-    if (sdone) {
+        sdone = tlen - (slen+sdone);
         sv_setpvn(src, (char*)s+slen, sdone);
-    }
-    SvCUR_set(src, sdone);
-    SvSETMAGIC(src);
+        SvSETMAGIC(src);
     }
     /* warn("check = 0x%X, code = 0x%d\n", check, code); */
 
@@ -335,7 +333,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
     SvPOK_only(dst);
 
 #if ENCODE_XS_PROFILE
-    if (SvCUR(dst) > SvCUR(src)){
+    if (SvCUR(dst) > tlen){
     Perl_warn(aTHX_
           "SvLEN(dst)=%d, SvCUR(dst)=%d. %d bytes unused(%f %%)\n",
           SvLEN(dst), SvCUR(dst), SvLEN(dst) - SvCUR(dst),
@@ -666,12 +664,9 @@ PPCODE:
 
     /* Clear out translated part of source unless asked not to */
     if (modify) {
-    slen = e-s;
-    if (slen) {
+        slen = e-s;
         sv_setpvn(src, (char*)s, slen);
-    }
-    SvCUR_set(src, slen);
-    SvSETMAGIC(src);
+        SvSETMAGIC(src);
     }
     SvUTF8_on(dst);
     if (SvTAINTED(src)) SvTAINTED_on(dst); /* propagate taintedness */
@@ -736,12 +731,9 @@ PPCODE:
 
     /* Clear out translated part of source unless asked not to */
     if (modify) {
-    slen = e-s;
-    if (slen) {
+        slen = e-s;
         sv_setpvn(src, (char*)s, slen);
-    }
-    SvCUR_set(src, slen);
-    SvSETMAGIC(src);
+        SvSETMAGIC(src);
     }
     SvPOK_only(dst);
     SvUTF8_off(dst);
