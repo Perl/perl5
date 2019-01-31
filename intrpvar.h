@@ -122,6 +122,15 @@ PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 PERLVAR(I, defstash,	HV *)		/* main symbol table */
 PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
 
+/*
+=for apidoc Amn|COP*|PL_curcop
+
+The currently active COP (control op) roughly representing the current
+statement in the source.
+
+=cut
+*/
+
 PERLVAR(I, curcop,	COP *)
 PERLVAR(I, curstack,	AV *)		/* THE STACK */
 PERLVAR(I, curstackinfo, PERL_SI *)	/* current stack + context */
