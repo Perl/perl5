@@ -93,6 +93,14 @@ PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
  */
 PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
 
+/*
+=for apidoc Amn|GV *|PL_defgv
+
+The GV representing C<*_>.  Useful for access to C<$_>.
+
+=cut
+*/
+
 PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
 PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(I, defgv,	GV *)           /* the *_ glob */
