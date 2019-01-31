@@ -690,8 +690,28 @@ PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
 
 PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
 
-/* This value may be set when embedding for full cleanup  */
-/* 0=none, 1=full, 2=full with checks */
+/*
+=for apidoc Amn|signed char|PL_perl_destruct_level
+
+This value may be set when embedding for full cleanup.
+
+Possible values:
+
+=over
+
+=item * 0 - none
+
+=item * 1 - full
+
+=item * 2 or greater - full with checks.
+
+=back
+
+If C<$ENV{PERL_DESTRUCT_LEVEL}> is set to an integer greater than the
+value of C<PL_perl_destruct_level> its value is used instead.
+
+=cut
+*/
 /* mod_perl is special, and also assigns a meaning -1 */
 PERLVARI(I, perl_destruct_level, signed char,	0)
 
