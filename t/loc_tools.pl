@@ -501,8 +501,8 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     return $ret;
 }
 
-sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
-                                  # thinks is a UTF-8 LC_CTYPE locale.
+sub find_utf8_ctype_locales (;$) { # Return the names of the locales that core
+                                  # Perl thinks are UTF-8 LC_CTYPE locales.
                                   # Optional parameter is a reference to a
                                   # list of locales to try; if omitted, this
                                   # tries all locales it can find on the
@@ -510,6 +510,7 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
     return unless locales_enabled('LC_CTYPE');
 
     my $locales_ref = shift;
+    my @return;
 
     if (! defined $locales_ref) {
 
@@ -518,8 +519,25 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
     }
 
     foreach my $locale (@$locales_ref) {
-        return $locale if is_locale_utf8($locale);
+        push @return, $locale if is_locale_utf8($locale);
     }
+
+    return @return;
+}
+
+
+sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
+                                  # thinks is a UTF-8 LC_CTYPE
+                                  # locale.
+                                  # Optional parameter is a reference to a
+                                  # list of locales to try; if omitted, this
+                                  # tries all locales it can find on the
+                                  # platform
+    my $try_locales_ref = shift;
+
+    my @utf8_locales = find_utf8_ctype_locales($try_locales_ref);
+
+    return $utf8_locales[0] if @utf8_locales;
 
     return;
 }
