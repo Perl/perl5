@@ -21947,6 +21947,7 @@ Perl_init_uniprops(pTHX)
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
     PL_utf8_mark = _new_invlist_C_array(uni_prop_ptrs[UNI_M]);
+    PL_CCC_non0_non230 = _new_invlist_C_array(_Perl_CCC_non0_non230_invlist);
 
 #ifdef UNI_XIDC
     /* The below are used only by deprecated functions.  They could be removed */

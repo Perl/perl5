@@ -351,6 +351,8 @@
 #define PL_GAboveLatin1		(my_vars->GAboveLatin1)
 #define PL_Assigned_invlist	(my_vars->GAssigned_invlist)
 #define PL_GAssigned_invlist	(my_vars->GAssigned_invlist)
+#define PL_CCC_non0_non230	(my_vars->GCCC_non0_non230)
+#define PL_GCCC_non0_non230	(my_vars->GCCC_non0_non230)
 #define PL_C_locale_obj		(my_vars->GC_locale_obj)
 #define PL_GC_locale_obj	(my_vars->GC_locale_obj)
 #define PL_GCB_invlist		(my_vars->GGCB_invlist)
