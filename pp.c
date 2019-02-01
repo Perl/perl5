@@ -28,6 +28,7 @@
 #include "perl.h"
 #include "keywords.h"
 
+#include "invlist_inline.h"
 #include "reentr.h"
 #include "regcharclass.h"
 
@@ -4039,12 +4040,16 @@ PP(pp_uc)
 	    STRLEN u;
 	    STRLEN ulen;
 	    UV uv;
-	    if (UNLIKELY(in_iota_subscript) && ! _is_utf8_mark(s)) {
+	    if (UNLIKELY(in_iota_subscript)) {
+                UV cp = utf8_to_uvchr_buf(s, send, NULL);
+
+                if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
 
 		/* A non-mark.  Time to output the iota subscript */
 		*d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
 		*d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
 		in_iota_subscript = FALSE;
+                }
             }
 
             /* Then handle the current character.  Get the changed case value
