@@ -4045,10 +4045,10 @@ PP(pp_uc)
 
                 if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
 
-		/* A non-mark.  Time to output the iota subscript */
-		*d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
-		*d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
-		in_iota_subscript = FALSE;
+                    /* A non-mark.  Time to output the iota subscript */
+                    *d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
+                    *d++ = UTF8_TWO_BYTE_LO(GREEK_CAPITAL_LETTER_IOTA);
+                    in_iota_subscript = FALSE;
                 }
             }
 
