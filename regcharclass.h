@@ -157,15 +157,6 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	REPLACEMENT: Unicode REPLACEMENT CHARACTER
-
-	0xFFFD
-*/
-/*** GENERATED CODE ***/
-#define is_REPLACEMENT_utf8_safe(s,e)                                       \
-( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xEF == ((const U8*)s)[0] ) ) && ( 0xBF == ((const U8*)s)[1] ) ) && ( 0xBD == ((const U8*)s)[2] ) ) ? 3 : 0 )
-
-/*
 	NONCHAR: Non character code points
 
 	\p{_Perl_Nchar}
@@ -766,15 +757,6 @@
 ( 0x2029 == cp || ( 0x2029 < cp &&                                          \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
-
-/*
-	REPLACEMENT: Unicode REPLACEMENT CHARACTER
-
-	0xFFFD
-*/
-/*** GENERATED CODE ***/
-#define is_REPLACEMENT_utf8_safe(s,e)                                       \
-( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( 0x73 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x71 == ((const U8*)s)[3] ) ) ? 4 : 0 )
 
 /*
 	NONCHAR: Non character code points
@@ -1394,15 +1376,6 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	REPLACEMENT: Unicode REPLACEMENT CHARACTER
-
-	0xFFFD
-*/
-/*** GENERATED CODE ***/
-#define is_REPLACEMENT_utf8_safe(s,e)                                       \
-( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( 0x72 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x70 == ((const U8*)s)[3] ) ) ? 4 : 0 )
-
-/*
 	NONCHAR: Non character code points
 
 	\p{_Perl_Nchar}
@@ -1939,6 +1912,6 @@
  * 457213d2957fa73d19eba1479093ab28419712c03c49f156c732ddb36d011112 lib/unicore/mktables
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
- * 6b1c1caf1004a96c15218dba6cec482f36a036ed91bb545315ba280319133a80 regen/regcharclass.pl
+ * 88bd981dbb45f57767c414170f85067c6e01b5afbc1e40c6514a2bc41ed8c1d8 regen/regcharclass.pl
  * c6b0b0b7e4ac4f5a57d203e84194749987477ea55b2366e3b343aadf8cc7d6b5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
