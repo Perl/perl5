@@ -593,7 +593,7 @@ type information to select a suitable comparison mechanism.
 
 The C<~~> operator compares its operands "polymorphically", determining how
 to compare them according to their actual types (numeric, string, array,
-hash, etc.)  Like the equality operators with which it shares the same
+hash, etc.).  Like the equality operators with which it shares the same
 precedence, C<~~> returns 1 for true and C<""> for false.  It is often best
 read aloud as "in", "inside of", or "is contained in", because the left
 operand is often looked for I<inside> the right operand.  That makes the
