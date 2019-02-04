@@ -3018,7 +3018,6 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 		SETs(tmpsv);
 	    }
 	    else {
-		dATARGET;
 		(void)POPs;
                 /* where the op is one of the two forms:
                  *    $x op= $y
@@ -3030,6 +3029,8 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
                     || (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
                         && (PL_op->op_private & OPpTARGET_MY)))
                 {
+                    dTARG;
+                    TARG = mutator ? *SP : PAD_SV(PL_op->op_targ);
 		    sv_setsv(TARG, tmpsv);
 		    SETTARG;
 		}
