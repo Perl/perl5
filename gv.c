@@ -2998,8 +2998,12 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 	SvGETMAGIC(right);
 
     if (SvAMAGIC(left) || SvAMAGIC(right)) {
-	SV * const tmpsv = amagic_call(left, right, method,
-		    ((flags & AMGf_assign) && opASSIGN ? AMGf_assign: 0)
+	SV * tmpsv;
+        /* STACKED implies mutator variant, e.g. $x += 1 */
+        bool mutator = (flags & AMGf_assign) && (PL_op->op_flags & OPf_STACKED);
+
+	tmpsv = amagic_call(left, right, method,
+		    (mutator ? AMGf_assign: 0)
 		  | (flags & AMGf_numarg));
 	if (tmpsv) {
 	    if (flags & AMGf_set) {
@@ -3009,7 +3013,7 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 	    else {
 		dATARGET;
 		(void)POPs;
-		if (opASSIGN || SvPADMY(TARG)) {
+		if (mutator || SvPADMY(TARG)) {
 		    sv_setsv(TARG, tmpsv);
 		    SETTARG;
 		}
