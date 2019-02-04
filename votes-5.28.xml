@@ -61,6 +61,15 @@ Fixes -Duseshrplib builds on darwin.
 
 <commit votes="tonyc" id="d6139ec4a9065ae249ab512398326a70dfb2fea2" ticket="133558" desc="fix 'for reverse @array' bug on AIX"/>
 
+All three of these or none.
+<commit votes="tonyc" id="63c1fa6a98bc60234a21de83dd191cd581a5d073" ticket="133760" desc="Add ability to include literal text in the prototype check."/>
+
+<commit votes="tonyc" id="f8d82a1010426d0eb49c33cb903413b882c85c3e" ticket="133760" desc="Another attempt to improve Configure detection of memmem() [perl #133760]."/>
+
+<commit votes="tonyc" id="ba73a4cb8f472480a2d630613d1e9e1172d518d3" ticket="133760" desc="Improve detection of memrchr, strlcat, and strlcpy"/>
+
+<commit votes="tonyc" id="04db542212fdad3a62f13afe741c99028f4bf799" ticket="133760" desc="Define _GNU_SOURCE if using the musl libc on linux."/>
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
