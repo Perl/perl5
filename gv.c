@@ -2959,8 +2959,15 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 	    SETs(tmpsv);
 	}
 	else {
-	    dTARGET;
-	    if (SvPADMY(TARG)) {
+            /* where the op is of the form:
+             *    $lex = $x op $y (where the assign is optimised away)
+             * then assign the returned value to targ and return that;
+             * otherwise return the value directly
+             */
+            if (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
+                && (PL_op->op_private & OPpTARGET_MY))
+            {
+                dTARGET;
 		sv_setsv(TARG, tmpsv);
 		SETTARG;
 	    }
@@ -3013,7 +3020,16 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 	    else {
 		dATARGET;
 		(void)POPs;
-		if (mutator || SvPADMY(TARG)) {
+                /* where the op is one of the two forms:
+                 *    $x op= $y
+                 *    $lex = $x op $y (where the assign is optimised away)
+                 * then assign the returned value to targ and return that;
+                 * otherwise return the value directly
+                 */
+		if (   mutator
+                    || (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
+                        && (PL_op->op_private & OPpTARGET_MY)))
+                {
 		    sv_setsv(TARG, tmpsv);
 		    SETTARG;
 		}

@@ -1060,9 +1060,9 @@ PP(pp_multiconcat)
                     SV * const tmpsv = amagic_call(left, right, concat_amg,
                                                 (nextappend ? AMGf_assign: 0));
                     if (tmpsv) {
-                        /* NB: tryAMAGICbin_MG() includes an SvPADMY test
-                         * here, which isn;t needed as any implicit
-                         * assign does under OPpTARGET_MY is done after
+                        /* NB: tryAMAGICbin_MG() includes an OPpTARGET_MY test
+                         * here, which isn't needed as any implicit
+                         * assign done under OPpTARGET_MY is done after
                          * this loop */
                         if (nextappend) {
                             sv_setsv(left, tmpsv);
