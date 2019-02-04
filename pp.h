@@ -556,7 +556,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define AMGf_assign	4       /* op supports mutator variant, e.g. $x += 1 */
 #define AMGf_unary	8
 #define AMGf_numeric	0x10	/* for Perl_try_amagic_bin */
-#define AMGf_set	0x20	/* for Perl_try_amagic_bin */
+
 #define AMGf_want_list	0x40
 #define AMGf_numarg	0x80
 

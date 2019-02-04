@@ -2938,8 +2938,6 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 /* Implement tryAMAGICun_MG macro.
    Do get magic, then see if the stack arg is overloaded and if so call it.
    Flags:
-	AMGf_set     return the arg using SETs rather than assigning to
-		     the targ
 	AMGf_numeric apply sv_2num to the stack arg.
 */
 
@@ -2955,10 +2953,7 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 					      AMGf_noright | AMGf_unary
 					    | (flags & AMGf_numarg))))
     {
-	if (flags & AMGf_set) {
-	    SETs(tmpsv);
-	}
-	else {
+	{
             /* where the op is of the form:
              *    $lex = $x op $y (where the assign is optimised away)
              * then assign the returned value to targ and return that;
@@ -2988,8 +2983,6 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
    Do get magic, then see if the two stack args are overloaded and if so
    call it.
    Flags:
-	AMGf_set     return the arg using SETs rather than assigning to
-		     the targ
 	AMGf_assign  op may be called as mutator (eg +=)
 	AMGf_numeric apply sv_2num to the stack arg.
 */
@@ -3013,11 +3006,7 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 		    (mutator ? AMGf_assign: 0)
 		  | (flags & AMGf_numarg));
 	if (tmpsv) {
-	    if (flags & AMGf_set) {
-		(void)POPs;
-		SETs(tmpsv);
-	    }
-	    else {
+	    {
 		(void)POPs;
                 /* where the op is one of the two forms:
                  *    $x op= $y

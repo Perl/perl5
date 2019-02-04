@@ -1257,7 +1257,7 @@ PP(pp_eq)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(eq_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(eq_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
