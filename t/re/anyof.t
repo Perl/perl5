@@ -462,7 +462,7 @@ my @tests = (
     '(?l:[\x{212A}])' => 'ANYOFL[212A]',
     '(?l:[\s\x{212A}])' => 'ANYOFPOSIXL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
     '(?l:[^\S\x{202F}])' => 'ANYOFPOSIXL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
-    '(?li:[a-z])' => 'ANYOFL{i}[a-z{utf8 locale}A-Z\x{017F}\x{212A}]',
+    '(?li:[a-z])' => 'ANYOFL{i}[a-z{utf8 locale}\x{017F}\x{212A}]',
 
     '\p{All}' => 'SANY',
     '\P{All}' => 'OPFAIL',

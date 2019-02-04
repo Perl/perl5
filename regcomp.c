@@ -17827,8 +17827,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             /* Our calculated list will be for Unicode rules.  For locale
              * matching, we have to keep a separate list that is consulted at
-             * runtime only when the locale indicates Unicode rules.  For
-             * non-locale, we just use the general list */
+             * runtime only when the locale indicates Unicode rules (and we
+             * don't include potential matches in the ASCII/Latin1 range, as
+             * any code point could fold to any other, based on the run-time
+             * locale).   For non-locale, we just use the general list */
             if (LOC) {
                 use_list = &only_utf8_locale_list;
             }
@@ -17860,7 +17862,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     if (j < 256) {
 
-                        if (IS_IN_SOME_FOLD_L1(j)) {
+                        /* Under /l, we don't know what code points below 256
+                         * fold to, except we do know the MICRO SIGN folds to
+                         * an above-255 character if the locale is UTF-8, so we
+                         * add it to the special list (in *use_list)  Otherwise
+                         * we know now what things can match, though some folds
+                         * are valid under /d only if the target is UTF-8.
+                         * Those go in a separate list */
+                        if (      IS_IN_SOME_FOLD_L1(j)
+                            && ! (LOC && j != MICRO_SIGN))
+                        {
 
                             /* ASCII is always matched; non-ASCII is matched
                              * only under Unicode rules (which could happen
