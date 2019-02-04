@@ -459,6 +459,13 @@ include some tools (C<type> for instance) which override the Windows
 ones and makes tests fail. Remove them from your path while testing to
 avoid these errors.
 
+To see the output of specific failing tests run the harness from the t
+directory:
+
+  # assuming you're starting from the win32 directory
+  cd ..\win32
+  .\perl harness <list of tests>
+
 Please report any other failures as described under L</BUGS AND CAVEATS>.
 
 =head2 Installation of Perl on Windows
