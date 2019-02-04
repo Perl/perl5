@@ -3709,6 +3709,7 @@ PP(pp_ucfirst)
     STRLEN tculen;  /* tculen is the byte length of the freshly titlecased (or
 		     * lowercased) character stored in tmpbuf.  May be either
 		     * UTF-8 or not, but in either case is the number of bytes */
+    bool remove_dot_above = FALSE;
 
     s = (const U8*)SvPV_const(source, slen);
 
@@ -3749,7 +3750,37 @@ PP(pp_ucfirst)
 #ifdef USE_LOCALE_CTYPE
 
 	    _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+
+            /* In turkic locales, lower casing an 'I' normally yields U+0131,
+             * LATIN SMALL LETTER DOTLESS I, but not if the grapheme also
+             * contains a COMBINING DOT ABOVE.  Instead it is treated like
+             * LATIN CAPITAL LETTER I WITH DOT ABOVE lowercased to 'i'.  The
+             * call to lowercase above has handled this.  But SpecialCasing.txt
+             * says we are supposed to remove the COMBINING DOT ABOVE.  We can
+             * tell if we have this situation if I ==> i in a turkic locale. */
+            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                && IN_LC_RUNTIME(LC_CTYPE)
+                && (UNLIKELY(*s == 'I' && tmpbuf[0] == 'i')))
+            {
+                /* Here, we know there was a COMBINING DOT ABOVE.  We won't be
+                 * able to handle this in-place. */
+                inplace = FALSE;
+
+                /* It seems likely that the DOT will immediately follow the
+                 * 'I'.  If so, we can remove it simply by indicating to the
+                 * code below to start copying the source just beyond the DOT.
+                 * We know its length is 2 */
+                if (LIKELY(memBEGINs(s + 1, s + slen, COMBINING_DOT_ABOVE_UTF8))) {
+                    ulen += 2;
+                }
+                else {  /* But if it doesn't follow immediately, set a flag for
+                           the code below */
+                    remove_dot_above = TRUE;
+                }
+            }
 #else
+            PERL_UNUSED_VAR(remove_dot_above);
+
 	    _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, 0);
 #endif
 
@@ -3767,41 +3798,63 @@ PP(pp_ucfirst)
 			 * need to be overridden for the tricky ones */
 	need = slen + 1;
 
-	if (op_type == OP_LCFIRST) {
 
-	    /* lower case the first letter: no trickiness for any character */
 #ifdef USE_LOCALE_CTYPE
-            if (IN_LC_RUNTIME(LC_CTYPE)) {
+
+        if (IN_LC_RUNTIME(LC_CTYPE)) {
+            if (    UNLIKELY(PL_in_utf8_turkic_locale)
+                && (   (op_type == OP_LCFIRST && UNLIKELY(*s == 'I'))
+                    || (op_type == OP_UCFIRST && UNLIKELY(*s == 'i'))))
+            {
+                if (*s == 'I') { /* lcfirst('I') */
+                    tmpbuf[0] = UTF8_TWO_BYTE_HI(LATIN_SMALL_LETTER_DOTLESS_I);
+                    tmpbuf[1] = UTF8_TWO_BYTE_LO(LATIN_SMALL_LETTER_DOTLESS_I);
+                }
+                else {  /* ucfirst('i') */
+                    tmpbuf[0] = UTF8_TWO_BYTE_HI(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                    tmpbuf[1] = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                }
+                tculen = 2;
+                inplace = FALSE;
+                doing_utf8 = TRUE;
+                convert_source_to_utf8 = TRUE;
+                need += variant_under_utf8_count(s, s + slen);
+            }
+            else if (op_type == OP_LCFIRST) {
+
+                /* For lc, there are no gotchas for UTF-8 locales (other than
+                 * the turkish ones already handled above) */
                 *tmpbuf = toLOWER_LC(*s);
             }
-            else
-#endif
-            {
-                *tmpbuf = (IN_UNI_8_BIT)
-                          ? toLOWER_LATIN1(*s)
-                          : toLOWER(*s);
-            }
-	}
-#ifdef USE_LOCALE_CTYPE
-	/* is ucfirst() */
-	else if (IN_LC_RUNTIME(LC_CTYPE)) {
-            if (IN_UTF8_CTYPE_LOCALE) {
-                goto do_uni_rules;
-            }
+            else { /* ucfirst */
 
-            *tmpbuf = (U8) toUPPER_LC(*s); /* This would be a bug if any
-                                              locales have upper and title case
-                                              different */
-	}
+                /* But for uc, some characters require special handling */
+                if (IN_UTF8_CTYPE_LOCALE) {
+                    goto do_uni_rules;
+                }
+
+                /* This would be a bug if any locales have upper and title case
+                 * different */
+                *tmpbuf = (U8) toUPPER_LC(*s);
+            }
+        }
+        else
 #endif
-	else if (! IN_UNI_8_BIT) {
-	    *tmpbuf = toUPPER(*s);	/* Returns caseless for non-ascii, or
-					 * on EBCDIC machines whatever the
-					 * native function does */
-	}
+        /* Here, not in locale.  If not using Unicode rules, is a simple
+         * lower/upper, depending */
+        if (! IN_UNI_8_BIT) {
+            *tmpbuf = (op_type == OP_LCFIRST)
+                      ? toLOWER(*s)
+                      : toUPPER(*s);
+        }
+        else if (op_type == OP_LCFIRST) {
+            /* lower case the first letter: no trickiness for any character */
+            *tmpbuf = toLOWER_LATIN1(*s);
+        }
         else {
             /* Here, is ucfirst non-UTF-8, not in locale (unless that locale is
-             * UTF-8, which we treat as not in locale), and cased latin1 */
+             * non-turkic UTF-8, which we treat as not in locale), and cased
+             * latin1 */
 	    UV title_ord;
 #ifdef USE_LOCALE_CTYPE
       do_uni_rules:
@@ -3837,7 +3890,7 @@ PP(pp_ucfirst)
                             + 1;
 
                         /* The (converted) UTF-8 and UTF-EBCDIC lengths of all
-                         * (both) characters whose title case is above 255 is
+                         * characters whose title case is above 255 is
                          * 2. */
 			ulen = 2;
 		    }
@@ -3881,6 +3934,29 @@ PP(pp_ucfirst)
 		 * of the string. */
 		sv_setpvn(dest, (char*)tmpbuf, tculen);
 		if (slen > ulen) {
+
+                    /* But this boolean being set means we are in a turkic
+                     * locale, and there is a DOT character that needs to be
+                     * removed, and it isn't immediately after the current
+                     * character.  Keep concatenating characters to the output
+                     * one at a time, until we find the DOT, which we simply
+                     * skip */
+                    if (UNLIKELY(remove_dot_above)) {
+                        do {
+                            Size_t this_len = UTF8SKIP(s + ulen);
+
+                            sv_catpvn(dest, (char*)(s + ulen), this_len);
+
+                            ulen += this_len;
+                            if (memBEGINs(s + ulen, s + slen, COMBINING_DOT_ABOVE_UTF8)) {
+                                ulen += 2;
+                                break;
+                            }
+                        } while (s + ulen < s + slen);
+                    }
+
+                    /* The rest of the string can be concatenated unchanged,
+                     * all at once */
 		    sv_catpvn(dest, (char*)(s + ulen), slen - ulen);
 		}
 	    }
@@ -3892,7 +3968,7 @@ PP(pp_ucfirst)
 		 * into tmpbuf.  First put that into dest, and then append the
 		 * rest of the source, converting it to UTF-8 as we go. */
 
-		/* Assert tculen is 2 here because the only two characters that
+		/* Assert tculen is 2 here because the only characters that
 		 * get to this part of the code have 2-byte UTF-8 equivalents */
                 assert(tculen == 2);
 		*d++ = *tmpbuf;
@@ -4124,15 +4200,24 @@ PP(pp_uc)
                     Size_t extra;
 
 		    *d = toUPPER_LATIN1_MOD(*s);
-		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
+		    if (   LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)
+
+#ifdef USE_LOCALE_CTYPE
+
+                        && (LIKELY(   ! PL_in_utf8_turkic_locale
+                                   || ! IN_LC_RUNTIME(LC_CTYPE))
+                                   || *s != 'i')
+#endif
+
+                    ) {
                         continue;
                     }
 
 		    /* The mainstream case is the tight loop above.  To avoid
-		     * extra tests in that, all three characters that require
-		     * special handling are mapped by the MOD to the one tested
-		     * just above.  
-		     * Use the source to distinguish between the three cases */
+                     * extra tests in that, all three characters that always
+                     * require special handling are mapped by the MOD to the
+                     * one tested just above.  Use the source to distinguish
+                     * between those cases */
 
 #if    UNICODE_MAJOR_VERSION > 2                                        \
    || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1		\
@@ -4150,7 +4235,7 @@ PP(pp_uc)
 		    }
 #endif
 
-		    /* The other two special handling characters have their
+		    /* The other special handling characters have their
 		     * upper cases outside the latin1 range, hence need to be
 		     * in UTF-8, so the whole result needs to be in UTF-8.
                      *
@@ -4176,13 +4261,31 @@ PP(pp_uc)
                      * not require much extra code.
                      *
                      * First, calculate the extra space needed for the
-                     * remainder of the source needing to be in UTF-8.  The
+                     * remainder of the source needing to be in UTF-8.  Except
+                     * for the 'i' in Turkic locales, in UTF-8 strings, the
                      * uppercase of a character below 256 occupies the same
                      * number of bytes as the original.  Therefore, the space
                      * needed is the that number plus the number of characters
-                     * that become two bytes when converted to UTF-8. */
+                     * that become two bytes when converted to UTF-8, plus, in
+                     * turkish locales, the number of 'i's. */
 
                     extra = send - s + variant_under_utf8_count(s, send);
+
+#ifdef USE_LOCALE_CTYPE
+
+                    if (UNLIKELY(*s == 'i')) {  /* We wouldn't get an 'i' here
+                                                   unless are in a Turkic
+                                                   locale */
+                        const U8 * s_peek = s;
+
+                        do {
+                            extra++;
+
+                            s_peek = (U8 *) memchr(s_peek + 1, 'i',
+                                                   send - (s_peek + 1));
+                        } while (s_peek != NULL);
+                    }
+#endif
 
                     /* Convert what we have so far into UTF-8, telling the
 		     * function that we know it should be converted, and to
@@ -4199,16 +4302,36 @@ PP(pp_uc)
 		    d = (U8*)SvPVX(dest) + len;
 
                     /* Now process the remainder of the source, simultaneously
-                     * converting to upper and UTF-8. */
+                     * converting to upper and UTF-8.
+                     *
+                     * To avoid extra tests in the loop body, and since the
+                     * loop is so simple, split out the rare Turkic case into
+                     * its own loop */
+
+#ifdef USE_LOCALE_CTYPE
+                    if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                        && UNLIKELY(IN_LC_RUNTIME(LC_CTYPE)))
+                    {
+                        for (; s < send; s++) {
+                            if (*s == 'i') {
+                                *d++ = UTF8_TWO_BYTE_HI(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                                *d++ = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                            }
+                            else {
+                                (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                                d += len;
+                            }
+                        }
+                    }
+                    else
+#endif
 		    for (; s < send; s++) {
 			(void) _to_upper_title_latin1(*s, d, &len, 'S');
 			d += len;
 		    }
-
-		    /* Here have processed the whole source; no need to continue
-		     * with the outer loop.  Each character has been converted
-		     * to upper case and converted to UTF-8 */
-
+                    /* Here have processed the whole source; no need to
+                     * continue with the outer loop.  Each character has been
+                     * converted to upper case and converted to UTF-8. */
 		    break;
 		} /* End of processing all latin1-style chars */
 	    } /* End of processing all chars */
@@ -4240,15 +4363,26 @@ PP(pp_lc)
     SV *dest;
     const U8 *s;
     U8 *d;
+    bool has_turkic_I = FALSE;
 
     SvGETMAGIC(source);
 
     if (   SvPADTMP(source)
 	&& !SvREADONLY(source) && SvPOK(source)
-	&& !DO_UTF8(source)) {
+	&& !DO_UTF8(source)
 
-	/* We can convert in place, as lowercasing anything in the latin1 range
-	 * (or else DO_UTF8 would have been on) doesn't lengthen it */
+#ifdef USE_LOCALE_CTYPE
+
+        && (   LIKELY(! IN_LC_RUNTIME(LC_CTYPE))
+            || LIKELY(! PL_in_utf8_turkic_locale))
+
+#endif
+
+    ) {
+
+        /* We can convert in place, as, outside of Turkic UTF-8 locales,
+         * lowercasing anything in the latin1 range (or else DO_UTF8 would have
+         * been on) doesn't lengthen it. */
 	dest = source;
 	s = d = (U8*)SvPV_force_nomg(source, len);
 	min = len + 1;
@@ -4270,7 +4404,37 @@ PP(pp_lc)
 #ifdef USE_LOCALE_CTYPE
 
     if (IN_LC_RUNTIME(LC_CTYPE)) {
+        const U8 * next_I;
+
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+
+        /* Lowercasing in a Turkic locale can cause non-UTF-8 to need to become
+         * UTF-8 for the single case of the character 'I' */
+        if (     UNLIKELY(PL_in_utf8_turkic_locale)
+            && ! DO_UTF8(source)
+            &&   (next_I = (U8 *) memchr(s, 'I', len)))
+        {
+            Size_t I_count = 0;
+            const U8 *const send = s + len;
+
+            do {
+                I_count++;
+
+                next_I = (U8 *) memchr(next_I + 1, 'I',
+                                        send - (next_I + 1));
+            } while (next_I != NULL);
+
+            /* Except for the 'I', in UTF-8 strings, the lower case of a
+             * character below 256 occupies the same number of bytes as the
+             * original.  Therefore, the space needed is the original length
+             * plus I_count plus the number of characters that become two bytes
+             * when converted to UTF-8 */
+            sv_utf8_upgrade_flags_grow(dest, 0, len
+                                              + I_count
+                                              + variant_under_utf8_count(s, send));
+            d = (U8*)SvPVX(dest);
+            has_turkic_I = TRUE;
+        }
     }
 
 #endif
@@ -4281,6 +4445,7 @@ PP(pp_lc)
     if (DO_UTF8(source)) {
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+        bool remove_dot_above = FALSE;
 
 	while (s < send) {
 	    const STRLEN u = UTF8SKIP(s);
@@ -4289,7 +4454,33 @@ PP(pp_lc)
 #ifdef USE_LOCALE_CTYPE
 
 	    _toLOWER_utf8_flags(s, send, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+
+            /* If we are in a Turkic locale, we have to do more work.  As noted
+             * in the comments for lcfirst, there is a special case if a 'I'
+             * is in a grapheme with COMBINING DOT ABOVE UTF8.  It turns into a
+             * 'i', and the DOT must be removed.  We check for that situation,
+             * and set a flag if the DOT is there.  Then each time through the
+             * loop, we have to see if we need to remove the next DOT above,
+             * and if so, do it.  We know that there is a DOT because
+             * _toLOWER_utf8_flags() wouldn't have returned 'i' unless there
+             * was one in a proper position. */
+            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                && IN_LC_RUNTIME(LC_CTYPE))
+            {
+                if (   UNLIKELY(remove_dot_above)
+                    && memBEGINs(tmpbuf, sizeof(tmpbuf), COMBINING_DOT_ABOVE_UTF8))
+                {
+                    s += u;
+                    remove_dot_above = FALSE;
+                    continue;
+                }
+                else if (UNLIKELY(*s == 'I' && tmpbuf[0] == 'i')) {
+                    remove_dot_above = TRUE;
+                }
+            }
 #else
+            PERL_UNUSED_VAR(remove_dot_above);
+
 	    _toLOWER_utf8_flags(s, send, tmpbuf, &ulen, 0);
 #endif
 
@@ -4330,8 +4521,22 @@ PP(pp_lc)
 	     * whole thing in a tight loop, for speed, */
 #ifdef USE_LOCALE_CTYPE
             if (IN_LC_RUNTIME(LC_CTYPE)) {
-		for (; s < send; d++, s++)
-		    *d = toLOWER_LC(*s);
+                if (LIKELY( ! has_turkic_I)) {
+                    for (; s < send; d++, s++)
+                        *d = toLOWER_LC(*s);
+                }
+                else {  /* This is the only case where lc() converts 'dest'
+                           into UTF-8 from a non-UTF-8 'source' */
+                    for (; s < send; s++) {
+                        if (*s == 'I') {
+                            *d++ = UTF8_TWO_BYTE_HI(LATIN_SMALL_LETTER_DOTLESS_I);
+                            *d++ = UTF8_TWO_BYTE_LO(LATIN_SMALL_LETTER_DOTLESS_I);
+                        }
+                        else {
+                            append_utf8_from_native_byte(toLOWER_LATIN1(*s), &d);
+                        }
+                    }
+                }
             }
 	    else
 #endif
@@ -4539,33 +4744,55 @@ PP(pp_fc)
 #ifdef USE_LOCALE_CTYPE
       do_uni_folding:
 #endif
-            /* For ASCII and the Latin-1 range, there's two
+            /* For ASCII and the Latin-1 range, there's potentially three
              * troublesome folds:
              *      \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
              *             casefolding becomes 'ss';
              *      \x{B5} (\N{MICRO SIGN}), which under any fold becomes
              *             \x{3BC} (\N{GREEK SMALL LETTER MU})
+             *      I      only in Turkic locales, this folds to \x{131}
+             *             \N{LATIN SMALL LETTER DOTLESS I}
              * For the rest, the casefold is their lowercase.  */
             for (; s < send; d++, s++) {
-                if (*s == MICRO_SIGN) {
+                if (    UNLIKELY(*s == MICRO_SIGN)
+#ifdef USE_LOCALE_CTYPE
+                    || (   UNLIKELY(PL_in_utf8_turkic_locale)
+                        && UNLIKELY(IN_LC_RUNTIME(LC_CTYPE))
+                        && UNLIKELY(*s == 'I'))
+#endif
+                ) {
                     Size_t extra = send - s
                                  + variant_under_utf8_count(s, send);
 
                     /* \N{MICRO SIGN}'s casefold is \N{GREEK SMALL LETTER MU},
-                     * which is outside of the latin-1 range. There's a couple
-                     * of ways to deal with this -- khw discusses them in
-                     * pp_lc/uc, so go there :) What we do here is upgrade what
-                     * we had already casefolded, then enter an inner loop that
-                     * appends the rest of the characters as UTF-8.
+                     * and 'I' in Turkic locales is \N{LATIN SMALL LETTER
+                     * DOTLESS I} both of which are outside of the latin-1
+                     * range. There's a couple of ways to deal with this -- khw
+                     * discusses them in pp_lc/uc, so go there :) What we do
+                     * here is upgrade what we had already casefolded, then
+                     * enter an inner loop that appends the rest of the
+                     * characters as UTF-8.
                      *
                      * First we calculate the needed size of the upgraded dest
                      * beyond what's been processed already (the upgrade
-                     * function figures that out).  In UTF-8 strings, the fold case of a
+                     * function figures that out).  Except for the 'I' in
+                     * Turkic locales, in UTF-8 strings, the fold case of a
                      * character below 256 occupies the same number of bytes as
                      * the original (even the Sharp S).  Therefore, the space
                      * needed is the number of bytes remaining plus the number
                      * of characters that become two bytes when converted to
-                     * UTF-8. */
+                     * UTF-8 plus, in turkish locales, the number of 'I's */
+
+                    if (UNLIKELY(*s == 'I')) {
+                        const U8 * s_peek = s;
+
+                        do {
+                            extra++;
+
+                            s_peek = (U8 *) memchr(s_peek + 1, 'i',
+                                                   send - (s_peek + 1));
+                        } while (s_peek != NULL);
+                    }
 
                     /* Growing may move things, so have to save and recalculate
                      * 'd' */
