@@ -2953,22 +2953,21 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 					      AMGf_noright | AMGf_unary
 					    | (flags & AMGf_numarg))))
     {
-	{
-            /* where the op is of the form:
-             *    $lex = $x op $y (where the assign is optimised away)
-             * then assign the returned value to targ and return that;
-             * otherwise return the value directly
-             */
-            if (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
-                && (PL_op->op_private & OPpTARGET_MY))
-            {
-                dTARGET;
-		sv_setsv(TARG, tmpsv);
-		SETTARG;
-	    }
-	    else
-		SETs(tmpsv);
-	}
+        /* where the op is of the form:
+         *    $lex = $x op $y (where the assign is optimised away)
+         * then assign the returned value to targ and return that;
+         * otherwise return the value directly
+         */
+        if (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
+            && (PL_op->op_private & OPpTARGET_MY))
+        {
+            dTARGET;
+            sv_setsv(TARG, tmpsv);
+            SETTARG;
+        }
+        else
+            SETs(tmpsv);
+
 	PUTBACK;
 	return TRUE;
     }
@@ -3006,30 +3005,30 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 		    (mutator ? AMGf_assign: 0)
 		  | (flags & AMGf_numarg));
 	if (tmpsv) {
-	    {
-		(void)POPs;
-                /* where the op is one of the two forms:
-                 *    $x op= $y
-                 *    $lex = $x op $y (where the assign is optimised away)
-                 * then assign the returned value to targ and return that;
-                 * otherwise return the value directly
-                 */
-		if (   mutator
-                    || (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
-                        && (PL_op->op_private & OPpTARGET_MY)))
-                {
-                    dTARG;
-                    TARG = mutator ? *SP : PAD_SV(PL_op->op_targ);
-		    sv_setsv(TARG, tmpsv);
-		    SETTARG;
-		}
-		else
-		    SETs(tmpsv);
-	    }
+            (void)POPs;
+            /* where the op is one of the two forms:
+             *    $x op= $y
+             *    $lex = $x op $y (where the assign is optimised away)
+             * then assign the returned value to targ and return that;
+             * otherwise return the value directly
+             */
+            if (   mutator
+                || (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
+                    && (PL_op->op_private & OPpTARGET_MY)))
+            {
+                dTARG;
+                TARG = mutator ? *SP : PAD_SV(PL_op->op_targ);
+                sv_setsv(TARG, tmpsv);
+                SETTARG;
+            }
+            else
+                SETs(tmpsv);
+
 	    PUTBACK;
 	    return TRUE;
 	}
     }
+
     if(left==right && SvGMAGICAL(left)) {
 	SV * const left = sv_newmortal();
 	*(sp-1) = left;
