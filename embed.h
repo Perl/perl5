@@ -2081,6 +2081,9 @@
 #define swash_scan_list_line(a,b,c,d,e,f,g)	S_swash_scan_list_line(aTHX_ a,b,c,d,e,f,g)
 #define swatch_get(a,b,c)	S_swatch_get(aTHX_ a,b,c)
 #define to_lower_latin1		S_to_lower_latin1
+#define turkic_fc(a,b,c,d)	S_turkic_fc(aTHX_ a,b,c,d)
+#define turkic_lc(a,b,c,d)	S_turkic_lc(aTHX_ a,b,c,d)
+#define turkic_uc(a,b,c,d)	S_turkic_uc(aTHX_ a,b,c,d)
 #define unexpected_non_continuation_text(a,b,c,d)	S_unexpected_non_continuation_text(aTHX_ a,b,c,d)
 #define warn_on_first_deprecated_use(a,b,c,d,e)	S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
 #  endif

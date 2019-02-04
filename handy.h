@@ -1542,7 +1542,7 @@ END_EXTERN_C
 /* These next three are also for internal core Perl use only: case-change
  * helper macros.  The reason for using the PL_latin arrays is in case the
  * system function is defective; it ensures uniform results that conform to the
- * Unicod standard. */
+ * Unicod standard.   It does not handle the anomalies in UTF-8 Turkic locales */
 #define _generic_toLOWER_LC(c, function, cast)  (! FITS_IN_8_BITS(c)           \
                                                 ? (c)                          \
                                                 : (IN_UTF8_CTYPE_LOCALE)       \
@@ -1553,7 +1553,8 @@ END_EXTERN_C
  * returns a single value, so can't adequately return the upper case of LATIN
  * SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of two
  * values "SS");  instead it asserts against that under DEBUGGING, and
- * otherwise returns its input */
+ * otherwise returns its input.  It does not handle the anomalies in UTF-8
+ * Turkic locales. */
 #define _generic_toUPPER_LC(c, function, cast)                                 \
                     (! FITS_IN_8_BITS(c)                                       \
                     ? (c)                                                      \
@@ -1571,7 +1572,8 @@ END_EXTERN_C
  * returns a single value, so can't adequately return the fold case of LATIN
  * SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of two
  * values "ss"); instead it asserts against that under DEBUGGING, and
- * otherwise returns its input */
+ * otherwise returns its input.  It does not handle the anomalies in UTF-8
+ * Turkic locales */
 #define _generic_toFOLD_LC(c, function, cast)                                  \
                     ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)     \
                       ? GREEK_SMALL_LETTER_MU                                  \

@@ -6243,6 +6243,15 @@ STATIC SV*	S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 STATIC U8	S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp, const char dummy)
 			__attribute__warn_unused_result__;
 
+STATIC UV	S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e, U8* ustrp, STRLEN *lenp);
+#define PERL_ARGS_ASSERT_TURKIC_FC	\
+	assert(p); assert(e); assert(ustrp); assert(lenp)
+STATIC UV	S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e, U8* ustrp, STRLEN *lenp);
+#define PERL_ARGS_ASSERT_TURKIC_LC	\
+	assert(p0); assert(e); assert(ustrp); assert(lenp)
+STATIC UV	S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e, U8* ustrp, STRLEN *lenp);
+#define PERL_ARGS_ASSERT_TURKIC_UC	\
+	assert(p); assert(e); assert(ustrp); assert(lenp)
 STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, STRLEN print_len, const STRLEN non_cont_byte_pos, const STRLEN expect_len)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT	\
