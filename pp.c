@@ -4325,10 +4325,11 @@ PP(pp_uc)
                     }
                     else
 #endif
-		    for (; s < send; s++) {
-			(void) _to_upper_title_latin1(*s, d, &len, 'S');
-			d += len;
-		    }
+                        for (; s < send; s++) {
+                            (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                            d += len;
+                        }
+
                     /* Here have processed the whole source; no need to
                      * continue with the outer loop.  Each character has been
                      * converted to upper case and converted to UTF-8. */
