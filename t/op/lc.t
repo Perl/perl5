@@ -1,4 +1,5 @@
 #!./perl
+use strict;
 
 # This file is intentionally encoded in latin-1.
 #
@@ -164,9 +165,10 @@ is(uc("\x{1C5}") , "\x{1C4}",      "U+01C5 uc is U+01C4");
 is(uc("\x{1C6}") , "\x{1C4}",      "U+01C6 uc is U+01C4, too");
 
 # #18107: A host of bugs involving [ul]c{,first}. AMS 20021106
-$a = "\x{3c3}foo.bar"; # \x{3c3} == GREEK SMALL LETTER SIGMA.
-$b = "\x{3a3}FOO.BAR"; # \x{3a3} == GREEK CAPITAL LETTER SIGMA.
+my $a = "\x{3c3}foo.bar"; # \x{3c3} == GREEK SMALL LETTER SIGMA.
+my $b = "\x{3a3}FOO.BAR"; # \x{3a3} == GREEK CAPITAL LETTER SIGMA.
 
+my $c;
 ($c = $b) =~ s/(\w+)/lc($1)/ge;
 is($c , $a, "Using s///e to change case.");
 
@@ -310,6 +312,7 @@ constantfolding
 
 # In-place lc/uc should not corrupt string buffers when given a non-utf8-
 # flagged thingy that stringifies to utf8
+my %h;
 $h{k} = bless[], "\x{3b0}\x{3b0}\x{3b0}bcde"; # U+03B0 grows with uc()
    # using delete marks it as TEMP, so uc-in-place is permitted
 like uc delete $h{k}, qr "^(?:\x{3a5}\x{308}\x{301}){3}BCDE=ARRAY\(.*\)",
