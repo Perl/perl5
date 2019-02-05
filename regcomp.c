@@ -10604,7 +10604,8 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 
 /*
  * As best we can, determine the characters that can match the start of
- * the given EXACTF-ish node.
+ * the given EXACTF-ish node.  This is for use in creating ssc nodes, so there
+ * can be false positive matches
  *
  * Returns the invlist as a new SV*; it is the caller's responsibility to
  * call SvREFCNT_dec() when done with it.
