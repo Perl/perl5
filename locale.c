@@ -1507,6 +1507,7 @@ S_new_ctype(pTHX_ const char *newctype)
 
     /* Don't check for problems if we are suppressing the warnings */
     bool check_for_problems = ckWARN_d(WARN_LOCALE) || UNLIKELY(DEBUG_L_TEST);
+    bool maybe_utf8_turkic = FALSE;
 
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
@@ -1523,6 +1524,14 @@ S_new_ctype(pTHX_ const char *newctype)
      * handle this specially because of the three problematic code points */
     if (PL_in_utf8_CTYPE_locale) {
         Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
+
+        /* UTF-8 locales can have special handling for 'I' and 'i' if they are
+         * Turkic.  Make sure these two are the only anomalies.  (We don't use
+         * towupper and towlower because they aren't in C89.) */
+        if (toupper('i') == 'i' && tolower('I') == 'I') {
+            check_for_problems = TRUE;
+            maybe_utf8_turkic = TRUE;
+        }
     }
 
     /* We don't populate the other lists if a UTF-8 locale, but do check that
@@ -1668,7 +1677,18 @@ S_new_ctype(pTHX_ const char *newctype)
             }
         }
 
+        if (bad_count == 2 && maybe_utf8_turkic) {
+            bad_count = 0;
+            *bad_chars_list = '\0';
+            PL_fold_locale['I'] = 'I';
+            PL_fold_locale['i'] = 'i';
+            PL_in_utf8_turkic_locale = TRUE;
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: %s is turkic\n",
+                                                 __FILE__, __LINE__, newctype));
+        }
+        else {
             PL_in_utf8_turkic_locale = FALSE;
+        }
 
 #  ifdef MB_CUR_MAX
 
@@ -1695,7 +1715,10 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #  endif
 
-        if (UNLIKELY(bad_count) || UNLIKELY(multi_byte_locale)) {
+        /* If we found problems and we want them output, do so */
+        if (   (UNLIKELY(bad_count) || UNLIKELY(multi_byte_locale))
+            && (LIKELY(ckWARN_d(WARN_LOCALE)) || UNLIKELY(DEBUG_L_TEST)))
+        {
             if (UNLIKELY(bad_count) && PL_in_utf8_CTYPE_locale) {
                 PL_warn_locale = Perl_newSVpvf(aTHX_
                      "Locale '%s' contains (at least) the following characters"
