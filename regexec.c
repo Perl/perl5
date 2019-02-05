@@ -4415,7 +4415,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                 int i;
 
                 for (i = 0; i < UTF8_MAX_FOLD_CHAR_EXPAND && s < pat_end; i++) {
-                    if (isASCII(*s)) {
+                    if (isASCII(*s) && LIKELY(! PL_in_utf8_turkic_locale)) {
                         *(d++) = (U8) toFOLD_LC(*s);
                         s++;
                     }
@@ -4446,7 +4446,28 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         }
         else { /* an EXACTFish node which doesn't begin with a multi-char fold */
             c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
-            if (c1 > 255) {
+
+            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                && OP(text_node) == EXACTFL
+                && UNLIKELY(   c1 == 'i' || c1 == 'I'
+                            || c1 == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE
+                            || c1 == LATIN_SMALL_LETTER_DOTLESS_I))
+            {   /* Hard-coded Turkish locale rules for these 4 characters
+                   override normal rules */
+                if (c1 == 'i') {
+                    c2 = LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE;
+                }
+                else if (c1 == 'I') {
+                    c2 = LATIN_SMALL_LETTER_DOTLESS_I;
+                }
+                else if (c1 == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
+                    c2 = 'i';
+                }
+                else if (c1 == LATIN_SMALL_LETTER_DOTLESS_I) {
+                    c2 = 'I';
+                }
+            }
+            else if (c1 > 255) {
                 const unsigned int * remaining_folds;
                 unsigned int first_fold;
 
@@ -9781,7 +9802,23 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		    utf8_p = utf8_buffer;
 		}
 
-		if (swash_fetch(sw, utf8_p, TRUE)) {
+                /* Turkish locales have these hard-coded rules overriding
+                 * normal ones */
+                if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                    && isALPHA_FOLD_EQ(*p, 'i'))
+                {
+                    if (*p == 'i') {
+                        if (swash_fetch(sw, (const U8 *) LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8, TRUE)) {
+                            match = TRUE;
+                        }
+                    }
+                    else if (*p == 'I') {
+                        if (swash_fetch(sw, (const U8 *) LATIN_SMALL_LETTER_DOTLESS_I_UTF8, TRUE)) {
+                            match = TRUE;
+                        }
+                    }
+                }
+                else if (swash_fetch(sw, utf8_p, TRUE)) {
 		    match = TRUE;
                 }
 	    }
@@ -9789,6 +9826,25 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 match = _invlist_contains_cp(only_utf8_locale, c);
             }
 	}
+
+        /* In a Turkic locale under folding, hard-code the I i case pair
+         * matches */
+        if (     UNLIKELY(PL_in_utf8_turkic_locale)
+            && ! match
+            &&   (flags & ANYOFL_FOLD)
+            &&   utf8_target)
+        {
+            if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
+		if (ANYOF_BITMAP_TEST(n, 'i')) {
+                    match = TRUE;
+                }
+            }
+            else if (c == LATIN_SMALL_LETTER_DOTLESS_I) {
+		if (ANYOF_BITMAP_TEST(n, 'I')) {
+                    match = TRUE;
+                }
+            }
+        }
 
         if (UNICODE_IS_SUPER(c)
             && (flags

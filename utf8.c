@@ -5644,7 +5644,12 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
 
     if (flags & FOLDEQ_LOCALE) {
         if (IN_UTF8_CTYPE_LOCALE) {
-            flags &= ~FOLDEQ_LOCALE;
+            if (UNLIKELY(PL_in_utf8_turkic_locale)) {
+                flags_for_folder |= FOLD_FLAGS_LOCALE;
+            }
+            else {
+                flags &= ~FOLDEQ_LOCALE;
+            }
         }
         else {
             flags_for_folder |= FOLD_FLAGS_LOCALE;
