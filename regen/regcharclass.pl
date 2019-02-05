@@ -1625,10 +1625,6 @@ XPERLSPACE: \p{XPerlSpace}
 => high cp_high : fast
 \p{XPerlSpace}
 
-REPLACEMENT: Unicode REPLACEMENT CHARACTER
-=> UTF8 :safe
-0xFFFD
-
 NONCHAR: Non character code points
 => UTF8 :safe
 \p{_Perl_Nchar}

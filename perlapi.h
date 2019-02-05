@@ -103,6 +103,8 @@ END_EXTERN_C
 #define PL_AboveLatin1		(*Perl_GAboveLatin1_ptr(NULL))
 #undef  PL_Assigned_invlist
 #define PL_Assigned_invlist	(*Perl_GAssigned_invlist_ptr(NULL))
+#undef  PL_CCC_non0_non230
+#define PL_CCC_non0_non230	(*Perl_GCCC_non0_non230_ptr(NULL))
 #undef  PL_C_locale_obj
 #define PL_C_locale_obj		(*Perl_GC_locale_obj_ptr(NULL))
 #undef  PL_GCB_invlist

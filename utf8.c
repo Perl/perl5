@@ -3077,10 +3077,10 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
     if (flags & FOLD_FLAGS_LOCALE) {
-        /* Treat a UTF-8 locale as not being in locale at all, except for
-         * potentially warning */
+        /* Treat a non-Turkic UTF-8 locale as not being in locale at all,
+         * except for potentially warning */
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        if (IN_UTF8_CTYPE_LOCALE) {
+        if (IN_UTF8_CTYPE_LOCALE && ! PL_in_utf8_turkic_locale) {
             flags &= ~FOLD_FLAGS_LOCALE;
         }
         else {
@@ -3716,6 +3716,119 @@ S_check_and_deprecate(pTHX_ const U8 *p,
     return utf8n_flags;
 }
 
+STATIC UV
+S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e,
+                        U8 * ustrp, STRLEN *lenp)
+{
+    /* Returns 0 if the foldcase of the input UTF-8 encoded sequence from
+     * p0..e-1 according to Turkic rules is the same as for non-Turkic.
+     * Otherwise, it returns the first code point of the Turkic foldcased
+     * sequence, and the entire sequence will be stored in *ustrp.  ustrp will
+     * contain *lenp bytes
+     *
+     * Turkic differs only from non-Turkic in that 'i' and LATIN CAPITAL LETTER
+     * I WITH DOT ABOVE form a case pair, as do 'I' and LATIN SMALL LETTER
+     * DOTLESS I */
+
+    PERL_ARGS_ASSERT_TURKIC_FC;
+    assert(e > p);
+
+    if (UNLIKELY(*p == 'I')) {
+        *lenp = 2;
+        ustrp[0] = UTF8_TWO_BYTE_HI(LATIN_SMALL_LETTER_DOTLESS_I);
+        ustrp[1] = UTF8_TWO_BYTE_LO(LATIN_SMALL_LETTER_DOTLESS_I);
+        return LATIN_SMALL_LETTER_DOTLESS_I;
+    }
+
+    if (UNLIKELY(memBEGINs(p, e - p,
+                           LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8)))
+    {
+        *lenp = 1;
+        *ustrp = 'i';
+        return 'i';
+    }
+
+    return 0;
+}
+
+STATIC UV
+S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
+                        U8 * ustrp, STRLEN *lenp)
+{
+    /* Returns 0 if the lowercase of the input UTF-8 encoded sequence from
+     * p0..e-1 according to Turkic rules is the same as for non-Turkic.
+     * Otherwise, it returns the first code point of the Turkic lowercased
+     * sequence, and the entire sequence will be stored in *ustrp.  ustrp will
+     * contain *lenp bytes */
+
+    PERL_ARGS_ASSERT_TURKIC_LC;
+    assert(e > p0);
+
+    /* A 'I' requires context as to what to do */
+    if (UNLIKELY(*p0 == 'I')) {
+        const U8 * p = p0 + 1;
+
+        /* According to the Unicode SpecialCasing.txt file, a capital 'I'
+         * modified by a dot above lowercases to 'i' even in turkic locales. */
+        while (p < e) {
+            UV cp;
+
+            if (memBEGINs(p, e - p, COMBINING_DOT_ABOVE_UTF8)) {
+                ustrp[0] = 'i';
+                *lenp = 1;
+                return 'i';
+            }
+
+            /* For the dot above to modify the 'I', it must be part of a
+             * combining sequence immediately following the 'I', and no other
+             * modifier with a ccc of 230 may intervene */
+            cp = utf8_to_uvchr_buf(p, e, NULL);
+            if (! _invlist_contains_cp(PL_CCC_non0_non230, cp)) {
+                break;
+            }
+
+            /* Here the combining sequence continues */
+            p += UTF8SKIP(p);
+        }
+    }
+
+    /* In all other cases the lc is the same as the fold */
+    return turkic_fc(p0, e, ustrp, lenp);
+}
+
+STATIC UV
+S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
+                        U8 * ustrp, STRLEN *lenp)
+{
+    /* Returns 0 if the upper or title-case of the input UTF-8 encoded sequence
+     * from p0..e-1 according to Turkic rules is the same as for non-Turkic.
+     * Otherwise, it returns the first code point of the Turkic upper or
+     * title-cased sequence, and the entire sequence will be stored in *ustrp.
+     * ustrp will contain *lenp bytes
+     *
+     * Turkic differs only from non-Turkic in that 'i' and LATIN CAPITAL LETTER
+     * I WITH DOT ABOVE form a case pair, as do 'I' and and LATIN SMALL LETTER
+     * DOTLESS I */
+
+    PERL_ARGS_ASSERT_TURKIC_UC;
+    assert(e > p);
+
+    if (*p == 'i') {
+        *lenp = 2;
+        ustrp[0] = UTF8_TWO_BYTE_HI(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+        ustrp[1] = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+        return LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE;
+    }
+
+    if (memBEGINs(p, e - p, LATIN_SMALL_LETTER_DOTLESS_I_UTF8)) {
+        *lenp = 1;
+        *ustrp = 'I';
+        return 'I';
+    }
+
+    return 0;
+}
+
 /* The process for changing the case is essentially the same for the four case
  * change types, except there are complications for folding.  Otherwise the
  * difference is only which case to change to.  To make sure that they all do
@@ -3742,15 +3855,24 @@ S_check_and_deprecate(pTHX_ const U8 *p,
  * the input code point calculated from the UTF-8.  The fold code needs to
  * realize all this and take it from there.
  *
+ * To deal with Turkic locales, the function specified by the parameter
+ * 'turkic' is called when appropriate.
+ *
  * If you read the two macros as sequential, it's easier to understand what's
  * going on. */
 #define CASE_CHANGE_BODY_START(locale_flags, LC_L1_change_macro, L1_func,    \
-                               L1_func_extra_param)                          \
+                               L1_func_extra_param, turkic)                  \
                                                                              \
     if (flags & (locale_flags)) {                                            \
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                  \
-        /* Treat a UTF-8 locale as not being in locale at all */             \
         if (IN_UTF8_CTYPE_LOCALE) {                                          \
+            if (UNLIKELY(PL_in_utf8_turkic_locale)) {                        \
+                UV ret = turkic(p, e, ustrp, lenp);                          \
+                if (ret) return ret;                                         \
+            }                                                                \
+                                                                             \
+            /* Otherwise, treat a UTF-8 locale as not being in locale at     \
+             * all */                                                        \
             flags &= ~(locale_flags);                                        \
         }                                                                    \
     }                                                                        \
@@ -3830,7 +3952,8 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
 
     /* ~0 makes anything non-zero in 'flags' mean we are using locale rules */
     /* 2nd char of uc(U+DF) is 'S' */
-    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 'S');
+    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 'S',
+                                                                    turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_UPPER_CASE);
 }
 
@@ -3863,7 +3986,8 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
 
     /* 2nd char of ucfirst(U+DF) is 's' */
-    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 's');
+    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 's',
+                                                                    turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_TITLE_CASE);
 }
 
@@ -3894,7 +4018,8 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
 
-    CASE_CHANGE_BODY_START(~0, toLOWER_LC, to_lower_latin1, 0 /* 0 is dummy */)
+    CASE_CHANGE_BODY_START(~0, toLOWER_LC, to_lower_latin1, 0 /* 0 is dummy */,
+                                                                    turkic_lc);
     CASE_CHANGE_BODY_END  (~0, CALL_LOWER_CASE)
 }
 
@@ -3936,7 +4061,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
     assert(p != ustrp); /* Otherwise overwrites */
 
     CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, toFOLD_LC, _to_fold_latin1,
-                 ((flags) & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII)));
+                 ((flags) & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII)),
+                                                                    turkic_fc);
 
 	result = CALL_FOLD_CASE(result, p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
 
@@ -5518,7 +5644,12 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
 
     if (flags & FOLDEQ_LOCALE) {
         if (IN_UTF8_CTYPE_LOCALE) {
-            flags &= ~FOLDEQ_LOCALE;
+            if (UNLIKELY(PL_in_utf8_turkic_locale)) {
+                flags_for_folder |= FOLD_FLAGS_LOCALE;
+            }
+            else {
+                flags &= ~FOLDEQ_LOCALE;
+            }
         }
         else {
             flags_for_folder |= FOLD_FLAGS_LOCALE;

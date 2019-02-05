@@ -1092,6 +1092,35 @@ sub UpperLatin1 {
     return \@return;
 }
 
+sub _Perl_CCC_non0_non230 {
+
+    # Create an inversion list of code points with non-zero canonical
+    # combining class that also don't have 230 as the class number.  This is
+    # part of a Unicode Standard rule
+
+    my @nonzeros = prop_invlist("ccc=0");
+    shift @nonzeros;    # Invert so is "ccc != 0"
+
+    my @return;
+
+    # Expand into list of code points, while excluding those with ccc == 230
+    for (my $i = 0; $i < @nonzeros; $i += 2) {
+        my $upper = ($i + 1) < @nonzeros
+                    ? $nonzeros[$i+1] - 1      # In range
+                    : $Unicode::UCD::MAX_CP;  # To infinity.
+        for my $j ($nonzeros[$i] .. $upper) {
+            my @ccc_names = prop_value_aliases("ccc", charprop($j, "ccc"));
+
+            # Final element in @ccc_names will be all numeric
+            push @return, $j if $ccc_names[-1] != 230;
+        }
+    }
+
+    @return = sort { $a <=> $b } @return;
+    @return = mk_invlist_from_sorted_cp_list(\@return);
+    return \@return;
+}
+
 sub output_table_common {
 
     # Common subroutine to actually output the generated rules table.
@@ -2319,6 +2348,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     Simple_Case_Folding
                     Case_Folding
                     &_Perl_IVCF
+                    &_Perl_CCC_non0_non230
                 );
                 # NOTE that the convention is that extra enum values come
                 # after the property name, separated by commas, with the enums

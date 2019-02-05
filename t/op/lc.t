@@ -17,7 +17,7 @@ BEGIN {
 
 use feature qw( fc );
 
-plan tests => 139 + 4 * 256;
+plan tests => 139 + 2 * (4 * 256) + 15;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -344,11 +344,15 @@ SKIP: {
     is($x, "A", "first { fc }");
 }
 
+my $non_turkic_locale = find_utf8_ctype_locale();
+my $turkic_locale = find_utf8_turkic_locale();
 
-my $utf8_locale = find_utf8_ctype_locale();
+foreach my $turkic (0 .. 1) {
+    my $type = ($turkic) ? "turkic" : "non-turkic";
+    my $locale = ($turkic) ? $turkic_locale : $non_turkic_locale;
 
-SKIP: {
-    skip 'Can\'t find a UTF-8 locale', 4*256 unless defined $utf8_locale;
+  SKIP: {
+    skip "Can't find a $type UTF-8 locale", 4*256 unless defined $locale;
 
     use feature qw( unicode_strings );
 
@@ -367,13 +371,70 @@ SKIP: {
         push @unicode_ucfirst, ucfirst(chr $i);
     }
 
+    if ($turkic) {
+        $unicode_lc[ord 'I'] = chr 0x131;
+        $unicode_lcfirst[ord 'I'] = chr 0x131;
+        $unicode_uc[ord 'i'] = chr 0x130;
+        $unicode_ucfirst[ord 'i'] = chr 0x130;
+    }
+
     use locale;
-    setlocale(LC_CTYPE, $utf8_locale);
+    setlocale(LC_CTYPE, $locale);
 
     for my $i (0 .. 255) {
-        is(lc(chr $i), $unicode_lc[$i], "In a UTF-8 locale, lc(chr $i) is the same as official Unicode");
-        is(uc(chr $i), $unicode_uc[$i], "In a UTF-8 locale, uc(chr $i) is the same as official Unicode");
-        is(lcfirst(chr $i), $unicode_lcfirst[$i], "In a UTF-8 locale, lcfirst(chr $i) is the same as official Unicode");
-        is(ucfirst(chr $i), $unicode_ucfirst[$i], "In a UTF-8 locale, ucfirst(chr $i) is the same as official Unicode");
+        is(lc(chr $i), $unicode_lc[$i], "In a $type UTF-8 locale, lc(chr $i) is the same as official Unicode");
+        is(uc(chr $i), $unicode_uc[$i], "In a $type UTF-8 locale, uc(chr $i) is the same as official Unicode");
+        is(lcfirst(chr $i), $unicode_lcfirst[$i], "In a $type UTF-8 locale, lcfirst(chr $i) is the same as official Unicode");
+        is(ucfirst(chr $i), $unicode_ucfirst[$i], "In a $type UTF-8 locale, ucfirst(chr $i) is the same as official Unicode");
     }
+  }
+}
+
+SKIP: {
+    skip "Can't find a turkic UTF-8 locale", 15 unless defined $turkic_locale;
+
+    # These are designed to stress the calculation of space needed for the
+    # strings.  $filler contains a variety of characters that have special
+    # handling in the casing functions, and some regular chars as well.
+    my $filler_length = 10000;
+    my $filler = uni_to_native("\x{df}\x{b5}\x{e0}\x{c1}\x{b6}\x{ff}") x $filler_length;
+
+    # These are the correct answers to what should happen when the given
+    # casing function is called on $filler;
+    my $filler_lc = uni_to_native("\x{df}\x{b5}\x{e0}\x{e1}\x{b6}\x{ff}") x $filler_length;
+    my $filler_fc = ("ss" . uni_to_native("\x{b5}\x{e0}\x{e1}\x{b6}\x{ff}")) x $filler_length;
+    my $filler_uc = ("SS" . uni_to_native("\x{39c}\x{c0}\x{c1}\x{b6}\x{178}")) x $filler_length;
+
+    use locale;
+    setlocale(LC_CTYPE, $turkic_locale);
+
+    is (lc "IIIIIII$filler", "\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}$filler_lc",
+        "lc non-UTF-8, in Turkic locale, beginning with a bunch of I's");
+    is (lc "${filler}IIIIIII$filler", "$filler_lc\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}$filler_lc",
+        "lc non-UTF-8, in Turkic locale, a bunch of I's, but not at the beginning");
+    is (lc "${filler}I\x{307}$filler", "${filler_lc}i$filler_lc",
+        "lc in Turkic locale with DOT ABOVE immediately following I");
+    is (lc "${filler}I\x{307}IIIIII$filler", "${filler_lc}i\x{131}\x{131}\x{131}\x{131}\x{131}\x{131}$filler_lc",
+        "lc in Turkic locale with DOT ABOVE immediately following I, then other I's ");
+    is (lc "${filler}I\x{316}\x{307}$filler", "${filler_lc}i\x{316}$filler_lc",
+        "lc in Turkic locale with DOT ABOVE after non-ABOVE");
+    is (lc "${filler}I\x{307}\x{300}$filler", "${filler_lc}i\x{300}$filler_lc",
+        "lc in Turkic locale with DOT ABOVE followed by ABOVE");
+    is (lc "${filler}I\x{300}\x{307}$filler", "$filler_lc\x{131}\x{300}\x{307}$filler_lc",
+        "lc in Turkic locale with with other ABOVE before DOT ABOVE");
+    is (lcfirst "IIIIIII$filler", "\x{131}IIIIII$filler",
+        "lcfirst in Turkic locale, only first I changed");
+    is (lcfirst "I\x{307}$filler", "i$filler",
+        "lcfirst in Turkic locale with DOT ABOVE immediately following I");
+    is (lcfirst "I\x{307}IIIIII$filler", "iIIIIII$filler",
+        "lcfirst in Turkic locale with DOT ABOVE immediately following I, then"
+      . " other I's ");
+    is (lcfirst "I\x{316}\x{307}IIIIII$filler", "i\x{316}IIIIII$filler",
+        "lcfirst in Turkic locale with DOT ABOVE after non-ABOVE");
+    is (lcfirst "I\x{307}\x{300}IIIIII$filler", "i\x{300}IIIIII$filler",
+        "lcfirst in Turkic locale with DOT ABOVE followed by ABOVE");
+    is (lcfirst "I\x{300}\x{307}IIIIII$filler", "\x{131}\x{300}\x{307}IIIIII$filler",
+        "lcfirst in Turkic locale with with other ABOVE before DOT ABOVE");
+    is (uc "${filler}i$filler", "$filler_uc\x{130}$filler_uc", "long string uc in Turkic locale");
+    is (ucfirst "ii$filler", "\x{130}i$filler", "long string ucfirst in Turkic locale; only first char changes");
 }

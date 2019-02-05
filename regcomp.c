@@ -1651,11 +1651,26 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
         _invlist_invert(invlist);
     }
-    else if (new_node_has_latin1 && ANYOF_FLAGS(node) & ANYOFL_FOLD) {
+    else if (ANYOF_FLAGS(node) & ANYOFL_FOLD) {
+        if (new_node_has_latin1) {
 
-        /* Under /li, any 0-255 could fold to any other 0-255, depending on the
-         * locale.  We can skip this if there are no 0-255 at all. */
-        _invlist_union(invlist, PL_Latin1, &invlist);
+            /* Under /li, any 0-255 could fold to any other 0-255, depending on
+             * the locale.  We can skip this if there are no 0-255 at all. */
+            _invlist_union(invlist, PL_Latin1, &invlist);
+
+            invlist = add_cp_to_invlist(invlist, LATIN_SMALL_LETTER_DOTLESS_I);
+            invlist = add_cp_to_invlist(invlist, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+        }
+        else {
+            if (_invlist_contains_cp(invlist, LATIN_SMALL_LETTER_DOTLESS_I)) {
+                invlist = add_cp_to_invlist(invlist, 'I');
+            }
+            if (_invlist_contains_cp(invlist,
+                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
+            {
+                invlist = add_cp_to_invlist(invlist, 'i');
+            }
+        }
     }
 
     /* Similarly add the UTF-8 locale possible matches.  These have to be
@@ -2042,7 +2057,7 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
     U32 count = 0;      /* Running total of number of code points matched by
                            'ssc' */
     UV start, end;      /* Start and end points of current range in inversion
-                           list */
+                           XXX outdated.  UTF-8 locales are common, what about invert? list */
     const U32 max_code_points = (LOC)
                                 ?  256
                                 : ((  ! UNI_SEMANTICS
@@ -10637,9 +10652,14 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         }
         else {
             /* Any Latin1 range character can potentially match any
-             * other depending on the locale */
+             * other depending on the locale, and in Turkic locales, U+130 and
+             * U+131 */
             if (OP(node) == EXACTFL) {
                 _invlist_union(invlist, PL_Latin1, &invlist);
+                invlist = add_cp_to_invlist(invlist,
+                                                LATIN_SMALL_LETTER_DOTLESS_I);
+                invlist = add_cp_to_invlist(invlist,
+                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
             }
             else {
                 /* But otherwise, it matches at least itself.  We can
@@ -10742,6 +10762,26 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
                 }
 
                 invlist = add_cp_to_invlist(invlist, c);
+            }
+
+            if (OP(node) == EXACTFL) {
+
+                /* If either [iI] are present in an EXACTFL node the above code
+                 * should have added its normal case pair, but under a Turkish
+                 * locale they could match instead the case pairs from it.  Add
+                 * those as potential matches as well */
+                if (isALPHA_FOLD_EQ(fc, 'I')) {
+                    invlist = add_cp_to_invlist(invlist,
+                                                LATIN_SMALL_LETTER_DOTLESS_I);
+                    invlist = add_cp_to_invlist(invlist,
+                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+                }
+                else if (fc == LATIN_SMALL_LETTER_DOTLESS_I) {
+                    invlist = add_cp_to_invlist(invlist, 'I');
+                }
+                else if (fc == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
+                    invlist = add_cp_to_invlist(invlist, 'i');
+                }
             }
         }
     }
@@ -17827,8 +17867,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             /* Our calculated list will be for Unicode rules.  For locale
              * matching, we have to keep a separate list that is consulted at
-             * runtime only when the locale indicates Unicode rules.  For
-             * non-locale, we just use the general list */
+             * runtime only when the locale indicates Unicode rules (and we
+             * don't include potential matches in the ASCII/Latin1 range, as
+             * any code point could fold to any other, based on the run-time
+             * locale).   For non-locale, we just use the general list */
             if (LOC) {
                 use_list = &only_utf8_locale_list;
             }
@@ -17860,7 +17902,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     if (j < 256) {
 
-                        if (IS_IN_SOME_FOLD_L1(j)) {
+                        /* Under /l, we don't know what code points below 256
+                         * fold to, except we do know the MICRO SIGN folds to
+                         * an above-255 character if the locale is UTF-8, so we
+                         * add it to the special list (in *use_list)  Otherwise
+                         * we know now what things can match, though some folds
+                         * are valid under /d only if the target is UTF-8.
+                         * Those go in a separate list */
+                        if (      IS_IN_SOME_FOLD_L1(j)
+                            && ! (LOC && j != MICRO_SIGN))
+                        {
 
                             /* ASCII is always matched; non-ASCII is matched
                              * only under Unicode rules (which could happen
@@ -18151,7 +18202,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 only_utf8_locale_list = NULL;
             }
         }
-        if (only_utf8_locale_list) {
+        if (    only_utf8_locale_list
+            || (cp_list && (   _invlist_contains_cp(cp_list, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE)
+                            || _invlist_contains_cp(cp_list, LATIN_SMALL_LETTER_DOTLESS_I))))
+        {
             has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
             anyof_flags
                  |= ANYOFL_FOLD
@@ -21947,6 +22001,7 @@ Perl_init_uniprops(pTHX)
     PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
     PL_utf8_mark = _new_invlist_C_array(uni_prop_ptrs[UNI_M]);
+    PL_CCC_non0_non230 = _new_invlist_C_array(_Perl_CCC_non0_non230_invlist);
 
 #ifdef UNI_XIDC
     /* The below are used only by deprecated functions.  They could be removed */

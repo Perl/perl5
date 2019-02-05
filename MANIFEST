@@ -5870,6 +5870,7 @@ t/re/fold_grind_a.t		Wrapper for fold_grind.pl for /a testing
 t/re/fold_grind_aa.t		Wrapper for fold_grind.pl for /aa testing
 t/re/fold_grind_d.t		Wrapper for fold_grind.pl for /d testing
 t/re/fold_grind_l.t		Wrapper for fold_grind.pl for /l testing with a C locale
+t/re/fold_grind_T.t		Wrapper for fold_grind.pl for /l testing with a Turkic locale
 t/re/fold_grind_u.t		Wrapper for fold_grind.pl for /u testing
 t/re/keep_tabs.t		Tests where \t can't be expanded.
 t/re/no_utf8_pm.t		Verify utf8.pm doesn't get loaded unless required

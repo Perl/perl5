@@ -157,15 +157,6 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	REPLACEMENT: Unicode REPLACEMENT CHARACTER
-
-	0xFFFD
-*/
-/*** GENERATED CODE ***/
-#define is_REPLACEMENT_utf8_safe(s,e)                                       \
-( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xEF == ((const U8*)s)[0] ) ) && ( 0xBF == ((const U8*)s)[1] ) ) && ( 0xBD == ((const U8*)s)[2] ) ) ? 3 : 0 )
-
-/*
 	NONCHAR: Non character code points
 
 	\p{_Perl_Nchar}
@@ -521,10 +512,14 @@
 ( ( ((const U8*)s)[0] <= 0x7F ) ? 1                                         \
 : ( ( ((const U8*)s)[0] & 0xFE ) == 0xC2 ) ?                                \
     2                                                                       \
-: ( 0xC4 == ((const U8*)s)[0] || 0xC7 == ((const U8*)s)[0] ) ?              \
-    ( ( 0xB0 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xC4 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ((const U8*)s)[1] & 0xFE ) == 0xB0 ) ? 2 : 0 )                    \
 : ( 0xC5 == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x89 == ((const U8*)s)[1] || 0xB8 == ((const U8*)s)[1] || 0xBF == ((const U8*)s)[1] ) ? 2 : 0 )\
+: ( 0xC7 == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0xB0 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xCC == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x87 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xCE == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ((const U8*)s)[1] & 0xDF ) == 0x9C ) ? 2 : 0 )                    \
 : ( 0xE1 == ((const U8*)s)[0] ) ?                                           \
@@ -537,16 +532,18 @@
 #define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
 ( 0x130 == cp || ( 0x130 < cp &&                                            \
+( 0x131 == cp || ( 0x131 < cp &&                                            \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
 ( 0x1F0 == cp || ( 0x1F0 < cp &&                                            \
+( 0x307 == cp || ( 0x307 < cp &&                                            \
 ( 0x39C == cp || ( 0x39C < cp &&                                            \
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( ( 0x1E96 <= cp && cp <= 0x1E9A ) || ( 0x1E9A < cp &&                      \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
@@ -558,10 +555,12 @@
 ( ( ((const U8*)s)[0] <= 0x7F ) ? 1                                         \
 : ( ( ((const U8*)s)[0] & 0xFE ) == 0xC2 ) ?                                \
     2                                                                       \
-: ( 0xC4 == ((const U8*)s)[0] || 0xC7 == ((const U8*)s)[0] ) ?              \
-    ( ( 0xB0 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xC4 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ((const U8*)s)[1] & 0xFE ) == 0xB0 ) ? 2 : 0 )                    \
 : ( 0xC5 == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x89 == ((const U8*)s)[1] || 0xB8 == ((const U8*)s)[1] || 0xBF == ((const U8*)s)[1] ) ? 2 : 0 )\
+: ( 0xC7 == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0xB0 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xCA == ((const U8*)s)[0] ) ?                                           \
     ( ( 0xBC == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xCE == ((const U8*)s)[0] ) ?                                           \
@@ -576,6 +575,7 @@
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
 ( 0x130 == cp || ( 0x130 < cp &&                                            \
+( 0x131 == cp || ( 0x131 < cp &&                                            \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -586,7 +586,7 @@
 ( ( 0x1E96 <= cp && cp <= 0x1E9A ) || ( 0x1E9A < cp &&                      \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PATWS: pattern white space
@@ -757,15 +757,6 @@
 ( 0x2029 == cp || ( 0x2029 < cp &&                                          \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
-
-/*
-	REPLACEMENT: Unicode REPLACEMENT CHARACTER
-
-	0xFFFD
-*/
-/*** GENERATED CODE ***/
-#define is_REPLACEMENT_utf8_safe(s,e)                                       \
-( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( 0x73 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x71 == ((const U8*)s)[3] ) ) ? 4 : 0 )
 
 /*
 	NONCHAR: Non character code points
@@ -1147,12 +1138,16 @@
 ( ( ( ( ((const U8*)s)[0] & 0xC0 ) == 0x00 ) || ( ( ((const U8*)s)[0] & 0xEF ) == 0x40 ) || ( ( ((const U8*)s)[0] & 0xDF ) == 0x4B ) || ( ( ((const U8*)s)[0] & 0xCC ) == 0x4C ) || ( ( ((const U8*)s)[0] & 0xDE ) == 0x5A ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0x60 ) || ((const U8*)s)[0] == 0x79 || ( ( ((const U8*)s)[0] & 0xEF ) == 0x81 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x82 ) || ( ( ((const U8*)s)[0] & 0xEC ) == 0x84 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x88 ) || ((const U8*)s)[0] == 0xA1 || ( ( ((const U8*)s)[0] & 0xBE ) == 0xA2 ) || ( ( ((const U8*)s)[0] & 0xBC ) == 0xA4 ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0xA8 ) || ( ( ((const U8*)s)[0] & 0xEF ) == 0xAD ) || ( ( ((const U8*)s)[0] & 0xE8 ) == 0xC0 ) || ( ( ((const U8*)s)[0] & 0xCE ) == 0xC8 ) || ((const U8*)s)[0] == 0xE0 || ( ( ((const U8*)s)[0] & 0xF8 ) == 0xF0 ) || ((const U8*)s)[0] == 0xFF ) ? 1\
 : ( 0x80 == ((const U8*)s)[0] || ( ((const U8*)s)[0] & 0xFE ) == 0x8A ) ?   \
     ( ( ( 0x41 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x4A ) || ( 0x51 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x59 ) || ( 0x62 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x6A ) || ( ((const U8*)s)[1] & 0xFC ) == 0x70 ) ? 2 : 0 )\
-: ( 0x8D == ((const U8*)s)[0] || 0x9C == ((const U8*)s)[0] ) ?              \
-    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0x8D == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] || 0x58 == ((const U8*)s)[1] ) ? 2 : 0 )  \
 : ( 0x8E == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x4A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0x8F == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x67 == ((const U8*)s)[1] || 0x73 == ((const U8*)s)[1] ) ? 2 : 0 )  \
+: ( 0x9C == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xAF == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x48 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xB3 == ((const U8*)s)[0] || 0xB4 == ((const U8*)s)[0] ) ?              \
     ( ( 0x70 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xBF == ((const U8*)s)[0] ) ?                                           \
@@ -1165,16 +1160,18 @@
 #define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
 ( 0x130 == cp || ( 0x130 < cp &&                                            \
+( 0x131 == cp || ( 0x131 < cp &&                                            \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
 ( 0x1F0 == cp || ( 0x1F0 < cp &&                                            \
+( 0x307 == cp || ( 0x307 < cp &&                                            \
 ( 0x39C == cp || ( 0x39C < cp &&                                            \
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( ( 0x1E96 <= cp && cp <= 0x1E9A ) || ( 0x1E9A < cp &&                      \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
@@ -1186,12 +1183,14 @@
 ( ( ( ( ((const U8*)s)[0] & 0xC0 ) == 0x00 ) || ( ( ((const U8*)s)[0] & 0xEF ) == 0x40 ) || ( ( ((const U8*)s)[0] & 0xDF ) == 0x4B ) || ( ( ((const U8*)s)[0] & 0xCC ) == 0x4C ) || ( ( ((const U8*)s)[0] & 0xDE ) == 0x5A ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0x60 ) || ((const U8*)s)[0] == 0x79 || ( ( ((const U8*)s)[0] & 0xEF ) == 0x81 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x82 ) || ( ( ((const U8*)s)[0] & 0xEC ) == 0x84 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x88 ) || ((const U8*)s)[0] == 0xA1 || ( ( ((const U8*)s)[0] & 0xBE ) == 0xA2 ) || ( ( ((const U8*)s)[0] & 0xBC ) == 0xA4 ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0xA8 ) || ( ( ((const U8*)s)[0] & 0xEF ) == 0xAD ) || ( ( ((const U8*)s)[0] & 0xE8 ) == 0xC0 ) || ( ( ((const U8*)s)[0] & 0xCE ) == 0xC8 ) || ((const U8*)s)[0] == 0xE0 || ( ( ((const U8*)s)[0] & 0xF8 ) == 0xF0 ) || ((const U8*)s)[0] == 0xFF ) ? 1\
 : ( 0x80 == ((const U8*)s)[0] || ( ((const U8*)s)[0] & 0xFE ) == 0x8A ) ?   \
     ( ( ( 0x41 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x4A ) || ( 0x51 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x59 ) || ( 0x62 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x6A ) || ( ((const U8*)s)[1] & 0xFC ) == 0x70 ) ? 2 : 0 )\
-: ( 0x8D == ((const U8*)s)[0] || 0x9C == ((const U8*)s)[0] ) ?              \
-    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0x8D == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] || 0x58 == ((const U8*)s)[1] ) ? 2 : 0 )  \
 : ( 0x8E == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x4A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0x8F == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x67 == ((const U8*)s)[1] || 0x73 == ((const U8*)s)[1] ) ? 2 : 0 )  \
+: ( 0x9C == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xAB == ((const U8*)s)[0] || ( 0xB3 == ((const U8*)s)[0] || 0xB4 == ((const U8*)s)[0] ) ) ?\
     ( ( 0x70 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xBF == ((const U8*)s)[0] ) ?                                           \
@@ -1204,6 +1203,7 @@
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
 ( 0x130 == cp || ( 0x130 < cp &&                                            \
+( 0x131 == cp || ( 0x131 < cp &&                                            \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -1214,7 +1214,7 @@
 ( ( 0x1E96 <= cp && cp <= 0x1E9A ) || ( 0x1E9A < cp &&                      \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PATWS: pattern white space
@@ -1374,15 +1374,6 @@
 ( 0x2029 == cp || ( 0x2029 < cp &&                                          \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
-
-/*
-	REPLACEMENT: Unicode REPLACEMENT CHARACTER
-
-	0xFFFD
-*/
-/*** GENERATED CODE ***/
-#define is_REPLACEMENT_utf8_safe(s,e)                                       \
-( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( 0x72 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x70 == ((const U8*)s)[3] ) ) ? 4 : 0 )
 
 /*
 	NONCHAR: Non character code points
@@ -1764,12 +1755,16 @@
 ( ( ( ( ((const U8*)s)[0] & 0xC0 ) == 0x00 ) || ( ( ((const U8*)s)[0] & 0xEF ) == 0x40 ) || ( ( ((const U8*)s)[0] & 0xDF ) == 0x4B ) || ( ( ((const U8*)s)[0] & 0xFC ) == 0x4C ) || ( ( ((const U8*)s)[0] & 0xDE ) == 0x5A ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0x5C ) || ((const U8*)s)[0] == 0x5E || ( ( ((const U8*)s)[0] & 0xFE ) == 0x60 ) || ( ( ((const U8*)s)[0] & 0xEC ) == 0x6C ) || ((const U8*)s)[0] == 0x79 || ( ( ((const U8*)s)[0] & 0xEF ) == 0x81 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x82 ) || ( ( ((const U8*)s)[0] & 0xEC ) == 0x84 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x88 ) || ((const U8*)s)[0] == 0xA1 || ( ( ((const U8*)s)[0] & 0xBE ) == 0xA2 ) || ( ( ((const U8*)s)[0] & 0xBC ) == 0xA4 ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0xA8 ) || ((const U8*)s)[0] == 0xB0 || ( ( ((const U8*)s)[0] & 0xFE ) == 0xBA ) || ( ( ((const U8*)s)[0] & 0xE8 ) == 0xC0 ) || ( ( ((const U8*)s)[0] & 0xCE ) == 0xC8 ) || ((const U8*)s)[0] == 0xE0 || ( ( ((const U8*)s)[0] & 0xF8 ) == 0xF0 ) || ((const U8*)s)[0] == 0xFF ) ? 1\
 : ( 0x78 == ((const U8*)s)[0] || 0x80 == ((const U8*)s)[0] || 0x8A == ((const U8*)s)[0] ) ?\
     ( ( ( 0x41 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x4A ) || ( 0x51 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x59 ) || 0x5F == ((const U8*)s)[1] || ( 0x62 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x6A ) || ( 0x70 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x72 ) ) ? 2 : 0 )\
-: ( 0x8C == ((const U8*)s)[0] || 0x9B == ((const U8*)s)[0] ) ?              \
-    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0x8C == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] || 0x58 == ((const U8*)s)[1] ) ? 2 : 0 )  \
 : ( 0x8D == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x4A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0x8E == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x66 == ((const U8*)s)[1] || 0x72 == ((const U8*)s)[1] ) ? 2 : 0 )  \
+: ( 0x9B == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xAD == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x48 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( ( ((const U8*)s)[0] & 0xFE ) == 0xB2 ) ?                                \
     ( ( 0x6A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xBF == ((const U8*)s)[0] ) ?                                           \
@@ -1782,16 +1777,18 @@
 #define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
 ( 0x130 == cp || ( 0x130 < cp &&                                            \
+( 0x131 == cp || ( 0x131 < cp &&                                            \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
 ( 0x1F0 == cp || ( 0x1F0 < cp &&                                            \
+( 0x307 == cp || ( 0x307 < cp &&                                            \
 ( 0x39C == cp || ( 0x39C < cp &&                                            \
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( ( 0x1E96 <= cp && cp <= 0x1E9A ) || ( 0x1E9A < cp &&                      \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
@@ -1803,12 +1800,14 @@
 ( ( ( ( ((const U8*)s)[0] & 0xC0 ) == 0x00 ) || ( ( ((const U8*)s)[0] & 0xEF ) == 0x40 ) || ( ( ((const U8*)s)[0] & 0xDF ) == 0x4B ) || ( ( ((const U8*)s)[0] & 0xFC ) == 0x4C ) || ( ( ((const U8*)s)[0] & 0xDE ) == 0x5A ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0x5C ) || ((const U8*)s)[0] == 0x5E || ( ( ((const U8*)s)[0] & 0xFE ) == 0x60 ) || ( ( ((const U8*)s)[0] & 0xEC ) == 0x6C ) || ((const U8*)s)[0] == 0x79 || ( ( ((const U8*)s)[0] & 0xEF ) == 0x81 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x82 ) || ( ( ((const U8*)s)[0] & 0xEC ) == 0x84 ) || ( ( ((const U8*)s)[0] & 0xEE ) == 0x88 ) || ((const U8*)s)[0] == 0xA1 || ( ( ((const U8*)s)[0] & 0xBE ) == 0xA2 ) || ( ( ((const U8*)s)[0] & 0xBC ) == 0xA4 ) || ( ( ((const U8*)s)[0] & 0xFE ) == 0xA8 ) || ((const U8*)s)[0] == 0xB0 || ( ( ((const U8*)s)[0] & 0xFE ) == 0xBA ) || ( ( ((const U8*)s)[0] & 0xE8 ) == 0xC0 ) || ( ( ((const U8*)s)[0] & 0xCE ) == 0xC8 ) || ((const U8*)s)[0] == 0xE0 || ( ( ((const U8*)s)[0] & 0xF8 ) == 0xF0 ) || ((const U8*)s)[0] == 0xFF ) ? 1\
 : ( 0x78 == ((const U8*)s)[0] || 0x80 == ((const U8*)s)[0] || 0x8A == ((const U8*)s)[0] ) ?\
     ( ( ( 0x41 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x4A ) || ( 0x51 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x59 ) || 0x5F == ((const U8*)s)[1] || ( 0x62 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x6A ) || ( 0x70 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x72 ) ) ? 2 : 0 )\
-: ( 0x8C == ((const U8*)s)[0] || 0x9B == ((const U8*)s)[0] ) ?              \
-    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0x8C == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] || 0x58 == ((const U8*)s)[1] ) ? 2 : 0 )  \
 : ( 0x8D == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x4A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0x8E == ((const U8*)s)[0] ) ?                                           \
     ( ( 0x66 == ((const U8*)s)[1] || 0x72 == ((const U8*)s)[1] ) ? 2 : 0 )  \
+: ( 0x9B == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x57 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xAA == ((const U8*)s)[0] || ( ((const U8*)s)[0] & 0xFE ) == 0xB2 ) ?   \
     ( ( 0x6A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xBF == ((const U8*)s)[0] ) ?                                           \
@@ -1821,6 +1820,7 @@
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
 ( 0x130 == cp || ( 0x130 < cp &&                                            \
+( 0x131 == cp || ( 0x131 < cp &&                                            \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -1831,7 +1831,7 @@
 ( ( 0x1E96 <= cp && cp <= 0x1E9A ) || ( 0x1E9A < cp &&                      \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x212B == cp || ( 0xFB00 <= cp && cp <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PATWS: pattern white space
@@ -1909,9 +1909,9 @@
  * 018e20fa2f469667cc7ccd8a3d4a4a8cce8ad9bdf5fce5b2f61137660ea1065f lib/unicore/extracted/DLineBreak.txt
  * 88c30a794011f5e6dc62154342e8bab1bd4ce2d0c0ab06fb69ba47134dc75b23 lib/unicore/extracted/DNumType.txt
  * dab1e84f48990e30635a4f489d33212b25d0e35d80839c08e33a8afe5736346c lib/unicore/extracted/DNumValues.txt
- * b4d304a8173a57d5baca855ba3465c0fbec45a723983445c03bb80cf2dff9f46 lib/unicore/mktables
+ * 457213d2957fa73d19eba1479093ab28419712c03c49f156c732ddb36d011112 lib/unicore/mktables
  * 7bd6bcbe3813e0cd55e0998053d182b7bc8c97dcfd0b85028e9f7f55af4ad61b lib/unicore/version
  * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
- * 6b1c1caf1004a96c15218dba6cec482f36a036ed91bb545315ba280319133a80 regen/regcharclass.pl
+ * 88bd981dbb45f57767c414170f85067c6e01b5afbc1e40c6514a2bc41ed8c1d8 regen/regcharclass.pl
  * c6b0b0b7e4ac4f5a57d203e84194749987477ea55b2366e3b343aadf8cc7d6b5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

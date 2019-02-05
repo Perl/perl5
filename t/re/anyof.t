@@ -454,7 +454,7 @@ my @tests = (
     '(?i)[\d\w]' => 'POSIXD[\w]',
     '(?i)[\D\w]' => 'SANY',
     #'(?i)(?l)[\d\w]' => varies depending on Unicode release
-    '(?i)(?l)[\D\w]' => 'ANYOFPOSIXL[\\w\\D][0100-INFTY]',
+    '(?i)(?l)[\D\w]' => 'ANYOFPOSIXL{i}[\\w\\D][0100-INFTY]',
     '(?i)(?u)[\d\w]' => 'POSIXU[\w]',
     '(?i)(?u)[\D\w]' => 'SANY',
     '(?i)(?a)[\d\w]' => 'POSIXA[\w]',
@@ -462,7 +462,7 @@ my @tests = (
     '(?l:[\x{212A}])' => 'ANYOFL[212A]',
     '(?l:[\s\x{212A}])' => 'ANYOFPOSIXL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
     '(?l:[^\S\x{202F}])' => 'ANYOFPOSIXL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
-    '(?li:[a-z])' => 'ANYOFL{i}[a-z{utf8 locale}A-Z\x{017F}\x{212A}]',
+    '(?li:[a-z])' => 'ANYOFL{i}[a-z{utf8 locale}\x{017F}\x{212A}]',
 
     '\p{All}' => 'SANY',
     '\P{All}' => 'OPFAIL',

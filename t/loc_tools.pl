@@ -527,7 +527,7 @@ sub find_utf8_ctype_locales (;$) { # Return the names of the locales that core
 
 
 sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
-                                  # thinks is a UTF-8 LC_CTYPE
+                                  # thinks is a UTF-8 LC_CTYPE non-turkic
                                   # locale.
                                   # Optional parameter is a reference to a
                                   # list of locales to try; if omitted, this
@@ -536,11 +536,46 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
     my $try_locales_ref = shift;
 
     my @utf8_locales = find_utf8_ctype_locales($try_locales_ref);
+    my @turkic_locales = find_utf8_turkic_locales($try_locales_ref);
 
-    return $utf8_locales[0] if @utf8_locales;
+    my %seen_turkic;
+
+    # Create undef elements in the hash for turkic locales
+    @seen_turkic{@turkic_locales} = ();
+
+    foreach my $locale (@utf8_locales) {
+        return $locale unless exists $seen_turkic{$locale};
+    }
 
     return;
 }
+
+sub find_utf8_turkic_locales (;$) {
+
+    # Return the name of all the locales that core Perl thinks are UTF-8
+    # Turkic LC_CTYPE.  Optional parameter is a reference to a list of locales
+    # to try; if omitted, this tries all locales it can find on the platform
+
+    my @return;
+
+    my $save_locale = setlocale(&POSIX::LC_CTYPE());
+    foreach my $locale (find_utf8_ctype_locales(shift)) {
+        use locale;
+        setlocale(&POSIX::LC_CTYPE(), $locale);
+        push @return, $locale if uc('i') eq "\x{130}";
+    }
+    setlocale(&POSIX::LC_CTYPE(), $save_locale);
+
+    return @return;
+}
+
+sub find_utf8_turkic_locale (;$) {
+    my @turkics = find_utf8_turkic_locales(shift);
+
+    return unless @turkics;
+    return $turkics[0]
+}
+
 
 # returns full path to the directory containing the current source
 # file, inspired by mauke's Dir::Self

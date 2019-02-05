@@ -40,9 +40,14 @@ Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
 UTF-8 locales, except for sorting and string comparisons like C<lt> and
 C<ge>.  Starting in v5.26, Perl can handle these reasonably as well,
 depending on the platform's implementation.  However, for earlier
-releases or for better control, use L<Unicode::Collate>.  Perl continues to
-support the old non UTF-8 locales as well.  There are currently no UTF-8
-locales for EBCDIC platforms.
+releases or for better control, use L<Unicode::Collate>.  There are
+actually two slightly different types of UTF-8 locales: one for Turkic
+languages and one for everything else.  Starting in Perl v5.30, Perl
+seamlessly handles both types; previously only the non-Turkic one was
+supported.
+
+Perl continues to support the old non UTF-8 locales as well.  There are
+currently no UTF-8 locales for EBCDIC platforms.
 
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
 L<http://cldr.unicode.org/> which includes more types of information than
