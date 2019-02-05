@@ -4321,7 +4321,7 @@ PP(pp_lc)
 	SvUTF8_on(dest);
 	*d = '\0';
 	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
-    } else {	/* Not utf8 */
+    } else {	/* 'source' not utf8 */
 	if (len) {
 	    const U8 *const send = s + len;
 
