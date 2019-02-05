@@ -2053,7 +2053,7 @@ PP(pp_lt)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(lt_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(lt_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2069,7 +2069,7 @@ PP(pp_gt)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(gt_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(gt_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2085,7 +2085,7 @@ PP(pp_le)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(le_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(le_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2101,7 +2101,7 @@ PP(pp_ge)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(ge_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(ge_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2117,7 +2117,7 @@ PP(pp_ne)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(ne_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(ne_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(
@@ -2249,7 +2249,7 @@ PP(pp_sle)
 	break;
     }
 
-    tryAMAGICbin_MG(amg_type, AMGf_set);
+    tryAMAGICbin_MG(amg_type, 0);
     {
       dPOPTOPssrl;
       const int cmp =
@@ -2267,7 +2267,7 @@ PP(pp_sle)
 PP(pp_seq)
 {
     dSP;
-    tryAMAGICbin_MG(seq_amg, AMGf_set);
+    tryAMAGICbin_MG(seq_amg, 0);
     {
       dPOPTOPssrl;
       SETs(boolSV(sv_eq_flags(left, right, 0)));
@@ -2278,7 +2278,7 @@ PP(pp_seq)
 PP(pp_sne)
 {
     dSP;
-    tryAMAGICbin_MG(sne_amg, AMGf_set);
+    tryAMAGICbin_MG(sne_amg, 0);
     {
       dPOPTOPssrl;
       SETs(boolSV(!sv_eq_flags(left, right, 0)));
@@ -2513,7 +2513,7 @@ PP(pp_not)
     dSP;
     SV *sv;
 
-    tryAMAGICun_MG(not_amg, AMGf_set);
+    tryAMAGICun_MG(not_amg, 0);
     sv = *PL_stack_sp;
     *PL_stack_sp = boolSV(!SvTRUE_nomg_NN(sv));
     return NORMAL;
@@ -2710,7 +2710,7 @@ PP(pp_i_subtract)
 PP(pp_i_lt)
 {
     dSP;
-    tryAMAGICbin_MG(lt_amg, AMGf_set);
+    tryAMAGICbin_MG(lt_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left < right));
@@ -2721,7 +2721,7 @@ PP(pp_i_lt)
 PP(pp_i_gt)
 {
     dSP;
-    tryAMAGICbin_MG(gt_amg, AMGf_set);
+    tryAMAGICbin_MG(gt_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left > right));
@@ -2732,7 +2732,7 @@ PP(pp_i_gt)
 PP(pp_i_le)
 {
     dSP;
-    tryAMAGICbin_MG(le_amg, AMGf_set);
+    tryAMAGICbin_MG(le_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left <= right));
@@ -2743,7 +2743,7 @@ PP(pp_i_le)
 PP(pp_i_ge)
 {
     dSP;
-    tryAMAGICbin_MG(ge_amg, AMGf_set);
+    tryAMAGICbin_MG(ge_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left >= right));
@@ -2754,7 +2754,7 @@ PP(pp_i_ge)
 PP(pp_i_eq)
 {
     dSP;
-    tryAMAGICbin_MG(eq_amg, AMGf_set);
+    tryAMAGICbin_MG(eq_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left == right));
@@ -2765,7 +2765,7 @@ PP(pp_i_eq)
 PP(pp_i_ne)
 {
     dSP;
-    tryAMAGICbin_MG(ne_amg, AMGf_set);
+    tryAMAGICbin_MG(ne_amg, 0);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left != right));

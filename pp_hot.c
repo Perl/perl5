@@ -1060,9 +1060,9 @@ PP(pp_multiconcat)
                     SV * const tmpsv = amagic_call(left, right, concat_amg,
                                                 (nextappend ? AMGf_assign: 0));
                     if (tmpsv) {
-                        /* NB: tryAMAGICbin_MG() includes an SvPADMY test
-                         * here, which isn;t needed as any implicit
-                         * assign does under OPpTARGET_MY is done after
+                        /* NB: tryAMAGICbin_MG() includes an OPpTARGET_MY test
+                         * here, which isn't needed as any implicit
+                         * assign done under OPpTARGET_MY is done after
                          * this loop */
                         if (nextappend) {
                             sv_setsv(left, tmpsv);
@@ -1097,15 +1097,20 @@ PP(pp_multiconcat)
 
         SP = toparg - stack_adj + 1;
 
-        /* Assign result of all RHS concats (left) to LHS (targ).
+        /* Return the result of all RHS concats, unless this op includes
+         * an assign ($lex = x.y.z or expr = x.y.z), in which case copy
+         * to target (which will be $lex or expr).
          * If we are appending, targ will already have been appended to in
          * the loop */
-        if (is_append)
-            SvTAINT(targ);
-        else {
+        if (  !is_append
+            && (   (PL_op->op_flags   & OPf_STACKED)
+                || (PL_op->op_private & OPpTARGET_MY))
+        ) {
             sv_setsv(targ, left);
             SvSETMAGIC(targ);
         }
+        else
+            targ = left;
         SETs(targ);
         RETURN;
     }
@@ -1257,7 +1262,7 @@ PP(pp_eq)
     dSP;
     SV *left, *right;
 
-    tryAMAGICbin_MG(eq_amg, AMGf_set|AMGf_numeric);
+    tryAMAGICbin_MG(eq_amg, AMGf_numeric);
     right = POPs;
     left  = TOPs;
     SETs(boolSV(

@@ -99,7 +99,12 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_REF		16	/* Certified reference. */
 				/*  (Return container, not containee). */
 #define OPf_MOD		32	/* Will modify (lvalue). */
+
 #define OPf_STACKED	64	/* Some arg is arriving on the stack. */
+                                /*   Indicates mutator-variant of op for those
+                                 *     ops which support them, e.g. $x += 1
+                                 */
+
 #define OPf_SPECIAL	128	/* Do something weird for this op: */
 				/*  On local LVAL, don't init local value. */
 				/*  On OP_SORT, subroutine is inlined. */
