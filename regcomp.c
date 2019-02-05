@@ -1654,9 +1654,9 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     else if (ANYOF_FLAGS(node) & ANYOFL_FOLD) {
         if (new_node_has_latin1) {
 
-        /* Under /li, any 0-255 could fold to any other 0-255, depending on the
-         * locale.  We can skip this if there are no 0-255 at all. */
-        _invlist_union(invlist, PL_Latin1, &invlist);
+            /* Under /li, any 0-255 could fold to any other 0-255, depending on
+             * the locale.  We can skip this if there are no 0-255 at all. */
+            _invlist_union(invlist, PL_Latin1, &invlist);
 
             invlist = add_cp_to_invlist(invlist, LATIN_SMALL_LETTER_DOTLESS_I);
             invlist = add_cp_to_invlist(invlist, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
@@ -2057,7 +2057,7 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
     U32 count = 0;      /* Running total of number of code points matched by
                            'ssc' */
     UV start, end;      /* Start and end points of current range in inversion
-                           list */
+                           XXX outdated.  UTF-8 locales are common, what about invert? list */
     const U32 max_code_points = (LOC)
                                 ?  256
                                 : ((  ! UNI_SEMANTICS
