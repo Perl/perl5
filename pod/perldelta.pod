@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Turkic UTF-8 locales are now seamlessly supported
+
+Turkic languages have different casing rules than other languages for
+the characters C<"i"> and C<"I">.  The uppercase of C<"i"> is LATIN
+CAPITAL LETTER I WITH DOT ABOVE (U+0130); and the lowercase of C<"I"> is LATIN
+SMALL LETTER DOTLESS I (U+0131).  Unicode furnishes alternate casing
+rules for use with Turkic languages.  Previously, Perl ignored these,
+but now, it uses them when it detects that it is operating under a
+Turkic UTF-8 locale.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
