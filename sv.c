@@ -3518,7 +3518,8 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
     }
 
     if (SvCUR(sv) == 0) {
-	if (extra) SvGROW(sv, extra);
+        if (extra) SvGROW(sv, extra + 1); /* Make sure is room for a trailing
+                                             byte */
     } else { /* Assume Latin-1/EBCDIC */
 	/* This function could be much more efficient if we
 	 * had a FLAG in SVs to signal if there are any variant
