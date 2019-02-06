@@ -337,6 +337,7 @@ sub find_locales ($;$) {
     my @Locale;
     _trylocale("C", $categories, \@Locale, $allow_incompatible);
     _trylocale("POSIX", $categories, \@Locale, $allow_incompatible);
+    _trylocale("C.UTF-8", $categories, \@Locale, $allow_incompatible);
     foreach (1..16) {
         _trylocale("ISO8859-$_", $categories, \@Locale, $allow_incompatible);
         _trylocale("iso8859$_", $categories, \@Locale, $allow_incompatible);
