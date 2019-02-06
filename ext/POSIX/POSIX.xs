@@ -3669,7 +3669,8 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 #else   /* If can't check directly, at least can see if script is consistent,
            under UTF-8, which gives us an extra measure of confidence. */
 
-                        && isSCRIPT_RUN((const U8 *) buf, buf + len,
+                        && isSCRIPT_RUN((const U8 *) buf,
+                                        (const U8 *) buf + len,
                                         TRUE) /* Means assume UTF-8 */
 #endif
                 )) {
