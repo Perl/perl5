@@ -4334,7 +4334,8 @@ S_print_collxfrm_input_and_return(pTHX_
 
 #  endif    /* DEBUGGING */
 #endif /* USE_LOCALE_COLLATE */
-#ifdef DEBUGGING
+#ifdef USE_LOCALE
+#  ifdef DEBUGGING
 
 STATIC void
 S_print_bytes_for_locale(pTHX_
@@ -4371,9 +4372,7 @@ S_print_bytes_for_locale(pTHX_
     }
 }
 
-#endif   /* #ifdef DEBUGGING */
-
-#ifdef USE_LOCALE
+#  endif   /* #ifdef DEBUGGING */
 
 STATIC const char *
 S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale)
