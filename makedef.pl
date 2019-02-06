@@ -427,7 +427,8 @@ unless ($define{'USE_ITHREADS'}) {
 			 );
 }
 
-unless ($define{USE_ITHREADS} || $define{USE_THREAD_SAFE_LOCALE})
+if (      $define{NO_LOCALE}
+    || (! $define{USE_ITHREADS} && ! $define{USE_THREAD_SAFE_LOCALE}))
 {
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
