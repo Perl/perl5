@@ -9750,11 +9750,15 @@ Perl_newRV(pTHX_ SV *const sv)
 Creates a new SV which is an exact duplicate of the original SV.
 (Uses C<sv_setsv>.)
 
+=for apidoc newSVsv_nomg
+
+Like C<newSVsv> but does not process get magic.
+
 =cut
 */
 
 SV *
-Perl_newSVsv(pTHX_ SV *const old)
+Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
 {
     SV *sv;
 
@@ -9765,11 +9769,10 @@ Perl_newSVsv(pTHX_ SV *const old)
 	return NULL;
     }
     /* Do this here, otherwise we leak the new SV if this croaks. */
-    SvGETMAGIC(old);
+    if (flags & SV_GMAGIC)
+        SvGETMAGIC(old);
     new_SV(sv);
-    /* SV_NOSTEAL prevents TEMP buffers being, well, stolen, and saves games
-       with SvTEMP_off and SvTEMP_on round a call to sv_setsv.  */
-    sv_setsv_flags(sv, old, SV_NOSTEAL);
+    sv_setsv_flags(sv, old, flags & ~SV_GMAGIC);
     return sv;
 }
 

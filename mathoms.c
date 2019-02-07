@@ -1755,6 +1755,12 @@ Perl_instr(const char *big, const char *little)
     return instr((char *) big, (char *) little);
 }
 
+SV *
+Perl_newSVsv(pTHX_ SV *const old)
+{
+    return newSVsv(old);
+}
+
 #endif /* NO_MATHOMS */
 
 /*

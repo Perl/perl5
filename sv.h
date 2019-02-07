@@ -2175,6 +2175,11 @@ struct clone_params {
   AV *unreferenced;
 };
 
+/* SV_NOSTEAL prevents TEMP buffers being, well, stolen, and saves games
+   with SvTEMP_off and SvTEMP_on round a call to sv_setsv.  */
+#define newSVsv(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL)
+#define newSVsv_nomg(sv) newSVsv_flags((sv), SV_NOSTEAL)
+
 /*
 =for apidoc Am|SV*|newSVpvn_utf8|const char* s|STRLEN len|U32 utf8
 

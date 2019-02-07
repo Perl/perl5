@@ -2516,8 +2516,16 @@ PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, I32 len, U32 hash)
 PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV *const rv, const char *const classname);
 #define PERL_ARGS_ASSERT_NEWSVRV	\
 	assert(rv)
+#ifndef NO_MATHOMS
 PERL_CALLCONV SV*	Perl_newSVsv(pTHX_ SV *const old)
 			__attribute__warn_unused_result__;
+#endif
+
+PERL_CALLCONV SV*	Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
+			__attribute__warn_unused_result__;
+
+/* PERL_CALLCONV SV*	Perl_newSVsv_nomg(pTHX_ SV *const old)
+			__attribute__warn_unused_result__; */
 
 PERL_CALLCONV SV*	Perl_newSVuv(pTHX_ const UV u)
 			__attribute__warn_unused_result__;
