@@ -1631,7 +1631,7 @@ Ein	|bool	|sv_only_taint_gmagic|NN SV *sv
 : exported for re.pm
 EXp	|MAGIC *|sv_magicext_mglob|NN SV *sv
 ApdbmR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
-XpR	|SV*	|sv_mortalcopy_flags|NULLOK SV *const oldsv|U32 flags
+ApdR	|SV*	|sv_mortalcopy_flags|NULLOK SV *const oldsv|U32 flags
 ApdR	|SV*	|sv_newmortal
 Apd	|SV*	|sv_newref	|NULLOK SV *const sv
 Ap	|char*	|sv_peek	|NULLOK SV* sv

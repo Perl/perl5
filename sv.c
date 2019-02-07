@@ -9224,6 +9224,11 @@ The new SV is marked as mortal.  It will be destroyed "soon", either by an
 explicit call to C<FREETMPS>, or by an implicit call at places such as
 statement boundaries.  See also C<L</sv_newmortal>> and C<L</sv_2mortal>>.
 
+=for apidoc sv_mortalcopy_flags
+
+Like C<sv_mortalcopy>, but the extra C<flags> are passed to the
+C<sv_setsv_flags>.
+
 =cut
 */
 
