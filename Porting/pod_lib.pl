@@ -639,7 +639,7 @@ sub get_pod_metadata {
 
     my @inconsistent;
     foreach my $i (sort keys %disk_pods) {
-        push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
+        push @inconsistent, "$0: $i exists but is unknown by buildtoc (add to perl.pod)\n"
             unless $our_pods{$i} || $ignoredpods{$i};
         push @inconsistent, "$0: $i exists but is unknown by MANIFEST\n"
             if !$BuildFiles{'MANIFEST'} # Ignore if we're rebuilding MANIFEST
