@@ -502,3 +502,17 @@ format=
 EXPECT
 syntax error at - line 4, next token ???
 Execution of - aborted due to compilation errors.
+########
+# NAME [perl #130585] close paren in subparse
+qr!@{s{0})(?{!;
+EXPECT
+syntax error at - line 1, near "})"
+Execution of - aborted due to compilation errors.
+########
+# NAME [perl #130585] close paren in subparse - a few more tests
+my ($x, %y, @z);
+qq!$x\U $z[0] $y{a}\E $z[1]!;
+qq!$x\U@{s{0})(?{!;
+EXPECT
+syntax error at - line 3, near ")("
+Execution of - aborted due to compilation errors.

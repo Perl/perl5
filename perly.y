@@ -60,6 +60,7 @@
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
 %token <ival> LOCAL MY REQUIRE
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
+%token <ival> SUBLEXSTART SUBLEXEND
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
@@ -909,6 +910,8 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($1, 0, $2); }
 	|	FUNC '(' optexpr ')'                 /* print (@args) */
 			{ $$ = op_convert_list($1, 0, $3); }
+	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
+			{ $$ = op_convert_list($1, 0, $3); }
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $<opval>$ = newANONATTRSUB($2, 0, NULL, $3); }
@@ -1230,7 +1233,7 @@ term	:	termbinop
 			    } else
 				$<ival>$ = 0;
 			}
-		    '(' listexpr optrepl ')'
+		    SUBLEXSTART listexpr optrepl SUBLEXEND
 			{ $$ = pmruntime($1, $4, $5, 1, $<ival>2); }
 	|	BAREWORD
 	|	listop
