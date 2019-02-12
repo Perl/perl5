@@ -104,7 +104,7 @@ reported with the C<perlbug> tool.
 Issues requiring feeding code to the interpreter.
 
 Rationale: if an attacker can feed code to the interpreter they can
-feed C< system "rm -rf /" > to it.
+already feed C< system "rm -rf /" > to it.
 
 =item *
 
