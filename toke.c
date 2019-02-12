@@ -371,6 +371,8 @@ static struct debug_tokens {
     { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
     { SIGSUB,		TOKENTYPE_NONE,		"SIGSUB" },
     { SUB,		TOKENTYPE_NONE,		"SUB" },
+    { SUBLEXEND,	TOKENTYPE_NONE,		"SUBLEXEND" },
+    { SUBLEXSTART,	TOKENTYPE_NONE,		"SUBLEXSTART" },
     { THING,		TOKENTYPE_OPVAL,	"THING" },
     { UMINUS,		TOKENTYPE_NONE,		"UMINUS" },
     { UNIOP,		TOKENTYPE_OPNUM,	"UNIOP" },
@@ -2507,7 +2509,7 @@ S_sublex_push(pTHX)
     PL_parser->lex_re_reparsing = cBOOL(PL_in_eval & EVAL_RE_REPARSING);
     PL_in_eval &= ~EVAL_RE_REPARSING;
 
-    return '(';
+    return SUBLEXSTART;
 }
 
 /*
@@ -2582,7 +2584,7 @@ S_sublex_done(pTHX)
 	PL_bufend = SvPVX(PL_linestr);
 	PL_bufend += SvCUR(PL_linestr);
 	PL_expect = XOPERATOR;
-	return ')';
+	return SUBLEXEND;
     }
 }
 
