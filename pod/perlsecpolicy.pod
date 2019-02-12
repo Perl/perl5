@@ -73,8 +73,18 @@ security issues with perl itself.
 
 =back
 
-A security issue in your perl code probably isn't a security issue in
-perl.
+A security issue in code written in perl that isn't part of the perl
+core is a security issue, but probably isn't a security issue in the
+perl core, and ought to be reported to the maintainer of that code, not
+to us. (The Perl ecosystem is not maintained by any single group, and
+this is the policy and contact information for just the small group
+maintaining the perl core. We're not the security "team" for the entire
+ecosystem, and we don't have the resources to act as a forwarding
+service.)
+
+A security issue in perl related websites (including perl.org) is a
+security issue, but not in the perl core, and again should be reported
+directly, to the contact address published on the relevant site.
 
 =head2 What we don't treat as a security issue
 
