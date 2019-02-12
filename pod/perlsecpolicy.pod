@@ -200,16 +200,16 @@ PerlIO layer and read badly encoded data, or with older perls, use
 sysread() on any layer that returns UTF-8 marked data.
 
 Other ways to received badly encoded SVs usually involve bugs in XS
-modules, or functions like Encode::_utf8_on() that document loudly
-their pre-conditions.
+modules, functions like Encode::_utf8_on() that document loudly
+its pre-conditions, and some C<pack> formats.
 
 =item *
 
 Issues that exist only in blead, or in a release candidate.
 
 Rationale: blead doesn't receive security support.  Such issues need
-to be fixed, but we don't do the whole security issue song and dance
-for them.
+to be fixed, but won't result in a CVE, they just need to be fixed
+before a stable release.
 
 =item *
 
