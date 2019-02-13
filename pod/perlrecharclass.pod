@@ -969,12 +969,6 @@ The POSIX class matches the same as the ASCII range counterpart.
 Which rules apply are determined as described in
 L<perlre/Which character set modifier is in effect?>.
 
-It is proposed to change this behavior in a future release of Perl so that
-whether or not Unicode rules are in effect would not change the
-behavior:  Outside of locale, the POSIX classes
-would behave like their ASCII-range counterparts.  If you wish to
-comment on this proposal, send email to C<perl5-porters@perl.org>.
-
 =head4 Negation of POSIX character classes
 X<character class, negation>
 
