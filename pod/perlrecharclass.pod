@@ -800,7 +800,7 @@ Perl recognizes the following POSIX character classes:
         ("\cK").
  upper  Any uppercase character (e.g., [A-Z]).
  word   A Perl extension (e.g., [A-Za-z0-9_]), equivalent to "\w".
- xdigit Any hexadecimal digit (e.g., [0-9a-fA-F]).
+ xdigit Any hexadecimal digit (e.g., [0-9a-fA-F]).  Note [7].
 
 Like the L<Unicode properties|/Unicode Properties>, most of the POSIX
 properties match the same regardless of whether case-insensitive (C</i>)
@@ -841,7 +841,7 @@ equivalent.
    space      \p{PosixSpace}       \p{XPosixSpace}          [6]
    upper      \p{PosixUpper}       \p{XPosixUpper}
    word       \p{PosixWord}        \p{XPosixWord}   \w
-   xdigit     \p{PosixXDigit}      \p{XPosixXDigit}
+   xdigit     \p{PosixXDigit}      \p{XPosixXDigit}         [7]
 
 =over 4
 
@@ -895,6 +895,16 @@ C<\p{XPerlSpace}> and C<\p{Space}> match identically starting with Perl
 v5.18.  In earlier versions, these differ only in that in non-locale
 matching, C<\p{XPerlSpace}> did not match the vertical tab, C<\cK>.
 Same for the two ASCII-only range forms.
+
+=item [7]
+
+Unlike C<[[:digit:]]> which matches digits in many writing systems, such
+as Thai and Devanagari, there are currently only two sets of hexadecimal
+digits, and it is unlikely that more will be added.  This is because you
+not only need the ten digits, but also the six C<[A-F]> (and C<[a-f]>)
+to correspond.  That means only the Latin script is suitable for these,
+and Unicode has only two sets of these, the familiar ASCII set, and the
+fullwidth forms starting at U+FF10 (FULLWIDTH DIGIT ZERO).
 
 =back
 
