@@ -15,6 +15,7 @@ __UNDEFINED__
 
 SV_NOSTEAL
 sv_setsv_flags
+newSVsv_nomg
 
 =implementation
 
@@ -31,6 +32,14 @@ sv_setsv_flags
       Perl_sv_setsv_flags(aTHX_ (dstr), (sstr), (flags) & ~SV_NOSTEAL);  \
     }                                                                    \
   } STMT_END
+#endif
+
+#if !defined(newSVsv_nomg) && defined(SV_NOSTEAL)
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define newSVsv_nomg(sv) ({ SV *_sv = newSV(0); sv_setsv_flags(_sv, (sv), SV_NOSTEAL); _sv; })
+#else
+#  define newSVsv_nomg(sv) ((PL_Sv = newSV(0)), sv_setsv_flags(PL_Sv, (sv), SV_NOSTEAL), PL_Sv)
+#endif
 #endif
 
 __UNDEFINED__ SvMAGIC_set(sv, val) \
@@ -128,7 +137,19 @@ Test_sv_setsv_SV_NOSTEAL()
 
 #endif
 
-=tests plan => 6
+#ifdef newSVsv_nomg
+
+SV *
+newSVsv_nomg(sv)
+        SV *sv
+        CODE:
+                RETVAL = newSVsv_nomg(sv);
+        OUTPUT:
+                RETVAL
+
+#endif
+
+=tests plan => 15
 
 my $foo = 5;
 ok(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
@@ -144,9 +165,44 @@ Devel::PPPort::TestSvSTASH_set($bar, 'bar');
 ok($bar->x(), 'hacker');
 
 if ( "$]" lt '5.007003' ) {
-    skip 'skip: no SV_NOSTEAL support', 0;
+    skip 'skip: no SV_NOSTEAL support', 0 for 1..10;
 } else {
     ok(Devel::PPPort::Test_sv_setsv_SV_NOSTEAL());
+
+    tie my $scalar, 'TieScalarCounter', 'string';
+
+    ok tied($scalar)->{fetch}, 0;
+    ok tied($scalar)->{store}, 0;
+    my $copy = Devel::PPPort::newSVsv_nomg($scalar);
+    ok tied($scalar)->{fetch}, 0;
+    ok tied($scalar)->{store}, 0;
+
+    my $fetch = $scalar;
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    my $copy2 = Devel::PPPort::newSVsv_nomg($scalar);
+    ok tied($scalar)->{fetch}, 1;
+    ok tied($scalar)->{store}, 0;
+    ok $copy2, 'string';
+}
+
+package TieScalarCounter;
+
+sub TIESCALAR {
+    my ($class, $value) = @_;
+    return bless { fetch => 0, store => 0, value => $value }, $class;
+}
+
+sub FETCH {
+    my ($self) = @_;
+    $self->{fetch}++;
+    return $self->{value};
+}
+
+sub STORE {
+    my ($self, $value) = @_;
+    $self->{store}++;
+    $self->{value} = $value;
 }
 
 package foo;
