@@ -265,8 +265,7 @@ and end up as a ticket in the C<perl5-security> queue in the L<perl
 Request Tracker|https://rt.perl.org> instance.
 
 Only members of the security team have access to this queue.
-Reporters should have access to any reports they make (FIXME: do
-they?).
+Reporters are CCed during the discussion of their issue.
 
 Only issues related to security issues with perl itself are accepted
 at this address.  Issues with C<perl.org> infrastructure, CPAN
