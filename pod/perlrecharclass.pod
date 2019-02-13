@@ -786,21 +786,21 @@ is valid and matches '0', '1', any alphabetic character, and the percent sign.
 
 Perl recognizes the following POSIX character classes:
 
- alpha  Any alphabetical character ("[A-Za-z]").
- alnum  Any alphanumeric character ("[A-Za-z0-9]").
+ alpha  Any alphabetical character (e.g., [A-Za-z]).
+ alnum  Any alphanumeric character (e.g., [A-Za-z0-9]).
  ascii  Any character in the ASCII character set.
  blank  A GNU extension, equal to a space or a horizontal tab ("\t").
  cntrl  Any control character.  See Note [2] below.
- digit  Any decimal digit ("[0-9]"), equivalent to "\d".
+ digit  Any decimal digit (e.g., [0-9]), equivalent to "\d".
  graph  Any printable character, excluding a space.  See Note [3] below.
- lower  Any lowercase character ("[a-z]").
+ lower  Any lowercase character (e.g., [a-z]).
  print  Any printable character, including a space.  See Note [4] below.
  punct  Any graphical character excluding "word" characters.  Note [5].
  space  Any whitespace character. "\s" including the vertical tab
         ("\cK").
- upper  Any uppercase character ("[A-Z]").
- word   A Perl extension ("[A-Za-z0-9_]"), equivalent to "\w".
- xdigit Any hexadecimal digit ("[0-9a-fA-F]").
+ upper  Any uppercase character (e.g., [A-Z]).
+ word   A Perl extension (e.g., [A-Za-z0-9_]), equivalent to "\w".
+ xdigit Any hexadecimal digit (e.g., [0-9a-fA-F]).
 
 Like the L<Unicode properties|/Unicode Properties>, most of the POSIX
 properties match the same regardless of whether case-insensitive (C</i>)
