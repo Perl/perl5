@@ -229,6 +229,11 @@ Rationale: We don't maintain them.
 In most cases these should just be reported to the upstream
 maintainer.
 
+=item *
+
+FIXME: For Win32, do list form of pipe open and list system belong
+here?
+
 =back
 
 =head2 Border cases
