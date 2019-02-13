@@ -281,8 +281,6 @@ L<HackerOne|https://hackerone.com/ibb-perl> do run a bug bounty
 program, which we have no control over, but you can try submitting
 your issues to them.
 
-FIXME: Anything below here is currently rubbish.
-
 Once in the queue an issue goes through the following stages:
 
 =over
@@ -298,10 +296,6 @@ Allocate a CVE ID.
 =item *
 
 Work up fixes.
-
-=item *
-
-CVE details.
 
 =item *
 
@@ -343,8 +337,7 @@ Hopefully some basic details can be determined at this point, in
 particular which versions of perl this is an issue for, since
 downstreams shipping older perls will want to know.
 
-If the issue is public, all fields should be filled in fully, and the
-L</CVE Details> step can be skipped.
+If the issue is public, all fields should be filled in fully.
 
 Requires: Triage.
 
@@ -354,10 +347,7 @@ We work up fixes for blead and the two most recent maint branches.
 Patches that apply to each of the branches should be included in the
 ticket.
 
-The maint fixes must be against the most recent maint B<release> on
-that branch, not against the C<HEAD> of the maint branch.
-
-Rationale: The intent is to produce minimal change security releases.
+The maint fixes should be against the C<HEAD> of the maint branch.
 
 Note: These should be patches produced by C<git format-patch>.
 
@@ -374,7 +364,7 @@ Currently the administrative parts of this are handled by Sawyer.
 A publication/release date should be negotiated with downstreams.
 
 There may be some back and forth here, and some iteration on the
-fixes, eg. if they find a bug with the issue.
+fixes, eg. if they find a bug with the fixes.
 
 Downstream may also ask for support with applying the patches to older
 releases.
@@ -389,13 +379,11 @@ Requires: Allocate a CVE ID, Notify downstreams, Work up fixes.
 
 =head2 Publication
 
+Any tickets related to the issue are made public.
 
+The description of the CVE is updated with Mitre.
 
 Requires: Release.
-
-=head2 CVE Details
-
-Requires: Publication
 
 =head1 SECURITY ISSUE BATCHES
 
