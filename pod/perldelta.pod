@@ -64,24 +64,6 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
-=head2 Module removals
-
-XXX Remove this section if not applicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
 =over
 
 =item XXX
@@ -110,62 +92,48 @@ XXX
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
+L<B> has been upgraded from version 1.75 to 1.76.
+
+=item *
+
 L<Encode> has been upgraded from version 2.97 to 3.00.
+
+=item *
 
 L<JSON::PP> has been upgraded from version 2.97001 to 4.00.
 JSON::PP as JSON::XS 4.0 enable allow_nonref by default
 
-L<Module::Load> has been upgraded from version 0.32 to 0.34.
+=item *
 
-L<Net::Ping> has been upgraded from version 2.61 to 2.71.
+L<Module::CoreList> has been upgraded from version 5.20190120 to 5.20190220.
 
-L<perlfaq> has been upgraded from version 5.20180915 to 5.20190126.
-
-L<Test::Simple> has been upgraded from version 1.302160 to 1.302162.
-
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+Changes to B::Op_private and Config
 
 =item *
 
-XXX
+L<Module::Load> has been upgraded from version 0.32 to 0.34.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.61 to 2.71.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20180915 to 5.20190126.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302160 to 1.302162.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 0.99 to 1.00.
 
 =back
 
