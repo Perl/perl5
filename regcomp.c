@@ -1546,6 +1546,10 @@ S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
     return TRUE;
 }
 
+#define INVLIST_INDEX 0
+#define ONLY_LOCALE_MATCHES_INDEX 1
+#define DEFERRED_USER_DEFINED_INDEX 2
+
 STATIC SV*
 S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                                const regnode_charclass* const node)
@@ -1571,24 +1575,24 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         SV **const ary = AvARRAY(av);
         assert(RExC_rxi->data->what[n] == 's');
 
-        if (av_tindex_skip_len_mg(av) > 1) {
+        if (av_tindex_skip_len_mg(av) >= DEFERRED_USER_DEFINED_INDEX) {
 
             /* Here there are things that won't be known until runtime -- we
              * have to assume it could be anything */
             invlist = sv_2mortal(_new_invlist(1));
             return _add_range_to_invlist(invlist, 0, UV_MAX);
         }
-        else if (ary[0]) {
+        else if (ary[INVLIST_INDEX]) {
 
             /* Use the node's inversion list */
-            invlist = sv_2mortal(invlist_clone(ary[0], NULL));
+            invlist = sv_2mortal(invlist_clone(ary[INVLIST_INDEX], NULL));
         }
 
         /* Get the code points valid only under UTF-8 locales */
         if (   (ANYOF_FLAGS(node) & ANYOFL_FOLD)
-            &&  av_tindex_skip_len_mg(av) > 0)
+            &&  av_tindex_skip_len_mg(av) >= ONLY_LOCALE_MATCHES_INDEX)
         {
-            only_utf8_locale_invlist = ary[1];
+            only_utf8_locale_invlist = ary[ONLY_LOCALE_MATCHES_INDEX];
         }
     }
 
@@ -19005,15 +19009,15 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	SV *rv;
 
         if (cp_list) {
-            av_store(av, 0, cp_list);
+            av_store(av, INVLIST_INDEX, cp_list);
         }
 
         if (only_utf8_locale_list) {
-            av_store(av, 1, only_utf8_locale_list);
+            av_store(av, ONLY_LOCALE_MATCHES_INDEX, only_utf8_locale_list);
         }
 
         if (runtime_defns) {
-            av_store(av, 2, SvREFCNT_inc(runtime_defns));
+            av_store(av, DEFERRED_USER_DEFINED_INDEX, SvREFCNT_inc(runtime_defns));
         }
 
 	rv = newRV_noinc(MUTABLE_SV(av));
@@ -19076,14 +19080,14 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
 
-            invlist = *ary;	/* ary[0] = the inversion list */
+            invlist = ary[INVLIST_INDEX];
 
-            if (av_tindex_skip_len_mg(av) > 0) {
-                *only_utf8_locale_ptr = ary[1];
+            if (av_tindex_skip_len_mg(av) >= ONLY_LOCALE_MATCHES_INDEX) {
+                *only_utf8_locale_ptr = ary[ONLY_LOCALE_MATCHES_INDEX];
             }
 
-            if (av_tindex_skip_len_mg(av) > 1) {
-                si = ary[2];
+            if (av_tindex_skip_len_mg(av) >= DEFERRED_USER_DEFINED_INDEX) {
+                si = ary[DEFERRED_USER_DEFINED_INDEX];
             }
 
 	    if (doinit && (si || invlist)) {
@@ -19117,8 +19121,15 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     else {
                         invlist = prop_definition;
                     }
-                    av_store(av, 0, invlist);
-                    av_fill(av, (ary[1]) ? 1 : 0);
+
+                    assert(ONLY_LOCALE_MATCHES_INDEX == 1 + INVLIST_INDEX);
+                    assert(DEFERRED_USER_DEFINED_INDEX == 1
+                                                + ONLY_LOCALE_MATCHES_INDEX);
+
+                    av_store(av, INVLIST_INDEX, invlist);
+                    av_fill(av, (ary[ONLY_LOCALE_MATCHES_INDEX])
+                                 ? ONLY_LOCALE_MATCHES_INDEX:
+                                 INVLIST_INDEX);
                     si = NULL;
                 }
 	    }
