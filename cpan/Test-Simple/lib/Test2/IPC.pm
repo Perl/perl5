@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302161'; # TRIAL
+our $VERSION = '1.302162';
 
 
 use Test2::API::Instance;
