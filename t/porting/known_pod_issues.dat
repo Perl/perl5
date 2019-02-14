@@ -342,7 +342,7 @@ dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =dontwarn	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =implementation	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =provides	1
 dist/exporter/lib/exporter.pm	Verbatim line length including indents exceeds 79 by	2
-dist/net-ping/lib/net/ping.pm	Apparent broken link	1
+dist/net-ping/lib/net/ping.pm	Apparent broken link	2
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 79 by	1
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
 ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 79 by	2
