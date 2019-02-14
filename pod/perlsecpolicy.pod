@@ -138,8 +138,7 @@ Rationale: Safe isn't considered a security mechanism.
 
 Use of the C<p> and C<P> pack templates.
 
-Rationale: These templates are unsafe by design.  If your code breaks
-because you use them you get to keep the pieces.
+Rationale: These templates are unsafe by design.
 
 =item *
 
