@@ -1,5 +1,8 @@
 =encoding utf-8
 
+=for stopwords
+CVE perlsecpolicy SV perl Perl SDBM HackerOne Mitre
+
 =head1 NAME
 
 perlsecpolicy - how we handle security issues
@@ -41,7 +44,7 @@ to do any of:
 =item *
 
 Crash the perl interpreter - this includes buffer overflows, use of
-freed memory, drefererencing NULL pointers, irregardless of the values
+freed memory, dereferencing invalid pointers, irregardless of the values
 written or read.
 
 C<Editors Note:> This includes vulnerabilities we haven't previously
@@ -56,7 +59,7 @@ problem|https://daniel.haxx.se/blog/2016/10/14/a-single-byte-write-opened-a-root
 
 =item *
 
-Exposes data that shouldn't be exposed, eg. data beyond the end of an
+Exposes data that shouldn't be exposed, e.g. data beyond the end of an
 SV's length(), or before the start for a C<SvOOK()> SV.
 
 FIXME: This is vaguely worded, better wording would be appreciated.
@@ -82,7 +85,7 @@ maintaining the perl core. We're not the security "team" for the entire
 ecosystem, and we don't have the resources to act as a forwarding
 service.)
 
-A security issue in perl related websites (including perl.org) is a
+A security issue in perl related websites (including C<perl.org>) is a
 security issue, but not in the perl core, and again should be reported
 directly, to the contact address published on the relevant site.
 
@@ -122,7 +125,7 @@ Rationale: If you allow an attacker to supply a large count and supply
 that to C<pack> or the C<x> operator and you run out of memory, you
 need to sanitize your inputs to limit resource usage.
 
-However if perl mis-handles a large value causing a buffer overflow
+However if perl mishandles a large value causing a buffer overflow
 that is a likely security issue.
 
 =item *
@@ -140,19 +143,19 @@ because you use them you get to keep the pieces.
 
 =item *
 
-Stack not refcounted issues.
+Stack not reference counted issues.
 
 These typically present as use-after-free errors or as assertion
 failures on the type of a C<SV>.  This does not mean that all
 use-after-free or assertions are not security issues.
 
-Rationale: Stack not refcounted crashes usually occur because your
-code is both modifying a reference or glob and using the values
+Rationale: Stack not reference counted crashes usually occur because
+your code is both modifying a reference or glob and using the values
 referenced by that glob or reference, so it depends on your code, or
 how your code reacts to attacker supplied data.
 
-Note that stack not refcounted is still a (difficult to fix) bug in
-perl, it just isn't a security issue.
+Note that stack not reference counted bug is still a (difficult to
+fix) bug in perl, it just isn't a security issue.
 
 =item *
 
@@ -192,7 +195,7 @@ state, and a badly encoded UTF-8 flagged SV is not a valid SV.
 
 Note: A SV may validly include code points in the surrogate pair
 range, but start bytes without the required number of continuation
-bytes, or continuation bytes without a start byte, or overlongs are
+bytes, or continuation bytes without a start byte, or over-longs are
 considered invalid.
 
 The simplest way to get such a badly encoded SV is to use the C<:utf8>
@@ -215,7 +218,7 @@ before a stable release.
 
 Issues in CPAN modules not distributed with perl.
 
-Rationale: They are completely irrelevent to core perl in terms of
+Rationale: They are completely irrelevant to core perl in terms of
 security.
 
 =item *
@@ -270,7 +273,7 @@ and end up as a ticket in the C<perl5-security> queue in the L<perl
 Request Tracker|https://rt.perl.org> instance.
 
 Only members of the security team have access to this queue.
-Reporters are CCed during the discussion of their issue.
+Reporters are CC-ed during the discussion of their issue.
 
 Only issues related to security issues with perl itself are accepted
 at this address.  Issues with C<perl.org> infrastructure, CPAN
@@ -299,7 +302,7 @@ Work up fixes.
 
 =item *
 
-Notify downstreams.
+Notify down stream distributors.
 
 =item *
 
@@ -316,10 +319,10 @@ Publication.
 Basic diagnosis to decide whether the ticket qualifies as a security
 issue.
 
-If we decide it isn't a security issue, we notify the requestor, who
+If we decide it isn't a security issue, we notify the requester, who
 has one week to argue that it is. FIXME: vagueness, wording.
 
-After a week, if the requestor hasn't convinced us that the issue is a
+After a week, if the requester hasn't convinced us that the issue is a
 security issue, it's moved to the public C<perl5> queue.
 
 =head2 Allocate a CVE ID
@@ -335,7 +338,7 @@ the underlying issue, don't include it.
 
 Hopefully some basic details can be determined at this point, in
 particular which versions of perl this is an issue for, since
-downstreams shipping older perls will want to know.
+down stream distributors shipping older perls will want to know.
 
 If the issue is public, all fields should be filled in fully.
 
@@ -343,11 +346,12 @@ Requires: Triage.
 
 =head2 Work up fixes
 
-We work up fixes for blead and the two most recent maint branches.
+We work up fixes for blead and the two most recent C<maint> branches.
 Patches that apply to each of the branches should be included in the
 ticket.
 
-The maint fixes should be against the C<HEAD> of the maint branch.
+The C<maint> fixes should be against the C<HEAD> of the C<maint>
+branch.
 
 Note: These should be patches produced by C<git format-patch>.
 
@@ -357,17 +361,18 @@ for everyone who gets them to apply and test.
 
 Requires: Triage.
 
-=head2 Notify downstreams
+=head2 Notify down stream distributors
 
 Currently the administrative parts of this are handled by Sawyer.
 
-A publication/release date should be negotiated with downstreams.
+A publication/release date should be negotiated with down stream
+distributors.
 
 There may be some back and forth here, and some iteration on the
-fixes, eg. if they find a bug with the fixes.
+fixes, e.g. if they find a bug with the fixes.
 
-Downstream may also ask for support with applying the patches to older
-releases.
+A distributor may also ask for support with applying the patches to
+older releases.
 
 Requires: Allocate a CVE ID, Work up fixes.
 
@@ -375,7 +380,8 @@ Requires: Allocate a CVE ID, Work up fixes.
 
 See L</SECURITY RELEASES>.
 
-Requires: Allocate a CVE ID, Notify downstreams, Work up fixes.
+Requires: Allocate a CVE ID, Notify down stream distributors, Work up
+fixes.
 
 =head2 Publication
 
