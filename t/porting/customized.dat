@@ -12,6 +12,7 @@ NEXT cpan/NEXT/t/next.t 66fd60eb0f75b6f3eea95d1dee745f9a7a348146
 Net::Ping dist/Net-Ping/lib/Net/Ping.pm e2e7053673ead1eff8f3ca8ecdd9b838598c1d8c
 Net::Ping dist/Net-Ping/t/000_load.t deff5dc2ca54dae28cb19d3631427db127279ac2
 Net::Ping dist/Net-Ping/t/500_ping_icmp.t 3eeb60181c01b85f876bd6658644548fdf2e24d4
+Net::Ping dist/Net-Ping/t/501_ping_icmpv6.t 54373de5858f8fb7e078e4998a4b3b8dbca91783
 Pod::Checker cpan/Pod-Checker/t/pod/contains_bad_pod.xr 73538fd80dfe6e19ad561fe034009b44460208f6
 Pod::Checker cpan/Pod-Checker/t/pod/selfcheck.t 8ce3cfd38e4b9bcf5bc7fe7f2a14195e49aed7d8
 Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916e3d8a16

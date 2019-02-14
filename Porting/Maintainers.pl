@@ -825,6 +825,7 @@ use File::Glob qw(:case);
                 lib/Net/Ping.pm
                 t/000_load.t
                 t/500_ping_icmp.t
+                t/501_ping_icmpv6.t
                 ),
         ],
 

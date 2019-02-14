@@ -19,7 +19,7 @@ BEGIN {
 }
 
 my $is_devel = $ENV{PERL_CORE} || -d ".git" ? 1 : 0;
-if (!Net::Ping::_isroot()) {
+if (0 && !Net::Ping::_isroot()) {
     my $file = __FILE__;
     my $lib = $ENV{PERL_CORE} ? '-I../../lib' : '-Mblib';
     # -n prevents from asking for a password. rather fail then
