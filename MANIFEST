@@ -1202,6 +1202,8 @@ cpan/JSON-PP/t/000_load.t
 cpan/JSON-PP/t/001_utf8.t
 cpan/JSON-PP/t/002_error.t
 cpan/JSON-PP/t/003_types.t
+cpan/JSON-PP/t/004_dwiw_encode.t
+cpan/JSON-PP/t/005_dwiw_decode.t
 cpan/JSON-PP/t/006_pc_pretty.t
 cpan/JSON-PP/t/007_pc_esc.t
 cpan/JSON-PP/t/008_pc_base.t
@@ -1216,9 +1218,11 @@ cpan/JSON-PP/t/016_tied.t
 cpan/JSON-PP/t/017_relaxed.t
 cpan/JSON-PP/t/018_json_checker.t
 cpan/JSON-PP/t/019_incr.t
+cpan/JSON-PP/t/020_faihu.t
 cpan/JSON-PP/t/020_unknown.t
-cpan/JSON-PP/t/021_evans_bugrep.t
+cpan/JSON-PP/t/021_evans.t
 cpan/JSON-PP/t/022_comment_at_eof.t
+cpan/JSON-PP/t/052_object.t
 cpan/JSON-PP/t/099_binary.t
 cpan/JSON-PP/t/104_sortby.t
 cpan/JSON-PP/t/105_esc_slash.t
@@ -1233,7 +1237,7 @@ cpan/JSON-PP/t/114_decode_prefix.t
 cpan/JSON-PP/t/115_tie_ixhash.t
 cpan/JSON-PP/t/116_incr_parse_fixed.t
 cpan/JSON-PP/t/117_numbers.t
-cpan/JSON-PP/t/_unicode_handling.pm
+cpan/JSON-PP/t/118_boolean_values.t
 cpan/JSON-PP/t/gh_28_json_test_suite.t
 cpan/JSON-PP/t/gh_29_trailing_false_value.t
 cpan/JSON-PP/t/rt_116998_wrong_character_offset.t

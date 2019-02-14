@@ -52,6 +52,7 @@ my %T = (
    'json' => sub {
       my $json = JSON::PP->new->utf8;
       $json->$_() for @json_opt;
+      $json->canonical if grep {$_ eq 'pretty'} @json_opt;
       $json->encode( $_ );
    },
    'dumper' => sub {
