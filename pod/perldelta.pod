@@ -47,6 +47,11 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
+=head2 JSON::PP enable allow_nonref by default
+
+As JSON::XS 4.0 changed its policy and enabled allow_nonref
+by default, JSON::PP also enabled allow_nonref by default
+
 XXX For a release on a stable branch, this section aspires to be:
 
     There are no changes intentionally incompatible with 5.XXX.XXX
@@ -134,6 +139,19 @@ XXX Remove this section if not applicable.
 =over 4
 
 =item *
+
+L<Encode> has been upgraded from version 2.97 to 3.00.
+
+L<JSON::PP> has been upgraded from version 2.97001 to 4.00.
+JSON::PP as JSON::XS 4.0 enable allow_nonref by default
+
+L<Module::Load> has been upgraded from version 0.32 to 0.34.
+
+L<Net::Ping> has been upgraded from version 2.61 to 2.71.
+
+L<perlfaq> has been upgraded from version 5.20180915 to 5.20190126.
+
+L<Test::Simple> has been upgraded from version 1.302160 to 1.302162.
 
 L<XXX> has been upgraded from version A.xx to B.yy.
 
