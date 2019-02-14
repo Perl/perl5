@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.29.8
 
 =head1 DESCRIPTION
@@ -17,15 +14,15 @@ L<perl5297delta>, which describes differences between 5.29.6 and 5.29.7.
 
 =head1 Notice
 
-XXX Any important notices here
+sv_utf8_(downgrade|decode) are no longer marked as experimental [perl #133788]
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 Use faster method to convert to UTF-8
 
-[ List each enhancement as a =head2 entry ]
+There is a special inline function that's used when converting a single
+byte to UTF-8, that is faster than the more general one used prior to
+this commit.
 
 =head2 Turkic UTF-8 locales are now seamlessly supported
 
@@ -37,56 +34,22 @@ rules for use with Turkic languages.  Previously, Perl ignored these,
 but now, it uses them when it detects that it is operating under a
 Turkic UTF-8 locale.
 
-=head1 Security
+=head2 Eliminate opASSIGN macro usage from core
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
+This macro is still defined but no longer used in core
 
 =head1 Incompatible Changes
 
 =head2 JSON::PP enable allow_nonref by default
 
 As JSON::XS 4.0 changed its policy and enabled allow_nonref
-by default, JSON::PP also enabled allow_nonref by default
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
+by default, JSON::PP also enabled allow_nonref by default.
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as an =item entry ]
-
 =over 4
 
-=item *
-
-XXX
+Eliminate recursion from finalize_op() [perl #108276]
 
 =back
 
@@ -139,26 +102,11 @@ L<XS::APItest> has been upgraded from version 0.99 to 1.00.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, send email
 to L<perlbug@perl.org|mailto:perlbug@perl.org>.
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 Additionally, the following selected changes have been made:
 
@@ -173,43 +121,35 @@ C<REGEXP> and why.  [perl #133751]
 
 =back
 
+=head3 L<perllocale>
+
+=over 4
+
+=item *
+
+There are actually two slightly different types of UTF-8 locales: one for Turkic
+languages and one for everything else. Starting in Perl v5.30, Perl seamlessly 
+handles both types.
+
+=back
+
+=head3 L<perlrecharclass>
+
+=over 4
+
+=item *
+
+Add a note for the ::xdigit:: character class.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
 =head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
 
@@ -223,39 +163,17 @@ rather than complaining that they no longer work on scalars. [perl
 
 =back
 
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as an =item entry ].
-
 =over 4
 
 =item *
 
-XXX
+Improve detection of memrchr, strlcat, and strlcpy
+
+=item *
+
+Improve Configure detection of memmem() [perl #133760].
 
 =back
 
@@ -284,7 +202,19 @@ made:
 
 =item *
 
-XXX
+t/lib/croak/op [perl #130367]
+
+separate error for push etc on hash/glob
+
+=item *
+
+t/op/svleak.t [perl #133660]
+
+add test for goto &sub in overload leaking
+
+=item *
+
+Split t/re/fold_grind.t into multiple test files
 
 =back
 
@@ -365,42 +295,28 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 =item *
 
 Regular expression matching no longer leaves stale UTF-8 length magic
-when updating C<$^R>.  This could result in C<length($^R)> returning
+when updating C<$^R>. This could result in C<length($^R)> returning
 an incorrect value.
 
-=back
+=item *
 
-=head1 Known Problems
+Fix a qr/[...]/ bug introduced in v5.29.7
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as an =item entry ]
-
-=over 4
+Using /il should not result in looking for a [:posix:] class
+that matches the code points given.
 
 =item *
 
-XXX
+Reduce recursion on ops [perl #108276]
 
-=back
-
-=head1 Errata From Previous Releases
-
-=over 4
+This can prevent stack overflow when processing extremely deep op
+trees.
 
 =item *
 
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+Avoid leak in multiconcat with overloading. [perl #133789]
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
 
 =head1 Acknowledgements
 
