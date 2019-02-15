@@ -18989,9 +18989,8 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                         invlist = prop_definition;
                     }
 
-                    assert(ONLY_LOCALE_MATCHES_INDEX == 1 + INVLIST_INDEX);
-                    assert(DEFERRED_USER_DEFINED_INDEX == 1
-                                                + ONLY_LOCALE_MATCHES_INDEX);
+                    STATIC_ASSERT_STMT(ONLY_LOCALE_MATCHES_INDEX == 1 + INVLIST_INDEX);
+                    STATIC_ASSERT_STMT(DEFERRED_USER_DEFINED_INDEX == 1 + ONLY_LOCALE_MATCHES_INDEX);
 
                     av_store(av, INVLIST_INDEX, invlist);
                     av_fill(av, (ary[ONLY_LOCALE_MATCHES_INDEX])
