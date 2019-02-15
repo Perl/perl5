@@ -215,6 +215,12 @@ END_EXTERN_C
 #define PL_timesbase		(*Perl_Gtimesbase_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_user_def_props
+#define PL_user_def_props	(*Perl_Guser_def_props_ptr(NULL))
+#undef  PL_user_def_props_aTHX
+#define PL_user_def_props_aTHX	(*Perl_Guser_def_props_aTHX_ptr(NULL))
+#undef  PL_user_prop_mutex
+#define PL_user_prop_mutex	(*Perl_Guser_prop_mutex_ptr(NULL))
 #undef  PL_utf8_charname_begin
 #define PL_utf8_charname_begin	(*Perl_Gutf8_charname_begin_ptr(NULL))
 #undef  PL_utf8_charname_continue

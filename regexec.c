@@ -504,7 +504,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
      * This just calls isFOO_lc on the code point for the character if it is in
      * the range 0-255.  Outside that range, all characters use Unicode
      * rules, ignoring any locale.  So use the Unicode function if this class
-     * requires a swash, and use the Unicode macro otherwise. */
+     * requires an inversion list, and use the Unicode macro otherwise. */
 
     PERL_ARGS_ASSERT_ISFOO_UTF8_LC;
 
@@ -9620,27 +9620,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     return(c);
 }
 
-
-#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-/*
-- regclass_swash - prepare the utf8 swash.  Wraps the shared core version to
-create a copy so that changes the caller makes won't change the shared one.
-If <altsvp> is non-null, will return NULL in it, for back-compat.
- */
-SV *
-Perl_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
-{
-    PERL_ARGS_ASSERT_REGCLASS_SWASH;
-
-    if (altsvp) {
-        *altsvp = NULL;
-    }
-
-    return newSVsv(_get_regclass_nonbitmap_data(prog, node, doinit, listsvp, NULL, NULL));
-}
-
-#endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
-
 /*
  - reginclass - determine if a character falls into a character class
  
@@ -9789,9 +9768,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                          && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
-	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
-                                                       &only_utf8_locale, NULL);
-	    if (sw) {
+	    SV * const definition = _get_regclass_nonbitmap_data(prog, n, TRUE,
+                                                   0, &only_utf8_locale, NULL);
+	    if (definition) {
                 U8 utf8_buffer[2];
 		U8 * utf8_p;
 		if (utf8_target) {
@@ -9808,17 +9787,21 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     && isALPHA_FOLD_EQ(*p, 'i'))
                 {
                     if (*p == 'i') {
-                        if (swash_fetch(sw, (const U8 *) LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8, TRUE)) {
+                        if (_invlist_contains_cp(definition,
+                                       LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
+                        {
                             match = TRUE;
                         }
                     }
                     else if (*p == 'I') {
-                        if (swash_fetch(sw, (const U8 *) LATIN_SMALL_LETTER_DOTLESS_I_UTF8, TRUE)) {
+                        if (_invlist_contains_cp(definition,
+                                                LATIN_SMALL_LETTER_DOTLESS_I))
+                        {
                             match = TRUE;
                         }
                     }
                 }
-                else if (swash_fetch(sw, utf8_p, TRUE)) {
+                else if (_invlist_contains_cp(definition, c)) {
 		    match = TRUE;
                 }
 	    }

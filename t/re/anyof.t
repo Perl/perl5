@@ -468,11 +468,11 @@ my @tests = (
     '\P{All}' => 'OPFAIL',
     '[\p{Any}]' => 'ANYOF[\x00-\xFF][0100-10FFFF]',
 
-    '[\p{IsMyRuntimeProperty}]' => 'ANYOF[+utf8::IsMyRuntimeProperty]',
-    '[^\p{IsMyRuntimeProperty}]' => 'ANYOF[^{+utf8::IsMyRuntimeProperty}]',
-    '[a\p{IsMyRuntimeProperty}]' => 'ANYOF[a][+utf8::IsMyRuntimeProperty]',
-    '[^a\p{IsMyRuntimeProperty}]' => 'ANYOF[^a{+utf8::IsMyRuntimeProperty}]',
-    '[^a\x{100}\p{IsMyRuntimeProperty}]' => 'ANYOF[^a{+utf8::IsMyRuntimeProperty}0100]',
+    '[\p{IsMyRuntimeProperty}]' => 'ANYOF[+main::IsMyRuntimeProperty]',
+    '[^\p{IsMyRuntimeProperty}]' => 'ANYOF[^{+main::IsMyRuntimeProperty}]',
+    '[a\p{IsMyRuntimeProperty}]' => 'ANYOF[a][+main::IsMyRuntimeProperty]',
+    '[^a\p{IsMyRuntimeProperty}]' => 'ANYOF[^a{+main::IsMyRuntimeProperty}]',
+    '[^a\x{100}\p{IsMyRuntimeProperty}]' => 'ANYOF[^a{+main::IsMyRuntimeProperty}0100]',
     '[^\p{All}\p{IsMyRuntimeProperty}]' => 'OPFAIL',
     '[\p{All}\p{IsMyRuntimeProperty}]' => 'SANY',
 

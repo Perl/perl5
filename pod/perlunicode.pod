@@ -965,7 +965,8 @@ A single hexadecimal number denoting a code point to include.
 =item *
 
 Two hexadecimal numbers separated by horizontal whitespace (space or
-tabular characters) denoting a range of code points to include.
+tabular characters) denoting a range of code points to include.  The
+second number must not be smaller than the first.
 
 =item *
 

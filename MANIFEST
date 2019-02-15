@@ -5943,6 +5943,7 @@ t/re/uniprops07.t		Test unicode \p{} regex constructs
 t/re/uniprops08.t		Test unicode \p{} regex constructs
 t/re/uniprops09.t		Test unicode \p{} regex constructs
 t/re/uniprops10.t		Test unicode \p{} regex constructs
+t/re/user_prop_race_thr.t	Test races in user-defined \p{} under threads
 t/README			Instructions for regression tests
 t/run/cloexec.t			Test close-on-exec.
 t/run/dtrace.pl			For dtrace.t

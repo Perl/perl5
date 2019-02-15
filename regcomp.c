@@ -1546,6 +1546,10 @@ S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
     return TRUE;
 }
 
+#define INVLIST_INDEX 0
+#define ONLY_LOCALE_MATCHES_INDEX 1
+#define DEFERRED_USER_DEFINED_INDEX 2
+
 STATIC SV*
 S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                                const regnode_charclass* const node)
@@ -1571,28 +1575,24 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         SV **const ary = AvARRAY(av);
         assert(RExC_rxi->data->what[n] == 's');
 
-        if (ary[1] && ary[1] != &PL_sv_undef) { /* Has compile-time swash */
-            invlist = sv_2mortal(invlist_clone(_get_swash_invlist(ary[1]), NULL));
-        }
-        else if (ary[0] && ary[0] != &PL_sv_undef) {
+        if (av_tindex_skip_len_mg(av) >= DEFERRED_USER_DEFINED_INDEX) {
 
-            /* Here, no compile-time swash, and there are things that won't be
-             * known until runtime -- we have to assume it could be anything */
+            /* Here there are things that won't be known until runtime -- we
+             * have to assume it could be anything */
             invlist = sv_2mortal(_new_invlist(1));
             return _add_range_to_invlist(invlist, 0, UV_MAX);
         }
-        else if (ary[3] && ary[3] != &PL_sv_undef) {
+        else if (ary[INVLIST_INDEX]) {
 
-            /* Here no compile-time swash, and no run-time only data.  Use the
-             * node's inversion list */
-            invlist = sv_2mortal(invlist_clone(ary[3], NULL));
+            /* Use the node's inversion list */
+            invlist = sv_2mortal(invlist_clone(ary[INVLIST_INDEX], NULL));
         }
 
         /* Get the code points valid only under UTF-8 locales */
-        if ((ANYOF_FLAGS(node) & ANYOFL_FOLD)
-            && ary[2] && ary[2] != &PL_sv_undef)
+        if (   (ANYOF_FLAGS(node) & ANYOFL_FOLD)
+            &&  av_tindex_skip_len_mg(av) >= ONLY_LOCALE_MATCHES_INDEX)
         {
-            only_utf8_locale_invlist = ary[2];
+            only_utf8_locale_invlist = ary[ONLY_LOCALE_MATCHES_INDEX];
         }
     }
 
@@ -2109,8 +2109,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
-    set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist,
-                                NULL, NULL, NULL, FALSE);
+    set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL);
 
     /* Make sure is clone-safe */
     ssc->invlist = NULL;
@@ -9130,9 +9129,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
 	initial_size = 10;
     }
 
-    /* Allocate the initial space */
     new_list = newSV_type(SVt_INVLIST);
-
     initialize_invlist_guts(new_list, initial_size);
 
     return new_list;
@@ -9385,100 +9382,6 @@ Perl__invlist_search(SV* const invlist, const UV cp)
     high--;
     invlist_set_previous_index(invlist, high);
     return high;
-}
-
-void
-Perl__invlist_populate_swatch(SV* const invlist,
-                              const UV start, const UV end, U8* swatch)
-{
-    /* populates a swatch of a swash the same way swatch_get() does in utf8.c,
-     * but is used when the swash has an inversion list.  This makes this much
-     * faster, as it uses a binary search instead of a linear one.  This is
-     * intimately tied to that function, and perhaps should be in utf8.c,
-     * except it is intimately tied to inversion lists as well.  It assumes
-     * that <swatch> is all 0's on input */
-
-    UV current = start;
-    const IV len = _invlist_len(invlist);
-    IV i;
-    const UV * array;
-
-    PERL_ARGS_ASSERT__INVLIST_POPULATE_SWATCH;
-
-    if (len == 0) { /* Empty inversion list */
-        return;
-    }
-
-    array = invlist_array(invlist);
-
-    /* Find which element it is */
-    i = _invlist_search(invlist, start);
-
-    /* We populate from <start> to <end> */
-    while (current < end) {
-        UV upper;
-
-	/* The inversion list gives the results for every possible code point
-	 * after the first one in the list.  Only those ranges whose index is
-	 * even are ones that the inversion list matches.  For the odd ones,
-	 * and if the initial code point is not in the list, we have to skip
-	 * forward to the next element */
-        if (i == -1 || ! ELEMENT_RANGE_MATCHES_INVLIST(i)) {
-            i++;
-            if (i >= len) { /* Finished if beyond the end of the array */
-                return;
-            }
-            current = array[i];
-	    if (current >= end) {   /* Finished if beyond the end of what we
-				       are populating */
-                if (LIKELY(end < UV_MAX)) {
-                    return;
-                }
-
-                /* We get here when the upper bound is the maximum
-                 * representable on the machine, and we are looking for just
-                 * that code point.  Have to special case it */
-                i = len;
-                goto join_end_of_list;
-            }
-        }
-        assert(current >= start);
-
-	/* The current range ends one below the next one, except don't go past
-	 * <end> */
-        i++;
-        upper = (i < len && array[i] < end) ? array[i] : end;
-
-	/* Here we are in a range that matches.  Populate a bit in the 3-bit U8
-	 * for each code point in it */
-        for (; current < upper; current++) {
-            const STRLEN offset = (STRLEN)(current - start);
-            swatch[offset >> 3] |= 1 << (offset & 7);
-        }
-
-      join_end_of_list:
-
-	/* Quit if at the end of the list */
-        if (i >= len) {
-
-	    /* But first, have to deal with the highest possible code point on
-	     * the platform.  The previous code assumes that <end> is one
-	     * beyond where we want to populate, but that is impossible at the
-	     * platform's infinity, so have to handle it specially */
-            if (UNLIKELY(end == UV_MAX && ELEMENT_RANGE_MATCHES_INVLIST(len-1)))
-	    {
-                const STRLEN offset = (STRLEN)(end - start);
-                swatch[offset >> 3] |= 1 << (offset & 7);
-            }
-            return;
-        }
-
-	/* Advance to the next range, which will be for code points not in the
-	 * inversion list */
-        current = array[i];
-    }
-
-    return;
 }
 
 void
@@ -10317,18 +10220,15 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
 SV*
 Perl_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 {
-
     /* Return a new inversion list that is a copy of the input one, which is
      * unchanged.  The new list will not be mortal even if the old one was. */
 
-    const STRLEN nominal_length = _invlist_len(invlist);    /* Why not +1 XXX */
+    const STRLEN nominal_length = _invlist_len(invlist);
     const STRLEN physical_length = SvCUR(invlist);
     const bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    /* Need to allocate extra space to accommodate Perl's addition of a
-     * trailing NUL to SvPV's, since it thinks they are always strings */
     if (new_invlist == NULL) {
         new_invlist = _new_invlist(nominal_length);
     }
@@ -16559,7 +16459,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      *
      * ANYOF nodes contain a bit map for the first NUM_ANYOF_CODE_POINTS
      * characters, with the corresponding bit set if that character is in the
-     * list.  For characters above this, a range list or swash is used.  There
+     * list.  For characters above this, an inversion list is used.  There
      * are extra bits for \w, etc. in locale ANYOFs, as what these match is not
      * determinable at compile time
      *
@@ -16578,7 +16478,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     STRLEN numlen;
     int namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
-    SV *listsv = NULL;
+    SV *listsv = NULL;      /* List of \p{user-defined} whose definitions
+                               aren't available at the time this was called */
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
     SV* properties = NULL;    /* Code points that match \p{} \P{} */
@@ -16606,14 +16507,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     /* ignore unescaped whitespace? */
     const bool skip_white = cBOOL(   ret_invlist
                                   || (RExC_flags & RXf_PMf_EXTENDED_MORE));
-
-    /* Unicode properties are stored in a swash; this holds the current one
-     * being parsed.  If this swash is the only above-latin1 component of the
-     * character class, an optimization is to pass it directly on to the
-     * execution engine.  Otherwise, it is set to NULL to indicate that there
-     * are other things in the class that have to be dealt with at execution
-     * time */
-    SV* swash = NULL;		/* Code points that match \p{} \P{} */
 
     /* inversion list of code points this node matches only when the target
      * string is in UTF-8.  These are all non-ASCII, < 256.  (Because is under
@@ -16696,7 +16589,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     allow_multi_folds = FALSE;
 #endif
 
-    listsv = newSVpvs_flags("# comment\n", SVs_TEMP);
+    /* We include the /i status at the beginning of this so that we can
+     * know it at runtime */
+    listsv = sv_2mortal(Perl_newSVpvf(aTHX_ "#%d\n", cBOOL(FOLD)));
     initial_listsv_len = SvCUR(listsv);
     SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
 
@@ -16935,17 +16830,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    case 'P':
 		{
 		char *e;
-                char *i;
-
-                /* We will handle any undefined properties ourselves */
-                U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF
-                                       /* And we actually would prefer to get
-                                        * the straight inversion list of the
-                                        * swash, since we will be accessing it
-                                        * anyway, to save a little time */
-                                      |_CORE_SWASH_INIT_ACCEPT_INVLIST;
-
-                SvREFCNT_dec(swash); /* Free any left-overs */
 
 		/* \p means they want Unicode semantics */
 		REQUIRE_UNI_RULES(flagp, 0);
@@ -17001,140 +16885,49 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		}
 		{
                     char* name = RExC_parse;
-                    char* base_name;    /* name after any packages are stripped */
-                    char* lookup_name = NULL;
-                    const char * const colon_colon = "::";
-                    bool invert;
 
-                    SV* invlist;
+                    /* Any message returned about expanding the definition */
+                    SV* msg = newSVpvs_flags("", SVs_TEMP);
 
-                    /* Temporary workaround for [perl #133136].  For this
-                    * precise input that is in the .t that is failing, load
-                    * utf8.pm, which is what the test wants, so that that
-                    * .t passes */
-                    if (     memEQs(RExC_start, e + 1 - RExC_start,
-                                    "foo\\p{Alnum}")
-                        && ! hv_common(GvHVn(PL_incgv),
-                                       NULL,
-                                       "utf8.pm", sizeof("utf8.pm") - 1,
-                                       0, HV_FETCH_ISEXISTS, NULL, 0))
-                    {
-                        require_pv("utf8.pm");
-                    }
-                    invlist = parse_uniprop_string(name, n, FOLD, &invert);
-                    if (invlist) {
-                        if (invert) {
-                            value ^= 'P' ^ 'p';
+                    /* If set TRUE, the property is user-defined as opposed to
+                     * official Unicode */
+                    bool user_defined = FALSE;
+
+                    SV * prop_definition = parse_uniprop_string(
+                                            name, n, UTF, FOLD,
+                                            FALSE, /* This is compile-time */
+                                            &user_defined,
+                                            msg,
+                                            0 /* Base level */
+                                           );
+                    if (SvCUR(msg)) {   /* Assumes any error causes a msg */
+                        assert(prop_definition == NULL);
+                        RExC_parse = e + 1;
+                        if (SvUTF8(msg)) {  /* msg being UTF-8 makes the whole
+                                               thing so, or else the display is
+                                               mojibake */
+                            RExC_utf8 = TRUE;
                         }
-                    }
-                    else {
-
-                    /* Try to get the definition of the property into
-                     * <invlist>.  If /i is in effect, the effective property
-                     * will have its name be <__NAME_i>.  The design is
-                     * discussed in commit
-                     * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
-                    name = savepv(Perl_form(aTHX_ "%.*s", (int)n, RExC_parse));
-                    SAVEFREEPV(name);
-
-                    for (i = RExC_parse; i < RExC_parse + n; i++) {
-                        if (isCNTRL(*i) && *i != '\t') {
-                            RExC_parse = e + 1;
-                            vFAIL2("Can't find Unicode property definition \"%s\"", name);
-                        }
+			/* diag_listed_as: Can't find Unicode property definition "%s" in regex; marked by <-- HERE in m/%s/ */
+                        vFAIL2utf8f("%" UTF8f, UTF8fARG(SvUTF8(msg),
+                                    SvCUR(msg), SvPVX(msg)));
                     }
 
-                    if (FOLD) {
-                        lookup_name = savepv(Perl_form(aTHX_ "__%s_i", name));
+                    if (! is_invlist(prop_definition)) {
 
-                        /* The function call just below that uses this can fail
-                         * to return, leaking memory if we don't do this */
-                        SAVEFREEPV(lookup_name);
-                    }
-
-                    /* Look up the property name, and get its swash and
-                     * inversion list, if the property is found  */
-                    swash = _core_swash_init("utf8",
-                                             (lookup_name)
-                                              ? lookup_name
-                                              : name,
-                                             &PL_sv_undef,
-                                             1, /* binary */
-                                             0, /* not tr/// */
-                                             NULL, /* No inversion list */
-                                             &swash_init_flags
-                                            );
-                    if (! swash || ! (invlist = _get_swash_invlist(swash))) {
-                        HV* curpkg = (IN_PERL_COMPILETIME)
-                                      ? PL_curstash
-                                      : CopSTASH(PL_curcop);
-                        UV final_n = n;
-                        bool has_pkg;
-
-                        if (swash) {    /* Got a swash but no inversion list.
-                                           Something is likely wrong that will
-                                           be sorted-out later */
-                            SvREFCNT_dec_NN(swash);
-                            swash = NULL;
-                        }
-
-                        /* Here didn't find it.  It could be a an error (like a
-                         * typo) in specifying a Unicode property, or it could
-                         * be a user-defined property that will be available at
-                         * run-time.  The names of these must begin with 'In'
-                         * or 'Is' (after any packages are stripped off).  So
-                         * if not one of those, or if we accept only
-                         * compile-time properties, is an error; otherwise add
-                         * it to the list for run-time look up. */
-                        if ((base_name = rninstr(name, name + n,
-                                                 colon_colon, colon_colon + 2)))
-                        { /* Has ::.  We know this must be a user-defined
-                             property */
-                            base_name += 2;
-                            final_n -= base_name - name;
-                            has_pkg = TRUE;
+                        /* Here, the definition isn't known, so we have gotten
+                         * returned a string that will be evaluated if and when
+                         * encountered at runtime.  We add it to the list of
+                         * such properties, along with whether it should be
+                         * complemented or not */
+                        if (value == 'P') {
+                            sv_catpvs(listsv, "!");
                         }
                         else {
-                            base_name = name;
-                            has_pkg = FALSE;
+                            sv_catpvs(listsv, "+");
                         }
+                        sv_catsv(listsv, prop_definition);
 
-                        if (   final_n < 3
-                            || base_name[0] != 'I'
-                            || (base_name[1] != 's' && base_name[1] != 'n')
-                            || ret_invlist)
-                        {
-                            const char * const msg
-                                = (has_pkg)
-                                  ? "Illegal user-defined property name"
-                                  : "Can't find Unicode property definition";
-                            RExC_parse = e + 1;
-
-                            /* diag_listed_as: Can't find Unicode property definition "%s" */
-                            vFAIL3utf8f("%s \"%" UTF8f "\"",
-                                msg, UTF8fARG(UTF, n, name));
-                        }
-
-                        /* If the property name doesn't already have a package
-                         * name, add the current one to it so that it can be
-                         * referred to outside it. [perl #121777] */
-                        if (! has_pkg && curpkg) {
-                            char* pkgname = HvNAME(curpkg);
-                            if (memNEs(pkgname, HvNAMELEN(curpkg), "main")) {
-                                char* full_name = Perl_form(aTHX_
-                                                            "%s::%s",
-                                                            pkgname,
-                                                            name);
-                                n = strlen(full_name);
-                                name = savepvn(full_name, n);
-                                SAVEFREEPV(name);
-                            }
-                        }
-                        Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s%" UTF8f "%s\n",
-                                        (value == 'p' ? '+' : '!'),
-                                        (FOLD) ? "__" : "",
-                                        UTF8fARG(UTF, n, name),
-                                        (FOLD) ? "_i" : "");
                         has_runtime_dependency |= HAS_USER_DEFINED_PROPERTY;
 
                         /* We don't know yet what this matches, so have to flag
@@ -17142,27 +16935,32 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         anyof_flags |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
                     }
                     else {
+                        assert (prop_definition && is_invlist(prop_definition));
 
-                        /* Here, did get the swash and its inversion list.  If
-                         * the swash is from a user-defined property, then this
-                         * whole character class should be regarded as such */
-                        if (swash_init_flags
-                            & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY)
+                        /* Here we do have the complete property definition
+                         *
+                         * Temporary workaround for [perl #133136].  For this
+                         * precise input that is in the .t that is failing,
+                         * load utf8.pm, which is what the test wants, so that
+                         * that .t passes */
+                        if (     memEQs(RExC_start, e + 1 - RExC_start,
+                                        "foo\\p{Alnum}")
+                            && ! hv_common(GvHVn(PL_incgv),
+                                           NULL,
+                                           "utf8.pm", sizeof("utf8.pm") - 1,
+                                           0, HV_FETCH_ISEXISTS, NULL, 0))
                         {
-                            has_runtime_dependency |= HAS_USER_DEFINED_PROPERTY;
+                            require_pv("utf8.pm");
                         }
-                    }
-                    }
-                    if (invlist) {
-                        if (! (has_runtime_dependency
-                                                & HAS_USER_DEFINED_PROPERTY) &&
+
+                        if (! user_defined &&
                             /* We warn on matching an above-Unicode code point
                              * if the match would return true, except don't
                              * warn for \p{All}, which has exactly one element
                              * = 0 */
-                            (_invlist_contains_cp(invlist, 0x110000)
-                                && (! (_invlist_len(invlist) == 1
-                                       && *invlist_array(invlist) == 0))))
+                            (_invlist_contains_cp(prop_definition, 0x110000)
+                                && (! (_invlist_len(prop_definition) == 1
+                                       && *invlist_array(prop_definition) == 0))))
                         {
                             warn_super = TRUE;
                         }
@@ -17170,23 +16968,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         /* Invert if asking for the complement */
                         if (value == 'P') {
 			    _invlist_union_complement_2nd(properties,
-                                                          invlist,
+                                                          prop_definition,
                                                           &properties);
-
-                            /* The swash can't be used as-is, because we've
-			     * inverted things; delay removing it to here after
-			     * have copied its invlist above */
-                            if (! swash) {
-                                SvREFCNT_dec_NN(invlist);
-                            }
-                            SvREFCNT_dec(swash);
-                            swash = NULL;
                         }
                         else {
-                            _invlist_union(properties, invlist, &properties);
-                            if (! swash) {
-                                SvREFCNT_dec_NN(invlist);
-                            }
+                            _invlist_union(properties, prop_definition, &properties);
 			}
                     }
                 }
@@ -18002,8 +17788,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /* And combine the result (if any) with any inversion lists from posix
      * classes.  The lists are kept separate up to now because we don't want to
-     * fold the classes (folding of those is automatically handled by the swash
-     * fetching code) */
+     * fold the classes */
     if (simple_posixes) {   /* These are the classes known to be unaffected by
                                /a, /aa, and /d */
         if (cp_list) {
@@ -18184,10 +17969,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * folded until runtime */
 
     /* If we didn't do folding, it's because some information isn't available
-     * until runtime; set the run-time fold flag for these.  (We don't have to
-     * worry about properties folding, as that is taken care of by the swash
-     * fetching).  We know to set the flag if we have a non-NULL list for UTF-8
-     * locales, or the class matches at least one 0-255 range code point */
+     * until runtime; set the run-time fold flag for these  We know to set the
+     * flag if we have a non-NULL list for UTF-8 locales, or the class matches
+     * at least one 0-255 range code point */
     if (LOC && FOLD) {
 
         /* Some things on the list might be unconditionally included because of
@@ -18237,18 +18021,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     {
         _invlist_invert(cp_list);
 
-        /* Any swash can't be used as-is, because we've inverted things */
-        if (swash) {
-            SvREFCNT_dec_NN(swash);
-            swash = NULL;
-        }
-
-        invert = FALSE;
+	/* Clear the invert flag since have just done it here */
+	invert = FALSE;
     }
 
     if (ret_invlist) {
         *ret_invlist = cp_list;
-        SvREFCNT_dec(swash);
 
         return RExC_emit;
     }
@@ -19043,23 +18821,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
     }
 
-    /* If there is a swash and more than one element, we can't use the swash in
-     * the optimization below. */
-    if (swash && element_count > 1) {
-	SvREFCNT_dec_NN(swash);
-	swash = NULL;
-    }
-
-    /* Note that the optimization of using 'swash' if it is the only thing in
-     * the class doesn't have us change swash at all, so it can include things
-     * that are also in the bitmap; otherwise we have purposely deleted that
-     * duplicate information */
     set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
                   (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
                    ? listsv : NULL,
-                  only_utf8_locale_list,
-                  swash, cBOOL(has_runtime_dependency
-                                                & HAS_USER_DEFINED_PROPERTY));
+                  only_utf8_locale_list);
     return ret;
 
   not_anyof:
@@ -19080,31 +18845,21 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 regnode* const node,
                 SV* const cp_list,
                 SV* const runtime_defns,
-                SV* const only_utf8_locale_list,
-                SV* const swash,
-                const bool has_user_defined_property)
+                SV* const only_utf8_locale_list)
 {
     /* Sets the arg field of an ANYOF-type node 'node', using information about
      * the node passed-in.  If there is nothing outside the node's bitmap, the
      * arg is set to ANYOF_ONLY_HAS_BITMAP.  Otherwise, it sets the argument to
      * the count returned by add_data(), having allocated and stored an array,
-     * av, that that count references, as follows:
-     *  av[0] stores the character class description in its textual form.
-     *        This is used later (regexec.c:Perl_regclass_swash()) to
-     *        initialize the appropriate swash, and is also useful for dumping
-     *        the regnode.  This is set to &PL_sv_undef if the textual
-     *        description is not needed at run-time (as happens if the other
-     *        elements completely define the class)
-     *  av[1] if &PL_sv_undef, is a placeholder to later contain the swash
-     *        computed from av[0].  But if no further computation need be done,
-     *        the swash is stored here now (and av[0] is &PL_sv_undef).
-     *  av[2] stores the inversion list of code points that match only if the
-     *        current locale is UTF-8
-     *  av[3] stores the cp_list inversion list for use in addition or instead
-     *        of av[0]; used only if cp_list exists and av[1] is &PL_sv_undef.
-     *        (Otherwise everything needed is already in av[0] and av[1])
-     *  av[4] is set if any component of the class is from a user-defined
-     *        property; used only if av[3] exists */
+     * av, as follows:
+     *
+     *  av[0] stores the inversion list defining this class as far as known at
+     *        this time, or PL_sv_undef if nothing definite is now known.
+     *  av[1] stores the inversion list of code points that match only if the
+     *        current locale is UTF-8, or if none, PL_sv_undef if there is an
+     *        av[2], or no entry otherwise.
+     *  av[2] stores the list of user-defined properties whose subroutine
+     *        definitions aren't known at this time, or no entry if none. */
 
     UV n;
 
@@ -19119,26 +18874,16 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	AV * const av = newAV();
 	SV *rv;
 
-	av_store(av, 0, (runtime_defns)
-			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
-	if (swash) {
-	    assert(cp_list);
-	    av_store(av, 1, swash);
-	    SvREFCNT_dec_NN(cp_list);
-	}
-	else {
-	    av_store(av, 1, &PL_sv_undef);
-	    if (cp_list) {
-		av_store(av, 3, cp_list);
-		av_store(av, 4, newSVuv(has_user_defined_property));
-	    }
-	}
+        if (cp_list) {
+            av_store(av, INVLIST_INDEX, cp_list);
+        }
 
         if (only_utf8_locale_list) {
-	    av_store(av, 2, only_utf8_locale_list);
+            av_store(av, ONLY_LOCALE_MATCHES_INDEX, only_utf8_locale_list);
         }
-        else {
-	    av_store(av, 2, &PL_sv_undef);
+
+        if (runtime_defns) {
+            av_store(av, DEFERRED_USER_DEFINED_INDEX, SvREFCNT_inc(runtime_defns));
         }
 
 	rv = newRV_noinc(MUTABLE_SV(av));
@@ -19159,14 +18904,15 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
 {
     /* For internal core use only.
-     * Returns the swash for the input 'node' in the regex 'prog'.
-     * If <doinit> is 'true', will attempt to create the swash if not already
-     *	  done.
+     * Returns the inversion list for the input 'node' in the regex 'prog'.
+     * If <doinit> is 'true', will attempt to create the inversion list if not
+     *    already done.
      * If <listsvp> is non-null, will return the printable contents of the
-     *    swash.  This can be used to get debugging information even before the
-     *    swash exists, by calling this function with 'doinit' set to false, in
-     *    which case the components that will be used to eventually create the
-     *    swash are returned  (in a printable form).
+     *    property definition.  This can be used to get debugging information
+     *    even before the inversion list exists, by calling this function with
+     *    'doinit' set to false, in which case the components that will be used
+     *    to eventually create the inversion list are returned  (in a printable
+     *    form).
      * If <only_utf8_locale_ptr> is not NULL, it is where this routine is to
      *    store an inversion list of code points that should match only if the
      *    execution-time locale is a UTF-8 one.
@@ -19174,18 +18920,17 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
      *    inversion list of the code points that would be instead returned in
      *    <listsvp> if this were NULL.  Thus, what gets output in <listsvp>
      *    when this parameter is used, is just the non-code point data that
-     *    will go into creating the swash.  This currently should be just
+     *    will go into creating the inversion list.  This currently should be just
      *    user-defined properties whose definitions were not known at compile
      *    time.  Using this parameter allows for easier manipulation of the
-     *    swash's data by the caller.  It is illegal to call this function with
-     *    this parameter set, but not <listsvp>
+     *    inversion list's data by the caller.  It is illegal to call this
+     *    function with this parameter set, but not <listsvp>
      *
      * Tied intimately to how S_set_ANYOF_arg sets up the data structure.  Note
-     * that, in spite of this function's name, the swash it returns may include
-     * the bitmap data as well */
+     * that, in spite of this function's name, the inversion list it returns
+     * may include the bitmap data as well */
 
-    SV *sw  = NULL;
-    SV *si  = NULL;         /* Input swash initialization string */
+    SV *si  = NULL;         /* Input initialization string */
     SV* invlist = NULL;
 
     RXi_GET_DECL(prog, progi);
@@ -19201,69 +18946,73 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	    SV * const rv = MUTABLE_SV(data->data[n]);
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
-	    U8 swash_init_flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
 
-	    si = *ary;	/* ary[0] = the string to initialize the swash with */
+            invlist = ary[INVLIST_INDEX];
 
-            if (av_tindex_skip_len_mg(av) >= 2) {
-                if (only_utf8_locale_ptr
-                    && ary[2]
-                    && ary[2] != &PL_sv_undef)
-                {
-                    *only_utf8_locale_ptr = ary[2];
-                }
-                else {
-                    assert(only_utf8_locale_ptr);
-                    *only_utf8_locale_ptr = NULL;
-                }
+            if (av_tindex_skip_len_mg(av) >= ONLY_LOCALE_MATCHES_INDEX) {
+                *only_utf8_locale_ptr = ary[ONLY_LOCALE_MATCHES_INDEX];
+            }
 
-                /* Elements 3 and 4 are either both present or both absent. [3]
-                 * is any inversion list generated at compile time; [4]
-                 * indicates if that inversion list has any user-defined
-                 * properties in it. */
-                if (av_tindex_skip_len_mg(av) >= 3) {
-                    invlist = ary[3];
-                    if (SvUV(ary[4])) {
-                        swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
+            if (av_tindex_skip_len_mg(av) >= DEFERRED_USER_DEFINED_INDEX) {
+                si = ary[DEFERRED_USER_DEFINED_INDEX];
+            }
+
+	    if (doinit && (si || invlist)) {
+                if (si) {
+                    bool user_defined;
+                    SV * msg = newSVpvs_flags("", SVs_TEMP);
+
+                    SV * prop_definition = handle_user_defined_property(
+                            "", 0, FALSE,   /* There is no \p{}, \P{} */
+                            SvPVX_const(si)[1] - '0',   /* /i or not has been
+                                                           stored here for just
+                                                           this occasion */
+                            TRUE,           /* run time */
+                            si,             /* The property definition  */
+                            &user_defined,
+                            msg,
+                            0               /* base level call */
+                           );
+
+                    if (SvCUR(msg)) {
+                        assert(prop_definition == NULL);
+
+                        Perl_croak(aTHX_ "%" UTF8f,
+                                UTF8fARG(SvUTF8(msg), SvCUR(msg), SvPVX(msg)));
                     }
-                }
-                else {
-                    invlist = NULL;
-                }
-	    }
 
-	    /* Element [1] is reserved for the set-up swash.  If already there,
-	     * return it; if not, create it and store it there */
-	    if (ary[1] && SvROK(ary[1])) {
-		sw = ary[1];
-	    }
-	    else if (doinit && ((si && si != &PL_sv_undef)
-                                 || (invlist && invlist != &PL_sv_undef))) {
-		assert(si);
-		sw = _core_swash_init("utf8", /* the utf8 package */
-				      "", /* nameless */
-				      si,
-				      1, /* binary */
-				      0, /* not from tr/// */
-				      invlist,
-				      &swash_init_flags);
-		(void)av_store(av, 1, sw);
+                    if (invlist) {
+                        _invlist_union(invlist, prop_definition, &invlist);
+                        SvREFCNT_dec_NN(prop_definition);
+                    }
+                    else {
+                        invlist = prop_definition;
+                    }
+
+                    assert(ONLY_LOCALE_MATCHES_INDEX == 1 + INVLIST_INDEX);
+                    assert(DEFERRED_USER_DEFINED_INDEX == 1
+                                                + ONLY_LOCALE_MATCHES_INDEX);
+
+                    av_store(av, INVLIST_INDEX, invlist);
+                    av_fill(av, (ary[ONLY_LOCALE_MATCHES_INDEX])
+                                 ? ONLY_LOCALE_MATCHES_INDEX:
+                                 INVLIST_INDEX);
+                    si = NULL;
+                }
 	    }
 	}
     }
 
-    /* If requested, return a printable version of what this swash matches */
+    /* If requested, return a printable version of what this ANYOF node matches
+     * */
     if (listsvp) {
 	SV* matches_string = NULL;
 
-        /* The swash should be used, if possible, to get the data, as it
-         * contains the resolved data.  But this function can be called at
-         * compile-time, before everything gets resolved, in which case we
-         * return the currently best available information, which is the string
-         * that will eventually be used to do that resolving, 'si' */
-	if ((! sw || (invlist = _get_swash_invlist(sw)) == NULL)
-            && (si && si != &PL_sv_undef))
-        {
+        /* This function can be called at compile-time, before everything gets
+         * resolved, in which case we return the currently best available
+         * information, which is the string that will eventually be used to do
+         * that resolving, 'si' */
+	if (si) {
             /* Here, we only have 'si' (and possibly some passed-in data in
              * 'invlist', which is handled below)  If the caller only wants
              * 'si', use that.  */
@@ -19356,12 +19105,10 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                 if (SvCUR(matches_string)) {  /* Get rid of trailing blank */
                     SvCUR_set(matches_string, SvCUR(matches_string) - 1);
                 }
-            } /* end of has an 'si' but no swash */
+            } /* end of has an 'si' */
 	}
 
-        /* If we have a swash in place, its equivalent inversion list was above
-         * placed into 'invlist'.  If not, this variable may contain a stored
-         * inversion list which is information beyond what is in 'si' */
+        /* Add the stuff that's already known */
         if (invlist) {
 
             /* Again, if the caller doesn't want the output inversion list, put
@@ -19385,7 +19132,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	*listsvp = matches_string;
     }
 
-    return sw;
+    return invlist;
 }
 #endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
@@ -21932,6 +21679,15 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 void
 Perl_init_uniprops(pTHX)
 {
+    PL_user_def_props = newHV();
+
+#ifdef USE_ITHREADS
+
+    HvSHAREKEYS_off(PL_user_def_props);
+    PL_user_def_props_aTHX = aTHX;
+
+#endif
+
     /* Set up the inversion list global variables */
 
     PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
@@ -22011,39 +21767,444 @@ Perl_init_uniprops(pTHX)
 #endif
 }
 
-SV *
-Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
-                                const bool to_fold, bool * invert)
-{
-    /* Parse the interior meat of \p{} passed to this in 'name' with length
-     * 'name_len', and return an inversion list if a property with 'name' is
-     * found, or NULL if not.  'name' point to the input with leading and
-     * trailing space trimmed.  'to_fold' indicates if /i is in effect.
-     *
-     * When the return is an inversion list, '*invert' will be set to a boolean
-     * indicating if it should be inverted or not
-     *
-     * This currently doesn't handle all cases.  A NULL return indicates the
-     * caller should try a different approach
-     */
+#if 0
 
-    char* lookup_name;
-    bool stricter = FALSE;
-    bool is_nv_type = FALSE;         /* nv= or numeric_value=, or possibly one
-                                        of the cjk numeric properties (though
-                                        it requires extra effort to compile
-                                        them) */
-    unsigned int i;
-    unsigned int j = 0, lookup_len;
-    int equals_pos = -1;        /* Where the '=' is found, or negative if none */
-    int slash_pos = -1;        /* Where the '/' is found, or negative if none */
-    int table_index = 0;
-    bool starts_with_In_or_Is = FALSE;
-    Size_t lookup_offset = 0;
+This code was mainly added for backcompat to give a warning for non-portable
+code points in user-defined properties.  But experiments showed that the
+warning in earlier perls were only omitted on overflow, which should be an
+error, so there really isnt a backcompat issue, and actually adding the
+warning when none was present before might cause breakage, for little gain.  So
+khw left this code in, but not enabled.  Tests were never added.
+
+embed.fnc entry:
+Ei	|const char *|get_extended_utf8_msg|const UV cp
+
+PERL_STATIC_INLINE const char *
+S_get_extended_utf8_msg(pTHX_ const UV cp)
+{
+    U8 dummy[UTF8_MAXBYTES + 1];
+    HV *msgs;
+    SV **msg;
+
+    uvchr_to_utf8_flags_msgs(dummy, cp, UNICODE_WARN_PERL_EXTENDED,
+                             &msgs);
+
+    msg = hv_fetchs(msgs, "text", 0);
+    assert(msg);
+
+    (void) sv_2mortal((SV *) msgs);
+
+    return SvPVX(*msg);
+}
+
+#endif
+
+SV *
+Perl_handle_user_defined_property(pTHX_
+
+    /* Parses the contents of a user-defined property definition; returning the
+     * expanded definition if possible.  If so, the return is an inversion
+     * list.
+     *
+     * If there are subroutines that are part of the expansion and which aren't
+     * known at the time of the call to this function, this returns what
+     * parse_uniprop_string() returned for the first one encountered.
+     *
+     * If an error was found, NULL is returned, and 'msg' gets a suitable
+     * message appended to it.  (Appending allows the back trace of how we got
+     * to the faulty definition to be displayed through nested calls of
+     * user-defined subs.)
+     *
+     * The caller IS responsible for freeing any returned SV.
+     *
+     * The syntax of the contents is pretty much described in perlunicode.pod,
+     * but we also allow comments on each line */
+
+    const char * name,          /* Name of property */
+    const STRLEN name_len,      /* The name's length in bytes */
+    const bool is_utf8,         /* ? Is 'name' encoded in UTF-8 */
+    const bool to_fold,         /* ? Is this under /i */
+    const bool runtime,         /* ? Are we in compile- or run-time */
+    SV* contents,               /* The property's definition */
+    bool *user_defined_ptr,     /* This will be set TRUE as we wouldn't be
+                                   getting called unless this is thought to be
+                                   a user-defined property */
+    SV * msg,                   /* Any error or warning msg(s) are appended to
+                                   this */
+    const STRLEN level)         /* Recursion level of this call */
+{
+    STRLEN len;
+    const char * string         = SvPV_const(contents, len);
+    const char * const e        = string + len;
+    const bool is_contents_utf8 = cBOOL(SvUTF8(contents));
+    const STRLEN msgs_length_on_entry = SvCUR(msg);
+
+    const char * s0 = string;   /* Points to first byte in the current line
+                                   being parsed in 'string' */
+    const char overflow_msg[] = "Code point too large in \"";
+    SV* running_definition = NULL;
+
+    PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY;
+
+    *user_defined_ptr = TRUE;
+
+    /* Look at each line */
+    while (s0 < e) {
+        const char * s;     /* Current byte */
+        char op = '+';      /* Default operation is 'union' */
+        IV   min = 0;       /* range begin code point */
+        IV   max = -1;      /* and range end */
+        SV* this_definition;
+
+        /* Skip comment lines */
+        if (*s0 == '#') {
+            s0 = strchr(s0, '\n');
+            if (s0 == NULL) {
+                break;
+            }
+            s0++;
+            continue;
+        }
+
+        /* For backcompat, allow an empty first line */
+        if (*s0 == '\n') {
+            s0++;
+            continue;
+        }
+
+        /* First character in the line may optionally be the operation */
+        if (   *s0 == '+'
+            || *s0 == '!'
+            || *s0 == '-'
+            || *s0 == '&')
+        {
+            op = *s0++;
+        }
+
+        /* If the line is one or two hex digits separated by blank space, its
+         * a range; otherwise it is either another user-defined property or an
+         * error */
+
+        s = s0;
+
+        if (! isXDIGIT(*s)) {
+            goto check_if_property;
+        }
+
+        do { /* Each new hex digit will add 4 bits. */
+            if (min > ( (IV) MAX_LEGAL_CP >> 4)) {
+                s = strchr(s, '\n');
+                if (s == NULL) {
+                    s = e;
+                }
+                if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                sv_catpv(msg, overflow_msg);
+                Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                                     UTF8fARG(is_contents_utf8, s - s0, s0));
+                sv_catpvs(msg, "\"");
+                goto return_msg;
+            }
+
+            /* Accumulate this digit into the value */
+            min = (min << 4) + READ_XDIGIT(s);
+        } while (isXDIGIT(*s));
+
+        while (isBLANK(*s)) { s++; }
+
+        /* We allow comments at the end of the line */
+        if (*s == '#') {
+            s = strchr(s, '\n');
+            if (s == NULL) {
+                s = e;
+            }
+            s++;
+        }
+        else if (s < e && *s != '\n') {
+            if (! isXDIGIT(*s)) {
+                goto check_if_property;
+            }
+
+            /* Look for the high point of the range */
+            max = 0;
+            do {
+                if (max > ( (IV) MAX_LEGAL_CP >> 4)) {
+                    s = strchr(s, '\n');
+                    if (s == NULL) {
+                        s = e;
+                    }
+                    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                    sv_catpv(msg, overflow_msg);
+                    Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                                      UTF8fARG(is_contents_utf8, s - s0, s0));
+                    sv_catpvs(msg, "\"");
+                    goto return_msg;
+                }
+
+                max = (max << 4) + READ_XDIGIT(s);
+            } while (isXDIGIT(*s));
+
+            while (isBLANK(*s)) { s++; }
+
+            if (*s == '#') {
+                s = strchr(s, '\n');
+                if (s == NULL) {
+                    s = e;
+                }
+            }
+            else if (s < e && *s != '\n') {
+                goto check_if_property;
+            }
+        }
+
+        if (max == -1) {    /* The line only had one entry */
+            max = min;
+        }
+        else if (max < min) {
+            if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+            sv_catpvs(msg, "Illegal range in \"");
+            Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                                UTF8fARG(is_contents_utf8, s - s0, s0));
+            sv_catpvs(msg, "\"");
+            goto return_msg;
+        }
+
+#if 0   /* See explanation at definition above of get_extended_utf8_msg() */
+
+        if (   UNICODE_IS_PERL_EXTENDED(min)
+            || UNICODE_IS_PERL_EXTENDED(max))
+        {
+            if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+
+            /* If both code points are non-portable, warn only on the lower
+             * one. */
+            sv_catpv(msg, get_extended_utf8_msg(
+                                            (UNICODE_IS_PERL_EXTENDED(min))
+                                            ? min : max));
+            sv_catpvs(msg, " in \"");
+            Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                                 UTF8fARG(is_contents_utf8, s - s0, s0));
+            sv_catpvs(msg, "\"");
+        }
+
+#endif
+
+        /* Here, this line contains a legal range */
+        this_definition = sv_2mortal(_new_invlist(2));
+        this_definition = _add_range_to_invlist(this_definition, min, max);
+        goto calculate;
+
+      check_if_property:
+
+        /* Here it isn't a legal range line.  See if it is a legal property
+         * line.  First find the end of the meat of the line */
+        s = strpbrk(s, "#\n");
+        if (s == NULL) {
+            s = e;
+        }
+
+        /* Ignore trailing blanks in keeping with the requirements of
+         * parse_uniprop_string() */
+        s--;
+        while (s > s0 && isBLANK_A(*s)) {
+            s--;
+        }
+        s++;
+
+        this_definition = parse_uniprop_string(s0, s - s0,
+                                               is_utf8, to_fold, runtime,
+                                               user_defined_ptr, msg,
+                                               (name_len == 0)
+                                                ? level /* Don't increase level
+                                                           if input is empty */
+                                                : level + 1
+                                              );
+        if (this_definition == NULL) {
+            goto return_msg;    /* 'msg' should have had the reason appended to
+                                   it by the above call */
+        }
+
+        if (! is_invlist(this_definition)) {    /* Unknown at this time */
+            return newSVsv(this_definition);
+        }
+
+        if (*s != '\n') {
+            s = strchr(s, '\n');
+            if (s == NULL) {
+                s = e;
+            }
+        }
+
+      calculate:
+
+        switch (op) {
+            case '+':
+                _invlist_union(running_definition, this_definition,
+                                                        &running_definition);
+                break;
+            case '-':
+                _invlist_subtract(running_definition, this_definition,
+                                                        &running_definition);
+                break;
+            case '&':
+                _invlist_intersection(running_definition, this_definition,
+                                                        &running_definition);
+                break;
+            case '!':
+                _invlist_union_complement_2nd(running_definition,
+                                        this_definition, &running_definition);
+                break;
+            default:
+                Perl_croak(aTHX_ "panic: %s: %d: Unexpected operation %d",
+                                 __FILE__, __LINE__, op);
+                break;
+        }
+
+        /* Position past the '\n' */
+        s0 = s + 1;
+    }   /* End of loop through the lines of 'contents' */
+
+    /* Here, we processed all the lines in 'contents' without error.  If we
+     * didn't add any warnings, simply return success */
+    if (msgs_length_on_entry == SvCUR(msg)) {
+
+        /* If the expansion was empty, the answer isn't nothing: its an empty
+         * inversion list */
+        if (running_definition == NULL) {
+            running_definition = _new_invlist(1);
+        }
+
+        return running_definition;
+    }
+
+    /* Otherwise, add some explanatory text, but we will return success */
+
+  return_msg:
+
+    if (name_len > 0) {
+        sv_catpvs(msg, " in expansion of ");
+        Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
+    }
+
+    return running_definition;
+}
+
+/* As explained below, certain operations need to take place in the first
+ * thread created.  These macros switch contexts */
+#ifdef USE_ITHREADS
+#  define DECLARATION_FOR_GLOBAL_CONTEXT                                    \
+                                        PerlInterpreter * save_aTHX = aTHX;
+#  define SWITCH_TO_GLOBAL_CONTEXT                                          \
+                           PERL_SET_CONTEXT((aTHX = PL_user_def_props_aTHX))
+#  define RESTORE_CONTEXT  PERL_SET_CONTEXT((aTHX = save_aTHX));
+#  define CUR_CONTEXT      aTHX
+#  define ORIGINAL_CONTEXT save_aTHX
+#else
+#  define DECLARATION_FOR_GLOBAL_CONTEXT
+#  define SWITCH_TO_GLOBAL_CONTEXT          NOOP
+#  define RESTORE_CONTEXT                   NOOP
+#  define CUR_CONTEXT                       NULL
+#  define ORIGINAL_CONTEXT                  NULL
+#endif
+
+STATIC void
+S_delete_recursion_entry(pTHX_ void *key)
+{
+    /* Deletes the entry used to detect recursion when expanding user-defined
+     * properties.  This is a function so it can be set up to be called even if
+     * the program unexpectedly quits */
+
+    SV ** current_entry;
+    const STRLEN key_len = strlen((const char *) key);
+    DECLARATION_FOR_GLOBAL_CONTEXT;
+
+    SWITCH_TO_GLOBAL_CONTEXT;
+
+    /* If the entry is one of these types, it is a permanent entry, and not the
+     * one used to detect recursions.  This function should delete only the
+     * recursion entry */
+    current_entry = hv_fetch(PL_user_def_props, (const char *) key, key_len, 0);
+    if (     current_entry
+        && ! is_invlist(*current_entry)
+        && ! SvPOK(*current_entry))
+    {
+        (void) hv_delete(PL_user_def_props, (const char *) key, key_len,
+                                                                    G_DISCARD);
+    }
+
+    RESTORE_CONTEXT;
+}
+
+SV *
+Perl_parse_uniprop_string(pTHX_
+
+    /* Parse the interior of a \p{}, \P{}.  Returns its definition if knowable
+     * now.  If so, the return is an inversion list.
+     *
+     * If the property is user-defined, it is a subroutine, which in turn
+     * may call other subroutines.  This function will call the whole nest of
+     * them to get the definition they return; if some aren't known at the time
+     * of the call to this function, the fully qualified name of the highest
+     * level sub is returned.  It is an error to call this function at runtime
+     * without every sub defined.
+     *
+     * If an error was found, NULL is returned, and 'msg' gets a suitable
+     * message appended to it.  (Appending allows the back trace of how we got
+     * to the faulty definition to be displayed through nested calls of
+     * user-defined subs.)
+     *
+     * The caller should NOT try to free any returned inversion list.
+     *
+     * Other parameters will be set on return as described below */
+
+    const char * const name,    /* The first non-blank in the \p{}, \P{} */
+    const Size_t name_len,      /* Its length in bytes, not including any
+                                   trailing space */
+    const bool is_utf8,         /* ? Is 'name' encoded in UTF-8 */
+    const bool to_fold,         /* ? Is this under /i */
+    const bool runtime,         /* TRUE if this is being called at run time */
+    bool *user_defined_ptr,     /* Upon return from this function it will be
+                                   set to TRUE if any component is a
+                                   user-defined property */
+    SV * msg,                   /* Any error or warning msg(s) are appended to
+                                   this */
+   const STRLEN level)          /* Recursion level of this call */
+{
+    char* lookup_name;          /* normalized name for lookup in our tables */
+    unsigned lookup_len;        /* Its length */
+    bool stricter = FALSE;      /* Some properties have stricter name
+                                   normalization rules, which we decide upon
+                                   based on parsing */
+
+    /* nv= or numeric_value=, or possibly one of the cjk numeric properties
+     * (though it requires extra effort to download them from Unicode and
+     * compile perl to know about them) */
+    bool is_nv_type = FALSE;
+
+    unsigned int i, j = 0;
+    int equals_pos = -1;    /* Where the '=' is found, or negative if none */
+    int slash_pos  = -1;    /* Where the '/' is found, or negative if none */
+    int table_index = 0;    /* The entry number for this property in the table
+                               of all Unicode property names */
+    bool starts_with_In_or_Is = FALSE;  /* ? Does the name start with 'In' or
+                                             'Is' */
+    Size_t lookup_offset = 0;   /* Used to ignore the first few characters of
+                                   the normalized name in certain situations */
+    Size_t non_pkg_begin = 0;   /* Offset of first byte in 'name' that isn't
+                                   part of a package name */
+    bool could_be_user_defined = TRUE;  /* ? Could this be a user-defined
+                                             property rather than a Unicode
+                                             one. */
+    SV * prop_definition = NULL;  /* The returned definition of 'name' or NULL
+                                     if an error.  If it is an inversion list,
+                                     it is the definition.  Otherwise it is a
+                                     string containing the fully qualified sub
+                                     name of 'name' */
+    bool invert_return = FALSE; /* ? Do we need to complement the result before
+                                     returning it */
 
     PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
-    /* The input will be modified into 'lookup_name' */
+    /* The input will be normalized into 'lookup_name' */
     Newx(lookup_name, name_len, char);
     SAVEFREEPV(lookup_name);
 
@@ -22051,40 +22212,86 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
     for (i = 0; i < name_len; i++) {
         char cur = name[i];
 
-        /* These characters can be freely ignored in most situations.  Later it
-         * may turn out we shouldn't have ignored them, and we have to reparse,
-         * but we don't have enough information yet to make that decision */
-        if (cur == '-' || cur == '_' || isSPACE_A(cur)) {
-            continue;
-        }
+        /* Most of the characters in the input will be of this ilk, being parts
+         * of a name */
+        if (isIDCONT_A(cur)) {
 
-        /* Case differences are also ignored.  Our lookup routine assumes
-         * everything is lowercase */
-        if (isUPPER_A(cur)) {
-            lookup_name[j++] = toLOWER(cur);
-            continue;
-        }
-
-        /* A double colon is either an error, or a package qualifier to a
-         * subroutine user-defined property; neither of which do we currently
-         * handle
-         *
-         * But a single colon is a synonym for '=' */
-        if (cur == ':') {
-            if (i < name_len - 1 && name[i+1] == ':') {
-                return NULL;
+            /* Case differences are ignored.  Our lookup routine assumes
+             * everything is lowercase, so normalize to that */
+            if (isUPPER_A(cur)) {
+                lookup_name[j++] = toLOWER_A(cur);
+                continue;
             }
-            cur = '=';
+
+            if (cur == '_') { /* Don't include these in the normalized name */
+                continue;
+            }
+
+            lookup_name[j++] = cur;
+
+            /* The first character in a user-defined name must be of this type.
+             * */
+            if (i - non_pkg_begin == 0 && ! isIDFIRST_A(cur)) {
+                could_be_user_defined = FALSE;
+            }
+
+            continue;
+        }
+
+        /* Here, the character is not something typically in a name,  But these
+         * two types of characters (and the '_' above) can be freely ignored in
+         * most situations.  Later it may turn out we shouldn't have ignored
+         * them, and we have to reparse, but we don't have enough information
+         * yet to make that decision */
+        if (cur == '-' || isSPACE_A(cur)) {
+            could_be_user_defined = FALSE;
+            continue;
+        }
+
+        /* An equals sign or single colon mark the end of the first part of
+         * the property name */
+        if (    cur == '='
+            || (cur == ':' && (i >= name_len - 1 || name[i+1] != ':')))
+        {
+            lookup_name[j++] = '='; /* Treat the colon as an '=' */
+            equals_pos = j; /* Note where it occurred in the input */
+            could_be_user_defined = FALSE;
+            break;
         }
 
         /* Otherwise, this character is part of the name. */
         lookup_name[j++] = cur;
 
-        /* Only the equals sign needs further processing */
-        if (cur == '=') {
-            equals_pos = j; /* Note where it occurred in the input */
-            break;
+        /* Here it isn't a single colon, so if it is a colon, it must be a
+         * double colon */
+        if (cur == ':') {
+
+            /* A double colon should be a package qualifier.  We note its
+             * position and continue.  Note that one could have
+             *      pkg1::pkg2::...::foo
+             * so that the position at the end of the loop will be just after
+             * the final qualifier */
+
+            i++;
+            non_pkg_begin = i + 1;
+            lookup_name[j++] = ':';
         }
+        else { /* Only word chars (and '::') can be in a user-defined name */
+            could_be_user_defined = FALSE;
+        }
+    } /* End of parsing through the lhs of the property name (or all of it if
+         no rhs) */
+
+#define STRLENs(s)  (sizeof("" s "") - 1)
+
+    /* If there is a single package name 'utf8::', it is ambiguous.  It could
+     * be for a user-defined property, or it could be a Unicode property, as
+     * all of them are considered to be for that package.  For the purposes of
+     * parsing the rest of the property, strip it off */
+    if (non_pkg_begin == STRLENs("utf8::") && memBEGINPs(name, name_len, "utf8::")) {
+        lookup_name +=  STRLENs("utf8::");
+        j -=  STRLENs("utf8::");
+        equals_pos -=  STRLENs("utf8::");
     }
 
     /* Here, we are either done with the whole property name, if it was simple;
@@ -22101,17 +22308,22 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
             }
         }
 
-        /* Certain properties need special handling.  They may optionally be
-         * prefixed by 'is'.  Ignore that prefix for the purposes of checking
-         * if this is one of those properties */
+        /* Certain properties whose values are numeric need special handling.
+         * They may optionally be prefixed by 'is'.  Ignore that prefix for the
+         * purposes of checking if this is one of those properties */
         if (memBEGINPs(lookup_name, name_len, "is")) {
             lookup_offset = 2;
         }
 
-        /* Then check if it is one of these properties.  This is hard-coded
-         * because easier this way, and the list is unlikely to change.  There
-         * are several properties like this in the Unihan DB, which is unlikely
-         * to be compiled, and they all end with 'numeric'.  The interiors
+        /* Then check if it is one of these specially-handled properties.  The
+         * possibilities are hard-coded because easier this way, and the list
+         * is unlikely to change.
+         *
+         * All numeric value type properties are of this ilk, and are also
+         * special in a different way later on.  So find those first.  There
+         * are several numeric value type properties in the Unihan DB (which is
+         * unlikely to be compiled with perl, but we handle it here in case it
+         * does get compiled).  They all end with 'numeric'.  The interiors
          * aren't checked for the precise property.  This would stop working if
          * a cjk property were to be created that ended with 'numeric' and
          * wasn't a numeric type */
@@ -22139,15 +22351,14 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         {
             unsigned int k;
 
-            /* What makes these properties special is that the stuff after the
-             * '=' is a number.  Therefore, we can't throw away '-'
-             * willy-nilly, as those could be a minus sign.  Other stricter
+            /* Since the stuff after the '=' is a number, we can't throw away
+             * '-' willy-nilly, as those could be a minus sign.  Other stricter
              * rules also apply.  However, these properties all can have the
              * rhs not be a number, in which case they contain at least one
              * alphabetic.  In those cases, the stricter rules don't apply.
              * But the numeric type properties can have the alphas [Ee] to
              * signify an exponent, and it is still a number with stricter
-             * rules.  So look for an alpha that signifys not-strict */
+             * rules.  So look for an alpha that signifies not-strict */
             stricter = TRUE;
             for (k = i; k < name_len; k++) {
                 if (   isALPHA_A(name[k])
@@ -22175,7 +22386,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
              * zeros, or between the final leading zero and the first other
              * digit */
             for (; i < name_len - 1; i++) {
-                if (   name[i] != '0'
+                if (    name[i] != '0'
                     && (name[i] != '_' || ! isDIGIT_A(name[i+1])))
                 {
                     break;
@@ -22185,9 +22396,8 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
     }
     else {  /* No '=' */
 
-       /* We are now in a position to determine if this property should have
-        * been parsed using stricter rules.  Only a few are like that, and
-        * unlikely to change. */
+       /* Only a few properties without an '=' should be parsed with stricter
+        * rules.  The list is unlikely to change. */
         if (   memBEGINPs(lookup_name, j, "perl")
             && memNEs(lookup_name + 4, j - 4, "space")
             && memNEs(lookup_name + 4, j - 4, "word"))
@@ -22282,33 +22492,308 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
     {
         lookup_name[j++] = '&';
     }
-    else if (name_len > 2 && name[0] == 'I' && (   name[1] == 'n'
-                                                || name[1] == 's'))
+
+    /* If the original input began with 'In' or 'Is', it could be a subroutine
+     * call to a user-defined property instead of a Unicode property name. */
+    if (    non_pkg_begin + name_len > 2
+        &&  name[non_pkg_begin+0] == 'I'
+        && (name[non_pkg_begin+1] == 'n' || name[non_pkg_begin+1] == 's'))
     {
-
-        /* Also, if the original input began with 'In' or 'Is', it could be a
-         * subroutine call instead of a property names, which currently isn't
-         * handled by this function.  Subroutine calls can't happen if there is
-         * an '=' in the name */
-        if (equals_pos < 0 && get_cvn_flags(name, name_len, GV_NOTQUAL) != NULL)
-        {
-            return NULL;
-        }
-
         starts_with_In_or_Is = TRUE;
     }
+    else {
+        could_be_user_defined = FALSE;
+    }
 
-    lookup_len = j;     /* Use a more mnemonic name starting here */
+    if (could_be_user_defined) {
+        CV* user_sub;
+
+        /* Here, the name could be for a user defined property, which are
+         * implemented as subs. */
+        user_sub = get_cvn_flags(name, name_len, 0);
+        if (user_sub) {
+
+            /* Here, there is a sub by the correct name.  Normally we call it
+             * to get the property definition */
+            dSP;
+            SV * user_sub_sv = MUTABLE_SV(user_sub);
+            SV * error;     /* Any error returned by calling 'user_sub' */
+            SV * fq_name;   /* Fully qualified property name */
+            SV * placeholder;
+            char to_fold_string[] = "0:";   /* The 0 gets overwritten with the
+                                               actual value */
+            SV ** saved_user_prop_ptr;      /* Hash entry for this property */
+
+            /* How many times to retry when another thread is in the middle of
+             * expanding the same definition we want */
+            PERL_INT_FAST8_T retry_countdown = 10;
+
+            DECLARATION_FOR_GLOBAL_CONTEXT;
+
+            /* If we get here, we know this property is user-defined */
+            *user_defined_ptr = TRUE;
+
+            /* We refuse to call a tainted subroutine; returning an error
+             * instead */
+            if (TAINT_get) {
+                if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                sv_catpvs(msg, "Insecure user-defined property");
+                goto append_name_to_msg;
+            }
+
+            /* In principal, we only call each subroutine property definition
+             * once during the life of the program.  This guarantees that the
+             * property definition never changes.  The results of the single
+             * sub call are stored in a hash, which is used instead for future
+             * references to this property.  The property definition is thus
+             * immutable.  But, to allow the user to have a /i-dependent
+             * definition, we call the sub once for non-/i, and once for /i,
+             * should the need arise, passing the /i status as a parameter.
+             *
+             * We start by constructing the hash key name, consisting of the
+             * fully qualified subroutine name */
+            fq_name = sv_2mortal(newSV(10));    /* 10 is just a guess */
+            (void) cv_name(user_sub, fq_name, 0);
+
+            /* But precede the sub name in the key with the /i status, so that
+             * there is a key for /i and a different key for non-/i */
+            to_fold_string[0] = to_fold + '0';
+            sv_insert(fq_name, 0, 0, to_fold_string, 2);
+
+            /* We only call the sub once throughout the life of the program
+             * (with the /i, non-/i exception noted above).  That means the
+             * hash must be global and accessible to all threads.  It is
+             * created at program start-up, before any threads are created, so
+             * is accessible to all children.  But this creates some
+             * complications.
+             *
+             * 1) The keys can't be shared, or else problems arise; sharing is
+             *    turned off at hash creation time
+             * 2) All SVs in it are there for the remainder of the life of the
+             *    program, and must be created in the same interpreter context
+             *    as the hash, or else they will be freed from the wrong pool
+             *    at global destruction time.  This is handled by switching to
+             *    the hash's context to create each SV going into it, and then
+             *    immediately switching back
+             * 3) All accesses to the hash must be controlled by a mutex, to
+             *    prevent two threads from getting an unstable state should
+             *    they simultaneously be accessing it.  The code below is
+             *    crafted so that the mutex is locked whenever there is an
+             *    access and unlocked only when the next stable state is
+             *    achieved.
+             *
+             * The hash stores either the definition of the property if it was
+             * valid, or, if invalid, the error message that was raised.  We
+             * use the type of SV to distinguish.
+             *
+             * There's also the need to guard against the definition expansion
+             * from infinitely recursing.  This is handled by storing the aTHX
+             * of the expanding thread during the expansion.  Again the SV type
+             * is used to distinguish this from the other two cases.  If we
+             * come to here and the hash entry for this property is our aTHX,
+             * it means we have recursed, and the code assumes that we would
+             * infinitely recurse, so instead stops and raises an error.
+             * (Any recursion has always been treated as infinite recursion in
+             * this feature.)
+             *
+             * If instead, the entry is for a different aTHX, it means that
+             * that thread has gotten here first, and hasn't finished expanding
+             * the definition yet.  We just have to wait until it is done.  We
+             * sleep and retry a few times, returning an error if the other
+             * thread doesn't complete. */
+
+          re_fetch:
+            USER_PROP_MUTEX_LOCK;
+
+            /* If we have an entry for this key, the subroutine has already
+             * been called once with this /i status. */
+            saved_user_prop_ptr = hv_fetch(PL_user_def_props,
+                                           SvPVX(fq_name), SvCUR(fq_name), 0);
+            if (saved_user_prop_ptr) {
+
+                /* If the saved result is an inversion list, it is the valid
+                 * definition of this property */
+                if (is_invlist(*saved_user_prop_ptr)) {
+                    prop_definition = *saved_user_prop_ptr;
+
+                    /* The SV in the hash won't be removed until global
+                     * destruction, so it is stable and we can unlock */
+                    USER_PROP_MUTEX_UNLOCK;
+
+                    /* The caller shouldn't try to free this SV */
+                    return prop_definition;
+                }
+
+                /* Otherwise, if it is a string, it is the error message
+                 * that was returned when we first tried to evaluate this
+                 * property.  Fail, and append the message */
+                if (SvPOK(*saved_user_prop_ptr)) {
+                    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                    sv_catsv(msg, *saved_user_prop_ptr);
+
+                    /* The SV in the hash won't be removed until global
+                     * destruction, so it is stable and we can unlock */
+                    USER_PROP_MUTEX_UNLOCK;
+
+                    return NULL;
+                }
+
+                assert(SvIOK(*saved_user_prop_ptr));
+
+                /* Here, we have an unstable entry in the hash.  Either another
+                 * thread is in the middle of expanding the property's
+                 * definition, or we are ourselves recursing.  We use the aTHX
+                 * in it to distinguish */
+                if (SvIV(*saved_user_prop_ptr) != PTR2IV(CUR_CONTEXT)) {
+
+                    /* Here, it's another thread doing the expanding.  We've
+                     * looked as much as we are going to at the contents of the
+                     * hash entry.  It's safe to unlock. */
+                    USER_PROP_MUTEX_UNLOCK;
+
+                    /* Retry a few times */
+                    if (retry_countdown-- > 0) {
+                        PerlProc_sleep(1);
+                        goto re_fetch;
+                    }
+
+                    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                    sv_catpvs(msg, "Timeout waiting for another thread to "
+                                   "define");
+                    goto append_name_to_msg;
+                }
+
+                /* Here, we are recursing; don't dig any deeper */
+                USER_PROP_MUTEX_UNLOCK;
+
+                if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                sv_catpvs(msg,
+                          "Infinite recursion in user-defined property");
+                goto append_name_to_msg;
+            }
+
+            /* Here, this thread has exclusive control, and there is no entry
+             * for this property in the hash.  So we have the go ahead to
+             * expand the definition ourselves. */
+
+            ENTER;
+
+            /* Create a temporary placeholder in the hash to detect recursion
+             * */
+            SWITCH_TO_GLOBAL_CONTEXT;
+            placeholder= newSVuv(PTR2IV(ORIGINAL_CONTEXT));
+            (void) hv_store_ent(PL_user_def_props, fq_name, placeholder, 0);
+            RESTORE_CONTEXT;
+
+            /* Now that we have a placeholder, we can let other threads
+             * continue */
+            USER_PROP_MUTEX_UNLOCK;
+
+            /* Make sure the placeholder always gets destroyed */
+            SAVEDESTRUCTOR_X(S_delete_recursion_entry, SvPVX(fq_name));
+
+            PUSHMARK(SP);
+            SAVETMPS;
+
+            /* Call the user's function, with the /i status as a parameter.
+             * Note that we have gone to a lot of trouble to keep this call
+             * from being within the locked mutex region. */
+            XPUSHs(boolSV(to_fold));
+            PUTBACK;
+
+            (void) call_sv(user_sub_sv, G_EVAL|G_SCALAR);
+
+            SPAGAIN;
+
+            error = ERRSV;
+            if (SvTRUE(error)) {
+                if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                sv_catpvs(msg, "Error \"");
+                sv_catsv(msg, error);
+                sv_catpvs(msg, "\"");
+                if (name_len > 0) {
+                    sv_catpvs(msg, " in expansion of ");
+                    Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8,
+                                                                  name_len,
+                                                                  name));
+                }
+
+                (void) POPs;
+                prop_definition = NULL;
+            }
+            else {  /* G_SCALAR guarantees a single return value */
+
+                /* The contents is supposed to be the expansion of the property
+                 * definition.  Call a function to check for valid syntax and
+                 * handle it */
+                prop_definition = handle_user_defined_property(name, name_len,
+                                                    is_utf8, to_fold, runtime,
+                                                    POPs, user_defined_ptr,
+                                                    msg,
+                                                    level);
+            }
+
+            /* Here, we have the results of the expansion.  Replace the
+             * placeholder with them.  We need exclusive access to the hash,
+             * and we can't let anyone else in, between when we delete the
+             * placeholder and add the permanent entry */
+            USER_PROP_MUTEX_LOCK;
+
+            S_delete_recursion_entry(aTHX_ SvPVX(fq_name));
+
+            if (! prop_definition || is_invlist(prop_definition)) {
+
+                /* If we got success we use the inversion list defining the
+                 * property; otherwise use the error message */
+                SWITCH_TO_GLOBAL_CONTEXT;
+                (void) hv_store_ent(PL_user_def_props,
+                                    fq_name,
+                                    ((prop_definition)
+                                     ? newSVsv(prop_definition)
+                                     : newSVsv(msg)),
+                                    0);
+                RESTORE_CONTEXT;
+            }
+
+            /* All done, and the hash now has a permanent entry for this
+             * property.  Give up exclusive control */
+            USER_PROP_MUTEX_UNLOCK;
+
+            FREETMPS;
+            LEAVE;
+
+            if (prop_definition) {
+
+                /* If the definition is for something not known at this time,
+                 * we toss it, and go return the main property name, as that's
+                 * the one the user will be aware of */
+                if (! is_invlist(prop_definition)) {
+                    SvREFCNT_dec_NN(prop_definition);
+                    goto definition_deferred;
+                }
+
+                sv_2mortal(prop_definition);
+            }
+
+            /* And return */
+            return prop_definition;
+
+        }   /* End of calling the subroutine for the user-defined property */
+    }       /* End of it could be a user-defined property */
+
+    /* Here it wasn't a user-defined property that is known at this time.  See
+     * if it is a Unicode property */
+
+    lookup_len = j;     /* This is a more mnemonic name than 'j' */
 
     /* Get the index into our pointer table of the inversion list corresponding
      * to the property */
     table_index = match_uniprop((U8 *) lookup_name, lookup_len);
 
-    /* If it didn't find the property */
+    /* If it didn't find the property ... */
     if (table_index == 0) {
 
-        /* If didn't find the property, we try again stripping off any initial
-         * 'In' or 'Is' */
+        /* Try again stripping off any initial 'In' or 'Is' */
         if (starts_with_In_or_Is) {
             lookup_name += 2;
             lookup_len -= 2;
@@ -22321,14 +22806,28 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
         if (table_index == 0) {
             char * canonical;
 
-            /* If not found, and not a numeric type property, isn't a legal
-             * property */
+            /* Here, we didn't find it.  If not a numeric type property, and
+             * can't be a user-defined one, it isn't a legal property */
             if (! is_nv_type) {
-                return NULL;
-            }
+                if (! could_be_user_defined) {
+                    goto failed;
+                }
 
-            /* But the numeric type properties need more work to decide.  What
-             * we do is make sure we have the number in canonical form and look
+                /* Here, the property name is legal as a user-defined one.   At
+                 * compile time, it might just be that the subroutine for that
+                 * property hasn't been encountered yet, but at runtime, it's
+                 * an error to try to use an undefined one */
+                if (runtime) {
+                    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                    sv_catpvs(msg, "Unknown user-defined property name");
+                    goto append_name_to_msg;
+                }
+
+                goto definition_deferred;
+            } /* End of isn't a numeric type property */
+
+            /* The numeric type properties need more work to decide.  What we
+             * do is make sure we have the number in canonical form and look
              * that up. */
 
             if (slash_pos < 0) {    /* No slash */
@@ -22344,13 +22843,14 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
                              lookup_len - equals_pos)
                           != lookup_name + lookup_len)
                 {
-                    return NULL;
+                    goto failed;
                 }
 
-                /* If the value is an integer, the canonical value is integral */
+                /* If the value is an integer, the canonical value is integral
+                 * */
                 if (Perl_ceil(value) == value) {
                     canonical = Perl_form(aTHX_ "%.*s%.0" NVff,
-                                                equals_pos, lookup_name, value);
+                                            equals_pos, lookup_name, value);
                 }
                 else {  /* Otherwise, it is %e with a known precision */
                     char * exp_ptr;
@@ -22412,12 +22912,12 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
                 /* Convert the numerator to numeric */
                 end_ptr = this_lookup_name + slash_pos;
                 if (! grok_atoUV(this_lookup_name, &numerator, &end_ptr)) {
-                    return NULL;
+                    goto failed;
                 }
 
                 /* It better have included all characters before the slash */
                 if (*end_ptr != '/') {
-                    return NULL;
+                    goto failed;
                 }
 
                 /* Set to look at just the denominator */
@@ -22427,7 +22927,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
 
                 /* Convert the denominator to numeric */
                 if (! grok_atoUV(this_lookup_name, &denominator, &end_ptr)) {
-                    return NULL;
+                    goto failed;
                 }
 
                 /* It better be the rest of the characters, and don't divide by
@@ -22435,7 +22935,7 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
                 if (   end_ptr != this_lookup_name + lookup_len
                     || denominator == 0)
                 {
-                    return NULL;
+                    goto failed;
                 }
 
                 /* Get the greatest common denominator using
@@ -22451,11 +22951,11 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
                 /* If already in lowest possible terms, we have already tried
                  * looking this up */
                 if (gcd == 1) {
-                    return NULL;
+                    goto failed;
                 }
 
-                /* Reduce the rational, which should put it in canonical form.
-                 * Then look it up */
+                /* Reduce the rational, which should put it in canonical form
+                 * */
                 numerator /= gcd;
                 denominator /= gcd;
 
@@ -22466,26 +22966,23 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
             /* Here, we have the number in canonical form.  Try that */
             table_index = match_uniprop((U8 *) canonical, strlen(canonical));
             if (table_index == 0) {
-                return NULL;
+                goto failed;
             }
-        }
-    }
+        }   /* End of still didn't find the property in our table */
+    }       /* End of       didn't find the property in our table */
 
-    /* The return is an index into a table of ptrs.  A negative return
-     * signifies that the real index is the absolute value, but the result
-     * needs to be inverted */
+    /* Here, we have a non-zero return, which is an index into a table of ptrs.
+     * A negative return signifies that the real index is the absolute value,
+     * but the result needs to be inverted */
     if (table_index < 0) {
-        *invert = TRUE;
+        invert_return = TRUE;
         table_index = -table_index;
-    }
-    else {
-        *invert = FALSE;
     }
 
     /* Out-of band indices indicate a deprecated property.  The proper index is
      * modulo it with the table size.  And dividing by the table size yields
-     * an offset into a table constructed to contain the corresponding warning
-     * message */
+     * an offset into a table constructed by regen/mk_invlists.pl to contain
+     * the corresponding warning message */
     if (table_index > MAX_UNI_KEYWORD_INDEX) {
         Size_t warning_offset = table_index / MAX_UNI_KEYWORD_INDEX;
         table_index %= MAX_UNI_KEYWORD_INDEX;
@@ -22519,7 +23016,62 @@ Perl_parse_uniprop_string(pTHX_ const char * const name, const Size_t name_len,
     }
 
     /* Create and return the inversion list */
-    return _new_invlist_C_array(uni_prop_ptrs[table_index]);
+    prop_definition =_new_invlist_C_array(uni_prop_ptrs[table_index]);
+    if (invert_return) {
+        _invlist_invert(prop_definition);
+    }
+    sv_2mortal(prop_definition);
+    return prop_definition;
+
+
+  failed:
+    if (non_pkg_begin != 0) {
+        if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+        sv_catpvs(msg, "Illegal user-defined property name");
+    }
+    else {
+        if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+        sv_catpvs(msg, "Can't find Unicode property definition");
+    }
+    /* FALLTHROUGH */
+
+  append_name_to_msg:
+    {
+        const char * prefix = (runtime && level == 0) ?  " \\p{" : " \"";
+        const char * suffix = (runtime && level == 0) ?  "}" : "\"";
+
+        sv_catpv(msg, prefix);
+        Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
+        sv_catpv(msg, suffix);
+    }
+
+    return NULL;
+
+  definition_deferred:
+
+    /* Here it could yet to be defined, so defer evaluation of this
+     * until its needed at runtime. */
+    prop_definition = newSVpvs_flags("", SVs_TEMP);
+
+    /* To avoid any ambiguity, the package is always specified.
+     * Use the current one if it wasn't included in our input */
+    if (non_pkg_begin == 0) {
+        const HV * pkg = (IN_PERL_COMPILETIME)
+                         ? PL_curstash
+                         : CopSTASH(PL_curcop);
+        const char* pkgname = HvNAME(pkg);
+
+        Perl_sv_catpvf(aTHX_ prop_definition, "%" UTF8f,
+                      UTF8fARG(is_utf8, strlen(pkgname), pkgname));
+        sv_catpvs(prop_definition, "::");
+    }
+
+    Perl_sv_catpvf(aTHX_ prop_definition, "%" UTF8f,
+                         UTF8fARG(is_utf8, name_len, name));
+    sv_catpvs(prop_definition, "\n");
+
+    *user_defined_ptr = TRUE;
+    return prop_definition;
 }
 
 #endif

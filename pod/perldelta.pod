@@ -316,6 +316,72 @@ trees.
 
 Avoid leak in multiconcat with overloading. [perl #133789]
 
+=item *
+
+The handling of user-defined C<\p{}> properties (see
+L<perlunicode/User-Defined Character Properties>) has been rewritten to
+be in C (instead of Perl).  This speeds things up, but in the process
+several inconsistencies and bug fixes are made.
+
+=over
+
+=item 1
+
+A few error messages have minor wording changes.  This is essentially
+because the new way is integrated into the regex error handling
+mechanism that marks the position in the input at which the error
+occurred.  That was not possible previously.  The messages now also
+contain additional back-trace-like information in case the error occurs
+deep in nested calls.
+
+=item 2
+
+A user-defined property is implemented as a perl subroutine with certain
+highly constrained naming conventions.  It was documented previously
+that the sub would be in the current package if the package was
+unspecified.  This turned out not to be true in all cases, but now it
+is.
+
+=item 3
+
+All recursive calls are treated as infinite recursion.  Previously they
+would cause the interpreter to panic.  Now, they cause the regex pattern
+to fail to compile.
+
+=item 4
+
+Similarly, any other error likely would lead to a panic; now to just the
+pattern failing to compile.
+
+=item 5
+
+The old mechanism did not detect illegal ranges in the definition of the
+property.  Now, the range max must not be smaller than the range min.
+Otherwise, the pattern fails to compile.
+
+=item 6
+
+The intention was to have each sub called only once during the lifetime
+of the program, so that a property's definition is immutable.  This was
+relaxed so that it could be called once for all /i compilations, and
+potentially a second time for non-/i (the sub is passed a parameter
+indicating which).  However, in practice there were instances when this
+was broken, and multiple calls were possible.  Those have been fixed.
+Now (besides the /i,non-/i cases) the only way a sub can be called
+multiple times is if some component of it has not been defined yet.  For
+example, suppose we have sub IsA() whose definition is known at compile
+time, and it in turn calls isB() whose definition is not yet known.
+isA() will be called each time a pattern it appears in is compiled.  If
+isA() also calls isC() and that definition is known, isC() will be
+called just once.
+
+=item 7
+
+There were some races and very long hangs should one thread be compiling
+the same property as another simultaneously.  These have now been fixed.
+
+=back
+
 =back
 
 =head1 Acknowledgements

@@ -5991,11 +5991,19 @@ typedef struct am_table_short AMTS;
 #  define KEYWORD_PLUGIN_MUTEX_LOCK    MUTEX_LOCK(&PL_keyword_plugin_mutex)
 #  define KEYWORD_PLUGIN_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_keyword_plugin_mutex)
 #  define KEYWORD_PLUGIN_MUTEX_TERM    MUTEX_DESTROY(&PL_keyword_plugin_mutex)
+#  define USER_PROP_MUTEX_INIT    MUTEX_INIT(&PL_user_prop_mutex)
+#  define USER_PROP_MUTEX_LOCK    MUTEX_LOCK(&PL_user_prop_mutex)
+#  define USER_PROP_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_user_prop_mutex)
+#  define USER_PROP_MUTEX_TERM    MUTEX_DESTROY(&PL_user_prop_mutex)
 #else
 #  define KEYWORD_PLUGIN_MUTEX_INIT    NOOP
 #  define KEYWORD_PLUGIN_MUTEX_LOCK    NOOP
 #  define KEYWORD_PLUGIN_MUTEX_UNLOCK  NOOP
 #  define KEYWORD_PLUGIN_MUTEX_TERM    NOOP
+#  define USER_PROP_MUTEX_INIT    NOOP
+#  define USER_PROP_MUTEX_LOCK    NOOP
+#  define USER_PROP_MUTEX_UNLOCK  NOOP
+#  define USER_PROP_MUTEX_TERM    NOOP
 #endif
 
 #ifdef USE_LOCALE /* These locale things are all subject to change */

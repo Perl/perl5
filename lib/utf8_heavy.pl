@@ -75,9 +75,6 @@ sub _loose_name ($) {
         ##
         ## Callers of swash_init:
         ##     op.c:pmtrans             -- for tr/// and y///
-        ##     regexec.c:regclass_swash -- for /[]/, \p, and \P
-        ##     utf8.c:is_utf8_common    -- for common Unicode properties
-        ##     utf8.c:S__to_utf8_case   -- for lc, uc, ucfirst, etc. and //i
         ##     Unicode::UCD::prop_invlist
         ##     Unicode::UCD::prop_invmap
         ##
