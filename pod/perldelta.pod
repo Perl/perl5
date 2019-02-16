@@ -387,6 +387,11 @@ the same property as another simultaneously.  These have now been fixed.
 This bug was introduced in the 5.29 series, so this should not be in the
 perldelta for 5.30.
 
+=item * Null pointer deref [perl #133770]
+
+This bug was introduced in the 5.29 series, so this should not be in the
+perldelta for 5.30.
+
 =back
 
 =head1 Acknowledgements
