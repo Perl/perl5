@@ -279,7 +279,10 @@ well.
 
 =item *
 
-XXX
+It is now forbidden to malloc more than C<PTRDIFF_T_MAX> bytes.  Much
+code (including C optimizers) assumes that all data structures will not
+be larger than this, so this catches such attempts before overflow
+happens.
 
 =back
 
