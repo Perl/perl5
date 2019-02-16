@@ -18178,8 +18178,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * the only element in the character class (perluniprops.pod notes
              * such properties). */
             if (partial_cp_count == 0) {
-                assert (! invert);
-                ret = reganode(pRExC_state, OPFAIL, 0);
+                if (invert) {
+                    ret = reg_node(pRExC_state, SANY);
+                }
+                else {
+                    ret = reganode(pRExC_state, OPFAIL, 0);
+                }
+
                 goto not_anyof;
             }
 

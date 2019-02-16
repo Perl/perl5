@@ -382,6 +382,11 @@ the same property as another simultaneously.  These have now been fixed.
 
 =back
 
+=item * Assertion failure in compiling invalid regex pattern [perl #133767]
+
+This bug was introduced in the 5.29 series, so this should not be in the
+perldelta for 5.30.
+
 =back
 
 =head1 Acknowledgements
