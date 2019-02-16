@@ -18057,9 +18057,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             invlist_iterinit(cp_list);
             for (i = 0; i <= MAX_FOLD_FROMS; i++) {
-                if (invlist_iternext(cp_list, &start[i], &end[i])) {
-                    partial_cp_count += end[i] - start[i] + 1;
+                if (! invlist_iternext(cp_list, &start[i], &end[i])) {
+                    break;
                 }
+                partial_cp_count += end[i] - start[i] + 1;
             }
 
             invlist_iterfinish(cp_list);
