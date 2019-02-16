@@ -18410,10 +18410,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * inversion list, making sure everything is included. */
                     fold_list = add_cp_to_invlist(fold_list, start[0]);
                     fold_list = add_cp_to_invlist(fold_list, folded);
-                    fold_list = add_cp_to_invlist(fold_list, first_fold);
-                    for (i = 0; i < folds_to_this_cp_count - 1; i++) {
-                        fold_list = add_cp_to_invlist(fold_list,
+                    if (folds_to_this_cp_count > 0) {
+                        fold_list = add_cp_to_invlist(fold_list, first_fold);
+                        for (i = 0; i + 1 < folds_to_this_cp_count; i++) {
+                            fold_list = add_cp_to_invlist(fold_list,
                                                         remaining_folds[i]);
+                        }
                     }
 
                     /* If the fold list is identical to what's in this ANYOF
