@@ -1230,6 +1230,18 @@ Perl_malloc(size_t nbytes)
   	union overhead *p;
   	int bucket;
 
+        /* A structure that has more than PTRDIFF_MAX bytes is unfortunately
+         * legal in C, but in such, if two elements are far enough apart, we
+         * can't legally find out how far apart they are.  Limit the size of a
+         * malloc so that pointer subtraction in the same structure is always
+         * well defined */
+        if (nbytes > PTRDIFF_MAX) {
+            MYMALLOC_WRITE2STDERR("Memory requests are limited to PTRDIFF_MAX"
+                                  " bytes to prevent possible undefined"
+                                  " behavior");
+            return NULL;
+        }
+
 #if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;
 #endif
