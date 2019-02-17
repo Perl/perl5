@@ -53,6 +53,9 @@
 #ifdef I_WCHAR
 #  include <wchar.h>
 #endif
+#ifdef I_WCTYPE
+#  include <wctype.h>
+#endif
 
 /* If the environment says to, we can output debugging information during
  * initialization.  This is done before option parsing, and before any thread
@@ -1528,7 +1531,16 @@ S_new_ctype(pTHX_ const char *newctype)
         /* UTF-8 locales can have special handling for 'I' and 'i' if they are
          * Turkic.  Make sure these two are the only anomalies.  (We don't use
          * towupper and towlower because they aren't in C89.) */
+
+#if defined(HAS_TOWUPPER) && defined (HAS_TOWLOWER)
+
+        if (towupper('i') == 0x130 && towlower('I') == 0x131) {
+
+#else
+
         if (toupper('i') == 'i' && tolower('I') == 'I') {
+
+#endif
             check_for_problems = TRUE;
             maybe_utf8_turkic = TRUE;
         }
