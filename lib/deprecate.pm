@@ -90,7 +90,8 @@ directory, a deprecation warning is issued, encouraging the user to use
 the version on CPAN.  If that module is located in a site library, it is
 the CPAN version, and no warning is issued.
 
-=head2 EXPORT
+
+=head1 EXPORT
 
 None by default.  The only method is C<import>, called by C<use deprecate;>.
 
