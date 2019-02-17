@@ -439,12 +439,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setlinebuf HAS_SETLINEBUF		/**/
 
-/* HAS_SETLOCALE:
- *	This symbol, if defined, indicates that the setlocale routine is
- *	available to handle locale-specific ctype implementations.
- */
-#$d_setlocale HAS_SETLOCALE	/**/
-
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates that the setpgid(pid, gpid)
  *	routine is available to set process group ID.
@@ -3265,6 +3259,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to set interval timers.
  */
 #$d_setitimer HAS_SETITIMER		/**/
+
+/* HAS_SETLOCALE:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available to handle locale-specific ctype implementations.
+ */
+/* SETLOCALE_ACCEPTS_ANY_LOCALE_NAME:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available and it accepts any input locale name as valid.
+ */
+#$d_setlocale HAS_SETLOCALE	/**/
+#$d_setlocale_accepts_any_locale_name SETLOCALE_ACCEPTS_ANY_LOCALE_NAME	/**/
 
 /* HAS_SETPROCTITLE:
  *	This symbol, if defined, indicates that the setproctitle routine is

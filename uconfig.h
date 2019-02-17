@@ -404,12 +404,6 @@
  */
 /*#define HAS_SETLINEBUF		/ **/
 
-/* HAS_SETLOCALE:
- *	This symbol, if defined, indicates that the setlocale routine is
- *	available to handle locale-specific ctype implementations.
- */
-/*#define HAS_SETLOCALE	/ **/
-
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates that the setpgid(pid, gpid)
  *	routine is available to set process group ID.
@@ -3231,6 +3225,17 @@
  */
 /*#define HAS_SETITIMER		/ **/
 
+/* HAS_SETLOCALE:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available to handle locale-specific ctype implementations.
+ */
+/* SETLOCALE_ACCEPTS_ANY_LOCALE_NAME:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available and it accepts any input locale name as valid.
+ */
+/*#define HAS_SETLOCALE	/ **/
+/*#define SETLOCALE_ACCEPTS_ANY_LOCALE_NAME	/ **/
+
 /* HAS_SETPROCTITLE:
  *	This symbol, if defined, indicates that the setproctitle routine is
  *	available to set process title.
@@ -5236,6 +5241,6 @@
 #endif
 
 /* Generated from:
- * 5ad5aeb4fcee5fe869bed0368fc2430fdf0ad7011927820be7d0e6fa076334c5 config_h.SH
- * 2caca0ed689d83f195e6d1887fcf6a1702cceaa595de14be09580f91d06f5d62 uconfig.sh
+ * 2cc5c49f1266887de8224d2804aae6f80c43da0a62782d74866d5e828194698d config_h.SH
+ * d6d2fc8bf209b3d6db681ac0994a29a281afe35c3a96bb62079cb15b0605d035 uconfig.sh
  * ex: set ro: */
