@@ -18089,7 +18089,7 @@ sub make_UCD () {
             next unless $alias->ucd;
             next unless $alias->ok_as_filename;
             push @{$perlprop_to_aliases{standardize($alias->name)}},
-                 @aliases_list;
+                 uniques @aliases_list;
         }
     }
 
