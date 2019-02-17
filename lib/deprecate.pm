@@ -84,7 +84,6 @@ deprecate - Perl pragma for deprecating the core version of a module
 
 This module is used using C<use deprecate;> (or something that calls
 C<< deprecate->import() >>, for example C<use if COND, deprecate;>).
-
 If the module that includes C<use deprecate> is located in a core library
 directory, a deprecation warning is issued, encouraging the user to use
 the version on CPAN.  If that module is located in a site library, it is
