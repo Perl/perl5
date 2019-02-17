@@ -3459,6 +3459,18 @@
  */
 /*#define HAS_TIMEGM		/ **/
 
+/* HAS_TOWLOWER:
+ *	This symbol, if defined, indicates that the towlower () routine is
+ *	available to do string concatenation.
+ */
+/*#define HAS_TOWLOWER		/ **/
+
+/* HAS_TOWUPPER:
+ *	This symbol, if defined, indicates that the towupper () routine is
+ *	available to do string concatenation.
+ */
+/*#define HAS_TOWUPPER		/ **/
+
 /* HAS_TRUNC:
  *	This symbol, if defined, indicates that the trunc routine is
  *	available to round doubles towards zero.
@@ -5224,6 +5236,6 @@
 #endif
 
 /* Generated from:
- * b0f7abde1e7d51e15bfef0b4f71fa0987c1b1e41ec3cff403b1a32497f08eac9 config_h.SH
- * 0b4d3ba29e28741fe7233bb4700224c1ffd68ed01beac57734c273e8736be025 uconfig.sh
+ * 5ad5aeb4fcee5fe869bed0368fc2430fdf0ad7011927820be7d0e6fa076334c5 config_h.SH
+ * 2caca0ed689d83f195e6d1887fcf6a1702cceaa595de14be09580f91d06f5d62 uconfig.sh
  * ex: set ro: */

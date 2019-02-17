@@ -904,6 +904,8 @@ clocktype=''
 d_times=''
 d_tmpnam_r=''
 tmpnam_r_proto=''
+d_towlower=''
+d_towupper=''
 d_trunc=''
 d_truncate=''
 d_truncl=''
@@ -17793,6 +17795,14 @@ eval $inlibc
 set locale.h i_locale
 eval $inhdr
 
+: see if this system has wctype.h
+set wctype.h i_wctype
+eval $inhdr
+
+: see if towupper exists
+set towupper d_towupper
+eval $inlibc
+
 : see if setlocale_r exists
 set setlocale_r d_setlocale_r
 eval $inlibc
@@ -19347,6 +19357,10 @@ case "$d_tmpnam_r" in
 *)	tmpnam_r_proto=0
 	;;
 esac
+
+: see if towlower exists
+set towlower d_towlower
+eval $inlibc
 
 : see if trunc exists
 set trunc d_trunc
@@ -23226,10 +23240,6 @@ esac
 set wchar.h i_wchar
 eval $inhdr
 
-: see if this system has wctype.h
-set wctype.h i_wctype
-eval $inhdr
-
 : Check extensions
 echo " "
 echo "Looking for extensions..." >&4
@@ -24339,6 +24349,8 @@ d_times='$d_times'
 d_tm_tm_gmtoff='$d_tm_tm_gmtoff'
 d_tm_tm_zone='$d_tm_tm_zone'
 d_tmpnam_r='$d_tmpnam_r'
+d_towlower='$d_towlower'
+d_towupper='$d_towupper'
 d_trunc='$d_trunc'
 d_truncate='$d_truncate'
 d_truncl='$d_truncl'
