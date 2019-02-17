@@ -1072,6 +1072,7 @@ i_ustat=''
 i_utime=''
 i_vfork=''
 i_wchar=''
+i_wctype=''
 d_inc_version_list=''
 inc_version_list=''
 inc_version_list_init=''
@@ -23225,6 +23226,10 @@ esac
 set wchar.h i_wchar
 eval $inhdr
 
+: see if this system has wctype.h
+set wctype.h i_wctype
+eval $inhdr
+
 : Check extensions
 echo " "
 echo "Looking for extensions..." >&4
@@ -24553,6 +24558,7 @@ i_ustat='$i_ustat'
 i_utime='$i_utime'
 i_vfork='$i_vfork'
 i_wchar='$i_wchar'
+i_wctype='$i_wctype'
 i_xlocale='$i_xlocale'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'

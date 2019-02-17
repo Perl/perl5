@@ -3761,6 +3761,11 @@
  */
 /*#define   I_WCHAR	/ **/
 
+/* I_WCTYPE:
+ *	This symbol, if defined, indicates that <wctype.h> exists.
+ */
+/*#define	I_WCTYPE		/ **/
+
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
  *	hexadecimal bytes for the double precision infinity.
@@ -5219,6 +5224,6 @@
 #endif
 
 /* Generated from:
- * 875df2221ab768da0a87740ad45e12bbc9e3b483bfa1a913727e982350ad74cf config_h.SH
- * 24ca29f990de08f8119ad2c15f060361b86fc407caab088289d7d5ac3e0f117a uconfig.sh
+ * b0f7abde1e7d51e15bfef0b4f71fa0987c1b1e41ec3cff403b1a32497f08eac9 config_h.SH
+ * 0b4d3ba29e28741fe7233bb4700224c1ffd68ed01beac57734c273e8736be025 uconfig.sh
  * ex: set ro: */

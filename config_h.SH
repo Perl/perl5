@@ -3796,6 +3796,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_wchar   I_WCHAR	/**/
 
+/* I_WCTYPE:
+ *	This symbol, if defined, indicates that <wctype.h> exists.
+ */
+#$i_wctype	I_WCTYPE		/**/
+
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
  *	hexadecimal bytes for the double precision infinity.

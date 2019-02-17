@@ -23,4 +23,5 @@
  * HAS_STRTOD_L
  * HAS_STRTOLD_L
  * I_WCHAR
+ * I_WCTYPE
  */
