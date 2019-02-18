@@ -5218,10 +5218,16 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
     dVAR;
     void *p;
     PERL_ARGS_ASSERT_MY_CXT_INIT;
+    /* do initial check without locking.
+     * -1:    not allocated or another thread currently allocating
+     *  other: already allocated by another thread
+     */
     if (*index == -1) {
-	/* this module hasn't been allocated an index yet */
 	MUTEX_LOCK(&PL_my_ctx_mutex);
-	*index = PL_my_cxt_index++;
+        /*now a stricter check with locking */
+        if (*index == -1)
+            /* this module hasn't been allocated an index yet */
+            *index = PL_my_cxt_index++;
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
     
@@ -5278,9 +5284,12 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 
     index = Perl_my_cxt_index(aTHX_ my_cxt_key);
     if (index == -1) {
-	/* this module hasn't been allocated an index yet */
 	MUTEX_LOCK(&PL_my_ctx_mutex);
-	index = PL_my_cxt_index++;
+        /*now a stricter check with locking */
+        index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+        if (index == -1)
+            /* this module hasn't been allocated an index yet */
+            index = PL_my_cxt_index++;
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
 
