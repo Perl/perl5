@@ -203,7 +203,7 @@ sysread() on any layer that returns UTF-8 marked data.
 
 Other ways to received badly encoded SVs usually involve bugs in XS
 modules, functions like Encode::_utf8_on() that document loudly
-its pre-conditions, and some C<pack> formats.
+its preconditions, and some C<pack> formats.
 
 =item *
 
@@ -224,7 +224,7 @@ security.
 
 Issues in CPAN sourced modules distributed with perl.
 
-ie. modules under F<cpan/> in the source tree.
+i.e. modules under F<cpan/> in the source tree.
 
 Rationale: We don't maintain them.
 
