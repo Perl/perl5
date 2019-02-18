@@ -337,3 +337,13 @@ PERLVARI(G, strategy_socket,     int, 0)	/* doio.c */
 PERLVARI(G, strategy_accept,     int, 0)	/* doio.c */
 PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
 PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
+
+#ifdef PERL_IMPLICIT_CONTEXT
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+/* per-module array of pointers to MY_CXT_KEY constants.
+ * It simulates each module having a static my_cxt_index var on builds
+ * which don't allow static vars */
+PERLVARI(G, my_cxt_keys, const char **, NULL)
+PERLVARI(G, my_cxt_keys_size, int,	0)	/* size of PL_my_cxt_keys */
+#  endif
+#endif

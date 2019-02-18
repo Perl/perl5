@@ -5290,6 +5290,33 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
         if (index == -1)
             /* this module hasn't been allocated an index yet */
             index = PL_my_cxt_index++;
+
+        /* Store the index in a global MY_CXT_KEY string to index mapping
+         * table. This emulates the perl-module static my_cxt_index var on
+         * builds which don't allow static vars */
+        if (PL_my_cxt_keys_size <= index) {
+            int old_size = PL_my_cxt_keys_size;
+            int i;
+            if (PL_my_cxt_keys_size) {
+                IV new_size = PL_my_cxt_keys_size;
+                while (new_size <= index)
+                    new_size *= 2;
+                PL_my_cxt_keys = (const char **)PerlMemShared_realloc(
+                                        PL_my_cxt_keys,
+                                        new_size * sizeof(const char *));
+                PL_my_cxt_keys_size = new_size;
+            }
+            else {
+                PL_my_cxt_keys_size = 16;
+                PL_my_cxt_keys = (const char **)PerlMemShared_malloc(
+                            PL_my_cxt_keys_size * sizeof(const char *));
+            }
+            for (i = old_size; i < PL_my_cxt_keys_size; i++) {
+                PL_my_cxt_keys[i] = 0;
+            }
+        }
+        PL_my_cxt_keys[index] = my_cxt_key;
+
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
 
@@ -5302,20 +5329,16 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 	    while (new_size <= index)
 		new_size *= 2;
 	    Renew(PL_my_cxt_list, new_size, void *);
-	    Renew(PL_my_cxt_keys, new_size, const char *);
             PL_my_cxt_size = new_size;
 	}
 	else {
 	    PL_my_cxt_size = 16;
 	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
-	    Newx(PL_my_cxt_keys, PL_my_cxt_size, const char *);
 	}
 	for (i = old_size; i < PL_my_cxt_size; i++) {
-	    PL_my_cxt_keys[i] = 0;
 	    PL_my_cxt_list[i] = 0;
 	}
     }
-    PL_my_cxt_keys[index] = my_cxt_key;
     /* newSV() allocates one more than needed */
     p = (void*)SvPVX(newSV(size-1));
     PL_my_cxt_list[index] = p;

@@ -15575,16 +15575,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (PL_my_cxt_size) {
 	Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
 	Copy(proto_perl->Imy_cxt_list, PL_my_cxt_list, PL_my_cxt_size, void *);
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-	Newx(PL_my_cxt_keys, PL_my_cxt_size, const char *);
-	Copy(proto_perl->Imy_cxt_keys, PL_my_cxt_keys, PL_my_cxt_size, char *);
-#endif
     }
     else {
 	PL_my_cxt_list	= (void**)NULL;
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-	PL_my_cxt_keys	= (const char**)NULL;
-#endif
     }
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal, param);
     PL_custom_op_names  = hv_dup_inc(proto_perl->Icustom_op_names,param);
