@@ -74,6 +74,23 @@ Allows the attacker to take control.
 Note: Issues like command-line or SQL injection aren't likely to be
 security issues with perl itself.
 
+The C<.> in C<@INC> issue (CVE-2016-1238) could allow an attacker to
+take control if a perl program was run from a directory an attacker
+could write to (such as /tmp), or if the program switched to that
+directory before calling C<require>.
+
+=item *
+
+Allows an attacker to modify, delete or read files they otherwise
+don't have access to.
+
+=item *
+
+Privilege escalation bugs.
+
+e.g. a bug in C<POSIX::setreuid> that failed to properly set the
+effective user id.
+
 =back
 
 A security issue in code written in perl that isn't part of the perl
