@@ -87,7 +87,7 @@ service.
 
 A security issue in perl related websites (including C<perl.org>) is a
 security issue, but not in the perl core, and again should be reported
-directly, to the contact address published on the relevant site.
+directly to the contact address published on the relevant site.
 
 =head2 What we don't treat as a security issue
 
