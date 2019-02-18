@@ -132,7 +132,7 @@ that is a likely security issue.
 
 Escape a L<Safe> compartment.
 
-Rationale: Safe isn't considered a security mechanism.
+Rationale: Safe isn't supported as a security mechanism.
 
 =item *
 
