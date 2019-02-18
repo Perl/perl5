@@ -201,7 +201,7 @@ The simplest way to get such a badly encoded SV is to use the C<:utf8>
 PerlIO layer and read badly encoded data, or with older perls, use
 sysread() on any layer that returns UTF-8 marked data.
 
-Other ways to received badly encoded SVs usually involve bugs in XS
+Other ways to receive badly encoded SVs usually involve bugs in XS
 modules, functions like Encode::_utf8_on() that document loudly
 its preconditions, and some C<pack> formats.
 
