@@ -1691,3 +1691,17 @@ EXPECT
 OPTION regex
 Malformed UTF-8 character: .*non-continuation.*
 The eval did not crash the program
+########
+# NAME [perl #133850] print $fh $1 in s///e expression
+use warnings;
+my $fh = \*STDOUT;
+$_ = "abc";
+s/(x)/ print $fh $1 /e;
+EXPECT
+########
+# NAME [perl #133850] side case
+use warnings;
+my $fh = \*STDOUT;
+my $y = "";
+my $x = "${print $fh $y; \'x'}";
+EXPECT
