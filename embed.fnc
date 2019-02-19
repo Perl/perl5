@@ -3130,7 +3130,7 @@ px	|void	|my_clearenv
 Apo	|void*	|my_cxt_init	|NN const char *my_cxt_key|size_t size
 Apo	|int	|my_cxt_index	|NN const char *my_cxt_key
 #else
-Apo	|void*	|my_cxt_init	|NN int *index|size_t size
+Apo	|void*	|my_cxt_init	|NN int *indexp|size_t size
 #endif
 #endif
 #if defined(PERL_IN_UTIL_C)

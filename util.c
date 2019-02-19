@@ -5213,29 +5213,35 @@ extending the interpreter's PL_my_cxt_list array */
 
 #ifndef PERL_GLOBAL_STRUCT_PRIVATE
 void *
-Perl_my_cxt_init(pTHX_ int *index, size_t size)
+Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
 {
     dVAR;
     void *p;
+    int index;
+
     PERL_ARGS_ASSERT_MY_CXT_INIT;
+
+    index = *indexp;
     /* do initial check without locking.
      * -1:    not allocated or another thread currently allocating
      *  other: already allocated by another thread
      */
-    if (*index == -1) {
+    if (index == -1) {
 	MUTEX_LOCK(&PL_my_ctx_mutex);
         /*now a stricter check with locking */
-        if (*index == -1)
+        index = *indexp;
+        if (index == -1)
             /* this module hasn't been allocated an index yet */
-            *index = PL_my_cxt_index++;
+            *indexp = PL_my_cxt_index++;
+        index = *indexp;
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
-    
+
     /* make sure the array is big enough */
-    if (PL_my_cxt_size <= *index) {
+    if (PL_my_cxt_size <= index) {
 	if (PL_my_cxt_size) {
             IV new_size = PL_my_cxt_size;
-	    while (new_size <= *index)
+	    while (new_size <= index)
 		new_size *= 2;
 	    Renew(PL_my_cxt_list, new_size, void *);
             PL_my_cxt_size = new_size;
@@ -5247,7 +5253,7 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
     }
     /* newSV() allocates one more than needed */
     p = (void*)SvPVX(newSV(size-1));
-    PL_my_cxt_list[*index] = p;
+    PL_my_cxt_list[index] = p;
     Zero(p, size, char);
     return p;
 }
@@ -5283,6 +5289,10 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
     PERL_ARGS_ASSERT_MY_CXT_INIT;
 
     index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+    /* do initial check without locking.
+     * -1:    not allocated or another thread currently allocating
+     *  other: already allocated by another thread
+     */
     if (index == -1) {
 	MUTEX_LOCK(&PL_my_ctx_mutex);
         /*now a stricter check with locking */
