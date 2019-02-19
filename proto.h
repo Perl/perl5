@@ -4232,9 +4232,6 @@ PERL_STATIC_INLINE void	S_invlist_clear(pTHX_ SV* invlist);
 #define PERL_ARGS_ASSERT_INVLIST_CLEAR	\
 	assert(invlist)
 #endif
-STATIC void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
-#define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
-	assert(invlist)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE UV	S_invlist_max(SV* const invlist)
 			__attribute__warn_unused_result__;
@@ -4252,11 +4249,6 @@ PERL_STATIC_INLINE IV	S_invlist_previous_index(SV* const invlist)
 STATIC void	S_invlist_replace_list_destroys_src(pTHX_ SV *dest, SV *src);
 #define PERL_ARGS_ASSERT_INVLIST_REPLACE_LIST_DESTROYS_SRC	\
 	assert(dest); assert(src)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
-#define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
-	assert(invlist)
-#endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_invlist_set_previous_index(SV* const invlist, const IV index);
 #define PERL_ARGS_ASSERT_INVLIST_SET_PREVIOUS_INDEX	\
@@ -5611,11 +5603,18 @@ STATIC regnode_offset	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV **
 PERL_CALLCONV SV *	Perl_handle_user_defined_property(pTHX_ const char * name, const STRLEN name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, SV* contents, bool *user_defined_ptr, SV * msg, const STRLEN level);
 #define PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY	\
 	assert(name); assert(contents); assert(user_defined_ptr); assert(msg)
-STATIC SV*	S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV*	S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_CONTENTS	\
 	assert(invlist)
+#endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
+#define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
+	assert(invlist)
+#endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE UV	S_invlist_highest(SV* const invlist)
 			__attribute__warn_unused_result__;
@@ -5640,11 +5639,18 @@ PERL_STATIC_INLINE void	S_invlist_iterinit(SV* invlist);
 #define PERL_ARGS_ASSERT_INVLIST_ITERINIT	\
 	assert(invlist)
 #endif
-STATIC bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_ITERNEXT	\
 	assert(invlist); assert(start); assert(end)
+#endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
+#define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
+	assert(invlist)
+#endif
 STATIC bool	S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc);
 #define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT	\
 	assert(pRExC_state); assert(ssc)
@@ -5797,7 +5803,7 @@ STATIC SSize_t	S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, S
 #define PERL_ARGS_ASSERT_STUDY_CHUNK	\
 	assert(pRExC_state); assert(scanp); assert(minlenp); assert(deltap); assert(last)
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 PERL_CALLCONV void	Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char* const indent, SV* const invlist);
 #define PERL_ARGS_ASSERT__INVLIST_DUMP	\
 	assert(file); assert(indent); assert(invlist)
@@ -5899,7 +5905,7 @@ PERL_STATIC_INLINE I32	S_regcurly(const char *s)
 #endif
 
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
 PERL_CALLCONV SV*	Perl__add_range_to_invlist(pTHX_ SV* invlist, UV start, UV end)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__ADD_RANGE_TO_INVLIST

@@ -1869,35 +1869,39 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 ApR	|NV	|str_to_version	|NN SV *sv
 EXpR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 EXp	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
-#ifdef PERL_IN_REGCOMP_C
+#if defined(PERL_IN_REGCOMP_C)
 EiR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
+Ei	|void	|invlist_extend    |NN SV* const invlist|const UV len
+Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
+EiRT	|UV	|invlist_highest|NN SV* const invlist
+EiRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
+EiT	|void	|invlist_iterinit|NN SV* invlist
+EiRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
+EiT	|void	|invlist_iterfinish|NN SV* invlist
+#endif
+#if defined(PERL_IN_REGCOMP_C)
 EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
+EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
+				 |const bool traditional_style
 #ifndef PERL_EXT_RE_BUILD
 EiRT	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiRT	|UV	|invlist_max	|NN SV* const invlist
-ES	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
-ES	|void	|invlist_extend    |NN SV* const invlist|const UV len
-ES	|void	|invlist_replace_list_destroys_src|NN SV *dest|NN SV *src
 EiRT	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
-Ei	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
 EiT	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
 EiRT	|IV	|invlist_previous_index|NN SV* const invlist
 EiT	|void	|invlist_trim	|NN SV* invlist
 Ei	|void	|invlist_clear	|NN SV* invlist
-S	|void	|initialize_invlist_guts|NN SV* invlist|const Size_t initial_size
 #endif
-EiRT	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
-EiT	|void	|invlist_iterinit|NN SV* invlist
-ESRT	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
-EiT	|void	|invlist_iterfinish|NN SV* invlist
-EiRT	|UV	|invlist_highest|NN SV* const invlist
-ESR	|SV*	|invlist_contents|NN SV* const invlist		    \
-				 |const bool traditional_style
 ESRT	|bool	|new_regcurly	|NN const char *s|NN const char *e
 ERS	|SV*	|make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
+#ifndef PERL_EXT_RE_BUILD
+ES	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
+ES	|void	|invlist_replace_list_destroys_src|NN SV *dest|NN SV *src
+S	|void	|initialize_invlist_guts|NN SV* invlist|const Size_t initial_size
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
 m	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EXp	|void	|_invlist_intersection_maybe_complement_2nd \
 		|NULLOK SV* const a|NN SV* const b          \
@@ -1935,7 +1939,7 @@ EXp	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK SV **lonly_utf8_locale		   \
 				|NULLOK SV **output_invlist
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 EXp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 				|NN const char* const indent \
 				|NN SV* const invlist

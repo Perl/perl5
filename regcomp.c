@@ -9032,23 +9032,6 @@ S__invlist_array_init(SV* const invlist, const bool will_have_0)
     return zero_addr + *offset;
 }
 
-PERL_STATIC_INLINE void
-S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
-{
-    /* Sets the current number of elements stored in the inversion list.
-     * Updates SvCUR correspondingly */
-    PERL_UNUSED_CONTEXT;
-    PERL_ARGS_ASSERT_INVLIST_SET_LEN;
-
-    assert(is_invlist(invlist));
-
-    SvCUR_set(invlist,
-              (len == 0)
-               ? 0
-               : TO_INTERNAL_SIZE(len + offset));
-    assert(SvLEN(invlist) == 0 || SvCUR(invlist) <= SvLEN(invlist));
-}
-
 STATIC void
 S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
 {
@@ -9277,20 +9260,6 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
     SvPOK_on(invlist);
 
     return invlist;
-}
-
-STATIC void
-S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
-{
-    /* Grow the maximum size of an inversion list */
-
-    PERL_ARGS_ASSERT_INVLIST_EXTEND;
-
-    assert(is_invlist(invlist));
-
-    /* Add one to account for the zero element at the beginning which may not
-     * be counted by the calling parameters */
-    SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max + 1));
 }
 
 STATIC void
@@ -10279,11 +10248,6 @@ Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0,
 
 #endif
 
-PERL_STATIC_INLINE SV*
-S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
-    return _add_range_to_invlist(invlist, cp, cp);
-}
-
 #ifndef PERL_IN_XSUB_RE
 void
 Perl__invlist_invert(pTHX_ SV* const invlist)
@@ -10333,108 +10297,6 @@ Perl_invlist_clone(pTHX_ SV* const invlist, SV* new_invlist)
 }
 
 #endif
-
-PERL_STATIC_INLINE STRLEN*
-S_get_invlist_iter_addr(SV* invlist)
-{
-    /* Return the address of the UV that contains the current iteration
-     * position */
-
-    PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
-
-    assert(is_invlist(invlist));
-
-    return &(((XINVLIST*) SvANY(invlist))->iterator);
-}
-
-PERL_STATIC_INLINE void
-S_invlist_iterinit(SV* invlist)	/* Initialize iterator for invlist */
-{
-    PERL_ARGS_ASSERT_INVLIST_ITERINIT;
-
-    *get_invlist_iter_addr(invlist) = 0;
-}
-
-PERL_STATIC_INLINE void
-S_invlist_iterfinish(SV* invlist)
-{
-    /* Terminate iterator for invlist.  This is to catch development errors.
-     * Any iteration that is interrupted before completed should call this
-     * function.  Functions that add code points anywhere else but to the end
-     * of an inversion list assert that they are not in the middle of an
-     * iteration.  If they were, the addition would make the iteration
-     * problematical: if the iteration hadn't reached the place where things
-     * were being added, it would be ok */
-
-    PERL_ARGS_ASSERT_INVLIST_ITERFINISH;
-
-    *get_invlist_iter_addr(invlist) = (STRLEN) UV_MAX;
-}
-
-STATIC bool
-S_invlist_iternext(SV* invlist, UV* start, UV* end)
-{
-    /* An C<invlist_iterinit> call on <invlist> must be used to set this up.
-     * This call sets in <*start> and <*end>, the next range in <invlist>.
-     * Returns <TRUE> if successful and the next call will return the next
-     * range; <FALSE> if was already at the end of the list.  If the latter,
-     * <*start> and <*end> are unchanged, and the next call to this function
-     * will start over at the beginning of the list */
-
-    STRLEN* pos = get_invlist_iter_addr(invlist);
-    UV len = _invlist_len(invlist);
-    UV *array;
-
-    PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
-
-    if (*pos >= len) {
-	*pos = (STRLEN) UV_MAX;	/* Force iterinit() to be required next time */
-	return FALSE;
-    }
-
-    array = invlist_array(invlist);
-
-    *start = array[(*pos)++];
-
-    if (*pos >= len) {
-	*end = UV_MAX;
-    }
-    else {
-	*end = array[(*pos)++] - 1;
-    }
-
-    return TRUE;
-}
-
-PERL_STATIC_INLINE UV
-S_invlist_highest(SV* const invlist)
-{
-    /* Returns the highest code point that matches an inversion list.  This API
-     * has an ambiguity, as it returns 0 under either the highest is actually
-     * 0, or if the list is empty.  If this distinction matters to you, check
-     * for emptiness before calling this function */
-
-    UV len = _invlist_len(invlist);
-    UV *array;
-
-    PERL_ARGS_ASSERT_INVLIST_HIGHEST;
-
-    if (len == 0) {
-	return 0;
-    }
-
-    array = invlist_array(invlist);
-
-    /* The last element in the array in the inversion list always starts a
-     * range that goes to infinity.  That range may be for code points that are
-     * matched in the inversion list, or it may be for ones that aren't
-     * matched.  In the latter case, the highest code point in the set is one
-     * less than the beginning of this range; otherwise it is the final element
-     * of this range: infinity */
-    return (ELEMENT_RANGE_MATCHES_INVLIST(len - 1))
-           ? UV_MAX
-           : array[len - 1] - 1;
-}
 
 STATIC SV *
 S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)

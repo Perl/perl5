@@ -957,11 +957,9 @@
 #define _invlist_array_init	S__invlist_array_init
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
 #define invlist_clear(a)	S_invlist_clear(aTHX_ a)
-#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_max		S_invlist_max
 #define invlist_previous_index	S_invlist_previous_index
 #define invlist_replace_list_destroys_src(a,b)	S_invlist_replace_list_destroys_src(aTHX_ a,b)
-#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
 #define invlist_set_previous_index	S_invlist_set_previous_index
 #define invlist_trim		S_invlist_trim
 #    endif
@@ -1033,11 +1031,13 @@
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
 #define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	Perl_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
+#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_highest		S_invlist_highest
 #define invlist_is_iterating	S_invlist_is_iterating
 #define invlist_iterfinish	S_invlist_iterfinish
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
+#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_exactf_invlist(a,b)	S_make_exactf_invlist(aTHX_ a,b)
@@ -1080,7 +1080,7 @@
 #define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
+#  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
 #define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
@@ -1112,7 +1112,7 @@
 #define grok_bslash_x(a,b,c,d,e,f,g,h)	Perl_grok_bslash_x(aTHX_ a,b,c,d,e,f,g,h)
 #define regcurly		S_regcurly
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
 #define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
