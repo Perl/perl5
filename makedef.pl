@@ -283,7 +283,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_hv_assert
 		    PL_watchaddr
 		    PL_watchok
-		    PL_watch_pvx
 			 );
 }
 

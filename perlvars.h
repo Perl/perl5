@@ -111,9 +111,7 @@ PERLVAR(G, lc_numeric_mutex, perl_mutex)   /* Mutex for switching LC_NUMERIC */
 PERLVAR(G, C_locale_obj, locale_t)
 #endif
 
-#ifdef DEBUGGING
 PERLVARI(G, watch_pvx,	char *, NULL)
-#endif
 
 /*
 =for apidoc AmU|Perl_check_t *|PL_check
