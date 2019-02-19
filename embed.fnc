@@ -1506,6 +1506,7 @@ p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|NULLOK OP *repl \
 #if defined(PERL_IN_OP_C)
 S	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif
+p	|void	|invmap_dump	|NN SV* invlist|NN UV * map
 Ap	|void	|pop_scope
 Ap	|void	|push_scope
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
@@ -1919,7 +1920,9 @@ EXpR	|SV*	|_setup_canned_invlist|const STRLEN size|const UV element0|NN UV** oth
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
 EpX	|SV*	|invlist_clone	|NN SV* const invlist|NULLOK SV* newlist
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	\
+ || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		\
+ || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)
 EiRT	|UV*	|invlist_array	|NN SV* const invlist
 EiRT	|bool	|is_invlist	|NULLOK SV* const invlist
 EiRT	|bool*	|get_invlist_offset_addr|NN SV* invlist

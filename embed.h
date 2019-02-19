@@ -1094,7 +1094,7 @@
 #endif
 #define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)
 #define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
@@ -1288,6 +1288,7 @@
 #define init_named_cv(a,b)	Perl_init_named_cv(aTHX_ a,b)
 #define init_uniprops()		Perl_init_uniprops(aTHX)
 #define invert(a)		Perl_invert(aTHX_ a)
+#define invmap_dump(a,b)	Perl_invmap_dump(aTHX_ a,b)
 #define io_close(a,b,c,d)	Perl_io_close(aTHX_ a,b,c,d)
 #define isinfnansv(a)		Perl_isinfnansv(aTHX_ a)
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)

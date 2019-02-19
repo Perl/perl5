@@ -164,6 +164,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "keywords.h"
 #include "feature.h"
 #include "regcomp.h"
+#include "invlist_inline.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
@@ -6711,6 +6712,46 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 	return (OP*)binop;
 
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
+}
+
+void
+Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
+{
+    const char indent[] = "    ";
+
+    UV len = _invlist_len(invlist);
+    UV * array = invlist_array(invlist);
+    UV i;
+
+    PERL_ARGS_ASSERT_INVMAP_DUMP;
+
+    for (i = 0; i < len; i++) {
+        UV start = array[i];
+        UV end   = (i + 1 < len) ? array[i+1] - 1 : IV_MAX;
+
+        PerlIO_printf(Perl_debug_log, "%s[%" UVuf "] 0x%04" UVXf, indent, i, start);
+        if (end == IV_MAX) {
+            PerlIO_printf(Perl_debug_log, " .. INFTY");
+	}
+	else if (end != start) {
+            PerlIO_printf(Perl_debug_log, " .. 0x%04" UVXf, end);
+	}
+        else {
+            PerlIO_printf(Perl_debug_log, "            ");
+        }
+
+        PerlIO_printf(Perl_debug_log, "\t");
+
+        if (map[i] == TR_UNLISTED) {
+            PerlIO_printf(Perl_debug_log, "TR_UNLISTED\n");
+        }
+        else if (map[i] == TR_SPECIAL_HANDLING) {
+            PerlIO_printf(Perl_debug_log, "TR_SPECIAL_HANDLING\n");
+        }
+        else {
+            PerlIO_printf(Perl_debug_log, "0x%04" UVXf "\n", map[i]);
+        }
+    }
 }
 
 /* Helper function for S_pmtrans(): comparison function to sort an array

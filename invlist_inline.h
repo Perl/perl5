@@ -13,7 +13,8 @@
  || defined(PERL_IN_REGCOMP_C)          \
  || defined(PERL_IN_REGEXEC_C)          \
  || defined(PERL_IN_TOKE_C)             \
- || defined(PERL_IN_PP_C)
+ || defined(PERL_IN_PP_C)               \
+ || defined(PERL_IN_OP_C)
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
  * etc */
