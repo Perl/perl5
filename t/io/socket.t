@@ -44,6 +44,18 @@ my $fork = $Config{d_fork} || $Config{d_pseudofork};
     ok(close($sock), "close the socket");
 }
 
+SKIP:
+{
+    $udp
+        or skip "No udp", 1;
+    # [perl #133853] failed socket creation didn't set error
+    # for bad parameters on Win32
+    $! = 0;
+    socket(my $sock, PF_INET, SOCK_STREAM, $udp)
+        and skip "managed to make a UDP stream socket", 1;
+    ok(0+$!, "error set on failed socket()");
+}
+
 SKIP: {
     # test it all in TCP
     $local or skip("No localhost", 3);
