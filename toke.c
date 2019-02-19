@@ -6838,7 +6838,7 @@ Perl_yylex(pTHX)
 	    }
 
 	    PL_expect = XOPERATOR;
-	    if (PL_lex_state == LEX_NORMAL && isSPACE((char)tmp)) {
+	    if ((PL_lex_state == LEX_NORMAL || PL_lex_brackets) && isSPACE((char)tmp)) {
 		const bool islop = (PL_last_lop == PL_oldoldbufptr);
 		if (!islop || PL_last_lop_op == OP_GREPSTART)
 		    PL_expect = XOPERATOR;
