@@ -1071,10 +1071,10 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
 #if defined(DEBUGGING) && defined(PERL_GLOBAL_STRUCT)
     dVAR;
 #endif
-#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
+#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT)
     static bool done_sanity_check;
 
-    /* PERL_GLOBAL_STRUCT_PRIVATE cannot coexist with global
+    /* PERL_GLOBAL_STRUCT cannot coexist with global
      * variables like done_sanity_check. */
     if (!done_sanity_check) {
 	unsigned int i = SVt_LAST;
