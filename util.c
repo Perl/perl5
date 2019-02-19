@@ -5332,8 +5332,6 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 
     /* make sure the array is big enough */
     if (PL_my_cxt_size <= index) {
-	int old_size = PL_my_cxt_size;
-	int i;
 	if (PL_my_cxt_size) {
             IV new_size = PL_my_cxt_size;
 	    while (new_size <= index)
@@ -5344,9 +5342,6 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 	else {
 	    PL_my_cxt_size = 16;
 	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
-	}
-	for (i = old_size; i < PL_my_cxt_size; i++) {
-	    PL_my_cxt_list[i] = 0;
 	}
     }
     /* newSV() allocates one more than needed */
