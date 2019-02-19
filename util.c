@@ -5204,62 +5204,12 @@ Perl_my_clearenv(pTHX)
 
 #ifdef PERL_IMPLICIT_CONTEXT
 
-/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
-the global PL_my_cxt_index is incremented, and that value is assigned to
-that module's static my_cxt_index (who's address is passed as an arg).
-Then, for each interpreter this function is called for, it makes sure a
-void* slot is available to hang the static data off, by allocating or
-extending the interpreter's PL_my_cxt_list array */
 
-#ifndef PERL_GLOBAL_STRUCT_PRIVATE
-void *
-Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
-{
-    dVAR;
-    void *p;
-    int index;
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
 
-    PERL_ARGS_ASSERT_MY_CXT_INIT;
-
-    index = *indexp;
-    /* do initial check without locking.
-     * -1:    not allocated or another thread currently allocating
-     *  other: already allocated by another thread
-     */
-    if (index == -1) {
-	MUTEX_LOCK(&PL_my_ctx_mutex);
-        /*now a stricter check with locking */
-        index = *indexp;
-        if (index == -1)
-            /* this module hasn't been allocated an index yet */
-            *indexp = PL_my_cxt_index++;
-        index = *indexp;
-	MUTEX_UNLOCK(&PL_my_ctx_mutex);
-    }
-
-    /* make sure the array is big enough */
-    if (PL_my_cxt_size <= index) {
-	if (PL_my_cxt_size) {
-            IV new_size = PL_my_cxt_size;
-	    while (new_size <= index)
-		new_size *= 2;
-	    Renew(PL_my_cxt_list, new_size, void *);
-            PL_my_cxt_size = new_size;
-	}
-	else {
-	    PL_my_cxt_size = 16;
-	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
-	}
-    }
-    /* newSV() allocates one more than needed */
-    p = (void*)SvPVX(newSV(size-1));
-    PL_my_cxt_list[index] = p;
-    Zero(p, size, char);
-    return p;
-}
-
-#else /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
-
+/* rather than each module having a static var holding its index,
+ * use a global array of name to index mappings
+ */
 int
 Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
 {
@@ -5278,9 +5228,22 @@ Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
     }
     return -1;
 }
+#  endif
+
+
+/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
+the global PL_my_cxt_index is incremented, and that value is assigned to
+that module's static my_cxt_index (who's address is passed as an arg).
+Then, for each interpreter this function is called for, it makes sure a
+void* slot is available to hang the static data off, by allocating or
+extending the interpreter's PL_my_cxt_list array */
 
 void *
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
 Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
+#  else
+Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
+#  endif
 {
     dVAR;
     void *p;
@@ -5288,7 +5251,11 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 
     PERL_ARGS_ASSERT_MY_CXT_INIT;
 
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+#  else
+    index = *indexp;
+#  endif
     /* do initial check without locking.
      * -1:    not allocated or another thread currently allocating
      *  other: already allocated by another thread
@@ -5296,9 +5263,14 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
     if (index == -1) {
 	MUTEX_LOCK(&PL_my_ctx_mutex);
         /*now a stricter check with locking */
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
         index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+#  else
+        index = *indexp;
+#  endif
         if (index == -1)
             /* this module hasn't been allocated an index yet */
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
             index = PL_my_cxt_index++;
 
         /* Store the index in a global MY_CXT_KEY string to index mapping
@@ -5326,7 +5298,10 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
             }
         }
         PL_my_cxt_keys[index] = my_cxt_key;
-
+#  else
+            *indexp = PL_my_cxt_index++;
+        index = *indexp;
+#  endif
 	MUTEX_UNLOCK(&PL_my_ctx_mutex);
     }
 
@@ -5350,7 +5325,7 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
     Zero(p, size, char);
     return p;
 }
-#endif /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
+
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 
