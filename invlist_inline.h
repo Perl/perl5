@@ -86,7 +86,7 @@ S_invlist_array(SV* const invlist)
     return ((UV *) SvPVX(invlist) + *get_invlist_offset_addr(invlist));
 }
 
-#   if defined(PERL_IN_REGEXEC_C)
+#   ifndef PERL_IN_REGCOMP_C
 
 /* These symbols are only needed later in regcomp.c */
 #       undef TO_INTERNAL_SIZE
