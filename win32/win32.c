@@ -1684,6 +1684,8 @@ win32_longpath(char *path)
 static void
 out_of_memory(void)
 {
+    dVAR;
+
     if (PL_curinterp)
 	croak_no_mem();
     exit(1);
@@ -4711,6 +4713,7 @@ win32_csighandler(int sig)
 void
 Perl_sys_intern_init(pTHX)
 {
+    dVAR;
     int i;
 
     w32_perlshell_tokens	= NULL;
@@ -4760,6 +4763,8 @@ Perl_sys_intern_init(pTHX)
 void
 Perl_sys_intern_clear(pTHX)
 {
+    dVAR;
+
     Safefree(w32_perlshell_tokens);
     Safefree(w32_perlshell_vec);
     /* NOTE: w32_fdpid is freed by sv_clean_all() */

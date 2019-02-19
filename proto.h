@@ -4058,9 +4058,9 @@ PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
 #endif
 #if !(defined(PERL_GLOBAL_STRUCT_PRIVATE))
 #  if defined(PERL_IMPLICIT_CONTEXT)
-PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size);
+PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
 #define PERL_ARGS_ASSERT_MY_CXT_INIT	\
-	assert(index)
+	assert(indexp)
 #  endif
 #endif
 #if !(defined(_MSC_VER))

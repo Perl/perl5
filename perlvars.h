@@ -111,9 +111,7 @@ PERLVAR(G, lc_numeric_mutex, perl_mutex)   /* Mutex for switching LC_NUMERIC */
 PERLVAR(G, C_locale_obj, locale_t)
 #endif
 
-#ifdef DEBUGGING
 PERLVARI(G, watch_pvx,	char *, NULL)
-#endif
 
 /*
 =for apidoc AmU|Perl_check_t *|PL_check
@@ -304,7 +302,7 @@ PERLVAR(G, utf8_tosimplefold,	SV *)
 PERLVAR(G, utf8_charname_begin, SV *)
 PERLVAR(G, utf8_charname_continue, SV *)
 PERLVAR(G, utf8_mark,	SV *)
-PERLVAR(G, InBitmap,	SV *)
+PERLVARI(G, InBitmap,	SV *, NULL)
 PERLVAR(G, CCC_non0_non230,	SV *)
 
 /* Definitions of user-defined \p{} properties, as the subs that define them
@@ -321,3 +319,29 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
 /* Everything that folds to a given character, for case insensitivity regex
  * matching */
 PERLVAR(G, utf8_foldclosures, SV *)
+
+/* these record the best way to to perform certain IO operations while
+ * atomically setting FD_CLOEXEC. On the first call, a probe is done
+ * and the result recorded for use by subsequent calls.
+ * In theory these variables aren't thread-safe, but the worst that can
+ * happen is that two treads will both do an initial probe
+ */
+PERLVARI(G, strategy_dup,        int, 0)	/* doio.c */
+PERLVARI(G, strategy_dup2,       int, 0)	/* doio.c */
+PERLVARI(G, strategy_open,       int, 0)	/* doio.c */
+PERLVARI(G, strategy_open3,      int, 0)	/* doio.c */
+PERLVARI(G, strategy_mkstemp,    int, 0)	/* doio.c */
+PERLVARI(G, strategy_socket,     int, 0)	/* doio.c */
+PERLVARI(G, strategy_accept,     int, 0)	/* doio.c */
+PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
+PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
+
+#ifdef PERL_IMPLICIT_CONTEXT
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+/* per-module array of pointers to MY_CXT_KEY constants.
+ * It simulates each module having a static my_cxt_index var on builds
+ * which don't allow static vars */
+PERLVARI(G, my_cxt_keys, const char **, NULL)
+PERLVARI(G, my_cxt_keys_size, int,	0)	/* size of PL_my_cxt_keys */
+#  endif
+#endif

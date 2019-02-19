@@ -2596,6 +2596,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
      * interior, hence to the "}".  Finds what the name resolves to, returning
      * an SV* containing it; NULL if no valid one found */
 
+    dVAR;
     SV* res = newSVpvn_flags(s, e - s, UTF ? SVf_UTF8 : 0);
 
     HV * table;

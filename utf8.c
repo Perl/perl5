@@ -2778,6 +2778,7 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 bool
 Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 {
+    dVAR;
     return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
 }
 
@@ -2787,6 +2788,8 @@ Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 bool
 Perl__is_utf8_idstart(pTHX_ const U8 *p)
 {
+    dVAR;
+
     PERL_ARGS_ASSERT__IS_UTF8_IDSTART;
 
     if (*p == '_')
@@ -2797,12 +2800,14 @@ Perl__is_utf8_idstart(pTHX_ const U8 *p)
 bool
 Perl__is_uni_perl_idcont(pTHX_ UV c)
 {
+    dVAR;
     return _invlist_contains_cp(PL_utf8_perl_idcont, c);
 }
 
 bool
 Perl__is_uni_perl_idstart(pTHX_ UV c)
 {
+    dVAR;
     return _invlist_contains_cp(PL_utf8_perl_idstart, c);
 }
 
@@ -2942,6 +2947,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
      * The ordinal of the first character of the changed version is returned
      * (but note, as explained above, that there may be more.) */
 
+    dVAR;
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
     if (c < 256) {
@@ -2954,6 +2960,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    dVAR;
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
     if (c < 256) {
@@ -2993,6 +3000,7 @@ S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp, const char dummy)
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    dVAR;
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
     if (c < 256) {
@@ -3074,6 +3082,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      */
 
+    dVAR;
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
     if (flags & FOLD_FLAGS_LOCALE) {
@@ -3210,6 +3219,7 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
                         const char * const file,
                         const unsigned line)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
     warn_on_first_deprecated_use(name, alternative, use_locale, file, line);
@@ -3282,6 +3292,7 @@ bool
 Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
                                                             const U8 * const e)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_FOO_WITH_LEN;
 
     return is_utf8_common_with_len(p, e, PL_XPosix_ptrs[classnum]);
@@ -3290,6 +3301,7 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
 bool
 Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART_WITH_LEN;
 
     return is_utf8_common_with_len(p, e, PL_utf8_perl_idstart);
@@ -3298,6 +3310,7 @@ Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 bool
 Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_XIDSTART;
 
     if (*p == '_')
@@ -3308,6 +3321,7 @@ Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN;
 
     return is_utf8_common_with_len(p, e, PL_utf8_perl_idcont);
@@ -3316,6 +3330,7 @@ Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 bool
 Perl__is_utf8_idcont(pTHX_ const U8 *p)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_IDCONT;
 
     return is_utf8_common(p, PL_utf8_idcont);
@@ -3324,6 +3339,7 @@ Perl__is_utf8_idcont(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_xidcont(pTHX_ const U8 *p)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_XIDCONT;
 
     return is_utf8_common(p, PL_utf8_xidcont);
@@ -3332,6 +3348,7 @@ Perl__is_utf8_xidcont(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_mark(pTHX_ const U8 *p)
 {
+    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_MARK;
 
     return is_utf8_common(p, PL_utf8_mark);
@@ -3535,6 +3552,7 @@ Perl__inverse_folds(pTHX_ const UV cp, unsigned int * first_folds_to,
      * the return can point to them, but single code points aren't, so would
      * need to be constructed if we didn't employ something like this API */
 
+    dVAR;
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [perl #133365] */
     SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
@@ -3761,6 +3779,7 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
      * sequence, and the entire sequence will be stored in *ustrp.  ustrp will
      * contain *lenp bytes */
 
+    dVAR;
     PERL_ARGS_ASSERT_TURKIC_LC;
     assert(e > p0);
 
@@ -3944,6 +3963,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
                                 const char * const file,
                                 const int line)
 {
+    dVAR;
     UV result;
     const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_UPPER,
                                                 cBOOL(flags), file, line);
@@ -3979,6 +3999,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
                                 const char * const file,
                                 const int line)
 {
+    dVAR;
     UV result;
     const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_TITLE,
                                                 cBOOL(flags), file, line);
@@ -4012,6 +4033,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
                                 const char * const file,
                                 const int line)
 {
+    dVAR;
     UV result;
     const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_LOWER,
                                                 cBOOL(flags), file, line);
@@ -4049,6 +4071,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
                                const char * const file,
                                const int line)
 {
+    dVAR;
     UV result;
     const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_FOLD,
                                                 cBOOL(flags), file, line);

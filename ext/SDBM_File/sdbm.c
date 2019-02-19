@@ -7,7 +7,6 @@
  * core routines
  */
 
-#include "INTERN.h"
 #include "config.h"
 #ifdef WIN32
 #include "io.h"

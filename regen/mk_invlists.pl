@@ -2911,7 +2911,7 @@ foreach my $prop (@props) {
 
 switch_pound_if ('binary_property_tables', 'PERL_IN_REGCOMP_C');
 
-print $out_fh "\nconst char * deprecated_property_msgs[] = {\n\t";
+print $out_fh "\nconst char * const deprecated_property_msgs[] = {\n\t";
 print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
 print $out_fh "\n};\n";
 

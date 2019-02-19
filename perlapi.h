@@ -177,6 +177,10 @@ END_EXTERN_C
 #define PL_my_ctx_mutex		(*Perl_Gmy_ctx_mutex_ptr(NULL))
 #undef  PL_my_cxt_index
 #define PL_my_cxt_index		(*Perl_Gmy_cxt_index_ptr(NULL))
+#undef  PL_my_cxt_keys
+#define PL_my_cxt_keys		(*Perl_Gmy_cxt_keys_ptr(NULL))
+#undef  PL_my_cxt_keys_size
+#define PL_my_cxt_keys_size	(*Perl_Gmy_cxt_keys_size_ptr(NULL))
 #undef  PL_op_mutex
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_op_seq
@@ -207,6 +211,24 @@ END_EXTERN_C
 #define PL_sig_trapped		(*Perl_Gsig_trapped_ptr(NULL))
 #undef  PL_sigfpe_saved
 #define PL_sigfpe_saved		(*Perl_Gsigfpe_saved_ptr(NULL))
+#undef  PL_strategy_accept
+#define PL_strategy_accept	(*Perl_Gstrategy_accept_ptr(NULL))
+#undef  PL_strategy_dup
+#define PL_strategy_dup		(*Perl_Gstrategy_dup_ptr(NULL))
+#undef  PL_strategy_dup2
+#define PL_strategy_dup2	(*Perl_Gstrategy_dup2_ptr(NULL))
+#undef  PL_strategy_mkstemp
+#define PL_strategy_mkstemp	(*Perl_Gstrategy_mkstemp_ptr(NULL))
+#undef  PL_strategy_open
+#define PL_strategy_open	(*Perl_Gstrategy_open_ptr(NULL))
+#undef  PL_strategy_open3
+#define PL_strategy_open3	(*Perl_Gstrategy_open3_ptr(NULL))
+#undef  PL_strategy_pipe
+#define PL_strategy_pipe	(*Perl_Gstrategy_pipe_ptr(NULL))
+#undef  PL_strategy_socket
+#define PL_strategy_socket	(*Perl_Gstrategy_socket_ptr(NULL))
+#undef  PL_strategy_socketpair
+#define PL_strategy_socketpair	(*Perl_Gstrategy_socketpair_ptr(NULL))
 #undef  PL_sv_placeholder
 #define PL_sv_placeholder	(*Perl_Gsv_placeholder_ptr(NULL))
 #undef  PL_thr_key

@@ -283,7 +283,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_hv_assert
 		    PL_watchaddr
 		    PL_watchok
-		    PL_watch_pvx
 			 );
 }
 
@@ -455,6 +454,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    PL_my_cxt_list
 		    PL_my_cxt_size
 		    PL_my_cxt_keys
+		    PL_my_cxt_keys_size
 		    Perl_croak_nocontext
 		    Perl_die_nocontext
 		    Perl_deb_nocontext
@@ -536,6 +536,7 @@ unless ($define{'PERL_GLOBAL_STRUCT'}) {
 unless ($define{'PERL_GLOBAL_STRUCT_PRIVATE'}) {
     ++$skip{$_} foreach qw(
 		    PL_my_cxt_keys
+		    PL_my_cxt_keys_size
 		    Perl_my_cxt_index
 			 );
 }
