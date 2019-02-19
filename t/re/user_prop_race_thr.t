@@ -95,7 +95,7 @@ require threads;
 
             state $which = 0;
 
-            sleep(500) unless $which++;
+            sleep(25) unless $which++;
             return "0042";
         }
 
