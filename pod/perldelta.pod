@@ -69,6 +69,10 @@ L<deprecate> has been upgraded from version 0.03 to 0.04.
 
 =item *
 
+L<Devel::PPPort> has been upgraded from version 3.43 to 3.44.
+
+=item *
+
 L<Encode> has been upgraded from version 2.97 to 3.00.
 
 =item *

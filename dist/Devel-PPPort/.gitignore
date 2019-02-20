@@ -1,4 +1,14 @@
+/blib/
+/Makefile
+/Makefile.old
+/MANIFEST.bak
+/META.yml
+/MYMETA.*
+pm_to_blib
 /PPPort.pm
-#ignored in the parent directory
-#/ppport.h
-/RealPPPort.xs
+/RealPPPort.*
+/ppport.h
+/t/*.t
+/*.o
+PPPort.bs
+/Devel-PPPort-*.tar.gz

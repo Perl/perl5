@@ -19,3 +19,4 @@
 ^RealPPPort\.
 ^testing
 Devel-PPPort.*\.tar\.gz$
+.travis.yml

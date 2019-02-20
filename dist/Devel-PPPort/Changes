@@ -1,4 +1,8 @@
-3.43 - 2018-09-19
+3.44 - 2019-02-20
+
+   * Fix D_PPP_FIX_UTF8_ERRSV macro to use errsv value from passed argument
+
+3.44 - 2018-09-19
 
     * Fix Devel::PPPort with Visual Studio by quoting $0.
 
