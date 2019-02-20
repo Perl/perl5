@@ -435,9 +435,11 @@ F<pod/perlpolicy.pod>.
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
 you're releasing, unless you're absolutely sure the release you're about to
-make is 100% binary compatible to an earlier release. When releasing a MAINT
-perl version, the C<PERL_API_*> constants C<MUST NOT> be changed as we aim
-to guarantee binary compatibility in maint branches.
+make is 100% binary compatible to an earlier release. Note: for BLEAD-POINT
+releases the bump should have already occured at the end of the previous release
+and this is somethig you would have to do at the very end.
+When releasing a MAINT perl version, the C<PERL_API_*> constants C<MUST NOT>
+be changed as we aim to guarantee binary compatibility in maint branches.
 
 After editing, regenerate uconfig.h (this must be run on a system with a
 /bin/sh available):
@@ -479,6 +481,7 @@ version number.
 =head3 update INSTALL
 
 Review and update INSTALL to account for the change in version number.
+INSTALL for a BLEAD-POINT release should already contain the expected version.
 The lines in F<INSTALL> about "is not binary compatible with" may require a
 correct choice of earlier version to declare incompatibility with. These are
 in the "Changes and Incompatibilities" and "Coexistence with earlier versions
@@ -530,6 +533,9 @@ C<-Dusethreads>
 
 If you have multiple compilers on your machine, you might also consider
 compiling with C<-Dcc=$other_compiler>.
+
+You can also consider pushing the repo to GitHub where Travis CI is enabled
+which would smoke different flavors of Perl for you.
 
 =head3 update perlport
 
