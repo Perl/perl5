@@ -660,6 +660,7 @@ the strings?).
  Ether     5.29.5       2018-Nov-20
  Abigail   5.29.6       2018-Dec-18
  Abigail   5.29.7       2019-Jan-20
+ Nicolas R 5.29.8       2019-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
