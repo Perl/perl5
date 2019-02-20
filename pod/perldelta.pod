@@ -261,9 +261,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+socket() now sets C<$!> if the protocol, address family and socket
+type combination is not found.  [perl #133853]
 
 =back
 
