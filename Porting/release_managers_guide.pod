@@ -799,6 +799,13 @@ Then build a clean perl and do a full test
 
 Once all tests pass, commit your changes.
 
+=head3 final check of perldelta placeholders
+
+Check for any 'XXX' leftover section in the perldelta.
+Either fill them or remove these sections appropriately.
+
+    $ git grep XX pod/perldelta.pod
+
 =head3 build a clean perl
 
 If you skipped the previous step (adding/removing perldeltas),
@@ -1018,6 +1025,8 @@ which is why you should test from the tarball.
 =head4 Run the Installation Verification Procedure utility
 
     $ ./perl ./perlivp
+    # Or, perhaps:
+    $ ./perl5.x.y ./perlivp5.x.y
     ...
     All tests successful.
     $
@@ -1080,7 +1089,7 @@ Test L<perlbug> with the following:
     (edit report)
     Action (Send/Display/Edit/Subject/Save to File): f
     Name of file to save message in [perlbug.rep]:
-    Action (Send/Display/Edit/Subject/Save to File): q
+    Action (Send/Display/Edit/Subject/Save to File): Q
 
 and carefully examine the output (in F<perlbug.rep]>), especially
 the "Locally applied patches" section. If everything appears okay, then
@@ -1142,8 +1151,10 @@ you have it configured:
     cpan-upload perl-5.X.Y.tar.xz
 
 Do not proceed any further until you are sure that your tarballs are on CPAN.
-Check your authors directory www.cpan.org (the globally balanced "fast"
-mirror) to confirm that your uploads have been successful.
+Check your authors directory metacpan.org to confirm that your uploads have
+been successful.
+
+    https://metacpan.org/author/YOUR_PAUSE_ID
 
 =for checklist skip RC BLEAD-POINT
 
