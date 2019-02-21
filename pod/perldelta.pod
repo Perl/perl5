@@ -2,58 +2,122 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.29.8
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.29.9
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.29.7 release and the 5.29.8
+This document describes differences between the 5.29.8 release and the 5.29.9
 release.
 
-If you are upgrading from an earlier release such as 5.29.6, first read
-L<perl5297delta>, which describes differences between 5.29.6 and 5.29.7.
+If you are upgrading from an earlier release such as 5.29.7, first read
+L<perl5298delta>, which describes differences between 5.29.7 and 5.29.8.
 
 =head1 Notice
 
-sv_utf8_(downgrade|decode) are no longer marked as experimental [perl #133788]
+XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 Use faster method to convert to UTF-8
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
 
-There is a special inline function that's used when converting a single
-byte to UTF-8, that is faster than the more general one used prior to
-this commit.
+[ List each enhancement as a =head2 entry ]
 
-=head2 Turkic UTF-8 locales are now seamlessly supported
+=head1 Security
 
-Turkic languages have different casing rules than other languages for
-the characters C<"i"> and C<"I">.  The uppercase of C<"i"> is LATIN
-CAPITAL LETTER I WITH DOT ABOVE (U+0130); and the lowercase of C<"I"> is LATIN
-SMALL LETTER DOTLESS I (U+0131).  Unicode furnishes alternate casing
-rules for use with Turkic languages.  Previously, Perl ignored these,
-but now, it uses them when it detects that it is operating under a
-Turkic UTF-8 locale.
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
 
-=head2 Eliminate opASSIGN macro usage from core
-
-This macro is still defined but no longer used in core
+[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
-=head2 JSON::PP enable allow_nonref by default
+XXX For a release on a stable branch, this section aspires to be:
 
-As JSON::XS 4.0 changed its policy and enabled allow_nonref
-by default, JSON::PP also enabled allow_nonref by default.
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
+
+[ List each incompatible change as a =head2 entry ]
+
+=head1 Deprecations
+
+XXX Any deprecated features, syntax, modules etc. should be listed here.
+
+=head2 Module removals
+
+XXX Remove this section if not applicable.
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item XXX
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
 
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as an =item entry ]
+
 =over 4
 
-Eliminate recursion from finalize_op() [perl #108276]
+=item *
+
+XXX
 
 =back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
+[ Within each section, list entries as an =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX Remove this section if not applicable.
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -61,66 +125,34 @@ Eliminate recursion from finalize_op() [perl #108276]
 
 =item *
 
-L<B> has been upgraded from version 1.75 to 1.76.
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+If there was something important to note about this change, include that here.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
 
 =item *
 
-L<deprecate> has been upgraded from version 0.03 to 0.04.
-
-=item *
-
-L<Devel::PPPort> has been upgraded from version 3.43 to 3.44.
-
-=item *
-
-L<Encode> has been upgraded from version 2.97 to 3.00.
-
-=item *
-
-L<ExtUtils::Miniperl> has been upgraded from version 1.08 to 1.09.
-
-=item *
-
-L<IO> has been upgraded from version 1.39 to 1.40.
-
-=item *
-
-L<JSON::PP> has been upgraded from version 2.97001 to 4.00.
-JSON::PP as JSON::XS 4.0 enable allow_nonref by default
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20190120 to 5.20190220.
-
-Changes to B::Op_private and Config
-
-=item *
-
-L<Module::Load> has been upgraded from version 0.32 to 0.34.
-
-=item *
-
-L<Net::Ping> has been upgraded from version 2.62 to 2.71.
-
-=item *
-
-L<perlfaq> has been upgraded from version 5.20180915 to 5.20190126.
-
-=item *
-
-L<POSIX> has been upgraded from version 1.86 to 1.87.
-
-=item *
-
-L<Test::Simple> has been upgraded from version 1.302160 to 1.302162.
-
-=item *
-
-L<XS::APItest> has been upgraded from version 0.99 to 1.00.
+XXX
 
 =back
 
 =head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -128,38 +160,19 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, send email
 to L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
 Additionally, the following selected changes have been made:
 
-=head3 L<perlfunc>
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-Try to clarify that C<< ref(qr/xx/) >> returns C<Regexp> rather than
-C<REGEXP> and why.  [perl #133751]
-
-=back
-
-=head3 L<perllocale>
-
-=over 4
-
-=item *
-
-There are actually two slightly different types of UTF-8 locales: one for Turkic
-languages and one for everything else. Starting in Perl v5.30, Perl seamlessly 
-handles both types.
-
-=back
-
-=head3 L<perlrecharclass>
-
-=over 4
-
-=item *
-
-Added a note for the ::xdigit:: character class.
+XXX Description of the change here
 
 =back
 
@@ -169,227 +182,228 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-=head2 Changes to Existing Diagnostics
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
+=head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
+
+=head3 New Errors
 
 =over 4
 
 =item *
 
-L<Type of arg %d to %s must be %s (not %s)|perldiag/"Type of arg %d to %s must be %s (not %s)">
+XXX L<message|perldiag/"message">
 
-Attempts to push, pop, etc on a hash or glob now produce this message
-rather than complaining that they no longer work on scalars. [perl
-#130367]
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+XXX L<message|perldiag/"message">
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
+=over 4
+
+=item *
+
+XXX Describe change here
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
+
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head2 L<XXX>
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Configuration and Compilation
 
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as an =item entry ].
+
 =over 4
 
 =item *
 
-Improve detection of memrchr, strlcat, and strlcpy
-
-=item *
-
-Improve Configure detection of memmem() [perl #133760].
-
-=item *
-
-Fix -DPERL_GLOBAL_STRUCT_PRIVATE build option.
-
-=item *
-
-Multiple improvements and fixes for -DPERL_GLOBAL_STRUCT build option.
+XXX
 
 =back
 
 =head1 Testing
 
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+XXX If instead there were significant changes, say this:
+
 Tests were added and changed to reflect the other additions and
 changes in this release.  Furthermore, these significant changes were
 made:
+
+[ List each test improvement as an =item entry ]
 
 =over 4
 
 =item *
 
-t/lib/croak/op [perl #130367]
+XXX
 
-separate error for push etc on hash/glob
+=back
 
-=item *
+=head1 Platform Support
 
-t/op/svleak.t [perl #133660]
+XXX Any changes to platform support should be listed in the sections below.
 
-add test for goto &sub in overload leaking
+[ Within the sections, list each platform as an =item entry with specific
+changes as paragraphs below it. ]
 
-=item *
+=head2 New Platforms
 
-Split t/re/fold_grind.t into multiple test files
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
 
 =back
 
 =head2 Platform-Specific Notes
 
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
 =over 4
 
-=item Windows
+=item XXX-some-platform
 
-socket() now sets C<$!> if the protocol, address family and socket
-type combination is not found.  [perl #133853]
+XXX
 
 =back
 
 =head1 Internal Changes
 
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as an =item entry ]
+
 =over 4
 
 =item *
 
-It is now forbidden to malloc more than C<PTRDIFF_T_MAX> bytes.  Much
-code (including C optimizers) assumes that all data structures will not
-be larger than this, so this catches such attempts before overflow
-happens.
+XXX
 
 =back
 
 =head1 Selected Bug Fixes
 
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+[ List each fix as an =item entry ]
+
 =over 4
 
 =item *
 
-Regular expression matching no longer leaves stale UTF-8 length magic
-when updating C<$^R>. This could result in C<length($^R)> returning
-an incorrect value.
-
-=item *
-
-Fix a qr/[...]/ bug introduced in v5.29.7
-
-Using /il should not result in looking for a [:posix:] class
-that matches the code points given.
-
-=item *
-
-Reduce recursion on ops [perl #108276]
-
-This can prevent stack overflow when processing extremely deep op
-trees.
-
-=item *
-
-Avoid leak in multiconcat with overloading. [perl #133789]
-
-=item *
-
-The handling of user-defined C<\p{}> properties (see
-L<perlunicode/User-Defined Character Properties>) has been rewritten to
-be in C (instead of Perl).  This speeds things up, but in the process
-several inconsistencies and bug fixes are made.
-
-=over
-
-=item 1
-
-A few error messages have minor wording changes.  This is essentially
-because the new way is integrated into the regex error handling
-mechanism that marks the position in the input at which the error
-occurred.  That was not possible previously.  The messages now also
-contain additional back-trace-like information in case the error occurs
-deep in nested calls.
-
-=item 2
-
-A user-defined property is implemented as a perl subroutine with certain
-highly constrained naming conventions.  It was documented previously
-that the sub would be in the current package if the package was
-unspecified.  This turned out not to be true in all cases, but now it
-is.
-
-=item 3
-
-All recursive calls are treated as infinite recursion.  Previously they
-would cause the interpreter to panic.  Now, they cause the regex pattern
-to fail to compile.
-
-=item 4
-
-Similarly, any other error likely would lead to a panic; now to just the
-pattern failing to compile.
-
-=item 5
-
-The old mechanism did not detect illegal ranges in the definition of the
-property.  Now, the range max must not be smaller than the range min.
-Otherwise, the pattern fails to compile.
-
-=item 6
-
-The intention was to have each sub called only once during the lifetime
-of the program, so that a property's definition is immutable.  This was
-relaxed so that it could be called once for all /i compilations, and
-potentially a second time for non-/i (the sub is passed a parameter
-indicating which).  However, in practice there were instances when this
-was broken, and multiple calls were possible.  Those have been fixed.
-Now (besides the /i,non-/i cases) the only way a sub can be called
-multiple times is if some component of it has not been defined yet.  For
-example, suppose we have sub IsA() whose definition is known at compile
-time, and it in turn calls isB() whose definition is not yet known.
-isA() will be called each time a pattern it appears in is compiled.  If
-isA() also calls isC() and that definition is known, isC() will be
-called just once.
-
-=item 7
-
-There were some races and very long hangs should one thread be compiling
-the same property as another simultaneously.  These have now been fixed.
+XXX
 
 =back
 
-=item * Assertion failure in compiling invalid regex pattern [perl #133767]
+=head1 Known Problems
 
-This bug was introduced in the 5.29 series, so this should not be in the
-perldelta for 5.30.
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
 
-=item * Null pointer deref [perl #133770]
+[ List each fix as an =item entry ]
 
-This bug was introduced in the 5.29 series, so this should not be in the
-perldelta for 5.30.
+=over 4
+
+=item *
+
+XXX
 
 =back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
+
+=back
+
+=head1 Obituary
+
+XXX If any significant core contributor or member of the CPAN community has
+died, add a short obituary here.
 
 =head1 Acknowledgements
 
-Perl 5.29.8 represents approximately 5 weeks of development since Perl
-5.29.7 and contains approximately 13,000 lines of changes across 290 files
-from 18 authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 9,500 lines of changes to 210 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.29.8:
-
-Abigail, Andreas König, Andy Dougherty, Aristotle Pagaltzis, Chris 'BinGOs'
-Williams, Dagfinn Ilmari Mannsåker, Dan Kogai, David Mitchell, Jakub Wilk,
-James E Keenan, Karen Etheridge, Karl Williamson, Nicolas R., Pali, Sawyer
-X, Shlomi Fish, Tomasz Konojacki, Tony Cook.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.29.8..HEAD
 
 =head1 Reporting Bugs
 
@@ -400,7 +414,7 @@ L<http://www.perl.org/>, the Perl Home Page.
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but
 sufficient test case.  Your bug report, along with the output of C<perl -V>,
-will be sent off to perlbug@perl.org to be analyzed by the Perl porting team.
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see

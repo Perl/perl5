@@ -1,0 +1,430 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5298delta - what is new for perl v5.29.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.29.7 release and the 5.29.8
+release.
+
+If you are upgrading from an earlier release such as 5.29.6, first read
+L<perl5297delta>, which describes differences between 5.29.6 and 5.29.7.
+
+=head1 Notice
+
+sv_utf8_(downgrade|decode) are no longer marked as experimental [perl #133788]
+
+=head1 Core Enhancements
+
+=head2 Use faster method to convert to UTF-8
+
+There is a special inline function that's used when converting a single
+byte to UTF-8, that is faster than the more general one used prior to
+this commit.
+
+=head2 Turkic UTF-8 locales are now seamlessly supported
+
+Turkic languages have different casing rules than other languages for
+the characters C<"i"> and C<"I">.  The uppercase of C<"i"> is LATIN
+CAPITAL LETTER I WITH DOT ABOVE (U+0130); and the lowercase of C<"I"> is LATIN
+SMALL LETTER DOTLESS I (U+0131).  Unicode furnishes alternate casing
+rules for use with Turkic languages.  Previously, Perl ignored these,
+but now, it uses them when it detects that it is operating under a
+Turkic UTF-8 locale.
+
+=head2 Eliminate opASSIGN macro usage from core
+
+This macro is still defined but no longer used in core
+
+=head1 Incompatible Changes
+
+=head2 JSON::PP enable allow_nonref by default
+
+As JSON::XS 4.0 changed its policy and enabled allow_nonref
+by default, JSON::PP also enabled allow_nonref by default.
+
+=head1 Performance Enhancements
+
+=over 4
+
+Eliminate recursion from finalize_op() [perl #108276]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.75 to 1.76.
+
+=item *
+
+L<deprecate> has been upgraded from version 0.03 to 0.04.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.43 to 3.44.
+
+=item *
+
+L<Encode> has been upgraded from version 2.97 to 3.00.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+L<IO> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.97001 to 4.00.
+JSON::PP as JSON::XS 4.0 enable allow_nonref by default
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20190120 to 5.20190220.
+
+Changes to B::Op_private and Config
+
+=item *
+
+L<Module::Load> has been upgraded from version 0.32 to 0.34.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.62 to 2.71.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20180915 to 5.20190126.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.86 to 1.87.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302160 to 1.302162.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 0.99 to 1.00.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email
+to L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Try to clarify that C<< ref(qr/xx/) >> returns C<Regexp> rather than
+C<REGEXP> and why.  [perl #133751]
+
+=back
+
+=head3 L<perllocale>
+
+=over 4
+
+=item *
+
+There are actually two slightly different types of UTF-8 locales: one for Turkic
+languages and one for everything else. Starting in Perl v5.30, Perl seamlessly 
+handles both types.
+
+=back
+
+=head3 L<perlrecharclass>
+
+=over 4
+
+=item *
+
+Added a note for the ::xdigit:: character class.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Type of arg %d to %s must be %s (not %s)|perldiag/"Type of arg %d to %s must be %s (not %s)">
+
+Attempts to push, pop, etc on a hash or glob now produce this message
+rather than complaining that they no longer work on scalars. [perl
+#130367]
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Improve detection of memrchr, strlcat, and strlcpy
+
+=item *
+
+Improve Configure detection of memmem() [perl #133760].
+
+=item *
+
+Fix -DPERL_GLOBAL_STRUCT_PRIVATE build option.
+
+=item *
+
+Multiple improvements and fixes for -DPERL_GLOBAL_STRUCT build option.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+t/lib/croak/op [perl #130367]
+
+separate error for push etc on hash/glob
+
+=item *
+
+t/op/svleak.t [perl #133660]
+
+add test for goto &sub in overload leaking
+
+=item *
+
+Split t/re/fold_grind.t into multiple test files
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+socket() now sets C<$!> if the protocol, address family and socket
+type combination is not found.  [perl #133853]
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+It is now forbidden to malloc more than C<PTRDIFF_T_MAX> bytes.  Much
+code (including C optimizers) assumes that all data structures will not
+be larger than this, so this catches such attempts before overflow
+happens.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Regular expression matching no longer leaves stale UTF-8 length magic
+when updating C<$^R>. This could result in C<length($^R)> returning
+an incorrect value.
+
+=item *
+
+Fix a qr/[...]/ bug introduced in v5.29.7
+
+Using /il should not result in looking for a [:posix:] class
+that matches the code points given.
+
+=item *
+
+Reduce recursion on ops [perl #108276]
+
+This can prevent stack overflow when processing extremely deep op
+trees.
+
+=item *
+
+Avoid leak in multiconcat with overloading. [perl #133789]
+
+=item *
+
+The handling of user-defined C<\p{}> properties (see
+L<perlunicode/User-Defined Character Properties>) has been rewritten to
+be in C (instead of Perl).  This speeds things up, but in the process
+several inconsistencies and bug fixes are made.
+
+=over
+
+=item 1
+
+A few error messages have minor wording changes.  This is essentially
+because the new way is integrated into the regex error handling
+mechanism that marks the position in the input at which the error
+occurred.  That was not possible previously.  The messages now also
+contain additional back-trace-like information in case the error occurs
+deep in nested calls.
+
+=item 2
+
+A user-defined property is implemented as a perl subroutine with certain
+highly constrained naming conventions.  It was documented previously
+that the sub would be in the current package if the package was
+unspecified.  This turned out not to be true in all cases, but now it
+is.
+
+=item 3
+
+All recursive calls are treated as infinite recursion.  Previously they
+would cause the interpreter to panic.  Now, they cause the regex pattern
+to fail to compile.
+
+=item 4
+
+Similarly, any other error likely would lead to a panic; now to just the
+pattern failing to compile.
+
+=item 5
+
+The old mechanism did not detect illegal ranges in the definition of the
+property.  Now, the range max must not be smaller than the range min.
+Otherwise, the pattern fails to compile.
+
+=item 6
+
+The intention was to have each sub called only once during the lifetime
+of the program, so that a property's definition is immutable.  This was
+relaxed so that it could be called once for all /i compilations, and
+potentially a second time for non-/i (the sub is passed a parameter
+indicating which).  However, in practice there were instances when this
+was broken, and multiple calls were possible.  Those have been fixed.
+Now (besides the /i,non-/i cases) the only way a sub can be called
+multiple times is if some component of it has not been defined yet.  For
+example, suppose we have sub IsA() whose definition is known at compile
+time, and it in turn calls isB() whose definition is not yet known.
+isA() will be called each time a pattern it appears in is compiled.  If
+isA() also calls isC() and that definition is known, isC() will be
+called just once.
+
+=item 7
+
+There were some races and very long hangs should one thread be compiling
+the same property as another simultaneously.  These have now been fixed.
+
+=back
+
+=item * Assertion failure in compiling invalid regex pattern [perl #133767]
+
+This bug was introduced in the 5.29 series, so this should not be in the
+perldelta for 5.30.
+
+=item * Null pointer deref [perl #133770]
+
+This bug was introduced in the 5.29 series, so this should not be in the
+perldelta for 5.30.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.29.8 represents approximately 5 weeks of development since Perl
+5.29.7 and contains approximately 13,000 lines of changes across 290 files
+from 18 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 9,500 lines of changes to 210 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.29.8:
+
+Abigail, Andreas König, Andy Dougherty, Aristotle Pagaltzis, Chris 'BinGOs'
+Williams, Dagfinn Ilmari Mannsåker, Dan Kogai, David Mitchell, Jakub Wilk,
+James E Keenan, Karen Etheridge, Karl Williamson, Nicolas R., Pali, Sawyer
+X, Shlomi Fish, Tomasz Konojacki, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analyzed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
