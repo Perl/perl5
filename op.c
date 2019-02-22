@@ -1442,8 +1442,7 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
         OpMAYBESIB_set(start, insert, NULL);
     }
     else {
-        if (!parent)
-            goto no_parent;
+        assert(parent);
         cLISTOPx(parent)->op_first = insert;
         if (insert)
             parent->op_flags |= OPf_KIDS;
