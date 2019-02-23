@@ -37,7 +37,7 @@ $js  = q|[1.01e+30]|;
 $obj = $pc->decode($js);
 is($obj->[0], 1.01e+30, 'digit 1.01e+30');
 $js = $pc->encode($obj);
-like($js,qr/\[1.01[Ee]\+0?30\]/, 'digit 1.01e+30');
+like($js,qr/\[(?:1.01[Ee]\+0?30|1010000000000000000000000000000)]/, 'digit 1.01e+30'); # RT-128589 (-Duselongdouble or -Dquadmath) 
 
 my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
 
