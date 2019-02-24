@@ -1467,7 +1467,17 @@ EOP
         # test that this is true for 1..100
         # Note that this test causes the engine to recurse at runtime, and
         # hence use a lot of C stack.
+
+        # Compiling for all 100 nested captures blows the stack under
+        # clang and ASan; reduce.
+        my $max_captures = $Config{ccflags} =~ /sanitize/ ? 20 : 100;
+
         for my $i (1..100) {
+            if ($i > $max_captures) {
+                pass("skipping $i buffers under ASan aa");
+                pass("skipping $i buffers under ASan aba");
+                next;
+            }
             my $capture= "a";
             $capture= "($capture)" for 1 .. $i;
             for my $mid ("","b") {
