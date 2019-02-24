@@ -348,7 +348,8 @@ well.
 
 =item *
 
-XXX
+Added C<newSVsv_nomg()> to copy a SV without processing get magic on
+the source.  [perl #132964]
 
 =back
 
