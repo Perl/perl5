@@ -899,6 +899,9 @@ PERL_CALLCONV void	Perl_dump_sub_perl(pTHX_ const GV* gv, bool justperl);
 PERL_CALLCONV void	Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args);
 #define PERL_ARGS_ASSERT_DUMP_VINDENT	\
 	assert(file); assert(pat)
+PERL_CALLCONV STRLEN*	Perl_dup_warnings(pTHX_ STRLEN* warnings);
+#define PERL_ARGS_ASSERT_DUP_WARNINGS	\
+	assert(warnings)
 PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv);
 #define PERL_ARGS_ASSERT_EMULATE_COP_IO	\
 	assert(c); assert(sv)

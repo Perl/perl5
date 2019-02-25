@@ -3279,4 +3279,6 @@ XEop	|void   |dtrace_probe_op   |NN const OP *op
 XEop	|void   |dtrace_probe_phase|enum perl_phase phase
 #endif
 
+XEop	|STRLEN*|dup_warnings	|NN STRLEN* warnings
+
 : ex: set ts=8 sts=4 sw=4 noet:

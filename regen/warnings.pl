@@ -376,10 +376,7 @@ EOM
 #define isWARN_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)))
 #define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
 
-#define DUP_WARNINGS(p)		\
-    (specialWARN(p) ? (STRLEN*)(p)	\
-    : (STRLEN*)CopyD(p, PerlMemShared_malloc(sizeof(*p)+*p), sizeof(*p)+*p, \
-		     			     char))
+#define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
 
 /*
 
