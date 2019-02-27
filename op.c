@@ -7261,14 +7261,16 @@ S_set_haseval(pTHX)
  *
  * Flags currently has 2 bits of meaning:
  * 1: isreg indicates that the pattern is part of a regex construct, eg
- * $x =~ /pattern/ or split /pattern/, as opposed to $x =~ $pattern or
- * split "pattern", which aren't. In the former case, expr will be a list
- * if the pattern contains more than one term (eg /a$b/).
+ *      $x =~ /pattern/ or split /pattern/, as opposed to $x =~ $pattern or
+ *      split "pattern", which aren't. In the former case, expr will be a list
+ *      if the pattern contains more than one term (eg /a$b/).
  * 2: The pattern is for a split.
  *
  * When the pattern has been compiled within a new anon CV (for
  * qr/(?{...})/ ), then floor indicates the savestack level just before
  * the new sub was created
+ *
+ * tr/// is also handled.
  */
 
 OP *
