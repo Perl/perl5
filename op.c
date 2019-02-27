@@ -640,7 +640,7 @@ S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
     yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %s", name), flags);
     return o;
 }
- 
+
 STATIC OP *
 S_too_many_arguments_pv(pTHX_ OP *o, const char *name, U32 flags)
 {
@@ -666,7 +666,7 @@ S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
 {
     SV * const namesv = cv_name((CV *)gv, NULL, 0);
     PERL_ARGS_ASSERT_BAD_TYPE_GV;
- 
+
     yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %" SVf " must be %s (not %s)",
 		 (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv));
 }
@@ -1038,7 +1038,7 @@ Perl_op_clear(pTHX_ OP *o)
 	/** Bug #15654
 	  Even if op_clear does a pad_free for the target of the op,
 	  pad_free doesn't actually remove the sv that exists in the pad;
-	  instead it lives on. This results in that it could be reused as 
+	  instead it lives on. This results in that it could be reused as
 	  a target later on when the pad was reallocated.
 	**/
         if(o->op_targ) {
@@ -1301,7 +1301,7 @@ S_forget_pmop(pTHX_ PMOP *const o)
 	    }
 	}
     }
-    if (PL_curpm == o) 
+    if (PL_curpm == o)
 	PL_curpm = NULL;
 }
 
@@ -3259,7 +3259,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
             sv_utf8_upgrade_nomg(sv);
         argp->p = SvPV_nomg(sv, argp->len);
         total_len += argp->len;
-        
+
         /* see if any strings would grow if converted to utf8 */
         if (!utf8) {
             variant += variant_under_utf8_count((U8 *) argp->p,
@@ -3498,7 +3498,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
             lastkidop = pmop;
     }
 
-    /* Optimise 
+    /* Optimise
      *    target  = A.B.C...
      *    target .= A.B.C...
      */
@@ -5325,7 +5325,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 	    /* The listop in rops might have a pushmark at the beginning,
 	       which will mess up list assignment. */
 	    LISTOP * const lrops = (LISTOP *)rops; /* for brevity */
-	    if (rops->op_type == OP_LIST && 
+	    if (rops->op_type == OP_LIST &&
 	        lrops->op_first && lrops->op_first->op_type == OP_PUSHMARK)
 	    {
 		OP * const pushmark = lrops->op_first;
@@ -7148,7 +7148,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
   warnins:
     if(del && rlen == tlen) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator");
     } else if(rlen > tlen && !complement) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
     }
@@ -9369,7 +9369,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 				SvPV_nolen_const(((SVOP*)label)->op_sv)));
 	    }
     }
-    
+
     /* If we have already created an op, we do not need the label. */
     if (o)
 		op_free(label);
@@ -9475,7 +9475,7 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
      - a filetest operator, with the exception of -s -M -A -C
      - defined(), exists() or eof()
      - /$re/ or $foo =~ /$re/
-   
+
    [*] possibly surprising
  */
 STATIC bool
@@ -9515,9 +9515,9 @@ S_looks_like_bool(pTHX_ const OP *o)
 
 	case OP_SEQ:	case OP_SNE:	case OP_SLT:
 	case OP_SGT:	case OP_SLE:	case OP_SGE:
-	
+
 	case OP_SMARTMATCH:
-	
+
 	case OP_FTRREAD:  case OP_FTRWRITE: case OP_FTREXEC:
 	case OP_FTEREAD:  case OP_FTEWRITE: case OP_FTEEXEC:
 	case OP_FTIS:     case OP_FTEOWNED: case OP_FTROWNED:
@@ -9526,7 +9526,7 @@ S_looks_like_bool(pTHX_ const OP *o)
 	case OP_FTPIPE:   case OP_FTLINK:   case OP_FTSUID:
 	case OP_FTSGID:   case OP_FTSVTX:   case OP_FTTTY:
 	case OP_FTTEXT:   case OP_FTBINARY:
-	
+
 	case OP_DEFINED: case OP_EXISTS:
 	case OP_MATCH:	 case OP_EOF:
 
@@ -9540,12 +9540,12 @@ S_looks_like_bool(pTHX_ const OP *o)
             if (o->op_private & OPpTRUEBOOL)
                 return TRUE;
             return FALSE;
-	
+
 	case OP_CONST:
 	    /* Detect comparisons that have been optimized away */
 	    if (cSVOPo->op_sv == &PL_sv_yes
 	    ||  cSVOPo->op_sv == &PL_sv_no)
-	    
+
 		return TRUE;
 	    else
 		return FALSE;
@@ -9610,7 +9610,7 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 		newDEFSVOP(),
 		scalar(ref_array_or_hash(cond)));
     }
-    
+
     return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
@@ -10022,7 +10022,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
        age sub (my sub foo; sub bar { sub foo { ... } }), outcv points to
        the package sub.  So check PadnameOUTER(name) too.
      */
-    if (outcv == CvOUTSIDE(compcv) && !PadnameOUTER(name)) { 
+    if (outcv == CvOUTSIDE(compcv) && !PadnameOUTER(name)) {
 	assert(!CvWEAKOUTSIDE(compcv));
 	SvREFCNT_dec(CvOUTSIDE(compcv));
 	CvWEAKOUTSIDE_on(compcv);
@@ -11154,7 +11154,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                 cv = NULL;
             }
         }
-    
+
         if (cv)				/* must reuse cv if autoloaded */
             cv_undef(cv);
         else {
@@ -11314,7 +11314,7 @@ OP *
 Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 {
     SV * const cv = MUTABLE_SV(newATTRSUB(floor, 0, proto, attrs, block));
-    OP * anoncode = 
+    OP * anoncode =
 	newSVOP(OP_ANONCODE, 0,
 		cv);
     if (CvANONCONST(cv))
@@ -12142,7 +12142,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				   PL_op_desc[type]);
 
 		if (kid->op_type == OP_CONST
-		      && (  !SvROK(cSVOPx_sv(kid)) 
+		      && (  !SvROK(cSVOPx_sv(kid))
 		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
 		        )
 		    bad_type_pv(numargs, "array", o, kid);
@@ -12556,7 +12556,7 @@ Perl_ck_smartmatch(pTHX_ OP *o)
     if (0 == (o->op_flags & OPf_SPECIAL)) {
 	OP *first  = cBINOPo->op_first;
 	OP *second = OpSIBLING(first);
-	
+
 	/* Implicitly take a reference to an array or hash */
 
         /* remove the original two siblings, then add back the
@@ -12568,7 +12568,7 @@ Perl_ck_smartmatch(pTHX_ OP *o)
 	second = ref_array_or_hash(second);
         op_sibling_splice(o, NULL, 0, second);
         op_sibling_splice(o, NULL, 0, first);
-	
+
 	/* Implicitly take a reference to a regular expression */
 	if (first->op_type == OP_MATCH && !(first->op_flags & OPf_STACKED)) {
             OpTYPE_set(first, OP_QR);
@@ -12577,7 +12577,7 @@ Perl_ck_smartmatch(pTHX_ OP *o)
             OpTYPE_set(second, OP_QR);
         }
     }
-    
+
     return o;
 }
 
@@ -12903,8 +12903,9 @@ Perl_ck_require(pTHX_ OP *o)
             HEK *hek;
 
 	    if (was_readonly) {
-		    SvREADONLY_off(sv);
-	    }   
+                SvREADONLY_off(sv);
+            }
+
 	    if (SvIsCOW(sv)) sv_force_normal_flags(sv, 0);
 
 	    s = SvPVX(sv);
@@ -13332,7 +13333,7 @@ Perl_ck_stringify(pTHX_ OP *o)
     }
     return ck_fun(o);
 }
-	
+
 OP *
 Perl_ck_join(pTHX_ OP *o)
 {
@@ -13843,7 +13844,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
 		SVfARG(namesv)), SvUTF8(namesv));
 	}
-	
+
 	op_free(entersubop);
 	switch(cvflags >> 16) {
 	case 'F': return newSVOP(OP_CONST, 0,
@@ -13872,7 +13873,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
             parent = aop;
 	    aop = cUNOPx(aop)->op_first;
         }
-	
+
 	first = prev = aop;
 	aop = OpSIBLING(aop);
         /* find last sibling */
@@ -13900,7 +13901,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
 	if (cvflags == (OP_ENTEREVAL | (1<<16)))
 	    flags |= OPpEVAL_BYTES <<8;
-	
+
 	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
 	case OA_UNOP:
 	case OA_BASEOP_OR_UNOP:
@@ -14371,9 +14372,9 @@ Perl_ck_length(pTHX_ OP *o)
 
 
 
-/* 
+/*
    ---------------------------------------------------------
- 
+
    Common vars in list assignment
 
    There now follows some enums and static functions for detecting
@@ -14383,43 +14384,43 @@ Perl_ck_length(pTHX_ OP *o)
    ----
 
    First some random observations:
-   
+
    * If a lexical var is an alias of something else, e.g.
        for my $x ($lex, $pkg, $a[0]) {...}
      then the act of aliasing will increase the reference count of the SV
-   
+
    * If a package var is an alias of something else, it may still have a
      reference count of 1, depending on how the alias was created, e.g.
      in *a = *b, $a may have a refcount of 1 since the GP is shared
      with a single GvSV pointer to the SV. So If it's an alias of another
      package var, then RC may be 1; if it's an alias of another scalar, e.g.
      a lexical var or an array element, then it will have RC > 1.
-   
+
    * There are many ways to create a package alias; ultimately, XS code
      may quite legally do GvSV(gv) = SvREFCNT_inc(sv) for example, so
      run-time tracing mechanisms are unlikely to be able to catch all cases.
-   
+
    * When the LHS is all my declarations, the same vars can't appear directly
      on the RHS, but they can indirectly via closures, aliasing and lvalue
      subs. But those techniques all involve an increase in the lexical
      scalar's ref count.
-   
+
    * When the LHS is all lexical vars (but not necessarily my declarations),
      it is possible for the same lexicals to appear directly on the RHS, and
      without an increased ref count, since the stack isn't refcounted.
      This case can be detected at compile time by scanning for common lex
      vars with PL_generation.
-   
+
    * lvalue subs defeat common var detection, but they do at least
      return vars with a temporary ref count increment. Also, you can't
      tell at compile time whether a sub call is lvalue.
-   
-    
+
+
    So...
-         
+
    A: There are a few circumstances where there definitely can't be any
      commonality:
-   
+
        LHS empty:  () = (...);
        RHS empty:  (....) = ();
        RHS contains only constants or other 'can't possibly be shared'
@@ -14432,165 +14433,165 @@ Perl_ck_length(pTHX_ OP *o)
        RHS contains a single element with no aggregate on LHS: e.g.
            ($a,$b,$c)  = ($x); again, once $a has been modified, its value
            won't be used again.
-   
+
    B: If LHS are all 'my' lexical var declarations (or safe ops, which
      we can ignore):
-   
+
        my ($a, $b, @c) = ...;
-   
+
        Due to closure and goto tricks, these vars may already have content.
        For the same reason, an element on the RHS may be a lexical or package
        alias of one of the vars on the left, or share common elements, for
        example:
-   
+
            my ($x,$y) = f(); # $x and $y on both sides
            sub f : lvalue { ($x,$y) = (1,2); $y, $x }
-   
+
        and
-   
+
            my $ra = f();
            my @a = @$ra;  # elements of @a on both sides
            sub f { @a = 1..4; \@a }
-   
-   
+
+
        First, just consider scalar vars on LHS:
-   
+
            RHS is safe only if (A), or in addition,
                * contains only lexical *scalar* vars, where neither side's
-                 lexicals have been flagged as aliases 
-   
+                 lexicals have been flagged as aliases
+
            If RHS is not safe, then it's always legal to check LHS vars for
            RC==1, since the only RHS aliases will always be associated
            with an RC bump.
-   
+
            Note that in particular, RHS is not safe if:
-   
+
                * it contains package scalar vars; e.g.:
-   
+
                    f();
                    my ($x, $y) = (2, $x_alias);
                    sub f { $x = 1; *x_alias = \$x; }
-   
+
                * It contains other general elements, such as flattened or
                * spliced or single array or hash elements, e.g.
-   
+
                    f();
-                   my ($x,$y) = @a; # or $a[0] or @a{@b} etc 
-   
+                   my ($x,$y) = @a; # or $a[0] or @a{@b} etc
+
                    sub f {
                        ($x, $y) = (1,2);
                        use feature 'refaliasing';
                        \($a[0], $a[1]) = \($y,$x);
                    }
-   
+
                  It doesn't matter if the array/hash is lexical or package.
-   
+
                * it contains a function call that happens to be an lvalue
                  sub which returns one or more of the above, e.g.
-   
+
                    f();
                    my ($x,$y) = f();
-   
+
                    sub f : lvalue {
                        ($x, $y) = (1,2);
                        *x1 = \$x;
                        $y, $x1;
                    }
-   
+
                    (so a sub call on the RHS should be treated the same
                    as having a package var on the RHS).
-   
+
                * any other "dangerous" thing, such an op or built-in that
                  returns one of the above, e.g. pp_preinc
-   
-   
+
+
            If RHS is not safe, what we can do however is at compile time flag
            that the LHS are all my declarations, and at run time check whether
            all the LHS have RC == 1, and if so skip the full scan.
-   
+
        Now consider array and hash vars on LHS: e.g. my (...,@a) = ...;
-   
+
            Here the issue is whether there can be elements of @a on the RHS
            which will get prematurely freed when @a is cleared prior to
            assignment. This is only a problem if the aliasing mechanism
            is one which doesn't increase the refcount - only if RC == 1
            will the RHS element be prematurely freed.
-   
+
            Because the array/hash is being INTROed, it or its elements
            can't directly appear on the RHS:
-   
+
                my (@a) = ($a[0], @a, etc) # NOT POSSIBLE
-   
+
            but can indirectly, e.g.:
-   
+
                my $r = f();
                my (@a) = @$r;
                sub f { @a = 1..3; \@a }
-   
+
            So if the RHS isn't safe as defined by (A), we must always
            mortalise and bump the ref count of any remaining RHS elements
            when assigning to a non-empty LHS aggregate.
-   
+
            Lexical scalars on the RHS aren't safe if they've been involved in
            aliasing, e.g.
-   
+
                use feature 'refaliasing';
-   
+
                f();
                \(my $lex) = \$pkg;
                my @a = ($lex,3); # equivalent to ($a[0],3)
-   
+
                sub f {
                    @a = (1,2);
                    \$pkg = \$a[0];
                }
-   
+
            Similarly with lexical arrays and hashes on the RHS:
-   
+
                f();
                my @b;
                my @a = (@b);
-   
+
                sub f {
                    @a = (1,2);
                    \$b[0] = \$a[1];
                    \$b[1] = \$a[0];
                }
-   
-   
-   
+
+
+
    C: As (B), but in addition the LHS may contain non-intro lexicals, e.g.
        my $a; ($a, my $b) = (....);
-   
+
        The difference between (B) and (C) is that it is now physically
        possible for the LHS vars to appear on the RHS too, where they
        are not reference counted; but in this case, the compile-time
        PL_generation sweep will detect such common vars.
-   
+
        So the rules for (C) differ from (B) in that if common vars are
        detected, the runtime "test RC==1" optimisation can no longer be used,
        and a full mark and sweep is required
-   
+
    D: As (C), but in addition the LHS may contain package vars.
-   
+
        Since package vars can be aliased without a corresponding refcount
        increase, all bets are off. It's only safe if (A). E.g.
-   
+
            my ($x, $y) = (1,2);
-   
+
            for $x_alias ($x) {
                ($x_alias, $y) = (3, $x); # whoops
            }
-   
+
        Ditto for LHS aggregate package vars.
-   
+
    E: Any other dangerous ops on LHS, e.g.
            (f(), $a[0], @$r) = (...);
-   
+
        this is similar to (E) in that all bets are off. In addition, it's
        impossible to determine at compile time whether the LHS
        contains a scalar or an aggregate, e.g.
-   
+
            sub f : lvalue { @a }
            (f()) = 1..3;
 
@@ -16599,7 +16600,7 @@ Perl_rpeep(pTHX_ OP *o)
 	    }
 
 	    break;
-        
+
         case OP_NOT:
             break;
 
@@ -16629,7 +16630,7 @@ Perl_rpeep(pTHX_ OP *o)
 	    DEFER(cLOGOP->op_other);
 	    o->op_opt = 1;
 	    break;
-	
+
 	case OP_GREPWHILE:
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
@@ -16773,7 +16774,7 @@ Perl_rpeep(pTHX_ OP *o)
 	    iter = enter->op_next;
 	    if (!iter || iter->op_type != OP_ITER)
 		break;
-	    
+
 	    expushmark = enter->op_first;
 	    if (!expushmark || expushmark->op_type != OP_NULL
 		|| expushmark->op_targ != OP_PUSHMARK)
@@ -17029,13 +17030,13 @@ Perl_rpeep(pTHX_ OP *o)
             break;
 
 	case OP_CUSTOM: {
-	    Perl_cpeep_t cpeep = 
+	    Perl_cpeep_t cpeep =
 		XopENTRYCUSTOM(o, xop_peep);
 	    if (cpeep)
 		cpeep(aTHX_ o, oldop);
 	    break;
 	}
-	    
+
 	}
         /* did we just null the current op? If so, re-process it to handle
          * eliding "empty" ops from the chain */
