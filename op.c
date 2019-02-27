@@ -7030,119 +7030,119 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	goto warnins;
     }
 
-    /* Non-utf8 case: set o->op_pv to point to a simple 256+ entry lookup
-     * table. Entries with the value -1 indicate chars not to be
-     * translated, while -2 indicates a search char without a
-     * corresponding replacement char under /d.
-     *
-     * Normally, the table has 256 slots. However, in the presence of
-     * /c, the search charlist has an implicit \x{100}-\x{7fffffff}
-     * added, and if there are enough replacement chars to start pairing
-     * with the \x{100},... search chars, then a larger (> 256) table
-     * is allocated.
-     *
-     * In addition, regardless of whether under /c, an extra slot at the
-     * end is used to store the final repeating char, or -3 under an empty
-     * replacement list, or -2 under /d; which makes the runtime code
-     * easier.
-     *
-     * The toker will have already expanded char ranges in t and r.
-     */
+        /* Non-utf8 case: set o->op_pv to point to a simple 256+ entry lookup
+        * table. Entries with the value -1 indicate chars not to be
+        * translated, while -2 indicates a search char without a
+        * corresponding replacement char under /d.
+        *
+        * Normally, the table has 256 slots. However, in the presence of
+        * /c, the search charlist has an implicit \x{100}-\x{7fffffff}
+        * added, and if there are enough replacement chars to start pairing
+        * with the \x{100},... search chars, then a larger (> 256) table
+        * is allocated.
+        *
+        * In addition, regardless of whether under /c, an extra slot at the
+        * end is used to store the final repeating char, or -3 under an empty
+        * replacement list, or -2 under /d; which makes the runtime code
+        * easier.
+        *
+        * The toker will have already expanded char ranges in t and r.
+        */
 
-    /* Initially allocate 257-slot table: 256 for basic (non /c) usage,
-     * plus final slot for repeat/-2/-3. Later we realloc if excess > * 0.
-     * The OPtrans_map struct already contains one slot; hence the -1.
-     */
-    struct_size = sizeof(OPtrans_map) + (256 - 1 + 1)*sizeof(short);
-    tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
-    tbl->size = 256;
-    cPVOPo->op_pv = (char*)tbl;
+        /* Initially allocate 257-slot table: 256 for basic (non /c) usage,
+        * plus final slot for repeat/-2/-3. Later we realloc if excess > * 0.
+        * The OPtrans_map struct already contains one slot; hence the -1.
+        */
+        struct_size = sizeof(OPtrans_map) + (256 - 1 + 1)*sizeof(short);
+        tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
+        tbl->size = 256;
+        cPVOPo->op_pv = (char*)tbl;
 
-    if (complement) {
-        Size_t excess;
+        if (complement) {
+            Size_t excess;
 
-        /* in this branch, j is a count of 'consumed' (i.e. paired off
-         * with a search char) replacement chars (so j <= rlen always)
-         */
-	for (i = 0; i < tlen; i++)
-	    tbl->map[t[i]] = -1;
+            /* in this branch, j is a count of 'consumed' (i.e. paired off
+            * with a search char) replacement chars (so j <= rlen always)
+            */
+            for (i = 0; i < tlen; i++)
+                tbl->map[t[i]] = -1;
 
-	for (i = 0, j = 0; i < 256; i++) {
-	    if (!tbl->map[i]) {
-		if (j == rlen) {
-		    if (del)
-			tbl->map[i] = -2;
-		    else if (rlen)
-			tbl->map[i] = r[j-1];
-		    else
-			tbl->map[i] = (short)i;
-		}
-		else {
-		    tbl->map[i] = r[j++];
-		}
-                if (   tbl->map[i] >= 0
-                    &&  UVCHR_IS_INVARIANT((UV)i)
-                    && !UVCHR_IS_INVARIANT((UV)(tbl->map[i]))
-                )
-                    grows = TRUE;
-	    }
-	}
+            for (i = 0, j = 0; i < 256; i++) {
+                if (!tbl->map[i]) {
+                    if (j == rlen) {
+                        if (del)
+                            tbl->map[i] = -2;
+                        else if (rlen)
+                            tbl->map[i] = r[j-1];
+                        else
+                            tbl->map[i] = (short)i;
+                    }
+                    else {
+                        tbl->map[i] = r[j++];
+                    }
+                    if (   tbl->map[i] >= 0
+                        &&  UVCHR_IS_INVARIANT((UV)i)
+                        && !UVCHR_IS_INVARIANT((UV)(tbl->map[i]))
+                    )
+                        grows = TRUE;
+                }
+            }
 
-        ASSUME(j <= rlen);
-        excess = rlen - j;
+            ASSUME(j <= rlen);
+            excess = rlen - j;
 
-        if (excess) {
-            /* More replacement chars than search chars:
-             * store excess replacement chars at end of main table.
-             */
+            if (excess) {
+                /* More replacement chars than search chars:
+                * store excess replacement chars at end of main table.
+                */
 
-            struct_size += excess;
-            tbl = (OPtrans_map*)PerlMemShared_realloc(tbl,
-                        struct_size + excess * sizeof(short));
-            tbl->size += excess;
-            cPVOPo->op_pv = (char*)tbl;
+                struct_size += excess;
+                tbl = (OPtrans_map*)PerlMemShared_realloc(tbl,
+                            struct_size + excess * sizeof(short));
+                tbl->size += excess;
+                cPVOPo->op_pv = (char*)tbl;
 
-            for (i = 0; i < excess; i++)
-                tbl->map[i + 256] = r[j+i];
+                for (i = 0; i < excess; i++)
+                    tbl->map[i + 256] = r[j+i];
+            }
+            else {
+                /* no more replacement chars than search chars */
+                if (!rlen && !del && !squash)
+                    o->op_private |= OPpTRANS_IDENTICAL;
+            }
+
+            tbl->map[tbl->size] = del ? -2 : rlen ? r[rlen - 1] : -3;
         }
         else {
-            /* no more replacement chars than search chars */
-            if (!rlen && !del && !squash)
+            if (!rlen && !del) {
+                r = t; rlen = tlen;
+                if (!squash)
+                    o->op_private |= OPpTRANS_IDENTICAL;
+            }
+            else if (!squash && rlen == tlen && memEQ((char*)t, (char*)r, tlen)) {
                 o->op_private |= OPpTRANS_IDENTICAL;
+            }
+
+            for (i = 0; i < 256; i++)
+                tbl->map[i] = -1;
+            for (i = 0, j = 0; i < tlen; i++,j++) {
+                if (j >= rlen) {
+                    if (del) {
+                        if (tbl->map[t[i]] == -1)
+                            tbl->map[t[i]] = -2;
+                        continue;
+                    }
+                    --j;
+                }
+                if (tbl->map[t[i]] == -1) {
+                    if (     UVCHR_IS_INVARIANT(t[i])
+                        && ! UVCHR_IS_INVARIANT(r[j]))
+                        grows = TRUE;
+                    tbl->map[t[i]] = r[j];
+                }
+            }
+            tbl->map[tbl->size] = del ? -1 : rlen ? -1 : -3;
         }
-
-        tbl->map[tbl->size] = del ? -2 : rlen ? r[rlen - 1] : -3;
-    }
-    else {
-	if (!rlen && !del) {
-	    r = t; rlen = tlen;
-	    if (!squash)
-		o->op_private |= OPpTRANS_IDENTICAL;
-	}
-	else if (!squash && rlen == tlen && memEQ((char*)t, (char*)r, tlen)) {
-	    o->op_private |= OPpTRANS_IDENTICAL;
-	}
-
-	for (i = 0; i < 256; i++)
-	    tbl->map[i] = -1;
-	for (i = 0, j = 0; i < tlen; i++,j++) {
-	    if (j >= rlen) {
-		if (del) {
-		    if (tbl->map[t[i]] == -1)
-			tbl->map[t[i]] = -2;
-		    continue;
-		}
-		--j;
-	    }
-	    if (tbl->map[t[i]] == -1) {
-                if (     UVCHR_IS_INVARIANT(t[i])
-                    && ! UVCHR_IS_INVARIANT(r[j]))
-		    grows = TRUE;
-		tbl->map[t[i]] = r[j];
-	    }
-	}
-        tbl->map[tbl->size] = del ? -1 : rlen ? -1 : -3;
-    }
 
     /* both non-utf8 and utf8 code paths end up here */
 
