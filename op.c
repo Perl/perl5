@@ -17053,9 +17053,7 @@ Perl_dup_warnings(pTHX_ STRLEN* warnings)
     Size_t size;
     STRLEN *new_warnings;
 
-    PERL_ARGS_ASSERT_DUP_WARNINGS;
-
-    if (specialWARN(warnings))
+    if (warnings == NULL || specialWARN(warnings))
         return warnings;
 
     size = sizeof(*warnings) + *warnings;
