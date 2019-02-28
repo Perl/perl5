@@ -2917,6 +2917,21 @@ SKIP:
     $wrapper->output_like(qr/In the thread/, "[perl #124203] the thread ran");
 
     $wrapper->output_like(qr/Finished/, "[perl #124203] debugger didn't deadlock");
+
+    $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/rt-124203b',
+        }
+    );
+
+    $wrapper->output_like(qr/In the thread/, "[perl #124203] the thread ran (lvalue)");
+
+    $wrapper->output_like(qr/Finished One/, "[perl #124203] debugger didn't deadlock (lvalue)");
 }
 
 done_testing();

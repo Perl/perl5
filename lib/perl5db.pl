@@ -4281,25 +4281,6 @@ sub DB::sub {
 
 sub lsub : lvalue {
 
-    no strict 'refs';
-
-    # lock ourselves under threads
-    lock($DBGR);
-
-    # Whether or not the autoloader was running, a scalar to put the
-    # sub's return value in (if needed), and an array to put the sub's
-    # return value in (if needed).
-    my ( $al, $ret, @ret ) = "";
-    if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
-        print "creating new thread\n";
-    }
-
-    # If the last ten characters are C'::AUTOLOAD', note we've traced
-    # into AUTOLOAD for $sub.
-    if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
-        $al = " for $$sub";
-    }
-
     # We stack the stack pointer and then increment it to protect us
     # from a situation that might unwind a whole bunch of call frames
     # at once. Localizing the stack pointer means that it will automatically
@@ -4317,12 +4298,32 @@ sub lsub : lvalue {
     # stack for us.
     local $single = $single & 1;
 
-    # If we've gotten really deeply recursed, turn on the flag that will
-    # make us stop with the 'deep recursion' message.
-    $single |= 4 if $stack_depth == $deep;
+    no strict 'refs';
+    {
+        # lock ourselves under threads
+        lock($DBGR);
 
-    # If frame messages are on ...
-    _print_frame_message($al);
+        # Whether or not the autoloader was running, a scalar to put the
+        # sub's return value in (if needed), and an array to put the sub's
+        # return value in (if needed).
+        my ( $al, $ret, @ret ) = "";
+        if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+            print "creating new thread\n";
+        }
+
+        # If the last ten characters are C'::AUTOLOAD', note we've traced
+        # into AUTOLOAD for $sub.
+        if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
+            $al = " for $$sub";
+        }
+
+        # If we've gotten really deeply recursed, turn on the flag that will
+        # make us stop with the 'deep recursion' message.
+        $single |= 4 if $stack_depth == $deep;
+
+        # If frame messages are on ...
+        _print_frame_message($al);
+    }
 
     # call the original lvalue sub.
     &$sub;
