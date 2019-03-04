@@ -68,7 +68,7 @@ EOF
 
 my $non_C_locale;
 foreach my $locale (@locales) {
-    next if $locale eq "C" || $locale eq 'POSIX';
+    next if $locale eq "C" || $locale eq 'POSIX' || $locale eq "C.UTF-8";
     $non_C_locale = $locale;
     last;
 }
@@ -460,15 +460,15 @@ EOF
     }
 
 SKIP: {
-        # Note: a Configure probe could be written to give us the syntax to
-        # use, but khw doesn't think it's worth it.  If the POSIX 2008 locale
-        # functions are being used, the syntax becomes mostly irrelevant, so
-        # do the test anyway if they are
-        # it's a lot of trouble to figure out in a perl script
-        if ($^O eq 'openbsd' && (     $Config{useithreads} ne 'define'
-                                 || ! ${^SAFE_LOCALES}))
+        # Note: the setlocale Configure probe could be enhanced to give us the
+        # syntax to use, but khw doesn't think it's worth it at this time, as
+        # the current outliers seem to be skipped by the test just below
+        # anyway.  If the POSIX 2008 locale functions are being used, the
+        # syntax becomes mostly irrelevant, so do the test anyway if they are.
+        # It's a lot of trouble to figure out in a perl script.
+        if ($Config{d_setlocale_accepts_any_locale_name} eq 'true')
         {
-            skip("The setlocale() syntax used is invalid on this platform", 2);
+            skip("Can't distinguish between valid and invalid locale names on this system", 2);
         }
 
         my @valid_categories = valid_locale_categories();

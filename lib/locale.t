@@ -2543,7 +2543,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 
 $test_num = $final_locales_test_number;
 
-unless ( $os =~ m!^(dragonfly|openbsd|bitrig|mirbsd)$! ) {
+if ( ! defined $Config{d_setlocale_accepts_any_locale_name}) {
     # perl #115808
     use warnings;
     my $warned = 0;

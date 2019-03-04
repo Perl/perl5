@@ -109,21 +109,14 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # systems
     return if $locale =~ / ^ pig $ /ix;
 
-    # As of 6.3, this platform's locale handling is basically broken.  khw
-    # filed a bug report (no ticket number was returned), and it is supposedly
-    # going to change in a future release, so the statements here below sunset
-    # for any larger version, at which point this may start failing and have
-    # to be revisited.
-    #
-    # Given a legal individual category, basically whatever you set the locale
-    # to, the return from setlocale() indicates that it has taken effect, even
-    # if it hasn't.  However, the return from querying LC_ALL won't reflect
-    # this.
-    if ($Config{osname} =~ /openbsd/i && $locale !~ / ^ (?: C | POSIX ) $/ix) {
-        my ($major, $minor) = $Config{osvers} =~ / ^ ( \d+ ) \. ( \d+ ) /ax;
-        return if ! defined $major || ! defined $minor
-                         || $major < 6 || ($major == 6 && $minor <= 3);
-    }
+    # Certain platforms have a crippled locale system in which setlocale
+    # returns success for just about any possible locale name, but if anything
+    # actually happens as a result of the call, it is that the underlying
+    # locale is set to a system default, likely C or C.UTF-8.  We can't test
+    # such systems fully, but we shouldn't disable the user from using
+    # locales, as it may work out for them (or not).
+    return if    defined $Config{d_setlocale_accepts_any_locale_name}
+              && $locale !~ / ^ (?: C | POSIX | C\.UTF-8 ) $/ix;
 
     $categories = [ $categories ] unless ref $categories;
 
@@ -341,6 +334,10 @@ sub find_locales ($;$) {
     if ($Config{d_has_C_UTF8} eq 'true') {
         _trylocale("C.UTF-8", $categories, \@Locale, $allow_incompatible);
     }
+
+    # There's no point in looking at anything more if we know that setlocale
+    # will return success on any garbage or non-garbage name.
+    return sort @Locale if defined $Config{d_setlocale_accepts_any_locale_name};
 
     foreach (1..16) {
         _trylocale("ISO8859-$_", $categories, \@Locale, $allow_incompatible);
