@@ -404,12 +404,6 @@
  */
 /*#define HAS_SETLINEBUF		/ **/
 
-/* HAS_SETLOCALE:
- *	This symbol, if defined, indicates that the setlocale routine is
- *	available to handle locale-specific ctype implementations.
- */
-/*#define HAS_SETLOCALE	/ **/
-
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates that the setpgid(pid, gpid)
  *	routine is available to set process group ID.
@@ -3231,6 +3225,17 @@
  */
 /*#define HAS_SETITIMER		/ **/
 
+/* HAS_SETLOCALE:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available to handle locale-specific ctype implementations.
+ */
+/* SETLOCALE_ACCEPTS_ANY_LOCALE_NAME:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available and it accepts any input locale name as valid.
+ */
+/*#define HAS_SETLOCALE	/ **/
+/*#define SETLOCALE_ACCEPTS_ANY_LOCALE_NAME	/ **/
+
 /* HAS_SETPROCTITLE:
  *	This symbol, if defined, indicates that the setproctitle routine is
  *	available to set process title.
@@ -3458,6 +3463,18 @@
  *	available to do the opposite of gmtime ()
  */
 /*#define HAS_TIMEGM		/ **/
+
+/* HAS_TOWLOWER:
+ *	This symbol, if defined, indicates that the towlower () routine is
+ *	available to do string concatenation.
+ */
+/*#define HAS_TOWLOWER		/ **/
+
+/* HAS_TOWUPPER:
+ *	This symbol, if defined, indicates that the towupper () routine is
+ *	available to do string concatenation.
+ */
+/*#define HAS_TOWUPPER		/ **/
 
 /* HAS_TRUNC:
  *	This symbol, if defined, indicates that the trunc routine is
@@ -3760,6 +3777,11 @@
  *	is available for inclusion
  */
 /*#define   I_WCHAR	/ **/
+
+/* I_WCTYPE:
+ *	This symbol, if defined, indicates that <wctype.h> exists.
+ */
+/*#define	I_WCTYPE		/ **/
 
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
@@ -5219,6 +5241,6 @@
 #endif
 
 /* Generated from:
- * 875df2221ab768da0a87740ad45e12bbc9e3b483bfa1a913727e982350ad74cf config_h.SH
- * 24ca29f990de08f8119ad2c15f060361b86fc407caab088289d7d5ac3e0f117a uconfig.sh
+ * 2cc5c49f1266887de8224d2804aae6f80c43da0a62782d74866d5e828194698d config_h.SH
+ * d6d2fc8bf209b3d6db681ac0994a29a281afe35c3a96bb62079cb15b0605d035 uconfig.sh
  * ex: set ro: */

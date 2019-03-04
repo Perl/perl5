@@ -439,12 +439,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setlinebuf HAS_SETLINEBUF		/**/
 
-/* HAS_SETLOCALE:
- *	This symbol, if defined, indicates that the setlocale routine is
- *	available to handle locale-specific ctype implementations.
- */
-#$d_setlocale HAS_SETLOCALE	/**/
-
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates that the setpgid(pid, gpid)
  *	routine is available to set process group ID.
@@ -3266,6 +3260,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setitimer HAS_SETITIMER		/**/
 
+/* HAS_SETLOCALE:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available to handle locale-specific ctype implementations.
+ */
+/* SETLOCALE_ACCEPTS_ANY_LOCALE_NAME:
+ *	This symbol, if defined, indicates that the setlocale routine is
+ *	available and it accepts any input locale name as valid.
+ */
+#$d_setlocale HAS_SETLOCALE	/**/
+#$d_setlocale_accepts_any_locale_name SETLOCALE_ACCEPTS_ANY_LOCALE_NAME	/**/
+
 /* HAS_SETPROCTITLE:
  *	This symbol, if defined, indicates that the setproctitle routine is
  *	available to set process title.
@@ -3493,6 +3498,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to do the opposite of gmtime ()
  */
 #$d_timegm HAS_TIMEGM		/**/
+
+/* HAS_TOWLOWER:
+ *	This symbol, if defined, indicates that the towlower () routine is
+ *	available to do string concatenation.
+ */
+#$d_towlower HAS_TOWLOWER		/**/
+
+/* HAS_TOWUPPER:
+ *	This symbol, if defined, indicates that the towupper () routine is
+ *	available to do string concatenation.
+ */
+#$d_towupper HAS_TOWUPPER		/**/
 
 /* HAS_TRUNC:
  *	This symbol, if defined, indicates that the trunc routine is
@@ -3795,6 +3812,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	is available for inclusion
  */
 #$i_wchar   I_WCHAR	/**/
+
+/* I_WCTYPE:
+ *	This symbol, if defined, indicates that <wctype.h> exists.
+ */
+#$i_wctype	I_WCTYPE		/**/
 
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
