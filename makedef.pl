@@ -129,30 +129,41 @@ if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'n
     $define{USE_REENTRANT_API} = 1;
 }
 
-if (    ($define{USE_ITHREADS} || $define{USE_THREAD_SAFE_LOCALE})
-    &&   $define{HAS_SETLOCALE}
-    && ! $define{NO_LOCALE}
-    && ! $define{NO_POSIX_2008_LOCALE})
-{
-    $define{HAS_POSIX_2008_LOCALE} = 1 if $define{HAS_NEWLOCALE}
-                                       && $define{HAS_FREELOCALE}
-                                       && $define{HAS_USELOCALE};
-    my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
-    if (    ! $define{NO_THREAD_SAFE_LOCALE}
-        && (  $define{HAS_POSIX_2008_LOCALE}
-            || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
-                                               && $cctype >= 80))))
+if (! $define{NO_LOCALE}) {
+    if ( ! $define{NO_POSIX_2008_LOCALE}
+        && $define{HAS_NEWLOCALE}
+        && $define{HAS_USELOCALE}
+        && $define{HAS_DUPLOCALE}
+        && $define{HAS_FREELOCALE})
     {
-        $define{USE_THREAD_SAFE_LOCALE} = 1;
-        $define{USE_POSIX_2008_LOCALE} = 1 if $define{HAS_POSIX_2008_LOCALE};
+        $define{HAS_POSIX_2008_LOCALE} = 1;
+        $define{USE_LOCALE} = 1;
     }
+    elsif ($define{HAS_SETLOCALE}) {
+        $define{USE_LOCALE} = 1;
+    }
+}
 
-    if (   $ARGS{PLATFORM} eq 'win32'
-        && $define{USE_THREAD_SAFE_LOCALE}
-        && $cctype < 140)
-    {
-        $define{TS_W32_BROKEN_LOCALECONV} = 1;
-    }
+my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
+if (! $define{HAS_SETLOCALE} && $define{HAS_POSIX_2008_LOCALE}) {
+    $define{USE_POSIX_2008_LOCALE} = 1;
+    $define{USE_THREAD_SAFE_LOCALE} = 1;
+}
+elsif (   ($define{USE_ITHREADS} || $define{USE_THREAD_SAFE_LOCALE})
+       && (    $define{HAS_POSIX_2008_LOCALE}
+           || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
+                                              && $cctype >= 80)))
+       && ! $define{NO_THREAD_SAFE_LOCALE})
+{
+    $define{USE_THREAD_SAFE_LOCALE} = 1 unless $define{USE_THREAD_SAFE_LOCALE};
+    $define{USE_POSIX_2008_LOCALE} = 1 if $define{HAS_POSIX_2008_LOCALE};
+}
+
+if (   $ARGS{PLATFORM} eq 'win32'
+    && $define{USE_THREAD_SAFE_LOCALE}
+    && $cctype < 140)
+{
+    $define{TS_W32_BROKEN_LOCALECONV} = 1;
 }
 
 # perl.h logic duplication ends

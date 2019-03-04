@@ -207,11 +207,16 @@ sub locales_enabled(;$) {
     # denoting a single category (either name or number).  No conversion into
     # a number is done in this case.
 
-    return 0 unless    $Config{d_setlocale}
-                        # I (khw) cargo-culted the '?' in the pattern on the
-                        # next line.
-                    && $Config{ccflags} !~ /\bD?NO_LOCALE\b/
-                    && $has_locale_h;
+    # khw cargo-culted the '?' in the pattern on the next line.
+    return 0 if $Config{ccflags} =~ /\bD?NO_LOCALE\b/;
+
+    if (! $Config{d_setlocale}) {
+        return 0 if $Config{ccflags} =~ /\bD?NO_POSIX_2008_LOCALE\b/;
+        return 0 unless $Config{d_newlocale};
+        return 0 unless $Config{d_uselocale};
+        return 0 unless $Config{d_duplocale};
+        return 0 unless $Config{d_freelocale};
+    }
 
     # Done with the global possibilities.  Now check if any passed in category
     # is disabled.

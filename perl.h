@@ -719,8 +719,31 @@
 #   include <xlocale.h>
 #endif
 
-#if !defined(NO_LOCALE) && defined(HAS_SETLOCALE)
-#   define USE_LOCALE
+/* If not forbidden, we enable locale handling if either 1) the POSIX 2008
+ * functions are available, or 2) just the setlocale() function.  This logic is
+ * repeated in t/loc_tools.pl and makedef.pl;  The three should be kept in
+ * sync. */
+#if   ! defined(NO_LOCALE)
+
+#  if ! defined(NO_POSIX_2008_LOCALE)           \
+   &&   defined(HAS_NEWLOCALE)                  \
+   &&   defined(HAS_USELOCALE)                  \
+   &&   defined(HAS_DUPLOCALE)                  \
+   &&   defined(HAS_FREELOCALE)                 \
+   &&   defined(LC_ALL_MASK)
+
+    /* For simplicity, the code is written to assume that any platform advanced
+     * enough to have the Posix 2008 locale functions has LC_ALL.  The final
+     * test above makes sure that assumption is valid */
+
+#    define HAS_POSIX_2008_LOCALE
+#    define USE_LOCALE
+#  elif defined(HAS_SETLOCALE)
+#    define USE_LOCALE
+#  endif
+#endif
+
+#ifdef USE_LOCALE
 #   define HAS_SKIP_LOCALE_INIT /* Solely for XS code to test for this
                                    #define */
 #   if !defined(NO_LOCALE_COLLATE) && defined(LC_COLLATE) \
@@ -757,31 +780,22 @@
 #   if !defined(NO_LOCALE_TELEPHONE) && defined(LC_TELEPHONE)
 #	define USE_LOCALE_TELEPHONE
 #   endif
-#endif /* !NO_LOCALE && HAS_SETLOCALE */
 
 /* XXX The next few defines are unfortunately duplicated in makedef.pl, and
  * changes here MUST also be made there */
 
-#ifdef USE_LOCALE /* These locale things are all subject to change */
-#  if      defined(HAS_NEWLOCALE)               \
-      &&   defined(LC_ALL_MASK)                 \
-      &&   defined(HAS_FREELOCALE)              \
-      &&   defined(HAS_USELOCALE)               \
-      && ! defined(NO_POSIX_2008_LOCALE)
-
-    /* For simplicity, the code is written to assume that any platform advanced
-     * enough to have the Posix 2008 locale functions has LC_ALL.  The test
-     * above makes sure that assumption is valid */
-
-#    define HAS_POSIX_2008_LOCALE
-#  endif
+#  if ! defined(HAS_SETLOCALE) && defined(HAS_POSIX_2008_LOCALE)
+#      define USE_POSIX_2008_LOCALE
+#      ifndef USE_THREAD_SAFE_LOCALE
+#        define USE_THREAD_SAFE_LOCALE
+#      endif
                                    /* If compiled with
                                     * -DUSE_THREAD_SAFE_LOCALE, will do so even
                                     * on unthreaded builds */
-#  if    (defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE))         \
-      && (    defined(HAS_POSIX_2008_LOCALE)                                \
-          || (defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400))     \
-      && ! defined(NO_THREAD_SAFE_LOCALE)
+#  elif   (defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE))         \
+       && (    defined(HAS_POSIX_2008_LOCALE)                                \
+           || (defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400))     \
+       && ! defined(NO_THREAD_SAFE_LOCALE)
 #    ifndef USE_THREAD_SAFE_LOCALE
 #      define USE_THREAD_SAFE_LOCALE
 #    endif
