@@ -1,6 +1,6 @@
-# ScriptExtensions-11.0.0.txt
-# Date: 2018-02-04, 20:04:00 GMT
-# © 2018 Unicode®, Inc.
+# ScriptExtensions-12.0.0.txt
+# Date: 2019-01-31, 02:26:00 GMT [RP]
+# © 2019 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
@@ -54,11 +54,10 @@
 1CDB          ; Deva # Mn       VEDIC TONE TRIPLE SVARITA
 1CDE..1CDF    ; Deva # Mn   [2] VEDIC TONE TWO DOTS BELOW..VEDIC TONE THREE DOTS BELOW
 1CE2..1CE8    ; Deva # Mn   [7] VEDIC SIGN VISARGA SVARITA..VEDIC SIGN VISARGA ANUDATTA WITH TAIL
-1CE9          ; Deva # Lo       VEDIC SIGN ANUSVARA ANTARGOMUKHA
 1CEB..1CEC    ; Deva # Lo   [2] VEDIC SIGN ANUSVARA VAMAGOMUKHA..VEDIC SIGN ANUSVARA VAMAGOMUKHA WITH TAIL
 1CEE..1CF1    ; Deva # Lo   [4] VEDIC SIGN HEXIFORM LONG ANUSVARA..VEDIC SIGN ANUSVARA UBHAYATO MUKHA
 
-# Total code points: 19
+# Total code points: 18
 
 # ================================================
 
@@ -108,6 +107,14 @@
 0363..036F    ; Latn # Mn  [13] COMBINING LATIN SMALL LETTER A..COMBINING LATIN SMALL LETTER X
 
 # Total code points: 13
+
+# ================================================
+
+# Script_Extensions=Nand
+
+1CFA          ; Nand # Lo       VEDIC SIGN DOUBLE ANUSVARA ANTARGOMUKHA
+
+# Total code points: 1
 
 # ================================================
 
@@ -224,10 +231,18 @@ A66F          ; Cyrl Glag # Mn       COMBINING CYRILLIC VZMET
 # Script_Extensions=Deva Gran
 
 1CD3          ; Deva Gran # Po       VEDIC SIGN NIHSHVASA
-1CF2..1CF3    ; Deva Gran # Mc   [2] VEDIC SIGN ARDHAVISARGA..VEDIC SIGN ROTATED ARDHAVISARGA
+1CF3          ; Deva Gran # Lo       VEDIC SIGN ROTATED ARDHAVISARGA
 1CF8..1CF9    ; Deva Gran # Mn   [2] VEDIC TONE RING ABOVE..VEDIC TONE DOUBLE RING ABOVE
 
-# Total code points: 5
+# Total code points: 4
+
+# ================================================
+
+# Script_Extensions=Deva Nand
+
+1CE9          ; Deva Nand # Lo       VEDIC SIGN ANUSVARA ANTARGOMUKHA
+
+# Total code points: 1
 
 # ================================================
 
@@ -266,8 +281,10 @@ A8F3          ; Deva Taml # Lo       DEVANAGARI SIGN CANDRABINDU VIRAMA
 11301         ; Gran Taml # Mn       GRANTHA SIGN CANDRABINDU
 11303         ; Gran Taml # Mc       GRANTHA SIGN VISARGA
 1133B..1133C  ; Gran Taml # Mn   [2] COMBINING BINDU BELOW..GRANTHA SIGN NUKTA
+11FD0..11FD1  ; Gran Taml # No   [2] TAMIL FRACTION ONE QUARTER..TAMIL FRACTION ONE HALF-1
+11FD3         ; Gran Taml # No       TAMIL FRACTION THREE QUARTERS
 
-# Total code points: 18
+# Total code points: 21
 
 # ================================================
 
@@ -298,6 +315,22 @@ FF70          ; Hira Kana # Lm       HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND
 FF9E..FF9F    ; Hira Kana # Lm   [2] HALFWIDTH KATAKANA VOICED SOUND MARK..HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK
 
 # Total code points: 14
+
+# ================================================
+
+# Script_Extensions=Knda Nand
+
+0CE6..0CEF    ; Knda Nand # Nd  [10] KANNADA DIGIT ZERO..KANNADA DIGIT NINE
+
+# Total code points: 10
+
+# ================================================
+
+# Script_Extensions=Latn Mong
+
+202F          ; Latn Mong # Zs       NARROW NO-BREAK SPACE
+
+# Total code points: 1
 
 # ================================================
 
@@ -472,6 +505,14 @@ FF64..FF65    ; Bopo Hang Hani Hira Kana Yiii # Po   [2] HALFWIDTH IDEOGRAPHIC C
 
 # ================================================
 
+# Script_Extensions=Beng Deva Gran Knda Nand Orya Telu Tirh
+
+1CF2          ; Beng Deva Gran Knda Nand Orya Telu Tirh # Lo       VEDIC SIGN ARDHAVISARGA
+
+# Total code points: 1
+
+# ================================================
+
 # Script_Extensions=Deva Dogr Gujr Guru Khoj Kthi Mahj Modi Sind Takr Tirh
 
 A836..A837    ; Deva Dogr Gujr Guru Khoj Kthi Mahj Modi Sind Takr Tirh # So   [2] NORTH INDIC QUARTER MARK..NORTH INDIC PLACEHOLDER MARK
@@ -490,14 +531,6 @@ A839          ; Deva Dogr Gujr Guru Khoj Kthi Mahj Modi Sind Takr Tirh # So     
 
 # ================================================
 
-# Script_Extensions=Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Modi Sind Takr Tirh
-
-A833..A835    ; Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Modi Sind Takr Tirh # No   [3] NORTH INDIC FRACTION ONE SIXTEENTH..NORTH INDIC FRACTION THREE SIXTEENTHS
-
-# Total code points: 3
-
-# ================================================
-
 # Script_Extensions=Beng Deva Gran Gujr Guru Knda Latn Mlym Orya Shrd Taml Telu Tirh
 
 0951          ; Beng Deva Gran Gujr Guru Knda Latn Mlym Orya Shrd Taml Telu Tirh # Mn       DEVANAGARI STRESS SIGN UDATTA
@@ -506,25 +539,33 @@ A833..A835    ; Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Modi Sind Takr Tirh # No
 
 # ================================================
 
-# Script_Extensions=Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Mlym Modi Sind Takr Tirh
+# Script_Extensions=Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Modi Nand Sind Takr Tirh
 
-A830..A832    ; Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Mlym Modi Sind Takr Tirh # No   [3] NORTH INDIC FRACTION ONE QUARTER..NORTH INDIC FRACTION THREE QUARTERS
+A833..A835    ; Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Modi Nand Sind Takr Tirh # No   [3] NORTH INDIC FRACTION ONE SIXTEENTH..NORTH INDIC FRACTION THREE SIXTEENTHS
 
 # Total code points: 3
 
 # ================================================
 
-# Script_Extensions=Beng Deva Dogr Gong Gran Gujr Guru Knda Mahj Mlym Orya Sind Sinh Sylo Takr Taml Telu Tirh
+# Script_Extensions=Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Mlym Modi Nand Sind Takr Tirh
 
-0964          ; Beng Deva Dogr Gong Gran Gujr Guru Knda Mahj Mlym Orya Sind Sinh Sylo Takr Taml Telu Tirh # Po       DEVANAGARI DANDA
+A830..A832    ; Deva Dogr Gujr Guru Khoj Knda Kthi Mahj Mlym Modi Nand Sind Takr Tirh # No   [3] NORTH INDIC FRACTION ONE QUARTER..NORTH INDIC FRACTION THREE QUARTERS
+
+# Total code points: 3
+
+# ================================================
+
+# Script_Extensions=Beng Deva Dogr Gong Gonm Gran Gujr Guru Knda Mahj Mlym Nand Orya Sind Sinh Sylo Takr Taml Telu Tirh
+
+0964          ; Beng Deva Dogr Gong Gonm Gran Gujr Guru Knda Mahj Mlym Nand Orya Sind Sinh Sylo Takr Taml Telu Tirh # Po       DEVANAGARI DANDA
 
 # Total code points: 1
 
 # ================================================
 
-# Script_Extensions=Beng Deva Dogr Gong Gran Gujr Guru Knda Limb Mahj Mlym Orya Sind Sinh Sylo Takr Taml Telu Tirh
+# Script_Extensions=Beng Deva Dogr Gong Gonm Gran Gujr Guru Knda Limb Mahj Mlym Nand Orya Sind Sinh Sylo Takr Taml Telu Tirh
 
-0965          ; Beng Deva Dogr Gong Gran Gujr Guru Knda Limb Mahj Mlym Orya Sind Sinh Sylo Takr Taml Telu Tirh # Po       DEVANAGARI DOUBLE DANDA
+0965          ; Beng Deva Dogr Gong Gonm Gran Gujr Guru Knda Limb Mahj Mlym Nand Orya Sind Sinh Sylo Takr Taml Telu Tirh # Po       DEVANAGARI DOUBLE DANDA
 
 # Total code points: 1
 

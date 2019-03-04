@@ -1,5 +1,5 @@
-# DerivedNumericValues-11.0.0.txt
-# Date: 2018-05-08, 06:52:34 GMT
+# DerivedNumericValues-12.0.0.txt
+# Date: 2018-08-02, 09:26:08 GMT
 # © 2018 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -113,35 +113,72 @@ FF10          ; 0.0 ; ; 0 # Nd       FULLWIDTH DIGIT ZERO
 1D7E2         ; 0.0 ; ; 0 # Nd       MATHEMATICAL SANS-SERIF DIGIT ZERO
 1D7EC         ; 0.0 ; ; 0 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT ZERO
 1D7F6         ; 0.0 ; ; 0 # Nd       MATHEMATICAL MONOSPACE DIGIT ZERO
+1E140         ; 0.0 ; ; 0 # Nd       NYIAKENG PUACHUE HMONG DIGIT ZERO
+1E2F0         ; 0.0 ; ; 0 # Nd       WANCHO DIGIT ZERO
 1E950         ; 0.0 ; ; 0 # Nd       ADLAM DIGIT ZERO
 1F100..1F101  ; 0.0 ; ; 0 # No   [2] DIGIT ZERO FULL STOP..DIGIT ZERO COMMA
 1F10B..1F10C  ; 0.0 ; ; 0 # No   [2] DINGBAT CIRCLED SANS-SERIF DIGIT ZERO..DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT ZERO
 
-# Total code points: 79
+# Total code points: 81
+
+# ================================================
+
+11FC0         ; 0.003125 ; ; 1/320 # No       TAMIL FRACTION ONE THREE-HUNDRED-AND-TWENTIETH
+11FD4         ; 0.003125 ; ; 1/320 # No       TAMIL FRACTION DOWNSCALING FACTOR KIIZH
+
+# Total code points: 2
 
 # ================================================
 
 0D58          ; 0.00625 ; ; 1/160 # No       MALAYALAM FRACTION ONE ONE-HUNDRED-AND-SIXTIETH
+11FC1         ; 0.00625 ; ; 1/160 # No       TAMIL FRACTION ONE ONE-HUNDRED-AND-SIXTIETH
+
+# Total code points: 2
+
+# ================================================
+
+11FC2         ; 0.0125 ; ; 1/80 # No       TAMIL FRACTION ONE EIGHTIETH
+
+# Total code points: 1
+
+# ================================================
+
+11FC3         ; 0.015625 ; ; 1/64 # No       TAMIL FRACTION ONE SIXTY-FOURTH
 
 # Total code points: 1
 
 # ================================================
 
 0D59          ; 0.025 ; ; 1/40 # No       MALAYALAM FRACTION ONE FORTIETH
+11FC4         ; 0.025 ; ; 1/40 # No       TAMIL FRACTION ONE FORTIETH
+
+# Total code points: 2
+
+# ================================================
+
+11FC5         ; 0.03125 ; ; 1/32 # No       TAMIL FRACTION ONE THIRTY-SECOND
 
 # Total code points: 1
 
 # ================================================
 
 0D5A          ; 0.0375 ; ; 3/80 # No       MALAYALAM FRACTION THREE EIGHTIETHS
+11FC6         ; 0.0375 ; ; 3/80 # No       TAMIL FRACTION THREE EIGHTIETHS
+
+# Total code points: 2
+
+# ================================================
+
+11FC7         ; 0.046875 ; ; 3/64 # No       TAMIL FRACTION THREE SIXTY-FOURTHS
 
 # Total code points: 1
 
 # ================================================
 
 0D5B          ; 0.05 ; ; 1/20 # No       MALAYALAM FRACTION ONE TWENTIETH
+11FC8         ; 0.05 ; ; 1/20 # No       TAMIL FRACTION ONE TWENTIETH
 
-# Total code points: 1
+# Total code points: 2
 
 # ================================================
 
@@ -149,8 +186,9 @@ FF10          ; 0.0 ; ; 0 # Nd       FULLWIDTH DIGIT ZERO
 0B75          ; 0.0625 ; ; 1/16 # No       ORIYA FRACTION ONE SIXTEENTH
 0D76          ; 0.0625 ; ; 1/16 # No       MALAYALAM FRACTION ONE SIXTEENTH
 A833          ; 0.0625 ; ; 1/16 # No       NORTH INDIC FRACTION ONE SIXTEENTH
+11FC9..11FCA  ; 0.0625 ; ; 1/16 # No   [2] TAMIL FRACTION ONE SIXTEENTH-1..TAMIL FRACTION ONE SIXTEENTH-2
 
-# Total code points: 4
+# Total code points: 6
 
 # ================================================
 
@@ -162,8 +200,9 @@ A833          ; 0.0625 ; ; 1/16 # No       NORTH INDIC FRACTION ONE SIXTEENTH
 
 0D5C          ; 0.1 ; ; 1/10 # No       MALAYALAM FRACTION ONE TENTH
 2152          ; 0.1 ; ; 1/10 # No       VULGAR FRACTION ONE TENTH
+11FCB         ; 0.1 ; ; 1/10 # No       TAMIL FRACTION ONE TENTH
 
-# Total code points: 2
+# Total code points: 3
 
 # ================================================
 
@@ -178,9 +217,10 @@ A833          ; 0.0625 ; ; 1/16 # No       NORTH INDIC FRACTION ONE SIXTEENTH
 0D77          ; 0.125 ; ; 1/8 # No       MALAYALAM FRACTION ONE EIGHTH
 215B          ; 0.125 ; ; 1/8 # No       VULGAR FRACTION ONE EIGHTH
 A834          ; 0.125 ; ; 1/8 # No       NORTH INDIC FRACTION ONE EIGHTH
+11FCC         ; 0.125 ; ; 1/8 # No       TAMIL FRACTION ONE EIGHTH
 1245F         ; 0.125 ; ; 1/8 # Nl       CUNEIFORM NUMERIC SIGN ONE EIGHTH ASH
 
-# Total code points: 6
+# Total code points: 7
 
 # ================================================
 
@@ -191,16 +231,18 @@ A834          ; 0.125 ; ; 1/8 # No       NORTH INDIC FRACTION ONE EIGHTH
 # ================================================
 
 0D5D          ; 0.15 ; ; 3/20 # No       MALAYALAM FRACTION THREE TWENTIETHS
+11FCD         ; 0.15 ; ; 3/20 # No       TAMIL FRACTION THREE TWENTIETHS
 
-# Total code points: 1
+# Total code points: 2
 
 # ================================================
 
 2159          ; 0.16666667 ; ; 1/6 # No       VULGAR FRACTION ONE SIXTH
 109F7         ; 0.16666667 ; ; 1/6 # No       MEROITIC CURSIVE FRACTION TWO TWELFTHS
 12461         ; 0.16666667 ; ; 1/6 # Nl       CUNEIFORM NUMERIC SIGN OLD ASSYRIAN ONE SIXTH
+1ED3D         ; 0.16666667 ; ; 1/6 # No       OTTOMAN SIYAQ FRACTION ONE SIXTH
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
@@ -208,15 +250,17 @@ A834          ; 0.125 ; ; 1/8 # No       NORTH INDIC FRACTION ONE EIGHTH
 0B77          ; 0.1875 ; ; 3/16 # No       ORIYA FRACTION THREE SIXTEENTHS
 0D78          ; 0.1875 ; ; 3/16 # No       MALAYALAM FRACTION THREE SIXTEENTHS
 A835          ; 0.1875 ; ; 3/16 # No       NORTH INDIC FRACTION THREE SIXTEENTHS
+11FCE         ; 0.1875 ; ; 3/16 # No       TAMIL FRACTION THREE SIXTEENTHS
 
-# Total code points: 4
+# Total code points: 5
 
 # ================================================
 
 0D5E          ; 0.2 ; ; 1/5 # No       MALAYALAM FRACTION ONE FIFTH
 2155          ; 0.2 ; ; 1/5 # No       VULGAR FRACTION ONE FIFTH
+11FCF         ; 0.2 ; ; 1/5 # No       TAMIL FRACTION ONE FIFTH
 
-# Total code points: 2
+# Total code points: 3
 
 # ================================================
 
@@ -229,11 +273,12 @@ A830          ; 0.25 ; ; 1/4 # No       NORTH INDIC FRACTION ONE QUARTER
 1018B         ; 0.25 ; ; 1/4 # No       GREEK ONE QUARTER SIGN
 109F8         ; 0.25 ; ; 1/4 # No       MEROITIC CURSIVE FRACTION THREE TWELFTHS
 10E7C         ; 0.25 ; ; 1/4 # No       RUMI FRACTION ONE QUARTER
+11FD0         ; 0.25 ; ; 1/4 # No       TAMIL FRACTION ONE QUARTER
 12460         ; 0.25 ; ; 1/4 # Nl       CUNEIFORM NUMERIC SIGN ONE QUARTER ASH
 12462..12463  ; 0.25 ; ; 1/4 # Nl   [2] CUNEIFORM NUMERIC SIGN OLD ASSYRIAN ONE QUARTER..CUNEIFORM NUMERIC SIGN ONE QUARTER GUR
 1ECAD         ; 0.25 ; ; 1/4 # No       INDIC SIYAQ FRACTION ONE QUARTER
 
-# Total code points: 13
+# Total code points: 14
 
 # ================================================
 
@@ -279,10 +324,12 @@ A831          ; 0.5 ; ; 1/2 # No       NORTH INDIC FRACTION ONE HALF
 10A48         ; 0.5 ; ; 1/2 # No       KHAROSHTHI FRACTION ONE HALF
 10E7B         ; 0.5 ; ; 1/2 # No       RUMI FRACTION ONE HALF
 10F26         ; 0.5 ; ; 1/2 # No       OLD SOGDIAN FRACTION ONE HALF
+11FD1..11FD2  ; 0.5 ; ; 1/2 # No   [2] TAMIL FRACTION ONE HALF-1..TAMIL FRACTION ONE HALF-2
 12464         ; 0.5 ; ; 1/2 # Nl       CUNEIFORM NUMERIC SIGN ONE HALF GUR
 1ECAE         ; 0.5 ; ; 1/2 # No       INDIC SIYAQ FRACTION ONE HALF
+1ED3C         ; 0.5 ; ; 1/2 # No       OTTOMAN SIYAQ FRACTION ONE HALF
 
-# Total code points: 16
+# Total code points: 19
 
 # ================================================
 
@@ -323,9 +370,10 @@ A831          ; 0.5 ; ; 1/2 # No       NORTH INDIC FRACTION ONE HALF
 A832          ; 0.75 ; ; 3/4 # No       NORTH INDIC FRACTION THREE QUARTERS
 10178         ; 0.75 ; ; 3/4 # No       GREEK THREE QUARTERS SIGN
 109FE         ; 0.75 ; ; 3/4 # No       MEROITIC CURSIVE FRACTION NINE TWELFTHS
+11FD3         ; 0.75 ; ; 3/4 # No       TAMIL FRACTION THREE QUARTERS
 1ECAF         ; 0.75 ; ; 3/4 # No       INDIC SIYAQ FRACTION THREE QUARTERS
 
-# Total code points: 8
+# Total code points: 9
 
 # ================================================
 
@@ -480,15 +528,18 @@ FF11          ; 1.0 ; ; 1 # Nd       FULLWIDTH DIGIT ONE
 1D7E3         ; 1.0 ; ; 1 # Nd       MATHEMATICAL SANS-SERIF DIGIT ONE
 1D7ED         ; 1.0 ; ; 1 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT ONE
 1D7F7         ; 1.0 ; ; 1 # Nd       MATHEMATICAL MONOSPACE DIGIT ONE
+1E141         ; 1.0 ; ; 1 # Nd       NYIAKENG PUACHUE HMONG DIGIT ONE
+1E2F1         ; 1.0 ; ; 1 # Nd       WANCHO DIGIT ONE
 1E8C7         ; 1.0 ; ; 1 # No       MENDE KIKAKUI DIGIT ONE
 1E951         ; 1.0 ; ; 1 # Nd       ADLAM DIGIT ONE
 1EC71         ; 1.0 ; ; 1 # No       INDIC SIYAQ NUMBER ONE
 1ECA3         ; 1.0 ; ; 1 # No       INDIC SIYAQ NUMBER PREFIXED ONE
 1ECB1         ; 1.0 ; ; 1 # No       INDIC SIYAQ NUMBER ALTERNATE ONE
+1ED01         ; 1.0 ; ; 1 # No       OTTOMAN SIYAQ NUMBER ONE
 1F102         ; 1.0 ; ; 1 # No       DIGIT ONE COMMA
 2092A         ; 1.0 ; ; 1 # Lo       CJK UNIFIED IDEOGRAPH-2092A
 
-# Total code points: 134
+# Total code points: 137
 
 # ================================================
 
@@ -620,15 +671,19 @@ FF12          ; 2.0 ; ; 2 # Nd       FULLWIDTH DIGIT TWO
 1D7E4         ; 2.0 ; ; 2 # Nd       MATHEMATICAL SANS-SERIF DIGIT TWO
 1D7EE         ; 2.0 ; ; 2 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT TWO
 1D7F8         ; 2.0 ; ; 2 # Nd       MATHEMATICAL MONOSPACE DIGIT TWO
+1E142         ; 2.0 ; ; 2 # Nd       NYIAKENG PUACHUE HMONG DIGIT TWO
+1E2F2         ; 2.0 ; ; 2 # Nd       WANCHO DIGIT TWO
 1E8C8         ; 2.0 ; ; 2 # No       MENDE KIKAKUI DIGIT TWO
 1E952         ; 2.0 ; ; 2 # Nd       ADLAM DIGIT TWO
 1EC72         ; 2.0 ; ; 2 # No       INDIC SIYAQ NUMBER TWO
 1ECA4         ; 2.0 ; ; 2 # No       INDIC SIYAQ NUMBER PREFIXED TWO
 1ECB2         ; 2.0 ; ; 2 # No       INDIC SIYAQ NUMBER ALTERNATE TWO
+1ED02         ; 2.0 ; ; 2 # No       OTTOMAN SIYAQ NUMBER TWO
+1ED2F         ; 2.0 ; ; 2 # No       OTTOMAN SIYAQ ALTERNATE NUMBER TWO
 1F103         ; 2.0 ; ; 2 # No       DIGIT TWO COMMA
 22390         ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-22390
 
-# Total code points: 132
+# Total code points: 136
 
 # ================================================
 
@@ -755,17 +810,21 @@ FF13          ; 3.0 ; ; 3 # Nd       FULLWIDTH DIGIT THREE
 1D7E5         ; 3.0 ; ; 3 # Nd       MATHEMATICAL SANS-SERIF DIGIT THREE
 1D7EF         ; 3.0 ; ; 3 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT THREE
 1D7F9         ; 3.0 ; ; 3 # Nd       MATHEMATICAL MONOSPACE DIGIT THREE
+1E143         ; 3.0 ; ; 3 # Nd       NYIAKENG PUACHUE HMONG DIGIT THREE
+1E2F3         ; 3.0 ; ; 3 # Nd       WANCHO DIGIT THREE
 1E8C9         ; 3.0 ; ; 3 # No       MENDE KIKAKUI DIGIT THREE
 1E953         ; 3.0 ; ; 3 # Nd       ADLAM DIGIT THREE
 1EC73         ; 3.0 ; ; 3 # No       INDIC SIYAQ NUMBER THREE
 1ECA5         ; 3.0 ; ; 3 # No       INDIC SIYAQ NUMBER PREFIXED THREE
+1ED03         ; 3.0 ; ; 3 # No       OTTOMAN SIYAQ NUMBER THREE
+1ED30         ; 3.0 ; ; 3 # No       OTTOMAN SIYAQ ALTERNATE NUMBER THREE
 1F104         ; 3.0 ; ; 3 # No       DIGIT THREE COMMA
 20AFD         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-20AFD
 20B19         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-20B19
 22998         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-22998
 23B1B         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-23B1B
 
-# Total code points: 133
+# Total code points: 137
 
 # ================================================
 
@@ -886,16 +945,20 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 1D7E6         ; 4.0 ; ; 4 # Nd       MATHEMATICAL SANS-SERIF DIGIT FOUR
 1D7F0         ; 4.0 ; ; 4 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT FOUR
 1D7FA         ; 4.0 ; ; 4 # Nd       MATHEMATICAL MONOSPACE DIGIT FOUR
+1E144         ; 4.0 ; ; 4 # Nd       NYIAKENG PUACHUE HMONG DIGIT FOUR
+1E2F4         ; 4.0 ; ; 4 # Nd       WANCHO DIGIT FOUR
 1E8CA         ; 4.0 ; ; 4 # No       MENDE KIKAKUI DIGIT FOUR
 1E954         ; 4.0 ; ; 4 # Nd       ADLAM DIGIT FOUR
 1EC74         ; 4.0 ; ; 4 # No       INDIC SIYAQ NUMBER FOUR
 1ECA6         ; 4.0 ; ; 4 # No       INDIC SIYAQ NUMBER PREFIXED FOUR
+1ED04         ; 4.0 ; ; 4 # No       OTTOMAN SIYAQ NUMBER FOUR
+1ED31         ; 4.0 ; ; 4 # No       OTTOMAN SIYAQ ALTERNATE NUMBER FOUR
 1F105         ; 4.0 ; ; 4 # No       DIGIT FOUR COMMA
 20064         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-20064
 200E2         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-200E2
 2626D         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-2626D
 
-# Total code points: 124
+# Total code points: 128
 
 # ================================================
 
@@ -1021,14 +1084,18 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 1D7E7         ; 5.0 ; ; 5 # Nd       MATHEMATICAL SANS-SERIF DIGIT FIVE
 1D7F1         ; 5.0 ; ; 5 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT FIVE
 1D7FB         ; 5.0 ; ; 5 # Nd       MATHEMATICAL MONOSPACE DIGIT FIVE
+1E145         ; 5.0 ; ; 5 # Nd       NYIAKENG PUACHUE HMONG DIGIT FIVE
+1E2F5         ; 5.0 ; ; 5 # Nd       WANCHO DIGIT FIVE
 1E8CB         ; 5.0 ; ; 5 # No       MENDE KIKAKUI DIGIT FIVE
 1E955         ; 5.0 ; ; 5 # Nd       ADLAM DIGIT FIVE
 1EC75         ; 5.0 ; ; 5 # No       INDIC SIYAQ NUMBER FIVE
 1ECA7         ; 5.0 ; ; 5 # No       INDIC SIYAQ NUMBER PREFIXED FIVE
+1ED05         ; 5.0 ; ; 5 # No       OTTOMAN SIYAQ NUMBER FIVE
+1ED32         ; 5.0 ; ; 5 # No       OTTOMAN SIYAQ ALTERNATE NUMBER FIVE
 1F106         ; 5.0 ; ; 5 # No       DIGIT FIVE COMMA
 20121         ; 5.0 ; ; 5 # Lo       CJK UNIFIED IDEOGRAPH-20121
 
-# Total code points: 123
+# Total code points: 127
 
 # ================================================
 
@@ -1139,14 +1206,18 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 1D7E8         ; 6.0 ; ; 6 # Nd       MATHEMATICAL SANS-SERIF DIGIT SIX
 1D7F2         ; 6.0 ; ; 6 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT SIX
 1D7FC         ; 6.0 ; ; 6 # Nd       MATHEMATICAL MONOSPACE DIGIT SIX
+1E146         ; 6.0 ; ; 6 # Nd       NYIAKENG PUACHUE HMONG DIGIT SIX
+1E2F6         ; 6.0 ; ; 6 # Nd       WANCHO DIGIT SIX
 1E8CC         ; 6.0 ; ; 6 # No       MENDE KIKAKUI DIGIT SIX
 1E956         ; 6.0 ; ; 6 # Nd       ADLAM DIGIT SIX
 1EC76         ; 6.0 ; ; 6 # No       INDIC SIYAQ NUMBER SIX
 1ECA8         ; 6.0 ; ; 6 # No       INDIC SIYAQ NUMBER PREFIXED SIX
+1ED06         ; 6.0 ; ; 6 # No       OTTOMAN SIYAQ NUMBER SIX
+1ED33         ; 6.0 ; ; 6 # No       OTTOMAN SIYAQ ALTERNATE NUMBER SIX
 1F107         ; 6.0 ; ; 6 # No       DIGIT SIX COMMA
 20AEA         ; 6.0 ; ; 6 # Lo       CJK UNIFIED IDEOGRAPH-20AEA
 
-# Total code points: 107
+# Total code points: 111
 
 # ================================================
 
@@ -1254,14 +1325,18 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 1D7E9         ; 7.0 ; ; 7 # Nd       MATHEMATICAL SANS-SERIF DIGIT SEVEN
 1D7F3         ; 7.0 ; ; 7 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT SEVEN
 1D7FD         ; 7.0 ; ; 7 # Nd       MATHEMATICAL MONOSPACE DIGIT SEVEN
+1E147         ; 7.0 ; ; 7 # Nd       NYIAKENG PUACHUE HMONG DIGIT SEVEN
+1E2F7         ; 7.0 ; ; 7 # Nd       WANCHO DIGIT SEVEN
 1E8CD         ; 7.0 ; ; 7 # No       MENDE KIKAKUI DIGIT SEVEN
 1E957         ; 7.0 ; ; 7 # Nd       ADLAM DIGIT SEVEN
 1EC77         ; 7.0 ; ; 7 # No       INDIC SIYAQ NUMBER SEVEN
 1ECA9         ; 7.0 ; ; 7 # No       INDIC SIYAQ NUMBER PREFIXED SEVEN
+1ED07         ; 7.0 ; ; 7 # No       OTTOMAN SIYAQ NUMBER SEVEN
+1ED34         ; 7.0 ; ; 7 # No       OTTOMAN SIYAQ ALTERNATE NUMBER SEVEN
 1F108         ; 7.0 ; ; 7 # No       DIGIT SEVEN COMMA
 20001         ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-20001
 
-# Total code points: 106
+# Total code points: 110
 
 # ================================================
 
@@ -1367,13 +1442,17 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 1D7EA         ; 8.0 ; ; 8 # Nd       MATHEMATICAL SANS-SERIF DIGIT EIGHT
 1D7F4         ; 8.0 ; ; 8 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT EIGHT
 1D7FE         ; 8.0 ; ; 8 # Nd       MATHEMATICAL MONOSPACE DIGIT EIGHT
+1E148         ; 8.0 ; ; 8 # Nd       NYIAKENG PUACHUE HMONG DIGIT EIGHT
+1E2F8         ; 8.0 ; ; 8 # Nd       WANCHO DIGIT EIGHT
 1E8CE         ; 8.0 ; ; 8 # No       MENDE KIKAKUI DIGIT EIGHT
 1E958         ; 8.0 ; ; 8 # Nd       ADLAM DIGIT EIGHT
 1EC78         ; 8.0 ; ; 8 # No       INDIC SIYAQ NUMBER EIGHT
 1ECAA         ; 8.0 ; ; 8 # No       INDIC SIYAQ NUMBER PREFIXED EIGHT
+1ED08         ; 8.0 ; ; 8 # No       OTTOMAN SIYAQ NUMBER EIGHT
+1ED35         ; 8.0 ; ; 8 # No       OTTOMAN SIYAQ ALTERNATE NUMBER EIGHT
 1F109         ; 8.0 ; ; 8 # No       DIGIT EIGHT COMMA
 
-# Total code points: 102
+# Total code points: 106
 
 # ================================================
 
@@ -1480,14 +1559,18 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 1D7EB         ; 9.0 ; ; 9 # Nd       MATHEMATICAL SANS-SERIF DIGIT NINE
 1D7F5         ; 9.0 ; ; 9 # Nd       MATHEMATICAL SANS-SERIF BOLD DIGIT NINE
 1D7FF         ; 9.0 ; ; 9 # Nd       MATHEMATICAL MONOSPACE DIGIT NINE
+1E149         ; 9.0 ; ; 9 # Nd       NYIAKENG PUACHUE HMONG DIGIT NINE
+1E2F9         ; 9.0 ; ; 9 # Nd       WANCHO DIGIT NINE
 1E8CF         ; 9.0 ; ; 9 # No       MENDE KIKAKUI DIGIT NINE
 1E959         ; 9.0 ; ; 9 # Nd       ADLAM DIGIT NINE
 1EC79         ; 9.0 ; ; 9 # No       INDIC SIYAQ NUMBER NINE
 1ECAB         ; 9.0 ; ; 9 # No       INDIC SIYAQ NUMBER PREFIXED NINE
+1ED09         ; 9.0 ; ; 9 # No       OTTOMAN SIYAQ NUMBER NINE
+1ED36         ; 9.0 ; ; 9 # No       OTTOMAN SIYAQ ALTERNATE NUMBER NINE
 1F10A         ; 9.0 ; ; 9 # No       DIGIT NINE COMMA
 2F890         ; 9.0 ; ; 9 # Lo       CJK COMPATIBILITY IDEOGRAPH-2F890
 
-# Total code points: 106
+# Total code points: 110
 
 # ================================================
 
@@ -1546,8 +1629,10 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 1D2EA         ; 10.0 ; ; 10 # No       MAYAN NUMERAL TEN
 1D369         ; 10.0 ; ; 10 # No       COUNTING ROD TENS DIGIT ONE
 1EC7A         ; 10.0 ; ; 10 # No       INDIC SIYAQ NUMBER TEN
+1ED0A         ; 10.0 ; ; 10 # No       OTTOMAN SIYAQ NUMBER TEN
+1ED37         ; 10.0 ; ; 10 # No       OTTOMAN SIYAQ ALTERNATE NUMBER TEN
 
-# Total code points: 59
+# Total code points: 61
 
 # ================================================
 
@@ -1692,8 +1777,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C64         ; 20.0 ; ; 20 # No       BHAIKSUKI NUMBER TWENTY
 1D36A         ; 20.0 ; ; 20 # No       COUNTING ROD TENS DIGIT TWO
 1EC7B         ; 20.0 ; ; 20 # No       INDIC SIYAQ NUMBER TWENTY
+1ED0B         ; 20.0 ; ; 20 # No       OTTOMAN SIYAQ NUMBER TWENTY
 
-# Total code points: 34
+# Total code points: 35
 
 # ================================================
 
@@ -1768,9 +1854,10 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C65         ; 30.0 ; ; 30 # No       BHAIKSUKI NUMBER THIRTY
 1D36B         ; 30.0 ; ; 30 # No       COUNTING ROD TENS DIGIT THREE
 1EC7C         ; 30.0 ; ; 30 # No       INDIC SIYAQ NUMBER THIRTY
+1ED0C         ; 30.0 ; ; 30 # No       OTTOMAN SIYAQ NUMBER THIRTY
 20983         ; 30.0 ; ; 30 # Lo       CJK UNIFIED IDEOGRAPH-20983
 
-# Total code points: 18
+# Total code points: 19
 
 # ================================================
 
@@ -1843,10 +1930,11 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 12467         ; 40.0 ; ; 40 # Nl       CUNEIFORM NUMERIC SIGN ELAMITE FORTY
 1D36C         ; 40.0 ; ; 40 # No       COUNTING ROD TENS DIGIT FOUR
 1EC7D         ; 40.0 ; ; 40 # No       INDIC SIYAQ NUMBER FORTY
+1ED0D         ; 40.0 ; ; 40 # No       OTTOMAN SIYAQ NUMBER FORTY
 2098C         ; 40.0 ; ; 40 # Lo       CJK UNIFIED IDEOGRAPH-2098C
 2099C         ; 40.0 ; ; 40 # Lo       CJK UNIFIED IDEOGRAPH-2099C
 
-# Total code points: 17
+# Total code points: 18
 
 # ================================================
 
@@ -1929,8 +2017,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 12468         ; 50.0 ; ; 50 # Nl       CUNEIFORM NUMERIC SIGN ELAMITE FIFTY
 1D36D         ; 50.0 ; ; 50 # No       COUNTING ROD TENS DIGIT FIVE
 1EC7E         ; 50.0 ; ; 50 # No       INDIC SIYAQ NUMBER FIFTY
+1ED0E         ; 50.0 ; ; 50 # No       OTTOMAN SIYAQ NUMBER FIFTY
 
-# Total code points: 28
+# Total code points: 29
 
 # ================================================
 
@@ -1946,8 +2035,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C68         ; 60.0 ; ; 60 # No       BHAIKSUKI NUMBER SIXTY
 1D36E         ; 60.0 ; ; 60 # No       COUNTING ROD TENS DIGIT SIX
 1EC7F         ; 60.0 ; ; 60 # No       INDIC SIYAQ NUMBER SIXTY
+1ED0F         ; 60.0 ; ; 60 # No       OTTOMAN SIYAQ NUMBER SIXTY
 
-# Total code points: 12
+# Total code points: 13
 
 # ================================================
 
@@ -1963,8 +2053,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C69         ; 70.0 ; ; 70 # No       BHAIKSUKI NUMBER SEVENTY
 1D36F         ; 70.0 ; ; 70 # No       COUNTING ROD TENS DIGIT SEVEN
 1EC80         ; 70.0 ; ; 70 # No       INDIC SIYAQ NUMBER SEVENTY
+1ED10         ; 70.0 ; ; 70 # No       OTTOMAN SIYAQ NUMBER SEVENTY
 
-# Total code points: 12
+# Total code points: 13
 
 # ================================================
 
@@ -1979,8 +2070,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C6A         ; 80.0 ; ; 80 # No       BHAIKSUKI NUMBER EIGHTY
 1D370         ; 80.0 ; ; 80 # No       COUNTING ROD TENS DIGIT EIGHT
 1EC81         ; 80.0 ; ; 80 # No       INDIC SIYAQ NUMBER EIGHTY
+1ED11         ; 80.0 ; ; 80 # No       OTTOMAN SIYAQ NUMBER EIGHTY
 
-# Total code points: 11
+# Total code points: 12
 
 # ================================================
 
@@ -1995,8 +2087,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C6B         ; 90.0 ; ; 90 # No       BHAIKSUKI NUMBER NINETY
 1D371         ; 90.0 ; ; 90 # No       COUNTING ROD TENS DIGIT NINE
 1EC82         ; 90.0 ; ; 90 # No       INDIC SIYAQ NUMBER NINETY
+1ED12         ; 90.0 ; ; 90 # No       OTTOMAN SIYAQ NUMBER NINETY
 
-# Total code points: 11
+# Total code points: 12
 
 # ================================================
 
@@ -2033,8 +2126,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11C6C         ; 100.0 ; ; 100 # No       BHAIKSUKI HUNDREDS UNIT MARK
 16B5C         ; 100.0 ; ; 100 # No       PAHAWH HMONG NUMBER HUNDREDS
 1EC83         ; 100.0 ; ; 100 # No       INDIC SIYAQ NUMBER ONE HUNDRED
+1ED13         ; 100.0 ; ; 100 # No       OTTOMAN SIYAQ NUMBER ONE HUNDRED
 
-# Total code points: 33
+# Total code points: 34
 
 # ================================================
 
@@ -2043,8 +2137,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D3         ; 200.0 ; ; 200 # No       MEROITIC CURSIVE NUMBER TWO HUNDRED
 10E73         ; 200.0 ; ; 200 # No       RUMI NUMBER TWO HUNDRED
 1EC84         ; 200.0 ; ; 200 # No       INDIC SIYAQ NUMBER TWO HUNDRED
+1ED14         ; 200.0 ; ; 200 # No       OTTOMAN SIYAQ NUMBER TWO HUNDRED
 
-# Total code points: 5
+# Total code points: 6
 
 # ================================================
 
@@ -2054,8 +2149,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D4         ; 300.0 ; ; 300 # No       MEROITIC CURSIVE NUMBER THREE HUNDRED
 10E74         ; 300.0 ; ; 300 # No       RUMI NUMBER THREE HUNDRED
 1EC85         ; 300.0 ; ; 300 # No       INDIC SIYAQ NUMBER THREE HUNDRED
+1ED15         ; 300.0 ; ; 300 # No       OTTOMAN SIYAQ NUMBER THREE HUNDRED
 
-# Total code points: 6
+# Total code points: 7
 
 # ================================================
 
@@ -2064,8 +2160,10 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D5         ; 400.0 ; ; 400 # No       MEROITIC CURSIVE NUMBER FOUR HUNDRED
 10E75         ; 400.0 ; ; 400 # No       RUMI NUMBER FOUR HUNDRED
 1EC86         ; 400.0 ; ; 400 # No       INDIC SIYAQ NUMBER FOUR HUNDRED
+1ED16         ; 400.0 ; ; 400 # No       OTTOMAN SIYAQ NUMBER FOUR HUNDRED
+1ED38         ; 400.0 ; ; 400 # No       OTTOMAN SIYAQ ALTERNATE NUMBER FOUR HUNDRED
 
-# Total code points: 5
+# Total code points: 7
 
 # ================================================
 
@@ -2080,8 +2178,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D6         ; 500.0 ; ; 500 # No       MEROITIC CURSIVE NUMBER FIVE HUNDRED
 10E76         ; 500.0 ; ; 500 # No       RUMI NUMBER FIVE HUNDRED
 1EC87         ; 500.0 ; ; 500 # No       INDIC SIYAQ NUMBER FIVE HUNDRED
+1ED17         ; 500.0 ; ; 500 # No       OTTOMAN SIYAQ NUMBER FIVE HUNDRED
 
-# Total code points: 15
+# Total code points: 16
 
 # ================================================
 
@@ -2090,8 +2189,10 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D7         ; 600.0 ; ; 600 # No       MEROITIC CURSIVE NUMBER SIX HUNDRED
 10E77         ; 600.0 ; ; 600 # No       RUMI NUMBER SIX HUNDRED
 1EC88         ; 600.0 ; ; 600 # No       INDIC SIYAQ NUMBER SIX HUNDRED
+1ED18         ; 600.0 ; ; 600 # No       OTTOMAN SIYAQ NUMBER SIX HUNDRED
+1ED39         ; 600.0 ; ; 600 # No       OTTOMAN SIYAQ ALTERNATE NUMBER SIX HUNDRED
 
-# Total code points: 5
+# Total code points: 7
 
 # ================================================
 
@@ -2100,8 +2201,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D8         ; 700.0 ; ; 700 # No       MEROITIC CURSIVE NUMBER SEVEN HUNDRED
 10E78         ; 700.0 ; ; 700 # No       RUMI NUMBER SEVEN HUNDRED
 1EC89         ; 700.0 ; ; 700 # No       INDIC SIYAQ NUMBER SEVEN HUNDRED
+1ED19         ; 700.0 ; ; 700 # No       OTTOMAN SIYAQ NUMBER SEVEN HUNDRED
 
-# Total code points: 5
+# Total code points: 6
 
 # ================================================
 
@@ -2110,8 +2212,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109D9         ; 800.0 ; ; 800 # No       MEROITIC CURSIVE NUMBER EIGHT HUNDRED
 10E79         ; 800.0 ; ; 800 # No       RUMI NUMBER EIGHT HUNDRED
 1EC8A         ; 800.0 ; ; 800 # No       INDIC SIYAQ NUMBER EIGHT HUNDRED
+1ED1A         ; 800.0 ; ; 800 # No       OTTOMAN SIYAQ NUMBER EIGHT HUNDRED
 
-# Total code points: 5
+# Total code points: 6
 
 # ================================================
 
@@ -2121,8 +2224,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 109DA         ; 900.0 ; ; 900 # No       MEROITIC CURSIVE NUMBER NINE HUNDRED
 10E7A         ; 900.0 ; ; 900 # No       RUMI NUMBER NINE HUNDRED
 1EC8B         ; 900.0 ; ; 900 # No       INDIC SIYAQ NUMBER NINE HUNDRED
+1ED1B         ; 900.0 ; ; 900 # No       OTTOMAN SIYAQ NUMBER NINE HUNDRED
 
-# Total code points: 6
+# Total code points: 7
 
 # ================================================
 
@@ -2146,32 +2250,37 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 11065         ; 1000.0 ; ; 1000 # No       BRAHMI NUMBER ONE THOUSAND
 111F4         ; 1000.0 ; ; 1000 # No       SINHALA ARCHAIC NUMBER ONE THOUSAND
 1EC8C         ; 1000.0 ; ; 1000 # No       INDIC SIYAQ NUMBER ONE THOUSAND
+1ED1C         ; 1000.0 ; ; 1000 # No       OTTOMAN SIYAQ NUMBER ONE THOUSAND
 
-# Total code points: 21
+# Total code points: 22
 
 # ================================================
 
 10123         ; 2000.0 ; ; 2000 # No       AEGEAN NUMBER TWO THOUSAND
 109DC         ; 2000.0 ; ; 2000 # No       MEROITIC CURSIVE NUMBER TWO THOUSAND
 1EC8D         ; 2000.0 ; ; 2000 # No       INDIC SIYAQ NUMBER TWO THOUSAND
+1ED1D         ; 2000.0 ; ; 2000 # No       OTTOMAN SIYAQ NUMBER TWO THOUSAND
+1ED3A         ; 2000.0 ; ; 2000 # No       OTTOMAN SIYAQ ALTERNATE NUMBER TWO THOUSAND
 
-# Total code points: 3
+# Total code points: 5
 
 # ================================================
 
 10124         ; 3000.0 ; ; 3000 # No       AEGEAN NUMBER THREE THOUSAND
 109DD         ; 3000.0 ; ; 3000 # No       MEROITIC CURSIVE NUMBER THREE THOUSAND
 1EC8E         ; 3000.0 ; ; 3000 # No       INDIC SIYAQ NUMBER THREE THOUSAND
+1ED1E         ; 3000.0 ; ; 3000 # No       OTTOMAN SIYAQ NUMBER THREE THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 10125         ; 4000.0 ; ; 4000 # No       AEGEAN NUMBER FOUR THOUSAND
 109DE         ; 4000.0 ; ; 4000 # No       MEROITIC CURSIVE NUMBER FOUR THOUSAND
 1EC8F         ; 4000.0 ; ; 4000 # No       INDIC SIYAQ NUMBER FOUR THOUSAND
+1ED1F         ; 4000.0 ; ; 4000 # No       OTTOMAN SIYAQ NUMBER FOUR THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
@@ -2182,40 +2291,45 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10172         ; 5000.0 ; ; 5000 # Nl       GREEK ACROPHONIC THESPIAN FIVE THOUSAND
 109DF         ; 5000.0 ; ; 5000 # No       MEROITIC CURSIVE NUMBER FIVE THOUSAND
 1EC90         ; 5000.0 ; ; 5000 # No       INDIC SIYAQ NUMBER FIVE THOUSAND
+1ED20         ; 5000.0 ; ; 5000 # No       OTTOMAN SIYAQ NUMBER FIVE THOUSAND
 
-# Total code points: 7
+# Total code points: 8
 
 # ================================================
 
 10127         ; 6000.0 ; ; 6000 # No       AEGEAN NUMBER SIX THOUSAND
 109E0         ; 6000.0 ; ; 6000 # No       MEROITIC CURSIVE NUMBER SIX THOUSAND
 1EC91         ; 6000.0 ; ; 6000 # No       INDIC SIYAQ NUMBER SIX THOUSAND
+1ED21         ; 6000.0 ; ; 6000 # No       OTTOMAN SIYAQ NUMBER SIX THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 10128         ; 7000.0 ; ; 7000 # No       AEGEAN NUMBER SEVEN THOUSAND
 109E1         ; 7000.0 ; ; 7000 # No       MEROITIC CURSIVE NUMBER SEVEN THOUSAND
 1EC92         ; 7000.0 ; ; 7000 # No       INDIC SIYAQ NUMBER SEVEN THOUSAND
+1ED22         ; 7000.0 ; ; 7000 # No       OTTOMAN SIYAQ NUMBER SEVEN THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 10129         ; 8000.0 ; ; 8000 # No       AEGEAN NUMBER EIGHT THOUSAND
 109E2         ; 8000.0 ; ; 8000 # No       MEROITIC CURSIVE NUMBER EIGHT THOUSAND
 1EC93         ; 8000.0 ; ; 8000 # No       INDIC SIYAQ NUMBER EIGHT THOUSAND
+1ED23         ; 8000.0 ; ; 8000 # No       OTTOMAN SIYAQ NUMBER EIGHT THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 1012A         ; 9000.0 ; ; 9000 # No       AEGEAN NUMBER NINE THOUSAND
 109E3         ; 9000.0 ; ; 9000 # No       MEROITIC CURSIVE NUMBER NINE THOUSAND
 1EC94         ; 9000.0 ; ; 9000 # No       INDIC SIYAQ NUMBER NINE THOUSAND
+1ED24         ; 9000.0 ; ; 9000 # No       OTTOMAN SIYAQ NUMBER NINE THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
@@ -2230,32 +2344,37 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 16B5D         ; 10000.0 ; ; 10000 # No       PAHAWH HMONG NUMBER TEN THOUSANDS
 1EC95         ; 10000.0 ; ; 10000 # No       INDIC SIYAQ NUMBER TEN THOUSAND
 1ECB3         ; 10000.0 ; ; 10000 # No       INDIC SIYAQ NUMBER ALTERNATE TEN THOUSAND
+1ED25         ; 10000.0 ; ; 10000 # No       OTTOMAN SIYAQ NUMBER TEN THOUSAND
+1ED3B         ; 10000.0 ; ; 10000 # No       OTTOMAN SIYAQ ALTERNATE NUMBER TEN THOUSAND
 
-# Total code points: 11
+# Total code points: 13
 
 # ================================================
 
 1012C         ; 20000.0 ; ; 20000 # No       AEGEAN NUMBER TWENTY THOUSAND
 109E5         ; 20000.0 ; ; 20000 # No       MEROITIC CURSIVE NUMBER TWENTY THOUSAND
 1EC96         ; 20000.0 ; ; 20000 # No       INDIC SIYAQ NUMBER TWENTY THOUSAND
+1ED26         ; 20000.0 ; ; 20000 # No       OTTOMAN SIYAQ NUMBER TWENTY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 1012D         ; 30000.0 ; ; 30000 # No       AEGEAN NUMBER THIRTY THOUSAND
 109E6         ; 30000.0 ; ; 30000 # No       MEROITIC CURSIVE NUMBER THIRTY THOUSAND
 1EC97         ; 30000.0 ; ; 30000 # No       INDIC SIYAQ NUMBER THIRTY THOUSAND
+1ED27         ; 30000.0 ; ; 30000 # No       OTTOMAN SIYAQ NUMBER THIRTY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 1012E         ; 40000.0 ; ; 40000 # No       AEGEAN NUMBER FORTY THOUSAND
 109E7         ; 40000.0 ; ; 40000 # No       MEROITIC CURSIVE NUMBER FORTY THOUSAND
 1EC98         ; 40000.0 ; ; 40000 # No       INDIC SIYAQ NUMBER FORTY THOUSAND
+1ED28         ; 40000.0 ; ; 40000 # No       OTTOMAN SIYAQ NUMBER FORTY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
@@ -2265,40 +2384,45 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10156         ; 50000.0 ; ; 50000 # Nl       GREEK ACROPHONIC ATTIC FIFTY THOUSAND STATERS
 109E8         ; 50000.0 ; ; 50000 # No       MEROITIC CURSIVE NUMBER FIFTY THOUSAND
 1EC99         ; 50000.0 ; ; 50000 # No       INDIC SIYAQ NUMBER FIFTY THOUSAND
+1ED29         ; 50000.0 ; ; 50000 # No       OTTOMAN SIYAQ NUMBER FIFTY THOUSAND
 
-# Total code points: 6
+# Total code points: 7
 
 # ================================================
 
 10130         ; 60000.0 ; ; 60000 # No       AEGEAN NUMBER SIXTY THOUSAND
 109E9         ; 60000.0 ; ; 60000 # No       MEROITIC CURSIVE NUMBER SIXTY THOUSAND
 1EC9A         ; 60000.0 ; ; 60000 # No       INDIC SIYAQ NUMBER SIXTY THOUSAND
+1ED2A         ; 60000.0 ; ; 60000 # No       OTTOMAN SIYAQ NUMBER SIXTY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 10131         ; 70000.0 ; ; 70000 # No       AEGEAN NUMBER SEVENTY THOUSAND
 109EA         ; 70000.0 ; ; 70000 # No       MEROITIC CURSIVE NUMBER SEVENTY THOUSAND
 1EC9B         ; 70000.0 ; ; 70000 # No       INDIC SIYAQ NUMBER SEVENTY THOUSAND
+1ED2B         ; 70000.0 ; ; 70000 # No       OTTOMAN SIYAQ NUMBER SEVENTY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 10132         ; 80000.0 ; ; 80000 # No       AEGEAN NUMBER EIGHTY THOUSAND
 109EB         ; 80000.0 ; ; 80000 # No       MEROITIC CURSIVE NUMBER EIGHTY THOUSAND
 1EC9C         ; 80000.0 ; ; 80000 # No       INDIC SIYAQ NUMBER EIGHTY THOUSAND
+1ED2C         ; 80000.0 ; ; 80000 # No       OTTOMAN SIYAQ NUMBER EIGHTY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 
 10133         ; 90000.0 ; ; 90000 # No       AEGEAN NUMBER NINETY THOUSAND
 109EC         ; 90000.0 ; ; 90000 # No       MEROITIC CURSIVE NUMBER NINETY THOUSAND
 1EC9D         ; 90000.0 ; ; 90000 # No       INDIC SIYAQ NUMBER NINETY THOUSAND
+1ED2D         ; 90000.0 ; ; 90000 # No       OTTOMAN SIYAQ NUMBER NINETY THOUSAND
 
-# Total code points: 3
+# Total code points: 4
 
 # ================================================
 

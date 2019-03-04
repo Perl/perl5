@@ -45,7 +45,7 @@ bytes.
 =cut
 */
 
-#define UNICODE_MAJOR_VERSION   11
+#define UNICODE_MAJOR_VERSION   12
 #define UNICODE_DOT_VERSION     0
 #define UNICODE_DOT_DOT_VERSION 0
 
@@ -177,7 +177,7 @@ bytes.
 #endif	/* EBCDIC 037 */
 
 /* The number of code points not matching \pC */
-#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  137222
+#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  137767
 
 /* The highest code point that has any type of case change */
 #define HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C  0x1E943

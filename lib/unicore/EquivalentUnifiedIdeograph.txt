@@ -1,6 +1,6 @@
-# EquivalentUnifiedIdeograph-11.0.0.txt
-# Date: 2017-09-11, 18:39:00 GMT [KL]
-# © 2017 Unicode®, Inc.
+# EquivalentUnifiedIdeograph-12.0.0.txt
+# Date: 2018-08-03, 00:00:00 GMT [KL, KW]
+# © 2018 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #

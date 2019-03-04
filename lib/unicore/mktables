@@ -31,7 +31,7 @@ use Text::Tabs;
 use re "/aa";
 use feature 'state';
 
-sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
+sub DEBUG () { 1 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
 sub NON_ASCII_PLATFORM { ord("A") != 65 }
@@ -45,7 +45,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v11.0.0;
+my $version_of_mk_invlist_bounds = v12.0.0;
 
 ##########################################################################
 #
@@ -660,7 +660,7 @@ sub stack_trace() {
 # common to both releases, and you can see the changes caused just by the
 # underlying release semantic changes.  For versions earlier than 3.2, you
 # must copy a version of DAge.txt into the directory.
-my $string_compare_versions = DEBUG && ""; #  e.g., "2.1";
+my $string_compare_versions = DEBUG && "";
 my $compare_versions = DEBUG
                        && $string_compare_versions
                        && pack "C*", split /\./, $string_compare_versions;
@@ -19228,8 +19228,8 @@ EOF_CODE
                                             );
                     }
                     else {
-                    # If the name is a rational number, add tests for a
-                    # non-reduced form, and for a floating point equivalent.
+                        # If the name is a rational number, add tests for a
+                        # non-reduced form, and for a floating point equivalent.
 
                         # 60 is a number divisible by a bunch of things
                         my ($numerator, $denominator) = $table_name
@@ -19309,7 +19309,8 @@ EOF_CODE
                                           # case, the representation at this
                                           # precision could actually be a
                                           # valid one for some other rational
-                                       || ! grep { $_ eq $this_table }
+                                       || ! grep { $this_table
+                                                            =~ / ^ $_ 0* $ /x }
                                                             @valid_base_floats)
                                 {
                                     push @output,

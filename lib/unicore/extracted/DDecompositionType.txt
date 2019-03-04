@@ -1,5 +1,5 @@
-# DerivedDecompositionType-11.0.0.txt
-# Date: 2018-01-31, 08:20:13 GMT
+# DerivedDecompositionType-12.0.0.txt
+# Date: 2018-08-02, 09:26:05 GMT
 # © 2018 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
@@ -861,9 +861,9 @@ A69C..A69D    ; Super # Lm   [2] MODIFIER LETTER CYRILLIC HARD SIGN..MODIFIER LE
 A770          ; Super # Lm       MODIFIER LETTER US
 A7F8..A7F9    ; Super # Lm   [2] MODIFIER LETTER CAPITAL H WITH STROKE..MODIFIER LETTER SMALL LIGATURE OE
 AB5C..AB5F    ; Super # Lm   [4] MODIFIER LETTER SMALL HENG..MODIFIER LETTER SMALL U WITH LEFT HOOK
-1F16A..1F16B  ; Super # So   [2] RAISED MC SIGN..RAISED MD SIGN
+1F16A..1F16C  ; Super # So   [3] RAISED MC SIGN..RAISED MR SIGN
 
-# Total code points: 152
+# Total code points: 153
 
 # ================================================
 

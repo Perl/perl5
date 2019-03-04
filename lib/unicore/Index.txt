@@ -96,6 +96,7 @@ accent, spacing acute	00B4
 accent, spacing circumflex	005E
 accent, spacing grave	0060
 accent, swedish grave	02DF
+Accessibility Symbols	1F9AE
 accident	26CC
 ACCOUNT OF	2100
 account, guest	1F464
@@ -847,6 +848,7 @@ Cherokee Supplement	AB70
 Chess Symbols	2654
 Chess Symbols, Chinese XiangQi	1FA60
 Chess Symbols, Japanese	2616
+Chess Symbols, Heterodox	1FA00
 chevron bracket, left	27EA
 chevron bracket, right	27EB
 chevrons	00AB
@@ -998,6 +1000,7 @@ COLON, MODIFIER LETTER HALF TRIANGULAR	02D1
 COLON, MODIFIER LETTER TRIANGULAR	02D0
 COLON, MONGOLIAN	1804
 COLON, Z NOTATION TYPE	2982
+Colored Shapes	1F7E0
 COMBINING ACUTE ACCENT	0301
 COMBINING ACUTE ACCENT BELOW	0317
 COMBINING ACUTE TONE MARK	0341
@@ -1810,6 +1813,7 @@ Eastern Arabic-Indic Digits	06F0
 Editorial Symbols, New Testament	2E00
 egressive airflow	2191
 Egyptian Hieroglyphs	13000
+Egyptian Hieroglyph Format Controls	13430
 EIGHTH NOTE	266A
 EIGHTH NOTES, BEAMED	266B
 Eighths, Fractions	215B
@@ -1837,6 +1841,7 @@ ELLIPSIS, MONGOLIAN	1801
 ELLIPSIS, UP RIGHT DIAGONAL	22F0
 ELLIPSIS, VERTICAL	22EE
 elliptic function, weierstrass	2118
+Elymaic	10FE0
 EM DASH	2014
 EM QUAD	2001
 EM SPACE	2003
@@ -2105,6 +2110,7 @@ form feed	21A1
 FORM FEED, SYMBOL FOR	240C
 Format Characters	200C
 Format Characters, Directional	202A
+Format Controls, Egyptian Hieroglyph	13430
 Format Controls, Mongolian	180B
 FORMATTING, POP DIRECTIONAL	202C
 forward arrow indicator	25BB
@@ -2468,6 +2474,7 @@ Heart Dingbats	2763
 Heart Ornaments	2763
 Heart Symbols	1F493
 HEART, BLACK	1F5A4
+HEART, WHITE	1F90D
 HEAVY BALLOT X	2718
 HEAVY CHECK MARK	2714
 HEAVY EXCLAMATION MARK ORNAMENT	2762
@@ -2504,6 +2511,8 @@ Hiragana Supplement	3095
 HIRAGANA VOICED ITERATION MARK	309E
 histogram marker	25AE
 HISTORIC SITE	26EC
+Hmong, Nyiakeng Puachue	1E100
+Hmong, Pahawh	16B00
 holler	2365
 home	21B8
 home	21F1
@@ -2827,6 +2836,7 @@ KA, HIRAGANA LETTER SMALL	3095
 kabusiki-gaisya	337F
 Kaithi	11080
 Kana Extended-A	1B100
+Kana Extension, Small	1B130
 Kana Repeat Marks	3031
 Kana Supplement	1B000
 Kanbun Ideographic Annotation, Japanese	3190
@@ -3299,7 +3309,7 @@ MAGNIFYING GLASS, RIGHT-POINTING	1F50E
 Mahajani	11150
 Mahjong Tiles	1F000
 Mail Symbols	1F4E4
-Makasar	1EE0
+Makasar	11EE0
 Malayalam	0D00
 malayalam chandrakkala	0D4D
 Malayalam Chillu Letters	0D7A
@@ -3593,6 +3603,7 @@ Nabataean	10880
 NABLA	2207
 NAIRA SIGN	20A6
 NAND	22BC
+Nandinagari	119A0
 NARROW NO-BREAK SPACE	202F
 nasal hook	0328
 natural exponent	212F
@@ -3697,6 +3708,7 @@ numbers, complex	2102
 Numbers, Double Circled	24F5
 Numbers, Ethiopic	1369
 Numbers, Indic Siyaq	1EC70
+Numbers, Ottoman Siyaq	1ED00
 Numbers, Parenthesized	2474
 numbers, rational	211A
 numbers, real	211D
@@ -3714,6 +3726,7 @@ numerics lock	21ED
 NUMERO SIGN	2116
 Nushu	1B170
 nut	2002
+Nyiakeng Puachue Hmong	1E100
 o bar, latin capital letter	019F
 o bar, latin small letter	0275
 o e, latin small letter	0153
@@ -3872,6 +3885,7 @@ orthogonal to	22A5
 Osage	104B0
 Osmanya	10480
 Osmanya Digits	104A0
+Ottoman Siyaq Numbers	1ED00
 OU, LATIN LETTER SMALL CAPITAL	1D15
 OU, LATIN SMALL LETTER	0223
 OUNCE SIGN	2125
@@ -4044,6 +4058,7 @@ PI, DOUBLE-STRUCK SMALL	213C
 PI, GREEK SMALL LETTER	03C0
 pi, mathematical constant 3.141592...	03C0
 PICK	26CF
+Pictographs Extended-A, Symbols and	1FA70
 Pictographs, Miscellaneous Symbols and	1F300
 Pictographs, Supplemental Symbols and	1F900
 Pictures for Control Codes, Graphic	2400
@@ -5116,6 +5131,7 @@ Syllables, Yi	A000
 Syloti Nagri	A800
 Symbol Variants, Fullwidth	FFE0
 Symbol Variants, Halfwidth	FFE8
+Symbols and Pictographs Extended-A	1FA70
 Symbols and Pictographs, Miscellaneous	1F300
 Symbols and Pictographs, Supplemental	1F900
 Symbols and Punctuation, CJK	3000
@@ -5125,6 +5141,7 @@ Symbols for Days, Ideographic Telegraph	33E0
 Symbols for Divination, Khmer Numeric	17F0
 Symbols for Hours, Ideographic Telegraph	3358
 Symbols for Months, Ideographic Telegraph	32C0
+Symbols, Accessibility	1F9AE
 Symbols, Alchemical	1F700
 Symbols, Ancient Greek Textual	2E0E
 Symbols, Animal	1F400
@@ -5154,6 +5171,7 @@ Symbols, Building and Map	1F3E0
 Symbols, Byzantine Musical	1D000
 Symbols, Celebration	1F380
 Symbols, Chess	2654
+Symbols, Chess	1FA00
 Symbols, Circle	29B5
 Symbols, Clock Face	1F550
 Symbols, Combining Diacritical Marks for	20D0
@@ -5372,6 +5390,7 @@ tamil patru	0BF6
 tamil rupai	0BF9
 TAMIL RUPEE SIGN	0BF9
 TAMIL SIGN VISARGA	0B83
+Tamil Supplement	11FC0
 Tamil Symbols	0BF3
 tamil varavu	0BF7
 tamil varudam	0BF5
@@ -5870,6 +5889,7 @@ W, LATIN LETTER SMALL CAPITAL	1D21
 W, LATIN SMALL LETTER TURNED	028D
 W, MODIFIER LETTER SMALL	02B7
 WAITING, MESSAGE	0095
+Wancho	1E2C0
 Warang Citi	118A0
 WARNING SIGN	26A0
 Warning Signs	2620
