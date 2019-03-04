@@ -51,6 +51,22 @@ sub get_column_headers ($$;$) {
     return $header . "*/\n";
 }
 
+sub output_table_start($$$) {
+    my ($out_fh, $TYPE, $name) = @_;
+
+    my $declaration = "EXTCONST $TYPE $name\[\]";
+    print $out_fh <<EOF;
+#  ifndef DOINIT
+#    $declaration;
+#  else
+#    $declaration = {
+EOF
+}
+
+sub output_table_end($) {
+    print $out_fh "};\n#  endif\n\n";
+}
+
 sub output_table ($$;$) {
     my $table_ref = shift;
     my $name = shift;
@@ -124,13 +140,7 @@ EOF
     my $TYPE = 'U8';
     $TYPE = 'U16' if grep { $_ > 255 } @$table_ref;
 
-    my $declaration = "EXTCONST $TYPE $name\[\]";
-    print $out_fh <<EOF;
-#  ifndef DOINIT
-#    $declaration;
-#  else
-#    $declaration = {
-EOF
+    output_table_start $out_fh, $TYPE, $name;
 
     # First the headers for the columns
     print $out_fh get_column_headers($row_hdr_length, $field_width);
@@ -192,7 +202,7 @@ EOF
     print $out_fh get_column_headers($row_hdr_length, $field_width,
                                      ($is_dfa) ? $columns_after_256 : undef);
 
-    print $out_fh "};\n#  endif\n\n";
+    output_table_end($out_fh);
 }
 
 print $out_fh <<'END';
