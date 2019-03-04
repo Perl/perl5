@@ -27,6 +27,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 12.0 is supported
+
+For details, see L<https://www.unicode.org/versions/Unicode12.0.0/>.
+
+Because of a change in Unicode release cycles, Perl jumps from Unicode
+10.0 in Perl 5.28 to Unicode 12.0 in Perl 5.30.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
