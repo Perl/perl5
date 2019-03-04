@@ -2551,7 +2551,7 @@ unless ( $os =~ m!^(dragonfly|openbsd|bitrig|mirbsd)$! ) {
         $warned = $_[0] =~ /uninitialized/;
     };
     my $z = "y" . setlocale(&POSIX::LC_ALL, "xyzzy");
-    ok($warned, "variable set to setlocale(BAD LOCALE) is considered uninitialized");
+    ok($warned, "variable set to setlocale(\"invalid locale name\") is considered uninitialized");
 }
 
 # Test that tainting and case changing works on utf8 strings.  These tests are
