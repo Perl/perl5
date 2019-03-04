@@ -57,9 +57,9 @@ sub output_table_start($$$) {
     my $declaration = "EXTCONST $TYPE $name\[\]";
     print $out_fh <<EOF;
 #  ifndef DOINIT
-#    $declaration;
+    $declaration;
 #  else
-#    $declaration = {
+    $declaration = {
 EOF
 }
 

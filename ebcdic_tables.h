@@ -44,9 +44,9 @@ SOFTWARE.
 
 /* Index is ASCII platform code point; value is EBCDIC 1047 equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_a2e[];
+    EXTCONST U8 PL_a2e[];
 #  else
-#    EXTCONST U8 PL_a2e[] = {
+    EXTCONST U8 PL_a2e[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x37,0x2D,0x2E,0x2F,0x16,0x05,0x15,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x3C,0x3D,0x32,0x26,0x18,0x19,0x3F,0x27,0x1C,0x1D,0x1E,0x1F,
@@ -70,9 +70,9 @@ SOFTWARE.
 
 /* Index is EBCDIC 1047 code point; value is ASCII platform equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_e2a[];
+    EXTCONST U8 PL_e2a[];
 #  else
-#    EXTCONST U8 PL_e2a[] = {
+    EXTCONST U8 PL_e2a[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x9C,0x09,0x86,0x7F,0x97,0x8D,0x8E,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x9D,0x0A,0x08,0x87,0x18,0x19,0x92,0x8F,0x1C,0x1D,0x1E,0x1F,
@@ -97,9 +97,9 @@ SOFTWARE.
 /* (Confusingly named) Index is EBCDIC 1047 I8 byte; value is
  * EBCDIC 1047 UTF-EBCDIC equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_utf2e[];
+    EXTCONST U8 PL_utf2e[];
 #  else
-#    EXTCONST U8 PL_utf2e[] = {
+    EXTCONST U8 PL_utf2e[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x37,0x2D,0x2E,0x2F,0x16,0x05,0x15,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x3C,0x3D,0x32,0x26,0x18,0x19,0x3F,0x27,0x1C,0x1D,0x1E,0x1F,
@@ -124,9 +124,9 @@ SOFTWARE.
 /* (Confusingly named) Index is EBCDIC 1047 UTF-EBCDIC byte; value is
  * EBCDIC 1047 I8 equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_e2utf[];
+    EXTCONST U8 PL_e2utf[];
 #  else
-#    EXTCONST U8 PL_e2utf[] = {
+    EXTCONST U8 PL_e2utf[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x9C,0x09,0x86,0x7F,0x97,0x8D,0x8E,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x9D,0x0A,0x08,0x87,0x18,0x19,0x92,0x8F,0x1C,0x1D,0x1E,0x1F,
@@ -153,9 +153,9 @@ SOFTWARE.
  * flags table in tr16.  The entries marked 9 in tr16 are continuation bytes
  * and are marked as length 1 here so that we can recover. */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_utf8skip[];
+    EXTCONST U8 PL_utf8skip[];
 #  else
-#    EXTCONST U8 PL_utf8skip[] = {
+    EXTCONST U8 PL_utf8skip[] = {
 /*     _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
 /*1_*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
@@ -179,9 +179,9 @@ SOFTWARE.
 
 /* Index is EBCDIC 1047 code point; value is its lowercase equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_latin1_lc[];
+    EXTCONST U8 PL_latin1_lc[];
 #  else
-#    EXTCONST U8 PL_latin1_lc[] = {
+    EXTCONST U8 PL_latin1_lc[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -207,9 +207,9 @@ SOFTWARE.
  * The 'mod' in the name means that codepoints whose uppercase is above 255 or
  * longer than 1 character map to LATIN SMALL LETTER Y WITH DIARESIS */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_mod_latin1_uc[];
+    EXTCONST U8 PL_mod_latin1_uc[];
 #  else
-#    EXTCONST U8 PL_mod_latin1_uc[] = {
+    EXTCONST U8 PL_mod_latin1_uc[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -234,9 +234,9 @@ SOFTWARE.
 /* Index is EBCDIC 1047 code point; For A-Z, value is a-z; for a-z, value
  * is A-Z; all other code points map to themselves */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_fold[];
+    EXTCONST U8 PL_fold[];
 #  else
-#    EXTCONST U8 PL_fold[] = {
+    EXTCONST U8 PL_fold[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -262,9 +262,9 @@ SOFTWARE.
  * (A => a; a => A, etc) in the 0-255 range.  If no such equivalent, value is
  * the code point itself */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_fold_latin1[];
+    EXTCONST U8 PL_fold_latin1[];
 #  else
-#    EXTCONST U8 PL_fold_latin1[] = {
+    EXTCONST U8 PL_fold_latin1[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -293,9 +293,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 PL_extended_utf8_dfa_tab[];
+    EXTCONST U8 PL_extended_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
+    EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
 /*         _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -334,9 +334,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U16 PL_strict_utf8_dfa_tab[];
+    EXTCONST U16 PL_strict_utf8_dfa_tab[];
 #  else
-#    EXTCONST U16 PL_strict_utf8_dfa_tab[] = {
+    EXTCONST U16 PL_strict_utf8_dfa_tab[] = {
 /*          _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -380,9 +380,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 PL_c9_utf8_dfa_tab[];
+    EXTCONST U8 PL_c9_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
+    EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
 /*        _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -421,9 +421,9 @@ SOFTWARE.
 
 /* Index is ASCII platform code point; value is EBCDIC 037 equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_a2e[];
+    EXTCONST U8 PL_a2e[];
 #  else
-#    EXTCONST U8 PL_a2e[] = {
+    EXTCONST U8 PL_a2e[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x37,0x2D,0x2E,0x2F,0x16,0x05,0x25,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x3C,0x3D,0x32,0x26,0x18,0x19,0x3F,0x27,0x1C,0x1D,0x1E,0x1F,
@@ -447,9 +447,9 @@ SOFTWARE.
 
 /* Index is EBCDIC 037 code point; value is ASCII platform equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_e2a[];
+    EXTCONST U8 PL_e2a[];
 #  else
-#    EXTCONST U8 PL_e2a[] = {
+    EXTCONST U8 PL_e2a[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x9C,0x09,0x86,0x7F,0x97,0x8D,0x8E,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x9D,0x85,0x08,0x87,0x18,0x19,0x92,0x8F,0x1C,0x1D,0x1E,0x1F,
@@ -474,9 +474,9 @@ SOFTWARE.
 /* (Confusingly named) Index is EBCDIC 037 I8 byte; value is
  * EBCDIC 037 UTF-EBCDIC equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_utf2e[];
+    EXTCONST U8 PL_utf2e[];
 #  else
-#    EXTCONST U8 PL_utf2e[] = {
+    EXTCONST U8 PL_utf2e[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x37,0x2D,0x2E,0x2F,0x16,0x05,0x25,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x3C,0x3D,0x32,0x26,0x18,0x19,0x3F,0x27,0x1C,0x1D,0x1E,0x1F,
@@ -501,9 +501,9 @@ SOFTWARE.
 /* (Confusingly named) Index is EBCDIC 037 UTF-EBCDIC byte; value is
  * EBCDIC 037 I8 equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_e2utf[];
+    EXTCONST U8 PL_e2utf[];
 #  else
-#    EXTCONST U8 PL_e2utf[] = {
+    EXTCONST U8 PL_e2utf[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x9C,0x09,0x86,0x7F,0x97,0x8D,0x8E,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x9D,0x85,0x08,0x87,0x18,0x19,0x92,0x8F,0x1C,0x1D,0x1E,0x1F,
@@ -530,9 +530,9 @@ SOFTWARE.
  * flags table in tr16.  The entries marked 9 in tr16 are continuation bytes
  * and are marked as length 1 here so that we can recover. */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_utf8skip[];
+    EXTCONST U8 PL_utf8skip[];
 #  else
-#    EXTCONST U8 PL_utf8skip[] = {
+    EXTCONST U8 PL_utf8skip[] = {
 /*     _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
 /*1_*/  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
@@ -556,9 +556,9 @@ SOFTWARE.
 
 /* Index is EBCDIC 037 code point; value is its lowercase equivalent */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_latin1_lc[];
+    EXTCONST U8 PL_latin1_lc[];
 #  else
-#    EXTCONST U8 PL_latin1_lc[] = {
+    EXTCONST U8 PL_latin1_lc[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -584,9 +584,9 @@ SOFTWARE.
  * The 'mod' in the name means that codepoints whose uppercase is above 255 or
  * longer than 1 character map to LATIN SMALL LETTER Y WITH DIARESIS */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_mod_latin1_uc[];
+    EXTCONST U8 PL_mod_latin1_uc[];
 #  else
-#    EXTCONST U8 PL_mod_latin1_uc[] = {
+    EXTCONST U8 PL_mod_latin1_uc[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -611,9 +611,9 @@ SOFTWARE.
 /* Index is EBCDIC 037 code point; For A-Z, value is a-z; for a-z, value
  * is A-Z; all other code points map to themselves */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_fold[];
+    EXTCONST U8 PL_fold[];
 #  else
-#    EXTCONST U8 PL_fold[] = {
+    EXTCONST U8 PL_fold[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -639,9 +639,9 @@ SOFTWARE.
  * (A => a; a => A, etc) in the 0-255 range.  If no such equivalent, value is
  * the code point itself */
 #  ifndef DOINIT
-#    EXTCONST U8 PL_fold_latin1[];
+    EXTCONST U8 PL_fold_latin1[];
 #  else
-#    EXTCONST U8 PL_fold_latin1[] = {
+    EXTCONST U8 PL_fold_latin1[] = {
 /*      _0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/
 /*0_*/0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 /*1_*/0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -670,9 +670,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 PL_extended_utf8_dfa_tab[];
+    EXTCONST U8 PL_extended_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
+    EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
 /*         _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_    */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -711,9 +711,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U16 PL_strict_utf8_dfa_tab[];
+    EXTCONST U16 PL_strict_utf8_dfa_tab[];
 #  else
-#    EXTCONST U16 PL_strict_utf8_dfa_tab[] = {
+    EXTCONST U16 PL_strict_utf8_dfa_tab[] = {
 /*          _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_     */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -757,9 +757,9 @@ SOFTWARE.
  */
 
 #  ifndef DOINIT
-#    EXTCONST U8 PL_c9_utf8_dfa_tab[];
+    EXTCONST U8 PL_c9_utf8_dfa_tab[];
 #  else
-#    EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
+    EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
 /*        _0  _1  _2  _3  _4  _5  _6  _7  _8  _9  _A  _B  _C  _D  _E _F*/
 /*0_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*1_   */  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
