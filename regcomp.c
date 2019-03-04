@@ -16478,7 +16478,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
     IV range = 0;
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
-    regnode_offset ret;
+    regnode_offset ret = -1;    /* Initialized to an illegal value */
     STRLEN numlen;
     int namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
