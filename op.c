@@ -246,6 +246,8 @@ S_prune_chain_head(OP** op_p)
 #define SIZE_TO_PSIZE(x)	(((x) + sizeof(I32 *) - 1)/sizeof(I32 *))
 #define DIFF(o,p)		((size_t)((I32 **)(p) - (I32**)(o)))
 
+/* malloc a new op slab (suitable for attaching to PL_compcv) */
+
 static OPSLAB *
 S_new_slab(pTHX_ size_t sz)
 {
@@ -276,6 +278,12 @@ S_new_slab(pTHX_ size_t sz)
     DEBUG_S( 								\
 	PerlIO_printf(Perl_debug_log, "%s", SvPVx_nolen(Perl_mess args)) \
     )
+
+/* Returns a sz-sized block of memory (suitable for holding an op) from
+ * a free slot in the chain of op slabs attached to PL_compcv.
+ * Allocates a new slab if necessary.
+ * if PL_compcv isn't compiling, malloc() instead.
+ */
 
 void *
 Perl_Slab_Alloc(pTHX_ size_t sz)
@@ -447,6 +455,11 @@ S_pp_freed(pTHX)
 }
 #endif
 
+
+/* Return the block of memory used by an op to the free list of
+ * the OP slab associated with that op.
+ */
+
 void
 Perl_Slab_Free(pTHX_ void *op)
 {
@@ -488,6 +501,16 @@ Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
     if (havepad) LEAVE;
 }
 
+/* Free a chain of OP slabs. Should only be called after all ops contained
+ * in it have been freed. At this point, its reference count should be 1,
+ * because OpslabREFCNT_dec() skips doing rc-- when it detects that rc == 1,
+ * and just directly calls opslab_free().
+ * (Note that the reference count which PL_compcv held on the slab should
+ * have been removed once compilation of the sub was complete).
+ *
+ *
+ */
+
 void
 Perl_opslab_free(pTHX_ OPSLAB *slab)
 {
@@ -514,6 +537,10 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
         slab = slab2;
     } while (slab);
 }
+
+/* like opslab_free(), but first calls op_free() on any ops in the slab
+ * not marked as OP_FREED
+ */
 
 void
 Perl_opslab_force_free(pTHX_ OPSLAB *slab)
