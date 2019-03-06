@@ -629,7 +629,7 @@
 #if 'A' == 193 /* EBCDIC 1047 */ \
      && '\\' == 224 && '[' == 173 && ']' == 189 && '{' == 192 && '}' == 208 \
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
+     && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 /*
 	LNBREAK: Line Break: \R
 
@@ -1246,7 +1246,7 @@
 #if 'A' == 193 /* EBCDIC 037 */ \
      && '\\' == 224 && '[' == 186 && ']' == 187 && '{' == 192 && '}' == 208 \
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 121
+     && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 /*
 	LNBREAK: Line Break: \R
 
@@ -1911,7 +1911,7 @@
  * 8b677a4cf17a4c6949632146fa8a99aaa65689a41b9dd231f81783e81600ff36 lib/unicore/extracted/DNumValues.txt
  * bdc891efa8fc8425685f8c773bbfba47247c2d3612c9926b096fc7f794a5ffc2 lib/unicore/mktables
  * 93cc868487ef3345596041bcb90c302b1b056733bb95233101bc10dc2dbe36b4 lib/unicore/version
- * 4bb677187a1a64e39d48f2e341b5ecb6c99857e49d7a79cf503bd8a3c709999b regen/charset_translations.pl
+ * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 88bd981dbb45f57767c414170f85067c6e01b5afbc1e40c6514a2bc41ed8c1d8 regen/regcharclass.pl
  * c6b0b0b7e4ac4f5a57d203e84194749987477ea55b2366e3b343aadf8cc7d6b5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
