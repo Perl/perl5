@@ -3424,7 +3424,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            we switch it back; otherwise we leave it swapped.
         */
         swap = prog->offs;
-        /* do we need a save destructor here for eval dies? */
+        /* avoid leak if we die, or clean up anyway if match completes */
+        SAVEFREEPV(swap);
         Newxz(prog->offs, (prog->nparens + 1), regexp_paren_pair);
         DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
 	    "rex=0x%" UVxf " saving  offs: orig=0x%" UVxf " new=0x%" UVxf "\n",
@@ -3809,17 +3810,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         goto phooey;
     }
 
-    DEBUG_BUFFERS_r(
-	if (swap)
-            Perl_re_exec_indentf( aTHX_
-		"rex=0x%" UVxf " freeing offs: 0x%" UVxf "\n",
-		0,
-                PTR2UV(prog),
-		PTR2UV(swap)
-	    );
-    );
-    Safefree(swap);
-
     /* clean up; this will trigger destructors that will free all slabs
      * above the current one, and cleanup the regmatch_info_aux
      * and regmatch_info_aux_eval sructs */
@@ -3841,24 +3831,29 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%sMatch failed%s\n",
 			  PL_colors[4], PL_colors[5]));
 
+    if (swap) {
+        /* we failed :-( roll it back.
+         * Since the swap buffer will be freed on scope exit which follows
+         * shortly, restore the old captures by copying 'swap's original
+         * data to the new offs buffer
+         */
+        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+	    "rex=0x%" UVxf " rolling back offs: 0x%" UVxf " will be freed; restoring data to =0x%" UVxf "\n",
+	    0,
+            PTR2UV(prog),
+	    PTR2UV(prog->offs),
+	    PTR2UV(swap)
+	));
+
+        Copy(swap, prog->offs, prog->nparens + 1, regexp_paren_pair);
+    }
+
     /* clean up; this will trigger destructors that will free all slabs
      * above the current one, and cleanup the regmatch_info_aux
      * and regmatch_info_aux_eval sructs */
 
     LEAVE_SCOPE(oldsave);
 
-    if (swap) {
-        /* we failed :-( roll it back */
-        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
-	    "rex=0x%" UVxf " rolling back offs: freeing=0x%" UVxf " restoring=0x%" UVxf "\n",
-	    0,
-            PTR2UV(prog),
-	    PTR2UV(prog->offs),
-	    PTR2UV(swap)
-	));
-        Safefree(prog->offs);
-        prog->offs = swap;
-    }
     return 0;
 }
 

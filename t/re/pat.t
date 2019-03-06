@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 852;  # Update this when adding/deleting tests.
+plan tests => 853;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1885,6 +1885,26 @@ EOF_CODE
             like($got[5],qr/Error: Infinite recursion via empty pattern/,
            "empty pattern in regex codeblock: produced the right exception message" );
         }
+
+    # This test is based on the one directly above, which happened to
+    # leak. Repeat the test, but stripped down to the bare essentials
+    # of the leak, which is to die while executing a regex which is
+    # already the current regex, thus causing the saved outer set of
+    # capture offsets to leak. The test itself doesn't do anything
+    # except sit around hoping not to be triggered by ASan
+    {
+        eval {
+            my $s = "abcd";
+            $s =~ m{([abcd]) (?{ die if $1 eq 'd'; })}gx;
+            $s =~ //g;
+            $s =~ //g;
+            $s =~ //g;
+        };
+        pass("call to current regex doesn't leak");
+    }
+
+
+
     {
         # [perl #130495] /x comment skipping stopped a byte short, leading
         # to assertion failure or 'malformed utf-8 character" warning
