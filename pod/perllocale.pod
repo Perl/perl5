@@ -487,6 +487,13 @@ doesn't actually call the system C<setlocale>.  Instead those
 thread-safe operations are used to emulate the C<setlocale> function,
 but in a thread-safe manner.
 
+You can force the thread-safe locale operations to always be used (if
+available) by recompiling perl with
+
+ -Accflags='-DUSE_THREAD_SAFE_LOCALE'
+
+added to your call to F<Configure>.
+
 For further information about the categories, consult L<setlocale(3)>.
 
 =head2 Multi-threaded operation

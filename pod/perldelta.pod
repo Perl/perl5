@@ -34,6 +34,17 @@ For details, see L<https://www.unicode.org/versions/Unicode12.0.0/>.
 Because of a change in Unicode release cycles, Perl jumps from Unicode
 10.0 in Perl 5.28 to Unicode 12.0 in Perl 5.30.
 
+=head2 It is now possible to compile perl to always use thread-safe
+locale operations.
+
+Previously, these calls were only used when the perl was compiled to be
+multi-threaded.  To always enable them, add
+
+ -Accflags='-DUSE_THREAD_SAFE_LOCALE'
+
+to your F<Configure> flags.
+
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
