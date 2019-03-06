@@ -1928,6 +1928,10 @@ EOP
     }
     {
         # buffer overflow
+
+        # This test also used to leak - fixed by the commit which added
+        # this line.
+
         fresh_perl_is("BEGIN{\$^H=0x200000}\ns/[(?{//xx",
                       "Unmatched [ in regex; marked by <-- HERE in m/[ <-- HERE (?{/ at (eval 1) line 1.\n",
                       {}, "buffer overflow for regexp component");

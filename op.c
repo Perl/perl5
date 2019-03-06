@@ -7112,8 +7112,13 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
 #  endif
 		}
 #endif
-		/* But we know that one op is using this CV's slab. */
-		cv_forget_slab(PL_compcv);
+                /* This LEAVE_SCOPE will restore PL_compcv to point to the
+                 * outer CV (the one whose slab holds the pm op). The
+                 * inner CV (which holds expr) will be freed later, once
+                 * all the entries on the parse stack have been popped on
+                 * return from this function. Which is why its safe to
+                 * call op_free(expr) below.
+                 */
 		LEAVE_SCOPE(floor);
 		pm->op_pmflags &= ~PMf_HAS_CV;
 	    }
