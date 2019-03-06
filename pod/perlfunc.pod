@@ -6448,7 +6448,7 @@ if the result is not defined.
         ...
     }
 
-Note that you have can't handle L<C<readline>|/readline EXPR> errors
+Note that you can't handle L<C<readline>|/readline EXPR> errors
 that way with the C<ARGV> filehandle.  In that case, you have to open
 each element of L<C<@ARGV>|perlvar/@ARGV> yourself since
 L<C<eof>|/eof FILEHANDLE> handles C<ARGV> differently.
