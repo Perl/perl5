@@ -4371,12 +4371,16 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
          * copy the input to the output, avoiding finding the code point of
          * that character */
         if (!is_utf8_pat) {
+            assert(OP(text_node) != EXACT_ONLY8);
             c2 = c1 = *pat;
         }
         else if (utf8_target) {
             Copy(pat, c1_utf8, UTF8SKIP(pat), U8);
             Copy(pat, c2_utf8, UTF8SKIP(pat), U8);
             utf8_has_been_setup = TRUE;
+        }
+        else if (OP(text_node) == EXACT_ONLY8) {
+            return FALSE;   /* Can only match UTF-8 target */
         }
         else {
             c2 = c1 = valid_utf8_to_uvchr(pat, NULL);
