@@ -387609,7 +387609,7 @@ const char * const deprecated_property_msgs[] = {
 #define UNI_LB__SG (UNI_LB__SG_perl_aux + (MAX_UNI_KEYWORD_INDEX * 1))
 
 typedef enum {
-	PERL_BIN_PLACEHOLDER = 0,
+	PERL_BIN_PLACEHOLDER = 0,  /* So no real value is zero */
 	UNI_ADLM,
 	UNI_AEGEANNUMBERS,
 	UNI_AGE__10,
@@ -390181,5 +390181,5 @@ static const U8 WB_table[23][23] = {
  * 93cc868487ef3345596041bcb90c302b1b056733bb95233101bc10dc2dbe36b4 lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 03e51b0f07beebd5da62ab943899aa4934eee1f792fa27c1fb638c33bf4ac6ea regen/mk_PL_charclass.pl
- * d62728e4cfcba3e6550ff12ad924f4811ca2077ebec705b9fecabed716764414 regen/mk_invlists.pl
+ * 9da0397d5df6369f0913e4e1c72fa00445d29460bbdbe25f32ba7b356c50d77d regen/mk_invlists.pl
  * ex: set ro: */

@@ -2945,7 +2945,7 @@ if (scalar keys %deprecated_tags) {
     }
 }
 
-print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,\n\t";
+print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,  /* So no real value is zero */\n\t";
 print $out_fh join ",\n\t", @enums;
 print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
