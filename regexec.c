@@ -4548,6 +4548,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     case EXACTFU:
                         c2 = PL_fold_latin1[c1];
                         break;
+                    case EXACTFU_ONLY8:
+                        return FALSE;
+                        NOT_REACHED; /* NOTREACHED */
 
                     default:
                         Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
