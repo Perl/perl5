@@ -371,6 +371,8 @@
 #define PL_GNonFinalFold	(my_vars->GNonFinalFold)
 #define PL_Posix_ptrs		(my_vars->GPosix_ptrs)
 #define PL_GPosix_ptrs		(my_vars->GPosix_ptrs)
+#define PL_Private_Use		(my_vars->GPrivate_Use)
+#define PL_GPrivate_Use		(my_vars->GPrivate_Use)
 #define PL_SB_invlist		(my_vars->GSB_invlist)
 #define PL_GSB_invlist		(my_vars->GSB_invlist)
 #define PL_SCX_invlist		(my_vars->GSCX_invlist)

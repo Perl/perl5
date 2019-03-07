@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.43';
+$VERSION = '1.44';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -111,6 +111,8 @@ my $tree = {
                                     [ 5.027, DEFAULT_ON ],
                                 'experimental::alpha_assertions' =>
                                     [ 5.027, DEFAULT_ON ],
+                                'experimental::private_use' =>
+                                    [ 5.029, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],

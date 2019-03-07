@@ -304,6 +304,7 @@ PERLVAR(G, utf8_charname_continue, SV *)
 PERLVAR(G, utf8_mark,	SV *)
 PERLVARI(G, InBitmap,	SV *, NULL)
 PERLVAR(G, CCC_non0_non230,	SV *)
+PERLVAR(G, Private_Use,	SV *)
 
 /* Definitions of user-defined \p{} properties, as the subs that define them
  * are only called once */

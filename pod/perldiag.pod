@@ -6130,6 +6130,11 @@ the feature:
 (F) The function indicated isn't implemented on this architecture,
 according to the probings of Configure.
 
+=item The private_use feature is experimental
+
+(S experimental::private_use) This feature is actually a hook for future
+use.
+
 =item The regex_sets feature is experimental
 
 (S experimental::regex_sets) This warning is emitted if you
