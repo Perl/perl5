@@ -4290,14 +4290,14 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
     return 0;
 }
 
-
 static bool
 S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         U8* c1_utf8, int *c2p, U8* c2_utf8, regmatch_info *reginfo)
 {
-    /* This function determines if there are one or two characters that match
-     * the first character of the passed-in EXACTish node <text_node>, and if
-     * so, returns them in the passed-in pointers.
+    /* This function determines if there are zero, one, two, or more characters
+     * that match the first character of the passed-in EXACTish node
+     * <text_node>, and if there are one or two, it returns them in the
+     * passed-in pointers.
      *
      * If it determines that no possible character in the target string can
      * match, it returns FALSE; otherwise TRUE.  (The FALSE situation occurs if
