@@ -3012,6 +3012,42 @@ my @sources = qw(regen/mk_invlists.pl
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
 
+use Data::Dumper;
+my %name_to_index;
+for my $i (0 .. @enums - 1) {
+    my $loose_name = $enums[$i] =~ s/^$table_name_prefix//r;
+    $loose_name = lc $loose_name;
+    $loose_name =~ s/__/=/;
+    $loose_name =~ s/_dot_/./;
+    $loose_name =~ s/_slash_/\//g;
+    $name_to_index{$loose_name} = $i + 1;
+}
+# unsanitize, exclude &, maybe add these before sanitize
+for my $i (0 .. @perl_prop_synonyms - 1) {
+    my $loose_name_pair = $perl_prop_synonyms[$i] =~ s/#\s*define\s*//r;
+    $loose_name_pair =~ s/\b$table_name_prefix//g;
+    $loose_name_pair = lc $loose_name_pair;
+    $loose_name_pair =~ s/__/=/g;
+    $loose_name_pair =~ s/_dot_/./g;
+    $loose_name_pair =~ s/_slash_/\//g;
+    my ($synonym, $primary) = split / +/, $loose_name_pair;
+    $name_to_index{$synonym} = $name_to_index{$primary};
+}
+
+my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
+		      {style => '*', by => 'regen/mk_invlists.pl',
+                      from => "Unicode::UCD"});
+{
+    print $uni_pl "\%utf8::uni_prop_ptrs_indices = (\n";
+    for my $name (sort keys %name_to_index) {
+        print STDERR __LINE__, $name, "\n" unless defined $name_to_index{$name};
+        print $uni_pl "    '$name' => $name_to_index{$name},\n";
+    }
+    print $uni_pl ");\n\n1;\n";
+}
+
+read_only_bottom_close_and_rename($uni_pl, \@sources);
+
 require './regen/mph.pl';
 
 sub token_name

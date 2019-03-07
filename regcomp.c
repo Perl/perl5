@@ -21775,6 +21775,7 @@ Perl_init_uniprops(pTHX)
     PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
     PL_utf8_mark = _new_invlist_C_array(uni_prop_ptrs[UNI_M]);
     PL_CCC_non0_non230 = _new_invlist_C_array(_Perl_CCC_non0_non230_invlist);
+    PL_Private_Use = _new_invlist_C_array(uni_prop_ptrs[UNI_CO]);
 
 #ifdef UNI_XIDC
     /* The below are used only by deprecated functions.  They could be removed */
@@ -23036,10 +23037,65 @@ Perl_parse_uniprop_string(pTHX_
 
     /* Create and return the inversion list */
     prop_definition =_new_invlist_C_array(uni_prop_ptrs[table_index]);
+    sv_2mortal(prop_definition);
+
+
+    /* See if there is a private use override to add to this definition */
+    {
+        COPHH * hinthash = (IN_PERL_COMPILETIME)
+                           ? CopHINTHASH_get(&PL_compiling)
+                           : CopHINTHASH_get(PL_curcop);
+	SV * pu_overrides = cophh_fetch_pv(hinthash, "private_use", 0, 0);
+
+        if (UNLIKELY(pu_overrides && SvPOK(pu_overrides))) {
+
+            /* See if there is an element in the hints hash for this table */
+            SV * pu_lookup = Perl_newSVpvf(aTHX_ "%d=", table_index);
+            const char * pos = strstr(SvPVX(pu_overrides), SvPVX(pu_lookup));
+
+            if (pos) {
+                bool dummy;
+                SV * pu_definition;
+                SV * pu_invlist;
+                SV * expanded_prop_definition =
+                            sv_2mortal(invlist_clone(prop_definition, NULL));
+
+                /* If so, it's definition is the string from here to the next
+                 * \a character.  And its format is the same as a user-defined
+                 * property */
+                pos += SvCUR(pu_lookup);
+                pu_definition = newSVpvn(pos, strchr(pos, '\a') - pos);
+                pu_invlist = handle_user_defined_property(lookup_name,
+                                                          lookup_len,
+                                                          0, /* Not UTF-8 */
+                                                          0, /* Not folded */
+                                                          runtime,
+                                                          pu_definition,
+                                                          &dummy,
+                                                          msg,
+                                                          level);
+                if (TAINT_get) {
+                    if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
+                    sv_catpvs(msg, "Insecure private-use override");
+                    goto append_name_to_msg;
+                }
+
+                /* For now, as a safety measure, make sure that it doesn't
+                 * override non-private use code points */
+                _invlist_intersection(pu_invlist, PL_Private_Use, &pu_invlist);
+
+                /* Add it to the list to be returned */
+                _invlist_union(prop_definition, pu_invlist,
+                               &expanded_prop_definition);
+                prop_definition = expanded_prop_definition;
+                Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__PRIVATE_USE), "The private_use feature is experimental");
+            }
+        }
+    }
+
     if (invert_return) {
         _invlist_invert(prop_definition);
     }
-    sv_2mortal(prop_definition);
     return prop_definition;
 
 

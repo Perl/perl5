@@ -123,6 +123,8 @@ END_EXTERN_C
 #define PL_NonFinalFold		(*Perl_GNonFinalFold_ptr(NULL))
 #undef  PL_Posix_ptrs
 #define PL_Posix_ptrs		(*Perl_GPosix_ptrs_ptr(NULL))
+#undef  PL_Private_Use
+#define PL_Private_Use		(*Perl_GPrivate_Use_ptr(NULL))
 #undef  PL_SB_invlist
 #define PL_SB_invlist		(*Perl_GSB_invlist_ptr(NULL))
 #undef  PL_SCX_invlist
