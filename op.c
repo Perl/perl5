@@ -10201,6 +10201,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (cv) {				/* must reuse cv if autoloaded */
 	/* transfer PL_compcv to cv */
 	if (block) {
+            bool free_file = CvFILE(cv) && CvDYNFILE(cv);
 	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
 	    PADLIST *const temp_av = CvPADLIST(cv);
 	    CV *const temp_cv = CvOUTSIDE(cv);
@@ -10238,7 +10239,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvFLAGS(PL_compcv) &= ~(CVf_SLABBED|CVf_WEAKOUTSIDE);
 	    CvFLAGS(PL_compcv) |= other_flags;
 
-	    if (CvFILE(cv) && CvDYNFILE(cv)) {
+	    if (free_file) {
 		Safefree(CvFILE(cv));
             }
 	    CvFILE_set_from_cop(cv, PL_curcop);
