@@ -10834,6 +10834,10 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
     return cv;
 }
 
+/* Add a stub CV to a typeglob.
+ * This is the implementation of a forward declaration, 'sub foo';'
+ */
+
 CV *
 Perl_newSTUB(pTHX_ GV *gv, bool fake)
 {
