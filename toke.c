@@ -2068,6 +2068,7 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
     SV * const sv = newSVpvn_utf8(start, len,
                     ! IN_BYTES
                   &&  UTF
+                  &&  len != 0
                   &&  is_utf8_non_invariant_string((const U8*)start, len));
     return sv;
 }
