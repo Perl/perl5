@@ -23,9 +23,7 @@
 PERL_STATIC_INLINE bool
 S_is_invlist(SV* const invlist)
 {
-    PERL_ARGS_ASSERT_IS_INVLIST;
-
-    return SvTYPE(invlist) == SVt_INVLIST;
+    return invlist != NULL && SvTYPE(invlist) == SVt_INVLIST;
 }
 
 PERL_STATIC_INLINE bool*
