@@ -2450,12 +2450,13 @@ S_modkids(pTHX_ OP *o, I32 type)
 
 /* for a helem/hslice/kvslice, if its a fixed hash, croak on invalid
  * const fields. Also, convert CONST keys to HEK-in-SVs.
- * rop is the op that retrieves the hash;
+ * rop    is the op that retrieves the hash;
  * key_op is the first key
+ * real   if false, only check (and possibly croak); don't update op
  */
 
 STATIC void
-S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
+S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
 {
     PADNAME *lexname;
     GV **fields;
@@ -2505,7 +2506,8 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
         if (   !SvIsCOW_shared_hash(sv = *svp)
             && SvTYPE(sv) < SVt_PVMG
             && SvOK(sv)
-            && !SvROK(sv))
+            && !SvROK(sv)
+            && real)
         {
             SSize_t keylen;
             const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
@@ -3731,7 +3733,7 @@ S_finalize_op(pTHX_ OP* o)
         check_keys:
             if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
                 rop = NULL;
-            S_check_hash_fields_and_hekify(aTHX_ rop, key_op);
+            S_check_hash_fields_and_hekify(aTHX_ rop, key_op, 1);
             break;
         }
         case OP_NULL:
@@ -14691,12 +14693,13 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                              * the extra hassle for those edge cases */
                             break;
 
-                        if (pass) {
+                        {
                             UNOP *rop = NULL;
                             OP * helem_op = o->op_next;
 
                             ASSUME(   helem_op->op_type == OP_HELEM
-                                   || helem_op->op_type == OP_NULL);
+                                   || helem_op->op_type == OP_NULL
+                                   || pass == 0);
                             if (helem_op->op_type == OP_HELEM) {
                                 rop = (UNOP*)(((BINOP*)helem_op)->op_first);
                                 if (   helem_op->op_private & OPpLVAL_INTRO
@@ -14704,9 +14707,14 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                 )
                                     rop = NULL;
                             }
-                            S_check_hash_fields_and_hekify(aTHX_ rop, cSVOPo);
+                            /* on first pass just check; on second pass
+                             * hekify */
+                            S_check_hash_fields_and_hekify(aTHX_ rop, cSVOPo,
+                                                            pass);
+                        }
 
 #ifdef USE_ITHREADS
+                        if (pass) {
                             /* Relocate sv to the pad for thread safety */
                             op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
                             arg->pad_offset = o->op_targ;
