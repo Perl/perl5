@@ -143,11 +143,25 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<perl5db.pl> has been upgraded from version 1.54 to 1.55.
+
+Debugging threaded code no longer deadlocks in C<DB::sub> nor
+C<DB::lsub>.
+
+=item *
+
 L<PerlIO::encoding> has been upgraded from version 0.26 to 0.27.
 
 Warnings enabled by setting the C<WARN_ON_ERR> flag in
 C<$PerlIO::encoding::fallback> are now only produced if warnings are
 enabled with C<use warnings "utf8";> or setting C<$^W>.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.59 to 1.60.
+
+Added support for extra tracing of locking, this requires a
+C<-DDEBUGGING> and extra compilation flags.
 
 =back
 
