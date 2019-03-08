@@ -4321,8 +4321,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv,
 	    SAVEBOOL(TAINT_get);
 	    TAINT_NOT;
 #endif
-	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
-			     NULL);
+            require_pv("utf8_heavy.pl");
 	    {
 		/* Not ERRSV, as there is no need to vivify a scalar we are
 		   about to discard. */
