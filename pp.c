@@ -4300,7 +4300,8 @@ PP(pp_uc)
 		    SvCUR_set(dest, len);
 		    len = sv_utf8_upgrade_flags_grow(dest,
 						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						extra);
+                                                extra
+                                              + 1 /* trailing NUL */ );
 		    d = (U8*)SvPVX(dest) + len;
 
                     /* Now process the remainder of the source, simultaneously
@@ -4434,7 +4435,8 @@ PP(pp_lc)
              * when converted to UTF-8 */
             sv_utf8_upgrade_flags_grow(dest, 0, len
                                               + I_count
-                                              + variant_under_utf8_count(s, send));
+                                              + variant_under_utf8_count(s, send)
+                                              + 1 /* Trailing NUL */ );
             d = (U8*)SvPVX(dest);
             has_turkic_I = TRUE;
         }
@@ -4803,7 +4805,8 @@ PP(pp_fc)
                     SvCUR_set(dest, len);
                     len = sv_utf8_upgrade_flags_grow(dest,
                                                 SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-                                                extra);
+                                                extra
+                                              + 1 /* Trailing NUL */ );
                     d = (U8*)SvPVX(dest) + len;
 
                     *d++ = UTF8_TWO_BYTE_HI(GREEK_SMALL_LETTER_MU);
