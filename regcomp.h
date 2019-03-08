@@ -404,7 +404,7 @@ struct regnode_ssc {
  *
  *  1)  The bitmap has a compiled-in very finite size.  So something else needs
  *      to be used to specify if a code point that is too large for the bitmap
- *      actually matches.  The mechanism currently is a swash or inversion
+ *      actually matches.  The mechanism currently is an inversion
  *      list.  ANYOF_ONLY_HAS_BITMAP, described above, being TRUE indicates
  *      there are no matches of too-large code points.  But if it is FALSE,
  *      then almost certainly there are matches too large for the bitmap.  (The
@@ -415,7 +415,7 @@ struct regnode_ssc {
  *  2)  A subset of item 1) is if all possible code points outside the bitmap
  *      match.  This is a common occurrence when the class is complemented,
  *      like /[^ij]/.  Therefore a bit is reserved to indicate this,
- *      rather than having an expensive swash created,
+ *      rather than having a more expensive inversion list created,
  *      ANYOF_MATCHES_ALL_ABOVE_BITMAP.
  *  3)  Under /d rules, it can happen that code points that are in the upper
  *      latin1 range (\x80-\xFF or their equivalents on EBCDIC platforms) match
@@ -428,12 +428,12 @@ struct regnode_ssc {
  *      handled.  But it can be a shared flag: see 5) below.
  *  4)  Also under /d rules, something like /[\Wfoo]/ will match everything in
  *      the \x80-\xFF range, unless the string being matched against is UTF-8.
- *      A swash could be created for this case, but this is relatively common,
- *      and it turns out that it's all or nothing:  if any one of these code
- *      points matches, they all do.  Hence a single bit suffices.  We use a
- *      shared flag that doesn't take up space by itself:
- *      ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER.
- *      This also implies 1), with one exception: [:^cntrl:].
+ *      An inversion list could be created for this case, but this is
+ *      relatively common, and it turns out that it's all or nothing:  if any
+ *      one of these code points matches, they all do.  Hence a single bit
+ *      suffices.  We use a shared flag that doesn't take up space by itself:
+ *      ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER.  This
+ *      also implies 1), with one exception: [:^cntrl:].
  *  5)  A user-defined \p{} property may not have been defined by the time the
  *      regex is compiled.  In this case, we don't know until runtime what it
  *      will match, so we have to assume it could match anything, including
@@ -540,10 +540,11 @@ struct regnode_ssc {
 /* Shared bit:
  *      Under /d it means the ANYOFD node matches more things if the target
  *          string is encoded in UTF-8; any such things will be non-ASCII,
- *          characters that are < 256, and can be accessed via the swash.
+ *          characters that are < 256, and can be accessed via the inversion
+ *          list.
  *      When not under /d, it means the ANYOF node contains a user-defined
  *      property that wasn't yet defined at the time the regex was compiled,
- *      and so must be looked up at runtime, by creating a swash
+ *      and so must be looked up at runtime, by creating an inversion list.
  * (These uses are mutually exclusive because a user-defined property is
  * specified by \p{}, and \p{} implies /u which deselects /d).  The long macro
  * name is to make sure that you are cautioned about its shared nature.  Only
@@ -773,9 +774,9 @@ END_EXTERN_C
  *   l - start op for literal (?{EVAL}) item
  *   L - start op for literal (?{EVAL}) item, with separate CV (qr//)
  *   r - pointer to an embedded code-containing qr, e.g. /ab$qr/
- *   s - swash for Unicode-style character class, and the multicharacter
- *       strings resulting from casefolding the single-character entries
- *       in the character class
+ *   s - inversion list for Unicode-style character class, and the
+ *       multicharacter strings resulting from casefolding the single-character
+ *       entries in the character class
  *   t - trie struct
  *   u - trie struct's widecharmap (a HV, so can't share, must dup)
  *       also used for revcharmap and words under DEBUGGING
