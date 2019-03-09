@@ -2425,8 +2425,9 @@ foreach my $property (sort
     # thing if there is no '='
     my ($lhs, $rhs) = $property =~ / ( [^=]* ) ( =? .*) /x;
 
-    # $lhs then becomes the property name.  See if there are any synonyms
-    # for this property.
+    # $lhs then becomes the property name.
+
+    # See if there are any synonyms for this property.
     if (exists $prop_name_aliases{$lhs}) {
 
         # If so, do the combinatorics so that a new entry is added for
@@ -2452,6 +2453,7 @@ foreach my $property (sort
     # processing.  But we haven't dealt with it yet.  If we already have a
     # property with the identical characteristics, this becomes just a
     # synonym for it.
+
     if (exists $enums{$tag}) {
         push @this_entries, $property;
     }
@@ -2813,7 +2815,8 @@ foreach my $prop (@props) {
                                                         =~ $integer_or_float_re
                                 && $xlated{$new_invlist[$i]}
                                                         =~ $integer_or_float_re
-                                && $xlated{$new_invlist[$i-1]} + 1 == $xlated{$new_invlist[$i]};
+                                && $xlated{$new_invlist[$i-1]} + 1
+                                                 == $xlated{$new_invlist[$i]};
                         push @temp, $new_invlist[$i];
                     }
                     @new_invlist = @temp;
