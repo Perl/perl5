@@ -3329,7 +3329,7 @@ mblen(s, n)
 #endif
     CODE:
 #if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
-        PERL_UNUSED_RESULT(mbrlen(NULL, 0, &ps));   /* Initialize state */
+        memset(&ps, 0, sizeof(ps)); /* Initialize state */
         RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
 #else
         RETVAL = mblen(s, n);
