@@ -36,7 +36,7 @@ if ($Is_VMS) {
 
 # We're going to be chdir'ing and modules are sometimes loaded on the
 # fly in this test, so we need an absolute @INC.
-@INC = map { File::Spec->rel2abs($_) } @INC;
+@INC = map File::Spec->rel2abs($_), @INC;
 
 # keep track of everything added so it can all be deleted
 my %Files;
@@ -95,7 +95,7 @@ chmod( 0744, 'foo') if $Config{'chmod'};
 # there shouldn't be a MANIFEST there
 my ($res, $warn) = catch_warning( \&mkmanifest );
 # Canonize the order.
-$warn = join("", map { "$_|" }
+$warn = join("", map "$_|",
                  sort { lc($a) cmp lc($b) } split /\r?\n/, $warn);
 is( $warn, "Added to MANIFEST: foo|Added to MANIFEST: MANIFEST|",
     "mkmanifest() displayed its additions" );
@@ -165,7 +165,7 @@ find( sub { push @copies, $_ if -f }, 'copy' );
 @copies = map { s/\.$//; $_ } @copies if $Is_VMS;  # VMS likes to put dots on
                                                    # the end of files.
 # Have to compare insensitively for non-case preserving VMS
-is_deeply( [sort map { lc } @copies], [sort map { lc } keys %$files] );
+is_deeply( [sort map lc, @copies], [sort map lc, keys %$files] );
 
 # cp would leave files readonly, so check permissions.
 foreach my $orig (@copies) {
@@ -257,7 +257,7 @@ is index($manicontents, "\015\012"), -1, 'MANIFEST no CRLF';
                 my @lines = split /$eol2/, $content;
                 pop @lines while $lines[-1] eq "";
                 open my $fh, ">", "MANIFEST" or die "Could not open >MANIFEST: $!";
-                print $fh map { "$_$eol" } @lines;
+                print $fh map "$_$eol", @lines;
                 close $fh or die "Could not close: $!";
                 last SPLITTER;
             }
@@ -444,7 +444,7 @@ add_file('MANIFEST'   => 'Makefile.PL');
 maniadd({ foo  => 'bar' });
 $files = maniread;
 # VMS downcases the MANIFEST.  We normalize it here to match.
-%$files = map { (lc $_ => $files->{$_}) } keys %$files;
+%$files = map +(lc $_ => $files->{$_}), keys %$files;
 my %expect = ( 'makefile.pl' => '',
                'foo'    => 'bar'
              );
