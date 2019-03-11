@@ -37,7 +37,7 @@ implement the Unicode standard or the accompanying technical reports
 from cover to cover, Perl does support many Unicode features.
 
 Also, the use of Unicode may present security issues that aren't
-obvious, see L</Security Implications of Unicode>.
+obvious, see L</Security Implications of Unicode> below.
 
 =over 4
 
@@ -853,8 +853,8 @@ L<perlrecharclass/POSIX Character Classes>.
 This property is used when you need to know in what Unicode version(s) a
 character is.
 
-The "*" above stands for some two digit Unicode version number, such as
-C<1.1> or C<4.0>; or the "*" can also be C<Unassigned>.  This property will
+The "*" above stands for some Unicode version number, such as
+C<1.1> or C<12.0>; or the "*" can also be C<Unassigned>.  This property will
 match the code points whose final disposition has been settled as of the
 Unicode release given by the version number; C<\p{Present_In: Unassigned}>
 will match those code points whose meaning has yet to be assigned.
@@ -1089,7 +1089,7 @@ The following list of Unicode supported features for regular expressions describ
 all features currently directly supported by core Perl.  The references
 to "Level I<N>" and the section numbers refer to
 L<UTS#18 "Unicode Regular Expressions"|http://www.unicode.org/reports/tr18>,
-version 13, November 2013.
+version 18, October 2016.
 
 =head3 Level 1 - Basic Unicode Support
 
@@ -1244,28 +1244,36 @@ L<UAX#29 "Unicode Text Segmentation"|http://www.unicode.org/reports/tr29>,
 =head3 Level 3 - Tailored Support
 
  RL3.1   Tailored Punctuation            - Missing
- RL3.2   Tailored Grapheme Clusters      - Missing       [12]
+ RL3.2   Tailored Grapheme Clusters      - Missing       [13]
  RL3.3   Tailored Word Boundaries        - Missing
  RL3.4   Tailored Loose Matches          - Retracted by Unicode
  RL3.5   Tailored Ranges                 - Retracted by Unicode
- RL3.6   Context Matching                - Missing       [13]
+ RL3.6   Context Matching                - Partial       [14]
  RL3.7   Incremental Matches             - Missing
- RL3.8   Unicode Set Sharing             - Unicode is proposing
-                                           to retract this
+ RL3.8   Unicode Set Sharing             - Retracted by Unicode
  RL3.9   Possible Match Sets             - Missing
  RL3.10  Folded Matching                 - Retracted by Unicode
- RL3.11  Submatchers                     - Missing
+ RL3.11  Submatchers                     - Partial       [15]
 
 =over 4
 
-=item [12]
+=item [13]
 Perl has L<Unicode::Collate>, but it isn't integrated with regular
 expressions.  See
 L<UTS#10 "Unicode Collation Algorithms"|http://www.unicode.org/reports/tr10>.
 
-=item [13]
-Perl has C<(?<=x)> and C<(?=x)>, but lookaheads or lookbehinds should
-see outside of the target substring
+=item [14]
+Perl has C<(?<=x)> and C<(?=x)>, but this requirement says that it
+should be possible to specify that matches may occur only in a substring
+with the lookaheads and lookbehinds able to see beyond that matchable
+portion.
+
+=item [15]
+Perl has user-defined properties (L</"User-Defined Character
+Properties">) to look at single code points in ways beyond Unicode, and
+it might be possible, though probably not very clean, to use code blocks
+and things like C<(?(DEFINE)...)> (see L<perlre> to do more specialized
+matching.
 
 =back
 
@@ -1326,10 +1334,10 @@ encoding of numbers up to C<0x7FFF_FFFF>.  Perl continues to allow those,
 and has extended that up to 13 bytes to encode code points up to what
 can fit in a 64-bit word.  However, Perl will warn if you output any of
 these as being non-portable; and under strict UTF-8 input protocols,
-they are forbidden.  In addition, it is deprecated to use a code point
+they are forbidden.  In addition, it is now illegal to use a code point
 larger than what a signed integer variable on your system can hold.  On
 32-bit ASCII systems, this means C<0x7FFF_FFFF> is the legal maximum
-going forward (much higher on 64-bit systems).
+(much higher on 64-bit systems).
 
 =item *
 
@@ -1513,7 +1521,7 @@ noncharacters.
 
 The maximum Unicode code point is C<U+10FFFF>, and Unicode only defines
 operations on code points up through that.  But Perl works on code
-points up to the maximum permissible unsigned number available on the
+points up to the maximum permissible signed number available on the
 platform.  However, Perl will not accept these from input streams unless
 lax rules are being used, and will warn (using the warning category
 C<"non_unicode">, which is a sub-category of C<"utf8">) if any are output.
