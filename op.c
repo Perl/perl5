@@ -5415,7 +5415,10 @@ Perl_newPROG(pTHX_ OP *o)
         start = LINKLIST(PL_main_root);
 	PL_main_root->op_next = 0;
         S_process_optree(aTHX_ NULL, PL_main_root, start);
-	cv_forget_slab(PL_compcv);
+        if (!PL_parser->error_count)
+            /* on error, leave CV slabbed so that ops left lying around
+             * will eb cleaned up. Else unslab */
+            cv_forget_slab(PL_compcv);
 	PL_compcv = 0;
 
 	/* Register with debugger */
