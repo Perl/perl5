@@ -9,6 +9,7 @@ use Unicode::UCD qw(prop_aliases
                     prop_invmap search_invlist
                     charprop
                     num
+                    charblock
                    );
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
@@ -2386,6 +2387,9 @@ foreach my $key (keys %utf8::nv_floating_to_rational) {
     $floating_to_file_of{$key} = $utf8::stricter_to_file_of{"nv=$value"};
 }
 
+# Properties that are specified with a prop=value syntax
+my @equals_properties;
+
 # Collect all the binary properties from data in lib/unicore
 # Sort so that complements come after the main table, and the shortest
 # names first, finally alphabetically.  Also, sort together the tables we want
@@ -2426,6 +2430,9 @@ foreach my $property (sort
     my ($lhs, $rhs) = $property =~ / ( [^=]* ) ( =? .*) /x;
 
     # $lhs then becomes the property name.
+    my $prop_value = $rhs =~ s/ ^ = //rx;
+
+    push @equals_properties, $lhs if $prop_value ne "";
 
     # See if there are any synonyms for this property.
     if (exists $prop_name_aliases{$lhs}) {
@@ -2977,6 +2984,131 @@ print $out_fh join "\n", "\n",
                          #"\n",
                          #"#    endif  /* DOINIT */",
                          "\n";
+
+switch_pound_if ('Valid property_values', 'PERL_IN_REGCOMP_C');
+
+# Each entry is a pointer to a table of property values for some property.
+# (Other properties may share this table.  The next two data structures allow
+# this sharing to be implemented.)
+my @values_tables = "NULL /* Placeholder so zero index is an error */";
+
+# Keys are all the values of a property, strung together.  The value of each
+# key is its index in @values_tables.  This is because many properties have
+# the same values, and this allows the data to appear just once.
+my %joined_values;
+
+# #defines for indices into @values_tables, so can have synonyms resolved by
+# the C compiler.
+my @values_indices;
+
+# Go through each property which is specifiable by \p{prop=value}, and create
+# a hash with the keys being the canonicalized short property names, and the
+# values for each property being all possible values that it can take on.
+# Both the full value and its short, canonicalized into lc, sans punctuation
+# version are included.
+my %all_values;
+for my $property (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) }
+                 uniques @equals_properties)
+{
+    # Get and canonicalize the short name for this property.
+    my ($short_name) = prop_aliases($property);
+    $short_name = lc $short_name;
+    $short_name =~ s/[ _-]//g;
+
+    # Now look at each value this property can take on
+    foreach my $value (prop_values($short_name)) {
+
+        # And for each value, look at each synonym for it
+        foreach my $alias (prop_value_aliases($short_name, $value)) {
+
+            # Add each synonym
+            push @{$all_values{$short_name}}, $alias;
+
+            # As well as its canonicalized name.  khw made the decision to not
+            # support the grandfathered L_ Gc property value
+            $alias = lc $alias;
+            $alias =~ s/[ _-]//g unless $alias =~ $numeric_re;
+            push @{$all_values{$short_name}}, $alias;
+        }
+    }
+}
+
+# Also include the old style block names, using the recipe given in
+# Unicode::UCD
+foreach my $block (prop_values('block')) {
+    push @{$all_values{'blk'}}, charblock((prop_invlist("block=$block"))[0]);
+}
+
+# Now create output tables for each property in @equals_properties (the keys
+# in %all_values) each containing that property's possible values as computed
+# just above.
+PROPERTY:
+for my $property (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b)
+                         or $a cmp $b } keys %all_values)
+{
+    @{$all_values{$property}} = uniques(@{$all_values{$property}});
+
+    # String together the values for this property, sorted.  This string forms
+    # a list definition, with each value as an entry in it, indented on a new
+    # line.  The sorting is used to find properties that take on the exact
+    # same values to share this string.
+    my $joined = "\t\"";
+    $joined .= join "\",\n\t\"",
+                sort { ($a =~ $numeric_re && $b =~ $numeric_re)
+                        ? eval $a <=> eval $b
+                        :    prop_name_for_cmp($a) cmp prop_name_for_cmp($b)
+                          or $a cmp $b
+                        } @{$all_values{$property}};
+    # And add a trailing marker
+    $joined .= "\",\n\tNULL\n";
+
+    my $table_name = $table_name_prefix . $property . "_values";
+    my $index_name = "${table_name}_index";
+
+    # Add a rule for the parser that is just an empty value.  It will need to
+    # know to look up empty things in the prop_value_ptrs[] table.
+
+    $keywords{"$property="} = $index_name;
+    if (exists $prop_name_aliases{$property}) {
+        foreach my $alias (@{$prop_name_aliases{$property}}) {
+            $keywords{"$alias="} = $index_name;
+        }
+    }
+
+    # Also create rules for the synonyms of this property to point to the same
+    # thing
+
+    # If this property's values are the same as one we've already computed,
+    # use that instead of creating a duplicate.  But we add a #define to point
+    # to the proper one.
+    if (exists $joined_values{$joined}) {
+        push @values_indices, "#define $index_name  $joined_values{$joined}\n";
+        next PROPERTY;
+    }
+
+    # And this property, now known to have unique values from any other seen
+    # so far is about to be pushed onto @values_tables.  Its index is the
+    # current count.
+    push @values_indices, "#define $index_name  "
+                         . scalar @values_tables . "\n";
+    $joined_values{$joined} = $index_name;
+    push @values_tables, $table_name;
+
+    # Create the table for this set of values.
+    output_table_header($out_fh, "char *", $table_name);
+    print $out_fh $joined;
+    output_table_trailer();
+} # End of loop through the properties, and their values
+
+# We have completely determined the table of the unique property values
+output_table_header($out_fh, "char * const *",
+                             "${table_name_prefix}prop_value_ptrs");
+print $out_fh join ",\n", @values_tables;
+print $out_fh "\n";
+output_table_trailer();
+
+# And the #defines for the indices in it
+print $out_fh "\n\n", join "", @values_indices;
 
 switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
 
