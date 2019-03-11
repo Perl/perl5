@@ -3022,7 +3022,6 @@ my @sources = qw(regen/mk_invlists.pl
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
 
-use Data::Dumper;
 my %name_to_index;
 for my $i (0 .. @enums - 1) {
     my $loose_name = $enums[$i] =~ s/^$table_name_prefix//r;
@@ -3050,7 +3049,6 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 {
     print $uni_pl "\%utf8::uni_prop_ptrs_indices = (\n";
     for my $name (sort keys %name_to_index) {
-        print STDERR __LINE__, $name, "\n" unless defined $name_to_index{$name};
         print $uni_pl "    '$name' => $name_to_index{$name},\n";
     }
     print $uni_pl ");\n\n1;\n";
