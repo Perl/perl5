@@ -4244,6 +4244,12 @@ earlier as an attempt to close an unopened filehandle.
 not recognized.  Say C<kill -l> in your shell to see the valid signal
 names on your system.
 
+=item No Unicode property value wildcard matches:
+
+(W regexp) You specified a wildcard for a Unicode property value, but
+there is no property value in the current Unicode release that matches
+it.  Check your spelling.
+
 =item Not a CODE reference
 
 (F) Perl was trying to evaluate a reference to a code value (that is, a
@@ -6172,6 +6178,12 @@ linkhood if the last stat that wrote to the stat buffer already went
 past the symlink to get to the real file.  Use an actual filename
 instead.
 
+=item The Unicode property wildcards feature is experimental
+
+(S experimental::uniprop_wildcards) This feature is experimental
+and its behavior may in any future release of perl.  See
+L<perlunicode/Wildcards in Property Values>.
+
 =item The 'unique' attribute may only be applied to 'our' variables
 
 (F) This attribute was never supported on C<my> or C<sub> declarations.
@@ -6710,6 +6722,14 @@ turn off this warning by C<no warnings 'nonchar';>.
 This is not really a "severe" error, but it is supposed to be
 raised by default even if warnings are not enabled, and currently
 the only way to do that in Perl is to mark it as serious.
+
+=item Unicode property wildcard not terminated
+
+(F) A Unicode property wildcard looks like a delimited regular
+expression pattern (all within the braces of the enclosing C<\p{...}>.
+The closing delimtter to match the opening one was not found.  If the
+opening one is escaped by preceding it with a backslash, the closing one
+must also be so escaped.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 

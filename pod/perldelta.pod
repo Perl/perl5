@@ -27,6 +27,22 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Wildcards in Unicode property value specifications are now
+partially supported
+
+You can now do something like this in a regular expression pattern
+
+ qr! \p{nv= /(?x) \A [0-5] \z / }!
+
+which matches all Unicode code points which have numeric value is
+between 0 and 5 inclusive.
+
+This marks another step in implementing the regular expression features
+the Unicode Consortium suggests.
+
+Most properties are supported, with the remainder planned for 5.32.
+Details are in L<perlunicode/Wildcards in Property Values>.
+
 =head2 Unicode 12.0 is supported
 
 For details, see L<https://www.unicode.org/versions/Unicode12.0.0/>.

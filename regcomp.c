@@ -22328,6 +22328,167 @@ Perl_parse_uniprop_string(pTHX_
             }
         }
 
+        /* Most punctuation after the equals indicates a subpattern, like
+         * \p{foo=/bar/} */
+        if (   isPUNCT_A(name[i])
+            && name[i] != '-'
+            && name[i] != '+'
+            && name[i] != '_'
+            && name[i] != '{')
+        {
+            /* Find the property.  The table includes the equals sign, so we
+             * use 'j' as-is */
+            table_index = match_uniprop((U8 *) lookup_name, j);
+            if (table_index) {
+                const char * const * prop_values
+                                            = UNI_prop_value_ptrs[table_index];
+                SV * subpattern;
+                Size_t subpattern_len;
+                REGEXP * subpattern_re;
+                char open = name[i++];
+                char close;
+                const char * pos_in_brackets;
+                bool escaped = 0;
+
+                /* A backslash means the real delimitter is the next character.
+                 * */
+                if (open == '\\') {
+                    open = name[i++];
+                    escaped = 1;
+                }
+
+                /* This data structure is constructed so that the matching
+                 * closing bracket is 3 past its matching opening.  The second
+                 * set of closing is so that if the opening is something like
+                 * ']', the closing will be that as well.  Something similar is
+                 * done in toke.c */
+                pos_in_brackets = strchr("([<)]>)]>", open);
+                close = (pos_in_brackets) ? pos_in_brackets[3] : open;
+
+                if (   name[name_len-1] != close
+                    || (escaped && name[name_len-2] != '\\'))
+                {
+                    sv_catpvs(msg, "Unicode property wildcard not terminated");
+                    goto append_name_to_msg;
+                }
+
+                Perl_ck_warner_d(aTHX_
+                    packWARN(WARN_EXPERIMENTAL__UNIPROP_WILDCARDS),
+                    "The Unicode property wildcards feature is experimental");
+
+                /* Now create and compile the wildcard subpattern.  Use /iaa
+                 * because nothing outside of ASCII will match, and it the
+                 * property values should all match /i.  Note that when the
+                 * pattern fails to compile, our added text to the user's
+                 * pattern will be displayed to the user, which is not so
+                 * desirable. */
+                subpattern_len = name_len - i - 1 - escaped;
+                subpattern = Perl_newSVpvf(aTHX_ "(?iaa:%.*s)",
+                                              (unsigned) subpattern_len,
+                                              name + i);
+                subpattern = sv_2mortal(subpattern);
+                subpattern_re = re_compile(subpattern, 0);
+                assert(subpattern_re);  /* Should have died if didn't compile
+                                         successfully */
+
+                /* For each legal property value, see if the supplied pattern
+                 * matches it. */
+                while (*prop_values) {
+                    const char * const entry = *prop_values;
+                    const Size_t len = strlen(entry);
+                    SV* entry_sv = newSVpvn_flags(entry, len, SVs_TEMP);
+
+                    if (pregexec(subpattern_re,
+                                 (char *) entry,
+                                 (char *) entry + len,
+                                 (char *) entry, 0,
+                                 entry_sv,
+                                 0))
+                    { /* Here, matched.  Add to the returned list */
+                        Size_t total_len = j + len;
+                        SV * sub_invlist = NULL;
+                        char * this_string;
+
+                        /* We know this is a legal \p{property=value}.  Call
+                         * the function to return the list of code points that
+                         * match it */
+                        Newxz(this_string, total_len + 1, char);
+                        Copy(lookup_name, this_string, j, char);
+                        my_strlcat(this_string, entry, total_len + 1);
+                        SAVEFREEPV(this_string);
+                        sub_invlist = parse_uniprop_string(this_string,
+                                                           total_len,
+                                                           is_utf8,
+                                                           to_fold,
+                                                           runtime,
+                                                           user_defined_ptr,
+                                                           msg,
+                                                           level + 1);
+                        _invlist_union(prop_definition, sub_invlist,
+                                       &prop_definition);
+                    }
+
+                    prop_values++;  /* Next iteration, look at next propvalue */
+                } /* End of looking through property values; (the data
+                     structure is terminated by a NULL ptr) */
+
+                SvREFCNT_dec_NN(subpattern_re);
+
+                if (prop_definition) {
+                    return prop_definition;
+                }
+
+                sv_catpvs(msg, "No Unicode property value wildcard matches:");
+                goto append_name_to_msg;
+            }
+
+            /* Here's how khw thinks we should proceed to handle the properties
+             * not yet done:    Bidi Mirroring Glyph
+                                Bidi Paired Bracket
+                                Case Folding  (both full and simple)
+                                Decomposition Mapping
+                                Equivalent Unified Ideograph
+                                Name
+                                Name Alias
+                                Lowercase Mapping  (both full and simple)
+                                NFKC Case Fold
+                                Titlecase Mapping  (both full and simple)
+                                Uppercase Mapping  (both full and simple)
+             * Move the part that looks at the property values into a perl
+             * script, like utf8_heavy.pl is done.  This makes things somewhat
+             * easier, but most importantly, it avoids always adding all these
+             * strings to the memory usage when the feature is little-used.
+             *
+             * The property values would all be concatenated into a single
+             * string per property with each value on a separate line, and the
+             * code point it's for on alternating lines.  Then we match the
+             * user's input pattern m//mg, without having to worry about their
+             * uses of '^' and '$'.  Only the values that aren't the default
+             * would be in the strings.  Code points would be in UTF-8.  The
+             * search pattern that we would construct would look like
+             * (?: \n (code-point_re) \n (?aam: user-re ) \n )
+             * And so $1 would contain the code point that matched the user-re.
+             * For properties where the default is the code point itself, such
+             * as any of the case changing mappings, the string would otherwise
+             * consist of all Unicode code points in UTF-8 strung together.
+             * This would be impractical.  So instead, examine their compiled
+             * pattern, looking at the ssc.  If none, reject the pattern as an
+             * error.  Otherwise run the pattern against every code point in
+             * the ssc.  The ssc is kind of like tr18's 3.9 Possible Match Sets
+             * And it might be good to create an API to return the ssc.
+             *
+             * For the name properties, a new function could be created in
+             * charnames which essentially does the same thing as above,
+             * sharing Name.pl with the other charname functions.  Don't know
+             * about loose name matching, or algorithmically determined names.
+             * Decomposition.pl similarly.
+             *
+             * It might be that a new pattern modifier would have to be
+             * created, like /t for resTricTed, which changed the behavior of
+             * some constructs in their subpattern, like \A. */
+        } /* End of is a wildcard subppattern */
+
+
         /* Certain properties whose values are numeric need special handling.
          * They may optionally be prefixed by 'is'.  Ignore that prefix for the
          * purposes of checking if this is one of those properties */

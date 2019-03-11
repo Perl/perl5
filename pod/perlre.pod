@@ -1019,7 +1019,7 @@ See L<perlrecharclass/POSIX Character Classes> for details.
 
 =item [3]
 
-See L<perlrecharclass/Backslash sequences> for details.
+See L<perlunicode/Unicode Character Properties> for details
 
 =item [4]
 

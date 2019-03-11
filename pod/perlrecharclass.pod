@@ -405,6 +405,9 @@ non-Unicode code points.  This could be somewhat surprising:
 Even though these two matches might be thought of as complements, until
 v5.20 they were so only on Unicode code points.
 
+Starting in perl v5.30, wildcards are allowed in Unicode property
+values.  See L<perlunicode/Wildcards in Property Values>.
+
 =head4 Examples
 
  "a"  =~  /\w/      # Match, "a" is a 'word' character.
