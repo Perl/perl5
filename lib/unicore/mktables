@@ -20367,6 +20367,7 @@ __DATA__
 
 use strict;
 use warnings;
+no warnings 'experimental::uniprop_wildcards';
 
 # Test qr/\X/ and the \p{} regular expression constructs.  This file is
 # constructed by mktables from the tables it generates, so if mktables is

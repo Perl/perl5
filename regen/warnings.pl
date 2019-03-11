@@ -113,6 +113,8 @@ my $tree = {
                                     [ 5.027, DEFAULT_ON ],
                                 'experimental::private_use' =>
                                     [ 5.029, DEFAULT_ON ],
+                                'experimental::uniprop_wildcards' =>
+                                    [ 5.029, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],

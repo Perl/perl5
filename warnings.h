@@ -124,6 +124,7 @@
 /* Warnings Categories added in Perl 5.029 */
 
 #define WARN_EXPERIMENTAL__PRIVATE_USE	 70
+#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 71
 
 #define WARNsize			 18
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
