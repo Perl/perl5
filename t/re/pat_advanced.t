@@ -783,11 +783,11 @@ sub run_tests {
     {
         my $re = qq /^([^X]*)X/;
         utf8::upgrade ($re);
-        ok "\x{100}X" =~ /$re/, "S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
+        like "\x{100}X", qr/$re/, "S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
         my $loc_re = qq /(?l:^([^X]*)X)/;
         utf8::upgrade ($loc_re);
         no warnings 'locale';
-        ok "\x{100}X" =~ /$loc_re/, "locale, S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
+        like "\x{100}X", qr/$loc_re/, "locale, S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
     }
 
     {
@@ -2110,7 +2110,7 @@ EOP
     }
 
     # RT #82610
-    ok 'foo/file.fob' =~ m,^(?=[^\.])[^/]*/(?=[^\.])[^/]*\.fo[^/]$,;
+    like 'foo/file.fob', qr,^(?=[^\.])[^/]*/(?=[^\.])[^/]*\.fo[^/]$,;
 
     {   # This was failing unless an explicit /d was added
         my $E0 = uni_to_native("\xE0");
@@ -2374,33 +2374,34 @@ EOF
         # scoped, and want to turn them off, so have to do the match in this
         # scope.
         if ($Config{uvsize} < 8) {
-            ok(chr(0x7FFF_FFFE) =~ /\p{Is_31_Bit_Super}/,
+            like(chr(0x7FFF_FFFE), qr/\p{Is_31_Bit_Super}/,
                             "chr(0x7FFF_FFFE) can match a Unicode property");
-            ok(chr(0x7FFF_FFFF) =~ /\p{Is_31_Bit_Super}/,
+            like(chr(0x7FFF_FFFF), qr/\p{Is_31_Bit_Super}/,
                             "chr(0x7FFF_FFFF) can match a Unicode property");
             my $p = qr/^[\x{7FFF_FFFF}]$/;
-            ok(chr(0x7FFF_FFFF) =~ $p,
+            like(chr(0x7FFF_FFFF), qr/$p/,
                     "chr(0x7FFF_FFFF) can match itself in a [class]");
-            ok(chr(0x7FFF_FFFF) =~ $p, # Tests any caching
+            like(chr(0x7FFF_FFFF), qr/$p/, # Tests any caching
                     "chr(0x7FFF_FFFF) can match itself in a [class] subsequently");
         }
         else {
             no warnings 'overflow';
-            ok(chr(0x7FFF_FFFF_FFFF_FFFE) =~ qr/\p{Is_Portable_Super}/,
+            like(chr(0x7FFF_FFFF_FFFF_FFFE), qr/\p{Is_Portable_Super}/,
                     "chr(0x7FFF_FFFF_FFFF_FFFE) can match a Unicode property");
-            ok(chr(0x7FFF_FFFF_FFFF_FFFF) =~ qr/^\p{Is_Portable_Super}$/,
+            like(chr(0x7FFF_FFFF_FFFF_FFFF), qr/^\p{Is_Portable_Super}$/,
                     "chr(0x7FFF_FFFF_FFFF_FFFF) can match a Unicode property");
 
             my $p = qr/^[\x{7FFF_FFFF_FFFF_FFFF}]$/;
-            ok(chr(0x7FFF_FFFF_FFFF_FFFF) =~ $p,
+            like(chr(0x7FFF_FFFF_FFFF_FFFF), qr/$p/,
                     "chr(0x7FFF_FFFF_FFFF_FFFF) can match itself in a [class]");
-            ok(chr(0x7FFF_FFFF_FFFF_FFFF) =~ $p, # Tests any caching
+            like(chr(0x7FFF_FFFF_FFFF_FFFF), qr/$p/, # Tests any caching
                     "chr(0x7FFF_FFFF_FFFF_FFFF) can match itself in a [class] subsequently");
 
             # This test is because something was declared as 32 bits, but
             # should have been cast to 64; only a problem where
             # sizeof(STRLEN) != sizeof(UV)
-            ok(chr(0x7FFF_FFFF_FFFF_FFFE) !~ qr/\p{Is_31_Bit_Super}/, "chr(0x7FFF_FFFF_FFFF_FFFE) shouldn't match a range ending in 0x7FFF_FFFF");
+            unlike(chr(0x7FFF_FFFF_FFFF_FFFE), qr/\p{Is_31_Bit_Super}/,
+                   "chr(0x7FFF_FFFF_FFFF_FFFE) shouldn't match a range ending in 0x7FFF_FFFF");
         }
     }
 
