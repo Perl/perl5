@@ -907,7 +907,8 @@ sub run_tests {
 	BEGIN {
 	    unshift @INC, 'lib';
 	}
-        use Cname;
+        use Cname;  # Our custom charname plugin, currently found in
+                    # t/lib/Cname.pm
 
         like 'fooB', qr/\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
         my $name = "foo\xDF";
@@ -937,6 +938,8 @@ sub run_tests {
         like $w, qr/Ignoring zero length/,
                  'Ignoring zero length \N{} in character class warning';
 
+        # EVIL keeps track of its calls, and appends a new character each
+        # time: A AB ABC ABCD ...
         ok 'AB'  =~ /(\N{EVIL})/ && $1 eq 'A', 'Charname caching $1';
         like 'ABC', qr/(\N{EVIL})/,              'Charname caching $1';
         like 'xy',  qr/x\N{EMPTY-STR}y/,
