@@ -18872,6 +18872,34 @@ EOC
     return @output;
 }
 
+sub generate_wildcard_tests($$$$$) {
+    # This used only for making the test script.  It generates wildcardl
+    # matching test cases that are expected to compile successfully in perl.
+
+    my $lhs = shift;           # The property: what's to the left of the
+                               # or equals separator
+    my $rhs = shift;           # The property value; what's to the right
+    my $valid_code = shift;    # A code point that's known to be in the
+                               # table given by LHS=RHS; undef if table is
+                               # empty
+    my $invalid_code = shift;  # A code point known to not be in the table;
+                               # undef if the table is all code points
+    my $warning = shift;
+
+    return if $lhs eq "";
+    return if $lhs =~ / ^ Is_ /x;   # These are not currently supported
+
+    # Generate a standardized pattern, with colon being the delimitter
+    my $wildcard = "$lhs=:\\A$rhs\\z:";
+
+    my @output;
+    push @output, "Expect(1, $valid_code, '\\p{$wildcard}', $warning);"
+                                                        if defined $valid_code;
+    push @output, "Expect(0, $invalid_code, '\\p{$wildcard}', $warning);"
+                                                      if defined $invalid_code;
+    return @output;
+}
+
 sub generate_error($$$) {
     # This used only for making the test script.  It generates test cases that
     # are expected to not only not match, but to be syntax or similar errors
@@ -19179,7 +19207,16 @@ EOF_CODE
                 # quit now without generating success cases.
                 next if $already_error;
 
-                # Now for the success cases.
+                # Now for the success cases.  First, wildcard matching, as it
+                # shouldn't have any randomization.
+                if ($table_alias->status eq $NORMAL) {
+                    push @output, generate_wildcard_tests($property_name,
+                                                          $table_name,
+                                                          $valid,
+                                                          $invalid,
+                                                          $warning,
+                                                         );
+                }
                 my $random;
                 if ($loose_match) {
 
@@ -19200,6 +19237,15 @@ EOF_CODE
                                                      $invalid,
                                                      $warning,
                                                  );
+                        if ($table_alias->status eq $NORMAL) {
+                            push @output, generate_wildcard_tests(
+                                                     $property_name,
+                                                     $standard,
+                                                     $valid,
+                                                     $invalid,
+                                                     $warning,
+                                                 );
+                        }
                     }
                     $random = randomize_loose_name($table_name)
                 }
