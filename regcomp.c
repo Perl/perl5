@@ -163,6 +163,7 @@ struct RExC_state_t {
     I32		seen_zerolen;
     regnode_offset *open_parens;	/* offsets to open parens */
     regnode_offset *close_parens;	/* offsets to close parens */
+    I32      parens_buf_size;           /* #slots malloced open/close_parens */
     regnode     *end_op;                /* END node in program */
     I32		utf8;		/* whether the pattern is utf8 or not */
     I32		orig_utf8;	/* whether the pattern was originally in utf8 */
@@ -253,6 +254,7 @@ struct RExC_state_t {
 #define RExC_maxlen        (pRExC_state->maxlen)
 #define RExC_npar	(pRExC_state->npar)
 #define RExC_total_parens	(pRExC_state->total_par)
+#define RExC_parens_buf_size	(pRExC_state->parens_buf_size)
 #define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_utf8	(pRExC_state->utf8)
@@ -7666,6 +7668,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_naughty = 0;
     RExC_npar = 1;
+    RExC_parens_buf_size = 0;
     RExC_emit_start = RExC_rxi->program;
     pRExC_state->code_index = 0;
 
@@ -11975,31 +11978,44 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             if (! ALL_PARENS_COUNTED) {
                 /* If we are in our first pass through (and maybe only pass),
                  * we  need to allocate memory for the capturing parentheses
-                 * data structures.  Since we start at npar=1, when it reaches
-                 * 2, for the first time it has something to put in it.  Above
-                 * 2 means we extend what we already have */
-                if (RExC_npar == 2) {
+                 * data structures.
+                 */
+
+                if (!RExC_parens_buf_size) {
+                    /* first guess at number of parens we might encounter */
+                    RExC_parens_buf_size = 10;
+
                     /* setup RExC_open_parens, which holds the address of each
                      * OPEN tag, and to make things simpler for the 0 index the
                      * start of the program - this is used later for offsets */
-                    Newxz(RExC_open_parens, RExC_npar, regnode_offset);
+                    Newxz(RExC_open_parens, RExC_parens_buf_size,
+                            regnode_offset);
                     RExC_open_parens[0] = 1;    /* +1 for REG_MAGIC */
 
                     /* setup RExC_close_parens, which holds the address of each
                      * CLOSE tag, and to make things simpler for the 0 index
                      * the end of the program - this is used later for offsets
                      * */
-                    Newxz(RExC_close_parens, RExC_npar, regnode_offset);
+                    Newxz(RExC_close_parens, RExC_parens_buf_size,
+                            regnode_offset);
                     /* we dont know where end op starts yet, so we dont need to
                      * set RExC_close_parens[0] like we do RExC_open_parens[0]
                      * above */
                 }
-                else {
-                    Renew(RExC_open_parens, RExC_npar, regnode_offset);
-                    Zero(RExC_open_parens + RExC_npar - 1, 1, regnode_offset);
+                else if (RExC_npar > RExC_parens_buf_size) {
+                    I32 old_size = RExC_parens_buf_size;
 
-                    Renew(RExC_close_parens, RExC_npar, regnode_offset);
-                    Zero(RExC_close_parens + RExC_npar - 1, 1, regnode_offset);
+                    RExC_parens_buf_size *= 2;
+
+                    Renew(RExC_open_parens, RExC_parens_buf_size,
+                            regnode_offset);
+                    Zero(RExC_open_parens + old_size,
+                            RExC_parens_buf_size - old_size, regnode_offset);
+
+                    Renew(RExC_close_parens, RExC_parens_buf_size,
+                            regnode_offset);
+                    Zero(RExC_close_parens + old_size,
+                            RExC_parens_buf_size - old_size, regnode_offset);
                 }
             }
 
