@@ -20,8 +20,9 @@ BEGIN {
     require './loc_tools.pl';
     set_up_inc('../lib', '.', '../ext/re');
 }
-    skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
-    skip_all_without_unicode_tables();
+
+skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
+skip_all_without_unicode_tables();
 
 plan tests => 854;  # Update this when adding/deleting tests.
 
