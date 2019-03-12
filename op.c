@@ -14716,8 +14716,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                                             pass);
                         }
 
-#ifdef USE_ITHREADS
                         if (pass) {
+#ifdef USE_ITHREADS
                             /* Relocate sv to the pad for thread safety */
                             op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
                             arg->pad_offset = o->op_targ;
