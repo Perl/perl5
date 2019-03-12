@@ -2732,7 +2732,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    if (SvUTF8(res)) { /* Don't accept malformed input */
+    if (SvUTF8(res)) { /* Don't accept malformed charname value */
         const U8* first_bad_char_loc;
         STRLEN len;
         const char* const str = SvPV_const(res, len);
