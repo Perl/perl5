@@ -1760,7 +1760,7 @@ STMT_START {                                                                    
     case trie_utf8l:                                                                \
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
         if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                             \
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc + UTF8SKIP(uc));          \
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);                     \
         }                                                                           \
         /* FALLTHROUGH */                                                           \
     case trie_utf8:                                                                 \
