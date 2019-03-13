@@ -931,7 +931,8 @@ is equivalent to $2, etc.
 
 should output "f-o-a-l".
 
-See also L</$I<digits>>, L</%{^CAPTURE}> and L</%{^CAPTURE_ALL}>.
+See also L<<< /$<I<digits>> ($1, $2, ...) >>>, L</%{^CAPTURE}> and
+L</%{^CAPTURE_ALL}>.
 
 Note that unlike most other regex magic variables there is no single
 letter equivalent to C<@{^CAPTURE}>.
