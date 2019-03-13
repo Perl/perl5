@@ -498,6 +498,17 @@ only) byte is pointed to by C<s>.
 #define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(s)]
 #define UTF8_SKIP(s) UTF8SKIP(s)
 
+/*
+
+=for apidoc Am|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
+returns the number of bytes in the UTF-8 encoded character whose first (perhaps
+only) byte is pointed to by C<s>.  But never returns beyond C<e>.
+
+=cut
+ */
+#define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) > (s))             \
+                               MIN(((e) - (s)), UTF8_SKIP(s)))
+
 /* Most code that says 'UNI_' really means the native value for code points up
  * through 255 */
 #define UNI_IS_INVARIANT(cp)   UVCHR_IS_INVARIANT(cp)
