@@ -12616,9 +12616,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * *cp_count will be set to 1, and *code_point_p will be set to that code
   * point.
   *
-  * Another possibility is for the input to be an empty \N{}, which for
-  * backwards compatibility we accept.  *cp_count will be set to 0. *node_p
-  * will be set to a generated NOTHING node.
+  * Another possibility is for the input to be an empty \N{}.  This is no
+  * longer accepted, and will generate a fatal error.
   *
   * Still another possibility is for the \N to mean [^\n]. *cp_count will be
   * set to 0. *node_p will be set to a generated REG_ANY node.
@@ -12685,7 +12684,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
     /* Disambiguate between \N meaning a named character versus \N meaning
      * [^\n].  The latter is assumed when the {...} following the \N is a legal
-     * quantifier, or there is no '{' at all */
+     * quantifier, or if there is no '{' at all */
     if (*p != '{' || regcurly(p)) {
         RExC_parse = p;
         if (cp_count) {
@@ -12718,15 +12717,16 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         vFAIL2("Missing right brace on \\%c{}", 'N');
     }
 
-    /* Here, we have decided it should be a named character or sequence */
-    REQUIRE_UNI_RULES(flagp, FALSE); /* Unicode named chars imply Unicode
-                                        semantics */
+    /* Here, we have decided it should be a named character or sequence.  These
+     * imply Unicode semantics */
+    REQUIRE_UNI_RULES(flagp, FALSE);
 
     if (endbrace == RExC_parse) {   /* empty: \N{} */
         if (strict) {
             RExC_parse++;   /* Position after the "}" */
             vFAIL("Zero length \\N{}");
         }
+
         if (cp_count) {
             *cp_count = 0;
         }
@@ -13765,7 +13765,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             assert( ! UTF     /* Is at the beginning of a character */
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
                    || UTF8_IS_START(UCHARAT(RExC_parse)));
-
 
             /* Here, we have a literal character.  Find the maximal string of
              * them in the input that we can fit into a single EXACTish node.
