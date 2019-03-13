@@ -259,13 +259,15 @@ S_new_msg_hv(const char * const message, /* The message text */
 #      define IS_UTF8_2_BYTE_SUPER(s0, s1)       ((s0) == 0xF4 && (s1) >= 0x90)
 #      define IS_UTF8_2_BYTE_SURROGATE(s0, s1)   ((s0) == 0xED && (s1) >= 0xA0)
 #    endif
-#    if defined(UV_IS_QUAD) /* These assume IV_MAX is 2**63-1 */
-#      ifdef EBCDIC     /* Actually is I8 */
-#       define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\xA7\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
-#      else
-#       define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\x80\x87\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#    ifndef HIGHEST_REPRESENTABLE_UTF8
+#      if defined(UV_IS_QUAD) /* These assume IV_MAX is 2**63-1 */
+#        ifdef EBCDIC     /* Actually is I8 */
+#          define HIGHEST_REPRESENTABLE_UTF8                                    \
+                   "\xFF\xA7\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#        else
+#          define HIGHEST_REPRESENTABLE_UTF8                                    \
+                   "\xFF\x80\x87\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#        endif
 #      endif
 #    endif
 #  endif
@@ -370,6 +372,9 @@ S_unexpected_non_continuation_text(const U8 * const s,
                            (int) expect_len,
                            (int) non_cont_byte_pos);
 }
+
+static int
+S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len);
 
 static int
 S_does_utf8_overflow(const U8 * const s,

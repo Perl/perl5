@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.46 2019/01/31 04:26:40 dankogai Exp $
+ $Id: Encode.xs,v 2.47 2019/03/13 00:26:18 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -631,7 +631,7 @@ PREINIT:
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
-    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV_nomg(check_sv);
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvOK(check_sv) ? SvIV_nomg(check_sv) : 0;
     modify = (check && !(check & ENCODE_LEAVE_SRC));
 PPCODE:
     if (!SvOK(src))
@@ -688,7 +688,7 @@ PREINIT:
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
-    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV_nomg(check_sv);
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvOK(check_sv) ? SvIV_nomg(check_sv) : 0;
     modify = (check && !(check & ENCODE_LEAVE_SRC));
 PPCODE:
     if (!SvOK(src))
@@ -796,7 +796,7 @@ PREINIT:
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
-    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV_nomg(check_sv);
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvOK(check_sv) ? SvIV_nomg(check_sv) : 0;
     fallback_cb = SvROK(check_sv) ? check_sv : &PL_sv_undef;
     modify = (check && !(check & ENCODE_LEAVE_SRC));
     enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
@@ -831,7 +831,7 @@ PREINIT:
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
-    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV_nomg(check_sv);
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvOK(check_sv) ? SvIV_nomg(check_sv) : 0;
     fallback_cb = SvROK(check_sv) ? check_sv : &PL_sv_undef;
     modify = (check && !(check & ENCODE_LEAVE_SRC));
     enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
@@ -862,7 +862,7 @@ PREINIT:
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
-    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV_nomg(check_sv);
+    check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvOK(check_sv) ? SvIV_nomg(check_sv) : 0;
     fallback_cb = SvROK(check_sv) ? check_sv : &PL_sv_undef;
     modify = (check && !(check & ENCODE_LEAVE_SRC));
     enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
