@@ -359,9 +359,10 @@ C</\pLl/> is valid, but means something different.
 It matches a two character string: a letter (Unicode property C<\pL>),
 followed by a lowercase C<l>.
 
-If locale rules are not in effect, the use of
-a Unicode property will force the regular expression into using Unicode
-rules, if it isn't already.
+What a Unicode property matches is never subject to locale rules, and
+if locale rules are not otherwise in effect, the use of a Unicode
+property will force the regular expression into using Unicode rules, if
+it isn't already.
 
 Note that almost all properties are immune to case-insensitive matching.
 That is, adding a C</i> regular expression modifier does not change what
