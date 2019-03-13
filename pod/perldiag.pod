@@ -7367,9 +7367,9 @@ but will become a fatal error in a future version of perl.  Untaint your
 arguments.  See L<perlsec>.
 
 =item Use of unassigned code point or non-standalone grapheme for a
-delimiter will be a fatal error starting in Perl 5.30
+delimiter is not allowed
 
-(D deprecated)
+(F)
 A grapheme is what appears to a native-speaker of a language to be a
 character.  In Unicode (and hence Perl) a grapheme may actually be
 several adjacent characters that together form a complete grapheme.  For
@@ -7379,7 +7379,7 @@ the circumflex hovering over the "R".  Perl currently allows things like
 that circumflex to be delimiters of strings, patterns, I<etc>.  When
 displayed, the circumflex would look like it belongs to the character
 just to the left of it.  In order to move the language to be able to
-accept graphemes as delimiters, we have to deprecate the use of
+accept graphemes as delimiters, we cannot allow the use of
 delimiters which aren't graphemes by themselves.  Also, a delimiter must
 already be assigned (or known to be never going to be assigned) to try
 to future-proof code, for otherwise code that works today would fail to
@@ -7389,7 +7389,7 @@ assign
 L<non-character code points|perlunicode/Noncharacter code points>, nor
 L<code points that are above the legal Unicode maximum|
 perlunicode/Beyond Unicode code points>, those can be delimiters, and
-their use won't raise this warning.
+their use is legal.
 
 =item Use of uninitialized value%s
 
