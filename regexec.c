@@ -155,7 +155,7 @@ static const char* const non_utf8_target_but_utf8_required
 #define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
 #define NEXTCHR_IS_EOS (nextchr < 0)
 
-#define SET_nextchr \
+#define SET_nextchr __ASSERT_(locinput <= reginfo->strend)                     \
     nextchr = ((locinput < reginfo->strend) ? UCHARAT(locinput) : NEXTCHR_EOS)
 
 #define SET_locinput(p) \
