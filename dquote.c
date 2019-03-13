@@ -141,7 +141,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     if (numbers_len != (STRLEN) (e - *s)) {
         if (strict) {
             *s += numbers_len;
-            *s += (UTF) ? UTF8SKIP(*s) : (STRLEN) 1;
+            *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
             *error_msg = "Non-octal character";
             return FALSE;
         }
@@ -223,7 +223,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
 	*s += len;
         if (strict && len != 2) {
             if (len < 2) {
-                *s += (UTF) ? UTF8SKIP(*s) : 1;
+                *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
                 *error_msg = "Non-hex character";
             }
             else {
@@ -272,7 +272,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv,
 
     if (strict && numbers_len != (STRLEN) (e - *s)) {
         *s += numbers_len;
-        *s += (UTF) ? UTF8SKIP(*s) : 1;
+        *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
         *error_msg = "Non-hex character";
         return FALSE;
     }
