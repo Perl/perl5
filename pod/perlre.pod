@@ -563,7 +563,8 @@ At any given time, exactly one of these modifiers is in effect.  Their
 existence allows Perl to keep the originally compiled behavior of a
 regular expression, regardless of what rules are in effect when it is
 actually executed.  And if it is interpolated into a larger regex, the
-original's rules continue to apply to it, and only it.
+original's rules continue to apply to it, and don't affect the other
+parts.
 
 The C</l> and C</u> modifiers are automatically selected for
 regular expressions compiled within the scope of various pragmas,
@@ -720,8 +721,8 @@ the pattern uses L<C<(*script_run: ...)>|/Script Runs>
 Another mnemonic for this modifier is "Depends", as the rules actually
 used depend on various things, and as a result you can get unexpected
 results.  See L<perlunicode/The "Unicode Bug">.  The Unicode Bug has
-become rather infamous, leading to yet another (printable) name for this
-modifier, "Dodgy".
+become rather infamous, leading to yet another (without swearing) name
+for this modifier, "Dodgy".
 
 Unless the pattern or string are encoded in UTF-8, only ASCII characters
 can match positively.
