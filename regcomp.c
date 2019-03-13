@@ -16794,6 +16794,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                               "Ignoring zero length \\N{} in character class");
                         }
                         else { /* cp_count > 1 */
+                            assert(cp_count > 1);
                             if (! RExC_in_multi_char_class) {
                                 if (invert || range || *RExC_parse == '-') {
                                     if (strict) {
