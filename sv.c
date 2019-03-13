@@ -10872,8 +10872,8 @@ Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 /*
 =for apidoc sv_catpvf
 
-Processes its arguments like C<sv_catpvfn>, and appends the formatted
-output to an SV.  As with C<sv_catpvfn> called with a non-null C-style
+Processes its arguments like C<sprintf>, and appends the formatted
+output to an SV.  As with C<sv_vcatpvfn> called with a non-null C-style
 variable argument list, argument reordering is not supported.
 If the appended data contains "wide" characters
 (including, but not limited to, SVs with a UTF-8 PV formatted with C<%s>,
@@ -10899,7 +10899,7 @@ Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
 /*
 =for apidoc sv_vcatpvf
 
-Processes its arguments like C<sv_catpvfn> called with a non-null C-style
+Processes its arguments like C<sv_vcatpvfn> called with a non-null C-style
 variable argument list, and appends the formatted output
 to an SV.  Does not handle 'set' magic.  See C<L</sv_vcatpvf_mg>>.
 
@@ -12047,7 +12047,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (*q == '$') {
                 if (args)
                     Perl_croak_nocontext(
-                        "Cannot yet reorder sv_catpvfn() arguments from va_list");
+                        "Cannot yet reorder sv_vcatpvfn() arguments from va_list");
 		++q;
 		efix = (Size_t)width;
                 width = 0;
@@ -12115,7 +12115,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		if (*q++ == '$') {
                     if (args)
                         Perl_croak_nocontext(
-                            "Cannot yet reorder sv_catpvfn() arguments from va_list");
+                            "Cannot yet reorder sv_vcatpvfn() arguments from va_list");
                     no_redundant_warning = TRUE;
                 } else
 		    goto unknown;
@@ -12200,7 +12200,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     if (*q++ == '$') {
                         if (args)
                             Perl_croak_nocontext(
-                                "Cannot yet reorder sv_catpvfn() arguments from va_list");
+                                "Cannot yet reorder sv_vcatpvfn() arguments from va_list");
                         no_redundant_warning = TRUE;
                     } else
                         goto unknown;
