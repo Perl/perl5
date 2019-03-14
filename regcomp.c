@@ -12315,16 +12315,16 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	    /* FIXME adding one for every branch after the first is probably
 	     * excessive now we have TRIE support. (hv) */
 	    MARK_NAUGHTY(1);
-            if (     chain > (SSize_t) BRANCH_MAX_OFFSET
-                && ! RExC_use_BRANCHJ)
-            {
-                /* XXX We could just redo this branch, but figuring out what
-                 * bookkeeping needs to be reset is a pain */
-                REQUIRE_BRANCHJ(flagp, 0);
-            }
             REGTAIL(pRExC_state, chain, latest);
 	}
 	chain = latest;
+        if (     chain > (SSize_t) BRANCH_MAX_OFFSET
+            && ! RExC_use_BRANCHJ)
+        {
+            /* XXX We could just redo this branch, but figuring out what
+                * bookkeeping needs to be reset is a pain */
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
 	c++;
     }
     if (chain == 0) {	/* Loop ran zero times. */
