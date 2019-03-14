@@ -535,27 +535,45 @@ sub run_tests {
         like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/\N{LATIN SMALL LETTER SHARP S}/, $message);
         like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr'\N{LATIN SMALL LETTER SHARP S}', $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/\N{LATIN SMALL LETTER SHARP S}/i, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr'\N{LATIN SMALL LETTER SHARP S}'i, $message);
         like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/[\N{LATIN SMALL LETTER SHARP S}]/, $message);
         like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr'[\N{LATIN SMALL LETTER SHARP S}]', $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/[\N{LATIN SMALL LETTER SHARP S}]/i, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr'[\N{LATIN SMALL LETTER SHARP S}]'i, $message);
 
         like("ss", qr /\N{LATIN SMALL LETTER SHARP S}/i, $message);
+        like("ss", qr '\N{LATIN SMALL LETTER SHARP S}'i, $message);
         like("SS", qr /\N{LATIN SMALL LETTER SHARP S}/i, $message);
+        like("SS", qr '\N{LATIN SMALL LETTER SHARP S}'i, $message);
         like("ss", qr/[\N{LATIN SMALL LETTER SHARP S}]/i, $message);
+        like("ss", qr'[\N{LATIN SMALL LETTER SHARP S}]'i, $message);
         like("SS", qr/[\N{LATIN SMALL LETTER SHARP S}]/i, $message);
+        like("SS", qr'[\N{LATIN SMALL LETTER SHARP S}]'i, $message);
 
         like("\N{LATIN SMALL LETTER SHARP S}", qr/ss/i, $message);
         like("\N{LATIN SMALL LETTER SHARP S}", qr/SS/i, $message);
 
          $message = "Unoptimized named sequence in class";
         like("ss", qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
+        like("ss", qr'[\N{LATIN SMALL LETTER SHARP S}x]'i, $message);
         like("SS", qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
+        like("SS", qr'[\N{LATIN SMALL LETTER SHARP S}x]'i, $message);
         like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/[\N{LATIN SMALL LETTER SHARP S}x]/, $message);
         like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr'[\N{LATIN SMALL LETTER SHARP S}x]', $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr'[\N{LATIN SMALL LETTER SHARP S}x]'i, $message);
     }
 
     {
@@ -825,6 +843,8 @@ sub run_tests {
             for my $tail ('\N{SNOWFLAKE}') {
                 eval qq {use charnames ':full';
                          like("$head$tail", qr/$head$tail/, \$message)};
+                eval qq {use charnames ':full';
+                         like("$head$tail", qr'$head$tail', \$message)};
 		is($@, '', $message);
             }
         }
@@ -942,7 +962,11 @@ sub run_tests {
         # time: A AB ABC ABCD ...
         ok 'AB'  =~ /(\N{EVIL})/ && $1 eq 'A', 'Charname caching $1';
         like 'ABC', qr/(\N{EVIL})/,              'Charname caching $1';
+        ok 'ABCD'  =~ m'(\N{EVIL})' && $1 eq 'ABC', 'Charname caching $1';
+        ok 'ABCDE'  =~ m'(\N{EVIL})',          'Charname caching $1';
         like 'xy',  qr/x\N{EMPTY-STR}y/,
+                    'Empty string charname produces NOTHING node';
+        ok 'xy'  =~ 'x\N{EMPTY-STR}y',
                     'Empty string charname produces NOTHING node';
         like '', qr/\N{EMPTY-STR}/,
                     'Empty string charname produces NOTHING node';
@@ -951,9 +975,14 @@ sub run_tests {
 
         # perlhacktips points out that these work on both ASCII and EBCDIC
         like "\xfc", qr/\N{EMPTY-STR}\xdc/i, 'Empty \N{} should change /d to /u';
+        like "\xfc", qr'\N{EMPTY-STR}\xdc'i, 'Empty \N{} should change /d to /u';
 
         eval '/(?[[\N{EMPTY-STR}]])/';
         like $@, qr/Zero length \\N\{\}/, 'Verify zero-length return from \N{} correctly fails';
+        ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/, 'Verify that long string works';
+        ok "\N{LONG-STR}" =~ '^\N{LONG-STR}$', 'Verify that long string works';
+        ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/i, 'Verify under folding that long string works';
+        ok "\N{LONG-STR}" =~ m'^\N{LONG-STR}$'i, 'Verify under folding that long string works';
 
         undef $w;
         {
@@ -2436,6 +2465,7 @@ EOF
     {   # [perl #126606 crashed the interpreter
         use Cname;
         like("sS", qr/\N{EMPTY-STR}Ss|/i, '\N{} with empty branch alternation works');
+        like("sS", qr'\N{EMPTY-STR}Ss|'i, '\N{} with empty branch alternation works');
     }
 
     { # Regexp:Grammars was broken:

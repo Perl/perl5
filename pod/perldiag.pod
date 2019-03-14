@@ -4021,38 +4021,6 @@ C<\N{...}> is used as one of the end points of the range, such as in
 What is meant here is unclear, as the C<\N{...}> escape is a sequence
 of code points, so this is made an error.
 
-=item \N{NAME} must be resolved by the lexer in regex; marked by
-S<<-- HERE> in m/%s/
-
-(F) When compiling a regex pattern, an unresolved named character or
-sequence was encountered.  This can happen in any of several ways that
-bypass the lexer, such as using single-quotish context, or an extra
-backslash in double-quotish:
-
-    $re = '\N{SPACE}';	# Wrong!
-    $re = "\\N{SPACE}";	# Wrong!
-    /$re/;
-
-Instead, use double-quotes with a single backslash:
-
-    $re = "\N{SPACE}";	# ok
-    /$re/;
-
-The lexer can be bypassed as well by creating the pattern from smaller
-components:
-
-    $re = '\N';
-    /${re}{SPACE}/;	# Wrong!
-
-It's not a good idea to split a construct in the middle like this, and
-it doesn't work here.  Instead use the solution above.
-
-Finally, the message also can happen under the C</x> regex modifier when the
-C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
-
-    /\N {SPACE}/x;	# Wrong!
-    /\N{SPACE}/x;	# ok
-
 =item No %s allowed while running setuid
 
 (F) Certain operations are deemed to be too insecure for a setuid or

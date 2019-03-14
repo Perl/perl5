@@ -3794,8 +3794,9 @@ S_scan_const(pTHX_ char *start)
                     if (PL_lex_inpat) {
 
 			if (! len) { /* The name resolved to an empty string */
-			    Copy("\\N{}", d, 4, char);
-			    d += 4;
+                            const char empty_N[] = "\\N{_}";
+                            Copy(empty_N, d, sizeof(empty_N) - 1, char);
+                            d += sizeof(empty_N) - 1;
 			}
 			else {
 			    /* In order to not lose information for the regex

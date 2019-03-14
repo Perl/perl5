@@ -1446,7 +1446,9 @@ foo(\h)bar	foo\tbar	y	$1	\t
 
 # Verify that \N{U+...} forces Unicode rules
 /\N{U+41}\x{c1}/i	a\x{e1}	y	$&	a\x{e1}
+'\N{U+41}\x{c1}'i	a\x{e1}	y	$&	a\x{e1}
 /[\N{U+41}\x{c1}]/i	\x{e1}	y	$&	\x{e1}
+'[\N{U+41}\x{c1}]'i	\x{e1}	y	$&	\x{e1}
 '\N{U+41}'	A	y	$&	A		# Even for single quoted patterns
 
 [\s][\S]	\x{a0}\x{a0}	n	-	-	# Unicode complements should not match same character
@@ -1479,7 +1481,7 @@ abc\N	abc\n	n
 [\N{U+}]	-	c	-	Invalid hexadecimal number
 \N{U+4AG3}	-	c	-	Invalid hexadecimal number
 [\N{U+4AG3}]	-	c	-	Invalid hexadecimal number
-abc\N{def}	-	c	-	\\N{NAME} must be resolved by the lexer
+abc\N{def}	-	c	-	Unknown charname 'def' in regex
 abc\N{U+4AG3	-	c	-	Missing right brace on \\N{}
 abc\N{def	-	c	-	Missing right brace on \\N{}
 abc\N{	-	c	-	Missing right brace on \\N{}
@@ -1490,6 +1492,7 @@ abc\N{	-	c	-	Missing right brace on \\N{}
 
 # Verifies catches hex errors
 /\N{U+0xBEEF}/	-	c	-	Invalid hexadecimal number
+\N{U+0xBEEF}	-	c	-	Invalid hexadecimal number
 # Used to be an error, but not any more:
 /\N{U+BEEF.BEAD}/	-	c	-	
 

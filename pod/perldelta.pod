@@ -43,6 +43,12 @@ the Unicode Consortium suggests.
 Most properties are supported, with the remainder planned for 5.32.
 Details are in L<perlunicode/Wildcards in Property Values>.
 
+=head2 qr'\N{name}' is now supported
+
+Previously it was an error to evaluate a named character C<\N{...}>
+within a single quoted regular expression pattern (whose evaluation is
+deferred from the normal place).  This restriction is now removed.
+
 =head2 Unicode 12.0 is supported
 
 For details, see L<https://www.unicode.org/versions/Unicode12.0.0/>.

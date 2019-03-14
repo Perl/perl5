@@ -193,6 +193,7 @@ struct RExC_state_t {
     scan_frame *frame_last;
     U32         frame_count;
     AV         *warn_text;
+    HV         *unlexed_names;
 #ifdef ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -280,6 +281,7 @@ struct RExC_state_t {
 #define RExC_warn_text (pRExC_state->warn_text)
 #define RExC_in_script_run      (pRExC_state->in_script_run)
 #define RExC_use_BRANCHJ        (pRExC_state->use_BRANCHJ)
+#define RExC_unlexed_names (pRExC_state->unlexed_names)
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
  * a flag to disable back-off on the fixed/floating substrings - if it's
@@ -7357,6 +7359,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     pRExC_state->warn_text = NULL;
+    pRExC_state->unlexed_names = NULL;
     pRExC_state->code_blocks = NULL;
 
     if (is_bare_re)
@@ -12610,7 +12613,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * points) that this \N sequence matches.  This is set, and the input is
   * parsed for errors, even if the function returns FALSE, as detailed below.
   *
-  * There are 5 possibilities here, as detailed in the next 5 paragraphs.
+  * There are 6 possibilities here, as detailed in the next 6 paragraphs.
   *
   * Probably the most common case is for the \N to specify a single code point.
   * *cp_count will be set to 1, and *code_point_p will be set to that code
@@ -12619,10 +12622,14 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * Another possibility is for the input to be an empty \N{}.  This is no
   * longer accepted, and will generate a fatal error.
   *
+  * Another possibility is for a custom charnames handler to be in effect which
+  * translates the input name to an empty string.  *cp_count will be set to 0.
+  * *node_p will be set to a generated NOTHING node.
+  *
   * Still another possibility is for the \N to mean [^\n]. *cp_count will be
   * set to 0. *node_p will be set to a generated REG_ANY node.
   *
-  * The fourth possibility is that \N resolves to a sequence of more than one
+  * The fifth possibility is that \N resolves to a sequence of more than one
   * code points.  *cp_count will be set to the number of code points in the
   * sequence. *node_p will be set to a generated node returned by this
   * function calling S_reg().
@@ -12630,7 +12637,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * The final possibility is that it is premature to be calling this function;
   * the parse needs to be restarted.  This can happen when this changes from
   * /d to /u rules, or when the pattern needs to be upgraded to UTF-8.  The
-  * latter occurs only when the fourth possibility would otherwise be in
+  * latter occurs only when the fifth possibility would otherwise be in
   * effect, and is because one of those code points requires the pattern to be
   * recompiled as UTF-8.  The function returns FALSE, and sets the
   * RESTART_PARSE and NEED_UTF8 flags in *flagp, as appropriate.  When this
@@ -12647,12 +12654,11 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * so we need a way to take a snapshot of what they resolve to at the time of
   * the original parse. [perl #56444].
   *
-  * That parsing is skipped for single-quoted regexes, so we may here get
-  * '\N{NAME}'.  This is a fatal error.  These names have to be resolved by the
-  * parser.  But if the single-quoted regex is something like '\N{U+41}', that
-  * is legal and handled here.  The code point is Unicode, and has to be
-  * translated into the native character set for non-ASCII platforms.
-  */
+  * That parsing is skipped for single-quoted regexes, so here we may get
+  * '\N{NAME}', which is parsed now.  If the single-quoted regex is something
+  * like '\N{U+41}', that code point is Unicode, and has to be translated into
+  * the native character set for non-ASCII platforms.  The other possibilities
+  * are already native, so no translation is done. */
 
     char * endbrace;    /* points to '}' following the name */
     char* p = RExC_parse; /* Temporary */
@@ -12660,8 +12666,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     SV * substitute_parse = NULL;
     char *orig_end;
     char *save_start;
+    bool save_strict;
     I32 flags;
-    Size_t count = 0;   /* code point count kept internally by this function */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -12721,7 +12727,10 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
      * imply Unicode semantics */
     REQUIRE_UNI_RULES(flagp, FALSE);
 
-    if (endbrace == RExC_parse) {   /* empty: \N{} */
+    /* \N{_} is what toke.c returns to us to indicate a name that evaluates to
+     * nothing at all (not allowed under strict) */
+    if (endbrace - RExC_parse == 1 && *RExC_parse == '_') {
+        RExC_parse = endbrace;
         if (strict) {
             RExC_parse++;   /* Position after the "}" */
             vFAIL("Zero length \\N{}");
@@ -12739,15 +12748,122 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         return TRUE;
     }
 
-    /* If we haven't got something that begins with 'U+', then it didn't get lexed. */
-    if (   endbrace - RExC_parse < 2
-        || strnNE(RExC_parse, "U+", 2))
-    {
-        RExC_parse = endbrace;  /* position msg's '<--HERE' */
-        vFAIL("\\N{NAME} must be resolved by the lexer");
-    }
+    if (endbrace - RExC_parse < 2 || ! strBEGINs(RExC_parse, "U+")) {
 
-        /* This code purposely indented below because of future changes coming */
+        /* Here, the name isn't of the form  U+....  This can happen if the
+         * pattern is single-quoted, so didn't get evaluated in toke.c.  Now
+         * is the time to find out what the name means */
+
+        const STRLEN name_len = endbrace - RExC_parse;
+        SV *  value_sv;     /* What does this name evaluate to */
+        SV ** value_svp;
+        const U8 * value;   /* string of name's value */
+        STRLEN value_len;   /* and its length */
+
+        /*  RExC_unlexed_names is a hash of names that weren't evaluated by
+         *  toke.c, and their values. Make sure is initialized */
+        if (! RExC_unlexed_names) {
+            RExC_unlexed_names = newHV();
+        }
+
+        /* If we have already seen this name in this pattern, use that.  This
+         * allows us to only call the charnames handler once per name per
+         * pattern.  A broken or malicious handler could return something
+         * different each time, which could cause the results to vary depending
+         * on if something gets added or subtracted from the pattern that
+         * causes the number of passes to change, for example */
+        if ((value_svp = hv_fetch(RExC_unlexed_names, RExC_parse,
+                                                      name_len, 0)))
+        {
+            value_sv = *value_svp;
+        }
+        else { /* Otherwise we have to go out and get the name */
+            const char * error_msg = NULL;
+            value_sv = get_and_check_backslash_N_name(RExC_parse, endbrace,
+                                                      UTF,
+                                                      &error_msg);
+            if (error_msg) {
+                RExC_parse = endbrace;
+                vFAIL(error_msg);
+            }
+
+            /* If no error message, should have gotten a valid return */
+            assert (value_sv);
+
+            /* Save the name's meaning for later use */
+            if (! hv_store(RExC_unlexed_names, RExC_parse, name_len,
+                           value_sv, 0))
+            {
+                Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+            }
+        }
+
+        /* Here, we have the value the name evaluates to in 'value_sv' */
+        value = (U8 *) SvPV(value_sv, value_len);
+
+        /* See if the result is one code point vs 0 or multiple */
+        if (value_len > 0 && value_len <= ((SvUTF8(value_sv))
+                                           ? UTF8SKIP(value)
+                                           : 1))
+        {
+            /* Here, exactly one code point.  If that isn't what is wanted,
+             * fail */
+            if (! code_point_p) {
+                RExC_parse = p;
+                return FALSE;
+            }
+
+            /* Convert from string to numeric code point */
+            *code_point_p = (SvUTF8(value_sv))
+                            ? valid_utf8_to_uvchr(value, NULL)
+                            : *value;
+
+            /* Have parsed this entire single code point \N{...}.  *cp_count
+             * has already been set to 1, so don't do it again. */
+            RExC_parse = endbrace;
+            nextchar(pRExC_state);
+            return TRUE;
+        } /* End of is a single code point */
+
+        /* Count the code points, if caller desires.  The API says to do this
+         * even if we will later return FALSE */
+        if (cp_count) {
+            *cp_count = 0;
+
+            *cp_count = (SvUTF8(value_sv))
+                        ? utf8_length(value, value + value_len)
+                        : value_len;
+        }
+
+        /* Fail if caller doesn't want to handle a multi-code-point sequence.
+         * But don't back the pointer up if the caller wants to know how many
+         * code points there are (they need to handle it themselves in this
+         * case).  */
+        if (! node_p) {
+            if (! cp_count) {
+                RExC_parse = p;
+            }
+            return FALSE;
+        }
+
+        /* Convert this to a sub-pattern of the form "(?: ... )", and then call
+         * reg recursively to parse it.  That way, it retains its atomicness,
+         * while not having to worry about any special handling that some code
+         * points may have. */
+
+        substitute_parse = newSVpvs("?:");
+        sv_catsv(substitute_parse, value_sv);
+        sv_catpv(substitute_parse, ")");
+
+#ifdef EBCDIC
+        /* The value should already be native, so no need to convert on EBCDIC
+         * platforms.*/
+        assert(! RExC_recode_x_to_native);
+#endif
+
+    }
+    else {   /* \N{U+...} */
+        Size_t count = 0;   /* code point count kept internally */
 
         /* We can get to here when the input is \N{U+...} or when toke.c has
          * converted a name to the \N{U+...} form.  This include changing a
@@ -12881,6 +12997,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
          * on a non-Unicode (meaning non-ASCII) platform. */
         RExC_recode_x_to_native = 1;
 #endif
+
+    }
 
     /* Here, we have the string the name evaluates to, ready to be parsed,
      * stored in 'substitute_parse' as a series of valid "\x{...}\x{...}"
