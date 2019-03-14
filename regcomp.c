@@ -11000,14 +11000,14 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
     RExC_sawback = 1;
     ret = reganode(pRExC_state,
                    ((! FOLD)
-                     ? NREF
+                     ? REFN
                      : (ASCII_FOLD_RESTRICTED)
-                       ? NREFFA
+                       ? REFFAN
                        : (AT_LEAST_UNI_SEMANTICS)
-                         ? NREFFU
+                         ? REFFUN
                          : (LOC)
-                           ? NREFFL
-                           : NREFF),
+                           ? REFFLN
+                           : REFFN),
                     num);
     *flagp |= HASWIDTH;
 
@@ -11848,7 +11848,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         RExC_rxi->data->data[num]=(void*)sv_dat;
                         SvREFCNT_inc_simple_void_NN(sv_dat);
                     }
-                    ret = reganode(pRExC_state, NGROUPP, num);
+                    ret = reganode(pRExC_state, GROUPPN, num);
                     goto insert_if_check_paren;
 		}
 		else if (memBEGINs(RExC_parse,
@@ -20294,7 +20294,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             name_list= RExC_paren_name_list;
         }
         if (name_list) {
-            if ( k != REF || (OP(o) < NREF)) {
+            if ( k != REF || (OP(o) < REFN)) {
                 SV **name= av_fetch(name_list, parno, 0 );
 	        if (name)
 	            Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));

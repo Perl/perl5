@@ -76,11 +76,11 @@
 #define	REFFL                 	62	/* 0x3e Match already matched string, using /li rules. */
 #define	REFFU                 	63	/* 0x3f Match already matched string, usng /ui. */
 #define	REFFA                 	64	/* 0x40 Match already matched string, using /aai rules. */
-#define	NREF                  	65	/* 0x41 Match some already matched string */
-#define	NREFF                 	66	/* 0x42 Match already matched string, using /di rules. */
-#define	NREFFL                	67	/* 0x43 Match already matched string, using /li rules. */
-#define	NREFFU                	68	/* 0x44 Match already matched string, using /ui rules. */
-#define	NREFFA                	69	/* 0x45 Match already matched string, using /aai rules. */
+#define	REFN                  	65	/* 0x41 Match some already matched string */
+#define	REFFN                 	66	/* 0x42 Match already matched string, using /di rules. */
+#define	REFFLN                	67	/* 0x43 Match already matched string, using /li rules. */
+#define	REFFUN                	68	/* 0x44 Match already matched string, using /ui rules. */
+#define	REFFAN                	69	/* 0x45 Match already matched string, using /aai rules. */
 #define	LONGJMP               	70	/* 0x46 Jump far away. */
 #define	BRANCHJ               	71	/* 0x47 BRANCH with long offset. */
 #define	IFMATCH               	72	/* 0x48 Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current */
@@ -97,7 +97,7 @@
 #define	AHOCORASICK           	83	/* 0x53 Aho Corasick stclass. flags==type */
 #define	AHOCORASICKC          	84	/* 0x54 Same as AHOCORASICK, but with embedded charclass data */
 #define	GOSUB                 	85	/* 0x55 recurse to paren arg1 at (signed) ofs arg2 */
-#define	NGROUPP               	86	/* 0x56 Whether the group matched. */
+#define	GROUPPN               	86	/* 0x56 Whether the group matched. */
 #define	INSUBP                	87	/* 0x57 Whether we are in a specific recurse. */
 #define	DEFINEP               	88	/* 0x58 Never execute directly. */
 #define	ENDLIKE               	89	/* 0x59 Used only for the type field of verbs */
@@ -226,11 +226,11 @@ EXTCONST U8 PL_regkind[] = {
 	REF,      	/* REFFL                  */
 	REF,      	/* REFFU                  */
 	REF,      	/* REFFA                  */
-	REF,      	/* NREF                   */
-	REF,      	/* NREFF                  */
-	REF,      	/* NREFFL                 */
-	REF,      	/* NREFFU                 */
-	REF,      	/* NREFFA                 */
+	REF,      	/* REFN                   */
+	REF,      	/* REFFN                  */
+	REF,      	/* REFFLN                 */
+	REF,      	/* REFFUN                 */
+	REF,      	/* REFFAN                 */
 	LONGJMP,  	/* LONGJMP                */
 	BRANCHJ,  	/* BRANCHJ                */
 	BRANCHJ,  	/* IFMATCH                */
@@ -247,7 +247,7 @@ EXTCONST U8 PL_regkind[] = {
 	TRIE,     	/* AHOCORASICK            */
 	TRIE,     	/* AHOCORASICKC           */
 	GOSUB,    	/* GOSUB                  */
-	NGROUPP,  	/* NGROUPP                */
+	GROUPPN,  	/* GROUPPN                */
 	INSUBP,   	/* INSUBP                 */
 	DEFINEP,  	/* DEFINEP                */
 	ENDLIKE,  	/* ENDLIKE                */
@@ -377,11 +377,11 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* REFFL        */
 	EXTRA_SIZE(struct regnode_1),        	/* REFFU        */
 	EXTRA_SIZE(struct regnode_1),        	/* REFFA        */
-	EXTRA_SIZE(struct regnode_1),        	/* NREF         */
-	EXTRA_SIZE(struct regnode_1),        	/* NREFF        */
-	EXTRA_SIZE(struct regnode_1),        	/* NREFFL       */
-	EXTRA_SIZE(struct regnode_1),        	/* NREFFU       */
-	EXTRA_SIZE(struct regnode_1),        	/* NREFFA       */
+	EXTRA_SIZE(struct regnode_1),        	/* REFN         */
+	EXTRA_SIZE(struct regnode_1),        	/* REFFN        */
+	EXTRA_SIZE(struct regnode_1),        	/* REFFLN       */
+	EXTRA_SIZE(struct regnode_1),        	/* REFFUN       */
+	EXTRA_SIZE(struct regnode_1),        	/* REFFAN       */
 	EXTRA_SIZE(struct regnode_1),        	/* LONGJMP      */
 	EXTRA_SIZE(struct regnode_1),        	/* BRANCHJ      */
 	EXTRA_SIZE(struct regnode_1),        	/* IFMATCH      */
@@ -398,7 +398,7 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
 	EXTRA_SIZE(struct regnode_charclass),	/* AHOCORASICKC */
 	EXTRA_SIZE(struct regnode_2L),       	/* GOSUB        */
-	EXTRA_SIZE(struct regnode_1),        	/* NGROUPP      */
+	EXTRA_SIZE(struct regnode_1),        	/* GROUPPN      */
 	EXTRA_SIZE(struct regnode_1),        	/* INSUBP       */
 	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
 	0,                                   	/* ENDLIKE      */
@@ -484,11 +484,11 @@ static const char reg_off_by_arg[] = {
 	0,	/* REFFL        */
 	0,	/* REFFU        */
 	0,	/* REFFA        */
-	0,	/* NREF         */
-	0,	/* NREFF        */
-	0,	/* NREFFL       */
-	0,	/* NREFFU       */
-	0,	/* NREFFA       */
+	0,	/* REFN         */
+	0,	/* REFFN        */
+	0,	/* REFFLN       */
+	0,	/* REFFUN       */
+	0,	/* REFFAN       */
 	1,	/* LONGJMP      */
 	1,	/* BRANCHJ      */
 	1,	/* IFMATCH      */
@@ -505,7 +505,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* AHOCORASICK  */
 	0,	/* AHOCORASICKC */
 	0,	/* GOSUB        */
-	0,	/* NGROUPP      */
+	0,	/* GROUPPN      */
 	0,	/* INSUBP       */
 	0,	/* DEFINEP      */
 	0,	/* ENDLIKE      */
@@ -597,11 +597,11 @@ EXTCONST char * const PL_reg_name[] = {
 	"REFFL",                 	/* 0x3e */
 	"REFFU",                 	/* 0x3f */
 	"REFFA",                 	/* 0x40 */
-	"NREF",                  	/* 0x41 */
-	"NREFF",                 	/* 0x42 */
-	"NREFFL",                	/* 0x43 */
-	"NREFFU",                	/* 0x44 */
-	"NREFFA",                	/* 0x45 */
+	"REFN",                  	/* 0x41 */
+	"REFFN",                 	/* 0x42 */
+	"REFFLN",                	/* 0x43 */
+	"REFFUN",                	/* 0x44 */
+	"REFFAN",                	/* 0x45 */
 	"LONGJMP",               	/* 0x46 */
 	"BRANCHJ",               	/* 0x47 */
 	"IFMATCH",               	/* 0x48 */
@@ -618,7 +618,7 @@ EXTCONST char * const PL_reg_name[] = {
 	"AHOCORASICK",           	/* 0x53 */
 	"AHOCORASICKC",          	/* 0x54 */
 	"GOSUB",                 	/* 0x55 */
-	"NGROUPP",               	/* 0x56 */
+	"GROUPPN",               	/* 0x56 */
 	"INSUBP",                	/* 0x57 */
 	"DEFINEP",               	/* 0x58 */
 	"ENDLIKE",               	/* 0x59 */
@@ -758,7 +758,7 @@ EXTCONST U8 PL_varies[] __attribute__deprecated__;
 #else
 EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
     CLUMP, BRANCH, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM, REF,
-    REFF, REFFL, REFFU, REFFA, NREF, NREFF, NREFFL, NREFFU, NREFFA,
+    REFF, REFFL, REFFU, REFFA, REFN, REFFN, REFFLN, REFFUN, REFFAN,
     BRANCHJ, SUSPEND, IFTHEN,
     0
 };

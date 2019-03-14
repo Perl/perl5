@@ -7034,7 +7034,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 	    break;
             
-	case NREFFL:  /*  /\g{name}/il  */
+	case REFFLN:  /*  /\g{name}/il  */
 	{   /* The capture buffer cases.  The ones beginning with N for the
 	       named buffers just convert to the equivalent numbered and
 	       pretend they were called as the corresponding numbered buffer
@@ -7054,28 +7054,28 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    utf8_fold_flags = FOLDEQ_LOCALE;
 	    goto do_nref;
 
-	case NREFFA:  /*  /\g{name}/iaa  */
+	case REFFAN:  /*  /\g{name}/iaa  */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    type = REFFA;
 	    utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_nref;
 
-	case NREFFU:  /*  /\g{name}/iu  */
+	case REFFUN:  /*  /\g{name}/iu  */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    type = REFFU;
 	    utf8_fold_flags = 0;
 	    goto do_nref;
 
-	case NREFF:  /*  /\g{name}/i  */
+	case REFFN:  /*  /\g{name}/i  */
 	    folder = foldEQ;
 	    fold_array = PL_fold;
 	    type = REFF;
 	    utf8_fold_flags = 0;
 	    goto do_nref;
 
-	case NREF:  /*  /\g{name}/   */
+	case REFN:  /*  /\g{name}/   */
 	    type = REF;
 	    folder = NULL;
 	    fold_array = NULL;
@@ -7729,7 +7729,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sw = cBOOL(rex->lastparen >= n && rex->offs[n].end != -1);
 	    break;
 
-	case NGROUPP:  /*  (?(<name>))  */
+	case GROUPPN:  /*  (?(<name>))  */
 	    /* reg_check_named_buff_matched returns 0 for no match */
 	    sw = cBOOL(0 < reg_check_named_buff_matched(rex,scan));
 	    break;
