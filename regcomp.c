@@ -353,7 +353,7 @@ struct RExC_state_t {
             if (DEPENDS_SEMANTICS) {                                        \
                 set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
                 RExC_uni_semantics = 1;                                     \
-                if (RExC_seen_d_op && LIKELY(RExC_total_parens >= 0)) {     \
+                if (RExC_seen_d_op && LIKELY(! IN_PARENS_PASS)) {           \
                     /* No need to restart the parse if we haven't seen      \
                      * anything that differs between /u and /d, and no need \
                      * to restart immediately if we're going to reparse     \
@@ -368,7 +368,7 @@ struct RExC_state_t {
 #define REQUIRE_BRANCHJ(flagp, restart_retval)                              \
     STMT_START {                                                            \
                 RExC_use_BRANCHJ = 1;                                       \
-                if (LIKELY(RExC_total_parens >= 0)) {                       \
+                if (LIKELY(! IN_PARENS_PASS)) {                             \
                     /* No need to restart the parse immediately if we're    \
                      * going to reparse anyway to count parens */           \
                     *flagp |= RESTART_PARSE;                                \
@@ -376,10 +376,19 @@ struct RExC_state_t {
                 }                                                           \
     } STMT_END
 
+/* Until we have completed the parse, we leave RExC_total_parens at 0 or
+ * less.  After that, it must always be positive, because the whole re is
+ * considered to be surrounded by virtual parens.  Setting it to negative
+ * indicates there is some construct that needs to know the actual number of
+ * parens to be properly handled.  And that means an extra pass will be
+ * required after we've counted them all */
+#define ALL_PARENS_COUNTED (RExC_total_parens > 0)
 #define REQUIRE_PARENS_PASS                                                 \
-    STMT_START {                                                            \
-                    if (RExC_total_parens == 0) RExC_total_parens = -1;     \
+    STMT_START {  /* No-op if have completed a pass */                      \
+                    if (! ALL_PARENS_COUNTED) RExC_total_parens = -1;       \
     } STMT_END
+#define IN_PARENS_PASS (RExC_total_parens < 0)
+
 
 /* This is used to return failure (zero) early from the calling function if
  * various flags in 'flags' are set.  Two flags always cause a return:
@@ -7667,9 +7676,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Do the parse */
     if (reg(pRExC_state, 0, &flags, 1)) {
 
-        /* Success!, But if RExC_total_parens < 0, we need to redo the parse
-         * knowing how many parens there actually are */
-        if (RExC_total_parens < 0) {
+        /* Success!, But we may need to redo the parse knowing how many parens
+         * there actually are */
+        if (IN_PARENS_PASS) {
             flags |= RESTART_PARSE;
         }
 
@@ -7711,7 +7720,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             DEBUG_PARSE_r(Perl_re_printf( aTHX_ "Need to redo parse\n"));
         }
 
-        if (RExC_total_parens > 0) {
+        if (ALL_PARENS_COUNTED) {
             /* Make enough room for all the known parens, and zero it */
             Renew(RExC_open_parens, RExC_total_parens, regnode_offset);
             Zero(RExC_open_parens, RExC_total_parens, regnode_offset);
@@ -8809,7 +8818,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             /* It might be a forward reference; we can't fail until we
                 * know, by completing the parse to get all the groups, and
                 * then reparsing */
-            if (RExC_total_parens > 0)  {
+            if (ALL_PARENS_COUNTED)  {
                 vFAIL("Reference to nonexistent named group");
             }
             else {
@@ -11595,7 +11604,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         /* It might be a forward reference; we can't fail until
                          * we know, by completing the parse to get all the
                          * groups, and then reparsing */
-                        if (RExC_total_parens > 0)  {
+                        if (ALL_PARENS_COUNTED)  {
                             RExC_parse++;
                             vFAIL("Reference to nonexistent group");
                         }
@@ -11621,7 +11630,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     /* It might be a forward reference; we can't fail until we
                      * know, by completing the parse to get all the groups, and
                      * then reparsing */
-                    if (RExC_total_parens > 0)  {
+                    if (ALL_PARENS_COUNTED)  {
                         if (num >= RExC_total_parens) {
                             RExC_parse++;
                             vFAIL("Reference to nonexistent group");
@@ -11952,7 +11961,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	  capturing_parens:
 	    parno = RExC_npar;
 	    RExC_npar++;
-            if (RExC_total_parens <= 0) {
+            if (! ALL_PARENS_COUNTED) {
                 /* If we are in our first pass through (and maybe only pass),
                  * we  need to allocate memory for the capturing parentheses
                  * data structures.  Since we start at npar=1, when it reaches
@@ -13731,7 +13740,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     /* It might be a forward reference; we can't fail until we
                      * know, by completing the parse to get all the groups, and
                      * then reparsing */
-                    if (RExC_total_parens > 0)  {
+                    if (ALL_PARENS_COUNTED)  {
                         if (num >= RExC_total_parens)  {
                             vFAIL("Reference to nonexistent group");
                         }
