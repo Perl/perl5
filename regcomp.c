@@ -19550,7 +19550,11 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     src = REGNODE_p(RExC_emit);
     RExC_emit += size;
     dst = REGNODE_p(RExC_emit);
-    if (RExC_open_parens) {
+
+    /* If we are in a "count the parentheses" pass, the numbers are unreliable,
+     * and [perl #133871] shows this can lead to problems, so skip this
+     * realignment of parens until a later pass when they are reliable */
+    if (! IN_PARENS_PASS && RExC_open_parens) {
         int paren;
         /*DEBUG_PARSE_FMT("inst"," - %" IVdf, (IV)RExC_npar);*/
         /* remember that RExC_npar is rex->nparens + 1,
