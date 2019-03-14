@@ -14,9 +14,19 @@ L<perl5281delta>, which describes differences between 5.28.0 and 5.28.1.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.28.1.  If any exist,
-they are bugs, and we request that you submit a report.  See L</Reporting
-Bugs> below.
+=head2 Any set of digits in the Common script are legal in a script run
+of another script
+
+There are several sets of digits in the Common script.  C<[0-9]> is the
+most familiar.  But there are also C<[\x{FF10}-\x{FF19}]> (FULLWIDTH
+DIGIT ZERO - FULLWIDTH DIGIT NINE), and several sets for use in
+mathematical notation, such as the MATHEMATICAL DOUBLE-STRUCK DIGITs.
+Any of these sets should be able to appear in script runs of, say,
+Greek.  But the design of 5.30 overlooked all but the ASCII digits
+C<[0-9]>, so the design was flawed.  This has been fixed, so is both a
+bug fix and an incompatibility. [perl #133547]
+
+All digits in a run still have to come from the same set of ten digits.
 
 =head1 Modules and Pragmata
 
@@ -112,6 +122,11 @@ sub-parses this could leave the parser in a strange state, possibly crashing
 perl if compilation continued.
 
 L<[perl #132158]|https://rt.perl.org/Ticket/Display.html?id=132158>
+
+=item *
+
+See L</Any set of digits in the Common script are legal in a script run
+of another script>.
 
 =back
 
