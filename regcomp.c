@@ -364,7 +364,6 @@ struct RExC_state_t {
             }                                                               \
     } STMT_END
 
-#define BRANCH_MAX_OFFSET   U16_MAX
 #define REQUIRE_BRANCHJ(flagp, restart_retval)                              \
     STMT_START {                                                            \
                 RExC_use_BRANCHJ = 1;                                       \
@@ -12070,7 +12069,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             RETURN_FAIL_ON_RESTART(flags, flagp);
             FAIL2("panic: regbranch returned failure, flags=%#" UVxf, (UV) flags);
         }
-        REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
+        if (!  REGTAIL(pRExC_state, lastbr, br)) {  /* BRANCH -> BRANCH. */
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
 	lastbr = br;
 	*flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
     }
@@ -12141,7 +12142,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                           (IV)(ender - lastbr)
             );
         );
-        REGTAIL(pRExC_state, lastbr, ender);
+        if (! REGTAIL(pRExC_state, lastbr, ender)) {
+            REQUIRE_BRANCHJ(flagp, 0);
+        }
 
 	if (have_branch) {
             char is_nothing= 1;
@@ -12152,9 +12155,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 	    for (br = REGNODE_p(ret); br; br = regnext(br)) {
 		const U8 op = PL_regkind[OP(br)];
 		if (op == BRANCH) {
-                    REGTAIL_STUDY(pRExC_state,
-                                  REGNODE_OFFSET(NEXTOPER(br)),
-                                  ender);
+                    if (! REGTAIL_STUDY(pRExC_state,
+                                        REGNODE_OFFSET(NEXTOPER(br)),
+                                        ender))
+                    {
+                        REQUIRE_BRANCHJ(flagp, 0);
+                    }
                     if ( OP(NEXTOPER(br)) != NOTHING
                          || regnext(NEXTOPER(br)) != REGNODE_p(ender))
                         is_nothing= 0;
@@ -12221,7 +12227,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             Set_Node_Cur_Length(REGNODE_p(ret), parse_start);
 	    Set_Node_Offset(REGNODE_p(ret), parse_start + 1);
 	    FLAGS(REGNODE_p(ret)) = flag;
-            REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL));
+            if (! REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL)))
+            {
+                REQUIRE_BRANCHJ(flagp, 0);
+            }
 	}
     }
 
@@ -12315,16 +12324,14 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	    /* FIXME adding one for every branch after the first is probably
 	     * excessive now we have TRIE support. (hv) */
 	    MARK_NAUGHTY(1);
-            REGTAIL(pRExC_state, chain, latest);
+            if (! REGTAIL(pRExC_state, chain, latest)) {
+                /* XXX We could just redo this branch, but figuring out what
+                 * bookkeeping needs to be reset is a pain, and it's likely
+                 * that other branches that goto END will also be too large */
+                REQUIRE_BRANCHJ(flagp, 0);
+            }
 	}
 	chain = latest;
-        if (     chain > (SSize_t) BRANCH_MAX_OFFSET
-            && ! RExC_use_BRANCHJ)
-        {
-            /* XXX We could just redo this branch, but figuring out what
-                * bookkeeping needs to be reset is a pain */
-            REQUIRE_BRANCHJ(flagp, 0);
-        }
 	c++;
     }
     if (chain == 0) {	/* Loop ran zero times. */
@@ -19627,10 +19634,13 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
 }
 
 /*
-- regtail - set the next-pointer at the end of a node chain of p to val.
+- regtail - set the next-pointer at the end of a node chain of p to val.  If
+            that value won't fit in the space available, instead returns FALSE.
+            (Except asserts if we can't fit in the largest space the regex
+            engine is designed for.)
 - SEE ALSO: regtail_study
 */
-STATIC void
+STATIC bool
 S_regtail(pTHX_ RExC_state_t * pRExC_state,
                 const regnode_offset p,
                 const regnode_offset val,
@@ -19666,8 +19676,17 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         ARG_SET(REGNODE_p(scan), val - scan);
     }
     else {
+        if (val - scan > U16_MAX) {
+            /* Since not all callers check the return value, populate this with
+             * something that won't loop and will likely lead to a crash if
+             * execution continues */
+            NEXT_OFF(REGNODE_p(scan)) = U16_MAX;
+            return FALSE;
+        }
         NEXT_OFF(REGNODE_p(scan)) = val - scan;
     }
+
+    return TRUE;
 }
 
 #ifdef DEBUGGING
@@ -19684,10 +19703,14 @@ that it is purely analytical.
 Currently only used when in DEBUG mode. The macro REGTAIL_STUDY() is used
 to control which is which.
 
+This used to return a value that was ignored.  It was a problem that it is
+#ifdef'd to be another function that didn't return a value.  khw has changed it
+so both currently return a pass/fail return.
+
 */
 /* TODO: All four parms should be const */
 
-STATIC U8
+STATIC bool
 S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
                       const regnode_offset val, U32 depth)
 {
@@ -19711,7 +19734,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 	    bool unfolded_multi_char;	/* Unexamined in this routine */
             if (join_exact(pRExC_state, scan, &min,
                            &unfolded_multi_char, 1, REGNODE_p(val), depth+1))
-                return EXACT;
+                return TRUE; /* Was return EXACT */
 	}
 #endif
         if ( exact ) {
@@ -19764,10 +19787,14 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 	ARG_SET(REGNODE_p(scan), val - scan);
     }
     else {
+        if (val - scan > U16_MAX) {
+            NEXT_OFF(REGNODE_p(scan)) = U16_MAX;
+            return FALSE;
+        }
 	NEXT_OFF(REGNODE_p(scan)) = val - scan;
     }
 
-    return exact;
+    return TRUE; /* Was 'return exact' */
 }
 #endif
 

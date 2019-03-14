@@ -2424,7 +2424,7 @@ Es	|void	|reginsert	|NN RExC_state_t *pRExC_state \
 				|const U8 op				    \
 				|const regnode_offset operand		    \
 				|const U32 depth
-Es	|void	|regtail	|NN RExC_state_t * pRExC_state		    \
+Es	|bool	|regtail	|NN RExC_state_t * pRExC_state		    \
 				|NN const regnode_offset p		    \
 				|NN const regnode_offset val		    \
 				|const U32 depth
@@ -2556,7 +2556,7 @@ Es	|void	|dump_trie_interim_list|NN const struct _reg_trie_data *trie\
 Es	|void	|dump_trie_interim_table|NN const struct _reg_trie_data *trie\
 				|NULLOK HV* widecharmap|NN AV *revcharmap\
 				|U32 next_alloc|U32 depth
-Es	|U8	|regtail_study	|NN RExC_state_t *pRExC_state \
+Es	|bool	|regtail_study	|NN RExC_state_t *pRExC_state \
 				|NN regnode_offset p|NN const regnode_offset val|U32 depth
 #  endif
 #endif
