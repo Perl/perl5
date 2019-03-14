@@ -12666,7 +12666,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     SV * substitute_parse = NULL;
     char *orig_end;
     char *save_start;
-    bool save_strict;
     I32 flags;
 
     GET_RE_DEBUG_FLAGS_DECL;
