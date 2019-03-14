@@ -24,7 +24,7 @@ BEGIN {
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 859;  # Update this when adding/deleting tests.
+plan tests => 860;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2055,6 +2055,30 @@ x{0c!}\;\;çÿ  q0/i0/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!}e;   ù\
 
 
 x{1c!}\;\;îçÿp  qr/elsif/! eF  /;îçÿù\Q   xÿÿÿÿ   ùHQx   `Lx{1c!}e;   ù\Qx`\Qx`\x{1c!}\;ÿÿÿÿc!}\;îçÿù\Qx\x ÿÿÿÿ  >=\Qx`\Qx`  ù\òx`ÿ  >=\Qx`\Qx`  ù\òx`\Qx`\x{1c!}8;\;îçÿp  unshifteF normat0 cmp  d?not    ùp  ç  !0000000000000000000000000m/00000000000000000000000000000000m/0R \   } )|\aï||K??p¿ÿÿfúd{\{gri{\x{1x/}  ð¹NuntiÀh', "", {}, "[perl #133921]");
+
+    fresh_perl_is('s|ß+W0ü0f0\Qx0\Qx0x0c0g0c 000n0000000000000O0h000x0 \xòÿÿÿ  ù\Q`\Q
+
+
+
+
+
+	ç
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q`\Qx`\x{0c!}\;ÿÿÿÿ!}\;îçÿù\Q\x ÿÿÿÿ  >=\Qx`\Qx`  ù\ò`ÿ  >=\Qx`\Qx`  ù\ò`\Qx`\x{0c!};\;îçÿ  000t0F 000t0 p  d?n    ù  ç  !00000000000000000000000m/0000000000000000000000000000000m/ \   } )|i', "", {}, "[perl #133933]");
     }
 
 } # End of sub run_tests
